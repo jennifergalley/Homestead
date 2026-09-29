@@ -55,6 +55,7 @@ private:
     {
         int32 Component = INDEX_NONE;
         int32 Lod = INDEX_NONE;
+        uint64 Obstacles = 0; // ChunkObstacleSignature when built.
     };
 
     bool LoadAssets();
@@ -64,6 +65,8 @@ private:
     int32 AcquireComponent();
     void ReleaseChunk(FChunk& Chunk);
     bool IsBlocked(FVector2D Centre) const;
+    // What the chunk's patches depend on: the interactables that can reach it and nearby building pieces.
+    uint64 ChunkObstacleSignature(FIntPoint Chunk) const;
 
     UPROPERTY() TArray<TObjectPtr<UStaticMesh>> Meshes;
     UPROPERTY() TObjectPtr<UMaterialInterface> Material;

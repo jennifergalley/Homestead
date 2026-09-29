@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "name": "Holly",
+  "description": "Woodland holly, a dense glossy evergreen cone about 2.8 m tall and 2.6 m across on two smooth grey stems; painted spiny leaf-cluster canopy, four LODs, walk-through.",
+  "collision": "none",
+  "triangle_budget": 70000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/holly.py",
+  "source_sha256": "1be6d1eb57e49b4de2982cd70f435042ba92ee77a17ce2d3f4cac44d34111276",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_Holly": {
+      "vertices": 36331,
+      "triangles": 40904,
+      "size_cm": [
+        314.19,
+        324.66,
+        328.64
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HollyBark",
+          "textures": {
+            "basecolor": "T_HollyBark_basecolor.png",
+            "normal": "T_HollyBark_normal.png",
+            "roughness": "T_HollyBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HollyLeaves",
+          "textures": {
+            "basecolor": "T_HollyLeaves_basecolor.png",
+            "normal": "T_HollyLeaves_normal.png",
+            "roughness": "T_HollyLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.005510606802999973,
+          0.01506499107927084,
+          1.6600000113248825
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 6.0,
+        "detail_distance": 2.2,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_Holly.fbx",
+      "sha256": "780c2dffbf4aa3025b7a0bdeea28c36ed66e112bfcd1125166fcdf57ad00359a",
+      "preview": "preview_SM_Holly.png"
+    },
+    "SM_Holly_LOD1": {
+      "vertices": 2842,
+      "triangles": 3864,
+      "size_cm": [
+        289.62,
+        312.95,
+        333.1
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HollyBark",
+          "textures": {
+            "basecolor": "T_HollyBark_basecolor.png",
+            "normal": "T_HollyBark_normal.png",
+            "roughness": "T_HollyBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HollyLeaves",
+          "textures": {
+            "basecolor": "T_HollyLeaves_basecolor.png",
+            "normal": "T_HollyLeaves_normal.png",
+            "roughness": "T_HollyLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.005510606802999973,
+          0.01506499107927084,
+          1.6600000113248825
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 6.0,
+        "detail_distance": 2.2,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_Holly_LOD1.fbx",
+      "sha256": "3b600260db257f689fe57f5d63add874aa92d3a4d58856c2e193924b3b692056",
+      "preview": "preview_SM_Holly_LOD1.png"
+    },
+    "SM_Holly_LOD2": {
+      "vertices": 508,
+      "triangles": 612,
+      "size_cm": [
+        369.68,
+        390.67,
+        320.66
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HollyBark",
+          "textures": {
+            "basecolor": "T_HollyBark_basecolor.png",
+            "normal": "T_HollyBark_normal.png",
+            "roughness": "T_HollyBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HollyLeaves",
+          "textures": {
+            "basecolor": "T_HollyLeaves_basecolor.png",
+            "normal": "T_HollyLeaves_normal.png",
+            "roughness": "T_HollyLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.005510606802999973,
+          0.01506499107927084,
+          1.6600000113248825
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 6.0,
+        "detail_distance": 2.2,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_Holly_LOD2.fbx",
+      "sha256": "a75870508affb2e44cae266a594b567dcc3d1c6828164c62748d978a8f60420c",
+      "preview": "preview_SM_Holly_LOD2.png"
+    },
+    "SM_Holly_LOD3": {
+      "vertices": 175,
+      "triangles": 188,
+      "size_cm": [
+        447.1,
+        418.58,
+        350.81
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HollyBark",
+          "textures": {
+            "basecolor": "T_HollyBark_basecolor.png",
+            "normal": "T_HollyBark_normal.png",
+            "roughness": "T_HollyBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HollyLeaves",
+          "textures": {
+            "basecolor": "T_HollyLeaves_basecolor.png",
+            "normal": "T_HollyLeaves_normal.png",
+            "roughness": "T_HollyLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.005510606802999973,
+          0.01506499107927084,
+          1.6600000113248825
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 6.0,
+        "detail_distance": 2.2,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_Holly_LOD3.fbx",
+      "sha256": "9e4f7fd8b490708ee9f9cb68f6c2d45ce18134248c306b25689552f44d905052",
+      "preview": "preview_SM_Holly_LOD3.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "unreal_folder": "Trees",
+  "nanite": true,
+  "tree": {
+    "height_m": 2.75,
+    "crown_m": [
+      2.5,
+      2.3
+    ],
+    "ground_line_cm": 15.0,
+    "note": "Pivot is the bottom of a 15 cm skirt under the stems; the ground line is 15 cm up. No collision."
+  },
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-branch random phase",
+    "B": "leaf flutter 0 at card base -> 1 at tip, 0 on wood",
+    "A": "1",
+    "strength": 4.0,
+    "flutter": 0.6
+  },
+  "material_notes": "Slot 0 M_HollyBark: tiling smooth bark T_HollyBark_* (0.4 m square). Slot 1 M_HollyLeaves: spiny leaf-cluster atlas T_HollyLeaves_* (basecolor alpha = mask, clip 0.5; roughness R rough, G translucency, B AO; normal OpenGL). Two-sided foliage, masked.",
+  "textures": {
+    "T_HollyBark_basecolor.png": "f42df9c68ed7b8b02f86a6de95f41523038457af76aece370f153f24eb6f8011",
+    "T_HollyBark_normal.png": "df298e79891c0c50477bf0eb55478024844d5409cc94ce68ac6ce105bd3d6a5c",
+    "T_HollyBark_roughness.png": "ccb8986da5259415196a5dbde914bd81a6966e718b132f0412a29dfca11c36f3",
+    "T_HollyLeaves_basecolor.png": "31c6190978671b55ac0299c034e696ea4e6f91af174f0f6a78d98e373063f129",
+    "T_HollyLeaves_normal.png": "173935e400b60be0f07adadb0ac42832c6ea69b6a107de9db4df2212055170ae",
+    "T_HollyLeaves_roughness.png": "3eebff0e232ee0e633b62c9751e41934affa60bbb83f8ba46820eacc5200e5b7"
+  }
+}

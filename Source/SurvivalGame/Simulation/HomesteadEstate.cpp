@@ -51,6 +51,8 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::TownSquare, {-54000.0, 115000.0}, 9109.0, 0.0},
             {Anchor::GeneralStoreDoor, {-54000.0, 117000.0}, 9153.0, 90.0},
             {Anchor::GeneralStoreCounter, {-54000.0, 117600.0}, 9166.0, -90.0},
+            // The derelict farm's broken gate, on its south fence facing the ruin's rear-wall gap.
+            {Anchor::DerelictFarmGate, {-22200.0, -65700.0}, 8720.6, 180.0},
         };
         layout.polygons = {
             {Anchor::EstateBoundary,
@@ -61,6 +63,10 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::ManorFootprint,
                 {{-24100.0, -66500.0}, {-24100.0, -63500.0}, {-25300.0, -63500.0}, {-25300.0, -64100.0},
                  {-25900.0, -64100.0}, {-25900.0, -66500.0}}},
+            // The old walled field 19 m behind the ruin: 60 x 60 m of gentle south-facing pasture
+            // (about 4 degrees, 5.5 m of relief), 25 m or more off the road.
+            {Anchor::DerelictFarm,
+                {{-22200.0, -70500.0}, {-22200.0, -64500.0}, {-16200.0, -64500.0}, {-16200.0, -70500.0}}},
             {std::string(Anchor::ForSaleParcelPrefix) + "Woodland",
                 {{16000.0, -90000.0}, {60000.0, -90000.0}, {60000.0, -25000.0}, {16000.0, -25000.0}}},
             {std::string(Anchor::ForSaleParcelPrefix) + "MoorField",
@@ -230,6 +236,23 @@ const EstatePlacements& ProvisionalEstatePlacements()
             table.placements.push_back({id, ResourceKind::BerryBush, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateBerryPlacements.inc"
+        // The derelict farm and neglected grounds (550000+) go after the brambles and keep 3 m from them.
+        AppendDerelictFarmAndDisrepair(table);
+        // The manor clear-out (570000+, Scripts/Terrain/clearout.py, add-coral-island-clearout): the
+        // ground round the ruin littered with weeds, nettles, stumps, rocks and rubbish to clear before
+        // she can dig or build there. A row within 1.5 m of an earlier placement (3 m of a blackberry
+        // bramble) is skipped, so other lanes' additions never collide with it or renumber it.
+        auto clearout = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+            {
+                const double gap = other.kind == ResourceKind::BerryBush ? 300.0 : 150.0;
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < gap * gap)
+                    return;
+            }
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateClearoutPlacements.inc"
         // Town lane (530000+).
         return table;
     }();

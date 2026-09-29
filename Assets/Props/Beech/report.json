@@ -6,7 +6,7 @@
   "triangle_budget": 90000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/beech.py",
-  "source_sha256": "d2e066ea918f4c23734f083abec332145f81b7771f1888984f04034b3122a056",
+  "source_sha256": "c396dc8bb7925a9308119095a92b6a8f2e704a12ad8535e7817c43a1cb79997e",
   "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
   "meshes": {
     "SM_Beech": {
@@ -58,7 +58,7 @@
         "detail_fstop": 11.0
       },
       "fbx": "SM_Beech.fbx",
-      "sha256": "d525b4cd6866a9d73d5aab1d3e32a4e57d7322483844eb7485599d77d70e96ca",
+      "sha256": "4024666f206632ee0594d77402758f4754082613274b484fd46a635a3958107c",
       "preview": "preview_SM_Beech.png"
     },
     "SM_Beech_LOD1": {
@@ -110,7 +110,7 @@
         "detail_fstop": 11.0
       },
       "fbx": "SM_Beech_LOD1.fbx",
-      "sha256": "835f27ba8a70a06037023deb2fb826ba5909e8a4521fc37500c9e15b6e3b2c9e",
+      "sha256": "5764de6726bb437c107c048aa3a1a6dc0b7ad3370e898e7858b60a9d8c78a15e",
       "preview": "preview_SM_Beech_LOD1.png"
     },
     "SM_Beech_LOD2": {
@@ -162,7 +162,7 @@
         "detail_fstop": 11.0
       },
       "fbx": "SM_Beech_LOD2.fbx",
-      "sha256": "11f177d5f55cdef33de3f7f3a8ffdc24a3728de69f808415850214f17e11a5c2",
+      "sha256": "75b4b343eeda90f3ef32efebfabbaf9a032d1da81ff49426948f7029af8ec849",
       "preview": "preview_SM_Beech_LOD2.png"
     },
     "SM_Beech_LOD3": {
@@ -214,7 +214,7 @@
         "detail_fstop": 11.0
       },
       "fbx": "SM_Beech_LOD3.fbx",
-      "sha256": "07ec67aeb19a45e5e67680e2c888e5b98587b158ac262398e720fe30a3ebcd8f",
+      "sha256": "b0c368e7eb44582070916a3a6a4a295de5c14d0530b3d8840e0a33828cced547",
       "preview": "preview_SM_Beech_LOD3.png"
     }
   },
@@ -249,10 +249,15 @@
     ],
     "radius_cm": 43.3,
     "length_cm": 463.3,
-    "note": "Unreal space (Y mirrored from Blender). Length is the cylinder part; the capsule spans the ground to the first fork."
+    "axis": [
+      -0.0569,
+      0.0275,
+      0.998
+    ],
+    "note": "Unreal space (Y mirrored from Blender). Length is the cylinder part; the capsule spans the ground to the first fork along the trunk axis."
   },
   "textures": {
-    "T_BeechBark_basecolor.png": "f57edf25e784212129636596643b6fa55a7d22aaf98fa6e03fbed2be9adc5964",
+    "T_BeechBark_basecolor.png": "fd73e381780bc0fdd26116cca4b5bb6d73a68a42150837ed36bffba3221cd600",
     "T_BeechBark_normal.png": "27b0ee541f3e89d3063d4b3989484cb418c9c9a38c6a408d7eb7e1cd134db78a",
     "T_BeechBark_roughness.png": "986c47e9745162e6f82cc804072a60c73f30c1ddbca7c2277ee2262aefb38b37",
     "T_BeechLeaves_basecolor.png": "25c5bbb4c267ea5339d5db641259a126ca9d37f2ef3cfb720e3a69e7a09d2f35",

@@ -59,6 +59,15 @@ DEFINE_LOG_CATEGORY_STATIC(LogHomesteadFootsteps, Log, All);
 
 namespace
 {
+FString SleepClockText(double Hour)
+{
+    const int32 Minutes = FMath::RoundToInt32(FMath::Fmod(FMath::Fmod(Hour, 24.0) + 24.0, 24.0) * 60.0) % (24 * 60);
+    return FString::Printf(TEXT("%02d:%02d"), Minutes / 60, Minutes % 60);
+}
+}
+
+namespace
+{
 constexpr const TCHAR* CameraSettingsSection = TEXT("Homestead.Camera");
 constexpr const TCHAR* CameraSensitivityKey = TEXT("Sensitivity");
 constexpr const TCHAR* CameraInvertYKey = TEXT("InvertY");
@@ -1023,6 +1032,12 @@ void AHomesteadController::HomesteadMorning(float Hour)
     RefreshRemaining = 0;
 }
 
+void AHomesteadController::HomesteadEnergy(float Energy)
+{
+    Notify(Sim.SetEnergy(Energy));
+    RefreshRemaining = 0;
+}
+
 void AHomesteadController::HomesteadStandingRoom()
 {
     const APawn* Avatar = GetPawn();
@@ -1593,6 +1608,18 @@ void AHomesteadController::Tick(float DeltaSeconds)
     }
 
     Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning || bTestResetRequired || ShopScreen.IsValid());
+    // Out of Energy she dozes off where she stands (the simulation sleeps her on the spot).
+    if (Sim.DozeCount() != SeenDozes)
+    {
+        SeenDozes = Sim.DozeCount();
+        if (!IsFailed())
+        {
+            if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->GetCharacterMovement()->StopMovementImmediately();
+            Notify(TEXT("Worn out, you dozed off where you stood. You wake at ") + SleepClockText(State().hour)
+                + TEXT(", stiff and only half rested. Sleep in a bed before you're this tired."));
+            RefreshRemaining = 0;
+        }
+    }
     TickStores(DeltaSeconds);
     if (bPlanning && !bBookOpen) UpdatePlacement(false);
     if (IsFailed() && !bWasFailed)
@@ -1899,9 +1926,12 @@ FString AHomesteadController::FocusActions() const
                 {
                     const bool Handles = ToolAvailable && Homestead::ToolForItem(SelectedTool) == Overgrowth->tool;
                     if (Node.kind == Homestead::ResourceKind::SalvagePile) return A + TEXT(" Search");
+                    // Weeds and nettles are pulled, rubbish is cleared away, a fallen bough gathered.
+                    const FString Hand = A + (Node.kind == Homestead::ResourceKind::Weeds || Node.kind == Homestead::ResourceKind::Nettles
+                        ? TEXT(" Pull") : Homestead::IsRubbish(Node.kind) ? TEXT(" Clear away") : TEXT(" Gather"));
                     if (Handles) return Use + TEXT(" ") + SwingVerb(SelectedTool)
-                        + (Overgrowth->byHand ? TEXT("   ") + A + TEXT(" Gather") : FString());
-                    if (Overgrowth->byHand) return A + TEXT(" Gather");
+                        + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
+                    if (Overgrowth->byHand) return Hand;
                     return ToolPrompt(Sim, Homestead::ToolItem(Overgrowth->tool), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                 }
                 return A + TEXT(" Gather");
@@ -1935,10 +1965,20 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Drop: return A + TEXT(" Pick up");
     case EFocus::Bed:
     {
-        const double Hours = BedSleepHours();
-        if (Hours <= 2.0) return A + TEXT(" Nap");
-        const bool bToDawn = FMath::Abs(FMath::Fmod(State().hour + Hours, 24.0) - 6.75) < 0.02;
-        return A + (bToDawn ? TEXT(" Sleep until morning") : TEXT(" Sleep 8 hours"));
+        const auto Options = BedSleepOptions();
+        const int32 Index = BedSleepIndex();
+        if (!Options.size()) return FString();
+        FString Line = A + TEXT(" ") + SleepOptionLabel(Options[Index]);
+        if (Options.size() > 1)
+        {
+            TArray<FString> Others;
+            for (int32 Other = 0; Other < static_cast<int32>(Options.size()); ++Other)
+                if (Other != Index)
+                    Others.Add(Options[Other].choice == Homestead::SleepChoice::UntilMorning ? TEXT("until morning")
+                        : Options[Other].choice == Homestead::SleepChoice::UntilRested ? TEXT("until rested") : TEXT("nap"));
+            Line += FString(TEXT("   ")) + (bGamepad ? TEXT("[D-pad]") : TEXT("[Up/Down]")) + TEXT(" ") + FString::Join(Others, TEXT(" / "));
+        }
+        return Line;
     }
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
     case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
@@ -2228,7 +2268,7 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
                     else Notify(Check);
                     return;
                 }
-        Notify(Tool == Homestead::Item::Scythe ? TEXT("Face tall grass or weeds to mow.")
+        Notify(Tool == Homestead::Item::Scythe ? TEXT("Face tall grass, weeds or nettles to mow.")
             : Tool == Homestead::Item::Billhook ? TEXT("Aim at bramble or a sapling.")
             : Tool == Homestead::Item::Pickaxe ? TEXT("Aim at rubble or a rock.")
             : TEXT("Aim at a tree, stump or fallen timber."), true);
@@ -2262,6 +2302,7 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     {
         // Rough footprint radius (cm) of what she strikes, so the point or bit lands on its near side.
         const float Radius = Kind == Homestead::ResourceKind::StumpSmall ? 16.0f
+            : Kind == Homestead::ResourceKind::StumpMedium ? 20.0f
             : Kind == Homestead::ResourceKind::StumpLarge ? 28.0f
             : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
             : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
@@ -2339,6 +2380,7 @@ void AHomesteadController::LandOvergrowthSwing()
     {
         // One sweep mows everything in the arc, each tuft its own transaction, with one summary.
         const int32 HayBefore = Sim.Count(Homestead::Item::Hay), WeedsBefore = Sim.Count(Homestead::Item::Weeds);
+        const int32 SeedsBefore = Sim.Count(Homestead::Item::Seeds);
         int32 Mown = 0;
         FString Problem;
         for (const int32 Id : ScytheTargets)
@@ -2358,6 +2400,8 @@ void AHomesteadController::LandOvergrowthSwing()
         if (Hay > 0 || Weeds > 0) Summary += TEXT(":");
         if (Hay > 0) Summary += FString::Printf(TEXT(" +%d Hay"), Hay);
         if (Weeds > 0) Summary += FString::Printf(TEXT("%s +%d Weeds"), Hay > 0 ? TEXT(",") : TEXT(""), Weeds);
+        if (const int32 Seeds = Sim.Count(Homestead::Item::Seeds) - SeedsBefore; Seeds > 0)
+            Summary += FString::Printf(TEXT(", +%d Seeds"), Seeds);
         Notify(Summary + TEXT("."));
         PlayEffect(GrassStepA, 0.8f);
         return;
@@ -2468,13 +2512,18 @@ void AHomesteadController::Interact()
                     Avatar->PlayKnifeCut(ActionTarget); // Work the dried hide free with the knife.
                 else if (Sticks || Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::Roots
                     || Kind == Homestead::ResourceKind::BerryBush || Kind == Homestead::ResourceKind::FallenBranch
-                    || Kind == Homestead::ResourceKind::SalvagePile)
+                    || Kind == Homestead::ResourceKind::SalvagePile || Kind == Homestead::ResourceKind::Weeds
+                    || Kind == Homestead::ResourceKind::Nettles || Homestead::IsRubbish(Kind))
                 {
                     const bool Berries = Kind == Homestead::ResourceKind::BerryBush;
-                    // A fallen bough gathered by hand is broken into sticks; searching a salvage pile
-                    // lifts its fallen stones aside, so it plays the stone gather.
-                    const auto Gather = Sticks || Kind == Homestead::ResourceKind::FallenBranch ? EHomesteadKneelGather::Sticks
+                    // A fallen bough gathered by hand is broken into sticks, and so are the rotten
+                    // boards of a crate, barrel or plank pile; searching a salvage pile or a midden
+                    // lifts its stones aside, so it plays the stone gather. Weeds are pulled like roots.
+                    const bool Boards = Kind == Homestead::ResourceKind::BrokenCrate || Kind == Homestead::ResourceKind::BrokenBarrel
+                        || Kind == Homestead::ResourceKind::RottenPlanks;
+                    const auto Gather = Sticks || Kind == Homestead::ResourceKind::FallenBranch || Boards ? EHomesteadKneelGather::Sticks
                         : Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::SalvagePile
+                            || Kind == Homestead::ResourceKind::RubbishHeap
                         ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
                     FVector2D Target(ActionTarget.x, ActionTarget.y);
                     // Berries are picked from the near side of the bush, not its centre; an estate
@@ -2484,6 +2533,15 @@ void AHomesteadController::Interact()
                         const bool Bramble = FocusId >= Homestead::EstatePlacementIdBase && FocusId < Homestead::TransientResourceIdBase;
                         const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
                         if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * (Bramble ? 62.0f : 22.0f);
+                    }
+                    // Rubbish is a metre or two across: she works at its near edge, not kneeling in it.
+                    else if (Homestead::IsRubbish(Kind))
+                    {
+                        const bool BigHeap = Kind == Homestead::ResourceKind::RubbishHeap && FocusId >= 570000 && FocusId < 570008;
+                        const float Edge = BigHeap ? 95.0f : Kind == Homestead::ResourceKind::BrokenBarrel ? 55.0f
+                            : Kind == Homestead::ResourceKind::RottenPlanks ? 50.0f : 45.0f;
+                        const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
+                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * FMath::Clamp(Toward.Size() - 30.0f, 0.0f, Edge);
                     }
                     if (Avatar->PlayKneelGather(Gather, Target, Berries) && Landscape)
                     {
@@ -2529,18 +2587,7 @@ void AHomesteadController::Interact()
         if (NativeMenu && !NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe, Selection, 0))
             Notify(TEXT("The cookfire recipe could not be selected."), true);
         break;
-    case EFocus::Bed:
-    {
-        Notify(SleepInBed(Position));
-        if (!IsFailed())
-        {
-            if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
-                AutoSaveIndex = (AutoSaveIndex + 1) % 3;
-            if (Sim.IsSheltered(Position) && State().hunger >= 35)
-                SaveSlot(TEXT("Homestead_Recovery"), true);
-        }
-        break;
-    }
+    case EFocus::Bed: SleepAtBed(Position); break;
     case EFocus::Chest: OpenChestStorage(FocusId); break;
     case EFocus::Water: FillPailAtStream(Position); break;
     case EFocus::Underbrush: StartMacheteHack(); break;
@@ -2775,7 +2822,7 @@ void AHomesteadController::NextPage()
 }
 void AHomesteadController::PreviousRow()
 {
-    if (!bBookOpen) return;
+    if (!bBookOpen) { CycleBedChoice(-1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + Count - 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -2783,7 +2830,7 @@ void AHomesteadController::PreviousRow()
 }
 void AHomesteadController::NextRow()
 {
-    if (!bBookOpen) return;
+    if (!bBookOpen) { CycleBedChoice(1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -3076,20 +3123,99 @@ void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
     PlayEffect(UIClick, 0.08f);
 }
 
+std::vector<Homestead::SleepOption> AHomesteadController::BedSleepOptions() const
+{
+    return Homestead::SleepOptions(State().hour, State().energy);
+}
+
+int32 AHomesteadController::BedSleepIndex() const
+{
+    if (Focus != EFocus::Bed || FocusId != BedChoiceBed) return 0;
+    const auto Options = BedSleepOptions();
+    for (int32 Index = 0; Index < static_cast<int32>(Options.size()); ++Index)
+        if (Options[Index].choice == BedChoice) return Index;
+    return 0;
+}
+
 double AHomesteadController::BedSleepHours() const
 {
-    return Homestead::BedSleepHours(State().hour);
+    const auto Options = BedSleepOptions();
+    return Options.empty() ? 0.0 : Options[BedSleepIndex()].hours;
+}
+
+FString AHomesteadController::SleepOptionLabel(const Homestead::SleepOption& Option)
+{
+    switch (Option.choice)
+    {
+    case Homestead::SleepChoice::UntilMorning: return TEXT("Sleep until morning (wake ") + SleepClockText(Option.wakeHour) + TEXT(")");
+    case Homestead::SleepChoice::UntilRested: return TEXT("Sleep until rested (wake ~") + SleepClockText(Option.wakeHour) + TEXT(")");
+    default: return FString::Printf(TEXT("Nap %g h (wake "), Option.hours) + SleepClockText(Option.wakeHour) + TEXT(")");
+    }
+}
+
+bool AHomesteadController::CycleBedChoice(int32 Delta)
+{
+    if (bBookOpen || bPlanning || IsFailed() || Focus != EFocus::Bed) return false;
+    const auto Options = BedSleepOptions();
+    if (Options.size() < 2) return true;
+    const int32 Count = static_cast<int32>(Options.size());
+    const int32 Index = (BedSleepIndex() + Delta % Count + Count) % Count;
+    BedChoice = Options[Index].choice;
+    BedChoiceBed = FocusId;
+    PlayEffect(UIClick, 0.06f);
+    return true;
+}
+
+void AHomesteadController::SleepAtBed(Homestead::Point Position)
+{
+    Notify(SleepInBed(Position));
+    if (!IsFailed())
+    {
+        if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
+            AutoSaveIndex = (AutoSaveIndex + 1) % 3;
+        if (Sim.IsSheltered(Position) && State().hunger >= 35)
+            SaveSlot(TEXT("Homestead_Recovery"), true);
+    }
+}
+
+void AHomesteadController::HomesteadSleep(int32 Option)
+{
+    if (bBookOpen || bPlanning || IsFailed()) return;
+    UpdateFocus();
+    if (Focus != EFocus::Bed) { Notify(TEXT("Stand beside a bed to sleep."), true); return; }
+    const auto Options = BedSleepOptions();
+    if (Option >= 0 && Option < static_cast<int32>(Options.size())) { BedChoice = Options[Option].choice; BedChoiceBed = FocusId; }
+    SleepAtBed(PlayerPoint());
+}
+
+void AHomesteadController::HomesteadBedChoice(int32 Delta)
+{
+    UpdateFocus();
+    CycleBedChoice(Delta);
 }
 
 Homestead::Result AHomesteadController::SleepInBed(Homestead::Point Position)
 {
-    const double Hours = BedSleepHours();
+    const auto Options = BedSleepOptions();
+    if (Options.empty()) return {false, "There's nothing to sleep on here.", Homestead::ResultCode::Unavailable, Sim.GetRevision()};
+    const Homestead::SleepOption Option = Options[BedSleepIndex()];
+    const double Hours = Option.hours;
+    // Sleep takes at most twelve hours at a time; an early night from 18:00 is two halves.
     Homestead::Result Slept = Sim.Sleep(Hours > 12.0 ? Hours * 0.5 : Hours, Position);
     if (Slept && Hours > 12.0) Slept = Sim.Sleep(Hours * 0.5, Position);
-    if (Slept && Hours <= 2.0)
-        Slept.message = "You nap for a while. Sleep in the evening to rest until morning.";
-    else if (Slept && FMath::Abs(FMath::Fmod(State().hour, 24.0) - 6.75) < 0.02)
-        Slept.message = "You wake at first light, rested. Your garden and fires carried on through the night.";
+    BedChoiceBed = INDEX_NONE;
+    if (!Slept) return Slept;
+    const FString Now = SleepClockText(State().hour);
+    FString Message;
+    if (Option.choice == Homestead::SleepChoice::Nap)
+        Message = TEXT("You nap for an hour and get up at ") + Now + TEXT(".");
+    else if (Option.choice == Homestead::SleepChoice::UntilMorning)
+        Message = State().energy >= 99.0
+            ? TEXT("You wake at first light, rested. Your garden and fires carried on through the night.")
+            : TEXT("You wake at first light, though still a little tired. An earlier night would leave you fully rested.");
+    else
+        Message = TEXT("You wake rested at ") + Now + TEXT(". Your garden and fires carried on while you slept.");
+    Slept.message = TCHAR_TO_UTF8(*Message);
     return Slept;
 }
 

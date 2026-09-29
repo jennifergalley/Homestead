@@ -70,6 +70,9 @@ const FRuinPiece ManorRuinPlan[] = {
     {TEXT("RuinSlateScatter"), 2150, 1600, 180},
     {TEXT("RuinSlateScatter"), 200, 1200, 90},
     {TEXT("RuinSlateScatter"), 700, -145, 180},
+    // Slate slid off outside the west gable and behind the rear wall (add-derelict-farm-and-estate-disrepair).
+    {TEXT("RuinSlateScatter"), -150, 1150, 270},
+    {TEXT("RuinSlateScatter"), 2350, 1945, 0},
 };
 
 // Ivy hanging from a wall run's broken head. X runs along the host run from its centre; Side +1
@@ -89,6 +92,15 @@ const FRuinCling ManorRuinIvy[] = {
     {10, -175, 1, 305},  // rear wall: faces the forecourt and the road
     {13, -175, -1, 305}, // rear wall, east
     {16, -175, 1, 305},  // east gable, inside the hall
+    // More of it twenty years on: outer faces all round, and the courtyard side of the west rooms.
+    {3, 120, 1, 388},    // south front, east of the fallen door, facing the sea
+    {4, 80, -1, 388},    // west gable, south run, outside
+    {6, -60, -1, 305},   // west gable, low run, outside
+    {7, 40, -1, 305},    // west gable, low run, inside the west rooms
+    {12, 60, 1, 305},    // rear wall, outside
+    {15, -80, -1, 305},  // rear wall, east end, outside
+    {18, 0, -1, 305},    // east gable, north run, outside
+    {19, 60, 1, 305},    // cross wall, hall side
 };
 
 bool RuinPieceBlocks(const TCHAR* Mesh)

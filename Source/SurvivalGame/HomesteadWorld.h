@@ -232,6 +232,22 @@ private:
     TArray<TWeakObjectPtr<class UPointLightComponent>> HearthLights;
     float HearthFlickerTime = 0.0f;
     void UpdateHearthFlicker(float DeltaSeconds);
+    // A cleared obstacle swells a touch and shrinks away while chips of it (leaf, wood or stone) fly
+    // out (add-coral-island-clearout). Cosmetic only: the components are the actor's until destroyed.
+    struct FClearPop
+    {
+        TArray<TWeakObjectPtr<USceneComponent>> Parts;
+        TArray<FVector> Scales;
+        TArray<FVector> Locations;
+        TArray<FVector> Velocities; // Chips only.
+        TArray<FRotator> Spins;
+        float Age = 0.0f;
+        float Life = 0.4f;
+        bool bChips = false;
+    };
+    TArray<FClearPop> ClearPops;
+    void StartClearPop(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node);
+    void UpdateClearPops(float DeltaSeconds);
     // A hearth's crackle is heard only with a clear line from the listener to the fire: walls between
     // them (even the room's own wall with her standing just outside it) silence it.
     struct FHearthSound
