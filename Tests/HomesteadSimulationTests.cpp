@@ -1243,10 +1243,10 @@ void CropTableAndStatus()
     CHECK(PlotStatus(plot) == "Roots: day 2 of 2  |  weedy, growing slowly");
     plot.growth = 1.0;
     CHECK(IsRipe(plot) && PlotStatus(plot) == "Roots: ready to harvest");
-    // A picked berry bush ripening again stays leafy and counts its regrowth days.
+    // A berry bush growing for the first time counts up normally (no regrowth special case).
     Plot bush{2, 0, 0, true, 1.0 - 24.0 / 42.0 + 0.01, 1.0, 0.0, CropKind::Berries};
-    CHECK(StageOf(bush) == CropStage::Mature);
-    CHECK(PlotStatus(bush) == "Berries: ripening again, day 1 of 1");
+    CHECK(StageOf(bush) == CropStage::Young);
+    CHECK(PlotStatus(bush) == "Berries: day 1 of 2");
 
     // A roots crop sown and watered each morning ripens on its stated day.
     Simulation sim;
@@ -1300,8 +1300,8 @@ void CropTableAndStatus()
     const Plot* beanPlot = nullptr;
     for (const auto& plot : sim.GetState().plots) if (plot.id == beanId) beanPlot = &plot;
     CHECK(beanPlot && beanPlot->planted && beanPlot->kind == CropKind::BroadBeans);
-    CHECK(beanPlot && Close(beanPlot->growth, 1.0 - 72.0 / 168.0) && StageOf(*beanPlot) == CropStage::Mature);
-    CHECK(beanPlot && PlotStatus(*beanPlot).rfind("Broad beans: ripening again, day 1 of 3", 0) == 0);
+    CHECK(beanPlot && Close(beanPlot->growth, 1.0 - 72.0 / 168.0) && StageOf(*beanPlot) == CropStage::Growing);
+    CHECK(beanPlot && PlotStatus(*beanPlot).rfind("Broad beans: day 5 of 7", 0) == 0);
     // Appended crop kinds survive a save round trip.
     Simulation saved;
     OK(saved.Deserialize(sim.Serialize()));

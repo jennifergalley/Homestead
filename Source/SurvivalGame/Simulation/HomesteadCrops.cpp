@@ -83,11 +83,8 @@ CropStage StageOf(const Plot& plot)
 {
     if (!plot.planted) return CropStage::Bare;
     if (plot.growth >= 1.0) return CropStage::Ripe;
-    // A picked plant that ripens again stays leafy (Mature) rather than shrinking back.
-    const auto& info = GetCropInfo(plot.kind);
-    const bool regrowing = info.regrowHours > 0.0 && info.regrowHours < info.growHours
-        && plot.growth >= 1.0 - info.regrowHours / info.growHours;
-    if (regrowing) return CropStage::Mature;
+    // A picked plant (beans, strawberries) restarts part-way up this scale, so it shows the stage
+    // before its pods or fruit form again.
     if (plot.growth < 0.06) return CropStage::Sown;
     if (plot.growth < 0.30) return CropStage::Sprout;
     if (plot.growth < 0.55) return CropStage::Young;
@@ -120,16 +117,9 @@ std::string PlotStatus(const Plot& plot)
     const auto& info = GetCropInfo(plot.kind);
     std::string text = info.name;
     if (IsRipe(plot)) return text + ": ready to harvest";
-    const double regrowStart = info.regrowHours > 0.0 && info.regrowHours < info.growHours
-        ? 1.0 - info.regrowHours / info.growHours : 2.0;
-    if (plot.growth >= regrowStart)
-    {
-        const int days = CropRegrowDays(plot.kind);
-        const int day = std::clamp(static_cast<int>(std::floor((plot.growth - regrowStart) / (1.0 - regrowStart) * days)) + 1, 1, days);
-        text += ": ripening again, day " + std::to_string(day) + " of " + std::to_string(days);
-    }
-    else
-        text += ": day " + std::to_string(CropDay(plot)) + " of " + std::to_string(CropDays(plot.kind));
+    // A picked plant resumes the count part-way (beans: day 5 of 7 after picking), so the days
+    // left always read right.
+    text += ": day " + std::to_string(CropDay(plot)) + " of " + std::to_string(CropDays(plot.kind));
     const bool dry = NeedsWater(plot), weedy = IsWeedy(plot);
     if (dry && weedy) text += "  |  needs water and weeding, growing slowly";
     else if (dry) text += "  |  needs water, growing slowly";

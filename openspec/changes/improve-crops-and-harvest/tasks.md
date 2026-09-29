@@ -17,4 +17,4 @@
 - [x] 3.1 Plot visuals: stage meshes per crop, a ripe glint, and dry and wet soil at the 0.4 threshold
 - [x] 3.2 Focus line from `PlotStatus`, with Harvest, Water and Weed actions
 - [x] 3.3 Harvest animations (pull and pick) with the produce in her hand, hidden afterwards, and a lab command
-- [ ] 3.4 PIE on the Estate: till, sow, water, sleep through each stage, harvest; screenshots of every stage
+- [x] 3.4 PIE on the Estate: till, sow, water, sleep through each stage, harvest; screenshots of every stage

@@ -13,7 +13,7 @@ import unreal
 FOLDER = '/Game/SurvivalGame/Environment/Props/CropGlint'
 NAME = 'M_CropRipeGlint'
 # Warm, pale gold (HDR, linear): bright enough to catch the eye at 15 m in daylight, not a lamp.
-COLOR = (2.2, 1.7, 0.8)
+COLOR = (1.5, 1.15, 0.55)
 PERIOD = 2.4
 
 
