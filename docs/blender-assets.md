@@ -339,12 +339,17 @@ pivots for hand attachment.
 
 Gathering rocks must read at a glance by size and setting (Jenny's playtest note):
 
-- `GraniteHandPile` A/B/C (`granite_hand_pile.py`) are the hand-gathered Stones nodes: 4-6
-  loose 10-25 cm cobbles and slabby spalls sitting on the turf (10-25 % sunk, ankle-high,
-  12-14 cm tall), light soil, little lichen, no collision, ~33k tris each.
-- `GranitePickRocks` Small/Medium/Large (`granite_pick_rocks.py`) are the pickaxe tiers:
-  knee-high (46 cm above ground), thigh-high (65 cm) and waist-high (94 cm) moorstone, sunk
-  13/17/22 cm, lichen-crusted, convex collision. The Large (iron-pick) one has a
+- `GraniteHandPile` A/B/C (`granite_hand_pile.py`) are the clusters for the hand-gathered
+  Stones nodes: 6-8 loose 5-18 cm cobbles, pebbles and slabby spalls sitting on the turf
+  (10-25 % sunk), 40-45 cm across and 9-11 cm tall, light soil, little lichen, no collision,
+  ~33k tris each. The single `HandStones` (12-19 cm) stay the stone she lifts.
+- `GranitePickRocks` Small/Large (`granite_pick_rocks.py`) are the SmallRock (worn pick) and
+  Boulder (iron pick) nodes: a knee-high rock (~65 cm long, ~30 cm above the turf) and a
+  waist-high moorstone (185 cm long, 94 cm above ground), lichen-crusted. Medium (thigh-high,
+  65 cm) is a spare boulder variant. `GranitePickRubble` (`granite_pick_rubble.py`) is the
+  Rubble (worn pick) node: a heap of dressed and broken granite blocks shed from a ruined
+  wall, ~90 cm across and 45 cm high, no collision. Resource nodes add their own blockers, so
+  the rocks' convex hulls are ignored in game. The Large (iron-pick) one has a
   plug-and-feather split face (paler, half drill holes along its top edge) facing the
   hero camera, plus an unfinished row of drill holes on top.
 - If the Cycles beauty render dies with `OIDN error: out of memory` while an editor holds

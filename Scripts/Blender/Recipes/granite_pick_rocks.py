@@ -11,9 +11,9 @@ from about 1800 leaves a straight split face with a row of half drill holes alon
 An abandoned line of holes on a boulder's top shows where the next split would have gone.
 
 Meshes:
-  Small   knee-high (~0.45 m tall, 0.95 m long). A sub-angular block with one freshly broken
-          corner.
-  Medium  thigh-high (~0.7 m tall, 1.4 m long). A rounded loaf with a natural joint crack across
+  Small   knee-high (~0.3 m above the turf, 0.65 m long; the SmallRock node). A sub-angular block with
+          one freshly broken corner.
+  Medium  thigh-high (~0.65 m above the turf, 1.4 m long); a spare boulder variant. A rounded loaf with a natural joint crack across
           its crown and spalled plates.
   Large   waist-high (~1.0 m tall, 1.7 m long); the iron-pick tier. A blocky moorstone with one end
           split off by plug and feathers: a paler, planar split face with half drill holes along its
@@ -34,7 +34,7 @@ TRIANGLE_BUDGET = 320000
 BAKE = {"size": 2048, "samples": 64, "repack": False}
 BAKE_MESHES = {"SM_GranitePickRock_Large": {"size": 4096}, "*": True}
 BEAUTY = {"pose": (0, 0, 0), "ground": "origin", "views": ["hero", "detail", "eye"],
-          "meshes": {"SM_GranitePickRock_Small": {"focus": (0.2, -0.2, 0.3), "eye_distance": 3.0},
+          "meshes": {"SM_GranitePickRock_Small": {"focus": (0.13, -0.13, 0.18), "eye_distance": 2.2},
                      "SM_GranitePickRock_Medium": {"focus": (0.1, -0.3, 0.5), "eye_distance": 4.0},
                      "SM_GranitePickRock_Large": {"focus": (-0.72, -0.2, 0.5), "eye_distance": 5.5}}}
 REPORT = {"nanite": True}
@@ -87,13 +87,13 @@ def _top_holes(points, normal, holes, radius, deep):
 
 ROCKS = {
     "Small": dict(
-        radii=(0.5, 0.36, 0.34), power=2.9, lumps=0.035, seed=4101, ground_z=-0.14, tris=110000,
-        lods=(22000, 5000),
-        faces=[((0.0, 0.05, -1.0), 0.26, 0.05, True),        # buried base
-               ((0.1, -0.15, 1.0), 0.3, 0.07, True),         # crown joint
-               ((0.85, -0.55, 0.35), 0.42, 0.012, False),    # freshly broken corner
-               ((-1.0, 0.25, 0.1), 0.44, 0.07, True),
-               ((0.2, 1.0, 0.0), 0.31, 0.06, True)],
+        radii=(0.325, 0.235, 0.235), power=2.9, lumps=0.025, seed=4101, ground_z=-0.09, tris=70000,
+        lods=(14000, 3500),
+        faces=[((0.0, 0.05, -1.0), 0.17, 0.033, True),       # buried base
+               ((0.1, -0.15, 1.0), 0.205, 0.045, True),      # crown joint
+               ((0.85, -0.55, 0.35), 0.273, 0.008, False),   # freshly broken corner
+               ((-1.0, 0.25, 0.1), 0.286, 0.045, True),
+               ((0.2, 1.0, 0.0), 0.2, 0.04, True)],
         material=dict(lichen=0.95, moss=0.25, iron=0.3, patina=0.75, seed=41.0)),
     "Medium": dict(
         radii=(0.74, 0.52, 0.5), power=2.6, lumps=0.03, seed=4102, ground_z=-0.2, tris=160000,

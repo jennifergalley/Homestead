@@ -1,21 +1,21 @@
 {
   "schema": 1,
   "name": "GraniteHandPile",
-  "description": "Three piles (A/B/C) of 3-6 loose, hand-sized Cornish granite stones (10-25 cm, ankle-high) sitting on the turf; Nanite; LOD1/LOD2 fallback.",
+  "description": "Three piles (A/B/C) of 6-8 loose, hand-sized Cornish granite stones (5-18 cm, ankle-high) sitting on the turf; Nanite; LOD1/LOD2 fallback.",
   "collision": "none",
   "triangle_budget": 40000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/granite_hand_pile.py",
-  "source_sha256": "aad08aace184b8da9a8fd3baebba10643c7777c9c163c3c810c8d83f6413d9e4",
+  "source_sha256": "43c31a25247bb1d8375e25312463677b0d149cdadc8fb6c53e73503c04e2ad8d",
   "provenance": "Original project-authored geometry; no third-party asset or texture",
   "meshes": {
     "SM_GraniteHandPile_A": {
-      "vertices": 16672,
-      "triangles": 33328,
+      "vertices": 16548,
+      "triangles": 33072,
       "size_cm": [
-        40.89,
-        31.14,
-        13.99
+        40.4,
+        40.17,
+        10.44
       ],
       "materials": [
         {
@@ -57,10 +57,10 @@
           "detail",
           "eye"
         ],
-        "eye_distance": 2.2
+        "eye_distance": 1.3
       },
       "fbx": "SM_GraniteHandPile_A.fbx",
-      "sha256": "e745b5163f207fc8d20b40ab5645e0177e961184909baee40857b543cf3ede19",
+      "sha256": "6cb4680d59e2c58713b1095c862d202c0cebc43f69bdd12e3daa1c0e18ffd1c8",
       "preview": "preview_SM_GraniteHandPile_A.png",
       "beauty": {
         "views": {
@@ -87,12 +87,12 @@
       }
     },
     "SM_GraniteHandPile_A_LOD1": {
-      "vertices": 3508,
+      "vertices": 3512,
       "triangles": 7000,
       "size_cm": [
-        40.9,
-        31.14,
-        13.99
+        40.39,
+        40.17,
+        10.45
       ],
       "materials": [
         {
@@ -135,19 +135,19 @@
           "detail",
           "eye"
         ],
-        "eye_distance": 2.2
+        "eye_distance": 1.3
       },
       "fbx": "SM_GraniteHandPile_A_LOD1.fbx",
-      "sha256": "20da9dfb6a79791d825da1f44079cd67c51c577d943e6800945866fa0d6492a0",
+      "sha256": "386d56a645213355cc6f65808f0167405e81fb5ba3d6e5e643df82cccc3bb3e6",
       "preview": "preview_SM_GraniteHandPile_A_LOD1.png"
     },
     "SM_GraniteHandPile_A_LOD2": {
-      "vertices": 908,
+      "vertices": 912,
       "triangles": 1800,
       "size_cm": [
-        40.93,
-        31.21,
-        14.0
+        40.37,
+        40.17,
+        10.42
       ],
       "materials": [
         {
@@ -190,19 +190,19 @@
           "detail",
           "eye"
         ],
-        "eye_distance": 2.2
+        "eye_distance": 1.3
       },
       "fbx": "SM_GraniteHandPile_A_LOD2.fbx",
-      "sha256": "c70161f955a627f1789ebe17bc2c712b62a873f5a3bad0707a4f4580a833dfd1",
+      "sha256": "ec3e83bb8f1c7607b8d705ed937e65aafcb210a06a260ca999f180d7a851ce5d",
       "preview": "preview_SM_GraniteHandPile_A_LOD2.png"
     },
     "SM_GraniteHandPile_B": {
-      "vertices": 15562,
-      "triangles": 31104,
+      "vertices": 15790,
+      "triangles": 31552,
       "size_cm": [
-        53.26,
-        33.63,
-        11.8
+        45.56,
+        34.22,
+        9.16
       ],
       "materials": [
         {
@@ -244,10 +244,10 @@
           "detail",
           "eye"
         ],
-        "eye_distance": 2.2
+        "eye_distance": 1.3
       },
       "fbx": "SM_GraniteHandPile_B.fbx",
-      "sha256": "1553086deca7171ae89e74a10ec1dd72494edddabab6221b61d6d662f849b71f",
+      "sha256": "3736dd9175f9a099cb612f3d8c18309904efc2660fb72c9e54c8e5f1b2fc7105",
       "preview": "preview_SM_GraniteHandPile_B.png",
       "beauty": {
         "views": {
@@ -274,12 +274,12 @@
       }
     },
     "SM_GraniteHandPile_B_LOD1": {
-      "vertices": 3510,
+      "vertices": 3514,
       "triangles": 7000,
       "size_cm": [
-        53.26,
-        33.64,
-        11.8
+        45.57,
+        34.23,
+        9.16
       ],
       "materials": [
         {
@@ -322,19 +322,19 @@
           "detail",
           "eye"
         ],
-        "eye_distance": 2.2
+        "eye_distance": 1.3
       },
       "fbx": "SM_GraniteHandPile_B_LOD1.fbx",
-      "sha256": "d64c0f16baa3f6565e05487b0d7ad84474a1be1e0a79bd70f5d5ea8c54c13321",
+      "sha256": "58d3029ed5f3b46c204da14c6f1f9426a32e62c5b6590b66d0b02836b0a69acc",
       "preview": "preview_SM_GraniteHandPile_B_LOD1.png"
     },
     "SM_GraniteHandPile_B_LOD2": {
-      "vertices": 910,
+      "vertices": 914,
       "triangles": 1800,
       "size_cm": [
-        53.3,
-        33.63,
-        11.83
+        45.59,
+        34.23,
+        9.17
       ],
       "materials": [
         {
@@ -377,19 +377,19 @@
           "detail",
           "eye"
         ],
-        "eye_distance": 2.2
+        "eye_distance": 1.3
       },
       "fbx": "SM_GraniteHandPile_B_LOD2.fbx",
-      "sha256": "4bd5cbbda4779d99446f2875087ca2607d4166c7a1d8227800811cf90fbfbd9c",
+      "sha256": "c547ac8d0fdf842da6d72565c65aa052ba98059d0c99a4e7855771d7fc402648",
       "preview": "preview_SM_GraniteHandPile_B_LOD2.png"
     },
     "SM_GraniteHandPile_C": {
-      "vertices": 16564,
-      "triangles": 33104,
+      "vertices": 16544,
+      "triangles": 33056,
       "size_cm": [
-        40.45,
-        45.58,
-        11.5
+        40.89,
+        35.6,
+        9.18
       ],
       "materials": [
         {
@@ -431,10 +431,10 @@
           "detail",
           "eye"
         ],
-        "eye_distance": 2.2
+        "eye_distance": 1.3
       },
       "fbx": "SM_GraniteHandPile_C.fbx",
-      "sha256": "fa69fd19d28bdfd0ee603997be2a2c7dc25cb535e289673b568455bc207e7404",
+      "sha256": "868d552f964bad86139a1e2a01b0f83b2bb36cb65deed8a4cf75ebc38954bc4d",
       "preview": "preview_SM_GraniteHandPile_C.png",
       "beauty": {
         "views": {
@@ -461,12 +461,12 @@
       }
     },
     "SM_GraniteHandPile_C_LOD1": {
-      "vertices": 3512,
+      "vertices": 3516,
       "triangles": 7000,
       "size_cm": [
-        40.46,
-        45.58,
-        11.5
+        40.9,
+        35.6,
+        9.17
       ],
       "materials": [
         {
@@ -509,19 +509,19 @@
           "detail",
           "eye"
         ],
-        "eye_distance": 2.2
+        "eye_distance": 1.3
       },
       "fbx": "SM_GraniteHandPile_C_LOD1.fbx",
-      "sha256": "c2533d9604bcb75c5032624e55fdd9d81e14e338d7101cbae6e8d26da1268ab4",
+      "sha256": "4a43fa16586f59f3a5a297e809b87600bb89b331dd72ebb03f0b2fddda16efbd",
       "preview": "preview_SM_GraniteHandPile_C_LOD1.png"
     },
     "SM_GraniteHandPile_C_LOD2": {
-      "vertices": 912,
+      "vertices": 916,
       "triangles": 1800,
       "size_cm": [
-        40.48,
-        45.64,
-        11.53
+        40.94,
+        35.55,
+        9.15
       ],
       "materials": [
         {
@@ -564,23 +564,23 @@
           "detail",
           "eye"
         ],
-        "eye_distance": 2.2
+        "eye_distance": 1.3
       },
       "fbx": "SM_GraniteHandPile_C_LOD2.fbx",
-      "sha256": "7ea874414714eef0beddc992511b945bf9ddc4b7065e80f84f7d2716d3935941",
+      "sha256": "3b4d003c08442d38c00f280bfc15a9a3ff2ed5a625da178b9abb8d4d2079d3b1",
       "preview": "preview_SM_GraniteHandPile_C_LOD2.png"
     }
   },
   "warnings": [],
   "notes": {
     "A": {
-      "sink_depth_m": 0.037
+      "sink_depth_m": 0.028
     },
     "B": {
-      "sink_depth_m": 0.015
+      "sink_depth_m": 0.011
     },
     "C": {
-      "sink_depth_m": 0.02
+      "sink_depth_m": 0.017
     },
     "placement": "Origin is the ground line; place at terrain height. Walk-through: no collision.",
     "north": "+Y (moss side)",
@@ -588,14 +588,14 @@
   },
   "nanite": true,
   "textures": {
-    "T_GraniteHandPile_A_basecolor.png": "e429204a2b2cafc7486b39037aa40000c5ee7258b30f1f9c2c30c6211e854210",
-    "T_GraniteHandPile_A_roughness.png": "a0d62197a0ec5f8bbb5915851bb60fd5891bbe0d7a10949e5888ca995ba29e85",
-    "T_GraniteHandPile_A_normal.png": "097aec5b22a889c7e2f6d3aebfa6750d033adc68bcdefeb06f82b05b26b461a1",
-    "T_GraniteHandPile_B_basecolor.png": "f359442c29daa79c4d00823cd49a2ec2192945df012791ede3c290949e89f12a",
-    "T_GraniteHandPile_B_roughness.png": "e0534eecb115b30c859a2f633b54a3fa0ef2c9ddb46fca32e1c3298f16bd6f68",
-    "T_GraniteHandPile_B_normal.png": "50a0924f86c75283102851ff2331f7d528a8d24ccd722ea51713306522ef0efd",
-    "T_GraniteHandPile_C_basecolor.png": "694ba6bc15b1acbbecb234e39a96d3eb9b10ca2746b038beb71eb5928e79a72d",
-    "T_GraniteHandPile_C_roughness.png": "63bac659a23924369bf8ac1725667482ae2ca65d396b400660341ddb5161ab04",
-    "T_GraniteHandPile_C_normal.png": "6181e1a8e5a42e5d6906574bdecc7eb3c7b0b4d2075f8aaacad8fafa58234c94"
+    "T_GraniteHandPile_A_basecolor.png": "decbee4992d440409a77bb6e2a4630e39bfafa5a83a269f69b8bb310c704cc1f",
+    "T_GraniteHandPile_A_roughness.png": "ef57abe364f43ddb80e09d8efe69cc2ae6f55c63668ba79044cb1ba703d0a1f2",
+    "T_GraniteHandPile_A_normal.png": "a65c252242f091b6ec1e72c39fa1f6f3f0a5731097a3c17cd8cab175d76b7454",
+    "T_GraniteHandPile_B_basecolor.png": "bb5677d12b56b268e92b78418f222a113e6fe24e3d6acf9ccbcb5bbbea2adca9",
+    "T_GraniteHandPile_B_roughness.png": "33eafbeaa3059b671196539e8b58ee8eabbe6d8be9506a9748deb66d62f3d62f",
+    "T_GraniteHandPile_B_normal.png": "d0534753f5148a18e295d88a1714fdc6430e43a6c7aaa942b62191da4c5f031b",
+    "T_GraniteHandPile_C_basecolor.png": "33a24c2b24d0461ea68b694ecf014f2bba98bb2adcbe39774f608f32cbef68cc",
+    "T_GraniteHandPile_C_roughness.png": "aef9f0a93bd3d9620e4024bcb2955b2e1ccd65102e17cf693b236f098878c2f7",
+    "T_GraniteHandPile_C_normal.png": "fdb18b22e52eec483234b40642ff526902c777f1672496a29dbcd230f8da75d7"
   }
 }

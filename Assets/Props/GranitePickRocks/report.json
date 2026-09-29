@@ -6,16 +6,16 @@
   "triangle_budget": 320000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/granite_pick_rocks.py",
-  "source_sha256": "f3e2253b0947327e6f5f2992de83528c3afc0f5c66a9ca7dbc2f3f456df96682",
+  "source_sha256": "7b3c067eb830edafa2a32ff4de617dc0db4814f10e67da5ff9a9e46272e9f92f",
   "provenance": "Original project-authored geometry; no third-party asset or texture",
   "meshes": {
     "SM_GranitePickRock_Small": {
-      "vertices": 55266,
-      "triangles": 110528,
+      "vertices": 35042,
+      "triangles": 70080,
       "size_cm": [
-        98.71,
-        69.53,
-        59.25
+        63.91,
+        45.59,
+        40.21
       ],
       "materials": [
         {
@@ -53,14 +53,14 @@
           "eye"
         ],
         "focus": [
-          0.2,
-          -0.2,
-          0.3
+          0.13,
+          -0.13,
+          0.18
         ],
-        "eye_distance": 3.0
+        "eye_distance": 2.2
       },
       "fbx": "SM_GranitePickRock_Small.fbx",
-      "sha256": "6e82cf19351625ce39db140fefa719bea798b3d0b55aa94ee1917515121c1492",
+      "sha256": "806ddeee299c64befc8d4a478a5922dfae7928d2ff059bab9652b2378c091ba0",
       "preview": "preview_SM_GranitePickRock_Small.png",
       "beauty": {
         "views": {
@@ -87,12 +87,12 @@
       }
     },
     "SM_GranitePickRock_Small_LOD1": {
-      "vertices": 11002,
-      "triangles": 22000,
+      "vertices": 7002,
+      "triangles": 14000,
       "size_cm": [
-        98.69,
-        69.52,
-        59.25
+        63.9,
+        45.6,
+        40.19
       ],
       "materials": [
         {
@@ -132,16 +132,16 @@
         ]
       },
       "fbx": "SM_GranitePickRock_Small_LOD1.fbx",
-      "sha256": "009d5c4e6af3b3780754075af8059d874527dd889b99cddba3e924c050e2e649",
+      "sha256": "c8b1090eeb8543911e26d7f4c8e3fc1ae79419b8d276a5ce7fe83d83e035d198",
       "preview": "preview_SM_GranitePickRock_Small_LOD1.png"
     },
     "SM_GranitePickRock_Small_LOD2": {
-      "vertices": 2502,
-      "triangles": 5000,
+      "vertices": 1752,
+      "triangles": 3500,
       "size_cm": [
-        98.67,
-        69.53,
-        59.25
+        63.91,
+        45.55,
+        40.17
       ],
       "materials": [
         {
@@ -181,7 +181,7 @@
         ]
       },
       "fbx": "SM_GranitePickRock_Small_LOD2.fbx",
-      "sha256": "a8a1e7d549705e5fc6d4a3422d608104434eaa939c692dbd6be5626d32213be5",
+      "sha256": "d0b113ca4de276fddcaa6aebfca9dc1c6799a789b5c20cd3171dfac31fd7eb3e",
       "preview": "preview_SM_GranitePickRock_Small_LOD2.png"
     },
     "SM_GranitePickRock_Medium": {
@@ -235,7 +235,7 @@
         "eye_distance": 4.0
       },
       "fbx": "SM_GranitePickRock_Medium.fbx",
-      "sha256": "1baf5ee7a57bafc8969caf4e21f436cf9be8a18e4330813f640a4c285129f59d",
+      "sha256": "b58c535903e922605cccfbfab0472e994819a63b5828b124cc4b86e7caf185f4",
       "preview": "preview_SM_GranitePickRock_Medium.png",
       "beauty": {
         "views": {
@@ -307,7 +307,7 @@
         ]
       },
       "fbx": "SM_GranitePickRock_Medium_LOD1.fbx",
-      "sha256": "1a383e8fae8fc70dcd99b027de6086ab0715342da0e895c4b2c4235d805c27dc",
+      "sha256": "e71da460311c42269d7c0437409b681aa322a70a5fe7b877520ca88f1a2af5cb",
       "preview": "preview_SM_GranitePickRock_Medium_LOD1.png"
     },
     "SM_GranitePickRock_Medium_LOD2": {
@@ -356,7 +356,7 @@
         ]
       },
       "fbx": "SM_GranitePickRock_Medium_LOD2.fbx",
-      "sha256": "8f418cdf32924c666f251245bb568d961affb7650313d9ded11f9e7823d2f13b",
+      "sha256": "4234d690ff5d959f753f6d748c363ced52b23143d8fdbd58c661f40abd676db0",
       "preview": "preview_SM_GranitePickRock_Medium_LOD2.png"
     },
     "SM_GranitePickRock_Large": {
@@ -410,7 +410,7 @@
         "eye_distance": 5.5
       },
       "fbx": "SM_GranitePickRock_Large.fbx",
-      "sha256": "84d4958d55e8ff38b0d1a639a8250d7c3547b375b472283e7011f38ef5baa244",
+      "sha256": "45ed9d89539781207f7cb16625f445a51c6be4db95d668107074c9fd3a21352b",
       "preview": "preview_SM_GranitePickRock_Large.png",
       "beauty": {
         "views": {
@@ -482,7 +482,7 @@
         ]
       },
       "fbx": "SM_GranitePickRock_Large_LOD1.fbx",
-      "sha256": "89e7c84074c29d19a2f27fd0b6530d41de7e89cf98a0ac5a866ac1f1c517ab00",
+      "sha256": "79928ff828c650597e116319acfc4c0c96c5f2a8d86f95f03d5f0b84a6431cce",
       "preview": "preview_SM_GranitePickRock_Large_LOD1.png"
     },
     "SM_GranitePickRock_Large_LOD2": {
@@ -531,14 +531,14 @@
         ]
       },
       "fbx": "SM_GranitePickRock_Large_LOD2.fbx",
-      "sha256": "723d5a8931eed48b9f6319ac58042d986e1cd82eb4901bf2116cabd4fb5a3daf",
+      "sha256": "64f127952227990952eef428645511388087b626b744a7731b9fe94c5ce63114",
       "preview": "preview_SM_GranitePickRock_Large_LOD2.png"
     }
   },
   "warnings": [],
   "notes": {
     "Small": {
-      "sink_depth_m": 0.133
+      "sink_depth_m": 0.09
     },
     "Medium": {
       "sink_depth_m": 0.165
@@ -554,14 +554,14 @@
   },
   "nanite": true,
   "textures": {
-    "T_GranitePickRock_Small_basecolor.png": "b3eafd35eda2a1f8917624eb14c58549369dad8c6cdd7974a89be5aea0b8c8c8",
-    "T_GranitePickRock_Small_roughness.png": "a5c6e2c18ca9b31438e206d1cf1212b9818357a40a18fe857a082cf85b14a70d",
-    "T_GranitePickRock_Small_normal.png": "5708d9e526fcddbb1e8db583e8c685042fb9bc273137d96e188a408d6366cb0e",
-    "T_GranitePickRock_Medium_basecolor.png": "118b97aad3b83d73083440533677736d63b8da189e3f7dc88e2893b58713d463",
-    "T_GranitePickRock_Medium_roughness.png": "0eab69ccdc3ece1f072acc30d55124d91fa8d0e067ecb5e5c02d12d8f68abefe",
-    "T_GranitePickRock_Medium_normal.png": "6ceea49e2a098bb59bf7cd063e4053a1296790279a6fd9fa64abbe84f858d226",
-    "T_GranitePickRock_Large_basecolor.png": "e6cc1c0eab12f0022d3842c0a16bf9852981845af2f056cd3b30c3423b95abb8",
-    "T_GranitePickRock_Large_roughness.png": "24a59ed5b8ec87f561955ad35e5dfccba00b123d0cddccc224c7564ee3557a70",
-    "T_GranitePickRock_Large_normal.png": "e7743009274e71339d1582bd92153dfcad6a14c138c3fd124218f6256fe7be9c"
+    "T_GranitePickRock_Small_basecolor.png": "d72db9d292d8e727aafe56efeab825bebfc66c9663624acb540b68948e58b101",
+    "T_GranitePickRock_Small_roughness.png": "11edfb017de2d0215ca98555357c9130b574f7c4dd7df564e4ee4f47c83d22e3",
+    "T_GranitePickRock_Small_normal.png": "0793e2660ccfa1f29c8b1552c3ae33d49bd34fb026f1a721758dbb6000daa168",
+    "T_GranitePickRock_Medium_basecolor.png": "b79a528223c67ed9095fb7fb5fcbef116d601c632aa37c8e552151999ffc71e9",
+    "T_GranitePickRock_Medium_roughness.png": "7c8b6f55b58bba0124cf5790b35d988ea74e48c507236786d8351730a4faecb2",
+    "T_GranitePickRock_Medium_normal.png": "cce9ca771e0cd337dd4ead40d0b6e24c5361ec862fe5b8fd5a2888b7b4b78bd6",
+    "T_GranitePickRock_Large_basecolor.png": "2aa82a67604e13a90c89c43c6f148b342959e57244b42a0acb3b2385a9c9f71f",
+    "T_GranitePickRock_Large_roughness.png": "7914e7eba55ea1e9a39734a327d4e11a4aec007e7d0560a0ff56826a5be7f787",
+    "T_GranitePickRock_Large_normal.png": "28940c767b983fb850863ad9c8fc1820069b9812107b0a873bd809a48a8c6507"
   }
 }
