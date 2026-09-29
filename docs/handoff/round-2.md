@@ -730,11 +730,12 @@ pending, so this does not claim early Energy is fully solved.
   preview the actual MetaHuman body and portrait; Cancel returns exact white at no cost; Apply Wine
   persists through F5 into a fresh PIE. It still needs 4K and carried-garment coverage. Integration
   reviews only the isolated dye commits; do not bundle the partial camera work.
-- **Leather backpack upgrade** — **pending, not shipped.** A tentative one-time **$15** purchase at
-  the open General Store doubles inventory capacity **120 → 240 items**. (`ShopGoods` normally repeats,
-  so this needs a special upgrade row.) $15 is intentionally above the $10 start—roughly ten cabbage
-  harvests net $0.50—and is tunable later. The worn rucksack appears on her back and its Appearance
-  show/hide is independent of capacity and saving.
+- **Leather backpack upgrade** — **pending, not shipped.** A tentative one-time **1,500-coin**
+  purchase at the open General Store doubles inventory capacity **120 → 240 items**. (`ShopGoods`
+  normally repeats, so this needs a special upgrade row.) This preserves the old raw-value intent:
+  above the 1,000-coin start, with cabbage harvests netting about 50 coins, and remains tunable later.
+  The worn rucksack appears on her back and its Appearance show/hide is independent of capacity and
+  saving.
 
   **Props** owns the core `bRucksackOwned` save state, `PackCapacity(state)` (120/240), validated
   optional trailing save section (old defaults false), and original leather back-socket prop; save
