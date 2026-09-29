@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "name": "Oak",
+  "description": "Mature pedunculate oak, about 16 m tall with a broad 17 m domed crown on a short fissured bole; painted leaf-cluster canopy, four LODs, trunk capsule.",
+  "collision": "capsule",
+  "triangle_budget": 90000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/oak.py",
+  "source_sha256": "ffe65b60942f171a036e1f03b1d17105ab1788eea4239b2c43cdb0e22b522265",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_Oak": {
+      "vertices": 51549,
+      "triangles": 62508,
+      "size_cm": [
+        1597.83,
+        1168.75,
+        1621.65
+      ],
+      "materials": [
+        {
+          "name": "M_SM_OakBark",
+          "textures": {
+            "basecolor": "T_OakBark_basecolor.png",
+            "normal": "T_OakBark_normal.png",
+            "roughness": "T_OakBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_OakLeaves",
+          "textures": {
+            "basecolor": "T_OakLeaves_basecolor.png",
+            "normal": "T_OakLeaves_normal.png",
+            "roughness": "T_OakLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.490577356889844,
+          -2.970146056264639,
+          5.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 16.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Oak.fbx",
+      "sha256": "485d7ae799c8848dd2ca7f85fdf6ffdc7265a4ead5d2f5c6394beac28af8d0a1",
+      "preview": "preview_SM_Oak.png"
+    },
+    "SM_Oak_LOD1": {
+      "vertices": 5925,
+      "triangles": 9146,
+      "size_cm": [
+        1570.07,
+        1153.8,
+        1645.73
+      ],
+      "materials": [
+        {
+          "name": "M_SM_OakBark",
+          "textures": {
+            "basecolor": "T_OakBark_basecolor.png",
+            "normal": "T_OakBark_normal.png",
+            "roughness": "T_OakBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_OakLeaves",
+          "textures": {
+            "basecolor": "T_OakLeaves_basecolor.png",
+            "normal": "T_OakLeaves_normal.png",
+            "roughness": "T_OakLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.490577356889844,
+          -2.970146056264639,
+          5.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 16.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Oak_LOD1.fbx",
+      "sha256": "e685f08c602fbea575b350c755497deefac22abb5f644916629cfac951f87a72",
+      "preview": "preview_SM_Oak_LOD1.png"
+    },
+    "SM_Oak_LOD2": {
+      "vertices": 1490,
+      "triangles": 2114,
+      "size_cm": [
+        1795.21,
+        1348.94,
+        1700.02
+      ],
+      "materials": [
+        {
+          "name": "M_SM_OakBark",
+          "textures": {
+            "basecolor": "T_OakBark_basecolor.png",
+            "normal": "T_OakBark_normal.png",
+            "roughness": "T_OakBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_OakLeaves",
+          "textures": {
+            "basecolor": "T_OakLeaves_basecolor.png",
+            "normal": "T_OakLeaves_normal.png",
+            "roughness": "T_OakLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.490577356889844,
+          -2.970146056264639,
+          5.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 16.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Oak_LOD2.fbx",
+      "sha256": "06ff47822e24b2e517e15cdc41d8b10f9fe2199b843bcc4bf0e5681c079a6ad0",
+      "preview": "preview_SM_Oak_LOD2.png"
+    },
+    "SM_Oak_LOD3": {
+      "vertices": 299,
+      "triangles": 344,
+      "size_cm": [
+        2073.89,
+        1346.43,
+        1827.07
+      ],
+      "materials": [
+        {
+          "name": "M_SM_OakBark",
+          "textures": {
+            "basecolor": "T_OakBark_basecolor.png",
+            "normal": "T_OakBark_normal.png",
+            "roughness": "T_OakBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_OakLeaves",
+          "textures": {
+            "basecolor": "T_OakLeaves_basecolor.png",
+            "normal": "T_OakLeaves_normal.png",
+            "roughness": "T_OakLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.490577356889844,
+          -2.970146056264639,
+          5.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 16.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Oak_LOD3.fbx",
+      "sha256": "5e3e2cbadd30a9db597201b16876cc599cb2c8414f30629b49a208cf06aad397",
+      "preview": "preview_SM_Oak_LOD3.png"
+    }
+  },
+  "warnings": [],
+  "blocking": true,
+  "unreal_folder": "Trees",
+  "nanite": true,
+  "tree": {
+    "height_m": 16.0,
+    "crown_m": [
+      17.2,
+      16.0
+    ],
+    "ground_line_cm": 30.0,
+    "note": "Pivot is the bottom of a 30 cm skirt under the trunk flare; the ground line is 30 cm up."
+  },
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / tree height",
+    "G": "per-branch random phase",
+    "B": "leaf flutter 0 at card base -> 1 at tip, 0 on wood",
+    "A": "1",
+    "strength": 14.0,
+    "flutter": 0.9
+  },
+  "material_notes": "Slot 0 M_OakBark: tiling bark T_OakBark_* (0.8 m square). Slot 1 M_OakLeaves: leaf-cluster atlas T_OakLeaves_* (basecolor alpha = mask, clip 0.5; roughness R rough, G translucency, B AO; normal OpenGL). Two-sided foliage, masked.",
+  "capsule": {
+    "center_cm": [
+      6.7,
+      -19.6,
+      178.4
+    ],
+    "radius_cm": 52.1,
+    "length_cm": 195.4,
+    "note": "Unreal space (Y mirrored from Blender). Length is the cylinder part; the capsule spans the ground to the first fork."
+  },
+  "textures": {
+    "T_OakBark_basecolor.png": "57bf819f1a8e60a5f782b86205f2b6cf8b1f7f8d33b0c8d9480323408f1df9da",
+    "T_OakBark_normal.png": "ea97a8bc8575c4a4c2c87c1962c93f5f1695317498652291caece48e098e48a5",
+    "T_OakBark_roughness.png": "da557c99e708ae54b2a87b89ff0f50592a36177909c0c8777f874209362bca18",
+    "T_OakLeaves_basecolor.png": "c7e288a5d071fea388a6b53985366bcbdcaa161df1608065fcc500d2b29750ec",
+    "T_OakLeaves_normal.png": "3f81ede237fd1d98a2683346259c5ac0b58940f5a93b3b239ee1602789e22faa",
+    "T_OakLeaves_roughness.png": "3b47a1295e0c66cda55bc26ac63138fa59f88fef6e3367f1a733090fbb2b0ee1"
+  }
+}
