@@ -9,7 +9,7 @@ page current; report changes to it rather than editing lane rows yourself.
 | Role / lane | Session | Branch | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | MCP port | OpenSpec change |
 | --- | --- | --- | --- | --- | --- |
 | Orchestrator (coordinates only; never builds, merges, packages or verifies) | `92eac339-51a7-4354-bc79-d33d0da1a000` | `jennifergalley-unreal-engine-mcp` | `jennifergalley-cautious-pancake` | 8765 (so the native `unreal` MCP tools reach the orchestrator's editor) | `author-fixed-cornish-estate-map` |
-| Integration and builds (only session that packages) | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-literate-eureka` | `jennifergalley-literate-eureka` | ask the session | none |
+| Integration and builds (only session that packages) | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-integration-and-builds` | `jennifergalley-literate-eureka` | 8775 | none |
 | Docs agent | `d99bb15c-6135-4f9d-b21a-f46b63c3b36f` | `jennifergalley-work-optimizer` | `jennifergalley-stunning-dollop` | none (no editor) | none |
 | Dollars and general store | `5cf73757-b7c2-43ce-9332-153a163267f3` | `jennifergalley-dollars-and-general-store` | `jennifergalley-fluffy-broccoli` | 8769 | `add-dollars-and-general-store` |
 | Overgrown estate clearing | `ce241dd6-2c0b-47ea-a402-ec9fe5dc3572` | `jennifergalley-overgrown-estate-clearing` | `jennifergalley-stunning-waddle` | 8767 | `add-overgrown-estate-clearing` |
@@ -19,6 +19,23 @@ page current; report changes to it rather than editing lane rows yourself.
 | MVP survival polish (separate product line; never merge with `main`) | `d587d011-6481-4e8d-a465-ecbe80e96bbc` | `mvp-survival` (session branch `jennifergalley-mvp-survival-polish`) | `jennifergalley-probable-barnacle` | 8770 | none |
 | Planning (idle) | `57cf6ea4-e358-4d63-b34d-c140448d7ad6` | `jennifergalley-cozy-estate-pivot-plan` | | | `pivot-to-cozy-estate-life-sim` |
 | Blender assets (idle) | `65a2408b-f87d-42c7-afdf-c48370465344` | `jennifergalley-blender-asset-pipeline` | | | |
+
+**Current app names** (each session keeps "<one or two words> Agent" and renames itself when its main
+task changes; `docs\handoff\README.md`):
+
+| Name | Session | Work |
+| --- | --- | --- |
+| Orchestrator Agent | `92eac339` | coordinates the lanes |
+| Integration Agent | `e251051b` | merges and builds; the only session that packages |
+| Clearing Agent | `ce241dd6` | clearing |
+| UI Agent, then Lamp Agent | `5cf73757` | UI, then the oil lamp |
+| Farm Agent | `f8b77021` | the derelict farm |
+| Ground Agent, then Sleep Agent | `89914e30` | ground, then the sleep change |
+| Trees Agent | `65a2408b` | trees |
+| Woodland Agent (app name still "MVP woodland biome") | `fd682909` | the MVP woodland biome |
+| Build Speed Agent (app name still "Estate boundary and minimap") | `6e131c6a` | build speed |
+| Documentation Agent | `a9f10974` (project session `d99bb15c`) | docs; named by Jenny, so kept |
+| Architecture agent | `a1648ae7` (`jennifergalley-cuddly-invention`) | code steward: `docs\architecture.md`, "Code practices", code-convention skills, safe refactors, batch reviews |
 
 Session IDs are the app's project-session IDs: use them with `send_session_message`. The worktree
 folder name is the session's **mailbox address** for urgent `mailbox_send` messages
@@ -62,6 +79,10 @@ integration session merges and packages.
 
 **Registry: estate placement ids and scenery kinds.** Claim a range here (through the docs agent or
 the orchestrator) before using it, and keep the comment at `Simulation\HomesteadEstate.h` ~87 in step.
+**Append only:** placements added with `grow()`/`along()` in `HomesteadEstate.cpp` take sequential ids
+(`next++`), so inserting a line mid-run renumbers every later placement, and saves then clear the
+wrong nodes. Moving or removing placements needs `table.bakeVersion` raised (the orchestrator's call,
+like the save version).
 
 | Placement ids | Owner |
 | --- | --- |
@@ -77,10 +98,11 @@ the orchestrator) before using it, and keep the comment at `Simulation\Homestead
 | Scenery kinds (`EstateSceneryKinds` in `HomesteadWorld.cpp`; `scatter.py` kind bytes must match) | Owner |
 | --- | --- |
 | 13-15: oak, beech, sycamore; 16-18: hawthorn, holly, hazel coppice | trees lane |
-| 19-47 | MVP woodland biome |
+| 19-41 | MVP woodland biome (`Scripts\Terrain\mvp_woodland.py`) |
 
-The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by `scatter.py` and
-`bake_ground.py` (on its lane branch; not on `main` yet).
+The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json` (not in `estate_layout.json`,
+which `reshape.py` regenerates), shared by `scatter.py` and `bake_ground.py`. On its lane branch; not on
+`main` yet.
 
 **Re-bake order after `scatter.py` regenerates the scenery:** `bake_ground.py` and
 `build_ground.py` (ground lane), then the estate map (`docs\setup.md`, "Estate map").
@@ -111,6 +133,13 @@ The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by
   If your branch adds anything to the save format, tell the orchestrator before your `[ready]`. New
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
+  **SAVE-SAFETY HOLD (orchestrator, 2026-09-28, in force now):** appending a value to `enum class Item`
+  (`Simulation\HomesteadItems.h`) silently makes existing saves unreadable, because `WriteStock` writes
+  every stock positionally with no count. **Don't push or send `[ready]` for commits that add items**
+  until the architecture agent's save hardening (count-prefixed stocks, save v13 with a v12 migration;
+  `openspec/changes/harden-save-item-stocks`) is on `main` and the orchestrator lifts the hold. Keep
+  developing on your branch. The architecture agent may coordinate edits in `HomesteadSimulation.cpp`
+  with you.
 - `SHomesteadMenu` edits are serialized through the orchestrator.
 - **Integration session: packaging and batching.** Merge `[ready]`s in batches (one editor build, one
   game-target build, one native test run, one PIE pass per batch), and package only at the end of a round
@@ -148,6 +177,10 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Decisions during the round
 
+- **Playtest builds on a schedule** (Jenny, 2026-09-28): on the "Homestead Estate" shortcut by 7:30 AM
+  daily and 4:00 PM on weekdays (plus weekend builds when noticeable features land). The orchestrator
+  triggers the integration session at about 5:30 AM and 2:00 PM; lanes close their editors while it
+  packages; `main` stays playable. Details are in `docs\handoff\README.md`, "Playtest builds".
 - **Waiting means ending your turn** (Jenny, 2026-09-28, all sessions): no sleep/poll loops while waiting
   for a slot, the UBT queue, a `[ready]` or a perf window. Schedule a wake-up with
   `save_session_automation`, end the turn, and clear it afterwards (`docs\handoff\README.md`). The
@@ -159,6 +192,9 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   15-17 GB; with three open, RAM ran out and the pagefile grew to 81.5 GB, filling C:.
   `Start-EditorMcp.ps1` enforces it. Close your editor as soon as a verification pass is done.
 - Agent editors start with Live Coding and ray tracing off (`bedbb9b8`, `50f9c64c`).
+- Agent editors skip the new-game setup (`homestead.SkipNewGameSetup`, passed by `Start-EditorMcp.ps1`):
+  new Estate games use the default names (Eleanor Cavendish, Trevennor). Set it to 0 in the console
+  to test the Appearance and "Who comes home?" steps; packaged builds and normal play are unaffected.
 - The Estate is the default editor startup and game map (`b07d4a82`). Packaged woodland test
   scripts pass `/Game/SurvivalGame/Maps/Homestead` explicitly until each suite is retargeted.
 - HUD layout (Jenny): minimap bottom-right, calendar top-right, key hints top-left, and an icon-only
@@ -174,11 +210,30 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   forwarded `[ready]`s, builds, runs native, packaged, PIE and perf checks, packages, and reports
   `[integrated] <what> @ <sha>`. Reason: while the orchestrator was busy with hands-on work its turn
   stayed open, so lanes' messages never reached it. Flow: lane `[ready]` → orchestrator → integration
-  session → `[integrated]` → orchestrator → Jenny. **Open question:** the "Homestead Estate" shortcut
-  still points at `jennifergalley-cautious-pancake\Build\Windows`; the integration session should
-  confirm where it packages to.
+  session → `[integrated]` → orchestrator → Jenny. **Packaging target:** the integration session packages into its own worktree
+  (`jennifergalley-literate-eureka\Build\Windows`). At the end of the round, when the orchestrator
+  says so, it retargets the "Homestead Estate" shortcut to that build's `JennysHomesteadGame.exe`, keeping
+  the Homestead icon. Until then the shortcut stays on `jennifergalley-cautious-pancake`, and
+  `Homestead.lnk` is never touched.
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. Its "Estate tool route"
   is now in skill section 4; the manor lane added the on-foot routes to all five salvage piles.
+
+## Pending doc updates on merge
+
+- Build speed (`f6ed1c42`, waiting on the orchestrator): once it merges, (a) point every `Build.bat
+  SurvivalGameEditor ...` recipe (editor skill quick-start and section 8, `docs\handoff\README.md` step 3,
+  `docs\setup.md`) at `Scripts\Invoke-UnrealBuild.ps1` (`-Target`, `-CheckOnly`, `-Force`; it skips UBT when
+  already built, logs to `Saved\Logs\UnrealBuildTool-<targets>.log`, and passes `-UBADisableRemote`), and
+  document `Start-EditorMcp -ForceBuild`; (b) add the private-PCH rule: `SurvivalGame` uses
+  `Source\SurvivalGame\SurvivalGamePCH.h`; `C2027`/`C2065 use of undefined type` in a file that used to
+  compile means include that engine header in the file; add to the PCH only headers many files use,
+  never UnrealEd or editor headers; every `.cpp` must compile on its own. The docs agent does this.
+
+- Architecture agent (`77d4cee7`, not on `main` yet): when `docs/architecture.md` and the
+  `homestead-code-conventions` skill land, point the C++ rows of the editor skill's table 0.1 (unity
+  clashes, C4458/C4459, C2487, enum default args, UPROPERTY-not-static, `../Simulation/` includes,
+  runtime ISM Rebuild) and section 8's "C++ conventions that bite" at that skill's "Unreal C++"
+  section, keeping each row's Symptom column. The docs agent does this.
 
 ## Tooling requests (unassigned)
 
