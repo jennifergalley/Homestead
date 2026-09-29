@@ -222,29 +222,7 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Pending doc updates on merge
 
-- Lamp lane (on its branch, not on `main` yet): the new commands `LabHold Lamp`, `LabAction LampDown|LampUp`,
-  `HomesteadLampOil <hours>`, and `HomesteadTeleport X Y [Z]` (stands her on the ground once collision has
-  streamed in; McpHelpers `tp` switches to it); lamp clips from `homestead_agent.lamp_pose`
-  (`build_raised` / `build_set_down` / `report`) and glass/flame materials from
-  `homestead_agent.lamp_materials.build()`. When it lands, add these to the character-lab and
-  console-command notes in the editor skill and check `tp`'s help in `McpHelpers.ps1`.
-
-- Lamp lane (uncommitted in `jennifergalley-fluffy-broccoli` as of 2026-09-28): `build_prop.py` gains a
-  recipe-level `BAKE_MESHES = {"SM_Name"}` (or a dict of per-mesh overrides) to bake only chosen meshes,
-  so a prop can bake its opaque body while leaving separate glass or flame meshes unbaked
-  (`Recipes/oil_lamp.py`: `SM_OilLamp` baked, `SM_OilLampGlass` and `SM_OilLampFlame` not). With only
-  `BAKE`, every mesh still bakes. When it lands, add it to the Blender skill's "Bake and review
-  settings" step and `docs\blender-assets.md`.
-
-- Architecture agent (not on `main` yet):
-  - **Static-init rule** (`6f5e920e`, `79b30016`): when its "Nothing at namespace scope may read runtime
-    state" bullet is in `homestead-code-conventions` on `main`, change the fix text of the 777006
-    row in editor skill table 0.1 to point at it, keeping `Scripts\Examples\dbgrun.py` there for
-    diagnosis.
-  - **Legacy probes removed** (`26b367e9`): `Test-AuthoringSettings.ps1`, `Tests\HomesteadMenuSourceTests.py`,
-    FernSpike and the `*Policy` scripts. Drop `Test-AuthoringSettings.ps1` from editor skill section 0's
-    "Never stop shared processes" bullet, and delete the table 0.1 row about `HomesteadMenuSourceTests.py`
-    failures.
+None.
 
 ## Tooling requests (unassigned)
 

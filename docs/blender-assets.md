@@ -101,6 +101,7 @@ NAME = "FlintAxe"
 COLLISION = "convex"
 TRIANGLE_BUDGET = 120000
 BAKE = {"size": 2048, "samples": 96}                           # procedural -> texture maps
+BAKE_MESHES = {"SM_OilLamp"}                                   # optional: bake only these (default: every mesh)
 BEAUTY = {"pose": (90, 0, 28), "focus": (0.02, 0.0, 0.50)}     # lay it down; close-up target
 
 def build(kit):
