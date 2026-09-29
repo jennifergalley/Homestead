@@ -302,11 +302,20 @@ requirement.
   right-stick orbit, wheel zoom and a default front view; it disables/clips camera collision while the
   page is open and restores it on close. After the package, Menu needs roughly 25 minutes of UE
   1080p-and-4K testing: orbit near a wall, close/restore and confirm no movement spill.
+- **Build menu wording** — **Menu, pending and not shipped.** Trace the current Build-menu `Plan`
+  action and relabel/adjust its semantics so the control accurately describes what it does. Keep this
+  separate from the active dye/Appearance verification work.
 - **Hair groom** — **temporary Gait Agent** (`65a2408b`), after the running-heel and scythe work:
   investigate the intermittent exploding/sticking-out groom.
 - **Gait and scythe** — **temporary Gait Agent** (`65a2408b`), after its current run-heel slice:
   lower the running foot swing apex slightly; at rest the scythe must sit in her hand, and its blade
   must not clip the terrain during a sweep.
+- **Tool feedback and clearing animation** — **Props, pending and not shipped.** An iron-billhook-tier
+  target must be non-actionable with no animation, Energy spend, progress or yield when the wrong tool
+  is selected, and give a clear needs-iron hint. Make billhook swings visibly contact their targets.
+  Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
+  two-swing clearing animation and awards/clears once, without a second click or double reward.
+  Architecture traces tool tier, input and reward paths before native/PIE proof.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
@@ -428,25 +437,44 @@ requirement.
 
   It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
   salvage. Props released its slot before 13:45.
+- **Owned chest names and original trunk** — **Props simulation/save/world with Menu rename input,
+  pending and not shipped.** An owned chest receives a persistent stable-ID custom name, shown in its
+  world interaction prompt before opening. Author an original high-fidelity Victorian timber trunk;
+  Coral Island is mood reference only, never copied. Architecture traces the name/save path before a
+  separate increment and native/PIE persistence coverage.
 - **Safe manor construction** — **Props, pending and not shipped.** The estate parcel is already
   owned, but `Manor::BlockedByManor` blanket-rejects nine footprint samples inside
   `ManorFootprint`, except furnishings on the heritage standing-room floor. Define a safe roofless-hall
   subpolygon with full-footprint and capsule margins that excludes heritage walls/masonry, then permit
   chests, beds, fires and own foundations there.
 
+  `ResolvePlacement` already snaps Wall/Doorway to a new foundation edge and Roof to its cell, while
+  `CheckSite` requires a foundation and rejects duplicates. Allow a physically clear 3 × 3 m new
+  foundation cell only after excluding the ruin cross wall (U1800), rubble (U2150/V1100) and a retained
+  walking corridor; then validate wall edges and doorways against heritage mesh even across building
+  IDs. Narrow `Manor::BlockedByManor`'s current broad exemption for any non-Foundation on the room
+  `buildingId` to an actual heritage foundation inside the standing room; hall extensions use the
+  measured safe-zone predicate.
+
   Later walls/roofs may snap only to a nonheritage new foundation with collision/segments, never
   replace heritage fabric. Controller green preview and `Place` share a core `CheckSite`; validate
   saved nonheritage structures after heritage/parcels deserialize and preserve old saves. Require
-  native plus PIE path, collision and save tests. Architecture is still checking whether the wall/roof
-  follow-up is viable; fast travel and music remain next-build priorities first.
+  native plus on-foot PIE path, collision and save tests. Architecture is still checking whether the
+  wall/roof follow-up is viable; fast travel and music remain next-build priorities first.
 - **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
   road to town, including the bridge approach, and significantly increase visible pickable
   berries/herbs/non-farm food across the estate distributions. The ID range is reserved; implementation
   remains pending the narrow public-road-corridor proof and bridge coordinate sync.
 - **Terrain-following road grade** — **Water Agent, pending and not shipped.** Eliminate artificial
-  raised/lowered road segments by keeping road elevation and grade consistent across r16,
-  Landscape, scenery, road material/ruts and the map. Architecture traces the mismatch before Water's
-  coordinated terrain bake and ordinary walking verification.
+  raised/lowered road segments. The road is Landscape paint/ruts, not a raised mesh: `reshape.py`
+  grades a 2.8 m flat half-width plus 12 m falloff at ±11%, and its weightmap/rut SDF share the route.
+  The recorded profile is p95 1.3 cm deviation, but reaches 1.107 m at ford (-12.53, -40.3) because a
+  river cut after road grading leaves the painted route deep in water.
+
+  Water first surveys rendered Landscape-versus-r16 1 m cross-sections at centre/±2.8/±15 m, then
+  patches only mismatched edit-layer tiles <=5 cm or makes a local ford embankment with a new wooden
+  bridge. Synchronize PNG, r16, roadProfile, weightmap, ruts, ground, material and map while retaining
+  anchors/chainage. Never broadly reshape from `game_raw_4033` or erase lake/river work.
 - **Field-book road label** — **Water Agent** (`89914e30`): the redundant runtime `"Dirt road"` label
   is removed with lake `df19d74a` in `main` `61c1595c`
   (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a book-map lake/path
@@ -454,6 +482,9 @@ requirement.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
+- **Reduced foliage shadow motion** — **Water, pending and not shipped.** Tune WPO and shadow
+  amplitude/frequency so bush sway does not cast excessive moving dark/light leaf shadows. Architecture
+  traces the wind path first; Water compares packaged RT-on captures before and after.
 - **Nighttime brightness** — **pending, not shipped.** At about 9 PM, the Estate visibly brightens:
   moonlight reads like sunlight. Architecture's read-only trace of current `HomesteadWorld.cpp`
   (`59–64`, `1715–1784`, `4268–4337`) found no 21:00 trigger: sun reaches zero around 18:23,
