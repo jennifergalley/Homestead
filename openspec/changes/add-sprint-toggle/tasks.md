@@ -4,4 +4,4 @@
 - [x] 1.2 Hints (HUD bar with on/off state, Character Lab), README controls
 - [x] 1.3 Hotbar, creek and visual sprint playtests use taps
 - [x] 1.4 Editor build
-- [ ] 1.5 PIE: L3 on/off with walk, stop and resume; Shift the same; Shift+Q doesn't toggle; the book doesn't toggle it and keeps it; low Energy refuses and turns it off with one notice; hints at 1080p and 4K
+- [x] 1.5 PIE: L3 on (480 cm/s), resumes after a stop without a press, L3 off (walks); a teleport clears it; a Shift tap turns it on; Shift held with Q doesn't toggle; with the book open L3/Shift presses are ignored and the toggle is kept; at Energy 9 a press is refused with the notice; sprinting from 10.25 turns it off at the reserve with the notice; the hint bar reads "[Shift] Sprint: on" / "[L3] Sprint: on"
