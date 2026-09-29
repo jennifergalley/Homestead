@@ -37,6 +37,7 @@ scikit-image.
 python Scripts\Terrain\mosaic.py               # tiles -> work\mosaic_E165000_N45000_1m.npy (+ overview_5m.png)
 python Scripts\Terrain\resample_game_frame.py  # -> work\game_raw_4033.npy in the game frame
 python Scripts\Terrain\reshape.py              # -> Estate_Heightmap_4033.png, estate_layout.json
+python Scripts\Terrain\public_road.py          # -> Simulation\HomesteadEstatePublicRoad.inc
 python Scripts\Terrain\preview_zoom.py game_reshaped_4033.npy overview.png -2016 2016 -2016 2016 4 Scripts\Terrain\estate_layout.json
 ```
 
@@ -48,6 +49,11 @@ JSON. Its arguments are `src out xmin xmax ymin ymax step [layout.json]`, in gam
 `Estate_Heightmap_4033.png`, `estate_layout.json` and the scenery scatter that `scatter.py` writes
 (`Content\SurvivalGame\Estate\Runtime\EstateScenery.bin`). After re-running `reshape.py` or
 `scatter.py`, re-bake and re-import it: see "Estate map (T_EstateMap)" in `docs\setup.md`.
+
+After a road, `roadProfile`, route sign/stop, or terrain-height change, also run
+`public_road.py`. It reads the layout plus `EstateHeightfield.r16` and generates the runtime 486-point
+public-road centreline, chainage, safe travel endpoints, sign anchors and bridge keep-out in
+`Simulation\HomesteadEstatePublicRoad.inc`. Verify its stops, signs and terrain heights before release.
 
 ## Game frame
 
