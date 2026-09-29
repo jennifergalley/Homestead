@@ -22,10 +22,12 @@
 - [ ] 3.1 Palette in menu, shop, vitals, HUD and controller
 - [ ] 3.2 Table-driven `EHandAction` in `HomesteadAnimInstance.cpp`
 - [ ] 3.3 Test admission and route dispatch out of `AHomesteadController::BeginPlay`
+- [ ] 3.3a Narrow `HomesteadController.h` / `HomesteadSimulation.h` fan-out (menu types header, forward declarations)
+- [ ] 3.3b Test harness into a Development-only `SurvivalGameTests` module (with the Build Speed Agent)
 - [ ] 3.4 Named log categories replace `LogTemp`
 - [ ] 3.5 Tool item enum names (`Axe`, `Hoe`, `Pail`), keys unchanged
 
 ## 4. Legacy tooling (approved; receipts in docs/research stay)
 
-- [ ] 4.1 Remove `FernSpike.cpp`, the authoring-probe commandlet and its scripts
-- [ ] 4.2 Remove unused policy tests; drop `HomesteadMenuSourceTests.py`
+- [x] 4.1 Remove `FernSpike.cpp`, the authoring-probe commandlet and its scripts
+- [x] 4.2 Remove unused policy tests; drop `HomesteadMenuSourceTests.py`

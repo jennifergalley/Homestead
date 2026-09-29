@@ -237,6 +237,10 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   settings" step and `docs\blender-assets.md`.
 
 - Architecture agent (not on `main` yet):
+  - **Static-init rule** (`6f5e920e`, `79b30016`): when its "Nothing at namespace scope may read runtime
+    state" bullet is in `homestead-code-conventions` on `main`, change the fix text of the 777006
+    row in editor skill table 0.1 to point at it, keeping `Scripts\Examples\dbgrun.py` there for
+    diagnosis.
   - **Legacy probes removed** (`26b367e9`): `Test-AuthoringSettings.ps1`, `Tests\HomesteadMenuSourceTests.py`,
     FernSpike and the `*Policy` scripts. Drop `Test-AuthoringSettings.ps1` from editor skill section 0's
     "Never stop shared processes" bullet, and delete the table 0.1 row about `HomesteadMenuSourceTests.py`

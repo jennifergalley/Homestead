@@ -37,6 +37,7 @@ public:
     UPROPERTY() int32 SelectedHotbarSlot = 0;
     // 0: saved before food could be pinned; 1: pinned food and the machete migration applied;
     // 2: the estate's hafted tools (scythe, billhook, pickaxe) join the hotbar.
-    static constexpr int32 CurrentHotbarLayout = 2;
+    // 3: the oil lamp joins older hotbars (add-oil-lamp).
+    static constexpr int32 CurrentHotbarLayout = 3;
     UPROPERTY() int32 HotbarLayout = 0;
 };

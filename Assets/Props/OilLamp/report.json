@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "name": "OilLamp",
+  "description": "1850s tinned-sheet-iron hand oil lantern with brass burner, wire cage, separate glass globe and emissive flame (original).",
+  "collision": "none",
+  "triangle_budget": 12000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/oil_lamp.py",
+  "source_sha256": "3d3bb5e8642563c598635ba6b244b2da4dd684a61abf9f83fcb21cf613f689fa",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_OilLamp": {
+      "vertices": 5786,
+      "triangles": 11244,
+      "size_cm": [
+        12.41,
+        12.4,
+        34.12
+      ],
+      "materials": [
+        {
+          "name": "M_OilLamp",
+          "textures": {
+            "basecolor": "T_OilLamp_basecolor.png",
+            "roughness": "T_OilLamp_roughness.png",
+            "metallic": "T_OilLamp_metallic.png",
+            "normal": "T_OilLamp_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_OilLamp_basecolor.png",
+          "roughness": "T_OilLamp_roughness.png",
+          "normal": "T_OilLamp_normal.png",
+          "ao": "T_OilLamp_ao.png",
+          "metallic": "T_OilLamp_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -28
+        ],
+        "focus": [
+          0.0,
+          -0.01,
+          0.16
+        ],
+        "ground": "origin",
+        "detail_distance": 0.36
+      },
+      "fbx": "SM_OilLamp.fbx",
+      "sha256": "cc343344334f47062f299644b67692bf1e78822d3ad6c64d21fde194b894144a",
+      "preview": "preview_SM_OilLamp.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_OilLamp_hero.png",
+          "detail": "beauty_SM_OilLamp_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -28
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_OilLampGlass": {
+      "vertices": 1440,
+      "triangles": 2688,
+      "size_cm": [
+        9.99,
+        10.0,
+        14.01
+      ],
+      "materials": [
+        {
+          "name": "M_OilLampGlass",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.08
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -28
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.154
+        ],
+        "ground": "lowest",
+        "detail_distance": 0.28
+      },
+      "fbx": "SM_OilLampGlass.fbx",
+      "sha256": "3a9e76428ec64ef53b612690ddc6d02e1a13bbf2100c52ddecc109d399d7c943",
+      "preview": "preview_SM_OilLampGlass.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_OilLampGlass_hero.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_OilLampFlame": {
+      "vertices": 222,
+      "triangles": 440,
+      "size_cm": [
+        1.34,
+        1.34,
+        3.6
+      ],
+      "materials": [
+        {
+          "name": "M_OilLampFlame",
+          "color": [
+            1.0,
+            0.42,
+            0.08
+          ],
+          "roughness": 0.4
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.1355
+        ],
+        "ground": "lowest",
+        "detail_distance": 0.18,
+        "detail_fstop": 32.0
+      },
+      "fbx": "SM_OilLampFlame.fbx",
+      "sha256": "0aa3233b0f2458aa241de8e0b465c0dbf55f63719b4b443587bc2af289a8c634",
+      "preview": "preview_SM_OilLampFlame.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_OilLampFlame_hero.png",
+          "detail": "beauty_SM_OilLampFlame_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "material_slots": "SM_OilLamp bakes to one textured opaque material; SM_OilLampGlass and SM_OilLampFlame stay separate for engine translucent/emissive parents."
+  },
+  "attach": {
+    "units": "cm in exported mesh frame; pivot is bottom-centre on ground, Z up, -Y forward (Blender FBX export mirrors Y into Unreal)",
+    "bail_grip_top_centre_cm": [
+      0.0,
+      0.0,
+      34.1
+    ],
+    "flame_centre_cm": [
+      0.0,
+      0.0,
+      13.55
+    ],
+    "glass_centre_cm": [
+      0.0,
+      0.0,
+      15.4
+    ],
+    "overall_height_cm_to_bail_grip_top": 34.1,
+    "base_fount_diameter_cm": 12.4
+  },
+  "textures": {
+    "T_OilLamp_basecolor.png": "290f8fa962915fb6267a34e002a1a16ae1c2232525c7fbbded71351aaa79d1e6",
+    "T_OilLamp_roughness.png": "30fd52dccafbc7bf66d5651e4a61b43d1749f1b2b066a57b598463d8f47de6e2",
+    "T_OilLamp_metallic.png": "4efab5e34299e8e901d9cb1777d70ce963d5431e6b574b56fca76d7bfeb91096",
+    "T_OilLamp_normal.png": "9b0927ae62f73a9a998b050cd320938c03d5daf34ef570a1ba5002bca18ccde3"
+  }
+}

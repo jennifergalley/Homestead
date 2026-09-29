@@ -1813,6 +1813,8 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
         {
             if (Known && Homestead::IsEdible(Item))
                 Add(TEXT("Eat 1"), Act(EHomesteadItemAction::Primary, 1), EHomesteadItemAction::Primary);
+            if (Known && (Item == Homestead::Item::OilFlask || Item == Homestead::Item::OilLamp))
+                Add(TEXT("Fill the lamp"), [this]() { Controller->MenuRefillLamp(); });
             if (Known && AHomesteadController::CanPinToHotbar(Item))
                 Add(Controller->IsPinnedToHotbar(Item) ? TEXT("Unpin from hotbar") : TEXT("Pin to hotbar"),
                     Act(EHomesteadItemAction::Pin, 1), EHomesteadItemAction::Pin);

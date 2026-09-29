@@ -20,6 +20,8 @@ enum class Item : int
     RustedAxeHead, RustedHoeBlade, RustedScytheBlade, RustedBillhookHead, RustedPickHead,
     Hay, Weeds, BrambleCanes, Kindling, ScrapIron, ScrapLead,
     Primroses, Bluebells, WildDaffodils, WildGarlic,
+    // add-oil-lamp.
+    OilLamp, OilFlask,
     Count
 };
 constexpr int ItemCount = static_cast<int>(Item::Count);
