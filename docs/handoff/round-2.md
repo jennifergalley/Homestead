@@ -399,11 +399,17 @@ requirement.
   intensity is 0.6 (day 1), and night auto-exposure has a -2 EV100 floor (day 0). The combined
   moon/sky/adaptation cause is plausible, not visually proven.
 
-  **Water** later runs a controlled existing-CVar trial — moon 0.1–0.3 lux, sky 0.1–0.2, and an
-  exposure floor toward -1/0 — while preserving smooth dusk and lamp readability. Log and use a
-  fixed camera at 18:00, 19:00, 21:00 and midnight in clear and rain. **Integration** judges
-  packaged RT-on Lumen hardware-ray-tracing plus VSM evidence, because the normal agent editor launch
-  disables RT/VSM; neither the trace nor screenshots alone establish a fix.
+  **Water headless partial `4d248d6f` is unwired, unshipped and outside the 4 PM candidate.** Its
+  pure `HomesteadNightLight` schedule targets 0.2 lux moonlit ground after dusk (0.2/sin altitude,
+  capped at 1 lux low), night sky 0.3 rather than 0.6, and EV100 floor -1 rather than -2. At 21:00 it
+  computes moon 0.28 lux/display key 0.16 (about -2.6 stops); noon is unchanged. Native 9/9 checks
+  the prior daylight-grey 21:00 key of about 1, a non-increasing 18:50→midnight curve, no jump above
+  0.25 lux/minute, moon <=1 lux, and 21:00/00:00/03:00 at -1.5 to -3.5 stops.
+
+  It still needs `UpdateLighting`/CVar wiring, an Editor build, and fixed-camera packaged RT-on Lumen
+  hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to calibrate
+  smooth dusk and lamp readability. Lamp and hearth behavior are untouched. Neither the trace nor the
+  schedule establishes a visual fix.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
