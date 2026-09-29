@@ -442,16 +442,17 @@ requirement.
   `FadeIn(2, 1)` and leaves gain solely to the multiplier. Rain is intentionally silent on dry
   days/times (currently only day 2/3, 09:00–15:00).
 
-  **Rain code is `[ready]` at `65726628`, but the subjective sound is not fixed yet.** This isolated,
-  one-file commit is cherry-pickable and PIE-verifies dry off; rainy-noon indoor `IsPlaying` gain
-  0.245 / outdoor 0.63; drizzle indoor 0.105; and the two-second fade. Those values establish the
-  single-gain formula instead of the prior `Gain²`; source RMS remains -24 dBFS. Lake and weather
-  schedule work are not included.
+  **The isolated code fix shipped** as `65726628` → `545e057b` on `main` `76b316a3` and is included
+  in the 4 PM package. Editor and game builds, native tests (8/8), and the static-init check pass.
+  Water's PIE evidence verifies dry off; rainy-noon indoor `IsPlaying` gain 0.245 / outdoor 0.63;
+  drizzle indoor 0.105; and the two-second fade. Those values establish the single-gain formula
+  instead of the prior `Gain²`; source RMS remains -24 dBFS. Lake and weather-schedule work were
+  excluded.
 
-  Water could not capture or hear editor output, so it cannot establish whether Jenny's symptom is
-  audibly resolved. Integration builds the isolated commit and seeks its own packaged-process
-  audio/mixer evidence in the 4 PM batch; otherwise report that uncertainty. Do not describe the
-  subjective rain sound as fixed without ears-on or recorded evidence.
+  **Audible resolution remains unproven.** Low RAM and the Menu editor prevented Water's ears-on
+  capture, and packaged `AudioProof` covers only legacy audio. Jenny can listen outdoors during rain
+  on day 2, roughly 11:00–15:30, in the 4 PM package. Do not describe the subjective rain sound as
+  conclusively fixed without ears-on or recorded Estate-rain evidence.
 
   The heritage-stone west doorway is a 130 × 220 cm gap with no leaf. **Props** queues an original
   oak-plank mesh and frame after the cove stairs. The later audio/door implementer makes the leaf
