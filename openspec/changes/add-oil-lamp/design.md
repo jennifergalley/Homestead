@@ -46,8 +46,8 @@ reservoir. It refuses when the lamp is already nearly full. In game: the flask's
   Saves without it load with an empty reservoir and `kitGranted = false`.
 - On load, if `kitGranted` is false, she gets the kit once (lamp, full, and three flasks) if her pack
   has room, then `kitGranted` is true. New games start with it granted.
-- No `SimulationSaveVersion` change. The new Items are appended to the enum, which is only safe once
-  the save hardening (count-prefixed stocks) is on main, so the change waits for it.
+- No `SimulationSaveVersion` change. The new Items are appended to the enum; the v13 save
+  hardening (count-prefixed stocks, on main at 8c723e87) makes that safe for older saves.
 - The hotbar's layout version (`UHomesteadSave::CurrentHotbarLayout`) goes up by one so existing
   hotbars get the lamp in a free slot.
 

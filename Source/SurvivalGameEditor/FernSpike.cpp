@@ -1636,7 +1636,7 @@ namespace Grass
             auto* Mesh = LoadObject<UStaticMesh>(nullptr, *(Root + TEXT("/Meshes/") + MeshName(Index)));
             if (!Mesh) return Reject(Result, TEXT("Missing selected clump: ") + MeshName(Index));
             FStaticMeshCompilingManager::Get().FinishCompilation({ Mesh });
-            const auto* Data = Cast<UFbxStaticMeshImportData>(Mesh->AssetImportData);
+            const auto* Data = Cast<UFbxStaticMeshImportData>(Mesh->GetAssetImportData());
             const auto* Description = Mesh->GetMeshDescription(0);
             const auto* Render = Mesh->GetRenderData();
             if (Mesh->GetNumSourceModels() != 1 || !Description || Description->Triangles().Num() != Triangles[Index]
@@ -2077,7 +2077,7 @@ namespace Woodland
             FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
             const auto* Description = Mesh->GetMeshDescription(0);
             const auto* Render = Mesh->GetRenderData();
-            const auto* Data = Cast<UFbxStaticMeshImportData>(Mesh->AssetImportData);
+            const auto* Data = Cast<UFbxStaticMeshImportData>(Mesh->GetAssetImportData());
             const bool Sapling = Expected.Slots == 2;
             const int32 LodCount = Sapling ? 2 : 1;
             if (!Description || Description->Triangles().Num() != Expected.Triangles

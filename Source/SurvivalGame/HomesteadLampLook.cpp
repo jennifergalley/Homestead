@@ -40,9 +40,9 @@ TArray<UStaticMeshComponent*> AddParts(UObject* Outer, USceneComponent* Parent, 
     UStaticMeshComponent* Frame = AddPart(Outer, Parent, Body, Offset, *(Base + TEXT("_Body")));
     Frame->SetCastShadow(true);
     Parts.Add(Frame);
-    if (UStaticMesh* Glass = LoadLampAsset<UStaticMesh>(TEXT("SM_OilLampGlass")))
+    if (UStaticMesh* GlassMesh = LoadLampAsset<UStaticMesh>(TEXT("SM_OilLampGlass")))
     {
-        UStaticMeshComponent* Chimney = AddPart(Outer, Parent, Glass, Offset, *(Base + TEXT("_Glass")));
+        UStaticMeshComponent* Chimney = AddPart(Outer, Parent, GlassMesh, Offset, *(Base + TEXT("_Glass")));
         if (UMaterialInterface* Material = LoadLampAsset<UMaterialInterface>(TEXT("M_OilLampGlass")))
             Chimney->SetMaterial(0, Material);
         // Glass throws no shadow of its own, and no light reaches it (lighting channel 2 only): the flame
@@ -86,11 +86,11 @@ float Flicker(float Time)
     return 0.96f + 0.04f * FMath::PerlinNoise1D(Time * 1.7f) + 0.025f * FMath::PerlinNoise1D(Time * 11.0f);
 }
 
-void SetLit(UStaticMeshComponent* Flame, UPointLightComponent* Light, bool bLit, float Time, UStaticMeshComponent* Glass)
+void SetLit(UStaticMeshComponent* Flame, UPointLightComponent* Light, bool bLit, float Time, UStaticMeshComponent* GlassPart)
 {
     const float Shiver = Flicker(Time);
     if (Flame && Flame->IsVisible() != bLit) Flame->SetVisibility(bLit);
-    if (Glass) Glass->SetScalarParameterValueOnMaterials(TEXT("Glow"), bLit ? Shiver : 0.0f);
+    if (GlassPart) GlassPart->SetScalarParameterValueOnMaterials(TEXT("Glow"), bLit ? Shiver : 0.0f);
     if (Light)
     {
         if (Light->IsVisible() != bLit) Light->SetVisibility(bLit);

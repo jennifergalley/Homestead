@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "WildMarjoram",
+  "description": "Wild marjoram in flower, 50 cm tall and 45 cm across: square downy red-purple stems, opposite ovate leaves, and loose flat-topped panicles of dense rosy-mauve flower heads in dark purple bracts, over a low leafy mat. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 18000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/wild_marjoram.py",
+  "source_sha256": "aebd0d7948932332bc76198af56cf553008f6bef54de8e4b4543f3492ccdd112",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_WildMarjoram": {
+      "vertices": 13528,
+      "triangles": 17542,
+      "size_cm": [
+        41.29,
+        37.79,
+        49.54
+      ],
+      "materials": [
+        {
+          "name": "M_WildMarjoram",
+          "textures": {
+            "basecolor": "T_WildMarjoram_basecolor.png",
+            "normal": "T_WildMarjoram_normal.png",
+            "roughness": "T_WildMarjoram_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.01667115718126297,
+          -0.05910525143146515,
+          0.44
+        ]
+      },
+      "fbx": "SM_WildMarjoram.fbx",
+      "sha256": "2f7403211d36c989a4ba08540e5434db7a452a653cf415a86b68eb5452d2eac0",
+      "preview": "preview_SM_WildMarjoram.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WildMarjoram_hero.png",
+          "detail": "beauty_SM_WildMarjoram_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_WildMarjoram_LOD1": {
+      "vertices": 5052,
+      "triangles": 5712,
+      "size_cm": [
+        42.1,
+        36.07,
+        50.01
+      ],
+      "materials": [
+        {
+          "name": "M_WildMarjoram",
+          "textures": {
+            "basecolor": "T_WildMarjoram_basecolor.png",
+            "normal": "T_WildMarjoram_normal.png",
+            "roughness": "T_WildMarjoram_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.01667115718126297,
+          -0.05910525143146515,
+          0.44
+        ]
+      },
+      "fbx": "SM_WildMarjoram_LOD1.fbx",
+      "sha256": "1c14fc85f23ea994c456b15675f0336837c400591603d883742174abc0592111",
+      "preview": "preview_SM_WildMarjoram_LOD1.png"
+    },
+    "SM_WildMarjoram_LOD2": {
+      "vertices": 1022,
+      "triangles": 1236,
+      "size_cm": [
+        43.65,
+        35.49,
+        48.3
+      ],
+      "materials": [
+        {
+          "name": "M_WildMarjoram",
+          "textures": {
+            "basecolor": "T_WildMarjoram_basecolor.png",
+            "normal": "T_WildMarjoram_normal.png",
+            "roughness": "T_WildMarjoram_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.01667115718126297,
+          -0.05910525143146515,
+          0.44
+        ]
+      },
+      "fbx": "SM_WildMarjoram_LOD2.fbx",
+      "sha256": "8dd018807f43f9b17d628e462dd406c1e54a50517a34cd8c2517a1091a0d1d26",
+      "preview": "preview_SM_WildMarjoram_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_WildMarjoram: T_WildMarjoram_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_WildMarjoram_basecolor.png": "09301a98b94330f75ef9a01e69c98d073fab38268aeac80197c9e465effbe350",
+    "T_WildMarjoram_normal.png": "c4d9358c5038cfe633dc7a5fa2175683f5321d26737a60c2ed71888363f0c631",
+    "T_WildMarjoram_roughness.png": "5a0e6ab5d91fbcdb1e90425faf4dea2d438ca7bd9133dbbb3bf040ea1d57270e"
+  }
+}

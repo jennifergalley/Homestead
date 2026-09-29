@@ -31,5 +31,5 @@ UPointLightComponent* AddLight(UObject* Outer, USceneComponent* Parent, const FV
 // A small oil flame: mostly steady, with quick shivers. Time in seconds; about 0.9-1.05.
 float Flicker(float Time);
 // Shows the flame and light when lit, animating both, and warms the glass (its "Glow").
-void SetLit(UStaticMeshComponent* Flame, UPointLightComponent* Light, bool bLit, float Time, UStaticMeshComponent* Glass = nullptr);
+void SetLit(UStaticMeshComponent* Flame, UPointLightComponent* Light, bool bLit, float Time, UStaticMeshComponent* GlassPart = nullptr);
 }

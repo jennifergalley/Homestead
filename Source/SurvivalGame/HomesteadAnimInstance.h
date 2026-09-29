@@ -19,6 +19,9 @@ public:
     void RequestGather();
     void RequestGatherSticks();
     bool IsGatheringSticks() const;
+    // A hand action is playing or still blending out (a new request would be refused), or one is
+    // already requested for the next update.
+    bool IsHandActionBusy() const;
     // Seconds into the stick-gather clip while it plays.
     float GatherSticksPhase() const;
     void RequestWater();
