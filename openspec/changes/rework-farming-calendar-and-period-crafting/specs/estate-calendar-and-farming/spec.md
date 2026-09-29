@@ -30,7 +30,7 @@ A new game SHALL default to a 30-real-minute day. The Settings choice of 30, 60 
 - **THEN** about 12 game hours have passed
 
 ### Requirement: Energy is the only meter, and meals make her Well fed
-On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penalty or hunger failure, and the HUD SHALL show no hunger meter. Food SHALL restore energy. Snacks (raw food, bread, cheese) SHALL restore a little and SHALL NOT grant Well fed. Meals (cooked dishes) SHALL restore more and SHALL grant Well fed for 3 game hours, shown as a clock time. While Well fed, every piece of work SHALL cost 15% less energy. Eating a meal SHALL set the Well fed expiry to 3 game hours from now, never stacking. Below full energy, any food SHALL restore its energy. At full energy, a snack SHALL be refused without being consumed. At full energy, a meal SHALL be eaten only if it starts Well fed or extends it by at least one game hour, and the game SHALL say that her energy was already full; otherwise the meal SHALL be refused without being consumed.
+On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penalty or hunger failure, and the HUD SHALL show no hunger meter. Food SHALL restore energy. Snacks (raw food, bread, cheese) SHALL restore a little and SHALL NOT grant Well fed. Meals (cooked dishes) SHALL restore more and SHALL grant Well fed for their tier's duration of 2, 3 or 4 game hours, shown as a clock time. While Well fed, every piece of work SHALL cost 15% less energy. Eating a meal SHALL set the Well fed expiry to the later of its current expiry and now plus the meal's duration, never stacking and never shortening it. Below full energy, any food SHALL restore its energy. At full energy, a snack SHALL be refused without being consumed. At full energy, a meal SHALL be eaten only if it starts Well fed or extends it by at least one game hour, and the game SHALL say that her energy was already full; otherwise the meal SHALL be refused without being consumed.
 
 #### Scenario: Meal
 - **WHEN** she eats a Cornish pasty below full energy
@@ -40,9 +40,9 @@ On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penal
 - **WHEN** she eats a loaf of bread below full energy
 - **THEN** her energy rises by 12 and no Well fed state begins
 
-#### Scenario: Second meal below full energy
-- **WHEN** she is Well fed for 2 more hours, is below full energy, and eats roast potatoes
-- **THEN** her energy rises by 25 and she is Well fed for 3 game hours from now
+#### Scenario: Short meal during a long buff
+- **WHEN** she is Well fed for 4 more hours from vegetable stew, is below full energy, and eats roast potatoes
+- **THEN** her energy rises by 25 and her Well fed expiry is unchanged
 
 #### Scenario: Full energy
 - **WHEN** her energy is full and she is not Well fed, and she tries to eat bread and then a Cornish pasty
@@ -57,12 +57,8 @@ On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penal
 - **THEN** she is still Well fed at 1:30 AM the next day, and it has ended by 2 AM
 
 #### Scenario: Tampered Well fed save
-- **WHEN** a save's Well fed expiry is not a finite number, or lies more than 3 game hours after the save's time
+- **WHEN** a save's Well fed expiry is not a finite number, or lies more than 4 game hours after the save's time
 - **THEN** loading fails with the corrupt-save message and the current game is unchanged
-
-#### Scenario: Expired Well fed save
-- **WHEN** a save's Well fed expiry is at or before the save's time
-- **THEN** the save loads normally and she is not Well fed
 
 #### Scenario: No hunger
 - **WHEN** she plays ten full days without eating
