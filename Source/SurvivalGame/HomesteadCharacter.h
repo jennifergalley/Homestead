@@ -421,6 +421,13 @@ private:
     float FellStepRemaining = 0;
     void BeginStanceStep(const FVector& To, float Yaw);
     static constexpr float FellStepSeconds = 0.4f;
+    // The pail fill's step down a stream bank keeps her feet on the ground (SettleOnGround).
+    bool bStanceStepFollowsGround = false;
+    void SettleOnGround();
+    static constexpr float StanceGroundProbeUp = 60.0f;     // cm above her root: a bank lip she steps onto
+    static constexpr float StanceGroundProbeDown = 80.0f;   // cm below her feet: down a 0.6-slope bank
+    // Longest step she takes toward the water to fill the pail (cm); the prompt shows 1.2 m back.
+    static constexpr float FillStepMax = 110.0f;
     // Walking up to a trunk beyond a stance step before the swing starts.
     bool bFellApproach = false;
     FVector2D FellApproachTo = FVector2D::ZeroVector;

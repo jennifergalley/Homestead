@@ -98,6 +98,8 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `Start-EditorMcp.ps1` in other worktrees refuses to launch. Ask owners with `mailbox_send` to close or
   pause, and run `Scripts\Stop-PerfWindow.ps1` as soon as you're done. Don't build while someone
   else holds the window.
+  `Start-PerfWindow.ps1` refuses until the process to measure is running, so a wrapper launches the game
+  first, then claims the window with `-ProcessId <pid>`.
 - **Nothing that pops up on Jenny's desktop.** Don't use `startfpschart`/`stopfpschart`: every dump
   opens an Explorer window on `Saved\Profiling\FPSChartStats\<timestamp>`, and she asked us to stop.
   For frame times, use `stat unit` / `ProfileGPU` output from the log, or `Playtest-Visual.ps1
@@ -174,6 +176,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. Python material builds report success even when the result fails to compile (the mesh renders flat grey in PIE): our `*_ao`/`*_roughness` textures are `TC_MASKS` non-sRGB and need `SAMPLERTYPE_MASKS`. |
 | A mesh draws the Default Material only in the packaged build (for example the ruin kit, scenery granite, the MVP trees `SM_TreeSmall02_Woodland` and `SM_MatureFir` after they went Nanite) | The base material lacks a usage flag for how the mesh is drawn; the editor log says `missing usage flag InstancedStaticMeshes/Nanite! Default Material will be used in game`, **once per material per session**, so search the whole log | Set the usage flag on the **base** material (`bUsedWithInstancedStaticMeshes`, `bUsedWithNanite`), not the material instance, and re-save the base. After the woods merge (`8dca3c3c`) five tree materials needed it. `M_PropTextured` has both, and `import_props.py` keeps them; `create_camera_safe_foliage.py` sets `used_with_nanite`. **Whenever you turn Nanite on for a mesh, or put a mesh in an ISM/HISM, audit its materials** with `py`: for each `static_materials` entry, walk to the base material (`get_base_material()`), and check `used_with_nanite` (if the mesh's `nanite_settings.enabled`) and `used_with_instanced_static_meshes`. |
+| A check reports "no material" on landscape ground that renders fine, only in the packaged build | `ULandscapeComponent::GetMaterial(0)` is overridden only under `WITH_EDITOR` (`LandscapeComponent.h` ~885, `LandscapeEdit.cpp`); in a cooked build it falls back to `UPrimitiveComponent` and returns null | Use `GetUsedMaterials()`, or `GetLandscapeMaterial()` where the Landscape module is a dependency (fixed at `e9f359c6`). |
 | Landscape grass (`LandscapeGrassOutput` + `LandscapeGrassType`) produces empty `GrassInstancedStaticMeshComponent`s in PIE on the Estate | Unknown (UE 5.8); also with `grass.GrassMap.UseRuntimeGeneration=1`, which needs an editor restart because the value is cached per shader platform | Gated off. Don't spend time on it without a new idea; scatter grass another way. |
 | Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset and clear its graph. `MaterialEditingLibrary.delete_all_material_expressions` alone leaves nodes behind on rebuilds (71 → 35; a second `LandscapeGrassOutput` survived). Symptoms: "only one Single Layer Water Material node", "The material can contain only one Landscape Grass node", missing-input errors, `get_statistics` vs/ps 0, and a silent fallback to the default grid. After `delete_all`, loop over `get_material_expressions` calling `delete_material_expression`, then assert `get_num_material_expressions(m) == 0` (`Scripts\Terrain\build_landscape_material.py` does this). |
 | `unreal.CustomInput(input_name=...)` fails in the constructor; or a Custom node won't compile | Constructor kwargs aren't supported; input/output names that clash with HLSL identifiers | Create it empty, then `set_editor_property('input_name', ...)`, and use unique names. In vertex-shader code sample with `Texture2DSampleLevel(Tex, TexSampler, uv, mip)`; the sampler is `<InputName>Sampler`. |
@@ -879,6 +882,19 @@ Extend it there when play needs a capability; prefer real input over state edits
   convention; not GitHub issues). The 2026-09-25 findings live in `fix-editor-playtest-findings`.
 - Measure only inside a perf window (section 0: one Unreal process, no builds, `Start-PerfWindow.ps1`);
   numbers taken alongside other editors or builds aren't comparable.
+- **Jenny's display caps 4K at 30 Hz.** Her monitor (Acer XB321HK) is on HDMI, where Windows offers
+  3840x2160 only at 23-30 Hz (60 Hz up to 1080p). With VSync on at 4K the game can't exceed 30 fps on this
+  cable, so don't read a 4K VSync cap of 30 as a performance problem. DisplayPort would give 4K60 with G-Sync.
+- **Measuring frame pacing:** use the engine's CSV `FrameTime` (csvprofile). The EstateSmoke
+  `PERFORMANCE_AT` p95/p99 overstate hitches: the smoke actor samples after the controller tick, so the
+  9.5 ms world Refresh every 0.25 s shows as about 26 ms / 8 ms interval pairs even when presented frames
+  are even. For per-thread timings without the Insights UI: run with ExecCmds
+  `stat namedevents, Trace.File <path>.utrace default`, then
+  `UnrealInsights.exe -OpenTraceFile="x.utrace" -AutoQuit -NoUI -ABSLOG=log -ExecOnAnalysisCompleteCmd="@=cmds.txt"`
+  with lines such as `TimingInsights.ExportTimerStatistics out.csv "-threads=RenderThread 0" -timers=*
+  -startTime=19.5 -endTime=29.5` (seconds from trace start, about the `Capture Starting` log line). The render
+  thread is `RenderThread 0`: `-threads=RenderThread` silently matches the GPU track. `ExportTimingEvents` with
+  `-columns=ThreadName,TimerName,StartTime,EndTime,Duration,Depth` gives call trees.
 - Jenny's performance bar: the framerate must be **smooth**, not just high. Never report a
   performance result from average FPS alone. Check frame pacing on the `Playtest-Visual.ps1
   -PresentationDiagnostics` timing passes (median, p95, p99, max, frames over 20 ms and over
@@ -1041,6 +1057,8 @@ OpenSpec changes, not here.
 - 2026-09-25: `Test-Game.ps1` smoke routes run a plain `-game` process (not UE automation) with
   `-HomesteadSmokeTest`, which selects the legacy heroine.
 - 2026-09-25: The Hotbar route's "Held mapped Shift again reaches active grounded sprint" step is flaky Still flaky on 2026-09-28 (packaged; passed on rerun).
+- 2026-09-29: **Changing the default hotbar layout** (for example the lamp taking slot 8) breaks the packaged Hotbar
+  suite's default-layout assert. Update that assert in the same change as `AHomesteadController::ResetHotbar`.
   after `NewGame`; it passed on rerun.
 - 2026-09-25: Frame-cost breakdown: `-ExecCmds "t.MaxFPS 0, r.GPUCsvStatsEnabled 1, csvprofile start"` on
   `Playtest-Visual.ps1`. The CSV lands in `Saved\Profiling\CSV\`. Before timing, check for other

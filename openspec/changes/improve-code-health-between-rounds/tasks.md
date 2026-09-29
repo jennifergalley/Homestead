@@ -14,8 +14,8 @@
 
 ## 2. Runtime cost
 
-- [ ] 2.1 Measure Estate `LastRefreshMilliseconds` and frame time (perf window)
-- [ ] 2.2 Gate `AHomesteadWorld::Refresh` on revision / ready-hour bucket / held produce; integer signatures; re-measure
+- [x] 2.1 Measure Estate refresh cost and frame time (Performance Agent, packaged 0ebd452d: the refresh tick costs 9.3-9.6 ms every 0.25 s, p95 of PlayerControllerTick; hidden behind a 17.5 ms render thread for now)
+- [ ] 2.2 Gate `AHomesteadWorld::Refresh` on revision / ready-hour bucket / held produce; integer signatures; re-measure (handed to the Performance Agent, a34483d7, 2026-09-29; the Architecture Agent reviews)
 
 ## 3. Consolidation
 

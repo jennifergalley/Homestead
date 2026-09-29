@@ -799,6 +799,8 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
             Slot.Icon = HotbarIcon(Slot.Tool);
             if (Slot.Tool == Homestead::Item::OilLamp && Slot.Available)
                 Slot.Fill = static_cast<float>(Sim.LampOil() / Homestead::Lamp::CapacityHours);
+            Slot.Seed = IsSowingSeed(Slot.Tool);
+            Slot.Pouch = Slot.Seed && OtherPouchSeeds(Index) > 0;
         }
 
         Result.Add(Slot);
@@ -970,7 +972,8 @@ Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Posit
         {
             const FVector Center = Spline->FindLocationClosestToWorldLocation(Here, ESplineCoordinateSpace::World);
             const float Key = Spline->FindInputKeyClosestToWorldLocation(Here);
-            const double HalfWidth = 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y;
+            // Aim a hand's breadth inside the waterline (spline scale Y is the waterline half width).
+            const double HalfWidth = FMath::Max(0.0, 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y - PailDipInsideCm);
             const FVector2D Out(Position.x - Center.X, Position.y - Center.Y);
             const FVector Edge = Out.SizeSquared() > 1.0
                 ? Center + FVector(Out.GetSafeNormal().X * HalfWidth, Out.GetSafeNormal().Y * HalfWidth, 0.0)
@@ -1335,6 +1338,7 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Gamepad_DPad_Left, IE_Pressed, this, &AHomesteadController::PreviousPage);
     InputComponent->BindKey(EKeys::Gamepad_DPad_Right, IE_Pressed, this, &AHomesteadController::NextPage);
     InputComponent->BindKey(EKeys::R, IE_Pressed, this, &AHomesteadController::RotatePlacement);
+    InputComponent->BindKey(EKeys::Q, IE_Pressed, this, &AHomesteadController::NextSeed);
     InputComponent->BindKey(EKeys::Gamepad_RightThumbstick, IE_Pressed, this, &AHomesteadController::CycleZoom);
     InputComponent->BindKey(EKeys::F5, IE_Pressed, this, &AHomesteadController::QuickSave);
     InputComponent->BindKey(EKeys::F9, IE_Pressed, this, &AHomesteadController::QuickLoad);
@@ -2193,11 +2197,20 @@ FString AHomesteadController::FocusActions() const
                     // Weeds and nettles are pulled, rubbish is cleared away, a fallen bough gathered.
                     const FString Hand = A + (Node.kind == Homestead::ResourceKind::Weeds || Node.kind == Homestead::ResourceKind::Nettles
                         ? TEXT(" Pull") : Homestead::IsRubbish(Node.kind) ? TEXT(" Clear away") : TEXT(" Gather"));
-                    if (Handles) return Use + TEXT(" ") + SwingVerb(SelectedTool)
-                        + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
+                    if (Handles)
+                    {
+                        // Out of tier: say which upgrade it needs rather than offering a swing that glances off.
+                        const Homestead::ToolTier Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
+                        if (Sim.GetToolTier(Overgrowth->tool) < Needed)
+                            return UTF8_TO_TCHAR(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str());
+                        return Use + TEXT(" ") + SwingVerb(SelectedTool)
+                            + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
+                    }
                     if (Overgrowth->byHand) return Hand;
                     return ToolPrompt(Sim, Homestead::ToolItem(Overgrowth->tool), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                 }
+                // Loose stones are small enough to pick up by hand, unlike the rocks the pickaxe breaks.
+                if (Node.kind == Homestead::ResourceKind::Stones) return A + TEXT(" Pick up");
                 return A + TEXT(" Gather");
             }
         return A + TEXT(" Gather");
@@ -2212,8 +2225,8 @@ FString AHomesteadController::FocusActions() const
                         if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
                             if (Seed->kind != Homestead::CropKind::Roots && Seed->kind != Homestead::CropKind::Berries
                                 && Sim.Count(Seed->seed) > 0)
-                                return A + TEXT(" Sow ") + Text(Seed->lower);
-                    return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
+                                return A + TEXT(" Sow ") + Text(Seed->lower) + SeedPouchHint();
+                    return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds") + SeedPouchHint();
                 }
                 if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
                 FString Actions;
@@ -2260,6 +2273,8 @@ FString AHomesteadController::FocusActions() const
     default:
         if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
+        if (!SeedPouchHint().IsEmpty())
+            return (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book")) + SeedPouchHint();
         return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
@@ -2581,9 +2596,9 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
             : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
             : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
             : Kind == Homestead::ResourceKind::GiantLog ? 38.0f
-            : Kind == Homestead::ResourceKind::Rubble ? 35.0f
-            : Kind == Homestead::ResourceKind::Boulder ? 50.0f
-            : Kind == Homestead::ResourceKind::SmallRock ? 18.0f : 8.0f;
+            : Kind == Homestead::ResourceKind::Rubble ? 42.0f
+            : Kind == Homestead::ResourceKind::Boulder ? 70.0f
+            : Kind == Homestead::ResourceKind::SmallRock ? 30.0f : 8.0f;
         if (Tool == Homestead::Item::Scythe)
         {
             // Mowing turns about her: she keeps facing the swath rather than the first tuft.
@@ -3121,7 +3136,7 @@ void AHomesteadController::NextPage()
 }
 void AHomesteadController::PreviousRow()
 {
-    if (!bBookOpen) { CycleBedChoice(-1); return; }
+    if (!bBookOpen) { if (!CycleBedChoice(-1)) CycleSeedPouch(-1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + Count - 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -3129,7 +3144,7 @@ void AHomesteadController::PreviousRow()
 }
 void AHomesteadController::NextRow()
 {
-    if (!bBookOpen) { CycleBedChoice(1); return; }
+    if (!bBookOpen) { if (!CycleBedChoice(1)) CycleSeedPouch(1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -4090,6 +4105,7 @@ void AHomesteadController::CycleZoom()
 UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 {
     bReadIncompatible = false;
+    bReadNewer = false;
     TArray<uint8> Data;
     if (IFileManager::Get().FileSize(*Filename) > 20 * 1024 * 1024) return nullptr;
     if (!FFileHelper::LoadFileToArray(Data, *Filename)) return nullptr;
@@ -4125,7 +4141,12 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     Homestead::Simulation Candidate;
     if (bEstateMap) PrepareEstateSimulation(Candidate);
     const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
-    if (!Decoded) { bReadIncompatible = Decoded.code == Homestead::ResultCode::UnsupportedVersion; return nullptr; }
+    if (!Decoded)
+    {
+        bReadIncompatible = Decoded.code == Homestead::ResultCode::UnsupportedVersion;
+        bReadNewer = Decoded.code == Homestead::ResultCode::NewerBuild;
+        return nullptr;
+    }
     return Save;
 }
 
@@ -4313,6 +4334,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     UHomesteadSave* Best = nullptr;
     bool Corrupt = false;
     bool Incompatible = false;
+    bool Newer = false;
     TArray<FString> IncompatiblePaths;
     for (const auto& Slot : Slots)
     {
@@ -4324,6 +4346,8 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             if (!Save)
             {
                 Incompatible |= bReadIncompatible;
+                // A newer build's save is treated like an unreadable one: kept in place, never autosaved over.
+                Newer |= bReadNewer;
                 Corrupt |= !bReadIncompatible;
                 if (bReadIncompatible) IncompatiblePaths.Add(Path);
                 UE_LOG(LogTemp, Warning, TEXT("Cannot read save: %s"), *Path);
@@ -4373,6 +4397,8 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             ? (bEstateMap
                 ? TEXT("Saves from earlier test builds can't be opened by this one. Start a new game; the old files are kept.")
                 : TEXT("These test saves use an incompatible version. Start a new seeded woodland to use this build; old files are retained."))
+            : Newer
+            ? TEXT("These saves come from a newer build of the game. Open them with that build; they're kept unchanged.")
             : TEXT("No usable save could be read. Data is corrupt or incompatible; nothing was loaded. You can retry loading or explicitly reset this test world.");
         Notify(LoadProblem, true);
         // Do not let a fresh startup silently autosave over an unsuccessful load.

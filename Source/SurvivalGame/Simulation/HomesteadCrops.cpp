@@ -2,6 +2,9 @@
 
 #include <algorithm>
 #include <cmath>
+#include <ostream>
+#include <istream>
+#include <vector>
 
 namespace Homestead
 {
@@ -133,5 +136,34 @@ std::string PlotStatus(const Plot& plot)
     else if (dry) text += "  |  needs water, growing slowly";
     else if (weedy) text += "  |  weedy, growing slowly";
     return text;
+}
+
+namespace Crops
+{
+void WriteSaveSection(std::ostream& output, const State& state)
+{
+    std::vector<int> picked;
+    for (const auto& plot : state.plots) if (plot.planted && plot.picked) picked.push_back(plot.id);
+    if (picked.empty()) return;
+    output << SaveTag << ' ' << picked.size();
+    for (int id : picked) output << ' ' << id;
+    output << '\n';
+}
+
+bool ReadSaveSection(std::istream& input, State& state)
+{
+    int count = 0;
+    if (!(input >> count) || count < 0 || count > static_cast<int>(state.plots.size())) return false;
+    for (int i = 0; i < count; ++i)
+    {
+        int id = 0;
+        if (!(input >> id)) return false;
+        const auto plot = std::find_if(state.plots.begin(), state.plots.end(), [id](const Plot& p) { return p.id == id; });
+        if (plot == state.plots.end() || !plot->planted || plot->picked || GetCropInfo(plot->kind).regrowHours <= 0.0)
+            return false;
+        plot->picked = true;
+    }
+    return true;
+}
 }
 }

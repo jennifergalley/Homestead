@@ -285,13 +285,16 @@ void OwnershipSavesAndReloads()
         Replace(Payload(saved), "ForSale.East 0", "ForSale.East 2"),
         Replace(Payload(saved), "ForSale.East 0", "EstateBoundary 0"),
         Replace(Payload(saved), "parcels 3", "parcels 4"),
-        Replace(Payload(saved), "parcels 3", "parcels -1"),
-        Payload(saved) + "trailing\n"})
+        Replace(Payload(saved), "parcels 3", "parcels -1")})
     {
         const Result result = older.Deserialize(Rewrap(saved, bad));
         CHECK(!result.ok && result.code == ResultCode::CorruptSave);
         CHECK(older.GetRevision() == revision);
     }
+    // An unknown trailing word reads as a section from a newer build: refused, the game untouched.
+    const Result unknown = older.Deserialize(Rewrap(saved, Payload(saved) + "trailing\n"));
+    CHECK(!unknown.ok && unknown.code == ResultCode::NewerBuild);
+    CHECK(older.GetRevision() == revision);
 }
 }
 

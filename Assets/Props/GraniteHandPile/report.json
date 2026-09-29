@@ -1,0 +1,601 @@
+{
+  "schema": 1,
+  "name": "GraniteHandPile",
+  "description": "Three piles (A/B/C) of 6-8 loose, hand-sized Cornish granite stones (5-18 cm, ankle-high) sitting on the turf; Nanite; LOD1/LOD2 fallback.",
+  "collision": "none",
+  "triangle_budget": 40000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_hand_pile.py",
+  "source_sha256": "43c31a25247bb1d8375e25312463677b0d149cdadc8fb6c53e73503c04e2ad8d",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GraniteHandPile_A": {
+      "vertices": 16548,
+      "triangles": 33072,
+      "size_cm": [
+        40.4,
+        40.17,
+        10.44
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteHandPile_A",
+          "textures": {
+            "basecolor": "T_GraniteHandPile_A_basecolor.png",
+            "roughness": "T_GraniteHandPile_A_roughness.png",
+            "normal": "T_GraniteHandPile_A_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteHandPile_A_basecolor.png",
+          "roughness": "T_GraniteHandPile_A_roughness.png",
+          "normal": "T_GraniteHandPile_A_normal.png",
+          "ao": "T_GraniteHandPile_A_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.3
+      },
+      "fbx": "SM_GraniteHandPile_A.fbx",
+      "sha256": "6cb4680d59e2c58713b1095c862d202c0cebc43f69bdd12e3daa1c0e18ffd1c8",
+      "preview": "preview_SM_GraniteHandPile_A.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteHandPile_A_hero.png",
+          "detail": "beauty_SM_GraniteHandPile_A_detail.png",
+          "eye": "beauty_SM_GraniteHandPile_A_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          1920,
+          1080
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteHandPile_A_LOD1": {
+      "vertices": 3512,
+      "triangles": 7000,
+      "size_cm": [
+        40.39,
+        40.17,
+        10.45
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteHandPile_A",
+          "textures": {
+            "basecolor": "T_GraniteHandPile_A_basecolor.png",
+            "roughness": "T_GraniteHandPile_A_roughness.png",
+            "normal": "T_GraniteHandPile_A_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteHandPile_A_basecolor.png",
+          "roughness": "T_GraniteHandPile_A_roughness.png",
+          "normal": "T_GraniteHandPile_A_normal.png",
+          "ao": "T_GraniteHandPile_A_ao.png"
+        },
+        "shared_with": "SM_GraniteHandPile_A"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.3
+      },
+      "fbx": "SM_GraniteHandPile_A_LOD1.fbx",
+      "sha256": "386d56a645213355cc6f65808f0167405e81fb5ba3d6e5e643df82cccc3bb3e6",
+      "preview": "preview_SM_GraniteHandPile_A_LOD1.png"
+    },
+    "SM_GraniteHandPile_A_LOD2": {
+      "vertices": 912,
+      "triangles": 1800,
+      "size_cm": [
+        40.37,
+        40.17,
+        10.42
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteHandPile_A",
+          "textures": {
+            "basecolor": "T_GraniteHandPile_A_basecolor.png",
+            "roughness": "T_GraniteHandPile_A_roughness.png",
+            "normal": "T_GraniteHandPile_A_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteHandPile_A_basecolor.png",
+          "roughness": "T_GraniteHandPile_A_roughness.png",
+          "normal": "T_GraniteHandPile_A_normal.png",
+          "ao": "T_GraniteHandPile_A_ao.png"
+        },
+        "shared_with": "SM_GraniteHandPile_A"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.3
+      },
+      "fbx": "SM_GraniteHandPile_A_LOD2.fbx",
+      "sha256": "ec3e83bb8f1c7607b8d705ed937e65aafcb210a06a260ca999f180d7a851ce5d",
+      "preview": "preview_SM_GraniteHandPile_A_LOD2.png"
+    },
+    "SM_GraniteHandPile_B": {
+      "vertices": 15790,
+      "triangles": 31552,
+      "size_cm": [
+        45.56,
+        34.22,
+        9.16
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteHandPile_B",
+          "textures": {
+            "basecolor": "T_GraniteHandPile_B_basecolor.png",
+            "roughness": "T_GraniteHandPile_B_roughness.png",
+            "normal": "T_GraniteHandPile_B_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteHandPile_B_basecolor.png",
+          "roughness": "T_GraniteHandPile_B_roughness.png",
+          "normal": "T_GraniteHandPile_B_normal.png",
+          "ao": "T_GraniteHandPile_B_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.3
+      },
+      "fbx": "SM_GraniteHandPile_B.fbx",
+      "sha256": "3736dd9175f9a099cb612f3d8c18309904efc2660fb72c9e54c8e5f1b2fc7105",
+      "preview": "preview_SM_GraniteHandPile_B.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteHandPile_B_hero.png",
+          "detail": "beauty_SM_GraniteHandPile_B_detail.png",
+          "eye": "beauty_SM_GraniteHandPile_B_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          1920,
+          1080
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteHandPile_B_LOD1": {
+      "vertices": 3514,
+      "triangles": 7000,
+      "size_cm": [
+        45.57,
+        34.23,
+        9.16
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteHandPile_B",
+          "textures": {
+            "basecolor": "T_GraniteHandPile_B_basecolor.png",
+            "roughness": "T_GraniteHandPile_B_roughness.png",
+            "normal": "T_GraniteHandPile_B_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteHandPile_B_basecolor.png",
+          "roughness": "T_GraniteHandPile_B_roughness.png",
+          "normal": "T_GraniteHandPile_B_normal.png",
+          "ao": "T_GraniteHandPile_B_ao.png"
+        },
+        "shared_with": "SM_GraniteHandPile_B"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.3
+      },
+      "fbx": "SM_GraniteHandPile_B_LOD1.fbx",
+      "sha256": "58d3029ed5f3b46c204da14c6f1f9426a32e62c5b6590b66d0b02836b0a69acc",
+      "preview": "preview_SM_GraniteHandPile_B_LOD1.png"
+    },
+    "SM_GraniteHandPile_B_LOD2": {
+      "vertices": 914,
+      "triangles": 1800,
+      "size_cm": [
+        45.59,
+        34.23,
+        9.17
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteHandPile_B",
+          "textures": {
+            "basecolor": "T_GraniteHandPile_B_basecolor.png",
+            "roughness": "T_GraniteHandPile_B_roughness.png",
+            "normal": "T_GraniteHandPile_B_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteHandPile_B_basecolor.png",
+          "roughness": "T_GraniteHandPile_B_roughness.png",
+          "normal": "T_GraniteHandPile_B_normal.png",
+          "ao": "T_GraniteHandPile_B_ao.png"
+        },
+        "shared_with": "SM_GraniteHandPile_B"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.3
+      },
+      "fbx": "SM_GraniteHandPile_B_LOD2.fbx",
+      "sha256": "c547ac8d0fdf842da6d72565c65aa052ba98059d0c99a4e7855771d7fc402648",
+      "preview": "preview_SM_GraniteHandPile_B_LOD2.png"
+    },
+    "SM_GraniteHandPile_C": {
+      "vertices": 16544,
+      "triangles": 33056,
+      "size_cm": [
+        40.89,
+        35.6,
+        9.18
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteHandPile_C",
+          "textures": {
+            "basecolor": "T_GraniteHandPile_C_basecolor.png",
+            "roughness": "T_GraniteHandPile_C_roughness.png",
+            "normal": "T_GraniteHandPile_C_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteHandPile_C_basecolor.png",
+          "roughness": "T_GraniteHandPile_C_roughness.png",
+          "normal": "T_GraniteHandPile_C_normal.png",
+          "ao": "T_GraniteHandPile_C_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.3
+      },
+      "fbx": "SM_GraniteHandPile_C.fbx",
+      "sha256": "868d552f964bad86139a1e2a01b0f83b2bb36cb65deed8a4cf75ebc38954bc4d",
+      "preview": "preview_SM_GraniteHandPile_C.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GraniteHandPile_C_hero.png",
+          "detail": "beauty_SM_GraniteHandPile_C_detail.png",
+          "eye": "beauty_SM_GraniteHandPile_C_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          1920,
+          1080
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GraniteHandPile_C_LOD1": {
+      "vertices": 3516,
+      "triangles": 7000,
+      "size_cm": [
+        40.9,
+        35.6,
+        9.17
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteHandPile_C",
+          "textures": {
+            "basecolor": "T_GraniteHandPile_C_basecolor.png",
+            "roughness": "T_GraniteHandPile_C_roughness.png",
+            "normal": "T_GraniteHandPile_C_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteHandPile_C_basecolor.png",
+          "roughness": "T_GraniteHandPile_C_roughness.png",
+          "normal": "T_GraniteHandPile_C_normal.png",
+          "ao": "T_GraniteHandPile_C_ao.png"
+        },
+        "shared_with": "SM_GraniteHandPile_C"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.3
+      },
+      "fbx": "SM_GraniteHandPile_C_LOD1.fbx",
+      "sha256": "4a43fa16586f59f3a5a297e809b87600bb89b331dd72ebb03f0b2fddda16efbd",
+      "preview": "preview_SM_GraniteHandPile_C_LOD1.png"
+    },
+    "SM_GraniteHandPile_C_LOD2": {
+      "vertices": 916,
+      "triangles": 1800,
+      "size_cm": [
+        40.94,
+        35.55,
+        9.15
+      ],
+      "materials": [
+        {
+          "name": "M_GraniteHandPile_C",
+          "textures": {
+            "basecolor": "T_GraniteHandPile_C_basecolor.png",
+            "roughness": "T_GraniteHandPile_C_roughness.png",
+            "normal": "T_GraniteHandPile_C_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GraniteHandPile_C_basecolor.png",
+          "roughness": "T_GraniteHandPile_C_roughness.png",
+          "normal": "T_GraniteHandPile_C_normal.png",
+          "ao": "T_GraniteHandPile_C_ao.png"
+        },
+        "shared_with": "SM_GraniteHandPile_C"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.06
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.3
+      },
+      "fbx": "SM_GraniteHandPile_C_LOD2.fbx",
+      "sha256": "3b4d003c08442d38c00f280bfc15a9a3ff2ed5a625da178b9abb8d4d2079d3b1",
+      "preview": "preview_SM_GraniteHandPile_C_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "A": {
+      "sink_depth_m": 0.028
+    },
+    "B": {
+      "sink_depth_m": 0.011
+    },
+    "C": {
+      "sink_depth_m": 0.017
+    },
+    "placement": "Origin is the ground line; place at terrain height. Walk-through: no collision.",
+    "north": "+Y (moss side)",
+    "use": "Stones resource node (hand-gathered). Keep distinct from the pickaxe rocks (GranitePickRocks): small, loose, on top of the turf, little lichen."
+  },
+  "nanite": true,
+  "textures": {
+    "T_GraniteHandPile_A_basecolor.png": "decbee4992d440409a77bb6e2a4630e39bfafa5a83a269f69b8bb310c704cc1f",
+    "T_GraniteHandPile_A_roughness.png": "ef57abe364f43ddb80e09d8efe69cc2ae6f55c63668ba79044cb1ba703d0a1f2",
+    "T_GraniteHandPile_A_normal.png": "a65c252242f091b6ec1e72c39fa1f6f3f0a5731097a3c17cd8cab175d76b7454",
+    "T_GraniteHandPile_B_basecolor.png": "bb5677d12b56b268e92b78418f222a113e6fe24e3d6acf9ccbcb5bbbea2adca9",
+    "T_GraniteHandPile_B_roughness.png": "33eafbeaa3059b671196539e8b58ee8eabbe6d8be9506a9748deb66d62f3d62f",
+    "T_GraniteHandPile_B_normal.png": "d0534753f5148a18e295d88a1714fdc6430e43a6c7aaa942b62191da4c5f031b",
+    "T_GraniteHandPile_C_basecolor.png": "33a24c2b24d0461ea68b694ecf014f2bba98bb2adcbe39774f608f32cbef68cc",
+    "T_GraniteHandPile_C_roughness.png": "aef9f0a93bd3d9620e4024bcb2955b2e1ccd65102e17cf693b236f098878c2f7",
+    "T_GraniteHandPile_C_normal.png": "fdb18b22e52eec483234b40642ff526902c777f1672496a29dbcd230f8da75d7"
+  }
+}

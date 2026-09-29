@@ -42,7 +42,8 @@ disagree, follow the code and tell the Architecture Agent.
   tell the orchestrator before your `[ready]` if your branch changes what `Serialize` writes.
   Appending an `Item` doesn't (stocks carry their width since version 13).
 - **New save data goes in a tagged trailing section**, which needs no version bump (the pattern of
-  `tools`, `manor`, `lamp` and `picked`):
+  `tools`, `manor`, `lamp` and `picked`, the last two beside their features in `HomesteadLamp.cpp`
+  and `HomesteadCrops.cpp`):
   - **Write** it at the end of `Serialize` as `<tag> <count> ...` (its own line or lines). Leave it
     out when it holds only defaults. Keep the writer beside the feature (`Lamp::WriteSaveSection`,
     `Lamp::SaveTag` in `HomesteadLamp.cpp`) rather than inline in `HomesteadSimulation.cpp`.
@@ -50,9 +51,10 @@ disagree, follow the code and tell the Architecture Agent.
     sections in any order. A save without yours must load with your defaults.
   - **Validate everything:** counts in range, ids that exist and suit the feature, no second copy of
     the section. On anything wrong return `invalid()`, so the current game is kept.
-  - **Tags are unique lowercase words, never reused.** An unknown tag refuses the whole save (it
-    came from a newer build, and its sections can't be skipped safely). `parcels` and `economy` are
-    the only positional ones (read before the loop); don't add more of those.
+  - **Tags are unique lowercase words, never reused.** An unknown tag refuses the whole save with
+    `ResultCode::NewerBuild` (it came from a newer build, and its sections can't be skipped safely);
+    the game then leaves that save untouched. `parcels` and `economy` are the only positional ones
+    (read before the loop); don't add more of those.
   - **Test** a round trip, a save without the section loading with defaults, and a malformed or
     duplicated section being refused.
   - Any new list or per-enum array you write gets its count first.

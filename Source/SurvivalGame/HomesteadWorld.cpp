@@ -62,6 +62,9 @@ TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.6f,
     TEXT("Sky light intensity at full night."));
 TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -2.0f,
     TEXT("Auto exposure min brightness at full night."));
+TAutoConsoleVariable<int32> CVarEstateSceneryCells(TEXT("homestead.EstateSceneryCells"), 1,
+    TEXT("1 = batch non-Nanite estate scenery per 128/512 m cell (default), 0 = one batch per kind. ")
+    TEXT("Read when the estate scenery is built (set it on the command line with -DPCVars=)."));
 
 // Original provisional shapes, not the final realistic environment asset set.
 const FLinearColor Meadow(0.22f, 0.31f, 0.095f);
@@ -1095,7 +1098,9 @@ const FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/SurvivalGame/Environment/Props/Hazel/SM_Hazel.SM_Hazel"), false, 14000, false, 0, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/BrackenFern/SM_BrackenFern.SM_BrackenFern"), false, 9000, false, 0, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/GrassYarrowTuft/SM_GrassYarrowTuft.SM_GrassYarrowTuft"), false, 6000, false, 0, 0},
-    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteCobbles/SM_GraniteCobbles.SM_GraniteCobbles"), false, 9000, false, 0, 0},
+    // A granite ledge breaking through the slope (scatter.py LEDGE): a talus block sunk a quarter of its
+    // height below the lowest ground under it. It used to be loose cobbles, which read as hand stones.
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBlockTalus/SM_GraniteBlockTalus.SM_GraniteBlockTalus"), true, 24000, false, 22, 52},
     {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBoulderLoaf/SM_GraniteBoulderLoaf.SM_GraniteBoulderLoaf"), true, 24000, false, 0, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/GraniteErratic/SM_GraniteErratic.SM_GraniteErratic"), true, 60000, false, 0, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/GraniteDome/SM_GraniteDome.SM_GraniteDome"), true, 0, false, 0, 0},
@@ -1150,6 +1155,17 @@ struct FEstateSceneryRecord
 };
 #pragma pack(pop)
 static_assert(sizeof(FEstateSceneryRecord) == 20, "EstateScenery.bin records are 20 bytes");
+
+// Non-Nanite scenery is batched per kind *and* per square cell of the estate. A non-Nanite HISM
+// gathers its ray-tracing instances by scanning every instance it holds, every frame
+// (FInstancedStaticMeshSceneProxy::GetDynamicRayTracingInstances), so one estate-wide batch of 80k
+// grass tufts cost ~3.5 ms of render thread at the manor. Cells let the renderer drop whole batches
+// (ray tracing culls primitives more than r.RayTracing.Culling.Radius, 300 m, away; the draw
+// distance below culls cells past the kind's instance cull distance) before any instance is looked at.
+// Kinds with a cull distance use small cells; kinds drawn at any distance use large ones, so the far
+// view doesn't turn into thousands of draws. Nanite kinds stay one batch: Nanite culls on the GPU.
+constexpr float EstateSceneryNearCellCm = 12800.0f;
+constexpr float EstateSceneryFarCellCm = 51200.0f;
 }
 
 bool AHomesteadWorld::BuildEstateScenery()
@@ -1173,40 +1189,73 @@ bool AHomesteadWorld::BuildEstateScenery()
     }
     const auto* Records = reinterpret_cast<const FEstateSceneryRecord*>(Raw.GetData() + 8);
     constexpr int32 KindCount = UE_ARRAY_COUNT(EstateSceneryKinds);
-    UHierarchicalInstancedStaticMeshComponent* Batches[KindCount] = {};
-    TArray<FTransform> Transforms[KindCount];
+    UStaticMesh* KindMeshes[KindCount] = {};
+    bool KindTried[KindCount] = {};
+    float KindCellCm[KindCount] = {};
+    TMap<FIntVector, int32> BatchOfCell;
+    TArray<UHierarchicalInstancedStaticMeshComponent*> Batches;
+    TArray<int32> BatchKinds;
+    TArray<TArray<FTransform>> Transforms;
+    const bool bUseCells = CVarEstateSceneryCells.GetValueOnGameThread() != 0;
+    auto NewBatch = [this, &Batches, &BatchKinds, &Transforms, &KindMeshes, &KindCellCm](int32 KindIndex)
+    {
+        const FEstateSceneryKind& Kind = EstateSceneryKinds[KindIndex];
+        auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+        Batch->SetupAttachment(GetRootComponent());
+        Batch->SetMobility(EComponentMobility::Static);
+        Batch->SetStaticMesh(KindMeshes[KindIndex]);
+        Batch->SetCollisionProfileName(Kind.bCollision ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
+        Batch->SetCollisionEnabled(Kind.bCollision ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+        Batch->SetCanEverAffectNavigation(false);
+        Batch->SetCastShadow(Kind.bTree || Kind.bCollision || Kind.bShadow);
+        // As the woodland's underbrush: gentle sway needn't redraw cached shadow pages every frame.
+        if (Kind.bShadow && !Kind.bTree) Batch->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Rigid;
+        if (Kind.CullCm > 0)
+        {
+            Batch->SetCullDistances(static_cast<int32>(Kind.CullCm * 0.8f), static_cast<int32>(Kind.CullCm));
+            // A cell whose nearest instance is past the cull distance draws nothing: drop it whole. The
+            // distance is measured to the cell's centre, so allow a full cell for its reach.
+            if (KindCellCm[KindIndex] > 0)
+            {
+                Batch->LDMaxDrawDistance = Kind.CullCm + KindCellCm[KindIndex];
+                Batch->SetCachedMaxDrawDistance(Batch->LDMaxDrawDistance);
+            }
+        }
+        // Wind sway only near her: beyond 60 m it's invisible, and animated Nanite foliage there would
+        // keep invalidating the cached virtual shadow maps of the whole wood every frame.
+        Batch->SetWorldPositionOffsetDisableDistance(6000);
+        Batch->ComponentTags.Add(TEXT("EstateScenery"));
+        ApplyCameraSafeFoliageMaterials(*Batch);
+        Batches.Add(Batch);
+        BatchKinds.Add(KindIndex);
+        Transforms.AddDefaulted();
+        return Batches.Num() - 1;
+    };
     for (uint32 Index = 0; Index < Count; ++Index)
     {
         const FEstateSceneryRecord& Record = Records[Index];
         if (Record.Kind >= KindCount) continue;
         const FEstateSceneryKind& Kind = EstateSceneryKinds[Record.Kind];
-        if (!Batches[Record.Kind])
+        if (!KindTried[Record.Kind])
         {
-            UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, Kind.Path);
-            if (!Mesh)
+            KindTried[Record.Kind] = true;
+            KindMeshes[Record.Kind] = LoadObject<UStaticMesh>(nullptr, Kind.Path);
+            if (!KindMeshes[Record.Kind])
             {
                 UE_LOG(LogHomesteadWorld, Warning, TEXT("Estate scenery mesh missing: %s"), Kind.Path);
-                continue;
             }
-            auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
-            Batch->SetupAttachment(GetRootComponent());
-            Batch->SetMobility(EComponentMobility::Static);
-            Batch->SetStaticMesh(Mesh);
-            Batch->SetCollisionProfileName(Kind.bCollision ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
-            Batch->SetCollisionEnabled(Kind.bCollision ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
-            Batch->SetCanEverAffectNavigation(false);
-            Batch->SetCastShadow(Kind.bTree || Kind.bCollision || Kind.bShadow);
-            // As the woodland's underbrush: gentle sway needn't redraw cached shadow pages every frame.
-            if (Kind.bShadow && !Kind.bTree) Batch->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Rigid;
-            if (Kind.CullCm > 0) Batch->SetCullDistances(static_cast<int32>(Kind.CullCm * 0.8f), static_cast<int32>(Kind.CullCm));
-            // Wind sway only near her: beyond 60 m it's invisible, and animated Nanite foliage there would
-            // keep invalidating the cached virtual shadow maps of the whole wood every frame.
-            Batch->SetWorldPositionOffsetDisableDistance(6000);
-            Batch->ComponentTags.Add(TEXT("EstateScenery"));
-            ApplyCameraSafeFoliageMaterials(*Batch);
-            Batches[Record.Kind] = Batch;
+            else if (bUseCells && !KindMeshes[Record.Kind]->HasValidNaniteData())
+            {
+                KindCellCm[Record.Kind] = Kind.CullCm > 0 ? EstateSceneryNearCellCm : EstateSceneryFarCellCm;
+            }
         }
-        UStaticMesh* Mesh = Batches[Record.Kind]->GetStaticMesh();
+        UStaticMesh* Mesh = KindMeshes[Record.Kind];
+        if (!Mesh) continue;
+        const float CellCm = KindCellCm[Record.Kind];
+        const FIntVector Cell(Record.Kind,
+            CellCm > 0 ? FMath::FloorToInt32(Record.X / CellCm) : 0, CellCm > 0 ? FMath::FloorToInt32(Record.Y / CellCm) : 0);
+        const int32* Found = BatchOfCell.Find(Cell);
+        const int32 BatchIndex = Found ? *Found : BatchOfCell.Add(Cell, NewBatch(Record.Kind));
         const FRotator Rotation(0, Record.Yaw, 0);
         FVector Base(Record.X, Record.Y, HomesteadEstateTerrain::Height(Record.X, Record.Y));
         FVector Anchor = FVector::ZeroVector;
@@ -1234,25 +1283,28 @@ bool AHomesteadWorld::BuildEstateScenery()
             }
             Base.Z -= Kind.RimLift * Record.Scale;
         }
-        Transforms[Record.Kind].Add(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Record.Scale), FVector(Record.Scale)));
+        Transforms[BatchIndex].Add(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Record.Scale), FVector(Record.Scale)));
     }
-    int32 Total = 0;
-    for (int32 Kind = 0; Kind < KindCount; ++Kind)
+    int32 Total = 0, Cells = 0;
+    for (int32 BatchIndex = 0; BatchIndex < Batches.Num(); ++BatchIndex)
     {
-        if (!Batches[Kind]) continue;
-        Batches[Kind]->RegisterComponent();
-        Batches[Kind]->AddInstances(Transforms[Kind], false, true);
-        EstateScenery.Add(Batches[Kind]);
+        UHierarchicalInstancedStaticMeshComponent* Batch = Batches[BatchIndex];
+        const int32 Kind = BatchKinds[BatchIndex];
+        Batch->RegisterComponent();
+        Batch->AddInstances(Transforms[BatchIndex], false, true);
+        EstateScenery.Add(Batch);
         const FEstateSceneryKind& Info = EstateSceneryKinds[Kind];
-        const FVector Extent = Batches[Kind]->GetStaticMesh()->GetBounds().BoxExtent;
+        const FVector Extent = Batch->GetStaticMesh()->GetBounds().BoxExtent;
         EstateSceneryClearRadius.Add(Info.bTree || Info.bCollision ? 0.0f : FMath::Max(Extent.X, Extent.Y) * 0.7f);
         EstateSceneryTrunkRadius.Add(Info.bTree ? Info.Footprint : 0.0f);
-        EstateSceneryHidden.Add(TBitArray<>(false, Transforms[Kind].Num()));
-        EstateSceneryTransforms.Add(MoveTemp(Transforms[Kind]));
+        EstateSceneryHidden.Add(TBitArray<>(false, Transforms[BatchIndex].Num()));
+        EstateSceneryTransforms.Add(MoveTemp(Transforms[BatchIndex]));
         Total += EstateSceneryTransforms.Last().Num();
+        Cells += KindCellCm[Kind] > 0 ? 1 : 0;
     }
     bEstateSceneryBuilt = true;
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Estate scenery: %d instances in %d batches."), Total, EstateScenery.Num());
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Estate scenery: %d instances in %d batches (%d of them non-Nanite cells)."),
+        Total, EstateScenery.Num(), Cells);
     return true;
 }
 
@@ -3084,7 +3136,10 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         return Mesh;
     };
-    auto Authored = [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale = 1.0f, float Lift = 0.0f)
+    // bPivotGround: the mesh is authored part-sunk with its pivot on the ground line, so place the pivot,
+    // not the lowest point, on the terrain.
+    auto Authored = [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale = 1.0f, float Lift = 0.0f,
+        bool bPivotGround = false)
     {
         if (bProduce != bProduceOnly || !Mesh) return;
         const FBox Bounds = Mesh->GetBoundingBox();
@@ -3095,7 +3150,7 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             return;
         }
         const FRotator Rotation(0, Yaw, 0);
-        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
+        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, bPivotGround ? 0.0 : Bounds.Min.Z);
         const FVector Ground = AtGround(Base.X + Offset.X, Base.Y + Offset.Y) + FVector(0, 0, Lift);
         auto* Component = NewObject<UStaticMeshComponent>(this);
         Component->SetupAttachment(GetRootComponent());
@@ -3118,7 +3173,9 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             Component->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
             Component->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
         }
-        if (Node.kind == Homestead::ResourceKind::Stones && RockMaterial)
+        // The legacy stone mesh takes the textured rock material; authored Nanite stones (hand stones,
+        // GraniteHandPile) keep their own, and M_Rock isn't flagged for Nanite.
+        if (Node.kind == Homestead::ResourceKind::Stones && RockMaterial && !Mesh->HasValidNaniteData())
             Component->SetMaterial(0, RockMaterial);
         Component->SetGenerateOverlapEvents(false);
         Component->SetCanEverAffectNavigation(false);
@@ -3162,7 +3219,8 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             Blocker->SetupAttachment(GetRootComponent());
             Blocker->SetMobility(EComponentMobility::Movable);
             const float Rise = bRound ? CastChecked<UCapsuleComponent>(Blocker)->GetUnscaledCapsuleHalfHeight() : Extent.Z;
-            Blocker->SetRelativeTransform(FTransform(Rotation, Ground + FVector(0, 0, Rise)));
+            const float Bottom = bPivotGround ? static_cast<float>(Bounds.Min.Z) * Scale : 0.0f;
+            Blocker->SetRelativeTransform(FTransform(Rotation, Ground + FVector(0, 0, Bottom + Rise)));
             Blocker->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
             Blocker->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
             Blocker->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
@@ -3215,6 +3273,24 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
                     bVisualBuildFailed = true;
                     UE_LOG(LogHomesteadWorld, Error, TEXT("Stone resource %d is missing admitted rock geometry."), Node.id);
                 }
+            }
+            // A scatter of pebbles and cobbles round them (the Rocks Agent's GraniteHandPile), so loose
+            // stones read at a glance as small enough to pick up. Appended after the three lifted stones,
+            // whose component order the kneel gather relies on.
+            static const TCHAR* const Clusters[] = {TEXT("SM_GraniteHandPile_A"), TEXT("SM_GraniteHandPile_B"), TEXT("SM_GraniteHandPile_C")};
+            const TCHAR* ClusterName = Clusters[Variation % UE_ARRAY_COUNT(Clusters)];
+            if (UStaticMesh* Cluster = LoadObject<UStaticMesh>(nullptr,
+                *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/GraniteHandPile/%s.%s"), ClusterName, ClusterName),
+                nullptr, LOAD_NoWarn | LOAD_Quiet))
+            {
+                const int32 First = Visual.Components.Num();
+                // A touch larger than life (still under 15 cm tall) so the scatter reads from 10-15 m away.
+                constexpr float HandPileScale = 1.25f;
+                Authored(Cluster, FVector2D::ZeroVector, static_cast<float>(Variation % 360), true, HandPileScale, 0.0f, true);
+                if (Visual.Components.Num() > First)
+                    if (auto* Placed = Cast<UStaticMeshComponent>(Visual.Components.Last()))
+                        for (int32 Slot = 0; Slot < Cluster->GetStaticMaterials().Num(); ++Slot)
+                            Placed->SetMaterial(Slot, Cluster->GetMaterial(Slot));
             }
         }
         break;
@@ -3332,8 +3408,8 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         if (Node.id >= Homestead::EstatePlacementIdBase && Node.id < Homestead::TransientResourceIdBase)
         {
             if (!bProduceOnly)
-                BuildOvergrowth(Node, Variation, [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale)
-                    { Authored(Mesh, Offset, Yaw, bProduce, Scale); });
+                BuildOvergrowth(Node, Variation, [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale, bool bPivotGround)
+                    { Authored(Mesh, Offset, Yaw, bProduce, Scale, 0.0f, bPivotGround); });
             break;
         }
         Homestead::Generation::GeneratedEntity Entity;
@@ -3376,14 +3452,14 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
     }
     default:
         // Estate overgrowth and flowers (add-overgrown-estate-clearing).
-        BuildOvergrowth(Node, Variation, [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale)
-            { Authored(Mesh, Offset, Yaw, bProduce, Scale); });
+        BuildOvergrowth(Node, Variation, [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale, bool bPivotGround)
+            { Authored(Mesh, Offset, Yaw, bProduce, Scale, 0.0f, bPivotGround); });
         break;
     }
 }
 
 void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint32 Variation,
-    const TFunctionRef<void(UStaticMesh*, FVector2D, float, bool, float)>& Place)
+    const TFunctionRef<void(UStaticMesh*, FVector2D, float, bool, float, bool)>& Place)
 {
     auto Load = [&](const TCHAR* Folder, const TCHAR* Name) -> UStaticMesh*
     {
@@ -3396,10 +3472,18 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
         }
         return Mesh;
     };
+    // An optional authored mesh from another lane: loaded quietly, so its stand-in shows until it lands.
+    auto QuietProp = [](const TCHAR* Folder, const TCHAR* Name) -> UStaticMesh*
+    {
+        return LoadObject<UStaticMesh>(nullptr, *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s/%s.%s"), Folder, Name, Name),
+            nullptr, LOAD_NoWarn | LOAD_Quiet);
+    };
     FRandomStream Random(static_cast<int32>(Variation * 2654435761u));
     const float Yaw = static_cast<float>(Variation % 360);
     // Overgrowth has no separate produce: the whole clump goes when she clears it.
-    auto Whole = [&](UStaticMesh* Mesh, FVector2D Offset, float Turn, float Scale) { Place(Mesh, Offset, Yaw + Turn, false, Scale); };
+    auto Whole = [&](UStaticMesh* Mesh, FVector2D Offset, float Turn, float Scale) { Place(Mesh, Offset, Yaw + Turn, false, Scale, false); };
+    // Authored part-sunk, pivot on the ground line (the Rocks Agent's granite pick rocks).
+    auto Sunk = [&](UStaticMesh* Mesh, float Scale) { Place(Mesh, FVector2D::ZeroVector, Yaw, false, Scale, true); };
     switch (Node.kind)
     {
     case Homestead::ResourceKind::BrambleThin:
@@ -3429,18 +3513,41 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     case Homestead::ResourceKind::Sapling:
         Whole(Load(TEXT("Hazel"), TEXT("SM_Hazel")), FVector2D::ZeroVector, 0, Random.FRandRange(0.45f, 0.6f));
         break;
-    case Homestead::ResourceKind::Rubble:
-        Whole(Load(TEXT("GraniteRubble"), TEXT("SM_GraniteRubble")), FVector2D::ZeroVector, 0, Random.FRandRange(0.8f, 1.0f));
-        break;
+    // Pickaxe rocks read as single chunky rocks far too big to lift, never as the pebbles she picks
+    // up by hand (Jenny's playtest): the Rocks Agent's GranitePickRocks, with bigger granite stand-ins until
+    // they land. Only the boulder blocks her (see Authored).
     case Homestead::ResourceKind::SmallRock:
-        Whole(Load(TEXT("GraniteSpalls"), TEXT("SM_GraniteSpalls")), FVector2D::ZeroVector, 0, Random.FRandRange(0.8f, 1.0f));
+        if (UStaticMesh* Rock = QuietProp(TEXT("GranitePickRocks"), TEXT("SM_GranitePickRock_Small")))
+            Sunk(Rock, Random.FRandRange(0.95f, 1.05f));
+        else
+            Whole(Load(TEXT("GraniteBoulderLow"), TEXT("SM_GraniteBoulderLow")), FVector2D::ZeroVector, 0, Random.FRandRange(0.42f, 0.5f));
+        break;
+    case Homestead::ResourceKind::Rubble:
+        // Masonry shed from the ruin: a heap of broken granite blocks.
+        if (UStaticMesh* Rock = QuietProp(TEXT("GranitePickRubble"), TEXT("SM_GranitePickRubble")))
+            Sunk(Rock, Random.FRandRange(0.95f, 1.05f));
+        else
+            Whole(Load(TEXT("GraniteBlockTalus"), TEXT("SM_GraniteBlockTalus")), FVector2D::ZeroVector, 0, Random.FRandRange(0.7f, 0.82f));
         break;
     case Homestead::ResourceKind::Boulder:
-        Whole(Load(TEXT("GraniteBoulderLoaf"), TEXT("SM_GraniteBoulderLoaf")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.05f));
+    {
+        // Mostly the waist-high split boulder, with the rounded loaf as a second shape; both are far
+        // bigger than any small rock or rubble heap.
+        UStaticMesh* Rock = Variation % 3 == 0 ? QuietProp(TEXT("GranitePickRocks"), TEXT("SM_GranitePickRock_Medium")) : nullptr;
+        if (!Rock) Rock = QuietProp(TEXT("GranitePickRocks"), TEXT("SM_GranitePickRock_Large"));
+        if (Rock)
+            Sunk(Rock, Random.FRandRange(0.95f, 1.05f));
+        else
+            Whole(Load(TEXT("GraniteBoulderLoaf"), TEXT("SM_GraniteBoulderLoaf")), FVector2D::ZeroVector, 0, Random.FRandRange(1.15f, 1.3f));
         break;
+    }
     case Homestead::ResourceKind::SalvagePile:
-        // Stand-in until add-ruined-manor-and-arrival dresses its piles: fallen masonry.
-        Whole(Load(TEXT("GraniteCobbles"), TEXT("SM_GraniteCobbles")), FVector2D::ZeroVector, 0, 0.7f);
+        // Rusted iron among the ruin's leavings (the Crops Agent's scrap heap), not a pile of stones she
+        // might take for loose ones; fallen masonry until it lands.
+        if (UStaticMesh* Scrap = QuietProp(TEXT("EstateRubbish"), TEXT("SM_ScrapHeap")))
+            Whole(Scrap, FVector2D::ZeroVector, 0, 1.0f);
+        else
+            Whole(Load(TEXT("GraniteCobbles"), TEXT("SM_GraniteCobbles")), FVector2D::ZeroVector, 0, 0.7f);
         break;
     case Homestead::ResourceKind::StumpSmall:
         Whole(Load(TEXT("EstateTimber"), TEXT("SM_StumpSmall")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.15f));
@@ -3533,7 +3640,7 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
         {
             // Primroses hug the ground, so their clumps are drawn a little large to read above the pasture.
             const bool Primrose = Node.kind == Homestead::ResourceKind::Primroses;
-            Place(Clump, FVector2D::ZeroVector, Yaw, true, Random.FRandRange(0.9f, 1.15f) * (Primrose ? 1.3f : 1.0f));
+            Place(Clump, FVector2D::ZeroVector, Yaw, true, Random.FRandRange(0.9f, 1.15f) * (Primrose ? 1.3f : 1.0f), false);
             return;
         }
     }
@@ -3543,7 +3650,7 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
         // Stand-in: the meadow-herb flowers in a grass tuft, until each spring flower is authored.
         auto* Flower = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_a.SM_FlowerEmpodium_a"));
         for (int32 I = 0; I < 3 && Flower; ++I)
-            Place(Flower, FVector2D(FMath::Cos(I * 2.1f) * 12, FMath::Sin(I * 2.1f) * 12), Yaw + I * 120.0f, true, 1.0f);
+            Place(Flower, FVector2D(FMath::Cos(I * 2.1f) * 12, FMath::Sin(I * 2.1f) * 12), Yaw + I * 120.0f, true, 1.0f, false);
         Whole(Load(TEXT("GrassYarrowTuft"), TEXT("SM_GrassYarrowTuft")), FVector2D::ZeroVector, 0, 0.6f);
     }
 }

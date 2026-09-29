@@ -1305,28 +1305,41 @@ void CropTableAndStatus()
     OK(pulled);
     CHECK(pulled.message == "Harvested 2 turnips. This plot is ready to replant.");
     CHECK(sim.Count(Item::Turnip) == turnipsBefore + 2);
-    for (const auto& plot : sim.GetState().plots)
-        if (plot.id == rootId) CHECK(!plot.planted && plot.kind == CropKind::Roots);
+    for (const auto& each : sim.GetState().plots)
+        if (each.id == rootId) CHECK(!each.planted && each.kind == CropKind::Roots);
     const Result picked = sim.HarvestCrop(beanId, beans);
     OK(picked);
     CHECK(picked.message == "Harvested 6 broad bean pods. More will ripen in about 3 days.");
     const Plot* beanPlot = nullptr;
-    for (const auto& plot : sim.GetState().plots) if (plot.id == beanId) beanPlot = &plot;
+    for (const auto& each : sim.GetState().plots) if (each.id == beanId) beanPlot = &each;
     CHECK(beanPlot && beanPlot->planted && beanPlot->kind == CropKind::BroadBeans);
     CHECK(beanPlot && Close(beanPlot->growth, 1.0 - 72.0 / 168.0) && StageOf(*beanPlot) == CropStage::Growing);
     CHECK(beanPlot && beanPlot->picked && PlotStatus(*beanPlot).rfind("Broad beans: ripening again, day 1 of 3", 0) == 0);
     Edit(sim, [&](State& state) { for (auto& plot : state.plots) if (plot.id == beanId) plot.growth = 1.0 - 24.0 / 168.0 + 0.01; });
-    for (const auto& plot : sim.GetState().plots)
-        if (plot.id == beanId) CHECK(PlotStatus(plot).rfind("Broad beans: ripening again, day 3 of 3", 0) == 0);
+    for (const auto& each : sim.GetState().plots)
+        if (each.id == beanId) CHECK(PlotStatus(each).rfind("Broad beans: ripening again, day 3 of 3", 0) == 0);
     Edit(sim, [&](State& state) { for (auto& plot : state.plots) if (plot.id == beanId) plot.growth = 1.0 - 72.0 / 168.0; });
     // Appended crop kinds and the picked flag survive a save round trip; saves without it load unpicked.
     Simulation saved;
     OK(saved.Deserialize(sim.Serialize()));
     CHECK(saved.Serialize() == sim.Serialize());
-    for (const auto& plot : saved.GetState().plots) if (plot.id == beanId) CHECK(plot.picked);
+    for (const auto& reloaded : saved.GetState().plots) if (reloaded.id == beanId) CHECK(reloaded.picked);
     {
-        std::string text = sim.Serialize();
-        CHECK(text.find("picked 1 " + std::to_string(beanId) + "\n") != std::string::npos);
+        const std::string text = sim.Serialize();
+        const std::string line = std::string(Crops::SaveTag) + " 1 " + std::to_string(beanId) + "\n";
+        const auto at = text.find(line);
+        CHECK(at != std::string::npos);
+        // An older save without the section loads with the plant unpicked.
+        std::string body = text.substr(text.find('\n') + 1);
+        body.erase(body.find(line), line.size());
+        Simulation older;
+        OK(older.Deserialize(Envelope(body)));
+        for (const auto& reloaded : older.GetState().plots) if (reloaded.id == beanId) CHECK(!reloaded.picked);
+        // A repeated section, or one naming a plot that isn't a picked regrowing crop, is refused.
+        Simulation strict;
+        CHECK(strict.Deserialize(Envelope(body + line + line)).code == ResultCode::CorruptSave);
+        CHECK(strict.Deserialize(Envelope(body + std::string(Crops::SaveTag) + " 1 " + std::to_string(rootId) + "\n")).code
+            == ResultCode::CorruptSave);
     }
 
     // Playtest aid: passing tended days grows a crop on schedule; untended ones dry out and lag.
@@ -1336,21 +1349,21 @@ void CropTableAndStatus()
     OK(untended.Deserialize(sim.Serialize()));
     const double hourBefore = sim.GetState().hour;
     OK(sim.PassDaysForPlaytest(3.9, true, roots));
-    for (const auto& plot : sim.GetState().plots)
-        if (plot.id == rootId) CHECK(plot.planted && !IsRipe(plot) && plot.growth > 0.95);
+    for (const auto& each : sim.GetState().plots)
+        if (each.id == rootId) CHECK(each.planted && !IsRipe(each) && each.growth > 0.95);
     OK(sim.PassDaysForPlaytest(0.2, true, roots));
-    for (const auto& plot : sim.GetState().plots)
-        if (plot.id == rootId) CHECK(IsRipe(plot));
+    for (const auto& each : sim.GetState().plots)
+        if (each.id == rootId) CHECK(IsRipe(each));
     CHECK(Close(sim.GetState().hour - hourBefore, 4.1 * 24.0) && !sim.GetState().failed);
     CHECK(sim.GetState().hunger == 100.0);
     OK(untended.PassDaysForPlaytest(4.1, false, roots));
-    for (const auto& plot : untended.GetState().plots)
-        if (plot.id == rootId) CHECK(!IsRipe(plot) && plot.growth > 0.1);
+    for (const auto& each : untended.GetState().plots)
+        if (each.id == rootId) CHECK(!IsRipe(each) && each.growth > 0.1);
     UnchangedFailure(sim, [&] { return sim.PassDaysForPlaytest(0.0, true, roots); });
     UnchangedFailure(sim, [&] { return sim.PassDaysForPlaytest(61.0, true, roots); });
     OK(sim.SetCropGrowthForPlaytest(0.5));
-    for (const auto& plot : sim.GetState().plots)
-        if (plot.planted) CHECK(plot.growth == 0.5);
+    for (const auto& each : sim.GetState().plots)
+        if (each.planted) CHECK(each.growth == 0.5);
     UnchangedFailure(sim, [&] { return sim.SetCropGrowthForPlaytest(1.5); });
 }
 
@@ -1502,8 +1515,8 @@ void ItemStockWidthCompatibility()
 
     // Stocks wider than this build's catalogue came from a newer build: refused, nothing changed.
     const std::string before = restored.Serialize();
-    CHECK(restored.Deserialize(Encode(sim.GetState(), SimulationSaveVersion, ItemCount + 1)).code == ResultCode::UnsupportedVersion);
-    CHECK(restored.Deserialize(Encode(sim.GetState(), PositionalStockSaveVersion, ItemCount + 1)).code == ResultCode::UnsupportedVersion);
+    CHECK(restored.Deserialize(Encode(sim.GetState(), SimulationSaveVersion, ItemCount + 1)).code == ResultCode::NewerBuild);
+    CHECK(restored.Deserialize(Encode(sim.GetState(), PositionalStockSaveVersion, ItemCount + 1)).code == ResultCode::NewerBuild);
     CHECK(restored.Serialize() == before);
     // Malformed widths are corrupt.
     CHECK(restored.Deserialize(Encode(sim.GetState(), SimulationSaveVersion, 0)).code == ResultCode::CorruptSave);
@@ -2473,9 +2486,11 @@ void WardrobeSaveRejection()
     FixtureLayouts(dependent);
     CHECK(sim.Deserialize(Encode(dependent)).code == ResultCode::CorruptSave);
     CHECK(sim.Serialize() == original);
+    // Older unreadable versions are unsupported; later ones came from a newer build.
     for (int version : {1, 2, 3, 4, 5, 6, RetiredTestSaveVersion, SimulationSaveVersion + 1, 999})
     {
-        CHECK(sim.Deserialize(Encode(sim.GetState(), version)).code == ResultCode::UnsupportedVersion);
+        CHECK(sim.Deserialize(Encode(sim.GetState(), version)).code
+            == (version > SimulationSaveVersion ? ResultCode::NewerBuild : ResultCode::UnsupportedVersion));
         CHECK(sim.Serialize() == original && sim.GetRevision() == revision);
     }
     InventoryRoundTrip(sim);
@@ -3556,7 +3571,10 @@ void HaftingBootstrapAndClearing()
     Simulation rejected;
     rejected.SetPlacements(placements);
     CHECK(!rejected.Deserialize(Envelope(withoutTools + "tools 6 0 0 0 0 9 0\n")));
-    CHECK(!rejected.Deserialize(Envelope(withoutTools + "shovels 1 0\n")));
+    // A section this build doesn't know came from a newer build: refused as such, not as corrupt.
+    const Result unknown = rejected.Deserialize(Envelope(withoutTools + "shovels 1 0\n"));
+    CHECK(!unknown && unknown.code == ResultCode::NewerBuild
+        && unknown.message.find("newer build") != std::string::npos);
     OK(rejected.Deserialize(Envelope(withoutTools + "tools 8 0 0 0 0 1 0 3 3\n")));
     CHECK(rejected.GetToolTier(ToolKind::Billhook) == ToolTier::Iron);
 }
