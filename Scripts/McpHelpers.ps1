@@ -19,7 +19,7 @@ Functions:
     pie / unpie                            start PIE in the viewport / stop it (then poll st for worldReady)
     quit                                   stop PIE and quit the editor cleanly (releases DLL and .uasset locks)
     pyfile <path>                          run a Python file in the editor with __file__ set (plain run_python has none)
-    tp <x> <y> [z]                         move the player pawn (z default 200; she drops to the ground)
+    tp <x> <y> [z]                         HomesteadTeleport: stand her on the ground at x,y (with z: on the first surface at or below z)
     click <x> <y>                          real Win32 left click at editor-window pixels (Slate clicks don't reach game widgets)
 Variables: $McpEditor $McpScene $McpLogs $McpSlate $McpPlay $McpPython (toolset names for your own mcp calls).
 Short aliases $E $S $L $SL $H $PY are set too, but only if you haven't already defined those names; dot-sourcing
@@ -121,10 +121,12 @@ function pyfile([string]$path, [int]$timeout = 600) {
     py "p = $(ConvertTo-Json $full)`nexec(compile(open(p, encoding='utf-8').read(), p, 'exec'), {'__file__': p, '__name__': '__main__', 'unreal': unreal})" $timeout
 }
 
-function tp([double]$x, [double]$y, [double]$z = 200) {
-    py ("w = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_game_world()`n" +
-        "pawn = unreal.GameplayStatics.get_player_pawn(w, 0) if w else None`n" +
-        "print(pawn.set_actor_location(unreal.Vector($x, $y, $z), False, True) if pawn else 'No PIE pawn')")
+function tp([double]$x, [double]$y, $z = $null) {
+    # HomesteadTeleport stands her on the ground at x,y (waiting for its collision to stream in), so she
+    # never drops from a guessed height. With z she lands on the first surface at or below z (an upper floor).
+    $cmd = "HomesteadTeleport $x $y" + $(if ($null -ne $z) { " $([double]$z)" } else { '' })
+    $null = con $cmd
+    $cmd
 }
 
 $script:McpUser32 = @"
