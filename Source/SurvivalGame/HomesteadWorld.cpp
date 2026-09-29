@@ -4167,8 +4167,17 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
                     WetSoil * 0.85f, false, FRotator::ZeroRotator, 0.95f - Moisture * 0.35f);
             constexpr int X = 0, Y = 0;
             const Homestead::CropStage CropStage = Homestead::StageOf(Plot);
-            UStaticMesh* Plant = CropStage >= Homestead::CropStage::Sprout
+            // A withered crop shows the Harvest lane's dead plant (SM_<visual>_Withered); until that
+            // lands, its mature plant squashed low in a flat dead brown stands in.
+            bool bWitheredStandIn = false;
+            UStaticMesh* Plant = CropStage == Homestead::CropStage::Withered ? CropMesh(Plot.kind, TEXT("Withered"))
+                : CropStage >= Homestead::CropStage::Sprout
                 ? CropMesh(Plot.kind, UTF8_TO_TCHAR(Homestead::StageName(CropStage))) : nullptr;
+            if (!Plant && CropStage == Homestead::CropStage::Withered)
+            {
+                Plant = CropMesh(Plot.kind, TEXT("Mature"));
+                bWitheredStandIn = Plant != nullptr;
+            }
             if (Plant)
             {
                 // The Blender plant for this stage, sized for the square and set on the bed's ridges.
@@ -4177,8 +4186,10 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
                     GroundHeight(PX, PY - Probe) - GroundHeight(PX, PY + Probe), 2 * Probe).GetSafeNormal();
                 const float Yaw = (Plot.id % 2) ? 180.0f : 0.0f;
                 const FRotator Lie = FRotationMatrix::MakeFromZX(Normal, FRotator(0, Yaw, 0).Vector()).Rotator();
-                if (auto* Part = AddPart(Visual, Plant, AtGround(PX, PY, Bed ? -1.2f : 0.0f), FVector(100, 100, 100), Leaf, false, Lie))
-                    Part->SetMaterial(0, Plant->GetMaterial(0));
+                const FLinearColor DeadBrown(0.16f, 0.10f, 0.05f);
+                if (auto* Part = AddPart(Visual, Plant, AtGround(PX, PY, Bed ? -1.2f : 0.0f),
+                    FVector(100, 100, bWitheredStandIn ? 45 : 100), bWitheredStandIn ? DeadBrown : Leaf, false, Lie))
+                    if (!bWitheredStandIn) Part->SetMaterial(0, Plant->GetMaterial(0));
                 // Ripeness shows in the produce itself (size and colour), with no effect on top.
                 AddCropProduce(Visual, Plot, CropStage, FTransform(Lie, AtGround(PX, PY, Bed ? -1.2f : 0.0f)));
             }

@@ -15,27 +15,34 @@ template <typename T> bool CropValidEnum(T value, T count)
     return static_cast<int>(value) >= 0 && static_cast<int>(value) < static_cast<int>(count);
 }
 
+// Season masks for the table (design §4 crop table).
+constexpr SeasonMask CropSeasonsSpringOnly = SeasonBit(Season::Spring);
+constexpr SeasonMask CropSeasonsSpringSummer = SeasonBit(Season::Spring) | SeasonBit(Season::Summer);
+constexpr SeasonMask CropSeasonsAutumnWinter = SeasonBit(Season::Autumn) | SeasonBit(Season::Winter);
+// Wild-sown legacy crops grow wherever wild roots and berries do.
+constexpr SeasonMask CropSeasonsSpringToAutumn = CropSeasonsSpringSummer | SeasonBit(Season::Autumn);
+
 // One row per CropKind, in enum order. Growing times are game hours at full care; the new period
 // crops follow Coral Island / Stardew pacing (a handful of days), not real gardening time.
 const CropInfo CropTable[] = {
     // Legacy crops from the woodland prototype, kept with their original timings and yields.
     {CropKind::Roots, "Roots", "roots", Item::Seeds, Item::Roots, 4, Item::Seeds, 2, 30.0, 0.0,
-        HarvestStyle::Pull, "CropCarrot"},
+        HarvestStyle::Pull, "CropCarrot", CropSeasonsSpringToAutumn},
     {CropKind::Berries, "Berries", "berries", Item::Berries, Item::Berries, 6, Item::Count, 0, 42.0, 24.0,
-        HarvestStyle::Pick, "CropStrawberry"},
+        HarvestStyle::Pick, "CropStrawberry", CropSeasonsSpringToAutumn},
     // Period crops sold as seed at the general store (improve-crops-and-harvest design table).
     {CropKind::Turnips, "Turnips", "turnips", Item::TurnipSeed, Item::Turnip, 2, Item::Count, 0, 96.0, 0.0,
-        HarvestStyle::Pull, "CropTurnip"},
+        HarvestStyle::Pull, "CropTurnip", CropSeasonsAutumnWinter},
     {CropKind::Carrots, "Carrots", "carrots", Item::CarrotSeed, Item::Carrot, 3, Item::Count, 0, 120.0, 0.0,
-        HarvestStyle::Pull, "CropCarrot"},
+        HarvestStyle::Pull, "CropCarrot", CropSeasonsSpringSummer},
     {CropKind::Potatoes, "Potatoes", "potatoes", Item::SeedPotato, Item::Potato, 4, Item::Count, 0, 144.0, 0.0,
-        HarvestStyle::Pull, "CropPotato"},
+        HarvestStyle::Pull, "CropPotato", CropSeasonsSpringOnly},
     {CropKind::Cabbage, "Cabbage", "cabbage", Item::CabbageSeed, Item::Cabbage, 1, Item::Count, 0, 216.0, 0.0,
-        HarvestStyle::Cut, "CropCabbage"},
+        HarvestStyle::Cut, "CropCabbage", CropSeasonsAutumnWinter},
     {CropKind::BroadBeans, "Broad beans", "broad beans", Item::BroadBeanSeed, Item::BroadBeans, 6, Item::Count, 0, 168.0, 72.0,
-        HarvestStyle::Pick, "CropBroadBean"},
+        HarvestStyle::Pick, "CropBroadBean", CropSeasonsSpringOnly},
     {CropKind::Strawberries, "Strawberries", "strawberries", Item::StrawberryRunner, Item::Strawberries, 5, Item::Count, 0,
-        192.0, 72.0, HarvestStyle::Pick, "CropStrawberry"},
+        192.0, 72.0, HarvestStyle::Pick, "CropStrawberry", CropSeasonsSpringSummer},
 };
 static_assert(sizeof(CropTable) / sizeof(CropTable[0]) == static_cast<int>(CropKind::Count),
     "Every CropKind needs exactly one CropTable row.");
@@ -85,6 +92,7 @@ double WeedGrowthFactor(double weeds)
 CropStage StageOf(const Plot& plot)
 {
     if (!plot.planted) return CropStage::Bare;
+    if (plot.withered) return CropStage::Withered;
     if (plot.growth >= 1.0) return CropStage::Ripe;
     // A picked plant (beans, strawberries) restarts part-way up this scale, so it shows the stage
     // before its pods or fruit form again.
@@ -97,7 +105,7 @@ CropStage StageOf(const Plot& plot)
 
 const char* StageName(CropStage stage)
 {
-    static const char* names[] = {"Bare", "Sown", "Sprout", "Young", "Growing", "Mature", "Ripe"};
+    static const char* names[] = {"Bare", "Sown", "Sprout", "Young", "Growing", "Mature", "Ripe", "Withered"};
     return CropValidEnum(stage, CropStage::Count) ? names[static_cast<int>(stage)] : "Bare";
 }
 
@@ -114,11 +122,44 @@ std::string ReadyInText(CropKind kind)
     return "Ready in about " + std::to_string(days) + (days == 1 ? " day" : " days") + " if watered.";
 }
 
-std::string PlotStatus(const Plot& plot)
+bool GrowsIn(CropKind kind, Season season) { return InSeason(GetCropInfo(kind).seasons, season); }
+
+std::string OutOfSeasonText(CropKind kind)
+{
+    const auto& info = GetCropInfo(kind);
+    // "Turnips grow", "Cabbage grows": the plural names end in s.
+    const std::string name = info.name;
+    const bool plural = !name.empty() && name.back() == 's';
+    return name + (plural ? " grow in " : " grows in ") + Calendar::SeasonList(info.seasons) + ".";
+}
+
+double HoursLeftInSeasons(CropKind kind, double hour)
+{
+    const auto today = Calendar::DateAt(hour);
+    const int days = Calendar::DaysLeftInRun(today, GetCropInfo(kind).seasons);
+    if (days <= 0) return 0.0;
+    // The run ends at the 06:00 rollover after its last day.
+    const double end = (static_cast<double>(today.dayIndex) + days) * 24.0 + Calendar::DayStartHour;
+    return std::max(0.0, end - hour);
+}
+
+std::string TooLateText(CropKind kind, double hoursToRipe, double hour)
+{
+    const auto& info = GetCropInfo(kind);
+    if ((info.seasons & AllSeasons) == AllSeasons || hoursToRipe <= 0.0) return {};
+    const double left = HoursLeftInSeasons(kind, hour);
+    if (left <= 0.0 || hoursToRipe <= left + 1e-9) return {};
+    const auto today = Calendar::DateAt(hour);
+    const auto last = Calendar::DateOfDay(today.dayIndex + Calendar::DaysLeftInRun(today, info.seasons) - 1);
+    return std::string("Won't ripen before ") + Calendar::SeasonName(last.season) + " ends.";
+}
+
+std::string PlotStatus(const Plot& plot, double hour)
 {
     if (!plot.planted) return "Tilled soil: ready to plant";
     const auto& info = GetCropInfo(plot.kind);
     std::string text = info.name;
+    if (plot.withered) return text + ": withered. Clear it with the hoe";
     if (IsRipe(plot)) return text + ": ready to harvest";
     const int regrowDays = CropRegrowDays(plot.kind);
     if (plot.picked && regrowDays > 0)
@@ -135,6 +176,11 @@ std::string PlotStatus(const Plot& plot)
     if (dry && weedy) text += "  |  needs water and weeding, growing slowly";
     else if (dry) text += "  |  needs water, growing slowly";
     else if (weedy) text += "  |  weedy, growing slowly";
+    if (hour >= 0.0)
+    {
+        const auto late = TooLateText(plot.kind, (1.0 - plot.growth) * info.growHours, hour);
+        if (!late.empty()) text += "  |  " + late;
+    }
     return text;
 }
 
@@ -164,6 +210,44 @@ bool ReadSaveSection(std::istream& input, State& state)
         plot->picked = true;
     }
     return true;
+}
+
+void WriteWitheredSection(std::ostream& output, const State& state)
+{
+    std::vector<int> withered;
+    for (const auto& plot : state.plots) if (plot.planted && plot.withered) withered.push_back(plot.id);
+    if (withered.empty()) return;
+    output << WitheredSaveTag << ' ' << withered.size();
+    for (int id : withered) output << ' ' << id;
+    output << '\n';
+}
+
+bool ReadWitheredSection(std::istream& input, State& state)
+{
+    int count = 0;
+    if (!(input >> count) || count < 0 || count > static_cast<int>(state.plots.size())) return false;
+    for (int i = 0; i < count; ++i)
+    {
+        int id = 0;
+        if (!(input >> id)) return false;
+        const auto plot = std::find_if(state.plots.begin(), state.plots.end(), [id](const Plot& p) { return p.id == id; });
+        if (plot == state.plots.end() || !plot->planted || plot->withered) return false;
+        plot->withered = true;
+    }
+    return true;
+}
+
+int WitherOutOfSeason(State& state, Season season)
+{
+    int count = 0;
+    for (auto& plot : state.plots)
+    {
+        if (!plot.planted || plot.withered || GrowsIn(plot.kind, season)) continue;
+        plot.withered = true;
+        plot.picked = false;
+        ++count;
+    }
+    return count;
 }
 }
 }

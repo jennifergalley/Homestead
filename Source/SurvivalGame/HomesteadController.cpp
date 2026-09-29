@@ -1851,6 +1851,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
         }
     }
     TickStores(DeltaSeconds);
+    TickCalendarNotices();
     if (bPlanning && !bBookOpen) UpdatePlacement(false);
     if (IsFailed() && !bWasFailed)
     {
@@ -2126,7 +2127,7 @@ FString AHomesteadController::FocusTitle() const
         {
             if (Plot.id != FocusId) continue;
             if (!Plot.planted) return TEXT("A little patch of earth");
-            return Text(Homestead::PlotStatus(Plot).c_str());
+            return Text(Homestead::PlotStatus(Plot, State().hour).c_str());
         }
         break;
     case EFocus::Drop:
@@ -2228,6 +2229,10 @@ FString AHomesteadController::FocusActions() const
                                 return A + TEXT(" Sow ") + Text(Seed->lower) + SeedPouchHint();
                     return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds") + SeedPouchHint();
                 }
+                if (Plot.withered)
+                    return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick ? Use + TEXT(" Hoe out")
+                        : Sim.Count(Homestead::Item::DiggingStick) > 0 ? A + TEXT(" Hoe out")
+                        : ToolPrompt(Sim, Homestead::Item::DiggingStick, TEXT("hoe"), TEXT(" to clear it"));
                 if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
                 FString Actions;
                 if (Homestead::NeedsWater(Plot))
@@ -2870,6 +2875,14 @@ void AHomesteadController::Interact()
             }
             const Homestead::CropKind Harvested = Plot.kind;
             const Homestead::Point Center = Homestead::PlotCenter(Plot);
+            if (Plot.withered)
+            {
+                const auto Result = Sim.ClearWithered(FocusId, Position);
+                Notify(Result, GrassStepA);
+                if (Result.ok)
+                    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayTill(Center);
+                break;
+            }
             const auto Result = Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
             Notify(Result, GrassStepB);
             if (Result.ok && Mature) PresentHarvest(FocusId, Harvested, Center);

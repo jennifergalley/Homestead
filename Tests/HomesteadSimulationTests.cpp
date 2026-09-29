@@ -144,12 +144,19 @@ std::string Encode(const State& s, int version = SimulationSaveVersion, int widt
         out << "tools " << ToolKindCount;
         for (const ToolTier tier : s.toolTiers) out << ' ' << static_cast<int>(tier);
         out << '\n';
-        std::vector<int> picked;
+        std::vector<int> picked, withered;
         for (const auto& p : s.plots) if (p.planted && p.picked) picked.push_back(p.id);
+        for (const auto& p : s.plots) if (p.planted && p.withered) withered.push_back(p.id);
         if (!picked.empty())
         {
             out << "picked " << picked.size();
             for (int id : picked) out << ' ' << id;
+            out << '\n';
+        }
+        if (!withered.empty())
+        {
+            out << "withered " << withered.size();
+            for (int id : withered) out << ' ' << id;
             out << '\n';
         }
     }
@@ -287,7 +294,7 @@ void DefaultsAndValidation()
     CHECK(sim.UsedCapacity() == 0);
     CHECK(sim.GetState().resources.size() >= 70);
     CHECK(sim.GetState().hour == 6);
-    CHECK(sim.GetState().dayMinutes == 60);
+    CHECK(sim.GetState().dayMinutes == 30);
     CHECK(std::string(ResourceName(ResourceKind::Flowers)) == "Meadow herb");
     CHECK(std::string(ItemName(Item::Flowers)) == "Meadow herb");
     CHECK(std::string(ItemName(Item::Timber)) == "Timber");
@@ -1288,23 +1295,23 @@ void CropTableAndStatus()
     CHECK(harvested.message == "Harvested 4 roots and 2 seeds. This plot is ready to replant.");
     CHECK(!sim.GetState().plots[0].planted);
 
-    // Sow bought turnip seed and broad beans: turnips clear the plot, beans keep cropping.
-    Stock(sim, {{Item::DiggingStick, 1}, {Item::WateringCan, 1}, {Item::TurnipSeed, 1}, {Item::BroadBeanSeed, 1}});
+    // Sow bought carrot seed and broad beans (both spring crops): carrots clear the plot, beans keep cropping.
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::WateringCan, 1}, {Item::CarrotSeed, 1}, {Item::BroadBeanSeed, 1}});
     const Point beans = CellCenter(-3, -1);
     OK(sim.Till(CellToGarden(-3), CellToGarden(-1), beans));
     const int beanId = sim.FindNearestPlot(beans, 1);
-    const Result sown = sim.Plant(rootId, roots, CropKind::Turnips);
+    const Result sown = sim.Plant(rootId, roots, CropKind::Carrots);
     OK(sown);
-    CHECK(sown.message == "Planted turnips. Ready in about 4 days if watered.");
-    CHECK(sim.Count(Item::TurnipSeed) == 0);
-    UnchangedFailure(sim, [&] { return sim.Plant(beanId, beans, CropKind::Carrots); });
+    CHECK(sown.message == "Planted carrots. Ready in about 5 days if watered.");
+    CHECK(sim.Count(Item::CarrotSeed) == 0);
+    UnchangedFailure(sim, [&] { return sim.Plant(beanId, beans, CropKind::Potatoes); });
     OK(sim.Plant(beanId, beans, CropKind::BroadBeans));
     Edit(sim, [](State& state) { for (auto& plot : state.plots) plot.growth = 1.0; });
-    const int turnipsBefore = sim.Count(Item::Turnip);
+    const int carrotsBefore = sim.Count(Item::Carrot);
     const Result pulled = sim.HarvestCrop(rootId, roots);
     OK(pulled);
-    CHECK(pulled.message == "Harvested 2 turnips. This plot is ready to replant.");
-    CHECK(sim.Count(Item::Turnip) == turnipsBefore + 2);
+    CHECK(pulled.message == "Harvested 3 carrots. This plot is ready to replant.");
+    CHECK(sim.Count(Item::Carrot) == carrotsBefore + 3);
     for (const auto& each : sim.GetState().plots)
         if (each.id == rootId) CHECK(!each.planted && each.kind == CropKind::Roots);
     const Result picked = sim.HarvestCrop(beanId, beans);
@@ -1343,20 +1350,20 @@ void CropTableAndStatus()
     }
 
     // Playtest aid: passing tended days grows a crop on schedule; untended ones dry out and lag.
-    Stock(sim, {{Item::TurnipSeed, 2}});
-    OK(sim.Plant(rootId, roots, CropKind::Turnips));
+    Stock(sim, {{Item::CarrotSeed, 2}});
+    OK(sim.Plant(rootId, roots, CropKind::Carrots));
     Simulation untended;
     OK(untended.Deserialize(sim.Serialize()));
     const double hourBefore = sim.GetState().hour;
-    OK(sim.PassDaysForPlaytest(3.9, true, roots));
+    OK(sim.PassDaysForPlaytest(4.9, true, roots));
     for (const auto& each : sim.GetState().plots)
         if (each.id == rootId) CHECK(each.planted && !IsRipe(each) && each.growth > 0.95);
     OK(sim.PassDaysForPlaytest(0.2, true, roots));
     for (const auto& each : sim.GetState().plots)
         if (each.id == rootId) CHECK(IsRipe(each));
-    CHECK(Close(sim.GetState().hour - hourBefore, 4.1 * 24.0) && !sim.GetState().failed);
+    CHECK(Close(sim.GetState().hour - hourBefore, 5.1 * 24.0) && !sim.GetState().failed);
     CHECK(sim.GetState().hunger == 100.0);
-    OK(untended.PassDaysForPlaytest(4.1, false, roots));
+    OK(untended.PassDaysForPlaytest(5.1, false, roots));
     for (const auto& each : untended.GetState().plots)
         if (each.id == rootId) CHECK(!IsRipe(each) && each.growth > 0.1);
     UnchangedFailure(sim, [&] { return sim.PassDaysForPlaytest(0.0, true, roots); });
@@ -1646,9 +1653,10 @@ void ClockPauseAndBatching()
     const auto initial = sim.Serialize();
     sim.Advance(3600, Home, true);
     CHECK(sim.Serialize() == initial);
+    // New games run 30-minute days: 150 real seconds are two game hours.
     sim.Advance(150, Home);
-    CHECK(Close(sim.GetState().hour, 7));
-    OK(sim.SetDayMinutes(30));
+    CHECK(Close(sim.GetState().hour, 8));
+    OK(sim.SetDayMinutes(60));
     sim.Advance(150, Home);
     CHECK(Close(sim.GetState().hour, 9));
     Simulation large, small;
@@ -1673,14 +1681,18 @@ void ClockPauseAndBatching()
     CHECK(Close(large.GetState().plots[0].moisture, small.GetState().plots[0].moisture, 0.001));
     CHECK(Close(large.GetState().plots[0].weeds, small.GetState().plots[0].weeds, 0.001));
     CHECK(Close(large.GetState().structures.back().fuelHours, small.GetState().structures.back().fuelHours));
-    Edit(sim, [](State& state) { state.hour = 14 * 24; });
+    // 28-day seasons from the 06:00 rollover (the calendar's own tests are in HomesteadCalendarTests).
+    Edit(sim, [](State& state) { state.hour = 14 * 24 + 6; });
     CHECK(sim.DayNumber() == 15);
+    CHECK(std::string(sim.SeasonName()) == "Spring");
+    Edit(sim, [](State& state) { state.hour = 28 * 24 + 6; });
+    CHECK(sim.DayNumber() == 1);
     CHECK(std::string(sim.SeasonName()) == "Summer");
-    Edit(sim, [](State& state) { state.hour = 28 * 24; });
+    Edit(sim, [](State& state) { state.hour = 56 * 24 + 6; });
     CHECK(std::string(sim.SeasonName()) == "Autumn");
-    Edit(sim, [](State& state) { state.hour = 42 * 24; });
+    Edit(sim, [](State& state) { state.hour = 84 * 24 + 6; });
     CHECK(std::string(sim.SeasonName()) == "Winter");
-    Edit(sim, [](State& state) { state.hour = 56 * 24; });
+    Edit(sim, [](State& state) { state.hour = 112 * 24 + 6; });
     CHECK(std::string(sim.SeasonName()) == "Spring");
 }
 
@@ -1733,8 +1745,8 @@ void CosmeticClothingAndRetiredFur()
 
     // A winter night costs the dressed and the bare exactly the same: there is no cold.
     Simulation bare;
-    Edit(bare, [](State& state) { state.hour = 42 * 24 + 20; state.energy = 100; state.hunger = 80; });
-    Edit(sim, [](State& state) { state.hour = 42 * 24 + 20; state.energy = 100; state.hunger = 80; });
+    Edit(bare, [](State& state) { state.hour = 84 * 24 + 20; state.energy = 100; state.hunger = 80; });
+    Edit(sim, [](State& state) { state.hour = 84 * 24 + 20; state.energy = 100; state.hunger = 80; });
     CHECK(std::string(bare.SeasonName()) == "Winter");
     bare.AdvanceGameHours(2, Home);
     sim.AdvanceGameHours(2, Home);
@@ -1789,7 +1801,7 @@ void SleepAndFailure()
     OK(bare.Deserialize(checkpoint));
     CHECK(!bare.GetState().failed);
     // A cold night in bed is simply rest now.
-    Edit(bare, [](State& state) { state.hour = 42 * 24 + 20; state.hunger = 80; state.energy = 60; });
+    Edit(bare, [](State& state) { state.hour = 84 * 24 + 20; state.hunger = 80; state.energy = 60; });
     OK(bare.Sleep(8, Home));
     CHECK(!bare.GetState().failed && bare.GetState().energy == 100);
     // Time awake drains Energy slowly (1.2 points last two hours). Running out doesn't fail her: she
@@ -3371,7 +3383,7 @@ void SleepOptionPolicy()
     CHECK(Close(SleepOptions(18.0, 50.0)[0].hours, 12.75));
     CHECK(Close(SleepOptions(12.0, 97.0)[0].hours, Exertion::MinRestHours));
     // One rain schedule for the rules, the lighting and the wet ground: day 2 of every 3, 09:00-15:00.
-    CHECK(!IsRainDay(12.0) && IsRainDay(24.0 + 1.0) && !IsRainDay(48.0 + 12.0) && IsRainDay(96.0 + 23.0));
+    CHECK(!IsRainDay(12.0) && IsRainDay(24.0 + 7.0) && !IsRainDay(48.0 + 12.0) && IsRainDay(96.0 + 23.0));
     CHECK(IsRainingAt(24.0 + RainStartHour) && !IsRainingAt(24.0 + RainEndHour) && !IsRainingAt(24.0 + 8.99) && !IsRainingAt(10.0));
     // Rain and cloud: none on dry days; the cloud builds half an hour ahead and clears half an hour
     // after; the rain eases in and out and swells between drizzle and showers without jumps.
