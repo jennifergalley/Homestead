@@ -28,6 +28,11 @@ constexpr float ArriveSeconds = 190.0f;
 // Frame timing: let streaming and shader work settle after she arrives, then sample.
 constexpr double TimingSettleSeconds = 6.0;
 constexpr double TimingSampleSeconds = 12.0;
+// Walking timing: a second to get into her stride, then 12 s of walking with the camera turning at a
+// quarter of full right-stick deflection (a slow circle, so she stays in the same part of the estate).
+constexpr double WalkSettleSeconds = 1.0;
+constexpr double WalkSampleSeconds = 12.0;
+constexpr float WalkTurn = 0.25f;
 // Where she stands to act on a resource (the controller's focus reaches 280 cm).
 constexpr double ApproachCm = 110.0;
 // A resource is used for an action only when nothing else she could focus is this close.
@@ -248,6 +253,40 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         };
         Step.Wait = static_cast<float>(EstateSmokeRoute::TimingSettleSeconds + EstateSmokeRoute::TimingSampleSeconds);
     };
+    // Walking timing, reported as PERFORMANCE_AT walk-<place>: she walks forward while the camera turns
+    // slowly, so the grass field rebuilds chunks, scenery cells come and go and World Partition streams,
+    // as in ordinary play. Adds the longest frame and the count over 20 ms, since hitches are the point.
+    const auto MeasureWalk = [this](const FString& Place)
+    {
+        TSharedRef<double> Began = MakeShared<double>(0.0);
+        TSharedRef<TArray<double>> Frames = MakeShared<TArray<double>>();
+        FStep& Step = Steps.AddDefaulted_GetRef();
+        Step.Name = TEXT("Walking frame timing at ") + Place;
+        Step.Action = [Began, Frames]() { *Began = FPlatformTime::Seconds(); Frames->Reset(); };
+        Step.Repeat = [this, Began, Frames]()
+        {
+            Axis(EKeys::Gamepad_LeftY, 1.0f);
+            Axis(EKeys::Gamepad_RightX, EstateSmokeRoute::WalkTurn);
+            if (FPlatformTime::Seconds() - *Began >= EstateSmokeRoute::WalkSettleSeconds) Frames->Add(FApp::GetDeltaTime() * 1000.0);
+        };
+        Step.Check = [this, Place, Frames]()
+        {
+            Axis(EKeys::Gamepad_LeftY, 0.0f);
+            Axis(EKeys::Gamepad_RightX, 0.0f);
+            if (Frames->Num() < 30) return false;
+            TArray<double> Sorted = *Frames;
+            Sorted.Sort();
+            double Total = 0;
+            int32 Over20 = 0;
+            for (const double Value : Sorted) { Total += Value; Over20 += Value > 20.0 ? 1 : 0; }
+            const int32 LastIndex = Sorted.Num() - 1;
+            Results.Add(FString::Printf(TEXT("PERFORMANCE_AT walk-%s mean_fps=%.2f p95_frame_ms=%.2f p99_frame_ms=%.2f max_frame_ms=%.2f over_20ms=%d samples=%d"),
+                *Place, 1000.0 / (Total / Sorted.Num()), Sorted[FMath::FloorToInt(LastIndex * 0.95)],
+                Sorted[FMath::FloorToInt(LastIndex * 0.99)], Sorted[LastIndex], Over20, Sorted.Num()));
+            return true;
+        };
+        Step.Wait = static_cast<float>(EstateSmokeRoute::WalkSettleSeconds + EstateSmokeRoute::WalkSampleSeconds);
+    };
 
     // 1. The new game: BeginPlay started an estate game and skipped the setup (default names).
     {
@@ -311,12 +350,16 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
     else { Finish(false, TEXT("The manor clear-out placements (570000+) are missing.")); return; }
     const Homestead::DerelictFarmPlan Farm = Homestead::EstateDerelictFarm(Layout);
     if (Farm.valid)
+    {
         Visit(TEXT("the derelict farm"), Farm.World(Farm.lengthU * 0.5, Farm.lengthV * 0.5), TEXT("estate-farm"));
+        MeasureWalk(TEXT("farm"));
+    }
     else { Finish(false, TEXT("The derelict farm's field is missing from the estate layout.")); return; }
     if (const auto* Woods = EstateSmokeRoute::FindInRange(Start, 560000, 570000))
     {
         Visit(TEXT("the MVP woodland"), {Woods->position.x + EstateSmokeRoute::StandOffCm, Woods->position.y}, TEXT("estate-woods"));
         Measure(TEXT("woods"));
+        MeasureWalk(TEXT("woods"));
     }
     else { Finish(false, TEXT("The MVP woodland placements (560000+) are missing.")); return; }
     if (const auto* Gateway = Layout.FindLandmark(Homestead::Anchor::EstateGateway))
