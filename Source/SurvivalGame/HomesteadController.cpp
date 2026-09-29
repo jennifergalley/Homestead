@@ -125,7 +125,8 @@ FName HotbarIcon(Homestead::Item Item)
     case Homestead::Item::OilLamp: return TEXT("oil-lamp");
     default:
         // Crop seeds and produce use their catalogue glyph.
-        if (Homestead::CropForSeed(Item) || (Item >= Homestead::Item::Turnip && Item <= Homestead::Item::Strawberries))
+        if (Homestead::CropForSeed(Item) || (Item >= Homestead::Item::Turnip && Item <= Homestead::Item::Strawberries)
+            || (Item >= Homestead::Item::Peas && Item <= Homestead::Item::WinterBroccoli))
             return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item)));
         return NAME_None;
     }

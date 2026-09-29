@@ -1217,6 +1217,16 @@ void CropTableAndStatus()
     }
     CHECK(CropDays(CropKind::Turnips) == 4 && CropDays(CropKind::Carrots) == 5 && CropDays(CropKind::Potatoes) == 6);
     CHECK(CropDays(CropKind::BroadBeans) == 7 && CropDays(CropKind::Strawberries) == 8 && CropDays(CropKind::Cabbage) == 9);
+    // Round 2's crops (design §4): days, regrow days and harvest styles.
+    CHECK(CropDays(CropKind::Peas) == 6 && CropRegrowDays(CropKind::Peas) == 3);
+    CHECK(CropDays(CropKind::Wheat) == 10 && CropDays(CropKind::Barley) == 8 && CropDays(CropKind::Leeks) == 8);
+    CHECK(CropDays(CropKind::WinterBroccoli) == 10);
+    for (CropKind once : {CropKind::Wheat, CropKind::Barley, CropKind::Leeks, CropKind::WinterBroccoli})
+        CHECK(CropRegrowDays(once) == 0);
+    CHECK(GetCropInfo(CropKind::Peas).style == HarvestStyle::Pick && GetCropInfo(CropKind::Leeks).style == HarvestStyle::Pull);
+    for (CropKind cut : {CropKind::Wheat, CropKind::Barley, CropKind::WinterBroccoli})
+        CHECK(GetCropInfo(cut).style == HarvestStyle::Cut);
+    CHECK(CountedName(Item::Wheat, 2) == "2 wheat sheaves" && CountedName(Item::Leek, 3) == "3 leeks");
 
     // Watered within a day or weeded within about two days: full speed. Bone dry: a fifth.
     CHECK(MoistureGrowthFactor(1.0) == 1.0 && MoistureGrowthFactor(CropCare::WellWatered) == 1.0);

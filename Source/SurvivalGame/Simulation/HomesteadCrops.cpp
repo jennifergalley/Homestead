@@ -36,6 +36,18 @@ const CropInfo CropTable[] = {
         HarvestStyle::Pick, "CropBroadBean"},
     {CropKind::Strawberries, "Strawberries", "strawberries", Item::StrawberryRunner, Item::Strawberries, 5, Item::Count, 0,
         192.0, 72.0, HarvestStyle::Pick, "CropStrawberry"},
+    // The farming year's new crops (rework-farming-calendar-and-period-crafting design §4). Grain is
+    // cut with the cabbage's kneel-and-cut; leeks are pulled like roots.
+    {CropKind::Peas, "Peas", "peas", Item::PeaSeed, Item::Peas, 6, Item::Count, 0, 144.0, 72.0,
+        HarvestStyle::Pick, "CropPea"},
+    {CropKind::Wheat, "Wheat", "wheat", Item::SeedWheat, Item::Wheat, 2, Item::Count, 0, 240.0, 0.0,
+        HarvestStyle::Cut, "CropWheat"},
+    {CropKind::Barley, "Barley", "barley", Item::SeedBarley, Item::Barley, 2, Item::Count, 0, 192.0, 0.0,
+        HarvestStyle::Cut, "CropBarley"},
+    {CropKind::Leeks, "Leeks", "leeks", Item::LeekSeedlings, Item::Leek, 3, Item::Count, 0, 192.0, 0.0,
+        HarvestStyle::Pull, "CropLeek"},
+    {CropKind::WinterBroccoli, "Winter broccoli", "winter broccoli", Item::WinterBroccoliSeed, Item::WinterBroccoli, 1,
+        Item::Count, 0, 240.0, 0.0, HarvestStyle::Cut, "CropWinterBroccoli"},
 };
 static_assert(sizeof(CropTable) / sizeof(CropTable[0]) == static_cast<int>(CropKind::Count),
     "Every CropKind needs exactly one CropTable row.");

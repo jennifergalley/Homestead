@@ -25,6 +25,9 @@ enum class Item : int
     // improve-crops-and-harvest: period crop seed (sold at the general store) and the produce.
     TurnipSeed, CarrotSeed, SeedPotato, CabbageSeed, BroadBeanSeed, StrawberryRunner,
     Turnip, Carrot, Potato, Cabbage, BroadBeans, Strawberries,
+    // rework-farming-calendar-and-period-crafting (round 2, lane B): the new crops' seed and produce.
+    PeaSeed, SeedWheat, SeedBarley, LeekSeedlings, WinterBroccoliSeed,
+    Peas, Wheat, Barley, Leek, WinterBroccoli,
     Count
 };
 constexpr int ItemCount = static_cast<int>(Item::Count);

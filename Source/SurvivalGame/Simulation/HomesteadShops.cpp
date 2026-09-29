@@ -49,7 +49,8 @@ std::string FormatMoneyDelta(Cents cents)
 const std::vector<Item>& ShopGoods(ShopKind kind)
 {
     static const std::vector<Item> generalStore = {Item::Pasty, Item::Bread, Item::Cheese, Item::Twine, Item::OilFlask,
-        Item::TurnipSeed, Item::CarrotSeed, Item::SeedPotato, Item::CabbageSeed, Item::BroadBeanSeed, Item::StrawberryRunner};
+        Item::TurnipSeed, Item::CarrotSeed, Item::SeedPotato, Item::CabbageSeed, Item::BroadBeanSeed, Item::StrawberryRunner,
+        Item::PeaSeed, Item::SeedWheat, Item::SeedBarley, Item::LeekSeedlings, Item::WinterBroccoliSeed};
     static const std::vector<Item> none;
     return kind == ShopKind::GeneralStore ? generalStore : none;
 }

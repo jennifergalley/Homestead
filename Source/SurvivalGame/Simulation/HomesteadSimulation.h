@@ -47,6 +47,8 @@ enum class CropKind : int
     Roots, Berries,
     // improve-crops-and-harvest: period crops. Append only (plots save the kind as an int).
     Turnips, Carrots, Potatoes, Cabbage, BroadBeans, Strawberries,
+    // rework-farming-calendar-and-period-crafting (round 2, lane B): the farming year's new crops.
+    Peas, Wheat, Barley, Leeks, WinterBroccoli,
     Count
 };
 

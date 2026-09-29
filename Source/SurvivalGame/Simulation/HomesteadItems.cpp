@@ -125,6 +125,28 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Food, "wild-garlic", 8, StoreBuys, 5.0, 3.0, "Picked from broad bean plants", false, "broad bean pods"},
     {Item::Strawberries, "strawberries", "Strawberries", "Sweet red strawberries, warm from the sun.",
         ItemCategory::Food, "berries", 13, StoreBuys, 8.0, 8.0, "Picked from strawberry plants", false, "strawberries"},
+    // rework-farming-calendar-and-period-crafting (lane B): the farming year's new crops. Grain goes to
+    // Tregear's once the seedsman opens (lane C moves the seed rows and the grain buyer there).
+    {Item::PeaSeed, "pea-seed", "Pea seed", "A twist of marrowfat peas for sowing along pea sticks. Ripens in about 6 days if watered, then crops every 3 days.",
+        ItemCategory::Supply, "seeds", 30, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "twists of pea seed"},
+    {Item::SeedWheat, "seed-wheat", "Seed wheat", "A bag of red winter wheat for sowing. Goldens in about 10 days if watered.",
+        ItemCategory::Supply, "seeds", 18, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "bags of seed wheat"},
+    {Item::SeedBarley, "seed-barley", "Seed barley", "A bag of bearded barley for sowing. Ripens in about 8 days if watered.",
+        ItemCategory::Supply, "seeds", 16, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "bags of seed barley"},
+    {Item::LeekSeedlings, "leek-seedlings", "Leek seedlings", "A bundle of pencil-thin leek plants, ready to dibble in. Ready in about 8 days if watered.",
+        ItemCategory::Supply, "seeds", 28, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "bundles of leek seedlings"},
+    {Item::WinterBroccoliSeed, "winter-broccoli-seed", "Winter broccoli seed", "A paper of Cornish winter broccoli seed, the white-curded kind. Heads in about 10 days if watered.",
+        ItemCategory::Supply, "seeds", 34, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "papers of winter broccoli seed"},
+    {Item::Peas, "peas", "Pea pods", "Plump green pea pods. Sweet raw, or dried for pease pudding.",
+        ItemCategory::Food, "wild-garlic", 7, StoreBuys, 4.0, 3.0, "Picked from pea plants", false, "pea pods"},
+    {Item::Wheat, "wheat", "Wheat sheaf", "A tied sheaf of ripe golden wheat. The corn merchant buys it for milling.",
+        ItemCategory::Material, "hay", 45, StoreBuys, 0.0, 0.0, "Cut from a wheat plot", false, "wheat sheaves"},
+    {Item::Barley, "barley", "Barley sheaf", "A tied sheaf of bearded barley. The corn merchant buys it for malting.",
+        ItemCategory::Material, "hay", 36, StoreBuys, 0.0, 0.0, "Cut from a barley plot", false, "barley sheaves"},
+    {Item::Leek, "leek", "Leek", "A long white leek with blue-green flags. Good in soup.",
+        ItemCategory::Food, "wild-garlic", 28, StoreBuys, 5.0, 3.0, "Pulled from a leek plot", false, "leeks"},
+    {Item::WinterBroccoli, "winter-broccoli", "Winter broccoli", "A heavy white head of Cornish winter broccoli, cut in the cold months.",
+        ItemCategory::Food, "wild-garlic", 120, StoreBuys, 14.0, 6.0, "Cut from a winter broccoli plot", false, "heads of winter broccoli"},
 };
 static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 
