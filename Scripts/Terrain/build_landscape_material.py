@@ -125,6 +125,21 @@ float pools = saturate(wear * 1.4 + (0.5 - Macro1) * 0.6) * porous;
 rough = lerp(rough, 0.08, w * smoothstep(0.55, 0.9, pools));
 n = normalize(lerp(n, float3(0, 0, 1), w * smoothstep(0.6, 0.9, pools) * 0.8));
 
+// Falling rain (MPC_EstateWeather.Rain) rings the standing water: expanding ripples, one per 30 cm
+// cell at a random place and phase, fading as they spread.
+float drops = saturate(RainNow) * w * smoothstep(0.45, 0.85, pools);
+if (drops > 0.01)
+{
+    float2 q = WP.xy / 30.0;
+    float2 cell = floor(q);
+    float h = frac(sin(dot(cell, float2(12.9898, 78.233))) * 43758.5453);
+    float2 dv = frac(q) - 0.5 - (float2(frac(h * 7.13), frac(h * 3.71)) - 0.5) * 0.5;
+    float ph = frac(Time * 1.25 + h);
+    float r = length(dv);
+    float ring = exp(-pow((r - ph * 0.45) / 0.05, 2.0)) * (1.0 - ph) * step(frac(h * 17.0), 0.35 + 0.65 * drops);
+    n = normalize(n + float3(dv / max(r, 1e-3) * ring * 0.9 * drops, 0.0));
+}
+
 NormalOut = n;
 RoughOut = rough;
 #if GROUND_DEBUG
@@ -214,6 +229,10 @@ def ground_finish(bc, nm, rg, y0):
         v.set_editor_property('group', 'Ground')
         return v
 
+    rain_p = MEL.create_material_expression(mat, unreal.MaterialExpressionCollectionParameter, -800, y + 1300)
+    rain_p.set_editor_property('collection', unreal.load_asset('/Game/SurvivalGame/Estate/Weather/MPC_EstateWeather'))
+    rain_p.set_editor_property('parameter_name', 'Rain')
+    time_p = MEL.create_material_expression(mat, unreal.MaterialExpressionTime, -800, y + 1360)
     wet_p = MEL.create_material_expression(mat, unreal.MaterialExpressionCollectionParameter, -800, y + 1240)
     wet_p.set_editor_property('collection', unreal.load_asset(f'{GROUND}/MPC_EstateGround'))
     wet_p.set_editor_property('parameter_name', 'Wetness')
@@ -236,7 +255,7 @@ def ground_finish(bc, nm, rg, y0):
               ('RockD', rock_d, 'RGB'), ('RockN', rock_n, 'RGB'), ('RockR', rock_r, 'R'),
               ('SwardNear', sward_near, 'RGB'), ('SwardFar', sward_far, 'RGB'),
               ('SwardMix', scal('SwardMix', 0.8, y + 1180), ''),
-              ('Wet', wet_p, ''),
+              ('Wet', wet_p, ''), ('RainNow', rain_p, ''), ('Time', time_p, ''),
               ('T0', tints[0], 'RGB'), ('T1', tints[1], 'RGB'), ('T2', tints[2], 'RGB'), ('T3', tints[3], 'RGB')]
     ins = []
     for name, *_ in inputs:

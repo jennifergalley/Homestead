@@ -3312,6 +3312,24 @@ void SleepOptionPolicy()
     // One rain schedule for the rules, the lighting and the wet ground: day 2 of every 3, 09:00-15:00.
     CHECK(!IsRainDay(12.0) && IsRainDay(24.0 + 1.0) && !IsRainDay(48.0 + 12.0) && IsRainDay(96.0 + 23.0));
     CHECK(IsRainingAt(24.0 + RainStartHour) && !IsRainingAt(24.0 + RainEndHour) && !IsRainingAt(24.0 + 8.99) && !IsRainingAt(10.0));
+    // Rain and cloud: none on dry days; the cloud builds half an hour ahead and clears half an hour
+    // after; the rain eases in and out and swells between drizzle and showers without jumps.
+    CHECK(RainAmount(10.0) == 0.0 && Overcast(10.0) == 0.0);
+    CHECK(Overcast(24.0 + RainStartHour - 0.6) == 0.0 && Overcast(24.0 + RainStartHour - 0.25) > 0.2
+        && Overcast(24.0 + RainStartHour) == 1.0 && Overcast(24.0 + 12.0) == 1.0);
+    CHECK(Overcast(24.0 + RainEndHour + 0.25) > 0.2 && Overcast(24.0 + RainEndHour + 0.6) == 0.0);
+    CHECK(RainAmount(24.0 + RainStartHour) == 0.0 && RainAmount(24.0 + RainStartHour - 0.1) == 0.0
+        && RainAmount(24.0 + RainEndHour) == 0.0);
+    double lowest = 1.0, highest = 0.0, biggestStep = 0.0, previous = RainAmount(24.0 + RainStartHour + 0.3);
+    for (double h = RainStartHour + 0.3; h < RainEndHour - 0.2; h += 1.0 / 60.0)
+    {
+        const double amount = RainAmount(24.0 + h);
+        lowest = std::min(lowest, amount);
+        highest = std::max(highest, amount);
+        biggestStep = std::max(biggestStep, std::abs(amount - previous));
+        previous = amount;
+    }
+    CHECK(lowest >= 0.29 && lowest < 0.45 && highest > 0.85 && highest <= 1.0 && biggestStep < 0.1);
     // Recovery follows hours slept, not the clock: a daytime sleep until rested fills her up.
     Simulation owlSim;
     BuildingStock(owlSim);

@@ -5,8 +5,14 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
     [ValidateRange(50,100)][int]$RenderScale = 100,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA,
-    [switch]$DisableChunkPreparation)
+    [switch]$DisableChunkPreparation,
+    # The Estate route (what Jenny plays): new game, each part of the estate, a few actions, fps.
+    [switch]$EstateSmoke, [ValidateRange(0,1000)][int]$MaxLogErrors = 0)
 $ErrorActionPreference = 'Stop'
+if ($EstateSmoke -and ($FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or $Creek -or $Crafting -or
+    $Weeding -or $Clearing -or $GeneratedWoodland -or $Prompts -or $BookClarity -or $Hotbar -or $NativeMenu -or $WithAudio -or $FixtureSave)) {
+    throw 'The Estate smoke route runs on its own.'
+}
 if ($LivingIdle -and -not $NativeMenu) {
     throw 'The living-idle proof requires the native-menu route.'
 }
@@ -91,7 +97,7 @@ $output = Join-Path $root 'Saved\Automation'
 # Map per suite. The default game map is the Estate, but every suite here still plays the seeded
 # woodland (estate tools with stand-in salvage grants). Once a suite is retargeted to the fixed
 # estate, add its switch here, for example @($Clearing); a run with any of them uses the Estate.
-$estateSuites = @()
+$estateSuites = @($EstateSmoke)
 $suiteMap = if ($estateSuites | Where-Object { $_ }) { '/Game/SurvivalGame/Maps/Estate' } else { '/Game/SurvivalGame/Maps/Homestead' }
 if ($Packaged) {
     $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
@@ -193,6 +199,7 @@ if ($NativeMenuQuit) { $captures = @() }
 if ($NativeSaveRetry) { $captures = @() }
 if ($Hotbar) { $captures = @('hotbar-gameplay.png') }
 if ($Crafting) { $captures = @('craft-requirements-ready.png','craft-hold-progress.png','craft-requirements-blocked.png') }
+if ($EstateSmoke) { $captures = @('estate-manor.png','estate-clearout.png','estate-farm.png','estate-woods.png','estate-drive.png','estate-store.png','estate-lamp-night.png') }
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })
 $previous = (@('smoke-result.txt', 'game-audio.wav', 'game-audio.json') + $captures + $frameReports) |
     ForEach-Object { Join-Path $output $_ } |
@@ -244,6 +251,8 @@ if ($NativeResumeFrom) { $loopArguments += " -HomesteadNativeResumeFrom=`"$([IO.
 # route presents them on the MetaHuman heroine.
 if ($Hotbar) { $loopArguments = '-HomesteadHotbarTest -HomesteadMetaHuman -HomesteadRequireLit' }
 if ($Crafting) { $loopArguments = '-HomesteadCraftingTest -HomesteadRequireLit' }
+# The Estate route plays the MetaHuman heroine Jenny plays, and skips the Names step.
+if ($EstateSmoke) { $loopArguments = '-HomesteadEstateSmoke -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRequireLit' }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $scaleArguments = if ($ShippingQA) { '' } else { "-ExecCmds=`"r.ScreenPercentage $RenderScale`"" }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height $scaleArguments -nosplash $audioArguments $loopArguments -abslog=`"$log`""
@@ -271,7 +280,29 @@ Write-Output $result
 if ($process.ExitCode -ne 0 -or $result -notmatch '(?m)^SUCCESS ') {
     throw "Game smoke test failed (exit $($process.ExitCode)). See $output."
 }
-if ($NativeResumeFrom -and $result -notmatch '(?m)^NATIVE_RESUME producer_pid=[1-9]\d* consumer_pid=[1-9]\d* ') {
+if ($EstateSmoke) {
+    # Estate-only regressions the woodland suites never load: materials drawn with the Default Material
+    # in the package, her failing to settle on the ground, and new Error lines.
+    $logText = Get-Content -LiteralPath $log
+    $problems = @()
+    $usage = @($logText | Select-String -SimpleMatch 'missing usage flag')
+    $fallback = @($logText | Select-String -SimpleMatch 'Default Material will be used')
+    $gaveUp = @($logText | Select-String -Pattern 'HOMESTEAD_GROUND_HOLD .*gave up')
+    $settled = @($logText | Select-String -SimpleMatch 'HOMESTEAD_GROUND_SETTLE')
+    $errors = @($logText | Select-String -Pattern '^\[[^\]]*\]\[[^\]]*\]\w+: Error: |^\w+: Error: ')
+    if ($usage.Count) { $problems += "$($usage.Count) 'missing usage flag' line(s)" }
+    if ($fallback.Count) { $problems += "$($fallback.Count) 'Default Material will be used' line(s)" }
+    if ($gaveUp.Count) { $problems += "$($gaveUp.Count) ground hold(s) gave up (she was placed on the heightfield, not on collision)" }
+    if (-not $settled.Count) { $problems += 'no HOMESTEAD_GROUND_SETTLE line: her spawn never settled on the ground' }
+    if ($errors.Count -gt $MaxLogErrors) { $problems += "$($errors.Count) Error line(s), above the baseline of $MaxLogErrors" }
+    $evidence = Join-Path $output 'estate-log-findings.txt'
+    (@('ESTATE_LOG usage_flags={0} default_material={1} ground_gave_up={2} ground_settles={3} errors={4} baseline={5}' -f
+        $usage.Count, $fallback.Count, $gaveUp.Count, $settled.Count, $errors.Count, $MaxLogErrors) +
+        ($usage + $fallback + $gaveUp + $errors | ForEach-Object { $_.Line })) | Set-Content -LiteralPath $evidence
+    Get-Content -LiteralPath $evidence | Select-Object -First 1 | Write-Output
+    $result -split '\r?\n' | Where-Object { $_ -like 'PERFORMANCE_AT *' } | Write-Output
+    if ($problems) { throw "Estate smoke log check failed: $($problems -join '; '). Lines: $evidence" }
+}if ($NativeResumeFrom -and $result -notmatch '(?m)^NATIVE_RESUME producer_pid=[1-9]\d* consumer_pid=[1-9]\d* ') {
     throw 'Distinct-process current-save resume evidence is missing.'
 }
 if ($RequireLit -and $result -notmatch '(?m)^LIT_GUARD samples=[1-9]\d* final_mode=3 shader_complexity=0 ') {
