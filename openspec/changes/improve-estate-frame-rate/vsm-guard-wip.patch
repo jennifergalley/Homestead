@@ -1,0 +1,87 @@
+diff --git a/Scripts/Start-EditorMcp.ps1 b/Scripts/Start-EditorMcp.ps1
+index faf3824a..9c811e0c 100644
+--- a/Scripts/Start-EditorMcp.ps1
++++ b/Scripts/Start-EditorMcp.ps1
+@@ -17,7 +17,8 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
+   behind other worktrees' UBT builds and can hold startup for 10+ minutes). Before launching it removes a
+   stale Saved\Autosaves\PackageRestoreData.json. All three otherwise block MCP with no log output.
+ - Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on). With RT off,
+-  virtual shadow maps are off too: their first Estate frame exceeds the GPU timeout and crashes every Unreal process.
++  the sun's virtual shadow maps run coarser (resolution bias 3, clipmap to level 18): at full resolution their
++  first Estate frame exceeded the GPU timeout and crashed every Unreal process.
+ - Refuses to launch when 2 or more Unreal processes (editors, games, commandlets) are already running on
+   the machine, and lists them with their worktree. One of the 2 slots is reserved for the integration
+   session (worktree jennifergalley-literate-eureka, or one containing Saved\IntegrationSession.marker), so
+@@ -189,11 +190,13 @@ $arguments += @(
+ # reset the driver (DXGI_ERROR_DEVICE_REMOVED / DRIVER_INTERNAL_ERROR), taking every Unreal process
+ # down with it, so agent editors render without ray tracing unless -RayTracing is passed.
+ # With RT off the sun falls back to virtual shadow maps, and the first frames of a new Estate game
+-# rasterize the dense Nanite estate into every empty clipmap page in one dispatch, past Windows' 2 s
+-# GPU timeout (TDR): "GPU Crashed or D3D Device Removed", Aftermath "MicropolyRasterize", 5 runs out of
+-# 5, taking every Unreal process down. So VSM goes off with RT. -DPCVars takes a comma-separated list
+-# (DeviceProfileManager.cpp).
+-if (-not $RayTracing) { $arguments += '-DPCVars=r.RayTracing.Enable=0,r.Shadow.Virtual.Enable=0' }
++# sent Nanite's culling of the dense estate into every empty clipmap page past Windows' 2 s GPU
++# timeout (TDR): "GPU Crashed or D3D Device Removed", 5 runs out of 5, taking every Unreal process
++# down. A coarser sun VSM (ResolutionLodBiasDirectional 3, clipmap to level 18) stays under it; the
++# game applies the same limits itself when the sun isn't ray traced (AHomesteadWorld::
++# ApplyVirtualShadowMapSunLimits), and these cover the editor viewport before PIE. -DPCVars takes a
++# comma-separated list (DeviceProfileManager.cpp).
++if (-not $RayTracing) { $arguments += '-DPCVars=r.RayTracing.Enable=0,r.Shadow.Virtual.ResolutionLodBiasDirectional=3,r.Shadow.Virtual.Clipmap.LastLevel=18' }
+ # Opt-in: registers homestead_agent.toolset.HomesteadEditorPython.run_python (arbitrary editor Python).
+ if ($AllowPython) { $arguments += '-HomesteadAgentPython' }
+ 
+diff --git a/Source/SurvivalGame/HomesteadWorld.cpp b/Source/SurvivalGame/HomesteadWorld.cpp
+index 2a1f0e43..541cf052 100644
+--- a/Source/SurvivalGame/HomesteadWorld.cpp
++++ b/Source/SurvivalGame/HomesteadWorld.cpp
+@@ -4365,6 +4365,27 @@ void AHomesteadWorld::BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::
+         FLinearColor(0.93f, 0.72f, 0.24f), false, FRotator::ZeroRotator, 0.65f, 0.05f);
+ }
+ 
++void AHomesteadWorld::ApplyVirtualShadowMapSunLimits()
++{
++    // Without ray tracing the sun falls back to Virtual Shadow Maps, and their first frame on the
++    // Estate (every page uncached) sent Nanite's node-and-cluster culling of the dense wood past
++    // Windows' 2 s GPU timeout: the device was removed on frame 2, every run. Measured with ray tracing
++    // off (improve-estate-frame-rate): coarse pages off, single-pass Nanite culling and a resolution bias
++    // of 1 all still timed out; a bias of 3 with the clipmap ending at level 18 (~2.6 km) played the
++    // whole EstateSmoke route. Only the directional lights' VSMs change; ray-traced play (Jenny's) never
++    // reaches this. Set once, at game-setting priority, so console and ini overrides still win.
++    if (bVirtualShadowMapSunLimited) return;
++    bVirtualShadowMapSunLimited = true;
++    constexpr float SunVsmResolutionLodBias = 3.0f;
++    constexpr int32 SunVsmLastClipmapLevel = 18;
++    if (IConsoleVariable* Bias = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Shadow.Virtual.ResolutionLodBiasDirectional")))
++        Bias->Set(SunVsmResolutionLodBias, ECVF_SetByGameSetting);
++    if (IConsoleVariable* Last = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Shadow.Virtual.Clipmap.LastLevel")))
++        Last->Set(SunVsmLastClipmapLevel, ECVF_SetByGameSetting);
++    UE_LOG(LogHomesteadWorld, Display, TEXT("Sun uses Virtual Shadow Maps: ResolutionLodBiasDirectional=%.1f Clipmap.LastLevel=%d (GPU timeout guard)."),
++        SunVsmResolutionLodBias, SunVsmLastClipmapLevel);
++}
++
+ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
+ {
+     const float Hour = static_cast<float>(FMath::Fmod(State.hour, 24.0));
+@@ -4389,6 +4410,7 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
+         Sun->SetCastRaytracedShadows(ShadowMode);
+         Moon->SetCastRaytracedShadows(ShadowMode);
+     }
++    if (!bRayTracedSun) ApplyVirtualShadowMapSunLimits();
+     const float LightRotationStepDegrees = bRayTracedSun ? 0.0f : 0.5f;
+     if (!bLightRotationApplied || !SunRotation.Equals(AppliedSunRotation, LightRotationStepDegrees))
+     {
+diff --git a/Source/SurvivalGame/HomesteadWorld.h b/Source/SurvivalGame/HomesteadWorld.h
+index ee9d5327..f9a0eff8 100644
+--- a/Source/SurvivalGame/HomesteadWorld.h
++++ b/Source/SurvivalGame/HomesteadWorld.h
+@@ -398,6 +398,9 @@ private:
+     // fire fuel), which change without a simulation revision. The simulation revision is mixed in too.
+     uint64 RefreshInputsKey(const Homestead::Simulation& Simulation) const;
+     void UpdateEstateGrass(const Homestead::State& State);
++    // Keeps the first Virtual Shadow Map frame of the sun under the GPU timeout when it isn't ray traced.
++    void ApplyVirtualShadowMapSunLimits();
++    bool bVirtualShadowMapSunLimited = false;
+     uint64 LastRefreshInputs = 0;
+     bool bRefreshInputsKnown = false;
+     FString OuterTreeLayoutSignature;

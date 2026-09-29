@@ -56,3 +56,19 @@ GPU headroom (GPU ms vs 16.7): 4K at her settings (1080p internal + TSR): manor 
 4K native 100%: manor 24.8 ms (38 fps), woods 41.2 ms (24 fps), so native 4K isn't viable on this GPU;
 her default (engine auto, 50% + TSR) is the right setting for 4K60.
 
+
+## Handoff (2026-09-29, Performance Agent retired)
+
+Future perf work: read-only assessment by the Architecture Agent, packaged profiling by the Integration
+Agent. Method: `design.md` "How we measure" (perf window, `-RenderScale 0`, CSV + Insights).
+
+- On `main`: batch 1 scenery cells (`0c12d5e9`), batch 2 refresh gate + smoke timing (`25ee51b4`, `84ee55d7`).
+- On branch `jennifergalley-performance-agent` only (pushed, not merged, not measured):
+  `6841f429` Blender blocks perf windows; `b1f117c1` EstateSmoke walking segments
+  (`PERFORMANCE_AT walk-manor/farm/glade/drive/sprint`); `f8fcb52a` grass chunks built over frames
+  (`homestead.GrassChunkBuildsPerFrame`, default 8, 0 = old). Merge only after an isolated A/B:
+  `-ExtraArguments '-DPCVars=homestead.GrassChunkBuildsPerFrame=0'` vs default, walk-* p99 / max / over-20 ms,
+  plus a look for grass pop.
+- Shelved: branch `perf/woods-material-rtswitch-shelved` (camera-safe foliage visible to ray tracing; no GPU gain).
+- Parked: `vsm-guard-wip.patch` in this folder (RT-off VSM limits; not reliable, see 3.5).
+- Held for Jenny: `r.TSR.History.ScreenPercentage 100` (woods 59 → 63 fps, slightly softer canopy).
