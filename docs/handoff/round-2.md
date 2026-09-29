@@ -132,6 +132,8 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 - **`Simulation\HomesteadSeasons.{h,cpp}`** (D): the forage season table and `Seasons::LookAt`.
 - **Enum values being appended** (append-only; keep catalogue rows in enum order): D adds `Item::Blackberries`,
   `Item::FieldMushrooms` and `ResourceKind::FieldMushrooms`. Lanes list theirs here as they claim them.
+- **Field-book map destination names reserved:** **Town** and **Manor**. The future travel action and
+  UI use these exact user-facing names; other map work must not reuse them.
 - **Seedsman anchors claimed (C; branch `4f21a2d8`, not on `main` yet):** `Anchor::SeedsmanDoor`
   `{-52050, 116000}`, yaw 0; `Anchor::SeedsmanCounter` `{-51450, 116000}`, yaw 180. The lane adds them
   to the provisional layout, `reshape.py` and `estate_layout.json` together.
@@ -205,6 +207,9 @@ require a scenario for every `ADDED` requirement.
 - **Gait and scythe** — **temporary Gait Agent** (`65a2408b`), after its current run-heel slice:
   lower the running foot swing apex slightly; at rest the scythe must sit in her hand, and its blade
   must not clip the terrain during a sweep.
+- **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
+  editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
+  side patches at some camera angles. Pending; not shipped.
 - **Sprint toggle** — **temporary Gait Agent** (`65a2408b`), after the run-heel work: sprint becomes
   a toggle on controller L3 and PC Shift. Update the controls and hints; pending PIE verification.
 - **Contextual hotbar eating** — **UI / temporary Menu Agent** (`5cf73757`), after the book-overlay
@@ -248,12 +253,24 @@ require a scenario for every `ADDED` requirement.
 - **Road-to-town forage** — **Seasons / forage lane** (`fd682909`), coordinating with **Water**: add
   pickable berries and herbs along the road to town, including the Water bridge approach. Pending;
   placement ids are claimed before use.
+- **Field-book road label** — **Water Agent** (`89914e30`), in the next lake/map bake: remove the
+  `"Dirt road"` label while keeping the road drawn. Pending; not shipped.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
 - **Change Dye** — **UI / temporary Menu Agent** (`5cf73757`), after contextual berries: the current
   action is a no-op. It opens the selected colour or swatch choice, supports preview, confirm and
   cancel, then persists the selection. Pending PIE verification.
+- **Leather backpack upgrade** — **pending, not shipped.** A one-time General Store purchase doubles
+  inventory capacity **120 → 240 items**, with a visible worn rucksack in Appearance whose show/hide
+  is independent of capacity and saving. **Architecture** traces the existing inventory, store and
+  appearance paths read-only; **Props** makes the original asset; **Menu** later owns purchase and
+  Appearance UI.
+- **Town travel** — **pending, not shipped.** A wooden `Walk to town` sign outside the estate and a
+  return sign by town; clickable **Town** and **Manor** destinations on the Map invoke the same travel
+  action. Travel elapses equivalent on-foot time and displays cost plus confirmation. **Water** owns
+  anchors, **Architecture** the read-only trace, **Props** the signs and **Menu** the map UI; a future
+  travel implementer owns the action.
 - **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
   trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
   implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the
@@ -278,10 +295,10 @@ require a scenario for every `ADDED` requirement.
 - **Seasons roadside forage (581000–581099; range reserved, implementation not approved):** about 30
   BerryBush, Flowers, Primroses, WildDaffodils and Roots along the public manor-to-town road
   (`Scripts\Terrain\roadside.py` → `Simulation\HomesteadEstateRoadsidePlacements.inc`). Most lie
-  outside `EstateBoundary`. Before it is marked implemented, Seasons proves that public-road pickups
-  are allowed outside the boundary, save and regenerate correctly, and that its path coordinates stay
-  in sync with Water's road bridge. If out-of-boundary gathering is blocked, explicitly adjust the
-  boundary or the placement rather than leaving silent dead props.
+  outside `EstateBoundary`. Architecture's trace says spawn/gather/save/regeneration are
+  position-independent, but PIE/native proof on the public road is still pending. Implementation needs
+  a **narrow road-corridor predicate and positive/negative tests**, not a blanket outside-boundary
+  exception, and must stay in sync with Water's road bridge.
 - Seedsman (`4f21a2d8`, not on `main` yet): Tregear's replaces `Town_Blockout_EastHouse`; the lane
   deletes that World Partition external actor and `town_massing.py` stops spawning it. When it lands:
   document the `WorldPartitionBlueprintLibrary.get_actor_descs()` + `load_actors(guids)` step before
