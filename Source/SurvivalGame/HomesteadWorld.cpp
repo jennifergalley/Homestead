@@ -41,6 +41,12 @@ DEFINE_LOG_CATEGORY_STATIC(LogHomesteadWorld, Log, All);
 
 namespace
 {
+// Estate blackberry brambles (BerryBush): the fruiting bramble (SM_BlackberryBramble) at about 1 m, with
+// the authored ripe clusters (SM_BerryBushProduce, built for a 60-80 cm shrub) scaled out onto its
+// crown. The clusters go when she picks; the bramble's own green, red and odd black fruit stays.
+constexpr float BerryBrambleScale = 0.8f;
+constexpr int32 BerryBrambleFruit = 3;
+constexpr float BerryFruitOffset = 24.0f, BerryFruitScale = 1.5f, BerryFruitLift = 20.0f;
 TAutoConsoleVariable<int32> CVarRayTracedSun(TEXT("homestead.RayTracedSun"), 1,
     TEXT("1 = ray-traced sun/moon shadows with continuous sun movement (default when hardware ray "
          "tracing is on). 0 = Virtual Shadow Maps with the sun stepped by 0.5 degrees."));
@@ -2998,7 +3004,7 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         return Mesh;
     };
-    auto Authored = [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale = 1.0f)
+    auto Authored = [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale = 1.0f, float Lift = 0.0f)
     {
         if (bProduce != bProduceOnly || !Mesh) return;
         const FBox Bounds = Mesh->GetBoundingBox();
@@ -3010,7 +3016,7 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         const FRotator Rotation(0, Yaw, 0);
         const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, Bounds.Min.Z);
-        const FVector Ground = AtGround(Base.X + Offset.X, Base.Y + Offset.Y);
+        const FVector Ground = AtGround(Base.X + Offset.X, Base.Y + Offset.Y) + FVector(0, 0, Lift);
         auto* Component = NewObject<UStaticMeshComponent>(this);
         Component->SetupAttachment(GetRootComponent());
         Component->SetMobility(EComponentMobility::Movable);
@@ -3082,6 +3088,32 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         break;
     case Homestead::ResourceKind::BerryBush:
+        if (Node.id >= Homestead::EstatePlacementIdBase && Node.id < Homestead::TransientResourceIdBase)
+        {
+            // Estate: a fruiting blackberry bramble hung with ripe clusters that go when she picks them.
+            auto Load = [&](const TCHAR* Folder, const TCHAR* Name) -> UStaticMesh*
+            {
+                auto* Mesh = LoadObject<UStaticMesh>(nullptr,
+                    *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s/%s.%s"), Folder, Name, Name));
+                if (!Mesh)
+                {
+                    bVisualBuildFailed = true;
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Berry bramble %d is missing authored mesh %s"), Node.id, Name);
+                }
+                return Mesh;
+            };
+            const float Yaw = static_cast<float>(Variation % 360);
+            Authored(Load(TEXT("BlackberryBramble"), TEXT("SM_BlackberryBramble")), FVector2D::ZeroVector, Yaw, false,
+                BerryBrambleScale * Random.FRandRange(0.95f, 1.08f));
+            UStaticMesh* Fruit = Load(TEXT("BerryBushProduce"), TEXT("SM_BerryBushProduce"));
+            for (int I = 0; I < BerryBrambleFruit && Fruit; ++I)
+            {
+                const float Angle = FMath::DegreesToRadians(Yaw + I * 137.5f);
+                Authored(Fruit, FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * BerryFruitOffset, Yaw + I * 97.0f, true,
+                    BerryFruitScale, Fruit->GetBoundingBox().Min.Z * BerryFruitScale + BerryFruitLift);
+            }
+            break;
+        }
         for (int I = 0; I < 3; ++I)
         {
             Authored(LoadResource(I == 1 ? TEXT("SM_Shrub04_a") : TEXT("SM_Shrub04_c")),
@@ -3111,6 +3143,17 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         break;
     case Homestead::ResourceKind::Flowers:
+        // Wild marjoram, knee-high and rosy-purple in flower, so a herb patch reads from across the
+        // pasture; she cuts the flowering stems and leaves the grass stubble.
+        if (UStaticMesh* Marjoram = LoadObject<UStaticMesh>(nullptr,
+                TEXT("/Game/SurvivalGame/Environment/Props/WildMarjoram/SM_WildMarjoram.SM_WildMarjoram"), nullptr,
+                LOAD_NoWarn | LOAD_Quiet))
+        {
+            const float Yaw = static_cast<float>(Variation % 360);
+            Authored(LoadResource(TEXT("SM_GrassMedium01_tiny_a"), true), FVector2D(6, -4), Yaw, false);
+            Authored(Marjoram, FVector2D::ZeroVector, Yaw, true, Random.FRandRange(0.9f, 1.1f));
+            break;
+        }
         for (int I = 0; I < 2; ++I)
         {
             const FVector2D Offset(I * 18 - 9, I * 6 - 3);
@@ -3968,15 +4011,18 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
             continue;
         }
         const bool bReady = Node.readyAtHour <= State.hour || Node.id == HeldProduceId;
+        // A fallen bough or salvage pile she is still kneeling at stays until she has lifted from it.
+        Homestead::ResourceNode Shown = Node;
+        Shown.cleared = Node.cleared && Node.id != HeldProduceId;
         const FString Signature = FString::Printf(TEXT("%d:%.3f:%.3f:%d"),
-            static_cast<int>(Node.kind), Node.position.x, Node.position.y, Node.cleared);
+            static_cast<int>(Node.kind), Node.position.x, Node.position.y, Shown.cleared);
         AdoptStaged(ResourceVisuals, StagedResourceVisuals, Node.id, Signature);
         if (bVisualBuildFailed) return false;
         FHomesteadWorldVisual& Visual = ResourceVisuals.FindOrAdd(Node.id);
         if (Visual.Signature != Signature)
         {
             ClearVisual(Visual);
-            BuildResource(Visual, Node, false);
+            BuildResource(Visual, Shown, false);
             if (bVisualBuildFailed) return false;
             Visual.Signature = Signature;
         }
@@ -3989,7 +4035,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
             ClearVisual(Produce);
             if (bReady)
             {
-                BuildResource(Produce, Node, true);
+                BuildResource(Produce, Shown, true);
                 if (bVisualBuildFailed) return false;
             }
             Produce.Signature = ProduceSignature;

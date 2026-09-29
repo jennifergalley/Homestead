@@ -50,7 +50,14 @@ constexpr int InventoryCapacity = 120;
 constexpr int ChestCapacity = 1200;
 constexpr int ContainerCapacity(int containerId) { return containerId > 0 ? ChestCapacity : InventoryCapacity; }
 // 12 is the estate pivot: no warmth in the vitals, estate items, tool tiers, parcels, money and the manor.
-constexpr int SimulationSaveVersion = 12;
+// 13 writes each item stock (and the equipment slots) with its width first, so appending an Item or a
+// slot no longer changes the save format. Enums that name data stay append-only.
+constexpr int SimulationSaveVersion = 13;
+// Version 12 wrote stocks without a width: exactly the writing build's item count (40 on every build
+// of main that wrote version 12), and five equipment slots. The reader measures each stock's line.
+constexpr int PositionalStockSaveVersion = 12;
+constexpr int PositionalStockMinimumItems = 40;
+constexpr int PositionalStockEquipmentSlots = 5;
 // Version 11 files came from the woodland MVP and the round-1 test builds, whose item stocks
 // changed width without a version bump, so they can't be read reliably and are refused.
 constexpr int RetiredTestSaveVersion = 11;

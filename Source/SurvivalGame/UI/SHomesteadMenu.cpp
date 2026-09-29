@@ -2,6 +2,7 @@
 #include "SHomesteadIcon.h"
 #include "HomesteadMenuNavigation.h"
 #include "SHomesteadMapView.h"
+#include "SHomesteadHudScale.h"
 #include "../HomesteadMapComponent.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/CoreStyle.h"
@@ -127,20 +128,8 @@ const FLinearColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
 const FLinearColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
 const FLinearColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
 constexpr float ItemCellWidth = 76;
-float LogicalBookWidth()
-{
-    const FViewport* Viewport = GEngine && GEngine->GameViewport
-        ? GEngine->GameViewport->Viewport : nullptr;
-    return Viewport ? FMath::Max(1280.0f,
-        Viewport->GetSizeXY().X * (1280.0f / 1920.0f)) : 1280.0f;
-}
-float LogicalBookHeight()
-{
-    const FViewport* Viewport = GEngine && GEngine->GameViewport
-        ? GEngine->GameViewport->Viewport : nullptr;
-    return Viewport ? FMath::Max(720.0f,
-        Viewport->GetSizeXY().Y * (720.0f / 1080.0f)) : 720.0f;
-}
+float LogicalBookWidth() { return static_cast<float>(HomesteadMenus::FullScreenLogicalSize().X); }
+float LogicalBookHeight() { return static_cast<float>(HomesteadMenus::FullScreenLogicalSize().Y); }
 float PortraitColumnWidth()
 {
     return FMath::Min(420.0f, 240.0f + (LogicalBookWidth() - 1280.0f) * 0.14f);

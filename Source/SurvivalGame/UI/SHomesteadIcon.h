@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "HomesteadPalette.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SLeafWidget.h"
 
@@ -11,7 +12,7 @@ class SURVIVALGAME_API SHomesteadIcon : public SLeafWidget
 public:
     SLATE_BEGIN_ARGS(SHomesteadIcon)
         : _Kind(FName(TEXT("pack")))
-        , _Tint(FLinearColor(0.92f, 0.74f, 0.43f, 1.0f))
+        , _Tint(HomesteadPalette::Brass)
         , _Desaturation(0.0f)
     {}
         SLATE_ATTRIBUTE(FName, Kind)
@@ -44,7 +45,7 @@ private:
         Primroses, Bluebells, WildDaffodils, WildGarlic
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
-    TAttribute<FLinearColor> Tint{FLinearColor(0.92f, 0.74f, 0.43f, 1.0f)};
+    TAttribute<FLinearColor> Tint{HomesteadPalette::Brass};
     TAttribute<float> Desaturation{0.0f};
 };
 }

@@ -111,3 +111,37 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
 - Never retarget or overwrite `Desktop\Homestead.lnk` or anything under `E:\Repos\HomesteadMVP\`.
   Never merge `mvp-survival` with `main`.
 - No worktrees, builds, renders, videos or big binaries on C:. See the user-level disk rules.
+
+## Code practices (owned by the Architecture Agent)
+
+The architecture map is `docs/architecture.md`; the long form with reasons is the
+`homestead-code-conventions` skill. Recipes: `homestead-add-item-or-interactable`,
+`homestead-add-hud-element`, `homestead-animation-layer`.
+
+- **Rules live in the simulation.** Anything that decides what she gets, pays, can do or saves goes
+  in `Source/SurvivalGame/Simulation` (plain C++17, no Unreal types), returns `Homestead::Result`,
+  and gets a native test (`Scripts\Test-Native.ps1 -Configuration Release`). Actors present and
+  animate.
+- **Don't grow the big four.** New features go in new files: `HomesteadController<Feature>.cpp`
+  for controller members, a new actor or widget for new things on screen or in the world. Add new
+  simulation `.cpp` files to `CMakeLists.txt`.
+- **Enums that name data are append-only** (`Item`, `ResourceKind`, `Recipe`, `Piece`...): add
+  before `Count`, never reorder or delete, and keep the parallel tables (`ItemCatalogue`,
+  `ResourceName`, `OgTable`) in step. Estate placement ids are claimed on the round page and never
+  reused or renumbered.
+- **Saves:** never change `SimulationSaveVersion` or `bakeVersion` yourself. Tell the orchestrator
+  before your `[ready]` if you changed what `Serialize` writes or moved or removed placements.
+  Appending an `Item` is save-safe (version 13 stocks carry their width); write any new list or
+  per-enum array with its count first.
+- **Unity-build safe:** file-local names are unique or live in a named namespace
+  (`namespace <Widget>Style`); no `using namespace` at file scope. Warnings are errors.
+- **Assets** are held in `UPROPERTY() TObjectPtr<>` members, never function-local statics.
+- **Per-frame cost:** nothing per tick or per paint that scales with the number of placements or
+  components; gate work on `Simulation::GetRevision()` or on an actual change.
+- **UI:** Slate widgets read `TWeakObjectPtr<AHomesteadController>` in cheap `*_Lambda`s; colours
+  come from `UI/HomesteadPalette.h`.
+- **Name tuning numbers** (`constexpr` with units and what they're tuned to); timings that match an
+  authored clip cite the `.py` that authored it.
+- **New code logs to a named category** (`LogHomestead<Area>`), not `LogTemp`.
+- **Python:** module docstring with the usage line, constants at the top, generated files marked
+  "do not edit by hand", big intermediates on `E:`.
