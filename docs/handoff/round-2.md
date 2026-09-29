@@ -551,7 +551,8 @@ pending, so this does not claim early Energy is fully solved.
   replace heritage fabric. Controller green preview and `Place` share a core `CheckSite`; validate
   saved nonheritage structures after heritage/parcels deserialize and preserve old saves. Require
   native plus on-foot PIE path, collision and save tests. Architecture is still checking whether the
-  wall/roof follow-up is viable; fast travel and music remain next-build priorities first.
+  wall/roof follow-up is viable; the packaged core loop (including fast travel) remains ahead, with
+  music postponed until that acceptance passes.
 - **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
   road to town, including the bridge approach, and significantly increase visible pickable
   berries/herbs/non-farm food across the estate distributions. The ID range is reserved; implementation
