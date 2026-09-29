@@ -13,10 +13,10 @@
 
 ## 3. Hold-to-Sprint
 
-- [ ] 3.1 Record ordinary selected-build straight/diagonal walk speed, Energy, locomotion cadence, root/foot motion, menu/action cancellation, and Shift/L3 availability before changing source
+- [ ] 3.1 Record ordinary selected-build straight/diagonal walk speed, Energy threshold admission/auto-off, locomotion cadence, root/foot motion, menu/action cancellation, and Shift/L3 availability before changing source
 - [ ] 3.2 Author and verify a dedicated scale-one heroine sprint cycle with forward lean, longer stride, arm drive, planted contacts, unchanged skeleton/bind/nonanimated bones, zero root travel, zero notifies, and a fresh trial import contract
-- [ ] 3.3 Integrate held Shift and controller-left-stick sprint at 300 cm/s with dedicated locomotion blending and simulation-authoritative 0.35 Energy/second cost above a 10-Energy reserve; verify stationary hold, release, diagonal normalization, low Energy, airborne/menu/planning/failure/action/load cancellation, and unchanged right-stick camera distance
-- [ ] 3.4 Run ordinary keyboard and controller sprint routes across representative appearance/equipment combinations, inspecting side/three-quarter/gameplay frames and verifying faster travel, distinct motion, grounded recovery, saved exertion, collision, camera, and cadence
+- [ ] 3.3 Integrate Shift and controller-left-stick toggle sprint at 300 cm/s with dedicated locomotion blending and simulation-authoritative admission above 10 Energy, zero sprint-specific Energy cost, and auto-off when baseline time or work reaches <=10. Verify stationary toggle, second-toggle release, diagonal normalization, low Energy, airborne/menu/planning/failure/action/load cancellation, no auto-resume after recovery, unchanged right-stick camera distance, and 30/60/120-day Energy behavior
+- [ ] 3.4 Run ordinary keyboard and controller sprint routes across representative appearance/equipment combinations, inspecting side/three-quarter/gameplay frames and verifying faster travel, distinct motion, low-Energy cutoff, no sprint-specific charge, collision, camera, and cadence
 
 ## 4. Integrated Acceptance and Promotion
 
