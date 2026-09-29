@@ -3220,7 +3220,9 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
                 nullptr, LOAD_NoWarn | LOAD_Quiet))
             {
                 const int32 First = Visual.Components.Num();
-                Authored(Cluster, FVector2D::ZeroVector, static_cast<float>(Variation % 360), true);
+                // A touch larger than life (still under 15 cm tall) so the scatter reads from 10-15 m away.
+                constexpr float HandPileScale = 1.25f;
+                Authored(Cluster, FVector2D::ZeroVector, static_cast<float>(Variation % 360), true, HandPileScale, 0.0f, true);
                 if (Visual.Components.Num() > First)
                     if (auto* Placed = Cast<UStaticMeshComponent>(Visual.Components.Last()))
                         for (int32 Slot = 0; Slot < Cluster->GetStaticMaterials().Num(); ++Slot)
