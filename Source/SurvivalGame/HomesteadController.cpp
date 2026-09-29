@@ -965,6 +965,28 @@ void AHomesteadController::UseSelectedTool()
     if (Tool == Homestead::Item::DiggingStick) HoeSquareAhead();
 }
 
+namespace HomesteadWaterProbe
+{
+// Even-odd test against a closed shoreline spline, sampled every ShoreProbeStepCm.
+constexpr float ShoreProbeStepCm = 200.0f;
+bool ShoreContains(const USplineComponent& Spline, const FVector2D& Point)
+{
+    const float Length = Spline.GetSplineLength();
+    const int32 Samples = FMath::Clamp(FMath::CeilToInt32(Length / ShoreProbeStepCm), 8, 512);
+    bool bInside = false;
+    FVector Previous = Spline.GetLocationAtDistanceAlongSpline(0.0f, ESplineCoordinateSpace::World);
+    for (int32 Index = 1; Index <= Samples; ++Index)
+    {
+        const FVector Next = Spline.GetLocationAtDistanceAlongSpline(Length * (Index % Samples) / Samples, ESplineCoordinateSpace::World);
+        if ((Previous.Y > Point.Y) != (Next.Y > Point.Y)
+            && Point.X < Previous.X + (Point.Y - Previous.Y) * (Next.X - Previous.X) / (Next.Y - Previous.Y))
+            bInside = !bInside;
+        Previous = Next;
+    }
+    return bInside;
+}
+}
+
 Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Position) const
 {
     if (!bEstateMap)
@@ -984,9 +1006,15 @@ Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Posit
             // Aim a hand's breadth inside the waterline (spline scale Y is the waterline half width).
             const double HalfWidth = FMath::Max(0.0, 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y - PailDipInsideCm);
             const FVector2D Out(Position.x - Center.X, Position.y - Center.Y);
-            const FVector Edge = Out.SizeSquared() > 1.0
+            FVector Edge = Out.SizeSquared() > 1.0
                 ? Center + FVector(Out.GetSafeNormal().X * HalfWidth, Out.GetSafeNormal().Y * HalfWidth, 0.0)
                 : Center;
+            // A lake's shoreline (a closed spline) is the waterline itself: step in from it, away from her.
+            if (Spline->IsClosedLoop() && Out.SizeSquared() > 1.0)
+            {
+                const double Toward = HomesteadWaterProbe::ShoreContains(*Spline, FVector2D(Position.x, Position.y)) ? 1.0 : -1.0;
+                Edge = Center + FVector(Out.GetSafeNormal() * (Toward * PailDipInsideCm), 0.0);
+            }
             const double Distance = FVector::Dist2D(Edge, Here);
             if (Distance < Best)
             {
@@ -1566,7 +1594,11 @@ double AHomesteadController::WaterEdgeDistance(Homestead::Point Position, bool b
             const FVector Point = Spline->FindLocationClosestToWorldLocation(Here, ESplineCoordinateSpace::World);
             const float Key = Spline->FindInputKeyClosestToWorldLocation(Here);
             const double HalfWidth = 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y;
-            Best = FMath::Min(Best, FVector::Dist2D(Point, Here) - HalfWidth);
+            double Distance = FVector::Dist2D(Point, Here) - HalfWidth;
+            // A lake (closed shoreline): inside it is in the water.
+            if (Spline->IsClosedLoop() && HomesteadWaterProbe::ShoreContains(*Spline, FVector2D(Position.x, Position.y)))
+                Distance = -Distance;
+            Best = FMath::Min(Best, Distance);
         }
     if (!bIncludeSea)
         return Best;
@@ -1709,7 +1741,7 @@ void AHomesteadController::UpdateCreekAudio()
         FVector Where = FVector::ZeroVector;
         WaterEdgeDistance({Listener.X, Listener.Y});
         for (const auto& Weak : EstateWaterSplines)
-            if (const USplineComponent* Spline = Weak.Get())
+            if (const USplineComponent* Spline = Weak.Get(); Spline && !Spline->IsClosedLoop())  // still lakes don't burble
             {
                 const FVector Point = Spline->FindLocationClosestToWorldLocation(Listener, ESplineCoordinateSpace::World);
                 const double Distance = FVector::Dist2D(Point, Listener);
