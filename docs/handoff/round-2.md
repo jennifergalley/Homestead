@@ -111,6 +111,20 @@ buy/sell/return. **Equivalent-time fast travel is part of that core loop.** Inte
 packaged sandbox acceptance run for it. Music is postponed until this loop is accepted; unfinished
 dye/Appearance and night-light work remain bounded partial work, not substitutes for the loop.
 
+**Packaged core-loop acceptance sequence (pending):**
+
+1. Start a fresh Estate game; open the standing-room chest, take the pail/branches/food, and find the
+   billhook then hoe without duplicating rack rewards across F5/F9.
+2. Till, sow, fill the carried pail at the lake, water, advance growth and harvest. The lake fill
+   check also runs from the copied packaged save with recorded pail/water/Energy/focus/edge telemetry.
+3. Gather live food in the estate/road corridor, eat it with immediate bounded Energy feedback, and
+   cook roots at a lit hearth with exactly one Kindling debit per successful batch.
+4. Use Town/Manor signs or Map travel to advance the equivalent safe walking time, buy/sell at town,
+   then return; reject hunger/doze/max-hour unsafe candidates without partial state.
+
+Every step needs the owning slice's native/PIE evidence plus a packaged sandbox pass. A failed step
+blocks promotion of the core loop, not unrelated visual experiments.
+
 ## Lanes and ownership
 
 The design's "Lanes and ownership" table is authoritative. In short:
