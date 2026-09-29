@@ -4,4 +4,6 @@
 - [x] 1.2 Always from the front: arm collision off while open, restored on close
 - [x] 1.3 "Long bob" label; page hint
 - [x] 1.4 Editor build
-- [ ] 1.5 PIE: drag, WASD (she doesn't walk), right stick, wheel limits; the standing room with a wall behind; after closing, normal movement, camera and hotbar wheel; 1080p and 4K
+- [x] 1.5 PIE (1080p editor viewport): real mouse drag, WASD and right stick orbit the view while she stays put; opens facing her front; on close the arm collision, distance and view come back and she walks normally
+- [x] 1.6 Wheel fix: the book swallowed the Slate wheel event so the zoom never ran; OnMouseWheel now zooms on page 6 (editor build only)
+- [ ] 1.7 PIE re-check of the wheel zoom and its limits, the standing room with a wall behind, the hotbar wheel after closing; 4K

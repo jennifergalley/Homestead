@@ -3379,8 +3379,8 @@ FString AHomesteadController::BookSummary() const
         : TEXT("Carried items and equipped clothing.");
     case 1: return FString();
     case 2: return TEXT("Choose a plan to start placing it. Materials are spent when you place it.");
-    case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. Right stick: turn her.")
-        : TEXT("Click a swatch or style to wear it. Drag or WASD: turn her. Wheel: zoom.");
+    case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. Right stick: look around her.")
+        : TEXT("Click a swatch or style to wear it. Drag or WASD: look around her. Wheel: zoom.");
     case 3: return FString::Printf(TEXT("Woodland seed %llu | generation %u | trees you fell stay cleared."),
         static_cast<unsigned long long>(State().world.seed), State().world.generationVersion);
     default: return {};

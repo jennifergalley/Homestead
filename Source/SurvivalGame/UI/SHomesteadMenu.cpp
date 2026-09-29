@@ -3069,8 +3069,14 @@ void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
 }
 FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event)
 {
-    // On Appearance the wheel zooms (HandleAppearanceKey, through the controller's wheel route).
-    if (SeenPage == 6 && Dialog == EDialog::None) return FReply::Handled();
+    // On Appearance the wheel zooms. Handling it here stops it reaching the viewport, so this is
+    // the zoom route whenever the pointer is over the book (HandleAppearanceKey covers the rest).
+    if (SeenPage == 6 && Dialog == EDialog::None)
+    {
+        if (Controller.IsValid() && Controller->MenuAcceptsPhysicalInput() && Event.GetWheelDelta() != 0.0f)
+            Controller->MenuZoomAppearance(Event.GetWheelDelta() > 0 ? 1.0f : -1.0f);
+        return FReply::Handled();
+    }
     if (Dialog == EDialog::Quantity)
     {
         if (Controller.IsValid() && Controller->MenuAcceptsPhysicalInput())
