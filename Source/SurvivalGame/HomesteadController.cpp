@@ -2123,6 +2123,7 @@ void AHomesteadController::UpdateFocus()
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
     }
     ConsiderStoreFocus(Consider);
+    FocusHeldToolTarget(Position);
     if (Sim.NearWater(Position))
     {
         // With the watering can out and not full, the stream wins over a crop on the bank when she
@@ -2613,9 +2614,8 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     }
     else
     {
-        // What she's aimed at wins; otherwise the nearest thing this tool handles just ahead of her.
-        const Homestead::Point Ahead{Position.x + Forward.X * 80.0, Position.y + Forward.Y * 80.0};
-        Target = Sim.FindNearestOvergrowth(Ahead, 200.0, Tool);
+        // What she's aimed at wins; otherwise what the focus would pick for this tool (same 300 cm reach).
+        Target = Sim.FindAimedOvergrowth(Position, Facing, Tool);
         if (Focus == EFocus::Resource)
             for (const auto& Node : State().resources)
                 if (Node.id == FocusId && Homestead::IsOvergrowth(Node.kind)

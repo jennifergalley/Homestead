@@ -62,6 +62,10 @@ double TierEnergyFactor(ToolTier tier);
 namespace Overgrowth
 {
 constexpr double Reach = 300.0;
+// Anything this close to her centre counts as in front of her when she aims a tool.
+constexpr double AimAnyDirection = 60.0;
+// Further out, what she aims a tool at lies within this many degrees of straight ahead.
+constexpr double AimHalfAngleDegrees = 80.0;
 // Weed creep (design 7): a cleared grass or weed placement within this distance of any uncleared
 // overgrowth has this daily chance of growing back.
 constexpr double CreepNeighbourDistance = 600.0;
