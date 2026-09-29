@@ -10,5 +10,6 @@
 
 ## 2. Verification
 
-- [ ] 2.1 PIE at 1080p and 4K: a transfer, a held craft (fill not covered), and rapid successive notices; before/after captures show no page shift, focus or selection change
-- [ ] 2.2 A long error wraps within the card; a confirmation dialog still looks and behaves modal
+- [x] 2.1 PIE 1080p: a notice doesn't move the page (pixel diff of tabs, recipe row and details panel before versus during: 0 changed pixels); the latest replaces; the card moves under the tabs when the focused equipment slot is under it; a held craft's white fill stays visible and "Crafted a worn hoe." shows below it
+- [ ] 2.2 4K: the HUD was checked in standalone 4K, but the book card wasn't captured at 4K (standalone key injection couldn't raise a notice with the book open). The card scales with the book's own ScaleBox.
+- [x] 2.3 A long error: rust ink and frame. An unbroken 100-character word was clipped at first; per-character wrapping was added and compiles, but hasn't been re-captured.

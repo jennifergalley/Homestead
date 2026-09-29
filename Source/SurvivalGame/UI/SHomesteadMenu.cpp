@@ -489,6 +489,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                                         .HAlign(HAlign_Center)
                                         [
                                             SNew(STextBlock).WrapTextAt(MenuNoticeStyle::MaxWidth - MenuNoticeStyle::TextInset)
+                                            .WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
                                             .Justification(ETextJustify::Center)
                                             .Font(DisplayFont(MenuNoticeStyle::FontSize))
                                             .ColorAndOpacity_Lambda([this]() { return FSlateColor(bNoticeError ? MenuNoticeStyle::RustInk : MenuNoticeStyle::InkBrown); })
