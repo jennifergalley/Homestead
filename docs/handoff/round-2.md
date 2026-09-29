@@ -297,13 +297,15 @@ requirement.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
-- **Sprint toggle** — **Menu `[ready]` `af7831b1`, Integration pending; not shipped.** Commit
+- **Sprint toggle** — **Menu `af7831b1` is main-integrated in 4 PM candidate `9175e34b`, package
+  pending; not shipped.** Commit
   `8e0516a0` toggles sprint with L3 or a released Shift tap: Shift+Q/click does not toggle, work/book/
   shop pause speed while preserving intent, and load/new/retry/teleport reset it. At <=10 Energy it
   gives a notice; exhaustion disables sprint. Native 8/8 plus economy 12 / scenario 521 checks and
-  Editor build pass. PIE verified L3 480 cm/s on/off, stop/resume, Shift+Q unchanged, ignored book
-  input, teleport reset, and the 9/10.25 Energy edges. The hint was checked in PIE but lacks a
-  standalone 4K capture; Integration decides package inclusion.
+  Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
+  210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture. The 2 PM package
+  still gates on `NativeMenu`/`Hotbar` (update a Shift-hold test to Shift-tap if needed), save and
+  shortcut work.
 - **Contextual hotbar eating and berry feedback** — **Menu `88180744` main-integrated, package
   pending; not shipped.** Controller A/X eats one selected berry per tap only when Talk has no
   precedence, and displays `+` the actual bounded Energy delta.
@@ -340,17 +342,18 @@ requirement.
   It is not eligible for the 4 PM merge until it reports `[ready]`. Only then may it establish that a
   visible weed asset exists wherever the prompt says `"Weeds  E  Pull"` and that none float above
   slopes or patches.
-- **Manor rubble** — **`53fe97d5` is locally cherry-picked by Integration as `9ecb08ad`; not pushed
-  to `main`, packaged or shipped.** Clearable slate heaps and granite/hall cobbles use reserved
-  placement IDs `582000–582099`. Day Estate PIE cleared slate `582003`/`582000` by hand (mesh and
-  prompt gone; Stone awarded); hall cobbles `582006` require the worn pickaxe and two swings
-  (mesh/prompt gone; Stone and Scrap iron awarded). Native 8/8 passed; the Editor build is running.
+- **Manor rubble** — **`53fe97d5` → `9ecb08ad` is main-integrated in 4 PM candidate `9175e34b`,
+  package pending; not shipped.** Clearable slate heaps and granite/hall cobbles use reserved placement
+  IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
+  rubble `582008` requires the pickaxe then two swings for Stone/Scrap iron. F5 before clearing
+  `582011`, then F9, visually restores only `582011`; `582001`/`582008` remain gone. Native 8/8,
+  Editor and Game builds/static-init pass.
 
-  After Menu's sprint editor closes, Integration takes the Unreal slot for PIE slate/cobble clearing
-  plus F5/F9 visual persistence, then pushes only if that passes. The packaged heap clear/save/reload
-  remains mandatory before 4 PM inclusion; otherwise defer. Focus can select nearby bramble/weed and
-  resource reach can pass through a wall, matching current nearby-resource behavior. Props' editor is
-  closed; the weeds branch remains partial and excluded while it owes dusk and PIE reload evidence.
+  The 2 PM package still must perform packaged heap clear/save/reload, `EstateSmoke` pond
+  material/landscape coverage, and save/shortcut work; otherwise defer affected content. Focus can
+  select nearby bramble/weed and resource reach can pass through a wall, matching current
+  nearby-resource behavior. Props' editor is closed; weeds `8418aa8e` remains partial/excluded while
+  it owes dusk and PIE reload evidence.
 - **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
   hoe blade; a documentation-only answer is insufficient.
 - **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
