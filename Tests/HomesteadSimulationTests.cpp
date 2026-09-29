@@ -1219,6 +1219,8 @@ void CropTableAndStatus()
     CHECK(CropDays(CropKind::BroadBeans) == 7 && CropDays(CropKind::Strawberries) == 8 && CropDays(CropKind::Cabbage) == 9);
     // Round 2's crops (design §4): days, regrow days and harvest styles.
     CHECK(CropDays(CropKind::Peas) == 6 && CropRegrowDays(CropKind::Peas) == 3);
+    // A picked pea vine restarts on the Growing mesh (>= 0.55), with its pods, not back on Young.
+    CHECK(1.0 - GetCropInfo(CropKind::Peas).regrowHours / GetCropInfo(CropKind::Peas).growHours >= 0.55);
     CHECK(CropDays(CropKind::Wheat) == 10 && CropDays(CropKind::Barley) == 8 && CropDays(CropKind::Leeks) == 8);
     CHECK(CropDays(CropKind::WinterBroccoli) == 10);
     for (CropKind once : {CropKind::Wheat, CropKind::Barley, CropKind::Leeks, CropKind::WinterBroccoli})

@@ -1,0 +1,474 @@
+{
+  "schema": 1,
+  "name": "CropWithered",
+  "description": "Four 1 m withered-crop plots (root, leafy, stalk and vine silhouette families) of dead, collapsed plants for crops that die at the change of season.",
+  "collision": "none",
+  "triangle_budget": 4000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/crop_withered.py",
+  "source_sha256": "2c6375aa55b703a0577843756818b3d159f324212ca5de1e763f53586ea996f8",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CropWithered_Root": {
+      "vertices": 1236,
+      "triangles": 1368,
+      "size_cm": [
+        94.52,
+        92.53,
+        15.79
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 3.6,
+        "focus": [
+          0.0,
+          0.0,
+          0.08
+        ]
+      },
+      "fbx": "SM_CropWithered_Root.fbx",
+      "sha256": "0c732bf83100d0d51488bc2a4ff6fcdf1fd8adeca266fa74b89c37eada8c2461",
+      "preview": "preview_SM_CropWithered_Root.png"
+    },
+    "SM_CropWithered_Root_LOD1": {
+      "vertices": 540,
+      "triangles": 528,
+      "size_cm": [
+        91.17,
+        87.37,
+        14.52
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_CropWithered_Root_LOD1.fbx",
+      "sha256": "5e46760b90f324488b8bb13dd9a877720b00aeb8e33123eb5e437112f87a789a",
+      "preview": "preview_SM_CropWithered_Root_LOD1.png"
+    },
+    "SM_CropWithered_Root_LOD2": {
+      "vertices": 228,
+      "triangles": 204,
+      "size_cm": [
+        83.57,
+        85.24,
+        22.77
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_CropWithered_Root_LOD2.fbx",
+      "sha256": "6a02948d200c10078d00318007b715dc7d5fcb673de1306b6798dbfe3a791132",
+      "preview": "preview_SM_CropWithered_Root_LOD2.png"
+    },
+    "SM_CropWithered_Leafy": {
+      "vertices": 1632,
+      "triangles": 2355,
+      "size_cm": [
+        91.17,
+        99.42,
+        23.92
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 3.6,
+        "focus": [
+          0.0,
+          0.0,
+          0.08
+        ]
+      },
+      "fbx": "SM_CropWithered_Leafy.fbx",
+      "sha256": "39389ac4aad5d3cf0327689f86e4a3dbcfbdcb969d4b48c627915fa33c039283",
+      "preview": "preview_SM_CropWithered_Leafy.png"
+    },
+    "SM_CropWithered_Leafy_LOD1": {
+      "vertices": 462,
+      "triangles": 555,
+      "size_cm": [
+        96.6,
+        98.41,
+        27.32
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_CropWithered_Leafy_LOD1.fbx",
+      "sha256": "4d457b5991579dcf5a42c6379df7b2072cf01f09c9f72f06e4ee042584faa2f5",
+      "preview": "preview_SM_CropWithered_Leafy_LOD1.png"
+    },
+    "SM_CropWithered_Leafy_LOD2": {
+      "vertices": 174,
+      "triangles": 180,
+      "size_cm": [
+        86.97,
+        98.04,
+        18.63
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_CropWithered_Leafy_LOD2.fbx",
+      "sha256": "ace0e3edb28acc6c192ce236c21cf05d04bdfaa6bf74a1dcbfd563217b3c1858",
+      "preview": "preview_SM_CropWithered_Leafy_LOD2.png"
+    },
+    "SM_CropWithered_Stalk": {
+      "vertices": 2859,
+      "triangles": 3784,
+      "size_cm": [
+        98.33,
+        104.87,
+        49.0
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 3.6,
+        "focus": [
+          0.0,
+          0.0,
+          0.08
+        ]
+      },
+      "fbx": "SM_CropWithered_Stalk.fbx",
+      "sha256": "13e8945d14f7d430d3c5db158b7712ef3b8c53c85b1fd244d169d294e1df7e27",
+      "preview": "preview_SM_CropWithered_Stalk.png"
+    },
+    "SM_CropWithered_Stalk_LOD1": {
+      "vertices": 1431,
+      "triangles": 1848,
+      "size_cm": [
+        101.17,
+        86.32,
+        48.07
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_CropWithered_Stalk_LOD1.fbx",
+      "sha256": "036c5c4a6605ec0757bd83daf68d67e47a2c60f9eedf65896dc83be07267ecea",
+      "preview": "preview_SM_CropWithered_Stalk_LOD1.png"
+    },
+    "SM_CropWithered_Stalk_LOD2": {
+      "vertices": 243,
+      "triangles": 324,
+      "size_cm": [
+        89.91,
+        80.21,
+        39.94
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_CropWithered_Stalk_LOD2.fbx",
+      "sha256": "d4902f1c8a22b3a49310a945c62fd2c8ce6ff1c23f3bc27f182aa0e3da52eee5",
+      "preview": "preview_SM_CropWithered_Stalk_LOD2.png"
+    },
+    "SM_CropWithered_Vine": {
+      "vertices": 1446,
+      "triangles": 1197,
+      "size_cm": [
+        92.1,
+        95.92,
+        58.59
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 3.6,
+        "focus": [
+          0.0,
+          0.0,
+          0.08
+        ]
+      },
+      "fbx": "SM_CropWithered_Vine.fbx",
+      "sha256": "8b1995eef7b8fafe1188ace2010a5cabe2820e1d391fbac607accb031239ec77",
+      "preview": "preview_SM_CropWithered_Vine.png"
+    },
+    "SM_CropWithered_Vine_LOD1": {
+      "vertices": 519,
+      "triangles": 516,
+      "size_cm": [
+        94.12,
+        94.15,
+        56.42
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_CropWithered_Vine_LOD1.fbx",
+      "sha256": "a0558419445fe969a566b61d0e4a8d49ae1001335af5c544dbb96f7db3d61b89",
+      "preview": "preview_SM_CropWithered_Vine_LOD1.png"
+    },
+    "SM_CropWithered_Vine_LOD2": {
+      "vertices": 132,
+      "triangles": 141,
+      "size_cm": [
+        86.36,
+        94.28,
+        54.39
+      ],
+      "materials": [
+        {
+          "name": "M_CropWithered",
+          "textures": {
+            "basecolor": "T_CropWithered_basecolor.png",
+            "normal": "T_CropWithered_normal.png",
+            "roughness": "T_CropWithered_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_CropWithered_Vine_LOD2.fbx",
+      "sha256": "11da6693927497c153c793ee3b76ef0511601cec68a8b4ab3ce56beaa10f69c0",
+      "preview": "preview_SM_CropWithered_Vine_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plot height",
+    "G": "per-plant phase",
+    "B": "a little flutter at dead leaf tips",
+    "A": "1"
+  },
+  "material_notes": "One M_CropWithered atlas: alpha in basecolor; roughness R, translucency G, AO B.",
+  "families": {
+    "Root": "turnips, carrots, potatoes, leeks, legacy roots",
+    "Leafy": "cabbage, winter broccoli",
+    "Stalk": "wheat, barley",
+    "Vine": "broad beans, peas, strawberries, legacy berries"
+  },
+  "textures": {
+    "T_CropWithered_basecolor.png": "4123733a408e9af0b6ac940ccfc8df5d6484a1a84b27a5ff66c4214101b87a39",
+    "T_CropWithered_normal.png": "3c612570ca54c0ce4572518e02ea307be79fd8f4eab4e2b7c4469d6e7e07025b",
+    "T_CropWithered_roughness.png": "b4884bad28bed1f230cf223b38f4a19ea47bd6da4e6f131a8a795e874f023109"
+  }
+}

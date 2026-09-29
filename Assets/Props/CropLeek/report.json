@@ -1,0 +1,1013 @@
+{
+  "schema": 1,
+  "name": "CropLeek",
+  "description": "One 1 m tilled-bed plot of twelve Musselburgh leeks in five stages: blue-green two-sided fans on green necks; the blanched white shanks are separate instanced produce.",
+  "collision": "none",
+  "triangle_budget": 5000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/crop_leek.py",
+  "source_sha256": "2a3ff0c19dd66a9a0a6d915f6f534c12308f4f2b16e4be35d932df476cb5a27f",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CropLeek_Sprout": {
+      "vertices": 1092,
+      "triangles": 1368,
+      "size_cm": [
+        81.89,
+        76.11,
+        11.39
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Sprout.fbx",
+      "sha256": "3537f7629f09e6fe5116614f9c0ba7da8c10736f396bd96b19147d2e59e6e26e",
+      "preview": "preview_SM_CropLeek_Sprout.png"
+    },
+    "SM_CropLeek_Sprout_LOD1": {
+      "vertices": 516,
+      "triangles": 624,
+      "size_cm": [
+        81.41,
+        76.71,
+        9.18
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Sprout_LOD1.fbx",
+      "sha256": "d2d65151ff07e1e6b4d3388b99e4a424b8917baac161db6a47c06ee9128f5cc3",
+      "preview": "preview_SM_CropLeek_Sprout_LOD1.png"
+    },
+    "SM_CropLeek_Sprout_LOD2": {
+      "vertices": 336,
+      "triangles": 372,
+      "size_cm": [
+        77.25,
+        75.67,
+        11.11
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Sprout_LOD2.fbx",
+      "sha256": "89ed6bca7b2d9bbe9933c7fceb86f2728d27ba72ce5b86256c39f72be1c76615",
+      "preview": "preview_SM_CropLeek_Sprout_LOD2.png"
+    },
+    "SM_CropLeek_Young": {
+      "vertices": 1668,
+      "triangles": 2040,
+      "size_cm": [
+        92.9,
+        92.06,
+        24.96
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Young.fbx",
+      "sha256": "f1854cc7660a0a9813e4c22bd1c2a7925085a05cd97f5670a68f836f19312bd8",
+      "preview": "preview_SM_CropLeek_Young.png"
+    },
+    "SM_CropLeek_Young_LOD1": {
+      "vertices": 696,
+      "triangles": 816,
+      "size_cm": [
+        92.85,
+        92.01,
+        19.35
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Young_LOD1.fbx",
+      "sha256": "557ae32527a51ddd2bb670d2f4b41cbd60e6781f4e3b4bd2fb3ac9cd6d68277f",
+      "preview": "preview_SM_CropLeek_Young_LOD1.png"
+    },
+    "SM_CropLeek_Young_LOD2": {
+      "vertices": 336,
+      "triangles": 372,
+      "size_cm": [
+        93.08,
+        91.83,
+        18.71
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Young_LOD2.fbx",
+      "sha256": "d92174f1a6c2182f5c70e7c758c1629661c1cb1108c54711e280faa36b0ef999",
+      "preview": "preview_SM_CropLeek_Young_LOD2.png"
+    },
+    "SM_CropLeek_Growing": {
+      "vertices": 1956,
+      "triangles": 2376,
+      "size_cm": [
+        99.27,
+        97.38,
+        38.3
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2,
+        "focus": [
+          0.0,
+          0.0,
+          0.18
+        ]
+      },
+      "fbx": "SM_CropLeek_Growing.fbx",
+      "sha256": "6cd4867d6ea8ac24beb8f80d824af44fe92f24e1ad306708e04f236f879eb21d",
+      "preview": "preview_SM_CropLeek_Growing.png"
+    },
+    "SM_CropLeek_Growing_LOD1": {
+      "vertices": 876,
+      "triangles": 1008,
+      "size_cm": [
+        99.77,
+        98.3,
+        34.09
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Growing_LOD1.fbx",
+      "sha256": "1f6d0841d1111136bf4d82f28a8be455a0b4acfc978cbbc8859f2ab2dc1a0bb4",
+      "preview": "preview_SM_CropLeek_Growing_LOD1.png"
+    },
+    "SM_CropLeek_Growing_LOD2": {
+      "vertices": 336,
+      "triangles": 372,
+      "size_cm": [
+        93.47,
+        89.65,
+        32.24
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Growing_LOD2.fbx",
+      "sha256": "4d368b4a924b32cc42dc3b02eeb9ac9610cc3122cde6ab80d6ed89f0573ec1f6",
+      "preview": "preview_SM_CropLeek_Growing_LOD2.png"
+    },
+    "SM_CropLeek_Mature": {
+      "vertices": 2244,
+      "triangles": 2712,
+      "size_cm": [
+        100.29,
+        98.75,
+        48.07
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Mature.fbx",
+      "sha256": "dba108e8fb34ea4151e3f83ceca715a3fdbed975ba17de7760515aa74fd26ab0",
+      "preview": "preview_SM_CropLeek_Mature.png"
+    },
+    "SM_CropLeek_Mature_LOD1": {
+      "vertices": 1056,
+      "triangles": 1200,
+      "size_cm": [
+        100.73,
+        99.44,
+        42.71
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Mature_LOD1.fbx",
+      "sha256": "3ccf39aa48906550e59c92be369c0fc5aa0c5032ce6f3565d21e5bdca764ac78",
+      "preview": "preview_SM_CropLeek_Mature_LOD1.png"
+    },
+    "SM_CropLeek_Mature_LOD2": {
+      "vertices": 444,
+      "triangles": 468,
+      "size_cm": [
+        97.33,
+        100.67,
+        37.41
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Mature_LOD2.fbx",
+      "sha256": "9fc2f68181928d7b1bcbb05ecadd1a0bef8699ad705991f2f1ae3fa507eee42e",
+      "preview": "preview_SM_CropLeek_Mature_LOD2.png"
+    },
+    "SM_CropLeek_Ripe": {
+      "vertices": 2532,
+      "triangles": 3048,
+      "size_cm": [
+        102.14,
+        99.38,
+        49.86
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.6,
+        "focus": [
+          0.0,
+          0.0,
+          0.25
+        ]
+      },
+      "fbx": "SM_CropLeek_Ripe.fbx",
+      "sha256": "9146c828558a8f99b615d87c2cd10bdd54ae4d1685ee23dcc4088ef0e7133807",
+      "preview": "preview_SM_CropLeek_Ripe.png"
+    },
+    "SM_CropLeek_Ripe_LOD1": {
+      "vertices": 1056,
+      "triangles": 1200,
+      "size_cm": [
+        103.15,
+        100.63,
+        41.53
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Ripe_LOD1.fbx",
+      "sha256": "47d047aeb89eb74df828af09f5c237812906602adbaea1f19d08ac6367926f30",
+      "preview": "preview_SM_CropLeek_Ripe_LOD1.png"
+    },
+    "SM_CropLeek_Ripe_LOD2": {
+      "vertices": 444,
+      "triangles": 468,
+      "size_cm": [
+        97.71,
+        95.04,
+        42.08
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropLeek_Ripe_LOD2.fbx",
+      "sha256": "029529767f9358d3fff947074c3eb130e1fe08fcb49488e147862797c55f75fb",
+      "preview": "preview_SM_CropLeek_Ripe_LOD2.png"
+    },
+    "SM_CropLeek_Produce": {
+      "vertices": 128,
+      "triangles": 252,
+      "size_cm": [
+        3.54,
+        3.63,
+        17.71
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeekProduce",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 0.6,
+        "focus": [
+          0.0,
+          0.0,
+          0.05
+        ],
+        "detail_distance": 0.3,
+        "detail_fstop": 32.0
+      },
+      "fbx": "SM_CropLeek_Produce.fbx",
+      "sha256": "017be901a60367e7d5d8e4ad8f87b3fb28c8ce1038068274889e886dd7647e7a",
+      "preview": "preview_SM_CropLeek_Produce.png"
+    },
+    "SM_CropLeek_Harvest": {
+      "vertices": 513,
+      "triangles": 786,
+      "size_cm": [
+        57.07,
+        19.23,
+        49.67
+      ],
+      "materials": [
+        {
+          "name": "M_CropLeek",
+          "textures": {
+            "basecolor": "T_CropLeek_basecolor.png",
+            "normal": "T_CropLeek_normal.png",
+            "roughness": "T_CropLeek_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.4,
+        "focus": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      "fbx": "SM_CropLeek_Harvest.fbx",
+      "sha256": "f33003a59b91b565c4f4dfaa395ff4de2f20199891b32d422cd4079e40111532",
+      "preview": "preview_SM_CropLeek_Harvest.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / crop height",
+    "G": "per-plant phase",
+    "B": "flag flutter 0.05 at the neck -> 1 at the tip",
+    "A": "1"
+  },
+  "crop_layout": "Twelve leeks at x=-0.33,-0.11,+0.11,+0.33 on ridges y=-0.3,0,+0.3; base z=0.045 m.",
+  "material_notes": "One M_CropLeek atlas: alpha in basecolor; roughness R, translucency G, AO B. The shank uses M_CropLeekProduce (re-parented to M_CropProduce in Unreal).",
+  "harvest_mesh": "SM_CropLeek_Harvest: whole pulled leek, grip at the neck (origin); shank and roots hang -Z, flags rise above.",
+  "produce": {
+    "mesh": "SM_CropLeek_Produce",
+    "anchors": {
+      "Young": [
+        [
+          -0.3296,
+          -0.2915,
+          0.045,
+          72.6,
+          0.96
+        ],
+        [
+          -0.1123,
+          -0.3093,
+          0.045,
+          21.3,
+          0.934
+        ],
+        [
+          0.1046,
+          -0.3094,
+          0.045,
+          32.4,
+          1.034
+        ],
+        [
+          0.3313,
+          -0.2926,
+          0.045,
+          96.8,
+          0.971
+        ],
+        [
+          -0.3271,
+          -0.007,
+          0.045,
+          45.2,
+          0.967
+        ],
+        [
+          -0.1034,
+          -0.0039,
+          0.045,
+          118.0,
+          0.907
+        ],
+        [
+          0.1103,
+          -0.0007,
+          0.045,
+          15.1,
+          1.055
+        ],
+        [
+          0.3389,
+          -0.0098,
+          0.045,
+          105.3,
+          1.07
+        ],
+        [
+          -0.3215,
+          0.3044,
+          0.045,
+          175.6,
+          1.065
+        ],
+        [
+          -0.0998,
+          0.2988,
+          0.045,
+          3.0,
+          0.996
+        ],
+        [
+          0.1042,
+          0.2992,
+          0.045,
+          33.5,
+          0.996
+        ],
+        [
+          0.32,
+          0.2907,
+          0.045,
+          132.6,
+          0.948
+        ]
+      ],
+      "Growing": [
+        [
+          -0.3296,
+          -0.2915,
+          0.045,
+          72.6,
+          0.96
+        ],
+        [
+          -0.1123,
+          -0.3093,
+          0.045,
+          21.3,
+          0.934
+        ],
+        [
+          0.1046,
+          -0.3094,
+          0.045,
+          32.4,
+          1.034
+        ],
+        [
+          0.3313,
+          -0.2926,
+          0.045,
+          96.8,
+          0.971
+        ],
+        [
+          -0.3271,
+          -0.007,
+          0.045,
+          45.2,
+          0.967
+        ],
+        [
+          -0.1034,
+          -0.0039,
+          0.045,
+          118.0,
+          0.907
+        ],
+        [
+          0.1103,
+          -0.0007,
+          0.045,
+          15.1,
+          1.055
+        ],
+        [
+          0.3389,
+          -0.0098,
+          0.045,
+          105.3,
+          1.07
+        ],
+        [
+          -0.3215,
+          0.3044,
+          0.045,
+          175.6,
+          1.065
+        ],
+        [
+          -0.0998,
+          0.2988,
+          0.045,
+          3.0,
+          0.996
+        ],
+        [
+          0.1042,
+          0.2992,
+          0.045,
+          33.5,
+          0.996
+        ],
+        [
+          0.32,
+          0.2907,
+          0.045,
+          132.6,
+          0.948
+        ]
+      ],
+      "Mature": [
+        [
+          -0.3296,
+          -0.2915,
+          0.045,
+          72.6,
+          0.96
+        ],
+        [
+          -0.1123,
+          -0.3093,
+          0.045,
+          21.3,
+          0.934
+        ],
+        [
+          0.1046,
+          -0.3094,
+          0.045,
+          32.4,
+          1.034
+        ],
+        [
+          0.3313,
+          -0.2926,
+          0.045,
+          96.8,
+          0.971
+        ],
+        [
+          -0.3271,
+          -0.007,
+          0.045,
+          45.2,
+          0.967
+        ],
+        [
+          -0.1034,
+          -0.0039,
+          0.045,
+          118.0,
+          0.907
+        ],
+        [
+          0.1103,
+          -0.0007,
+          0.045,
+          15.1,
+          1.055
+        ],
+        [
+          0.3389,
+          -0.0098,
+          0.045,
+          105.3,
+          1.07
+        ],
+        [
+          -0.3215,
+          0.3044,
+          0.045,
+          175.6,
+          1.065
+        ],
+        [
+          -0.0998,
+          0.2988,
+          0.045,
+          3.0,
+          0.996
+        ],
+        [
+          0.1042,
+          0.2992,
+          0.045,
+          33.5,
+          0.996
+        ],
+        [
+          0.32,
+          0.2907,
+          0.045,
+          132.6,
+          0.948
+        ]
+      ],
+      "Ripe": [
+        [
+          -0.3296,
+          -0.2915,
+          0.045,
+          72.6,
+          0.96
+        ],
+        [
+          -0.1123,
+          -0.3093,
+          0.045,
+          21.3,
+          0.934
+        ],
+        [
+          0.1046,
+          -0.3094,
+          0.045,
+          32.4,
+          1.034
+        ],
+        [
+          0.3313,
+          -0.2926,
+          0.045,
+          96.8,
+          0.971
+        ],
+        [
+          -0.3271,
+          -0.007,
+          0.045,
+          45.2,
+          0.967
+        ],
+        [
+          -0.1034,
+          -0.0039,
+          0.045,
+          118.0,
+          0.907
+        ],
+        [
+          0.1103,
+          -0.0007,
+          0.045,
+          15.1,
+          1.055
+        ],
+        [
+          0.3389,
+          -0.0098,
+          0.045,
+          105.3,
+          1.07
+        ],
+        [
+          -0.3215,
+          0.3044,
+          0.045,
+          175.6,
+          1.065
+        ],
+        [
+          -0.0998,
+          0.2988,
+          0.045,
+          3.0,
+          0.996
+        ],
+        [
+          0.1042,
+          0.2992,
+          0.045,
+          33.5,
+          0.996
+        ],
+        [
+          0.32,
+          0.2907,
+          0.045,
+          132.6,
+          0.948
+        ]
+      ]
+    }
+  },
+  "textures": {
+    "T_CropLeek_basecolor.png": "75349841ad7f25597b8e502ebfd6db5d51fbb56f98228403b99e0eb9125630ce",
+    "T_CropLeek_normal.png": "0a2e1e700f7d6d95c7d011bc6357261312abd504197d36322651e5f04d289bdc",
+    "T_CropLeek_roughness.png": "a7c224e1f3331cdd57208c5c6f26c7c4803b5b3254c2e8c8c7ab87f2adaf03ff"
+  }
+}

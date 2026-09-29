@@ -1,0 +1,760 @@
+{
+  "schema": 1,
+  "name": "CropWinterBroccoli",
+  "description": "One 1 m tilled-bed plot of three Cornish winter broccoli plants in five stages: big blue-green leaf rosettes; the white curd is separate instanced produce.",
+  "collision": "none",
+  "triangle_budget": 6000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/crop_winter_broccoli.py",
+  "source_sha256": "bef6a0d4ace06cda333aaba17166bac79c8871587719a3ccec6aba624dfa94c3",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CropWinterBroccoli_Sprout": {
+      "vertices": 114,
+      "triangles": 84,
+      "size_cm": [
+        57.08,
+        74.52,
+        6.98
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Sprout.fbx",
+      "sha256": "91c97606f82ad95778c3af855be24d3023c83ac8070b35426ea75b0d17e99901",
+      "preview": "preview_SM_CropWinterBroccoli_Sprout.png"
+    },
+    "SM_CropWinterBroccoli_Sprout_LOD1": {
+      "vertices": 84,
+      "triangles": 54,
+      "size_cm": [
+        57.54,
+        74.84,
+        6.67
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Sprout_LOD1.fbx",
+      "sha256": "74c99ce714fa35b2d1b1cb9b38e08be152f62fe102e5ba5dc2a9ecc3289787c3",
+      "preview": "preview_SM_CropWinterBroccoli_Sprout_LOD1.png"
+    },
+    "SM_CropWinterBroccoli_Sprout_LOD2": {
+      "vertices": 84,
+      "triangles": 54,
+      "size_cm": [
+        57.54,
+        74.84,
+        6.67
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Sprout_LOD2.fbx",
+      "sha256": "ec77f9bd47a443f7b061993f98e54fa4a44c08588968a703047b633e51e44d11",
+      "preview": "preview_SM_CropWinterBroccoli_Sprout_LOD2.png"
+    },
+    "SM_CropWinterBroccoli_Young": {
+      "vertices": 1335,
+      "triangles": 2064,
+      "size_cm": [
+        57.45,
+        80.23,
+        11.95
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Young.fbx",
+      "sha256": "8bc7a6024802ffd167df72b423788d035d92d0330664d8a08f6fd33b94ef728a",
+      "preview": "preview_SM_CropWinterBroccoli_Young.png"
+    },
+    "SM_CropWinterBroccoli_Young_LOD1": {
+      "vertices": 288,
+      "triangles": 363,
+      "size_cm": [
+        54.08,
+        72.74,
+        9.28
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Young_LOD1.fbx",
+      "sha256": "9bb2117aafdbf811cd8c42ea78634ec2d86cef4717b4b12d01585c76eab47d28",
+      "preview": "preview_SM_CropWinterBroccoli_Young_LOD1.png"
+    },
+    "SM_CropWinterBroccoli_Young_LOD2": {
+      "vertices": 120,
+      "triangles": 132,
+      "size_cm": [
+        50.75,
+        70.85,
+        9.75
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Young_LOD2.fbx",
+      "sha256": "5cfe9180bfb18283f2824918a8369880085a2ffe9a52db26ad68ffb17ebbe4b5",
+      "preview": "preview_SM_CropWinterBroccoli_Young_LOD2.png"
+    },
+    "SM_CropWinterBroccoli_Growing": {
+      "vertices": 2175,
+      "triangles": 3360,
+      "size_cm": [
+        84.0,
+        91.17,
+        17.69
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.6,
+        "focus": [
+          0.0,
+          0.0,
+          0.15
+        ]
+      },
+      "fbx": "SM_CropWinterBroccoli_Growing.fbx",
+      "sha256": "85d8e2eea54b42fddc196807a7d03077b10505fa33a3cd50ea703686b314c23b",
+      "preview": "preview_SM_CropWinterBroccoli_Growing.png"
+    },
+    "SM_CropWinterBroccoli_Growing_LOD1": {
+      "vertices": 408,
+      "triangles": 507,
+      "size_cm": [
+        79.72,
+        90.49,
+        18.23
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Growing_LOD1.fbx",
+      "sha256": "3bdda1dbd736bf60933e16a891ad77e4eed0a13e349555a92bcc06e007f02ab8",
+      "preview": "preview_SM_CropWinterBroccoli_Growing_LOD1.png"
+    },
+    "SM_CropWinterBroccoli_Growing_LOD2": {
+      "vertices": 147,
+      "triangles": 156,
+      "size_cm": [
+        56.24,
+        89.93,
+        17.73
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Growing_LOD2.fbx",
+      "sha256": "f8d70879d8ed3044b391bbbedb116569336721e5f95e0c78cc0bc9b8219309ed",
+      "preview": "preview_SM_CropWinterBroccoli_Growing_LOD2.png"
+    },
+    "SM_CropWinterBroccoli_Mature": {
+      "vertices": 3015,
+      "triangles": 4656,
+      "size_cm": [
+        90.86,
+        93.54,
+        43.28
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Mature.fbx",
+      "sha256": "c8165724a02c2540a975eea4c515162bf5c491e82c164ffa231393f7db4a99dc",
+      "preview": "preview_SM_CropWinterBroccoli_Mature.png"
+    },
+    "SM_CropWinterBroccoli_Mature_LOD1": {
+      "vertices": 588,
+      "triangles": 723,
+      "size_cm": [
+        90.8,
+        92.92,
+        28.31
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Mature_LOD1.fbx",
+      "sha256": "16a7fd1fc2869120e6eb9b0e2660df7bfbb1d819089b734c24c94cb941959a25",
+      "preview": "preview_SM_CropWinterBroccoli_Mature_LOD1.png"
+    },
+    "SM_CropWinterBroccoli_Mature_LOD2": {
+      "vertices": 174,
+      "triangles": 180,
+      "size_cm": [
+        74.35,
+        91.32,
+        27.06
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Mature_LOD2.fbx",
+      "sha256": "72bd50954331f7288378a11e8b3d4d70ed049c48a8d32f2e88985400be336c99",
+      "preview": "preview_SM_CropWinterBroccoli_Mature_LOD2.png"
+    },
+    "SM_CropWinterBroccoli_Ripe": {
+      "vertices": 3225,
+      "triangles": 4980,
+      "size_cm": [
+        91.65,
+        95.33,
+        50.13
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2,
+        "focus": [
+          0.0,
+          0.0,
+          0.25
+        ]
+      },
+      "fbx": "SM_CropWinterBroccoli_Ripe.fbx",
+      "sha256": "2d30d38ba01f4fdc3932dd1f97b4ddaa60201f55b866d697949102c1d51da68a",
+      "preview": "preview_SM_CropWinterBroccoli_Ripe.png"
+    },
+    "SM_CropWinterBroccoli_Ripe_LOD1": {
+      "vertices": 588,
+      "triangles": 723,
+      "size_cm": [
+        91.73,
+        92.73,
+        31.79
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Ripe_LOD1.fbx",
+      "sha256": "20d3c3c95d842374cb79c11900cfc4385bba55bba9ada786e7f1bc565a5c9394",
+      "preview": "preview_SM_CropWinterBroccoli_Ripe_LOD1.png"
+    },
+    "SM_CropWinterBroccoli_Ripe_LOD2": {
+      "vertices": 201,
+      "triangles": 204,
+      "size_cm": [
+        82.88,
+        92.31,
+        32.04
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2
+      },
+      "fbx": "SM_CropWinterBroccoli_Ripe_LOD2.fbx",
+      "sha256": "708e0f1660271e7efec14e4df39ddd179f85560636f0f0a7fde9559fc204dd8e",
+      "preview": "preview_SM_CropWinterBroccoli_Ripe_LOD2.png"
+    },
+    "SM_CropWinterBroccoli_Produce": {
+      "vertices": 489,
+      "triangles": 828,
+      "size_cm": [
+        16.74,
+        15.52,
+        9.8
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoliProduce",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 0.7,
+        "focus": [
+          0.0,
+          0.0,
+          0.04
+        ],
+        "detail_distance": 0.35
+      },
+      "fbx": "SM_CropWinterBroccoli_Produce.fbx",
+      "sha256": "e055eb8bdcb740f41c200dd6c96155cdc5c52c6c7189294667f1467109713bfe",
+      "preview": "preview_SM_CropWinterBroccoli_Produce.png"
+    },
+    "SM_CropWinterBroccoli_Harvest": {
+      "vertices": 587,
+      "triangles": 956,
+      "size_cm": [
+        18.5,
+        16.75,
+        11.49
+      ],
+      "materials": [
+        {
+          "name": "M_CropWinterBroccoli",
+          "textures": {
+            "basecolor": "T_CropWinterBroccoli_basecolor.png",
+            "normal": "T_CropWinterBroccoli_normal.png",
+            "roughness": "T_CropWinterBroccoli_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.4,
+        "focus": [
+          0.0,
+          0.0,
+          -0.08
+        ]
+      },
+      "fbx": "SM_CropWinterBroccoli_Harvest.fbx",
+      "sha256": "a03a87d66c63c99d51df3b8f366bb1e98c16c33d934597dcc5ffd71432aeab4c",
+      "preview": "preview_SM_CropWinterBroccoli_Harvest.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / stage height",
+    "G": "per-plant phase",
+    "B": "leaf flutter 0.1 at the petiole -> 1 at the tip",
+    "A": "1"
+  },
+  "crop_layout": "Three plants at (-0.2,-0.3), (0.2,0), (-0.2,0.3); base z=0.045 m.",
+  "material_notes": "One M_CropWinterBroccoli atlas: alpha in basecolor; roughness R, translucency G, AO B. The curd uses M_CropWinterBroccoliProduce (re-parented to M_CropProduce in Unreal).",
+  "harvest_mesh": "SM_CropWinterBroccoli_Harvest: cut curd in a collar of trimmed leaves, grip at the cut stalk (origin), head hanging -Z.",
+  "produce": {
+    "mesh": "SM_CropWinterBroccoli_Produce",
+    "anchors": {
+      "Young": [
+        [
+          -0.2,
+          -0.3,
+          0.065,
+          0.0,
+          1.0
+        ],
+        [
+          0.2,
+          0.0,
+          0.065,
+          67.0,
+          1.08
+        ],
+        [
+          -0.2,
+          0.3,
+          0.065,
+          134.0,
+          0.94
+        ]
+      ],
+      "Growing": [
+        [
+          -0.2,
+          -0.3,
+          0.105,
+          0.0,
+          1.0
+        ],
+        [
+          0.2,
+          0.0,
+          0.105,
+          67.0,
+          1.08
+        ],
+        [
+          -0.2,
+          0.3,
+          0.105,
+          134.0,
+          0.94
+        ]
+      ],
+      "Mature": [
+        [
+          -0.2,
+          -0.3,
+          0.175,
+          0.0,
+          1.0
+        ],
+        [
+          0.2,
+          0.0,
+          0.175,
+          67.0,
+          1.08
+        ],
+        [
+          -0.2,
+          0.3,
+          0.175,
+          134.0,
+          0.94
+        ]
+      ],
+      "Ripe": [
+        [
+          -0.2,
+          -0.3,
+          0.195,
+          0.0,
+          1.0
+        ],
+        [
+          0.2,
+          0.0,
+          0.195,
+          67.0,
+          1.08
+        ],
+        [
+          -0.2,
+          0.3,
+          0.195,
+          134.0,
+          0.94
+        ]
+      ]
+    }
+  },
+  "textures": {
+    "T_CropWinterBroccoli_basecolor.png": "113b2ebc4873e6fe97e00995318eade428efa28c85d363540f8fe2f461c613e6",
+    "T_CropWinterBroccoli_normal.png": "9f74cab4b07a3811d94ce3c29af3048434cd8c5dd957679bda7cdd77692a118b",
+    "T_CropWinterBroccoli_roughness.png": "a5293ab6e1c23bb1e0b9c2c376c774f6e581d8d35eadcab2ef4befd61c01fb83"
+  }
+}

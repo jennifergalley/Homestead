@@ -4075,6 +4075,15 @@ const FLook Looks[] = {
     // appear just below that: a picked plant is left with tiny green fruit that swells again.
     {TEXT("CropBroadBean"), 0.50f, 0.0f, 0.45f, 0.30f, 1.3f, 1.8f},
     {TEXT("CropStrawberry"), 0.55f, 0.0f, 0.35f, 0.35f, 1.8f, 2.0f},
+    // Round 2 crops (tuned offline with Scripts/Blender/render_crop_sheet.py at 7 m, day/dusk/rain).
+    // Peas regrow from 1 - 64/144 = 0.556, so the pods appear just below it, like the beans.
+    {TEXT("CropPea"), 0.52f, 0.0f, 0.40f, 0.30f, 1.5f, 1.8f},
+    // Ears emerge with the Growing stand (0.55) and stay green until late: grain colours last.
+    {TEXT("CropWheat"), 0.55f, 0.0f, 0.55f, 0.45f, 2.5f, 1.35f},
+    {TEXT("CropBarley"), 0.55f, 0.0f, 0.55f, 0.45f, 2.5f, 1.4f},
+    // Leek shanks thicken from the Young stage and are earthed up, so they rise out of the ridge.
+    {TEXT("CropLeek"), 0.30f, 4.0f, 0.35f, 0.45f, 1.2f, 1.25f},
+    {TEXT("CropWinterBroccoli"), 0.55f, 0.0f, 0.25f, 0.25f, 1.4f, 1.5f},
 };
 }
 

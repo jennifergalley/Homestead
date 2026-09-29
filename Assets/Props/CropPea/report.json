@@ -1,0 +1,1693 @@
+{
+  "schema": 1,
+  "name": "CropPea",
+  "description": "One 1 m tilled-bed plot of tall garden peas climbing six brushy hazel pea-sticks, five crop stages; the pods are separate instanced produce.",
+  "collision": "none",
+  "triangle_budget": 7500,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/crop_pea.py",
+  "source_sha256": "62cf593ba0db48ef2618928b55d6c7487cafe74135c6a79525bedfd7c007b5c2",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CropPea_Sprout": {
+      "vertices": 2016,
+      "triangles": 2256,
+      "size_cm": [
+        72.3,
+        90.54,
+        110.82
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.6,
+        "focus": [
+          0.0,
+          0.0,
+          0.3
+        ]
+      },
+      "fbx": "SM_CropPea_Sprout.fbx",
+      "sha256": "6196bd1343923f5e4b792c13a20a70782714549eb4b70815459690f4cf9d3ea0",
+      "preview": "preview_SM_CropPea_Sprout.png"
+    },
+    "SM_CropPea_Sprout_LOD1": {
+      "vertices": 1104,
+      "triangles": 1188,
+      "size_cm": [
+        68.28,
+        89.45,
+        98.14
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Sprout_LOD1.fbx",
+      "sha256": "9dd2cbaa5cbd3ac90600d9e59c0ca8e843894df51385ef3567a2f6d5ac2c86aa",
+      "preview": "preview_SM_CropPea_Sprout_LOD1.png"
+    },
+    "SM_CropPea_Sprout_LOD2": {
+      "vertices": 312,
+      "triangles": 318,
+      "size_cm": [
+        64.65,
+        88.06,
+        98.13
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Sprout_LOD2.fbx",
+      "sha256": "1502df2209b22e7a7d149d29e5721830cb4ba9305f1ceb83e479d29bc44cbf08",
+      "preview": "preview_SM_CropPea_Sprout_LOD2.png"
+    },
+    "SM_CropPea_Young": {
+      "vertices": 3528,
+      "triangles": 3744,
+      "size_cm": [
+        77.2,
+        92.24,
+        110.82
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Young.fbx",
+      "sha256": "9be8ad0d42c3559cddcc9e2c6dc1926865ce2a9bc1421629f1c3a47e52c0b623",
+      "preview": "preview_SM_CropPea_Young.png"
+    },
+    "SM_CropPea_Young_LOD1": {
+      "vertices": 1440,
+      "triangles": 1500,
+      "size_cm": [
+        70.39,
+        89.45,
+        98.14
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Young_LOD1.fbx",
+      "sha256": "53195eeefce7af3b2df2d2a8e6e71237e911652702f70be8281f18b9771ce6c2",
+      "preview": "preview_SM_CropPea_Young_LOD1.png"
+    },
+    "SM_CropPea_Young_LOD2": {
+      "vertices": 444,
+      "triangles": 438,
+      "size_cm": [
+        68.82,
+        88.06,
+        98.13
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Young_LOD2.fbx",
+      "sha256": "d6a36d32cdc26d09effb1f52439166fa82ae598b8f68888b4fd9baead3f61f8d",
+      "preview": "preview_SM_CropPea_Young_LOD2.png"
+    },
+    "SM_CropPea_Growing": {
+      "vertices": 5436,
+      "triangles": 5496,
+      "size_cm": [
+        75.42,
+        98.07,
+        110.82
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.0,
+        "focus": [
+          0.0,
+          0.0,
+          0.4
+        ]
+      },
+      "fbx": "SM_CropPea_Growing.fbx",
+      "sha256": "812c49a4e035051f46c7e58f4aa49f2b5edd7bc2869556dd86b6f707aebbae31",
+      "preview": "preview_SM_CropPea_Growing.png"
+    },
+    "SM_CropPea_Growing_LOD1": {
+      "vertices": 1812,
+      "triangles": 1884,
+      "size_cm": [
+        74.16,
+        92.84,
+        98.14
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Growing_LOD1.fbx",
+      "sha256": "960d186555b84ab931e694eb718790d1bb56ca854034404b20232582a60e0ebd",
+      "preview": "preview_SM_CropPea_Growing_LOD1.png"
+    },
+    "SM_CropPea_Growing_LOD2": {
+      "vertices": 612,
+      "triangles": 630,
+      "size_cm": [
+        68.98,
+        90.94,
+        98.13
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Growing_LOD2.fbx",
+      "sha256": "ea52346e1ea7b83d344bf8992ec8c3d7179d0b1dc82d9b37d6fdf0a1529a3820",
+      "preview": "preview_SM_CropPea_Growing_LOD2.png"
+    },
+    "SM_CropPea_Mature": {
+      "vertices": 8316,
+      "triangles": 8376,
+      "size_cm": [
+        77.22,
+        98.69,
+        110.82
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Mature.fbx",
+      "sha256": "0c895c81f5996765483dfd16ac3873309dbded5f2f89267f2e401b07475dd0e9",
+      "preview": "preview_SM_CropPea_Mature.png"
+    },
+    "SM_CropPea_Mature_LOD1": {
+      "vertices": 2808,
+      "triangles": 2724,
+      "size_cm": [
+        71.39,
+        90.91,
+        98.14
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Mature_LOD1.fbx",
+      "sha256": "2a61b525ef7f5c2acc4ed6fe118f1621561a8ba4f165ce55bc3fd3b78a5b04f2",
+      "preview": "preview_SM_CropPea_Mature_LOD1.png"
+    },
+    "SM_CropPea_Mature_LOD2": {
+      "vertices": 864,
+      "triangles": 846,
+      "size_cm": [
+        67.27,
+        89.84,
+        98.13
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Mature_LOD2.fbx",
+      "sha256": "f6eecc7ac0ff2575b4586123322a87d807969f640ed8894c00f4242f1607ec0c",
+      "preview": "preview_SM_CropPea_Mature_LOD2.png"
+    },
+    "SM_CropPea_Ripe": {
+      "vertices": 7668,
+      "triangles": 7704,
+      "size_cm": [
+        79.07,
+        96.89,
+        110.82
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.6,
+        "focus": [
+          0.0,
+          0.0,
+          0.48
+        ]
+      },
+      "fbx": "SM_CropPea_Ripe.fbx",
+      "sha256": "f6ab1832bdd2403b3c02d37c301a087e0a0f8ac783bc3ccd5e6a9e6a062e555b",
+      "preview": "preview_SM_CropPea_Ripe.png"
+    },
+    "SM_CropPea_Ripe_LOD1": {
+      "vertices": 2568,
+      "triangles": 2532,
+      "size_cm": [
+        73.57,
+        91.79,
+        98.14
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Ripe_LOD1.fbx",
+      "sha256": "1e5d248b34caa289d0a355579a8b3fd0e2c4d62ef4c3d0b706fadedd24d10dc4",
+      "preview": "preview_SM_CropPea_Ripe_LOD1.png"
+    },
+    "SM_CropPea_Ripe_LOD2": {
+      "vertices": 864,
+      "triangles": 846,
+      "size_cm": [
+        66.64,
+        89.4,
+        98.13
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropPea_Ripe_LOD2.fbx",
+      "sha256": "b1fc684a1ecdc26476833237263fb64b90856e22ec8be6fa55d61f5248da46db",
+      "preview": "preview_SM_CropPea_Ripe_LOD2.png"
+    },
+    "SM_CropPea_Produce": {
+      "vertices": 169,
+      "triangles": 304,
+      "size_cm": [
+        2.14,
+        3.32,
+        10.38
+      ],
+      "materials": [
+        {
+          "name": "M_CropPeaProduce",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 0.6,
+        "focus": [
+          0.0,
+          0.0,
+          -0.05
+        ],
+        "detail_distance": 0.25,
+        "detail_fstop": 32.0
+      },
+      "fbx": "SM_CropPea_Produce.fbx",
+      "sha256": "2c06b0b67424b0fa10138302c1a018f473eae63bae2caebe4ca68a9b367abb8a",
+      "preview": "preview_SM_CropPea_Produce.png"
+    },
+    "SM_CropPea_Harvest": {
+      "vertices": 333,
+      "triangles": 600,
+      "size_cm": [
+        6.47,
+        4.62,
+        9.18
+      ],
+      "materials": [
+        {
+          "name": "M_CropPea",
+          "textures": {
+            "basecolor": "T_CropPea_basecolor.png",
+            "normal": "T_CropPea_normal.png",
+            "roughness": "T_CropPea_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 0.9,
+        "focus": [
+          0.0,
+          0.0,
+          -0.06
+        ]
+      },
+      "fbx": "SM_CropPea_Harvest.fbx",
+      "sha256": "4e74bcb139cd2c9ca3c77533060a0804975d4b44c0081fd03ebc99191dbfa850",
+      "preview": "preview_SM_CropPea_Harvest.png"
+    }
+  },
+  "warnings": [
+    "SM_CropPea_Mature: 8376 triangles exceeds budget 7500",
+    "SM_CropPea_Ripe: 7704 triangles exceeds budget 7500"
+  ],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / crop height",
+    "G": "per-plant phase",
+    "B": "leaf flutter; the pea-sticks are nearly still",
+    "A": "1"
+  },
+  "crop_layout": "Six hazel pea-sticks at x=-0.22,+0.22 on ridges y=-0.3,0,+0.3, two vines each; base z=0.045 m.",
+  "material_notes": "One M_CropPea atlas: alpha in basecolor; roughness R, translucency G, AO B. Pods use M_CropPeaProduce (re-parented to M_CropProduce in Unreal).",
+  "harvest_mesh": "SM_CropPea_Harvest: three pods on their stalks, grip at the origin, hanging -Z.",
+  "produce": {
+    "mesh": "SM_CropPea_Produce",
+    "anchors": {
+      "Young": [
+        [
+          -0.2575,
+          -0.2614,
+          0.139,
+          4.3,
+          1.117
+        ],
+        [
+          -0.2811,
+          -0.2802,
+          0.1749,
+          118.2,
+          1.045
+        ],
+        [
+          -0.2754,
+          -0.2814,
+          0.2107,
+          240.0,
+          1.1
+        ],
+        [
+          -0.1621,
+          -0.3633,
+          0.1317,
+          176.9,
+          0.931
+        ],
+        [
+          -0.1407,
+          -0.3464,
+          0.1647,
+          292.0,
+          0.898
+        ],
+        [
+          -0.1515,
+          -0.3368,
+          0.1977,
+          426.1,
+          1.081
+        ],
+        [
+          0.2243,
+          -0.3562,
+          0.1342,
+          159.5,
+          1.042
+        ],
+        [
+          0.2539,
+          -0.3482,
+          0.1681,
+          292.5,
+          0.88
+        ],
+        [
+          0.2518,
+          -0.3471,
+          0.2021,
+          415.6,
+          1.075
+        ],
+        [
+          0.2049,
+          -0.2202,
+          0.1336,
+          356.0,
+          1.103
+        ],
+        [
+          0.1839,
+          -0.2289,
+          0.1674,
+          488.8,
+          1.084
+        ],
+        [
+          0.1925,
+          -0.2214,
+          0.2011,
+          587.5,
+          0.998
+        ],
+        [
+          -0.1377,
+          -0.0048,
+          0.1394,
+          249.7,
+          0.938
+        ],
+        [
+          -0.137,
+          0.0243,
+          0.1754,
+          363.6,
+          1.093
+        ],
+        [
+          -0.1398,
+          0.0231,
+          0.2114,
+          484.0,
+          1.042
+        ],
+        [
+          -0.2743,
+          -0.0195,
+          0.1326,
+          448.6,
+          1.075
+        ],
+        [
+          -0.264,
+          -0.0454,
+          0.1659,
+          557.4,
+          0.935
+        ],
+        [
+          -0.2658,
+          -0.0442,
+          0.1993,
+          667.7,
+          0.973
+        ],
+        [
+          0.2464,
+          0.0564,
+          0.1326,
+          -32.1,
+          1.091
+        ],
+        [
+          0.2214,
+          0.0559,
+          0.166,
+          90.7,
+          0.935
+        ],
+        [
+          0.2279,
+          0.0572,
+          0.1994,
+          218.3,
+          1.083
+        ],
+        [
+          0.2144,
+          -0.0651,
+          0.1337,
+          151.6,
+          1.04
+        ],
+        [
+          0.2392,
+          -0.0676,
+          0.1675,
+          280.6,
+          0.948
+        ],
+        [
+          0.2255,
+          -0.0734,
+          0.2013,
+          387.0,
+          0.94
+        ],
+        [
+          -0.1395,
+          0.315,
+          0.1326,
+          247.9,
+          1.091
+        ],
+        [
+          -0.1433,
+          0.3416,
+          0.166,
+          370.8,
+          0.935
+        ],
+        [
+          -0.1398,
+          0.3375,
+          0.1994,
+          498.3,
+          1.083
+        ],
+        [
+          -0.2647,
+          0.3253,
+          0.1337,
+          431.6,
+          1.04
+        ],
+        [
+          -0.2618,
+          0.3026,
+          0.1675,
+          560.7,
+          0.948
+        ],
+        [
+          -0.2687,
+          0.3172,
+          0.2013,
+          667.0,
+          0.94
+        ],
+        [
+          0.1957,
+          0.2389,
+          0.1344,
+          125.0,
+          0.944
+        ],
+        [
+          0.2284,
+          0.2297,
+          0.1684,
+          236.3,
+          1.111
+        ],
+        [
+          0.2329,
+          0.2419,
+          0.2024,
+          373.8,
+          1.065
+        ],
+        [
+          0.2275,
+          0.3665,
+          0.1382,
+          303.8,
+          1.085
+        ],
+        [
+          0.1911,
+          0.37,
+          0.1737,
+          447.1,
+          0.999
+        ],
+        [
+          0.1878,
+          0.3634,
+          0.2092,
+          547.9,
+          0.943
+        ]
+      ],
+      "Growing": [
+        [
+          -0.2714,
+          -0.2915,
+          0.2673,
+          -0.5,
+          0.884
+        ],
+        [
+          -0.2801,
+          -0.3592,
+          0.352,
+          129.1,
+          0.896
+        ],
+        [
+          -0.2559,
+          -0.3756,
+          0.4366,
+          251.7,
+          0.983
+        ],
+        [
+          -0.153,
+          -0.3331,
+          0.2498,
+          188.5,
+          0.922
+        ],
+        [
+          -0.1369,
+          -0.2856,
+          0.3278,
+          293.3,
+          1.033
+        ],
+        [
+          -0.1549,
+          -0.2646,
+          0.4059,
+          419.3,
+          0.955
+        ],
+        [
+          0.2593,
+          -0.3388,
+          0.2557,
+          176.8,
+          1.067
+        ],
+        [
+          0.2926,
+          -0.2994,
+          0.336,
+          290.8,
+          0.996
+        ],
+        [
+          0.2733,
+          -0.2716,
+          0.4163,
+          400.8,
+          0.923
+        ],
+        [
+          0.1752,
+          -0.2297,
+          0.2544,
+          366.5,
+          0.992
+        ],
+        [
+          0.1471,
+          -0.2681,
+          0.3342,
+          483.7,
+          1.063
+        ],
+        [
+          0.1388,
+          -0.3038,
+          0.414,
+          593.9,
+          0.891
+        ],
+        [
+          -0.1451,
+          0.0385,
+          0.2682,
+          273.9,
+          1.042
+        ],
+        [
+          -0.1874,
+          0.066,
+          0.3533,
+          394.4,
+          1.029
+        ],
+        [
+          -0.2015,
+          0.0707,
+          0.4383,
+          486.2,
+          0.906
+        ],
+        [
+          -0.2576,
+          -0.0498,
+          0.2519,
+          444.8,
+          0.971
+        ],
+        [
+          -0.233,
+          -0.0706,
+          0.3308,
+          555.5,
+          0.956
+        ],
+        [
+          -0.1903,
+          -0.0672,
+          0.4096,
+          670.9,
+          1.009
+        ],
+        [
+          0.2179,
+          0.0509,
+          0.2521,
+          -24.7,
+          0.911
+        ],
+        [
+          0.1843,
+          0.0367,
+          0.331,
+          93.7,
+          1.054
+        ],
+        [
+          0.1675,
+          -0.0006,
+          0.4099,
+          202.0,
+          0.941
+        ],
+        [
+          0.2459,
+          -0.075,
+          0.2547,
+          164.6,
+          1.048
+        ],
+        [
+          0.2991,
+          -0.0574,
+          0.3345,
+          288.5,
+          1.107
+        ],
+        [
+          0.3028,
+          -0.0355,
+          0.4144,
+          384.9,
+          0.887
+        ],
+        [
+          -0.1459,
+          0.3496,
+          0.2521,
+          255.3,
+          0.911
+        ],
+        [
+          -0.1632,
+          0.3851,
+          0.331,
+          373.7,
+          1.054
+        ],
+        [
+          -0.2002,
+          0.4,
+          0.4099,
+          482.0,
+          0.941
+        ],
+        [
+          -0.265,
+          0.3002,
+          0.2547,
+          444.6,
+          1.048
+        ],
+        [
+          -0.2357,
+          0.2558,
+          0.3345,
+          568.5,
+          1.107
+        ],
+        [
+          -0.2109,
+          0.261,
+          0.4144,
+          664.9,
+          0.887
+        ],
+        [
+          0.2307,
+          0.2468,
+          0.2562,
+          122.2,
+          1.02
+        ],
+        [
+          0.2714,
+          0.2389,
+          0.3367,
+          267.2,
+          0.991
+        ],
+        [
+          0.2854,
+          0.2699,
+          0.4171,
+          377.9,
+          0.999
+        ],
+        [
+          0.1874,
+          0.3512,
+          0.2652,
+          302.4,
+          1.007
+        ],
+        [
+          0.1438,
+          0.3303,
+          0.3491,
+          427.4,
+          1.071
+        ],
+        [
+          0.1382,
+          0.2975,
+          0.433,
+          550.5,
+          0.956
+        ]
+      ],
+      "Mature": [
+        [
+          -0.2566,
+          -0.3427,
+          0.387,
+          -1.2,
+          0.928
+        ],
+        [
+          -0.2378,
+          -0.3872,
+          0.5172,
+          115.1,
+          0.942
+        ],
+        [
+          -0.1759,
+          -0.3985,
+          0.6475,
+          241.5,
+          1.115
+        ],
+        [
+          -0.1564,
+          -0.2994,
+          0.3601,
+          198.2,
+          0.898
+        ],
+        [
+          -0.1697,
+          -0.2563,
+          0.4801,
+          294.2,
+          0.997
+        ],
+        [
+          -0.2307,
+          -0.2446,
+          0.6002,
+          433.9,
+          1.065
+        ],
+        [
+          0.2701,
+          -0.3055,
+          0.3692,
+          180.8,
+          1.074
+        ],
+        [
+          0.2729,
+          -0.2472,
+          0.4927,
+          298.5,
+          1.056
+        ],
+        [
+          0.2269,
+          -0.2199,
+          0.6162,
+          412.4,
+          1.06
+        ],
+        [
+          0.1652,
+          -0.2654,
+          0.3672,
+          339.6,
+          0.969
+        ],
+        [
+          0.1375,
+          -0.3212,
+          0.4899,
+          456.6,
+          1.023
+        ],
+        [
+          0.1681,
+          -0.3611,
+          0.6127,
+          596.4,
+          1.036
+        ],
+        [
+          -0.1793,
+          0.0512,
+          0.3884,
+          275.3,
+          1.112
+        ],
+        [
+          -0.2223,
+          0.0799,
+          0.5193,
+          372.3,
+          0.988
+        ],
+        [
+          -0.2724,
+          0.0378,
+          0.6501,
+          482.4,
+          1.07
+        ],
+        [
+          -0.2315,
+          -0.0473,
+          0.3634,
+          423.2,
+          1.057
+        ],
+        [
+          -0.1652,
+          -0.0713,
+          0.4847,
+          563.4,
+          1.012
+        ],
+        [
+          -0.12,
+          -0.0277,
+          0.6059,
+          671.2,
+          1.023
+        ],
+        [
+          0.204,
+          0.0306,
+          0.3637,
+          -37.1,
+          1.006
+        ],
+        [
+          0.1624,
+          -0.021,
+          0.485,
+          90.6,
+          0.891
+        ],
+        [
+          0.1987,
+          -0.0827,
+          0.6064,
+          212.8,
+          1.025
+        ],
+        [
+          0.2791,
+          -0.0562,
+          0.3676,
+          141.6,
+          1.037
+        ],
+        [
+          0.3241,
+          -0.019,
+          0.4905,
+          291.4,
+          0.982
+        ],
+        [
+          0.295,
+          0.03,
+          0.6133,
+          415.3,
+          1.109
+        ],
+        [
+          -0.1646,
+          0.3667,
+          0.3637,
+          242.9,
+          1.006
+        ],
+        [
+          -0.2187,
+          0.4061,
+          0.485,
+          370.6,
+          0.891
+        ],
+        [
+          -0.2691,
+          0.3672,
+          0.6064,
+          492.8,
+          1.025
+        ],
+        [
+          -0.2369,
+          0.2778,
+          0.3676,
+          421.6,
+          1.037
+        ],
+        [
+          -0.1883,
+          0.2476,
+          0.4905,
+          571.4,
+          0.982
+        ],
+        [
+          -0.1411,
+          0.2925,
+          0.6133,
+          695.3,
+          1.109
+        ],
+        [
+          0.2517,
+          0.2444,
+          0.3699,
+          141.5,
+          1.038
+        ],
+        [
+          0.2958,
+          0.2848,
+          0.4937,
+          255.2,
+          0.911
+        ],
+        [
+          0.2708,
+          0.3461,
+          0.6175,
+          359.2,
+          1.037
+        ],
+        [
+          0.1676,
+          0.3197,
+          0.3838,
+          316.8,
+          0.996
+        ],
+        [
+          0.1301,
+          0.2767,
+          0.5129,
+          437.0,
+          0.937
+        ],
+        [
+          0.17,
+          0.1989,
+          0.642,
+          560.0,
+          1.005
+        ]
+      ],
+      "Ripe": [
+        [
+          -0.2491,
+          -0.3517,
+          0.4212,
+          -1.2,
+          0.928
+        ],
+        [
+          -0.2227,
+          -0.3913,
+          0.5645,
+          115.1,
+          0.942
+        ],
+        [
+          -0.1566,
+          -0.3907,
+          0.7078,
+          241.5,
+          1.115
+        ],
+        [
+          -0.1612,
+          -0.2934,
+          0.3916,
+          198.2,
+          0.898
+        ],
+        [
+          -0.1827,
+          -0.2535,
+          0.5236,
+          294.2,
+          0.997
+        ],
+        [
+          -0.2505,
+          -0.2526,
+          0.6557,
+          433.9,
+          1.065
+        ],
+        [
+          0.2691,
+          -0.2966,
+          0.4016,
+          180.8,
+          1.074
+        ],
+        [
+          0.2616,
+          -0.2373,
+          0.5375,
+          298.5,
+          1.056
+        ],
+        [
+          0.2054,
+          -0.2159,
+          0.6733,
+          412.4,
+          1.06
+        ],
+        [
+          0.1632,
+          -0.2744,
+          0.3994,
+          339.6,
+          0.969
+        ],
+        [
+          0.1442,
+          -0.3345,
+          0.5344,
+          456.6,
+          1.023
+        ],
+        [
+          0.1858,
+          -0.3733,
+          0.6694,
+          596.4,
+          1.036
+        ],
+        [
+          -0.1874,
+          0.0528,
+          0.4228,
+          275.3,
+          1.112
+        ],
+        [
+          -0.2365,
+          0.0738,
+          0.5667,
+          372.3,
+          0.988
+        ],
+        [
+          -0.2803,
+          0.0174,
+          0.7106,
+          482.4,
+          1.07
+        ],
+        [
+          -0.2223,
+          -0.0488,
+          0.3952,
+          423.2,
+          1.057
+        ],
+        [
+          -0.1517,
+          -0.0623,
+          0.5286,
+          563.4,
+          1.012
+        ],
+        [
+          -0.1116,
+          -0.0061,
+          0.662,
+          671.2,
+          1.023
+        ],
+        [
+          0.2005,
+          0.0224,
+          0.3955,
+          -37.1,
+          1.006
+        ],
+        [
+          0.167,
+          -0.037,
+          0.5291,
+          90.6,
+          0.891
+        ],
+        [
+          0.2179,
+          -0.0967,
+          0.6626,
+          212.8,
+          1.025
+        ],
+        [
+          0.285,
+          -0.0491,
+          0.3998,
+          141.6,
+          1.037
+        ],
+        [
+          0.3255,
+          -0.0044,
+          0.535,
+          291.4,
+          0.982
+        ],
+        [
+          0.2825,
+          0.043,
+          0.6702,
+          415.3,
+          1.109
+        ],
+        [
+          -0.1723,
+          0.3706,
+          0.3955,
+          242.9,
+          1.006
+        ],
+        [
+          -0.2322,
+          0.4016,
+          0.5291,
+          370.6,
+          0.891
+        ],
+        [
+          -0.2777,
+          0.3493,
+          0.6626,
+          492.8,
+          1.025
+        ],
+        [
+          -0.2278,
+          0.2752,
+          0.3998,
+          421.6,
+          1.037
+        ],
+        [
+          -0.1723,
+          0.2516,
+          0.535,
+          571.4,
+          0.982
+        ],
+        [
+          -0.1285,
+          0.3106,
+          0.6702,
+          695.3,
+          1.109
+        ],
+        [
+          0.2563,
+          0.2509,
+          0.4024,
+          141.5,
+          1.038
+        ],
+        [
+          0.2923,
+          0.2989,
+          0.5386,
+          255.2,
+          0.911
+        ],
+        [
+          0.2515,
+          0.3583,
+          0.6748,
+          359.2,
+          1.037
+        ],
+        [
+          0.1643,
+          0.3088,
+          0.4177,
+          316.8,
+          0.996
+        ],
+        [
+          0.1337,
+          0.2588,
+          0.5597,
+          437.0,
+          0.937
+        ],
+        [
+          0.1909,
+          0.1866,
+          0.7017,
+          560.0,
+          1.005
+        ]
+      ]
+    }
+  },
+  "textures": {
+    "T_CropPea_basecolor.png": "ce83adff3c4f929890ab8ef5f80401ee409e6c6099960938b8b696dfb77c6387",
+    "T_CropPea_normal.png": "6489906849264003e358c9123efb029448276e755b9de7e5d8e278db6a569ae0",
+    "T_CropPea_roughness.png": "e16a8722721499720da8e22e3c595fabe4db3dd82b567e7dcf6f7d4161d9d5fd"
+  }
+}
