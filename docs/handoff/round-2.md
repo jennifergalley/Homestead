@@ -310,11 +310,11 @@ requirement.
 - **Remove Guidebook UI** — **Menu, pending and not shipped.** Remove the Guidebook surface entirely,
   updating navigation cycles, shortcuts, page indexes, NativeMenu coverage and packaged checks while
   retaining save compatibility.
-- **Appearance controls and naming** — **Menu local-only partial, not pushed/PIE/shipped or 4 PM
-  content.** `61059621` renames **Curly bob** to **Long bob**. `f63ba148` implements drag, WASD and
-  right-stick orbit, wheel zoom and a default front view; it disables/clips camera collision while the
-  page is open and restores it on close. After the package, Menu needs roughly 25 minutes of UE
-  1080p-and-4K testing: orbit near a wall, close/restore and confirm no movement spill.
+- **Appearance controls and naming** — **Long bob `61059621` is ready; orbit remains local-only
+  partial and unshipped.** `f63ba148` + `b77ada68` implement front framing plus mouse/WASD/right-stick
+  orbit without movement, and camera collision restore on close; those passed PIE. The Slate wheel-zoom
+  fix only builds: it still needs PIE near-wall and 4K checks before camera work can be reviewed or
+  merged.
 - **Build menu wording** — **Menu, pending and not shipped.** Trace the current Build-menu `Plan`
   action and relabel/adjust its semantics so the control accurately describes what it does. Keep this
   separate from the active dye/Appearance verification work.
@@ -463,11 +463,12 @@ requirement.
   world interaction prompt before opening. Author an original high-fidelity Victorian timber trunk;
   Coral Island is mood reference only, never copied. Architecture traces the name/save path before a
   separate increment and native/PIE persistence coverage.
-- **Auto-store matching stacks** — **Menu plus Props Simulation, pending and not shipped.** Add a Menu
-  button beside Sort and a single-key shortcut. In one atomic simulation transfer, move only carried
-  items matching stacks that already exist in the **current** chest; exclude equipped and unmatched
-  items, respect capacity, permit a partial transfer without loss, and persist it. Cover capacity,
-  partial/no-loss and save behavior in native and PIE tests.
+- **Auto-store matching stacks** — **Menu plus Props Simulation, pending and not shipped.**
+  Architecture specifies one atomic storage-only transfer API: move only carried items matching stacks
+  already in the **current** chest; exclude equipped and unmatched items, respect capacity, permit a
+  partial transfer without loss, and persist it. Menu exposes a Storage-only T/button shortcut (add
+  gamepad Y only if it is safe). Cover capacity, partial/no-loss and old-save behavior in native and
+  PIE tests.
 - **Safe manor construction** — **Props, pending and not shipped.** The estate parcel is already
   owned, but `Manor::BlockedByManor` blanket-rejects nine footprint samples inside
   `ManorFootprint`, except furnishings on the heritage standing-room floor. Define a safe roofless-hall
@@ -555,11 +556,12 @@ requirement.
   town entrance to the store counter without teleporting in day, night and rain. Only after the
   route is final can the coordinate bridge, roadside forage and travel signs be aligned. This is a
   later, separate increment and is **not** 4 PM package content.
-- **Change Dye** — **Menu local-only partial `3a664e4b`, not pushed/PIE/shipped or 4 PM content.**
-  Four swatches (Moss, Wine, Slate and Flax) provide hover preview, Apply and Cancel with no cost.
-  The root MetaHuman dyeable linen tunic now renders tinted instead of as the untinted base tank and
-  shorts. After the package, validate at 1080p and 4K on the actual model and portrait: preview,
-  Cancel, F5/F9 persistence and no cross-page visual spill.
+- **Change Dye** — **Menu 1080p `[ready]` branch `4a3a895e`, integration review pending; not
+  shipped or 4 PM content.** Isolated commits `3a664e4b` + `a38b57af` add
+  `M_HomespunDyeable` / `MI_PrimitiveTankTop+Shorts` tint assets (three `.uasset`s). Four swatches
+  preview the actual MetaHuman body and portrait; Cancel returns exact white at no cost; Apply Wine
+  persists through F5 into a fresh PIE. It still needs 4K and carried-garment coverage. Integration
+  reviews only the isolated dye commits; do not bundle the partial camera work.
 - **Leather backpack upgrade** — **pending, not shipped.** A tentative one-time **$15** purchase at
   the open General Store doubles inventory capacity **120 → 240 items**. (`ShopGoods` normally repeats,
   so this needs a special upgrade row.) $15 is intentionally above the $10 start—roughly ten cabbage
