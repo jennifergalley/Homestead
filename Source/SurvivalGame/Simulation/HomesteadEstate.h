@@ -85,7 +85,8 @@ const EstateLayout& ProvisionalEstateLayout();
 
 // Provisional interactive placements until the world lane bakes DA_EstatePlacements from the
 // Estate level. Each lane appends its own section (ids: world 500000+, overgrowth 510000+,
-// salvage 520000+, town 530000+).
+// salvage 520000+, town 530000+, berry bushes 540000+, derelict farm 550000+, MVP woodland 560000+
+// (scatter.py / mvp_woodland.py, in HomesteadEstateWorldPlacements.inc)).
 const EstatePlacements& ProvisionalEstatePlacements();
 
 // The gap in the ruin's fallen front door on its south front, 10.5 m east of the ManorFootprint's

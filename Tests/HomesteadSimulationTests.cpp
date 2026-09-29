@@ -3316,6 +3316,36 @@ void LegacyVitalsLine()
     CHECK(!legacy.Deserialize(Envelope(hour + " " + minutes + " " + hunger + " " + energy + " nan " + failed + " 1 " + nextId + rest)));
 }
 
+void MvpWoodlandPlacements()
+{
+    // add-mvp-woodland-biome: the west woods carry the MVP's forage (ids 560000+, baked by
+    // Scripts/Terrain/mvp_woodland.py), all on the estate and in a new game.
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
+    const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
+    int trees = 0, branches = 0, berries = 0, roots = 0, total = 0;
+    double nearest = 1e9;
+    for (const auto& placement : ProvisionalEstatePlacements().placements)
+    {
+        if (placement.id < 560000 || placement.id >= 570000) continue;
+        ++total;
+        CHECK(PointInPolygon(boundary, placement.position));
+        trees += placement.kind == ResourceKind::ForestTree;
+        branches += placement.kind == ResourceKind::Branches;
+        berries += placement.kind == ResourceKind::BerryBush;
+        roots += placement.kind == ResourceKind::Roots;
+        nearest = std::min(nearest, std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y));
+    }
+    CHECK(trees >= 150 && branches >= 30 && berries >= 20 && roots >= 20);
+    // West of the manor, about a minute's walk: the region's near edge is some 200 m out.
+    CHECK(nearest > 15000.0 && nearest < 30000.0);
+    Simulation estate;
+    OK(estate.NewEstateGame(layout, ProvisionalEstatePlacements()));
+    const auto& resources = estate.GetState().resources;
+    CHECK(std::count_if(resources.begin(), resources.end(),
+        [](const ResourceNode& node) { return node.id >= 560000 && node.id < 570000; }) == total);
+}
+
 }
 
 int main()
@@ -3372,6 +3402,7 @@ int main()
     Run("long deterministic negative and positive chunk walk", LongDeterministicChunkWalk);
     Run("mixed distant edits, cache churn and exact reload", MixedPersistentWorldChurn);
     Run("sparse edit scale, payload bounds and atomic rejection", SparseEditScaleAndPayloadBounds);
+    Run("MVP woodland placements", MvpWoodlandPlacements);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }
