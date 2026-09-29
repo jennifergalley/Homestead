@@ -216,7 +216,7 @@ work that goes beyond a small verified correction.
 
 | Feedback | Owner | OpenSpec reference / note |
 | --- | --- | --- |
-| **Main-integrated, package pending; not shipped:** approved lake in the owned geographic north-west (Jenny's map reads north-up, right=east, so her visual "up-and-left" overrides her spoken "NE") at **(-50, -745) m**, about **76 × 44 m**, with roughly 110 m from the farm edge and a ~90 m farm-side access path | Weather Agent (`89914e30`) | `df19d74a` is merged as `main` `61c1595c`: Editor build/native 8/8/static-init clean and PIE verify actor load, peaty water/stony landing, carried pail fill/full, knee-deep wade wall, map lake and no `"Dirt road"`. The 2 PM package still must pass pond M/MI material compile/default and heightfield-versus-Landscape packed visual smoke; defer the lake if either fails. |
+| **Main-integrated, package pending; not shipped:** approved lake in the owned geographic north-west (Jenny's map reads north-up, right=east, so her visual "up-and-left" overrides her spoken "NE") at **(-50, -745) m**, about **76 × 44 m**, with roughly 110 m from the farm edge and a ~90 m farm-side access path | Weather Agent (`89914e30`) | `df19d74a` is merged as `main` `61c1595c`: Editor build/native 8/8/static-init clean and PIE verify actor load, peaty water/stony landing, carried pail fill/full, knee-deep wade wall, map lake and no `"Dirt road"`. Integration additionally verified the visible water surface from above (landing reflections and water around the heroine's knees), resolving the prior architecture winding false alarm. The 2 PM package still must pass pond M/MI material compile/default and heightfield-versus-Landscape packed visual smoke; defer the lake if either fails. |
 | **Approved:** a clearly signed manor-south gate/path with protected switchbacks or stairs to a **12–20 m dry beach** along the owned ~630 m cliff coast | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-regional-landforms-water` |
 | **Approved:** the wider walkable beach above (12–20 m dry width) below the owned cliffs | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-shore-and-river-fishing` |
 | The river looks as if it stops before reaching the ocean in Jenny's screenshot | Weather Agent (`89914e30`) | **Partly checked, not resolved:** PIE on `27e2e917` confirms the source, banks and water down to the beach, but the ribbon still ends a couple metres short of the ocean, separated by sand/foam. Own a later true estuary connection while widening the beach; do not mark the gap fixed. |
@@ -224,13 +224,14 @@ work that goes beyond a small verified correction.
 | **Pending:** town buildings are bunched too tightly | Water, after the final road route | The current 12 blocking blockouts occupy a 40 × 34.5 m four-sided square with 0.2–0.35 m adjacent gaps (about 0.9 m by the store); the main road ends ~72 m short. Make a ~60 × 45 m open square with terraces/cottages, 3–6 m side lanes, and a separate curved 5–6 m `townStreet`; preserve main-road 1.94 km chainage plus StoreDoor/Counter and Shop IDs/saves. |
 | Running foot kicks too high toward her butt; lower its swing apex slightly | Harvest Agent / temporary Gait Agent (`65a2408b`) | `polish-locomotion-view-distance-and-time-hud` |
 
-**Water-lane order:** the north-west lake is main-integrated but **package pending, not shipped**;
-defer it if the listed 2 PM material/default or packed-heightfield smoke gates fail. Verify the river
-mouth in the parked 4 PM river branch, then stage **beach → route**. Night lighting and the town-road
-layout are separate later increments after the north-west lake; town-entry/store acceptance, coordinate
-bridge, roadside forage and travel signs wait for the final road route. If the terrain or water work
-needs placement ids, the Water Agent claims them through this page before using them (the registry
-starts at 581000+).
+**Water-lane order:** the north-west lake is main-integrated but **package pending, not shipped**.
+Integration's above-surface/reflection check resolved the false-alarm concern; defer it only if the
+remaining 2 PM material/default or packed-heightfield smoke gates fail. Verify the river mouth in the
+parked 4 PM river branch, then stage **beach → route**. Night lighting and the town-road layout are
+separate later increments after the north-west lake; town-entry/store acceptance, coordinate bridge,
+roadside forage and travel signs wait for the final road route. If the terrain or water work needs
+placement ids, the Water Agent claims them through this page before using them (the registry starts at
+581000+).
 
 **Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
 all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
@@ -332,8 +333,17 @@ requirement.
   It is not eligible for the 4 PM merge until it reports `[ready]`. Only then may it establish that a
   visible weed asset exists wherever the prompt says `"Weeds  E  Pull"` and that none float above
   slopes or patches.
-- **Manor debris** — **Clearing / Props lane** (owner **TBD** when a slot opens): slate and shingle
-  piles that look clearable should become suitable saved clearables, rather than static scenery.
+- **Manor rubble** — **`53fe97d5` is locally cherry-picked by Integration as `9ecb08ad`; not pushed
+  to `main`, packaged or shipped.** Clearable slate heaps and granite/hall cobbles use reserved
+  placement IDs `582000–582099`. Day Estate PIE cleared slate `582003`/`582000` by hand (mesh and
+  prompt gone; Stone awarded); hall cobbles `582006` require the worn pickaxe and two swings
+  (mesh/prompt gone; Stone and Scrap iron awarded). Native 8/8 passed; the Editor build is running.
+
+  After Menu's sprint editor closes, Integration takes the Unreal slot for PIE slate/cobble clearing
+  plus F5/F9 visual persistence, then pushes only if that passes. The packaged heap clear/save/reload
+  remains mandatory before 4 PM inclusion; otherwise defer. Focus can select nearby bramble/weed and
+  resource reach can pass through a wall, matching current nearby-resource behavior. Props' editor is
+  closed; the weeds branch remains partial and excluded while it owes dusk and PIE reload evidence.
 - **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
   hoe blade; a documentation-only answer is insufficient.
 - **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one

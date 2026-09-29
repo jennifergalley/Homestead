@@ -282,6 +282,11 @@ public:
     // vitals' "+N" popups; Serial counts meals so a repeat of the same gain still shows.
     struct FMealGain { double Food = 0, Energy = 0; uint32 Serial = 0; };
     const FMealGain& LastMealGain() const { return MealGain; }
+    // Sprint was asked for (or ran out) with too little Energy: a gentle notice, not a failure.
+    void SprintTooTired();
+    // Keyboard sprint: a tap of Shift toggles it on release, unless Shift was a modifier (Shift+Q,
+    // Shift+click) meanwhile. Movement keys don't count, so Shift+W still toggles.
+    void TrackSprintShift(const FInputKeyEventArgs& Params);
     // The selected hotbar slot's food, even when she has none left (Item::Count if it isn't food).
     Homestead::Item SelectedHotbarFood() const;
     // Console playtest aid: open the general store on the ground ahead of her (moving it if it exists).
@@ -336,6 +341,8 @@ private:
     int64 LastWalletDelta = 0;
     float WalletDeltaRemaining = 0.0f;
     FMealGain MealGain;
+    bool bSprintShiftDown = false;
+    bool bSprintShiftModifier = false;
     // A/X with food selected and nothing to interact with: eat one (or say none is left).
     bool EatSelectedFoodInstead();
     void SyncStores();

@@ -1189,18 +1189,25 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     if (Blocked) CancelSprint();
     const bool Moving = Movement->GetCurrentAcceleration().SizeSquared2D() > 1.0f
         && GetVelocity().SizeSquared2D() > 144.0f;
-    bSprintActive = bSprintHeld && !Blocked && Moving
-        && (Lab || PC->State().energy > 10.0) && SprintAnimation != nullptr;
+    // Too tired to go on: the toggle goes off with one gentle notice, and she walks.
+    if (bSprintOn && !Lab && PC && PC->State().energy <= SprintEnergyFloor)
+    {
+        ResetSprint();
+        PC->SprintTooTired();
+    }
+    bSprintActive = bSprintOn && !Blocked && Moving
+        && (Lab || PC->State().energy > SprintEnergyFloor) && SprintAnimation != nullptr;
     Movement->MaxWalkSpeed = bSprintActive ? SprintSpeed() : WalkSpeed();
     if (bSprintActive && !Lab)
     {
         const auto Result = PC->SpendSprintEnergy(DeltaSeconds);
-        if (!Result.ok || PC->State().energy <= 10.0)
+        if (!Result.ok || PC->State().energy <= SprintEnergyFloor)
         {
-            if (!Result.ok && PC->State().energy > 10.0)
+            if (!Result.ok && PC->State().energy > SprintEnergyFloor)
                 UE_LOG(LogTemp, Error, TEXT("Sprint Energy update failed: %s"),
                     UTF8_TO_TCHAR(Result.message.c_str()));
-            CancelSprint();
+            ResetSprint();
+            if (PC->State().energy <= SprintEnergyFloor) PC->SprintTooTired();
         }
     }
     if (bAppearancePreview) UpdateAppearanceFraming();
@@ -2521,6 +2528,7 @@ void AHomesteadCharacter::CreateMappings()
     };
     MoveAction = MakeAction(EInputActionValueType::Axis2D);
     SprintAction = MakeAction(EInputActionValueType::Boolean);
+    ShiftSprintAction = MakeAction(EInputActionValueType::Boolean);
     MouseLookAction = MakeAction(EInputActionValueType::Axis2D);
     StickLookAction = MakeAction(EInputActionValueType::Axis2D);
     ZoomAction = MakeAction(EInputActionValueType::Axis1D);
@@ -2543,8 +2551,8 @@ void AHomesteadCharacter::CreateMappings()
     auto& MoveStick = Mapping->MapKey(MoveAction, EKeys::Gamepad_Left2D);
     MoveStick.Modifiers.Add(NewObject<UInputModifierDeadZone>(Mapping));
     Mapping->MapKey(MouseLookAction, EKeys::Mouse2D);
-    Mapping->MapKey(SprintAction, EKeys::LeftShift);
-    Mapping->MapKey(SprintAction, EKeys::RightShift);
+    Mapping->MapKey(ShiftSprintAction, EKeys::LeftShift);
+    Mapping->MapKey(ShiftSprintAction, EKeys::RightShift);
     Mapping->MapKey(SprintAction, EKeys::Gamepad_LeftThumbstick);
     auto& LookStick = Mapping->MapKey(StickLookAction, EKeys::Gamepad_Right2D);
     LookStick.Modifiers.Add(NewObject<UInputModifierDeadZone>(Mapping));
@@ -2557,9 +2565,10 @@ void AHomesteadCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
     if (auto* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent))
     {
         Input->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AHomesteadCharacter::Move);
-        Input->BindAction(SprintAction, ETriggerEvent::Started, this, &AHomesteadCharacter::BeginSprint);
-        Input->BindAction(SprintAction, ETriggerEvent::Completed, this, &AHomesteadCharacter::EndSprint);
-        Input->BindAction(SprintAction, ETriggerEvent::Canceled, this, &AHomesteadCharacter::EndSprint);
+        Input->BindAction(SprintAction, ETriggerEvent::Started, this, &AHomesteadCharacter::ToggleSprint);
+        // In the game the controller reads Shift taps itself (so Shift+Q and Shift+click don't flip
+        // sprint); the character lab has no Homestead controller, so Shift's release toggles here.
+        Input->BindAction(ShiftSprintAction, ETriggerEvent::Completed, this, &AHomesteadCharacter::LabShiftSprint);
         Input->BindAction(MouseLookAction, ETriggerEvent::Triggered, this, &AHomesteadCharacter::MouseLook);
         Input->BindAction(StickLookAction, ETriggerEvent::Triggered, this, &AHomesteadCharacter::StickLook);
         Input->BindAction(ZoomAction, ETriggerEvent::Triggered, this, &AHomesteadCharacter::ZoomInput);
@@ -2582,23 +2591,33 @@ void AHomesteadCharacter::Move(const FInputActionValue& Value)
     AddMovementInput(FRotationMatrix(Facing).GetUnitAxis(EAxis::Y), Axis.X);
 }
 
-void AHomesteadCharacter::BeginSprint(const FInputActionValue&)
+void AHomesteadCharacter::RequestSprintToggle()
 {
-    const auto* PC = Cast<AHomesteadController>(Controller);
-    bSprintHeld = PC ? PC->IsWorldReady() && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
-        : InCharacterLab();
+    auto* PC = Cast<AHomesteadController>(Controller);
+    // Menus, planning, the shop and a failed run own the button; it doesn't flip the toggle there.
+    const bool Allowed = PC ? PC->IsWorldReady() && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
+        && !PC->IsShopScreenOpen() && !bAppearancePreview : InCharacterLab();
+    if (!Allowed) return;
+    if (bSprintOn) { ResetSprint(); return; }
+    if (PC && PC->State().energy <= SprintEnergyFloor) { PC->SprintTooTired(); return; }
+    bSprintOn = true;
 }
 
-void AHomesteadCharacter::EndSprint(const FInputActionValue&)
+void AHomesteadCharacter::LabShiftSprint(const FInputActionValue&)
 {
-    CancelSprint();
+    if (!Cast<AHomesteadController>(Controller)) RequestSprintToggle();
 }
 
 void AHomesteadCharacter::CancelSprint()
 {
-    bSprintHeld = false;
     bSprintActive = false;
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed();
+}
+
+void AHomesteadCharacter::ResetSprint()
+{
+    bSprintOn = false;
+    CancelSprint();
 }
 
 void AHomesteadCharacter::ApplyLook(FVector2D Value, float Scale)

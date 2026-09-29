@@ -583,15 +583,16 @@ void AHomesteadLabHUD::DrawHUD()
     if (Avatar)
     {
         const FVector P = Avatar->GetActorLocation();
-        Lines.Add(FString::Printf(TEXT("Speed %.0f cm/s   Sprint %s   Pos %.0f, %.0f, %.0f"),
-            Avatar->GetVelocity().Size2D(), Avatar->IsSprinting() ? TEXT("on") : TEXT("off"), P.X, P.Y, P.Z));
+        Lines.Add(FString::Printf(TEXT("Speed %.0f cm/s   Sprint %s (%s)   Pos %.0f, %.0f, %.0f"),
+            Avatar->GetVelocity().Size2D(), Avatar->IsSprintOn() ? TEXT("on") : TEXT("off"),
+            Avatar->IsSprinting() ? TEXT("running") : TEXT("not running"), P.X, P.Y, P.Z));
     }
     if (Anim)
         Lines.Add(FString::Printf(TEXT("Walk %.2f  Sprint %.2f  Action %.2f   Foot placement %s"),
             Anim->WalkWeight(), Anim->SprintWeight(), Anim->ActionWeight(),
             Feet && Feet->GetInt() ? TEXT("on") : TEXT("off")));
     Lines.Add(FString::Printf(TEXT("Frame %.1f ms   Sun %.1f h"), SmoothedFrameMs, Lab && Lab->LabWorld() ? Lab->LabWorld()->SunHour() : 0.0f));
-    Lines.Add(TEXT("Move WASD / left stick   Sprint Shift / L3   Look mouse / right stick   Zoom wheel"));
+    Lines.Add(TEXT("Move WASD / left stick   Sprint toggle Shift / L3   Look mouse / right stick   Zoom wheel"));
     Lines.Add(TEXT("Console: LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Craft|Water|Fill|Chop|Knife|Till|Machete|Fell   LabHold <tool>|None   LabLoop <action>|Off   LabProp Sticks|Stones|Roots|Berries|Reeds|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
     float Y = 24.0f * Scale;
     for (const FString& Line : Lines)

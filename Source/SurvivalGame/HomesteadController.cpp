@@ -476,6 +476,7 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         if (Params.Event == IE_Pressed) bControlDown = true;
         else if (Params.Event == IE_Released) bControlDown = false;
     }
+    TrackSprintShift(Params);
     if (NamesWidget.IsValid())
     {
         // The Names step owns input; real keys reach it through Slate focus first.
@@ -1480,7 +1481,7 @@ void AHomesteadController::HomesteadTeleport(float X, float Y, float Z)
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
         Avatar->CancelAction(true);
-        Avatar->CancelSprint();
+        Avatar->ResetSprint();
     }
 }
 
@@ -4319,7 +4320,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     if (Avatar)
     {
         Avatar->CancelAction(true);
-        Avatar->CancelSprint();
+        Avatar->ResetSprint();
     }
     WorldId = Save.WorldId;
     LastSuccessfulSave = FDateTime::FromUnixTimestamp(Save.SavedAtUtc);
@@ -4476,7 +4477,7 @@ void AHomesteadController::RetryCheckpoint()
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
         Avatar->CancelAction(true);
-        Avatar->CancelSprint();
+        Avatar->ResetSprint();
     }
     Appearance = SessionAppearance;
     PendingLocation = SessionLocation;
@@ -4519,6 +4520,7 @@ void AHomesteadController::NewGame()
         Appearance.HairStyle = 1; Appearance.MetaHair = HomesteadLook::MetaHairForLegacy(1);
     }
     ResetHotbar();
+    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->ResetSprint();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);
     PendingRotation = FRotator(-15, 15, 0);
