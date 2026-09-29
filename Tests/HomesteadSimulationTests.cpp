@@ -294,7 +294,7 @@ void DefaultsAndValidation()
     CHECK(sim.UsedCapacity() == 0);
     CHECK(sim.GetState().resources.size() >= 70);
     CHECK(sim.GetState().hour == 6);
-    CHECK(sim.GetState().dayMinutes == 30);
+    CHECK(sim.GetState().dayMinutes == 60);
     CHECK(std::string(ResourceName(ResourceKind::Flowers)) == "Meadow herb");
     CHECK(std::string(ItemName(Item::Flowers)) == "Meadow herb");
     CHECK(std::string(ItemName(Item::Timber)) == "Timber");
@@ -1653,10 +1653,10 @@ void ClockPauseAndBatching()
     const auto initial = sim.Serialize();
     sim.Advance(3600, Home, true);
     CHECK(sim.Serialize() == initial);
-    // New games run 30-minute days: 150 real seconds are two game hours.
+    // New games run 60-minute days: 150 real seconds are one game hour.
     sim.Advance(150, Home);
-    CHECK(Close(sim.GetState().hour, 8));
-    OK(sim.SetDayMinutes(60));
+    CHECK(Close(sim.GetState().hour, 7));
+    OK(sim.SetDayMinutes(30));
     sim.Advance(150, Home);
     CHECK(Close(sim.GetState().hour, 9));
     Simulation large, small;

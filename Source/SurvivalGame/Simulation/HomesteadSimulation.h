@@ -291,8 +291,9 @@ struct Parcel
 struct State
 {
     double hour = 6.0;
-    // Real minutes per game day; new games start at 30 (Settings offers 30, 60 and 120).
-    double dayMinutes = 30.0;
+    // Real minutes per game day. New games start at 60 ("Balanced"), long enough to walk to town
+    // and back while the shops are open; Settings offers 30, 60 and 120, and saves keep their own.
+    double dayMinutes = 60.0;
     double hunger = 85.0;
     double energy = 100.0;
     bool failed = false;

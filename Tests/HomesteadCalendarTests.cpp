@@ -155,20 +155,27 @@ void NewGameDateAndDayLength()
     Simulation sim = Estate();
     CHECK(Calendar::ShortDate(sim.Today()) == "Mon, Spring 1");
     CHECK(sim.DayNumber() == 1 && std::string(sim.SeasonName()) == "Spring");
-    // A new game's day lasts 30 real minutes: 15 real minutes unpaused pass 12 game hours.
-    CHECK(sim.GetState().dayMinutes == 30.0);
+    // A new game's day lasts 60 real minutes: 15 real minutes unpaused pass 6 game hours.
+    CHECK(sim.GetState().dayMinutes == 60.0);
     const double before = sim.GetState().hour;
     sim.Advance(15.0 * 60.0, Spawn);
-    CHECK(Close(sim.GetState().hour - before, 12.0));
-    // Settings keep the longer days, and the choice saves with the game.
-    OK(sim.SetDayMinutes(60.0));
+    CHECK(Close(sim.GetState().hour - before, 6.0));
+    // Settings offer faster days too, and the choice saves with the game.
+    OK(sim.SetDayMinutes(30.0));
     Simulation loaded;
     EstatePlacements none;
     none.bakeVersion = 7;
     loaded.SetLayout(SquareLayout());
     loaded.SetPlacements(none);
     OK(loaded.Deserialize(sim.Serialize()));
-    CHECK(loaded.GetState().dayMinutes == 60.0);
+    CHECK(loaded.GetState().dayMinutes == 30.0);
+    // A save made at another day length keeps it, rather than taking the new-game default.
+    OK(sim.SetDayMinutes(120.0));
+    Simulation leisurely;
+    leisurely.SetLayout(SquareLayout());
+    leisurely.SetPlacements(none);
+    OK(leisurely.Deserialize(sim.Serialize()));
+    CHECK(leisurely.GetState().dayMinutes == 120.0);
     // The rain schedule keeps every third day, keyed off the calendar day.
     CHECK(!IsRainingAt(HourOf(0, 1, 12.0)) && IsRainingAt(HourOf(0, 2, 12.0)) && !IsRainingAt(HourOf(0, 3, 12.0)));
 }
@@ -385,7 +392,7 @@ void CropSeasonsAndWithering()
 int main()
 {
     Run("calendar math: 28-day seasons, weekdays and years", CalendarMath);
-    Run("a new game starts Mon, Spring 1 with 30-minute days", NewGameDateAndDayLength);
+    Run("a new game starts Mon, Spring 1 with 60-minute days", NewGameDateAndDayLength);
     Run("the season rollover hook fires once per season", SeasonRolloverHook);
     Run("hunger slows her but never fails the estate", GentleHunger);
     Run("crops grow in season and wither when it ends", CropSeasonsAndWithering);
