@@ -607,10 +607,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, Garden]() { Teleport(Garden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
     const auto SeedsBefore = MakeShared<int32>(0);
-    Add(TEXT("Plant the wild-root seeds through gamepad A"),
+    Add(TEXT("Plant the wild-root seeds through gamepad A (Seeds chosen on the hotbar)"),
         [this, SeedsBefore]()
         {
             *SeedsBefore = Controller->Simulation().Count(Homestead::Item::Seeds);
+            Controller->ChooseOnHotbar(Homestead::Item::Seeds);
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, SeedsBefore]()
@@ -643,15 +644,40 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Approach the bare berry garden"),
         [this, BerryGarden]() { Teleport(BerryGarden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
+    const auto StockBefore = MakeShared<TPair<int32, int32>>();
+    const auto Unchanged = [this, BerryPlotId, StockBefore]()
+    {
+        const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
+        return Plot && !Plot->planted && Controller->ToastIsError()
+            && Controller->Simulation().Count(Homestead::Item::Berries) == StockBefore->Key
+            && Controller->Simulation().Count(Homestead::Item::Seeds) == StockBefore->Value;
+    };
+    Add(TEXT("Gamepad X on bare soil only weeds: it sows nothing and spends nothing"),
+        [this, StockBefore]()
+        {
+            *StockBefore = {Controller->Simulation().Count(Homestead::Item::Berries), Controller->Simulation().Count(Homestead::Item::Seeds)};
+            Controller->ChooseOnHotbar(Homestead::Item::Berries);
+            Tap(EKeys::Gamepad_FaceButton_Left);
+        }, Unchanged);
+    Add(TEXT("Gamepad A with no seed chosen sows nothing and spends nothing"),
+        [this, StockBefore]()
+        {
+            *StockBefore = {Controller->Simulation().Count(Homestead::Item::Berries), Controller->Simulation().Count(Homestead::Item::Seeds)};
+            for (const auto& Slot : Controller->HotbarSnapshot())
+                if (!Slot.Seed && Slot.Tool != Homestead::Item::Berries) { Controller->SelectHotbarSlot(Slot.Index); break; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        }, Unchanged);
     const auto FruitBefore = MakeShared<int32>(0);
     const auto BerrySeedStock = MakeShared<int32>(0);
-    Add(TEXT("Plant seeds from a foraged berry with gamepad X rather than the root action"),
+    Add(TEXT("Sow seeds from a foraged berry: berries chosen on the hotbar, then gamepad A"),
         [this, FruitBefore, BerrySeedStock, SecondaryStarts, PickingStarts]()
         {
             *FruitBefore = Controller->Simulation().Count(Homestead::Item::Berries);
             *BerrySeedStock = Controller->Simulation().Count(Homestead::Item::Seeds);
             *SecondaryStarts = PickingStarts();
-            Tap(EKeys::Gamepad_FaceButton_Left);
+            // X / F only weeds (Jenny); a berry is sown only when it's the chosen seed.
+            Controller->ChooseOnHotbar(Homestead::Item::Berries);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, BerryPlotId, FruitBefore, BerrySeedStock, SecondaryStarts, PickingStarts]()
         {

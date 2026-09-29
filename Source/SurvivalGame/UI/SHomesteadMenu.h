@@ -170,6 +170,12 @@ private:
     void BuildPopup();
     void AdjustQuantity(int32 Delta);
     bool BuildItemOptions(const FHomesteadRow& Row);
+    // A second line under the popup title (the walk's distance, time and arrival), wrapped.
+    FString PopupBody;
+    // The Map tab's walk to the focused place: Town (or its store) and the manor.
+    TOptional<Homestead::TravelDestination> MapTravelDestination() const;
+    FString MapTravelLine() const;
+    void OpenTravelPrompt(Homestead::TravelDestination Destination);
     void OpenItemContextMenuFor(const FHomesteadRow& Row, FVector2D Anchor);
     // Where a popup opens: at the pointer for mouse input, beside the focused tile otherwise.
     FVector2D PopupAnchorFor(const TSharedPtr<SWidget>& Widget, bool bPointer) const;

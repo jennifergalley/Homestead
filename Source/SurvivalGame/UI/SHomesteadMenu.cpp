@@ -2070,8 +2070,9 @@ void SHomesteadMenu::BuildPopup()
     DialogScroll.Reset();
     ModalHost->SetVisibility(EVisibility::Visible);
     const bool Quantity = Dialog == EDialog::Quantity;
-    const float Width = Quantity ? 340.0f : 280.0f;
-    const float Height = 60.0f + PopupOptions.Num() * 48.0f + (Quantity ? 110.0f : 0.0f);
+    const bool Body = !PopupBody.IsEmpty();
+    const float Width = Quantity ? 340.0f : Body ? 420.0f : 280.0f;
+    const float Height = 60.0f + PopupOptions.Num() * 48.0f + (Quantity ? 110.0f : 0.0f) + (Body ? 110.0f : 0.0f);
     // Open beside the pointer, kept inside the book.
     const FGeometry Frame = Root->GetCachedGeometry();
     const FVector2D Size = Frame.GetLocalSize();
@@ -2104,6 +2105,12 @@ void SHomesteadMenu::BuildPopup()
         SNew(STextBlock).Text(FText::FromString(PopupTitle)).ColorAndOpacity(MenuGold)
         .Font(FCoreStyle::GetDefaultFontStyle("Bold", 16))
     ];
+    if (Body)
+        List->AddSlot().AutoHeight().Padding(4, 0, 4, 10)
+        [
+            SNew(STextBlock).Text(FText::FromString(PopupBody)).ColorAndOpacity(Ink).AutoWrapText(true)
+            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14)).LineHeightPercentage(1.1f)
+        ];
     if (Quantity)
     {
         List->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 2)
@@ -2651,8 +2658,57 @@ TSharedRef<SWidget> SHomesteadMenu::BuildMap()
     return SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(MenuPine).Padding(4)
     [
         FocusAnchor(SAssignNew(MapView, SHomesteadMapView).Map(Presenter)
-            .UsesGamepad_Lambda([this]() { return Controller.IsValid() && Controller->UsesGamepad(); }), ERegion::Content, 0)
+            .UsesGamepad_Lambda([this]() { return Controller.IsValid() && Controller->UsesGamepad(); })
+            .PlaceAction_Lambda([this]() { return MapTravelLine(); })
+            .OnPlaceAction_Lambda([this]()
+            {
+                if (const auto Destination = MapTravelDestination(); Destination && PointerAction()) OpenTravelPrompt(*Destination);
+            }), ERegion::Content, 0)
     ];
+}
+
+TOptional<Homestead::TravelDestination> SHomesteadMenu::MapTravelDestination() const
+{
+    const TOptional<EHomesteadMapGlyph> Glyph = MapView ? MapView->SelectedGlyph() : TOptional<EHomesteadMapGlyph>();
+    if (!Glyph) return {};
+    if (*Glyph == EHomesteadMapGlyph::Manor) return Homestead::TravelDestination::Manor;
+    if (*Glyph == EHomesteadMapGlyph::Town || *Glyph == EHomesteadMapGlyph::Store) return Homestead::TravelDestination::Town;
+    return {};
+}
+
+FString SHomesteadMenu::MapTravelLine() const
+{
+    const auto Destination = MapTravelDestination();
+    if (!Destination || !Controller.IsValid()) return {};
+    const Homestead::TravelPlan Plan = Controller->MenuPlanTravel(*Destination);
+    if (!Plan.ok) return UTF8_TO_TCHAR(Plan.error.c_str());
+    return FString::Printf(TEXT("%s: walk there, about %s"), Controller->UsesGamepad() ? TEXT("X") : TEXT("T or click here"),
+        UTF8_TO_TCHAR(Homestead::FormatWalkDuration(Plan.gameHours).c_str()));
+}
+
+void SHomesteadMenu::OpenTravelPrompt(Homestead::TravelDestination Destination)
+{
+    if (!Controller.IsValid() || Dialog != EDialog::None) return;
+    const Homestead::TravelPlan Plan = Controller->MenuPlanTravel(Destination);
+    if (!Plan.ok)
+    {
+        // The walk refuses with the reason, as a notice, and changes nothing.
+        Controller->MenuTravel(Destination, Controller->Simulation().GetRevision());
+        return;
+    }
+    const uint64 Revision = Controller->Simulation().GetRevision();
+    PopupOptions.Reset();
+    PopupTitle = Destination == Homestead::TravelDestination::Manor ? TEXT("Walk home to the manor?") : TEXT("Walk into town?");
+    PopupBody = UTF8_TO_TCHAR(Plan.summary.c_str());
+    PopupOptions.Add({[]() { return FString(TEXT("Set off")); },
+        [this, Destination, Revision]() { Controller->MenuTravel(Destination, Revision); }, nullptr});
+    PopupOptions.Add({[]() { return FString(TEXT("Stay here")); }, nullptr, nullptr});
+    // Centred over the map.
+    PopupAnchor = MapView ? MapView->GetCachedGeometry().LocalToAbsolute(MapView->GetCachedGeometry().GetLocalSize() * 0.5f
+        - FVector2D(200, 110)) : FVector2D::ZeroVector;
+    SetDialog(EDialog::Context);
+    DialogSelection = 0;
+    bFocusPending = true;
 }
 
 bool SHomesteadMenu::HandleMapKey(FKey Key, EInputEvent Event, float InputAmount)
@@ -2674,6 +2730,11 @@ bool SHomesteadMenu::HandleMapKey(FKey Key, EInputEvent Event, float InputAmount
     // The triggers zoom here (through their axes) instead of cycling sections.
     if (Key == EKeys::Gamepad_LeftTrigger || Key == EKeys::Gamepad_RightTrigger) return true;
     if (Key == EKeys::M) { Back(); return true; }
+    if (Key == EKeys::T || Key == EKeys::Gamepad_FaceButton_Left)
+    {
+        if (const auto Destination = MapTravelDestination()) OpenTravelPrompt(*Destination);
+        return true;
+    }
     const int32 Dx = Key == EKeys::Right || Key == EKeys::Gamepad_DPad_Right ? 1 : Key == EKeys::Left || Key == EKeys::Gamepad_DPad_Left ? -1 : 0;
     const int32 Dy = Key == EKeys::Down || Key == EKeys::Gamepad_DPad_Down ? 1 : Key == EKeys::Up || Key == EKeys::Gamepad_DPad_Up ? -1 : 0;
     if (Region == ERegion::Tabs)
@@ -2945,6 +3006,7 @@ void SHomesteadMenu::SetDialog(EDialog Value)
     CancelVirtualItemDrag();
     StopCraftHold();
     Dialog = Value; DialogSelection = 0;
+    if (Value == EDialog::None) PopupBody.Reset();
     bEditingAmount = false;
     LeftStick.Reset();
     PendingDirection = {};

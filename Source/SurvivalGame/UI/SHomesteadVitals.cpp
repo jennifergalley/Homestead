@@ -82,9 +82,12 @@ void SHomesteadVitals::Tick(const FGeometry& Geometry, double Time, float Delta)
     {
         // A full bar gains nothing (or less than one point), and says nothing.
         if (Gains[Meter] < 0.5) continue;
-        // Fill on from wherever the bar is showing now, so a second mouthful carries on smoothly.
+        // Fill on from wherever the bar is showing now, so a second mouthful carries on smoothly, and
+        // quick mouthfuls add up in one "+N" rather than replacing each other.
+        const double Age = Now - Meals[Meter].StartedAt;
+        const bool bShowing = Age >= 0 && Age < VitalsStyle::MealPopupSeconds;
         Meals[Meter].From = Displayed(Meter, Values[Meter] - Gains[Meter]);
-        Meals[Meter].Gain = Gains[Meter];
+        Meals[Meter].Gain = (bShowing ? Meals[Meter].Gain : 0.0) + Gains[Meter];
         Meals[Meter].StartedAt = Now;
     }
 }

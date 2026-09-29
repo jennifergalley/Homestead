@@ -250,14 +250,15 @@ Gather berries and eat them from the Pack page, or pin food to the hotbar (Pack 
 Pin to hotbar) and eat it with the left mouse button / RT while it's selected. Gather branches, stones, and
 fiber from reeds. Make a hatchet, a stone hoe, and a watering can. Clear a
 small patch, build a floor/walls/doorway/roof, and add a bedroll, chest, and fire.
-Collect planting stock from wild roots, hoe a garden square (one 1 m square per stroke, just ahead of her), and kneel to plant it with the seed you choose (E roots, F berry seeds). Refill the can
+Collect planting stock from wild roots, hoe a garden square (one 1 m square per stroke, just ahead of her), and kneel to plant it with the seed chosen on the hotbar (E). Refill the can
 at the stream; water and weed as needed. Fuel the fire with branches and prepare
 the simple root recipes. Food and warmth matter while time passes. Work spends
 Energy (felling and tilling most, gathering little) while time alone tires her
 only slowly; when she's too exhausted to work, eat or sleep.
 
-On a bare plot, **A/E plants roots using seeds**; **X/F plants berry seeds using
-one foraged berry**. Once planted, X/F weeds. Mature roots produce roots and seeds,
+On a bare plot, **A/E sows the seed chosen on the hotbar** (Seeds for wild roots, a
+chosen berry for berry seed; with nothing chosen it sows nothing). **X/F only ever weeds**, and **RT/LMB eats a
+chosen berry**, even beside the garden. Mature roots produce roots and seeds,
 then leave the plot available for replanting; mature berry plants give six berries
 and remain in place to regrow. The Look page changes appearance without making a
 cosmetic apron into free winter insulation.
