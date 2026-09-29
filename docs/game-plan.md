@@ -140,7 +140,9 @@ is historical, not the current build/authorization status.
 - **Meters:** one gentle energy meter, as in Coral Island. There's no hunger, cold, death or
   spoilage. Food restores energy, and proper meals make her Well fed, so work costs less for a
   few hours.
-- **Calendar:** days of about 30 real minutes, from 6 AM to 2 AM, and four 28-day seasons.
+- **Calendar:** new Estate games default to days of about 60 real minutes, from 6 AM to 2 AM, and
+  four 28-day seasons. Settings retain 30/60/120-minute choices, and existing saves retain their
+  stored day length.
   It's sunny with occasional rain.
 - **Tools:** axe, hoe, pail or watering can, scythe, billhook and pickaxe, then a fishing
   pole. The first tools are hafted from salvaged heads, and a blacksmith takes them through
