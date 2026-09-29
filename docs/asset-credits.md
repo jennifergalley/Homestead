@@ -49,12 +49,13 @@ Partly Cloudy (Pure Sky) HDRI by Greg Zaal (https://polyhaven.com/a/kloofendal_4
 which ships with no asset.
 
 The woodland underbrush set (`Assets\Props\` BlackberryBramble, ToyonHedge, Hazel, DeerBrush,
-Thimbleberry, BrackenFern, WildStrawberry, GrassYarrowTuft and WildMarjoram, built with
+Thimbleberry, BrackenFern, WildStrawberry, GrassYarrowTuft, WildMarjoram and Nettle, built with
 `Scripts\Blender\homestead_foliage.py` and `homestead_shrub.py`) is project-authored: every mesh is generated from
 code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
 library. No scan, photo or third-party texture is used.
 
-The Cornish woodland trees (`Assets\Props\` Oak, Beech, Sycamore and Hawthorn, imported to
+The Cornish woodland trees and shrubs (`Assets\Props\` Oak, Beech, Sycamore, Hawthorn, Holly and
+HazelCoppice, imported to
 `Content/SurvivalGame/Environment/Trees/<Name>/SM_<Name>`; recipes in `Scripts\Blender\Recipes\`, grown
 by `Scripts\Blender\homestead_tree.py` on top of `homestead_shrub.py` and `homestead_foliage.py`) are
 project-authored: skeletons, bark tubes and leaf cards are generated from code, and every bark column
@@ -94,6 +95,7 @@ https://opengameart.org/content/fireplace-sound-loop).
 RuinFallenTimbers (`Scripts\Blender\Recipes\ruin_fallen_timbers.py`) is project-authored procedural charred/weathered oak roof-timber debris with adzed beam geometry, split fibre, irregular char and rotten end treatment, hand-forged nails and procedural materials.
 RuinSlateScatter (`Scripts\Blender\Recipes\ruin_slate_scatter.py`) is project-authored procedural Delabole-style slate-roof debris with thick split-cleavage slate geometry, nail holes, subdued soil/moss pockets and procedural materials.
 RuinIvy (`Scripts\Blender\Recipes\ruin_ivy.py`) is project-authored procedural common-ivy wall mat geometry with woody clinging stems, rootlets, alpha-free broad Hedera-style lobed leaves with palmate veins on a shared UV atlas and procedural plant materials.
+The derelict farm and estate disrepair props are project-authored procedural geometry with procedural materials and no third-party asset or texture: FarmFence (rotten riven-oak posts, rails, broken rails and the field gateway, `Recipes\farm_fence.py`), FarmField (grassed-over ridge patch, dead bolted stalks, bean poles, `Recipes\farm_field.py`), FarmPlough (a rusted swing plough, `Recipes\farm_plough.py`), FarmCart (a broken tumbril cart, `Recipes\farm_cart.py`) and EstateDebris (a stove-in barrel, a broken crate, a rubbish heap and a collapsed lean-to, `Recipes\estate_debris.py`) and EstateRubbish (the clear-out's hand-clearable rotten plank pile, small ash midden and rusty scrap heap, `Recipes\estate_rubbish.py`, reusing the EstateDebris helpers); shared helpers are in `Recipes\farm\common.py`. `M_FarmFurrowsGrass` (`Scripts\Terrain\build_farm_furrow_material.py`) reuses the project's existing GrassGround pasture textures so the ridges match the landscape.
 The Estate ocean (`Content\SurvivalGame\Estate\Water`: `M_EstateOcean`, `MI_EstateOcean`,
 `SM_EstateOcean`, `T_EstateOceanShore`, `T_EstateOceanShoreFar`, `T_OceanRipples_N`, `T_OceanFoam` and `VT_OceanWaves` with its atlas) is project-authored.
 `Scripts\Terrain\bake_ocean.py` generates the mesh and all three textures in numpy: the shore data

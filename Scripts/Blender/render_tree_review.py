@@ -1,16 +1,18 @@
 """Quick Cycles review renders for a built tree set, headless.
 
     blender --background <Assets/Props/Name/Name.blend> --python render_tree_review.py
-        -- [--samples 96] [--width 1920 --height 1080] [--view eye|under|far|lods]
+        -- [--samples 96] [--width 1920 --height 1080] [--view eye|close|under|far|lods]
 
-Views (``review_<view>.png`` beside report.json):
+Views (``review_<view>.png`` beside report.json; the default set is eye, under, far, lods):
 - ``eye``: LOD0 from a standing player's eye (1.6 m) about 1.2 crown widths away.
+- ``close``: LOD0 from about a metre outside the crown, for judging leaf shape and shrubs.
 - ``under``: LOD0 from just outside the trunk, looking up into the canopy.
 - ``far``: a small grove of LOD0 copies from about 150 m.
 - ``lods``: LOD0..LOD3 side by side from about 150 m, to judge whether the far LODs hold the
   canopy's mass and colour.
 """
 import argparse
+import json
 import math
 import sys
 from pathlib import Path
@@ -78,7 +80,11 @@ def main():
     lo, hi = kit.bounds(lod0)
     size = hi - lo
     width = max(size.x, size.y)
-    ground = 0.3  # the skirt: the tree's ground line sits 30 cm above its pivot
+    # The skirt: the tree's ground line sits this far above its pivot (report tree.ground_line_cm).
+    ground = 0.3
+    report = folder / "report.json"
+    if report.exists():
+        ground = json.loads(report.read_text()).get("tree", {}).get("ground_line_cm", 30.0) / 100.0
     for obj in meshes:
         obj.location = (0, 0, -ground)
     views = args.view or ["eye", "under", "far", "lods"]
@@ -90,6 +96,10 @@ def main():
             lod0.hide_render = False
             d = width * 1.15 + 4
             camera((-0.55 * d, -0.84 * d, 1.6), (0, 0, size.z * 0.45), 24)
+        elif view == "close":
+            lod0.hide_render = False
+            d = width * 0.5 + 1.2
+            camera((-0.55 * d, -0.84 * d, 1.5), (0, 0, min(1.4, size.z * 0.5)), 35)
         elif view == "under":
             lod0.hide_render = False
             camera((-2.2, -3.0, 1.6), (4.0, 6.0, size.z * 0.75), 16)

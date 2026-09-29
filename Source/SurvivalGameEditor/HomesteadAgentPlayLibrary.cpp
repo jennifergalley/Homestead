@@ -175,6 +175,12 @@ namespace
         case Homestead::ResourceKind::Bluebells: return TEXT("Bluebells");
         case Homestead::ResourceKind::WildDaffodils: return TEXT("WildDaffodils");
         case Homestead::ResourceKind::WildGarlic: return TEXT("WildGarlic");
+        case Homestead::ResourceKind::Nettles: return TEXT("Nettles");
+        case Homestead::ResourceKind::StumpMedium: return TEXT("StumpMedium");
+        case Homestead::ResourceKind::BrokenCrate: return TEXT("BrokenCrate");
+        case Homestead::ResourceKind::BrokenBarrel: return TEXT("BrokenBarrel");
+        case Homestead::ResourceKind::RubbishHeap: return TEXT("RubbishHeap");
+        case Homestead::ResourceKind::RottenPlanks: return TEXT("RottenPlanks");
         default: return TEXT("Unknown");
         }
     }

@@ -1926,9 +1926,12 @@ FString AHomesteadController::FocusActions() const
                 {
                     const bool Handles = ToolAvailable && Homestead::ToolForItem(SelectedTool) == Overgrowth->tool;
                     if (Node.kind == Homestead::ResourceKind::SalvagePile) return A + TEXT(" Search");
+                    // Weeds and nettles are pulled, rubbish is cleared away, a fallen bough gathered.
+                    const FString Hand = A + (Node.kind == Homestead::ResourceKind::Weeds || Node.kind == Homestead::ResourceKind::Nettles
+                        ? TEXT(" Pull") : Homestead::IsRubbish(Node.kind) ? TEXT(" Clear away") : TEXT(" Gather"));
                     if (Handles) return Use + TEXT(" ") + SwingVerb(SelectedTool)
-                        + (Overgrowth->byHand ? TEXT("   ") + A + TEXT(" Gather") : FString());
-                    if (Overgrowth->byHand) return A + TEXT(" Gather");
+                        + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
+                    if (Overgrowth->byHand) return Hand;
                     return ToolPrompt(Sim, Homestead::ToolItem(Overgrowth->tool), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                 }
                 return A + TEXT(" Gather");
@@ -2265,7 +2268,7 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
                     else Notify(Check);
                     return;
                 }
-        Notify(Tool == Homestead::Item::Scythe ? TEXT("Face tall grass or weeds to mow.")
+        Notify(Tool == Homestead::Item::Scythe ? TEXT("Face tall grass, weeds or nettles to mow.")
             : Tool == Homestead::Item::Billhook ? TEXT("Aim at bramble or a sapling.")
             : Tool == Homestead::Item::Pickaxe ? TEXT("Aim at rubble or a rock.")
             : TEXT("Aim at a tree, stump or fallen timber."), true);
@@ -2299,6 +2302,7 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     {
         // Rough footprint radius (cm) of what she strikes, so the point or bit lands on its near side.
         const float Radius = Kind == Homestead::ResourceKind::StumpSmall ? 16.0f
+            : Kind == Homestead::ResourceKind::StumpMedium ? 20.0f
             : Kind == Homestead::ResourceKind::StumpLarge ? 28.0f
             : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
             : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
@@ -2376,6 +2380,7 @@ void AHomesteadController::LandOvergrowthSwing()
     {
         // One sweep mows everything in the arc, each tuft its own transaction, with one summary.
         const int32 HayBefore = Sim.Count(Homestead::Item::Hay), WeedsBefore = Sim.Count(Homestead::Item::Weeds);
+        const int32 SeedsBefore = Sim.Count(Homestead::Item::Seeds);
         int32 Mown = 0;
         FString Problem;
         for (const int32 Id : ScytheTargets)
@@ -2395,6 +2400,8 @@ void AHomesteadController::LandOvergrowthSwing()
         if (Hay > 0 || Weeds > 0) Summary += TEXT(":");
         if (Hay > 0) Summary += FString::Printf(TEXT(" +%d Hay"), Hay);
         if (Weeds > 0) Summary += FString::Printf(TEXT("%s +%d Weeds"), Hay > 0 ? TEXT(",") : TEXT(""), Weeds);
+        if (const int32 Seeds = Sim.Count(Homestead::Item::Seeds) - SeedsBefore; Seeds > 0)
+            Summary += FString::Printf(TEXT(", +%d Seeds"), Seeds);
         Notify(Summary + TEXT("."));
         PlayEffect(GrassStepA, 0.8f);
         return;
@@ -2505,13 +2512,18 @@ void AHomesteadController::Interact()
                     Avatar->PlayKnifeCut(ActionTarget); // Work the dried hide free with the knife.
                 else if (Sticks || Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::Roots
                     || Kind == Homestead::ResourceKind::BerryBush || Kind == Homestead::ResourceKind::FallenBranch
-                    || Kind == Homestead::ResourceKind::SalvagePile)
+                    || Kind == Homestead::ResourceKind::SalvagePile || Kind == Homestead::ResourceKind::Weeds
+                    || Kind == Homestead::ResourceKind::Nettles || Homestead::IsRubbish(Kind))
                 {
                     const bool Berries = Kind == Homestead::ResourceKind::BerryBush;
-                    // A fallen bough gathered by hand is broken into sticks; searching a salvage pile
-                    // lifts its fallen stones aside, so it plays the stone gather.
-                    const auto Gather = Sticks || Kind == Homestead::ResourceKind::FallenBranch ? EHomesteadKneelGather::Sticks
+                    // A fallen bough gathered by hand is broken into sticks, and so are the rotten
+                    // boards of a crate, barrel or plank pile; searching a salvage pile or a midden
+                    // lifts its stones aside, so it plays the stone gather. Weeds are pulled like roots.
+                    const bool Boards = Kind == Homestead::ResourceKind::BrokenCrate || Kind == Homestead::ResourceKind::BrokenBarrel
+                        || Kind == Homestead::ResourceKind::RottenPlanks;
+                    const auto Gather = Sticks || Kind == Homestead::ResourceKind::FallenBranch || Boards ? EHomesteadKneelGather::Sticks
                         : Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::SalvagePile
+                            || Kind == Homestead::ResourceKind::RubbishHeap
                         ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
                     FVector2D Target(ActionTarget.x, ActionTarget.y);
                     // Berries are picked from the near side of the bush, not its centre; an estate
@@ -2521,6 +2533,15 @@ void AHomesteadController::Interact()
                         const bool Bramble = FocusId >= Homestead::EstatePlacementIdBase && FocusId < Homestead::TransientResourceIdBase;
                         const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
                         if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * (Bramble ? 62.0f : 22.0f);
+                    }
+                    // Rubbish is a metre or two across: she works at its near edge, not kneeling in it.
+                    else if (Homestead::IsRubbish(Kind))
+                    {
+                        const bool BigHeap = Kind == Homestead::ResourceKind::RubbishHeap && FocusId >= 570000 && FocusId < 570008;
+                        const float Edge = BigHeap ? 95.0f : Kind == Homestead::ResourceKind::BrokenBarrel ? 55.0f
+                            : Kind == Homestead::ResourceKind::RottenPlanks ? 50.0f : 45.0f;
+                        const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
+                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * FMath::Clamp(Toward.Size() - 30.0f, 0.0f, Edge);
                     }
                     if (Avatar->PlayKneelGather(Gather, Target, Berries) && Landscape)
                     {

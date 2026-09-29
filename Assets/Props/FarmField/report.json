@@ -1,0 +1,257 @@
+{
+  "schema": 1,
+  "name": "FarmField",
+  "description": "Modular abandoned field details: an old slumped ridge-and-furrow patch, dead crop/weed stalks, and old hazel bean/pea stakes with rotten twine.",
+  "collision": "none",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/farm_field.py",
+  "source_sha256": "b886726e4dcc40b923fd28bd11ac4a49aa3767a2e537fc8f058d0e35a047da11",
+  "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_FarmFurrows": {
+      "vertices": 9184,
+      "triangles": 17982,
+      "size_cm": [
+        600.0,
+        400.0,
+        22.42
+      ],
+      "materials": [
+        {
+          "name": "M_FarmFurrows",
+          "textures": {
+            "basecolor": "T_FarmFurrows_basecolor.png",
+            "roughness": "T_FarmFurrows_roughness.png",
+            "normal": "T_FarmFurrows_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmFurrows_basecolor.png",
+          "roughness": "T_FarmFurrows_roughness.png",
+          "normal": "T_FarmFurrows_normal.png",
+          "ao": "T_FarmFurrows_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.04
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 5.2,
+        "ground": "origin"
+      },
+      "fbx": "SM_FarmFurrows.fbx",
+      "sha256": "8d628f969d01f36906f411dc22c8f164bafc8c9ddd95b23a53e9c1c79508d52f",
+      "preview": "preview_SM_FarmFurrows.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmFurrows_hero.png",
+          "detail": "beauty_SM_FarmFurrows_detail.png",
+          "eye": "beauty_SM_FarmFurrows_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_FarmDeadStalks": {
+      "vertices": 6038,
+      "triangles": 11052,
+      "size_cm": [
+        99.01,
+        95.3,
+        110.93
+      ],
+      "materials": [
+        {
+          "name": "M_FarmDeadStalks",
+          "textures": {
+            "basecolor": "T_FarmDeadStalks_basecolor.png",
+            "roughness": "T_FarmDeadStalks_roughness.png",
+            "normal": "T_FarmDeadStalks_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmDeadStalks_basecolor.png",
+          "roughness": "T_FarmDeadStalks_roughness.png",
+          "normal": "T_FarmDeadStalks_normal.png",
+          "ao": "T_FarmDeadStalks_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.002281695604324341,
+          -0.016270503401756287,
+          0.553734348807484
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.1
+      },
+      "fbx": "SM_FarmDeadStalks.fbx",
+      "sha256": "3faf9aeaf753625550a90a78c1d5a991ac70432b91d210b2e864f0702a9419f6",
+      "preview": "preview_SM_FarmDeadStalks.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmDeadStalks_hero.png",
+          "detail": "beauty_SM_FarmDeadStalks_detail.png",
+          "eye": "beauty_SM_FarmDeadStalks_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_FarmStakes": {
+      "vertices": 1649,
+      "triangles": 3148,
+      "size_cm": [
+        237.46,
+        114.94,
+        230.53
+      ],
+      "materials": [
+        {
+          "name": "M_FarmStakes",
+          "textures": {
+            "basecolor": "T_FarmStakes_basecolor.png",
+            "roughness": "T_FarmStakes_roughness.png",
+            "normal": "T_FarmStakes_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmStakes_basecolor.png",
+          "roughness": "T_FarmStakes_roughness.png",
+          "normal": "T_FarmStakes_normal.png",
+          "ao": "T_FarmStakes_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.08466917276382446,
+          0.02497774362564087,
+          1.0042569763027132
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_FarmStakes.fbx",
+      "sha256": "b94533eccc3c087561946ef0dec98037a624de548c130b4aa3116888efe320ba",
+      "preview": "preview_SM_FarmStakes.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmStakes_hero.png",
+          "detail": "beauty_SM_FarmStakes_detail.png",
+          "eye": "beauty_SM_FarmStakes_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Blender (x,y,z) imports as Unreal (x,-y,z); extents in report are Unreal cm.",
+  "furrow_axis": "Old crop rows/ridges run along local X; the 6 m patch length is X and width is Y.",
+  "pivot_notes": "SM_FarmFurrows origin is at the patch centre on the average ground line z=0, with feathered edges below zero; stalks and stakes use bottom-centre pivots.",
+  "textures": {
+    "T_FarmFurrows_basecolor.png": "83435b8dbf82b0b0b177c6be97f8d61ed9fea314bbb05f3f21abbb14e658bc48",
+    "T_FarmFurrows_roughness.png": "6db8e785f683eefa4a557ddd8202f32161156057032e668d014a2666b217000a",
+    "T_FarmFurrows_normal.png": "37e3df470459409ce75c985146808f69197d83cd38747e1d6afecf8cb6d5ab59",
+    "T_FarmDeadStalks_basecolor.png": "021ae20af9100065463dc18def9aef3669a6aa0f228c1170256272efe151d4ae",
+    "T_FarmDeadStalks_roughness.png": "d7da5572747df3384fefd8976d00d429ab9333e8417326c81e75f2bd5701f459",
+    "T_FarmDeadStalks_normal.png": "c32959ded6e40448ae79f7963989807749564e88646bbd29060c7919c2cb8987",
+    "T_FarmStakes_basecolor.png": "eb837aaf16ffbaedbb09b837e0ebe44d489a7975a704a27933a74812bc86dbd2",
+    "T_FarmStakes_roughness.png": "fa896716b1fb728b6a219a16fd45ea8661c0bcc420b2b6dfd42b79406d80f138",
+    "T_FarmStakes_normal.png": "6dadedb93279c7d918f64441ba378a9f8de8fcb79117260f31611a3d7c86d85c"
+  }
+}

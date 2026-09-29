@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Primrose",
+  "description": "A primrose in flower, 14 cm tall and 35 cm across: a rosette of wrinkled obovate leaves with pale sulphur-yellow five-petalled flowers on soft stalks. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 9000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/primrose.py",
+  "source_sha256": "39169cc66a7878b4cf54860c8071d99ad578f73a155bfdfd1fb849f79e3bdb90",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_PrimroseClump": {
+      "vertices": 529,
+      "triangles": 664,
+      "size_cm": [
+        35.37,
+        28.77,
+        16.78
+      ],
+      "materials": [
+        {
+          "name": "M_Primrose",
+          "textures": {
+            "basecolor": "T_Primrose_basecolor.png",
+            "normal": "T_Primrose_normal.png",
+            "roughness": "T_Primrose_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0017524957656860352,
+          0.0047676339745521545,
+          0.07
+        ]
+      },
+      "fbx": "SM_PrimroseClump.fbx",
+      "sha256": "fa4ebd8dc2f92bf4215a5d6783e62e88a47bb544cca4075e0a162495356c0a18",
+      "preview": "preview_SM_PrimroseClump.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_PrimroseClump_hero.png",
+          "detail": "beauty_SM_PrimroseClump_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_PrimroseClump_LOD1": {
+      "vertices": 218,
+      "triangles": 240,
+      "size_cm": [
+        33.92,
+        28.85,
+        16.15
+      ],
+      "materials": [
+        {
+          "name": "M_Primrose",
+          "textures": {
+            "basecolor": "T_Primrose_basecolor.png",
+            "normal": "T_Primrose_normal.png",
+            "roughness": "T_Primrose_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0017524957656860352,
+          0.0047676339745521545,
+          0.07
+        ]
+      },
+      "fbx": "SM_PrimroseClump_LOD1.fbx",
+      "sha256": "4a578bebceeec4a6848a7db79adee98a13418bd21ced24351505741c47518068",
+      "preview": "preview_SM_PrimroseClump_LOD1.png"
+    },
+    "SM_PrimroseClump_LOD2": {
+      "vertices": 132,
+      "triangles": 126,
+      "size_cm": [
+        32.58,
+        24.38,
+        18.68
+      ],
+      "materials": [
+        {
+          "name": "M_Primrose",
+          "textures": {
+            "basecolor": "T_Primrose_basecolor.png",
+            "normal": "T_Primrose_normal.png",
+            "roughness": "T_Primrose_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.0017524957656860352,
+          0.0047676339745521545,
+          0.07
+        ]
+      },
+      "fbx": "SM_PrimroseClump_LOD2.fbx",
+      "sha256": "dcf2b2c2250379c49f3a07073e2266f521d11d26a2a4ceb57fe6d8ca8b702122",
+      "preview": "preview_SM_PrimroseClump_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_Primrose: T_Primrose_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_Primrose_basecolor.png": "c174ba826805a5b36d72df7a084b6f019706e500d65a51f395b02d6c06a14767",
+    "T_Primrose_normal.png": "8beb2096f2b92694b1799dc2126ef6bce1d3dab2d14eaea7c2426b61b7692dd0",
+    "T_Primrose_roughness.png": "2659095615442d13f8289d5f44194c4603dbbb2901768c421ccbe9775df24cc5"
+  }
+}

@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "name": "Hawthorn",
+  "description": "Wind-pruned hawthorn, about 5 m tall with a dense flat-topped crown streaming 7 m downwind from a leaning lichen-crusted bole; painted leaf-cluster canopy, four LODs, tilted trunk capsule.",
+  "collision": "capsule",
+  "triangle_budget": 70000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/hawthorn.py",
+  "source_sha256": "fd51326de341ff4583cf7a2eca9c2acd782b40d964207eabedc111750c0d9fd7",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_Hawthorn": {
+      "vertices": 56756,
+      "triangles": 59762,
+      "size_cm": [
+        873.75,
+        695.97,
+        604.56
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HawthornBark",
+          "textures": {
+            "basecolor": "T_HawthornBark_basecolor.png",
+            "normal": "T_HawthornBark_normal.png",
+            "roughness": "T_HawthornBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HawthornLeaves",
+          "textures": {
+            "basecolor": "T_HawthornLeaves_basecolor.png",
+            "normal": "T_HawthornLeaves_normal.png",
+            "roughness": "T_HawthornLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.4992705196491443,
+          0.032249968498945236,
+          2.8100000083446504
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 9.0,
+        "detail_distance": 3.5,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_Hawthorn.fbx",
+      "sha256": "9511f24a6937cd033ba532cbaeb741c3d8125a6529318a07ff3ff1afaca54ed4",
+      "preview": "preview_SM_Hawthorn.png"
+    },
+    "SM_Hawthorn_LOD1": {
+      "vertices": 2971,
+      "triangles": 4010,
+      "size_cm": [
+        869.9,
+        673.3,
+        599.9
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HawthornBark",
+          "textures": {
+            "basecolor": "T_HawthornBark_basecolor.png",
+            "normal": "T_HawthornBark_normal.png",
+            "roughness": "T_HawthornBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HawthornLeaves",
+          "textures": {
+            "basecolor": "T_HawthornLeaves_basecolor.png",
+            "normal": "T_HawthornLeaves_normal.png",
+            "roughness": "T_HawthornLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.4992705196491443,
+          0.032249968498945236,
+          2.8100000083446504
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 9.0,
+        "detail_distance": 3.5,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_Hawthorn_LOD1.fbx",
+      "sha256": "a0d24a09001612de6902d51ded8b76ee6ec63d27fb6eecc36fd1afdfb413930d",
+      "preview": "preview_SM_Hawthorn_LOD1.png"
+    },
+    "SM_Hawthorn_LOD2": {
+      "vertices": 719,
+      "triangles": 882,
+      "size_cm": [
+        954.67,
+        730.92,
+        599.09
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HawthornBark",
+          "textures": {
+            "basecolor": "T_HawthornBark_basecolor.png",
+            "normal": "T_HawthornBark_normal.png",
+            "roughness": "T_HawthornBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HawthornLeaves",
+          "textures": {
+            "basecolor": "T_HawthornLeaves_basecolor.png",
+            "normal": "T_HawthornLeaves_normal.png",
+            "roughness": "T_HawthornLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.4992705196491443,
+          0.032249968498945236,
+          2.8100000083446504
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 9.0,
+        "detail_distance": 3.5,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_Hawthorn_LOD2.fbx",
+      "sha256": "14b5c777c9a072100d80663faf9e614434e9b0cd698cac8f369f766c6057426c",
+      "preview": "preview_SM_Hawthorn_LOD2.png"
+    },
+    "SM_Hawthorn_LOD3": {
+      "vertices": 169,
+      "triangles": 175,
+      "size_cm": [
+        1110.4,
+        796.9,
+        692.08
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HawthornBark",
+          "textures": {
+            "basecolor": "T_HawthornBark_basecolor.png",
+            "normal": "T_HawthornBark_normal.png",
+            "roughness": "T_HawthornBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HawthornLeaves",
+          "textures": {
+            "basecolor": "T_HawthornLeaves_basecolor.png",
+            "normal": "T_HawthornLeaves_normal.png",
+            "roughness": "T_HawthornLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          1.4992705196491443,
+          0.032249968498945236,
+          2.8100000083446504
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 9.0,
+        "detail_distance": 3.5,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_Hawthorn_LOD3.fbx",
+      "sha256": "fdfd83589b2bbc0676e08db3b7b4af586e920b851c18a4f14a46a78ebe4ecfbc",
+      "preview": "preview_SM_Hawthorn_LOD3.png"
+    }
+  },
+  "warnings": [],
+  "blocking": true,
+  "unreal_folder": "Trees",
+  "nanite": true,
+  "tree": {
+    "height_m": 5.2,
+    "crown_m": [
+      7.0,
+      5.8
+    ],
+    "ground_line_cm": 20.0,
+    "prevailing_wind": "from -X (crown streams toward +X)",
+    "note": "Pivot is the bottom of a 20 cm skirt under the trunk flare; the ground line is 20 cm up."
+  },
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / tree height",
+    "G": "per-branch random phase",
+    "B": "leaf flutter 0 at card base -> 1 at tip, 0 on wood",
+    "A": "1",
+    "strength": 8.0,
+    "flutter": 1.0
+  },
+  "material_notes": "Slot 0 M_HawthornBark: tiling bark T_HawthornBark_* (0.5 m square). Slot 1 M_HawthornLeaves: leaf-cluster atlas T_HawthornLeaves_* (basecolor alpha = mask, clip 0.5; roughness R rough, G translucency, B AO; normal OpenGL). Two-sided foliage, masked.",
+  "capsule": {
+    "center_cm": [
+      45.6,
+      11.5,
+      78.4
+    ],
+    "radius_cm": 12.5,
+    "length_cm": 124.9,
+    "axis": [
+      0.6087,
+      0.1529,
+      0.7786
+    ],
+    "note": "Unreal space (Y mirrored from Blender). Length is the cylinder part; the capsule spans the ground to the first fork along the trunk axis."
+  },
+  "textures": {
+    "T_HawthornBark_basecolor.png": "ed86c2f87003d9ebbc4d21e4a3672d84cf9bfb33695f74746d1920544c66f00c",
+    "T_HawthornBark_normal.png": "3d5dd0dbb41f454378a06c42e00e3ed23f3c9bed3fd9e96e7fe45ca54d961454",
+    "T_HawthornBark_roughness.png": "2a6d0abd6742908dd762086ff31674266c67405e1c34ce45169c7fbbf3e52fbe",
+    "T_HawthornLeaves_basecolor.png": "2a06bb4102038a54eaa0ef4a3e75184d8bcb02e12b335ecd56b190ca3962cd13",
+    "T_HawthornLeaves_normal.png": "79e0509812af4d20994c2e3acd0c493cd0c733daf426da282348194cc5311e79",
+    "T_HawthornLeaves_roughness.png": "24a1f7ab683397267f50fb612efb1e9c31ce6617255f68c5f09ba1ce501ee2c3"
+  }
+}

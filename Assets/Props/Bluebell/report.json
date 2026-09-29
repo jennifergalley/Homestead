@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Bluebell",
+  "description": "A clump of native bluebells in flower, 35 cm tall and 45 cm across: glossy strap leaves flopping outward and nodding scapes hung on one side with deep violet-blue bells. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 16000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/bluebell.py",
+  "source_sha256": "5676dcf1b58387c2281cf12247f39bc3c947133f7000543726d5d377969e3af9",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_BluebellClump": {
+      "vertices": 2799,
+      "triangles": 4182,
+      "size_cm": [
+        57.28,
+        54.38,
+        44.79
+      ],
+      "materials": [
+        {
+          "name": "M_Bluebell",
+          "textures": {
+            "basecolor": "T_Bluebell_basecolor.png",
+            "normal": "T_Bluebell_normal.png",
+            "roughness": "T_Bluebell_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.04147756934165955,
+          0.09525597840547562,
+          0.24
+        ]
+      },
+      "fbx": "SM_BluebellClump.fbx",
+      "sha256": "8b10cbb1ef6fba43c7fe9957ca911bd1c4ae6b040733b9f1414589cb0c861199",
+      "preview": "preview_SM_BluebellClump.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BluebellClump_hero.png",
+          "detail": "beauty_SM_BluebellClump_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_BluebellClump_LOD1": {
+      "vertices": 653,
+      "triangles": 800,
+      "size_cm": [
+        50.01,
+        46.41,
+        42.44
+      ],
+      "materials": [
+        {
+          "name": "M_Bluebell",
+          "textures": {
+            "basecolor": "T_Bluebell_basecolor.png",
+            "normal": "T_Bluebell_normal.png",
+            "roughness": "T_Bluebell_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.04147756934165955,
+          0.09525597840547562,
+          0.24
+        ]
+      },
+      "fbx": "SM_BluebellClump_LOD1.fbx",
+      "sha256": "9c381a1274f921335e276821688f27fc95e364cff6f67f6877200860bb3e5c4b",
+      "preview": "preview_SM_BluebellClump_LOD1.png"
+    },
+    "SM_BluebellClump_LOD2": {
+      "vertices": 354,
+      "triangles": 440,
+      "size_cm": [
+        42.25,
+        32.81,
+        48.64
+      ],
+      "materials": [
+        {
+          "name": "M_Bluebell",
+          "textures": {
+            "basecolor": "T_Bluebell_basecolor.png",
+            "normal": "T_Bluebell_normal.png",
+            "roughness": "T_Bluebell_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.04147756934165955,
+          0.09525597840547562,
+          0.24
+        ]
+      },
+      "fbx": "SM_BluebellClump_LOD2.fbx",
+      "sha256": "48e64ac869c0e6ebb99cd22a43fb1391110aff62a57297ccd6dc7fcd96ed0d56",
+      "preview": "preview_SM_BluebellClump_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_Bluebell: T_Bluebell_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_Bluebell_basecolor.png": "65c642c639c385d743675de976ec26b5a7b50ff17699913f62b71674c3468cc7",
+    "T_Bluebell_normal.png": "089a07ed457d1200b37dbe246df91d8bc585de6d193a258dabe4025fc6bdde99",
+    "T_Bluebell_roughness.png": "1fb61c9f7948fffd80111492e4c73ae57a459b91a7713d29ddb1f8c3fb68b8b9"
+  }
+}
