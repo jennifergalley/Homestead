@@ -901,6 +901,43 @@ def tinplate(name, base=(0.50, 0.49, 0.45), rust=0.28, seed=0.0):
     return g.mat
 
 
+def painted_metal(name, paint=(0.025, 0.050, 0.035), exposed=(0.34, 0.32, 0.29),
+                  rust=0.25, wear=0.45, seed=0.0):
+    """Oil-painted iron hardware: dark enamel over metal, rubbed through on arrises and
+    hand-touched high points, with rust freckles where paint has chipped. Include a
+    metallic bake map; intact paint is nearly non-metallic while exposed iron is metal."""
+    g = Graph(name)
+    p = g.coord()
+    ps = g.vmath("ADD", p, (seed * 0.31, seed * 0.17, seed * 0.43))
+    blotch = g.noise(ps, scale=34.0, detail=5.0, roughness=0.65).outputs["Fac"]
+    scratches = g.noise(g.vmath("MULTIPLY", ps, (55.0, 55.0, 10.0)), scale=9.0,
+                        detail=4.0, roughness=0.62).outputs["Fac"]
+    curvature = g.node("ShaderNodeNewGeometry").outputs["Pointiness"]
+    edge = g.remap(curvature, 0.52, 0.62, 0.0, wear)
+    chip = g.math("MAXIMUM", edge, g.remap(scratches, 0.78, 0.92, 0.0, wear * 0.8))
+    paint_col = g.mix(tuple(c * 0.68 for c in paint), tuple(min(1.0, c * 1.25) for c in paint),
+                      g.remap(blotch, 0.3, 0.72))
+    bare = g.mix(tuple(c * 0.56 for c in exposed), exposed, g.remap(scratches, 0.25, 0.75))
+    rust_noise = g.noise(g.vmath("ADD", ps, (2.0, 5.0, 1.0)), scale=95.0, detail=5.0,
+                         roughness=0.7).outputs["Fac"]
+    rust_mask = g.math("MULTIPLY", chip, g.remap(rust_noise, 0.55, 0.76, 0.0, rust))
+    color = g.mix(paint_col, bare, chip)
+    color = g.mix(color, (0.20, 0.075, 0.028), rust_mask)
+    grime = g.noise(ps, scale=12.0, detail=4.0).outputs["Fac"]
+    color = g.mix(color, (0.018, 0.016, 0.013), g.remap(grime, 0.66, 0.82, 0.0, 0.24))
+    g.set("Base Color", color)
+    metal = g.math("SUBTRACT", g.math("MULTIPLY", chip, 0.92), g.math("MULTIPLY", rust_mask, 0.86))
+    g.set("Metallic", g.math("MAXIMUM", metal, 0.02))
+    rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=chip, A=0.70, B=0.42).outputs[0]
+    rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=rust_mask, A=rough, B=0.92).outputs[0]
+    g.set("Roughness", rough)
+    pits = g.noise(ps, scale=650.0, detail=2.0).outputs["Fac"]
+    height = g.math("ADD", g.math("MULTIPLY", blotch, 0.25), g.math("MULTIPLY", scratches, 0.18))
+    height = g.math("ADD", height, g.math("MULTIPLY", rust_mask, g.math("MULTIPLY", pits, 0.5)))
+    g.set("Normal", g.bump(height, strength=0.35, distance=0.0008))
+    return g.mat
+
+
 def green_glass(name, tint=(0.10, 0.16, 0.12), grime=0.25, seed=0.0):
     """Dark green hand-blown bottle glass represented as baked opaque tinted glass:
     uneven thickness, seed bubbles, rubbed shoulders and dusty punt."""

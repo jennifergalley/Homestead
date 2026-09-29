@@ -422,8 +422,9 @@ void AHomesteadGeneralStore::BuildSeedsmanInterior()
     const float CounterX = DoorToCounter - 70.0f;
     // SM_Store_Counter's top (store_counter.py: 0.96 m body, 0.04 m top).
     constexpr float CounterTop = 100.0f;
-    // SM_TinWateringCan hangs from its handle pivot; standing on the floor its pivot sits this high.
-    constexpr float CanGripHeight = 34.0f;
+    // SM_TinWateringCan hangs from its handle pivot; standing on the floor its pivot sits this high
+    // (seedsman_tin_watering_can.py: the grip is 40.5 cm above the base).
+    constexpr float CanGripHeight = 40.5f;
     if (!Prop(TEXT("SM_Store_Counter"), FVector(CounterX, 0, 0), 180.0f))
     {
         Box(FVector(CounterX, 20, 48), FVector(66, 520, 96), Tint(Oak, 0.7f));
@@ -449,7 +450,7 @@ void AHomesteadGeneralStore::BuildSeedsmanInterior()
         Box(At(0, 0, 90), FVector(44, 140, 180), Tint(DarkOak), true, LocalYaw);
         for (int32 Row = 0; Row < 7; ++Row)
             for (int32 Column = 0; Column < 6; ++Column)
-                Box(At(-56 + Column * 22.4f, -23, 22 + Row * 22.0f), FVector(2, 19, 18), Tint(Oak, 0.6f), false, LocalYaw);
+                Box(At(-56 + Column * 22.4f, 23, 22 + Row * 22.0f), FVector(2, 19, 18), Tint(Oak, 0.6f), false, LocalYaw);
     };
     Drawers(FVector(RoomDepth - 24, -210, 0), 180.0f);
     Drawers(FVector(RoomDepth - 24, 210, 0), 180.0f);

@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "SeedsmanDrawers",
+  "description": "Victorian seedsman's wall seed chest: 7 x 7 small drawers, labels, knobs, plinth and cornice; front -Y.",
+  "collision": "box",
+  "triangle_budget": 30000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/seedsman_drawers.py",
+  "source_sha256": "18cf0bb6d8547f07699096275f94b23bcc260543f2680076314129e40e3c4708",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_SeedsmanDrawers": {
+      "vertices": 12580,
+      "triangles": 22472,
+      "size_cm": [
+        148.02,
+        58.47,
+        182.53
+      ],
+      "materials": [
+        {
+          "name": "M_SeedsmanDrawers",
+          "textures": {
+            "basecolor": "T_SeedsmanDrawers_basecolor.png",
+            "roughness": "T_SeedsmanDrawers_roughness.png",
+            "metallic": "T_SeedsmanDrawers_metallic.png",
+            "normal": "T_SeedsmanDrawers_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SeedsmanDrawers_basecolor.png",
+          "roughness": "T_SeedsmanDrawers_roughness.png",
+          "normal": "T_SeedsmanDrawers_normal.png",
+          "ao": "T_SeedsmanDrawers_ao.png",
+          "metallic": "T_SeedsmanDrawers_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -9
+        ],
+        "focus": [
+          -1.659989356994629e-05,
+          -0.19283308625221252,
+          0.9608108615875244
+        ]
+      },
+      "fbx": "SM_SeedsmanDrawers.fbx",
+      "sha256": "4e6449272818dabea0e172b308245033acd3f00037c85553d5c773ef3b9f47c3",
+      "preview": "preview_SM_SeedsmanDrawers.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SeedsmanDrawers_hero.png",
+          "detail": "beauty_SM_SeedsmanDrawers_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -9
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "dimensions_m": {
+    "width": 1.4,
+    "depth": 0.45,
+    "height": 1.8
+  },
+  "front": "drawer grid and labels face -Y; bottom-centre pivot",
+  "textures": {
+    "T_SeedsmanDrawers_basecolor.png": "2a1929bfb01db076bdeb0214f51d1744861e8874c850a123a621e30cfc588c49",
+    "T_SeedsmanDrawers_roughness.png": "e0fdc9dee3e1b128f508afc71f5d0ce49756bb1cd3c9fb9c16c088981a342cfe",
+    "T_SeedsmanDrawers_metallic.png": "5fb32c56225256dc5dc230186884851986ea99e0acb86ab6d209ea83cc936b71",
+    "T_SeedsmanDrawers_normal.png": "8a146173c9f70846c63a62e86e47c4b59dfe05f79e9758e5bd3d61cd36bbeb16"
+  }
+}

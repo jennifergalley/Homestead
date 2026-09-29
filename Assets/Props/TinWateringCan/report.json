@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "name": "TinWateringCan",
+  "description": "1850s tinned sheet-iron watering can hotbar tool; pivot at top handle grip; spout +X.",
+  "collision": "none",
+  "triangle_budget": 15000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/seedsman_tin_watering_can.py",
+  "source_sha256": "31cba56045863cfdd613dcf2bd64d0ca7d81570c2ffe944e94e4d736500e9623",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_TinWateringCan": {
+      "vertices": 4318,
+      "triangles": 8342,
+      "size_cm": [
+        52.95,
+        24.61,
+        41.8
+      ],
+      "materials": [
+        {
+          "name": "M_TinWateringCan",
+          "textures": {
+            "basecolor": "T_TinWateringCan_basecolor.png",
+            "roughness": "T_TinWateringCan_roughness.png",
+            "metallic": "T_TinWateringCan_metallic.png",
+            "normal": "T_TinWateringCan_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_TinWateringCan_basecolor.png",
+          "roughness": "T_TinWateringCan_roughness.png",
+          "normal": "T_TinWateringCan_normal.png",
+          "ao": "T_TinWateringCan_ao.png",
+          "metallic": "T_TinWateringCan_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -55
+        ],
+        "focus": [
+          0.22,
+          -0.02,
+          -0.20500000119209288
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_TinWateringCan.fbx",
+      "sha256": "df477dc9a5c7bcb68fad42b432a97ed4ee88813fb70a30d9b1b3e0d0976a394f",
+      "preview": "preview_SM_TinWateringCan.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_TinWateringCan_hero.png",
+          "detail": "beauty_SM_TinWateringCan_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -55
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "attach": {
+    "units": "cm in exported mesh frame; origin is top carrying-handle grip centre; grip runs Y; spout points +X; can hangs -Z",
+    "grip_height_above_base_cm": 40.5,
+    "spout_tip_offset_cm": [
+      34.5,
+      0.0,
+      -18.0
+    ],
+    "body_height_cm": 30.0,
+    "body_diameter_cm": 23.2
+  },
+  "pivot": "top grip centre, not bottom; collision none",
+  "textures": {
+    "T_TinWateringCan_basecolor.png": "9edb11c3e4aa4ff5641a404b0bf54abbc70355765752b23c7acf22fcdc38e1f3",
+    "T_TinWateringCan_roughness.png": "dea61919d446775074ae4a2dee8aa03ea0e5d50faf2818ec7ab888809f0112e4",
+    "T_TinWateringCan_metallic.png": "a8db77ac6303735d7815ba7ad19b6ce09d5e75e0cc104b5789a900f27acf5f22",
+    "T_TinWateringCan_normal.png": "f75558df13ac5d0f7035cae2f6ac62d8bcd3e611727de76e813ab4127e56e84c"
+  }
+}

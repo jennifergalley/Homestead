@@ -42,6 +42,17 @@ BUILDINGS = [
 REMOVED = ["EastHouse"]
 
 
+def load_town():
+    """World Partition keeps unloaded actors out of get_all_level_actors, so load every town building
+    first; otherwise a rerun would spawn duplicates beside the saved ones."""
+    library = unreal.WorldPartitionBlueprintLibrary
+    guids = [d.get_editor_property("guid") for d in library.get_actor_descs()
+             if str(d.get_editor_property("label")).startswith("Town_Blockout_")]
+    if guids:
+        library.load_actors(guids)
+    return len(guids)
+
+
 def existing():
     found = {}
     for actor in EAS.get_all_level_actors():
@@ -54,6 +65,7 @@ def main():
     world = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()
     if not world or world.get_name() != "Estate":
         raise RuntimeError("Open the Estate level (not PIE) before placing the town massing.")
+    load_town()
     have = existing()
     packages = []
     for name in REMOVED:

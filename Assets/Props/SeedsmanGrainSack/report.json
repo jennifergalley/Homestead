@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "SeedsmanGrainSack",
+  "description": "Open rolled-down hessian sack of wheat grain with wooden scoop; bottom-centre pivot.",
+  "collision": "convex",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/seedsman_grain_sack.py",
+  "source_sha256": "2bd7b83f2f99d6c14cddceaa91b4ea1bd87f812b073d315d5c15fce564e58824",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_SeedsmanGrainSack": {
+      "vertices": 10481,
+      "triangles": 19910,
+      "size_cm": [
+        55.36,
+        42.54,
+        63.24
+      ],
+      "materials": [
+        {
+          "name": "M_SeedsmanGrainSack",
+          "textures": {
+            "basecolor": "T_SeedsmanGrainSack_basecolor.png",
+            "roughness": "T_SeedsmanGrainSack_roughness.png",
+            "normal": "T_SeedsmanGrainSack_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SeedsmanGrainSack_basecolor.png",
+          "roughness": "T_SeedsmanGrainSack_roughness.png",
+          "normal": "T_SeedsmanGrainSack_normal.png",
+          "ao": "T_SeedsmanGrainSack_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -16
+        ],
+        "focus": [
+          0.01664589285850525,
+          -0.028114833235740662,
+          0.5052716873132158
+        ],
+        "detail_distance": 0.32
+      },
+      "fbx": "SM_SeedsmanGrainSack.fbx",
+      "sha256": "28d4d0cc8a487406a0553214b8c678fe87958b19f5fa943e4da05c99cdb0a902",
+      "preview": "preview_SM_SeedsmanGrainSack.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SeedsmanGrainSack_hero.png",
+          "detail": "beauty_SM_SeedsmanGrainSack_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -16
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "dimensions_m": {
+    "height": 0.6,
+    "mouth_width": 0.5,
+    "depth": 0.43
+  },
+  "pivot": "bottom-centre; best display face -Y",
+  "textures": {
+    "T_SeedsmanGrainSack_basecolor.png": "fff5f394a2ea0c869f880c6218e8b2cbc9832f9a52e5997ad0ad54a2b06ea402",
+    "T_SeedsmanGrainSack_roughness.png": "243f10f36d4dde562c9c5871ac059431716a230a60fa2e94201c8e595076e806",
+    "T_SeedsmanGrainSack_normal.png": "67a50187b6f848f0075e007b1f59de62f83cab49f27e11c95ecbebd9521c06aa"
+  }
+}

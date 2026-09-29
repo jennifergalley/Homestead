@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "name": "SeedsmanScale",
+  "description": "Victorian counter beam scale: japanned cast-iron base, brass pans, beam and weights.",
+  "collision": "box",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/seedsman_scale.py",
+  "source_sha256": "f4bf09789387cdf72c75ab97cee4412c90d43454a76be712aaac436b10f7742b",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_SeedsmanScale": {
+      "vertices": 5980,
+      "triangles": 11616,
+      "size_cm": [
+        58.04,
+        26.68,
+        39.65
+      ],
+      "materials": [
+        {
+          "name": "M_SeedsmanScale",
+          "textures": {
+            "basecolor": "T_SeedsmanScale_basecolor.png",
+            "roughness": "T_SeedsmanScale_roughness.png",
+            "metallic": "T_SeedsmanScale_metallic.png",
+            "normal": "T_SeedsmanScale_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SeedsmanScale_basecolor.png",
+          "roughness": "T_SeedsmanScale_roughness.png",
+          "normal": "T_SeedsmanScale_normal.png",
+          "ao": "T_SeedsmanScale_ao.png",
+          "metallic": "T_SeedsmanScale_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -24
+        ],
+        "focus": [
+          0.16500132620334626,
+          -0.06299999594688416,
+          0.115
+        ],
+        "detail_distance": 0.24,
+        "detail_fstop": 32.0
+      },
+      "fbx": "SM_SeedsmanScale.fbx",
+      "sha256": "215d76af141a5c216a07be81efddc543f507532400ff3627fc9a279d80b804e0",
+      "preview": "preview_SM_SeedsmanScale.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SeedsmanScale_hero.png",
+          "detail": "beauty_SM_SeedsmanScale_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -24
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "dimensions_m": {
+    "width": 0.55,
+    "depth": 0.3,
+    "height": 0.45
+  },
+  "pivot": "bottom-centre; beam spans X; customer/front side -Y",
+  "textures": {
+    "T_SeedsmanScale_basecolor.png": "51c62758e9e2abaa4d37d21e08507c6b2d70568dfb92abc5269a9d1eec48e98d",
+    "T_SeedsmanScale_roughness.png": "491e9005e8939a62326749ffcb63a5141f2c4a947c910d8c48b441707ed8f0e2",
+    "T_SeedsmanScale_metallic.png": "084632638bb8c53a119448cc8e9dee76e43ffe2c0f09a304ac1615fe37f24604",
+    "T_SeedsmanScale_normal.png": "eeccb76259921b99bc9c418c3b416b510df22b5746d3215a58c38aed8874b348"
+  }
+}

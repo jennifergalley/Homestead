@@ -2300,7 +2300,7 @@ void AHomesteadCharacter::UpdateWaterPail(UStaticMeshComponent& Pail, float Delt
     // tin can pours from its rose, further out on the same axis.
     static const FVector PailLipLocal(11.5f, 0.0f, -14.0f);
     // SM_TinWateringCan's rose (tin_watering_can recipe REPORT: spout tip from the grip pivot).
-    static const FVector TinCanRoseLocal(30.0f, 0.0f, -12.0f);
+    static const FVector TinCanRoseLocal(34.5f, 0.0f, -18.0f);
     const bool bTinCan = Pail.GetStaticMesh() && Pail.GetStaticMesh()->GetName() == TEXT("SM_TinWateringCan");
     const FVector LipLocal = bTinCan ? TinCanRoseLocal : PailLipLocal;
     // pail_pour.GRIP_DROP / GRIP_RADIUS: she holds its sides this far below the pivot.
