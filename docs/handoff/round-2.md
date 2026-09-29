@@ -224,10 +224,19 @@ hands-on work; no one edits a busy lane's files or starts a fourth implementer.
 ### Held planning OpenSpec correction
 
 Planning's `b82eec53` OpenSpec docs briefly landed on `main` in `514c48c5`, with **no gameplay code
-changed**, but they misstated the approved tiered Well Fed duration (2/3/4 h) and the refusal when a
-full-energy character eats. Planning is preparing an immediate corrective docs commit for Integration.
-**Treat the current spec wording as pending correction:** Calendar must not implement stale `b82` text,
-and this handoff does not duplicate or revert the shared OpenSpec artifacts.
+changed**. **Final planning decision (2026-09-29):** Integration merges Planning `16f4ed5b`, not the
+tiered `e2159ea2`: flat **3 game hours** of Well Fed at ×0.85, Meals +25/+40/+60 energy, the
+full-energy ≥1-hour extension guard and explicit `CorruptSave` validation. Treat current `main` wording
+as pending correction until Integration reports the final merged SHA. Calendar must not implement stale
+`b82`; this handoff does not duplicate or revert the shared OpenSpec artifacts.
+
+### Calendar day-length / town-arrival blocker
+
+Calendar lane A's `a3c7e04d` changes the default `dayMinutes` **60 → 30**. On the ~1.94 km
+manor-to-town road, that doubles the in-game walk to roughly 12–14 hours and worsens Jenny's late-store
+arrival. Calendar is preparing read-only rationale and a minimal retain-60 option. Integration holds
+post-4-PM Calendar A work until this is resolved; it does not affect the earlier package. Update this
+handoff from Integration's final `main` SHA, not from an unmerged branch.
 
 ### OpenSpec strict-validation baseline (fix pending merge)
 
