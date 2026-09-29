@@ -4046,6 +4046,80 @@ void MvpWoodlandPlacements()
 
 }
 
+// Jenny's playtest: a bare bramble 285 cm ahead showed no prompt, and a weed at her feet stole the
+// focus. The held tool now aims at what it clears, out to the full Overgrowth::Reach, never behind her.
+void AimedOvergrowthReach()
+{
+    const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    EstatePlacements table;
+    table.bakeVersion = 7;
+    int next = EstatePlacementIdBase + 20000;
+    const auto add = [&](ResourceKind kind, double dx, double dy)
+    {
+        table.placements.push_back({next++, kind, {at.x + dx, at.y + dy}, 0, 0, 1, 0});
+        return table.placements.back().id;
+    };
+    const int bramble = add(ResourceKind::BrambleThin, 285, 0);
+    const int weed = add(ResourceKind::Weeds, 50, 20);
+    const int grass = add(ResourceKind::TallGrass, 120, -30);
+    const int behind = add(ResourceKind::BrambleThin, -150, 40);
+    const int beyond = add(ResourceKind::BrambleThin, 0, -301);
+    const int thicket = add(ResourceKind::BrambleThicket, -260, 60);
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), table));
+    OK(sim.GrantItems(Item::Billhook, 1));
+    OK(sim.GrantItems(Item::Scythe, 1));
+    const Point east{1, 0}, west{-1, 0}, south{0, -1};
+
+    // The bramble 285 cm ahead is the billhook's target, past the nearer weed and grass.
+    CHECK(sim.FindAimedOvergrowth(at, east, Item::Billhook) == bramble);
+    OK(sim.CheckOvergrowth(bramble, Item::Billhook, at));
+    // Only what the tool clears is aimed at; the scythe takes the weed at her feet in any direction.
+    CHECK(sim.FindAimedOvergrowth(at, east, Item::Scythe) == weed);
+    CHECK(sim.FindAimedOvergrowth(at, west, Item::Scythe) == weed);
+    CHECK(sim.FindAimedOvergrowth({at.x + 90, at.y}, east, Item::Scythe) == grass);
+    // Never behind her: turning round aims at the other bramble.
+    CHECK(sim.FindAimedOvergrowth(at, west, Item::Billhook) == behind);
+    // 301 cm is past the reach the clear itself allows.
+    CHECK(sim.FindAimedOvergrowth(at, south, Item::Billhook) == -1);
+    CHECK(!sim.CheckOvergrowth(beyond, Item::Billhook, at));
+    CHECK(sim.FindAimedOvergrowth(at, east, Item::Hatchet) == -1);
+    CHECK(sim.FindAimedOvergrowth(at, east, Item::Count) == -1);
+    CHECK(sim.FindAimedOvergrowth(at, {0, 0}, Item::Billhook) == -1);
+    CHECK(sim.FindAimedOvergrowth({std::numeric_limits<double>::quiet_NaN(), 0}, east, Item::Billhook) == -1);
+
+    // The billhook is the wrong tool for weeds (hand or scythe), and says so without a tier code.
+    const auto wrong = sim.CheckOvergrowth(weed, Item::Billhook, at);
+    CHECK(!wrong.ok && wrong.code != ResultCode::ToolTier);
+    UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(weed, Item::Billhook, at); });
+
+    // One press clears the thin bramble at 285 cm, and spends energy once.
+    double energy = sim.GetState().energy;
+    OK(sim.ClearOvergrowth(bramble, Item::Billhook, at));
+    CHECK(Close(sim.GetState().energy, energy - FindOvergrowth(ResourceKind::BrambleThin)->energy));
+    CHECK(sim.FindAimedOvergrowth(at, east, Item::Billhook) == -1);
+    UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(bramble, Item::Billhook, at); });
+
+    // An under-tier thicket is still aimed at, so she's told why; nothing changes and the gates hold.
+    OK(sim.ClearOvergrowth(behind, Item::Billhook, at));
+    CHECK(sim.FindAimedOvergrowth(at, west, Item::Billhook) == thicket);
+    const auto gated = sim.CheckOvergrowth(thicket, Item::Billhook, at);
+    CHECK(!gated.ok && gated.code == ResultCode::ToolTier && gated.message == "Needs an iron billhook");
+    UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(thicket, Item::Billhook, at); });
+    CHECK(FindOvergrowth(ResourceKind::BrambleThin)->swings == (std::array<int, ToolTierCount>{1, 1, 1, 1}));
+    CHECK(FindOvergrowth(ResourceKind::BrambleThicket)->swings == (std::array<int, ToolTierCount>{3, 2, 1, 1}));
+    CHECK(FindOvergrowth(ResourceKind::BrambleBank)->swings == (std::array<int, ToolTierCount>{4, 3, 2, 1}));
+    CHECK(FindOvergrowth(ResourceKind::BrambleThicket)->minTier == ToolTier::Iron);
+    CHECK(FindOvergrowth(ResourceKind::BrambleBank)->minTier == ToolTier::Steel);
+    Simulation loaded;
+    loaded.SetPlacements(table);
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(loaded, bramble).cleared && PlacedNode(loaded, behind).cleared);
+    CHECK(!PlacedNode(loaded, thicket).cleared && !PlacedNode(loaded, weed).cleared);
+    CHECK(loaded.FindAimedOvergrowth(at, east, Item::Billhook) == -1);
+    CHECK(loaded.FindAimedOvergrowth(at, east, Item::Scythe) == weed);
+}
+
 int main()
 {
     Run("defaults and input validation", DefaultsAndValidation);
@@ -4057,6 +4131,7 @@ int main()
     Run("sleep option policy", SleepOptionPolicy);
     Run("overgrowth tools, tiers and prompts", OvergrowthTableAndPrompts);
     Run("salvage, hafting and tier-gated clearing by stable id", HaftingBootstrapAndClearing);
+    Run("the held tool aims at what it clears, out to the full reach", AimedOvergrowthReach);
     Run("multi-swing clears, energy reserve and full-pack yields", MultiSwingTiersAndCapacity);
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
