@@ -141,7 +141,9 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
             if (Action == EHomesteadItemAction::Unequip) return Target.UnequipWearable(Row.SubjectId, ExpectedRevision);
             const auto* Item = Target.GetWearable(Row.SubjectId);
             if (!Item) return {false, "That owned garment no longer exists."};
-            return Target.RecolorWearable(Row.SubjectId, (Item->dye + 1) % 4, PlayerPoint(), ExpectedRevision);
+            // The dye chooser passes the chosen dye + 1; older callers without one step to the next.
+            const int32 Dye = Amount >= 1 && Amount <= 4 ? Amount - 1 : (Item->dye + 1) % 4;
+            return Target.RecolorWearable(Row.SubjectId, Dye, PlayerPoint(), ExpectedRevision);
         };
         Homestead::Simulation Candidate = Sim;
         const auto Proposed = Transaction(Candidate);

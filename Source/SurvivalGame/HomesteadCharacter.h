@@ -490,6 +490,10 @@ private:
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> MetaHumanGarments;
     // Wearable definition per MetaHuman garment slot (-1 when nothing is worn there).
     TArray<int32> MetaHumanWorn, PendingMetaHumanWorn;
+    // The equipped linen tunic's dye (INDEX_NONE when none): on the MetaHuman the tunic is the
+    // homespun tank top and shorts, tinted to match.
+    int32 MetaHumanTunicDye = INDEX_NONE, PendingMetaHumanTunicDye = INDEX_NONE;
+    void ApplyMetaHumanTunicDye();
     // How far soled footwear lifts her off the ground, in cm.
     float FootwearLift = 0;
     void ApplyMetaHumanGarments();

@@ -128,6 +128,18 @@ const FLinearColor MenuPine(0.025f, 0.05f, 0.038f, 0.6f);
 const FLinearColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
 const FLinearColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
 const FLinearColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
+// The dye chooser's colour chips (display colours for Homestead::DyeName's four plant dyes).
+namespace MenuDyeStyle
+{
+constexpr int32 Count = 4;
+FLinearColor Swatch(int32 Dye)
+{
+    static const FLinearColor Values[] = {
+        FLinearColor(0.23f, 0.29f, 0.14f), FLinearColor(0.36f, 0.08f, 0.11f),
+        FLinearColor(0.20f, 0.25f, 0.33f), FLinearColor(0.70f, 0.60f, 0.42f)};
+    return Values[FMath::Clamp(Dye, 0, Count - 1)];
+}
+}
 // The notice card over the book (logical book units and seconds): a small parchment slip with a
 // double-ruled frame and Garamond ink, so it reads as a note laid on the book, not a dialog. Tuned
 // so a one-line notice reads at a glance and is gone before it gets in the way; errors linger a little.
@@ -638,6 +650,13 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
     UpdateNotice();
+    // The dye chooser previews whichever dye is under the cursor or focus, or the chosen one.
+    if (bDyeChooser && Dialog == EDialog::Context)
+    {
+        const int32 Want = DialogSelection >= 0 && DialogSelection < MenuDyeStyle::Count ? DialogSelection : DyeChoice;
+        if (Want != DyePreviewed && Controller->MenuPreviewDye(DyeRow.SubjectId, Want)) DyePreviewed = Want;
+    }
+    else if (DyePreviewed != INDEX_NONE || bDyeChooser) EndDyePreview();
     if (bPointerItemDown && PointerDragRevision != Controller->Simulation().GetRevision())
         CancelPointerItemDrag();
     if (bVirtualDraggingItem && VirtualDragRevision != Controller->Simulation().GetRevision())
@@ -1918,11 +1937,50 @@ FVector2D SHomesteadMenu::PopupAnchorFor(const TSharedPtr<SWidget>& Widget, bool
     const FGeometry Geometry = Widget->GetCachedGeometry();
     return FVector2D(Geometry.GetAbsolutePosition()) + FVector2D(Geometry.GetAbsoluteSize()) * 0.6f;
 }
+void SHomesteadMenu::OpenDyeChooser(int32 Choice)
+{
+    if (!Controller.IsValid()) return;
+    DyeChoice = FMath::Clamp(Choice, 0, MenuDyeStyle::Count - 1);
+    PopupOptions.Reset();
+    PopupTitle = FString::Printf(TEXT("Dye the %s"), *FString(UTF8_TO_TCHAR(Homestead::GetWearableDefinition(
+        static_cast<Homestead::WearableDefinition>(DyeRow.Id))->name)).ToLower());
+    for (int32 Dye = 0; Dye < MenuDyeStyle::Count; ++Dye)
+        PopupOptions.Add({[this, Dye]()
+            {
+                return FString(UTF8_TO_TCHAR(Homestead::DyeName(Dye)))
+                    + (Dye == DyeOriginal ? TEXT("  (as it is)") : Dye == DyeChoice ? TEXT("  (chosen)") : TEXT(""));
+            },
+            [this, Dye]() { OpenDyeChooser(Dye); }, nullptr, {}, MenuDyeStyle::Swatch(Dye)});
+    // Nothing is spent and nothing changes until Apply.
+    PopupOptions.Add({[this]() { return FString::Printf(TEXT("Apply %s"), UTF8_TO_TCHAR(Homestead::DyeName(DyeChoice))); },
+        [this]()
+        {
+            bDyeChooser = false;
+            DyePreviewed = INDEX_NONE;
+            if (!Controller->MenuItemAction(DyeRow, EHomesteadItemAction::Dye, DyeChoice + 1, DyeRevision))
+                Controller->MenuEndDyePreview();
+        },
+        [this]() { return DyeChoice != DyeOriginal; }});
+    PopupOptions.Add({[]() { return FString(TEXT("Cancel")); }, nullptr, nullptr});
+    bDyeChooser = true;
+    SetDialog(EDialog::Context);
+    // After choosing a dye the next press applies it; otherwise start on her current dye.
+    DialogSelection = DyeChoice != DyeOriginal ? MenuDyeStyle::Count : DyeChoice;
+    bFocusPending = true;
+}
+void SHomesteadMenu::EndDyePreview()
+{
+    bDyeChooser = false;
+    if (DyePreviewed == INDEX_NONE) return;
+    DyePreviewed = INDEX_NONE;
+    if (Controller.IsValid()) Controller->MenuEndDyePreview();
+}
 bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
 {
     if (!Controller.IsValid()) return false;
     if (Row.Subject != EHomesteadMenuSubject::ItemGroup && Row.Subject != EHomesteadMenuSubject::Wearable) return false;
     PopupOptions.Reset();
+    bDyeChooser = false;
     const auto Add = [this](const FString& Label, TFunction<void()> Run, TOptional<EHomesteadItemAction> Action = {})
     {
         PopupOptions.Add({[Label]() { return Label; }, MoveTemp(Run), nullptr, Action});
@@ -1980,7 +2038,16 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
         }
         else Add(TEXT("Take to pack"), Move, EHomesteadItemAction::Transfer);
         const auto* Info = Homestead::GetWearableDefinition(static_cast<Homestead::WearableDefinition>(Row.Id));
-        if (Info && Info->dyeable) Add(TEXT("Change dye"), Act(EHomesteadItemAction::Dye, 1), EHomesteadItemAction::Dye);
+        if (Info && Info->dyeable)
+            Add(TEXT("Change dye..."), [this, Row]()
+            {
+                const auto* Owned = Controller->Simulation().GetWearable(Row.SubjectId);
+                if (!Owned) return;
+                DyeRow = Row;
+                DyeRevision = Controller->Simulation().GetRevision();
+                DyeOriginal = Owned->dye;
+                OpenDyeChooser(Owned->dye);
+            }, EHomesteadItemAction::Dye);
     }
     if (SeenPage == 0 && Row.ContainerId >= 0)
         Add(TEXT("Sort pack"), [this]() { Controller->MenuSortPack(); });
@@ -2128,6 +2195,7 @@ void SHomesteadMenu::BuildPopup()
     for (int32 Index = 0; Index < PopupOptions.Num(); ++Index)
     {
         const TFunction<FString()> Label = PopupOptions[Index].Label;
+        const TOptional<FLinearColor> Swatch = PopupOptions[Index].Swatch;
         const TFunction<bool()> Enabled = PopupOptions[Index].Enabled;
         TSharedRef<SButton> Button = SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(12, 8))
             .ButtonColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? MenuGold : Selected; })
@@ -2135,9 +2203,23 @@ void SHomesteadMenu::BuildPopup()
             .OnHovered_Lambda([this, Index]() { DialogSelection = Index; })
             .OnClicked_Lambda([this, Index]() { if (PointerAction()) DialogAction(Index); return FReply::Handled(); })
             [
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 10, 0)
+                [
+                    SNew(SBox).WidthOverride(22).HeightOverride(22)
+                    .Visibility(Swatch.IsSet() ? EVisibility::Visible : EVisibility::Collapsed)
+                    [
+                        SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
+                        .BorderBackgroundColor(PineInk)
+                        [ SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(Swatch.Get(FLinearColor::White)) ]
+                    ]
+                ]
+                + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+                [
                 SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
                 .ColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? FSlateColor(PineInk) : FSlateColor(Ink); })
                 .Text_Lambda([Label]() { return FText::FromString(Label ? Label() : FString()); })
+                ]
             ];
         Button->SetOnFocusReceived(FSimpleDelegate::CreateLambda([this, Index]()
             { if (!bSynchronizingFocus) DialogSelection = Index; }));
@@ -2245,6 +2327,15 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
         }
         if (Action == EHomesteadItemAction::Drop && Row.Subject == EHomesteadMenuSubject::Wearable)
         { SetDialog(EDialog::DropWearable); return; }
+        if (Action == EHomesteadItemAction::Dye && Row.Subject == EHomesteadMenuSubject::Wearable)
+        {
+            const auto* Owned = Controller->Simulation().GetWearable(Row.SubjectId);
+            if (!Owned) return;
+            DyeRow = Row; DyeRevision = PendingRevision; DyeOriginal = Owned->dye;
+            PopupAnchor = PopupAnchorFor(Cells.IsValidIndex(ContentSelection) ? Cells[ContentSelection] : nullptr, false);
+            OpenDyeChooser(Owned->dye);
+            return;
+        }
         if (Action == EHomesteadItemAction::Merge)
         {
             MergeTargets.Reset();

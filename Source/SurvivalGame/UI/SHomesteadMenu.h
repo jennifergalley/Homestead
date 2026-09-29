@@ -94,6 +94,9 @@ public:
     bool IsNoticeShowing() const;
     bool IsNoticeAtTop() const { return bNoticeTop; }
     FString GetNoticeText() const { return IsNoticeShowing() ? NoticeText : FString(); }
+    bool IsDyeChooserOpen() const { return bDyeChooser && Dialog == EDialog::Context; }
+    int32 GetDyePreview() const { return DyePreviewed; }
+    int32 GetDyeChoice() const { return DyeChoice; }
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery };
@@ -162,6 +165,8 @@ private:
         TFunction<FString()> Label; TFunction<void()> Run; TFunction<bool()> Enabled;
         // The item action this option performs, so keyboard/controller routes can land on it.
         TOptional<EHomesteadItemAction> Action;
+        // A colour chip shown before the label (the dye chooser's swatches).
+        TOptional<FLinearColor> Swatch;
     };
     TArray<FPopupOption> PopupOptions;
     FString PopupTitle;
@@ -170,6 +175,14 @@ private:
     void BuildPopup();
     void AdjustQuantity(int32 Delta);
     bool BuildItemOptions(const FHomesteadRow& Row);
+    // The dye chooser: a popup of the four dyes over the live book. Moving over a dye shows it on
+    // her (a real wardrobe preview; nothing is saved), Apply commits it, Cancel puts hers back.
+    bool bDyeChooser = false;
+    FHomesteadRow DyeRow;
+    uint64 DyeRevision = 0;
+    int32 DyeOriginal = 0, DyeChoice = 0, DyePreviewed = INDEX_NONE;
+    void OpenDyeChooser(int32 Choice);
+    void EndDyePreview();
     void OpenItemContextMenuFor(const FHomesteadRow& Row, FVector2D Anchor);
     // Where a popup opens: at the pointer for mouse input, beside the focused tile otherwise.
     FVector2D PopupAnchorFor(const TSharedPtr<SWidget>& Widget, bool bPointer) const;

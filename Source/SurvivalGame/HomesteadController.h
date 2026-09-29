@@ -102,6 +102,10 @@ public:
     void MenuInventoryView(int32 View);
     int32 InventoryView() const { return MenuInventoryViewIndex; }
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
+    // The dye chooser's live preview: shows her wearing the garment in `Dye` through the real wardrobe
+    // path without changing anything saved; MenuEndDyePreview puts her own clothes back.
+    bool MenuPreviewDye(int32 WearableId, int32 Dye);
+    void MenuEndDyePreview();
     bool MenuSplitHalf(const FHomesteadRow& Row);
     // Moves a whole stack or garment between the pack and the open chest (as much as fits).
     bool MenuMoveWhole(const FHomesteadRow& Row);
