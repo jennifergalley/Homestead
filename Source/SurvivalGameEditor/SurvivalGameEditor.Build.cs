@@ -5,12 +5,10 @@ public class SurvivalGameEditor : ModuleRules
     public SurvivalGameEditor(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-        PrivateIncludePathModuleNames.Add("PythonScriptPlugin");
         PrivateIncludePaths.Add(System.IO.Path.Combine(ModuleDirectory, "..", "SurvivalGame"));
         PrivateDependencyModuleNames.AddRange(new[] {
-            "Core", "CoreUObject", "Engine", "UnrealEd", "Json", "Projects", "DerivedDataCache",
-            "MaterialEditor", "MeshDescription", "StaticMeshDescription", "PhysicsCore", "RHI", "RenderCore",
-            "InputCore", "Landscape", "ImageWrapper", "AssetRegistry", "AssetTools", "SurvivalGame"
+            "Core", "CoreUObject", "Engine", "UnrealEd", "Json", "RenderCore", "InputCore", "Landscape",
+            "ImageWrapper", "AssetRegistry", "AssetTools", "SurvivalGame"
         });
     }
 }

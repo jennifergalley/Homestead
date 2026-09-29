@@ -1739,6 +1739,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
                 Notify(TEXT("Owned clothing could not be displayed; the character preview is provisional. ") + Error, true);
             }
             Avatar->SetAppearancePreview(false);
+            Avatar->SnapCamera();
         }
         bPendingSpawn = false;
         if (bFreshTerrainSpawn) CaptureSessionCheckpoint(PendingLocation, PendingRotation);
@@ -1751,6 +1752,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
         if (!SettleOnGround(GroundSnapTarget, GroundSnapWait, DeltaSeconds, bEstateMap ? 180.0f : 0.0f, TEXT("teleport"))) return;
         bPendingGroundSnap = false;
         GetPawn()->SetActorLocation(GroundSnapTarget, false, nullptr, ETeleportType::TeleportPhysics);
+        if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SnapCamera();
         LastStepPosition = GroundSnapTarget;
         LastSafeWorldPosition = GroundSnapTarget;
         StepDistance = 0;
@@ -2120,7 +2122,9 @@ FString AHomesteadController::FocusActions() const
                     return FString();
                 if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind))
                 {
-                    const bool Handles = ToolAvailable && Homestead::ToolForItem(SelectedTool) == Overgrowth->tool;
+                    // Only a tool that clears this overgrowth offers a swing; the lamp (no ToolKind) never does.
+                    const bool Handles = ToolAvailable && Homestead::ToolForItem(SelectedTool) != Homestead::ToolKind::Count
+                        && Homestead::ToolForItem(SelectedTool) == Overgrowth->tool;
                     if (Node.kind == Homestead::ResourceKind::SalvagePile) return A + TEXT(" Search");
                     // Weeds and nettles are pulled, rubbish is cleared away, a fallen bough gathered.
                     const FString Hand = A + (Node.kind == Homestead::ResourceKind::Weeds || Node.kind == Homestead::ResourceKind::Nettles
@@ -2501,8 +2505,8 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     {
         // Rough footprint radius (cm) of what she strikes, so the point or bit lands on its near side.
         const float Radius = Kind == Homestead::ResourceKind::StumpSmall ? 16.0f
-            : Kind == Homestead::ResourceKind::StumpMedium ? 20.0f
-            : Kind == Homestead::ResourceKind::StumpLarge ? 28.0f
+            : Kind == Homestead::ResourceKind::StumpMedium ? 30.0f
+            : Kind == Homestead::ResourceKind::StumpLarge ? 44.0f
             : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
             : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
             : Kind == Homestead::ResourceKind::GiantLog ? 38.0f

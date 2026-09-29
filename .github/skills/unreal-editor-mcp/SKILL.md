@@ -86,8 +86,8 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 - **Never stop shared processes.** `zenserver.exe` (the DDC/Zen server on port 8558),
   `UnrealTraceServer.exe`, `ShaderCompileWorker.exe` and other worktrees' `UnrealEditor*`/UBT/UAT
   processes may be serving another session's build or cook. Stop only processes you started, by PID.
-  Scripts that refuse to run while any Unreal process exists (`Invoke-ShippingQA.ps1`,
-  `Test-AuthoringSettings.ps1`) need an idle machine; coordinate through the orchestrator.
+  `Invoke-ShippingQA.ps1` refuses to run while any Unreal process exists, so it needs an idle machine;
+  coordinate through the orchestrator.
 - **Perf and frame-rate measurements need the machine to yourself** (Jenny, 2026-09-28): only ONE
   Unreal process (the one you measure) and no UBT/`cl.exe` builds. With several editors and builds
   running, readings swung about 5x (render thread 20 ms vs 97-118 ms). Before measuring, run
@@ -189,7 +189,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `C4458: declaration of '<name>' hides class member` (for example a local `Ground` in `AHomesteadWorld`) | A local variable shadows a member; warnings are errors in this project | See the `homestead-code-conventions` skill, "Unreal C++". |
 | `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | See the `homestead-code-conventions` skill, "Unreal C++". |
 | `error C2027: use of undefined type 'X'` (or C2065) in a file that used to compile | `SurvivalGame` now has a private PCH (`SurvivalGamePCH.h`) instead of the UnrealEd shared one, so headers it used to pull in aren't there | Include the engine header for X in that file. See section 8, "Private PCH". |
-| The packaged game exits at once with code **777006** and writes no log | `CrashDuringStaticInit` (`GenericPlatformCrashContext.h`): code ran during static initialisation that needs the engine. The case on 2026-09-28: a namespace-scope `TAutoConsoleVariable` whose default called `FParse::Param(FCommandLine::Get(), ...)`. That works in the editor, where the module DLL loads late, but is fatal in the monolithic game, and every package from `a725ff1d` to `7c5fdc28` crashed at launch | Never read `FCommandLine`, `GConfig` or other engine state in a static initialiser or a CVar default; read it on use (for example default the CVar to -1 and check the command line when it's first read). To find such a crash, `python Scripts\Examples\dbgrun.py "<exe and args>"` runs the game under a minimal debugger and prints debug output, exceptions and a symbolised stack. |
+| The packaged game exits at once with code **777006** and writes no log | `CrashDuringStaticInit` (`GenericPlatformCrashContext.h`): code ran during static initialisation that needs the engine. The case on 2026-09-28: a namespace-scope `TAutoConsoleVariable` whose default called `FParse::Param(FCommandLine::Get(), ...)`. That works in the editor, where the module DLL loads late, but is fatal in the monolithic game, and every package from `a725ff1d` to `7c5fdc28` crashed at launch | See the `homestead-code-conventions` skill, "Unreal C++" ("Nothing at namespace scope may read runtime state"). To find such a crash, `python Scripts\Examples\dbgrun.py "<exe and args>"` runs the game under a minimal debugger and prints debug output, exceptions and a symbolised stack. |
 | `Build-Game.ps1 -Package -SkipAssets` fails: `Missing licensed source asset ... forest-ground\GroundColor.jpg` | `-SkipAssets` only skips the asset fetch; the content bootstrap still runs and needs `Assets\Source`, which new worktrees don't have | When generated content is committed and current, use `-PackageOnly`. |
 | New lane's worktree is incomplete: `SurvivalGame.uproject` missing, thousands of staged deletions in `git status` | The app's `create_session` worktree step hit `git command timed out after 300 seconds` (a full checkout with LFS is slow under load), but the session started anyway | `git -C <worktree> reset --hard HEAD` (about 3 min), then confirm `git status` is clean and `SurvivalGame.uproject` exists before building. |
 | Estate "Save failed... check disk space and permissions" (misleading text) / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejected `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on `main` in `f2e504c5` (bound by `MaxWorldCoordinate`). Rebase if you still see it. |
@@ -242,7 +242,6 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Frame times from a Slate tick callback in PIE are about 125 ms (8 fps) | An unfocused PIE window is throttled to 8 fps | Give the PIE window focus before sampling (`click` brings it forward), or measure a standalone `-game` window. |
 | `Start-EditorMcp.ps1`: "Perf window held by <worktree>" | Another session is measuring performance (`E:\CopilotScratch\homestead-perf.lock`, under 20 min old) | Wait for its `Stop-PerfWindow.ps1` or for the lock to go stale (20 min). `-Force` overrides; don't use it just to skip the wait. |
 | `UnicodeEncodeError: 'charmap' codec can't encode` from Python output | The console is cp1252 | `$env:PYTHONIOENCODING='utf-8'`, or write to a file. |
-| `Tests\HomesteadMenuSourceTests.py`: 9 failures, 1 error | Pre-existing on `main` (2026-09-27) | Compare against `main` before assuming you broke it. |
 
 ## 1. Is the server up?
 
@@ -322,7 +321,7 @@ clashes between parallel callers.
 | `pie` / `unpie` | start PIE in the viewport / stop it; poll `st` for `worldReady` |
 | `quit` | stop PIE and quit the editor cleanly (releases DLL and `.uasset` locks) |
 | `pyfile <path>` | run a Python file in the editor with `__file__` set |
-| `tp <x> <y> [z]` | move the player pawn (z 200 drops her to the ground) |
+| `tp <x> <y> [z]` | `HomesteadTeleport`: stands her on the ground at x,y once its collision has streamed in (with z: on the first surface at or below z, for an upper floor). Works in packaged Development builds too |
 | `click <x> <y>` | real Win32 left click at editor-window pixels; Slate clicks don't reach game widgets. Slate `Snapshot` positions are relative to the client area, so add the window chrome (about 12 px). To click something seen in a `shot` capture, scale capture pixels by client width / capture width and add the window-rect origin: with a 3840-wide client, a 1280x692 capture and the rect at (-12, -12), `x = cap_x * 3 + 12`, `y = cap_y * 3 + 12` |
 
 Toolset variables: `$McpEditor` (EditorAppToolset), `$McpScene` (SceneTools), `$McpLogs`,
@@ -656,8 +655,8 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   then `StartPIE`. Set it back to 0 for the woodland. Packaged: `CharacterLab.cmd`, or
   `-HomesteadCharacterLab`.
 - `get_play_state` reports `"characterLab": true`; sticks, keys and `walk_to` work as usual.
-- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Craft|Water|Chop|Knife|Till|Machete|Fell`,
-  `LabHold Knife|Hatchet|DiggingStick|Pail|Machete|None` (the hand-carry prop for that tool, as
+- Console: `LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Craft|Water|Chop|Knife|Till|Machete|Fell|LampDown|LampUp`,
+  `LabHold Knife|Hatchet|DiggingStick|Pail|Machete|Lamp|None` (the hand-carry prop for that tool, as
   when it's selected on the hotbar),
   `LabProp Sticks|Stones|Roots|Berries|Reeds|None` (puts that pile on the ground in front of her, the way the
   woodland does), `LabLoop <action>|Off` (replays the action every few seconds from the same
@@ -1119,6 +1118,11 @@ OpenSpec changes, not here.
   `/Game/Characters/Heroine_MH/Common/Optional/Grooms/GroomAssets/Hair/<Style>`, repoints their
   materials at the heroine's hair instances and builds a `<Style>_Binding` against her face. Its
   `STYLES` order must match `HomesteadLook::MetaHairGroom`.
+- 2026-09-28: **Oil lamp (Lamp lane).** `LabHold Lamp` puts the lamp in her hand in the character lab, and
+  `LabAction LampDown` / `LampUp` set it on the floor at arm's length and pick it up again. `HomesteadLampOil
+  <hours>` (console, with the player controller) sets the in-hand lamp's oil. The clips are authored by
+  `homestead_agent.lamp_pose` (`build_raised`, `build_set_down`, `report`), and the glass and flame materials by
+  `homestead_agent.lamp_materials.build()`.
 - 2026-09-27: `HomesteadWear <key|name>` (console, in PIE) grants the materials, crafts one garment
   and puts it on, for example `HomesteadWear fur-coat` or `HomesteadWear woven-sandals`. The
   MetaHuman garments live in `/Game/Characters/Heroine_MH/Assembled/Heroine/Garments`. To
