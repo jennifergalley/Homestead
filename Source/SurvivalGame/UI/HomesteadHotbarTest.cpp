@@ -25,6 +25,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
     const auto SaplingId = MakeShared<int32>(0);
     const auto HackStarts = MakeShared<uint32>(0);
     const auto ClearStarts = MakeShared<uint32>(0);
+    const auto BranchesBefore = MakeShared<int32>(0);
+    const auto KindlingBefore = MakeShared<int32>(0);
     const auto OldHairStyle = MakeShared<int32>(-1);
     const auto OldBodyPreset = MakeShared<int32>(-1);
     const auto AirborneEnergy = MakeShared<double>(0);
@@ -457,24 +459,30 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Controller->Simulation().GetRevision() == *Revision && !SaplingCleared()
                 && Animation && Animation->MacheteStarts() == *HackStarts;
         });
-    Add(TEXT("Number one then left click lands the first of two Billhook swings with the held prop"),
-        [this, Anim, HackStarts, ClearStarts]()
+    Add(TEXT("Number one then one left click fells the sapling with a single two-blow Billhook hack"),
+        [this, Anim, HackStarts, ClearStarts, BranchesBefore, KindlingBefore]()
         {
             const auto* Animation = Anim();
             if (!Animation) { Finish(false, TEXT("Billhook animation instance is missing.")); return; }
             *HackStarts = Animation->MacheteStarts();
             *ClearStarts = Animation->ClearStarts();
+            *BranchesBefore = Controller->Simulation().Count(Item::Branch);
+            *KindlingBefore = Controller->Simulation().Count(Item::Kindling);
             Tap(EKeys::One);
             Tap(EKeys::LeftMouseButton);
         },
-        [this, Anim, HackStarts, ClearStarts, BillhookShown, SaplingCleared]()
+        [this, Anim, HackStarts, ClearStarts, BillhookShown, SaplingCleared, BranchesBefore, KindlingBefore]()
         {
+            // Worn billhook, one press: the clip's second blow commits the clear, with one yield.
             const auto* Animation = Anim();
+            const int32 Branches = Controller->Simulation().Count(Item::Branch) - *BranchesBefore;
             return Controller->SelectedHotbarIndex() == 0 && Animation && BillhookShown()
                 && Animation->MacheteStarts() == *HackStarts + 1
                 && Animation->ClearStarts() == *ClearStarts
                 && Animation->MacheteWeight() > 0.3f
-                && Controller->ToastText.StartsWith(TEXT("1 more swing")) && !SaplingCleared();
+                && SaplingCleared() && Branches >= 3 && Branches <= 4
+                && Controller->Simulation().Count(Item::Kindling) == *KindlingBefore + 1
+                && !Controller->ToastIsError();
         }, 2.5f);
     // The blow lands 1.25 s into the hack; move on while the follow-through is still playing.
     Steps.Last().bCompleteWhenReady = true;
@@ -567,14 +575,6 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Controller->SelectedHotbarIndex() == 0 && BillhookShown()
                 && Animation->MacheteStarts() == *HackStarts + 1;
         }, 0.3f);
-    Add(TEXT("The second Billhook swing clears the sapling"),
-        [this]() { Tap(EKeys::LeftMouseButton); },
-        [this, Anim, HackStarts, SaplingCleared]()
-        {
-            const auto* Animation = Anim();
-            return SaplingCleared() && Animation && Animation->MacheteStarts() >= *HackStarts + 2;
-        }, 2.5f);
-    Steps.Last().bCompleteWhenReady = true;
     Add(TEXT("Find a valid nearby till cell using an authority copy"),
         [this, TillX, TillY]()
         {

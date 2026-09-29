@@ -29,7 +29,8 @@ const OvergrowthInfo OgTable[] = {
         {OgGives(Item::Weeds, 1, 2), OgGives(Item::Seeds, 1, 1, 10)}, 60.0},
     {ResourceKind::BrambleThin, ToolKind::Billhook, false, ToolTier::Worn, 1.2, OgSwings(1, 1, 1, 1),
         {OgGives(Item::BrambleCanes, 2, 3)}, 90.0},
-    {ResourceKind::Sapling, ToolKind::Billhook, false, ToolTier::Worn, 1.5, OgSwings(2, 1, 1, 1),
+    // One press fells a sapling even with the worn billhook: the hack clip already strikes twice.
+    {ResourceKind::Sapling, ToolKind::Billhook, false, ToolTier::Worn, 1.5, OgSwings(1, 1, 1, 1),
         {OgGives(Item::Branch, 3, 4), OgGives(Item::Kindling, 1, 1)}, 60.0},
     {ResourceKind::BrambleThicket, ToolKind::Billhook, false, ToolTier::Iron, 2.0, OgSwings(3, 2, 1, 1),
         {OgGives(Item::BrambleCanes, 4, 5)}, 150.0},

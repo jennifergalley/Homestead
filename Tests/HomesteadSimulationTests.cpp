@@ -4120,6 +4120,36 @@ void AimedOvergrowthReach()
     CHECK(loaded.FindAimedOvergrowth(at, east, Item::Scythe) == weed);
 }
 
+// A worn billhook fells a sapling in one logical swing (the hack clip already shows both blows):
+// one yield of 3-4 branches and a kindling, 1.5 Energy, and it stays down through a reload.
+void OneSwingWornSapling()
+{
+    const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    EstatePlacements table;
+    table.bakeVersion = 7;
+    table.placements.push_back({EstatePlacementIdBase + 20100, ResourceKind::Sapling, {at.x, at.y + 800}, 0, 0, 1, 0});
+    const int sapling = table.placements.back().id;
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), table));
+    OK(sim.GrantItems(Item::Billhook, 1));
+    const Point grove{at.x, at.y + 700}, north{0, 1};
+    CHECK(FindOvergrowth(ResourceKind::Sapling)->swings == (std::array<int, ToolTierCount>{1, 1, 1, 1}));
+    CHECK(sim.FindAimedOvergrowth(grove, north, Item::Billhook) == sapling);
+    CHECK(sim.OvergrowthSwings(sapling) == 1);
+    const int branches = sim.Count(Item::Branch), kindling = sim.Count(Item::Kindling);
+    const double energy = sim.GetState().energy;
+    OK(sim.ClearOvergrowth(sapling, Item::Billhook, grove));
+    const int gained = sim.Count(Item::Branch) - branches;
+    CHECK(gained >= 3 && gained <= 4 && sim.Count(Item::Kindling) == kindling + 1);
+    CHECK(Close(sim.GetState().energy, energy - 1.5));
+    UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(sapling, Item::Billhook, grove); });
+    Simulation loaded;
+    loaded.SetPlacements(table);
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(loaded, sapling).cleared);
+    CHECK(loaded.FindAimedOvergrowth(grove, north, Item::Billhook) == -1);
+}
+
 int main()
 {
     Run("defaults and input validation", DefaultsAndValidation);
@@ -4132,6 +4162,7 @@ int main()
     Run("overgrowth tools, tiers and prompts", OvergrowthTableAndPrompts);
     Run("salvage, hafting and tier-gated clearing by stable id", HaftingBootstrapAndClearing);
     Run("the held tool aims at what it clears, out to the full reach", AimedOvergrowthReach);
+    Run("a worn billhook fells a sapling in one press", OneSwingWornSapling);
     Run("multi-swing clears, energy reserve and full-pack yields", MultiSwingTiersAndCapacity);
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
