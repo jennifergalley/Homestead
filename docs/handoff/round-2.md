@@ -39,14 +39,17 @@ launches**; documenting them does not change a live session's model or reasoning
 | Orchestrator Agent | GPT-6 Sol (`gpt-6-sol`) | **medium** | **long** |
 | Implementer (Blender, Unreal or code work) | Claude Opus 5.5 | high | long |
 
-**At most three concurrent implementers** do Blender, Unreal or code work. This is a cap across
-implementer agents, separate from the 2-Unreal-process machine cap. Coordinating, documentation,
-architecture and review-only work do not use an implementer slot unless they start implementation.
-The orchestrator grants the next implementer slot before a waiting lane resumes. A lane that is idle
-or waiting schedules a wake-up and ends its turn; it doesn't hold a slot by sleeping or polling.
+**At most three concurrent hands-on implementers** do Blender, Unreal or code work. This is a cap
+across active work, not a role-label exemption, and is separate from the 2-Unreal-process machine cap.
+The Integration Agent counts while merging, compiling, PIE testing or packaging, but not while only
+coordinating; Architecture counts while editing or building code; Docs counts while implementing tooling.
+Time-critical integration gets a slot by pausing a lane. The orchestrator grants the next slot before a
+waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
+a slot by sleeping or polling.
 
-**Current implementer slots (2026-09-29):** Calendar Agent, Harvest Agent and Performance Agent.
-Seedsman Agent, Seasons Agent and Crafting Agent are paused until the orchestrator grants a slot.
+**Current implementer slots (2026-09-29):** Integration Agent (time-critical batch), Calendar Agent
+and Performance Agent. Harvest Agent was paused to give Integration the slot; Seedsman Agent, Seasons Agent
+and Crafting Agent are also paused until the orchestrator grants a slot.
 
 ## Lanes and ownership
 
