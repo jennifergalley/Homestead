@@ -54,6 +54,10 @@ for at the time. If she doesn't say, work headless when she's away and ask when 
 4. **Bake and review settings.**
    - `BAKE = {"size": 2048|4096, "samples": 96}` converts materials to basecolor, roughness,
      normal (OpenGL) and AO PNGs on fresh UVs.
+   - `BAKE_MESHES` chooses which meshes that bake applies to. Omit it and every mesh bakes. A set
+     (`{"SM_OilLamp"}`) bakes only those meshes; a dict gives per-mesh overrides (`"*"` for the rest). Use it
+     for props whose glass, flame or other translucent or emissive parts must stay unbaked
+     (`Recipes/oil_lamp.py`: `SM_OilLamp` baked, `SM_OilLampGlass` and `SM_OilLampFlame` not).
    - For foliage with a hand-laid shared UV atlas, use `"repack": False` and drop AO.
      `kit.assign_tube_uvs` puts stems and scapes into their own atlas rects.
    - `BEAUTY = {"pose": (rx, ry, rz), "focus": (x, y, z)}` sets the review pose. For example, lay a tool flat
