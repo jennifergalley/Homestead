@@ -40,7 +40,7 @@ FString AHomesteadController::EstateName() const
 
 FString AHomesteadController::CurrentSaveLabel() const
 {
-    return FromUtf8(Homestead::Manor::SaveLabel(State(), Sim.SeasonName(), Sim.DayNumber()));
+    return FromUtf8(Homestead::Manor::SaveLabel(State()));
 }
 
 void AHomesteadController::BeginNewGameSetup()
