@@ -16,7 +16,8 @@ class UStaticMesh;
  *
  * M_EstateGrass does the look: it thins blades by rank with distance and density, sways them in the
  * wind, parts them round the heroine, keeps the road's wheel tracks clear and clears a circle round
- * each of up to three interactables per patch (per-instance custom data: x, y, radius cm, three times).
+ * each of up to three interactables per patch, and keeps garden plots bare (per-instance custom data:
+ * x, y, radius cm, three times; a negative radius is a bare square of that half size).
  * The game only picks which patch LOD a chunk uses, never showing fewer blades than the material
  * would draw there, so a chunk changing LOD doesn't pop.
  */
@@ -37,6 +38,8 @@ public:
     // Chunks are re-picked every Refresh (0.25 s), so pick LODs as if the camera were this much nearer.
     static constexpr float LodMarginCm = 400.0f;
     static constexpr int32 CustomFloats = 9;
+    // Bare soil round a tilled garden square, beyond its own half size (M_EstateGrass fades over 18 cm more).
+    static constexpr double PlotMarginCm = 15.0;
 
     /** Keeps the grass round View up to date with the state's interactables and buildings. */
     void Update(const Homestead::State& State, const FVector& View);

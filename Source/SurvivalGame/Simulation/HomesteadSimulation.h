@@ -390,6 +390,12 @@ constexpr double FuelEnergy = 0.2;
 constexpr double DeconstructEnergy = 1.0;
 }
 
+// The spring weather: it rains on the second of every three days, RainStartHour to RainEndHour.
+constexpr double RainStartHour = 9.0;
+constexpr double RainEndHour = 15.0;
+bool IsRainDay(double hour);
+bool IsRainingAt(double hour);
+
 // What the bed offers (flexible-sleep): each choice with its length and the hour of day she'd wake.
 enum class SleepChoice { UntilMorning, UntilRested, Nap };
 struct SleepOption
