@@ -97,6 +97,9 @@ public:
         if (!bFillingPail && PailPourAnimation) return PailPourAnimation;
         return WaterAnimation;
     }
+    // True while the carved pail's clips drive filling or pouring, so the older contextual
+    // watering can (UHomesteadWateringTool) stays hidden and only the pail shows.
+    bool UsesPailClips() const { return GetWaterAnimation() != WaterAnimation; }
     // homestead_agent.pail_pour EVENTS (seconds): her left hand takes the pail by its side, the
     // water starts and stops running, and her right fist takes the bail again. SPOT: where the
     // stream lands, ahead of her.
