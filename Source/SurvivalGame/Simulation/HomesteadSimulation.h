@@ -28,6 +28,8 @@ enum class ResourceKind : int
     Primroses, Bluebells, WildDaffodils, WildGarlic,
     // add-coral-island-clearout: the manor clear-out's nettles, a middling stump and hand-cleared rubbish.
     Nettles, StumpMedium, BrokenCrate, BrokenBarrel, RubbishHeap, RottenPlanks,
+    // Slate slid off the manor's roofs, heaped in and round the ruin; cleared by hand.
+    SlateHeap,
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.

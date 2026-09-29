@@ -5,6 +5,7 @@
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
 #include "Simulation/HomesteadEstate.h"
+#include "Simulation/HomesteadRuinDebris.h"
 
 namespace
 {
@@ -193,7 +194,13 @@ int32 AHomesteadManorRuin::Rebuild()
         return FTransform(FRotator(0.0f, Entry.Yaw, 0.0f), FVector(Entry.V, Entry.U, 0.0f), FVector(Entry.Scale));
     };
     TArray<UStaticMeshComponent*> PlanPieces;
-    for (const FRuinPiece& Entry : ManorRuinPlan) PlanPieces.Add(Place(Entry.Mesh, PlanTransform(Entry)));
+    for (const FRuinPiece& Entry : ManorRuinPlan)
+    {
+        // The loose slate and granite heaps she can clear are estate placements now
+        // (Simulation/HomesteadRuinDebris.h), drawn and cleared by AHomesteadWorld.
+        if (Homestead::RuinDebris::Replaces(TCHAR_TO_UTF8(Entry.Mesh), Entry.U, Entry.V)) { PlanPieces.Add(nullptr); continue; }
+        PlanPieces.Add(Place(Entry.Mesh, PlanTransform(Entry)));
+    }
     // The ivy's own +Y is its leafy face, so it turns to face whichever side of the run it hangs on.
     for (const FRuinCling& Cling : ManorRuinIvy)
     {

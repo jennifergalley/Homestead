@@ -2817,7 +2817,7 @@ void AHomesteadController::Interact()
                         || Kind == Homestead::ResourceKind::RottenPlanks;
                     const auto Gather = Sticks || Kind == Homestead::ResourceKind::FallenBranch || Boards ? EHomesteadKneelGather::Sticks
                         : Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::SalvagePile
-                            || Kind == Homestead::ResourceKind::RubbishHeap
+                            || Kind == Homestead::ResourceKind::RubbishHeap || Kind == Homestead::ResourceKind::SlateHeap
                         ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
                     FVector2D Target(ActionTarget.x, ActionTarget.y);
                     // Berries are picked from the near side of the bush, not its centre; an estate
@@ -2833,7 +2833,9 @@ void AHomesteadController::Interact()
                     {
                         const bool BigHeap = Kind == Homestead::ResourceKind::RubbishHeap && FocusId >= 570000 && FocusId < 570008;
                         const float Edge = BigHeap ? 95.0f : Kind == Homestead::ResourceKind::BrokenBarrel ? 55.0f
-                            : Kind == Homestead::ResourceKind::RottenPlanks ? 50.0f : 45.0f;
+                            : Kind == Homestead::ResourceKind::RottenPlanks ? 50.0f
+                            // A slate heap is nearly three metres by two: she stacks from its edge.
+                            : Kind == Homestead::ResourceKind::SlateHeap ? 100.0f : 45.0f;
                         const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
                         if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * FMath::Clamp(Toward.Size() - 30.0f, 0.0f, Edge);
                     }

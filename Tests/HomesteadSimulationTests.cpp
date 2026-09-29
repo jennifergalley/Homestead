@@ -4,6 +4,7 @@
 #include "HomesteadEstate.h"
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
+#include "HomesteadRuinDebris.h"
 
 #include <algorithm>
 #include <cmath>
@@ -3147,14 +3148,16 @@ void FixedEstateNewGameAndSave()
     CHECK(PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, spawn));
     CHECK(!PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points,
         layout.PointOr(Anchor::TownSquare, {})));
-    // The standing room is the carved-out corner of the ruin, and everything but its salvage lies outside it.
+    // The standing room is the carved-out corner of the ruin, and everything but its salvage and its
+    // own loose debris (HomesteadRuinDebris.h) lies outside it.
     const auto& footprint = layout.FindPolygon(Anchor::ManorFootprint)->points;
     CHECK(!PointInPolygon(footprint, spawn));
     int misplaced = 0;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
     {
         const bool onEstate = PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, placement.position);
-        const bool inRuin = placement.kind != ResourceKind::SalvagePile && PointInPolygon(footprint, placement.position);
+        const bool inRuin = placement.kind != ResourceKind::SalvagePile && !RuinDebris::Find(placement.id)
+            && PointInPolygon(footprint, placement.position);
         if (!onEstate || inRuin)
             std::cout << "Placement " << placement.id << " at (" << placement.position.x << ", " << placement.position.y
                 << ") is " << (inRuin ? "inside the ruin footprint" : "off the estate") << ".\n";
@@ -3766,6 +3769,81 @@ void WeedCreepNearOvergrowth()
     OK(loaded.ClearOvergrowth(regrownId, Item::Scythe, PlacedNode(loaded, regrownId).position));
 }
 
+void RuinDebrisIsClearable()
+{
+    // Jenny saw slate and rubble heaps in the manor that looked clearable but weren't. The loose
+    // ones are estate placements now: fallen slates stacked aside by hand, loose granite broken with
+    // the worn pickaxe, each cleared once and for good, and none in the way of the standing room,
+    // its door or the salvage piles.
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
+    double manorX = 1e18, manorY = 1e18;
+    for (const Point& corner : layout.FindPolygon(Anchor::ManorFootprint)->points)
+    {
+        manorX = std::min(manorX, corner.x);
+        manorY = std::min(manorY, corner.y);
+    }
+    Simulation sim;
+    OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
+    const Point room = layout.PointOr(Anchor::StandingRoomOrigin, {});
+    int slate = 0, granite = 0;
+    for (const RuinDebris::Spot& spot : RuinDebris::Spots)
+    {
+        CHECK(spot.id >= RuinDebris::FirstId && spot.id <= RuinDebris::LastId);
+        const ResourceNode& node = PlacedNode(sim, spot.id);
+        CHECK(node.kind == spot.kind && !node.cleared);
+        CHECK(std::hypot(node.position.x - (manorX + spot.v), node.position.y - (manorY + spot.u)) <= 150.0 + 1e-6);
+        CHECK(PointInPolygon(boundary, node.position));
+        // Clear of the standing room (U 2400-3000, V 0-600) and its doorway.
+        CHECK(std::abs(node.position.x - room.x) > 400.0 || std::abs(node.position.y - room.y) > 400.0);
+        const auto* info = FindOvergrowth(node.kind);
+        CHECK(info);
+        if (node.kind == ResourceKind::SlateHeap) { ++slate; CHECK(info->byHand && IsRubbish(node.kind)); }
+        else { ++granite; CHECK(node.kind == ResourceKind::Rubble && info->tool == ToolKind::Pickaxe && info->minTier == ToolTier::Worn); }
+    }
+    CHECK(slate == 6 && granite == 6 && RuinDebris::SpotCount == 12);
+    CHECK(std::string(ResourceName(ResourceKind::SlateHeap)) == "Fallen slates");
+    // Standing at any salvage pile, the pile itself is what her hands find.
+    for (int pile = 520001; pile <= 520005; ++pile)
+        CHECK(sim.FindNearestOvergrowth(PlacedNode(sim, pile).position, Overgrowth::Reach, Item::Count) == pile);
+
+    // Slates by hand: stone, and sometimes the lead and nails that came down with them.
+    const ResourceNode heap = PlacedNode(sim, 582000);
+    const int stone = sim.Count(Item::Stone);
+    OK(sim.ClearOvergrowth(heap.id, Item::Count, heap.position));
+    CHECK(PlacedNode(sim, heap.id).cleared && sim.Count(Item::Stone) >= stone + 1 && sim.Count(Item::Stone) <= stone + 2);
+    CHECK(!sim.ClearOvergrowth(heap.id, Item::Count, heap.position).ok);
+    // Granite needs the pickaxe; bare hands are refused and nothing changes.
+    const ResourceNode cobbles = PlacedNode(sim, 582006);
+    const auto before = sim.GetState().inventory;
+    CHECK(!sim.ClearOvergrowth(cobbles.id, Item::Count, cobbles.position).ok);
+    CHECK(sim.GetState().inventory == before && !PlacedNode(sim, cobbles.id).cleared);
+    OK(sim.GrantItems(Item::Pickaxe, 1));
+    OK(sim.ClearOvergrowth(cobbles.id, Item::Pickaxe, cobbles.position));
+    CHECK(PlacedNode(sim, cobbles.id).cleared);
+
+    // Cleared heaps stay cleared across a save and reload; the rest are still there.
+    Simulation loaded;
+    loaded.SetLayout(layout);
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(loaded, 582000).cleared && PlacedNode(loaded, 582006).cleared);
+    CHECK(!PlacedNode(loaded, 582001).cleared && !PlacedNode(loaded, 582011).cleared);
+
+    // A save from before the heaps were clearable loads with every heap standing.
+    EstatePlacements older = ProvisionalEstatePlacements();
+    older.placements.erase(std::remove_if(older.placements.begin(), older.placements.end(),
+        [](const EstatePlacement& placement) { return placement.id >= RuinDebris::FirstId && placement.id <= RuinDebris::LastId; }),
+        older.placements.end());
+    Simulation original;
+    OK(original.NewEstateGame(layout, older));
+    Simulation upgraded;
+    upgraded.SetLayout(layout);
+    upgraded.SetPlacements(ProvisionalEstatePlacements());
+    OK(upgraded.Deserialize(original.Serialize()));
+    for (const RuinDebris::Spot& spot : RuinDebris::Spots) CHECK(!PlacedNode(upgraded, spot.id).cleared);
+}
+
 void ManorClearoutField()
 {
     // The ground round the ruin (570000+) is thick with clearables of every early kind, a few that
@@ -3981,6 +4059,7 @@ int main()
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
     Run("manor clear-out field placement", ManorClearoutField);
+    Run("the ruin's loose slate and rubble can be cleared", RuinDebrisIsClearable);
     Run("clear-out rubbish, nettles, stumps and spoiled ground", ClearoutKindsAndSpoiledGround);
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);
