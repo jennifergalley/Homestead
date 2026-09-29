@@ -98,10 +98,11 @@ like the save version).
 | Scenery kinds (`EstateSceneryKinds` in `HomesteadWorld.cpp`; `scatter.py` kind bytes must match) | Owner |
 | --- | --- |
 | 13-15: oak, beech, sycamore; 16-18: hawthorn, holly, hazel coppice | trees lane |
-| 19-47 | MVP woodland biome |
+| 19-41 | MVP woodland biome (`Scripts\Terrain\mvp_woodland.py`) |
 
-The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by `scatter.py` and
-`bake_ground.py` (on its lane branch; not on `main` yet).
+The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json` (not in `estate_layout.json`,
+which `reshape.py` regenerates), shared by `scatter.py` and `bake_ground.py`. On its lane branch; not on
+`main` yet.
 
 **Re-bake order after `scatter.py` regenerates the scenery:** `bake_ground.py` and
 `build_ground.py` (ground lane), then the estate map (`docs\setup.md`, "Estate map").
@@ -132,10 +133,13 @@ The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by
   If your branch adds anything to the save format, tell the orchestrator before your `[ready]`. New
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
-  **Appending a `Homestead::Item` breaks same-version saves:** `WriteStock` writes every stock
-  positionally with no count, so a new item widens the line and existing saves read as "corrupt".
-  Until `openspec/changes/harden-save-item-stocks` lands, tell the orchestrator before appending an
-  item (also in the architecture agent's `homestead-add-item-or-interactable` skill).
+  **SAVE-SAFETY HOLD (orchestrator, 2026-09-28, in force now):** appending a value to `enum class Item`
+  (`Simulation\HomesteadItems.h`) silently makes existing saves unreadable, because `WriteStock` writes
+  every stock positionally with no count. **Don't push or send `[ready]` for commits that add items**
+  until the architecture agent's save hardening (count-prefixed stocks, save v13 with a v12 migration;
+  `openspec/changes/harden-save-item-stocks`) is on `main` and the orchestrator lifts the hold. Keep
+  developing on your branch. The architecture agent may coordinate edits in `HomesteadSimulation.cpp`
+  with you.
 - `SHomesteadMenu` edits are serialized through the orchestrator.
 - **Integration session: packaging and batching.** Merge `[ready]`s in batches (one editor build, one
   game-target build, one native test run, one PIE pass per batch), and package only at the end of a round
@@ -187,6 +191,8 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 - **At most 2 Unreal processes machine-wide** (Jenny, 2026-09-28; it was 3). Each editor commits
   15-17 GB; with three open, RAM ran out and the pagefile grew to 81.5 GB, filling C:.
   `Start-EditorMcp.ps1` enforces it. Close your editor as soon as a verification pass is done.
+  **One slot is reserved for the Integration Agent** (`jennifergalley-literate-eureka`); all other lanes
+  share the second, one at a time (also enforced).
 - Agent editors start with Live Coding and ray tracing off (`bedbb9b8`, `50f9c64c`).
 - Agent editors skip the new-game setup (`homestead.SkipNewGameSetup`, passed by `Start-EditorMcp.ps1`):
   new Estate games use the default names (Eleanor Cavendish, Trevennor). Set it to 0 in the console
@@ -216,13 +222,42 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Pending doc updates on merge
 
+- Lamp lane (uncommitted in `jennifergalley-fluffy-broccoli` as of 2026-09-28): `build_prop.py` gains a
+  recipe-level `BAKE_MESHES = {"SM_Name"}` (or a dict of per-mesh overrides) to bake only chosen meshes,
+  so a prop can bake its opaque body while leaving separate glass or flame meshes unbaked
+  (`Recipes/oil_lamp.py`: `SM_OilLamp` baked, `SM_OilLampGlass` and `SM_OilLampFlame` not). With only
+  `BAKE`, every mesh still bakes. When it lands, add it to the Blender skill's "Bake and review
+  settings" step and `docs\blender-assets.md`.
+
+- Build speed (`f6ed1c42`, waiting on the orchestrator): once it merges, (a) point every `Build.bat
+  SurvivalGameEditor ...` recipe (editor skill quick-start and section 8, `docs\handoff\README.md` step 3,
+  `docs\setup.md`) at `Scripts\Invoke-UnrealBuild.ps1` (`-Target`, `-CheckOnly`, `-Force`; it skips UBT when
+  already built, logs to `Saved\Logs\UnrealBuildTool-<targets>.log`, and passes `-UBADisableRemote`), and
+  document `Start-EditorMcp -ForceBuild`; (b) add the private-PCH rule: `SurvivalGame` uses
+  `Source\SurvivalGame\SurvivalGamePCH.h`; `C2027`/`C2065 use of undefined type` in a file that used to
+  compile means include that engine header in the file; add to the PCH only headers many files use,
+  never UnrealEd or editor headers; every `.cpp` must compile on its own. The docs agent does this.
+
 - Architecture agent (`77d4cee7`, not on `main` yet): when `docs/architecture.md` and the
   `homestead-code-conventions` skill land, point the C++ rows of the editor skill's table 0.1 (unity
   clashes, C4458/C4459, C2487, enum default args, UPROPERTY-not-static, `../Simulation/` includes,
   runtime ISM Rebuild) and section 8's "C++ conventions that bite" at that skill's "Unreal C++"
   section, keeping each row's Symptom column. The docs agent does this.
+- Architecture agent, same merge:
+  - **Save v13** (`c729d4e6`): stocks carry their width, and v12 saves migrate. Then replace the
+    SAVE-SAFETY HOLD above and in editor skill section 0 with: "Items can be appended freely (v13+);
+    never reorder or remove them. New save sections write any list or per-enum array with its count
+    first." Update the save-version line to 13, and the orchestrator lifts the hold.
+  - **Legacy probes removed** (`26b367e9`): `Test-AuthoringSettings.ps1`, `Tests\HomesteadMenuSourceTests.py`,
+    FernSpike and the `*Policy` scripts. Drop `Test-AuthoringSettings.ps1` from editor skill section 0's
+    "Never stop shared processes" bullet, and delete the table 0.1 row about `HomesteadMenuSourceTests.py`
+    failures.
 
 ## Tooling requests (unassigned)
+
+- `get_play_state` (`st`) should report `namesOpen` and `shopOpen`. Both make the controller swallow
+  gameplay keys, but `st` can't show them today, so a tap that does nothing looks like broken input
+  (the Sleep/Ground lane, 2026-09-28). Asked for by that lane.
 
 - The `HomesteadPlayTools` additions asked for by the clearing lane:
   - `bootstrap_estate_tools`: search every salvage pile, gather branches, haft all five tools and

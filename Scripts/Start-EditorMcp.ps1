@@ -17,8 +17,10 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
   stale Saved\Autosaves\PackageRestoreData.json. All three otherwise block MCP with no log output.
 - Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on).
 - Refuses to launch when 2 or more Unreal processes (editors, games, commandlets) are already running on
-  the machine, and lists them with their worktree. It also refuses while another worktree holds a fresh
-  perf window (Start-PerfWindow.ps1). -Force overrides both.
+  the machine, and lists them with their worktree. One of the 2 slots is reserved for the integration
+  session (worktree jennifergalley-literate-eureka, or one containing Saved\IntegrationSession.marker), so
+  any other worktree is refused while another lane's Unreal process is running. It also refuses while
+  another worktree holds a fresh perf window (Start-PerfWindow.ps1). -Force overrides all of these.
 #>
 [CmdletBinding()]
 param(
@@ -98,6 +100,26 @@ if ($unreal.Count -ge 2 -and -not $Force) {
         "  PID $($_.ProcessId) $($_.Name) $([int]($_.WorkingSetSize / 1MB)) MB since $($_.CreationDate.ToString('HH:mm')) ($where)"
     }) -join "`n"
     throw "$($unreal.Count) Unreal processes are already running (the machine limit is 2):`n$list`nDon't retry in a loop: schedule a wake-up with save_session_automation (about 5 min) and end your turn, close your own, or ask its owner. A tiny editor that's been up a long time may be stuck on a dialog. -Force overrides this check."
+}
+
+# Slot rule: of the 2 slots, one is reserved for the integration session (it verifies batches for Jenny's
+# scheduled playtest builds; it once waited over an hour for a slot). Every other worktree shares the second
+# slot, one Unreal process at a time. The integration worktree is jennifergalley-literate-eureka, or any
+# worktree containing Saved\IntegrationSession.marker (for a later round's integrator).
+$integrationWorktrees = @('jennifergalley-literate-eureka')
+$isIntegrationWorktree = ($integrationWorktrees -contains (Split-Path $root -Leaf)) -or (Test-Path -LiteralPath (Join-Path $root 'Saved\IntegrationSession.marker'))
+$isIntegrationProcess = {
+    param($p)
+    $wt = if ($p.CommandLine -match 'copilot-worktrees\\SurvivalGame\\([^\\"]+)') { $Matches[1] } else { '' }
+    $wt -and (($integrationWorktrees -contains $wt) -or (Test-Path -LiteralPath "E:\Repos\copilot-worktrees\SurvivalGame\$wt\Saved\IntegrationSession.marker"))
+}
+$laneProcesses = @($unreal | Where-Object { -not (& $isIntegrationProcess $_) })
+if (-not $isIntegrationWorktree -and $laneProcesses.Count -ge 1 -and -not $Force) {
+    $list = ($laneProcesses | ForEach-Object {
+        $where = if ($_.CommandLine -match 'copilot-worktrees\\SurvivalGame\\([^\\"]+)') { $Matches[1] } elseif ($_.ExecutablePath -match 'HomesteadMVP') { 'HomesteadMVP' } else { '?' }
+        "  PID $($_.ProcessId) $($_.Name) since $($_.CreationDate.ToString('HH:mm')) ($where)"
+    }) -join "`n"
+    throw "The lanes' shared Unreal slot is taken (one slot is reserved for the integration session):`n$list`nDon't retry in a loop: schedule a wake-up with save_session_automation (about 5 min) and end your turn, or ask its owner. -Force overrides this check."
 }
 
 # Belt and braces for the -ini: Live Coding opt-out below: also write it into this worktree's saved
