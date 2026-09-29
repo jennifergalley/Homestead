@@ -126,31 +126,46 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
   - Hotbar quick-eat follows the same rules.
 - **Food restores energy only.** The catalogue gains a food class: `Snack`, `Meal`, or not edible.
   On the estate `ItemInfo::hunger` is ignored for effect but kept above zero for the woodland.
-  Agreed values, to be tuned at playtest:
+  **This table is final** (Orchestrator and Calendar Agent, 2026-09-29) and is tuned at playtest:
 
-  | Food | Class | Energy |
-  | --- | --- | --- |
-  | Broad beans (raw) | Snack | +4 |
-  | Berries, blackberries, raw turnip, raw carrot | Snack | +6 |
-  | Strawberries | Snack | +8 |
-  | Cabbage (raw) | Snack | +10 |
-  | Cheese | Snack | +14 |
-  | Bread | Snack | +16 |
-  | Roasted roots, roast potatoes, pease pudding | Meal | +20 |
-  | Herbed roots, leek & potato soup | Meal | +30 |
-  | Cornish pasty | Meal | +40 |
-  | Vegetable stew | Meal | +45 |
+  | Food | Class | Energy | Well fed |
+  | --- | --- | --- | --- |
+  | Broad beans (raw) | Snack | +4 | none |
+  | Berries, blackberries, raw turnip, raw carrot | Snack | +6 | none |
+  | Strawberries | Snack | +8 | none |
+  | Cabbage (raw) | Snack | +10 | none |
+  | Bread | Snack | +12 | none |
+  | Cheese | Snack | +15 | none |
+  | Roasted roots, roast potatoes, pease pudding | Meal, tier 1 | +25 | 2 game hours |
+  | Cornish pasty, herbed roots, leek & potato soup | Meal, tier 2 | +40 | 3 game hours |
+  | Vegetable stew | Meal, tier 3 | +60 | 4 game hours |
 
   - Raw potatoes, leeks, peas, wheat, barley and field mushrooms can't be eaten: they're cooked
-    or sold. Fish dishes (round 4) are Meals with values set in that round.
-  - "Meal" means a cooked dish, whether cooked at the hearth or bought ready-made. So the pasty
-    counts, and bread and cheese stay Snacks.
-- **Well fed (final, agreed by the Orchestrator and the Calendar Agent on 2026-09-29):**
-  - Any Meal grants three game hours of Well fed, during which `WorkCost(base)` returns
-    `base × 0.85`. That's the 15% reduction first recommended. Tests, toasts and descriptions all
-    use 0.85.
-  - Eating another Meal sets the expiry to three hours from now, never adding to the time left, so
-    bonuses never stack. It never changes the doze or sleep rules.
+    or sold. Fish dishes (round 4) are Meals, and their tiers are set in that round.
+  - "Meal" means a cooked dish, whether cooked at the hearth or bought ready-made. So the pasty is
+    a Meal, and bread and cheese are Snacks.
+- **Well fed (final):**
+  - While she's Well fed, `WorkCost(base)` returns `base × 0.85`, the 15% reduction. Tests, toasts
+    and descriptions all use 0.85. It never changes the doze or sleep rules.
+  - A Meal grants Well fed for its tier's duration: 2, 3 or 4 game hours.
+  - **Refresh, never stack:** eating a Meal sets `wellFedUntilHour = max(current expiry, hour +
+    meal duration)`. The expiry is never shortened and time is never added on top, so a tier-1
+    meal eaten during a tier-3 buff doesn't cut it short.
+- **When she can eat (final):**
+  - **Below full energy:** any Snack or Meal is eaten and always restores its energy, capped at
+    full. A Meal also applies the refresh rule above, even when that doesn't extend the buff (for
+    example a tier-1 meal during a longer tier-3 buff). The toast reads "+25 Energy" when the buff
+    is unchanged, or "+40 Energy · Well fed until 2:30 PM" when it starts or extends.
+  - **At full energy, a Snack:** refused and not consumed. "You're full of energy. Save it for
+    later."
+  - **At full energy, a Meal:** eaten only if it **starts** Well fed (she isn't Well fed now) or
+    **extends** it by at least 1 game hour, meaning `hour + meal duration >= current expiry + 1`.
+    - When eaten, the toast says outright that energy was full and gives the time: "Your energy
+      was already full. Well fed until 2:30 PM."
+    - Otherwise it's refused and not consumed: "You're full, and already well fed until 2:30 PM.
+      Save it for later."
+  - Hotbar quick-eat follows the same rules.
+- **Well fed timer, save and display:**
   - **Timebase:** store `wellFedUntilHour` as an absolute game hour, in the same timebase as
     `State::hour`, and treat her as Well fed while `hour < wellFedUntilHour`. Don't store a
     remaining duration or real time.
@@ -158,18 +173,19 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
       since the game began, never wrapped per day: `DayNumber()` is `hour / 24 + 1`.
     - `hour` only moves forward. `SkipToHourOfDay` always moves to a later hour, and load accepts
       `hour` in `[6, MaxHour]`.
-    - So a meal at 11 PM (hour 41) expires at hour 44, 2 AM the next day, with no special case.
+    - So a tier-2 meal at 11 PM (hour 41) expires at hour 44, 2 AM the next day, with no special
+      case.
     - Sleep, dozing and `HomesteadGrowCrops` all advance `hour` consistently, so the timer expires
       correctly across them and across day-length settings.
-    - Add a native test: a meal at 23:00 is still Well fed at 01:30 the next day and expired by
-      02:00.
+    - Add a native test: a tier-2 meal (pasty) at 23:00 is still Well fed at 01:30 the next day and
+      expired by 02:00.
   - **Save:** an optional trailing tagged section, `wellfed`, like lane A's `withered` section,
     with no version bump.
     - It's written only while she's Well fed.
     - On load, a missing section means not Well fed. The stored expiry must be finite. An expiry at
-      or before the save's `hour` means not Well fed, and any value above the save's `hour + 3` is
-      clamped to `hour + 3`, so a corrupt or hand-edited save can't grant a long buff. Loading never
-      fails silently.
+      or before the save's `hour` means not Well fed, and any value above the save's `hour + 4` (the
+      longest tier) is clamped to `hour + 4`, so a corrupt or hand-edited save can't grant a long
+      buff. Loading never fails silently.
     - An older build reports a save with an unknown section as `NewerBuild` and leaves it untouched.
       Writing the section only while it's active keeps most saves readable by older builds.
     - Losing the timer is harmless.
@@ -177,13 +193,11 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
     "Well fed until 2:30 PM". "3 h" means different real lengths at 30-, 60- and 120-minute days
     and is easy to misread against the clock.
   - **Tuning flag for Jenny's playtest:**
-    - At the 30-minute default day, three game hours is under 4 real minutes.
-    - A typical three-hour stretch of clearing, costing about 15–20 energy, saves about 3 at ×0.85.
-      That's modest, and it may be hard to notice.
-    - If Jenny can't feel it, the first knob is the **duration**, six game hours: about 7.5 real
-      minutes, saving roughly 5–8 energy, about a snack's worth. It still never stacks.
-    - The duration and the multiplier are constants in the catalogue and `Exertion`, not
-      structure.
+    - At the 30-minute default day, the 2/3/4 game-hour tiers last only about 2.5 to 5 real
+      minutes.
+    - A three-hour stretch of clearing, costing about 15–20 energy, saves about 3 at ×0.85.
+    - If Jenny can't feel it, the first knob is the **durations**: double them to 4, 6 and 8 hours.
+      They're constants in the catalogue and `Exertion`, not structure.
 - **Why not keep hunger with better tuning:** it would be a second chore meter that's off-genre,
   and Jenny already finds it uninteresting. The Well fed bonus keeps the one decision that
   matters: cook and stop for a proper meal, or snack and push on.
@@ -347,14 +361,14 @@ Prices and yields are tuned in the catalogue.
 - **Hearth dishes** are hearth recipes. They're Meals, so they restore energy and grant Well fed
   (§3a) in tiers:
 
-  | Dish | Ingredients | Energy (Meal, grants Well fed) |
-  | --- | --- | --- |
-  | Roast potatoes | 3 Potato | +20 |
-  | Pease pudding | 4 Peas | +20 |
-  | Leek & potato soup | 2 Leek, 2 Potato | +30 |
-  | Vegetable stew | Potato, Carrot, Turnip, Leek | +45 |
+  | Dish | Ingredients | Energy | Well fed |
+  | --- | --- | --- | --- |
+  | Roast potatoes | 3 Potato | +25 | 2 h (tier 1) |
+  | Pease pudding | 4 Peas | +25 | 2 h (tier 1) |
+  | Leek & potato soup | 2 Leek, 2 Potato | +40 | 3 h (tier 2) |
+  | Vegetable stew | Potato, Carrot, Turnip, Leek | +60 | 4 h (tier 3) |
 
-  RoastedRoots (+20) and HerbedRoots (+30) stay for legacy roots, and are Meals too.
+  RoastedRoots (+25, tier 1) and HerbedRoots (+40, tier 2) stay for legacy roots, and are Meals too.
 - **Craft categories:** Craft groups recipes into tabs: Tools (the hafts), Stations, Farm (fence,
   gate, planks), Furniture and Cooking. Tabs follow the existing icon-tab and directional-focus
   rules, and LB/RB still switch the book's main tabs.
