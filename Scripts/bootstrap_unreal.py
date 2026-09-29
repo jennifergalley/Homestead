@@ -125,7 +125,7 @@ def textured_material(name, source_folder, prefix):
     return material
 
 
-def creek_water_material(rebuild=False, name="M_CreekWater"):
+def creek_water_material(rebuild=False, name="M_CreekWater", flow=1.0):
     """Flowing creek water on the Single Layer Water shading model, from the generated ripple and foam maps.
 
     Single Layer Water renders in the opaque pass, so the surface receives the woodland's shadows and
@@ -135,7 +135,8 @@ def creek_water_material(rebuild=False, name="M_CreekWater"):
     colour carries the depth over the rendered bed: R reaches 1 at 35 cm deep, G at 8 cm, which
     thins the foam and softens the shoreline highlight. B adds white water (M_EstateRiver, built from
     this graph by Scripts/Terrain/place_water.py, for the estate river's riffles and spring; 0 on the
-    woodland creek). Pass rebuild=True to re-author in place.
+    woodland creek). flow scales every drift speed (M_EstatePond, the estate lake, uses a small fraction).
+    Pass rebuild=True to re-author in place.
     """
     creek = ROOT / "Assets" / "Environment" / "Creek"
     ripples = import_asset("T_CreekRipples_N.png", "Textures", "T_CreekRipples_N", source_root=creek)
@@ -167,7 +168,8 @@ def creek_water_material(rebuild=False, name="M_CreekWater"):
 
     def sample(texture, tiling, speed, x, y, normal=False):
         coords = node(unreal.MaterialExpressionTextureCoordinate, x - 600, y, utiling=tiling, vtiling=tiling)
-        pan = node(unreal.MaterialExpressionPanner, x - 400, y, speed_x=speed[0], speed_y=speed[1])
+        # flow scales the drift: 1 for running water, a small fraction for still water stirred by the wind.
+        pan = node(unreal.MaterialExpressionPanner, x - 400, y, speed_x=speed[0] * flow, speed_y=speed[1] * flow)
         link(coords, "", pan, "Coordinate")
         tex = node(unreal.MaterialExpressionTextureSample, x - 200, y, texture=texture,
                    sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL if normal

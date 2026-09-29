@@ -170,6 +170,25 @@ The river runs over the cove beach into the shore wash; its `HomesteadWater` tag
 covers only the stream. The sea is tagged `HomesteadSea` only. Save the actors' packages afterwards
 (`set_course` alone doesn't dirty the package; the script calls `modify()` first).
 
+### Estate lake (`lake_basin.py`, `lake_features.py`)
+
+An upland pool north-west of the farm (up-left on the north-up estate map), centred (-50, -745) m, about
+76 x 44 m. `python Scripts\Terrain\lake_basin.py` grades it once:
+- a bed shelving 1 in 4 to 1.8 m, a wet lip rising 0.3 per metre out of the water;
+- a cut bank with granite on the uphill side, and a low turfed pond bay on the downhill side;
+- a 1 in 10 landing on the farm side, and a footpath from the farm's north fence (-160, -688) to it.
+
+It writes the heightfield, PNG and work npy, and "lake" in `estate_layout.json` (shore, level, landing,
+path, pathProfile, graded). Once "graded" is set it only reapplies the scenery: to regrade, restore the
+heightfield and remove "lake". `lake_features.py` clears the scatter from the water, its lip and the path
+and plants the margin (tussock grass, talus and boulders; fixed seed). `scatter.py` applies it after a
+fresh scatter. Then, in the editor: `apply_estate_heightfield` over the rectangle it printed, save only the
+proxies it touched, run `place_water.py` (`EstateLake`, an `AHomesteadWaterPool` with `MI_EstatePond`, not
+spatially loaded), `bake_ground.py` + `build_ground.py`, and `bake_estate_map.py` + `ImportEstateMap`.
+
+The pool's shoreline is a closed spline at the water level with scale Y 0: the controller's water probe
+treats its inside as in the water and the pail aims 25 cm inside it. An invisible pawn-only wall 2.2 m in
+from the shore (about knee deep) keeps her out of the deep water.
 ### River channel (`river_channel.py`)
 
 reshape.py's cut only lowers ground, so where the river runs along a valley side the downhill bank

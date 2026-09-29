@@ -226,6 +226,23 @@ def ground_fields(h, w, layout):
     d_river = line_distance(layout["river"], h.shape)
     density *= smoothstep(3.1, 3.9, d_river)
     height = np.where(d_river < 8.0, np.maximum(height, 1.0 * smoothstep(8.0, 4.0, d_river)), height)  # lush banks
+    # The estate lake (lake_basin.py): no blades in the water or on its wet lip, a muddy bed under the
+    # water, lush grass round the margin, and a trodden path and landing from the farm.
+    lake = layout.get("lake")
+    s_lake = np.full(h.shape, np.inf, np.float32)
+    if lake:
+        poly = np.asarray(lake["shore"], np.float64)
+        wet = np.zeros(h.shape, bool)
+        rr, cc = fill_polygon(poly[:, 1] + H, poly[:, 0] + H, h.shape)
+        wet[rr, cc] = True
+        s_lake = np.where(wet, -distance_transform_edt(wet), distance_transform_edt(~wet)).astype(np.float32)
+        density *= smoothstep(0.6, 1.4, s_lake)
+        height = np.where((s_lake > 0) & (s_lake < 5.0), np.maximum(height, smoothstep(5.0, 1.5, s_lake)), height)
+        d_path = line_distance(lake["path"], h.shape)
+        lx, ly = lake["landing"]
+        tread = np.maximum(0.7 * smoothstep(1.9, 0.6, d_path) * (0.6 + 0.4 * clump), 0.8 * smoothstep(5.0, 1.5, np.hypot(X - lx, Y - ly)))
+        wear = np.maximum(wear, np.maximum(tread, np.where(s_lake < 0, 1.0, 0.0)))
+        density *= 1.0 - 0.95 * tread
     tx, ty = lm["TownSquare"][:2]
     density *= smoothstep(100.0, 140.0, np.hypot(X - tx, Y - ty))
 
@@ -259,7 +276,7 @@ def ground_fields(h, w, layout):
     surface[(canopy > 0.5) & np.isin(surface, [SURFACES["Grass"], SURFACES["Moor"]])] = SURFACES["Woodland"]
     surface[(zone > 0.5) & (surface != SURFACES["Water"])] = SURFACES["Woodland"]
     surface[inside] = SURFACES["Soil"]
-    surface[(h < 0.25) | (d_river < 3.0)] = SURFACES["Water"]
+    surface[(h < 0.25) | (d_river < 3.0) | (s_lake < 0.0)] = SURFACES["Water"]
     return fields, surface
 
 

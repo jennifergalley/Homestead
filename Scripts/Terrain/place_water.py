@@ -10,7 +10,7 @@ import unreal
 
 LAYOUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "estate_layout.json")
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
-existing = {a.get_actor_label(): a for a in eas.get_all_level_actors() if a.get_actor_label() in ("EstateSea", "EstateRiver")}
+existing = {a.get_actor_label(): a for a in eas.get_all_level_actors() if a.get_actor_label() in ("EstateSea", "EstateRiver", "EstateLake")}
 
 L = json.load(open(LAYOUT))
 OCEAN_MESH = "/Game/SurvivalGame/Estate/Water/SM_EstateOcean"
@@ -159,3 +159,52 @@ for index, (mesh, angle, dist, scale, radius, yaw) in enumerate(SPRING_STONES):
     stone.set_actor_rotation(unreal.Rotator(0, 0, base + yaw), False)
     stone.set_actor_scale3d(unreal.Vector(scale, scale, scale))
 print("sea + river placed:", len(course), "river points, mouth at", course[-1], "; spring at", course[1])
+
+
+def water_look(material_path, instance_name, flow, look):
+    """A material instance over a creek-graph material (built once with the given flow)."""
+    tools = unreal.AssetToolsHelpers.get_asset_tools()
+    if not unreal.EditorAssetLibrary.does_asset_exist(material_path):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "hs_bootstrap", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "bootstrap_unreal.py"))
+        bootstrap = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(bootstrap)
+        bootstrap.creek_water_material(name=material_path.rsplit("/", 1)[1], flow=flow)
+    path = "/Game/SurvivalGame/Materials/" + instance_name
+    if unreal.EditorAssetLibrary.does_asset_exist(path):
+        mi = unreal.load_asset(path)
+    else:
+        mi = tools.create_asset(instance_name, "/Game/SurvivalGame/Materials", unreal.MaterialInstanceConstant,
+                                unreal.MaterialInstanceConstantFactoryNew())
+    mel = unreal.MaterialEditingLibrary
+    mel.set_material_instance_parent(mi, unreal.load_asset(material_path))
+    for name, value in look.items():
+        if isinstance(value, tuple):
+            mel.set_material_instance_vector_parameter_value(mi, name, unreal.LinearColor(*value, 0.0))
+        else:
+            mel.set_material_instance_scalar_parameter_value(mi, name, value)
+    unreal.EditorAssetLibrary.save_loaded_asset(mi, False)
+    return mi
+
+
+# The estate lake (lake_basin.py): a closed shoreline at its level, still water with a wind-stirred
+# surface and the peaty tea colour of a Cornish upland pool. Not spatially loaded, so it's drawn and the
+# pail probe finds it from anywhere; tagged HomesteadWater (fresh water, fills the pail).
+LAKE = L.get("lake")
+if LAKE:
+    # Near-neutral absorption: clear, slightly peaty shallows over the bed and dark depths (absorbing blue
+    # much faster than red read as a rust-orange band along the shore).
+    pond_look = water_look("/Game/SurvivalGame/Materials/M_EstatePond", "MI_EstatePond", 0.08,
+                           {"RippleScale": (0.1, 0.1, 1.0), "Specular": 0.9, "Roughness": 0.02,
+                            "Absorption": (0.05, 0.048, 0.05), "Scattering": (0.0003, 0.0005, 0.0004),
+                            "ShallowFoam": 0.12, "DeepFoam": 0.0})
+    lake = existing.get("EstateLake") or eas.spawn_actor_from_class(
+        unreal.HomesteadWaterPool, unreal.Vector(LAKE["shore"][0][0] * 100, LAKE["shore"][0][1] * 100, LAKE["level"] * 100))
+    lake.set_actor_label("EstateLake")
+    lake.set_folder_path("Water")
+    lake.set_editor_property("is_spatially_loaded", False)
+    lake.modify()
+    lake.set_editor_property("material", pond_look)
+    lake.set_shore([unreal.Vector2D(x * 100, y * 100) for x, y in LAKE["shore"]], LAKE["level"] * 100)
+    print("lake placed: level", LAKE["level"], "m,", len(LAKE["shore"]), "shore points")

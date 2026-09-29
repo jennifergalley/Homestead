@@ -158,11 +158,7 @@ void UHomesteadMapComponent::RefreshModel()
     for (const FLandmarkInfo& Place : Places)
         if (const Homestead::Landmark* Found = Layout.FindLandmark(Place.Anchor))
             Next->Landmarks.Add({Place.Name, Place.Description, Place.Glyph, ToVec(Found->position)});
-    const Homestead::Landmark* RoadStart = Layout.FindLandmark(Homestead::Anchor::RoadEstateEnd);
-    const Homestead::Landmark* RoadEnd = Layout.FindLandmark(Homestead::Anchor::RoadTownEnd);
-    if (RoadStart && RoadEnd)
-        Next->Landmarks.Add({TEXT("Dirt road"), TEXT("About a mile of rutted road from the gateway to town."), EHomesteadMapGlyph::Road,
-            {(RoadStart->position.x + RoadEnd->position.x) * 0.5, (RoadStart->position.y + RoadEnd->position.y) * 0.5}});
+    // The road itself is drawn on the map; it has no label (Jenny, 2026-09-29).
     Model = Next;
 }
 
