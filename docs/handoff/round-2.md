@@ -180,8 +180,9 @@ None yet.
   shows a banner at the top of the inventory/field book that reflows the menu and pushes its items.
   Replace it with a brief, floating notification that looks modal over the menu but **is not a real
   modal dialog**: it auto-disappears, preserves the current focus and input, and shifts no content at
-  1080p or 4K. **UI Agent / temporary Menu Agent** (`5cf73757`) owns this when the orchestrator grants
-  an implementer slot. Pending; not shipped.
+  1080p or 4K. Use a Victorian licensed font, larger centered text and a compact content-sized frame.
+  **UI Agent / temporary Menu Agent** (`5cf73757`) owns this when the orchestrator grants an
+  implementer slot. Pending; not shipped.
 - **Appearance controls and naming** — **UI / Menu Agent** (`5cf73757`), when granted a slot:
   click-drag rotates the preview, WASD orbits it, wheel zooms it, and the default heroine faces the menu
   regardless of the wall or world yaw. Rename the user-facing **Curly Bob** option to **Long bob**.
@@ -221,10 +222,24 @@ None yet.
   Planning traced the present state: Hunger starts at 85, drains 2/hour awake and fails at 0; Energy
   starts at 100 and drains through work; food restores both. The change is **pending, not in today's
   4 PM build**; Planning updates the OpenSpec spec.
+- **Weather recurrence** — **Calendar Agent** (later weather slice, after the calendar first
+  increment): rain every third day is too frequent. Change it to around once every five days with a
+  varied but deterministic recurrence. Architecture owns read-only trace support; pending, not shipped.
 - **Starter food and hoe wayfinding** — **Clearing / Props lane** (after weed/rubble work): put **3
   pasties and 2 loaves** in the starter chest. Make the **hoe head** the second salvage reward after the
   billhook, with a contextual refusal and west-chimney journal hints to find it. Pending; no code or
   content is finished yet.
+- **Starter wardrobe** — **Props lane** (with starter food): put completed wearable clothes in the
+  starter chest so Jenny can change outfit; verify pack/chest capacity and saving. Pending; not shipped.
+- **Road-to-town forage** — **Seasons / forage lane** (`fd682909`), coordinating with **Water**: add
+  pickable berries and herbs along the road to town, including the Water bridge approach. Pending;
+  placement ids are claimed before use.
+- **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
+  period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
+  shipped.
+- **Change Dye** — **UI / temporary Menu Agent** (`5cf73757`), after contextual berries: the current
+  action is a no-op. It opens the selected colour or swatch choice, supports preview, confirm and
+  cancel, then persists the selection. Pending PIE verification.
 - **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
   trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
   implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the
@@ -241,7 +256,8 @@ None yet.
 
 ## Decisions during the round
 
-None yet.
+- **4 PM playtest package:** only independently verified `[ready]` slices are eligible. Pending
+  feedback above is not included merely because it has an owner.
 
 ## Pending doc updates on merge
 
