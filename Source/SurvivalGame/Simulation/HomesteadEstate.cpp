@@ -254,6 +254,16 @@ const EstatePlacements& ProvisionalEstatePlacements()
             table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateClearoutPlacements.inc"
+        // Forage on the verges of the public road to town (581000-581099, Scripts/Terrain/forage.py), off
+        // the estate by the narrow IsPublicRoadsidePlacement exception. Same 3 m rule as the brambles.
+        auto roadside = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateRoadsidePlacements.inc"
         // Clearable manor ruin debris (582000-582099, HomesteadRuinDebris.h): the slate and loose
         // granite heaps the ruin used to draw as scenery, at the same spots in its frame. A heap an
         // earlier section has since grown into steps 1.5 m aside (never onto another placement).
@@ -270,6 +280,16 @@ const EstatePlacements& ProvisionalEstatePlacements()
             }
             table.placements.push_back({spot.id, spot.kind, at, 0.0, spot.yaw, spot.scale, 0});
         }
+        // More brambles in the estate's woods and field hedges (582100-582299, Scripts/Terrain/forage.py),
+        // after everything else; a row within 3 m of an earlier placement is skipped.
+        auto forage = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateForagePlacements.inc"
         // Town lane (530000+).
         return table;
     }();
