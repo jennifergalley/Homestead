@@ -166,11 +166,15 @@ work that goes beyond a small verified correction.
 
 **Water-lane order:** verify the river mouth in the parked 4 PM river branch first, then stage **lake → beach → route**. These are unverified slices: they do **not** edit the 4 PM package. If the terrain or water work needs placement ids, the Water Agent claims them through this page before using them (the registry starts at 581000+).
 
+**Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
+all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
+hands-on work; no one edits a busy lane's files or starts a fourth implementer.
+
 ## Open blockers and known bugs
 
 None yet.
 
-## Pending UI playtest feedback
+## Pending playtest feedback
 
 - **Field book notification overlay** (Jenny, 2026-09-29): a successful transfer or craft currently
   shows a banner at the top of the inventory/field book that reflows the menu and pushes its items.
@@ -178,6 +182,33 @@ None yet.
   modal dialog**: it auto-disappears, preserves the current focus and input, and shifts no content at
   1080p or 4K. **UI Agent / temporary Menu Agent** (`5cf73757`) owns this when the orchestrator grants
   an implementer slot. Pending; not shipped.
+- **Appearance controls and naming** — **UI / Menu Agent** (`5cf73757`), when granted a slot:
+  click-drag rotates the preview, WASD orbits it, wheel zooms it, and the default heroine faces the menu
+  regardless of the wall or world yaw. Rename the user-facing **Curly Bob** option to **Long bob**.
+- **Hair groom** — **temporary Gait Agent** (`65a2408b`), after the running-heel and scythe work:
+  investigate the intermittent exploding/sticking-out groom.
+- **Gait and scythe** — **temporary Gait Agent** (`65a2408b`), after its current run-heel slice:
+  lower the running foot swing apex slightly; at rest the scythe must sit in her hand, and its blade
+  must not clip the terrain during a sweep.
+- **Music variety** — **Architecture Agent** (`a1648ae7`) first does a read-only trace and licensing
+  review; the implementation owner is **TBD**. The result should have multiple randomized tracks and
+  longer ambient-only silence between them.
+- **Context hint** — **UI Agent** (`5cf73757`): the hint says Ctrl+wheel zooms, but gameplay uses the
+  wheel to cycle the hotbar. Correct the context copy.
+- **Invisible weeds** — **Clearing / Props lane** (owner **TBD** when an implementer slot opens):
+  inspect forage-node visuals and culling; a visible weed asset must exist wherever the prompt says
+  `"Weeds  E  Pull"`.
+- **Manor debris** — **Clearing / Props lane** (owner **TBD** when a slot opens): slate and shingle
+  piles that look clearable should become suitable saved clearables, rather than static scenery.
+- **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
+  hoe blade; a documentation-only answer is insufficient.
+- **Starter food** — **balance owner TBD**: add more food at the start, balancing the starter kit
+  without removing hunger prematurely.
+- **Hunger and energy model** — **Planning Agent** (evidence/design recommendation): investigate whether
+  the two systems should collapse to one bar like *Coral Island*. Do not silently remove either system.
+- **Hearth, birds and door** — **Audio / door owner TBD** after slots open: increase the fireplace
+  modestly while keeping it inaudible outside its room; muffle outdoor bird ambience indoors; add a
+  working wooden standing-room door that opens and closes automatically on entering or leaving.
 
 ## Decisions during the round
 
