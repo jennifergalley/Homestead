@@ -221,9 +221,11 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
   and `homestead.SeasonDay` / `homestead.Frost` overrides), `build_season_materials.py` and a native
   test. Native tests pass **9/9** on that branch. Still required before `[ready]`: import the mesh,
   run the material script (the MPC asset does not yet exist), and PIE season captures.
-- **Road geometry:** C++ `EstateLayout` has landmarks and polygons, not a road polyline. Native code
-  needing road geometry derives it from `Scripts\Terrain\estate_layout.json`; don't invent a separate
-  C++ path.
+- **Road geometry:** C++ `EstateLayout` still has landmarks and polygons, not a road polyline. Native
+  travel/sign/forage code uses generated `Simulation\HomesteadEstatePublicRoad.inc`, written by
+  `Scripts\Terrain\public_road.py` from `estate_layout.json` road/roadProfile plus
+  `EstateHeightfield.r16`. Do not invent another C++ path; regenerate the include whenever those
+  inputs move.
 - **Field-book map destination names reserved:** **Town** and **Manor**. The future travel action and
   UI use these exact user-facing names; other map work must not reuse them.
 - **Seedsman anchors claimed (C; branch `4f21a2d8`, not on `main` yet):** `Anchor::SeedsmanDoor`
