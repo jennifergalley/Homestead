@@ -2182,6 +2182,7 @@ FString AHomesteadController::FocusActions() const
         for (const auto& Node : State().resources)
             if (Node.id == FocusId)
             {
+                if (!Sim.IsForageReady(Node) && Node.kind != Homestead::ResourceKind::ForestTree && !Homestead::FindOvergrowth(Node.kind)) return FString();
                 if (Node.readyAtHour > State().hour) return FString();
                 if (Node.kind == Homestead::ResourceKind::ForestTree)
                     return ToolAvailable && SelectedTool == Homestead::Item::Hatchet

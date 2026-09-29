@@ -283,6 +283,10 @@ private:
     static constexpr float OvercastSaturation = 0.72f;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
+    // The seasonal look's parameters (MPC_Season), written by UpdateSeasonLook (HomesteadWorldSeasons.cpp).
+    UPROPERTY()
+    TObjectPtr<class UMaterialParameterCollection> SeasonCollection;
+    double LastSeasonLookHour = -1.0;
     UPROPERTY()
     TObjectPtr<UMaterialInterface> FieldMaterial;
     UPROPERTY()
@@ -485,6 +489,7 @@ private:
     bool bLampDropLit = false;
     float LampDropFlickerTime = 0.0f;
     void UpdateLighting(const Homestead::State& State);
+    void UpdateSeasonLook(const Homestead::State& State);
     static void ClearVisual(FHomesteadWorldVisual& Visual);
     // Floor height for a turned cell: its highest ground plus a lip.
     float StructureBase(Homestead::Point Center, double Yaw) const;

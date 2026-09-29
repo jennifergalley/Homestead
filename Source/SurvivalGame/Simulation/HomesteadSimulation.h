@@ -28,6 +28,8 @@ enum class ResourceKind : int
     Primroses, Bluebells, WildDaffodils, WildGarlic,
     // add-coral-island-clearout: the manor clear-out's nettles, a middling stump and hand-cleared rubbish.
     Nettles, StumpMedium, BrokenCrate, BrokenBarrel, RubbishHeap, RottenPlanks,
+    // rework-farming-calendar-and-period-crafting (lane D): autumn field mushrooms.
+    FieldMushrooms,
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
@@ -481,6 +483,8 @@ public:
     bool IsSheltered(Point position) const;
     bool IsNearFire(Point position) const;
     RecipeAssessment AssessRecipe(Recipe recipe, Point player) const;
+    // Has something to gather now: not cleared, grown back, and in season (HomesteadSeasons).
+    bool IsForageReady(const ResourceNode& node) const;
     bool CanHarvest(int nodeId) const;
     int FindNearestResource(Point position, double maxDistance) const;
     int FindNearestPlot(Point position, double maxDistance) const;

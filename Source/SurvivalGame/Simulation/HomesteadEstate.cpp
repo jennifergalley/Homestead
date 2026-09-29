@@ -253,6 +253,20 @@ const EstatePlacements& ProvisionalEstatePlacements()
             table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateClearoutPlacements.inc"
+        // Autumn field mushrooms (580000+, Scripts/Terrain/mushrooms.py, rework-farming-calendar-and-period-crafting):
+        // groups in the pasture and at the woodland edges. A row within 1.5 m of an earlier placement (3 m of a
+        // blackberry bramble) is skipped, so other lanes' additions never collide with it or renumber it.
+        auto mushroom = [&](int id, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+            {
+                const double gap = other.kind == ResourceKind::BerryBush ? 300.0 : 150.0;
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < gap * gap)
+                    return;
+            }
+            table.placements.push_back({id, ResourceKind::FieldMushrooms, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateMushroomPlacements.inc"
         // Town lane (530000+).
         return table;
     }();

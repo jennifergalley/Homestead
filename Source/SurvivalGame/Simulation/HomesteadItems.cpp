@@ -125,6 +125,11 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Food, "wild-garlic", 8, StoreBuys, 5.0, 3.0, "Picked from broad bean plants", false, "broad bean pods"},
     {Item::Strawberries, "strawberries", "Strawberries", "Sweet red strawberries, warm from the sun.",
         ItemCategory::Food, "berries", 13, StoreBuys, 8.0, 8.0, "Picked from strawberry plants", false, "strawberries"},
+    // rework-farming-calendar-and-period-crafting (lane D): seasonal forage.
+    {Item::Blackberries, "blackberries", "Blackberries", "A handful of ripe blackberries off the brambles, late summer into autumn.",
+        ItemCategory::Food, "blackberries", 7, StoreBuys, 8.0, 5.0, "Blackberry brambles, Summer 15 to the end of Autumn", false, "blackberries"},
+    {Item::FieldMushrooms, "field-mushrooms", "Field mushrooms", "White-capped field mushrooms with pink gills, picked from the autumn grass.",
+        ItemCategory::Food, "field-mushrooms", 12, StoreBuys, 6.0, 3.0, "The pasture and woodland edges in autumn", false, "field mushrooms"},
 };
 static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 

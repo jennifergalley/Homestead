@@ -288,7 +288,9 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("wild-garlic")), EKind::WildGarlic},
         {FName(TEXT("oil-lamp")), EKind::OilLamp},
         {FName(TEXT("oil-flask")), EKind::OilFlask},
-        {FName(TEXT("pouch-arrows")), EKind::PouchArrows}
+        {FName(TEXT("pouch-arrows")), EKind::PouchArrows},
+        {FName(TEXT("blackberries")), EKind::Blackberries},
+        {FName(TEXT("field-mushrooms")), EKind::FieldMushrooms}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -430,8 +432,37 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{33, 29}, {36, 27}}, Cream, 2);
         P.Line({{25, 40}, {28, 39}}, Gold, 2);
         break;
-    case EKind::Roots:
-        P.Root(21, 29, RootOrange);
+    case EKind::Blackberries:
+    {
+        // A sprig with a cluster of dark drupelet berries, one still red.
+        const FLinearColor Bramble(0.09f, 0.03f, 0.10f, 1.0f);
+        const FLinearColor Unripe(0.55f, 0.06f, 0.08f, 1.0f);
+        P.Line({{16, 14}, {28, 22}, {40, 16}}, Wood, 2);
+        P.Leaf({28, 22}, {18, 7}, 4);
+        P.Leaf({40, 16}, {49, 8}, 4);
+        for (const FVector2D& D : {FVector2D(22, 32), FVector2D(28, 29), FVector2D(34, 32), FVector2D(25, 37),
+            FVector2D(31, 37), FVector2D(28, 43)})
+            P.Disc(static_cast<float>(D.X), static_cast<float>(D.Y), 4.2f, Bramble);
+        P.Disc(42, 37, 5, Unripe);
+        P.Line({{25, 30}, {27, 29}}, Cream, 1.5f);
+        P.Line({{31, 35}, {33, 34}}, Cream, 1.5f);
+        break;
+    }
+    case EKind::FieldMushrooms:
+    {
+        // Two white-capped field mushrooms, one tipped to show its pink gills.
+        const FLinearColor Cap(0.93f, 0.90f, 0.82f, 1.0f);
+        const FLinearColor Gill(0.78f, 0.52f, 0.50f, 1.0f);
+        P.Shape({{20, 46}, {19, 32}, {26, 32}, {26, 46}}, Cream);
+        P.Shape({{8, 32}, {12, 22}, {22, 18}, {33, 22}, {37, 32}}, Cap);
+        P.Line({{9, 32}, {36, 32}}, Wood, 1.5f);
+        P.Shape({{38, 46}, {37, 37}, {42, 37}, {43, 46}}, Cream);
+        P.Shape({{30, 38}, {33, 30}, {41, 27}, {49, 31}, {50, 38}}, Gill);
+        P.Line({{31, 38}, {49, 38}}, Cap, 2);
+        P.Line({{14, 47}, {48, 47}}, LeafGreen, 2);
+        break;
+    }
+    case EKind::Roots:        P.Root(21, 29, RootOrange);
         P.Root(35, 24, Gold);
         P.Leaf({21, 29}, {11, 14}, 4);
         P.Leaf({21, 29}, {25, 9}, 4);

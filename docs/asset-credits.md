@@ -55,6 +55,11 @@ Thimbleberry, BrackenFern, WildStrawberry, GrassYarrowTuft, WildMarjoram and Net
 code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
 library. No scan, photo or third-party texture is used.
 
+FieldMushrooms (`Assets\Props\FieldMushrooms`, `Scripts\Blender\Recipes\field_mushrooms.py`) is
+project-authored procedural geometry and procedural PBR materials: the mushrooms, gills, rings,
+soil clods, moss flecks and short grass are generated from code and baked to textures, with no
+scanned or downloaded mesh or texture.
+
 The Cornish woodland trees and shrubs (`Assets\Props\` Oak, Beech, Sycamore, Hawthorn, Holly and
 HazelCoppice, imported to
 `Content/SurvivalGame/Environment/Trees/<Name>/SM_<Name>`; recipes in `Scripts\Blender\Recipes\`, grown

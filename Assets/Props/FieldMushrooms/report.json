@@ -1,0 +1,198 @@
+{
+  "schema": 1,
+  "name": "FieldMushrooms",
+  "description": "A loose 30 x 25 cm group of field mushrooms: young buttons, open caps with pink and chocolate gills, fragile rings, soil and short pasture grass.",
+  "collision": "none",
+  "triangle_budget": 30000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/field_mushrooms.py",
+  "source_sha256": "5262d9fa0d183fcc8c83369c1ff67c5f35c8d8014eb4d56d92c47f27b57a09b4",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_FieldMushrooms": {
+      "vertices": 11122,
+      "triangles": 20330,
+      "size_cm": [
+        31.71,
+        24.13,
+        10.46
+      ],
+      "materials": [
+        {
+          "name": "M_FieldMushrooms",
+          "textures": {
+            "basecolor": "T_FieldMushrooms_basecolor.png",
+            "roughness": "T_FieldMushrooms_roughness.png",
+            "normal": "T_FieldMushrooms_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FieldMushrooms_basecolor.png",
+          "roughness": "T_FieldMushrooms_roughness.png",
+          "normal": "T_FieldMushrooms_normal.png",
+          "ao": "T_FieldMushrooms_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -18
+        ],
+        "focus": [
+          -0.04914377719163895,
+          0.06424679499864577,
+          0.05009602266922593
+        ],
+        "detail_distance": 0.46,
+        "ground": "origin",
+        "detail_fstop": 22
+      },
+      "fbx": "SM_FieldMushrooms.fbx",
+      "sha256": "58d331808e15ace338a4b30e51762a1fd13d0f6e41d43e51b6de45c27db18d43",
+      "preview": "preview_SM_FieldMushrooms.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FieldMushrooms_hero.png",
+          "detail": "beauty_SM_FieldMushrooms_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -18
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_FieldMushrooms_LOD1": {
+      "vertices": 5791,
+      "triangles": 8845,
+      "size_cm": [
+        31.71,
+        24.13,
+        10.47
+      ],
+      "materials": [
+        {
+          "name": "M_FieldMushrooms",
+          "textures": {
+            "basecolor": "T_FieldMushrooms_basecolor.png",
+            "roughness": "T_FieldMushrooms_roughness.png",
+            "normal": "T_FieldMushrooms_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FieldMushrooms_basecolor.png",
+          "roughness": "T_FieldMushrooms_roughness.png",
+          "normal": "T_FieldMushrooms_normal.png",
+          "ao": "T_FieldMushrooms_ao.png"
+        },
+        "shared_with": "SM_FieldMushrooms"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -18
+        ],
+        "focus": [
+          -0.04914377719163895,
+          0.06424679499864577,
+          0.05009602266922593
+        ],
+        "detail_distance": 0.46,
+        "ground": "origin",
+        "detail_fstop": 22
+      },
+      "fbx": "SM_FieldMushrooms_LOD1.fbx",
+      "sha256": "cf0cfca430973436f27d33d10e7f63c7a2b5b11a72591130d736ce024ad0feaa",
+      "preview": "preview_SM_FieldMushrooms_LOD1.png"
+    },
+    "SM_FieldMushrooms_LOD2": {
+      "vertices": 2780,
+      "triangles": 3460,
+      "size_cm": [
+        31.71,
+        24.13,
+        10.46
+      ],
+      "materials": [
+        {
+          "name": "M_FieldMushrooms",
+          "textures": {
+            "basecolor": "T_FieldMushrooms_basecolor.png",
+            "roughness": "T_FieldMushrooms_roughness.png",
+            "normal": "T_FieldMushrooms_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FieldMushrooms_basecolor.png",
+          "roughness": "T_FieldMushrooms_roughness.png",
+          "normal": "T_FieldMushrooms_normal.png",
+          "ao": "T_FieldMushrooms_ao.png"
+        },
+        "shared_with": "SM_FieldMushrooms"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -18
+        ],
+        "focus": [
+          -0.04914377719163895,
+          0.06424679499864577,
+          0.05009602266922593
+        ],
+        "detail_distance": 0.46,
+        "ground": "origin",
+        "detail_fstop": 22
+      },
+      "fbx": "SM_FieldMushrooms_LOD2.fbx",
+      "sha256": "b733d5ac78417b3591ab18e23c569e90c5d0fac235caef7f4946a884a72f122e",
+      "preview": "preview_SM_FieldMushrooms_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "reference": "Agaricus campestris in Cornish pasture/woodland edge, autumn, 1850s.",
+    "scale": "Patch footprint roughly 30 x 25 cm; individual caps 2.5-8.8 cm across.",
+    "collision": "None; small forage decoration/static prop."
+  },
+  "textures": {
+    "T_FieldMushrooms_basecolor.png": "95dd07050ebd08b83daf322bc74a973c6383d83f29c8191aa00ad785afc8c3ec",
+    "T_FieldMushrooms_roughness.png": "b4cac8eeae418789e14a34b8c409a5af27dc086174ece161fca38943df4c21a7",
+    "T_FieldMushrooms_normal.png": "7caa81323d6eedc137e0c8a68650edf8b9d82cf1cbdcdf5d422e97d8eac0f66f"
+  }
+}

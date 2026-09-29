@@ -5,6 +5,7 @@
 #include "HomesteadManor.h"
 #include "HomesteadLamp.h"
 #include "HomesteadOvergrowth.h"
+#include "HomesteadSeasons.h"
 #include "HomesteadSimulationDetail.h"
 
 #include <algorithm>
@@ -124,6 +125,7 @@ double Regrowth(ResourceKind kind)
     case ResourceKind::Branches: return 24.0;
     case ResourceKind::Stones: return 48.0;
     case ResourceKind::BerryBush: return 36.0;
+    case ResourceKind::FieldMushrooms: return 48.0;
     case ResourceKind::Roots: return 48.0;
     case ResourceKind::Flowers: return 24.0;
     case ResourceKind::Reeds: return 24.0;
@@ -153,12 +155,36 @@ Inventory Yield(ResourceKind kind)
     case ResourceKind::Bluebells: return Items({{Item::Bluebells, 3}});
     case ResourceKind::WildDaffodils: return Items({{Item::WildDaffodils, 3}});
     case ResourceKind::WildGarlic: return Items({{Item::WildGarlic, 3}});
+    case ResourceKind::FieldMushrooms: return Items({{Item::FieldMushrooms, 3}});
     // Reeds, deer remains and the overgrowth kinds (see HomesteadOvergrowth) yield nothing here.
     default: return {};
     }
 }
 // Reeds (fibre) and deer remains (fur) are retired from play; the knife that cut them is gone.
 bool Retired(ResourceKind kind) { return kind == ResourceKind::Reeds || kind == ResourceKind::DeerRemains; }
+// The estate's fruiting brambles give blackberries; the woodland's berry bushes their wild berries.
+Inventory ForageYield(const ResourceNode& node)
+{
+    if (node.kind == ResourceKind::BerryBush && node.id >= EstatePlacementIdBase && node.id < TransientResourceIdBase)
+        return Items({{Item::Blackberries, 5}});
+    return Yield(node.kind);
+}
+// On the estate, forage renews on its season table's clock (blackberries every three days).
+double EstateRegrowth(ResourceKind kind)
+{
+    const double renew = Seasons::ForageSeasonFor(kind).renewHours;
+    return renew > 0.0 ? renew : Regrowth(kind);
+}
+const char* OutOfSeasonMessage(ResourceKind kind)
+{
+    switch (kind)
+    {
+    case ResourceKind::BerryBush: return "No ripe blackberries. They come in the middle of summer.";
+    case ResourceKind::FieldMushrooms: return "Nothing up yet. Field mushrooms come with the autumn damp.";
+    case ResourceKind::Flowers: return "The herb has died back for the winter.";
+    default: return "Nothing to gather here this season.";
+    }
+}
 // Bramble canes, split and woven as wattle, take the place of the retired fibre lashing.
 Inventory BuildCost(Piece kind)
 {
@@ -878,7 +904,8 @@ const char* ResourceName(ResourceKind kind)
         "Tall grass", "Weeds", "Thin bramble", "Bramble thicket", "Bramble bank", "Fallen bough",
         "Small stump", "Large stump", "Ancient stump", "Fallen log", "Giant log", "Rubble", "Small rock", "Boulder",
         "Salvage pile", "Primroses", "Bluebells", "Wild daffodils", "Wild garlic",
-        "Nettles", "Stump", "Broken crate", "Broken barrel", "Rubbish heap", "Rotten planks"};
+        "Nettles", "Stump", "Broken crate", "Broken barrel", "Rubbish heap", "Rotten planks",
+        "Field mushrooms"};
     static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(ResourceKind::Count), "Every resource needs a name.");
     return ValidEnum(kind, ResourceKind::Count) ? names[static_cast<int>(kind)] : "Unknown resource";
 }
@@ -1733,10 +1760,16 @@ bool Simulation::IsNearFire(Point position) const
             Near(position, Homestead::StructureCenter(state_, piece), FireReach)) return true;
     return false;
 }
+bool Simulation::IsForageReady(const ResourceNode& node) const
+{
+    // The legacy generated woodland keeps its year-round forage; seasons are the estate's.
+    return !node.cleared && node.readyAtHour <= state_.hour
+        && (!state_.fixedEstate || Seasons::InSeason(node.kind, state_.hour));
+}
 bool Simulation::CanHarvest(int nodeId) const
 {
     const auto* node = Find(state_.resources, nodeId);
-    if (state_.failed || !node || node->cleared || node->readyAtHour > state_.hour || Retired(node->kind)) return false;
+    if (state_.failed || !node || !IsForageReady(*node) || Retired(node->kind)) return false;
     // Overgrowth is cleared with its tool (ClearOvergrowth); only boughs and salvage piles come away by hand.
     if (const auto* overgrowth = FindOvergrowth(node->kind)) return overgrowth->byHand;
     return !RequiresHatchet(node->kind) || Count(Item::Hatchet) > 0;
@@ -1812,12 +1845,13 @@ Result Simulation::Harvest(int nodeId, Point player)
     if (!Near(player, node->position)) return Bad("Move closer to gather this resource.");
     if (Retired(node->kind)) return Bad("There's nothing here worth taking.");
     if (node->readyAtHour > state_.hour) return Bad("Nothing to gather here.");
+    if (state_.fixedEstate && !Seasons::InSeason(node->kind, state_.hour)) return Bad(OutOfSeasonMessage(node->kind));
     const double cost = HarvestCost(nodeId);
     if (auto ready = CheckExertion(cost); !ready) return ready;
-    const Inventory yield = Yield(node->kind);
+    const Inventory yield = ForageYield(*node);
     State candidate = state_;
     auto* updated = Find(candidate.resources, nodeId);
-    updated->readyAtHour = state_.hour + Regrowth(node->kind);
+    updated->readyAtHour = state_.hour + (state_.fixedEstate ? EstateRegrowth(node->kind) : Regrowth(node->kind));
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
     const std::string message = std::string("Gathered ") + ResourceName(node->kind) + ".";
@@ -1834,7 +1868,7 @@ Result Simulation::Clear(int nodeId, Point player)
         return Bad("Craft an axe before felling trees.");
     const double cost = ClearCost(nodeId);
     if (auto ready = CheckExertion(cost); !ready) return ready;
-    const Inventory yield = node->readyAtHour <= state_.hour ? Yield(node->kind) : Inventory{};
+    const Inventory yield = IsForageReady(*node) ? ForageYield(*node) : Inventory{};
     State candidate = state_;
     auto* updated = Find(candidate.resources, nodeId);
     updated->cleared = true;
@@ -2982,7 +3016,7 @@ Result Simulation::Deserialize(const std::string& data)
             const auto placement = std::find_if(all.begin(), all.end(),
                 [&](const EstatePlacement& value) { return value.id == static_cast<int>(edit.key.localId); });
             if (placement == all.end() || edit.key.chunk.x != 0 || edit.key.chunk.y != 0) continue;
-            if (!FiniteRange(edit.readyAtHour, 0.0, candidate.hour + Regrowth(placement->kind))
+            if (!FiniteRange(edit.readyAtHour, 0.0, candidate.hour + EstateRegrowth(placement->kind))
                 || (edit.cleared && edit.readyAtHour != 0.0)) return invalid();
             candidate.resourceEdits.push_back(edit);
             continue;

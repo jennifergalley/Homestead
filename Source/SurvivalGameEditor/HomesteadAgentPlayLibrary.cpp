@@ -181,6 +181,7 @@ namespace
         case Homestead::ResourceKind::BrokenBarrel: return TEXT("BrokenBarrel");
         case Homestead::ResourceKind::RubbishHeap: return TEXT("RubbishHeap");
         case Homestead::ResourceKind::RottenPlanks: return TEXT("RottenPlanks");
+        case Homestead::ResourceKind::FieldMushrooms: return TEXT("FieldMushrooms");
         default: return TEXT("Unknown");
         }
     }

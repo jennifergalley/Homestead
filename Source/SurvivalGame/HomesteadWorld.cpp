@@ -2439,7 +2439,7 @@ bool AHomesteadWorld::StageAdjacentResources(const Homestead::Simulation& Destin
         BuildResource(Base, Node, false);
         Base.Signature = Signature;
         auto& Produce = StagedResourceProduceVisuals.FindOrAdd(Node.id);
-        const bool bReady = Node.readyAtHour <= State.hour;
+        const bool bReady = Destination.IsForageReady(Node);
         if (bReady) BuildResource(Produce, Node, true);
         Produce.Signature = Signature + (bReady ? TEXT(":ready") : TEXT(":harvested"));
         bStagingResourceBuild = false;
@@ -3294,6 +3294,20 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             }
         }
         break;
+    case Homestead::ResourceKind::FieldMushrooms:
+    {
+        // Autumn field mushrooms: all produce, so out of season there's nothing there at all.
+        UStaticMesh* Mushrooms = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/SurvivalGame/Environment/Props/FieldMushrooms/SM_FieldMushrooms.SM_FieldMushrooms"));
+        if (!Mushrooms)
+        {
+            bVisualBuildFailed = true;
+            UE_LOG(LogHomesteadWorld, Error, TEXT("Field mushrooms %d are missing their authored mesh."), Node.id);
+            break;
+        }
+        Authored(Mushrooms, FVector2D::ZeroVector, static_cast<float>(Variation % 360), true, 0.9f + (Variation % 5) * 0.05f);
+        break;
+    }
     case Homestead::ResourceKind::BerryBush:
         if (Node.id >= Homestead::EstatePlacementIdBase && Node.id < Homestead::TransientResourceIdBase)
         {
@@ -4609,7 +4623,8 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
             ResourceProduceVisuals.Remove(Node.id);
             continue;
         }
-        const bool bReady = Node.readyAtHour <= State.hour || Node.id == HeldProduceId;
+        // Out of season there's nothing on it (Simulation::IsForageReady): no berries hang in winter.
+        const bool bReady = Simulation.IsForageReady(Node) || Node.id == HeldProduceId;
         // A fallen bough or salvage pile she is still kneeling at stays until she has lifted from it.
         Homestead::ResourceNode Shown = Node;
         Shown.cleared = Node.cleared && Node.id != HeldProduceId;
@@ -4732,6 +4747,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     }
     const double LightingStarted = FPlatformTime::Seconds();
     UpdateLighting(State);
+    UpdateSeasonLook(State);
     LastRefreshMilliseconds = (FPlatformTime::Seconds() - RefreshStarted) * 1000;
     if (Transition)
     {
