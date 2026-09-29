@@ -4,7 +4,7 @@ public class SurvivalGameEditor : ModuleRules
 {
     public SurvivalGameEditor(ReadOnlyTargetRules Target) : base(Target)
     {
-        PCHUsage = PCHUsageMode.NoPCHs;
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PrivateIncludePathModuleNames.Add("PythonScriptPlugin");
         PrivateIncludePaths.Add(System.IO.Path.Combine(ModuleDirectory, "..", "SurvivalGame"));
         PrivateDependencyModuleNames.AddRange(new[] {

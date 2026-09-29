@@ -94,9 +94,11 @@ if ($Configuration -ne 'Development' -or $ReusePakDirectory) {
     throw 'Shipping builds require the explicit -ReuseCooked path; no editor will be launched implicitly.'
 }
 if (-not $SkipAssets -and -not $PackageOnly) { & (Join-Path $PSScriptRoot 'Fetch-Assets.ps1') }
-$build = Join-Path $engine 'Engine\Build\BatchFiles\Build.bat'
-& $build SurvivalGameEditor Win64 Development "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild
-if ($LASTEXITCODE -ne 0) { throw "Unreal editor-module build failed ($LASTEXITCODE)." }
+# The cook needs the editor and staging needs the game, so with -Package both targets build in one UBT run:
+# one wait for the machine-wide UBT queue instead of two. Invoke-UnrealBuild skips UBT when they're
+# already built from the current sources.
+$targets = if ($Package) { @('SurvivalGameEditor', 'SurvivalGame') } else { @('SurvivalGameEditor') }
+& (Join-Path $PSScriptRoot 'Invoke-UnrealBuild.ps1') -Target $targets -EngineRoot $engine
 $editor = Join-Path $engine 'Engine\Binaries\Win64\UnrealEditor-Cmd.exe'
 $offlineArguments = @(& (Join-Path $PSScriptRoot 'Get-UnrealOfflineArguments.ps1'))
 $bootstrap = Join-Path $PSScriptRoot 'bootstrap_unreal.py'
@@ -124,9 +126,7 @@ if ($Package) {
     # gets overwritten, so keep this worktree's full packaging output alongside the bootstrap log.
     $packageLog = Join-Path $logDirectory "package-$(Get-Date -Format 'yyyyMMdd-HHmmss').log"
     # UAT's own build step can't wait for another worktree's UBT (it tucks -UbtArgs inside each
-    # -Target="..." string, where -WaitMutex is ignored), so build the game target here and skip it there.
-    & $build SurvivalGame Win64 Development "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild
-    if ($LASTEXITCODE -ne 0) { throw "Game target build failed ($LASTEXITCODE)." }
+    # -Target="..." string, where -WaitMutex is ignored), so the game target was built above and UAT skips it.
     # Cook to loose files, not the machine-shared Zen server on port 8558: another worktree's zenserver
     # restarting mid-run broke staging ("Failed to read oplog from Zen ... HTTP NotFound"). Staging uses
     # the Zen store whenever ue.projectstore exists, so remove a stale marker first.
