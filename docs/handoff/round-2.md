@@ -196,9 +196,16 @@ None yet.
   toast: selected hotbar berries are edible with controller X or A **only when no higher-priority
   focused action exists**. Preserve focused interactions, and update the controls and hints; pending
   PIE verification.
-- **Music variety** — **Architecture Agent** (`a1648ae7`) first does a read-only trace and licensing
-  review; the implementation owner is **TBD**. The result should have multiple randomized tracks and
-  longer ambient-only silence between them.
+- **Music variety** — **pending, not fixed.** **Architecture Agent** (`a1648ae7`) traced the root
+  cause: the shipped catalog loads only one track, `EveningHarp`, despite five named entries. The
+  shuffle bag anti-repeats correctly when it has more than one track, but the existing 55–110 s gap
+  (and first 18 s) are too short. Four other Kevin MacLeod CC-BY imported `.uasset`s exist only
+  untracked in the orchestrator worktree; **do not commit them** under the music eligibility rule
+  (new project-authored or verified CC0 only). Architecture owns read-only license sourcing. A later
+  dedicated implementer slot owns `expand-randomized-music-playlist`: verify 3–5 CC0/original
+  recordings, import them with credits and catalog entries, use 3–8 minute ambient-only gaps and a
+  randomized 45–120 s first gap, register `MusicShuffleBagTests` in CMake, then verify packaged
+  multi-track load and run.
 - **Context hint** — **UI Agent** (`5cf73757`): the hint says Ctrl+wheel zooms, but gameplay uses the
   wheel to cycle the hotbar. Correct the context copy.
 - **Invisible weeds** — **Clearing / Props lane** (owner **TBD** when an implementer slot opens):
