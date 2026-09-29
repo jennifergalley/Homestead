@@ -4,6 +4,7 @@
 #include "HomesteadParcels.h"
 #include "HomesteadManor.h"
 #include "HomesteadLamp.h"
+#include "HomesteadCrafting.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadSimulationDetail.h"
 
@@ -171,6 +172,16 @@ Inventory BuildCost(Piece kind)
     case Piece::Fire: return Items({{Item::Branch, -3}, {Item::Stone, -4}});
     case Piece::Bed: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -4}});
     case Piece::Chest: return Items({{Item::Branch, -5}, {Item::BrambleCanes, -2}});
+    // Period crafting: the stations are built from timber and twine by hand; the rest are made at
+    // the workbench and set up whole, so taking one down returns it whole.
+    case Piece::Workbench: return Items({{Item::Timber, -6}, {Item::Twine, -4}});
+    case Piece::Sawhorse: return Items({{Item::Timber, -4}, {Item::Twine, -2}});
+    case Piece::FenceRail: return Items({{Item::FenceSection, -1}});
+    case Piece::FenceGate: return Items({{Item::FieldGate, -1}});
+    case Piece::Stool: return Items({{Item::Stool, -1}});
+    case Piece::Table: return Items({{Item::Table, -1}});
+    case Piece::Chair: return Items({{Item::Chair, -1}});
+    case Piece::Shelf: return Items({{Item::Shelf, -1}});
     default: return {};
     }
 }
@@ -186,6 +197,15 @@ Inventory CraftChange(Recipe recipe)
     case Recipe::RoastedRoots: return Items({{Item::Roots, -2}, {Item::RoastedRoots, 1}});
     case Recipe::HerbedRoots: return Items({{Item::Roots, -2}, {Item::Flowers, -1}, {Item::HerbedRoots, 1}});
     case Recipe::SplitFirewood: return Items({{Item::Timber, -1}, {Item::Firewood, 4}});
+    case Recipe::SawPlanks: return Items({{Item::Timber, -1}, {Item::Planks, Crafting::PlanksPerTimber}});
+    case Recipe::MakeFenceSection: return Items({{Item::Planks, -2}, {Item::FenceSection, 1}});
+    // The hinges are salvaged scrap iron.
+    case Recipe::MakeFieldGate: return Items({{Item::Planks, -4}, {Item::ScrapIron, -1}, {Item::FieldGate, 1}});
+    case Recipe::MakeStool: return Items({{Item::Planks, -2}, {Item::Stool, 1}});
+    case Recipe::MakeTable: return Items({{Item::Planks, -5}, {Item::Table, 1}});
+    case Recipe::MakeChair: return Items({{Item::Planks, -3}, {Item::Chair, 1}});
+    // The brackets are scrap iron.
+    case Recipe::MakeShelf: return Items({{Item::Planks, -3}, {Item::ScrapIron, -1}, {Item::Shelf, 1}});
     default: return {};
     }
 }
@@ -451,10 +471,11 @@ Result CheckFootprintResources(const State& state, const Footprint& area, bool q
         }
     return Good("");
 }
-Footprint ResourceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation)
+Footprint ResourceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation,
+    Point spot = {})
 {
-    const bool furniture = IsFurniture(kind);
-    return furniture ? PieceFootprint(building, kind, cellX, cellY, rotation, onFoundation)
+    const bool own = IsFurniture(kind) || Crafting::IsFence(kind);
+    return own ? PieceFootprint(building, kind, cellX, cellY, rotation, onFoundation, spot)
         : PieceFootprint(building, Piece::Foundation, cellX, cellY, 0, true);
 }
 Footprint GardenFootprint(const Plot& plot)
@@ -885,13 +906,16 @@ const char* ResourceName(ResourceKind kind)
 const char* RecipeName(Recipe recipe)
 {
     static const char* names[] = {"Craft an axe", "Craft a hoe", "Craft a scythe", "Craft a billhook", "Craft a pickaxe",
-        "Roasted roots", "Herbed roots", "Split firewood"};
+        "Roasted roots", "Herbed roots", "Split firewood",
+        "Saw planks", "Fence section", "Field gate", "Stool", "Table", "Chair", "Shelf"};
     static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(Recipe::Count), "Every recipe needs a name.");
     return ValidEnum(recipe, Recipe::Count) ? names[static_cast<int>(recipe)] : "Unknown recipe";
 }
 const char* PieceName(Piece piece)
 {
-    static const char* names[] = {"Foundation", "Wall", "Doorway", "Roof", "Cookfire", "Bed", "Chest", "Hearth"};
+    static const char* names[] = {"Foundation", "Wall", "Doorway", "Roof", "Cookfire", "Bed", "Chest", "Hearth",
+        "Workbench", "Sawhorse", "Fence", "Field gate", "Stool", "Table", "Chair", "Shelf"};
+    static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(Piece::Count), "Every piece needs a name.");
     return ValidEnum(piece, Piece::Count) ? names[static_cast<int>(piece)] : "Unknown structure";
 }
 const char* CropName(CropKind kind)
@@ -911,6 +935,10 @@ const char* RecipeRequirements(Recipe recipe)
                 result[i] += "; nearby fueled fire (no pot needed)";
             else if (kind == Recipe::SplitFirewood)
                 result[i] += "; axe required";
+            else if (Crafting::StationFor(kind) == Piece::Sawhorse)
+                result[i] += "; at a sawhorse";
+            else if (Crafting::StationFor(kind) == Piece::Workbench)
+                result[i] += "; at a workbench";
             else
                 result[i] += "; by hand, no station";
         }
@@ -929,6 +957,8 @@ const char* PieceRequirements(Piece piece)
             if (EdgePiece(kind) || kind == Piece::Roof) result[i] += "; foundation required";
             if (kind == Piece::Fire) result[i] += "; add firewood or a branch after placement to light";
             if (kind == Piece::Hearth) result[i] = "Part of the old house; always lit";
+            if (Crafting::IsFence(kind)) result[i] += "; on your own land, joins end to end at the posts";
+            if (Crafting::IsStation(kind)) result[i] += "; a station for period crafts";
         }
         return result;
     }();
@@ -937,7 +967,8 @@ const char* PieceRequirements(Piece piece)
 bool IsBuildable(Piece piece) { return ValidEnum(piece, Piece::Count) && piece != Piece::Hearth; }
 bool IsFurniture(Piece piece)
 {
-    return piece == Piece::Fire || piece == Piece::Bed || piece == Piece::Chest || piece == Piece::Hearth;
+    return piece == Piece::Fire || piece == Piece::Bed || piece == Piece::Chest || piece == Piece::Hearth
+        || Crafting::IsStation(piece) || Crafting::IsMovable(piece);
 }
 double StreamX(double y) { return Generation::StreamCenterCm(y); }
 bool IsNearWater(Point position)
@@ -1013,10 +1044,14 @@ Point FurnitureOffset(Piece kind)
     case Piece::Fire: return {-100.0, 95.0};
     // Against the wall on the piece's own edge, its back to the masonry's inner face.
     case Piece::Hearth: return {0.0, 98.0};
+    // The workbench stands along the piece's own edge, the sawhorse just in from it.
+    case Piece::Workbench: return {0.0, 100.0};
+    case Piece::Sawhorse: return {0.0, 50.0};
     default: return {};
     }
 }
-Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation)
+Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation,
+    Point spot)
 {
     const Point center = BuildingCellCenter(building, cellX, cellY);
     const double yaw = PieceYaw(building, rotation);
@@ -1033,6 +1068,14 @@ Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int ce
     case Piece::Chest: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {35.0, 28.0});
     case Piece::Fire: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {40.0, 40.0});
     case Piece::Hearth: return at(onFoundation ? FurnitureOffset(kind) : Point{}, {85.0, 32.0});
+    case Piece::Workbench:
+    case Piece::Sawhorse: return at(onFoundation ? FurnitureOffset(kind) : Point{}, Crafting::FurnitureHalf(kind));
+    case Piece::Stool:
+    case Piece::Table:
+    case Piece::Chair:
+    case Piece::Shelf: return at(onFoundation ? spot : Point{}, Crafting::FurnitureHalf(kind));
+    case Piece::FenceRail:
+    case Piece::FenceGate: return at({}, {Crafting::FenceFootprintHalfLength, Crafting::FenceFootprintHalfWidth});
     default: return {center, {CellSize * 0.5, CellSize * 0.5}, building.yaw};
     }
 }
@@ -1040,7 +1083,7 @@ Footprint StructureFootprint(const State& state, const Structure& structure)
 {
     const Building* building = FindBuilding(state, structure.buildingId);
     return PieceFootprint(building ? *building : Building{}, structure.kind, structure.cellX, structure.cellY,
-        structure.rotation, HasFoundation(state, structure.buildingId, structure.cellX, structure.cellY));
+        structure.rotation, HasFoundation(state, structure.buildingId, structure.cellX, structure.cellY), structure.spot);
 }
 bool FootprintsOverlap(const Footprint& a, const Footprint& b)
 {
@@ -1905,8 +1948,13 @@ Result Simulation::Craft(Recipe recipe, Point player)
     if (cooking && !IsNearFire(player)) return Bad("Move beside a lit cookfire or the hearth to cook roots; no pot is needed.");
     if (recipe == Recipe::SplitFirewood && Count(Item::Hatchet) == 0)
         return Bad("Take your axe from storage to split firewood.");
+    const Piece station = Crafting::StationFor(recipe);
+    if (station != Piece::Count && FindNearestStructure(player, station, Crafting::StationReach) < 0)
+        return Bad(Crafting::StationMissingMessage(station));
     const double cost = cooking ? Exertion::CookEnergy
-        : recipe == Recipe::SplitFirewood ? Exertion::SplitFirewoodEnergy : Exertion::CraftEnergy;
+        : recipe == Recipe::SplitFirewood ? Exertion::SplitFirewoodEnergy
+        : station == Piece::Sawhorse ? Crafting::SawEnergy
+        : station == Piece::Workbench ? Crafting::JoineryEnergy : Exertion::CraftEnergy;
     if (auto ready = CheckExertion(cost); !ready) return ready;
     if (!TryAdjust(change)) return Bad(MissingMessage(change, state_.inventory));
     if (Hafting(recipe))
@@ -1914,6 +1962,13 @@ Result Simulation::Craft(Recipe recipe, Point player)
         const auto made = std::find_if(change.begin(), change.end(), [](int value) { return value > 0; });
         const Item tool = static_cast<Item>(made - change.begin());
         return Exert(cost, Good(std::string("Crafted a worn ") + ToolName(ToolForItem(tool)) + "."));
+    }
+    if (station != Piece::Count)
+    {
+        const auto made = std::find_if(change.begin(), change.end(), [](int value) { return value > 0; });
+        const std::string output = CountedName(static_cast<Item>(made - change.begin()), *made);
+        return Exert(cost, Good(station == Piece::Sawhorse ? "Sawed a length of timber into " + output + "."
+            : "Made " + output + " at the workbench."));
     }
     return Exert(cost, Good(std::string("Made ") + RecipeName(recipe) + "."));
 }
@@ -1950,8 +2005,11 @@ RecipeAssessment Simulation::AssessRecipe(Recipe recipe, Point player) const
 
     const bool cooking = recipe == Recipe::RoastedRoots
         || recipe == Recipe::HerbedRoots;
-    assessment.stationRequired = cooking;
-    assessment.stationMet = !cooking || IsNearFire(player);
+    const Piece station = Crafting::StationFor(recipe);
+    assessment.stationRequired = cooking || station != Piece::Count;
+    assessment.stationMet = cooking ? IsNearFire(player)
+        : station == Piece::Count || FindNearestStructure(player, station, Crafting::StationReach) >= 0;
+    assessment.stationLabel = cooking ? "Fueled cookfire nearby" : station != Piece::Count ? Crafting::StationLabel(station) : "";
     if (recipe == Recipe::SplitFirewood)
         assessment.retainedTool = Item::Hatchet;
     assessment.retainedToolMet = assessment.retainedTool == Item::Count
@@ -1995,6 +2053,9 @@ PlacementTarget Simulation::ResolvePlacement(Piece kind, Point aim, double freeY
         target.blocker = "Choose a valid structure and building site.";
         return target;
     }
+    if (Crafting::IsFence(kind))
+        return Crafting::ResolveFence(state_, kind, aim, freeYaw,
+            [this](const PlacementTarget& candidate) { return static_cast<bool>(CheckSite(candidate, true)); });
     std::set<std::tuple<int, int, int>> floors;
     for (const auto& piece : state_.structures)
         if (piece.kind == Piece::Foundation) floors.insert({piece.buildingId, piece.cellX, piece.cellY});
@@ -2016,6 +2077,8 @@ PlacementTarget Simulation::ResolvePlacement(Piece kind, Point aim, double freeY
             snap.cellY = cellY;
             snap.frame = *building;
             snap.snapped = true;
+            if (Crafting::IsMovable(kind))
+                snap.spot = Crafting::MovableSpot(*building, kind, cellX, cellY, snap.rotation, aim);
             snaps.emplace_back(distance, std::move(snap));
         };
         if (kind == Piece::Foundation)
@@ -2108,7 +2171,8 @@ Result Simulation::CheckSite(const PlacementTarget& target, bool quick) const
     if (auto owned = CanBuildAt(target); !owned) return owned;
     if (!IsBuildable(kind)) return Bad("That belongs to the old house and can't be built.");
     const bool onFoundation = existing && HasPiece(state_, Piece::Foundation, target.buildingId, cellX, cellY);
-    const Footprint ground = ResourceFootprint(*building, kind, cellX, cellY, rotation, onFoundation);
+    const bool movable = Crafting::IsMovable(kind);
+    const Footprint ground = ResourceFootprint(*building, kind, cellX, cellY, rotation, onFoundation, target.spot);
     if (Manor::BlockedByManor(state_, Layout(), target, ground)) return Bad(Manor::FootprintBlocked);
     const auto space = CheckFootprintResources(state_, ground, quick);
     if (!space) return space;
@@ -2124,19 +2188,35 @@ Result Simulation::CheckSite(const PlacementTarget& target, bool quick) const
                 EdgeKey(cellX, cellY, rotation) == EdgeKey(piece.cellX, piece.cellY, piece.rotation))
                 return Bad("There is already a wall or doorway along that edge.");
             if (piece.cellX != cellX || piece.cellY != cellY) continue;
+            // Small furniture shares a floor cell with anything it doesn't overlap (checked below).
+            if (movable || (Crafting::IsMovable(piece.kind) && Furniture(kind))) continue;
             if ((!EdgePiece(kind) && piece.kind == kind) || (Furniture(kind) && Furniture(piece.kind)))
                 return Bad("That building space is already occupied.");
         }
     if ((kind == Piece::Roof || EdgePiece(kind)) && !onFoundation)
         return Bad("Build a foundation in this cell first.");
+    if (existing && (movable || Furniture(kind)))
+    {
+        const Footprint mine = Inset(PieceFootprint(*building, kind, cellX, cellY, rotation, onFoundation, target.spot));
+        for (const auto& piece : state_.structures)
+        {
+            if (piece.buildingId != target.buildingId || !(Furniture(piece.kind) || (movable && EdgePiece(piece.kind))))
+                continue;
+            if ((movable || Crafting::IsMovable(piece.kind)) && FootprintsOverlap(mine, Inset(StructureFootprint(state_, piece))))
+                return Bad(EdgePiece(piece.kind) ? "That would stand in the wall. Aim further into the room."
+                    : "Something already stands there. Aim at a clear part of the floor.");
+        }
+    }
     if (!EdgePiece(kind))
     {
-        const Footprint mine = Inset(PieceFootprint(*building, kind, cellX, cellY, rotation, onFoundation));
+        const Footprint mine = Inset(PieceFootprint(*building, kind, cellX, cellY, rotation, onFoundation, target.spot));
         for (const auto& piece : state_.structures)
         {
             if ((existing && piece.buildingId == target.buildingId) || EdgePiece(piece.kind)) continue;
             if (FootprintsOverlap(mine, Inset(StructureFootprint(state_, piece))))
-                return Bad("That overlaps another building. Move it clear, or aim at a foundation to snap on.");
+                return Bad(Crafting::IsFence(kind) && Crafting::IsFence(piece.kind)
+                    ? "That runs into another fence. Turn it, or aim at a free post."
+                    : "That overlaps another building. Move it clear, or aim at a foundation to snap on.");
         }
     }
     return Good("");
@@ -2157,6 +2237,7 @@ Result Simulation::Place(const PlacementTarget& target, Point player)
     }
     Structure piece{state_.nextId++, kind, target.cellX, target.cellY, ((target.rotation % 4) + 4) % 4, 0.0, {}};
     piece.buildingId = buildingId;
+    if (Crafting::IsMovable(kind) && target.buildingId >= 0) piece.spot = target.spot;
     state_.structures.push_back(std::move(piece));
     return Exert(Exertion::BuildEnergy, Good(std::string("Placed ") + PieceName(kind) + "."));
 }
@@ -2872,6 +2953,7 @@ std::string Simulation::Serialize() const
     if (Manor::HasSaveSection(state_)) Manor::WriteSaveSection(body, state_);
     Lamp::WriteSaveSection(body, state_);
     Crops::WriteSaveSection(body, state_);
+    Crafting::WriteSaveSections(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3042,8 +3124,10 @@ Result Simulation::Deserialize(const std::string& data)
         {
             if (!edges.insert({piece.buildingId, EdgeKey(piece.cellX, piece.cellY, piece.rotation)}).second) return invalid();
         }
-        else if (!cells.insert({piece.buildingId, piece.cellX, piece.cellY, kind}).second) return invalid();
-        if (Furniture(piece.kind) && !furniture.insert({piece.buildingId, piece.cellX, piece.cellY}).second) return invalid();
+        else if (!Crafting::IsMovable(piece.kind) && !cells.insert({piece.buildingId, piece.cellX, piece.cellY, kind}).second)
+            return invalid();
+        if (Furniture(piece.kind) && !Crafting::IsMovable(piece.kind)
+            && !furniture.insert({piece.buildingId, piece.cellX, piece.cellY}).second) return invalid();
         candidate.structures.push_back(piece);
     }
     for (const auto& piece : candidate.structures)
@@ -3158,6 +3242,8 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Manor::SaveTag) { if (!Manor::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Crafting::GateTag) { if (!Crafting::ReadGates(input, candidate)) return invalid(); }
+        else if (tag == Crafting::SpotTag) { if (!Crafting::ReadSpots(input, candidate)) return invalid(); }
         // A section this build doesn't know came from a newer build; it can't be skipped safely.
         else return newer;
         input >> std::ws;

@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "Simulation/HomesteadCrafting.h"
 #include "HomesteadEstateGround.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadCrops.h"
@@ -249,6 +250,13 @@ const TCHAR* RecipeDescription(Homestead::Recipe Recipe)
     case Homestead::Recipe::RoastedRoots: return TEXT("Wild roots softened and warmed over a fueled cookfire.");
     case Homestead::Recipe::HerbedRoots: return TEXT("Roasted roots brightened with meadow herbs.");
     case Homestead::Recipe::SplitFirewood: return TEXT("Prepared fuel split from timber with a carried axe.");
+    case Homestead::Recipe::SawPlanks: return TEXT("Saw a length of timber into four deal planks at the sawhorse.");
+    case Homestead::Recipe::MakeFenceSection: return TEXT("Post and rail for one 2.4 m bay. Set it up on your own land from the Build page; bays join at their posts.");
+    case Homestead::Recipe::MakeFieldGate: return TEXT("A ledged and braced field gate hung on salvaged iron hinges. It fits a bay of fence and swings open and shut.");
+    case Homestead::Recipe::MakeStool: return TEXT("A three-legged cricket stool, steady on any floor.");
+    case Homestead::Recipe::MakeTable: return TEXT("A plain deal kitchen table with a drawer, for the standing room or anywhere under a roof.");
+    case Homestead::Recipe::MakeChair: return TEXT("A plain country chair with a plank seat and a slatted back.");
+    case Homestead::Recipe::MakeShelf: return TEXT("Plank shelving on forged brackets made from scrap iron.");
     default: return TEXT("");
     }
 }
@@ -2065,6 +2073,7 @@ void AHomesteadController::UpdateFocus()
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
     }
     ConsiderStoreFocus(Consider);
+    ConsiderCraftingFocus(Consider);
     if (Sim.NearWater(Position))
     {
         // With the watering can out and not full, the stream wins over a crop on the bank when she
@@ -2153,6 +2162,9 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusTitle();
+    case EFocus::Gate:
+    case EFocus::Workbench:
+    case EFocus::Sawhorse: return CraftingFocusTitle();
     default: break;
     }
     if (Focus == EFocus::None && SelectedCarriedTool() == Homestead::Item::OilLamp)
@@ -2270,6 +2282,9 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
+    case EFocus::Gate:
+    case EFocus::Workbench:
+    case EFocus::Sawhorse: return CraftingFocusActions();
     default:
         if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
@@ -2892,6 +2907,9 @@ void AHomesteadController::Interact()
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
+    case EFocus::Gate:
+    case EFocus::Workbench:
+    case EFocus::Sawhorse: InteractWithCrafting(); break;
     default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
 
@@ -4063,7 +4081,8 @@ void AHomesteadController::RotatePlacement() { RotatePlacementBy(1); }
 void AHomesteadController::RotatePlacementBy(int32 Direction)
 {
     if (!bPlanning || bDeconstructing) return;
-    const bool bQuarterTurns = BuildTarget.snapped || BuildKind == Homestead::Piece::Wall
+    // Fences always turn in whole 15 degree steps, joined to a post or not.
+    const bool bQuarterTurns = (BuildTarget.snapped && !Homestead::Crafting::IsFence(BuildKind)) || BuildKind == Homestead::Piece::Wall
         || BuildKind == Homestead::Piece::Doorway || BuildKind == Homestead::Piece::Roof;
     if (bQuarterTurns) BuildRotation = ((BuildRotation + Direction) % 4 + 4) % 4;
     else BuildYawOffset = FMath::Fmod(BuildYawOffset + 15.0 * Direction + 360.0, 360.0);
@@ -4093,6 +4112,9 @@ FString AHomesteadController::PlacementStatus() const
     if (!BuildBlocker.IsEmpty()) return BuildBlocker;
     if (bDeconstructing)
         return TEXT("Everything it cost comes back to your pack; a chest's contents come with it.");
+    if (Homestead::Crafting::IsFence(BuildKind))
+        return BuildTarget.snapped ? FString(TEXT("Joins your fence at its post; rotate turns it 15 degrees."))
+            : FString(TEXT("Stands free: it runs the way you look; rotate turns it 15 degrees."));
     return BuildTarget.snapped ? FString(TEXT("Snaps onto your building."))
         : FString(TEXT("Free-standing: it faces the way you look; rotate turns it."));
 }

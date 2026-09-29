@@ -474,6 +474,28 @@ private:
     void BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
         const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid = true,
         bool bDeconstruct = false);
+    // Period crafting (HomesteadWorldCrafting.cpp): the workbench, sawhorse, fences, gates and small
+    // furniture. False for any other piece. A fence draws the posts in PostMask (bit 0 its -X end,
+    // bit 1 its +X end), so a post two bays share is drawn once.
+    bool BuildCraftedPiece(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
+        const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid, bool bDeconstruct,
+        uint32 PostMask);
+    UStaticMesh* CraftMesh(const TCHAR* Folder, const TCHAR* Name);
+    UPROPERTY()
+    TMap<FName, TObjectPtr<UStaticMesh>> CraftMeshes;
+    // Which posts each fence piece draws, refreshed with the structures (Homestead::Crafting::PostOwners).
+    TMap<int32, uint32> FencePostMasks;
+    // A gate swinging open or shut: its leaf turns about the hinge post over GateSwingSeconds.
+    struct FGateSwing
+    {
+        TWeakObjectPtr<USceneComponent> Leaf;
+        float FromYaw = 0.0f;
+        float ToYaw = 0.0f;
+        float Age = 0.0f;
+    };
+    TMap<int32, FGateSwing> GateSwings;
+    TMap<int32, bool> GateShownOpen;
+    void UpdateGateSwings(float DeltaSeconds);
     void BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot);
     void BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop);
     // A set-down oil lamp: the lamp on whatever is underfoot, lit while it has oil (false when the

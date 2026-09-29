@@ -1,4 +1,5 @@
 #include "HomesteadParcels.h"
+#include "HomesteadCrafting.h"
 #include "HomesteadEstate.h"
 
 #include <cctype>
@@ -144,9 +145,10 @@ Result Simulation::CanBuildAt(const PlacementTarget& target) const
         return {false, "Choose a valid structure and building cell.", ResultCode::Invalid};
     const bool onFoundation = target.buildingId >= 0 && HasFoundation(state_, target.buildingId, target.cellX, target.cellY);
     // Walls, doorways and roofs stand on their foundation's cell, so they count that ground.
-    const bool furniture = target.kind == Piece::Fire || target.kind == Piece::Bed || target.kind == Piece::Chest;
+    const bool furniture = IsFurniture(target.kind) || Crafting::IsFence(target.kind);
     Footprint area = furniture
-        ? PieceFootprint(*building, target.kind, target.cellX, target.cellY, ((target.rotation % 4) + 4) % 4, onFoundation)
+        ? PieceFootprint(*building, target.kind, target.cellX, target.cellY, ((target.rotation % 4) + 4) % 4, onFoundation,
+            target.spot)
         : PieceFootprint(*building, Piece::Foundation, target.cellX, target.cellY, 0, true);
     // Pieces flush against the boundary still count as inside.
     area.half = {area.half.x > 1.0 ? area.half.x - 1.0 : 0.0, area.half.y > 1.0 ? area.half.y - 1.0 : 0.0};

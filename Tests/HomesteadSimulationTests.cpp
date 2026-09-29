@@ -1,5 +1,6 @@
 #include "HomesteadSimulation.h"
 #include "HomesteadCrops.h"
+#include "HomesteadCrafting.h"
 #include "HomesteadShops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadManor.h"
@@ -244,6 +245,13 @@ void BuildingStock(Simulation& sim)
 {
     Stock(sim, {{Item::Branch, 65}, {Item::Stone, 24}, {Item::BrambleCanes, 25}});
 }
+// A workbench on her own cell and a sawhorse beside it, both within Crafting::StationReach of Home.
+void PlaceStations(Simulation& sim)
+{
+    Stock(sim, {{Item::Timber, 10}, {Item::Twine, 6}});
+    OK(sim.Place(Piece::Workbench, -3, 0, 0, Home));
+    OK(sim.Place(Piece::Sawhorse, -4, 0, 0, Home));
+}
 void BuildRoom(Simulation& sim, int x = -3, int y = 0)
 {
     Edit(sim, [](State&) {});
@@ -348,10 +356,11 @@ void RequirementsMatchTransactions()
         BuildingStock(sim);
         OK(sim.Place(Piece::Fire, -3, -1, 0, CellCenter(-3, -1)));
         OK(sim.AddFuel(sim.GetState().structures.back().id, CellCenter(-3, -1)));
+        PlaceStations(sim);
         Stock(sim, {{Item::Hatchet, 1}, {Item::Branch, 40}, {Item::Stone, 20},
             {Item::RustedAxeHead, 1}, {Item::RustedHoeBlade, 1}, {Item::RustedScytheBlade, 1},
             {Item::RustedBillhookHead, 1}, {Item::RustedPickHead, 1},
-            {Item::Roots, 10}, {Item::Flowers, 10}, {Item::Timber, 1}});
+            {Item::Roots, 10}, {Item::Flowers, 10}, {Item::Timber, 1}, {Item::Planks, 10}, {Item::ScrapIron, 2}});
         const auto before = sim.GetState().inventory;
         const double hour = sim.GetState().hour;
         const char* description = RecipeRequirements(recipe);
@@ -368,6 +377,10 @@ void RequirementsMatchTransactions()
         if (!IsBuildable(piece)) continue;
         Simulation sim;
         BuildingStock(sim);
+        // The stations are built from timber and twine; the rest are made at the workbench first.
+        if (Crafting::IsStation(piece) || Crafting::IsFence(piece) || Crafting::IsMovable(piece))
+            Stock(sim, {{Item::Timber, 6}, {Item::Twine, 4}, {Item::FenceSection, 1}, {Item::FieldGate, 1},
+                {Item::Stool, 1}, {Item::Table, 1}, {Item::Chair, 1}, {Item::Shelf, 1}});
         if (piece == Piece::Wall || piece == Piece::Doorway || piece == Piece::Roof)
             OK(sim.Place(Piece::Foundation, -3, 0, 0, Home));
         const auto before = sim.GetState().inventory;
@@ -433,13 +446,15 @@ void StructuredRecipeAssessment()
     const Point completeFire = CellCenter(-3, -1);
     OK(complete.Place(Piece::Fire, -3, -1, 0, completeFire));
     OK(complete.AddFuel(complete.GetState().structures.back().id, completeFire));
+    PlaceStations(complete);
     Stock(complete, {{Item::Hatchet, 1}, {Item::Branch, 40},
         {Item::RustedAxeHead, 1}, {Item::RustedHoeBlade, 1}, {Item::RustedScytheBlade, 1},
         {Item::RustedBillhookHead, 1}, {Item::RustedPickHead, 1}, {Item::Roots, 10},
-        {Item::Flowers, 10}, {Item::Timber, 4}});
+        {Item::Flowers, 10}, {Item::Timber, 4}, {Item::Planks, 10}, {Item::ScrapIron, 2}});
     const Item Outputs[] = {Item::Hatchet, Item::DiggingStick, Item::Scythe, Item::Billhook, Item::Pickaxe,
-        Item::RoastedRoots, Item::HerbedRoots, Item::Firewood};
-    const int OutputCounts[] = {1, 1, 1, 1, 1, 1, 1, 4};
+        Item::RoastedRoots, Item::HerbedRoots, Item::Firewood,
+        Item::Planks, Item::FenceSection, Item::FieldGate, Item::Stool, Item::Table, Item::Chair, Item::Shelf};
+    const int OutputCounts[] = {1, 1, 1, 1, 1, 1, 1, 4, 4, 1, 1, 1, 1, 1, 1};
     static_assert(sizeof(Outputs) / sizeof(Outputs[0]) == static_cast<int>(Recipe::Count), "Every recipe is assessed.");
     for (int index = 0; index < static_cast<int>(Recipe::Count); ++index)
     {
@@ -908,7 +923,8 @@ void TimberAndFirewoodTransactions()
     static_assert(ItemCount > static_cast<int>(Item::Fur), "Later items append after fur");
     static_assert(static_cast<int>(Recipe::HaftPickaxe) == 4, "Five hafting recipes replace the knife-crafted tools");
     static_assert(static_cast<int>(Recipe::SplitFirewood) == 7, "Split Firewood follows cooking");
-    static_assert(static_cast<int>(Recipe::Count) == 8, "Hafting, cooking and one processing recipe are present");
+    static_assert(static_cast<int>(Recipe::SawPlanks) == 8, "Period crafting appends after Split Firewood");
+    static_assert(static_cast<int>(Recipe::Count) == 15, "Hafting, cooking, processing and the workbench recipes are present");
 
     Simulation sim;
     BuildingStock(sim);

@@ -288,7 +288,16 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("wild-garlic")), EKind::WildGarlic},
         {FName(TEXT("oil-lamp")), EKind::OilLamp},
         {FName(TEXT("oil-flask")), EKind::OilFlask},
-        {FName(TEXT("pouch-arrows")), EKind::PouchArrows}
+        {FName(TEXT("pouch-arrows")), EKind::PouchArrows},
+        {FName(TEXT("planks")), EKind::Planks},
+        {FName(TEXT("fence")), EKind::Fence},
+        {FName(TEXT("gate")), EKind::Gate},
+        {FName(TEXT("stool")), EKind::Stool},
+        {FName(TEXT("table")), EKind::Table},
+        {FName(TEXT("chair")), EKind::Chair},
+        {FName(TEXT("shelf")), EKind::Shelf},
+        {FName(TEXT("workbench")), EKind::Workbench},
+        {FName(TEXT("sawhorse")), EKind::Sawhorse}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -952,6 +961,95 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         // Up and down chevrons: this hotbar slot switches between the seed in her pack.
         P.Shape({{28, 4}, {48, 24}, {8, 24}}, Gold);
         P.Shape({{8, 32}, {48, 32}, {28, 52}}, Gold);
+        break;
+    // Period crafting: sawn planks, a fence bay, a field gate, the stations and small furniture.
+    case EKind::Planks:
+        P.Shape({{6, 20}, {40, 10}, {50, 14}, {16, 24}}, Gold);
+        P.Shape({{6, 20}, {16, 24}, {16, 29}, {6, 25}}, Wood);
+        P.Shape({{6, 32}, {40, 22}, {50, 26}, {16, 36}}, Cream * 0.6f + Gold * 0.4f);
+        P.Shape({{6, 32}, {16, 36}, {16, 41}, {6, 37}}, Wood);
+        P.Shape({{8, 44}, {42, 34}, {50, 38}, {18, 48}}, Gold);
+        P.Shape({{8, 44}, {18, 48}, {18, 52}, {8, 48}}, Wood);
+        P.Line({{20, 18}, {38, 13}}, Wood, 1);
+        P.Line({{22, 42}, {40, 37}}, Wood, 1);
+        break;
+    case EKind::Fence:
+        P.Rect(8, 12, 7, 38, Wood);
+        P.Rect(41, 12, 7, 38, Wood);
+        P.Shape({{8, 10}, {11.5f, 7}, {15, 10}}, Wood);
+        P.Shape({{41, 10}, {44.5f, 7}, {48, 10}}, Wood);
+        P.Rect(6, 17, 44, 5, Gold);
+        P.Rect(6, 28, 44, 5, Gold);
+        P.Rect(6, 39, 44, 5, Gold);
+        P.Line({{4, 51}, {52, 51}}, LeafGreen, 2);
+        break;
+    case EKind::Gate:
+        P.Rect(5, 8, 6, 43, Wood);
+        P.Rect(45, 8, 6, 43, Wood);
+        P.Rect(12, 12, 4, 34, Gold);
+        P.Rect(40, 12, 4, 34, Gold);
+        for (float Bar : {13.0f, 21.0f, 29.0f, 37.0f, 44.0f}) P.Rect(12, Bar, 32, 3, Gold);
+        P.Line({{14, 45}, {42, 14}}, Cream, 2.5f);
+        P.Rect(10, 14, 9, 3, Iron);
+        P.Rect(10, 40, 9, 3, Iron);
+        break;
+    case EKind::Stool:
+        P.Shape({{10, 18}, {28, 13}, {46, 18}, {28, 23}}, Gold);
+        P.Shape({{10, 18}, {28, 23}, {28, 26}, {10, 21}}, Wood);
+        P.Shape({{28, 23}, {46, 18}, {46, 21}, {28, 26}}, Wood);
+        P.Line({{15, 22}, {10, 48}}, Wood, 3);
+        P.Line({{41, 22}, {46, 48}}, Wood, 3);
+        P.Line({{28, 26}, {28, 50}}, Gold, 3);
+        break;
+    case EKind::Table:
+        P.Rect(5, 16, 46, 6, Gold);
+        P.Rect(8, 22, 40, 6, Wood);
+        P.Rect(22, 23, 12, 3, Cream);
+        P.Rect(9, 28, 5, 22, Wood);
+        P.Rect(42, 28, 5, 22, Wood);
+        P.Line({{6, 17}, {50, 17}}, Cream, 1);
+        break;
+    case EKind::Chair:
+        P.Rect(16, 6, 5, 44, Wood);
+        P.Rect(19, 11, 20, 4, Gold);
+        P.Rect(19, 19, 20, 4, Gold);
+        P.Shape({{16, 29}, {44, 29}, {46, 34}, {16, 34}}, Gold);
+        P.Rect(40, 34, 5, 16, Wood);
+        P.Rect(35, 6, 5, 23, Wood);
+        P.Line({{20, 42}, {41, 42}}, Wood, 2);
+        break;
+    case EKind::Shelf:
+        P.Rect(8, 6, 5, 46, Wood);
+        P.Rect(43, 6, 5, 46, Wood);
+        P.Rect(8, 16, 40, 4, Gold);
+        P.Rect(8, 30, 40, 4, Gold);
+        P.Rect(8, 44, 40, 4, Gold);
+        P.Line({{13, 20}, {18, 25}}, Iron, 2);
+        P.Line({{43, 20}, {38, 25}}, Iron, 2);
+        P.Rect(18, 9, 7, 7, RootOrange);
+        P.Rect(30, 23, 9, 7, StoneGray);
+        P.Rect(20, 37, 6, 7, Cream);
+        break;
+    case EKind::Workbench:
+        P.Shape({{4, 20}, {40, 14}, {52, 19}, {16, 25}}, Gold);
+        P.Shape({{4, 20}, {16, 25}, {16, 30}, {4, 25}}, Wood);
+        P.Shape({{16, 25}, {52, 19}, {52, 24}, {16, 30}}, Wood);
+        P.Line({{8, 25}, {8, 48}}, Wood, 4);
+        P.Line({{18, 30}, {18, 52}}, Wood, 4);
+        P.Line({{48, 24}, {48, 47}}, Wood, 4);
+        P.Line({{9, 42}, {47, 38}}, Gold, 2);
+        P.Line({{12, 31}, {12, 38}}, Iron, 3);
+        P.Disc(12, 39, 2.5f, Iron);
+        break;
+    case EKind::Sawhorse:
+        P.Rect(6, 16, 44, 7, Gold);
+        P.Line({{12, 23}, {6, 50}}, Wood, 4);
+        P.Line({{16, 23}, {22, 50}}, Wood, 4);
+        P.Line({{40, 23}, {34, 50}}, Wood, 4);
+        P.Line({{44, 23}, {50, 50}}, Wood, 4);
+        P.Rect(14, 8, 34, 8, Wood);
+        P.Disc(14, 12, 4, Cream);
+        P.Line({{31, 6}, {31, 17}}, Iron, 2);
         break;
     case EKind::Unknown:        P.Unknown();
         break;

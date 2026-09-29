@@ -125,6 +125,22 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Food, "wild-garlic", 8, StoreBuys, 5.0, 3.0, "Picked from broad bean plants", false, "broad bean pods"},
     {Item::Strawberries, "strawberries", "Strawberries", "Sweet red strawberries, warm from the sun.",
         ItemCategory::Food, "berries", 13, StoreBuys, 8.0, 8.0, "Picked from strawberry plants", false, "strawberries"},
+    // Period crafting: planks sawn at the sawhorse, and fences and furniture made at the workbench.
+    // Each made piece is set up from the Build page and comes back whole when taken down.
+    {Item::Planks, "planks", "Plank", "A sawn deal plank, the stuff of fences, gates and furniture.",
+        ItemCategory::Material, "planks", 10, StoreBuys, 0.0, 0.0, "Timber, sawn at a sawhorse", false, "planks"},
+    {Item::FenceSection, "fence-section", "Fence section", "A 2.4 m bay of oak post and rail, ready to set up on your own land.",
+        ItemCategory::Material, "fence", 30, NoBuyers, 0.0, 0.0, "Made from planks at a workbench", false, "fence sections"},
+    {Item::FieldGate, "field-gate", "Field gate", "A ledged and braced field gate on salvaged iron hinges.",
+        ItemCategory::Material, "gate", 70, NoBuyers, 0.0, 0.0, "Made from planks and scrap iron at a workbench", false, "field gates"},
+    {Item::Stool, "stool", "Stool", "A three-legged cricket stool that sits steady on an uneven floor.",
+        ItemCategory::Supply, "stool", 30, NoBuyers, 0.0, 0.0, "Made from planks at a workbench", false, "stools"},
+    {Item::Table, "table", "Table", "A plain deal kitchen table with a drawer.",
+        ItemCategory::Supply, "table", 80, NoBuyers, 0.0, 0.0, "Made from planks at a workbench", false, "tables"},
+    {Item::Chair, "chair", "Chair", "A plain country chair with a plank seat and a slatted back.",
+        ItemCategory::Supply, "chair", 45, NoBuyers, 0.0, 0.0, "Made from planks at a workbench", false, "chairs"},
+    {Item::Shelf, "shelf", "Shelf", "Plank shelving on forged iron brackets, for crocks and jars.",
+        ItemCategory::Supply, "shelf", 60, NoBuyers, 0.0, 0.0, "Made from planks and scrap iron at a workbench", false, "shelves"},
 };
 static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 

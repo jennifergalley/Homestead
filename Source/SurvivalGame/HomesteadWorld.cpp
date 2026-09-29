@@ -12,6 +12,7 @@
 
 #include "HomesteadCharacter.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "Simulation/HomesteadCrafting.h"
 #include "HomesteadLampLook.h"
 #include "Kismet/GameplayStatics.h"
 #include "Async/Async.h"
@@ -599,6 +600,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     HomesteadLampLook::SetLit(LampDropFlame.Get(), LampDropLight.Get(), bLampDropLit, LampDropFlickerTime, LampDropGlass.Get());
     UpdateHearthSound(DeltaSeconds);
     UpdateClearPops(DeltaSeconds);
+    UpdateGateSwings(DeltaSeconds);
     if (Weather) Weather->TickWeather(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
     {
@@ -3817,6 +3819,9 @@ void AHomesteadWorld::UpdateHearthSound(float DeltaSeconds)
 void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homestead::Structure& Structure,
     const Homestead::Building& Frame, bool bOnFoundation, bool bPreview, bool bValid, bool bDeconstruct)
 {
+    if (BuildCraftedPiece(Visual, Structure, Frame, bOnFoundation, bPreview, bValid, bDeconstruct,
+        bPreview ? 3u : FencePostMasks.FindRef(Structure.id)))
+        return;
     const Homestead::Point Center = Homestead::BuildingCellCenter(Frame, Structure.cellX, Structure.cellY);
     FVector Base(Center.x, Center.y, StructureBase(Center, Frame.yaw));
     // UE positive yaw rotates +X toward +Y; negative yaw maps the north edge to east.
@@ -4673,12 +4678,15 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     for (const auto& Structure : State.structures)
         if (Structure.kind == Homestead::Piece::Foundation)
             FoundationCells.Add(FIntVector(Structure.cellX, Structure.cellY, Structure.buildingId));
+    FencePostMasks.Reset();
+    for (const auto& Entry : Homestead::Crafting::PostOwners(State)) FencePostMasks.Add(Entry.first, Entry.second);
     for (const auto& Structure : NearStructures)
     {
         const bool bOnFoundation = FoundationCells.Contains(FIntVector(Structure.cellX, Structure.cellY, Structure.buildingId));
-        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d:%d"),
+        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d:%d:%d:%u:%.0f:%.0f"),
             static_cast<int>(Structure.kind), Structure.buildingId, Structure.cellX, Structure.cellY, Structure.rotation,
-            Structure.fuelHours > 0, bOnFoundation, static_cast<int>(Structure.skin));
+            Structure.fuelHours > 0, bOnFoundation, static_cast<int>(Structure.skin), Structure.open,
+            FencePostMasks.FindRef(Structure.id), Structure.spot.x, Structure.spot.y);
         FHomesteadWorldVisual& Visual = StructureVisuals.FindOrAdd(Structure.id);
         if (Visual.Signature != Signature)
         {
@@ -4773,9 +4781,9 @@ void AHomesteadWorld::SetPlacementPreview(bool Visible, const Homestead::Placeme
     }
     const bool bOnFoundation = Target.buildingId >= 0
         && FoundationCells.Contains(FIntVector(Target.cellX, Target.cellY, Target.buildingId));
-    const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%.1f:%.1f:%.2f:%d:%d"), static_cast<int>(Target.kind),
+    const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%.1f:%.1f:%.2f:%d:%d:%.0f:%.0f"), static_cast<int>(Target.kind),
         Target.buildingId, Target.cellX, Target.cellY, Target.rotation, Target.frame.origin.x, Target.frame.origin.y,
-        Target.frame.yaw, bOnFoundation, bValid);
+        Target.frame.yaw, bOnFoundation, bValid, Target.spot.x, Target.spot.y);
     if (Preview.Signature == Signature)
     {
         return;
@@ -4787,6 +4795,7 @@ void AHomesteadWorld::SetPlacementPreview(bool Visible, const Homestead::Placeme
     Structure.cellX = Target.cellX;
     Structure.cellY = Target.cellY;
     Structure.rotation = Target.rotation;
+    Structure.spot = Target.spot;
     BuildStructure(Preview, Structure, Target.frame, bOnFoundation, true, bValid);
     Preview.Signature = Signature;
 }

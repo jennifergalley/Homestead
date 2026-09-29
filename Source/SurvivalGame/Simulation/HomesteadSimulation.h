@@ -31,7 +31,13 @@ enum class ResourceKind : int
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
-enum class Recipe : int { HaftAxe, HaftHoe, HaftScythe, HaftBillhook, HaftPickaxe, RoastedRoots, HerbedRoots, SplitFirewood, Count };
+enum class Recipe : int
+{
+    HaftAxe, HaftHoe, HaftScythe, HaftBillhook, HaftPickaxe, RoastedRoots, HerbedRoots, SplitFirewood,
+    // Period crafting (HomesteadCrafting.h): planks at the sawhorse, the rest at the workbench.
+    SawPlanks, MakeFenceSection, MakeFieldGate, MakeStool, MakeTable, MakeChair, MakeShelf,
+    Count
+};
 // One of each tool; its tier belongs to the tool type (State::toolTiers).
 enum class ToolKind : int { Axe, Hoe, Pail, Scythe, Billhook, Pickaxe, Count };
 enum class ToolTier : int { Worn, Iron, Steel, Master, Count };
@@ -39,7 +45,13 @@ constexpr int ToolKindCount = static_cast<int>(ToolKind::Count);
 constexpr int ToolTierCount = static_cast<int>(ToolTier::Count);
 // Hearth: the standing room's granite fireplace. It cooks like a cookfire and is always lit in
 // round 1; it can't be built.
-enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Hearth, Count };
+// Period crafting (HomesteadCrafting.h) adds the stations, fences and small furniture.
+enum class Piece : int
+{
+    Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Hearth,
+    Workbench, Sawhorse, FenceRail, FenceGate, Stool, Table, Chair, Shelf,
+    Count
+};
 // How a building piece looks; the rules are the same. Stone is the old manor's granite masonry.
 enum class StructureSkin : int { Timber, Stone, Count };
 enum class CropKind : int
@@ -165,6 +177,8 @@ struct RecipeAssessment
     bool retainedToolMet = true;
     bool stationRequired = false;
     bool stationMet = true;
+    // What the station line says: "Fueled cookfire nearby", "Workbench within reach".
+    std::string stationLabel;
     bool capacityMet = true;
     bool craftable = false;
     std::string blocker;
@@ -223,6 +237,11 @@ struct Structure
     StructureSkin skin = StructureSkin::Timber;
     // Part of the old manor (the standing room): not removable until the round-5 rebuild.
     bool heritage = false;
+    // A field gate swung open (saved in the "gates" section, HomesteadCrafting.cpp).
+    bool open = false;
+    // Where small furniture (stool, table, chair, shelf) stands in its foundation cell, in piece
+    // space from the cell centre; saved in the "spots" section. Zero everywhere else.
+    Point spot;
 };
 
 // A turned rectangle on the ground: centre, half extents along its own axes, Unreal yaw in degrees.
@@ -244,6 +263,7 @@ struct PlacementTarget
     int rotation = 0;
     Building frame;
     bool snapped = false;
+    Point spot; // Small furniture on a foundation: see Structure::spot.
     std::string blocker; // Set when no valid site could be resolved at all.
 };
 
@@ -367,8 +387,10 @@ double PieceYaw(const Building& building, int rotation);
 bool HasFoundation(const State& state, int buildingId, int cellX, int cellY);
 // Where furniture sits inside a foundation cell (piece space); off a foundation it is centred.
 Point FurnitureOffset(Piece kind);
-// The ground a piece covers. Walls and doorways cover their edge; furniture covers only itself.
-Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation);
+// The ground a piece covers. Walls and doorways cover their edge; furniture covers only itself;
+// small furniture on a foundation stands at `spot` (Structure::spot) instead of a fixed offset.
+Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation,
+    Point spot = {});
 Footprint StructureFootprint(const State& state, const Structure& structure);
 bool FootprintsOverlap(const Footprint& a, const Footprint& b);
 // Energy: time awake drains it slowly; work spends it. Work is refused when it would leave her
@@ -514,6 +536,8 @@ public:
     Result Deconstruct(int structureId, Point player);
     // Whether she carries what the piece costs.
     Result CheckBuildCost(Piece kind) const;
+    // Period crafting (HomesteadCrafting.cpp): swing a field gate open or shut.
+    Result ToggleGate(int structureId, Point player);
     // Estate land (HomesteadParcels.cpp). The seeded woodland has no parcels and is all hers.
     const Parcel* ParcelAt(Point point) const;
     bool IsOwned(Point point) const;

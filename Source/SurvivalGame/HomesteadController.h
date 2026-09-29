@@ -318,7 +318,15 @@ private:
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
     friend class UHomesteadMapComponent;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth,
+        Gate, Workbench, Sawhorse };
+    // Period crafting (HomesteadControllerCrafting.cpp): gates, the workbench and the sawhorse.
+    void ConsiderCraftingFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;
+    FString CraftingFocusTitle() const;
+    FString CraftingFocusActions() const;
+    void InteractWithCrafting();
+    // Opens the Craft page on the first recipe made at `Station` (the workbench or sawhorse).
+    void OpenCraftAtStation(Homestead::Piece Station);
     // General store (HomesteadShopFlow.cpp).
     TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;

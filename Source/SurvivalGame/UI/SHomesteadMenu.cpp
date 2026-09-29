@@ -197,9 +197,14 @@ FName RequirementIcon(Homestead::Item Item)
     return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item)));
 }
 const TCHAR* RecipeIcons[] = {TEXT("hatchet"), TEXT("digging-stick"), TEXT("scythe"), TEXT("billhook"),
-    TEXT("pickaxe"), TEXT("roasted-roots"), TEXT("herbed-roots"), TEXT("firewood")};
+    TEXT("pickaxe"), TEXT("roasted-roots"), TEXT("herbed-roots"), TEXT("firewood"),
+    TEXT("planks"), TEXT("fence"), TEXT("gate"), TEXT("stool"), TEXT("table"), TEXT("chair"), TEXT("shelf")};
+static_assert(UE_ARRAY_COUNT(RecipeIcons) == static_cast<int32>(Homestead::Recipe::Count), "Every recipe needs an icon.");
 const TCHAR* PieceIcons[] = {TEXT("foundation"), TEXT("wall"), TEXT("doorway"), TEXT("roof"),
-    TEXT("fire"), TEXT("bed"), TEXT("chest")};
+    TEXT("fire"), TEXT("bed"), TEXT("chest"), TEXT("fire"),
+    TEXT("workbench"), TEXT("sawhorse"), TEXT("fence"), TEXT("gate"), TEXT("stool"), TEXT("table"), TEXT("chair"),
+    TEXT("shelf")};
+static_assert(UE_ARRAY_COUNT(PieceIcons) == static_cast<int32>(Homestead::Piece::Count), "Every piece needs an icon.");
 // The legacy apron still works but has no slot of its own here; it shows under the Top it ties over.
 constexpr Homestead::EquipmentSlot VisibleEquipmentSlots[] = {
     Homestead::EquipmentSlot::Torso, Homestead::EquipmentSlot::Legs, Homestead::EquipmentSlot::Outer,
@@ -1515,9 +1520,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 Assessment.retainedToolMet);
         }
         if (Assessment.stationRequired)
-            AddRequirement(FName(TEXT("fire")), TEXT("Cookfire"),
-                Assessment.stationMet ? TEXT("Ready") : TEXT("Missing"),
-                TEXT("Fueled cookfire nearby"), Assessment.stationMet);
+        {
+            // The cookfire, or the workbench or sawhorse a period recipe is made at.
+            const FString Station = UTF8_TO_TCHAR(Assessment.stationLabel.c_str());
+            const bool bFire = Station.StartsWith(TEXT("Fueled"));
+            AddRequirement(FName(bFire ? TEXT("fire") : Station.StartsWith(TEXT("Sawhorse")) ? TEXT("sawhorse") : TEXT("workbench")),
+                bFire ? TEXT("Cookfire") : Station.StartsWith(TEXT("Sawhorse")) ? TEXT("Sawhorse") : TEXT("Workbench"),
+                Assessment.stationMet ? TEXT("Ready") : TEXT("Missing"), Station, Assessment.stationMet);
+        }
         if (!Assessment.capacityMet)
             AddRequirement(FName(TEXT("pack")), TEXT("Pack space"), TEXT("Full"),
                 TEXT("Make room for the crafted output"), false);
@@ -1609,7 +1619,7 @@ FString SHomesteadMenu::DetailsText() const
                 UTF8_TO_TCHAR(Homestead::ItemName(Row.RecipeState.retainedTool)),
                 Row.RecipeState.retainedToolMet ? TEXT("Ready") : TEXT("Missing"));
         if (Row.RecipeState.stationRequired)
-            Result += FString::Printf(TEXT("\nFueled cookfire nearby: %s"),
+            Result += FString::Printf(TEXT("\n%s: %s"), UTF8_TO_TCHAR(Row.RecipeState.stationLabel.c_str()),
                 Row.RecipeState.stationMet ? TEXT("Ready") : TEXT("Not nearby"));
         Result += FString::Printf(TEXT("\nPack space: %s"),
             Row.RecipeState.capacityMet ? TEXT("Available") : TEXT("Full"));
