@@ -80,7 +80,7 @@ direction is round 1, "Walk your estate":
 ### New Capabilities
 
 - `estate-life-sim-direction`: The product-level rules every later round must honour. These
-  cover the cozy, never-lethal pressure model; energy and hunger without cold; the fixed
+  cover the cozy, never-lethal pressure model; a single energy meter with no hunger or cold; the fixed
   authored world; physical hauling to town; money with meaningful sinks; tiered tools that
   gate what can be cleared; and no slaughter.
 

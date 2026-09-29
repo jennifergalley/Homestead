@@ -78,6 +78,11 @@ next five sessions.
 - **New to the work, or starting a round?** Read `docs/handoff/README.md` (roles, direction,
   protocol) and the current `docs/handoff/round-<n>.md` (who's who, lane status, open blockers)
   first.
+- **Cross-session messages are immediate** (Jenny, 2026-09-29): every `send_session_message` sets
+  `delivery_mode: "immediate"`; never use default/enqueue for routine messages. Keep messages short,
+  self-contained and actionable. For a blocker or rule change that must reach a busy session mid-turn,
+  also use `mailbox_send` to its worktree. Older queued messages may still arrive late: honor the newest
+  timestamp or explicit decision, and ignore stale superseded instructions.
 - **Report what you learn to the docs agent** listed on the round page, via `send_session_message`.
   That covers failures and fixes, missing or wrong docs, recipes, and interfaces other lanes need.
   The docs agent verifies each finding and records it once in the canonical place. The report

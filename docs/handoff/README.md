@@ -103,9 +103,12 @@ Send a message whenever you:
 - find a doc, skill or script help that's confusing, wrong or stale,
 - learn a recipe, convention or interface another session will need.
 
-Use `send_session_message` with `delivery_mode: "enqueue"` to the docs agent's session ID. Don't
-wait for a reply, and don't hold reports until your feature lands. One message can carry several
-items. Template:
+Use `send_session_message` with `delivery_mode: "immediate"` to the docs agent's session ID (never
+default/enqueue). Keep it short, self-contained and actionable; don't wait for a reply or hold reports
+until your feature lands. One message can carry several items. For a blocker or rule change that must
+reach a busy session mid-turn, also send `mailbox_send` to its worktree. Older queued messages may
+arrive late: honor the newest timestamp or explicit decision and ignore stale superseded instructions.
+Template:
 
 ```text
 [docs report] from <session name> (<branch>, port <mcp port>)
@@ -156,7 +159,7 @@ A lane delivers an increment like this:
 4. Commit only your files. Push to `main` when you're rebased and tested; otherwise commit to your
    lane branch. All worktrees share one local repository, so the integration session can read
    unpushed lane branches directly.
-5. Message the orchestrator (`send_session_message`, `delivery_mode: "enqueue"`):
+5. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
 
    ```text
    [ready] <lane> — branch <branch> @ <sha> (pushed to main: yes/no)
@@ -246,6 +249,9 @@ turn (with a wake-up if you need one).
 - A proposal-only stub fails `openspec validate` with `Change must have at least one delta`. Give it
   a small outcome-level `specs\<capability>\spec.md` (one or two requirements with scenarios), or
   set `skip_specs: true` in the change's `.openspec.yaml`.
+- Every `ADDED` requirement needs at least one `#### Scenario:` with WHEN/THEN. Otherwise
+  `openspec validate --changes --strict` fails the whole-repo gate, even when the implementation is
+  unrelated to that change.
 - `openspec new change` takes 3-4 s each. Scaffold many changes in one background command.
 - Plan mode blocks even read-only `openspec list`; run it after plan approval.
 - Completed changes haven't been archived yet, so `openspec list` includes finished work. Ask the
