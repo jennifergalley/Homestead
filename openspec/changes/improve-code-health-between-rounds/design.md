@@ -39,6 +39,28 @@ Each step is its own `[ready]` to the orchestrator; the Integration Agent merges
 with its usual batch checks. Coordinate step 1 with the Build Speed Agent (`6e131c6a`), which owns
 `*.Build.cs` and the PCH.
 
+## Sequenced plan (orchestrator-approved 2026-09-28; window scheduled after the Performance pass)
+
+Steps run in this order. "Conflict risk" is what an in-flight lane edit to the same files would
+cost; every step needs a quiet window for the files it names (check `git worktree list`, each
+worktree's `git status`, and unmerged lane branches first).
+
+| # | Step | Files | Conflict risk | Why this position |
+| --- | --- | --- | --- | --- |
+| 1 | Anim table (`EHandAction` rows) | `HomesteadAnimInstance.{h,cpp}` | Medium (4 lanes touched it in round 1) | Self-contained; no dependency on the splits |
+| 2 | Controller split into `HomesteadController<Feature>.cpp` | `HomesteadController.cpp` (header comments only) | **High** while any lane is open; none once all have merged | Biggest merge-conflict and compile-time win; unblocks 5 and 6 |
+| 3 | World split into `HomesteadWorld<Area>.cpp` | `HomesteadWorld.cpp` | High, as above | Unblocks the refresh gating |
+| 4 | Refresh gating + integer signatures, measured in a perf window | `HomesteadWorldRefresh.cpp` (after 3), controller tick | Low after 3 (one small file) | Needs the Performance Agent's baseline; coordinate |
+| 5 | Test admission and route dispatch out of `BeginPlay` | new `HomesteadTestAdmission.cpp`, controller | Low after 2 | Product code stops carrying test plumbing |
+| 6 | Character and menu splits | `HomesteadCharacter.cpp`, `UI/SHomesteadMenu.cpp` | High, as 2 | Same pattern as 2-3 |
+| 7 | Palette in menu, shop, vitals, HUD, controller | UI files, HUD | Low after 6 (value-identical one-liners) | Cosmetic consolidation |
+| 8 | Named log categories | many, one area per commit | Low (single lines) | Do per file as it's split |
+| 9 | Tool item enum names (`Axe`, `Hoe`, `Pail`) | simulation, controller, tests | Medium (touches many files; keys unchanged) | Last: pure rename, easiest to redo if it conflicts |
+| - | Explicit ids for hand-placed estate placements (debt item 9) | `HomesteadEstate.cpp` | Medium (lanes add placements) | Only if a lane is about to reorder placements; otherwise documented rule suffices |
+
+Steps 2-4 and 6 are coordinated with the Build Speed Agent (`6e131c6a`, owns `*.Build.cs` and the
+PCH) and the Performance Agent (step 4's measurement). Each step is its own `[ready]`.
+
 ## Verification per step
 
 - `Scripts\Test-Native.ps1 -Configuration Release` 7/7.

@@ -25,7 +25,7 @@
 - [ ] 3.4 Named log categories replace `LogTemp`
 - [ ] 3.5 Tool item enum names (`Axe`, `Hoe`, `Pail`), keys unchanged
 
-## 4. Legacy tooling (needs the orchestrator's yes)
+## 4. Legacy tooling (approved; receipts in docs/research stay)
 
 - [ ] 4.1 Remove `FernSpike.cpp`, the authoring-probe commandlet and its scripts
-- [ ] 4.2 Remove unused policy tests and `docs/research/**/receipt.json` evidence; fix or drop `HomesteadMenuSourceTests.py`
+- [ ] 4.2 Remove unused policy tests; drop `HomesteadMenuSourceTests.py`

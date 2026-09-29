@@ -38,10 +38,10 @@ In priority order (payoff over risk):
    from `AHomesteadController::BeginPlay` into `HomesteadTestAdmission.cpp`; break the 500-1000-line
    route builders into named step groups.
 6. **Named log categories** for the 106 `LogTemp` call sites, by area.
-7. **Retire legacy probe tooling, with the orchestrator's go-ahead:** `FernSpike.cpp` and the
-   authoring-probe commandlet, the unused `Tests/Test-*Policy.ps1` scripts and their
-   `docs/research/**/receipt.json` evidence (1,576 files), and the failing
-   `HomesteadMenuSourceTests.py`.
+7. **Retire legacy probe tooling** (approved; cold files, any time): `FernSpike.cpp` and the
+   authoring-probe commandlet with the scripts that only drive it, the unused `Tests/Test-*Policy.ps1`
+   scripts, and the failing `HomesteadMenuSourceTests.py`, after checking references. The receipts
+   under `docs/research` stay.
 8. **Tool item identifiers** (`Item::Hatchet` → `Axe`, `DiggingStick` → `Hoe`, `WateringCan` →
    `Pail`): enum names only, keys and order unchanged, so saves are unaffected.
 
