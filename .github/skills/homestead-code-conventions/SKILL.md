@@ -60,6 +60,17 @@ disagree, follow the code and tell the Architecture Agent.
   Build Speed Agent's: add to it only headers nearly every file needs, and never `UnrealEd`. Headers forward-declare classes they only point to; a header that every
   unity blob includes (`HomesteadController.h`, `HomesteadSimulation.h`) makes each edit rebuild the
   whole module, so don't add includes to those two lightly.
+- **Nothing at namespace scope may read runtime state.** Globals, file-scope statics, class static
+  members and `TAutoConsoleVariable`/`FAutoConsoleCommand` arguments are constructed during static
+  initialization, before the engine has set the command line, config, paths or `GEngine`. The
+  packaged game is monolithic, so a read there is a fatal launch crash (`CrashDuringStaticInit`,
+  exit 777006). Editor and PIE builds hide it, because modules load after the engine is up. Every
+  packaged build crashed at launch from `a725ff1d` to `7c5fdc28` because of
+  `FParse::Param(FCommandLine::Get(), ...)` in a CVar default. So: CVar defaults are literals (use
+  `-1` for "follow the command line" and resolve it in a function on use, as `SkipNewGameSetup()` in
+  `HomesteadControllerManor.cpp` does); `FPaths::`, `GConfig`, `FParse`, `FApp::`, `IFileManager`,
+  `LoadObject` and `GEngine` belong inside functions (a function-local `static` runs on first call,
+  which is fine). Plain `constexpr` values, `FLinearColor`s, `TEXT()` strings and `FName`s are safe.
 - Warnings are errors, including `C4458` (a local hides a member) and `C4459` (hides a global).
 - In an `_API`-exported `UCLASS`, declare one `static constexpr` per line (several declarators on one
   line give `C2487`).
@@ -119,4 +130,19 @@ disagree, follow the code and tell the Architecture Agent.
 ## Reviews
 
 The Architecture Agent reviews each integrated batch on `main` and sends suggestions to the owning
-lane. Suggestions don't block a `[ready]`; fix them in your next increment or say why not.
+lane. Suggestions don't block a `[ready]`; fix them in your next increment or say why not. The
+checklist it (and you) run over a diff:
+
+1. **Static init:** no runtime reads (command line, config, paths, files, `GEngine`, asset loads) in
+   globals, file-scope statics, static members or CVar/console-command arguments.
+2. **Unity build:** file-local names unique or in a named namespace; no file-scope `using namespace`;
+   no local that hides a member or global.
+3. **Saves:** no `SimulationSaveVersion`/`bakeVersion` change; new save data in a tagged section with
+   counts first; enums appended, not reordered; placement ids appended.
+4. **Rules in the simulation**, with a native test; actors only present.
+5. **Per-frame cost:** nothing per tick or paint that scales with placements, resources or components;
+   no per-frame `LoadObject`, actor iteration or string building.
+6. **Assets** in `UPROPERTY()` members, never function-local statics.
+7. **Duplication:** a rule, constant or colour that already exists elsewhere (weather, palette,
+   item data) is called, not re-derived.
+8. **Logging** to a named category; tuning numbers named with units.

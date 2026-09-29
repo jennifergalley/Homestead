@@ -135,6 +135,9 @@ The architecture map is `docs/architecture.md`; the long form with reasons is th
   per-enum array with its count first.
 - **Unity-build safe:** file-local names are unique or live in a named namespace
   (`namespace <Widget>Style`); no `using namespace` at file scope. Warnings are errors.
+- **No runtime reads during static init:** globals, file-scope statics and CVar defaults never call
+  `FCommandLine`, `FParse`, `GConfig`, `FPaths`, `GEngine` or `LoadObject`; the packaged game crashes
+  at launch (777006). Read them inside a function on use.
 - **Assets** are held in `UPROPERTY() TObjectPtr<>` members, never function-local statics.
 - **Per-frame cost:** nothing per tick or per paint that scales with the number of placements or
   components; gate work on `Simulation::GetRevision()` or on an actual change.
