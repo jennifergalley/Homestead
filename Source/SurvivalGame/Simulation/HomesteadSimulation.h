@@ -399,6 +399,14 @@ constexpr double RainStartHour = 9.0;
 constexpr double RainEndHour = 15.0;
 bool IsRainDay(double hour);
 bool IsRainingAt(double hour);
+// How hard it's raining at `hour`, 0-1 (add-rain-weather): nothing outside the rain window; inside
+// it a drizzle (0.3) that swells into passing showers (up to 1) every hour and a half or so, easing
+// in over the first quarter hour and out over the last ten minutes.
+double RainAmount(double hour);
+// Cloud cover at `hour`, 0-1: builds over the half hour before the rain and clears over the half
+// hour after it, so the sky greys before a drop falls.
+double Overcast(double hour);
+constexpr double OvercastLeadHours = 0.5;
 
 // What the bed offers (flexible-sleep): each choice with its length and the hour of day she'd wake.
 enum class SleepChoice { UntilMorning, UntilRested, Nap };

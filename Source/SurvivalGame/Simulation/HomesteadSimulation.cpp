@@ -1653,6 +1653,27 @@ bool IsRainingAt(double hour)
     return IsRainDay(hour) && ofDay >= RainStartHour && ofDay < RainEndHour;
 }
 bool Simulation::IsRaining() const { return IsRainingAt(state_.hour); }
+double RainAmount(double hour)
+{
+    if (!IsRainingAt(hour)) return 0.0;
+    const double ofDay = std::fmod(hour, 24.0);
+    const double day = std::floor(hour / 24.0);
+    const auto ease = [](double t) { t = Clamp(t, 0.0, 1.0); return t * t * (3.0 - 2.0 * t); };
+    const double envelope = ease((ofDay - RainStartHour) / 0.25) * ease((RainEndHour - ofDay) / (1.0 / 6.0));
+    const double wave = 0.5 + 0.5 * std::sin((ofDay - RainStartHour) * 6.2831853 / 1.6 + day * 1.7)
+        * (0.8 + 0.2 * std::sin((ofDay - RainStartHour) * 6.2831853 / 0.55 + day * 0.9));
+    const double shower = ease((wave - 0.35) / 0.5);
+    return envelope * (0.3 + 0.7 * shower);
+}
+double Overcast(double hour)
+{
+    // The rain window sits mid-morning, so the cloud's half-hour lead never crosses midnight.
+    if (!IsRainDay(hour)) return 0.0;
+    const double ofDay = std::fmod(hour, 24.0);
+    const auto ease = [](double t) { t = Clamp(t, 0.0, 1.0); return t * t * (3.0 - 2.0 * t); };
+    return ease((ofDay - (RainStartHour - OvercastLeadHours)) / OvercastLeadHours)
+        * ease((RainEndHour + OvercastLeadHours - ofDay) / OvercastLeadHours);
+}
 int Simulation::DayNumber() const { return static_cast<int>(state_.hour / 24.0) + 1; }
 const char* Simulation::SeasonName() const
 {
