@@ -22,7 +22,7 @@
 **Goals:**
 
 - A readable agricultural year: each season has its own crops, forage and look.
-- Bring the code back in line with the pivot's cozy rules: 28-day seasons, ~30-minute days, and
+- Bring the code back in line with the pivot's cozy rules: 28-day seasons, a ~30-minute default day (to be measured), and
   a single energy meter with nothing that fails her.
 - A second shop that spreads buying and selling across town, ready for round 3's prices.
 - The first period crafting stations, planks, fences and furniture.
@@ -182,10 +182,15 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
   - **Save:** an optional trailing tagged section, `wellfed`, like lane A's `withered` section,
     with no version bump.
     - It's written only while she's Well fed.
-    - On load, a missing section means not Well fed. The stored expiry must be finite. An expiry at
-      or before the save's `hour` means not Well fed, and any value above the save's `hour + 4` (the
-      longest tier) is clamped to `hour + 4`, so a corrupt or hand-edited save can't grant a long
-      buff. Loading never fails silently.
+    - On load, a missing section means not Well fed.
+    - A present section must hold a finite expiry with `hour < expiry <= hour + 4`, where 4 is the
+      longest meal duration.
+    - Any other value fails the whole load explicitly through the existing invalid-save path:
+      `ResultCode::CorruptSave`, "This save is corrupt or incomplete. Your current game was not
+      changed." That covers non-finite values, an expiry at or before the save's `hour` (which a
+      section written only while active can't produce), and one beyond `hour + 4` (no meal lasts
+      that long).
+    - Nothing is clamped or silently dropped.
     - An older build reports a save with an unknown section as `NewerBuild` and leaves it untouched.
       Writing the section only while it's active keeps most saves readable by older builds.
     - Losing the timer is harmless.
@@ -193,8 +198,15 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
     "Well fed until 2:30 PM". "3 h" means different real lengths at 30-, 60- and 120-minute days
     and is easy to misread against the clock.
   - **Tuning flag for Jenny's playtest:**
-    - At the 30-minute default day, the 2/3/4 game-hour tiers last only about 2.5 to 5 real
-      minutes.
+    - Real length is `game hours × dayMinutes / 24`, from `Simulation::Advance`: game hours =
+      real seconds × 24 / (dayMinutes × 60).
+      - `main` still defaults to `dayMinutes = 60`: 1 game hour is 2.5 real minutes, and the
+        2/3/4-hour tiers are 5, 7.5 and 10 real minutes. That matches the editor skill's "1 game
+        hour ≈ 2.5 real minutes".
+      - Lane A's branch changes the new-game default to 30 (task 1.2): 1 game hour is 1.25 real
+        minutes, and the tiers are 2.5, 3.75 and 5 real minutes.
+      - These figures are computed from the formula, not measured. Measure them in a packaged
+        build at 6.6 before quoting them to Jenny.
     - A three-hour stretch of clearing, costing about 15–20 energy, saves about 3 at ×0.85.
     - If Jenny can't feel it, the first knob is the **durations**: double them to 4, 6 and 8 hours.
       They're constants in the catalogue and `Exertion`, not structure.

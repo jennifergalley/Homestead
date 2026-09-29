@@ -56,6 +56,10 @@ On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penal
 - **WHEN** she eats a pasty at 11 PM
 - **THEN** she is still Well fed at 1:30 AM the next day, and it has ended by 2 AM
 
+#### Scenario: Tampered Well fed save
+- **WHEN** a save's Well fed expiry is not a finite number, or lies more than 4 game hours after the save's time
+- **THEN** loading fails with the corrupt-save message and the current game is unchanged
+
 #### Scenario: No hunger
 - **WHEN** she plays ten full days without eating
 - **THEN** no hunger toast, penalty or failure appears, and the HUD shows only energy among her vitals
