@@ -504,10 +504,12 @@ pending, so this does not claim early Energy is fully solved.
   clearable like the shipped slates using appended stable debris IDs only: no existing ID shift, old
   saves preserve their state, and heritage structural support remains untouched. Require PIE F5/F9
   clear-state proof.
-- **Rusted hoe wayfinding** — **Props isolated partial `be810887`, not PIE-verified, 4 PM content or
-  shipped.** The salvage order is billhook → hoe → axe → scythe → pickaxe. Tilling without a hoe
-  directs her to search the old manor; the journal/guide points to the west rooms by the chimney.
-  Native tests cover reward order and old saves, but ordinary-play second-salvage verification remains.
+- **Rusted hoe wayfinding** — **main-integrated `a785a417`, not packaged or shipped.** The salvage
+  order is billhook → hoe → axe → scythe → pickaxe. Tilling without a hoe directs her to search the
+  old manor; the journal/guide points to the west rooms by the chimney. Fresh-game PIE verified
+  `520001` billhook then `520002` hoe, crafting/tilling, and F5/F9 search flags. Native 9/9 covers
+  reward order and old saves. Honest old-save PIE has not separately run; Integration's copied-save
+  packaged core-loop test remains the gate.
 - **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
   visible **Energy** meter later, rather than a visible hunger-plus-energy pair. Keep serialized hunger
   compatibility; revise gentle-hunger penalties into energy/food balance and modest **Well Fed** meals.
@@ -538,16 +540,13 @@ pending, so this does not claim early Energy is fully solved.
   section. Old saves' forecast can change, while accrued plot moisture persists; document that at
   implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
   after its lane-A work.
-- **Starter chest, wardrobe and hoe wayfinding** — **Props isolated partial `be810887` on
-  `jennifergalley-starter-chest`, descendant of `d2c48511`; not PIE-verified, 4 PM content or
-  shipped.** New Estate games seed the standing-room chest through the normal capacity path with its
-  pail and four branches plus 3 pasties, 2 bread, LinenShirt, LinenLongShirt, Trousers, FurCoat,
-  FurBoots, WovenSandals and TurnShoes. It runs only in `NewEstateGame`, never restocks on load, and
-  leaves the tunic worn. Native 8/8 covers exact contents, save round trip, reward order and old saves;
-  the Editor build passes.
-
-  It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
-  salvage. Props released its slot before 13:45.
+- **Starter chest and wardrobe** — **main-integrated `a785a417`, not packaged or shipped.** Fresh-game
+  PIE verified the standing-room chest's pail, four branches, 3 pasties, 2 bread and seven garments;
+  the tunic stays worn. It runs only in `NewEstateGame`, never restocks on load and uses normal chest
+  capacity. The original 2197-placement table hash is pinned, excluding only appended rack `520006`;
+  F5/F9 keeps the rack unsearched with the next axe head and does not duplicate the hoe. Native 9/9,
+  Editor/Game builds and static-init check pass. The copied-save packaged core-loop test is still
+  pending, so do not call this shipped.
 - **Clean bed recipe** — **Props, pending and not shipped.** Jenny rejects thorny bramble canes in a
   bed recipe. The live `Piece::Bed` cost is 4 Branch + 4 BrambleCanes (the crafting progression doc's
   retired Fiber text is also stale). Props replaces it with **4 Branch + 4 Hay**: the same eight units,
