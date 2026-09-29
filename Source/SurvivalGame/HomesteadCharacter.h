@@ -252,6 +252,8 @@ public:
     // The Blender prop shown in her hand while Tool is selected on the hotbar (MetaHuman only), or
     // null when that tool has no authored held prop.
     UStaticMeshComponent* GetHeldProp(Homestead::Item Tool) const;
+    // The water vessel she works with: Tregear's tin can when she carries one, else the pail.
+    Homestead::Item ActiveWaterVessel() const;
     // Character lab only (no hotbar there): the tool she carries at rest. Item::Count = none.
     void SetLabHeldTool(Homestead::Item Tool);
     // Oil lamp (add-oil-lamp). Selected on the hotbar, she holds it up ahead of her, hanging from

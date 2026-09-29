@@ -28,6 +28,9 @@ constexpr const char* RoadTownEnd = "RoadTownEnd";
 constexpr const char* TownSquare = "TownSquare";
 constexpr const char* GeneralStoreDoor = "GeneralStoreDoor"; // Outside the door; yaw faces into the shop.
 constexpr const char* GeneralStoreCounter = "GeneralStoreCounter"; // Where the shopkeeper stands; yaw faces the customer.
+// Tregear's, the seedsman and corn merchant, on the town square's east side.
+constexpr const char* SeedsmanDoor = "SeedsmanDoor"; // Outside the door; yaw faces into the shop.
+constexpr const char* SeedsmanCounter = "SeedsmanCounter"; // Where the shopkeeper stands; yaw faces the customer.
 // Polygons (world XY rings, not closed: the last point joins the first).
 constexpr const char* EstateBoundary = "EstateBoundary";
 constexpr const char* ManorFootprint = "ManorFootprint";

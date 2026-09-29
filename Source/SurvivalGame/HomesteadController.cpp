@@ -87,7 +87,8 @@ constexpr int32 FieldBookPages[] = {0, 1, 2, 7, 3, 6};
 // The estate's tools. The retired knife and machete no longer ride on the hotbar.
 bool IsHotbarTool(Homestead::Item Item)
 {
-    return Homestead::ToolForItem(Item) != Homestead::ToolKind::Count || Item == Homestead::Item::OilLamp;
+    return Homestead::ToolForItem(Item) != Homestead::ToolKind::Count || Item == Homestead::Item::OilLamp
+        || Item == Homestead::Item::TinWateringCan;
 }
 
 template <typename FPredicate>
@@ -118,6 +119,7 @@ FName HotbarIcon(Homestead::Item Item)
     case Homestead::Item::Hatchet: return TEXT("hatchet");
     case Homestead::Item::DiggingStick: return TEXT("digging-stick");
     case Homestead::Item::WateringCan: return TEXT("watering-can");
+    case Homestead::Item::TinWateringCan: return TEXT("tin-watering-can");
     case Homestead::Item::Machete: return TEXT("machete");
     case Homestead::Item::Scythe: return TEXT("scythe");
     case Homestead::Item::Billhook: return TEXT("billhook");
@@ -929,7 +931,7 @@ void AHomesteadController::UseSelectedTool()
         return;
     }
 
-    if (Tool == Homestead::Item::WateringCan)
+    if (Tool == Homestead::Item::WateringCan || Tool == Homestead::Item::TinWateringCan)
     {
         if (Focus == EFocus::Water)
         {
@@ -2070,11 +2072,12 @@ void AHomesteadController::UpdateFocus()
         // With the watering can out and not full, the stream wins over a crop on the bank when she
         // is at least as close to the water's edge, and always once the can is empty.
         const bool bCan = HotbarSlots.IsValidIndex(SelectedHotbarSlot)
-            && HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::WateringCan)
-            && Sim.Count(Homestead::Item::WateringCan) > 0;
+            && (HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::WateringCan)
+                || HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::TinWateringCan))
+            && Sim.CarriesWaterVessel();
         const int32 Water = Sim.Count(Homestead::Item::Water);
         const double Edge = FMath::Max(0.0, WaterEdgeDistance(Position, false));
-        if (Focus == EFocus::None || (bCan && Water < 6 && (Water == 0 || Edge <= Best)))
+        if (Focus == EFocus::None || (bCan && Water < Sim.WaterCapacity() && (Water == 0 || Edge <= Best)))
         {
             Focus = EFocus::Water;
             FocusId = -1;
@@ -2232,10 +2235,13 @@ FString AHomesteadController::FocusActions() const
                 FString Actions;
                 if (Homestead::NeedsWater(Plot))
                 {
-                    // The pail in her pack waters on [E]/[A]; otherwise say where it is.
-                    const int32 Pail = ToolWhereabouts(Sim, Homestead::Item::WateringCan);
-                    Actions = Pail == 2 && Sim.Count(Homestead::Item::Water) <= 0 ? FString(UTF8_TO_TCHAR(Homestead::EmptyPailText))
-                        : Pail == 2 ? (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water")
+                    // The pail (or tin can) in her pack waters on [E]/[A]; otherwise say where the pail is.
+                    const bool bTinCan = Sim.Count(Homestead::Item::TinWateringCan) > 0;
+                    const int32 Pail = bTinCan ? 2 : ToolWhereabouts(Sim, Homestead::Item::WateringCan);
+                    const bool bVesselOut = ToolAvailable && (SelectedTool == Homestead::Item::WateringCan || SelectedTool == Homestead::Item::TinWateringCan);
+                    Actions = Pail == 2 && Sim.Count(Homestead::Item::Water) <= 0
+                            ? (bTinCan ? FString(TEXT("The watering can is empty. Fill it at the river.")) : FString(UTF8_TO_TCHAR(Homestead::EmptyPailText)))
+                        : Pail == 2 ? (bVesselOut ? Use : A) + TEXT(" Water")
                         : ToolPrompt(Sim, Homestead::Item::WateringCan, TEXT("pail"), TEXT(" to water"));
                 }
                 if (Plot.weeds > 0.1)
@@ -2265,8 +2271,12 @@ FString AHomesteadController::FocusActions() const
         return Line;
     }
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
-    case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
-        ? Use + TEXT(" Fill Pail") : A + TEXT(" Fill carried Pail");
+    case EFocus::Water:
+        if (Sim.Count(Homestead::Item::TinWateringCan) > 0)
+            return (ToolAvailable && (SelectedTool == Homestead::Item::TinWateringCan || SelectedTool == Homestead::Item::WateringCan)
+                ? Use : A) + TEXT(" Fill watering can");
+        return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
+            ? Use + TEXT(" Fill Pail") : A + TEXT(" Fill carried Pail");
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();

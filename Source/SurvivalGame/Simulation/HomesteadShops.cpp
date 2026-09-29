@@ -1,4 +1,5 @@
 #include "HomesteadShops.h"
+#include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadSimulation.h"
 
@@ -46,22 +47,99 @@ std::string FormatMoneyDelta(Cents cents)
     return cents < 0 ? FormatMoney(cents) : "+" + FormatMoney(cents);
 }
 
+namespace ShopCalendar
+{
+int DayIndex(double hour)
+{
+    if (!std::isfinite(hour) || hour < DayRolloverHour) return 0;
+    return static_cast<int>(std::floor((hour - DayRolloverHour) / 24.0));
+}
+int Weekday(double hour) { return DayIndex(hour) % DaysPerWeek; }
+int Season(double hour) { return DayIndex(hour) / DaysPerSeason % 4; }
+bool IsSunday(double hour) { return Weekday(hour) == Sunday; }
+
+unsigned CropSeasons(CropKind kind)
+{
+    constexpr unsigned Spring = 1u, Summer = 2u, Autumn = 4u, Winter = 8u;
+    switch (kind)
+    {
+    case CropKind::Roots:
+    case CropKind::Berries: return Spring | Summer | Autumn;
+    case CropKind::Potatoes:
+    case CropKind::BroadBeans: return Spring;
+    case CropKind::Carrots:
+    case CropKind::Strawberries: return Spring | Summer;
+    case CropKind::Turnips:
+    case CropKind::Cabbage: return Autumn | Winter;
+    default: return 0u;
+    }
+}
+}
+
 const std::vector<Item>& ShopGoods(ShopKind kind)
 {
-    static const std::vector<Item> generalStore = {Item::Pasty, Item::Bread, Item::Cheese, Item::Twine, Item::OilFlask,
-        Item::TurnipSeed, Item::CarrotSeed, Item::SeedPotato, Item::CabbageSeed, Item::BroadBeanSeed, Item::StrawberryRunner};
+    static const std::vector<Item> generalStore = {Item::Pasty, Item::Bread, Item::Cheese, Item::Twine, Item::OilFlask};
+    // Tregear's: every crop seed sold in town (never the wild roots' seed or a berry), then the can.
+    static const std::vector<Item> seedsman = []
+    {
+        std::vector<Item> goods;
+        for (int kind = 0; kind < static_cast<int>(CropKind::Count); ++kind)
+        {
+            const Item seed = GetCropInfo(static_cast<CropKind>(kind)).seed;
+            if (seed != Item::Seeds && seed != Item::Berries && seed != Item::Count) goods.push_back(seed);
+        }
+        goods.push_back(Item::TinWateringCan);
+        return goods;
+    }();
     static const std::vector<Item> none;
-    return kind == ShopKind::GeneralStore ? generalStore : none;
+    return kind == ShopKind::GeneralStore ? generalStore : kind == ShopKind::Seedsman ? seedsman : none;
+}
+
+std::vector<Item> ShopGoodsOn(ShopKind kind, double hour)
+{
+    std::vector<Item> goods;
+    const unsigned season = 1u << ShopCalendar::Season(hour);
+    for (const Item item : ShopGoods(kind))
+    {
+        // Seed is only on the shelf in a season it can be sown.
+        const CropInfo* crop = CropForSeed(item);
+        if (crop && (ShopCalendar::CropSeasons(crop->kind) & season) == 0) continue;
+        goods.push_back(item);
+    }
+    return goods;
 }
 
 const char* ShopDisplayName(ShopKind kind)
 {
-    return kind == ShopKind::GeneralStore ? "General store" : "Shop";
+    switch (kind)
+    {
+    case ShopKind::GeneralStore: return "General store";
+    case ShopKind::Seedsman: return "Tregear's, Seedsman & Corn Merchant";
+    default: return "Shop";
+    }
+}
+
+const char* ShopkeeperName(ShopKind kind)
+{
+    switch (kind)
+    {
+    case ShopKind::GeneralStore: return "Mrs. Pascoe";
+    case ShopKind::Seedsman: return "Mr. Tregear";
+    default: return "the shopkeeper";
+    }
+}
+
+void ShopHours(Shop& shop)
+{
+    shop.openHour = 8.0;
+    shop.closeHour = shop.kind == ShopKind::Seedsman ? 17.0 : 18.0;
+    shop.closedSundays = true;
 }
 
 bool IsShopOpen(const Shop& shop, double hour)
 {
     if (!std::isfinite(hour)) return false;
+    if (shop.closedSundays && ShopCalendar::IsSunday(hour)) return false;
     const double time = std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0);
     return time >= shop.openHour && time < shop.closeHour;
 }
@@ -76,9 +154,16 @@ std::string FormatHour(double hour)
     return text + (whole < 12 ? " AM" : " PM");
 }
 
-std::string ClosedMessage(const Shop& shop)
+std::string ClosedMessage(const Shop& shop, double hour)
 {
+    if (shop.closedSundays && ShopCalendar::IsSunday(hour)) return "Closed on Sundays";
     return "Closed - opens at " + FormatHour(shop.openHour);
+}
+
+std::string ClosedSign(const Shop& shop, double hour)
+{
+    if (shop.closedSundays && ShopCalendar::IsSunday(hour)) return "CLOSED\non Sundays";
+    return "CLOSED\nopens at " + FormatHour(shop.openHour);
 }
 
 Cents SellPrice(Item item) { return BasePrice(item); }
@@ -109,7 +194,7 @@ Result Simulation::CheckShopAccess(int shopId, Point player) const
     if (state_.failed) return ShopBad("You need to recover first.", revision_, ResultCode::Unavailable);
     const Shop* shop = FindShop(shopId);
     if (!shop) return ShopBad("There is no such shop.", revision_);
-    if (!IsShopOpen(*shop, state_.hour)) return ShopBad(ClosedMessage(*shop), revision_, ResultCode::Unavailable);
+    if (!IsShopOpen(*shop, state_.hour)) return ShopBad(ClosedMessage(*shop, state_.hour), revision_, ResultCode::Unavailable);
     if (!NearCounter(*shop, player)) return ShopBad("Step up to the counter to trade.", revision_);
     return ShopGood("", revision_);
 }
@@ -146,14 +231,19 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     const Shop* shop = FindShop(shopId);
     if (!ValidShopItem(item) || quantity <= 0 || quantity > InventoryCapacity)
         return ShopBad("Choose something to buy and how many.", revision_);
-    const auto& goods = ShopGoods(shop->kind);
+    const auto goods = ShopGoodsOn(shop->kind, state_.hour);
     if (fromHeroineStock)
     {
         if (shop->heroineStock[static_cast<int>(item)] < quantity)
             return ShopBad("The shop only has " + Plural(shop->heroineStock[static_cast<int>(item)], item) + " left.", revision_);
     }
     else if (std::find(goods.begin(), goods.end(), item) == goods.end())
+    {
+        const auto& ever = ShopGoods(shop->kind);
+        if (std::find(ever.begin(), ever.end(), item) != ever.end())
+            return ShopBad(std::string(ItemName(item)) + " isn't sown this season.", revision_);
         return ShopBad(std::string(ShopDisplayName(shop->kind)) + " doesn't sell " + ItemName(item) + ".", revision_);
+    }
     const Cents cost = (fromHeroineStock ? BuyBackPrice(item) : BuyPrice(item)) * quantity;
     if (cost > state_.money)
         return ShopBad("That costs " + FormatMoney(cost) + "; you have " + FormatMoney(state_.money) + ".", revision_);
@@ -203,6 +293,7 @@ Result Simulation::PlaceShop(ShopKind kind, Point counter, double yaw)
     shop.id = state_.nextId++;
     shop.kind = kind;
     shop.name = ShopDisplayName(kind);
+    ShopHours(shop);
     shop.counterX = counter.x;
     shop.counterY = counter.y;
     shop.counterYaw = yaw;
@@ -210,29 +301,53 @@ Result Simulation::PlaceShop(ShopKind kind, Point counter, double yaw)
     return ShopGood("Shop opened.", ++revision_);
 }
 
+namespace
+{
+const char* CounterAnchor(ShopKind kind)
+{
+    return kind == ShopKind::Seedsman ? Anchor::SeedsmanCounter : Anchor::GeneralStoreCounter;
+}
+
+Shop EstateShop(State& candidate, const EstateLayout& layout, ShopKind kind)
+{
+    const Landmark* landmark = layout.FindLandmark(CounterAnchor(kind));
+    const Point counter = landmark ? landmark->position : Point{};
+    Shop shop;
+    shop.id = candidate.nextId++;
+    shop.kind = kind;
+    shop.name = ShopDisplayName(kind);
+    ShopHours(shop);
+    shop.counterX = counter.x;
+    shop.counterY = counter.y;
+    shop.counterYaw = landmark ? landmark->yaw : 0.0;
+    return shop;
+}
+}
+
 void Simulation::SeedEstateShops(State& candidate, const EstateLayout& layout)
 {
     candidate.money = StartingMoney;
-    const Landmark* landmark = layout.FindLandmark(Anchor::GeneralStoreCounter);
-    const Point counter = landmark ? landmark->position : Point{};
-    Shop store;
-    store.id = candidate.nextId++;
-    store.kind = ShopKind::GeneralStore;
-    store.name = ShopDisplayName(ShopKind::GeneralStore);
-    store.counterX = counter.x;
-    store.counterY = counter.y;
-    store.counterYaw = landmark ? landmark->yaw : 0.0;
-    candidate.shops.push_back(store);
+    candidate.shops.push_back(EstateShop(candidate, layout, ShopKind::GeneralStore));
+    candidate.shops.push_back(EstateShop(candidate, layout, ShopKind::Seedsman));
 }
 
 void Simulation::RefreshShopCounters(State& candidate, const EstateLayout& layout)
 {
     if (!candidate.fixedEstate) return;
+    // Estate games saved before Tregear's opened gain the shop in town (no save change: its record
+    // is written like any other from then on).
+    const bool estateShops = std::any_of(candidate.shops.begin(), candidate.shops.end(),
+        [](const Shop& shop) { return shop.kind == ShopKind::GeneralStore; });
+    const bool seedsman = std::any_of(candidate.shops.begin(), candidate.shops.end(),
+        [](const Shop& shop) { return shop.kind == ShopKind::Seedsman; });
+    if (estateShops && !seedsman && layout.FindLandmark(Anchor::SeedsmanCounter))
+        candidate.shops.push_back(EstateShop(candidate, layout, ShopKind::Seedsman));
     for (auto& shop : candidate.shops)
-        if (shop.kind == ShopKind::GeneralStore)
+        if (const Landmark* counter = layout.FindLandmark(CounterAnchor(shop.kind)))
         {
-            const Landmark* counter = layout.FindLandmark(Anchor::GeneralStoreCounter);
-            if (counter) { shop.counterX = counter->position.x; shop.counterY = counter->position.y; shop.counterYaw = counter->yaw; }
+            shop.counterX = counter->position.x;
+            shop.counterY = counter->position.y;
+            shop.counterYaw = counter->yaw;
         }
 }
 
@@ -287,6 +402,7 @@ bool Simulation::ReadEconomy(std::istream& input, State& candidate, std::set<int
             return false;
         shop.kind = static_cast<ShopKind>(kind);
         shop.name = ShopDisplayName(shop.kind);
+        ShopHours(shop);
         for (int s = 0; s < stocked; ++s)
         {
             std::string key;

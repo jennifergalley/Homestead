@@ -3,7 +3,9 @@
 Each building is an AHomesteadTownBuilding level actor in outliner folder `Town`, labelled
 `Town_Blockout_<name>`, snapped to the estate ground by the actor itself. Rerunning updates the
 existing actors by label, so it's safe to tweak a row and run it again. The general store stands on
-the north side at the GeneralStoreDoor anchor (-54000, 117000) and is spawned by the game, not here.
+the north side at the GeneralStoreDoor anchor (-54000, 117000), and Tregear's (the seedsman) on the east
+side at the SeedsmanDoor anchor (-52050, 116000); both are spawned by the game, not here. Rows listed in
+REMOVED are deleted from the level (the east house made way for Tregear's).
 Only the saved external-actor packages of these buildings are written.
 """
 import unreal
@@ -33,9 +35,11 @@ BUILDINGS = [
     ("Butcher", -55350, 113500, -90, 900, 750, 2, 290, 45, GABLE, RUBBLE, c(0.92, 0.92, 0.9), -1, -0.55, True, c(0.05, 0.12, 0.06), True),
     ("SouthHouse", -54430, 113500, -90, 900, 700, 2, 300, 38, RIDGE, RENDER, c(0.92, 0.95, 1.0), 2, 0.0, False, c(0.05, 0.05, 0.05), False),
     ("Chemist", -53520, 113500, -90, 880, 750, 2, 310, 35, RIDGE, ASHLAR, c(1.05, 1.0, 0.92), 1, 0.55, True, c(0.10, 0.06, 0.02), True),
-    ("EastHouse", -52000, 116000, 0, 1100, 800, 2, 295, 40, RIDGE, RENDER, c(1.0, 0.95, 0.80), 2, 0.3, False, c(0.08, 0.04, 0.02), True),
     ("EastCottage", -52000, 114900, 0, 800, 650, 1, 285, 48, GABLE, RUBBLE, c(1, 1, 1), 1, -0.5, False, c(0.1, 0.07, 0.03), True),
 ]
+
+# Buildings whose plots were taken over by a game-spawned shop.
+REMOVED = ["EastHouse"]
 
 
 def existing():
@@ -52,6 +56,13 @@ def main():
         raise RuntimeError("Open the Estate level (not PIE) before placing the town massing.")
     have = existing()
     packages = []
+    for name in REMOVED:
+        gone = have.pop(f"Town_Blockout_{name}", None)
+        if gone is not None:
+            # Saving its external-actor package deletes the file.
+            packages.append(gone.get_outermost())
+            EAS.destroy_actor(gone)
+            unreal.log(f"TOWN_MASSING_REMOVED {name}")
     for (name, x, y, yaw, width, depth, storeys, storey_h, pitch, roof, wall, tint, chimneys, door,
          shop, sign, side) in BUILDINGS:
         label = f"Town_Blockout_{name}"

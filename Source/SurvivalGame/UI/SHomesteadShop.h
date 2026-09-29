@@ -90,6 +90,7 @@ private:
     TSharedRef<SWidget> Label(const FString& Value, int32 Size, const FLinearColor& Color) const;
     FString Wallet() const;
     FString EstateName() const;
+    FString KeeperFullName() const;
     void ScrollToSelection();
 };
 }

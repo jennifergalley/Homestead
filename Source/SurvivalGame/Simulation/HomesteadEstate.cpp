@@ -51,6 +51,8 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::TownSquare, {-54000.0, 115000.0}, 9109.0, 0.0},
             {Anchor::GeneralStoreDoor, {-54000.0, 117000.0}, 9153.0, 90.0},
             {Anchor::GeneralStoreCounter, {-54000.0, 117600.0}, 9166.0, -90.0},
+        {Anchor::SeedsmanDoor, {-52050.0, 116000.0}, 9150.0, 0.0},
+        {Anchor::SeedsmanCounter, {-51450.0, 116000.0}, 9160.0, 180.0},
             // The derelict farm's broken gate, on its south fence facing the ruin's rear-wall gap.
             {Anchor::DerelictFarmGate, {-22200.0, -65700.0}, 8720.6, 180.0},
         };

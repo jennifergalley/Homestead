@@ -442,6 +442,9 @@ struct PreparedWorldRegion
     std::array<const Generation::ChunkBaseline*, 9> chunks{};
 };
 
+// Water portions a full pail holds (FillWater); Tregear's tin watering can holds twice this.
+constexpr int PailWaterPortions = 6;
+
 class Simulation
 {
 public:
@@ -535,6 +538,9 @@ public:
     Result Weed(int plotId, Point player);
     Result HarvestCrop(int plotId, Point player);
     Result FillWater(Point player);
+    // The pail or Tregear's tin watering can: either carries water; the can holds twice as much.
+    bool CarriesWaterVessel() const { return Count(Item::WateringCan) > 0 || Count(Item::TinWateringCan) > 0; }
+    int WaterCapacity() const { return Count(Item::TinWateringCan) > 0 ? 2 * PailWaterPortions : PailWaterPortions; }
     Result AddFuel(int structureId, Point player);
     Result Transfer(int chestId, Item item, int amount, Point player);
     Result EquipWearable(int id, std::uint64_t expectedRevision);

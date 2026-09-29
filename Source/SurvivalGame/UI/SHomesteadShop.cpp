@@ -91,6 +91,12 @@ FString SHomesteadShop::Wallet() const
     return Controller.IsValid() ? Money(Controller->Simulation().GetState().money) : FString();
 }
 
+FString SHomesteadShop::KeeperFullName() const
+{
+    const Homestead::Shop* Shop = Controller.IsValid() ? Controller->Simulation().FindShop(ShopId) : nullptr;
+    return Shop && Shop->kind == Homestead::ShopKind::Seedsman ? FString(TEXT("Mr. Jago Tregear")) : FString(AHomesteadShopkeeper::FullName());
+}
+
 FString SHomesteadShop::EstateName() const
 {
     return Controller.IsValid() ? Controller->EstateName() : FString(TEXT("the estate"));
@@ -120,7 +126,7 @@ void SHomesteadShop::BuildRows()
     FRow Goods;
     Goods.Header = TEXT("Shop goods");
     Rows.Add(Goods);
-    for (const Homestead::Item Item : Homestead::ShopGoods(Shop->kind))
+    for (const Homestead::Item Item : Homestead::ShopGoodsOn(Shop->kind, Sim.GetState().hour))
     {
         FRow Row;
         Row.Item = Item;
@@ -237,7 +243,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildGreeting()
                     ]
                     + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
                     [
-                        Label(AHomesteadShopkeeper::FullName(), 19, ShopGold)
+                        Label(KeeperFullName(), 19, ShopGold)
                     ]
                 ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 10, 0, 14)
@@ -362,7 +368,12 @@ TSharedRef<SWidget> SHomesteadShop::BuildFooter()
     FString Hint = bPad ? TEXT("[A] Choose   [LB / RB] Sell / Buy   [B] Leave")
         : TEXT("Click or [Enter] to choose   [Tab] Sell / Buy   [Esc] Leave");
     if (Tab == 0 && Rows.IsEmpty())
-        Hint = TEXT("Nothing you're carrying sells here. The store buys hay, scrap, firewood, stone, kindling and spring flowers. ") + Hint;
+    {
+        const Homestead::Shop* Shop = Controller.IsValid() ? Controller->Simulation().FindShop(ShopId) : nullptr;
+        Hint = (Shop && Shop->kind == Homestead::ShopKind::Seedsman
+            ? TEXT("Nothing you're carrying sells here. Tregear's buys grain: wheat and barley. ")
+            : TEXT("Nothing you're carrying sells here. The store buys hay, scrap, firewood, stone, kindling, flowers and garden produce. ")) + Hint;
+    }
     Footer->AddSlot().AutoHeight()[Label(Hint, 14, ShopMuted)];
     return Footer;
 }
@@ -370,9 +381,12 @@ TSharedRef<SWidget> SHomesteadShop::BuildFooter()
 TSharedRef<SWidget> SHomesteadShop::BuildTrade()
 {
     const Homestead::Shop* Shop = Controller.IsValid() ? Controller->Simulation().FindShop(ShopId) : nullptr;
-    const FString Hours = Shop ? FString::Printf(TEXT("Open %s - %s"),
-        UTF8_TO_TCHAR(Homestead::FormatHour(Shop->openHour).c_str()), UTF8_TO_TCHAR(Homestead::FormatHour(Shop->closeHour).c_str()))
+    const FString Hours = Shop ? FString::Printf(TEXT("Open %s - %s%s"),
+        UTF8_TO_TCHAR(Homestead::FormatHour(Shop->openHour).c_str()), UTF8_TO_TCHAR(Homestead::FormatHour(Shop->closeHour).c_str()),
+        Shop->closedSundays ? TEXT(", closed Sundays") : TEXT(""))
         : FString();
+    const FString Title = Shop && Shop->kind == Homestead::ShopKind::Seedsman ? TEXT("Tregear's, Seedsman & Corn Merchant")
+        : TEXT("Pascoe's General Store");
     const auto TabButton = [this](int32 Index, const FString& Text)
     {
         return SNew(SBox).MinDesiredWidth(150)
@@ -409,7 +423,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
                     + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
                     [
                         SNew(SVerticalBox)
-                        + SVerticalBox::Slot().AutoHeight()[Label(TEXT("Pascoe's General Store"), 22, ShopInk)]
+                        + SVerticalBox::Slot().AutoHeight()[Label(Title, 22, ShopInk)]
                         + SVerticalBox::Slot().AutoHeight()[Label(Hours, 13, ShopMuted)]
                     ]
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 8, 0)

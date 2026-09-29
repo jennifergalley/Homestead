@@ -586,7 +586,17 @@ void AtomicTransactions()
     CHECK(sim.UsedCapacity() == 114);
     CHECK(sim.Count(Item::Water) == 6);
     UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
+    // Tregear's tin watering can holds twice the pail: twelve portions, and waters like the pail.
+    Stock(sim, {{Item::TinWateringCan, 1}, {Item::Water, 6}});
+    CHECK(sim.CarriesWaterVessel() && sim.WaterCapacity() == 2 * PailWaterPortions);
+    OK(sim.FillWater(WaterSource));
+    CHECK(sim.Count(Item::Water) == 12);
+    UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
+    Stock(sim, {{Item::TinWateringCan, 1}, {Item::WateringCan, 1}});
+    OK(sim.FillWater(WaterSource));
+    CHECK(sim.Count(Item::Water) == 12);
     Stock(sim, {{Item::Knife, 1}, {Item::Roots, 2}});
+    CHECK(!sim.CarriesWaterVessel() && sim.WaterCapacity() == PailWaterPortions);
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::RoastedRoots, Home); });
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::HerbedRoots, Home); });
     UnchangedFailure(sim, [&] { return sim.Eat(Item::Berries); });
@@ -1200,9 +1210,9 @@ void CropTableAndStatus()
     CHECK(CropRegrowDays(CropKind::Berries) == 1 && CropRegrowDays(CropKind::Roots) == 0);
     CHECK(ReadyInText(CropKind::Roots) == "Ready in about 2 days if watered.");
     CHECK(std::string(ItemDescription(Item::Seeds)).find("Matures in about 2 days") != std::string::npos);
-    // Period crops: each seed's description states its days (and regrow days), the store sells it,
-    // and its produce sells back at the store.
-    const auto& storeGoods = ShopGoods(ShopKind::GeneralStore);
+    // Period crops: each seed's description states its days (and regrow days), Tregear's sells it,
+    // and its produce sells back at the general store.
+    const auto& storeGoods = ShopGoods(ShopKind::Seedsman);
     for (int kind = static_cast<int>(CropKind::Turnips); kind < static_cast<int>(CropKind::Count); ++kind)
     {
         const auto& info = GetCropInfo(static_cast<CropKind>(kind));

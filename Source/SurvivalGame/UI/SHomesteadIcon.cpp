@@ -288,7 +288,8 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("wild-garlic")), EKind::WildGarlic},
         {FName(TEXT("oil-lamp")), EKind::OilLamp},
         {FName(TEXT("oil-flask")), EKind::OilFlask},
-        {FName(TEXT("pouch-arrows")), EKind::PouchArrows}
+        {FName(TEXT("pouch-arrows")), EKind::PouchArrows},
+        {FName(TEXT("tin-watering-can")), EKind::TinWateringCan}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -947,6 +948,19 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{20, 33}, {36, 33}}, Wood, 1.5f);
         P.Line({{22, 37}, {34, 37}}, Wood, 1);
         P.Line({{17, 24}, {17, 48}}, StoneGray, 1.5f);
+        break;
+    case EKind::TinWateringCan:
+        // A tin can: a rounded body, a long spout to a brass rose at the upper left, and the arched
+        // carrying handle over the top.
+        P.Line({{15, 30}, {6, 16}}, Iron, 4);
+        P.Shape({{2, 13}, {9, 9}, {12, 15}, {5, 19}}, Gold);
+        P.Shape({{14, 22}, {40, 22}, {43, 26}, {43, 46}, {40, 50}, {14, 50}, {11, 46}, {11, 26}}, Iron);
+        P.Line({{12, 25}, {42, 25}}, StoneGray, 2);
+        P.Line({{16, 29}, {16, 46}}, Cream, 1.5f);
+        P.Line({{16, 22}, {20, 11}, {36, 11}, {40, 22}}, Iron, 3);
+        P.Line({{43, 27}, {50, 30}, {50, 42}, {43, 45}}, Iron, 3);
+        P.Line({{4, 23}, {3, 26}}, WaterBlue, 2);
+        P.Line({{7, 27}, {6, 30}}, WaterBlue, 2);
         break;
     case EKind::PouchArrows:
         // Up and down chevrons: this hotbar slot switches between the seed in her pack.

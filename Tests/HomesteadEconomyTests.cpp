@@ -1,8 +1,10 @@
 // Portable tests for the item catalogue, money and shops.
+#include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadItems.h"
 #include "HomesteadSimulation.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -147,10 +149,16 @@ void NewEstateStartsWithMoneyAndAStore()
     Simulation sim;
     OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
     CHECK(sim.GetState().money == StartingMoney && StartingMoney == 1000);
-    CHECK(sim.GetState().shops.size() == 1);
+    CHECK(sim.GetState().shops.size() == 2);
     const Shop& shop = sim.GetState().shops[0];
-    CHECK(shop.openHour == 8.0 && shop.closeHour == 18.0);
+    CHECK(shop.kind == ShopKind::GeneralStore && shop.openHour == 8.0 && shop.closeHour == 18.0 && shop.closedSundays);
     for (int quantity : shop.heroineStock) CHECK(quantity == 0);
+    // Tregear's, the seedsman, stands at its own counter anchor and shuts an hour earlier.
+    const Shop& seedsman = sim.GetState().shops[1];
+    const Landmark* counter = ProvisionalEstateLayout().FindLandmark(Anchor::SeedsmanCounter);
+    CHECK(seedsman.kind == ShopKind::Seedsman && counter && ProvisionalEstateLayout().FindLandmark(Anchor::SeedsmanDoor));
+    CHECK(seedsman.counterX == counter->position.x && seedsman.counterY == counter->position.y && seedsman.counterYaw == counter->yaw);
+    CHECK(seedsman.openHour == 8.0 && seedsman.closeHour == 17.0 && seedsman.closedSundays && seedsman.id != shop.id);
     Simulation woodland;
     CHECK(woodland.GetState().money == 0 && woodland.GetState().shops.empty());
 }
@@ -294,7 +302,7 @@ void EconomySurvivesSaveAndReload()
     loaded.SetPlacements(ProvisionalEstatePlacements());
     OK(loaded.Deserialize(saved));
     CHECK(loaded.GetState().money == sim.GetState().money);
-    CHECK(loaded.GetState().shops.size() == 1);
+    CHECK(loaded.GetState().shops.size() == 2 && loaded.FindShop(ShopKind::Seedsman));
     const Shop& shop = loaded.GetState().shops[0];
     CHECK(shop.id == store.shop && shop.greetings == 1);
     CHECK(shop.heroineStock == sim.FindShop(store.shop)->heroineStock);
@@ -329,6 +337,134 @@ void PlaytestShopPlacement()
     CHECK(loaded.FindShop(ShopKind::GeneralStore)->counterYaw == 45.0);
 }
 
+// A shop's open hour on the day day (0 = Spring 1, a Monday) at hourOfDay.
+double On(int day, double hourOfDay) { return day * 24.0 + hourOfDay; }
+
+void SeedsmanSellsTheSeasonsSeed()
+{
+    const auto has = [](const std::vector<Item>& goods, Item item) { return std::find(goods.begin(), goods.end(), item) != goods.end(); };
+    // Pascoe's no longer keeps seed; everything a gardener buys is at Tregear's.
+    for (Item item : ShopGoods(ShopKind::GeneralStore)) CHECK(CropForSeed(item) == nullptr && item != Item::TinWateringCan);
+    const auto& ever = ShopGoods(ShopKind::Seedsman);
+    for (Item seed : {Item::TurnipSeed, Item::CarrotSeed, Item::SeedPotato, Item::CabbageSeed, Item::BroadBeanSeed, Item::StrawberryRunner,
+             Item::TinWateringCan})
+        CHECK(has(ever, seed));
+    CHECK(!has(ever, Item::Seeds) && !has(ever, Item::Berries));
+    // Spring: potatoes, carrots, broad beans and strawberries; no turnips or cabbage until Autumn.
+    const auto spring = ShopGoodsOn(ShopKind::Seedsman, On(3, 9.0));
+    CHECK(has(spring, Item::SeedPotato) && has(spring, Item::CarrotSeed) && has(spring, Item::BroadBeanSeed));
+    CHECK(has(spring, Item::StrawberryRunner) && has(spring, Item::TinWateringCan));
+    CHECK(!has(spring, Item::TurnipSeed) && !has(spring, Item::CabbageSeed));
+    // The shelf turns over at the 6 AM rollover into Summer (day 28) and Autumn (day 56).
+    CHECK(has(ShopGoodsOn(ShopKind::Seedsman, On(27, 23.0)), Item::SeedPotato));
+    const auto summer = ShopGoodsOn(ShopKind::Seedsman, On(28, 9.0));
+    CHECK(!has(summer, Item::SeedPotato) && has(summer, Item::CarrotSeed) && has(summer, Item::StrawberryRunner));
+    const auto autumn = ShopGoodsOn(ShopKind::Seedsman, On(56, 9.0));
+    CHECK(has(autumn, Item::TurnipSeed) && has(autumn, Item::CabbageSeed) && !has(autumn, Item::CarrotSeed));
+    const auto winter = ShopGoodsOn(ShopKind::Seedsman, On(84, 9.0));
+    CHECK(has(winter, Item::TurnipSeed) && has(winter, Item::TinWateringCan) && !has(winter, Item::StrawberryRunner));
+    CHECK(has(ShopGoodsOn(ShopKind::Seedsman, On(112, 9.0)), Item::SeedPotato)); // Spring again, the next year.
+    // Grain is sold to Tregear's; everything else she grows or finds goes to Pascoe's.
+    CHECK(!ShopBuys(ShopKind::Seedsman, Item::Carrot) && !ShopBuys(ShopKind::Seedsman, Item::Stone));
+    CHECK(ShopBuys(ShopKind::GeneralStore, Item::Carrot));
+    CHECK(std::string(ItemSource(Item::CarrotSeed)) == "Tregear's, the seedsman");
+}
+
+void BuySeedAndACanAtTregears()
+{
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    sim.SkipToHourOfDay(9.0);
+    // Trades replace the state, so keep ids, not pointers into it.
+    CHECK(sim.FindShop(ShopKind::Seedsman) && sim.FindShop(ShopKind::GeneralStore));
+    const int seedsmanId = sim.FindShop(ShopKind::Seedsman)->id, storeId = sim.FindShop(ShopKind::GeneralStore)->id;
+    const Point counter{sim.FindShop(seedsmanId)->counterX, sim.FindShop(seedsmanId)->counterY};
+    const Point customer{counter.x - 150.0, counter.y};
+    OK(sim.GrantMoney(1000));
+    OK(sim.Buy(seedsmanId, Item::CarrotSeed, 3, false, customer));
+    CHECK(sim.Count(Item::CarrotSeed) == 3);
+    const std::string saved = sim.Serialize();
+    // Out of season, not stocked, or at the wrong counter: refused, and nothing changes.
+    const auto turnips = sim.Buy(seedsmanId, Item::TurnipSeed, 1, false, customer);
+    CHECK(!turnips.ok && turnips.message == "Turnip seed isn't sown this season.");
+    CHECK(!sim.Buy(seedsmanId, Item::Pasty, 1, false, customer).ok);
+    CHECK(!sim.Buy(storeId, Item::CarrotSeed, 1, false, customer).ok);
+    CHECK(sim.Serialize() == saved);
+    const Cents before = sim.GetState().money;
+    OK(sim.Buy(seedsmanId, Item::TinWateringCan, 1, false, customer));
+    CHECK(sim.Count(Item::TinWateringCan) == 1 && sim.GetState().money == before - BuyPrice(Item::TinWateringCan));
+    CHECK(BuyPrice(Item::TinWateringCan) == 313 && IsTool(Item::TinWateringCan));
+    // Nothing of hers sells here but grain.
+    CHECK(!sim.Sell(seedsmanId, Item::CarrotSeed, 1, customer).ok);
+    // Five o'clock closes Tregear's; Pascoe's stays open till six.
+    sim.SkipToHourOfDay(17.5);
+    const auto shut = sim.Buy(seedsmanId, Item::CarrotSeed, 1, false, customer);
+    CHECK(!shut.ok && shut.code == ResultCode::Unavailable && shut.message == "Closed - opens at 8 AM");
+    CHECK(IsShopOpen(*sim.FindShop(ShopKind::GeneralStore), sim.GetState().hour));
+}
+
+void BothShopsCloseOnSundays()
+{
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    for (const Shop& shop : sim.GetState().shops)
+    {
+        CHECK(ShopCalendar::Weekday(On(0, 9.0)) == 0 && ShopCalendar::IsSunday(On(6, 9.0)));
+        CHECK(IsShopOpen(shop, On(5, 9.0)) && !IsShopOpen(shop, On(6, 9.0)) && !IsShopOpen(shop, On(6, 12.0)));
+        CHECK(IsShopOpen(shop, On(7, 9.0)) && !IsShopOpen(shop, On(13, 10.0)) && IsShopOpen(shop, On(14, 10.0)));
+        CHECK(ClosedMessage(shop, On(6, 9.0)) == "Closed on Sundays" && ClosedMessage(shop, On(7, 7.0)) == "Closed - opens at 8 AM");
+        CHECK(ClosedSign(shop, On(6, 9.0)) == "CLOSED\non Sundays");
+    }
+    // Saturday night runs into Sunday at the 6 AM rollover, not at midnight.
+    CHECK(!ShopCalendar::IsSunday(On(5, 29.5)) && ShopCalendar::IsSunday(On(5, 30.5)));
+    // A Sunday trade is refused with the notice.
+    sim.SkipToHourOfDay(9.0);
+    Edit(sim, 100.0, 100.0);
+    for (int day = 0; day < 6; ++day)
+    {
+        Edit(sim, 100.0, 100.0);
+        sim.AdvanceGameHours(24.0, {-54000.0, 116000.0});
+    }
+    CHECK(ShopCalendar::IsSunday(sim.GetState().hour));
+    const Shop* store = sim.FindShop(ShopKind::GeneralStore);
+    const Point customer{store->counterX, store->counterY - 150.0};
+    const auto sunday = sim.Buy(store->id, Item::Bread, 1, false, customer);
+    CHECK(!sunday.ok && sunday.message == "Closed on Sundays" && sunday.code == ResultCode::Unavailable);
+}
+
+void OlderEstateSavesGainTregears()
+{
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const int seedsmanId = sim.FindShop(ShopKind::Seedsman)->id;
+    const std::string saved = sim.Serialize();
+    // Rewrite the economy section as a round-1 save wrote it: the general store alone.
+    const auto newline = saved.find('\n');
+    std::string payload = saved.substr(newline + 1);
+    const auto section = payload.find("economy ");
+    CHECK(section != std::string::npos);
+    const auto header = payload.find('\n', section);
+    std::istringstream line(payload.substr(section, header - section));
+    std::string tag;
+    long long money = 0;
+    int count = 0;
+    line >> tag >> money >> count;
+    CHECK(count == 2);
+    const auto storeEnd = payload.find('\n', header + 1);
+    const auto seedsmanEnd = payload.find('\n', storeEnd + 1);
+    CHECK(payload.substr(storeEnd + 1, 24).rfind(std::to_string(seedsmanId) + " 1 ", 0) == 0);
+    payload = payload.substr(0, section) + "economy " + std::to_string(money) + " 1" + payload.substr(header, storeEnd - header + 1)
+        + payload.substr(seedsmanEnd + 1);
+    Simulation loaded;
+    loaded.SetLayout(ProvisionalEstateLayout());
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(Reseal(saved, payload)));
+    CHECK(loaded.GetState().shops.size() == 2);
+    const Shop* seedsman = loaded.FindShop(ShopKind::Seedsman);
+    CHECK(seedsman && seedsman->counterX == ProvisionalEstateLayout().PointOr(Anchor::SeedsmanCounter, {}).x);
+    CHECK(seedsman->closeHour == 17.0 && seedsman->id != loaded.FindShop(ShopKind::GeneralStore)->id);
+}
+
 const char* filter = nullptr;void Run(const char* name, void (*test)())
 {
     if (filter && !std::strstr(name, filter)) return;
@@ -352,6 +488,10 @@ int main(int argc, char** argv)
     Run("her goods sell down each morning", StockSellsDownEachMorning);
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
     Run("playtest shop placement", PlaytestShopPlacement);
+    Run("Tregear's sells the season's seed", SeedsmanSellsTheSeasonsSeed);
+    Run("buy seed and a tin can at Tregear's", BuySeedAndACanAtTregears);
+    Run("both shops close on Sundays", BothShopsCloseOnSundays);
+    Run("older estate saves gain Tregear's", OlderEstateSavesGainTregears);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

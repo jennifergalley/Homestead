@@ -2526,11 +2526,12 @@ Result Simulation::Water(int plotId, Point player)
     if (state_.failed) return Failed();
     auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to water it.");
-    if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to water crops.");
+    if (!CarriesWaterVessel()) return Bad("Carry your pail or watering can to water crops.");
     if (plot->moisture >= 1.0) return Bad("This soil is already fully watered.");
-    if (Count(Item::Water) <= 0) return Bad(EmptyPailText);
+    if (Count(Item::Water) <= 0)
+        return Bad(Count(Item::TinWateringCan) > 0 ? "The watering can is empty. Fill it at the river." : EmptyPailText);
     if (auto ready = CheckExertion(Exertion::WaterEnergy); !ready) return ready;
-    if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad(EmptyPailText);
+    if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad("Out of water. Fill up at the river.");
     plot->moisture = 1.0;
     return Exert(Exertion::WaterEnergy, Good("Soil watered."));
 }
@@ -2579,13 +2580,16 @@ Result Simulation::HarvestCrop(int plotId, Point player)
 Result Simulation::FillWater(Point player)
 {
     if (state_.failed) return Failed();
-    if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to collect water.");
-    if (!NearWater(player)) return Bad("Walk to the stream to refill your pail.");
-    if (Count(Item::Water) >= 6) return Bad("Your pail is already full.");
-    const Inventory change = Items({{Item::Water, 6 - Count(Item::Water)}});
+    if (!CarriesWaterVessel()) return Bad("Carry your pail or watering can to collect water.");
+    // The tin can, when she has one, is what she fills: it holds twice the pail.
+    const bool can = Count(Item::TinWateringCan) > 0;
+    const int capacity = WaterCapacity();
+    if (!NearWater(player)) return Bad(can ? "Walk to the stream to refill your watering can." : "Walk to the stream to refill your pail.");
+    if (Count(Item::Water) >= capacity) return Bad(can ? "Your watering can is already full." : "Your pail is already full.");
+    const Inventory change = Items({{Item::Water, capacity - Count(Item::Water)}});
     if (auto ready = CheckExertion(Exertion::FillWaterEnergy); !ready) return ready;
-    if (!TryAdjust(change)) return Bad("Make enough room in your pack for six water portions.");
-    return Exert(Exertion::FillWaterEnergy, Good("Pail filled with six water portions."));
+    if (!TryAdjust(change)) return Bad("Make enough room in your pack for the water.");
+    return Exert(Exertion::FillWaterEnergy, Good(can ? "Watering can filled with twelve water portions." : "Pail filled with six water portions."));
 }
 Result Simulation::AddFuel(int structureId, Point player)
 {

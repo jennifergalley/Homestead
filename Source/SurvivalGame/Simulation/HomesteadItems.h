@@ -25,15 +25,22 @@ enum class Item : int
     // improve-crops-and-harvest: period crop seed (sold at the general store) and the produce.
     TurnipSeed, CarrotSeed, SeedPotato, CabbageSeed, BroadBeanSeed, StrawberryRunner,
     Turnip, Carrot, Potato, Cabbage, BroadBeans, Strawberries,
+    // rework-farming-calendar-and-period-crafting (Tregear's, the seedsman): twice the pail's water.
+    TinWateringCan,
     Count
 };
 constexpr int ItemCount = static_cast<int>(Item::Count);
 
 enum class ItemCategory : int { Tool, Material, Forage, Food, Salvage, Supply, Count };
 
-enum class ShopKind : int { GeneralStore, Count };
+// Append only: the kind is saved as its number.
+enum class ShopKind : int { GeneralStore, Seedsman, Count };
 using ShopMask = unsigned;
 constexpr ShopMask ShopBit(ShopKind kind) { return 1u << static_cast<int>(kind); }
+// Catalogue `buyers` values: Pascoe's general store, and Tregear's (the seedsman and corn merchant,
+// who buys grain).
+constexpr ShopMask StoreBuys = ShopBit(ShopKind::GeneralStore);
+constexpr ShopMask SeedsmanBuys = ShopBit(ShopKind::Seedsman);
 
 struct ItemInfo
 {

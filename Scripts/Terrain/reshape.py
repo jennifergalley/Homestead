@@ -230,6 +230,9 @@ def main():
             "TownSquare": [*TOWN_SQUARE, zat(TOWN_SQUARE), 0.0],
             "GeneralStoreDoor": [TOWN_SQUARE[0], TOWN_SQUARE[1] + 20.0, zat((TOWN_SQUARE[0], TOWN_SQUARE[1] + 20.0)), 90.0],
             "GeneralStoreCounter": [TOWN_SQUARE[0], TOWN_SQUARE[1] + 26.0, zat((TOWN_SQUARE[0], TOWN_SQUARE[1] + 26.0)), -90.0],
+            # Tregear's, the seedsman, on the square's east side (its front at x = -520).
+            "SeedsmanDoor": [TOWN_SQUARE[0] + 19.5, TOWN_SQUARE[1] + 10.0, zat((TOWN_SQUARE[0] + 19.5, TOWN_SQUARE[1] + 10.0)), 0.0],
+            "SeedsmanCounter": [TOWN_SQUARE[0] + 25.5, TOWN_SQUARE[1] + 10.0, zat((TOWN_SQUARE[0] + 25.5, TOWN_SQUARE[1] + 10.0)), 180.0],
         },
         "polygons": {
             "EstateBoundary": ESTATE_BOUNDARY,

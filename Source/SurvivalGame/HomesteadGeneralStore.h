@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Simulation/HomesteadItems.h"
 #include "HomesteadGeneralStore.generated.h"
 
 class AHomesteadShopkeeper;
@@ -12,10 +13,11 @@ class UStaticMesh;
 class UStaticMeshComponent;
 class UTextRenderComponent;
 
-// The general store: a single-room granite-and-slate shop whose door opens onto the street, with a
-// counter, shelves, barrels, sacks and crates inside, a hanging sign board, and a closed sign on the
-// door outside opening hours. Built around the shop's counter point: the shopkeeper stands there
-// facing `CounterYaw`, toward the door 600 cm away.
+// A town shop: a single-room granite-and-slate building whose door opens onto the street, with a sign
+// board and a closed sign on the door outside opening hours. Pascoe's general store has shelves,
+// barrels, sacks and crates; Tregear's, the seedsman, has seed drawers, open grain sacks and a scale.
+// Built around the shop's counter point: the shopkeeper stands there facing `CounterYaw`, toward the
+// door 600 cm away.
 UCLASS()
 class SURVIVALGAME_API AHomesteadGeneralStore : public AActor
 {
@@ -23,8 +25,11 @@ class SURVIVALGAME_API AHomesteadGeneralStore : public AActor
 public:
     AHomesteadGeneralStore();
     // `Ground` samples terrain height at a world XY point.
-    void Build(int32 InShopId, const FVector2D& Counter, float CounterYaw, TFunctionRef<float(float, float)> Ground,
-        const FString& ClosedText);
+    void Build(int32 InShopId, Homestead::ShopKind InKind, const FVector2D& Counter, float CounterYaw,
+        TFunctionRef<float(float, float)> Ground, const FString& ClosedText);
+    // The notice on the shut door ("on Sundays" or the opening hour); cheap when unchanged.
+    void SetClosedText(const FString& Text);
+    Homestead::ShopKind GetKind() const { return Kind; }
     // Opens or shuts the door and puts the shopkeeper on or off duty. The door stays open while the
     // heroine is still inside at closing.
     void SetOpen(bool bOpen, const FVector& HeroineLocation);
@@ -56,6 +61,8 @@ private:
     UPROPERTY() TObjectPtr<UMaterialInterface> RockMaterial;
     UPROPERTY() TMap<FString, TObjectPtr<UMaterialInterface>> TintCache;
     int32 ShopId = 0;
+    Homestead::ShopKind Kind = Homestead::ShopKind::GeneralStore;
+    FString ClosedTextShown;
     FVector2D Counter2D = FVector2D::ZeroVector;
     float Yaw = 0.0f;
     float Floor = 0.0f;
@@ -77,5 +84,6 @@ private:
     void BuildShell(TFunctionRef<float(float, float)> Ground);
     void Gable(float X, float HalfWidth, float Rise, UMaterialInterface* Material);
     void BuildInterior();
+    void BuildSeedsmanInterior();
     FVector StoreToWorld(const FVector& Local) const;
 };

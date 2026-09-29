@@ -1,5 +1,6 @@
-// The general store in the game: its building and shopkeeper actors, the interaction focus, the
-// shop screen and the wallet readout. Trading itself is Simulation::Sell / Simulation::Buy.
+// The town shops in the game (Pascoe's general store and Tregear's, the seedsman): their buildings and
+// shopkeeper actors, the interaction focus, the shop screen and the wallet readout. Trading itself is
+// Simulation::Sell / Simulation::Buy.
 #include "HomesteadController.h"
 
 #include "HomesteadCharacter.h"
@@ -19,12 +20,27 @@ FString ShopText(const std::string& Value) { return UTF8_TO_TCHAR(Value.c_str())
 FString AHomesteadController::GreetingFor(const Homestead::Shop& Shop) const
 {
     const FString Estate = EstateName();
+    const double Hour = FMath::Fmod(State().hour, 24.0);
+    const int32 Pick = Shop.greetings % 2;
+    if (Shop.kind == Homestead::ShopKind::Seedsman)
+    {
+        if (Shop.greetings == 0)
+            return FString::Printf(TEXT("Jago Tregear. So you're the one taken on %s. You'll be wanting seed, then. "
+                "Whatever the season will grow, I've a drawer of it, and come harvest I'll give you a fair price for "
+                "your wheat and barley."), *Estate);
+        if (Hour < 12.0)
+            return Pick ? TEXT("Early bird. The ground's warming nicely, if you've a mind to sow.")
+                : TEXT("Morning. Mind the sacks, I've only just had the corn in.");
+        if (Hour < 15.0)
+            return Pick ? FString::Printf(TEXT("How's the ground up at %s? Turning over nicely, I hope."), *Estate)
+                : TEXT("Afternoon. Seed's weighed out fresh, same as always.");
+        return Pick ? TEXT("Nearly shutting, but I'll not send you home empty-handed.")
+            : TEXT("Evening. Quick now, the scale's still out.");
+    }
     if (Shop.greetings == 0)
         return FString::Printf(TEXT("Well now, you'll be the new lady up at %s! Martha Pascoe. Word travels quick in a town "
             "this size. If it's sold in Cornwall I've likely a shelf of it, and anything you bring down from the estate, "
             "set it on the counter and I'll give you a fair price."), *Estate);
-    const double Hour = FMath::Fmod(State().hour, 24.0);
-    const int32 Pick = Shop.greetings % 2;
     if (Hour < 12.0)
         return Pick ? TEXT("You're up with the lark. What can I do for you this morning?")
             : TEXT("Morning, my 'andsome. Kettle's only just boiled. What'll it be?");
@@ -41,7 +57,7 @@ void AHomesteadController::OpenShopScreen(int32 ShopId, bool bGreet)
     if (!Shop || !GEngine || !GEngine->GameViewport) return;
     if (!Homestead::IsShopOpen(*Shop, State().hour))
     {
-        Notify(ShopText(Homestead::ClosedMessage(*Shop)), true);
+        Notify(ShopText(Homestead::ClosedMessage(*Shop, State().hour)), true);
         return;
     }
     if (bBookOpen) CloseBook();
@@ -95,6 +111,13 @@ Homestead::Result AHomesteadController::ShopTrade(int32 ShopId, Homestead::Item 
         WalletDeltaRemaining = 3.0f;
         PlayEffect(bSell ? WoodTapA : WoodTapB, 0.35f);
         if (!bSell) PinNewSeed(Item);
+        if (!bSell && Item == Homestead::Item::TinWateringCan && !IsPinnedToHotbar(Item))
+        {
+            // The can replaces the pail on the hotbar (it's what she fills and pours from now).
+            const int32 Pail = HotbarSlots.IndexOfByKey(static_cast<int32>(Homestead::Item::WateringCan));
+            if (Pail != INDEX_NONE) HotbarSlots[Pail] = static_cast<int32>(Item);
+            else TogglePinnedToHotbar(Item);
+        }
     }
     return Result;
 }
@@ -123,15 +146,14 @@ void AHomesteadController::SyncStores()
     }
     for (const auto& Shop : Shops)
     {
-        if (Shop.kind != Homestead::ShopKind::GeneralStore) continue;
         if (Stores.ContainsByPredicate([&](const AHomesteadGeneralStore* Store) { return Store && Store->GetShopId() == Shop.id; }))
             continue;
         FActorSpawnParameters Parameters;
         Parameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         auto* Store = GetWorld()->SpawnActor<AHomesteadGeneralStore>(Parameters);
         if (!Store) continue;
-        Store->Build(Shop.id, FVector2D(Shop.counterX, Shop.counterY), static_cast<float>(Shop.counterYaw),
-            [this](float X, float Y) { return GroundHeight(X, Y); }, TEXT("CLOSED\nopens at ") + ShopText(Homestead::FormatHour(Shop.openHour)));
+        Store->Build(Shop.id, Shop.kind, FVector2D(Shop.counterX, Shop.counterY), static_cast<float>(Shop.counterYaw),
+            [this](float X, float Y) { return GroundHeight(X, Y); }, ShopText(Homestead::ClosedSign(Shop, State().hour)));
         Stores.Add(Store);
         UE_LOG(LogTemp, Display, TEXT("STORE_BUILT shop=%d counter=(%.0f, %.0f) yaw=%.0f"), Shop.id, Shop.counterX, Shop.counterY,
             Shop.counterYaw);
@@ -151,7 +173,10 @@ void AHomesteadController::TickStores(float DeltaSeconds)
     const FVector Heroine = GetPawn() ? GetPawn()->GetActorLocation() : FVector(1e9);
     for (const auto& Store : Stores)
         if (const Homestead::Shop* Shop = Store ? Sim.FindShop(Store->GetShopId()) : nullptr)
+        {
             Store->SetOpen(Homestead::IsShopOpen(*Shop, State().hour), Heroine);
+            Store->SetClosedText(ShopText(Homestead::ClosedSign(*Shop, State().hour)));
+        }
 }
 
 void AHomesteadController::ConsiderStoreFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const
@@ -178,16 +203,17 @@ FString AHomesteadController::StoreFocusTitle() const
 {
     const Homestead::Shop* Shop = Sim.FindShop(FocusId);
     if (!Shop) return TEXT("General store");
-    if (Focus == EFocus::StoreDoor) return TEXT("General store  |  Closed");
-    return FString(AHomesteadShopkeeper::DisplayName()) + TEXT("  |  General store");
+    const FString Name = Shop->kind == Homestead::ShopKind::Seedsman ? TEXT("Tregear's, seedsman") : TEXT("General store");
+    if (Focus == EFocus::StoreDoor) return Name + TEXT("  |  Closed");
+    return ShopText(Homestead::ShopkeeperName(Shop->kind)) + TEXT("  |  ") + Name;
 }
 
 FString AHomesteadController::StoreFocusActions() const
 {
     const Homestead::Shop* Shop = Sim.FindShop(FocusId);
     if (!Shop) return FString();
-    if (Focus == EFocus::StoreDoor) return ShopText(Homestead::ClosedMessage(*Shop));
-    return (bGamepad ? TEXT("[A]") : TEXT("[E]")) + FString(TEXT(" Talk to ")) + AHomesteadShopkeeper::DisplayName();
+    if (Focus == EFocus::StoreDoor) return ShopText(Homestead::ClosedMessage(*Shop, State().hour));
+    return (bGamepad ? TEXT("[A]") : TEXT("[E]")) + FString(TEXT(" Talk to ")) + ShopText(Homestead::ShopkeeperName(Shop->kind));
 }
 
 void AHomesteadController::InteractWithStore()
@@ -196,7 +222,7 @@ void AHomesteadController::InteractWithStore()
     if (!Shop) return;
     if (Focus == EFocus::StoreDoor || !Homestead::IsShopOpen(*Shop, State().hour))
     {
-        Notify(ShopText(Homestead::ClosedMessage(*Shop)), true);
+        Notify(ShopText(Homestead::ClosedMessage(*Shop, State().hour)), true);
         return;
     }
     OpenShopScreen(Shop->id);

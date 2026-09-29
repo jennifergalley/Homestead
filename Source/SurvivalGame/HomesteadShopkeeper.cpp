@@ -41,14 +41,22 @@ AHomesteadShopkeeper::AHomesteadShopkeeper()
     Label->SetCastShadow(false);
 }
 
+void AHomesteadShopkeeper::SetIdentity(const FString& InFullName, const TCHAR* MeshPath)
+{
+    FullNameText = InFullName;
+    StandInMeshPath = MeshPath ? MeshPath : TEXT("");
+    Label->SetText(FText::FromString(FullNameText + TEXT("\n(stand-in body)")));
+}
+
 void AHomesteadShopkeeper::Place(const FVector& Location, float Yaw)
 {
     RestYaw = Yaw;
     SetActorLocationAndRotation(Location, FRotator(0, Yaw, 0));
     if (!Body->GetSkeletalMeshAsset())
     {
-        if (USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(nullptr, StandInMesh)) Body->SetSkeletalMeshAsset(Mesh);
-        else UE_LOG(LogTemp, Warning, TEXT("Shopkeeper stand-in mesh is missing: %s"), StandInMesh);
+        const TCHAR* MeshPath = StandInMeshPath.IsEmpty() ? StandInMesh : *StandInMeshPath;
+        if (USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(nullptr, MeshPath)) Body->SetSkeletalMeshAsset(Mesh);
+        else UE_LOG(LogTemp, Warning, TEXT("Shopkeeper stand-in mesh is missing: %s"), MeshPath);
         if (UAnimSequence* Idle = LoadObject<UAnimSequence>(nullptr, StandInIdle))
         {
             Body->SetAnimationMode(EAnimationMode::AnimationSingleNode);

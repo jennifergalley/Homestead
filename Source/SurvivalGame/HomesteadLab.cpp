@@ -459,7 +459,7 @@ void AHomesteadLabController::LabHold(const FString& Name)
     if (!Avatar) return;
     using Homestead::Item;
     const TPair<const TCHAR*, Item> Tools[] = {{TEXT("Knife"), Item::Knife}, {TEXT("Hatchet"), Item::Hatchet},
-        {TEXT("DiggingStick"), Item::DiggingStick}, {TEXT("Pail"), Item::WateringCan}, {TEXT("Machete"), Item::Machete},
+        {TEXT("DiggingStick"), Item::DiggingStick}, {TEXT("Pail"), Item::WateringCan}, {TEXT("TinCan"), Item::TinWateringCan}, {TEXT("Machete"), Item::Machete},
         {TEXT("Lamp"), Item::OilLamp}};
     for (const auto& Tool : Tools)
         if (Name.Equals(Tool.Key, ESearchCase::IgnoreCase)) { Avatar->SetLabHeldTool(Tool.Value); return; }

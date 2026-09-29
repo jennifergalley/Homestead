@@ -26,6 +26,12 @@ const FLinearColor Tin(0.42f, 0.44f, 0.45f);
 const FLinearColor Jar(0.52f, 0.38f, 0.22f);
 const FLinearColor Cloth(0.46f, 0.12f, 0.10f);
 const FLinearColor GraniteGrey(0.29f, 0.28f, 0.26f);
+// Tregear's: an oxblood sign board and door, and the wheat in its open sacks.
+const FLinearColor TregearOxblood(0.16f, 0.035f, 0.03f);
+const FLinearColor TregearGrain(0.62f, 0.46f, 0.20f);
+// Stand-in bodies: Pascoe in the aproned ponytail heroine, Tregear in the aproned bob so the two differ.
+const TCHAR* PascoeStandIn = TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Ponytail_Apron.SK_Heroine_Ponytail_Apron");
+const TCHAR* TregearStandIn = TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Hazel_Bob_Apron.SK_Heroine_Hazel_Bob_Apron");
 constexpr float WallHeight = 340.0f;
 constexpr float WallThickness = 50.0f;
 constexpr float DoorHalfWidth = 70.0f;
@@ -150,10 +156,12 @@ bool AHomesteadGeneralStore::IsInside(const FVector& Location) const
     return Local.X > -10 && Local.X < RoomDepth && FMath::Abs(Local.Y) < RoomHalfWidth + 10;
 }
 
-void AHomesteadGeneralStore::Build(int32 InShopId, const FVector2D& Counter, float CounterYaw,
+void AHomesteadGeneralStore::Build(int32 InShopId, Homestead::ShopKind InKind, const FVector2D& Counter, float CounterYaw,
     TFunctionRef<float(float, float)> Ground, const FString& ClosedText)
 {
     ShopId = InShopId;
+    Kind = InKind;
+    const bool bSeedsman = Kind == Homestead::ShopKind::Seedsman;
     Counter2D = Counter;
     Yaw = CounterYaw;
     FieldMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/SurvivalGame/Materials/M_Field.M_Field"));
@@ -164,15 +172,21 @@ void AHomesteadGeneralStore::Build(int32 InShopId, const FVector2D& Counter, flo
     const float StoreYaw = CounterYaw + 180.0f;
     SetActorLocationAndRotation(FVector(Door.X, Door.Y, 0), FRotator(0, StoreYaw, 0));
     BuildShell(Ground);
-    BuildInterior();
+    if (bSeedsman) BuildSeedsmanInterior();
+    else BuildInterior();
     ClosedBoard = Box(FVector(-10, DoorHalfWidth - 8, 150), FVector(3, 70, 36), Tint(Cream), false, 0, DoorHinge);
     ClosedSign = Words(ClosedText, FVector(-12, DoorHalfWidth - 8, 150), 180.0f, 7.0f, FColor(40, 24, 12), DoorHinge);
+    ClosedTextShown = ClosedText;
     if (UWorld* World = GetWorld())
     {
         FActorSpawnParameters Parameters;
         Parameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
         Shopkeeper = World->SpawnActor<AHomesteadShopkeeper>(Parameters);
-        if (Shopkeeper) Shopkeeper->Place(ShopkeeperLocation(), CounterYaw);
+        if (Shopkeeper)
+        {
+            Shopkeeper->SetIdentity(bSeedsman ? TEXT("Mr. Jago Tregear") : TEXT("Mrs. Martha Pascoe"), bSeedsman ? TregearStandIn : PascoeStandIn);
+            Shopkeeper->Place(ShopkeeperLocation(), CounterYaw);
+        }
     }
     bBuilt = true;
     bDoorOpen = false;
@@ -270,13 +284,16 @@ void AHomesteadGeneralStore::BuildShell(TFunctionRef<float(float, float)> Ground
     DoorHinge->SetupAttachment(Root);
     DoorHinge->SetRelativeLocation(FVector(-WallThickness * 0.5f, -DoorHalfWidth, 0));
     DoorHinge->RegisterComponent();
-    Box(FVector(0, DoorHalfWidth, DoorHeight * 0.5f), FVector(7, DoorHalfWidth * 2 - 4, DoorHeight - 4), Tint(SignGreen, 0.6f), true, 0, DoorHinge);
+    const bool bSeedsman = Kind == Homestead::ShopKind::Seedsman;
+    const FLinearColor Paint = bSeedsman ? TregearOxblood : SignGreen;
+    Box(FVector(0, DoorHalfWidth, DoorHeight * 0.5f), FVector(7, DoorHalfWidth * 2 - 4, DoorHeight - 4), Tint(Paint, 0.6f), true, 0, DoorHinge);
     Box(FVector(-4, DoorHalfWidth, DoorHeight * 0.66f), FVector(2, DoorHalfWidth * 2 - 36, 70), Tint(Glass, 0.15f), false, 0, DoorHinge);
     Box(FVector(-5, DoorHalfWidth * 2 - 18, 110), FVector(6, 6, 6), Tint(Tin, 0.3f), false, 0, DoorHinge);
-    Box(FVector(-WallThickness - 6, 0, DoorHeight + 62), FVector(8, 360, 58), Tint(SignGreen, 0.7f), false);
-    Words(TEXT("GENERAL STORE"), FVector(-WallThickness - 11, 0, DoorHeight + 70), 180.0f, 30.0f, FColor(222, 178, 96));
-    Words(TEXT("M. PASCOE  -  PROVISIONS & SUNDRIES"), FVector(-WallThickness - 11, 0, DoorHeight + 45), 180.0f, 11.0f,
-        FColor(222, 206, 170));
+    Box(FVector(-WallThickness - 6, 0, DoorHeight + 62), FVector(8, bSeedsman ? 420.0f : 360.0f, 58), Tint(Paint, 0.7f), false);
+    Words(bSeedsman ? TEXT("SEEDSMAN & CORN MERCHANT") : TEXT("GENERAL STORE"), FVector(-WallThickness - 11, 0, DoorHeight + 70), 180.0f,
+        bSeedsman ? 24.0f : 30.0f, FColor(222, 178, 96));
+    Words(bSeedsman ? TEXT("J. TREGEAR  -  SEEDS, CORN & GARDEN SUNDRIES") : TEXT("M. PASCOE  -  PROVISIONS & SUNDRIES"),
+        FVector(-WallThickness - 11, 0, DoorHeight + 45), 180.0f, 11.0f, FColor(222, 206, 170));
     // Warm lamplight inside.
     for (float X : {260.0f, 640.0f})
     {
@@ -398,6 +415,83 @@ void AHomesteadGeneralStore::BuildInterior()
     Round(FVector(CounterX + 10, 0, WallHeight - 50), 1.5f, 60, Tint(Iron), false);
     Box(FVector(CounterX + 10, 0, WallHeight - 92), FVector(22, 22, 30), Tint(Glass, 0.1f), false);
     Round(FVector(20, 40, DoorHeight + 10), 7, 10, Tint(Jar, 0.3f), false);
+}
+
+void AHomesteadGeneralStore::BuildSeedsmanInterior()
+{
+    const float CounterX = DoorToCounter - 70.0f;
+    // SM_Store_Counter's top (store_counter.py: 0.96 m body, 0.04 m top).
+    constexpr float CounterTop = 100.0f;
+    // SM_TinWateringCan hangs from its handle pivot; standing on the floor its pivot sits this high.
+    constexpr float CanGripHeight = 34.0f;
+    if (!Prop(TEXT("SM_Store_Counter"), FVector(CounterX, 0, 0), 180.0f))
+    {
+        Box(FVector(CounterX, 20, 48), FVector(66, 520, 96), Tint(Oak, 0.7f));
+        Box(FVector(CounterX - 2, 20, 99), FVector(78, 536, 6), Tint(DarkOak, 0.45f));
+    }
+    // The beam scale for weighing out seed and corn, at the customer's left.
+    if (!Prop(TEXT("SM_SeedsmanScale"), FVector(CounterX - 4, -150, CounterTop), 180.0f, false))
+    {
+        Box(FVector(CounterX - 4, -150, CounterTop + 4), FVector(34, 20, 8), Tint(Iron, 0.5f), false);
+        Box(FVector(CounterX - 4, -150, CounterTop + 24), FVector(4, 4, 36), Tint(Iron, 0.5f), false);
+        Box(FVector(CounterX - 4, -150, CounterTop + 42), FVector(4, 50, 3), Tint(Jar, 0.3f), false);
+        for (float Side : {-1.0f, 1.0f})
+            Round(FVector(CounterX - 4, -150 + Side * 24, CounterTop + 30), 10, 2, Tint(Jar, 0.3f), false);
+    }
+    // A ledger by the till.
+    Box(FVector(CounterX + 6, 150, CounterTop + 2), FVector(30, 40, 4), Tint(Cloth, 0.6f), false);
+    // Nests of seed drawers behind the counter and down the right wall.
+    const auto Drawers = [this](const FVector& Base, float LocalYaw)
+    {
+        if (Prop(TEXT("SM_SeedsmanDrawers"), Base, LocalYaw)) return;
+        const FRotator Turn(0, LocalYaw, 0);
+        const auto At = [&](float Along, float Out, float Up) { return Base + Turn.RotateVector(FVector(Out, Along, Up)); };
+        Box(At(0, 0, 90), FVector(44, 140, 180), Tint(DarkOak), true, LocalYaw);
+        for (int32 Row = 0; Row < 7; ++Row)
+            for (int32 Column = 0; Column < 6; ++Column)
+                Box(At(-56 + Column * 22.4f, -23, 22 + Row * 22.0f), FVector(2, 19, 18), Tint(Oak, 0.6f), false, LocalYaw);
+    };
+    Drawers(FVector(RoomDepth - 24, -210, 0), 180.0f);
+    Drawers(FVector(RoomDepth - 24, 210, 0), 180.0f);
+    Drawers(FVector(740, RoomHalfWidth - 24, 0), -90.0f);
+    // Open sacks of grain down the left wall for customers to see and scoop from.
+    const FVector OpenSacks[] = {{170, -340, 0}, {265, -352, 0}, {360, -340, 0}, {455, -350, 0}};
+    for (int32 Index = 0; Index < UE_ARRAY_COUNT(OpenSacks); ++Index)
+    {
+        const FVector& At = OpenSacks[Index];
+        if (Prop(TEXT("SM_SeedsmanGrainSack"), At, 90.0f + (Index % 2 ? 12.0f : -9.0f))) continue;
+        Round(At + FVector(0, 0, 28), 26, 56, Tint(Hessian, 0.95f));
+        Round(At + FVector(0, 0, 57), 23, 4, Tint(TregearGrain, 0.9f), false);
+    }
+    // Tied sacks of corn stacked by the door, on the right.
+    const FVector Sacks[] = {{150, 335, 0}, {225, 355, 0}, {205, 275, 0}, {160, 330, 55}};
+    for (const FVector& At : Sacks)
+        if (!Prop(TEXT("SM_Store_Sack"), At, At.Y))
+        {
+            Round(At + FVector(0, 0, 32), 30, 64, Tint(Hessian, 0.95f));
+            Round(At + FVector(0, 0, 66), 12, 10, Tint(Hessian, 0.95f), false);
+        }
+    // Tin watering cans for sale, standing on the boards by the counter.
+    const FVector Cans[] = {{410, 300, CanGripHeight}, {455, 345, CanGripHeight}};
+    for (int32 Index = 0; Index < UE_ARRAY_COUNT(Cans); ++Index)
+        if (!Prop(TEXT("SM_TinWateringCan"), Cans[Index], Index ? 25.0f : 70.0f, false))
+            Round(Cans[Index] - FVector(0, 0, CanGripHeight - 14), 11, 28, Tint(Tin, 0.35f), false);
+    // A barrel of seed potatoes and a crate of runners on the right, by the drawers.
+    if (!Prop(TEXT("SM_Store_Barrel"), FVector(560, 360, 0), 30.0f))
+        Round(FVector(560, 360, 48), 38, 96, Tint(Oak, 0.7f));
+    if (!Prop(TEXT("SM_Store_Crate"), FVector(640, 355, 0), 0.0f))
+        Box(FVector(640, 355, 30), FVector(60, 60, 60), Tint(Planks, 0.8f));
+    // A hanging lantern over the counter and the shop bell over the door.
+    Round(FVector(CounterX + 10, 0, WallHeight - 50), 1.5f, 60, Tint(Iron), false);
+    Box(FVector(CounterX + 10, 0, WallHeight - 92), FVector(22, 22, 30), Tint(Glass, 0.1f), false);
+    Round(FVector(20, 40, DoorHeight + 10), 7, 10, Tint(Jar, 0.3f), false);
+}
+
+void AHomesteadGeneralStore::SetClosedText(const FString& Text)
+{
+    if (!ClosedSign || Text == ClosedTextShown) return;
+    ClosedTextShown = Text;
+    ClosedSign->SetText(FText::FromString(Text));
 }
 
 void AHomesteadGeneralStore::SetOpen(bool bOpen, const FVector& HeroineLocation)

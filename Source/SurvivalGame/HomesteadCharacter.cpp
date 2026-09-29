@@ -572,6 +572,9 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         {Homestead::Item::DiggingStick, TEXT("StoneHoe/SM_StoneHoe"), 24, false, FTransform::Identity},
         {Homestead::Item::DiggingStick, TEXT("DiggingStick/SM_DiggingStick"), 34, false, StickTrail},
         {Homestead::Item::WateringCan, TEXT("WaterPail/SM_WaterPail"), 20, true, FTransform::Identity},
+        // Tregear's tin can (seedsman_... tin_watering_can recipe) shares the pail's frame: pivot at the top
+        // handle's grip, hanging -Z, spout +X, so the pail's carry, fill and pour clips fit it.
+        {Homestead::Item::TinWateringCan, TEXT("TinWateringCan/SM_TinWateringCan"), 20, true, FTransform::Identity},
         // Authored in the machete's frame (grip pivot, blade +Z, edge -Y), so the hack fits it as is.
         {Homestead::Item::Billhook, TEXT("Billhook/SM_Billhook"), MacheteCarryDegrees, false, FTransform::Identity},
         // The pick shares the hatchet's frame (knob grip pivot, head +Z, point -Y). Carried one-handed
@@ -1911,6 +1914,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     const bool Hoeing = bHoeTill && Animation->TillWeight() > 0.01f;
     // Filling or pouring with the carved pail's own clips: the pail stays in her hand throughout.
     const bool PailWork = Animation->WaterWeight() > 0.01f && GetWaterAnimation() != WaterAnimation;
+    const Homestead::Item WaterVessel = ActiveWaterVessel();
     bool bPouring = false;
     float Grip = 0, Carry = RestWristDegrees;
     // At rest a tool's handle crosses the palm diagonally (heel of the hand to the index knuckle),
@@ -1943,7 +1947,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
             || Spec.Tool == Homestead::Item::Knife && CuttingReeds
             || Spec.Tool == Homestead::Item::DiggingStick && Hoeing
             || (Hacking && Spec.Tool == HackTool)
-            || Spec.Tool == Homestead::Item::WateringCan && PailWork
+            || Spec.Tool == WaterVessel && PailWork
             || (HandsFree && !Hacking && Presented == Spec.Tool);
         Prop->SetVisibility(Held);
         if (!Held) continue;
@@ -2248,6 +2252,16 @@ UStaticMeshComponent* AHomesteadCharacter::GetHeldProp(Homestead::Item Tool) con
     return nullptr;
 }
 
+Homestead::Item AHomesteadCharacter::ActiveWaterVessel() const
+{
+    // The simulation fills and pours from Tregear's tin can whenever she carries one, so that's what
+    // she holds while watering; otherwise the pail (also when the can has no mesh yet).
+    const auto* PC = Cast<AHomesteadController>(GetController());
+    const bool bCan = PC && PC->Simulation().Count(Homestead::Item::TinWateringCan) > 0
+        && HeldToolSpecs.ContainsByPredicate([](const FHeldToolSpec& Spec) { return Spec.Tool == Homestead::Item::TinWateringCan; });
+    return bCan ? Homestead::Item::TinWateringCan : Homestead::Item::WateringCan;
+}
+
 void AHomesteadCharacter::UpdateHangingPail(USceneComponent& Pail, float DeltaSeconds)
 {
     // A pendulum hanging from the bail: the hand's horizontal acceleration swings the pail the
@@ -2282,8 +2296,13 @@ void AHomesteadCharacter::UpdateHangingPail(USceneComponent& Pail, float DeltaSe
 
 void AHomesteadCharacter::UpdateWaterPail(UStaticMeshComponent& Pail, float DeltaSeconds)
 {
-    // SM_WaterPail's pouring lip in its own space (pivot at the bail grip, hanging -Z, lip +X).
+    // SM_WaterPail's pouring lip in its own space (pivot at the bail grip, hanging -Z, lip +X); the
+    // tin can pours from its rose, further out on the same axis.
     static const FVector PailLipLocal(11.5f, 0.0f, -14.0f);
+    // SM_TinWateringCan's rose (tin_watering_can recipe REPORT: spout tip from the grip pivot).
+    static const FVector TinCanRoseLocal(30.0f, 0.0f, -12.0f);
+    const bool bTinCan = Pail.GetStaticMesh() && Pail.GetStaticMesh()->GetName() == TEXT("SM_TinWateringCan");
+    const FVector LipLocal = bTinCan ? TinCanRoseLocal : PailLipLocal;
     // pail_pour.GRIP_DROP / GRIP_RADIUS: she holds its sides this far below the pivot.
     constexpr float GripDrop = 18.0f;
     constexpr float GripRadius = 11.5f;
@@ -2325,7 +2344,7 @@ void AHomesteadCharacter::UpdateWaterPail(UStaticMeshComponent& Pail, float Delt
         return;
     }
     // The water runs from the pouring lip straight down to the soil.
-    const FVector LipPoint = Pail.GetComponentTransform().TransformPosition(PailLipLocal);
+    const FVector LipPoint = Pail.GetComponentTransform().TransformPosition(LipLocal);
     FHitResult Hit;
     const FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadPourStream), false, this);
     const FVector Reach = LipPoint - FVector(0, 0, 250);
