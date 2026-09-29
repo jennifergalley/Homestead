@@ -19,6 +19,9 @@ ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 WORK = os.environ.get("HOMESTEAD_TERRAIN_WORK", r"E:\TerrainSource\work")
 H = 2016
 BROADLEAF, FIR, HAZEL, BRACKEN, YARROW, COBBLES, BOULDER, ERRATIC, DOME, FERN, GRASS_TALL, GRASS_MID, SHRUB, OAK, BEECH, SYCAMORE, HAWTHORN, HOLLY, HAZEL_COPPICE = range(19)
+# The Hawthorn mesh streams toward +X; Cornwall's prevailing wind is south-westerly, so thorns lean
+# north-east (+X north, +Y east): yaw 45 +- WIND_SPREAD.
+WIND_YAW, WIND_SPREAD = 45.0, 25.0
 # 19+ are the MVP woodland's kinds (mvp_woodland.py).
 
 def weights():
@@ -124,9 +127,14 @@ def main():
     def emit(kind, p, smin, smax):
         # Inside the MVP woodland the estate's own scenery gives way (the draws still happen, so
         # everything outside the region is unchanged).
+        emit_yawed(kind, p, smin, smax, 0.0, 360.0)
+    def emit_windswept(kind, p, smin, smax):
+        # Same two draws per point as emit, so swapping a share to a windswept kind keeps the sequence.
+        emit_yawed(kind, p, smin, smax, WIND_YAW - WIND_SPREAD, WIND_YAW + WIND_SPREAD)
+    def emit_yawed(kind, p, smin, smax, yaw_lo, yaw_hi):
         blocked = mvp.cornish_blocked(p) if len(p) else []
         for i, (x, y) in enumerate(p):
-            yaw, s = rng.uniform(0, 360), rng.uniform(smin, smax)
+            yaw, s = rng.uniform(yaw_lo, yaw_hi), rng.uniform(smin, smax)
             if not blocked[i]:
                 recs.append((kind, x, y, yaw, s))
     def clear_of_interactive(p, gap):
@@ -201,17 +209,21 @@ def main():
     wu = woodable(keep_common(candidates(1 / 7.0, (-1100, 600, -1500, 700)), 3.5, 3))
     wu = wu[wood_score(wu) > WOOD_AT]
     wu = clear_of_interactive(wu, 2.0)
+    # Holly and hazel coppice stools take part of the old hazel and shrub shares.
     pick = rng.random(len(wu))
-    emit(HAZEL, wu[pick < 0.14], 0.8, 1.25)
+    emit(HAZEL, wu[pick < 0.07], 0.8, 1.25)
+    emit(HAZEL_COPPICE, wu[(pick >= 0.07) & (pick < 0.14)], 0.75, 1.1)
     emit(BRACKEN, wu[(pick >= 0.14) & (pick < 0.5)], 0.8, 1.35)
     emit(FERN, wu[(pick >= 0.5) & (pick < 0.75)], 0.85, 1.4)
-    emit(SHRUB, wu[pick >= 0.75], 0.85, 1.35)
-    # The woods' ragged fringe: hazel and thorn scrub with the odd young tree.
+    emit(HOLLY, wu[(pick >= 0.75) & (pick < 0.86)], 0.7, 1.15)
+    emit(SHRUB, wu[pick >= 0.86], 0.85, 1.35)
+    # The woods' ragged fringe: windswept hawthorn, hazel and thorn scrub with the odd young tree.
     fringe = woodable(keep_common(candidates(1 / 14.0, (-1100, 600, -1500, 700)), 4, 4))
     fs = wood_score(fringe)
     fringe = clear_of_interactive(fringe[(fs > WOOD_AT - 0.22) & (fs <= WOOD_AT)], 2.0)
     pick = rng.random(len(fringe))
-    emit(SHRUB, fringe[pick < 0.45], 0.8, 1.3)
+    emit_windswept(HAWTHORN, fringe[pick < 0.14], 0.7, 1.05)
+    emit(SHRUB, fringe[(pick >= 0.14) & (pick < 0.45)], 0.8, 1.3)
     emit(HAZEL, fringe[(pick >= 0.45) & (pick < 0.7)], 0.7, 1.1)
     emit(BRACKEN, fringe[(pick >= 0.7) & (pick < 0.96)], 0.8, 1.2)
     emit(BROADLEAF, fringe[pick >= 0.96], 0.55, 0.8)
@@ -236,7 +248,8 @@ def main():
     hedge = woodable(hedge)
     hedge = clear_of_interactive(hedge[kept_open(hedge, 0.0) < 0.3], 2.0)
     pick = rng.random(len(hedge))
-    emit(SHRUB, hedge[pick < 0.5], 0.9, 1.4)
+    emit_windswept(HAWTHORN, hedge[pick < 0.12], 0.75, 1.0)
+    emit(SHRUB, hedge[(pick >= 0.12) & (pick < 0.5)], 0.9, 1.4)
     emit(HAZEL, hedge[(pick >= 0.5) & (pick < 0.85)], 0.9, 1.3)
     emit(BRACKEN, hedge[(pick >= 0.85) & (pick < 0.97)], 0.8, 1.1)
     emit(OAK, hedge[pick >= 0.97], 0.75, 1.05)
