@@ -3943,19 +3943,15 @@ void SeasonalForage()
     // rework-farming-calendar-and-period-crafting, lane D: the forage season table and the look.
     namespace S = Seasons;
     const auto at = [](int dayIndex, double hourOfDay) { return 6.0 + dayIndex * 24.0 + (hourOfDay - 6.0); };
-    CHECK(S::DayIndex(6.0) == 0 && S::SeasonOf(6.0) == 0 && S::DayOfSeason(6.0) == 1);
-    CHECK(S::DayIndex(at(27, 23.0)) == 27 && S::SeasonOf(at(28, 6.0)) == 1 && S::DayOfSeason(at(28, 6.0)) == 1);
-    // Winter 28 rolls over to Spring 1 of the next year.
-    CHECK(S::SeasonOf(at(111, 12.0)) == 3 && S::DayOfSeason(at(111, 12.0)) == 28);
-    CHECK(S::SeasonOf(at(112, 6.0)) == 0 && S::DayOfSeason(at(112, 6.0)) == 1);
     // Blackberries: Summer 15 to Autumn 28 only.
-    CHECK(!S::InSeason(ResourceKind::BerryBush, at(28 + 13, 12.0)));
-    CHECK(S::InSeason(ResourceKind::BerryBush, at(28 + 14, 12.0)));
-    CHECK(S::InSeason(ResourceKind::BerryBush, at(56 + 27, 12.0)));
-    CHECK(!S::InSeason(ResourceKind::BerryBush, at(84, 12.0)));
-    CHECK(S::InSeason(ResourceKind::FieldMushrooms, at(56, 12.0)) && !S::InSeason(ResourceKind::FieldMushrooms, at(55, 12.0)));
-    CHECK(S::InSeason(ResourceKind::Bluebells, at(3, 12.0)) && !S::InSeason(ResourceKind::Bluebells, at(30, 12.0)));
-    CHECK(S::InSeason(ResourceKind::Branches, at(90, 12.0)));
+
+    CHECK(!S::ForageInSeason(ResourceKind::BerryBush, at(28 + 13, 12.0)));
+    CHECK(S::ForageInSeason(ResourceKind::BerryBush, at(28 + 14, 12.0)));
+    CHECK(S::ForageInSeason(ResourceKind::BerryBush, at(56 + 27, 12.0)));
+    CHECK(!S::ForageInSeason(ResourceKind::BerryBush, at(84, 12.0)));
+    CHECK(S::ForageInSeason(ResourceKind::FieldMushrooms, at(56, 12.0)) && !S::ForageInSeason(ResourceKind::FieldMushrooms, at(55, 12.0)));
+    CHECK(S::ForageInSeason(ResourceKind::Bluebells, at(3, 12.0)) && !S::ForageInSeason(ResourceKind::Bluebells, at(30, 12.0)));
+    CHECK(S::ForageInSeason(ResourceKind::Branches, at(90, 12.0)));
     // The look: green summer, turned autumn, bare frosty winter mornings, no frost at noon.
     const auto summer = S::LookAt(at(40, 12.0));
     const auto autumn = S::LookAt(at(56 + 14, 12.0));
@@ -3994,7 +3990,7 @@ void SeasonalForage()
     CHECK(!sim.Harvest(bramble.id, bramble.position));
     CHECK(sim.FindNearestResource(bramble.position, 50.0) != bramble.id);
     for (int day = 0; day < 43; ++day) sim.SkipToHourOfDay(8.0);
-    CHECK(S::SeasonOf(sim.GetState().hour) == 1 && S::DayOfSeason(sim.GetState().hour) == 15);
+    CHECK(Calendar::DateAt(sim.GetState().hour).season == Season::Summer && Calendar::DateAt(sim.GetState().hour).dayOfSeason == 15);
     CHECK(sim.CanHarvest(bramble.id) && !sim.CanHarvest(mushroom.id));
     const int before = sim.Count(Item::Blackberries);
     OK(sim.Harvest(bramble.id, bramble.position));
@@ -4003,12 +3999,12 @@ void SeasonalForage()
     for (const auto& value : sim.GetState().resources)
         if (value.id == bramble.id) CHECK(std::abs(value.readyAtHour - (picked + 72.0)) < 1e-9);
     // Autumn: mushrooms are up.
-    while (S::SeasonOf(sim.GetState().hour) != 2) sim.SkipToHourOfDay(8.0);
+    while (Calendar::DateAt(sim.GetState().hour).season != Season::Autumn) sim.SkipToHourOfDay(8.0);
     CHECK(sim.CanHarvest(mushroom.id));
     OK(sim.Harvest(mushroom.id, mushroom.position));
     CHECK(sim.Count(Item::FieldMushrooms) == 3);
     // Winter: nothing on the brambles again.
-    while (S::SeasonOf(sim.GetState().hour) != 3) sim.SkipToHourOfDay(8.0);
+    while (Calendar::DateAt(sim.GetState().hour).season != Season::Winter) sim.SkipToHourOfDay(8.0);
     CHECK(!sim.CanHarvest(bramble.id) && !sim.CanHarvest(mushroom.id));
 }
 

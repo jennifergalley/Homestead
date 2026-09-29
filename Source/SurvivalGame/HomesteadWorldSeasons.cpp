@@ -7,7 +7,6 @@
 #include "Engine/World.h"
 #include "HAL/IConsoleManager.h"
 #include "Simulation/HomesteadSeasons.h"
-#include "Simulation/HomesteadShops.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 
@@ -48,8 +47,8 @@ void AHomesteadWorld::UpdateSeasonLook(const Homestead::State& State)
     const float OverrideFrost = CVarFrost.GetValueOnGameThread();
     double Hour = State.hour;
     if (OverrideDay >= 0.0f)
-        Hour = Homestead::DayRolloverHour + FMath::Floor(OverrideDay) * 24.0
-            + FMath::Fmod(State.hour - Homestead::DayRolloverHour + 240.0, 24.0);
+        Hour = Homestead::Calendar::DayStartHour + FMath::Floor(OverrideDay) * 24.0
+            + FMath::Fmod(State.hour - Homestead::Calendar::DayStartHour + 240.0, 24.0);
     // Overrides take effect at once; the calendar is followed in quarter-hour steps.
     const double Key = FMath::Floor(Hour / WriteStepHours) + (OverrideDay >= 0.0f ? 1e7 : 0.0) + OverrideFrost * 1e5;
     if (Key == LastSeasonLookHour) return;

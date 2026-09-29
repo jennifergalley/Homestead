@@ -1760,7 +1760,7 @@ bool Simulation::IsForageReady(const ResourceNode& node) const
 {
     // The legacy generated woodland keeps its year-round forage; seasons are the estate's.
     return !node.cleared && node.readyAtHour <= state_.hour
-        && (!state_.fixedEstate || Seasons::InSeason(node.kind, state_.hour));
+        && (!state_.fixedEstate || Seasons::ForageInSeason(node.kind, state_.hour));
 }
 bool Simulation::CanHarvest(int nodeId) const
 {
@@ -1841,7 +1841,7 @@ Result Simulation::Harvest(int nodeId, Point player)
     if (!Near(player, node->position)) return Bad("Move closer to gather this resource.");
     if (Retired(node->kind)) return Bad("There's nothing here worth taking.");
     if (node->readyAtHour > state_.hour) return Bad("Nothing to gather here.");
-    if (state_.fixedEstate && !Seasons::InSeason(node->kind, state_.hour)) return Bad(OutOfSeasonMessage(node->kind));
+    if (state_.fixedEstate && !Seasons::ForageInSeason(node->kind, state_.hour)) return Bad(OutOfSeasonMessage(node->kind));
     const double cost = HarvestCost(nodeId);
     if (auto ready = CheckExertion(cost); !ready) return ready;
     const Inventory yield = ForageYield(*node);
