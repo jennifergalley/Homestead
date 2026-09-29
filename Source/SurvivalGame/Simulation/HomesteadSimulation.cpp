@@ -2490,8 +2490,7 @@ Result Simulation::Till(int cellX, int cellY, Point player)
     if (!ValidCell(buildingX, buildingY) || !Near(player, GardenCellCenter(cellX, cellY)))
         return Bad("Move closer to a valid garden square.");
     if (Count(Item::DiggingStick) == 0)
-        return Bad(state_.fixedEstate ? "You need a hoe to till. Search the salvage in the old manor for a hoe blade."
-            : "Craft a hoe before tilling soil.");
+        return Bad(NoHoeMessage(state_, player));
     if (state_.plots.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
         return Bad("The garden has reached its plot limit.");
     const auto space = CheckGardenResources(state_, cellX, cellY);

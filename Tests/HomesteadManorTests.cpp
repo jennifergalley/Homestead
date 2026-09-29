@@ -6,6 +6,8 @@
 #include "HomesteadSimulation.h"
 
 #include <cmath>
+#include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -362,10 +364,89 @@ void StarterChestAndHoeClue()
     // Tilling without a hoe says where to look; the journal says where the tools hung.
     const int gx = GardenCell(Spawn().x + 900.0), gy = GardenCell(Spawn().y);
     const Result till = search.Till(gx, gy, GardenCellCenter(gx, gy));
-    CHECK(!till.ok && till.message == "You need a hoe to till. Search the salvage in the old manor for a hoe blade.");
+    // She holds the blade now, so it says to haft it; before that it names the nearest unsearched pile.
+    CHECK(!till.ok && till.message == "You need a hoe to till. Craft one from your rusted hoe blade and two branches on the Craft page.");
+    Simulation fresh = NewEstate();
+    const Result lost = fresh.Till(gx, gy, GardenCellCenter(gx, gy));
+    CHECK(!lost.ok && StartsWith(lost.message, "You need a hoe to till. Search the old manor's salvage for a hoe blade: there's a pile "));
+    CHECK(std::string(SalvageWhereabouts(520006)) == "by the chimney in the west rooms, where Father's tools hung");
     const std::string arrival = Manor::JournalText(Manor::ArrivalEntry, state);
     CHECK(arrival.find("pasties and bread") != std::string::npos && arrival.find("change of clothes") != std::string::npos);
     CHECK(arrival.find("Father's garden tools always hung in the west rooms, by the chimney") != std::string::npos);
+}
+
+// The placement table as it stood before the tool rack (main 9a409e07): every id, kind and spot.
+std::uint64_t PlacementHashWithout(int skippedId, int& count)
+{
+    std::uint64_t hash = UINT64_C(14695981039346656037);
+    count = 0;
+    char line[256];
+    for (const auto& p : ProvisionalEstatePlacements().placements)
+    {
+        if (p.id == skippedId) continue;
+        std::snprintf(line, sizeof line, "%d %d %.3f %.3f %.3f %.3f %.3f %d\n", p.id, static_cast<int>(p.kind),
+            p.position.x, p.position.y, p.z, p.yaw, p.scale, p.minTier);
+        for (const char* c = line; *c; ++c) { hash ^= static_cast<unsigned char>(*c); hash *= UINT64_C(1099511628211); }
+        ++count;
+    }
+    return hash;
+}
+
+void ToolRackIsSaveSafe()
+{
+    // Jenny's own save couldn't reach a hoe. Father's tool rack (520006) is a salvage pile appended
+    // after every other section, so no earlier id, kind or spot moves: an older save's cleared nodes
+    // still name the same things, and the rack waits unsearched with whichever head she lacks.
+    int count = 0;
+    const std::uint64_t before = PlacementHashWithout(520006, count);
+    CHECK(count == 2197 && before == UINT64_C(12311480322052281513));
+    const auto& all = ProvisionalEstatePlacements().placements;
+    CHECK(all.back().id == 520006 && all.back().kind == ResourceKind::SalvagePile);
+    const Point rack = all.back().position;
+    CHECK(PointInPolygon(ProvisionalEstateLayout().FindPolygon(Anchor::ManorFootprint)->points, rack));
+    for (const auto& other : all)
+        if (other.id != 520006) CHECK(std::hypot(other.position.x - rack.x, other.position.y - rack.y) >= 150.0);
+
+    // An older save (no rack in its table) with the billhook pile searched and a nettle pulled.
+    EstatePlacements older = ProvisionalEstatePlacements();
+    older.placements.pop_back();
+    Simulation old;
+    old.SetPlacements(older);
+    OK(old.NewEstateGame(ProvisionalEstateLayout(), older));
+    auto at = [](const Simulation& sim, int id) { for (const auto& n : sim.GetState().resources) if (n.id == id) return n; return ResourceNode{}; };
+    OK(old.ClearOvergrowth(520001, Item::Count, at(old, 520001).position));
+    CHECK(old.Count(Item::RustedBillhookHead) == 1);
+    int nettle = 0;
+    for (const auto& n : old.GetState().resources) if (n.kind == ResourceKind::Nettles && n.id >= 570000) { nettle = n.id; break; }
+    OK(old.ClearOvergrowth(nettle, Item::Count, at(old, nettle).position));
+    const std::string saved = old.Serialize();
+    // Loaded by this build: the same nodes are cleared, the rack is new and unsearched.
+    Simulation loaded;
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(saved));
+    CHECK(at(loaded, 520001).cleared && at(loaded, nettle).cleared && !at(loaded, 520006).cleared);
+    int cleared = 0, oldCleared = 0;
+    for (const auto& n : loaded.GetState().resources) cleared += n.cleared;
+    for (const auto& n : old.GetState().resources) oldCleared += n.cleared;
+    CHECK(cleared == oldCleared);
+    // Her next search, the rack included, gives the hoe blade; never a second billhook.
+    OK(loaded.ClearOvergrowth(520006, Item::Count, at(loaded, 520006).position));
+    CHECK(loaded.Count(Item::RustedHoeBlade) == 1 && loaded.Count(Item::RustedBillhookHead) == 1);
+    // With every other pile searched and every head owned, the rack gives only scrap.
+    Simulation full = NewEstate();
+    for (int pile = 520001; pile <= 520005; ++pile) OK(full.ClearOvergrowth(pile, Item::Count, at(full, pile).position));
+    const int heads = full.Count(Item::RustedBillhookHead) + full.Count(Item::RustedHoeBlade) + full.Count(Item::RustedAxeHead)
+        + full.Count(Item::RustedScytheBlade) + full.Count(Item::RustedPickHead);
+    CHECK(heads == 5);
+    const int scrap = full.Count(Item::ScrapIron);
+    OK(full.ClearOvergrowth(520006, Item::Count, at(full, 520006).position));
+    CHECK(full.Count(Item::RustedHoeBlade) == 1 && full.Count(Item::ScrapIron) == scrap + 1);
+    // A lost blade (nothing of the hoe anywhere) is exactly what the rack would give.
+    State lost = full.GetState();
+    lost.inventory[static_cast<int>(Item::RustedHoeBlade)] = 0;
+    CHECK(NextSalvageHead(lost) == Item::RustedHoeBlade);
+    // Once all six are searched, the refusal says so plainly.
+    CHECK(NoHoeMessage(lost, Spawn()) == "You need a hoe to till, and the manor's salvage has all been searched.");
 }
 
 int main()
@@ -382,6 +463,8 @@ int main()
     std::cout << "PASS derelict farm and estate disrepair\n";
     StarterChestAndHoeClue();
     std::cout << "PASS starter chest, hoe blade second and its clues\n";
+    ToolRackIsSaveSafe();
+    std::cout << "PASS the tool rack is save-safe and finds her a hoe\n";
     std::cout << checks << " checks passed.\n";
     return 0;
 }

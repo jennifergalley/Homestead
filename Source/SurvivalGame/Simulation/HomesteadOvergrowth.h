@@ -51,6 +51,11 @@ std::string NeedsToolMessage(ToolKind tool, ToolTier tier);
 // The rusted head a salvage pile gives next: the first of billhook, hoe, axe, scythe and pickaxe
 // she owns neither as a head nor as a hafted tool; Item::Count once she has all five.
 Item NextSalvageHead(const State& state);
+// Where a manor salvage pile lies, for directions: "by the chimney in the west rooms".
+const char* SalvageWhereabouts(int pileId);
+// Why she can't till without a hoe, and where the nearest way to one is: her own rusted blade to
+// haft, else the nearest unsearched salvage pile to `player`.
+std::string NoHoeMessage(const State& state, Point player);
 // Energy multiplier for a tool tier (1 at worn).
 double TierEnergyFactor(ToolTier tier);
 

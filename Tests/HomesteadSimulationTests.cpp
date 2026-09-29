@@ -3469,7 +3469,7 @@ void OvergrowthTableAndPrompts()
         if (placement.id == 520001) CHECK(PointInPolygon(manor, placement.position));
         teases += info && info->minTier > ToolTier::Worn;
     }
-    CHECK(overgrowth >= 60 && salvage == 5 && doorway >= 5 && rearGap >= 2 && teases >= 4);
+    CHECK(overgrowth >= 60 && salvage == 6 && doorway >= 5 && rearGap >= 2 && teases >= 4);
     CHECK(nearestSalvage < 700.0);
     // Pickable blackberry brambles (540000+): plenty of them, two within sight of the front door,
     // none in the ruin, and none crowding another placement.

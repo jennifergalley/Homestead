@@ -245,6 +245,36 @@ Item NextSalvageHead(const State& state)
         if (!owned(entry.first) && !owned(entry.second)) return entry.first;
     return Item::Count;
 }
+const char* SalvageWhereabouts(int pileId)
+{
+    switch (pileId)
+    {
+    case 520001: return "in the south range, beside the standing room's door";
+    case 520002: return "just inside the fallen front door";
+    case 520003: return "in the west rooms, north of the chimney";
+    case 520004: return "outside the gap in the fallen rear wall";
+    case 520005: return "under the collapsed south-west corner";
+    case 520006: return "by the chimney in the west rooms, where Father's tools hung";
+    default: return "in the old manor";
+    }
+}
+
+std::string NoHoeMessage(const State& state, Point player)
+{
+    const int blade = static_cast<int>(Item::RustedHoeBlade);
+    bool hasBlade = state.inventory[blade] > 0;
+    for (const auto& piece : state.structures) hasBlade = hasBlade || (piece.kind == Piece::Chest && piece.storage[blade] > 0);
+    if (hasBlade) return "You need a hoe to till. Craft one from your rusted hoe blade and two branches on the Craft page.";
+    if (!state.fixedEstate) return "Craft a hoe before tilling soil.";
+    const ResourceNode* nearest = nullptr;
+    for (const auto& node : state.resources)
+        if (node.kind == ResourceKind::SalvagePile && !node.cleared
+            && (!nearest || OgDistanceSquared(node.position, player) < OgDistanceSquared(nearest->position, player)))
+            nearest = &node;
+    if (!nearest) return "You need a hoe to till, and the manor's salvage has all been searched.";
+    return std::string("You need a hoe to till. Search the old manor's salvage for a hoe blade: there's a pile ")
+        + SalvageWhereabouts(nearest->id) + ".";
+}
 
 ToolTier Simulation::GetToolTier(ToolKind tool) const
 {
