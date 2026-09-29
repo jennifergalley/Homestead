@@ -369,6 +369,15 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
+- **Pickup gain popup** — **Menu headless partial `b2a49e36`, not ready or shipped.** Based on common
+  Simulation revision gains across pack, owned chests and drops, it suppresses moves/reloads and Water,
+  then presents a brass/cream `+N` right of the projected chest for 2.6 visible seconds (maximum four)
+  while book/shop hold. It removes `Selected quantity stored/taken`, garment and drag success notices;
+  errors remain.
+
+  The Editor module build passed, but no PIE 720p/4K or gather/harvest/craft/buy visual route ran.
+  Duplicate harvest/craft success toasts remain. The branch is rooted on `769500a5`; Menu released its
+  hands-on slot for Integration's core package priority.
 - **Zero-stock hotbar seed/food items** — **Menu plus Props Simulation, pending and not shipped.**
   `HotbarSnapshot` currently preserves a pinned item and icon even after `Sim.Count(pack)==0`, making
   planted/stored turnip seeds and strawberry runners look available. Hide zero-count consumable
