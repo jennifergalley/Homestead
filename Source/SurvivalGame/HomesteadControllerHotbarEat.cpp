@@ -1,8 +1,8 @@
 // Eating from the hotbar with the interact buttons: with food selected and nothing in front of her to
 // use them on, A / E (Interact) and X / F (Secondary) eat one, as RT / LMB always has. A focused
 // chest, drop, plot, weed, fire, bed, door or shopkeeper keeps its own action, so she never eats by
-// accident. One press eats one: EatFromHotbar ignores presses while she's still eating, and the key
-// bindings fire on press only.
+// accident. One press eats one, even while she's still chewing the last (the bite clip isn't
+// restarted), and the key bindings fire on press only, so a held button never repeats.
 #include "HomesteadController.h"
 
 #include "Simulation/HomesteadItems.h"

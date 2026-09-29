@@ -645,13 +645,17 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
     const auto FruitBefore = MakeShared<int32>(0);
     const auto BerrySeedStock = MakeShared<int32>(0);
-    Add(TEXT("Plant seeds from a foraged berry with gamepad X rather than the root action"),
+    Add(TEXT("Sow seeds from a foraged berry: berries chosen on the hotbar, then gamepad A"),
         [this, FruitBefore, BerrySeedStock, SecondaryStarts, PickingStarts]()
         {
             *FruitBefore = Controller->Simulation().Count(Homestead::Item::Berries);
             *BerrySeedStock = Controller->Simulation().Count(Homestead::Item::Seeds);
             *SecondaryStarts = PickingStarts();
-            Tap(EKeys::Gamepad_FaceButton_Left);
+            // X / F only weeds (Jenny); a berry is sown only when it's the chosen seed.
+            if (!Controller->IsPinnedToHotbar(Homestead::Item::Berries)) Controller->TogglePinnedToHotbar(Homestead::Item::Berries);
+            for (const auto& Slot : Controller->HotbarSnapshot())
+                if (Slot.Assigned && Slot.Tool == Homestead::Item::Berries) Controller->SelectHotbarSlot(Slot.Index);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, BerryPlotId, FruitBefore, BerrySeedStock, SecondaryStarts, PickingStarts]()
         {
