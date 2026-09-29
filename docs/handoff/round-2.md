@@ -317,6 +317,13 @@ requirement.
   Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
   210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture; packaged NativeMenu
   and Hotbar suites passed.
+- **Sprint Energy recovery** — **pending, not shipped.** Reduce sprint's Energy drain and slowly
+  restore Energy while she stands or walks slowly, never while paused or working. Cap recovery and
+  prevent an idle exploit. Architecture first traces the rule; the eventual implementation adds native
+  boundary/rate/no-exploit coverage and ordinary-play verification.
+- **Live sound sliders** — **pending, not shipped.** Settings volume sliders apply gains immediately
+  while dragging or stepping, and Cancel restores their original gains. Architecture traces current
+  slider/audio ownership before the bounded Menu implementation and 1080p/4K PIE verification.
 - **Contextual hotbar eating and berry feedback** — **Menu `88180744` shipped in the 4 PM playable
   build.** Controller A/X eats one selected berry per tap only when Talk has no
   precedence, and displays `+` the actual bounded Energy delta.
@@ -336,10 +343,10 @@ requirement.
     <https://opengameart.org/content/town-theme-rpg> (durations not yet recorded).
   - Optional *Celtic Loop* (<https://opengameart.org/content/celtic-loop>) may be too repetitive.
 
-  A later dedicated music implementer auditions texture, period fit and clip silence before selecting
-  anything; then imports only the selected CC0/original recordings with credits and catalog entries,
-  uses 3–8 minute ambient-only gaps and a randomized 45–120 s first gap, registers
-  `MusicShuffleBagTests` in CMake, and verifies packaged multi-track load and run.
+  **Next-build priority:** a dedicated music implementer auditions the four CC0 candidate recordings,
+  selects/imports only the qualified set with credits and catalog entries, and adds the shuffle with
+  long ambient-only gaps. Do not use the untracked Kevin MacLeod CC-BY files. Register
+  `MusicShuffleBagTests` in CMake and verify packaged multi-track load and run.
 - **Context hint** — **Menu `88180744` shipped in the 4 PM playable build.** Plain wheel
   cycles the hotbar; Ctrl+wheel zooms while the book has focus.
 - **Weed visibility and grounding** — **Props `[ready]` `8418aa8e` for post-4 PM integration only;
@@ -407,9 +414,18 @@ requirement.
 
   It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
   salvage. Props released its slot before 13:45.
+- **Safe manor construction** — **Props, pending and not shipped.** Let chests and building placement
+  work safely inside the manor ruins through a simulation/build exception, while retaining heritage
+  walls, collision and save behavior. Architecture traces current placement and collision rules before
+  implementation and native/PIE verification.
 - **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
-  road to town, including the bridge approach. The ID range is reserved; implementation remains
-  pending the narrow public-road-corridor proof and bridge coordinate sync.
+  road to town, including the bridge approach, and significantly increase visible pickable
+  berries/herbs/non-farm food across the estate distributions. The ID range is reserved; implementation
+  remains pending the narrow public-road-corridor proof and bridge coordinate sync.
+- **Terrain-following road grade** — **Water Agent, pending and not shipped.** Eliminate artificial
+  raised/lowered road segments by keeping road elevation and grade consistent across r16,
+  Landscape, scenery, road material/ruts and the map. Architecture traces the mismatch before Water's
+  coordinated terrain bake and ordinary walking verification.
 - **Field-book road label** — **Water Agent** (`89914e30`): the redundant runtime `"Dirt road"` label
   is removed with lake `df19d74a` in `main` `61c1595c`
   (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a book-map lake/path
@@ -467,7 +483,7 @@ requirement.
   `ValidateInventory`. **Menu** owns the shop upgrade row, `bRucksackVisible`, the Appearance toggle
   and the 120-cap UI helpers. Tests cover malformed/duplicate entitlement sections, rebuy refusal,
   insufficient funds and capacity/save behavior.
-- **Town travel** — **pending, not shipped.** A wooden `Walk to town` sign outside the estate and a
+- **Town travel** — **next-build priority; pending and not shipped.** A wooden `Walk to town` sign outside the estate and a
   return sign by town; clickable **Town** and **Manor** destinations on the Map invoke the same travel
   action. Architecture traced the road polyline in `estate_layout.json` (486 points / 1.94 km; runtime
   has landmarks only). The MetaHuman walks 210 cm/s (legacy 180); at a 60-minute day, road-only travel
