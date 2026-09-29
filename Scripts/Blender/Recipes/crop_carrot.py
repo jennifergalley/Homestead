@@ -12,8 +12,9 @@ Real-object research (written before modeling):
   y=-0.3,0,+0.3 m, z about 4.5-5.5 cm. Twelve carrots are planted, x=-0.30,-0.10,+0.10,+0.30 on each ridge.
 
 Game notes: walk-through (no collision). One 2K atlas and one material for all five stages
-(alpha-masked, two-sided foliage). Wind vertex colours per homestead_foliage.py. Ripe orange
-shoulders are opaque atlas spheres so the crop reads from 10-15 m.
+(alpha-masked, two-sided foliage). Wind vertex colours per homestead_foliage.py. The plant-stage
+meshes carry only foliage/stems; the game places SM_CropCarrot_Produce on report anchors and scales
+it from sunk pale-green young roots up to the ripe orange shoulder/taproot.
 """
 import math
 import random
@@ -218,6 +219,24 @@ def _plot_positions(rng):
     return plants
 
 
+def _produce_anchor_rows(shift=(0.0, 0.0, 0.0)):
+    rng = random.Random(SEED + 704)
+    offset = Vector(shift)
+    rows = []
+    for base in _plot_positions(random.Random(SEED + 53)):
+        local = base - offset
+        rows.append([round(local.x, 4), round(local.y, 4), round(local.z, 4),
+                     round(rng.uniform(0.0, 360.0), 1), round(rng.uniform(0.86, 1.08), 3)])
+    return rows
+
+
+REPORT["produce"] = {
+    "mesh": _stage_name("Produce"),
+    "anchors": {stage: [list(row) for row in _produce_anchor_rows()]
+                for stage in ("Young", "Growing", "Mature", "Ripe")},
+}
+
+
 STAGE_PARAMS = {
     "Sprout": dict(height=0.045, leaves=0, leaf_len=0.034, petiole=0.006, root=0.0),
     "Young": dict(height=0.105, leaves=3, leaf_len=0.078, petiole=0.030, root=0.0),
@@ -328,14 +347,76 @@ def emit(stage, atlas, lod):
                 az = az0 + i * 2.39996 + rng.uniform(-0.28, 0.28)
                 _emit_frond(b, atlas, base, Vector((math.cos(az), math.sin(az), 0)), phase, rng, stage, lod)
         stats["leaves"] += b.triangles - t0
-        if p["root"] > 0:
-            t0 = b.triangles
-            rr = p["root"] * rng.uniform(0.88, 1.12)
-            center = base + Vector((0, 0, 0.006))
-            b.sphere(center, rr, atlas.uv("root", inset=False), segs=(7, 6, 5)[lod], rings=(4, 3, 3)[lod],
-                     stretch=0.65, axis=Vector((0, 0, 1)), phase=phase)
-            stats["roots"] += b.triangles - t0
     print("HOMESTEAD_TRIS", stage, lod, stats)
+    return b
+
+
+def _zero_wind(obj):
+    attr = obj.data.attributes.get("Wind")
+    if attr:
+        values = []
+        for i in range(len(attr.data)):
+            g = ((i * 41) % 251) / 251.0
+            values.extend((0.0, g, 0.0, 1.0))
+        attr.data.foreach_set("color_srgb", values)
+        obj.data.color_attributes.active_color = obj.data.color_attributes["Wind"]
+
+
+def emit_produce(atlas):
+    """Ripe carrot shoulder/taproot used by the game as a separately scaled/tinted instance."""
+    rng = random.Random(SEED + 808)
+    b = F.Batch(height=1.0)
+    phase = 0.0
+    u0, u1, v0, v1 = atlas.uv("root", inset=False)
+    sides = 16
+    profile = [
+        (0.018, 0.0100),
+        (0.010, 0.0190),
+        (0.000, 0.0225),
+        (-0.025, 0.0200),
+        (-0.060, 0.0150),
+        (-0.102, 0.0076),
+        (-0.140, 0.0015),
+    ]
+    rings = []
+    for ri, (z, rad) in enumerate(profile):
+        t = ri / (len(profile) - 1)
+        center = Vector((0.0025 * math.sin(t * math.pi * 1.1), -0.0015 * math.sin(t * math.pi * 0.7), z))
+        row = []
+        for j in range(sides):
+            a = math.tau * j / sides
+            shoulder = 1.0 + 0.055 * math.sin(3 * a + 0.4) + 0.025 * math.sin(7 * a + 1.1)
+            row.append(b._vert(center + Vector((math.cos(a) * rad * shoulder,
+                                                math.sin(a) * rad * (0.93 + 0.05 * math.cos(a)),
+                                                0)), phase, 0.0))
+        rings.append(row)
+    for ri in range(len(rings) - 1):
+        ta, tb = ri / (len(rings) - 1), (ri + 1) / (len(rings) - 1)
+        va, vb = v1 + (v0 - v1) * ta, v1 + (v0 - v1) * tb
+        for j in range(sides):
+            k = (j + 1) % sides
+            b.faces.append((rings[ri][j], rings[ri][k], rings[ri + 1][k], rings[ri + 1][j]))
+            ua, ub = u0 + (u1 - u0) * j / sides, u0 + (u1 - u0) * (j + 1) / sides
+            b.uvs.append([(ua, va), (ub, va), (ub, vb), (ua, vb)])
+    top = b._vert(Vector((0, 0, 0.020)), phase, 0.0)
+    tip = b._vert(Vector((0.0025, -0.0015, -0.144)), phase, 0.0)
+    for j in range(sides):
+        k = (j + 1) % sides
+        ua, ub = u0 + (u1 - u0) * j / sides, u0 + (u1 - u0) * (j + 1) / sides
+        b.faces.append((top, rings[0][j], rings[0][k]))
+        b.uvs.append([((u0 + u1) * 0.5, v1), (ua, v1), (ub, v1)])
+        b.faces.append((rings[-1][j], tip, rings[-1][k]))
+        b.uvs.append([(ua, v0), ((u0 + u1) * 0.5, v0), (ub, v0)])
+    for i in range(5):
+        az = i * 2.39996 + rng.uniform(-0.20, 0.20)
+        radial = Vector((math.cos(az), math.sin(az), 0))
+        start = radial * rng.uniform(0.002, 0.007) + Vector((0, 0, 0.018 + rng.uniform(-0.001, 0.002)))
+        mid = start + radial * rng.uniform(0.003, 0.008) + Vector((0, 0, rng.uniform(0.006, 0.010)))
+        end = mid + radial * rng.uniform(0.004, 0.010) + Vector((0, 0, rng.uniform(0.005, 0.010)))
+        radius = rng.uniform(0.0011, 0.0018)
+        b.tube([start, mid, end], [radius, radius * 0.75, radius * 0.45], 4,
+               atlas.uv("stem"), v_length=0.35, phase=phase, flutter=0.0, cap=True)
+    print("HOMESTEAD_TRIS Produce", b.triangles)
     return b
 
 
@@ -405,14 +486,22 @@ def emit_harvest(atlas):
 def build(kit):
     atlas = paint_atlas()
     material = atlas.material()
+    produce_material = material.copy()
+    produce_material.name = "M_CropCarrotProduce"
     objects = []
     for stage in STAGES:
         batches = [emit(stage, atlas, lod) for lod in range(3)]
         lods = F.finish_lods(kit, batches, _stage_name(stage), material, smooth_angle=179.0)
+        if stage in REPORT["produce"]["anchors"]:
+            REPORT["produce"]["anchors"][stage] = _produce_anchor_rows(lods[0].get("homestead_shift", (0, 0, 0)))
         print("HOMESTEAD_LODS", stage, F.lod_report(lods))
         objects.extend(lods)
     harvest = emit_harvest(atlas).build(_stage_name("Harvest"), material)
     harvest = kit.join([harvest], _stage_name("Harvest"), pivot=None, unwrap=False, reshade=True, smooth_angle=179.0)
     harvest.data.color_attributes.active_color = harvest.data.color_attributes["Wind"]
     objects.append(harvest)
+    produce = emit_produce(atlas).build(_stage_name("Produce"), produce_material)
+    produce = kit.join([produce], _stage_name("Produce"), pivot=None, unwrap=False, reshade=True, smooth_angle=179.0)
+    _zero_wind(produce)
+    objects.append(produce)
     return objects

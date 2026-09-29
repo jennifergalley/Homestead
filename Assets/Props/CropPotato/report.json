@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "name": "CropPotato",
-  "description": "One 1 m garden plot of earthed-up Cornish potato plants in five crop stages: sprout, young, growing, mature/flowering and ripe die-back with visible tubers.",
+  "description": "One 1 m garden plot of earthed-up Cornish potato plants in five crop stages: sprout, young, growing, mature/flowering and ripe die-back; produce is drawn by the game as separate anchored tuber clusters.",
   "collision": "none",
   "triangle_budget": 3000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/crop_potato.py",
-  "source_sha256": "a06e9669d3aa5d1ad8953158353e7c23e44c9fcacdcb40ce5ee8834e293fa3ef",
+  "source_sha256": "2730105fb731a130cd13c69f50e0dc53c3b07dad1cb2c4ed4941e75d6cc65864",
   "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
   "meshes": {
     "SM_CropPotato_Sprout": {
@@ -40,8 +40,29 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Sprout.fbx",
-      "sha256": "7c7ae260454cd0573f4575d6dc922d3b76f4113e141ff3b34855f0e4ff3b92b3",
-      "preview": "preview_SM_CropPotato_Sprout.png"
+      "sha256": "e83639ec2e61706f26945f550165f4d96cb6af4969f434f3e5290b91e48c81ed",
+      "preview": "preview_SM_CropPotato_Sprout.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropPotato_Sprout_hero.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropPotato_Sprout_LOD1": {
       "vertices": 156,
@@ -74,7 +95,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Sprout_LOD1.fbx",
-      "sha256": "e457db9ce849bce00dc8daf18d0945a0743e4bc38680b71e2ecfbbe5ed509004",
+      "sha256": "0649965e96f8562385033f662ec03356f519b0a35103543f2ad34f5880219f7b",
       "preview": "preview_SM_CropPotato_Sprout_LOD1.png"
     },
     "SM_CropPotato_Sprout_LOD2": {
@@ -108,7 +129,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Sprout_LOD2.fbx",
-      "sha256": "3fa9849e5e8076f9953e0d85ff7da209c0560dac75968345b59fc3ad10b005eb",
+      "sha256": "67685020e3b310cf4a6ded20474f71083c55adf968163b3bae79fd4a6b4614f6",
       "preview": "preview_SM_CropPotato_Sprout_LOD2.png"
     },
     "SM_CropPotato_Young": {
@@ -142,8 +163,29 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Young.fbx",
-      "sha256": "43a004d57cee8421d40fdda384c64f19b1365412754fb5ffef193a85247e5f94",
-      "preview": "preview_SM_CropPotato_Young.png"
+      "sha256": "eeb4487f2b4008ee86a7f5971d46e1dfe04997def2a533086a049ddf5e06f656",
+      "preview": "preview_SM_CropPotato_Young.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropPotato_Young_hero.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropPotato_Young_LOD1": {
       "vertices": 528,
@@ -176,7 +218,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Young_LOD1.fbx",
-      "sha256": "31bdebc9e8f555e6e480d201741d6d5203a430851efba70f753500cd3af709cc",
+      "sha256": "3b10afd3269bd1e43bdcf2d3fd4757cc9ed4b8d809b6909a897c4249fd449bc2",
       "preview": "preview_SM_CropPotato_Young_LOD1.png"
     },
     "SM_CropPotato_Young_LOD2": {
@@ -210,7 +252,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Young_LOD2.fbx",
-      "sha256": "2c6d580ae39d5bd0b204ec1c8b34903c34d9dfd28822bcae7eb82a70409a6dd9",
+      "sha256": "55fdac65293408bd39f9a3028d84bad1f60a435fe15f8d16731e40ce1af1bb29",
       "preview": "preview_SM_CropPotato_Young_LOD2.png"
     },
     "SM_CropPotato_Growing": {
@@ -250,8 +292,30 @@
         ]
       },
       "fbx": "SM_CropPotato_Growing.fbx",
-      "sha256": "1701b9f65d968e20dd38fe0c9b2158af4e5ea96eda07c4cbd440779b6a4c03fa",
-      "preview": "preview_SM_CropPotato_Growing.png"
+      "sha256": "1087550122bd4fbda49f29f3281b03fa1feb655a955741bcdd57ef78b04cb749",
+      "preview": "preview_SM_CropPotato_Growing.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropPotato_Growing_hero.png",
+          "detail": "beauty_SM_CropPotato_Growing_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropPotato_Growing_LOD1": {
       "vertices": 924,
@@ -284,7 +348,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Growing_LOD1.fbx",
-      "sha256": "0ef32a9efbc63329bcb76bdced3df93b61c2ba60615cdff0b46f1da1456f79e5",
+      "sha256": "6fc6038221b00ebfb02cf08e9b303a57bf9e894cc46993efb42d2c14509f5c3b",
       "preview": "preview_SM_CropPotato_Growing_LOD1.png"
     },
     "SM_CropPotato_Growing_LOD2": {
@@ -318,7 +382,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Growing_LOD2.fbx",
-      "sha256": "93da98f6b403b1fbf83515e642edc7809380e0a1d8bab2d936d4b841aef9c67c",
+      "sha256": "e2c3a8306b1ade9b1d46c6f403cfe6d547f05407893fbeec2d4bafce53f6db3a",
       "preview": "preview_SM_CropPotato_Growing_LOD2.png"
     },
     "SM_CropPotato_Mature": {
@@ -352,8 +416,29 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Mature.fbx",
-      "sha256": "dae680e0d5d0203df052d9e2bfe2b3813b25230e90b35761e454a40a6eec2505",
-      "preview": "preview_SM_CropPotato_Mature.png"
+      "sha256": "2b32b5279a95b7a5f417e56ae1f257713da48ce1897c7f1021ca8cf9edcc1eff",
+      "preview": "preview_SM_CropPotato_Mature.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropPotato_Mature_hero.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropPotato_Mature_LOD1": {
       "vertices": 855,
@@ -386,7 +471,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Mature_LOD1.fbx",
-      "sha256": "2048170794b61c06d671004011be60e14eb7007658e1c6a2bd1cb2abac69e5a5",
+      "sha256": "37f6d2f49355dc8c2ee9a2d51bae3b77309fd99f67081fa56be2ebc249159e94",
       "preview": "preview_SM_CropPotato_Mature_LOD1.png"
     },
     "SM_CropPotato_Mature_LOD2": {
@@ -420,12 +505,12 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Mature_LOD2.fbx",
-      "sha256": "0e1e30f6c84080f97529e652c5bd15dc4ee07c8b823b313089be532791a2a642",
+      "sha256": "50972f75e0865ba15e432ae3d33181b0c546af32422504ad114eb54ef187a0f1",
       "preview": "preview_SM_CropPotato_Mature_LOD2.png"
     },
     "SM_CropPotato_Ripe": {
-      "vertices": 2430,
-      "triangles": 2880,
+      "vertices": 1920,
+      "triangles": 1920,
       "size_cm": [
         47.93,
         102.9,
@@ -460,12 +545,34 @@
         ]
       },
       "fbx": "SM_CropPotato_Ripe.fbx",
-      "sha256": "69970962f403d6ec3ce9c51b22fbb7e1d77ee711679513ff9e64c69a5674641d",
-      "preview": "preview_SM_CropPotato_Ripe.png"
+      "sha256": "4c18d1cf09c1d1ed95d6879484c682a8cead5635c4a08d37d3e58866dd1f9e7e",
+      "preview": "preview_SM_CropPotato_Ripe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropPotato_Ripe_hero.png",
+          "detail": "beauty_SM_CropPotato_Ripe_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropPotato_Ripe_LOD1": {
-      "vertices": 840,
-      "triangles": 834,
+      "vertices": 660,
+      "triangles": 510,
       "size_cm": [
         49.69,
         101.68,
@@ -494,12 +601,12 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Ripe_LOD1.fbx",
-      "sha256": "239ea01bec1d8886dd753807dc08e20f116d04836f493bb71364275c162dd8a8",
+      "sha256": "e826a25f3d4b3a9d2465b1923ad55a6d10c4d253da4f2c8f49271cd1080016dd",
       "preview": "preview_SM_CropPotato_Ripe_LOD1.png"
     },
     "SM_CropPotato_Ripe_LOD2": {
-      "vertices": 180,
-      "triangles": 210,
+      "vertices": 108,
+      "triangles": 90,
       "size_cm": [
         41.04,
         88.44,
@@ -528,8 +635,71 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropPotato_Ripe_LOD2.fbx",
-      "sha256": "16d04155aebb59689ebace355456ea9cabaf103e64cfd7fda11ed54026f7c2c8",
+      "sha256": "f634fafca09c1c8f6e6eda041a4564938274aa66b0e292e75b0573df5c3a0df0",
       "preview": "preview_SM_CropPotato_Ripe_LOD2.png"
+    },
+    "SM_CropPotato_Produce": {
+      "vertices": 282,
+      "triangles": 520,
+      "size_cm": [
+        13.56,
+        10.49,
+        7.09
+      ],
+      "materials": [
+        {
+          "name": "M_CropPotatoProduce",
+          "textures": {
+            "basecolor": "T_CropPotato_basecolor.png",
+            "normal": "T_CropPotato_normal.png",
+            "roughness": "T_CropPotato_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 0.65,
+        "focus": [
+          0.0,
+          0.0,
+          -0.005
+        ],
+        "detail_distance": 0.28
+      },
+      "fbx": "SM_CropPotato_Produce.fbx",
+      "sha256": "4bd8c024c2eb39b1e78eec981efb8ca4a33a754a881fcd2d005ad7168881b009",
+      "preview": "preview_SM_CropPotato_Produce.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropPotato_Produce_hero.png",
+          "detail": "beauty_SM_CropPotato_Produce_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropPotato_Harvest": {
       "vertices": 152,
@@ -568,7 +738,7 @@
         ]
       },
       "fbx": "SM_CropPotato_Harvest.fbx",
-      "sha256": "b49a2805628963057c65db31b87f793d412a59ac5ed3c5e6c26f13eb8ff6ef01",
+      "sha256": "ba009245a0b95d987f34bb4af60360f101e44ccbf5af32f494a8b42b2ada07a6",
       "preview": "preview_SM_CropPotato_Harvest.png",
       "beauty": {
         "views": {
@@ -601,13 +771,110 @@
     "attribute": "Wind (vertex colour)",
     "R": "height above plot ground / stage height",
     "G": "per-stem random phase",
-    "B": "leaf/tuber flutter mask",
+    "B": "leaf flutter mask; produce mesh is static",
     "A": "1"
   },
-  "material_notes": "One material M_CropPotato: 2K alpha-masked foliage atlas with dark matt potato leaflets, yellow die-back leaves, star flowers, buff tubers and muted stem/ridge details.",
+  "material_notes": "One material M_CropPotato: 2K alpha-masked foliage atlas with dark matt potato leaflets, yellow die-back leaves, star flowers, buff tubers and muted stem/ridge details. SM_CropPotato_Produce uses material slot M_CropPotatoProduce with the same atlas.",
+  "produce": {
+    "mesh": "SM_CropPotato_Produce",
+    "anchors": {
+      "Young": [
+        [
+          -0.036,
+          -0.3,
+          0.045,
+          -18.0,
+          0.92
+        ],
+        [
+          0.042,
+          0.0,
+          0.045,
+          11.0,
+          1.05
+        ],
+        [
+          -0.026,
+          0.3,
+          0.045,
+          27.0,
+          0.88
+        ]
+      ],
+      "Growing": [
+        [
+          -0.036,
+          -0.3,
+          0.045,
+          -18.0,
+          0.92
+        ],
+        [
+          0.042,
+          0.0,
+          0.045,
+          11.0,
+          1.05
+        ],
+        [
+          -0.026,
+          0.3,
+          0.045,
+          27.0,
+          0.88
+        ]
+      ],
+      "Mature": [
+        [
+          -0.036,
+          -0.3,
+          0.045,
+          -18.0,
+          0.92
+        ],
+        [
+          0.042,
+          0.0,
+          0.045,
+          11.0,
+          1.05
+        ],
+        [
+          -0.026,
+          0.3,
+          0.045,
+          27.0,
+          0.88
+        ]
+      ],
+      "Ripe": [
+        [
+          -0.036,
+          -0.3,
+          0.045,
+          -18.0,
+          0.92
+        ],
+        [
+          0.042,
+          0.0,
+          0.045,
+          11.0,
+          1.05
+        ],
+        [
+          -0.026,
+          0.3,
+          0.045,
+          27.0,
+          0.88
+        ]
+      ]
+    }
+  },
   "textures": {
-    "T_CropPotato_basecolor.png": "f23cee0969b77648682af07e42d869e7d18aa33fc74df071d5dc39ab8a290efe",
-    "T_CropPotato_normal.png": "5016ecebed1ff91e34da753faae5a0e081230c54b9e32b536a08bfb17988df41",
-    "T_CropPotato_roughness.png": "e9dc0eda4df30a0dad02b1861f6c8e418d08438cc65c6ff9652d28b513c2c40c"
+    "T_CropPotato_basecolor.png": "0064a2d5a9b98d873496b3031b6b8265916fb88da9103bff099518121e50ae20",
+    "T_CropPotato_normal.png": "541580b4d0d7a11e97bb38012a12519fcb4831fbcfb232fc3da9d3c4768aa4a6",
+    "T_CropPotato_roughness.png": "0f42ed96212ca629a40cf476080ec92bf0a47a4905331338ed0ccba6a4d416a8"
   }
 }

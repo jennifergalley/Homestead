@@ -2755,6 +2755,44 @@ void Simulation::SkipToHourOfDay(double hourOfDay)
     state_.hour = target;
     ++revision_;
 }
+Result Simulation::SetCropGrowthForPlaytest(double growth)
+{
+    if (state_.failed) return Failed();
+    if (!FiniteRange(growth, 0.0, 1.0)) return Bad("Growth must be between 0 and 1.");
+    int count = 0;
+    for (auto& plot : state_.plots)
+        if (plot.planted)
+        {
+            plot.growth = growth;
+            ++count;
+        }
+    ++revision_;
+    return Good(std::to_string(count) + (count == 1 ? " crop set to " : " crops set to ")
+        + std::to_string(static_cast<int>(std::lround(growth * 100))) + "% grown.");
+}
+Result Simulation::PassDaysForPlaytest(double days, bool tend, Point player)
+{
+    if (state_.failed) return Failed();
+    if (!FiniteRange(days, 0.0, 60.0) || days <= 0.0) return Bad("Choose between a moment and 60 days.");
+    double left = std::min(days * 24.0, MaxHour - state_.hour);
+    while (left > 1e-9)
+    {
+        if (tend)
+            for (auto& plot : state_.plots)
+            {
+                plot.moisture = 1.0;
+                plot.weeds = 0.0;
+            }
+        state_.hunger = 100.0;
+        state_.energy = 100.0;
+        left -= Step(std::min(1.0, left), player, false);
+    }
+    state_.hunger = 100.0;
+    state_.energy = 100.0;
+    ++revision_;
+    const int whole = static_cast<int>(std::lround(days));
+    return Good(std::to_string(whole) + (whole == 1 ? " day passes" : " days pass") + (tend ? "; the garden was tended." : "."));
+}
 Result Simulation::Sleep(double hours, Point player)
 {
     if (state_.failed) return Failed();

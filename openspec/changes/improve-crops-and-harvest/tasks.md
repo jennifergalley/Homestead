@@ -14,7 +14,17 @@
 
 ## 3. Game
 
-- [x] 3.1 Plot visuals: stage meshes per crop, a ripe glint, and dry and wet soil at the 0.4 threshold
+- [x] 3.1 Plot visuals: stage meshes per crop and dry and wet soil at the 0.4 threshold
 - [x] 3.2 Focus line from `PlotStatus`, with Harvest, Water and Weed actions
 - [x] 3.3 Harvest animations (pull and pick) with the produce in her hand, hidden afterwards, and a lab command
 - [x] 3.4 PIE on the Estate: till, sow, water, sleep through each stage, harvest; screenshots of every stage
+
+## 4. Visible produce (Jenny's playtest)
+
+- [x] 4.1 Stage meshes without produce; one SM_Crop<Name>_Produce per crop with per-stage anchors in the report
+- [x] 4.2 crop_produce_anchors.py generates HomesteadCropProduceAnchors.inc; AddCropProduce draws produce per plot on one instanced mesh, sized and raised by growth
+- [x] 4.3 M_CropProduce: per-instance ripeness tints produce from pale green to full colour
+- [x] 4.4 Drop the ripe glint (Jenny): ripeness shows by the produce alone
+- [x] 4.5 HomesteadGrowCrops <days> [tend] playtest exec (Simulation::PassDaysForPlaytest) with a native test
+- [x] 4.6 Keyboard X does the secondary action outside build planning, matching controller X in the prompt
+- [x] 4.7 PIE: every crop at 25/50/75/100% at the gameplay camera, in daylight, rain and dusk

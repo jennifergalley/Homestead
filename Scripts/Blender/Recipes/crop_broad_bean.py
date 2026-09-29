@@ -25,7 +25,7 @@ import homestead_foliage as F
 
 NAME = "CropBroadBean"
 DESCRIPTION = ("One 1 m tilled-bed plot of six Windsor/Longpod broad bean plants across five crop "
-               "stages, with glaucous pinnate leaves, black-blotched flowers and large readable pods.")
+               "stages, with glaucous pinnate leaves, black-blotched flowers and separate instanced pods.")
 COLLISION = "none"
 TRIANGLE_BUDGET = 4000
 PROVENANCE = "Original project-authored procedural geometry and numpy-painted textures; no third-party asset."
@@ -35,6 +35,8 @@ BEAUTY = {"pose": (0, 0, 0), "views": ["hero", "detail", "eye"], "eye_distance":
           "meshes": {
               "SM_CropBroadBean_Growing": {"focus": (0.0, 0.0, 0.32), "eye_distance": 4.0},
               "SM_CropBroadBean_Ripe": {"focus": (0.02, 0.0, 0.44), "eye_distance": 4.8},
+              "SM_CropBroadBean_Produce": {"focus": (0.0, 0.0, -0.085), "eye_distance": 1.0,
+                                           "detail_distance": 0.28, "detail_fstop": 32.0},
           }}
 REPORT = {
     "blocking": False,
@@ -44,8 +46,8 @@ REPORT = {
     "material_notes": "One M_CropBroadBean atlas: alpha in basecolor; roughness R, translucency G, AO B.",
 }
 NOTES = {
-    "SM_CropBroadBean_Ripe": "Pick-and-regrow stage: 70-80 cm plants, fat 12-18 cm green pods with lumpy geometry.",
-    "SM_CropBroadBean_Mature": "White axillary flowers carry dark blotches plus young green pods.",
+    "SM_CropBroadBean_Ripe": "Pick-and-regrow stage: 70-80 cm plants without baked-in pods; visible pods are instanced from SM_CropBroadBean_Produce.",
+    "SM_CropBroadBean_Mature": "White axillary flowers carry dark blotches; young pods are separate instanced produce.",
     "SM_CropBroadBean_Harvest": "Hand-held produce: small bunch of three pods, grip at stalk top/origin, pods hang down -Z.",
 }
 
@@ -56,8 +58,8 @@ STAGES = {
     "Sprout": dict(height=0.105, plant_height=0.060, leaves=1, side=0, pods=0, flowers=0),
     "Young": dict(height=0.225, plant_height=0.180, leaves=4, side=0, pods=0, flowers=0),
     "Growing": dict(height=0.535, plant_height=0.490, leaves=8, side=2, pods=0, flowers=0),
-    "Mature": dict(height=0.755, plant_height=0.710, leaves=6, side=1, pods=1, flowers=2),
-    "Ripe": dict(height=0.825, plant_height=0.780, leaves=6, side=1, pods=4, flowers=1),
+    "Mature": dict(height=0.755, plant_height=0.710, leaves=6, side=1, pods=0, flowers=2),
+    "Ripe": dict(height=0.825, plant_height=0.780, leaves=6, side=1, pods=0, flowers=1),
 }
 
 
@@ -275,6 +277,79 @@ def _add_pod(b, atlas, node, az, length, radius, phase, lod, rng, young=False):
            phase=phase, flutter=0.04, cap=True, flatten=0.82, roll=rng.uniform(0, math.tau))
 
 
+def _stage_stem(stage, plant):
+    cfg = STAGES[stage]
+    rng = random.Random(plant["seed"] + sum(ord(c) for c in stage))
+    H = cfg["plant_height"] * rng.uniform(0.94, 1.04)
+    return _stem_path(plant["pos"], H, rng, lean=0.018 if stage in ("Mature", "Ripe") else 0.010, n=6)
+
+
+def _stem_node(stem, t):
+    seg = min(int(t * (len(stem) - 1)), len(stem) - 2)
+    f = t * (len(stem) - 1) - seg
+    return stem[seg].lerp(stem[seg + 1], f)
+
+
+def _produce_anchor_specs(stage):
+    """Three lower-axil pod attachment points per plant, aligned to LOD0 stems."""
+    specs = []
+    for plant in _plants():
+        stem = _stage_stem(stage, plant)
+        for slot, t in enumerate((0.28, 0.42, 0.56)):
+            rng = random.Random(plant["seed"] + slot * 271 + 7309)
+            az = plant["heading"] + slot * 2.094 + rng.uniform(-0.22, 0.22)
+            heading = Vector((math.cos(az), math.sin(az), 0))
+            node = _stem_node(stem, t) + heading * 0.006
+            scale = 0.85 + 0.25 * random.Random(plant["seed"] + slot * 467).random()
+            specs.append({
+                "pos": node,
+                "yaw": math.degrees(az - math.pi * 0.5),
+                "scale": scale,
+            })
+    return specs
+
+
+def _produce_report(stage_shifts=None):
+    anchors = {}
+    stage_shifts = stage_shifts or {}
+    for stage in ("Young", "Growing", "Mature", "Ripe"):
+        shift = Vector(stage_shifts.get(stage, (0, 0, 0)))
+        anchors[stage] = [[round(float((spec["pos"] - shift).x), 4),
+                           round(float((spec["pos"] - shift).y), 4),
+                           round(float((spec["pos"] - shift).z), 4),
+                           round(float(spec["yaw"]), 1),
+                           round(float(spec["scale"]), 3)]
+                          for spec in _produce_anchor_specs(stage)]
+    return {"mesh": f"SM_{NAME}_Produce", "anchors": anchors}
+
+
+def _emit_produce(atlas):
+    b = F.Batch(height=0.17)
+    stalk = [Vector((0, 0, 0)), Vector((0, 0.010, -0.017)), Vector((0, 0.018, -0.030))]
+    b.tube(stalk, [0.00125, 0.00095, 0.00070], 6, atlas.uv("stem"), v_length=0.35,
+           phase=0.0, flutter=0.0)
+    axis = Vector((0, 0.28, -1.0)).normalized()
+    side = axis.cross(Vector((0, 0, 1))).normalized()
+    length = 0.135
+    radius = 0.0128
+    pts = []
+    rings = 9
+    for i in range(rings):
+        t = i / (rings - 1)
+        bow = side * math.sin(t * math.pi) * 0.006
+        pts.append(stalk[-1] + axis * (length * t) + bow + Vector((0, 0, -0.012 * math.sin(t * math.pi))))
+    radii = []
+    for i in range(rings):
+        t = i / (rings - 1)
+        envelope = math.sin(math.pi * (0.08 + 0.84 * t)) ** 0.31
+        lump = 1.0 + 0.20 * max(math.exp(-((t - c) / 0.105) ** 2) for c in (0.24, 0.43, 0.62, 0.80))
+        radii.append(radius * envelope * lump)
+    b.tube(pts, radii, 14, atlas.uv("pod"), v_length=length, phase=0.0, flutter=0.0,
+           cap=True, flatten=0.82, roll=0.0)
+    print("HOMESTEAD_TRIS Produce 0", b.triangles)
+    return b
+
+
 def _emit_stage(stage, atlas, lod):
     cfg = STAGES[stage]
     b = F.Batch(height=cfg["height"])
@@ -367,11 +442,20 @@ def build(kit):
     atlas = paint_atlas()
     material = atlas.material()
     objs = []
+    stage_shifts = {}
     for stage in ("Sprout", "Young", "Growing", "Mature", "Ripe"):
         batches = [_emit_stage(stage, atlas, lod) for lod in range(3)]
         made = F.finish_lods(kit, batches, f"SM_{NAME}_{stage}", material, smooth_angle=179.0)
+        stage_shifts[stage] = made[0].get("homestead_shift", (0, 0, 0))
         print("HOMESTEAD_LODS", stage, F.lod_report(made))
         objs.extend(made)
+    REPORT["produce"] = _produce_report(stage_shifts)
+    produce_material = material.copy()
+    produce_material.name = f"M_{NAME}Produce"
+    produce = _emit_produce(atlas).build(f"SM_{NAME}_Produce", produce_material)
+    produce = kit.join([produce], f"SM_{NAME}_Produce", pivot=None, unwrap=False, reshade=True, smooth_angle=179.0)
+    produce.data.color_attributes.active_color = produce.data.color_attributes["Wind"]
+    objs.append(produce)
     harvest = _emit_harvest(atlas).build(f"SM_{NAME}_Harvest", material)
     harvest = kit.join([harvest], f"SM_{NAME}_Harvest", pivot=None, unwrap=False, reshade=True, smooth_angle=179.0)
     harvest.data.color_attributes.active_color = harvest.data.color_attributes["Wind"]

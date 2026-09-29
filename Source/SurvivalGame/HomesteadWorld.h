@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Async/Future.h"
 #include "GameFramework/Actor.h"
+#include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadRegionalDescriptorCache.h"
 #include "Simulation/HomesteadSimulation.h"
 #include "Simulation/HomesteadWorldGeneration.h"
@@ -144,6 +145,10 @@ public:
     void ReleaseHarvest() { HeldHarvestPlotId = INDEX_NONE; }
     // The plant or produce mesh for a crop stage ("Sprout" ... "Ripe", "Harvest"), or null until imported.
     UStaticMesh* CropMesh(Homestead::CropKind Kind, const TCHAR* Stage);
+    // The crop's produce (SM_Crop<Name>_Produce) at each of the stage's anchors on the plant, sized
+    // and coloured by growth: roots push up out of the soil, fruit and pods swell and colour up.
+    void AddCropProduce(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot, Homestead::CropStage CropStage,
+        const FTransform& PlantTransform);
     // Hide one component of the held produce (a stick she has already lifted from the pile).
     void HideHeldProducePart(int32 Index);
     // Felling: call right after tree or sapling ResourceId is cleared. A standing copy stays up
@@ -230,10 +235,7 @@ private:
     UPROPERTY()
     TMap<FName, TObjectPtr<UStaticMesh>> CropMeshes;
     UPROPERTY()
-    TObjectPtr<UMaterialInterface> RipeGlintMaterial;
-    UPROPERTY()
     TObjectPtr<UStaticMesh> WeedTuftMesh;
-    bool bRipeGlintLoaded = false;
     // The manor's granite kit and hearth (StoneFoundation, StoneWall, StoneDoorway, StoneRoof,
     // StoneHearth), loaded on first use by name.
     UPROPERTY()

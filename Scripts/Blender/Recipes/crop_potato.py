@@ -28,28 +28,48 @@ import homestead_shrub as S
 
 NAME = "CropPotato"
 DESCRIPTION = ("One 1 m garden plot of earthed-up Cornish potato plants in five crop stages: "
-               "sprout, young, growing, mature/flowering and ripe die-back with visible tubers.")
+               "sprout, young, growing, mature/flowering and ripe die-back; produce is drawn "
+               "by the game as separate anchored tuber clusters.")
 COLLISION = "none"
 TRIANGLE_BUDGET = 3000
 PROVENANCE = "Original project-authored procedural geometry and numpy-painted textures; no third-party asset."
 BEAUTY = {"pose": (0, 0, 0), "views": ["hero"], "eye_distance": 5.0, "meshes": {
     "SM_CropPotato_Growing": {"focus": (0.0, 0.0, 0.24), "eye_distance": 5.0, "views": ["hero", "detail"]},
     "SM_CropPotato_Ripe": {"focus": (0.0, 0.0, 0.18), "eye_distance": 5.2, "views": ["hero", "detail"]},
+    "SM_CropPotato_Produce": {"focus": (0.0, 0.0, -0.005), "eye_distance": 0.65,
+                              "detail_distance": 0.28, "views": ["hero", "detail"]},
     "SM_CropPotato_Harvest": {"focus": (0.0, 0.0, -0.07), "eye_distance": 1.4, "views": ["hero", "detail"]},
 }}
 REPORT = {
     "blocking": False,
     "plot": "1 m square, pivot bottom-centre; plant crowns stand on tilled-bed ridge tops at z≈0.045 m.",
     "wind": {"attribute": "Wind (vertex colour)", "R": "height above plot ground / stage height",
-             "G": "per-stem random phase", "B": "leaf/tuber flutter mask", "A": "1"},
+             "G": "per-stem random phase", "B": "leaf flutter mask; produce mesh is static", "A": "1"},
     "material_notes": ("One material M_CropPotato: 2K alpha-masked foliage atlas with dark matt potato leaflets, "
-                       "yellow die-back leaves, star flowers, buff tubers and muted stem/ridge details."),
+                       "yellow die-back leaves, star flowers, buff tubers and muted stem/ridge details. "
+                       "SM_CropPotato_Produce uses material slot M_CropPotatoProduce with the same atlas."),
 }
 
 SEED = 1851
 BASE_Z = 0.045
 RIDGES = (-0.30, 0.0, 0.30)
 STAGES = ("Sprout", "Young", "Growing", "Mature", "Ripe")
+
+
+def _produce_anchor_lists():
+    scales = (0.92, 1.05, 0.88)
+    yaws = (-18.0, 11.0, 27.0)
+    x_offsets = (-0.036, 0.042, -0.026)
+    anchors = []
+    for idx, y in enumerate(RIDGES):
+        anchors.append([round(x_offsets[idx], 3), round(y, 3), round(BASE_Z, 3), yaws[idx], scales[idx]])
+    return {stage: [list(a) for a in anchors] for stage in ("Young", "Growing", "Mature", "Ripe")}
+
+
+REPORT["produce"] = {
+    "mesh": "SM_CropPotato_Produce",
+    "anchors": _produce_anchor_lists(),
+}
 
 
 def _palettes():
@@ -144,6 +164,20 @@ def _paint_tuber(atlas, nrng):
     atlas.put("tuber", layer, meters_per_px=0.065 / X.shape[0], opaque=True)
 
 
+def _paint_soil(atlas, nrng):
+    X, Y, px = atlas.grid("soil")
+    n = F.noise(X.shape, nrng, freq=20, beta=1.5)
+    grit = F.smoothstep(0.70, 0.94, F.noise(X.shape, nrng, freq=95, beta=1.0))
+    layer = F.Layer(X.shape)
+    layer.color = F.lerp((0.060, 0.042, 0.026), (0.145, 0.105, 0.060), n)
+    layer.color = F.lerp(layer.color, (0.030, 0.023, 0.017), grit * 0.45)
+    layer.alpha[...] = 1
+    layer.height = 0.00022 * n + 0.00012 * grit
+    layer.rough = 0.86 + 0.10 * grit
+    layer.trans[...] = 0.0
+    atlas.put("soil", layer, meters_per_px=0.050 / X.shape[0], opaque=True)
+
+
 def _paint_stem_column(atlas, nrng):
     U, V = atlas.column_grid("stem")
     n = F.noise(U.shape, nrng, freq=42, beta=1.4, aniso=(1.0, 8.0))
@@ -167,6 +201,7 @@ def paint_atlas():
     atlas.tile("compound_dry", 380, 720)
     atlas.tile("flower", 260, 260)
     atlas.tile("tuber", 360, 360)
+    atlas.tile("soil", 220, 220)
     if atlas.cached():
         return atlas
     nrng = np.random.default_rng(SEED)
@@ -178,6 +213,7 @@ def paint_atlas():
     _paint_compound(atlas, "compound_dry", nrng, rng, dry=True)
     _paint_flower(atlas, nrng, rng)
     _paint_tuber(atlas, nrng)
+    _paint_soil(atlas, nrng)
     _paint_stem_column(atlas, nrng)
     atlas.save()
     return atlas
@@ -340,19 +376,6 @@ def emit(stage, atlas, lod):
                 _flower_cluster(b, atlas, base + Vector((0, 0, 0.32 + 0.07 * prng.random())), hd,
                                 p["phase"], lod, prng)
                 stats["flowers"] += b.triangles - t0
-        if cfg.get("ripe"):
-            tubers = (5, 3, 2)[lod]
-            for j in range(tubers):
-                side = -1 if j % 2 else 1
-                x = (-0.11 + 0.055 * j) + prng.uniform(-0.012, 0.012)
-                y = base.y + side * prng.uniform(0.010, 0.040)
-                if abs(y) > 0.51:
-                    y = math.copysign(0.49, y)
-                r = prng.uniform(0.024, 0.036)
-                axis = Vector((prng.uniform(0.8, 1.2), prng.uniform(-0.4, 0.4), prng.uniform(0.15, 0.35))).normalized()
-                t0 = b.triangles
-                _tuber(b, atlas, Vector((x, y, BASE_Z + r * 0.42)), r, axis, p["phase"], lod)
-                stats["tubers"] += b.triangles - t0
     print("HOMESTEAD_TRIS", stage, lod, stats)
     return b
 
@@ -397,6 +420,44 @@ def harvest(kit, atlas, material):
     return obj
 
 
+def _static_wind(obj):
+    attr = obj.data.color_attributes.get("Wind") or obj.data.attributes.get("Wind")
+    if attr:
+        for datum in attr.data:
+            datum.color = (0.0, 0.0, 0.0, 1.0)
+        obj.data.color_attributes.active_color = attr
+    return obj
+
+
+def produce(kit, atlas, material):
+    """Separate ripe-size potato produce cluster; pivot is the soil line."""
+    m2 = material.copy()
+    m2.name = "M_CropPotatoProduce"
+    b = F.Batch(height=0.14)
+    tubers = (
+        (Vector((-0.030, -0.008, -0.020)), 0.034, Vector((1.00, 0.20, 0.20))),
+        (Vector((0.026, 0.010, -0.023)), 0.030, Vector((0.82, -0.55, 0.25))),
+        (Vector((0.000, 0.031, -0.026)), 0.026, Vector((0.25, 0.96, 0.20))),
+    )
+    for i, (center, radius, axis) in enumerate(tubers):
+        b.sphere(center, radius, atlas.uv("tuber", inset=False), segs=12, rings=6,
+                 stretch=1.32, axis=axis.normalized(), phase=0.07 * i)
+    rng = random.Random(SEED + 1200)
+    for i in range(8):
+        az = rng.uniform(0, math.tau)
+        dist = rng.uniform(0.018, 0.061)
+        loc = Vector((math.cos(az) * dist, math.sin(az) * dist * 0.72, rng.uniform(-0.002, 0.012)))
+        b.sphere(loc, rng.uniform(0.004, 0.008), atlas.uv("soil", inset=False), segs=5, rings=3,
+                 stretch=rng.uniform(0.65, 1.15),
+                 axis=Vector((rng.uniform(-0.4, 0.4), rng.uniform(-0.4, 0.4), 1)).normalized(),
+                 phase=0.0)
+    obj = b.build("SM_CropPotato_Produce", m2)
+    obj = kit.join([obj], "SM_CropPotato_Produce", pivot=None, unwrap=False, reshade=True, smooth_angle=65.0)
+    _static_wind(obj)
+    print("HOMESTEAD_LODS Produce", F.lod_report([obj]))
+    return obj
+
+
 def build(kit):
     atlas = paint_atlas()
     material = atlas.material(translucent=(1.05, 1.10, 0.55))
@@ -407,5 +468,6 @@ def build(kit):
         _restore_plot_origin(objs)
         out.extend(objs)
         print("HOMESTEAD_LODS", stage, F.lod_report(objs))
+    out.append(produce(kit, atlas, material))
     out.append(harvest(kit, atlas, material))
     return out

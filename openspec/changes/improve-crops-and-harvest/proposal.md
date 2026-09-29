@@ -30,8 +30,12 @@ and Stardew Valley, set in 1850s Cornwall.
 - **Visible growth.** Blender-made plants for every crop in five stages (Sprout, Young, Growing,
   Mature, Ripe), with LODs. Ripe roots show their shoulders, the cabbage its head, beans their
   pods and strawberries their fruit. The plot swaps stage as the days pass.
-- **Ripeness indicators.** A ripe plot glints gently and shows its produce. The focus line reads
+- **Ripeness you can see (Coral Island style, from Jenny's playtest).** The produce itself (turnip
+  and carrot shoulders, potatoes, cabbage heads, bean pods, strawberries) appears on the plants,
+  grows continuously and colours up from pale green as the crop ripens, so a ripe crop reads as
+  "done" from the gameplay camera by its full size and colour alone, with no effect on top. The focus line reads
   "ready to harvest" with a harvest prompt. A dry plot keeps its pale, cracked soil.
+- **Playtest aid.** `HomesteadGrowCrops <days> [tend]` lets whole days pass so crops really grow.
 - **Harvest animation.** For root crops and cabbage she kneels, pulls or cuts, and lifts the
   produce. For beans and berries she picks from the standing plant. The produce shows briefly in
   her hand and is hidden when she's done.

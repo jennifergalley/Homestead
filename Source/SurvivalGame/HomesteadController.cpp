@@ -713,10 +713,22 @@ bool AHomesteadController::CanPinToHotbar(Homestead::Item Item)
 
 void AHomesteadController::PinNewSeed(Homestead::Item Item)
 {
-    // Bought or given crop seed goes straight onto a free hotbar slot, ready to sow.
+    // Bought or given crop seed goes straight onto the hotbar, ready to sow: into a free slot, or
+    // else into the slot of a seed she has run out of.
     const auto* Crop = Homestead::CropForSeed(Item);
-    if (!Crop || Item == Homestead::Item::Berries || IsPinnedToHotbar(Item) || HotbarSlots.IndexOfByKey(-1) == INDEX_NONE) return;
-    TogglePinnedToHotbar(Item);
+    if (!Crop || Item == Homestead::Item::Berries || IsPinnedToHotbar(Item)) return;
+    if (HotbarSlots.IndexOfByKey(-1) != INDEX_NONE)
+    {
+        TogglePinnedToHotbar(Item);
+        return;
+    }
+    for (int32& Slot : HotbarSlots)
+        if (Slot >= 0 && static_cast<Homestead::Item>(Slot) != Homestead::Item::Berries
+            && Homestead::CropForSeed(static_cast<Homestead::Item>(Slot)) && Sim.Count(static_cast<Homestead::Item>(Slot)) <= 0)
+        {
+            Slot = static_cast<int32>(Item);
+            return;
+        }
 }
 
 bool AHomesteadController::IsPinnedToHotbar(Homestead::Item Item) const
@@ -1064,6 +1076,18 @@ void AHomesteadController::HomesteadPackMenu(int32 Tile, int32 Mode)
 void AHomesteadController::HomesteadMorning(float Hour)
 {
     Sim.SkipToHourOfDay(Hour);
+    RefreshRemaining = 0;
+}
+
+void AHomesteadController::HomesteadGrowCrops(float Days, int32 Tend)
+{
+    Notify(Sim.PassDaysForPlaytest(Days, Tend != 0, PlayerPoint()));
+    RefreshRemaining = 0;
+}
+
+void AHomesteadController::HomesteadCropGrowth(float Growth)
+{
+    Notify(Sim.SetCropGrowthForPlaytest(Growth));
     RefreshRemaining = 0;
 }
 
@@ -2196,7 +2220,8 @@ FString AHomesteadController::FocusActions() const
                     // A seed chosen on the hotbar is sown with the use button (UseSelectedTool).
                     if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
                         if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
-                            if (Seed->kind != Homestead::CropKind::Roots && Seed->kind != Homestead::CropKind::Berries)
+                            if (Seed->kind != Homestead::CropKind::Roots && Seed->kind != Homestead::CropKind::Berries
+                                && Sim.Count(Seed->seed) > 0)
                                 return A + TEXT(" Sow ") + Text(Seed->lower);
                     return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
                 }
@@ -2829,9 +2854,10 @@ void AHomesteadController::Interact()
             const bool Mature = Plot.growth >= 1;
             if (!Planted)
             {
-                // The seed chosen on the hotbar, else wild root seed.
+                // The seed chosen on the hotbar (if she has any left), else wild root seed.
                 TOptional<Homestead::CropKind> Seed;
-                if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
+                if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0
+                    && Sim.Count(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])) > 0)
                     Seed = PlantingCrop(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]));
                 PlantFocusedPlot(Seed && *Seed != Homestead::CropKind::Berries ? *Seed : Homestead::CropKind::Roots);
                 break;
@@ -3956,6 +3982,9 @@ void AHomesteadController::EndPlacement()
 
 void AHomesteadController::ToggleDeconstruct()
 {
+    // Outside build planning, keyboard X does what controller X does (the secondary action: weed,
+    // plant berry seeds, add fuel), so a prompt reading "[X]" is right on either device.
+    if (!bPlanning && !bBookOpen && !IsFailed()) { Secondary(); return; }
     if (!bPlanning || bBookOpen || IsFailed()) return;
     bDeconstructing = !bDeconstructing;
     DeconstructId = INDEX_NONE;

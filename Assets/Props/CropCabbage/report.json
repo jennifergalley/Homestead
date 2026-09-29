@@ -1,12 +1,12 @@
 {
   "schema": 1,
   "name": "CropCabbage",
-  "description": "One 1 m garden plot of Early York/Cornish spring cabbage in five stages: seedling, young, open rosette, hearting mature plant and ripe pale tight head.",
+  "description": "One 1 m garden plot of Early York/Cornish spring cabbage in five stages: seedling, young, open rosette and hearting/ripe wrapper leaves; the cabbage head is drawn by the game as a separate anchored produce mesh.",
   "collision": "none",
   "triangle_budget": 4000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/crop_cabbage.py",
-  "source_sha256": "b71c2bacf70ffdc6b211198f0ed370ed9e7465774d2dac403c5b71f537c70f04",
+  "source_sha256": "bd05f8924c71a5f43d7766459a81921b7464061d433e7b58ea42bcc3494d414b",
   "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
   "meshes": {
     "SM_CropCabbage_Sprout": {
@@ -41,8 +41,30 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Sprout.fbx",
-      "sha256": "7ce45fc999bfb8e6876652403cc5e791bf353764879542856777d6237f6fa57c",
-      "preview": "preview_SM_CropCabbage_Sprout.png"
+      "sha256": "71c8425c83f56a9ff95c2d07d7f0faa491e9abe4cb2600b5f1bc0c87000a2f5b",
+      "preview": "preview_SM_CropCabbage_Sprout.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropCabbage_Sprout_hero.png",
+          "detail": "beauty_SM_CropCabbage_Sprout_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropCabbage_Sprout_LOD1": {
       "vertices": 54,
@@ -76,7 +98,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Sprout_LOD1.fbx",
-      "sha256": "305a4a718612c45477efad43ae79112207c592cbc7580fec8477df720db4924c",
+      "sha256": "05a01a88735db2780ff4eb1e779ff39e9a0c68af4887c7a07e4611df5b172507",
       "preview": "preview_SM_CropCabbage_Sprout_LOD1.png"
     },
     "SM_CropCabbage_Sprout_LOD2": {
@@ -111,7 +133,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Sprout_LOD2.fbx",
-      "sha256": "769fcf1bcfc55a31d437a633ac52cd7959309be1df93cddfe4c21638ab0395d1",
+      "sha256": "ff4c8cdbc88362406ea83ae8a4ed19e292f49978bd3a1849490cc7a08bdf1df0",
       "preview": "preview_SM_CropCabbage_Sprout_LOD2.png"
     },
     "SM_CropCabbage_Young": {
@@ -146,8 +168,30 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Young.fbx",
-      "sha256": "515837422544ab0479c512b6494c8f871248a135059414c0d15e3a2231a300e7",
-      "preview": "preview_SM_CropCabbage_Young.png"
+      "sha256": "b4d526bb0b853db36ee74b6c8c7a636bf91773404c8d49e3419c8975e06ab425",
+      "preview": "preview_SM_CropCabbage_Young.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropCabbage_Young_hero.png",
+          "detail": "beauty_SM_CropCabbage_Young_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropCabbage_Young_LOD1": {
       "vertices": 54,
@@ -181,7 +225,7 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Young_LOD1.fbx",
-      "sha256": "0319076c277622575ed3d32315827a7d0347d5149156f7a154bd4f04682b665b",
+      "sha256": "7a2e3ae22cdc9383c504ad6be8b204a802a28ce0c0e75776b1d1d7d7219df589",
       "preview": "preview_SM_CropCabbage_Young_LOD1.png"
     },
     "SM_CropCabbage_Young_LOD2": {
@@ -216,12 +260,12 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Young_LOD2.fbx",
-      "sha256": "15b08e5ed6febc49e858a70f875092b8cc1aa3e82d5d39f21df725d6ffcdf4ec",
+      "sha256": "7d7fc50b138151e105809bc88e8a07b77d596445febbc79b3a9b7a847c9494e5",
       "preview": "preview_SM_CropCabbage_Young_LOD2.png"
     },
     "SM_CropCabbage_Growing": {
-      "vertices": 2061,
-      "triangles": 3216,
+      "vertices": 936,
+      "triangles": 1248,
       "size_cm": [
         68.41,
         86.42,
@@ -256,11 +300,12 @@
         ]
       },
       "fbx": "SM_CropCabbage_Growing.fbx",
-      "sha256": "c7d89df61bbf1e1a8f61745723f52f627b660941d474d443a20838b5d0d26cf1",
+      "sha256": "1caa32b044ce685034014e5c34061e870843bc1e520699007989c56bbe64f68e",
       "preview": "preview_SM_CropCabbage_Growing.png",
       "beauty": {
         "views": {
-          "hero": "beauty_SM_CropCabbage_Growing_hero.png"
+          "hero": "beauty_SM_CropCabbage_Growing_hero.png",
+          "detail": "beauty_SM_CropCabbage_Growing_detail.png"
         },
         "device": "OPTIX",
         "gpus": [
@@ -281,8 +326,8 @@
       }
     },
     "SM_CropCabbage_Growing_LOD1": {
-      "vertices": 693,
-      "triangles": 984,
+      "vertices": 258,
+      "triangles": 264,
       "size_cm": [
         70.32,
         85.33,
@@ -312,16 +357,16 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Growing_LOD1.fbx",
-      "sha256": "7a9f1929cfa6724904c89564cb5274aa01e19eacf74992e8233745684de123aa",
+      "sha256": "5b63c33213c0b0c649f5807e4a575a01174c454c16dcad34899b97a3b1ef257c",
       "preview": "preview_SM_CropCabbage_Growing_LOD1.png"
     },
     "SM_CropCabbage_Growing_LOD2": {
-      "vertices": 210,
-      "triangles": 372,
+      "vertices": 27,
+      "triangles": 24,
       "size_cm": [
         72.78,
         92.75,
-        12.91
+        4.65
       ],
       "materials": [
         {
@@ -347,12 +392,12 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Growing_LOD2.fbx",
-      "sha256": "90f48ec2e0351c6d9a8dc396d85f5d379c3346e6c6ca1cf1b95bfe8cc2ea7b83",
+      "sha256": "0e7f689c76691d4c34db72a5a2b3b769409e31143e9163aa5c61b368131f756e",
       "preview": "preview_SM_CropCabbage_Growing_LOD2.png"
     },
     "SM_CropCabbage_Mature": {
-      "vertices": 2439,
-      "triangles": 3744,
+      "vertices": 1314,
+      "triangles": 1776,
       "size_cm": [
         79.01,
         93.25,
@@ -382,16 +427,38 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Mature.fbx",
-      "sha256": "68502bcab3c2fdffe936955db952b6ad763631337bb16b3e48bb3e065d138f9b",
-      "preview": "preview_SM_CropCabbage_Mature.png"
+      "sha256": "c67ad4cf62a66637f13513cfbae15db049ef07b69c7bef73ecfa26ab3120904a",
+      "preview": "preview_SM_CropCabbage_Mature.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropCabbage_Mature_hero.png",
+          "detail": "beauty_SM_CropCabbage_Mature_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropCabbage_Mature_LOD1": {
-      "vertices": 804,
-      "triangles": 1104,
+      "vertices": 369,
+      "triangles": 384,
       "size_cm": [
         78.54,
         100.63,
-        17.04
+        16.11
       ],
       "materials": [
         {
@@ -417,16 +484,16 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Mature_LOD1.fbx",
-      "sha256": "bc3d30b73b2d4a83f9895921900f25b9bf53b52f1b8a319d288f49b15a4082ee",
+      "sha256": "f383c5f6f779b1a8b9ea42252fd730548d84373cc590df57afad8f81aa8debdc",
       "preview": "preview_SM_CropCabbage_Mature_LOD1.png"
     },
     "SM_CropCabbage_Mature_LOD2": {
-      "vertices": 210,
-      "triangles": 372,
+      "vertices": 27,
+      "triangles": 24,
       "size_cm": [
         87.82,
         107.32,
-        19.4
+        6.82
       ],
       "materials": [
         {
@@ -452,12 +519,12 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Mature_LOD2.fbx",
-      "sha256": "45455d653db1402514794fa868a8f98d69bd307b9184293b96bae95d7cde17b2",
+      "sha256": "8e3915b285dc20853ef37507f3d2d7b05a5aa1aba0e71513ef7fdeebfe6aa679",
       "preview": "preview_SM_CropCabbage_Mature_LOD2.png"
     },
     "SM_CropCabbage_Ripe": {
-      "vertices": 2589,
-      "triangles": 3912,
+      "vertices": 1404,
+      "triangles": 1872,
       "size_cm": [
         83.64,
         105.52,
@@ -492,11 +559,12 @@
         ]
       },
       "fbx": "SM_CropCabbage_Ripe.fbx",
-      "sha256": "84fb5399b09c7bd1657965cf2776b4877d4f1823da2c53e014a5ef6c7ebc6c3c",
+      "sha256": "12f9330a5637d42b040a3025e1c7ca23d5020d9db1716447740dd7dfe1b03af2",
       "preview": "preview_SM_CropCabbage_Ripe.png",
       "beauty": {
         "views": {
-          "hero": "beauty_SM_CropCabbage_Ripe_hero.png"
+          "hero": "beauty_SM_CropCabbage_Ripe_hero.png",
+          "detail": "beauty_SM_CropCabbage_Ripe_detail.png"
         },
         "device": "OPTIX",
         "gpus": [
@@ -517,12 +585,12 @@
       }
     },
     "SM_CropCabbage_Ripe_LOD1": {
-      "vertices": 822,
-      "triangles": 1116,
+      "vertices": 387,
+      "triangles": 396,
       "size_cm": [
         83.11,
         101.77,
-        21.59
+        18.53
       ],
       "materials": [
         {
@@ -548,16 +616,16 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Ripe_LOD1.fbx",
-      "sha256": "412323d88594f37b7e298c71d736127163b744b7a4079d7de113e324794f16dc",
+      "sha256": "1654f208899e662ba58f08d024f47b29600b93d3f8e8326362227b9bb3aad54d",
       "preview": "preview_SM_CropCabbage_Ripe_LOD1.png"
     },
     "SM_CropCabbage_Ripe_LOD2": {
-      "vertices": 210,
-      "triangles": 372,
+      "vertices": 27,
+      "triangles": 24,
       "size_cm": [
         86.3,
         103.09,
-        24.67
+        7.28
       ],
       "materials": [
         {
@@ -583,8 +651,71 @@
         "eye_distance": 5.0
       },
       "fbx": "SM_CropCabbage_Ripe_LOD2.fbx",
-      "sha256": "b4ce4963c8c16a504f5cd4c05095ec767eb81af9f831b5122368a0894bdd430c",
+      "sha256": "9159faf13f49704cded11499758ba30bbcdf9fc27ce7b65b1ad29318a8670003",
       "preview": "preview_SM_CropCabbage_Ripe_LOD2.png"
+    },
+    "SM_CropCabbage_Produce": {
+      "vertices": 665,
+      "triangles": 1056,
+      "size_cm": [
+        20.94,
+        21.1,
+        15.72
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbageProduce",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 0.78,
+        "focus": [
+          0.0,
+          0.0,
+          0.082
+        ],
+        "detail_distance": 0.46
+      },
+      "fbx": "SM_CropCabbage_Produce.fbx",
+      "sha256": "304e8b1162eea11e497e506fed0d24669336e8be6bdb42629f00a0ae363842ca",
+      "preview": "preview_SM_CropCabbage_Produce.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropCabbage_Produce_hero.png",
+          "detail": "beauty_SM_CropCabbage_Produce_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     },
     "SM_CropCabbage_Harvest": {
       "vertices": 659,
@@ -623,11 +754,12 @@
         ]
       },
       "fbx": "SM_CropCabbage_Harvest.fbx",
-      "sha256": "05b61e148e096fc027bd00edafec562d64113289d02a9c4548e94ef7d5bc6dfa",
+      "sha256": "a5114468a45cbf2114c1a8bbefe5d9610b3c72c999e518f98e36001694480515",
       "preview": "preview_SM_CropCabbage_Harvest.png",
       "beauty": {
         "views": {
-          "hero": "beauty_SM_CropCabbage_Harvest_hero.png"
+          "hero": "beauty_SM_CropCabbage_Harvest_hero.png",
+          "detail": "beauty_SM_CropCabbage_Harvest_detail.png"
         },
         "device": "OPTIX",
         "gpus": [
@@ -655,10 +787,107 @@
     "attribute": "Wind (vertex colour)",
     "R": "height above plot ground / stage height",
     "G": "per-plant random phase",
-    "B": "outer-leaf flutter, 0 on tight heads",
+    "B": "outer-leaf flutter; produce mesh is static",
     "A": "1"
   },
-  "material_notes": "One material M_CropCabbage: 2K alpha-masked foliage atlas with waxy glaucous leaves, slug damage/yellowed margins and opaque wrapped-head tiles.",
+  "material_notes": "One material M_CropCabbage: 2K alpha-masked foliage atlas with waxy glaucous leaves, slug damage/yellowed margins and opaque wrapped-head tiles. SM_CropCabbage_Produce uses material slot M_CropCabbageProduce with the same atlas.",
+  "produce": {
+    "mesh": "SM_CropCabbage_Produce",
+    "anchors": {
+      "Young": [
+        [
+          -0.2,
+          -0.3,
+          0.101,
+          9.0,
+          0.94
+        ],
+        [
+          0.2,
+          0.0,
+          0.101,
+          -16.0,
+          1.08
+        ],
+        [
+          -0.2,
+          0.3,
+          0.101,
+          23.0,
+          0.89
+        ]
+      ],
+      "Growing": [
+        [
+          -0.2,
+          -0.3,
+          0.12,
+          9.0,
+          0.94
+        ],
+        [
+          0.2,
+          0.0,
+          0.12,
+          -16.0,
+          1.08
+        ],
+        [
+          -0.2,
+          0.3,
+          0.12,
+          23.0,
+          0.89
+        ]
+      ],
+      "Mature": [
+        [
+          -0.2,
+          -0.3,
+          0.116,
+          9.0,
+          0.94
+        ],
+        [
+          0.2,
+          0.0,
+          0.116,
+          -16.0,
+          1.08
+        ],
+        [
+          -0.2,
+          0.3,
+          0.116,
+          23.0,
+          0.89
+        ]
+      ],
+      "Ripe": [
+        [
+          -0.2,
+          -0.3,
+          0.113,
+          9.0,
+          0.94
+        ],
+        [
+          0.2,
+          0.0,
+          0.113,
+          -16.0,
+          1.08
+        ],
+        [
+          -0.2,
+          0.3,
+          0.113,
+          23.0,
+          0.89
+        ]
+      ]
+    }
+  },
   "textures": {
     "T_CropCabbage_basecolor.png": "7de70346797fbc7c6fb5f4bce7dbae27f0e038b2a8ddbdfc8850df969f792372",
     "T_CropCabbage_normal.png": "2734676714d1272802abf3f85181dd5df8092d0e6335c2077c9d520a457dad09",

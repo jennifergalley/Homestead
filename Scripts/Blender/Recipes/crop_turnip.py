@@ -13,8 +13,9 @@ Real-object research (written before modeling):
   y=-0.3,0,+0.3 m, z about 4.5-5.5 cm. Six turnips are planted, x=-0.22,+0.22 on each ridge.
 
 Game notes: walk-through (no collision). One 2K atlas and one material for all five stages
-(alpha-masked, two-sided foliage). Wind vertex colours per homestead_foliage.py. Ripe roots are
-painted opaque atlas spheres so their white globes and purple crowns read from 10-15 m.
+(alpha-masked, two-sided foliage). Wind vertex colours per homestead_foliage.py. The plant-stage
+meshes carry only leaves/stems; the game places SM_CropTurnip_Produce on report anchors and scales
+it from sunk pale-green young roots up to the ripe white/purple globe.
 """
 import math
 import random
@@ -209,6 +210,24 @@ def _plot_positions(rng):
     return plants
 
 
+def _produce_anchor_rows(shift=(0.0, 0.0, 0.0)):
+    rng = random.Random(SEED + 704)
+    offset = Vector(shift)
+    rows = []
+    for base in _plot_positions(random.Random(SEED + 42)):
+        local = base - offset
+        rows.append([round(local.x, 4), round(local.y, 4), round(local.z, 4),
+                     round(rng.uniform(0.0, 360.0), 1), round(rng.uniform(0.88, 1.08), 3)])
+    return rows
+
+
+REPORT["produce"] = {
+    "mesh": _stage_name("Produce"),
+    "anchors": {stage: [list(row) for row in _produce_anchor_rows()]
+                for stage in ("Young", "Growing", "Mature", "Ripe")},
+}
+
+
 STAGE_PARAMS = {
     "Sprout": dict(height=0.052, leaves=1, leaf_len=0.034, petiole=0.012, root=0.0),
     "Young": dict(height=0.135, leaves=5, leaf_len=0.094, petiole=0.040, root=0.0),
@@ -309,17 +328,39 @@ def emit(stage, atlas, lod):
                 old = stage in ("Mature", "Ripe") and i >= leaf_count - (2 if lod < 2 else 1)
                 _emit_leaf(b, atlas, base, heading, phase, rng, stage, lod, old=old)
         stats["leaves"] += b.triangles - t0
-
-        radius = p["root"]
-        if radius > 0 and not (stage == "Growing" and lod == 2):
-            t0 = b.triangles
-            rr = radius * rng.uniform(0.92, 1.08)
-            center = base + Vector((0, 0, (0.004 if stage != "Ripe" else 0.012)))
-            rect = atlas.uv("root_ripe" if stage in ("Mature", "Ripe") else "root_small", inset=False)
-            b.sphere(center, rr, rect, segs=(10, 7, 6)[lod], rings=(6, 4, 3)[lod],
-                     stretch=0.93 if stage == "Ripe" else 0.65, axis=Vector((0, 0, 1)), phase=phase)
-            stats["roots"] += b.triangles - t0
     print("HOMESTEAD_TRIS", stage, lod, stats)
+    return b
+
+
+def _zero_wind(obj):
+    attr = obj.data.attributes.get("Wind")
+    if attr:
+        values = []
+        for i in range(len(attr.data)):
+            g = ((i * 37) % 251) / 251.0
+            values.extend((0.0, g, 0.0, 1.0))
+        attr.data.foreach_set("color_srgb", values)
+        obj.data.color_attributes.active_color = obj.data.color_attributes["Wind"]
+
+
+def emit_produce(atlas):
+    """Ripe turnip globe used by the game as a separately scaled/tinted instance."""
+    rng = random.Random(SEED + 808)
+    b = F.Batch(height=1.0)
+    phase = 0.0
+    # Ten-centimetre exaggerated globe: origin/soil line crosses 60% up from the buried bottom.
+    b.sphere(Vector((0, 0, -0.010)), 0.050, atlas.uv("root_ripe", inset=False),
+             segs=18, rings=9, stretch=1.0, axis=Vector((0, 0, 1)), phase=phase)
+    for i in range(6):
+        az = i * 2.39996 + rng.uniform(-0.22, 0.22)
+        radial = Vector((math.cos(az), math.sin(az), 0))
+        start = radial * rng.uniform(0.004, 0.014) + Vector((0, 0, 0.034 + rng.uniform(-0.002, 0.003)))
+        mid = start + radial * rng.uniform(0.003, 0.008) + Vector((0, 0, rng.uniform(0.006, 0.010)))
+        end = mid + radial * rng.uniform(0.006, 0.012) + Vector((0, 0, rng.uniform(0.005, 0.010)))
+        radius = rng.uniform(0.0017, 0.0026)
+        b.tube([start, mid, end], [radius, radius * 0.82, radius * 0.52], 5,
+               atlas.uv("stem"), v_length=0.35, phase=phase, flutter=0.0, cap=True)
+    print("HOMESTEAD_TRIS Produce", b.triangles)
     return b
 
 
@@ -374,14 +415,22 @@ def emit_harvest(atlas):
 def build(kit):
     atlas = paint_atlas()
     material = atlas.material()
+    produce_material = material.copy()
+    produce_material.name = "M_CropTurnipProduce"
     objects = []
     for stage in STAGES:
         batches = [emit(stage, atlas, lod) for lod in range(3)]
         lods = F.finish_lods(kit, batches, _stage_name(stage), material, smooth_angle=179.0)
+        if stage in REPORT["produce"]["anchors"]:
+            REPORT["produce"]["anchors"][stage] = _produce_anchor_rows(lods[0].get("homestead_shift", (0, 0, 0)))
         print("HOMESTEAD_LODS", stage, F.lod_report(lods))
         objects.extend(lods)
     harvest = emit_harvest(atlas).build(_stage_name("Harvest"), material)
     harvest = kit.join([harvest], _stage_name("Harvest"), pivot=None, unwrap=False, reshade=True, smooth_angle=179.0)
     harvest.data.color_attributes.active_color = harvest.data.color_attributes["Wind"]
     objects.append(harvest)
+    produce = emit_produce(atlas).build(_stage_name("Produce"), produce_material)
+    produce = kit.join([produce], _stage_name("Produce"), pivot=None, unwrap=False, reshade=True, smooth_angle=179.0)
+    _zero_wind(produce)
+    objects.append(produce)
     return objects

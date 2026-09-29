@@ -1,6 +1,5 @@
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadCrops.h"
-#include "Components/MaterialBillboardComponent.h"
 #include "HomesteadEstateTerrain.h"
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
@@ -3991,6 +3990,81 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
     }
 }
 
+namespace HomesteadCropProduce
+{
+// Where each crop's produce sits on each stage's plants (generated from the Blender reports).
+struct FAnchor
+{
+    const TCHAR* Visual;
+    int32 Stage; // 0 Young, 1 Growing, 2 Mature, 3 Ripe
+    float X, Y, Z, Yaw, Scale;
+};
+const FAnchor Anchors[] = {
+#include "HomesteadCropProduceAnchors.inc"
+    {nullptr, -1, 0, 0, 0, 0, 0},
+};
+// How each crop's produce grows in, tuned by eye at the gameplay camera (about 7 m):
+// Appear: growth at which it shows. RiseCm: how far below the soil roots start before they push up.
+// MinScale / MinLength: size across and along its hanging axis when it first shows (pods lengthen
+// faster than they fatten). ColourPower: how late it colours up (higher stays pale longer).
+struct FLook
+{
+    const TCHAR* Visual;
+    float Appear, RiseCm, MinScale, MinLength, ColourPower;
+    float Boost = 1.0f; // extra size at ripe where the mesh alone reads small at 7 m
+};
+const FLook Looks[] = {
+    {TEXT("CropTurnip"), 0.30f, 3.0f, 0.50f, 0.50f, 1.0f, 1.3f},
+    {TEXT("CropCarrot"), 0.30f, 3.0f, 0.50f, 0.50f, 1.0f, 1.9f},
+    // Three hills of pale tubers on dark soil vanish in rain at 7 m below about 2.2x.
+    {TEXT("CropPotato"), 0.30f, 3.0f, 0.45f, 0.45f, 1.2f, 2.3f},
+    {TEXT("CropCabbage"), 0.30f, 0.0f, 0.25f, 0.25f, 1.2f},
+    // Picked plants restart at growth 1 - regrow/grow (beans 0.57, strawberries 0.63), so these
+    // appear just below that: a picked plant is left with tiny green fruit that swells again.
+    {TEXT("CropBroadBean"), 0.50f, 0.0f, 0.45f, 0.30f, 1.3f, 1.8f},
+    {TEXT("CropStrawberry"), 0.55f, 0.0f, 0.35f, 0.35f, 1.8f, 2.0f},
+};
+}
+
+void AHomesteadWorld::AddCropProduce(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot,
+    Homestead::CropStage CropStage, const FTransform& PlantTransform)
+{
+    using namespace HomesteadCropProduce;
+    if (CropStage < Homestead::CropStage::Young || CropStage > Homestead::CropStage::Ripe) return;
+    const FString CropVisual = UTF8_TO_TCHAR(Homestead::GetCropInfo(Plot.kind).visual);
+    const FLook* Look = nullptr;
+    for (const FLook& Candidate : Looks)
+        if (CropVisual == Candidate.Visual) Look = &Candidate;
+    if (!Look || Plot.growth < Look->Appear) return;
+    UStaticMesh* Produce = CropMesh(Plot.kind, TEXT("Produce"));
+    if (!Produce) return;
+    const float T = FMath::Clamp(static_cast<float>((Plot.growth - Look->Appear) / (1.0 - Look->Appear)), 0.0f, 1.0f);
+    const float Ripeness = Plot.growth >= 1.0 ? 1.0f : FMath::Pow(T, Look->ColourPower);
+    const int32 StageIndex = static_cast<int32>(CropStage) - static_cast<int32>(Homestead::CropStage::Young);
+    // One instanced mesh per plot: its instances carry their ripeness for M_CropProduce's tint.
+    auto* Fruit = NewObject<UInstancedStaticMeshComponent>(this);
+    Fruit->SetupAttachment(GetRootComponent());
+    Fruit->SetMobility(EComponentMobility::Movable);
+    Fruit->SetStaticMesh(Produce);
+    Fruit->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    Fruit->SetCanEverAffectNavigation(false);
+    Fruit->SetGenerateOverlapEvents(false);
+    Fruit->SetRelativeTransform(PlantTransform);
+    Fruit->SetNumCustomDataFloats(1);
+    Fruit->RegisterComponent();
+    for (const FAnchor& Anchor : Anchors)
+    {
+        if (!Anchor.Visual || Anchor.Stage != StageIndex || CropVisual != Anchor.Visual) continue;
+        const float Across = FMath::Lerp(Look->MinScale, 1.0f, T) * Anchor.Scale * Look->Boost;
+        const float Along = FMath::Lerp(Look->MinLength, 1.0f, T) * Anchor.Scale * Look->Boost;
+        const FTransform At(FRotator(0.0f, Anchor.Yaw, 0.0f),
+            FVector(Anchor.X, Anchor.Y, Anchor.Z - (1.0f - T) * Look->RiseCm), FVector(Across, Across, Along));
+        const int32 Index = Fruit->AddInstance(At);
+        Fruit->SetCustomDataValue(Index, 0, Ripeness);
+    }
+    Visual.Components.Add(Fruit);
+}
+
 UStaticMesh* AHomesteadWorld::CropMesh(Homestead::CropKind Kind, const TCHAR* StageName)
 {
     const FString Visual = UTF8_TO_TCHAR(Homestead::GetCropInfo(Kind).visual);
@@ -4053,28 +4127,8 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
                 const FRotator Lie = FRotationMatrix::MakeFromZX(Normal, FRotator(0, Yaw, 0).Vector()).Rotator();
                 if (auto* Part = AddPart(Visual, Plant, AtGround(PX, PY, Bed ? -1.2f : 0.0f), FVector(100, 100, 100), Leaf, false, Lie))
                     Part->SetMaterial(0, Plant->GetMaterial(0));
-                if (CropStage == Homestead::CropStage::Ripe)
-                {
-                    // A slow, soft glint over a ripe plant, readable from across the garden.
-                    if (!bRipeGlintLoaded)
-                    {
-                        RipeGlintMaterial = LoadObject<UMaterialInterface>(nullptr,
-                            TEXT("/Game/SurvivalGame/Environment/Props/CropGlint/M_CropRipeGlint.M_CropRipeGlint"), nullptr, LOAD_NoWarn | LOAD_Quiet);
-                        bRipeGlintLoaded = true;
-                    }
-                    if (RipeGlintMaterial)
-                    {
-                        auto* Glint = NewObject<UMaterialBillboardComponent>(this);
-                        Glint->SetupAttachment(GetRootComponent());
-                        Glint->SetMobility(EComponentMobility::Movable);
-                        const float Top = Plant->GetBounds().GetBox().Max.Z;
-                        Glint->SetRelativeLocation(AtGround(PX, PY, Top + 18.0f));
-                        Glint->AddElement(RipeGlintMaterial, nullptr, false, 26.0f, 26.0f, nullptr);
-                        Glint->SetCastShadow(false);
-                        Glint->RegisterComponent();
-                        Visual.Components.Add(Glint);
-                    }
-                }
+                // Ripeness shows in the produce itself (size and colour), with no effect on top.
+                AddCropProduce(Visual, Plot, CropStage, FTransform(Lie, AtGround(PX, PY, Bed ? -1.2f : 0.0f)));
             }
             else if (Plot.planted && CropStage == Homestead::CropStage::Sown)
             {
@@ -4591,7 +4645,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         const bool bShownPlanted = (Plot.planted || bHarvestHeld) && Plot.id != HeldPlotId;
         const bool bSquareHidden = bHeldPlotHidden && Plot.id == HeldPlotId;
         const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d:%d:%d:%d"),
-            Plot.cellX, Plot.cellY, bShownPlanted, bSquareHidden, Stage(Plot.growth, 12),
+            Plot.cellX, Plot.cellY, bShownPlanted, bSquareHidden, Stage(Plot.growth, 24),
             Stage(Plot.moisture, 5), Stage(Plot.weeds, 8), static_cast<int>(Plot.kind), bHarvestHeld,
             static_cast<int>(Homestead::StageOf(Plot)));
         FHomesteadWorldVisual& Visual = PlotVisuals.FindOrAdd(Plot.id);

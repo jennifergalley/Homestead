@@ -1306,6 +1306,30 @@ void CropTableAndStatus()
     Simulation saved;
     OK(saved.Deserialize(sim.Serialize()));
     CHECK(saved.Serialize() == sim.Serialize());
+
+    // Playtest aid: passing tended days grows a crop on schedule; untended ones dry out and lag.
+    Stock(sim, {{Item::TurnipSeed, 2}});
+    OK(sim.Plant(rootId, roots, CropKind::Turnips));
+    Simulation untended;
+    OK(untended.Deserialize(sim.Serialize()));
+    const double hourBefore = sim.GetState().hour;
+    OK(sim.PassDaysForPlaytest(3.9, true, roots));
+    for (const auto& plot : sim.GetState().plots)
+        if (plot.id == rootId) CHECK(plot.planted && !IsRipe(plot) && plot.growth > 0.95);
+    OK(sim.PassDaysForPlaytest(0.2, true, roots));
+    for (const auto& plot : sim.GetState().plots)
+        if (plot.id == rootId) CHECK(IsRipe(plot));
+    CHECK(Close(sim.GetState().hour - hourBefore, 4.1 * 24.0) && !sim.GetState().failed);
+    CHECK(sim.GetState().hunger == 100.0);
+    OK(untended.PassDaysForPlaytest(4.1, false, roots));
+    for (const auto& plot : untended.GetState().plots)
+        if (plot.id == rootId) CHECK(!IsRipe(plot) && plot.growth > 0.1);
+    UnchangedFailure(sim, [&] { return sim.PassDaysForPlaytest(0.0, true, roots); });
+    UnchangedFailure(sim, [&] { return sim.PassDaysForPlaytest(61.0, true, roots); });
+    OK(sim.SetCropGrowthForPlaytest(0.5));
+    for (const auto& plot : sim.GetState().plots)
+        if (plot.planted) CHECK(plot.growth == 0.5);
+    UnchangedFailure(sim, [&] { return sim.SetCropGrowthForPlaytest(1.5); });
 }
 
 // A real version 12 estate save, written by main at 8762ba46 (40 items; a new estate game with goods

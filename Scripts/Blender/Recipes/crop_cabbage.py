@@ -28,28 +28,56 @@ import homestead_shrub as S
 
 NAME = "CropCabbage"
 DESCRIPTION = ("One 1 m garden plot of Early York/Cornish spring cabbage in five stages: seedling, young, "
-               "open rosette, hearting mature plant and ripe pale tight head.")
+               "open rosette and hearting/ripe wrapper leaves; the cabbage head is drawn by the game "
+               "as a separate anchored produce mesh.")
 COLLISION = "none"
 TRIANGLE_BUDGET = 4000
 PROVENANCE = "Original project-authored procedural geometry and numpy-painted textures; no third-party asset."
 BEAUTY = {"pose": (0, 0, 0), "views": ["hero", "detail"], "eye_distance": 5.0, "meshes": {
     "SM_CropCabbage_Growing": {"focus": (0.0, 0.0, 0.16), "eye_distance": 4.8},
     "SM_CropCabbage_Ripe": {"focus": (0.0, 0.0, 0.18), "eye_distance": 5.0},
+    "SM_CropCabbage_Produce": {"focus": (0.0, 0.0, 0.082), "eye_distance": 0.78,
+                               "detail_distance": 0.46, "views": ["hero", "detail"]},
     "SM_CropCabbage_Harvest": {"focus": (0.0, 0.0, -0.09), "eye_distance": 1.5, "views": ["hero", "detail"]},
 }}
 REPORT = {
     "blocking": False,
     "plot": "1 m square, pivot bottom-centre; cabbage crowns stand on tilled-bed ridge tops at z≈0.045 m.",
     "wind": {"attribute": "Wind (vertex colour)", "R": "height above plot ground / stage height",
-             "G": "per-plant random phase", "B": "outer-leaf flutter, 0 on tight heads", "A": "1"},
+             "G": "per-plant random phase", "B": "outer-leaf flutter; produce mesh is static", "A": "1"},
     "material_notes": ("One material M_CropCabbage: 2K alpha-masked foliage atlas with waxy glaucous leaves, "
-                       "slug damage/yellowed margins and opaque wrapped-head tiles."),
+                       "slug damage/yellowed margins and opaque wrapped-head tiles. "
+                       "SM_CropCabbage_Produce uses material slot M_CropCabbageProduce with the same atlas."),
 }
 
 SEED = 1852
 BASE_Z = 0.045
 PLANTS = [(-0.20, -0.30), (0.20, 0.0), (-0.20, 0.30)]
 STAGES = ("Sprout", "Young", "Growing", "Mature", "Ripe")
+
+
+def _produce_anchor_lists():
+    scales = (0.94, 1.08, 0.89)
+    yaws = (9.0, -16.0, 23.0)
+    stage_z = {
+        "Young": BASE_Z + 0.056,
+        "Growing": BASE_Z + 0.075,
+        "Mature": BASE_Z + 0.071,
+        "Ripe": BASE_Z + 0.068,
+    }
+    anchors = {}
+    for stage, z in stage_z.items():
+        anchors[stage] = [
+            [round(x, 3), round(y, 3), round(z, 3), yaws[idx], scales[idx]]
+            for idx, (x, y) in enumerate(PLANTS)
+        ]
+    return anchors
+
+
+REPORT["produce"] = {
+    "mesh": "SM_CropCabbage_Produce",
+    "anchors": _produce_anchor_lists(),
+}
 
 
 def _leaf_shape(kind="outer"):
@@ -332,6 +360,34 @@ def _head(b, center, radius, height, rect, phase, lod, pointed=True, crown_rect=
                crown_rect, spin=0.0, cup=-0.03, phase=phase, flutter=0.02, segs=(2, 2, 1)[lod])
 
 
+def _head_wrap_patch(b, atlas, center, radius, height, azimuth, span, twist, phase, *,
+                     rows=5, cols=4, offset=0.003):
+    """Overlapping outside leaf panel on a drumhead cabbage."""
+    u0, u1, v0, v1 = atlas.uv("head", inset=False)
+    grid = []
+    for i in range(rows + 1):
+        t = i / rows
+        z = -height * 0.45 + height * (0.08 + 0.86 * t)
+        prof = math.sin(math.pi * (0.10 + 0.80 * (0.08 + 0.86 * t))) ** 0.55
+        row = []
+        for j in range(cols + 1):
+            s = j / cols * 2 - 1
+            curl = span * s * (1.04 - 0.38 * t)
+            a = azimuth + curl + twist * (t - 0.5)
+            rib = 0.0015 * math.cos(s * math.pi) * math.sin(t * math.pi)
+            rr = radius * prof + offset + rib
+            p = Vector(center) + Vector((math.cos(a) * rr, math.sin(a) * rr, z))
+            row.append(b._vert(p, phase, 0.0))
+        grid.append(row)
+    for i in range(rows):
+        for j in range(cols):
+            b.faces.append((grid[i][j], grid[i][j + 1], grid[i + 1][j + 1], grid[i + 1][j]))
+            b.uvs.append([(u0 + (u1 - u0) * (j / cols), v0 + (v1 - v0) * (i / rows)),
+                          (u0 + (u1 - u0) * ((j + 1) / cols), v0 + (v1 - v0) * (i / rows)),
+                          (u0 + (u1 - u0) * ((j + 1) / cols), v0 + (v1 - v0) * ((i + 1) / rows)),
+                          (u0 + (u1 - u0) * (j / cols), v0 + (v1 - v0) * ((i + 1) / rows))])
+
+
 def emit(stage, atlas, lod):
     rng = random.Random(SEED + 151 * STAGES.index(stage))
     cfg = {
@@ -365,7 +421,7 @@ def emit(stage, atlas, lod):
             t0 = b.triangles
             b.flat(base + Vector((0, 0, 0.055)), Vector((0, 0, 1)), cfg["length"] * 1.55,
                    atlas.uv("spray"), spin=prng.uniform(0, math.tau), cup=-0.10, phase=phase,
-                   flutter=0.8, segs=1)
+                   flutter=0.8, segs=2)
             stats["leaves"] += b.triangles - t0
         else:
             for i in range(leaves):
@@ -394,12 +450,6 @@ def emit(stage, atlas, lod):
         if cfg["head"]:
             radius = {"Growing": 0.048, "Mature": 0.070, "Ripe": 0.090}[stage]
             height = {"Growing": 0.060, "Mature": 0.105, "Ripe": 0.155}[stage]
-            t0 = b.triangles
-            _head(b, base + Vector((0, 0, 0.080 + height * 0.42)), radius, height,
-                  atlas.uv("head", inset=False), phase, lod, pointed=False, crown_rect=atlas.uv("crown"))
-            _head_leaf_layers(b, atlas, base + Vector((0, 0, 0.080 + height * 0.42)), radius, height,
-                              phase, lod, prng, count=6 if stage == "Ripe" else 5)
-            stats["heads"] += b.triangles - t0
             if lod < 2:
                 wrappers = 3 if stage in ("Mature", "Ripe") else 2
                 for j in range(wrappers):
@@ -446,6 +496,48 @@ def harvest(kit, atlas, material):
     return obj
 
 
+def _static_wind(obj):
+    attr = obj.data.color_attributes.get("Wind") or obj.data.attributes.get("Wind")
+    if attr:
+        for datum in attr.data:
+            datum.color = (0.0, 0.0, 0.0, 1.0)
+        obj.data.color_attributes.active_color = attr
+    return obj
+
+
+def produce(kit, atlas, material):
+    """Separate ripe-size firm cabbage head; pivot is at the base where it sits in the rosette."""
+    rng = random.Random(SEED + 1200)
+    m2 = material.copy()
+    m2.name = "M_CropCabbageProduce"
+    b = F.Batch(height=0.24)
+    phase = 0.0
+    radius = 0.100
+    height = 0.150
+    center = Vector((0, 0, height * 0.50))
+    _head(b, center, radius, height, atlas.uv("head", inset=False), phase, 0,
+          pointed=False, crown_rect=None)
+    for j in range(8):
+        _head_wrap_patch(b, atlas, center, radius, height, j * math.tau / 8.0 + rng.uniform(-0.05, 0.05),
+                         span=rng.uniform(0.28, 0.34), twist=rng.uniform(-0.34, 0.34),
+                         phase=phase + j * 0.015, rows=5, cols=4, offset=0.0035 + 0.0004 * j)
+    b.flat(center + Vector((0, 0, height * 0.548)), Vector((0, 0, 1)), radius * 0.18,
+           atlas.uv("crown"), spin=0.15, cup=-0.012, phase=phase, flutter=0.0, segs=2)
+    for j in range(5):
+        az = j * math.tau / 5.0 + rng.uniform(-0.08, 0.08)
+        rad = Vector((math.cos(az), math.sin(az), 0))
+        base = rad * rng.uniform(0.024, 0.042) + Vector((0, 0, 0.010 + 0.004 * (j % 2)))
+        _cupped_leaf_grid(b, atlas, base, rad, rng.uniform(0.078, 0.098), rng.uniform(0.046, 0.058),
+                          "pale", phase + 0.02 * j, rng, elev=math.radians(70),
+                          droop=0.035, cup=0.013, rows=5, cols=4, flutter=0.02)
+    obj = b.build("SM_CropCabbage_Produce", m2)
+    obj = kit.join([obj], "SM_CropCabbage_Produce", pivot=None, unwrap=False,
+                   reshade=True, smooth_angle=179.0)
+    _static_wind(obj)
+    print("HOMESTEAD_LODS Produce", F.lod_report([obj]))
+    return obj
+
+
 def build(kit):
     atlas = paint_atlas()
     material = atlas.material(translucent=(0.95, 1.10, 0.72))
@@ -456,5 +548,6 @@ def build(kit):
         _restore_plot_origin(objs)
         out.extend(objs)
         print("HOMESTEAD_LODS", stage, F.lod_report(objs))
+    out.append(produce(kit, atlas, material))
     out.append(harvest(kit, atlas, material))
     return out

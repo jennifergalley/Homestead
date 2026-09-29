@@ -24,7 +24,7 @@ import homestead_shrub as S
 
 NAME = "CropStrawberry"
 DESCRIPTION = ("One 1 m tilled-bed plot of six garden strawberry crowns across five crop stages, with "
-               "large trifoliate leaves, straw mulch, white flowers and readable red berries.")
+               "large trifoliate leaves, straw mulch, white flowers and separate instanced produce.")
 COLLISION = "none"
 TRIANGLE_BUDGET = 3000
 PROVENANCE = "Original project-authored procedural geometry and numpy-painted textures; no third-party asset."
@@ -34,6 +34,8 @@ BEAUTY = {"pose": (0, 0, 0), "views": ["hero", "detail", "eye"], "eye_distance":
           "meshes": {
               "SM_CropStrawberry_Growing": {"focus": (0.0, 0.0, 0.12), "eye_distance": 3.2},
               "SM_CropStrawberry_Ripe": {"focus": (0.0, 0.0, 0.11), "eye_distance": 3.6},
+              "SM_CropStrawberry_Produce": {"focus": (0.0, 0.0, -0.035), "eye_distance": 0.85,
+                                            "detail_distance": 0.16, "detail_fstop": 32.0},
           }}
 REPORT = {
     "blocking": False,
@@ -43,8 +45,8 @@ REPORT = {
     "material_notes": "One M_CropStrawberry atlas: alpha in basecolor; roughness R, translucency G, AO B.",
 }
 NOTES = {
-    "SM_CropStrawberry_Ripe": "Pick-and-regrow stage: red 2.5-3.5 cm berries hang over straw mulch; some berries remain pale.",
-    "SM_CropStrawberry_Mature": "White flower scapes and green-white unripe berries, before red fruit colour.",
+    "SM_CropStrawberry_Ripe": "Pick-and-regrow stage: foliage, straw and bare trusses only; visible berries are instanced from SM_CropStrawberry_Produce.",
+    "SM_CropStrawberry_Mature": "White flower scapes and bare berry trusses, before red fruit colour.",
     "SM_CropStrawberry_Harvest": "Hand-held produce: three ripe berries on short stalks, grip at stalk top/origin, berries hang down -Z.",
 }
 
@@ -55,9 +57,9 @@ STAGES = {
     "Sprout": dict(height=0.100, leaves=4, leaf=0.036, petiole=(0.040, 0.060), radius=0.080, flowers=0, berries=0, straw=0),
     "Young": dict(height=0.145, leaves=7, leaf=0.048, petiole=(0.070, 0.100), radius=0.130, flowers=0, berries=0, straw=3),
     "Growing": dict(height=0.260, leaves=8, leaf=0.068, petiole=(0.130, 0.180), radius=0.205, flowers=0, berries=0, straw=5),
-    "Mature": dict(height=0.265, leaves=8, leaf=0.070, petiole=(0.130, 0.185), radius=0.215, flowers=2, berries=2, straw=6),
+    "Mature": dict(height=0.265, leaves=8, leaf=0.070, petiole=(0.130, 0.185), radius=0.215, flowers=2, berries=0, straw=6),
     "Ripe": dict(height=0.265, leaves=5, leaf=0.070, petiole=(0.130, 0.185), radius=0.220, flowers=0,
-                 berries=4, unripe=0.5, straw=2),
+                 berries=0, unripe=0.5, straw=2),
 }
 
 
@@ -329,6 +331,100 @@ def _add_flower_or_berry(b, atlas, base, az, phase, lod, rng, berry_kind=None, e
                    cup=-0.18, phase=phase, flutter=0.30, segs=1)
 
 
+def _produce_anchor_specs(stage):
+    """Four bare berry-truss attachment points per crown, in LOD0 stage space."""
+    cfg = STAGES[stage]
+    specs = []
+    for crown_index, crown in enumerate(_crowns()):
+        base = crown["pos"] + Vector((0, 0, 0.004))
+        for slot in range(4):
+            rng = random.Random(crown["seed"] + sum(ord(c) for c in stage) + 8101 + slot * 173)
+            az = crown["heading"] - 0.94 + slot * 1.38 + rng.uniform(-0.18, 0.18)
+            heading = Vector((math.cos(az), math.sin(az), 0))
+            radius = cfg["radius"]
+            scape_len = min(0.195, max(0.055, radius * rng.uniform(0.56, 0.78)))
+            elev = math.radians(46 if stage == "Young" else (40 if stage == "Growing" else 34))
+            droop = 0.86 if stage == "Young" else (1.04 if stage == "Growing" else 1.18)
+            pts = _arc(base, heading, elev, scape_len, droop, n=4)
+            lift = 0.025 if stage == "Young" else (0.035 if stage == "Growing" else 0.045)
+            for i, p in enumerate(pts):
+                p.z += lift * (i / (len(pts) - 1))
+            scale = 0.85 + 0.25 * random.Random(crown["seed"] + slot * 421).random()
+            specs.append({
+                "points": pts,
+                "yaw": math.degrees(az - math.pi * 0.5),
+                "scale": scale,
+            })
+    return specs
+
+
+def _produce_report(stage_shifts=None):
+    anchors = {}
+    stage_shifts = stage_shifts or {}
+    for stage in ("Young", "Growing", "Mature", "Ripe"):
+        shift = Vector(stage_shifts.get(stage, (0, 0, 0)))
+        anchors[stage] = [[round(float((spec["points"][-1] - shift).x), 4),
+                           round(float((spec["points"][-1] - shift).y), 4),
+                           round(float((spec["points"][-1] - shift).z), 4),
+                           round(float(spec["yaw"]), 1),
+                           round(float(spec["scale"]), 3)]
+                          for spec in _produce_anchor_specs(stage)]
+    return {"mesh": f"SM_{NAME}_Produce", "anchors": anchors}
+
+
+def _add_bare_produce_scape(b, atlas, spec, phase, lod):
+    pts = spec["points"] if lod == 0 else [spec["points"][0], spec["points"][-1]]
+    b.tube(pts, [0.00090] * len(pts), 3, atlas.uv("petiole"), v_length=0.32, phase=phase, flutter=0.30)
+
+
+def _emit_produce(atlas):
+    b = F.Batch(height=0.060)
+    stalk = [Vector((0, 0, 0)), Vector((0, 0.007, -0.010)), Vector((0, 0.012, -0.020))]
+    b.tube(stalk, [0.00105, 0.00085, 0.00060], 6, atlas.uv("petiole"), v_length=0.32,
+           phase=0.0, flutter=0.0)
+    down = Vector((0, 0.22, -1.0)).normalized()
+    rad = 0.0190
+    length = 0.043
+    d, side, n = F.frame(down)
+    u0, u1, v0, v1 = atlas.uv("berry", inset=False)
+    segs, rings = 18, 9
+    top = stalk[-1] + down * 0.004
+    pole_top = b._vert(top, 0.0, 0.0)
+    grid = []
+    for i in range(1, rings):
+        t = i / rings
+        row = []
+        # Garden strawberries are broad-shouldered under the calyx and taper to a soft point.
+        rr = rad * (math.sin(math.pi * t) ** 0.50) * (1.26 - 0.58 * t)
+        center = top + d * (length * t)
+        for j in range(segs):
+            ph = 2 * math.pi * j / segs
+            row.append(b._vert(center + (side * math.cos(ph) + n * math.sin(ph)) * rr, 0.0, 0.0))
+        grid.append(row)
+    pole_tip = b._vert(top + d * length, 0.0, 0.0)
+
+    def uv(i, j):
+        return (u0 + (u1 - u0) * j / segs, v0 + (v1 - v0) * i / rings)
+
+    for j in range(segs):
+        k = (j + 1) % segs
+        b.faces.append((pole_top, grid[0][j], grid[0][k]))
+        b.uvs.append([((u0 + u1) * 0.5, v0), uv(1, j), uv(1, j + 1)])
+    for i in range(rings - 2):
+        for j in range(segs):
+            k = (j + 1) % segs
+            b.faces.append((grid[i][j], grid[i + 1][j], grid[i + 1][k], grid[i][k]))
+            b.uvs.append([uv(i + 1, j), uv(i + 2, j), uv(i + 2, j + 1), uv(i + 1, j + 1)])
+    for j in range(segs):
+        k = (j + 1) % segs
+        b.faces.append((grid[-1][j], pole_tip, grid[-1][k]))
+        b.uvs.append([uv(rings - 1, j), ((u0 + u1) * 0.5, v1), uv(rings - 1, j + 1)])
+    b.flat(stalk[-1] + down * rad * 0.18, -down, rad * 2.35, atlas.uv("calyx"),
+           spin=0.0, cup=-0.18, phase=0.0, flutter=0.0, segs=2)
+    print("HOMESTEAD_TRIS Produce 0", b.triangles)
+    return b
+
+
 def _emit_stage(stage, atlas, lod):
     cfg = STAGES[stage]
     b = F.Batch(height=cfg["height"])
@@ -353,17 +449,10 @@ def _emit_stage(stage, atlas, lod):
             _add_flower_or_berry(b, atlas, base + Vector((0, 0, 0.008)),
                                  crown["heading"] + 0.9 + s * 2.6 + rng.uniform(-0.25, 0.25),
                                  phase, lod, rng, berry_kind=None)
-        for s in range(cfg["berries"]):
-            if lod == 2 and s >= max(1, cfg["berries"] // 2):
-                break
-            kind = rng.choice(["unripe", "unripe", "pale"]) if stage == "Mature" else "berry"
-            _add_flower_or_berry(b, atlas, base + Vector((0, 0, 0.004)),
-                                 crown["heading"] - 0.9 + s * 1.38 + rng.uniform(-0.28, 0.28),
-                                 phase, lod, rng, berry_kind=kind, edge=(stage == "Ripe"))
-        if stage == "Ripe" and crown_index % 2 == 0 and lod < 2:
-            _add_flower_or_berry(b, atlas, base + Vector((0, 0, 0.004)),
-                                 crown["heading"] + 2.8 + rng.uniform(-0.25, 0.25),
-                                 phase, lod, rng, berry_kind=rng.choice(["unripe", "pale"]), edge=True)
+        if stage != "Sprout":
+            crown_specs = _produce_anchor_specs(stage)[crown_index * 4:(crown_index + 1) * 4]
+            for spec in crown_specs:
+                _add_bare_produce_scape(b, atlas, spec, phase, lod)
     print("HOMESTEAD_TRIS", stage, lod, b.triangles)
     return b
 
@@ -393,11 +482,20 @@ def build(kit):
     atlas = paint_atlas()
     material = atlas.material()
     objs = []
+    stage_shifts = {}
     for stage in ("Sprout", "Young", "Growing", "Mature", "Ripe"):
         batches = [_emit_stage(stage, atlas, lod) for lod in range(3)]
         made = F.finish_lods(kit, batches, f"SM_{NAME}_{stage}", material, smooth_angle=179.0)
+        stage_shifts[stage] = made[0].get("homestead_shift", (0, 0, 0))
         print("HOMESTEAD_LODS", stage, F.lod_report(made))
         objs.extend(made)
+    REPORT["produce"] = _produce_report(stage_shifts)
+    produce_material = material.copy()
+    produce_material.name = f"M_{NAME}Produce"
+    produce = _emit_produce(atlas).build(f"SM_{NAME}_Produce", produce_material)
+    produce = kit.join([produce], f"SM_{NAME}_Produce", pivot=None, unwrap=False, reshade=True, smooth_angle=179.0)
+    produce.data.color_attributes.active_color = produce.data.color_attributes["Wind"]
+    objs.append(produce)
     harvest = _emit_harvest(atlas).build(f"SM_{NAME}_Harvest", material)
     harvest = kit.join([harvest], f"SM_{NAME}_Harvest", pivot=None, unwrap=False, reshade=True, smooth_angle=179.0)
     harvest.data.color_attributes.active_color = harvest.data.color_attributes["Wind"]
