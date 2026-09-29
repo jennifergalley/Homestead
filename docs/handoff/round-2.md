@@ -221,11 +221,21 @@ require a scenario for every `ADDED` requirement.
   shuffle bag anti-repeats correctly when it has more than one track, but the existing 55–110 s gap
   (and first 18 s) are too short. Four other Kevin MacLeod CC-BY imported `.uasset`s exist only
   untracked in the orchestrator worktree; **do not commit them** under the music eligibility rule
-  (new project-authored or verified CC0 only). Architecture owns read-only license sourcing. A later
-  dedicated implementer slot owns `expand-randomized-music-playlist`: verify 3–5 CC0/original
-  recordings, import them with credits and catalog entries, use 3–8 minute ambient-only gaps and a
-  randomized 45–120 s first gap, register `MusicShuffleBagTests` in CMake, then verify packaged
-  multi-track load and run.
+  (new project-authored or verified CC0 only). Architecture owns read-only license sourcing. Its
+  verified **CC0 recording** audition shortlist (links and license labels checked; no file imported
+  or listened to yet) is:
+  - Maarten Schellekens, *Whispers of the Glen* (2:41) and *Medieval Theme* (2:36), Free Music
+    Archive: <https://freemusicarchive.org/music/maarten-schellekens/public-domain-1/whispers-of-the-glen/>
+    and <https://freemusicarchive.org/music/maarten-schellekens/public-domain-1/medieval-theme/>.
+  - cynicmusic, *A New Town (RPG Theme)* and *Town Theme RPG*, OpenGameArt:
+    <https://opengameart.org/content/a-new-town-rpg-theme> and
+    <https://opengameart.org/content/town-theme-rpg> (durations not yet recorded).
+  - Optional *Celtic Loop* (<https://opengameart.org/content/celtic-loop>) may be too repetitive.
+
+  A later dedicated music implementer auditions texture, period fit and clip silence before selecting
+  anything; then imports only the selected CC0/original recordings with credits and catalog entries,
+  uses 3–8 minute ambient-only gaps and a randomized 45–120 s first gap, registers
+  `MusicShuffleBagTests` in CMake, and verifies packaged multi-track load and run.
 - **Context hint** — **UI Agent** (`5cf73757`): the hint says Ctrl+wheel zooms, but gameplay uses the
   wheel to cycle the hotbar. Correct the context copy.
 - **Invisible weeds** — **Clearing / Props lane** (owner **TBD** when an implementer slot opens):
