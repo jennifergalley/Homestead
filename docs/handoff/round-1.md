@@ -239,6 +239,10 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Tooling requests (unassigned)
 
+- `get_play_state` (`st`) should report `namesOpen` and `shopOpen`. Both make the controller swallow
+  gameplay keys, but `st` can't show them today, so a tap that does nothing looks like broken input
+  (the Sleep/Ground lane, 2026-09-28). Asked for by that lane.
+
 - The `HomesteadPlayTools` additions asked for by the clearing lane:
   - `bootstrap_estate_tools`: search every salvage pile, gather branches, haft all five tools and
     slot the hotbar in one call.
