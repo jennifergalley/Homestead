@@ -48,6 +48,12 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -ErrorAction SilentlyContinue`.
   More processes than that have reset the GPU driver and exhausted VRAM, which takes every
   session's editor down.
+  **One of the 2 slots is reserved for the Integration Agent** (Jenny, 2026-09-28; it once waited over
+  an hour to verify a batch for the 7:30 AM build). Every other lane shares the second slot, one Unreal
+  process at a time. `Start-EditorMcp.ps1` enforces this: outside the integration worktree
+  (`jennifergalley-literate-eureka`, or any worktree with `Saved\IntegrationSession.marker`) it refuses
+  while another lane's Unreal process runs. Check once; if the lanes' slot is taken, schedule a wake-up
+  and end your turn.
 - **One editor per worktree, on its own MCP port.** Pick a free port in 8766-8799:
   `8766..8799 | ? { -not (Get-NetTCPConnection -LocalPort $_ -State Listen -EA 0) } | select -First 1`.
   Pass it as `Start-EditorMcp.ps1 -Port <p>`, then dot-source `Scripts\McpHelpers.ps1 -Port <p>`
@@ -121,7 +127,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 ```powershell
 git status --short | Measure-Object; Test-Path .\SurvivalGame.uproject   # new worktree complete? (0 and True; else see 0.1)
 $p = 8768                                                     # your registered port
-Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # 2 running? save_session_automation ~5 min out and end your turn; never loop
+Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # another lane's already running (one slot is Integration's)? save_session_automation ~5 min out, end your turn
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200   # -Port picks the MCP port
 . .\Scripts\McpHelpers.ps1 -Port $p                             # every later command; sets UNREAL_MCP_URL for editor_mcp.py
 # ...work, StartPIE, hk/st/hshot...
