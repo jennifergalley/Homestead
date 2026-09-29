@@ -12,7 +12,8 @@ agent keeps both current.
   from real LIDAR), with no procedural world, cold, death or predators.
 - The authoritative design and round order: `openspec\changes\pivot-to-cozy-estate-life-sim\design.md`.
 - The working policy (playable increments, reuse first, OpenSpec before each round): `docs\game-plan.md`.
-- The current round: [round-1.md](round-1.md).
+- The current round: [round-2.md](round-2.md) (the farming year and period crafting). Round 1, "Walk
+  your estate", is recorded in [round-1.md](round-1.md).
 
 ## Roles
 
