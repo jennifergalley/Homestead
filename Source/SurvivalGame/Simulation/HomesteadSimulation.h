@@ -535,6 +535,8 @@ public:
     Result Weed(int plotId, Point player);
     Result HarvestCrop(int plotId, Point player);
     Result FillWater(Point player);
+    // Tip the water out of the pail (it stays in her pack, empty).
+    Result EmptyPail();
     Result AddFuel(int structureId, Point player);
     Result Transfer(int chestId, Item item, int amount, Point player);
     Result EquipWearable(int id, std::uint64_t expectedRevision);

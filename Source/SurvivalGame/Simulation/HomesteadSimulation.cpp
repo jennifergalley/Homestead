@@ -2587,6 +2587,16 @@ Result Simulation::FillWater(Point player)
     if (!TryAdjust(change)) return Bad("Make enough room in your pack for six water portions.");
     return Exert(Exertion::FillWaterEnergy, Good("Pail filled with six water portions."));
 }
+Result Simulation::EmptyPail()
+{
+    if (state_.failed) return Failed();
+    if (Count(Item::WateringCan) == 0) return Bad("You aren't carrying a pail.");
+    const int water = Count(Item::Water);
+    if (water == 0) return Bad("Your pail is already empty.");
+    if (!TryAdjust(Items({{Item::Water, -water}}))) return Bad("Your pail won't empty.");
+    ++revision_;
+    return Good("You tip the water out of your pail.");
+}
 Result Simulation::AddFuel(int structureId, Point player)
 {
     if (state_.failed) return Failed();

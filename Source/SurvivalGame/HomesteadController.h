@@ -281,6 +281,8 @@ public:
     UFUNCTION(Exec) void HomesteadMoney(int32 Cents = 1000);
     // Playtest aid: set her Energy (0-100), e.g. to try dozing off or the bed's "until rested".
     UFUNCTION(Exec) void HomesteadEnergy(float Energy = 100.0f);
+    // Playtest aid: tip the water out of her pail, e.g. to try filling it at the river again.
+    UFUNCTION(Exec) void HomesteadEmptyPail();
     // Playtest aids for the bed (stand beside one): sleep with choice N as listed in the prompt (-1 =
     // the one shown), or step the shown choice by Delta, as Up/Down (D-pad) do.
     UFUNCTION(Exec) void HomesteadSleep(int32 Option = -1);

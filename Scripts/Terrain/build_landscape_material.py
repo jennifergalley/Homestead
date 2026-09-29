@@ -120,9 +120,12 @@ rough = lerp(rough, lerp(MudR, MvpR, mw), zone);
 // glossy, and trodden ground and wheel ruts hold a sheen of standing water.
 float w = saturate(Wet);
 float porous = saturate(1.0 - grassy * 0.6);
-col *= lerp(1.0, lerp(0.8, 0.52, porous), w);
-rough = lerp(rough, lerp(0.5, 0.3, porous), w);
-float pools = saturate(wear * 1.4 + (0.5 - Macro1) * 0.6) * porous;
+// Leaf litter and the woodland floor soak up rain: darker, but matt, never a glossy sheet (under trees
+// and in the MVP zone a wet floor otherwise read as a water surface round the river mouth).
+float litterish = saturate(max(canopy, zone));
+col *= lerp(1.0, lerp(lerp(0.8, 0.52, porous), 0.66, litterish), w);
+rough = lerp(rough, lerp(lerp(0.5, 0.3, porous), 0.55, litterish), w);
+float pools = saturate(wear * 1.4 + (0.5 - Macro1) * 0.6) * porous * (1.0 - litterish);
 rough = lerp(rough, 0.08, w * smoothstep(0.55, 0.9, pools));
 n = normalize(lerp(n, float3(0, 0, 1), w * smoothstep(0.6, 0.9, pools) * 0.8));
 

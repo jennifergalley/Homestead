@@ -193,14 +193,16 @@ reshape.py runs it last on fresh terrain. Afterwards, with the Estate level load
    their actor bounds.
 3. Run `place_water.py`, then `bake_ground.py` and `build_ground.py`. Don't re-run `scatter.py` for a local edit: a change in which cells pass its tests shifts its random draws, and about 3,900 cobbles and boulders move across the whole map. Scenery stores only X and Y (Z comes from the heightfield at runtime), so the committed scatter sits correctly on the regraded ground. Drop only the records that now fall in the water (this regrade dropped 10 plants within 30 cm of the waterline).
 
-The Landscape doesn't match the r16 everywhere: a full-map dry run finds about 3,000 vertices
-elsewhere that differ (a strip at some tile edges, worst 43 m). Apply only the rectangle you changed.
+The Landscape matches the r16 everywhere: a full-map dry run reports no differences, and the rendered
+heights (`editor_ground_height`) agree within 1.1 cm along the map edge and 0.15 cm at 4,000 random
+interior vertices. The tool skips the outermost row and column, because the landscape data
+interface misreads them there (GetData and GetDataFast both return a neighbour's value).
 
 The ribbon (`AHomesteadWaterRibbon`) reads spline scale Y as the waterline half-width and runs
 `BankOverlap` (45 cm) under each bank. It rounds off round the pool (`StartCap`, one pool radius,
 with the spline starting that far upstream of the pool centre) and tapers over `EndCap` (6 m) into
 the sea. Vertex colour B makes white water on grades over about 4 % and at the spring
-(`M_EstateRiver`, the creek graph plus a white-water layer). V restarts every 10 m, because
+(`M_EstateRiver`, the creek graph plus a white-water layer, through `MI_EstateRiver`: calmer ripples (RippleScale 0.12), Specular 0.9, Roughness 0.02, so at a grazing angle it reflects the banks and sky instead of reading as a streaked glass slab). V restarts every 10 m, because
 half-precision UVs smear the ripples into stripes at 1 km.
 
 Cost, from `ProfileGPU` in PIE at a 3054×1135 viewport with the sea filling the view from the western clifftop: `SLW::Draw` 0.23 ms, depth prepass 0.09 ms, and Lumen water reflections about 0.2 ms. The old one-plane creek-material sea cost 0.10, 0.07 and 0.2 ms. The mesh has about 89k vertices. Read the stable sub-passes: frame times and reflection spikes swing widely when other editors share the GPU.
@@ -258,7 +260,7 @@ branches land: `scatter.py`, then `bake_ground.py` and `build_ground.py`.
 
 Weather and night: `build_ground.py` also makes `MPC_EstateGround` (Wetness, Daylight), which
 `AHomesteadWorld::UpdateLighting` sets every refresh. The ground wets through over the first half hour
-of the rain and dries over four hours after it. Wet soil, litter and stone darken and gloss (turf
+of the rain and dries over four hours after it. Wet soil and stone darken and gloss (leaf litter under trees and the MVP woodland floor darken but stay matt, with no puddles, or they read as a sheet of water beside the river; turf
 less), trodden ground holds a sheen of water, and grass blades darken and gloss. The blades' light
 transmission and gust sheen fade out at night so the meadow doesn't glow under the moon
 (`NightTransmission` on `MI_EstateGrass`: 0.3 keeps a little light through the blades so their shaded faces don't go black).

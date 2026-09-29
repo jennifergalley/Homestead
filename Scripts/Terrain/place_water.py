@@ -91,6 +91,24 @@ if not unreal.EditorAssetLibrary.does_asset_exist(RIVER_MATERIAL):
     spec.loader.exec_module(bootstrap)
     bootstrap.creek_water_material(name="M_EstateRiver")
 
+# The estate river's look over the creek graph: calmer ripples and a brighter reflection, so at a
+# grazing angle it reflects the banks and sky rather than reading as a streaked glass slab.
+RIVER_INSTANCE = "/Game/SurvivalGame/Materials/MI_EstateRiver"
+RIVER_LOOK = {"RippleScale": (0.12, 0.12, 1.0), "Specular": 0.9, "Roughness": 0.02}
+if unreal.EditorAssetLibrary.does_asset_exist(RIVER_INSTANCE):
+    river_look = unreal.load_asset(RIVER_INSTANCE)
+else:
+    river_look = unreal.AssetToolsHelpers.get_asset_tools().create_asset(
+        "MI_EstateRiver", "/Game/SurvivalGame/Materials", unreal.MaterialInstanceConstant,
+        unreal.MaterialInstanceConstantFactoryNew())
+unreal.MaterialEditingLibrary.set_material_instance_parent(river_look, unreal.load_asset(RIVER_MATERIAL))
+for name, value in RIVER_LOOK.items():
+    if isinstance(value, tuple):
+        unreal.MaterialEditingLibrary.set_material_instance_vector_parameter_value(river_look, name, unreal.LinearColor(*value, 0.0))
+    else:
+        unreal.MaterialEditingLibrary.set_material_instance_scalar_parameter_value(river_look, name, value)
+unreal.EditorAssetLibrary.save_loaded_asset(river_look, False)
+
 river = existing.get("EstateRiver") or eas.spawn_actor_from_class(unreal.HomesteadWaterRibbon, course[0])
 river.set_actor_label("EstateRiver")
 river.set_folder_path("Water")
@@ -99,7 +117,7 @@ river.modify()  # set_course alone doesn't dirty the actor package, and PIE stre
 river.set_editor_property("bank_overlap", 45.0)
 river.set_editor_property("start_cap", cap * 100.0)
 river.set_editor_property("end_cap", 600.0)
-river.set_editor_property("material", unreal.load_asset(RIVER_MATERIAL))
+river.set_editor_property("material", river_look)
 river.set_course(course, widths)
 
 # The spring: granite stones set into the head wall round the pool, a couple half-sunk in the rill.
