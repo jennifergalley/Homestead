@@ -28,8 +28,8 @@ pivot design (`pivot-to-cozy-estate-life-sim`):
   - Four 28-day seasons (Spring, Summer, Autumn, Winter) and a year counter starting in 1851.
   - Seven named weekdays. Spring 1, 1851 is a Monday.
   - The HUD calendar reads "Mon, Spring 12". In a season's last three days it adds "3 days left".
-  - The default day length is 30 real minutes. The existing Settings choice of 30, 60 or 120
-    minutes stays, so Jenny can slow it down.
+  - New Estate games default to 60 real minutes. The existing Settings choices of 30, 60 or 120
+    minutes stay, and existing saves retain their stored day length.
   - Sleep stays exactly as `flexible-sleep` made it. This supersedes the design's "2 AM
     pass-out" rule.
 - **Gentle hunger (superseded 2026-09-29):**

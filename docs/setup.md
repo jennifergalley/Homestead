@@ -124,7 +124,11 @@ scenery scatter, and before a release:
    It replaces the texture (all mips resident, never streamed) and rewrites `DA_EstateMap`.
 
 The estate boundary, for-sale parcels and landmark glyphs are drawn live from the layout, not
-baked, so moving an anchor or polygon needs no re-bake.
+baked, so moving an anchor or polygon needs no **map** re-bake. However, any public-road route,
+profile, terrain-height or road-stop/sign input change also requires
+`python Scripts\Terrain\public_road.py` to regenerate
+`Simulation\HomesteadEstatePublicRoad.inc`, then verification of its safe stops, signs and terrain
+heights before release.
 
 ## Isolated human-play preview
 
