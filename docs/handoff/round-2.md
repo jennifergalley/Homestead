@@ -608,8 +608,10 @@ pending, so this does not claim early Energy is fully solved.
   The old Seasons handoff would gate Blackberries from Summer 15 through Autumn 28; do not silently
   add that gate without spring food and clear player prompts. Acceptance is live-node density,
   seasonal readiness/regeneration, save safety and performance - never decorative instance count.
-  Water has a headless draft of +28 estate bushes (15 roadside) with native 10/10, but it is neither
-  built nor pushed and has no delivery claim.
+  Water's partial food checkpoint is `fc758da4` (+28 live BerryBush: 18 woods, 10 hedges) followed
+  by `01bda38d` (+16 Roots near the manor, three within 110 m) and 15 roadside
+  bramble/herb/root placements at `581000+`. Old placements stay append-only; native 10/10 covers old
+  save, picked state and regrowth. It has no Editor/Game build, PIE fruit/harvest or delivery claim.
 - **Terrain-following road grade** — **Water Agent, pending and not shipped.** Eliminate artificial
   raised/lowered road segments. The road is Landscape paint/ruts, not a raised mesh: `reshape.py`
   grades a 2.8 m flat half-width plus 12 m falloff at ±11%, and its weightmap/rut SDF share the route.
@@ -629,7 +631,9 @@ pending, so this does not claim early Energy is fully solved.
   screenshot. It **shipped with the lake** in the 4 PM playable build.
 - **Farm-to-lake trail** — **Water, pending and not shipped.** The dashed lake path is absent on the
   ground; its current route is hidden below canopy litter. Cut a clear, actual woods trail from farm to
-  landing through ground-material wear, then verify it visually and on foot.
+  landing through ground-material wear, then verify it visually and on foot. Water's separate
+  `1d5b90a9` trail PNG/bin is committed but requires `build_ground.py`, importing `T_EstateGround` /
+  `T_EstateCanopy`, `ImportEstateMap`, and a visual check before any delivery claim.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.

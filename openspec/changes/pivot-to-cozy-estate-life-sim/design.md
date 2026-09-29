@@ -94,10 +94,10 @@ adapts conventions only and copies no proprietary art, text or branding.
   night, or sleep through the day to make up for it. At the bed she chooses between sleeping
   until morning, until rested, or a nap. If her energy runs out, she dozes off where she stands
   for a few hours of rough sleep and wakes only part rested. Nothing else is lost.
-- A day lasts about **30 real minutes**, with the 30/60/120-minute setting kept. The day turns
-  over at 6 AM. There are four 28-day seasons with named weekdays, starting on Monday, Spring 1,
-  1851. Crops are tied to their seasons and wither when the season changes; round 2 has the
-  details.
+- New Estate games default to about **60 real minutes**, with the 30/60/120-minute setting kept and
+  existing saves retaining their stored value. The day turns over at 6 AM. There are four 28-day
+  seasons with named weekdays, starting on Monday, Spring 1, 1851. Crops are tied to their seasons
+  and wither when the season changes; round 2 has the details.
 - Weather is sunny and cozy by default, with occasional rain that waters crops.
 - There's no spoilage, in storage or anywhere else.
 
