@@ -236,15 +236,6 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   `BAKE`, every mesh still bakes. When it lands, add it to the Blender skill's "Bake and review
   settings" step and `docs\blender-assets.md`.
 
-- Build speed (`f6ed1c42`, waiting on the orchestrator): once it merges, (a) point every `Build.bat
-  SurvivalGameEditor ...` recipe (editor skill quick-start and section 8, `docs\handoff\README.md` step 3,
-  `docs\setup.md`) at `Scripts\Invoke-UnrealBuild.ps1` (`-Target`, `-CheckOnly`, `-Force`; it skips UBT when
-  already built, logs to `Saved\Logs\UnrealBuildTool-<targets>.log`, and passes `-UBADisableRemote`), and
-  document `Start-EditorMcp -ForceBuild`; (b) add the private-PCH rule: `SurvivalGame` uses
-  `Source\SurvivalGame\SurvivalGamePCH.h`; `C2027`/`C2065 use of undefined type` in a file that used to
-  compile means include that engine header in the file; add to the PCH only headers many files use,
-  never UnrealEd or editor headers; every `.cpp` must compile on its own. The docs agent does this.
-
 - Architecture agent (not on `main` yet):
   - **Legacy probes removed** (`26b367e9`): `Test-AuthoringSettings.ps1`, `Tests\HomesteadMenuSourceTests.py`,
     FernSpike and the `*Policy` scripts. Drop `Test-AuthoringSettings.ps1` from editor skill section 0's

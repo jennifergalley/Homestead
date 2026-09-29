@@ -34,7 +34,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 - **Only the integration session packages.** UAT (`Build-Game.ps1 -Package`/`-PackageOnly`, `RunUAT
   BuildCookRun`) and packaged-game tests run only in the integration session's worktree (registry in
   `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests, compile-check
-  with `Build.bat SurvivalGameEditor ... -WaitMutex`, commit and push, then send `[ready]` to the
+  with `Scripts\Invoke-UnrealBuild.ps1`, commit and push, then send `[ready]` to the
   orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The orchestrator only
   coordinates and never builds. The separate `mvp-survival` line packages its own deliverables to
   `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
@@ -133,7 +133,7 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -Timeo
 # ...work, StartPIE, hk/st/hshot...
 .\Scripts\Stop-MyEditor.ps1 -Port $p                              # before building, rebasing, or when done (only your editor)
 # Build only when your C++ changed, once per batch of fixes; asset/Blender/Python/config work: Start-EditorMcp -SkipBuild
-& 'E:\Program Files\UE_5.8\Engine\Build\BatchFiles\Build.bat' SurvivalGameEditor Win64 Development "-Project=$PWD\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE   # editor module only; never the game target
+.\Scripts\Invoke-UnrealBuild.ps1   # editor module only (never the game target); skips UBT if already built from these sources
 .\Scripts\Test-Native.ps1 -Configuration Release               # ~3 min; Debug is 16-19 min
 git status --short                                               # commit only your files, rebase, push
 # then send_session_message the orchestrator: branch + SHA, what changed, what you verified, what to try.
@@ -148,8 +148,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | --- | --- | --- |
 | `Unable to build while Live Coding is active` | Some editor on the machine has an active Live Coding session. UBT checks a mutex named after the shared `UnrealEditor.exe` path, so it's any editor, any worktree (a hand-launched editor, one started before the opt-out, or one where `CompileLiveCoding` ran). An editor log shows `LogLiveCoding: Display: Starting LiveCoding` when it starts | Pass `-NoHotReloadFromIDE` to `Build.bat` (the scripts do), which skips the check. To find the culprit, search editors' `Saved\Logs\*.log` for `Starting LiveCoding`. Agent editors now start with Live Coding off (command line plus ini) and without `LiveCodingToolset`. |
 | `Result: Failed (ConflictingInstance)` from UBT | Two worktrees building at the same moment | Retry after a minute. `-WaitMutex` (used by the scripts) queues instead. A "Build.bat already running" wait is the same queue. |
-| An editor build (`Build.bat SurvivalGameEditor ... -WaitMutex`) sits silent for many minutes | It's queued behind other worktrees' UBT builds (the mutex is machine-wide). With 4 lanes building at once, one build waited about 50 minutes (3265 s in total); on 2026-09-28 the integration editor build took 36 min and the game target 21 min behind 4-5 queued worktrees | Expect it and don't kill the waiting UBT: a killed build rejoins the back of the queue. Check who's building with `Get-CimInstance Win32_Process -Filter "Name='dotnet.exe'"` (UnrealBuildTool in the command line) before assuming a hang. |
-| A build opens a network listener on `0.0.0.0:1345` | UBA's remote-execution listener starts on every build | Harmless on this machine; pass `-UBADisableRemote` to `Build.bat` to stop it (the build-speed lane's helper will do this). The UBT mutex itself is machine-wide, keyed on the UBT dll path, not on the project. |
+| An editor build sits silent for many minutes | It's queued behind other worktrees' UBT builds (the mutex is machine-wide). With 4 lanes building at once, one build waited about 50 minutes (3265 s in total); on 2026-09-28 the integration editor build took 36 min and the game target 21 min behind 4-5 queued worktrees | Expect it and don't kill the waiting UBT: a killed build rejoins the back of the queue. Check who's building with `Get-CimInstance Win32_Process -Filter "Name='dotnet.exe'"` (UnrealBuildTool in the command line) before assuming a hang (`Invoke-UnrealBuild.ps1` prints who it's queued behind). |
+| A build opens a network listener on `0.0.0.0:1345` | UBA's remote-execution listener starts on every build | `Scripts\Invoke-UnrealBuild.ps1` passes `-UBADisableRemote`; add it yourself to a hand-run `Build.bat`. The UBT mutex is machine-wide, keyed on the UBT dll path, not on the project. |
 | A build runs one compile at a time (takes minutes instead of seconds); UBT logs `Requested 1.5 GB memory per action, X GB available: limiting max parallel actions to 1`, or `UbaSessionServer - Killed process ... Low on memory (83.3gb/87.6gb)` and retries | Not enough memory for parallel compiles. Two gates must both pass: UBT's start-up check wants N × 1.5 GB of available physical memory (6 GB for 4 compiles, 9 GB for 6), and UBA won't start a compile while commit is above 85% of the limit (it kills compiles above 95%), so 4 compiles need about 23-26 GB of free commit and 6 need 28-31 GB. An open editor commits 15-16 GB; an agent session 0.3-6 GB. The same full rebuild took 178 s with 7 in parallel (commit 61 of 79 GB) and 804 s serially (96 of 98.5 GB) | Search the UBT log for `limiting max parallel`. Close your editor, and Blender if it's yours, before building; keep to the 2-process limit. Details: the build-speed lane's `docs\research\build-speed\README.md` (lands with `f6ed1c42`). |
 | `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's build step can't wait for another worktree's UBT. With several targets it puts `-UbtArgs` inside each `-Target="..."` string, where `-WaitMutex` is ignored | Fixed: `Build-Game.ps1` builds `SurvivalGame` itself with `Build.bat ... -WaitMutex`, then runs `BuildCookRun -skipbuild`. Do the same for a hand-run BuildCookRun. |
 | Editor never shows a window, or startup holds for 10+ minutes; the log stops at `Build.bat -Mode=ValidatePlatforms` (the Turnkey platform check) | Every editor start runs that UBT check (no AutoSDK is set up, so it always runs). It's single-instance, so it waits on another worktree's UBT build | `Start-EditorMcp.ps1` now stops its own editor's ValidatePlatforms child tree after 2 minutes. By hand: `Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`, then `Stop-Process -Id` that `cmd.exe` and its children. The editor continues. Don't set `UE_SKIP_UBT_SDK_SETUP=1` instead: the editor then treats every platform SDK as invalid. |
@@ -188,6 +188,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | See the `homestead-code-conventions` skill, "Unreal C++". |
 | `C4458: declaration of '<name>' hides class member` (for example a local `Ground` in `AHomesteadWorld`) | A local variable shadows a member; warnings are errors in this project | See the `homestead-code-conventions` skill, "Unreal C++". |
 | `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | See the `homestead-code-conventions` skill, "Unreal C++". |
+| `error C2027: use of undefined type 'X'` (or C2065) in a file that used to compile | `SurvivalGame` now has a private PCH (`SurvivalGamePCH.h`) instead of the UnrealEd shared one, so headers it used to pull in aren't there | Include the engine header for X in that file. See section 8, "Private PCH". |
 | New lane's worktree is incomplete: `SurvivalGame.uproject` missing, thousands of staged deletions in `git status` | The app's `create_session` worktree step hit `git command timed out after 300 seconds` (a full checkout with LFS is slow under load), but the session started anyway | `git -C <worktree> reset --hard HEAD` (about 3 min), then confirm `git status` is clean and `SurvivalGame.uproject` exists before building. |
 | Estate "Save failed... check disk space and permissions" (misleading text) / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejected `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on `main` in `f2e504c5` (bound by `MaxWorldCoordinate`). Rebase if you still see it. |
 | Spawn yaw ignored on Estate | `ChooseStartingView` (fresh terrain) and `SetAppearancePreview(false)` restoring a `SavedViewRotation` captured before spawn both overwrote it | The manor lane's fix is in `f2e504c5`; if it recurs, check `controlYaw` and a capture after the book closes. |
@@ -228,7 +229,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `FVector2D` has no `Rotation()` | Only `FVector` does | Use `GetRotated(Degrees)`, or build the vector yourself. |
 | Every mesh of a runtime-built ISM actor shows twice in PIE | PIE duplicates the editor instance's instance components, but not a transient list of them (`AHomesteadManorRuin` / `AHomesteadDerelictFarm` pattern: a transient `Parts` array plus `AddInstanceComponent`) | See the `homestead-code-conventions` skill, "Unreal C++". |
 | `import_props` fails: the FBX `changed after the Blender build` | It checks each FBX's sha256 against the recipe's `report.json`, and a Blender agent was still rebuilding | Import only after the Blender build has finished. |
-| `Start-EditorMcp.ps1` sits in its `Build.bat` step for a long time | The build waits on another worktree's UBT (the queue can take about 50 min) | Expected. If the module is already built (for example you ran `Build.bat SurvivalGameEditor ... -WaitMutex` yourself), launch with `-SkipBuild`. |
+| `Start-EditorMcp.ps1` sits in its build step for a long time | The build waits on another worktree's UBT (the queue can take about 50 min) | Expected. `Start-EditorMcp` now builds through `Invoke-UnrealBuild.ps1`, which skips UBT entirely when the module is already built from the current sources (`-ForceBuild` builds anyway; `-SkipBuild` skips the step). While it waits it names the build it's queued behind. |
 | A "Profile Data Visualizer" window pops over PIE and spoils captures | An editor hotkey (unidentified) opened it mid-run | Close it with `WM_CLOSE` to its window (find it with `EnumWindows` on the editor PID). |
 | A 4K screen grab of the packaged game captured another session's editor | Matching the window by size; other sessions' maximised editors are also about 3840 wide | Match the window by process image (`QueryFullProcessImageNameW` contains `JennysHomesteadGame`). For 4K launch `-ResX=3840 -ResY=2160 -fullscreen`; a 4K `-windowed` window doesn't fit the 175%-scaled desktop. A 3840x2160 PNG is about 11 MB, over the `view` tool's 10 MB limit: downscale or crop it with PIL before viewing. |
 | A teleport lands in the air or underground; traces return None | That World Partition cell isn't streamed, so there's nothing to trace | Take Z from the heightmap: `(v - 32768) / 128` m, where `v = a[y_m + 2016, x_m + 2016]` of `Scripts\Terrain\Estate_Heightmap_4033.png` (row = +Y, column = +X, metres from the map centre). This matches the estate anchors exactly. |
@@ -273,7 +274,7 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port 8768 -AllowPython -Ski
 - A cold start can take more than 10 minutes. Quiet is not hung; check `Saved\Logs\SurvivalGame.log`
   and table 0.1 (the `ValidatePlatforms` hang).
 - C++ changes: quit the editor (it locks its module DLLs), run the build (the script's build step,
-  or `Build.bat SurvivalGameEditor Win64 Development "-Project=<worktree>\SurvivalGame.uproject"
+  or `Scripts\Invoke-UnrealBuild.ps1` (it wraps `Build.bat SurvivalGameEditor Win64 Development "-Project=<worktree>\SurvivalGame.uproject"
   -WaitMutex -NoHotReloadFromIDE`), and relaunch with `-SkipBuild`. Live Coding is off in agent
   editors because it blocks other worktrees' builds.
 - `-ExtraPlugins A,B` enables more engine plugins for the session (for example
@@ -879,9 +880,20 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 ## 8. Build, package and test
 
-- **Editor module:** close your editor, then `& 'E:\Program Files\UE_5.8\Engine\Build\BatchFiles\Build.bat'
-  SurvivalGameEditor Win64 Development "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex
-  -NoHotReloadFromIDE` (2-5 min; it queues behind other worktrees' builds).
+- **Editor module:** close your editor, then `.\Scripts\Invoke-UnrealBuild.ps1` (default target
+  `SurvivalGameEditor`). It skips UBT when this script already built the targets from exactly the current
+  sources (a git tree hash of `Source\` and the `.uproject`, including uncommitted files), because even a
+  no-op `Build.bat` waits in the machine-wide queue. `-Target SurvivalGameEditor,SurvivalGame` builds
+  both in one UBT run (the integration session); `-CheckOnly` reports whether they're current; `-Force`
+  builds anyway. It passes `-UBADisableRemote` and keeps the log in
+  `Saved\Logs\UnrealBuildTool-<targets>.log` (the default UBT log is shared and overwritten). While
+  queued, it names the build it's waiting behind.
+- **Private PCH:** the `SurvivalGame` module uses its own precompiled header,
+  `Source\SurvivalGame\SurvivalGamePCH.h` (about 1.2 GB), not the engine's 2.4 GB UnrealEd shared PCH.
+  `error C2027`/`C2065 use of undefined type 'X'` in a file that used to compile means that file relied
+  on the old PCH: include the engine header for X in the file. Add a header to `SurvivalGamePCH.h` only
+  when many files use it, and never UnrealEd or editor headers (it's a runtime module). Every `.cpp`
+  must also compile on its own, because adaptive unity compiles git-modified files standalone.
 - **Native rules and persistence:** `Scripts\Test-Native.ps1 -Configuration Release` runs every
   CMake suite (Simulation, WorldGeneration, RegionalGeneration, Parcel, Economy, ...) in about
   3 min; Debug takes about 10. For one suite, build its target and run
