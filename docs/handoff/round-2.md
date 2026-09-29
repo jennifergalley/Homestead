@@ -261,6 +261,11 @@ None yet.
 
 ## Pending doc updates on merge
 
+- **Proposed roadside forage claim (awaiting orchestrator approval; not reserved yet):** Seasons Agent
+  proposes **581000–581099** for about 30 BerryBush, Flowers, Primroses, WildDaffodils and Roots along
+  the manor-to-town public road (`Scripts\Terrain\roadside.py` →
+  `Simulation\HomesteadEstateRoadsidePlacements.inc`). Most sit outside `EstateBoundary`; do not use
+  the range until the orchestrator approves it, then move it into the placement registry.
 - Seedsman (`4f21a2d8`, not on `main` yet): Tregear's replaces `Town_Blockout_EastHouse`; the lane
   deletes that World Partition external actor and `town_massing.py` stops spawning it. When it lands:
   document the `WorldPartitionBlueprintLibrary.get_actor_descs()` + `load_actors(guids)` step before
