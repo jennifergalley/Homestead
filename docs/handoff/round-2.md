@@ -322,12 +322,16 @@ requirement.
   cycles the hotbar; Ctrl+wheel zooms while the book has focus. Integration reviews it with the Menu
   batch.
 - **Weed visibility and grounding** — **Props weeds-only branch
-  `jennifergalley-weed-visuals @ 889cfde8`, partial; not shipped.** It has a new main-mesh fallback
-  (no thimbleberry), Landscape-versus-r16 grounding/reseat behavior, and an unimported Cornish
-  `WeedClump` Blender asset. Native tests pass 8/8 and the Editor compile passed. The branch still
-  owes an eye-height PIE check, sweep of all **115** placements, day-and-dusk captures, and a
-  new-game reload. Only after that evidence may it establish that a visible weed asset exists wherever
-  the prompt says `"Weeds  E  Pull"` and that none float above slopes or patches.
+  `jennifergalley-weed-visuals @ 8418aa8e`, partial; not shipped.** This extends `889cfde8` with the
+  original imported `WeedClump` content and a pivot-seating correction. Day Estate PIE renders 157
+  clumps (dock 57, thistle 54, dandelion 46); every Landscape-trace pivot sits 0–10 cm below ground
+  (2.7 cm median, including 36% slopes), and pulling removes mesh plus focus. The native save path is
+  unchanged. At 4–7 m in tall grass the weeds still read visually modest.
+
+  The branch still owes a dusk capture and PIE save/reload; the bounded rubble PIE is separate.
+  It is not eligible for the 4 PM merge until it reports `[ready]`. Only then may it establish that a
+  visible weed asset exists wherever the prompt says `"Weeds  E  Pull"` and that none float above
+  slopes or patches.
 - **Manor debris** — **Clearing / Props lane** (owner **TBD** when a slot opens): slate and shingle
   piles that look clearable should become suitable saved clearables, rather than static scenery.
 - **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
