@@ -48,5 +48,9 @@ foreach ($p in Get-MyEditors) {
     Write-Host "Stopping PID $($p.ProcessId)."
     Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
 }
-if ((Get-MyEditors).Count) { throw 'The editor is still running.' }
+# A large editor can take 30 s or more to finish exiting after a quit or a forced stop (it releases
+# 15-17 GB and flushes files). Wait for it instead of reporting failure straight away.
+$deadline = (Get-Date).AddSeconds(90)
+while ((Get-Date) -lt $deadline -and (Get-MyEditors).Count) { Start-Sleep 2 }
+if ((Get-MyEditors).Count) { throw 'The editor is still running 90 s after being stopped; check it with Get-Process.' }
 Write-Host 'Closed. Live Coding patch files can stay locked for about a minute after exit.'
