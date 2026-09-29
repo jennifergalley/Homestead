@@ -187,6 +187,10 @@ On weekends, also cut one as soon as features she'd notice land.
 3. The integration session packages `main` (`Build-Game.ps1 -Package`), runs the packaged suites, and
    retargets the shortcut to its `Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
    keeping the Homestead icon. It never touches `Homestead.lnk`.
+   **Before retargeting to a new package folder, copy Jenny's saves and settings across:** packaged
+   Development builds keep them inside the package (`<package>\SurvivalGame\Saved\SaveGames`, with an
+   `Estate\` subfolder, and `Saved\Config`). Copy both from the old package into the new one, or she
+   loses her game.
 4. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
    orchestrator relays that to Jenny.
 5. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
