@@ -500,7 +500,8 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
     }
     if (bPlanning && !bBookOpen && !IsFailed() && Params.Key == EKeys::MouseWheelAxis && Params.Event == IE_Axis
         && FMath::Abs(Params.AmountDepressed) >= 1.0f
-        && !(bControlDown || IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl)))
+        && !(bControlDown || IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl)
+            || FSlateApplication::Get().GetModifierKeys().IsControlDown()))
     {
         RotatePlacementBy(Params.AmountDepressed > 0 ? 1 : -1);
         return true;
@@ -521,8 +522,10 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         if (Params.Key == EKeys::MouseWheelAxis && Params.Event == IE_Axis
             && FMath::Abs(Params.AmountDepressed) >= 1.0f)
         {
+            // Slate's modifier state is the OS's: a Ctrl press that a focused widget took never reaches
+            // InputKey, so bControlDown alone missed it and Ctrl+wheel cycled the hotbar instead.
             const bool Control = bControlDown || IsInputKeyDown(EKeys::LeftControl)
-                || IsInputKeyDown(EKeys::RightControl);
+                || IsInputKeyDown(EKeys::RightControl) || FSlateApplication::Get().GetModifierKeys().IsControlDown();
             if (Control)
             {
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
