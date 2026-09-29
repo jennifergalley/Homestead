@@ -297,6 +297,16 @@ requirement.
   It replaces the menu-reflowing banner with the brief floating non-modal overlay: it auto-disappears,
   preserves focus/input, uses a Victorian licensed font with larger centered text and a compact
   content-sized frame.
+- **Unified hints and toasts** — **Menu/UI ownership note; pending and not shipped.** Architecture
+  traced separate current channels: unconditional top-left controls, `DrawInteractCue` focus text,
+  world Canvas toasts and the native-menu parchment NoticeCard. Unify transient world feedback and
+  persistent focus actions in a top-centre parchment visual through shared style, not a duplicate UI;
+  retain separate error-over-success priority and device-specific glyphs without focus theft.
+
+  Show top-left controls only for the first 60 visible real seconds after boot, new game or
+  `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
+  successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
+  pause timing and focus behavior.
 - **Appearance controls and naming** — **Menu local-only partial, not pushed/PIE/shipped or 4 PM
   content.** `61059621` renames **Curly bob** to **Long bob**. `f63ba148` implements drag, WASD and
   right-stick orbit, wheel zoom and a default front view; it disables/clips camera collision while the
@@ -437,6 +447,10 @@ requirement.
 
   It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
   salvage. Props released its slot before 13:45.
+- **Starter rack placement save safety** — **Props urgent implementation guard; not shipped.** A new
+  rack at placement ID `520006` must append after every existing placement section, not insert into an
+  earlier numeric range and renumber later `550xxx` saved resources. Before `[ready]`, require a
+  byte-identical old-table regression proving no existing placement IDs move; do not mutate user saves.
 - **Owned chest names and original trunk** — **Props simulation/save/world with Menu rename input,
   pending and not shipped.** An owned chest receives a persistent stable-ID custom name, shown in its
   world interaction prompt before opening. Author an original high-fidelity Victorian timber trunk;
@@ -482,9 +496,16 @@ requirement.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
-- **Reduced foliage shadow motion** — **Water, pending and not shipped.** Tune WPO and shadow
-  amplitude/frequency so bush sway does not cast excessive moving dark/light leaf shadows. Architecture
-  traces the wind path first; Water compares packaged RT-on captures before and after.
+- **Reduced foliage shadow motion** — **Water, pending and not shipped.** EstateScenery HISM
+  brambles/hedge/brush/thimbleberry are shadowed with WPO disabled beyond 60 m and
+  `ShadowCacheInvalidationBehavior::Rigid`; individual resource bushes are movable/shadowed, while
+  landscape grass has WPO but no shadow. The camera-safe foliage script has masked-opacity dithering
+  but no explicit source WPO, so the cause may be shadow cache, dither or RT denoising rather than
+  wind alone.
+
+  Water pinpoints the shrub/material, then makes independent packaged RT-on fixed-camera A/B captures:
+  wind off, reduced 25–50% tip-only motion, shrub shadows off and dither off. Compare pixel flicker
+  and frame cost while retaining natural sway and tree shadows.
 - **Nighttime brightness** — **pending, not shipped.** At about 9 PM, the Estate visibly brightens:
   moonlight reads like sunlight. Architecture's read-only trace of current `HomesteadWorld.cpp`
   (`59–64`, `1715–1784`, `4268–4337`) found no 21:00 trigger: sun reaches zero around 18:23,
