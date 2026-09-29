@@ -225,7 +225,6 @@ const EstatePlacements& ProvisionalEstatePlacements()
         salvage(520003, 300.0, 1300.0);  // In the west rooms, north of the chimney breast.
         salvage(520004, 1350.0, 1950.0); // Outside the gap in the fallen rear wall.
         salvage(520005, 400.0, -200.0);  // Under the collapsed south-west corner, outside.
-        AppendDerelictFarmAndDisrepair(table);
         // Pickable blackberry brambles (540000+, Scripts/Terrain/berries.py): round the manor, along the
         // drive and at the woodland edges. A row within 3 m of an earlier placement is skipped (its id
         // stays unused), so other lanes' additions never renumber them.
@@ -237,6 +236,8 @@ const EstatePlacements& ProvisionalEstatePlacements()
             table.placements.push_back({id, ResourceKind::BerryBush, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateBerryPlacements.inc"
+        // The derelict farm and neglected grounds (550000+) go after the brambles and keep 3 m from them.
+        AppendDerelictFarmAndDisrepair(table);
         // The manor clear-out (570000+, Scripts/Terrain/clearout.py, add-coral-island-clearout): the
         // ground round the ruin littered with weeds, nettles, stumps, rocks and rubbish to clear before
         // she can dig or build there. A row within 1.5 m of an earlier placement (3 m of a blackberry
