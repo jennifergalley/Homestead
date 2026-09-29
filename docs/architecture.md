@@ -171,6 +171,7 @@ reads only values the game thread copied into the proxy.
 | --- | --- | --- |
 | `Estate_Heightmap_4033.png`, `estate_layout.json` | `Scripts/Terrain/reshape.py` | Landscape import (editor); layout mirrored by hand into `ProvisionalEstateLayout()`, which `AHomesteadController::PrepareEstateSimulation` currently installs directly. Moving an anchor requires both updates; there is no live `DA_EstateLandmarks` replacement path. |
 | `Content/SurvivalGame/Estate/Runtime/EstateHeightfield.r16` | terrain pipeline | `HomesteadEstateTerrain::Activate` (ground height outside the Landscape) |
+| `Simulation/HomesteadEstatePublicRoad.inc` | `Scripts/Terrain/public_road.py` from `estate_layout.json` road/roadProfile and `EstateHeightfield.r16` | Simulation public-road centreline/chainage, safe travel endpoints, sign anchors and bridge keep-out. Re-run it whenever route, profile or terrain heights move, then verify stops, signs and terrain heights. |
 | `Content/SurvivalGame/Estate/Runtime/EstateScenery.bin` (`HSC1`) | `Scripts/Terrain/scatter.py` | `AHomesteadWorld::BuildEstateScenery`; kind bytes must match `EstateSceneryKinds` |
 | `Simulation/HomesteadEstateWorldPlacements.inc` and the other `*Placements.inc` | `scatter.py`, `berries.py`, `clearout.py`, `estate_disrepair.py` ("do not edit by hand") | `ProvisionalEstatePlacements()` |
 | `EstateGround.bin` (ground lane) | `Scripts/Terrain/bake_ground.py` | `HomesteadEstateGround` / `HomesteadGrassField` |
