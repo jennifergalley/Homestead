@@ -148,7 +148,8 @@ Inventory Yield(ResourceKind kind)
 {
     switch (kind)
     {
-    case ResourceKind::Branches: return Items({{Item::Branch, 5}});
+    // Fallen branches come with a handful of dry twigs, so she can always light a cook without a billhook.
+    case ResourceKind::Branches: return Items({{Item::Branch, 5}, {Item::Kindling, 1}});
     case ResourceKind::Stones: return Items({{Item::Stone, 4}});
     case ResourceKind::BerryBush: return Items({{Item::Berries, 5}});
     case ResourceKind::Roots: return Items({{Item::Roots, 2}, {Item::Seeds, 2}});
@@ -188,13 +189,16 @@ Inventory CraftChange(Recipe recipe)
     case Recipe::HaftScythe: return Items({{Item::RustedScytheBlade, -1}, {Item::Branch, -2}, {Item::Scythe, 1}});
     case Recipe::HaftBillhook: return Items({{Item::RustedBillhookHead, -1}, {Item::Branch, -2}, {Item::Billhook, 1}});
     case Recipe::HaftPickaxe: return Items({{Item::RustedPickHead, -1}, {Item::Branch, -2}, {Item::Pickaxe, 1}});
-    case Recipe::RoastedRoots: return Items({{Item::Roots, -2}, {Item::RoastedRoots, 1}});
-    case Recipe::HerbedRoots: return Items({{Item::Roots, -2}, {Item::Flowers, -1}, {Item::HerbedRoots, 1}});
+    // Every cooked batch burns one kindling to get the pan going, even at the always-lit hearth.
+    case Recipe::RoastedRoots: return Items({{Item::Roots, -2}, {Item::Kindling, -1}, {Item::RoastedRoots, 1}});
+    case Recipe::HerbedRoots: return Items({{Item::Roots, -2}, {Item::Flowers, -1}, {Item::Kindling, -1}, {Item::HerbedRoots, 1}});
     case Recipe::SplitFirewood: return Items({{Item::Timber, -1}, {Item::Firewood, 4}});
     default: return {};
     }
 }
 bool Hafting(Recipe recipe) { return recipe >= Recipe::HaftAxe && recipe <= Recipe::HaftPickaxe; }
+// The one place that says which recipes cook: they need a lit fire or the hearth.
+bool Cooking(Recipe recipe) { return recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots; }
 std::string DescribeCost(const Inventory& change)
 {
     std::string result;
@@ -913,7 +917,7 @@ const char* RecipeRequirements(Recipe recipe)
         {
             const auto kind = static_cast<Recipe>(i);
             result[i] = DescribeCost(CraftChange(kind));
-            if (kind == Recipe::RoastedRoots || kind == Recipe::HerbedRoots)
+            if (Cooking(kind))
                 result[i] += "; nearby fueled fire (no pot needed)";
             else if (kind == Recipe::SplitFirewood)
                 result[i] += "; axe required";
@@ -1909,7 +1913,7 @@ Result Simulation::Craft(Recipe recipe, Point player)
     if (state_.failed) return Failed();
     if (!ValidEnum(recipe, Recipe::Count) || !ValidPoint(player)) return Bad("Choose a valid recipe and location.");
     const Inventory change = CraftChange(recipe);
-    const bool cooking = recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots;
+    const bool cooking = Cooking(recipe);
     if (cooking && !IsNearFire(player)) return Bad("Move beside a lit cookfire or the hearth to cook roots; no pot is needed.");
     if (recipe == Recipe::SplitFirewood && Count(Item::Hatchet) == 0)
         return Bad("Take your axe from storage to split firewood.");
@@ -1956,8 +1960,7 @@ RecipeAssessment Simulation::AssessRecipe(Recipe recipe, Point player) const
         }
     }
 
-    const bool cooking = recipe == Recipe::RoastedRoots
-        || recipe == Recipe::HerbedRoots;
+    const bool cooking = Cooking(recipe);
     assessment.stationRequired = cooking;
     assessment.stationMet = !cooking || IsNearFire(player);
     if (recipe == Recipe::SplitFirewood)

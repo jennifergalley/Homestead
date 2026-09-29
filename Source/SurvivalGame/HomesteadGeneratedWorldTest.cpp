@@ -798,14 +798,14 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             }, 0.8f);
     }
     QueueCraft(Recipe::SplitFirewood);
-    Add(TEXT("CONTROLLED post-felling supply: digging/watering tools, build materials, roots, seed and water; retain earned timber/firewood"),
+    Add(TEXT("CONTROLLED post-felling supply: digging/watering tools, build materials, roots, kindling, seed and water; retain earned timber/firewood"),
         [this]()
         {
             Homestead::Simulation Supplied = Controller->Simulation();
             auto& Stock = const_cast<Homestead::State&>(Supplied.GetState());
             const TPair<Item, int32> Minimums[] = {{Item::DiggingStick, 1}, {Item::WateringCan, 1},
                 {Item::Branch, 12}, {Item::Stone, 6}, {Item::Fiber, 2},
-                {Item::Roots, 2}, {Item::Seeds, 1}, {Item::Water, 1}};
+                {Item::Roots, 2}, {Item::Kindling, 1}, {Item::Seeds, 1}, {Item::Water, 1}};
             for (const auto& Supply : Minimums)
             {
                 const int32 Index = static_cast<int32>(Supply.Key);
