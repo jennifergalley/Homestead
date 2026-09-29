@@ -192,13 +192,13 @@ bool BlockedByManor(const State& state, const EstateLayout& layout, const Placem
     return false;
 }
 
-std::string SaveLabel(const State& state, const char* season, int day)
+std::string SaveLabel(const State& state)
 {
     if (state.heroineName.empty() && state.familyName.empty() && state.estateName.empty()) return {};
     std::string label = state.heroineName;
     if (!state.familyName.empty()) label += (label.empty() ? "" : " ") + state.familyName;
     if (!state.estateName.empty()) label += " \xE2\x80\x94 " + state.estateName;
-    return label + ", " + (season ? season : "") + " " + std::to_string(day);
+    return label + ", " + Calendar::LongDate(Calendar::DateAt(state.hour));
 }
 
 bool HasSaveSection(const State& state)

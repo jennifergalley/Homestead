@@ -173,11 +173,18 @@ void AHomesteadHUD::DrawCalendar(const AHomesteadController& PC, float X, float 
     Stroke(CX - R - 16, CY, CX + R + 16, CY, 2.5f, Muted);
 
     const float TextX = X + 140;
-    Write(FString::Printf(TEXT("%s  /  Day %d"), UTF8_TO_TCHAR(Sim.SeasonName()), Sim.DayNumber()), TextX, Y + 10, 24, Ink);
+    // "Mon, Spring 12", with the days left in the season's last three days (lane A calendar).
+    const Homestead::Calendar::Date Today = Sim.Today();
+    Write(UTF8_TO_TCHAR(Homestead::Calendar::ShortDate(Today).c_str()), TextX, Y + 10, 24, Ink);
     if (PC.IsPlanning() || PC.IsBookOpen() || PC.IsShopScreenOpen())
     {
         const FString Paused = TEXT("time paused");
         Write(Paused, X + Width - 16 - TextWidth(Paused, 16), Y + 16, 16, Muted);
+    }
+    else if (const std::string Warning = Homestead::Calendar::SeasonWarning(Today); !Warning.empty())
+    {
+        const FString Left = UTF8_TO_TCHAR(Warning.c_str());
+        Write(Left, X + Width - 16 - TextWidth(Left, 16), Y + 16, 16, HudGold);
     }
     const int32 H = FMath::FloorToInt(Hour);
     const int32 M = FMath::FloorToInt((Hour - H) * 60);
