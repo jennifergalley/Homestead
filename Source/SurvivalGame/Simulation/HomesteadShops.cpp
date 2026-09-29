@@ -26,6 +26,11 @@ bool NearCounter(const Shop& shop, Point player)
     return dx * dx + dy * dy <= CounterReach * CounterReach;
 }
 std::string Plural(int quantity, Item item) { return CountedName(item, quantity); }
+std::string ToLowerAscii(std::string text)
+{
+    for (char& c : text) if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
+    return text;
+}
 }
 
 std::string FormatMoney(Cents cents)
@@ -64,6 +69,14 @@ bool IsShopOpen(const Shop& shop, double hour)
     if (!std::isfinite(hour)) return false;
     const double time = std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0);
     return time >= shop.openHour && time < shop.closeHour;
+}
+
+double HoursUntilOpen(const Shop& shop, double hour)
+{
+    if (!std::isfinite(hour) || IsShopOpen(shop, hour)) return 0.0;
+    const double time = std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0);
+    const double wait = shop.openHour - time;
+    return wait > 0.0 ? wait : wait + 24.0;
 }
 
 std::string FormatHour(double hour)
@@ -166,6 +179,37 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     candidate.money -= cost;
     const std::string message = "Bought " + Plural(quantity, item) + " for " + FormatMoney(cost) + ".";
     return CommitInventory(std::move(candidate), message.c_str());
+}
+
+Result Simulation::WaitForShop(int shopId, Point player)
+{
+    if (state_.failed) return ShopBad("You need to recover first.", revision_, ResultCode::Unavailable);
+    const Shop* shop = FindShop(shopId);
+    if (!shop) return ShopBad("There is no such shop.", revision_);
+    const std::string name = ShopDisplayName(shop->kind);
+    if (IsShopOpen(*shop, state_.hour)) return ShopBad("The " + ToLowerAscii(name) + " is open now.", revision_);
+    if (!std::isfinite(player.x) || !std::isfinite(player.y)
+        || std::hypot(player.x - shop->counterX, player.y - shop->counterY) > ShopWaitReach)
+        return ShopBad("Wait by the shop's door.", revision_);
+    const double openHour = shop->openHour;
+    // A hair past the hour, so the step boundaries can't leave the clock a rounding error short.
+    const double hours = HoursUntilOpen(*shop, state_.hour) + 1e-6;
+    // Try it on a copy first: if she'd collapse before it opens, she waits no time at all.
+    Simulation trial = *this;
+    trial.AdvanceGameHours(hours, player);
+    if (trial.state_.failed)
+        return ShopBad("You're too hungry to wait until " + FormatHour(openHour) + ". Eat something first.", revision_,
+            ResultCode::Unavailable);
+    // AdvanceGameHours passes no time at all past the calendar's supported limit.
+    if (trial.state_.hour < state_.hour + hours - 1e-3)
+        return ShopBad("The calendar has reached its supported limit.", revision_);
+    // The ordinary passage of time: crops, weather, fires, vitals and the morning sell-down all run.
+    AdvanceGameHours(hours, player);
+    ++revision_;
+    const Shop* opened = FindShop(shopId);
+    if (!opened || !IsShopOpen(*opened, state_.hour))
+        return ShopBad("You waited, but the " + ToLowerAscii(name) + " is still closed.", revision_, ResultCode::Unavailable);
+    return ShopGood("You wait by the door until " + FormatHour(openHour) + ". The " + ToLowerAscii(name) + " is open.", revision_);
 }
 
 Result Simulation::GreetShopkeeper(int shopId)

@@ -614,6 +614,9 @@ public:
     Result Buy(int shopId, Item item, int quantity, bool fromHeroineStock, Point player);
     // Counts a shopkeeper greeting (a friendship stub).
     Result GreetShopkeeper(int shopId);
+    // Waits by a closed shop until it opens: the ordinary passage of time (crops, weather, vitals,
+    // the morning sell-down), refused before any time passes if she'd collapse first.
+    Result WaitForShop(int shopId, Point player);
     // Playtest aids: adjust the purse; open (or move) a shop with its counter at `counter`.
     Result GrantMoney(Cents cents);
     Result PlaceShop(ShopKind kind, Point counter, double yaw = 0.0);

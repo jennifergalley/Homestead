@@ -344,6 +344,11 @@ private:
     FString StoreFocusTitle() const;
     FString StoreFocusActions() const;
     void InteractWithStore();
+    // Waiting at a closed shop's door: A asks, a second A (or B to cancel) answers.
+    int32 WaitShopId = INDEX_NONE;
+    double WaitAskedAt = 0.0;
+    bool IsShopWaitArmed() const;
+    bool CancelShopWait();
     FString GreetingFor(const Homestead::Shop& Shop) const;
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;

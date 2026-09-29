@@ -3133,6 +3133,7 @@ void AHomesteadController::Back()
     if (IsFailed()) { RetryCheckpoint(); return; }
     if (bBookOpen) CloseBook();
     else if (bPlanning) EndPlacement();
+    else if (CancelShopWait()) PlayEffect(UIClick, 0.05f);
     else OpenBook(4);
 }
 void AHomesteadController::PreviousPage()

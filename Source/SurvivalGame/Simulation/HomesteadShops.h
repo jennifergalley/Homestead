@@ -48,6 +48,11 @@ struct Shop
 const std::vector<Item>& ShopGoods(ShopKind kind);
 const char* ShopDisplayName(ShopKind kind);
 bool IsShopOpen(const Shop& shop, double hour);
+// Hours from `hour` until the shop next opens; 0 while it's open.
+double HoursUntilOpen(const Shop& shop, double hour);
+// How near the shop (its counter) she must be to wait for it to open, in cm: the door and the
+// street outside it.
+constexpr double ShopWaitReach = 1500.0;
 // "Closed - opens at 8 AM".
 std::string ClosedMessage(const Shop& shop);
 // What she is paid per unit.

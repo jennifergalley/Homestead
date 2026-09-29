@@ -11,6 +11,8 @@
 #include "Framework/Application/SlateApplication.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadShop, Log, All);
+
 namespace
 {
 FString ShopText(const std::string& Value) { return UTF8_TO_TCHAR(Value.c_str()); }
@@ -182,12 +184,50 @@ FString AHomesteadController::StoreFocusTitle() const
     return FString(AHomesteadShopkeeper::DisplayName()) + TEXT("  |  General store");
 }
 
+namespace ShopWait
+{
+// How long the "Wait until ...?" question stays up, and how soon a second press may answer it (so a
+// bounced or doubled press can't confirm by accident), in real seconds.
+constexpr double AskSeconds = 8.0;
+constexpr double MinAnswerSeconds = 0.35;
+// "13 h", "1 h 30 min", "45 min".
+FString Duration(double Hours)
+{
+    const int32 Minutes = FMath::Max(1, FMath::RoundToInt(Hours * 60.0));
+    if (Minutes < 60) return FString::Printf(TEXT("%d min"), Minutes);
+    const int32 Whole = Minutes / 60, Rest = Minutes % 60;
+    return Rest ? FString::Printf(TEXT("%d h %d min"), Whole, Rest) : FString::Printf(TEXT("%d h"), Whole);
+}
+}
+
+bool AHomesteadController::IsShopWaitArmed() const
+{
+    return WaitShopId != INDEX_NONE && Focus == EFocus::StoreDoor && FocusId == WaitShopId
+        && FPlatformTime::Seconds() - WaitAskedAt < ShopWait::AskSeconds;
+}
+
+bool AHomesteadController::CancelShopWait()
+{
+    const bool bArmed = IsShopWaitArmed();
+    WaitShopId = INDEX_NONE;
+    return bArmed;
+}
+
 FString AHomesteadController::StoreFocusActions() const
 {
     const Homestead::Shop* Shop = Sim.FindShop(FocusId);
     if (!Shop) return FString();
-    if (Focus == EFocus::StoreDoor) return ShopText(Homestead::ClosedMessage(*Shop));
-    return (bGamepad ? TEXT("[A]") : TEXT("[E]")) + FString(TEXT(" Talk to ")) + AHomesteadShopkeeper::DisplayName();
+    const FString A = bGamepad ? TEXT("[A]") : TEXT("[E]");
+    if (Focus == EFocus::StoreDoor)
+    {
+        const FString Opens = ShopText(Homestead::FormatHour(Shop->openHour));
+        const FString Hours = ShopWait::Duration(Homestead::HoursUntilOpen(*Shop, State().hour));
+        if (IsShopWaitArmed())
+            return FString::Printf(TEXT("Wait %s until %s?   %s Wait   %s Cancel"), *Hours, *Opens, *A,
+                bGamepad ? TEXT("[B]") : TEXT("[Esc]"));
+        return ShopText(Homestead::ClosedMessage(*Shop)) + TEXT("   ") + A + TEXT(" Wait until ") + Opens + TEXT(" (") + Hours + TEXT(")");
+    }
+    return A + FString(TEXT(" Talk to ")) + AHomesteadShopkeeper::DisplayName();
 }
 
 void AHomesteadController::InteractWithStore()
@@ -196,7 +236,21 @@ void AHomesteadController::InteractWithStore()
     if (!Shop) return;
     if (Focus == EFocus::StoreDoor || !Homestead::IsShopOpen(*Shop, State().hour))
     {
-        Notify(ShopText(Homestead::ClosedMessage(*Shop)), true);
+        if (Focus != EFocus::StoreDoor) { Notify(ShopText(Homestead::ClosedMessage(*Shop)), true); return; }
+        if (!IsShopWaitArmed())
+        {
+            // First press asks; the prompt shows the question and how to answer it.
+            WaitShopId = FocusId;
+            WaitAskedAt = FPlatformTime::Seconds();
+            PlayEffect(UIClick, 0.05f);
+            return;
+        }
+        if (FPlatformTime::Seconds() - WaitAskedAt < ShopWait::MinAnswerSeconds) return;
+        const int32 ShopId = WaitShopId;
+        WaitShopId = INDEX_NONE;
+        const auto Result = Sim.WaitForShop(ShopId, PlayerPoint());
+        Notify(ShopText(Result.message), !Result.ok);
+        if (Result.ok) UE_LOG(LogHomesteadShop, Log, TEXT("Waited for shop %d; now hour %.2f."), ShopId, State().hour);
         return;
     }
     OpenShopScreen(Shop->id);
