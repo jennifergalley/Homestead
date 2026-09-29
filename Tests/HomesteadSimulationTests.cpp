@@ -2,6 +2,7 @@
 #include "HomesteadCrops.h"
 #include "HomesteadShops.h"
 #include "HomesteadEstate.h"
+#include "HomesteadEstatePublicRoad.h"
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadRuinDebris.h"
@@ -3155,7 +3156,8 @@ void FixedEstateNewGameAndSave()
     int misplaced = 0;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
     {
-        const bool onEstate = PointInPolygon(layout.FindPolygon(Anchor::EstateBoundary)->points, placement.position);
+        // On the estate, or the narrow public-roadside exception (HomesteadEstatePublicRoad.h).
+        const bool onEstate = EstatePlacementAllowed(layout, placement);
         const bool inRuin = placement.kind != ResourceKind::SalvagePile && !RuinDebris::Find(placement.id)
             && PointInPolygon(footprint, placement.position);
         if (!onEstate || inRuin)

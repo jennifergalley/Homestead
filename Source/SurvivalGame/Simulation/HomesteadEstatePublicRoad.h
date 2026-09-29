@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HomesteadEstate.h"
 #include "HomesteadSimulation.h"
 
 #include <string>
@@ -60,4 +61,13 @@ struct PublicRoad
 };
 
 const PublicRoad& EstatePublicRoad();
+
+// The public roadside exception to the estate boundary: forage she may pick on the verges of the road to
+// town (ids 581000-581099, Scripts/Terrain/forage.py). True only for those ids, forage kinds, 3.2-12 m
+// from the road's centreline and outside the bridge keep-out; every other placement stays on the estate.
+constexpr int PublicRoadsideFirstId = 581000;
+constexpr int PublicRoadsideEndId = 581100;
+bool IsPublicRoadsidePlacement(const EstatePlacement& placement);
+// Where a placement may stand: on the estate, or the narrow public-roadside exception.
+bool EstatePlacementAllowed(const EstateLayout& layout, const EstatePlacement& placement);
 }
