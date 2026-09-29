@@ -1820,6 +1820,24 @@ void AHomesteadController::UpdateFocus()
         Consider(EFocus::Drop, Drop.id, Drop.position);
     for (const auto& Plot : State().plots)
         Consider(EFocus::Plot, Plot.id, Homestead::PlotCenter(Plot));
+    // In a garden of adjoining squares the nearest centre is ambiguous (and a weed at her feet can
+    // win): the square her reach lands in, 60 cm ahead of her, takes the focus.
+    if (const APawn* Avatar = GetPawn(); Avatar && !State().plots.empty())
+    {
+        constexpr double GardenReachAheadCm = 60.0;
+        const FVector Forward = Avatar->GetActorForwardVector();
+        const int ReachX = Homestead::GardenCell(Position.x + Forward.X * GardenReachAheadCm);
+        const int ReachY = Homestead::GardenCell(Position.y + Forward.Y * GardenReachAheadCm);
+        for (const auto& Plot : State().plots)
+            if (Plot.cellX == ReachX && Plot.cellY == ReachY)
+            {
+                Best = FMath::Min(Best, FMath::Sqrt(FMath::Square(Homestead::PlotCenter(Plot).x - Position.x)
+                    + FMath::Square(Homestead::PlotCenter(Plot).y - Position.y)));
+                Focus = EFocus::Plot;
+                FocusId = Plot.id;
+                break;
+            }
+    }
     for (const auto& Structure : State().structures)
     {
         EFocus Kind = EFocus::None;
