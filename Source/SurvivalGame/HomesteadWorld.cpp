@@ -3,6 +3,7 @@
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
 #include "HomesteadGrassField.h"
+#include "HomesteadWeather.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Misc/FileHelper.h"
@@ -594,6 +595,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     HomesteadLampLook::SetLit(LampDropFlame.Get(), LampDropLight.Get(), bLampDropLit, LampDropFlickerTime, LampDropGlass.Get());
     UpdateHearthSound(DeltaSeconds);
     UpdateClearPops(DeltaSeconds);
+    if (Weather) Weather->TickWeather(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
     {
         FHomesteadChunkBaselineBuild Completed = ChunkBaselineBuild->Get();
@@ -1739,6 +1741,9 @@ void AHomesteadWorld::BuildLighting()
     Settings.AutoExposureSpeedUp = 3.0f;
     Settings.bOverride_AutoExposureSpeedDown = true;
     Settings.AutoExposureSpeedDown = 1.0f;
+    // Overcast greys the scene (UpdateLighting).
+    Settings.bOverride_ColorSaturation = true;
+    Settings.ColorSaturation = FVector4(1.0f, 1.0f, 1.0f, 1.0f);
     Exposure->RegisterComponent();
 
     Sun = NewObject<UDirectionalLightComponent>(this, TEXT("MeadowSun"));
@@ -1781,6 +1786,10 @@ void AHomesteadWorld::BuildLighting()
     Fog->SetFogHeightFalloff(0.3f);
     Fog->SetStartDistance(1100.0f);
     Fog->RegisterComponent();
+
+    Weather = NewObject<UHomesteadWeather>(this, TEXT("Weather"));
+    Weather->SetupAttachment(GetRootComponent());
+    Weather->RegisterComponent();
 }
 
 bool AHomesteadWorld::IsDecorationReserved(const Homestead::State& State, float X, float Y,
@@ -4086,8 +4095,11 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float SolarAngle = (Hour - 6.0f) / 24.0f * 2.0f * PI;
     const float Elevation = FMath::Sin(SolarAngle);
     const float Daylight = FMath::SmoothStep(-0.1f, 0.25f, Elevation);
-    // The simulation's three-day spring weather (Homestead::IsRainingAt).
-    const bool bRaining = Homestead::IsRainingAt(State.hour);
+    // The simulation's three-day spring weather: cloud builds half an hour before the rain and clears
+    // half an hour after it (Homestead::Overcast), the rain swells and eases (Homestead::RainAmount).
+    if (Weather) Weather->Update(State, Daylight);
+    const float Cloud = Weather ? Weather->GetOvercast() : 0.0f;
+    const float Shower = Weather ? Weather->GetRain() : 0.0f;
     const FRotator SunRotation(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0);
     const FRotator MoonRotation(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0);
     // With ray-traced sun shadows, follow the sun every refresh (about 0.025 degrees at normal game
@@ -4110,7 +4122,15 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
         AppliedMoonRotation = MoonRotation;
         bLightRotationApplied = true;
     }
-    Sun->SetIntensity(FMath::Lerp(0.0f, bRaining ? 17000.0f : 46000.0f, Daylight));
+    // Under cloud the sun is a dim, broad glow: little direct light and soft, faint shadows; the sky
+    // light carries the scene instead.
+    Sun->SetIntensity(FMath::Lerp(0.0f, 46000.0f, Daylight) * FMath::Lerp(1.0f, OvercastSunScale, Cloud));
+    const float SourceAngle = FMath::Lerp(0.5357f, OvercastSunSourceAngle, Cloud);
+    if (FMath::Abs(SourceAngle - AppliedSunSourceAngle) > 0.25f)
+    {
+        Sun->SetLightSourceAngle(SourceAngle);
+        AppliedSunSourceAngle = SourceAngle;
+    }
     // The sky atmosphere already reddens a low sun through its transmittance; keep only a mild
     // extra tint so dawn stays golden instead of saturating to orange.
     Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.9f, 0.8f),
@@ -4119,14 +4139,23 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float NightSkyIntensity = CVarNightSky.GetValueOnGameThread();
     const float NightMinExposure = CVarNightMinExposure.GetValueOnGameThread();
     Moon->SetIntensity(NightMoonLux * (1.0f - Daylight));
-    Sky->SetIntensity(FMath::Lerp(NightSkyIntensity, 1.0f, Daylight));
+    Sky->SetIntensity(FMath::Lerp(NightSkyIntensity, 1.0f, Daylight) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud));
+    // The real-time sky capture still sees the clear blue atmosphere under the cloud layer, so warm it
+    // back towards a neutral grey overcast.
+    Sky->SetLightColor(FMath::Lerp(FLinearColor::White, FLinearColor(1.0f, 0.93f, 0.84f), Cloud));
     Exposure->Settings.AutoExposureMinBrightness = FMath::Lerp(NightMinExposure, 0.0f, Daylight);
-    Fog->SetFogDensity(bRaining ? 0.035f : FMath::Lerp(0.016f, 0.007f, Daylight));
-    Fog->SetFogInscatteringColor(bRaining ? FLinearColor(0.43f, 0.49f, 0.52f)
-        : FMath::Lerp(FLinearColor(0.055f, 0.085f, 0.14f), FLinearColor(0.64f, 0.72f, 0.68f), Daylight));
+    // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
+    Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud;
+    const float Saturation = FMath::Lerp(1.0f, OvercastSaturation, Cloud);
+    Exposure->Settings.ColorSaturation = FVector4(Saturation, Saturation, Saturation, 1.0f);
+    const float ClearFog = FMath::Lerp(0.016f, 0.007f, Daylight);
+    Fog->SetFogDensity(FMath::Lerp(ClearFog, 0.022f, Cloud) + 0.016f * Shower);
+    Fog->SetFogHeightFalloff(FMath::Lerp(0.3f, 0.12f, Cloud));
+    const FLinearColor ClearHaze = FMath::Lerp(FLinearColor(0.055f, 0.085f, 0.14f), FLinearColor(0.64f, 0.72f, 0.68f), Daylight);
+    Fog->SetFogInscatteringColor(FMath::Lerp(ClearHaze, FLinearColor(0.43f, 0.47f, 0.5f) * FMath::Lerp(0.15f, 1.0f, Daylight), Cloud));
 
     // The ground and meadow wet through in the first half hour of rain and dry over the four hours
-    // after it stops; the rain days follow the simulation's schedule (as bRaining above).
+    // after it stops; the rain days follow Homestead::IsRainDay.
     if (!bGroundParametersTried)
     {
         bGroundParametersTried = true;
