@@ -494,8 +494,20 @@ requirement.
   remains pending the narrow public-road-corridor proof and bridge coordinate sync.
 - **Abundant live berry bushes and non-farm food** — **Water, pending and not shipped.** Populate
   Estate woods, fields and the road with measurably abundant **live pickable** bushes, rather than
-  decorative-only foliage. Define biome density, seasonal readiness, regeneration and save behavior
-  without moving old placement IDs; retain off-season food options.
+  decorative-only foliage. Architecture's baseline is about 104 live `BerryBush` nodes (22 normal
+  woodland, 43 MVP and 39 of 42 special; 3 skipped), five berries per harvest and 36 game-hour regrow,
+  with no current season gate. The 374,654 scenery instances include many decorative berry-looking
+  bushes and do not count.
+
+  Only 13 live nodes sit within 15 m of the 1.94 km road: 11 in its first 400 m, two from 400–800 m
+  and none beyond 800 m. Water's first targeted increment adds about 25 live bushes: 14–20 roadside
+  stops from chainage 800–1940 at 55–80 m intervals, plus 8–12 woods/field edges beyond the first
+  150 m. Preserve existing IDs and player edits, use reserved `581000–581099`, and measure visibility
+  and performance. Roots/herbs provide off-season food.
+
+  The old Seasons handoff would gate Blackberries from Summer 15 through Autumn 28; do not silently
+  add that gate without spring food and clear player prompts. Acceptance is live-node density,
+  seasonal readiness/regeneration, save safety and performance - never decorative instance count.
 - **Terrain-following road grade** — **Water Agent, pending and not shipped.** Eliminate artificial
   raised/lowered road segments. The road is Landscape paint/ruts, not a raised mesh: `reshape.py`
   grades a 2.8 m flat half-width plus 12 m falloff at ±11%, and its weightmap/rut SDF share the route.
