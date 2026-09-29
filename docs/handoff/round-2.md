@@ -103,6 +103,14 @@ Gait run, Menu toast/berry A-X Energy/Ctrl+wheel/wait changes, manor rubble and 
 crop, river, performance and save work. Rain remains audibly unproven; listen outdoors on day 2 from
 about 11:00 to 15:30.
 
+## Core-loop priority after 4 PM
+
+Jenny's next priority is a packaged, end-to-end first core loop, in this order: hoe/tool assembly;
+manor rubble; early till/sow/water/harvest; easy live foraged food; lake pail fill; then town
+buy/sell/return. **Equivalent-time fast travel is part of that core loop.** Integration owns a
+packaged sandbox acceptance run for it. Music is postponed until this loop is accepted; unfinished
+dye/Appearance and night-light work remain bounded partial work, not substitutes for the loop.
+
 ## Lanes and ownership
 
 The design's "Lanes and ownership" table is authoritative. In short:
@@ -248,6 +256,10 @@ after the north-west lake; town-entry/store acceptance, coordinate bridge, roads
 signs wait for the final road route. If the terrain or water work needs placement ids, the Water Agent
 claims them through this page before using them (the registry starts at 581000+).
 
+**Packaged lake pail regression:** despite PIE fill success, the packaged lake pail cannot fill.
+Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save,
+then add this to the core-loop package acceptance.
+
 **Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
 all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
 hands-on work; no one edits a busy lane's files or starts a fourth implementer.
@@ -308,6 +320,10 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
+- **Minimap/compass HUD trial** — **Architecture trace, pending and not shipped.** Keep the minimap
+  while trialing larger important minimap icons and a top-centre compass strip with bearings/cardinals.
+  Avoid competing with toast feedback and make the time text as crisp as the money readout. Validate
+  legibility and layout at 720p and 4K before committing a direction.
 - **Remove Guidebook UI** — **Menu, pending and not shipped.** Remove the Guidebook surface entirely,
   updating navigation cycles, shortcuts, page indexes, NativeMenu coverage and packaged checks while
   retaining save compatibility.
@@ -363,7 +379,9 @@ requirement.
   behavior; verify at 1080p and 4K.
 - **Contextual hotbar eating and berry feedback** — **Menu `88180744` shipped in the 4 PM playable
   build.** Controller A/X eats one selected berry per tap only when Talk has no
-  precedence, and displays `+` the actual bounded Energy delta.
+  precedence, and displays `+` the actual bounded Energy delta. **Pending follow-up:** every rapid
+  berry tap must apply Energy immediately without waiting for the bite animation, auto-repeat or a
+  focus conflict; Menu owns input/Simulation coordination and Props owns animation.
 - **Music variety** — **pending, not fixed.** **Architecture Agent** (`a1648ae7`) traced the root
   cause: the shipped catalog loads only one track, `EveningHarp`, despite five named entries. The
   shuffle bag anti-repeats correctly when it has more than one track, but the existing 55–110 s gap
@@ -380,7 +398,7 @@ requirement.
     <https://opengameart.org/content/town-theme-rpg> (durations not yet recorded).
   - Optional *Celtic Loop* (<https://opengameart.org/content/celtic-loop>) may be too repetitive.
 
-  **Next-build priority:** a dedicated music implementer auditions the four CC0 candidate recordings,
+  **Post-core-loop work:** a dedicated music implementer auditions the four CC0 candidate recordings,
   selects/imports only the qualified set with credits and catalog entries, and adds the shuffle with
   long ambient-only gaps. Do not use the untracked Kevin MacLeod CC-BY files. Register
   `MusicShuffleBagTests` in CMake and verify packaged multi-track load and run.
@@ -523,9 +541,14 @@ requirement.
   is removed with lake `df19d74a` in `main` `61c1595c`
   (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a book-map lake/path
   screenshot. It **shipped with the lake** in the 4 PM playable build.
+- **Farm-to-lake trail** — **Water, pending and not shipped.** The dashed lake path is absent on the
+  ground. Cut a clear, actual woods trail from farm to landing and verify it visually and on foot.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
+- **Oil-lamp reach** — **Architecture trace, pending and not shipped.** Increase the throw by roughly
+  300% (about four times distance) only after measuring attenuation, brightness and performance; then
+  verify the tuned result.
 - **Reduced foliage shadow motion** — **Water, pending and not shipped.** EstateScenery HISM
   brambles/hedge/brush/thimbleberry are shadowed with WPO disabled beyond 60 m and
   `ShadowCacheInvalidationBehavior::Rigid`; individual resource bushes are movable/shadowed, while
@@ -587,7 +610,7 @@ requirement.
   `ValidateInventory`. **Menu** owns the shop upgrade row, `bRucksackVisible`, the Appearance toggle
   and the 120-cap UI helpers. Tests cover malformed/duplicate entitlement sections, rebuy refusal,
   insufficient funds and capacity/save behavior.
-- **Town travel** — **next-build priority; pending and not shipped.** A wooden `Walk to town` sign outside the estate and a
+- **Town travel** — **core-loop priority; pending and not shipped.** A wooden `Walk to town` sign outside the estate and a
   return sign by town; clickable **Town** and **Manor** destinations on the Map invoke the same travel
   action. Architecture traced the road polyline in `estate_layout.json` (486 points / 1.94 km; runtime
   has landmarks only). The MetaHuman walks 210 cm/s (legacy 180); at a 60-minute day, road-only travel
