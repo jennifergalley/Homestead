@@ -25,7 +25,7 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Forage, "roots", 4, NoBuyers, 0.0, 0.0, "Wild roots"},
     {Item::Flowers, "flowers", "Meadow herb", "A fragrant meadow herb for seasoning and posies.",
         ItemCategory::Forage, "flowers", 10, StoreBuys, 0.0, 0.0, "Meadow herb patches"},
-    {Item::Seeds, "seeds", "Seeds", "Root seeds for planting in tilled soil.",
+    {Item::Seeds, "seeds", "Seeds", "Root seeds for planting in tilled soil. Matures in about 2 days if watered.",
         ItemCategory::Supply, "seeds", 2, NoBuyers},
     // The axe, hoe and pail keep their original keys and enum names.
     {Item::Hatchet, "hatchet", "Axe", "A salvaged iron axe head on a new haft. Fells trees and clears stumps and fallen timber.",

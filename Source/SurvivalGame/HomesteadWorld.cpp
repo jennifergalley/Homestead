@@ -1,4 +1,6 @@
 #include "HomesteadWorld.h"
+#include "Simulation/HomesteadCrops.h"
+#include "Components/MaterialBillboardComponent.h"
 #include "HomesteadEstateTerrain.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
@@ -3573,6 +3575,19 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
     }
 }
 
+UStaticMesh* AHomesteadWorld::CropMesh(Homestead::CropKind Kind, const TCHAR* StageName)
+{
+    const FString Visual = UTF8_TO_TCHAR(Homestead::GetCropInfo(Kind).visual);
+    if (Visual.IsEmpty()) return nullptr;
+    const FName Key(*FString::Printf(TEXT("%s_%s"), *Visual, StageName));
+    if (const TObjectPtr<UStaticMesh>* Cached = CropMeshes.Find(Key)) return Cached->Get();
+    UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, *FString::Printf(
+        TEXT("/Game/SurvivalGame/Environment/Props/%s/SM_%s_%s.SM_%s_%s"), *Visual, *Visual, StageName, *Visual, StageName),
+        nullptr, LOAD_NoWarn | LOAD_Quiet);
+    CropMeshes.Add(Key, Mesh);
+    return Mesh;
+}
+
 void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot)
 {
     const Homestead::Point Center = Homestead::PlotCenter(Plot);
@@ -3603,13 +3618,49 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
                 const float Yaw = (Plot.id % 2) ? 180.0f : 0.0f;
                 const FRotator Lie = FRotationMatrix::MakeFromZX(Normal, FRotator(0, Yaw, 0).Vector()).Rotator();
                 if (auto* Part = AddPart(Visual, Bed, AtGround(PX, PY, -1.2f), FVector(100, 100, 100), WetSoil, false, Lie))
-                    Part->SetMaterial(0, Moisture >= 0.4f && WetBed ? WetBed : Bed->GetMaterial(0));
+                    Part->SetMaterial(0, !Homestead::NeedsWater(Plot) && WetBed ? WetBed : Bed->GetMaterial(0));
             }
             else
                 AddPart(Visual, Cube, AtGround(PX, PY, 0.4f), FVector(Homestead::GardenCellSize - 8.0f, Homestead::GardenCellSize - 8.0f, 1.2f),
                     WetSoil * 0.85f, false, FRotator::ZeroRotator, 0.95f - Moisture * 0.35f);
             constexpr int X = 0, Y = 0;
-            if (Plot.planted && Stage(Plot.growth, 12) == 0)
+            const Homestead::CropStage CropStage = Homestead::StageOf(Plot);
+            UStaticMesh* Plant = CropStage >= Homestead::CropStage::Sprout
+                ? CropMesh(Plot.kind, UTF8_TO_TCHAR(Homestead::StageName(CropStage))) : nullptr;
+            if (Plant)
+            {
+                // The Blender plant for this stage, sized for the square and set on the bed's ridges.
+                constexpr float Probe = 40.0f;
+                const FVector Normal = FVector(GroundHeight(PX - Probe, PY) - GroundHeight(PX + Probe, PY),
+                    GroundHeight(PX, PY - Probe) - GroundHeight(PX, PY + Probe), 2 * Probe).GetSafeNormal();
+                const float Yaw = (Plot.id % 2) ? 180.0f : 0.0f;
+                const FRotator Lie = FRotationMatrix::MakeFromZX(Normal, FRotator(0, Yaw, 0).Vector()).Rotator();
+                if (auto* Part = AddPart(Visual, Plant, AtGround(PX, PY, Bed ? -1.2f : 0.0f), FVector(100, 100, 100), Leaf, false, Lie))
+                    Part->SetMaterial(0, Plant->GetMaterial(0));
+                if (CropStage == Homestead::CropStage::Ripe)
+                {
+                    // A slow, soft glint over a ripe plant, readable from across the garden.
+                    if (!bRipeGlintLoaded)
+                    {
+                        RipeGlintMaterial = LoadObject<UMaterialInterface>(nullptr,
+                            TEXT("/Game/SurvivalGame/Environment/Props/CropGlint/M_CropRipeGlint.M_CropRipeGlint"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+                        bRipeGlintLoaded = true;
+                    }
+                    if (RipeGlintMaterial)
+                    {
+                        auto* Glint = NewObject<UMaterialBillboardComponent>(this);
+                        Glint->SetupAttachment(GetRootComponent());
+                        Glint->SetMobility(EComponentMobility::Movable);
+                        const float Top = Plant->GetBounds().GetBox().Max.Z;
+                        Glint->SetRelativeLocation(AtGround(PX, PY, Top + 18.0f));
+                        Glint->AddElement(RipeGlintMaterial, nullptr, false, 26.0f, 26.0f, nullptr);
+                        Glint->SetCastShadow(false);
+                        Glint->RegisterComponent();
+                        Visual.Components.Add(Glint);
+                    }
+                }
+            }
+            else if (Plot.planted && CropStage == Homestead::CropStage::Sown)
             {
                 // Just sown: a small mound of soil over the seed, with her fingertip's press.
                 if (!SoilMoundMesh)
@@ -4007,17 +4058,25 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     RemoveMissing(PlotVisuals, NearPlots);
     for (const auto& Plot : NearPlots)
     {
-        const bool bShownPlanted = Plot.planted && Plot.id != HeldPlotId;
+        // Just harvested: the ripe plant stays until her hands lift the produce.
+        const bool bHarvestHeld = Plot.id == HeldHarvestPlotId;
+        const bool bShownPlanted = (Plot.planted || bHarvestHeld) && Plot.id != HeldPlotId;
         const bool bSquareHidden = bHeldPlotHidden && Plot.id == HeldPlotId;
-        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d:%d"),
+        const FString Signature = FString::Printf(TEXT("%d:%d:%d:%d:%d:%d:%d:%d:%d:%d"),
             Plot.cellX, Plot.cellY, bShownPlanted, bSquareHidden, Stage(Plot.growth, 12),
-            Stage(Plot.moisture, 5), Stage(Plot.weeds, 8), static_cast<int>(Plot.kind));
+            Stage(Plot.moisture, 5), Stage(Plot.weeds, 8), static_cast<int>(Plot.kind), bHarvestHeld,
+            static_cast<int>(Homestead::StageOf(Plot)));
         FHomesteadWorldVisual& Visual = PlotVisuals.FindOrAdd(Plot.id);
         if (Visual.Signature != Signature)
         {
             ClearVisual(Visual);
             Homestead::Plot Shown = Plot;
             Shown.planted = bShownPlanted;
+            if (bHarvestHeld)
+            {
+                Shown.kind = HeldHarvestKind;
+                Shown.growth = 1.0;
+            }
             if (!bSquareHidden) BuildPlot(Visual, Shown);
             Visual.Signature = Signature;
         }

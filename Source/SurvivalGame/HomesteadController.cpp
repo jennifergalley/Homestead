@@ -1,5 +1,6 @@
 #include "HomesteadController.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "Simulation/HomesteadCrops.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
@@ -84,11 +85,10 @@ const Homestead::Plot* FindPlotWhere(const std::vector<Homestead::Plot>& Plots, 
     return nullptr;
 }
 
-// Chosen on the hotbar to plant bare tilled soil: seeds grow roots, a berry's seeds grow a bush.
+// Chosen on the hotbar to plant bare tilled soil: each seed grows its crop (a berry's seeds grow a bush).
 TOptional<Homestead::CropKind> PlantingCrop(Homestead::Item Item)
 {
-    if (Item == Homestead::Item::Seeds) return Homestead::CropKind::Roots;
-    if (Item == Homestead::Item::Berries) return Homestead::CropKind::Berries;
+    if (const auto* Crop = Homestead::CropForSeed(Item)) return Crop->kind;
     return {};
 }
 
@@ -1580,6 +1580,17 @@ void AHomesteadController::Tick(float DeltaSeconds)
             RefreshRemaining = 0;
         }
     }
+    if (HeldHarvestPlot != INDEX_NONE)
+    {
+        const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+        if (!Avatar || Avatar->SticksLiftedFromPile() >= 1 || !Avatar->IsStickPileOnGround()
+            || GetWorld()->GetTimeSeconds() - HeldHarvestSince > 6.0)
+        {
+            if (Landscape) Landscape->ReleaseHarvest();
+            HeldHarvestPlot = INDEX_NONE;
+            RefreshRemaining = 0;
+        }
+    }
     if (HeldStickPile != INDEX_NONE)
     {
         const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -1776,9 +1787,7 @@ FString AHomesteadController::FocusTitle() const
         {
             if (Plot.id != FocusId) continue;
             if (!Plot.planted) return TEXT("A little patch of earth");
-            return FString::Printf(TEXT("%s  |  %d%% grown  |  %d%% watered  |  %d%% weeds"),
-                *Text(Homestead::CropName(Plot.kind)), FMath::RoundToInt(Plot.growth * 100),
-                FMath::RoundToInt(Plot.moisture * 100), FMath::RoundToInt(Plot.weeds * 100));
+            return Text(Homestead::PlotStatus(Plot).c_str());
         }
         break;
     case EFocus::Drop:
@@ -1848,12 +1857,14 @@ FString AHomesteadController::FocusActions() const
             if (Plot.id == FocusId)
             {
                 if (!Plot.planted) return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
-                if (Plot.growth >= 1) return A + TEXT(" Harvest");
-                if (ToolAvailable && SelectedTool == Homestead::Item::WateringCan)
-                    return Use + TEXT(" Water");
-                if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
-                    return Use + TEXT(" Weed");
-                return TEXT("Select the pail or hoe");
+                if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
+                FString Actions;
+                if (Homestead::NeedsWater(Plot))
+                    Actions = (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water");
+                if (Plot.weeds > 0.1)
+                    Actions += (Actions.IsEmpty() ? TEXT("") : TEXT("   "))
+                        + (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick ? Use : X) + TEXT(" Weed");
+                return Actions;
             }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
@@ -2434,11 +2445,14 @@ void AHomesteadController::Interact()
                 PlantFocusedPlot(Homestead::CropKind::Roots);
                 break;
             }
+            const Homestead::CropKind Harvested = Plot.kind;
+            const Homestead::Point Center = Homestead::PlotCenter(Plot);
             const auto Result = Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
             Notify(Result, GrassStepB);
+            if (Result.ok && Mature) PresentHarvest(FocusId, Harvested, Center);
             if (Result.ok && !Mature)
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                    Avatar->PlayWater(Homestead::PlotCenter(Plot));
+                    Avatar->PlayWater(Center);
             break;
         }
         break;
@@ -2597,6 +2611,20 @@ void AHomesteadController::HoeSquareAhead()
         HeldPlotSince = GetWorld()->GetTimeSeconds();
         bHeldPlotTilling = true;
     }
+}
+
+void AHomesteadController::PresentHarvest(int32 PlotId, Homestead::CropKind Crop, Homestead::Point Center)
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar) return;
+    const bool bPick = Homestead::GetCropInfo(Crop).style == Homestead::HarvestStyle::Pick;
+    UStaticMesh* Produce = Landscape ? Landscape->CropMesh(Crop, TEXT("Harvest")) : nullptr;
+    if (!Avatar->PlayHarvest(Center, bPick, Produce) || !Landscape) return;
+    // The ripe plant stays in the ground until her hands lift the crop out of it.
+    Landscape->HoldHarvest(PlotId, Crop);
+    HeldHarvestPlot = PlotId;
+    HeldHarvestSince = GetWorld()->GetTimeSeconds();
+    RefreshRemaining = 0;
 }
 
 void AHomesteadController::PlantFocusedPlot(Homestead::CropKind Crop)
