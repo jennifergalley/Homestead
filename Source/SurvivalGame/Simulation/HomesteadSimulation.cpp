@@ -2871,15 +2871,7 @@ std::string Simulation::Serialize() const
     // Optional tagged trailing sections; saves without them still load.
     if (Manor::HasSaveSection(state_)) Manor::WriteSaveSection(body, state_);
     Lamp::WriteSaveSection(body, state_);
-    // Tagged trailing section: ids of regrowing plots picked since sowing (omitted when none).
-    std::vector<int> picked;
-    for (const auto& plot : state_.plots) if (plot.planted && plot.picked) picked.push_back(plot.id);
-    if (!picked.empty())
-    {
-        body << "picked " << picked.size();
-        for (int id : picked) body << ' ' << id;
-        body << '\n';
-    }
+    Crops::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -2904,6 +2896,10 @@ Result Simulation::Deserialize(const std::string& data)
     if (version == RetiredTestSaveVersion) return {false,
         "This save is from an earlier test build and can't be opened by this one. Start a new game; no save was changed.",
         ResultCode::UnsupportedVersion, revision_};
+    const Result newer{false,
+        "This save comes from a newer build of the game. Open it with that build; no save was changed.",
+        ResultCode::NewerBuild, revision_};
+    if (version > SimulationSaveVersion) return newer;
     if (version != SimulationSaveVersion && version != PositionalStockSaveVersion && version != FreeBuildingSaveVersion
         && version != GardenSquareSaveVersion && version != LegacySimulationSaveVersion
         && version != GardenSquareSaveVersion - 1) return {false,
@@ -2913,9 +2909,6 @@ Result Simulation::Deserialize(const std::string& data)
         : version < ClothingSaveVersion ? static_cast<int>(Item::Fur) : ItemCount;
     const int storedSlots = version < ClothingSaveVersion ? static_cast<int>(EquipmentSlot::Outer)
         : PositionalStockEquipmentSlots;
-    const Result newer{false,
-        "This save comes from a newer build of the game. Open it with that build; no save was changed.",
-        ResultCode::UnsupportedVersion, revision_};
     const std::string payload = data.substr(newline + 1);
     if (size != payload.size() || Checksum(payload) != checksum) return invalid();
     for (unsigned char c : payload) if (c > 127 || (c < 32 && c != '\n' && c != '\r' && c != '\t')) return invalid();
@@ -3164,19 +3157,9 @@ Result Simulation::Deserialize(const std::string& data)
         }
         else if (tag == Manor::SaveTag) { if (!Manor::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
-        else if (tag == "picked")
-        {
-            if (!(input >> count) || count < 0 || count > static_cast<int>(candidate.plots.size())) return invalid();
-            for (int i = 0; i < count; ++i)
-            {
-                int id = 0;
-                if (!(input >> id)) return invalid();
-                auto* plot = Find(candidate.plots, id);
-                if (!plot || !plot->planted || plot->picked || GetCropInfo(plot->kind).regrowHours <= 0.0) return invalid();
-                plot->picked = true;
-            }
-        }
-        else return invalid();
+        else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
+        // A section this build doesn't know came from a newer build; it can't be skipped safely.
+        else return newer;
         input >> std::ws;
     }
     if (!input.eof()) return invalid();

@@ -4105,6 +4105,7 @@ void AHomesteadController::CycleZoom()
 UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 {
     bReadIncompatible = false;
+    bReadNewer = false;
     TArray<uint8> Data;
     if (IFileManager::Get().FileSize(*Filename) > 20 * 1024 * 1024) return nullptr;
     if (!FFileHelper::LoadFileToArray(Data, *Filename)) return nullptr;
@@ -4140,7 +4141,12 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     Homestead::Simulation Candidate;
     if (bEstateMap) PrepareEstateSimulation(Candidate);
     const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
-    if (!Decoded) { bReadIncompatible = Decoded.code == Homestead::ResultCode::UnsupportedVersion; return nullptr; }
+    if (!Decoded)
+    {
+        bReadIncompatible = Decoded.code == Homestead::ResultCode::UnsupportedVersion;
+        bReadNewer = Decoded.code == Homestead::ResultCode::NewerBuild;
+        return nullptr;
+    }
     return Save;
 }
 
@@ -4328,6 +4334,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     UHomesteadSave* Best = nullptr;
     bool Corrupt = false;
     bool Incompatible = false;
+    bool Newer = false;
     TArray<FString> IncompatiblePaths;
     for (const auto& Slot : Slots)
     {
@@ -4339,6 +4346,8 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             if (!Save)
             {
                 Incompatible |= bReadIncompatible;
+                // A newer build's save is treated like an unreadable one: kept in place, never autosaved over.
+                Newer |= bReadNewer;
                 Corrupt |= !bReadIncompatible;
                 if (bReadIncompatible) IncompatiblePaths.Add(Path);
                 UE_LOG(LogTemp, Warning, TEXT("Cannot read save: %s"), *Path);
@@ -4388,6 +4397,8 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             ? (bEstateMap
                 ? TEXT("Saves from earlier test builds can't be opened by this one. Start a new game; the old files are kept.")
                 : TEXT("These test saves use an incompatible version. Start a new seeded woodland to use this build; old files are retained."))
+            : Newer
+            ? TEXT("These saves come from a newer build of the game. Open them with that build; they're kept unchanged.")
             : TEXT("No usable save could be read. Data is corrupt or incompatible; nothing was loaded. You can retry loading or explicitly reset this test world.");
         Notify(LoadProblem, true);
         // Do not let a fresh startup silently autosave over an unsuccessful load.

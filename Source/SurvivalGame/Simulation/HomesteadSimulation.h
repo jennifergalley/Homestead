@@ -99,7 +99,10 @@ enum class WearableDefinition : int
 enum class EquipmentSlot : int { Torso, Legs, Apron, Feet, Outer, Count };
 enum class WearableOwner : int { Carried, Chest, Equipped, World };
 // ToolTier: the target needs a better tool than hers; nothing changed and no energy was spent.
-enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable, ToolTier };
+// UnsupportedVersion: a save from an older build this one can't read. NewerBuild: a save written by a
+// newer build (a later version, wider item stocks or a section this build doesn't know); the game
+// must leave it untouched so that build can still open it.
+enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable, ToolTier, NewerBuild };
 constexpr int EquipmentSlotCount = static_cast<int>(EquipmentSlot::Count);
 
 struct WearableDefinitionInfo
