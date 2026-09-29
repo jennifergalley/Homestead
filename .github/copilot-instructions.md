@@ -1,5 +1,23 @@
 # Working with Jenny on Homestead
 
+## Model, reasoning and implementer slots
+
+Jenny's standing team preference (2026-09-29). These are **required settings for future session
+launches**; documenting them does not change a live session's model or reasoning level.
+
+| Role | Model | Reasoning | Context |
+| --- | --- | --- | --- |
+| Documentation Agent | GPT-5.6 Terra | high | long |
+| Architecture Agent | GPT-6 Sol | high | long |
+| Orchestrator Agent | GPT-6 Sol | medium | long |
+| Implementer (Blender, Unreal or code work) | Claude Opus 5.5 | high | long |
+
+**At most three concurrent implementers** do Blender, Unreal or code work. This is a cap across
+implementer agents, separate from the 2-Unreal-process machine cap. Coordinating, documentation,
+architecture and review-only work do not use an implementer slot unless they start implementation.
+The orchestrator grants the next implementer slot before a waiting lane resumes. A lane that is idle
+or waiting schedules a wake-up and ends its turn; it doesn't hold a slot by sleeping or polling.
+
 ## Loops
 
 Jenny works in two modes. When she hasn't said which, treat short requests as the Interactive Loop.
