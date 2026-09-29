@@ -10,6 +10,8 @@
 
 #include "HomesteadCharacter.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "HomesteadLampLook.h"
+#include "Kismet/GameplayStatics.h"
 #include "Async/Async.h"
 #include "Async/ParallelFor.h"
 #include "Components/DirectionalLightComponent.h"
@@ -587,6 +589,8 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     UpdateFallingTree(DeltaSeconds);
     UpdateHearthFlicker(DeltaSeconds);
+    LampDropFlickerTime += DeltaSeconds;
+    HomesteadLampLook::SetLit(LampDropFlame.Get(), LampDropLight.Get(), bLampDropLit, LampDropFlickerTime, LampDropGlass.Get());
     UpdateHearthSound(DeltaSeconds);
     UpdateClearPops(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
@@ -3959,8 +3963,47 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
     }
 }
 
+bool AHomesteadWorld::BuildLampDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop)
+{
+    // Stand it on whatever is underfoot: the terrain outdoors, a floor or hearthstone indoors. Start
+    // low enough to miss lintels and roofs, and skip starts inside a wall's collision.
+    FVector Base = AtGround(Drop.position.x, Drop.position.y, 0.0f);
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadLampDrop), false, UGameplayStatics::GetPlayerPawn(this, 0));
+    for (const float Lift : {90.0f, 45.0f, 15.0f})
+    {
+        FHitResult Hit;
+        if (GetWorld() && GetWorld()->LineTraceSingleByChannel(Hit, Base + FVector(0, 0, Lift), Base - FVector(0, 0, 150), ECC_WorldStatic, Params)
+            && !Hit.bStartPenetrating)
+        {
+            Base.Z = Hit.ImpactPoint.Z;
+            break;
+        }
+    }
+    auto* Stand = NewObject<USceneComponent>(this, MakeUniqueObjectName(this, USceneComponent::StaticClass(), TEXT("LampDrop")));
+    Stand->SetupAttachment(GetRootComponent());
+    Stand->SetMobility(EComponentMobility::Movable);
+    Stand->SetWorldLocationAndRotation(Base, FRotator(0, Drop.id * 53 % 360, 0));
+    Stand->RegisterComponent();
+    const TArray<UStaticMeshComponent*> Parts = HomesteadLampLook::AddParts(this, Stand, FVector::ZeroVector, TEXT("LampDropPart"));
+    if (Parts.IsEmpty())
+    {
+        Stand->DestroyComponent();
+        return false;
+    }
+    Visual.Components.Add(Stand);
+    for (UStaticMeshComponent* Part : Parts) if (Part) Visual.Components.Add(Part);
+    UPointLightComponent* Light = HomesteadLampLook::AddLight(this, Stand, FVector::ZeroVector, TEXT("LampDropLight"));
+    if (Light) Visual.Components.Add(Light);
+    LampDropFlame = Parts.Last();
+    LampDropGlass = Parts.Num() >= 3 ? Parts[1] : nullptr;
+    LampDropLight = Light;
+    HomesteadLampLook::SetLit(Parts.Last(), Light, bLampDropLit, LampDropFlickerTime, LampDropGlass.Get());
+    return true;
+}
+
 void AHomesteadWorld::BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop)
 {
+    if (Drop.wearableId == 0 && Drop.item == Homestead::Item::OilLamp && BuildLampDrop(Visual, Drop)) return;
     FLinearColor Tint(0.56f, 0.43f, 0.22f);
     if (Drop.wearableId != 0) Tint = FLinearColor(0.64f, 0.42f, 0.52f);
     else
@@ -3997,8 +4040,8 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float SolarAngle = (Hour - 6.0f) / 24.0f * 2.0f * PI;
     const float Elevation = FMath::Sin(SolarAngle);
     const float Daylight = FMath::SmoothStep(-0.1f, 0.25f, Elevation);
-    // Matches the simulation's deterministic three-day spring weather cycle.
-    const bool bRaining = static_cast<int64>(State.hour / 24.0) % 3 == 1 && Hour >= 9.0f && Hour < 15.0f;
+    // The simulation's three-day spring weather (Homestead::IsRainingAt).
+    const bool bRaining = Homestead::IsRainingAt(State.hour);
     const FRotator SunRotation(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0);
     const FRotator MoonRotation(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0);
     // With ray-traced sun shadows, follow the sun every refresh (about 0.025 degrees at normal game
@@ -4047,9 +4090,10 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     if (GroundParameters && GetWorld())
         if (UMaterialParameterCollectionInstance* GroundValues = GetWorld()->GetParameterCollectionInstance(GroundParameters))
         {
-            const bool bRainDay = static_cast<int64>(State.hour / 24.0) % 3 == 1;
-            const float Wetness = !bRainDay ? 0.0f
-                : FMath::SmoothStep(9.0f, 9.5f, Hour) * (1.0f - FMath::SmoothStep(15.0f, 19.0f, Hour));
+            constexpr float RainStart = static_cast<float>(Homestead::RainStartHour);
+            constexpr float RainEnd = static_cast<float>(Homestead::RainEndHour);
+            const float Wetness = !Homestead::IsRainDay(State.hour) ? 0.0f
+                : FMath::SmoothStep(RainStart, RainStart + 0.5f, Hour) * (1.0f - FMath::SmoothStep(RainEnd, RainEnd + 4.0f, Hour));
             GroundValues->SetScalarParameterValue(TEXT("Wetness"), Wetness);
             GroundValues->SetScalarParameterValue(TEXT("Daylight"), Daylight);
         }
@@ -4362,6 +4406,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
             Visual.Signature = Signature;
         }
     }
+    bLampDropLit = Simulation.LampOil() > 0.0;
     RemoveMissing(DropVisuals, NearDrops);
     for (const auto& Drop : NearDrops)
     {

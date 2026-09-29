@@ -308,6 +308,10 @@ struct State
     std::string estateName;
     // Field-book journal entries, oldest first, by key ("arrival"); see Manor::JournalTitle.
     std::vector<std::string> journal;
+    // add-oil-lamp (HomesteadLamp.h): the lamp's oil in game hours, and whether she has had the
+    // lamp kit (new estate games start with it; older saves get it once on load).
+    double lampOilHours = 0.0;
+    bool lampKitGranted = false;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -389,6 +393,12 @@ constexpr double FillWaterEnergy = 0.3;
 constexpr double FuelEnergy = 0.2;
 constexpr double DeconstructEnergy = 1.0;
 }
+
+// The spring weather: it rains on the second of every three days, RainStartHour to RainEndHour.
+constexpr double RainStartHour = 9.0;
+constexpr double RainEndHour = 15.0;
+bool IsRainDay(double hour);
+bool IsRainingAt(double hour);
 
 // What the bed offers (flexible-sleep): each choice with its length and the hour of day she'd wake.
 enum class SleepChoice { UntilMorning, UntilRested, Nap };
@@ -578,6 +588,21 @@ public:
     // Playtest aids: adjust the purse; open (or move) a shop with its counter at `counter`.
     Result GrantMoney(Cents cents);
     Result PlaceShop(ShopKind kind, Point counter, double yaw = 0.0);
+    // Oil lamp (HomesteadLamp.cpp). One lamp, one reservoir of oil wherever the lamp is.
+    double LampOil() const { return state_.lampOilHours; }
+    // Playtest aid: set the lamp's oil (clamped to its capacity).
+    void SetLampOil(double hours);
+    // Whether she is holding the lamp out (the selected hotbar tool); set by the game each frame.
+    void SetLampInHand(bool inHand) { lampInHand_ = inHand; }
+    bool IsLampInHand() const { return lampInHand_ && Count(Item::OilLamp) > 0; }
+    // The lamp she set down, if any (a world drop of the lamp).
+    const WorldDrop* SetDownLampDrop() const;
+    // Lit in her hand (selected, awake) or set down, while it has oil.
+    bool IsLampLit(bool sleeping = false) const;
+    // Spends a flask to fill the lamp in her pack.
+    Result RefillLamp();
+    // Sets the carried lamp on dry ground within reach; it keeps burning there.
+    Result SetDownLamp(Point position, Point player);
     std::string Serialize() const;
     Result Deserialize(const std::string& data);
     Result Deserialize(const std::string& data, Generation::WorldDescriptor expectedWorld);
@@ -610,5 +635,10 @@ private:
     static bool ReadEconomy(std::istream& input, State& candidate, std::set<int>& ids);
     // Once a day at the 6 AM rollover: cleared grass and weeds near remaining overgrowth may regrow.
     void CreepWeeds(int day);
+    // Oil lamp (HomesteadLamp.cpp).
+    bool lampInHand_ = false;
+    void BurnLamp(double hours, bool sleeping);
+    // Gives an estate game the lamp kit once (lamp, full, and flasks) when the pack has room.
+    void GrantLampKit();
 };
 }

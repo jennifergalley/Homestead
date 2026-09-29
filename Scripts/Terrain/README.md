@@ -205,7 +205,7 @@ second rebuilds `M_EstateLandscape` with its ground-finish pass.
 At runtime `UHomesteadGrassField` (`Source/SurvivalGame/HomesteadGrassField.*`) instances the patches
 in 6 m chunks within 51 m of the camera. `AHomesteadWorld::Refresh` updates it every 0.25 s. It writes
 three clear circles per patch into per-instance custom data, one for each nearby interactable, world
-drop or plot, and skips patches under building pieces. Inside those circles the sward is grazed to a fifth of its height, with a ragged edge, rather than left bare. Blades near a low game camera, and along its line to the heroine, are grazed too (`MPC_CameraSafeFoliage`), so the camera never looks through a wall of grass. `M_EstateGrass` thins blades by rank with
+drop or plot, and skips patches under building pieces. A garden plot is a bare square instead of a circle (a negative radius in the custom data: the plot's half size plus 15 cm), so tilled beds and planted crops never have blades through them. Inside those circles the sward is grazed to a fifth of its height, with a ragged edge, rather than left bare. Blades near a low game camera, and along its line to the heroine, are grazed too (`MPC_CameraSafeFoliage`), so the camera never looks through a wall of grass. `M_EstateGrass` thins blades by rank with
 distance (`GrassFade`: blades ranked below min(1, (12/d)^1.7) show). It also clears the road's wheel
 tracks, bends the blades in gusts (`GrassWind`) and parts them round the heroine (`GrassPush`).
 `HomesteadGrassField.h`'s LOD distances depend on `GrassFade` and the LOD keep fractions, so change

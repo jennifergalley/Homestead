@@ -2974,7 +2974,9 @@ void FixedEstateNewGameAndSave()
     OK(sim.SetActiveWorldRegion({spawn.x + 900000, spawn.y}));
     CHECK(sim.GetState().resources.size() == 2);
     // The pail is her one starting tool, waiting in the standing room's chest; gathering needs no knife.
-    CHECK(sim.Count(Item::WateringCan) == 0 && sim.Count(Item::Knife) == 0 && sim.UsedCapacity() == 0);
+    // She carries only the oil lamp and its flasks (add-oil-lamp).
+    CHECK(sim.Count(Item::WateringCan) == 0 && sim.Count(Item::Knife) == 0);
+    CHECK(sim.Count(Item::OilLamp) == 1 && sim.Count(Item::OilFlask) == 3 && sim.UsedCapacity() == 4);
     int pails = 0;
     for (const auto& piece : sim.GetState().structures) pails += piece.storage[static_cast<int>(Item::WateringCan)];
     CHECK(pails == 1);
@@ -3170,6 +3172,9 @@ void SleepOptionPolicy()
     CHECK(Close(SleepOptions(12.0, 0.0)[0].hours, Exertion::MaxRestHours));
     CHECK(Close(SleepOptions(18.0, 50.0)[0].hours, 12.75));
     CHECK(Close(SleepOptions(12.0, 97.0)[0].hours, Exertion::MinRestHours));
+    // One rain schedule for the rules, the lighting and the wet ground: day 2 of every 3, 09:00-15:00.
+    CHECK(!IsRainDay(12.0) && IsRainDay(24.0 + 1.0) && !IsRainDay(48.0 + 12.0) && IsRainDay(96.0 + 23.0));
+    CHECK(IsRainingAt(24.0 + RainStartHour) && !IsRainingAt(24.0 + RainEndHour) && !IsRainingAt(24.0 + 8.99) && !IsRainingAt(10.0));
     // Recovery follows hours slept, not the clock: a daytime sleep until rested fills her up.
     Simulation owlSim;
     BuildingStock(owlSim);

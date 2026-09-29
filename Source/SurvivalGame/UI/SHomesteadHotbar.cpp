@@ -1,4 +1,5 @@
 #include "SHomesteadHotbar.h"
+#include "Widgets/Notifications/SProgressBar.h"
 
 #include "../HomesteadController.h"
 #include "HomesteadPalette.h"
@@ -117,6 +118,41 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             .ShadowOffset(FVector2D(1, 1))
                             .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
                             .Visibility(EVisibility::HitTestInvisible)
+                        ]
+                        + SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Bottom)
+                        .Padding(6, 0, 6, 3)
+                        [
+                            // The lamp's oil: a thin amber bar that shortens as it burns, red when low.
+                            SNew(SBox).HeightOverride(4)
+                            .Visibility_Lambda([Weak = Controller, Index]()
+                            {
+                                if (!Weak.IsValid()) return EVisibility::Collapsed;
+                                const auto Snapshot = Weak->HotbarSnapshot();
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Fill >= 0.0f ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+                            })
+                            [
+                                SNew(SBorder)
+                                .BorderImage(FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
+                                .BorderBackgroundColor(FLinearColor(0.02f, 0.03f, 0.025f, 0.85f))
+                                .Padding(0)
+                                [
+                                    SNew(SProgressBar)
+                                    .Percent_Lambda([Weak = Controller, Index]()
+                                    {
+                                        if (!Weak.IsValid()) return TOptional<float>(0.0f);
+                                        const auto Snapshot = Weak->HotbarSnapshot();
+                                        return TOptional<float>(Snapshot.IsValidIndex(Index) ? FMath::Clamp(Snapshot[Index].Fill, 0.0f, 1.0f) : 0.0f);
+                                    })
+                                    .FillColorAndOpacity_Lambda([Weak = Controller, Index]()
+                                    {
+                                        const auto Snapshot = Weak.IsValid() ? Weak->HotbarSnapshot() : TArray<FHomesteadHotbarSlot>();
+                                        const bool bLow = Snapshot.IsValidIndex(Index) && Snapshot[Index].Fill < 1.0f / 6.0f;
+                                        return FSlateColor(bLow ? FLinearColor(0.9f, 0.32f, 0.2f) : FLinearColor(0.98f, 0.68f, 0.28f));
+                                    })
+                                    .BackgroundImage(FCoreStyle::Get().GetBrush(TEXT("NoBrush")))
+                                    .FillImage(FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
+                                ]
+                            ]
                         ]
                         + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top)
                         .Padding(5, 2, 0, 0)
