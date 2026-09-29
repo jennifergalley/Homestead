@@ -389,17 +389,15 @@ requirement.
   Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
   210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture; packaged NativeMenu
   and Hotbar suites passed.
-- **Sprint Energy recovery** — **pending, not shipped.** Architecture measured current
-  `SpendSprintEnergy` at 0.35 per real second: the 1.94 km road at 480 cm/s takes 404 s and costs
-  141.5 Energy to its floor of 10; baseline awake drain remains -0.6/game-hour separately. Props'
-  trial is 0.05/s (~20.2 per trip), with an explicit real-time movement signal to `Step()`: stationary
-  recovers +0.6 Energy/game-hour and slow/ordinary walking +0.2/hour only below a soft cap of 70;
-  above the cap, retain the -0.6 baseline drain.
+- **Sprint Energy cost** — **final product direction, pending and not shipped.** Sprint has **zero**
+sprint-specific Energy cost; this supersedes both current 0.35/real-second behavior and the tentative
+0.05/s/regen proposal. Baseline awake time drain remains -0.6/game-hour and ordinary work costs remain.
+Refuse the sprint toggle at Energy <=10 and turn it off if other work/time reaches that threshold; do
+not auto-resume after recovery.
 
-  Never recover during sprint, work/action, menu/shop/planning, failure, sleep or any
-  `AdvanceGameHours` fast-forward (travel or shop wait); clamp at 70 without oscillation. Hunger stays
-  until Energy lane F. Native tests cover 30/60/120-day real-time rates, no double charge and save
-  invariance; package timed sprint/slow-walk checks and coordinate with Menu's travel API.
+Props implements this in an isolated slice after urgent Hoe work. Native tests cover 30/60/120 day
+lengths; PIE covers road sprint, clearing and farming. Starter food and abundant berry requests remain
+pending, so this does not claim early Energy is fully solved.
 - **Live sound sliders** — **symptom investigation pending, not shipped.** Mouse drag already calls
   `MenuPreviewAudioVolume` live through `SSlider.OnValueChanged`, then release writes INI; d-pad steps
   preview and persist. Jenny's symptom may instead be effects without a continuous audible source,
@@ -508,6 +506,12 @@ requirement.
 
   It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
   salvage. Props released its slot before 13:45.
+- **Clean bed recipe** — **Props, pending and not shipped.** Jenny rejects thorny bramble canes in a
+  bed recipe. The live `Piece::Bed` cost is 4 Branch + 4 BrambleCanes (the crafting progression doc's
+  retired Fiber text is also stale). Props replaces it with **4 Branch + 4 Hay**: the same eight units,
+  with Hay from TallGrass using a worn scythe at 1–2 per tuft and no iron-tier upgrade. Existing built
+  beds plus v12/v13 saves, Piece IDs and Item IDs stay unchanged; other cane recipes stay unchanged.
+  Update the canonical progression doc only after the code lands.
 - **Starter rack placement save safety** — **Props urgent implementation guard; not shipped.** A new
   rack at placement ID `520006` must append after every existing placement section, not insert into an
   earlier numeric range and renumber later `550xxx` saved resources. Before `[ready]`, require a
