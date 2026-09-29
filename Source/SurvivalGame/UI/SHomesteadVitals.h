@@ -23,7 +23,8 @@ public:
     // Where the stack sits in the Canvas HUD's 1080-line logical units, for layout and feedback checks.
     // It matches the calendar panel's width and right edge (AHomesteadHUD::DrawHUD) and sits just below it.
     static FBox2D LogicalBox(float ViewWidth);
-    static constexpr float Right = 30, Top = 107, RowHeight = 54, RowGap = 6, Width = 460;
+    // Top = the calendar's top (26) + height (100) + an 8-unit gap (HomesteadHudLayout in HomesteadHUD.h).
+    static constexpr float Right = 30, Top = 134, RowHeight = 54, RowGap = 6, Width = 460;
 
 private:
     TSharedRef<SWidget> MeterRow(FName Icon, TFunction<double()> Value, FLinearColor Fill);

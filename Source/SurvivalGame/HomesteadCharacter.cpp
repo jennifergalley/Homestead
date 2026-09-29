@@ -6,6 +6,8 @@
 #include "HomesteadHatchet.h"
 #include "HomesteadDiggingStick.h"
 #include "HomesteadKnife.h"
+#include "HomesteadLampLook.h"
+#include "Components/PointLightComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -482,6 +484,13 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     CraftAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_CraftHands"));
     if (CraftAnimation && CraftAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
         CraftAnimation = nullptr;
+    // Optional: authored with homestead_agent.lamp_pose.
+    LampRaisedAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_LampRaised"));
+    if (LampRaisedAnimation && LampRaisedAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        LampRaisedAnimation = nullptr;
+    LampSetDownAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_LampSetDown"));
+    if (LampSetDownAnimation && LampSetDownAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        LampSetDownAnimation = nullptr;
     // The branch she works while crafting, upright through her left fist.
     if (UStaticMesh* Piece = LoadObject<UStaticMesh>(nullptr,
             TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b")))
@@ -588,6 +597,27 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         Prop->SetCastShadow(true);
         HeldProps.Add(Prop);
         HeldToolSpecs.Add({Asset.Tool, Asset.CarryDegrees, Asset.bHangs, Asset.Offset * Grip});
+    }
+    // The oil lamp hangs from her fist by its bail (oil_lamp.py): a hanger at the grip that the
+    // pendulum turns, with the bail's top at the hanger.
+    if (!LampHanger)
+    {
+        LampHanger = NewObject<USceneComponent>(this, TEXT("LampHanger"));
+        LampHanger->SetupAttachment(GetMesh(), TEXT("hand_r"));
+        LampHanger->SetUsingAbsoluteRotation(true);
+        LampHanger->RegisterComponent();
+    }
+    LampHanger->SetRelativeLocation(Grip.GetLocation());
+    if (HeldLampParts.IsEmpty())
+    {
+        const FVector Hang(0, 0, -HomesteadLampLook::BailTopHeight);
+        for (UStaticMeshComponent* Part : HomesteadLampLook::AddParts(this, LampHanger, Hang, TEXT("HeldLamp")))
+            HeldLampParts.Add(Part);
+        if (!HeldLampParts.IsEmpty() && !HeldLampLight)
+            HeldLampLight = HomesteadLampLook::AddLight(this, LampHanger, Hang, TEXT("HeldLampLight"));
+        // Held up, the lamp's own fount would shade the ground beneath it from its flame.
+        for (UStaticMeshComponent* Part : HeldLampParts) if (Part) { Part->SetVisibility(false); Part->SetCastShadow(false); }
+        if (HeldLampLight) HeldLampLight->SetVisibility(false);
     }
     // Pouring water: an engine cylinder with the translucent stream material, stretched from the
     // pail's lip down to the soil while she pours (UpdateWaterPail).
@@ -1192,6 +1222,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     UpdateStickAlignment(DeltaSeconds);
     UpdateHairMotion(DeltaSeconds);
     if (!Lab) UpdateRoomCamera(DeltaSeconds);
+    if (CameraSnapFrames > 0 && --CameraSnapFrames == 0) CameraArm->bEnableCameraLag = true;
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
     {
         const FVector CameraPosition = Camera->GetComponentLocation();
@@ -1955,13 +1986,80 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
             else UpdateHangingPail(*Prop, DeltaSeconds);
         }
     }
+    const bool bLampHeld = UpdateHeldLamp(*Animation, HandsFree && !Hacking && !Felling, Presented, DeltaSeconds);
+    if (bLampHeld)
+    {
+        // Her fist closes on the bail with the wrist straight; the lamp hangs plumb below it.
+        Grip = 1;
+        Carry = 0;
+    }
     if (PourStream && !bPouring) PourStream->SetVisibility(false);
-    if (!HeldProps.ContainsByPredicate([](const UStaticMeshComponent* Prop) { return Prop->IsVisible(); })) bPailHandValid = false;
+    if (!bLampHeld && !HeldProps.ContainsByPredicate([](const UStaticMeshComponent* Prop) { return Prop->IsVisible(); })) bPailHandValid = false;
     Animation->SetRightHandGrip(Grip, Carry);
     // She ticks after the pose is final (TG_PostUpdateWork), so the felling haft is laid through
     // both fists here, over the one-handed placement just set.
     UpdateFellingHatchet();
     UpdateCraftPiece(Animation->CraftWeight());
+}
+
+bool AHomesteadCharacter::UpdateHeldLamp(UHomesteadAnimInstance& Animation, bool bHandsFree, Homestead::Item Presented, float DeltaSeconds)
+{
+    LampFlickerTime += DeltaSeconds;
+    bool bShow = false;
+    if (LampKneel != ELampKneel::None)
+    {
+        const float Phase = Animation.LampKneelPhase();
+        if (Animation.IsLampKneeling() || Phase >= 0.0f)
+        {
+            // Setting down, it leaves her hand at the contact; picking up, it arrives there.
+            const bool bBeforeContact = Phase < LampContactSeconds();
+            bShow = LampKneel == ELampKneel::SetDown ? bBeforeContact : !bBeforeContact;
+            if (!bBeforeContact && !bLampContactDone) bLampContactPending = bLampContactDone = true;
+        }
+        else LampKneel = ELampKneel::None;
+    }
+    if (LampKneel == ELampKneel::None) bShow = bHandsFree && Presented == Homestead::Item::OilLamp;
+    Animation.SetLampRaised(bShow && LampKneel == ELampKneel::None);
+    UStaticMeshComponent* Flame = HeldLampParts.IsEmpty() ? nullptr : HeldLampParts.Last().Get();
+    for (UStaticMeshComponent* Part : HeldLampParts)
+        if (Part && Part != Flame && Part->IsVisible() != bShow) Part->SetVisibility(bShow);
+    const bool bLit = bShow && (bHeldLampLit || InCharacterLab());
+    HomesteadLampLook::SetLit(Flame, HeldLampLight, bLit, LampFlickerTime, HeldLampParts.Num() >= 3 ? HeldLampParts[1].Get() : nullptr);
+    if (bShow && LampHanger) UpdateHangingPail(*LampHanger, DeltaSeconds);
+    return bShow && !HeldLampParts.IsEmpty();
+}
+
+bool AHomesteadCharacter::PlayLampKneel(Homestead::Point Spot, bool bSetDown)
+{
+    auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (!bMetaHumanActive || !Animation || !GetLampSetDownAnimation() || HeldLampParts.IsEmpty() || Animation->IsLampKneeling())
+        return false;
+    CancelSprint();
+    GetCharacterMovement()->StopMovementImmediately();
+    const FVector2D Delta(Spot.x - GetActorLocation().X, Spot.y - GetActorLocation().Y);
+    if (!Delta.IsNearlyZero()) SetActorRotation(FRotator(0, FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X)), 0));
+    LampKneel = bSetDown ? ELampKneel::SetDown : ELampKneel::PickUp;
+    bLampContactPending = bLampContactDone = false;
+    Animation->RequestLampKneel();
+    return true;
+}
+
+bool AHomesteadCharacter::ConsumeLampContact()
+{
+    const bool bContact = bLampContactPending;
+    bLampContactPending = false;
+    return bContact;
+}
+
+bool AHomesteadCharacter::IsLampKneeling() const
+{
+    return LampKneel != ELampKneel::None;
+}
+
+float AHomesteadCharacter::LampContactSeconds() const
+{
+    // The stick-gather stand-in lays its first stick on the ground at its first pick.
+    return LampSetDownAnimation ? LampSetDownContact : 38.0f / 30.0f;
 }
 
 void AHomesteadCharacter::UpdateCraftPiece(float Weight)
@@ -2143,7 +2241,7 @@ UStaticMeshComponent* AHomesteadCharacter::GetHeldProp(Homestead::Item Tool) con
     return nullptr;
 }
 
-void AHomesteadCharacter::UpdateHangingPail(UStaticMeshComponent& Pail, float DeltaSeconds)
+void AHomesteadCharacter::UpdateHangingPail(USceneComponent& Pail, float DeltaSeconds)
 {
     // A pendulum hanging from the bail: the hand's horizontal acceleration swings the pail the
     // other way, then gravity (a ~25 cm pendulum) and a little damping settle it plumb.
@@ -2683,4 +2781,20 @@ FRotator AHomesteadCharacter::GameplayViewRotation() const
 float AHomesteadCharacter::CameraDistance() const
 {
     return CameraArm->TargetArmLength;
+}
+
+void AHomesteadCharacter::SnapCamera()
+{
+    if (!CameraArm || bAppearancePreview) return;
+    // The lagged arm still aims at where she was: its sweep from her new spot back toward the old
+    // one hits the ground at her feet and pins the lens against her. Skip the lag for a couple of
+    // ticks so the arm re-seats behind her, and start the indoor check afresh.
+    if (bRoomCamera && FMath::IsNearlyEqual(CameraArm->TargetArmLength, RoomSetArm, 1.0f))
+        CameraArm->TargetArmLength = RoomOpenArm;
+    bRoomCamera = false;
+    RoomCameraSwitchTime = 0.0f;
+    CameraArm->SocketOffset = FVector(0, 45, 55);
+    CameraArm->TargetOffset.Z = 0.0f;
+    CameraArm->bEnableCameraLag = false;
+    CameraSnapFrames = 3;
 }

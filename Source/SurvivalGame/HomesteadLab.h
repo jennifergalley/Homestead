@@ -80,7 +80,7 @@ public:
     UFUNCTION(Exec) void LabProp(const FString& Name);
     // Repeat a LabAction (with a fresh prop and from the same spot) until LabLoop Off.
     UFUNCTION(Exec) void LabLoop(const FString& Name);
-    // Carry a hotbar tool at rest in her hand: Knife, Hatchet, DiggingStick, Pail, Machete or None.
+    // Carry a hotbar tool at rest in her hand: Knife, Hatchet, DiggingStick, Pail, Machete, Lamp or None.
     UFUNCTION(Exec) void LabHold(const FString& Name);
     // Move the sun to a time of day (0-24); shadows and sky follow.
     UFUNCTION(Exec) void LabSun(float Hour);
@@ -99,6 +99,12 @@ private:
     double LastFootstepTime = -1;
     int32 LastStep = INDEX_NONE;
     bool bHoldingStickPile = false;
+    // LabAction LampDown / LampUp: the lamp she set on the floor, and which way the kneel goes.
+    UPROPERTY() TArray<TObjectPtr<USceneComponent>> GroundLamp;
+    int32 LampKneel = 0; // 1 setting down, 2 taking up.
+    FVector LampSpot = FVector::ZeroVector;
+    void PlaceGroundLamp(const FVector& At);
+    void ClearGroundLamp();
     int32 HeldPartsFirst = 1, HeldPartsCount = 1;
     FString LoopAction;
     FTransform LoopStart;

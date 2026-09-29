@@ -15,6 +15,8 @@
 #include "HAL/IConsoleManager.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadCharacter.h"
+#include "HomesteadLampLook.h"
+#include "Components/PointLightComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -387,7 +389,51 @@ void AHomesteadLabController::LabAction(const FString& Name)
     else if (Name.Equals(TEXT("Till"), ESearchCase::IgnoreCase)) Avatar->PlayTill(Target);
     else if (Name.Equals(TEXT("Machete"), ESearchCase::IgnoreCase)) Avatar->PlayMacheteHack(Target);
     else if (Name.Equals(TEXT("Fell"), ESearchCase::IgnoreCase)) Avatar->PlayFell(Target, 2);
-    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Reeds, Pull, Pick, Eat, Craft, Water, Fill, Chop, Knife, Till, Machete or Fell."));
+    else if (Name.Equals(TEXT("LampDown"), ESearchCase::IgnoreCase))
+    {
+        // She sets the lamp she's holding (LabHold Lamp) on the floor at arm's length.
+        ClearGroundLamp();
+        Avatar->SetLabHeldTool(Homestead::Item::OilLamp);
+        const FVector Spot = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 45.0f;
+        LampSpot = FVector(Spot.X, Spot.Y, Avatar->GetActorLocation().Z - Avatar->GetSimpleCollisionHalfHeight());
+        LampKneel = Avatar->PlayLampKneel({Spot.X, Spot.Y}, true) ? 1 : 0;
+    }
+    else if (Name.Equals(TEXT("LampUp"), ESearchCase::IgnoreCase))
+    {
+        // Takes up the lamp on the floor ahead (placing one there first if there's none).
+        if (GroundLamp.IsEmpty())
+        {
+            const FVector Spot = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 45.0f;
+            LampSpot = FVector(Spot.X, Spot.Y, Avatar->GetActorLocation().Z - Avatar->GetSimpleCollisionHalfHeight());
+            PlaceGroundLamp(LampSpot);
+        }
+        Avatar->SetLabHeldTool(Homestead::Item::OilLamp);
+        LampKneel = Avatar->PlayLampKneel({LampSpot.X, LampSpot.Y}, false) ? 2 : 0;
+    }
+    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Reeds, Pull, Pick, Eat, Craft, Water, Fill, Chop, Knife, Till, Machete, Fell, LampDown or LampUp."));
+}
+
+void AHomesteadLabController::PlaceGroundLamp(const FVector& At)
+{
+    ClearGroundLamp();
+    if (!World) return;
+    auto* Stand = NewObject<USceneComponent>(World, MakeUniqueObjectName(World, USceneComponent::StaticClass(), TEXT("LabLamp")));
+    Stand->SetupAttachment(World->GetRootComponent());
+    Stand->SetMobility(EComponentMobility::Movable);
+    Stand->SetWorldLocation(At);
+    Stand->RegisterComponent();
+    GroundLamp.Add(Stand);
+    const TArray<UStaticMeshComponent*> Parts = HomesteadLampLook::AddParts(World, Stand, FVector::ZeroVector, TEXT("LabLampPart"));
+    for (UStaticMeshComponent* Part : Parts) if (Part) GroundLamp.Add(Part);
+    UPointLightComponent* Light = HomesteadLampLook::AddLight(World, Stand, FVector::ZeroVector, TEXT("LabLampLight"));
+    if (Light) GroundLamp.Add(Light);
+    if (!Parts.IsEmpty()) HomesteadLampLook::SetLit(Parts.Last(), Light, true, 0.0f, Parts.Num() >= 3 ? Parts[1] : nullptr);
+}
+
+void AHomesteadLabController::ClearGroundLamp()
+{
+    for (USceneComponent* Part : GroundLamp) if (IsValid(Part)) Part->DestroyComponent();
+    GroundLamp.Reset();
 }
 
 void AHomesteadLabController::LabProp(const FString& Name)
@@ -413,12 +459,13 @@ void AHomesteadLabController::LabHold(const FString& Name)
     if (!Avatar) return;
     using Homestead::Item;
     const TPair<const TCHAR*, Item> Tools[] = {{TEXT("Knife"), Item::Knife}, {TEXT("Hatchet"), Item::Hatchet},
-        {TEXT("DiggingStick"), Item::DiggingStick}, {TEXT("Pail"), Item::WateringCan}, {TEXT("Machete"), Item::Machete}};
+        {TEXT("DiggingStick"), Item::DiggingStick}, {TEXT("Pail"), Item::WateringCan}, {TEXT("Machete"), Item::Machete},
+        {TEXT("Lamp"), Item::OilLamp}};
     for (const auto& Tool : Tools)
         if (Name.Equals(Tool.Key, ESearchCase::IgnoreCase)) { Avatar->SetLabHeldTool(Tool.Value); return; }
     Avatar->SetLabHeldTool(Item::Count);
     if (!Name.Equals(TEXT("None"), ESearchCase::IgnoreCase))
-        UE_LOG(LogTemp, Warning, TEXT("LabHold takes Knife, Hatchet, DiggingStick, Pail, Machete or None."));
+        UE_LOG(LogTemp, Warning, TEXT("LabHold takes Knife, Hatchet, DiggingStick, Pail, Machete, Lamp or None."));
 }
 
 void AHomesteadLabController::LabLoop(const FString& Name)
@@ -444,6 +491,17 @@ void AHomesteadLabController::LabLoop(const FString& Name)
 void AHomesteadLabController::PlayerTick(float DeltaTime)
 {
     Super::PlayerTick(DeltaTime);
+    if (LampKneel != 0)
+        if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+        {
+            if (Avatar->ConsumeLampContact())
+            {
+                if (LampKneel == 1) { PlaceGroundLamp(LampSpot); Avatar->SetLabHeldTool(Homestead::Item::Count); }
+                else { ClearGroundLamp(); Avatar->SetLabHeldTool(Homestead::Item::OilLamp); }
+                LampKneel = 0;
+            }
+            else if (!Avatar->IsLampKneeling()) LampKneel = 0;
+        }
     if (!LoopAction.IsEmpty() && GetWorld()->GetTimeSeconds() >= LoopNextStart)
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
         {

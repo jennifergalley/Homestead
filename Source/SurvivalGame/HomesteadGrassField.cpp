@@ -110,11 +110,13 @@ void UHomesteadGrassField::RebuildObstacles(const Homestead::State& State)
     Obstacles.Reset();
     ObstacleCells.Reset();
     Blocks.Reset();
+    // Radius > 0 is a grazed circle round an interactable; < 0 is a bare, world-aligned square of half
+    // size -Radius (a garden plot), where no blade grows at all.
     auto Add = [this](double X, double Y, float Radius)
     {
         const int32 Index = Obstacles.Add({FVector2f(static_cast<float>(X), static_cast<float>(Y)), Radius});
         // Register in every cell a tile could see it from.
-        const float Reach = Radius + TileCm;
+        const float Reach = FMath::Abs(Radius) * (Radius < 0 ? UE_SQRT_2 : 1.0f) + TileCm;
         const FIntPoint Low = GrassCellOf(X - Reach, Y - Reach, ChunkCm), High = GrassCellOf(X + Reach, Y + Reach, ChunkCm);
         for (int32 CX = Low.X; CX <= High.X; ++CX)
             for (int32 CY = Low.Y; CY <= High.Y; ++CY)
@@ -127,7 +129,7 @@ void UHomesteadGrassField::RebuildObstacles(const Homestead::State& State)
     for (const auto& Plot : State.plots)
     {
         const Homestead::Point Centre = Homestead::PlotCenter(Plot);
-        Add(Centre.x, Centre.y, 85.0f);
+        Add(Centre.x, Centre.y, -static_cast<float>(Homestead::GardenCellSize * 0.5 + PlotMarginCm));
     }
     for (const auto& Structure : State.structures)
         Blocks.Add(Homestead::StructureFootprint(State, Structure));
@@ -238,7 +240,7 @@ void UHomesteadGrassField::BuildChunk(FIntPoint Chunk, FChunk& Out, int32 Lod)
             for (const int32 Index : Near)
             {
                 const FObstacle& O = Obstacles[Index];
-                const double Reach = O.Radius + TileCm * 0.72 + 35.0;
+                const double Reach = FMath::Abs(O.Radius) * (O.Radius < 0 ? UE_SQRT_2 : 1.0) + TileCm * 0.72 + 35.0;
                 if (FVector2D::DistSquared(FVector2D(O.Centre.X, O.Centre.Y), FVector2D(CX, CY)) > Reach * Reach) continue;
                 if (Count == 3) { bCrowded = true; break; }
                 Found[Count][0] = O.Centre.X;

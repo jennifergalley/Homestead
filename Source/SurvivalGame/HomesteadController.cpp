@@ -19,6 +19,7 @@
 #include "AudioDevice.h"
 #include "Sound/SoundAttenuation.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/GameUserSettings.h"
 #include "HAL/IConsoleManager.h"
 #include "Misc/ConfigCacheIni.h"
@@ -44,6 +45,7 @@
 #include "UI/SHomesteadVitals.h"
 #include "HomesteadMapComponent.h"
 #include "Simulation/HomesteadManor.h"
+#include "Simulation/HomesteadLamp.h"
 #include "UI/SHomesteadNames.h"
 #include "UI/SHomesteadArrival.h"
 #include "Framework/Application/SlateApplication.h"
@@ -85,7 +87,7 @@ constexpr int32 FieldBookPages[] = {0, 1, 2, 7, 3, 6};
 // The estate's tools. The retired knife and machete no longer ride on the hotbar.
 bool IsHotbarTool(Homestead::Item Item)
 {
-    return Homestead::ToolForItem(Item) != Homestead::ToolKind::Count;
+    return Homestead::ToolForItem(Item) != Homestead::ToolKind::Count || Item == Homestead::Item::OilLamp;
 }
 
 template <typename FPredicate>
@@ -120,6 +122,7 @@ FName HotbarIcon(Homestead::Item Item)
     case Homestead::Item::Scythe: return TEXT("scythe");
     case Homestead::Item::Billhook: return TEXT("billhook");
     case Homestead::Item::Pickaxe: return TEXT("pickaxe");
+    case Homestead::Item::OilLamp: return TEXT("oil-lamp");
     default:
         // Crop seeds and produce use their catalogue glyph.
         if (Homestead::CropForSeed(Item) || (Item >= Homestead::Item::Turnip && Item <= Homestead::Item::Strawberries))
@@ -662,6 +665,7 @@ void AHomesteadController::ResetHotbar()
     HotbarSlots[4] = static_cast<int32>(Homestead::Item::DiggingStick);
     HotbarSlots[5] = static_cast<int32>(Homestead::Item::WateringCan);
     HotbarSlots[6] = static_cast<int32>(Homestead::Item::Berries);
+    HotbarSlots[7] = static_cast<int32>(Homestead::Item::OilLamp);
     SelectedHotbarSlot = 0;
     HoveredHotbarSlot = INDEX_NONE;
 }
@@ -679,8 +683,17 @@ void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Sele
             Seen.Add(Slots[Index]);
         }
     }
+    // Older hotbars get the oil lamp once (layout 3), in the first free slot from 8.
+    if (Layout < 3 && !Seen.Contains(static_cast<int32>(Homestead::Item::OilLamp)))
+        for (int32 Step = 0; Step < 10; ++Step)
+            if (const int32 Index = (Step + 7) % 10; HotbarSlots[Index] < 0)
+            {
+                HotbarSlots[Index] = static_cast<int32>(Homestead::Item::OilLamp);
+                Seen.Add(HotbarSlots[Index]);
+                break;
+            }
     // Older hotbars get the estate tools and pinned food once, in free slots.
-    if (Layout < UHomesteadSave::CurrentHotbarLayout)
+    if (Layout < 2)
         for (const auto Item : {Homestead::Item::Billhook, Homestead::Item::Scythe, Homestead::Item::Pickaxe,
             Homestead::Item::Berries})
         {
@@ -770,6 +783,8 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
             Slot.Count = Slot.Assigned ? Sim.Count(Slot.Tool) : 0;
             Slot.Available = Slot.Assigned && Slot.Count > 0;
             Slot.Icon = HotbarIcon(Slot.Tool);
+            if (Slot.Tool == Homestead::Item::OilLamp && Slot.Available)
+                Slot.Fill = static_cast<float>(Sim.LampOil() / Homestead::Lamp::CapacityHours);
         }
 
         Result.Add(Slot);
@@ -872,6 +887,11 @@ void AHomesteadController::UseSelectedTool()
     const FHintUse Hint = BeginHintUse(bGamepad ? TEXT("RT") : TEXT("LMB"));
     ON_SCOPE_EXIT { EndHintUse(Hint); };
 
+    if (Tool == Homestead::Item::OilLamp)
+    {
+        StartLampSetDown();
+        return;
+    }
     if (Tool == Homestead::Item::Hatchet && Focus == EFocus::Resource)
         for (const auto& Node : State().resources)
             if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::ForestTree)
@@ -1329,6 +1349,155 @@ void AHomesteadController::SetEstateSpawn()
     EstateSpawnWait = 0;
 }
 
+bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float DeltaSeconds, float HoldLimitSeconds, const TCHAR* Why)
+{
+    APawn* Avatar = GetPawn();
+    if (!Avatar) return false;
+    ACharacter* Body = Cast<ACharacter>(Avatar);
+    UCapsuleComponent* Capsule = Body ? Body->GetCapsuleComponent() : nullptr;
+    UCharacterMovementComponent* Movement = Body ? Body->GetCharacterMovement() : nullptr;
+    const float HalfHeight = Capsule ? Capsule->GetScaledCapsuleHalfHeight() : 90.0f;
+    const float Ground = GroundHeight(Target.X, Target.Y);
+    // Trace for exactly what her capsule collides with, down to well below the terrain.
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadSettleOnGround), false, Avatar);
+    FCollisionResponseParams Responses;
+    ECollisionChannel Channel = ECC_Pawn;
+    if (Capsule)
+    {
+        Capsule->InitSweepCollisionParams(Params, Responses);
+        Channel = Capsule->GetCollisionObjectType();
+    }
+    FHitResult Hit;
+    const bool bFound = GetWorld()->LineTraceSingleByChannel(Hit, Target,
+        FVector(Target.X, Target.Y, FMath::Min(Target.Z, Ground) - 500.0f), Channel, Params, Responses);
+    if (!bFound && Waited < HoldLimitSeconds)
+    {
+        // Hold her where the terrain will be, not falling, until its collision arrives.
+        if (Waited <= 0) UE_LOG(LogTemp, Display, TEXT("HOMESTEAD_GROUND_HOLD %s: no collision yet at (%.0f, %.0f); holding"), Why, Target.X, Target.Y);
+        Waited += DeltaSeconds;
+        if (Movement)
+        {
+            Movement->StopMovementImmediately();
+            if (Movement->MovementMode != MOVE_None) Movement->DisableMovement();
+        }
+        Avatar->SetActorLocation(FVector(Target.X, Target.Y, FMath::Min(Target.Z, Ground + HalfHeight + 2.0f)),
+            false, nullptr, ETeleportType::TeleportPhysics);
+        return false;
+    }
+    const float Floor = bFound ? Hit.ImpactPoint.Z : Ground;
+    if (!bFound)
+        UE_LOG(LogTemp, Warning, TEXT("HOMESTEAD_GROUND_HOLD %s: gave up after %.1f s at (%.0f, %.0f); placing on the heightfield"), Why, Waited, Target.X, Target.Y);
+    UE_LOG(LogTemp, Display, TEXT("HOMESTEAD_GROUND_SETTLE %s: held %.1f s; feet at %.0f (heightfield %.0f) at (%.0f, %.0f)"),
+        Why, Waited, Floor, Ground, Target.X, Target.Y);
+    Target.Z = Floor + HalfHeight + 2.0f;
+    Waited = 0;
+    if (Movement)
+    {
+        Movement->StopMovementImmediately();
+        Movement->SetMovementMode(MOVE_Walking);
+    }
+    return true;
+}
+
+void AHomesteadController::HomesteadTeleport(float X, float Y, float Z)
+{
+    if (!GetPawn()) return;
+    const bool bOnTerrain = Z <= -100000.0f;
+    GroundSnapTarget = FVector(X, Y, bOnTerrain ? GroundHeight(X, Y) + 150.0f : Z + 100.0f);
+    GroundSnapWait = 0;
+    bPendingGroundSnap = true;
+    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+    {
+        Avatar->CancelAction(true);
+        Avatar->CancelSprint();
+    }
+}
+
+void AHomesteadController::MenuRefillLamp()
+{
+    Notify(Sim.RefillLamp());
+    LastLampOil = Sim.LampOil();
+}
+
+void AHomesteadController::HomesteadLampOil(float Hours)
+{
+    Sim.SetLampOil(Hours);
+    Notify(FString::Printf(TEXT("The lamp has %.1f hours of oil."), Sim.LampOil()));
+}
+
+void AHomesteadController::UpdateLamp()
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const bool bInHand = !IsFailed() && LampHandoff == ELampHandoff::None
+        && SelectedCarriedTool() == Homestead::Item::OilLamp;
+    Sim.SetLampInHand(bInHand);
+    if (Avatar) Avatar->SetHeldLampLit(Sim.LampOil() > 0.0);
+    // Her hand has reached the ground: the lamp changes hands now.
+    if (Avatar && Avatar->ConsumeLampContact())
+    {
+        if (LampHandoff == ELampHandoff::SetDown) Notify(Sim.SetDownLamp(LampSpot, PlayerPoint()));
+        else if (LampHandoff == ELampHandoff::PickUp)
+        {
+            const auto Result = Sim.PickUpDrop(LampDropId, PlayerPoint());
+            if (Result.ok) Notify(TEXT("Picked up the lamp."));
+            else Notify(Result);
+        }
+        LampHandoff = ELampHandoff::None;
+        RefreshRemaining = 0;
+    }
+    else if (LampHandoff != ELampHandoff::None && (!Avatar || !Avatar->IsLampKneeling()))
+        LampHandoff = ELampHandoff::None; // She stood up before her hand reached the ground.
+    const double Oil = Sim.LampOil();
+    if (bInHand && !bLampWasInHand && Oil <= 0.0)
+        Notify(bGamepad ? TEXT("The lamp is empty. Press X to fill it from an oil flask.")
+            : TEXT("The lamp is empty. Press F to fill it from an oil flask."));
+    else if (LastLampOil > Homestead::Lamp::LowHours && Oil <= Homestead::Lamp::LowHours && Oil > 0.0)
+        Notify(TEXT("The lamp is burning low."));
+    else if (LastLampOil > 0.0 && Oil <= 0.0)
+        Notify(TEXT("The lamp has gone out. Fill it from an oil flask."));
+    LastLampOil = Oil;
+    bLampWasInHand = bInHand;
+}
+
+void AHomesteadController::StartLampSetDown()
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar || LampHandoff != ELampHandoff::None) return;
+    const auto Position = PlayerPoint();
+    const FVector Forward = Avatar->GetActorForwardVector();
+    // Arm's length ahead of her, where the kneel lowers it.
+    const Homestead::Point Spot{Position.x + Forward.X * 45.0, Position.y + Forward.Y * 45.0};
+    if (Sim.NearWater(Spot))
+    {
+        Notify(TEXT("Set the lamp on dry ground."), true);
+        return;
+    }
+    if (Avatar->PlayLampKneel(Spot, true))
+    {
+        LampHandoff = ELampHandoff::SetDown;
+        LampSpot = Spot;
+        return;
+    }
+    Notify(Sim.SetDownLamp(Spot, Position));
+    RefreshRemaining = 0;
+}
+
+bool AHomesteadController::StartLampPickUp(int32 DropId)
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const auto* Lamp = Sim.SetDownLampDrop();
+    if (!Avatar || !Lamp || Lamp->id != DropId || LampHandoff != ELampHandoff::None) return false;
+    if (Sim.UsedCapacity() >= Homestead::InventoryCapacity)
+    {
+        Notify(TEXT("Not enough pack space to pick up the lamp."), true);
+        return true;
+    }
+    if (!Avatar->PlayLampKneel(Lamp->position, false)) return false;
+    LampHandoff = ELampHandoff::PickUp;
+    LampDropId = DropId;
+    return true;
+}
+
 double AHomesteadController::WaterEdgeDistance(Homestead::Point Position, bool bIncludeSea) const
 {
     if (!bEstateMap)
@@ -1542,22 +1711,19 @@ void AHomesteadController::Tick(float DeltaSeconds)
     {
         if (!PrepareWorldAt({PendingLocation.X, PendingLocation.Y})) return;
         const float Ground = GroundHeight(PendingLocation.X, PendingLocation.Y);
-        if (bEstateMap && EstateSpawnWait < 20.0f)
+        if (bEstateMap)
         {
-            // Wait for World Partition to stream in the ground under the spawn before placing her.
-            FHitResult Hit;
-            FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadEstateSpawn), false, GetPawn());
-            if (!GetWorld()->LineTraceSingleByChannel(Hit, FVector(PendingLocation.X, PendingLocation.Y, Ground + 500),
-                FVector(PendingLocation.X, PendingLocation.Y, Ground - 500), ECC_WorldStatic, Params))
-            {
-                EstateSpawnWait += DeltaSeconds;
-                GetPawn()->SetActorLocation(FVector(PendingLocation.X, PendingLocation.Y, Ground + 100), false, nullptr, ETeleportType::TeleportPhysics);
-                if (auto* Waiting = Cast<AHomesteadCharacter>(GetPawn())) Waiting->GetCharacterMovement()->StopMovementImmediately();
-                return;
-            }
+            // Wait (in place, movement off) for World Partition to stream in the ground under the spawn,
+            // then stand her on it. Standalone and packaged games take about a minute to stream it.
+            PendingLocation.Z = bFreshTerrainSpawn ? Ground + 150.0f : FMath::Max(PendingLocation.Z, Ground + 100.0f);
+            if (!SettleOnGround(PendingLocation, EstateSpawnWait, DeltaSeconds, 180.0f,
+                bFreshTerrainSpawn ? TEXT("new game") : TEXT("load"))) return;
+        }
+        else
+        {
+            PendingLocation.Z = bFreshTerrainSpawn ? Ground + 100.0f : FMath::Max(PendingLocation.Z, Ground + 100.0f);
         }
         EstateSpawnWait = 0;
-        PendingLocation.Z = bFreshTerrainSpawn ? Ground + 100.0f : FMath::Max(PendingLocation.Z, Ground + 100.0f);
         GetPawn()->SetActorLocation(PendingLocation, false, nullptr, ETeleportType::TeleportPhysics);
         LastStepPosition = PendingLocation;
         LastSafeWorldPosition = PendingLocation;
@@ -1584,11 +1750,23 @@ void AHomesteadController::Tick(float DeltaSeconds)
                 Notify(TEXT("Owned clothing could not be displayed; the character preview is provisional. ") + Error, true);
             }
             Avatar->SetAppearancePreview(false);
+            Avatar->SnapCamera();
         }
         bPendingSpawn = false;
         if (bFreshTerrainSpawn) CaptureSessionCheckpoint(PendingLocation, PendingRotation);
         bFreshTerrainSpawn = false;
         RefreshMenuPortrait();
+    }
+    if (bPendingGroundSnap && GetPawn())
+    {
+        if (!PrepareWorldAt({GroundSnapTarget.X, GroundSnapTarget.Y})) return;
+        if (!SettleOnGround(GroundSnapTarget, GroundSnapWait, DeltaSeconds, bEstateMap ? 180.0f : 0.0f, TEXT("teleport"))) return;
+        bPendingGroundSnap = false;
+        GetPawn()->SetActorLocation(GroundSnapTarget, false, nullptr, ETeleportType::TeleportPhysics);
+        if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SnapCamera();
+        LastStepPosition = GroundSnapTarget;
+        LastSafeWorldPosition = GroundSnapTarget;
+        StepDistance = 0;
     }
     if (APawn* ControlledPawn = GetPawn())
     {
@@ -1613,13 +1791,22 @@ void AHomesteadController::Tick(float DeltaSeconds)
         if (Position.Z < Surface - 200)
         {
             ++WorldRecoveries;
+            Notify(TEXT("Recovered the character above the generated terrain; this traversal needs review."), true);
+            if (bEstateMap)
+            {
+                // She fell through ground that hadn't streamed in yet: hold her until it has, then stand her on it.
+                GroundSnapTarget = FVector(Position.X, Position.Y, Surface + 150.0f);
+                GroundSnapWait = 0;
+                bPendingGroundSnap = true;
+                return;
+            }
             ControlledPawn->SetActorLocation(FVector(Position.X, Position.Y, Surface + 100),
                 false, nullptr, ETeleportType::TeleportPhysics);
-            Notify(TEXT("Recovered the character above the generated terrain; this traversal needs review."), true);
         }
         LastSafeWorldPosition = ControlledPawn->GetActorLocation();
     }
 
+    UpdateLamp();
     Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning || bTestResetRequired || ShopScreen.IsValid());
     // Out of Energy she dozes off where she stands (the simulation sleeps her on the spot).
     if (Sim.DozeCount() != SeenDozes)
@@ -1922,6 +2109,8 @@ FString AHomesteadController::FocusTitle() const
                     return Wearable ? Text(Homestead::WearableName(Wearable->definition))
                         : TEXT("Dropped garment");
                 }
+                if (Drop.item == Homestead::Item::OilLamp)
+                    return Sim.LampOil() > 0.0 ? TEXT("Oil lamp") : TEXT("Oil lamp (out of oil)");
                 return FString::Printf(TEXT("%s x%d"),
                     *Text(Homestead::ItemName(Drop.item)), Drop.quantity);
             }
@@ -1935,6 +2124,13 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusTitle();
     default: break;
+    }
+    if (Focus == EFocus::None && SelectedCarriedTool() == Homestead::Item::OilLamp)
+    {
+        const double Oil = Sim.LampOil();
+        return Oil <= 0.0 ? FString(TEXT("Oil lamp - out of oil"))
+            : FString::Printf(TEXT("Oil lamp - %s left"), Oil >= 1.5 ? *FString::Printf(TEXT("%.0f hours"), FMath::RoundToDouble(Oil))
+                : *FString::Printf(TEXT("%d minutes"), FMath::Max(1, FMath::RoundToInt(Oil * 60.0))));
     }
     return TEXT("Woodland");
 }
@@ -1964,7 +2160,9 @@ FString AHomesteadController::FocusActions() const
                     return FString();
                 if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind))
                 {
-                    const bool Handles = ToolAvailable && Homestead::ToolForItem(SelectedTool) == Overgrowth->tool;
+                    // Only a tool that clears this overgrowth offers a swing; the lamp (no ToolKind) never does.
+                    const bool Handles = ToolAvailable && Homestead::ToolForItem(SelectedTool) != Homestead::ToolKind::Count
+                        && Homestead::ToolForItem(SelectedTool) == Overgrowth->tool;
                     if (Node.kind == Homestead::ResourceKind::SalvagePile) return A + TEXT(" Search");
                     // Weeds and nettles are pulled, rubbish is cleared away, a fallen bough gathered.
                     const FString Hand = A + (Node.kind == Homestead::ResourceKind::Weeds || Node.kind == Homestead::ResourceKind::Nettles
@@ -2031,7 +2229,10 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
-    default: return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
+    default:
+        if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
+            return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
+        return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
     return FString();
@@ -2347,8 +2548,8 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     {
         // Rough footprint radius (cm) of what she strikes, so the point or bit lands on its near side.
         const float Radius = Kind == Homestead::ResourceKind::StumpSmall ? 16.0f
-            : Kind == Homestead::ResourceKind::StumpMedium ? 20.0f
-            : Kind == Homestead::ResourceKind::StumpLarge ? 28.0f
+            : Kind == Homestead::ResourceKind::StumpMedium ? 30.0f
+            : Kind == Homestead::ResourceKind::StumpLarge ? 44.0f
             : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
             : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
             : Kind == Homestead::ResourceKind::GiantLog ? 38.0f
@@ -2604,6 +2805,8 @@ void AHomesteadController::Interact()
         break;
     }
     case EFocus::Drop:
+        // The lamp is taken up with a kneel; it reaches her hand when her fingers close on the bail.
+        if (const auto* Lamp = Sim.SetDownLampDrop(); Lamp && Lamp->id == FocusId && StartLampPickUp(FocusId)) break;
         Notify(Sim.PickUpDrop(FocusId, Position));
         break;
     case EFocus::Plot:
@@ -2737,6 +2940,7 @@ void AHomesteadController::Secondary()
         }
     }
     else if (Focus == EFocus::Fire) Notify(Sim.AddFuel(FocusId, PlayerPoint()), WoodTapA);
+    else if (SelectedCarriedTool() == Homestead::Item::OilLamp) MenuRefillLamp();
     else HoeSquareAhead();
 }
 

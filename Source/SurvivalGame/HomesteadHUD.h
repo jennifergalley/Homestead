@@ -6,6 +6,12 @@
 
 class AHomesteadController;
 
+namespace HomesteadHudLayout
+{
+// The calendar panel's place in Canvas HUD units (1080-line layout); the vitals stack sits under it.
+inline constexpr float CalendarTop = 26, CalendarHeight = 100;
+}
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadHUD : public AHUD
 {
@@ -43,6 +49,15 @@ private:
     TArray<FString> WrappedLines(const FString& Text, float Width, float Size);
     void Wrap(const FString& Text, float X, float Y, float Width, float Size, FLinearColor Color, int MaxLines = 3);
     void Panel(float X, float Y, float Width, float Height, FLinearColor Color);
+    // The calendar: a sun/moon dial for the time of day, "Spring / Day 2", the 12-hour time and a weather icon.
+    void DrawCalendar(const AHomesteadController& PC, float X, float Y);
+    // Procedural icon primitives in HUD units (scaled by UiScale).
+    void Disc(float CX, float CY, float Radius, FLinearColor Color, int32 Segments = 28);
+    void Band(float CX, float CY, float InnerRadius, float OuterRadius, float FromRadians, float ToRadians, FLinearColor Color, int32 Segments = 32);
+    void Stroke(float X0, float Y0, float X1, float Y1, float Thickness, FLinearColor Color);
+    void SunIcon(float CX, float CY, float Radius, FLinearColor Color);
+    void MoonIcon(float CX, float CY, float Radius, FLinearColor Color, FLinearColor Behind);
+    void RainIcon(float CX, float CY, float Size);
     void DrawBook(const AHomesteadController& PC);
     // The focus prompt, floating just above the heroine's head: key badges and verbs ("E  Gather")
     // with the target's name small above, on a soft dark backing for contrast.

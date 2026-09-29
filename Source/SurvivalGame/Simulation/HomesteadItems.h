@@ -20,6 +20,8 @@ enum class Item : int
     RustedAxeHead, RustedHoeBlade, RustedScytheBlade, RustedBillhookHead, RustedPickHead,
     Hay, Weeds, BrambleCanes, Kindling, ScrapIron, ScrapLead,
     Primroses, Bluebells, WildDaffodils, WildGarlic,
+    // add-oil-lamp.
+    OilLamp, OilFlask,
     // improve-crops-and-harvest: period crop seed (sold at the general store) and the produce.
     TurnipSeed, CarrotSeed, SeedPotato, CabbageSeed, BroadBeanSeed, StrawberryRunner,
     Turnip, Carrot, Potato, Cabbage, BroadBeans, Strawberries,

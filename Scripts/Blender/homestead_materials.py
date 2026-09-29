@@ -808,6 +808,33 @@ def paper(name, color=(0.58, 0.50, 0.36), string_shadow=0.25, seed=0.0):
     return g.mat
 
 
+def cork(name, color=(0.33, 0.22, 0.12), dark=(0.11, 0.075, 0.045), seed=0.0):
+    """Natural cork stopper: honey-brown bark cells, dark pores, chipped rims and
+    waxy oil staining around the neck."""
+    g = Graph(name)
+    p = g.coord()
+    x, y, z = g.separate(p)
+    seeded = g.vmath("ADD", p, (seed * 0.23, seed * 0.41, seed * 0.17))
+    cells = g.voronoi(g.vmath("MULTIPLY", seeded, (1.0, 1.0, 0.55)), scale=95.0,
+                      randomness=0.85, feature="DISTANCE_TO_EDGE").outputs["Distance"]
+    pore = g.remap(cells, 0.0, 0.035, 1.0, 0.0)
+    mottled = g.noise(seeded, scale=42.0, detail=6.0, roughness=0.62).outputs["Fac"]
+    base = g.ramp(mottled, [(0.25, dark), (0.58, color),
+                            (0.9, tuple(min(1.0, c * 1.35) for c in color))])
+    base = g.mix(base, (0.045, 0.032, 0.022), g.math("MULTIPLY", pore, 0.75))
+    oil = g.noise(g.vmath("ADD", seeded, (3.0, 1.0, 7.0)), scale=20.0, detail=4.0).outputs["Fac"]
+    oil_mask = g.math("MULTIPLY", g.remap(z, 0.012, -0.01, 0.0, 0.55),
+                      g.remap(oil, 0.42, 0.68))
+    base = g.mix(base, (0.12, 0.08, 0.04), oil_mask)
+    g.set("Base Color", base)
+    rough = g.math("ADD", g.remap(mottled, 0.3, 0.7, 0.72, 0.92),
+                   g.math("MULTIPLY", oil_mask, -0.18))
+    g.set("Roughness", rough)
+    height = g.math("SUBTRACT", g.math("MULTIPLY", mottled, 0.35), g.math("MULTIPLY", pore, 0.8))
+    g.set("Normal", g.bump(height, strength=0.5, distance=0.0007))
+    return g.mat
+
+
 def stoneware(name, glaze=(0.36, 0.32, 0.25), clay=(0.22, 0.12, 0.065), seed=0.0):
     """Salt-glazed stoneware: warm clay body, tan/grey glaze mottling, iron specks
     and a darker unglazed foot."""
@@ -836,23 +863,41 @@ def tinplate(name, base=(0.50, 0.49, 0.45), rust=0.28, seed=0.0):
     tea/cocoa staining and small rust freckles. Include a metallic bake map."""
     g = Graph(name)
     p = g.coord()
+    x, y, z = g.separate(p)
     seeded = g.vmath("ADD", p, (seed * 0.37, seed * 0.07, seed * 0.19))
     blotch = g.noise(seeded, scale=35.0, detail=5.0, roughness=0.65).outputs["Fac"]
-    scratches = g.noise(g.vmath("MULTIPLY", seeded, (35.0, 35.0, 6.0)), scale=9.0,
-                        detail=4.0).outputs["Fac"]
-    color = g.mix(tuple(c * 0.72 for c in base), tuple(min(1.0, c * 1.2) for c in base),
+    scratches = g.noise(g.vmath("MULTIPLY", seeded, (46.0, 46.0, 7.0)), scale=9.0,
+                        detail=4.0, roughness=0.62).outputs["Fac"]
+    patina_noise = g.noise(g.vmath("MULTIPLY", seeded, (0.9, 0.9, 0.38)), scale=11.0,
+                           detail=5.0, roughness=0.7).outputs["Fac"]
+    patina = g.remap(patina_noise, 0.38, 0.70, 0.0, 0.72)
+    low_grime = g.math("MULTIPLY", g.remap(z, 0.030, 0.0, 0.0, 0.55),
+                       g.remap(blotch, 0.42, 0.68))
+    color = g.mix(tuple(c * 0.62 for c in base), tuple(c * 0.90 for c in base),
                   g.remap(blotch, 0.25, 0.75))
-    rust_noise = g.noise(seeded, scale=95.0, detail=5.0, roughness=0.7).outputs["Fac"]
-    rust_mask = g.remap(rust_noise, 0.68, 0.82, 0.0, rust)
-    color = g.mix(color, (0.28, 0.13, 0.045), rust_mask)
-    rub = g.remap(scratches, 0.72, 0.88, 0.0, 0.35)
-    color = g.mix(color, (0.62, 0.60, 0.55), rub)
+    grey_brown = (0.175, 0.160, 0.135)
+    color = g.mix(color, grey_brown, g.math("MAXIMUM", g.math("MULTIPLY", patina, 0.55), low_grime))
+    rust_noise = g.noise(g.vmath("ADD", seeded, (4.0, 2.0, 1.0)), scale=85.0, detail=5.0,
+                         roughness=0.74).outputs["Fac"]
+    rust_mask = g.remap(rust_noise, 0.66, 0.82, 0.0, rust)
+    rust_mask = g.math("MAXIMUM", rust_mask, g.math("MULTIPLY", low_grime, rust * 0.55))
+    color = g.mix(color, (0.22, 0.085, 0.030), rust_mask)
+    rub = g.remap(scratches, 0.80, 0.93, 0.0, 0.22)
+    color = g.mix(color, (0.48, 0.47, 0.43), rub)
     g.set("Base Color", color)
-    g.set("Metallic", g.math("SUBTRACT", 1.0, rust_mask))
-    g.set("Roughness", g.math("ADD", 0.43, g.math("MULTIPLY", rust_mask, 0.42)))
-    g.set("Normal", g.bump(g.math("ADD", g.math("MULTIPLY", blotch, 0.3),
-                                  g.math("MULTIPLY", scratches, 0.2)),
-                           strength=0.25, distance=0.0006))
+    metal = g.math("SUBTRACT", 0.88, g.math("MULTIPLY", patina, 0.38))
+    metal = g.math("SUBTRACT", metal, g.math("MULTIPLY", low_grime, 0.22))
+    metal = g.math("SUBTRACT", metal, g.math("MULTIPLY", rust_mask, 0.86))
+    g.set("Metallic", g.math("MAXIMUM", metal, 0.06))
+    rough = g.math("ADD", 0.54, g.remap(blotch, 0.25, 0.75, -0.05, 0.08))
+    rough = g.math("ADD", rough, g.math("MULTIPLY", patina, 0.14))
+    rough = g.math("ADD", rough, g.math("MULTIPLY", low_grime, 0.18))
+    rough = g.math("ADD", rough, g.math("MULTIPLY", rust_mask, 0.28))
+    rough = g.math("SUBTRACT", rough, g.math("MULTIPLY", rub, 0.10))
+    g.set("Roughness", g.math("MINIMUM", rough, 0.92))
+    height = g.math("ADD", g.math("MULTIPLY", blotch, 0.28), g.math("MULTIPLY", scratches, 0.16))
+    height = g.math("ADD", height, g.math("MULTIPLY", rust_mask, 0.34))
+    g.set("Normal", g.bump(height, strength=0.30, distance=0.0007))
     return g.mat
 
 

@@ -94,6 +94,11 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Forage, "wild-daffodils", 15, StoreBuys, 0.0, 0.0, "Spring flowers in the verges and valley"},
     {Item::WildGarlic, "wild-garlic", "Wild garlic", "Ramsons leaves and flowers from the damp valley floor.",
         ItemCategory::Forage, "wild-garlic", 10, StoreBuys, 0.0, 0.0, "Spring flowers in the verges and valley"},
+    // add-oil-lamp: her first light, and the oil for it.
+    {Item::OilLamp, "oil-lamp", "Oil lamp", "A tin and brass hurricane lantern with a glass chimney. Select it to carry it lit; set it down to light the ground around it.",
+        ItemCategory::Tool, "oil-lamp", 150, NoBuyers},
+    {Item::OilFlask, "oil-flask", "Oil flask", "A stoppered tin flask of lamp oil. Fills the lamp for about six hours.",
+        ItemCategory::Supply, "oil-flask", 12, NoBuyers, 0.0, 0.0, "The general store", false, "oil flasks"},
     // improve-crops-and-harvest. Seed prices are base; the store sells at 125%. Growing times match
     // HomesteadCrops.cpp (checked by the native tests).
     {Item::TurnipSeed, "turnip-seed", "Turnip seed", "A paper of white-globe turnip seed. Matures in about 4 days if watered.",
