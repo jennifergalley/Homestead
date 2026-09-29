@@ -373,6 +373,18 @@ requirement.
   Planning traced the present state: Hunger starts at 85, drains 2/hour awake and fails at 0; Energy
   starts at 100 and drains through work; food restores both. The change is **pending, not in today's
   4 PM build**; Planning updates the OpenSpec spec.
+- **Food Energy affordance** — **pending, not 4 PM content.** Before purchase, shops and Inventory
+  hover show the canonical nominal `+N Energy` for food. Remove only the redundant stack number from
+  hover text; retain tile quantity and controls. **Menu** owns the UI after active dye/Appearance work;
+  source values from `ItemInfo` so future Energy-only lane-F values flow through automatically.
+  Require native coverage and PIE checks at 1080p and 4K.
+- **Whole-number currency** — **provisional, trace-gated and not 4 PM content.** Architecture first
+  traces stored integer units, save serialization and every hardcoded cents/display surface. The product
+  direction, if that trace confirms it is safe, reinterprets the current smallest unit as one whole
+  `coin`: 1000 (formerly $10) becomes 1000 coins and 40 (formerly $0.40) becomes 40 coins, preserving
+  buying power and saves. **Props** owns simulation/economy after an explicit slot; **Menu** owns the
+  coordinated presentation slice. Do not make a UI-only half-change or treat this design as final
+  before the trace.
 - **Weather recurrence** — **Water Agent** (retained lane; supersedes the broader Calendar proposal):
   rain every third day is too frequent. The smallest traced change is a stable hash selecting offsets
   **1 or 2** and **6 or 7** in every 10-day block: exactly 20% rain, 4–6-day gaps and day 0 dry. Keep
