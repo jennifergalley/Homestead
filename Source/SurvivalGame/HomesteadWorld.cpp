@@ -61,6 +61,9 @@ TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.6f,
     TEXT("Sky light intensity at full night."));
 TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -2.0f,
     TEXT("Auto exposure min brightness at full night."));
+TAutoConsoleVariable<int32> CVarEstateSceneryCells(TEXT("homestead.EstateSceneryCells"), 1,
+    TEXT("1 = batch non-Nanite estate scenery per 128/512 m cell (default), 0 = one batch per kind. ")
+    TEXT("Read when the estate scenery is built (set it on the command line with -DPCVars=)."));
 
 // Original provisional shapes, not the final realistic environment asset set.
 const FLinearColor Meadow(0.22f, 0.31f, 0.095f);
@@ -1149,6 +1152,17 @@ struct FEstateSceneryRecord
 };
 #pragma pack(pop)
 static_assert(sizeof(FEstateSceneryRecord) == 20, "EstateScenery.bin records are 20 bytes");
+
+// Non-Nanite scenery is batched per kind *and* per square cell of the estate. A non-Nanite HISM
+// gathers its ray-tracing instances by scanning every instance it holds, every frame
+// (FInstancedStaticMeshSceneProxy::GetDynamicRayTracingInstances), so one estate-wide batch of 80k
+// grass tufts cost ~3.5 ms of render thread at the manor. Cells let the renderer drop whole batches
+// (ray tracing culls primitives more than r.RayTracing.Culling.Radius, 300 m, away; the draw
+// distance below culls cells past the kind's instance cull distance) before any instance is looked at.
+// Kinds with a cull distance use small cells; kinds drawn at any distance use large ones, so the far
+// view doesn't turn into thousands of draws. Nanite kinds stay one batch: Nanite culls on the GPU.
+constexpr float EstateSceneryNearCellCm = 12800.0f;
+constexpr float EstateSceneryFarCellCm = 51200.0f;
 }
 
 bool AHomesteadWorld::BuildEstateScenery()
@@ -1172,40 +1186,73 @@ bool AHomesteadWorld::BuildEstateScenery()
     }
     const auto* Records = reinterpret_cast<const FEstateSceneryRecord*>(Raw.GetData() + 8);
     constexpr int32 KindCount = UE_ARRAY_COUNT(EstateSceneryKinds);
-    UHierarchicalInstancedStaticMeshComponent* Batches[KindCount] = {};
-    TArray<FTransform> Transforms[KindCount];
+    UStaticMesh* KindMeshes[KindCount] = {};
+    bool KindTried[KindCount] = {};
+    float KindCellCm[KindCount] = {};
+    TMap<FIntVector, int32> BatchOfCell;
+    TArray<UHierarchicalInstancedStaticMeshComponent*> Batches;
+    TArray<int32> BatchKinds;
+    TArray<TArray<FTransform>> Transforms;
+    const bool bUseCells = CVarEstateSceneryCells.GetValueOnGameThread() != 0;
+    auto NewBatch = [this, &Batches, &BatchKinds, &Transforms, &KindMeshes, &KindCellCm](int32 KindIndex)
+    {
+        const FEstateSceneryKind& Kind = EstateSceneryKinds[KindIndex];
+        auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+        Batch->SetupAttachment(GetRootComponent());
+        Batch->SetMobility(EComponentMobility::Static);
+        Batch->SetStaticMesh(KindMeshes[KindIndex]);
+        Batch->SetCollisionProfileName(Kind.bCollision ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
+        Batch->SetCollisionEnabled(Kind.bCollision ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+        Batch->SetCanEverAffectNavigation(false);
+        Batch->SetCastShadow(Kind.bTree || Kind.bCollision || Kind.bShadow);
+        // As the woodland's underbrush: gentle sway needn't redraw cached shadow pages every frame.
+        if (Kind.bShadow && !Kind.bTree) Batch->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Rigid;
+        if (Kind.CullCm > 0)
+        {
+            Batch->SetCullDistances(static_cast<int32>(Kind.CullCm * 0.8f), static_cast<int32>(Kind.CullCm));
+            // A cell whose nearest instance is past the cull distance draws nothing: drop it whole. The
+            // distance is measured to the cell's centre, so allow a full cell for its reach.
+            if (KindCellCm[KindIndex] > 0)
+            {
+                Batch->LDMaxDrawDistance = Kind.CullCm + KindCellCm[KindIndex];
+                Batch->SetCachedMaxDrawDistance(Batch->LDMaxDrawDistance);
+            }
+        }
+        // Wind sway only near her: beyond 60 m it's invisible, and animated Nanite foliage there would
+        // keep invalidating the cached virtual shadow maps of the whole wood every frame.
+        Batch->SetWorldPositionOffsetDisableDistance(6000);
+        Batch->ComponentTags.Add(TEXT("EstateScenery"));
+        ApplyCameraSafeFoliageMaterials(*Batch);
+        Batches.Add(Batch);
+        BatchKinds.Add(KindIndex);
+        Transforms.AddDefaulted();
+        return Batches.Num() - 1;
+    };
     for (uint32 Index = 0; Index < Count; ++Index)
     {
         const FEstateSceneryRecord& Record = Records[Index];
         if (Record.Kind >= KindCount) continue;
         const FEstateSceneryKind& Kind = EstateSceneryKinds[Record.Kind];
-        if (!Batches[Record.Kind])
+        if (!KindTried[Record.Kind])
         {
-            UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, Kind.Path);
-            if (!Mesh)
+            KindTried[Record.Kind] = true;
+            KindMeshes[Record.Kind] = LoadObject<UStaticMesh>(nullptr, Kind.Path);
+            if (!KindMeshes[Record.Kind])
             {
                 UE_LOG(LogHomesteadWorld, Warning, TEXT("Estate scenery mesh missing: %s"), Kind.Path);
-                continue;
             }
-            auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
-            Batch->SetupAttachment(GetRootComponent());
-            Batch->SetMobility(EComponentMobility::Static);
-            Batch->SetStaticMesh(Mesh);
-            Batch->SetCollisionProfileName(Kind.bCollision ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
-            Batch->SetCollisionEnabled(Kind.bCollision ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
-            Batch->SetCanEverAffectNavigation(false);
-            Batch->SetCastShadow(Kind.bTree || Kind.bCollision || Kind.bShadow);
-            // As the woodland's underbrush: gentle sway needn't redraw cached shadow pages every frame.
-            if (Kind.bShadow && !Kind.bTree) Batch->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Rigid;
-            if (Kind.CullCm > 0) Batch->SetCullDistances(static_cast<int32>(Kind.CullCm * 0.8f), static_cast<int32>(Kind.CullCm));
-            // Wind sway only near her: beyond 60 m it's invisible, and animated Nanite foliage there would
-            // keep invalidating the cached virtual shadow maps of the whole wood every frame.
-            Batch->SetWorldPositionOffsetDisableDistance(6000);
-            Batch->ComponentTags.Add(TEXT("EstateScenery"));
-            ApplyCameraSafeFoliageMaterials(*Batch);
-            Batches[Record.Kind] = Batch;
+            else if (bUseCells && !KindMeshes[Record.Kind]->HasValidNaniteData())
+            {
+                KindCellCm[Record.Kind] = Kind.CullCm > 0 ? EstateSceneryNearCellCm : EstateSceneryFarCellCm;
+            }
         }
-        UStaticMesh* Mesh = Batches[Record.Kind]->GetStaticMesh();
+        UStaticMesh* Mesh = KindMeshes[Record.Kind];
+        if (!Mesh) continue;
+        const float CellCm = KindCellCm[Record.Kind];
+        const FIntVector Cell(Record.Kind,
+            CellCm > 0 ? FMath::FloorToInt32(Record.X / CellCm) : 0, CellCm > 0 ? FMath::FloorToInt32(Record.Y / CellCm) : 0);
+        const int32* Found = BatchOfCell.Find(Cell);
+        const int32 BatchIndex = Found ? *Found : BatchOfCell.Add(Cell, NewBatch(Record.Kind));
         const FRotator Rotation(0, Record.Yaw, 0);
         FVector Base(Record.X, Record.Y, HomesteadEstateTerrain::Height(Record.X, Record.Y));
         FVector Anchor = FVector::ZeroVector;
@@ -1233,25 +1280,28 @@ bool AHomesteadWorld::BuildEstateScenery()
             }
             Base.Z -= Kind.RimLift * Record.Scale;
         }
-        Transforms[Record.Kind].Add(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Record.Scale), FVector(Record.Scale)));
+        Transforms[BatchIndex].Add(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Record.Scale), FVector(Record.Scale)));
     }
-    int32 Total = 0;
-    for (int32 Kind = 0; Kind < KindCount; ++Kind)
+    int32 Total = 0, Cells = 0;
+    for (int32 BatchIndex = 0; BatchIndex < Batches.Num(); ++BatchIndex)
     {
-        if (!Batches[Kind]) continue;
-        Batches[Kind]->RegisterComponent();
-        Batches[Kind]->AddInstances(Transforms[Kind], false, true);
-        EstateScenery.Add(Batches[Kind]);
+        UHierarchicalInstancedStaticMeshComponent* Batch = Batches[BatchIndex];
+        const int32 Kind = BatchKinds[BatchIndex];
+        Batch->RegisterComponent();
+        Batch->AddInstances(Transforms[BatchIndex], false, true);
+        EstateScenery.Add(Batch);
         const FEstateSceneryKind& Info = EstateSceneryKinds[Kind];
-        const FVector Extent = Batches[Kind]->GetStaticMesh()->GetBounds().BoxExtent;
+        const FVector Extent = Batch->GetStaticMesh()->GetBounds().BoxExtent;
         EstateSceneryClearRadius.Add(Info.bTree || Info.bCollision ? 0.0f : FMath::Max(Extent.X, Extent.Y) * 0.7f);
         EstateSceneryTrunkRadius.Add(Info.bTree ? Info.Footprint : 0.0f);
-        EstateSceneryHidden.Add(TBitArray<>(false, Transforms[Kind].Num()));
-        EstateSceneryTransforms.Add(MoveTemp(Transforms[Kind]));
+        EstateSceneryHidden.Add(TBitArray<>(false, Transforms[BatchIndex].Num()));
+        EstateSceneryTransforms.Add(MoveTemp(Transforms[BatchIndex]));
         Total += EstateSceneryTransforms.Last().Num();
+        Cells += KindCellCm[Kind] > 0 ? 1 : 0;
     }
     bEstateSceneryBuilt = true;
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Estate scenery: %d instances in %d batches."), Total, EstateScenery.Num());
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Estate scenery: %d instances in %d batches (%d of them non-Nanite cells)."),
+        Total, EstateScenery.Num(), Cells);
     return true;
 }
 
