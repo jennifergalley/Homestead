@@ -131,6 +131,9 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 - **`Simulation\HomesteadSeasons.{h,cpp}`** (D): the forage season table and `Seasons::LookAt`.
 - **Enum values being appended** (append-only; keep catalogue rows in enum order): D adds `Item::Blackberries`,
   `Item::FieldMushrooms` and `ResourceKind::FieldMushrooms`. Lanes list theirs here as they claim them.
+- **Seedsman anchors claimed (C; branch `4f21a2d8`, not on `main` yet):** `Anchor::SeedsmanDoor`
+  `{-52050, 116000}`, yaw 0; `Anchor::SeedsmanCounter` `{-51450, 116000}`, yaw 180. The lane adds them
+  to the provisional layout, `reshape.py` and `estate_layout.json` together.
 
 ## Open questions for Jenny
 
@@ -151,6 +154,14 @@ None yet.
 None yet.
 
 ## Pending doc updates on merge
+
+- Seedsman (`4f21a2d8`, not on `main` yet): Tregear's replaces `Town_Blockout_EastHouse`; the lane
+  deletes that World Partition external actor and `town_massing.py` stops spawning it. When it lands:
+  document the `WorldPartitionBlueprintLibrary.get_actor_descs()` + `load_actors(guids)` step before
+  `get_all_level_actors` (otherwise a re-run duplicates unloaded massing), the external-actor save that
+  removes the deleted actor file, and the shop-trade pointer rule (FindShop pointers dangle after Sell/Buy;
+  keep the shop id and look it up again). Add a store-recipe cross-link to the Blender -Y/+Y `Prop()` yaw
+  convention.
 
 - Performance (`6841f429`, not on `main` yet): `PerfLock.ps1` treats `blender.exe` as a build, so
   `Start-PerfWindow.ps1` names and refuses it. When it lands, update the editor skill perf-window
