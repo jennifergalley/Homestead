@@ -1,7 +1,7 @@
 """Packaged walk-off: teleport onto the road inside the gateway, walk out past the boundary and back,
 recording frames. Args: exe w h outdir [wait] [settle].
 
-Reference driver for packaged-game playtests (packaged tests are orchestrator-only during multi-lane
+Reference driver for packaged-game playtests (packaged tests are integration-session-only during multi-lane
 rounds). From the estate-boundary lane, verified on the bbab1de7 package. It shows the pieces that work:
 find the game window by process image (never by size), open the console with backtick, type with
 keybd_event, `Walk` after `BugItGo`, and record with ffmpeg ddagrab.

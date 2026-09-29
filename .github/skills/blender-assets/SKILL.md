@@ -97,6 +97,8 @@ before each pass.
 - **Knapped stone.** Uniform Voronoi scars read as crumpled paper or turtle shell. Scars are struck from the
   edges, so elongate the cells across the blade and keep them few and broad. Soil-worn chert is waxy
   (roughness ~0.45); only the use-polished bit is glossy.
+- **Poly Haven API from Python:** `api.polyhaven.com` returns 403 to `urllib` without a browser-like
+  `User-Agent` header (PowerShell's `Invoke-RestMethod` works); set one, as `build_ground.import_polyhaven` does.
 - **Review HDRI.** `render_beauty` needs the Kloofendal sky in the git-ignored Poly Haven cache. On a
   fresh worktree fetch it first:
   `.\Scripts\Blender\Get-PolyHavenAsset.ps1 kloofendal_48d_partly_cloudy_puresky -Resolution 2k -Kind hdri`.

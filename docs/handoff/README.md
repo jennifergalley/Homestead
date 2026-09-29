@@ -18,12 +18,36 @@ agent keeps both current.
 
 | Role | What it does | How to find it |
 | --- | --- | --- |
-| **Orchestrator** | Plans the round, spawns lane and docs sessions, owns shared interfaces and the save-version bump, merges ready lane work, **is the only session that packages** (and runs packaged tests), and reconciles merge conflicts, including in docs | The round page's registry; `get_sessions_status` ("Orchestrator Agent") |
+| **Orchestrator** | **Coordinates only** (Jenny's standing preference): plans the round, spawns lane, docs and integration sessions, owns shared interfaces and decisions (such as the save-version bump), forwards lanes' `[ready]`s to the integration session, relays results to Jenny, assigns follow-ups, and reconciles doc conflicts. It **never builds, merges, packages or verifies**: while its turn is busy with hands-on work, queued messages from lanes can't reach it. It ends its turns promptly | The round page's registry; `get_sessions_status` ("Orchestrator Agent") |
+| **Integration session** | Does all hands-on integration: merges the lane work the orchestrator forwards, resolves conflicts, builds, runs native and packaged tests, PIE and perf checks, and **is the only session that packages** (the only one running UAT). Reports `[integrated] <what> @ <sha>` to the orchestrator | The round page's registry ("Integration Agent") |
 | **Docs agent** | Standing session for the whole round. It receives findings and blockers from every session and records each once in the canonical doc. It keeps this folder, the skills and the setup docs current, and relays cross-lane blockers to the orchestrator | The round page's registry ("Documentation Agent") |
+| **Architecture agent** (code steward) | Long-lived. Owns how the code is written: `docs\architecture.md`, the "Code practices" section of `.github\copilot-instructions.md`, and the code-convention skills under `.github\skills`. Makes small, safe refactors in files no lane is editing, proposes larger ones as OpenSpec changes for between rounds, and reviews each integrated batch. The docs agent owns process docs (this folder, the editor/Blender skills' shared-machine and failure sections, setup); the two keep each other's docs consistent | The round page's registry ("Architecture agent") |
 | **Lanes** | One worktree and one OpenSpec change each. They own the files named in their design's "Lanes and ownership" | The round page's registry |
+
+**Session names:** every session keeps its app name as "<one or two words> Agent", describing its
+current work ("Clearing Agent", "Integration Agent", "Docs Agent"), and renames itself with
+`rename_session` (`force: true`) when it starts and whenever its main task changes. The orchestrator
+names sessions this way when it creates them. The round page maps names to session IDs and work.
 
 If the round page lists no docs agent, or the one listed is archived, ask the orchestrator to spawn
 one (`send_session_message`). Until one exists, record findings yourself in the canonical doc.
+
+## Waiting: end your turn, don't loop
+
+Jenny's standing rule for every session. A session that's waiting (for an editor slot, the UBT queue,
+another lane's `[ready]`, an `[integrated]`, or a perf window) must never sleep, poll or loop in a shell:
+a blocking wait keeps its turn open, so queued `send_session_message`s never arrive. Instead:
+
+1. Schedule a wake-up with `save_session_automation`: `interval: "once"` with a `run_at` a few
+   minutes ahead, or `interval: "minutes"` with `every_minutes`. Its prompt says what to check.
+2. End the turn, so the session goes idle and messages can reach it.
+3. Clear the automation (`clear: true`) when it's no longer needed.
+
+Waiting on a build or command the session itself started is fine through the tool's own completion
+notification (async shells / `initial_wait`); a sleep loop isn't. For an editor slot, check
+`Get-Process UnrealEditor*` once, and if 2 Unreal processes are running, schedule a wake-up about 5
+minutes out and end the turn. The orchestrator uses the same pattern: it checks in every 30 minutes
+through its own session automation.
 
 ## Reaching a busy session fast: the mailbox
 
@@ -82,9 +106,9 @@ belong only to their feature, and code comments. Shared docs (`.github\skills\**
 `docs\setup.md`, `docs\version-control.md`, this folder, and cross-cutting script help) go through
 the docs agent, so each finding lands once instead of five times.
 
-## Delivering lane work (only the orchestrator packages)
+## Delivering lane work (only the integration session packages)
 
-UAT runs only in the orchestrator's worktree. That covers `Scripts\Build-Game.ps1 -Package` or
+UAT runs only in the integration session's worktree. That covers `Scripts\Build-Game.ps1 -Package` or
 `-PackageOnly`, `RunUAT BuildCookRun`, and packaged-game tests (`Test-Game.ps1 -Packaged`,
 `Playtest-Visual.ps1 -Packaged`). Several worktrees packaging at once fought over the machine-wide
 UBT mutex (`Result: Failed (ConflictingInstance)`, UAT exit 10) and the shared Zen server on port
@@ -98,13 +122,19 @@ A lane delivers an increment like this:
    the pack broke a manor chest test). If the breakage comes from an interaction between lanes, say
    so in your `[ready]` rather than silently patching the other lane's code; the orchestrator
    assigns it.
-3. Compile-check the editor module: `Build.bat SurvivalGameEditor Win64 Development
-   "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE`. If you touched C++,
-   also compile the game target (`Build.bat SurvivalGame Win64 Development ...`): the editor build
-   skips unity merging for files you've changed, so name clashes only show up in the game build.
+3. **Build only when your C++ changed** (Jenny's build policy, 2026-09-28). Close your editor (and
+   Blender, if it's yours) first: on a loaded machine UBT runs out of memory and retries, and a
+   5-minute build took 40. Batch several fixes, then
+   one editor build and one PIE pass, not a build per fix. Asset, Blender, Python and config work needs
+   no build: launch with `Start-EditorMcp.ps1 -SkipBuild` if your binaries are current. When C++ did
+   change, build the editor module once: `Build.bat SurvivalGameEditor Win64 Development
+   "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE`. Don't compile the
+   `SurvivalGame` game target; the integration session does that once per batch (unity-build clashes
+   the editor build hides show up there; see the editor skill's table 0.1). Keep running the native
+   tests (step 2).
 4. Commit only your files. Push to `main` when you're rebased and tested; otherwise commit to your
-   lane branch. All worktrees share one local repository, so the orchestrator can read unpushed
-   lane branches directly.
+   lane branch. All worktrees share one local repository, so the integration session can read
+   unpushed lane branches directly.
 5. Message the orchestrator (`send_session_message`, `delivery_mode: "enqueue"`):
 
    ```text
@@ -115,11 +145,22 @@ A lane delivers an increment like this:
    Known issues / needs from integration: ...
    ```
 
-The orchestrator merges ready lane work in its worktree, resolves conflicts, runs the native tests,
-packages once, runs the packaged tests, and pushes the integrated result to `main`. Then it tells
-the lanes to rebase and reports to Jenny what she can try.
+Message flow:
 
-Orchestrator merge notes:
+1. The lane sends `[ready]` to the orchestrator.
+2. The orchestrator forwards it to the integration session and ends its turn.
+3. The integration session merges the ready work in its worktree, resolves conflicts, runs the native
+   tests, packages once, runs the packaged tests, and pushes the integrated result to `main`. It
+   reports `[integrated] <what> @ <sha>` (with anything that failed) to the orchestrator.
+4. The orchestrator tells the lanes to rebase, relays to Jenny what she can try, and assigns
+   follow-ups.
+
+**Batching (integration session):** merge `[ready]`s in batches, with one editor build, one game-target
+build, one native test run and one PIE pass per batch. A single `[ready]` may wait up to about 60
+minutes for company, unless it unblocks another lane. Package only at the end of a round, or when the
+orchestrator asks for a playtest build.
+
+Integration merge notes:
 
 - All worktrees share one `.git`, so a lane's local branch can be merged without a push. Lanes
   sometimes rewrite history before pushing (for example ocean `e777db71` became `8a407908`), so
@@ -132,6 +173,30 @@ Orchestrator merge notes:
 The separate MVP survival line (`mvp-survival`) packages its own build to
 `E:\Repos\HomesteadMVP\Windows`, only for real deliverables, and tells the orchestrator before
 starting.
+
+## Playtest builds (schedule)
+
+Jenny's standing preference. A packaged playtest build is on the **"Homestead Estate"** desktop
+shortcut by **7:30 AM every day** (weekends included) and by **4:00 PM on weekdays**, after her work.
+On weekends, also cut one as soon as features she'd notice land.
+
+1. The orchestrator triggers the integration session at about **5:30 AM** and **2:00 PM** (its session
+   automation), and tells lanes a build is being cut.
+2. Lanes close their editors (`Stop-MyEditor.ps1`) until the build is done: packaging needs the
+   process slots.
+3. The integration session packages `main` (`Build-Game.ps1 -Package`), runs the packaged suites, and
+   retargets the shortcut to its `Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
+   keeping the Homestead icon. It never touches `Homestead.lnk`.
+4. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
+   orchestrator relays that to Jenny.
+5. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
+
+Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.
+This replaces the old "package after every improvement" step of the Interactive Loop.
+
+**Pause for play:** when Jenny asks to pause feature development so she can use the PC to play, every
+session stops launching editors and builds until she says to resume. Close your editor and end your
+turn (with a wake-up if you need one).
 
 ## Docs agent duties
 

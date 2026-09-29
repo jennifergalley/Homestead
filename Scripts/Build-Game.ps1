@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
 Builds the editor module, regenerates content and (with -Package) packages the Development game.
-Orchestrator-only during multi-lane rounds: lanes don't package (docs\handoff\README.md, "Delivering lane work").
+Integration-session-only during multi-lane rounds: lanes and the orchestrator don't package (docs\handoff\README.md, "Delivering lane work").
 .DESCRIPTION
 -Package              also runs UAT BuildCookRun into -ArchiveDirectory (default Build\Windows).
 -PackageOnly          packages without re-running Fetch-Assets, the content bootstrap and the character/
