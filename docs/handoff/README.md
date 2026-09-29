@@ -21,7 +21,13 @@ agent keeps both current.
 | **Orchestrator** | **Coordinates only** (Jenny's standing preference): plans the round, spawns lane, docs and integration sessions, owns shared interfaces and decisions (such as the save-version bump), forwards lanes' `[ready]`s to the integration session, relays results to Jenny, assigns follow-ups, and reconciles doc conflicts. It **never builds, merges, packages or verifies**: while its turn is busy with hands-on work, queued messages from lanes can't reach it. It ends its turns promptly | The round page's registry; `get_sessions_status` ("Orchestrator Agent") |
 | **Integration session** | Does all hands-on integration: merges the lane work the orchestrator forwards, resolves conflicts, builds, runs native and packaged tests, PIE and perf checks, and **is the only session that packages** (the only one running UAT). Reports `[integrated] <what> @ <sha>` to the orchestrator | The round page's registry ("Integration Agent") |
 | **Docs agent** | Standing session for the whole round. It receives findings and blockers from every session and records each once in the canonical doc. It keeps this folder, the skills and the setup docs current, and relays cross-lane blockers to the orchestrator | The round page's registry ("Documentation Agent") |
+| **Architecture agent** (code steward) | Long-lived. Owns how the code is written: `docs\architecture.md`, the "Code practices" section of `.github\copilot-instructions.md`, and the code-convention skills under `.github\skills`. Makes small, safe refactors in files no lane is editing, proposes larger ones as OpenSpec changes for between rounds, and reviews each integrated batch. The docs agent owns process docs (this folder, the editor/Blender skills' shared-machine and failure sections, setup); the two keep each other's docs consistent | The round page's registry ("Architecture agent") |
 | **Lanes** | One worktree and one OpenSpec change each. They own the files named in their design's "Lanes and ownership" | The round page's registry |
+
+**Session names:** every session keeps its app name as "<one or two words> Agent", describing its
+current work ("Clearing Agent", "Integration Agent", "Docs Agent"), and renames itself with
+`rename_session` (`force: true`) when it starts and whenever its main task changes. The orchestrator
+names sessions this way when it creates them. The round page maps names to session IDs and work.
 
 If the round page lists no docs agent, or the one listed is archived, ask the orchestrator to spawn
 one (`send_session_message`). Until one exists, record findings yourself in the canonical doc.
@@ -167,6 +173,30 @@ Integration merge notes:
 The separate MVP survival line (`mvp-survival`) packages its own build to
 `E:\Repos\HomesteadMVP\Windows`, only for real deliverables, and tells the orchestrator before
 starting.
+
+## Playtest builds (schedule)
+
+Jenny's standing preference. A packaged playtest build is on the **"Homestead Estate"** desktop
+shortcut by **7:30 AM every day** (weekends included) and by **4:00 PM on weekdays**, after her work.
+On weekends, also cut one as soon as features she'd notice land.
+
+1. The orchestrator triggers the integration session at about **5:30 AM** and **2:00 PM** (its session
+   automation), and tells lanes a build is being cut.
+2. Lanes close their editors (`Stop-MyEditor.ps1`) until the build is done: packaging needs the
+   process slots.
+3. The integration session packages `main` (`Build-Game.ps1 -Package`), runs the packaged suites, and
+   retargets the shortcut to its `Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
+   keeping the Homestead icon. It never touches `Homestead.lnk`.
+4. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
+   orchestrator relays that to Jenny.
+5. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
+
+Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.
+This replaces the old "package after every improvement" step of the Interactive Loop.
+
+**Pause for play:** when Jenny asks to pause feature development so she can use the PC to play, every
+session stops launching editors and builds until she says to resume. Close your editor and end your
+turn (with a wake-up if you need one).
 
 ## Docs agent duties
 
