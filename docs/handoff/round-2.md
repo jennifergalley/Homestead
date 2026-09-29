@@ -364,10 +364,17 @@ requirement.
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
 - **Nighttime brightness** — **pending, not shipped.** At about 9 PM, the Estate visibly brightens:
-  moonlight reads like sunlight. **Architecture** first performs a read-only trace of the nighttime
-  directional-light, skylight and auto-exposure path. **Water** later makes a measured correction only
-  after that trace. **Integration** provides packaged RT-on evidence at 19:00, 21:00 and midnight;
-  neither the trace nor screenshots alone establish a fix.
+  moonlight reads like sunlight. Architecture's read-only trace of current `HomesteadWorld.cpp`
+  (`59–64`, `1715–1784`, `4268–4337`) found no 21:00 trigger: sun reaches zero around 18:23,
+  moon intensity is 2 lux and rises from roughly 7 to 46 degrees by 21:00, real-time sky capture
+  intensity is 0.6 (day 1), and night auto-exposure has a -2 EV100 floor (day 0). The combined
+  moon/sky/adaptation cause is plausible, not visually proven.
+
+  **Water** later runs a controlled existing-CVar trial — moon 0.1–0.3 lux, sky 0.1–0.2, and an
+  exposure floor toward -1/0 — while preserving smooth dusk and lamp readability. Log and use a
+  fixed camera at 18:00, 19:00, 21:00 and midnight in clear and rain. **Integration** judges
+  packaged RT-on Lumen hardware-ray-tracing plus VSM evidence, because the normal agent editor launch
+  disables RT/VSM; neither the trace nor screenshots alone establish a fix.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: separate
   currently bunched town buildings along a coherent, winding, walkable road. Keep the store entrance,
   anchors and save IDs, ground/scenery and map synchronized. Only after the route is final can the
