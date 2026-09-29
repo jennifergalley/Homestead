@@ -3131,6 +3131,22 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
                     UE_LOG(LogHomesteadWorld, Error, TEXT("Stone resource %d is missing admitted rock geometry."), Node.id);
                 }
             }
+            // A scatter of pebbles and cobbles round them (the Rocks Agent's HandStoneClusters), so loose
+            // stones read at a glance as small enough to pick up. Appended after the three lifted stones,
+            // whose component order the kneel gather relies on.
+            static const TCHAR* const Clusters[] = {TEXT("SM_HandStoneCluster_A"), TEXT("SM_HandStoneCluster_B"), TEXT("SM_HandStoneCluster_C")};
+            const TCHAR* ClusterName = Clusters[Variation % UE_ARRAY_COUNT(Clusters)];
+            if (UStaticMesh* Cluster = LoadObject<UStaticMesh>(nullptr,
+                *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/HandStoneClusters/%s.%s"), ClusterName, ClusterName),
+                nullptr, LOAD_NoWarn | LOAD_Quiet))
+            {
+                const int32 First = Visual.Components.Num();
+                Authored(Cluster, FVector2D::ZeroVector, static_cast<float>(Variation % 360), true);
+                if (Visual.Components.Num() > First)
+                    if (auto* Placed = Cast<UStaticMeshComponent>(Visual.Components.Last()))
+                        for (int32 Slot = 0; Slot < Cluster->GetStaticMaterials().Num(); ++Slot)
+                            Placed->SetMaterial(Slot, Cluster->GetMaterial(Slot));
+            }
         }
         break;
     case Homestead::ResourceKind::BerryBush:
@@ -3311,6 +3327,12 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
         }
         return Mesh;
     };
+    // An optional authored mesh from another lane: loaded quietly, so its stand-in shows until it lands.
+    auto QuietProp = [](const TCHAR* Folder, const TCHAR* Name) -> UStaticMesh*
+    {
+        return LoadObject<UStaticMesh>(nullptr, *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s/%s.%s"), Folder, Name, Name),
+            nullptr, LOAD_NoWarn | LOAD_Quiet);
+    };
     FRandomStream Random(static_cast<int32>(Variation * 2654435761u));
     const float Yaw = static_cast<float>(Variation % 360);
     // Overgrowth has no separate produce: the whole clump goes when she clears it.
@@ -3338,18 +3360,35 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     case Homestead::ResourceKind::Sapling:
         Whole(Load(TEXT("Hazel"), TEXT("SM_Hazel")), FVector2D::ZeroVector, 0, Random.FRandRange(0.45f, 0.6f));
         break;
-    case Homestead::ResourceKind::Rubble:
-        Whole(Load(TEXT("GraniteRubble"), TEXT("SM_GraniteRubble")), FVector2D::ZeroVector, 0, Random.FRandRange(0.8f, 1.0f));
-        break;
+    // Pickaxe rocks read as single chunky rocks far too big to lift, never as the pebbles she picks
+    // up by hand (Jenny's playtest): the Rocks Agent's PickRocks, with bigger granite stand-ins until
+    // they land. Only the boulder blocks her (see Authored).
     case Homestead::ResourceKind::SmallRock:
-        Whole(Load(TEXT("GraniteSpalls"), TEXT("SM_GraniteSpalls")), FVector2D::ZeroVector, 0, Random.FRandRange(0.8f, 1.0f));
+        if (UStaticMesh* Rock = QuietProp(TEXT("PickRocks"), TEXT("SM_PickRock_Small")))
+            Whole(Rock, FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.1f));
+        else
+            Whole(Load(TEXT("GraniteBoulderLow"), TEXT("SM_GraniteBoulderLow")), FVector2D::ZeroVector, 0, Random.FRandRange(0.42f, 0.5f));
+        break;
+    case Homestead::ResourceKind::Rubble:
+        // Masonry shed from the ruin: a heap of broken granite blocks.
+        if (UStaticMesh* Rock = QuietProp(TEXT("PickRocks"), TEXT("SM_PickRock_Medium")))
+            Whole(Rock, FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.1f));
+        else
+            Whole(Load(TEXT("GraniteBlockTalus"), TEXT("SM_GraniteBlockTalus")), FVector2D::ZeroVector, 0, Random.FRandRange(0.7f, 0.82f));
         break;
     case Homestead::ResourceKind::Boulder:
-        Whole(Load(TEXT("GraniteBoulderLoaf"), TEXT("SM_GraniteBoulderLoaf")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.05f));
+        if (UStaticMesh* Rock = QuietProp(TEXT("PickRocks"), TEXT("SM_PickRock_Large")))
+            Whole(Rock, FVector2D::ZeroVector, 0, Random.FRandRange(0.92f, 1.08f));
+        else
+            Whole(Load(TEXT("GraniteBoulderLoaf"), TEXT("SM_GraniteBoulderLoaf")), FVector2D::ZeroVector, 0, Random.FRandRange(1.15f, 1.3f));
         break;
     case Homestead::ResourceKind::SalvagePile:
-        // Stand-in until add-ruined-manor-and-arrival dresses its piles: fallen masonry.
-        Whole(Load(TEXT("GraniteCobbles"), TEXT("SM_GraniteCobbles")), FVector2D::ZeroVector, 0, 0.7f);
+        // Rusted iron among the ruin's leavings (the Crops Agent's scrap heap), not a pile of stones she
+        // might take for loose ones; fallen masonry until it lands.
+        if (UStaticMesh* Scrap = QuietProp(TEXT("EstateRubbish"), TEXT("SM_ScrapHeap")))
+            Whole(Scrap, FVector2D::ZeroVector, 0, 1.0f);
+        else
+            Whole(Load(TEXT("GraniteCobbles"), TEXT("SM_GraniteCobbles")), FVector2D::ZeroVector, 0, 0.7f);
         break;
     case Homestead::ResourceKind::StumpSmall:
         Whole(Load(TEXT("EstateTimber"), TEXT("SM_StumpSmall")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.15f));
