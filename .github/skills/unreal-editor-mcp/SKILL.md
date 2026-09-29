@@ -694,6 +694,13 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   `Time` follows the dilation too (`slomo 0.3` gives about 1.1 s of game time per still).
 - `homestead_agent.prop_clearance`: `start()`, play the action, then `print(stop())` reports the
   worst clearance per carried stick and body part in PIE (negative cm = inside her).
+- **Pose the lab heroine; don't spawn a new actor.** Python can't spawn actors into the PIE world.
+  Pose her own `CharacterMesh0`: set `ANIMATION_SINGLE_NODE`, call
+  `override_animation_data(anim, False, False, time, 0)`, then `set_position(time)`. Single-node
+  playback locks root motion, so no root offset is needed. Restore `ANIMATION_BLUEPRINT` and mesh
+  relative location `(0, 0, -86)` afterwards. For clean side/back captures, set the SpringArm
+  `do_collision_test` false. Use `LabTeleport 16297 3564` for the flat lab floor; (0, 0) is a
+  hillside that buries the camera.
 
 ### Author an animation with the MetaHuman Control Rig
 
@@ -718,6 +725,11 @@ C++. Details that cost time to find:
 - Spine controls: `roll` bends forward, `pitch` bends sideways, `yaw` twists.
 - Bake with `SequencerTools.export_anim_sequence`; the AnimSequence factory needs
   `target_skeleton` set, or creation fails.
+- `AnimationLibrary` / `AnimationDataController.set_bone_track_keys` translation keys are evaluated
+  with the retarget offset added. Writing an evaluated translation back lengthens the bone: measure
+  the shift and write `p - (evaluated - p)`. This is the same quirk handled by
+  `gasp_locomotion.straighten_root`.
+- `IKRetargetBatchOperation` produces nothing while PIE is running. Stop PIE before retargeting.
 - Reading bones from the rig hierarchy after `set_current_time` does **not** give the keyed pose;
   it keeps returning the rest pose. To key something in a moving bone's frame (for example, the
   stick bundle cradled against `spine_05` in `kneel_gather.py`), bake once, read the bone from the
@@ -791,6 +803,10 @@ setup = s.simulation_setup; setup.linear_velocity_scale = 0.5; s.simulation_setu
   sprint values, so edit them with the CVars rather than Python: `homestead.HairLinearWalk`
   0.5, `homestead.HairLinearSprint` 0.65, `homestead.HairAngularWalk` 0.4,
   `homestead.HairAngularSprint` 0.45.
+- **Runtime groom swaps:** after `set_groom_asset`, `MetaHumanHair` renders bald while the groom
+  initializes. Wait about 3 s before capturing. `groom_groups_desc` edits from Python don't apply:
+  its struct array is a copy, and groom struct fields aren't ordinary Python attributes; inspect
+  with `group.export_text()` and assign a rebuilt value back instead.
 
 ### Record a playtest video and measure motion
 

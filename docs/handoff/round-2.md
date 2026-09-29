@@ -48,9 +48,12 @@ three-hands-on-implementer cap (including Integration) and the two-Unreal-proces
 commit and handoff links in this page until then; remove stale wake-ups and ownership pointers only
 after confirmation.
 
-Gait and Planning are not orchestrator children. Jenny may archive Gait once it finishes the current
-run/hair work and hands sprint to Menu and character asset recipes to Props. Planning remains outside
-this child-roster decision.
+Gait and Planning are not orchestrator children. **Gait is idle and ready for Jenny to archive, not
+archived:** its editor exited, tracked work is pushed, no automation remains, and only 97 disposable
+`crop_preview_*.png` files are untracked. Sprint is handed to Menu and character asset recipes to
+Props. For the run/hair change, Integration may cherry-pick `1197f02a` + `b1d43919` alone to avoid
+the unready Harvest ancestor `ad534632`; Integration is verifying. Planning remains outside this
+child-roster decision.
 
 **Build Speed handoff:** the Integration Agent owns `Scripts\Invoke-UnrealBuild.ps1` and the build
 recipe. Canonical measurements and the non-adopted UBA cache decision remain in
@@ -221,10 +224,19 @@ hands-on work; no one edits a busy lane's files or starts a fourth implementer.
 ### Held planning OpenSpec correction
 
 Planning's `b82eec53` OpenSpec docs briefly landed on `main` in `514c48c5`, with **no gameplay code
-changed**, but they misstated the approved tiered Well Fed duration (2/3/4 h) and the refusal when a
-full-energy character eats. Planning is preparing an immediate corrective docs commit for Integration.
-**Treat the current spec wording as pending correction:** Calendar must not implement stale `b82` text,
-and this handoff does not duplicate or revert the shared OpenSpec artifacts.
+changed**. **Final planning decision (2026-09-29):** Integration merges Planning `16f4ed5b`, not the
+tiered `e2159ea2`: flat **3 game hours** of Well Fed at ×0.85, Meals +25/+40/+60 energy, the
+full-energy ≥1-hour extension guard and explicit `CorruptSave` validation. Treat current `main` wording
+as pending correction until Integration reports the final merged SHA. Calendar must not implement stale
+`b82`; this handoff does not duplicate or revert the shared OpenSpec artifacts.
+
+### Calendar day-length / town-arrival blocker
+
+Calendar lane A's `a3c7e04d` changes the default `dayMinutes` **60 → 30**. On the ~1.94 km
+manor-to-town road, that doubles the in-game walk to roughly 12–14 hours and worsens Jenny's late-store
+arrival. Calendar is preparing read-only rationale and a minimal retain-60 option. Integration holds
+post-4-PM Calendar A work until this is resolved; it does not affect the earlier package. Update this
+handoff from Integration's final `main` SHA, not from an unmerged branch.
 
 ### OpenSpec strict-validation baseline (fix pending merge)
 
@@ -322,32 +334,51 @@ requirement.
   content is finished yet.
 - **Starter wardrobe** — **Props lane** (with starter food): put completed wearable clothes in the
   starter chest so Jenny can change outfit; verify pack/chest capacity and saving. Pending; not shipped.
-- **Road-to-town forage** — **Seasons / forage lane** (`fd682909`), coordinating with **Water**: add
-  pickable berries and herbs along the road to town, including the Water bridge approach. Pending;
-  placement ids are claimed before use.
-- **Field-book road label** — **Water Agent** (`89914e30`), in the next lake/map bake: remove the
-  `"Dirt road"` label while keeping the road drawn. Pending; not shipped.
+- **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
+  road to town, including the bridge approach. The ID range is reserved; implementation remains
+  pending the narrow public-road-corridor proof and bridge coordinate sync.
+- **Field-book road label** — **Water Agent** (`89914e30`): the redundant runtime `"Dirt road"` label
+  is removed on Water's branch (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a
+  lake-PIE map screenshot. It is **pushed but not delivered/shipped**: it rides with the
+  editor-verified lake `[ready]`.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
 - **Change Dye** — **UI / temporary Menu Agent** (`5cf73757`), after contextual berries: the current
   action is a no-op. It opens the selected colour or swatch choice, supports preview, confirm and
   cancel, then persists the selection. Pending PIE verification.
-- **Leather backpack upgrade** — **pending, not shipped.** A one-time General Store purchase doubles
-  inventory capacity **120 → 240 items**, with a visible worn rucksack in Appearance whose show/hide
-  is independent of capacity and saving. **Architecture** traces the existing inventory, store and
-  appearance paths read-only; **Props** makes the original asset; **Menu** later owns purchase and
-  Appearance UI.
+- **Leather backpack upgrade** — **pending, not shipped.** A tentative one-time **$15** purchase at
+  the open General Store doubles inventory capacity **120 → 240 items**. (`ShopGoods` normally repeats,
+  so this needs a special upgrade row.) $15 is intentionally above the $10 start—roughly ten cabbage
+  harvests net $0.50—and is tunable later. The worn rucksack appears on her back and its Appearance
+  show/hide is independent of capacity and saving.
+
+  **Props** owns the core `bRucksackOwned` save state, `PackCapacity(state)` (120/240), validated
+  optional trailing save section (old defaults false), and original leather back-socket prop; save
+  loading reads structural inventory up to 240 **before** the entitlement tag, then runs post-tag
+  `ValidateInventory`. **Menu** owns the shop upgrade row, `bRucksackVisible`, the Appearance toggle
+  and the 120-cap UI helpers. Tests cover malformed/duplicate entitlement sections, rebuy refusal,
+  insufficient funds and capacity/save behavior.
 - **Town travel** — **pending, not shipped.** A wooden `Walk to town` sign outside the estate and a
   return sign by town; clickable **Town** and **Manor** destinations on the Map invoke the same travel
-  action. Travel elapses equivalent on-foot time and displays cost plus confirmation. **Water** owns
-  anchors, **Architecture** the read-only trace, **Props** the signs and **Menu** the map UI; a future
-  travel implementer owns the action.
+  action. Architecture traced the road polyline in `estate_layout.json` (486 points / 1.94 km; runtime
+  has landmarks only). The MetaHuman walks 210 cm/s (legacy 180); at a 60-minute day, road-only travel
+  is 6.16 game hours / 15.4 real minutes (12.32 game hours at a 30-minute day), plus connectors.
+
+  Travel must first preflight a candidate advance for hunger failure, unexpected 6-hour doze and
+  `MaxHour`, then atomically commit time plus a safe position through `PrepareWorldAt` /
+  `SettleOnGround`; no unsafe fallback. On the Map, a single click selects and double-click/A zooms,
+  so travel needs a separate explicit confirmation. The signs and map invoke the same action.
+  **Water** owns the generated runtime route and endpoints, **Architecture** the read-only trace,
+  **Props** the original signs and **Menu** the shared travel/map UI; a future travel implementer owns
+  the action.
 - **Wait for opening** — **Menu / Store Agent** (`5cf73757`): at the closed General Store, provide a
   safe `Wait until opening` interaction with displayed duration and confirmation. It advances the
   actual simulation across midnight, crop, weather, vitals and store updates, then rechecks opening
-  hours. Trace 2 AM, sleep/collapse and error handling first. This **complements, not replaces** the
-  future equivalent-time Town/Manor travel signs and map action. Pending; not shipped.
+  hours. The shop is open 08:00–18:00 and has no 2 AM curfew; preflight the candidate to the next
+  08:00 through the same safety checks before committing. Trace 2 AM, sleep/collapse and error
+  handling first. This **complements, not replaces** the future equivalent-time Town/Manor travel
+  signs and map action. Pending; not shipped.
 - **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
   trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
   implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the
