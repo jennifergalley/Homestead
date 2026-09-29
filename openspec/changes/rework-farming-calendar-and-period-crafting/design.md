@@ -136,31 +136,30 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
   | Cabbage (raw) | Snack | +10 | none |
   | Bread | Snack | +12 | none |
   | Cheese | Snack | +15 | none |
-  | Roasted roots, roast potatoes, pease pudding | Meal | +25 | 3 game hours |
-  | Cornish pasty, herbed roots, leek & potato soup | Meal | +40 | 3 game hours |
-  | Vegetable stew | Meal | +60 | 3 game hours |
+  | Roasted roots, roast potatoes, pease pudding | Meal, tier 1 | +25 | 2 game hours |
+  | Cornish pasty, herbed roots, leek & potato soup | Meal, tier 2 | +40 | 3 game hours |
+  | Vegetable stew | Meal, tier 3 | +60 | 4 game hours |
 
   - Raw potatoes, leeks, peas, wheat, barley and field mushrooms can't be eaten: they're cooked
-    or sold. Fish dishes (round 4) are Meals, and their energy is set in that round.
+    or sold. Fish dishes (round 4) are Meals, and their tiers are set in that round.
   - "Meal" means a cooked dish, whether cooked at the hearth or bought ready-made. So the pasty is
     a Meal, and bread and cheese are Snacks.
 - **Well fed (final):**
   - While she's Well fed, `WorkCost(base)` returns `base × 0.85`, the 15% reduction. Tests, toasts
     and descriptions all use 0.85. It never changes the doze or sleep rules.
-  - **Every Meal grants the same flat 3 game hours of Well fed.** The Orchestrator settled this on
-    2026-09-29 for simplicity, and the earlier 2/3/4-hour tiers are dropped. Meals still differ in
-    energy.
-  - **Refresh, never stack:** eating a Meal sets `wellFedUntilHour = hour + 3`. Because every meal
-    lasts the same time, this never shortens the timer and never adds time on top.
+  - A Meal grants Well fed for its tier's duration: 2, 3 or 4 game hours.
+  - **Refresh, never stack:** eating a Meal sets `wellFedUntilHour = max(current expiry, hour +
+    meal duration)`. The expiry is never shortened and time is never added on top, so a tier-1
+    meal eaten during a tier-3 buff doesn't cut it short.
 - **When she can eat (final):**
   - **Below full energy:** any Snack or Meal is eaten and always restores its energy, capped at
-    full. A Meal also applies the refresh rule above, and its toast reads "+40 Energy · Well fed until
-    2:30 PM".
+    full. A Meal also applies the refresh rule above, even when that doesn't extend the buff (for
+    example a tier-1 meal during a longer tier-3 buff). The toast reads "+25 Energy" when the buff
+    is unchanged, or "+40 Energy · Well fed until 2:30 PM" when it starts or extends.
   - **At full energy, a Snack:** refused and not consumed. "You're full of energy. Save it for
     later."
   - **At full energy, a Meal:** eaten only if it **starts** Well fed (she isn't Well fed now) or
-    **extends** it by at least 1 game hour, meaning `hour + 3 >= current expiry + 1`, that is, 2 game
-    hours or less of Well fed are left.
+    **extends** it by at least 1 game hour, meaning `hour + meal duration >= current expiry + 1`.
     - When eaten, the toast says outright that energy was full and gives the time: "Your energy
       was already full. Well fed until 2:30 PM."
     - Otherwise it's refused and not consumed: "You're full, and already well fed until 2:30 PM.
@@ -174,10 +173,11 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
       since the game began, never wrapped per day: `DayNumber()` is `hour / 24 + 1`.
     - `hour` only moves forward. `SkipToHourOfDay` always moves to a later hour, and load accepts
       `hour` in `[6, MaxHour]`.
-    - So a meal at 11 PM (hour 41) expires at hour 44, 2 AM the next day, with no special case.
+    - So a tier-2 meal at 11 PM (hour 41) expires at hour 44, 2 AM the next day, with no special
+      case.
     - Sleep, dozing and `HomesteadGrowCrops` all advance `hour` consistently, so the timer expires
       correctly across them and across day-length settings.
-    - Add a native test: a meal (pasty) at 23:00 is still Well fed at 01:30 the next day and
+    - Add a native test: a tier-2 meal (pasty) at 23:00 is still Well fed at 01:30 the next day and
       expired by 02:00.
   - **Save:** an optional trailing tagged section, `wellfed`, like lane A's `withered` section,
     with no version bump.
@@ -185,8 +185,8 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
     - On load, a missing section means not Well fed.
     - A present section's expiry **at or before** the save's `hour` has simply run out. It loads
       normally as not Well fed.
-    - A **non-finite** expiry, or one **later than** the save's `hour + 3`, is corrupt data (no meal
-      lasts longer than 3 hours). The whole load is rejected explicitly through the repo's standard
+    - A **non-finite** expiry, or one **later than** the save's `hour + 4`, is corrupt data (4 hours
+      is the longest meal tier). The whole load is rejected explicitly through the repo's standard
       invalid-save path. That path is `ResultCode::CorruptSave`, with the message "This save is
       corrupt or incomplete. Your current game was not changed." (`HomesteadSimulation.cpp`, around
       line 2894).
@@ -202,16 +202,16 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
   - **Tuning flag for Jenny's playtest:**
     - Real length is `game hours × dayMinutes / 24`, from `Simulation::Advance`: game hours =
       real seconds × 24 / (dayMinutes × 60).
-      - `main` still defaults to `dayMinutes = 60`: 1 game hour is 2.5 real minutes, so Well fed's
-        3 hours are 7.5 real minutes. That matches the editor skill's "1 game hour ≈ 2.5 real
-        minutes".
+      - `main` still defaults to `dayMinutes = 60`: 1 game hour is 2.5 real minutes, and the
+        2/3/4-hour tiers are 5, 7.5 and 10 real minutes. That matches the editor skill's "1 game
+        hour ≈ 2.5 real minutes".
       - Lane A's branch changes the new-game default to 30 (task 1.2): 1 game hour is 1.25 real
-        minutes, so Well fed is 3.75 real minutes.
+        minutes, and the tiers are 2.5, 3.75 and 5 real minutes.
       - These figures are computed from the formula, not measured. Measure them in a packaged
         build at 6.6 before quoting them to Jenny.
     - A three-hour stretch of clearing, costing about 15–20 energy, saves about 3 at ×0.85.
-    - If Jenny can't feel it, the first knob is the **duration**: raise the flat 3 hours to 6. It's
-      a single constant (then the save check becomes `hour + 6`).
+    - If Jenny can't feel it, the first knob is the **durations**: double them to 4, 6 and 8 hours.
+      They're constants in the catalogue and `Exertion`, not structure.
 - **Why not keep hunger with better tuning:** it would be a second chore meter that's off-genre,
   and Jenny already finds it uninteresting. The Well fed bonus keeps the one decision that
   matters: cook and stop for a proper meal, or snack and push on.
@@ -373,16 +373,16 @@ Prices and yields are tuned in the catalogue.
   - Recipes at the workbench use planks, plus scrap for the shelf brackets.
   - Freeform décor comes in round 5.
 - **Hearth dishes** are hearth recipes. They're Meals, so they restore energy and grant Well fed
-  (§3a) and grant the flat 3-hour Well fed:
+  (§3a) in tiers:
 
   | Dish | Ingredients | Energy | Well fed |
   | --- | --- | --- | --- |
-  | Roast potatoes | 3 Potato | +25 | 3 h |
-  | Pease pudding | 4 Peas | +25 | 3 h |
-  | Leek & potato soup | 2 Leek, 2 Potato | +40 | 3 h |
-  | Vegetable stew | Potato, Carrot, Turnip, Leek | +60 | 3 h |
+  | Roast potatoes | 3 Potato | +25 | 2 h (tier 1) |
+  | Pease pudding | 4 Peas | +25 | 2 h (tier 1) |
+  | Leek & potato soup | 2 Leek, 2 Potato | +40 | 3 h (tier 2) |
+  | Vegetable stew | Potato, Carrot, Turnip, Leek | +60 | 4 h (tier 3) |
 
-  RoastedRoots (+25) and HerbedRoots (+40) stay for legacy roots, and are Meals too.
+  RoastedRoots (+25, tier 1) and HerbedRoots (+40, tier 2) stay for legacy roots, and are Meals too.
 - **Craft categories:** Craft groups recipes into tabs: Tools (the hafts), Stations, Farm (fence,
   gate, planks), Furniture and Cooking. Tabs follow the existing icon-tab and directional-focus
   rules, and LB/RB still switch the book's main tabs.
