@@ -1,0 +1,357 @@
+{
+  "schema": 1,
+  "name": "EstateDebris",
+  "description": "Ruined Cornish estate debris: broken barrel, broken crate, household midden and collapsed lean-to.",
+  "collision": "convex",
+  "triangle_budget": 70000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/estate_debris.py",
+  "source_sha256": "707ec532a39018f815851e5cacc3bce0da44ceba38fae1ee280609e2d85966d6",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_BrokenBarrel": {
+      "vertices": 6454,
+      "triangles": 12216,
+      "size_cm": [
+        150.59,
+        117.24,
+        69.36
+      ],
+      "materials": [
+        {
+          "name": "M_BrokenBarrel",
+          "textures": {
+            "basecolor": "T_BrokenBarrel_basecolor.png",
+            "roughness": "T_BrokenBarrel_roughness.png",
+            "metallic": "T_BrokenBarrel_metallic.png",
+            "normal": "T_BrokenBarrel_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BrokenBarrel_basecolor.png",
+          "roughness": "T_BrokenBarrel_roughness.png",
+          "normal": "T_BrokenBarrel_normal.png",
+          "ao": "T_BrokenBarrel_ao.png",
+          "metallic": "T_BrokenBarrel_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2,
+        "focus": [
+          0.040736519098281854,
+          -0.06931726932525635,
+          0.28
+        ]
+      },
+      "fbx": "SM_BrokenBarrel.fbx",
+      "sha256": "202b3c75f9f0bb37073a9eba1910574f377bb02978cf68d36946b413987aec54",
+      "preview": "preview_SM_BrokenBarrel.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BrokenBarrel_hero.png",
+          "detail": "beauty_SM_BrokenBarrel_detail.png",
+          "eye": "beauty_SM_BrokenBarrel_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_BrokenCrate": {
+      "vertices": 2214,
+      "triangles": 3940,
+      "size_cm": [
+        123.11,
+        94.36,
+        50.62
+      ],
+      "materials": [
+        {
+          "name": "M_BrokenCrate",
+          "textures": {
+            "basecolor": "T_BrokenCrate_basecolor.png",
+            "roughness": "T_BrokenCrate_roughness.png",
+            "metallic": "T_BrokenCrate_metallic.png",
+            "normal": "T_BrokenCrate_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BrokenCrate_basecolor.png",
+          "roughness": "T_BrokenCrate_roughness.png",
+          "normal": "T_BrokenCrate_normal.png",
+          "ao": "T_BrokenCrate_ao.png",
+          "metallic": "T_BrokenCrate_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2,
+        "focus": [
+          -0.03201301097869873,
+          -0.0026826620101928766,
+          0.22
+        ]
+      },
+      "fbx": "SM_BrokenCrate.fbx",
+      "sha256": "00a3a5a6d30a0cb41a0691cd8c4fb2d5ef0ee75f257877d9ee67077fbbf60034",
+      "preview": "preview_SM_BrokenCrate.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BrokenCrate_hero.png",
+          "detail": "beauty_SM_BrokenCrate_detail.png",
+          "eye": "beauty_SM_BrokenCrate_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RubbishHeap": {
+      "vertices": 16658,
+      "triangles": 15744,
+      "size_cm": [
+        227.61,
+        166.36,
+        34.54
+      ],
+      "materials": [
+        {
+          "name": "M_RubbishHeap",
+          "textures": {
+            "basecolor": "T_RubbishHeap_basecolor.png",
+            "roughness": "T_RubbishHeap_roughness.png",
+            "metallic": "T_RubbishHeap_metallic.png",
+            "normal": "T_RubbishHeap_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RubbishHeap_basecolor.png",
+          "roughness": "T_RubbishHeap_roughness.png",
+          "normal": "T_RubbishHeap_normal.png",
+          "ao": "T_RubbishHeap_ao.png",
+          "metallic": "T_RubbishHeap_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.2,
+        "focus": [
+          0.58,
+          0.25,
+          0.22
+        ]
+      },
+      "fbx": "SM_RubbishHeap.fbx",
+      "sha256": "18ad4a7a7e490a4d1fa4079e613813c352508b44b856772c92697519ad5af7bc",
+      "preview": "preview_SM_RubbishHeap.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RubbishHeap_hero.png",
+          "detail": "beauty_SM_RubbishHeap_detail.png",
+          "eye": "beauty_SM_RubbishHeap_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CollapsedLeanTo": {
+      "vertices": 5572,
+      "triangles": 10460,
+      "size_cm": [
+        233.64,
+        332.14,
+        183.88
+      ],
+      "materials": [
+        {
+          "name": "M_CollapsedLeanTo",
+          "textures": {
+            "basecolor": "T_CollapsedLeanTo_basecolor.png",
+            "roughness": "T_CollapsedLeanTo_roughness.png",
+            "metallic": "T_CollapsedLeanTo_metallic.png",
+            "normal": "T_CollapsedLeanTo_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CollapsedLeanTo_basecolor.png",
+          "roughness": "T_CollapsedLeanTo_roughness.png",
+          "normal": "T_CollapsedLeanTo_normal.png",
+          "ao": "T_CollapsedLeanTo_ao.png",
+          "metallic": "T_CollapsedLeanTo_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 5.0,
+        "focus": [
+          0.7386893033981323,
+          0.00013768672943115234,
+          0.24685761585831645
+        ]
+      },
+      "fbx": "SM_CollapsedLeanTo.fbx",
+      "sha256": "f0e31103c978d188f05d42fe19185cd0685b4a659aa021535e4594b28049d6c6",
+      "preview": "preview_SM_CollapsedLeanTo.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CollapsedLeanTo_hero.png",
+          "detail": "beauty_SM_CollapsedLeanTo_detail.png",
+          "eye": "beauty_SM_CollapsedLeanTo_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Blender (x,y,z) imports as Unreal (x,-y,z).",
+  "pivot": "Each mesh pivot is bottom centre at z=0.",
+  "orientation": {
+    "SM_BrokenBarrel": "Axis runs Blender/Unreal X; burst open end faces +X.",
+    "SM_BrokenCrate": "Skewed slatted face generally faces Blender -Y / Unreal +Y.",
+    "SM_RubbishHeap": "No preferred facing.",
+    "SM_CollapsedLeanTo": "Wall side is local -X in both Blender and Unreal; back edge is flat along x=-1.1 m."
+  },
+  "materials": "The prop builder has one BAKE spec per recipe, so final build uses 4096px for all meshes; drafts use 1024px via HOMESTEAD_DRAFT.",
+  "textures": {
+    "T_BrokenBarrel_ao.png": "151cefbd42a6036479bd1f9520f23fcb7be62f682a93ecbf8b47272d38e8f4ce",
+    "T_BrokenBarrel_basecolor.png": "db3744885f0e32e9bf72a7173920fc12a26495bcb18b54983551dfef755f8be7",
+    "T_BrokenBarrel_metallic.png": "f839dfff10382fca91ed2e7c0f15134b32f3b5f2cec749dbd7a059e1baf1030d",
+    "T_BrokenBarrel_normal.png": "1dca290c90f8f9753e5c5b1ff9ec37e5a55889c53d676e06a80a85b62fac24c6",
+    "T_BrokenBarrel_roughness.png": "9a90ffa1ba2093886621447709f96f7e8bc4fef51b5e656c042c7b3c34cbd887",
+    "T_BrokenCrate_ao.png": "396a1344b403996ccd38ec017f182b5d28c7579d05fc75550a04a2cd41d0a89f",
+    "T_BrokenCrate_basecolor.png": "53ec5804f8b992f323b39eed0361d970acd3f575e8f439622879544d05bab721",
+    "T_BrokenCrate_metallic.png": "705c62eb82569064de645cc844a18941aef0bc549a63c132937b95d469759d82",
+    "T_BrokenCrate_normal.png": "a581b5ae61b906b96318872a4e1e63fd748aaa1a0e88f08be85325b25f9d8192",
+    "T_BrokenCrate_roughness.png": "2681d68af5919a68eec897ac7f1db1ccb3894b737598b5443c534521dc5d8793",
+    "T_RubbishHeap_ao.png": "8ab73896597fa415d8c79f1ba34f51cb68aae4dbd8414ec4aa281945224b2f3f",
+    "T_RubbishHeap_basecolor.png": "d638fcc120726f3549f5e44d39ea3a8f9791293d964b9eaff77ce953d87087dd",
+    "T_RubbishHeap_metallic.png": "6a66c65fc1df04f5746c4b324b9ba27efa4fd497d1b2bde744d4d1e7170bc4a7",
+    "T_RubbishHeap_normal.png": "0c48185fffbcdada06e116bdd208e3d3b5d689a69377853ee1cf747f0cbc946d",
+    "T_RubbishHeap_roughness.png": "7bdb61294d07ae38cb77133a65326ff51aec4827a88e50637ca23f439bb00007",
+    "T_CollapsedLeanTo_ao.png": "ca510323718b12d8708570ee5662da83e456777bcb1289d4d3c7f03366a67968",
+    "T_CollapsedLeanTo_basecolor.png": "2b8276a0966673327f3c020b9957cc1aad518bff07447f5533ba3b6f0cd4e450",
+    "T_CollapsedLeanTo_metallic.png": "054b72cb4e64f0a42d3f6fc0396a7784a01228a75e06f35c4764589bca58998f",
+    "T_CollapsedLeanTo_normal.png": "ab28528c9d252b2971d943dac246f7d3149c7a6e564ea6a7ca24469251f48dda",
+    "T_CollapsedLeanTo_roughness.png": "08259681829dce110b656c83f560f12597a91da69030ed6d2e63c504186d6b4d"
+  }
+}

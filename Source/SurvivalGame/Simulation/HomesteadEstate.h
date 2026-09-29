@@ -2,6 +2,7 @@
 
 #include "HomesteadSimulation.h"
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -31,6 +32,10 @@ constexpr const char* GeneralStoreCounter = "GeneralStoreCounter"; // Where the 
 constexpr const char* EstateBoundary = "EstateBoundary";
 constexpr const char* ManorFootprint = "ManorFootprint";
 constexpr const char* ForSaleParcelPrefix = "ForSale."; // ForSale.Woodland, ForSale.MoorField, ...
+// The derelict farm behind the manor: an axis-aligned field (a 4-point ring) and the gap of its
+// broken field gate on the fence (yaw faces out of the field).
+constexpr const char* DerelictFarm = "DerelictFarm";
+constexpr const char* DerelictFarmGate = "DerelictFarmGate";
 }
 
 struct Landmark
@@ -86,13 +91,31 @@ const EstateLayout& ProvisionalEstateLayout();
 // Provisional interactive placements until the world lane bakes DA_EstatePlacements from the
 // Estate level. Each lane appends its own section. Id ranges (registry: docs/handoff/round-<n>.md):
 // world 500000+, overgrowth 510000+, salvage 520000+, town 530000+ (reserved), berry brambles
-// 540000-540043 (clearing), derelict farm 550000+ (manor), MVP woodland biome 560000-569999 (scatter.py / mvp_woodland.py),
+// 540000-540043 (clearing), derelict farm and estate disrepair 550000+ (manor), MVP woodland biome 560000-569999 (scatter.py / mvp_woodland.py),
 // clear-out near the manor 570000-579999 (clearing).
 const EstatePlacements& ProvisionalEstatePlacements();
 
 // The gap in the ruin's fallen front door on its south front, 10.5 m east of the ManorFootprint's
 // west end: the way she walks out of the ruin.
 Point EstateManorFrontDoor(const EstateLayout& layout = ProvisionalEstateLayout());
+// The derelict farm's field in its own frame: u runs north from the field's south fence, v east
+// from its west fence (cm). The Simulation's overgrowth and the Unreal set dressing both read it.
+struct DerelictFarmPlan
+{
+    bool valid = false;
+    Point southWest;        // world XY of the field's south-west fence corner
+    double lengthU = 0.0;   // north-south fence length
+    double lengthV = 0.0;   // east-west fence length
+    double gateV = 0.0;     // centre of the gate gap along the south fence
+    double gateWidth = 310.0;
+    // Where the old crop ridges still show (u0, v0, u1, v1), rows running along u (downhill).
+    std::vector<std::array<double, 4>> ridgeBlocks;
+    Point plough; // (u, v) where the plough was left in the ridges
+    Point World(double u, double v) const { return {southWest.x + u, southWest.y + v}; }
+};
+DerelictFarmPlan EstateDerelictFarm(const EstateLayout& layout = ProvisionalEstateLayout());
+// Appends the derelict farm's and the grounds' clearable overgrowth (550000+) to a placement table.
+void AppendDerelictFarmAndDisrepair(EstatePlacements& table);
 // Even-odd point-in-polygon test for simple rings in world XY.
 bool PointInPolygon(const std::vector<Point>& ring, Point point);
 }

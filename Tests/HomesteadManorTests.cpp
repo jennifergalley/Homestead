@@ -2,11 +2,14 @@
 // new-game names. Kept apart from HomesteadSimulationTests so it builds and runs in seconds.
 #include "HomesteadEstate.h"
 #include "HomesteadManor.h"
+#include "HomesteadOvergrowth.h"
 #include "HomesteadSimulation.h"
 
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace Homestead;
 
@@ -228,6 +231,58 @@ void NamesValidationAndPersistence()
     OK(aidLoaded.Deserialize(aid.Serialize()));
     CHECK(aidLoaded.GetState().structures.size() == aid.GetState().structures.size());
 }
+
+// add-derelict-farm-and-estate-disrepair: the old field and the neglected grounds are thick with
+// clearable overgrowth, all on the estate, off the ruin and apart from the piles and each other.
+void DerelictFarmAndDisrepair()
+{
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const DerelictFarmPlan farm = EstateDerelictFarm(layout);
+    CHECK(farm.valid && farm.lengthU >= 5000.0 && farm.lengthV >= 5000.0 && farm.ridgeBlocks.size() == 2);
+    const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
+    const auto& manor = layout.FindPolygon(Anchor::ManorFootprint)->points;
+    const auto& field = layout.FindPolygon(Anchor::DerelictFarm)->points;
+    // The field stays clear of the ruin: its south fence is well north of the rear wall.
+    for (const Point& corner : manor) CHECK(!PointInPolygon(field, corner));
+    CHECK(farm.southWest.x - (-24100.0) > 1500.0);
+    const auto& placements = ProvisionalEstatePlacements().placements;
+    int inField = 0, grounds = 0, worn = 0, teases = 0, gate = 0;
+    std::vector<Point> piles;
+    for (const auto& placement : placements)
+        if (placement.kind == ResourceKind::SalvagePile) piles.push_back(placement.position);
+    for (size_t i = 0; i < placements.size(); ++i)
+    {
+        const EstatePlacement& placement = placements[i];
+        if (placement.id < 550000 || placement.id >= 560000) continue;
+        CHECK(PointInPolygon(boundary, placement.position) && !PointInPolygon(manor, placement.position));
+        const OvergrowthInfo* info = FindOvergrowth(placement.kind);
+        CHECK(info != nullptr && placement.kind != ResourceKind::SalvagePile);
+        worn += info && info->minTier == ToolTier::Worn;
+        teases += info && info->minTier > ToolTier::Worn;
+        const bool inside = PointInPolygon(field, placement.position);
+        inField += inside;
+        grounds += !inside;
+        const Point gatePoint = layout.PointOr(Anchor::DerelictFarmGate, {});
+        gate += std::hypot(placement.position.x - gatePoint.x, placement.position.y - gatePoint.y) < 350.0;
+        for (const Point& pile : piles)
+            CHECK(std::hypot(placement.position.x - pile.x, placement.position.y - pile.y) > 200.0);
+        // Nothing grows inside the heritage standing room or on its door step.
+        const Point room = layout.PointOr(Anchor::StandingRoomOrigin, {});
+        CHECK(std::hypot(placement.position.x - room.x, placement.position.y - room.y) > 450.0);
+        for (size_t j = 0; j < placements.size(); ++j)
+            if (j != i)
+            {
+                CHECK(placements[j].id != placement.id);
+                CHECK(std::hypot(placements[j].position.x - placement.position.x,
+                    placements[j].position.y - placement.position.y) > 100.0);
+            }
+    }
+    std::cout << "  derelict farm: " << inField << " in the field, " << grounds << " round the grounds, " << teases
+              << " iron/steel teases\n";
+    CHECK(inField >= 150 && grounds >= 120 && worn > 250 && teases >= 6 && gate >= 3);
+    Simulation sim;
+    OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
+}
 }
 
 int main()
@@ -240,6 +295,8 @@ int main()
     std::cout << "PASS manor footprint reservation\n";
     NamesValidationAndPersistence();
     std::cout << "PASS names validation and persistence\n";
+    DerelictFarmAndDisrepair();
+    std::cout << "PASS derelict farm and estate disrepair\n";
     std::cout << checks << " checks passed.\n";
     return 0;
 }

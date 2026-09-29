@@ -13,6 +13,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadSimulation.cpp
     Source/SurvivalGame/Simulation/HomesteadOvergrowth.cpp
     Source/SurvivalGame/Simulation/HomesteadEstate.cpp
+    Source/SurvivalGame/Simulation/HomesteadEstateDisrepair.cpp
     Source/SurvivalGame/Simulation/HomesteadParcels.cpp
     Source/SurvivalGame/Simulation/HomesteadItems.cpp
     Source/SurvivalGame/Simulation/HomesteadShops.cpp
