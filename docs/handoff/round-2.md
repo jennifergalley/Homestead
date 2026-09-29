@@ -575,7 +575,10 @@ pending, so this does not claim early Energy is fully solved.
   Water first surveys rendered Landscape-versus-r16 1 m cross-sections at centre/±2.8/±15 m, then
   patches only mismatched edit-layer tiles <=5 cm or makes a local ford embankment with a new wooden
   bridge. Synchronize PNG, r16, roadProfile, weightmap, ruts, ground, material and map while retaining
-  anchors/chainage. Never broadly reshape from `game_raw_4033` or erase lake/river work.
+  anchors/chainage. Also rerun `Scripts\Terrain\public_road.py` to regenerate compiled
+  `Simulation\HomesteadEstatePublicRoad.inc` from `estate_layout` road/roadProfile and
+  `EstateHeightfield.r16`; verify generated fast-travel stops, signs and terrain heights. Never broadly
+  reshape from `game_raw_4033` or erase lake/river work.
 - **Field-book road label** — **Water Agent** (`89914e30`): the redundant runtime `"Dirt road"` label
   is removed with lake `df19d74a` in `main` `61c1595c`
   (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a book-map lake/path
