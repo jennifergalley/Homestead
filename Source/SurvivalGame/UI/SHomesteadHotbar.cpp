@@ -81,23 +81,22 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             {
                                 if (!Weak.IsValid()) return FName();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                // Pinned food keeps its (faded) icon when the pack runs out.
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Available || Snapshot[Index].Food)
-                                    ? Snapshot[Index].Icon : FName();
+                                // A pinned seed or food she has none of in her pack shows an empty slot
+                                // (the pin is kept, so it comes back when she has some again).
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available ? Snapshot[Index].Icon : FName();
                             })
                             .Tint_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return FLinearColor(1, 1, 1, 0);
                                 const auto Snapshot = Weak->HotbarSnapshot();
                                 if (!Snapshot.IsValidIndex(Index)) return FLinearColor(1, 1, 1, 0);
-                                return Snapshot[Index].Available ? HotbarStyle::Gold
-                                    : Snapshot[Index].Food ? FLinearColor(HotbarStyle::Gold.R, HotbarStyle::Gold.G, HotbarStyle::Gold.B, 0.3f) : FLinearColor(1, 1, 1, 0);
+                                return Snapshot[Index].Available ? HotbarStyle::Gold : FLinearColor(1, 1, 1, 0);
                             })
                             .Visibility_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return EVisibility::Collapsed;
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Available || Snapshot[Index].Food)
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
                                     ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
                             })
                         ]
@@ -110,7 +109,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             {
                                 if (!Weak.IsValid()) return FText::GetEmpty();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || (Snapshot[Index].Seed && Snapshot[Index].Available))
+                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || Snapshot[Index].Seed) && Snapshot[Index].Available
                                     ? FText::AsNumber(Snapshot[Index].Count) : FText::GetEmpty();
                             })
                             .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))

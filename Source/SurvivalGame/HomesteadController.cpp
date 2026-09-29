@@ -776,12 +776,12 @@ bool AHomesteadController::TogglePinnedToHotbar(Homestead::Item Item)
 void AHomesteadController::EatFromHotbar(Homestead::Item Food)
 {
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-    const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-    // One mouthful at a time: clicks while she is still eating are ignored.
-    if (Animation && Animation->IsEating()) return;
+    // Every deliberate press is a mouthful, even mid-chew: the meal lands now and the one bite clip
+    // already playing stands for them all (PlayEat won't restart or stack it).
     const double FoodBefore = State().hunger, EnergyBefore = State().energy;
     const auto Result = Sim.Eat(Food);
-    Notify(Result);
+    // Success shows as the vitals' +N popups (MealGain); only refusals need words.
+    NotifyResourceAction(Result, nullptr);
     if (!Result.ok) return;
     if (Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
     MealGain.Food = State().hunger - FoodBefore;
@@ -846,8 +846,9 @@ void AHomesteadController::SelectHotbarSlot(int32 Index)
             Avatar->CancelAction(true);
     SelectedHotbarSlot = Index;
     const auto Snapshot = HotbarSnapshot();
-    ToastText = Snapshot[Index].Assigned
-        ? Text(Homestead::ItemName(Snapshot[Index].Tool)) : TEXT("Empty slot");
+    ToastText = !Snapshot[Index].Assigned ? FString(TEXT("Empty slot"))
+        : Snapshot[Index].Available || IsHotbarTool(Snapshot[Index].Tool) ? Text(Homestead::ItemName(Snapshot[Index].Tool))
+        : FString::Printf(TEXT("Empty slot (no %s left)"), *Text(Homestead::ItemName(Snapshot[Index].Tool)).ToLower());
     bToastError = false;
     ToastRemaining = 1.0f;
     PlayEffect(UIClick, 0.05f);
@@ -865,10 +866,17 @@ void AHomesteadController::UseSelectedTool()
     if (bPlanning && !bBookOpen) { Interact(); return; }
     if (!ShouldShowHotbar() || !HotbarSlots.IsValidIndex(SelectedHotbarSlot)) return;
     const int32 ToolValue = HotbarSlots[SelectedHotbarSlot];
-    // Seeds or a berry on bare tilled soil: plant it there (a berry is eaten anywhere else).
-    if (ToolValue >= 0)
+    // Seeds on bare tilled soil: plant them there. A selected berry is always eaten (X / F sows
+    // berry seed into a bare plot), so she can snack beside her own garden.
+    if (ToolValue >= 0 && static_cast<Homestead::Item>(ToolValue) != Homestead::Item::Berries)
         if (const auto Crop = PlantingCrop(static_cast<Homestead::Item>(ToolValue)))
         {
+            if (Sim.Count(static_cast<Homestead::Item>(ToolValue)) <= 0)
+            {
+                Notify(FString::Printf(TEXT("No %s left. Choose another seed on the hotbar."),
+                    *Text(Homestead::ItemName(static_cast<Homestead::Item>(ToolValue))).ToLower()), true);
+                return;
+            }
             if (bWorldReady && PrepareWorldAt(PlayerPoint()))
             {
                 UpdateFocus();
@@ -881,11 +889,8 @@ void AHomesteadController::UseSelectedTool()
                     return;
                 }
             }
-            if (static_cast<Homestead::Item>(ToolValue) != Homestead::Item::Berries)
-            {
-                Notify(TEXT("Aim at bare tilled soil to sow it."), true);
-                return;
-            }
+            Notify(TEXT("Aim at bare tilled soil to sow it."), true);
+            return;
         }
     if (ToolValue >= 0 && IsFoodItem(static_cast<Homestead::Item>(ToolValue)))
     {
@@ -2266,13 +2271,21 @@ FString AHomesteadController::FocusActions() const
             {
                 if (!Plot.planted)
                 {
-                    // A seed chosen on the hotbar is sown with the use button (UseSelectedTool).
+                    // [A]/[E] sows the seed stack chosen on the hotbar (a berry sows berry seed), else
+                    // wild root seed; [X]/[F] only weeds, and bare soil has none. [RT] eats a berry.
                     if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
                         if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
-                            if (Seed->kind != Homestead::CropKind::Roots && Seed->kind != Homestead::CropKind::Berries
-                                && Sim.Count(Seed->seed) > 0)
-                                return A + TEXT(" Sow ") + Text(Seed->lower) + SeedPouchHint();
-                    return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds") + SeedPouchHint();
+                        {
+                            const auto Chosen = static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]);
+                            const FString What = Seed->kind == Homestead::CropKind::Berries ? FString(TEXT("berry seeds"))
+                                : Seed->kind == Homestead::CropKind::Roots ? FString(TEXT("roots")) : Text(Seed->lower);
+                            if (Sim.Count(Chosen) <= 0)
+                                return TEXT("No ") + FString(UTF8_TO_TCHAR(Homestead::ItemName(Chosen))).ToLower()
+                                    + TEXT(" left") + SeedPouchHint();
+                            return A + TEXT(" Sow ") + What
+                                + (Chosen == Homestead::Item::Berries ? TEXT("   ") + Use + TEXT(" Eat") : FString()) + SeedPouchHint();
+                        }
+                    return A + TEXT(" Plant roots") + SeedPouchHint();
                 }
                 if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
                 FString Actions;
@@ -2911,12 +2924,25 @@ void AHomesteadController::Interact()
             const bool Mature = Plot.growth >= 1;
             if (!Planted)
             {
-                // The seed chosen on the hotbar (if she has any left), else wild root seed.
+                // The seed stack chosen on the hotbar (a selected berry sows berry seed); with no seed
+                // chosen, wild root seed. A chosen seed that has run out says so rather than quietly
+                // sowing something else, and nothing is ever taken from the pack unasked.
                 TOptional<Homestead::CropKind> Seed;
-                if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0
-                    && Sim.Count(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])) > 0)
-                    Seed = PlantingCrop(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]));
-                PlantFocusedPlot(Seed && *Seed != Homestead::CropKind::Berries ? *Seed : Homestead::CropKind::Roots);
+                if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
+                {
+                    const auto Chosen = static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]);
+                    if (const auto Crop = PlantingCrop(Chosen))
+                    {
+                        if (Sim.Count(Chosen) <= 0)
+                        {
+                            Notify(FString::Printf(TEXT("No %s left. Choose another seed on the hotbar."),
+                                *FString(UTF8_TO_TCHAR(Homestead::ItemName(Chosen))).ToLower()), true);
+                            break;
+                        }
+                        Seed = Crop;
+                    }
+                }
+                PlantFocusedPlot(Seed ? *Seed : Homestead::CropKind::Roots);
                 break;
             }
             const Homestead::CropKind Harvested = Plot.kind;
@@ -3024,7 +3050,9 @@ void AHomesteadController::Secondary()
             if (Plot.id != FocusId) continue;
             if (!Plot.planted)
             {
-                PlantFocusedPlot(Homestead::CropKind::Berries);
+                // X / F only ever weeds (Jenny): bare soil has none, and nothing is sown by accident.
+                Notify(TEXT("No weeds to pull here. Choose seeds on the hotbar and press ")
+                    + FString(UsesGamepad() ? TEXT("A") : TEXT("E")) + TEXT(" to sow."), true);
                 break;
             }
             const auto Result = Sim.Weed(FocusId, PlayerPoint());
@@ -3280,7 +3308,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({1, TEXT("1. Find a little breakfast"), TEXT("Gather berries, then eat them from the Pack page.")});
         Result.Add({2, TEXT("2. Make your first tools"), TEXT("Search the salvage piles around the manor for rusted heads, then craft each into a tool with two branches on the Craft page.")});
         Result.Add({3, TEXT("3. Make a home"), TEXT("Fell the trees at your chosen site with the axe. Place a floor, walls, doorway and roof. Felled trees stay gone when you return.")});
-        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Search the old manor's salvage for a hoe blade (the second head you'll find) and craft a hoe. Each swing tills one small square; plant each square with A/E (root seeds) or X/F (berry seeds), or pick seeds or a berry on the hotbar and click.")});
+        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Search the old manor's salvage for a hoe blade (the second head you'll find) and craft a hoe. Each swing tills one small square; choose seeds (or a berry, for berry seed) on the hotbar and sow each square with A/E; with nothing chosen, A/E plants wild root seed. X/F pulls weeds.")});
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill your pail at the stream. F/X removes weeds from a plot.")});
         Result.Add({6, TEXT("6. Cook and rest"), TEXT("Split timber with a carried axe. Cookfires use prepared firewood first, then branches. Roast roots; sleep in a sheltered bedroll.")});
         Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is cosmetic.")});
