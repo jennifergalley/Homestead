@@ -222,6 +222,13 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Pending doc updates on merge
 
+- Lamp lane (uncommitted in `jennifergalley-fluffy-broccoli` as of 2026-09-28): `build_prop.py` gains a
+  recipe-level `BAKE_MESHES = {"SM_Name"}` (or a dict of per-mesh overrides) to bake only chosen meshes,
+  so a prop can bake its opaque body while leaving separate glass or flame meshes unbaked
+  (`Recipes/oil_lamp.py`: `SM_OilLamp` baked, `SM_OilLampGlass` and `SM_OilLampFlame` not). With only
+  `BAKE`, every mesh still bakes. When it lands, add it to the Blender skill's "Bake and review
+  settings" step and `docs\blender-assets.md`.
+
 - Build speed (`f6ed1c42`, waiting on the orchestrator): once it merges, (a) point every `Build.bat
   SurvivalGameEditor ...` recipe (editor skill quick-start and section 8, `docs\handoff\README.md` step 3,
   `docs\setup.md`) at `Scripts\Invoke-UnrealBuild.ps1` (`-Target`, `-CheckOnly`, `-Force`; it skips UBT when
