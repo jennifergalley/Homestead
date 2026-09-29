@@ -361,8 +361,15 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         ActionBlend.A.SetLinkNode(&Blend);
         ActionBlend.B.SetLinkNode(&Gather);
         Gather.SetTeleportToExplicitTime(true);
+        // Crafting by hand takes her chest, both arms and her head over the standing pose.
+        CraftLayer.BasePose.SetLinkNode(&ActionBlend);
+        CraftLayer.AddPose();
+        CraftLayer.BlendPoses[0].SetLinkNode(&Craft);
+        CraftLayer.LayerSetup[0].BranchFilters.AddDefaulted_GetRef().BoneName = TEXT("spine_02");
+        CraftLayer.BlendWeights[0] = 0;
+        Craft.SetTeleportToExplicitTime(true);
         // Eating rides on top of whatever she is doing: the right arm and the head only.
-        EatLayer.BasePose.SetLinkNode(&ActionBlend);
+        EatLayer.BasePose.SetLinkNode(&CraftLayer);
         EatLayer.AddPose();
         EatLayer.BlendPoses[0].SetLinkNode(&Eat);
         for (const TCHAR* Branch : {TEXT("clavicle_r"), TEXT("neck_01")})
@@ -453,6 +460,10 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     FGatherPose Gather;
     FAnimNode_SequenceEvaluator_Standalone Eat;
     FAnimNode_LayeredBoneBlend EatLayer;
+    FAnimNode_SequenceEvaluator_Standalone Craft;
+    FAnimNode_LayeredBoneBlend CraftLayer;
+    float CraftAlpha = 0;
+    float CraftTime = 0;
     float EatTime = 0;
     float EatAlpha = 0;
     bool bEating = false;
@@ -543,6 +554,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             Sprint.SetSequence(Avatar->GetSprintAnimation());
             Gather.SetSequence(Avatar->GetGatherAnimation());
             Eat.SetSequence(Avatar->GetEatAnimation());
+            Craft.SetSequence(Avatar->GetCraftAnimation());
             bHoeTill = Avatar->UsesHoeTill();
         }
     }
@@ -804,6 +816,20 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         LeftGripAlpha = FMath::FInterpConstantTo(LeftGripAlpha, LeftGripTarget, DeltaSeconds, 1.0f / 0.15f);
         LeftGrip.Alpha = FMath::Max(bTwoHanded ? ActionBlend.Alpha : 0.0f, LeftGripAlpha);
         UpdateEating(DeltaSeconds);
+        UpdateCrafting(Avatar, DeltaSeconds);
+    }
+
+    // The craft clip follows the field book's hold: one loop per craft cycle, so her presses land
+    // on the craft beats. It eases in over 0.2 s and out over 0.3 s when the hold ends.
+    void UpdateCrafting(const AHomesteadCharacter* Avatar, float DeltaSeconds)
+    {
+        const auto* Clip = Craft.GetSequence();
+        const float Phase = Avatar && Clip ? Avatar->CraftingPhase() : -1.0f;
+        if (Phase >= 0.0f) CraftTime = Phase * Clip->GetPlayLength();
+        const float Target = Phase >= 0.0f ? 1.0f : 0.0f;
+        CraftAlpha = FMath::FInterpConstantTo(CraftAlpha, Target, DeltaSeconds, Target > CraftAlpha ? 1.0f / 0.2f : 1.0f / 0.3f);
+        CraftLayer.BlendWeights[0] = CraftAlpha;
+        Craft.SetExplicitTime(CraftTime);
     }
 
     void UpdateEating(float DeltaSeconds)
@@ -964,6 +990,11 @@ float UHomesteadAnimInstance::EatPhase() const
 {
     const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
     return Proxy.bEating ? Proxy.EatTime : 0.0f;
+}
+
+float UHomesteadAnimInstance::CraftWeight() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().CraftAlpha;
 }
 
 float UHomesteadAnimInstance::EatWeight() const

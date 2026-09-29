@@ -85,8 +85,8 @@ def main():
         for obj in meshes:
             kit.finalize(obj, pivot=None if args.keep_pivot else "base")
 
-    if meta["collision"] not in ("none", "box", "convex"):
-        raise RuntimeError("COLLISION must be none, box or convex")
+    if meta["collision"] not in ("none", "box", "convex", "capsule"):
+        raise RuntimeError("COLLISION must be none, box, convex or capsule")
     out = Path(args.out).resolve() if args.out else ROOT / "Assets" / "Props" / name
     out.mkdir(parents=True, exist_ok=True)
 

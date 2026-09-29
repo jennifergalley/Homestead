@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "name": "Beech",
+  "description": "Mature common beech, about 20 m tall with a tall domed 14 m crown on a smooth grey bole; layered painted leaf-spray canopy, four LODs, trunk capsule.",
+  "collision": "capsule",
+  "triangle_budget": 90000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/beech.py",
+  "source_sha256": "d2e066ea918f4c23734f083abec332145f81b7771f1888984f04034b3122a056",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_Beech": {
+      "vertices": 72423,
+      "triangles": 85200,
+      "size_cm": [
+        1514.16,
+        1600.05,
+        2107.34
+      ],
+      "materials": [
+        {
+          "name": "M_SM_BeechBark",
+          "textures": {
+            "basecolor": "T_BeechBark_basecolor.png",
+            "normal": "T_BeechBark_normal.png",
+            "roughness": "T_BeechBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_BeechLeaves",
+          "textures": {
+            "basecolor": "T_BeechLeaves_basecolor.png",
+            "normal": "T_BeechLeaves_normal.png",
+            "roughness": "T_BeechLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.020587487146258354,
+          -0.020640138536691666,
+          6.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 18.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Beech.fbx",
+      "sha256": "d525b4cd6866a9d73d5aab1d3e32a4e57d7322483844eb7485599d77d70e96ca",
+      "preview": "preview_SM_Beech.png"
+    },
+    "SM_Beech_LOD1": {
+      "vertices": 7573,
+      "triangles": 11514,
+      "size_cm": [
+        1473.0,
+        1647.05,
+        2102.89
+      ],
+      "materials": [
+        {
+          "name": "M_SM_BeechBark",
+          "textures": {
+            "basecolor": "T_BeechBark_basecolor.png",
+            "normal": "T_BeechBark_normal.png",
+            "roughness": "T_BeechBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_BeechLeaves",
+          "textures": {
+            "basecolor": "T_BeechLeaves_basecolor.png",
+            "normal": "T_BeechLeaves_normal.png",
+            "roughness": "T_BeechLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.020587487146258354,
+          -0.020640138536691666,
+          6.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 18.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Beech_LOD1.fbx",
+      "sha256": "835f27ba8a70a06037023deb2fb826ba5909e8a4521fc37500c9e15b6e3b2c9e",
+      "preview": "preview_SM_Beech_LOD1.png"
+    },
+    "SM_Beech_LOD2": {
+      "vertices": 1515,
+      "triangles": 2036,
+      "size_cm": [
+        1569.95,
+        1749.05,
+        2222.99
+      ],
+      "materials": [
+        {
+          "name": "M_SM_BeechBark",
+          "textures": {
+            "basecolor": "T_BeechBark_basecolor.png",
+            "normal": "T_BeechBark_normal.png",
+            "roughness": "T_BeechBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_BeechLeaves",
+          "textures": {
+            "basecolor": "T_BeechLeaves_basecolor.png",
+            "normal": "T_BeechLeaves_normal.png",
+            "roughness": "T_BeechLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.020587487146258354,
+          -0.020640138536691666,
+          6.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 18.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Beech_LOD2.fbx",
+      "sha256": "11f177d5f55cdef33de3f7f3a8ffdc24a3728de69f808415850214f17e11a5c2",
+      "preview": "preview_SM_Beech_LOD2.png"
+    },
+    "SM_Beech_LOD3": {
+      "vertices": 353,
+      "triangles": 398,
+      "size_cm": [
+        2008.82,
+        1967.93,
+        2215.8
+      ],
+      "materials": [
+        {
+          "name": "M_SM_BeechBark",
+          "textures": {
+            "basecolor": "T_BeechBark_basecolor.png",
+            "normal": "T_BeechBark_normal.png",
+            "roughness": "T_BeechBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_BeechLeaves",
+          "textures": {
+            "basecolor": "T_BeechLeaves_basecolor.png",
+            "normal": "T_BeechLeaves_normal.png",
+            "roughness": "T_BeechLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.020587487146258354,
+          -0.020640138536691666,
+          6.310000002384186
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 18.0,
+        "detail_distance": 6.0,
+        "detail_fstop": 11.0
+      },
+      "fbx": "SM_Beech_LOD3.fbx",
+      "sha256": "07ec67aeb19a45e5e67680e2c888e5b98587b158ac262398e720fe30a3ebcd8f",
+      "preview": "preview_SM_Beech_LOD3.png"
+    }
+  },
+  "warnings": [],
+  "blocking": true,
+  "unreal_folder": "Trees",
+  "nanite": true,
+  "tree": {
+    "height_m": 20.0,
+    "crown_m": [
+      14.8,
+      14.0
+    ],
+    "ground_line_cm": 30.0,
+    "note": "Pivot is the bottom of a 30 cm skirt under the trunk flare; the ground line is 30 cm up."
+  },
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / tree height",
+    "G": "per-branch random phase",
+    "B": "leaf flutter 0 at card base -> 1 at tip, 0 on wood",
+    "A": "1",
+    "strength": 16.0,
+    "flutter": 0.9
+  },
+  "material_notes": "Slot 0 M_BeechBark: tiling bark T_BeechBark_* (1 m square). Slot 1 M_BeechLeaves: leaf-spray atlas T_BeechLeaves_* (basecolor alpha = mask, clip 0.5; roughness R rough, G translucency, B AO; normal OpenGL). Two-sided foliage, masked.",
+  "capsule": {
+    "center_cm": [
+      -15.6,
+      7.6,
+      304.4
+    ],
+    "radius_cm": 43.3,
+    "length_cm": 463.3,
+    "note": "Unreal space (Y mirrored from Blender). Length is the cylinder part; the capsule spans the ground to the first fork."
+  },
+  "textures": {
+    "T_BeechBark_basecolor.png": "f57edf25e784212129636596643b6fa55a7d22aaf98fa6e03fbed2be9adc5964",
+    "T_BeechBark_normal.png": "27b0ee541f3e89d3063d4b3989484cb418c9c9a38c6a408d7eb7e1cd134db78a",
+    "T_BeechBark_roughness.png": "986c47e9745162e6f82cc804072a60c73f30c1ddbca7c2277ee2262aefb38b37",
+    "T_BeechLeaves_basecolor.png": "25c5bbb4c267ea5339d5db641259a126ca9d37f2ef3cfb720e3a69e7a09d2f35",
+    "T_BeechLeaves_normal.png": "6c6f837c703cebe023ce7a7a726d2ccee106b187fc302330be27fdc86bf83d07",
+    "T_BeechLeaves_roughness.png": "faa18a38ede520ca8276ea99c81f0d097bc38797fff14ace176b26b2ddaac66e"
+  }
+}

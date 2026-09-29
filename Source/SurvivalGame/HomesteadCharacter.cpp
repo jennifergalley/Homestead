@@ -470,6 +470,14 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     EatAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Eat"));
     if (EatAnimation && EatAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
         EatAnimation = nullptr;
+    // Optional: authored with homestead_agent.craft_hands.
+    CraftAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_CraftHands"));
+    if (CraftAnimation && CraftAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        CraftAnimation = nullptr;
+    // The branch she works while crafting, upright through her left fist.
+    if (UStaticMesh* Piece = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b")))
+        CraftPiece = MakeProp(TEXT("CraftPiece"), Piece);
     if (UStaticMesh* Pouch = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/ForagePouch/SM_ForagePouch.SM_ForagePouch")))
     {
         ForagePouch = MakeProp(TEXT("ForagePouch"), Pouch);
@@ -1750,9 +1758,12 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     {
         if (!bAppearancePreview && !PC->IsPlanning() && !PC->IsFailed())
             Presented = PC->IsBookOpen() ? PC->SelectedCarriedTool() : PC->PresentedTool();
+        // Crafting by hand needs both hands; the carried tool goes back to her belt meanwhile.
+        if (CraftingPhase() >= 0 || Animation->CraftWeight() > 0.01f) Presented = Homestead::Item::Count;
     }
-    else if (InCharacterLab() && LabHeldTool) Presented = *LabHeldTool;
-    const bool HandsFree = Animation->ActionWeight() < 0.01f && Animation->EatWeight() < 0.01f;
+    else if (InCharacterLab() && LabHeldTool && LabCraftUntil < GetWorld()->GetTimeSeconds()) Presented = *LabHeldTool;
+    const bool HandsFree = Animation->ActionWeight() < 0.01f && Animation->EatWeight() < 0.01f
+        && Animation->CraftWeight() < 0.01f;
     const bool Hacking = Animation->MacheteWeight() > 0.01f;
     const bool Felling = Animation->FellWeight() > 0.01f;
     const bool CuttingReeds = IsCuttingReeds();
@@ -1830,6 +1841,36 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     // She ticks after the pose is final (TG_PostUpdateWork), so the felling haft is laid through
     // both fists here, over the one-handed placement just set.
     UpdateFellingHatchet();
+    UpdateCraftPiece(Animation->CraftWeight());
+}
+
+void AHomesteadCharacter::UpdateCraftPiece(float Weight)
+{
+    if (!CraftPiece) return;
+    // Shown once her fists have mostly closed on it, so it never floats beside an open hand.
+    const bool bShow = Weight > 0.6f;
+    if (!bShow)
+    {
+        if (CraftPiece->IsVisible()) CraftPiece->SetVisibility(false);
+        return;
+    }
+    // Upright through the left fist: along the knuckles (index above pinky, thumb up), centred
+    // a little above the fist so its top runs through the right fist (homestead_agent.craft_hands).
+    USkeletalMeshComponent* Body = GetMesh();
+    const FVector Hand = Body->GetSocketLocation(TEXT("hand_l"));
+    const FVector Fingers = (Body->GetSocketLocation(TEXT("middle_01_l")) - Hand).GetSafeNormal();
+    const FVector Across = (Body->GetSocketLocation(TEXT("index_01_l")) - Body->GetSocketLocation(TEXT("pinky_01_l"))).GetSafeNormal();
+    const FVector Palm = FVector::CrossProduct(Across, Fingers).GetSafeNormal();
+    const FVector Grip = Hand + Fingers * 6.5f + Palm * 3.0f;
+    // Branch meshes run along their local Y.
+    const FRotator Rotation = FRotationMatrix::MakeFromYZ(Across, Palm).Rotator();
+    const FVector Scale(CraftPieceScale);
+    const FVector Offset = Rotation.RotateVector(CraftPiece->GetStaticMesh()->GetBounds().Origin * Scale);
+    if (CraftPiece->GetAttachParent() != Body || CraftPiece->GetAttachSocketName() != TEXT("hand_l"))
+        CraftPiece->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_l"));
+    CraftPiece->SetWorldLocationAndRotation(Grip + Across * 6.0f - Offset, Rotation);
+    CraftPiece->SetWorldScale3D(Scale);
+    CraftPiece->SetVisibility(true);
 }
 
 void AHomesteadCharacter::UpdateFellingHatchet()
@@ -1900,6 +1941,25 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
     FTransform Blended;
     Blended.Blend(Prop.GetComponentTransform(), TwoHanded, FMath::SmoothStep(0.0f, 1.0f, Weight));
     Prop.SetWorldTransform(Blended);
+}
+
+float AHomesteadCharacter::CraftingPhase() const
+{
+    if (const auto* PC = Cast<AHomesteadController>(Controller))
+    {
+        const float Progress = PC->CraftProgress();
+        return Progress > 0.0f ? Progress : -1.0f;
+    }
+    if (!InCharacterLab() || !GetWorld()) return -1.0f;
+    const double Now = GetWorld()->GetTimeSeconds();
+    return Now < LabCraftUntil ? FMath::Fmod(static_cast<float>(Now - LabCraftStart) / CraftCycleSeconds, 1.0f) : -1.0f;
+}
+
+void AHomesteadCharacter::PlayLabCraft(int32 Cycles)
+{
+    if (!GetWorld()) return;
+    LabCraftStart = GetWorld()->GetTimeSeconds();
+    LabCraftUntil = LabCraftStart + CraftCycleSeconds * FMath::Max(1, Cycles);
 }
 
 bool AHomesteadCharacter::PlayEat(bool bBerry)

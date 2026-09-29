@@ -9,11 +9,21 @@
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "Framework/Application/SlateApplication.h"
+#include "HAL/IConsoleManager.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "Widgets/Layout/SBox.h"
 
 namespace
 {
 FString FromUtf8(const std::string& Text) { return UTF8_TO_TCHAR(Text.c_str()); }
+
+// Agent editors (Start-EditorMcp.ps1 passes -HomesteadSkipNewGameSetup) start new Estate games with the
+// default names instead of stopping on Appearance and "Who comes home?". Set it to 0 in the console to
+// test the setup steps themselves.
+TAutoConsoleVariable<int32> CVarSkipNewGameSetup(TEXT("homestead.SkipNewGameSetup"),
+    FParse::Param(FCommandLine::Get(), TEXT("HomesteadSkipNewGameSetup")) ? 1 : 0,
+    TEXT("1: a new Estate game skips the Appearance and Names steps and uses the default names."));
 }
 
 FString AHomesteadController::EstateName() const
@@ -29,6 +39,17 @@ FString AHomesteadController::CurrentSaveLabel() const
 void AHomesteadController::BeginNewGameSetup()
 {
     if (IsFailed()) return;
+    if (CVarSkipNewGameSetup.GetValueOnGameThread() != 0)
+    {
+        const auto Result = Sim.SetNames(Homestead::Manor::DefaultHeroineName, Homestead::Manor::DefaultFamilyName,
+            Homestead::Manor::DefaultEstateName);
+        UE_LOG(LogTemp, Display, TEXT("New-game setup skipped (homestead.SkipNewGameSetup): %s"),
+            Result ? TEXT("default names") : *FromUtf8(Result.message));
+        bNewGameSetup = false;
+        HideNames();
+        if (bBookOpen) CloseBook();
+        return;
+    }
     bNewGameSetup = true;
     HideNames();
     OpenBook(6);

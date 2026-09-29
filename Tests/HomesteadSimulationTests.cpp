@@ -2982,7 +2982,7 @@ void OvergrowthTableAndPrompts()
     CHECK(ToolForItem(Item::Hatchet) == ToolKind::Axe && ToolItem(ToolKind::Hoe) == Item::DiggingStick);
     CHECK(ToolForItem(Item::Knife) == ToolKind::Count && ToolForItem(Item::Machete) == ToolKind::Count);
     CHECK(std::string(ItemName(Item::Hatchet)) == "Axe" && std::string(ItemName(Item::DiggingStick)) == "Hoe");
-    CHECK(std::string(ItemName(Item::WateringCan)) == "Pail" && std::string(RecipeName(Recipe::HaftBillhook)) == "Haft a billhook");
+    CHECK(std::string(ItemName(Item::WateringCan)) == "Pail" && std::string(RecipeName(Recipe::HaftBillhook)) == "Craft a billhook");
     CHECK(std::string(RecipeRequirements(Recipe::HaftBillhook)) == "2 Branch + 1 Rusted billhook head; by hand, no station");
     CHECK(std::string(ResourceName(ResourceKind::FallenBranch)) == "Fallen bough");
 

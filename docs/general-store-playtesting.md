@@ -5,7 +5,7 @@ shopkeeper (a stand-in body for now) and the town-square blockout on the Estate 
 
 ## What to try
 
-1. Start a new estate game. The purse, a coin icon in the vitals stack at the bottom left, reads **$10.00**.
+1. Start a new estate game. The purse, a coin icon in the vitals stack under the calendar at the top right, reads **$10.00**.
 2. Walk to the town square, about 1.7 km east of the house along the road. The general store is on
    the north side, with a green **GENERAL STORE** board over the door.
 3. Climb the steps and go inside. At the counter the prompt reads **Talk to Mrs. Pascoe**. Press

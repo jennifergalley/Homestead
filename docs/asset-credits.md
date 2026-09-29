@@ -54,6 +54,13 @@ Thimbleberry, BrackenFern, WildStrawberry, GrassYarrowTuft, WildMarjoram and Net
 code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
 library. No scan, photo or third-party texture is used.
 
+The Cornish woodland trees (`Assets\Props\` Oak, Beech, Sycamore and Hawthorn, imported to
+`Content/SurvivalGame/Environment/Trees/<Name>/SM_<Name>`; recipes in `Scripts\Blender\Recipes\`, grown
+by `Scripts\Blender\homestead_tree.py` on top of `homestead_shrub.py` and `homestead_foliage.py`) are
+project-authored: skeletons, bark tubes and leaf cards are generated from code, and every bark column
+and leaf-cluster atlas is painted procedurally with numpy. No scan, photo, SpeedTree or third-party
+texture is used. Their review renders use the same CC0 Kloofendal HDRI, which ships with no asset.
+
 The StoneHoe (`Scripts\Blender\Recipes\stone_hoe.py`), the TilledBed garden square (`Scripts\Blender\Recipes\tilled_bed.py`) and the Seeds set (tepary beans and the
 covered-seed SoilMound, `Scripts\Blender\Recipes\seeds.py`) are project-authored procedural geometry
 with procedural materials baked to textures; they use no scanned or downloaded geometry or

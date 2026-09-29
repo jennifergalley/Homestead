@@ -36,6 +36,8 @@ public:
     float EatPhase() const;
     float EatWeight() const;
     uint32 EatStarts() const;
+    // Crafting by hand (AN_HeroineMH_CraftHands) layered from spine_02 up while a recipe is held.
+    float CraftWeight() const;
     // Two-handed axe felling: Strokes cuts into the trunk (the clip's stroke cycle repeats).
     void RequestFell(int32 Strokes);
     // Curl the right hand's fingers around a held tool handle (0 open, 1 closed grip). At rest the

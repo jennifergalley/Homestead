@@ -855,7 +855,7 @@ const char* ResourceName(ResourceKind kind)
 }
 const char* RecipeName(Recipe recipe)
 {
-    static const char* names[] = {"Haft an axe", "Haft a hoe", "Haft a scythe", "Haft a billhook", "Haft a pickaxe",
+    static const char* names[] = {"Craft an axe", "Craft a hoe", "Craft a scythe", "Craft a billhook", "Craft a pickaxe",
         "Roasted roots", "Herbed roots", "Split firewood"};
     static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(Recipe::Count), "Every recipe needs a name.");
     return ValidEnum(recipe, Recipe::Count) ? names[static_cast<int>(recipe)] : "Unknown recipe";
@@ -1770,7 +1770,7 @@ Result Simulation::Clear(int nodeId, Point player)
     if (IsOvergrowth(node->kind)) return Harvest(nodeId, player);
     if (!Near(player, node->position)) return Bad("Move closer to clear this patch.");
     if (RequiresHatchet(node->kind) && Count(Item::Hatchet) == 0)
-        return Bad("Haft an axe before felling trees.");
+        return Bad("Craft an axe before felling trees.");
     const double cost = ClearCost(nodeId);
     if (auto ready = CheckExertion(cost); !ready) return ready;
     const Inventory yield = node->readyAtHour <= state_.hour ? Yield(node->kind) : Inventory{};
@@ -1852,7 +1852,7 @@ Result Simulation::Craft(Recipe recipe, Point player)
     {
         const auto made = std::find_if(change.begin(), change.end(), [](int value) { return value > 0; });
         const Item tool = static_cast<Item>(made - change.begin());
-        return Exert(cost, Good(std::string("Hafted a worn ") + ToolName(ToolForItem(tool)) + "."));
+        return Exert(cost, Good(std::string("Crafted a worn ") + ToolName(ToolForItem(tool)) + "."));
     }
     return Exert(cost, Good(std::string("Made ") + RecipeName(recipe) + "."));
 }
@@ -2425,7 +2425,7 @@ Result Simulation::Till(int cellX, int cellY, Point player)
     const int buildingX = GardenToCell(cellX), buildingY = GardenToCell(cellY);
     if (!ValidCell(buildingX, buildingY) || !Near(player, GardenCellCenter(cellX, cellY)))
         return Bad("Move closer to a valid garden square.");
-    if (Count(Item::DiggingStick) == 0) return Bad("Haft a hoe before tilling soil.");
+    if (Count(Item::DiggingStick) == 0) return Bad("Craft a hoe before tilling soil.");
     if (state_.plots.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
         return Bad("The garden has reached its plot limit.");
     const auto space = CheckGardenResources(state_, cellX, cellY);
