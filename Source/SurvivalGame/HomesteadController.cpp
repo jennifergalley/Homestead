@@ -2221,7 +2221,8 @@ FString AHomesteadController::FocusActions() const
                 {
                     // The pail in her pack waters on [E]/[A]; otherwise say where it is.
                     const int32 Pail = ToolWhereabouts(Sim, Homestead::Item::WateringCan);
-                    Actions = Pail == 2 ? (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water")
+                    Actions = Pail == 2 && Sim.Count(Homestead::Item::Water) <= 0 ? FString(UTF8_TO_TCHAR(Homestead::EmptyPailText))
+                        : Pail == 2 ? (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water")
                         : ToolPrompt(Sim, Homestead::Item::WateringCan, TEXT("pail"), TEXT(" to water"));
                 }
                 if (Plot.weeds > 0.1)
