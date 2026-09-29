@@ -3331,13 +3331,13 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     case Homestead::ResourceKind::BrokenBarrel:
     case Homestead::ResourceKind::RubbishHeap:
     {
-        // The Farm Agent's estate debris (EstateDebris); the store goods stand in until it lands.
+        // The Farm Agent's estate debris (EstateDebris, EstateRubbish); the store goods stand in until it lands.
         // The first clear-out rows (570000-570007) are its eight freed spots and keep the full
         // midden; elsewhere a heap is a small midden or a rusty scrap pile.
-        auto Quiet = [](const TCHAR* Name) -> UStaticMesh*
+        auto Quiet = [](const TCHAR* Name, const TCHAR* Folder = TEXT("EstateDebris")) -> UStaticMesh*
         {
             return LoadObject<UStaticMesh>(nullptr,
-                *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/EstateDebris/%s.%s"), Name, Name), nullptr,
+                *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s/%s.%s"), Folder, Name, Name), nullptr,
                 LOAD_NoWarn | LOAD_Quiet);
         };
         const bool Crate = Node.kind == Homestead::ResourceKind::BrokenCrate;
@@ -3349,7 +3349,7 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
         else if (Node.id >= 570000 && Node.id < 570008) Debris = Quiet(TEXT("SM_RubbishHeap"));
         else
         {
-            Debris = Quiet(Variation % 2 ? TEXT("SM_ScrapHeap") : TEXT("SM_RubbishHeapSmall"));
+            Debris = Quiet(Variation % 2 ? TEXT("SM_ScrapHeap") : TEXT("SM_RubbishHeapSmall"), TEXT("EstateRubbish"));
             if (!Debris && (Debris = Quiet(TEXT("SM_RubbishHeap")))) Scale = Random.FRandRange(0.45f, 0.55f);
         }
         if (Debris)
@@ -3368,7 +3368,7 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     }
     case Homestead::ResourceKind::RottenPlanks:
         if (auto* Planks = LoadObject<UStaticMesh>(nullptr,
-            TEXT("/Game/SurvivalGame/Environment/Props/EstateDebris/SM_RottenPlanks.SM_RottenPlanks"), nullptr, LOAD_NoWarn | LOAD_Quiet))
+            TEXT("/Game/SurvivalGame/Environment/Props/EstateRubbish/SM_RottenPlanks.SM_RottenPlanks"), nullptr, LOAD_NoWarn | LOAD_Quiet))
             Whole(Planks, FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.05f));
         else
             // Until the Farm Agent's plank pile lands: the ruin's fallen roof timbers at plank scale.
@@ -3391,7 +3391,9 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
             : TEXT("/Game/SurvivalGame/Environment/Props/WildDaffodil/SM_WildDaffodilClump.SM_WildDaffodilClump");
         if (auto* Clump = LoadObject<UStaticMesh>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet))
         {
-            Place(Clump, FVector2D::ZeroVector, Yaw, true, Random.FRandRange(0.9f, 1.15f));
+            // Primroses hug the ground, so their clumps are drawn a little large to read above the pasture.
+            const bool Primrose = Node.kind == Homestead::ResourceKind::Primroses;
+            Place(Clump, FVector2D::ZeroVector, Yaw, true, Random.FRandRange(0.9f, 1.15f) * (Primrose ? 1.3f : 1.0f));
             return;
         }
     }

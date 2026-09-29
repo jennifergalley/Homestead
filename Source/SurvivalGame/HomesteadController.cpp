@@ -2455,6 +2455,15 @@ void AHomesteadController::Interact()
                         const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
                         if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * (Bramble ? 62.0f : 22.0f);
                     }
+                    // Rubbish is a metre or two across: she works at its near edge, not kneeling in it.
+                    else if (Homestead::IsRubbish(Kind))
+                    {
+                        const bool BigHeap = Kind == Homestead::ResourceKind::RubbishHeap && FocusId >= 570000 && FocusId < 570008;
+                        const float Edge = BigHeap ? 95.0f : Kind == Homestead::ResourceKind::BrokenBarrel ? 55.0f
+                            : Kind == Homestead::ResourceKind::RottenPlanks ? 50.0f : 45.0f;
+                        const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
+                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * FMath::Clamp(Toward.Size() - 30.0f, 0.0f, Edge);
+                    }
                     if (Avatar->PlayKneelGather(Gather, Target, Berries) && Landscape)
                     {
                         Landscape->HoldProduce(FocusId);

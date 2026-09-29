@@ -119,6 +119,13 @@ ToolTier OgRequiredTier(const OvergrowthInfo& info, const ResourceNode& node)
     return std::max(info.minTier, node.minTier);
 }
 
+// "an axe", "a billhook".
+std::string OgArticle(const std::string& noun)
+{
+    const bool vowel = !noun.empty() && std::string("aeiouAEIOU").find(noun[0]) != std::string::npos;
+    return (vowel ? "an " : "a ") + noun;
+}
+
 bool OgCreepCandidate(ResourceKind kind)
 {
     return kind == ResourceKind::TallGrass || kind == ResourceKind::Weeds || kind == ResourceKind::Nettles;
@@ -260,16 +267,18 @@ Result Simulation::CheckOvergrowth(int nodeId, Item tool, Point player) const
     const std::string target = OgLower(ResourceName(node->kind));
     if (tool == Item::Count)
     {
-        if (!info->byHand) return OgBad(std::string("Clearing ") + target + " needs a " + ToolName(info->tool) + ".");
+        if (!info->byHand) return OgBad(std::string("Clearing ") + target + " needs " + OgArticle(ToolName(info->tool)) + ".");
     }
     else
     {
         const ToolKind used = ToolForItem(tool);
         if (used == ToolKind::Count || used != info->tool)
         {
-            if (info->tool == ToolKind::Count) return OgBad(std::string("Search the ") + target + " by hand.");
-            return OgBad(std::string("A ") + (used == ToolKind::Count ? ItemName(tool) : ToolName(used))
-                + " won't clear " + target + ". Use a " + ToolName(info->tool) + ".");
+            if (info->tool == ToolKind::Count)
+                return OgBad(std::string(node->kind == ResourceKind::SalvagePile ? "Search the " : "Clear the ") + target + " by hand.");
+            std::string with = OgArticle(used == ToolKind::Count ? ItemName(tool) : ToolName(used));
+            with[0] = static_cast<char>(with[0] - 'a' + 'A');
+            return OgBad(with + " won't clear " + target + ". Use " + OgArticle(ToolName(info->tool)) + ".");
         }
         if (Count(tool) == 0) return OgBad(std::string("Take your ") + ToolName(used) + " from storage first.");
         const ToolTier needed = OgRequiredTier(*info, *node);

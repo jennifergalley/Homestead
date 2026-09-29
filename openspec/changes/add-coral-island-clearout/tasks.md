@@ -11,10 +11,10 @@
 - [x] 2.1 Visuals: SM_NettlePatch (new `nettle.py` recipe), SM_StumpLarge at medium scale, EstateDebris meshes with store stand-ins, fallen timbers as the plank pile, and wild garlic's clump
 - [x] 2.2 Prompts "Pull" and "Clear away"; the stick, stone or root kneel per kind; the mow summary counts seed
 - [x] 2.3 The clear pop: swell, shrink and sink, with chips of leaf, wood or stone
-- [ ] 2.4 PIE on the Estate: walk out of the front door into the field, clear each kind, check tilling is refused beside an obstacle and allowed after clearing, and take screenshots
-- [ ] 2.5 When the manor lane's EstateDebris lands on main, check the real crate, barrel and heap meshes in PIE
+- [x] 2.4 PIE on the Estate (2026-09-29). An old save loads with the field present. On a fresh game: barrel cleared by hand ("Clear away", +seed, kindling, scrap), nettles pulled ("Pull"), medium stump in 5 axe swings, tilling refused beside weeds and allowed after pulling them, and spoiled ground named ("Clear the thin bramble here first."). The new flower and nettle meshes are in use.
+- [x] 2.5 The real EstateDebris crate, barrel and heap checked in PIE from the Farm Agent's branch; EstateRubbish (SM_RottenPlanks, SM_RubbishHeapSmall, SM_ScrapHeap) loads quietly when it lands
 
 ## 3. Follow-ups
 
 - [ ] 3.1 Physically blocking collision for stumps, boulders and barrels, once the strike approach handles convex hulls
-- [ ] 3.2 Dedicated primrose, bluebell and wild daffodil meshes (still the stand-in flowers)
+- [x] 3.2 Dedicated primrose, bluebell and wild daffodil meshes (primrose.py, bluebell.py, wild_daffodil.py), with wild garlic from wild_garlic.py

@@ -367,7 +367,7 @@ Result CheckAreaResources(const State& state, double left, double bottom, double
                 return Bad(blockedMessage);
             const bool inside = node.position.x >= left && node.position.x < left + size
                 && node.position.y >= bottom && node.position.y < bottom + size;
-            if (inside && IsOvergrowth(node.kind)) return Bad("Clear the overgrowth here first.");
+            if (inside && IsOvergrowth(node.kind)) return Bad(SpoiledGroundMessage(node));
         }
         return Good("");
     }
@@ -419,7 +419,7 @@ Result CheckFootprintResources(const State& state, const Footprint& area, bool q
             {
                 const Point local = RotateYaw({node.position.x - area.center.x, node.position.y - area.center.y}, -area.yaw);
                 if (std::abs(local.x) < area.half.x && std::abs(local.y) < area.half.y)
-                    return Bad("Clear the overgrowth here before building.");
+                    return Bad(SpoiledGroundMessage(node));
             }
         }
         return Good("");
