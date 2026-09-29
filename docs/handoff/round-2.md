@@ -216,7 +216,7 @@ work that goes beyond a small verified correction.
 
 | Feedback | Owner | OpenSpec reference / note |
 | --- | --- | --- |
-| **Approved:** a lake in the owned geographic north-west (Jenny's map reads north-up, right=east, so her visual "up-and-left" overrides her spoken "NE") at **(-50, -745) m**, about **76 × 44 m**, with roughly 110 m from the farm edge and a ~90 m farm-side access path | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-regional-landforms-water`. Jenny can redirect this after seeing it. |
+| **Integration pending; not shipped:** approved lake in the owned geographic north-west (Jenny's map reads north-up, right=east, so her visual "up-and-left" overrides her spoken "NE") at **(-50, -745) m**, about **76 × 44 m**, with roughly 110 m from the farm edge and a ~90 m farm-side access path | Weather Agent (`89914e30`) | `[ready]` `2bc18c46` (lake `df19d74a` plus main merge): Editor build/native 8/8, two saved proxies, six landscape tiles / 4,279 vertices with a subsequent zero diff, on-foot farm-to-landing path, pail kneel/fill 6, knee-deep wading barrier, peaty water, and book-map lake/path evidence. Integration still needs packaged smoke of actor/material, landscape-vs-r16, visual and pail behavior; lake is small on the map and lacks dawn/dusk and packaged-cook evidence. |
 | **Approved:** a clearly signed manor-south gate/path with protected switchbacks or stairs to a **12–20 m dry beach** along the owned ~630 m cliff coast | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-regional-landforms-water` |
 | **Approved:** the wider walkable beach above (12–20 m dry width) below the owned cliffs | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-shore-and-river-fishing` |
 | The river looks as if it stops before reaching the ocean in Jenny's screenshot | Weather Agent (`89914e30`) | **Partly checked, not resolved:** PIE on `27e2e917` confirms the source, banks and water down to the beach, but the ribbon still ends a couple metres short of the ocean, separated by sand/foam. Own a later true estuary connection while widening the beach; do not mark the gap fixed. |
@@ -224,12 +224,12 @@ work that goes beyond a small verified correction.
 | **Pending:** town buildings are bunched too tightly | Water, after the final road route | The current 12 blocking blockouts occupy a 40 × 34.5 m four-sided square with 0.2–0.35 m adjacent gaps (about 0.9 m by the store); the main road ends ~72 m short. Make a ~60 × 45 m open square with terraces/cottages, 3–6 m side lanes, and a separate curved 5–6 m `townStreet`; preserve main-road 1.94 km chainage plus StoreDoor/Counter and Shop IDs/saves. |
 | Running foot kicks too high toward her butt; lower its swing apex slightly | Harvest Agent / temporary Gait Agent (`65a2408b`) | `polish-locomotion-view-distance-and-time-hud` |
 
-**Water-lane order:** verify the river mouth in the parked 4 PM river branch first, then stage
-**lake → beach → route**. Night lighting and the town-road layout are separate later increments after
-the north-west lake; town-entry/store acceptance, coordinate bridge, roadside forage and travel signs
-wait for the final road route. These are unverified slices: they do **not** edit the 4 PM package. If
-the terrain or water work needs placement ids, the Water Agent claims them through this page before
-using them (the registry starts at 581000+).
+**Water-lane order:** the north-west lake is `[ready]` but **Integration pending, not shipped**; it
+is eligible only if the listed packaged smoke gates pass. Verify the river mouth in the parked 4 PM
+river branch, then stage **beach → route**. Night lighting and the town-road layout are separate later
+increments after the north-west lake; town-entry/store acceptance, coordinate bridge, roadside forage
+and travel signs wait for the final road route. If the terrain or water work needs placement ids, the
+Water Agent claims them through this page before using them (the registry starts at 581000+).
 
 **Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
 all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
@@ -360,9 +360,9 @@ requirement.
   road to town, including the bridge approach. The ID range is reserved; implementation remains
   pending the narrow public-road-corridor proof and bridge coordinate sync.
 - **Field-book road label** — **Water Agent** (`89914e30`): the redundant runtime `"Dirt road"` label
-  is removed on Water's branch (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a
-  lake-PIE map screenshot. It is **pushed but not delivered/shipped**: it rides with the
-  editor-verified lake `[ready]`.
+  is removed in lake `[ready]` `2bc18c46` (`HomesteadMapComponent::RefreshModel`; the road remains
+  drawn), with a book-map lake/path screenshot. It is **Integration pending, not shipped** with the
+  lake; no separate road-label merge occurred.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
