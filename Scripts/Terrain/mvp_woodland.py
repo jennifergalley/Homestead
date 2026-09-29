@@ -12,7 +12,8 @@ on a 24 m chunk grid over the region in mvp_woodland.json:
   underbrush   HomesteadWorld.cpp GenerateUnderbrush (thicket / shrub / meadow clusters by a density
                field, plus scattered plants, 0.6 x radius spacing)
   granite      GenerateRocks (outcrops in broad bands, a dome or split boulder on each knob, lone
-               erratics, scattered cobbles)
+               erratics; the MVP's loose cobble clusters become a few granite ledges at the
+               outcrops, so nothing looks like the hand stones she can pick up)
   ground cover BuildDecorations (grass clumps, every 32nd try a fern, every 64th a flower)
 
 and the MVP's clearance rules (IsDecorationReserved: cover keeps off tree trunks and forage).
@@ -29,7 +30,7 @@ from skimage.measure import points_in_poly
 
 CHUNK = 24.0
 # Shared with scatter.py (the estate's own kinds, which are also MVP meshes).
-BROADLEAF, FIR, HAZEL, BRACKEN, YARROW, COBBLES, LOAF, ERRATIC, DOME, FERN_A, GRASS_TALL, GRASS_MID = range(12)
+BROADLEAF, FIR, HAZEL, BRACKEN, YARROW, LEDGE, LOAF, ERRATIC, DOME, FERN_A, GRASS_TALL, GRASS_MID = range(12)
 # The MVP woodland's own kinds (19+; 16-18 are the trees lane's hawthorn, holly and hazel coppice).
 (JACARANDA, FIR_POLE, FIR_SAPLING_A, FIR_SAPLING_C, BRAMBLE, BRAMBLE_LARGE, TOYON, DEER_BRUSH,
  THIMBLEBERRY, STRAWBERRY, FERN_B, FERN_C, FERN_D, GRASS_SMALL, GRASS_TINY, FLOWER_A, FLOWER_B,
@@ -47,7 +48,7 @@ UNDERBRUSH = [
 UB_BRAMBLE, UB_BRAMBLE_LARGE, UB_HEDGE, UB_HAZEL, UB_DEER, UB_THIMBLE, UB_FERN, UB_STRAWBERRY, UB_YARROW = range(9)
 # GenerateRocks' granite, in its enum order: (kind, radius m, min scale, max scale, size class).
 ROCKS = [
-    (COBBLES, 0.45, 0.8, 1.3, 0), (SPALLS, 0.40, 0.8, 1.3, 0), (RUBBLE, 0.40, 0.8, 1.4, 0),
+    (LEDGE, 0.45, 0.8, 1.3, 0), (SPALLS, 0.40, 0.8, 1.3, 0), (RUBBLE, 0.40, 0.8, 1.4, 0),
     (LOAF, 0.62, 0.8, 1.35, 1), (TALUS, 0.52, 0.8, 1.4, 1), (BOULDER_LOW, 0.72, 0.8, 1.3, 1),
     (ERRATIC, 1.5, 0.85, 1.2, 2), (JOINTED, 1.6, 0.85, 1.15, 2),
     (DOME, 4.7, 0.85, 1.05, 3), (SPLIT, 4.0, 0.9, 1.1, 3),
@@ -257,6 +258,12 @@ def build(region, keep, ground_ok, avoid=None):
     # Everything cover keeps off: trunks (all trees are "resources" in the MVP) and forage.
     stems = np.r_[trees[:, :2], young[:, :2], forage_pts, avoid]
     stem_tree = cKDTree(stems)
+    # Rock scenery keeps away from the stones she can pick up.
+    stone_pts = np.array([pt for _, kind, pt in rows if kind == "Stones"]).reshape(-1, 2)
+    stone_tree = cKDTree(stone_pts) if len(stone_pts) else None
+
+    def clear_of_stones(p, gap=8.0):
+        return np.ones(len(p), bool) if stone_tree is None else stone_tree.query(p)[0] > gap
 
     def reserved(p, radius, low):
         """IsDecorationReserved against trunks and forage: FootprintRadius + 35 cm (low cover) or 130 cm."""
@@ -268,7 +275,7 @@ def build(region, keep, ground_ok, avoid=None):
         mine = []
         in_chunk_knob = [k for k in knobs if ox <= k[0] < ox + CHUNK and oy <= k[1] < oy + CHUNK]
 
-        def try_add(r, x, y):
+        def try_add(r, x, y, at_outcrop=False):
             kind, radius, smin, smax, size = ROCKS[r]
             scale = U(smin, smax)
             yaw = U(-40, 40) + (U(0, 360) if size == 0 else 0)
@@ -279,7 +286,7 @@ def build(region, keep, ground_ok, avoid=None):
             pt = np.array([x, y])
             if not allowed(pt)[0]: return None
             if size < 3 and reserved(pt, rad * (0.6 if size == 0 else 0.85), True)[0]: return None
-            rock = (r, x, y, yaw, scale)
+            rock = (r, x, y, yaw, scale, at_outcrop)
             mine.append(rock)
             return rock
 
@@ -287,7 +294,7 @@ def build(region, keep, ground_ok, avoid=None):
             base = ROCKS[anchor[0]][1] * anchor[4] + ROCKS[r][1]
             for _ in range(4):
                 a, d = U(0, 2 * np.pi), base + U(lo, hi)
-                if try_add(r, anchor[1] + np.cos(a) * d, anchor[2] + np.sin(a) * d): return
+                if try_add(r, anchor[1] + np.cos(a) * d, anchor[2] + np.sin(a) * d, True): return
 
         def outcrop(anchor, house):
             if rng.random() < (0.45 if house else 0.3):
@@ -408,8 +415,16 @@ def build(region, keep, ground_ok, avoid=None):
         recs.append((int(kind), x, y, U(0, 360), scale))
     for x, y, kind, scale in young:
         recs.append((int(kind), x, y, U(0, 360), scale))
-    for r, x, y, yaw, scale in rocks:
-        recs.append((ROCKS[int(r)][0], x, y, yaw % 360, scale))
+    for i, (r, x, y, yaw, scale, at_outcrop) in enumerate(rocks):
+        kind, _, _, _, size = ROCKS[int(r)]
+        if size == 0:
+            # The MVP's loose cobble, spall and rubble clusters read as the hand stones she can pick
+            # up. Round an outcrop every third becomes a ledge of the same granite breaking through
+            # the ground; loose clusters on the open floor are left out.
+            if at_outcrop and i % 3 == 0 and clear_of_stones(np.array([[x, y]]))[0]:
+                recs.append((LEDGE, x, y, yaw % 360, scale * 1.1))
+            continue
+        recs.append((kind, x, y, yaw % 360, scale))
     for s, x, y, yaw, scale in plants:
         if int(s) in bramble_kind:
             add_row(bramble_kind[int(s)], (x, y))

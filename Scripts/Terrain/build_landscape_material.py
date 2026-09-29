@@ -111,7 +111,8 @@ float patch = 0.5 + 0.5 * sin(WP.x * 0.0021) * cos(WP.y * 0.0017);
 float mw = 0.07 + 0.20 * patch;
 float3 mvp = lerp(MudD, MvpD, mw);
 mvp = lerp(mvp, lerp(MudFarD, MvpFarD, mw), smoothstep(60.0, 160.0, dist) * 0.5);
-col = lerp(col, mvp, zone);
+// ZoneTint cools the floor toward the prototype's grey-green under the estate's warmer sun and sky.
+col = lerp(col, mvp * ZoneTint, zone);
 n = normalize(lerp(n, normalize(lerp(MudN, MvpN, mw)), zone));
 rough = lerp(rough, lerp(MudR, MvpR, mw), zone);
 
@@ -255,6 +256,7 @@ def ground_finish(bc, nm, rg, y0):
               ('RockD', rock_d, 'RGB'), ('RockN', rock_n, 'RGB'), ('RockR', rock_r, 'R'),
               ('SwardNear', sward_near, 'RGB'), ('SwardFar', sward_far, 'RGB'),
               ('SwardMix', scal('SwardMix', 0.8, y + 1180), ''),
+              ('ZoneTint', vec('ZoneTint', (0.93, 1.02, 1.12), y + 1420), 'RGB'),
               ('Wet', wet_p, ''), ('RainNow', rain_p, ''), ('Time', time_p, ''),
               ('T0', tints[0], 'RGB'), ('T1', tints[1], 'RGB'), ('T2', tints[2], 'RGB'), ('T3', tints[3], 'RGB')]
     ins = []
