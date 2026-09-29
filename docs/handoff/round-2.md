@@ -42,7 +42,7 @@ three-hands-on-implementer cap (including Integration) and the two-Unreal-proces
 | Performance Agent (`a34483d7`) | Retire | After safe handoff/merge |
 | Build Speed Agent (`6e131c6a`) | **Archived** (orchestrator confirmed 2026-09-29) | Handoff complete: `f6ed1c42` and `a624c704` are on `main`; Integration owns the build recipe |
 | Seasons/Mushroom Agent (`fd682909`) | Retirement requested; archive pending confirmation | Handoff branch `b19a0ad0` is unmerged; Water owns completion |
-| Calendar Agent (`f8b77021`) | Retire | After its post-4 PM `a3c7e04d` handoff/merge |
+| Calendar Agent (`f8b77021`) | Retire | `a3c7e04d` is held: Props must first add and test the retain-60 correction; Integration merges both commits atomically |
 
 **No archive is complete until the archive tool confirms it.** Keep each retiring session's code,
 commit and handoff links in this page until then; remove stale wake-ups and ownership pointers only
@@ -191,7 +191,9 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 
 ## Open questions for Jenny
 
-- **Day length:** 30-minute days (the design's default), or 60? Settings keep 60 and 120 either way.
+- **Day length:** resolved 2026-09-29 — new Estate games default to **60-minute days**. Settings
+  continue to offer 30 and 120 minutes, and existing saves retain their stored value. The source
+  OpenSpec is updated only after Props implements and verifies the corrective commit held below.
 - **Sunday closing:** should shops close on Sundays? (A per-shop data flag, so easy to turn off.)
 - **Names:** Tregear's and its keeper are placeholders.
 
@@ -238,10 +240,15 @@ as pending correction until Integration reports the final merged SHA. Calendar m
 ### Calendar day-length / town-arrival blocker
 
 Calendar lane A's `a3c7e04d` changes the default `dayMinutes` **60 → 30**. On the ~1.94 km
-manor-to-town road, that doubles the in-game walk to roughly 12–14 hours and worsens Jenny's late-store
-arrival. Calendar is preparing read-only rationale and a minimal retain-60 option. Integration holds
-post-4-PM Calendar A work until this is resolved; it does not affect the earlier package. Update this
-handoff from Integration's final `main` SHA, not from an unmerged branch.
+manor-to-town road, that doubles the in-game walk to roughly 12.3–14.4 hours: an 8 AM departure reaches
+town about 8:19–10:22 PM, after the 6 PM General Store close. **Product decision:** new Estate games
+keep the 60-minute default; the 30/120 Settings options remain, and old saves retain their stored
+`dayMinutes` value.
+
+**Integration hold:** Props later adds a focused, safely tested restore-60 correction on top of
+`a3c7e04d`; Integration merges that pair atomically. Do **not** merge raw A or include it in the 4 PM
+package. After Props reports the implementation SHA and verification, update the source-of-truth
+OpenSpec and then replace this blocker with Integration's final `main` SHA.
 
 ### OpenSpec strict-validation baseline (fix pending merge)
 
@@ -408,6 +415,8 @@ requirement.
 
 - **4 PM playtest package:** only independently verified `[ready]` slices are eligible. Pending
   feedback above is not included merely because it has an owner.
+- **Calendar A package hold:** raw `a3c7e04d` is excluded. Its 60-minute-default correction must be
+  implemented and verified by Props, then atomically merged with A by Integration.
 
 ## Pending doc updates on merge
 
