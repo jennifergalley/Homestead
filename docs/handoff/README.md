@@ -246,6 +246,9 @@ turn (with a wake-up if you need one).
 - A proposal-only stub fails `openspec validate` with `Change must have at least one delta`. Give it
   a small outcome-level `specs\<capability>\spec.md` (one or two requirements with scenarios), or
   set `skip_specs: true` in the change's `.openspec.yaml`.
+- Every `ADDED` requirement needs at least one `#### Scenario:` with WHEN/THEN. Otherwise
+  `openspec validate --changes --strict` fails the whole-repo gate, even when the implementation is
+  unrelated to that change.
 - `openspec new change` takes 3-4 s each. Scaffold many changes in one background command.
 - Plan mode blocks even read-only `openspec list`; run it after plan approval.
 - Completed changes haven't been archived yet, so `openspec list` includes finished work. Ask the
