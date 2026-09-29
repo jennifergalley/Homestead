@@ -3711,12 +3711,20 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
 
 bool AHomesteadWorld::BuildLampDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop)
 {
-    // Stand it on whatever is underfoot: the terrain outdoors, a floor or hearthstone indoors.
+    // Stand it on whatever is underfoot: the terrain outdoors, a floor or hearthstone indoors. Start
+    // low enough to miss lintels and roofs, and skip starts inside a wall's collision.
     FVector Base = AtGround(Drop.position.x, Drop.position.y, 0.0f);
-    FHitResult Hit;
     FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadLampDrop), false, UGameplayStatics::GetPlayerPawn(this, 0));
-    if (GetWorld() && GetWorld()->LineTraceSingleByChannel(Hit, Base + FVector(0, 0, 250), Base - FVector(0, 0, 150), ECC_WorldStatic, Params))
-        Base.Z = Hit.ImpactPoint.Z;
+    for (const float Lift : {90.0f, 45.0f, 15.0f})
+    {
+        FHitResult Hit;
+        if (GetWorld() && GetWorld()->LineTraceSingleByChannel(Hit, Base + FVector(0, 0, Lift), Base - FVector(0, 0, 150), ECC_WorldStatic, Params)
+            && !Hit.bStartPenetrating)
+        {
+            Base.Z = Hit.ImpactPoint.Z;
+            break;
+        }
+    }
     auto* Stand = NewObject<USceneComponent>(this, MakeUniqueObjectName(this, USceneComponent::StaticClass(), TEXT("LampDrop")));
     Stand->SetupAttachment(GetRootComponent());
     Stand->SetMobility(EComponentMobility::Movable);
