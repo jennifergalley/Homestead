@@ -320,10 +320,19 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
-- **Minimap/compass HUD trial** — **Architecture trace, pending and not shipped.** Keep the minimap
-  while trialing larger important minimap icons and a top-centre compass strip with bearings/cardinals.
-  Avoid competing with toast feedback and make the time text as crisp as the money readout. Validate
-  legibility and layout at 720p and 4K before committing a direction.
+- **Minimap/compass HUD trial** — **pending behind the core loop, not shipped.** The current minimap
+  is 220 logical px / 120 m crop; far badge radius 8.5 U, near 11 U and glyphs 10 U become about 5.7
+  physical px at 720p (`UiScale` 0.667), while 4K caps at 1.5. Enlarge important glyphs with a minimum
+  physical-pixel radius, collision spacing and pixel snap, preserving the crop. The current
+  `MapPainter` custom verts disable subpixel snapping; Canvas rescales the clock to logical 42, while
+  money's native Slate Bold 20 remains crisp.
+
+  Render time through native Slate `SHomesteadHudScale` without duplicate Canvas time, leaving the
+  dial. Retain the minimap while trialing a top-centre compass with N/E/S/W and selected Map landmarks
+  from `MapComponent` frame/player/camera yaw and `MapGeometry` bearing (+X north/+Y east), with no
+  per-paint actor scan. Avoid top-centre parchment toast/calendar and the first-60-second controls;
+  collapse at 720p if needed. Validate 720/1080/4K, rotation, map/controller overlap and crisp still
+  text.
 - **Remove Guidebook UI** — **Menu, pending and not shipped.** Remove the Guidebook surface entirely,
   updating navigation cycles, shortcuts, page indexes, NativeMenu coverage and packaged checks while
   retaining save compatibility.
@@ -546,9 +555,15 @@ requirement.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
-- **Oil-lamp reach** — **Architecture trace, pending and not shipped.** Increase the throw by roughly
-  300% (about four times distance) only after measuring attenuation, brightness and performance; then
-  verify the tuned result.
+- **Oil-lamp reach** — **pending behind the core loop, not shipped.** Held and placed lamps share
+  `LightIntensity=1400` and `radius=1000 cm`, use inverse-square point lights with shadows, and flicker
+  at 0.9–1.05. A literal +300% radius reaches 4000 cm but is only 1/16 as bright at 40 m versus 10 m
+  and can expand shadow-caster volume about 64x; do not assume radius alone produces a useful throw.
+
+  Props/Integration first trial measured low-gain broad fill or bounded falloff that avoids near glare
+  and wall leak. Compare held and placed lamps in packaged RT-on 4K manor/woods fixed cameras at
+  5/10/20/40 m: lux/median brightness, p95/p99, GPU and shadow cost, indoor wall leak, night warmth
+  and unchanged oil use.
 - **Reduced foliage shadow motion** — **Water, pending and not shipped.** EstateScenery HISM
   brambles/hedge/brush/thimbleberry are shadowed with WPO disabled beyond 60 m and
   `ShadowCacheInvalidationBehavior::Rigid`; individual resource bushes are movable/shadowed, while
