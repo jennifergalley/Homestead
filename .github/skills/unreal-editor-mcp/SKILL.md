@@ -375,7 +375,9 @@ hk release_all; mcp $E StopPIE
   clock without simulating the skipped hours. With `h` earlier than the current hour it goes to the next
   day, which is the quick way to reach rain: it rains on days 2, 5, 8, ... from 9 to 15 h (`IsRainDay` in
   `HomesteadSimulation.cpp`), so from a new game `HomesteadMorning 10` twice lands in day-2 rain. Time skips
-  don't grow crops or run day-rollover logic; only Advance or Sleep does.
+  don't grow crops or run day-rollover logic; only Advance or Sleep does. For deterministic crop tests,
+  use `HomesteadGrowCrops <days> [tend=1]` to advance crop days, or
+  `HomesteadCropGrowth <0-1>` to set the growth fraction directly.
 - **Sleep tests on the Estate:** the manor bedroll is next to (-25500, -63720), z about 8800.
   `Sim.Sleep` needs a bed within reach; the E prompt reads "Sleep 8 hours". Store testing
   shortcuts (`HomesteadOpenStore` and the counter snap-back on reload) are in
@@ -912,6 +914,12 @@ Extend it there when play needs a capability; prefer real input over state edits
   -startTime=19.5 -endTime=29.5` (seconds from trace start, about the `Capture Starting` log line). The render
   thread is `RenderThread 0`: `-threads=RenderThread` silently matches the GPU track. `ExportTimingEvents` with
   `-columns=ThreadName,TimerName,StartTime,EndTime,Duration,Depth` gives call trees.
+- **`Test-Game.ps1` test overrides:** `-RenderScale 0` leaves the player resolution policy intact
+  (at 4K, typically about 50% with TSR); 50-100 supplies `r.ScreenPercentage` for non-Shipping QA.
+  `-ExtraExecCmds` appends comma-separated startup commands, while `-ExtraArguments` appends command-line
+  arguments; neither is admitted by `-ShippingQA`. The harness isolates user data with
+  `-UserDir <output>\EngineUser`, so its CSV output is
+  `<output>\EngineUser\Saved\Profiling\CSV`, not the project-level `Saved\Profiling\CSV`.
 - Jenny's performance bar: the framerate must be **smooth**, not just high. Never report a
   performance result from average FPS alone. Check frame pacing on the `Playtest-Visual.ps1
   -PresentationDiagnostics` timing passes (median, p95, p99, max, frames over 20 ms and over

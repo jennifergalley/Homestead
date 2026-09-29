@@ -465,6 +465,14 @@ pending, so this does not claim early Energy is fully solved.
   remains. This completes the prior dusk and PIE reload debt. At 4–7 m in tall grass the weeds still
   read visually modest. Props closed its editor at 13:10; the orchestrator verified no Unreal
   processes remain.
+
+  **Screenshot diagnosis correction:** the bare, leafless ~69 cm arching canes near a fence/grazed
+  125 cm ring are tentatively spring `SM_BrambleThin` overgrowth, not the green tuft/small-leafy
+  thimbleberry visual used for ordinary weeds. `WeedClump` replacement `cc5b115d` will not fix this
+  look. After the core hoe/pail test, Props traces exact node ID/kind/focus versus cleared state in
+  copied-save PIE: it should be actionable with a worn billhook inside 280 cm, though nearby
+  weed/grass may steal focus. Add spring leaf-out or an appropriate cue and resolve any missing prompt;
+  no shipped claim follows from the tentative identification.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` shipped in the 4 PM playable build.** Clearable
   slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
@@ -755,12 +763,6 @@ pending, so this does not claim early Energy is fully solved.
 - Performance (`6841f429`, not on `main` yet): `PerfLock.ps1` treats `blender.exe` as a build, so
   `Start-PerfWindow.ps1` names and refuses it. When it lands, update the editor skill perf-window
   bullet to say the script enforces the no-Blender rule.
-- Crops (`b51aa930`, from round 1's polish): `HomesteadGrowCrops <days> [tend=1]` and
-  `HomesteadCropGrowth <0-1>` grow crops for tests (time skips don't). When it lands, add them to the
-  editor skill's "Time and weather for tests" bullet.
-- Performance (`0c12d5e9`): `Test-Game.ps1 -RenderScale 0`, `-ExtraExecCmds`, `-ExtraArguments`, and the
-  `-UserDir` CSV path. When it lands, add them to the editor skill's perf notes.
-
 ## Tooling requests (unassigned)
 
 - `get_play_state` (`st`) should report `namesOpen` and `shopOpen` (carried over from round 1).
