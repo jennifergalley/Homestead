@@ -1643,12 +1643,13 @@ bool Simulation::IsNight() const
     const double hour = std::fmod(state_.hour, 24.0);
     return hour < 6.0 || hour >= 19.0;
 }
-bool Simulation::IsRaining() const
+bool IsRainDay(double hour) { return static_cast<long long>(std::floor(hour / 24.0)) % 3 == 1; }
+bool IsRainingAt(double hour)
 {
-    const int day = static_cast<int>(state_.hour / 24.0);
-    const double hour = std::fmod(state_.hour, 24.0);
-    return day % 3 == 1 && hour >= 9.0 && hour < 15.0;
+    const double ofDay = std::fmod(hour, 24.0);
+    return IsRainDay(hour) && ofDay >= RainStartHour && ofDay < RainEndHour;
 }
+bool Simulation::IsRaining() const { return IsRainingAt(state_.hour); }
 int Simulation::DayNumber() const { return static_cast<int>(state_.hour / 24.0) + 1; }
 const char* Simulation::SeasonName() const
 {

@@ -3169,6 +3169,9 @@ void SleepOptionPolicy()
     CHECK(Close(SleepOptions(12.0, 0.0)[0].hours, Exertion::MaxRestHours));
     CHECK(Close(SleepOptions(18.0, 50.0)[0].hours, 12.75));
     CHECK(Close(SleepOptions(12.0, 97.0)[0].hours, Exertion::MinRestHours));
+    // One rain schedule for the rules, the lighting and the wet ground: day 2 of every 3, 09:00-15:00.
+    CHECK(!IsRainDay(12.0) && IsRainDay(24.0 + 1.0) && !IsRainDay(48.0 + 12.0) && IsRainDay(96.0 + 23.0));
+    CHECK(IsRainingAt(24.0 + RainStartHour) && !IsRainingAt(24.0 + RainEndHour) && !IsRainingAt(24.0 + 8.99) && !IsRainingAt(10.0));
     // Recovery follows hours slept, not the clock: a daytime sleep until rested fills her up.
     Simulation owlSim;
     BuildingStock(owlSim);

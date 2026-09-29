@@ -3743,8 +3743,8 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float SolarAngle = (Hour - 6.0f) / 24.0f * 2.0f * PI;
     const float Elevation = FMath::Sin(SolarAngle);
     const float Daylight = FMath::SmoothStep(-0.1f, 0.25f, Elevation);
-    // Matches the simulation's deterministic three-day spring weather cycle.
-    const bool bRaining = static_cast<int64>(State.hour / 24.0) % 3 == 1 && Hour >= 9.0f && Hour < 15.0f;
+    // The simulation's three-day spring weather (Homestead::IsRainingAt).
+    const bool bRaining = Homestead::IsRainingAt(State.hour);
     const FRotator SunRotation(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0);
     const FRotator MoonRotation(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0);
     // With ray-traced sun shadows, follow the sun every refresh (about 0.025 degrees at normal game
@@ -3793,9 +3793,10 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     if (GroundParameters && GetWorld())
         if (UMaterialParameterCollectionInstance* GroundValues = GetWorld()->GetParameterCollectionInstance(GroundParameters))
         {
-            const bool bRainDay = static_cast<int64>(State.hour / 24.0) % 3 == 1;
-            const float Wetness = !bRainDay ? 0.0f
-                : FMath::SmoothStep(9.0f, 9.5f, Hour) * (1.0f - FMath::SmoothStep(15.0f, 19.0f, Hour));
+            constexpr float RainStart = static_cast<float>(Homestead::RainStartHour);
+            constexpr float RainEnd = static_cast<float>(Homestead::RainEndHour);
+            const float Wetness = !Homestead::IsRainDay(State.hour) ? 0.0f
+                : FMath::SmoothStep(RainStart, RainStart + 0.5f, Hour) * (1.0f - FMath::SmoothStep(RainEnd, RainEnd + 4.0f, Hour));
             GroundValues->SetScalarParameterValue(TEXT("Wetness"), Wetness);
             GroundValues->SetScalarParameterValue(TEXT("Daylight"), Daylight);
         }
