@@ -22,12 +22,12 @@ The game SHALL count four 28-day seasons (Spring, Summer, Autumn, Winter), seven
 - **WHEN** Winter 28, 1851 rolls over at 06:00
 - **THEN** the date becomes Spring 1, 1852
 
-### Requirement: Default day length is about 30 real minutes
-A new game SHALL default to a 30-real-minute day. The Settings choice of 30, 60 or 120 minutes SHALL remain available and SHALL persist with the save.
+### Requirement: Default day length is about 60 real minutes
+A new game SHALL default to a 60-real-minute day. The Settings choice of 30, 60 or 120 minutes SHALL remain available, and each existing save SHALL retain its stored value.
 
 #### Scenario: Default length
 - **WHEN** a new game runs for 15 real minutes unpaused
-- **THEN** about 12 game hours have passed
+- **THEN** about 6 game hours have passed
 
 ### Requirement: Energy is the only meter, and meals make her Well fed
 On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penalty or hunger failure, and the HUD SHALL show no hunger meter. Food SHALL restore energy. Snacks (raw food, bread, cheese) SHALL restore a little and SHALL NOT grant Well fed. Meals (cooked dishes) SHALL restore more and SHALL grant Well fed for 3 game hours, shown as a clock time. While Well fed, every piece of work SHALL cost 15% less energy. Eating a meal SHALL set the Well fed expiry to 3 game hours from now, never stacking. Below full energy, any food SHALL restore its energy. At full energy, a snack SHALL be refused without being consumed. At full energy, a meal SHALL be eaten only if it starts Well fed or extends it by at least one game hour, and the game SHALL say that her energy was already full; otherwise the meal SHALL be refused without being consumed.

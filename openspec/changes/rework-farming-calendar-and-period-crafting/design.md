@@ -22,7 +22,7 @@
 **Goals:**
 
 - A readable agricultural year: each season has its own crops, forage and look.
-- Bring the code back in line with the pivot's cozy rules: 28-day seasons, a ~30-minute default day (to be measured), and
+- Bring the code back in line with the pivot's cozy rules: 28-day seasons, a ~60-minute default day, and
   a single energy meter with nothing that fails her.
 - A second shop that spreads buying and selling across town, ready for round 3's prices.
 - The first period crafting stations, planks, fences and furniture.
@@ -57,12 +57,11 @@
 - **Alternative considered:** store the season and day separately. Rejected, because two sources
   of truth drift.
 
-### 2. Day length default 30 minutes
+### 2. Day length default 60 minutes
 
-- `State::dayMinutes` defaults to 30 for new games.
+- `State::dayMinutes` defaults to 60 for new games.
 - The Settings cycle stays at 30, 60 and 120, and saves keep their own value.
-- Jenny confirms whether 30 feels right at the next playtest. The playtest build notes call this
-  out.
+- The 60-minute default preserves a practical manor-to-town walk before the General Store closes.
 
 ### 3. Gentle hunger replaces hunger failure (delivered as an interim by lane A, superseded by §3a)
 
