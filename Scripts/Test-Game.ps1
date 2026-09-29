@@ -287,20 +287,27 @@ if ($EstateSmoke) {
     $problems = @()
     $usage = @($logText | Select-String -SimpleMatch 'missing usage flag')
     $fallback = @($logText | Select-String -SimpleMatch 'Default Material will be used')
+    # Material compile failures: uncooked runs log 'Failed to compile Material <name> for platform'
+    # (LogShaderCompilers/LogMaterial); cooked packages log 'with an invalid ShaderMap' when loading a
+    # material that failed at cook time. The route also checks the landscape's own shader maps.
+    $compile = @($logText | Select-String -Pattern 'Failed to compile (Material|default material)|Material failed to compile|with an invalid ShaderMap')
     $gaveUp = @($logText | Select-String -Pattern 'HOMESTEAD_GROUND_HOLD .*gave up')
     $settled = @($logText | Select-String -SimpleMatch 'HOMESTEAD_GROUND_SETTLE')
     $errors = @($logText | Select-String -Pattern '^\[[^\]]*\]\[[^\]]*\]\w+: Error: |^\w+: Error: ')
     if ($usage.Count) { $problems += "$($usage.Count) 'missing usage flag' line(s)" }
     if ($fallback.Count) { $problems += "$($fallback.Count) 'Default Material will be used' line(s)" }
+    if ($compile.Count) { $problems += "$($compile.Count) material compile failure line(s)" }
+    $landscape = @($result -split '\r?\n' | Where-Object { $_ -like 'LANDSCAPE_MATERIAL *' })
+    if ($landscape.Count -lt 6) { $problems += "landscape material checked at $($landscape.Count) of 6 places" }
     if ($gaveUp.Count) { $problems += "$($gaveUp.Count) ground hold(s) gave up (she was placed on the heightfield, not on collision)" }
     if (-not $settled.Count) { $problems += 'no HOMESTEAD_GROUND_SETTLE line: her spawn never settled on the ground' }
     if ($errors.Count -gt $MaxLogErrors) { $problems += "$($errors.Count) Error line(s), above the baseline of $MaxLogErrors" }
     $evidence = Join-Path $output 'estate-log-findings.txt'
-    (@('ESTATE_LOG usage_flags={0} default_material={1} ground_gave_up={2} ground_settles={3} errors={4} baseline={5}' -f
-        $usage.Count, $fallback.Count, $gaveUp.Count, $settled.Count, $errors.Count, $MaxLogErrors) +
-        ($usage + $fallback + $gaveUp + $errors | ForEach-Object { $_.Line })) | Set-Content -LiteralPath $evidence
+    (@('ESTATE_LOG usage_flags={0} default_material={1} material_compile={2} ground_gave_up={3} ground_settles={4} errors={5} baseline={6}' -f
+        $usage.Count, $fallback.Count, $compile.Count, $gaveUp.Count, $settled.Count, $errors.Count, $MaxLogErrors) +
+        ($usage + $fallback + $compile + $gaveUp + $errors | ForEach-Object { $_.Line })) | Set-Content -LiteralPath $evidence
     Get-Content -LiteralPath $evidence | Select-Object -First 1 | Write-Output
-    $result -split '\r?\n' | Where-Object { $_ -like 'PERFORMANCE_AT *' } | Write-Output
+    $result -split '\r?\n' | Where-Object { $_ -like 'PERFORMANCE_AT *' -or $_ -like 'LANDSCAPE_MATERIAL *' } | Write-Output
     if ($problems) { throw "Estate smoke log check failed: $($problems -join '; '). Lines: $evidence" }
 }if ($NativeResumeFrom -and $result -notmatch '(?m)^NATIVE_RESUME producer_pid=[1-9]\d* consumer_pid=[1-9]\d* ') {
     throw 'Distinct-process current-save resume evidence is missing.'
