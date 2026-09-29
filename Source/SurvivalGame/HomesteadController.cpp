@@ -43,6 +43,7 @@
 #include "UI/SHomesteadHotbar.h"
 #include "UI/SHomesteadHudScale.h"
 #include "UI/SHomesteadVitals.h"
+#include "UI/SHomesteadPickups.h"
 #include "HomesteadMapComponent.h"
 #include "Simulation/HomesteadManor.h"
 #include "Simulation/HomesteadLamp.h"
@@ -641,6 +642,15 @@ void AHomesteadController::ShowHotbar()
             SNew(HomesteadMenus::SHomesteadVitals).Controller(this)
         ];
     GEngine->GameViewport->AddViewportWidgetContent(VitalsRoot.ToSharedRef(), 50);
+    PickupsRoot = SNew(SBox)
+        .Visibility_Lambda([this]()
+        {
+            return PickupsVisible() && !Pickups.IsEmpty() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+        })
+        [
+            SNew(HomesteadMenus::SHomesteadPickups).Controller(this)
+        ];
+    GEngine->GameViewport->AddViewportWidgetContent(PickupsRoot.ToSharedRef(), 50);
 }
 
 void AHomesteadController::HideHotbar()
@@ -651,6 +661,9 @@ void AHomesteadController::HideHotbar()
     if (VitalsRoot.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(VitalsRoot.ToSharedRef());
     VitalsRoot.Reset();
+    if (PickupsRoot.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(PickupsRoot.ToSharedRef());
+    PickupsRoot.Reset();
     HotbarWidget.Reset();
     HotbarRoot.Reset();
 }
@@ -1785,6 +1798,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     UpdateArrival();
     if (!Landscape) return;
+    UpdatePickups(DeltaSeconds);
     if (!StartupProbeDirectory.IsEmpty()) TickStartupProbe();
     UpdateCreekAudio();
 #if !UE_BUILD_SHIPPING
