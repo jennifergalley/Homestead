@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "WildDaffodil",
+  "description": "A clump of wild daffodils in flower, 30 cm tall: erect glaucous strap leaves and nodding flowers with pale yellow tepals round a deeper golden trumpet. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 12000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/wild_daffodil.py",
+  "source_sha256": "c3497dc116e367b6fd236fb9e5c939bfd3d86302bab2beb0084a38887855bb34",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_WildDaffodilClump": {
+      "vertices": 1280,
+      "triangles": 1468,
+      "size_cm": [
+        34.77,
+        34.02,
+        31.92
+      ],
+      "materials": [
+        {
+          "name": "M_WildDaffodil",
+          "textures": {
+            "basecolor": "T_WildDaffodil_basecolor.png",
+            "normal": "T_WildDaffodil_normal.png",
+            "roughness": "T_WildDaffodil_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.048551766872406005,
+          -0.033614881336688995,
+          0.25
+        ]
+      },
+      "fbx": "SM_WildDaffodilClump.fbx",
+      "sha256": "bba6aaef75bc6df01135dfc6ba801cf4491656dee31527363b0aa91acc01da3e",
+      "preview": "preview_SM_WildDaffodilClump.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WildDaffodilClump_hero.png",
+          "detail": "beauty_SM_WildDaffodilClump_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_WildDaffodilClump_LOD1": {
+      "vertices": 689,
+      "triangles": 648,
+      "size_cm": [
+        36.09,
+        32.54,
+        31.89
+      ],
+      "materials": [
+        {
+          "name": "M_WildDaffodil",
+          "textures": {
+            "basecolor": "T_WildDaffodil_basecolor.png",
+            "normal": "T_WildDaffodil_normal.png",
+            "roughness": "T_WildDaffodil_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.048551766872406005,
+          -0.033614881336688995,
+          0.25
+        ]
+      },
+      "fbx": "SM_WildDaffodilClump_LOD1.fbx",
+      "sha256": "f1f47a19cc6dc4d942630ea81ed2e8e33f27284ccbe3cd6d653768bc35901aa1",
+      "preview": "preview_SM_WildDaffodilClump_LOD1.png"
+    },
+    "SM_WildDaffodilClump_LOD2": {
+      "vertices": 336,
+      "triangles": 322,
+      "size_cm": [
+        29.75,
+        32.03,
+        31.89
+      ],
+      "materials": [
+        {
+          "name": "M_WildDaffodil",
+          "textures": {
+            "basecolor": "T_WildDaffodil_basecolor.png",
+            "normal": "T_WildDaffodil_normal.png",
+            "roughness": "T_WildDaffodil_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.048551766872406005,
+          -0.033614881336688995,
+          0.25
+        ]
+      },
+      "fbx": "SM_WildDaffodilClump_LOD2.fbx",
+      "sha256": "5d57b1f1649131cf04397a76553a41ac00b93eef83e7ee424fc99bc25fa08fef",
+      "preview": "preview_SM_WildDaffodilClump_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_WildDaffodil: T_WildDaffodil_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_WildDaffodil_basecolor.png": "d150300f1e18f0cb6dd2203d95c64d738cba51eec3d0bfcdd199005d73b1737b",
+    "T_WildDaffodil_normal.png": "c0f223163a928361649c9cd381a065fe46a7b07de8972ddc1ee4009d146fb5d2",
+    "T_WildDaffodil_roughness.png": "0aa640ec53ffc9300889ca29f08add35d280bbce66e65c5e61eb6ab828e7ad17"
+  }
+}

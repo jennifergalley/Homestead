@@ -3378,15 +3378,17 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
         break;
     }
     if (Node.kind == Homestead::ResourceKind::WildGarlic || Node.kind == Homestead::ResourceKind::Bluebells
-        || Node.kind == Homestead::ResourceKind::Primroses)
+        || Node.kind == Homestead::ResourceKind::Primroses || Node.kind == Homestead::ResourceKind::WildDaffodils)
     {
-        // Authored spring flowers (Scripts/Blender/Recipes wild_garlic.py, bluebell.py, primrose.py): the
+        // Authored spring flowers (Scripts/Blender/Recipes wild_garlic.py, bluebell.py, primrose.py and wild_daffodil.py): the
         // whole flowering clump is what she picks, so it's the produce.
         const TCHAR* Path = Node.kind == Homestead::ResourceKind::WildGarlic
             ? TEXT("/Game/SurvivalGame/Environment/Props/WildGarlic/SM_WildGarlic.SM_WildGarlic")
             : Node.kind == Homestead::ResourceKind::Bluebells
             ? TEXT("/Game/SurvivalGame/Environment/Props/Bluebell/SM_BluebellClump.SM_BluebellClump")
-            : TEXT("/Game/SurvivalGame/Environment/Props/Primrose/SM_PrimroseClump.SM_PrimroseClump");
+            : Node.kind == Homestead::ResourceKind::Primroses
+            ? TEXT("/Game/SurvivalGame/Environment/Props/Primrose/SM_PrimroseClump.SM_PrimroseClump")
+            : TEXT("/Game/SurvivalGame/Environment/Props/WildDaffodil/SM_WildDaffodilClump.SM_WildDaffodilClump");
         if (auto* Clump = LoadObject<UStaticMesh>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet))
         {
             Place(Clump, FVector2D::ZeroVector, Yaw, true, Random.FRandRange(0.9f, 1.15f));
