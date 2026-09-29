@@ -2,10 +2,10 @@
 
 ## 1. Calendar and hunger: lane A, which lands first
 
-- [ ] 1.1 Add `Homestead::Calendar`: day index, day of season, season, year, weekday and days left, derived from `hour` with 28-day seasons. Route `SeasonName`, `DayNumber`, the save label and rain days through it. Expose a season-rollover hook. Add native tests for the boundaries, including Winter 28 to Spring 1 of the next year
+- [x] 1.1 Add `Homestead::Calendar`: day index, day of season, season, year, weekday and days left, derived from `hour` with 28-day seasons. Route `SeasonName`, `DayNumber`, the save label and rain days through it. Expose a season-rollover hook. Add native tests for the boundaries, including Winter 28 to Spring 1 of the next year
 - [ ] 1.2 Default `dayMinutes` to 30 for new games and keep the 30/60/120 setting. Show "Mon, Spring 12" in the HUD calendar, plus "N days left" in a season's last three days. Verify at 720p and 4K
-- [ ] 1.3 Replace hunger failure with the Fed, Hungry and Famished penalties. `WorkCost` scales every work cost, sleep recovery follows the hunger state, and the threshold toasts fire once each. Add native tests covering days at 0 hunger without failure
-- [ ] 1.4 Add crop season masks, the out-of-season planting refusal, the too-late warning on planting and on the focus line, and withering at the season rollover with hoe clearing. Add native tests for the Spring-to-Summer potatoes-versus-carrots case
+- [x] 1.3 Replace hunger failure with the Fed, Hungry and Famished penalties. `WorkCost` scales every work cost, sleep recovery follows the hunger state, and the threshold toasts fire once each. Add native tests covering days at 0 hunger without failure
+- [x] 1.4 Add crop season masks, the out-of-season planting refusal, the too-late warning on planting and on the focus line, and withering at the season rollover with hoe clearing. Add native tests for the Spring-to-Summer potatoes-versus-carrots case
 - [ ] 1.5 Package, then play the first demonstration: buy and plant spring seed, advance to the end of Spring, harvest, and watch an out-of-season plot wither. Check that hunger only slows her. Capture in-game views, commit and push
 
 ## 2. New crops: lane B
