@@ -278,6 +278,12 @@ public:
     // The signed change of the last trade and how visible its readout still is (1 fresh, 0 gone).
     int64 WalletDelta() const { return LastWalletDelta; }
     float WalletDeltaAlpha() const { return FMath::Clamp(WalletDeltaRemaining / 1.0f, 0.0f, 1.0f); }
+    // What the last meal from the hotbar actually added to food and energy (after caps), for the
+    // vitals' "+N" popups; Serial counts meals so a repeat of the same gain still shows.
+    struct FMealGain { double Food = 0, Energy = 0; uint32 Serial = 0; };
+    const FMealGain& LastMealGain() const { return MealGain; }
+    // The selected hotbar slot's food, even when she has none left (Item::Count if it isn't food).
+    Homestead::Item SelectedHotbarFood() const;
     // Console playtest aid: open the general store on the ground ahead of her (moving it if it exists).
     UFUNCTION(Exec) void HomesteadOpenStore();
     // Console playtest aid: add (or with a negative amount remove) cents from her purse.
@@ -329,6 +335,9 @@ private:
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
     int64 LastWalletDelta = 0;
     float WalletDeltaRemaining = 0.0f;
+    FMealGain MealGain;
+    // A/X with food selected and nothing to interact with: eat one (or say none is left).
+    bool EatSelectedFoodInstead();
     void SyncStores();
     void TickStores(float DeltaSeconds);
     void ConsiderStoreFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;

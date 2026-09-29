@@ -775,9 +775,14 @@ void AHomesteadController::EatFromHotbar(Homestead::Item Food)
     const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     // One mouthful at a time: clicks while she is still eating are ignored.
     if (Animation && Animation->IsEating()) return;
+    const double FoodBefore = State().hunger, EnergyBefore = State().energy;
     const auto Result = Sim.Eat(Food);
     Notify(Result);
-    if (Result.ok && Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
+    if (!Result.ok) return;
+    if (Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
+    MealGain.Food = State().hunger - FoodBefore;
+    MealGain.Energy = State().energy - EnergyBefore;
+    ++MealGain.Serial;
 }
 
 TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
@@ -2280,6 +2285,9 @@ FString AHomesteadController::FocusActions() const
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
         if (!SeedPouchHint().IsEmpty())
             return (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book")) + SeedPouchHint();
+        // Food on the hotbar is eaten with A / E (or X / F) when there's nothing else to use them on.
+        if (const auto Food = SelectedHotbarFood(); Food != Homestead::Item::Count && Sim.Count(Food) > 0)
+            return A + TEXT(" Eat ") + Text(Homestead::ItemName(Food)).ToLower();
         return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
@@ -2897,7 +2905,7 @@ void AHomesteadController::Interact()
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
-    default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
+    default: if (!EatSelectedFoodInstead()) Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
 
 }
@@ -2990,6 +2998,7 @@ void AHomesteadController::Secondary()
     }
     else if (Focus == EFocus::Fire) Notify(Sim.AddFuel(FocusId, PlayerPoint()), WoodTapA);
     else if (SelectedCarriedTool() == Homestead::Item::OilLamp) MenuRefillLamp();
+    else if (Focus == EFocus::None && EatSelectedFoodInstead()) {}
     else HoeSquareAhead();
 }
 
