@@ -4169,11 +4169,11 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
     }
     FRandomStream Random(Plot.id * 193 + 51);
     const int WeedCount = Stage(Plot.weeds, 8);
-    // Weeds creeping into the bed: small tufts of the estate's yarrow/grass weed at the rim and
-    // between the ridges (the cones remain only if the mesh isn't imported).
+    // Weeds creeping into the bed: young nettles at the rim and between the ridges (the cones remain
+    // only if the mesh isn't imported). Plain green, no white flower heads, so they never read as ripe produce.
     if (!WeedTuftMesh)
         WeedTuftMesh = LoadObject<UStaticMesh>(nullptr,
-            TEXT("/Game/SurvivalGame/Environment/Props/GrassYarrowTuft/SM_GrassYarrowTuft.SM_GrassYarrowTuft"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+            TEXT("/Game/SurvivalGame/Environment/Props/Nettle/SM_NettlePatch.SM_NettlePatch"), nullptr, LOAD_NoWarn | LOAD_Quiet);
     UStaticMesh* WeedTuft = WeedTuftMesh;
     for (int I = 0; I < WeedCount; ++I)
     {

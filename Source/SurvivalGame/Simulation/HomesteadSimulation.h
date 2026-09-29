@@ -255,6 +255,10 @@ struct Plot
     double moisture = 0.0;
     double weeds = 0.0;
     CropKind kind = CropKind::Roots;
+    // A regrowing crop (beans, strawberries) picked at least once since sowing: its status counts the
+    // regrowth days ("ripening again, day 1 of 3") instead of the first growth. Saved in the optional
+    // "picked" section; older saves default to false.
+    bool picked = false;
 };
 
 struct WorldDrop

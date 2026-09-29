@@ -144,6 +144,14 @@ std::string Encode(const State& s, int version = SimulationSaveVersion, int widt
         out << "tools " << ToolKindCount;
         for (const ToolTier tier : s.toolTiers) out << ' ' << static_cast<int>(tier);
         out << '\n';
+        std::vector<int> picked;
+        for (const auto& p : s.plots) if (p.planted && p.picked) picked.push_back(p.id);
+        if (!picked.empty())
+        {
+            out << "picked " << picked.size();
+            for (int id : picked) out << ' ' << id;
+            out << '\n';
+        }
     }
     return Envelope(out.str(), version);
 }
@@ -1306,11 +1314,20 @@ void CropTableAndStatus()
     for (const auto& plot : sim.GetState().plots) if (plot.id == beanId) beanPlot = &plot;
     CHECK(beanPlot && beanPlot->planted && beanPlot->kind == CropKind::BroadBeans);
     CHECK(beanPlot && Close(beanPlot->growth, 1.0 - 72.0 / 168.0) && StageOf(*beanPlot) == CropStage::Growing);
-    CHECK(beanPlot && PlotStatus(*beanPlot).rfind("Broad beans: day 5 of 7", 0) == 0);
-    // Appended crop kinds survive a save round trip.
+    CHECK(beanPlot && beanPlot->picked && PlotStatus(*beanPlot).rfind("Broad beans: ripening again, day 1 of 3", 0) == 0);
+    Edit(sim, [&](State& state) { for (auto& plot : state.plots) if (plot.id == beanId) plot.growth = 1.0 - 24.0 / 168.0 + 0.01; });
+    for (const auto& plot : sim.GetState().plots)
+        if (plot.id == beanId) CHECK(PlotStatus(plot).rfind("Broad beans: ripening again, day 3 of 3", 0) == 0);
+    Edit(sim, [&](State& state) { for (auto& plot : state.plots) if (plot.id == beanId) plot.growth = 1.0 - 72.0 / 168.0; });
+    // Appended crop kinds and the picked flag survive a save round trip; saves without it load unpicked.
     Simulation saved;
     OK(saved.Deserialize(sim.Serialize()));
     CHECK(saved.Serialize() == sim.Serialize());
+    for (const auto& plot : saved.GetState().plots) if (plot.id == beanId) CHECK(plot.picked);
+    {
+        std::string text = sim.Serialize();
+        CHECK(text.find("picked 1 " + std::to_string(beanId) + "\n") != std::string::npos);
+    }
 
     // Playtest aid: passing tended days grows a crop on schedule; untended ones dry out and lag.
     Stock(sim, {{Item::TurnipSeed, 2}});
