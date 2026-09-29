@@ -79,6 +79,10 @@ integration session merges and packages.
 
 **Registry: estate placement ids and scenery kinds.** Claim a range here (through the docs agent or
 the orchestrator) before using it, and keep the comment at `Simulation\HomesteadEstate.h` ~87 in step.
+**Section order:** later sections yield to earlier ones (they keep clear of what's already placed), so
+`ProvisionalEstatePlacements` adds them in id order: berry brambles (540000+), then the derelict farm
+(550000+), then the clear-out (570000+). Adding the farm first skipped 10 of 42 brambles and failed
+`HomesteadSimulationTests` (~line 3259, `berries >= 36 && byDoor >= 2`).
 **Append only:** placements added with `grow()`/`along()` in `HomesteadEstate.cpp` take sequential ids
 (`next++`), so inserting a line mid-run renumbers every later placement, and saves then clear the
 wrong nodes. Moving or removing placements needs `table.bakeVersion` raised (the orchestrator's call,
@@ -218,21 +222,19 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Pending doc updates on merge
 
+- Lamp lane (on its branch, not on `main` yet): the new commands `LabHold Lamp`, `LabAction LampDown|LampUp`,
+  `HomesteadLampOil <hours>`, and `HomesteadTeleport X Y [Z]` (stands her on the ground once collision has
+  streamed in; McpHelpers `tp` switches to it); lamp clips from `homestead_agent.lamp_pose`
+  (`build_raised` / `build_set_down` / `report`) and glass/flame materials from
+  `homestead_agent.lamp_materials.build()`. When it lands, add these to the character-lab and
+  console-command notes in the editor skill and check `tp`'s help in `McpHelpers.ps1`.
+
 - Lamp lane (uncommitted in `jennifergalley-fluffy-broccoli` as of 2026-09-28): `build_prop.py` gains a
   recipe-level `BAKE_MESHES = {"SM_Name"}` (or a dict of per-mesh overrides) to bake only chosen meshes,
   so a prop can bake its opaque body while leaving separate glass or flame meshes unbaked
   (`Recipes/oil_lamp.py`: `SM_OilLamp` baked, `SM_OilLampGlass` and `SM_OilLampFlame` not). With only
   `BAKE`, every mesh still bakes. When it lands, add it to the Blender skill's "Bake and review
   settings" step and `docs\blender-assets.md`.
-
-- Build speed (`f6ed1c42`, waiting on the orchestrator): once it merges, (a) point every `Build.bat
-  SurvivalGameEditor ...` recipe (editor skill quick-start and section 8, `docs\handoff\README.md` step 3,
-  `docs\setup.md`) at `Scripts\Invoke-UnrealBuild.ps1` (`-Target`, `-CheckOnly`, `-Force`; it skips UBT when
-  already built, logs to `Saved\Logs\UnrealBuildTool-<targets>.log`, and passes `-UBADisableRemote`), and
-  document `Start-EditorMcp -ForceBuild`; (b) add the private-PCH rule: `SurvivalGame` uses
-  `Source\SurvivalGame\SurvivalGamePCH.h`; `C2027`/`C2065 use of undefined type` in a file that used to
-  compile means include that engine header in the file; add to the PCH only headers many files use,
-  never UnrealEd or editor headers; every `.cpp` must compile on its own. The docs agent does this.
 
 - Architecture agent (not on `main` yet):
   - **Legacy probes removed** (`26b367e9`): `Test-AuthoringSettings.ps1`, `Tests\HomesteadMenuSourceTests.py`,

@@ -127,8 +127,8 @@ A lane delivers an increment like this:
    5-minute build took 40. Batch several fixes, then
    one editor build and one PIE pass, not a build per fix. Asset, Blender, Python and config work needs
    no build: launch with `Start-EditorMcp.ps1 -SkipBuild` if your binaries are current. When C++ did
-   change, build the editor module once: `Build.bat SurvivalGameEditor Win64 Development
-   "-Project=<worktree>\SurvivalGame.uproject" -WaitMutex -NoHotReloadFromIDE`. Don't compile the
+   change, build the editor module once with `Scripts\Invoke-UnrealBuild.ps1` (it skips UBT if the module is
+   already built from these sources, and logs to `Saved\Logs`). Don't compile the
    `SurvivalGame` game target; the integration session does that once per batch (unity-build clashes
    the editor build hides show up there; see the editor skill's table 0.1). Keep running the native
    tests (step 2).
