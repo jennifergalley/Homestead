@@ -94,6 +94,7 @@ Homestead::Result AHomesteadController::ShopTrade(int32 ShopId, Homestead::Item 
         LastWalletDelta = State().money - Before;
         WalletDeltaRemaining = 3.0f;
         PlayEffect(bSell ? WoodTapA : WoodTapB, 0.35f);
+        if (!bSell) PinNewSeed(Item);
     }
     return Result;
 }

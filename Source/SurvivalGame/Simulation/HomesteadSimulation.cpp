@@ -1,4 +1,5 @@
 #include "HomesteadSimulation.h"
+#include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadParcels.h"
 #include "HomesteadManor.h"
@@ -7,6 +8,7 @@
 #include "HomesteadSimulationDetail.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <cstdint>
 #include <iomanip>
@@ -894,8 +896,7 @@ const char* PieceName(Piece piece)
 }
 const char* CropName(CropKind kind)
 {
-    static const char* names[] = {"Roots", "Berries"};
-    return ValidEnum(kind, CropKind::Count) ? names[static_cast<int>(kind)] : "Unknown crop";
+    return GetCropInfo(kind).name;
 }
 const char* RecipeRequirements(Recipe recipe)
 {
@@ -2504,19 +2505,20 @@ Result Simulation::Till(int cellX, int cellY, Point player)
 Result Simulation::Plant(int plotId, Point player, CropKind kind)
 {
     if (state_.failed) return Failed();
-    if (!ValidEnum(kind, CropKind::Count)) return Bad("Choose roots or berries to plant.");
+    if (!ValidEnum(kind, CropKind::Count)) return Bad("Choose seeds to plant.");
     auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a tilled plot to plant.");
     if (plot->planted) return Bad("A crop is already growing here.");
-    const bool berries = kind == CropKind::Berries;
-    const Item plantingItem = berries ? Item::Berries : Item::Seeds;
+    const auto& crop = GetCropInfo(kind);
     if (auto ready = CheckExertion(Exertion::PlantEnergy); !ready) return ready;
-    if (!TryAdjust(Items({{plantingItem, -1}})))
-        return Bad(berries ? "Gather a berry to plant the seeds from its fruit." : "Gather seeds from wild roots before planting.");
+    if (!TryAdjust(Items({{crop.seed, -1}})))
+        return Bad(kind == CropKind::Berries ? "Gather a berry to plant the seeds from its fruit."
+            : kind == CropKind::Roots ? "Gather seeds from wild roots before planting."
+            : std::string("You have no ") + ItemName(crop.seed) + " to sow.");
     plot->kind = kind;
     plot->planted = true;
     plot->growth = 0.0;
-    return Exert(Exertion::PlantEnergy, Good(berries ? "Planted berry seeds." : "Roots planted."));
+    return Exert(Exertion::PlantEnergy, Good(std::string("Planted ") + crop.lower + ". " + ReadyInText(kind)));
 }
 Result Simulation::Water(int plotId, Point player)
 {
@@ -2545,15 +2547,31 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     if (state_.failed) return Failed();
     auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside your crop to harvest.");
-    if (!plot->planted || plot->growth < 1.0) return Bad("This crop is not ready to harvest.");
-    const bool berries = plot->kind == CropKind::Berries;
-    const Inventory yield = berries ? Items({{Item::Berries, 6}}) : Items({{Item::Roots, 4}, {Item::Seeds, 2}});
+    if (!plot->planted || plot->growth < 1.0)
+        return Bad(plot->planted ? PlotStatus(*plot) + "." : std::string("Nothing is growing here yet."));
+    const auto& crop = GetCropInfo(plot->kind);
+    Inventory yield{};
+    yield[static_cast<int>(crop.produce)] += crop.produceCount;
+    if (crop.bonus != Item::Count && crop.bonusCount > 0) yield[static_cast<int>(crop.bonus)] += crop.bonusCount;
     if (auto ready = CheckExertion(Exertion::HarvestCropEnergy); !ready) return ready;
     if (!TryAdjust(yield)) return Bad(MissingMessage(yield, state_.inventory));
-    plot->planted = berries;
-    plot->growth = 0.0;
-    return Exert(Exertion::HarvestCropEnergy, Good(berries ? "Harvested six berries. The bush remains planted and will grow more fruit."
-        : "Harvested four roots and two seeds. This plot is ready to replant."));
+    const bool regrows = crop.regrowHours > 0.0;
+    plot->planted = regrows;
+    // A cleared plot keeps the neutral kind (saves require it for bare soil).
+    if (!regrows) plot->kind = CropKind::Roots;
+    plot->growth = regrows ? std::max(0.0, 1.0 - crop.regrowHours / crop.growHours) : 0.0;
+    const auto counted = [](Item item, int count)
+    {
+        std::string text = CountedName(item, count);
+        for (auto& c : text) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+        return text;
+    };
+    std::string message = "Harvested " + counted(crop.produce, crop.produceCount);
+    if (crop.bonus != Item::Count && crop.bonusCount > 0) message += " and " + counted(crop.bonus, crop.bonusCount);
+    message += regrows ? ". More will ripen in about " + std::to_string(CropRegrowDays(plot->kind))
+            + (CropRegrowDays(plot->kind) == 1 ? " day." : " days.")
+        : ". This plot is ready to replant.";
+    return Exert(Exertion::HarvestCropEnergy, Good(message));
 }
 Result Simulation::FillWater(Point player)
 {
@@ -2624,10 +2642,9 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
         plot.weeds = Clamp(plot.weeds + 0.009 * elapsed, 0.0, 1.0);
         if (plot.planted)
         {
-            const double moistureFactor = 0.15 + 0.85 * plot.moisture;
-            const double weedFactor = 1.0 - 0.7 * plot.weeds;
-            const double growingHours = plot.kind == CropKind::Berries ? 42.0 : 30.0;
-            plot.growth = Clamp(plot.growth + elapsed * moistureFactor * weedFactor / growingHours, 0.0, 1.0);
+            const double growingHours = GetCropInfo(plot.kind).growHours;
+            const double rate = MoistureGrowthFactor(plot.moisture) * WeedGrowthFactor(plot.weeds) / growingHours;
+            plot.growth = Clamp(plot.growth + elapsed * rate, 0.0, 1.0);
         }
     }
     const double before = state_.hour;
@@ -2737,6 +2754,44 @@ void Simulation::SkipToHourOfDay(double hourOfDay)
     if (target > MaxHour) return;
     state_.hour = target;
     ++revision_;
+}
+Result Simulation::SetCropGrowthForPlaytest(double growth)
+{
+    if (state_.failed) return Failed();
+    if (!FiniteRange(growth, 0.0, 1.0)) return Bad("Growth must be between 0 and 1.");
+    int count = 0;
+    for (auto& plot : state_.plots)
+        if (plot.planted)
+        {
+            plot.growth = growth;
+            ++count;
+        }
+    ++revision_;
+    return Good(std::to_string(count) + (count == 1 ? " crop set to " : " crops set to ")
+        + std::to_string(static_cast<int>(std::lround(growth * 100))) + "% grown.");
+}
+Result Simulation::PassDaysForPlaytest(double days, bool tend, Point player)
+{
+    if (state_.failed) return Failed();
+    if (!FiniteRange(days, 0.0, 60.0) || days <= 0.0) return Bad("Choose between a moment and 60 days.");
+    double left = std::min(days * 24.0, MaxHour - state_.hour);
+    while (left > 1e-9)
+    {
+        if (tend)
+            for (auto& plot : state_.plots)
+            {
+                plot.moisture = 1.0;
+                plot.weeds = 0.0;
+            }
+        state_.hunger = 100.0;
+        state_.energy = 100.0;
+        left -= Step(std::min(1.0, left), player, false);
+    }
+    state_.hunger = 100.0;
+    state_.energy = 100.0;
+    ++revision_;
+    const int whole = static_cast<int>(std::lround(days));
+    return Good(std::to_string(whole) + (whole == 1 ? " day passes" : " days pass") + (tend ? "; the garden was tended." : "."));
 }
 Result Simulation::Sleep(double hours, Point player)
 {
