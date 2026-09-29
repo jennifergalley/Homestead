@@ -352,14 +352,21 @@ Point FurnitureOffset(Piece kind);
 Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation);
 Footprint StructureFootprint(const State& state, const Structure& structure);
 bool FootprintsOverlap(const Footprint& a, const Footprint& b);
-double BedSleepHours(double hour);
-
 // Energy: time awake drains it slowly; work spends it. Work is refused when it would leave her
-// below Reserve, so exertion alone never collapses her.
+// below Reserve. Nothing enforces a bedtime: sleep restores SleepPerHour for each hour slept at any
+// hour, and only running Energy out forces rest, when she dozes off where she stands.
 namespace Exertion
 {
 constexpr double AwakePerHour = 0.6;
 constexpr double Reserve = 5.0;
+constexpr double SleepPerHour = 10.0;
+// Dozing off on the spot: DozeHours of rough sleep at the slower DozePerHour, so she wakes stiff
+// and only part rested.
+constexpr double DozeHours = 6.0;
+constexpr double DozePerHour = 6.0;
+constexpr double NapHours = 1.0;
+constexpr double MinRestHours = 1.0;
+constexpr double MaxRestHours = 10.0;
 constexpr double GatherEnergy = 0.5;
 constexpr double ClearEnergy = 1.0;
 constexpr double SaplingEnergy = 1.5;
@@ -380,6 +387,21 @@ constexpr double FillWaterEnergy = 0.3;
 constexpr double FuelEnergy = 0.2;
 constexpr double DeconstructEnergy = 1.0;
 }
+
+// What the bed offers (flexible-sleep): each choice with its length and the hour of day she'd wake.
+enum class SleepChoice { UntilMorning, UntilRested, Nap };
+struct SleepOption
+{
+    SleepChoice choice = SleepChoice::UntilRested;
+    double hours = 0.0;
+    double wakeHour = 0.0; // Hour of day, 0-24.
+};
+constexpr double MorningWakeHour = 6.75;
+// The choices at `hour` with `energy`, the default first: "until morning" (06:45) in the evening and
+// at night (18:00-05:00), "until rested" (her Energy deficit at SleepPerHour, a quarter hour up,
+// MinRestHours to MaxRestHours; left out when it would wake her within 45 minutes of morning) and a
+// NapHours nap (left out when "until rested" is already that short).
+std::vector<SleepOption> SleepOptions(double hour, double energy);
 
 struct PreparedWorldRegion
 {
@@ -501,6 +523,11 @@ public:
         std::uint64_t expectedRevision);
     Result PickUpDrop(int dropId, Point player);
     Result Sleep(double hours, Point player);
+    // How many times she has dozed off from exhaustion in this session (never saved); the game
+    // compares it to tell her when she wakes.
+    int DozeCount() const { return dozes_; }
+    // Playtest aid: set her Energy (0-100).
+    Result SetEnergy(double energy);
     Result SetDayMinutes(double minutes);
 
     // Overgrowth clearing (HomesteadOvergrowth.cpp). `tool` is the carried tool she swings, or
@@ -560,6 +587,7 @@ private:
     std::function<bool(Point)> waterProbe_;
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
+    int dozes_ = 0;
     bool TryAdjust(const Inventory& change);
     Result CheckRevision(std::uint64_t expectedRevision) const;
     // CheckPlacement without the reach and exertion rules (the starter kit places from afar).
@@ -567,7 +595,11 @@ private:
     Result CommitInventory(State&& candidate, const char* message);
     // Charges `cost` Energy when `done` succeeded.
     Result Exert(double cost, Result done);
-    void Step(double hours, Point player, bool sleeping);
+    // Advances the world up to `hours` and returns the hours actually passed (less when hunger runs
+    // out, or awake Energy reaches zero). Sleeping restores `recoveryPerHour` Energy an hour.
+    double Step(double hours, Point player, bool sleeping, double recoveryPerHour = Exertion::SleepPerHour);
+    // Out of Energy: she sleeps where she stands for DozeHours at DozePerHour. Returns hours slept.
+    double DozeOff(Point player);
     // Shops (HomesteadShops.cpp).
     static void SeedEstateShops(State& candidate, const EstateLayout& layout);
     static void RefreshShopCounters(State& candidate, const EstateLayout& layout);

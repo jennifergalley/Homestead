@@ -1222,7 +1222,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 && !Controller->Simulation().IsNearFire(Controller->PlayerPoint())
                 && !Controller->IsFailed();
         }, 0.65f);
-    // Only hunger can fail her now, so allow enough rests to run it out even when daytime naps occur.
+    // Only hunger can fail her (running out of Energy makes her doze off), so sleep night after night
+    // until it runs out.
     for (int32 Rest = 0; Rest < 40; ++Rest)
     {
         const auto BeforeHour = MakeShared<double>(0);
@@ -1231,6 +1232,9 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         Add(FString::Printf(TEXT("Outdoor sleep %d advances real survival needs until failure"), Rest + 1),
             [this, BeforeHour, BeforeHunger, ExpectedSleep]()
             {
+                // Beds no longer cap daytime sleep by the clock, and "until rested" is short when she
+                // is rested, so go to bed at night each time: "until morning" is a full night.
+                Controller->Sim.SkipToHourOfDay(22.75);
                 *BeforeHour = Controller->State().hour;
                 *BeforeHunger = Controller->State().hunger;
                 *ExpectedSleep = Controller->BedSleepHours();

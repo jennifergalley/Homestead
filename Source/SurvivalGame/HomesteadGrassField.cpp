@@ -7,10 +7,12 @@
 #include "HomesteadEstateTerrain.h"
 #include "Materials/MaterialInterface.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadGround, Log, All);
+
 namespace
 {
 // Clear radius (cm) round each kind of interactable, so the meadow never hides one.
-float ClearRadius(Homestead::ResourceKind Kind)
+float GrassClearRadius(Homestead::ResourceKind Kind)
 {
     using K = Homestead::ResourceKind;
     switch (Kind)
@@ -29,15 +31,15 @@ float ClearRadius(Homestead::ResourceKind Kind)
     }
 }
 
-uint64 Mix(uint64 Hash, uint64 Value)
+uint64 GrassMix(uint64 Hash, uint64 Value)
 {
     Hash ^= Value + 0x9e3779b97f4a7c15ull + (Hash << 6) + (Hash >> 2);
     return Hash;
 }
 
-uint64 Quantize(double Value) { return static_cast<uint64>(static_cast<int64>(FMath::RoundToDouble(Value))); }
+uint64 GrassQuantize(double Value) { return static_cast<uint64>(static_cast<int64>(FMath::RoundToDouble(Value))); }
 
-FIntPoint CellOf(float X, float Y, float Size)
+FIntPoint GrassCellOf(float X, float Y, float Size)
 {
     return FIntPoint(FMath::FloorToInt32(X / Size), FMath::FloorToInt32(Y / Size));
 }
@@ -53,7 +55,7 @@ bool UHomesteadGrassField::LoadAssets()
         UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
         if (!Mesh)
         {
-            UE_LOG(LogTemp, Warning, TEXT("Estate grass mesh missing: %s. Run Scripts/Terrain/build_ground.py."), *Path);
+            UE_LOG(LogHomesteadGround, Warning, TEXT("Estate grass mesh missing: %s. Run Scripts/Terrain/build_ground.py."), *Path);
             return false;
         }
         Meshes.Add(Mesh);
@@ -61,7 +63,7 @@ bool UHomesteadGrassField::LoadAssets()
     Material = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/SurvivalGame/Estate/Ground/MI_EstateGrass.MI_EstateGrass"));
     if (!Material)
     {
-        UE_LOG(LogTemp, Warning, TEXT("MI_EstateGrass is missing. Run Scripts/Terrain/build_ground.py."));
+        UE_LOG(LogHomesteadGround, Warning, TEXT("MI_EstateGrass is missing. Run Scripts/Terrain/build_ground.py."));
         return false;
     }
     bAssetsReady = true;
@@ -82,23 +84,23 @@ uint64 UHomesteadGrassField::LayoutSignature(const Homestead::State& State) cons
     uint64 Hash = 1469598103934665603ull;
     for (const auto& Node : State.resources)
     {
-        Hash = Mix(Hash, static_cast<uint64>(Node.id));
-        Hash = Mix(Hash, Quantize(Node.position.x));
-        Hash = Mix(Hash, Quantize(Node.position.y));
+        Hash = GrassMix(Hash, static_cast<uint64>(Node.id));
+        Hash = GrassMix(Hash, GrassQuantize(Node.position.x));
+        Hash = GrassMix(Hash, GrassQuantize(Node.position.y));
     }
     for (const auto& Drop : State.worldDrops)
     {
-        Hash = Mix(Hash, static_cast<uint64>(Drop.id) + 0x5000000ull);
-        Hash = Mix(Hash, Quantize(Drop.position.x));
-        Hash = Mix(Hash, Quantize(Drop.position.y));
+        Hash = GrassMix(Hash, static_cast<uint64>(Drop.id) + 0x5000000ull);
+        Hash = GrassMix(Hash, GrassQuantize(Drop.position.x));
+        Hash = GrassMix(Hash, GrassQuantize(Drop.position.y));
     }
     for (const auto& Plot : State.plots)
-        Hash = Mix(Hash, (static_cast<uint64>(static_cast<uint32>(Plot.cellX)) << 32) ^ static_cast<uint32>(Plot.cellY) ^ 0x70ull);
+        Hash = GrassMix(Hash, (static_cast<uint64>(static_cast<uint32>(Plot.cellX)) << 32) ^ static_cast<uint32>(Plot.cellY) ^ 0x70ull);
     for (const auto& Structure : State.structures)
     {
-        Hash = Mix(Hash, static_cast<uint64>(Structure.id) + 0x9000000ull);
-        Hash = Mix(Hash, (static_cast<uint64>(static_cast<uint32>(Structure.cellX)) << 32) ^ static_cast<uint32>(Structure.cellY));
-        Hash = Mix(Hash, static_cast<uint64>(Structure.buildingId) * 31 + static_cast<uint64>(Structure.kind));
+        Hash = GrassMix(Hash, static_cast<uint64>(Structure.id) + 0x9000000ull);
+        Hash = GrassMix(Hash, (static_cast<uint64>(static_cast<uint32>(Structure.cellX)) << 32) ^ static_cast<uint32>(Structure.cellY));
+        Hash = GrassMix(Hash, static_cast<uint64>(Structure.buildingId) * 31 + static_cast<uint64>(Structure.kind));
     }
     return Hash;
 }
@@ -113,13 +115,13 @@ void UHomesteadGrassField::RebuildObstacles(const Homestead::State& State)
         const int32 Index = Obstacles.Add({FVector2f(static_cast<float>(X), static_cast<float>(Y)), Radius});
         // Register in every cell a tile could see it from.
         const float Reach = Radius + TileCm;
-        const FIntPoint Low = CellOf(X - Reach, Y - Reach, ChunkCm), High = CellOf(X + Reach, Y + Reach, ChunkCm);
+        const FIntPoint Low = GrassCellOf(X - Reach, Y - Reach, ChunkCm), High = GrassCellOf(X + Reach, Y + Reach, ChunkCm);
         for (int32 CX = Low.X; CX <= High.X; ++CX)
             for (int32 CY = Low.Y; CY <= High.Y; ++CY)
                 ObstacleCells.Add(FIntPoint(CX, CY), Index);
     };
     for (const auto& Node : State.resources)
-        Add(Node.position.x, Node.position.y, ClearRadius(Node.kind));
+        Add(Node.position.x, Node.position.y, GrassClearRadius(Node.kind));
     for (const auto& Drop : State.worldDrops)
         Add(Drop.position.x, Drop.position.y, 60.0f);
     for (const auto& Plot : State.plots)
@@ -129,6 +131,32 @@ void UHomesteadGrassField::RebuildObstacles(const Homestead::State& State)
     }
     for (const auto& Structure : State.structures)
         Blocks.Add(Homestead::StructureFootprint(State, Structure));
+}
+
+uint64 UHomesteadGrassField::ChunkObstacleSignature(FIntPoint Chunk) const
+{
+    uint64 Hash = 0x9e37ull;
+    TArray<int32> Near;
+    ObstacleCells.MultiFind(Chunk, Near);
+    Near.Sort();
+    for (const int32 Index : Near)
+    {
+        const FObstacle& O = Obstacles[Index];
+        Hash = GrassMix(Hash, GrassQuantize(O.Centre.X));
+        Hash = GrassMix(Hash, GrassQuantize(O.Centre.Y));
+        Hash = GrassMix(Hash, GrassQuantize(O.Radius));
+    }
+    const FBox2D Box(FVector2D(Chunk.X * ChunkCm - TileCm, Chunk.Y * ChunkCm - TileCm),
+        FVector2D((Chunk.X + 1) * ChunkCm + TileCm, (Chunk.Y + 1) * ChunkCm + TileCm));
+    for (const auto& Block : Blocks)
+    {
+        const double Reach = FMath::Max(Block.half.x, Block.half.y) * UE_SQRT_2;
+        if (Box.ComputeSquaredDistanceToPoint(FVector2D(Block.center.x, Block.center.y)) > Reach * Reach) continue;
+        Hash = GrassMix(Hash, GrassQuantize(Block.center.x));
+        Hash = GrassMix(Hash, GrassQuantize(Block.center.y));
+        Hash = GrassMix(Hash, GrassQuantize(Block.yaw * 10.0));
+    }
+    return Hash;
 }
 
 bool UHomesteadGrassField::IsBlocked(FVector2D Centre) const
@@ -235,6 +263,7 @@ void UHomesteadGrassField::BuildChunk(FIntPoint Chunk, FChunk& Out, int32 Lod)
             for (int32 I = 0; I < 3; ++I)
                 Custom.Append({Found[I][0], Found[I][1], Found[I][2]});
         }
+    Out.Obstacles = ChunkObstacleSignature(Chunk);
     if (Transforms.IsEmpty())
     {
         ReleaseChunk(Out);
@@ -263,10 +292,12 @@ void UHomesteadGrassField::Update(const Homestead::State& State, const FVector& 
     {
         Signature = Now;
         RebuildObstacles(State);
-        for (auto& Entry : Live) Entry.Value.Lod = INDEX_NONE; // Rebuild every live chunk below.
+        // Rebuild only the chunks whose interactables or building pieces changed.
+        for (auto& Entry : Live)
+            if (Entry.Value.Obstacles != ChunkObstacleSignature(Entry.Key)) Entry.Value.Lod = INDEX_NONE;
     }
-    const FIntPoint Low = CellOf(View.X - RadiusCm, View.Y - RadiusCm, ChunkCm);
-    const FIntPoint High = CellOf(View.X + RadiusCm, View.Y + RadiusCm, ChunkCm);
+    const FIntPoint Low = GrassCellOf(View.X - RadiusCm, View.Y - RadiusCm, ChunkCm);
+    const FIntPoint High = GrassCellOf(View.X + RadiusCm, View.Y + RadiusCm, ChunkCm);
     TMap<FIntPoint, int32> Want;
     for (int32 CX = Low.X; CX <= High.X; ++CX)
         for (int32 CY = Low.Y; CY <= High.Y; ++CY)
