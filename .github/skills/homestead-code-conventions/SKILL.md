@@ -64,7 +64,7 @@ disagree, follow the code and tell the Architecture Agent.
   members and `TAutoConsoleVariable`/`FAutoConsoleCommand` arguments are constructed during static
   initialization, before the engine has set the command line, config, paths or `GEngine`. The
   packaged game is monolithic, so a read there is a fatal launch crash (`CrashDuringStaticInit`,
-  exit 777006). Editor and PIE builds hide it, because modules load after the engine is up. Every
+  exit 777006, and no log is written). Editor and PIE builds hide it, because modules load after the engine is up. Every
   packaged build crashed at launch from `a725ff1d` to `7c5fdc28` because of
   `FParse::Param(FCommandLine::Get(), ...)` in a CVar default. So: CVar defaults are literals (use
   `-1` for "follow the command line" and resolve it in a function on use, as `SkipNewGameSetup()` in

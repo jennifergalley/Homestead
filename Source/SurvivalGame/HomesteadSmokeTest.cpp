@@ -192,6 +192,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadEstateSmoke")))
+    {
+        PrepareEstateSmokeChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadGeneratedWoodland")))
     {
         PrepareGeneratedWorldChecks();
@@ -879,6 +884,7 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadCameraPreferenceTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadEstateSmoke"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));

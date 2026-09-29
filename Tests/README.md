@@ -1,5 +1,26 @@
 # Homestead verification
 
+## Estate smoke (what Jenny plays)
+
+`Scripts\Test-Game.ps1 -EstateSmoke` (packaged: add `-Packaged`) is the only route on the Estate map;
+every other suite loads the legacy woodland. It runs `-HomesteadSmokeTest -HomesteadEstateSmoke
+-HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRequireLit` in an isolated save sandbox
+(`<output>\SmokeSave`; Jenny's saves are never touched). Route: `HomesteadEstateSmokeTest.cpp`.
+
+- A new estate game started the way a player starts one (Names skipped, default names).
+- A loose stone gathered and a weed pulled by hand with gamepad A, each checked in the pack.
+- Ground-settle visits to the manor clear-out, the derelict farm, the MVP woodland, the drive at the
+  gateway and the store door, with a capture at each (`estate-*.png`).
+- The oil lamp selected with key 8 at 22:00, in hand and lit.
+- `PERFORMANCE_AT manor|woods mean_fps=... p95_frame_ms=... p99_frame_ms=...` (12 s after a 6 s
+  settle), for the Performance pass.
+
+The runner then fails the run on any `missing usage flag` or `Default Material will be used` line, a
+ground hold that gave up, a spawn that never logged `HOMESTEAD_GROUND_SETTLE`, or more Error lines
+than `-MaxLogErrors` (default 0). Findings are in `<output>\estate-log-findings.txt`. First run
+(editor binary `-game`, 2026-09-28): all steps passed, 0 errors, manor 53.9 fps (p99 29.3 ms), woods
+35.8 fps (p99 54.5 ms); packaged numbers will differ.
+
 ## Directional menu refinement
 
 The focused existing smoke route accepts `-HomesteadDirectionalNavigationTest`
