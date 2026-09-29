@@ -2527,8 +2527,9 @@ Result Simulation::Water(int plotId, Point player)
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to water it.");
     if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to water crops.");
     if (plot->moisture >= 1.0) return Bad("This soil is already fully watered.");
+    if (Count(Item::Water) <= 0) return Bad(EmptyPailText);
     if (auto ready = CheckExertion(Exertion::WaterEnergy); !ready) return ready;
-    if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad("Refill your pail at the stream.");
+    if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad(EmptyPailText);
     plot->moisture = 1.0;
     return Exert(Exertion::WaterEnergy, Good("Soil watered."));
 }

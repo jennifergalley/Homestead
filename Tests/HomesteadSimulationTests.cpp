@@ -1012,6 +1012,7 @@ void FarmingAndRain()
     OK(sim.Plant(id, garden));
     UnchangedFailure(sim, [&] { return sim.Plant(id, garden); });
     UnchangedFailure(sim, [&] { return sim.Water(id, garden); });
+    CHECK(sim.Water(id, garden).message == EmptyPailText);
     UnchangedFailure(sim, [&] { return sim.FillWater(Home); });
     OK(sim.FillWater(WaterSource));
     OK(sim.Water(id, garden));
@@ -1247,6 +1248,10 @@ void CropTableAndStatus()
     Plot bush{2, 0, 0, true, 1.0 - 24.0 / 42.0 + 0.01, 1.0, 0.0, CropKind::Berries};
     CHECK(StageOf(bush) == CropStage::Young);
     CHECK(PlotStatus(bush) == "Berries: day 1 of 2");
+    // Broad beans past the regrow point on their first growth still count days 5 of 7 and show Growing.
+    Plot firstBeans{3, 0, 0, true, 1.0 - 72.0 / 168.0 + 0.02, 1.0, 0.0, CropKind::BroadBeans};
+    CHECK(StageOf(firstBeans) == CropStage::Growing);
+    CHECK(PlotStatus(firstBeans) == "Broad beans: day 5 of 7");
 
     // A roots crop sown and watered each morning ripens on its stated day.
     Simulation sim;
