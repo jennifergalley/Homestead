@@ -114,8 +114,8 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   before your `[ready]`. PIE saves live in the worktree's `Saved\SaveGames` (Estate in
   `SaveGames\Estate\`). Packaged saves live inside the package at `SurvivalGame\Saved\SaveGames`,
   not in `%LOCALAPPDATA%`.
-  **Items (v13+):** append to `enum class Item` freely; never reorder or remove values. New save
-  sections write any list or per-enum array with its count first.
+  **Items (v13+):** append to `enum class Item` freely; never reorder or remove values. Any list or
+  per-enum array in a tagged save section is written with its count first (the architecture agent's rule).
 - **Git with sub-agents.** Don't `git stash -u` while a sub-agent may be writing files; use
   `git pull --rebase --autostash`. Never commit `Content/Trials/Probe/` or `.uasset`/`.umap`
   changes that aren't yours. The Estate level uses one file per actor: commit only your own
@@ -167,7 +167,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
 | The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
 | `hshot` / `HighResShot` captures come out black | The editor window is minimised | Keep it restored (it can be behind other windows). |
-| On the first PIE after launch, a floating "Message Log" window (Asset Check, Map Check, Localization Service) covers PIE in `shot` captures | The editor reports load-time checks | Close it with `click` on its X (scale capture coordinates to window pixels; see the helper table). |
+| On the first PIE after launch, a floating "Message Log" window (Asset Check, Map Check, Localization Service) covers PIE in `shot` captures | The editor reports load-time checks | Close it: post `WM_CLOSE` to the editor-PID window titled "Message Log", or `click` its X (scale capture coordinates; see the helper table). `hshot` (HighResShot) isn't affected. |
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. Python material builds report success even when the result fails to compile (the mesh renders flat grey in PIE): our `*_ao`/`*_roughness` textures are `TC_MASKS` non-sRGB and need `SAMPLERTYPE_MASKS`. |
@@ -201,6 +201,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `System.Exception: A conflicting instance of AutomationTool is already running` (in `%LOCALAPPDATA%\UnrealEngine\Programs\AutomationTool\Saved\Logs\ErrorLog.txt`); the script only says "Game packaging failed (1)" | UAT is single-instance machine-wide and another worktree is packaging | `Build-Game.ps1` now passes `-WaitForUATMutex` and waits. For a hand-run `RunUAT.bat`, add it yourself. |
 | `git status` shows dozens of modified `.uasset`s (Audio, heroine animations and materials) after `Build-Game.ps1` | The content bootstrap re-saves generated assets | Restore the ones your change didn't intend (`git checkout -- <paths>`) before committing. `-PackageOnly` skips the bootstrap when content is current. |
 | PIE woodland forest floor near-black at noon; terrain half streamed | Agent editors run with ray tracing off; the game's lighting is tuned for RT | Don't judge brightness, night lighting or shadows in PIE. Use the packaged build (RT on), or `-RayTracing` when process limits allow. |
+| Estate nights look like a bright moonlit day | `homestead.NightMinExposure` (default -2, `HomesteadWorld.cpp`) lets auto-exposure brighten the night | At `homestead.NightMinExposure 1`, point lights (lamp, hearth) read as night lighting. Judge night lighting in the packaged build (RT on), and tell the orchestrator before changing the default. |
 | A red on-screen warning in Development builds: "Cached lighting in Lumen ... going to be clipped ... r.EyeAdaptation.CachedLightingPreExposure", in full sun (about EV 13.5) | The cached-lighting pre-exposure range didn't cover bright sun | `DefaultEngine.ini` `[SystemSettings]` sets `r.EyeAdaptation.CachedLightingPreExposure=8` (about EV -4 to 16). If it returns, adjust that value, not the exposure. |
 | `'HomesteadLabController' object has no attribute 'get_pawn'` | Not exposed to Python | `unreal.GameplayStatics.get_player_pawn(world, 0)`. |
 | `NameError: name '__file__' is not defined` in `run_python` | `run_python` executes a code string, not a file | `pyfile <path>` (McpHelpers), or `exec(compile(open(p).read(), p, 'exec'), {'__file__': p, '__name__': '__main__'})`. |

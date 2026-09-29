@@ -218,6 +218,13 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Pending doc updates on merge
 
+- Lamp lane (on its branch, not on `main` yet): the new commands `LabHold Lamp`, `LabAction LampDown|LampUp`,
+  `HomesteadLampOil <hours>`, and `HomesteadTeleport X Y [Z]` (stands her on the ground once collision has
+  streamed in; McpHelpers `tp` switches to it); lamp clips from `homestead_agent.lamp_pose`
+  (`build_raised` / `build_set_down` / `report`) and glass/flame materials from
+  `homestead_agent.lamp_materials.build()`. When it lands, add these to the character-lab and
+  console-command notes in the editor skill and check `tp`'s help in `McpHelpers.ps1`.
+
 - Lamp lane (uncommitted in `jennifergalley-fluffy-broccoli` as of 2026-09-28): `build_prop.py` gains a
   recipe-level `BAKE_MESHES = {"SM_Name"}` (or a dict of per-mesh overrides) to bake only chosen meshes,
   so a prop can bake its opaque body while leaving separate glass or flame meshes unbaked
