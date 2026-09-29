@@ -102,14 +102,18 @@ col = lerp(col, RockD * Tints[3].rgb, steep * 0.8);
 n = normalize(lerp(n, RockN, steep * 0.8));
 rough = lerp(rough, RockR, steep * 0.8);
 
-// The MVP woodland zone (T_EstateCanopy.B): the survival prototype's forest floor as it drew it,
-// T_GrassGround untinted at 3 m world-aligned tiling, easing into a coarser copy of itself past 60 m
-// (the prototype never showed it that far) so it doesn't tile at range.
+// The MVP woodland zone (T_EstateCanopy.B): the survival prototype's forest floor exactly as its
+// M_GrassGroundBlend drew it: lerp(T_Ground* (brown mud and leaves), T_GrassGround*, w) at 3 m world
+// tiling, where away from the creek w = 0.07 + 0.2 * patch (CreekGroundBlendWeight's far-bank value),
+// so mostly leaf litter with patches of grass. Past 60 m it eases into a coarser copy to hide tiling.
 float zone = saturate(Zone);
-float3 mvp = lerp(MvpD, MvpFarD, smoothstep(60.0, 160.0, dist) * 0.5);
+float patch = 0.5 + 0.5 * sin(WP.x * 0.0021) * cos(WP.y * 0.0017);
+float mw = 0.07 + 0.20 * patch;
+float3 mvp = lerp(MudD, MvpD, mw);
+mvp = lerp(mvp, lerp(MudFarD, MvpFarD, mw), smoothstep(60.0, 160.0, dist) * 0.5);
 col = lerp(col, mvp, zone);
-n = normalize(lerp(n, MvpN, zone));
-rough = lerp(rough, MvpR, zone);
+n = normalize(lerp(n, normalize(lerp(MudN, MvpN, mw)), zone));
+rough = lerp(rough, lerp(MudR, MvpR, mw), zone);
 
 // Rain (MPC_EstateGround.Wetness): soil, litter and stone darken most, turf less; everything turns
 // glossy, and trodden ground and wheel ruts hold a sheen of standing water.
@@ -185,6 +189,11 @@ def ground_finish(bc, nm, rg, y0):
     mvp_n = tex(f'{MVP}_NormalDX', -1100, y + 760, ST.SAMPLERTYPE_NORMAL, muv)
     mvp_r = tex(f'{MVP}_Roughness', -1100, y + 820, ST.SAMPLERTYPE_MASKS, muv)
     mvp_far = tex(f'{MVP}_Diff', -1100, y + 880, ST.SAMPLERTYPE_COLOR, scaled(12.9, -1300, y + 880, 0.21))
+    MUD = '/Game/SurvivalGame/Textures/T_Ground'
+    mud_d = tex(f'{MUD}Color', -1100, y + 940, ST.SAMPLERTYPE_COLOR, muv)
+    mud_n = tex(f'{MUD}Normal', -1100, y + 1000, ST.SAMPLERTYPE_NORMAL, muv)
+    mud_r = tex(f'{MUD}Roughness', -1100, y + 1060, ST.SAMPLERTYPE_LINEAR_COLOR, muv)
+    mud_far = tex(f'{MUD}Color', -1100, y + 1120, ST.SAMPLERTYPE_COLOR, scaled(12.9, -1300, y + 1120, 0.21))
     ruv = scaled(4.5, -1300, y + 560)
     rock_d = tex(f'{GROUND}/T_Ground_Stony_D', -1100, y + 540, ST.SAMPLERTYPE_COLOR, ruv)
     rock_n = tex(f'{GROUND}/T_Ground_Stony_N', -1100, y + 600, ST.SAMPLERTYPE_NORMAL, ruv)
@@ -220,7 +229,8 @@ def ground_finish(bc, nm, rg, y0):
     c.set_editor_property('description', 'GroundFinish')
     inputs = [('BC', bc, ''), ('NIn', nm, ''), ('R', rg, ''), ('WP', wp, ''), ('D', depth, ''),
               ('GroundTex', ground, 'RGBA'), ('Canopy', canopy, 'R'), ('Stony', canopy, 'G'), ('Zone', canopy, 'B'),
-              ('MvpD', mvp_d, 'RGB'), ('MvpN', mvp_n, 'RGB'), ('MvpR', mvp_r, 'R'), ('MvpFarD', mvp_far, 'RGB'), ('Macro1', macro1, 'R'), ('Macro2', macro2, 'R'),
+              ('MvpD', mvp_d, 'RGB'), ('MvpN', mvp_n, 'RGB'), ('MvpR', mvp_r, 'R'), ('MvpFarD', mvp_far, 'RGB'),
+              ('MudD', mud_d, 'RGB'), ('MudN', mud_n, 'RGB'), ('MudR', mud_r, 'R'), ('MudFarD', mud_far, 'RGB'), ('Macro1', macro1, 'R'), ('Macro2', macro2, 'R'),
               ('WearD', wear_d, 'RGB'), ('WearN', wear_n, 'RGB'), ('WearR', wear_r, 'R'),
               ('LitterD', litter_d, 'RGB'), ('LitterN', litter_n, 'RGB'),
               ('RockD', rock_d, 'RGB'), ('RockN', rock_n, 'RGB'), ('RockR', rock_r, 'R'),

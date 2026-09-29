@@ -215,8 +215,9 @@ MVP woodland zone: when `Scripts/Terrain/mvp_woodland.json` exists (the woodland
 region: `polygon` in metres, optional `floor_edge_m` (default 15) and `glades`), no meadow blades grow
 inside the polygon and footsteps are woodland floor there, since that lane scatters the survival
 prototype's own grass clumps. `T_EstateCanopy.B` ramps the prototype's forest floor in from the edge
-to `floor_edge_m` inside, along a wandering line. The floor is `T_GrassGround`, untinted, at 3 m
-world tiling, easing into a 12.9 m copy past 60 m, and glades take a lighter mix. Tree canopy kinds
+to `floor_edge_m` inside, along a wandering line. The floor is the prototype's `M_GrassGroundBlend` as the generated woodland drew it away from the
+creek: `T_Ground*` (brown mud and leaves) mixed with 7-27 % `T_GrassGround*` in slow patches, at 3 m
+world tiling, easing into a 12.9 m copy past 60 m. Glades take a lighter mix. Tree canopy kinds
 and crown radii come from `SCENERY_TREES` in `Scripts/Map/bake_estate_map.py`, with a fallback in
 `bake_ground.py` for kinds 13-16 and 19-22 until it lists them. Order after the woodland and trees
 branches land: `scatter.py`, then `bake_ground.py` and `build_ground.py`.
