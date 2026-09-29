@@ -355,8 +355,10 @@ requirement.
   select nearby bramble/weed and resource reach can pass through a wall, matching current
   nearby-resource behavior. Props' editor is closed; weeds `8418aa8e` remains partial/excluded while
   it owes dusk and PIE reload evidence.
-- **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
-  hoe blade; a documentation-only answer is insufficient.
+- **Rusted hoe wayfinding** — **Props isolated partial `be810887`, not PIE-verified, 4 PM content or
+  shipped.** The salvage order is billhook → hoe → axe → scythe → pickaxe. Tilling without a hoe
+  directs her to search the old manor; the journal/guide points to the west rooms by the chimney.
+  Native tests cover reward order and old saves, but ordinary-play second-salvage verification remains.
 - **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
   visible **Energy** meter later, rather than a visible hunger-plus-energy pair. Keep serialized hunger
   compatibility; revise gentle-hunger penalties into energy/food balance and modest **Well Fed** meals.
@@ -370,12 +372,16 @@ requirement.
   section. Old saves' forecast can change, while accrued plot moisture persists; document that at
   implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
   after its lane-A work.
-- **Starter food and hoe wayfinding** — **Clearing / Props lane** (after weed/rubble work): put **3
-  pasties and 2 loaves** in the starter chest. Make the **hoe head** the second salvage reward after the
-  billhook, with a contextual refusal and west-chimney journal hints to find it. Pending; no code or
-  content is finished yet.
-- **Starter wardrobe** — **Props lane** (with starter food): put completed wearable clothes in the
-  starter chest so Jenny can change outfit; verify pack/chest capacity and saving. Pending; not shipped.
+- **Starter chest, wardrobe and hoe wayfinding** — **Props isolated partial `be810887` on
+  `jennifergalley-starter-chest`, descendant of `d2c48511`; not PIE-verified, 4 PM content or
+  shipped.** New Estate games seed the standing-room chest through the normal capacity path with its
+  pail and four branches plus 3 pasties, 2 bread, LinenShirt, LinenLongShirt, Trousers, FurCoat,
+  FurBoots, WovenSandals and TurnShoes. It runs only in `NewEstateGame`, never restocks on load, and
+  leaves the tunic worn. Native 8/8 covers exact contents, save round trip, reward order and old saves;
+  the Editor build passes.
+
+  It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
+  salvage. Props released its slot before 13:45.
 - **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
   road to town, including the bridge approach. The ID range is reserved; implementation remains
   pending the narrow public-road-corridor proof and bridge coordinate sync.
