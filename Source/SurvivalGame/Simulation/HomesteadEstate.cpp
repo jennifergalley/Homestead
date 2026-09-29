@@ -1,4 +1,5 @@
 #include "HomesteadEstate.h"
+#include "HomesteadRuinDebris.h"
 
 #include <algorithm>
 #include <cmath>
@@ -253,6 +254,22 @@ const EstatePlacements& ProvisionalEstatePlacements()
             table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateClearoutPlacements.inc"
+        // Clearable manor ruin debris (582000-582099, HomesteadRuinDebris.h): the slate and loose
+        // granite heaps the ruin used to draw as scenery, at the same spots in its frame. A heap an
+        // earlier section has since grown into steps 1.5 m aside (never onto another placement).
+        for (const RuinDebris::Spot& spot : RuinDebris::Spots)
+        {
+            const Point steps[] = {{0, 0}, {150, 0}, {-150, 0}, {0, 150}, {0, -150}};
+            Point at{manorX + spot.v, manorY + spot.u};
+            for (const Point& step : steps)
+            {
+                const Point candidate{manorX + spot.v + step.x, manorY + spot.u + step.y};
+                const bool crowded = std::any_of(table.placements.begin(), table.placements.end(), [&](const EstatePlacement& other)
+                    { return std::hypot(other.position.x - candidate.x, other.position.y - candidate.y) <= 120.0; });
+                if (!crowded) { at = candidate; break; }
+            }
+            table.placements.push_back({spot.id, spot.kind, at, 0.0, spot.yaw, spot.scale, 0});
+        }
         // Town lane (530000+).
         return table;
     }();
