@@ -1,0 +1,567 @@
+{
+  "schema": 1,
+  "name": "GranitePickRocks",
+  "description": "Three pickaxe rocks (Small knee-high, Medium thigh-high, Large waist-high with a plug-and-feather split face) of part-buried Cornish moorstone; Nanite; LOD1/LOD2 fallback.",
+  "collision": "convex",
+  "triangle_budget": 320000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_pick_rocks.py",
+  "source_sha256": "7b3c067eb830edafa2a32ff4de617dc0db4814f10e67da5ff9a9e46272e9f92f",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GranitePickRock_Small": {
+      "vertices": 35042,
+      "triangles": 70080,
+      "size_cm": [
+        63.91,
+        45.59,
+        40.21
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRock_Small",
+          "textures": {
+            "basecolor": "T_GranitePickRock_Small_basecolor.png",
+            "roughness": "T_GranitePickRock_Small_roughness.png",
+            "normal": "T_GranitePickRock_Small_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRock_Small_basecolor.png",
+          "roughness": "T_GranitePickRock_Small_roughness.png",
+          "normal": "T_GranitePickRock_Small_normal.png",
+          "ao": "T_GranitePickRock_Small_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "focus": [
+          0.13,
+          -0.13,
+          0.18
+        ],
+        "eye_distance": 2.2
+      },
+      "fbx": "SM_GranitePickRock_Small.fbx",
+      "sha256": "806ddeee299c64befc8d4a478a5922dfae7928d2ff059bab9652b2378c091ba0",
+      "preview": "preview_SM_GranitePickRock_Small.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GranitePickRock_Small_hero.png",
+          "detail": "beauty_SM_GranitePickRock_Small_detail.png",
+          "eye": "beauty_SM_GranitePickRock_Small_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          1920,
+          1080
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GranitePickRock_Small_LOD1": {
+      "vertices": 7002,
+      "triangles": 14000,
+      "size_cm": [
+        63.9,
+        45.6,
+        40.19
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRock_Small",
+          "textures": {
+            "basecolor": "T_GranitePickRock_Small_basecolor.png",
+            "roughness": "T_GranitePickRock_Small_roughness.png",
+            "normal": "T_GranitePickRock_Small_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRock_Small_basecolor.png",
+          "roughness": "T_GranitePickRock_Small_roughness.png",
+          "normal": "T_GranitePickRock_Small_normal.png",
+          "ao": "T_GranitePickRock_Small_ao.png"
+        },
+        "shared_with": "SM_GranitePickRock_Small"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GranitePickRock_Small_LOD1.fbx",
+      "sha256": "c8b1090eeb8543911e26d7f4c8e3fc1ae79419b8d276a5ce7fe83d83e035d198",
+      "preview": "preview_SM_GranitePickRock_Small_LOD1.png"
+    },
+    "SM_GranitePickRock_Small_LOD2": {
+      "vertices": 1752,
+      "triangles": 3500,
+      "size_cm": [
+        63.91,
+        45.55,
+        40.17
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRock_Small",
+          "textures": {
+            "basecolor": "T_GranitePickRock_Small_basecolor.png",
+            "roughness": "T_GranitePickRock_Small_roughness.png",
+            "normal": "T_GranitePickRock_Small_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRock_Small_basecolor.png",
+          "roughness": "T_GranitePickRock_Small_roughness.png",
+          "normal": "T_GranitePickRock_Small_normal.png",
+          "ao": "T_GranitePickRock_Small_ao.png"
+        },
+        "shared_with": "SM_GranitePickRock_Small"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GranitePickRock_Small_LOD2.fbx",
+      "sha256": "d0b113ca4de276fddcaa6aebfca9dc1c6799a789b5c20cd3171dfac31fd7eb3e",
+      "preview": "preview_SM_GranitePickRock_Small_LOD2.png"
+    },
+    "SM_GranitePickRock_Medium": {
+      "vertices": 80946,
+      "triangles": 161888,
+      "size_cm": [
+        139.15,
+        104.78,
+        81.47
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRock_Medium",
+          "textures": {
+            "basecolor": "T_GranitePickRock_Medium_basecolor.png",
+            "roughness": "T_GranitePickRock_Medium_roughness.png",
+            "normal": "T_GranitePickRock_Medium_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRock_Medium_basecolor.png",
+          "roughness": "T_GranitePickRock_Medium_roughness.png",
+          "normal": "T_GranitePickRock_Medium_normal.png",
+          "ao": "T_GranitePickRock_Medium_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "focus": [
+          0.1,
+          -0.3,
+          0.5
+        ],
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_GranitePickRock_Medium.fbx",
+      "sha256": "b58c535903e922605cccfbfab0472e994819a63b5828b124cc4b86e7caf185f4",
+      "preview": "preview_SM_GranitePickRock_Medium.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GranitePickRock_Medium_hero.png",
+          "detail": "beauty_SM_GranitePickRock_Medium_detail.png",
+          "eye": "beauty_SM_GranitePickRock_Medium_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          1920,
+          1080
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GranitePickRock_Medium_LOD1": {
+      "vertices": 15002,
+      "triangles": 30000,
+      "size_cm": [
+        139.16,
+        104.79,
+        81.48
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRock_Medium",
+          "textures": {
+            "basecolor": "T_GranitePickRock_Medium_basecolor.png",
+            "roughness": "T_GranitePickRock_Medium_roughness.png",
+            "normal": "T_GranitePickRock_Medium_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRock_Medium_basecolor.png",
+          "roughness": "T_GranitePickRock_Medium_roughness.png",
+          "normal": "T_GranitePickRock_Medium_normal.png",
+          "ao": "T_GranitePickRock_Medium_ao.png"
+        },
+        "shared_with": "SM_GranitePickRock_Medium"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GranitePickRock_Medium_LOD1.fbx",
+      "sha256": "e71da460311c42269d7c0437409b681aa322a70a5fe7b877520ca88f1a2af5cb",
+      "preview": "preview_SM_GranitePickRock_Medium_LOD1.png"
+    },
+    "SM_GranitePickRock_Medium_LOD2": {
+      "vertices": 3502,
+      "triangles": 7000,
+      "size_cm": [
+        139.13,
+        104.84,
+        81.38
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRock_Medium",
+          "textures": {
+            "basecolor": "T_GranitePickRock_Medium_basecolor.png",
+            "roughness": "T_GranitePickRock_Medium_roughness.png",
+            "normal": "T_GranitePickRock_Medium_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRock_Medium_basecolor.png",
+          "roughness": "T_GranitePickRock_Medium_roughness.png",
+          "normal": "T_GranitePickRock_Medium_normal.png",
+          "ao": "T_GranitePickRock_Medium_ao.png"
+        },
+        "shared_with": "SM_GranitePickRock_Medium"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GranitePickRock_Medium_LOD2.fbx",
+      "sha256": "4234d690ff5d959f753f6d748c363ced52b23143d8fdbd58c661f40abd676db0",
+      "preview": "preview_SM_GranitePickRock_Medium_LOD2.png"
+    },
+    "SM_GranitePickRock_Large": {
+      "vertices": 131802,
+      "triangles": 263600,
+      "size_cm": [
+        184.69,
+        132.22,
+        115.93
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRock_Large",
+          "textures": {
+            "basecolor": "T_GranitePickRock_Large_basecolor.png",
+            "roughness": "T_GranitePickRock_Large_roughness.png",
+            "normal": "T_GranitePickRock_Large_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRock_Large_basecolor.png",
+          "roughness": "T_GranitePickRock_Large_roughness.png",
+          "normal": "T_GranitePickRock_Large_normal.png",
+          "ao": "T_GranitePickRock_Large_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "focus": [
+          -0.72,
+          -0.2,
+          0.5
+        ],
+        "eye_distance": 5.5
+      },
+      "fbx": "SM_GranitePickRock_Large.fbx",
+      "sha256": "45ed9d89539781207f7cb16625f445a51c6be4db95d668107074c9fd3a21352b",
+      "preview": "preview_SM_GranitePickRock_Large.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GranitePickRock_Large_hero.png",
+          "detail": "beauty_SM_GranitePickRock_Large_detail.png",
+          "eye": "beauty_SM_GranitePickRock_Large_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          1920,
+          1080
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GranitePickRock_Large_LOD1": {
+      "vertices": 25002,
+      "triangles": 50000,
+      "size_cm": [
+        184.68,
+        132.24,
+        115.94
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRock_Large",
+          "textures": {
+            "basecolor": "T_GranitePickRock_Large_basecolor.png",
+            "roughness": "T_GranitePickRock_Large_roughness.png",
+            "normal": "T_GranitePickRock_Large_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRock_Large_basecolor.png",
+          "roughness": "T_GranitePickRock_Large_roughness.png",
+          "normal": "T_GranitePickRock_Large_normal.png",
+          "ao": "T_GranitePickRock_Large_ao.png"
+        },
+        "shared_with": "SM_GranitePickRock_Large"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GranitePickRock_Large_LOD1.fbx",
+      "sha256": "79928ff828c650597e116319acfc4c0c96c5f2a8d86f95f03d5f0b84a6431cce",
+      "preview": "preview_SM_GranitePickRock_Large_LOD1.png"
+    },
+    "SM_GranitePickRock_Large_LOD2": {
+      "vertices": 5002,
+      "triangles": 10000,
+      "size_cm": [
+        184.79,
+        132.08,
+        115.91
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRock_Large",
+          "textures": {
+            "basecolor": "T_GranitePickRock_Large_basecolor.png",
+            "roughness": "T_GranitePickRock_Large_roughness.png",
+            "normal": "T_GranitePickRock_Large_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRock_Large_basecolor.png",
+          "roughness": "T_GranitePickRock_Large_roughness.png",
+          "normal": "T_GranitePickRock_Large_normal.png",
+          "ao": "T_GranitePickRock_Large_ao.png"
+        },
+        "shared_with": "SM_GranitePickRock_Large"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ]
+      },
+      "fbx": "SM_GranitePickRock_Large_LOD2.fbx",
+      "sha256": "64f127952227990952eef428645511388087b626b744a7731b9fe94c5ce63114",
+      "preview": "preview_SM_GranitePickRock_Large_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "Small": {
+      "sink_depth_m": 0.09
+    },
+    "Medium": {
+      "sink_depth_m": 0.165
+    },
+    "Large": {
+      "sink_depth_m": 0.223
+    },
+    "placement": "Origin is the ground line; place at terrain height (each is already part-sunk; see sink_depth_m). Add ~0.5 x slope x radius on slopes.",
+    "north": "+Y (moss side)",
+    "collision": "Convex (simple) per mesh; they're blocking obstacles.",
+    "tiers": "Small/Medium: stone pick. Large: iron pick (the split face and drill holes mark it quarry-able).",
+    "traces": "Nanite meshes don't answer LineTraceComponent; trace the world and test Hit.GetComponent()."
+  },
+  "nanite": true,
+  "textures": {
+    "T_GranitePickRock_Small_basecolor.png": "d72db9d292d8e727aafe56efeab825bebfc66c9663624acb540b68948e58b101",
+    "T_GranitePickRock_Small_roughness.png": "11edfb017de2d0215ca98555357c9130b574f7c4dd7df564e4ee4f47c83d22e3",
+    "T_GranitePickRock_Small_normal.png": "0793e2660ccfa1f29c8b1552c3ae33d49bd34fb026f1a721758dbb6000daa168",
+    "T_GranitePickRock_Medium_basecolor.png": "b79a528223c67ed9095fb7fb5fcbef116d601c632aa37c8e552151999ffc71e9",
+    "T_GranitePickRock_Medium_roughness.png": "7c8b6f55b58bba0124cf5790b35d988ea74e48c507236786d8351730a4faecb2",
+    "T_GranitePickRock_Medium_normal.png": "cce9ca771e0cd337dd4ead40d0b6e24c5361ec862fe5b8fd5a2888b7b4b78bd6",
+    "T_GranitePickRock_Large_basecolor.png": "2aa82a67604e13a90c89c43c6f148b342959e57244b42a0acb3b2385a9c9f71f",
+    "T_GranitePickRock_Large_roughness.png": "7914e7eba55ea1e9a39734a327d4e11a4aec007e7d0560a0ff56826a5be7f787",
+    "T_GranitePickRock_Large_normal.png": "28940c767b983fb850863ad9c8fc1820069b9812107b0a873bd809a48a8c6507"
+  }
+}

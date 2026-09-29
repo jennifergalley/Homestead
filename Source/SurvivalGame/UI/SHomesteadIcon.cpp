@@ -287,7 +287,8 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("wild-daffodils")), EKind::WildDaffodils},
         {FName(TEXT("wild-garlic")), EKind::WildGarlic},
         {FName(TEXT("oil-lamp")), EKind::OilLamp},
-        {FName(TEXT("oil-flask")), EKind::OilFlask}
+        {FName(TEXT("oil-flask")), EKind::OilFlask},
+        {FName(TEXT("pouch-arrows")), EKind::PouchArrows}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -299,6 +300,13 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
             IconKind = Entry.Value;
             break;
         }
+    }
+    // Shop seed without a glyph of its own yet draws as a seed packet.
+    if (IconKind == EKind::Unknown && !CurrentKind.IsNone())
+    {
+        const FString Id = CurrentKind.ToString();
+        if (Id.EndsWith(TEXT("-seed")) || Id == TEXT("seed-potato") || Id == TEXT("strawberry-runner"))
+            IconKind = EKind::Seeds;
     }
 
     const ESlateDrawEffect Effects = ShouldBeEnabled(bParentEnabled)
@@ -939,6 +947,11 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{20, 33}, {36, 33}}, Wood, 1.5f);
         P.Line({{22, 37}, {34, 37}}, Wood, 1);
         P.Line({{17, 24}, {17, 48}}, StoneGray, 1.5f);
+        break;
+    case EKind::PouchArrows:
+        // Up and down chevrons: this hotbar slot switches between the seed in her pack.
+        P.Shape({{28, 4}, {48, 24}, {8, 24}}, Gold);
+        P.Shape({{8, 32}, {48, 32}, {28, 52}}, Gold);
         break;
     case EKind::Unknown:        P.Unknown();
         break;

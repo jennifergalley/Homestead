@@ -371,6 +371,16 @@ void AHomesteadLabController::LabAction(const FString& Name)
         HeldPartsCount = 1;
     }
     else if (Name.Equals(TEXT("Eat"), ESearchCase::IgnoreCase)) Avatar->PlayEat(true);
+    else if (Name.Equals(TEXT("Pull"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Pick"), ESearchCase::IgnoreCase))
+    {
+        // Crop harvests (kneel_harvest / the pouch pick) with a turnip or strawberries in her hand.
+        const bool Pick = Name.Equals(TEXT("Pick"), ESearchCase::IgnoreCase);
+        const TCHAR* Path = Pick
+            ? TEXT("/Game/SurvivalGame/Environment/Props/CropStrawberry/SM_CropStrawberry_Harvest.SM_CropStrawberry_Harvest")
+            : TEXT("/Game/SurvivalGame/Environment/Props/CropTurnip/SM_CropTurnip_Harvest.SM_CropTurnip_Harvest");
+        const FVector Crown = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 45.0f;
+        Avatar->PlayHarvest(Homestead::Point{Crown.X, Crown.Y}, Pick, LoadObject<UStaticMesh>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet));
+    }
     else if (Name.Equals(TEXT("Craft"), ESearchCase::IgnoreCase)) Avatar->PlayLabCraft(3);
     else if (Name.Equals(TEXT("Water"), ESearchCase::IgnoreCase)) Avatar->PlayWater(Target);
     else if (Name.Equals(TEXT("Fill"), ESearchCase::IgnoreCase)) Avatar->PlayFillPail(Target);
@@ -400,7 +410,7 @@ void AHomesteadLabController::LabAction(const FString& Name)
         Avatar->SetLabHeldTool(Homestead::Item::OilLamp);
         LampKneel = Avatar->PlayLampKneel({LampSpot.X, LampSpot.Y}, false) ? 2 : 0;
     }
-    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Reeds, Eat, Craft, Water, Fill, Chop, Knife, Till, Machete, Fell, LampDown or LampUp."));
+    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Reeds, Pull, Pick, Eat, Craft, Water, Fill, Chop, Knife, Till, Machete, Fell, LampDown or LampUp."));
 }
 
 void AHomesteadLabController::PlaceGroundLamp(const FVector& At)
@@ -471,7 +481,8 @@ void AHomesteadLabController::LabLoop(const FString& Name)
     // One clip plus a second's pause between repeats.
     const bool Kneel = Name.Equals(TEXT("Sticks"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Stones"), ESearchCase::IgnoreCase)
         || Name.Equals(TEXT("Roots"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Berries"), ESearchCase::IgnoreCase)
-        || Name.Equals(TEXT("Reeds"), ESearchCase::IgnoreCase);
+        || Name.Equals(TEXT("Reeds"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("Pull"), ESearchCase::IgnoreCase)
+        || Name.Equals(TEXT("Pick"), ESearchCase::IgnoreCase);
     const UAnimSequence* Clip = Kneel ? Avatar->GetGatherSticksAnimation() : nullptr;
     LoopPeriod = (Clip ? Clip->GetPlayLength() : 3.5f) + 1.0f;
     LoopNextStart = GetWorld()->GetTimeSeconds();
