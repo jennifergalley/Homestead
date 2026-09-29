@@ -4,6 +4,7 @@
 
 - [x] 1.1 Add the `HomesteadItems` catalogue table with completeness assertion. Migrate `ItemName` and the other metadata lookups to it, keeping behaviour unchanged under the existing tests
 - [x] 1.2 Add money in cents, a formatting helper, and the shop records, including the `Sell`/`Buy` transactions, opening hours and the daily sell-down. Portable tests cover money, rejects, capacity, rollover and save/reload
+- [ ] 1.3 Reinterpret the existing raw `int64` money unit as one whole coin without a numeric migration. Rename the simulation/economy semantics, centralize grouped integer `FormatMoney`/`Delta` output with singular/plural text and no `$`/decimals, and guard `GrantMoney` against cap overflow. Props owns simulation/economy; Menu owns all presentation surfaces in the same release. Cover Economy and Lamp plus legacy v12/v13 save loads, raw 0/1/`INT64_MIN`, cap behavior, and a packaged 720p/4K 1,000 → 900 coin pasty purchase.
 
 ## 2. First playable sale (first delivery)
 

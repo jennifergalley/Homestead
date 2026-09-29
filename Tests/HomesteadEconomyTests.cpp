@@ -329,6 +329,46 @@ void PlaytestShopPlacement()
     CHECK(loaded.FindShop(ShopKind::GeneralStore)->counterYaw == 45.0);
 }
 
+void WaitForTheStoreToOpen()
+{
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    const Point door{store.counter.x, store.counter.y - 700.0};
+    CHECK(HoursUntilOpen(*sim.FindShop(store.shop), 9.0) == 0.0);
+    CHECK(std::abs(HoursUntilOpen(*sim.FindShop(store.shop), 19.0) - 13.0) < 1e-9);
+    CHECK(std::abs(HoursUntilOpen(*sim.FindShop(store.shop), 7.5) - 0.5) < 1e-9);
+    // Open now: nothing to wait for, and no time passes.
+    const std::string morning = sim.Serialize();
+    CHECK(!sim.WaitForShop(store.shop, door).ok && sim.Serialize() == morning);
+    // 7 PM: too far from the shop to wait for it.
+    sim.SkipToHourOfDay(19.0);
+    Edit(sim, 100.0, 100.0);
+    const std::string evening = sim.Serialize();
+    CHECK(!sim.WaitForShop(store.shop, {door.x, door.y - 5000.0}).ok && sim.Serialize() == evening);
+    CHECK(!sim.WaitForShop(store.shop + 999, door).ok && sim.Serialize() == evening);
+    // Too hungry to last the night: refused before any time passes.
+    Edit(sim, 5.0, 100.0);
+    const std::string hungry = sim.Serialize();
+    const auto refused = sim.WaitForShop(store.shop, door);
+    CHECK(!refused.ok && refused.message.find("too hungry") != std::string::npos);
+    CHECK(sim.Serialize() == hungry);
+    // Too tired to last the night (she'd doze off in the street): refused before any time passes.
+    Edit(sim, 100.0, 3.0);
+    const std::string tired = sim.Serialize();
+    const auto sleepy = sim.WaitForShop(store.shop, door);
+    CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos);
+    CHECK(sim.Serialize() == tired);
+    // Fed: she waits the night through, across midnight and the 6 AM rollover, and it's open.
+    Edit(sim, 100.0, 100.0);
+    const double before = sim.GetState().hour;
+    OK(sim.WaitForShop(store.shop, door));
+    const double after = sim.GetState().hour;
+    CHECK(std::abs((after - before) - 13.0) < 0.01);
+    CHECK(IsShopOpen(*sim.FindShop(store.shop), after));
+    CHECK(sim.GetState().hunger < 100.0);
+    OK(sim.CheckShopAccess(store.shop, store.customer));
+}
+
 const char* filter = nullptr;void Run(const char* name, void (*test)())
 {
     if (filter && !std::strstr(name, filter)) return;
@@ -352,6 +392,7 @@ int main(int argc, char** argv)
     Run("her goods sell down each morning", StockSellsDownEachMorning);
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
     Run("playtest shop placement", PlaytestShopPlacement);
+    Run("wait for the store to open", WaitForTheStoreToOpen);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

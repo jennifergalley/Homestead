@@ -85,7 +85,16 @@ public:
     UAnimSequence* GetSlowWalkAnimation() const { return SlowWalkAnimation; }
     UAnimSequence* GetSprintAnimation() const { return SprintAnimation; }
     bool IsSprinting() const { return bSprintActive; }
+    // Sprint is a toggle (Shift / L3): on until pressed again, a load or new game, or she tires.
+    bool IsSprintOn() const { return bSprintOn; }
+    // Simulation::SpendSprintEnergy stops at this much Energy; below it she can't sprint.
+    static constexpr double SprintEnergyFloor = 10.0;
+    // L3 (on press) and a tap of Shift (on release; AHomesteadController::TrackSprintShift) flip it.
+    void RequestSprintToggle();
+    // Drops out of sprint speed for now (work, menus, falling) but leaves the toggle on.
     void CancelSprint();
+    // Turns the toggle off as well (a load, a new game, a teleport).
+    void ResetSprint();
     UAnimSequence* GetGatherAnimation() const { return GatherAnimation; }
     // MetaHuman only: the kneeling gather clip for the current kind (sticks and stones share the
     // arm-cradle clip; roots and berries use the hip-pouch clip; reeds are sawn free with the
@@ -284,6 +293,7 @@ private:
     UPROPERTY() TObjectPtr<UInputMappingContext> Mapping;
     UPROPERTY() TObjectPtr<UInputAction> MoveAction;
     UPROPERTY() TObjectPtr<UInputAction> SprintAction;
+    UPROPERTY() TObjectPtr<UInputAction> ShiftSprintAction;
     UPROPERTY() TObjectPtr<UInputAction> MouseLookAction;
     UPROPERTY() TObjectPtr<UInputAction> StickLookAction;
     UPROPERTY() TObjectPtr<UInputAction> ZoomAction;
@@ -497,7 +507,7 @@ private:
     float FaceFocusBlend = 0.0f;
     float FaceFocusBodyArm = 280.0f;
     TOptional<float> SavedNearClip;
-    bool bSprintHeld = false;
+    bool bSprintOn = false;
     bool bSprintActive = false;
     float SavedCameraDistance = 470;
     bool bRoomCamera = false;
@@ -520,8 +530,8 @@ private:
     void UpdateAppearanceFraming();
     void RestoreNearClip();
     void Move(const FInputActionValue& Value);
-    void BeginSprint(const FInputActionValue& Value);
-    void EndSprint(const FInputActionValue& Value);
+    void ToggleSprint(const FInputActionValue& Value) { RequestSprintToggle(); }
+    void LabShiftSprint(const FInputActionValue& Value);
     void MouseLook(const FInputActionValue& Value);
     void StickLook(const FInputActionValue& Value);
     void ZoomInput(const FInputActionValue& Value);

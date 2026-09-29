@@ -724,11 +724,12 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this, ReserveEnergy]() { return FMath::IsNearlyEqual(*ReserveEnergy, 10.0, 0.001)
             && Controller->State().energy <= 10.0 && Controller->State().energy > 9.9; });
-    Add(TEXT("Held mapped Shift walks instead of sprinting below Energy reserve"),
+    Add(TEXT("A Shift tap below the Energy reserve is refused and she walks"),
         [this, ReserveEnergy]()
         {
             *ReserveEnergy = Controller->State().energy;
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
             Axis(EKeys::Gamepad_LeftY, 1);
         },
         [this, ReserveEnergy]()
@@ -758,10 +759,11 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             return Avatar && !Controller->IsBookOpen() && !Controller->bPendingSpawn
                 && Avatar->GetCharacterMovement()->IsMovingOnGround();
         }, 0.6f);
-    Add(TEXT("Held mapped Shift again reaches active grounded sprint"),
+    Add(TEXT("A Shift tap turns sprint on and she reaches a grounded sprint"),
         [this]()
         {
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
             Axis(EKeys::Gamepad_LeftY, 1);
         },
         [this]()
@@ -820,6 +822,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             if (Avatar) Avatar->CancelAction(true);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
         },
         [this, WorkStarts]()
@@ -831,12 +834,13 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Animation->ActionWeight() < 0.01f
                 && Animation->MacheteStarts() == *WorkStarts + 1;
         }, 0.3f);
-    Add(TEXT("Fresh mapped hold re-enters sprint after completed work"),
+    Add(TEXT("A fresh Shift tap turns sprint back on after completed work"),
         [this]()
         {
             // Back to the open ground the first sprint crossed, clear of the trees further on.
             Teleport({-1000, 0});
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
             Axis(EKeys::Gamepad_LeftY, 1);
         },
         [this]()
@@ -868,10 +872,11 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, Avatar->WalkSpeed())
                 && FMath::Abs(Controller->State().energy - *AirborneEnergy) < 0.1;
         }, 0.45f);
-    Add(TEXT("Release airborne sprint input without queued restart"),
+    Add(TEXT("A Shift tap turns sprint off after the airborne check"),
         [this]()
         {
             Axis(EKeys::Gamepad_LeftY, 0);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
         },
         [this]()

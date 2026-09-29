@@ -178,12 +178,14 @@ void AHomesteadSmokeTest::PrepareCreekChecks()
     const auto SprintStartEnergy = MakeShared<double>(0);
     if (HeroineSequence)
     {
-        Add(TEXT("Hold mapped L3 after ordinary walking"),
+        Add(TEXT("Press mapped L3 (sprint on) after ordinary walking"),
             [this, SprintStartEnergy]()
             {
                 *SprintStartEnergy = Controller->State().energy;
                 Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
                     EKeys::Gamepad_LeftThumbstick, IE_Pressed, 1));
+                Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+                    EKeys::Gamepad_LeftThumbstick, IE_Released, 0));
             }, []() { return true; });
     }
     Add(TEXT("Cross the former bank ribbons on colliding terrain"),
@@ -198,8 +200,13 @@ void AHomesteadSmokeTest::PrepareCreekChecks()
         {
             Axis(EKeys::Gamepad_LeftY, 0);
             if (HeroineSequence)
+            {
+                // Sprint is a toggle: a second L3 press turns it off.
+                Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+                    EKeys::Gamepad_LeftThumbstick, IE_Pressed, 1));
                 Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
                     EKeys::Gamepad_LeftThumbstick, IE_Released, 0));
+            }
         },
         [this, HeroineSequence, SprintStartEnergy]()
         {

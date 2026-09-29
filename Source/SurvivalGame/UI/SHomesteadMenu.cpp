@@ -3,6 +3,7 @@
 #include "HomesteadMenuNavigation.h"
 #include "SHomesteadMapView.h"
 #include "SHomesteadHudScale.h"
+#include "SHomesteadArrival.h"
 #include "../HomesteadMapComponent.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/CoreStyle.h"
@@ -127,6 +128,50 @@ const FLinearColor MenuPine(0.025f, 0.05f, 0.038f, 0.6f);
 const FLinearColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
 const FLinearColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
 const FLinearColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
+// The notice card over the book (logical book units and seconds): a small parchment slip with a
+// double-ruled frame and Garamond ink, so it reads as a note laid on the book, not a dialog. Tuned
+// so a one-line notice reads at a glance and is gone before it gets in the way; errors linger a little.
+namespace MenuNoticeStyle
+{
+constexpr float MaxWidth = 700.0f;
+constexpr float FontSize = 25.0f;
+// Outer frame padding plus the inner rule's padding, each side of the text.
+constexpr float TextInset = 2.0f * (5.0f + 22.0f);
+constexpr float BottomInset = 28.0f;
+constexpr float GapBelowTabs = 14.0f;
+// Clearance kept between the card and the focused control.
+constexpr float Clearance = 8.0f;
+constexpr double Seconds = 2.6;
+constexpr double ErrorSeconds = 3.8;
+constexpr double FadeInSeconds = 0.14;
+constexpr double FadeOutSeconds = 0.35;
+constexpr float RiseDistance = 8.0f;
+// Aged paper, iron-gall brown ink, and a rust ink for things that went wrong.
+constexpr FLinearColor Paper(0.62f, 0.54f, 0.38f, 0.97f);
+constexpr FLinearColor InkBrown(0.03f, 0.022f, 0.014f, 1.0f);
+constexpr FLinearColor RustInk(0.22f, 0.03f, 0.015f, 1.0f);
+const FSlateBrush& CardBrush()
+{
+    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, FLinearColor(0.2f, 0.12f, 0.05f, 1.0f), 2.0f);
+    return Brush;
+}
+const FSlateBrush& ErrorCardBrush()
+{
+    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, RustInk, 2.0f);
+    return Brush;
+}
+// The inner rule of the double frame.
+const FSlateBrush& RuleBrush()
+{
+    static const FSlateRoundedBoxBrush Brush(FLinearColor::Transparent, 3.0f, InkBrown.CopyWithNewOpacity(0.45f), 1.0f);
+    return Brush;
+}
+const FSlateBrush& ShadowBrush()
+{
+    static const FSlateRoundedBoxBrush Brush(FLinearColor(0, 0, 0, 0.4f), 8.0f);
+    return Brush;
+}
+}
 constexpr float ItemCellWidth = 76;
 float LogicalBookWidth() { return static_cast<float>(HomesteadMenus::FullScreenLogicalSize().X); }
 float LogicalBookHeight() { return static_cast<float>(HomesteadMenus::FullScreenLogicalSize().Y); }
@@ -404,7 +449,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                     .WidthOverride_Lambda([]() { return FOptionalSize(LogicalBookWidth()); })
                     .HeightOverride_Lambda([]() { return FOptionalSize(LogicalBookHeight()); })
                     [
-                        SNew(SOverlay)
+                        SAssignNew(BookOverlay, SOverlay)
                     + SOverlay::Slot().Padding(24, 16)
                     [
                         SAssignNew(Root, SVerticalBox)
@@ -412,29 +457,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                         [
                             SAssignNew(TabBar, SHorizontalBox)
                         ]
-                        + SVerticalBox::Slot().AutoHeight().Padding(0, 10)
-                        [
-                            SNew(SBox).HeightOverride(62)
-                            .Visibility_Lambda([this]() { return Controller.IsValid() && !Controller->Toast().IsEmpty()
-                                ? EVisibility::Visible : EVisibility::Collapsed; })
-                            [
-                                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                                .BorderBackgroundColor(MenuPine).Padding(12, 6)
-                                [
-                                    SNew(SScrollBox)
-                                    + SScrollBox::Slot()
-                                    [
-                                        SNew(STextBlock).AutoWrapText(true)
-                                        .Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
-                                        .ColorAndOpacity_Lambda([this]() { return Controller.IsValid() && Controller->ToastIsError()
-                                            ? FSlateColor(FLinearColor(1, 0.67f, 0.48f)) : FSlateColor(Muted); })
-                                        .Text_Lambda([this]() { return FText::FromString(Controller.IsValid()
-                                            ? Controller->Toast()
-                                            : TEXT("Menu unavailable.")); })
-                                    ]
-                                ]
-                            ]
-                        ]
+                        // Notices float over the page in the card below (NoticeSlot), so nothing here moves.
                         + SVerticalBox::Slot().FillHeight(1)
                         [ SAssignNew(ContentHost, SBox).Clipping(EWidgetClipping::ClipToBounds) ]
                         + SVerticalBox::Slot().AutoHeight().Padding(0, 10, 0, 0)
@@ -450,6 +473,32 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                         ]
                     ]
                         + SOverlay::Slot()[ SAssignNew(ModalHost, SBox).Visibility(EVisibility::Collapsed) ]
+                        // Notices: a small card over the page that never takes focus, clicks or layout space.
+                        + SOverlay::Slot().Expose(NoticeSlot).HAlign(HAlign_Center).VAlign(VAlign_Bottom)
+                            .Padding(0, 0, 0, MenuNoticeStyle::BottomInset)
+                        [
+                            SAssignNew(NoticeCard, SBox).MaxDesiredWidth(MenuNoticeStyle::MaxWidth)
+                            .Visibility_Lambda([this]() { return IsNoticeShowing() ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+                            [
+                                SNew(SBorder).BorderImage(&MenuNoticeStyle::ShadowBrush()).Padding(FMargin(0, 0, 0, 4))
+                                [
+                                    SNew(SBorder).Padding(5)
+                                    .BorderImage_Lambda([this]() { return bNoticeError ? &MenuNoticeStyle::ErrorCardBrush() : &MenuNoticeStyle::CardBrush(); })
+                                    [
+                                        SNew(SBorder).BorderImage(&MenuNoticeStyle::RuleBrush()).Padding(FMargin(22, 9, 22, 11))
+                                        .HAlign(HAlign_Center)
+                                        [
+                                            SNew(STextBlock).WrapTextAt(MenuNoticeStyle::MaxWidth - MenuNoticeStyle::TextInset)
+                                            .WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
+                                            .Justification(ETextJustify::Center)
+                                            .Font(DisplayFont(MenuNoticeStyle::FontSize))
+                                            .ColorAndOpacity_Lambda([this]() { return FSlateColor(bNoticeError ? MenuNoticeStyle::RustInk : MenuNoticeStyle::InkBrown); })
+                                            .Text_Lambda([this]() { return FText::FromString(NoticeText); })
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
                     ]
                 ]
             ]
@@ -504,10 +553,91 @@ void SHomesteadMenu::Construct(const FArguments& Args)
     Refresh();
 }
 
+bool SHomesteadMenu::IsNoticeShowing() const
+{
+    if (NoticeText.IsEmpty() || !Controller.IsValid() || Controller->Toast().IsEmpty()) return false;
+    const double Life = bNoticeError ? MenuNoticeStyle::ErrorSeconds : MenuNoticeStyle::Seconds;
+    return FSlateApplication::Get().GetCurrentTime() - NoticeShownAt < Life;
+}
+
+void SHomesteadMenu::UpdateNotice()
+{
+    const double Now = FSlateApplication::Get().GetCurrentTime();
+    const FString Current = Controller->Toast();
+    const uint32 Serial = Controller->NoticeCount();
+    const bool bError = Controller->ToastIsError();
+    if (!bNoticePrimed)
+    {
+        // A notice from the moment the book opened (a load, a save) shows; an older world toast doesn't.
+        bNoticePrimed = true;
+        const bool bFresh = !Current.IsEmpty() && Controller->ToastSecondsLeft() >= (bError ? 8.0f : 5.0f) - 0.5f;
+        NoticeText = Current;
+        bNoticeError = bError;
+        if (bFresh) NoticeShownAt = Now;
+    }
+    else if (!Current.IsEmpty() && (Serial != NoticeSerialSeen || Current != NoticeText || bError != bNoticeError))
+    {
+        // A replacement while one is up starts part-faded, so it reads as new without blinking out.
+        const bool bWasShowing = IsNoticeShowing();
+        NoticeText = Current;
+        bNoticeError = bError;
+        NoticeShownAt = Now - (bWasShowing ? MenuNoticeStyle::FadeInSeconds * 0.5 : 0.0);
+    }
+    NoticeSerialSeen = Serial;
+    if (!NoticeCard || !IsNoticeShowing()) return;
+    PlaceNotice();
+    const double Age = Now - NoticeShownAt;
+    const double Life = bNoticeError ? MenuNoticeStyle::ErrorSeconds : MenuNoticeStyle::Seconds;
+    const float In = FMath::Clamp(static_cast<float>(Age / MenuNoticeStyle::FadeInSeconds), 0.0f, 1.0f);
+    const float Out = FMath::Clamp(static_cast<float>((Life - Age) / MenuNoticeStyle::FadeOutSeconds), 0.0f, 1.0f);
+    NoticeCard->SetRenderOpacity(FMath::InterpEaseOut(0.0f, 1.0f, In, 2.0f) * Out);
+    // It settles in from just off its edge: up from below, or down from the tabs.
+    const float Rise = (1.0f - FMath::InterpEaseOut(0.0f, 1.0f, In, 2.0f)) * MenuNoticeStyle::RiseDistance;
+    NoticeCard->SetRenderTransform(FSlateRenderTransform(FVector2f(0.0f, bNoticeTop ? -Rise : Rise)));
+}
+
+void SHomesteadMenu::PlaceNotice()
+{
+    if (!BookOverlay || !NoticeSlot || !NoticeCard) return;
+    const FGeometry& Book = BookOverlay->GetCachedGeometry();
+    const FVector2D Size = Book.GetLocalSize();
+    if (Size.X <= 0 || Size.Y <= 0) return;
+    const auto LocalRect = [&Book](const SWidget& Widget)
+    {
+        const FGeometry& Bounds = Widget.GetCachedGeometry();
+        const FVector2D Position = Bounds.GetAbsolutePosition();
+        const FVector2D Extent = Bounds.GetAbsoluteSize();
+        const FVector2D A = Book.AbsoluteToLocal(Position), B = Book.AbsoluteToLocal(Position + Extent);
+        return FSlateRect(A.X, A.Y, B.X, B.Y);
+    };
+    const FVector2D Card = NoticeCard->GetDesiredSize();
+    const float Pad = MenuNoticeStyle::Clearance;
+    const float Top = TabBar ? LocalRect(*TabBar).Bottom + MenuNoticeStyle::GapBelowTabs : 110.0f;
+    const float Left = (Size.X - Card.X) * 0.5f - Pad, Right = (Size.X + Card.X) * 0.5f + Pad;
+    const FSlateRect BottomZone(Left, Size.Y - MenuNoticeStyle::BottomInset - Card.Y - Pad, Right, Size.Y);
+    const FSlateRect TopZone(Left, Top - Pad, Right, Top + Card.Y + Pad);
+    bool bCoversBottom = false, bCoversTop = false;
+    if (const auto Focused = FocusWidget())
+    {
+        const FSlateRect Target = LocalRect(*Focused);
+        bCoversBottom = FSlateRect::DoRectanglesIntersect(Target, BottomZone);
+        bCoversTop = FSlateRect::DoRectanglesIntersect(Target, TopZone);
+    }
+    const bool bTop = bCoversBottom && !bCoversTop;
+    const FMargin Padding = bTop ? FMargin(0, Top, 0, 0) : FMargin(0, 0, 0, MenuNoticeStyle::BottomInset);
+    if (bTop != bNoticeTop || NoticeSlot->GetPadding() != Padding)
+    {
+        bNoticeTop = bTop;
+        NoticeSlot->SetVerticalAlignment(bTop ? VAlign_Top : VAlign_Bottom);
+        NoticeSlot->SetPadding(Padding);
+    }
+}
+
 void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
 {
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
+    UpdateNotice();
     if (bPointerItemDown && PointerDragRevision != Controller->Simulation().GetRevision())
         CancelPointerItemDrag();
     if (bVirtualDraggingItem && VirtualDragRevision != Controller->Simulation().GetRevision())

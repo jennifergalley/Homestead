@@ -476,6 +476,7 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         if (Params.Event == IE_Pressed) bControlDown = true;
         else if (Params.Event == IE_Released) bControlDown = false;
     }
+    TrackSprintShift(Params);
     if (NamesWidget.IsValid())
     {
         // The Names step owns input; real keys reach it through Slate focus first.
@@ -500,7 +501,8 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
     }
     if (bPlanning && !bBookOpen && !IsFailed() && Params.Key == EKeys::MouseWheelAxis && Params.Event == IE_Axis
         && FMath::Abs(Params.AmountDepressed) >= 1.0f
-        && !(bControlDown || IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl)))
+        && !(bControlDown || IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl)
+            || FSlateApplication::Get().GetModifierKeys().IsControlDown()))
     {
         RotatePlacementBy(Params.AmountDepressed > 0 ? 1 : -1);
         return true;
@@ -521,8 +523,10 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         if (Params.Key == EKeys::MouseWheelAxis && Params.Event == IE_Axis
             && FMath::Abs(Params.AmountDepressed) >= 1.0f)
         {
+            // Slate's modifier state is the OS's: a Ctrl press that a focused widget took never reaches
+            // InputKey, so bControlDown alone missed it and Ctrl+wheel cycled the hotbar instead.
             const bool Control = bControlDown || IsInputKeyDown(EKeys::LeftControl)
-                || IsInputKeyDown(EKeys::RightControl);
+                || IsInputKeyDown(EKeys::RightControl) || FSlateApplication::Get().GetModifierKeys().IsControlDown();
             if (Control)
             {
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
@@ -775,9 +779,14 @@ void AHomesteadController::EatFromHotbar(Homestead::Item Food)
     const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     // One mouthful at a time: clicks while she is still eating are ignored.
     if (Animation && Animation->IsEating()) return;
+    const double FoodBefore = State().hunger, EnergyBefore = State().energy;
     const auto Result = Sim.Eat(Food);
     Notify(Result);
-    if (Result.ok && Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
+    if (!Result.ok) return;
+    if (Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
+    MealGain.Food = State().hunger - FoodBefore;
+    MealGain.Energy = State().energy - EnergyBefore;
+    ++MealGain.Serial;
 }
 
 TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
@@ -1472,7 +1481,7 @@ void AHomesteadController::HomesteadTeleport(float X, float Y, float Z)
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
         Avatar->CancelAction(true);
-        Avatar->CancelSprint();
+        Avatar->ResetSprint();
     }
 }
 
@@ -2312,6 +2321,9 @@ FString AHomesteadController::FocusActions() const
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
         if (!SeedPouchHint().IsEmpty())
             return (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book")) + SeedPouchHint();
+        // Food on the hotbar is eaten with A / E (or X / F) when there's nothing else to use them on.
+        if (const auto Food = SelectedHotbarFood(); Food != Homestead::Item::Count && Sim.Count(Food) > 0)
+            return A + TEXT(" Eat ") + Text(Homestead::ItemName(Food)).ToLower();
         return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
@@ -2849,7 +2861,7 @@ void AHomesteadController::Interact()
                         || Kind == Homestead::ResourceKind::RottenPlanks;
                     const auto Gather = Sticks || Kind == Homestead::ResourceKind::FallenBranch || Boards ? EHomesteadKneelGather::Sticks
                         : Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::SalvagePile
-                            || Kind == Homestead::ResourceKind::RubbishHeap
+                            || Kind == Homestead::ResourceKind::RubbishHeap || Kind == Homestead::ResourceKind::SlateHeap
                         ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
                     FVector2D Target(ActionTarget.x, ActionTarget.y);
                     // Berries are picked from the near side of the bush, not its centre; an estate
@@ -2865,7 +2877,9 @@ void AHomesteadController::Interact()
                     {
                         const bool BigHeap = Kind == Homestead::ResourceKind::RubbishHeap && FocusId >= 570000 && FocusId < 570008;
                         const float Edge = BigHeap ? 95.0f : Kind == Homestead::ResourceKind::BrokenBarrel ? 55.0f
-                            : Kind == Homestead::ResourceKind::RottenPlanks ? 50.0f : 45.0f;
+                            : Kind == Homestead::ResourceKind::RottenPlanks ? 50.0f
+                            // A slate heap is nearly three metres by two: she stacks from its edge.
+                            : Kind == Homestead::ResourceKind::SlateHeap ? 100.0f : 45.0f;
                         const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
                         if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * FMath::Clamp(Toward.Size() - 30.0f, 0.0f, Edge);
                     }
@@ -2929,7 +2943,7 @@ void AHomesteadController::Interact()
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
-    default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
+    default: if (!EatSelectedFoodInstead()) Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
 
 }
@@ -3022,6 +3036,7 @@ void AHomesteadController::Secondary()
     }
     else if (Focus == EFocus::Fire) Notify(Sim.AddFuel(FocusId, PlayerPoint()), WoodTapA);
     else if (SelectedCarriedTool() == Homestead::Item::OilLamp) MenuRefillLamp();
+    else if (Focus == EFocus::None && EatSelectedFoodInstead()) {}
     else HoeSquareAhead();
 }
 
@@ -3153,6 +3168,7 @@ void AHomesteadController::Back()
     if (IsFailed()) { RetryCheckpoint(); return; }
     if (bBookOpen) CloseBook();
     else if (bPlanning) EndPlacement();
+    else if (CancelShopWait()) PlayEffect(UIClick, 0.05f);
     else OpenBook(4);
 }
 void AHomesteadController::PreviousPage()
@@ -4304,7 +4320,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     if (Avatar)
     {
         Avatar->CancelAction(true);
-        Avatar->CancelSprint();
+        Avatar->ResetSprint();
     }
     WorldId = Save.WorldId;
     LastSuccessfulSave = FDateTime::FromUnixTimestamp(Save.SavedAtUtc);
@@ -4461,7 +4477,7 @@ void AHomesteadController::RetryCheckpoint()
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
         Avatar->CancelAction(true);
-        Avatar->CancelSprint();
+        Avatar->ResetSprint();
     }
     Appearance = SessionAppearance;
     PendingLocation = SessionLocation;
@@ -4504,6 +4520,7 @@ void AHomesteadController::NewGame()
         Appearance.HairStyle = 1; Appearance.MetaHair = HomesteadLook::MetaHairForLegacy(1);
     }
     ResetHotbar();
+    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->ResetSprint();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);
     PendingRotation = FRotator(-15, 15, 0);

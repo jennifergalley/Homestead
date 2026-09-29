@@ -4,6 +4,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
+#include "Simulation/HomesteadCrops.h"
 #include "UI/SHomesteadMenu.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -953,7 +954,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, BerryPlotId, FruitBefore, BerrySeedStock, BerryHarvestRoots, WaterBefore, CropWaterStarts, WaterStarts]()
         {
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
-            return Plot && Plot->planted && Plot->kind == Homestead::CropKind::Berries && Plot->growth < 0.001
+            // A picked bush keeps its leaves and ripens again from the regrow stage (improve-crops-and-harvest).
+            const auto& Berry = Homestead::GetCropInfo(Homestead::CropKind::Berries);
+            const double RegrowStart = FMath::Max(0.0, 1.0 - Berry.regrowHours / Berry.growHours);
+            return Plot && Plot->planted && Plot->kind == Homestead::CropKind::Berries && Plot->picked
+                && FMath::Abs(Plot->growth - RegrowStart) < 0.001
                 && Controller->Simulation().Count(Homestead::Item::Berries) == *FruitBefore + 6
                 && Controller->Simulation().Count(Homestead::Item::Seeds) == *BerrySeedStock
                 && Controller->Simulation().Count(Homestead::Item::Roots) == *BerryHarvestRoots

@@ -28,6 +28,8 @@ enum class ResourceKind : int
     Primroses, Bluebells, WildDaffodils, WildGarlic,
     // add-coral-island-clearout: the manor clear-out's nettles, a middling stump and hand-cleared rubbish.
     Nettles, StumpMedium, BrokenCrate, BrokenBarrel, RubbishHeap, RottenPlanks,
+    // Slate slid off the manor's roofs, heaped in and round the ruin; cleared by hand.
+    SlateHeap,
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
@@ -614,6 +616,9 @@ public:
     Result Buy(int shopId, Item item, int quantity, bool fromHeroineStock, Point player);
     // Counts a shopkeeper greeting (a friendship stub).
     Result GreetShopkeeper(int shopId);
+    // Waits by a closed shop until it opens: the ordinary passage of time (crops, weather, vitals,
+    // the morning sell-down), refused before any time passes if she'd collapse first.
+    Result WaitForShop(int shopId, Point player);
     // Playtest aids: adjust the purse; open (or move) a shop with its counter at `counter`.
     Result GrantMoney(Cents cents);
     Result PlaceShop(ShopKind kind, Point counter, double yaw = 0.0);

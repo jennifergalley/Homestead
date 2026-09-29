@@ -68,6 +68,10 @@ const OvergrowthInfo OgTable[] = {
         {OgGives(Item::ScrapIron, 1, 2), OgGives(Item::Stone, 1, 2), OgGives(Item::ScrapLead, 1, 1, 25)}, 130.0},
     {ResourceKind::RottenPlanks, ToolKind::Count, true, ToolTier::Worn, 0.6, OgSwings(1, 1, 1, 1),
         {OgGives(Item::Kindling, 1, 2), OgGives(Item::ScrapIron, 1, 1, 50)}, 90.0},
+    // Slate slid off the ruin's roofs, stacked aside by hand: the sound pieces as stone, and the lead
+    // flashing and roofing nails that came down with them.
+    {ResourceKind::SlateHeap, ToolKind::Count, true, ToolTier::Worn, 0.8, OgSwings(1, 1, 1, 1),
+        {OgGives(Item::Stone, 1, 2), OgGives(Item::ScrapLead, 1, 1, 30), OgGives(Item::ScrapIron, 1, 1, 30)}, 150.0},
 };
 const OvergrowthInfo* OgByKind(ResourceKind kind)
 {
@@ -146,7 +150,7 @@ const OvergrowthInfo* FindOvergrowth(ResourceKind kind) { return OgByKind(kind);
 bool IsRubbish(ResourceKind kind)
 {
     return kind == ResourceKind::BrokenCrate || kind == ResourceKind::BrokenBarrel || kind == ResourceKind::RubbishHeap
-        || kind == ResourceKind::RottenPlanks;
+        || kind == ResourceKind::RottenPlanks || kind == ResourceKind::SlateHeap;
 }
 
 const ResourceNode* OvergrowthSpoiling(const State& state, const Footprint& area)

@@ -3,6 +3,15 @@
 Round 1, lane `add-dollars-and-general-store`. Covers her purse, the general store in town, the
 shopkeeper (a stand-in body for now) and the town-square blockout on the Estate map.
 
+## Planned whole-coin follow-up
+
+The current playable build and its historical receipts below still show US dollars and cents. The
+agreed pending change keeps every stored `int64` raw value and save byte unchanged, but reinterprets
+one raw unit as one whole coin: a prior raw 1000/$10 becomes **1,000 coins**, and a raw 100/$1 pasty
+becomes **100 coins**. `FormatMoney` and signed deltas will use grouped integers and singular/plural
+coin text, with no `$` or decimal display. This is a coordinated Simulation and UI change, not a
+display-only conversion; the historic dollar-era receipts remain intact as evidence.
+
 ## What to try
 
 1. Start a new estate game. The purse, a coin icon in the vitals stack under the calendar at the top right, reads **$10.00**.

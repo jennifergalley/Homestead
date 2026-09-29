@@ -13,6 +13,7 @@
 #include "HomesteadCharacter.h"
 #include "Simulation/HomesteadNightLight.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "Simulation/HomesteadRuinDebris.h"
 #include "HomesteadLampLook.h"
 #include "Kismet/GameplayStatics.h"
 #include "Async/Async.h"
@@ -3536,6 +3537,15 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     auto Whole = [&](UStaticMesh* Mesh, FVector2D Offset, float Turn, float Scale) { Place(Mesh, Offset, Yaw + Turn, false, Scale, false); };
     // Authored part-sunk, pivot on the ground line (the Rocks Agent's granite pick rocks).
     auto Sunk = [&](UStaticMesh* Mesh, float Scale) { Place(Mesh, FVector2D::ZeroVector, Yaw, false, Scale, true); };
+    // The ruin's own slate and granite heaps (HomesteadRuinDebris.h) keep the mesh, turn and size the
+    // ruin gave them, with their ground-centre pivot on the ground, so clearing them is the only change.
+    if (const Homestead::RuinDebris::Spot* Debris = Homestead::RuinDebris::Find(Node.id))
+    {
+        const FString Folder = UTF8_TO_TCHAR(Debris->mesh);
+        Place(Load(*Folder, *(TEXT("SM_") + Folder)), FVector2D::ZeroVector, static_cast<float>(Debris->yaw), false,
+            static_cast<float>(Debris->scale), true);
+        return;
+    }
     switch (Node.kind)
     {
     case Homestead::ResourceKind::BrambleThin:
@@ -3754,7 +3764,7 @@ void AHomesteadWorld::StartClearPop(FHomesteadWorldVisual& Visual, const Homeste
     using Homestead::ResourceKind;
     const ResourceKind Kind = Node.kind;
     const bool bStone = Kind == ResourceKind::Rubble || Kind == ResourceKind::SmallRock || Kind == ResourceKind::Boulder
-        || Kind == ResourceKind::RubbishHeap || Kind == ResourceKind::SalvagePile;
+        || Kind == ResourceKind::RubbishHeap || Kind == ResourceKind::SalvagePile || Kind == ResourceKind::SlateHeap;
     const bool bGreen = Kind == ResourceKind::TallGrass || Kind == ResourceKind::Weeds || Kind == ResourceKind::Nettles
         || Kind == ResourceKind::BrambleThin || Kind == ResourceKind::BrambleThicket || Kind == ResourceKind::BrambleBank
         || Kind == ResourceKind::Sapling;
