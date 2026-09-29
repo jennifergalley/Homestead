@@ -886,7 +886,7 @@ void AHomesteadCharacter::ApplyMetaHumanGarments()
 void AHomesteadCharacter::ApplyMetaHumanTunicDye()
 {
     if (!MetaHumanOutfit) return;
-    // M_PropTextured's Tint multiplies the homespun albedo (import_primitive_outfit.py).
+    // M_HomespunDyeable's Tint multiplies the homespun albedo (import_primitive_outfit.py).
     const FLinearColor Tint = MetaHumanTunicDye == INDEX_NONE ? FLinearColor::White : HomesteadLook::HomespunDyeTint(MetaHumanTunicDye);
     const TArray<FName> Names = MetaHumanOutfit->GetMaterialSlotNames();
     for (int32 Index = 0; Index < Names.Num(); ++Index)
