@@ -18,7 +18,7 @@ break unless the orchestrator remembers to bump the version for it.
   count (a save from a newer build) with the existing "incompatible version" message rather than
   "corrupt".
 - `SimulationSaveVersion` goes to 13 in the same change (the orchestrator's bump). Version 12 saves
-  keep loading exactly as today (fixed width); versions 7-10 are unchanged.
+  migrate: each positional stock is measured from its line; versions 7-10 are unchanged.
 - After this, appending an `Item` needs no save-version bump. Reordering or removing items still
   does (enums that name data stay append-only).
 

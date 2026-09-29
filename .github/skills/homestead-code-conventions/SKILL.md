@@ -39,9 +39,10 @@ disagree, follow the code and tell the Architecture Agent.
   with `static_assert` on the count.
 - Randomness is a stable hash of ids (`OgRoll`), not hidden RNG state, so tests and saves replay.
 - Save format: see `docs/architecture.md` section 5. Lanes never change `SimulationSaveVersion`;
-  tell the orchestrator before your `[ready]` if your branch changes what `Serialize` writes,
-  **including appending an `Item`** (stocks are positional until `harden-save-item-stocks` lands).
-  New data goes in a tagged trailing section.
+  tell the orchestrator before your `[ready]` if your branch changes what `Serialize` writes.
+  Appending an `Item` doesn't (stocks carry their width since version 13). New data goes in a
+  tagged trailing section (`<tag> ...`, read in `Deserialize`'s tag loop); older saves without it
+  must still load. Any new list or per-enum array you write gets its count first.
 - Test it natively: add cases to the matching `Tests/Homestead*Tests.cpp` and run
   `Scripts\Test-Native.ps1 -Configuration Release`.
 

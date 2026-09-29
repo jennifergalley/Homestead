@@ -129,8 +129,9 @@ The architecture map is `docs/architecture.md`; the long form with reasons is th
   `ResourceName`, `OgTable`) in step. Estate placement ids are claimed on the round page and never
   reused or renumbered.
 - **Saves:** never change `SimulationSaveVersion` or `bakeVersion` yourself. Tell the orchestrator
-  before your `[ready]` if you changed what `Serialize` writes, appended an `Item`, or moved or
-  removed placements.
+  before your `[ready]` if you changed what `Serialize` writes or moved or removed placements.
+  Appending an `Item` is save-safe (version 13 stocks carry their width); write any new list or
+  per-enum array with its count first.
 - **Unity-build safe:** file-local names are unique or live in a named namespace
   (`namespace <Widget>Style`); no `using namespace` at file scope. Warnings are errors.
 - **Assets** are held in `UPROPERTY() TObjectPtr<>` members, never function-local statics.

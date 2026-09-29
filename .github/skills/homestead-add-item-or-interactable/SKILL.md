@@ -28,9 +28,8 @@ item) and `BrambleBank` (clearable overgrowth).
 5. **Hotbar:** tools and food can be pinned (`AHomesteadController::CanPinToHotbar`). A new tool
    also needs its `ToolKind` mapping, held-mesh attachment in `AHomesteadCharacter` and an action
    animation (skill `homestead-animation-layer`).
-6. **Saves:** until `openspec/changes/harden-save-item-stocks` lands, a new item widens every
-   saved stock. Tell the orchestrator in your `[ready]` so the save version bump is scheduled;
-   don't bump it yourself.
+6. **Saves:** nothing to do. Stocks are saved with their width (version 13), so older saves load
+   with your item at zero. Never reorder or remove items; that does break saves.
 7. **Tests:** extend `Tests/HomesteadSimulationTests.cpp` or `Tests/HomesteadEconomyTests.cpp`
    (catalogue lookups, yield, price, recipe). Run `Scripts\Test-Native.ps1 -Configuration Release`.
 8. **Editor play tools:** if agents need to name it from Python, the item key already works

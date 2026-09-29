@@ -110,12 +110,14 @@ orchestrator before removing any of it.**
   equipment, layout, cleared underbrush), then **tagged trailing sections** (parcels, economy,
   `tools`, `manor`). A missing trailing section loads with defaults; an unknown tag invalidates the
   save. Bytes above 127 are rejected (hex-encode free text such as names).
-- **Versioning:** `SimulationSaveVersion` (12) in `HomesteadSimulation.h`. Lanes never bump it; the
-  orchestrator does, once per integration. Version 11 is refused; 7-10 still migrate.
-- **Item stocks are positional.** `WriteStock` writes `ItemCount` integers with no count prefix, so
-  appending an `Item` changes the width of every stock and older saves of the same version no longer
-  parse (reported as corrupt). This is what broke version 11. See OpenSpec
-  `harden-save-item-stocks`.
+- **Versioning:** `SimulationSaveVersion` (13) in `HomesteadSimulation.h`. Lanes never bump it; the
+  orchestrator does, once per integration. Version 12 migrates; 11 is refused; 7-10 still migrate.
+- **Item stocks carry their width** (version 13, `harden-save-item-stocks`): each stock (the pack and
+  every chest) and the equipment slots are written as `<count> v0 v1 ...`. A save from a build with
+  fewer items loads with the new ones at zero, so **appending an `Item` needs no version bump**; a
+  wider stock means a newer build and is refused. Version 12 stocks were positional (always 40 items
+  wide on `main`); the reader measures each stock's line. Reordering or removing items still breaks
+  saves: enums that name data stay append-only.
 - **Estate saves** also check `State::placementBakeVersion` against the placements baked into the
   build; a save from a different layout is refused with a "start a new game" message.
 - **Routing:** `HomesteadSaveRouting` picks the save directory (normal, test sandbox, fixtures).
@@ -202,8 +204,7 @@ Longest functions: test route builders (`PrepareGeneratedWorldChecks` 1049 lines
 
 Known debt, highest payoff first (the plan is in `openspec/changes/improve-code-health-between-rounds`):
 
-1. **Positional item stocks in saves** (section 5). Every appended item silently breaks same-version
-   saves.
+1. ~~Positional item stocks in saves~~: fixed by `harden-save-item-stocks` (version 13).
 2. **God classes on the hottest files.** Controller, world and character mix many features; every
    lane edits them, so they cause most merge conflicts and every change recompiles ~4k lines. Split
    by feature into more `.cpp` files of the same class (as `HomesteadControllerManor.cpp` already
