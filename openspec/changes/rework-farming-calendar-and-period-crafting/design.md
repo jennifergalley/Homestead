@@ -113,12 +113,16 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
   `IsEdible` means `ItemInfo::hunger > 0`. With hunger frozen at 100, she could never eat. On the
   estate:
   - `IsEdible` reads the new food class (Snack or Meal) instead of `hunger > 0`.
-  - `CanEat` refuses a **Snack** only when her energy is already full: "You're full of energy.
-    Save it for later." Nothing is consumed.
-  - A **Meal** is always allowed and is consumed. At full energy it restores nothing but still
-    grants or refreshes Well fed. The toast then leaves out the energy gain and reads only "Well fed
-    until 2:30 PM"; with an energy gain it reads "+40 Energy · Well fed until 2:30 PM". That way a
-    deliberate meal before a big job is never refused.
+  - `CanEat` refuses a **Snack** (raw food) when her energy is already full: "You're full of
+    energy. Save it for later." Nothing is consumed.
+  - A **Meal** (cooked food) below full energy is always allowed, and its toast reads
+    "+40 Energy · Well fed until 2:30 PM".
+  - A **Meal at full energy** is allowed only if it starts Well fed, or extends the current Well
+    fed by at least 1 game hour (new expiry ≥ current expiry + 1). Then it's consumed, and the toast
+    says outright that energy was full and gives the duration: "Your energy was already full. Well
+    fed until 2:30 PM." Otherwise it's refused and nothing is consumed: "You're full, and already
+    well fed until 2:30 PM. Save it for later." That way a deliberate meal before a big job still
+    works, and a meal can't be wasted by accident.
   - Hotbar quick-eat follows the same rules.
 - **Food restores energy only.** The catalogue gains a food class: `Snack`, `Meal`, or not edible.
   On the estate `ItemInfo::hunger` is ignored for effect but kept above zero for the woodland.
@@ -162,8 +166,10 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
   - **Save:** an optional trailing tagged section, `wellfed`, like lane A's `withered` section,
     with no version bump.
     - It's written only while she's Well fed.
-    - On load, a missing section means not Well fed. A value is clamped to `[hour, hour + 3]`, so a
-      corrupt or hand-edited save can't grant a long buff.
+    - On load, a missing section means not Well fed. The stored expiry must be finite. An expiry at
+      or before the save's `hour` means not Well fed, and any value above the save's `hour + 3` is
+      clamped to `hour + 3`, so a corrupt or hand-edited save can't grant a long buff. Loading never
+      fails silently.
     - An older build reports a save with an unknown section as `NewerBuild` and leaves it untouched.
       Writing the section only while it's active keeps most saves readable by older builds.
     - Losing the timer is harmless.

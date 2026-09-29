@@ -30,7 +30,7 @@ A new game SHALL default to a 30-real-minute day. The Settings choice of 30, 60 
 - **THEN** about 12 game hours have passed
 
 ### Requirement: Energy is the only meter, and meals make her Well fed
-On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penalty or hunger failure, and the HUD SHALL show no hunger meter. Food SHALL restore energy. Snacks SHALL restore a little. Meals, which are cooked dishes, SHALL restore more and SHALL grant Well fed for a limited number of game hours, shown as a clock time. While Well fed, every piece of work SHALL cost less energy. Eating another meal SHALL refresh the timer rather than stack the benefit. A snack SHALL be refused without being consumed when her energy is full, and a meal SHALL always be allowed.
+On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penalty or hunger failure, and the HUD SHALL show no hunger meter. Food SHALL restore energy. Snacks SHALL restore a little. Meals, which are cooked dishes, SHALL restore more and SHALL grant Well fed for a limited number of game hours, shown as a clock time. While Well fed, every piece of work SHALL cost less energy. Eating another meal SHALL refresh the timer rather than stack the benefit. When her energy is full, a snack SHALL be refused without being consumed. A meal SHALL be allowed only if it starts Well fed or extends it by at least one game hour, and the game SHALL say that her energy was already full. Otherwise the meal SHALL be refused without being consumed.
 
 #### Scenario: Meal
 - **WHEN** she eats a Cornish pasty
@@ -42,7 +42,11 @@ On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penal
 
 #### Scenario: Full energy
 - **WHEN** her energy is full and she tries to eat bread, and then a Cornish pasty
-- **THEN** the bread is refused and kept, and the pasty is eaten, restores no energy, and refreshes Well fed without claiming an energy gain
+- **THEN** the bread is refused and kept, and the pasty is eaten with a message that her energy was already full and how long she is Well fed
+
+#### Scenario: Already well fed at full energy
+- **WHEN** her energy is full, she ate a meal 30 game minutes ago, and she tries to eat another meal
+- **THEN** the meal is refused and kept, because it would extend Well fed by less than one hour
 
 #### Scenario: Well fed across midnight
 - **WHEN** she eats a meal at 11 PM
