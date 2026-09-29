@@ -92,7 +92,7 @@ const EstateLayout& ProvisionalEstateLayout();
 // Estate level. Each lane appends its own section. Id ranges (registry: docs/handoff/round-<n>.md):
 // world 500000+, overgrowth 510000+, salvage 520000+, town 530000+ (reserved), berry brambles
 // 540000-540043 (clearing), derelict farm and estate disrepair 550000+ (manor), MVP woodland biome 560000-569999 (scatter.py / mvp_woodland.py),
-// clear-out near the manor 570000-579999 (clearing). Order matters: later sections yield to earlier
+// clear-out near the manor 570000-579999 (clearing), field mushrooms 580000-580999 (seasons). Order matters: later sections yield to earlier
 // ones (keep clear of what's already placed), so add sections in id order: berries, then the farm,
 // then the clear-out. Farm-first skipped a quarter of the brambles and failed the simulation tests.
 const EstatePlacements& ProvisionalEstatePlacements();
