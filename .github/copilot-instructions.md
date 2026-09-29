@@ -5,21 +5,22 @@
 Jenny works in two modes. When she hasn't said which, treat short requests as the Interactive Loop.
 
 - **Interactive Loop** (default when she's around): work in short, incremental loops that each
-  deliver one small end-to-end improvement she can playtest (for example, one new animation).
-  When an improvement is done:
-  1. package a new playable build to `Build\Windows` (`Scripts\Build-Game.ps1 -Package`; her
-     desktop shortcut launches it),
-  2. commit with a descriptive message,
-  3. push to `main`.
-
-  Then report what to try. Don't batch several improvements into one delivery.
-
-  **In multi-session rounds only the integration session packages.** Lane sessions do steps 2-3
-  without step 1: implement, verify in the editor, run native tests, compile-check, commit and push (to
-  `main` when rebased and tested, or to the lane branch). Then they send `[ready]` to the orchestrator,
-  which forwards it to the integration session. The integration session merges, packages once, runs the
-  packaged tests and reports `[integrated]` back; the orchestrator relays to Jenny. See "Delivering lane
-  work" in `docs/handoff/README.md`.
+  deliver one small end-to-end improvement she can playtest (for example, one new animation). When an
+  improvement is done and verified, commit it with a descriptive message and push it to `main` (a lane
+  sends `[ready]` instead; see "Delivering lane work" in `docs/handoff/README.md`), then report what
+  to try. Don't batch several improvements into one delivery. Packaging now follows the playtest
+  schedule below rather than every improvement.
+- **Playtest builds on a schedule** (Jenny, standing preference). A packaged build must be on the
+  "Homestead Estate" desktop shortcut by **7:30 AM every day** (weekends too) and by **4:00 PM on
+  weekdays**, after her work. On weekends, also cut one as soon as features she'd notice land. The
+  orchestrator triggers the integration session at about 5:30 AM and 2:00 PM. It packages `main`,
+  runs the packaged suites, retargets the shortcut (keeping the Homestead icon) and reports
+  `[playtest] ready @ <sha>` with what's new and what to try. Lanes close their editors while a
+  build is being cut. If packaging or the suites fail, the last good build stays on the shortcut.
+  **`main` must stay playable:** push only verified work.
+- **When Jenny pauses development to play,** every session stops launching editors and builds until
+  she says to resume. Finish or park your current step, close your editor, and wait by ending your
+  turn (see "Waiting means ending your turn" below).
 - **The orchestrator only coordinates** (Jenny's standing preference). It never builds, merges,
   packages or verifies: while it's busy with hands-on work its turn stays open, and queued messages from
   lanes can't reach it (a manager too busy being an IC to manage). It forwards `[ready]`s, relays
@@ -83,6 +84,11 @@ next five sessions.
 
 The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
 
+- **Session names** (Jenny, standing preference). Every session keeps its app name as
+  "<one or two words> Agent", describing its current work ("Clearing Agent", "Integration Agent",
+  "Lamp Agent"). Rename yourself with `rename_session` (`force: true`) when you start and whenever your
+  main task changes. The orchestrator names new sessions this way when it creates them. If the tool
+  refuses because Jenny renamed the session herself, keep her name.
 - **Waiting means ending your turn** (Jenny, all sessions). Never sleep, poll or loop in a shell while waiting (for an editor slot, the UBT queue, a `[ready]`
   or a perf window): a blocking wait keeps your turn open, so queued `send_session_message`s never
   arrive. Schedule a wake-up with `save_session_automation` (`interval: "once"` with a `run_at` a few
@@ -90,7 +96,8 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   and clear the automation when it's no longer needed. Waiting on a build or command you started
   yourself is fine through the tool's own completion notification (async shell / `initial_wait`).
 - **At most 2 Unreal processes on the machine** in total: editors, packaged games and commandlets
-  all count. `Start-EditorMcp.ps1` refuses a third; check other launches with
+  all count, and one of the two is reserved for the integration session, so the other lanes share one
+  slot. `Start-EditorMcp.ps1` enforces both; check other launches with
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead*`. Each editor commits 15-17 GB, and three
   filled RAM and grew the pagefile on C: to 81.5 GB. **Close your editor as soon as a verification
   pass is done.**

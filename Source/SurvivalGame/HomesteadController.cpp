@@ -39,6 +39,7 @@
 #include "UI/SHomesteadMenu.h"
 #include "UI/SHomesteadShop.h"
 #include "UI/SHomesteadHotbar.h"
+#include "UI/SHomesteadHudScale.h"
 #include "UI/SHomesteadVitals.h"
 #include "HomesteadMapComponent.h"
 #include "Simulation/HomesteadManor.h"
@@ -211,11 +212,11 @@ const TCHAR* RecipeDescription(Homestead::Recipe Recipe)
 {
     switch (Recipe)
     {
-    case Homestead::Recipe::HaftAxe: return TEXT("Fit a salvaged axe head to a new haft. Fells trees and clears stumps and fallen timber.");
+    case Homestead::Recipe::HaftAxe: return TEXT("Fit a salvaged axe head to a new handle. Fells trees and clears stumps and fallen timber.");
     case Homestead::Recipe::HaftHoe: return TEXT("Fit a salvaged hoe blade to a new handle, to break and tend garden soil.");
     case Homestead::Recipe::HaftScythe: return TEXT("Fit a salvaged scythe blade to a snath. Mows tall grass and weeds in a wide sweep.");
     case Homestead::Recipe::HaftBillhook: return TEXT("Fit a salvaged billhook head to a handle. Hacks through bramble and saplings.");
-    case Homestead::Recipe::HaftPickaxe: return TEXT("Fit a salvaged pick head to a haft. Breaks rubble and rocks into stone and scrap.");
+    case Homestead::Recipe::HaftPickaxe: return TEXT("Fit a salvaged pick head to a new handle. Breaks rubble and rocks into stone and scrap.");
     case Homestead::Recipe::RoastedRoots: return TEXT("Wild roots softened and warmed over a fueled cookfire.");
     case Homestead::Recipe::HerbedRoots: return TEXT("Roasted roots brightened with meadow herbs.");
     case Homestead::Recipe::SplitFirewood: return TEXT("Prepared fuel split from timber with a carried axe.");
@@ -583,18 +584,14 @@ void AHomesteadController::ShowHotbar()
         })
         .HAlign(HAlign_Center)
         .VAlign(VAlign_Bottom)
-        .Padding(0, 0, 0, 22)
         [
-            SNew(SScaleBox).Stretch(EStretch::UserSpecified)
-            .UserSpecifiedScale_Lambda([]()
-            {
-                const FViewport* Viewport = GEngine && GEngine->GameViewport
-                    ? GEngine->GameViewport->Viewport : nullptr;
-                return Viewport ? FMath::Min(1.0f,
-                    1080.0f / FMath::Max(720, Viewport->GetSizeXY().Y)) : 1.0f;
-            })
+            // Sized in Canvas HUD units, like the calendar and minimap, so it keeps its proportion at 4K.
+            SNew(HomesteadMenus::SHomesteadHudScale)
             [
-                HotbarWidget.ToSharedRef()
+                SNew(SBox).Padding(0, 0, 0, 22)
+                [
+                    HotbarWidget.ToSharedRef()
+                ]
             ]
         ];
     GEngine->GameViewport->AddViewportWidgetContent(HotbarRoot.ToSharedRef(), 50);
@@ -1117,6 +1114,10 @@ void AHomesteadController::SlotHaftedTool(Homestead::Recipe Recipe)
         HotbarSlots[Slot] = Value;
     }
     SelectedHotbarSlot = Slot;
+}
+float AHomesteadController::CraftProgress() const
+{
+    return bBookOpen && NativeMenu.IsValid() ? NativeMenu->GetCraftProgress() : 0.0f;
 }
 void AHomesteadController::MenuCraftBeat(int32 Beat)
 {
@@ -2810,9 +2811,9 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         }
         Result.Add({0, TEXT("Choose your own home"), TEXT("Explore the seeded woodland. There is no prepared house clearing; find a place you like and make room.")});
         Result.Add({1, TEXT("1. Find a little breakfast"), TEXT("Gather berries, then eat them from the Pack page.")});
-        Result.Add({2, TEXT("2. Make your first tools"), TEXT("Search the salvage piles around the manor for rusted heads, then haft each on two branches from the Craft page.")});
+        Result.Add({2, TEXT("2. Make your first tools"), TEXT("Search the salvage piles around the manor for rusted heads, then craft each into a tool with two branches on the Craft page.")});
         Result.Add({3, TEXT("3. Make a home"), TEXT("Fell the trees at your chosen site with the axe. Place a floor, walls, doorway and roof. Felled trees stay gone when you return.")});
-        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Haft a hoe. Each swing tills one small square; plant each square with A/E (root seeds) or X/F (berry seeds), or pick seeds or a berry on the hotbar and click.")});
+        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a hoe. Each swing tills one small square; plant each square with A/E (root seeds) or X/F (berry seeds), or pick seeds or a berry on the hotbar and click.")});
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill your pail at the stream. F/X removes weeds from a plot.")});
         Result.Add({6, TEXT("6. Cook and rest"), TEXT("Split timber with a carried axe. Cookfires use prepared firewood first, then branches. Roast roots; sleep in a sheltered bedroll.")});
         Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is cosmetic.")});

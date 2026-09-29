@@ -149,6 +149,8 @@ public:
     const Homestead::PlacementTarget& CurrentPlacement() const { return BuildTarget; }
     bool IsPlacementValid() const { return bBuildValid; }
     bool HasNativeMenu() const { return NativeMenu.IsValid(); }
+    // The held Craft recipe's progress through its cycle (0-1), or 0 when nothing is being crafted.
+    float CraftProgress() const;
     void MenuPage(int32 TargetPage);
     void MenuSelect(int32 Row);
     void MenuActivate();

@@ -17,7 +17,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 WORK = os.environ.get("HOMESTEAD_TERRAIN_WORK", r"E:\TerrainSource\work")
 H = 2016
-BROADLEAF, FIR, HAZEL, BRACKEN, YARROW, COBBLES, BOULDER, ERRATIC, DOME, FERN, GRASS_TALL, GRASS_MID, SHRUB = range(13)
+BROADLEAF, FIR, HAZEL, BRACKEN, YARROW, COBBLES, BOULDER, ERRATIC, DOME, FERN, GRASS_TALL, GRASS_MID, SHRUB, OAK, BEECH, SYCAMORE = range(16)
 
 def weights():
     out = {}
@@ -170,9 +170,14 @@ def main():
     out_d = np.linalg.norm(ww - boundary.mean(axis=0), axis=1)
     ww = ww[points_in_poly(ww, boundary) | (rng.random(len(ww)) < np.clip(1.3 - out_d / 1100.0, 0.18, 1.0))]
     ww = clear_of_interactive(ww, 6.5)
-    firs = rng.random(len(ww)) < 0.1
-    emit(BROADLEAF, ww[~firs], 1.0, 1.55)
-    emit(FIR, ww[firs], 0.85, 1.2)
+    # Mature oak, beech and sycamore (14-17 m crowns) make the canopy; young broadleaf and the odd
+    # fir fill between them.
+    pick = rng.random(len(ww))
+    emit(OAK, ww[pick < 0.16], 0.8, 1.15)
+    emit(BEECH, ww[(pick >= 0.16) & (pick < 0.26)], 0.8, 1.1)
+    emit(SYCAMORE, ww[(pick >= 0.26) & (pick < 0.34)], 0.8, 1.1)
+    emit(BROADLEAF, ww[(pick >= 0.34) & (pick < 0.92)], 0.9, 1.4)
+    emit(FIR, ww[pick >= 0.92], 0.85, 1.2)
     # Undergrowth under the new woods, thickest on the estate itself.
     wu = woodable(keep_common(candidates(1 / 7.0, (-1100, 600, -1500, 700)), 3.5, 3))
     wu = wu[wood_score(wu) > WOOD_AT]
@@ -215,10 +220,14 @@ def main():
     emit(SHRUB, hedge[pick < 0.5], 0.9, 1.4)
     emit(HAZEL, hedge[(pick >= 0.5) & (pick < 0.85)], 0.9, 1.3)
     emit(BRACKEN, hedge[(pick >= 0.85) & (pick < 0.97)], 0.8, 1.1)
-    emit(BROADLEAF, hedge[pick >= 0.97], 0.9, 1.3)
+    emit(OAK, hedge[pick >= 0.97], 0.75, 1.05)
     # Lone field trees and hedgerow shrubs on the pasture.
     field = clear_of_interactive(by_weight(keep_common(candidates(1 / 2500.0)), "Pasture", 0.6), 10)
-    emit(BROADLEAF, field, 1.0, 1.35)
+    # Parkland field trees: mostly broad old oaks.
+    pick = rng.random(len(field))
+    emit(OAK, field[pick < 0.6], 0.9, 1.25)
+    emit(SYCAMORE, field[(pick >= 0.6) & (pick < 0.75)], 0.85, 1.1)
+    emit(BROADLEAF, field[pick >= 0.75], 1.0, 1.35)
     # Grass tufts and yarrow close to where she walks: round the manor and along the road.
     close = candidates(1 / 5.0, (-420, -80, -900, -400))
     close = np.r_[close, densify(L["road"], 1.0)[::1] + rng.normal(0, 9, (len(densify(L["road"], 1.0)), 2))]
