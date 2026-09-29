@@ -260,6 +260,16 @@ claims them through this page before using them (the registry starts at 581000+)
 Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save,
 then add this to the core-loop package acceptance.
 
+**Pail state core-loop requirement:** water is no longer an inventory `Item`; the pail holds 0..6
+units with an oil-lamp-style progress bar. Props owns core state and migration of existing v12/v13 water
+stock; Menu owns the UI. Prove capacity, save migration and packaged lake fill before calling the loop
+accepted.
+
+**Turnip planting regression:** after the first turnip seed, remaining planting can fail. Integration
+reproduces it from a copied packaged save and records exact seed stock, focus, plot, moisture, season,
+Energy and toast state; trace and fix the root cause rather than silently refusing the action. This is
+an unshipped core-loop acceptance gate.
+
 **Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
 all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
 hands-on work; no one edits a busy lane's files or starts a fourth implementer.
@@ -355,6 +365,14 @@ requirement.
   Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
   two-swing clearing animation and awards/clears once, without a second click or double reward.
   Architecture traces tool tier, input and reward paths before native/PIE proof.
+- **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
+  gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
+  Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
+  Replace the scythe cue with an original or verified CC0 airy grass/steel `shhhhnk`, timed to the
+  blade pass.
+- **Hoe/pail exact target** — **Props World/Simulation plus Menu UI, pending and not shipped.** With
+  Hoe or Pail selected, highlight the exact 1 m target plot before action, showing current cell and
+  green/red validity. Verify target selection, validity and action remain consistent.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
@@ -390,7 +408,9 @@ requirement.
   build.** Controller A/X eats one selected berry per tap only when Talk has no
   precedence, and displays `+` the actual bounded Energy delta. **Pending follow-up:** every rapid
   berry tap must apply Energy immediately without waiting for the bite animation, auto-repeat or a
-  focus conflict; Menu owns input/Simulation coordination and Props owns animation.
+  focus conflict; Menu owns input/Simulation coordination and Props owns animation. Berries remain
+  edible beside tilled soil despite plant focus. Remove the duplicate centre `Ate Berries +Energy
+  +0Food` success toast when the bar popup shows the gain, while preserving errors.
 - **Music variety** — **pending, not fixed.** **Architecture Agent** (`a1648ae7`) traced the root
   cause: the shipped catalog loads only one track, `EveningHarp`, despite five named entries. The
   shuffle bag anti-repeats correctly when it has more than one track, but the existing 55–110 s gap
