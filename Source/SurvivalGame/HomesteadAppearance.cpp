@@ -20,7 +20,7 @@ const TCHAR* HairStyleName(int32 Index)
 const TCHAR* MetaHairName(int32 Index)
 {
     static const TCHAR* Values[] = {TEXT("Long and straight"), TEXT("Straight bob"), TEXT("Low ponytail"),
-        TEXT("Braided updo"), TEXT("Twin buns"), TEXT("Long and tousled"), TEXT("Curly bob"),
+        TEXT("Braided updo"), TEXT("Twin buns"), TEXT("Long and tousled"), TEXT("Long bob"),
         TEXT("Long with a fringe"), TEXT("Pixie crop")};
     static_assert(UE_ARRAY_COUNT(Values) == MetaHairCount);
     return Choice(Values, Index);
