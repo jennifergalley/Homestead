@@ -79,6 +79,10 @@ integration session merges and packages.
 
 **Registry: estate placement ids and scenery kinds.** Claim a range here (through the docs agent or
 the orchestrator) before using it, and keep the comment at `Simulation\HomesteadEstate.h` ~87 in step.
+**Section order:** later sections yield to earlier ones (they keep clear of what's already placed), so
+`ProvisionalEstatePlacements` adds them in id order: berry brambles (540000+), then the derelict farm
+(550000+), then the clear-out (570000+). Adding the farm first skipped 10 of 42 brambles and failed
+`HomesteadSimulationTests` (~line 3259, `berries >= 36 && byDoor >= 2`).
 **Append only:** placements added with `grow()`/`along()` in `HomesteadEstate.cpp` take sequential ids
 (`next++`), so inserting a line mid-run renumbers every later placement, and saves then clear the
 wrong nodes. Moving or removing placements needs `table.bakeVersion` raised (the orchestrator's call,
