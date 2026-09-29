@@ -71,8 +71,9 @@ The design's "Lanes and ownership" table is authoritative. In short:
 - **Two Unreal processes** machine-wide, **one reserved for the Integration Agent**; every other lane
   shares the second, one at a time (`Start-EditorMcp.ps1` enforces both). Close your editor as soon as a
   verification pass is done (`Scripts\Stop-MyEditor.ps1`).
-- **Perf window:** measurements run alone (`Scripts\Start-PerfWindow.ps1`); don't launch Unreal or build
-  while someone holds it.
+- **Perf window:** measurements run alone (`Scripts\Start-PerfWindow.ps1`); don't launch Unreal, build
+  or run Blender (including a headless batch) while someone holds it. Headless Blender skewed a perf run
+  about 2x.
 - **Waiting means ending your turn:** schedule a wake-up with `save_session_automation`, never sleep or
   loop.
 - **Build only when your C++ changed,** once per batch, with `Scripts\Invoke-UnrealBuild.ps1`; lanes don't
@@ -151,6 +152,9 @@ None yet.
 
 ## Pending doc updates on merge
 
+- Performance (`6841f429`, not on `main` yet): `PerfLock.ps1` treats `blender.exe` as a build, so
+  `Start-PerfWindow.ps1` names and refuses it. When it lands, update the editor skill perf-window
+  bullet to say the script enforces the no-Blender rule.
 - Crops (`b51aa930`, from round 1's polish): `HomesteadGrowCrops <days> [tend=1]` and
   `HomesteadCropGrowth <0-1>` grow crops for tests (time skips don't). When it lands, add them to the
   editor skill's "Time and weather for tests" bullet.
