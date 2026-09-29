@@ -47,9 +47,9 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current implementer slots (2026-09-29):** Integration Agent (time-critical batch), Calendar Agent
-and Performance Agent. Harvest Agent was paused to give Integration the slot; Seedsman Agent, Seasons Agent
-and Crafting Agent are also paused until the orchestrator grants a slot.
+**Current implementer slots (2026-09-29):** Weather Agent, temporary Gait Agent (Harvest) and
+temporary Menu Agent (UI). Integration released its hands-on slot after pushing `27e2e917`; UI/Menu
+resumed. These three hold the slots until the 2 PM packaging rotation.
 
 ## Lanes and ownership
 
@@ -161,7 +161,7 @@ work that goes beyond a small verified correction.
 | **Approved:** a lake in the owned geographic north-west (Jenny's map reads north-up, right=east, so her visual "up-and-left" overrides her spoken "NE") at **(-50, -745) m**, about **76 × 44 m**, with roughly 110 m from the farm edge and a ~90 m farm-side access path | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-regional-landforms-water`. Jenny can redirect this after seeing it. |
 | **Approved:** a clearly signed manor-south gate/path with protected switchbacks or stairs to a **12–20 m dry beach** along the owned ~630 m cliff coast | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-regional-landforms-water` |
 | **Approved:** the wider walkable beach above (12–20 m dry width) below the owned cliffs | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-shore-and-river-fishing` |
-| The river looks as if it stops before reaching the ocean in Jenny's screenshot | Weather Agent (`89914e30`) | Check the parked 4 PM `fix-estate-river-source` branch first, then its OpenSpec change |
+| The river looks as if it stops before reaching the ocean in Jenny's screenshot | Weather Agent (`89914e30`) | **Partly checked, not resolved:** PIE on `27e2e917` confirms the source, banks and water down to the beach, but the ribbon still ends a couple metres short of the ocean, separated by sand/foam. Own a later true estuary connection while widening the beach; do not mark the gap fixed. |
 | Running foot kicks too high toward her butt; lower its swing apex slightly | Harvest Agent / temporary Gait Agent (`65a2408b`) | `polish-locomotion-view-distance-and-time-hud` |
 
 **Water-lane order:** verify the river mouth in the parked 4 PM river branch first, then stage **lake → beach → route**. These are unverified slices: they do **not** edit the 4 PM package. If the terrain or water work needs placement ids, the Water Agent claims them through this page before using them (the registry starts at 581000+).
