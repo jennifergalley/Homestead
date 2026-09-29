@@ -403,6 +403,21 @@ requirement.
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
   Replace the scythe cue with an original or verified CC0 airy grass/steel `shhhhnk`, timed to the
   blade pass.
+- **Bilateral ground-pull and sapling action count** — **Props, pending and not shipped.** By-hand
+  Resource Weeds/Nettles already resolve in one `Sim.Harvest`; replace right-knee-only
+  `KneelGather(Pouch)` with a dedicated bilateral kneel: two hand grabs, left/right toss behind,
+  rise, and one final-contact commit (cancel free, no double stock). Garden `Sim.Weed` stays instant
+  and yieldless.
+
+  Keep tool-kind rules narrow: Weeds/Nettles are one hand-or-Scythe action and Billhook is wrong tool;
+  `BrambleThin` with worn Billhook is one; only the common worn `Sapling` requires two logical swings.
+  Its existing `MacheteHack` already has blade strikes at frames 20/37 but commits once at the second
+  (1.25 s), causing the extra click. After food work, make worn Sapling one logical clear per clip:
+  3–4 Branch + 1 Kindling, 1.5 Energy, tier rules preserved, and update Hotbar tests. Keep a standing
+  two-strike hack or dedicated standing hook for tall rigid saplings/billhook work; never reuse the
+  soft 40 cm one-knee reeds saw. Iron+ `BrambleThicket` (3/2/1/1) and Steel+ Bank (4/3/2/1) gates stay
+  unchanged. For the pictured missing bramble prompt, obtain actual `FocusId`, kind and toast before
+  declaring this a root cause.
 - **Hoe/pail exact target** — **Props World/Simulation plus Menu UI, pending and not shipped.** With
   Hoe or Pail selected, highlight the exact 1 m target plot before action, showing current cell and
   green/red validity. Verify target selection, validity and action remain consistent.
