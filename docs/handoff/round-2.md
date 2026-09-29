@@ -216,6 +216,10 @@ require a scenario for every `ADDED` requirement.
   toast: selected hotbar berries are edible with controller X or A **only when no higher-priority
   focused action exists**. Preserve focused interactions, and update the controls and hints; pending
   PIE verification.
+- **Berry eating feedback** — **temporary Gait Agent** (`65a2408b`) and **UI / temporary Menu Agent**
+  (`5cf73757`), coordinated with contextual A/X: make the character's bite more visible, then show a
+  `+X Energy` popup near the bar using the actual bounded energy delta and a smooth fill. Pending PIE
+  verification.
 - **Music variety** — **pending, not fixed.** **Architecture Agent** (`a1648ae7`) traced the root
   cause: the shipped catalog loads only one track, `EveningHarp`, despite five named entries. The
   shuffle bag anti-repeats correctly when it has more than one track, but the existing 55–110 s gap
@@ -241,6 +245,9 @@ require a scenario for every `ADDED` requirement.
 - **Invisible weeds** — **Clearing / Props lane** (owner **TBD** when an implementer slot opens):
   inspect forage-node visuals and culling; a visible weed asset must exist wherever the prompt says
   `"Weeds  E  Pull"`.
+- **Floating weeds** — **Props lane, weeds-only slice** (owner **TBD** when a slot opens): some weeds
+  float above the rendered ground on slopes or patches. Add actual landscape/base grounding and PIE
+  visually test **all 115** weed placements. Pending; not shipped.
 - **Manor debris** — **Clearing / Props lane** (owner **TBD** when a slot opens): slate and shingle
   piles that look clearable should become suitable saved clearables, rather than static scenery.
 - **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
@@ -281,6 +288,11 @@ require a scenario for every `ADDED` requirement.
   action. Travel elapses equivalent on-foot time and displays cost plus confirmation. **Water** owns
   anchors, **Architecture** the read-only trace, **Props** the signs and **Menu** the map UI; a future
   travel implementer owns the action.
+- **Wait for opening** — **Menu / Store Agent** (`5cf73757`): at the closed General Store, provide a
+  safe `Wait until opening` interaction with displayed duration and confirmation. It advances the
+  actual simulation across midnight, crop, weather, vitals and store updates, then rechecks opening
+  hours. Trace 2 AM, sleep/collapse and error handling first. This **complements, not replaces** the
+  future equivalent-time Town/Manor travel signs and map action. Pending; not shipped.
 - **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
   trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
   implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the
