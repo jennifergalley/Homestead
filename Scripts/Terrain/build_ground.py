@@ -132,6 +132,28 @@ def uv_flipped(mesh):
     return err[1] < err[0]
 
 
+GROUND_MPC = f"{FOLDER}/MPC_EstateGround"
+
+
+def build_mpc():
+    """Wetness (0 dry .. 1 soaked) and Daylight (0 night .. 1 day), set every refresh by
+    AHomesteadWorld::UpdateLighting from the game clock and the rain schedule."""
+    mpc = unreal.load_asset(GROUND_MPC) if LIB.does_asset_exist(GROUND_MPC) else None
+    if mpc is None:
+        mpc = TOOLS.create_asset("MPC_EstateGround", FOLDER, unreal.MaterialParameterCollection,
+                                 unreal.MaterialParameterCollectionFactoryNew())
+    params = []
+    for name, value in (("Wetness", 0.0), ("Daylight", 1.0)):
+        s = unreal.CollectionScalarParameter()
+        s.set_editor_property("parameter_name", name)
+        s.set_editor_property("default_value", value)
+        params.append(s)
+    if [str(p.get_editor_property("parameter_name")) for p in mpc.get_editor_property("scalar_parameters")] != ["Wetness", "Daylight"]:
+        mpc.set_editor_property("scalar_parameters", params)
+    LIB.save_loaded_asset(mpc, False)
+    return mpc
+
+
 ROOT_LOCAL = """
 float fy = VFlip > 0.5 ? 1.0 - UV.y : UV.y;
 return float3(frac(UV.x) / 0.999 * 200.0 - 100.0, fy / 0.999 * 200.0 - 100.0, 0.0);
@@ -207,12 +229,19 @@ return RootW + nv - VtxW;
 
 PIXEL_CODE = """
 float dry = I.x, t = I.y, rank = I.z, gs = I.w;
+float wet = saturate(Wet), day = saturate(Day);
 float hue = frac(rank * 37.31);
 float3 tip = lerp(Tip.rgb, Dry.rgb, dry) * (0.78 + 0.44 * hue);
 tip = lerp(tip, tip * float3(1.25, 1.05, 0.7), saturate(frac(rank * 11.7) * 3.0 - 2.2));   // the odd yellowing blade
 float3 col = lerp(Root.rgb, tip, smoothstep(0.0, 0.85, t));
-col *= lerp(1.0, 1.12, gs * t);
-Sub = tip * SubTint.rgb;
+// The gust sheen is sunlight catching the blades: none at night.
+col *= lerp(1.0, 1.12, gs * t * day);
+// Rain: water film darkens the blades and makes them glossy.
+col *= lerp(1.0, 0.72, wet);
+RoughOut = lerp(Rough, 0.38, wet);
+SpecOut = lerp(Spec, 0.5, wet);
+// Light through the blades is a daylight effect; at night the moon and sky would make it glow.
+Sub = tip * SubTint.rgb * lerp(NightTx, 1.0, smoothstep(0.05, 0.6, day)) * lerp(1.0, 0.7, wet);
 return col;
 """
 
@@ -311,13 +340,18 @@ def build_material(v_flip):
     tip_c = vector("TipColour", (0.085, 0.16, 0.04, 0), -500, 330, "Colour")
     dry_c = vector("DryColour", (0.3, 0.25, 0.11, 0), -500, 410, "Colour")
     sub_c = vector("SubsurfaceTint", (0.8, 1.0, 0.45, 0), -500, 490, "Colour")
+    mpc = build_mpc()
+    wet = node(unreal.MaterialExpressionCollectionParameter, -500, 570, collection=mpc, parameter_name="Wetness")
+    day = node(unreal.MaterialExpressionCollectionParameter, -500, 640, collection=mpc, parameter_name="Daylight")
+    F1 = unreal.CustomMaterialOutputType.CMOT_FLOAT1
     ps = custom(PIXEL_CODE, [("I", (interp, "PS")), ("Root", (root_c, "RGB")), ("Tip", (tip_c, "RGB")),
-                             ("Dry", (dry_c, "RGB")), ("SubTint", (sub_c, "RGB"))], -200, 250,
-                extra=(("Sub", F3),))
+                             ("Dry", (dry_c, "RGB")), ("SubTint", (sub_c, "RGB")), ("Wet", (wet, "")), ("Day", (day, "")),
+                             ("Rough", (scalar("Roughness", 0.72, -500, 710), "")), ("Spec", (scalar("Specular", 0.32, -500, 780), "")),
+                             ("NightTx", (scalar("NightTransmission", 0.3, -500, 850), ""))],
+                -200, 250, extra=(("Sub", F3), ("RoughOut", F1), ("SpecOut", F1)))
     P = unreal.MaterialProperty
     for src, out, prop in ((ps, "", P.MP_BASE_COLOR), (ps, "Sub", P.MP_SUBSURFACE_COLOR),
-                           (scalar("Roughness", 0.72, -200, 450), "", P.MP_ROUGHNESS),
-                           (scalar("Specular", 0.32, -200, 520), "", P.MP_SPECULAR),
+                           (ps, "RoughOut", P.MP_ROUGHNESS), (ps, "SpecOut", P.MP_SPECULAR),
                            (vs, "", P.MP_WORLD_POSITION_OFFSET)):
         if not MEL.connect_material_property(src, out, prop):
             raise RuntimeError(f"Could not connect {prop}")

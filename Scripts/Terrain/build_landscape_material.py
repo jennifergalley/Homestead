@@ -102,6 +102,16 @@ col = lerp(col, RockD * Tints[3].rgb, steep * 0.8);
 n = normalize(lerp(n, RockN, steep * 0.8));
 rough = lerp(rough, RockR, steep * 0.8);
 
+// Rain (MPC_EstateGround.Wetness): soil, litter and stone darken most, turf less; everything turns
+// glossy, and trodden ground and wheel ruts hold a sheen of standing water.
+float w = saturate(Wet);
+float porous = saturate(1.0 - grassy * 0.6);
+col *= lerp(1.0, lerp(0.8, 0.52, porous), w);
+rough = lerp(rough, lerp(0.5, 0.3, porous), w);
+float pools = saturate(wear * 1.4 + (0.5 - Macro1) * 0.6) * porous;
+rough = lerp(rough, 0.08, w * smoothstep(0.55, 0.9, pools));
+n = normalize(lerp(n, float3(0, 0, 1), w * smoothstep(0.6, 0.9, pools) * 0.8));
+
 NormalOut = n;
 RoughOut = rough;
 #if GROUND_DEBUG
@@ -180,6 +190,9 @@ def ground_finish(bc, nm, rg, y0):
         v.set_editor_property('group', 'Ground')
         return v
 
+    wet_p = MEL.create_material_expression(mat, unreal.MaterialExpressionCollectionParameter, -800, y + 1240)
+    wet_p.set_editor_property('collection', unreal.load_asset(f'{GROUND}/MPC_EstateGround'))
+    wet_p.set_editor_property('parameter_name', 'Wetness')
     sward_near = vec('SwardNear', (0.03, 0.055, 0.018), y + 820)
     sward_far = vec('SwardFar', (0.036, 0.066, 0.02), y + 880)
     tints = [vec('TintTrodden', (0.85, 0.8, 0.72), y + 940), vec('TintLitter', (0.4, 0.36, 0.3), y + 1000),
@@ -197,6 +210,7 @@ def ground_finish(bc, nm, rg, y0):
               ('RockD', rock_d, 'RGB'), ('RockN', rock_n, 'RGB'), ('RockR', rock_r, 'R'),
               ('SwardNear', sward_near, 'RGB'), ('SwardFar', sward_far, 'RGB'),
               ('SwardMix', scal('SwardMix', 0.8, y + 1180), ''),
+              ('Wet', wet_p, ''),
               ('T0', tints[0], 'RGB'), ('T1', tints[1], 'RGB'), ('T2', tints[2], 'RGB'), ('T3', tints[3], 'RGB')]
     ins = []
     for name, *_ in inputs:
