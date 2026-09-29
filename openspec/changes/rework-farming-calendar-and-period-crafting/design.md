@@ -183,15 +183,20 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
     with no version bump.
     - It's written only while she's Well fed.
     - On load, a missing section means not Well fed.
-    - A present section must hold a finite expiry with `hour < expiry <= hour + 4`, where 4 is the
-      longest meal duration.
-    - Any other value fails the whole load explicitly through the existing invalid-save path:
-      `ResultCode::CorruptSave`, "This save is corrupt or incomplete. Your current game was not
-      changed." That covers non-finite values, an expiry at or before the save's `hour` (which a
-      section written only while active can't produce), and one beyond `hour + 4` (no meal lasts
-      that long).
-    - Nothing is clamped or silently dropped.
-    - An older build reports a save with an unknown section as `NewerBuild` and leaves it untouched.
+    - A present section whose expiry is **at or before** the save's `hour` has simply run out. It's
+      valid and loads normally as not Well fed.
+    - The load is rejected explicitly through the existing invalid-save path when the `wellfed`
+      section:
+      - **can't be parsed**;
+      - **appears more than once**;
+      - holds a **non-finite** expiry;
+      - or holds an expiry **later than** the save's `hour + 4`, since 4 hours is the longest meal
+        tier.
+    - That path is `ResultCode::CorruptSave`, with the message "This save is corrupt or incomplete.
+      Your current game was not changed." (`HomesteadSimulation.cpp`, around line 2894).
+    - Nothing is clamped or silently dropped. The repo has no separate `InvalidSave` code.
+    - An **unknown** section tag is `ResultCode::NewerBuild`, and the save is left untouched. That
+      covers an older build reading a newer save.
       Writing the section only while it's active keeps most saves readable by older builds.
     - Losing the timer is harmless.
   - **Show clock time, not a duration:** the HUD icon beside the energy meter and the eat toasts say
