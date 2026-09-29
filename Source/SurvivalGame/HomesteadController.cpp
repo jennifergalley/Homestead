@@ -773,6 +773,13 @@ bool AHomesteadController::TogglePinnedToHotbar(Homestead::Item Item)
     return true;
 }
 
+bool AHomesteadController::ChooseOnHotbar(Homestead::Item Item)
+{
+    if (!IsPinnedToHotbar(Item) && !TogglePinnedToHotbar(Item)) return false;
+    SelectHotbarSlot(HotbarSlots.IndexOfByKey(static_cast<int32>(Item)));
+    return SelectedHotbarSlot == HotbarSlots.IndexOfByKey(static_cast<int32>(Item));
+}
+
 void AHomesteadController::EatFromHotbar(Homestead::Item Food)
 {
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -2271,8 +2278,8 @@ FString AHomesteadController::FocusActions() const
             {
                 if (!Plot.planted)
                 {
-                    // [A]/[E] sows the seed stack chosen on the hotbar (a berry sows berry seed), else
-                    // wild root seed; [X]/[F] only weeds, and bare soil has none. [RT] eats a berry.
+                    // [A]/[E] sows the seed stack chosen on the hotbar (a berry sows berry seed; wild
+                    // roots are chosen as Seeds); [X]/[F] only weeds, and bare soil has none.
                     if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
                         if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
                         {
@@ -2285,7 +2292,7 @@ FString AHomesteadController::FocusActions() const
                             return A + TEXT(" Sow ") + What
                                 + (Chosen == Homestead::Item::Berries ? TEXT("   ") + Use + TEXT(" Eat") : FString()) + SeedPouchHint();
                         }
-                    return A + TEXT(" Plant roots") + SeedPouchHint();
+                    return TEXT("Choose seeds on the hotbar to sow") + SeedPouchHint();
                 }
                 if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
                 FString Actions;
@@ -2924,9 +2931,9 @@ void AHomesteadController::Interact()
             const bool Mature = Plot.growth >= 1;
             if (!Planted)
             {
-                // The seed stack chosen on the hotbar (a selected berry sows berry seed); with no seed
-                // chosen, wild root seed. A chosen seed that has run out says so rather than quietly
-                // sowing something else, and nothing is ever taken from the pack unasked.
+                // The seed stack chosen on the hotbar (a chosen berry sows berry seed). A chosen seed
+                // that has run out says so, and with no seed chosen nothing is sown: nothing is ever
+                // taken from the pack unasked (wild roots too are chosen as Seeds on the hotbar).
                 TOptional<Homestead::CropKind> Seed;
                 if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
                 {
@@ -2942,7 +2949,12 @@ void AHomesteadController::Interact()
                         Seed = Crop;
                     }
                 }
-                PlantFocusedPlot(Seed ? *Seed : Homestead::CropKind::Roots);
+                if (!Seed)
+                {
+                    Notify(TEXT("Choose seeds on the hotbar to sow."), true);
+                    break;
+                }
+                PlantFocusedPlot(*Seed);
                 break;
             }
             const Homestead::CropKind Harvested = Plot.kind;
@@ -3308,7 +3320,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({1, TEXT("1. Find a little breakfast"), TEXT("Gather berries, then eat them from the Pack page.")});
         Result.Add({2, TEXT("2. Make your first tools"), TEXT("Search the salvage piles around the manor for rusted heads, then craft each into a tool with two branches on the Craft page.")});
         Result.Add({3, TEXT("3. Make a home"), TEXT("Fell the trees at your chosen site with the axe. Place a floor, walls, doorway and roof. Felled trees stay gone when you return.")});
-        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a hoe. Each swing tills one small square; choose seeds (or a berry, for berry seed) on the hotbar and sow each square with A/E; with nothing chosen, A/E plants wild root seed. X/F pulls weeds.")});
+        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a hoe. Each swing tills one small square; choose seeds on the hotbar (Seeds for wild roots, a berry for berry seed) and sow each square with A/E. X/F pulls weeds.")});
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill your pail at the stream. F/X removes weeds from a plot.")});
         Result.Add({6, TEXT("6. Cook and rest"), TEXT("Split timber with a carried axe. Cookfires use prepared firewood first, then branches. Roast roots; sleep in a sheltered bedroll.")});
         Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is cosmetic.")});

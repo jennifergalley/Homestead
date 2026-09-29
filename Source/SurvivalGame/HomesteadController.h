@@ -219,6 +219,9 @@ public:
     static bool CanPinToHotbar(Homestead::Item Item);
     bool IsPinnedToHotbar(Homestead::Item Item) const;
     bool TogglePinnedToHotbar(Homestead::Item Item);
+    // Pins `Item` if it isn't already and selects its slot, as a player would (tests, and choosing
+    // seed to sow). False when it can't go on the hotbar or the hotbar is full.
+    bool ChooseOnHotbar(Homestead::Item Item);
     // Pins newly bought or given crop seed to a free hotbar slot (no-op if pinned or full).
     void PinNewSeed(Homestead::Item Item);
     // Seed pouch: a hotbar slot holding sowing seed steps through every seed type in her pack
