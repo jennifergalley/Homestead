@@ -13,6 +13,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/PlatformTime.h"
 #include "InputCoreTypes.h"
+#include "Materials/Material.h"
+#include "Materials/MaterialInterface.h"
+#include "MaterialShared.h"
+#include "RHIGlobals.h"
+#include "UObject/UObjectIterator.h"
 
 namespace EstateSmokeRoute
 {
@@ -74,6 +79,77 @@ const Homestead::ResourceNode* FindNode(const Homestead::State& State, int32 Id)
         if (Node.id == Id) return &Node;
     return nullptr;
 }
+
+// Uncooked -game compiles landscape material permutations on first use, which can take minutes.
+constexpr float LandscapeMaterialSeconds = 300.0f;
+// After this long, a landscape component with no compiled material and nothing compiling has failed.
+constexpr double LandscapeGraceSeconds = 60.0;
+// A landscape component counts as on screen if it drew within this long.
+constexpr float RecentlyRenderedSeconds = 0.5f;
+
+enum class ELandscapeMaterials { Pending, Rendering, Failed };
+// Whether every landscape component drawn in `World` renders a compiled material rather than the
+// Default Material. A component's own material is its per-component landscape material instance
+// (GetUsedMaterials; GetMaterial(0) only returns the proxy's base material, which isn't what
+// renders). It fails when one of them reports compile errors (uncooked), or when none of them has a
+// valid shader map (cooked; the used list also holds mobile variants PC never builds, so one valid
+// material is enough). The Landscape module isn't a dependency of the game module, so the class is
+// matched by name.
+ELandscapeMaterials CheckLandscapeMaterials(const UWorld* World, bool bGraceOver, int32& Components, FString& Problem)
+{
+    Components = 0;
+    bool bPending = false;
+    const UMaterial* Fallback = UMaterial::GetDefaultMaterial(MD_Surface);
+    static const FName LandscapeComponentClass(TEXT("LandscapeComponent"));
+    TArray<UMaterialInterface*> Used;
+    for (TObjectIterator<UPrimitiveComponent> It; It; ++It)
+    {
+        const UPrimitiveComponent* Component = *It;
+        // Only what's on screen: uncooked runs compile a component's permutation when it first draws.
+        if (Component->GetWorld() != World || !Component->IsRegistered()
+            || Component->GetClass()->GetFName() != LandscapeComponentClass
+            || !Component->WasRecentlyRendered(RecentlyRenderedSeconds)) continue;
+        ++Components;
+        const UMaterialInterface* Base = Component->GetMaterial(0);
+        if (!Base || Base == Fallback)
+        {
+            Problem = FString::Printf(TEXT("%s has no landscape material (the Default Material draws)."), *Component->GetPathName());
+            return ELandscapeMaterials::Failed;
+        }
+        Used.Reset();
+        Component->GetUsedMaterials(Used);
+        bool bValid = false, bCompiling = false;
+        for (const UMaterialInterface* Material : Used)
+        {
+            const FMaterialResource* Resource = Material ? Material->GetMaterialResource(GMaxRHIShaderPlatform) : nullptr;
+            if (!Resource) continue;
+#if WITH_EDITOR
+            if (Resource->GetCompileErrors().Num() > 0)
+            {
+                Problem = FString::Printf(TEXT("%s (on %s) failed to compile, so the Default Material draws: %s"),
+                    *Material->GetPathName(), *Base->GetName(), *Resource->GetCompileErrors()[0]);
+                return ELandscapeMaterials::Failed;
+            }
+            if (!Resource->IsCompilationFinished()) bCompiling = true;
+#endif
+            if (Resource->HasValidGameThreadShaderMap()) bValid = true;
+        }
+#if WITH_EDITOR
+        // Uncooked: shader maps fill in on demand and aren't "finalized" while she plays, so a failed
+        // compile shows as compile errors (checked above). Wait while any is still compiling.
+        (void)bValid;
+        if (bCompiling && !bGraceOver) bPending = true;
+#else
+        // Cooked: a permutation that failed at cook time loads without a valid shader map.
+        if (bValid) continue;
+        Problem = FString::Printf(TEXT("%s: none of its %d landscape material(s) based on %s has a valid shader map, so the Default Material draws."),
+            *Component->GetPathName(), Used.Num(), *Base->GetName());
+        return ELandscapeMaterials::Failed;
+#endif
+    }
+    if (Components == 0) { Problem = TEXT("No landscape components are on screen."); return ELandscapeMaterials::Pending; }
+    return bPending ? ELandscapeMaterials::Pending : ELandscapeMaterials::Rendering;
+}
 }
 
 void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
@@ -92,8 +168,34 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         const auto* Avatar = Cast<ACharacter>(Controller->GetPawn());
         return Avatar && Avatar->GetCharacterMovement() && Avatar->GetCharacterMovement()->IsMovingOnGround();
     };
+    // The landscape around her renders its material, not the Default Material (a failed landscape
+    // compile was once caught only by eye).
+    const auto LandscapeRenders = [this](const FString& Place)
+    {
+        FStep& Step = Steps.AddDefaulted_GetRef();
+        Step.Name = TEXT("Landscape material renders at ") + Place;
+        TSharedRef<double> Began = MakeShared<double>(0.0);
+        Step.Action = [Began]() { *Began = FPlatformTime::Seconds(); };
+        Step.Check = [this, Place, Began]()
+        {
+            int32 Components = 0;
+            FString Problem;
+            const bool bGraceOver = FPlatformTime::Seconds() - *Began > EstateSmokeRoute::LandscapeGraceSeconds;
+            const auto Status = EstateSmokeRoute::CheckLandscapeMaterials(GetWorld(), bGraceOver, Components, Problem);
+            if (Status == EstateSmokeRoute::ELandscapeMaterials::Failed)
+            {
+                Finish(false, TEXT("Landscape material at ") + Place + TEXT(": ") + Problem);
+                return false;
+            }
+            if (Status != EstateSmokeRoute::ELandscapeMaterials::Rendering) return false;
+            Results.Add(FString::Printf(TEXT("LANDSCAPE_MATERIAL %s components=%d rendering=1"), *Place, Components));
+            return true;
+        };
+        Step.Wait = EstateSmokeRoute::LandscapeMaterialSeconds;
+        Step.bCompleteWhenReady = true;
+    };
     // Visits go through HomesteadTeleport, the same ground settle a player's teleport or spawn uses.
-    const auto Visit = [this, OnGround](const FString& Label, Point Target, const FString& Capture)
+    const auto Visit = [this, OnGround, LandscapeRenders](const FString& Label, Point Target, const FString& Capture)
     {
         FStep& Arrive = Steps.AddDefaulted_GetRef();
         Arrive.Name = TEXT("Arrive on the ground at ") + Label;
@@ -106,7 +208,10 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         Arrive.Wait = EstateSmokeRoute::ArriveSeconds;
         Arrive.bCompleteWhenReady = true;
         if (!Capture.IsEmpty())
+        {
+            LandscapeRenders(Label);
             Add(TEXT("Capture ") + Label, [this, Capture]() { Screenshot(Capture); }, [OnGround]() { return OnGround(); }, 3.0f);
+        }
     };
     // Frame timing over TimingSampleSeconds after TimingSettleSeconds, reported as PERFORMANCE_AT.
     const auto Measure = [this](const FString& Place)
@@ -155,6 +260,7 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
     }
     Add(TEXT("Hands free for the first actions"), [this]() { Controller->SelectHotbarSlot(0); },
         [this]() { return Controller->SelectedCarriedTool() == Homestead::Item::Count; });
+    LandscapeRenders(TEXT("the manor"));
     Add(TEXT("Capture the standing room"), [this]() { Screenshot(TEXT("estate-manor")); }, []() { return true; }, 3.0f);
     Measure(TEXT("manor"));
 
