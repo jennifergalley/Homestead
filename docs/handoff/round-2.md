@@ -32,11 +32,11 @@ Lane names in the app may lag behind this table while sessions rename themselves
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
 launches**; documenting them does not change a live session's model or reasoning level.
 
-| Role | Model | Reasoning | Context |
+| Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
-| Documentation Agent | GPT-5.6 Terra | high | long |
-| Architecture Agent | GPT-6 Sol | high | long |
-| Orchestrator Agent | GPT-6 Sol | medium | long |
+| Documentation Agent | GPT-5.6 Terra (`gpt-5.6-terra`) | **high** | **long** |
+| Architecture Agent | GPT-6 Sol (`gpt-6-sol`) | high | long |
+| Orchestrator Agent | GPT-6 Sol (`gpt-6-sol`) | **medium** | **long** |
 | Implementer (Blender, Unreal or code work) | Claude Opus 5.5 | high | long |
 
 **At most three concurrent implementers** do Blender, Unreal or code work. This is a cap across
@@ -44,6 +44,9 @@ implementer agents, separate from the 2-Unreal-process machine cap. Coordinating
 architecture and review-only work do not use an implementer slot unless they start implementation.
 The orchestrator grants the next implementer slot before a waiting lane resumes. A lane that is idle
 or waiting schedules a wake-up and ends its turn; it doesn't hold a slot by sleeping or polling.
+
+**Current implementer slots (2026-09-29):** Calendar Agent, Harvest Agent and Performance Agent.
+Seedsman Agent, Seasons Agent and Crafting Agent are paused until the orchestrator grants a slot.
 
 ## Lanes and ownership
 

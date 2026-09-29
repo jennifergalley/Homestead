@@ -5,11 +5,11 @@
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
 launches**; documenting them does not change a live session's model or reasoning level.
 
-| Role | Model | Reasoning | Context |
+| Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
-| Documentation Agent | GPT-5.6 Terra | high | long |
-| Architecture Agent | GPT-6 Sol | high | long |
-| Orchestrator Agent | GPT-6 Sol | medium | long |
+| Documentation Agent | GPT-5.6 Terra (`gpt-5.6-terra`) | **high** | **long** |
+| Architecture Agent | GPT-6 Sol (`gpt-6-sol`) | high | long |
+| Orchestrator Agent | GPT-6 Sol (`gpt-6-sol`) | **medium** | **long** |
 | Implementer (Blender, Unreal or code work) | Claude Opus 5.5 | high | long |
 
 **At most three concurrent implementers** do Blender, Unreal or code work. This is a cap across
