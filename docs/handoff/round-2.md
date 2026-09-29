@@ -1,0 +1,133 @@
+# Round 2: the farming year and period crafting
+
+Kicked off 2026-09-29. Plan: `openspec\changes\rework-farming-calendar-and-period-crafting` (proposal,
+design, specs, tasks; on `main` at `64183cfb`). The docs agent keeps this page current; report changes to
+it rather than editing lane rows yourself. Round 1's page (`round-1.md`) stays as the record of that
+round; its shared-machine rules and lessons carry over through `docs\handoff\README.md` and the skills.
+
+## Registry
+
+**App names** follow "<one or two words> Agent" (`docs\handoff\README.md`). The worktree folder is each
+session's **mailbox address**; session IDs are for `send_session_message`.
+
+| Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Scope |
+| --- | --- | --- | --- |
+| Orchestrator Agent | `92eac339` | `jennifergalley-cautious-pancake` | coordinates only; forwards `[ready]`s, relays to Jenny |
+| Integration Agent | `e251051b` | `jennifergalley-literate-eureka` (MCP 8775) | merges batches, builds, tests, packages; the reserved Unreal slot |
+| Documentation Agent | `a9f10974` (project session `d99bb15c`) | `jennifergalley-stunning-dollop` | process docs, this page, findings from every lane |
+| Architecture Agent | `a1648ae7` | `jennifergalley-cuddly-invention` | code steward: `docs\architecture.md`, code conventions, safe refactors, batch reviews |
+| **A. Calendar Agent** | `f8b77021` | `jennifergalley-studious-doodle` | `Homestead::Calendar`, gentle hunger, crop seasons and withering; **lands first** |
+| **B. Harvest Agent** | `65a2408b` | `jennifergalley-vigilant-fishstick` | peas, wheat, barley, leeks, winter broccoli; withered silhouettes |
+| **C. Seedsman Agent** | `5cf73757` | `jennifergalley-fluffy-broccoli` | Tregear's shop, the watering can, Sunday closing |
+| **D. Seasons Agent** | `fd682909` | `jennifergalley-improved-giggle` | forage seasons, `MPC_Season`, winter canopies, frost |
+| **E. Crafting Agent** | `ce241dd6` | `jennifergalley-stunning-waddle` | workbench, sawhorse, fences and gate, furniture, dishes, craft categories; **the only lane editing `SHomesteadMenu`** |
+| Performance Agent | `a34483d7` | `jennifergalley-refactored-doodle` (branch `jennifergalley-performance-agent`) | frame rate and pacing; holds the perf window while measuring (winter canopies are on its list) |
+| Weather Agent | `89914e30` | `jennifergalley-silver-guide` | weather and water, continuing from round 1 |
+| Build Speed Agent | `6e131c6a` | `jennifergalley-automatic-spork` | idle |
+
+Lane names in the app may lag behind this table while sessions rename themselves.
+
+## Lanes and ownership
+
+The design's "Lanes and ownership" table is authoritative. In short:
+
+- **A** owns `Homestead::Calendar`, the `Step()` hunger and energy changes, `WorkCost`, the season
+  rollover hook, crop season masks, planting and focus warnings, withering, the HUD calendar text, and
+  hunger and season toasts. **It exposes `Calendar` and the rollover hook to B-D first, within a day.**
+- **B** owns the five `CropKind` rows, their plant and withered sets (Blender), and withered plot visuals.
+- **C** owns `ShopKind::Seedsman`, Sunday closing, the seed stock move, the tin watering can, Tregear's
+  building, interior and props, and the `SeedsmanDoor` anchor.
+- **D** owns the forage season table, the blackberry item and picking, field mushrooms (kind, placements,
+  prop), `MPC_Season` and the seasonal material edits.
+- **E** owns the Workbench, Sawhorse, Fence, Gate and furniture pieces and meshes, recipes and dishes, and
+  the Craft categories in `SHomesteadMenu`. It's independent of A.
+
+## Rules this round (carried over)
+
+- **Two Unreal processes** machine-wide, **one reserved for the Integration Agent**; every other lane
+  shares the second, one at a time (`Start-EditorMcp.ps1` enforces both). Close your editor as soon as a
+  verification pass is done (`Scripts\Stop-MyEditor.ps1`).
+- **Perf window:** measurements run alone (`Scripts\Start-PerfWindow.ps1`); don't launch Unreal or build
+  while someone holds it.
+- **Waiting means ending your turn:** schedule a wake-up with `save_session_automation`, never sleep or
+  loop.
+- **Build only when your C++ changed,** once per batch, with `Scripts\Invoke-UnrealBuild.ps1`; lanes don't
+  build the game target.
+- **Items and other data enums are append-only,** in small commits rebased onto `main`
+  (`HomesteadItems` catalogue rows match enum order; never reorder or remove). Any list or per-enum array
+  in a tagged save section is written with its count first.
+- **`SimulationSaveVersion` is bumped once, at final integration** (design §10: `Plot::withered`, the new
+  enum values, gate state, the second shop, `dayMinutes`). Lanes never bump it; tell the orchestrator
+  before your `[ready]` if you add to the save format.
+- **Playtest builds** on the "Homestead Estate" shortcut by 7:30 AM daily and 4:00 PM on weekdays
+  (`docs\handoff\README.md`, "Playtest builds"). `main` must stay playable.
+- **Jenny's playtest feedback takes priority** over round-2 lane work.
+- **Launching with ray tracing off:** `Start-EditorMcp.ps1` also turns virtual shadow maps off; any other
+  RT-off launch must too, or a new Estate game hangs the GPU (editor skill, table 0.1).
+- Delivery: "Delivering lane work" in `docs\handoff\README.md` (`[ready]` to the orchestrator).
+
+## Order and first increments
+
+1. **A** lands `Calendar` and the season rollover hook first; B, C and D build on them.
+2. **E** proceeds in parallel.
+3. The Integration Agent merges in batches, and the save version is bumped once at the end.
+
+## Registry: estate placement ids and scenery kinds
+
+Claim a range here (through the docs agent or the orchestrator) before using it, and keep the comment at
+`Simulation\HomesteadEstate.h` ~87 in step. `ProvisionalEstatePlacements` adds sections in id order,
+because later sections keep clear of earlier ones; placements are append-only (`next++` ids), and moving
+or removing them needs `table.bakeVersion` raised. Details are in round 1's registry.
+
+| Placement ids | Owner |
+| --- | --- |
+| 500000+ | world lane |
+| 510000+ | overgrowth |
+| 520000+ | salvage piles |
+| 530000+ | town (reserved) |
+| 540000-540043 | berry brambles |
+| 550000+ | derelict farm and estate disrepair |
+| 560000-569999 | MVP woodland biome interactables |
+| 570000-579999 | clear-out near the manor |
+| *next free: 580000+* | *claim here (for example D's field mushrooms)* |
+
+| Scenery kinds (`EstateSceneryKinds`; `scatter.py` kind bytes must match) | Owner |
+| --- | --- |
+| 13-18 | trees (oak, beech, sycamore, hawthorn, holly, hazel coppice) |
+| 19-41 | MVP woodland biome |
+| *next free: 42+* | *claim here* |
+
+## Open questions for Jenny
+
+- **Day length:** 30-minute days (the design's default), or 60? Settings keep 60 and 120 either way.
+- **Sunday closing:** should shops close on Sundays? (A per-shop data flag, so easy to turn off.)
+- **Names:** Tregear's and its keeper are placeholders.
+
+## Lane status
+
+Not started. Lanes send `[ready]` to the orchestrator; the docs agent records what's integrated here.
+
+## Open blockers and known bugs
+
+None yet.
+
+## Decisions during the round
+
+None yet.
+
+## Pending doc updates on merge
+
+- Crops (`b51aa930`, from round 1's polish): `HomesteadGrowCrops <days> [tend=1]` and
+  `HomesteadCropGrowth <0-1>` grow crops for tests (time skips don't). When it lands, add them to the
+  editor skill's "Time and weather for tests" bullet.
+- Performance (`0c12d5e9`): `Test-Game.ps1 -RenderScale 0`, `-ExtraExecCmds`, `-ExtraArguments`, and the
+  `-UserDir` CSV path. When it lands, add them to the editor skill's perf notes.
+
+## Tooling requests (unassigned)
+
+- `get_play_state` (`st`) should report `namesOpen` and `shopOpen` (carried over from round 1).
+
+## Next
+
+When round 2's lanes are integrated: the save-version bump, a playtest build, and Jenny's answers to the
+open questions.

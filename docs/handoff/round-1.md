@@ -1,5 +1,8 @@
 # Round 1: "Walk your estate"
 
+> **Round 1 is closed** (2026-09-29). The current round is [round-2.md](round-2.md). This page is kept as
+> the record of round 1; its rules carried over, and its pending and tooling items moved to round 2.
+
 Kicked off 2026-09-27 (Jenny's go at 10:54 Arizona time). Kickoff brief:
 `openspec\changes\pivot-to-cozy-estate-life-sim\round-1-kickoff.md`. The docs agent keeps this
 page current; report changes to it rather than editing lane rows yourself.
