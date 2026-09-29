@@ -332,8 +332,16 @@ requirement.
   It is not eligible for the 4 PM merge until it reports `[ready]`. Only then may it establish that a
   visible weed asset exists wherever the prompt says `"Weeds  E  Pull"` and that none float above
   slopes or patches.
-- **Manor debris** — **Clearing / Props lane** (owner **TBD** when a slot opens): slate and shingle
-  piles that look clearable should become suitable saved clearables, rather than static scenery.
+- **Manor rubble** — **Props `[ready]` `53fe97d5`, integration pending; not shipped.** Clearable
+  slate heaps and granite/hall cobbles use reserved placement IDs `582000–582099`. Day Estate PIE
+  cleared slate `582003`/`582000` by hand (mesh and prompt gone; Stone awarded); hall cobbles
+  `582006` require the worn pickaxe and two swings (mesh/prompt gone; Stone and Scrap iron awarded).
+  Native 8/8 covers save/reload clear state and old-save heaps remaining. Editor and Game builds pass.
+
+  Integration must perform a packaged heap clear/save/reload before 4 PM inclusion; otherwise defer.
+  PIE visual persistence is not yet proven. Focus can select nearby bramble/weed and resource reach can
+  pass through a wall, matching current nearby-resource behavior. Props' editor is closed; the weeds
+  branch remains partial and excluded while it owes dusk and PIE reload evidence.
 - **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
   hoe blade; a documentation-only answer is insufficient.
 - **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
