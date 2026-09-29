@@ -5,6 +5,11 @@
 #include <initializer_list>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <regex>
+#include <sstream>
+#include <string>
 
 using namespace Homestead;
 
@@ -67,6 +72,37 @@ int main()
         // the horizon (at most 0.25 lux a minute) is a fade of several seconds, not a pop.
         Check(std::abs(light.moonLux - previousMoon) < 0.25, "moon pops", minute);
         previousMoon = light.moonLux;
+    }
+
+    // The sky light: full at noon, the night level at night, and a smooth blend through dusk.
+    const NightLightTuning defaults;
+    Check(std::abs(NightLightAt(0.0).skyScale - defaults.nightSky) < 1e-9, "night sky at midnight", NightLightAt(0.0).skyScale);
+    Check(std::abs(NightLightAt(21.0).skyScale - defaults.nightSky) < 1e-9, "night sky at 21:00", NightLightAt(21.0).skyScale);
+    double lastSky = 2.0;
+    for (int minute = 12 * 60; minute <= 21 * 60; ++minute)
+    {
+        const double sky = NightLightAt(minute / 60.0).skyScale;
+        Check(sky <= lastSky + 1e-9 && sky >= defaults.nightSky - 1e-9 && sky <= 1.0 + 1e-9, "sky blend through dusk", minute);
+        Check(lastSky > 1.5 || lastSky - sky < 0.02, "sky pops at dusk", minute);
+        lastSky = sky;
+    }
+
+    // The console variables start at the tuned defaults (AHomesteadWorld reads them every refresh).
+    {
+        std::ifstream file(HOMESTEAD_SOURCE_DIR "/Source/SurvivalGame/HomesteadWorld.cpp");
+        std::stringstream text;
+        text << file.rdbuf();
+        const std::string source = text.str();
+        Check(!source.empty(), "HomesteadWorld.cpp readable");
+        auto cvarDefault = [&](const char* name) {
+            const std::regex pattern(std::string("TEXT\\(\"") + name + "\"\\),\\s*(-?[0-9.]+)f");
+            std::smatch match;
+            return std::regex_search(source, match, pattern) ? std::stod(match[1].str()) : 1e9;
+        };
+        Check(std::abs(cvarDefault("homestead.NightMoonLux") - defaults.moonGroundLux) < 1e-6, "NightMoonLux default", cvarDefault("homestead.NightMoonLux"));
+        Check(std::abs(cvarDefault("homestead.NightSky") - defaults.nightSky) < 1e-6, "NightSky default", cvarDefault("homestead.NightSky"));
+        Check(std::abs(cvarDefault("homestead.NightMinExposure") - defaults.nightMinExposureEV) < 1e-6, "NightMinExposure default", cvarDefault("homestead.NightMinExposure"));
+        Check(source.find("Homestead::NightLightAt(Hour, NightTuning)") != std::string::npos, "UpdateLighting uses NightLightAt");
     }
 
     // The old schedule's failure, reproduced: fixed 2 lux, EV -2 floor, and the scene adapts to a daylight

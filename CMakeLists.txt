@@ -108,6 +108,8 @@ add_test(NAME HomesteadLampTests COMMAND HomesteadLampTests)
 
 add_executable(HomesteadNightLightTests Tests/HomesteadNightLightTests.cpp)
 target_link_libraries(HomesteadNightLightTests PRIVATE HomesteadSimulation)
+# The test also checks the world's console-variable defaults against the tuned schedule.
+target_compile_definitions(HomesteadNightLightTests PRIVATE HOMESTEAD_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 if(MSVC)
     target_compile_options(HomesteadNightLightTests PRIVATE /W4 /EHs-c-)
 else()
