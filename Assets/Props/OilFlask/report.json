@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "OilFlask",
+  "description": "Stoppered flattened tin flask of lamp oil with cork and aged paper label (original).",
+  "collision": "convex",
+  "triangle_budget": 5000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/oil_flask.py",
+  "source_sha256": "382655cb36064d7e56cd81ae974452ee0a45f87974cbd805643ecdf7b6594691",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_OilFlask": {
+      "vertices": 1436,
+      "triangles": 2748,
+      "size_cm": [
+        9.45,
+        5.73,
+        16.03
+      ],
+      "materials": [
+        {
+          "name": "M_OilFlask",
+          "textures": {
+            "basecolor": "T_OilFlask_basecolor.png",
+            "roughness": "T_OilFlask_roughness.png",
+            "metallic": "T_OilFlask_metallic.png",
+            "normal": "T_OilFlask_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_OilFlask_basecolor.png",
+          "roughness": "T_OilFlask_roughness.png",
+          "normal": "T_OilFlask_normal.png",
+          "ao": "T_OilFlask_ao.png",
+          "metallic": "T_OilFlask_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -28
+        ],
+        "focus": [
+          0.0,
+          -0.010924988649785519,
+          0.08130951159633697
+        ],
+        "ground": "origin",
+        "detail_distance": 0.28
+      },
+      "fbx": "SM_OilFlask.fbx",
+      "sha256": "3a7453c6cc19bbbf0bfb52b3ae8f25062d3381f9db2aad4fc3ddabc33981e3ad",
+      "preview": "preview_SM_OilFlask.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_OilFlask_hero.png",
+          "detail": "beauty_SM_OilFlask_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -28
+        ],
+        "ground": "origin"
+      }
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "pivot": "bottom-centre, z=0; Z up, -Y forward (Blender FBX export mirrors Y into Unreal)",
+    "dimensions_cm": [
+      9.4,
+      5.8,
+      16.0
+    ]
+  },
+  "textures": {
+    "T_OilFlask_basecolor.png": "e6b4e1b818cfced78b4d15066a87d90ff04834670990a014ce4ea69b48225348",
+    "T_OilFlask_roughness.png": "d38a0118a9d3676dee7f34183390c93da579e9e5350d1c553aa5355a45af7dcd",
+    "T_OilFlask_metallic.png": "be913b5e4ed211cce3cc5a37a1f60e7ca5a2b02ce8f25739a26fa58c90f6d4c2",
+    "T_OilFlask_normal.png": "ed09d913d0b9b1d76d198a4d6e2adaeed24bb0ac192e683aefeb462e9bd01067"
+  }
+}

@@ -43,6 +43,7 @@
 #include "UI/SHomesteadVitals.h"
 #include "HomesteadMapComponent.h"
 #include "Simulation/HomesteadManor.h"
+#include "Simulation/HomesteadLamp.h"
 #include "UI/SHomesteadNames.h"
 #include "UI/SHomesteadArrival.h"
 #include "Framework/Application/SlateApplication.h"
@@ -75,7 +76,7 @@ constexpr int32 FieldBookPages[] = {0, 1, 2, 7, 3, 6};
 // The estate's tools. The retired knife and machete no longer ride on the hotbar.
 bool IsHotbarTool(Homestead::Item Item)
 {
-    return Homestead::ToolForItem(Item) != Homestead::ToolKind::Count;
+    return Homestead::ToolForItem(Item) != Homestead::ToolKind::Count || Item == Homestead::Item::OilLamp;
 }
 
 template <typename FPredicate>
@@ -111,6 +112,7 @@ FName HotbarIcon(Homestead::Item Item)
     case Homestead::Item::Scythe: return TEXT("scythe");
     case Homestead::Item::Billhook: return TEXT("billhook");
     case Homestead::Item::Pickaxe: return TEXT("pickaxe");
+    case Homestead::Item::OilLamp: return TEXT("oil-lamp");
     default: return NAME_None;
     }
 }
@@ -627,6 +629,7 @@ void AHomesteadController::ResetHotbar()
     HotbarSlots[4] = static_cast<int32>(Homestead::Item::DiggingStick);
     HotbarSlots[5] = static_cast<int32>(Homestead::Item::WateringCan);
     HotbarSlots[6] = static_cast<int32>(Homestead::Item::Berries);
+    HotbarSlots[7] = static_cast<int32>(Homestead::Item::OilLamp);
     SelectedHotbarSlot = 0;
     HoveredHotbarSlot = INDEX_NONE;
 }
@@ -644,8 +647,17 @@ void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Sele
             Seen.Add(Slots[Index]);
         }
     }
+    // Older hotbars get the oil lamp once (layout 3), in the first free slot from 8.
+    if (Layout < 3 && !Seen.Contains(static_cast<int32>(Homestead::Item::OilLamp)))
+        for (int32 Step = 0; Step < 10; ++Step)
+            if (const int32 Index = (Step + 7) % 10; HotbarSlots[Index] < 0)
+            {
+                HotbarSlots[Index] = static_cast<int32>(Homestead::Item::OilLamp);
+                Seen.Add(HotbarSlots[Index]);
+                break;
+            }
     // Older hotbars get the estate tools and pinned food once, in free slots.
-    if (Layout < UHomesteadSave::CurrentHotbarLayout)
+    if (Layout < 2)
         for (const auto Item : {Homestead::Item::Billhook, Homestead::Item::Scythe, Homestead::Item::Pickaxe,
             Homestead::Item::Berries})
         {
@@ -727,6 +739,8 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
             Slot.Count = Slot.Assigned ? Sim.Count(Slot.Tool) : 0;
             Slot.Available = Slot.Assigned && Slot.Count > 0;
             Slot.Icon = HotbarIcon(Slot.Tool);
+            if (Slot.Tool == Homestead::Item::OilLamp && Slot.Available)
+                Slot.Fill = static_cast<float>(Sim.LampOil() / Homestead::Lamp::CapacityHours);
         }
 
         Result.Add(Slot);
@@ -829,6 +843,11 @@ void AHomesteadController::UseSelectedTool()
     const FHintUse Hint = BeginHintUse(bGamepad ? TEXT("RT") : TEXT("LMB"));
     ON_SCOPE_EXIT { EndHintUse(Hint); };
 
+    if (Tool == Homestead::Item::OilLamp)
+    {
+        StartLampSetDown();
+        return;
+    }
     if (Tool == Homestead::Item::Hatchet && Focus == EFocus::Resource)
         for (const auto& Node : State().resources)
             if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::ForestTree)
@@ -1302,6 +1321,91 @@ void AHomesteadController::HomesteadTeleport(float X, float Y, float Z)
     }
 }
 
+void AHomesteadController::MenuRefillLamp()
+{
+    Notify(Sim.RefillLamp());
+    LastLampOil = Sim.LampOil();
+}
+
+void AHomesteadController::HomesteadLampOil(float Hours)
+{
+    Sim.SetLampOil(Hours);
+    Notify(FString::Printf(TEXT("The lamp has %.1f hours of oil."), Sim.LampOil()));
+}
+
+void AHomesteadController::UpdateLamp()
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const bool bInHand = !IsFailed() && LampHandoff == ELampHandoff::None
+        && SelectedCarriedTool() == Homestead::Item::OilLamp;
+    Sim.SetLampInHand(bInHand);
+    if (Avatar) Avatar->SetHeldLampLit(Sim.LampOil() > 0.0);
+    // Her hand has reached the ground: the lamp changes hands now.
+    if (Avatar && Avatar->ConsumeLampContact())
+    {
+        if (LampHandoff == ELampHandoff::SetDown) Notify(Sim.SetDownLamp(LampSpot, PlayerPoint()));
+        else if (LampHandoff == ELampHandoff::PickUp)
+        {
+            const auto Result = Sim.PickUpDrop(LampDropId, PlayerPoint());
+            if (Result.ok) Notify(TEXT("Picked up the lamp."));
+            else Notify(Result);
+        }
+        LampHandoff = ELampHandoff::None;
+        RefreshRemaining = 0;
+    }
+    else if (LampHandoff != ELampHandoff::None && (!Avatar || !Avatar->IsLampKneeling()))
+        LampHandoff = ELampHandoff::None; // She stood up before her hand reached the ground.
+    const double Oil = Sim.LampOil();
+    if (bInHand && !bLampWasInHand && Oil <= 0.0)
+        Notify(bGamepad ? TEXT("The lamp is empty. Press X to fill it from an oil flask.")
+            : TEXT("The lamp is empty. Press F to fill it from an oil flask."));
+    else if (LastLampOil > Homestead::Lamp::LowHours && Oil <= Homestead::Lamp::LowHours && Oil > 0.0)
+        Notify(TEXT("The lamp is burning low."));
+    else if (LastLampOil > 0.0 && Oil <= 0.0)
+        Notify(TEXT("The lamp has gone out. Fill it from an oil flask."));
+    LastLampOil = Oil;
+    bLampWasInHand = bInHand;
+}
+
+void AHomesteadController::StartLampSetDown()
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar || LampHandoff != ELampHandoff::None) return;
+    const auto Position = PlayerPoint();
+    const FVector Forward = Avatar->GetActorForwardVector();
+    // Arm's length ahead of her, where the kneel lowers it.
+    const Homestead::Point Spot{Position.x + Forward.X * 45.0, Position.y + Forward.Y * 45.0};
+    if (Sim.NearWater(Spot))
+    {
+        Notify(TEXT("Set the lamp on dry ground."), true);
+        return;
+    }
+    if (Avatar->PlayLampKneel(Spot, true))
+    {
+        LampHandoff = ELampHandoff::SetDown;
+        LampSpot = Spot;
+        return;
+    }
+    Notify(Sim.SetDownLamp(Spot, Position));
+    RefreshRemaining = 0;
+}
+
+bool AHomesteadController::StartLampPickUp(int32 DropId)
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const auto* Lamp = Sim.SetDownLampDrop();
+    if (!Avatar || !Lamp || Lamp->id != DropId || LampHandoff != ELampHandoff::None) return false;
+    if (Sim.UsedCapacity() >= Homestead::InventoryCapacity)
+    {
+        Notify(TEXT("Not enough pack space to pick up the lamp."), true);
+        return true;
+    }
+    if (!Avatar->PlayLampKneel(Lamp->position, false)) return false;
+    LampHandoff = ELampHandoff::PickUp;
+    LampDropId = DropId;
+    return true;
+}
+
 double AHomesteadController::WaterEdgeDistance(Homestead::Point Position, bool bIncludeSea) const
 {
     if (!bEstateMap)
@@ -1608,6 +1712,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
         LastSafeWorldPosition = ControlledPawn->GetActorLocation();
     }
 
+    UpdateLamp();
     Sim.Advance(DeltaSeconds, PlayerPoint(), bBookOpen || bPlanning || bTestResetRequired || ShopScreen.IsValid());
     TickStores(DeltaSeconds);
     if (bPlanning && !bBookOpen) UpdatePlacement(false);
@@ -1871,6 +1976,8 @@ FString AHomesteadController::FocusTitle() const
                     return Wearable ? Text(Homestead::WearableName(Wearable->definition))
                         : TEXT("Dropped garment");
                 }
+                if (Drop.item == Homestead::Item::OilLamp)
+                    return Sim.LampOil() > 0.0 ? TEXT("Oil lamp") : TEXT("Oil lamp (out of oil)");
                 return FString::Printf(TEXT("%s x%d"),
                     *Text(Homestead::ItemName(Drop.item)), Drop.quantity);
             }
@@ -1884,6 +1991,13 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusTitle();
     default: break;
+    }
+    if (Focus == EFocus::None && SelectedCarriedTool() == Homestead::Item::OilLamp)
+    {
+        const double Oil = Sim.LampOil();
+        return Oil <= 0.0 ? FString(TEXT("Oil lamp - out of oil"))
+            : FString::Printf(TEXT("Oil lamp - %s left"), Oil >= 1.5 ? *FString::Printf(TEXT("%.0f hours"), FMath::RoundToDouble(Oil))
+                : *FString::Printf(TEXT("%d minutes"), FMath::Max(1, FMath::RoundToInt(Oil * 60.0))));
     }
     return TEXT("Woodland");
 }
@@ -1952,7 +2066,10 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
-    default: return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
+    default:
+        if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
+            return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
+        return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
     return FString();
@@ -2501,6 +2618,8 @@ void AHomesteadController::Interact()
         break;
     }
     case EFocus::Drop:
+        // The lamp is taken up with a kneel; it reaches her hand when her fingers close on the bail.
+        if (const auto* Lamp = Sim.SetDownLampDrop(); Lamp && Lamp->id == FocusId && StartLampPickUp(FocusId)) break;
         Notify(Sim.PickUpDrop(FocusId, Position));
         break;
     case EFocus::Plot:
@@ -2638,6 +2757,7 @@ void AHomesteadController::Secondary()
         }
     }
     else if (Focus == EFocus::Fire) Notify(Sim.AddFuel(FocusId, PlayerPoint()), WoodTapA);
+    else if (SelectedCarriedTool() == Homestead::Item::OilLamp) MenuRefillLamp();
     else HoeSquareAhead();
 }
 

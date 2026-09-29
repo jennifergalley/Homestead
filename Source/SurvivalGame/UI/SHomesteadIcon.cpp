@@ -284,7 +284,9 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("primroses")), EKind::Primroses},
         {FName(TEXT("bluebells")), EKind::Bluebells},
         {FName(TEXT("wild-daffodils")), EKind::WildDaffodils},
-        {FName(TEXT("wild-garlic")), EKind::WildGarlic}
+        {FName(TEXT("wild-garlic")), EKind::WildGarlic},
+        {FName(TEXT("oil-lamp")), EKind::OilLamp},
+        {FName(TEXT("oil-flask")), EKind::OilFlask}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -913,6 +915,29 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
             P.Line({{27, 18}, At}, LeafGreen, 1);
             P.Disc(At.X, At.Y, 2.2f, Cream);
         }
+        break;
+    case EKind::OilLamp:
+        // A hurricane lantern hung from its bail: tin cap and fount, a glass chimney with its flame.
+        P.Line({{17, 16}, {17, 9}, {22, 4}, {34, 4}, {39, 9}, {39, 16}}, Iron, 2);
+        P.Shape({{19, 18}, {23, 12}, {33, 12}, {37, 18}}, StoneGray);
+        P.Shape({{18, 21}, {22, 18}, {34, 18}, {38, 21}, {40, 29}, {38, 37}, {34, 40}, {22, 40}, {18, 37}, {16, 29}}, Cream * 0.55f + Gold * 0.45f);
+        P.Shape({{25, 34}, {26, 27}, {28, 22}, {30, 27}, {31, 34}, {28, 36}}, RootOrange);
+        P.Shape({{27, 33}, {27.5f, 28}, {28, 25}, {28.5f, 28}, {29, 33}}, FLinearColor(1.0f, 0.93f, 0.62f));
+        P.Line({{17, 22}, {17, 38}}, Iron, 1.5f);
+        P.Line({{39, 22}, {39, 38}}, Iron, 1.5f);
+        P.Rect(19, 39, 18, 3, Gold);
+        P.Shape({{14, 42}, {42, 42}, {44, 49}, {40, 52}, {16, 52}, {12, 49}}, Iron);
+        P.Line({{15, 46}, {41, 46}}, StoneGray, 1.5f);
+        break;
+    case EKind::OilFlask:
+        // A stoppered tin flask of lamp oil with a paper label.
+        P.Rect(24, 6, 8, 7, Wood);
+        P.Rect(23, 12, 10, 5, StoneGray);
+        P.Shape({{17, 20}, {23, 16}, {33, 16}, {39, 20}, {41, 26}, {41, 48}, {37, 52}, {19, 52}, {15, 48}, {15, 26}}, Iron);
+        P.Rect(16, 29, 24, 12, Cream * 0.8f + Gold * 0.2f);
+        P.Line({{20, 33}, {36, 33}}, Wood, 1.5f);
+        P.Line({{22, 37}, {34, 37}}, Wood, 1);
+        P.Line({{17, 24}, {17, 48}}, StoneGray, 1.5f);
         break;
     case EKind::Unknown:        P.Unknown();
         break;

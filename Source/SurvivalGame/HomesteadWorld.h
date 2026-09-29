@@ -428,6 +428,14 @@ private:
         bool bDeconstruct = false);
     void BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot);
     void BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop);
+    // A set-down oil lamp: the lamp on whatever is underfoot, lit while it has oil (false when the
+    // lamp mesh isn't imported, so the generic bundle shows instead).
+    bool BuildLampDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop);
+    TWeakObjectPtr<UStaticMeshComponent> LampDropFlame;
+    TWeakObjectPtr<UStaticMeshComponent> LampDropGlass;
+    TWeakObjectPtr<class UPointLightComponent> LampDropLight;
+    bool bLampDropLit = false;
+    float LampDropFlickerTime = 0.0f;
     void UpdateLighting(const Homestead::State& State);
     static void ClearVisual(FHomesteadWorldVisual& Visual);
     // Floor height for a turned cell: its highest ground plus a lip.

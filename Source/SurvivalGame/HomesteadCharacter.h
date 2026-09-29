@@ -24,6 +24,7 @@ class UHomesteadKnife;
 class UGroomComponent;
 class ULODSyncComponent;
 class AHomesteadWorld;
+class UHomesteadAnimInstance;
 namespace Homestead { struct Point; enum class Item : int; }
 
 enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds, Plant };
@@ -218,6 +219,21 @@ public:
     UStaticMeshComponent* GetHeldProp(Homestead::Item Tool) const;
     // Character lab only (no hotbar there): the tool she carries at rest. Item::Count = none.
     void SetLabHeldTool(Homestead::Item Tool);
+    // Oil lamp (add-oil-lamp). Selected on the hotbar, she holds it up ahead of her, hanging from
+    // her fist by its bail (AN_HeroineMH_LampRaised over the right arm and head), lit while it has oil.
+    UAnimSequence* GetLampRaisedAnimation() const { return LampRaisedAnimation; }
+    // AN_HeroineMH_LampSetDown (homestead_agent.lamp_pose); the stick-gather kneel until it's authored.
+    UAnimSequence* GetLampSetDownAnimation() const { return LampSetDownAnimation ? LampSetDownAnimation.Get() : GatherSticksAnimation.Get(); }
+    // Kneels to set the lamp down at Spot, or to take it up from there. The lamp changes hands at
+    // LampContactSeconds() into the clip, which ConsumeLampContact reports once.
+    bool PlayLampKneel(Homestead::Point Spot, bool bSetDown);
+    bool ConsumeLampContact();
+    bool IsLampKneeling() const;
+    float LampContactSeconds() const;
+    // lamp_pose.py EVENTS: the lamp's base meets the ground.
+    static constexpr float LampSetDownContact = 30.0f / 30.0f;
+    // Whether the held lamp shows lit (set by the controller from the simulation; the lab keeps it lit).
+    void SetHeldLampLit(bool bLit) { bHeldLampLit = bLit; }
     float ClearTargetYaw() const { return ClearYaw.Get(GetActorRotation().Yaw); }
     float TillTargetYaw() const { return TillYaw.Get(GetActorRotation().Yaw); }
     float WaterTargetYaw() const { return WaterYaw.Get(GetActorRotation().Yaw); }
@@ -260,6 +276,21 @@ private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CarriedForage;
     UPROPERTY() TObjectPtr<UAnimSequence> EatAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> CraftAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> LampRaisedAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> LampSetDownAnimation;
+    // The held lamp: a hanger at her grip (turned by the pendulum, like the pail), the lamp's parts
+    // under it with the bail's top at the hanger, and the flame's light.
+    UPROPERTY() TObjectPtr<USceneComponent> LampHanger;
+    UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> HeldLampParts;
+    UPROPERTY() TObjectPtr<class UPointLightComponent> HeldLampLight;
+    enum class ELampKneel : uint8 { None, SetDown, PickUp };
+    ELampKneel LampKneel = ELampKneel::None;
+    bool bLampContactPending = false;
+    bool bLampContactDone = false;
+    bool bHeldLampLit = true;
+    float LampFlickerTime = 0;
+    // Returns whether the lamp is in her hand this frame.
+    bool UpdateHeldLamp(UHomesteadAnimInstance& Animation, bool bHandsFree, Homestead::Item Presented, float DeltaSeconds);
     UPROPERTY() TObjectPtr<UStaticMeshComponent> CraftPiece;
     void UpdateCraftPiece(float Weight);
     double LabCraftStart = 0;
@@ -362,7 +393,7 @@ private:
     FVector PailHandLast = FVector::ZeroVector, PailHandVelocity = FVector::ZeroVector;
     bool bPailHandValid = false;
     void UpdateHeldTools(float DeltaSeconds);
-    void UpdateHangingPail(UStaticMeshComponent& Pail, float DeltaSeconds);
+    void UpdateHangingPail(USceneComponent& Pail, float DeltaSeconds);
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadHatchet> Hatchet;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadDiggingStick> DiggingStick;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadKnife> Knife;

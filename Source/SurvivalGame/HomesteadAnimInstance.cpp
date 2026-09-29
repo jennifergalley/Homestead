@@ -79,7 +79,7 @@ struct FGroundedFootIK : FAnimNode_TwoBoneIK
     }
 };
 
-enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till, GatherSticks, Machete, Fell };
+enum class EHandAction { None, Gather, Water, Clear, KnifeCut, Till, GatherSticks, Machete, Fell, Lamp };
 struct FLocomotionBlend : FAnimNode_TwoWayBlend
 {
     FLocomotionBlend() { bAlwaysUpdateChildren = true; }
@@ -368,8 +368,17 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         CraftLayer.LayerSetup[0].BranchFilters.AddDefaulted_GetRef().BoneName = TEXT("spine_02");
         CraftLayer.BlendWeights[0] = 0;
         Craft.SetTeleportToExplicitTime(true);
+        // The raised lamp (AN_HeroineMH_LampRaised): her right arm holds it up ahead of her and her
+        // head peers past it, over walking and idling.
+        LampLayer.BasePose.SetLinkNode(&CraftLayer);
+        LampLayer.AddPose();
+        LampLayer.BlendPoses[0].SetLinkNode(&LampPose);
+        for (const TCHAR* Branch : {TEXT("clavicle_r"), TEXT("neck_01")})
+            LampLayer.LayerSetup[0].BranchFilters.AddDefaulted_GetRef().BoneName = Branch;
+        LampLayer.BlendWeights[0] = 0;
+        LampPose.SetTeleportToExplicitTime(true);
         // Eating rides on top of whatever she is doing: the right arm and the head only.
-        EatLayer.BasePose.SetLinkNode(&CraftLayer);
+        EatLayer.BasePose.SetLinkNode(&LampLayer);
         EatLayer.AddPose();
         EatLayer.BlendPoses[0].SetLinkNode(&Eat);
         for (const TCHAR* Branch : {TEXT("clavicle_r"), TEXT("neck_01")})
@@ -462,6 +471,10 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     FAnimNode_LayeredBoneBlend EatLayer;
     FAnimNode_SequenceEvaluator_Standalone Craft;
     FAnimNode_LayeredBoneBlend CraftLayer;
+    FAnimNode_SequenceEvaluator_Standalone LampPose;
+    FAnimNode_LayeredBoneBlend LampLayer;
+    float LampAlpha = 0;
+    bool bLampRaised = false;
     float CraftAlpha = 0;
     float CraftTime = 0;
     float EatTime = 0;
@@ -555,6 +568,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             Gather.SetSequence(Avatar->GetGatherAnimation());
             Eat.SetSequence(Avatar->GetEatAnimation());
             Craft.SetSequence(Avatar->GetCraftAnimation());
+            LampPose.SetSequence(Avatar->GetLampRaisedAnimation());
             bHoeTill = Avatar->UsesHoeTill();
         }
     }
@@ -774,7 +788,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
                 : Active == EHandAction::KnifeCut ? Avatar->GetKnifeCutAnimation()
                 : Active == EHandAction::Clear ? Avatar->GetClearAnimation()
                 : Active == EHandAction::Water ? Avatar->GetWaterAnimation()
-                : Active == EHandAction::GatherSticks ? Avatar->GetGatherSticksAnimation() : Avatar->GetGatherAnimation());
+                : Active == EHandAction::Lamp ? Avatar->GetLampSetDownAnimation()
+        : Active == EHandAction::GatherSticks ? Avatar->GetGatherSticksAnimation() : Avatar->GetGatherAnimation());
         }
         const auto* Clip = Gather.GetSequence();
         if (Blocked || bCancelled) bGathering = false;
@@ -817,6 +832,16 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         LeftGrip.Alpha = FMath::Max(bTwoHanded ? ActionBlend.Alpha : 0.0f, LeftGripAlpha);
         UpdateEating(DeltaSeconds);
         UpdateCrafting(Avatar, DeltaSeconds);
+        UpdateLamp(DeltaSeconds);
+    }
+
+    // The raised hold eases in over 0.3 s and down over 0.25 s; a set-down or pick-up takes over.
+    void UpdateLamp(float DeltaSeconds)
+    {
+        const float Target = bLampRaised && LampPose.GetSequence() && ActionBlend.Alpha < 0.5f ? 1.0f : 0.0f;
+        LampAlpha = FMath::FInterpConstantTo(LampAlpha, Target, DeltaSeconds, Target > LampAlpha ? 1.0f / 0.3f : 1.0f / 0.25f);
+        LampLayer.BlendWeights[0] = LampAlpha;
+        LampPose.SetExplicitTime(0.0f);
     }
 
     // The craft clip follows the field book's hold: one loop per craft cycle, so her presses land
@@ -984,6 +1009,33 @@ float UHomesteadAnimInstance::EatPhase() const
 {
     const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
     return Proxy.bEating ? Proxy.EatTime : 0.0f;
+}
+
+void UHomesteadAnimInstance::SetLampRaised(bool bRaised)
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().bLampRaised = bRaised;
+}
+
+float UHomesteadAnimInstance::LampRaisedWeight() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().LampAlpha;
+}
+
+void UHomesteadAnimInstance::RequestLampKneel()
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().Requested = EHandAction::Lamp;
+}
+
+bool UHomesteadAnimInstance::IsLampKneeling() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return (Proxy.Active == EHandAction::Lamp && Proxy.bGathering && !Proxy.bCancelled) || Proxy.Requested == EHandAction::Lamp;
+}
+
+float UHomesteadAnimInstance::LampKneelPhase() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Active == EHandAction::Lamp && Proxy.bGathering ? Proxy.GatherTime : -1.0f;
 }
 
 float UHomesteadAnimInstance::CraftWeight() const

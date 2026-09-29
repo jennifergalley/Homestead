@@ -2,6 +2,7 @@
 #include "HomesteadEstate.h"
 #include "HomesteadParcels.h"
 #include "HomesteadManor.h"
+#include "HomesteadLamp.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadSimulationDetail.h"
 
@@ -1115,6 +1116,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     layout_ = std::make_shared<const EstateLayout>(layout);
     placements_ = std::make_shared<const EstatePlacements>(placements);
     state_ = std::move(candidate);
+    GrantLampKit();
     return {true, "You arrive home to " + state_.estateName + ".", ResultCode::None, ++revision_};
 }
 
@@ -2554,6 +2556,7 @@ void Simulation::Step(double hours, Point player, bool sleeping)
     state_.energy = Clamp(state_.energy + energyRate * elapsed, 0.0, 100.0);
     for (auto& piece : state_.structures)
         if (piece.kind == Piece::Fire) piece.fuelHours = std::max(0.0, piece.fuelHours - elapsed);
+    BurnLamp(elapsed, sleeping);
     for (auto& plot : state_.plots)
     {
         plot.moisture = Clamp(plot.moisture + (rain ? 0.3 : -0.025) * elapsed, 0.0, 1.0);
@@ -2718,6 +2721,7 @@ std::string Simulation::Serialize() const
     body << '\n';
     // Optional tagged trailing sections; saves without them still load.
     if (Manor::HasSaveSection(state_)) Manor::WriteSaveSection(body, state_);
+    Lamp::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -2982,6 +2986,7 @@ Result Simulation::Deserialize(const std::string& data)
             }
         }
         else if (tag == Manor::SaveTag) { if (!Manor::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
         else return invalid();
         input >> std::ws;
     }
@@ -3000,6 +3005,8 @@ Result Simulation::Deserialize(const std::string& data)
     if (!populated) return populated;
     state_ = std::move(candidate);
     nextResourceHandle_ = nextHandle;
+    // Saves from before the lamp get its kit once.
+    GrantLampKit();
     return {true, "Homestead restored. No time passed while you were away.", ResultCode::None, ++revision_};
 }
 Result Simulation::Deserialize(const std::string& data, Generation::WorldDescriptor expectedWorld)

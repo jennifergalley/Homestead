@@ -158,14 +158,14 @@ void AHomesteadHUD::DrawCalendar(const AHomesteadController& PC, float X, float 
     // Time-of-day dial: the sun climbs a half-arc from dawn (6 AM) to dusk (7 PM), the moon by night.
     const float CX = X + 70, CY = Y + 78, R = 48;
     const FLinearColor Sky = DialSky(Hour);
-    const FLinearColor Cream(0.95f, 0.92f, 0.80f, 1);
+    const FLinearColor MoonCream(0.95f, 0.92f, 0.80f, 1);
     Band(CX, CY, 0, R + 10, PI, 2 * PI, Sky, 36);
     Band(CX, CY, R - 1.0f, R + 1.0f, PI, 2 * PI, FLinearColor(Muted.R, Muted.G, Muted.B, 0.45f), 36);
     Stroke(CX, CY - R - 5, CX, CY - R + 5, 2, FLinearColor(Muted.R, Muted.G, Muted.B, 0.7f));
     const double Progress = bNight ? FMath::Fmod(Hour - 19.0 + 24.0, 24.0) / 11.0 : (Hour - 6.0) / 13.0;
     const float Angle = PI * (1.0f + static_cast<float>(FMath::Clamp(Progress, 0.0, 1.0)));
     const float BodyX = CX + FMath::Cos(Angle) * R, BodyY = CY + FMath::Sin(Angle) * R;
-    if (bNight) MoonIcon(BodyX, BodyY, 10, Cream, Sky);
+    if (bNight) MoonIcon(BodyX, BodyY, 10, MoonCream, Sky);
     else SunIcon(BodyX, BodyY, 9, bRain ? FLinearColor(0.80f, 0.70f, 0.52f, 1) : HudGold);
     // The ground hides the sun or moon as it sets, then the horizon line.
     const FLinearColor Solid(Pine.R, Pine.G, Pine.B, 1);
@@ -188,7 +188,7 @@ void AHomesteadHUD::DrawCalendar(const AHomesteadController& PC, float X, float 
     // Weather: sun, rain cloud, or a clear night's moon.
     const float IconX = X + 350, IconY = Y + 68;
     if (bRain) RainIcon(IconX, IconY, 34);
-    else if (bNight) MoonIcon(IconX, IconY, 11, Cream, Solid);
+    else if (bNight) MoonIcon(IconX, IconY, 11, MoonCream, Solid);
     else SunIcon(IconX, IconY, 9, HudGold);
     Write(bRain ? TEXT("Rain") : bNight ? TEXT("Clear") : TEXT("Sunny"), IconX + 28, Y + 56, 21, Muted);
 }

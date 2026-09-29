@@ -2775,7 +2775,9 @@ void FixedEstateNewGameAndSave()
     OK(sim.SetActiveWorldRegion({spawn.x + 900000, spawn.y}));
     CHECK(sim.GetState().resources.size() == 2);
     // The pail is her one starting tool, waiting in the standing room's chest; gathering needs no knife.
-    CHECK(sim.Count(Item::WateringCan) == 0 && sim.Count(Item::Knife) == 0 && sim.UsedCapacity() == 0);
+    // She carries only the oil lamp and its flasks (add-oil-lamp).
+    CHECK(sim.Count(Item::WateringCan) == 0 && sim.Count(Item::Knife) == 0);
+    CHECK(sim.Count(Item::OilLamp) == 1 && sim.Count(Item::OilFlask) == 3 && sim.UsedCapacity() == 4);
     int pails = 0;
     for (const auto& piece : sim.GetState().structures) pails += piece.storage[static_cast<int>(Item::WateringCan)];
     CHECK(pails == 1);
