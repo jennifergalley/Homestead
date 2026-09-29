@@ -153,8 +153,8 @@ is historical, not the current build/authorization status.
   - Artisan processing and the water mill.
   - Hauling by hand, then handcart, then horse and wagon, to town shops with supply-sensitive
     prices.
-- **Money:** US dollars and cents. Sinks include rates and taxes, wages, upkeep, materials,
-  land and upgrades. She never loses the estate.
+- **Money:** whole coins, backed by stable integer units with no fractional display. Sinks include
+  rates and taxes, wages, upkeep, materials, land and upgrades. She never loses the estate.
 - **Manor:** a freeform wall-by-wall rebuild on the old footprint, and interior décor.
 - **Later:** hired workers, family reputation, town events, land purchase, a dog companion
   (pit bull or Great Dane), and courtship.

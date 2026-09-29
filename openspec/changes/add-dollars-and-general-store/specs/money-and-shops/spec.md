@@ -8,11 +8,20 @@ shop.
 ## ADDED Requirements
 
 ### Requirement: Money is exact and visible
-The simulation SHALL store money as integer cents and SHALL display it as US dollars and cents. The gameplay HUD SHALL show the current balance, and each change SHALL be shown as a brief signed delta. Money SHALL persist across save and load.
+The simulation SHALL preserve money as an `int64` raw integer, where one raw unit is one whole coin.
+It SHALL NOT numerically convert existing balances, catalogue prices or saved values. The canonical
+money formatter and signed delta formatter SHALL display grouped whole integers with correct
+singular/plural `coin` text, without `$` or decimal notation. The gameplay HUD SHALL show the current
+balance, and each change SHALL be shown as a brief signed delta. Money SHALL persist across save and
+load.
 
 #### Scenario: Sale updates the wallet
 - **WHEN** the heroine sells 5 Hay at 40 cents each
-- **THEN** her balance rises by exactly $2.00 and the HUD shows "+$2.00"
+- **THEN** her balance rises by exactly 200 coins and the HUD shows "+200 coins"
+
+#### Scenario: Existing money save keeps its numeric value
+- **WHEN** a legacy v12 fixture stores raw money 2234
+- **THEN** it loads as 2,234 coins without any numeric migration
 
 ### Requirement: One item catalogue
 Every item SHALL have exactly one catalogue entry, giving its name, description, category, icon, base price and the shops that buy it. Item names shown anywhere in the game SHALL come from the catalogue.

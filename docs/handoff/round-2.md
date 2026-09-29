@@ -82,10 +82,26 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / rotation snapshot (2026-09-29 11:09):** Props released its weeds slice slot, then
-received the third **headless** slot solely for the retain-60 Calendar correction below. Props must
-release it by the 2 PM packaging window. The next editor sequence is **Menu → Water lake → Props weeds**;
-the orchestrator continues to enforce the three-hands-on and two-Unreal-process caps.
+**Current slot / build snapshot (2026-09-29 14:25):** Integration completed the 4 PM package and
+released Unreal, UBT and Blender. All slots are available; the orchestrator continues to enforce the
+three-hands-on and two-Unreal-process caps for post-package work.
+
+## 4 PM playable build
+
+**[playtest] ready:** gameplay `9175e34b`, packaged from `main` `9a409e07` (including the
+FullLoop berry-regrowth assertion correction). After Jenny quit and asked, Integration retargeted only
+`Homestead Estate.lnk` to
+`jennifergalley-literate-eureka\Build\Playtest-0929pm\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`;
+`Homestead.lnk` and the morning `Playtest-0929` build remain untouched. The latest Estate save
+(`Manual`, 2:01 PM) carried over and is scratch-backed.
+
+All packaged 1080p suites passed: Smoke 57.9 fps, Clearing 52.1, Hotbar 53.5, NativeMenu 56.6 and
+FullLoop 54.5. `EstateSmoke` passed with zero material compile/errors, all six landscape points
+rendering, and the pond default material/usage checks; manor measured 59.2 fps (p99 20.2 ms) and woods
+60 fps (p99 16.7 ms). The build includes the north-west lake and map-label removal, rain gain fix,
+Gait run, Menu toast/berry A-X Energy/Ctrl+wheel/wait changes, manor rubble and sprint, plus earlier
+crop, river, performance and save work. Rain remains audibly unproven; listen outdoors on day 2 from
+about 11:00 to 15:30.
 
 ## Lanes and ownership
 
@@ -216,7 +232,7 @@ work that goes beyond a small verified correction.
 
 | Feedback | Owner | OpenSpec reference / note |
 | --- | --- | --- |
-| **Main-integrated, package pending; not shipped:** approved lake in the owned geographic north-west (Jenny's map reads north-up, right=east, so her visual "up-and-left" overrides her spoken "NE") at **(-50, -745) m**, about **76 × 44 m**, with roughly 110 m from the farm edge and a ~90 m farm-side access path | Weather Agent (`89914e30`) | `df19d74a` is merged as `main` `61c1595c`: Editor build/native 8/8/static-init clean and PIE verify actor load, peaty water/stony landing, carried pail fill/full, knee-deep wade wall, map lake and no `"Dirt road"`. Integration additionally verified the visible water surface from above (landing reflections and water around the heroine's knees), resolving the prior architecture winding false alarm. The 2 PM package still must pass pond M/MI material compile/default and heightfield-versus-Landscape packed visual smoke; defer the lake if either fails. |
+| **Shipped in the 4 PM playable build:** approved lake in the owned geographic north-west (Jenny's map reads north-up, right=east, so her visual "up-and-left" overrides her spoken "NE") at **(-50, -745) m**, about **76 × 44 m**, with roughly 110 m from the farm edge and a ~90 m farm-side access path | Weather Agent (`89914e30`) | `df19d74a` merged as `main` `61c1595c`: Editor build/native 8/8/static-init clean and PIE verified actor load, peaty water/stony landing, carried pail fill/full, knee-deep wade wall, map lake and no `"Dirt road"`. Integration's packaged `EstateSmoke` passed pond M/MI default/material compile and heightfield-versus-Landscape visual checks; above-surface reflections/water visibility had already resolved the architecture winding false alarm. |
 | **Approved:** a clearly signed manor-south gate/path with protected switchbacks or stairs to a **12–20 m dry beach** along the owned ~630 m cliff coast | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-regional-landforms-water` |
 | **Approved:** the wider walkable beach above (12–20 m dry width) below the owned cliffs | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-shore-and-river-fishing` |
 | The river looks as if it stops before reaching the ocean in Jenny's screenshot | Weather Agent (`89914e30`) | **Partly checked, not resolved:** PIE on `27e2e917` confirms the source, banks and water down to the beach, but the ribbon still ends a couple metres short of the ocean, separated by sand/foam. Own a later true estuary connection while widening the beach; do not mark the gap fixed. |
@@ -224,14 +240,12 @@ work that goes beyond a small verified correction.
 | **Pending:** town buildings are bunched too tightly | Water, after the final road route | The current 12 blocking blockouts occupy a 40 × 34.5 m four-sided square with 0.2–0.35 m adjacent gaps (about 0.9 m by the store); the main road ends ~72 m short. Make a ~60 × 45 m open square with terraces/cottages, 3–6 m side lanes, and a separate curved 5–6 m `townStreet`; preserve main-road 1.94 km chainage plus StoreDoor/Counter and Shop IDs/saves. |
 | Running foot kicks too high toward her butt; lower its swing apex slightly | Harvest Agent / temporary Gait Agent (`65a2408b`) | `polish-locomotion-view-distance-and-time-hud` |
 
-**Water-lane order:** the north-west lake is main-integrated but **package pending, not shipped**.
-Integration's above-surface/reflection check resolved the false-alarm concern; defer it only if the
-remaining 2 PM material/default or packed-heightfield smoke gates fail. Verify the river mouth in the
-parked 4 PM river branch, then stage **beach → route**. Night lighting and the town-road layout are
-separate later increments after the north-west lake; town-entry/store acceptance, coordinate bridge,
-roadside forage and travel signs wait for the final road route. If the terrain or water work needs
-placement ids, the Water Agent claims them through this page before using them (the registry starts at
-581000+).
+**Water-lane order:** the north-west lake shipped in the 4 PM build; its above-surface/reflection and
+packaged material/heightfield gates passed. Verify the river mouth in the parked 4 PM river branch,
+then stage **beach → route**. Night lighting and the town-road layout are separate later increments
+after the north-west lake; town-entry/store acceptance, coordinate bridge, roadside forage and travel
+signs wait for the final road route. If the terrain or water work needs placement ids, the Water Agent
+claims them through this page before using them (the registry starts at 581000+).
 
 **Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
 all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
@@ -278,36 +292,73 @@ requirement.
 
 ## Pending playtest feedback
 
-- **Field book notification overlay** — **Menu `88180744` main-integrated, package pending; not
-  shipped.** The open-book hoe-craft notice has zero 4K layout-pixel difference and long words wrap.
+- **Field book notification overlay** — **Menu `88180744` shipped in the 4 PM playable build.** The
+  open-book hoe-craft notice has zero 4K layout-pixel difference and long words wrap.
   It replaces the menu-reflowing banner with the brief floating non-modal overlay: it auto-disappears,
   preserves focus/input, uses a Victorian licensed font with larger centered text and a compact
-  content-sized frame. The Menu batch is on top of lake `main` `61c1595c`; native 8/8 passed and
-  Editor/Game builds are running for the 2 PM package decision.
+  content-sized frame.
+- **Unified hints and toasts** — **Menu/UI ownership note; pending and not shipped.** Architecture
+  traced separate current channels: unconditional top-left controls, `DrawInteractCue` focus text,
+  world Canvas toasts and the native-menu parchment NoticeCard. Unify transient world feedback and
+  persistent focus actions in a top-centre parchment visual through shared style, not a duplicate UI;
+  retain separate error-over-success priority and device-specific glyphs without focus theft.
+
+  Show top-left controls only for the first 60 visible real seconds after boot, new game or
+  `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
+  successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
+  pause timing and focus behavior.
 - **Appearance controls and naming** — **Menu local-only partial, not pushed/PIE/shipped or 4 PM
   content.** `61059621` renames **Curly bob** to **Long bob**. `f63ba148` implements drag, WASD and
   right-stick orbit, wheel zoom and a default front view; it disables/clips camera collision while the
   page is open and restores it on close. After the package, Menu needs roughly 25 minutes of UE
   1080p-and-4K testing: orbit near a wall, close/restore and confirm no movement spill.
+- **Build menu wording** — **Menu, pending and not shipped.** Trace the current Build-menu `Plan`
+  action and relabel/adjust its semantics so the control accurately describes what it does. Keep this
+  separate from the active dye/Appearance verification work.
 - **Hair groom** — **temporary Gait Agent** (`65a2408b`), after the running-heel and scythe work:
   investigate the intermittent exploding/sticking-out groom.
 - **Gait and scythe** — **temporary Gait Agent** (`65a2408b`), after its current run-heel slice:
   lower the running foot swing apex slightly; at rest the scythe must sit in her hand, and its blade
   must not clip the terrain during a sweep.
+- **Tool feedback and clearing animation** — **Props, pending and not shipped.** An iron-billhook-tier
+  target must be non-actionable with no animation, Energy spend, progress or yield when the wrong tool
+  is selected, and give a clear needs-iron hint. Make billhook swings visibly contact their targets.
+  Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
+  two-swing clearing animation and awards/clears once, without a second click or double reward.
+  Architecture traces tool tier, input and reward paths before native/PIE proof.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
-- **Sprint toggle** — **Menu `af7831b1` is main-integrated in 4 PM candidate `9175e34b`, package
-  pending; not shipped.** Commit
+- **Sprint toggle** — **Menu `af7831b1` shipped in the 4 PM playable build.** Commit
   `8e0516a0` toggles sprint with L3 or a released Shift tap: Shift+Q/click does not toggle, work/book/
   shop pause speed while preserving intent, and load/new/retry/teleport reset it. At <=10 Energy it
   gives a notice; exhaustion disables sprint. Native 8/8 plus economy 12 / scenario 521 checks and
   Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
-  210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture. The 2 PM package
-  still gates on `NativeMenu`/`Hotbar` (update a Shift-hold test to Shift-tap if needed), save and
-  shortcut work.
-- **Contextual hotbar eating and berry feedback** — **Menu `88180744` main-integrated, package
-  pending; not shipped.** Controller A/X eats one selected berry per tap only when Talk has no
+  210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture; packaged NativeMenu
+  and Hotbar suites passed.
+- **Sprint Energy recovery** — **pending, not shipped.** Architecture measured current
+  `SpendSprintEnergy` at 0.35 per real second: the 1.94 km road at 480 cm/s takes 404 s and costs
+  141.5 Energy to its floor of 10; baseline awake drain remains -0.6/game-hour separately. Props'
+  trial is 0.05/s (~20.2 per trip), with an explicit real-time movement signal to `Step()`: stationary
+  recovers +0.6 Energy/game-hour and slow/ordinary walking +0.2/hour only below a soft cap of 70;
+  above the cap, retain the -0.6 baseline drain.
+
+  Never recover during sprint, work/action, menu/shop/planning, failure, sleep or any
+  `AdvanceGameHours` fast-forward (travel or shop wait); clamp at 70 without oscillation. Hunger stays
+  until Energy lane F. Native tests cover 30/60/120-day real-time rates, no double charge and save
+  invariance; package timed sprint/slow-walk checks and coordinate with Menu's travel API.
+- **Live sound sliders** — **symptom investigation pending, not shipped.** Mouse drag already calls
+  `MenuPreviewAudioVolume` live through `SSlider.OnValueChanged`, then release writes INI; d-pad steps
+  preview and persist. Jenny's symptom may instead be effects without a continuous audible source,
+  music silence, or a broken cancel path: Esc/B/book close during drag does not roll back,
+  `OnMouseCaptureEnd` always commits, and keyboard/pad-origin sliders may preview without committing.
+
+  Menu first reproduces an audible component path. The later bounded fix snapshots transactional gains:
+  preview while changing, Confirm commits, and Cancel/focus loss/book close restores every old gain
+  without saving a drag. Consider a one-shot Effects preview and avoid reintroducing gain-squared
+  behavior; verify at 1080p and 4K.
+- **Contextual hotbar eating and berry feedback** — **Menu `88180744` shipped in the 4 PM playable
+  build.** Controller A/X eats one selected berry per tap only when Talk has no
   precedence, and displays `+` the actual bounded Energy delta.
 - **Music variety** — **pending, not fixed.** **Architecture Agent** (`a1648ae7`) traced the root
   cause: the shipped catalog loads only one track, `EveningHarp`, despite five named entries. The
@@ -325,11 +376,11 @@ requirement.
     <https://opengameart.org/content/town-theme-rpg> (durations not yet recorded).
   - Optional *Celtic Loop* (<https://opengameart.org/content/celtic-loop>) may be too repetitive.
 
-  A later dedicated music implementer auditions texture, period fit and clip silence before selecting
-  anything; then imports only the selected CC0/original recordings with credits and catalog entries,
-  uses 3–8 minute ambient-only gaps and a randomized 45–120 s first gap, registers
-  `MusicShuffleBagTests` in CMake, and verifies packaged multi-track load and run.
-- **Context hint** — **Menu `88180744` main-integrated, package pending; not shipped.** Plain wheel
+  **Next-build priority:** a dedicated music implementer auditions the four CC0 candidate recordings,
+  selects/imports only the qualified set with credits and catalog entries, and adds the shuffle with
+  long ambient-only gaps. Do not use the untracked Kevin MacLeod CC-BY files. Register
+  `MusicShuffleBagTests` in CMake and verify packaged multi-track load and run.
+- **Context hint** — **Menu `88180744` shipped in the 4 PM playable build.** Plain wheel
   cycles the hotbar; Ctrl+wheel zooms while the book has focus.
 - **Weed visibility and grounding** — **Props `[ready]` `8418aa8e` for post-4 PM integration only;
   not in the 4 PM package or shipped.** This extends `889cfde8` with the original imported
@@ -343,18 +394,15 @@ requirement.
   remains. This completes the prior dusk and PIE reload debt. At 4–7 m in tall grass the weeds still
   read visually modest. Props closed its editor at 13:10; the orchestrator verified no Unreal
   processes remain.
-- **Manor rubble** — **`53fe97d5` → `9ecb08ad` is main-integrated in 4 PM candidate `9175e34b`,
-  package pending; not shipped.** Clearable slate heaps and granite/hall cobbles use reserved placement
+- **Manor rubble** — **`53fe97d5` → `9ecb08ad` shipped in the 4 PM playable build.** Clearable
+  slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
   rubble `582008` requires the pickaxe then two swings for Stone/Scrap iron. F5 before clearing
   `582011`, then F9, visually restores only `582011`; `582001`/`582008` remain gone. Native 8/8,
   Editor and Game builds/static-init pass.
 
-  The 2 PM package still must perform packaged heap clear/save/reload, `EstateSmoke` pond
-  material/landscape coverage, and save/shortcut work; otherwise defer affected content. Focus can
-  select nearby bramble/weed and resource reach can pass through a wall, matching current
-  nearby-resource behavior. Props' editor is closed; weeds `8418aa8e` remains partial/excluded while
-  it owes dusk and PIE reload evidence.
+  Packaged suites passed. Focus can select nearby bramble/weed and resource reach can pass through a
+  wall, matching current nearby-resource behavior. Weeds `8418aa8e` remains post-package work.
 - **Rusted hoe wayfinding** — **Props isolated partial `be810887`, not PIE-verified, 4 PM content or
   shipped.** The salvage order is billhook → hoe → axe → scythe → pickaxe. Tilling without a hoe
   directs her to search the old manor; the journal/guide points to the west rooms by the chimney.
@@ -365,6 +413,23 @@ requirement.
   Planning traced the present state: Hunger starts at 85, drains 2/hour awake and fails at 0; Energy
   starts at 100 and drains through work; food restores both. The change is **pending, not in today's
   4 PM build**; Planning updates the OpenSpec spec.
+- **Food Energy affordance** — **pending, not 4 PM content.** Before purchase, shops and Inventory
+  hover show the canonical nominal `+N Energy` for food. Remove only the redundant stack number from
+  hover text; retain tile quantity and controls. **Menu** owns the UI after active dye/Appearance work;
+  source values from `ItemInfo` so future Energy-only lane-F values flow through automatically.
+  Require native coverage and PIE checks at 1080p and 4K.
+- **Whole-number currency** — **agreed design, pending and not 4 PM content.** Preserve the current
+  `int64` raw values and save bytes: semantically relabel the smallest stored unit as one whole
+  `coin`, with **no numeric x100 migration**. Thus raw 1000 (formerly $10) becomes 1,000 coins and
+  raw 40 (formerly $0.40) becomes 40 coins; buying power and saves remain unchanged. The canonical
+  `FormatMoney`/`Delta` renders grouped whole integers with correct singular/plural and no `$` or
+  decimal anywhere. Reference raw prices remain pasty 80 base / 100 shop, bread 40 / 50 and cabbage
+  seed 32 / 40; the v12 fixture remains raw 2234 coins.
+
+  **Props** owns the future simulation/economy semantic field/type rename and `GrantMoney`
+  cap-overflow guard after an explicit slot; **Menu** owns the coordinated shop/HUD/toast/UI formatter
+  slice. Avoid a half release. Validate Economy, Lamp, legacy v12/v13 saves, raw 0/1/`INT64_MIN` and
+  cap behavior; package a 720p/4K purchase such as 1,000 → 900 coins for a pasty.
 - **Weather recurrence** — **Water Agent** (retained lane; supersedes the broader Calendar proposal):
   rain every third day is too frequent. The smallest traced change is a stable hash selecting offsets
   **1 or 2** and **6 or 7** in every 10-day block: exactly 20% rain, 4–6-day gaps and day 0 dry. Keep
@@ -382,16 +447,65 @@ requirement.
 
   It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
   salvage. Props released its slot before 13:45.
+- **Starter rack placement save safety** — **Props urgent implementation guard; not shipped.** A new
+  rack at placement ID `520006` must append after every existing placement section, not insert into an
+  earlier numeric range and renumber later `550xxx` saved resources. Before `[ready]`, require a
+  byte-identical old-table regression proving no existing placement IDs move; do not mutate user saves.
+- **Owned chest names and original trunk** — **Props simulation/save/world with Menu rename input,
+  pending and not shipped.** An owned chest receives a persistent stable-ID custom name, shown in its
+  world interaction prompt before opening. Author an original high-fidelity Victorian timber trunk;
+  Coral Island is mood reference only, never copied. Architecture traces the name/save path before a
+  separate increment and native/PIE persistence coverage.
+- **Safe manor construction** — **Props, pending and not shipped.** The estate parcel is already
+  owned, but `Manor::BlockedByManor` blanket-rejects nine footprint samples inside
+  `ManorFootprint`, except furnishings on the heritage standing-room floor. Define a safe roofless-hall
+  subpolygon with full-footprint and capsule margins that excludes heritage walls/masonry, then permit
+  chests, beds, fires and own foundations there.
+
+  `ResolvePlacement` already snaps Wall/Doorway to a new foundation edge and Roof to its cell, while
+  `CheckSite` requires a foundation and rejects duplicates. Allow a physically clear 3 × 3 m new
+  foundation cell only after excluding the ruin cross wall (U1800), rubble (U2150/V1100) and a retained
+  walking corridor; then validate wall edges and doorways against heritage mesh even across building
+  IDs. Narrow `Manor::BlockedByManor`'s current broad exemption for any non-Foundation on the room
+  `buildingId` to an actual heritage foundation inside the standing room; hall extensions use the
+  measured safe-zone predicate.
+
+  Later walls/roofs may snap only to a nonheritage new foundation with collision/segments, never
+  replace heritage fabric. Controller green preview and `Place` share a core `CheckSite`; validate
+  saved nonheritage structures after heritage/parcels deserialize and preserve old saves. Require
+  native plus on-foot PIE path, collision and save tests. Architecture is still checking whether the
+  wall/roof follow-up is viable; fast travel and music remain next-build priorities first.
 - **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
-  road to town, including the bridge approach. The ID range is reserved; implementation remains
-  pending the narrow public-road-corridor proof and bridge coordinate sync.
+  road to town, including the bridge approach, and significantly increase visible pickable
+  berries/herbs/non-farm food across the estate distributions. The ID range is reserved; implementation
+  remains pending the narrow public-road-corridor proof and bridge coordinate sync.
+- **Terrain-following road grade** — **Water Agent, pending and not shipped.** Eliminate artificial
+  raised/lowered road segments. The road is Landscape paint/ruts, not a raised mesh: `reshape.py`
+  grades a 2.8 m flat half-width plus 12 m falloff at ±11%, and its weightmap/rut SDF share the route.
+  The recorded profile is p95 1.3 cm deviation, but reaches 1.107 m at ford (-12.53, -40.3) because a
+  river cut after road grading leaves the painted route deep in water.
+
+  Water first surveys rendered Landscape-versus-r16 1 m cross-sections at centre/±2.8/±15 m, then
+  patches only mismatched edit-layer tiles <=5 cm or makes a local ford embankment with a new wooden
+  bridge. Synchronize PNG, r16, roadProfile, weightmap, ruts, ground, material and map while retaining
+  anchors/chainage. Never broadly reshape from `game_raw_4033` or erase lake/river work.
 - **Field-book road label** — **Water Agent** (`89914e30`): the redundant runtime `"Dirt road"` label
   is removed with lake `df19d74a` in `main` `61c1595c`
   (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a book-map lake/path
-  screenshot. It is **package pending, not shipped** with the lake.
+  screenshot. It **shipped with the lake** in the 4 PM playable build.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
+- **Reduced foliage shadow motion** — **Water, pending and not shipped.** EstateScenery HISM
+  brambles/hedge/brush/thimbleberry are shadowed with WPO disabled beyond 60 m and
+  `ShadowCacheInvalidationBehavior::Rigid`; individual resource bushes are movable/shadowed, while
+  landscape grass has WPO but no shadow. The camera-safe foliage script has masked-opacity dithering
+  but no explicit source WPO, so the cause may be shadow cache, dither or RT denoising rather than
+  wind alone.
+
+  Water pinpoints the shrub/material, then makes independent packaged RT-on fixed-camera A/B captures:
+  wind off, reduced 25–50% tip-only motion, shrub shadows off and dither off. Compare pixel flicker
+  and frame cost while retaining natural sway and tree shadows.
 - **Nighttime brightness** — **pending, not shipped.** At about 9 PM, the Estate visibly brightens:
   moonlight reads like sunlight. Architecture's read-only trace of current `HomesteadWorld.cpp`
   (`59–64`, `1715–1784`, `4268–4337`) found no 21:00 trigger: sun reaches zero around 18:23,
@@ -399,17 +513,18 @@ requirement.
   intensity is 0.6 (day 1), and night auto-exposure has a -2 EV100 floor (day 0). The combined
   moon/sky/adaptation cause is plausible, not visually proven.
 
-  **Water headless partial `4d248d6f` is unwired, unshipped and outside the 4 PM candidate.** Its
-  pure `HomesteadNightLight` schedule targets 0.2 lux moonlit ground after dusk (0.2/sin altitude,
-  capped at 1 lux low), night sky 0.3 rather than 0.6, and EV100 floor -1 rather than -2. At 21:00 it
-  computes moon 0.28 lux/display key 0.16 (about -2.6 stops); noon is unchanged. Native 9/9 checks
-  the prior daylight-grey 21:00 key of about 1, a non-increasing 18:50→midnight curve, no jump above
-  0.25 lux/minute, moon <=1 lux, and 21:00/00:00/03:00 at -1.5 to -3.5 stops.
+  **Water wired partial `71cffeaa` is unshipped and outside the 4 PM build.** It wires
+  `HomesteadNightLight` into `UpdateLighting`; CVar defaults `NightMoonLux=0.2`, `NightSky=0.3` and
+  `NightMinExposure=-1` match `NightLightTuning`. The schedule holds 0.2 lux moonlit ground after
+  dusk (altitude compensation capped at 1 lux low), uses night sky 0.3 rather than 0.6 and leaves noon
+  unchanged. Native 9/9 and the Editor module compile pass: tests pin a monotonic noon 1→night 0.3
+  sky transition, dusk steps <=0.02, no 18:50→midnight brightening, no pops/moon glare and
+  21:00/00:00/03:00 at -1.5 to -3.5 stops.
 
-  It still needs `UpdateLighting`/CVar wiring, an Editor build, and fixed-camera packaged RT-on Lumen
-  hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to calibrate
-  smooth dusk and lamp readability. Lamp and hearth behavior are untouched. Neither the trace nor the
-  schedule establishes a visual fix.
+  It still needs PIE after the Menu/Props editor turns, then Integration's fixed-camera packaged RT-on
+  Lumen hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to
+  calibrate smooth dusk and lamp/hearth readability. Neither the trace nor the wired schedule
+  establishes a visual fix; do not update the editor skill's default row before this sign-off.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
@@ -441,7 +556,7 @@ requirement.
   `ValidateInventory`. **Menu** owns the shop upgrade row, `bRucksackVisible`, the Appearance toggle
   and the 120-cap UI helpers. Tests cover malformed/duplicate entitlement sections, rebuy refusal,
   insufficient funds and capacity/save behavior.
-- **Town travel** — **pending, not shipped.** A wooden `Walk to town` sign outside the estate and a
+- **Town travel** — **next-build priority; pending and not shipped.** A wooden `Walk to town` sign outside the estate and a
   return sign by town; clickable **Town** and **Manor** destinations on the Map invoke the same travel
   action. Architecture traced the road polyline in `estate_layout.json` (486 points / 1.94 km; runtime
   has landmarks only). The MetaHuman walks 210 cm/s (legacy 180); at a 60-minute day, road-only travel
@@ -454,7 +569,7 @@ requirement.
   **Water** owns the generated runtime route and endpoints, **Architecture** the read-only trace,
   **Props** the original signs and **Menu** the shared travel/map UI; a future travel implementer owns
   the action.
-- **Wait for opening** — **Menu `88180744` main-integrated, package pending; not shipped.** At a
+- **Wait for opening** — **Menu `88180744` shipped in the 4 PM playable build.** At a
   closed 19:00 store, B cancels with no time change; then A+A advances to the next 08:00 and returns
   Pascoe's Talk interaction. Follow-on `643a857a` rejects a candidate that would doze during
   preflight. It shares Menu's current integration/package review; the safe candidate preflight/commit
