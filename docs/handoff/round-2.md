@@ -442,11 +442,16 @@ requirement.
   `FadeIn(2, 1)` and leaves gain solely to the multiplier. Rain is intentionally silent on dry
   days/times (currently only day 2/3, 09:00–15:00).
 
-  **Rain audio remains pending, not fixed:** the correction is not yet audibly or PIE verified.
-  Water requests a separate isolated `[ready]` commit after the Menu editor slot. Integration may
-  include only that commit in the 4 PM batch if hearing and volume checks, native validation and branch
-  ancestry all pass; the unverified lake WIP must not hitchhike. The later 20% weather-cadence change
-  remains a separate increment.
+  **Rain code is `[ready]` at `65726628`, but the subjective sound is not fixed yet.** This isolated,
+  one-file commit is cherry-pickable and PIE-verifies dry off; rainy-noon indoor `IsPlaying` gain
+  0.245 / outdoor 0.63; drizzle indoor 0.105; and the two-second fade. Those values establish the
+  single-gain formula instead of the prior `Gain²`; source RMS remains -24 dBFS. Lake and weather
+  schedule work are not included.
+
+  Water could not capture or hear editor output, so it cannot establish whether Jenny's symptom is
+  audibly resolved. Integration builds the isolated commit and seeks its own packaged-process
+  audio/mixer evidence in the 4 PM batch; otherwise report that uncertainty. Do not describe the
+  subjective rain sound as fixed without ears-on or recorded evidence.
 
   The heritage-stone west doorway is a 130 × 220 cm gap with no leaf. **Props** queues an original
   oak-plank mesh and frame after the cove stairs. The later audio/door implementer makes the leaf
