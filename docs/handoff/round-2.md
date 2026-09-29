@@ -335,11 +335,18 @@ requirement.
 - **Change Dye** — **UI / temporary Menu Agent** (`5cf73757`), after contextual berries: the current
   action is a no-op. It opens the selected colour or swatch choice, supports preview, confirm and
   cancel, then persists the selection. Pending PIE verification.
-- **Leather backpack upgrade** — **pending, not shipped.** A one-time General Store purchase doubles
-  inventory capacity **120 → 240 items**, with a visible worn rucksack in Appearance whose show/hide
-  is independent of capacity and saving. **Architecture** traces the existing inventory, store and
-  appearance paths read-only; **Props** makes the original asset; **Menu** later owns purchase and
-  Appearance UI.
+- **Leather backpack upgrade** — **pending, not shipped.** A tentative one-time **$15** purchase at
+  the open General Store doubles inventory capacity **120 → 240 items**. (`ShopGoods` normally repeats,
+  so this needs a special upgrade row.) $15 is intentionally above the $10 start—roughly ten cabbage
+  harvests net $0.50—and is tunable later. The worn rucksack appears on her back and its Appearance
+  show/hide is independent of capacity and saving.
+
+  **Props** owns the core `bRucksackOwned` save state, `PackCapacity(state)` (120/240), validated
+  optional trailing save section (old defaults false), and original leather back-socket prop; save
+  loading reads structural inventory up to 240 **before** the entitlement tag, then runs post-tag
+  `ValidateInventory`. **Menu** owns the shop upgrade row, `bRucksackVisible`, the Appearance toggle
+  and the 120-cap UI helpers. Tests cover malformed/duplicate entitlement sections, rebuy refusal,
+  insufficient funds and capacity/save behavior.
 - **Town travel** — **pending, not shipped.** A wooden `Walk to town` sign outside the estate and a
   return sign by town; clickable **Town** and **Manor** destinations on the Map invoke the same travel
   action. Travel elapses equivalent on-foot time and displays cost plus confirmation. **Water** owns
