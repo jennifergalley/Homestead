@@ -110,14 +110,17 @@ ELandscapeMaterials CheckLandscapeMaterials(const UWorld* World, bool bGraceOver
             || Component->GetClass()->GetFName() != LandscapeComponentClass
             || !Component->WasRecentlyRendered(RecentlyRenderedSeconds)) continue;
         ++Components;
+        Used.Reset();
+        Component->GetUsedMaterials(Used);
+        // ULandscapeComponent overrides GetMaterial only WITH_EDITOR; cooked, it returns null, so fall
+        // back to the first material the component uses.
         const UMaterialInterface* Base = Component->GetMaterial(0);
+        if (!Base) Base = Used.IsEmpty() ? nullptr : Used[0];
         if (!Base || Base == Fallback)
         {
             Problem = FString::Printf(TEXT("%s has no landscape material (the Default Material draws)."), *Component->GetPathName());
             return ELandscapeMaterials::Failed;
         }
-        Used.Reset();
-        Component->GetUsedMaterials(Used);
         bool bValid = false, bCompiling = false;
         for (const UMaterialInterface* Material : Used)
         {

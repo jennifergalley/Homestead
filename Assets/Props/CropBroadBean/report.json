@@ -1,0 +1,1222 @@
+{
+  "schema": 1,
+  "name": "CropBroadBean",
+  "description": "One 1 m tilled-bed plot of six Windsor/Longpod broad bean plants across five crop stages, with glaucous pinnate leaves, black-blotched flowers and separate instanced pods.",
+  "collision": "none",
+  "triangle_budget": 4000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/crop_broad_bean.py",
+  "source_sha256": "dda21da03c5067e97155b07c9d684e3720faf20042e4bc6fdc22b05e59dbd150",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CropBroadBean_Sprout": {
+      "vertices": 246,
+      "triangles": 324,
+      "size_cm": [
+        49.5,
+        66.08,
+        6.94
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Sprout.fbx",
+      "sha256": "2f67a1fc0b35dce133ad954319ac1c5abf4247737fe4488e35fd8cd883a0ddbf",
+      "preview": "preview_SM_CropBroadBean_Sprout.png"
+    },
+    "SM_CropBroadBean_Sprout_LOD1": {
+      "vertices": 186,
+      "triangles": 228,
+      "size_cm": [
+        49.77,
+        65.86,
+        6.95
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Sprout_LOD1.fbx",
+      "sha256": "abc5153c04a63164ebec7148c30b69848d65c729412b9a8c51ee33d235d8fa4d",
+      "preview": "preview_SM_CropBroadBean_Sprout_LOD1.png"
+    },
+    "SM_CropBroadBean_Sprout_LOD2": {
+      "vertices": 186,
+      "triangles": 228,
+      "size_cm": [
+        50.75,
+        66.68,
+        6.91
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Sprout_LOD2.fbx",
+      "sha256": "f58a4ea40357479121d0d54ec418c69a56422f5d03d2be78625cb7323dcfd0f4",
+      "preview": "preview_SM_CropBroadBean_Sprout_LOD2.png"
+    },
+    "SM_CropBroadBean_Young": {
+      "vertices": 1014,
+      "triangles": 1080,
+      "size_cm": [
+        56.39,
+        74.62,
+        18.88
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Young.fbx",
+      "sha256": "8b91456b88108673ad61f30b0aa86fca7d1b0aa5e3a05c634bf875f792046ac8",
+      "preview": "preview_SM_CropBroadBean_Young.png"
+    },
+    "SM_CropBroadBean_Young_LOD1": {
+      "vertices": 694,
+      "triangles": 608,
+      "size_cm": [
+        56.09,
+        75.12,
+        18.5
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Young_LOD1.fbx",
+      "sha256": "e727a5c319ebb95550394a7203ccfd8432cf47725506ad254f69e27ae8b06266",
+      "preview": "preview_SM_CropBroadBean_Young_LOD1.png"
+    },
+    "SM_CropBroadBean_Young_LOD2": {
+      "vertices": 486,
+      "triangles": 504,
+      "size_cm": [
+        58.12,
+        74.61,
+        18.86
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Young_LOD2.fbx",
+      "sha256": "7afdb29e0e6da97d0bc61a136e19aa6aea1865ef9807fdf5355b59e289603d62",
+      "preview": "preview_SM_CropBroadBean_Young_LOD2.png"
+    },
+    "SM_CropBroadBean_Growing": {
+      "vertices": 2466,
+      "triangles": 2608,
+      "size_cm": [
+        72.25,
+        87.83,
+        50.82
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.0,
+        "focus": [
+          0.004745453596115112,
+          0.0027122199535369873,
+          0.32
+        ]
+      },
+      "fbx": "SM_CropBroadBean_Growing.fbx",
+      "sha256": "5d53469e0d81892b74edaeeada4386f3028aca8007cd5931ab8951fa403f4dcf",
+      "preview": "preview_SM_CropBroadBean_Growing.png"
+    },
+    "SM_CropBroadBean_Growing_LOD1": {
+      "vertices": 1174,
+      "triangles": 920,
+      "size_cm": [
+        59.86,
+        77.95,
+        50.7
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Growing_LOD1.fbx",
+      "sha256": "cbf2689aaade29e15a7114aa34bd3547c96006af3e9882f2802e69c65cfdbff4",
+      "preview": "preview_SM_CropBroadBean_Growing_LOD1.png"
+    },
+    "SM_CropBroadBean_Growing_LOD2": {
+      "vertices": 822,
+      "triangles": 744,
+      "size_cm": [
+        62.44,
+        78.34,
+        49.56
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Growing_LOD2.fbx",
+      "sha256": "18d2a2a88f955dbc728c3241b2c03f2ba1e4aa9f7ff20f63cf41161a2eb46e37",
+      "preview": "preview_SM_CropBroadBean_Growing_LOD2.png"
+    },
+    "SM_CropBroadBean_Mature": {
+      "vertices": 2376,
+      "triangles": 2532,
+      "size_cm": [
+        77.16,
+        83.87,
+        73.51
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Mature.fbx",
+      "sha256": "70d41f9c1008ad65f055361fd3696222a2c08668d45c07654c66eb86f07b8728",
+      "preview": "preview_SM_CropBroadBean_Mature.png"
+    },
+    "SM_CropBroadBean_Mature_LOD1": {
+      "vertices": 1154,
+      "triangles": 964,
+      "size_cm": [
+        62.87,
+        77.18,
+        72.0
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Mature_LOD1.fbx",
+      "sha256": "7669b44c84c0bf3fcdb5f7dacc7ffb0f7b7c30bbbf4870ac18d24cbc80a65e6e",
+      "preview": "preview_SM_CropBroadBean_Mature_LOD1.png"
+    },
+    "SM_CropBroadBean_Mature_LOD2": {
+      "vertices": 732,
+      "triangles": 708,
+      "size_cm": [
+        63.25,
+        78.9,
+        73.04
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Mature_LOD2.fbx",
+      "sha256": "6594452f3d86ff1bde7539dd858c1648afd07362879bccb7decaec21bf70b0bf",
+      "preview": "preview_SM_CropBroadBean_Mature_LOD2.png"
+    },
+    "SM_CropBroadBean_Ripe": {
+      "vertices": 1986,
+      "triangles": 2140,
+      "size_cm": [
+        76.94,
+        90.76,
+        80.16
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.8,
+        "focus": [
+          0.012149174213409424,
+          0.02733488380908966,
+          0.44
+        ]
+      },
+      "fbx": "SM_CropBroadBean_Ripe.fbx",
+      "sha256": "387fb71913fd28808d5495824f7ff7443e24ee3554a3a318e4b713b1e579ed36",
+      "preview": "preview_SM_CropBroadBean_Ripe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropBroadBean_Ripe_hero.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CropBroadBean_Ripe_LOD1": {
+      "vertices": 1068,
+      "triangles": 876,
+      "size_cm": [
+        59.78,
+        77.65,
+        79.87
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Ripe_LOD1.fbx",
+      "sha256": "fee034f26e492b86c320c4bb3e6a9a8355e31107bca45275edfa68c1752ae7a2",
+      "preview": "preview_SM_CropBroadBean_Ripe_LOD1.png"
+    },
+    "SM_CropBroadBean_Ripe_LOD2": {
+      "vertices": 732,
+      "triangles": 708,
+      "size_cm": [
+        64.97,
+        79.0,
+        80.26
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Ripe_LOD2.fbx",
+      "sha256": "e865b499c43254f7f7cc3126f9d7c1131beff6961411930e83b1dd27b01cbf5a",
+      "preview": "preview_SM_CropBroadBean_Ripe_LOD2.png"
+    },
+    "SM_CropBroadBean_Produce": {
+      "vertices": 145,
+      "triangles": 262,
+      "size_cm": [
+        2.47,
+        6.31,
+        16.51
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBeanProduce",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.0,
+        "focus": [
+          0.0,
+          0.0,
+          -0.085
+        ],
+        "detail_distance": 0.28,
+        "detail_fstop": 32.0
+      },
+      "fbx": "SM_CropBroadBean_Produce.fbx",
+      "sha256": "93f284e4cc9ba3004b2cc1d7f6adf9e00cc631e5ecc13c07bcb415ab05af5fa5",
+      "preview": "preview_SM_CropBroadBean_Produce.png",
+      "beauty": {
+        "views": {
+          "detail": "beauty_SM_CropBroadBean_Produce_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CropBroadBean_Harvest": {
+      "vertices": 273,
+      "triangles": 480,
+      "size_cm": [
+        12.59,
+        7.77,
+        16.78
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Harvest.fbx",
+      "sha256": "620147c06fd698ab4a868dbd54c503f00808b50b3209fc94a15a271eb6dbc1f6",
+      "preview": "preview_SM_CropBroadBean_Harvest.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_CropBroadBean_Ripe": "Pick-and-regrow stage: 70-80 cm plants without baked-in pods; visible pods are instanced from SM_CropBroadBean_Produce.",
+    "SM_CropBroadBean_Mature": "White axillary flowers carry dark blotches; young pods are separate instanced produce.",
+    "SM_CropBroadBean_Harvest": "Hand-held produce: small bunch of three pods, grip at stalk top/origin, pods hang down -Z."
+  },
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / crop height",
+    "G": "per-plant phase",
+    "B": "leaf flutter, low on stems/pods",
+    "A": "1"
+  },
+  "crop_layout": "Six plants at x=-0.22,+0.22 on tilled-bed ridges y=-0.3,0,+0.3; base z=0.045 m.",
+  "material_notes": "One M_CropBroadBean atlas: alpha in basecolor; roughness R, translucency G, AO B.",
+  "produce": {
+    "mesh": "SM_CropBroadBean_Produce",
+    "anchors": {
+      "Young": [
+        [
+          -0.2225,
+          -0.3108,
+          0.0944,
+          -72.2,
+          0.956
+        ],
+        [
+          -0.2354,
+          -0.3093,
+          0.1191,
+          49.6,
+          1.006
+        ],
+        [
+          -0.2364,
+          -0.3188,
+          0.1437,
+          156.1,
+          0.907
+        ],
+        [
+          0.2149,
+          -0.3134,
+          0.0973,
+          195.0,
+          0.879
+        ],
+        [
+          0.2209,
+          -0.3052,
+          0.1235,
+          302.4,
+          0.961
+        ],
+        [
+          0.2107,
+          -0.3086,
+          0.1497,
+          426.8,
+          0.974
+        ],
+        [
+          -0.2233,
+          -0.0049,
+          0.0936,
+          51.9,
+          0.96
+        ],
+        [
+          -0.2214,
+          -0.0152,
+          0.118,
+          180.5,
+          0.917
+        ],
+        [
+          -0.2192,
+          -0.0062,
+          0.1423,
+          299.4,
+          0.966
+        ],
+        [
+          0.2195,
+          -0.0206,
+          0.0972,
+          208.4,
+          0.973
+        ],
+        [
+          0.2244,
+          -0.0101,
+          0.1234,
+          309.3,
+          0.917
+        ],
+        [
+          0.2156,
+          -0.0105,
+          0.1495,
+          434.1,
+          1.009
+        ],
+        [
+          -0.2129,
+          0.2782,
+          0.093,
+          199.5,
+          0.95
+        ],
+        [
+          -0.2139,
+          0.2875,
+          0.1171,
+          318.3,
+          1.005
+        ],
+        [
+          -0.2252,
+          0.2837,
+          0.1411,
+          449.2,
+          1.1
+        ],
+        [
+          0.2277,
+          0.2956,
+          0.0943,
+          -75.9,
+          0.986
+        ],
+        [
+          0.2141,
+          0.2973,
+          0.119,
+          50.0,
+          1.027
+        ],
+        [
+          0.2141,
+          0.2881,
+          0.1436,
+          160.6,
+          0.915
+        ]
+      ],
+      "Growing": [
+        [
+          -0.2169,
+          -0.3049,
+          0.177,
+          -72.2,
+          0.956
+        ],
+        [
+          -0.2258,
+          -0.3032,
+          0.2429,
+          49.6,
+          1.006
+        ],
+        [
+          -0.2206,
+          -0.3114,
+          0.3089,
+          156.1,
+          0.907
+        ],
+        [
+          0.2104,
+          -0.3085,
+          0.1851,
+          195.0,
+          0.879
+        ],
+        [
+          0.213,
+          -0.3003,
+          0.2551,
+          302.4,
+          0.961
+        ],
+        [
+          0.2041,
+          -0.3002,
+          0.3252,
+          426.8,
+          0.974
+        ],
+        [
+          -0.2108,
+          0.0069,
+          0.1868,
+          51.9,
+          0.96
+        ],
+        [
+          -0.2041,
+          -0.0036,
+          0.2577,
+          180.5,
+          0.917
+        ],
+        [
+          -0.1996,
+          0.0032,
+          0.3287,
+          299.4,
+          0.966
+        ],
+        [
+          0.2143,
+          -0.0137,
+          0.178,
+          208.4,
+          0.973
+        ],
+        [
+          0.2135,
+          -0.0055,
+          0.2445,
+          309.3,
+          0.917
+        ],
+        [
+          0.2027,
+          -0.0069,
+          0.311,
+          434.1,
+          1.009
+        ],
+        [
+          -0.1978,
+          0.2922,
+          0.1864,
+          199.5,
+          0.95
+        ],
+        [
+          -0.1942,
+          0.3016,
+          0.257,
+          318.3,
+          1.005
+        ],
+        [
+          -0.205,
+          0.2951,
+          0.3277,
+          449.2,
+          1.1
+        ],
+        [
+          0.2313,
+          0.303,
+          0.1774,
+          -75.9,
+          0.986
+        ],
+        [
+          0.219,
+          0.3044,
+          0.2436,
+          50.0,
+          1.027
+        ],
+        [
+          0.2222,
+          0.2958,
+          0.3099,
+          160.6,
+          0.915
+        ]
+      ],
+      "Mature": [
+        [
+          -0.2255,
+          -0.262,
+          0.238,
+          -72.2,
+          0.956
+        ],
+        [
+          -0.2382,
+          -0.2593,
+          0.3345,
+          49.6,
+          1.006
+        ],
+        [
+          -0.2395,
+          -0.2679,
+          0.431,
+          156.1,
+          0.907
+        ],
+        [
+          0.2105,
+          -0.2719,
+          0.2338,
+          195.0,
+          0.879
+        ],
+        [
+          0.2178,
+          -0.2631,
+          0.3282,
+          302.4,
+          0.961
+        ],
+        [
+          0.2108,
+          -0.2633,
+          0.4226,
+          426.8,
+          0.974
+        ],
+        [
+          -0.2287,
+          0.0428,
+          0.2504,
+          51.9,
+          0.96
+        ],
+        [
+          -0.2277,
+          0.0334,
+          0.3531,
+          180.5,
+          0.917
+        ],
+        [
+          -0.2261,
+          0.0434,
+          0.4557,
+          299.4,
+          0.966
+        ],
+        [
+          0.2186,
+          0.0267,
+          0.2388,
+          208.4,
+          0.973
+        ],
+        [
+          0.2243,
+          0.0376,
+          0.3358,
+          309.3,
+          0.917
+        ],
+        [
+          0.2158,
+          0.0371,
+          0.4327,
+          434.1,
+          1.009
+        ],
+        [
+          -0.2096,
+          0.3214,
+          0.2364,
+          199.5,
+          0.95
+        ],
+        [
+          -0.2049,
+          0.3305,
+          0.3321,
+          318.3,
+          1.005
+        ],
+        [
+          -0.2114,
+          0.3264,
+          0.4278,
+          449.2,
+          1.1
+        ],
+        [
+          0.2206,
+          0.3382,
+          0.2476,
+          -75.9,
+          0.986
+        ],
+        [
+          0.2073,
+          0.3392,
+          0.3489,
+          50.0,
+          1.027
+        ],
+        [
+          0.2094,
+          0.3302,
+          0.4502,
+          160.6,
+          0.915
+        ]
+      ],
+      "Ripe": [
+        [
+          -0.2223,
+          -0.2781,
+          0.2617,
+          -72.2,
+          0.956
+        ],
+        [
+          -0.2285,
+          -0.2754,
+          0.37,
+          49.6,
+          1.006
+        ],
+        [
+          -0.2232,
+          -0.2838,
+          0.4784,
+          156.1,
+          0.907
+        ],
+        [
+          0.2078,
+          -0.2765,
+          0.2676,
+          195.0,
+          0.879
+        ],
+        [
+          0.213,
+          -0.2674,
+          0.379,
+          302.4,
+          0.961
+        ],
+        [
+          0.2016,
+          -0.2692,
+          0.4903,
+          426.8,
+          0.974
+        ],
+        [
+          -0.2217,
+          0.0292,
+          0.2599,
+          51.9,
+          0.96
+        ],
+        [
+          -0.2127,
+          0.0204,
+          0.3674,
+          180.5,
+          0.917
+        ],
+        [
+          -0.2046,
+          0.0305,
+          0.4748,
+          299.4,
+          0.966
+        ],
+        [
+          0.202,
+          0.0149,
+          0.2661,
+          208.4,
+          0.973
+        ],
+        [
+          0.1999,
+          0.0241,
+          0.3767,
+          309.3,
+          0.917
+        ],
+        [
+          0.186,
+          0.023,
+          0.4873,
+          434.1,
+          1.009
+        ],
+        [
+          -0.211,
+          0.3116,
+          0.269,
+          199.5,
+          0.95
+        ],
+        [
+          -0.2052,
+          0.3215,
+          0.381,
+          318.3,
+          1.005
+        ],
+        [
+          -0.2117,
+          0.3178,
+          0.493,
+          449.2,
+          1.1
+        ],
+        [
+          0.2284,
+          0.3278,
+          0.2643,
+          -75.9,
+          0.986
+        ],
+        [
+          0.2217,
+          0.33,
+          0.374,
+          50.0,
+          1.027
+        ],
+        [
+          0.2279,
+          0.3211,
+          0.4836,
+          160.6,
+          0.915
+        ]
+      ]
+    }
+  },
+  "textures": {
+    "T_CropBroadBean_basecolor.png": "0f7fb0c77a557c1960cf6edded2ab723545248dd309ee8c8c48937212d54110b",
+    "T_CropBroadBean_normal.png": "b6dc9b87be35e4d9563c2d21f681855b09fe9e1f6c6cd581120cc42baf950a75",
+    "T_CropBroadBean_roughness.png": "008401c7be32d66aa476dc7f668d97ff7f822464bb1b293596a6c61aaa9af86c"
+  }
+}
