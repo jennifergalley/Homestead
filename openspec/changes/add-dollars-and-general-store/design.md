@@ -15,7 +15,7 @@
 
 **Goals:**
 
-- A trustworthy money path: every cent is accounted for in one transaction.
+- A trustworthy whole-coin path: every stored unit is accounted for in one transaction.
 - Selling in town is easy.
 - The player's goods are visibly present in the shop.
 - One item catalogue that later rounds extend.
@@ -27,10 +27,15 @@
 
 ## Decisions
 
-### 1. Money is integer cents in Simulation
+### 1. Money is stable integer whole coins in Simulation
 
-- `State.money` is an `int64` in cents. Formatting lives in one helper: `$` plus the dollars
-  with thousands separators, a dot, and two digits of cents.
+- The existing `State.money` `int64` raw value is semantically one whole coin per unit. It is not
+  numerically converted: balances, catalogue prices and serialized bytes retain their value, so old
+  raw 1000 becomes 1,000 coins rather than 10,000.
+- Formatting lives in canonical `FormatMoney`/`Delta` helpers: grouped integers plus correct
+  singular/plural `coin` text, with no `$` or decimal notation.
+- The implementation performs the semantic field/type rename and routes all display surfaces through
+  those helpers. `GrantMoney` guards against cap overflow.
 - Every change goes through `Sell` or `Buy`, which validate before mutating.
 - A negative balance is impossible in round 1, since there's no debt. Round 10's bills may
   add late fees, but never a debt that blocks play.
@@ -39,7 +44,7 @@
 
 - `HomesteadItems.cpp` holds a `constexpr` array of `ItemInfo` in `Item` order:
   - key, name, description, category, icon glyph;
-  - base price in cents;
+  - base price in whole coins;
   - a mask of the shop kinds that buy it, for example `GeneralStore`;
   - an edible restore amount (hunger and energy) for food;
   - a hidden-from-new-games flag, for the retired items.
