@@ -1,6 +1,7 @@
 #include "HomesteadController.h"
 #include "HomesteadEstateGround.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "Simulation/HomesteadCrops.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
@@ -96,11 +97,10 @@ const Homestead::Plot* FindPlotWhere(const std::vector<Homestead::Plot>& Plots, 
     return nullptr;
 }
 
-// Chosen on the hotbar to plant bare tilled soil: seeds grow roots, a berry's seeds grow a bush.
+// Chosen on the hotbar to plant bare tilled soil: each seed grows its crop (a berry's seeds grow a bush).
 TOptional<Homestead::CropKind> PlantingCrop(Homestead::Item Item)
 {
-    if (Item == Homestead::Item::Seeds) return Homestead::CropKind::Roots;
-    if (Item == Homestead::Item::Berries) return Homestead::CropKind::Berries;
+    if (const auto* Crop = Homestead::CropForSeed(Item)) return Crop->kind;
     return {};
 }
 
@@ -123,7 +123,11 @@ FName HotbarIcon(Homestead::Item Item)
     case Homestead::Item::Billhook: return TEXT("billhook");
     case Homestead::Item::Pickaxe: return TEXT("pickaxe");
     case Homestead::Item::OilLamp: return TEXT("oil-lamp");
-    default: return NAME_None;
+    default:
+        // Crop seeds and produce use their catalogue glyph.
+        if (Homestead::CropForSeed(Item) || (Item >= Homestead::Item::Turnip && Item <= Homestead::Item::Strawberries))
+            return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item)));
+        return NAME_None;
     }
 }
 
@@ -707,6 +711,14 @@ bool AHomesteadController::CanPinToHotbar(Homestead::Item Item)
     return IsHotbarTool(Item) || IsFoodItem(Item) || PlantingCrop(Item).IsSet();
 }
 
+void AHomesteadController::PinNewSeed(Homestead::Item Item)
+{
+    // Bought or given crop seed goes straight onto a free hotbar slot, ready to sow.
+    const auto* Crop = Homestead::CropForSeed(Item);
+    if (!Crop || Item == Homestead::Item::Berries || IsPinnedToHotbar(Item) || HotbarSlots.IndexOfByKey(-1) == INDEX_NONE) return;
+    TogglePinnedToHotbar(Item);
+}
+
 bool AHomesteadController::IsPinnedToHotbar(Homestead::Item Item) const
 {
     return HotbarSlots.Contains(static_cast<int32>(Item));
@@ -846,9 +858,9 @@ void AHomesteadController::UseSelectedTool()
                     return;
                 }
             }
-            if (static_cast<Homestead::Item>(ToolValue) == Homestead::Item::Seeds)
+            if (static_cast<Homestead::Item>(ToolValue) != Homestead::Item::Berries)
             {
-                Notify(TEXT("Aim at bare tilled soil to plant seeds."), true);
+                Notify(TEXT("Aim at bare tilled soil to sow it."), true);
                 return;
             }
         }
@@ -1084,6 +1096,7 @@ void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
             continue;
         const auto Result = Sim.GrantItems(Item, Amount);
         Notify(UTF8_TO_TCHAR(Result.message.c_str()), !Result);
+        if (Result) PinNewSeed(Item);
         return;
     }
     Notify(FString::Printf(TEXT("No item called %s."), *ItemName), true);
@@ -1860,6 +1873,17 @@ void AHomesteadController::Tick(float DeltaSeconds)
             RefreshRemaining = 0;
         }
     }
+    if (HeldHarvestPlot != INDEX_NONE)
+    {
+        const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+        if (!Avatar || Avatar->SticksLiftedFromPile() >= 1 || !Avatar->IsStickPileOnGround()
+            || GetWorld()->GetTimeSeconds() - HeldHarvestSince > 6.0)
+        {
+            if (Landscape) Landscape->ReleaseHarvest();
+            HeldHarvestPlot = INDEX_NONE;
+            RefreshRemaining = 0;
+        }
+    }
     if (HeldStickPile != INDEX_NONE)
     {
         const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -1985,6 +2009,24 @@ void AHomesteadController::UpdateFocus()
         Consider(EFocus::Drop, Drop.id, Drop.position);
     for (const auto& Plot : State().plots)
         Consider(EFocus::Plot, Plot.id, Homestead::PlotCenter(Plot));
+    // In a garden of adjoining squares the nearest centre is ambiguous (and a weed at her feet can
+    // win): the square her reach lands in, 60 cm ahead of her, takes the focus.
+    if (const APawn* Avatar = GetPawn(); Avatar && !State().plots.empty())
+    {
+        constexpr double GardenReachAheadCm = 60.0;
+        const FVector Forward = Avatar->GetActorForwardVector();
+        const int ReachX = Homestead::GardenCell(Position.x + Forward.X * GardenReachAheadCm);
+        const int ReachY = Homestead::GardenCell(Position.y + Forward.Y * GardenReachAheadCm);
+        for (const auto& Plot : State().plots)
+            if (Plot.cellX == ReachX && Plot.cellY == ReachY)
+            {
+                Best = FMath::Min(Best, FMath::Sqrt(FMath::Square(Homestead::PlotCenter(Plot).x - Position.x)
+                    + FMath::Square(Homestead::PlotCenter(Plot).y - Position.y)));
+                Focus = EFocus::Plot;
+                FocusId = Plot.id;
+                break;
+            }
+    }
     for (const auto& Structure : State().structures)
     {
         EFocus Kind = EFocus::None;
@@ -2056,9 +2098,7 @@ FString AHomesteadController::FocusTitle() const
         {
             if (Plot.id != FocusId) continue;
             if (!Plot.planted) return TEXT("A little patch of earth");
-            return FString::Printf(TEXT("%s  |  %d%% grown  |  %d%% watered  |  %d%% weeds"),
-                *Text(Homestead::CropName(Plot.kind)), FMath::RoundToInt(Plot.growth * 100),
-                FMath::RoundToInt(Plot.moisture * 100), FMath::RoundToInt(Plot.weeds * 100));
+            return Text(Homestead::PlotStatus(Plot).c_str());
         }
         break;
     case EFocus::Drop:
@@ -2129,11 +2169,20 @@ FString AHomesteadController::FocusActions() const
                     // Weeds and nettles are pulled, rubbish is cleared away, a fallen bough gathered.
                     const FString Hand = A + (Node.kind == Homestead::ResourceKind::Weeds || Node.kind == Homestead::ResourceKind::Nettles
                         ? TEXT(" Pull") : Homestead::IsRubbish(Node.kind) ? TEXT(" Clear away") : TEXT(" Gather"));
-                    if (Handles) return Use + TEXT(" ") + SwingVerb(SelectedTool)
-                        + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
+                    if (Handles)
+                    {
+                        // Out of tier: say which upgrade it needs rather than offering a swing that glances off.
+                        const Homestead::ToolTier Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
+                        if (Sim.GetToolTier(Overgrowth->tool) < Needed)
+                            return UTF8_TO_TCHAR(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str());
+                        return Use + TEXT(" ") + SwingVerb(SelectedTool)
+                            + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
+                    }
                     if (Overgrowth->byHand) return Hand;
                     return ToolPrompt(Sim, Homestead::ToolItem(Overgrowth->tool), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                 }
+                // Loose stones are small enough to pick up by hand, unlike the rocks the pickaxe breaks.
+                if (Node.kind == Homestead::ResourceKind::Stones) return A + TEXT(" Pick up");
                 return A + TEXT(" Gather");
             }
         return A + TEXT(" Gather");
@@ -2141,23 +2190,28 @@ FString AHomesteadController::FocusActions() const
         for (const auto& Plot : State().plots)
             if (Plot.id == FocusId)
             {
-                if (!Plot.planted) return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
-                if (Plot.growth >= 1) return A + TEXT(" Harvest");
-                if (ToolAvailable && SelectedTool == Homestead::Item::WateringCan)
-                    return Use + TEXT(" Water");
-                if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
-                    return Use + TEXT(" Weed");
+                if (!Plot.planted)
                 {
-                    // Plot tools: the pail waters, the hoe weeds.
-                    const int32 Pail = ToolWhereabouts(Sim, Homestead::Item::WateringCan);
-                    const int32 Hoe = ToolWhereabouts(Sim, Homestead::Item::DiggingStick);
-                    if (Pail == 2 && Hoe == 2) return TEXT("Select the pail or hoe");
-                    if (Pail == 2) return TEXT("Select the pail");
-                    if (Hoe == 2) return TEXT("Select the hoe");
-                    if (Pail || Hoe) return ToolPrompt(Sim, Pail ? Homestead::Item::WateringCan : Homestead::Item::DiggingStick,
-                        Pail ? TEXT("pail") : TEXT("hoe"));
-                    return TEXT("Requires a pail or hoe");
+                    // A seed chosen on the hotbar is sown with the use button (UseSelectedTool).
+                    if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
+                        if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
+                            if (Seed->kind != Homestead::CropKind::Roots && Seed->kind != Homestead::CropKind::Berries)
+                                return A + TEXT(" Sow ") + Text(Seed->lower);
+                    return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
                 }
+                if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
+                FString Actions;
+                if (Homestead::NeedsWater(Plot))
+                {
+                    // The pail in her pack waters on [E]/[A]; otherwise say where it is.
+                    const int32 Pail = ToolWhereabouts(Sim, Homestead::Item::WateringCan);
+                    Actions = Pail == 2 ? (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water")
+                        : ToolPrompt(Sim, Homestead::Item::WateringCan, TEXT("pail"), TEXT(" to water"));
+                }
+                if (Plot.weeds > 0.1)
+                    Actions += (Actions.IsEmpty() ? TEXT("") : TEXT("   "))
+                        + (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick ? Use : X) + TEXT(" Weed");
+                return Actions;
             }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
@@ -2510,9 +2564,9 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
             : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
             : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
             : Kind == Homestead::ResourceKind::GiantLog ? 38.0f
-            : Kind == Homestead::ResourceKind::Rubble ? 35.0f
-            : Kind == Homestead::ResourceKind::Boulder ? 50.0f
-            : Kind == Homestead::ResourceKind::SmallRock ? 18.0f : 8.0f;
+            : Kind == Homestead::ResourceKind::Rubble ? 42.0f
+            : Kind == Homestead::ResourceKind::Boulder ? 70.0f
+            : Kind == Homestead::ResourceKind::SmallRock ? 30.0f : 8.0f;
         if (Tool == Homestead::Item::Scythe)
         {
             // Mowing turns about her: she keeps facing the swath rather than the first tuft.
@@ -2774,14 +2828,21 @@ void AHomesteadController::Interact()
             const bool Mature = Plot.growth >= 1;
             if (!Planted)
             {
-                PlantFocusedPlot(Homestead::CropKind::Roots);
+                // The seed chosen on the hotbar, else wild root seed.
+                TOptional<Homestead::CropKind> Seed;
+                if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
+                    Seed = PlantingCrop(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]));
+                PlantFocusedPlot(Seed && *Seed != Homestead::CropKind::Berries ? *Seed : Homestead::CropKind::Roots);
                 break;
             }
+            const Homestead::CropKind Harvested = Plot.kind;
+            const Homestead::Point Center = Homestead::PlotCenter(Plot);
             const auto Result = Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
             Notify(Result, GrassStepB);
+            if (Result.ok && Mature) PresentHarvest(FocusId, Harvested, Center);
             if (Result.ok && !Mature)
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                    Avatar->PlayWater(Homestead::PlotCenter(Plot));
+                    Avatar->PlayWater(Center);
             break;
         }
         break;
@@ -2930,6 +2991,20 @@ void AHomesteadController::HoeSquareAhead()
         HeldPlotSince = GetWorld()->GetTimeSeconds();
         bHeldPlotTilling = true;
     }
+}
+
+void AHomesteadController::PresentHarvest(int32 PlotId, Homestead::CropKind Crop, Homestead::Point Center)
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar) return;
+    const bool bPick = Homestead::GetCropInfo(Crop).style == Homestead::HarvestStyle::Pick;
+    UStaticMesh* Produce = Landscape ? Landscape->CropMesh(Crop, TEXT("Harvest")) : nullptr;
+    if (!Avatar->PlayHarvest(Center, bPick, Produce) || !Landscape) return;
+    // The ripe plant stays in the ground until her hands lift the crop out of it.
+    Landscape->HoldHarvest(PlotId, Crop);
+    HeldHarvestPlot = PlotId;
+    HeldHarvestSince = GetWorld()->GetTimeSeconds();
+    RefreshRemaining = 0;
 }
 
 void AHomesteadController::PlantFocusedPlot(Homestead::CropKind Crop)

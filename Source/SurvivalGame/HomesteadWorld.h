@@ -139,6 +139,11 @@ public:
     // bHidden hides the square entirely (just tilled, before the hoe bites).
     void HoldPlot(int32 Id, bool bHideSquare = false) { HeldPlotId = Id; bHeldPlotHidden = bHideSquare; }
     void ReleasePlot() { HeldPlotId = INDEX_NONE; bHeldPlotHidden = false; }
+    // Keeps a just-harvested plot showing its ripe plant until her hands lift the produce.
+    void HoldHarvest(int32 Id, Homestead::CropKind Kind) { HeldHarvestPlotId = Id; HeldHarvestKind = Kind; }
+    void ReleaseHarvest() { HeldHarvestPlotId = INDEX_NONE; }
+    // The plant or produce mesh for a crop stage ("Sprout" ... "Ripe", "Harvest"), or null until imported.
+    UStaticMesh* CropMesh(Homestead::CropKind Kind, const TCHAR* Stage);
     // Hide one component of the held produce (a stick she has already lifted from the pile).
     void HideHeldProducePart(int32 Index);
     // Felling: call right after tree or sapling ResourceId is cleared. A standing copy stays up
@@ -221,6 +226,14 @@ private:
     TObjectPtr<UMaterialInterface> TilledBedWetMaterial;
     UPROPERTY()
     TObjectPtr<UStaticMesh> SoilMoundMesh;
+    // Crop plants per stage (SM_Crop<Name>_<Stage>), loaded on first use; misses are cached as null.
+    UPROPERTY()
+    TMap<FName, TObjectPtr<UStaticMesh>> CropMeshes;
+    UPROPERTY()
+    TObjectPtr<UMaterialInterface> RipeGlintMaterial;
+    UPROPERTY()
+    TObjectPtr<UStaticMesh> WeedTuftMesh;
+    bool bRipeGlintLoaded = false;
     // The manor's granite kit and hearth (StoneFoundation, StoneWall, StoneDoorway, StoneRoof,
     // StoneHearth), loaded on first use by name.
     UPROPERTY()
@@ -373,6 +386,8 @@ private:
     int32 HeldProduceId = INDEX_NONE;
     int32 HeldPlotId = INDEX_NONE;
     bool bHeldPlotHidden = false;
+    int32 HeldHarvestPlotId = INDEX_NONE;
+    Homestead::CropKind HeldHarvestKind = Homestead::CropKind::Roots;
     FString OuterTreeLayoutSignature;
     FString ActiveTreeLayoutSignature;
     FString RegionalWaterSignature;
@@ -445,9 +460,9 @@ private:
     bool BuildDecorations(const Homestead::Simulation& Simulation,
         const FIntPoint* StageChunk = nullptr);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
-    // The estate's overgrowth kinds, each placed through Place(mesh, offset, yaw, produce, scale).
+    // The estate's overgrowth kinds, each placed through Place(mesh, offset, yaw, produce, scale, pivotOnGround).
     void BuildOvergrowth(const Homestead::ResourceNode& Node, uint32 Variation,
-        const TFunctionRef<void(UStaticMesh*, FVector2D, float, bool, float)>& Place);
+        const TFunctionRef<void(UStaticMesh*, FVector2D, float, bool, float, bool)>& Place);
     bool ResolveGeneratedTreeVisual(const Homestead::ResourceNode& Node, UStaticMesh*& Mesh,
         FHomesteadOuterTreeInstance& Instance);
     bool RebuildOuterTreeBatches(const Homestead::Simulation& Simulation);

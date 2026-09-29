@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "GranitePickRubble",
+  "description": "Pickaxe rubble: a heap of dressed and broken Cornish granite blocks shed from a ruined wall (~0.9 m across, ~0.45 m high); Nanite; LOD1/LOD2.",
+  "collision": "none",
+  "triangle_budget": 180000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/granite_pick_rubble.py",
+  "source_sha256": "78c47644309e9b8735cc466ce96ad77e221d3136e3003e48eb535a8c46b964ea",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_GranitePickRubble": {
+      "vertices": 79146,
+      "triangles": 158256,
+      "size_cm": [
+        91.86,
+        78.6,
+        44.52
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRubble",
+          "textures": {
+            "basecolor": "T_GranitePickRubble_basecolor.png",
+            "roughness": "T_GranitePickRubble_roughness.png",
+            "normal": "T_GranitePickRubble_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRubble_basecolor.png",
+          "roughness": "T_GranitePickRubble_roughness.png",
+          "normal": "T_GranitePickRubble_normal.png",
+          "ao": "T_GranitePickRubble_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.05,
+          -0.15,
+          0.22
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_GranitePickRubble.fbx",
+      "sha256": "9db22d0682d65ed19ac792218037c7e0cd96ed87084a28f829aa3281a63dfc08",
+      "preview": "preview_SM_GranitePickRubble.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GranitePickRubble_hero.png",
+          "detail": "beauty_SM_GranitePickRubble_detail.png",
+          "eye": "beauty_SM_GranitePickRubble_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          1920,
+          1080
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_GranitePickRubble_LOD1": {
+      "vertices": 15018,
+      "triangles": 30000,
+      "size_cm": [
+        91.86,
+        78.61,
+        44.52
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRubble",
+          "textures": {
+            "basecolor": "T_GranitePickRubble_basecolor.png",
+            "roughness": "T_GranitePickRubble_roughness.png",
+            "normal": "T_GranitePickRubble_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRubble_basecolor.png",
+          "roughness": "T_GranitePickRubble_roughness.png",
+          "normal": "T_GranitePickRubble_normal.png",
+          "ao": "T_GranitePickRubble_ao.png"
+        },
+        "shared_with": "SM_GranitePickRubble"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.05,
+          -0.15,
+          0.22
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_GranitePickRubble_LOD1.fbx",
+      "sha256": "8e6c554b3ed95314509bf1fa275cc3060b882af82b07900337c46a663adacd50",
+      "preview": "preview_SM_GranitePickRubble_LOD1.png"
+    },
+    "SM_GranitePickRubble_LOD2": {
+      "vertices": 3518,
+      "triangles": 7000,
+      "size_cm": [
+        91.86,
+        78.51,
+        44.52
+      ],
+      "materials": [
+        {
+          "name": "M_GranitePickRubble",
+          "textures": {
+            "basecolor": "T_GranitePickRubble_basecolor.png",
+            "roughness": "T_GranitePickRubble_roughness.png",
+            "normal": "T_GranitePickRubble_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GranitePickRubble_basecolor.png",
+          "roughness": "T_GranitePickRubble_roughness.png",
+          "normal": "T_GranitePickRubble_normal.png",
+          "ao": "T_GranitePickRubble_ao.png"
+        },
+        "shared_with": "SM_GranitePickRubble"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.05,
+          -0.15,
+          0.22
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_GranitePickRubble_LOD2.fbx",
+      "sha256": "e7c71b58f4e074c41b74421ea8f29e15918e10f07deb622cc18b0b730ffab1bc",
+      "preview": "preview_SM_GranitePickRubble_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.057,
+    "placement": "Origin is the ground line; place at terrain height (blocks extend 6 cm below it). Walk-through resource node (Rubble, worn pick): no collision.",
+    "north": "+Y (moss side)"
+  },
+  "nanite": true,
+  "textures": {
+    "T_GranitePickRubble_basecolor.png": "787b2f6fdc337da0607a8fd64928fda931b4077d3193519e228fef813e99ee5a",
+    "T_GranitePickRubble_roughness.png": "fbdb1f9d4780709453d13ba98c384ecd72c570948a5c5aebbba29eff291d556a",
+    "T_GranitePickRubble_normal.png": "7cdd0e4a75ae5eee7bc3877895db0a0db0adb7ad814109a23ae010022fb3ec20"
+  }
+}

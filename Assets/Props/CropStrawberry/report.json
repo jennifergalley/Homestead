@@ -1,0 +1,664 @@
+{
+  "schema": 1,
+  "name": "CropStrawberry",
+  "description": "One 1 m tilled-bed plot of six garden strawberry crowns across five crop stages, with large trifoliate leaves, straw mulch, white flowers and readable red berries.",
+  "collision": "none",
+  "triangle_budget": 3000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/crop_strawberry.py",
+  "source_sha256": "0963fa4f9c58ab3e6e5217960c7c9c6fc367529f4b5dc401b6b6818862abac90",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CropStrawberry_Sprout": {
+      "vertices": 864,
+      "triangles": 864,
+      "size_cm": [
+        58.31,
+        74.44,
+        5.42
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Sprout.fbx",
+      "sha256": "e2101c1c6124a0f40fa17f42c3acd0ab05b7b8a489349b63886421d72c0c7452",
+      "preview": "preview_SM_CropStrawberry_Sprout.png"
+    },
+    "SM_CropStrawberry_Sprout_LOD1": {
+      "vertices": 432,
+      "triangles": 384,
+      "size_cm": [
+        58.22,
+        74.07,
+        4.55
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Sprout_LOD1.fbx",
+      "sha256": "f2a0d6fd1440885d3157bfd93b302e4e935f0505b901836ef2977572e6cbd9df",
+      "preview": "preview_SM_CropStrawberry_Sprout_LOD1.png"
+    },
+    "SM_CropStrawberry_Sprout_LOD2": {
+      "vertices": 240,
+      "triangles": 192,
+      "size_cm": [
+        59.31,
+        75.47,
+        4.42
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Sprout_LOD2.fbx",
+      "sha256": "31e50c586fb42a744405604cfc70dcd3e20d2de197b4ac2675070e2f514b07e3",
+      "preview": "preview_SM_CropStrawberry_Sprout_LOD2.png"
+    },
+    "SM_CropStrawberry_Young": {
+      "vertices": 1566,
+      "triangles": 1620,
+      "size_cm": [
+        66.69,
+        84.85,
+        8.58
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Young.fbx",
+      "sha256": "457f2602a9ca831e0ca1f173f5e70f2fcc154eb7efc2176f401ac48967e13746",
+      "preview": "preview_SM_CropStrawberry_Young.png"
+    },
+    "SM_CropStrawberry_Young_LOD1": {
+      "vertices": 810,
+      "triangles": 780,
+      "size_cm": [
+        64.46,
+        82.31,
+        8.16
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Young_LOD1.fbx",
+      "sha256": "965985eff8eb146f3bf887ef3ea8bbf4cf49ef92755ef23be640e80a686afb69",
+      "preview": "preview_SM_CropStrawberry_Young_LOD1.png"
+    },
+    "SM_CropStrawberry_Young_LOD2": {
+      "vertices": 420,
+      "triangles": 336,
+      "size_cm": [
+        67.06,
+        82.7,
+        8.03
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Young_LOD2.fbx",
+      "sha256": "1acb3455020087f63784116e68f91d031265b4bf53407294de86eaf5c2f48de8",
+      "preview": "preview_SM_CropStrawberry_Young_LOD2.png"
+    },
+    "SM_CropStrawberry_Growing": {
+      "vertices": 1854,
+      "triangles": 1944,
+      "size_cm": [
+        83.15,
+        97.19,
+        15.17
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2,
+        "focus": [
+          -0.0012461692094802856,
+          0.0016017109155654907,
+          0.12
+        ]
+      },
+      "fbx": "SM_CropStrawberry_Growing.fbx",
+      "sha256": "a50a5986a259dd0f53ad728a203da019783d05d65fc3460eb7cbafc03e8212d4",
+      "preview": "preview_SM_CropStrawberry_Growing.png"
+    },
+    "SM_CropStrawberry_Growing_LOD1": {
+      "vertices": 990,
+      "triangles": 984,
+      "size_cm": [
+        80.72,
+        95.92,
+        14.08
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Growing_LOD1.fbx",
+      "sha256": "0b7c5be04f90d335c94e4c7ef0b2b9c02950a59b925762396a9951994e6b4bf7",
+      "preview": "preview_SM_CropStrawberry_Growing_LOD1.png"
+    },
+    "SM_CropStrawberry_Growing_LOD2": {
+      "vertices": 480,
+      "triangles": 384,
+      "size_cm": [
+        83.93,
+        97.5,
+        13.34
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Growing_LOD2.fbx",
+      "sha256": "b4ae021f12183f505d7b71787fa3f32b15c377ec17d7a493581988e6792562b6",
+      "preview": "preview_SM_CropStrawberry_Growing_LOD2.png"
+    },
+    "SM_CropStrawberry_Mature": {
+      "vertices": 2568,
+      "triangles": 2952,
+      "size_cm": [
+        84.25,
+        97.25,
+        15.54
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Mature.fbx",
+      "sha256": "9fc8df4f32f896fc478a08e3239417620ab7b3d69140a448b21bdb532a958985",
+      "preview": "preview_SM_CropStrawberry_Mature.png"
+    },
+    "SM_CropStrawberry_Mature_LOD1": {
+      "vertices": 1380,
+      "triangles": 1464,
+      "size_cm": [
+        79.62,
+        99.76,
+        14.71
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Mature_LOD1.fbx",
+      "sha256": "b45698d676218a462bf2544dfbbee5f9e849175cc236412a9e50fa630df8be6f",
+      "preview": "preview_SM_CropStrawberry_Mature_LOD1.png"
+    },
+    "SM_CropStrawberry_Mature_LOD2": {
+      "vertices": 576,
+      "triangles": 468,
+      "size_cm": [
+        86.23,
+        97.7,
+        14.16
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Mature_LOD2.fbx",
+      "sha256": "1463b61e43221d7cf51d028ba330287af7a40a4ca13471e9395c09ff85761401",
+      "preview": "preview_SM_CropStrawberry_Mature_LOD2.png"
+    },
+    "SM_CropStrawberry_Ripe": {
+      "vertices": 2253,
+      "triangles": 2958,
+      "size_cm": [
+        85.2,
+        97.83,
+        20.06
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.6,
+        "focus": [
+          -0.0001331120729446411,
+          -0.013320162892341614,
+          0.11
+        ]
+      },
+      "fbx": "SM_CropStrawberry_Ripe.fbx",
+      "sha256": "233e74012c6f76a2f992267712eca23c27717b1feffac06ec2ee419b4d7f69e6",
+      "preview": "preview_SM_CropStrawberry_Ripe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropStrawberry_Ripe_hero.png",
+          "detail": "beauty_SM_CropStrawberry_Ripe_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CropStrawberry_Ripe_LOD1": {
+      "vertices": 1098,
+      "triangles": 1290,
+      "size_cm": [
+        79.32,
+        94.6,
+        21.17
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Ripe_LOD1.fbx",
+      "sha256": "c826cfed79786f958030c320e2d37600e7cf3ea84d6be04c2cbbe14eaf34bb2e",
+      "preview": "preview_SM_CropStrawberry_Ripe_LOD1.png"
+    },
+    "SM_CropStrawberry_Ripe_LOD2": {
+      "vertices": 516,
+      "triangles": 552,
+      "size_cm": [
+        83.38,
+        97.45,
+        21.33
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Ripe_LOD2.fbx",
+      "sha256": "f82c5c4d8e183c4ea7deb45f4a40b933848c4083b95bc62068f54840497ec3f9",
+      "preview": "preview_SM_CropStrawberry_Ripe_LOD2.png"
+    },
+    "SM_CropStrawberry_Harvest": {
+      "vertices": 195,
+      "triangles": 342,
+      "size_cm": [
+        8.95,
+        6.43,
+        11.79
+      ],
+      "materials": [
+        {
+          "name": "M_CropStrawberry",
+          "textures": {
+            "basecolor": "T_CropStrawberry_basecolor.png",
+            "normal": "T_CropStrawberry_normal.png",
+            "roughness": "T_CropStrawberry_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.8
+      },
+      "fbx": "SM_CropStrawberry_Harvest.fbx",
+      "sha256": "fbbfaccbd0429bdd77603cf1f3de0008edae75ffc8324684ce80df7eca204d75",
+      "preview": "preview_SM_CropStrawberry_Harvest.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropStrawberry_Harvest_hero.png",
+          "detail": "beauty_SM_CropStrawberry_Harvest_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_CropStrawberry_Ripe": "Pick-and-regrow stage: red 2.5-3.5 cm berries hang over straw mulch; some berries remain pale.",
+    "SM_CropStrawberry_Mature": "White flower scapes and green-white unripe berries, before red fruit colour.",
+    "SM_CropStrawberry_Harvest": "Hand-held produce: three ripe berries on short stalks, grip at stalk top/origin, berries hang down -Z."
+  },
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / crop height",
+    "G": "per-crown phase",
+    "B": "leaf flutter 0 at petiole -> 1 at leaflet tips",
+    "A": "1"
+  },
+  "crop_layout": "Six crowns at x=-0.22,+0.22 on tilled-bed ridges y=-0.3,0,+0.3; base z=0.045 m.",
+  "material_notes": "One M_CropStrawberry atlas: alpha in basecolor; roughness R, translucency G, AO B.",
+  "textures": {
+    "T_CropStrawberry_basecolor.png": "f13f87717c7ae63ad32921cc264d514f0c99c5584c9c8f940ec81b43b4cef929",
+    "T_CropStrawberry_normal.png": "39b63b9e073d4dd1befe4d8cc065bfd02dec93e2a81d3b9c459da036c7044f25",
+    "T_CropStrawberry_roughness.png": "3f20289f8329a14bfac6f773f34fb19cb8e3072671a6c3e39b50abdb1642f4aa"
+  }
+}
