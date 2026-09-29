@@ -98,10 +98,11 @@ like the save version).
 | Scenery kinds (`EstateSceneryKinds` in `HomesteadWorld.cpp`; `scatter.py` kind bytes must match) | Owner |
 | --- | --- |
 | 13-15: oak, beech, sycamore; 16-18: hawthorn, holly, hazel coppice | trees lane |
-| 19-47 | MVP woodland biome |
+| 19-41 | MVP woodland biome (`Scripts\Terrain\mvp_woodland.py`) |
 
-The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by `scatter.py` and
-`bake_ground.py` (on its lane branch; not on `main` yet).
+The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json` (not in `estate_layout.json`,
+which `reshape.py` regenerates), shared by `scatter.py` and `bake_ground.py`. On its lane branch; not on
+`main` yet.
 
 **Re-bake order after `scatter.py` regenerates the scenery:** `bake_ground.py` and
 `build_ground.py` (ground lane), then the estate map (`docs\setup.md`, "Estate map").
