@@ -405,7 +405,9 @@ void AHomesteadController::BeginPlay()
     {
         HomesteadEstateTerrain::Deactivate();
     }
-    if (!SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending)
+    // A smoke route on the Estate (-HomesteadEstateSmoke) starts a real new estate game, as a player does.
+    const bool EstateSmoke = SmokeTest && bEstateMap;
+    if ((!SmokeTest || EstateSmoke) && !VisualPlaytest && !bSaveRoutingTestPending)
     {
         const FGuid Seed = FGuid::NewGuid();
         const auto Result = bEstateMap
@@ -431,7 +433,7 @@ void AHomesteadController::BeginPlay()
     const bool Loaded = !SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending && LoadLatest();
     if (!Loaded) GrantPlaytestKit(true);
     bHasPlayableSession = !bTestResetRequired;
-    if (!Loaded && bEstateMap && !bTestResetRequired && !SmokeTest && !VisualPlaytest) BeginNewGameSetup();
+    if (!Loaded && bEstateMap && !bTestResetRequired && (!SmokeTest || EstateSmoke) && !VisualPlaytest) BeginNewGameSetup();
     else if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
     ShowHotbar();
     if (!StartupProbeDirectory.IsEmpty() && !Loaded) { FinishStartupProbe(TEXT("The isolated prepared save did not load.")); return; }
@@ -1737,6 +1739,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
                 Notify(TEXT("Owned clothing could not be displayed; the character preview is provisional. ") + Error, true);
             }
             Avatar->SetAppearancePreview(false);
+            Avatar->SnapCamera();
         }
         bPendingSpawn = false;
         if (bFreshTerrainSpawn) CaptureSessionCheckpoint(PendingLocation, PendingRotation);
@@ -1749,6 +1752,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
         if (!SettleOnGround(GroundSnapTarget, GroundSnapWait, DeltaSeconds, bEstateMap ? 180.0f : 0.0f, TEXT("teleport"))) return;
         bPendingGroundSnap = false;
         GetPawn()->SetActorLocation(GroundSnapTarget, false, nullptr, ETeleportType::TeleportPhysics);
+        if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SnapCamera();
         LastStepPosition = GroundSnapTarget;
         LastSafeWorldPosition = GroundSnapTarget;
         StepDistance = 0;
@@ -2118,7 +2122,9 @@ FString AHomesteadController::FocusActions() const
                     return FString();
                 if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind))
                 {
-                    const bool Handles = ToolAvailable && Homestead::ToolForItem(SelectedTool) == Overgrowth->tool;
+                    // Only a tool that clears this overgrowth offers a swing; the lamp (no ToolKind) never does.
+                    const bool Handles = ToolAvailable && Homestead::ToolForItem(SelectedTool) != Homestead::ToolKind::Count
+                        && Homestead::ToolForItem(SelectedTool) == Overgrowth->tool;
                     if (Node.kind == Homestead::ResourceKind::SalvagePile) return A + TEXT(" Search");
                     // Weeds and nettles are pulled, rubbish is cleared away, a fallen bough gathered.
                     const FString Hand = A + (Node.kind == Homestead::ResourceKind::Weeds || Node.kind == Homestead::ResourceKind::Nettles

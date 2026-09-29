@@ -1,5 +1,31 @@
 # Homestead verification
 
+## Estate smoke (what Jenny plays)
+
+`Scripts\Test-Game.ps1 -EstateSmoke` (packaged: add `-Packaged`) is the only route on the Estate map;
+every other suite loads the legacy woodland. It runs `-HomesteadSmokeTest -HomesteadEstateSmoke
+-HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRequireLit` in an isolated save sandbox
+(`<output>\SmokeSave`; Jenny's saves are never touched). Route: `HomesteadEstateSmokeTest.cpp`.
+
+- A new estate game started the way a player starts one (Names skipped, default names).
+- A loose stone gathered and a weed pulled by hand with gamepad A, each checked in the pack.
+- Ground-settle visits to the manor clear-out, the derelict farm, the MVP woodland, the drive at the
+  gateway and the store door, with a capture at each (`estate-*.png`).
+- The oil lamp selected with key 8 at 22:00, in hand and lit.
+- `PERFORMANCE_AT manor|woods mean_fps=... p95_frame_ms=... p99_frame_ms=...` (12 s after a 6 s
+  settle), for the Performance pass.
+- `LANDSCAPE_MATERIAL <place>` at each of six places: every on-screen landscape component's own
+  material instances have no compile errors (uncooked; waits up to 60 s for permutations) or a valid
+  shader map (cooked), so the landscape isn't drawing the Default Material.
+
+The runner then fails the run on any `missing usage flag`, `Default Material will be used`,
+`Failed to compile Material`/`default material`, `Material failed to compile` or `with an invalid
+ShaderMap` (cooked) line, fewer than six `LANDSCAPE_MATERIAL` lines, a
+ground hold that gave up, a spawn that never logged `HOMESTEAD_GROUND_SETTLE`, or more Error lines
+than `-MaxLogErrors` (default 0). Findings are in `<output>\estate-log-findings.txt`. First run
+(editor binary `-game`, 2026-09-28): all steps passed, 0 errors, manor 53.9 fps (p99 29.3 ms), woods
+35.8 fps (p99 54.5 ms); packaged numbers will differ.
+
 ## Directional menu refinement
 
 The focused existing smoke route accepts `-HomesteadDirectionalNavigationTest`

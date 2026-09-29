@@ -322,6 +322,11 @@ sets, 2k JPG:
 - Trodden soil: `grass_path_2` by Rob Tuytel (https://polyhaven.com/a/grass_path_2)
 - Stony banks: `rocky_trail` by Amal Kumar (https://polyhaven.com/a/rocky_trail)
 
+The rain ambience (`Assets\Audio\Ambience\RainLoop.wav`) is cut from "Rain (loopable)" by Ylmir
+(OpenGameArt, CC0, https://opengameart.org/content/rain-loopable), file 3.ogg, by
+`Scripts\prepare_rain_loop.py`. The rain streaks, cloud layer and ripples
+(`Content\SurvivalGame\Estate\Weather`) are project-authored procedural materials.
+
 The 3D meadow (`Content\SurvivalGame\Estate\Ground`: the `SM_GrassPatch` blade meshes,
 `M_EstateGrass`, `T_EstateGround`, `T_EstateCanopy` and `T_GrassWind`) is project-authored. It's
 generated in numpy by `Scripts\Terrain\bake_ground.py` with no scanned or downloaded geometry or

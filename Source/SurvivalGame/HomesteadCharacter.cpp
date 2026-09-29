@@ -1219,6 +1219,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     UpdateStickAlignment(DeltaSeconds);
     UpdateHairMotion(DeltaSeconds);
     if (!Lab) UpdateRoomCamera(DeltaSeconds);
+    if (CameraSnapFrames > 0 && --CameraSnapFrames == 0) CameraArm->bEnableCameraLag = true;
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
     {
         const FVector CameraPosition = Camera->GetComponentLocation();
@@ -2727,4 +2728,20 @@ FRotator AHomesteadCharacter::GameplayViewRotation() const
 float AHomesteadCharacter::CameraDistance() const
 {
     return CameraArm->TargetArmLength;
+}
+
+void AHomesteadCharacter::SnapCamera()
+{
+    if (!CameraArm || bAppearancePreview) return;
+    // The lagged arm still aims at where she was: its sweep from her new spot back toward the old
+    // one hits the ground at her feet and pins the lens against her. Skip the lag for a couple of
+    // ticks so the arm re-seats behind her, and start the indoor check afresh.
+    if (bRoomCamera && FMath::IsNearlyEqual(CameraArm->TargetArmLength, RoomSetArm, 1.0f))
+        CameraArm->TargetArmLength = RoomOpenArm;
+    bRoomCamera = false;
+    RoomCameraSwitchTime = 0.0f;
+    CameraArm->SocketOffset = FVector(0, 45, 55);
+    CameraArm->TargetOffset.Z = 0.0f;
+    CameraArm->bEnableCameraLag = false;
+    CameraSnapFrames = 3;
 }

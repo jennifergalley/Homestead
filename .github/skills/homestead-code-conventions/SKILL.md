@@ -40,9 +40,22 @@ disagree, follow the code and tell the Architecture Agent.
 - Randomness is a stable hash of ids (`OgRoll`), not hidden RNG state, so tests and saves replay.
 - Save format: see `docs/architecture.md` section 5. Lanes never change `SimulationSaveVersion`;
   tell the orchestrator before your `[ready]` if your branch changes what `Serialize` writes.
-  Appending an `Item` doesn't (stocks carry their width since version 13). New data goes in a
-  tagged trailing section (`<tag> ...`, read in `Deserialize`'s tag loop); older saves without it
-  must still load. Any new list or per-enum array you write gets its count first.
+  Appending an `Item` doesn't (stocks carry their width since version 13).
+- **New save data goes in a tagged trailing section**, which needs no version bump (the pattern of
+  `tools`, `manor`, `lamp` and `picked`):
+  - **Write** it at the end of `Serialize` as `<tag> <count> ...` (its own line or lines). Leave it
+    out when it holds only defaults. Keep the writer beside the feature (`Lamp::WriteSaveSection`,
+    `Lamp::SaveTag` in `HomesteadLamp.cpp`) rather than inline in `HomesteadSimulation.cpp`.
+  - **Read** it with one `else if (tag == ...)` in `Deserialize`'s tag loop. The loop takes the
+    sections in any order. A save without yours must load with your defaults.
+  - **Validate everything:** counts in range, ids that exist and suit the feature, no second copy of
+    the section. On anything wrong return `invalid()`, so the current game is kept.
+  - **Tags are unique lowercase words, never reused.** An unknown tag refuses the whole save (it
+    came from a newer build, and its sections can't be skipped safely). `parcels` and `economy` are
+    the only positional ones (read before the loop); don't add more of those.
+  - **Test** a round trip, a save without the section loading with defaults, and a malformed or
+    duplicated section being refused.
+  - Any new list or per-enum array you write gets its count first.
 - Test it natively: add cases to the matching `Tests/Homestead*Tests.cpp` and run
   `Scripts\Test-Native.ps1 -Configuration Release`.
 
@@ -64,7 +77,7 @@ disagree, follow the code and tell the Architecture Agent.
   members and `TAutoConsoleVariable`/`FAutoConsoleCommand` arguments are constructed during static
   initialization, before the engine has set the command line, config, paths or `GEngine`. The
   packaged game is monolithic, so a read there is a fatal launch crash (`CrashDuringStaticInit`,
-  exit 777006). Editor and PIE builds hide it, because modules load after the engine is up. Every
+  exit 777006, and no log is written). Editor and PIE builds hide it, because modules load after the engine is up. Every
   packaged build crashed at launch from `a725ff1d` to `7c5fdc28` because of
   `FParse::Param(FCommandLine::Get(), ...)` in a CVar default. So: CVar defaults are literals (use
   `-1` for "follow the command line" and resolve it in a function on use, as `SkipNewGameSetup()` in

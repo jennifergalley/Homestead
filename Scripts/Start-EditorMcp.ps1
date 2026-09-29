@@ -16,7 +16,8 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
   editor's own `Build.bat -Mode=ValidatePlatforms` or `-Mode=QueryTargets` child if it's still running after 2 minutes (both queue
   behind other worktrees' UBT builds and can hold startup for 10+ minutes). Before launching it removes a
   stale Saved\Autosaves\PackageRestoreData.json. All three otherwise block MCP with no log output.
-- Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on).
+- Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on). With RT off,
+  virtual shadow maps are off too: their first Estate frame exceeds the GPU timeout and crashes every Unreal process.
 - Refuses to launch when 2 or more Unreal processes (editors, games, commandlets) are already running on
   the machine, and lists them with their worktree. One of the 2 slots is reserved for the integration
   session (worktree jennifergalley-literate-eureka, or one containing Saved\IntegrationSession.marker), so
@@ -187,7 +188,12 @@ $arguments += @(
 # Several agent editors share one GPU. Building ray-tracing pipelines in all of them at once has
 # reset the driver (DXGI_ERROR_DEVICE_REMOVED / DRIVER_INTERNAL_ERROR), taking every Unreal process
 # down with it, so agent editors render without ray tracing unless -RayTracing is passed.
-if (-not $RayTracing) { $arguments += '-DPCVars=r.RayTracing.Enable=0' }
+# With RT off the sun falls back to virtual shadow maps, and the first frames of a new Estate game
+# rasterize the dense Nanite estate into every empty clipmap page in one dispatch, past Windows' 2 s
+# GPU timeout (TDR): "GPU Crashed or D3D Device Removed", Aftermath "MicropolyRasterize", 5 runs out of
+# 5, taking every Unreal process down. So VSM goes off with RT. -DPCVars takes a comma-separated list
+# (DeviceProfileManager.cpp).
+if (-not $RayTracing) { $arguments += '-DPCVars=r.RayTracing.Enable=0,r.Shadow.Virtual.Enable=0' }
 # Opt-in: registers homestead_agent.toolset.HomesteadEditorPython.run_python (arbitrary editor Python).
 if ($AllowPython) { $arguments += '-HomesteadAgentPython' }
 

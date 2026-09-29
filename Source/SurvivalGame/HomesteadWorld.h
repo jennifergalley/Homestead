@@ -259,6 +259,13 @@ private:
         float Gate = -1.0f;
     };
     static constexpr float HearthCrackleVolume = 0.2f;
+    // Overcast (add-rain-weather): the sun's share and the sky light's lift under full cloud, the sun's
+    // disc widened so what shadows remain are soft, the exposure held down (EV) and the colour taken out.
+    static constexpr float OvercastSunScale = 0.12f;
+    static constexpr float OvercastSkyScale = 1.3f;
+    static constexpr float OvercastSunSourceAngle = 12.0f;
+    static constexpr float OvercastExposureBias = -0.8f;
+    static constexpr float OvercastSaturation = 0.72f;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
     UPROPERTY()
@@ -318,6 +325,9 @@ private:
     UPROPERTY() TObjectPtr<class UHomesteadGrassField> EstateGrass;
     // Wetness and Daylight for the estate ground and meadow materials (Scripts/Terrain/build_ground.py).
     UPROPERTY() TObjectPtr<class UMaterialParameterCollection> GroundParameters;
+    // Rain, cloud and the rain's sound (HomesteadWeather), fed from UpdateLighting and ticked every frame.
+    UPROPERTY() TObjectPtr<class UHomesteadWeather> Weather;
+    float AppliedSunSourceAngle = -1.0f;
     bool bGroundParametersTried = false;
     FString EstateSceneryClearSignature;
     UPROPERTY()
