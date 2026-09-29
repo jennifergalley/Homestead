@@ -30,7 +30,7 @@ A new game SHALL default to a 30-real-minute day. The Settings choice of 30, 60 
 - **THEN** about 12 game hours have passed
 
 ### Requirement: Energy is the only meter, and meals make her Well fed
-On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penalty or hunger failure, and the HUD SHALL show no hunger meter. Food SHALL restore energy. Snacks SHALL restore a little. Meals SHALL restore more and SHALL grant Well fed for a limited number of game hours. While Well fed, every piece of work SHALL cost less energy. Eating another meal SHALL refresh the timer rather than stack the benefit.
+On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penalty or hunger failure, and the HUD SHALL show no hunger meter. Food SHALL restore energy. Snacks SHALL restore a little. Meals, which are cooked dishes, SHALL restore more and SHALL grant Well fed for a limited number of game hours, shown as a clock time. While Well fed, every piece of work SHALL cost less energy. Eating another meal SHALL refresh the timer rather than stack the benefit. A snack SHALL be refused without being consumed when her energy is full, and a meal SHALL always be allowed.
 
 #### Scenario: Meal
 - **WHEN** she eats a Cornish pasty
@@ -40,12 +40,24 @@ On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penal
 - **WHEN** she eats a loaf of bread
 - **THEN** her energy rises a little and no Well fed state begins
 
+#### Scenario: Full energy
+- **WHEN** her energy is full and she tries to eat bread, and then a Cornish pasty
+- **THEN** the bread is refused and kept, and the pasty is eaten, restores no energy, and refreshes Well fed without claiming an energy gain
+
+#### Scenario: Well fed across midnight
+- **WHEN** she eats a meal at 11 PM
+- **THEN** she is still Well fed at 1:30 AM the next day, and it has ended by 2 AM
+
 #### Scenario: No hunger
-- **WHEN** she plays two full days without eating
+- **WHEN** she plays ten full days without eating
 - **THEN** no hunger toast, penalty or failure appears, and the HUD shows only energy among her vitals
 
 ### Requirement: A new game starts with some food and a findable hoe
-A new game SHALL seed the standing-room chest with 3 Cornish pasties and 2 loaves of bread. Salvage piles SHALL yield the rusted hoe blade second, after the billhook blade. Trying to till without a hoe SHALL suggest searching the old manor's salvage. The arrival journal note SHALL hint where the garden tools were kept.
+A new game SHALL seed the standing-room chest with 3 Cornish pasties, 2 loaves of bread and one of every finished outfit piece she doesn't already wear. Loading a game SHALL NOT seed them again. Salvage piles SHALL yield the rusted hoe blade second, after the billhook blade. Trying to till without a hoe SHALL suggest searching the old manor's salvage. The arrival journal note SHALL hint where the garden tools were kept.
+
+#### Scenario: Starter wardrobe
+- **WHEN** a new game begins, and later she saves and reloads
+- **THEN** the standing-room chest holds one of each finished outfit piece except the tunic she wears, and reloading adds no second copy
 
 #### Scenario: Second salvage pile
 - **WHEN** she has hafted the billhook and searches any other salvage pile

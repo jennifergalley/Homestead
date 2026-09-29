@@ -95,39 +95,89 @@ Jenny found that hunger drained so slowly it felt irrelevant, and asked whether 
 one bar. It does. Coral Island has a single energy bar, food restores it, and many dishes add
 temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny chose that model.
 
-- **The estate has no hunger.**
-  - `Step()` stops draining `hunger` when `fixedEstate` is set.
-  - `GetHungerState()` always returns Fed.
-  - The recovery and work-cost factors from §3 drop out.
-  - The hunger toasts and the hunger icon in the HUD vitals cluster are removed on the estate.
-    The seeded woodland keeps its legacy behaviour until the Architecture agent retires that
-    path.
-- **Saves:** `State::hunger` stays serialized and is ignored on the estate, so this needs no save
-  bump. The field is dropped at the next planned `SimulationSaveVersion` bump (§10), which
-  already resets test saves.
-- **Food restores energy only.** The catalogue gains a food class: `Snack`, `Meal` or not edible.
-  The `hunger` value on `ItemInfo` is ignored on the estate. Starting values, to be tuned at
-  playtest:
+- **The estate has no hunger.** This was agreed with the Calendar Agent, who implements it as the
+  follow-up to its interim a3c7e04d.
+  - On the estate, `hunger` is frozen at 100: set so at new game and on load, and never drained.
+    The seeded woodland keeps its legacy hunger unchanged until the Architecture agent retires
+    that path.
+  - `GetHungerState()` always returns Fed on the estate. The Hungry and Famished recovery and
+    work-cost factors that a3c7e04d added are removed, and so are the hunger toasts.
+  - The Food icon is hidden in the estate HUD's vitals cluster.
+  - The sleep hunger gate is dropped. `HomesteadController.cpp` around line 3495 only allows the
+    sheltered-sleep path at `hunger >= 35`.
+  - Acceptance: ten estate days without eating, with no hunger toast, penalty or failure.
+- **Saves:** `State::hunger` stays serialized, always 100 on the estate, so there's no save bump.
+  The field is dropped at the next planned `SimulationSaveVersion` bump (§10).
+- **Eating is gated on energy, not hunger.** This is a must-fix. Today `CanEat` refuses at
+  `hunger >= 100` ("You are already full...", `HomesteadSimulation.cpp` around line 86), and
+  `IsEdible` means `ItemInfo::hunger > 0`. With hunger frozen at 100, she could never eat. On the
+  estate:
+  - `IsEdible` reads the new food class (Snack or Meal) instead of `hunger > 0`.
+  - `CanEat` refuses a **Snack** only when her energy is already full: "You're full of energy.
+    Save it for later." Nothing is consumed.
+  - A **Meal** is always allowed and is consumed. At full energy it restores nothing but still
+    grants or refreshes Well fed. The toast then leaves out the energy gain and reads only "Well fed
+    until 2:30 PM"; with an energy gain it reads "+40 Energy · Well fed until 2:30 PM". That way a
+    deliberate meal before a big job is never refused.
+  - Hotbar quick-eat follows the same rules.
+- **Food restores energy only.** The catalogue gains a food class: `Snack`, `Meal`, or not edible.
+  On the estate `ItemInfo::hunger` is ignored for effect but kept above zero for the woodland.
+  Agreed values, to be tuned at playtest:
 
-  | Food | Class | Energy | Well fed |
-  | --- | --- | --- | --- |
-  | Berries, blackberries, strawberries, raw turnip or carrot | Snack | +6 to +8 | none |
-  | Bread | Snack | +12 | none |
-  | Cheese | Snack | +15 | none |
-  | Roasted roots, roast potatoes, pease pudding | Meal | +25 | 2 game hours |
-  | Cornish pasty, herbed roots, leek & potato soup | Meal | +40 | 3 game hours |
-  | Vegetable stew, later fish pie and stargazy pie | Meal | +60 | 4 game hours |
+  | Food | Class | Energy |
+  | --- | --- | --- |
+  | Broad beans (raw) | Snack | +4 |
+  | Berries, blackberries, raw turnip, raw carrot | Snack | +6 |
+  | Strawberries | Snack | +8 |
+  | Cabbage (raw) | Snack | +10 |
+  | Cheese | Snack | +14 |
+  | Bread | Snack | +16 |
+  | Roasted roots, roast potatoes, pease pudding | Meal | +20 |
+  | Herbed roots, leek & potato soup | Meal | +30 |
+  | Cornish pasty | Meal | +40 |
+  | Vegetable stew | Meal | +45 |
 
-- **Well fed:**
-  - It's one timed state in Simulation, `wellFedUntilHour`. Saving it is optional, since a lost
-    timer on reload is harmless.
-  - While it's active, `WorkCost(base)` returns `base × 0.85`. It never makes a cost below zero
-    and never changes the doze or sleep rules.
-  - Eating any meal sets the timer to the later of the current expiry and now plus that meal's
-    duration, so bonuses never stack.
-  - The HUD shows a small Well fed icon beside the energy meter, with the time left on hover or
-    focus.
-  - Food descriptions and eat toasts read "+40 Energy · Well fed 3 h" or "+12 Energy".
+  - Raw potatoes, leeks, peas, wheat, barley and field mushrooms can't be eaten: they're cooked
+    or sold. Fish dishes (round 4) are Meals with values set in that round.
+  - "Meal" means a cooked dish, whether cooked at the hearth or bought ready-made. So the pasty
+    counts, and bread and cheese stay Snacks.
+- **Well fed (final, agreed by the Orchestrator and the Calendar Agent on 2026-09-29):**
+  - Any Meal grants three game hours of Well fed, during which `WorkCost(base)` returns
+    `base × 0.85`. That's the 15% reduction first recommended. Tests, toasts and descriptions all
+    use 0.85.
+  - Eating another Meal sets the expiry to three hours from now, never adding to the time left, so
+    bonuses never stack. It never changes the doze or sleep rules.
+  - **Timebase:** store `wellFedUntilHour` as an absolute game hour, in the same timebase as
+    `State::hour`, and treat her as Well fed while `hour < wellFedUntilHour`. Don't store a
+    remaining duration or real time.
+    - **It carries across midnight on its own.** `State::hour` is a running count of game hours
+      since the game began, never wrapped per day: `DayNumber()` is `hour / 24 + 1`.
+    - `hour` only moves forward. `SkipToHourOfDay` always moves to a later hour, and load accepts
+      `hour` in `[6, MaxHour]`.
+    - So a meal at 11 PM (hour 41) expires at hour 44, 2 AM the next day, with no special case.
+    - Sleep, dozing and `HomesteadGrowCrops` all advance `hour` consistently, so the timer expires
+      correctly across them and across day-length settings.
+    - Add a native test: a meal at 23:00 is still Well fed at 01:30 the next day and expired by
+      02:00.
+  - **Save:** an optional trailing tagged section, `wellfed`, like lane A's `withered` section,
+    with no version bump.
+    - It's written only while she's Well fed.
+    - On load, a missing section means not Well fed. A value is clamped to `[hour, hour + 3]`, so a
+      corrupt or hand-edited save can't grant a long buff.
+    - An older build reports a save with an unknown section as `NewerBuild` and leaves it untouched.
+      Writing the section only while it's active keeps most saves readable by older builds.
+    - Losing the timer is harmless.
+  - **Show clock time, not a duration:** the HUD icon beside the energy meter and the eat toasts say
+    "Well fed until 2:30 PM". "3 h" means different real lengths at 30-, 60- and 120-minute days
+    and is easy to misread against the clock.
+  - **Tuning flag for Jenny's playtest:**
+    - At the 30-minute default day, three game hours is under 4 real minutes.
+    - A typical three-hour stretch of clearing, costing about 15–20 energy, saves about 3 at ×0.85.
+      That's modest, and it may be hard to notice.
+    - If Jenny can't feel it, the first knob is the **duration**, six game hours: about 7.5 real
+      minutes, saving roughly 5–8 energy, about a snack's worth. It still never stacks.
+    - The duration and the multiplier are constants in the catalogue and `Exertion`, not
+      structure.
 - **Why not keep hunger with better tuning:** it would be a second chore meter that's off-genre,
   and Jenny already finds it uninteresting. The Well fed bonus keeps the one decision that
   matters: cook and stop for a proper meal, or snack and push on.
@@ -139,6 +189,24 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
 - **Starter chest:** `Manor::SeedStandingRoom` also seeds **3 Cornish pasties and 2 loaves of
   bread**, alongside the pail and branches. That's about $5 of food, a day or two of cushion
   before her first sale.
+- **Starter wardrobe (Jenny, 2026-09-29):** the same chest also holds **one of every finished
+  outfit piece**.
+  - "Finished" means the wearable has a garment mesh in the heroine's garment table
+    (`HomesteadCharacter.cpp`, about line 811): today that's LinenShirt (`SKM_LinenTee`),
+    LinenLongShirt, Trousers (`SKM_WoolTrousers`), FurCoat, FurBoots, WovenSandals and TurnShoes.
+  - Definitions with no mesh (LinenApron, LeatherShoes, WovenFootwraps) are left out until their
+    art lands.
+  - The LinenTunic she's wearing isn't duplicated, and none of these is dropped because it was
+    once winter or warmth gear, since clothing is cosmetic.
+  - Each piece is a `WearableInstance` with `owner = Chest` and `chestId` set to the room chest,
+    plus its chest layout entry, in stable definition order.
+  - **New games only, never duplicated.** Seeding happens only in `NewEstateGame`'s call to
+    `SeedStandingRoom`, never on load. `SeedStandingRoomAt` (the re-lay/debug path) must not seed
+    wearables. A definition she already owns anywhere (worn, carried, in any chest, or dropped) is
+    skipped.
+  - **Capacity:** the pail, 4 branches, 5 food and 7 garments sit well inside `ChestCapacity`
+    (1200). Seeding still goes through the normal capacity check and fails the new game loudly
+    rather than dropping items silently.
 - **The hoe is the second salvage find.** The next-missing-head order in `HomesteadOvergrowth.cpp`
   (the `order[]` array, about line 236) becomes billhook, hoe, axe, scythe, pickaxe. Before, the
   hoe was always the fifth and most hidden pile. The next head is worked out from what she owns,
@@ -273,14 +341,14 @@ Prices and yields are tuned in the catalogue.
 - **Hearth dishes** are hearth recipes. They're Meals, so they restore energy and grant Well fed
   (§3a) in tiers:
 
-  | Dish | Ingredients | Restores |
+  | Dish | Ingredients | Energy (Meal, grants Well fed) |
   | --- | --- | --- |
-  | Roast potatoes | 3 Potato | small |
-  | Pease pudding | 4 Peas | small |
-  | Leek & potato soup | 2 Leek, 2 Potato | medium |
-  | Vegetable stew | Potato, Carrot, Turnip, Leek | large |
+  | Roast potatoes | 3 Potato | +20 |
+  | Pease pudding | 4 Peas | +20 |
+  | Leek & potato soup | 2 Leek, 2 Potato | +30 |
+  | Vegetable stew | Potato, Carrot, Turnip, Leek | +45 |
 
-  RoastedRoots and HerbedRoots stay for legacy roots.
+  RoastedRoots (+20) and HerbedRoots (+30) stay for legacy roots, and are Meals too.
 - **Craft categories:** Craft groups recipes into tabs: Tools (the hafts), Stations, Farm (fence,
   gate, planks), Furniture and Cooking. Tabs follow the existing icon-tab and directional-focus
   rules, and LB/RB still switch the book's main tabs.
@@ -303,7 +371,7 @@ Test saves reset with the existing notice, and old Estate saves move to `Retired
 | Lane | Owns | Reads/shares |
 | --- | --- | --- |
 | **A. Calendar & hunger** | `Homestead::Calendar`; `Step()` hunger/energy changes; `WorkCost`; season rollover hook; crop season masks, plant/focus warnings, withering in `HomesteadCrops`/`Step`; HUD calendar text; hunger and season toasts | exposes `Calendar` and the rollover hook to B–E first (first increment) |
-| **F. Energy & food (after A integrates)** | §3a/§3b: estate hunger removal, food class and energy values, `wellFedUntilHour` + `WorkCost` factor, Well fed HUD icon and toasts, hunger icon removal; starter chest food in `Manor::SeedStandingRoom`; salvage `order[]`, till refusal hint, arrival journal line | catalogue rows (serialized); `WorkCost`/`GetHungerState` from A; HUD vitals cluster (coordinate with any HUD lane); hearth-dish values with E |
+| **F. Energy & food (Calendar Agent's follow-up, after A integrates)** | §3a/§3b: estate hunger removal, food class and energy values, `wellFedUntilHour` + `WorkCost` factor, Well fed HUD icon and toasts, hunger icon removal; starter chest food in `Manor::SeedStandingRoom`; salvage `order[]`, till refusal hint, arrival journal line | catalogue rows (serialized); `WorkCost`/`GetHungerState` from A; HUD vitals cluster (coordinate with any HUD lane); hearth-dish values with E |
 | **B. New crops** | 5 `CropKind` rows and their plant sets + withered sets (Blender); plot visuals for withered state | catalogue rows (serialized); season masks from A |
 | **C. Seedsman shop** | `ShopKind::Seedsman`, Sunday closing, seed stock move, tin watering can; Tregear's building/interior/props; `SeedsmanDoor` anchor | catalogue rows (serialized); `Calendar` from A; shop UI title |
 | **D. Seasonal forage & look** | forage season table, blackberry item/picking, field mushroom kind + placements + prop; `MPC_Season` and material edits | `Calendar` from A; placement bake with the world owner |
