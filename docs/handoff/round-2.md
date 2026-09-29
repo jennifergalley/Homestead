@@ -307,9 +307,11 @@ saves or IDs. Water adds woodland roots because the first existing live patch is
 Test the hearth/lit-fire route, exact one debit and the woodland recipe before treating cooking as
 accepted.
 
-**Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
-all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
-hands-on work; no one edits a busy lane's files or starts a fourth implementer.
+**Priority:** these playtest items take precedence over the ordinary round-2 feature queue. Each row's
+own status is authoritative: shipped work remains historical evidence, while pending and
+main-integrated work is not player-shipped until its stated gate passes. The orchestrator assigns an
+implementer slot before any owner starts hands-on work; no one edits a busy lane's files or starts a
+fourth implementer.
 
 ## Open blockers and known bugs
 
