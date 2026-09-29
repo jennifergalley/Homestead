@@ -284,9 +284,11 @@ requirement.
   preserves focus/input, uses a Victorian licensed font with larger centered text and a compact
   content-sized frame. The Menu batch is on top of lake `main` `61c1595c`; native 8/8 passed and
   Editor/Game builds are running for the 2 PM package decision.
-- **Appearance controls and naming** — **UI / Menu Agent** (`5cf73757`), when granted a slot:
-  click-drag rotates the preview, WASD orbits it, wheel zooms it, and the default heroine faces the menu
-  regardless of the wall or world yaw. Rename the user-facing **Curly Bob** option to **Long bob**.
+- **Appearance controls and naming** — **Menu local-only partial, not pushed/PIE/shipped or 4 PM
+  content.** `61059621` renames **Curly bob** to **Long bob**. `f63ba148` implements drag, WASD and
+  right-stick orbit, wheel zoom and a default front view; it disables/clips camera collision while the
+  page is open and restores it on close. After the package, Menu needs roughly 25 minutes of UE
+  1080p-and-4K testing: orbit near a wall, close/restore and confirm no movement spill.
 - **Hair groom** — **temporary Gait Agent** (`65a2408b`), after the running-heel and scythe work:
   investigate the intermittent exploding/sticking-out groom.
 - **Gait and scythe** — **temporary Gait Agent** (`65a2408b`), after its current run-heel slice:
@@ -406,10 +408,11 @@ requirement.
   town entrance to the store counter without teleporting in day, night and rain. Only after the
   route is final can the coordinate bridge, roadside forage and travel signs be aligned. This is a
   later, separate increment and is **not** 4 PM package content.
-- **Change Dye** — **excluded from this package.** The chooser implementation is stashed, unbuilt and
-  untested because the MetaHuman linen tunic currently renders as an untinted base tank and shorts.
-  Keep the current no-op action until the asset/root cause and preview, confirm/cancel and persistence
-  path can be completed and PIE-verified.
+- **Change Dye** — **Menu local-only partial `3a664e4b`, not pushed/PIE/shipped or 4 PM content.**
+  Four swatches (Moss, Wine, Slate and Flax) provide hover preview, Apply and Cancel with no cost.
+  The root MetaHuman dyeable linen tunic now renders tinted instead of as the untinted base tank and
+  shorts. After the package, validate at 1080p and 4K on the actual model and portrait: preview,
+  Cancel, F5/F9 persistence and no cross-page visual spill.
 - **Leather backpack upgrade** — **pending, not shipped.** A tentative one-time **$15** purchase at
   the open General Store doubles inventory capacity **120 → 240 items**. (`ShopGoods` normally repeats,
   so this needs a special upgrade row.) $15 is intentionally above the $10 start—roughly ten cabbage
