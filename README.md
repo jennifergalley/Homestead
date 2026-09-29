@@ -199,15 +199,17 @@ use the explicit procedure in `docs\offline-startup.md` for this release.
 | Action | Xbox controller | Mouse and keyboard |
 | --- | --- | --- |
 | Walk / camera | Left / right stick | WASD / mouse |
-| Contextual interaction | A | E or Enter |
-| Clear / weed / fuel / till | X | F |
+| Sprint on / off (a toggle) | Left stick click (L3) | Tap Shift |
+| Contextual interaction (or eat the selected hotbar food) | A | E or Enter |
+| Clear / weed / fuel / till (or eat the selected hotbar food) | X | F |
 | Field book | Menu | I or Tab |
 | Notes | View | H |
 | Craft / build pages | D-pad left / right | C / B |
 | Book selection | D-pad up / down | Up / down |
 | Book pages | LB / RB | Left / right |
 | Back / pause menu | B | Escape |
-| Camera distance | Right stick click | Mouse wheel |
+| Camera distance | Right stick click | Ctrl + mouse wheel |
+| Hotbar tool | LB / RB | Mouse wheel or 1-0 |
 | Aim placement | Walk + right stick | WASD + mouse |
 | Rotate placement | RB / LB or X | R, F or mouse wheel |
 | Place piece | A | E or left click |
