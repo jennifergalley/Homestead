@@ -317,13 +317,27 @@ requirement.
   Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
   210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture; packaged NativeMenu
   and Hotbar suites passed.
-- **Sprint Energy recovery** — **pending, not shipped.** Reduce sprint's Energy drain and slowly
-  restore Energy while she stands or walks slowly, never while paused or working. Cap recovery and
-  prevent an idle exploit. Architecture first traces the rule; the eventual implementation adds native
-  boundary/rate/no-exploit coverage and ordinary-play verification.
-- **Live sound sliders** — **pending, not shipped.** Settings volume sliders apply gains immediately
-  while dragging or stepping, and Cancel restores their original gains. Architecture traces current
-  slider/audio ownership before the bounded Menu implementation and 1080p/4K PIE verification.
+- **Sprint Energy recovery** — **pending, not shipped.** Architecture measured current
+  `SpendSprintEnergy` at 0.35 per real second: the 1.94 km road at 480 cm/s takes 404 s and costs
+  141.5 Energy to its floor of 10; baseline awake drain remains -0.6/game-hour separately. Props'
+  trial is 0.05/s (~20.2 per trip), with an explicit real-time movement signal to `Step()`: stationary
+  recovers +0.6 Energy/game-hour and slow/ordinary walking +0.2/hour only below a soft cap of 70;
+  above the cap, retain the -0.6 baseline drain.
+
+  Never recover during sprint, work/action, menu/shop/planning, failure, sleep or any
+  `AdvanceGameHours` fast-forward (travel or shop wait); clamp at 70 without oscillation. Hunger stays
+  until Energy lane F. Native tests cover 30/60/120-day real-time rates, no double charge and save
+  invariance; package timed sprint/slow-walk checks and coordinate with Menu's travel API.
+- **Live sound sliders** — **symptom investigation pending, not shipped.** Mouse drag already calls
+  `MenuPreviewAudioVolume` live through `SSlider.OnValueChanged`, then release writes INI; d-pad steps
+  preview and persist. Jenny's symptom may instead be effects without a continuous audible source,
+  music silence, or a broken cancel path: Esc/B/book close during drag does not roll back,
+  `OnMouseCaptureEnd` always commits, and keyboard/pad-origin sliders may preview without committing.
+
+  Menu first reproduces an audible component path. The later bounded fix snapshots transactional gains:
+  preview while changing, Confirm commits, and Cancel/focus loss/book close restores every old gain
+  without saving a drag. Consider a one-shot Effects preview and avoid reintroducing gain-squared
+  behavior; verify at 1080p and 4K.
 - **Contextual hotbar eating and berry feedback** — **Menu `88180744` shipped in the 4 PM playable
   build.** Controller A/X eats one selected berry per tap only when Talk has no
   precedence, and displays `+` the actual bounded Energy delta.
@@ -414,10 +428,17 @@ requirement.
 
   It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
   salvage. Props released its slot before 13:45.
-- **Safe manor construction** — **Props, pending and not shipped.** Let chests and building placement
-  work safely inside the manor ruins through a simulation/build exception, while retaining heritage
-  walls, collision and save behavior. Architecture traces current placement and collision rules before
-  implementation and native/PIE verification.
+- **Safe manor construction** — **Props, pending and not shipped.** The estate parcel is already
+  owned, but `Manor::BlockedByManor` blanket-rejects nine footprint samples inside
+  `ManorFootprint`, except furnishings on the heritage standing-room floor. Define a safe roofless-hall
+  subpolygon with full-footprint and capsule margins that excludes heritage walls/masonry, then permit
+  chests, beds, fires and own foundations there.
+
+  Later walls/roofs may snap only to a nonheritage new foundation with collision/segments, never
+  replace heritage fabric. Controller green preview and `Place` share a core `CheckSite`; validate
+  saved nonheritage structures after heritage/parcels deserialize and preserve old saves. Require
+  native plus PIE path, collision and save tests. Architecture is still checking whether the wall/roof
+  follow-up is viable; fast travel and music remain next-build priorities first.
 - **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
   road to town, including the bridge approach, and significantly increase visible pickable
   berries/herbs/non-farm food across the estate distributions. The ID range is reserved; implementation
