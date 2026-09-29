@@ -19,7 +19,7 @@ Surveyed on `main` at `8762ba46` (2026-09-28).
 | Editor Python | `Content/Python/homestead_agent/` | MCP toolset for play (`toolset.py`), animation authoring on the MetaHuman Control Rig (`rig_authoring.py` plus one module per clip), MetaHuman look/hair, store and town set-up. |
 | Pipelines | `Scripts/Terrain`, `Scripts/Map`, `Scripts/Blender`, `Scripts/Characters` | Offline Python: LIDAR → heightmap and layout, scenery/placement scatter, ground and ocean bakes, the minimap bake, Blender prop recipes and import. |
 | Build/test scripts | `Scripts/*.ps1` | `Start-EditorMcp`, `Build-Game`, `Test-Native`, `Test-Game`, MCP helpers, perf lock. |
-| Native tests | `Tests/*.cpp`, `CMakeLists.txt` | Seven CTest suites against the simulation library (`Scripts\Test-Native.ps1`). `Tests/` also holds older policy/evidence scripts that nothing runs routinely. |
+| Native tests | `Tests/*.cpp`, `CMakeLists.txt` | CTest suites against the simulation library (eight on 2026-09-29; count them with `ctest -N`) (`Scripts\Test-Native.ps1`). `Tests/` also holds older policy/evidence scripts that nothing runs routinely. |
 | Plans | `openspec/changes/` | One change per feature, bug or refactor. |
 
 ## 2. Runtime flow
@@ -179,7 +179,7 @@ Re-bake order after `scatter.py` changes: `bake_ground.py`, `build_ground.py`, t
 
 ## 9. Tests
 
-- **Native (authoritative, fast):** `Scripts\Test-Native.ps1 -Configuration Release`, 7 suites, about
+- **Native (authoritative, fast):** `Scripts\Test-Native.ps1 -Configuration Release`, every suite (8 after the lamp), about
   3 minutes. Add a suite with `add_executable` + `add_test` in `CMakeLists.txt`. New simulation `.cpp`
   files must also be added to the `HomesteadSimulation` library there.
 - **In-game routes:** `Scripts\Test-Game.ps1` launches `-game -HomesteadSmokeTest` with a route flag
