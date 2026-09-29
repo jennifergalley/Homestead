@@ -88,6 +88,8 @@ private:
     void QueueBookCapture(const FString& Name);
     bool VerifyPresentationMaterials() const;
     void PrepareFullLoop();
+    // HomesteadEstateSmokeTest.cpp: the packaged Estate route (-HomesteadEstateSmoke).
+    void PrepareEstateSmokeChecks();
     void QueueSelectRow(int32 Id);
     void QueueGatherTo(Homestead::Item Item, int32 TargetCount);
     void QueueCraft(Homestead::Recipe Recipe);
