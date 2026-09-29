@@ -226,6 +226,17 @@ const EstatePlacements& ProvisionalEstatePlacements()
         salvage(520004, 1350.0, 1950.0); // Outside the gap in the fallen rear wall.
         salvage(520005, 400.0, -200.0);  // Under the collapsed south-west corner, outside.
         AppendDerelictFarmAndDisrepair(table);
+        // Pickable blackberry brambles (540000+, Scripts/Terrain/berries.py): round the manor, along the
+        // drive and at the woodland edges. A row within 3 m of an earlier placement is skipped (its id
+        // stays unused), so other lanes' additions never renumber them.
+        auto berry = [&](int id, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, ResourceKind::BerryBush, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateBerryPlacements.inc"
         // Town lane (530000+).
         return table;
     }();

@@ -49,7 +49,7 @@ Partly Cloudy (Pure Sky) HDRI by Greg Zaal (https://polyhaven.com/a/kloofendal_4
 which ships with no asset.
 
 The woodland underbrush set (`Assets\Props\` BlackberryBramble, ToyonHedge, Hazel, DeerBrush,
-Thimbleberry, BrackenFern, WildStrawberry and GrassYarrowTuft, built with
+Thimbleberry, BrackenFern, WildStrawberry, GrassYarrowTuft and WildMarjoram, built with
 `Scripts\Blender\homestead_foliage.py` and `homestead_shrub.py`) is project-authored: every mesh is generated from
 code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
 library. No scan, photo or third-party texture is used.
@@ -313,6 +313,17 @@ The landscape paint layers use CC0 textures from Poly Haven (https://polyhaven.c
 - Beach: `damp_beach_sand`
 - CliffRock: `rock_face`
 - DirtRoad: `stony_dirt_path`
+
+The ground-finish pass (`Scripts\Terrain\build_landscape_material.py`) adds two more CC0 Poly Haven
+sets, 2k JPG:
+
+- Trodden soil: `grass_path_2` by Rob Tuytel (https://polyhaven.com/a/grass_path_2)
+- Stony banks: `rocky_trail` by Amal Kumar (https://polyhaven.com/a/rocky_trail)
+
+The 3D meadow (`Content\SurvivalGame\Estate\Ground`: the `SM_GrassPatch` blade meshes,
+`M_EstateGrass`, `T_EstateGround`, `T_EstateCanopy` and `T_GrassWind`) is project-authored. It's
+generated in numpy by `Scripts\Terrain\bake_ground.py` with no scanned or downloaded geometry or
+textures.
 
 Pasture uses the admitted `GrassGround_20260921_01` set, and `leafy_grass` was imported but isn't
 used. The sea and the river reuse the project-authored `M_CreekWater` Single Layer Water material.

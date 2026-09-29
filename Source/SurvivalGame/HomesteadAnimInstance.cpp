@@ -932,6 +932,12 @@ bool UHomesteadAnimInstance::IsGatheringSticks() const
     return Proxy.Active == EHandAction::GatherSticks && Proxy.bGathering && !Proxy.bCancelled;
 }
 
+bool UHomesteadAnimInstance::IsHandActionBusy() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.Requested != EHandAction::None || (Proxy.bGathering && !Proxy.bCancelled) || Proxy.ActionBlend.Alpha > 0.001f;
+}
+
 float UHomesteadAnimInstance::GatherSticksPhase() const
 {
     const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();

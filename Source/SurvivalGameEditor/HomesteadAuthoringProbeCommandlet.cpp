@@ -90,7 +90,7 @@ bool CapturePython(const TSharedRef<FJsonObject>& State)
             {
                 RuntimeFound = true;
                 using FIsInitialized = int (__cdecl*)();
-                const auto Query = reinterpret_cast<FIsInitialized>(GetProcAddress(Modules[Index], "Py_IsInitialized"));
+                const auto Query = reinterpret_cast<FIsInitialized>(reinterpret_cast<void*>(GetProcAddress(Modules[Index], "Py_IsInitialized")));
                 QueryAvailable = Query != nullptr;
                 if (Query) Initialized = Query();
                 Valid &= QueryAvailable && Initialized == 0;

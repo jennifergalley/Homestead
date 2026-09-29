@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "HomesteadEstateGround.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadCrops.h"
 #include "HomesteadCharacter.h"
@@ -123,6 +124,28 @@ const TCHAR* SwingVerb(Homestead::Item Tool)
     case Homestead::Item::Scythe: return TEXT("Mow with Scythe");
     case Homestead::Item::Pickaxe: return TEXT("Break with Pickaxe");
     default: return TEXT("Clear");
+    }
+}
+
+// Where she keeps a tool: 2 in the pack, 1 only in a storage chest, 0 not owned at all.
+int32 ToolWhereabouts(const Homestead::Simulation& Sim, Homestead::Item Tool)
+{
+    if (Sim.Count(Tool) > 0) return 2;
+    for (const auto& Structure : Sim.GetState().structures)
+        if (Structure.storage[static_cast<int>(Tool)] > 0) return 1;
+    return 0;
+}
+
+// "Select the scythe" when it's in her pack but not in hand, "Take the scythe from storage" when it's
+// only in a chest, and "Requires a scythe" when she has none yet.
+FString ToolPrompt(const Homestead::Simulation& Sim, Homestead::Item Tool, const FString& Name, const TCHAR* Purpose = TEXT(""))
+{
+    switch (ToolWhereabouts(Sim, Tool))
+    {
+    case 2: return TEXT("Select the ") + Name + Purpose;
+    case 1: return TEXT("Take the ") + Name + TEXT(" from storage");
+    default:
+        return (FString(TEXT("aeiouAEIOU")).Contains(Name.Left(1)) ? TEXT("Requires an ") : TEXT("Requires a ")) + Name;
     }
 }
 
@@ -853,7 +876,7 @@ void AHomesteadController::UseSelectedTool()
     {
         if (Focus == EFocus::Water)
         {
-            Notify(Sim.FillWater(Position));
+            FillPailAtStream(Position);
             return;
         }
         if (Focus != EFocus::Plot)
@@ -874,6 +897,47 @@ void AHomesteadController::UseSelectedTool()
     }
 
     if (Tool == Homestead::Item::DiggingStick) HoeSquareAhead();
+}
+
+Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Position) const
+{
+    if (!bEstateMap)
+        return {Homestead::StreamX(Position.y), Position.y};
+
+    // Refresh the tagged HomesteadWater spline cache and aim the pail at the nearest fresh-water edge,
+    // not the retired procedural creek curve.
+    WaterEdgeDistance(Position, false);
+    const FVector Here(Position.x, Position.y, GroundHeight(Position.x, Position.y));
+    double Best = TNumericLimits<double>::Max();
+    FVector BestPoint(Homestead::StreamX(Position.y), Position.y, Here.Z);
+    for (const auto& Weak : EstateWaterSplines)
+        if (const USplineComponent* Spline = Weak.Get())
+        {
+            const FVector Center = Spline->FindLocationClosestToWorldLocation(Here, ESplineCoordinateSpace::World);
+            const float Key = Spline->FindInputKeyClosestToWorldLocation(Here);
+            const double HalfWidth = 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y;
+            const FVector2D Out(Position.x - Center.X, Position.y - Center.Y);
+            const FVector Edge = Out.SizeSquared() > 1.0
+                ? Center + FVector(Out.GetSafeNormal().X * HalfWidth, Out.GetSafeNormal().Y * HalfWidth, 0.0)
+                : Center;
+            const double Distance = FVector::Dist2D(Edge, Here);
+            if (Distance < Best)
+            {
+                Best = Distance;
+                BestPoint = Edge;
+            }
+        }
+    return {BestPoint.X, BestPoint.Y};
+}
+
+void AHomesteadController::FillPailAtStream(Homestead::Point Position)
+{
+    const auto Result = Sim.FillWater(Position);
+    Notify(Result);
+    // She kneels at the bank and dips the pail into the nearest authored fresh-water ribbon.
+    if (Result.ok)
+        if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+            Avatar->PlayFillPail(FreshWaterDipPoint(Position));
 }
 
 void AHomesteadController::RefreshMenuPortrait()
@@ -1767,13 +1831,13 @@ FString AHomesteadController::FocusTitle() const
             if (Node.id == FocusId)
             {
                 FString Status;
-                if (Node.kind == Homestead::ResourceKind::ForestTree && Sim.Count(Homestead::Item::Hatchet) == 0)
+                if (Node.kind == Homestead::ResourceKind::ForestTree && ToolWhereabouts(Sim, Homestead::Item::Hatchet) == 0)
                     Status = TEXT("  (axe needed)");
                 else if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind);
                     Overgrowth && Overgrowth->tool != Homestead::ToolKind::Count && !Overgrowth->byHand)
                 {
                     const auto Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
-                    if (Sim.Count(Homestead::ToolItem(Overgrowth->tool)) == 0)
+                    if (ToolWhereabouts(Sim, Homestead::ToolItem(Overgrowth->tool)) == 0)
                         Status = FString::Printf(TEXT("  (%s needed)"), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                     else if (Sim.GetToolTier(Overgrowth->tool) < Needed)
                         Status = TEXT("  (") + Text(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str()).ToLower() + TEXT(")");
@@ -1837,7 +1901,7 @@ FString AHomesteadController::FocusActions() const
                 if (Node.readyAtHour > State().hour) return FString();
                 if (Node.kind == Homestead::ResourceKind::ForestTree)
                     return ToolAvailable && SelectedTool == Homestead::Item::Hatchet
-                        ? Use + TEXT(" Fell with Axe") : TEXT("Select the axe to fell");
+                        ? Use + TEXT(" Fell with Axe") : ToolPrompt(Sim, Homestead::Item::Hatchet, TEXT("axe"), TEXT(" to fell"));
                 if (Node.kind == Homestead::ResourceKind::DeerRemains || Node.kind == Homestead::ResourceKind::Reeds)
                     return FString();
                 if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind))
@@ -1847,7 +1911,7 @@ FString AHomesteadController::FocusActions() const
                     if (Handles) return Use + TEXT(" ") + SwingVerb(SelectedTool)
                         + (Overgrowth->byHand ? TEXT("   ") + A + TEXT(" Gather") : FString());
                     if (Overgrowth->byHand) return A + TEXT(" Gather");
-                    return TEXT("Select the ") + FString(UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
+                    return ToolPrompt(Sim, Homestead::ToolItem(Overgrowth->tool), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                 }
                 return A + TEXT(" Gather");
             }
@@ -1860,7 +1924,12 @@ FString AHomesteadController::FocusActions() const
                 if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
                 FString Actions;
                 if (Homestead::NeedsWater(Plot))
-                    Actions = (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water");
+                {
+                    // The pail in her pack waters on [E]/[A]; otherwise say where it is.
+                    const int32 Pail = ToolWhereabouts(Sim, Homestead::Item::WateringCan);
+                    Actions = Pail == 2 ? (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water")
+                        : ToolPrompt(Sim, Homestead::Item::WateringCan, TEXT("pail"), TEXT(" to water"));
+                }
                 if (Plot.weeds > 0.1)
                     Actions += (Actions.IsEmpty() ? TEXT("") : TEXT("   "))
                         + (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick ? Use : X) + TEXT(" Weed");
@@ -2404,17 +2473,23 @@ void AHomesteadController::Interact()
                 else if (Kind == Homestead::ResourceKind::DeerRemains)
                     Avatar->PlayKnifeCut(ActionTarget); // Work the dried hide free with the knife.
                 else if (Sticks || Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::Roots
-                    || Kind == Homestead::ResourceKind::BerryBush)
+                    || Kind == Homestead::ResourceKind::BerryBush || Kind == Homestead::ResourceKind::FallenBranch
+                    || Kind == Homestead::ResourceKind::SalvagePile)
                 {
                     const bool Berries = Kind == Homestead::ResourceKind::BerryBush;
-                    const auto Gather = Sticks ? EHomesteadKneelGather::Sticks
-                        : Kind == Homestead::ResourceKind::Stones ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
+                    // A fallen bough gathered by hand is broken into sticks; searching a salvage pile
+                    // lifts its fallen stones aside, so it plays the stone gather.
+                    const auto Gather = Sticks || Kind == Homestead::ResourceKind::FallenBranch ? EHomesteadKneelGather::Sticks
+                        : Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::SalvagePile
+                        ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
                     FVector2D Target(ActionTarget.x, ActionTarget.y);
-                    // Berries are picked from the near side of the bush, not its centre.
+                    // Berries are picked from the near side of the bush, not its centre; an estate
+                    // blackberry bramble is a metre across, so she reaches in at its edge.
                     if (Berries)
                     {
+                        const bool Bramble = FocusId >= Homestead::EstatePlacementIdBase && FocusId < Homestead::TransientResourceIdBase;
                         const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
-                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * 22.0f;
+                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * (Bramble ? 62.0f : 22.0f);
                     }
                     if (Avatar->PlayKneelGather(Gather, Target, Berries) && Landscape)
                     {
@@ -2476,7 +2551,7 @@ void AHomesteadController::Interact()
         break;
     }
     case EFocus::Chest: OpenChestStorage(FocusId); break;
-    case EFocus::Water: Notify(Sim.FillWater(Position)); break;
+    case EFocus::Water: FillPailAtStream(Position); break;
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
@@ -4140,7 +4215,30 @@ void AHomesteadController::PlayFootstep(bool bLeftFoot, bool bRun)
         bRun ? TEXT("run") : TEXT("walk"), Now);
     // Bare feet on soft soil are quiet: about 10 dB under the old shod grass step while walking,
     // a little firmer when running, with a small level variation so repeats don't stand out.
-    PlayEffect(Pool[Pick].Get(), (bRun ? 0.07f : 0.04f) * FMath::FRandRange(0.85f, 1.15f));
+    const float Gain = (bRun ? 0.07f : 0.04f) * FMath::FRandRange(0.85f, 1.15f);
+    // On the estate's turf, moor and leaf litter the step is softer still: a few dB down, with a
+    // low-pass taking the grit off the top, as bare feet on grass sound. Other ground is unchanged.
+    const FVector Feet = Avatar->GetActorLocation();
+    if (HomesteadEstateTerrain::IsActive() && HomesteadEstateGround::Activate())
+    {
+        using ESurface = HomesteadEstateGround::ESurface;
+        const ESurface Surface = HomesteadEstateGround::SurfaceAt(Feet.X, Feet.Y);
+        if (HomesteadEstateGround::IsSoft(Surface))
+        {
+            const float Softer = Surface == ESurface::Grass ? 0.55f : Surface == ESurface::Moor ? 0.6f : 0.7f;
+            const float Cutoff = Surface == ESurface::Grass ? 2400.0f : Surface == ESurface::Moor ? 3000.0f : 3600.0f;
+            if (Pool[Pick] && bAudioEnabled && EffectsVolume > 0)
+                if (UAudioComponent* Step = UGameplayStatics::CreateSound2D(this, Pool[Pick].Get(),
+                        EffectsVolume * Gain * Softer, FMath::FRandRange(0.94f, 1.02f)))
+                {
+                    Step->SetLowPassFilterEnabled(true);
+                    Step->SetLowPassFilterFrequency(Cutoff);
+                    Step->Play();
+                }
+            return;
+        }
+    }
+    PlayEffect(Pool[Pick].Get(), Gain);
 }
 
 void AHomesteadController::MusicFinished()

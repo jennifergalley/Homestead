@@ -1,4 +1,5 @@
 #include "SHomesteadNames.h"
+#include "HomesteadPalette.h"
 
 #include "SHomesteadArrival.h"
 #include "../Simulation/HomesteadManor.h"
@@ -17,11 +18,11 @@ namespace HomesteadMenus
 {
 namespace
 {
-const FLinearColor NameInk(0.93f, 0.93f, 0.84f);
-const FLinearColor NameMuted(0.71f, 0.77f, 0.69f);
-const FLinearColor NameGold(0.92f, 0.74f, 0.43f);
+constexpr FLinearColor NameInk = HomesteadPalette::Cream;
+constexpr FLinearColor NameMuted = HomesteadPalette::Sage;
+constexpr FLinearColor NameGold = HomesteadPalette::Brass;
 const FLinearColor NameWarning(0.95f, 0.55f, 0.42f);
-const FLinearColor NamePanel(0.025f, 0.05f, 0.038f, 0.9f);
+const FLinearColor NamePanel = HomesteadPalette::DeepPine.CopyWithNewOpacity(0.9f);
 const FLinearColor NameField(0.06f, 0.1f, 0.075f, 0.95f);
 const FLinearColor NameFieldSelected(0.13f, 0.19f, 0.14f, 1.0f);
 

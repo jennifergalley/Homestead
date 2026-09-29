@@ -129,17 +129,13 @@ which `reshape.py` regenerates), shared by `scatter.py` and `bake_ground.py`. On
 - The item catalogue: `Simulation\HomesteadItems.{h,cpp}`. Append only; rows must match enum order.
   Serialize edits between lanes.
 - Saves: lanes never change `SimulationSaveVersion`; the orchestrator bumps it once per integration.
-  It's **12** since `0e08e717` (version 11 saves are refused with a reset notice; 7-10 still migrate).
+  It's **13** since `c729d4e6` (v12 saves migrate; 11 is refused with a reset notice; 7-10 still migrate).
   If your branch adds anything to the save format, tell the orchestrator before your `[ready]`. New
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
-  **SAVE-SAFETY HOLD (orchestrator, 2026-09-28, in force now):** appending a value to `enum class Item`
-  (`Simulation\HomesteadItems.h`) silently makes existing saves unreadable, because `WriteStock` writes
-  every stock positionally with no count. **Don't push or send `[ready]` for commits that add items**
-  until the architecture agent's save hardening (count-prefixed stocks, save v13 with a v12 migration;
-  `openspec/changes/harden-save-item-stocks`) is on `main` and the orchestrator lifts the hold. Keep
-  developing on your branch. The architecture agent may coordinate edits in `HomesteadSimulation.cpp`
-  with you.
+  **Items (save v13+, `c729d4e6`):** append to `enum class Item` (`Simulation\HomesteadItems.h`)
+  freely; stocks now carry their width and v12 saves migrate. Never reorder or remove items. New save
+  sections write any list or per-enum array with its count first. The save-safety hold is lifted.
 - `SHomesteadMenu` edits are serialized through the orchestrator.
 - **Integration session: packaging and batching.** Merge `[ready]`s in batches (one editor build, one
   game-target build, one native test run, one PIE pass per batch), and package only at the end of a round
@@ -238,16 +234,7 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   compile means include that engine header in the file; add to the PCH only headers many files use,
   never UnrealEd or editor headers; every `.cpp` must compile on its own. The docs agent does this.
 
-- Architecture agent (`77d4cee7`, not on `main` yet): when `docs/architecture.md` and the
-  `homestead-code-conventions` skill land, point the C++ rows of the editor skill's table 0.1 (unity
-  clashes, C4458/C4459, C2487, enum default args, UPROPERTY-not-static, `../Simulation/` includes,
-  runtime ISM Rebuild) and section 8's "C++ conventions that bite" at that skill's "Unreal C++"
-  section, keeping each row's Symptom column. The docs agent does this.
-- Architecture agent, same merge:
-  - **Save v13** (`c729d4e6`): stocks carry their width, and v12 saves migrate. Then replace the
-    SAVE-SAFETY HOLD above and in editor skill section 0 with: "Items can be appended freely (v13+);
-    never reorder or remove them. New save sections write any list or per-enum array with its count
-    first." Update the save-version line to 13, and the orchestrator lifts the hold.
+- Architecture agent (not on `main` yet):
   - **Legacy probes removed** (`26b367e9`): `Test-AuthoringSettings.ps1`, `Tests\HomesteadMenuSourceTests.py`,
     FernSpike and the `*Policy` scripts. Drop `Test-AuthoringSettings.ps1` from editor skill section 0's
     "Never stop shared processes" bullet, and delete the table 0.1 row about `HomesteadMenuSourceTests.py`

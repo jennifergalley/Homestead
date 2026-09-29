@@ -17,6 +17,14 @@ FIntPoint HudScaleViewportSize()
 }
 }
 
+FVector2D FullScreenLogicalSize()
+{
+    const FIntPoint Size = HudScaleViewportSize();
+    if (Size.X <= 0 || Size.Y <= 0) return FVector2D(1280, 720);
+    const float Scale = 1.5f * HudCanvasScale(static_cast<float>(Size.Y));
+    return FVector2D(FMath::Max(1280.0f, Size.X / Scale), FMath::Max(720.0f, Size.Y / Scale));
+}
+
 void SHomesteadHudScale::Construct(const FArguments& Args)
 {
     // A first guess from the DPI curve until the first tick reads the real ambient scale.

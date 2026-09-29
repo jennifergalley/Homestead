@@ -66,7 +66,7 @@ void UHomesteadWateringTool::TickComponent(float DeltaTime, ELevelTick TickType,
     const auto* PC = Avatar ? Cast<AHomesteadController>(Avatar->GetController()) : nullptr;
     const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     const float Phase = Animation ? Animation->WaterPhase() : 0;
-    const bool Visible = PC && Animation && Animation->IsWatering() && Animation->WaterWeight() > 0.5f
+    const bool Visible = PC && Animation && !Avatar->UsesPailClips() && Animation->IsWatering() && Animation->WaterWeight() > 0.5f
         && Phase >= 0.22f && Phase <= 1.60f && !PC->IsBookOpen() && !PC->IsPlanning() && !PC->IsFailed()
         && PC->Simulation().Count(Homestead::Item::WateringCan) > 0 && GetNumSections() == 2;
     SetHiddenInGame(!Visible);

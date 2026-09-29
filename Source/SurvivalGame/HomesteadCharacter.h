@@ -88,17 +88,33 @@ public:
     // knife), or null.
     UAnimSequence* GetGatherSticksAnimation() const
     {
-        if (!bMetaHumanActive) return nullptr;
-        switch (KneelKind)
-        {
-        case EHomesteadKneelGather::Pouch: return GatherPouchAnimation.Get();
-        case EHomesteadKneelGather::Reeds: return GatherReedsAnimation.Get();
-        case EHomesteadKneelGather::Plant: return GatherPlantAnimation.Get();
-        case EHomesteadKneelGather::Harvest: return GatherHarvestAnimation.Get();
-        default: return GatherSticksAnimation.Get();
-        }
+        return KneelClip(KneelKind);
     }
-    UAnimSequence* GetWaterAnimation() const { return WaterAnimation; }
+    UAnimSequence* GetWaterAnimation() const
+    {
+        // The carved pail's own clips (homestead_agent.pail_fill / pail_pour) when present.
+        if (bFillingPail && PailFillAnimation) return PailFillAnimation;
+        if (!bFillingPail && PailPourAnimation) return PailPourAnimation;
+        return WaterAnimation;
+    }
+    // True while the carved pail's clips drive filling or pouring, so the older contextual
+    // watering can (UHomesteadWateringTool) stays hidden and only the pail shows.
+    bool UsesPailClips() const { return GetWaterAnimation() != WaterAnimation; }
+    // homestead_agent.pail_pour EVENTS (seconds): her left hand takes the pail by its side, the
+    // water starts and stops running, and her right fist takes the bail again. SPOT: where the
+    // stream lands, ahead of her.
+    static constexpr float PailTakeStart = 16.0f / 30.0f;
+    static constexpr float PailTakeEnd = 22.0f / 30.0f;
+    static constexpr float PailPourStart = 36.0f / 30.0f;
+    static constexpr float PailPourStop = 64.0f / 30.0f;
+    static constexpr float PailGiveStart = 80.0f / 30.0f;
+    static constexpr float PailGiveEnd = 86.0f / 30.0f;
+    static constexpr float PourForward = 43.0f;
+    static constexpr float PourRight = 0.0f;
+    // homestead_agent.pail_fill: the pail goes into the water this far ahead and to her right.
+    static constexpr float FillForward = 59.0f;
+    static constexpr float FillRight = 12.0f;
+    bool IsFillingPail() const { return bFillingPail; }
     UHomesteadWateringTool* GetWateringTool() const { return WateringTool; }
     UAnimSequence* GetClearAnimation() const { return ClearAnimation; }
     UAnimSequence* GetKnifeCutAnimation() const { return KnifeCutAnimation; }
@@ -141,9 +157,9 @@ public:
     bool PlayHarvest(Homestead::Point Target, bool bPick, UStaticMesh* Produce);
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
     // world keeps the gathered pile visible until then.
-    bool IsStickPileOnGround() const { return bStickPileOnGround; }
+    bool IsStickPileOnGround() const { return PendingKneel.IsSet() || bStickPileOnGround; }
     // Sticks lifted off the pile so far in the current kneeling gather (0-2).
-    int32 SticksLiftedFromPile() const { return bStickPileOnGround ? SticksLifted : 2; }
+    int32 SticksLiftedFromPile() const { return PendingKneel.IsSet() ? 0 : bStickPileOnGround ? SticksLifted : 2; }
     // World scale of the carried stick props; the woodland's Branches pile uses the same meshes at this scale.
     static constexpr float CarriedStickScale = 0.6f;
     // Loose single stones (Blender prop set HandStones, A-C), or null until they are imported. The
@@ -154,6 +170,8 @@ public:
     static float StonePileSize(int32 Index, bool bHandStone) { return bHandStone ? 13.0f + Index * 3.0f : 24.0f + Index * 4.0f; }
     void PlayWater();
     void PlayWater(Homestead::Point Target);
+    // Kneel at the bank and fill the pail in the stream at Stream (a point on the water).
+    void PlayFillPail(Homestead::Point Stream);
     void PlayClear();
     void PlayClear(Homestead::Point Target);
     void PlayKnifeCut(Homestead::Point Target);
@@ -303,6 +321,25 @@ private:
     bool bStickGatherStarted = false;
     int32 SticksLifted = 0;
     void UpdateCarriedSticks();
+    // A kneeling gather committed while another hand action is still playing or blending out. It
+    // starts once the hands are free (the old clip keeps its own kind and props until then), and is
+    // re-requested if the animation refused it, e.g. while she was still sliding to a stop.
+    struct FPendingKneel
+    {
+        EHomesteadKneelGather Kind = EHomesteadKneelGather::Sticks;
+        TOptional<FVector2D> Pile;
+        bool bBerries = false;
+        bool bApplied = false;
+        bool bCancelledBlocker = false;
+        double Since = 0;
+        TWeakObjectPtr<UStaticMesh> Produce; // a harvested crop shown in her hand
+    };
+    TOptional<FPendingKneel> PendingKneel;
+    UAnimSequence* KneelClip(EHomesteadKneelGather Kind) const;
+    void StartKneelGather(FPendingKneel& Kneel);
+    void UpdatePendingKneel();
+    // Hides every carried gather prop (sticks, stones, forage, reeds, seed).
+    void HideKneelProps();
     static constexpr float StickAlignSeconds = 0.5f;
     FTransform StickAlignFrom, StickAlignTo;
     float StickAlignRemaining = 0;
@@ -319,6 +356,13 @@ private:
     bool bHairHasLastHead = false;
     void UpdateHairMotion(float DeltaSeconds);
     UPROPERTY() TObjectPtr<UAnimSequence> WaterAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> PailPourAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> PailFillAnimation;
+    bool bFillingPail = false;
+    // The water running from the pail's lip while she pours (a thin translucent column).
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> PourStream;
+    // Two-handed pouring: the pail laid between her fists instead of hanging from the bail.
+    void UpdateWaterPail(UStaticMeshComponent& Pail, float DeltaSeconds);
     UPROPERTY(VisibleAnywhere) TObjectPtr<UHomesteadWateringTool> WateringTool;
     UPROPERTY() TObjectPtr<UAnimSequence> ClearAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> KnifeCutAnimation;
