@@ -3123,7 +3123,9 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             Component->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
             Component->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
         }
-        if (Node.kind == Homestead::ResourceKind::Stones && RockMaterial)
+        // The legacy stone mesh takes the textured rock material; authored Nanite stones (hand stones,
+        // GraniteHandPile) keep their own, and M_Rock isn't flagged for Nanite.
+        if (Node.kind == Homestead::ResourceKind::Stones && RockMaterial && !Mesh->HasValidNaniteData())
             Component->SetMaterial(0, RockMaterial);
         Component->SetGenerateOverlapEvents(false);
         Component->SetCanEverAffectNavigation(false);
