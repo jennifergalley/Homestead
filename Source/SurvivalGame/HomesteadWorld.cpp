@@ -1094,7 +1094,9 @@ const FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/SurvivalGame/Environment/Props/Hazel/SM_Hazel.SM_Hazel"), false, 14000, false, 0, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/BrackenFern/SM_BrackenFern.SM_BrackenFern"), false, 9000, false, 0, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/GrassYarrowTuft/SM_GrassYarrowTuft.SM_GrassYarrowTuft"), false, 6000, false, 0, 0},
-    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteCobbles/SM_GraniteCobbles.SM_GraniteCobbles"), false, 9000, false, 0, 0},
+    // A granite ledge breaking through the slope (scatter.py LEDGE): a talus block sunk a quarter of its
+    // height below the lowest ground under it. It used to be loose cobbles, which read as hand stones.
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBlockTalus/SM_GraniteBlockTalus.SM_GraniteBlockTalus"), true, 24000, false, 22, 52},
     {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBoulderLoaf/SM_GraniteBoulderLoaf.SM_GraniteBoulderLoaf"), true, 24000, false, 0, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/GraniteErratic/SM_GraniteErratic.SM_GraniteErratic"), true, 60000, false, 0, 0},
     {TEXT("/Game/SurvivalGame/Environment/Props/GraniteDome/SM_GraniteDome.SM_GraniteDome"), true, 0, false, 0, 0},
