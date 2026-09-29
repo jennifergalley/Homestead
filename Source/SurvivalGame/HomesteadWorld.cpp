@@ -4001,12 +4001,26 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
     }
     FRandomStream Random(Plot.id * 193 + 51);
     const int WeedCount = Stage(Plot.weeds, 8);
+    // Weeds creeping into the bed: small tufts of the estate's yarrow/grass weed at the rim and
+    // between the ridges (the cones remain only if the mesh isn't imported).
+    if (!WeedTuftMesh)
+        WeedTuftMesh = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/SurvivalGame/Environment/Props/GrassYarrowTuft/SM_GrassYarrowTuft.SM_GrassYarrowTuft"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+    UStaticMesh* WeedTuft = WeedTuftMesh;
     for (int I = 0; I < WeedCount; ++I)
     {
-        const float X = Center.x + Random.FRandRange(-38, 38);
-        const float Y = Center.y + Random.FRandRange(-38, 38);
-        AddPart(Visual, Cone, AtGround(X, Y, 12), FVector(14, 14, 24),
-            FLinearColor(0.34f, 0.31f, 0.07f), false, FRotator(0, I * 47, 16));
+        const float X = Center.x + Random.FRandRange(-40, 40);
+        const float Y = Center.y + Random.FRandRange(-40, 40);
+        if (WeedTuft)
+        {
+            const float Scale = Random.FRandRange(0.28f, 0.42f);
+            if (auto* Part = AddPart(Visual, WeedTuft, AtGround(X, Y, -1.0f), FVector(100 * Scale), Leaf, false,
+                FRotator(0, Random.FRandRange(0, 360), 0)))
+                Part->SetMaterial(0, WeedTuft->GetMaterial(0));
+        }
+        else
+            AddPart(Visual, Cone, AtGround(X, Y, 12), FVector(14, 14, 24),
+                FLinearColor(0.34f, 0.31f, 0.07f), false, FRotator(0, I * 47, 16));
     }
 }
 

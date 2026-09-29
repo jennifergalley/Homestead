@@ -231,6 +231,8 @@ private:
     TMap<FName, TObjectPtr<UStaticMesh>> CropMeshes;
     UPROPERTY()
     TObjectPtr<UMaterialInterface> RipeGlintMaterial;
+    UPROPERTY()
+    TObjectPtr<UStaticMesh> WeedTuftMesh;
     bool bRipeGlintLoaded = false;
     // The manor's granite kit and hearth (StoneFoundation, StoneWall, StoneDoorway, StoneRoof,
     // StoneHearth), loaded on first use by name.
