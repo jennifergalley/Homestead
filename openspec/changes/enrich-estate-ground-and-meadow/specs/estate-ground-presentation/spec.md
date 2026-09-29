@@ -29,3 +29,8 @@ the clear radius of any interactable, world drop, plot or building piece.
 
 The heroine's footsteps SHALL be quieter and duller on grass, moor and woodland floor than on other
 ground, and unchanged elsewhere.
+
+#### Scenario: From the drive onto the meadow
+
+- **WHEN** she walks off the drive onto the meadow
+- **THEN** her footsteps soften and lose their sharp high end, and sharpen again when she steps back onto the road

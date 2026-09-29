@@ -26,3 +26,8 @@ hour, and a one-hour nap, each showing its wake time, chosen with Up/Down and co
 ### Requirement: Recovery by hours slept
 
 Sleep SHALL restore Energy by hours slept at a fixed rate, capped at full, whatever the hour.
+
+#### Scenario: A nap in the afternoon
+
+- **WHEN** she naps for an hour at 15:00 with Energy 40
+- **THEN** Energy rises by one hour's worth, the same as an hour slept at night, and never above full
