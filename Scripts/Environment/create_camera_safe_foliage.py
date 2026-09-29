@@ -148,6 +148,13 @@ def create_collection():
         unreal.MaterialParameterCollection,
         unreal.MaterialParameterCollectionFactoryNew(),
     )
+    # Keep an existing collection as it is: new parameter structs get new ids, which breaks every
+    # material compiled against the old ones.
+    existing = {p.get_editor_property("parameter_name") for p in collection.get_editor_property("vector_parameters")}
+    existing |= {p.get_editor_property("parameter_name") for p in collection.get_editor_property("scalar_parameters")}
+    if {"CameraPosition", "HeroTargetPosition", "NearRadiusCm", "CorridorRadiusCm", "FadeBandCm"} <= set(map(str, existing)):
+        return collection
+
     def vector_parameter(name, value):
         parameter = unreal.CollectionVectorParameter()
         parameter.set_editor_property("parameter_name", name)
@@ -192,16 +199,18 @@ def collection_parameter(material, collection, name, x, y):
 def create_visibility_function(collection):
     path = f"{DEST}/MF_CameraSafeFoliageVisibility"
     function = LIB.load_asset(path) if LIB.does_asset_exist(path) else None
-    if function:
-        return function
-    function = TOOLS.create_asset(
-        "MF_CameraSafeFoliageVisibility",
-        DEST,
-        unreal.MaterialFunction,
-        unreal.MaterialFunctionFactoryNew(),
-    )
+    if not function:
+        function = TOOLS.create_asset(
+            "MF_CameraSafeFoliageVisibility",
+            DEST,
+            unreal.MaterialFunction,
+            unreal.MaterialFunctionFactoryNew(),
+        )
     if not function:
         raise RuntimeError("Could not create " + path)
+    # Rebuilt in place on every run so graph changes (the ray-tracing switch below) reach the
+    # existing asset.
+    EDIT.delete_all_material_expressions_in_function(function)
 
     def function_expression(kind, x, y):
         node = EDIT.create_material_expression_in_function(function, kind, x, y)
@@ -261,7 +270,15 @@ return step(noise, visibility);
     connect(fade_band, "", custom, "FadeBand")
     output = function_expression(unreal.MaterialExpressionFunctionOutput, 0, 250)
     output.set_editor_property("output_name", "Visibility")
-    connect(custom, "", output, "")
+    # Ray tracing (the sun's shadows, Lumen hits) sees every leaf: the camera fade is for the view
+    # only. Without this, leaves between the camera and her also dropped out of the sun's shadow,
+    # so dappled shade shifted as the camera moved, and every shadow any-hit ran the fade code.
+    switch = function_expression(unreal.MaterialExpressionRayTracingQualitySwitch, -300, 250)
+    visible = function_expression(unreal.MaterialExpressionConstant, -500, 400)
+    visible.set_editor_property("r", 1.0)
+    connect(custom, "", switch, "Normal")
+    connect(visible, "", switch, "RayTraced")
+    connect(switch, "", output, "")
     EDIT.update_material_function(function)
     save(function)
     return function
