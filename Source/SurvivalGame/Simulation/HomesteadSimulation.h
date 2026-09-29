@@ -42,7 +42,13 @@ constexpr int ToolTierCount = static_cast<int>(ToolTier::Count);
 enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Hearth, Count };
 // How a building piece looks; the rules are the same. Stone is the old manor's granite masonry.
 enum class StructureSkin : int { Timber, Stone, Count };
-enum class CropKind : int { Roots, Berries, Count };
+enum class CropKind : int
+{
+    Roots, Berries,
+    // improve-crops-and-harvest: period crops. Append only (plots save the kind as an int).
+    Turnips, Carrots, Potatoes, Cabbage, BroadBeans, Strawberries,
+    Count
+};
 
 constexpr double CellSize = 300.0;
 // Garden squares: each building cell holds 3 x 3 of them, and the middle one shares its centre.
@@ -249,6 +255,10 @@ struct Plot
     double moisture = 0.0;
     double weeds = 0.0;
     CropKind kind = CropKind::Roots;
+    // A regrowing crop (beans, strawberries) picked at least once since sowing: its status counts the
+    // regrowth days ("ripening again, day 1 of 3") instead of the first growth. Saved in the optional
+    // "picked" section; older saves default to false.
+    bool picked = false;
 };
 
 struct WorldDrop
@@ -576,6 +586,12 @@ public:
     // Playtest aid: jump the clock forward to the next occurrence of hourOfDay (0-24) without
     // simulating the skipped interval, so needs, crops and fires are left as they were.
     void SkipToHourOfDay(double hourOfDay);
+    // Playtest aid: let `days` whole days pass hour by hour (crops grow, soil dries, weeds creep,
+    // shops sell down, just as if she'd lived them), keeping her fed and rested. With `tend`, every
+    // plot is watered and weeded each hour, so crops grow at full speed.
+    Result PassDaysForPlaytest(double days, bool tend, Point player);
+    // Playtest aid for screenshots: set every planted plot's growth (0-1) directly.
+    Result SetCropGrowthForPlaytest(double growth);
     Result SpendSprintEnergy(double realSeconds);
     // Whether she has the Energy for work costing `cost` (see Exertion); ok when she does.
     Result CheckExertion(double cost) const;
