@@ -129,6 +129,9 @@ public:
     void ResetActionHints();
     bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }
     FString Toast() const { return ToastRemaining > 0 ? ToastText : FString(); }
+    // Seconds the current toast has left, and a count of Notify calls (tells a repeated message apart).
+    float ToastSecondsLeft() const { return ToastRemaining; }
+    uint32 NoticeCount() const { return NoticeSerial; }
     FString PlacementLabel() const;
     // Whether the preview snaps, stands free, or why it can't be built there.
     FString PlacementStatus() const;
