@@ -7,6 +7,14 @@ Recipe mode runs ``build(kit)`` from a recipe module; blend mode exports every
 ``SM_*`` mesh object from a hand-edited .blend. Both write, per asset set, to
 ``Assets/Props/<Name>/``: one FBX per mesh, the source .blend, a contact-sheet
 preview per mesh and ``report.json`` (consumed by the Unreal importer).
+
+Recipe options for texture baking:
+
+- ``BAKE``: a dict (``size``, ``maps``, ...) that turns on baking for the recipe's meshes.
+- ``BAKE_MESHES``: which meshes get that bake. Omitted (the default) means every mesh bakes.
+  A set of mesh names bakes only those (``{"SM_OilLamp"}`` leaves the glass and flame to
+  engine-side materials). A dict maps mesh names, or ``"*"`` for the rest, to ``True`` (use
+  ``BAKE``), a partial spec merged over ``BAKE``, or a falsy value to skip that mesh.
 """
 import argparse
 import hashlib
@@ -103,28 +111,49 @@ def main():
     if args.recipe:
         report.update(getattr(recipe, "REPORT", {}))
     bake_spec = getattr(recipe, "BAKE", None) if args.recipe else None
+    bake_meshes = getattr(recipe, "BAKE_MESHES", None) if args.recipe else None
+
+    def mesh_bake_spec(obj):
+        """Return the bake spec for this mesh. Recipes normally bake every mesh;
+        multi-mesh props may opt a glass/flame/etc. mesh out with BAKE_MESHES."""
+        if not bake_spec:
+            return None
+        if bake_meshes is None:
+            return bake_spec
+        if isinstance(bake_meshes, dict):
+            spec = bake_meshes.get(obj.name, bake_meshes.get("*", None))
+            if spec is True:
+                return bake_spec
+            if spec:
+                merged = dict(bake_spec)
+                merged.update(spec)
+                return merged
+            return None
+        return bake_spec if obj.name in bake_meshes else None
+
     baked_materials = {}
     for obj in meshes:
+        obj_bake_spec = mesh_bake_spec(obj)
         baked = None
         lod = re.match(r"^(SM_.+)_LOD\d+$", obj.name)
-        if bake_spec and lod and lod.group(1) in baked_materials:
+        if obj_bake_spec and lod and lod.group(1) in baked_materials:
             # LODs decimated from an unwrapped LOD0 share its UVs and texture set.
             obj.data.materials.clear()
             obj.data.materials.append(baked_materials[lod.group(1)][0])
             baked = dict(baked_materials[lod.group(1)][1], shared_with=lod.group(1))
-        elif bake_spec:
-            if bake_spec.get("repack", True):
-                kit.pack_uvs(obj, margin=bake_spec.get("margin", 0.004))
-            print(f"HOMESTEAD_BAKING {obj.name} {bake_spec.get('size', 2048)}px", flush=True)
+        elif obj_bake_spec:
+            if obj_bake_spec.get("repack", True):
+                kit.pack_uvs(obj, margin=obj_bake_spec.get("margin", 0.004))
+            print(f"HOMESTEAD_BAKING {obj.name} {obj_bake_spec.get('size', 2048)}px", flush=True)
             # Hide the other meshes (notably LODs sitting exactly on top of LOD0) so they don't
             # occlude the AO bake or catch its rays.
             hidden = [o for o in meshes if o is not obj and not o.hide_render]
             for other in hidden:
                 other.hide_render = True
             try:
-                baked = kit.bake(obj, out / "Textures", obj.name[3:], size=bake_spec.get("size", 2048),
-                                 samples=bake_spec.get("samples", 96),
-                                 maps=tuple(bake_spec.get("maps", kit.BAKE_MAPS)))
+                baked = kit.bake(obj, out / "Textures", obj.name[3:], size=obj_bake_spec.get("size", 2048),
+                                 samples=obj_bake_spec.get("samples", 96),
+                                 maps=tuple(obj_bake_spec.get("maps", kit.BAKE_MAPS)))
             finally:
                 for other in hidden:
                     other.hide_render = False

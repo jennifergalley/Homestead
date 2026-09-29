@@ -1,0 +1,576 @@
+{
+  "schema": 1,
+  "name": "EstateRubbish",
+  "description": "Hand-clearable estate rubbish: rotten plank pile, small midden heap and rusty scrap-iron heap.",
+  "collision": "convex",
+  "triangle_budget": 20000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/estate_rubbish.py",
+  "source_sha256": "a989b32e4503a98bd810b53020225eee8640214fe83c3110a59ff85f6c801997",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_RottenPlanks": {
+      "vertices": 1275,
+      "triangles": 2190,
+      "size_cm": [
+        149.94,
+        95.67,
+        16.16
+      ],
+      "materials": [
+        {
+          "name": "M_RottenPlanks",
+          "textures": {
+            "basecolor": "T_RottenPlanks_basecolor.png",
+            "roughness": "T_RottenPlanks_roughness.png",
+            "metallic": "T_RottenPlanks_metallic.png",
+            "normal": "T_RottenPlanks_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RottenPlanks_basecolor.png",
+          "roughness": "T_RottenPlanks_roughness.png",
+          "normal": "T_RottenPlanks_normal.png",
+          "ao": "T_RottenPlanks_ao.png",
+          "metallic": "T_RottenPlanks_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0,
+        "focus": [
+          0.45,
+          0.0,
+          0.06
+        ]
+      },
+      "fbx": "SM_RottenPlanks.fbx",
+      "sha256": "4ad34a8ae9f0157d6effbed34ba654d4766f99afed651ee82926770a1229c3f1",
+      "preview": "preview_SM_RottenPlanks.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RottenPlanks_hero.png",
+          "detail": "beauty_SM_RottenPlanks_detail.png",
+          "eye": "beauty_SM_RottenPlanks_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RottenPlanks_LOD1": {
+      "vertices": 628,
+      "triangles": 984,
+      "size_cm": [
+        149.82,
+        95.61,
+        15.88
+      ],
+      "materials": [
+        {
+          "name": "M_RottenPlanks",
+          "textures": {
+            "basecolor": "T_RottenPlanks_basecolor.png",
+            "roughness": "T_RottenPlanks_roughness.png",
+            "metallic": "T_RottenPlanks_metallic.png",
+            "normal": "T_RottenPlanks_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RottenPlanks_basecolor.png",
+          "roughness": "T_RottenPlanks_roughness.png",
+          "normal": "T_RottenPlanks_normal.png",
+          "ao": "T_RottenPlanks_ao.png",
+          "metallic": "T_RottenPlanks_metallic.png"
+        },
+        "shared_with": "SM_RottenPlanks"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_RottenPlanks_LOD1.fbx",
+      "sha256": "be72d2ada9bc47d649f6636a9daefa03fe32f4b8171fdea9cd76e77860dba990",
+      "preview": "preview_SM_RottenPlanks_LOD1.png"
+    },
+    "SM_RottenPlanks_LOD2": {
+      "vertices": 322,
+      "triangles": 394,
+      "size_cm": [
+        150.15,
+        95.5,
+        15.84
+      ],
+      "materials": [
+        {
+          "name": "M_RottenPlanks",
+          "textures": {
+            "basecolor": "T_RottenPlanks_basecolor.png",
+            "roughness": "T_RottenPlanks_roughness.png",
+            "metallic": "T_RottenPlanks_metallic.png",
+            "normal": "T_RottenPlanks_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RottenPlanks_basecolor.png",
+          "roughness": "T_RottenPlanks_roughness.png",
+          "normal": "T_RottenPlanks_normal.png",
+          "ao": "T_RottenPlanks_ao.png",
+          "metallic": "T_RottenPlanks_metallic.png"
+        },
+        "shared_with": "SM_RottenPlanks"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_RottenPlanks_LOD2.fbx",
+      "sha256": "4a1c2455cb1ba914a660fda4058ee68dc7940d9c4ba53d1045e9715a016a3abb",
+      "preview": "preview_SM_RottenPlanks_LOD2.png"
+    },
+    "SM_RubbishHeapSmall": {
+      "vertices": 4765,
+      "triangles": 9028,
+      "size_cm": [
+        117.95,
+        88.1,
+        17.35
+      ],
+      "materials": [
+        {
+          "name": "M_RubbishHeapSmall",
+          "textures": {
+            "basecolor": "T_RubbishHeapSmall_basecolor.png",
+            "roughness": "T_RubbishHeapSmall_roughness.png",
+            "metallic": "T_RubbishHeapSmall_metallic.png",
+            "normal": "T_RubbishHeapSmall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RubbishHeapSmall_basecolor.png",
+          "roughness": "T_RubbishHeapSmall_roughness.png",
+          "normal": "T_RubbishHeapSmall_normal.png",
+          "ao": "T_RubbishHeapSmall_ao.png",
+          "metallic": "T_RubbishHeapSmall_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.8,
+        "focus": [
+          0.1,
+          0.05,
+          0.1
+        ]
+      },
+      "fbx": "SM_RubbishHeapSmall.fbx",
+      "sha256": "149136f14e9ad8161d3aab2cf65837c493dcda8c54194ca4aa3e07e3514bde37",
+      "preview": "preview_SM_RubbishHeapSmall.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RubbishHeapSmall_hero.png",
+          "detail": "beauty_SM_RubbishHeapSmall_detail.png",
+          "eye": "beauty_SM_RubbishHeapSmall_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RubbishHeapSmall_LOD1": {
+      "vertices": 2250,
+      "triangles": 4061,
+      "size_cm": [
+        117.95,
+        88.1,
+        17.34
+      ],
+      "materials": [
+        {
+          "name": "M_RubbishHeapSmall",
+          "textures": {
+            "basecolor": "T_RubbishHeapSmall_basecolor.png",
+            "roughness": "T_RubbishHeapSmall_roughness.png",
+            "metallic": "T_RubbishHeapSmall_metallic.png",
+            "normal": "T_RubbishHeapSmall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RubbishHeapSmall_basecolor.png",
+          "roughness": "T_RubbishHeapSmall_roughness.png",
+          "normal": "T_RubbishHeapSmall_normal.png",
+          "ao": "T_RubbishHeapSmall_ao.png",
+          "metallic": "T_RubbishHeapSmall_metallic.png"
+        },
+        "shared_with": "SM_RubbishHeapSmall"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_RubbishHeapSmall_LOD1.fbx",
+      "sha256": "dee51e9ec5bf516be2222196963845b6edbfcc136705618d1ef8985d6fe4c055",
+      "preview": "preview_SM_RubbishHeapSmall_LOD1.png"
+    },
+    "SM_RubbishHeapSmall_LOD2": {
+      "vertices": 1006,
+      "triangles": 1625,
+      "size_cm": [
+        117.95,
+        88.1,
+        17.38
+      ],
+      "materials": [
+        {
+          "name": "M_RubbishHeapSmall",
+          "textures": {
+            "basecolor": "T_RubbishHeapSmall_basecolor.png",
+            "roughness": "T_RubbishHeapSmall_roughness.png",
+            "metallic": "T_RubbishHeapSmall_metallic.png",
+            "normal": "T_RubbishHeapSmall_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RubbishHeapSmall_basecolor.png",
+          "roughness": "T_RubbishHeapSmall_roughness.png",
+          "normal": "T_RubbishHeapSmall_normal.png",
+          "ao": "T_RubbishHeapSmall_ao.png",
+          "metallic": "T_RubbishHeapSmall_metallic.png"
+        },
+        "shared_with": "SM_RubbishHeapSmall"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_RubbishHeapSmall_LOD2.fbx",
+      "sha256": "c7d2ab720175ee86a115d384fb0fdfcda7684d5b156733967b382c881f8527c2",
+      "preview": "preview_SM_RubbishHeapSmall_LOD2.png"
+    },
+    "SM_ScrapHeap": {
+      "vertices": 6527,
+      "triangles": 12832,
+      "size_cm": [
+        97.49,
+        89.64,
+        36.79
+      ],
+      "materials": [
+        {
+          "name": "M_ScrapHeap",
+          "textures": {
+            "basecolor": "T_ScrapHeap_basecolor.png",
+            "roughness": "T_ScrapHeap_roughness.png",
+            "metallic": "T_ScrapHeap_metallic.png",
+            "normal": "T_ScrapHeap_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_ScrapHeap_basecolor.png",
+          "roughness": "T_ScrapHeap_roughness.png",
+          "normal": "T_ScrapHeap_normal.png",
+          "ao": "T_ScrapHeap_ao.png",
+          "metallic": "T_ScrapHeap_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.6,
+        "focus": [
+          0.0,
+          0.05,
+          0.12
+        ]
+      },
+      "fbx": "SM_ScrapHeap.fbx",
+      "sha256": "4ad8cdc5d3527ee92816a366eda1713060c1bd19c67c0c2fc3acc7922635a37f",
+      "preview": "preview_SM_ScrapHeap.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_ScrapHeap_hero.png",
+          "detail": "beauty_SM_ScrapHeap_detail.png",
+          "eye": "beauty_SM_ScrapHeap_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_ScrapHeap_LOD1": {
+      "vertices": 2997,
+      "triangles": 5774,
+      "size_cm": [
+        97.49,
+        89.63,
+        36.79
+      ],
+      "materials": [
+        {
+          "name": "M_ScrapHeap",
+          "textures": {
+            "basecolor": "T_ScrapHeap_basecolor.png",
+            "roughness": "T_ScrapHeap_roughness.png",
+            "metallic": "T_ScrapHeap_metallic.png",
+            "normal": "T_ScrapHeap_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_ScrapHeap_basecolor.png",
+          "roughness": "T_ScrapHeap_roughness.png",
+          "normal": "T_ScrapHeap_normal.png",
+          "ao": "T_ScrapHeap_ao.png",
+          "metallic": "T_ScrapHeap_metallic.png"
+        },
+        "shared_with": "SM_ScrapHeap"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_ScrapHeap_LOD1.fbx",
+      "sha256": "8df562c901699fbacdee46b038a728882fbd2423eeb344308cd5dda3a3303104",
+      "preview": "preview_SM_ScrapHeap_LOD1.png"
+    },
+    "SM_ScrapHeap_LOD2": {
+      "vertices": 1254,
+      "triangles": 2309,
+      "size_cm": [
+        97.49,
+        89.76,
+        36.66
+      ],
+      "materials": [
+        {
+          "name": "M_ScrapHeap",
+          "textures": {
+            "basecolor": "T_ScrapHeap_basecolor.png",
+            "roughness": "T_ScrapHeap_roughness.png",
+            "metallic": "T_ScrapHeap_metallic.png",
+            "normal": "T_ScrapHeap_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_ScrapHeap_basecolor.png",
+          "roughness": "T_ScrapHeap_roughness.png",
+          "normal": "T_ScrapHeap_normal.png",
+          "ao": "T_ScrapHeap_ao.png",
+          "metallic": "T_ScrapHeap_metallic.png"
+        },
+        "shared_with": "SM_ScrapHeap"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.0
+      },
+      "fbx": "SM_ScrapHeap_LOD2.fbx",
+      "sha256": "4b4f9c23ad508d69f03c1e788fa6d756174a1d49b1bc36d3c78f2cbfed6174c1",
+      "preview": "preview_SM_ScrapHeap_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Blender (x,y,z) imports as Unreal (x,-y,z).",
+  "pivot": "Ground-centre of each pile at z=0; up to ~2 cm of each pile sits below z=0 so it reads sunk into turf.",
+  "orientation": {
+    "SM_RottenPlanks": "Longest board runs roughly X.",
+    "SM_RubbishHeapSmall": "No preferred facing.",
+    "SM_ScrapHeap": "No preferred facing; pot mouth faces roughly +X+Y."
+  },
+  "lods": "LOD1/LOD2 are collapse-decimated from LOD0 (0.45 / 0.18) and share its UVs and textures.",
+  "textures": {
+    "T_RottenPlanks_basecolor.png": "cc11738dd727d024dfc5452eba8138a313ce940710a0de65d196ebc6a2134fc4",
+    "T_RottenPlanks_roughness.png": "fb0604399a2181d16d3e6a80bfdd248727092cae6af2c59e3b06aff1ff0bb531",
+    "T_RottenPlanks_metallic.png": "f1441f2d759aacefb4dea7b45a8c8a1cbe2d42353b53c4a431c525739ed025b1",
+    "T_RottenPlanks_normal.png": "13e7c7d20a4ec44cab3413160cca2f452094681c4e5391fcde8af065834f46f4",
+    "T_RubbishHeapSmall_basecolor.png": "cc517c202a5d6a9883c4ec671c1c53f3405d9aecd4fb4887d21fc6d1f5ad2a9a",
+    "T_RubbishHeapSmall_roughness.png": "add2561c8cd4bce1a21ef2a049083f5c59ccd8c6775e3413da56400040e3a2f8",
+    "T_RubbishHeapSmall_metallic.png": "679c8be82e7a423c879aba16d972b5c782f943bdff0d90fcb27ff4a8c1f95ae9",
+    "T_RubbishHeapSmall_normal.png": "73cc128d084a0cd719544a5a1383edb67ad1298d2b2f3fbf75f231111c5b33ec",
+    "T_ScrapHeap_basecolor.png": "7c8ac9ea6a476cda0e660ed96fdd20cffc604c37e45fb6efe3902d9c6d6b4984",
+    "T_ScrapHeap_roughness.png": "92d7f18e2f47ca8a3d82b9d825a2a561bb6aec070b727cad0e475b23653c9286",
+    "T_ScrapHeap_metallic.png": "720070b4aa1513b4c7a5f46e066e94fabcee6f074eff6f4eea75b519783d8bcd",
+    "T_ScrapHeap_normal.png": "7e2221cfc69cf2821c63a62568470e406c67c70edbe16d406df871cbbcc81061"
+  }
+}

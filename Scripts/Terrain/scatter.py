@@ -13,11 +13,16 @@ from scipy.ndimage import gaussian_filter
 from scipy.spatial import cKDTree
 from skimage.measure import points_in_poly
 
+import mvp_woodland
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 WORK = os.environ.get("HOMESTEAD_TERRAIN_WORK", r"E:\TerrainSource\work")
 H = 2016
-BROADLEAF, FIR, HAZEL, BRACKEN, YARROW, COBBLES, BOULDER, ERRATIC, DOME, FERN, GRASS_TALL, GRASS_MID, SHRUB, OAK, BEECH, SYCAMORE = range(16)
+BROADLEAF, FIR, HAZEL, BRACKEN, YARROW, COBBLES, BOULDER, ERRATIC, DOME, FERN, GRASS_TALL, GRASS_MID, SHRUB, OAK, BEECH, SYCAMORE, HAWTHORN, HOLLY, HAZEL_COPPICE = range(19)
+# The Hawthorn mesh streams toward +X; Cornwall's prevailing wind is south-westerly, so thorns lean
+# north-east (+X north, +Y east): yaw 45 +- WIND_SPREAD.
+WIND_YAW, WIND_SPREAD = 45.0, 25.0
+# 19+ are the MVP woodland's kinds (mvp_woodland.py).
 
 def weights():
     out = {}
@@ -44,6 +49,7 @@ def main():
     gy, gx = np.gradient(gaussian_filter(z, 1.0))
     slope = np.degrees(np.arctan(np.hypot(gx, gy)))
     L = json.load(open(os.path.join(HERE, "estate_layout.json")))
+    mvp = mvp_woodland.Region(os.path.join(HERE, "mvp_woodland.json"))
     lm = {k: np.array(v[:2]) for k, v in L["landmarks"].items()}
     road = cKDTree(densify(L["road"]))
     river = cKDTree(densify(L["river"]))
@@ -56,7 +62,7 @@ def main():
         n = rng.poisson(per_m2 * (x1 - x0) * (y1 - y0))
         return np.c_[rng.uniform(x0, x1, n), rng.uniform(y0, y1, n)]
 
-    def keep_common(p, road_clear=6.0, river_clear=5.0):
+    def common_mask(p, road_clear=6.0, river_clear=5.0):
         ok = sample(z, p[:, 0], p[:, 1]) > 1.5
         ok &= road.query(p)[0] > road_clear
         ok &= river.query(p)[0] > river_clear
@@ -64,7 +70,10 @@ def main():
         ok &= np.linalg.norm(p - lm["StandingRoomOrigin"], axis=1) > 28
         ok &= np.linalg.norm(p - lm["MineEntrance"], axis=1) > 20
         ok &= np.linalg.norm(p - lm["MillSite"], axis=1) > 14
-        return p[ok]
+        return ok
+
+    def keep_common(p, road_clear=6.0, river_clear=5.0):
+        return p[common_mask(p, road_clear, river_clear)]
 
     def by_weight(p, layer, lo=0.35, jitter=True):
         w = sample(W[layer], p[:, 0], p[:, 1])
@@ -105,11 +114,29 @@ def main():
     # Reeds are retired by add-overgrown-estate-clearing; the river banks get no interactive reeds.
     tree_tree = cKDTree(np.array(interactive_trees)) if interactive_trees else None
 
+    # ---- the MVP woodland (add-mvp-woodland-biome): its own rng, so the rest stays as it was ----
+    def mvp_ground(p):
+        sv = slope[np.clip(np.round(H - p[:, 0]).astype(int), 0, 4032), np.clip(np.round(H + p[:, 1]).astype(int), 0, 4032)]
+        return sv < 35
+    mvp_rows, mvp_recs = mvp_woodland.build(mvp, lambda p: common_mask(p, 4.0, 6.0), mvp_ground,
+                                            np.array([pt for _, _, pt in rows]))
+    rows += mvp_rows
+
     # ---- decorative scenery -------------------------------------------------------------
     recs = []
     def emit(kind, p, smin, smax):
-        for x, y in p:
-            recs.append((kind, x, y, rng.uniform(0, 360), rng.uniform(smin, smax)))
+        # Inside the MVP woodland the estate's own scenery gives way (the draws still happen, so
+        # everything outside the region is unchanged).
+        emit_yawed(kind, p, smin, smax, 0.0, 360.0)
+    def emit_windswept(kind, p, smin, smax):
+        # Same two draws per point as emit, so swapping a share to a windswept kind keeps the sequence.
+        emit_yawed(kind, p, smin, smax, WIND_YAW - WIND_SPREAD, WIND_YAW + WIND_SPREAD)
+    def emit_yawed(kind, p, smin, smax, yaw_lo, yaw_hi):
+        blocked = mvp.cornish_blocked(p) if len(p) else []
+        for i, (x, y) in enumerate(p):
+            yaw, s = rng.uniform(yaw_lo, yaw_hi), rng.uniform(smin, smax)
+            if not blocked[i]:
+                recs.append((kind, x, y, yaw, s))
     def clear_of_interactive(p, gap):
         pts = np.array(taken)
         return p[cKDTree(pts).query(p)[0] > gap] if len(p) else p
@@ -182,17 +209,21 @@ def main():
     wu = woodable(keep_common(candidates(1 / 7.0, (-1100, 600, -1500, 700)), 3.5, 3))
     wu = wu[wood_score(wu) > WOOD_AT]
     wu = clear_of_interactive(wu, 2.0)
+    # Holly and hazel coppice stools take part of the old hazel and shrub shares.
     pick = rng.random(len(wu))
-    emit(HAZEL, wu[pick < 0.14], 0.8, 1.25)
+    emit(HAZEL, wu[pick < 0.07], 0.8, 1.25)
+    emit(HAZEL_COPPICE, wu[(pick >= 0.07) & (pick < 0.14)], 0.75, 1.1)
     emit(BRACKEN, wu[(pick >= 0.14) & (pick < 0.5)], 0.8, 1.35)
     emit(FERN, wu[(pick >= 0.5) & (pick < 0.75)], 0.85, 1.4)
-    emit(SHRUB, wu[pick >= 0.75], 0.85, 1.35)
-    # The woods' ragged fringe: hazel and thorn scrub with the odd young tree.
+    emit(HOLLY, wu[(pick >= 0.75) & (pick < 0.86)], 0.7, 1.15)
+    emit(SHRUB, wu[pick >= 0.86], 0.85, 1.35)
+    # The woods' ragged fringe: windswept hawthorn, hazel and thorn scrub with the odd young tree.
     fringe = woodable(keep_common(candidates(1 / 14.0, (-1100, 600, -1500, 700)), 4, 4))
     fs = wood_score(fringe)
     fringe = clear_of_interactive(fringe[(fs > WOOD_AT - 0.22) & (fs <= WOOD_AT)], 2.0)
     pick = rng.random(len(fringe))
-    emit(SHRUB, fringe[pick < 0.45], 0.8, 1.3)
+    emit_windswept(HAWTHORN, fringe[pick < 0.14], 0.7, 1.05)
+    emit(SHRUB, fringe[(pick >= 0.14) & (pick < 0.45)], 0.8, 1.3)
     emit(HAZEL, fringe[(pick >= 0.45) & (pick < 0.7)], 0.7, 1.1)
     emit(BRACKEN, fringe[(pick >= 0.7) & (pick < 0.96)], 0.8, 1.2)
     emit(BROADLEAF, fringe[pick >= 0.96], 0.55, 0.8)
@@ -217,7 +248,8 @@ def main():
     hedge = woodable(hedge)
     hedge = clear_of_interactive(hedge[kept_open(hedge, 0.0) < 0.3], 2.0)
     pick = rng.random(len(hedge))
-    emit(SHRUB, hedge[pick < 0.5], 0.9, 1.4)
+    emit_windswept(HAWTHORN, hedge[pick < 0.12], 0.75, 1.0)
+    emit(SHRUB, hedge[(pick >= 0.12) & (pick < 0.5)], 0.9, 1.4)
     emit(HAZEL, hedge[(pick >= 0.5) & (pick < 0.85)], 0.9, 1.3)
     emit(BRACKEN, hedge[(pick >= 0.85) & (pick < 0.97)], 0.8, 1.1)
     emit(OAK, hedge[pick >= 0.97], 0.75, 1.05)
@@ -278,6 +310,7 @@ def main():
     pick = rng.random(len(steep))
     emit(COBBLES, steep[pick < 0.6], 0.8, 1.3)
     emit(BOULDER, steep[pick >= 0.6], 0.8, 1.3)
+    recs += mvp_recs
 
     # ---- write -------------------------------------------------------------------------
     runtime = os.path.join(ROOT, "Content", "SurvivalGame", "Estate", "Runtime")

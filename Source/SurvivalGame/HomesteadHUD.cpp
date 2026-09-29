@@ -3,6 +3,8 @@
 #include "HomesteadMapComponent.h"
 #include "UI/SHomesteadVitals.h"
 #include "Engine/Canvas.h"
+#include "CanvasItem.h"
+#include "GlobalRenderResources.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
 #include "Misc/CommandLine.h"
@@ -36,6 +38,159 @@ void AHomesteadHUD::Write(const FString& Text, float X, float Y, float Size, FLi
 void AHomesteadHUD::Panel(float X, float Y, float Width, float Height, FLinearColor Color)
 {
     DrawRect(Color, X * UiScale, Y * UiScale, Width * UiScale, Height * UiScale);
+}
+
+namespace
+{
+FCanvasUVTri Tri(FVector2D A, FVector2D B, FVector2D C, FLinearColor Color)
+{
+    FCanvasUVTri T;
+    T.V0_Pos = A; T.V1_Pos = B; T.V2_Pos = C;
+    T.V0_Color = T.V1_Color = T.V2_Color = Color;
+    return T;
+}
+
+// Sky colour of the dial by hour: night, rose dawn, soft day, amber dusk.
+FLinearColor DialSky(double Hour)
+{
+    struct FKey { double Hour; FLinearColor Color; };
+    static const FKey Keys[] = {
+        {0.0, FLinearColor(0.035f, 0.06f, 0.10f, 1)}, {4.8, FLinearColor(0.035f, 0.06f, 0.10f, 1)},
+        {6.0, FLinearColor(0.44f, 0.25f, 0.20f, 1)}, {8.0, FLinearColor(0.18f, 0.31f, 0.33f, 1)},
+        {16.5, FLinearColor(0.18f, 0.31f, 0.33f, 1)}, {18.6, FLinearColor(0.50f, 0.26f, 0.11f, 1)},
+        {20.0, FLinearColor(0.035f, 0.06f, 0.10f, 1)}, {24.0, FLinearColor(0.035f, 0.06f, 0.10f, 1)}};
+    for (int32 Index = 1; Index < UE_ARRAY_COUNT(Keys); ++Index)
+        if (Hour <= Keys[Index].Hour)
+        {
+            const double Alpha = (Hour - Keys[Index - 1].Hour) / FMath::Max(0.001, Keys[Index].Hour - Keys[Index - 1].Hour);
+            return FMath::Lerp(Keys[Index - 1].Color, Keys[Index].Color, static_cast<float>(Alpha));
+        }
+    return Keys[0].Color;
+}
+}
+
+void AHomesteadHUD::Disc(float CX, float CY, float Radius, FLinearColor Color, int32 Segments)
+{
+    Band(CX, CY, 0, Radius, 0, 2 * PI, Color, Segments);
+}
+
+void AHomesteadHUD::Band(float CX, float CY, float InnerRadius, float OuterRadius, float FromRadians, float ToRadians, FLinearColor Color, int32 Segments)
+{
+    // Angles run clockwise on screen from +X (y points down), so PI..2*PI is the upper half.
+    TArray<FCanvasUVTri> Tris;
+    const FVector2D C(CX * UiScale, CY * UiScale);
+    const float R0 = InnerRadius * UiScale, R1 = OuterRadius * UiScale;
+    for (int32 Index = 0; Index < Segments; ++Index)
+    {
+        const float A0 = FMath::Lerp(FromRadians, ToRadians, static_cast<float>(Index) / Segments);
+        const float A1 = FMath::Lerp(FromRadians, ToRadians, static_cast<float>(Index + 1) / Segments);
+        const FVector2D D0(FMath::Cos(A0), FMath::Sin(A0)), D1(FMath::Cos(A1), FMath::Sin(A1));
+        if (R0 <= 0) Tris.Add(Tri(C, C + D0 * R1, C + D1 * R1, Color));
+        else
+        {
+            Tris.Add(Tri(C + D0 * R0, C + D0 * R1, C + D1 * R1, Color));
+            Tris.Add(Tri(C + D0 * R0, C + D1 * R1, C + D1 * R0, Color));
+        }
+    }
+    FCanvasTriangleItem Item(Tris, GWhiteTexture);
+    Item.BlendMode = SE_BLEND_Translucent;
+    Canvas->DrawItem(Item);
+}
+
+void AHomesteadHUD::Stroke(float X0, float Y0, float X1, float Y1, float Thickness, FLinearColor Color)
+{
+    const FVector2D A(X0 * UiScale, Y0 * UiScale), B(X1 * UiScale, Y1 * UiScale);
+    FVector2D Dir = B - A;
+    if (!Dir.Normalize()) return;
+    const FVector2D Side = FVector2D(-Dir.Y, Dir.X) * (Thickness * UiScale * 0.5f);
+    TArray<FCanvasUVTri> Tris;
+    Tris.Add(Tri(A - Side, A + Side, B + Side, Color));
+    Tris.Add(Tri(A - Side, B + Side, B - Side, Color));
+    FCanvasTriangleItem Item(Tris, GWhiteTexture);
+    Item.BlendMode = SE_BLEND_Translucent;
+    Canvas->DrawItem(Item);
+}
+
+void AHomesteadHUD::SunIcon(float CX, float CY, float Radius, FLinearColor Color)
+{
+    for (int32 Ray = 0; Ray < 8; ++Ray)
+    {
+        const float A = Ray * PI / 4;
+        const FVector2D D(FMath::Cos(A), FMath::Sin(A));
+        Stroke(CX + D.X * Radius * 1.35f, CY + D.Y * Radius * 1.35f, CX + D.X * Radius * 1.85f, CY + D.Y * Radius * 1.85f,
+            FMath::Max(2.0f, Radius * 0.22f), Color);
+    }
+    Disc(CX, CY, Radius, Color);
+}
+
+void AHomesteadHUD::MoonIcon(float CX, float CY, float Radius, FLinearColor Color, FLinearColor Behind)
+{
+    Disc(CX, CY, Radius, Color);
+    Disc(CX + Radius * 0.48f, CY - Radius * 0.28f, Radius * 0.86f, Behind);
+}
+
+void AHomesteadHUD::RainIcon(float CX, float CY, float Size)
+{
+    const float S = Size / 30.0f;
+    const FLinearColor Cloud(0.86f, 0.87f, 0.82f, 1);
+    const FLinearColor Drop(0.56f, 0.77f, 0.95f, 1);
+    for (int32 Index = 0; Index < 3; ++Index)
+    {
+        const float X = CX + (-7.0f + Index * 8.0f) * S;
+        Stroke(X, CY + 8 * S, X - 3 * S, CY + 16 * S, 2.6f * S, Drop);
+    }
+    Disc(CX - 8 * S, CY - 1 * S, 7 * S, Cloud);
+    Disc(CX + 1 * S, CY - 6 * S, 9.5f * S, Cloud);
+    Disc(CX + 10 * S, CY, 6 * S, Cloud);
+    Panel(CX - 8 * S, CY - 1 * S, 18 * S, 7 * S, Cloud);
+}
+
+void AHomesteadHUD::DrawCalendar(const AHomesteadController& PC, float X, float Y)
+{
+    const auto& Sim = PC.Simulation();
+    const double Hour = FMath::Fmod(PC.State().hour, 24.0);
+    const bool bNight = Sim.IsNight();
+    const bool bRain = Sim.IsRaining();
+    const float Width = 460, Height = HomesteadHudLayout::CalendarHeight;
+    Panel(X, Y, Width, Height, Pine);
+    ProtectFeedback(TEXT("calendar-panel"), X, Y, Width, Height);
+
+    // Time-of-day dial: the sun climbs a half-arc from dawn (6 AM) to dusk (7 PM), the moon by night.
+    const float CX = X + 70, CY = Y + 78, R = 48;
+    const FLinearColor Sky = DialSky(Hour);
+    const FLinearColor MoonCream(0.95f, 0.92f, 0.80f, 1);
+    Band(CX, CY, 0, R + 10, PI, 2 * PI, Sky, 36);
+    Band(CX, CY, R - 1.0f, R + 1.0f, PI, 2 * PI, FLinearColor(Muted.R, Muted.G, Muted.B, 0.45f), 36);
+    Stroke(CX, CY - R - 5, CX, CY - R + 5, 2, FLinearColor(Muted.R, Muted.G, Muted.B, 0.7f));
+    const double Progress = bNight ? FMath::Fmod(Hour - 19.0 + 24.0, 24.0) / 11.0 : (Hour - 6.0) / 13.0;
+    const float Angle = PI * (1.0f + static_cast<float>(FMath::Clamp(Progress, 0.0, 1.0)));
+    const float BodyX = CX + FMath::Cos(Angle) * R, BodyY = CY + FMath::Sin(Angle) * R;
+    if (bNight) MoonIcon(BodyX, BodyY, 10, MoonCream, Sky);
+    else SunIcon(BodyX, BodyY, 9, bRain ? FLinearColor(0.80f, 0.70f, 0.52f, 1) : HudGold);
+    // The ground hides the sun or moon as it sets, then the horizon line.
+    const FLinearColor Solid(Pine.R, Pine.G, Pine.B, 1);
+    Panel(CX - R - 20, CY, (R + 20) * 2, Y + Height - CY, Solid);
+    Stroke(CX - R - 16, CY, CX + R + 16, CY, 2.5f, Muted);
+
+    const float TextX = X + 140;
+    Write(FString::Printf(TEXT("%s  /  Day %d"), UTF8_TO_TCHAR(Sim.SeasonName()), Sim.DayNumber()), TextX, Y + 10, 24, Ink);
+    if (PC.IsPlanning() || PC.IsBookOpen() || PC.IsShopScreenOpen())
+    {
+        const FString Paused = TEXT("time paused");
+        Write(Paused, X + Width - 16 - TextWidth(Paused, 16), Y + 16, 16, Muted);
+    }
+    const int32 H = FMath::FloorToInt(Hour);
+    const int32 M = FMath::FloorToInt((Hour - H) * 60);
+    const FString Clock = FString::Printf(TEXT("%d:%02d"), H % 12 == 0 ? 12 : H % 12, M);
+    Write(Clock, TextX, Y + 42, 42, Ink);
+    Write(H < 12 ? TEXT("AM") : TEXT("PM"), TextX + TextWidth(Clock, 42) + 8, Y + 58, 24, HudGold);
+
+    // Weather: sun, rain cloud, or a clear night's moon.
+    const float IconX = X + 350, IconY = Y + 68;
+    if (bRain) RainIcon(IconX, IconY, 34);
+    else if (bNight) MoonIcon(IconX, IconY, 11, MoonCream, Solid);
+    else SunIcon(IconX, IconY, 9, HudGold);
+    Write(bRain ? TEXT("Rain") : bNight ? TEXT("Clear") : TEXT("Sunny"), IconX + 28, Y + 56, 21, Muted);
 }
 
 TArray<FString> AHomesteadHUD::WrappedLines(const FString& Text, float Width, float Size)
@@ -88,18 +243,11 @@ void AHomesteadHUD::DrawHUD()
         FeedbackViewport = FVector2D(Canvas->ClipX, Canvas->ClipY);
         ToastSource.Reset(); ToastLines.Reset(); ToastTextBounds.Reset(); FeedbackProtected.Reset();
         ToastBounds = FBox2D(ForceInit);
-    }
-    const auto& State = PC->State();
-    const double Hour = FMath::Fmod(State.hour, 24.0);
-    const int H = FMath::FloorToInt(Hour);
-    const int M = FMath::FloorToInt((Hour - H) * 60);
-    // The calendar sits top-right; the key hints take the top-left.
+        }
+        // The calendar sits top-right; the key hints take the top-left. The vitals stack sits under it
+    // (SHomesteadVitals::Top = CalendarTop + CalendarHeight + 8).
     const float CalendarX = FMath::Max(30.0f, ViewWidth - 30 - 460);
-    Panel(CalendarX, 26, 460, 73, Pine);
-    ProtectFeedback(TEXT("calendar-panel"), CalendarX, 26, 460, 73);
-    Write(FString::Printf(TEXT("%s  /  Day %d"), UTF8_TO_TCHAR(PC->Simulation().SeasonName()), PC->Simulation().DayNumber()), CalendarX + 18, 38, 24, Ink);
-    Write(FString::Printf(TEXT("%02d:%02d   %s%s"), H, M, PC->Simulation().IsRaining() ? TEXT("Rain") : TEXT("Clear"),
-        PC->IsPlanning() || PC->IsBookOpen() || PC->IsShopScreenOpen() ? TEXT("   -   time paused") : TEXT("")), CalendarX + 18, 72, 18, Muted);
+    DrawCalendar(*PC, CalendarX, HomesteadHudLayout::CalendarTop);
 
     if (PC->IsFailed())
     {

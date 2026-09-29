@@ -61,6 +61,8 @@ struct FHomesteadHotbarSlot
     bool Food = false;
     int32 Count = 0;
     FName Icon;
+    // A level shown as a thin bar along the slot's foot (the lamp's oil), 0-1; negative for none.
+    float Fill = -1.0f;
 };
 
 UCLASS()
@@ -127,7 +129,13 @@ public:
     FString PlacementLabel() const;
     // Whether the preview snaps, stands free, or why it can't be built there.
     FString PlacementStatus() const;
+    // The bed's choices (Homestead::SleepOptions) for her Energy now, and the one the prompt shows:
+    // the default first, or what she picked with the D-pad (Up/Down) while at this bed.
+    std::vector<Homestead::SleepOption> BedSleepOptions() const;
+    int32 BedSleepIndex() const;
     double BedSleepHours() const;
+    // "Sleep until morning (wake 06:45)", "Sleep until rested (wake ~14:30)", "Nap 1 h (wake 23:15)".
+    static FString SleepOptionLabel(const Homestead::SleepOption& Option);
     FString PreviewLabel() const;
     bool ToastIsError() const { return bToastError; }
     Homestead::Point PlayerPoint() const;
@@ -251,6 +259,20 @@ public:
     UFUNCTION(Exec) void HomesteadOpenStore();
     // Console playtest aid: add (or with a negative amount remove) cents from her purse.
     UFUNCTION(Exec) void HomesteadMoney(int32 Cents = 1000);
+    // Playtest aid: set her Energy (0-100), e.g. to try dozing off or the bed's "until rested".
+    UFUNCTION(Exec) void HomesteadEnergy(float Energy = 100.0f);
+    // Playtest aids for the bed (stand beside one): sleep with choice N as listed in the prompt (-1 =
+    // the one shown), or step the shown choice by Delta, as Up/Down (D-pad) do.
+    UFUNCTION(Exec) void HomesteadSleep(int32 Option = -1);
+    UFUNCTION(Exec) void HomesteadBedChoice(int32 Delta = 1);
+    // Console playtest aid: move her to world X,Y and stand her on the ground there (waiting for the
+    // ground's collision to stream in). Give Z to land on the first surface at or below Z instead
+    // (an upper floor, say); omit it for the terrain.
+    UFUNCTION(Exec) void HomesteadTeleport(float X, float Y, float Z = -1000000.0f);
+    // Oil lamp (add-oil-lamp): fill the lamp from a flask (the flask's pack menu, or F / X in hand).
+    void MenuRefillLamp();
+    // Console playtest aid: set the lamp's oil in game hours (0-6), e.g. HomesteadLampOil 0.5.
+    UFUNCTION(Exec) void HomesteadLampOil(float Hours = 6.0f);
 
     float Sensitivity = 1.0f;
     bool bInvertY = false;
@@ -346,6 +368,25 @@ private:
     bool bFreshTerrainSpawn = true;
     bool bEstateMap = false;
     float EstateSpawnWait = 0;
+    // A teleport or fall recovery waiting to put her feet on the ground at X,Y (Z: search down from).
+    bool bPendingGroundSnap = false;
+    FVector GroundSnapTarget = FVector::ZeroVector;
+    float GroundSnapWait = 0;
+    // Oil lamp: the kneel to set it down at LampSpot, or take up the set-down lamp LampDropId,
+    // commits when her hand reaches the ground (AHomesteadCharacter::ConsumeLampContact).
+    enum class ELampHandoff : uint8 { None, SetDown, PickUp };
+    ELampHandoff LampHandoff = ELampHandoff::None;
+    Homestead::Point LampSpot{};
+    int32 LampDropId = 0;
+    double LastLampOil = -1.0;
+    bool bLampWasInHand = false;
+    void UpdateLamp();
+    void StartLampSetDown();
+    bool StartLampPickUp(int32 DropId);
+    // Finds the surface she'd stand on below Target.Z at Target.X/Y and sets Target.Z to her capsule
+    // centre on it. Until the ground there has collision (World Partition still streaming) it holds her
+    // in the air with movement off, so she never drops from a height, and returns false.
+    bool SettleOnGround(FVector& Target, float& Waited, float DeltaSeconds, float HoldLimitSeconds, const TCHAR* Why);
     mutable TArray<TWeakObjectPtr<class USplineComponent>> EstateWaterSplines;
     mutable double EstateWaterScanTime = -1000;
     void PrepareEstateSimulation(Homestead::Simulation& Target) const;
@@ -535,6 +576,13 @@ private:
     // second unless forced).
     void UpdatePlacement(bool bForce);
     Homestead::Result SleepInBed(Homestead::Point Position);
+    // Sleeps with the chosen option and makes the usual autosave and recovery checkpoint.
+    void SleepAtBed(Homestead::Point Position);
+    // At the bed, Up/Down (D-pad) steps through the sleep choices. False when not at a bed.
+    bool CycleBedChoice(int32 Delta);
+    Homestead::SleepChoice BedChoice = Homestead::SleepChoice::UntilMorning;
+    int32 BedChoiceBed = INDEX_NONE;
+    int32 SeenDozes = 0;
     void CycleZoom();
     void QuickSave();
     void QuickLoad();

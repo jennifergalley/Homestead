@@ -6,7 +6,8 @@ Outputs:
                                              M_EstateLandscape: R = grass density, G = grass height,
                                              B = dryness (straw), A = wear (bare, trodden soil)
   Saved/Ground/T_EstateCanopy.png            2048^2 RGBA: R = tree canopy cover (leaf litter and moss
-                                             underfoot), G = stony soil on steep banks
+                                             underfoot), G = stony soil on steep banks, B = the MVP
+                                             woodland zone (mvp_woodland.json)
   Content/SurvivalGame/Estate/Runtime/EstateGround.bin
                                              1024^2 cells for the game (HomesteadEstateGround):
                                              "HGD1", u16 size, then per cell u8 grass density (max over
@@ -22,7 +23,8 @@ local cm, so the material can find the root, sample the ground there and bend th
 Normals lean towards up so the blades light like a lawn rather than a set of flat cards.
 
 Inputs: Content/SurvivalGame/Estate/Runtime/EstateHeightfield.r16 and EstateScenery.bin (its trees make
-the canopy mask, so re-run this after scatter.py), Scripts/Terrain/estate_layout.json
+the canopy mask, at the crown radii in SCENERY_TREES of Scripts/Map/bake_estate_map.py, so re-run this
+after scatter.py or a new tree kind), Scripts/Terrain/estate_layout.json
 and the paint-layer weights in HOMESTEAD_TERRAIN_WORK/weights (default E:\\TerrainSource\\work).
 Run from the repo root:
   python Scripts/Terrain/bake_ground.py
@@ -99,23 +101,85 @@ def line_distance(points, shape):
     return distance_transform_edt(mask).astype(np.float32)
 
 
-def canopy_mask(shape):
-    """0-1 cover of tree canopy on the 1 m grid, from the scenery's tree records (kinds 0 and 1:
-    broadleaf and fir; see scatter.py) splatted with their crown size and blurred over about 9 m."""
-    path = os.path.join(REPO, "Content", "SurvivalGame", "Estate", "Runtime", "EstateScenery.bin")
+# Crown radius (m, scale 1) for tree kinds that bake_estate_map.py's SCENERY_TREES doesn't list yet;
+# SCENERY_TREES overrides these. 13-16 are the trees lane's oak, beech, sycamore and hawthorn; 19-22
+# the woodland-biome lane's jacaranda, fir pole and two fir saplings. Shrub kinds (holly, hazel
+# coppice) aren't canopy.
+CROWN_FALLBACK = {0: 3.6, 1: 2.8, 13: 8.3, 14: 7.2, 15: 7.4, 16: 2.5,
+                  19: 4.0, 20: 2.2, 21: 1.0, 22: 1.2}
+
+
+def crown_radii():
+    """EstateSceneryKinds index -> crown radius (m) at scale 1, shared with the estate map bake
+    (SCENERY_TREES in Scripts/Map/bake_estate_map.py), so a tree kind added there shades the ground too."""
+    import importlib.util
+    path = os.path.join(REPO, "Scripts", "Map", "bake_estate_map.py")
+    try:
+        spec = importlib.util.spec_from_file_location("bake_estate_map", path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        return {**CROWN_FALLBACK, **dict(module.SCENERY_TREES)}
+    except Exception as error:  # noqa: BLE001 - fall back to the known tree kinds
+        print("canopy: could not read SCENERY_TREES from", path, "-", error)
+        return dict(CROWN_FALLBACK)
+
+
+def canopy_mask(shape, scenery=None):
+    """0-1 cover of tree canopy on the 1 m grid, from the scenery's tree records (every kind in
+    crown_radii(), each at its own crown radius times its scale), with a soft edge of a few metres."""
+    path = scenery or os.path.join(REPO, "Content", "SurvivalGame", "Estate", "Runtime", "EstateScenery.bin")
     raw = open(path, "rb").read()
     count = struct.unpack_from("<I", raw, 4)[0]
     rec = np.frombuffer(raw, dtype=np.dtype([("k", "u1"), ("pad", "u1", 3), ("x", "<f4"), ("y", "<f4"), ("yaw", "<f4"), ("s", "<f4")]),
                         count=count, offset=8)
-    trees = rec[rec["k"] <= 1]
-    grid = np.zeros(shape, np.float32)
+    radii = crown_radii()
+    trees = rec[np.isin(rec["k"], list(radii))]
+    r = np.array([radii[int(k)] for k in trees["k"]], np.float32) * np.clip(trees["s"], 0.6, 1.6)
     xi = np.clip(np.round(trees["x"] / 100.0 + H).astype(int), 0, shape[1] - 1)
     yi = np.clip(np.round(trees["y"] / 100.0 + H).astype(int), 0, shape[0] - 1)
-    np.add.at(grid, (yi, xi), (trees["s"] ** 2).astype(np.float32))
-    cover = gaussian_filter(grid, 3.5) * (2 * np.pi * 3.5 ** 2)        # crowns about 7 m across
-    cover = gaussian_filter(np.clip(cover, 0, 1), 3.0)                 # soften to a ~9 m edge
-    print("canopy:", len(trees), "trees,", round(float((cover > 0.5).mean()) * 100, 1), "% of the map under canopy")
+    # Each crown is a Gaussian with sigma 0.8 r, scaled to peak at 1: about half cover at its drip
+    # line. Group crowns by radius (0.5 m bins) so each group is one separable blur.
+    cover = np.zeros(shape, np.float32)
+    bins = np.round(r * 2.0) / 2.0
+    for radius in np.unique(bins):
+        m = bins == radius
+        sigma = max(0.8 * float(radius), 0.8)
+        grid = np.zeros(shape, np.float32)
+        np.add.at(grid, (yi[m], xi[m]), 1.0)
+        cover += gaussian_filter(grid, sigma) * (2 * np.pi * sigma * sigma)
+    cover = gaussian_filter(np.clip(cover, 0, 1), 3.0)                 # soften to a leaf-litter edge
+    kinds = {int(k): int((trees["k"] == k).sum()) for k in np.unique(trees["k"])}
+    print("canopy:", len(trees), "trees", kinds, "-", round(float((cover > 0.5).mean()) * 100, 1), "% of the map under canopy")
     return np.clip(cover * 1.4, 0, 1)
+
+
+def mvp_woodland_zone(shape):
+    """The woodland-biome lane's "MVP woodland" region (Scripts/Terrain/mvp_woodland.json: "polygon"
+    [[x, y], ...] in metres, optional "floor_edge_m" (default 15) and "glades" [[x, y, radius], ...]).
+    Returns (zone, floor): zone is 1 inside the polygon (no meadow blades, woodland footsteps) and
+    floor ramps the MVP forest floor in from 0 at the polygon's edge to 1 floor_edge_m inside, the
+    ramp's line wandering with noise; glades take a lighter mix of the floor. None when absent."""
+    path = os.path.join(HERE, "mvp_woodland.json")
+    if not os.path.exists(path):
+        return None
+    spec = json.load(open(path))
+    poly = np.asarray(spec["polygon"], np.float64)
+    ramp = float(spec.get("floor_edge_m", 15.0))
+    inside = np.zeros(shape, bool)
+    rr, cc = fill_polygon(poly[:, 1] + H, poly[:, 0] + H, shape)      # rows = y, cols = x
+    inside[rr, cc] = True
+    depth = distance_transform_edt(inside).astype(np.float32)          # metres inside the polygon
+    wander = (fbm(shape, 2, 256, 31) - 0.5) * 0.9 * ramp               # the ecotone line meanders
+    floor = smoothstep(0.0, ramp, depth + wander) * inside
+    zone = smoothstep(0.0, 2.0, depth).astype(np.float32)
+    coords = (np.arange(shape[0]) - H).astype(np.float32)
+    X, Y = np.meshgrid(coords, coords)
+    for gx, gy, gr in spec.get("glades", []):
+        glade = smoothstep(gr + 4.0, gr * 0.6, np.hypot(X - gx, Y - gy))
+        floor *= 1.0 - 0.3 * glade
+    print("MVP woodland zone:", len(poly), "points,", round(float(inside.sum()) / 1e4, 1), "ha, floor ramp", ramp, "m,",
+          len(spec.get("glades", [])), "glades")
+    return zone, floor.astype(np.float32)
 
 
 def ground_fields(h, w, layout):
@@ -180,11 +244,14 @@ def ground_fields(h, w, layout):
     density *= 1.0 - 0.8 * canopy
     height *= 1.0 - 0.3 * canopy
 
+    zone, floor = mvp_woodland_zone(h.shape) or (np.zeros(h.shape, np.float32), np.zeros(h.shape, np.float32))
+    density *= 1.0 - zone
+
     density = np.clip(density, 0, 1)
     # Stony soil on steep banks that aren't painted cliff (the cliff layer has its own rock).
     stony = smoothstep(20.0, 34.0, gaussian_filter(slope, 2.0)) * (1.0 - w["CliffRock"])
     fields = {"density": density, "height": np.clip(height, 0, 1), "dry": np.clip(dry, 0, 1), "wear": np.clip(wear, 0, 1),
-              "canopy": canopy, "stony": np.clip(stony, 0, 1)}
+              "canopy": canopy, "stony": np.clip(stony, 0, 1), "zone": floor}
 
     surface = np.full(h.shape, SURFACES["Soil"], np.uint8)
     dominant = np.argmax(np.stack([w[n] for n in LAYERS]), axis=0)
@@ -194,6 +261,7 @@ def ground_fields(h, w, layout):
         surface[dominant == i] = SURFACES[kind[n]]
     surface[(surface == SURFACES["Grass"]) & (wear > 0.45)] = SURFACES["Soil"]
     surface[(canopy > 0.5) & np.isin(surface, [SURFACES["Grass"], SURFACES["Moor"]])] = SURFACES["Woodland"]
+    surface[(zone > 0.5) & (surface != SURFACES["Water"])] = SURFACES["Woodland"]
     surface[inside] = SURFACES["Soil"]
     surface[(h < 0.25) | (d_river < 3.0)] = SURFACES["Water"]
     return fields, surface
@@ -208,8 +276,8 @@ def write_ground(fields, surface):
     img = np.stack(chans, -1)
     Image.fromarray(np.round(np.clip(img, 0, 1) * 255).astype(np.uint8), "RGBA").save(
         os.path.join(REPO, "Saved", "Ground", "T_EstateGround.png"))
-    extra = np.stack([map_coordinates(fields[k], [yy, xx], order=1, mode="nearest") for k in ("canopy", "stony")]
-                     + [np.zeros((TEX, TEX)), np.ones((TEX, TEX))], -1)
+    extra = np.stack([map_coordinates(fields[k], [yy, xx], order=1, mode="nearest") for k in ("canopy", "stony", "zone")]
+                     + [np.ones((TEX, TEX))], -1)
     Image.fromarray(np.round(np.clip(extra, 0, 1) * 255).astype(np.uint8), "RGBA").save(
         os.path.join(REPO, "Saved", "Ground", "T_EstateCanopy.png"))
 

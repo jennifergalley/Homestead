@@ -54,6 +54,10 @@ for at the time. If she doesn't say, work headless when she's away and ask when 
 4. **Bake and review settings.**
    - `BAKE = {"size": 2048|4096, "samples": 96}` converts materials to basecolor, roughness,
      normal (OpenGL) and AO PNGs on fresh UVs.
+   - `BAKE_MESHES` chooses which meshes that bake applies to. Omit it and every mesh bakes. A set
+     (`{"SM_OilLamp"}`) bakes only those meshes; a dict gives per-mesh overrides (`"*"` for the rest). Use it
+     for props whose glass, flame or other translucent or emissive parts must stay unbaked
+     (`Recipes/oil_lamp.py`: `SM_OilLamp` baked, `SM_OilLampGlass` and `SM_OilLampFlame` not).
    - For foliage with a hand-laid shared UV atlas, use `"repack": False` and drop AO.
      `kit.assign_tube_uvs` puts stems and scapes into their own atlas rects.
    - `BEAUTY = {"pose": (rx, ry, rz), "focus": (x, y, z)}` sets the review pose. For example, lay a tool flat
@@ -107,6 +111,13 @@ before each pass.
 - **Nanite props and traces.** Props with Nanite on (`NANITE_PROPS` in `import_props.py`, plus the
   ruin kit) don't answer `LineTraceComponent`. Code that checks a prop with a component trace must
   trace the world and test `Hit.GetComponent()` instead (see the editor skill's table 0.1).
+- **Trees (see `docs\blender-assets.md`, "Trees and woodland shrubs").** Grow them with
+  `homestead_tree.py` from a recipe (`Recipes\oak.py`, `holly.py` and others). Review them with
+  `render_tree_review.py --view eye|close|under|far|lods`, not the prop beauty shots. A cobbled
+  or tiled bark look means a Voronoi crack net that is too regular: use `plated` with `broken`
+  (sycamore). Sparse "sticks" canopies need more clusters per twig and lower `foliage.min_z`.
+  Trees get one capsule (tilted by `axis`); shrubs get `COLLISION = "none"`. Measure perf only
+  inside `Scripts\Start-PerfWindow.ps1`, and never with `startfpschart`.
 - **SDF parts.** Evaluate only near the surface (`homestead_sdf` does coarse-to-fine) or a skull takes a
   minute. Never smart-project decimated SDF meshes; unwrap each part with `homestead_rocks.unwrap` first.
   Settle every loose part onto the ground (`deer.common.settle`/`lay_flat`); authored layouts float.

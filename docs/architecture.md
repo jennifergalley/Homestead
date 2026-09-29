@@ -15,7 +15,7 @@ Surveyed on `main` at `8762ba46` (2026-09-28).
 | Slate UI | `Source/SurvivalGame/UI/` | Field book (`SHomesteadMenu`), shop, hotbar, vitals, minimap/map, icons, new-game names, arrival title. |
 | Canvas HUD | `HomesteadHUD.cpp` | Calendar, key hints, toasts, focus cues, drawn every frame with `UCanvas`. |
 | In-game test routes | `Homestead*Test.cpp`, `Homestead*Playtest.cpp`, `UI/Homestead*Test.cpp` | Scripted input routes run by `AHomesteadSmokeTest` / `AHomesteadVisualPlaytest` in `-game` processes. Compiled into Development builds. |
-| Editor module | `Source/SurvivalGameEditor/` | Python-callable libraries (`HomesteadAgentPlayLibrary`, `HomesteadEstateAuthoringLibrary`), estate map import, and the authoring-probe commandlet (`FernSpike.cpp`, a 3.3k-line legacy asset probe). |
+| Editor module | `Source/SurvivalGameEditor/` | Python-callable libraries (`HomesteadAgentPlayLibrary`, `HomesteadEstateAuthoringLibrary`) and the estate map import. |
 | Editor Python | `Content/Python/homestead_agent/` | MCP toolset for play (`toolset.py`), animation authoring on the MetaHuman Control Rig (`rig_authoring.py` plus one module per clip), MetaHuman look/hair, store and town set-up. |
 | Pipelines | `Scripts/Terrain`, `Scripts/Map`, `Scripts/Blender`, `Scripts/Characters` | Offline Python: LIDAR → heightmap and layout, scenery/placement scatter, ground and ocean bakes, the minimap bake, Blender prop recipes and import. |
 | Build/test scripts | `Scripts/*.ps1` | `Start-EditorMcp`, `Build-Game`, `Test-Native`, `Test-Game`, MCP helpers, perf lock. |
@@ -186,15 +186,16 @@ Re-bake order after `scatter.py` changes: `bake_ground.py`, `build_ground.py`, t
   (`-HomesteadFullLoop`, `-HomesteadNativeMenuTest`...). A route is a list of `FStep`s (input,
   predicate, timeout) in `AHomesteadSmokeTest`. Most routes still target the woodland map; several
   fail on retired content (round page, "Open blockers").
-- **Legacy policy/evidence scripts** in `Tests/*.ps1|*.py` and receipts in `docs/research/` come
-  from an earlier, heavier process. Nothing runs them routinely; `HomesteadMenuSourceTests.py` fails
-  on `main`.
+- **Older scripts:** a few `Tests/*.ps1|*.py` policy checks remain from an earlier, heavier process
+  (for example `Test-AuthoringProbePolicy.ps1` for the packaged QA guard). Nothing runs them
+  routinely. That process's receipts stay in `docs/research/`.
 
 ## 10. Size, hotspots and debt (measured 2026-09-28)
 
-Largest files (lines): `HomesteadWorld.cpp` 4009, `HomesteadController.cpp` 3965, `FernSpike.cpp`
-3336, `HomesteadSimulation.cpp` 2992, `SHomesteadMenu.cpp` 2983, `HomesteadNativeMenuTest.cpp` 2549,
-`HomesteadCharacter.cpp` 2337. `HomesteadController.h` declares about 440 members (some 300 of them functions). Churn in the last 14
+Largest files (lines): `HomesteadWorld.cpp` 4009, `HomesteadController.cpp` 3965,
+`HomesteadSimulation.cpp` 2992, `SHomesteadMenu.cpp` 2983, `HomesteadNativeMenuTest.cpp` 2549,
+`HomesteadCharacter.cpp` 2337 (the 3336-line `FernSpike.cpp` editor probe was removed the same day).
+`HomesteadController.h` declares about 440 members (some 300 of them functions). Churn in the last 14
 days: controller 79 commits, world 59, character 48, menu 46.
 
 Longest functions: test route builders (`PrepareGeneratedWorldChecks` 1049 lines, `PrepareFullLoop`
@@ -221,5 +222,5 @@ Known debt, highest payoff first (the plan is in `openspec/changes/improve-code-
    `Item::DiggingStick`). Harmless for saves (positional), confusing for readers.
 8. **Mixed HUD technologies:** Canvas (`AHomesteadHUD`) and Slate (`SHomesteadHudScale` rescales
    Slate into Canvas units so they line up).
-9. **Editor probe code:** `FernSpike.cpp` (3.3k lines) and its policy scripts only serve the old
-   authoring-probe commandlet.
+9. ~~Editor probe code~~: `FernSpike.cpp`, the authoring-probe commandlet and the policy scripts
+   that only served them were removed (2026-09-28).

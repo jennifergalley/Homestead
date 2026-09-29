@@ -20,10 +20,17 @@ FString FromUtf8(const std::string& Text) { return UTF8_TO_TCHAR(Text.c_str()); 
 
 // Agent editors (Start-EditorMcp.ps1 passes -HomesteadSkipNewGameSetup) start new Estate games with the
 // default names instead of stopping on Appearance and "Who comes home?". Set it to 0 in the console to
-// test the setup steps themselves.
-TAutoConsoleVariable<int32> CVarSkipNewGameSetup(TEXT("homestead.SkipNewGameSetup"),
-    FParse::Param(FCommandLine::Get(), TEXT("HomesteadSkipNewGameSetup")) ? 1 : 0,
-    TEXT("1: a new Estate game skips the Appearance and Names steps and uses the default names."));
+// test the setup steps themselves. The default (-1) follows the command line, read on use: a monolithic
+// game constructs this during static init, before FCommandLine is set, and reading it there crashes.
+TAutoConsoleVariable<int32> CVarSkipNewGameSetup(TEXT("homestead.SkipNewGameSetup"), -1,
+    TEXT("1: a new Estate game skips the Appearance and Names steps and uses the default names. 0: it doesn't. "
+         "-1 (default): skip only with -HomesteadSkipNewGameSetup on the command line."));
+
+bool SkipNewGameSetup()
+{
+    const int32 Value = CVarSkipNewGameSetup.GetValueOnGameThread();
+    return Value < 0 ? FParse::Param(FCommandLine::Get(), TEXT("HomesteadSkipNewGameSetup")) : Value != 0;
+}
 }
 
 FString AHomesteadController::EstateName() const
@@ -39,7 +46,7 @@ FString AHomesteadController::CurrentSaveLabel() const
 void AHomesteadController::BeginNewGameSetup()
 {
     if (IsFailed()) return;
-    if (CVarSkipNewGameSetup.GetValueOnGameThread() != 0)
+    if (SkipNewGameSetup())
     {
         const auto Result = Sim.SetNames(Homestead::Manor::DefaultHeroineName, Homestead::Manor::DefaultFamilyName,
             Homestead::Manor::DefaultEstateName);

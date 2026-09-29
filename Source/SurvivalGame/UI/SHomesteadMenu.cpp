@@ -690,7 +690,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         return SNew(SVerticalBox)
             + SVerticalBox::Slot().AutoHeight().Padding(24)[ Text(TEXT("Time to try again"), 32) ]
             + SVerticalBox::Slot().FillHeight(1).Padding(24)
-            [ Text(TEXT("You ran out of food or energy.\n\nReturn to a recovery checkpoint, or open Settings to quit. No failed state will replace your usable checkpoint."), 23) ]
+            [ Text(TEXT("You ran out of food.\n\nReturn to a recovery checkpoint, or open Settings to quit. No failed state will replace your usable checkpoint."), 23) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
             [ RegisterButton(MakeButton(TEXT("Retry checkpoint  [A / Enter]"), [this]() { Controller->MenuRetry(); }), ERegion::Recovery, 0) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
@@ -1813,6 +1813,8 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
         {
             if (Known && Homestead::IsEdible(Item))
                 Add(TEXT("Eat 1"), Act(EHomesteadItemAction::Primary, 1), EHomesteadItemAction::Primary);
+            if (Known && (Item == Homestead::Item::OilFlask || Item == Homestead::Item::OilLamp))
+                Add(TEXT("Fill the lamp"), [this]() { Controller->MenuRefillLamp(); });
             if (Known && AHomesteadController::CanPinToHotbar(Item))
                 Add(Controller->IsPinnedToHotbar(Item) ? TEXT("Unpin from hotbar") : TEXT("Pin to hotbar"),
                     Act(EHomesteadItemAction::Pin, 1), EHomesteadItemAction::Pin);

@@ -182,8 +182,8 @@ the tree records in `EstateScenery.bin`, and writes:
 - `Saved/Ground/T_EstateGround.png` (2048², over the map like `T_EstateRoadSDF`): R = grass density,
   G = grass height, B = dryness, A = wear (trodden soil round the manor, the road shoulders, the mill,
   mine and gateway).
-- `Saved/Ground/T_EstateCanopy.png`: R = tree canopy (the broadleaf and fir records, kinds 0-1, as
-  7 m crowns blurred to a 9 m edge), G = stony soil on steep banks outside the cliff layer.
+- `Saved/Ground/T_EstateCanopy.png`: R = tree canopy (every tree kind in `SCENERY_TREES` of
+  `Scripts/Map/bake_estate_map.py`, each at its own crown radius times its scale, with a soft edge), G = stony soil on steep banks outside the cliff layer.
 - `Content/SurvivalGame/Estate/Runtime/EstateGround.bin`: "HGD1", u16 size (1024), then per cell the
   most grass anywhere in it (u8) and the surface under it (u8: Soil, Grass, Road, Sand, Rock, Woodland,
   Moor, Water). The game reads it through `HomesteadEstateGround` for the meadow and footsteps.
@@ -205,11 +205,22 @@ second rebuilds `M_EstateLandscape` with its ground-finish pass.
 At runtime `UHomesteadGrassField` (`Source/SurvivalGame/HomesteadGrassField.*`) instances the patches
 in 6 m chunks within 51 m of the camera. `AHomesteadWorld::Refresh` updates it every 0.25 s. It writes
 three clear circles per patch into per-instance custom data, one for each nearby interactable, world
-drop or plot, and skips patches under building pieces. Inside those circles the sward is grazed to a fifth of its height, with a ragged edge, rather than left bare. Blades near a low game camera, and along its line to the heroine, are grazed too (`MPC_CameraSafeFoliage`), so the camera never looks through a wall of grass. `M_EstateGrass` thins blades by rank with
+drop or plot, and skips patches under building pieces. A garden plot is a bare square instead of a circle (a negative radius in the custom data: the plot's half size plus 15 cm), so tilled beds and planted crops never have blades through them. Inside those circles the sward is grazed to a fifth of its height, with a ragged edge, rather than left bare. Blades near a low game camera, and along its line to the heroine, are grazed too (`MPC_CameraSafeFoliage`), so the camera never looks through a wall of grass. `M_EstateGrass` thins blades by rank with
 distance (`GrassFade`: blades ranked below min(1, (12/d)^1.7) show). It also clears the road's wheel
 tracks, bends the blades in gusts (`GrassWind`) and parts them round the heroine (`GrassPush`).
 `HomesteadGrassField.h`'s LOD distances depend on `GrassFade` and the LOD keep fractions, so change
 all three together.
+
+MVP woodland zone: when `Scripts/Terrain/mvp_woodland.json` exists (the woodland-biome lane's
+region: `polygon` in metres, optional `floor_edge_m` (default 15) and `glades`), no meadow blades grow
+inside the polygon and footsteps are woodland floor there, since that lane scatters the survival
+prototype's own grass clumps. `T_EstateCanopy.B` ramps the prototype's forest floor in from the edge
+to `floor_edge_m` inside, along a wandering line. The floor is the prototype's `M_GrassGroundBlend` as the generated woodland drew it away from the
+creek: `T_Ground*` (brown mud and leaves) mixed with 7-27 % `T_GrassGround*` in slow patches, at 3 m
+world tiling, easing into a 12.9 m copy past 60 m. Glades take a lighter mix. Tree canopy kinds
+and crown radii come from `SCENERY_TREES` in `Scripts/Map/bake_estate_map.py`, with a fallback in
+`bake_ground.py` for kinds 13-16 and 19-22 until it lists them. Order after the woodland and trees
+branches land: `scatter.py`, then `bake_ground.py` and `build_ground.py`.
 
 Weather and night: `build_ground.py` also makes `MPC_EstateGround` (Wetness, Daylight), which
 `AHomesteadWorld::UpdateLighting` sets every refresh. The ground wets through over the first half hour

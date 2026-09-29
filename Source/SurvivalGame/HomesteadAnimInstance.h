@@ -38,6 +38,14 @@ public:
     uint32 EatStarts() const;
     // Crafting by hand (AN_HeroineMH_CraftHands) layered from spine_02 up while a recipe is held.
     float CraftWeight() const;
+    // The oil lamp held up ahead of her (AN_HeroineMH_LampRaised), over the right arm and head.
+    void SetLampRaised(bool bRaised);
+    float LampRaisedWeight() const;
+    // Kneeling to set the lamp down or take it up (AN_HeroineMH_LampSetDown).
+    void RequestLampKneel();
+    bool IsLampKneeling() const;
+    // Seconds into the kneel while it plays, else -1.
+    float LampKneelPhase() const;
     // Two-handed axe felling: Strokes cuts into the trunk (the clip's stroke cycle repeats).
     void RequestFell(int32 Strokes);
     // Curl the right hand's fingers around a held tool handle (0 open, 1 closed grip). At rest the

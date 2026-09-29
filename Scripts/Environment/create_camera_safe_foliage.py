@@ -277,6 +277,8 @@ def create_master(visibility_function, name, use_alpha):
     material.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
     material.set_editor_property("two_sided", True)
     material.set_editor_property("used_with_instanced_static_meshes", True)
+    # The woodland trees these dress (small broadleaf, fir, jacaranda) are Nanite meshes.
+    material.set_editor_property("used_with_nanite", True)
     material.set_editor_property("opacity_mask_clip_value", 0.333)
 
     default = SURFACES["Grass"]

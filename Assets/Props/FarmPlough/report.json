@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "FarmPlough",
+  "description": "Abandoned 1850s English/Cornish horse swing plough tipped onto its landside: rotten wood, cast-iron mouldboard, share, landside, knife coulter and draught clevis.",
+  "collision": "convex",
+  "triangle_budget": 40000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/farm_plough.py",
+  "source_sha256": "dbe382727999079934dc16902fc1aa55c52f766cc91ebbd24d033411c88df6b1",
+  "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture. Researched from period English/Ransomes-type swing plough construction.",
+  "meshes": {
+    "SM_FarmPlough": {
+      "vertices": 6707,
+      "triangles": 13146,
+      "size_cm": [
+        280.95,
+        83.78,
+        100.15
+      ],
+      "materials": [
+        {
+          "name": "M_FarmPlough",
+          "textures": {
+            "basecolor": "T_FarmPlough_basecolor.png",
+            "roughness": "T_FarmPlough_roughness.png",
+            "metallic": "T_FarmPlough_metallic.png",
+            "normal": "T_FarmPlough_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FarmPlough_basecolor.png",
+          "roughness": "T_FarmPlough_roughness.png",
+          "normal": "T_FarmPlough_normal.png",
+          "ao": "T_FarmPlough_ao.png",
+          "metallic": "T_FarmPlough_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -8
+        ],
+        "focus": [
+          0.15418493270874023,
+          0.3861210370063782,
+          0.34
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "detail_distance": 1.9,
+        "eye_distance": 4.0
+      },
+      "fbx": "SM_FarmPlough.fbx",
+      "sha256": "af8e7ae9de42bc70dfc7c4c9fd9b0ea2a4c4eb894643c4c618d16e15715c0ecf",
+      "preview": "preview_SM_FarmPlough.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FarmPlough_hero.png",
+          "detail": "beauty_SM_FarmPlough_detail.png",
+          "eye": "beauty_SM_FarmPlough_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -8
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Extents are Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "Bottom centre of the settled tipped plough at z=0.",
+  "orientation": "Long beam axis runs along X with draught clevis/hitch toward +X; the plough is already tipped onto its landside for placement in grass.",
+  "authored_scale_m": {
+    "overall_length": 2.82,
+    "tipped_width": 1.04,
+    "tipped_height": 1.12
+  },
+  "textures": {
+    "T_FarmPlough_basecolor.png": "f4264f71ee50fa70e32797e1f5e23a0be3e3b94cb0d3498d6063dc0297b6816a",
+    "T_FarmPlough_roughness.png": "c563e3bb0200105e06be5c593fdd7c1608e46d85c0ae358d15e383a2d402c8c2",
+    "T_FarmPlough_metallic.png": "b59b16b27c41edcf894fd8ecf28a8c17dfc02dabaa726899061ffc61464c884d",
+    "T_FarmPlough_normal.png": "2bc597021c31bb7372a24b885eb862dafa751f442b6c791ccd29ab47484b4bdf"
+  }
+}

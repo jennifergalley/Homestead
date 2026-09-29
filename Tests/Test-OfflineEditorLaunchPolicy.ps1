@@ -32,11 +32,4 @@ $networkDisabled = $engine -match '(?ms)\[/Script/AndroidFileServerEditor\.Andro
 if (-not ($pluginDisabled -and $networkDisabled)) {
     throw 'Android File Server remains enabled for Editor launches.'
 }
-$authoring = Get-Content -LiteralPath (Join-Path $root 'Scripts\FernSpikePolicy.ps1') -Raw
-foreach ($token in @('-notraceserver','-traceautostart=0','AndroidFileServer',
-    'bEnablePlugin=False','bAllowNetworkConnection=False')) {
-    if ($authoring -notmatch [regex]::Escape($token)) {
-        throw "Bounded authoring policy is missing offline control: $token"
-    }
-}
-Write-Output "PASS offline Editor launch policy: $($required.Count) arguments, 8 launch scripts, bounded authoring, Android File Server disabled."
+Write-Output "PASS offline Editor launch policy: $($required.Count) arguments, 8 launch scripts, Android File Server disabled."

@@ -6,7 +6,7 @@
   "triangle_budget": 90000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/sycamore.py",
-  "source_sha256": "e14159ca54d9f390374595ab36db41305cad3340a4cf961e2b06d912955e1703",
+  "source_sha256": "d57f626487ede1e60db6a366534c6d2fd38b4d8cd27b02f3bdc862942c700b2e",
   "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
   "meshes": {
     "SM_Sycamore": {
@@ -58,7 +58,7 @@
         "detail_fstop": 11.0
       },
       "fbx": "SM_Sycamore.fbx",
-      "sha256": "78e6771363e5f763548a59be22c713516a97953e75db2ce4d6d8119f4738c55b",
+      "sha256": "761200c3ab009474ed2a5d063b92a8ba3023517a9eed17fd1f7464ba97322581",
       "preview": "preview_SM_Sycamore.png"
     },
     "SM_Sycamore_LOD1": {
@@ -110,7 +110,7 @@
         "detail_fstop": 11.0
       },
       "fbx": "SM_Sycamore_LOD1.fbx",
-      "sha256": "d76c3f6322a79e67450f02ed916988c3fe729afbaa997c623856a2dcc8bf2c16",
+      "sha256": "3cab889e51da68ee7274f11b192c0f1b5964957daa27b56e591a99465b303c5d",
       "preview": "preview_SM_Sycamore_LOD1.png"
     },
     "SM_Sycamore_LOD2": {
@@ -162,7 +162,7 @@
         "detail_fstop": 11.0
       },
       "fbx": "SM_Sycamore_LOD2.fbx",
-      "sha256": "7fb4bf767a79ee2bea3ceb674ccb318d4cbd7a2db9605c87b86c719e9ca86c3a",
+      "sha256": "3e9978e638a1feab8eb9ac3cd1a6dd728fd60d45b6a021db9d9a728f06fc4fc0",
       "preview": "preview_SM_Sycamore_LOD2.png"
     },
     "SM_Sycamore_LOD3": {
@@ -214,7 +214,7 @@
         "detail_fstop": 11.0
       },
       "fbx": "SM_Sycamore_LOD3.fbx",
-      "sha256": "544d46bf8cf6fd683ecde1e6f89c7c01591fd0a70ca9a9e7a1ae2e9dad1c1f73",
+      "sha256": "da5437182cc50afaa3d24612d6f0316fb0cfafcf84997cc7924feac2234a5566",
       "preview": "preview_SM_Sycamore_LOD3.png"
     }
   },
@@ -249,12 +249,17 @@
     ],
     "radius_cm": 31.9,
     "length_cm": 276.3,
-    "note": "Unreal space (Y mirrored from Blender). Length is the cylinder part; the capsule spans the ground to the first fork."
+    "axis": [
+      0.0545,
+      0.0296,
+      0.9981
+    ],
+    "note": "Unreal space (Y mirrored from Blender). Length is the cylinder part; the capsule spans the ground to the first fork along the trunk axis."
   },
   "textures": {
-    "T_SycamoreBark_basecolor.png": "dd8f1b07f7d6905ef265c4a578148a4cd58a6f7626742908d0460a8852368d08",
-    "T_SycamoreBark_normal.png": "4496fd53c5392917d253d5822ae6aa709c62b9f9edc206fc4854d797cefbd3f2",
-    "T_SycamoreBark_roughness.png": "51306ae36a155c44e72fd1331bb657c317ff9080903d0a7b89e876eab0e27ad7",
+    "T_SycamoreBark_basecolor.png": "48a2ac1eec37f8c07751e031f94545a727d02be8c68c613c892829252467cb1c",
+    "T_SycamoreBark_normal.png": "236e108bf027169be3b079e8493cad191d435ecb281c640a43a13c3c26d8ef9c",
+    "T_SycamoreBark_roughness.png": "e44b1b569bb117a8b912d357358cc8b95738316c4d329051b1c4c0085b2c7414",
     "T_SycamoreLeaves_basecolor.png": "5d6521cf68dd78af2e22d1a132f9d13f815c8db1c69fa30d1b099c3286295ab8",
     "T_SycamoreLeaves_normal.png": "4d319463ab147d4962289cb2f8e14ba6b734e52621b537659cb37210abffcc92",
     "T_SycamoreLeaves_roughness.png": "d3a6b440aa6642273e3be795123dded146013b5a62d175e2e9ecbfaad04c7f9f"

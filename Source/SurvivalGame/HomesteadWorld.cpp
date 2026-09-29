@@ -10,6 +10,8 @@
 
 #include "HomesteadCharacter.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "HomesteadLampLook.h"
+#include "Kismet/GameplayStatics.h"
 #include "Async/Async.h"
 #include "Async/ParallelFor.h"
 #include "Components/DirectionalLightComponent.h"
@@ -588,6 +590,8 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     UpdateFallingTree(DeltaSeconds);
     UpdateHearthFlicker(DeltaSeconds);
+    LampDropFlickerTime += DeltaSeconds;
+    HomesteadLampLook::SetLit(LampDropFlame.Get(), LampDropLight.Get(), bLampDropLit, LampDropFlickerTime, LampDropGlass.Get());
     UpdateHearthSound(DeltaSeconds);
     UpdateClearPops(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
@@ -1062,16 +1066,26 @@ int32 AHomesteadWorld::StartingViewObstructions(FVector Focus, FVector Camera) c
 
 namespace
 {
+// The MVP woodland's interactables (add-mvp-woodland-biome; Scripts/Terrain/mvp_woodland.py).
+constexpr int32 MvpWoodlandIdBase = 560000;
+constexpr int32 MvpWoodlandIdEnd = 570000;
+bool IsMvpWoodlandId(int32 Id) { return Id >= MvpWoodlandIdBase && Id < MvpWoodlandIdEnd; }
+
 struct FEstateSceneryKind
 {
     const TCHAR* Path;
     bool bCollision;
     float CullCm;
     bool bTree;
+    // Trees: how far the root flare's rim rises above the mesh's lowest vertex. Other kinds: how far
+    // to sink the pivot (cm at scale 1), as the woodland's underbrush roots into uneven ground.
     float RimLift;
+    // Trees: the root flare's reach. Other kinds: the footprint radius they settle on (lowest
+    // ground under it, as the woodland's granite does); 0 sits on the ground at the pivot.
     float Footprint;
+    bool bShadow = false;
 };
-// Index = the kind byte written by Scripts/Terrain/scatter.py. Keep the two in step.
+// Index = the kind byte written by Scripts/Terrain/scatter.py (19+: mvp_woodland.py). Keep them in step.
 const FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland"), true, 0, true, 3, 41},
     {TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir"), true, 0, true, 30, 76},
@@ -1091,6 +1105,37 @@ const FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/SurvivalGame/Environment/Trees/Oak/SM_Oak.SM_Oak"), true, 0, true, 30, 60},
     {TEXT("/Game/SurvivalGame/Environment/Trees/Beech/SM_Beech.SM_Beech"), true, 0, true, 30, 50},
     {TEXT("/Game/SurvivalGame/Environment/Trees/Sycamore/SM_Sycamore.SM_Sycamore"), true, 0, true, 30, 45},
+    // Windswept hawthorn (hawthorn.py) for wood fringes and hedges. Its capsule leans downwind (+X), so the
+    // capsule centre sits ~46 cm from the trunk base: a 50 cm footprint keeps the root ring round the base.
+    {TEXT("/Game/SurvivalGame/Environment/Trees/Hawthorn/SM_Hawthorn.SM_Hawthorn"), true, 0, true, 30, 50},
+    // Woodland understory shrubs (holly.py, hazel_coppice.py): walk-through, no collision.
+    {TEXT("/Game/SurvivalGame/Environment/Trees/Holly/SM_Holly.SM_Holly"), false, 14000, false, 0, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Trees/HazelCoppice/SM_HazelCoppice.SM_HazelCoppice"), false, 14000, false, 0, 0},
+    // The MVP woodland (add-mvp-woodland-biome), with the MVP's cull distances and shadows. Its trees'
+    // rim lift and flare reach are ResolveGeneratedTreeVisual's.
+    {TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_Jacaranda.SM_Jacaranda"), true, 0, true, 19, 240},
+    {TEXT("/Game/Trials/TreePalette_20260921_01/Meshes/SM_FirPole.SM_FirPole"), true, 0, true, 0, 20},
+    {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_a.SM_FirSapling_a"), false, 9000, false, 0, 0, true},
+    {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FirSapling_c.SM_FirSapling_c"), false, 9000, false, 0, 0, true},
+    {TEXT("/Game/SurvivalGame/Environment/Props/BlackberryBramble/SM_BlackberryBramble.SM_BlackberryBramble"), false, 9000, false, 4, 0, true},
+    {TEXT("/Game/SurvivalGame/Environment/Props/BlackberryBramble/SM_BlackberryBrambleLarge.SM_BlackberryBrambleLarge"), false, 9000, false, 4, 0, true},
+    {TEXT("/Game/SurvivalGame/Environment/Props/ToyonHedge/SM_ToyonHedge.SM_ToyonHedge"), false, 9000, false, 4, 0, true},
+    {TEXT("/Game/SurvivalGame/Environment/Props/DeerBrush/SM_DeerBrush.SM_DeerBrush"), false, 9000, false, 4, 0, true},
+    {TEXT("/Game/SurvivalGame/Environment/Props/Thimbleberry/SM_Thimbleberry.SM_Thimbleberry"), false, 9000, false, 4, 0, true},
+    {TEXT("/Game/SurvivalGame/Environment/Props/WildStrawberry/SM_WildStrawberry.SM_WildStrawberry"), false, 3800, false, 4, 0},
+    {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_b.SM_Fern02_b"), false, 7000, false, 0, 0},
+    {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_c.SM_Fern02_c"), false, 7000, false, 0, 0},
+    {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_d.SM_Fern02_d"), false, 7000, false, 0, 0},
+    {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_small_b.SM_GrassMedium01_small_b"), false, 4500, false, 0, 0},
+    {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tiny_a.SM_GrassMedium01_tiny_a"), false, 4500, false, 0, 0},
+    {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_a.SM_FlowerEmpodium_a"), false, 4800, false, 0, 0},
+    {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_FlowerEmpodium_b.SM_FlowerEmpodium_b"), false, 4800, false, 0, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteSpalls/SM_GraniteSpalls.SM_GraniteSpalls"), false, 9000, false, 0, 40, true},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteRubble/SM_GraniteRubble.SM_GraniteRubble"), false, 9000, false, 0, 40, true},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBlockTalus/SM_GraniteBlockTalus.SM_GraniteBlockTalus"), true, 24000, false, 0, 52},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBoulderLow/SM_GraniteBoulderLow.SM_GraniteBoulderLow"), true, 24000, false, 0, 72},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBoulderJointed/SM_GraniteBoulderJointed.SM_GraniteBoulderJointed"), true, 60000, false, 0, 160},
+    {TEXT("/Game/SurvivalGame/Environment/Props/GraniteSplitBoulder/SM_GraniteSplitBoulder.SM_GraniteSplitBoulder"), true, 0, false, 0, 400},
 };
 
 #pragma pack(push, 1)
@@ -1147,7 +1192,9 @@ bool AHomesteadWorld::BuildEstateScenery()
             Batch->SetCollisionProfileName(Kind.bCollision ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
             Batch->SetCollisionEnabled(Kind.bCollision ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
             Batch->SetCanEverAffectNavigation(false);
-            Batch->SetCastShadow(Kind.bTree || Kind.bCollision);
+            Batch->SetCastShadow(Kind.bTree || Kind.bCollision || Kind.bShadow);
+            // As the woodland's underbrush: gentle sway needn't redraw cached shadow pages every frame.
+            if (Kind.bShadow && !Kind.bTree) Batch->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Rigid;
             if (Kind.CullCm > 0) Batch->SetCullDistances(static_cast<int32>(Kind.CullCm * 0.8f), static_cast<int32>(Kind.CullCm));
             // Wind sway only near her: beyond 60 m it's invisible, and animated Nanite foliage there would
             // keep invalidating the cached virtual shadow maps of the whole wood every frame.
@@ -1173,6 +1220,16 @@ bool AHomesteadWorld::BuildEstateScenery()
                 Root = FMath::Min(Root, HomesteadEstateTerrain::Height(Record.X + Radius * FMath::Cos(Angle), Record.Y + Radius * FMath::Sin(Angle)));
             }
             Base.Z = Root - (4.0f + Kind.RimLift * Record.Scale);
+        }
+        else if (!Kind.bTree)
+        {
+            const float Reach = Kind.Footprint * Record.Scale * 0.55f;
+            for (int32 Step = 0; Reach > 0 && Step < 6; ++Step)
+            {
+                const float Angle = Step * UE_TWO_PI / 6.0f;
+                Base.Z = FMath::Min(Base.Z, HomesteadEstateTerrain::Height(Record.X + Reach * FMath::Cos(Angle), Record.Y + Reach * FMath::Sin(Angle)));
+            }
+            Base.Z -= Kind.RimLift * Record.Scale;
         }
         Transforms[Record.Kind].Add(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Record.Scale), FVector(Record.Scale)));
     }
@@ -2367,13 +2424,23 @@ bool AHomesteadWorld::ResolveGeneratedTreeVisual(const Homestead::ResourceNode& 
     if (bFixedEstate && Node.kind == Homestead::ResourceKind::ForestTree)
     {
         // Estate trees are baked placements, not generated entities: pick a period-plausible
-        // broadleaf or conifer and a stable yaw and size from the placement id.
+        // broadleaf or conifer and a stable yaw and size from the placement id. The MVP woodland's
+        // trees (ids 560000+) take the MVP palette: 60% broadleaf, 35% fir, 5% jacaranda.
         const uint32 Hash = HashCombine(GetTypeHash(Node.id), 0x9E3779B9u);
-        Entity.paletteRole = Hash % 5 == 0 ? Homestead::Generation::TreePaletteRole::ConiferMature
+        const bool bMvpWoodland = IsMvpWoodlandId(Node.id);
+        const uint32 PaletteRoll = Hash % 100;
+        Entity.paletteRole = bMvpWoodland
+            ? (PaletteRoll < 60 ? Homestead::Generation::TreePaletteRole::BroadleafMature
+                : PaletteRoll < 95 ? Homestead::Generation::TreePaletteRole::ConiferMature
+                : Homestead::Generation::TreePaletteRole::WoodlandAccent)
+            : Hash % 5 == 0 ? Homestead::Generation::TreePaletteRole::ConiferMature
             : Homestead::Generation::TreePaletteRole::BroadleafMature;
         Entity.variantIndex = 0;
         Entity.yawDegrees = static_cast<decltype(Entity.yawDegrees)>((Hash >> 8) % 360);
-        Entity.scalePermille = static_cast<decltype(Entity.scalePermille)>(900 + (Hash >> 16) % 260);
+        // AssignTreePalette's MVP sizes: 0.90 up to 1.04 (broadleaf), 1.05 (fir) or 1.06 (jacaranda).
+        const uint32 Spread = Entity.paletteRole == Homestead::Generation::TreePaletteRole::BroadleafMature ? 141
+            : Entity.paletteRole == Homestead::Generation::TreePaletteRole::ConiferMature ? 151 : 161;
+        Entity.scalePermille = static_cast<decltype(Entity.scalePermille)>(900 + (Hash >> 16) % (bMvpWoodland ? Spread : 260));
     }
     else if (Node.kind != Homestead::ResourceKind::ForestTree
         || Homestead::Generation::FindEntity(Descriptor, Node.key, Entity) != Homestead::Generation::Status::Ok)
@@ -3033,6 +3100,14 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         Component->SetRelativeTransform(FTransform(Rotation, Ground - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));
         Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Component->SetCollisionResponseToAllChannels(ECR_Ignore);
+        if (IsMvpWoodlandId(Node.id) && !bProduce
+            && (Node.kind == Homestead::ResourceKind::BrambleThin || Node.kind == Homestead::ResourceKind::BrambleThicket))
+        {
+            // As in the MVP, a bramble stops her until she cuts it; the camera boom and traces pass.
+            Component->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+            Component->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+            Component->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+        }
         if (Node.kind == Homestead::ResourceKind::Stones && RockMaterial)
             Component->SetMaterial(0, RockMaterial);
         Component->SetGenerateOverlapEvents(false);
@@ -3340,10 +3415,16 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     switch (Node.kind)
     {
     case Homestead::ResourceKind::BrambleThin:
-        Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThin")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.1f));
+        if (IsMvpWoodlandId(Node.id))
+            Whole(Load(TEXT("BlackberryBramble"), TEXT("SM_BlackberryBramble")), FVector2D::ZeroVector, 0, Random.FRandRange(0.85f, 1.2f));
+        else
+            Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThin")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.1f));
         break;
     case Homestead::ResourceKind::BrambleThicket:
-        Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThicket")), FVector2D::ZeroVector, 0, Random.FRandRange(0.95f, 1.1f));
+        if (IsMvpWoodlandId(Node.id))
+            Whole(Load(TEXT("BlackberryBramble"), TEXT("SM_BlackberryBrambleLarge")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.15f));
+        else
+            Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThicket")), FVector2D::ZeroVector, 0, Random.FRandRange(0.95f, 1.1f));
         break;
     case Homestead::ResourceKind::BrambleBank:
         Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleBank")), FVector2D::ZeroVector, 0, Random.FRandRange(1.0f, 1.12f));
@@ -3967,8 +4048,47 @@ void AHomesteadWorld::BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::
     }
 }
 
+bool AHomesteadWorld::BuildLampDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop)
+{
+    // Stand it on whatever is underfoot: the terrain outdoors, a floor or hearthstone indoors. Start
+    // low enough to miss lintels and roofs, and skip starts inside a wall's collision.
+    FVector Base = AtGround(Drop.position.x, Drop.position.y, 0.0f);
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadLampDrop), false, UGameplayStatics::GetPlayerPawn(this, 0));
+    for (const float Lift : {90.0f, 45.0f, 15.0f})
+    {
+        FHitResult Hit;
+        if (GetWorld() && GetWorld()->LineTraceSingleByChannel(Hit, Base + FVector(0, 0, Lift), Base - FVector(0, 0, 150), ECC_WorldStatic, Params)
+            && !Hit.bStartPenetrating)
+        {
+            Base.Z = Hit.ImpactPoint.Z;
+            break;
+        }
+    }
+    auto* Stand = NewObject<USceneComponent>(this, MakeUniqueObjectName(this, USceneComponent::StaticClass(), TEXT("LampDrop")));
+    Stand->SetupAttachment(GetRootComponent());
+    Stand->SetMobility(EComponentMobility::Movable);
+    Stand->SetWorldLocationAndRotation(Base, FRotator(0, Drop.id * 53 % 360, 0));
+    Stand->RegisterComponent();
+    const TArray<UStaticMeshComponent*> Parts = HomesteadLampLook::AddParts(this, Stand, FVector::ZeroVector, TEXT("LampDropPart"));
+    if (Parts.IsEmpty())
+    {
+        Stand->DestroyComponent();
+        return false;
+    }
+    Visual.Components.Add(Stand);
+    for (UStaticMeshComponent* Part : Parts) if (Part) Visual.Components.Add(Part);
+    UPointLightComponent* Light = HomesteadLampLook::AddLight(this, Stand, FVector::ZeroVector, TEXT("LampDropLight"));
+    if (Light) Visual.Components.Add(Light);
+    LampDropFlame = Parts.Last();
+    LampDropGlass = Parts.Num() >= 3 ? Parts[1] : nullptr;
+    LampDropLight = Light;
+    HomesteadLampLook::SetLit(Parts.Last(), Light, bLampDropLit, LampDropFlickerTime, LampDropGlass.Get());
+    return true;
+}
+
 void AHomesteadWorld::BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop)
 {
+    if (Drop.wearableId == 0 && Drop.item == Homestead::Item::OilLamp && BuildLampDrop(Visual, Drop)) return;
     FLinearColor Tint(0.56f, 0.43f, 0.22f);
     if (Drop.wearableId != 0) Tint = FLinearColor(0.64f, 0.42f, 0.52f);
     else
@@ -4005,8 +4125,8 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float SolarAngle = (Hour - 6.0f) / 24.0f * 2.0f * PI;
     const float Elevation = FMath::Sin(SolarAngle);
     const float Daylight = FMath::SmoothStep(-0.1f, 0.25f, Elevation);
-    // Matches the simulation's deterministic three-day spring weather cycle.
-    const bool bRaining = static_cast<int64>(State.hour / 24.0) % 3 == 1 && Hour >= 9.0f && Hour < 15.0f;
+    // The simulation's three-day spring weather (Homestead::IsRainingAt).
+    const bool bRaining = Homestead::IsRainingAt(State.hour);
     const FRotator SunRotation(-Elevation * 65.0f, (Hour - 6) * 15.0f - 70.0f, 0);
     const FRotator MoonRotation(Elevation * 65.0f, (Hour - 6) * 15.0f + 110.0f, 0);
     // With ray-traced sun shadows, follow the sun every refresh (about 0.025 degrees at normal game
@@ -4055,9 +4175,10 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     if (GroundParameters && GetWorld())
         if (UMaterialParameterCollectionInstance* GroundValues = GetWorld()->GetParameterCollectionInstance(GroundParameters))
         {
-            const bool bRainDay = static_cast<int64>(State.hour / 24.0) % 3 == 1;
-            const float Wetness = !bRainDay ? 0.0f
-                : FMath::SmoothStep(9.0f, 9.5f, Hour) * (1.0f - FMath::SmoothStep(15.0f, 19.0f, Hour));
+            constexpr float RainStart = static_cast<float>(Homestead::RainStartHour);
+            constexpr float RainEnd = static_cast<float>(Homestead::RainEndHour);
+            const float Wetness = !Homestead::IsRainDay(State.hour) ? 0.0f
+                : FMath::SmoothStep(RainStart, RainStart + 0.5f, Hour) * (1.0f - FMath::SmoothStep(RainEnd, RainEnd + 4.0f, Hour));
             GroundValues->SetScalarParameterValue(TEXT("Wetness"), Wetness);
             GroundValues->SetScalarParameterValue(TEXT("Daylight"), Daylight);
         }
@@ -4370,6 +4491,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
             Visual.Signature = Signature;
         }
     }
+    bLampDropLit = Simulation.LampOil() > 0.0;
     RemoveMissing(DropVisuals, NearDrops);
     for (const auto& Drop : NearDrops)
     {

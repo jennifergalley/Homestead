@@ -1,0 +1,19 @@
+{
+  "_comment": "The MVP woodland region (add-mvp-woodland-biome): metres, +X north, +Y east. scatter.py scatters the MVP survival game's woodland inside it; the ground bake (bake_ground.py) gives it the MVP forest floor. edge_m is the ecotone width inside the polygon.",
+  "polygon": [
+    [130.0, -1135.0],
+    [130.0, -830.0],
+    [60.0, -800.0],
+    [-40.0, -790.0],
+    [-140.0, -810.0],
+    [-240.0, -860.0],
+    [-300.0, -930.0],
+    [-310.0, -1135.0]
+  ],
+  "edge_m": 25.0,
+  "glades": [
+    [-160.0, -880.0, 11.0],
+    [40.0, -960.0, 9.0],
+    [-60.0, -1070.0, 8.0]
+  ]
+}

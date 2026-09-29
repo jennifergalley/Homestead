@@ -101,6 +101,7 @@ NAME = "FlintAxe"
 COLLISION = "convex"
 TRIANGLE_BUDGET = 120000
 BAKE = {"size": 2048, "samples": 96}                           # procedural -> texture maps
+BAKE_MESHES = {"SM_OilLamp"}                                   # optional: bake only these (default: every mesh)
 BEAUTY = {"pose": (90, 0, 28), "focus": (0.02, 0.0, 0.50)}     # lay it down; close-up target
 
 def build(kit):
@@ -373,6 +374,44 @@ scratch with two shared modules in `Scripts\Blender`:
 - `$env:HOMESTEAD_REUSE_TEXTURES = '1'` reuses the existing PNGs. That gives quick,
   geometry-only iterations (seconds instead of minutes for a 4K atlas). Set it back to
   `'0'` after any painting change.
+
+### Trees and woodland shrubs (`homestead_tree.py`)
+
+The Cornish woodland set (`oak`, `beech`, `sycamore`, `hawthorn`, `holly`, `hazel_coppice`) is grown
+by `homestead_tree.py` (`T`, on top of `S` and `F`; its docstring has the full design). A recipe gives
+a `SPEC` dict, a bark painter (`T.paint_bark`, styles `fissured`, `smooth` and `plated`) and leaf
+clusters (`T.cluster_layout` + `T.paint_cluster`, far `T.paint_mass`), then calls
+`T.build(kit, SPEC, bark, leaves, CLUSTERS, MASS, "SM_" + NAME)`. The output is `SM_<Name>` plus
+`_LOD1`..`_LOD3` with two material slots, bark then leaves, both on `M_PropFoliage` in Unreal.
+
+- **Shape.** Level 0 is the trunk: `low_frac`/`low_elev`/`low_length` add low, spreading limbs
+  (oak). A windswept thorn uses `bias`/`azimuth` to lean and stream the crown downwind (hawthorn:
+  crown toward +X, wind from -X). Multi-stemmed plants list `crowns` and set `clumps=True`
+  (holly: 2 stems; hazel coppice: an 8-crown stool with 15 poles).
+- **Foliage.** Cluster cards (painted twigs with 10-40 leaves) sit on the outer finest branches.
+  Normals bend toward the crown ellipsoid (`normal_blend`), so the canopy shades as one volume.
+  A bare base (coppice, shrubs) means `crown_base`, `foliage.min_z` and the shell `z_min` are
+  too high. Lower them and start level 1 lower.
+- **Collision.** Trees write `REPORT["capsule"]` via `T.capsule_report(cap)`, which gives radius,
+  length, centre and `axis` in cm. Import builds it as the only simple shape (`SphylElems[0]`),
+  tilted along `axis` for leaning trunks. Shrubs set `COLLISION = "none"`, `"blocking": False` and
+  omit the capsule.
+- **Budget.** About 40-85k triangles at LOD0, 4-12k at LOD1, 0.6-2k at LOD2 and 175-500 at LOD3
+  (trunk plus a few big mass cards). Each tree has a 2K bark set and a 2K leaf atlas.
+- **Review.** `blender -b Assets\Props\<N>\<N>.blend --python Scripts\Blender\render_tree_review.py -- --samples 48 --view eye|close|under|far|lods`
+  (`--view` can repeat) writes `review_<view>.png`. Use `under` to judge bark, `close` for leaf
+  shape, `far` and `lods` for the 150 m+ read. The ground line comes from `report.json`
+  `tree.ground_line_cm`.
+- **Repainting one atlas.** `HOMESTEAD_REUSE_TEXTURES=1` reuses an atlas only when all three of
+  its PNGs exist. Delete `T_<Name>Bark_*.png` to repaint only the bark, or `T_<Name>Leaves_*.png`
+  to repaint only the leaves.
+- **Import.** A report `unreal_folder` sends trees to `/Game/SurvivalGame/Environment/Trees/<Name>`.
+  `nanite: true` enables Nanite foliage settings with area preservation, so far canopies stay full.
+- **In-game test.** `Scripts\Blender\tree_grove_test.py` drops a HISM grove (up to 2000 instances,
+  traced onto the landscape) in PIE on the Estate; see its docstring. HighResShot doesn't capture
+  stat overlays. Don't use `startfpschart`: it opens Explorer windows. Take `stat unit` or
+  `ProfileGPU` readings only inside a perf window (`Scripts\Start-PerfWindow.ps1` /
+  `Stop-PerfWindow.ps1`: your editor is the only Unreal process and no build is running).
 
 ## Outputs and review
 
