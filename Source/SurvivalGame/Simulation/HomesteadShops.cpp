@@ -200,6 +200,10 @@ Result Simulation::WaitForShop(int shopId, Point player)
     if (trial.state_.failed)
         return ShopBad("You're too hungry to wait until " + FormatHour(openHour) + ". Eat something first.", revision_,
             ResultCode::Unavailable);
+    // Worn out, she'd doze off in the street before it opens: that isn't the wait she agreed to.
+    if (trial.DozeCount() != DozeCount())
+        return ShopBad("You're too tired to wait until " + FormatHour(openHour) + ". Rest or eat first.", revision_,
+            ResultCode::Unavailable);
     // AdvanceGameHours passes no time at all past the calendar's supported limit.
     if (trial.state_.hour < state_.hour + hours - 1e-3)
         return ShopBad("The calendar has reached its supported limit.", revision_);

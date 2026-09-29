@@ -352,6 +352,12 @@ void WaitForTheStoreToOpen()
     const auto refused = sim.WaitForShop(store.shop, door);
     CHECK(!refused.ok && refused.message.find("too hungry") != std::string::npos);
     CHECK(sim.Serialize() == hungry);
+    // Too tired to last the night (she'd doze off in the street): refused before any time passes.
+    Edit(sim, 100.0, 3.0);
+    const std::string tired = sim.Serialize();
+    const auto sleepy = sim.WaitForShop(store.shop, door);
+    CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos);
+    CHECK(sim.Serialize() == tired);
     // Fed: she waits the night through, across midnight and the 6 AM rollover, and it's open.
     Edit(sim, 100.0, 100.0);
     const double before = sim.GetState().hour;
