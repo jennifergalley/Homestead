@@ -108,7 +108,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this]() { return Controller->ShouldShowHotbar()
             && Controller->HotbarWidget.IsValid(); });
     QueueGrant(Item::Billhook, 1);
-    Add(TEXT("Default ten-slot references add no capacity, resolve only the carried Billhook and pin Berries"),
+    Add(TEXT("Default ten-slot references add no capacity, resolve only the carried Billhook, pin Berries and place the lamp in slot 8"),
         [this, Capacity]()
         {
             *Capacity = Controller->Simulation().UsedCapacity();
@@ -124,7 +124,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Slots[4].Tool == Item::DiggingStick && !Slots[4].Available
                 && Slots[5].Tool == Item::WateringCan && !Slots[5].Available
                 && Slots[6].Tool == Item::Berries && Slots[6].Assigned && Slots[6].Food
-                && !Slots[7].Assigned && !Slots[9].Assigned
+                && Slots[7].Tool == Item::OilLamp && !Slots[9].Assigned
                 && Controller->Simulation().UsedCapacity() == *Capacity;
         });
     Add(TEXT("Carried selected Billhook is presented in the heroine hand"),
