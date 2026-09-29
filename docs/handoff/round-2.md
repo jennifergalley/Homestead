@@ -331,17 +331,18 @@ requirement.
   `MusicShuffleBagTests` in CMake, and verifies packaged multi-track load and run.
 - **Context hint** — **Menu `88180744` main-integrated, package pending; not shipped.** Plain wheel
   cycles the hotbar; Ctrl+wheel zooms while the book has focus.
-- **Weed visibility and grounding** — **Props weeds-only branch
-  `jennifergalley-weed-visuals @ 8418aa8e`, partial; not shipped.** This extends `889cfde8` with the
-  original imported `WeedClump` content and a pivot-seating correction. Day Estate PIE renders 157
-  clumps (dock 57, thistle 54, dandelion 46); every Landscape-trace pivot sits 0–10 cm below ground
-  (2.7 cm median, including 36% slopes), and pulling removes mesh plus focus. The native save path is
-  unchanged. At 4–7 m in tall grass the weeds still read visually modest.
+- **Weed visibility and grounding** — **Props `[ready]` `8418aa8e` for post-4 PM integration only;
+  not in the 4 PM package or shipped.** This extends `889cfde8` with the original imported
+  `WeedClump` asset and a pivot-seating correction. Day Estate PIE renders all 157 original clumps
+  (dock 57, thistle 54, dandelion 46); every Landscape-trace pivot sits 0–10 cm below ground
+  (2.7 cm median, including 36% slopes), and prompts appear only over drawn clumps. Native 8/8 and
+  Editor compile pass.
 
-  The branch still owes a dusk capture and PIE save/reload; the bounded rubble PIE is separate.
-  It is not eligible for the 4 PM merge until it reports `[ready]`. Only then may it establish that a
-  visible weed asset exists wherever the prompt says `"Weeds  E  Pull"` and that none float above
-  slopes or patches.
+  Dusk PIE (19:30–20:10) shows visible rosettes and their prompt; pulling dock changes the drawn count
+  156 → 155. F5/F9 clock rewind confirms the pulled clump stays gone while an untouched neighbour
+  remains. This completes the prior dusk and PIE reload debt. At 4–7 m in tall grass the weeds still
+  read visually modest. Props closed its editor at 13:10; the orchestrator verified no Unreal
+  processes remain.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` is main-integrated in 4 PM candidate `9175e34b`,
   package pending; not shipped.** Clearable slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
@@ -354,8 +355,10 @@ requirement.
   select nearby bramble/weed and resource reach can pass through a wall, matching current
   nearby-resource behavior. Props' editor is closed; weeds `8418aa8e` remains partial/excluded while
   it owes dusk and PIE reload evidence.
-- **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
-  hoe blade; a documentation-only answer is insufficient.
+- **Rusted hoe wayfinding** — **Props isolated partial `be810887`, not PIE-verified, 4 PM content or
+  shipped.** The salvage order is billhook → hoe → axe → scythe → pickaxe. Tilling without a hoe
+  directs her to search the old manor; the journal/guide points to the west rooms by the chimney.
+  Native tests cover reward order and old saves, but ordinary-play second-salvage verification remains.
 - **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
   visible **Energy** meter later, rather than a visible hunger-plus-energy pair. Keep serialized hunger
   compatibility; revise gentle-hunger penalties into energy/food balance and modest **Well Fed** meals.
@@ -369,12 +372,16 @@ requirement.
   section. Old saves' forecast can change, while accrued plot moisture persists; document that at
   implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
   after its lane-A work.
-- **Starter food and hoe wayfinding** — **Clearing / Props lane** (after weed/rubble work): put **3
-  pasties and 2 loaves** in the starter chest. Make the **hoe head** the second salvage reward after the
-  billhook, with a contextual refusal and west-chimney journal hints to find it. Pending; no code or
-  content is finished yet.
-- **Starter wardrobe** — **Props lane** (with starter food): put completed wearable clothes in the
-  starter chest so Jenny can change outfit; verify pack/chest capacity and saving. Pending; not shipped.
+- **Starter chest, wardrobe and hoe wayfinding** — **Props isolated partial `be810887` on
+  `jennifergalley-starter-chest`, descendant of `d2c48511`; not PIE-verified, 4 PM content or
+  shipped.** New Estate games seed the standing-room chest through the normal capacity path with its
+  pail and four branches plus 3 pasties, 2 bread, LinenShirt, LinenLongShirt, Trousers, FurCoat,
+  FurBoots, WovenSandals and TurnShoes. It runs only in `NewEstateGame`, never restocks on load, and
+  leaves the tunic worn. Native 8/8 covers exact contents, save round trip, reward order and old saves;
+  the Editor build passes.
+
+  It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
+  salvage. Props released its slot before 13:45.
 - **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
   road to town, including the bridge approach. The ID range is reserved; implementation remains
   pending the narrow public-road-corridor proof and bridge coordinate sync.
@@ -392,11 +399,17 @@ requirement.
   intensity is 0.6 (day 1), and night auto-exposure has a -2 EV100 floor (day 0). The combined
   moon/sky/adaptation cause is plausible, not visually proven.
 
-  **Water** later runs a controlled existing-CVar trial — moon 0.1–0.3 lux, sky 0.1–0.2, and an
-  exposure floor toward -1/0 — while preserving smooth dusk and lamp readability. Log and use a
-  fixed camera at 18:00, 19:00, 21:00 and midnight in clear and rain. **Integration** judges
-  packaged RT-on Lumen hardware-ray-tracing plus VSM evidence, because the normal agent editor launch
-  disables RT/VSM; neither the trace nor screenshots alone establish a fix.
+  **Water headless partial `4d248d6f` is unwired, unshipped and outside the 4 PM candidate.** Its
+  pure `HomesteadNightLight` schedule targets 0.2 lux moonlit ground after dusk (0.2/sin altitude,
+  capped at 1 lux low), night sky 0.3 rather than 0.6, and EV100 floor -1 rather than -2. At 21:00 it
+  computes moon 0.28 lux/display key 0.16 (about -2.6 stops); noon is unchanged. Native 9/9 checks
+  the prior daylight-grey 21:00 key of about 1, a non-increasing 18:50→midnight curve, no jump above
+  0.25 lux/minute, moon <=1 lux, and 21:00/00:00/03:00 at -1.5 to -3.5 stops.
+
+  It still needs `UpdateLighting`/CVar wiring, an Editor build, and fixed-camera packaged RT-on Lumen
+  hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to calibrate
+  smooth dusk and lamp readability. Lamp and hearth behavior are untouched. Neither the trace nor the
+  schedule establishes a visual fix.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
