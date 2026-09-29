@@ -54,6 +54,12 @@ disagree, follow the code and tell the Architecture Agent.
   (`HomesteadMenus`) still clashes. No `using namespace` at file scope. No file-scope names that
   shadow engine globals (`Face`, `Color`...). Lanes' editor builds hide these clashes; the game
   target shows them.
+- **Includes and compile cost:** include what each `.cpp` uses. Every `.cpp` must compile on its
+  own: adaptive unity builds git-modified files outside their unity blob, so a missing include only
+  shows up once someone edits that file. The module's private PCH (`SurvivalGamePCH.h`) is the
+  Build Speed Agent's: add to it only headers nearly every file needs, and never `UnrealEd`. Headers forward-declare classes they only point to; a header that every
+  unity blob includes (`HomesteadController.h`, `HomesteadSimulation.h`) makes each edit rebuild the
+  whole module, so don't add includes to those two lightly.
 - Warnings are errors, including `C4458` (a local hides a member) and `C4459` (hides a global).
 - In an `_API`-exported `UCLASS`, declare one `static constexpr` per line (several declarators on one
   line give `C2487`).
