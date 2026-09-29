@@ -307,6 +307,9 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
+- **Remove Guidebook UI** — **Menu, pending and not shipped.** Remove the Guidebook surface entirely,
+  updating navigation cycles, shortcuts, page indexes, NativeMenu coverage and packaged checks while
+  retaining save compatibility.
 - **Appearance controls and naming** — **Menu local-only partial, not pushed/PIE/shipped or 4 PM
   content.** `61059621` renames **Curly bob** to **Long bob**. `f63ba148` implements drag, WASD and
   right-stick orbit, wheel zoom and a default front view; it disables/clips camera collision while the
@@ -403,6 +406,10 @@ requirement.
 
   Packaged suites passed. Focus can select nearby bramble/weed and resource reach can pass through a
   wall, matching current nearby-resource behavior. Weeds `8418aa8e` remains post-package work.
+- **Loose manor timber piles** — **Props, pending and not shipped.** Make large loose timber piles
+  clearable like the shipped slates using appended stable debris IDs only: no existing ID shift, old
+  saves preserve their state, and heritage structural support remains untouched. Require PIE F5/F9
+  clear-state proof.
 - **Rusted hoe wayfinding** — **Props isolated partial `be810887`, not PIE-verified, 4 PM content or
   shipped.** The salvage order is billhook → hoe → axe → scythe → pickaxe. Tilling without a hoe
   directs her to search the old manor; the journal/guide points to the west rooms by the chimney.
@@ -456,6 +463,11 @@ requirement.
   world interaction prompt before opening. Author an original high-fidelity Victorian timber trunk;
   Coral Island is mood reference only, never copied. Architecture traces the name/save path before a
   separate increment and native/PIE persistence coverage.
+- **Auto-store matching stacks** — **Menu plus Props Simulation, pending and not shipped.** Add a Menu
+  button beside Sort and a single-key shortcut. In one atomic simulation transfer, move only carried
+  items matching stacks that already exist in the **current** chest; exclude equipped and unmatched
+  items, respect capacity, permit a partial transfer without loss, and persist it. Cover capacity,
+  partial/no-loss and save behavior in native and PIE tests.
 - **Safe manor construction** — **Props, pending and not shipped.** The estate parcel is already
   owned, but `Manor::BlockedByManor` blanket-rejects nine footprint samples inside
   `ManorFootprint`, except furnishings on the heritage standing-room floor. Define a safe roofless-hall
@@ -479,6 +491,10 @@ requirement.
   road to town, including the bridge approach, and significantly increase visible pickable
   berries/herbs/non-farm food across the estate distributions. The ID range is reserved; implementation
   remains pending the narrow public-road-corridor proof and bridge coordinate sync.
+- **Abundant live berry bushes and non-farm food** — **Water, pending and not shipped.** Populate
+  Estate woods, fields and the road with measurably abundant **live pickable** bushes, rather than
+  decorative-only foliage. Define biome density, seasonal readiness, regeneration and save behavior
+  without moving old placement IDs; retain off-season food options.
 - **Terrain-following road grade** — **Water Agent, pending and not shipped.** Eliminate artificial
   raised/lowered road segments. The road is Landscape paint/ruts, not a raised mesh: `reshape.py`
   grades a 2.8 m flat half-width plus 12 m falloff at ±11%, and its weightmap/rut SDF share the route.
