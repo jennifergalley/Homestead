@@ -167,6 +167,8 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                                     {
                                         const auto Snapshot = Weak.IsValid() ? Weak->HotbarSnapshot() : TArray<FHomesteadHotbarSlot>();
                                         const bool bLow = Snapshot.IsValidIndex(Index) && Snapshot[Index].Fill < 1.0f / 6.0f;
+                                        const bool bWater = Snapshot.IsValidIndex(Index) && Snapshot[Index].Tool == Homestead::Item::WateringCan;
+                                        if (bWater) return FSlateColor(bLow ? FLinearColor(0.9f, 0.32f, 0.2f) : FLinearColor(0.36f, 0.66f, 0.92f));
                                         return FSlateColor(bLow ? FLinearColor(0.9f, 0.32f, 0.2f) : FLinearColor(0.98f, 0.68f, 0.28f));
                                     })
                                     .BackgroundImage(FCoreStyle::Get().GetBrush(TEXT("NoBrush")))
