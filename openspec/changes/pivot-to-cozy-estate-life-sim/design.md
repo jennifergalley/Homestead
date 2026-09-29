@@ -85,10 +85,14 @@ adapts conventions only and copies no proprietary art, text or branding.
   hunger falls, energy recovers more slowly and work costs a little more. At empty she can
   still work, just inefficiently, and a meal fixes it immediately. Hunger never causes
   fainting or health damage.
-- Energy running out, or staying up past 2 AM, sends her home asleep with a small penalty, as
-  Coral Island does. The exact penalty is defined in round 2.
-- A day lasts about **30 real minutes**, from 6 AM to 2 AM. There are four 28-day seasons, and
-  crops are tied to their season.
+- There's no bedtime by the clock. Jenny ruled this in `flexible-sleep`: she can stay up all
+  night, or sleep through the day to make up for it. At the bed she chooses between sleeping
+  until morning, until rested, or a nap. If her energy runs out, she dozes off where she stands
+  for a few hours of rough sleep and wakes only part rested. Nothing else is lost.
+- A day lasts about **30 real minutes**, with the 30/60/120-minute setting kept. The day turns
+  over at 6 AM. There are four 28-day seasons with named weekdays, starting on Monday, Spring 1,
+  1851. Crops are tied to their seasons and wither when the season changes; round 2 has the
+  details.
 - Weather is sunny and cozy by default, with occasional rain that waters crops.
 - There's no spoilage, in storage or anywhere else.
 
@@ -335,6 +339,6 @@ reported plainly. Current-version save and load must keep working in every round
 
 ## Open Questions
 
-- The exact energy-exhaustion and 2 AM penalty (round 2).
+- Nothing about sleep or exhaustion remains open. `flexible-sleep` settled it.
 - Dog breed coats and naming: resolved at round 5, possibly from Jenny's photos.
 - The romance cast: resolved at round 14.

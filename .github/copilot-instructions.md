@@ -1,5 +1,25 @@
 # Working with Jenny on Homestead
 
+## Model, reasoning and implementer slots
+
+Jenny's standing team preference (2026-09-29). These are **required settings for future session
+launches**; documenting them does not change a live session's model or reasoning level.
+
+| Role | Model (exact ID) | Reasoning | Context |
+| --- | --- | --- | --- |
+| Documentation Agent | GPT-5.6 Terra (`gpt-5.6-terra`) | **high** | **long** |
+| Architecture Agent | GPT-6 Sol (`gpt-6-sol`) | high | long |
+| Orchestrator Agent | GPT-6 Sol (`gpt-6-sol`) | **medium** | **long** |
+| Implementer (Blender, Unreal or code work) | Claude Opus 5.5 | high | long |
+
+**At most three concurrent hands-on implementers** do Blender, Unreal or code work. This is a cap
+across active work, not a role-label exemption, and is separate from the 2-Unreal-process machine cap.
+The Integration Agent counts while merging, compiling, PIE testing or packaging, but not while only
+coordinating; Architecture counts while editing or building code; Docs counts while implementing tooling.
+Time-critical integration gets a slot by pausing a lane. The orchestrator grants the next slot before a
+waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
+a slot by sleeping or polling.
+
 ## Loops
 
 Jenny works in two modes. When she hasn't said which, treat short requests as the Interactive Loop.

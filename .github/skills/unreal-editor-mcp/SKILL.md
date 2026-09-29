@@ -90,7 +90,8 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `Invoke-ShippingQA.ps1` refuses to run while any Unreal process exists, so it needs an idle machine;
   coordinate through the orchestrator.
 - **Perf and frame-rate measurements need the machine to yourself** (Jenny, 2026-09-28): only ONE
-  Unreal process (the one you measure) and no UBT/`cl.exe` builds. With several editors and builds
+  Unreal process (the one you measure), no UBT/`cl.exe` builds, and **no Blender process** (headless
+  Blender batches skewed one run about 2x). With several editors and builds
   running, readings swung about 5x (render thread 20 ms vs 97-118 ms). Before measuring, run
   `Scripts\Start-PerfWindow.ps1 -Purpose '<what>'` (add `-ProcessId <pid>` for a standalone game you
   launched). It refuses, naming every other Unreal process and build, unless yours is the only one,
