@@ -40,7 +40,7 @@ three-hands-on-implementer cap (including Integration) and the two-Unreal-proces
 | Weather Agent / Water (`89914e30`) | **Retain** | Water and terrain owner |
 | Props Agent | **Retain role; session TBD** | Receives props and character asset recipes |
 | Performance Agent (`a34483d7`) | Retire | After safe handoff/merge |
-| Build Speed Agent (`6e131c6a`) | Ready for orchestrator archive | Handoff complete: `f6ed1c42` and `a624c704` are on `main`; worktree clean, no PR, automation or process |
+| Build Speed Agent (`6e131c6a`) | **Archived** (orchestrator confirmed 2026-09-29) | Handoff complete: `f6ed1c42` and `a624c704` are on `main`; Integration owns the build recipe |
 | Seasons/Mushroom Agent (`fd682909`) | Retire | After safe handoff/merge |
 | Calendar Agent (`f8b77021`) | Retire | After its post-4 PM `a3c7e04d` handoff/merge |
 
@@ -340,7 +340,13 @@ requirement.
   0.70 and never mixes indoors: expose a cheap `GetIndoorMix` from the existing
   `Weather::Indoors` roof/shelter easing (0–1), and apply indoor gain/low-pass to birds and creek while
   retaining the user's slider multiplier; the roof-overhead check must also run in sun. Architecture is
-  separately checking the rain-audio asset and gain.
+  separately checking rain audio. The asset itself is **not missing**: tracked/cooked `RainLoop.wav`
+  (CC0 Ylmir, *Rain (loopable)*; credited) and its `.uasset` load non-spatial through
+  `UHomesteadWeather`; at full rain, the default 0.70 ambience volume yields gain 0.63 outdoors and
+  0.245 indoors, with a 2 s fade-in and low-pass. Rain is intentionally silent on dry days/times
+  (currently only day 2/3, 09:00–15:00). **Rain audio remains pending, not fixed:** Water tests a
+  rainy noon `IsPlaying`, gain and source RMS plus isolated own-editor output, then adjusts only if
+  measured.
 
   The heritage-stone west doorway is a 130 × 220 cm gap with no leaf. **Props** queues an original
   oak-plank mesh and frame after the cove stairs. The later audio/door implementer makes the leaf
