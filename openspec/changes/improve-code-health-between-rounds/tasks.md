@@ -27,5 +27,5 @@
 
 ## 4. Legacy tooling (approved; receipts in docs/research stay)
 
-- [ ] 4.1 Remove `FernSpike.cpp`, the authoring-probe commandlet and its scripts
-- [ ] 4.2 Remove unused policy tests; drop `HomesteadMenuSourceTests.py`
+- [x] 4.1 Remove `FernSpike.cpp`, the authoring-probe commandlet and its scripts
+- [x] 4.2 Remove unused policy tests; drop `HomesteadMenuSourceTests.py`

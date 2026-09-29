@@ -8,6 +8,6 @@
 
 ## 2. Verification
 
-- [ ] 2.1 `Scripts\Test-Native.ps1 -Configuration Release` 7/7, editor module and game target build
+- [x] 2.1 `Scripts\Test-Native.ps1 -Configuration Release` 7/7, editor module and game target build
 - [ ] 2.2 PIE: save, reload, pack and chest contents unchanged
 - [x] 2.3 Update `docs/architecture.md` section 5 and the item skill (no version bump needed for appended items)
