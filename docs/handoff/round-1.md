@@ -243,6 +243,15 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   clashes, C4458/C4459, C2487, enum default args, UPROPERTY-not-static, `../Simulation/` includes,
   runtime ISM Rebuild) and section 8's "C++ conventions that bite" at that skill's "Unreal C++"
   section, keeping each row's Symptom column. The docs agent does this.
+- Architecture agent, same merge:
+  - **Save v13** (`c729d4e6`): stocks carry their width, and v12 saves migrate. Then replace the
+    SAVE-SAFETY HOLD above and in editor skill section 0 with: "Items can be appended freely (v13+);
+    never reorder or remove them. New save sections write any list or per-enum array with its count
+    first." Update the save-version line to 13, and the orchestrator lifts the hold.
+  - **Legacy probes removed** (`26b367e9`): `Test-AuthoringSettings.ps1`, `Tests\HomesteadMenuSourceTests.py`,
+    FernSpike and the `*Policy` scripts. Drop `Test-AuthoringSettings.ps1` from editor skill section 0's
+    "Never stop shared processes" bullet, and delete the table 0.1 row about `HomesteadMenuSourceTests.py`
+    failures.
 
 ## Tooling requests (unassigned)
 
