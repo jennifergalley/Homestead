@@ -87,7 +87,7 @@ adapts conventions only and copies no proprietary art, text or branding.
   - Snacks restore a little: raw forage, bread, cheese.
   - Meals restore much more and also give **Well fed**. A meal is a cooked or cooked-and-bought
     dish: pasty, hearth dishes, fish dishes. While Well fed, every piece of work costs 15% less
-    energy for a few game hours, and better dishes last longer.
+    energy for 3 game hours. Better dishes restore more energy.
   - Eating while Well fed refreshes the timer; bonuses don't stack.
   - This keeps a reason to cook and to stop for a proper meal, without a second bar to watch.
 - There's no bedtime by the clock. Jenny ruled this in `flexible-sleep`: she can stay up all
