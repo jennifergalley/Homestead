@@ -27,7 +27,7 @@ class AHomesteadWorld;
 class UHomesteadAnimInstance;
 namespace Homestead { struct Point; enum class Item : int; }
 
-enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds, Plant };
+enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds, Plant, Harvest };
 
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
@@ -127,6 +127,13 @@ public:
     bool UsesHoeTill() const { return bHoeTill; }
     // homestead_agent.hoe_till EVENTS: the first chop turns the soil.
     static constexpr float HoeFirstChop = 31.0f / 30.0f;
+    // homestead_agent.kneel_harvest: the crop's crown (both hands' grip) ahead of and to the right
+    // of her standing position, and the moments it comes free of the soil and goes into the pouch.
+    static constexpr float HarvestCrownForward = 36.0f;
+    static constexpr float HarvestCrownRight = 6.0f;
+    static constexpr float HarvestGrip = 36.0f / 30.0f;
+    static constexpr float HarvestPulled = 56.0f / 30.0f;
+    static constexpr float HarvestStowed = 96.0f / 30.0f;
     UHomesteadHatchet* GetHatchet() const { return Hatchet; }
     UHomesteadDiggingStick* GetDiggingStick() const { return DiggingStick; }
     UHomesteadKnife* GetKnife() const { return Knife; }
@@ -139,13 +146,19 @@ public:
     // berries are slipped into the hip pouch, reeds are gathered in the left fist and sawn through
     // with the knife. Returns true when the kneeling clip plays; false (with no animation for
     // reeds, PlayGather for the rest) when its clip or props are unavailable.
-    bool PlayKneelGather(EHomesteadKneelGather Kind, TOptional<FVector2D> Pile = {}, bool bBerries = false);
+    bool PlayKneelGather(EHomesteadKneelGather Kind, TOptional<FVector2D> Pile = {}, bool bBerries = false,
+        UStaticMesh* Produce = nullptr);
     EHomesteadKneelGather GetKneelKind() const { return KneelKind; }
     // Kneeling over reeds with the knife (the reed gather is playing).
     bool IsCuttingReeds() const;
     // Kneel and press one seed into the tilled square at Target, then cover it (MetaHuman only;
     // false when the clip is unavailable). IsStickPileOnGround stays true until it is covered.
     bool PlayPlant(Homestead::Point Target);
+    // Harvest a ripe crop at Target: root crops and cabbage are pulled or cut two-handed and lifted
+    // (AN_HeroineMH_KneelHarvest); beans and berries are picked into the pouch. Produce is the
+    // mesh shown in her hand (pivot at the grip). Like the other kneels, IsStickPileOnGround stays
+    // true until the crop leaves the ground. False when no kneeling clip can play.
+    bool PlayHarvest(Homestead::Point Target, bool bPick, UStaticMesh* Produce);
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
     // world keeps the gathered pile visible until then.
     bool IsStickPileOnGround() const { return PendingKneel.IsSet() || bStickPileOnGround; }
@@ -286,6 +299,7 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> GatherPouchAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherReedsAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherPlantAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> GatherHarvestAnimation;
     // The pinch of seed in her fingers while she plants.
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CarriedSeed;
     // The cut bundle of reed stems in her left fist after the reed gather's cut.
@@ -323,6 +337,8 @@ private:
     void UpdateEating();
     UPROPERTY() TObjectPtr<UStaticMesh> ForageBerryMesh;
     UPROPERTY() TObjectPtr<UStaticMesh> ForageRootMesh;
+    // A harvested crop's produce, shown in her hand instead of the wild forage prop (pivot at the grip).
+    UPROPERTY() TObjectPtr<UStaticMesh> HarvestProduceMesh;
     // The forage pouch on her right hip (shown on the MetaHuman heroine).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> ForagePouch;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CordBelt;
@@ -350,6 +366,7 @@ private:
         bool bApplied = false;
         bool bCancelledBlocker = false;
         double Since = 0;
+        TWeakObjectPtr<UStaticMesh> Produce; // a harvested crop shown in her hand
     };
     TOptional<FPendingKneel> PendingKneel;
     UAnimSequence* KneelClip(EHomesteadKneelGather Kind) const;
@@ -404,6 +421,13 @@ private:
     float FellStepRemaining = 0;
     void BeginStanceStep(const FVector& To, float Yaw);
     static constexpr float FellStepSeconds = 0.4f;
+    // The pail fill's step down a stream bank keeps her feet on the ground (SettleOnGround).
+    bool bStanceStepFollowsGround = false;
+    void SettleOnGround();
+    static constexpr float StanceGroundProbeUp = 60.0f;     // cm above her root: a bank lip she steps onto
+    static constexpr float StanceGroundProbeDown = 80.0f;   // cm below her feet: down a 0.6-slope bank
+    // Longest step she takes toward the water to fill the pail (cm); the prompt shows 1.2 m back.
+    static constexpr float FillStepMax = 110.0f;
     // Walking up to a trunk beyond a stance step before the swing starts.
     bool bFellApproach = false;
     FVector2D FellApproachTo = FVector2D::ZeroVector;

@@ -11,6 +11,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadRegionalTerrainAdapter.cpp
     Source/SurvivalGame/Simulation/HomesteadWorldGeneration.cpp
     Source/SurvivalGame/Simulation/HomesteadSimulation.cpp
+    Source/SurvivalGame/Simulation/HomesteadCrops.cpp
     Source/SurvivalGame/Simulation/HomesteadOvergrowth.cpp
     Source/SurvivalGame/Simulation/HomesteadEstate.cpp
     Source/SurvivalGame/Simulation/HomesteadEstateDisrepair.cpp

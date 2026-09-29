@@ -73,7 +73,8 @@ The script applies these steps in order:
    bank at the estate gateway, and continues about 1.7 km east to the town. It's graded to a 5 m bed
    with 12 m verges, and its gradient is capped at 11%.
 5. **River.** A least-cost path finds the floor of the wooded valley. The river is cut into it as a
-   channel 0.9 m deep and about 4.5 m wide, with its bed forced to run downhill.
+   channel 0.9 m deep and about 4.5 m wide, with its bed forced to run downhill. At the end of the
+   run `river_channel.py` grades it to its finished channel (see "River channel" below).
 6. **Cove.** A sand beach is blended into the valley mouth.
 7. **Waterline.** The waterline is softened.
 
@@ -162,12 +163,45 @@ python Scripts\Terrain\bake_ocean.py            # ~45 s -> Saved\Ocean\*, Assets
 Then, in the editor with the Estate level loaded and PIE stopped, run `pyfile
 Scripts\Terrain\build_ocean.py` (McpHelpers). It imports the three textures and the mesh, re-authors
 the material graph in place and points `EstateSea` at the result. `place_water.py` updates
-`EstateSea` and `EstateRiver` in place (their external actor files keep their names). The river ends
-where its surface meets the cove beach (the stream soaks into the sand), so the ribbon and its
-`HomesteadWater` pail-refill tag never lie over salt water. The sea is tagged `HomesteadSea` only.
-Save both actors' packages afterwards: PIE streams spatially loaded actors such as `EstateRiver`
-from their saved packages, so unsaved edits don't show in play, and `set_course` alone doesn't
-dirty the package (the script calls `modify()` first).
+`EstateSea` and `EstateRiver` in place (their external actor files keep their names), and places the
+spring's stones (`EstateSpringStone1-8`, folder `Water/Spring`). Neither the sea nor the river is
+spatially loaded, so both are drawn, and the pail probe finds the river, from anywhere on the map.
+The river runs over the cove beach into the shore wash; its `HomesteadWater` tag (the pail refill)
+covers only the stream. The sea is tagged `HomesteadSea` only. Save the actors' packages afterwards
+(`set_course` alone doesn't dirty the package; the script calls `modify()` first).
+
+### River channel (`river_channel.py`)
+
+reshape.py's cut only lowers ground, so where the river runs along a valley side the downhill bank
+was missing and the water floated over grass. `python Scripts\Terrain\river_channel.py` grades the
+channel to a designed section along the layout's river: a flat bed, banks rising 0.6 m per metre
+to 0.25-0.5 m above the water, and a raised bank (a 0.8 m berm falling back at 0.5 per metre)
+wherever the ground falls away. The stream grows from a 1.2 m spring rill to a 3.8 m river over its
+first 300 m. It rises in a 3 m pool cut into the head of its valley, fords the drive between low,
+gentle banks, and crosses the cove beach 0.3 m below the sand into the sea.
+
+It rewrites `EstateHeightfield.r16` (the source of truth), `Estate_Heightmap_4033.png` and the work
+npy, and adds `riverChannel`, `riverSurface` (m), `riverHalfWidth` (the waterline, m) and `riverEnd`
+to `estate_layout.json`. Once they're stored it reuses them, so re-running it changes nothing;
+reshape.py runs it last on fresh terrain. Afterwards, with the Estate level loaded and PIE stopped:
+
+1. `unreal.HomesteadEstateAuthoringLibrary.apply_estate_heightfield(<absolute r16 path>, MinX, MinY,
+   MaxX, MaxY, 63, True)` is a dry run over the vertex rectangle it printed (column = X, row = Y). Then
+   pass `False` to write the tiles that differ into the Landscape's base edit layer.
+2. Save only the landscape proxies over the changed vertices. Loading the region leaves every
+   other proxy dirty with no real change, and saving those would rewrite 230 files. Find them by
+   their actor bounds.
+3. Run `place_water.py`, then `bake_ground.py` and `build_ground.py`. Don't re-run `scatter.py` for a local edit: a change in which cells pass its tests shifts its random draws, and about 3,900 cobbles and boulders move across the whole map. Scenery stores only X and Y (Z comes from the heightfield at runtime), so the committed scatter sits correctly on the regraded ground. Drop only the records that now fall in the water (this regrade dropped 10 plants within 30 cm of the waterline).
+
+The Landscape doesn't match the r16 everywhere: a full-map dry run finds about 3,000 vertices
+elsewhere that differ (a strip at some tile edges, worst 43 m). Apply only the rectangle you changed.
+
+The ribbon (`AHomesteadWaterRibbon`) reads spline scale Y as the waterline half-width and runs
+`BankOverlap` (45 cm) under each bank. It rounds off round the pool (`StartCap`, one pool radius,
+with the spline starting that far upstream of the pool centre) and tapers over `EndCap` (6 m) into
+the sea. Vertex colour B makes white water on grades over about 4 % and at the spring
+(`M_EstateRiver`, the creek graph plus a white-water layer). V restarts every 10 m, because
+half-precision UVs smear the ripples into stripes at 1 km.
 
 Cost, from `ProfileGPU` in PIE at a 3054×1135 viewport with the sea filling the view from the western clifftop: `SLW::Draw` 0.23 ms, depth prepass 0.09 ms, and Lumen water reflections about 0.2 ms. The old one-plane creek-material sea cost 0.10, 0.07 and 0.2 ms. The mesh has about 89k vertices. Read the stable sub-passes: frame times and reflection spikes swing widely when other editors share the GPU.
 
@@ -217,7 +251,7 @@ inside the polygon and footsteps are woodland floor there, since that lane scatt
 prototype's own grass clumps. `T_EstateCanopy.B` ramps the prototype's forest floor in from the edge
 to `floor_edge_m` inside, along a wandering line. The floor is the prototype's `M_GrassGroundBlend` as the generated woodland drew it away from the
 creek: `T_Ground*` (brown mud and leaves) mixed with 7-27 % `T_GrassGround*` in slow patches, at 3 m
-world tiling, easing into a 12.9 m copy past 60 m. Glades take a lighter mix. Tree canopy kinds
+world tiling, easing into a 12.9 m copy past 60 m. Glades take the same floor, as the prototype's openings did. `ZoneTint` on `M_EstateLandscape` (0.93, 1.02, 1.12) cools the zone's floor toward the prototype's grey-green; the rest of the estate is untouched. Tree canopy kinds
 and crown radii come from `SCENERY_TREES` in `Scripts/Map/bake_estate_map.py`, with a fallback in
 `bake_ground.py` for kinds 13-16 and 19-22 until it lists them. Order after the woodland and trees
 branches land: `scatter.py`, then `bake_ground.py` and `build_ground.py`.

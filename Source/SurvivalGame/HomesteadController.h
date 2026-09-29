@@ -201,6 +201,8 @@ public:
     static bool CanPinToHotbar(Homestead::Item Item);
     bool IsPinnedToHotbar(Homestead::Item Item) const;
     bool TogglePinnedToHotbar(Homestead::Item Item);
+    // Pins newly bought or given crop seed to a free hotbar slot (no-op if pinned or full).
+    void PinNewSeed(Homestead::Item Item);
     void HoverHotbarSlot(int32 Index) { HoveredHotbarSlot = Index >= 0 && Index < 10 ? Index : INDEX_NONE; }
     bool KnifePreviewRequested() const;
     // The carried tool in the selected (or hovered) hotbar slot, or Item::Count.
@@ -214,6 +216,11 @@ public:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     // Console playtest aid: skip the clock ahead to the next morning (default 8:00) so there's light to see by.
     UFUNCTION(Exec) void HomesteadMorning(float Hour = 8.0f);
+    // Console playtest aid: let whole days pass so crops actually grow (HomesteadMorning only moves
+    // the clock). Tend 1 waters and weeds every plot as the days pass; 0 leaves them to dry out.
+    UFUNCTION(Exec) void HomesteadGrowCrops(float Days = 1.0f, int32 Tend = 1);
+    // Console playtest aid for screenshots: set every planted plot to this growth (0-1).
+    UFUNCTION(Exec) void HomesteadCropGrowth(float Growth = 1.0f);
     // Console playtest aid: add items to her pack by name (spaces optional, e.g. HomesteadGive Berries 6).
     UFUNCTION(Exec) void HomesteadGive(const FString& ItemName, int32 Amount = 5);
     // Console playtest aid (woodland games): raise the manor's standing room around her, its
@@ -466,6 +473,9 @@ private:
     int32 HeldPlot = INDEX_NONE;
     double HeldPlotSince = 0;
     bool bHeldPlotTilling = false;
+    // A just-harvested plot whose ripe plant stays up until her hands lift the crop.
+    int32 HeldHarvestPlot = INDEX_NONE;
+    double HeldHarvestSince = 0;
     double HeldStickPileSince = 0;
     // Ground parts of the held produce to hide at the first pickup (the rest go with the second).
     int32 HeldPartsFirst = 0, HeldPartsCount = 0;
@@ -530,6 +540,8 @@ private:
     void HoeSquareAhead();
     // Plant the focused bare plot with Crop; she kneels to press in the seed.
     void PlantFocusedPlot(Homestead::CropKind Crop);
+    // After HarvestCrop succeeds: she pulls or picks the crop, which stays in the ground until lifted.
+    void PresentHarvest(int32 PlotId, Homestead::CropKind Crop, Homestead::Point Center);
     // Jenny's playtest kit (tools, bed, two chests; seeds on new games). Skipped in automation.
     void GrantPlaytestKit(bool bNewGame);
     void UseSelectedTool();
@@ -595,6 +607,8 @@ private:
     // Fill the watering pail at the nearest fresh water edge, with her kneeling fill when it succeeds.
     void FillPailAtStream(Homestead::Point Position);
     Homestead::Point FreshWaterDipPoint(Homestead::Point Position) const;
+    // The pail goes in this far inside the waterline, so it visibly dips into the water.
+    static constexpr double PailDipInsideCm = 25.0;
     void EndPlacement();
     void Notify(const Homestead::Result& Result, USoundBase* SuccessCue = nullptr);
     void Notify(const FString& Text, bool Error = false);

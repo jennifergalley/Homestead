@@ -18,7 +18,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 WORK = os.environ.get("HOMESTEAD_TERRAIN_WORK", r"E:\TerrainSource\work")
 H = 2016
-BROADLEAF, FIR, HAZEL, BRACKEN, YARROW, COBBLES, BOULDER, ERRATIC, DOME, FERN, GRASS_TALL, GRASS_MID, SHRUB, OAK, BEECH, SYCAMORE, HAWTHORN, HOLLY, HAZEL_COPPICE = range(19)
+BROADLEAF, FIR, HAZEL, BRACKEN, YARROW, LEDGE, BOULDER, ERRATIC, DOME, FERN, GRASS_TALL, GRASS_MID, SHRUB, OAK, BEECH, SYCAMORE, HAWTHORN, HOLLY, HAZEL_COPPICE = range(19)
+# LEDGE (5) was loose granite cobbles; it's now a block of granite sunk into the slope, so no scenery
+# looks like the hand stones she can pick up.
 # The Hawthorn mesh streams toward +X; Cornwall's prevailing wind is south-westerly, so thorns lean
 # north-east (+X north, +Y east): yaw 45 +- WIND_SPREAD.
 WIND_YAW, WIND_SPREAD = 45.0, 25.0
@@ -140,6 +142,26 @@ def main():
     def clear_of_interactive(p, gap):
         pts = np.array(taken)
         return p[cKDTree(pts).query(p)[0] > gap] if len(p) else p
+    # Where the real hand stones are: the Stones forage, the manor clear-out (clearout.py) and the
+    # grounds round the house. Rock scenery keeps its distance, so the two aren't confused.
+    stone_pts = [pt for _, kind, pt in rows if kind == "Stones"]
+    clearout_inc = os.path.join(ROOT, "Source", "SurvivalGame", "Simulation", "HomesteadEstateClearoutPlacements.inc")
+    if os.path.exists(clearout_inc):
+        for line in open(clearout_inc):
+            if line.startswith("clearout("):
+                parts = line[line.index("(") + 1:line.rindex(")")].split(",")
+                stone_pts.append((float(parts[2]) / 100.0, float(parts[3]) / 100.0))
+    stone_tree = cKDTree(np.array(stone_pts)) if stone_pts else None
+    def clear_of_stones(p, gap):
+        if not len(p):
+            return np.zeros(0, bool)
+        ok = np.linalg.norm(p - lm["StandingRoomOrigin"], axis=1) > 60.0
+        ok &= road.query(p)[0] > 15.0
+        # The derelict farm (X -222..-162 m, Y -705..-645 m) and a 15 m margin.
+        ok &= (np.abs(p[:, 0] + 192.0) > 45.0) | (np.abs(p[:, 1] + 675.0) > 45.0)
+        if stone_tree is not None:
+            ok &= stone_tree.query(p)[0] > gap
+        return ok
 
     all_wood = keep_common(candidates(1 / 45.0), 7, 6)
     wt = by_weight(all_wood, "WoodlandFloor", 0.3)
@@ -303,12 +325,15 @@ def main():
     if len(high):
         for r, c in high[rng.choice(len(high), size=min(5, len(high)), replace=False)]:
             recs.append((DOME, float(H - r), float(c - H), rng.uniform(0, 360), rng.uniform(0.9, 1.05)))
-    # Cliffs and steep valley sides: rubble.
+    # Cliffs and steep valley sides: granite ledges breaking through the slope, and boulders. (Loose
+    # cobble piles here read as the hand stones she can pick up, so the ground shows bedrock instead.)
     steep = keep_common(candidates(1 / 90.0))
     sv = slope[np.clip(np.round(H - steep[:, 0]).astype(int), 0, 4032), np.clip(np.round(H + steep[:, 1]).astype(int), 0, 4032)]
     steep = steep[(sv > 22) & (sv < 45)]
     pick = rng.random(len(steep))
-    emit(COBBLES, steep[pick < 0.6], 0.8, 1.3)
+    ledges = steep[(pick < 0.6) & (rng.random(len(steep)) < 0.45)]
+    ledges = clear_of_interactive(ledges[clear_of_stones(ledges, 12.0)], 4.0)
+    emit(LEDGE, ledges, 1.2, 1.9)
     emit(BOULDER, steep[pick >= 0.6], 0.8, 1.3)
     recs += mvp_recs
 
