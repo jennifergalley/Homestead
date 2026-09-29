@@ -8,7 +8,7 @@ context: |
   The authoritative design and round order are in
   openspec\changes\pivot-to-cozy-estate-life-sim\design.md; product rules are in
   its specs\estate-life-sim-direction. No cold, death, predators, hunting or
-  spoilage; energy and hunger only. One fixed hand-authored map, no procedural
+  spoilage; one energy meter only (no hunger). One fixed hand-authored map, no procedural
   world. Money is shown in US dollars and cents.
   Read docs\game-plan.md, especially "Working policy: playable iteration first"
   and "Apply these lessons to every feature round", before planning changes.

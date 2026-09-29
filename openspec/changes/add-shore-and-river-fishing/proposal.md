@@ -5,7 +5,7 @@ Round 4: shore, river and lake fishing.
 ## Why
 
 The map is mostly coast, river and lake. Jenny wants fishing as an early loop: fish that store
-without spoiling, cook into meals that restore hunger and energy, or sell to a fishmonger.
+without spoiling, cook into meals that restore energy and make her Well fed, or sell to a fishmonger.
 
 ## What Changes
 
@@ -19,8 +19,7 @@ without spoiling, cook into meals that restore hunger and energy, or sell to a f
   with period-plausible Cornish species: mackerel, pollock, bass, mullet, trout, eel, perch,
   and rare catches.
 - **Fish are ordinary goods.** They store in chests without spoiling.
-- **Cooking at the hearth:** grilled fish, fish pie and stargazy pie. Meals refill hunger and
-  energy.
+- **Cooking at the hearth:** grilled fish, fish pie and stargazy pie. Meals restore energy and grant Well fed.
 - **Fishmonger** at the harbour, with a shopkeeper who buys fish.
 
 ## Reuse starting points

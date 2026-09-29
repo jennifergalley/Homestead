@@ -22,6 +22,13 @@ supply, so money isn't infinite.
   - Each shop's price for an item falls as its stock of that item piles up.
   - Prices recover over the following days as townsfolk buy.
   - The quality tier multiplies the price.
+- **Crop quality and compost,** moved here from round 2 because they need item quality in the
+  inventory:
+  - Harvests get a quality tier (ordinary, fine or choice) from care, meaning watering and
+    weeding.
+  - A compost heap turns weeds and bramble trimmings into compost, and compost raises a plot's
+    chance of better quality.
+  - Quality stacks separately in the pack and in chests.
 - The Sell screen shows today's price trend for each item, so selling stays easy.
 
 ## Reuse starting points

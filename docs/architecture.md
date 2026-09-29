@@ -109,7 +109,9 @@ orchestrator before removing any of it.**
   stock, world id, resource edits, buildings, structures with chest stocks, plots, drops, wearables,
   equipment, layout, cleared underbrush), then **tagged trailing sections**: `parcels` and
   `economy` (read in that order), then any of `tools`, `manor`, `lamp`, `picked` in any order. A
-  missing trailing section loads with defaults; an unknown tag refuses the save. New
+  missing trailing section loads with defaults. A save from a newer build (a later version, wider item
+  stocks or an unknown tag) is refused with `ResultCode::NewerBuild` and left untouched on disk; only
+  unreadable older saves (`UnsupportedVersion`) are moved to `Retired`. New
   save data is added this way without a version bump (recipe in the conventions skill). Bytes above
   127 are rejected (hex-encode free text such as names).
 - **Versioning:** `SimulationSaveVersion` (13) in `HomesteadSimulation.h`. Lanes never bump it; the
@@ -167,7 +169,7 @@ reads only values the game thread copied into the proxy.
 
 | Output (in the repo) | Written by | Read by |
 | --- | --- | --- |
-| `Estate_Heightmap_4033.png`, `estate_layout.json` | `Scripts/Terrain/reshape.py` | Landscape import (editor); layout mirrored by hand into `ProvisionalEstateLayout()` |
+| `Estate_Heightmap_4033.png`, `estate_layout.json` | `Scripts/Terrain/reshape.py` | Landscape import (editor); layout mirrored by hand into `ProvisionalEstateLayout()`, which `AHomesteadController::PrepareEstateSimulation` currently installs directly. Moving an anchor requires both updates; there is no live `DA_EstateLandmarks` replacement path. |
 | `Content/SurvivalGame/Estate/Runtime/EstateHeightfield.r16` | terrain pipeline | `HomesteadEstateTerrain::Activate` (ground height outside the Landscape) |
 | `Content/SurvivalGame/Estate/Runtime/EstateScenery.bin` (`HSC1`) | `Scripts/Terrain/scatter.py` | `AHomesteadWorld::BuildEstateScenery`; kind bytes must match `EstateSceneryKinds` |
 | `Simulation/HomesteadEstateWorldPlacements.inc` and the other `*Placements.inc` | `scatter.py`, `berries.py`, `clearout.py`, `estate_disrepair.py` ("do not edit by hand") | `ProvisionalEstatePlacements()` |

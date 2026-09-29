@@ -6,9 +6,10 @@
 #include <string>
 #include <vector>
 
-// The fixed estate map's shared round-1 interface. The world lane owns the positions (authored in
-// the Estate level's DA_EstateLandmarks); every other lane reads anchors by name only, so the
-// coordinates may move freely as the terrain is reshaped.
+// The fixed estate map's shared round-1 interface. `estate_layout.json` is mirrored manually in
+// ProvisionalEstateLayout(), which the controller currently installs for every Estate simulation.
+// Every other lane reads anchors by name only, so keep that C++ table in step when terrain scripts
+// move an anchor.
 //
 // World frame: Unreal centimetres, +X north, +Y east, the map centred on the origin (a 4033 m
 // Landscape spans about -201600..201600 on both axes). The sea lies to the south.
@@ -84,15 +85,15 @@ struct EstatePlacements
     std::vector<EstatePlacement> placements;
 };
 
-// Rough v1 anchors so every lane can develop and test before the Estate level is authored. The
-// Unreal game replaces these with the level's DA_EstateLandmarks when it loads the Estate map.
+// The current Estate anchor source. The name remains provisional from the early development phase;
+// AHomesteadController installs this table directly when preparing an Estate simulation.
 const EstateLayout& ProvisionalEstateLayout();
 
 // Provisional interactive placements until the world lane bakes DA_EstatePlacements from the
 // Estate level. Each lane appends its own section. Id ranges (registry: docs/handoff/round-<n>.md):
 // world 500000+, overgrowth 510000+, salvage 520000+, town 530000+ (reserved), berry brambles
 // 540000-540043 (clearing), derelict farm and estate disrepair 550000+ (manor), MVP woodland biome 560000-569999 (scatter.py / mvp_woodland.py),
-// clear-out near the manor 570000-579999 (clearing). Order matters: later sections yield to earlier
+// clear-out near the manor 570000-579999 (clearing), field mushrooms 580000-580999 (seasons). Order matters: later sections yield to earlier
 // ones (keep clear of what's already placed), so add sections in id order: berries, then the farm,
 // then the clear-out. Farm-first skipped a quarter of the brambles and failed the simulation tests.
 const EstatePlacements& ProvisionalEstatePlacements();

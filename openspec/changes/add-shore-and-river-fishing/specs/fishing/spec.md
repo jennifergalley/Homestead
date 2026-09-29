@@ -7,8 +7,8 @@ Confirmed outcome-level rules for this round. Expand them when the round is full
 ## ADDED Requirements
 
 ### Requirement: Fish can be caught, cooked, stored and sold
-Fishing SHALL work at shore, river and lake water. Caught fish SHALL store without spoiling, SHALL be cookable into meals that restore hunger and energy, and SHALL sell to the fishmonger.
+Fishing SHALL work at shore, river and lake water. Caught fish SHALL store without spoiling, SHALL be cookable into meals that restore energy and grant Well fed, and SHALL sell to the fishmonger.
 
 #### Scenario: Cook a catch
 - **WHEN** she cooks a caught fish at the hearth and eats it
-- **THEN** her hunger and energy rise by the meal's catalogue amounts
+- **THEN** her energy rises by the meal's catalogue amount and she becomes Well fed

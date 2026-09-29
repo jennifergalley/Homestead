@@ -35,6 +35,8 @@ struct FHomesteadWorldVisual
     TArray<TObjectPtr<USceneComponent>> Components;
 
     FString Signature;
+    // Resource visuals: whether this was built showing the node cleared (for the clear-pop).
+    bool bShownCleared = false;
 };
 
 USTRUCT()
@@ -344,7 +346,8 @@ private:
     UPROPERTY() TObjectPtr<class UHomesteadWeather> Weather;
     float AppliedSunSourceAngle = -1.0f;
     bool bGroundParametersTried = false;
-    FString EstateSceneryClearSignature;
+    uint64 EstateSceneryClearKey = 0;
+    bool bEstateSceneryClearKnown = false;
     UPROPERTY()
     TObjectPtr<USkyLightComponent> Sky;
     UPROPERTY()
@@ -390,6 +393,13 @@ private:
     bool bHeldPlotHidden = false;
     int32 HeldHarvestPlotId = INDEX_NONE;
     Homestead::CropKind HeldHarvestKind = Homestead::CropKind::Roots;
+    // Refresh rebuilds visuals only when something they're built from changed: a hash of every input
+    // the per-object signatures read, including the time-driven ones (produce readiness, plot stages,
+    // fire fuel), which change without a simulation revision. The simulation revision is mixed in too.
+    uint64 RefreshInputsKey(const Homestead::Simulation& Simulation) const;
+    void UpdateEstateGrass(const Homestead::State& State);
+    uint64 LastRefreshInputs = 0;
+    bool bRefreshInputsKnown = false;
     FString OuterTreeLayoutSignature;
     FString ActiveTreeLayoutSignature;
     FString RegionalWaterSignature;

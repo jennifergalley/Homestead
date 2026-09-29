@@ -31,7 +31,7 @@ Menus and construction planning pause simulation. No online gameplay services.
 
 ## Product principles
 
-- Cozy, never lethal. Energy and hunger are gentle, with no cold, death, predators or
+- Cozy, never lethal. One gentle energy meter, like Coral Island, with no hunger, cold, death, predators or
   spoilage. Setbacks are small and recoverable, and she never loses the estate.
 - Earning a fortune is the goal, with real money sinks (rates, wages, upkeep, materials, land
   and upgrades) so wealth is earned.

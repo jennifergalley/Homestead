@@ -716,9 +716,12 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         }
         ++LitGuardSamples;
     }
+    // The engine's own frame time (frame start to frame start, what the player sees and the CSV
+    // profiler's FrameTime), not the interval between this actor's ticks: that lands after the
+    // controller's tick, so a slow tick there showed as a long/short interval pair.
     const double Now = FPlatformTime::Seconds();
     if (LastFrameWallTime >= IgnoreProfileUntil && Now > LastFrameWallTime)
-        FrameMilliseconds.Add((Now - LastFrameWallTime) * 1000.0);
+        FrameMilliseconds.Add(FApp::GetDeltaTime() * 1000.0);
     LastFrameWallTime = Now;
     if (!Steps.IsValidIndex(StepIndex))
     {

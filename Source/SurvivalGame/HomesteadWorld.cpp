@@ -62,6 +62,9 @@ TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.6f,
     TEXT("Sky light intensity at full night."));
 TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -2.0f,
     TEXT("Auto exposure min brightness at full night."));
+TAutoConsoleVariable<int32> CVarEstateSceneryCells(TEXT("homestead.EstateSceneryCells"), 1,
+    TEXT("1 = batch non-Nanite estate scenery per 128/512 m cell (default), 0 = one batch per kind. ")
+    TEXT("Read when the estate scenery is built (set it on the command line with -DPCVars=)."));
 
 // Original provisional shapes, not the final realistic environment asset set.
 const FLinearColor Meadow(0.22f, 0.31f, 0.095f);
@@ -567,6 +570,40 @@ void RemoveMissing(TMap<int32, FHomesteadWorldVisual>& Visuals, const T& Entries
             It.RemoveCurrent();
         }
     }
+}
+}
+
+// Integer change keys for AHomesteadWorld::Refresh (the grass field's GrassMix pattern). A named
+// namespace keeps the names unique in unity builds.
+namespace HomesteadWorldKeys
+{
+constexpr uint64 Seed = 1469598103934665603ull;
+
+uint64 Mix(uint64 Hash, uint64 Value)
+{
+    return Hash ^ (Value + 0x9e3779b97f4a7c15ull + (Hash << 6) + (Hash >> 2));
+}
+
+uint64 Bits(double Value)
+{
+    uint64 Out = 0;
+    FMemory::Memcpy(&Out, &Value, sizeof(Out));
+    return Out;
+}
+
+uint64 Pair(int32 A, int32 B)
+{
+    return (static_cast<uint64>(static_cast<uint32>(A)) << 32) | static_cast<uint32>(B);
+}
+
+// A resource visual's signature: what it is, where, and whether it's shown cleared.
+FString ResourceSignature(Homestead::ResourceKind Kind, Homestead::Point Position, bool bCleared)
+{
+    uint64 Hash = Mix(Seed, static_cast<uint64>(Kind));
+    Hash = Mix(Hash, Bits(Position.x));
+    Hash = Mix(Hash, Bits(Position.y));
+    Hash = Mix(Hash, bCleared ? 1 : 0);
+    return FString::Printf(TEXT("%016llx"), static_cast<unsigned long long>(Hash));
 }
 }
 
@@ -1152,6 +1189,17 @@ struct FEstateSceneryRecord
 };
 #pragma pack(pop)
 static_assert(sizeof(FEstateSceneryRecord) == 20, "EstateScenery.bin records are 20 bytes");
+
+// Non-Nanite scenery is batched per kind *and* per square cell of the estate. A non-Nanite HISM
+// gathers its ray-tracing instances by scanning every instance it holds, every frame
+// (FInstancedStaticMeshSceneProxy::GetDynamicRayTracingInstances), so one estate-wide batch of 80k
+// grass tufts cost ~3.5 ms of render thread at the manor. Cells let the renderer drop whole batches
+// (ray tracing culls primitives more than r.RayTracing.Culling.Radius, 300 m, away; the draw
+// distance below culls cells past the kind's instance cull distance) before any instance is looked at.
+// Kinds with a cull distance use small cells; kinds drawn at any distance use large ones, so the far
+// view doesn't turn into thousands of draws. Nanite kinds stay one batch: Nanite culls on the GPU.
+constexpr float EstateSceneryNearCellCm = 12800.0f;
+constexpr float EstateSceneryFarCellCm = 51200.0f;
 }
 
 bool AHomesteadWorld::BuildEstateScenery()
@@ -1175,40 +1223,73 @@ bool AHomesteadWorld::BuildEstateScenery()
     }
     const auto* Records = reinterpret_cast<const FEstateSceneryRecord*>(Raw.GetData() + 8);
     constexpr int32 KindCount = UE_ARRAY_COUNT(EstateSceneryKinds);
-    UHierarchicalInstancedStaticMeshComponent* Batches[KindCount] = {};
-    TArray<FTransform> Transforms[KindCount];
+    UStaticMesh* KindMeshes[KindCount] = {};
+    bool KindTried[KindCount] = {};
+    float KindCellCm[KindCount] = {};
+    TMap<FIntVector, int32> BatchOfCell;
+    TArray<UHierarchicalInstancedStaticMeshComponent*> Batches;
+    TArray<int32> BatchKinds;
+    TArray<TArray<FTransform>> Transforms;
+    const bool bUseCells = CVarEstateSceneryCells.GetValueOnGameThread() != 0;
+    auto NewBatch = [this, &Batches, &BatchKinds, &Transforms, &KindMeshes, &KindCellCm](int32 KindIndex)
+    {
+        const FEstateSceneryKind& Kind = EstateSceneryKinds[KindIndex];
+        auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
+        Batch->SetupAttachment(GetRootComponent());
+        Batch->SetMobility(EComponentMobility::Static);
+        Batch->SetStaticMesh(KindMeshes[KindIndex]);
+        Batch->SetCollisionProfileName(Kind.bCollision ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
+        Batch->SetCollisionEnabled(Kind.bCollision ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
+        Batch->SetCanEverAffectNavigation(false);
+        Batch->SetCastShadow(Kind.bTree || Kind.bCollision || Kind.bShadow);
+        // As the woodland's underbrush: gentle sway needn't redraw cached shadow pages every frame.
+        if (Kind.bShadow && !Kind.bTree) Batch->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Rigid;
+        if (Kind.CullCm > 0)
+        {
+            Batch->SetCullDistances(static_cast<int32>(Kind.CullCm * 0.8f), static_cast<int32>(Kind.CullCm));
+            // A cell whose nearest instance is past the cull distance draws nothing: drop it whole. The
+            // distance is measured to the cell's centre, so allow a full cell for its reach.
+            if (KindCellCm[KindIndex] > 0)
+            {
+                Batch->LDMaxDrawDistance = Kind.CullCm + KindCellCm[KindIndex];
+                Batch->SetCachedMaxDrawDistance(Batch->LDMaxDrawDistance);
+            }
+        }
+        // Wind sway only near her: beyond 60 m it's invisible, and animated Nanite foliage there would
+        // keep invalidating the cached virtual shadow maps of the whole wood every frame.
+        Batch->SetWorldPositionOffsetDisableDistance(6000);
+        Batch->ComponentTags.Add(TEXT("EstateScenery"));
+        ApplyCameraSafeFoliageMaterials(*Batch);
+        Batches.Add(Batch);
+        BatchKinds.Add(KindIndex);
+        Transforms.AddDefaulted();
+        return Batches.Num() - 1;
+    };
     for (uint32 Index = 0; Index < Count; ++Index)
     {
         const FEstateSceneryRecord& Record = Records[Index];
         if (Record.Kind >= KindCount) continue;
         const FEstateSceneryKind& Kind = EstateSceneryKinds[Record.Kind];
-        if (!Batches[Record.Kind])
+        if (!KindTried[Record.Kind])
         {
-            UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, Kind.Path);
-            if (!Mesh)
+            KindTried[Record.Kind] = true;
+            KindMeshes[Record.Kind] = LoadObject<UStaticMesh>(nullptr, Kind.Path);
+            if (!KindMeshes[Record.Kind])
             {
                 UE_LOG(LogHomesteadWorld, Warning, TEXT("Estate scenery mesh missing: %s"), Kind.Path);
-                continue;
             }
-            auto* Batch = NewObject<UHierarchicalInstancedStaticMeshComponent>(this);
-            Batch->SetupAttachment(GetRootComponent());
-            Batch->SetMobility(EComponentMobility::Static);
-            Batch->SetStaticMesh(Mesh);
-            Batch->SetCollisionProfileName(Kind.bCollision ? UCollisionProfile::BlockAll_ProfileName : UCollisionProfile::NoCollision_ProfileName);
-            Batch->SetCollisionEnabled(Kind.bCollision ? ECollisionEnabled::QueryAndPhysics : ECollisionEnabled::NoCollision);
-            Batch->SetCanEverAffectNavigation(false);
-            Batch->SetCastShadow(Kind.bTree || Kind.bCollision || Kind.bShadow);
-            // As the woodland's underbrush: gentle sway needn't redraw cached shadow pages every frame.
-            if (Kind.bShadow && !Kind.bTree) Batch->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Rigid;
-            if (Kind.CullCm > 0) Batch->SetCullDistances(static_cast<int32>(Kind.CullCm * 0.8f), static_cast<int32>(Kind.CullCm));
-            // Wind sway only near her: beyond 60 m it's invisible, and animated Nanite foliage there would
-            // keep invalidating the cached virtual shadow maps of the whole wood every frame.
-            Batch->SetWorldPositionOffsetDisableDistance(6000);
-            Batch->ComponentTags.Add(TEXT("EstateScenery"));
-            ApplyCameraSafeFoliageMaterials(*Batch);
-            Batches[Record.Kind] = Batch;
+            else if (bUseCells && !KindMeshes[Record.Kind]->HasValidNaniteData())
+            {
+                KindCellCm[Record.Kind] = Kind.CullCm > 0 ? EstateSceneryNearCellCm : EstateSceneryFarCellCm;
+            }
         }
-        UStaticMesh* Mesh = Batches[Record.Kind]->GetStaticMesh();
+        UStaticMesh* Mesh = KindMeshes[Record.Kind];
+        if (!Mesh) continue;
+        const float CellCm = KindCellCm[Record.Kind];
+        const FIntVector Cell(Record.Kind,
+            CellCm > 0 ? FMath::FloorToInt32(Record.X / CellCm) : 0, CellCm > 0 ? FMath::FloorToInt32(Record.Y / CellCm) : 0);
+        const int32* Found = BatchOfCell.Find(Cell);
+        const int32 BatchIndex = Found ? *Found : BatchOfCell.Add(Cell, NewBatch(Record.Kind));
         const FRotator Rotation(0, Record.Yaw, 0);
         FVector Base(Record.X, Record.Y, HomesteadEstateTerrain::Height(Record.X, Record.Y));
         FVector Anchor = FVector::ZeroVector;
@@ -1236,38 +1317,58 @@ bool AHomesteadWorld::BuildEstateScenery()
             }
             Base.Z -= Kind.RimLift * Record.Scale;
         }
-        Transforms[Record.Kind].Add(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Record.Scale), FVector(Record.Scale)));
+        Transforms[BatchIndex].Add(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Record.Scale), FVector(Record.Scale)));
     }
-    int32 Total = 0;
-    for (int32 Kind = 0; Kind < KindCount; ++Kind)
+    int32 Total = 0, Cells = 0;
+    for (int32 BatchIndex = 0; BatchIndex < Batches.Num(); ++BatchIndex)
     {
-        if (!Batches[Kind]) continue;
-        Batches[Kind]->RegisterComponent();
-        Batches[Kind]->AddInstances(Transforms[Kind], false, true);
-        EstateScenery.Add(Batches[Kind]);
+        UHierarchicalInstancedStaticMeshComponent* Batch = Batches[BatchIndex];
+        const int32 Kind = BatchKinds[BatchIndex];
+        Batch->RegisterComponent();
+        Batch->AddInstances(Transforms[BatchIndex], false, true);
+        EstateScenery.Add(Batch);
         const FEstateSceneryKind& Info = EstateSceneryKinds[Kind];
-        const FVector Extent = Batches[Kind]->GetStaticMesh()->GetBounds().BoxExtent;
+        const FVector Extent = Batch->GetStaticMesh()->GetBounds().BoxExtent;
         EstateSceneryClearRadius.Add(Info.bTree || Info.bCollision ? 0.0f : FMath::Max(Extent.X, Extent.Y) * 0.7f);
         EstateSceneryTrunkRadius.Add(Info.bTree ? Info.Footprint : 0.0f);
-        EstateSceneryHidden.Add(TBitArray<>(false, Transforms[Kind].Num()));
-        EstateSceneryTransforms.Add(MoveTemp(Transforms[Kind]));
+        EstateSceneryHidden.Add(TBitArray<>(false, Transforms[BatchIndex].Num()));
+        EstateSceneryTransforms.Add(MoveTemp(Transforms[BatchIndex]));
         Total += EstateSceneryTransforms.Last().Num();
+        Cells += KindCellCm[Kind] > 0 ? 1 : 0;
     }
     bEstateSceneryBuilt = true;
-    UE_LOG(LogHomesteadWorld, Display, TEXT("Estate scenery: %d instances in %d batches."), Total, EstateScenery.Num());
+    UE_LOG(LogHomesteadWorld, Display, TEXT("Estate scenery: %d instances in %d batches (%d of them non-Nanite cells)."),
+        Total, EstateScenery.Num(), Cells);
     return true;
 }
 
 void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& State)
 {
-    TArray<Homestead::Footprint> Pieces;
-    FString Signature;
+    // The pieces' footprints and the interactables' positions, to the centimetre (yaw to 0.1 degree).
+    const auto Round = [](double Value) { return static_cast<uint64>(FMath::RoundToInt64(Value)); };
+    uint64 Key = HomesteadWorldKeys::Seed;
     for (const auto& Structure : State.structures)
     {
         const auto Box = Homestead::StructureFootprint(State, Structure);
-        Pieces.Add(Box);
-        Signature += FString::Printf(TEXT("%.0f:%.0f:%.0f:%.0f:%.1f;"), Box.center.x, Box.center.y, Box.half.x, Box.half.y, Box.yaw);
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.center.x));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.center.y));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.half.x));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.half.y));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.yaw * 10.0));
     }
+    Key = HomesteadWorldKeys::Mix(Key, State.structures.size());
+    for (const auto& Node : State.resources)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, static_cast<uint64>(Node.id));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Node.position.x));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Node.position.y));
+    }
+    if (bEstateSceneryClearKnown && Key == EstateSceneryClearKey) return;
+    bEstateSceneryClearKnown = true;
+    EstateSceneryClearKey = Key;
+    TArray<Homestead::Footprint> Pieces;
+    for (const auto& Structure : State.structures)
+        Pieces.Add(Homestead::StructureFootprint(State, Structure));
     // Interactables, bucketed by 20 m cell; the cover or trunk reach never spans more than a cell.
     constexpr double NodeCell = 2000.0;
     TMap<FIntPoint, TArray<FVector2D>> Nodes;
@@ -1275,10 +1376,7 @@ void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& Stat
     {
         Nodes.FindOrAdd(FIntPoint(FMath::FloorToInt32(Node.position.x / NodeCell), FMath::FloorToInt32(Node.position.y / NodeCell)))
             .Add(FVector2D(Node.position.x, Node.position.y));
-        Signature += FString::Printf(TEXT("n%d:%.0f:%.0f;"), Node.id, Node.position.x, Node.position.y);
     }
-    if (Signature == EstateSceneryClearSignature) return;
-    EstateSceneryClearSignature = MoveTemp(Signature);
     constexpr float Margin = 20.0f;
     // Clear ground round an interactable: enough to show a berry bush or herb tuft whole.
     constexpr float NodeCoverClear = 110.0f;
@@ -2322,6 +2420,7 @@ void AHomesteadWorld::ClearVisual(FHomesteadWorldVisual& Visual)
     }
     Visual.Components.Reset();
     Visual.Signature.Reset();
+    Visual.bShownCleared = false;
 }
 
 void AHomesteadWorld::CancelStagedResources()
@@ -2382,12 +2481,12 @@ bool AHomesteadWorld::StageAdjacentResources(const Homestead::Simulation& Destin
         && (FPlatformTime::Seconds() - Started) < 0.004)
     {
         const auto& Node = StagedResourceNodes[StagedResourceCursor++];
-        const FString Signature = FString::Printf(TEXT("%d:%.3f:%.3f:%d"),
-            static_cast<int>(Node.kind), Node.position.x, Node.position.y, Node.cleared);
+        const FString Signature = HomesteadWorldKeys::ResourceSignature(Node.kind, Node.position, Node.cleared);
         bStagingResourceBuild = true;
         auto& Base = StagedResourceVisuals.FindOrAdd(Node.id);
         BuildResource(Base, Node, false);
         Base.Signature = Signature;
+        Base.bShownCleared = Node.cleared;
         auto& Produce = StagedResourceProduceVisuals.FindOrAdd(Node.id);
         const bool bReady = Node.readyAtHour <= State.hour;
         if (bReady) BuildResource(Produce, Node, true);
@@ -2965,6 +3064,7 @@ bool AHomesteadWorld::BeginFelling(int32 ResourceId)
                 }
             Visual->Components.Reset();
             ResourceVisuals.Remove(ResourceId);
+            bRefreshInputsKnown = false;
         }
     if (FallingParts.IsEmpty()) return false;
     FBox Bounds(ForceInit);
@@ -4403,6 +4503,81 @@ bool AHomesteadWorld::Initialize(const Homestead::Simulation& Simulation)
     return Refresh(Simulation);
 }
 
+void AHomesteadWorld::UpdateEstateGrass(const Homestead::State& State)
+{
+    if (!State.fixedEstate)
+    {
+        if (EstateGrass) EstateGrass->Clear();
+        return;
+    }
+    if (!EstateGrass)
+    {
+        EstateGrass = NewObject<UHomesteadGrassField>(this, TEXT("EstateGrass"));
+        EstateGrass->SetupAttachment(GetRootComponent());
+        EstateGrass->RegisterComponent();
+    }
+    const APlayerController* Viewer = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+    if (Viewer && Viewer->PlayerCameraManager)
+        EstateGrass->Update(State, Viewer->PlayerCameraManager->GetCameraLocation());
+}
+
+uint64 AHomesteadWorld::RefreshInputsKey(const Homestead::Simulation& Simulation) const
+{
+    // Everything Refresh's layout strings and per-object signatures read, in integers. Readiness,
+    // plot stages and fire fuel change as game time passes, without a revision bump.
+    const Homestead::State& State = Simulation.GetState();
+    uint64 Key = HomesteadWorldKeys::Mix(HomesteadWorldKeys::Seed, Simulation.GetRevision());
+    Key = HomesteadWorldKeys::Mix(Key, State.world.seed);
+    Key = HomesteadWorldKeys::Mix(Key, State.world.generationVersion);
+    Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(State.activeChunk.x, State.activeChunk.y));
+    Key = HomesteadWorldKeys::Mix(Key, State.fixedEstate ? 1 : 0);
+    Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(HeldProduceId, HeldPlotId));
+    Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(HeldHarvestPlotId, static_cast<int32>(HeldHarvestKind)));
+    Key = HomesteadWorldKeys::Mix(Key, bHeldPlotHidden ? 1 : 0);
+    Key = HomesteadWorldKeys::Mix(Key, 0x3ull + State.resources.size());
+    for (const auto& Node : State.resources)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Node.id, static_cast<int32>(Node.kind)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Bits(Node.position.x));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Bits(Node.position.y));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Node.key.chunk.x, Node.key.chunk.y));
+        Key = HomesteadWorldKeys::Mix(Key, (static_cast<uint64>(Node.key.localId) << 2)
+            | (Node.cleared ? 2u : 0u) | (Node.readyAtHour <= State.hour ? 1u : 0u));
+    }
+    Key = HomesteadWorldKeys::Mix(Key, 0x5ull + State.structures.size());
+    for (const auto& Structure : State.structures)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Structure.id, static_cast<int32>(Structure.kind)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Structure.buildingId, Structure.rotation));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Structure.cellX, Structure.cellY));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(static_cast<int32>(Structure.skin), Structure.fuelHours > 0 ? 1 : 0));
+    }
+    Key = HomesteadWorldKeys::Mix(Key, 0x7ull + State.plots.size());
+    for (const auto& Plot : State.plots)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Plot.id, static_cast<int32>(Plot.kind)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Plot.cellX, Plot.cellY));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Stage(Plot.growth, 24), Stage(Plot.moisture, 5)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Stage(Plot.weeds, 8) * 2 + (Plot.planted ? 1 : 0),
+            static_cast<int32>(Homestead::StageOf(Plot))));
+    }
+    Key = HomesteadWorldKeys::Mix(Key, 0xDull + State.worldDrops.size());
+    for (const auto& Drop : State.worldDrops)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Drop.id, static_cast<int32>(Drop.item)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Bits(Drop.position.x));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Bits(Drop.position.y));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Drop.quantity, Drop.wearableId));
+    }
+    Key = HomesteadWorldKeys::Mix(Key, 0xEull + State.resourceEdits.size());
+    for (const auto& Edit : State.resourceEdits)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Edit.key.chunk.x, Edit.key.chunk.y));
+        Key = HomesteadWorldKeys::Mix(Key, (static_cast<uint64>(Edit.key.localId) << 1) | (Edit.cleared ? 1u : 0u));
+    }
+    return Key;
+}
+
 bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
 {
     const double RefreshStarted = FPlatformTime::Seconds();
@@ -4429,42 +4604,51 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         ClearActiveTreeBatches();
         ClearVisual(Preview);
     }
-    FString Layout = FString::Printf(TEXT("%llu:%u:%d,%d;"), static_cast<unsigned long long>(State.world.seed),
-        State.world.generationVersion, State.activeChunk.x, State.activeChunk.y);
+    const uint64 Inputs = RefreshInputsKey(Simulation);
+    if (!Transition && !WorldChanged && bRefreshInputsKnown && Inputs == LastRefreshInputs)
+    {
+        // Nothing the visuals are built from has changed: keep them and do only the per-refresh work.
+        UpdateEstateGrass(State);
+        bLampDropLit = Simulation.LampOil() > 0.0;
+        UpdateLighting(State);
+        LastRefreshMilliseconds = (FPlatformTime::Seconds() - RefreshStarted) * 1000;
+        return true;
+    }
+    bRefreshInputsKnown = false;
+    uint64 LayoutKey = HomesteadWorldKeys::Mix(HomesteadWorldKeys::Seed, State.world.seed);
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, State.world.generationVersion);
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Pair(State.activeChunk.x, State.activeChunk.y));
     for (const auto& Node : State.resources)
     {
-        Layout += FString::Printf(TEXT("%d:%.3f:%.3f:%d;"), Node.id, Node.position.x, Node.position.y, Node.cleared);
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, static_cast<uint64>(Node.id));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Bits(Node.position.x));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Bits(Node.position.y));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, Node.cleared ? 1 : 0);
     }
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, 0x5ull + State.structures.size());
     for (const auto& Structure : State.structures)
     {
-        Layout += FString::Printf(TEXT("S:%d:%d:%d;"), Structure.buildingId, Structure.cellX, Structure.cellY);
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, static_cast<uint64>(Structure.buildingId));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Pair(Structure.cellX, Structure.cellY));
     }
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, 0x7ull + State.plots.size());
     for (const auto& Plot : State.plots)
-    {
-        Layout += FString::Printf(TEXT("P:%d:%d;"), Plot.cellX, Plot.cellY);
-    }
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Pair(Plot.cellX, Plot.cellY));
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, 0xDull + State.worldDrops.size());
     for (const auto& Drop : State.worldDrops)
-        Layout += FString::Printf(TEXT("D:%d:%.3f:%.3f;"), Drop.id, Drop.position.x, Drop.position.y);
+    {
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, static_cast<uint64>(Drop.id));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Bits(Drop.position.x));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Bits(Drop.position.y));
+    }
+    FString Layout = FString::Printf(TEXT("%016llx"), static_cast<unsigned long long>(LayoutKey));
     if (ResourceLayoutSignature != Layout)
     {
         if (!State.fixedEstate && !BuildDecorations(Simulation)) return false;
         ResourceLayoutSignature = MoveTemp(Layout);
     }
     if (State.fixedEstate) ClearEstateSceneryUnderPieces(State);
-    if (State.fixedEstate)
-    {
-        if (!EstateGrass)
-        {
-            EstateGrass = NewObject<UHomesteadGrassField>(this, TEXT("EstateGrass"));
-            EstateGrass->SetupAttachment(GetRootComponent());
-            EstateGrass->RegisterComponent();
-        }
-        const APlayerController* Viewer = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
-        if (Viewer && Viewer->PlayerCameraManager)
-            EstateGrass->Update(State, Viewer->PlayerCameraManager->GetCameraLocation());
-    }
-    else if (EstateGrass)
-        EstateGrass->Clear();
+    UpdateEstateGrass(State);
     FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
         static_cast<unsigned long long>(State.world.seed), State.world.generationVersion,
         State.activeChunk.x, State.activeChunk.y);
@@ -4563,20 +4747,20 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         // A fallen bough or salvage pile she is still kneeling at stays until she has lifted from it.
         Homestead::ResourceNode Shown = Node;
         Shown.cleared = Node.cleared && Node.id != HeldProduceId;
-        const FString Signature = FString::Printf(TEXT("%d:%.3f:%.3f:%d"),
-            static_cast<int>(Node.kind), Node.position.x, Node.position.y, Shown.cleared);
+        const FString Signature = HomesteadWorldKeys::ResourceSignature(Node.kind, Node.position, Shown.cleared);
         AdoptStaged(ResourceVisuals, StagedResourceVisuals, Node.id, Signature);
         if (bVisualBuildFailed) return false;
         FHomesteadWorldVisual& Visual = ResourceVisuals.FindOrAdd(Node.id);
         if (Visual.Signature != Signature)
         {
             // Cleared in play (not loaded or streamed in cleared): it pops away instead of vanishing.
-            if (Shown.cleared && !Transition && Homestead::IsOvergrowth(Node.kind) && Visual.Signature.EndsWith(TEXT(":0")))
+            if (Shown.cleared && !Transition && Homestead::IsOvergrowth(Node.kind) && !Visual.Signature.IsEmpty() && !Visual.bShownCleared)
                 StartClearPop(Visual, Node);
             ClearVisual(Visual);
             BuildResource(Visual, Shown, false);
             if (bVisualBuildFailed) return false;
             Visual.Signature = Signature;
+            Visual.bShownCleared = Shown.cleared;
         }
         const FString ProduceSignature = Signature + (bReady ? TEXT(":ready") : TEXT(":harvested"));
         AdoptStaged(ResourceProduceVisuals, StagedResourceProduceVisuals, Node.id, ProduceSignature);
@@ -4681,6 +4865,8 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         }
     }
     const double LightingStarted = FPlatformTime::Seconds();
+    LastRefreshInputs = Inputs;
+    bRefreshInputsKnown = true;
     UpdateLighting(State);
     LastRefreshMilliseconds = (FPlatformTime::Seconds() - RefreshStarted) * 1000;
     if (Transition)

@@ -3,7 +3,13 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [switch]$Weeding, [switch]$Clearing, [switch]$CameraLifecycle, [switch]$GeneratedWoodland, [string]$GeneratedResumeFrom, [switch]$Prompts, [switch]$BookClarity, [switch]$Hotbar, [switch]$NativeMenu, [switch]$DirectionalNavigation, [switch]$NativeMenuQuit, [switch]$NativeSaveRetry, [string]$NativeResumeFrom, [switch]$RequireLit, [string]$FixtureSave,
     [string]$PackageDirectory = 'Build\Windows', [string]$OutputDirectory,
     [ValidateRange(1280,7680)][int]$Width = 1920, [ValidateRange(720,4320)][int]$Height = 1080,
-    [ValidateRange(50,100)][int]$RenderScale = 100,
+    # 3D resolution percentage. 0 leaves the player default (sg.ResolutionQuality=0: the engine picks
+    # it from the display, about 50% at 4K with TSR upscaling), which is how Jenny plays.
+    [ValidateScript({ $_ -eq 0 -or ($_ -ge 50 -and $_ -le 100) })][int]$RenderScale = 100,
+    # Extra console commands run at start-up, comma-separated (for example 't.MaxFPS 0, csvprofile start').
+    [string]$ExtraExecCmds,
+    # Extra command-line arguments for the game process (for example '-DPCVars=homestead.EstateSceneryCells=0').
+    [string]$ExtraArguments,
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA,
     [switch]$DisableChunkPreparation,
     # The Estate route (what Jenny plays): new game, each part of the estate, a few actions, fps.
@@ -254,16 +260,20 @@ if ($Crafting) { $loopArguments = '-HomesteadCraftingTest -HomesteadRequireLit' 
 # The Estate route plays the MetaHuman heroine Jenny plays, and skips the Names step.
 if ($EstateSmoke) { $loopArguments = '-HomesteadEstateSmoke -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRequireLit' }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
-$scaleArguments = if ($ShippingQA) { '' } else { "-ExecCmds=`"r.ScreenPercentage $RenderScale`"" }
+$execCommands = @()
+if (-not $ShippingQA -and $RenderScale -gt 0) { $execCommands += "r.ScreenPercentage $RenderScale" }
+if (-not $ShippingQA -and $ExtraExecCmds) { $execCommands += $ExtraExecCmds }
+$scaleArguments = if ($execCommands) { "-ExecCmds=`"$($execCommands -join ', ')`"" } else { '' }
 $arguments = $prefix + "-HomesteadSmokeTest -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$graphics`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height $scaleArguments -nosplash $audioArguments $loopArguments -abslog=`"$log`""
 if ($ShippingQA) { $arguments += ' -HomesteadShippingQA' }
+if ($ExtraArguments -and -not $ShippingQA) { $arguments += " $ExtraArguments" }
 if ($ShippingQA) {
     $process = & (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments -CompletionDriven:($GeneratedWoodland -or $FullLoop -or $NativeMenu)
 } else {
     $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
     Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
 }
-Write-Host "Requested output: ${Width}x${Height}; 3D resolution policy: $(if($ShippingQA){'unchanged Shipping defaults'}else{$RenderScale})."
+Write-Host "Requested output: ${Width}x${Height}; 3D resolution policy: $(if($ShippingQA){'unchanged Shipping defaults'}elseif($RenderScale -eq 0){'player default'}else{$RenderScale})."
 if (-not $ShippingQA -and -not $process.WaitForExit($TimeoutSeconds * 1000)) {
     Stop-Process -Id $process.Id
     throw "Engine smoke test exceeded $TimeoutSeconds seconds. Stopped only its process $($process.Id)."
