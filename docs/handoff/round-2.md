@@ -218,9 +218,16 @@ work that goes beyond a small verified correction.
 | **Approved:** a clearly signed manor-south gate/path with protected switchbacks or stairs to a **12–20 m dry beach** along the owned ~630 m cliff coast | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-regional-landforms-water` |
 | **Approved:** the wider walkable beach above (12–20 m dry width) below the owned cliffs | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-shore-and-river-fishing` |
 | The river looks as if it stops before reaching the ocean in Jenny's screenshot | Weather Agent (`89914e30`) | **Partly checked, not resolved:** PIE on `27e2e917` confirms the source, banks and water down to the beach, but the ribbon still ends a couple metres short of the ocean, separated by sand/foam. Own a later true estuary connection while widening the beach; do not mark the gap fixed. |
+| **Pending:** around 9 PM the Estate visibly brightens and moonlight reads like sunlight | Architecture traces the nighttime directional/skylight/auto-exposure path; Water owns a later measured fix | Integration captures packaged **RT-on** evidence at 19:00, 21:00 and midnight. No fix is shipped or inferred from the trace. |
+| **Pending:** town buildings are bunched too tightly | Water, after the final road route | Space buildings around a coherent, winding, walkable road; synchronize store entrance/anchors, save IDs, ground/scenery and the map. On-foot town-entry/store acceptance, coordinate bridge, roadside forage and travel signs follow the final route. |
 | Running foot kicks too high toward her butt; lower its swing apex slightly | Harvest Agent / temporary Gait Agent (`65a2408b`) | `polish-locomotion-view-distance-and-time-hud` |
 
-**Water-lane order:** verify the river mouth in the parked 4 PM river branch first, then stage **lake → beach → route**. These are unverified slices: they do **not** edit the 4 PM package. If the terrain or water work needs placement ids, the Water Agent claims them through this page before using them (the registry starts at 581000+).
+**Water-lane order:** verify the river mouth in the parked 4 PM river branch first, then stage
+**lake → beach → route**. Night lighting and the town-road layout are separate later increments after
+the north-west lake; town-entry/store acceptance, coordinate bridge, roadside forage and travel signs
+wait for the final road route. These are unverified slices: they do **not** edit the 4 PM package. If
+the terrain or water work needs placement ids, the Water Agent claims them through this page before
+using them (the registry starts at 581000+).
 
 **Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
 all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
@@ -356,6 +363,16 @@ requirement.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
+- **Nighttime brightness** — **pending, not shipped.** At about 9 PM, the Estate visibly brightens:
+  moonlight reads like sunlight. **Architecture** first performs a read-only trace of the nighttime
+  directional-light, skylight and auto-exposure path. **Water** later makes a measured correction only
+  after that trace. **Integration** provides packaged RT-on evidence at 19:00, 21:00 and midnight;
+  neither the trace nor screenshots alone establish a fix.
+- **Town-road layout** — **Water Agent**, after the north-west lake and final road route: separate
+  currently bunched town buildings along a coherent, winding, walkable road. Keep the store entrance,
+  anchors and save IDs, ground/scenery and map synchronized. Only after the route is final can the
+  on-foot town-entry/store acceptance, coordinate bridge, roadside forage and travel signs be aligned.
+  This is a later, separate increment and is **not** 4 PM package content.
 - **Change Dye** — **UI / temporary Menu Agent** (`5cf73757`), after contextual berries: the current
   action is a no-op. It opens the selected colour or swatch choice, supports preview, confirm and
   cancel, then persists the selection. Pending PIE verification.
