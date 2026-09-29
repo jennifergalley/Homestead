@@ -8,7 +8,7 @@ public class SurvivalGameEditor : ModuleRules
         PrivateIncludePaths.Add(System.IO.Path.Combine(ModuleDirectory, "..", "SurvivalGame"));
         PrivateDependencyModuleNames.AddRange(new[] {
             "Core", "CoreUObject", "Engine", "UnrealEd", "Json", "RenderCore", "InputCore", "Landscape",
-            "ImageWrapper", "AssetRegistry", "AssetTools", "SurvivalGame"
+            "ImageWrapper", "AssetRegistry", "AssetTools", "Foliage", "SurvivalGame"
         });
     }
 }

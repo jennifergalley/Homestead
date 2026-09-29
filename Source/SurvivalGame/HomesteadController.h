@@ -602,6 +602,8 @@ private:
     // Fill the watering pail at the nearest fresh water edge, with her kneeling fill when it succeeds.
     void FillPailAtStream(Homestead::Point Position);
     Homestead::Point FreshWaterDipPoint(Homestead::Point Position) const;
+    // The pail goes in this far inside the waterline, so it visibly dips into the water.
+    static constexpr double PailDipInsideCm = 25.0;
     void EndPlacement();
     void Notify(const Homestead::Result& Result, USoundBase* SuccessCue = nullptr);
     void Notify(const FString& Text, bool Error = false);

@@ -6,6 +6,8 @@
 #include "IImageWrapper.h"
 #include "IImageWrapperModule.h"
 #include "Landscape.h"
+#include "LandscapeEdit.h"
+#include "LandscapeEditLayer.h"
 #include "LandscapeInfo.h"
 #include "LandscapeLayerInfoObject.h"
 #include "LandscapeProxy.h"
@@ -17,6 +19,9 @@
 #include "Modules/ModuleManager.h"
 #include "UObject/Package.h"
 #include "UObject/SavePackage.h"
+#include "WorldPartition/LoaderAdapter/LoaderAdapterShape.h"
+#include "WorldPartition/WorldPartition.h"
+#include "WorldPartition/WorldPartitionEditorLoaderAdapter.h"
 
 namespace
 {
@@ -152,4 +157,87 @@ double UHomesteadEstateAuthoringLibrary::EditorGroundHeight(double X, double Y)
             return Z.GetValue();
     }
     return -1e9;
+}
+
+FString UHomesteadEstateAuthoringLibrary::ApplyEstateHeightfield(const FString& HeightfieldR16, int32 MinX, int32 MinY,
+    int32 MaxX, int32 MaxY, int32 TileSize, bool bDryRun)
+{
+    UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+    if (!World)
+        return TEXT("error: no editor world");
+    TArray64<uint8> File;
+    constexpr int64 Expected = int64(EstateAuthoringVerts) * EstateAuthoringVerts * sizeof(uint16);
+    if (!FFileHelper::LoadFileToArray(File, *HeightfieldR16) || File.Num() != Expected)
+        return FString::Printf(TEXT("error: %s is not a %d^2 16-bit heightfield"), *HeightfieldR16, EstateAuthoringVerts);
+    const uint16* Source = reinterpret_cast<const uint16*>(File.GetData());
+
+    ALandscape* Landscape = nullptr;
+    for (TActorIterator<ALandscape> It(World); It && !Landscape; ++It)
+        Landscape = *It;
+    ULandscapeInfo* Info = Landscape ? Landscape->GetLandscapeInfo() : nullptr;
+    if (!Info)
+        return TEXT("error: no landscape");
+    const ULandscapeEditLayerBase* BaseLayer = Landscape->GetEditLayer(0);
+    if (!BaseLayer)
+        return TEXT("error: the landscape has no edit layer 0");
+
+    MinX = FMath::Clamp(MinX, 0, EstateAuthoringVerts - 1);
+    MinY = FMath::Clamp(MinY, 0, EstateAuthoringVerts - 1);
+    MaxX = FMath::Clamp(MaxX, MinX, EstateAuthoringVerts - 1);
+    MaxY = FMath::Clamp(MaxY, MinY, EstateAuthoringVerts - 1);
+    TileSize = FMath::Max(8, TileSize);
+
+    // The region's landscape proxies must be loaded to be read and written.
+    UWorldPartitionEditorLoaderAdapter* Loader = nullptr;
+    if (UWorldPartition* Partition = World->GetWorldPartition())
+    {
+        const FTransform ToWorld = Landscape->LandscapeActorToWorld();
+        const FBox Region(ToWorld.TransformPosition(FVector(MinX - 1, MinY - 1, -1e5)),
+            ToWorld.TransformPosition(FVector(MaxX + 1, MaxY + 1, 1e5)));
+        Loader = Partition->CreateEditorLoaderAdapter<FLoaderAdapterShape>(World, Region, TEXT("Homestead heightfield patch"));
+        Loader->GetLoaderAdapter()->Load();
+    }
+
+    int32 LandscapeMinX = 0, LandscapeMinY = 0, LandscapeMaxX = 0, LandscapeMaxY = 0;
+    Info->GetLandscapeExtent(LandscapeMinX, LandscapeMinY, LandscapeMaxX, LandscapeMaxY);
+    int32 Tiles = 0, TilesChanged = 0;
+    int64 VerticesChanged = 0;
+    int32 WorstDelta = 0;
+    {
+        FHeightmapAccessor<false> Accessor(Info);
+        Accessor.SetEditLayer(BaseLayer->GetGuid());
+        TArray<uint16> Current, Wanted;
+        for (int32 Y0 = MinY; Y0 <= MaxY; Y0 += TileSize)
+            for (int32 X0 = MinX; X0 <= MaxX; X0 += TileSize)
+            {
+                const int32 X1 = FMath::Min(X0 + TileSize - 1, MaxX), Y1 = FMath::Min(Y0 + TileSize - 1, MaxY);
+                const int32 Width = X1 - X0 + 1, Height = Y1 - Y0 + 1;
+                Current.SetNumZeroed(Width * Height);
+                Wanted.SetNumUninitialized(Width * Height);
+                Accessor.GetDataFast(X0 + LandscapeMinX, Y0 + LandscapeMinY, X1 + LandscapeMinX, Y1 + LandscapeMinY, Current.GetData());
+                int32 Differ = 0;
+                for (int32 Y = 0; Y < Height; ++Y)
+                    for (int32 X = 0; X < Width; ++X)
+                    {
+                        const uint16 Value = Source[int64(Y0 + Y) * EstateAuthoringVerts + X0 + X];
+                        Wanted[Y * Width + X] = Value;
+                        const int32 Delta = FMath::Abs(int32(Value) - int32(Current[Y * Width + X]));
+                        Differ += Delta != 0;
+                        WorstDelta = FMath::Max(WorstDelta, Delta);
+                    }
+                ++Tiles;
+                if (Differ == 0)
+                    continue;
+                ++TilesChanged;
+                VerticesChanged += Differ;
+                if (!bDryRun)
+                    Accessor.SetData(X0 + LandscapeMinX, Y0 + LandscapeMinY, X1 + LandscapeMinX, Y1 + LandscapeMinY, Wanted.GetData());
+            }
+    }
+    if (Loader && bDryRun)
+        if (UWorldPartition* Partition = World->GetWorldPartition())
+            Partition->ReleaseEditorLoaderAdapter(Loader);
+    return FString::Printf(TEXT("%s: %d of %d tiles differ, %lld vertices, worst %.2f m%s"),
+        bDryRun ? TEXT("dry run") : TEXT("applied"), TilesChanged, Tiles, VerticesChanged, WorstDelta / 128.0,
+        bDryRun ? TEXT("") : TEXT("; let the editor tick, then save the dirty landscape proxies"));
 }
