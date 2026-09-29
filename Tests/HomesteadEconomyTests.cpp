@@ -1,8 +1,11 @@
 // Portable tests for the item catalogue, money and shops.
 #include "HomesteadEstate.h"
+#include "HomesteadEstatePublicRoad.h"
 #include "HomesteadItems.h"
 #include "HomesteadSimulation.h"
+#include "HomesteadTravel.h"
 
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -369,6 +372,80 @@ void WaitForTheStoreToOpen()
     OK(sim.CheckShopAccess(store.shop, store.customer));
 }
 
+void WalkTheRoad()
+{
+    CHECK(FormatHour(7.9999) == "8 AM" && FormatHour(23.999) == "12 AM" && FormatHour(19.2) == "7:12 PM");
+    CHECK(FormatWalkDuration(7.2) == "7 h 12 min" && FormatWalkDuration(0.5) == "30 min" && FormatWalkDuration(2.0) == "2 h");
+    const PublicRoad& road = EstatePublicRoad();
+    const PublicRoadStop* manor = road.FindStop("Manor");
+    const PublicRoadStop* town = road.FindStop("Town");
+    CHECK(manor && town);
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    // Noon at the manor, default 60-minute day: the whole road at the conservative pace, ~7 game hours.
+    sim.SkipToHourOfDay(12.0);
+    const TravelPlan noon = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
+    CHECK(noon.ok && noon.connectorMetres < 1.0);
+    CHECK(std::abs(noon.roadMetres - (town->chainage - manor->chainage)) < 1.0);
+    const double expected = noon.totalMetres * 100.0 / RoadWalkPaceCmPerSecond / 3600.0 * 24.0 * 60.0 / sim.GetState().dayMinutes;
+    CHECK(std::abs(noon.gameHours - expected) < 1e-9 && noon.gameHours > 6.8 && noon.gameHours < 7.4);
+    CHECK(noon.arrival.x == town->position.x && noon.arrival.y == town->position.y && noon.arrivalZ == town->z);
+    CHECK(noon.storeClosedOnArrival && noon.summary.find("closed") != std::string::npos && !noon.nextDay);
+    CHECK(noon.summary.find("1.9 km") != std::string::npos);
+    // The saved day length scales it: a 30-minute day doubles the game hours, 120 halves them.
+    OK(sim.SetDayMinutes(30.0));
+    CHECK(std::abs(PlanTravel(sim.GetState(), manor->position, TravelDestination::Town).gameHours - noon.gameHours * 2.0) < 1e-9);
+    OK(sim.SetDayMinutes(120.0));
+    CHECK(std::abs(PlanTravel(sim.GetState(), manor->position, TravelDestination::Town).gameHours - noon.gameHours / 2.0) < 1e-9);
+    // ...and survives a save and reload.
+    Simulation reloaded;
+    reloaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(std::abs(PlanTravel(reloaded.GetState(), manor->position, TravelDestination::Town).gameHours - noon.gameHours / 2.0) < 1e-9);
+    OK(sim.SetDayMinutes(60.0));
+    // Early enough, the store is open when she gets there.
+    sim.SkipToHourOfDay(6.5);
+    const TravelPlan morning = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
+    CHECK(morning.ok && !morning.storeClosedOnArrival && morning.summary.find("closed") == std::string::npos);
+    // Late: past midnight on the way.
+    sim.SkipToHourOfDay(22.0);
+    CHECK(PlanTravel(sim.GetState(), manor->position, TravelDestination::Town).nextDay);
+    // Partway along (the gateway), only the rest of the road counts; home to the manor never warns about the store.
+    const Point gateway = road.At(road.FindStop("Gateway")->chainage);
+    const TravelPlan half = PlanTravel(sim.GetState(), gateway, TravelDestination::Town);
+    CHECK(half.ok && half.gameHours < noon.gameHours * 0.7);
+    const TravelPlan home = PlanTravel(sim.GetState(), town->position, TravelDestination::Manor);
+    CHECK(home.ok && !home.storeClosedOnArrival && home.arrival.x == manor->position.x);
+    // Off the road: the straight walk back to it counts too, and far off she has to find it herself.
+    const TravelPlan field = PlanTravel(sim.GetState(), {gateway.x + 20000.0, gateway.y}, TravelDestination::Town);
+    CHECK(field.ok && field.connectorMetres > 150.0 && field.totalMetres > half.totalMetres);
+    CHECK(!PlanTravel(sim.GetState(), {gateway.x + 90000.0, gateway.y}, TravelDestination::Town).ok);
+    CHECK(!PlanTravel(sim.GetState(), town->position, TravelDestination::Town).ok);
+    Simulation woodland;
+    CHECK(!PlanTravel(woodland.GetState(), manor->position, TravelDestination::Town).ok);
+    // Refusals pass no time at all.
+    sim.SkipToHourOfDay(12.0);
+    Edit(sim, 5.0, 100.0);
+    const std::string hungry = sim.Serialize();
+    const auto starving = sim.WalkRoad(TravelDestination::Town, manor->position);
+    CHECK(!starving.ok && starving.message.find("too hungry") != std::string::npos && sim.Serialize() == hungry);
+    Edit(sim, 100.0, 3.0);
+    const std::string tired = sim.Serialize();
+    const auto sleepy = sim.WalkRoad(TravelDestination::Town, manor->position);
+    CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos && sim.Serialize() == tired);
+    const std::string there = sim.Serialize();
+    CHECK(!sim.WalkRoad(TravelDestination::Town, town->position).ok && sim.Serialize() == there);
+    // Fed and rested: the clock runs for the whole walk, and she's hungrier and a little more tired.
+    Edit(sim, 100.0, 100.0);
+    const double before = sim.GetState().hour;
+    const std::uint64_t revision = sim.GetRevision();
+    const TravelPlan plan = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
+    OK(sim.WalkRoad(TravelDestination::Town, manor->position));
+    CHECK(std::abs(sim.GetState().hour - before - plan.gameHours) < 1e-6);
+    CHECK(sim.GetRevision() > revision && sim.GetState().hunger < 100.0 && sim.GetState().energy < 100.0);
+    CHECK(sim.DozeCount() == 0);
+}
+
 const char* filter = nullptr;void Run(const char* name, void (*test)())
 {
     if (filter && !std::strstr(name, filter)) return;
@@ -393,6 +470,7 @@ int main(int argc, char** argv)
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
     Run("playtest shop placement", PlaytestShopPlacement);
     Run("wait for the store to open", WaitForTheStoreToOpen);
+    Run("walk the road to town and back", WalkTheRoad);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

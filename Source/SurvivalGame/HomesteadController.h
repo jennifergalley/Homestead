@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Simulation/HomesteadSimulation.h"
+#include "Simulation/HomesteadTravel.h"
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveRouting.h"
 #include "HomesteadPromptIntent.h"
@@ -102,6 +103,10 @@ public:
     void MenuInventoryView(int32 View);
     int32 InventoryView() const { return MenuInventoryViewIndex; }
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
+    // Walking the public road to the manor or town (HomesteadControllerTravel.cpp): the preview from
+    // where she stands, and the walk itself (the clock runs for its length; she's stood at the end).
+    Homestead::TravelPlan MenuPlanTravel(Homestead::TravelDestination Destination) const;
+    bool MenuTravel(Homestead::TravelDestination Destination, uint64 ExpectedRevision);
     bool MenuSplitHalf(const FHomesteadRow& Row);
     // Moves a whole stack or garment between the pack and the open chest (as much as fits).
     bool MenuMoveWhole(const FHomesteadRow& Row);

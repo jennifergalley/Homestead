@@ -34,6 +34,8 @@ void SHomesteadMapView::Construct(const FArguments& Args)
 {
     Map = Args._Map;
     UsesGamepad = Args._UsesGamepad;
+    PlaceAction = Args._PlaceAction;
+    OnPlaceAction = Args._OnPlaceAction;
     SetClipping(EWidgetClipping::ClipToBounds);
 }
 
@@ -191,6 +193,15 @@ FString SHomesteadMapView::SelectedName() const
     return Places.IsValidIndex(State().Selected) ? Places[State().Selected].Name : FString();
 }
 
+TOptional<EHomesteadMapGlyph> SHomesteadMapView::SelectedGlyph() const
+{
+    const UHomesteadMapComponent* Component = Map.Get();
+    if (!Component || !Component->Frame().Model.IsValid()) return {};
+    const auto& Places = Component->Frame().Model->Landmarks;
+    if (!Places.IsValidIndex(State().Selected)) return {};
+    return Places[State().Selected].Glyph;
+}
+
 void SHomesteadMapView::Tick(const FGeometry& Geometry, const double, const float DeltaTime)
 {
     Size = FVector2D(Geometry.GetLocalSize()).ComponentMax(FVector2D(1, 1));
@@ -221,6 +232,12 @@ FReply SHomesteadMapView::OnMouseButtonUp(const FGeometry& Geometry, const FPoin
     const FVector2D At = Geometry.AbsoluteToLocal(Event.GetScreenSpacePosition());
     // A click without a drag picks the landmark under the pointer.
     const UHomesteadMapComponent* Component = Map.Get();
+    if (FVector2D::Distance(At, DragStart) < 5.0f && ActionBox.bIsValid && ActionBox.IsInside(At) && OnPlaceAction.IsBound())
+    {
+        // The focused place's action line (the walk there) is a button.
+        OnPlaceAction.Execute();
+        return FReply::Handled().ReleaseMouseCapture();
+    }
     if (FVector2D::Distance(At, DragStart) < 5.0f && Component && Component->Frame().Model.IsValid())
     {
         const auto& Places = Component->Frame().Model->Landmarks;
@@ -449,14 +466,24 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
     FString Detail = Model.Landmarks.IsValidIndex(Selected) ? Model.Landmarks[Selected].Description
         : FString(Frame.bInsideEstate ? TEXT("You are on your own land.") : TEXT("You are off your land just now."));
     if (Title.IsEmpty()) Title = FString::Printf(TEXT("The %s estate"), *Model.EstateName);
+    const FString Action = Model.Landmarks.IsValidIndex(Selected) ? PlaceAction.Get(FString()) : FString();
     const FVector2D TitleSize = HomesteadMapPaint::FPainter::MeasureText(Title, CardSize);
     const FVector2D DetailSize = HomesteadMapPaint::FPainter::MeasureText(Detail, CardSize * 0.8f, false);
+    const FVector2D ActionSize = Action.IsEmpty() ? FVector2D::ZeroVector
+        : HomesteadMapPaint::FPainter::MeasureText(Action, CardSize * 0.8f) + FVector2D(0, 6 * Scale);
     const FVector2D CardAt(14 * Scale, 14 * Scale);
-    const float CardWidth = FMath::Max(TitleSize.X, DetailSize.X) + 24 * Scale;
-    const float CardHeight = TitleSize.Y + DetailSize.Y + 20 * Scale;
+    const float CardWidth = FMath::Max3(TitleSize.X, DetailSize.X, ActionSize.X) + 24 * Scale;
+    const float CardHeight = TitleSize.Y + DetailSize.Y + ActionSize.Y + 20 * Scale;
     Paint.Fill({CardAt, CardAt + FVector2D(CardWidth, 0), CardAt + FVector2D(CardWidth, CardHeight), CardAt + FVector2D(0, CardHeight)}, MvPlate);
     Paint.Text(Title, CardAt + FVector2D(12, 8) * Scale, CardSize, MvGold);
     Paint.Text(Detail, CardAt + FVector2D(12 * Scale, 10 * Scale + TitleSize.Y), CardSize * 0.8f, MvCream, false);
+    if (!Action.IsEmpty())
+    {
+        const FVector2D ActionAt = CardAt + FVector2D(12 * Scale, 16 * Scale + TitleSize.Y + DetailSize.Y);
+        Paint.Text(Action, ActionAt, CardSize * 0.8f, MvGold);
+        ActionBox = FBox2D(ActionAt - FVector2D(6, 4) * Scale, ActionAt + ActionSize + FVector2D(6, 0) * Scale);
+    }
+    else ActionBox.Init();
 
     const bool bGamepad = UsesGamepad.Get(false);
     const FString Hints = bGamepad
