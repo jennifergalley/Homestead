@@ -493,22 +493,48 @@ bool ReadUnsigned(std::istream& stream, std::uint64_t& value)
     value = parsed;
     return true;
 }
-bool ReadStock(std::istream& stream, Inventory& stock, int stored = ItemCount)
-{
-    stock.fill(0);
-    for (int i = 0; i < stored; ++i) if (!(stream >> stock[i])) return false;
-    return StockValid(stock);
-}
-bool ReadStock(std::istream& stream, Inventory& stock, int stored, int capacity)
-{
-    stock.fill(0);
-    for (int i = 0; i < stored; ++i) if (!(stream >> stock[i])) return false;
-    return StockValid(stock, capacity);
-}
+// Width first, then one count per item in enum order (version 13 on).
 void WriteStock(std::ostream& stream, const Inventory& stock)
 {
+    stream << ' ' << ItemCount;
     for (int value : stock) stream << ' ' << value;
     stream << '\n';
+}
+enum class SavedStock { Ok, Invalid, Newer };
+// Reads one saved item stock. Version 13 stocks carry their width; a narrower stock (from before
+// items were appended) leaves the new items at zero, and a wider one came from a newer build.
+// Version 12 stocks are the rest of the current line, as wide as the writing build's catalogue.
+// Older versions have the fixed width `legacyWidth`.
+SavedStock ReadSavedStock(std::istream& stream, Inventory& stock, int version, int legacyWidth, int capacity)
+{
+    stock.fill(0);
+    if (version > PositionalStockSaveVersion)
+    {
+        int width = 0;
+        if (!(stream >> width) || width < 1) return SavedStock::Invalid;
+        if (width > ItemCount) return SavedStock::Newer;
+        for (int i = 0; i < width; ++i) if (!(stream >> stock[i])) return SavedStock::Invalid;
+    }
+    else if (version == PositionalStockSaveVersion)
+    {
+        std::string line;
+        if (!std::getline(stream, line)) return SavedStock::Invalid;
+        std::istringstream values(line);
+        values.imbue(std::locale::classic());
+        std::vector<int> read;
+        for (int value = 0; values >> value;) read.push_back(value);
+        values >> std::ws;
+        if (!values.eof()) return SavedStock::Invalid;
+        const int width = static_cast<int>(read.size());
+        if (width < PositionalStockMinimumItems) return SavedStock::Invalid;
+        if (width > ItemCount) return SavedStock::Newer;
+        std::copy(read.begin(), read.end(), stock.begin());
+    }
+    else
+    {
+        for (int i = 0; i < legacyWidth; ++i) if (!(stream >> stock[i])) return SavedStock::Invalid;
+    }
+    return StockValid(stock, capacity) ? SavedStock::Ok : SavedStock::Invalid;
 }
 constexpr unsigned Slot(EquipmentSlot slot) { return 1u << static_cast<int>(slot); }
 constexpr WearableDefinitionInfo Wearables[] = {
@@ -2706,7 +2732,8 @@ std::string Simulation::Serialize() const
     for (const auto& item : state_.wearables)
         body << item.id << ' ' << static_cast<int>(item.definition) << ' ' << item.dye << ' '
              << static_cast<int>(item.owner) << ' ' << item.chestId << '\n';
-    for (int id : state_.equipment) body << id << ' ';
+    body << EquipmentSlotCount;
+    for (int id : state_.equipment) body << ' ' << id;
     body << '\n';
     WriteLayout(body, state_.inventoryLayout);
     body << state_.clearedUnderbrush.size() << '\n';
@@ -2745,13 +2772,18 @@ Result Simulation::Deserialize(const std::string& data)
     if (version == RetiredTestSaveVersion) return {false,
         "This save is from an earlier test build and can't be opened by this one. Start a new game; no save was changed.",
         ResultCode::UnsupportedVersion, revision_};
-    if (version != SimulationSaveVersion && version != FreeBuildingSaveVersion && version != GardenSquareSaveVersion
-        && version != LegacySimulationSaveVersion && version != GardenSquareSaveVersion - 1) return {false,
+    if (version != SimulationSaveVersion && version != PositionalStockSaveVersion && version != FreeBuildingSaveVersion
+        && version != GardenSquareSaveVersion && version != LegacySimulationSaveVersion
+        && version != GardenSquareSaveVersion - 1) return {false,
         "This test save uses an incompatible version. Start a new woodland with this build; no save was changed.",
         ResultCode::UnsupportedVersion, revision_};
     const int storedItems = version == LegacySimulationSaveVersion ? static_cast<int>(Item::Machete)
         : version < ClothingSaveVersion ? static_cast<int>(Item::Fur) : ItemCount;
-    const int storedSlots = version < ClothingSaveVersion ? static_cast<int>(EquipmentSlot::Outer) : EquipmentSlotCount;
+    const int storedSlots = version < ClothingSaveVersion ? static_cast<int>(EquipmentSlot::Outer)
+        : PositionalStockEquipmentSlots;
+    const Result newer{false,
+        "This save comes from a newer build of the game. Open it with that build; no save was changed.",
+        ResultCode::UnsupportedVersion, revision_};
     const std::string payload = data.substr(newline + 1);
     if (size != payload.size() || Checksum(payload) != checksum) return invalid();
     for (unsigned char c : payload) if (c > 127 || (c < 32 && c != '\n' && c != '\r' && c != '\t')) return invalid();
@@ -2780,7 +2812,13 @@ Result Simulation::Deserialize(const std::string& data)
         !FiniteRange(legacyWarmth, 0.0, 100.0) || candidate.nextId < 1 ||
         candidate.nextId >= TransientResourceIdBase) return invalid();
     const bool critical = candidate.hunger == 0 || candidate.energy == 0 || legacyWarmth == 0;
-    if (critical != candidate.failed || !ReadStock(input, candidate.inventory, storedItems)) return invalid();
+    if (critical != candidate.failed) return invalid();
+    switch (ReadSavedStock(input, candidate.inventory, version, storedItems, InventoryCapacity))
+    {
+    case SavedStock::Ok: break;
+    case SavedStock::Newer: return newer;
+    default: return invalid();
+    }
     std::set<int> ids;
     const auto acceptId = [&](int id) { return id > 0 && id < candidate.nextId && ids.insert(id).second; };
     int count = 0;
@@ -2859,8 +2897,10 @@ Result Simulation::Deserialize(const std::string& data)
         int kind = 0;
         if (!(input >> piece.id >> kind) ||
             (version >= FreeBuildingSaveVersion && !(input >> piece.buildingId)) ||
-            !(input >> piece.cellX >> piece.cellY >> piece.rotation >> piece.fuelHours) ||
-            !ReadStock(input, piece.storage, storedItems, ChestCapacity) || !ReadLayout(input, piece.layout)) return invalid();
+            !(input >> piece.cellX >> piece.cellY >> piece.rotation >> piece.fuelHours)) return invalid();
+        const SavedStock storage = ReadSavedStock(input, piece.storage, version, storedItems, ChestCapacity);
+        if (storage == SavedStock::Newer) return newer;
+        if (storage != SavedStock::Ok || !ReadLayout(input, piece.layout)) return invalid();
         piece.kind = static_cast<Piece>(kind);
         PlacementTarget site;
         site.kind = piece.kind;
@@ -2947,7 +2987,13 @@ Result Simulation::Deserialize(const std::string& data)
         candidate.wearables.push_back(item);
     }
     candidate.equipment.fill(0);
-    for (int slot = 0; slot < storedSlots; ++slot) if (!(input >> candidate.equipment[slot])) return invalid();
+    int savedSlots = storedSlots;
+    if (version > PositionalStockSaveVersion)
+    {
+        if (!(input >> savedSlots) || savedSlots < 1) return invalid();
+        if (savedSlots > EquipmentSlotCount) return newer;
+    }
+    for (int slot = 0; slot < savedSlots; ++slot) if (!(input >> candidate.equipment[slot])) return invalid();
     if (!ReadLayout(input, candidate.inventoryLayout)) return invalid();
     if (version != LegacySimulationSaveVersion)
     {

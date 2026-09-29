@@ -1,5 +1,10 @@
 #include "HomesteadWorld.h"
 #include "HomesteadEstateTerrain.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
+#include "HomesteadGrassField.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
+#include "Materials/MaterialParameterCollection.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
@@ -3999,6 +4004,24 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     Fog->SetFogDensity(bRaining ? 0.035f : FMath::Lerp(0.016f, 0.007f, Daylight));
     Fog->SetFogInscatteringColor(bRaining ? FLinearColor(0.43f, 0.49f, 0.52f)
         : FMath::Lerp(FLinearColor(0.055f, 0.085f, 0.14f), FLinearColor(0.64f, 0.72f, 0.68f), Daylight));
+
+    // The ground and meadow wet through in the first half hour of rain and dry over the four hours
+    // after it stops; the rain days follow the simulation's schedule (as bRaining above).
+    if (!bGroundParametersTried)
+    {
+        bGroundParametersTried = true;
+        GroundParameters = LoadObject<UMaterialParameterCollection>(nullptr,
+            TEXT("/Game/SurvivalGame/Estate/Ground/MPC_EstateGround.MPC_EstateGround"));
+    }
+    if (GroundParameters && GetWorld())
+        if (UMaterialParameterCollectionInstance* GroundValues = GetWorld()->GetParameterCollectionInstance(GroundParameters))
+        {
+            const bool bRainDay = static_cast<int64>(State.hour / 24.0) % 3 == 1;
+            const float Wetness = !bRainDay ? 0.0f
+                : FMath::SmoothStep(9.0f, 9.5f, Hour) * (1.0f - FMath::SmoothStep(15.0f, 19.0f, Hour));
+            GroundValues->SetScalarParameterValue(TEXT("Wetness"), Wetness);
+            GroundValues->SetScalarParameterValue(TEXT("Daylight"), Daylight);
+        }
 }
 
 bool AHomesteadWorld::Initialize(const Homestead::Simulation& Simulation)
@@ -4102,6 +4125,20 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         ResourceLayoutSignature = MoveTemp(Layout);
     }
     if (State.fixedEstate) ClearEstateSceneryUnderPieces(State);
+    if (State.fixedEstate)
+    {
+        if (!EstateGrass)
+        {
+            EstateGrass = NewObject<UHomesteadGrassField>(this, TEXT("EstateGrass"));
+            EstateGrass->SetupAttachment(GetRootComponent());
+            EstateGrass->RegisterComponent();
+        }
+        const APlayerController* Viewer = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+        if (Viewer && Viewer->PlayerCameraManager)
+            EstateGrass->Update(State, Viewer->PlayerCameraManager->GetCameraLocation());
+    }
+    else if (EstateGrass)
+        EstateGrass->Clear();
     FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
         static_cast<unsigned long long>(State.world.seed), State.world.generationVersion,
         State.activeChunk.x, State.activeChunk.y);

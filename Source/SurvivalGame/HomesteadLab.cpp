@@ -371,12 +371,13 @@ void AHomesteadLabController::LabAction(const FString& Name)
     else if (Name.Equals(TEXT("Eat"), ESearchCase::IgnoreCase)) Avatar->PlayEat(true);
     else if (Name.Equals(TEXT("Craft"), ESearchCase::IgnoreCase)) Avatar->PlayLabCraft(3);
     else if (Name.Equals(TEXT("Water"), ESearchCase::IgnoreCase)) Avatar->PlayWater(Target);
+    else if (Name.Equals(TEXT("Fill"), ESearchCase::IgnoreCase)) Avatar->PlayFillPail(Target);
     else if (Name.Equals(TEXT("Chop"), ESearchCase::IgnoreCase)) Avatar->PlayClear(Target);
     else if (Name.Equals(TEXT("Knife"), ESearchCase::IgnoreCase)) Avatar->PlayKnifeCut(Target);
     else if (Name.Equals(TEXT("Till"), ESearchCase::IgnoreCase)) Avatar->PlayTill(Target);
     else if (Name.Equals(TEXT("Machete"), ESearchCase::IgnoreCase)) Avatar->PlayMacheteHack(Target);
     else if (Name.Equals(TEXT("Fell"), ESearchCase::IgnoreCase)) Avatar->PlayFell(Target, 2);
-    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Reeds, Eat, Craft, Water, Chop, Knife, Till, Machete or Fell."));
+    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Reeds, Eat, Craft, Water, Fill, Chop, Knife, Till, Machete or Fell."));
 }
 
 void AHomesteadLabController::LabProp(const FString& Name)
@@ -522,7 +523,7 @@ void AHomesteadLabHUD::DrawHUD()
             Feet && Feet->GetInt() ? TEXT("on") : TEXT("off")));
     Lines.Add(FString::Printf(TEXT("Frame %.1f ms   Sun %.1f h"), SmoothedFrameMs, Lab && Lab->LabWorld() ? Lab->LabWorld()->SunHour() : 0.0f));
     Lines.Add(TEXT("Move WASD / left stick   Sprint Shift / L3   Look mouse / right stick   Zoom wheel"));
-    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Craft|Water|Chop|Knife|Till|Machete|Fell   LabHold <tool>|None   LabLoop <action>|Off   LabProp Sticks|Stones|Roots|Berries|Reeds|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
+    Lines.Add(TEXT("Console: LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Craft|Water|Fill|Chop|Knife|Till|Machete|Fell   LabHold <tool>|None   LabLoop <action>|Off   LabProp Sticks|Stones|Roots|Berries|Reeds|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
     float Y = 24.0f * Scale;
     for (const FString& Line : Lines)
     {

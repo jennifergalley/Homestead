@@ -314,6 +314,11 @@ private:
     TArray<float> EstateSceneryClearRadius; // 0 for trees and rocks, which are never hidden under pieces.
     TArray<float> EstateSceneryTrunkRadius; // Trees only: the trunk footprint kept clear of interactables.
     TArray<TBitArray<>> EstateSceneryHidden;
+    // The near meadow round the camera on the fixed estate (HomesteadGrassField).
+    UPROPERTY() TObjectPtr<class UHomesteadGrassField> EstateGrass;
+    // Wetness and Daylight for the estate ground and meadow materials (Scripts/Terrain/build_ground.py).
+    UPROPERTY() TObjectPtr<class UMaterialParameterCollection> GroundParameters;
+    bool bGroundParametersTried = false;
     FString EstateSceneryClearSignature;
     UPROPERTY()
     TObjectPtr<USkyLightComponent> Sky;

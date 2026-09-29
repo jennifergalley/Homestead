@@ -544,6 +544,9 @@ private:
     void CloseBook();
     void UpdateFocus();
     void BeginPlacement(Homestead::Piece Kind);
+    // Fill the watering pail at the nearest fresh water edge, with her kneeling fill when it succeeds.
+    void FillPailAtStream(Homestead::Point Position);
+    Homestead::Point FreshWaterDipPoint(Homestead::Point Position) const;
     void EndPlacement();
     void Notify(const Homestead::Result& Result, USoundBase* SuccessCue = nullptr);
     void Notify(const FString& Text, bool Error = false);
