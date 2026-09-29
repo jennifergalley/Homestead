@@ -20,6 +20,19 @@ const CropInfo CropTable[] = {
         HarvestStyle::Pull, "CropCarrot"},
     {CropKind::Berries, "Berries", "berries", Item::Berries, Item::Berries, 6, Item::Count, 0, 42.0, 24.0,
         HarvestStyle::Pick, "CropStrawberry"},
+    // Period crops sold as seed at the general store (improve-crops-and-harvest design table).
+    {CropKind::Turnips, "Turnips", "turnips", Item::TurnipSeed, Item::Turnip, 2, Item::Count, 0, 96.0, 0.0,
+        HarvestStyle::Pull, "CropTurnip"},
+    {CropKind::Carrots, "Carrots", "carrots", Item::CarrotSeed, Item::Carrot, 3, Item::Count, 0, 120.0, 0.0,
+        HarvestStyle::Pull, "CropCarrot"},
+    {CropKind::Potatoes, "Potatoes", "potatoes", Item::SeedPotato, Item::Potato, 4, Item::Count, 0, 144.0, 0.0,
+        HarvestStyle::Pull, "CropPotato"},
+    {CropKind::Cabbage, "Cabbage", "cabbage", Item::CabbageSeed, Item::Cabbage, 1, Item::Count, 0, 216.0, 0.0,
+        HarvestStyle::Cut, "CropCabbage"},
+    {CropKind::BroadBeans, "Broad beans", "broad beans", Item::BroadBeanSeed, Item::BroadBeans, 6, Item::Count, 0, 168.0, 72.0,
+        HarvestStyle::Pick, "CropBroadBean"},
+    {CropKind::Strawberries, "Strawberries", "strawberries", Item::StrawberryRunner, Item::Strawberries, 5, Item::Count, 0,
+        192.0, 72.0, HarvestStyle::Pick, "CropStrawberry"},
 };
 static_assert(sizeof(CropTable) / sizeof(CropTable[0]) == static_cast<int>(CropKind::Count),
     "Every CropKind needs exactly one CropTable row.");

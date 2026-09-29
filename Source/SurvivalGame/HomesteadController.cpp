@@ -111,7 +111,11 @@ FName HotbarIcon(Homestead::Item Item)
     case Homestead::Item::Scythe: return TEXT("scythe");
     case Homestead::Item::Billhook: return TEXT("billhook");
     case Homestead::Item::Pickaxe: return TEXT("pickaxe");
-    default: return NAME_None;
+    default:
+        // Crop seeds and produce use their catalogue glyph.
+        if (Homestead::CropForSeed(Item) || (Item >= Homestead::Item::Turnip && Item <= Homestead::Item::Strawberries))
+            return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item)));
+        return NAME_None;
     }
 }
 
@@ -820,9 +824,9 @@ void AHomesteadController::UseSelectedTool()
                     return;
                 }
             }
-            if (static_cast<Homestead::Item>(ToolValue) == Homestead::Item::Seeds)
+            if (static_cast<Homestead::Item>(ToolValue) != Homestead::Item::Berries)
             {
-                Notify(TEXT("Aim at bare tilled soil to plant seeds."), true);
+                Notify(TEXT("Aim at bare tilled soil to sow it."), true);
                 return;
             }
         }
@@ -1920,7 +1924,15 @@ FString AHomesteadController::FocusActions() const
         for (const auto& Plot : State().plots)
             if (Plot.id == FocusId)
             {
-                if (!Plot.planted) return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
+                if (!Plot.planted)
+                {
+                    // A seed chosen on the hotbar is sown with the use button (UseSelectedTool).
+                    if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
+                        if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
+                            if (Seed->kind != Homestead::CropKind::Roots && Seed->kind != Homestead::CropKind::Berries)
+                                return Use + TEXT(" Sow ") + Text(Seed->lower) + TEXT("   ") + A + TEXT(" Plant roots");
+                    return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
+                }
                 if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
                 FString Actions;
                 if (Homestead::NeedsWater(Plot))

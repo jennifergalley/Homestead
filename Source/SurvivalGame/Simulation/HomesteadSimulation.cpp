@@ -2520,6 +2520,8 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     if (!TryAdjust(yield)) return Bad(MissingMessage(yield, state_.inventory));
     const bool regrows = crop.regrowHours > 0.0;
     plot->planted = regrows;
+    // A cleared plot keeps the neutral kind (saves require it for bare soil).
+    if (!regrows) plot->kind = CropKind::Roots;
     plot->growth = regrows ? std::max(0.0, 1.0 - crop.regrowHours / crop.growHours) : 0.0;
     const auto counted = [](Item item, int count)
     {

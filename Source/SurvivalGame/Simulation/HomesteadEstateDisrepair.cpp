@@ -34,8 +34,11 @@ struct DisrepairPicker
 
     bool Clear(Point at, double gap) const
     {
+        // Pickable brambles (540000+) keep 3 m to themselves, so they stay easy to find and pick.
         for (const auto& placement : table.placements)
-            if (std::hypot(placement.position.x - at.x, placement.position.y - at.y) < gap) return false;
+            if (std::hypot(placement.position.x - at.x, placement.position.y - at.y)
+                < (placement.kind == ResourceKind::BerryBush && placement.id >= 540000 && placement.id < 550000 ? std::max(gap, 300.0) : gap))
+                return false;
         return true;
     }
     bool Add(ResourceKind kind, Point at, double gap = 0.0)

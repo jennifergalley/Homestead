@@ -40,7 +40,13 @@ constexpr int ToolTierCount = static_cast<int>(ToolTier::Count);
 enum class Piece : int { Foundation, Wall, Doorway, Roof, Fire, Bed, Chest, Hearth, Count };
 // How a building piece looks; the rules are the same. Stone is the old manor's granite masonry.
 enum class StructureSkin : int { Timber, Stone, Count };
-enum class CropKind : int { Roots, Berries, Count };
+enum class CropKind : int
+{
+    Roots, Berries,
+    // improve-crops-and-harvest: period crops. Append only (plots save the kind as an int).
+    Turnips, Carrots, Potatoes, Cabbage, BroadBeans, Strawberries,
+    Count
+};
 
 constexpr double CellSize = 300.0;
 // Garden squares: each building cell holds 3 x 3 of them, and the middle one shares its centre.

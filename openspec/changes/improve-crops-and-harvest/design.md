@@ -26,8 +26,8 @@ drop back to `growth = 1 - regrowHours / growHours` when picked and ripen again 
 | Turnips | 4 | - | Turnip seed, 20c | 2 turnips | 20c | Pull | CropTurnip |
 | Carrots | 5 | - | Carrot seed, 25c | 3 carrots | 16c | Pull | CropCarrot |
 | Potatoes | 6 | - | Seed potato, 30c | 4 potatoes | 14c | Pull (lift) | CropPotato |
-| Broad beans | 7 | 3 | Broad bean seed, 45c | 5 bean pods | 8c | Pick | CropBroadBean |
-| Strawberries | 8 | 3 | Strawberry runner, 60c | 4 strawberries | 12c | Pick | CropStrawberry |
+| Broad beans | 7 | 3 | Broad bean seed, 45c | 6 bean pods | 8c | Pick | CropBroadBean |
+| Strawberries | 8 | 3 | Strawberry runner, 60c | 5 strawberries | 13c | Pick | CropStrawberry |
 | Cabbage | 9 | - | Cabbage seed, 40c | 1 cabbage | 90c | Cut | CropCabbage |
 
 The store sells at base price × 125%, so the seed column is the shelf price. Every crop pays back
@@ -38,7 +38,12 @@ Produce is `ItemCategory::Food`, bought by the store (`StoreBuys`), and edible r
 
 - turnip, carrot and cabbage: a light snack;
 - strawberries: a treat, with a small energy bump;
-- broad beans and potatoes: edible raw in the game for now; cooking recipes come later.
+- broad beans: young pods, edible raw;
+- potatoes: not edible raw, sold (or cooked once there's a pot; cooking recipes come later).
+
+The hotbar and pack reuse existing glyphs for now (seeds; roots for turnip, carrot and potato;
+berries for strawberries; the leafy wild-garlic glyph for cabbage and beans). Bespoke icons are a
+follow-up.
 
 The plural names read naturally in the store and inventory ("turnips", "bean pods").
 

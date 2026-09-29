@@ -1,0 +1,620 @@
+{
+  "schema": 1,
+  "name": "CropBroadBean",
+  "description": "One 1 m tilled-bed plot of six Windsor/Longpod broad bean plants across five crop stages, with glaucous pinnate leaves, black-blotched flowers and large readable pods.",
+  "collision": "none",
+  "triangle_budget": 4000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/crop_broad_bean.py",
+  "source_sha256": "1cff4d0db2950e4fb4d213a7ff77ae75f65277719d6d44d91f31ee81ae8612ca",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CropBroadBean_Sprout": {
+      "vertices": 246,
+      "triangles": 324,
+      "size_cm": [
+        49.5,
+        66.08,
+        6.94
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Sprout.fbx",
+      "sha256": "827deb047d634cb3696c8a31e4d6cf98ed2594c1d14938ef80fc4e7defd694c7",
+      "preview": "preview_SM_CropBroadBean_Sprout.png"
+    },
+    "SM_CropBroadBean_Sprout_LOD1": {
+      "vertices": 186,
+      "triangles": 228,
+      "size_cm": [
+        49.77,
+        65.86,
+        6.95
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Sprout_LOD1.fbx",
+      "sha256": "2411c3507b4471f33d1deb853d25f66d43e35a0de72e3aa007ea581a54bb60ed",
+      "preview": "preview_SM_CropBroadBean_Sprout_LOD1.png"
+    },
+    "SM_CropBroadBean_Sprout_LOD2": {
+      "vertices": 186,
+      "triangles": 228,
+      "size_cm": [
+        50.75,
+        66.68,
+        6.91
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Sprout_LOD2.fbx",
+      "sha256": "e47172100271e96aefae11a37b187b4a9b8b628827b4150e01353a3c9f1c14f5",
+      "preview": "preview_SM_CropBroadBean_Sprout_LOD2.png"
+    },
+    "SM_CropBroadBean_Young": {
+      "vertices": 1014,
+      "triangles": 1080,
+      "size_cm": [
+        56.39,
+        74.62,
+        18.88
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Young.fbx",
+      "sha256": "a7a371f1ac57140d30e5fb51b64d6db2226160b99fe04eb07f0fb27cb4dc7da1",
+      "preview": "preview_SM_CropBroadBean_Young.png"
+    },
+    "SM_CropBroadBean_Young_LOD1": {
+      "vertices": 694,
+      "triangles": 608,
+      "size_cm": [
+        56.09,
+        75.12,
+        18.5
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Young_LOD1.fbx",
+      "sha256": "503ef2029922db151d9aa03ad9a23383c65599df3cc1b2a4440b00f312e492df",
+      "preview": "preview_SM_CropBroadBean_Young_LOD1.png"
+    },
+    "SM_CropBroadBean_Young_LOD2": {
+      "vertices": 486,
+      "triangles": 504,
+      "size_cm": [
+        58.12,
+        74.61,
+        18.86
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Young_LOD2.fbx",
+      "sha256": "a785e7cbe02baab9384a1e3013273c010982e52b498e319b94ff165ace4c5971",
+      "preview": "preview_SM_CropBroadBean_Young_LOD2.png"
+    },
+    "SM_CropBroadBean_Growing": {
+      "vertices": 2466,
+      "triangles": 2608,
+      "size_cm": [
+        72.25,
+        87.83,
+        50.82
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.0,
+        "focus": [
+          0.004745453596115112,
+          0.0027122199535369873,
+          0.32
+        ]
+      },
+      "fbx": "SM_CropBroadBean_Growing.fbx",
+      "sha256": "dd8f787ba20a79f102298ca7c2e822489e76f7b96e25459abf2e6b55fa423aed",
+      "preview": "preview_SM_CropBroadBean_Growing.png"
+    },
+    "SM_CropBroadBean_Growing_LOD1": {
+      "vertices": 1174,
+      "triangles": 920,
+      "size_cm": [
+        59.86,
+        77.95,
+        50.7
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Growing_LOD1.fbx",
+      "sha256": "b3820dd7ad03879c09e1fc04f100157341d0fda8d812ae11ad21bc2e7d5c5e38",
+      "preview": "preview_SM_CropBroadBean_Growing_LOD1.png"
+    },
+    "SM_CropBroadBean_Growing_LOD2": {
+      "vertices": 822,
+      "triangles": 744,
+      "size_cm": [
+        62.44,
+        78.34,
+        49.56
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Growing_LOD2.fbx",
+      "sha256": "ce4d0e05f43c9a99c6fb4039f122b2f62b381b5538d5205a36a62230e2f6f72e",
+      "preview": "preview_SM_CropBroadBean_Growing_LOD2.png"
+    },
+    "SM_CropBroadBean_Mature": {
+      "vertices": 2586,
+      "triangles": 2874,
+      "size_cm": [
+        77.16,
+        83.87,
+        73.51
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Mature.fbx",
+      "sha256": "16b09ef8e21d87d48801ab1922218ec29238baf4df93bf530dcc01cee279b6be",
+      "preview": "preview_SM_CropBroadBean_Mature.png"
+    },
+    "SM_CropBroadBean_Mature_LOD1": {
+      "vertices": 1286,
+      "triangles": 1156,
+      "size_cm": [
+        62.87,
+        77.18,
+        72.0
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Mature_LOD1.fbx",
+      "sha256": "337b6e3c8fc85ea0eea9b4d0ee9fd099cc7b120d857461828f9acb00287c0ec7",
+      "preview": "preview_SM_CropBroadBean_Mature_LOD1.png"
+    },
+    "SM_CropBroadBean_Mature_LOD2": {
+      "vertices": 810,
+      "triangles": 828,
+      "size_cm": [
+        63.43,
+        78.9,
+        73.04
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Mature_LOD2.fbx",
+      "sha256": "a09b9df3ab7e63c9cb0bd45cf1da49b81b87791ec4c558cdf0dee3c09a0f2f28",
+      "preview": "preview_SM_CropBroadBean_Mature_LOD2.png"
+    },
+    "SM_CropBroadBean_Ripe": {
+      "vertices": 2826,
+      "triangles": 3508,
+      "size_cm": [
+        76.94,
+        91.2,
+        80.16
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.8,
+        "focus": [
+          0.012149174213409424,
+          0.025135114789009094,
+          0.44
+        ]
+      },
+      "fbx": "SM_CropBroadBean_Ripe.fbx",
+      "sha256": "5cab50e7bc25efd3f6bf643eb32a63ad9c612ad36b96d98ce16b7cb4f7c38ad4",
+      "preview": "preview_SM_CropBroadBean_Ripe.png"
+    },
+    "SM_CropBroadBean_Ripe_LOD1": {
+      "vertices": 1464,
+      "triangles": 1452,
+      "size_cm": [
+        77.12,
+        93.91,
+        79.87
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Ripe_LOD1.fbx",
+      "sha256": "179ac94f4ae5275a2b1c78c0b2847ac4062f3149e9892ddbeae445fce634c064",
+      "preview": "preview_SM_CropBroadBean_Ripe_LOD1.png"
+    },
+    "SM_CropBroadBean_Ripe_LOD2": {
+      "vertices": 810,
+      "triangles": 828,
+      "size_cm": [
+        70.95,
+        86.25,
+        80.26
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Ripe_LOD2.fbx",
+      "sha256": "86633fa095351b0adfc0bbc6febcb7b0d93ee9bd3236419cfb36573e92165b75",
+      "preview": "preview_SM_CropBroadBean_Ripe_LOD2.png"
+    },
+    "SM_CropBroadBean_Harvest": {
+      "vertices": 273,
+      "triangles": 480,
+      "size_cm": [
+        12.59,
+        7.77,
+        16.78
+      ],
+      "materials": [
+        {
+          "name": "M_CropBroadBean",
+          "textures": {
+            "basecolor": "T_CropBroadBean_basecolor.png",
+            "normal": "T_CropBroadBean_normal.png",
+            "roughness": "T_CropBroadBean_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 4.5
+      },
+      "fbx": "SM_CropBroadBean_Harvest.fbx",
+      "sha256": "1ca74d42eb1bfe4427425480d245762263b24bbe1dbcf5c9ddadf015999e6c3d",
+      "preview": "preview_SM_CropBroadBean_Harvest.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_CropBroadBean_Ripe": "Pick-and-regrow stage: 70-80 cm plants, fat 12-18 cm green pods with lumpy geometry.",
+    "SM_CropBroadBean_Mature": "White axillary flowers carry dark blotches plus young green pods.",
+    "SM_CropBroadBean_Harvest": "Hand-held produce: small bunch of three pods, grip at stalk top/origin, pods hang down -Z."
+  },
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / crop height",
+    "G": "per-plant phase",
+    "B": "leaf flutter, low on stems/pods",
+    "A": "1"
+  },
+  "crop_layout": "Six plants at x=-0.22,+0.22 on tilled-bed ridges y=-0.3,0,+0.3; base z=0.045 m.",
+  "material_notes": "One M_CropBroadBean atlas: alpha in basecolor; roughness R, translucency G, AO B.",
+  "textures": {
+    "T_CropBroadBean_basecolor.png": "0f7fb0c77a557c1960cf6edded2ab723545248dd309ee8c8c48937212d54110b",
+    "T_CropBroadBean_normal.png": "b6dc9b87be35e4d9563c2d21f681855b09fe9e1f6c6cd581120cc42baf950a75",
+    "T_CropBroadBean_roughness.png": "008401c7be32d66aa476dc7f668d97ff7f822464bb1b293596a6c61aaa9af86c"
+  }
+}

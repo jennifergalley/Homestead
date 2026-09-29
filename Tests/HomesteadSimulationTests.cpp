@@ -1,5 +1,6 @@
 #include "HomesteadSimulation.h"
 #include "HomesteadCrops.h"
+#include "HomesteadShops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
@@ -1189,6 +1190,23 @@ void CropTableAndStatus()
     CHECK(CropRegrowDays(CropKind::Berries) == 1 && CropRegrowDays(CropKind::Roots) == 0);
     CHECK(ReadyInText(CropKind::Roots) == "Ready in about 2 days if watered.");
     CHECK(std::string(ItemDescription(Item::Seeds)).find("Matures in about 2 days") != std::string::npos);
+    // Period crops: each seed's description states its days (and regrow days), the store sells it,
+    // and its produce sells back at the store.
+    const auto& storeGoods = ShopGoods(ShopKind::GeneralStore);
+    for (int kind = static_cast<int>(CropKind::Turnips); kind < static_cast<int>(CropKind::Count); ++kind)
+    {
+        const auto& info = GetCropInfo(static_cast<CropKind>(kind));
+        const std::string description = ItemDescription(info.seed);
+        CHECK(description.find("in about " + std::to_string(CropDays(info.kind)) + " days") != std::string::npos);
+        if (info.regrowHours > 0)
+            CHECK(description.find("every " + std::to_string(CropRegrowDays(info.kind)) + " days") != std::string::npos);
+        CHECK(std::find(storeGoods.begin(), storeGoods.end(), info.seed) != storeGoods.end());
+        CHECK(ShopBuys(ShopKind::GeneralStore, info.produce));
+        // The first harvest pays back the seed at shelf price.
+        CHECK(SellPrice(info.produce) * info.produceCount >= BuyPrice(info.seed));
+    }
+    CHECK(CropDays(CropKind::Turnips) == 4 && CropDays(CropKind::Carrots) == 5 && CropDays(CropKind::Potatoes) == 6);
+    CHECK(CropDays(CropKind::BroadBeans) == 7 && CropDays(CropKind::Strawberries) == 8 && CropDays(CropKind::Cabbage) == 9);
 
     // Watered within a day or weeded within about two days: full speed. Bone dry: a fifth.
     CHECK(MoistureGrowthFactor(1.0) == 1.0 && MoistureGrowthFactor(CropCare::WellWatered) == 1.0);
@@ -1255,6 +1273,38 @@ void CropTableAndStatus()
     OK(harvested);
     CHECK(harvested.message == "Harvested 4 roots and 2 seeds. This plot is ready to replant.");
     CHECK(!sim.GetState().plots[0].planted);
+
+    // Sow bought turnip seed and broad beans: turnips clear the plot, beans keep cropping.
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::WateringCan, 1}, {Item::TurnipSeed, 1}, {Item::BroadBeanSeed, 1}});
+    const Point beans = CellCenter(-3, -1);
+    OK(sim.Till(CellToGarden(-3), CellToGarden(-1), beans));
+    const int beanId = sim.FindNearestPlot(beans, 1);
+    const Result sown = sim.Plant(rootId, roots, CropKind::Turnips);
+    OK(sown);
+    CHECK(sown.message == "Planted turnips. Ready in about 4 days if watered.");
+    CHECK(sim.Count(Item::TurnipSeed) == 0);
+    UnchangedFailure(sim, [&] { return sim.Plant(beanId, beans, CropKind::Carrots); });
+    OK(sim.Plant(beanId, beans, CropKind::BroadBeans));
+    Edit(sim, [](State& state) { for (auto& plot : state.plots) plot.growth = 1.0; });
+    const int turnipsBefore = sim.Count(Item::Turnip);
+    const Result pulled = sim.HarvestCrop(rootId, roots);
+    OK(pulled);
+    CHECK(pulled.message == "Harvested 2 turnips. This plot is ready to replant.");
+    CHECK(sim.Count(Item::Turnip) == turnipsBefore + 2);
+    for (const auto& plot : sim.GetState().plots)
+        if (plot.id == rootId) CHECK(!plot.planted && plot.kind == CropKind::Roots);
+    const Result picked = sim.HarvestCrop(beanId, beans);
+    OK(picked);
+    CHECK(picked.message == "Harvested 6 broad bean pods. More will ripen in about 3 days.");
+    const Plot* beanPlot = nullptr;
+    for (const auto& plot : sim.GetState().plots) if (plot.id == beanId) beanPlot = &plot;
+    CHECK(beanPlot && beanPlot->planted && beanPlot->kind == CropKind::BroadBeans);
+    CHECK(beanPlot && Close(beanPlot->growth, 1.0 - 72.0 / 168.0) && StageOf(*beanPlot) == CropStage::Mature);
+    CHECK(beanPlot && PlotStatus(*beanPlot).rfind("Broad beans: ripening again, day 1 of 3", 0) == 0);
+    // Appended crop kinds survive a save round trip.
+    Simulation saved;
+    OK(saved.Deserialize(sim.Serialize()));
+    CHECK(saved.Serialize() == sim.Serialize());
 }
 
 // A real version 12 estate save, written by main at 8762ba46 (40 items; a new estate game with goods
@@ -1500,7 +1550,7 @@ void CropKindPersistenceAndVersionRejection()
         CHECK(!restored.Deserialize(data));
         CHECK(restored.Serialize() == mixed);
     };
-    for (int invalid : {-1, 2, 999999, std::numeric_limits<int>::max()})
+    for (int invalid : {-1, static_cast<int>(CropKind::Count), 999999, std::numeric_limits<int>::max()})
     {
         State state = restored.GetState();
         state.plots[1].kind = static_cast<CropKind>(invalid);

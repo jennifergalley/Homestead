@@ -94,6 +94,32 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Forage, "wild-daffodils", 15, StoreBuys, 0.0, 0.0, "Spring flowers in the verges and valley"},
     {Item::WildGarlic, "wild-garlic", "Wild garlic", "Ramsons leaves and flowers from the damp valley floor.",
         ItemCategory::Forage, "wild-garlic", 10, StoreBuys, 0.0, 0.0, "Spring flowers in the verges and valley"},
+    // improve-crops-and-harvest. Seed prices are base; the store sells at 125%. Growing times match
+    // HomesteadCrops.cpp (checked by the native tests).
+    {Item::TurnipSeed, "turnip-seed", "Turnip seed", "A paper of white-globe turnip seed. Matures in about 4 days if watered.",
+        ItemCategory::Supply, "seeds", 16, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "papers of turnip seed"},
+    {Item::CarrotSeed, "carrot-seed", "Carrot seed", "A paper of long orange carrot seed. Matures in about 5 days if watered.",
+        ItemCategory::Supply, "seeds", 20, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "papers of carrot seed"},
+    {Item::SeedPotato, "seed-potato", "Seed potato", "A chitted seed potato, sprouting from its eyes. Matures in about 6 days if watered.",
+        ItemCategory::Supply, "seeds", 24, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "seed potatoes"},
+    {Item::CabbageSeed, "cabbage-seed", "Cabbage seed", "A paper of drumhead cabbage seed. Matures in about 9 days if watered.",
+        ItemCategory::Supply, "seeds", 32, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "papers of cabbage seed"},
+    {Item::BroadBeanSeed, "broad-bean-seed", "Broad bean seed", "A twist of broad beans for sowing. Matures in about 7 days if watered, then crops every 3 days.",
+        ItemCategory::Supply, "seeds", 36, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "twists of broad bean seed"},
+    {Item::StrawberryRunner, "strawberry-runner", "Strawberry runner", "A rooted strawberry runner. Fruits in about 8 days if watered, then every 3 days.",
+        ItemCategory::Supply, "seeds", 48, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "strawberry runners"},
+    {Item::Turnip, "turnip", "Turnip", "A white turnip with a purple shoulder. Crisp and peppery raw.",
+        ItemCategory::Food, "roots", 20, StoreBuys, 8.0, 4.0, "Grown from turnip seed", false, "turnips"},
+    {Item::Carrot, "carrot", "Carrot", "A sweet orange carrot, earth still on it.",
+        ItemCategory::Food, "roots", 16, StoreBuys, 6.0, 4.0, "Grown from carrot seed", false, "carrots"},
+    {Item::Potato, "potato", "Potato", "A floury potato. Best sold, or cooked once there's a pot to boil it in.",
+        ItemCategory::Food, "roots", 14, StoreBuys, 0.0, 0.0, "Grown from seed potatoes", false, "potatoes"},
+    {Item::Cabbage, "cabbage", "Cabbage", "A firm drumhead cabbage. It fetches a good price in town.",
+        ItemCategory::Food, "wild-garlic", 90, StoreBuys, 14.0, 6.0, "Grown from cabbage seed", false, "cabbages"},
+    {Item::BroadBeans, "broad-beans", "Broad bean pods", "Fat green pods of young broad beans.",
+        ItemCategory::Food, "wild-garlic", 8, StoreBuys, 5.0, 3.0, "Picked from broad bean plants", false, "broad bean pods"},
+    {Item::Strawberries, "strawberries", "Strawberries", "Sweet red strawberries, warm from the sun.",
+        ItemCategory::Food, "berries", 13, StoreBuys, 8.0, 8.0, "Picked from strawberry plants", false, "strawberries"},
 };
 static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 
