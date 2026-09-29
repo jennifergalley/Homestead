@@ -177,8 +177,15 @@ float cr[3] = {C2, C5, C8};
 // Round interactables the sward is grazed short rather than bare, so nothing is hidden and there's
 // no bald patch: blades keep a fifth of their height inside the circle.
 float graze = 1.0;
+float bare = 1.0;
 [unroll] for (int i = 0; i < 3; i++)
-    if (cr[i] > 0.0)
+    if (cr[i] < 0.0)
+    {
+        // A garden plot (negative radius = half size of its square): bare soil, no blade at all.
+        float2 o = abs(RootW.xy - cc[i]);
+        bare = min(bare, smoothstep(-cr[i], -cr[i] + 18.0, max(o.x, o.y)));
+    }
+    else if (cr[i] > 0.0)
     {
         // A ragged, trampled edge rather than a mown circle: the radius wanders by a quarter.
         float2 o = RootW.xy - cc[i];
@@ -186,6 +193,7 @@ float graze = 1.0;
         float wob = 0.78 + 0.14 * sin(ang * 3.0 + cc[i].x * 0.013) + 0.1 * sin(ang * 7.0 + cc[i].y * 0.021) + 0.12 * frac(rank * 17.3);
         graze = min(graze, smoothstep(cr[i] * wob - 25.0, cr[i] * wob + 55.0, length(o)));
     }
+s *= bare;
 
 // Height from the ground (lush by the river, short on the moor and the trodden edges); far blades
 // widen so they stay a pixel or more across instead of shimmering.
