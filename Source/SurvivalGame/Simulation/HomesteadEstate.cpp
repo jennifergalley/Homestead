@@ -270,6 +270,11 @@ const EstatePlacements& ProvisionalEstatePlacements()
             }
             table.placements.push_back({spot.id, spot.kind, at, 0.0, spot.yaw, spot.scale, 0});
         }
+        // Father's tool rack, where the arrival journal says his garden tools hung: by the chimney in
+        // the west rooms. Added after the first playtests (Jenny couldn't find a hoe), so it waits
+        // unsearched in every older save and gives whichever rusted head she is still missing. It goes
+        // last, so no earlier section's proximity skips or sequential ids can shift because of it.
+        salvage(520006, 230.0, 1010.0);
         // Town lane (530000+).
         return table;
     }();

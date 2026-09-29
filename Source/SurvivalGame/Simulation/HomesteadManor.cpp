@@ -165,6 +165,34 @@ bool SeedStandingRoom(State& state, const EstateLayout& layout)
     return true;
 }
 
+bool StockStarterChest(State& state)
+{
+    Structure* chest = nullptr;
+    for (auto& piece : state.structures)
+        if (piece.heritage && piece.kind == Piece::Chest) { chest = &piece; break; }
+    if (!chest) return false;
+    int used = 0;
+    for (int i = 0; i < ItemCount; ++i) used += chest->storage[i];
+    std::vector<WearableDefinition> clothes;
+    for (const WearableDefinition piece : StarterWardrobe)
+        if (std::none_of(state.wearables.begin(), state.wearables.end(),
+            [&](const WearableInstance& worn) { return worn.definition == piece; }))
+            clothes.push_back(piece);
+    for (const auto& item : state.wearables) used += item.owner == WearableOwner::Chest && item.chestId == chest->id;
+    if (used + StarterPasties + StarterBread + static_cast<int>(clothes.size()) > ChestCapacity) return false;
+    chest->storage[static_cast<int>(Item::Pasty)] += StarterPasties;
+    chest->storage[static_cast<int>(Item::Bread)] += StarterBread;
+    chest->layout.push_back({state.nextGroupId++, Item::Pasty, StarterPasties, 0});
+    chest->layout.push_back({state.nextGroupId++, Item::Bread, StarterBread, 0});
+    for (const WearableDefinition piece : clothes)
+    {
+        const int id = state.nextWearableId++;
+        state.wearables.push_back({id, piece, 0, WearableOwner::Chest, chest->id});
+        chest->layout.push_back({0, Item::Knife, 0, id});
+    }
+    return true;
+}
+
 int HeritageBuildingId(const State& state)
 {
     for (const auto& piece : state.structures)
@@ -271,7 +299,8 @@ std::string JournalText(const std::string& key, const State& state)
     return "Spring 1, " + std::to_string(ArrivalYear) + ". Home at last, to " + estate + ". The house is a ruin, "
         "the fields are bramble to the hedgerow, and the roof of the old hall lies where it fell. One room still keeps "
         "the weather out: the corner by the kitchen hearth, with a bed and a chest. The pail is in the chest, with a few "
-        "dry branches. It will do for a beginning.";
+        "dry branches, pasties and bread from the town, and a change of clothes. Father's garden tools always hung in the "
+        "west rooms, by the chimney; something of them may be left under the rubble. It will do for a beginning.";
 }
 }
 }
