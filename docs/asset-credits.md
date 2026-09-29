@@ -39,7 +39,8 @@ MetaHuman body and face for fitting and review only. The review renders use the 
 
 The granite rocks and boulders in `Assets\Props` (GraniteCobbles, GraniteSpalls,
 GraniteRubble, GraniteBoulderLoaf, GraniteBlockTalus, GraniteBoulderLow,
-GraniteErratic, GraniteBoulderJointed, GraniteDome, GraniteSplitBoulder, HandStones)
+GraniteErratic, GraniteBoulderJointed, GraniteDome, GraniteSplitBoulder, HandStones,
+GraniteHandPile, GranitePickRocks)
 and the shared tiling GraniteDetail maps are project-authored: procedural geometry
 (`Scripts\Blender\homestead_rocks.py`) and procedural materials
 (`homestead_materials.granite`) baked to textures, with no scanned or downloaded

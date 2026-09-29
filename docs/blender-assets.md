@@ -337,6 +337,21 @@ terrain height sinks it by its recorded `sink_depth_m`; `BEAUTY["ground"] = "ori
 reviews them half-buried the same way. `HandStones` are the exception: bounds-centre
 pivots for hand attachment.
 
+Gathering rocks must read at a glance by size and setting (Jenny's playtest note):
+
+- `GraniteHandPile` A/B/C (`granite_hand_pile.py`) are the hand-gathered Stones nodes: 4-6
+  loose 10-25 cm cobbles and slabby spalls sitting on the turf (10-25 % sunk, ankle-high,
+  12-14 cm tall), light soil, little lichen, no collision, ~33k tris each.
+- `GranitePickRocks` Small/Medium/Large (`granite_pick_rocks.py`) are the pickaxe tiers:
+  knee-high (46 cm above ground), thigh-high (65 cm) and waist-high (94 cm) moorstone, sunk
+  13/17/22 cm, lichen-crusted, convex collision. The Large (iron-pick) one has a
+  plug-and-feather split face (paler, half drill holes along its top edge) facing the
+  hero camera, plus an unfinished row of drill holes on top.
+- If the Cycles beauty render dies with `OIDN error: out of memory` while an editor holds
+  most of the VRAM, re-run only the beauty pass at 1080p: `blender --background
+  Assets\Props\<Name>\<Name>.blend --python Scripts\Blender\render_beauty.py -- --width 1920
+  --height 1080`.
+
 ### Procedural foliage (bushes, brambles, ferns, groundcover)
 
 The woodland underbrush set (`blackberry_bramble`, `toyon_hedge`, `hazel`, `deer_brush`,
