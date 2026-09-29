@@ -863,8 +863,8 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
     Add(TEXT("CONTROLLED short plot approach"),
         [this, Garden]() { Teleport(Garden); },
         [this]() { return Controller->Focus == AHomesteadController::EFocus::Plot; }, 0.8f);
-    Add(TEXT("Plant roots through mapped A using one disclosed seed"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Plant roots through mapped A using one disclosed seed (Seeds chosen on the hotbar)"),
+        [this]() { Controller->ChooseOnHotbar(Homestead::Item::Seeds); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Fixture]() { const auto* Plot = FixturePlot(Controller->State(), *Fixture);
             return Plot && Plot->planted && Plot->kind == CropKind::Roots && !Controller->ToastIsError(); });
     Add(TEXT("Water the actual planted plot through mapped A using disclosed water"),
