@@ -378,13 +378,18 @@ requirement.
   hover text; retain tile quantity and controls. **Menu** owns the UI after active dye/Appearance work;
   source values from `ItemInfo` so future Energy-only lane-F values flow through automatically.
   Require native coverage and PIE checks at 1080p and 4K.
-- **Whole-number currency** — **provisional, trace-gated and not 4 PM content.** Architecture first
-  traces stored integer units, save serialization and every hardcoded cents/display surface. The product
-  direction, if that trace confirms it is safe, reinterprets the current smallest unit as one whole
-  `coin`: 1000 (formerly $10) becomes 1000 coins and 40 (formerly $0.40) becomes 40 coins, preserving
-  buying power and saves. **Props** owns simulation/economy after an explicit slot; **Menu** owns the
-  coordinated presentation slice. Do not make a UI-only half-change or treat this design as final
-  before the trace.
+- **Whole-number currency** — **agreed design, pending and not 4 PM content.** Preserve the current
+  `int64` raw values and save bytes: semantically relabel the smallest stored unit as one whole
+  `coin`, with **no numeric x100 migration**. Thus raw 1000 (formerly $10) becomes 1,000 coins and
+  raw 40 (formerly $0.40) becomes 40 coins; buying power and saves remain unchanged. The canonical
+  `FormatMoney`/`Delta` renders grouped whole integers with correct singular/plural and no `$` or
+  decimal anywhere. Reference raw prices remain pasty 80 base / 100 shop, bread 40 / 50 and cabbage
+  seed 32 / 40; the v12 fixture remains raw 2234 coins.
+
+  **Props** owns the future simulation/economy semantic field/type rename and `GrantMoney`
+  cap-overflow guard after an explicit slot; **Menu** owns the coordinated shop/HUD/toast/UI formatter
+  slice. Avoid a half release. Validate Economy, Lamp, legacy v12/v13 saves, raw 0/1/`INT64_MIN` and
+  cap behavior; package a 720p/4K purchase such as 1,000 → 900 coins for a pasty.
 - **Weather recurrence** — **Water Agent** (retained lane; supersedes the broader Calendar proposal):
   rain every third day is too frequent. The smallest traced change is a stable hash selecting offsets
   **1 or 2** and **6 or 7** in every 10-day block: exactly 20% rain, 4–6-day gaps and day 0 dry. Keep
@@ -419,17 +424,18 @@ requirement.
   intensity is 0.6 (day 1), and night auto-exposure has a -2 EV100 floor (day 0). The combined
   moon/sky/adaptation cause is plausible, not visually proven.
 
-  **Water headless partial `4d248d6f` is unwired, unshipped and outside the 4 PM candidate.** Its
-  pure `HomesteadNightLight` schedule targets 0.2 lux moonlit ground after dusk (0.2/sin altitude,
-  capped at 1 lux low), night sky 0.3 rather than 0.6, and EV100 floor -1 rather than -2. At 21:00 it
-  computes moon 0.28 lux/display key 0.16 (about -2.6 stops); noon is unchanged. Native 9/9 checks
-  the prior daylight-grey 21:00 key of about 1, a non-increasing 18:50→midnight curve, no jump above
-  0.25 lux/minute, moon <=1 lux, and 21:00/00:00/03:00 at -1.5 to -3.5 stops.
+  **Water wired partial `71cffeaa` is unshipped and outside the 4 PM build.** It wires
+  `HomesteadNightLight` into `UpdateLighting`; CVar defaults `NightMoonLux=0.2`, `NightSky=0.3` and
+  `NightMinExposure=-1` match `NightLightTuning`. The schedule holds 0.2 lux moonlit ground after
+  dusk (altitude compensation capped at 1 lux low), uses night sky 0.3 rather than 0.6 and leaves noon
+  unchanged. Native 9/9 and the Editor module compile pass: tests pin a monotonic noon 1→night 0.3
+  sky transition, dusk steps <=0.02, no 18:50→midnight brightening, no pops/moon glare and
+  21:00/00:00/03:00 at -1.5 to -3.5 stops.
 
-  It still needs `UpdateLighting`/CVar wiring, an Editor build, and fixed-camera packaged RT-on Lumen
-  hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to calibrate
-  smooth dusk and lamp readability. Lamp and hearth behavior are untouched. Neither the trace nor the
-  schedule establishes a visual fix.
+  It still needs PIE after the Menu/Props editor turns, then Integration's fixed-camera packaged RT-on
+  Lumen hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to
+  calibrate smooth dusk and lamp/hearth readability. Neither the trace nor the wired schedule
+  establishes a visual fix; do not update the editor skill's default row before this sign-off.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
