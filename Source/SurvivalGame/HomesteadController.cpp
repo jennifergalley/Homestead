@@ -799,6 +799,8 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
             Slot.Icon = HotbarIcon(Slot.Tool);
             if (Slot.Tool == Homestead::Item::OilLamp && Slot.Available)
                 Slot.Fill = static_cast<float>(Sim.LampOil() / Homestead::Lamp::CapacityHours);
+            Slot.Seed = IsSowingSeed(Slot.Tool);
+            Slot.Pouch = Slot.Seed && OtherPouchSeeds(Index) > 0;
         }
 
         Result.Add(Slot);
@@ -1336,6 +1338,7 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Gamepad_DPad_Left, IE_Pressed, this, &AHomesteadController::PreviousPage);
     InputComponent->BindKey(EKeys::Gamepad_DPad_Right, IE_Pressed, this, &AHomesteadController::NextPage);
     InputComponent->BindKey(EKeys::R, IE_Pressed, this, &AHomesteadController::RotatePlacement);
+    InputComponent->BindKey(EKeys::Q, IE_Pressed, this, &AHomesteadController::NextSeed);
     InputComponent->BindKey(EKeys::Gamepad_RightThumbstick, IE_Pressed, this, &AHomesteadController::CycleZoom);
     InputComponent->BindKey(EKeys::F5, IE_Pressed, this, &AHomesteadController::QuickSave);
     InputComponent->BindKey(EKeys::F9, IE_Pressed, this, &AHomesteadController::QuickLoad);
@@ -2222,8 +2225,8 @@ FString AHomesteadController::FocusActions() const
                         if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
                             if (Seed->kind != Homestead::CropKind::Roots && Seed->kind != Homestead::CropKind::Berries
                                 && Sim.Count(Seed->seed) > 0)
-                                return A + TEXT(" Sow ") + Text(Seed->lower);
-                    return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
+                                return A + TEXT(" Sow ") + Text(Seed->lower) + SeedPouchHint();
+                    return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds") + SeedPouchHint();
                 }
                 if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
                 FString Actions;
@@ -2269,6 +2272,8 @@ FString AHomesteadController::FocusActions() const
     default:
         if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
+        if (!SeedPouchHint().IsEmpty())
+            return (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book")) + SeedPouchHint();
         return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
@@ -3130,7 +3135,7 @@ void AHomesteadController::NextPage()
 }
 void AHomesteadController::PreviousRow()
 {
-    if (!bBookOpen) { CycleBedChoice(-1); return; }
+    if (!bBookOpen) { if (!CycleBedChoice(-1)) CycleSeedPouch(-1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + Count - 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -3138,7 +3143,7 @@ void AHomesteadController::PreviousRow()
 }
 void AHomesteadController::NextRow()
 {
-    if (!bBookOpen) { CycleBedChoice(1); return; }
+    if (!bBookOpen) { if (!CycleBedChoice(1)) CycleSeedPouch(1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + 1) % Count;
     PlayEffect(UIClick, 0.06f);

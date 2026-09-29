@@ -110,7 +110,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             {
                                 if (!Weak.IsValid()) return FText::GetEmpty();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Food
+                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || (Snapshot[Index].Seed && Snapshot[Index].Available))
                                     ? FText::AsNumber(Snapshot[Index].Count) : FText::GetEmpty();
                             })
                             .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
@@ -118,6 +118,27 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             .ShadowOffset(FVector2D(1, 1))
                             .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
                             .Visibility(EVisibility::HitTestInvisible)
+                        ]
+                        + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top)
+                        .Padding(0, 1, 5, 0)
+                        [
+                            // A seed slot that can switch to other seed in her pack (the seed pouch).
+                            SNew(SBox).WidthOverride(12).HeightOverride(12)
+                            .Visibility_Lambda([Weak = Controller, Index]()
+                            {
+                                if (!Weak.IsValid()) return EVisibility::Collapsed;
+                                const auto Snapshot = Weak->HotbarSnapshot();
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Pouch
+                                    ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+                            })
+                            [
+                                SNew(SHomesteadIcon).Kind(FName(TEXT("pouch-arrows")))
+                                .Tint_Lambda([Weak = Controller, Index]()
+                                {
+                                    // Dark on the selected slot's brass face, brass on the others.
+                                    return Weak.IsValid() && Weak->SelectedHotbarIndex() == Index ? HotbarStyle::Pine : HotbarStyle::Gold;
+                                })
+                            ]
                         ]
                         + SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Bottom)
                         .Padding(6, 0, 6, 3)

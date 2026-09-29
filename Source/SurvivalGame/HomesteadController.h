@@ -63,6 +63,9 @@ struct FHomesteadHotbarSlot
     FName Icon;
     // A level shown as a thin bar along the slot's foot (the lamp's oil), 0-1; negative for none.
     float Fill = -1.0f;
+    // Sowing seed: shows how many she has; Pouch when other seed types can be switched in.
+    bool Seed = false;
+    bool Pouch = false;
 };
 
 UCLASS()
@@ -203,6 +206,16 @@ public:
     bool TogglePinnedToHotbar(Homestead::Item Item);
     // Pins newly bought or given crop seed to a free hotbar slot (no-op if pinned or full).
     void PinNewSeed(Homestead::Item Item);
+    // Seed pouch: a hotbar slot holding sowing seed steps through every seed type in her pack
+    // (D-pad up/down, or Q / Shift+Q), so one slot carries them all. Returns false when the selected
+    // slot isn't seed, so the D-pad can do its other jobs.
+    static bool IsSowingSeed(Homestead::Item Item);
+    bool CycleSeedPouch(int32 Direction);
+    void NextSeed();
+    // Other seed types the selected seed slot can switch to (0 when it isn't a seed slot).
+    int32 OtherPouchSeeds(int32 SlotIndex) const;
+    // "   [D-pad] Other seeds" after a prompt when the selected slot's pouch has more.
+    FString SeedPouchHint() const;
     void HoverHotbarSlot(int32 Index) { HoveredHotbarSlot = Index >= 0 && Index < 10 ? Index : INDEX_NONE; }
     bool KnifePreviewRequested() const;
     // The carried tool in the selected (or hovered) hotbar slot, or Item::Count.
