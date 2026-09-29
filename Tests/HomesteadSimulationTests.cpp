@@ -576,6 +576,12 @@ void AtomicTransactions()
     CHECK(sim.UsedCapacity() == 114);
     CHECK(sim.Count(Item::Water) == 6);
     UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
+    OK(sim.EmptyPail());
+    CHECK(sim.Count(Item::Water) == 0);
+    CHECK(sim.Count(Item::WateringCan) == 1);
+    UnchangedFailure(sim, [&] { return sim.EmptyPail(); });
+    OK(sim.FillWater(WaterSource));
+    CHECK(sim.Count(Item::Water) == 6);
     Stock(sim, {{Item::Knife, 1}, {Item::Roots, 2}});
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::RoastedRoots, Home); });
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::HerbedRoots, Home); });

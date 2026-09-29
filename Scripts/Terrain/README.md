@@ -202,7 +202,7 @@ The ribbon (`AHomesteadWaterRibbon`) reads spline scale Y as the waterline half-
 `BankOverlap` (45 cm) under each bank. It rounds off round the pool (`StartCap`, one pool radius,
 with the spline starting that far upstream of the pool centre) and tapers over `EndCap` (6 m) into
 the sea. Vertex colour B makes white water on grades over about 4 % and at the spring
-(`M_EstateRiver`, the creek graph plus a white-water layer). V restarts every 10 m, because
+(`M_EstateRiver`, the creek graph plus a white-water layer, through `MI_EstateRiver`: calmer ripples (RippleScale 0.12), Specular 0.9, Roughness 0.02, so at a grazing angle it reflects the banks and sky instead of reading as a streaked glass slab). V restarts every 10 m, because
 half-precision UVs smear the ripples into stripes at 1 km.
 
 Cost, from `ProfileGPU` in PIE at a 3054×1135 viewport with the sea filling the view from the western clifftop: `SLW::Draw` 0.23 ms, depth prepass 0.09 ms, and Lumen water reflections about 0.2 ms. The old one-plane creek-material sea cost 0.10, 0.07 and 0.2 ms. The mesh has about 89k vertices. Read the stable sub-passes: frame times and reflection spikes swing widely when other editors share the GPU.
@@ -260,7 +260,7 @@ branches land: `scatter.py`, then `bake_ground.py` and `build_ground.py`.
 
 Weather and night: `build_ground.py` also makes `MPC_EstateGround` (Wetness, Daylight), which
 `AHomesteadWorld::UpdateLighting` sets every refresh. The ground wets through over the first half hour
-of the rain and dries over four hours after it. Wet soil, litter and stone darken and gloss (turf
+of the rain and dries over four hours after it. Wet soil and stone darken and gloss (leaf litter under trees and the MVP woodland floor darken but stay matt, with no puddles, or they read as a sheet of water beside the river; turf
 less), trodden ground holds a sheen of water, and grass blades darken and gloss. The blades' light
 transmission and gust sheen fade out at night so the meadow doesn't glow under the moon
 (`NightTransmission` on `MI_EstateGrass`: 0.3 keeps a little light through the blades so their shaded faces don't go black).

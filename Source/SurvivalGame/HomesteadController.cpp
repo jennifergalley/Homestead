@@ -1075,6 +1075,11 @@ void AHomesteadController::HomesteadStandingRoom()
     if (Result) ShowArrival();
 }
 
+void AHomesteadController::HomesteadEmptyPail()
+{
+    Notify(Sim.EmptyPail());
+}
+
 void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
 {
     const FString Wanted = ItemName.Replace(TEXT(" "), TEXT(""));
