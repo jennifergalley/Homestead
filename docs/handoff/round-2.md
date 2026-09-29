@@ -256,9 +256,15 @@ after the north-west lake; town-entry/store acceptance, coordinate bridge, roads
 signs wait for the final road route. If the terrain or water work needs placement ids, the Water Agent
 claims them through this page before using them (the registry starts at 581000+).
 
-**Packaged lake pail regression:** despite PIE fill success, the packaged lake pail cannot fill.
-Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save,
-then add this to the core-loop package acceptance.
+**Packaged lake pail regression:** the diagnosis is inconclusive; do not make a speculative shore-range
+change. The shipped probe accepts lake shore <=120 cm, and PIE filled at landing (-79, -744) using an
+emptied carried pail. Current world focus misleadingly offers `[A] Fill carried Pail` even with no
+carried pail (the starter pail remains in its chest), then errors `Carry your pail`; a full pail, low
+Energy or being >1.2 m off bank are other possibilities.
+
+Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save.
+The unique copied-save packaged run records pail/water/Energy/focus/edge distance/actor tag plus A/E/RT
+input and toast output, then becomes a core-loop acceptance test.
 
 **Pail state core-loop requirement:** the first safe slice keeps positional v12/v13 `Item::Water`
 stock internally (pack, chest and drops; max 1200; `TakesSpace=false`) rather than silently migrating
@@ -275,6 +281,17 @@ Prove packaged lake fill before calling the loop accepted.
 reproduces it from a copied packaged save and records exact seed stock, focus, plot, moisture, season,
 Energy and toast state; trace and fix the root cause rather than silently refusing the action. This is
 an unshipped core-loop acceptance gate.
+
+**Cooking Kindling requirement:** **pending core-loop work, not shipped.** The current cooked recipes
+are RoastedRoots (2 Roots) and HerbedRoots (2 Roots + Meadow herb). Each **successful** cooked batch
+uses one Kindling through canonical `CraftChange`, requirements/`AssessRecipe` and Menu display; it
+does not debit on failed/canceled recipes, other crafts or fire fuel.
+
+Kindling is otherwise finite crates/boughs and woodland starts with none, so Props adds renewable
+`+1` Kindling co-yield to hand-gathered Branches (five Branches, 24-hour regrow), without changing old
+saves or IDs. Water adds woodland roots because the first existing live patch is about 222 m away.
+Test the hearth/lit-fire route, exact one debit and the woodland recipe before treating cooking as
+accepted.
 
 **Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
 all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
@@ -336,6 +353,16 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
+- **Zero-stock hotbar seed/food items** — **Menu plus Props Simulation, pending and not shipped.**
+  `HotbarSnapshot` currently preserves a pinned item and icon even after `Sim.Count(pack)==0`, making
+  planted/stored turnip seeds and strawberry runners look available. Hide zero-count consumable
+  seed/food visuals and actions while retaining optional pin mapping for reacquisition; Props guards
+  against any zero-stock implicit fallback. Cover sow, stow, F5/F9, old-save pinned zero,
+  reacquisition and no accidental planting.
+- **Human-readable save confirmation time** — **Menu, pending and not shipped.**
+  `Controller::MenuSaveStatus` currently shows an ISO-like UTC timestamp. Present it as a localized,
+  human-readable local date/time (for example, `September 28, 2026 12:01 PM`) without changing the
+  saved UTC timestamp or applying an incorrect time-zone conversion. Cover unknown time and 720p/4K.
 - **Minimap/compass HUD trial** — **pending behind the core loop, not shipped.** The current minimap
   is 220 logical px / 120 m crop; far badge radius 8.5 U, near 11 U and glyphs 10 U become about 5.7
   physical px at 720p (`UiScale` 0.667), while 4K caps at 1.5. Enlarge important glyphs with a minimum
@@ -389,17 +416,15 @@ requirement.
   Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
   210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture; packaged NativeMenu
   and Hotbar suites passed.
-- **Sprint Energy recovery** — **pending, not shipped.** Architecture measured current
-  `SpendSprintEnergy` at 0.35 per real second: the 1.94 km road at 480 cm/s takes 404 s and costs
-  141.5 Energy to its floor of 10; baseline awake drain remains -0.6/game-hour separately. Props'
-  trial is 0.05/s (~20.2 per trip), with an explicit real-time movement signal to `Step()`: stationary
-  recovers +0.6 Energy/game-hour and slow/ordinary walking +0.2/hour only below a soft cap of 70;
-  above the cap, retain the -0.6 baseline drain.
+- **Sprint Energy cost** — **final product direction, pending and not shipped.** Sprint has **zero**
+sprint-specific Energy cost; this supersedes both current 0.35/real-second behavior and the tentative
+0.05/s/regen proposal. Baseline awake time drain remains -0.6/game-hour and ordinary work costs remain.
+Refuse the sprint toggle at Energy <=10 and turn it off if other work/time reaches that threshold; do
+not auto-resume after recovery.
 
-  Never recover during sprint, work/action, menu/shop/planning, failure, sleep or any
-  `AdvanceGameHours` fast-forward (travel or shop wait); clamp at 70 without oscillation. Hunger stays
-  until Energy lane F. Native tests cover 30/60/120-day real-time rates, no double charge and save
-  invariance; package timed sprint/slow-walk checks and coordinate with Menu's travel API.
+Props implements this in an isolated slice after urgent Hoe work. Native tests cover 30/60/120 day
+lengths; PIE covers road sprint, clearing and farming. Starter food and abundant berry requests remain
+pending, so this does not claim early Energy is fully solved.
 - **Live sound sliders** — **symptom investigation pending, not shipped.** Mouse drag already calls
   `MenuPreviewAudioVolume` live through `SSlider.OnValueChanged`, then release writes INI; d-pad steps
   preview and persist. Jenny's symptom may instead be effects without a continuous audible source,
@@ -451,6 +476,21 @@ requirement.
   remains. This completes the prior dusk and PIE reload debt. At 4–7 m in tall grass the weeds still
   read visually modest. Props closed its editor at 13:10; the orchestrator verified no Unreal
   processes remain.
+
+  **Screenshot diagnosis correction:** the bare, leafless ~69 cm arching canes near a fence/grazed
+  125 cm ring are tentatively spring `SM_BrambleThin` overgrowth, not the green tuft/small-leafy
+  thimbleberry visual used for ordinary weeds. `WeedClump` replacement `cc5b115d` will not fix this
+  look. Fence live nodes in `HomesteadEstateDisrepair.cpp` IDs 550001+ are worn-billhook
+  `SM_BrambleThin` canes. The concrete candidate mismatch is controller focus choosing the nearest
+  **centre** inside 280 cm without gaze, versus `Overgrowth::Reach=300 cm` and a forward 80 cm /
+  200 cm-radius swing probe: a dead-ahead 285 cm cane can be in Simulation reach but show no prompt or
+  swing target, while a nearer weed/grass steals focus.
+
+  After the core hoe/pail test, Props' next code slot makes targeting forward-biased at 300 cm and
+  arbitrates competing weeds. Integration verifies isolated copied-save PIE at 285 cm, an overlapping
+  weed and F5/F9; RT/LMB with worn billhook should clear 2–3 canes in one swing, while bare A/E cannot.
+  World mesh removal/save edits already should work. Add spring leaf-out or an appropriate cue and
+  resolve any missing prompt; this remains a plausible cause, not proof for Jenny's pictured cane.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` shipped in the 4 PM playable build.** Clearable
   slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
@@ -508,6 +548,12 @@ requirement.
 
   It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
   salvage. Props released its slot before 13:45.
+- **Clean bed recipe** — **Props, pending and not shipped.** Jenny rejects thorny bramble canes in a
+  bed recipe. The live `Piece::Bed` cost is 4 Branch + 4 BrambleCanes (the crafting progression doc's
+  retired Fiber text is also stale). Props replaces it with **4 Branch + 4 Hay**: the same eight units,
+  with Hay from TallGrass using a worn scythe at 1–2 per tuft and no iron-tier upgrade. Existing built
+  beds plus v12/v13 saves, Piece IDs and Item IDs stay unchanged; other cane recipes stay unchanged.
+  Update the canonical progression doc only after the code lands.
 - **Starter rack placement save safety** — **Props urgent implementation guard; not shipped.** A new
   rack at placement ID `520006` must append after every existing placement section, not insert into an
   earlier numeric range and renumber later `550xxx` saved resources. Before `[ready]`, require a
@@ -541,7 +587,8 @@ requirement.
   replace heritage fabric. Controller green preview and `Place` share a core `CheckSite`; validate
   saved nonheritage structures after heritage/parcels deserialize and preserve old saves. Require
   native plus on-foot PIE path, collision and save tests. Architecture is still checking whether the
-  wall/roof follow-up is viable; fast travel and music remain next-build priorities first.
+  wall/roof follow-up is viable; the packaged core loop (including fast travel) remains ahead, with
+  music postponed until that acceptance passes.
 - **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
   road to town, including the bridge approach, and significantly increase visible pickable
   berries/herbs/non-farm food across the estate distributions. The ID range is reserved; implementation
@@ -562,6 +609,8 @@ requirement.
   The old Seasons handoff would gate Blackberries from Summer 15 through Autumn 28; do not silently
   add that gate without spring food and clear player prompts. Acceptance is live-node density,
   seasonal readiness/regeneration, save safety and performance - never decorative instance count.
+  Water has a headless draft of +28 estate bushes (15 roadside) with native 10/10, but it is neither
+  built nor pushed and has no delivery claim.
 - **Terrain-following road grade** — **Water Agent, pending and not shipped.** Eliminate artificial
   raised/lowered road segments. The road is Landscape paint/ruts, not a raised mesh: `reshape.py`
   grades a 2.8 m flat half-width plus 12 m falloff at ±11%, and its weightmap/rut SDF share the route.
@@ -571,13 +620,17 @@ requirement.
   Water first surveys rendered Landscape-versus-r16 1 m cross-sections at centre/±2.8/±15 m, then
   patches only mismatched edit-layer tiles <=5 cm or makes a local ford embankment with a new wooden
   bridge. Synchronize PNG, r16, roadProfile, weightmap, ruts, ground, material and map while retaining
-  anchors/chainage. Never broadly reshape from `game_raw_4033` or erase lake/river work.
+  anchors/chainage. Also rerun `Scripts\Terrain\public_road.py` to regenerate compiled
+  `Simulation\HomesteadEstatePublicRoad.inc` from `estate_layout` road/roadProfile and
+  `EstateHeightfield.r16`; verify generated fast-travel stops, signs and terrain heights. Never broadly
+  reshape from `game_raw_4033` or erase lake/river work.
 - **Field-book road label** — **Water Agent** (`89914e30`): the redundant runtime `"Dirt road"` label
   is removed with lake `df19d74a` in `main` `61c1595c`
   (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a book-map lake/path
   screenshot. It **shipped with the lake** in the 4 PM playable build.
 - **Farm-to-lake trail** — **Water, pending and not shipped.** The dashed lake path is absent on the
-  ground. Cut a clear, actual woods trail from farm to landing and verify it visually and on foot.
+  ground; its current route is hidden below canopy litter. Cut a clear, actual woods trail from farm to
+  landing through ground-material wear, then verify it visually and on foot.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
@@ -728,11 +781,10 @@ requirement.
 - Performance (`6841f429`, not on `main` yet): `PerfLock.ps1` treats `blender.exe` as a build, so
   `Start-PerfWindow.ps1` names and refuses it. When it lands, update the editor skill perf-window
   bullet to say the script enforces the no-Blender rule.
-- Crops (`b51aa930`, from round 1's polish): `HomesteadGrowCrops <days> [tend=1]` and
-  `HomesteadCropGrowth <0-1>` grow crops for tests (time skips don't). When it lands, add them to the
-  editor skill's "Time and weather for tests" bullet.
-- Performance (`0c12d5e9`): `Test-Game.ps1 -RenderScale 0`, `-ExtraExecCmds`, `-ExtraArguments`, and the
-  `-UserDir` CSV path. When it lands, add them to the editor skill's perf notes.
+- Menu planting prompts (`a874d260`, pending PIE/main): after it lands, update the editor skill's
+  tilled-square controls: A/E sows the hotbar-selected seed; no seed selected says `Choose seeds on
+  the hotbar to sow`; selected Wild Roots sow roots; F/X weeds only; selected zero stock gives the
+  seed-specific refusal. The Menu README changes with the commit already describe the behavior.
 
 ## Tooling requests (unassigned)
 
