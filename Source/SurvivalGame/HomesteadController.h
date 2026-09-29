@@ -652,6 +652,8 @@ private:
     void OpenBook(int32 TargetPage);
     void CloseBook();
     void UpdateFocus();
+    // HomesteadControllerToolFocus.cpp: the held tool's aimed overgrowth, and the 280-300 cm band.
+    void FocusHeldToolTarget(Homestead::Point Position);
     void BeginPlacement(Homestead::Piece Kind);
     // Fill the watering pail at the nearest fresh water edge, with her kneeling fill when it succeeds.
     void FillPailAtStream(Homestead::Point Position);

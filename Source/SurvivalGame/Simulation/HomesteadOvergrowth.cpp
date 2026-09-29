@@ -409,6 +409,29 @@ int Simulation::FindNearestOvergrowth(Point position, double maxDistance, Item t
     return nearest;
 }
 
+int Simulation::FindAimedOvergrowth(Point player, Point facing, Item tool) const
+{
+    const ToolKind used = ToolForItem(tool);
+    const double length = std::sqrt(facing.x * facing.x + facing.y * facing.y);
+    if (!OgValid(player) || used == ToolKind::Count || !std::isfinite(length) || length < 1e-6) return -1;
+    const Point forward{facing.x / length, facing.y / length};
+    const double cosine = std::cos(Overgrowth::AimHalfAngleDegrees * 3.14159265358979323846 / 180.0);
+    int aimed = -1;
+    double best = Overgrowth::Reach;
+    for (const auto& node : state_.resources)
+    {
+        const auto* info = node.cleared ? nullptr : FindOvergrowth(node.kind);
+        if (!info || info->tool != used) continue;
+        const Point offset{node.position.x - player.x, node.position.y - player.y};
+        const double distance = std::sqrt(offset.x * offset.x + offset.y * offset.y);
+        if (distance > best || (distance == best && aimed != -1)) continue;
+        if (distance > Overgrowth::AimAnyDirection && (offset.x * forward.x + offset.y * forward.y) / distance < cosine) continue;
+        aimed = node.id;
+        best = distance;
+    }
+    return aimed;
+}
+
 double Simulation::ScytheArcRadius(ToolTier tier)
 {
     static const double radii[] = {160.0, 200.0, 240.0, 280.0};

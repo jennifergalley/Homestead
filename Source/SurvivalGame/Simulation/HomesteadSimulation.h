@@ -586,6 +586,10 @@ public:
     Result ClearOvergrowth(int nodeId, Item tool, Point player);
     // The uncleared overgrowth `tool` handles nearest to `position`, or -1.
     int FindNearestOvergrowth(Point position, double maxDistance, Item tool) const;
+    // What a swing of `tool` is aimed at: the nearest uncleared overgrowth of that tool's kind whose
+    // centre is within Overgrowth::Reach and roughly ahead of her (Overgrowth::AimHalfAngleDegrees), or -1. Tier and energy aren't checked
+    // here, so an under-tier target still gets named and refused. Focus and swing both use this.
+    int FindAimedOvergrowth(Point player, Point facing, Item tool) const;
     // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
     std::vector<int> ScytheArcTargets(Point player, Point facing) const;
     static double ScytheArcRadius(ToolTier tier);
