@@ -256,9 +256,15 @@ after the north-west lake; town-entry/store acceptance, coordinate bridge, roads
 signs wait for the final road route. If the terrain or water work needs placement ids, the Water Agent
 claims them through this page before using them (the registry starts at 581000+).
 
-**Packaged lake pail regression:** despite PIE fill success, the packaged lake pail cannot fill.
-Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save,
-then add this to the core-loop package acceptance.
+**Packaged lake pail regression:** the diagnosis is inconclusive; do not make a speculative shore-range
+change. The shipped probe accepts lake shore <=120 cm, and PIE filled at landing (-79, -744) using an
+emptied carried pail. Current world focus misleadingly offers `[A] Fill carried Pail` even with no
+carried pail (the starter pail remains in its chest), then errors `Carry your pail`; a full pail, low
+Energy or being >1.2 m off bank are other possibilities.
+
+Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save.
+The unique copied-save packaged run records pail/water/Energy/focus/edge distance/actor tag plus A/E/RT
+input and toast output, then becomes a core-loop acceptance test.
 
 **Pail state core-loop requirement:** the first safe slice keeps positional v12/v13 `Item::Water`
 stock internally (pack, chest and drops; max 1200; `TakesSpace=false`) rather than silently migrating
@@ -566,6 +572,8 @@ pending, so this does not claim early Energy is fully solved.
   The old Seasons handoff would gate Blackberries from Summer 15 through Autumn 28; do not silently
   add that gate without spring food and clear player prompts. Acceptance is live-node density,
   seasonal readiness/regeneration, save safety and performance - never decorative instance count.
+  Water has a headless draft of +28 estate bushes (15 roadside) with native 10/10, but it is neither
+  built nor pushed and has no delivery claim.
 - **Terrain-following road grade** — **Water Agent, pending and not shipped.** Eliminate artificial
   raised/lowered road segments. The road is Landscape paint/ruts, not a raised mesh: `reshape.py`
   grades a 2.8 m flat half-width plus 12 m falloff at ±11%, and its weightmap/rut SDF share the route.
@@ -584,7 +592,8 @@ pending, so this does not claim early Energy is fully solved.
   (`HomesteadMapComponent::RefreshModel`; the road remains drawn), with a book-map lake/path
   screenshot. It **shipped with the lake** in the 4 PM playable build.
 - **Farm-to-lake trail** — **Water, pending and not shipped.** The dashed lake path is absent on the
-  ground. Cut a clear, actual woods trail from farm to landing and verify it visually and on foot.
+  ground; its current route is hidden below canopy litter. Cut a clear, actual woods trail from farm to
+  landing through ground-material wear, then verify it visually and on foot.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
