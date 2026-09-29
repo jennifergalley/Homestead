@@ -82,6 +82,6 @@ item) and `BrambleBank` (clearable overgrowth).
 
 ## Done when
 
-- Native tests pass (7/7), the editor module builds, and in PIE you can walk up to it, see the
+- Native tests all pass, the editor module builds, and in PIE you can walk up to it, see the
   right prompt, act on it with the right tool and get the right items (a `shot` capture of the
   prompt and the pack is the evidence).
