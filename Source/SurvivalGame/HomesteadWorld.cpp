@@ -3574,7 +3574,9 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
         // dark toothed leaves, taller than the grazed ring. Every live node draws one at its point.
         static const TCHAR* const Clumps[] = {TEXT("SM_WeedClump_Dock"), TEXT("SM_WeedClump_Thistle"), TEXT("SM_WeedClump_Dandelion")};
         if (UStaticMesh* Clump = QuietProp(TEXT("WeedClump"), Clumps[Variation % UE_ARRAY_COUNT(Clumps)]))
-            Whole(Clump, FVector2D::ZeroVector, 0, Random.FRandRange(0.95f, 1.15f));
+            // Authored with the rosette's base at z 0 and a few leaf tips dipping below it: the pivot
+            // goes on the soil, so the rosette sits on it rather than hovering on its lowest leaf.
+            Place(Clump, FVector2D::ZeroVector, Yaw, false, Random.FRandRange(0.95f, 1.15f), true);
         else
         {
             Whole(Load(TEXT("Nettle"), TEXT("SM_NettlePatch")), FVector2D::ZeroVector, 0, Random.FRandRange(0.7f, 0.8f));
