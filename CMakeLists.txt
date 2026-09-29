@@ -19,7 +19,8 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadItems.cpp
     Source/SurvivalGame/Simulation/HomesteadShops.cpp
     Source/SurvivalGame/Simulation/HomesteadManor.cpp
-    Source/SurvivalGame/Simulation/HomesteadLamp.cpp)
+    Source/SurvivalGame/Simulation/HomesteadLamp.cpp
+    Source/SurvivalGame/Simulation/HomesteadNightLight.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
 target_compile_features(HomesteadSimulation PUBLIC cxx_std_17)
 set_target_properties(HomesteadSimulation PROPERTIES CXX_EXTENSIONS OFF)
@@ -104,3 +105,12 @@ else()
     target_compile_options(HomesteadLampTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadLampTests COMMAND HomesteadLampTests)
+
+add_executable(HomesteadNightLightTests Tests/HomesteadNightLightTests.cpp)
+target_link_libraries(HomesteadNightLightTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadNightLightTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadNightLightTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadNightLightTests COMMAND HomesteadNightLightTests)
