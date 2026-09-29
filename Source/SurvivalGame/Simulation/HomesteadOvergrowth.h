@@ -26,11 +26,19 @@ struct OvergrowthInfo
     double energy = 0.0; // At worn tier; better tools cost less.
     std::array<int, ToolTierCount> swings{}; // Swings to clear at each tool tier.
     std::array<OvergrowthYield, 3> yields{};
+    // Radius (cm) of the ground it spoils: no tilling or building overlaps it until it's cleared.
+    double spoil = 60.0;
 };
 
 // Null for kinds that aren't overgrowth (trees, forage).
 const OvergrowthInfo* FindOvergrowth(ResourceKind kind);
 inline bool IsOvergrowth(ResourceKind kind) { return FindOvergrowth(kind) != nullptr; }
+// The uncleared overgrowth whose spoiled ground overlaps the footprint, or null (fixed estate only).
+const ResourceNode* OvergrowthSpoiling(const State& state, const Footprint& area);
+// "Clear the nettles here first."
+std::string SpoiledGroundMessage(const ResourceNode& node);
+// Hand-cleared rubbish (crates, barrels, heaps and planks).
+bool IsRubbish(ResourceKind kind);
 // Lower-case, for prompts: "axe", "billhook".
 const char* ToolName(ToolKind tool);
 // Lower-case: "worn", "iron", "steel", "master-forged".

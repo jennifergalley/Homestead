@@ -9,6 +9,7 @@
 #include "Misc/Paths.h"
 
 #include "HomesteadCharacter.h"
+#include "Simulation/HomesteadOvergrowth.h"
 #include "Async/Async.h"
 #include "Async/ParallelFor.h"
 #include "Components/DirectionalLightComponent.h"
@@ -587,6 +588,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     UpdateFallingTree(DeltaSeconds);
     UpdateHearthFlicker(DeltaSeconds);
     UpdateHearthSound(DeltaSeconds);
+    UpdateClearPops(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
     {
         FHomesteadChunkBaselineBuild Completed = ChunkBaselineBuild->Get();
@@ -3400,8 +3402,82 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     case Homestead::ResourceKind::GiantLog:
         Whole(Load(TEXT("EstateTimber"), TEXT("SM_GiantLog")), FVector2D::ZeroVector, 0, Random.FRandRange(0.95f, 1.05f));
         break;
+    // The manor clear-out (add-coral-island-clearout).
+    case Homestead::ResourceKind::Nettles:
+        Whole(Load(TEXT("Nettle"), TEXT("SM_NettlePatch")), FVector2D::ZeroVector, 0, Random.FRandRange(0.85f, 1.15f));
+        break;
+    case Homestead::ResourceKind::StumpMedium:
+        Whole(Load(TEXT("EstateTimber"), TEXT("SM_StumpLarge")), FVector2D::ZeroVector, 0, Random.FRandRange(0.58f, 0.7f));
+        break;
+    case Homestead::ResourceKind::BrokenCrate:
+    case Homestead::ResourceKind::BrokenBarrel:
+    case Homestead::ResourceKind::RubbishHeap:
+    {
+        // The Farm Agent's estate debris (EstateDebris, EstateRubbish); the store goods stand in until it lands.
+        // The first clear-out rows (570000-570007) are its eight freed spots and keep the full
+        // midden; elsewhere a heap is a small midden or a rusty scrap pile.
+        auto Quiet = [](const TCHAR* Name, const TCHAR* Folder = TEXT("EstateDebris")) -> UStaticMesh*
+        {
+            return LoadObject<UStaticMesh>(nullptr,
+                *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s/%s.%s"), Folder, Name, Name), nullptr,
+                LOAD_NoWarn | LOAD_Quiet);
+        };
+        const bool Crate = Node.kind == Homestead::ResourceKind::BrokenCrate;
+        const bool Barrel = Node.kind == Homestead::ResourceKind::BrokenBarrel;
+        UStaticMesh* Debris = nullptr;
+        float Scale = Random.FRandRange(0.8f, 0.95f);
+        if (Crate) Debris = Quiet(TEXT("SM_BrokenCrate"));
+        else if (Barrel) Debris = Quiet(TEXT("SM_BrokenBarrel"));
+        else if (Node.id >= 570000 && Node.id < 570008) Debris = Quiet(TEXT("SM_RubbishHeap"));
+        else
+        {
+            Debris = Quiet(Variation % 2 ? TEXT("SM_ScrapHeap") : TEXT("SM_RubbishHeapSmall"), TEXT("EstateRubbish"));
+            if (!Debris && (Debris = Quiet(TEXT("SM_RubbishHeap")))) Scale = Random.FRandRange(0.45f, 0.55f);
+        }
+        if (Debris)
+            Whole(Debris, FVector2D::ZeroVector, 0, Scale);
+        else if (Crate)
+            Whole(Load(TEXT("StoreCrate"), TEXT("SM_Store_Crate")), FVector2D::ZeroVector, 0, 0.9f);
+        else if (Barrel)
+            Whole(Load(TEXT("StoreBarrel"), TEXT("SM_Store_Barrel")), FVector2D::ZeroVector, 0, 0.9f);
+        else
+        {
+            // A midden stand-in: broken stone and a rotten board.
+            Whole(Load(TEXT("GraniteCobbles"), TEXT("SM_GraniteCobbles")), FVector2D::ZeroVector, 0, 0.8f);
+            Whole(Load(TEXT("EstateTimber"), TEXT("SM_FallenBough")), FVector2D(20, 10), 70, 0.6f);
+        }
+        break;
+    }
+    case Homestead::ResourceKind::RottenPlanks:
+        if (auto* Planks = LoadObject<UStaticMesh>(nullptr,
+            TEXT("/Game/SurvivalGame/Environment/Props/EstateRubbish/SM_RottenPlanks.SM_RottenPlanks"), nullptr, LOAD_NoWarn | LOAD_Quiet))
+            Whole(Planks, FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.05f));
+        else
+            // Until the Farm Agent's plank pile lands: the ruin's fallen roof timbers at plank scale.
+            Whole(Load(TEXT("RuinFallenTimbers"), TEXT("SM_RuinFallenTimbers")), FVector2D::ZeroVector, 0, Random.FRandRange(0.34f, 0.4f));
+        break;
     default:
         break;
+    }
+    if (Node.kind == Homestead::ResourceKind::WildGarlic || Node.kind == Homestead::ResourceKind::Bluebells
+        || Node.kind == Homestead::ResourceKind::Primroses || Node.kind == Homestead::ResourceKind::WildDaffodils)
+    {
+        // Authored spring flowers (Scripts/Blender/Recipes wild_garlic.py, bluebell.py, primrose.py and wild_daffodil.py): the
+        // whole flowering clump is what she picks, so it's the produce.
+        const TCHAR* Path = Node.kind == Homestead::ResourceKind::WildGarlic
+            ? TEXT("/Game/SurvivalGame/Environment/Props/WildGarlic/SM_WildGarlic.SM_WildGarlic")
+            : Node.kind == Homestead::ResourceKind::Bluebells
+            ? TEXT("/Game/SurvivalGame/Environment/Props/Bluebell/SM_BluebellClump.SM_BluebellClump")
+            : Node.kind == Homestead::ResourceKind::Primroses
+            ? TEXT("/Game/SurvivalGame/Environment/Props/Primrose/SM_PrimroseClump.SM_PrimroseClump")
+            : TEXT("/Game/SurvivalGame/Environment/Props/WildDaffodil/SM_WildDaffodilClump.SM_WildDaffodilClump");
+        if (auto* Clump = LoadObject<UStaticMesh>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet))
+        {
+            // Primroses hug the ground, so their clumps are drawn a little large to read above the pasture.
+            const bool Primrose = Node.kind == Homestead::ResourceKind::Primroses;
+            Place(Clump, FVector2D::ZeroVector, Yaw, true, Random.FRandRange(0.9f, 1.15f) * (Primrose ? 1.3f : 1.0f));
+            return;
+        }
     }
     if (Node.kind == Homestead::ResourceKind::Primroses || Node.kind == Homestead::ResourceKind::Bluebells
         || Node.kind == Homestead::ResourceKind::WildDaffodils || Node.kind == Homestead::ResourceKind::WildGarlic)
@@ -3438,6 +3514,107 @@ void AHomesteadWorld::UpdateHearthFlicker(float DeltaSeconds)
         const float Flicker = 0.82f + 0.1f * FMath::PerlinNoise1D(T * 1.3f) + 0.08f * FMath::PerlinNoise1D(T * 7.1f)
             + 0.05f * FMath::PerlinNoise1D(T * 17.0f);
         HearthLights[Index]->SetIntensity(5200.0f * Flicker);
+    }
+}
+
+void AHomesteadWorld::StartClearPop(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node)
+{
+    FClearPop Pop;
+    for (USceneComponent* Part : Visual.Components)
+        if (IsValid(Part))
+        {
+            Pop.Parts.Add(Part);
+            Pop.Scales.Add(Part->GetRelativeScale3D());
+            Pop.Locations.Add(Part->GetRelativeLocation());
+        }
+    // The popping parts now belong to the pop, not the node's visual.
+    Visual.Components.Reset();
+    if (!Pop.Parts.IsEmpty()) ClearPops.Add(MoveTemp(Pop));
+
+    // Chips of whatever it was: clippings, splinters or grit.
+    using Homestead::ResourceKind;
+    const ResourceKind Kind = Node.kind;
+    const bool bStone = Kind == ResourceKind::Rubble || Kind == ResourceKind::SmallRock || Kind == ResourceKind::Boulder
+        || Kind == ResourceKind::RubbishHeap || Kind == ResourceKind::SalvagePile;
+    const bool bGreen = Kind == ResourceKind::TallGrass || Kind == ResourceKind::Weeds || Kind == ResourceKind::Nettles
+        || Kind == ResourceKind::BrambleThin || Kind == ResourceKind::BrambleThicket || Kind == ResourceKind::BrambleBank
+        || Kind == ResourceKind::Sapling;
+    const TCHAR* Path = bStone ? TEXT("/Game/SurvivalGame/Environment/Props/GraniteSpalls/SM_GraniteSpalls.SM_GraniteSpalls")
+        : bGreen ? TEXT("/Game/SurvivalGame/Environment/Props/GrassYarrowTuft/SM_GrassYarrowTuft.SM_GrassYarrowTuft")
+        : TEXT("/Game/SurvivalGame/Environment/Props/EstateTimber/SM_FallenBough.SM_FallenBough");
+    UStaticMesh* ChipMesh = LoadObject<UStaticMesh>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
+    if (!ChipMesh) return;
+    const float Size = Kind == ResourceKind::Boulder || Kind == ResourceKind::StumpLarge || Kind == ResourceKind::StumpAncient
+        || Kind == ResourceKind::RubbishHeap || Kind == ResourceKind::BrambleThicket ? 1.5f : 1.0f;
+    FRandomStream Random(Node.id * 7919 + static_cast<int32>(GetWorld() ? GetWorld()->GetTimeSeconds() * 10.0 : 0.0));
+    FClearPop Chips;
+    Chips.bChips = true;
+    Chips.Life = 0.75f;
+    const FVector Origin = AtGround(Node.position.x, Node.position.y) + FVector(0, 0, 18.0f * Size);
+    const int32 Count = FMath::RoundToInt(7 * Size);
+    for (int32 Index = 0; Index < Count; ++Index)
+    {
+        auto* Chip = NewObject<UStaticMeshComponent>(this);
+        Chip->SetupAttachment(GetRootComponent());
+        Chip->SetMobility(EComponentMobility::Movable);
+        Chip->SetStaticMesh(ChipMesh);
+        Chip->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Chip->SetCollisionResponseToAllChannels(ECR_Ignore);
+        Chip->SetGenerateOverlapEvents(false);
+        Chip->SetCanEverAffectNavigation(false);
+        Chip->SetCastShadow(false);
+        const float Scale = (bStone ? 0.12f : bGreen ? 0.16f : 0.07f) * Random.FRandRange(0.7f, 1.2f) * FMath::Sqrt(Size);
+        const FVector Start = Origin + FVector(Random.FRandRange(-12, 12), Random.FRandRange(-12, 12), Random.FRandRange(0, 10)) * Size;
+        const FRotator Turn(Random.FRandRange(-40, 40), Random.FRandRange(0, 360), Random.FRandRange(-40, 40));
+        Chip->SetRelativeTransform(FTransform(Turn, Start, FVector(Scale)));
+        Chip->RegisterComponent();
+        const float Heading = Random.FRandRange(0.0f, 2.0f * PI);
+        const float Out = Random.FRandRange(90.0f, 220.0f) * Size;
+        Chips.Parts.Add(Chip);
+        Chips.Scales.Add(FVector(Scale));
+        Chips.Locations.Add(Start);
+        Chips.Velocities.Add(FVector(FMath::Cos(Heading) * Out, FMath::Sin(Heading) * Out, Random.FRandRange(260.0f, 420.0f)));
+        Chips.Spins.Add(FRotator(Random.FRandRange(-540, 540), Random.FRandRange(-540, 540), Random.FRandRange(-540, 540)));
+    }
+    ClearPops.Add(MoveTemp(Chips));
+}
+
+void AHomesteadWorld::UpdateClearPops(float DeltaSeconds)
+{
+    for (int32 PopIndex = ClearPops.Num() - 1; PopIndex >= 0; --PopIndex)
+    {
+        FClearPop& Pop = ClearPops[PopIndex];
+        Pop.Age += DeltaSeconds;
+        const float T = FMath::Clamp(Pop.Age / Pop.Life, 0.0f, 1.0f);
+        for (int32 Index = 0; Index < Pop.Parts.Num(); ++Index)
+        {
+            USceneComponent* Part = Pop.Parts[Index].Get();
+            if (!Part) continue;
+            if (Pop.bChips)
+            {
+                // Thrown out and falling, tumbling, shrinking away over the last third.
+                const float Seconds = Pop.Age;
+                const FVector& V = Pop.Velocities[Index];
+                Part->SetRelativeLocation(Pop.Locations[Index] + FVector(V.X * Seconds, V.Y * Seconds,
+                    V.Z * Seconds - 0.5f * 980.0f * Seconds * Seconds));
+                Part->SetRelativeRotation(Part->GetRelativeRotation() + Pop.Spins[Index] * DeltaSeconds);
+                Part->SetRelativeScale3D(Pop.Scales[Index] * FMath::Clamp((1.0f - T) * 3.0f, 0.0f, 1.0f));
+            }
+            else
+            {
+                // A quick swell, then it shrinks into the ground.
+                const float Swell = T < 0.2f ? 1.0f + 0.1f * (T / 0.2f)
+                    : 1.1f * (1.0f - FMath::SmoothStep(0.0f, 1.0f, (T - 0.2f) / 0.8f));
+                Part->SetRelativeScale3D(Pop.Scales[Index] * FMath::Max(Swell, 0.001f));
+                Part->SetRelativeLocation(Pop.Locations[Index] - FVector(0, 0, 12.0f * T));
+            }
+        }
+        if (Pop.Age >= Pop.Life)
+        {
+            for (const TWeakObjectPtr<USceneComponent>& Part : Pop.Parts)
+                if (Part.IsValid()) Part->DestroyComponent();
+            ClearPops.RemoveAtSwap(PopIndex);
+        }
     }
 }
 
@@ -4098,6 +4275,9 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         FHomesteadWorldVisual& Visual = ResourceVisuals.FindOrAdd(Node.id);
         if (Visual.Signature != Signature)
         {
+            // Cleared in play (not loaded or streamed in cleared): it pops away instead of vanishing.
+            if (Shown.cleared && !Transition && Homestead::IsOvergrowth(Node.kind) && Visual.Signature.EndsWith(TEXT(":0")))
+                StartClearPop(Visual, Node);
             ClearVisual(Visual);
             BuildResource(Visual, Shown, false);
             if (bVisualBuildFailed) return false;

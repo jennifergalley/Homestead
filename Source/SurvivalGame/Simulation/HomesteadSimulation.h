@@ -26,6 +26,8 @@ enum class ResourceKind : int
     TallGrass, Weeds, BrambleThin, BrambleThicket, BrambleBank, FallenBranch,
     StumpSmall, StumpLarge, StumpAncient, FallenLog, GiantLog, Rubble, SmallRock, Boulder, SalvagePile,
     Primroses, Bluebells, WildDaffodils, WildGarlic,
+    // add-coral-island-clearout: the manor clear-out's nettles, a middling stump and hand-cleared rubbish.
+    Nettles, StumpMedium, BrokenCrate, BrokenBarrel, RubbishHeap, RottenPlanks,
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.

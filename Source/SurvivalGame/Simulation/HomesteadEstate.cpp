@@ -237,6 +237,21 @@ const EstatePlacements& ProvisionalEstatePlacements()
             table.placements.push_back({id, ResourceKind::BerryBush, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateBerryPlacements.inc"
+        // The manor clear-out (570000+, Scripts/Terrain/clearout.py, add-coral-island-clearout): the
+        // ground round the ruin littered with weeds, nettles, stumps, rocks and rubbish to clear before
+        // she can dig or build there. A row within 1.5 m of an earlier placement (3 m of a blackberry
+        // bramble) is skipped, so other lanes' additions never collide with it or renumber it.
+        auto clearout = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+            {
+                const double gap = other.kind == ResourceKind::BerryBush ? 300.0 : 150.0;
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < gap * gap)
+                    return;
+            }
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateClearoutPlacements.inc"
         // Town lane (530000+).
         return table;
     }();

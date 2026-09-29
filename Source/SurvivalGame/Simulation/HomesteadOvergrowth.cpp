@@ -16,43 +16,59 @@ constexpr std::array<int, ToolTierCount> OgSwings(int worn, int iron, int steel,
 constexpr OvergrowthYield OgGives(Item item, int low, int high, int chance = 100) { return {item, low, high, chance}; }
 
 // Tuned for Jenny's first playtest (tasks 4.2): mostly one-swing worn targets, with multi-swing
-// stumps and rocks, and the iron and steel kinds visible as teases.
+// stumps and rocks, and the iron and steel kinds visible as teases. The last value of each row is
+// the radius of ground it spoils for tilling and building (add-coral-island-clearout).
 const OvergrowthInfo OgTable[] = {
     {ResourceKind::TallGrass, ToolKind::Scythe, false, ToolTier::Worn, 0.3, OgSwings(1, 1, 1, 1),
-        {OgGives(Item::Hay, 1, 2)}},
-    {ResourceKind::Weeds, ToolKind::Scythe, false, ToolTier::Worn, 0.3, OgSwings(1, 1, 1, 1),
-        {OgGives(Item::Weeds, 1, 1)}},
+        {OgGives(Item::Hay, 1, 2)}, 50.0},
+    // Weeds and nettles pull by hand too. In the old kitchen garden the weeds hide self-sown roots
+    // gone to seed.
+    {ResourceKind::Weeds, ToolKind::Scythe, true, ToolTier::Worn, 0.3, OgSwings(1, 1, 1, 1),
+        {OgGives(Item::Weeds, 1, 1), OgGives(Item::Seeds, 1, 1, 15)}, 50.0},
+    {ResourceKind::Nettles, ToolKind::Scythe, true, ToolTier::Worn, 0.4, OgSwings(1, 1, 1, 1),
+        {OgGives(Item::Weeds, 1, 2), OgGives(Item::Seeds, 1, 1, 10)}, 60.0},
     {ResourceKind::BrambleThin, ToolKind::Billhook, false, ToolTier::Worn, 1.2, OgSwings(1, 1, 1, 1),
-        {OgGives(Item::BrambleCanes, 2, 3)}},
+        {OgGives(Item::BrambleCanes, 2, 3)}, 90.0},
     {ResourceKind::Sapling, ToolKind::Billhook, false, ToolTier::Worn, 1.5, OgSwings(2, 1, 1, 1),
-        {OgGives(Item::Branch, 3, 4), OgGives(Item::Kindling, 1, 1)}},
+        {OgGives(Item::Branch, 3, 4), OgGives(Item::Kindling, 1, 1)}, 60.0},
     {ResourceKind::BrambleThicket, ToolKind::Billhook, false, ToolTier::Iron, 2.0, OgSwings(3, 2, 1, 1),
-        {OgGives(Item::BrambleCanes, 4, 5)}},
+        {OgGives(Item::BrambleCanes, 4, 5)}, 150.0},
     {ResourceKind::BrambleBank, ToolKind::Billhook, false, ToolTier::Steel, 3.0, OgSwings(4, 3, 2, 1),
-        {OgGives(Item::BrambleCanes, 6, 8), OgGives(Item::ScrapIron, 1, 1, 25)}},
+        {OgGives(Item::BrambleCanes, 6, 8), OgGives(Item::ScrapIron, 1, 1, 25)}, 220.0},
     {ResourceKind::FallenBranch, ToolKind::Axe, true, ToolTier::Worn, 0.8, OgSwings(1, 1, 1, 1),
-        {OgGives(Item::Branch, 3, 3), OgGives(Item::Kindling, 1, 1)}},
+        {OgGives(Item::Branch, 3, 3), OgGives(Item::Kindling, 1, 1)}, 90.0},
     {ResourceKind::StumpSmall, ToolKind::Axe, false, ToolTier::Worn, 3.0, OgSwings(3, 2, 1, 1),
-        {OgGives(Item::Firewood, 2, 3), OgGives(Item::Kindling, 1, 1)}},
+        {OgGives(Item::Firewood, 2, 3), OgGives(Item::Kindling, 1, 1)}, 60.0},
+    {ResourceKind::StumpMedium, ToolKind::Axe, false, ToolTier::Worn, 4.0, OgSwings(5, 3, 2, 1),
+        {OgGives(Item::Firewood, 3, 4), OgGives(Item::Kindling, 1, 2)}, 80.0},
     {ResourceKind::StumpLarge, ToolKind::Axe, false, ToolTier::Iron, 4.5, OgSwings(5, 4, 3, 2),
-        {OgGives(Item::Timber, 1, 2), OgGives(Item::Firewood, 3, 3)}},
+        {OgGives(Item::Timber, 1, 2), OgGives(Item::Firewood, 3, 3)}, 110.0},
     {ResourceKind::StumpAncient, ToolKind::Axe, false, ToolTier::Steel, 6.0, OgSwings(6, 5, 4, 3),
-        {OgGives(Item::Timber, 3, 4), OgGives(Item::Firewood, 4, 4)}},
+        {OgGives(Item::Timber, 3, 4), OgGives(Item::Firewood, 4, 4)}, 160.0},
     {ResourceKind::FallenLog, ToolKind::Axe, false, ToolTier::Iron, 3.5, OgSwings(4, 3, 2, 1),
-        {OgGives(Item::Timber, 2, 3), OgGives(Item::Firewood, 2, 2)}},
+        {OgGives(Item::Timber, 2, 3), OgGives(Item::Firewood, 2, 2)}, 180.0},
     {ResourceKind::GiantLog, ToolKind::Axe, false, ToolTier::Steel, 5.0, OgSwings(6, 5, 4, 3),
-        {OgGives(Item::Timber, 5, 6)}},
+        {OgGives(Item::Timber, 5, 6)}, 280.0},
     {ResourceKind::Rubble, ToolKind::Pickaxe, false, ToolTier::Worn, 2.0, OgSwings(2, 2, 1, 1),
-        {OgGives(Item::Stone, 2, 3), OgGives(Item::ScrapIron, 1, 1, 50), OgGives(Item::ScrapLead, 1, 1, 20)}},
+        {OgGives(Item::Stone, 2, 3), OgGives(Item::ScrapIron, 1, 1, 50), OgGives(Item::ScrapLead, 1, 1, 20)}, 100.0},
     {ResourceKind::SmallRock, ToolKind::Pickaxe, false, ToolTier::Worn, 1.5, OgSwings(2, 1, 1, 1),
-        {OgGives(Item::Stone, 2, 3)}},
+        {OgGives(Item::Stone, 2, 3)}, 60.0},
     {ResourceKind::Boulder, ToolKind::Pickaxe, false, ToolTier::Iron, 4.0, OgSwings(5, 4, 3, 2),
-        {OgGives(Item::Stone, 6, 8)}},
+        {OgGives(Item::Stone, 6, 8)}, 140.0},
     // Searched by hand; the rusted head itself comes from NextSalvageHead.
     {ResourceKind::SalvagePile, ToolKind::Count, true, ToolTier::Worn, 0.5, OgSwings(1, 1, 1, 1),
-        {OgGives(Item::ScrapIron, 1, 1)}},
+        {OgGives(Item::ScrapIron, 1, 1)}, 100.0},
+    // Rubbish from the years of neglect, hauled aside by hand: kindling from the rotten wood, the
+    // nails and hoops as scrap, and now and then something worth keeping.
+    {ResourceKind::BrokenCrate, ToolKind::Count, true, ToolTier::Worn, 0.8, OgSwings(1, 1, 1, 1),
+        {OgGives(Item::Kindling, 2, 3), OgGives(Item::ScrapIron, 1, 1, 40), OgGives(Item::Twine, 1, 1, 15)}, 80.0},
+    {ResourceKind::BrokenBarrel, ToolKind::Count, true, ToolTier::Worn, 1.0, OgSwings(1, 1, 1, 1),
+        {OgGives(Item::ScrapIron, 1, 2), OgGives(Item::Kindling, 2, 3), OgGives(Item::Seeds, 2, 3, 12)}, 90.0},
+    {ResourceKind::RubbishHeap, ToolKind::Count, true, ToolTier::Worn, 1.2, OgSwings(1, 1, 1, 1),
+        {OgGives(Item::ScrapIron, 1, 2), OgGives(Item::Stone, 1, 2), OgGives(Item::ScrapLead, 1, 1, 25)}, 130.0},
+    {ResourceKind::RottenPlanks, ToolKind::Count, true, ToolTier::Worn, 0.6, OgSwings(1, 1, 1, 1),
+        {OgGives(Item::Kindling, 1, 2), OgGives(Item::ScrapIron, 1, 1, 50)}, 90.0},
 };
-
 const OvergrowthInfo* OgByKind(ResourceKind kind)
 {
     static const auto index = [] {
@@ -103,10 +119,55 @@ ToolTier OgRequiredTier(const OvergrowthInfo& info, const ResourceNode& node)
     return std::max(info.minTier, node.minTier);
 }
 
-bool OgCreepCandidate(ResourceKind kind) { return kind == ResourceKind::TallGrass || kind == ResourceKind::Weeds; }
+// "an axe", "a billhook".
+std::string OgArticle(const std::string& noun)
+{
+    const bool vowel = !noun.empty() && std::string("aeiouAEIOU").find(noun[0]) != std::string::npos;
+    return (vowel ? "an " : "a ") + noun;
+}
+
+bool OgCreepCandidate(ResourceKind kind)
+{
+    return kind == ResourceKind::TallGrass || kind == ResourceKind::Weeds || kind == ResourceKind::Nettles;
+}
+
+// Whether a circle of `radius` about `centre` overlaps the (rotated) footprint.
+bool OgCircleTouches(Point centre, double radius, const Footprint& area)
+{
+    const Point local = RotateYaw({centre.x - area.center.x, centre.y - area.center.y}, -area.yaw);
+    const double dx = std::max(0.0, std::abs(local.x) - area.half.x);
+    const double dy = std::max(0.0, std::abs(local.y) - area.half.y);
+    return dx * dx + dy * dy < radius * radius;
+}
 }
 
 const OvergrowthInfo* FindOvergrowth(ResourceKind kind) { return OgByKind(kind); }
+
+bool IsRubbish(ResourceKind kind)
+{
+    return kind == ResourceKind::BrokenCrate || kind == ResourceKind::BrokenBarrel || kind == ResourceKind::RubbishHeap
+        || kind == ResourceKind::RottenPlanks;
+}
+
+const ResourceNode* OvergrowthSpoiling(const State& state, const Footprint& area)
+{
+    if (!state.fixedEstate) return nullptr;
+    const ResourceNode* nearest = nullptr;
+    double best = 0.0;
+    for (const auto& node : state.resources)
+    {
+        const auto* info = node.cleared ? nullptr : FindOvergrowth(node.kind);
+        if (!info || !OgCircleTouches(node.position, info->spoil, area)) continue;
+        const double distance = OgDistanceSquared(node.position, area.center);
+        if (!nearest || distance < best) { nearest = &node; best = distance; }
+    }
+    return nearest;
+}
+
+std::string SpoiledGroundMessage(const ResourceNode& node)
+{
+    return "Clear the " + OgLower(ResourceName(node.kind)) + " here first.";
+}
 
 const char* ToolName(ToolKind tool)
 {
@@ -206,16 +267,18 @@ Result Simulation::CheckOvergrowth(int nodeId, Item tool, Point player) const
     const std::string target = OgLower(ResourceName(node->kind));
     if (tool == Item::Count)
     {
-        if (!info->byHand) return OgBad(std::string("Clearing ") + target + " needs a " + ToolName(info->tool) + ".");
+        if (!info->byHand) return OgBad(std::string("Clearing ") + target + " needs " + OgArticle(ToolName(info->tool)) + ".");
     }
     else
     {
         const ToolKind used = ToolForItem(tool);
         if (used == ToolKind::Count || used != info->tool)
         {
-            if (info->tool == ToolKind::Count) return OgBad(std::string("Search the ") + target + " by hand.");
-            return OgBad(std::string("A ") + (used == ToolKind::Count ? ItemName(tool) : ToolName(used))
-                + " won't clear " + target + ". Use a " + ToolName(info->tool) + ".");
+            if (info->tool == ToolKind::Count)
+                return OgBad(std::string(node->kind == ResourceKind::SalvagePile ? "Search the " : "Clear the ") + target + " by hand.");
+            std::string with = OgArticle(used == ToolKind::Count ? ItemName(tool) : ToolName(used));
+            with[0] = static_cast<char>(with[0] - 'a' + 'A');
+            return OgBad(with + " won't clear " + target + ". Use " + OgArticle(ToolName(info->tool)) + ".");
         }
         if (Count(tool) == 0) return OgBad(std::string("Take your ") + ToolName(used) + " from storage first.");
         const ToolTier needed = OgRequiredTier(*info, *node);
@@ -365,13 +428,14 @@ void Simulation::CreepWeeds(int day)
         if (OgRoll(node.id ^ (day * 7919), 97) >= static_cast<int>(Overgrowth::CreepChance * 100.0)) continue;
         if (std::none_of(standing.begin(), standing.end(), [&](const ResourceNode* other)
             { return OgDistanceSquared(other->position, node.position) <= neighbour; })) continue;
-        // Tilled or built-on ground never regrows overgrowth.
-        const Footprint spot{node.position, {40.0, 40.0}, 0.0};
+        // Tilled or built-on ground never regrows overgrowth, nor does ground its spoil would reach.
+        const auto* info = FindOvergrowth(node.kind);
+        const double reach = info ? info->spoil : 40.0;
         bool covered = false;
         for (const auto& plot : state_.plots)
-            covered = covered || FootprintsOverlap(spot, {PlotCenter(plot), {GardenCellSize * 0.5, GardenCellSize * 0.5}, 0.0});
+            covered = covered || OgCircleTouches(node.position, reach, {PlotCenter(plot), {GardenCellSize * 0.5, GardenCellSize * 0.5}, 0.0});
         for (const auto& structure : state_.structures)
-            covered = covered || FootprintsOverlap(spot, StructureFootprint(state_, structure));
+            covered = covered || OgCircleTouches(node.position, reach, StructureFootprint(state_, structure));
         if (!covered) regrown.push_back(node.id);
     }
     if (regrown.empty()) return;

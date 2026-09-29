@@ -157,8 +157,8 @@ void ManorFootprintReservation()
     const Point west{door.x, door.y - 250.0};
     const auto snapped = sim.ResolvePlacement(Piece::Foundation, west, 0.0, 0);
     CHECK(!sim.CheckPlacement(snapped, west));
-    // Outside the manor, the same foundation is fine.
-    const Point lawn{-27000.0, -65000.0};
+    // Outside the manor, beyond the clear-out's littered ground, the same foundation is fine.
+    const Point lawn{-30500.0, -65000.0};
     CHECK(!PointInPolygon(manor->points, lawn));
     OK(sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, lawn, 0.0, 0), lawn));
     // The room itself stays furnishable, and the hearth is never a plan.
