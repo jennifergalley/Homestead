@@ -6,7 +6,7 @@
   "triangle_budget": 3000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/crop_carrot.py",
-  "source_sha256": "24dc8f08f50c2c22590606b9646f1a85d11830cc329d8f5613caa5e964f3b38a",
+  "source_sha256": "5a757d2255ee60e6c554160ee298472dcf8239b547c1e974db1181793ed6cd1c",
   "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
   "meshes": {
     "SM_CropCarrot_Sprout": {
@@ -46,7 +46,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Sprout.fbx",
-      "sha256": "34c4914b2c3285bfda04741db4900009d8e1715bce06facaf8997faf5f114048",
+      "sha256": "9dd65706b47b5645bc3f27e4fcde92f7b53386829083ffac9d1e855fe0f726f0",
       "preview": "preview_SM_CropCarrot_Sprout.png"
     },
     "SM_CropCarrot_Sprout_LOD1": {
@@ -86,7 +86,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Sprout_LOD1.fbx",
-      "sha256": "1f4d904e21a3b725a2ea387da966d9a94f78ed0557702daee8ee2847cfa88289",
+      "sha256": "b87108d8d0821cee39ee0c3ee694c266ade8ce5e75cb498b588ca207c808ff98",
       "preview": "preview_SM_CropCarrot_Sprout_LOD1.png"
     },
     "SM_CropCarrot_Sprout_LOD2": {
@@ -126,7 +126,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Sprout_LOD2.fbx",
-      "sha256": "86327d343bd0ee84eafbecb1831bd8fe75dd35b794407bed9b1c8c63fab19c0c",
+      "sha256": "1f0e11adc7e20749e24c9826dff8ed0c6f3887cc8b23380971e98537f9525a66",
       "preview": "preview_SM_CropCarrot_Sprout_LOD2.png"
     },
     "SM_CropCarrot_Young": {
@@ -166,7 +166,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Young.fbx",
-      "sha256": "8814489a556ec60a70e857df434b7a3ab5456accffa1774cdc512777544fdbe2",
+      "sha256": "bb98d3701bd708e550f0780c36bbb29d2c7ad9a8a2e3e1b35748672d2e576709",
       "preview": "preview_SM_CropCarrot_Young.png"
     },
     "SM_CropCarrot_Young_LOD1": {
@@ -206,7 +206,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Young_LOD1.fbx",
-      "sha256": "871fc61089c1d67cc9d4cb7035c848495e00a1a85860a456cef322a701c74fb9",
+      "sha256": "8aa6f1629a84dbb666b710b3cfc2b759e48338c7d6916ad57394a69d33fbc2fb",
       "preview": "preview_SM_CropCarrot_Young_LOD1.png"
     },
     "SM_CropCarrot_Young_LOD2": {
@@ -246,7 +246,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Young_LOD2.fbx",
-      "sha256": "9bab429197072d472c99dd19a15413056172189d58247521038993dd9e6b85c4",
+      "sha256": "77b9949cd36dc48c60f978006eecca2f75dac0fc6b1d4e6369fbfb024e8ffec3",
       "preview": "preview_SM_CropCarrot_Young_LOD2.png"
     },
     "SM_CropCarrot_Growing": {
@@ -286,30 +286,8 @@
         "detail_distance": 1.35
       },
       "fbx": "SM_CropCarrot_Growing.fbx",
-      "sha256": "25df44e0a90680b06e9f082d5aed29b4d8f45cbe09a055be945fdaa4c79da622",
-      "preview": "preview_SM_CropCarrot_Growing.png",
-      "beauty": {
-        "views": {
-          "hero": "beauty_SM_CropCarrot_Growing_hero.png",
-          "detail": "beauty_SM_CropCarrot_Growing_detail.png"
-        },
-        "device": "OPTIX",
-        "gpus": [
-          "NVIDIA GeForce RTX 5080"
-        ],
-        "samples": 96,
-        "resolution": [
-          3840,
-          2160
-        ],
-        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
-        "pose": [
-          0,
-          0,
-          0
-        ],
-        "ground": "lowest"
-      }
+      "sha256": "15ab4a12821f32b5f96d16c26ee6ccd504283a29129de1a29a01ddc534bd1d22",
+      "preview": "preview_SM_CropCarrot_Growing.png"
     },
     "SM_CropCarrot_Growing_LOD1": {
       "vertices": 360,
@@ -348,7 +326,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Growing_LOD1.fbx",
-      "sha256": "c8d55c7a5437aa2a2543ff8d7a47f576549ce6d9da2839710dac01decd1f01d6",
+      "sha256": "81bf6abf3869c996db4d871ce301254223f40f50847005bc5779af637240e04b",
       "preview": "preview_SM_CropCarrot_Growing_LOD1.png"
     },
     "SM_CropCarrot_Growing_LOD2": {
@@ -388,7 +366,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Growing_LOD2.fbx",
-      "sha256": "fd204bba08aa47e0db497c2fee64a3609c88d683c8a7209104323a5fffd8d7b4",
+      "sha256": "c27b1b88955098c87d4d4eb25e192ca9b5c6f7022c7eef4019710497ddedbab7",
       "preview": "preview_SM_CropCarrot_Growing_LOD2.png"
     },
     "SM_CropCarrot_Mature": {
@@ -428,30 +406,8 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Mature.fbx",
-      "sha256": "c0137a1b1f50c4539d24c9eb48e7fab8dba21694f276ec78b10d780557a0d848",
-      "preview": "preview_SM_CropCarrot_Mature.png",
-      "beauty": {
-        "views": {
-          "hero": "beauty_SM_CropCarrot_Mature_hero.png",
-          "detail": "beauty_SM_CropCarrot_Mature_detail.png"
-        },
-        "device": "OPTIX",
-        "gpus": [
-          "NVIDIA GeForce RTX 5080"
-        ],
-        "samples": 96,
-        "resolution": [
-          3840,
-          2160
-        ],
-        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
-        "pose": [
-          0,
-          0,
-          0
-        ],
-        "ground": "lowest"
-      }
+      "sha256": "eb680ef34420273d506f7ba8c81e5352087fe94c07d797858bdfd2fc5e9b8cae",
+      "preview": "preview_SM_CropCarrot_Mature.png"
     },
     "SM_CropCarrot_Mature_LOD1": {
       "vertices": 360,
@@ -490,7 +446,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Mature_LOD1.fbx",
-      "sha256": "99c372a146a0e6ad67eb599af49fc44d5f1c9a960bdf6e5197cb594fd9215996",
+      "sha256": "7c1b32579a721126010f62422dc6418f7f6470fa2843b7d72f3bcab61202d237",
       "preview": "preview_SM_CropCarrot_Mature_LOD1.png"
     },
     "SM_CropCarrot_Mature_LOD2": {
@@ -530,16 +486,16 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Mature_LOD2.fbx",
-      "sha256": "c78b957a58b19ece949eb0b50b8b65df6773f75a09bfba50ea1e2ef183caf235",
+      "sha256": "116eb23aaec38628f6c8bf79a5f4437b1475e4e42b3efb43816c1452da5162b5",
       "preview": "preview_SM_CropCarrot_Mature_LOD2.png"
     },
     "SM_CropCarrot_Ripe": {
-      "vertices": 2436,
-      "triangles": 2424,
+      "vertices": 2160,
+      "triangles": 1920,
       "size_cm": [
-        80.31,
-        83.02,
-        30.97
+        79.87,
+        83.49,
+        30.09
       ],
       "materials": [
         {
@@ -559,8 +515,8 @@
           0
         ],
         "focus": [
-          -0.005546092987060547,
-          -0.018564839363098145,
+          0.010539606213569641,
+          -0.00418395221233368,
           0.16
         ],
         "views": [
@@ -571,7 +527,7 @@
         "eye_distance": 2.5
       },
       "fbx": "SM_CropCarrot_Ripe.fbx",
-      "sha256": "ccc78435723b0a0993573850032ed22c37cc089ce72e772afaf0b4f1d46988f1",
+      "sha256": "3c62fe908b077e71bd81bc490d128e701edc754fb74c39c35275b0115cbfe208",
       "preview": "preview_SM_CropCarrot_Ripe.png",
       "beauty": {
         "views": {
@@ -582,7 +538,7 @@
         "gpus": [
           "NVIDIA GeForce RTX 5080"
         ],
-        "samples": 96,
+        "samples": 256,
         "resolution": [
           3840,
           2160
@@ -597,12 +553,12 @@
       }
     },
     "SM_CropCarrot_Ripe_LOD1": {
-      "vertices": 528,
-      "triangles": 672,
+      "vertices": 360,
+      "triangles": 384,
       "size_cm": [
-        81.56,
-        82.29,
-        28.8
+        80.98,
+        79.96,
+        28.09
       ],
       "materials": [
         {
@@ -622,8 +578,8 @@
           0
         ],
         "focus": [
-          -0.005546092987060547,
-          0.0014351606369018555,
+          0.010539606213569641,
+          0.01581604778766632,
           0.16
         ],
         "views": [
@@ -633,16 +589,16 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Ripe_LOD1.fbx",
-      "sha256": "137b9f74dc021c8626f8d0eaa1921b3f127fe5924a8f58122d2bd92e535964c0",
+      "sha256": "969e781e07f4e3c77ef6491a307c156e392bf8421ad9ec03d0dbd8664a372e43",
       "preview": "preview_SM_CropCarrot_Ripe_LOD1.png"
     },
     "SM_CropCarrot_Ripe_LOD2": {
-      "vertices": 264,
-      "triangles": 336,
+      "vertices": 120,
+      "triangles": 96,
       "size_cm": [
-        79.64,
-        83.19,
-        28.42
+        74.47,
+        79.56,
+        23.25
       ],
       "materials": [
         {
@@ -662,8 +618,8 @@
           0
         ],
         "focus": [
-          -0.005546092987060547,
-          0.0014351606369018555,
+          0.010539606213569641,
+          0.01581604778766632,
           0.16
         ],
         "views": [
@@ -673,7 +629,7 @@
         "detail_distance": 1.6
       },
       "fbx": "SM_CropCarrot_Ripe_LOD2.fbx",
-      "sha256": "87e91f3a552b0de79eeab656bd4883807b50eacf51a518a55a1f40f81cce9b59",
+      "sha256": "7751235c98b2f41d769eae107839c4574b60cbe8731f1f0f78372ba08ef8f278",
       "preview": "preview_SM_CropCarrot_Ripe_LOD2.png"
     },
     "SM_CropCarrot_Harvest": {
@@ -713,18 +669,58 @@
         "detail_distance": 0.6
       },
       "fbx": "SM_CropCarrot_Harvest.fbx",
-      "sha256": "b375985bceaa386da12b6b83becbe61ee3c8bab653fcf3dce624fa41b6f97b4d",
-      "preview": "preview_SM_CropCarrot_Harvest.png",
+      "sha256": "878869fe8fb46967cfa48983677467245424aad0039c169e644472c7159a2538",
+      "preview": "preview_SM_CropCarrot_Harvest.png"
+    },
+    "SM_CropCarrot_Produce": {
+      "vertices": 179,
+      "triangles": 324,
+      "size_cm": [
+        4.56,
+        4.19,
+        17.9
+      ],
+      "materials": [
+        {
+          "name": "M_CropCarrotProduce",
+          "textures": {
+            "basecolor": "T_CropCarrot_basecolor.png",
+            "normal": "T_CropCarrot_normal.png",
+            "roughness": "T_CropCarrot_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.6
+      },
+      "fbx": "SM_CropCarrot_Produce.fbx",
+      "sha256": "2c770603c5ce21b1eb081cdd337d7770682072b256ca96aa111e0a7761958f1f",
+      "preview": "preview_SM_CropCarrot_Produce.png",
       "beauty": {
         "views": {
-          "hero": "beauty_SM_CropCarrot_Harvest_hero.png",
-          "detail": "beauty_SM_CropCarrot_Harvest_detail.png"
+          "hero": "beauty_SM_CropCarrot_Produce_hero.png",
+          "detail": "beauty_SM_CropCarrot_Produce_detail.png"
         },
         "device": "OPTIX",
         "gpus": [
           "NVIDIA GeForce RTX 5080"
         ],
-        "samples": 96,
+        "samples": 256,
         "resolution": [
           3840,
           2160
@@ -750,6 +746,355 @@
   },
   "material_notes": "One material M_CropCarrot: T_CropCarrot_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency, B AO). Two-sided masked foliage; carrot root and soil tiles are opaque in the same atlas.",
   "harvest_mesh": "SM_CropCarrot_Harvest pivot is the grip point at the leaf base/top of root; carrot hangs down -Z.",
+  "produce": {
+    "mesh": "SM_CropCarrot_Produce",
+    "anchors": {
+      "Young": [
+        [
+          -0.2988,
+          -0.2948,
+          0.0439,
+          31.9,
+          1.028
+        ],
+        [
+          -0.1012,
+          -0.3071,
+          0.044,
+          114.6,
+          1.015
+        ],
+        [
+          0.0933,
+          -0.3047,
+          0.0445,
+          349.7,
+          0.867
+        ],
+        [
+          0.3016,
+          -0.307,
+          0.0458,
+          43.9,
+          1.058
+        ],
+        [
+          -0.3027,
+          0.0069,
+          0.0468,
+          141.7,
+          1.055
+        ],
+        [
+          -0.0987,
+          -0.0037,
+          0.0468,
+          108.6,
+          1.016
+        ],
+        [
+          0.0951,
+          0.0014,
+          0.0434,
+          93.9,
+          0.863
+        ],
+        [
+          0.2967,
+          -0.0067,
+          0.0443,
+          262.7,
+          1.002
+        ],
+        [
+          -0.2968,
+          0.3086,
+          0.0443,
+          214.7,
+          0.997
+        ],
+        [
+          -0.1007,
+          0.2974,
+          0.0432,
+          180.9,
+          0.972
+        ],
+        [
+          0.0926,
+          0.3075,
+          0.0461,
+          189.5,
+          1.059
+        ],
+        [
+          0.3019,
+          0.2931,
+          0.0442,
+          328.4,
+          0.919
+        ]
+      ],
+      "Growing": [
+        [
+          -0.2975,
+          -0.3047,
+          0.0439,
+          31.9,
+          1.028
+        ],
+        [
+          -0.0999,
+          -0.317,
+          0.044,
+          114.6,
+          1.015
+        ],
+        [
+          0.0946,
+          -0.3147,
+          0.0445,
+          349.7,
+          0.867
+        ],
+        [
+          0.3029,
+          -0.3169,
+          0.0458,
+          43.9,
+          1.058
+        ],
+        [
+          -0.3014,
+          -0.003,
+          0.0468,
+          141.7,
+          1.055
+        ],
+        [
+          -0.0973,
+          -0.0136,
+          0.0468,
+          108.6,
+          1.016
+        ],
+        [
+          0.0965,
+          -0.0085,
+          0.0434,
+          93.9,
+          0.863
+        ],
+        [
+          0.298,
+          -0.0166,
+          0.0443,
+          262.7,
+          1.002
+        ],
+        [
+          -0.2955,
+          0.2987,
+          0.0443,
+          214.7,
+          0.997
+        ],
+        [
+          -0.0993,
+          0.2875,
+          0.0432,
+          180.9,
+          0.972
+        ],
+        [
+          0.0939,
+          0.2976,
+          0.0461,
+          189.5,
+          1.059
+        ],
+        [
+          0.3032,
+          0.2832,
+          0.0442,
+          328.4,
+          0.919
+        ]
+      ],
+      "Mature": [
+        [
+          -0.3077,
+          -0.2953,
+          0.0439,
+          31.9,
+          1.028
+        ],
+        [
+          -0.1102,
+          -0.3076,
+          0.044,
+          114.6,
+          1.015
+        ],
+        [
+          0.0843,
+          -0.3052,
+          0.0445,
+          349.7,
+          0.867
+        ],
+        [
+          0.2926,
+          -0.3075,
+          0.0458,
+          43.9,
+          1.058
+        ],
+        [
+          -0.3117,
+          0.0064,
+          0.0468,
+          141.7,
+          1.055
+        ],
+        [
+          -0.1076,
+          -0.0042,
+          0.0468,
+          108.6,
+          1.016
+        ],
+        [
+          0.0862,
+          0.0009,
+          0.0434,
+          93.9,
+          0.863
+        ],
+        [
+          0.2878,
+          -0.0072,
+          0.0443,
+          262.7,
+          1.002
+        ],
+        [
+          -0.3057,
+          0.3081,
+          0.0443,
+          214.7,
+          0.997
+        ],
+        [
+          -0.1096,
+          0.2969,
+          0.0432,
+          180.9,
+          0.972
+        ],
+        [
+          0.0836,
+          0.307,
+          0.0461,
+          189.5,
+          1.059
+        ],
+        [
+          0.2929,
+          0.2926,
+          0.0442,
+          328.4,
+          0.919
+        ]
+      ],
+      "Ripe": [
+        [
+          -0.2881,
+          -0.2805,
+          0.0439,
+          31.9,
+          1.028
+        ],
+        [
+          -0.0906,
+          -0.2929,
+          0.044,
+          114.6,
+          1.015
+        ],
+        [
+          0.104,
+          -0.2905,
+          0.0445,
+          349.7,
+          0.867
+        ],
+        [
+          0.3123,
+          -0.2927,
+          0.0458,
+          43.9,
+          1.058
+        ],
+        [
+          -0.292,
+          0.0212,
+          0.0468,
+          141.7,
+          1.055
+        ],
+        [
+          -0.088,
+          0.0106,
+          0.0468,
+          108.6,
+          1.016
+        ],
+        [
+          0.1058,
+          0.0156,
+          0.0434,
+          93.9,
+          0.863
+        ],
+        [
+          0.3074,
+          0.0076,
+          0.0443,
+          262.7,
+          1.002
+        ],
+        [
+          -0.2861,
+          0.3229,
+          0.0443,
+          214.7,
+          0.997
+        ],
+        [
+          -0.09,
+          0.3116,
+          0.0432,
+          180.9,
+          0.972
+        ],
+        [
+          0.1033,
+          0.3218,
+          0.0461,
+          189.5,
+          1.059
+        ],
+        [
+          0.3126,
+          0.3074,
+          0.0442,
+          328.4,
+          0.919
+        ]
+      ]
+    }
+  },
   "textures": {
     "T_CropCarrot_basecolor.png": "83ec1263e24ea2154270e5c407a5d38553f47bf100c2878a5c5d059e64e2b44a",
     "T_CropCarrot_normal.png": "7596d97cd11cac565176254200c78f398439b503f011404e1b9f711771350170",

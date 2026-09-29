@@ -51,11 +51,19 @@ A sown plot SHALL show a plant for its crop that changes through Sprout, Young, 
 - **THEN** the plant is visibly larger each morning, and the ripe plant shows its produce
 
 ### Requirement: Ripe crops are easy to spot
-A ripe plot SHALL glint softly, be readable from across the garden, and read "ready to harvest" with a Harvest action when focused.
+A growing crop SHALL show its produce (roots pushing out of the soil, heads, pods or fruit) growing and colouring up from pale green as it ripens. A ripe plot SHALL read as ripe at the gameplay camera distance, in rain and at dusk, by the produce's full size and colour alone, with no glint or other effect. When focused, it SHALL read "ready to harvest" with a Harvest action.
+
+#### Scenario: A ripening plot
+- **WHEN** a strawberry plot is three-quarters grown
+- **THEN** it shows small, pale berries that are visibly larger and redder each morning
 
 #### Scenario: A ripe plot
 - **WHEN** a plot is ripe
-- **THEN** it glints, shows its produce, and focusing it offers Harvest
+- **THEN** its produce is full size and full colour, and focusing it offers Harvest
+
+#### Scenario: A picked plant
+- **WHEN** she picks a ripe broad bean plot
+- **THEN** the big pods are gone and small green ones grow back over the next days
 
 ### Requirement: Harvesting has its own animation
 Harvesting SHALL play a kneel-and-pull animation for root crops and cabbage, and a pick animation for beans and berries. The produce SHALL show briefly in her hand and then be hidden.

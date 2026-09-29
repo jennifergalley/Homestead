@@ -216,6 +216,11 @@ public:
     virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
     // Console playtest aid: skip the clock ahead to the next morning (default 8:00) so there's light to see by.
     UFUNCTION(Exec) void HomesteadMorning(float Hour = 8.0f);
+    // Console playtest aid: let whole days pass so crops actually grow (HomesteadMorning only moves
+    // the clock). Tend 1 waters and weeds every plot as the days pass; 0 leaves them to dry out.
+    UFUNCTION(Exec) void HomesteadGrowCrops(float Days = 1.0f, int32 Tend = 1);
+    // Console playtest aid for screenshots: set every planted plot to this growth (0-1).
+    UFUNCTION(Exec) void HomesteadCropGrowth(float Growth = 1.0f);
     // Console playtest aid: add items to her pack by name (spaces optional, e.g. HomesteadGive Berries 6).
     UFUNCTION(Exec) void HomesteadGive(const FString& ItemName, int32 Amount = 5);
     // Console playtest aid (woodland games): raise the manor's standing room around her, its

@@ -94,19 +94,32 @@ The Sown stage keeps the existing soil mound. `AHomesteadWorld` swaps the plot's
 the stage changes, so there is no per-frame cost. Legacy Roots use the carrot meshes and legacy
 Berries use the strawberry meshes.
 
-## Ripeness indicators
+## Visible produce and ripeness (Jenny's playtest: "like Coral Island")
 
-A ripe plot:
+The stage meshes carry foliage only. Each crop's produce is a separate Blender mesh,
+`SM_Crop<Name>_Produce` (one turnip, carrot crown, potato cluster, cabbage head, bean pod or
+strawberry, exaggerated about 1.4x so it reads at the 7 m camera). The recipe records where it sits
+on each stage's plants (`report.json` `"produce"` anchors); `Scripts/Blender/crop_produce_anchors.py`
+turns them into the generated `HomesteadCropProduceAnchors.inc`.
 
-- shows its produce on the Ripe mesh (turnip and carrot shoulders, the potato haulm yellowing
-  with tubers breaking the soil, the cabbage head, bean pods, red strawberries);
-- adds a slow, soft glint above the plant: a small unlit additive sprite that pulses, seen from
-  across the garden but not bright enough to look magical;
-- when focused, reads "<Crop>: ready to harvest" with the action "Harvest".
+`AHomesteadWorld::AddCropProduce` draws them per plot on one instanced mesh:
 
-A plot that needs water keeps the dry bed material. The focus line and the wet material share
-the 0.4 threshold, so they always agree.
+- From a per-crop `Appear` growth (0.30 for roots and cabbage; 0.50 beans, 0.55 strawberries,
+  just below where a picked plant restarts) produce grows continuously with `plot.growth`: it
+  swells from a small size to full (pods lengthen faster than they fatten), and roots rise out of
+  the soil (they start several centimetres down).
+- Its colour goes from a pale unripe tint to the crop's full colour. Each instance carries its
+  ripeness in custom data 0; `M_CropProduce` (`homestead_agent/crop_produce.py`) lerps the
+  baked, ripe-coloured albedo from a per-crop `UnripeTint`. Strawberries stay white-green longest.
+- Ripe (growth 1) is full size and full colour. That is the only ripeness signal on the plot:
+  there is no glint or other effect (Jenny dropped the glint as "weird"). Picked beans and
+  strawberries visibly lose their fruit, then grow it back.
+- The plot's visual signature steps growth in 24ths, so produce grows in small steps without
+  per-frame work.
 
+When focused, a ripe plot reads "<Crop>: ready to harvest" with the action "Harvest". A plot that
+needs water keeps the dry bed material; the focus line and the wet material share the 0.4
+threshold, so they always agree.
 ## Harvest animation
 
 - **Roots and cabbage (Pull and Cut).** She kneels and reaches down with both hands. She grips,
