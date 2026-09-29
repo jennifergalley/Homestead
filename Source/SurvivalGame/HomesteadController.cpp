@@ -405,7 +405,9 @@ void AHomesteadController::BeginPlay()
     {
         HomesteadEstateTerrain::Deactivate();
     }
-    if (!SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending)
+    // A smoke route on the Estate (-HomesteadEstateSmoke) starts a real new estate game, as a player does.
+    const bool EstateSmoke = SmokeTest && bEstateMap;
+    if ((!SmokeTest || EstateSmoke) && !VisualPlaytest && !bSaveRoutingTestPending)
     {
         const FGuid Seed = FGuid::NewGuid();
         const auto Result = bEstateMap
@@ -431,7 +433,7 @@ void AHomesteadController::BeginPlay()
     const bool Loaded = !SmokeTest && !VisualPlaytest && !bSaveRoutingTestPending && LoadLatest();
     if (!Loaded) GrantPlaytestKit(true);
     bHasPlayableSession = !bTestResetRequired;
-    if (!Loaded && bEstateMap && !bTestResetRequired && !SmokeTest && !VisualPlaytest) BeginNewGameSetup();
+    if (!Loaded && bEstateMap && !bTestResetRequired && (!SmokeTest || EstateSmoke) && !VisualPlaytest) BeginNewGameSetup();
     else if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
     ShowHotbar();
     if (!StartupProbeDirectory.IsEmpty() && !Loaded) { FinishStartupProbe(TEXT("The isolated prepared save did not load.")); return; }
