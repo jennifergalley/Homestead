@@ -11,5 +11,5 @@
 ## 2. Verification
 
 - [x] 2.1 PIE 1080p: a notice doesn't move the page (pixel diff of tabs, recipe row and details panel before versus during: 0 changed pixels); the latest replaces; the card moves under the tabs when the focused equipment slot is under it; a held craft's white fill stays visible and "Crafted a worn hoe." shows below it
-- [ ] 2.2 4K: the HUD was checked in standalone 4K, but the book card wasn't captured at 4K (standalone key injection couldn't raise a notice with the book open). The card scales with the book's own ScaleBox.
-- [x] 2.3 A long error: rust ink and frame. An unbroken 100-character word was clipped at first; per-character wrapping was added and compiles, but hasn't been re-captured.
+- [x] 2.2 Standalone 4K: with the book open, holding Enter on the hoe recipe showed the white fill, then "Crafted a worn hoe." bottom centre; the tabs and recipe rows didn't change (0 changed pixels, before versus during)
+- [x] 2.3 A long error: rust ink and frame; an unbroken 100-character word now wraps inside the card at 4K (per-character wrapping), with no clipping
