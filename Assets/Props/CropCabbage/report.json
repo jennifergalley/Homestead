@@ -1,0 +1,667 @@
+{
+  "schema": 1,
+  "name": "CropCabbage",
+  "description": "One 1 m garden plot of Early York/Cornish spring cabbage in five stages: seedling, young, open rosette, hearting mature plant and ripe pale tight head.",
+  "collision": "none",
+  "triangle_budget": 4000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/crop_cabbage.py",
+  "source_sha256": "b71c2bacf70ffdc6b211198f0ed370ed9e7465774d2dac403c5b71f537c70f04",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CropCabbage_Sprout": {
+      "vertices": 135,
+      "triangles": 144,
+      "size_cm": [
+        46.66,
+        64.64,
+        2.84
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Sprout.fbx",
+      "sha256": "7ce45fc999bfb8e6876652403cc5e791bf353764879542856777d6237f6fa57c",
+      "preview": "preview_SM_CropCabbage_Sprout.png"
+    },
+    "SM_CropCabbage_Sprout_LOD1": {
+      "vertices": 54,
+      "triangles": 36,
+      "size_cm": [
+        46.21,
+        64.9,
+        2.96
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Sprout_LOD1.fbx",
+      "sha256": "305a4a718612c45477efad43ae79112207c592cbc7580fec8477df720db4924c",
+      "preview": "preview_SM_CropCabbage_Sprout_LOD1.png"
+    },
+    "SM_CropCabbage_Sprout_LOD2": {
+      "vertices": 36,
+      "triangles": 18,
+      "size_cm": [
+        46.11,
+        64.99,
+        2.89
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Sprout_LOD2.fbx",
+      "sha256": "769fcf1bcfc55a31d437a633ac52cd7959309be1df93cddfe4c21638ab0395d1",
+      "preview": "preview_SM_CropCabbage_Sprout_LOD2.png"
+    },
+    "SM_CropCabbage_Young": {
+      "vertices": 270,
+      "triangles": 288,
+      "size_cm": [
+        58.14,
+        73.46,
+        10.44
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Young.fbx",
+      "sha256": "515837422544ab0479c512b6494c8f871248a135059414c0d15e3a2231a300e7",
+      "preview": "preview_SM_CropCabbage_Young.png"
+    },
+    "SM_CropCabbage_Young_LOD1": {
+      "vertices": 54,
+      "triangles": 36,
+      "size_cm": [
+        55.99,
+        75.54,
+        9.52
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Young_LOD1.fbx",
+      "sha256": "0319076c277622575ed3d32315827a7d0347d5149156f7a154bd4f04682b665b",
+      "preview": "preview_SM_CropCabbage_Young_LOD1.png"
+    },
+    "SM_CropCabbage_Young_LOD2": {
+      "vertices": 36,
+      "triangles": 18,
+      "size_cm": [
+        53.29,
+        74.23,
+        9.69
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Young_LOD2.fbx",
+      "sha256": "15b08e5ed6febc49e858a70f875092b8cc1aa3e82d5d39f21df725d6ffcdf4ec",
+      "preview": "preview_SM_CropCabbage_Young_LOD2.png"
+    },
+    "SM_CropCabbage_Growing": {
+      "vertices": 2061,
+      "triangles": 3216,
+      "size_cm": [
+        68.41,
+        86.42,
+        15.01
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.8,
+        "focus": [
+          0.0,
+          0.0,
+          0.16
+        ]
+      },
+      "fbx": "SM_CropCabbage_Growing.fbx",
+      "sha256": "c7d89df61bbf1e1a8f61745723f52f627b660941d474d443a20838b5d0d26cf1",
+      "preview": "preview_SM_CropCabbage_Growing.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropCabbage_Growing_hero.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CropCabbage_Growing_LOD1": {
+      "vertices": 693,
+      "triangles": 984,
+      "size_cm": [
+        70.32,
+        85.33,
+        15.03
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Growing_LOD1.fbx",
+      "sha256": "7a9f1929cfa6724904c89564cb5274aa01e19eacf74992e8233745684de123aa",
+      "preview": "preview_SM_CropCabbage_Growing_LOD1.png"
+    },
+    "SM_CropCabbage_Growing_LOD2": {
+      "vertices": 210,
+      "triangles": 372,
+      "size_cm": [
+        72.78,
+        92.75,
+        12.91
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Growing_LOD2.fbx",
+      "sha256": "90f48ec2e0351c6d9a8dc396d85f5d379c3346e6c6ca1cf1b95bfe8cc2ea7b83",
+      "preview": "preview_SM_CropCabbage_Growing_LOD2.png"
+    },
+    "SM_CropCabbage_Mature": {
+      "vertices": 2439,
+      "triangles": 3744,
+      "size_cm": [
+        79.01,
+        93.25,
+        18.66
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Mature.fbx",
+      "sha256": "68502bcab3c2fdffe936955db952b6ad763631337bb16b3e48bb3e065d138f9b",
+      "preview": "preview_SM_CropCabbage_Mature.png"
+    },
+    "SM_CropCabbage_Mature_LOD1": {
+      "vertices": 804,
+      "triangles": 1104,
+      "size_cm": [
+        78.54,
+        100.63,
+        17.04
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Mature_LOD1.fbx",
+      "sha256": "bc3d30b73b2d4a83f9895921900f25b9bf53b52f1b8a319d288f49b15a4082ee",
+      "preview": "preview_SM_CropCabbage_Mature_LOD1.png"
+    },
+    "SM_CropCabbage_Mature_LOD2": {
+      "vertices": 210,
+      "triangles": 372,
+      "size_cm": [
+        87.82,
+        107.32,
+        19.4
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Mature_LOD2.fbx",
+      "sha256": "45455d653db1402514794fa868a8f98d69bd307b9184293b96bae95d7cde17b2",
+      "preview": "preview_SM_CropCabbage_Mature_LOD2.png"
+    },
+    "SM_CropCabbage_Ripe": {
+      "vertices": 2589,
+      "triangles": 3912,
+      "size_cm": [
+        83.64,
+        105.52,
+        23.27
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0,
+        "focus": [
+          0.0,
+          0.0,
+          0.18
+        ]
+      },
+      "fbx": "SM_CropCabbage_Ripe.fbx",
+      "sha256": "84fb5399b09c7bd1657965cf2776b4877d4f1823da2c53e014a5ef6c7ebc6c3c",
+      "preview": "preview_SM_CropCabbage_Ripe.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropCabbage_Ripe_hero.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CropCabbage_Ripe_LOD1": {
+      "vertices": 822,
+      "triangles": 1116,
+      "size_cm": [
+        83.11,
+        101.77,
+        21.59
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Ripe_LOD1.fbx",
+      "sha256": "412323d88594f37b7e298c71d736127163b744b7a4079d7de113e324794f16dc",
+      "preview": "preview_SM_CropCabbage_Ripe_LOD1.png"
+    },
+    "SM_CropCabbage_Ripe_LOD2": {
+      "vertices": 210,
+      "triangles": 372,
+      "size_cm": [
+        86.3,
+        103.09,
+        24.67
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_CropCabbage_Ripe_LOD2.fbx",
+      "sha256": "b4ce4963c8c16a504f5cd4c05095ec767eb81af9f831b5122368a0894bdd430c",
+      "preview": "preview_SM_CropCabbage_Ripe_LOD2.png"
+    },
+    "SM_CropCabbage_Harvest": {
+      "vertices": 659,
+      "triangles": 1094,
+      "size_cm": [
+        18.57,
+        19.14,
+        16.4
+      ],
+      "materials": [
+        {
+          "name": "M_CropCabbage",
+          "textures": {
+            "basecolor": "T_CropCabbage_basecolor.png",
+            "normal": "T_CropCabbage_normal.png",
+            "roughness": "T_CropCabbage_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 1.5,
+        "focus": [
+          0.0,
+          0.0,
+          -0.09
+        ]
+      },
+      "fbx": "SM_CropCabbage_Harvest.fbx",
+      "sha256": "05b61e148e096fc027bd00edafec562d64113289d02a9c4548e94ef7d5bc6dfa",
+      "preview": "preview_SM_CropCabbage_Harvest.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropCabbage_Harvest_hero.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "plot": "1 m square, pivot bottom-centre; cabbage crowns stand on tilled-bed ridge tops at z\u22480.045 m.",
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above plot ground / stage height",
+    "G": "per-plant random phase",
+    "B": "outer-leaf flutter, 0 on tight heads",
+    "A": "1"
+  },
+  "material_notes": "One material M_CropCabbage: 2K alpha-masked foliage atlas with waxy glaucous leaves, slug damage/yellowed margins and opaque wrapped-head tiles.",
+  "textures": {
+    "T_CropCabbage_basecolor.png": "7de70346797fbc7c6fb5f4bce7dbae27f0e038b2a8ddbdfc8850df969f792372",
+    "T_CropCabbage_normal.png": "2734676714d1272802abf3f85181dd5df8092d0e6335c2077c9d520a457dad09",
+    "T_CropCabbage_roughness.png": "8a5945befbc5fc9032b8b42e4d6d865118f2182b965562c4bc548d7801b86111"
+  }
+}
