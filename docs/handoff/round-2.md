@@ -260,10 +260,16 @@ claims them through this page before using them (the registry starts at 581000+)
 Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save,
 then add this to the core-loop package acceptance.
 
-**Pail state core-loop requirement:** water is no longer an inventory `Item`; the pail holds 0..6
-units with an oil-lamp-style progress bar. Props owns core state and migration of existing v12/v13 water
-stock; Menu owns the UI. Prove capacity, save migration and packaged lake fill before calling the loop
-accepted.
+**Pail state core-loop requirement:** the first safe slice keeps positional v12/v13 `Item::Water`
+stock internally (pack, chest and drops; max 1200; `TakesSpace=false`) rather than silently migrating
+or discarding it. `FillWater` tops pack Water to six and `Water(plot)` spends one; pails are currently
+fungible and may be multiple. For an ordinary one-pail case, hide the inventory Water tile and show
+`PailCharge` 0..6 with oil-lamp-style hotbar progress. Excess above six and Water in chests/world stays
+accessible and visible as legacy reserve; pail transfer/drop preserves charge atomically.
+
+Props owns core compatibility and Menu the UI. Cover v12/v13 plus 0/1/6/7/1200, multiple containers,
+no pail and round-trip cases. Stable per-pail IDs/tagged migration is a separate large follow-up.
+Prove packaged lake fill before calling the loop accepted.
 
 **Turnip planting regression:** after the first turnip seed, remaining planting can fail. Integration
 reproduces it from a copied packaged save and records exact seed stock, focus, plot, moisture, season,
