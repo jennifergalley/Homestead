@@ -27,6 +27,31 @@ session's **mailbox address**; session IDs are for `send_session_message`.
 
 Lane names in the app may lag behind this table while sessions rename themselves.
 
+## Lean roster transition (pending archive confirmation)
+
+Jenny's requested long-lived child roster is **Documentation, Integration, Architecture, Menu/UI,
+Water and Props only**. Future feature work goes to these retained feature sessions, subject to the
+three-hands-on-implementer cap (including Integration) and the two-Unreal-process cap.
+
+| Current session / role | Planned disposition | Handoff condition |
+| --- | --- | --- |
+| Documentation Agent, Integration Agent, Architecture Agent | **Retain** | Long-lived team roles |
+| UI Agent / temporary Menu Agent (`5cf73757`) | **Retain** | Menu/UI feature owner |
+| Weather Agent / Water (`89914e30`) | **Retain** | Water and terrain owner |
+| Props Agent | **Retain role; session TBD** | Receives props and character asset recipes |
+| Performance Agent (`a34483d7`) | Retire | After safe handoff/merge |
+| Build Speed Agent (`6e131c6a`) | Retire | After safe handoff/merge |
+| Seasons/Mushroom Agent (`fd682909`) | Retire | After safe handoff/merge |
+| Calendar Agent (`f8b77021`) | Retire | After its post-4 PM `a3c7e04d` handoff/merge |
+
+**No archive is complete until the archive tool confirms it.** Keep each retiring session's code,
+commit and handoff links in this page until then; remove stale wake-ups and ownership pointers only
+after confirmation.
+
+Gait and Planning are not orchestrator children. Jenny may archive Gait once it finishes the current
+run/hair work and hands sprint to Menu and character asset recipes to Props. Planning remains outside
+this child-roster decision.
+
 ## Model, reasoning and implementer slots
 
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
