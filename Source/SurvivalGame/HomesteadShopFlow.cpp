@@ -221,11 +221,15 @@ FString AHomesteadController::StoreFocusActions() const
     if (Focus == EFocus::StoreDoor)
     {
         const FString Opens = ShopText(Homestead::FormatHour(Shop->openHour));
-        const FString Hours = ShopWait::Duration(Homestead::HoursUntilOpen(*Shop, State().hour));
+        const double Wait = Homestead::HoursUntilOpen(*Shop, State().hour);
+        // Past midnight is a night out in the street; say so before she agrees.
+        const bool bOvernight = FMath::Fmod(State().hour, 24.0) + Wait >= 24.0;
+        const FString Hours = ShopWait::Duration(Wait) + (bOvernight ? TEXT(", overnight,") : TEXT(""));
         if (IsShopWaitArmed())
             return FString::Printf(TEXT("Wait %s until %s?   %s Wait   %s Cancel"), *Hours, *Opens, *A,
                 bGamepad ? TEXT("[B]") : TEXT("[Esc]"));
-        return ShopText(Homestead::ClosedMessage(*Shop)) + TEXT("   ") + A + TEXT(" Wait until ") + Opens + TEXT(" (") + Hours + TEXT(")");
+        return ShopText(Homestead::ClosedMessage(*Shop)) + TEXT("   ") + A + TEXT(" Wait until ") + Opens
+            + TEXT(" (") + ShopWait::Duration(Wait) + TEXT(")");
     }
     return A + FString(TEXT(" Talk to ")) + AHomesteadShopkeeper::DisplayName();
 }
