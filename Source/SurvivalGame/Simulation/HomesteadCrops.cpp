@@ -7,7 +7,7 @@ namespace Homestead
 {
 namespace
 {
-template <typename T> bool ValidEnum(T value, T count)
+template <typename T> bool CropValidEnum(T value, T count)
 {
     return static_cast<int>(value) >= 0 && static_cast<int>(value) < static_cast<int>(count);
 }
@@ -37,22 +37,22 @@ const CropInfo CropTable[] = {
 static_assert(sizeof(CropTable) / sizeof(CropTable[0]) == static_cast<int>(CropKind::Count),
     "Every CropKind needs exactly one CropTable row.");
 
-bool TableInOrder()
+bool CropTableInOrder()
 {
     for (int i = 0; i < static_cast<int>(CropKind::Count); ++i)
         if (static_cast<int>(CropTable[i].kind) != i) return false;
     return true;
 }
 
-const CropInfo UnknownCrop{CropKind::Count, "Unknown crop", "unknown crop"};
+const CropInfo UnknownCropInfo{CropKind::Count, "Unknown crop", "unknown crop"};
 
-int DaysFor(double hours) { return hours <= 0.0 ? 0 : std::max(1, static_cast<int>(std::ceil(hours / 24.0 - 1e-9))); }
+int CropDaysFor(double hours) { return hours <= 0.0 ? 0 : std::max(1, static_cast<int>(std::ceil(hours / 24.0 - 1e-9))); }
 }
 
 const CropInfo& GetCropInfo(CropKind kind)
 {
-    static const bool ordered = TableInOrder();
-    if (!ordered || !ValidEnum(kind, CropKind::Count)) return UnknownCrop;
+    static const bool ordered = CropTableInOrder();
+    if (!ordered || !CropValidEnum(kind, CropKind::Count)) return UnknownCropInfo;
     return CropTable[static_cast<int>(kind)];
 }
 
@@ -63,8 +63,8 @@ const CropInfo* CropForSeed(Item seed)
     return nullptr;
 }
 
-int CropDays(CropKind kind) { return DaysFor(GetCropInfo(kind).growHours); }
-int CropRegrowDays(CropKind kind) { return DaysFor(GetCropInfo(kind).regrowHours); }
+int CropDays(CropKind kind) { return CropDaysFor(GetCropInfo(kind).growHours); }
+int CropRegrowDays(CropKind kind) { return CropDaysFor(GetCropInfo(kind).regrowHours); }
 
 double MoistureGrowthFactor(double moisture)
 {
@@ -98,7 +98,7 @@ CropStage StageOf(const Plot& plot)
 const char* StageName(CropStage stage)
 {
     static const char* names[] = {"Bare", "Sown", "Sprout", "Young", "Growing", "Mature", "Ripe"};
-    return ValidEnum(stage, CropStage::Count) ? names[static_cast<int>(stage)] : "Bare";
+    return CropValidEnum(stage, CropStage::Count) ? names[static_cast<int>(stage)] : "Bare";
 }
 
 int CropDay(const Plot& plot)
