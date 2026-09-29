@@ -8,7 +8,10 @@ editor, for example through the MCP ``run_python`` tool:
     gl.build_retargeter()
     gl.retarget(gl.CLIPS)
     print(gl.measure('/Game/Characters/Heroine_MH/Animations/GASP/AN_HeroineMH_GASP_Sprint'))
+    print(gl.heel_report('/Game/Characters/Heroine_MH/Animations/GASP/AN_HeroineMH_GASP_Run'))
 """
+import math
+
 import unreal
 
 SOURCE_RIG = '/Game/Characters/UEFN_Mannequin/Rigs/IK_UEFN_Mannequin'
@@ -107,6 +110,8 @@ def retarget(clips=None):
         # GASP foley notifies reference sample-only audio and blueprints; the game plays its own steps.
         unreal.AnimationLibrary.remove_all_animation_notify_tracks(anim)
         straighten_root(anim)
+        if any(word in name for word in HEEL_EASE_CLIPS):
+            ease_heel_kick(anim)
         add_footstep_notifies(anim)
         # In place: the capsule drives movement, so lock the root and discard sequence root motion.
         unreal.AnimationLibrary.set_root_motion_enabled(anim, True)
@@ -212,7 +217,162 @@ def add_footstep_notifies(anim):
     return contacts
 
 
-LEGACY_MESH =  '/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave'
+# --- Heel kick (Jenny's playtest: "her feet kick slightly too high up, near her butt") -----------
+# GASP's neutral run folds the trailing knee to about 120 degrees in swing, so the heel curls up
+# toward the glutes. ease_heel_kick opens the knee a little, only where it is folded past
+# HEEL_EASE_START_DEG: stance, contact and toe-off never fold that far, so foot placement, stride,
+# cadence, the pelvis and the loop seam are untouched. The thigh is kept, so the knee drives
+# forward exactly as before and only the lower leg swings a little lower. The foot keeps its
+# local pose on the calf.
+HEEL_EASE_CLIPS = ('Run', 'Sprint')
+HEEL_EASE_START_DEG = 70.0   # knee flexion (0 = straight) below which nothing changes
+HEEL_EASE_KEEP = 0.80        # share of the flexion beyond the start that is kept at the peak
+HEEL_EASE_SOFT_DEG = 10.0    # blend width, so the easing fades in with no kink at the start
+HEEL_EASE_TAG = 'HomesteadHeelEase'
+
+
+def _q(t):
+    return (t.w, t.x, t.y, t.z)
+
+
+def _qmul(a, b):
+    aw, ax, ay, az = a
+    bw, bx, by, bz = b
+    return (aw * bw - ax * bx - ay * by - az * bz, aw * bx + ax * bw + ay * bz - az * by,
+            aw * by - ax * bz + ay * bw + az * bx, aw * bz + ax * by - ay * bx + az * bw)
+
+
+def _qinv(q):
+    return (q[0], -q[1], -q[2], -q[3])
+
+
+def _qrot(q, v):
+    w, x, y, z = _qmul(_qmul(q, (0.0, v[0], v[1], v[2])), _qinv(q))
+    return (x, y, z)
+
+
+def _qaxis(axis, angle):
+    s = math.sin(angle / 2)
+    return (math.cos(angle / 2), axis[0] * s, axis[1] * s, axis[2] * s)
+
+
+def _sub(a, b):
+    return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
+
+
+def _cross(a, b):
+    return (a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])
+
+
+def _norm(a):
+    length = sum(c * c for c in a) ** 0.5
+    return tuple(c / length for c in a) if length > 1e-9 else (0.0, 0.0, 0.0)
+
+
+def _angle(a, b):
+    a, b = _norm(a), _norm(b)
+    return math.degrees(math.acos(max(-1.0, min(1.0, sum(x * y for x, y in zip(a, b))))))
+
+
+def _chain(anim, frame, leaf):
+    """Component-space (rotation, position) of every bone from the root down to ``leaf``."""
+    lib = unreal.AnimationLibrary
+    path = list(lib.find_bone_path_to_root(anim, leaf))[::-1]   # root first
+    rot, pos, out = (1.0, 0.0, 0.0, 0.0), (0.0, 0.0, 0.0), {}
+    for name in path:
+        local = lib.get_bone_pose_for_frame(anim, str(name), frame, False)
+        t = local.translation
+        offset = _qrot(rot, (t.x, t.y, t.z))
+        pos = (pos[0] + offset[0], pos[1] + offset[1], pos[2] + offset[2])
+        rot = _qmul(rot, _q(local.rotation))
+        out[str(name)] = (rot, pos)
+    return out
+
+
+def _eased_flexion(theta):
+    excess = theta - HEEL_EASE_START_DEG
+    if excess <= 0:
+        return theta
+    return theta - (1 - HEEL_EASE_KEEP) * excess * excess / (excess + HEEL_EASE_SOFT_DEG)
+
+
+def ease_heel_kick(anim, force=False):
+    """Open the swing knee of a run loop so the heel stays further from her seat (see above)."""
+    lib = unreal.AnimationLibrary
+    tag = unreal.EditorAssetLibrary.get_metadata_tag(anim, HEEL_EASE_TAG)
+    if tag and not force:
+        raise RuntimeError(f'{anim.get_name()} already eased ({tag}); re-retarget it or pass force=True')
+    frames = lib.get_num_keys(anim)
+    changed = {}
+    for side in 'lr':
+        calf = f'calf_{side}'
+        positions, rotations, scales, peak = [], [], [], 0.0
+        for i in range(frames):
+            bones = _chain(anim, i, f'foot_{side}')
+            thigh_rot, hip = bones[f'thigh_{side}']
+            knee, ankle = bones[calf][1], bones[f'foot_{side}'][1]
+            upper, lower = _sub(knee, hip), _sub(ankle, knee)
+            theta = _angle(upper, lower)
+            local = lib.get_bone_pose_for_frame(anim, calf, i, False)
+            rotation = _q(local.rotation)
+            ease = theta - _eased_flexion(theta)
+            if ease > 1e-4:
+                # Rotate the lower leg toward the thigh's line about the knee hinge, in thigh space.
+                hinge = _qrot(_qinv(thigh_rot), _norm(_cross(upper, lower)))
+                rotation = _qmul(_qaxis(hinge, -math.radians(ease)), rotation)
+                peak = max(peak, ease)
+            positions.append(local.translation)
+            rotations.append(unreal.Quat(rotation[1], rotation[2], rotation[3], rotation[0]))
+            scales.append(local.scale3d)
+        changed[calf] = (positions, rotations, scales, round(peak, 2))
+    ctl = anim.get_editor_property('controller')
+    ctl.open_bracket(unreal.Text('Ease heel kick'))
+    for calf, (positions, rotations, scales, _) in changed.items():
+        ctl.set_bone_track_keys(calf, positions, rotations, scales)
+    ctl.close_bracket()
+    params = f'start={HEEL_EASE_START_DEG} keep={HEEL_EASE_KEEP} soft={HEEL_EASE_SOFT_DEG}'
+    unreal.EditorAssetLibrary.set_metadata_tag(anim, HEEL_EASE_TAG, params)
+    return {calf: value[3] for calf, value in changed.items()}
+
+
+def heel_report(asset):
+    """Swing-phase heel measurements of a locomotion loop (cm, component space, floor at z=0).
+
+    peak_heel_cm: highest ankle; min_heel_below_pelvis_cm: closest the ankle comes up under the
+    pelvis; min_heel_to_seat_cm: closest the ankle comes to a point 12 cm behind and 8 cm below the
+    pelvis (her seat); max_knee_deg: peak knee flexion; min_toe_cm: lowest ball of the foot
+    above its standing height while the ankle is up in swing (toe clearance, should stay > 0).
+    """
+    anim = unreal.load_asset(asset) if isinstance(asset, str) else asset
+    lib = unreal.AnimationLibrary
+    frames = lib.get_num_keys(anim)
+    root_first = lib.get_bone_pose_for_frame(anim, 'root', 0, False).translation
+    root_last = lib.get_bone_pose_for_frame(anim, 'root', frames - 1, False).translation
+    forward = _norm((root_last.x - root_first.x, root_last.y - root_first.y, 0.0))
+    if forward == (0.0, 0.0, 0.0):
+        forward = (0.0, 1.0, 0.0)
+    out = {}
+    for side in 'lr':
+        peak, below, seat, knee_max, toe = 0.0, 1e9, 1e9, 0.0, 1e9
+        for i in range(frames):
+            bones = _chain(anim, i, f'ball_{side}')
+            pelvis = bones['pelvis'][1]
+            hip, knee = bones[f'thigh_{side}'][1], bones[f'calf_{side}'][1]
+            ankle, ball = bones[f'foot_{side}'][1], bones[f'ball_{side}'][1]
+            seat_point = (pelvis[0] - forward[0] * 12, pelvis[1] - forward[1] * 12, pelvis[2] - 8)
+            peak = max(peak, ankle[2])
+            below = min(below, pelvis[2] - ankle[2])
+            seat = min(seat, math.dist(ankle, seat_point))
+            knee_max = max(knee_max, _angle(_sub(knee, hip), _sub(ankle, knee)))
+            if ankle[2] - ANKLE_HEIGHT > 6.0:
+                toe = min(toe, ball[2] - BALL_HEIGHT)
+        out[side] = {'peak_heel_cm': round(peak, 1), 'min_heel_below_pelvis_cm': round(below, 1),
+                     'min_heel_to_seat_cm': round(seat, 1), 'max_knee_deg': round(knee_max, 1),
+                     'min_toe_cm': round(toe, 1)}
+    return out
+
+
+LEGACY_MESH = '/Game/SurvivalGame/Characters/Heroine/SK_Heroine_LongWave'
 LEGACY_RETARGETER = '/Game/Characters/Heroine_MH/Retarget/RTG_HeroineLegacy_To_MH'
 LEGACY_ANIMS = '/Game/SurvivalGame/Characters/Heroine/Animations/'
 # Work actions and idle still come from the legacy heroine (task 6.1/6.2 replaces them).
