@@ -6,7 +6,7 @@
   "triangle_budget": 70000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/estate_debris.py",
-  "source_sha256": "296c2a99216eefaeb4b1a0dc7a1f80bd558c56ea4cd1f2319c9dddaed3cd51ca",
+  "source_sha256": "707ec532a39018f815851e5cacc3bce0da44ceba38fae1ee280609e2d85966d6",
   "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
   "meshes": {
     "SM_BrokenBarrel": {
@@ -171,7 +171,7 @@
       "size_cm": [
         227.61,
         166.36,
-        31.27
+        34.54
       ],
       "materials": [
         {
@@ -211,13 +211,13 @@
         ],
         "eye_distance": 4.2,
         "focus": [
-          0.561970191001892,
-          0.2481885850429535,
-          0.09372377514839172
+          0.58,
+          0.25,
+          0.22
         ]
       },
       "fbx": "SM_RubbishHeap.fbx",
-      "sha256": "c597757444b6ab63374fed6fba95eb5ffa633a0d73f94c1b5c3f430286eac2a3",
+      "sha256": "18ad4a7a7e490a4d1fa4079e613813c352508b44b856772c92697519ad5af7bc",
       "preview": "preview_SM_RubbishHeap.png",
       "beauty": {
         "views": {
@@ -229,7 +229,7 @@
         "gpus": [
           "NVIDIA GeForce RTX 5080"
         ],
-        "samples": 96,
+        "samples": 256,
         "resolution": [
           3840,
           2160

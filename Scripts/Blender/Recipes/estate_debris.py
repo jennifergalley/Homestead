@@ -192,11 +192,13 @@ def cloth(kit,n,loc,yaw,sx,sy,mat,seed,pitch=0,roll=0):
             a=iy*(cols+1)+ix; faces.append((a,a+1,a+cols+2,a+cols+1))
     obj=kit.mesh(n,verts,faces,mat); kit.tag_coords(obj.data,coords); return kit.recalc_normals(obj)
 
+def outline_radius_xy(x,y):
+    a=math.atan2(y/.82,x/1.12)
+    return 1.0+0.11*noise.noise(Vector((math.cos(a)*2.9,math.sin(a)*2.9,4.0)))+0.045*math.sin(5*a+0.7)+0.025*math.sin(9*a-1.2)
+
 def midden_ground(kit,mat):
     cols,rows=(72,52) if DRAFT else (132,96); verts=[]; faces=[]; coords=[]
-    def outline_radius(x,y):
-        a=math.atan2(y/.82,x/1.12)
-        return 1.0+0.11*noise.noise(Vector((math.cos(a)*2.9,math.sin(a)*2.9,4.0)))+0.045*math.sin(5*a+0.7)+0.025*math.sin(9*a-1.2)
+    outline_radius=outline_radius_xy
     def mound_z(x,y):
         edge=outline_radius(x,y)
         rr=math.sqrt((x/(1.12*edge))**2+(y/(.82*edge))**2)
@@ -287,8 +289,9 @@ def mat_midden_soil(kit):
     cinder=g.noise(g.combine(g.math("MULTIPLY",x,16.0),g.math("MULTIPLY",y,16.0),0.0),scale=20.0,detail=3.0).outputs["Fac"]
     base=g.ramp(ash,[(.18,(.042,.036,.030)),(.58,(.070,.061,.048)),(1.0,(.095,.080,.060))])
     base=g.mix(base,(.026,.025,.023),g.remap(cinder,.72,.90,0.0,.40))
-    edge=g.remap(r,.58,.98,0.0,.72)
-    moss=g.ramp(g.noise(p,scale=18.0,detail=5.0).outputs["Fac"],[(.2,(.040,.042,.031)),(.8,(.056,.058,.041))])
+    # The rim grades into living turf (olive, broken by noise) rather than ending in a dark band.
+    edge=g.remap(r,.62,.98,0.0,.85)
+    moss=g.ramp(g.noise(p,scale=18.0,detail=5.0).outputs["Fac"],[(.2,(.046,.056,.026)),(.8,(.072,.086,.036))])
     base=g.mix(base,moss,edge)
     g.set("Base Color",base); g.set("Roughness",.98)
     height=g.math("ADD",g.math("MULTIPLY",ash,.35),g.math("MULTIPLY",cinder,.18))
@@ -441,7 +444,22 @@ def build_rubbish_heap(kit,m):
     for i in range(3):
         x=rng.uniform(-.75,.75); y=rng.uniform(-.55,.55)
         parts.append(board(kit,f"MiddenBrokenBoard_{i}",(rng.uniform(.32,.66),rng.uniform(.045,.070),rng.uniform(.018,.026)),(x,y,h_at(x,y)+.025),m["crate_wood"],rot=(rng.uniform(-5,5),rng.uniform(-6,6),rng.uniform(-75,75)),rough=.003,seed=SEED+1000+i))
-    settle(parts); return kit.join(parts,"SM_RubbishHeap",unwrap=True,reshade=True,smooth_angle=50)
+    settle(parts)
+    # Sink the feathered skirt a few centimetres below the pivot's ground line so the terrain, not a
+    # hard mesh outline, forms the heap's edge; loose bits near the rim ride down with it.
+    def dip(x,y):
+        edge=outline_radius_xy(x,y)
+        rr=math.sqrt((x/(1.12*edge))**2+(y/(.82*edge))**2)
+        return .035*smoothstep(.74,1.0,rr)
+    ground=parts[0]
+    for v in ground.data.vertices:
+        v.co.z-=dip(v.co.x,v.co.y)
+    ground.data.update()
+    for o in parts[1:]:
+        ws=[o.matrix_world@v.co for v in o.data.vertices]
+        if ws:
+            c=sum(ws,Vector())/len(ws); o.location.z-=dip(c.x,c.y)
+    return kit.join(parts,"SM_RubbishHeap",pivot=None,unwrap=True,reshade=True,smooth_angle=50)
 
 def build_collapsed_leanto(kit,m):
     rng=random.Random(SEED+1200); parts=[]; timber=m["lean_timber"]; darkwood=m["barrel_wood"]; slates=(m["slate"],m["slate_dark"])
