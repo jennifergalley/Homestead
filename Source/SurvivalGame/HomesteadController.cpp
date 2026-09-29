@@ -2486,18 +2486,7 @@ void AHomesteadController::Interact()
         if (NativeMenu && !NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe, Selection, 0))
             Notify(TEXT("The cookfire recipe could not be selected."), true);
         break;
-    case EFocus::Bed:
-    {
-        Notify(SleepInBed(Position));
-        if (!IsFailed())
-        {
-            if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
-                AutoSaveIndex = (AutoSaveIndex + 1) % 3;
-            if (Sim.IsSheltered(Position) && State().hunger >= 35)
-                SaveSlot(TEXT("Homestead_Recovery"), true);
-        }
-        break;
-    }
+    case EFocus::Bed: SleepAtBed(Position); break;
     case EFocus::Chest: OpenChestStorage(FocusId); break;
     case EFocus::Water: Notify(Sim.FillWater(Position)); break;
     case EFocus::Underbrush: StartMacheteHack(); break;
@@ -3074,6 +3063,34 @@ bool AHomesteadController::CycleBedChoice(int32 Delta)
     BedChoiceBed = FocusId;
     PlayEffect(UIClick, 0.06f);
     return true;
+}
+
+void AHomesteadController::SleepAtBed(Homestead::Point Position)
+{
+    Notify(SleepInBed(Position));
+    if (!IsFailed())
+    {
+        if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
+            AutoSaveIndex = (AutoSaveIndex + 1) % 3;
+        if (Sim.IsSheltered(Position) && State().hunger >= 35)
+            SaveSlot(TEXT("Homestead_Recovery"), true);
+    }
+}
+
+void AHomesteadController::HomesteadSleep(int32 Option)
+{
+    if (bBookOpen || bPlanning || IsFailed()) return;
+    UpdateFocus();
+    if (Focus != EFocus::Bed) { Notify(TEXT("Stand beside a bed to sleep."), true); return; }
+    const auto Options = BedSleepOptions();
+    if (Option >= 0 && Option < static_cast<int32>(Options.size())) { BedChoice = Options[Option].choice; BedChoiceBed = FocusId; }
+    SleepAtBed(PlayerPoint());
+}
+
+void AHomesteadController::HomesteadBedChoice(int32 Delta)
+{
+    UpdateFocus();
+    CycleBedChoice(Delta);
 }
 
 Homestead::Result AHomesteadController::SleepInBed(Homestead::Point Position)

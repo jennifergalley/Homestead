@@ -257,6 +257,10 @@ public:
     UFUNCTION(Exec) void HomesteadMoney(int32 Cents = 1000);
     // Playtest aid: set her Energy (0-100), e.g. to try dozing off or the bed's "until rested".
     UFUNCTION(Exec) void HomesteadEnergy(float Energy = 100.0f);
+    // Playtest aids for the bed (stand beside one): sleep with choice N as listed in the prompt (-1 =
+    // the one shown), or step the shown choice by Delta, as Up/Down (D-pad) do.
+    UFUNCTION(Exec) void HomesteadSleep(int32 Option = -1);
+    UFUNCTION(Exec) void HomesteadBedChoice(int32 Delta = 1);
 
     float Sensitivity = 1.0f;
     bool bInvertY = false;
@@ -541,6 +545,8 @@ private:
     // second unless forced).
     void UpdatePlacement(bool bForce);
     Homestead::Result SleepInBed(Homestead::Point Position);
+    // Sleeps with the chosen option and makes the usual autosave and recovery checkpoint.
+    void SleepAtBed(Homestead::Point Position);
     // At the bed, Up/Down (D-pad) steps through the sleep choices. False when not at a bed.
     bool CycleBedChoice(int32 Delta);
     Homestead::SleepChoice BedChoice = Homestead::SleepChoice::UntilMorning;
