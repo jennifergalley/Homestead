@@ -220,7 +220,7 @@ work that goes beyond a small verified correction.
 | **Approved:** the wider walkable beach above (12–20 m dry width) below the owned cliffs | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-shore-and-river-fishing` |
 | The river looks as if it stops before reaching the ocean in Jenny's screenshot | Weather Agent (`89914e30`) | **Partly checked, not resolved:** PIE on `27e2e917` confirms the source, banks and water down to the beach, but the ribbon still ends a couple metres short of the ocean, separated by sand/foam. Own a later true estuary connection while widening the beach; do not mark the gap fixed. |
 | **Pending:** around 9 PM the Estate visibly brightens and moonlight reads like sunlight | Architecture traces the nighttime directional/skylight/auto-exposure path; Water owns a later measured fix | Integration captures packaged **RT-on** evidence at 19:00, 21:00 and midnight. No fix is shipped or inferred from the trace. |
-| **Pending:** town buildings are bunched too tightly | Water, after the final road route | Space buildings around a coherent, winding, walkable road; synchronize store entrance/anchors, save IDs, ground/scenery and the map. On-foot town-entry/store acceptance, coordinate bridge, roadside forage and travel signs follow the final route. |
+| **Pending:** town buildings are bunched too tightly | Water, after the final road route | The current 12 blocking blockouts occupy a 40 × 34.5 m four-sided square with 0.2–0.35 m adjacent gaps (about 0.9 m by the store); the main road ends ~72 m short. Make a ~60 × 45 m open square with terraces/cottages, 3–6 m side lanes, and a separate curved 5–6 m `townStreet`; preserve main-road 1.94 km chainage plus StoreDoor/Counter and Shop IDs/saves. |
 | Running foot kicks too high toward her butt; lower its swing apex slightly | Harvest Agent / temporary Gait Agent (`65a2408b`) | `polish-locomotion-view-distance-and-time-hud` |
 
 **Water-lane order:** verify the river mouth in the parked 4 PM river branch first, then stage
@@ -377,11 +377,20 @@ requirement.
   fixed camera at 18:00, 19:00, 21:00 and midnight in clear and rain. **Integration** judges
   packaged RT-on Lumen hardware-ray-tracing plus VSM evidence, because the normal agent editor launch
   disables RT/VSM; neither the trace nor screenshots alone establish a fix.
-- **Town-road layout** — **Water Agent**, after the north-west lake and final road route: separate
-  currently bunched town buildings along a coherent, winding, walkable road. Keep the store entrance,
-  anchors and save IDs, ground/scenery and map synchronized. Only after the route is final can the
-  on-foot town-entry/store acceptance, coordinate bridge, roadside forage and travel signs be aligned.
-  This is a later, separate increment and is **not** 4 PM package content.
+- **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
+  blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
+  gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
+  TownSquare. Make a ~60 × 45 m open square, with irregular terraces/cottages, 3–6 m side lanes and
+  a separate curved 5–6 m `townStreet` from the main-road end to the square. Keep the existing
+  1.94 km main-road chainage stable, plus GeneralStoreDoor/Counter access and persisted `Shop.id`.
+
+  Update `town_massing.py` external actors, the graded heightfield and `estate_layout.json`, road
+  SDF/material/ruts, scenery clear mask, ground and map bake/import together. The controller
+  currently uses `ProvisionalEstateLayout()` directly: mirror moved anchors into that C++ table;
+  do not rely on the stale `DA_EstateLandmarks` claim. Verify walking from RoadTownEnd through the
+  town entrance to the store counter without teleporting in day, night and rain. Only after the
+  route is final can the coordinate bridge, roadside forage and travel signs be aligned. This is a
+  later, separate increment and is **not** 4 PM package content.
 - **Change Dye** — **UI / temporary Menu Agent** (`5cf73757`), after contextual berries: the current
   action is a no-op. It opens the selected colour or swatch choice, supports preview, confirm and
   cancel, then persists the selection. Pending PIE verification.

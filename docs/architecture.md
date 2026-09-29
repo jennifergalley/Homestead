@@ -169,7 +169,7 @@ reads only values the game thread copied into the proxy.
 
 | Output (in the repo) | Written by | Read by |
 | --- | --- | --- |
-| `Estate_Heightmap_4033.png`, `estate_layout.json` | `Scripts/Terrain/reshape.py` | Landscape import (editor); layout mirrored by hand into `ProvisionalEstateLayout()` |
+| `Estate_Heightmap_4033.png`, `estate_layout.json` | `Scripts/Terrain/reshape.py` | Landscape import (editor); layout mirrored by hand into `ProvisionalEstateLayout()`, which `AHomesteadController::PrepareEstateSimulation` currently installs directly. Moving an anchor requires both updates; there is no live `DA_EstateLandmarks` replacement path. |
 | `Content/SurvivalGame/Estate/Runtime/EstateHeightfield.r16` | terrain pipeline | `HomesteadEstateTerrain::Activate` (ground height outside the Landscape) |
 | `Content/SurvivalGame/Estate/Runtime/EstateScenery.bin` (`HSC1`) | `Scripts/Terrain/scatter.py` | `AHomesteadWorld::BuildEstateScenery`; kind bytes must match `EstateSceneryKinds` |
 | `Simulation/HomesteadEstateWorldPlacements.inc` and the other `*Placements.inc` | `scatter.py`, `berries.py`, `clearout.py`, `estate_disrepair.py` ("do not edit by hand") | `ProvisionalEstatePlacements()` |
