@@ -13,8 +13,8 @@ permanent loss of the estate, livestock or companion. Setbacks SHALL be recovera
 money or item penalty, lost time, lower output, or a reputation dip.
 
 #### Scenario: Collapse from exhaustion
-- **WHEN** the heroine's energy is exhausted or she is still awake at 2 AM
-- **THEN** she wakes next morning at home with at most a small, disclosed penalty and no other loss
+- **WHEN** the heroine's energy runs out at any hour
+- **THEN** she dozes off for a few hours of rough sleep and wakes only part rested, with no other loss
 
 #### Scenario: Unpaid bills
 - **WHEN** a seasonal rate, tax or wage goes unpaid
