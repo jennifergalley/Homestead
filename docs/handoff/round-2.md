@@ -298,16 +298,19 @@ reproduces it from a copied packaged save and records exact seed stock, focus, p
 Energy and toast state; trace and fix the root cause rather than silently refusing the action. This is
 an unshipped core-loop acceptance gate.
 
-**Cooking Kindling requirement:** **pending core-loop work, not shipped.** The current cooked recipes
-are RoastedRoots (2 Roots) and HerbedRoots (2 Roots + Meadow herb). Each **successful** cooked batch
-uses one Kindling through canonical `CraftChange`, requirements/`AssessRecipe` and Menu display; it
-does not debit on failed/canceled recipes, other crafts or fire fuel.
+**Food and Cooking Kindling partial:** **Props branch
+`jennifergalley-food-kindling` off `a785a417`, native Release 9/9, not built/PIE/shipped.** `CanEat`
+now permits a full-Food/low-Energy benefit while both-full refuses. RoastedRoots uses 2 Roots + 1
+Kindling; HerbedRoots uses 2 Roots + 1 MeadowHerb + 1 Kindling, at a lit Hearth/fire through canonical
+`CraftChange` / requirements / `AssessRecipe`. One Kindling debits only for a successful cooked batch,
+never for failed/canceled recipes, other crafts or fire fuel.
 
-Kindling is otherwise finite crates/boughs and woodland starts with none, so Props adds renewable
-`+1` Kindling co-yield to hand-gathered Branches (five Branches, 24-hour regrow), without changing old
-saves or IDs. Water adds woodland roots because the first existing live patch is about 222 m away.
-Test the hearth/lit-fire route, exact one debit and the woodland recipe before treating cooking as
-accepted.
+Branches hand-gather as 5 Branch + 1 renewable Kindling (24-hour regrow); source text is `Fallen
+branches, saplings and old boughs`. Native coverage includes failures, no stock, fire, Energy, v12
+reload and woodland/Estate. Water adds woodland roots because the first existing live patch is about
+222 m away. Integration still owns UE compile, suites and PIE hearth/lit-fire exact-debit/woodland
+recipe verification. Food success still returns `Ate Berries: Energy +6`; combined testing with Menu
+`60c6d6ba` must confirm the centre success toast is suppressed while the bar popup remains.
 
 **Priority:** these playtest items take precedence over the ordinary round-2 feature queue. Each row's
 own status is authoritative: shipped work remains historical evidence, while pending and
