@@ -11,6 +11,7 @@
 #include "Misc/Paths.h"
 
 #include "HomesteadCharacter.h"
+#include "Simulation/HomesteadNightLight.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "HomesteadLampLook.h"
 #include "Kismet/GameplayStatics.h"
@@ -56,12 +57,13 @@ constexpr float BerryFruitOffset = 24.0f, BerryFruitScale = 1.5f, BerryFruitLift
 TAutoConsoleVariable<int32> CVarRayTracedSun(TEXT("homestead.RayTracedSun"), 1,
     TEXT("1 = ray-traced sun/moon shadows with continuous sun movement (default when hardware ray "
          "tracing is on). 0 = Virtual Shadow Maps with the sun stepped by 0.5 degrees."));
-TAutoConsoleVariable<float> CVarNightMoonLux(TEXT("homestead.NightMoonLux"), 2.0f,
-    TEXT("Moonlight lux at full night."));
-TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.6f,
+// Night light (Simulation/HomesteadNightLight; defaults match Homestead::NightLightTuning).
+TAutoConsoleVariable<float> CVarNightMoonLux(TEXT("homestead.NightMoonLux"), 0.2f,
+    TEXT("Moonlit level ground (lux) at full night; the moon's intensity compensates for its altitude."));
+TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.3f,
     TEXT("Sky light intensity at full night."));
-TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -2.0f,
-    TEXT("Auto exposure min brightness at full night."));
+TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -1.0f,
+    TEXT("Auto exposure min brightness (EV100) at full night."));
 TAutoConsoleVariable<int32> CVarEstateSceneryCells(TEXT("homestead.EstateSceneryCells"), 1,
     TEXT("1 = batch non-Nanite estate scenery per 128/512 m cell (default), 0 = one batch per kind. ")
     TEXT("Read when the estate scenery is built (set it on the command line with -DPCVars=)."));
@@ -4411,15 +4413,20 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // extra tint so dawn stays golden instead of saturating to orange.
     Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.9f, 0.8f),
         FLinearColor(1.0f, 0.99f, 0.95f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
-    const float NightMoonLux = CVarNightMoonLux.GetValueOnGameThread();
-    const float NightSkyIntensity = CVarNightSky.GetValueOnGameThread();
-    const float NightMinExposure = CVarNightMinExposure.GetValueOnGameThread();
-    Moon->SetIntensity(NightMoonLux * (1.0f - Daylight));
-    Sky->SetIntensity(FMath::Lerp(NightSkyIntensity, 1.0f, Daylight) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud));
+    // Night: the moonlit ground holds level from dusk to dawn instead of brightening as the moon climbs,
+    // and the exposure floor keeps auto-exposure from adapting moonlight to a daylight grey
+    // (Homestead::NightLightAt, native-tested).
+    Homestead::NightLightTuning NightTuning;
+    NightTuning.moonGroundLux = CVarNightMoonLux.GetValueOnGameThread();
+    NightTuning.nightSky = CVarNightSky.GetValueOnGameThread();
+    NightTuning.nightMinExposureEV = CVarNightMinExposure.GetValueOnGameThread();
+    const Homestead::NightLight Night = Homestead::NightLightAt(Hour, NightTuning);
+    Moon->SetIntensity(static_cast<float>(Night.moonLux));
+    Sky->SetIntensity(static_cast<float>(Night.skyScale) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud));
     // The real-time sky capture still sees the clear blue atmosphere under the cloud layer, so warm it
     // back towards a neutral grey overcast.
     Sky->SetLightColor(FMath::Lerp(FLinearColor::White, FLinearColor(1.0f, 0.93f, 0.84f), Cloud));
-    Exposure->Settings.AutoExposureMinBrightness = FMath::Lerp(NightMinExposure, 0.0f, Daylight);
+    Exposure->Settings.AutoExposureMinBrightness = static_cast<float>(Night.minExposureEV);
     // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
     Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud;
     const float Saturation = FMath::Lerp(1.0f, OvercastSaturation, Cloud);
