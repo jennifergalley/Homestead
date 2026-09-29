@@ -14,6 +14,7 @@
 #include <iostream>
 #include <limits>
 #include <locale>
+#include <set>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -1732,13 +1733,20 @@ void SleepAndFailure()
     Edit(bare, [](State& state) { state.hour = 42 * 24 + 20; state.hunger = 80; state.energy = 60; });
     OK(bare.Sleep(8, Home));
     CHECK(!bare.GetState().failed && bare.GetState().energy == 100);
+    // Time awake drains Energy slowly (1.2 points last two hours). Running out doesn't fail her: she
+    // dozes off where she stands for DozeHours at the slower rate, then carries on awake.
     Simulation tired;
     Edit(tired, [](State& state) { state.energy = 1.2; });
+    const double tiredStart = tired.GetState().hour;
     tired.AdvanceGameHours(10, Home);
-    CHECK(tired.GetState().failed);
-    CHECK(tired.GetState().energy == 0);
-    // Time awake drains Energy slowly: 1.2 points last two hours.
-    CHECK(Close(tired.GetState().hour, 8.0));
+    CHECK(!tired.GetState().failed && tired.DozeCount() == 1);
+    CHECK(Close(tired.GetState().hour, tiredStart + 10.0));
+    CHECK(Close(tired.GetState().energy, Exertion::DozeHours * Exertion::DozePerHour - 2.0 * Exertion::AwakePerHour));
+    // A doze that runs out her food still fails her, as any sleep would.
+    Simulation starving;
+    Edit(starving, [](State& state) { state.energy = 0.6; state.hunger = 3.0; });
+    starving.AdvanceGameHours(4, Home);
+    CHECK(starving.GetState().failed && starving.GetState().hunger == 0 && starving.DozeCount() == 1);
 }
 
 void SleepAndFiniteBoundaries()
@@ -3277,12 +3285,36 @@ void ChestCapacityAndWaterSpace()
     CHECK(waterSim.UsedCapacity() == InventoryCapacity);
 }
 
-void BedSleepHourPolicy()
+void SleepOptionPolicy()
 {
-    CHECK(Close(BedSleepHours(20.0), 10.75));
-    CHECK(Close(BedSleepHours(3.0), 8.0));
-    CHECK(Close(BedSleepHours(12.0), 2.0));
-    CHECK(Close(BedSleepHours(16.5), 1.5));
+    // 21:00 with part of her energy left: "until morning" leads and wakes her at 06:45; "until
+    // rested" (40 short, 4 h) and a nap follow.
+    const auto night = SleepOptions(21.0, 60.0);
+    CHECK(night.size() == 3);
+    CHECK(night[0].choice == SleepChoice::UntilMorning && Close(night[0].hours, 9.75) && Close(night[0].wakeHour, 6.75));
+    CHECK(night[1].choice == SleepChoice::UntilRested && Close(night[1].hours, 4.0) && Close(night[1].wakeHour, 1.0));
+    CHECK(night[2].choice == SleepChoice::Nap && Close(night[2].hours, 1.0) && Close(night[2].wakeHour, 22.0));
+    // A night owl going to bed at 05:00 nearly spent sleeps through into the afternoon.
+    const auto owl = SleepOptions(5.0, 5.0);
+    CHECK(owl[0].choice == SleepChoice::UntilRested && Close(owl[0].hours, 9.5) && Close(owl[0].wakeHour, 14.5));
+    // Rested at noon: one short rest, no separate nap.
+    const auto noon = SleepOptions(12.0, 100.0);
+    CHECK(noon.size() == 1 && noon[0].choice == SleepChoice::UntilRested && Close(noon[0].hours, 1.0));
+    // "Until rested" that would wake her near morning is folded into "until morning".
+    const auto late = SleepOptions(22.75, 20.0);
+    CHECK(late.size() == 2 && late[0].choice == SleepChoice::UntilMorning && late[1].choice == SleepChoice::Nap);
+    // Bounds: at most ten hours to rest, an early night from 18:00 runs to morning.
+    CHECK(Close(SleepOptions(12.0, 0.0)[0].hours, Exertion::MaxRestHours));
+    CHECK(Close(SleepOptions(18.0, 50.0)[0].hours, 12.75));
+    CHECK(Close(SleepOptions(12.0, 97.0)[0].hours, Exertion::MinRestHours));
+    // Recovery follows hours slept, not the clock: a daytime sleep until rested fills her up.
+    Simulation owlSim;
+    BuildingStock(owlSim);
+    OK(owlSim.Place(Piece::Bed, -3, 0, 0, Home));
+    Edit(owlSim, [](State& state) { state.hour = 29.0; state.energy = 5.0; state.hunger = 90.0; });
+    OK(owlSim.Sleep(SleepOptions(owlSim.GetState().hour, owlSim.GetState().energy)[0].hours, Home));
+    CHECK(Close(owlSim.GetState().hour, 38.5));
+    CHECK(Close(owlSim.GetState().energy, 100.0) && !owlSim.GetState().failed);
 }
 
 void OvergrowthTableAndPrompts()
@@ -3641,6 +3673,152 @@ void WeedCreepNearOvergrowth()
     OK(loaded.ClearOvergrowth(regrownId, Item::Scythe, PlacedNode(loaded, regrownId).position));
 }
 
+void ManorClearoutField()
+{
+    // The ground round the ruin (570000+) is thick with clearables of every early kind, a few that
+    // need a better tool, and lanes left open to the doors and the salvage piles.
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
+    const auto& manor = layout.FindPolygon(Anchor::ManorFootprint)->points;
+    const Point room = layout.PointOr(Anchor::StandingRoomOrigin, {});
+    const Point frontDoor = EstateManorFrontDoor(layout);
+    const auto& all = ProvisionalEstatePlacements().placements;
+    const auto wallDistance = [&](Point p)
+    {
+        double x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+        for (const Point& corner : manor)
+        {
+            x0 = std::min(x0, corner.x); x1 = std::max(x1, corner.x);
+            y0 = std::min(y0, corner.y); y1 = std::max(y1, corner.y);
+        }
+        return std::hypot(std::max({0.0, x0 - p.x, p.x - x1}), std::max({0.0, y0 - p.y, p.y - y1}));
+    };
+    int field = 0, nearHouse = 0, teases = 0, rubbish = 0;
+    std::set<ResourceKind> kinds;
+    std::set<int> ids;
+    for (const auto& placement : all)
+    {
+        CHECK(ids.insert(placement.id).second);
+        if (placement.id < 570000 || placement.id >= 580000) continue;
+        const auto* info = FindOvergrowth(placement.kind);
+        CHECK(info != nullptr && placement.kind != ResourceKind::SalvagePile);
+        CHECK(PointInPolygon(boundary, placement.position) && !PointInPolygon(manor, placement.position));
+        // Not in or against the standing room, and clear of the derelict farm's field.
+        CHECK(std::abs(placement.position.x - room.x) > 450.0 || std::abs(placement.position.y - room.y) > 450.0);
+        CHECK(!(placement.position.x > -22500.0 && placement.position.x < -15900.0
+            && placement.position.y > -70800.0 && placement.position.y < -64200.0));
+        CHECK(wallDistance(placement.position) < 4000.0);
+        for (const auto& other : all)
+            if (other.id != placement.id)
+                CHECK(std::hypot(other.position.x - placement.position.x, other.position.y - placement.position.y)
+                    >= (other.kind == ResourceKind::BerryBush ? 300.0 : 150.0));
+        ++field;
+        nearHouse += wallDistance(placement.position) < 2000.0;
+        teases += info->minTier > ToolTier::Worn;
+        rubbish += IsRubbish(placement.kind);
+        kinds.insert(placement.kind);
+        // The lane out of the front door and the salvage piles outside keep clear ground.
+        for (double out = 0.0; out <= 550.0; out += 50.0)
+            CHECK(std::hypot(placement.position.x - (frontDoor.x - out), placement.position.y - frontDoor.y) > 160.0);
+    }
+    for (const auto& pile : all)
+        if (pile.kind == ResourceKind::SalvagePile)
+            for (const auto& placement : all)
+                if (placement.id >= 570000 && placement.id < 580000)
+                    CHECK(std::hypot(pile.position.x - placement.position.x, pile.position.y - placement.position.y) > 200.0);
+    CHECK(field >= 300 && nearHouse >= 150 && teases >= 10 && teases * 10 < field && rubbish >= 20);
+    for (auto kind : {ResourceKind::Weeds, ResourceKind::Nettles, ResourceKind::TallGrass, ResourceKind::BrambleThin,
+        ResourceKind::Sapling, ResourceKind::StumpSmall, ResourceKind::StumpMedium, ResourceKind::StumpLarge,
+        ResourceKind::SmallRock, ResourceKind::Rubble, ResourceKind::Boulder, ResourceKind::BrokenCrate,
+        ResourceKind::BrokenBarrel, ResourceKind::RubbishHeap, ResourceKind::RottenPlanks})
+        CHECK(kinds.count(kind) == 1);
+    Simulation estate;
+    OK(estate.NewEstateGame(layout, ProvisionalEstatePlacements()));
+    int present = 0;
+    for (const auto& node : estate.GetState().resources) present += node.id >= 570000 && node.id < 580000 && !node.cleared;
+    CHECK(present == field);
+}
+
+void ClearoutKindsAndSpoiledGround()
+{
+    const Point spawn = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    const Point at{spawn.x - 1500, spawn.y + 1500};
+    EstatePlacements placements;
+    placements.bakeVersion = 12;
+    int next = EstatePlacementIdBase + 40000;
+    const auto add = [&](ResourceKind kind, double dx, double dy)
+    {
+        placements.placements.push_back({next++, kind, {at.x + dx, at.y + dy}, 0, 0, 1, 0});
+        return next - 1;
+    };
+    const int crate = add(ResourceKind::BrokenCrate, 0, 0);
+    const int barrel = add(ResourceKind::BrokenBarrel, 100, 0);
+    const int heap = add(ResourceKind::RubbishHeap, 0, 100);
+    const int planks = add(ResourceKind::RottenPlanks, -100, 0);
+    const int nettles = add(ResourceKind::Nettles, 0, -100);
+    const int mown = add(ResourceKind::Nettles, 50, -150);
+    const int weeds = add(ResourceKind::Weeds, -100, -100);
+    // A stump beside a garden square, not in it: its spoiled ground still covers the square.
+    const Point square = GardenCellCenter(GardenCell(at.x + 1000), GardenCell(at.y));
+    const int stump = add(ResourceKind::StumpMedium, square.x - at.x + GardenCellSize * 0.5 + 40.0, square.y - at.y);
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), placements));
+    // Rubbish, nettles and weeds come away by hand, each clear yielding once.
+    for (int id : {crate, barrel, heap, planks, nettles, weeds}) CHECK(sim.CanHarvest(id));
+    const auto cleared = sim.Harvest(crate, at);
+    OK(cleared);
+    CHECK(cleared.message.find("Cleared the broken crate") == 0);
+    CHECK(sim.Count(Item::Kindling) >= 2 && sim.Count(Item::Kindling) <= 3);
+    UnchangedFailure(sim, [&] { return sim.Harvest(crate, at); });
+    OK(sim.Harvest(barrel, at));
+    CHECK(sim.Count(Item::ScrapIron) >= 1);
+    OK(sim.Harvest(heap, at));
+    OK(sim.Harvest(planks, at));
+    OK(sim.Harvest(nettles, at));
+    OK(sim.Harvest(weeds, at));
+    CHECK(sim.Count(Item::Weeds) >= 2);
+    // Nettles mow with the scythe too; the stump takes the axe, five worn swings.
+    OK(sim.GrantItems(Item::Scythe, 1));
+    OK(sim.ClearOvergrowth(mown, Item::Scythe, at));
+    CHECK(!sim.CanHarvest(stump));
+    UnchangedFailure(sim, [&] { return sim.Harvest(stump, square); });
+    OK(sim.GrantItems(Item::Hatchet, 1));
+    CHECK(sim.OvergrowthSwings(stump) == 5);
+    // Tilling or building on spoiled ground is refused, naming what to clear, until it's cleared.
+    OK(sim.GrantItems(Item::DiggingStick, 1));
+    const int gx = GardenCell(square.x), gy = GardenCell(square.y);
+    const auto refused = sim.Till(gx, gy, square);
+    CHECK(!refused.ok && refused.message == "Clear the stump here first.");
+    UnchangedFailure(sim, [&] { return sim.Till(gx, gy, square); });
+    OK(sim.ClearOvergrowth(stump, Item::Hatchet, square));
+    CHECK(sim.Count(Item::Firewood) >= 3);
+    OK(sim.Till(gx, gy, square));
+    // The spoil radius scales with the obstacle.
+    CHECK(FindOvergrowth(ResourceKind::Boulder)->spoil > FindOvergrowth(ResourceKind::SmallRock)->spoil);
+    CHECK(FindOvergrowth(ResourceKind::StumpLarge)->spoil > FindOvergrowth(ResourceKind::StumpSmall)->spoil);
+    CHECK(FindOvergrowth(ResourceKind::StumpMedium)->minTier == ToolTier::Worn);
+    for (auto kind : {ResourceKind::BrokenCrate, ResourceKind::BrokenBarrel, ResourceKind::RubbishHeap, ResourceKind::RottenPlanks})
+        CHECK(IsRubbish(kind) && FindOvergrowth(kind)->byHand && FindOvergrowth(kind)->tool == ToolKind::Count);
+    CHECK(FindOvergrowth(ResourceKind::Nettles)->tool == ToolKind::Scythe && FindOvergrowth(ResourceKind::Nettles)->byHand);
+    CHECK(std::string(ResourceName(ResourceKind::RubbishHeap)) == "Rubbish heap");
+    // Saved and reloaded by stable id.
+    Simulation loaded;
+    loaded.SetPlacements(placements);
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(loaded, stump).cleared && PlacedNode(loaded, heap).cleared);
+    // A save made before the clear-out was baked loads with any new obstacle on her plot already cleared.
+    EstatePlacements rebaked = placements;
+    rebaked.placements.push_back({next++, ResourceKind::Nettles, square, 0, 0, 1, 0});
+    Simulation later;
+    later.SetPlacements(rebaked);
+    OK(later.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(later, next - 1).cleared && later.GetState().plots.size() == 1);
+    Simulation again;
+    again.SetPlacements(rebaked);
+    OK(again.Deserialize(later.Serialize()));
+    CHECK(PlacedNode(again, next - 1).cleared);
+}
+
 void LegacyVitalsLine()
 {
     // Pre-pivot saves carried warmth and the warm-outfit flag on the first line; they're dropped on load.
@@ -3660,6 +3838,39 @@ void LegacyVitalsLine()
     CHECK(!legacy.Deserialize(Envelope(hour + " " + minutes + " " + hunger + " " + energy + " nan " + failed + " 1 " + nextId + rest)));
 }
 
+void MvpWoodlandPlacements()
+{
+    // add-mvp-woodland-biome: the west woods carry the MVP's forage (ids 560000+, baked by
+    // Scripts/Terrain/mvp_woodland.py), all on the estate and in a new game.
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
+    const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
+    int trees = 0, branches = 0, berries = 0, roots = 0, brambles = 0, total = 0;
+    double nearest = 1e9;
+    for (const auto& placement : ProvisionalEstatePlacements().placements)
+    {
+        if (placement.id < 560000 || placement.id >= 570000) continue;
+        ++total;
+        CHECK(PointInPolygon(boundary, placement.position));
+        trees += placement.kind == ResourceKind::ForestTree;
+        branches += placement.kind == ResourceKind::Branches;
+        berries += placement.kind == ResourceKind::BerryBush;
+        roots += placement.kind == ResourceKind::Roots;
+        brambles += placement.kind == ResourceKind::BrambleThin || placement.kind == ResourceKind::BrambleThicket;
+        nearest = std::min(nearest, std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y));
+    }
+    CHECK(trees >= 150 && branches >= 30 && berries >= 20 && roots >= 20);
+    // The MVP's blocking brambles are clearable overgrowth here.
+    CHECK(brambles >= 100);
+    // West of the manor, about a minute's walk: the region's near edge is some 200 m out.
+    CHECK(nearest > 15000.0 && nearest < 30000.0);
+    Simulation estate;
+    OK(estate.NewEstateGame(layout, ProvisionalEstatePlacements()));
+    const auto& resources = estate.GetState().resources;
+    CHECK(std::count_if(resources.begin(), resources.end(),
+        [](const ResourceNode& node) { return node.id >= 560000 && node.id < 570000; }) == total);
+}
+
 }
 
 int main()
@@ -3670,12 +3881,14 @@ int main()
     Run("taking down chests returns contents and drops overflow", DeconstructChestContentsAndOverflow);
     Run("heritage manor pieces cannot be taken down", HeritageManorPiecesCannotBeDeconstructed);
     Run("large chests and water portions do not crowd the pack", ChestCapacityAndWaterSpace);
-    Run("bed sleep hour policy", BedSleepHourPolicy);
+    Run("sleep option policy", SleepOptionPolicy);
     Run("overgrowth tools, tiers and prompts", OvergrowthTableAndPrompts);
     Run("salvage, hafting and tier-gated clearing by stable id", HaftingBootstrapAndClearing);
     Run("multi-swing clears, energy reserve and full-pack yields", MultiSwingTiersAndCapacity);
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
+    Run("manor clear-out field placement", ManorClearoutField);
+    Run("clear-out rubbish, nettles, stumps and spoiled ground", ClearoutKindsAndSpoiledGround);
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);
     Run("HUD requirements and zero-time action commits", RequirementsMatchTransactions);
@@ -3718,6 +3931,7 @@ int main()
     Run("long deterministic negative and positive chunk walk", LongDeterministicChunkWalk);
     Run("mixed distant edits, cache churn and exact reload", MixedPersistentWorldChurn);
     Run("sparse edit scale, payload bounds and atomic rejection", SparseEditScaleAndPayloadBounds);
+    Run("MVP woodland placements", MvpWoodlandPlacements);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

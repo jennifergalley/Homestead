@@ -29,16 +29,17 @@ struct DisrepairPicker
 {
     EstatePlacements& table;
     int next = 550001;
-    // Keep new nodes this far from every placement already in the table, so each keeps its focus.
+    // Keep new nodes this far from every placement already in the table, so each keeps its focus
+    // (and 3 m from the blackberry brambles, which are placed first and keep that berth).
     double spacing = 150.0;
 
     bool Clear(Point at, double gap) const
     {
-        // Pickable brambles (540000+) keep 3 m to themselves, so they stay easy to find and pick.
         for (const auto& placement : table.placements)
-            if (std::hypot(placement.position.x - at.x, placement.position.y - at.y)
-                < (placement.kind == ResourceKind::BerryBush && placement.id >= 540000 && placement.id < 550000 ? std::max(gap, 300.0) : gap))
-                return false;
+        {
+            const double berth = placement.kind == ResourceKind::BerryBush ? std::max(gap, 300.0) : gap;
+            if (std::hypot(placement.position.x - at.x, placement.position.y - at.y) < berth) return false;
+        }
         return true;
     }
     bool Add(ResourceKind kind, Point at, double gap = 0.0)
