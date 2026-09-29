@@ -444,6 +444,9 @@ struct PreparedWorldRegion
     std::array<const Generation::ChunkBaseline*, 9> chunks{};
 };
 
+// Where the public road leads (HomesteadTravel.h).
+enum class TravelDestination : int;
+
 class Simulation
 {
 public:
@@ -619,6 +622,10 @@ public:
     // Waits by a closed shop until it opens: the ordinary passage of time (crops, weather, vitals,
     // the morning sell-down), refused before any time passes if she'd collapse first.
     Result WaitForShop(int shopId, Point player);
+    // Walks the public road to the manor or town from `from` (HomesteadTravel.cpp): the ordinary
+    // passage of time for the walk's length, refused before any time passes if she'd collapse or
+    // doze off on the way. The caller stands her at PlanTravel's arrival point.
+    Result WalkRoad(TravelDestination destination, Point from);
     // Playtest aids: adjust the purse; open (or move) a shop with its counter at `counter`.
     Result GrantMoney(Cents cents);
     Result PlaceShop(ShopKind kind, Point counter, double yaw = 0.0);

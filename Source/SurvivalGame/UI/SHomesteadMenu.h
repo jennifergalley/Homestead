@@ -186,6 +186,12 @@ private:
     int32 DyeOriginal = 0, DyeChoice = 0, DyePreviewed = INDEX_NONE;
     void OpenDyeChooser(int32 Choice);
     void EndDyePreview();
+    // A second line under the popup title (the walk's distance, time and arrival), wrapped.
+    FString PopupBody;
+    // The Map tab's walk to the focused place: Town (or its store) and the manor.
+    TOptional<Homestead::TravelDestination> MapTravelDestination() const;
+    FString MapTravelLine() const;
+    void OpenTravelPrompt(Homestead::TravelDestination Destination);
     // Appearance camera input (page 6): held WASD, the right stick and a drag on the view orbit her.
     bool bOrbitLeft = false, bOrbitRight = false, bOrbitUp = false, bOrbitDown = false;
     float OrbitStickX = 0.0f, OrbitStickY = 0.0f;

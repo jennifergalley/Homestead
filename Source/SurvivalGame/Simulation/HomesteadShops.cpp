@@ -81,8 +81,10 @@ double HoursUntilOpen(const Shop& shop, double hour)
 
 std::string FormatHour(double hour)
 {
-    const int whole = static_cast<int>(std::floor(std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0)));
-    const int minutes = static_cast<int>(std::lround((hour - std::floor(hour)) * 60.0)) % 60;
+    // Round to the minute first, so 7:59:50 reads 8 AM rather than 7 AM.
+    const long total = std::lround(std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0) * 60.0) % (24 * 60);
+    const int whole = static_cast<int>(total / 60);
+    const int minutes = static_cast<int>(total % 60);
     const int twelve = whole % 12 == 0 ? 12 : whole % 12;
     std::string text = std::to_string(twelve);
     if (minutes) text += (minutes < 10 ? ":0" : ":") + std::to_string(minutes);
