@@ -107,9 +107,11 @@ orchestrator before removing any of it.**
 - **Payload:** `Simulation::Serialize()` writes ASCII text: a header line
   `HOMESTEAD <SimulationSaveVersion> <size> <checksum>`, then fixed sections in order (vitals, pack
   stock, world id, resource edits, buildings, structures with chest stocks, plots, drops, wearables,
-  equipment, layout, cleared underbrush), then **tagged trailing sections** (parcels, economy,
-  `tools`, `manor`). A missing trailing section loads with defaults; an unknown tag invalidates the
-  save. Bytes above 127 are rejected (hex-encode free text such as names).
+  equipment, layout, cleared underbrush), then **tagged trailing sections**: `parcels` and
+  `economy` (read in that order), then any of `tools`, `manor`, `lamp`, `picked` in any order. A
+  missing trailing section loads with defaults; an unknown tag refuses the save. New
+  save data is added this way without a version bump (recipe in the conventions skill). Bytes above
+  127 are rejected (hex-encode free text such as names).
 - **Versioning:** `SimulationSaveVersion` (13) in `HomesteadSimulation.h`. Lanes never bump it; the
   orchestrator does, once per integration. Version 12 migrates; 11 is refused; 7-10 still migrate.
 - **Item stocks carry their width** (version 13, `harden-save-item-stocks`): each stock (the pack and
