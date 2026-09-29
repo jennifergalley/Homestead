@@ -2635,13 +2635,8 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     const auto Ready = Sim.CheckOvergrowth(Target, Tool, Position);
     if (!Ready)
     {
+        // Out of tier (or otherwise refused): she doesn't swing at all, and nothing changes.
         Notify(Ready);
-        // Out of tier: the blade glances off with a dull knock, and nothing changes.
-        if (Ready.code == Homestead::ResultCode::ToolTier)
-        {
-            PlayEffect(WoodTapA, 0.45f);
-            if (Avatar) Avatar->PlayClear();
-        }
         return;
     }
     if (Target != SwingNode)
