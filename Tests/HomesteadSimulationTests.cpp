@@ -2394,7 +2394,7 @@ void SelectedFoodGroupTransactions()
             CHECK(sim.GetLayout(0)->back().groupId == selected && sim.GetLayout(0)->back().quantity == 1);
             CHECK(sim.Serialize() == expected.Serialize());
             UnchangedFailure(sim, [&] { return sim.EatGroup(selected, revision); });
-            if (sim.GetState().hunger == 100.0)
+            if (sim.GetState().hunger == 100.0 && sim.GetState().energy == 100.0)
             {
                 UnchangedFailure(sim, [&] { return sim.EatGroup(selected, sim.GetRevision()); });
             }
@@ -4048,6 +4048,53 @@ void MvpWoodlandPlacements()
 
 }
 
+// A full stomach doesn't stop a snack that restores Energy she's short of.
+void SnackOnFullStomachRestoresEnergy()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Berries, 3}, {Item::Roots, 2}});
+    Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 40.0; });
+    const auto ate = sim.Eat(Item::Berries);
+    OK(ate);
+    CHECK(ate.message == "Ate Berries: Energy +6.");
+    CHECK(sim.GetState().hunger == 100.0 && Close(sim.GetState().energy, 46.0) && sim.Count(Item::Berries) == 2);
+    // Raw roots are still refused, full or not.
+    UnchangedFailure(sim, [&] { return sim.Eat(Item::Roots); });
+    // Eating a chosen food group follows the same rule.
+    OK(sim.EatGroup(Group(sim, Item::Berries), sim.GetRevision()));
+    CHECK(sim.Count(Item::Berries) == 1 && Close(sim.GetState().energy, 52.0));
+    // The last few points of Energy still count; the meal stops at 100.
+    Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 97.0; });
+    OK(sim.Eat(Item::Berries));
+    CHECK(sim.GetState().energy == 100.0 && sim.GetState().hunger == 100.0 && sim.Count(Item::Berries) == 0);
+    // Both meters full: nothing to gain, so the food is kept.
+    Stock(sim, {{Item::Berries, 1}, {Item::HerbedRoots, 1}});
+    Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 100.0; });
+    const auto full = sim.Eat(Item::Berries);
+    CHECK(!full.ok && full.message == "You are already full. Save this food for later.");
+    UnchangedFailure(sim, [&] { return sim.Eat(Item::HerbedRoots); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Berries), sim.GetRevision()); });
+    // Hungry but rested: food only, and the message says so.
+    Edit(sim, [](State& state) { state.hunger = 50.0; state.energy = 100.0; });
+    const auto fed = sim.Eat(Item::Berries);
+    OK(fed);
+    CHECK(fed.message == "Ate Berries: Food +12." && sim.GetState().hunger == 62.0);
+    // Full and tired with a cooked dish: Energy only.
+    Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 20.0; });
+    const auto dish = sim.Eat(Item::HerbedRoots);
+    OK(dish);
+    CHECK(dish.message == "Ate Herbed roots: Energy +18." && Close(sim.GetState().energy, 38.0));
+    Simulation loaded;
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(loaded.Serialize() == sim.Serialize());
+
+    Simulation failed;
+    Stock(failed, {{Item::Berries, 1}});
+    failed.AdvanceGameHours(120, Home);
+    CHECK(failed.GetState().failed);
+    UnchangedFailure(failed, [&] { return failed.Eat(Item::Berries); });
+}
+
 int main()
 {
     Run("defaults and input validation", DefaultsAndValidation);
@@ -4069,6 +4116,7 @@ int main()
     Run("playtest skip to morning", SkipToMorning);
     Run("HUD requirements and zero-time action commits", RequirementsMatchTransactions);
     Run("pure structured recipe assessment", StructuredRecipeAssessment);
+    Run("a snack on a full stomach restores Energy", SnackOnFullStomachRestoresEnergy);
     Run("default gameplay walkthrough", GameplayWalkthrough);
     Run("atomic inventory transactions", AtomicTransactions);
     Run("regrowth and persistent clearing", RegrowthAndClearing);

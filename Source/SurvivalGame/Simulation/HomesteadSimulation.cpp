@@ -74,8 +74,10 @@ std::string ApplyMeal(State& state, Item item)
     const double energy = std::min(100.0, state.energy + FoodEnergy(item)) - state.energy;
     state.hunger += food;
     state.energy += energy;
-    std::string message = std::string("Ate ") + ItemName(item) + ": Food +" + std::to_string(static_cast<int>(std::lround(food)));
-    if (energy >= 0.5) message += ", Energy +" + std::to_string(static_cast<int>(std::lround(energy)));
+    std::string message = std::string("Ate ") + ItemName(item) + ":";
+    const bool showFood = food >= 0.5 || energy < 0.5;
+    if (showFood) message += " Food +" + std::to_string(static_cast<int>(std::lround(food)));
+    if (energy >= 0.5) message += std::string(showFood ? "," : "") + " Energy +" + std::to_string(static_cast<int>(std::lround(energy)));
     return message + ".";
 }
 Result CanEat(const State& state, Item item)
@@ -83,7 +85,10 @@ Result CanEat(const State& state, Item item)
     if (state.failed) return Failed();
     if (FoodNutrition(item) == 0.0) return Bad(item == Item::Roots ? std::string("Raw roots need cooking first.")
         : std::string(ItemName(item)) + " isn't something to eat.");
-    if (state.hunger >= 100.0) return Bad("You are already full. Save this food for later.");
+    // A snack is still worth eating on a full stomach when it restores energy she's short of.
+    const bool feeds = state.hunger < 100.0;
+    const bool restores = state.energy < 100.0 && FoodEnergy(item) > 0.0;
+    if (!feeds && !restores) return Bad("You are already full. Save this food for later.");
     return Good("");
 }
 Inventory Items(std::initializer_list<std::pair<Item, int>> values)
