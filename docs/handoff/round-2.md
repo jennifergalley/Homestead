@@ -295,8 +295,13 @@ requirement.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
-- **Sprint toggle** — **temporary Gait Agent** (`65a2408b`), after the run-heel work: sprint becomes
-  a toggle on controller L3 and PC Shift. Update the controls and hints; pending PIE verification.
+- **Sprint toggle** — **Menu `[ready]` `af7831b1`, Integration pending; not shipped.** Commit
+  `8e0516a0` toggles sprint with L3 or a released Shift tap: Shift+Q/click does not toggle, work/book/
+  shop pause speed while preserving intent, and load/new/retry/teleport reset it. At <=10 Energy it
+  gives a notice; exhaustion disables sprint. Native 8/8 plus economy 12 / scenario 521 checks and
+  Editor build pass. PIE verified L3 480 cm/s on/off, stop/resume, Shift+Q unchanged, ignored book
+  input, teleport reset, and the 9/10.25 Energy edges. The hint was checked in PIE but lacks a
+  standalone 4K capture; Integration decides package inclusion.
 - **Contextual hotbar eating and berry feedback** — **Menu `88180744` main-integrated, package
   pending; not shipped.** Controller A/X eats one selected berry per tap only when Talk has no
   precedence, and displays `+` the actual bounded Energy delta.
@@ -401,9 +406,10 @@ requirement.
   town entrance to the store counter without teleporting in day, night and rain. Only after the
   route is final can the coordinate bridge, roadside forage and travel signs be aligned. This is a
   later, separate increment and is **not** 4 PM package content.
-- **Change Dye** — **UI / temporary Menu Agent** (`5cf73757`), after contextual berries: the current
-  action is a no-op. It opens the selected colour or swatch choice, supports preview, confirm and
-  cancel, then persists the selection. Pending PIE verification.
+- **Change Dye** — **excluded from this package.** The chooser implementation is stashed, unbuilt and
+  untested because the MetaHuman linen tunic currently renders as an untinted base tank and shorts.
+  Keep the current no-op action until the asset/root cause and preview, confirm/cancel and persistence
+  path can be completed and PIE-verified.
 - **Leather backpack upgrade** — **pending, not shipped.** A tentative one-time **$15** purchase at
   the open General Store doubles inventory capacity **120 → 240 items**. (`ShopGoods` normally repeats,
   so this needs a special upgrade row.) $15 is intentionally above the $10 start—roughly ten cabbage
@@ -431,8 +437,9 @@ requirement.
   the action.
 - **Wait for opening** — **Menu `88180744` main-integrated, package pending; not shipped.** At a
   closed 19:00 store, B cancels with no time change; then A+A advances to the next 08:00 and returns
-  Pascoe's Talk interaction. The safe candidate preflight/commit path remains separate from future
-  equivalent-time Town/Manor travel signs and map actions.
+  Pascoe's Talk interaction. Follow-on `643a857a` rejects a candidate that would doze during
+  preflight. It shares Menu's current integration/package review; the safe candidate preflight/commit
+  path remains separate from future equivalent-time Town/Manor travel signs and map actions.
 - **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
   trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
   implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the
