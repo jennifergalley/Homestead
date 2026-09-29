@@ -329,7 +329,19 @@ def ease_heel_kick(anim, force=False):
     ctl.open_bracket(unreal.Text('Ease heel kick'))
     for calf, (positions, rotations, scales, _) in changed.items():
         ctl.set_bone_track_keys(calf, positions, rotations, scales)
+    # As in straighten_root, evaluation adds the retarget offset to raw translation keys, so writing
+    # back the evaluated translations lengthens the shin. Measure that shift and write keys that
+    # evaluate to the original bone translations.
+    for calf, (positions, rotations, scales, _) in changed.items():
+        shifted = [lib.get_bone_pose_for_frame(anim, calf, i, False).translation for i in range(frames)]
+        fixed = [p - (s - p) for p, s in zip(positions, shifted)]
+        ctl.set_bone_track_keys(calf, fixed, rotations, scales)
     ctl.close_bracket()
+    for calf, (positions, _, _, _) in changed.items():
+        worst = max((lib.get_bone_pose_for_frame(anim, calf, i, False).translation - positions[i]).length()
+                    for i in range(frames))
+        if worst > 0.01:
+            raise RuntimeError(f'{calf} translation drifted {worst:.3f} cm after easing')
     params = f'start={HEEL_EASE_START_DEG} keep={HEEL_EASE_KEEP} soft={HEEL_EASE_SOFT_DEG}'
     unreal.EditorAssetLibrary.set_metadata_tag(anim, HEEL_EASE_TAG, params)
     return {calf: value[3] for calf, value in changed.items()}
