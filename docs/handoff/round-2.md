@@ -284,9 +284,11 @@ requirement.
   preserves focus/input, uses a Victorian licensed font with larger centered text and a compact
   content-sized frame. The Menu batch is on top of lake `main` `61c1595c`; native 8/8 passed and
   Editor/Game builds are running for the 2 PM package decision.
-- **Appearance controls and naming** — **UI / Menu Agent** (`5cf73757`), when granted a slot:
-  click-drag rotates the preview, WASD orbits it, wheel zooms it, and the default heroine faces the menu
-  regardless of the wall or world yaw. Rename the user-facing **Curly Bob** option to **Long bob**.
+- **Appearance controls and naming** — **Menu local-only partial, not pushed/PIE/shipped or 4 PM
+  content.** `61059621` renames **Curly bob** to **Long bob**. `f63ba148` implements drag, WASD and
+  right-stick orbit, wheel zoom and a default front view; it disables/clips camera collision while the
+  page is open and restores it on close. After the package, Menu needs roughly 25 minutes of UE
+  1080p-and-4K testing: orbit near a wall, close/restore and confirm no movement spill.
 - **Hair groom** — **temporary Gait Agent** (`65a2408b`), after the running-heel and scythe work:
   investigate the intermittent exploding/sticking-out groom.
 - **Gait and scythe** — **temporary Gait Agent** (`65a2408b`), after its current run-heel slice:
@@ -295,8 +297,15 @@ requirement.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
-- **Sprint toggle** — **temporary Gait Agent** (`65a2408b`), after the run-heel work: sprint becomes
-  a toggle on controller L3 and PC Shift. Update the controls and hints; pending PIE verification.
+- **Sprint toggle** — **Menu `af7831b1` is main-integrated in 4 PM candidate `9175e34b`, package
+  pending; not shipped.** Commit
+  `8e0516a0` toggles sprint with L3 or a released Shift tap: Shift+Q/click does not toggle, work/book/
+  shop pause speed while preserving intent, and load/new/retry/teleport reset it. At <=10 Energy it
+  gives a notice; exhaustion disables sprint. Native 8/8 plus economy 12 / scenario 521 checks and
+  Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
+  210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture. The 2 PM package
+  still gates on `NativeMenu`/`Hotbar` (update a Shift-hold test to Shift-tap if needed), save and
+  shortcut work.
 - **Contextual hotbar eating and berry feedback** — **Menu `88180744` main-integrated, package
   pending; not shipped.** Controller A/X eats one selected berry per tap only when Talk has no
   precedence, and displays `+` the actual bounded Energy delta.
@@ -322,30 +331,34 @@ requirement.
   `MusicShuffleBagTests` in CMake, and verifies packaged multi-track load and run.
 - **Context hint** — **Menu `88180744` main-integrated, package pending; not shipped.** Plain wheel
   cycles the hotbar; Ctrl+wheel zooms while the book has focus.
-- **Weed visibility and grounding** — **Props weeds-only branch
-  `jennifergalley-weed-visuals @ 8418aa8e`, partial; not shipped.** This extends `889cfde8` with the
-  original imported `WeedClump` content and a pivot-seating correction. Day Estate PIE renders 157
-  clumps (dock 57, thistle 54, dandelion 46); every Landscape-trace pivot sits 0–10 cm below ground
-  (2.7 cm median, including 36% slopes), and pulling removes mesh plus focus. The native save path is
-  unchanged. At 4–7 m in tall grass the weeds still read visually modest.
+- **Weed visibility and grounding** — **Props `[ready]` `8418aa8e` for post-4 PM integration only;
+  not in the 4 PM package or shipped.** This extends `889cfde8` with the original imported
+  `WeedClump` asset and a pivot-seating correction. Day Estate PIE renders all 157 original clumps
+  (dock 57, thistle 54, dandelion 46); every Landscape-trace pivot sits 0–10 cm below ground
+  (2.7 cm median, including 36% slopes), and prompts appear only over drawn clumps. Native 8/8 and
+  Editor compile pass.
 
-  The branch still owes a dusk capture and PIE save/reload; the bounded rubble PIE is separate.
-  It is not eligible for the 4 PM merge until it reports `[ready]`. Only then may it establish that a
-  visible weed asset exists wherever the prompt says `"Weeds  E  Pull"` and that none float above
-  slopes or patches.
-- **Manor rubble** — **`53fe97d5` is locally cherry-picked by Integration as `9ecb08ad`; not pushed
-  to `main`, packaged or shipped.** Clearable slate heaps and granite/hall cobbles use reserved
-  placement IDs `582000–582099`. Day Estate PIE cleared slate `582003`/`582000` by hand (mesh and
-  prompt gone; Stone awarded); hall cobbles `582006` require the worn pickaxe and two swings
-  (mesh/prompt gone; Stone and Scrap iron awarded). Native 8/8 passed; the Editor build is running.
+  Dusk PIE (19:30–20:10) shows visible rosettes and their prompt; pulling dock changes the drawn count
+  156 → 155. F5/F9 clock rewind confirms the pulled clump stays gone while an untouched neighbour
+  remains. This completes the prior dusk and PIE reload debt. At 4–7 m in tall grass the weeds still
+  read visually modest. Props closed its editor at 13:10; the orchestrator verified no Unreal
+  processes remain.
+- **Manor rubble** — **`53fe97d5` → `9ecb08ad` is main-integrated in 4 PM candidate `9175e34b`,
+  package pending; not shipped.** Clearable slate heaps and granite/hall cobbles use reserved placement
+  IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
+  rubble `582008` requires the pickaxe then two swings for Stone/Scrap iron. F5 before clearing
+  `582011`, then F9, visually restores only `582011`; `582001`/`582008` remain gone. Native 8/8,
+  Editor and Game builds/static-init pass.
 
-  After Menu's sprint editor closes, Integration takes the Unreal slot for PIE slate/cobble clearing
-  plus F5/F9 visual persistence, then pushes only if that passes. The packaged heap clear/save/reload
-  remains mandatory before 4 PM inclusion; otherwise defer. Focus can select nearby bramble/weed and
-  resource reach can pass through a wall, matching current nearby-resource behavior. Props' editor is
-  closed; the weeds branch remains partial and excluded while it owes dusk and PIE reload evidence.
-- **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
-  hoe blade; a documentation-only answer is insufficient.
+  The 2 PM package still must perform packaged heap clear/save/reload, `EstateSmoke` pond
+  material/landscape coverage, and save/shortcut work; otherwise defer affected content. Focus can
+  select nearby bramble/weed and resource reach can pass through a wall, matching current
+  nearby-resource behavior. Props' editor is closed; weeds `8418aa8e` remains partial/excluded while
+  it owes dusk and PIE reload evidence.
+- **Rusted hoe wayfinding** — **Props isolated partial `be810887`, not PIE-verified, 4 PM content or
+  shipped.** The salvage order is billhook → hoe → axe → scythe → pickaxe. Tilling without a hoe
+  directs her to search the old manor; the journal/guide points to the west rooms by the chimney.
+  Native tests cover reward order and old saves, but ordinary-play second-salvage verification remains.
 - **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
   visible **Energy** meter later, rather than a visible hunger-plus-energy pair. Keep serialized hunger
   compatibility; revise gentle-hunger penalties into energy/food balance and modest **Well Fed** meals.
@@ -359,12 +372,16 @@ requirement.
   section. Old saves' forecast can change, while accrued plot moisture persists; document that at
   implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
   after its lane-A work.
-- **Starter food and hoe wayfinding** — **Clearing / Props lane** (after weed/rubble work): put **3
-  pasties and 2 loaves** in the starter chest. Make the **hoe head** the second salvage reward after the
-  billhook, with a contextual refusal and west-chimney journal hints to find it. Pending; no code or
-  content is finished yet.
-- **Starter wardrobe** — **Props lane** (with starter food): put completed wearable clothes in the
-  starter chest so Jenny can change outfit; verify pack/chest capacity and saving. Pending; not shipped.
+- **Starter chest, wardrobe and hoe wayfinding** — **Props isolated partial `be810887` on
+  `jennifergalley-starter-chest`, descendant of `d2c48511`; not PIE-verified, 4 PM content or
+  shipped.** New Estate games seed the standing-room chest through the normal capacity path with its
+  pail and four branches plus 3 pasties, 2 bread, LinenShirt, LinenLongShirt, Trousers, FurCoat,
+  FurBoots, WovenSandals and TurnShoes. It runs only in `NewEstateGame`, never restocks on load, and
+  leaves the tunic worn. Native 8/8 covers exact contents, save round trip, reward order and old saves;
+  the Editor build passes.
+
+  It still needs ordinary PIE coverage: open the chest, eat, wear clothes and complete the second
+  salvage. Props released its slot before 13:45.
 - **Road-to-town forage** — **Water Agent** (`89914e30`): add pickable berries and herbs along the
   road to town, including the bridge approach. The ID range is reserved; implementation remains
   pending the narrow public-road-corridor proof and bridge coordinate sync.
@@ -382,11 +399,17 @@ requirement.
   intensity is 0.6 (day 1), and night auto-exposure has a -2 EV100 floor (day 0). The combined
   moon/sky/adaptation cause is plausible, not visually proven.
 
-  **Water** later runs a controlled existing-CVar trial — moon 0.1–0.3 lux, sky 0.1–0.2, and an
-  exposure floor toward -1/0 — while preserving smooth dusk and lamp readability. Log and use a
-  fixed camera at 18:00, 19:00, 21:00 and midnight in clear and rain. **Integration** judges
-  packaged RT-on Lumen hardware-ray-tracing plus VSM evidence, because the normal agent editor launch
-  disables RT/VSM; neither the trace nor screenshots alone establish a fix.
+  **Water headless partial `4d248d6f` is unwired, unshipped and outside the 4 PM candidate.** Its
+  pure `HomesteadNightLight` schedule targets 0.2 lux moonlit ground after dusk (0.2/sin altitude,
+  capped at 1 lux low), night sky 0.3 rather than 0.6, and EV100 floor -1 rather than -2. At 21:00 it
+  computes moon 0.28 lux/display key 0.16 (about -2.6 stops); noon is unchanged. Native 9/9 checks
+  the prior daylight-grey 21:00 key of about 1, a non-increasing 18:50→midnight curve, no jump above
+  0.25 lux/minute, moon <=1 lux, and 21:00/00:00/03:00 at -1.5 to -3.5 stops.
+
+  It still needs `UpdateLighting`/CVar wiring, an Editor build, and fixed-camera packaged RT-on Lumen
+  hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to calibrate
+  smooth dusk and lamp readability. Lamp and hearth behavior are untouched. Neither the trace nor the
+  schedule establishes a visual fix.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
@@ -401,9 +424,11 @@ requirement.
   town entrance to the store counter without teleporting in day, night and rain. Only after the
   route is final can the coordinate bridge, roadside forage and travel signs be aligned. This is a
   later, separate increment and is **not** 4 PM package content.
-- **Change Dye** — **UI / temporary Menu Agent** (`5cf73757`), after contextual berries: the current
-  action is a no-op. It opens the selected colour or swatch choice, supports preview, confirm and
-  cancel, then persists the selection. Pending PIE verification.
+- **Change Dye** — **Menu local-only partial `3a664e4b`, not pushed/PIE/shipped or 4 PM content.**
+  Four swatches (Moss, Wine, Slate and Flax) provide hover preview, Apply and Cancel with no cost.
+  The root MetaHuman dyeable linen tunic now renders tinted instead of as the untinted base tank and
+  shorts. After the package, validate at 1080p and 4K on the actual model and portrait: preview,
+  Cancel, F5/F9 persistence and no cross-page visual spill.
 - **Leather backpack upgrade** — **pending, not shipped.** A tentative one-time **$15** purchase at
   the open General Store doubles inventory capacity **120 → 240 items**. (`ShopGoods` normally repeats,
   so this needs a special upgrade row.) $15 is intentionally above the $10 start—roughly ten cabbage
@@ -431,8 +456,9 @@ requirement.
   the action.
 - **Wait for opening** — **Menu `88180744` main-integrated, package pending; not shipped.** At a
   closed 19:00 store, B cancels with no time change; then A+A advances to the next 08:00 and returns
-  Pascoe's Talk interaction. The safe candidate preflight/commit path remains separate from future
-  equivalent-time Town/Manor travel signs and map actions.
+  Pascoe's Talk interaction. Follow-on `643a857a` rejects a candidate that would doze during
+  preflight. It shares Menu's current integration/package review; the safe candidate preflight/commit
+  path remains separate from future equivalent-time Town/Manor travel signs and map actions.
 - **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
   trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
   implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the

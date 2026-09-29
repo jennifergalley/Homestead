@@ -37,7 +37,7 @@ inline bool IsOvergrowth(ResourceKind kind) { return FindOvergrowth(kind) != nul
 const ResourceNode* OvergrowthSpoiling(const State& state, const Footprint& area);
 // "Clear the nettles here first."
 std::string SpoiledGroundMessage(const ResourceNode& node);
-// Hand-cleared rubbish (crates, barrels, heaps and planks).
+// Hand-cleared rubbish (crates, barrels, heaps, planks and fallen slates).
 bool IsRubbish(ResourceKind kind);
 // Lower-case, for prompts: "axe", "billhook".
 const char* ToolName(ToolKind tool);
