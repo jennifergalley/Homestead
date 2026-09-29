@@ -1,0 +1,692 @@
+{
+  "schema": 1,
+  "name": "CropTurnip",
+  "description": "Six Early Snowball / purple-crowned turnips on a 1 m tilled-bed plot, authored as five growth-stage meshes from sprout to ripe with shared atlas/material.",
+  "collision": "none",
+  "triangle_budget": 3000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/crop_turnip.py",
+  "source_sha256": "fa0ee8e904b0fcd1dfa4044c073df815578c9ae9a2da06fb3eeecbad5f8fd1d9",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CropTurnip_Sprout": {
+      "vertices": 96,
+      "triangles": 60,
+      "size_cm": [
+        49.93,
+        65.91,
+        1.94
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.006397992372512817,
+          -0.00428907573223114,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Sprout.fbx",
+      "sha256": "e77939e7c6fa67994563c82bb7548d9187653f893d97c0d85fc13bc75fdb5141",
+      "preview": "preview_SM_CropTurnip_Sprout.png"
+    },
+    "SM_CropTurnip_Sprout_LOD1": {
+      "vertices": 72,
+      "triangles": 36,
+      "size_cm": [
+        50.16,
+        66.68,
+        2.02
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.006397992372512817,
+          -0.00428907573223114,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Sprout_LOD1.fbx",
+      "sha256": "49ac70c5c46eb44c596f519dd1303e1084504a461678c8978c920030ed91656c",
+      "preview": "preview_SM_CropTurnip_Sprout_LOD1.png"
+    },
+    "SM_CropTurnip_Sprout_LOD2": {
+      "vertices": 72,
+      "triangles": 36,
+      "size_cm": [
+        50.85,
+        66.7,
+        2.02
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.006397992372512817,
+          -0.00428907573223114,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Sprout_LOD2.fbx",
+      "sha256": "a506459199f2676eeb9e683c16187b77f1d2e1b714651248684e265ccc655552",
+      "preview": "preview_SM_CropTurnip_Sprout_LOD2.png"
+    },
+    "SM_CropTurnip_Young": {
+      "vertices": 930,
+      "triangles": 1200,
+      "size_cm": [
+        61.4,
+        77.69,
+        7.41
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.006713435053825378,
+          0.0038926899433135986,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Young.fbx",
+      "sha256": "0e2d393ae5cb25774b532a3b729b0807993dad51b0d29ac936d1c6fc5ed5537c",
+      "preview": "preview_SM_CropTurnip_Young.png"
+    },
+    "SM_CropTurnip_Young_LOD1": {
+      "vertices": 270,
+      "triangles": 288,
+      "size_cm": [
+        62.61,
+        78.22,
+        7.13
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.006713435053825378,
+          0.0038926899433135986,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Young_LOD1.fbx",
+      "sha256": "5748a3bfc283d8d39ea146268f77c07c0a6a8d3c9a37a8c4c1b269af927ed81f",
+      "preview": "preview_SM_CropTurnip_Young_LOD1.png"
+    },
+    "SM_CropTurnip_Young_LOD2": {
+      "vertices": 120,
+      "triangles": 96,
+      "size_cm": [
+        62.07,
+        74.69,
+        6.16
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.006713435053825378,
+          0.0038926899433135986,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Young_LOD2.fbx",
+      "sha256": "3c3cf68f6d1d6a93ed6c9e550f1649d2fe5e83bb756f77d4e9d1d3cdedc76d79",
+      "preview": "preview_SM_CropTurnip_Young_LOD2.png"
+    },
+    "SM_CropTurnip_Growing": {
+      "vertices": 1800,
+      "triangles": 2520,
+      "size_cm": [
+        79.84,
+        91.39,
+        16.61
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.00906611979007721,
+          0.0012037605047225952,
+          0.13
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.45
+      },
+      "fbx": "SM_CropTurnip_Growing.fbx",
+      "sha256": "7b0ce66bebbb1e38b06c9af2c6661f6da0fa8ff2d067dc44f5623e9a9c0ebdbf",
+      "preview": "preview_SM_CropTurnip_Growing.png"
+    },
+    "SM_CropTurnip_Growing_LOD1": {
+      "vertices": 498,
+      "triangles": 636,
+      "size_cm": [
+        78.68,
+        91.77,
+        15.26
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.00906611979007721,
+          0.0012037605047225952,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Growing_LOD1.fbx",
+      "sha256": "c3575e87e643d274ec572d07af89914646eb94cff533492b6e0adec1897d365a",
+      "preview": "preview_SM_CropTurnip_Growing_LOD1.png"
+    },
+    "SM_CropTurnip_Growing_LOD2": {
+      "vertices": 120,
+      "triangles": 96,
+      "size_cm": [
+        81.03,
+        84.3,
+        13.59
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.00906611979007721,
+          0.0012037605047225952,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Growing_LOD2.fbx",
+      "sha256": "fd7030db086d59710f8b71ff8e8e524d68717ccfcfcac9da6c4aef7248839e1a",
+      "preview": "preview_SM_CropTurnip_Growing_LOD2.png"
+    },
+    "SM_CropTurnip_Mature": {
+      "vertices": 2172,
+      "triangles": 3000,
+      "size_cm": [
+        86.45,
+        89.5,
+        24.89
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0056832581758499146,
+          -0.002565041184425354,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Mature.fbx",
+      "sha256": "9de06a2b514c821782fe25c20299689f0a68c5dac6e040abfec2204b2d5ae6fe",
+      "preview": "preview_SM_CropTurnip_Mature.png"
+    },
+    "SM_CropTurnip_Mature_LOD1": {
+      "vertices": 588,
+      "triangles": 732,
+      "size_cm": [
+        83.51,
+        90.12,
+        20.43
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0056832581758499146,
+          -0.002565041184425354,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Mature_LOD1.fbx",
+      "sha256": "7393d535da14e88c10e5d2b528edcdd7bde6e13ad6b4c1bfa9374cad394502ca",
+      "preview": "preview_SM_CropTurnip_Mature_LOD1.png"
+    },
+    "SM_CropTurnip_Mature_LOD2": {
+      "vertices": 264,
+      "triangles": 288,
+      "size_cm": [
+        89.1,
+        95.97,
+        18.49
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0056832581758499146,
+          -0.002565041184425354,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Mature_LOD2.fbx",
+      "sha256": "36ab2b9ca02ef0fed52dcad68b7d936c898f48642bdbaad4403d5ec886ecbadd",
+      "preview": "preview_SM_CropTurnip_Mature_LOD2.png"
+    },
+    "SM_CropTurnip_Ripe": {
+      "vertices": 1986,
+      "triangles": 2760,
+      "size_cm": [
+        88.29,
+        89.34,
+        17.89
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.00914175808429718,
+          -0.022901121973991394,
+          0.15
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.25,
+        "eye_distance": 2.5
+      },
+      "fbx": "SM_CropTurnip_Ripe.fbx",
+      "sha256": "5102037b78b80ac33f77337dbdeb28b519c92f95430d223db09442fe819a416f",
+      "preview": "preview_SM_CropTurnip_Ripe.png"
+    },
+    "SM_CropTurnip_Ripe_LOD1": {
+      "vertices": 588,
+      "triangles": 732,
+      "size_cm": [
+        88.61,
+        92.43,
+        14.52
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.00914175808429718,
+          -0.002901121973991394,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Ripe_LOD1.fbx",
+      "sha256": "ce1a7e0af3cebaf6b7ab3d21d3ae1bb9491410796220f20a45457258c87d2e31",
+      "preview": "preview_SM_CropTurnip_Ripe_LOD1.png"
+    },
+    "SM_CropTurnip_Ripe_LOD2": {
+      "vertices": 204,
+      "triangles": 240,
+      "size_cm": [
+        82.85,
+        88.74,
+        14.3
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.00914175808429718,
+          -0.002901121973991394,
+          0.16
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 1.7
+      },
+      "fbx": "SM_CropTurnip_Ripe_LOD2.fbx",
+      "sha256": "dffa35446bf09eae71dcc6e6f3dc3b141de80503f7ecf07d58e759cc2e87644a",
+      "preview": "preview_SM_CropTurnip_Ripe_LOD2.png"
+    },
+    "SM_CropTurnip_Harvest": {
+      "vertices": 333,
+      "triangles": 480,
+      "size_cm": [
+        26.4,
+        24.02,
+        24.83
+      ],
+      "materials": [
+        {
+          "name": "M_CropTurnip",
+          "textures": {
+            "basecolor": "T_CropTurnip_basecolor.png",
+            "normal": "T_CropTurnip_normal.png",
+            "roughness": "T_CropTurnip_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          -0.035
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 0.55
+      },
+      "fbx": "SM_CropTurnip_Harvest.fbx",
+      "sha256": "4a0ebb24be2b67a1d44a65f451c3946436b0d3f75ded2887e7f9baa6dc3c81c9",
+      "preview": "preview_SM_CropTurnip_Harvest.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CropTurnip_Harvest_hero.png",
+          "detail": "beauty_SM_CropTurnip_Harvest_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 96,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / stage height",
+    "G": "per-plant random phase",
+    "B": "leaf flutter 0 at petiole -> 1 at blade tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_CropTurnip: T_CropTurnip_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency, B AO). Two-sided masked foliage; turnip root and soil tiles are opaque in the same atlas.",
+  "harvest_mesh": "SM_CropTurnip_Harvest pivot is the grip point at the leaf base/top of root; root hangs down -Z.",
+  "textures": {
+    "T_CropTurnip_basecolor.png": "ced69fc330d6409e406528d4641b8d505041113591c4baabe9c1faf843f0af93",
+    "T_CropTurnip_normal.png": "dbbb6027a3a99960a548ed2b8faaea63ea48ddb1c154d7ec88fc562498d5a3f4",
+    "T_CropTurnip_roughness.png": "85bd35dc70950d50b14d4792125afe0973b10ba4a31582f8301e614327d00fc3"
+  }
+}
