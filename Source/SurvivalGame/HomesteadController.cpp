@@ -2513,9 +2513,9 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
             : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
             : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
             : Kind == Homestead::ResourceKind::GiantLog ? 38.0f
-            : Kind == Homestead::ResourceKind::Rubble ? 42.0f
-            : Kind == Homestead::ResourceKind::Boulder ? 72.0f
-            : Kind == Homestead::ResourceKind::SmallRock ? 28.0f : 8.0f;
+            : Kind == Homestead::ResourceKind::Rubble ? 52.0f
+            : Kind == Homestead::ResourceKind::Boulder ? 76.0f
+            : Kind == Homestead::ResourceKind::SmallRock ? 38.0f : 8.0f;
         if (Tool == Homestead::Item::Scythe)
         {
             // Mowing turns about her: she keeps facing the swath rather than the first tuft.
