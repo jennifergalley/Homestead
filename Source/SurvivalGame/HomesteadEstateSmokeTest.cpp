@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/PlatformTime.h"
 #include "InputCoreTypes.h"
+#include "Misc/App.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInterface.h"
 #include "MaterialShared.h"
@@ -216,7 +217,8 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
             Add(TEXT("Capture ") + Label, [this, Capture]() { Screenshot(Capture); }, [OnGround]() { return OnGround(); }, 3.0f);
         }
     };
-    // Frame timing over TimingSampleSeconds after TimingSettleSeconds, reported as PERFORMANCE_AT.
+    // Frame timing over TimingSampleSeconds after TimingSettleSeconds, reported as PERFORMANCE_AT. The
+    // samples are the engine's frame times (FApp::GetDeltaTime), not this route's tick intervals.
     const auto Measure = [this](const FString& Place)
     {
         TSharedRef<double> Began = MakeShared<double>(0.0);
@@ -228,7 +230,7 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         Step.Repeat = [Began, Last, Frames]()
         {
             const double Now = FPlatformTime::Seconds();
-            if (Now - *Began >= EstateSmokeRoute::TimingSettleSeconds && Now > *Last) Frames->Add((Now - *Last) * 1000.0);
+            if (Now - *Began >= EstateSmokeRoute::TimingSettleSeconds && Now > *Last) Frames->Add(FApp::GetDeltaTime() * 1000.0);
             *Last = Now;
         };
         Step.Check = [this, Place, Frames]()
