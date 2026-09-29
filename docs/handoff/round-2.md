@@ -282,6 +282,17 @@ reproduces it from a copied packaged save and records exact seed stock, focus, p
 Energy and toast state; trace and fix the root cause rather than silently refusing the action. This is
 an unshipped core-loop acceptance gate.
 
+**Cooking Kindling requirement:** **pending core-loop work, not shipped.** The current cooked recipes
+are RoastedRoots (2 Roots) and HerbedRoots (2 Roots + Meadow herb). Each **successful** cooked batch
+uses one Kindling through canonical `CraftChange`, requirements/`AssessRecipe` and Menu display; it
+does not debit on failed/canceled recipes, other crafts or fire fuel.
+
+Kindling is otherwise finite crates/boughs and woodland starts with none, so Props adds renewable
+`+1` Kindling co-yield to hand-gathered Branches (five Branches, 24-hour regrow), without changing old
+saves or IDs. Water adds woodland roots because the first existing live patch is about 222 m away.
+Test the hearth/lit-fire route, exact one debit and the woodland recipe before treating cooking as
+accepted.
+
 **Priority:** these playtest items take precedence over the ordinary round-2 feature queue. They are
 all **pending, not shipped**. The orchestrator assigns an implementer slot before any owner starts
 hands-on work; no one edits a busy lane's files or starts a fourth implementer.
