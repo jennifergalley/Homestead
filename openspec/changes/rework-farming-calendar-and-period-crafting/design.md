@@ -23,7 +23,7 @@
 
 - A readable agricultural year: each season has its own crops, forage and look.
 - Bring the code back in line with the pivot's cozy rules: 28-day seasons, ~30-minute days, and
-  hunger that never fails her.
+  a single energy meter with nothing that fails her.
 - A second shop that spreads buying and selling across town, ready for round 3's prices.
 - The first period crafting stations, planks, fences and furniture.
 
@@ -64,7 +64,15 @@
 - Jenny confirms whether 30 feels right at the next playtest. The playtest build notes call this
   out.
 
-### 3. Gentle hunger replaces hunger failure
+### 3. Gentle hunger replaces hunger failure (delivered as an interim by lane A, superseded by §3a)
+
+Lane A delivered this on `jennifergalley-ruined-manor-and-arrival` (a3c7e04d), which integrates
+first. It exposes `HungerState`, `Hunger::RecoveryFactor`, `Hunger::WorkCostFactor`,
+`Simulation::WorkCost` and `GetHungerState`, and it removes hunger failure on the estate. §3a
+replaces its behaviour and keeps its useful pieces: `WorkCost` stays as the single work-cost
+entry point, and Well fed feeds it.
+
+Original design, kept for reference:
 
 - `Step()` no longer sets `failed` for hunger.
 - A new helper, `HungerState` (Fed, Hungry, Famished), with thresholds at 25 and 0 in
@@ -81,7 +89,67 @@
 - A native test drives hunger to 0 over several days and asserts no failure, slower recovery and
   higher costs.
 
-### 4. Crop seasons and withering
+### 3a. One energy bar with Well fed (Jenny, 2026-09-29)
+
+Jenny found that hunger drained so slowly it felt irrelevant, and asked whether Coral Island uses
+one bar. It does. Coral Island has a single energy bar, food restores it, and many dishes add
+temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny chose that model.
+
+- **The estate has no hunger.**
+  - `Step()` stops draining `hunger` when `fixedEstate` is set.
+  - `GetHungerState()` always returns Fed.
+  - The recovery and work-cost factors from §3 drop out.
+  - The hunger toasts and the hunger icon in the HUD vitals cluster are removed on the estate.
+    The seeded woodland keeps its legacy behaviour until the Architecture agent retires that
+    path.
+- **Saves:** `State::hunger` stays serialized and is ignored on the estate, so this needs no save
+  bump. The field is dropped at the next planned `SimulationSaveVersion` bump (§10), which
+  already resets test saves.
+- **Food restores energy only.** The catalogue gains a food class: `Snack`, `Meal` or not edible.
+  The `hunger` value on `ItemInfo` is ignored on the estate. Starting values, to be tuned at
+  playtest:
+
+  | Food | Class | Energy | Well fed |
+  | --- | --- | --- | --- |
+  | Berries, blackberries, strawberries, raw turnip or carrot | Snack | +6 to +8 | none |
+  | Bread | Snack | +12 | none |
+  | Cheese | Snack | +15 | none |
+  | Roasted roots, roast potatoes, pease pudding | Meal | +25 | 2 game hours |
+  | Cornish pasty, herbed roots, leek & potato soup | Meal | +40 | 3 game hours |
+  | Vegetable stew, later fish pie and stargazy pie | Meal | +60 | 4 game hours |
+
+- **Well fed:**
+  - It's one timed state in Simulation, `wellFedUntilHour`. Saving it is optional, since a lost
+    timer on reload is harmless.
+  - While it's active, `WorkCost(base)` returns `base × 0.85`. It never makes a cost below zero
+    and never changes the doze or sleep rules.
+  - Eating any meal sets the timer to the later of the current expiry and now plus that meal's
+    duration, so bonuses never stack.
+  - The HUD shows a small Well fed icon beside the energy meter, with the time left on hover or
+    focus.
+  - Food descriptions and eat toasts read "+40 Energy · Well fed 3 h" or "+12 Energy".
+- **Why not keep hunger with better tuning:** it would be a second chore meter that's off-genre,
+  and Jenny already finds it uninteresting. The Well fed bonus keeps the one decision that
+  matters: cook and stop for a proper meal, or snack and push on.
+- **Why not an optional hunger setting:** it doubles the balance and test work with no request
+  for it.
+
+### 3b. Starter food and hoe signposting (Jenny, 2026-09-29)
+
+- **Starter chest:** `Manor::SeedStandingRoom` also seeds **3 Cornish pasties and 2 loaves of
+  bread**, alongside the pail and branches. That's about $5 of food, a day or two of cushion
+  before her first sale.
+- **The hoe is the second salvage find.** The next-missing-head order in `HomesteadOvergrowth.cpp`
+  (the `order[]` array, about line 236) becomes billhook, hoe, axe, scythe, pickaxe. Before, the
+  hoe was always the fifth and most hidden pile. The next head is worked out from what she owns,
+  so this needs no save change.
+- **Refusal hint:** trying to till with no hoe adds "Search the salvage in the old manor for a
+  hoe blade." to the existing requires-a-tool prompt.
+- **Journal hint:** the arrival note (`Manor::ArrivalEntry`) gains one diegetic line: "Father's
+  garden tools always hung in the west rooms, by the chimney." Salvage pile 520003, in the west
+  rooms north of the chimney breast, is where she's likely to look. Because of the new order,
+  whichever pile she searches second gives the hoe anyway.
+- **Optional, not scheduled:** a minimap and Map glyph over unsearched salvage piles.
 
 - `CropInfo` gains `unsigned seasons`, a bitmask.
 - `Plant` refuses a crop out of season: "Peas grow in Spring and Summer."
@@ -202,7 +270,8 @@ Prices and yields are tuned in the catalogue.
     foundations, including the standing room.
   - Recipes at the workbench use planks, plus scrap for the shelf brackets.
   - Freeform décor comes in round 5.
-- **Hearth dishes** are hearth recipes that restore hunger and energy in tiers:
+- **Hearth dishes** are hearth recipes. They're Meals, so they restore energy and grant Well fed
+  (§3a) in tiers:
 
   | Dish | Ingredients | Restores |
   | --- | --- | --- |
@@ -224,7 +293,8 @@ One bump at integration covers:
 - the new `Item`, `Piece`, `Recipe`, `CropKind` and `ResourceKind` values;
 - gate open state;
 - the second shop's records;
-- the default `dayMinutes`.
+- the default `dayMinutes`;
+- dropping the unused `hunger` field and adding the optional `wellFedUntilHour` (§3a).
 
 Test saves reset with the existing notice, and old Estate saves move to `Retired`.
 
@@ -233,6 +303,7 @@ Test saves reset with the existing notice, and old Estate saves move to `Retired
 | Lane | Owns | Reads/shares |
 | --- | --- | --- |
 | **A. Calendar & hunger** | `Homestead::Calendar`; `Step()` hunger/energy changes; `WorkCost`; season rollover hook; crop season masks, plant/focus warnings, withering in `HomesteadCrops`/`Step`; HUD calendar text; hunger and season toasts | exposes `Calendar` and the rollover hook to B–E first (first increment) |
+| **F. Energy & food (after A integrates)** | §3a/§3b: estate hunger removal, food class and energy values, `wellFedUntilHour` + `WorkCost` factor, Well fed HUD icon and toasts, hunger icon removal; starter chest food in `Manor::SeedStandingRoom`; salvage `order[]`, till refusal hint, arrival journal line | catalogue rows (serialized); `WorkCost`/`GetHungerState` from A; HUD vitals cluster (coordinate with any HUD lane); hearth-dish values with E |
 | **B. New crops** | 5 `CropKind` rows and their plant sets + withered sets (Blender); plot visuals for withered state | catalogue rows (serialized); season masks from A |
 | **C. Seedsman shop** | `ShopKind::Seedsman`, Sunday closing, seed stock move, tin watering can; Tregear's building/interior/props; `SeedsmanDoor` anchor | catalogue rows (serialized); `Calendar` from A; shop UI title |
 | **D. Seasonal forage & look** | forage season table, blackberry item/picking, field mushroom kind + placements + prop; `MPC_Season` and material edits | `Calendar` from A; placement bake with the world owner |
@@ -244,7 +315,9 @@ Test saves reset with the existing notice, and old Estate saves move to `Retired
   - `SHomesteadMenu` (lane E only this round);
   - UAT and packaging (the Integration Agent only).
 - **Order:** A's `Calendar` and rollover hook land first, within a day, because B, C and D build
-  on them. E is independent.
+  on them. E is independent. F starts only after A's branch (a3c7e04d or later) is integrated on
+  `main`, because it rewrites A's hunger code. F's hearth-dish energy values come from §3a.
+  E owns the dish recipes, and F owns the catalogue food class and values.
 
 ## Risks / Trade-offs
 

@@ -33,8 +33,19 @@
 - [ ] 5.3 Add the stool, table, chair and shelf, with placement on foundations including the standing room
 - [ ] 5.4 Add the four hearth dishes with tiered restores, and the Craft categories with mouse and controller navigation
 
-## 6. Integration and acceptance
+## 6. Energy, food and a kinder start: lane F, after lane A integrates
 
-- [ ] 6.1 Do the single `SimulationSaveVersion` bump with the reset notice at final integration. Retarget the packaged FullLoop and Smoke suites to the seasonal year
-- [ ] 6.2 Run the full-acceptance route in a packaged build, one continuous run. Harvest one crop per season, pick blackberries, find mushrooms, sell grain to Tregear's, fence a plot, furnish the room, cook each dish, and find both shops closed on a Sunday. Check mouse and controller parity
-- [ ] 6.3 Jenny playtests. Confirm the day length (30 or 60), Sunday closing, and the shop and keeper names, and fold in her feedback
+Jenny decided on 2026-09-29 to replace task 1.3's interim Hungry/Famished work (design §3a and §3b). Start only after lane A (a3c7e04d or later) is on `main`.
+
+- [ ] 6.1 Remove hunger on the estate: stop the drain in `Step()`, make `GetHungerState()` always return Fed, drop the recovery and work-cost hunger factors, and remove the hunger toasts. Keep `State::hunger` serialized and ignored. Native tests: two days without eating bring no penalty and no failure
+- [ ] 6.2 Add the catalogue food class (Snack or Meal) and the §3a energy values. Add Well fed (`wellFedUntilHour`, a ×0.85 `WorkCost` factor, refreshed rather than stacked). Native tests cover a meal against a snack, expiry, the refresh, and the reduced work cost
+- [ ] 6.3 HUD: remove the hunger icon from the vitals cluster, add the Well fed icon with time left, and change the eat toasts and food descriptions to "+40 Energy · Well fed 3 h". Verify at 720p and 4K with mouse and controller
+- [ ] 6.4 Starter food: seed 3 Cornish pasties and 2 loaves of bread in the standing-room chest (`Manor::SeedStandingRoom`). Native test of the new-game chest contents
+- [ ] 6.5 Hoe signposting: salvage `order[]` becomes billhook, hoe, axe, scythe, pickaxe; the no-hoe till refusal suggests the salvage; the arrival journal gets the west-rooms line. Native tests: the second search yields the hoe blade, and the refusal text
+- [ ] 6.6 Package, then from a new game: eat a chest pasty and see Well fed, check there's no hunger icon, find the hoe blade in the second salvage pile, and till. Capture in-game views
+
+## 7. Integration and acceptance
+
+- [ ] 7.1 Do the single `SimulationSaveVersion` bump with the reset notice at final integration. It also drops the unused `hunger` field. Retarget the packaged FullLoop and Smoke suites to the seasonal year and the one-meter model
+- [ ] 7.2 Run the full-acceptance route in a packaged build, one continuous run. Harvest one crop per season, pick blackberries, find mushrooms, sell grain to Tregear's, fence a plot, furnish the room, cook and eat each dish (checking Well fed), and find both shops closed on a Sunday. Check mouse and controller parity
+- [ ] 7.3 Jenny playtests. Confirm the day length (30 or 60), Sunday closing, the shop and keeper names, and the energy and Well fed values, and fold in her feedback

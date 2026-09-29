@@ -78,13 +78,18 @@ adapts conventions only and copies no proprietary art, text or branding.
 
 ### Meters, calendar, weather
 
-- **Energy and hunger only, both gentle.** Cold and warmth are removed entirely: no meter, no
-  cold nights, no clothing insulation. Clothing is purely expressive. Winter changes crops,
-  forage and scenery, and it's never a threat.
-- Food matters. Meals refill hunger and restore energy, and better dishes restore more. As
-  hunger falls, energy recovers more slowly and work costs a little more. At empty she can
-  still work, just inefficiently, and a meal fixes it immediately. Hunger never causes
-  fainting or health damage.
+- **Energy is the only personal meter**, as in Coral Island. Jenny decided this on 2026-09-29.
+  - Cold and warmth are removed entirely: no meter, no cold nights, no clothing insulation.
+    Clothing is purely expressive. Winter changes crops, forage and scenery, and it's never a
+    threat.
+  - There's no hunger meter, hunger penalty or hunger failure.
+- **Food restores energy.**
+  - Snacks restore a little: raw forage, bread, cheese.
+  - Meals restore much more and also give **Well fed**. A meal is a cooked or cooked-and-bought
+    dish: pasty, hearth dishes, fish dishes. While Well fed, every piece of work costs 15% less
+    energy for a few game hours, and better dishes last longer.
+  - Eating while Well fed refreshes the timer; bonuses don't stack.
+  - This keeps a reason to cook and to stop for a proper meal, without a second bar to watch.
 - There's no bedtime by the clock. Jenny ruled this in `flexible-sleep`: she can stay up all
   night, or sleep through the day to make up for it. At the bed she chooses between sleeping
   until morning, until rested, or a nap. If her energy runs out, she dozes off where she stands
@@ -165,7 +170,7 @@ adapts conventions only and copies no proprietary art, text or branding.
 - **Fishing.**
   - An early loop from the shore, river and lake, with a gentle timing minigame.
   - Fish store like any goods and never spoil.
-  - Fish can be cooked into meals that refill hunger and energy, such as grilled fish, fish
+  - Fish can be cooked into meals that restore energy and give Well fed, such as grilled fish, fish
     pie and stargazy pie, or sold to the fishmonger.
   - Later a boat opens pilchard and crab fishing as a fourth lucrative loop.
 - **Mining.**

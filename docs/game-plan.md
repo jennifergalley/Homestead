@@ -137,8 +137,9 @@ is historical, not the current build/authorization status.
   - The estate boundary is shown on a minimap and world map. There are no pre-built fences.
 - **Start:** Spring day 1, in the one standing room of a ruined manor, on an estate buried in
   bramble, weeds, stumps and rubble.
-- **Meters:** energy and hunger only, both gentle. There's no cold, death or spoilage. Food
-  refills hunger and energy.
+- **Meters:** one gentle energy meter, as in Coral Island. There's no hunger, cold, death or
+  spoilage. Food restores energy, and proper meals make her Well fed, so work costs less for a
+  few hours.
 - **Calendar:** days of about 30 real minutes, from 6 AM to 2 AM, and four 28-day seasons.
   It's sunny with occasional rain.
 - **Tools:** axe, hoe, pail or watering can, scythe, billhook and pickaxe, then a fishing

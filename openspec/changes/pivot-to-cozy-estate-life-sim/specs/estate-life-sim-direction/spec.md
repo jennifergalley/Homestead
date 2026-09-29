@@ -20,12 +20,16 @@ money or item penalty, lost time, lower output, or a reputation dip.
 - **WHEN** a seasonal rate, tax or wage goes unpaid
 - **THEN** late fees and a reputation reduction apply, and the estate, its buildings and parcels remain hers
 
-### Requirement: Energy and hunger are the only personal meters
-The game SHALL track energy and hunger and SHALL NOT track warmth or cold. Meals SHALL refill hunger and restore energy, with better dishes restoring more. As hunger falls, energy SHALL recover more slowly and work SHALL cost more energy. At empty hunger, work SHALL remain possible, and eating SHALL remove the penalty immediately.
+### Requirement: Energy is the only personal meter
+The game SHALL track energy as the heroine's only personal meter and SHALL NOT track hunger, warmth or cold. Eating SHALL restore energy. Meals SHALL restore more than snacks and SHALL grant a temporary Well fed benefit that reduces work costs. No meter SHALL cause fainting, damage or failure.
 
-#### Scenario: Working while hungry
-- **WHEN** hunger is empty and the heroine uses a tool
-- **THEN** the action succeeds at a higher energy cost and no fainting or damage occurs
+#### Scenario: Meal versus snack
+- **WHEN** the heroine eats a Cornish pasty, and at another time eats a loaf of bread
+- **THEN** the pasty restores more energy and grants Well fed, and the bread restores a little energy without Well fed
+
+#### Scenario: A day without eating
+- **WHEN** the heroine works through a whole day without eating
+- **THEN** no hunger warning, penalty or failure occurs, and only her energy limits her work
 
 #### Scenario: Winter clothing
 - **WHEN** it is winter and the heroine wears any outfit

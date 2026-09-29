@@ -29,16 +29,31 @@ A new game SHALL default to a 30-real-minute day. The Settings choice of 30, 60 
 - **WHEN** a new game runs for 15 real minutes unpaused
 - **THEN** about 12 game hours have passed
 
-### Requirement: Hunger slows her but never fails the game
-Empty hunger SHALL NOT fail the game, block actions or send the heroine to a checkpoint. Below 25 hunger, energy SHALL recover more slowly and work SHALL cost more energy. At 0 both effects SHALL be stronger. Eating SHALL remove the penalty at once.
+### Requirement: Energy is the only meter, and meals make her Well fed
+On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penalty or hunger failure, and the HUD SHALL show no hunger meter. Food SHALL restore energy. Snacks SHALL restore a little. Meals SHALL restore more and SHALL grant Well fed for a limited number of game hours. While Well fed, every piece of work SHALL cost less energy. Eating another meal SHALL refresh the timer rather than stack the benefit.
 
-#### Scenario: Famished but working
-- **WHEN** hunger is 0 and the heroine clears bramble
-- **THEN** the clear succeeds at a higher energy cost and no failure screen appears
+#### Scenario: Meal
+- **WHEN** she eats a Cornish pasty
+- **THEN** her energy rises, "Well fed" appears beside the energy meter, and clearing bramble costs less energy until it expires
 
-#### Scenario: Eating restores normal pace
-- **WHEN** a famished heroine eats a meal
-- **THEN** hunger rises and her work costs return to normal immediately
+#### Scenario: Snack
+- **WHEN** she eats a loaf of bread
+- **THEN** her energy rises a little and no Well fed state begins
+
+#### Scenario: No hunger
+- **WHEN** she plays two full days without eating
+- **THEN** no hunger toast, penalty or failure appears, and the HUD shows only energy among her vitals
+
+### Requirement: A new game starts with some food and a findable hoe
+A new game SHALL seed the standing-room chest with 3 Cornish pasties and 2 loaves of bread. Salvage piles SHALL yield the rusted hoe blade second, after the billhook blade. Trying to till without a hoe SHALL suggest searching the old manor's salvage. The arrival journal note SHALL hint where the garden tools were kept.
+
+#### Scenario: Second salvage pile
+- **WHEN** she has hafted the billhook and searches any other salvage pile
+- **THEN** that pile yields the rusted hoe blade
+
+#### Scenario: Tilling without a hoe
+- **WHEN** she tries to till with no hoe
+- **THEN** the refusal suggests searching the salvage in the old manor for a hoe blade
 
 ### Requirement: Crops grow only in their seasons
 Every crop SHALL declare the seasons it grows in. Planting out of season SHALL be refused and SHALL name the crop's seasons. Planting a crop that cannot ripen before its last in-season day SHALL be allowed with a warning.
