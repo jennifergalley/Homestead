@@ -222,6 +222,13 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Pending doc updates on merge
 
+- Lamp lane (uncommitted in `jennifergalley-fluffy-broccoli` as of 2026-09-28): `build_prop.py` gains a
+  recipe-level `BAKE_MESHES = {"SM_Name"}` (or a dict of per-mesh overrides) to bake only chosen meshes,
+  so a prop can bake its opaque body while leaving separate glass or flame meshes unbaked
+  (`Recipes/oil_lamp.py`: `SM_OilLamp` baked, `SM_OilLampGlass` and `SM_OilLampFlame` not). With only
+  `BAKE`, every mesh still bakes. When it lands, add it to the Blender skill's "Bake and review
+  settings" step and `docs\blender-assets.md`.
+
 - Build speed (`f6ed1c42`, waiting on the orchestrator): once it merges, (a) point every `Build.bat
   SurvivalGameEditor ...` recipe (editor skill quick-start and section 8, `docs\handoff\README.md` step 3,
   `docs\setup.md`) at `Scripts\Invoke-UnrealBuild.ps1` (`-Target`, `-CheckOnly`, `-Force`; it skips UBT when
@@ -236,8 +243,21 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   clashes, C4458/C4459, C2487, enum default args, UPROPERTY-not-static, `../Simulation/` includes,
   runtime ISM Rebuild) and section 8's "C++ conventions that bite" at that skill's "Unreal C++"
   section, keeping each row's Symptom column. The docs agent does this.
+- Architecture agent, same merge:
+  - **Save v13** (`c729d4e6`): stocks carry their width, and v12 saves migrate. Then replace the
+    SAVE-SAFETY HOLD above and in editor skill section 0 with: "Items can be appended freely (v13+);
+    never reorder or remove them. New save sections write any list or per-enum array with its count
+    first." Update the save-version line to 13, and the orchestrator lifts the hold.
+  - **Legacy probes removed** (`26b367e9`): `Test-AuthoringSettings.ps1`, `Tests\HomesteadMenuSourceTests.py`,
+    FernSpike and the `*Policy` scripts. Drop `Test-AuthoringSettings.ps1` from editor skill section 0's
+    "Never stop shared processes" bullet, and delete the table 0.1 row about `HomesteadMenuSourceTests.py`
+    failures.
 
 ## Tooling requests (unassigned)
+
+- `get_play_state` (`st`) should report `namesOpen` and `shopOpen`. Both make the controller swallow
+  gameplay keys, but `st` can't show them today, so a tap that does nothing looks like broken input
+  (the Sleep/Ground lane, 2026-09-28). Asked for by that lane.
 
 - The `HomesteadPlayTools` additions asked for by the clearing lane:
   - `bootstrap_estate_tools`: search every salvage pile, gather branches, haft all five tools and
