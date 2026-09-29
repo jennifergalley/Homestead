@@ -129,6 +129,9 @@ public:
     void ResetActionHints();
     bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }
     FString Toast() const { return ToastRemaining > 0 ? ToastText : FString(); }
+    // Seconds the current toast has left, and a count of Notify calls (tells a repeated message apart).
+    float ToastSecondsLeft() const { return ToastRemaining; }
+    uint32 NoticeCount() const { return NoticeSerial; }
     FString PlacementLabel() const;
     // Whether the preview snaps, stands free, or why it can't be built there.
     FString PlacementStatus() const;
@@ -275,6 +278,17 @@ public:
     // The signed change of the last trade and how visible its readout still is (1 fresh, 0 gone).
     int64 WalletDelta() const { return LastWalletDelta; }
     float WalletDeltaAlpha() const { return FMath::Clamp(WalletDeltaRemaining / 1.0f, 0.0f, 1.0f); }
+    // What the last meal from the hotbar actually added to food and energy (after caps), for the
+    // vitals' "+N" popups; Serial counts meals so a repeat of the same gain still shows.
+    struct FMealGain { double Food = 0, Energy = 0; uint32 Serial = 0; };
+    const FMealGain& LastMealGain() const { return MealGain; }
+    // Sprint was asked for (or ran out) with too little Energy: a gentle notice, not a failure.
+    void SprintTooTired();
+    // Keyboard sprint: a tap of Shift toggles it on release, unless Shift was a modifier (Shift+Q,
+    // Shift+click) meanwhile. Movement keys don't count, so Shift+W still toggles.
+    void TrackSprintShift(const FInputKeyEventArgs& Params);
+    // The selected hotbar slot's food, even when she has none left (Item::Count if it isn't food).
+    Homestead::Item SelectedHotbarFood() const;
     // Console playtest aid: open the general store on the ground ahead of her (moving it if it exists).
     UFUNCTION(Exec) void HomesteadOpenStore();
     // Console playtest aid: add (or with a negative amount remove) cents from her purse.
@@ -326,12 +340,22 @@ private:
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
     int64 LastWalletDelta = 0;
     float WalletDeltaRemaining = 0.0f;
+    FMealGain MealGain;
+    bool bSprintShiftDown = false;
+    bool bSprintShiftModifier = false;
+    // A/X with food selected and nothing to interact with: eat one (or say none is left).
+    bool EatSelectedFoodInstead();
     void SyncStores();
     void TickStores(float DeltaSeconds);
     void ConsiderStoreFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;
     FString StoreFocusTitle() const;
     FString StoreFocusActions() const;
     void InteractWithStore();
+    // Waiting at a closed shop's door: A asks, a second A (or B to cancel) answers.
+    int32 WaitShopId = INDEX_NONE;
+    double WaitAskedAt = 0.0;
+    bool IsShopWaitArmed() const;
+    bool CancelShopWait();
     FString GreetingFor(const Homestead::Shop& Shop) const;
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;

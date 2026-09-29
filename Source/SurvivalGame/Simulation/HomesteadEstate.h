@@ -6,9 +6,10 @@
 #include <string>
 #include <vector>
 
-// The fixed estate map's shared round-1 interface. The world lane owns the positions (authored in
-// the Estate level's DA_EstateLandmarks); every other lane reads anchors by name only, so the
-// coordinates may move freely as the terrain is reshaped.
+// The fixed estate map's shared round-1 interface. `estate_layout.json` is mirrored manually in
+// ProvisionalEstateLayout(), which the controller currently installs for every Estate simulation.
+// Every other lane reads anchors by name only, so keep that C++ table in step when terrain scripts
+// move an anchor.
 //
 // World frame: Unreal centimetres, +X north, +Y east, the map centred on the origin (a 4033 m
 // Landscape spans about -201600..201600 on both axes). The sea lies to the south.
@@ -84,8 +85,8 @@ struct EstatePlacements
     std::vector<EstatePlacement> placements;
 };
 
-// Rough v1 anchors so every lane can develop and test before the Estate level is authored. The
-// Unreal game replaces these with the level's DA_EstateLandmarks when it loads the Estate map.
+// The current Estate anchor source. The name remains provisional from the early development phase;
+// AHomesteadController installs this table directly when preparing an Estate simulation.
 const EstateLayout& ProvisionalEstateLayout();
 
 // Provisional interactive placements until the world lane bakes DA_EstatePlacements from the
