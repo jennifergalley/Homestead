@@ -186,7 +186,9 @@ void UHomesteadWeather::TickWeather(float DeltaSeconds)
         const float Gain = FMath::Pow(Rain, 0.7f) * Setting * FMath::Lerp(OutdoorGain, IndoorGain, Indoors);
         if (Gain > 0.001f)
         {
-            if (!Sound->IsPlaying()) Sound->FadeIn(2.0f, Gain, FMath::FRandRange(0.0f, 30.0f));
+            // Fade to full and let the volume multiplier carry the gain: FadeIn's level multiplies it, so
+            // fading to Gain as well played the rain at Gain squared (inaudible in drizzle).
+            if (!Sound->IsPlaying()) Sound->FadeIn(2.0f, 1.0f, FMath::FRandRange(0.0f, 30.0f));
             Sound->SetVolumeMultiplier(Gain);
             Sound->SetLowPassFilterFrequency(FMath::Lerp(20000.0f, IndoorCutoffHz, Indoors));
         }
