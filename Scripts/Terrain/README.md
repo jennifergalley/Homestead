@@ -211,6 +211,15 @@ tracks, bends the blades in gusts (`GrassWind`) and parts them round the heroine
 `HomesteadGrassField.h`'s LOD distances depend on `GrassFade` and the LOD keep fractions, so change
 all three together.
 
+MVP woodland zone: when `Scripts/Terrain/mvp_woodland.json` exists (the woodland-biome lane's
+region: `polygon` in metres, `edge_m`), `bake_ground.py` writes a mask into `T_EstateCanopy.B`. It
+rises from 0 at the polygon's edge to 1 at `edge_m` inside. Inside the zone the landscape shows the
+survival prototype's forest floor (`T_GrassGround`, untinted, 3 m world tiling, easing into a
+12.9 m copy past 60 m). The meadow grows no blades there, because that lane scatters the prototype's
+own grass clumps, and footsteps use the woodland-floor sound. Tree canopy kinds and crown radii come
+from `SCENERY_TREES` in `Scripts/Map/bake_estate_map.py`, with a fallback table in `bake_ground.py`
+for kinds it doesn't list yet.
+
 Weather and night: `build_ground.py` also makes `MPC_EstateGround` (Wetness, Daylight), which
 `AHomesteadWorld::UpdateLighting` sets every refresh. The ground wets through over the first half hour
 of the rain and dries over four hours after it. Wet soil, litter and stone darken and gloss (turf

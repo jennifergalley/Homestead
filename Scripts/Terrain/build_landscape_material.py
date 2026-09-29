@@ -102,6 +102,15 @@ col = lerp(col, RockD * Tints[3].rgb, steep * 0.8);
 n = normalize(lerp(n, RockN, steep * 0.8));
 rough = lerp(rough, RockR, steep * 0.8);
 
+// The MVP woodland zone (T_EstateCanopy.B): the survival prototype's forest floor as it drew it,
+// T_GrassGround untinted at 3 m world-aligned tiling, easing into a coarser copy of itself past 60 m
+// (the prototype never showed it that far) so it doesn't tile at range.
+float zone = saturate(Zone);
+float3 mvp = lerp(MvpD, MvpFarD, smoothstep(60.0, 160.0, dist) * 0.5);
+col = lerp(col, mvp, zone);
+n = normalize(lerp(n, MvpN, zone));
+rough = lerp(rough, MvpR, zone);
+
 // Rain (MPC_EstateGround.Wetness): soil, litter and stone darken most, turf less; everything turns
 // glossy, and trodden ground and wheel ruts hold a sheen of standing water.
 float w = saturate(Wet);
@@ -170,6 +179,12 @@ def ground_finish(bc, nm, rg, y0):
     luv = scaled(4.0, -1300, y + 420)
     litter_d = tex(texture('WoodlandFloor', 'D').get_path_name(), -1100, y + 420, ST.SAMPLERTYPE_COLOR, luv)
     litter_n = tex(texture('WoodlandFloor', 'N').get_path_name(), -1100, y + 480, ST.SAMPLERTYPE_NORMAL, luv)
+    MVP = '/Game/Trials/GrassGround_20260921_01/Textures/T_GrassGround'
+    muv = scaled(3.0, -1300, y + 700)
+    mvp_d = tex(f'{MVP}_Diff', -1100, y + 700, ST.SAMPLERTYPE_COLOR, muv)
+    mvp_n = tex(f'{MVP}_NormalDX', -1100, y + 760, ST.SAMPLERTYPE_NORMAL, muv)
+    mvp_r = tex(f'{MVP}_Roughness', -1100, y + 820, ST.SAMPLERTYPE_MASKS, muv)
+    mvp_far = tex(f'{MVP}_Diff', -1100, y + 880, ST.SAMPLERTYPE_COLOR, scaled(12.9, -1300, y + 880, 0.21))
     ruv = scaled(4.5, -1300, y + 560)
     rock_d = tex(f'{GROUND}/T_Ground_Stony_D', -1100, y + 540, ST.SAMPLERTYPE_COLOR, ruv)
     rock_n = tex(f'{GROUND}/T_Ground_Stony_N', -1100, y + 600, ST.SAMPLERTYPE_NORMAL, ruv)
@@ -204,7 +219,8 @@ def ground_finish(bc, nm, rg, y0):
     c.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
     c.set_editor_property('description', 'GroundFinish')
     inputs = [('BC', bc, ''), ('NIn', nm, ''), ('R', rg, ''), ('WP', wp, ''), ('D', depth, ''),
-              ('GroundTex', ground, 'RGBA'), ('Canopy', canopy, 'R'), ('Stony', canopy, 'G'), ('Macro1', macro1, 'R'), ('Macro2', macro2, 'R'),
+              ('GroundTex', ground, 'RGBA'), ('Canopy', canopy, 'R'), ('Stony', canopy, 'G'), ('Zone', canopy, 'B'),
+              ('MvpD', mvp_d, 'RGB'), ('MvpN', mvp_n, 'RGB'), ('MvpR', mvp_r, 'R'), ('MvpFarD', mvp_far, 'RGB'), ('Macro1', macro1, 'R'), ('Macro2', macro2, 'R'),
               ('WearD', wear_d, 'RGB'), ('WearN', wear_n, 'RGB'), ('WearR', wear_r, 'R'),
               ('LitterD', litter_d, 'RGB'), ('LitterN', litter_n, 'RGB'),
               ('RockD', rock_d, 'RGB'), ('RockN', rock_n, 'RGB'), ('RockR', rock_r, 'R'),
