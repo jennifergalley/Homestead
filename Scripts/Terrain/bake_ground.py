@@ -158,7 +158,7 @@ def mvp_woodland_zone(shape):
     [[x, y], ...] in metres, optional "floor_edge_m" (default 15) and "glades" [[x, y, radius], ...]).
     Returns (zone, floor): zone is 1 inside the polygon (no meadow blades, woodland footsteps) and
     floor ramps the MVP forest floor in from 0 at the polygon's edge to 1 floor_edge_m inside, the
-    ramp's line wandering with noise; glades take a lighter mix of the floor. None when absent."""
+    ramp's line wandering with noise; glades get the same floor. None when absent."""
     path = os.path.join(HERE, "mvp_woodland.json")
     if not os.path.exists(path):
         return None
@@ -172,11 +172,7 @@ def mvp_woodland_zone(shape):
     wander = (fbm(shape, 2, 256, 31) - 0.5) * 0.9 * ramp               # the ecotone line meanders
     floor = smoothstep(0.0, ramp, depth + wander) * inside
     zone = smoothstep(0.0, 2.0, depth).astype(np.float32)
-    coords = (np.arange(shape[0]) - H).astype(np.float32)
-    X, Y = np.meshgrid(coords, coords)
-    for gx, gy, gr in spec.get("glades", []):
-        glade = smoothstep(gr + 4.0, gr * 0.6, np.hypot(X - gx, Y - gy))
-        floor *= 1.0 - 0.3 * glade
+    # Glades take the same floor as under the trees, as the prototype's openings did.
     print("MVP woodland zone:", len(poly), "points,", round(float(inside.sum()) / 1e4, 1), "ha, floor ramp", ramp, "m,",
           len(spec.get("glades", [])), "glades")
     return zone, floor.astype(np.float32)

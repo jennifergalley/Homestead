@@ -1,6 +1,7 @@
 #include "HomesteadController.h"
 #include "HomesteadEstateGround.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "Simulation/HomesteadCrops.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
@@ -96,11 +97,10 @@ const Homestead::Plot* FindPlotWhere(const std::vector<Homestead::Plot>& Plots, 
     return nullptr;
 }
 
-// Chosen on the hotbar to plant bare tilled soil: seeds grow roots, a berry's seeds grow a bush.
+// Chosen on the hotbar to plant bare tilled soil: each seed grows its crop (a berry's seeds grow a bush).
 TOptional<Homestead::CropKind> PlantingCrop(Homestead::Item Item)
 {
-    if (Item == Homestead::Item::Seeds) return Homestead::CropKind::Roots;
-    if (Item == Homestead::Item::Berries) return Homestead::CropKind::Berries;
+    if (const auto* Crop = Homestead::CropForSeed(Item)) return Crop->kind;
     return {};
 }
 
@@ -123,7 +123,11 @@ FName HotbarIcon(Homestead::Item Item)
     case Homestead::Item::Billhook: return TEXT("billhook");
     case Homestead::Item::Pickaxe: return TEXT("pickaxe");
     case Homestead::Item::OilLamp: return TEXT("oil-lamp");
-    default: return NAME_None;
+    default:
+        // Crop seeds and produce use their catalogue glyph.
+        if (Homestead::CropForSeed(Item) || (Item >= Homestead::Item::Turnip && Item <= Homestead::Item::Strawberries))
+            return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item)));
+        return NAME_None;
     }
 }
 
@@ -707,6 +711,26 @@ bool AHomesteadController::CanPinToHotbar(Homestead::Item Item)
     return IsHotbarTool(Item) || IsFoodItem(Item) || PlantingCrop(Item).IsSet();
 }
 
+void AHomesteadController::PinNewSeed(Homestead::Item Item)
+{
+    // Bought or given crop seed goes straight onto the hotbar, ready to sow: into a free slot, or
+    // else into the slot of a seed she has run out of.
+    const auto* Crop = Homestead::CropForSeed(Item);
+    if (!Crop || Item == Homestead::Item::Berries || IsPinnedToHotbar(Item)) return;
+    if (HotbarSlots.IndexOfByKey(-1) != INDEX_NONE)
+    {
+        TogglePinnedToHotbar(Item);
+        return;
+    }
+    for (int32& Slot : HotbarSlots)
+        if (Slot >= 0 && static_cast<Homestead::Item>(Slot) != Homestead::Item::Berries
+            && Homestead::CropForSeed(static_cast<Homestead::Item>(Slot)) && Sim.Count(static_cast<Homestead::Item>(Slot)) <= 0)
+        {
+            Slot = static_cast<int32>(Item);
+            return;
+        }
+}
+
 bool AHomesteadController::IsPinnedToHotbar(Homestead::Item Item) const
 {
     return HotbarSlots.Contains(static_cast<int32>(Item));
@@ -775,6 +799,8 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
             Slot.Icon = HotbarIcon(Slot.Tool);
             if (Slot.Tool == Homestead::Item::OilLamp && Slot.Available)
                 Slot.Fill = static_cast<float>(Sim.LampOil() / Homestead::Lamp::CapacityHours);
+            Slot.Seed = IsSowingSeed(Slot.Tool);
+            Slot.Pouch = Slot.Seed && OtherPouchSeeds(Index) > 0;
         }
 
         Result.Add(Slot);
@@ -846,9 +872,9 @@ void AHomesteadController::UseSelectedTool()
                     return;
                 }
             }
-            if (static_cast<Homestead::Item>(ToolValue) == Homestead::Item::Seeds)
+            if (static_cast<Homestead::Item>(ToolValue) != Homestead::Item::Berries)
             {
-                Notify(TEXT("Aim at bare tilled soil to plant seeds."), true);
+                Notify(TEXT("Aim at bare tilled soil to sow it."), true);
                 return;
             }
         }
@@ -946,7 +972,8 @@ Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Posit
         {
             const FVector Center = Spline->FindLocationClosestToWorldLocation(Here, ESplineCoordinateSpace::World);
             const float Key = Spline->FindInputKeyClosestToWorldLocation(Here);
-            const double HalfWidth = 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y;
+            // Aim a hand's breadth inside the waterline (spline scale Y is the waterline half width).
+            const double HalfWidth = FMath::Max(0.0, 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y - PailDipInsideCm);
             const FVector2D Out(Position.x - Center.X, Position.y - Center.Y);
             const FVector Edge = Out.SizeSquared() > 1.0
                 ? Center + FVector(Out.GetSafeNormal().X * HalfWidth, Out.GetSafeNormal().Y * HalfWidth, 0.0)
@@ -1054,6 +1081,18 @@ void AHomesteadController::HomesteadMorning(float Hour)
     RefreshRemaining = 0;
 }
 
+void AHomesteadController::HomesteadGrowCrops(float Days, int32 Tend)
+{
+    Notify(Sim.PassDaysForPlaytest(Days, Tend != 0, PlayerPoint()));
+    RefreshRemaining = 0;
+}
+
+void AHomesteadController::HomesteadCropGrowth(float Growth)
+{
+    Notify(Sim.SetCropGrowthForPlaytest(Growth));
+    RefreshRemaining = 0;
+}
+
 void AHomesteadController::HomesteadEnergy(float Energy)
 {
     Notify(Sim.SetEnergy(Energy));
@@ -1084,6 +1123,7 @@ void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
             continue;
         const auto Result = Sim.GrantItems(Item, Amount);
         Notify(UTF8_TO_TCHAR(Result.message.c_str()), !Result);
+        if (Result) PinNewSeed(Item);
         return;
     }
     Notify(FString::Printf(TEXT("No item called %s."), *ItemName), true);
@@ -1298,6 +1338,7 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Gamepad_DPad_Left, IE_Pressed, this, &AHomesteadController::PreviousPage);
     InputComponent->BindKey(EKeys::Gamepad_DPad_Right, IE_Pressed, this, &AHomesteadController::NextPage);
     InputComponent->BindKey(EKeys::R, IE_Pressed, this, &AHomesteadController::RotatePlacement);
+    InputComponent->BindKey(EKeys::Q, IE_Pressed, this, &AHomesteadController::NextSeed);
     InputComponent->BindKey(EKeys::Gamepad_RightThumbstick, IE_Pressed, this, &AHomesteadController::CycleZoom);
     InputComponent->BindKey(EKeys::F5, IE_Pressed, this, &AHomesteadController::QuickSave);
     InputComponent->BindKey(EKeys::F9, IE_Pressed, this, &AHomesteadController::QuickLoad);
@@ -1860,6 +1901,17 @@ void AHomesteadController::Tick(float DeltaSeconds)
             RefreshRemaining = 0;
         }
     }
+    if (HeldHarvestPlot != INDEX_NONE)
+    {
+        const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+        if (!Avatar || Avatar->SticksLiftedFromPile() >= 1 || !Avatar->IsStickPileOnGround()
+            || GetWorld()->GetTimeSeconds() - HeldHarvestSince > 6.0)
+        {
+            if (Landscape) Landscape->ReleaseHarvest();
+            HeldHarvestPlot = INDEX_NONE;
+            RefreshRemaining = 0;
+        }
+    }
     if (HeldStickPile != INDEX_NONE)
     {
         const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -1985,6 +2037,24 @@ void AHomesteadController::UpdateFocus()
         Consider(EFocus::Drop, Drop.id, Drop.position);
     for (const auto& Plot : State().plots)
         Consider(EFocus::Plot, Plot.id, Homestead::PlotCenter(Plot));
+    // In a garden of adjoining squares the nearest centre is ambiguous (and a weed at her feet can
+    // win): the square her reach lands in, 60 cm ahead of her, takes the focus.
+    if (const APawn* Avatar = GetPawn(); Avatar && !State().plots.empty())
+    {
+        constexpr double GardenReachAheadCm = 60.0;
+        const FVector Forward = Avatar->GetActorForwardVector();
+        const int ReachX = Homestead::GardenCell(Position.x + Forward.X * GardenReachAheadCm);
+        const int ReachY = Homestead::GardenCell(Position.y + Forward.Y * GardenReachAheadCm);
+        for (const auto& Plot : State().plots)
+            if (Plot.cellX == ReachX && Plot.cellY == ReachY)
+            {
+                Best = FMath::Min(Best, FMath::Sqrt(FMath::Square(Homestead::PlotCenter(Plot).x - Position.x)
+                    + FMath::Square(Homestead::PlotCenter(Plot).y - Position.y)));
+                Focus = EFocus::Plot;
+                FocusId = Plot.id;
+                break;
+            }
+    }
     for (const auto& Structure : State().structures)
     {
         EFocus Kind = EFocus::None;
@@ -2056,9 +2126,7 @@ FString AHomesteadController::FocusTitle() const
         {
             if (Plot.id != FocusId) continue;
             if (!Plot.planted) return TEXT("A little patch of earth");
-            return FString::Printf(TEXT("%s  |  %d%% grown  |  %d%% watered  |  %d%% weeds"),
-                *Text(Homestead::CropName(Plot.kind)), FMath::RoundToInt(Plot.growth * 100),
-                FMath::RoundToInt(Plot.moisture * 100), FMath::RoundToInt(Plot.weeds * 100));
+            return Text(Homestead::PlotStatus(Plot).c_str());
         }
         break;
     case EFocus::Drop:
@@ -2150,23 +2218,30 @@ FString AHomesteadController::FocusActions() const
         for (const auto& Plot : State().plots)
             if (Plot.id == FocusId)
             {
-                if (!Plot.planted) return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
-                if (Plot.growth >= 1) return A + TEXT(" Harvest");
-                if (ToolAvailable && SelectedTool == Homestead::Item::WateringCan)
-                    return Use + TEXT(" Water");
-                if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
-                    return Use + TEXT(" Weed");
+                if (!Plot.planted)
                 {
-                    // Plot tools: the pail waters, the hoe weeds.
-                    const int32 Pail = ToolWhereabouts(Sim, Homestead::Item::WateringCan);
-                    const int32 Hoe = ToolWhereabouts(Sim, Homestead::Item::DiggingStick);
-                    if (Pail == 2 && Hoe == 2) return TEXT("Select the pail or hoe");
-                    if (Pail == 2) return TEXT("Select the pail");
-                    if (Hoe == 2) return TEXT("Select the hoe");
-                    if (Pail || Hoe) return ToolPrompt(Sim, Pail ? Homestead::Item::WateringCan : Homestead::Item::DiggingStick,
-                        Pail ? TEXT("pail") : TEXT("hoe"));
-                    return TEXT("Requires a pail or hoe");
+                    // A seed chosen on the hotbar is sown with the use button (UseSelectedTool).
+                    if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
+                        if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
+                            if (Seed->kind != Homestead::CropKind::Roots && Seed->kind != Homestead::CropKind::Berries
+                                && Sim.Count(Seed->seed) > 0)
+                                return A + TEXT(" Sow ") + Text(Seed->lower) + SeedPouchHint();
+                    return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds") + SeedPouchHint();
                 }
+                if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
+                FString Actions;
+                if (Homestead::NeedsWater(Plot))
+                {
+                    // The pail in her pack waters on [E]/[A]; otherwise say where it is.
+                    const int32 Pail = ToolWhereabouts(Sim, Homestead::Item::WateringCan);
+                    Actions = Pail == 2 && Sim.Count(Homestead::Item::Water) <= 0 ? FString(UTF8_TO_TCHAR(Homestead::EmptyPailText))
+                        : Pail == 2 ? (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water")
+                        : ToolPrompt(Sim, Homestead::Item::WateringCan, TEXT("pail"), TEXT(" to water"));
+                }
+                if (Plot.weeds > 0.1)
+                    Actions += (Actions.IsEmpty() ? TEXT("") : TEXT("   "))
+                        + (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick ? Use : X) + TEXT(" Weed");
+                return Actions;
             }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
@@ -2198,6 +2273,8 @@ FString AHomesteadController::FocusActions() const
     default:
         if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
+        if (!SeedPouchHint().IsEmpty())
+            return (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book")) + SeedPouchHint();
         return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
@@ -2783,14 +2860,22 @@ void AHomesteadController::Interact()
             const bool Mature = Plot.growth >= 1;
             if (!Planted)
             {
-                PlantFocusedPlot(Homestead::CropKind::Roots);
+                // The seed chosen on the hotbar (if she has any left), else wild root seed.
+                TOptional<Homestead::CropKind> Seed;
+                if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0
+                    && Sim.Count(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])) > 0)
+                    Seed = PlantingCrop(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]));
+                PlantFocusedPlot(Seed && *Seed != Homestead::CropKind::Berries ? *Seed : Homestead::CropKind::Roots);
                 break;
             }
+            const Homestead::CropKind Harvested = Plot.kind;
+            const Homestead::Point Center = Homestead::PlotCenter(Plot);
             const auto Result = Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
             Notify(Result, GrassStepB);
+            if (Result.ok && Mature) PresentHarvest(FocusId, Harvested, Center);
             if (Result.ok && !Mature)
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                    Avatar->PlayWater(Homestead::PlotCenter(Plot));
+                    Avatar->PlayWater(Center);
             break;
         }
         break;
@@ -2941,6 +3026,20 @@ void AHomesteadController::HoeSquareAhead()
     }
 }
 
+void AHomesteadController::PresentHarvest(int32 PlotId, Homestead::CropKind Crop, Homestead::Point Center)
+{
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    if (!Avatar) return;
+    const bool bPick = Homestead::GetCropInfo(Crop).style == Homestead::HarvestStyle::Pick;
+    UStaticMesh* Produce = Landscape ? Landscape->CropMesh(Crop, TEXT("Harvest")) : nullptr;
+    if (!Avatar->PlayHarvest(Center, bPick, Produce) || !Landscape) return;
+    // The ripe plant stays in the ground until her hands lift the crop out of it.
+    Landscape->HoldHarvest(PlotId, Crop);
+    HeldHarvestPlot = PlotId;
+    HeldHarvestSince = GetWorld()->GetTimeSeconds();
+    RefreshRemaining = 0;
+}
+
 void AHomesteadController::PlantFocusedPlot(Homestead::CropKind Crop)
 {
     const auto* Plot = FindPlotWhere(State().plots, [this](const Homestead::Plot& Candidate) { return Candidate.id == FocusId; });
@@ -3037,7 +3136,7 @@ void AHomesteadController::NextPage()
 }
 void AHomesteadController::PreviousRow()
 {
-    if (!bBookOpen) { CycleBedChoice(-1); return; }
+    if (!bBookOpen) { if (!CycleBedChoice(-1)) CycleSeedPouch(-1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + Count - 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -3045,7 +3144,7 @@ void AHomesteadController::PreviousRow()
 }
 void AHomesteadController::NextRow()
 {
-    if (!bBookOpen) { CycleBedChoice(1); return; }
+    if (!bBookOpen) { if (!CycleBedChoice(1)) CycleSeedPouch(1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -3889,6 +3988,9 @@ void AHomesteadController::EndPlacement()
 
 void AHomesteadController::ToggleDeconstruct()
 {
+    // Outside build planning, keyboard X does what controller X does (the secondary action: weed,
+    // plant berry seeds, add fuel), so a prompt reading "[X]" is right on either device.
+    if (!bPlanning && !bBookOpen && !IsFailed()) { Secondary(); return; }
     if (!bPlanning || bBookOpen || IsFailed()) return;
     bDeconstructing = !bDeconstructing;
     DeconstructId = INDEX_NONE;
@@ -4003,6 +4105,7 @@ void AHomesteadController::CycleZoom()
 UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 {
     bReadIncompatible = false;
+    bReadNewer = false;
     TArray<uint8> Data;
     if (IFileManager::Get().FileSize(*Filename) > 20 * 1024 * 1024) return nullptr;
     if (!FFileHelper::LoadFileToArray(Data, *Filename)) return nullptr;
@@ -4038,7 +4141,12 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     Homestead::Simulation Candidate;
     if (bEstateMap) PrepareEstateSimulation(Candidate);
     const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
-    if (!Decoded) { bReadIncompatible = Decoded.code == Homestead::ResultCode::UnsupportedVersion; return nullptr; }
+    if (!Decoded)
+    {
+        bReadIncompatible = Decoded.code == Homestead::ResultCode::UnsupportedVersion;
+        bReadNewer = Decoded.code == Homestead::ResultCode::NewerBuild;
+        return nullptr;
+    }
     return Save;
 }
 
@@ -4226,6 +4334,7 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
     UHomesteadSave* Best = nullptr;
     bool Corrupt = false;
     bool Incompatible = false;
+    bool Newer = false;
     TArray<FString> IncompatiblePaths;
     for (const auto& Slot : Slots)
     {
@@ -4237,6 +4346,8 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             if (!Save)
             {
                 Incompatible |= bReadIncompatible;
+                // A newer build's save is treated like an unreadable one: kept in place, never autosaved over.
+                Newer |= bReadNewer;
                 Corrupt |= !bReadIncompatible;
                 if (bReadIncompatible) IncompatiblePaths.Add(Path);
                 UE_LOG(LogTemp, Warning, TEXT("Cannot read save: %s"), *Path);
@@ -4286,6 +4397,8 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             ? (bEstateMap
                 ? TEXT("Saves from earlier test builds can't be opened by this one. Start a new game; the old files are kept.")
                 : TEXT("These test saves use an incompatible version. Start a new seeded woodland to use this build; old files are retained."))
+            : Newer
+            ? TEXT("These saves come from a newer build of the game. Open them with that build; they're kept unchanged.")
             : TEXT("No usable save could be read. Data is corrupt or incompatible; nothing was loaded. You can retry loading or explicitly reset this test world.");
         Notify(LoadProblem, true);
         // Do not let a fresh startup silently autosave over an unsuccessful load.

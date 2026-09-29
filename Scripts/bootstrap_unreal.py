@@ -125,7 +125,7 @@ def textured_material(name, source_folder, prefix):
     return material
 
 
-def creek_water_material(rebuild=False):
+def creek_water_material(rebuild=False, name="M_CreekWater"):
     """Flowing creek water on the Single Layer Water shading model, from the generated ripple and foam maps.
 
     Single Layer Water renders in the opaque pass, so the surface receives the woodland's shadows and
@@ -133,7 +133,9 @@ def creek_water_material(rebuild=False):
     absorption and scattering act over the real distance to the bed, which also clears the shallows
     and the shoreline by itself. Mesh UVs are metres (U across the stream, V along it) and vertex
     colour carries the depth over the rendered bed: R reaches 1 at 35 cm deep, G at 8 cm, which
-    thins the foam and softens the shoreline highlight. Pass rebuild=True to re-author in place.
+    thins the foam and softens the shoreline highlight. B adds white water (M_EstateRiver, built from
+    this graph by Scripts/Terrain/place_water.py, for the estate river's riffles and spring; 0 on the
+    woodland creek). Pass rebuild=True to re-author in place.
     """
     creek = ROOT / "Assets" / "Environment" / "Creek"
     ripples = import_asset("T_CreekRipples_N.png", "Textures", "T_CreekRipples_N", source_root=creek)
@@ -145,7 +147,7 @@ def creek_water_material(rebuild=False):
     for texture in (ripples, foam):
         if not LIB.save_loaded_asset(texture, only_if_is_dirty=False):
             raise RuntimeError(f"Could not save texture settings for {texture.get_name()}.")
-    material, created = new_material("M_CreekWater")
+    material, created = new_material(name)
     if not created and not rebuild:
         return material
     MATERIALS.delete_all_material_expressions(material)
@@ -206,9 +208,29 @@ def creek_water_material(rebuild=False):
 
     flecks = sample(foam, 1.3, (0.0, -0.75), 0, 350)
     froth = lerp(scalar("ShallowFoam", 0.55, -50, 450), scalar("DeepFoam", 0.1, -50, 520), (color, "R"), 150, 300)
-    foam_amount = node(unreal.MaterialExpressionMultiply, 300, 350)
-    link(flecks, "R", foam_amount, "A")
-    link(froth, "", foam_amount, "B")
+    streaming = node(unreal.MaterialExpressionMultiply, 300, 350)
+    link(flecks, "R", streaming, "A")
+    link(froth, "", streaming, "B")
+    # White water where vertex colour B says the water tumbles (the estate river's riffles and its
+    # spring): a coarser, faster froth layer over most of the surface. B is 0 on the woodland creek.
+    tumble = sample(foam, 0.9, (0.04, -1.4), 0, 650)
+    churn = node(unreal.MaterialExpressionMultiply, 150, 650)
+    link(tumble, "R", churn, "A")
+    link(scalar("WhiteWaterContrast", 1.8, -50, 720), "", churn, "B")
+    lift = node(unreal.MaterialExpressionAdd, 250, 650)
+    link(churn, "", lift, "A")
+    link(scalar("WhiteWaterFloor", 0.2, -50, 790), "", lift, "B")
+    white = node(unreal.MaterialExpressionMultiply, 350, 650)
+    link(lift, "", white, "A")
+    link(color, "B", white, "B")
+    white_amount = node(unreal.MaterialExpressionMultiply, 450, 650)
+    link(white, "", white_amount, "A")
+    link(scalar("WhiteWater", 0.85, 300, 790), "", white_amount, "B")
+    combined = node(unreal.MaterialExpressionAdd, 550, 400)
+    link(streaming, "", combined, "A")
+    link(white_amount, "", combined, "B")
+    foam_amount = node(unreal.MaterialExpressionSaturate, 650, 400)
+    link(combined, "", foam_amount, "")
     base = node(unreal.MaterialExpressionMultiply, 450, -100)
     link(vector("FoamColor", (0.62, 0.65, 0.62), 300, -20), "", base, "A")
     link(foam_amount, "", base, "B")
@@ -234,10 +256,10 @@ def creek_water_material(rebuild=False):
                          (foam_amount, properties.MP_OPACITY), (shine, properties.MP_SPECULAR),
                          (rough, properties.MP_ROUGHNESS), (bend, properties.MP_REFRACTION)):
         if not MATERIALS.connect_material_property(source, "", prop):
-            raise RuntimeError(f"Could not connect {prop} in M_CreekWater.")
+            raise RuntimeError(f"Could not connect {prop} in {name}.")
     MATERIALS.recompile_material(material)
     if not LIB.save_loaded_asset(material, only_if_is_dirty=False):
-        raise RuntimeError("Could not save M_CreekWater.")
+        raise RuntimeError(f"Could not save {name}.")
     return material
 
 

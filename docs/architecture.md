@@ -109,7 +109,9 @@ orchestrator before removing any of it.**
   stock, world id, resource edits, buildings, structures with chest stocks, plots, drops, wearables,
   equipment, layout, cleared underbrush), then **tagged trailing sections**: `parcels` and
   `economy` (read in that order), then any of `tools`, `manor`, `lamp`, `picked` in any order. A
-  missing trailing section loads with defaults; an unknown tag refuses the save. New
+  missing trailing section loads with defaults. A save from a newer build (a later version, wider item
+  stocks or an unknown tag) is refused with `ResultCode::NewerBuild` and left untouched on disk; only
+  unreadable older saves (`UnsupportedVersion`) are moved to `Retired`. New
   save data is added this way without a version bump (recipe in the conventions skill). Bytes above
   127 are rejected (hex-encode free text such as names).
 - **Versioning:** `SimulationSaveVersion` (13) in `HomesteadSimulation.h`. Lanes never bump it; the

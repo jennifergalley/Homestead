@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Async/Future.h"
 #include "GameFramework/Actor.h"
+#include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadRegionalDescriptorCache.h"
 #include "Simulation/HomesteadSimulation.h"
 #include "Simulation/HomesteadWorldGeneration.h"
@@ -139,6 +140,15 @@ public:
     // bHidden hides the square entirely (just tilled, before the hoe bites).
     void HoldPlot(int32 Id, bool bHideSquare = false) { HeldPlotId = Id; bHeldPlotHidden = bHideSquare; }
     void ReleasePlot() { HeldPlotId = INDEX_NONE; bHeldPlotHidden = false; }
+    // Keeps a just-harvested plot showing its ripe plant until her hands lift the produce.
+    void HoldHarvest(int32 Id, Homestead::CropKind Kind) { HeldHarvestPlotId = Id; HeldHarvestKind = Kind; }
+    void ReleaseHarvest() { HeldHarvestPlotId = INDEX_NONE; }
+    // The plant or produce mesh for a crop stage ("Sprout" ... "Ripe", "Harvest"), or null until imported.
+    UStaticMesh* CropMesh(Homestead::CropKind Kind, const TCHAR* Stage);
+    // The crop's produce (SM_Crop<Name>_Produce) at each of the stage's anchors on the plant, sized
+    // and coloured by growth: roots push up out of the soil, fruit and pods swell and colour up.
+    void AddCropProduce(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot, Homestead::CropStage CropStage,
+        const FTransform& PlantTransform);
     // Hide one component of the held produce (a stick she has already lifted from the pile).
     void HideHeldProducePart(int32 Index);
     // Felling: call right after tree or sapling ResourceId is cleared. A standing copy stays up
@@ -221,6 +231,11 @@ private:
     TObjectPtr<UMaterialInterface> TilledBedWetMaterial;
     UPROPERTY()
     TObjectPtr<UStaticMesh> SoilMoundMesh;
+    // Crop plants per stage (SM_Crop<Name>_<Stage>), loaded on first use; misses are cached as null.
+    UPROPERTY()
+    TMap<FName, TObjectPtr<UStaticMesh>> CropMeshes;
+    UPROPERTY()
+    TObjectPtr<UStaticMesh> WeedTuftMesh;
     // The manor's granite kit and hearth (StoneFoundation, StoneWall, StoneDoorway, StoneRoof,
     // StoneHearth), loaded on first use by name.
     UPROPERTY()
@@ -373,6 +388,8 @@ private:
     int32 HeldProduceId = INDEX_NONE;
     int32 HeldPlotId = INDEX_NONE;
     bool bHeldPlotHidden = false;
+    int32 HeldHarvestPlotId = INDEX_NONE;
+    Homestead::CropKind HeldHarvestKind = Homestead::CropKind::Roots;
     FString OuterTreeLayoutSignature;
     FString ActiveTreeLayoutSignature;
     FString RegionalWaterSignature;
