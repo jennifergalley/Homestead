@@ -225,9 +225,19 @@ None yet.
   pasties and 2 loaves** in the starter chest. Make the **hoe head** the second salvage reward after the
   billhook, with a contextual refusal and west-chimney journal hints to find it. Pending; no code or
   content is finished yet.
-- **Hearth, birds and door** — **Audio / door owner TBD** after slots open: increase the fireplace
-  modestly while keeping it inaudible outside its room; muffle outdoor bird ambience indoors; add a
-  working wooden standing-room door that opens and closes automatically on entering or leaving.
+- **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
+  trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
+  implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the
+  hearth stays quiet outdoors even with the door open. `ForestAmbience` is a non-spatial loop at default
+  0.70 and never mixes indoors: expose a cheap `GetIndoorMix` from the existing
+  `Weather::Indoors` roof/shelter easing (0–1), and apply indoor gain/low-pass to birds and creek while
+  retaining the user's slider multiplier; the roof-overhead check must also run in sun. Architecture is
+  separately checking the rain-audio asset and gain.
+
+  The heritage-stone west doorway is a 130 × 220 cm gap with no leaf. **Props** queues an original
+  oak-plank mesh and frame after the cove stairs. The later audio/door implementer makes the leaf
+  world-owned and smoothly auto-hinged, non-trapping in physics, and PIE-verifies opening and closing.
+  No save migration is needed. Architecture continues verified CC0 music sourcing separately.
 
 ## Decisions during the round
 
