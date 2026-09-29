@@ -1150,6 +1150,8 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
         candidate.inventory[static_cast<int>(Item::WateringCan)] = 1;
         candidate.inventoryLayout.push_back({candidate.nextGroupId++, Item::WateringCan, 1, 0});
     }
+    // A few days' food and a change of clothes wait in the chest too.
+    else Manor::StockStarterChest(candidate);
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return inventory;
     layout_ = std::make_shared<const EstateLayout>(layout);
@@ -2487,7 +2489,8 @@ Result Simulation::Till(int cellX, int cellY, Point player)
     const int buildingX = GardenToCell(cellX), buildingY = GardenToCell(cellY);
     if (!ValidCell(buildingX, buildingY) || !Near(player, GardenCellCenter(cellX, cellY)))
         return Bad("Move closer to a valid garden square.");
-    if (Count(Item::DiggingStick) == 0) return Bad("Craft a hoe before tilling soil.");
+    if (Count(Item::DiggingStick) == 0)
+        return Bad(NoHoeMessage(state_, player));
     if (state_.plots.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
         return Bad("The garden has reached its plot limit.");
     const auto space = CheckGardenResources(state_, cellX, cellY);

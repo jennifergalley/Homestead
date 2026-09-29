@@ -3320,7 +3320,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         Result.Add({1, TEXT("1. Find a little breakfast"), TEXT("Gather berries, then eat them from the Pack page.")});
         Result.Add({2, TEXT("2. Make your first tools"), TEXT("Search the salvage piles around the manor for rusted heads, then craft each into a tool with two branches on the Craft page.")});
         Result.Add({3, TEXT("3. Make a home"), TEXT("Fell the trees at your chosen site with the axe. Place a floor, walls, doorway and roof. Felled trees stay gone when you return.")});
-        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Craft a hoe. Each swing tills one small square; choose seeds on the hotbar (Seeds for wild roots, a berry for berry seed) and sow each square with A/E. X/F pulls weeds.")});
+        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Search the old manor's salvage for a hoe blade (the second head you'll find) and craft a hoe. Each swing tills one small square; choose seeds on the hotbar (Seeds for wild roots, a berry for berry seed) and sow each square with A/E. X/F pulls weeds.")});
         Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill your pail at the stream. F/X removes weeds from a plot.")});
         Result.Add({6, TEXT("6. Cook and rest"), TEXT("Split timber with a carried axe. Cookfires use prepared firewood first, then branches. Roast roots; sleep in a sheltered bedroll.")});
         Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is cosmetic.")});
