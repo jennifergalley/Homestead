@@ -185,13 +185,15 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
     - On load, a missing section means not Well fed.
     - A present section's expiry **at or before** the save's `hour` has simply run out. It loads
       normally as not Well fed.
-    - A **non-finite** expiry, or one **later than** the save's `hour + 4`, is corrupt data (4 hours
-      is the longest meal tier). The whole load is rejected explicitly through the repo's standard
+    - A `wellfed` section that **can't be parsed**, appears **more than once**, or holds a
+      **non-finite** expiry or one **later than** the save's `hour + 4` is corrupt data (4 hours is
+      the longest meal tier). The whole load is rejected explicitly through the repo's standard
       invalid-save path. That path is `ResultCode::CorruptSave`, with the message "This save is
       corrupt or incomplete. Your current game was not changed." (`HomesteadSimulation.cpp`, around
       line 2894).
+    - An **unknown** section tag is still `ResultCode::NewerBuild`, and the save is left untouched.
     - The repo has no separate `InvalidSave` code. `CorruptSave` is the existing load-rejection
-      result, and `NewerBuild` is for saves from newer builds.
+      result.
     - Nothing is clamped into a success-shaped buff.
     - An older build reports a save with an unknown section as `NewerBuild` and leaves it untouched.
       Writing the section only while it's active keeps most saves readable by older builds.

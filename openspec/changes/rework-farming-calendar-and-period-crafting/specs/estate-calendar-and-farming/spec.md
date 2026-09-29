@@ -57,7 +57,7 @@ On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penal
 - **THEN** she is still Well fed at 1:30 AM the next day, and it has ended by 2 AM
 
 #### Scenario: Tampered Well fed save
-- **WHEN** a save's Well fed expiry is not a finite number, or lies more than 4 game hours after the save's time
+- **WHEN** a save's Well fed section cannot be parsed or appears more than once, or its expiry is not a finite number or lies more than 4 game hours after the save's time
 - **THEN** loading fails with the corrupt-save message and the current game is unchanged
 
 #### Scenario: Expired Well fed save
