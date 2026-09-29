@@ -152,8 +152,8 @@ def paint_bark():
         return atlas
     nrng = np.random.default_rng(SEED + 1)
     T.paint_bark(atlas, "bark", nrng, size_m=SPEC["bark_size"], style="smooth",
-                 base=(0.125, 0.122, 0.112), depth=0.004, lenticels=0.45, algae=0.5,
-                 lichen=0.3, lichen_color=(0.27, 0.28, 0.23), moss=0.0, rough=0.7, stripes=0.25)
+                 base=(0.088, 0.086, 0.078), depth=0.004, lenticels=0.5, algae=0.65,
+                 lichen=0.3, lichen_color=(0.19, 0.20, 0.16), moss=0.0, rough=0.7, stripes=0.35)
     atlas.save()
     return atlas
 

@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "name": "HazelCoppice",
+  "description": "Hazel coppice stool, a vase of about fifteen straight poles 2.8 m tall arching to 3 m across from a knuckled 0.8 m stool; painted leaf-spray canopy, four LODs, walk-through.",
+  "collision": "none",
+  "triangle_budget": 70000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/hazel_coppice.py",
+  "source_sha256": "db5618022fb6ed82a37ced53d28f6c5547a5b4597ef827886548616bf21eef16",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_HazelCoppice": {
+      "vertices": 32809,
+      "triangles": 44436,
+      "size_cm": [
+        413.42,
+        396.33,
+        332.02
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HazelCoppiceBark",
+          "textures": {
+            "basecolor": "T_HazelCoppiceBark_basecolor.png",
+            "normal": "T_HazelCoppiceBark_normal.png",
+            "roughness": "T_HazelCoppiceBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HazelCoppiceLeaves",
+          "textures": {
+            "basecolor": "T_HazelCoppiceLeaves_basecolor.png",
+            "normal": "T_HazelCoppiceLeaves_normal.png",
+            "roughness": "T_HazelCoppiceLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.003165188943967223,
+          0.032826557755470276,
+          1.5600000113248824
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 6.0,
+        "detail_distance": 2.2,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_HazelCoppice.fbx",
+      "sha256": "21548018d8bcd9f039896cf9ad910cb3ee7572f253f725b8a9517871355060a7",
+      "preview": "preview_SM_HazelCoppice.png"
+    },
+    "SM_HazelCoppice_LOD1": {
+      "vertices": 4231,
+      "triangles": 6142,
+      "size_cm": [
+        381.71,
+        367.55,
+        305.49
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HazelCoppiceBark",
+          "textures": {
+            "basecolor": "T_HazelCoppiceBark_basecolor.png",
+            "normal": "T_HazelCoppiceBark_normal.png",
+            "roughness": "T_HazelCoppiceBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HazelCoppiceLeaves",
+          "textures": {
+            "basecolor": "T_HazelCoppiceLeaves_basecolor.png",
+            "normal": "T_HazelCoppiceLeaves_normal.png",
+            "roughness": "T_HazelCoppiceLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.003165188943967223,
+          0.032826557755470276,
+          1.5600000113248824
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 6.0,
+        "detail_distance": 2.2,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_HazelCoppice_LOD1.fbx",
+      "sha256": "28d178a13964a08dfa4b2e7a7ae140841c1b9dce55b542e6f30d053befb84895",
+      "preview": "preview_SM_HazelCoppice_LOD1.png"
+    },
+    "SM_HazelCoppice_LOD2": {
+      "vertices": 789,
+      "triangles": 1188,
+      "size_cm": [
+        417.36,
+        410.65,
+        350.34
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HazelCoppiceBark",
+          "textures": {
+            "basecolor": "T_HazelCoppiceBark_basecolor.png",
+            "normal": "T_HazelCoppiceBark_normal.png",
+            "roughness": "T_HazelCoppiceBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HazelCoppiceLeaves",
+          "textures": {
+            "basecolor": "T_HazelCoppiceLeaves_basecolor.png",
+            "normal": "T_HazelCoppiceLeaves_normal.png",
+            "roughness": "T_HazelCoppiceLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.003165188943967223,
+          0.032826557755470276,
+          1.5600000113248824
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 6.0,
+        "detail_distance": 2.2,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_HazelCoppice_LOD2.fbx",
+      "sha256": "47fcf4ff0532519955a8ab952eca4497dae0d00619f352b9a3e62a83ae7f7e8d",
+      "preview": "preview_SM_HazelCoppice_LOD2.png"
+    },
+    "SM_HazelCoppice_LOD3": {
+      "vertices": 335,
+      "triangles": 492,
+      "size_cm": [
+        494.56,
+        464.0,
+        394.44
+      ],
+      "materials": [
+        {
+          "name": "M_SM_HazelCoppiceBark",
+          "textures": {
+            "basecolor": "T_HazelCoppiceBark_basecolor.png",
+            "normal": "T_HazelCoppiceBark_normal.png",
+            "roughness": "T_HazelCoppiceBark_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        },
+        {
+          "name": "M_SM_HazelCoppiceLeaves",
+          "textures": {
+            "basecolor": "T_HazelCoppiceLeaves_basecolor.png",
+            "normal": "T_HazelCoppiceLeaves_normal.png",
+            "roughness": "T_HazelCoppiceLeaves_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.003165188943967223,
+          0.032826557755470276,
+          1.5600000113248824
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 6.0,
+        "detail_distance": 2.2,
+        "detail_fstop": 8.0
+      },
+      "fbx": "SM_HazelCoppice_LOD3.fbx",
+      "sha256": "2d654ab1e78585e30a74b9802b19cd7017fef8918725d827c9ab2e645ec7c153",
+      "preview": "preview_SM_HazelCoppice_LOD3.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "unreal_folder": "Trees",
+  "nanite": true,
+  "tree": {
+    "height_m": 2.8,
+    "crown_m": [
+      3.1,
+      2.9
+    ],
+    "ground_line_cm": 15.0,
+    "note": "Pivot is the bottom of a 15 cm skirt under the stool; the ground line is 15 cm up. No collision."
+  },
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-branch random phase",
+    "B": "leaf flutter 0 at card base -> 1 at tip, 0 on wood",
+    "A": "1",
+    "strength": 7.0,
+    "flutter": 1.0
+  },
+  "material_notes": "Slot 0 M_HazelCoppiceBark: tiling smooth bark T_HazelCoppiceBark_* (0.3 m square). Slot 1 M_HazelCoppiceLeaves: leaf-spray atlas T_HazelCoppiceLeaves_* (basecolor alpha = mask, clip 0.5; roughness R rough, G translucency, B AO; normal OpenGL). Two-sided foliage, masked.",
+  "textures": {
+    "T_HazelCoppiceBark_basecolor.png": "d9f2a188032dd97ea4bdea2e5ff0f6a61f911366f3a4befa0402b59d484fa7ff",
+    "T_HazelCoppiceBark_normal.png": "3ea80d08e67279f4bc5ec41b40a692ab3934a4f60e11236b72a704f1db1195ca",
+    "T_HazelCoppiceBark_roughness.png": "a3913accd022d5c049fe9a7775042471095aa3ba99d3fdaac5baae7bcbc5d9c6",
+    "T_HazelCoppiceLeaves_basecolor.png": "13290972faf8c04730c2a08bafaf8d4b11cf33f2702e9019710a2fc95aa5594c",
+    "T_HazelCoppiceLeaves_normal.png": "268394a3317efb8d1f1906c1364336d20cfdbb744e9cb6fda8fcafca5e1f55fa",
+    "T_HazelCoppiceLeaves_roughness.png": "d6e4d47e914a1337a33a0365d07db390f50a211382c5ddc4e3a8ff4ed5c5e444"
+  }
+}

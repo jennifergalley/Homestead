@@ -1088,6 +1088,12 @@ const FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/SurvivalGame/Environment/Trees/Oak/SM_Oak.SM_Oak"), true, 0, true, 30, 60},
     {TEXT("/Game/SurvivalGame/Environment/Trees/Beech/SM_Beech.SM_Beech"), true, 0, true, 30, 50},
     {TEXT("/Game/SurvivalGame/Environment/Trees/Sycamore/SM_Sycamore.SM_Sycamore"), true, 0, true, 30, 45},
+    // Windswept hawthorn (hawthorn.py) for wood fringes and hedges. Its capsule leans downwind (+X), so the
+    // capsule centre sits ~46 cm from the trunk base: a 50 cm footprint keeps the root ring round the base.
+    {TEXT("/Game/SurvivalGame/Environment/Trees/Hawthorn/SM_Hawthorn.SM_Hawthorn"), true, 0, true, 30, 50},
+    // Woodland understory shrubs (holly.py, hazel_coppice.py): walk-through, no collision.
+    {TEXT("/Game/SurvivalGame/Environment/Trees/Holly/SM_Holly.SM_Holly"), false, 14000, false, 0, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Trees/HazelCoppice/SM_HazelCoppice.SM_HazelCoppice"), false, 14000, false, 0, 0},
 };
 
 #pragma pack(push, 1)
