@@ -506,6 +506,8 @@ private:
     int32 MenuInventoryViewIndex = 0;
     TOptional<int32> ActiveChestId;
     mutable bool bReadIncompatible = false;
+    // The last ReadSave failed because a newer build wrote the save; it's left untouched, never retired.
+    mutable bool bReadNewer = false;
     bool bTestResetRequired = false;
     bool bHasPlayableSession = false;
     FString LoadProblem;

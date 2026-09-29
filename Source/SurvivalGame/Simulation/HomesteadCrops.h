@@ -3,6 +3,7 @@
 #include "HomesteadItems.h"
 #include "HomesteadSimulation.h"
 
+#include <iosfwd>
 #include <string>
 
 // Garden crops (improve-crops-and-harvest): what each crop is sown from, how many days it takes,
@@ -72,4 +73,14 @@ int CropDay(const Plot& plot);
 std::string PlotStatus(const Plot& plot);
 // "Ready in about 4 days if watered."
 std::string ReadyInText(CropKind kind);
+
+namespace Crops
+{
+// Optional trailing save section (tag "picked"): the ids of regrowing plots picked since sowing.
+// Written only when there are some, so saves without it load every plot unpicked.
+constexpr const char* SaveTag = "picked";
+void WriteSaveSection(std::ostream& output, const State& state);
+// Reads the section after its tag. Refuses ids that aren't planted regrowing plots, and repeats.
+bool ReadSaveSection(std::istream& input, State& state);
+}
 }
