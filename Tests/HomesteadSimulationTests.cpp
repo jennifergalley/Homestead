@@ -3766,6 +3766,37 @@ void WeedCreepNearOvergrowth()
     OK(loaded.ClearOvergrowth(regrownId, Item::Scythe, PlacedNode(loaded, regrownId).position));
 }
 
+void EveryLiveWeedIsOnOpenGround()
+{
+    // Jenny saw "Weeds [E] Pull" with nothing on the ground. Every pullable weed or nettle on a new
+    // estate stands on open estate ground where its clump can be drawn: outside the ruin's footprint,
+    // clear of the standing room and every other structure, pulled by hand, and no two stacked on
+    // one spot. Pulling one takes it (and its prompt) away for good.
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
+    const auto& manor = layout.FindPolygon(Anchor::ManorFootprint)->points;
+    std::vector<const ResourceNode*> weeds;
+    for (const auto& node : sim.GetState().resources)
+    {
+        if (node.cleared || (node.kind != ResourceKind::Weeds && node.kind != ResourceKind::Nettles)) continue;
+        weeds.push_back(&node);
+        CHECK(FindOvergrowth(node.kind) && FindOvergrowth(node.kind)->byHand);
+        CHECK(PointInPolygon(boundary, node.position) && !PointInPolygon(manor, node.position));
+        const Footprint spot{node.position, {1.0, 1.0}, 0.0};
+        for (const auto& piece : sim.GetState().structures) CHECK(!FootprintsOverlap(spot, StructureFootprint(sim.GetState(), piece)));
+    }
+    CHECK(weeds.size() >= 100);
+    for (std::size_t i = 0; i < weeds.size(); ++i)
+        for (std::size_t j = i + 1; j < weeds.size(); ++j)
+            CHECK(std::hypot(weeds[i]->position.x - weeds[j]->position.x, weeds[i]->position.y - weeds[j]->position.y) >= 20.0);
+    const ResourceNode weed = *weeds.front();
+    OK(sim.ClearOvergrowth(weed.id, Item::Count, weed.position));
+    CHECK(PlacedNode(sim, weed.id).cleared);
+    CHECK(sim.FindNearestOvergrowth(weed.position, 1.0, Item::Count) != weed.id);
+}
+
 void ManorClearoutField()
 {
     // The ground round the ruin (570000+) is thick with clearables of every early kind, a few that
@@ -3981,6 +4012,7 @@ int main()
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
     Run("manor clear-out field placement", ManorClearoutField);
+    Run("every live weed is on open ground", EveryLiveWeedIsOnOpenGround);
     Run("clear-out rubbish, nettles, stumps and spoiled ground", ClearoutKindsAndSpoiledGround);
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);

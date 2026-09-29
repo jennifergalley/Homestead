@@ -472,6 +472,26 @@ private:
     bool BuildDecorations(const Homestead::Simulation& Simulation,
         const FIntPoint* StageChunk = nullptr);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
+    // Soft ground cover drawn right on the soil (HomesteadWorldGrounding.cpp): weeds, nettles and tall
+    // grass. SoilHeight is the lowest drawn ground under the clump's footprint (the Landscape's own
+    // collision where it's loaded, else the runtime heightfield), never more than a hand's depth below
+    // its centre; bOnLandscape is false when the Landscape wasn't there to trace.
+    static bool IsSoilGrounded(Homestead::ResourceKind Kind);
+    float SoilHeight(FVector2D Centre, FVector2D Half, float Yaw, bool& bOnLandscape) const;
+    struct FPendingSoil
+    {
+        TWeakObjectPtr<USceneComponent> Part;
+        FVector2D Centre;
+        FVector2D Half;
+        float Yaw = 0.0f;
+        float PlacedOn = 0.0f; // The ground height it was placed on.
+        int32 Tries = 0;
+    };
+    TArray<FPendingSoil> PendingSoil;
+    float SoilRetryTimer = 0.0f;
+    int32 SoilRetryCursor = 0;
+    void QueueSoilGrounding(USceneComponent* Part, FVector2D Centre, FVector2D Half, float Yaw, float PlacedOn);
+    void UpdateSoilGrounding(float DeltaSeconds);
     // The estate's overgrowth kinds, each placed through Place(mesh, offset, yaw, produce, scale, pivotOnGround).
     void BuildOvergrowth(const Homestead::ResourceNode& Node, uint32 Variation,
         const TFunctionRef<void(UStaticMesh*, FVector2D, float, bool, float, bool)>& Place);
