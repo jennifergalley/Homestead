@@ -3452,23 +3452,29 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     // they land. Only the boulder blocks her (see Authored).
     case Homestead::ResourceKind::SmallRock:
         if (UStaticMesh* Rock = QuietProp(TEXT("GranitePickRocks"), TEXT("SM_GranitePickRock_Small")))
-            Sunk(Rock, Random.FRandRange(0.9f, 1.05f));
+            Sunk(Rock, Random.FRandRange(0.95f, 1.05f));
         else
             Whole(Load(TEXT("GraniteBoulderLow"), TEXT("SM_GraniteBoulderLow")), FVector2D::ZeroVector, 0, Random.FRandRange(0.42f, 0.5f));
         break;
     case Homestead::ResourceKind::Rubble:
         // Masonry shed from the ruin: a heap of broken granite blocks.
-        if (UStaticMesh* Rock = QuietProp(TEXT("GranitePickRocks"), TEXT("SM_GranitePickRock_Medium")))
-            Sunk(Rock, Random.FRandRange(0.85f, 1.0f));
+        if (UStaticMesh* Rock = QuietProp(TEXT("GranitePickRubble"), TEXT("SM_GranitePickRubble")))
+            Sunk(Rock, Random.FRandRange(0.95f, 1.05f));
         else
             Whole(Load(TEXT("GraniteBlockTalus"), TEXT("SM_GraniteBlockTalus")), FVector2D::ZeroVector, 0, Random.FRandRange(0.7f, 0.82f));
         break;
     case Homestead::ResourceKind::Boulder:
-        if (UStaticMesh* Rock = QuietProp(TEXT("GranitePickRocks"), TEXT("SM_GranitePickRock_Large")))
-            Sunk(Rock, Random.FRandRange(0.92f, 1.05f));
+    {
+        // Mostly the waist-high split boulder, with the rounded loaf as a second shape; both are far
+        // bigger than any small rock or rubble heap.
+        UStaticMesh* Rock = Variation % 3 == 0 ? QuietProp(TEXT("GranitePickRocks"), TEXT("SM_GranitePickRock_Medium")) : nullptr;
+        if (!Rock) Rock = QuietProp(TEXT("GranitePickRocks"), TEXT("SM_GranitePickRock_Large"));
+        if (Rock)
+            Sunk(Rock, Random.FRandRange(0.95f, 1.05f));
         else
             Whole(Load(TEXT("GraniteBoulderLoaf"), TEXT("SM_GraniteBoulderLoaf")), FVector2D::ZeroVector, 0, Random.FRandRange(1.15f, 1.3f));
         break;
+    }
     case Homestead::ResourceKind::SalvagePile:
         // Rusted iron among the ruin's leavings (the Crops Agent's scrap heap), not a pile of stones she
         // might take for loose ones; fallen masonry until it lands.
