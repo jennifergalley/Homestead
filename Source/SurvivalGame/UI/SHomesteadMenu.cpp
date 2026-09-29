@@ -128,6 +128,14 @@ const FLinearColor MenuPine(0.025f, 0.05f, 0.038f, 0.6f);
 const FLinearColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
 const FLinearColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
 const FLinearColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
+// The Appearance page's camera input (degrees per second, degrees per pixel dragged).
+namespace MenuAppearanceInput
+{
+constexpr float KeyYawRate = 90.0f, KeyPitchRate = 45.0f;
+constexpr float StickYawRate = 120.0f, StickPitchRate = 60.0f;
+constexpr float StickDeadZone = 0.2f;
+constexpr float DragYawPerPixel = 0.35f, DragPitchPerPixel = 0.2f;
+}
 // The dye chooser's colour chips (display colours for Homestead::DyeName's four plant dyes).
 namespace MenuDyeStyle
 {
@@ -657,6 +665,17 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
         if (Want != DyePreviewed && Controller->MenuPreviewDye(DyeRow.SubjectId, Want)) DyePreviewed = Want;
     }
     else if (DyePreviewed != INDEX_NONE || bDyeChooser) EndDyePreview();
+    // Held WASD and the right stick turn the Appearance view at a steady rate.
+    if (SeenPage == 6 && Dialog == EDialog::None)
+    {
+        const float Yaw = ((bOrbitRight ? 1.0f : 0.0f) - (bOrbitLeft ? 1.0f : 0.0f)) * MenuAppearanceInput::KeyYawRate
+            + OrbitStickX * MenuAppearanceInput::StickYawRate;
+        const float Pitch = ((bOrbitDown ? 1.0f : 0.0f) - (bOrbitUp ? 1.0f : 0.0f)) * MenuAppearanceInput::KeyPitchRate
+            + OrbitStickY * MenuAppearanceInput::StickPitchRate;
+        if (Yaw != 0.0f || Pitch != 0.0f) Controller->MenuOrbitAppearance(Yaw * Delta, Pitch * Delta);
+    }
+    else if (bOrbitLeft || bOrbitRight || bOrbitUp || bOrbitDown || OrbitStickX != 0.0f || OrbitStickY != 0.0f)
+        ClearAppearanceOrbit();
     if (bPointerItemDown && PointerDragRevision != Controller->Simulation().GetRevision())
         CancelPointerItemDrag();
     if (bVirtualDraggingItem && VirtualDragRevision != Controller->Simulation().GetRevision())
@@ -2801,6 +2820,8 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
 {
     if (SeenPage == 7 && MapView && Dialog == EDialog::None && !bRecovery && !bSaving
         && HandleMapKey(Key, Event, InputAmount)) return true;
+    if (SeenPage == 6 && Dialog == EDialog::None && !bRecovery && !bSaving
+        && HandleAppearanceKey(Key, Event, InputAmount)) return true;
     if (Key == EKeys::LeftControl || Key == EKeys::RightControl) bControl = Event != IE_Released;
     if (Key == EKeys::LeftShift || Key == EKeys::RightShift) bShift = Event != IE_Released;
     if (Event == IE_Axis)
@@ -2954,8 +2975,68 @@ FReply SHomesteadMenu::OnAnalogValueChanged(const FGeometry&, const FAnalogInput
 }
 FReply SHomesteadMenu::OnMouseMove(const FGeometry&, const FPointerEvent& Event)
 {
+    if (bOrbitDragging && HasMouseCapture())
+    {
+        const FVector2D Position = Event.GetScreenSpacePosition();
+        const FVector2D Delta = Position - OrbitDragLast;
+        OrbitDragLast = Position;
+        if (Controller.IsValid())
+            Controller->MenuOrbitAppearance(Delta.X * MenuAppearanceInput::DragYawPerPixel, -Delta.Y * MenuAppearanceInput::DragPitchPerPixel);
+        return FReply::Handled();
+    }
     PointerItemDragMove(Event.GetScreenSpacePosition());
     return FReply::Handled();
+}
+FReply SHomesteadMenu::OnMouseButtonDown(const FGeometry&, const FPointerEvent& Event)
+{
+    // A left drag anywhere the Appearance page has no control of its own turns her around.
+    if (SeenPage == 6 && Dialog == EDialog::None && Event.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        bOrbitDragging = true;
+        OrbitDragLast = Event.GetScreenSpacePosition();
+        return FReply::Handled().CaptureMouse(SharedThis(this));
+    }
+    return FReply::Unhandled();
+}
+FReply SHomesteadMenu::OnMouseButtonUp(const FGeometry&, const FPointerEvent& Event)
+{
+    if (bOrbitDragging && Event.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        bOrbitDragging = false;
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+    return FReply::Unhandled();
+}
+void SHomesteadMenu::OnMouseCaptureLost(const FCaptureLostEvent& Event)
+{
+    SCompoundWidget::OnMouseCaptureLost(Event);
+    bOrbitDragging = false;
+}
+bool SHomesteadMenu::HandleAppearanceKey(FKey Key, EInputEvent Event, float InputAmount)
+{
+    if (Key == EKeys::MouseWheelAxis)
+    {
+        // The wheel zooms here, wherever the pointer is, instead of scrolling or picking a tool.
+        if (Event == IE_Axis && InputAmount != 0.0f && Controller.IsValid()) Controller->MenuZoomAppearance(InputAmount > 0 ? 1.0f : -1.0f);
+        return true;
+    }
+    if (Event == IE_Axis && (Key == EKeys::Gamepad_RightX || Key == EKeys::Gamepad_RightY))
+    {
+        const float Value = FMath::Abs(InputAmount) > MenuAppearanceInput::StickDeadZone ? InputAmount : 0.0f;
+        (Key == EKeys::Gamepad_RightX ? OrbitStickX : OrbitStickY) = Value;
+        return true;
+    }
+    bool* Held = Key == EKeys::A ? &bOrbitLeft : Key == EKeys::D ? &bOrbitRight
+        : Key == EKeys::W ? &bOrbitUp : Key == EKeys::S ? &bOrbitDown : nullptr;
+    if (!Held) return false;
+    if (Event == IE_Pressed || Event == IE_Repeat) *Held = true;
+    else if (Event == IE_Released) *Held = false;
+    return true;
+}
+void SHomesteadMenu::ClearAppearanceOrbit()
+{
+    bOrbitLeft = bOrbitRight = bOrbitUp = bOrbitDown = false;
+    OrbitStickX = OrbitStickY = 0.0f;
 }
 void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
 {
@@ -2988,6 +3069,8 @@ void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
 }
 FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event)
 {
+    // On Appearance the wheel zooms (HandleAppearanceKey, through the controller's wheel route).
+    if (SeenPage == 6 && Dialog == EDialog::None) return FReply::Handled();
     if (Dialog == EDialog::Quantity)
     {
         if (Controller.IsValid() && Controller->MenuAcceptsPhysicalInput())

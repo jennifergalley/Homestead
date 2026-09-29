@@ -31,6 +31,9 @@ public:
     virtual FReply OnKeyUp(const FGeometry&, const FKeyEvent& Event) override;
     virtual FReply OnAnalogValueChanged(const FGeometry&, const FAnalogInputEvent& Event) override;
     virtual FReply OnMouseMove(const FGeometry&, const FPointerEvent& Event) override;
+    virtual FReply OnMouseButtonDown(const FGeometry&, const FPointerEvent& Event) override;
+    virtual FReply OnMouseButtonUp(const FGeometry&, const FPointerEvent& Event) override;
+    virtual void OnMouseCaptureLost(const FCaptureLostEvent& Event) override;
     virtual FReply OnMouseWheel(const FGeometry&, const FPointerEvent& Event) override;
     bool HandleKey(FKey Key, EInputEvent Event, float InputAmount);
     void ChangePage(int32 Page);
@@ -183,6 +186,13 @@ private:
     int32 DyeOriginal = 0, DyeChoice = 0, DyePreviewed = INDEX_NONE;
     void OpenDyeChooser(int32 Choice);
     void EndDyePreview();
+    // Appearance camera input (page 6): held WASD, the right stick and a drag on the view orbit her.
+    bool bOrbitLeft = false, bOrbitRight = false, bOrbitUp = false, bOrbitDown = false;
+    float OrbitStickX = 0.0f, OrbitStickY = 0.0f;
+    bool bOrbitDragging = false;
+    FVector2D OrbitDragLast = FVector2D::ZeroVector;
+    bool HandleAppearanceKey(FKey Key, EInputEvent Event, float InputAmount);
+    void ClearAppearanceOrbit();
     void OpenItemContextMenuFor(const FHomesteadRow& Row, FVector2D Anchor);
     // Where a popup opens: at the pointer for mouse input, beside the focused tile otherwise.
     FVector2D PopupAnchorFor(const TSharedPtr<SWidget>& Widget, bool bPointer) const;
