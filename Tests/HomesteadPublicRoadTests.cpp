@@ -179,6 +179,55 @@ int main()
         }
     }
 
+    // Wild roots (a cooked meal) in the woods round the manor: some within reach on day one, all at least
+    // 12 m apart, and an old save made before they existed loads them fresh and ready.
+    {
+        const Point home = estateLayout.PointOr(Anchor::StandingRoomOrigin, {});
+        int roots = 0, near = 0;
+        const EstatePlacement* firstRoot = nullptr;
+        for (const EstatePlacement& placement : ProvisionalEstatePlacements().placements)
+            if (placement.id >= 582100 && placement.id < 582300 && placement.kind == ResourceKind::Roots)
+            {
+                ++roots;
+                near += Distance(placement.position, home) < 11000.0;
+                if (!firstRoot) firstRoot = &placement;
+            }
+        Check(roots >= 12, "wild roots in the woods round the manor", roots);
+        Check(near >= 2, "wild roots within 110 m of the standing room", near);
+        EstatePlacements old;
+        old.bakeVersion = ProvisionalEstatePlacements().bakeVersion;
+        for (const EstatePlacement& placement : ProvisionalEstatePlacements().placements)
+            if (!(placement.id >= 581000 && placement.id < 581100) && !(placement.id >= 582100 && placement.id < 582300))
+                old.placements.push_back(placement);
+        Simulation before;
+        Check(before.NewEstateGame(estateLayout, old).ok, "old-table game");
+        const std::string saved = before.Serialize();
+        Simulation after;
+        after.SetLayout(estateLayout);
+        after.SetPlacements(ProvisionalEstatePlacements());
+        Check(after.Deserialize(saved).ok, "old save loads with the new forage");
+        if (firstRoot)
+        {
+            Check(after.CanHarvest(firstRoot->id), "new roots ready in an old save");
+            const int rootsBefore = after.Count(Item::Roots);
+            Check(after.Harvest(firstRoot->id, firstRoot->position).ok, "dug the new roots");
+            Check(after.Count(Item::Roots) > rootsBefore, "roots in the pack", after.Count(Item::Roots));
+            // They grow back in 48 hours (her hunger would run out first if the test just waited it out).
+            for (const auto& node : after.GetState().resources)
+                if (node.id == firstRoot->id)
+                    Check(std::abs(node.readyAtHour - after.GetState().hour - 48.0) < 0.01, "roots grow back after 48 hours", node.readyAtHour - after.GetState().hour);
+        }
+        // Every node the old save knew is still there, at the same place.
+        for (const EstatePlacement& placement : old.placements)
+        {
+            bool found = false;
+            for (const EstatePlacement& now : ProvisionalEstatePlacements().placements)
+                if (now.id == placement.id && now.kind == placement.kind && Distance(now.position, placement.position) < 0.01) found = true;
+            Check(found, "an old placement moved or vanished", placement.id);
+        }
+        std::printf("wild roots: %d new, %d within 110 m of the standing room\n", roots, near);
+    }
+
     std::printf("forage: %d new estate brambles, %d roadside nodes (%d brambles, to %.0f m), %zu brambles in all\n",
         estateBrambles, roadsideNodes, roadsideBrambles, farthest, brambles.size());
     std::printf("public road %.1f m; manor %.1f, bridge %.1f, gateway %.1f, town %.1f m\n", road.Length(),
