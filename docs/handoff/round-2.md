@@ -781,10 +781,10 @@ pending, so this does not claim early Energy is fully solved.
 - Performance (`6841f429`, not on `main` yet): `PerfLock.ps1` treats `blender.exe` as a build, so
   `Start-PerfWindow.ps1` names and refuses it. When it lands, update the editor skill perf-window
   bullet to say the script enforces the no-Blender rule.
-- Menu planting prompts (`60c6d6ba`, pending PIE/main): after it lands, update the editor skill's
-  tilled-square controls: A/E sows the hotbar-selected seed; nothing selected offers Plant roots; F/X
-  weeds only; selected zero stock gives the seed-specific refusal. The Menu README changes with the
-  commit already describe the behavior.
+- Menu planting prompts (`a874d260`, pending PIE/main): after it lands, update the editor skill's
+  tilled-square controls: A/E sows the hotbar-selected seed; no seed selected says `Choose seeds on
+  the hotbar to sow`; selected Wild Roots sow roots; F/X weeds only; selected zero stock gives the
+  seed-specific refusal. The Menu README changes with the commit already describe the behavior.
 
 ## Tooling requests (unassigned)
 
