@@ -110,6 +110,11 @@ The design's "Lanes and ownership" table is authoritative. In short:
 - **Perf window:** measurements run alone (`Scripts\Start-PerfWindow.ps1`); don't launch Unreal, build
   or run Blender (including a headless batch) while someone holds it. Headless Blender skewed a perf run
   about 2x.
+- **Cross-session messages are immediate:** every `send_session_message` uses
+  `delivery_mode: "immediate"`, never default/enqueue. Keep it short, self-contained and actionable.
+  For an urgent blocker or rule change that must reach a busy session mid-turn, also use `mailbox_send`
+  to its worktree. Older queued messages can arrive late: honor the newest timestamp or explicit
+  decision, and ignore stale superseded instructions.
 - **Waiting means ending your turn:** schedule a wake-up with `save_session_automation`, never sleep or
   loop.
 - **Build only when your C++ changed,** once per batch, with `Scripts\Invoke-UnrealBuild.ps1`; lanes don't
