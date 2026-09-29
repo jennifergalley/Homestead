@@ -247,6 +247,9 @@ def main():
         json.dump(layout, fh, indent=1)
     print("z", round(float(z.min()), 2), round(float(z.max()), 2), "manor", manor_z, "mine", mine_z,
           "mill", mill_z, "town", town_z, "road m", len(road), "river m", len(riv), "estuary m", len(est))
+    # Grade the river into its finished channel (spring pool, banks, ford, beach run) on the outputs.
+    import river_channel
+    river_channel.main()
 
 if __name__ == "__main__":
     main()

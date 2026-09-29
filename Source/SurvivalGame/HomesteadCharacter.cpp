@@ -1215,6 +1215,8 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
         Step.Z = GetActorLocation().Z;
         const float Yaw = FellStepFromYaw + FMath::FindDeltaAngleDegrees(FellStepFromYaw, FellStepToYaw) * Alpha;
         SetActorLocationAndRotation(Step, FRotator(0, Yaw, 0), true);
+        if (bStanceStepFollowsGround)
+            SettleOnGround();
     }
     UpdateStickAlignment(DeltaSeconds);
     UpdateHairMotion(DeltaSeconds);
@@ -1749,12 +1751,17 @@ void AHomesteadCharacter::PlayFillPail(Homestead::Point Stream)
     const FVector2D Delta(Stream.x - GetActorLocation().X, Stream.y - GetActorLocation().Y);
     if (FMath::IsFinite(Delta.X) && FMath::IsFinite(Delta.Y) && Delta.SizeSquared() >= 1)
     {
-        // Kneel facing the water so the pail goes in ahead of her (pail_fill.SPOT), without
-        // stepping further in than the bank she stands on.
+        // Kneel facing the water so the pail goes in ahead of her (pail_fill.SPOT). The prompt shows
+        // up to a metre or so back from the waterline, so she steps down the bank until the pail's
+        // reach lands on the dip point, never further than FillStepMax.
         const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X))
             - FMath::RadiansToDegrees(FMath::Atan2(FillRight, FillForward));
         WaterYaw = Yaw;
-        BeginStanceStep(GetActorLocation(), Yaw);
+        const float Reach = FVector2D(FillForward, FillRight).Size();
+        const float Step = FMath::Clamp(static_cast<float>(Delta.Size()) - Reach, 0.0f, FillStepMax);
+        const FVector2D Toward = Delta.GetSafeNormal() * Step;
+        BeginStanceStep(GetActorLocation() + FVector(Toward.X, Toward.Y, 0.0), Yaw);
+        bStanceStepFollowsGround = Step > 1.0f;
     }
     Animation->RequestWater();
 }
@@ -2308,6 +2315,22 @@ void AHomesteadCharacter::BeginStanceStep(const FVector& To, float Yaw)
     FellStepFromYaw = GetActorRotation().Yaw;
     FellStepToYaw = Yaw;
     FellStepRemaining = FellStepSeconds;
+    bStanceStepFollowsGround = false;
+}
+
+void AHomesteadCharacter::SettleOnGround()
+{
+    // Down a stream bank the step's straight line leaves her hovering over the slope; put her feet
+    // back on the ground below (the Landscape) rather than letting her drop and land.
+    UWorld* World = GetWorld();
+    if (!World) return;
+    const float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+    const FVector Here = GetActorLocation();
+    FHitResult Hit;
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadSettleOnGround), false, this);
+    if (World->LineTraceSingleByChannel(Hit, Here + FVector(0, 0, StanceGroundProbeUp),
+            Here - FVector(0, 0, HalfHeight + StanceGroundProbeDown), ECC_Visibility, Query))
+        SetActorLocation(FVector(Here.X, Here.Y, Hit.ImpactPoint.Z + HalfHeight + 1.0f), false);
 }
 
 bool AHomesteadCharacter::CanFell() const

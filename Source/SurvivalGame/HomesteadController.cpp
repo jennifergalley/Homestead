@@ -944,7 +944,8 @@ Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Posit
         {
             const FVector Center = Spline->FindLocationClosestToWorldLocation(Here, ESplineCoordinateSpace::World);
             const float Key = Spline->FindInputKeyClosestToWorldLocation(Here);
-            const double HalfWidth = 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y;
+            // Aim a hand's breadth inside the waterline (spline scale Y is the waterline half width).
+            const double HalfWidth = FMath::Max(0.0, 100.0 * Spline->GetScaleAtSplineInputKey(Key).Y - PailDipInsideCm);
             const FVector2D Out(Position.x - Center.X, Position.y - Center.Y);
             const FVector Edge = Out.SizeSquared() > 1.0
                 ? Center + FVector(Out.GetSafeNormal().X * HalfWidth, Out.GetSafeNormal().Y * HalfWidth, 0.0)

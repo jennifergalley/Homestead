@@ -31,4 +31,16 @@ public:
     /** Landscape height (cm) at a world XY in the editor world, or -1e9 when nothing is hit. */
     UFUNCTION(BlueprintCallable, Category = "Homestead Estate")
     static double EditorGroundHeight(double X, double Y);
+
+    /**
+     * Brings the Landscape's base edit layer in line with a 4033x4033 little-endian 16-bit
+     * heightfield (row = +Y, column = +X, the EstateHeightfield.r16 layout), within the vertex
+     * rectangle [MinX..MaxX] x [MinY..MaxY]. Works tile by tile (TileSize vertices square) and writes
+     * only tiles that differ, so only the landscape proxies a terrain edit touched get dirtied.
+     * Loads that part of the World Partition first. With bDryRun it only reports. Save afterwards,
+     * once the editor has ticked the edit-layer merge. Returns a status string.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Homestead Estate")
+    static FString ApplyEstateHeightfield(const FString& HeightfieldR16, int32 MinX, int32 MinY, int32 MaxX,
+        int32 MaxY, int32 TileSize = 63, bool bDryRun = true);
 };
