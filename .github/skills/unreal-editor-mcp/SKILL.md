@@ -98,6 +98,8 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `Start-EditorMcp.ps1` in other worktrees refuses to launch. Ask owners with `mailbox_send` to close or
   pause, and run `Scripts\Stop-PerfWindow.ps1` as soon as you're done. Don't build while someone
   else holds the window.
+  `Start-PerfWindow.ps1` refuses until the process to measure is running, so a wrapper launches the game
+  first, then claims the window with `-ProcessId <pid>`.
 - **Nothing that pops up on Jenny's desktop.** Don't use `startfpschart`/`stopfpschart`: every dump
   opens an Explorer window on `Saved\Profiling\FPSChartStats\<timestamp>`, and she asked us to stop.
   For frame times, use `stat unit` / `ProfileGPU` output from the log, or `Playtest-Visual.ps1
@@ -880,6 +882,19 @@ Extend it there when play needs a capability; prefer real input over state edits
   convention; not GitHub issues). The 2026-09-25 findings live in `fix-editor-playtest-findings`.
 - Measure only inside a perf window (section 0: one Unreal process, no builds, `Start-PerfWindow.ps1`);
   numbers taken alongside other editors or builds aren't comparable.
+- **Jenny's display caps 4K at 30 Hz.** Her monitor (Acer XB321HK) is on HDMI, where Windows offers
+  3840x2160 only at 23-30 Hz (60 Hz up to 1080p). With VSync on at 4K the game can't exceed 30 fps on this
+  cable, so don't read a 4K VSync cap of 30 as a performance problem. DisplayPort would give 4K60 with G-Sync.
+- **Measuring frame pacing:** use the engine's CSV `FrameTime` (csvprofile). The EstateSmoke
+  `PERFORMANCE_AT` p95/p99 overstate hitches: the smoke actor samples after the controller tick, so the
+  9.5 ms world Refresh every 0.25 s shows as about 26 ms / 8 ms interval pairs even when presented frames
+  are even. For per-thread timings without the Insights UI: run with ExecCmds
+  `stat namedevents, Trace.File <path>.utrace default`, then
+  `UnrealInsights.exe -OpenTraceFile="x.utrace" -AutoQuit -NoUI -ABSLOG=log -ExecOnAnalysisCompleteCmd="@=cmds.txt"`
+  with lines such as `TimingInsights.ExportTimerStatistics out.csv "-threads=RenderThread 0" -timers=*
+  -startTime=19.5 -endTime=29.5` (seconds from trace start, about the `Capture Starting` log line). The render
+  thread is `RenderThread 0`: `-threads=RenderThread` silently matches the GPU track. `ExportTimingEvents` with
+  `-columns=ThreadName,TimerName,StartTime,EndTime,Duration,Depth` gives call trees.
 - Jenny's performance bar: the framerate must be **smooth**, not just high. Never report a
   performance result from average FPS alone. Check frame pacing on the `Playtest-Visual.ps1
   -PresentationDiagnostics` timing passes (median, p95, p99, max, frames over 20 ms and over
