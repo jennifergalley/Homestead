@@ -17,7 +17,7 @@ session's **mailbox address**; session IDs are for `send_session_message`.
 | Documentation Agent | `a9f10974` (project session `d99bb15c`) | `jennifergalley-stunning-dollop` | process docs, this page, findings from every lane |
 | Architecture Agent | `a1648ae7` | `jennifergalley-cuddly-invention` | code steward: `docs\architecture.md`, code conventions, safe refactors, batch reviews |
 | **A. Calendar Agent** | `f8b77021` | `jennifergalley-studious-doodle` | `Homestead::Calendar`, gentle hunger, crop seasons and withering; **lands first** |
-| **B. Harvest Agent** | `65a2408b` | `jennifergalley-vigilant-fishstick` | peas, wheat, barley, leeks, winter broccoli; withered silhouettes |
+| **B. Harvest Agent / temporary Gait Agent** | `65a2408b` | `jennifergalley-vigilant-fishstick` | peas, wheat, barley, leeks, winter broccoli; withered silhouettes; temporarily lowers the running foot swing apex |
 | **C. Seedsman Agent** | `5cf73757` | `jennifergalley-fluffy-broccoli` | Tregear's shop, the watering can, Sunday closing |
 | **D. Seasons Agent** | `fd682909` | `jennifergalley-improved-giggle` | forage seasons, `MPC_Season`, winter canopies, frost |
 | **E. Crafting Agent** | `ce241dd6` | `jennifergalley-stunning-waddle` | workbench, sawhorse, fences and gate, furniture, dishes, craft categories; **the only lane editing `SHomesteadMenu`** |
@@ -144,6 +144,24 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 ## Lane status
 
 Not started. Lanes send `[ready]` to the orchestrator; the docs agent records what's integrated here.
+
+## Jenny's 2026-09-29 playtest feedback
+
+Jenny is playing the **morning package** now. No agent may disturb it: do not launch editors, games or
+builds against that package, retarget its shortcut, or overwrite its `Build\Windows` folder until she says
+she is done. These are feedback items, not implementation detail; the owner creates or updates the linked
+OpenSpec change before work that goes beyond a small verified correction.
+
+| Feedback | Owner | OpenSpec reference / note |
+| --- | --- | --- |
+| A lake on the owned estate north-east of the manor (up-left on Jenny's map), as accessible farm water | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-regional-landforms-water` |
+| A discoverable manor-to-cove route due south; a winding stair or zigzag is acceptable instead of a gentle slope | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-regional-landforms-water` |
+| A wider walkable beach along the coast below sheer cliffs | Weather Agent (`89914e30`) | `author-fixed-cornish-estate-map`; `add-shore-and-river-fishing` |
+| The river looks as if it stops before reaching the ocean in Jenny's screenshot | Weather Agent (`89914e30`) | Check the parked 4 PM `fix-estate-river-source` branch first, then its OpenSpec change |
+| Running foot kicks too high toward her butt; lower its swing apex slightly | Harvest Agent / temporary Gait Agent (`65a2408b`) | `polish-locomotion-view-distance-and-time-hud` |
+
+If the terrain or water work needs placement ids, the Water Agent claims them through this page before
+using them (the registry starts at 581000+).
 
 ## Open blockers and known bugs
 
