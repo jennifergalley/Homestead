@@ -331,17 +331,18 @@ requirement.
   `MusicShuffleBagTests` in CMake, and verifies packaged multi-track load and run.
 - **Context hint** — **Menu `88180744` main-integrated, package pending; not shipped.** Plain wheel
   cycles the hotbar; Ctrl+wheel zooms while the book has focus.
-- **Weed visibility and grounding** — **Props weeds-only branch
-  `jennifergalley-weed-visuals @ 8418aa8e`, partial; not shipped.** This extends `889cfde8` with the
-  original imported `WeedClump` content and a pivot-seating correction. Day Estate PIE renders 157
-  clumps (dock 57, thistle 54, dandelion 46); every Landscape-trace pivot sits 0–10 cm below ground
-  (2.7 cm median, including 36% slopes), and pulling removes mesh plus focus. The native save path is
-  unchanged. At 4–7 m in tall grass the weeds still read visually modest.
+- **Weed visibility and grounding** — **Props `[ready]` `8418aa8e` for post-4 PM integration only;
+  not in the 4 PM package or shipped.** This extends `889cfde8` with the original imported
+  `WeedClump` asset and a pivot-seating correction. Day Estate PIE renders all 157 original clumps
+  (dock 57, thistle 54, dandelion 46); every Landscape-trace pivot sits 0–10 cm below ground
+  (2.7 cm median, including 36% slopes), and prompts appear only over drawn clumps. Native 8/8 and
+  Editor compile pass.
 
-  The branch still owes a dusk capture and PIE save/reload; the bounded rubble PIE is separate.
-  It is not eligible for the 4 PM merge until it reports `[ready]`. Only then may it establish that a
-  visible weed asset exists wherever the prompt says `"Weeds  E  Pull"` and that none float above
-  slopes or patches.
+  Dusk PIE (19:30–20:10) shows visible rosettes and their prompt; pulling dock changes the drawn count
+  156 → 155. F5/F9 clock rewind confirms the pulled clump stays gone while an untouched neighbour
+  remains. This completes the prior dusk and PIE reload debt. At 4–7 m in tall grass the weeds still
+  read visually modest. Props closed its editor at 13:10; the orchestrator verified no Unreal
+  processes remain.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` is main-integrated in 4 PM candidate `9175e34b`,
   package pending; not shipped.** Clearable slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
