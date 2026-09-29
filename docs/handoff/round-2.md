@@ -435,11 +435,17 @@ requirement.
   retaining the user's slider multiplier; the roof-overhead check must also run in sun. Architecture is
   separately checking rain audio. The asset itself is **not missing**: tracked/cooked `RainLoop.wav`
   (CC0 Ylmir, *Rain (loopable)*; credited) and its `.uasset` load non-spatial through
-  `UHomesteadWeather`; at full rain, the default 0.70 ambience volume yields gain 0.63 outdoors and
-  0.245 indoors, with a 2 s fade-in and low-pass. Rain is intentionally silent on dry days/times
-  (currently only day 2/3, 09:00–15:00). **Rain audio remains pending, not fixed:** Water tests a
-  rainy noon `IsPlaying`, gain and source RMS plus isolated own-editor output, then adjusts only if
-  measured.
+  `UHomesteadWeather`. Water's headless trace found the cause: `FadeIn(2, Gain)` followed by
+  `SetVolumeMultiplier(Gain)` applies rain gain twice, leaving roughly 0.40 for a default shower and
+  0.07 for drizzle, while source RMS is a healthy -24 dBFS. Its narrow branch correction uses
+  `FadeIn(2, 1)` and leaves gain solely to the multiplier. Rain is intentionally silent on dry
+  days/times (currently only day 2/3, 09:00–15:00).
+
+  **Rain audio remains pending, not fixed:** the correction is not yet audibly or PIE verified.
+  Water requests a separate isolated `[ready]` commit after the Menu editor slot. Integration may
+  include only that commit in the 4 PM batch if hearing and volume checks, native validation and branch
+  ancestry all pass; the unverified lake WIP must not hitchhike. The later 20% weather-cadence change
+  remains a separate increment.
 
   The heritage-stone west doorway is a 130 × 220 cm gap with no leaf. **Props** queues an original
   oak-plank mesh and frame after the cove stairs. The later audio/door implementer makes the leaf
