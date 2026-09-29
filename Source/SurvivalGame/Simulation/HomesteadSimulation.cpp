@@ -2998,6 +2998,21 @@ Result Simulation::Deserialize(const std::string& data)
     {
         const auto estate = MaterializeEstate(candidate, *placements_);
         if (!estate) return estate;
+        // Overgrowth baked after this save was made (the manor clear-out) can land on her plots or
+        // under her buildings: there it counts as already cleared.
+        for (auto& node : candidate.resources)
+        {
+            if (node.cleared || !IsOvergrowth(node.kind)) continue;
+            const Footprint spot{node.position, {1.0, 1.0}, 0.0};
+            bool covered = false;
+            for (const auto& plot : candidate.plots) covered = covered || FootprintsOverlap(spot, GardenFootprint(plot));
+            for (const auto& piece : candidate.structures)
+                covered = covered || (!piece.heritage && FootprintsOverlap(spot, StructureFootprint(candidate, piece)));
+            if (!covered) continue;
+            node.cleared = true;
+            node.readyAtHour = 0.0;
+            if (!SaveResourceEdit(candidate, node)) return invalid();
+        }
     }
     const auto populated = Materialize(candidate, sameWorld ? &state_ : nullptr, nextHandle);
     if (!populated) return populated;

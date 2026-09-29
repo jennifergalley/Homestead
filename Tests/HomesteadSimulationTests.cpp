@@ -3447,6 +3447,17 @@ void ClearoutKindsAndSpoiledGround()
     loaded.SetPlacements(placements);
     OK(loaded.Deserialize(sim.Serialize()));
     CHECK(PlacedNode(loaded, stump).cleared && PlacedNode(loaded, heap).cleared);
+    // A save made before the clear-out was baked loads with any new obstacle on her plot already cleared.
+    EstatePlacements rebaked = placements;
+    rebaked.placements.push_back({next++, ResourceKind::Nettles, square, 0, 0, 1, 0});
+    Simulation later;
+    later.SetPlacements(rebaked);
+    OK(later.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(later, next - 1).cleared && later.GetState().plots.size() == 1);
+    Simulation again;
+    again.SetPlacements(rebaked);
+    OK(again.Deserialize(later.Serialize()));
+    CHECK(PlacedNode(again, next - 1).cleared);
 }
 
 void LegacyVitalsLine()
