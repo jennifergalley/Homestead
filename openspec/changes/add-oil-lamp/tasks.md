@@ -18,5 +18,5 @@
 - [x] 2.7 Raised-lamp upper-body pose, set-down/pick-up clip, lab commands
 
 ## 3. Verification
-- [ ] 3.1 PIE at night: held and walking; set down and the area lit; picked up; refilled; flask bought
-- [ ] 3.2 Native tests pass; editor module compiles
+- [x] 3.1 PIE at night: held and walking; set down and the area lit; picked up; refilled; flask bought
+- [x] 3.2 Native tests pass; editor module compiles
