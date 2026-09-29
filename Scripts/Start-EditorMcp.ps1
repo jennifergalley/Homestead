@@ -12,7 +12,7 @@ Playbook: .github\skills\unreal-editor-mcp\SKILL.md (read sections 0 and 0.1 fir
 - The first launch after a build can take more than 10 minutes before MCP answers. Raise -TimeoutSeconds
   rather than killing it; watch Saved\Logs\SurvivalGame.log.
 - While it waits, the script answers the editor's "Wait for ZenServer?" dialog with Yes, and stops the
-  editor's own `Build.bat -Mode=ValidatePlatforms` child if it's still running after 2 minutes (it queues
+  editor's own `Build.bat -Mode=ValidatePlatforms` or `-Mode=QueryTargets` child if it's still running after 2 minutes (both queue
   behind other worktrees' UBT builds and can hold startup for 10+ minutes). Before launching it removes a
   stale Saved\Autosaves\PackageRestoreData.json. All three otherwise block MCP with no log output.
 - Live Coding and ray tracing are off by default for agent editors (-RayTracing turns RT back on).
@@ -208,13 +208,17 @@ while ((Get-Date) -lt $deadline) {
     if ([HomesteadMcp.EditorDialogs]::AnswerYes([uint32]$process.Id, 'Wait for ZenServer?')) {
         Write-Host 'Answered "Wait for ZenServer?" with Yes (zenserver was restarting for this worktree''s cache).'
     }
-    # Every editor start runs `Build.bat -Mode=ValidatePlatforms` (TargetPlatformManagerModule.cpp). It's a
-    # single-instance UBT mode, so it queues behind any other worktree's UBT build and can hold startup for
-    # 10+ minutes. It normally takes seconds; stopping a stuck one lets the editor continue (lanes did this
-    # by hand). Only this editor's own child tree is touched.
+    # Two UBT steps the editor runs at startup are single-instance UBT modes, so each queues behind any other
+    # worktree's UBT build and can hold startup for 10-30+ minutes; normally they take seconds:
+    #   -Mode=ValidatePlatforms (TargetPlatformManagerModule.cpp): platform SDK check.
+    #   -Mode=QueryTargets (DesktopPlatformBase.cpp): refreshes the cached target list, and the editor falls
+    #   back to the existing cache if it doesn't finish.
+    # Stopping a stuck one lets the editor continue (lanes did this by hand). Only this editor's own child tree
+    # is touched.
     $stuck = @(Get-CimInstance Win32_Process -Filter "ParentProcessId = $($process.Id)" -ErrorAction SilentlyContinue |
-        Where-Object { $_.CommandLine -match 'ValidatePlatforms' -and ((Get-Date) - $_.CreationDate).TotalSeconds -gt 120 })
+        Where-Object { $_.CommandLine -match 'Mode=(ValidatePlatforms|QueryTargets)' -and ((Get-Date) - $_.CreationDate).TotalSeconds -gt 120 })
     foreach ($child in $stuck) {
+        $step = if ($child.CommandLine -match 'Mode=(\w+)') { $Matches[1] } else { 'UBT' }
         $tree = @($child.ProcessId)
         for ($i = 0; $i -lt $tree.Count -and $i -lt 64; $i++) {
             $tree += @(Get-CimInstance Win32_Process -Filter "ParentProcessId = $($tree[$i])" -ErrorAction SilentlyContinue |
@@ -222,7 +226,7 @@ while ((Get-Date) -lt $deadline) {
         }
         [array]::Reverse($tree)
         foreach ($id in $tree) { Stop-Process -Id $id -Force -ErrorAction SilentlyContinue }
-        Write-Host "Stopped the editor's ValidatePlatforms check (PID $($child.ProcessId), over 2 min; probably waiting on another worktree's UBT build)."
+        Write-Host "Stopped the editor's $step step (PID $($child.ProcessId), over 2 min; probably waiting on another worktree's UBT build)."
     }
     Start-Sleep -Seconds 3
 }

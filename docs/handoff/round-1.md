@@ -79,6 +79,10 @@ integration session merges and packages.
 
 **Registry: estate placement ids and scenery kinds.** Claim a range here (through the docs agent or
 the orchestrator) before using it, and keep the comment at `Simulation\HomesteadEstate.h` ~87 in step.
+**Append only:** placements added with `grow()`/`along()` in `HomesteadEstate.cpp` take sequential ids
+(`next++`), so inserting a line mid-run renumbers every later placement, and saves then clear the
+wrong nodes. Moving or removing placements needs `table.bakeVersion` raised (the orchestrator's call,
+like the save version).
 
 | Placement ids | Owner |
 | --- | --- |
@@ -94,10 +98,11 @@ the orchestrator) before using it, and keep the comment at `Simulation\Homestead
 | Scenery kinds (`EstateSceneryKinds` in `HomesteadWorld.cpp`; `scatter.py` kind bytes must match) | Owner |
 | --- | --- |
 | 13-15: oak, beech, sycamore; 16-18: hawthorn, holly, hazel coppice | trees lane |
-| 19-47 | MVP woodland biome |
+| 19-41 | MVP woodland biome (`Scripts\Terrain\mvp_woodland.py`) |
 
-The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by `scatter.py` and
-`bake_ground.py` (on its lane branch; not on `main` yet).
+The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json` (not in `estate_layout.json`,
+which `reshape.py` regenerates), shared by `scatter.py` and `bake_ground.py`. On its lane branch; not on
+`main` yet.
 
 **Re-bake order after `scatter.py` regenerates the scenery:** `bake_ground.py` and
 `build_ground.py` (ground lane), then the estate map (`docs\setup.md`, "Estate map").
@@ -128,6 +133,10 @@ The MVP woodland polygon lives in `Scripts\Terrain\mvp_woodland.json`, shared by
   If your branch adds anything to the save format, tell the orchestrator before your `[ready]`. New
   save data goes in tagged trailing sections (parcels, economy, `tools`, `manor`), and an unknown tag
   invalidates the save. Estate saves go to `<SaveGames>\Estate\`.
+  **Appending a `Homestead::Item` breaks same-version saves:** `WriteStock` writes every stock
+  positionally with no count, so a new item widens the line and existing saves read as "corrupt".
+  Until `openspec/changes/harden-save-item-stocks` lands, tell the orchestrator before appending an
+  item (also in the architecture agent's `homestead-add-item-or-interactable` skill).
 - `SHomesteadMenu` edits are serialized through the orchestrator.
 - **Integration session: packaging and batching.** Merge `[ready]`s in batches (one editor build, one
   game-target build, one native test run, one PIE pass per batch), and package only at the end of a round
@@ -165,6 +174,10 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Decisions during the round
 
+- **Playtest builds on a schedule** (Jenny, 2026-09-28): on the "Homestead Estate" shortcut by 7:30 AM
+  daily and 4:00 PM on weekdays (plus weekend builds when noticeable features land). The orchestrator
+  triggers the integration session at about 5:30 AM and 2:00 PM; lanes close their editors while it
+  packages; `main` stays playable. Details are in `docs\handoff\README.md`, "Playtest builds".
 - **Waiting means ending your turn** (Jenny, 2026-09-28, all sessions): no sleep/poll loops while waiting
   for a slot, the UBT queue, a `[ready]` or a perf window. Schedule a wake-up with
   `save_session_automation`, end the turn, and clear it afterwards (`docs\handoff\README.md`). The
@@ -201,6 +214,14 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   `Homestead.lnk` is never touched.
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. Its "Estate tool route"
   is now in skill section 4; the manor lane added the on-foot routes to all five salvage piles.
+
+## Pending doc updates on merge
+
+- Architecture agent (`77d4cee7`, not on `main` yet): when `docs/architecture.md` and the
+  `homestead-code-conventions` skill land, point the C++ rows of the editor skill's table 0.1 (unity
+  clashes, C4458/C4459, C2487, enum default args, UPROPERTY-not-static, `../Simulation/` includes,
+  runtime ISM Rebuild) and section 8's "C++ conventions that bite" at that skill's "Unreal C++"
+  section, keeping each row's Symptom column. The docs agent does this.
 
 ## Tooling requests (unassigned)
 
