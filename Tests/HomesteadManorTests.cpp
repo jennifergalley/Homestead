@@ -285,6 +285,89 @@ void DerelictFarmAndDisrepair()
 }
 }
 
+void StarterChestAndHoeClue()
+{
+    // Jenny's playtest: a new estate's chest also holds food and a change of clothes, the hoe is
+    // the second rusted head she finds, and the game says where to look for it.
+    Simulation sim = NewEstate();
+    const State& state = sim.GetState();
+    const Structure* chest = Find(state, Piece::Chest);
+    CHECK(chest->storage[static_cast<int>(Item::WateringCan)] == 1);
+    CHECK(chest->storage[static_cast<int>(Item::Branch)] == Manor::SeededBranches);
+    CHECK(chest->storage[static_cast<int>(Item::Pasty)] == Manor::StarterPasties && Manor::StarterPasties == 3);
+    CHECK(chest->storage[static_cast<int>(Item::Bread)] == Manor::StarterBread && Manor::StarterBread == 2);
+    // Pail, branches, pasties, bread, then each outfit piece in order; she still wears only her tunic.
+    CHECK(chest->layout.size() == 4 + std::size(Manor::StarterWardrobe));
+    CHECK(chest->layout[2].item == Item::Pasty && chest->layout[2].quantity == 3);
+    CHECK(chest->layout[3].item == Item::Bread && chest->layout[3].quantity == 2);
+    int stored = 0, worn = 0;
+    for (std::size_t i = 0; i < std::size(Manor::StarterWardrobe); ++i)
+    {
+        const LayoutEntry& entry = chest->layout[4 + i];
+        const WearableInstance* item = sim.GetWearable(entry.wearableId);
+        CHECK(item && item->definition == Manor::StarterWardrobe[i] && item->owner == WearableOwner::Chest
+            && item->chestId == chest->id && item->dye == 0);
+    }
+    for (const auto& item : state.wearables)
+    {
+        stored += item.owner == WearableOwner::Chest;
+        worn += item.owner == WearableOwner::Equipped;
+        if (item.owner == WearableOwner::Equipped) CHECK(item.definition == WearableDefinition::LinenTunic);
+    }
+    CHECK(stored == 7 && worn == 1 && state.wearables.size() == 8);
+    CHECK(sim.ChestUsedCapacity(chest->id) == 1 + Manor::SeededBranches + 3 + 2 + 7);
+    CHECK(sim.ChestUsedCapacity(chest->id) <= ChestCapacity);
+    // Nothing more appears on reload: the chest and wardrobe round-trip exactly.
+    Simulation reloaded;
+    reloaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(reloaded.Serialize() == sim.Serialize());
+    const Structure* again = Find(reloaded.GetState(), Piece::Chest);
+    CHECK(again->storage[static_cast<int>(Item::Pasty)] == 3 && again->storage[static_cast<int>(Item::Bread)] == 2);
+    CHECK(reloaded.GetState().wearables.size() == 8);
+    // Loading never restocks it: take the food and clothes out, save and reload, and the chest stays bare.
+    Simulation emptied = NewEstate();
+    const int chestId = Find(emptied.GetState(), Piece::Chest)->id;
+    const Point chestSide = StructureCenter(emptied.GetState(), *Find(emptied.GetState(), Piece::Chest));
+    OK(emptied.Transfer(chestId, Item::Pasty, -3, chestSide));
+    OK(emptied.Transfer(chestId, Item::Bread, -2, chestSide));
+    Simulation bareLoad;
+    bareLoad.SetPlacements(ProvisionalEstatePlacements());
+    OK(bareLoad.Deserialize(emptied.Serialize()));
+    const Structure* bare = Find(bareLoad.GetState(), Piece::Chest);
+    CHECK(bare->storage[static_cast<int>(Item::Pasty)] == 0 && bare->storage[static_cast<int>(Item::Bread)] == 0);
+    CHECK(bareLoad.Count(Item::Pasty) == 3 && bareLoad.Count(Item::Bread) == 2 && bareLoad.GetState().wearables.size() == 8);    // The hoe blade is the second rusted head, after the billhook.
+    State order = state;
+    CHECK(NextSalvageHead(order) == Item::RustedBillhookHead);
+    ++order.inventory[static_cast<int>(Item::Billhook)];
+    CHECK(NextSalvageHead(order) == Item::RustedHoeBlade);
+    ++order.inventory[static_cast<int>(Item::RustedHoeBlade)];
+    CHECK(NextSalvageHead(order) == Item::RustedAxeHead);
+    ++order.inventory[static_cast<int>(Item::Hatchet)];
+    CHECK(NextSalvageHead(order) == Item::RustedScytheBlade);
+    ++order.inventory[static_cast<int>(Item::Scythe)];
+    CHECK(NextSalvageHead(order) == Item::RustedPickHead);
+    ++order.inventory[static_cast<int>(Item::Pickaxe)];
+    CHECK(NextSalvageHead(order) == Item::Count);
+    // Two searches in a new game: billhook first, then the hoe blade.
+    Simulation search = NewEstate();
+    for (int pile : {520001, 520002})
+    {
+        Point at{};
+        for (const auto& node : search.GetState().resources) if (node.id == pile) at = node.position;
+        OK(search.ClearOvergrowth(pile, Item::Count, at));
+    }
+    CHECK(search.Count(Item::RustedBillhookHead) == 1 && search.Count(Item::RustedHoeBlade) == 1);
+    CHECK(search.Count(Item::RustedAxeHead) == 0);
+    // Tilling without a hoe says where to look; the journal says where the tools hung.
+    const int gx = GardenCell(Spawn().x + 900.0), gy = GardenCell(Spawn().y);
+    const Result till = search.Till(gx, gy, GardenCellCenter(gx, gy));
+    CHECK(!till.ok && till.message == "You need a hoe to till. Search the salvage in the old manor for a hoe blade.");
+    const std::string arrival = Manor::JournalText(Manor::ArrivalEntry, state);
+    CHECK(arrival.find("pasties and bread") != std::string::npos && arrival.find("change of clothes") != std::string::npos);
+    CHECK(arrival.find("Father's garden tools always hung in the west rooms, by the chimney") != std::string::npos);
+}
+
 int main()
 {
     SeededStandingRoom();
@@ -297,6 +380,8 @@ int main()
     std::cout << "PASS names validation and persistence\n";
     DerelictFarmAndDisrepair();
     std::cout << "PASS derelict farm and estate disrepair\n";
+    StarterChestAndHoeClue();
+    std::cout << "PASS starter chest, hoe blade second and its clues\n";
     std::cout << checks << " checks passed.\n";
     return 0;
 }

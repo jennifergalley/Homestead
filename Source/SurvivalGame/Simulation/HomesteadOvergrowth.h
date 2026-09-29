@@ -48,7 +48,7 @@ Item ToolItem(ToolKind tool);
 ToolKind ToolForItem(Item item);
 // "Needs an iron axe".
 std::string NeedsToolMessage(ToolKind tool, ToolTier tier);
-// The rusted head a salvage pile gives next: the first of billhook, axe, scythe, pickaxe and hoe
+// The rusted head a salvage pile gives next: the first of billhook, hoe, axe, scythe and pickaxe
 // she owns neither as a head nor as a hafted tool; Item::Count once she has all five.
 Item NextSalvageHead(const State& state);
 // Energy multiplier for a tool tier (1 at worn).

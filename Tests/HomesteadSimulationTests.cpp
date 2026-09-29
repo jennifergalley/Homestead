@@ -3512,7 +3512,8 @@ void HaftingBootstrapAndClearing()
     CHECK(sim.Count(Item::RustedBillhookHead) == 1 && sim.Count(Item::ScrapIron) == 1);
     CHECK(PlacedNode(sim, salvage).cleared && !sim.CanHarvest(salvage));
     UnchangedFailure(sim, [&] { return sim.Harvest(salvage, at); });
-    CHECK(NextSalvageHead(sim.GetState()) == Item::RustedAxeHead);
+    // The hoe blade comes second (Jenny's playtest): she can start a garden on her first morning.
+    CHECK(NextSalvageHead(sim.GetState()) == Item::RustedHoeBlade);
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::HaftBillhook, at); });
     OK(sim.Harvest(bough, at));
     CHECK(sim.Count(Item::Branch) == 3 && sim.Count(Item::Kindling) == 1);
@@ -3523,7 +3524,8 @@ void HaftingBootstrapAndClearing()
     CHECK(sim.Count(Item::Billhook) == 1 && sim.Count(Item::RustedBillhookHead) == 0 && sim.Count(Item::Branch) == 1);
     CHECK(Close(sim.GetState().energy, energy - Exertion::CraftEnergy));
     CHECK(sim.GetToolTier(ToolKind::Billhook) == ToolTier::Worn);
-    CHECK(NextSalvageHead(sim.GetState()) == Item::RustedAxeHead);
+    // The hoe blade comes second (Jenny's playtest): she can start a garden on her first morning.
+    CHECK(NextSalvageHead(sim.GetState()) == Item::RustedHoeBlade);
 
     // The wrong tool never clears; a worn billhook clears thin bramble in one swing and spends energy once.
     OK(sim.GrantItems(Item::Hatchet, 1));
@@ -3667,9 +3669,9 @@ void SalvageOrderAndScytheArc()
     placements.placements.push_back({next++, ResourceKind::Weeds, {at.x + 1100, at.y + 20}, 0, 0, 1, 0});
     Simulation sim;
     OK(sim.NewEstateGame(ProvisionalEstateLayout(), placements));
-    // Each pile gives the next missing head, billhook first, then only scrap.
-    const Item order[] = {Item::RustedBillhookHead, Item::RustedAxeHead, Item::RustedScytheBlade,
-        Item::RustedPickHead, Item::RustedHoeBlade};
+    // Each pile gives the next missing head, billhook then hoe first, then only scrap.
+    const Item order[] = {Item::RustedBillhookHead, Item::RustedHoeBlade, Item::RustedAxeHead,
+        Item::RustedScytheBlade, Item::RustedPickHead};
     for (int i = 0; i < 6; ++i)
     {
         const int pile = PlacedId(sim, ResourceKind::SalvagePile, i);

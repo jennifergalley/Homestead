@@ -236,10 +236,11 @@ Item NextSalvageHead(const State& state)
             if (drop.wearableId == 0 && drop.item == item) return true;
         return false;
     };
+    // The hoe comes second, so she can start a garden on her first morning (Jenny's playtest).
     const std::pair<Item, Item> order[] = {
-        {Item::RustedBillhookHead, Item::Billhook}, {Item::RustedAxeHead, Item::Hatchet},
-        {Item::RustedScytheBlade, Item::Scythe}, {Item::RustedPickHead, Item::Pickaxe},
-        {Item::RustedHoeBlade, Item::DiggingStick}};
+        {Item::RustedBillhookHead, Item::Billhook}, {Item::RustedHoeBlade, Item::DiggingStick},
+        {Item::RustedAxeHead, Item::Hatchet}, {Item::RustedScytheBlade, Item::Scythe},
+        {Item::RustedPickHead, Item::Pickaxe}};
     for (const auto& entry : order)
         if (!owned(entry.first) && !owned(entry.second)) return entry.first;
     return Item::Count;
