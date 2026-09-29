@@ -160,7 +160,7 @@ double UHomesteadEstateAuthoringLibrary::EditorGroundHeight(double X, double Y)
 }
 
 FString UHomesteadEstateAuthoringLibrary::ApplyEstateHeightfield(const FString& HeightfieldR16, int32 MinX, int32 MinY,
-    int32 MaxX, int32 MaxY, int32 TileSize, bool bDryRun)
+    int32 MaxX, int32 MaxY, int32 TileSize, bool bDryRun, const FString& ReportCsv)
 {
     UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
     if (!World)
@@ -203,6 +203,7 @@ FString UHomesteadEstateAuthoringLibrary::ApplyEstateHeightfield(const FString& 
     int32 Tiles = 0, TilesChanged = 0;
     int64 VerticesChanged = 0;
     int32 WorstDelta = 0;
+    FString Report = TEXT("x,y,landscape,heightfield\n");
     {
         FHeightmapAccessor<false> Accessor(Info);
         Accessor.SetEditLayer(BaseLayer->GetGuid());
@@ -219,10 +220,16 @@ FString UHomesteadEstateAuthoringLibrary::ApplyEstateHeightfield(const FString& 
                 for (int32 Y = 0; Y < Height; ++Y)
                     for (int32 X = 0; X < Width; ++X)
                     {
-                        const uint16 Value = Source[int64(Y0 + Y) * EstateAuthoringVerts + X0 + X];
+                        // The data interface misreads the landscape's outermost row and column (both
+                        // GetData and GetDataFast return a neighbour's value there, while the rendered
+                        // landscape matches the heightfield), so leave them as they are.
+                        const bool bOuterEdge = X0 + X >= EstateAuthoringVerts - 1 || Y0 + Y >= EstateAuthoringVerts - 1;
+                        const uint16 Value = bOuterEdge ? Current[Y * Width + X] : Source[int64(Y0 + Y) * EstateAuthoringVerts + X0 + X];
                         Wanted[Y * Width + X] = Value;
                         const int32 Delta = FMath::Abs(int32(Value) - int32(Current[Y * Width + X]));
                         Differ += Delta != 0;
+                        if (Delta != 0 && !ReportCsv.IsEmpty())
+                            Report += FString::Printf(TEXT("%d,%d,%d,%d\n"), X0 + X, Y0 + Y, Current[Y * Width + X], Value);
                         WorstDelta = FMath::Max(WorstDelta, Delta);
                     }
                 ++Tiles;
@@ -234,6 +241,8 @@ FString UHomesteadEstateAuthoringLibrary::ApplyEstateHeightfield(const FString& 
                     Accessor.SetData(X0 + LandscapeMinX, Y0 + LandscapeMinY, X1 + LandscapeMinX, Y1 + LandscapeMinY, Wanted.GetData());
             }
     }
+    if (!ReportCsv.IsEmpty())
+        FFileHelper::SaveStringToFile(Report, *ReportCsv);
     if (Loader && bDryRun)
         if (UWorldPartition* Partition = World->GetWorldPartition())
             Partition->ReleaseEditorLoaderAdapter(Loader);
