@@ -465,12 +465,16 @@ pending, so this does not claim early Energy is fully solved.
   without saving a drag. Consider a one-shot Effects preview and avoid reintroducing gain-squared
   behavior; verify at 1080p and 4K.
 - **Contextual hotbar eating and berry feedback** — **Menu `88180744` shipped in the 4 PM playable
-  build.** Controller A/X eats one selected berry per tap only when Talk has no
-  precedence, and displays `+` the actual bounded Energy delta. **Pending follow-up:** every rapid
-  berry tap must apply Energy immediately without waiting for the bite animation, auto-repeat or a
-  focus conflict; Menu owns input/Simulation coordination and Props owns animation. Berries remain
-  edible beside tilled soil despite plant focus. Remove the duplicate centre `Ate Berries +Energy
-  +0Food` success toast when the bar popup shows the gain, while preserving errors.
+  build.** Menu core-input pair `60c6d6ba` + `a874d260` is `[ready]` for Integration, not merged or
+  shipped: native 9/9, Editor build and PIE verify F/X weeds without sowing, A/E seed-selection
+  refusal when empty, no Turnip fallback after depletion, selected berry A/E sow, and five rapid berry
+  taps consuming five during the chew. Berries remain edible beside tilled soil despite plant focus.
+  The first planted plot still holds focus until squarely at the next plot; woodland UE suites remain
+  unrun.
+
+  **Next Menu slice:** show the bar popup without a duplicate centre `Ate Berries +Energy +0Food`
+  success toast, preserving errors; remove the `Selected quantity stored` copy. No UE while
+  Integration owns the slot.
 - **Music variety** — **pending, not fixed.** **Architecture Agent** (`a1648ae7`) traced the root
   cause: the shipped catalog loads only one track, `EveningHarp`, despite five named entries. The
   shuffle bag anti-repeats correctly when it has more than one track, but the existing 55–110 s gap
@@ -736,11 +740,14 @@ pending, so this does not claim early Energy is fully solved.
   `ValidateInventory`. **Menu** owns the shop upgrade row, `bRucksackVisible`, the Appearance toggle
   and the 120-cap UI helpers. Tests cover malformed/duplicate entitlement sections, rebuy refusal,
   insufficient funds and capacity/save behavior.
-- **Town travel** — **core-loop priority; pending and not shipped.** A wooden `Walk to town` sign outside the estate and a
-  return sign by town; clickable **Town** and **Manor** destinations on the Map invoke the same travel
-  action. Architecture traced the road polyline in `estate_layout.json` (486 points / 1.94 km; runtime
-  has landmarks only). The MetaHuman walks 210 cm/s (legacy 180); at a 60-minute day, road-only travel
-  is 6.16 game hours / 15.4 real minutes (12.32 game hours at a 30-minute day), plus connectors.
+- **Town travel** — **core-loop priority; Menu Map travel `a4bb831f` is `[ready]` for Integration,
+  not merged or shipped.** Its PIE evidence shows cancel remains atomic; Town→Manor advances 7 h 27
+  while grounded/awake with hunger loss; Manor→Town preview warns the next-day store will be closed.
+  Signs are not wired. A wooden `Walk to town` sign outside the estate and a return sign by town still
+  invoke the same action as clickable **Town** and **Manor** map destinations. Architecture traced the
+  road polyline in `estate_layout.json` (486 points / 1.94 km; runtime has landmarks only). The
+  MetaHuman walks 210 cm/s (legacy 180); at a 60-minute day, road-only travel is 6.16 game hours /
+  15.4 real minutes (12.32 game hours at a 30-minute day), plus connectors.
 
   Travel must first preflight a candidate advance for hunger failure, unexpected 6-hour doze and
   `MaxHour`, then atomically commit time plus a safe position through `PrepareWorldAt` /
@@ -813,7 +820,7 @@ pending, so this does not claim early Energy is fully solved.
 - Performance (`6841f429`, not on `main` yet): `PerfLock.ps1` treats `blender.exe` as a build, so
   `Start-PerfWindow.ps1` names and refuses it. When it lands, update the editor skill perf-window
   bullet to say the script enforces the no-Blender rule.
-- Menu planting prompts (`a874d260`, pending PIE/main): after it lands, update the editor skill's
+- Menu planting prompts (`a874d260`, `[ready]`, pending main): after it lands, update the editor skill's
   tilled-square controls: A/E sows the hotbar-selected seed; no seed selected says `Choose seeds on
   the hotbar to sow`; selected Wild Roots sow roots; F/X weeds only; selected zero stock gives the
   seed-specific refusal. The Menu README changes with the commit already describe the behavior.
