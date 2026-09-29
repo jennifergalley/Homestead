@@ -212,13 +212,14 @@ tracks, bends the blades in gusts (`GrassWind`) and parts them round the heroine
 all three together.
 
 MVP woodland zone: when `Scripts/Terrain/mvp_woodland.json` exists (the woodland-biome lane's
-region: `polygon` in metres, `edge_m`), `bake_ground.py` writes a mask into `T_EstateCanopy.B`. It
-rises from 0 at the polygon's edge to 1 at `edge_m` inside. Inside the zone the landscape shows the
-survival prototype's forest floor (`T_GrassGround`, untinted, 3 m world tiling, easing into a
-12.9 m copy past 60 m). The meadow grows no blades there, because that lane scatters the prototype's
-own grass clumps, and footsteps use the woodland-floor sound. Tree canopy kinds and crown radii come
-from `SCENERY_TREES` in `Scripts/Map/bake_estate_map.py`, with a fallback table in `bake_ground.py`
-for kinds it doesn't list yet.
+region: `polygon` in metres, optional `floor_edge_m` (default 15) and `glades`), no meadow blades grow
+inside the polygon and footsteps are woodland floor there, since that lane scatters the survival
+prototype's own grass clumps. `T_EstateCanopy.B` ramps the prototype's forest floor in from the edge
+to `floor_edge_m` inside, along a wandering line. The floor is `T_GrassGround`, untinted, at 3 m
+world tiling, easing into a 12.9 m copy past 60 m, and glades take a lighter mix. Tree canopy kinds
+and crown radii come from `SCENERY_TREES` in `Scripts/Map/bake_estate_map.py`, with a fallback in
+`bake_ground.py` for kinds 13-16 and 19-22 until it lists them. Order after the woodland and trees
+branches land: `scatter.py`, then `bake_ground.py` and `build_ground.py`.
 
 Weather and night: `build_ground.py` also makes `MPC_EstateGround` (Wetness, Daylight), which
 `AHomesteadWorld::UpdateLighting` sets every refresh. The ground wets through over the first half hour

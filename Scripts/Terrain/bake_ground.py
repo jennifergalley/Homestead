@@ -102,9 +102,10 @@ def line_distance(points, shape):
 
 
 # Crown radius (m, scale 1) for tree kinds that bake_estate_map.py's SCENERY_TREES doesn't list yet;
-# SCENERY_TREES overrides these. 13-18 are the trees lane's oak, beech, sycamore, hawthorn, holly and
-# hazel coppice; 19-22 the woodland-biome lane's jacaranda, fir pole and two fir saplings.
-CROWN_FALLBACK = {0: 3.6, 1: 2.8, 13: 8.3, 14: 7.2, 15: 7.4, 16: 2.5, 17: 2.5, 18: 2.2,
+# SCENERY_TREES overrides these. 13-16 are the trees lane's oak, beech, sycamore and hawthorn; 19-22
+# the woodland-biome lane's jacaranda, fir pole and two fir saplings. Shrub kinds (holly, hazel
+# coppice) aren't canopy.
+CROWN_FALLBACK = {0: 3.6, 1: 2.8, 13: 8.3, 14: 7.2, 15: 7.4, 16: 2.5,
                   19: 4.0, 20: 2.2, 21: 1.0, 22: 1.2}
 
 
@@ -153,24 +154,32 @@ def canopy_mask(shape, scenery=None):
 
 
 def mvp_woodland_zone(shape):
-    """0-1 over the woodland-biome lane's "MVP woodland" region (Scripts/Terrain/mvp_woodland.json:
-    {"polygon": [[x, y], ...] in metres, "edge_m": ecotone width}), rising from 0 at its edge to 1
-    edge_m inside. Inside
-    it the ground is the MVP forest floor, the meadow grows no blades (that lane scatters the MVP's
-    own grass clumps) and she walks on woodland floor. None when the file is absent."""
+    """The woodland-biome lane's "MVP woodland" region (Scripts/Terrain/mvp_woodland.json: "polygon"
+    [[x, y], ...] in metres, optional "floor_edge_m" (default 15) and "glades" [[x, y, radius], ...]).
+    Returns (zone, floor): zone is 1 inside the polygon (no meadow blades, woodland footsteps) and
+    floor ramps the MVP forest floor in from 0 at the polygon's edge to 1 floor_edge_m inside, the
+    ramp's line wandering with noise; glades take a lighter mix of the floor. None when absent."""
     path = os.path.join(HERE, "mvp_woodland.json")
     if not os.path.exists(path):
         return None
-    zone = json.load(open(path))
-    poly = np.asarray(zone["polygon"], np.float64)
-    edge = float(zone.get("edge_m", 25.0))
+    spec = json.load(open(path))
+    poly = np.asarray(spec["polygon"], np.float64)
+    ramp = float(spec.get("floor_edge_m", 15.0))
     inside = np.zeros(shape, bool)
     rr, cc = fill_polygon(poly[:, 1] + H, poly[:, 0] + H, shape)      # rows = y, cols = x
     inside[rr, cc] = True
-    signed = distance_transform_edt(inside) - distance_transform_edt(~inside)   # + inside, metres
-    mask = smoothstep(0.0, edge, signed).astype(np.float32)             # the ecotone lies inside the polygon
-    print("MVP woodland zone:", len(poly), "points,", round(float(inside.sum()) / 1e4, 1), "ha, edge", edge, "m")
-    return mask
+    depth = distance_transform_edt(inside).astype(np.float32)          # metres inside the polygon
+    wander = (fbm(shape, 2, 256, 31) - 0.5) * 0.9 * ramp               # the ecotone line meanders
+    floor = smoothstep(0.0, ramp, depth + wander) * inside
+    zone = smoothstep(0.0, 2.0, depth).astype(np.float32)
+    coords = (np.arange(shape[0]) - H).astype(np.float32)
+    X, Y = np.meshgrid(coords, coords)
+    for gx, gy, gr in spec.get("glades", []):
+        glade = smoothstep(gr + 4.0, gr * 0.6, np.hypot(X - gx, Y - gy))
+        floor *= 1.0 - 0.3 * glade
+    print("MVP woodland zone:", len(poly), "points,", round(float(inside.sum()) / 1e4, 1), "ha, floor ramp", ramp, "m,",
+          len(spec.get("glades", [])), "glades")
+    return zone, floor.astype(np.float32)
 
 
 def ground_fields(h, w, layout):
@@ -235,16 +244,14 @@ def ground_fields(h, w, layout):
     density *= 1.0 - 0.8 * canopy
     height *= 1.0 - 0.3 * canopy
 
-    zone = mvp_woodland_zone(h.shape)
-    if zone is None:
-        zone = np.zeros(h.shape, np.float32)
+    zone, floor = mvp_woodland_zone(h.shape) or (np.zeros(h.shape, np.float32), np.zeros(h.shape, np.float32))
     density *= 1.0 - zone
 
     density = np.clip(density, 0, 1)
     # Stony soil on steep banks that aren't painted cliff (the cliff layer has its own rock).
     stony = smoothstep(20.0, 34.0, gaussian_filter(slope, 2.0)) * (1.0 - w["CliffRock"])
     fields = {"density": density, "height": np.clip(height, 0, 1), "dry": np.clip(dry, 0, 1), "wear": np.clip(wear, 0, 1),
-              "canopy": canopy, "stony": np.clip(stony, 0, 1), "zone": zone}
+              "canopy": canopy, "stony": np.clip(stony, 0, 1), "zone": floor}
 
     surface = np.full(h.shape, SURFACES["Soil"], np.uint8)
     dominant = np.argmax(np.stack([w[n] for n in LAYERS]), axis=0)
