@@ -290,11 +290,12 @@ void AHomesteadHUD::DrawHUD()
             const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth, ViewHeight);
             ProtectFeedback(TEXT("minimap"), Minimap.Min.X, Minimap.Min.Y, Minimap.GetSize().X, Minimap.GetSize().Y);
         }
-        const float HintsWidth = FMath::Min(686.0f, ViewWidth - 36);
+        // The wheel picks the hotbar tool; Ctrl+wheel zooms the camera (AHomesteadController::InputKey).
+        const TCHAR* Hints = PC->UsesGamepad() ? TEXT("[Menu] Field book   [L3] Sprint   [R3] Camera distance")
+            : TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] Sprint   Wheel: tool   Ctrl+wheel: zoom");
+        const float HintsWidth = FMath::Max(120.0f, FMath::Min(TextWidth(Hints, 19) + 26, CalendarX - 16 - 30));
         Panel(30, 26, HintsWidth, 46, Pine);
-        Write(PC->UsesGamepad() ? TEXT("[Menu] Field book   [L3] Sprint   [R3] Camera distance")
-                : TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] Sprint   Ctrl+wheel: zoom"),
-            42, 38, 19, Ink);
+        Write(Hints, 42, 38, 19, Ink);
     }
     const FString Toast = PC->Toast();
     if (!Toast.IsEmpty())

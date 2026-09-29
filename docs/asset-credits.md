@@ -106,7 +106,7 @@ material. No scanned, photographed or downloaded texture or mesh is used.
 
 ## Fonts
 
-The title card, the Names step and the display headings use **EB Garamond** (Regular and Italic,
+The title card, the Names step, the display headings and the field book's notice card use **EB Garamond** (Regular and Italic,
 `Assets\Fonts\EBGaramond`), Copyright 2017 The EB Garamond Project Authors
 (https://github.com/octaviopardo/EBGaramond12), licensed under the
 [SIL Open Font License 1.1](https://openfontlicense.org). The licence text ships beside the fonts in

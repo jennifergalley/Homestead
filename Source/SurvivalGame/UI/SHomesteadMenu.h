@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/SOverlay.h"
 #include "../HomesteadController.h"
 #include "HomesteadMenuNavigation.h"
 
@@ -89,6 +90,10 @@ public:
     }
     void PointerItemDragMove(FVector2D Position);
     float GetCraftProgress() const { return CraftHoldRecipe >= 0 ? CraftHoldElapsed / CraftCycleSeconds : 0.0f; }
+    // The notice card that floats over the book for the latest toast (never takes layout space).
+    bool IsNoticeShowing() const;
+    bool IsNoticeAtTop() const { return bNoticeTop; }
+    FString GetNoticeText() const { return IsNoticeShowing() ? NoticeText : FString(); }
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery };
@@ -196,6 +201,19 @@ private:
     double CraftFlashStart = 0;
     int32 CraftBeat = 0;
     ECraftInput CraftInput = ECraftInput::None;
+    // The notice card: a brief, non-focusable card over the book at the bottom centre, or under the
+    // tabs when the focused control sits where the card would go.
+    TSharedPtr<SOverlay> BookOverlay;
+    TSharedPtr<SWidget> NoticeCard;
+    SOverlay::FOverlaySlot* NoticeSlot = nullptr;
+    FString NoticeText;
+    bool bNoticeError = false;
+    bool bNoticeTop = false;
+    bool bNoticePrimed = false;
+    uint32 NoticeSerialSeen = 0;
+    double NoticeShownAt = -1000.0;
+    void UpdateNotice();
+    void PlaceNotice();
 
     TSharedRef<SWidget> BuildBody();
     // The Map tab (page 7): one focusable map view that takes sticks, triggers and the D-pad.

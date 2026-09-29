@@ -500,7 +500,8 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
     }
     if (bPlanning && !bBookOpen && !IsFailed() && Params.Key == EKeys::MouseWheelAxis && Params.Event == IE_Axis
         && FMath::Abs(Params.AmountDepressed) >= 1.0f
-        && !(bControlDown || IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl)))
+        && !(bControlDown || IsInputKeyDown(EKeys::LeftControl) || IsInputKeyDown(EKeys::RightControl)
+            || FSlateApplication::Get().GetModifierKeys().IsControlDown()))
     {
         RotatePlacementBy(Params.AmountDepressed > 0 ? 1 : -1);
         return true;
@@ -521,8 +522,10 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         if (Params.Key == EKeys::MouseWheelAxis && Params.Event == IE_Axis
             && FMath::Abs(Params.AmountDepressed) >= 1.0f)
         {
+            // Slate's modifier state is the OS's: a Ctrl press that a focused widget took never reaches
+            // InputKey, so bControlDown alone missed it and Ctrl+wheel cycled the hotbar instead.
             const bool Control = bControlDown || IsInputKeyDown(EKeys::LeftControl)
-                || IsInputKeyDown(EKeys::RightControl);
+                || IsInputKeyDown(EKeys::RightControl) || FSlateApplication::Get().GetModifierKeys().IsControlDown();
             if (Control)
             {
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
@@ -775,9 +778,14 @@ void AHomesteadController::EatFromHotbar(Homestead::Item Food)
     const auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     // One mouthful at a time: clicks while she is still eating are ignored.
     if (Animation && Animation->IsEating()) return;
+    const double FoodBefore = State().hunger, EnergyBefore = State().energy;
     const auto Result = Sim.Eat(Food);
     Notify(Result);
-    if (Result.ok && Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
+    if (!Result.ok) return;
+    if (Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
+    MealGain.Food = State().hunger - FoodBefore;
+    MealGain.Energy = State().energy - EnergyBefore;
+    ++MealGain.Serial;
 }
 
 TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
@@ -2312,6 +2320,9 @@ FString AHomesteadController::FocusActions() const
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
         if (!SeedPouchHint().IsEmpty())
             return (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book")) + SeedPouchHint();
+        // Food on the hotbar is eaten with A / E (or X / F) when there's nothing else to use them on.
+        if (const auto Food = SelectedHotbarFood(); Food != Homestead::Item::Count && Sim.Count(Food) > 0)
+            return A + TEXT(" Eat ") + Text(Homestead::ItemName(Food)).ToLower();
         return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
@@ -2929,7 +2940,7 @@ void AHomesteadController::Interact()
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
-    default: Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
+    default: if (!EatSelectedFoodInstead()) Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
 
 }
@@ -3022,6 +3033,7 @@ void AHomesteadController::Secondary()
     }
     else if (Focus == EFocus::Fire) Notify(Sim.AddFuel(FocusId, PlayerPoint()), WoodTapA);
     else if (SelectedCarriedTool() == Homestead::Item::OilLamp) MenuRefillLamp();
+    else if (Focus == EFocus::None && EatSelectedFoodInstead()) {}
     else HoeSquareAhead();
 }
 
@@ -3153,6 +3165,7 @@ void AHomesteadController::Back()
     if (IsFailed()) { RetryCheckpoint(); return; }
     if (bBookOpen) CloseBook();
     else if (bPlanning) EndPlacement();
+    else if (CancelShopWait()) PlayEffect(UIClick, 0.05f);
     else OpenBook(4);
 }
 void AHomesteadController::PreviousPage()
