@@ -687,6 +687,14 @@ bool AHomesteadController::CanPinToHotbar(Homestead::Item Item)
     return IsHotbarTool(Item) || IsFoodItem(Item) || PlantingCrop(Item).IsSet();
 }
 
+void AHomesteadController::PinNewSeed(Homestead::Item Item)
+{
+    // Bought or given crop seed goes straight onto a free hotbar slot, ready to sow.
+    const auto* Crop = Homestead::CropForSeed(Item);
+    if (!Crop || Item == Homestead::Item::Berries || IsPinnedToHotbar(Item) || HotbarSlots.IndexOfByKey(-1) == INDEX_NONE) return;
+    TogglePinnedToHotbar(Item);
+}
+
 bool AHomesteadController::IsPinnedToHotbar(Homestead::Item Item) const
 {
     return HotbarSlots.Contains(static_cast<int32>(Item));
@@ -1051,6 +1059,7 @@ void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
             continue;
         const auto Result = Sim.GrantItems(Item, Amount);
         Notify(UTF8_TO_TCHAR(Result.message.c_str()), !Result);
+        if (Result) PinNewSeed(Item);
         return;
     }
     Notify(FString::Printf(TEXT("No item called %s."), *ItemName), true);
@@ -1930,7 +1939,7 @@ FString AHomesteadController::FocusActions() const
                     if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
                         if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
                             if (Seed->kind != Homestead::CropKind::Roots && Seed->kind != Homestead::CropKind::Berries)
-                                return Use + TEXT(" Sow ") + Text(Seed->lower) + TEXT("   ") + A + TEXT(" Plant roots");
+                                return A + TEXT(" Sow ") + Text(Seed->lower);
                     return A + TEXT(" Plant roots   ") + X + TEXT(" Plant berry seeds");
                 }
                 if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
@@ -2529,7 +2538,11 @@ void AHomesteadController::Interact()
             const bool Mature = Plot.growth >= 1;
             if (!Planted)
             {
-                PlantFocusedPlot(Homestead::CropKind::Roots);
+                // The seed chosen on the hotbar, else wild root seed.
+                TOptional<Homestead::CropKind> Seed;
+                if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
+                    Seed = PlantingCrop(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]));
+                PlantFocusedPlot(Seed && *Seed != Homestead::CropKind::Berries ? *Seed : Homestead::CropKind::Roots);
                 break;
             }
             const Homestead::CropKind Harvested = Plot.kind;

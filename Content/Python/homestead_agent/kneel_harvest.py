@@ -51,8 +51,8 @@ def _author(pelvis_anim):
         s.key_bool(f, 'arm_r_fk_ik_switch', True)
 
     # Forward lean: in over the crop, back as she pulls, upright to look, a little in to stow.
-    lean = {F['stand']: 0, F['step']: 8, F['kneel']: 30, F['reach']: 56, F['grip']: 64, F['tug1']: 58,
-            F['tug2']: 62, F['pulled']: 30, F['lift']: 16, F['look']: 12, F['hold']: 14, F['stow']: 22,
+    lean = {F['stand']: 0, F['step']: 8, F['kneel']: 30, F['reach']: 66, F['grip']: 76, F['tug1']: 70,
+            F['tug2']: 74, F['pulled']: 30, F['lift']: 16, F['look']: 12, F['hold']: 14, F['stow']: 22,
             F['out']: 24, F['rise']: 8, F['end']: 0}
 
     def tilt(frame):
@@ -61,7 +61,7 @@ def _author(pelvis_anim):
     s.key_world(F['stand'], 'body_ctrl', kg.BODY_STAND, tilt(F['stand']))
     s.key_world(F['step'], 'body_ctrl', (0.0, 6.0, 96.0), tilt(F['step']))
     # The pull: her weight rocks back onto the heel of the kneeling leg.
-    shift = {'grip': (0, 0, -4.0), 'tug1': (0, -2.0, -2.0), 'tug2': (0, 0, -4.0), 'pulled': (0, -6.0, 2.0),
+    shift = {'reach': (0, 2.0, -4.0), 'grip': (0, 3.0, -7.0), 'tug1': (0, 0, -5.0), 'tug2': (0, 2.0, -7.0), 'pulled': (0, -6.0, 2.0),
              'lift': (0, -3.0, 2.0)}
     for name in ('kneel', 'reach', 'grip', 'tug1', 'tug2', 'pulled', 'lift', 'look', 'hold', 'stow', 'out'):
         s.key_world(F[name], 'body_ctrl', kg._add(kg.BODY_KNEEL, shift.get(name, (0, 0, 0))), tilt(F[name]))
