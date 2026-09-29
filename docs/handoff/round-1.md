@@ -36,6 +36,7 @@ task changes; `docs\handoff\README.md`):
 | Build Speed Agent (app name still "Estate boundary and minimap") | `6e131c6a` | build speed |
 | Documentation Agent | `a9f10974` (project session `d99bb15c`) | docs; named by Jenny, so kept |
 | Architecture agent | `a1648ae7` (`jennifergalley-cuddly-invention`) | code steward: `docs\architecture.md`, "Code practices", code-convention skills, safe refactors, batch reviews |
+| Performance agent | `a34483d7` (`jennifergalley-refactored-doodle`) | frame rate and pacing: packaged perf runs at Jenny's settings (holds the perf window while measuring) |
 
 Session IDs are the app's project-session IDs: use them with `send_session_message`. The worktree
 folder name is the session's **mailbox address** for urgent `mailbox_send` messages
@@ -221,6 +222,14 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   is now in skill section 4; the manor lane added the on-foot routes to all five salvage piles.
 
 ## Pending doc updates on merge
+
+- Performance lane (`0c12d5e9`, not on `main` yet): `Test-Game.ps1 -RenderScale 0` keeps Jenny's own
+  resolution policy (`sg.ResolutionQuality=0`, about 50% with TSR at 4K) instead of forcing
+  `r.ScreenPercentage`; the old default forced native 4K, which is why "4K ~32 fps" was reported. Also
+  `-ExtraExecCmds` (comma list, for example `t.MaxFPS 0, r.VSync 0, r.GPUCsvStatsEnabled 1, csvprofile start`)
+  and `-ExtraArguments`. With `-UserDir`, csvprofile CSVs land in `<OutputDirectory>\EngineUser\Saved\Profiling\CSV`.
+  When it lands, add these to the editor skill's perf notes and correct the CSV path in the section 9 2026-09-25
+  frame-cost bullet.
 
 - Crops lane (`b51aa930`, due in the 4 PM batch): `HomesteadGrowCrops <days> [tend=1]` and
   `HomesteadCropGrowth <0-1>` grow crops for tests (time skips don't). When it lands, add them to the
