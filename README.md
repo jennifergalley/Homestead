@@ -15,7 +15,7 @@ see `docs\blender-assets.md`.
 
 This is a **playable prototype** of the cozy-estate direction, not the finished game. It's in
 round 1, "Walk your estate": the round's lanes are integrated on `main` and being polished. Status,
-lanes and known issues are in `docs\handoff\round-1.md`; the design and round order are in
+lanes and known issues are in `docs\handoff\round-2.md` (round 1: `round-1.md`); the design and round order are in
 `openspec\changes\pivot-to-cozy-estate-life-sim\design.md`.
 
 - **The Estate is the default map** (`/Game/SurvivalGame/Maps/Estate`): a fixed 4 km World
