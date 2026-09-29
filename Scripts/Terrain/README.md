@@ -231,3 +231,18 @@ transmission and gust sheen fade out at night so the meadow doesn't glow under t
 
 Re-run `bake_ground.py` and `build_ground.py` after changing the heightfield, the layout,
 the paint layers or the scatter (the canopy comes from its trees).
+
+## Rain and overcast (`build_weather.py`, `Scripts/prepare_rain_loop.py`)
+
+`python Scripts\prepare_rain_loop.py` cuts `Assets/Audio/Ambience/RainLoop.wav` from a CC0 recording.
+Then, in the editor with PIE stopped, run `pyfile Scripts\Terrain\build_weather.py`. It builds
+`/Game/SurvivalGame/Estate/Weather`:
+- `MPC_EstateWeather`: Rain, Overcast, Daylight, and Shelter0-7 (the roofs nearest the camera).
+- `SM_RainStreaks`: 16,000 near and 9,000 far quads.
+- `M_Rain`: world-anchored streaks wrapped round the camera, slanted by the wind and thinned by the rain.
+- `M_RainClouds`: the cloud layer over sky pixels only.
+It also imports `RainLoop`. At runtime `UHomesteadWeather` (`Source/SurvivalGame/HomesteadWeather.*`)
+follows the camera. `AHomesteadWorld::UpdateLighting` greys the light from
+`Homestead::Overcast(hour)`: the sun dims and softens, the sky light rises, exposure drops 0.8 EV and
+saturation drops to 72%. The streaks and sound follow `Homestead::RainAmount(hour)`. The landscape
+rings its standing water with ripples while it rains.
