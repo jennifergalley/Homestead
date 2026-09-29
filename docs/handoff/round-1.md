@@ -191,6 +191,8 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 - **At most 2 Unreal processes machine-wide** (Jenny, 2026-09-28; it was 3). Each editor commits
   15-17 GB; with three open, RAM ran out and the pagefile grew to 81.5 GB, filling C:.
   `Start-EditorMcp.ps1` enforces it. Close your editor as soon as a verification pass is done.
+  **One slot is reserved for the Integration Agent** (`jennifergalley-literate-eureka`); all other lanes
+  share the second, one at a time (also enforced).
 - Agent editors start with Live Coding and ray tracing off (`bedbb9b8`, `50f9c64c`).
 - Agent editors skip the new-game setup (`homestead.SkipNewGameSetup`, passed by `Start-EditorMcp.ps1`):
   new Estate games use the default names (Eleanor Cavendish, Trevennor). Set it to 0 in the console

@@ -54,19 +54,27 @@ std::string Envelope(const std::string& body, int version = SimulationSaveVersio
         std::to_string(hash) + "\n" + body;
 }
 // Independent fixture writer intentionally permits invalid states so parser validation is exercised.
-std::string Encode(const State& s, int version = SimulationSaveVersion)
+// `width` overrides the item-stock width for version 12 on (a build with a different catalogue).
+std::string Encode(const State& s, int version = SimulationSaveVersion, int width = -1)
 {
     // Version 7 stocks predate the machete, and versions before 11 predate fur and the estate items.
-    const int stockItems = version >= ClothingSaveVersion ? ItemCount
+    // Version 12 stocks are as wide as the catalogue was when it was written (40 items); version 13 on
+    // writes the width first.
+    const bool prefixed = version > PositionalStockSaveVersion;
+    const int stockItems = prefixed ? ItemCount : version >= PositionalStockSaveVersion ? PositionalStockMinimumItems
+        : version >= ClothingSaveVersion ? ItemCount
         : version >= 8 ? static_cast<int>(Item::Fur) : static_cast<int>(Item::Machete);
+    const int written = width >= 0 && version >= PositionalStockSaveVersion ? width : stockItems;
+    const auto count = [](const Inventory& stock, int i) { return i < ItemCount ? stock[i] : 0; };
     std::ostringstream out;
     out.imbue(std::locale::classic());
     out << std::setprecision(17) << s.hour << ' ' << s.dayMinutes << ' ' << s.hunger << ' ' << s.energy << ' ';
     // Older saves carried warmth and the warm-outfit flag; the estate pivot removed both.
-    if (version < SimulationSaveVersion) out << (s.failed ? 0.0 : 90.0) << ' ' << s.failed << ' ' << 0 << ' ';
+    if (version < PositionalStockSaveVersion) out << (s.failed ? 0.0 : 90.0) << ' ' << s.failed << ' ' << 0 << ' ';
     else out << s.failed << ' ';
     out << s.nextId << '\n';
-    for (int i = 0; i < stockItems; ++i) out << s.inventory[i] << ' ';
+    if (prefixed) out << written << ' ';
+    for (int i = 0; i < written; ++i) out << count(s.inventory, i) << ' ';
     out << '\n' << s.world.seed << ' ' << s.world.generationVersion << ' ' << s.activeChunk.x << ' ' << s.activeChunk.y << '\n';
     out << s.resourceEdits.size() << '\n';
     for (const auto& edit : s.resourceEdits)
@@ -84,7 +92,8 @@ std::string Encode(const State& s, int version = SimulationSaveVersion)
         if (version >= FreeBuildingSaveVersion) out << p.buildingId << ' ';
         out << p.cellX << ' ' << p.cellY << ' '
             << p.rotation << ' ' << p.fuelHours << ' ';
-        for (int i = 0; i < stockItems; ++i) out << p.storage[i] << ' ';
+        if (prefixed) out << written << ' ';
+        for (int i = 0; i < written; ++i) out << count(p.storage, i) << ' ';
         out << '\n';
         if (version >= 4)
         {
@@ -114,6 +123,7 @@ std::string Encode(const State& s, int version = SimulationSaveVersion)
         for (const auto& w : s.wearables)
             out << w.id << ' ' << static_cast<int>(w.definition) << ' ' << w.dye << ' '
                 << static_cast<int>(w.owner) << ' ' << w.chestId << '\n';
+        if (prefixed) out << EquipmentSlotCount << ' ';
         for (int slot = 0; slot < (version >= ClothingSaveVersion ? EquipmentSlotCount : 4); ++slot)
             out << s.equipment[slot] << ' ';
         out << '\n' << s.inventoryLayout.size() << '\n';
@@ -126,7 +136,7 @@ std::string Encode(const State& s, int version = SimulationSaveVersion)
         for (const auto& plant : s.clearedUnderbrush)
             out << plant.chunk.x << ' ' << plant.chunk.y << ' ' << plant.index << '\n';
     }
-    if (version >= SimulationSaveVersion)
+    if (version >= PositionalStockSaveVersion)
     {
         out << "tools " << ToolKindCount;
         for (const ToolTier tier : s.toolTiers) out << ' ' << static_cast<int>(tier);
@@ -1159,6 +1169,187 @@ void BerryCropCycle()
     const double hungerBefore = regrowing.GetState().hunger;
     OK(regrowing.Eat(Item::Berries));
     CHECK(regrowing.GetState().hunger > hungerBefore);
+}
+
+// A real version 12 estate save, written by main at 8762ba46 (40 items; a new estate game with goods
+// granted, some moved into the standing room's chest, and 1.5 hours played). Only its placement bake
+// version (the seed slot on line 3) is replaced with the current one before loading.
+const char* const Version12EstateSave = R"HS12(7.5000000000000249 60 82.00000000000027 99.100000000000847 0 22
+ 0 12 5 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 5 0 0 2
+2 15039102 0 0
+0
+1
+2 -25900 -64100 0
+19
+3 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+4 0 2 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+5 0 2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+6 0 2 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+7 1 2 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+8 1 2 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+9 2 2 0 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+10 1 2 0 0 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+11 1 2 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+12 1 2 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+13 1 2 1 0 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+14 1 2 0 1 3 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+15 3 2 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+16 3 2 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+17 3 2 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+18 3 2 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+19 7 2 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+20 5 2 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+0
+21 6 2 1 0 0 0 0 4 4 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1
+4
+1 10 1 0
+2 1 4 0
+8 2 4 0
+9 39 1 0
+0
+0
+2 10
+1
+1 0 0 2 0
+1 1 0 0 0 
+5
+3 1 12 0
+4 2 5 0
+5 18 2 0
+6 39 2 0
+7 36 5 0
+0
+parcels 4
+EstateBoundary 1
+ForSale.Woodland 0
+ForSale.MoorField 0
+ForSale.WestCove 0
+economy 2234 1
+1 0 -54000 117600 -90 0 0
+tools 6 0 0 0 0 0 0
+manor 456c65616e6f72 436176656e64697368 54726576656e6e6f72 19
+3 1 1
+4 1 1
+5 1 1
+6 1 1
+7 1 1
+8 1 1
+9 1 1
+10 1 1
+11 1 1
+12 1 1
+13 1 1
+14 1 1
+15 1 1
+16 1 1
+17 1 1
+18 1 1
+19 0 1
+20 0 1
+21 0 1
+1 arrival
+)HS12";
+
+// harden-save-item-stocks: stocks carry their width from version 13, so a save written before items
+// were appended still loads, and version 12 saves (always 40 items wide) migrate.
+void ItemStockWidthCompatibility()
+{
+    Simulation sim;
+    BuildingStock(sim);
+    BuildRoom(sim);
+    OK(sim.Place(Piece::Chest, -4, 0, 0, CellCenter(-4, 0)));
+    const Item last = static_cast<Item>(PositionalStockMinimumItems - 1);
+    Stock(sim, {{Item::Roots, 4}, {Item::Branch, 3}, {last, 2}});
+    const int chest = StructureId(sim, Piece::Chest, CellCenter(-4, 0));
+    OK(sim.Transfer(chest, Item::Roots, 1, CellCenter(-4, 0)));
+    OK(sim.Transfer(chest, last, 1, CellCenter(-4, 0)));
+    const std::string current = sim.Serialize();
+    CHECK(current.rfind("HOMESTEAD 13 ", 0) == 0);
+    const auto chestStock = [](const Simulation& s) {
+        for (const auto& piece : s.GetState().structures) if (piece.kind == Piece::Chest) return piece.storage;
+        return Inventory{};
+    };
+    const auto sameGoods = [&](const Simulation& loaded) {
+        CHECK(loaded.GetState().inventory == sim.GetState().inventory);
+        CHECK(chestStock(loaded) == chestStock(sim));
+        CHECK(loaded.GetState().equipment == sim.GetState().equipment);
+    };
+
+    // Round trip at version 13.
+    Simulation restored;
+    OK(restored.Deserialize(current));
+    CHECK(restored.Serialize() == current);
+    sameGoods(restored);
+
+    // A version 12 save (positional, 40 wide) migrates, and the next save is version 13.
+    Simulation migrated;
+    OK(migrated.Deserialize(Encode(sim.GetState(), PositionalStockSaveVersion)));
+    sameGoods(migrated);
+    CHECK(migrated.Serialize().rfind("HOMESTEAD 13 ", 0) == 0);
+    OK(restored.Deserialize(migrated.Serialize()));
+    sameGoods(restored);
+
+    // A save from a build with fewer items loads with the missing ones at zero: appending an item
+    // no longer breaks same-version saves. (That build never had the last item, so its save holds none.)
+    State older = sim.GetState();
+    older.inventory[static_cast<int>(last)] = 0;
+    for (auto& piece : older.structures) piece.storage[static_cast<int>(last)] = 0;
+    FixtureLayouts(older);
+    Simulation narrower;
+    OK(narrower.Deserialize(Encode(older, SimulationSaveVersion, PositionalStockMinimumItems - 1)));
+    CHECK(narrower.Count(last) == 0 && chestStock(narrower)[static_cast<int>(last)] == 0);
+    CHECK(narrower.Count(Item::Roots) == sim.Count(Item::Roots) && chestStock(narrower)[static_cast<int>(Item::Roots)] == 1);
+
+    // Stocks wider than this build's catalogue came from a newer build: refused, nothing changed.
+    const std::string before = restored.Serialize();
+    CHECK(restored.Deserialize(Encode(sim.GetState(), SimulationSaveVersion, ItemCount + 1)).code == ResultCode::UnsupportedVersion);
+    CHECK(restored.Deserialize(Encode(sim.GetState(), PositionalStockSaveVersion, ItemCount + 1)).code == ResultCode::UnsupportedVersion);
+    CHECK(restored.Serialize() == before);
+    // Malformed widths are corrupt.
+    CHECK(restored.Deserialize(Encode(sim.GetState(), SimulationSaveVersion, 0)).code == ResultCode::CorruptSave);
+    CHECK(restored.Deserialize(Encode(sim.GetState(), PositionalStockSaveVersion, PositionalStockMinimumItems - 1)).code
+        == ResultCode::CorruptSave);
+    CHECK(restored.Serialize() == before);
+
+    // The real version 12 estate save migrates with every stock, the purse and the manor intact.
+    std::string payload = Version12EstateSave;
+    std::vector<std::string> lines;
+    std::istringstream split(payload);
+    for (std::string line; std::getline(split, line);) lines.push_back(line);
+    lines[2] = std::to_string(ProvisionalEstatePlacements().bakeVersion) + lines[2].substr(lines[2].find(' '));
+    payload.clear();
+    for (const auto& line : lines) payload += line + '\n';
+    Simulation estate;
+    OK(estate.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    OK(estate.Deserialize(Envelope(payload, PositionalStockSaveVersion)));
+    CHECK(estate.Count(Item::Branch) == 12 && estate.Count(Item::Stone) == 5 && estate.Count(Item::Pasty) == 2);
+    CHECK(estate.Count(Item::Primroses) == 5 && estate.Count(Item::WildGarlic) == 2);
+    const Inventory estateChest = chestStock(estate);
+    CHECK(estateChest[static_cast<int>(Item::Stone)] == 4 && estateChest[static_cast<int>(Item::WildGarlic)] == 1);
+    CHECK(estate.GetState().money == 2234 && estate.GetState().fixedEstate);
+    const std::string upgraded = estate.Serialize();
+    CHECK(upgraded.rfind("HOMESTEAD 13 ", 0) == 0);
+    Simulation reloaded;
+    OK(reloaded.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    OK(reloaded.Deserialize(upgraded));
+    CHECK(reloaded.Serialize() == upgraded);
 }
 
 void CropKindPersistenceAndVersionRejection()
@@ -3365,6 +3556,7 @@ int main()
     Run("small garden squares, per-square planting and plot migration", GardenSquares);
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);
+    Run("item stocks carry their width; version 12 saves migrate", ItemStockWidthCompatibility);
     Run("clock, pause and batching consistency", ClockPauseAndBatching);
     Run("sprint consumes existing Energy with a reserve", SprintEnergyContract);
     Run("work spends Energy and time drains it slowly", ActionEnergyContract);

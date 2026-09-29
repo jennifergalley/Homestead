@@ -1,6 +1,7 @@
 #include "SHomesteadHotbar.h"
 
 #include "../HomesteadController.h"
+#include "HomesteadPalette.h"
 #include "SHomesteadIcon.h"
 #include "Styling/CoreStyle.h"
 #include "Widgets/Images/SImage.h"
@@ -13,12 +14,12 @@
 
 namespace HomesteadMenus
 {
-namespace
+namespace HotbarStyle
 {
-const FLinearColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
+const FLinearColor Pine = HomesteadPalette::Pine.CopyWithNewOpacity(0.96f);
 const FLinearColor MutedPine(0.035f, 0.055f, 0.046f, 0.82f);
-const FLinearColor Cream(0.93f, 0.93f, 0.84f, 1.0f);
-const FLinearColor Gold(0.92f, 0.74f, 0.43f, 1.0f);
+constexpr FLinearColor Cream = HomesteadPalette::Cream;
+constexpr FLinearColor Gold = HomesteadPalette::Brass;
 constexpr float HotbarSlotSize = 64.0f;
 }
 
@@ -40,7 +41,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
             .BorderImage(FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
             .BorderBackgroundColor_Lambda([Weak = Controller, Index]()
             {
-                return Weak.IsValid() && Weak->SelectedHotbarIndex() == Index ? Gold : Pine;
+                return Weak.IsValid() && Weak->SelectedHotbarIndex() == Index ? HotbarStyle::Gold : HotbarStyle::Pine;
             })
             .Padding(3)
             [
@@ -49,10 +50,10 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                 .ContentPadding(0)
                 .ButtonColorAndOpacity_Lambda([Weak = Controller, Index]()
                 {
-                    if (!Weak.IsValid()) return MutedPine;
+                    if (!Weak.IsValid()) return HotbarStyle::MutedPine;
                     const auto Snapshot = Weak->HotbarSnapshot();
                     return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
-                        ? Pine : MutedPine;
+                        ? HotbarStyle::Pine : HotbarStyle::MutedPine;
                 })
                 .OnClicked_Lambda([Weak = Controller, Index]()
                 {
@@ -69,7 +70,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                 })
                 [
                     // Genre-typical 1080p slot size (Stardew and Valheim use roughly 64-70 px).
-                    SNew(SBox).WidthOverride(HotbarSlotSize).HeightOverride(HotbarSlotSize)
+                    SNew(SBox).WidthOverride(HotbarStyle::HotbarSlotSize).HeightOverride(HotbarStyle::HotbarSlotSize)
                     [
                         SNew(SOverlay)
                         + SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
@@ -88,8 +89,8 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                                 if (!Weak.IsValid()) return FLinearColor(1, 1, 1, 0);
                                 const auto Snapshot = Weak->HotbarSnapshot();
                                 if (!Snapshot.IsValidIndex(Index)) return FLinearColor(1, 1, 1, 0);
-                                return Snapshot[Index].Available ? Gold
-                                    : Snapshot[Index].Food ? FLinearColor(Gold.R, Gold.G, Gold.B, 0.3f) : FLinearColor(1, 1, 1, 0);
+                                return Snapshot[Index].Available ? HotbarStyle::Gold
+                                    : Snapshot[Index].Food ? FLinearColor(HotbarStyle::Gold.R, HotbarStyle::Gold.G, HotbarStyle::Gold.B, 0.3f) : FLinearColor(1, 1, 1, 0);
                             })
                             .Visibility_Lambda([Weak = Controller, Index]()
                             {
@@ -112,7 +113,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                                     ? FText::AsNumber(Snapshot[Index].Count) : FText::GetEmpty();
                             })
                             .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
-                            .ColorAndOpacity(Cream)
+                            .ColorAndOpacity(HotbarStyle::Cream)
                             .ShadowOffset(FVector2D(1, 1))
                             .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
                             .Visibility(EVisibility::HitTestInvisible)
@@ -124,7 +125,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             .Text(FText::FromString(Index == 9
                                 ? TEXT("0") : FString::FromInt(Index + 1)))
                             .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
-                            .ColorAndOpacity(Cream)
+                            .ColorAndOpacity(HotbarStyle::Cream)
                             .ShadowOffset(FVector2D(1, 1))
                             .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
                         ]

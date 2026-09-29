@@ -48,6 +48,12 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -ErrorAction SilentlyContinue`.
   More processes than that have reset the GPU driver and exhausted VRAM, which takes every
   session's editor down.
+  **One of the 2 slots is reserved for the Integration Agent** (Jenny, 2026-09-28; it once waited over
+  an hour to verify a batch for the 7:30 AM build). Every other lane shares the second slot, one Unreal
+  process at a time. `Start-EditorMcp.ps1` enforces this: outside the integration worktree
+  (`jennifergalley-literate-eureka`, or any worktree with `Saved\IntegrationSession.marker`) it refuses
+  while another lane's Unreal process runs. Check once; if the lanes' slot is taken, schedule a wake-up
+  and end your turn.
 - **One editor per worktree, on its own MCP port.** Pick a free port in 8766-8799:
   `8766..8799 | ? { -not (Get-NetTCPConnection -LocalPort $_ -State Listen -EA 0) } | select -First 1`.
   Pass it as `Start-EditorMcp.ps1 -Port <p>`, then dot-source `Scripts\McpHelpers.ps1 -Port <p>`
@@ -121,7 +127,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 ```powershell
 git status --short | Measure-Object; Test-Path .\SurvivalGame.uproject   # new worktree complete? (0 and True; else see 0.1)
 $p = 8768                                                     # your registered port
-Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # 2 running? save_session_automation ~5 min out and end your turn; never loop
+Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # another lane's already running (one slot is Integration's)? save_session_automation ~5 min out, end your turn
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200   # -Port picks the MCP port
 . .\Scripts\McpHelpers.ps1 -Port $p                             # every later command; sets UNREAL_MCP_URL for editor_mcp.py
 # ...work, StartPIE, hk/st/hshot...
@@ -208,6 +214,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `HomesteadEstateAuthoringLibrary.editor_ground_height` returns -1e9 | That World Partition cell isn't loaded in the editor | Load the region first. In game, `GroundHeight()` uses the runtime heightfield everywhere. |
 | `Test-Game.ps1` runs only the default smoke test, or errors "Generated resume requires..." | Switches passed as an array or as empty strings | Use a hashtable splat: `$p=@{Packaged=$true; Hotbar=$true}; .\Scripts\Test-Game.ps1 @p`. |
 | `tap_key` letters type nothing into a text box (for example the Names card); BackSpace works | `HomesteadPlayTools` sends key events through `InputKey`, which produces no character events for Slate text boxes | Use real Win32 keys: bring the editor's main window forward (the Alt `keybd_event` trick, as in `click`), then send `keybd_event` VK codes, with Shift for capitals. |
+| **Unsolved (2026-09-28, Sleep/Ground lane):** in Estate PIE, `hk tap_key` and `hk hold_key` of bound actions do nothing (E/Enter/Gamepad A at the bedroll, Tab for the book, D-pad), while Escape still closes an open book and `con` exec commands work. Seen in a fresh PIE too, not only after switching the view target | Unknown. `TapKey` sends `IE_Pressed` and `IE_Released` in the same frame (`HomesteadAgentPlayLibrary.cpp`), so a binding that samples key state per frame could miss it (unconfirmed; other lanes' taps have worked). Also check that the PIE window is restored and focused | Workaround: drive the same code path with a `UFUNCTION(Exec)` playtest command (for sleep, `HomesteadSleep` / `HomesteadBedChoice`). If you see it too, or find the cause, tell the docs agent. |
 | Slate Inspector `Snapshot` returns nothing useful, non-JSON, or refs that don't match last run | It needs `{"ref":"","maxDepth":60}` and a prior `Observe`; output is occasionally malformed; widget refs (`b30`, `b97`...) change between runs | Observe first, retry on non-JSON, and look refs up by name each run rather than hard-coding them. |
 | Clicking a button in a custom Slate panel breaks Tab or typing (Tab runs Slate navigation, keys go to the old row) | `SButton`s take keyboard focus on click | Give such buttons `.IsFocusable(false)`. |
 | UI is double-scaled at 4K but fine in PIE | The engine DPI curve (`bAllowHighDPIInGameMode`) already scales viewport widgets, so an extra height/1080 `SScaleBox` doubles them | Don't add your own resolution scaling. Check real resolutions in a standalone window (section 8), because PIE at editor size hides it. |
