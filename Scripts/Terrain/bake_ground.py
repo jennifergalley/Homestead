@@ -230,6 +230,7 @@ def ground_fields(h, w, layout):
     # water, lush grass round the margin, and a trodden path and landing from the farm.
     lake = layout.get("lake")
     s_lake = np.full(h.shape, np.inf, np.float32)
+    trail = np.zeros(h.shape, np.float32)
     if lake:
         poly = np.asarray(lake["shore"], np.float64)
         wet = np.zeros(h.shape, bool)
@@ -240,9 +241,12 @@ def ground_fields(h, w, layout):
         height = np.where((s_lake > 0) & (s_lake < 5.0), np.maximum(height, smoothstep(5.0, 1.5, s_lake)), height)
         d_path = line_distance(lake["path"], h.shape)
         lx, ly = lake["landing"]
-        tread = np.maximum(0.7 * smoothstep(1.9, 0.6, d_path) * (0.6 + 0.4 * clump), 0.8 * smoothstep(5.0, 1.5, np.hypot(X - lx, Y - ly)))
+        # A trodden track about 2 m wide from the farm to the landing, bare in the middle.
+        trail = smoothstep(2.6, 1.0, d_path).astype(np.float32)
+        tread = np.maximum(0.9 * smoothstep(2.4, 0.9, d_path) * (0.75 + 0.25 * clump), 0.8 * smoothstep(5.0, 1.5, np.hypot(X - lx, Y - ly)))
         wear = np.maximum(wear, np.maximum(tread, np.where(s_lake < 0, 1.0, 0.0)))
         density *= 1.0 - 0.95 * tread
+        height *= 1.0 - 0.8 * tread
     tx, ty = lm["TownSquare"][:2]
     density *= smoothstep(100.0, 140.0, np.hypot(X - tx, Y - ty))
 
@@ -254,6 +258,9 @@ def ground_fields(h, w, layout):
 
     # Under the trees: leaf litter and moss, a thin shaded grass.
     canopy = canopy_mask(h.shape)
+    # The lake trail cuts through the tree belt north of the farm: its trodden soil shows through the
+    # leaf litter (the landscape material lays litter over wear wherever the canopy mask is up).
+    canopy = canopy * (1.0 - 0.9 * trail)
     density *= 1.0 - 0.8 * canopy
     height *= 1.0 - 0.3 * canopy
 
