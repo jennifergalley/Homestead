@@ -438,9 +438,9 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
     - A straight `walk_to` to 520003 or 520005 gets stuck on the ruin walls; use the waypoints.
     - **Close the field book before walking.** A by the hearth opens the Cook page, and `walk_to`
       then reports `stuck` without moving.
-    - If `walk_to` doesn't move her after a Python `set_actor_location` teleport indoors (she stays
-      frozen at the teleport Z), set the movement mode back to `MOVE_WALKING` and teleport again about
-      60 cm higher.
+    - Teleport with `tp x y` (`HomesteadTeleport`), which stands her on the ground. A raw Python
+      `set_actor_location` indoors can leave her frozen at the teleport Z; if you used one, set the
+      movement mode back to `MOVE_WALKING` and teleport again about 60 cm higher.
   - The first haft needs no trip outside: the standing-room chest (about 200 cm +X of the
     spawn; `walk_to` (-25560, -63950)) holds the pail and 4 Branch. Open it with A, pick the
     Branch tile, then Y > "Take to pack". Then search 520001 and haft the billhook (Craft tile 4,
@@ -904,9 +904,10 @@ OpenSpec changes, not here.
 - 2026-09-28: **PIE stills.** `HighResShot 1920x1080` (via `execute_console_command(w, cmd, pc)`) writes
   to `Saved\Screenshots\WindowsEditor\`.
   `hshot` in `Scripts\McpHelpers.ps1` wraps this.
-- 2026-09-26: **Go and look.** Put her next to the target with `get_player_pawn(w, 0).set_actor_location(v,
-  False, True)` at z ≈ 200 (she drops to the ground) and `set_actor_rotation`. Then use `walk_to`
-  into a boulder to prove collision: `stuck` at about the footprint radius.
+- 2026-09-26: **Go and look.** Put her next to the target with `tp x y` (`HomesteadTeleport X Y [Z]`
+  with the player controller; it waits for the ground's collision and stands her on it, where a raw
+  `set_actor_location` with a guessed Z drops her from the sky or sinks her) and `set_actor_rotation`.
+  Then use `walk_to` into a boulder to prove collision: `stuck` at about the footprint radius.
 - 2026-09-26: `EditorAssetLibrary.save_asset(path, False)` returned False on material instances during PIE.
   After stopping PIE, `save_loaded_asset(obj, False)` saved them.
 - 2026-09-26: **Modal dialogs block MCP.** One modal (for example "Overwrite Existing Object" during a

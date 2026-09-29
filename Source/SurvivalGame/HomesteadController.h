@@ -251,6 +251,10 @@ public:
     UFUNCTION(Exec) void HomesteadOpenStore();
     // Console playtest aid: add (or with a negative amount remove) cents from her purse.
     UFUNCTION(Exec) void HomesteadMoney(int32 Cents = 1000);
+    // Console playtest aid: move her to world X,Y and stand her on the ground there (waiting for the
+    // ground's collision to stream in). Give Z to land on the first surface at or below Z instead
+    // (an upper floor, say); omit it for the terrain.
+    UFUNCTION(Exec) void HomesteadTeleport(float X, float Y, float Z = -1000000.0f);
 
     float Sensitivity = 1.0f;
     bool bInvertY = false;
@@ -346,6 +350,14 @@ private:
     bool bFreshTerrainSpawn = true;
     bool bEstateMap = false;
     float EstateSpawnWait = 0;
+    // A teleport or fall recovery waiting to put her feet on the ground at X,Y (Z: search down from).
+    bool bPendingGroundSnap = false;
+    FVector GroundSnapTarget = FVector::ZeroVector;
+    float GroundSnapWait = 0;
+    // Finds the surface she'd stand on below Target.Z at Target.X/Y and sets Target.Z to her capsule
+    // centre on it. Until the ground there has collision (World Partition still streaming) it holds her
+    // in the air with movement off, so she never drops from a height, and returns false.
+    bool SettleOnGround(FVector& Target, float& Waited, float DeltaSeconds, float HoldLimitSeconds, const TCHAR* Why);
     mutable TArray<TWeakObjectPtr<class USplineComponent>> EstateWaterSplines;
     mutable double EstateWaterScanTime = -1000;
     void PrepareEstateSimulation(Homestead::Simulation& Target) const;
