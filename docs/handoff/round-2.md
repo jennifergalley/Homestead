@@ -208,10 +208,16 @@ None yet.
   piles that look clearable should become suitable saved clearables, rather than static scenery.
 - **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
   hoe blade; a documentation-only answer is insufficient.
-- **Starter food** — **balance owner TBD**: add more food at the start, balancing the starter kit
-  without removing hunger prematurely.
-- **Hunger and energy model** — **Planning Agent** (evidence/design recommendation): investigate whether
-  the two systems should collapse to one bar like *Coral Island*. Do not silently remove either system.
+- **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
+  visible **Energy** meter later, rather than a visible hunger-plus-energy pair. Keep serialized hunger
+  compatibility; revise gentle-hunger penalties into energy/food balance and modest **Well Fed** meals.
+  Planning traced the present state: Hunger starts at 85, drains 2/hour awake and fails at 0; Energy
+  starts at 100 and drains through work; food restores both. The change is **pending, not in today's
+  4 PM build**; Planning updates the OpenSpec spec.
+- **Starter food and hoe wayfinding** — **Clearing / Props lane** (after weed/rubble work): put **3
+  pasties and 2 loaves** in the starter chest. Make the **hoe head** the second salvage reward after the
+  billhook, with a contextual refusal and west-chimney journal hints to find it. Pending; no code or
+  content is finished yet.
 - **Hearth, birds and door** — **Audio / door owner TBD** after slots open: increase the fireplace
   modestly while keeping it inaudible outside its room; muffle outdoor bird ambience indoors; add a
   working wooden standing-room door that opens and closes automatically on entering or leaving.
