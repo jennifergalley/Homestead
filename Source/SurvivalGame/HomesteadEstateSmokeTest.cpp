@@ -33,6 +33,9 @@ constexpr double TimingSampleSeconds = 12.0;
 constexpr double WalkSettleSeconds = 1.0;
 constexpr double WalkSampleSeconds = 12.0;
 constexpr float WalkTurn = 0.25f;
+// The sprint starts this far west of a 128 m scenery cell boundary (AHomesteadWorld::BuildEstateScenery).
+constexpr double SceneryCellCm = 12800.0;
+constexpr double SprintLeadCm = 2500.0;
 // Where she stands to act on a resource (the controller's focus reaches 280 cm).
 constexpr double ApproachCm = 110.0;
 // A resource is used for an action only when nothing else she could focus is this close.
@@ -255,24 +258,31 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
     };
     // Walking timing, reported as PERFORMANCE_AT walk-<place>: she walks forward while the camera turns
     // slowly, so the grass field rebuilds chunks, scenery cells come and go and World Partition streams,
-    // as in ordinary play. Adds the longest frame and the count over 20 ms, since hitches are the point.
-    const auto MeasureWalk = [this](const FString& Place)
+    // as in ordinary play. With bSprint she sprints straight ahead instead (Shift held). Adds the longest
+    // frame and the count over 20 ms, since hitches are the point.
+    const auto MeasureWalk = [this](const FString& Place, bool bSprint)
     {
         TSharedRef<double> Began = MakeShared<double>(0.0);
         TSharedRef<TArray<double>> Frames = MakeShared<TArray<double>>();
         FStep& Step = Steps.AddDefaulted_GetRef();
         Step.Name = TEXT("Walking frame timing at ") + Place;
-        Step.Action = [Began, Frames]() { *Began = FPlatformTime::Seconds(); Frames->Reset(); };
-        Step.Repeat = [this, Began, Frames]()
+        Step.Action = [this, Began, Frames, bSprint]()
+        {
+            *Began = FPlatformTime::Seconds();
+            Frames->Reset();
+            if (bSprint) Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+        };
+        Step.Repeat = [this, Began, Frames, bSprint]()
         {
             Axis(EKeys::Gamepad_LeftY, 1.0f);
-            Axis(EKeys::Gamepad_RightX, EstateSmokeRoute::WalkTurn);
+            Axis(EKeys::Gamepad_RightX, bSprint ? 0.0f : EstateSmokeRoute::WalkTurn);
             if (FPlatformTime::Seconds() - *Began >= EstateSmokeRoute::WalkSettleSeconds) Frames->Add(FApp::GetDeltaTime() * 1000.0);
         };
-        Step.Check = [this, Place, Frames]()
+        Step.Check = [this, Place, Frames, bSprint]()
         {
             Axis(EKeys::Gamepad_LeftY, 0.0f);
             Axis(EKeys::Gamepad_RightX, 0.0f);
+            if (bSprint) Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
             if (Frames->Num() < 30) return false;
             TArray<double> Sorted = *Frames;
             Sorted.Sort();
@@ -287,7 +297,6 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         };
         Step.Wait = static_cast<float>(EstateSmokeRoute::WalkSettleSeconds + EstateSmokeRoute::WalkSampleSeconds);
     };
-
     // 1. The new game: BeginPlay started an estate game and skipped the setup (default names).
     {
         FStep& Step = Steps.AddDefaulted_GetRef();
@@ -346,24 +355,36 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
 
     // 4. Each part of the estate: she must settle on the ground, and the log must stay clean.
     if (const auto* Clearout = EstateSmokeRoute::FindInRange(Start, 570000, 580000))
+    {
         Visit(TEXT("the manor clear-out"), {Clearout->position.x + EstateSmokeRoute::StandOffCm, Clearout->position.y}, TEXT("estate-clearout"));
+        MeasureWalk(TEXT("manor"), false);
+    }
     else { Finish(false, TEXT("The manor clear-out placements (570000+) are missing.")); return; }
     const Homestead::DerelictFarmPlan Farm = Homestead::EstateDerelictFarm(Layout);
     if (Farm.valid)
     {
         Visit(TEXT("the derelict farm"), Farm.World(Farm.lengthU * 0.5, Farm.lengthV * 0.5), TEXT("estate-farm"));
-        MeasureWalk(TEXT("farm"));
+        MeasureWalk(TEXT("farm"), false);
     }
     else { Finish(false, TEXT("The derelict farm's field is missing from the estate layout.")); return; }
     if (const auto* Woods = EstateSmokeRoute::FindInRange(Start, 560000, 570000))
     {
         Visit(TEXT("the MVP woodland"), {Woods->position.x + EstateSmokeRoute::StandOffCm, Woods->position.y}, TEXT("estate-woods"));
         Measure(TEXT("woods"));
-        MeasureWalk(TEXT("woods"));
+        MeasureWalk(TEXT("glade"), false);
     }
     else { Finish(false, TEXT("The MVP woodland placements (560000+) are missing.")); return; }
     if (const auto* Gateway = Layout.FindLandmark(Homestead::Anchor::EstateGateway))
+    {
         Visit(TEXT("the drive at the estate gateway"), Gateway->position, TEXT("estate-drive"));
+        MeasureWalk(TEXT("drive"), false);
+        // Sprint east across a scenery cell boundary (BuildEstateScenery batches per 128 m cell), starting
+        // SprintLeadCm short of it.
+        const double Boundary = FMath::CeilToDouble(Gateway->position.x / EstateSmokeRoute::SceneryCellCm) * EstateSmokeRoute::SceneryCellCm;
+        Visit(TEXT("the sprint start"), {Boundary - EstateSmokeRoute::SprintLeadCm, Gateway->position.y}, FString());
+        Add(TEXT("Face east for the sprint"), [this]() { Controller->SetControlRotation(FRotator(0, 0, 0)); }, []() { return true; }, 0.5f);
+        MeasureWalk(TEXT("sprint"), true);
+    }
     else { Finish(false, TEXT("The estate gateway anchor is missing.")); return; }
     if (const auto* Store = Layout.FindLandmark(Homestead::Anchor::GeneralStoreDoor))
         Visit(TEXT("the general store door"), Store->position, TEXT("estate-store"));
