@@ -170,6 +170,15 @@ work that goes beyond a small verified correction.
 
 None yet.
 
+## Pending UI playtest feedback
+
+- **Field book notification overlay** (Jenny, 2026-09-29): a successful transfer or craft currently
+  shows a banner at the top of the inventory/field book that reflows the menu and pushes its items.
+  Replace it with a brief, floating notification that looks modal over the menu but **is not a real
+  modal dialog**: it auto-disappears, preserves the current focus and input, and shifts no content at
+  1080p or 4K. **UI Agent / temporary Menu Agent** (`5cf73757`) owns this when the orchestrator grants
+  an implementer slot. Pending; not shipped.
+
 ## Decisions during the round
 
 None yet.
