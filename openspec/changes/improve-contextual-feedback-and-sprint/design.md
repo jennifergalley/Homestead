@@ -17,7 +17,7 @@ Locomotion uses one Enhanced Input movement action, a 180 cm/s movement componen
 - Let ordinary world-action rejection guidance clear sooner than critical system failures.
 - Replace the wide labeled survival-meter row with a compact lower-left icon stack.
 - Make fallen branches finite and durably absent after pickup.
-- Add responsive Shift/L3 sprint with distinct animation, faster movement, and safe existing-Energy cost.
+- Add responsive Shift/L3 toggle sprint with distinct animation, faster movement, zero sprint-specific Energy cost, and safe low-Energy admission/auto-off.
 - Preserve simulation authority, current saves, collision, prompt-device switching, HUD readability, and the one-action presentation contract.
 
 **Non-Goals:**
@@ -63,11 +63,17 @@ The HUD retains authoritative numeric values, fill ratios, colors, low-value thr
 
 **Alternative considered:** set an extremely long renewal timer. Rejected because it is not permanent, communicates the wrong model, and complicates tests.
 
-### 6. Sprint spends existing Energy with a reserve floor
+### 6. Sprint has zero extra Energy cost with a low-Energy admission floor
 
-Sprint speed will be 300 cm/s versus the retained 180 cm/s walk. While sprint is actually active, grounded, and moving, Simulation will spend 0.35 Energy per real second. Sprint is admitted only above 10 Energy and clamps/stops at that reserve, so sprint alone cannot create the `energy == 0` failed-state invariant. Walking and sleep remain available; existing saves already persist the resulting Energy.
+Sprint speed will be 300 cm/s versus the retained 180 cm/s walk. Sprint itself does not mutate Energy:
+baseline awake time drain and ordinary work costs remain the only Energy costs. Sprint is admitted only
+above 10 Energy and turns off if those other costs reach the threshold, so sprint cannot create the
+`energy == 0` failed-state invariant. Walking and sleep remain available; existing saves keep their
+Energy unchanged by sprint alone.
 
-The character owns held-input and physical sprint state; Simulation owns Energy mutation. No drain occurs for a held key while stationary, blocked, airborne, in menus/planning/failure, or during the hand-action overlay.
+The character owns toggle-input and physical sprint state; Simulation owns threshold admission/auto-off.
+Sprint never auto-resumes after Energy recovers. No sprint state persists or resumes through stationary,
+blocked, airborne, menu/planning/failure, hand-action overlay, load or retry states.
 
 **Alternative considered:** a new fast-regenerating stamina pool. Deferred because it duplicates the visible Energy meter and adds tuning/save/UI scope before playtesting the smaller mechanic.
 
@@ -88,17 +94,17 @@ The HUD/simulation lane owns Simulation harvest/energy APIs, HUD context/toast p
 - **[Icon-only meters become ambiguous]** -> Use three visibly distinct silhouettes, stable order/color, retained numeric values, semantic measurement IDs, and ordinary first-look acceptance at 720p/4K.
 - **[Shorter errors disappear before they are read]** -> Reduce only ordinary action rejection from eight to six seconds; keep critical failures at eight and verify maximum real copy length.
 - **[Branch gather bypasses an atomic capacity check]** -> Apply cleared state only to the candidate after the existing full-yield capacity validation and commit once.
-- **[Energy mutation every frame churns revisions or saves]** -> Use one bounded simulation API, consume only while active movement is confirmed, and test transaction/save behavior after exertion.
+- **[Low Energy admits sprint accidentally]** -> Use one bounded threshold API, turn sprint off at <=10 Energy, and test every relevant time/work path without persisting or auto-resuming sprint.
 - **[Sprint animation slides or looks like a fast walk]** -> Author against 300 cm/s travel cadence, inspect side/three-quarter/gameplay views, and reject simple walk-speedup as completion.
 - **[Shift conflicts with menu quantity modifiers]** -> Sprint input is ignored while menus are open; existing native-menu Shift handling remains local to the menu.
 - **[L3 click conflicts with future controls]** -> Left-stick click is currently unused; retain right-stick click for camera distance and cover both bindings in prompt/input tests.
 
 ## Migration Plan
 
-1. Record ordinary no-focus/focus/gather HUD and walk/Energy baselines in the selected build.
+1. Record ordinary no-focus/focus/gather HUD and walk/Energy/low-threshold baselines in the selected build.
 2. Deliver the smallest HUD, six-second world-action feedback, icon-meter stack, and pickup-message correction with portable/source tests.
 3. Make fallen branches permanent and verify atomic save/revisit behavior.
-4. Author, import, and integrate sprint input, Energy authority, speed, and dedicated animation.
+4. Author, import, and integrate sprint input, low-Energy admission/auto-off, speed, and dedicated animation.
 5. Run controller/keyboard, HUD layout, lifecycle, persistence, full-loop, and ordinary visual routes in Editor.
 6. Build one immutable Shipping candidate, run separate-process replay and comparable cadence checks, and promote only if HUD quietness and sprint readability are materially improved.
 7. Retain `work-animation-complete-02-shipping / work-actions-v13` as rollback until promotion passes.
