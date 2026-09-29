@@ -2169,11 +2169,20 @@ FString AHomesteadController::FocusActions() const
                     // Weeds and nettles are pulled, rubbish is cleared away, a fallen bough gathered.
                     const FString Hand = A + (Node.kind == Homestead::ResourceKind::Weeds || Node.kind == Homestead::ResourceKind::Nettles
                         ? TEXT(" Pull") : Homestead::IsRubbish(Node.kind) ? TEXT(" Clear away") : TEXT(" Gather"));
-                    if (Handles) return Use + TEXT(" ") + SwingVerb(SelectedTool)
-                        + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
+                    if (Handles)
+                    {
+                        // Out of tier: say which upgrade it needs rather than offering a swing that glances off.
+                        const Homestead::ToolTier Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
+                        if (Sim.GetToolTier(Overgrowth->tool) < Needed)
+                            return UTF8_TO_TCHAR(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str());
+                        return Use + TEXT(" ") + SwingVerb(SelectedTool)
+                            + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
+                    }
                     if (Overgrowth->byHand) return Hand;
                     return ToolPrompt(Sim, Homestead::ToolItem(Overgrowth->tool), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                 }
+                // Loose stones are small enough to pick up by hand, unlike the rocks the pickaxe breaks.
+                if (Node.kind == Homestead::ResourceKind::Stones) return A + TEXT(" Pick up");
                 return A + TEXT(" Gather");
             }
         return A + TEXT(" Gather");
@@ -2555,9 +2564,9 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
             : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
             : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
             : Kind == Homestead::ResourceKind::GiantLog ? 38.0f
-            : Kind == Homestead::ResourceKind::Rubble ? 35.0f
-            : Kind == Homestead::ResourceKind::Boulder ? 50.0f
-            : Kind == Homestead::ResourceKind::SmallRock ? 18.0f : 8.0f;
+            : Kind == Homestead::ResourceKind::Rubble ? 42.0f
+            : Kind == Homestead::ResourceKind::Boulder ? 70.0f
+            : Kind == Homestead::ResourceKind::SmallRock ? 30.0f : 8.0f;
         if (Tool == Homestead::Item::Scythe)
         {
             // Mowing turns about her: she keeps facing the swath rather than the first tuft.
