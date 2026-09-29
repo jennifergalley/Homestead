@@ -11,6 +11,7 @@
 #include "RenderUtils.h"
 #include "Components/ExponentialHeightFogComponent.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/MeshComponent.h"
 #include "Components/PointLightComponent.h"
@@ -3039,6 +3040,49 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         Component->RegisterComponent();
         Visual.Components.Add(Component);
+        // Solid clear-out obstacles (stumps, logs, boulders, barrels, crates, middens) block her
+        // until they're cleared: a box a little inside the mesh's bounds, removed with the visual.
+        // It ignores the camera and visibility traces, so neither the view nor her focus snags on it.
+        using Homestead::ResourceKind;
+        const ResourceKind Kind = Node.kind;
+        const bool bSolid = Kind == ResourceKind::StumpSmall || Kind == ResourceKind::StumpMedium
+            || Kind == ResourceKind::StumpLarge || Kind == ResourceKind::StumpAncient || Kind == ResourceKind::FallenLog
+            || Kind == ResourceKind::GiantLog || Kind == ResourceKind::Boulder || Kind == ResourceKind::BrokenBarrel
+            || Kind == ResourceKind::BrokenCrate || Kind == ResourceKind::RubbishHeap;
+        if (bSolid && !bProduce && !bStagingResourceBuild)
+        {
+            const FVector Extent = Bounds.GetExtent() * Scale;
+            // Stumps are round: an upright capsule, so she can stand close to chop without snagging a corner.
+            const bool bRound = Kind == ResourceKind::StumpSmall || Kind == ResourceKind::StumpMedium
+                || Kind == ResourceKind::StumpLarge || Kind == ResourceKind::StumpAncient;
+            UShapeComponent* Blocker = nullptr;
+            if (bRound)
+            {
+                auto* Capsule = NewObject<UCapsuleComponent>(this);
+                const float Radius = FMath::Min(Extent.X, Extent.Y) * 0.85f;
+                Capsule->SetCapsuleSize(Radius, FMath::Max(Extent.Z, Radius), false);
+                Blocker = Capsule;
+            }
+            else
+            {
+                auto* Box = NewObject<UBoxComponent>(this);
+                Box->SetBoxExtent(FVector(Extent.X * 0.85f, Extent.Y * 0.85f, Extent.Z), false);
+                Blocker = Box;
+            }
+            Blocker->SetupAttachment(GetRootComponent());
+            Blocker->SetMobility(EComponentMobility::Movable);
+            const float Rise = bRound ? CastChecked<UCapsuleComponent>(Blocker)->GetUnscaledCapsuleHalfHeight() : Extent.Z;
+            Blocker->SetRelativeTransform(FTransform(Rotation, Ground + FVector(0, 0, Rise)));
+            Blocker->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+            Blocker->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+            Blocker->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+            Blocker->SetGenerateOverlapEvents(false);
+            Blocker->SetCanEverAffectNavigation(false);
+            Blocker->SetHiddenInGame(true);
+            Blocker->ComponentTags.Add(TEXT("ClearoutBlocker"));
+            Blocker->RegisterComponent();
+            Visual.Components.Add(Blocker);
+        }
     };
 
     switch (Node.kind)
@@ -3441,6 +3485,8 @@ void AHomesteadWorld::StartClearPop(FHomesteadWorldVisual& Visual, const Homeste
     for (USceneComponent* Part : Visual.Components)
         if (IsValid(Part))
         {
+            // A popping obstacle no longer blocks her.
+            if (auto* Primitive = Cast<UPrimitiveComponent>(Part)) Primitive->SetCollisionEnabled(ECollisionEnabled::NoCollision);
             Pop.Parts.Add(Part);
             Pop.Scales.Add(Part->GetRelativeScale3D());
             Pop.Locations.Add(Part->GetRelativeLocation());

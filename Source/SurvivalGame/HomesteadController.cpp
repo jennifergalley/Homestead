@@ -2223,8 +2223,8 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     {
         // Rough footprint radius (cm) of what she strikes, so the point or bit lands on its near side.
         const float Radius = Kind == Homestead::ResourceKind::StumpSmall ? 16.0f
-            : Kind == Homestead::ResourceKind::StumpMedium ? 20.0f
-            : Kind == Homestead::ResourceKind::StumpLarge ? 28.0f
+            : Kind == Homestead::ResourceKind::StumpMedium ? 30.0f
+            : Kind == Homestead::ResourceKind::StumpLarge ? 44.0f
             : Kind == Homestead::ResourceKind::StumpAncient ? 45.0f
             : Kind == Homestead::ResourceKind::FallenLog ? 20.0f
             : Kind == Homestead::ResourceKind::GiantLog ? 38.0f
