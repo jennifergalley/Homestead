@@ -190,6 +190,12 @@ None yet.
 - **Gait and scythe** — **temporary Gait Agent** (`65a2408b`), after its current run-heel slice:
   lower the running foot swing apex slightly; at rest the scythe must sit in her hand, and its blade
   must not clip the terrain during a sweep.
+- **Sprint toggle** — **temporary Gait Agent** (`65a2408b`), after the run-heel work: sprint becomes
+  a toggle on controller L3 and PC Shift. Update the controls and hints; pending PIE verification.
+- **Contextual hotbar eating** — **UI / temporary Menu Agent** (`5cf73757`), after the book-overlay
+  toast: selected hotbar berries are edible with controller X or A **only when no higher-priority
+  focused action exists**. Preserve focused interactions, and update the controls and hints; pending
+  PIE verification.
 - **Music variety** — **Architecture Agent** (`a1648ae7`) first does a read-only trace and licensing
   review; the implementation owner is **TBD**. The result should have multiple randomized tracks and
   longer ambient-only silence between them.
