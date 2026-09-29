@@ -48,7 +48,7 @@ The checkboxes on each lane's branch are the source of truth (`openspec\changes\
 **Integrated round-1 build: `main` at `3b8172ba` (2026-09-27, packaged by the orchestrator).** It
 contains store `d679b64f`, clearing `96b8fb84` (with the pail fix), manor `dc2c86f9`, map `0bdec5fe`
 and ocean v2 `8a407908`, plus world changes: every landscape proxy stays loaded, the pasture is
-green, and `M_PropTextured` has the ISM and Nanite usage flags. All 7 native test suites pass. The
+green, and `M_PropTextured` has the ISM and Nanite usage flags. All native test suites passed (7 at the time). The
 package boots the Estate in 3.5 s with no material errors. Jenny launches it from the **"Homestead
 Estate"** desktop shortcut: the orchestrator worktree's `Build\Windows` with the argument
 `/Game/SurvivalGame/Maps/Estate`. The first integration build was `f2e504c5`.
