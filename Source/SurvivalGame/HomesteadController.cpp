@@ -46,6 +46,7 @@
 #include "HomesteadMapComponent.h"
 #include "Simulation/HomesteadManor.h"
 #include "Simulation/HomesteadLamp.h"
+#include "Simulation/HomesteadPail.h"
 #include "UI/SHomesteadNames.h"
 #include "UI/SHomesteadArrival.h"
 #include "Framework/Application/SlateApplication.h"
@@ -815,6 +816,10 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
             Slot.Icon = HotbarIcon(Slot.Tool);
             if (Slot.Tool == Homestead::Item::OilLamp && Slot.Available)
                 Slot.Fill = static_cast<float>(Sim.LampOil() / Homestead::Lamp::CapacityHours);
+            // The pail's water shows on the pail (HomesteadPail.h), like the lamp's oil.
+            if (Slot.Tool == Homestead::Item::WateringCan && Slot.Available)
+                if (const auto Pail = Homestead::PresentPail(State()); Pail.gauge)
+                    Slot.Fill = static_cast<float>(Pail.charge) / Homestead::PailCapacity;
             Slot.Seed = IsSowingSeed(Slot.Tool);
             Slot.Pouch = Slot.Seed && OtherPouchSeeds(Index) > 0;
         }

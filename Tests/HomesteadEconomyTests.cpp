@@ -2,6 +2,7 @@
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
 #include "HomesteadItems.h"
+#include "HomesteadPail.h"
 #include "HomesteadSimulation.h"
 #include "HomesteadTravel.h"
 
@@ -482,6 +483,45 @@ void WalkTheRoad()
     CHECK(sim.DozeCount() == 0);
 }
 
+void PailWaterPresentation()
+{
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const auto With = [&sim](int pails, int water)
+    {
+        State state = sim.GetState();
+        state.inventory[static_cast<int>(Item::WateringCan)] = pails;
+        state.inventory[static_cast<int>(Item::Water)] = water;
+        return PresentPail(state);
+    };
+    // One carried pail: its water is a gauge and the pack's Water tile folds into it.
+    for (int water : {0, 1, 6})
+    {
+        const auto pail = With(1, water);
+        CHECK(pail.gauge && pail.charge == water && pail.hidePackWater);
+    }
+    // More than one pail holds (an older save), or 1200: the gauge is full and the tile shows every portion.
+    for (int water : {7, 1200})
+    {
+        const auto pail = With(1, water);
+        CHECK(pail.gauge && pail.charge == PailCapacity && !pail.hidePackWater);
+    }
+    // No pail carried (the starter pail is in a chest): no gauge, and any pack water shows as a tile.
+    CHECK(!With(0, 0).gauge && !With(0, 0).hidePackWater);
+    CHECK(!With(0, 4).gauge && !With(0, 4).hidePackWater);
+    // Two pails: the gauge shows, and the water stays an ordinary tile rather than be split between them.
+    CHECK(With(2, 4).gauge && With(2, 4).charge == 4 && !With(2, 4).hidePackWater);
+    // Presentation only: the stock itself round-trips through a save untouched.
+    OK(sim.GrantItems(Item::WateringCan, 1));
+    OK(sim.GrantItems(Item::Water, 9));
+    Simulation reloaded;
+    reloaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= 9);
+    const auto loaded = PresentPail(reloaded.GetState());
+    CHECK(loaded.gauge && loaded.charge == PailCapacity && !loaded.hidePackWater);
+}
+
 const char* filter = nullptr;void Run(const char* name, void (*test)())
 {
     if (filter && !std::strstr(name, filter)) return;
@@ -508,6 +548,7 @@ int main(int argc, char** argv)
     Run("playtest shop placement", PlaytestShopPlacement);
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);
+    Run("pail water shows on the pail", PailWaterPresentation);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }
