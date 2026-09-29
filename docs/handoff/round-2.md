@@ -309,9 +309,13 @@ requirement.
   Planning traced the present state: Hunger starts at 85, drains 2/hour awake and fails at 0; Energy
   starts at 100 and drains through work; food restores both. The change is **pending, not in today's
   4 PM build**; Planning updates the OpenSpec spec.
-- **Weather recurrence** — **Calendar Agent** (later weather slice, after the calendar first
-  increment): rain every third day is too frequent. Change it to around once every five days with a
-  varied but deterministic recurrence. Architecture owns read-only trace support; pending, not shipped.
+- **Weather recurrence** — **Water Agent** (retained lane; supersedes the broader Calendar proposal):
+  rain every third day is too frequent. The smallest traced change is a stable hash selecting offsets
+  **1 or 2** and **6 or 7** in every 10-day block: exactly 20% rain, 4–6-day gaps and day 0 dry. Keep
+  the current 09:00–15:00 rain window, overcast, moisture and audio behavior; no seed or new save
+  section. Old saves' forecast can change, while accrued plot moisture persists; document that at
+  implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
+  after its lane-A work.
 - **Starter food and hoe wayfinding** — **Clearing / Props lane** (after weed/rubble work): put **3
   pasties and 2 loaves** in the starter chest. Make the **hoe head** the second salvage reward after the
   billhook, with a contextual refusal and west-chimney journal hints to find it. Pending; no code or
