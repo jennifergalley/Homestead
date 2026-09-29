@@ -48,9 +48,12 @@ three-hands-on-implementer cap (including Integration) and the two-Unreal-proces
 commit and handoff links in this page until then; remove stale wake-ups and ownership pointers only
 after confirmation.
 
-Gait and Planning are not orchestrator children. Jenny may archive Gait once it finishes the current
-run/hair work and hands sprint to Menu and character asset recipes to Props. Planning remains outside
-this child-roster decision.
+Gait and Planning are not orchestrator children. **Gait is idle and ready for Jenny to archive, not
+archived:** its editor exited, tracked work is pushed, no automation remains, and only 97 disposable
+`crop_preview_*.png` files are untracked. Sprint is handed to Menu and character asset recipes to
+Props. For the run/hair change, Integration may cherry-pick `1197f02a` + `b1d43919` alone to avoid
+the unready Harvest ancestor `ad534632`; Integration is verifying. Planning remains outside this
+child-roster decision.
 
 **Build Speed handoff:** the Integration Agent owns `Scripts\Invoke-UnrealBuild.ps1` and the build
 recipe. Canonical measurements and the non-adopted UBA cache decision remain in
@@ -349,14 +352,24 @@ requirement.
   insufficient funds and capacity/save behavior.
 - **Town travel** — **pending, not shipped.** A wooden `Walk to town` sign outside the estate and a
   return sign by town; clickable **Town** and **Manor** destinations on the Map invoke the same travel
-  action. Travel elapses equivalent on-foot time and displays cost plus confirmation. **Water** owns
-  anchors, **Architecture** the read-only trace, **Props** the signs and **Menu** the map UI; a future
-  travel implementer owns the action.
+  action. Architecture traced the road polyline in `estate_layout.json` (486 points / 1.94 km; runtime
+  has landmarks only). The MetaHuman walks 210 cm/s (legacy 180); at a 60-minute day, road-only travel
+  is 6.16 game hours / 15.4 real minutes (12.32 game hours at a 30-minute day), plus connectors.
+
+  Travel must first preflight a candidate advance for hunger failure, unexpected 6-hour doze and
+  `MaxHour`, then atomically commit time plus a safe position through `PrepareWorldAt` /
+  `SettleOnGround`; no unsafe fallback. On the Map, a single click selects and double-click/A zooms,
+  so travel needs a separate explicit confirmation. The signs and map invoke the same action.
+  **Water** owns the generated runtime route and endpoints, **Architecture** the read-only trace,
+  **Props** the original signs and **Menu** the shared travel/map UI; a future travel implementer owns
+  the action.
 - **Wait for opening** — **Menu / Store Agent** (`5cf73757`): at the closed General Store, provide a
   safe `Wait until opening` interaction with displayed duration and confirmation. It advances the
   actual simulation across midnight, crop, weather, vitals and store updates, then rechecks opening
-  hours. Trace 2 AM, sleep/collapse and error handling first. This **complements, not replaces** the
-  future equivalent-time Town/Manor travel signs and map action. Pending; not shipped.
+  hours. The shop is open 08:00–18:00 and has no 2 AM curfew; preflight the candidate to the next
+  08:00 through the same safety checks before committing. Trace 2 AM, sleep/collapse and error
+  handling first. This **complements, not replaces** the future equivalent-time Town/Manor travel
+  signs and map action. Pending; not shipped.
 - **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
   trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
   implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the
