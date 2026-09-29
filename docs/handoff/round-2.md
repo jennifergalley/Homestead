@@ -147,10 +147,14 @@ Not started. Lanes send `[ready]` to the orchestrator; the docs agent records wh
 
 ## Jenny's 2026-09-29 playtest feedback
 
-Jenny is playing the **morning package** now. No agent may disturb it: do not launch editors, games or
-builds against that package, retarget its shortcut, or overwrite its `Build\Windows` folder until she says
-she is done. These are feedback items, not implementation detail; the owner creates or updates the linked
-OpenSpec change before work that goes beyond a small verified correction.
+Jenny is playing the **morning package** now. Protect its running process and its `Saved` folder: do not
+focus, kill, retarget or overwrite the currently running package without coordinating with her. This is **not**
+a global pause: headless code and Blender work may continue, and a separate editor slot may be used under
+the 2-Unreal-process and 3-implementer limits. The 4 PM build remains active. If she is still playing at 2 PM,
+the Integration Agent prepares a **new** playtest folder and runs its suites without closing her game (or asks
+her to pause before the final shortcut switch); the existing shortcut stays untouched until she confirms. These
+are feedback items, not implementation detail; the owner creates or updates the linked OpenSpec change before
+work that goes beyond a small verified correction.
 
 | Feedback | Owner | OpenSpec reference / note |
 | --- | --- | --- |
