@@ -2517,6 +2517,7 @@ Result Simulation::Plant(int plotId, Point player, CropKind kind)
             : std::string("You have no ") + ItemName(crop.seed) + " to sow.");
     plot->kind = kind;
     plot->planted = true;
+    plot->picked = false;
     plot->growth = 0.0;
     return Exert(Exertion::PlantEnergy, Good(std::string("Planted ") + crop.lower + ". " + ReadyInText(kind)));
 }
@@ -2558,6 +2559,7 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     if (!TryAdjust(yield)) return Bad(MissingMessage(yield, state_.inventory));
     const bool regrows = crop.regrowHours > 0.0;
     plot->planted = regrows;
+    plot->picked = regrows;
     // A cleared plot keeps the neutral kind (saves require it for bare soil).
     if (!regrows) plot->kind = CropKind::Roots;
     plot->growth = regrows ? std::max(0.0, 1.0 - crop.regrowHours / crop.growHours) : 0.0;
@@ -2869,6 +2871,15 @@ std::string Simulation::Serialize() const
     // Optional tagged trailing sections; saves without them still load.
     if (Manor::HasSaveSection(state_)) Manor::WriteSaveSection(body, state_);
     Lamp::WriteSaveSection(body, state_);
+    // Tagged trailing section: ids of regrowing plots picked since sowing (omitted when none).
+    std::vector<int> picked;
+    for (const auto& plot : state_.plots) if (plot.planted && plot.picked) picked.push_back(plot.id);
+    if (!picked.empty())
+    {
+        body << "picked " << picked.size();
+        for (int id : picked) body << ' ' << id;
+        body << '\n';
+    }
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3153,6 +3164,18 @@ Result Simulation::Deserialize(const std::string& data)
         }
         else if (tag == Manor::SaveTag) { if (!Manor::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == "picked")
+        {
+            if (!(input >> count) || count < 0 || count > static_cast<int>(candidate.plots.size())) return invalid();
+            for (int i = 0; i < count; ++i)
+            {
+                int id = 0;
+                if (!(input >> id)) return invalid();
+                auto* plot = Find(candidate.plots, id);
+                if (!plot || !plot->planted || plot->picked || GetCropInfo(plot->kind).regrowHours <= 0.0) return invalid();
+                plot->picked = true;
+            }
+        }
         else return invalid();
         input >> std::ws;
     }

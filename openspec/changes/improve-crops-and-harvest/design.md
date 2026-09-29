@@ -82,7 +82,7 @@ thresholds are:
 | Mature | 0.80 to 1.0 |
 | Ripe | 1.0 |
 
-A picked plant (beans, strawberries) restarts part-way along the same scale, at growth 1 − regrow/grow, so it shows the stage before its pods or fruit form. Its day count carries on from there too: broad beans read "day 5 of 7" after picking and are ripe again 3 days later. Plots don't save whether a crop has been picked before, so first growth and regrowth share one display.
+A picked plant (beans, strawberries) restarts part-way along the same scale, at growth 1 − regrow/grow, so it shows the stage before its pods or fruit form. The plot remembers that it has been picked (`Plot::picked`, cleared on sowing, saved in an optional trailing `picked` section so older saves load unpicked). While picked, its status counts the regrowth instead: broad beans read "ripening again, day 1 of 3" after picking, matching the harvest message "more will ripen in about 3 days". A first-growth plant always counts "day N of 7", even past the regrow point.
 
 Each crop has `SM_Crop<Name>_<Stage>` meshes for the five plant stages, made in Blender:
 

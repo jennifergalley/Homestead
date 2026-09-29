@@ -64,6 +64,11 @@ A growing crop SHALL show its produce (roots pushing out of the soil, heads, pod
 #### Scenario: A picked plant
 - **WHEN** she picks a ripe broad bean plot
 - **THEN** the big pods are gone and small green ones grow back over the next days
+- **AND** the plot reads "Broad beans: ripening again, day 1 of 3", matching the harvest message, while a first-growth plot keeps counting "day N of 7"
+
+#### Scenario: Weeds don't look like produce
+- **WHEN** a plot grows weedy
+- **THEN** the weeds are plain green young nettles, with no white or coloured flower heads that could read as ripe produce
 
 ### Requirement: Harvesting has its own animation
 Harvesting SHALL play a kneel-and-pull animation for root crops and cabbage, and a pick animation for beans and berries. The produce SHALL show briefly in her hand and then be hidden.

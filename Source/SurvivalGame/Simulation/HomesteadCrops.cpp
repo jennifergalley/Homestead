@@ -117,9 +117,17 @@ std::string PlotStatus(const Plot& plot)
     const auto& info = GetCropInfo(plot.kind);
     std::string text = info.name;
     if (IsRipe(plot)) return text + ": ready to harvest";
-    // A picked plant resumes the count part-way (beans: day 5 of 7 after picking), so the days
-    // left always read right.
-    text += ": day " + std::to_string(CropDay(plot)) + " of " + std::to_string(CropDays(plot.kind));
+    const int regrowDays = CropRegrowDays(plot.kind);
+    if (plot.picked && regrowDays > 0)
+    {
+        // Count the regrowth from where picking left the plant, matching "more will ripen in about N days".
+        const double start = std::max(0.0, 1.0 - info.regrowHours / info.growHours);
+        const double through = start < 1.0 ? (plot.growth - start) / (1.0 - start) : 1.0;
+        const int day = std::clamp(static_cast<int>(std::floor(through * regrowDays)) + 1, 1, regrowDays);
+        text += ": ripening again, day " + std::to_string(day) + " of " + std::to_string(regrowDays);
+    }
+    else
+        text += ": day " + std::to_string(CropDay(plot)) + " of " + std::to_string(CropDays(plot.kind));
     const bool dry = NeedsWater(plot), weedy = IsWeedy(plot);
     if (dry && weedy) text += "  |  needs water and weeding, growing slowly";
     else if (dry) text += "  |  needs water, growing slowly";
