@@ -82,9 +82,10 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current implementer slots (2026-09-29):** Weather Agent, temporary Gait Agent (Harvest) and
-temporary Menu Agent (UI). Integration released its hands-on slot after pushing `27e2e917`; UI/Menu
-resumed. These three hold the slots until the 2 PM packaging rotation.
+**Current slot / rotation snapshot (2026-09-29 11:09):** Props released its weeds slice slot, then
+received the third **headless** slot solely for the retain-60 Calendar correction below. Props must
+release it by the 2 PM packaging window. The next editor sequence is **Menu → Water lake → Props weeds**;
+the orchestrator continues to enforce the three-hands-on and two-Unreal-process caps.
 
 ## Lanes and ownership
 
@@ -252,10 +253,10 @@ town about 8:19–10:22 PM, after the 6 PM General Store close. **Product decisi
 keep the 60-minute default; the 30/120 Settings options remain, and old saves retain their stored
 `dayMinutes` value.
 
-**Integration hold:** Props later adds a focused, safely tested restore-60 correction on top of
-`a3c7e04d`; Integration merges that pair atomically. Do **not** merge raw A or include it in the 4 PM
-package. After Props reports the implementation SHA and verification, update the source-of-truth
-OpenSpec and then replace this blocker with Integration's final `main` SHA.
+**Integration hold:** Props is adding a focused, safely tested restore-60 correction on top of
+`a3c7e04d`; Integration merges that pair atomically. Do **not** merge raw A, and exclude both commits
+from the 4 PM package. After Props reports the implementation SHA and verification, update the
+source-of-truth OpenSpec and then replace this blocker with Integration's final `main` SHA.
 
 ### OpenSpec strict-validation baseline (fix pending merge)
 
@@ -324,12 +325,13 @@ requirement.
   `MusicShuffleBagTests` in CMake, and verifies packaged multi-track load and run.
 - **Context hint** — **UI Agent** (`5cf73757`): the hint says Ctrl+wheel zooms, but gameplay uses the
   wheel to cycle the hotbar. Correct the context copy.
-- **Invisible weeds** — **Clearing / Props lane** (owner **TBD** when an implementer slot opens):
-  inspect forage-node visuals and culling; a visible weed asset must exist wherever the prompt says
-  `"Weeds  E  Pull"`.
-- **Floating weeds** — **Props lane, weeds-only slice** (owner **TBD** when a slot opens): some weeds
-  float above the rendered ground on slopes or patches. Add actual landscape/base grounding and PIE
-  visually test **all 115** weed placements. Pending; not shipped.
+- **Weed visibility and grounding** — **Props weeds-only branch
+  `jennifergalley-weed-visuals @ 889cfde8`, partial; not shipped.** It has a new main-mesh fallback
+  (no thimbleberry), Landscape-versus-r16 grounding/reseat behavior, and an unimported Cornish
+  `WeedClump` Blender asset. Native tests pass 8/8 and the Editor compile passed. The branch still
+  owes an eye-height PIE check, sweep of all **115** placements, day-and-dusk captures, and a
+  new-game reload. Only after that evidence may it establish that a visible weed asset exists wherever
+  the prompt says `"Weeds  E  Pull"` and that none float above slopes or patches.
 - **Manor debris** — **Clearing / Props lane** (owner **TBD** when a slot opens): slate and shingle
   piles that look clearable should become suitable saved clearables, rather than static scenery.
 - **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
