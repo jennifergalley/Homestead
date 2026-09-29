@@ -222,7 +222,9 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
 
 ## Pending doc updates on merge
 
-None.
+- Crops lane (`b51aa930`, due in the 4 PM batch): `HomesteadGrowCrops <days> [tend=1]` and
+  `HomesteadCropGrowth <0-1>` grow crops for tests (time skips don't). When it lands, add them to the
+  editor skill's "Time and weather for tests" bullet.
 
 ## Tooling requests (unassigned)
 

@@ -14,8 +14,13 @@ every other suite loads the legacy woodland. It runs `-HomesteadSmokeTest -Homes
 - The oil lamp selected with key 8 at 22:00, in hand and lit.
 - `PERFORMANCE_AT manor|woods mean_fps=... p95_frame_ms=... p99_frame_ms=...` (12 s after a 6 s
   settle), for the Performance pass.
+- `LANDSCAPE_MATERIAL <place>` at each of six places: every on-screen landscape component's own
+  material instances have no compile errors (uncooked; waits up to 60 s for permutations) or a valid
+  shader map (cooked), so the landscape isn't drawing the Default Material.
 
-The runner then fails the run on any `missing usage flag` or `Default Material will be used` line, a
+The runner then fails the run on any `missing usage flag`, `Default Material will be used`,
+`Failed to compile Material`/`default material`, `Material failed to compile` or `with an invalid
+ShaderMap` (cooked) line, fewer than six `LANDSCAPE_MATERIAL` lines, a
 ground hold that gave up, a spawn that never logged `HOMESTEAD_GROUND_SETTLE`, or more Error lines
 than `-MaxLogErrors` (default 0). Findings are in `<output>\estate-log-findings.txt`. First run
 (editor binary `-game`, 2026-09-28): all steps passed, 0 errors, manor 53.9 fps (p99 29.3 ms), woods
