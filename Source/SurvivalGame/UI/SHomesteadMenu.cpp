@@ -2698,7 +2698,6 @@ void SHomesteadMenu::OpenTravelPrompt(Homestead::TravelDestination Destination)
     }
     const uint64 Revision = Controller->Simulation().GetRevision();
     PopupOptions.Reset();
-    bDyeChooser = false;
     PopupTitle = Destination == Homestead::TravelDestination::Manor ? TEXT("Walk home to the manor?") : TEXT("Walk into town?");
     PopupBody = UTF8_TO_TCHAR(Plan.summary.c_str());
     PopupOptions.Add({[]() { return FString(TEXT("Set off")); },
