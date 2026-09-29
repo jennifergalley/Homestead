@@ -135,9 +135,21 @@ void SleepChestAndHearth()
     sim.AdvanceGameHours(12.0, hearthSide);
     CHECK(sim.IsNearFire(hearthSide));
     OK(sim.GrantItems(Item::Roots, 2));
+    // The always-lit hearth still takes one kindling per batch, like any cookfire.
+    const int kindling = sim.Count(Item::Kindling);
+    OK(sim.GrantItems(Item::Kindling, 1));
+    const double hour = sim.GetState().hour;
     OK(sim.Craft(Recipe::RoastedRoots, hearthSide));
-    CHECK(sim.Count(Item::Roots) == 0 && sim.Count(Item::RoastedRoots) == 1);
+    CHECK(sim.Count(Item::Roots) == 0 && sim.Count(Item::RoastedRoots) == 1 && sim.Count(Item::Kindling) == kindling);
+    CHECK(sim.GetState().hour == hour && sim.IsNearFire(hearthSide));
     CHECK(!sim.Craft(Recipe::RoastedRoots, hearthSide));
+    CHECK(kindling == 0);
+    OK(sim.GrantItems(Item::Roots, 2));
+    const auto unlit = sim.Craft(Recipe::RoastedRoots, hearthSide);
+    CHECK(!unlit.ok && unlit.message.find("Kindling") != std::string::npos && sim.Count(Item::Roots) == 2);
+    OK(sim.GrantItems(Item::Kindling, 1));
+    OK(sim.Craft(Recipe::RoastedRoots, hearthSide));
+    CHECK(sim.Count(Item::Kindling) == 0 && sim.Count(Item::RoastedRoots) == 2);
     const Point faraway{hearthSide.x + 5000.0, hearthSide.y};
     OK(sim.GrantItems(Item::Roots, 2));
     CHECK(!sim.Craft(Recipe::RoastedRoots, faraway));
