@@ -469,10 +469,17 @@ pending, so this does not claim early Energy is fully solved.
   **Screenshot diagnosis correction:** the bare, leafless ~69 cm arching canes near a fence/grazed
   125 cm ring are tentatively spring `SM_BrambleThin` overgrowth, not the green tuft/small-leafy
   thimbleberry visual used for ordinary weeds. `WeedClump` replacement `cc5b115d` will not fix this
-  look. After the core hoe/pail test, Props traces exact node ID/kind/focus versus cleared state in
-  copied-save PIE: it should be actionable with a worn billhook inside 280 cm, though nearby
-  weed/grass may steal focus. Add spring leaf-out or an appropriate cue and resolve any missing prompt;
-  no shipped claim follows from the tentative identification.
+  look. Fence live nodes in `HomesteadEstateDisrepair.cpp` IDs 550001+ are worn-billhook
+  `SM_BrambleThin` canes. The concrete candidate mismatch is controller focus choosing the nearest
+  **centre** inside 280 cm without gaze, versus `Overgrowth::Reach=300 cm` and a forward 80 cm /
+  200 cm-radius swing probe: a dead-ahead 285 cm cane can be in Simulation reach but show no prompt or
+  swing target, while a nearer weed/grass steals focus.
+
+  After the core hoe/pail test, Props' next code slot makes targeting forward-biased at 300 cm and
+  arbitrates competing weeds. Integration verifies isolated copied-save PIE at 285 cm, an overlapping
+  weed and F5/F9; RT/LMB with worn billhook should clear 2–3 canes in one swing, while bare A/E cannot.
+  World mesh removal/save edits already should work. Add spring leaf-out or an appropriate cue and
+  resolve any missing prompt; this remains a plausible cause, not proof for Jenny's pictured cane.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` shipped in the 4 PM playable build.** Clearable
   slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
