@@ -23,7 +23,8 @@ function Get-UnrealProcesses {
 }
 
 function Get-BuildProcesses {
-    @(Get-CimInstance Win32_Process -Filter "Name = 'dotnet.exe' OR Name = 'cl.exe' OR Name = 'link.exe' OR Name = 'UnrealBuildTool.exe'" -ErrorAction SilentlyContinue |
+    # Blender counts too: headless asset builds from other lanes load the CPU and skew frame times.
+    @(Get-CimInstance Win32_Process -Filter "Name = 'dotnet.exe' OR Name = 'cl.exe' OR Name = 'link.exe' OR Name = 'UnrealBuildTool.exe' OR Name = 'blender.exe'" -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -ne 'dotnet.exe' -or $_.CommandLine -match 'UnrealBuildTool|AutomationTool' })
 }
 

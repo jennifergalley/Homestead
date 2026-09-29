@@ -15,10 +15,10 @@
 
 - [x] 3.1 Game thread: gate `AHomesteadWorld::Refresh` on an integer key of its inputs; integer signatures (improve-code-health-between-rounds 2.2, reviewed by the Architecture Agent); PIE: plot rebuilds on time-only stage changes, clear pop plays
 - [x] 3.1a Smoke `PERFORMANCE`/`PERFORMANCE_AT` sample the engine frame time (`FApp::GetDeltaTime`)
-- [ ] 3.2 Manor occlusion queries (~1,300 per frame) and the RHI occlusion fence wait
-- [ ] 3.3 Woods GPU at 4K (ray-traced shadow any-hit on canopy, Nanite, TSR) without visible change
+- [ ] 3.2 Manor occlusion queries (~1,300 per frame) and the RHI occlusion fence wait. Findings: they come from the ~900 per-node StaticMeshComponents (clear-out, farm, brambles), not the scenery HISMs (`foliage.MinOcclusionQueriesPerComponent 2` / `MinInstancesPerOcclusionQuery 1024` left 1,281); `r.HZBOcclusion 1` and `r.AllowOcclusionQueries 0` are slower. Remaining lever: batch per-node visuals into instanced components (larger change; the manor already renders at ~70 fps at 4K)
+- [ ] 3.3 Woods GPU at 4K. Findings: ray-traced sun shadows 6.0 ms (any-hit on leaves ~40% of it; off = solid leaf shadows, rejected); camera-safe foliage `RayTracingQualitySwitch` no gain (6.02 → 6.03 ms, shelved); `r.TSR.History.ScreenPercentage 100` = woods 59.1 → 63.2 fps but slightly softer canopy (option with shots sent for Jenny, held; `compare/tsr-history`). No quality-neutral GPU win found yet
 - [ ] 3.4 Walking hitches: grass-field chunk rebuilds, scenery hide pass on clears
-- [ ] 3.5 Non-RT players: VSM first-frame GPU timeout (TDR) on the dense Nanite estate
+- [ ] 3.5 Non-RT players: VSM first-frame GPU timeout (TDR) on the dense Nanite estate. The hang is Nanite `NodeAndClusterCull` in `RenderVirtualShadowMaps(Nanite)` on frame 2. Crashed: `MarkCoarsePagesDirectional 0`, `r.Nanite.Culling.TwoPass 0`, `ResolutionLodBiasDirectional 1`, and bias 3 + `Clipmap.LastLevel 18` applied from game code (once). Passed once: bias 3 + LastLevel 18 via `-DPCVars`. Not reliable yet; note Epic scalability also sets `ResolutionLodBiasDirectionalMoving -1.5`. Parked patch: `E:\CopilotScratch\a34483d7\vsm-guard-wip.patch`
 
 ## Results (EstateSmoke, CSV frame times inside the 12 s windows; uncapped)
 
@@ -55,3 +55,4 @@ contention in the uncooked run), not from the scenery. The 4K woods are GPU-boun
 GPU headroom (GPU ms vs 16.7): 4K at her settings (1080p internal + TSR): manor 10.3, woods 15.6.
 4K native 100%: manor 24.8 ms (38 fps), woods 41.2 ms (24 fps), so native 4K isn't viable on this GPU;
 her default (engine auto, 50% + TSR) is the right setting for 4K60.
+
