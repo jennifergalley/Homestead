@@ -293,6 +293,18 @@ Props owns core compatibility and Menu the UI. Cover v12/v13 plus 0/1/6/7/1200, 
 no pail and round-trip cases. Stable per-pail IDs/tagged migration is a separate large follow-up.
 Prove packaged lake fill before calling the loop accepted.
 
+**Menu pail gauge partial `9d5da35d`:** native Release 9/9 (economy 14 / scenario 573), no UE
+compile/PIE or delivery claim. `Homestead::PresentPail` renders carried-pail hotbar Fill as
+`min(Water, 6) / 6`, blue when charged and red when empty. With exactly one pail and pack Water <=6,
+it hides the pack Water tile/detail as `Water N/6`; zero/multiple pails or overflow >=7 retain the
+tile. Chest/drop Water always remains visible; stowing/dropping the pail reveals the pack tile. v12/v13
+positional-stock/save mechanics remain unchanged.
+
+The native cases cover 0/1/6/7/1200, 0/1/2 pails and round-trip nine. Cherry-pick after the
+`a4bb831f` travel test hunk; it is independent of the pickup popup. Integration still needs Editor
+compile plus PIE gauge refill/water/chest/drop/F5/F9 and the copied-save packaged pail repro. The
+misleading fill prompt is unchanged.
+
 **Turnip planting regression:** after the first turnip seed, remaining planting can fail. Integration
 reproduces it from a copied packaged save and records exact seed stock, focus, plot, moisture, season,
 Energy and toast state; trace and fix the root cause rather than silently refusing the action. This is
