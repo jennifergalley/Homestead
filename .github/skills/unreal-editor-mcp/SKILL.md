@@ -23,6 +23,14 @@ outcomes, not diaries. Fix or remove advice that proves wrong instead of adding 
 Several agent sessions (one worktree each, under `E:\Repos\copilot-worktrees\SurvivalGame\`)
 build, run editors and package on one PC with one RTX 5080 at the same time.
 
+- **Waiting means ending your turn** (Jenny, all sessions). Never sleep, poll or loop in a shell while waiting (for an editor slot, the UBT queue, a `[ready]`
+  or a perf window): a blocking wait keeps your turn open, so queued `send_session_message`s never
+  arrive. Schedule a wake-up with `save_session_automation` (`interval: "once"` with a `run_at` a few
+  minutes ahead, or `"minutes"` with `every_minutes`), say in its prompt what to check, end your turn,
+  and clear the automation when it's no longer needed. Waiting on a build or command you started
+  yourself is fine through the tool's own completion notification (async shell / `initial_wait`).
+  For a full editor slot: check `Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead*` once; if 2 are
+  running, schedule a wake-up about 5 minutes out and end the turn. Don't retry `Start-EditorMcp.ps1` in a loop.
 - **Only the integration session packages.** UAT (`Build-Game.ps1 -Package`/`-PackageOnly`, `RunUAT
   BuildCookRun`) and packaged-game tests run only in the integration session's worktree (registry in
   `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests, compile-check
@@ -111,7 +119,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
 ```powershell
 git status --short | Measure-Object; Test-Path .\SurvivalGame.uproject   # new worktree complete? (0 and True; else see 0.1)
 $p = 8768                                                     # your registered port
-Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # fewer than 2? (Start-EditorMcp checks too)
+Get-Process UnrealEditor*,SurvivalGame*,JennysHomestead* -EA 0 # 2 running? save_session_automation ~5 min out and end your turn; never loop
 pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port $p -AllowPython -TimeoutSeconds 1200   # -Port picks the MCP port
 . .\Scripts\McpHelpers.ps1 -Port $p                             # every later command; sets UNREAL_MCP_URL for editor_mcp.py
 # ...work, StartPIE, hk/st/hshot...
@@ -136,6 +144,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | UBT prints `UbaSessionServer - Killed process ... Low on memory (83.3gb/87.6gb)` and retries; an editor build takes about 40 min instead of 5 | The machine is out of memory: editors (15-17 GB each), Blender and other builds | Close your editor, and Blender if it's yours, before building; keep to the 2-process limit. |
 | `Build-Game.ps1 -Package` fails within seconds: `A conflicting instance of Global\UnrealBuildTool_Mutex_... is already running. Result: Failed (ConflictingInstance)`, then `AutomationTool exiting with ExitCode=10 (Error_SDKNotFound)` (the exit code is misleading) | UAT's build step can't wait for another worktree's UBT. With several targets it puts `-UbtArgs` inside each `-Target="..."` string, where `-WaitMutex` is ignored | Fixed: `Build-Game.ps1` builds `SurvivalGame` itself with `Build.bat ... -WaitMutex`, then runs `BuildCookRun -skipbuild`. Do the same for a hand-run BuildCookRun. |
 | Editor never shows a window, or startup holds for 10+ minutes; the log stops at `Build.bat -Mode=ValidatePlatforms` (the Turnkey platform check) | Every editor start runs that UBT check (no AutoSDK is set up, so it always runs). It's single-instance, so it waits on another worktree's UBT build | `Start-EditorMcp.ps1` now stops its own editor's ValidatePlatforms child tree after 2 minutes. By hand: `Get-CimInstance Win32_Process -Filter "ParentProcessId=<editor pid>"`, then `Stop-Process -Id` that `cmd.exe` and its children. The editor continues. Don't set `UE_SKIP_UBT_SDK_SETUP=1` instead: the editor then treats every platform SDK as invalid. |
+| Editor startup holds for up to 30 minutes at `Launching UnrealBuildTool... -Mode=QueryTargets` | The editor refreshes its cached target list with a single-instance UBT mode (`DesktopPlatformBase.cpp`), which queues behind other worktrees' UBT builds | `Start-EditorMcp.ps1` now stops its own editor's QueryTargets child tree (`cmd.exe` and its `PING`) after 2 minutes, as it does for ValidatePlatforms; the editor then uses the existing cache. By hand: stop that `cmd.exe` and its children by PID. |
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map through `-Map` during startup | Don't pass `-Map`: the Estate is now the default startup map and opens cleanly without it. |
 | Every MCP call times out for minutes, but the editor process is still responding | The shared zenserver (`%LOCALAPPDATA%\UnrealEngine\Common\Zen`) stopped answering and the game thread is blocked on it; it recovers by itself (one stall lasted 1009 s: `post recovery finished in 1009.384 seconds`) | Search `Saved\Logs\SurvivalGame.log` for `LogZenServiceInstance` and wait. Don't kill the editor, and never stop `zenserver.exe`. |
 | MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
@@ -148,6 +157,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
 | The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
+| `hshot` / `HighResShot` captures come out black | The editor window is minimised | Keep it restored (it can be behind other windows). |
+| On the first PIE after launch, a floating "Message Log" window (Asset Check, Map Check, Localization Service) covers PIE in `shot` captures | The editor reports load-time checks | Close it with `click` on its X (scale capture coordinates to window pixels; see the helper table). |
 | `save_asset` returns False | PIE is running | Stop PIE, then `save_loaded_asset(obj, False)`. |
 | PIE crashes after a Live Coding patch; `Binaries\Win64\*patch*` locked | Live Coding patch state | Quit, wait about 60 s, delete `Binaries\Win64\*patch*`, rebuild. |
 | A material renders as the default grid; the log has `Failed to compile` | A Masks-compressed texture on a sampler that isn't `SAMPLERTYPE_MASKS`, or sRGB engine defaults on a Masks sampler | Match the sampler type; use `T_PropDefault{White,Black}`. Python material builds report success even when the result fails to compile (the mesh renders flat grey in PIE): our `*_ao`/`*_roughness` textures are `TC_MASKS` non-sRGB and need `SAMPLERTYPE_MASKS`. |
@@ -156,6 +167,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Editor RHI-thread crash when deleting a material | Deleting an asset the renderer is using | Reuse the asset and clear its graph. `MaterialEditingLibrary.delete_all_material_expressions` alone leaves nodes behind on rebuilds (71 → 35; a second `LandscapeGrassOutput` survived). Symptoms: "only one Single Layer Water Material node", "The material can contain only one Landscape Grass node", missing-input errors, `get_statistics` vs/ps 0, and a silent fallback to the default grid. After `delete_all`, loop over `get_material_expressions` calling `delete_material_expression`, then assert `get_num_material_expressions(m) == 0` (`Scripts\Terrain\build_landscape_material.py` does this). |
 | `unreal.CustomInput(input_name=...)` fails in the constructor; or a Custom node won't compile | Constructor kwargs aren't supported; input/output names that clash with HLSL identifiers | Create it empty, then `set_editor_property('input_name', ...)`, and use unique names. In vertex-shader code sample with `Texture2DSampleLevel(Tex, TexSampler, uv, mip)`; the sampler is `<InputName>Sampler`. |
 | A `MaterialExpressionCollectionParameter` outputs nothing | It needs both `collection` (the MPC asset) and `parameter_name` set | Set both. `MPC_CameraSafeFoliage`'s `CameraPosition` and `HeroTargetPosition` vectors work from any material for player-aware effects. |
+| `AttributeError: module 'unreal' has no attribute 'KismetMaterialLibrary'` when reading an MPC value | UE 5.8 Python exposes it as `MaterialLibrary` | Read at runtime with `unreal.MaterialLibrary.get_scalar_parameter_value(world, mpc, name)`. Create a new MPC with `AssetTools.create_asset(name, folder, unreal.MaterialParameterCollection, unreal.MaterialParameterCollectionFactoryNew())` and add `CollectionScalarParameter` entries (see `build_ground.build_mpc`). |
 | A `VolumeTexture` built from Python has the wrong tile size, or property errors | Setting `source2d_texture` resets the tile size to a default (102 for a 1024² atlas); `VolumeTexture` has a single address mode (no `address_x`) and no `blueprint_get_size_x` | Set `source2d_texture` first, then `source2d_tile_size_x/y`. In a Custom node sample it with `Texture3DSample(Vol, VolSampler, uvw)`. |
 | An Estate actor edited from Python looks unchanged in PIE | Spatially loaded World Partition actors stream into PIE from their **saved** external-actor packages (non-spatially-loaded ones such as `EstateSea` show edits live), and Python setters such as `AHomesteadWaterRibbon.set_course()` don't dirty the package | Call `actor.modify()` before editing, then `unreal.EditorLoadingAndSavingUtils.save_packages([actor.get_outermost()], False)` before PIE. |
 | An OBJ imported through Interchange comes in mirrored and invisible from outside, or data stored in UVs comes out wrong | Interchange maps OBJ (x, y, z) to Unreal (x, −y, z), which flips winding, **and** flips texture V (v → 1 − v) | Write y negated and swap face winding (a, c, b). A mesh that stores data in UV0 (for example grass-blade roots) must detect or undo the V flip (`build_ground.py` compares vertex positions with their UVs after import). Set `use_full_precision_u_vs` when UVs hold values above about 16; half floats lose the fraction. |
@@ -164,6 +176,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Edits to `import_props.py` don't take effect | `import` returns the cached module | Load with `importlib.util.spec_from_file_location` + `exec_module`. |
 | C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | Give file-local helpers unique names or prefixes (for example `Og*` in `HomesteadOvergrowth.cpp`), and never put `using namespace` at file scope in a `.cpp`. An anonymous namespace inside a shared named one (`namespace HomesteadMenus { namespace { Gold } }`) still collides across UI files; use a named inner namespace. The integration session compiles the game target once per batch, so it catches these; lanes build only the editor module. |
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | Declare one per line. |
+| `C4458: declaration of '<name>' hides class member` (for example a local `Ground` in `AHomesteadWorld`) | A local variable shadows a member; warnings are errors in this project | Give locals names that don't match members of the class. |
 | `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | Rename it to something project-specific. |
 | New lane's worktree is incomplete: `SurvivalGame.uproject` missing, thousands of staged deletions in `git status` | The app's `create_session` worktree step hit `git command timed out after 300 seconds` (a full checkout with LFS is slow under load), but the session started anyway | `git -C <worktree> reset --hard HEAD` (about 3 min), then confirm `git status` is clean and `SurvivalGame.uproject` exists before building. |
 | Estate "Save failed... check disk space and permissions" (misleading text) / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejected `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on `main` in `f2e504c5` (bound by `MaxWorldCoordinate`). Rebase if you still see it. |
@@ -324,8 +337,8 @@ hk release_all; mcp $E StopPIE
   keep their proportion at 4K. Check captures against this; the field book covers it when open.
 - **Estate PIE recipe:** the editor opens the Estate at startup (if you've switched away, `load_level`
   it back). For a fresh start move `Saved\SaveGames\Estate\*` into a dated backup folder; `pie`; poll `st`
-  until `worldReady`; close the Appearance/Names book (B or Escape; check `bookOpen`) before
-  captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
+  until `worldReady`; with an agent editor it starts straight in the standing room (`homestead.SkipNewGameSetup`; see the tool
+  route), otherwise close the Appearance/Names book (B or Escape; check `bookOpen`) before captures. Estate saves go to `Saved\SaveGames\Estate\`, and a leftover `*.tmp` there means a
   failed save. Text in a `.sav` (such as the save label) is UTF-16, so search it with
   `[Text.Encoding]::Unicode`, not as ASCII. **Packaged Estate runs resume too:** after the first run the build loads its own
   estate save (inside the package's `SurvivalGame\Saved\SaveGames`), so the Appearance → Names setup
@@ -398,6 +411,9 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 - **Test clearing anywhere without the salvage route:** `HomesteadGive Scythe 1` or `HomesteadGive Billhook 1`
   (console, with the player controller) grants the tool directly. Then tap `Three` or `One` and
   `LeftMouseButton` (keyboard mode throughout). Verified on the derelict farm's 550000+ weeds and a thin bramble.
+- **Gather props (clearing lane, `bb6eb697`):** kneel-gather props are hidden on cancel, on a chained gather
+  and whenever her hands are idle, and a gather requested while her hands are busy is queued rather than
+  refused. A prop left stuck to her hand or arm is a regression; report it.
 - **Tool swings are refused while she's moving.** Any velocity or acceleration blocks the action
   in the anim instance, so an action key right after `set_sticks` or `walk_to` is silently dropped.
   `release_all`, wait until `speedCmPerSec` is 0, then act.
@@ -411,9 +427,13 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   (below). `HomesteadGive RustedBillhookHead 1` + two Branches is only a shortcut for testing
   "Craft a billhook" elsewhere (for example on the woodland map).
 - **Estate tool route (new game, verified in PIE on main 17a64854):**
-  - Setup: PIE opens Appearance. `Gamepad_FaceButton_Right` closes it and shows Names. Press
-    `Gamepad_DPad_Down` three times to reach Begin, then `Gamepad_FaceButton_Bottom`. She stands in
-    the standing room at about (-25750, -63800). To leave on foot, `walk_to` (-25750, -64300) and
+  - Setup: agent editors (`Start-EditorMcp.ps1` passes `-HomesteadSkipNewGameSetup`, so
+    `homestead.SkipNewGameSetup` is 1) start a new Estate game with the default names, Eleanor Cavendish of
+    Trevennor, without the Appearance and "Who comes home?" steps. To test those steps, run
+    `homestead.SkipNewGameSetup 0` before starting PIE. Then PIE opens Appearance:
+    `Gamepad_FaceButton_Right` closes it and shows Names; press `Gamepad_DPad_Down` three times to reach
+    Begin, then `Gamepad_FaceButton_Bottom`. The switch is off in packaged builds and normal play.
+    She stands in the standing room at about (-25750, -63800). To leave on foot, `walk_to` (-25750, -64300) and
     then (-25750, -64900).
   - Salvage piles: 520001 (-25600, -64350), 520002 (-25450, -65250), 520004 (-23950, -65150),
     520003 (-24600, -66200) and 520005 (-26100, -66100). Search each with `E`/A.
@@ -468,7 +488,7 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
   `Gamepad_FaceButton_Right`). `HomesteadMorning <hour>` (pass the player controller) only moves
   the clock, so it costs no energy; night playtests are too dark to judge.
 - `HomesteadGive <Item> [count]` (console, pass the player controller) adds to the pack by item
-  name, spaces optional: `HomesteadGive Berries 10`, `HomesteadGive RoastedRoots 3`. The toast
+  name (the display name: `Branch`, not `Branches`; `RustedAxeHead`, `RustedBillhookHead`), spaces optional: `HomesteadGive Berries 10`, `HomesteadGive RoastedRoots 3`. The toast
   says what was added or why not (full pack, unknown name).
 - Energy: work costs it (gather 0.5, fell 4, till 2, overgrowth 0.3-6 by kind and tier, build 1.5; the full tables
   are `Homestead::Exertion` and `HomesteadOvergrowth.cpp`), time awake drains only 0.6/game hour.
@@ -537,7 +557,9 @@ sprinting (hold `LeftShift` while moving) about 300 cm/s.
   equipped slots only. Shift+Enter is the keyboard Shift+click (quick move / pin / wear).
 - **Craft**: recipes sit in a horizontal row, so D-pad **Right/Left** moves between them (Down
   doesn't). The details list requirements. Crafting is **press and hold**; a tap does nothing
-  (`hold_key Gamepad_FaceButton_Bottom 3`, or `hold_key {"key":"Enter","seconds":2.5}` on keyboard).
+  (`hold_key Gamepad_FaceButton_Bottom 3`, or `hold_key {"key":"Enter","seconds":2.5}` on keyboard). A craft takes about 1 s, so capture right after `hold_key` to see the slot's white fill.
+  The recipe list doesn't refresh its counts while the book stays open after a console `HomesteadGive`;
+  close it and reopen with `C`.
   One craft takes a 1.2 s cycle and the hold repeats while materials last. While held, the
   recipe square fills with white from the bottom (`SHomesteadCraftFill`) and flashes when the item
   is made. Behind the book she stands head-down, working a branch between her fists
@@ -631,6 +653,8 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   to (0, 0, -35), then aim with `pc.set_control_rotation`. For a front view use a control yaw of
   her yaw + 180 ± 45 and a pitch of about -18. Tighter shots (200 or less) crop her legs and head
   when she kneels; use them only for a specific close-up, and share the full-body view too.
+- A single `hshot` of a short action misses its start (about 3 s to capture): press the action key,
+  wait about 1-1.5 s, then capture, or use the faster `shot` viewport capture.
 - Contact sheets of an action: `hshot` (HighResShot) takes about 3-4 s per still, so slow the action
   with `slomo 0.08`-`0.1` to get several frames across a 3 s clip, or record video (below). Material
   `Time` follows the dilation too (`slomo 0.3` gives about 1.1 s of game time per still).
