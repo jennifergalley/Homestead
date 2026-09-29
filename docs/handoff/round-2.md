@@ -175,20 +175,28 @@ hands-on work; no one edits a busy lane's files or starts a fourth implementer.
 
 ## Open blockers and known bugs
 
-### OpenSpec strict-validation baseline
+### Held planning OpenSpec correction
 
-`openspec validate --changes --strict` has a baseline failure: **56 passed, 3 failed (59 items)** on
-the planning session's `94059a0d` baseline. Every `ADDED` requirement must have at least one
-`#### Scenario:` with WHEN/THEN:
+Planning's `b82eec53` OpenSpec docs briefly landed on `main` in `514c48c5`, with **no gameplay code
+changed**, but they misstated the approved tiered Well Fed duration (2/3/4 h) and the refusal when a
+full-energy character eats. Planning is preparing an immediate corrective docs commit for Integration.
+**Treat the current spec wording as pending correction:** Calendar must not implement stale `b82` text,
+and this handoff does not duplicate or revert the shared OpenSpec artifacts.
+
+### OpenSpec strict-validation baseline (fix pending merge)
+
+`openspec validate --changes --strict` still fails on current `main`: **56 passed, 3 failed (59
+items)**. Every `ADDED` requirement needs at least one `#### Scenario:` with WHEN/THEN:
 
 | Change | Spec requirement missing a scenario | Owner / fix |
 | --- | --- | --- |
-| `enrich-estate-ground-and-meadow` | `estate-ground-presentation`: “Soft steps on grass” | Ground lane adds a scenario |
-| `fix-estate-river-source` | `estate-river`: “The river is always present” | Water lane adds a scenario |
-| `flexible-sleep` | `flexible-sleep`: “Recovery by hours slept” | Sleep/Weather lane adds a scenario |
+| `enrich-estate-ground-and-meadow` | `estate-ground-presentation`: “Soft steps on grass” | Water's `9d587d6a` adds the scenario; pending merge |
+| `fix-estate-river-source` | `estate-river`: “The river is always present” | Water's `9d587d6a` adds the scenario; pending merge |
+| `flexible-sleep` | `flexible-sleep`: “Recovery by hours slept” | Water's `9d587d6a` adds the scenario; pending merge |
 
-This blocks only strict whole-repo validation, not feature implementation. The OpenSpec house rules now
-require a scenario for every `ADDED` requirement.
+Water validated **59/59** locally with `9d587d6a`; until it lands, this blocks only strict whole-repo
+validation, not feature implementation. The OpenSpec house rules require a scenario for every `ADDED`
+requirement.
 
 ## Pending playtest feedback
 
