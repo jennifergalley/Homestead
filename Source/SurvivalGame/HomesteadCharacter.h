@@ -77,6 +77,9 @@ public:
     void SetAppearanceFaceFocus(bool bFace);
     FRotator GameplayViewRotation() const;
     float CameraDistance() const;
+    // After a teleport or ground settle: drop the camera lag and indoor pull-in so the chase
+    // camera lands at its normal distance behind her at once, instead of trailing from where she was.
+    void SnapCamera();
     UAnimSequence* GetIdleAnimation() const { return IdleAnimation; }
     UAnimSequence* GetWalkAnimation() const { return WalkAnimation; }
     UAnimSequence* GetSlowWalkAnimation() const { return SlowWalkAnimation; }
@@ -478,6 +481,7 @@ private:
     float RoomOpenArm = 470.0f;
     float RoomSetArm = 0.0f;
     bool bHiddenFromCamera = false;
+    int32 CameraSnapFrames = 0;
     void UpdateRoomCamera(float DeltaSeconds);
     FRotator SavedViewRotation = FRotator::ZeroRotator;
     FString InitialViewEvidence = TEXT("Saved/manual view; no fresh-start selection recorded.");
