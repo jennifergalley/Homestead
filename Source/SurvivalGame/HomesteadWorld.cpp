@@ -573,6 +573,40 @@ void RemoveMissing(TMap<int32, FHomesteadWorldVisual>& Visuals, const T& Entries
 }
 }
 
+// Integer change keys for AHomesteadWorld::Refresh (the grass field's GrassMix pattern). A named
+// namespace keeps the names unique in unity builds.
+namespace HomesteadWorldKeys
+{
+constexpr uint64 Seed = 1469598103934665603ull;
+
+uint64 Mix(uint64 Hash, uint64 Value)
+{
+    return Hash ^ (Value + 0x9e3779b97f4a7c15ull + (Hash << 6) + (Hash >> 2));
+}
+
+uint64 Bits(double Value)
+{
+    uint64 Out = 0;
+    FMemory::Memcpy(&Out, &Value, sizeof(Out));
+    return Out;
+}
+
+uint64 Pair(int32 A, int32 B)
+{
+    return (static_cast<uint64>(static_cast<uint32>(A)) << 32) | static_cast<uint32>(B);
+}
+
+// A resource visual's signature: what it is, where, and whether it's shown cleared.
+FString ResourceSignature(Homestead::ResourceKind Kind, Homestead::Point Position, bool bCleared)
+{
+    uint64 Hash = Mix(Seed, static_cast<uint64>(Kind));
+    Hash = Mix(Hash, Bits(Position.x));
+    Hash = Mix(Hash, Bits(Position.y));
+    Hash = Mix(Hash, bCleared ? 1 : 0);
+    return FString::Printf(TEXT("%016llx"), static_cast<unsigned long long>(Hash));
+}
+}
+
 AHomesteadWorld::AHomesteadWorld()
 {
     PrimaryActorTick.bCanEverTick = true;
@@ -1310,14 +1344,31 @@ bool AHomesteadWorld::BuildEstateScenery()
 
 void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& State)
 {
-    TArray<Homestead::Footprint> Pieces;
-    FString Signature;
+    // The pieces' footprints and the interactables' positions, to the centimetre (yaw to 0.1 degree).
+    const auto Round = [](double Value) { return static_cast<uint64>(FMath::RoundToInt64(Value)); };
+    uint64 Key = HomesteadWorldKeys::Seed;
     for (const auto& Structure : State.structures)
     {
         const auto Box = Homestead::StructureFootprint(State, Structure);
-        Pieces.Add(Box);
-        Signature += FString::Printf(TEXT("%.0f:%.0f:%.0f:%.0f:%.1f;"), Box.center.x, Box.center.y, Box.half.x, Box.half.y, Box.yaw);
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.center.x));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.center.y));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.half.x));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.half.y));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Box.yaw * 10.0));
     }
+    Key = HomesteadWorldKeys::Mix(Key, State.structures.size());
+    for (const auto& Node : State.resources)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, static_cast<uint64>(Node.id));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Node.position.x));
+        Key = HomesteadWorldKeys::Mix(Key, Round(Node.position.y));
+    }
+    if (bEstateSceneryClearKnown && Key == EstateSceneryClearKey) return;
+    bEstateSceneryClearKnown = true;
+    EstateSceneryClearKey = Key;
+    TArray<Homestead::Footprint> Pieces;
+    for (const auto& Structure : State.structures)
+        Pieces.Add(Homestead::StructureFootprint(State, Structure));
     // Interactables, bucketed by 20 m cell; the cover or trunk reach never spans more than a cell.
     constexpr double NodeCell = 2000.0;
     TMap<FIntPoint, TArray<FVector2D>> Nodes;
@@ -1325,10 +1376,7 @@ void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& Stat
     {
         Nodes.FindOrAdd(FIntPoint(FMath::FloorToInt32(Node.position.x / NodeCell), FMath::FloorToInt32(Node.position.y / NodeCell)))
             .Add(FVector2D(Node.position.x, Node.position.y));
-        Signature += FString::Printf(TEXT("n%d:%.0f:%.0f;"), Node.id, Node.position.x, Node.position.y);
     }
-    if (Signature == EstateSceneryClearSignature) return;
-    EstateSceneryClearSignature = MoveTemp(Signature);
     constexpr float Margin = 20.0f;
     // Clear ground round an interactable: enough to show a berry bush or herb tuft whole.
     constexpr float NodeCoverClear = 110.0f;
@@ -2372,6 +2420,7 @@ void AHomesteadWorld::ClearVisual(FHomesteadWorldVisual& Visual)
     }
     Visual.Components.Reset();
     Visual.Signature.Reset();
+    Visual.bShownCleared = false;
 }
 
 void AHomesteadWorld::CancelStagedResources()
@@ -2432,12 +2481,12 @@ bool AHomesteadWorld::StageAdjacentResources(const Homestead::Simulation& Destin
         && (FPlatformTime::Seconds() - Started) < 0.004)
     {
         const auto& Node = StagedResourceNodes[StagedResourceCursor++];
-        const FString Signature = FString::Printf(TEXT("%d:%.3f:%.3f:%d"),
-            static_cast<int>(Node.kind), Node.position.x, Node.position.y, Node.cleared);
+        const FString Signature = HomesteadWorldKeys::ResourceSignature(Node.kind, Node.position, Node.cleared);
         bStagingResourceBuild = true;
         auto& Base = StagedResourceVisuals.FindOrAdd(Node.id);
         BuildResource(Base, Node, false);
         Base.Signature = Signature;
+        Base.bShownCleared = Node.cleared;
         auto& Produce = StagedResourceProduceVisuals.FindOrAdd(Node.id);
         const bool bReady = Node.readyAtHour <= State.hour;
         if (bReady) BuildResource(Produce, Node, true);
@@ -3015,6 +3064,7 @@ bool AHomesteadWorld::BeginFelling(int32 ResourceId)
                 }
             Visual->Components.Reset();
             ResourceVisuals.Remove(ResourceId);
+            bRefreshInputsKnown = false;
         }
     if (FallingParts.IsEmpty()) return false;
     FBox Bounds(ForceInit);
@@ -4453,6 +4503,81 @@ bool AHomesteadWorld::Initialize(const Homestead::Simulation& Simulation)
     return Refresh(Simulation);
 }
 
+void AHomesteadWorld::UpdateEstateGrass(const Homestead::State& State)
+{
+    if (!State.fixedEstate)
+    {
+        if (EstateGrass) EstateGrass->Clear();
+        return;
+    }
+    if (!EstateGrass)
+    {
+        EstateGrass = NewObject<UHomesteadGrassField>(this, TEXT("EstateGrass"));
+        EstateGrass->SetupAttachment(GetRootComponent());
+        EstateGrass->RegisterComponent();
+    }
+    const APlayerController* Viewer = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+    if (Viewer && Viewer->PlayerCameraManager)
+        EstateGrass->Update(State, Viewer->PlayerCameraManager->GetCameraLocation());
+}
+
+uint64 AHomesteadWorld::RefreshInputsKey(const Homestead::Simulation& Simulation) const
+{
+    // Everything Refresh's layout strings and per-object signatures read, in integers. Readiness,
+    // plot stages and fire fuel change as game time passes, without a revision bump.
+    const Homestead::State& State = Simulation.GetState();
+    uint64 Key = HomesteadWorldKeys::Mix(HomesteadWorldKeys::Seed, Simulation.GetRevision());
+    Key = HomesteadWorldKeys::Mix(Key, State.world.seed);
+    Key = HomesteadWorldKeys::Mix(Key, State.world.generationVersion);
+    Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(State.activeChunk.x, State.activeChunk.y));
+    Key = HomesteadWorldKeys::Mix(Key, State.fixedEstate ? 1 : 0);
+    Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(HeldProduceId, HeldPlotId));
+    Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(HeldHarvestPlotId, static_cast<int32>(HeldHarvestKind)));
+    Key = HomesteadWorldKeys::Mix(Key, bHeldPlotHidden ? 1 : 0);
+    Key = HomesteadWorldKeys::Mix(Key, 0x3ull + State.resources.size());
+    for (const auto& Node : State.resources)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Node.id, static_cast<int32>(Node.kind)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Bits(Node.position.x));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Bits(Node.position.y));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Node.key.chunk.x, Node.key.chunk.y));
+        Key = HomesteadWorldKeys::Mix(Key, (static_cast<uint64>(Node.key.localId) << 2)
+            | (Node.cleared ? 2u : 0u) | (Node.readyAtHour <= State.hour ? 1u : 0u));
+    }
+    Key = HomesteadWorldKeys::Mix(Key, 0x5ull + State.structures.size());
+    for (const auto& Structure : State.structures)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Structure.id, static_cast<int32>(Structure.kind)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Structure.buildingId, Structure.rotation));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Structure.cellX, Structure.cellY));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(static_cast<int32>(Structure.skin), Structure.fuelHours > 0 ? 1 : 0));
+    }
+    Key = HomesteadWorldKeys::Mix(Key, 0x7ull + State.plots.size());
+    for (const auto& Plot : State.plots)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Plot.id, static_cast<int32>(Plot.kind)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Plot.cellX, Plot.cellY));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Stage(Plot.growth, 24), Stage(Plot.moisture, 5)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Stage(Plot.weeds, 8) * 2 + (Plot.planted ? 1 : 0),
+            static_cast<int32>(Homestead::StageOf(Plot))));
+    }
+    Key = HomesteadWorldKeys::Mix(Key, 0xDull + State.worldDrops.size());
+    for (const auto& Drop : State.worldDrops)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Drop.id, static_cast<int32>(Drop.item)));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Bits(Drop.position.x));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Bits(Drop.position.y));
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Drop.quantity, Drop.wearableId));
+    }
+    Key = HomesteadWorldKeys::Mix(Key, 0xEull + State.resourceEdits.size());
+    for (const auto& Edit : State.resourceEdits)
+    {
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Edit.key.chunk.x, Edit.key.chunk.y));
+        Key = HomesteadWorldKeys::Mix(Key, (static_cast<uint64>(Edit.key.localId) << 1) | (Edit.cleared ? 1u : 0u));
+    }
+    return Key;
+}
+
 bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
 {
     const double RefreshStarted = FPlatformTime::Seconds();
@@ -4479,42 +4604,51 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         ClearActiveTreeBatches();
         ClearVisual(Preview);
     }
-    FString Layout = FString::Printf(TEXT("%llu:%u:%d,%d;"), static_cast<unsigned long long>(State.world.seed),
-        State.world.generationVersion, State.activeChunk.x, State.activeChunk.y);
+    const uint64 Inputs = RefreshInputsKey(Simulation);
+    if (!Transition && !WorldChanged && bRefreshInputsKnown && Inputs == LastRefreshInputs)
+    {
+        // Nothing the visuals are built from has changed: keep them and do only the per-refresh work.
+        UpdateEstateGrass(State);
+        bLampDropLit = Simulation.LampOil() > 0.0;
+        UpdateLighting(State);
+        LastRefreshMilliseconds = (FPlatformTime::Seconds() - RefreshStarted) * 1000;
+        return true;
+    }
+    bRefreshInputsKnown = false;
+    uint64 LayoutKey = HomesteadWorldKeys::Mix(HomesteadWorldKeys::Seed, State.world.seed);
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, State.world.generationVersion);
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Pair(State.activeChunk.x, State.activeChunk.y));
     for (const auto& Node : State.resources)
     {
-        Layout += FString::Printf(TEXT("%d:%.3f:%.3f:%d;"), Node.id, Node.position.x, Node.position.y, Node.cleared);
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, static_cast<uint64>(Node.id));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Bits(Node.position.x));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Bits(Node.position.y));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, Node.cleared ? 1 : 0);
     }
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, 0x5ull + State.structures.size());
     for (const auto& Structure : State.structures)
     {
-        Layout += FString::Printf(TEXT("S:%d:%d:%d;"), Structure.buildingId, Structure.cellX, Structure.cellY);
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, static_cast<uint64>(Structure.buildingId));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Pair(Structure.cellX, Structure.cellY));
     }
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, 0x7ull + State.plots.size());
     for (const auto& Plot : State.plots)
-    {
-        Layout += FString::Printf(TEXT("P:%d:%d;"), Plot.cellX, Plot.cellY);
-    }
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Pair(Plot.cellX, Plot.cellY));
+    LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, 0xDull + State.worldDrops.size());
     for (const auto& Drop : State.worldDrops)
-        Layout += FString::Printf(TEXT("D:%d:%.3f:%.3f;"), Drop.id, Drop.position.x, Drop.position.y);
+    {
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, static_cast<uint64>(Drop.id));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Bits(Drop.position.x));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Bits(Drop.position.y));
+    }
+    FString Layout = FString::Printf(TEXT("%016llx"), static_cast<unsigned long long>(LayoutKey));
     if (ResourceLayoutSignature != Layout)
     {
         if (!State.fixedEstate && !BuildDecorations(Simulation)) return false;
         ResourceLayoutSignature = MoveTemp(Layout);
     }
     if (State.fixedEstate) ClearEstateSceneryUnderPieces(State);
-    if (State.fixedEstate)
-    {
-        if (!EstateGrass)
-        {
-            EstateGrass = NewObject<UHomesteadGrassField>(this, TEXT("EstateGrass"));
-            EstateGrass->SetupAttachment(GetRootComponent());
-            EstateGrass->RegisterComponent();
-        }
-        const APlayerController* Viewer = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
-        if (Viewer && Viewer->PlayerCameraManager)
-            EstateGrass->Update(State, Viewer->PlayerCameraManager->GetCameraLocation());
-    }
-    else if (EstateGrass)
-        EstateGrass->Clear();
+    UpdateEstateGrass(State);
     FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
         static_cast<unsigned long long>(State.world.seed), State.world.generationVersion,
         State.activeChunk.x, State.activeChunk.y);
@@ -4613,20 +4747,20 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         // A fallen bough or salvage pile she is still kneeling at stays until she has lifted from it.
         Homestead::ResourceNode Shown = Node;
         Shown.cleared = Node.cleared && Node.id != HeldProduceId;
-        const FString Signature = FString::Printf(TEXT("%d:%.3f:%.3f:%d"),
-            static_cast<int>(Node.kind), Node.position.x, Node.position.y, Shown.cleared);
+        const FString Signature = HomesteadWorldKeys::ResourceSignature(Node.kind, Node.position, Shown.cleared);
         AdoptStaged(ResourceVisuals, StagedResourceVisuals, Node.id, Signature);
         if (bVisualBuildFailed) return false;
         FHomesteadWorldVisual& Visual = ResourceVisuals.FindOrAdd(Node.id);
         if (Visual.Signature != Signature)
         {
             // Cleared in play (not loaded or streamed in cleared): it pops away instead of vanishing.
-            if (Shown.cleared && !Transition && Homestead::IsOvergrowth(Node.kind) && Visual.Signature.EndsWith(TEXT(":0")))
+            if (Shown.cleared && !Transition && Homestead::IsOvergrowth(Node.kind) && !Visual.Signature.IsEmpty() && !Visual.bShownCleared)
                 StartClearPop(Visual, Node);
             ClearVisual(Visual);
             BuildResource(Visual, Shown, false);
             if (bVisualBuildFailed) return false;
             Visual.Signature = Signature;
+            Visual.bShownCleared = Shown.cleared;
         }
         const FString ProduceSignature = Signature + (bReady ? TEXT(":ready") : TEXT(":harvested"));
         AdoptStaged(ResourceProduceVisuals, StagedResourceProduceVisuals, Node.id, ProduceSignature);
@@ -4731,6 +4865,8 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         }
     }
     const double LightingStarted = FPlatformTime::Seconds();
+    LastRefreshInputs = Inputs;
+    bRefreshInputsKnown = true;
     UpdateLighting(State);
     LastRefreshMilliseconds = (FPlatformTime::Seconds() - RefreshStarted) * 1000;
     if (Transition)
