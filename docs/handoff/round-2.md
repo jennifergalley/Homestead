@@ -40,7 +40,7 @@ three-hands-on-implementer cap (including Integration) and the two-Unreal-proces
 | Weather Agent / Water (`89914e30`) | **Retain** | Water and terrain owner |
 | Props Agent | **Retain role; session TBD** | Receives props and character asset recipes |
 | Performance Agent (`a34483d7`) | Retire | After safe handoff/merge |
-| Build Speed Agent (`6e131c6a`) | Retire | After safe handoff/merge |
+| Build Speed Agent (`6e131c6a`) | Ready for orchestrator archive | Handoff complete: `f6ed1c42` and `a624c704` are on `main`; worktree clean, no PR, automation or process |
 | Seasons/Mushroom Agent (`fd682909`) | Retire | After safe handoff/merge |
 | Calendar Agent (`f8b77021`) | Retire | After its post-4 PM `a3c7e04d` handoff/merge |
 
@@ -51,6 +51,13 @@ after confirmation.
 Gait and Planning are not orchestrator children. Jenny may archive Gait once it finishes the current
 run/hair work and hands sprint to Menu and character asset recipes to Props. Planning remains outside
 this child-roster decision.
+
+**Build Speed handoff:** the Integration Agent owns `Scripts\Invoke-UnrealBuild.ps1` and the build
+recipe. Canonical measurements and the non-adopted UBA cache decision remain in
+`docs\research\build-speed\README.md`. The lane's private-PCH rule stays in
+`homestead-code-conventions`: after C2027/C2065, include the type's header in the file; add it to
+`SurvivalGamePCH.h` only when common across the runtime module, never UnrealEd. The UBT mutex is per
+engine installation; compile throughput hinges on physical free memory and UBA's 85% commit threshold.
 
 ## Model, reasoning and implementer slots
 
