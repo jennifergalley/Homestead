@@ -276,13 +276,11 @@ requirement.
 
 ## Pending playtest feedback
 
-- **Field book notification overlay** (Jenny, 2026-09-29): a successful transfer or craft currently
-  shows a banner at the top of the inventory/field book that reflows the menu and pushes its items.
-  Replace it with a brief, floating notification that looks modal over the menu but **is not a real
-  modal dialog**: it auto-disappears, preserves the current focus and input, and shifts no content at
-  1080p or 4K. Use a Victorian licensed font, larger centered text and a compact content-sized frame.
-  **UI Agent / temporary Menu Agent** (`5cf73757`) owns this when the orchestrator grants an
-  implementer slot. Pending; not shipped.
+- **Field book notification overlay** — **Menu `[ready]` `88180744`, Integration pending; not
+  shipped.** The open-book hoe-craft notice has zero 4K layout-pixel difference and long words wrap.
+  It replaces the menu-reflowing banner with the brief floating non-modal overlay: it auto-disappears,
+  preserves focus/input, uses a Victorian licensed font with larger centered text and a compact
+  content-sized frame. Integration inspects it for `main`/package inclusion.
 - **Appearance controls and naming** — **UI / Menu Agent** (`5cf73757`), when granted a slot:
   click-drag rotates the preview, WASD orbits it, wheel zooms it, and the default heroine faces the menu
   regardless of the wall or world yaw. Rename the user-facing **Curly Bob** option to **Long bob**.
@@ -296,14 +294,10 @@ requirement.
   side patches at some camera angles. Pending; not shipped.
 - **Sprint toggle** — **temporary Gait Agent** (`65a2408b`), after the run-heel work: sprint becomes
   a toggle on controller L3 and PC Shift. Update the controls and hints; pending PIE verification.
-- **Contextual hotbar eating** — **UI / temporary Menu Agent** (`5cf73757`), after the book-overlay
-  toast: selected hotbar berries are edible with controller X or A **only when no higher-priority
-  focused action exists**. Preserve focused interactions, and update the controls and hints; pending
-  PIE verification.
-- **Berry eating feedback** — **temporary Gait Agent** (`65a2408b`) and **UI / temporary Menu Agent**
-  (`5cf73757`), coordinated with contextual A/X: make the character's bite more visible, then show a
-  `+X Energy` popup near the bar using the actual bounded energy delta and a smooth fill. Pending PIE
-  verification.
+- **Contextual hotbar eating and berry feedback** — **Menu `[ready]` `88180744`, Integration
+  pending; not shipped.** Controller A/X eats one selected berry per tap only when Talk has no
+  precedence, and displays `+` the actual bounded Energy delta. Integration reviews the evidence before
+  package inclusion.
 - **Music variety** — **pending, not fixed.** **Architecture Agent** (`a1648ae7`) traced the root
   cause: the shipped catalog loads only one track, `EveningHarp`, despite five named entries. The
   shuffle bag anti-repeats correctly when it has more than one track, but the existing 55–110 s gap
@@ -324,15 +318,20 @@ requirement.
   anything; then imports only the selected CC0/original recordings with credits and catalog entries,
   uses 3–8 minute ambient-only gaps and a randomized 45–120 s first gap, registers
   `MusicShuffleBagTests` in CMake, and verifies packaged multi-track load and run.
-- **Context hint** — **UI Agent** (`5cf73757`): the hint says Ctrl+wheel zooms, but gameplay uses the
-  wheel to cycle the hotbar. Correct the context copy.
+- **Context hint** — **Menu `[ready]` `88180744`, Integration pending; not shipped.** Plain wheel
+  cycles the hotbar; Ctrl+wheel zooms while the book has focus. Integration reviews it with the Menu
+  batch.
 - **Weed visibility and grounding** — **Props weeds-only branch
-  `jennifergalley-weed-visuals @ 889cfde8`, partial; not shipped.** It has a new main-mesh fallback
-  (no thimbleberry), Landscape-versus-r16 grounding/reseat behavior, and an unimported Cornish
-  `WeedClump` Blender asset. Native tests pass 8/8 and the Editor compile passed. The branch still
-  owes an eye-height PIE check, sweep of all **115** placements, day-and-dusk captures, and a
-  new-game reload. Only after that evidence may it establish that a visible weed asset exists wherever
-  the prompt says `"Weeds  E  Pull"` and that none float above slopes or patches.
+  `jennifergalley-weed-visuals @ 8418aa8e`, partial; not shipped.** This extends `889cfde8` with the
+  original imported `WeedClump` content and a pivot-seating correction. Day Estate PIE renders 157
+  clumps (dock 57, thistle 54, dandelion 46); every Landscape-trace pivot sits 0–10 cm below ground
+  (2.7 cm median, including 36% slopes), and pulling removes mesh plus focus. The native save path is
+  unchanged. At 4–7 m in tall grass the weeds still read visually modest.
+
+  The branch still owes a dusk capture and PIE save/reload; the bounded rubble PIE is separate.
+  It is not eligible for the 4 PM merge until it reports `[ready]`. Only then may it establish that a
+  visible weed asset exists wherever the prompt says `"Weeds  E  Pull"` and that none float above
+  slopes or patches.
 - **Manor debris** — **Clearing / Props lane** (owner **TBD** when a slot opens): slate and shingle
   piles that look clearable should become suitable saved clearables, rather than static scenery.
 - **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
@@ -420,13 +419,10 @@ requirement.
   **Water** owns the generated runtime route and endpoints, **Architecture** the read-only trace,
   **Props** the original signs and **Menu** the shared travel/map UI; a future travel implementer owns
   the action.
-- **Wait for opening** — **Menu / Store Agent** (`5cf73757`): at the closed General Store, provide a
-  safe `Wait until opening` interaction with displayed duration and confirmation. It advances the
-  actual simulation across midnight, crop, weather, vitals and store updates, then rechecks opening
-  hours. The shop is open 08:00–18:00 and has no 2 AM curfew; preflight the candidate to the next
-  08:00 through the same safety checks before committing. Trace 2 AM, sleep/collapse and error
-  handling first. This **complements, not replaces** the future equivalent-time Town/Manor travel
-  signs and map action. Pending; not shipped.
+- **Wait for opening** — **Menu `[ready]` `88180744`, Integration pending; not shipped.** At a
+  closed 19:00 store, B cancels with no time change; then A+A advances to the next 08:00 and returns
+  Pascoe's Talk interaction. The safe candidate preflight/commit path remains separate from future
+  equivalent-time Town/Manor travel signs and map actions. Integration reviews it with the Menu batch.
 - **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
   trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
   implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the
