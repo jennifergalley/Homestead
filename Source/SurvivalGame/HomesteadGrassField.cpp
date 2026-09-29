@@ -3,11 +3,26 @@
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
+#include "HAL/IConsoleManager.h"
 #include "HomesteadEstateGround.h"
 #include "HomesteadEstateTerrain.h"
 #include "Materials/MaterialInterface.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogHomesteadGround, Log, All);
+
+namespace HomesteadGrassBudget
+{
+TAutoConsoleVariable<int32> CVarChunksPerFrame(TEXT("homestead.GrassChunkBuildsPerFrame"), 8,
+    TEXT("Grass chunks (6 m) the estate meadow builds per frame, nearest first. 0 = all at once in the refresh."));
+
+int32 ChunksPerFrame() { return CVarChunksPerFrame.GetValueOnGameThread(); }
+}
+
+UHomesteadGrassField::UHomesteadGrassField()
+{
+    PrimaryComponentTick.bCanEverTick = true;
+    PrimaryComponentTick.bStartWithTickEnabled = true;
+}
 
 namespace
 {
@@ -317,16 +332,41 @@ void UHomesteadGrassField::Update(const Homestead::State& State, const FVector& 
             ReleaseChunk(It.Value());
             It.RemoveCurrent();
         }
+    // Chunks to (re)build, nearest first. Building them all in this one refresh made a hitch whenever
+    // she walked into a new ring of chunks, so TickComponent spreads them over the next frames.
+    Pending.Reset();
     for (const auto& Entry : Want)
     {
         FChunk& Chunk = Live.FindOrAdd(Entry.Key);
-        if (Chunk.Lod != Entry.Value) BuildChunk(Entry.Key, Chunk, Entry.Value);
+        if (Chunk.Lod == Entry.Value) continue;
+        const FVector2D Centre((Entry.Key.X + 0.5) * ChunkCm, (Entry.Key.Y + 0.5) * ChunkCm);
+        Pending.Add({Entry.Key, Entry.Value, FVector2D::DistSquared(Centre, FVector2D(View.X, View.Y))});
     }
+    Pending.Sort([](const FPendingChunk& A, const FPendingChunk& B) { return A.DistanceSquared > B.DistanceSquared; });
+    if (HomesteadGrassBudget::ChunksPerFrame() <= 0) BuildPending(Pending.Num());
+}
+
+void UHomesteadGrassField::BuildPending(int32 Budget)
+{
+    // Pending is sorted farthest first, so the nearest chunks pop off the end.
+    while (Budget-- > 0 && Pending.Num() > 0)
+    {
+        const FPendingChunk Next = Pending.Pop(EAllowShrinking::No);
+        FChunk* Chunk = Live.Find(Next.Key);
+        if (Chunk && Chunk->Lod != Next.Lod) BuildChunk(Next.Key, *Chunk, Next.Lod);
+    }
+}
+
+void UHomesteadGrassField::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+    Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+    if (Pending.Num() > 0) BuildPending(FMath::Max(1, HomesteadGrassBudget::ChunksPerFrame()));
 }
 
 void UHomesteadGrassField::Clear()
 {
     for (auto& Entry : Live) ReleaseChunk(Entry.Value);
     Live.Reset();
+    Pending.Reset();
     Signature = 0;
 }

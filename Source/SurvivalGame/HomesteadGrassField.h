@@ -27,6 +27,8 @@ class SURVIVALGAME_API UHomesteadGrassField : public USceneComponent
     GENERATED_BODY()
 
 public:
+    UHomesteadGrassField();
+    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
     // Tie these to M_EstateGrass's GrassFade parameter (x = 12 m, y = 1.7): blades ranked below
     // min(1, (12 / d)^1.7) show at d metres. LOD1 keeps 38 % of the blades, LOD2 14 % (bake_ground.py's
     // LOD_KEEP), so the curve drops under them at 21.2 m and 38.1 m.
@@ -60,8 +62,15 @@ private:
         int32 Lod = INDEX_NONE;
         uint64 Obstacles = 0; // ChunkObstacleSignature when built.
     };
+    struct FPendingChunk
+    {
+        FIntPoint Key;
+        int32 Lod = 0;
+        double DistanceSquared = 0;
+    };
 
     bool LoadAssets();
+    void BuildPending(int32 Budget);
     uint64 LayoutSignature(const Homestead::State& State) const;
     void RebuildObstacles(const Homestead::State& State);
     void BuildChunk(FIntPoint Chunk, FChunk& Out, int32 Lod);
@@ -76,6 +85,8 @@ private:
     UPROPERTY() TArray<TObjectPtr<UInstancedStaticMeshComponent>> Pool;
     TArray<int32> FreeComponents;
     TMap<FIntPoint, FChunk> Live;
+    // Chunks waiting to be (re)built, farthest first (TickComponent pops the nearest).
+    TArray<FPendingChunk> Pending;
     TArray<FObstacle> Obstacles;
     TMultiMap<FIntPoint, int32> ObstacleCells; // Obstacles by ChunkCm cell.
     TArray<Homestead::Footprint> Blocks;
