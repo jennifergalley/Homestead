@@ -180,8 +180,9 @@ None yet.
   shows a banner at the top of the inventory/field book that reflows the menu and pushes its items.
   Replace it with a brief, floating notification that looks modal over the menu but **is not a real
   modal dialog**: it auto-disappears, preserves the current focus and input, and shifts no content at
-  1080p or 4K. **UI Agent / temporary Menu Agent** (`5cf73757`) owns this when the orchestrator grants
-  an implementer slot. Pending; not shipped.
+  1080p or 4K. Use a Victorian licensed font, larger centered text and a compact content-sized frame.
+  **UI Agent / temporary Menu Agent** (`5cf73757`) owns this when the orchestrator grants an
+  implementer slot. Pending; not shipped.
 - **Appearance controls and naming** — **UI / Menu Agent** (`5cf73757`), when granted a slot:
   click-drag rotates the preview, WASD orbits it, wheel zooms it, and the default heroine faces the menu
   regardless of the wall or world yaw. Rename the user-facing **Curly Bob** option to **Long bob**.
@@ -196,9 +197,16 @@ None yet.
   toast: selected hotbar berries are edible with controller X or A **only when no higher-priority
   focused action exists**. Preserve focused interactions, and update the controls and hints; pending
   PIE verification.
-- **Music variety** — **Architecture Agent** (`a1648ae7`) first does a read-only trace and licensing
-  review; the implementation owner is **TBD**. The result should have multiple randomized tracks and
-  longer ambient-only silence between them.
+- **Music variety** — **pending, not fixed.** **Architecture Agent** (`a1648ae7`) traced the root
+  cause: the shipped catalog loads only one track, `EveningHarp`, despite five named entries. The
+  shuffle bag anti-repeats correctly when it has more than one track, but the existing 55–110 s gap
+  (and first 18 s) are too short. Four other Kevin MacLeod CC-BY imported `.uasset`s exist only
+  untracked in the orchestrator worktree; **do not commit them** under the music eligibility rule
+  (new project-authored or verified CC0 only). Architecture owns read-only license sourcing. A later
+  dedicated implementer slot owns `expand-randomized-music-playlist`: verify 3–5 CC0/original
+  recordings, import them with credits and catalog entries, use 3–8 minute ambient-only gaps and a
+  randomized 45–120 s first gap, register `MusicShuffleBagTests` in CMake, then verify packaged
+  multi-track load and run.
 - **Context hint** — **UI Agent** (`5cf73757`): the hint says Ctrl+wheel zooms, but gameplay uses the
   wheel to cycle the hotbar. Correct the context copy.
 - **Invisible weeds** — **Clearing / Props lane** (owner **TBD** when an implementer slot opens):
@@ -208,20 +216,56 @@ None yet.
   piles that look clearable should become suitable saved clearables, rather than static scenery.
 - **Rusted hoe wayfinding** — **UI Agent / Docs review**: add in-game guide or wayfinding to the rusted
   hoe blade; a documentation-only answer is insufficient.
-- **Starter food** — **balance owner TBD**: add more food at the start, balancing the starter kit
-  without removing hunger prematurely.
-- **Hunger and energy model** — **Planning Agent** (evidence/design recommendation): investigate whether
-  the two systems should collapse to one bar like *Coral Island*. Do not silently remove either system.
-- **Hearth, birds and door** — **Audio / door owner TBD** after slots open: increase the fireplace
-  modestly while keeping it inaudible outside its room; muffle outdoor bird ambience indoors; add a
-  working wooden standing-room door that opens and closes automatically on entering or leaving.
+- **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
+  visible **Energy** meter later, rather than a visible hunger-plus-energy pair. Keep serialized hunger
+  compatibility; revise gentle-hunger penalties into energy/food balance and modest **Well Fed** meals.
+  Planning traced the present state: Hunger starts at 85, drains 2/hour awake and fails at 0; Energy
+  starts at 100 and drains through work; food restores both. The change is **pending, not in today's
+  4 PM build**; Planning updates the OpenSpec spec.
+- **Weather recurrence** — **Calendar Agent** (later weather slice, after the calendar first
+  increment): rain every third day is too frequent. Change it to around once every five days with a
+  varied but deterministic recurrence. Architecture owns read-only trace support; pending, not shipped.
+- **Starter food and hoe wayfinding** — **Clearing / Props lane** (after weed/rubble work): put **3
+  pasties and 2 loaves** in the starter chest. Make the **hoe head** the second salvage reward after the
+  billhook, with a contextual refusal and west-chimney journal hints to find it. Pending; no code or
+  content is finished yet.
+- **Starter wardrobe** — **Props lane** (with starter food): put completed wearable clothes in the
+  starter chest so Jenny can change outfit; verify pack/chest capacity and saving. Pending; not shipped.
+- **Road-to-town forage** — **Seasons / forage lane** (`fd682909`), coordinating with **Water**: add
+  pickable berries and herbs along the road to town, including the Water bridge approach. Pending;
+  placement ids are claimed before use.
+- **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
+  period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
+  shipped.
+- **Change Dye** — **UI / temporary Menu Agent** (`5cf73757`), after contextual berries: the current
+  action is a no-op. It opens the selected colour or swatch choice, supports preview, confirm and
+  cancel, then persists the selection. Pending PIE verification.
+- **Hearth, ambience and standing-room door** — **pending, not shipped.** Architecture's read-only
+  trace found hearth gain 0.2 (NaturalSound spatial 150+550 cm) with occlusion. A later **audio/door
+  implementer** modestly raises it to ~0.3–0.35 and adds standing-room-specific containment, so the
+  hearth stays quiet outdoors even with the door open. `ForestAmbience` is a non-spatial loop at default
+  0.70 and never mixes indoors: expose a cheap `GetIndoorMix` from the existing
+  `Weather::Indoors` roof/shelter easing (0–1), and apply indoor gain/low-pass to birds and creek while
+  retaining the user's slider multiplier; the roof-overhead check must also run in sun. Architecture is
+  separately checking the rain-audio asset and gain.
+
+  The heritage-stone west doorway is a 130 × 220 cm gap with no leaf. **Props** queues an original
+  oak-plank mesh and frame after the cove stairs. The later audio/door implementer makes the leaf
+  world-owned and smoothly auto-hinged, non-trapping in physics, and PIE-verifies opening and closing.
+  No save migration is needed. Architecture continues verified CC0 music sourcing separately.
 
 ## Decisions during the round
 
-None yet.
+- **4 PM playtest package:** only independently verified `[ready]` slices are eligible. Pending
+  feedback above is not included merely because it has an owner.
 
 ## Pending doc updates on merge
 
+- **Proposed roadside forage claim (awaiting orchestrator approval; not reserved yet):** Seasons Agent
+  proposes **581000–581099** for about 30 BerryBush, Flowers, Primroses, WildDaffodils and Roots along
+  the manor-to-town public road (`Scripts\Terrain\roadside.py` →
+  `Simulation\HomesteadEstateRoadsidePlacements.inc`). Most sit outside `EstateBoundary`; do not use
+  the range until the orchestrator approves it, then move it into the placement registry.
 - Seedsman (`4f21a2d8`, not on `main` yet): Tregear's replaces `Town_Blockout_EastHouse`; the lane
   deletes that World Partition external actor and `town_massing.py` stops spawning it. When it lands:
   document the `WorldPartitionBlueprintLibrary.get_actor_descs()` + `load_actors(guids)` step before
