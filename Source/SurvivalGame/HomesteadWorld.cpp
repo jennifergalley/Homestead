@@ -1048,6 +1048,11 @@ int32 AHomesteadWorld::StartingViewObstructions(FVector Focus, FVector Camera) c
 
 namespace
 {
+// The MVP woodland's interactables (add-mvp-woodland-biome; Scripts/Terrain/mvp_woodland.py).
+constexpr int32 MvpWoodlandIdBase = 560000;
+constexpr int32 MvpWoodlandIdEnd = 570000;
+bool IsMvpWoodlandId(int32 Id) { return Id >= MvpWoodlandIdBase && Id < MvpWoodlandIdEnd; }
+
 struct FEstateSceneryKind
 {
     const TCHAR* Path;
@@ -2404,8 +2409,7 @@ bool AHomesteadWorld::ResolveGeneratedTreeVisual(const Homestead::ResourceNode& 
         // broadleaf or conifer and a stable yaw and size from the placement id. The MVP woodland's
         // trees (ids 560000+) take the MVP palette: 60% broadleaf, 35% fir, 5% jacaranda.
         const uint32 Hash = HashCombine(GetTypeHash(Node.id), 0x9E3779B9u);
-        constexpr int32 MvpWoodlandIdBase = 560000, MvpWoodlandIdEnd = 570000;
-        const bool bMvpWoodland = Node.id >= MvpWoodlandIdBase && Node.id < MvpWoodlandIdEnd;
+        const bool bMvpWoodland = IsMvpWoodlandId(Node.id);
         const uint32 PaletteRoll = Hash % 100;
         Entity.paletteRole = bMvpWoodland
             ? (PaletteRoll < 60 ? Homestead::Generation::TreePaletteRole::BroadleafMature
@@ -3078,6 +3082,14 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         Component->SetRelativeTransform(FTransform(Rotation, Ground - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));
         Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Component->SetCollisionResponseToAllChannels(ECR_Ignore);
+        if (IsMvpWoodlandId(Node.id) && !bProduce
+            && (Node.kind == Homestead::ResourceKind::BrambleThin || Node.kind == Homestead::ResourceKind::BrambleThicket))
+        {
+            // As in the MVP, a bramble stops her until she cuts it; the camera boom and traces pass.
+            Component->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+            Component->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+            Component->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+        }
         if (Node.kind == Homestead::ResourceKind::Stones && RockMaterial)
             Component->SetMaterial(0, RockMaterial);
         Component->SetGenerateOverlapEvents(false);
@@ -3283,10 +3295,16 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
     switch (Node.kind)
     {
     case Homestead::ResourceKind::BrambleThin:
-        Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThin")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.1f));
+        if (IsMvpWoodlandId(Node.id))
+            Whole(Load(TEXT("BlackberryBramble"), TEXT("SM_BlackberryBramble")), FVector2D::ZeroVector, 0, Random.FRandRange(0.85f, 1.2f));
+        else
+            Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThin")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.1f));
         break;
     case Homestead::ResourceKind::BrambleThicket:
-        Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThicket")), FVector2D::ZeroVector, 0, Random.FRandRange(0.95f, 1.1f));
+        if (IsMvpWoodlandId(Node.id))
+            Whole(Load(TEXT("BlackberryBramble"), TEXT("SM_BlackberryBrambleLarge")), FVector2D::ZeroVector, 0, Random.FRandRange(0.9f, 1.15f));
+        else
+            Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleThicket")), FVector2D::ZeroVector, 0, Random.FRandRange(0.95f, 1.1f));
         break;
     case Homestead::ResourceKind::BrambleBank:
         Whole(Load(TEXT("BrambleOvergrowth"), TEXT("SM_BrambleBank")), FVector2D::ZeroVector, 0, Random.FRandRange(1.0f, 1.12f));

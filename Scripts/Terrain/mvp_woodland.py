@@ -400,6 +400,9 @@ def build(region, keep, ground_ok, avoid=None):
     cover = cover[ok]
 
     # ---- scenery records -------------------------------------------------------------------------
+    # The MVP's brambles blocked her until she cut them: here they're clearable nodes (after every
+    # other id, so those stay put) that the game draws with the MVP bramble meshes and collision.
+    bramble_kind = {UB_BRAMBLE: "BrambleThin", UB_BRAMBLE_LARGE: "BrambleThicket"}
     recs = []
     for x, y, kind, scale in trees[~felling]:
         recs.append((int(kind), x, y, U(0, 360), scale))
@@ -408,7 +411,10 @@ def build(region, keep, ground_ok, avoid=None):
     for r, x, y, yaw, scale in rocks:
         recs.append((ROCKS[int(r)][0], x, y, yaw % 360, scale))
     for s, x, y, yaw, scale in plants:
-        recs.append((UNDERBRUSH[int(s)][0], x, y, yaw, scale))
+        if int(s) in bramble_kind:
+            add_row(bramble_kind[int(s)], (x, y))
+        else:
+            recs.append((UNDERBRUSH[int(s)][0], x, y, yaw, scale))
     for kind, x, y, yaw, scale, _ in cover:
         recs.append((int(kind), x, y, yaw, scale))
     return rows, recs

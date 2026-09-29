@@ -37,8 +37,7 @@ From `HomesteadWorldGeneration.cpp` and `HomesteadWorld.cpp` (unchanged on `mvp-
   flowers at about a third of the MVP per-chunk rates, all clear of the drive and each other. Ids
   start at 560000 and are written into the same generated `.inc`. Forest trees with ids in 560000+
   pick the MVP palette in `ResolveGeneratedTreeVisual`.
-- **Brambles don't collide yet.** Estate scenery has no clearing path; blocking brambles she can't
-  cut would trap her. They're drawn without collision. Clearable brambles are deferred.
+- **Brambles are clearable overgrowth.** As in the MVP, a blackberry bramble blocks her until she cuts it. The region's brambles are interactable nodes, not scenery: `BrambleThin` (`SM_BlackberryBramble`, worn billhook) and `BrambleThicket` (`SM_BlackberryBrambleLarge`, iron billhook, the estate's rule). `BuildOvergrowth` draws the MVP meshes for ids in the region's range, and their base mesh blocks her (not the camera or traces). They take ids after the forage, so no earlier id moves. Toyon and the other shrubs stay walk-through scenery.
 - **Performance.** Tree kinds keep cull distance 0 (as the other estate trees); every small kind gets
   the MVP's cull distances, no shadows on grass/ferns/flowers/low underbrush, and the existing 60 m
   WPO disable distance. Grass density is set after measuring the instance count and load time.

@@ -3323,7 +3323,7 @@ void MvpWoodlandPlacements()
     const EstateLayout& layout = ProvisionalEstateLayout();
     const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
     const Point spawn = layout.PointOr(Anchor::StandingRoomSpawn, {});
-    int trees = 0, branches = 0, berries = 0, roots = 0, total = 0;
+    int trees = 0, branches = 0, berries = 0, roots = 0, brambles = 0, total = 0;
     double nearest = 1e9;
     for (const auto& placement : ProvisionalEstatePlacements().placements)
     {
@@ -3334,9 +3334,12 @@ void MvpWoodlandPlacements()
         branches += placement.kind == ResourceKind::Branches;
         berries += placement.kind == ResourceKind::BerryBush;
         roots += placement.kind == ResourceKind::Roots;
+        brambles += placement.kind == ResourceKind::BrambleThin || placement.kind == ResourceKind::BrambleThicket;
         nearest = std::min(nearest, std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y));
     }
     CHECK(trees >= 150 && branches >= 30 && berries >= 20 && roots >= 20);
+    // The MVP's blocking brambles are clearable overgrowth here.
+    CHECK(brambles >= 100);
     // West of the manor, about a minute's walk: the region's near edge is some 200 m out.
     CHECK(nearest > 15000.0 && nearest < 30000.0);
     Simulation estate;

@@ -55,7 +55,7 @@ woodland and the estate region from the same PIE session setup show the match.
 
 First delivery: the region's scenery and interactables (this lane). Full acceptance also needs the
 ground lane's MVP floor zone and the integration session's packaged build with ray tracing, where
-the canopy light is judged. Deferred: clearable (colliding) brambles as in the MVP, MVP creek, and
+the canopy light is judged. Follow-up in this change: the MVP's blocking, clearable brambles. Deferred: the MVP creek and
 regional fog or lighting tweaks.
 
 ## Impact
