@@ -365,6 +365,11 @@ hk release_all; mcp $E StopPIE
   only shows on the first run. Move that save aside to see it again. On a resumed game, Enter by the
   hearth opens Cook (the Craft page). Code written for the woodland can still assume woodland heights (estate ground is
   about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
+- **Time and weather for tests:** `HomesteadMorning <h>` (console, with the player controller) jumps the
+  clock without simulating the skipped hours. With `h` earlier than the current hour it goes to the next
+  day, which is the quick way to reach rain: it rains on days 2, 5, 8, ... from 9 to 15 h (`IsRainDay` in
+  `HomesteadSimulation.cpp`), so from a new game `HomesteadMorning 10` twice lands in day-2 rain. Time skips
+  don't grow crops or run day-rollover logic; only Advance or Sleep does.
 - **Sleep tests on the Estate:** the manor bedroll is next to (-25500, -63720), z about 8800.
   `Sim.Sleep` needs a bed within reach; the E prompt reads "Sleep 8 hours". Store testing
   shortcuts (`HomesteadOpenStore` and the counter snap-back on reload) are in
