@@ -471,6 +471,9 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     GatherPlantAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelPlant"));
     if (GatherPlantAnimation && GatherPlantAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
         GatherPlantAnimation = nullptr;
+    GatherHarvestAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelHarvest"));
+    if (GatherHarvestAnimation && GatherHarvestAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        GatherHarvestAnimation = nullptr;
     if (UStaticMesh* Seeds = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/Seeds/SM_Seeds.SM_Seeds")))
         CarriedSeed = MakeProp(TEXT("CarriedSeed"), Seeds);
     // Optional: authored with homestead_agent.eat_berry.
@@ -1215,6 +1218,8 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
         Step.Z = GetActorLocation().Z;
         const float Yaw = FellStepFromYaw + FMath::FindDeltaAngleDegrees(FellStepFromYaw, FellStepToYaw) * Alpha;
         SetActorLocationAndRotation(Step, FRotator(0, Yaw, 0), true);
+        if (bStanceStepFollowsGround)
+            SettleOnGround();
     }
     UpdateStickAlignment(DeltaSeconds);
     UpdateHairMotion(DeltaSeconds);
@@ -1302,6 +1307,7 @@ UAnimSequence* AHomesteadCharacter::KneelClip(EHomesteadKneelGather Kind) const
     case EHomesteadKneelGather::Pouch: return GatherPouchAnimation.Get();
     case EHomesteadKneelGather::Reeds: return GatherReedsAnimation.Get();
     case EHomesteadKneelGather::Plant: return GatherPlantAnimation.Get();
+    case EHomesteadKneelGather::Harvest: return GatherHarvestAnimation.Get();
     default: return GatherSticksAnimation.Get();
     }
 }
@@ -1314,7 +1320,8 @@ void AHomesteadCharacter::HideKneelProps()
         if (Prop) Prop->SetVisibility(false);
 }
 
-bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<FVector2D> Pile, bool bBerries)
+bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<FVector2D> Pile, bool bBerries,
+    UStaticMesh* Produce)
 {
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
     const bool bPropsReady = Kind == EHomesteadKneelGather::Sticks ? CarriedSticks.Num() >= 2
@@ -1332,7 +1339,7 @@ bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<
     GetCharacterMovement()->StopMovementImmediately();
     // A later pickup replaces one still waiting; one that is already playing finishes first, with
     // its own clip and props, so a quick second pickup never borrows the first one's animation.
-    PendingKneel = FPendingKneel{Kind, Pile, bBerries, false, false, GetWorld()->GetTimeSeconds()};
+    PendingKneel = FPendingKneel{Kind, Pile, bBerries, false, false, GetWorld()->GetTimeSeconds(), Produce};
     UpdatePendingKneel();
     return true;
 }
@@ -1378,7 +1385,15 @@ void AHomesteadCharacter::StartKneelGather(FPendingKneel& Kneel)
     HideKneelProps();
     KneelKind = Kind;
     bForageBerries = bBerries;
-    if (Kind == EHomesteadKneelGather::Pouch)
+    UStaticMesh* Produce = Kneel.Produce.Get();
+    HarvestProduceMesh = Produce;
+    if (Kind == EHomesteadKneelGather::Harvest || (Kind == EHomesteadKneelGather::Pouch && Produce))
+    {
+        CarriedForage->SetStaticMesh(Produce ? Produce : ForageRootMesh.Get());
+        if (!CarriedForage->GetStaticMesh()) HarvestProduceMesh = nullptr;
+        else for (int32 Slot = 0; Slot < CarriedForage->GetNumMaterials(); ++Slot) CarriedForage->SetMaterial(Slot, nullptr);
+    }
+    else if (Kind == EHomesteadKneelGather::Pouch)
     {
         UStaticMesh* ForageMesh = bBerries ? ForageBerryMesh.Get() : ForageRootMesh.Get();
         if (ForageMesh) CarriedForage->SetStaticMesh(ForageMesh);
@@ -1405,8 +1420,10 @@ void AHomesteadCharacter::StartKneelGather(FPendingKneel& Kneel)
         // first step so that spot lands on the pile.
         // Her forefinger presses the seed in 32 cm ahead and 9 cm to her right (kneel_plant.SPOT, as baked).
         const bool bReeds = Kind == EHomesteadKneelGather::Reeds, bPlant = Kind == EHomesteadKneelGather::Plant;
-        const float GrabForward = bReeds ? 34.0f : bPlant ? 32.0f : 32.0f;
-        const float GrabRight = bReeds ? 10.0f : bPlant ? 9.0f : 26.0f;
+        const bool bHarvest = Kind == EHomesteadKneelGather::Harvest;
+        // Both hands close on the crop's crown 36 cm ahead and 6 cm to her right (kneel_harvest.CROWN).
+        const float GrabForward = bReeds ? 34.0f : bHarvest ? HarvestCrownForward : 32.0f;
+        const float GrabRight = bReeds ? 10.0f : bPlant ? 9.0f : bHarvest ? HarvestCrownRight : 26.0f;
         const FVector Here = GetActorLocation();
         const FVector2D ToPile = *Pile - FVector2D(Here);
         if (ToPile.Size() > 1.0f && ToPile.Size() < 150.0f)
@@ -1527,6 +1544,19 @@ bool AHomesteadCharacter::PlayPlant(Homestead::Point Target)
     return PlayKneelGather(EHomesteadKneelGather::Plant, FVector2D(Target.x, Target.y));
 }
 
+bool AHomesteadCharacter::PlayHarvest(Homestead::Point Target, bool bPick, UStaticMesh* Produce)
+{
+    const FVector2D Spot(Target.x, Target.y);
+    if (!bPick && bMetaHumanActive && GatherHarvestAnimation)
+        return PlayKneelGather(EHomesteadKneelGather::Harvest, Spot, false, Produce);
+    // Picked crops (and pulled ones until the harvest clip is imported) use the pouch forage clip,
+    // picking from the near side of the plant.
+    FVector2D Pick = Spot;
+    const FVector2D Toward = FVector2D(GetActorLocation()) - Spot;
+    if (bPick && Toward.Size() > 1.0f) Pick += Toward.GetSafeNormal() * 14.0f;
+    return PlayKneelGather(EHomesteadKneelGather::Pouch, Pick, bPick, Produce);
+}
+
 bool AHomesteadCharacter::IsCuttingReeds() const
 {
     const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
@@ -1539,24 +1569,27 @@ void AHomesteadCharacter::UpdateCarriedSticks()
     const bool bStones = KneelKind == EHomesteadKneelGather::Stones;
     const bool bReeds = KneelKind == EHomesteadKneelGather::Reeds;
     const bool bPlant = KneelKind == EHomesteadKneelGather::Plant;
+    const bool bHarvest = KneelKind == EHomesteadKneelGather::Harvest;
     const auto& Props = bStones ? CarriedStones : CarriedSticks;
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
     const bool Active = Animation && Animation->IsGatheringSticks();
     // Whatever ended the gather (its clip, a cancel, another action), nothing stays in her hands.
     if (!Active) HideKneelProps();
-    if (bPlant ? !CarriedSeed : bReeds ? !CarriedReeds : bPouch ? !CarriedForage : Props.Num() < 2) return;
+    if (bPlant ? !CarriedSeed : bReeds ? !CarriedReeds : (bPouch || bHarvest) ? !CarriedForage : Props.Num() < 2) return;
     const float Time = Active ? Animation->GatherSticksPhase() : 0.0f;
     // Reeds come off the clump all at once, with the cut.
     // Reeds come off the clump all at once, with the cut; a planted square stays bare until covered.
+    // A pulled crop comes out of the ground in one go.
     const float Pick1 = bPlant ? GatherPlantTiming::Covered : bReeds ? GatherReedsTiming::Cut
-        : bPouch ? GatherPouchTiming::Pick1 : GatherSticksTiming::Pick1;
+        : bHarvest ? HarvestPulled : bPouch ? GatherPouchTiming::Pick1 : GatherSticksTiming::Pick1;
     const float Pick2 = bPlant ? GatherPlantTiming::Covered : bReeds ? GatherReedsTiming::Cut
-        : bPouch ? GatherPouchTiming::Pick2 : GatherSticksTiming::Pick2;
+        : bHarvest ? HarvestPulled : bPouch ? GatherPouchTiming::Pick2 : GatherSticksTiming::Pick2;
     if (bReeds && Animation)
         Animation->SetLeftHandGrip(Active && Time >= GatherReedsTiming::Grab - 0.1f ? 1.0f : 0.0f);
     int32 Stage = 0;
     if (bPlant) Stage = Active && Time >= GatherPlantTiming::Pick && Time < GatherPlantTiming::Press ? 1 : 0;
     else if (bReeds) Stage = Active && Time >= GatherReedsTiming::Cut ? 1 : 0;
+    else if (bHarvest) Stage = Active && Time >= HarvestPulled && Time < HarvestStowed ? 1 : 0;
     else if (bPouch)
     {
         using namespace GatherPouchTiming;
@@ -1624,6 +1657,20 @@ void AHomesteadCharacter::UpdateCarriedSticks()
             FVector(0.28f, 0.28f, 0.85f), TEXT("hand_l"), false);
         return;
     }
+    if (bHarvest)
+    {
+        if (Stage != 1)
+        {
+            CarriedForage->SetVisibility(false);
+            return;
+        }
+        // Held between both fists by its crown, hanging below them.
+        const FVector Grip = (Body->GetSocketLocation(TEXT("middle_01_r")) + Body->GetSocketLocation(TEXT("middle_01_l"))) * 0.5f;
+        const FVector Forward = GetActorForwardVector();
+        Put(CarriedForage, Grip - FVector(0, 0, 2.0f), FRotationMatrix::MakeFromZX(FVector::UpVector, Forward).Rotator(),
+            FVector(1.0f), TEXT("hand_r"), false);
+        return;
+    }
     if (bPouch)
     {
         if (Stage != 1 && Stage != 3)
@@ -1633,6 +1680,14 @@ void AHomesteadCharacter::UpdateCarriedSticks()
         }
         FVector Hand, Fingers, Across, Palm;
         HandFrame(Hand, Fingers, Across, Palm);
+        const bool bProduce = HarvestProduceMesh && CarriedForage->GetStaticMesh() == HarvestProduceMesh.Get();
+        if (bProduce)
+        {
+            // Crop produce hangs from the pinch by its stalk.
+            const FVector Pinch = Hand + Fingers * 8.0f + Palm * 2.5f;
+            Put(CarriedForage, Pinch, FRotationMatrix::MakeFromZX(-Fingers, Across).Rotator(), FVector(1.0f), TEXT("hand_r"), false);
+            return;
+        }
         const bool bAuthored = CarriedForage->GetStaticMesh() == (bForageBerries ? ForageBerryMesh.Get() : ForageRootMesh.Get())
             && CarriedForage->GetStaticMesh() != nullptr;
         // Pinched between thumb and fingers: authored props hang from their pinch pivot, a root
@@ -1749,12 +1804,17 @@ void AHomesteadCharacter::PlayFillPail(Homestead::Point Stream)
     const FVector2D Delta(Stream.x - GetActorLocation().X, Stream.y - GetActorLocation().Y);
     if (FMath::IsFinite(Delta.X) && FMath::IsFinite(Delta.Y) && Delta.SizeSquared() >= 1)
     {
-        // Kneel facing the water so the pail goes in ahead of her (pail_fill.SPOT), without
-        // stepping further in than the bank she stands on.
+        // Kneel facing the water so the pail goes in ahead of her (pail_fill.SPOT). The prompt shows
+        // up to a metre or so back from the waterline, so she steps down the bank until the pail's
+        // reach lands on the dip point, never further than FillStepMax.
         const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X))
             - FMath::RadiansToDegrees(FMath::Atan2(FillRight, FillForward));
         WaterYaw = Yaw;
-        BeginStanceStep(GetActorLocation(), Yaw);
+        const float Reach = FVector2D(FillForward, FillRight).Size();
+        const float Step = FMath::Clamp(static_cast<float>(Delta.Size()) - Reach, 0.0f, FillStepMax);
+        const FVector2D Toward = Delta.GetSafeNormal() * Step;
+        BeginStanceStep(GetActorLocation() + FVector(Toward.X, Toward.Y, 0.0), Yaw);
+        bStanceStepFollowsGround = Step > 1.0f;
     }
     Animation->RequestWater();
 }
@@ -2308,6 +2368,22 @@ void AHomesteadCharacter::BeginStanceStep(const FVector& To, float Yaw)
     FellStepFromYaw = GetActorRotation().Yaw;
     FellStepToYaw = Yaw;
     FellStepRemaining = FellStepSeconds;
+    bStanceStepFollowsGround = false;
+}
+
+void AHomesteadCharacter::SettleOnGround()
+{
+    // Down a stream bank the step's straight line leaves her hovering over the slope; put her feet
+    // back on the ground below (the Landscape) rather than letting her drop and land.
+    UWorld* World = GetWorld();
+    if (!World) return;
+    const float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+    const FVector Here = GetActorLocation();
+    FHitResult Hit;
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadSettleOnGround), false, this);
+    if (World->LineTraceSingleByChannel(Hit, Here + FVector(0, 0, StanceGroundProbeUp),
+            Here - FVector(0, 0, HalfHeight + StanceGroundProbeDown), ECC_Visibility, Query))
+        SetActorLocation(FVector(Here.X, Here.Y, Hit.ImpactPoint.Z + HalfHeight + 1.0f), false);
 }
 
 bool AHomesteadCharacter::CanFell() const
