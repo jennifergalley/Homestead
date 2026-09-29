@@ -342,6 +342,16 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
+- **Zero-stock hotbar seed/food items** — **Menu plus Props Simulation, pending and not shipped.**
+  `HotbarSnapshot` currently preserves a pinned item and icon even after `Sim.Count(pack)==0`, making
+  planted/stored turnip seeds and strawberry runners look available. Hide zero-count consumable
+  seed/food visuals and actions while retaining optional pin mapping for reacquisition; Props guards
+  against any zero-stock implicit fallback. Cover sow, stow, F5/F9, old-save pinned zero,
+  reacquisition and no accidental planting.
+- **Human-readable save confirmation time** — **Menu, pending and not shipped.**
+  `Controller::MenuSaveStatus` currently shows an ISO-like UTC timestamp. Present it as a localized,
+  human-readable local date/time (for example, `September 28, 2026 12:01 PM`) without changing the
+  saved UTC timestamp or applying an incorrect time-zone conversion. Cover unknown time and 720p/4K.
 - **Minimap/compass HUD trial** — **pending behind the core loop, not shipped.** The current minimap
   is 220 logical px / 120 m crop; far badge radius 8.5 U, near 11 U and glyphs 10 U become about 5.7
   physical px at 720p (`UiScale` 0.667), while 4K caps at 1.5. Enlarge important glyphs with a minimum
