@@ -1836,7 +1836,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     Add(TEXT("Capture real stored transaction result"),
         [this]() { Screenshot(TEXT("native-storage-transactions")); },
         [this]() { return Controller->BookPage() == 0 && Controller->InventoryView() == 1; }, 0.8f);
-    // The hotbar row with a chest open: the first row of her pack, ten cells under both grids,
+    // The hotbar row with a chest open: the first row of her pack, ten cells heading the pack column,
     // holding real stacks (Simulation/HomesteadPackRow.h). A chest stack goes straight into a cell in
     // one transaction; stacks move, merge or swap between cells and the rest of the pack; what she
     // owns in pack and chest together never changes. The stock is restored after.
@@ -1909,7 +1909,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 if (Controller->HotbarItem(Cell) == Homestead::Item::Pasty) return Cell;
             return static_cast<int32>(INDEX_NONE);
         };
-        Add(TEXT("Chest view shows the hotbar row (her pack's first row) inside the book, under both grids"),
+        Add(TEXT("Chest view shows the hotbar row as the pack's first row: inside the book, heading the pack column above the grids"),
             [this, SavedSelected, PreStrip]() { *SavedSelected = Controller->SelectedHotbarIndex(); *PreStrip = Controller->Simulation().Serialize(); },
             [this]()
             {
@@ -1927,11 +1927,16 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 }
                 const FGeometry First = Menu->GetBookHotbarSlot(0)->GetCachedGeometry();
                 const FGeometry Last = Menu->GetBookHotbarSlot(9)->GetCachedGeometry();
-                Results.Add(FString::Printf(TEXT("GEOMETRY chest-strip viewport=%.0fx%.0f strip=(%.0f,%.0f)-(%.0f,%.0f) grids_bottom=%.0f"),
+                const float RowBottom = Last.GetAbsolutePosition().Y + Last.GetAbsoluteSize().Y;
+                const float RowRight = Last.GetAbsolutePosition().X + Last.GetAbsoluteSize().X;
+                Results.Add(FString::Printf(TEXT("GEOMETRY chest-row viewport=%.0fx%.0f row=(%.0f,%.0f)-(%.0f,%.0f) cell=%.0f grids_top=%.0f pack_left=%.0f"),
                     Book.GetAbsoluteSize().X, Book.GetAbsoluteSize().Y, First.GetAbsolutePosition().X, First.GetAbsolutePosition().Y,
-                    Last.GetAbsolutePosition().X + Last.GetAbsoluteSize().X, Last.GetAbsolutePosition().Y + Last.GetAbsoluteSize().Y,
-                    Menu->GetContentScrollBottom()));
-                return First.GetAbsolutePosition().Y >= Menu->GetContentScrollBottom() - 1.0f;
+                    RowRight, RowBottom, First.GetAbsoluteSize().X, Menu->GetContentScrollTop(), Menu->GetPackColumnLeft()));
+                // The first row: above both grids, over the pack column (not the chest's), in one line.
+                return RowBottom <= Menu->GetContentScrollTop() + 1.0f
+                    && First.GetAbsolutePosition().X >= Menu->GetPackColumnLeft() - 12.0f
+                    && FMath::IsNearlyEqual(First.GetAbsolutePosition().Y, Last.GetAbsolutePosition().Y, 1.0f)
+                    && First.GetAbsoluteSize().X >= 30.0f * Book.GetAbsoluteSize().Y / 720.0f;
             }, 0.5f);
         Add(TEXT("Disclosed fixture: one pasty below the hotbar row and one in the chest"),
             [this, Chest, PastyGroup, ChestPasty, PackPasty, HoldingsBefore, Holdings]()
@@ -1960,13 +1965,13 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 Tap(EKeys::Gamepad_FaceButton_Bottom);
             },
             [this]() { return Controller->NativeMenu->IsVirtualDraggingItem(); });
-        Add(TEXT("D-pad Down from the chest grid reaches the row under it"),
-            [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+        Add(TEXT("D-pad Up from the chest grid's top row reaches the hotbar row above it"),
+            [this]() { Tap(EKeys::Gamepad_DPad_Up); },
             [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Hotbar")
                 && Controller->NativeMenu->HasSynchronizedFocus(); });
         Steps.Last().Repeat = [this]()
         {
-            if (Controller->NativeMenu && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content")) Tap(EKeys::Gamepad_DPad_Down);
+            if (Controller->NativeMenu && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content")) Tap(EKeys::Gamepad_DPad_Up);
         };
         Add(TEXT("A on a cell takes the chest pasty straight into it in one step; nothing is lost or duplicated"),
             [this, TargetCell]() { *TargetCell = Controller->NativeMenu->GetFocusedHotbarSlot(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
@@ -1978,8 +1983,8 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                     && Controller->Simulation().ChestUsedCapacity(*Chest) >= 0 && Holdings() == *HoldingsBefore
                     && Controller->SelectedHotbarIndex() == *SavedSelected;
             });
-        Add(TEXT("Up returns to the grids"),
-            [this]() { Tap(EKeys::Gamepad_DPad_Up); },
+        Add(TEXT("Down returns to the grids"),
+            [this]() { Tap(EKeys::Gamepad_DPad_Down); },
             [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content"); });
         Add(TEXT("Move to a hotbar slot, then A on the chest pasty's cell merges the pack pasty into it"),
             [this, PackPasty, TargetCell]()

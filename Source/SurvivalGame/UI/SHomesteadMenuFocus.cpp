@@ -406,8 +406,9 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
                     Moved = true;
                     break;
                 }
-                // Below the last row of either grid: the hotbar strip that runs under both.
-                if (Direction.y > 0 && !HotbarCells.IsEmpty())
+                // Above the top row of either grid: the hotbar, the pack's first row heading the
+                // pack column.
+                if (Direction.y < 0 && !HotbarCells.IsEmpty())
                 {
                     Region = ERegion::Hotbar;
                     Moved = true;
@@ -471,9 +472,9 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
             // she is holding) off into the grid above.
             if (!Moved) return;
         }
-        // Back to the grid tile she left (pack or chest), not wherever is nearest: up from the row
-        // under both grids with a chest open, down from the row heading the pack page.
-        else if (Direction.y == (Controller->ActiveStorageChest().IsSet() ? -1 : 1) && !Entries.IsEmpty())
+        // Down goes back to the grid tile she left (pack or chest), not wherever is nearest; the
+        // row heads the pack with or without a chest open.
+        else if (Direction.y > 0 && !Entries.IsEmpty())
         { Region = ERegion::Content; Select(ContentSelection, true); Moved = true; }
         break;
     case ERegion::Portrait:

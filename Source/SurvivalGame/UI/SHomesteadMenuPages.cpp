@@ -367,6 +367,47 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     {
         TSharedPtr<SVerticalBox> ChestColumn;
         TSharedPtr<SVerticalBox> PackColumn;
+        // The headings stay put above the scrolling grids. On the pack side the hotbar, her pack's
+        // first row (Simulation/HomesteadPackRow.h), heads the pack grid, scaled down to the pack
+        // column's width when ten cells don't fit (720p); the chest side is left clear beside it.
+        InventoryColumn->AddSlot().AutoHeight()
+        [
+            SNew(SHorizontalBox)
+            + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 8, 0)
+            [ SNew(SBox).Padding(4, 0, 4, 6)[ Text(TEXT("Chest"), 20) ] ]
+            + SHorizontalBox::Slot().FillWidth(1).Padding(8, 0, 0, 0)
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot().AutoHeight().Padding(4, 0, 4, 6)
+                [
+                    SNew(SHorizontalBox)
+                    + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+                    [ Text(TEXT("Pack"), 20) ]
+                    + SHorizontalBox::Slot().AutoWidth()
+                    [
+                        SNew(SBox).WidthOverride(34).HeightOverride(34)
+                        [
+                            SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false)
+                            .ContentPadding(4).ButtonColorAndOpacity(Selected)
+                            .ToolTipText(FText::FromString(TEXT("Sort pack")))
+                            .OnClicked_Lambda([this]()
+                            {
+                                if (PointerAction() && Controller->MenuSortPack()) Refresh();
+                                return FReply::Handled();
+                            })
+                            [ SNew(SHomesteadIcon).Kind(FName(TEXT("sort"))).Tint(MenuGold) ]
+                        ]
+                    ]
+                ]
+                + SVerticalBox::Slot().AutoHeight().Padding(4, 0, 4, 4)
+                [ Text(TEXT("Hotbar  -  the first row of your pack (keys 1-0)"), 15) ]
+                + SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Left).Padding(0, 0, 0, 8)
+                [
+                    SNew(SScaleBox).Stretch(EStretch::ScaleToFitX).StretchDirection(EStretchDirection::DownOnly)
+                    [ BuildBookHotbar() ]
+                ]
+            ]
+        ];
         InventoryColumn->AddSlot().FillHeight(1)
         [
             SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
@@ -376,35 +417,12 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 8, 0)
                 [
                     SAssignNew(ChestColumn, SVerticalBox)
-                    + SVerticalBox::Slot().AutoHeight().Padding(4, 0, 4, 6)
-                    [ Text(TEXT("Chest"), 20) ]
                     + SVerticalBox::Slot().AutoHeight()
                     [ SAssignNew(ChestGrid, SUniformGridPanel).SlotPadding(FMargin(3)) ]
                 ]
                 + SHorizontalBox::Slot().FillWidth(1).Padding(8, 0, 0, 0)
                 [
                     SAssignNew(PackColumn, SVerticalBox)
-                    + SVerticalBox::Slot().AutoHeight().Padding(4, 0, 4, 6)
-                    [
-                        SNew(SHorizontalBox)
-                        + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
-                        [ Text(TEXT("Pack"), 20) ]
-                        + SHorizontalBox::Slot().AutoWidth()
-                        [
-                            SNew(SBox).WidthOverride(34).HeightOverride(34)
-                            [
-                                SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false)
-                                .ContentPadding(4).ButtonColorAndOpacity(Selected)
-                                .ToolTipText(FText::FromString(TEXT("Sort pack")))
-                                .OnClicked_Lambda([this]()
-                                {
-                                    if (PointerAction() && Controller->MenuSortPack()) Refresh();
-                                    return FReply::Handled();
-                                })
-                                [ SNew(SHomesteadIcon).Kind(FName(TEXT("sort"))).Tint(MenuGold) ]
-                            ]
-                        ]
-                    ]
                     + SVerticalBox::Slot().AutoHeight()
                     [ SAssignNew(PackGrid, SUniformGridPanel).SlotPadding(FMargin(3)) ]
                 ]
@@ -432,14 +450,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         ];
         if (SeenPage == 0) PackDropArea = Scroll;
     }
-    if (SeenPage == 0 && Storage)
-    {
-        // With a chest open the pack's first row runs across the book under both grids; chest
-        // stacks can be dragged straight into it.
-        InventoryColumn->AddSlot().AutoHeight().Padding(0, 8, 0, 4)
-        [ Text(TEXT("Hotbar  -  the first row of your pack (keys 1-0)"), 16) ];
-        InventoryColumn->AddSlot().AutoHeight().HAlign(HAlign_Center)[ BuildBookHotbar() ];
-    }
+
     if (SeenPage == 0 && !Storage)
     {
         TSharedPtr<SHorizontalBox> EquipmentBar;

@@ -1,6 +1,6 @@
 // The field book's hotbar row: her pack's first row (Simulation/HomesteadPackRow.h), ten keyed cells
-// holding real stacks, shown whenever the inventory is open (heading the Pack page, or under both
-// grids with a chest open). She drags a pack or chest stack into a cell, a cell onto another, or a
+// holding real stacks, shown whenever the inventory is open (heading the Pack page, or the pack
+// column with a chest open). She drags a pack or chest stack into a cell, a cell onto another, or a
 // cell back down into her pack or the chest: onto an empty place it moves, onto the same item it
 // merges, onto anything else the two swap (HomesteadControllerHotbarEditor.cpp).
 #include "SHomesteadMenuPrivate.h"
