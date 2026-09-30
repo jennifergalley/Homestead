@@ -373,6 +373,42 @@ void WaitForTheStoreToOpen()
     OK(sim.CheckShopAccess(store.shop, store.customer));
 }
 
+void NoWalkToTownFromTown()
+{
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const Point counter = store.counter;
+    const Point door = layout.PointOr(Anchor::GeneralStoreDoor, {});
+    const Point square = layout.PointOr(Anchor::TownSquare, {});
+    const auto Refused = [&sim, &layout](Point from, const char* text)
+    {
+        const TravelPlan plan = PlanTravel(sim.GetState(), from, TravelDestination::Town, layout);
+        return !plan.ok && plan.error == text;
+    };
+    // Inside the store and on its step: already there, open or closed.
+    for (double hour : {9.0, 20.0})
+    {
+        sim.SkipToHourOfDay(hour);
+        CHECK(Refused(counter, "You're already at the general store."));
+        CHECK(Refused(store.customer, "You're already at the general store."));
+        CHECK(Refused(door, "You're already at the general store."));
+    }
+    // About the square: already in town.
+    CHECK(Refused(square, "You're already in town."));
+    // A little way off down the street she can still walk to the road's end in town, briefly.
+    const TravelPlan street = PlanTravel(sim.GetState(), {square.x, square.y - 6000.0}, TravelDestination::Town, layout);
+    CHECK(street.ok && street.gameHours < 1.0);
+    // From the gateway it's a real walk, and home to the manor from inside the store still is too.
+    const Point gateway = EstatePublicRoad().At(EstatePublicRoad().FindStop("Gateway")->chainage);
+    CHECK(PlanTravel(sim.GetState(), gateway, TravelDestination::Town, layout).ok);
+    CHECK(PlanTravel(sim.GetState(), counter, TravelDestination::Manor, layout).ok);
+    // Refused at the store: no time passes and nothing changes.
+    const std::string before = sim.Serialize();
+    const auto refused = sim.WalkRoad(TravelDestination::Town, counter);
+    CHECK(!refused.ok && refused.message == "You're already at the general store." && sim.Serialize() == before);
+}
+
 void WalkTheRoad()
 {
     CHECK(FormatHour(7.9999) == "8 AM" && FormatHour(23.999) == "12 AM" && FormatHour(19.2) == "7:12 PM");
@@ -508,6 +544,7 @@ int main(int argc, char** argv)
     Run("buy back and pack capacity", BuyBackAndCapacity);
     Run("her goods sell down each morning", StockSellsDownEachMorning);
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
+    Run("no walk to town from town", NoWalkToTownFromTown);
     Run("playtest shop placement", PlaytestShopPlacement);
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);

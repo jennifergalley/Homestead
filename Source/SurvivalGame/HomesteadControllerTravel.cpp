@@ -11,7 +11,7 @@ DEFINE_LOG_CATEGORY_STATIC(LogHomesteadTravel, Log, All);
 
 Homestead::TravelPlan AHomesteadController::MenuPlanTravel(Homestead::TravelDestination Destination) const
 {
-    return Homestead::PlanTravel(State(), PlayerPoint(), Destination);
+    return Homestead::PlanTravel(State(), PlayerPoint(), Destination, Sim.Layout());
 }
 
 bool AHomesteadController::MenuTravel(Homestead::TravelDestination Destination, uint64 ExpectedRevision)
@@ -28,7 +28,7 @@ bool AHomesteadController::MenuTravel(Homestead::TravelDestination Destination, 
         return false;
     }
     const Homestead::Point From = PlayerPoint();
-    const Homestead::TravelPlan Plan = Homestead::PlanTravel(State(), From, Destination);
+    const Homestead::TravelPlan Plan = Homestead::PlanTravel(State(), From, Destination, Sim.Layout());
     if (!Plan.ok)
     {
         Notify(UTF8_TO_TCHAR(Plan.error.c_str()), true);
