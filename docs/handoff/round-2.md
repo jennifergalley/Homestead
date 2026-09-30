@@ -1259,8 +1259,16 @@ not claim early Energy is fully solved.
   Native coverage spans 10,000 days, spacing, all offset pairs, whole days, negative hours and
   save/reload. The first Development FullLoop failed only because its crop-wetting fixture skipped
   until `day % 3 == 1`; it now advances until `Homestead::IsRainDay(State.hour)` and retains the
-  assertion that both plots become wet. Four prior Development suites passed; recook/retest is in
-  progress. This is a **test-fixture correction, not a rain rollback or delivery claim**.
+  assertion that both plots become wet. Phoenix Development v2 subsequently passed all six packaged
+  suites. This remains branch-only until `69827d75` is integrated: it is a **test-fixture
+  correction, not a rain rollback or delivery claim**.
+
+  A separate hidden copied-Estate-save QA run physically F5-saved (scratch hash changed), then
+  key-7/F9 restored slot 1 and the prior game time; the source save remained untouched. Its later
+  `HomesteadTeleport` to the standing room logged `HOMESTEAD_GROUND_HOLD` with no collision and
+  stalled render/log progress for about 164 seconds before Integration stopped only its own PID.
+  Do not use that run for door/forage visual evidence or infer a Shipping gameplay bug. The test
+  wrapper already treats a ground hold that gives up as invalid collision placement evidence.
 - **Starter chest and wardrobe** — **main-integrated `a785a417`, not packaged or shipped.** Fresh-game
   PIE verified the standing-room chest's pail, four branches, 3 pasties, 2 bread and seven garments;
   the tunic stays worn. It runs only in `NewEstateGame`, never restocks on load and uses normal chest
