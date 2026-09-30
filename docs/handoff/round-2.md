@@ -82,12 +82,12 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / package snapshot (2026-09-29 18:39):** Integration pushed `main` `5d11ceed` with
-11 accepted picks, pail footer `d2c8b4b0` and docs merge `28cc8f6c`; Editor/Game builds are green and
-the editor is closed. UAT/cook package `Build\Playtest-0929night` is running; all other lanes keep
-Unreal/UBT/Blender off until `packaging done`. Six packaged suites plus copied-save smoke decide
-promotion. `Playtest-0929eve` remains the current `Homestead Estate.lnk` target until night evidence
-passes and retargeting is safe.
+**Current play/package snapshot (2026-09-29 19:05):** Integration's provisional night package has
+finished its suites but remains withheld by the aim blocker. Jenny is actively playing verified
+`Playtest-0929eve` (packaged PID 2328); Menu closed its editor early at roughly 4 GB free RAM.
+Integration holds editor/PIE/UBT/UAT while her game runs; if a process had already begun, it may finish
+safely then pauses. Never touch Jenny's process or save. The evening `Homestead Estate.lnk` target
+remains protected until the aim fix and Shipping acceptance chain pass.
 
 ### Development firewall prompts / offline Shipping candidate
 
@@ -139,6 +139,11 @@ aim blocker makes the package provisional. After the target fix, Integration rer
 corrected Development package/six suites plus copied-save smoke, then stages the supported Shipping
 `-ReuseCooked` candidate and proves its PID has no TCP/UDP listener using isolated `-UserDir` save
 round-trip/offscreen tests. Only an accepted Shipping candidate may retarget the Estate shortcut.
+
+**Final rain loudness decision:** rain is about half as loud in the next build (gain 0.5, -6 dB).
+Water has a headless native slot for that one change, preserving `FadeIn(2, 1)` versus the prior
+`Gain²` bug, effects slider, indoors mix and mute behavior. It integrates only after Jenny exits and
+the editor is safe, together with the aim fix before the corrected Development/Shipping package.
 
 **Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
 evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
@@ -543,16 +548,19 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
-- **Pickup gain popup** — **Menu partial `b2a49e36` + `cb3f40c7`, not ready or shipped.** Based on
-  common Simulation revision gains across pack, owned chests and drops, it suppresses moves/reloads and
-  Water, then presents a brass/cream `+N` right of the projected chest for 2.6 visible seconds
-  (maximum four) while book/shop hold. It removes `Selected quantity stored/taken`, garment and drag
-  success notices; errors remain.
+- **Pickup gain popup** — **Menu acceptance `04959978` is main-integrated in `23aba36a`, but excluded
+  from the next aim/rain/Shipping package and not shipped.** Based on common Simulation revision gains
+  across pack, owned chests and drops, it suppresses moves/reloads and Water, then presents a
+  brass/cream `+N` right of the projected chest for 2.6 visible seconds (maximum four) while
+  book/shop hold. It removes `Selected quantity stored/taken`, garment and drag success notices;
+  errors remain.
 
-  Editor build and 1080p PIE verify `+5 Branch`, `+4 Stone` and `+1 Axe craft` right of the heroine,
-  with the craft toast removed. Berry popup is uncaptured; harvest/shop plus 720p/4K remain unverified,
-  and duplicate harvest/craft success toasts remain. The branch is rooted on `769500a5`; Menu released
-  its hands-on slot for Integration's core package priority.
+  Native passes economy 16 / scenario 670 and Editor build is green. 1080-class PIE verifies a real
+  BerryBush `+5 Berries` beside the heroine from 0.8–2.6 s, gone at 3.5 with no toast; crop harvest
+  `+4 Roots` and `+2 Seeds` separately with no toast; two quick `+3 Branch` grants combine `+6`;
+  three Water gives none; legacy 9 Water tile remains visible and the pail bar is full. Earlier craft
+  `+1 Axe` also has no toast. Drop/chest/shop-buy plus 720p/4K remain unverified; Menu closed its
+  editor before Jenny's game startup rather than attempting a 4K capture under memory pressure.
 - **Zero-stock hotbar seed/food items** — **Menu plus Props Simulation, pending and not shipped.**
   `HotbarSnapshot` currently preserves a pinned item and icon even after `Sim.Count(pack)==0`, making
   planted/stored turnip seeds and strawberry runners look available. Hide zero-count consumable
