@@ -6,6 +6,7 @@
 #include "Simulation/HomesteadEstate.h"
 
 #include "Engine/World.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 using HomesteadControllerText::Text;

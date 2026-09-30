@@ -3,6 +3,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
+#include "HomesteadMapComponent.h"
 #include "Simulation/HomesteadManor.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadCrops.h"
