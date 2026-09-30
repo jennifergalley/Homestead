@@ -3,6 +3,7 @@
 #include "HomesteadShops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
+#include "HomesteadGardenTarget.h"
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadRuinDebris.h"
@@ -518,6 +519,72 @@ void StructuredRecipeAssessment()
     CHECK(failed.GetState().failed);
     const auto failedAssessment = failed.AssessRecipe(Recipe::HaftAxe, Home);
     CHECK(!failedAssessment.craftable && !failedAssessment.blocker.empty());
+}
+
+// The garden outline: the square the hoe and the pail act on, and whether it would work, without changing
+// anything (Simulation::CheckTill/CheckWeed/CheckWater, Homestead::PreviewGarden).
+void GardenTargetPreview()
+{
+    Simulation sim;
+    Edit(sim, [](State&) {});
+    for (Item head : {Item::RustedHoeBlade}) OK(sim.GrantItems(head, 1));
+    GatherUntil(sim, Item::Branch, ResourceKind::Branches, 5);
+    OK(sim.Craft(Recipe::HaftHoe, Home));
+    const Point garden = CellCenter(-2, -1);
+    const int gx = CellToGarden(-2), gy = CellToGarden(-1);
+    // Stand a garden square south of the target, facing north: the hoe bites 85 cm ahead, into it.
+    const Point stand{GardenCellCenter(gx, gy).x - 85.0, GardenCellCenter(gx, gy).y};
+    int hx = 0, hy = 0;
+    HoeCellAhead(stand, 1.0, 0.0, hx, hy);
+    CHECK(hx == gx && hy == gy);
+    // Near a square's edge the hoe's 85 cm and the pail's 60 cm land in different squares.
+    const Point edge{GardenCellCenter(gx, gy).x - GardenCellSize * 0.5 - 70.0, GardenCellCenter(gx, gy).y};
+    HoeCellAhead(edge, 1.0, 0.0, hx, hy);
+    CHECK(hx == gx && GardenCell(edge.x + GardenReach::PailAheadCm) == gx - 1);
+
+    const std::string before = sim.Serialize();
+    GardenTarget hoe = PreviewGarden(sim, GardenTool::Hoe, stand, 1.0, 0.0);
+    CHECK(hoe.shown && hoe.valid && hoe.plotId == -1 && hoe.cellX == gx && hoe.cellY == gy);
+    for (int repeat = 0; repeat < 50; ++repeat) PreviewGarden(sim, GardenTool::Hoe, stand, 1.0, 0.0);
+    CHECK(sim.Serialize() == before);                 // previewing changes nothing
+    CHECK(sim.CheckTill(gx, gy, stand).ok == sim.Till(gx, gy, stand).ok);
+    const int plotId = sim.FindNearestPlot(garden, 1);
+    CHECK(plotId != -1);
+
+    // Tilled: the hoe now weeds it, and a clean plot is refused with the same reason Weed gives.
+    hoe = PreviewGarden(sim, GardenTool::Hoe, stand, 1.0, 0.0);
+    CHECK(hoe.shown && hoe.plotId == plotId);
+    const Result weed = sim.CheckWeed(plotId, stand);
+    CHECK(hoe.valid == weed.ok && hoe.reason == (weed.ok ? std::string() : weed.message));
+    CHECK(!sim.CheckTill(gx, gy, stand).ok && sim.CheckTill(gx, gy, stand).message == "This cell is already tilled.");
+
+    // Blocked ground gives Till's own refusal: facing away from a square she's out of reach of, and too
+    // tired to work.
+    const Result farTill = sim.CheckTill(gx + 6, gy, stand);
+    CHECK(!farTill.ok && farTill.message == "Move closer to a valid garden square.");
+    {
+        Simulation tired = sim;
+        Edit(tired, [](State& state) { state.energy = 0.5; });
+        const GardenTarget exhausted = PreviewGarden(tired, GardenTool::Hoe, {stand.x - 300.0, stand.y}, 1.0, 0.0);
+        CHECK(exhausted.shown && !exhausted.valid && exhausted.reason.find("exhausted") != std::string::npos);
+    }
+
+    // The pail: nothing without a focused plot; no pail, then empty, then fillable, then fully watered.
+    CHECK(!PreviewGarden(sim, GardenTool::Pail, stand, 1.0, 0.0).shown);
+    GardenTarget pail = PreviewGarden(sim, GardenTool::Pail, garden, 1.0, 0.0, plotId);
+    CHECK(pail.shown && !pail.valid && pail.reason == "Carry your pail to water crops.");
+    OK(sim.GrantItems(Item::WateringCan, 1));
+    pail = PreviewGarden(sim, GardenTool::Pail, garden, 1.0, 0.0, plotId);
+    CHECK(!pail.valid && pail.reason == EmptyPailText);
+    OK(sim.FillWater(WaterSource));
+    const std::string filled = sim.Serialize();
+    pail = PreviewGarden(sim, GardenTool::Pail, garden, 1.0, 0.0, plotId);
+    CHECK(pail.valid && pail.reason.empty() && pail.cellX == gx && pail.cellY == gy);
+    CHECK(sim.Serialize() == filled);
+    OK(sim.Water(plotId, garden));
+    pail = PreviewGarden(sim, GardenTool::Pail, garden, 1.0, 0.0, plotId);
+    CHECK(!pail.valid && pail.reason == "This soil is already fully watered.");
+    CHECK(!PreviewGarden(sim, GardenTool::None, garden, 1.0, 0.0, plotId).shown);
 }
 
 void GameplayWalkthrough()
@@ -4598,6 +4665,7 @@ int main()
     Run("mixed distant edits, cache churn and exact reload", MixedPersistentWorldChurn);
     Run("sparse edit scale, payload bounds and atomic rejection", SparseEditScaleAndPayloadBounds);
     Run("MVP woodland placements", MvpWoodlandPlacements);
+    Run("garden outline preview matches the hoe and pail", GardenTargetPreview);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

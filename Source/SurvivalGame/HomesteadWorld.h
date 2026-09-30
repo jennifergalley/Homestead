@@ -166,6 +166,9 @@ public:
     bool TreeChopTarget(int32 ResourceId, FVector2D& Centre, float& Radius) const;
     void SetPlacementPreview(bool Visible, const Homestead::PlacementTarget& Target, bool bValid);
     void SetDeconstructPreview(const Homestead::State& State, int32 StructureId, bool bValid);
+    // A thin ground outline round one garden square (HomesteadWorldGardenOutline.cpp): green when the hoe or
+    // pail would work there, red when not. Hidden when bVisible is false.
+    void SetGardenOutline(bool bVisible, int32 CellX, int32 CellY, bool bValid);
     static float GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World);
     float GroundHeight(float X, float Y) const;
     bool IsPreparedFor(const Homestead::State& State) const;
@@ -204,6 +207,7 @@ public:
 private:
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
+    friend class AHomesteadGardenProbe;
     static constexpr int32 ActiveMatureTreeMinLOD = 1;
     // The tree being felled or falling, as world-space parts pivoting about its base.
     UPROPERTY() TArray<TObjectPtr<USceneComponent>> FallingParts;
@@ -385,6 +389,8 @@ private:
     TMap<int32, FHomesteadWorldVisual> DropVisuals;
     UPROPERTY()
     FHomesteadWorldVisual Preview;
+    UPROPERTY()
+    FHomesteadWorldVisual GardenOutline;
 
     bool bInitialized = false;
     FString ResourceLayoutSignature;

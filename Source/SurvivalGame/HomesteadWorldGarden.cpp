@@ -4,6 +4,7 @@
 #include "HomesteadWorldVisualHelpers.h"
 #include "Simulation/HomesteadCrops.h"
 
+#include "Components/InstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"

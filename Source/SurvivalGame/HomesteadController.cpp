@@ -17,6 +17,7 @@
 #include "Engine/GameViewportClient.h"
 #include "Misc/SecureHash.h"
 #include "HomesteadSmokeTest.h"
+#include "HomesteadGardenProbe.h"
 #include "HomesteadVisualPlaytest.h"
 #include "HomesteadTestPaths.h"
 #include "Components/AudioComponent.h"
@@ -240,6 +241,11 @@ void AHomesteadController::BeginPlay()
     {
         if (SmokeTest) GetWorld()->SpawnActor<AHomesteadSmokeTest>();
         else if (VisualPlaytest) GetWorld()->SpawnActor<AHomesteadVisualPlaytest>();
+#if !UE_BUILD_SHIPPING
+        // Development-only garden-outline acceptance on a loaded copy of a real save (HomesteadGardenProbe.h).
+        else if (Loaded && FCString::Strifind(FCommandLine::Get(), TEXT("-HomesteadGardenProbe=")))
+            GetWorld()->SpawnActor<AHomesteadGardenProbe>();
+#endif
     }
 }
 
@@ -410,6 +416,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     }
     TickStores(DeltaSeconds);
     if (bPlanning && !bBookOpen) UpdatePlacement(false);
+    UpdateGardenOutline();
     if (IsFailed() && !bWasFailed)
     {
         EndPlacement();

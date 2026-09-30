@@ -362,6 +362,7 @@ private:
         std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
+    friend class AHomesteadGardenProbe;
     friend class UHomesteadMapComponent;
     enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth };
     // General store (HomesteadShopFlow.cpp).
@@ -612,6 +613,10 @@ private:
     void TillSquareAhead(int32& X, int32& Y) const;
     // Till the square ahead with the hoe, or hoe out its weeds if it is already tilled.
     void HoeSquareAhead();
+    // The garden outline for the selected hoe or pail (HomesteadControllerGarden.cpp), every tick.
+    void UpdateGardenOutline();
+    // Why the outlined square is red (the check's refusal), for the focus line; empty when it's green.
+    FString GardenOutlineReason;
     // Plant the focused bare plot with Crop; she kneels to press in the seed.
     void PlantFocusedPlot(Homestead::CropKind Crop);
     // After HarvestCrop succeeds: she pulls or picks the crop, which stays in the ground until lifted.
