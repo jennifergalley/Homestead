@@ -1275,7 +1275,8 @@ bool AHomesteadController::MenuCraftRecipe(Homestead::Recipe Recipe)
         return false;
     }
     const auto Result = Sim.Craft(Recipe, PlayerPoint());
-    Notify(Result);
+    // What she made shows as the "+1 Hoe" pickup beside her; only a refusal needs words.
+    NotifyResourceAction(Result, nullptr);
     if (Result.ok)
     {
         Sim.AdvanceGameHours(0.05, PlayerPoint());
@@ -2974,7 +2975,9 @@ void AHomesteadController::Interact()
             const Homestead::CropKind Harvested = Plot.kind;
             const Homestead::Point Center = Homestead::PlotCenter(Plot);
             const auto Result = Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
-            Notify(Result, GrassStepB);
+            // A harvest shows as its "+N" pickups beside her; watering and refusals still say so.
+            if (Mature) NotifyResourceAction(Result, GrassStepB);
+            else Notify(Result, GrassStepB);
             if (Result.ok && Mature) PresentHarvest(FocusId, Harvested, Center);
             if (Result.ok && !Mature)
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
@@ -3665,7 +3668,7 @@ void AHomesteadController::ActivateRow()
     else if (Page == 1)
     {
         const auto Result = Sim.Craft(static_cast<Homestead::Recipe>(Id), PlayerPoint());
-        Notify(Result, WoodTapB);
+        NotifyResourceAction(Result, WoodTapB);
         if (Result.ok)
         {
             Sim.AdvanceGameHours(0.05, PlayerPoint());
