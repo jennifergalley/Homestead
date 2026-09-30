@@ -21,7 +21,9 @@
 // soil uphill and hang in the air downhill.
 namespace MowGround
 {
-const FVector BladeSamples[] = {FVector(2.8f, 11.0f, -101.4f), FVector(45.8f, 9.3f, -98.3f), FVector(88.8f, -0.3f, -90.1f)};
+// Blade edge heel, middle and point, in SM_Scythe's local space as measured in PIE (the FBX export
+// mirrors Y, so the edge sits at -Y here although the Blender report lists it at +Y).
+const FVector BladeSamples[] = {FVector(2.8f, -10.8f, -101.2f), FVector(42.2f, -9.5f, -98.4f), FVector(88.8f, 0.3f, -89.7f)};
 // Below this clearance (cm) the blade is lifted clear of the ground...
 constexpr float MinClearance = 3.0f;
 // ...and above this one (downhill) it is lowered just to it (a continuous target, so gentle downslopes
