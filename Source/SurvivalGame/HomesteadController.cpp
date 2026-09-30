@@ -32,6 +32,7 @@
 #include "HAL/FileManager.h"
 #include "HAL/PlatformProcess.h"
 #include "HAL/PlatformMisc.h"
+#include "HAL/PlatformTime.h"
 #include "InputKeyEventArgs.h"
 #include "GameFramework/PlayerInput.h"
 #include "Kismet/GameplayStatics.h"
@@ -75,6 +76,12 @@ using HomesteadControllerHelpers::PlantingCrop;
 using HomesteadControllerHelpers::SwingVerb;
 using HomesteadControllerHelpers::ToolPrompt;
 using HomesteadControllerHelpers::ToolWhereabouts;
+
+namespace HomesteadControllerGroundSnap
+{
+// Real time, independent of pause, slow frames and time dilation; Estate collision usually streams in under a minute.
+constexpr double TimeoutSeconds = 90.0;
+}
 
 AHomesteadController::AHomesteadController()
 {
@@ -273,6 +280,7 @@ bool ShoreContains(const USplineComponent& Spline, const FVector2D& Point)
 
 void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
 {
+    EndGroundSnap();
     HideNames();
     if (ArrivalCard.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(StaticCastSharedPtr<SWidget>(ArrivalCard).ToSharedRef());
@@ -354,9 +362,15 @@ void AHomesteadController::Tick(float DeltaSeconds)
     }
     if (bPendingGroundSnap && GetPawn())
     {
+        if (bEstateMap && FPlatformTime::Seconds() - GroundSnapStartedAt >= HomesteadControllerGroundSnap::TimeoutSeconds)
+        {
+            AbortGroundSnap();
+            return;
+        }
         if (!PrepareWorldAt({GroundSnapTarget.X, GroundSnapTarget.Y})) return;
-        if (!SettleOnGround(GroundSnapTarget, GroundSnapWait, DeltaSeconds, bEstateMap ? 180.0f : 0.0f, TEXT("teleport"))) return;
-        bPendingGroundSnap = false;
+        if (!SettleOnGround(GroundSnapTarget, GroundSnapWait, DeltaSeconds,
+            bEstateMap ? TNumericLimits<float>::Max() : 0.0f, TEXT("teleport"))) return;
+        EndGroundSnap();
         GetPawn()->SetActorLocation(GroundSnapTarget, false, nullptr, ETeleportType::TeleportPhysics);
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SnapCamera();
         LastStepPosition = GroundSnapTarget;
@@ -390,9 +404,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
             if (bEstateMap)
             {
                 // She fell through ground that hadn't streamed in yet: hold her until it has, then stand her on it.
-                GroundSnapTarget = FVector(Position.X, Position.Y, Surface + 150.0f);
-                GroundSnapWait = 0;
-                bPendingGroundSnap = true;
+                BeginGroundSnap(FVector(Position.X, Position.Y, Surface + 150.0f));
                 return;
             }
             ControlledPawn->SetActorLocation(FVector(Position.X, Position.Y, Surface + 100),

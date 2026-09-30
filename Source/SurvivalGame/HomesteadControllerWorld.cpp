@@ -7,9 +7,34 @@
 
 #include "Engine/World.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SceneComponent.h"
+#include "Components/WorldPartitionStreamingSourceComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "HAL/PlatformTime.h"
 
 using HomesteadControllerText::Text;
+
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadGroundSnap, Log, All);
+
+namespace HomesteadGroundSnap
+{
+constexpr double ReportIntervalSeconds = 10.0;
+// Reach the neighbouring Landscape proxy at a cell edge without requesting the whole Estate.
+constexpr float SourceRadiusCm = 18000.0f;
+
+bool HasLandscapeCollision(UWorld* World, const FVector& Start, const FVector& End, const APawn* Avatar)
+{
+    TArray<FHitResult> Hits;
+    FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadLandscapeGround), false, Avatar);
+    World->LineTraceMultiByObjectType(Hits, Start, End, FCollisionObjectQueryParams(ECC_WorldStatic), Params);
+    for (const FHitResult& Hit : Hits)
+        if (const UPrimitiveComponent* Component = Hit.GetComponent();
+            Component && Component->GetClass()->GetName().StartsWith(TEXT("Landscape"))
+                && Component->GetCollisionResponseToChannel(ECC_Pawn) == ECR_Block)
+            return true;
+    return false;
+}
+}
 
 Homestead::Point AHomesteadController::PlayerPoint() const
 {
@@ -65,26 +90,42 @@ bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float 
         Channel = Capsule->GetCollisionObjectType();
     }
     FHitResult Hit;
-    const bool bFound = GetWorld()->LineTraceSingleByChannel(Hit, Target,
-        FVector(Target.X, Target.Y, FMath::Min(Target.Z, Ground) - 500.0f), Channel, Params, Responses);
-    if (!bFound && Waited < HoldLimitSeconds)
+    const FVector End(Target.X, Target.Y, FMath::Min(Target.Z, Ground) - 500.0f);
+    const bool bFound = GetWorld()->LineTraceSingleByChannel(Hit, Target, End, Channel, Params, Responses);
+    const bool bLandscapeReady = !bEstateMap || HomesteadGroundSnap::HasLandscapeCollision(GetWorld(), Target, End, Avatar);
+    if ((!bFound || !bLandscapeReady) && Waited < HoldLimitSeconds)
     {
-        // Hold her where the terrain will be, not falling, until its collision arrives.
-        if (Waited <= 0) UE_LOG(LogTemp, Display, TEXT("HOMESTEAD_GROUND_HOLD %s: no collision yet at (%.0f, %.0f); holding"), Why, Target.X, Target.Y);
+        const double Now = FPlatformTime::Seconds();
+        if (Waited <= 0 || (bPendingGroundSnap && Now - GroundSnapLastReportAt >= HomesteadGroundSnap::ReportIntervalSeconds))
+        {
+            UE_LOG(LogHomesteadGroundSnap, Display,
+                TEXT("HOMESTEAD_GROUND_HOLD %s: floor=%d landscape=%d source=%d elapsed=%.1f s at (%.0f, %.0f)"),
+                Why, bFound, bLandscapeReady,
+                GroundSnapStreamingSource ? GroundSnapStreamingSource->IsStreamingCompleted() : -1,
+                bPendingGroundSnap ? Now - GroundSnapStartedAt : static_cast<double>(Waited), Target.X, Target.Y);
+            GroundSnapLastReportAt = Now;
+        }
         Waited += DeltaSeconds;
         if (Movement)
         {
             Movement->StopMovementImmediately();
             if (Movement->MovementMode != MOVE_None) Movement->DisableMovement();
         }
-        Avatar->SetActorLocation(FVector(Target.X, Target.Y, FMath::Min(Target.Z, Ground + HalfHeight + 2.0f)),
+        const FVector HoldAt = bPendingGroundSnap ? GroundSnapSafePosition
+            : FVector(Target.X, Target.Y, FMath::Min(Target.Z, Ground + HalfHeight + 2.0f));
+        Avatar->SetActorLocation(HoldAt,
             false, nullptr, ETeleportType::TeleportPhysics);
         return false;
     }
     const float Floor = bFound ? Hit.ImpactPoint.Z : Ground;
-    if (!bFound)
-        UE_LOG(LogTemp, Warning, TEXT("HOMESTEAD_GROUND_HOLD %s: gave up after %.1f s at (%.0f, %.0f); placing on the heightfield"), Why, Waited, Target.X, Target.Y);
-    UE_LOG(LogTemp, Display, TEXT("HOMESTEAD_GROUND_SETTLE %s: held %.1f s; feet at %.0f (heightfield %.0f) at (%.0f, %.0f)"),
+    if (!bFound || !bLandscapeReady)
+    {
+        if (bPendingGroundSnap && bEstateMap) return false;
+        UE_LOG(LogHomesteadGroundSnap, Warning,
+            TEXT("HOMESTEAD_GROUND_HOLD %s: gave up after %.1f game s at (%.0f, %.0f); placing on the heightfield"),
+            Why, Waited, Target.X, Target.Y);
+    }
+    UE_LOG(LogHomesteadGroundSnap, Display, TEXT("HOMESTEAD_GROUND_SETTLE %s: held %.1f s; feet at %.0f (heightfield %.0f) at (%.0f, %.0f)"),
         Why, Waited, Floor, Ground, Target.X, Target.Y);
     Target.Z = Floor + HalfHeight + 2.0f;
     Waited = 0;
@@ -96,13 +137,99 @@ bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float 
     return true;
 }
 
+void AHomesteadController::EndGroundSnap()
+{
+    bPendingGroundSnap = false;
+    GroundSnapWait = 0;
+    GroundSnapStartedAt = 0;
+    GroundSnapLastReportAt = 0;
+    GroundSnapStreamingSource = nullptr;
+    if (IsValid(GroundSnapStreamingActor))
+    {
+        GroundSnapStreamingActor->Destroy();
+    }
+    GroundSnapStreamingActor = nullptr;
+}
+
+void AHomesteadController::BeginGroundSnap(FVector Target)
+{
+    if (Target.ContainsNaN())
+    {
+        UE_LOG(LogHomesteadGroundSnap, Error, TEXT("Refusing ground snap to a non-finite destination."));
+        Notify(TEXT("The destination is invalid. You are still where you started."), true);
+        return;
+    }
+    const FVector SafePosition = bPendingGroundSnap ? GroundSnapSafePosition : LastSafeWorldPosition;
+    EndGroundSnap();
+    GroundSnapTarget = Target;
+    GroundSnapSafePosition = SafePosition;
+    GroundSnapSafeRotation = GetControlRotation();
+    GroundSnapStartedAt = FPlatformTime::Seconds();
+    bPendingGroundSnap = true;
+    if (!bEstateMap) return;
+
+    FActorSpawnParameters Spawn;
+    Spawn.ObjectFlags |= RF_Transient;
+    Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AActor* SourceActor = GetWorld()->SpawnActor<AActor>(AActor::StaticClass(), Target, FRotator::ZeroRotator, Spawn);
+    if (!SourceActor)
+    {
+        UE_LOG(LogHomesteadGroundSnap, Error, TEXT("Could not request World Partition streaming at (%.0f, %.0f)."), Target.X, Target.Y);
+        Notify(TEXT("The destination could not be prepared. Your position will be restored."), true);
+        return;
+    }
+    GroundSnapStreamingActor = SourceActor;
+    USceneComponent* Anchor = NewObject<USceneComponent>(SourceActor);
+    SourceActor->AddInstanceComponent(Anchor);
+    SourceActor->SetRootComponent(Anchor);
+    Anchor->RegisterComponent();
+    SourceActor->SetActorLocation(Target);
+    UWorldPartitionStreamingSourceComponent* Source = NewObject<UWorldPartitionStreamingSourceComponent>(SourceActor);
+    Source->Priority = EStreamingSourcePriority::Highest;
+    Source->TargetState = EStreamingSourceTargetState::Activated;
+    FStreamingSourceShape Shape;
+    Shape.bUseGridLoadingRange = false;
+    Shape.Radius = HomesteadGroundSnap::SourceRadiusCm;
+    Source->Shapes.Add(Shape);
+    SourceActor->AddInstanceComponent(Source);
+    Source->RegisterComponent();
+    GroundSnapStreamingSource = Source;
+}
+
+void AHomesteadController::AbortGroundSnap()
+{
+    UE_LOG(LogHomesteadGroundSnap, Error, TEXT("HOMESTEAD_GROUND_TIMEOUT: no landscape collision after %.1f real s at (%.0f, %.0f); restoring (%.0f, %.0f)."),
+        FPlatformTime::Seconds() - GroundSnapStartedAt, GroundSnapTarget.X, GroundSnapTarget.Y,
+        GroundSnapSafePosition.X, GroundSnapSafePosition.Y);
+    const FVector SafePosition = GroundSnapSafePosition;
+    const FRotator SafeRotation = GroundSnapSafeRotation;
+    EndGroundSnap();
+    if (APawn* Avatar = GetPawn())
+    {
+        Avatar->SetActorLocation(SafePosition, false, nullptr, ETeleportType::TeleportPhysics);
+        if (ACharacter* Body = Cast<ACharacter>(Avatar))
+        {
+            Body->GetCharacterMovement()->StopMovementImmediately();
+            Body->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+        }
+        if (AHomesteadCharacter* Heroine = Cast<AHomesteadCharacter>(Avatar))
+        {
+            Heroine->SetRestingViewRotation(SafeRotation);
+            Heroine->SnapCamera();
+        }
+    }
+    SetControlRotation(SafeRotation);
+    LastStepPosition = SafePosition;
+    LastSafeWorldPosition = SafePosition;
+    StepDistance = 0;
+    Notify(TEXT("The ground there did not load. You are back where you started."), true);
+}
+
 void AHomesteadController::HomesteadTeleport(float X, float Y, float Z)
 {
     if (!GetPawn()) return;
     const bool bOnTerrain = Z <= -100000.0f;
-    GroundSnapTarget = FVector(X, Y, bOnTerrain ? GroundHeight(X, Y) + 150.0f : Z + 100.0f);
-    GroundSnapWait = 0;
-    bPendingGroundSnap = true;
+    BeginGroundSnap(FVector(X, Y, bOnTerrain ? GroundHeight(X, Y) + 150.0f : Z + 100.0f));
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
         Avatar->CancelAction(true);

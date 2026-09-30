@@ -48,9 +48,7 @@ bool AHomesteadController::MenuTravel(Homestead::TravelDestination Destination, 
     Avatar->ResetSprint();
     // Stood on the road bed facing the way she walked; the ground snap holds her until the
     // destination's collision has streamed in.
-    GroundSnapTarget = FVector(Plan.arrival.x, Plan.arrival.y, Plan.arrivalZ + 150.0);
-    GroundSnapWait = 0;
-    bPendingGroundSnap = true;
+    BeginGroundSnap(FVector(Plan.arrival.x, Plan.arrival.y, Plan.arrivalZ + 150.0));
     const FRotator Facing(0, Plan.arrivalYaw, 0);
     Avatar->SetActorRotation(Facing);
     if (bBookOpen) CloseBook();

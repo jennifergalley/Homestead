@@ -206,6 +206,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     Appearance.Outfit = Save.Outfit;
     Appearance.BodyPreset = Save.BodyPreset;
     SanitizeHotbar(Save.HotbarSlots, Save.SelectedHotbarSlot, Save.HotbarLayout);
+    EndGroundSnap();
     PendingLocation = Save.PlayerLocation;
     PendingRotation = Save.ViewRotation;
     bFreshTerrainSpawn = false;
@@ -346,6 +347,7 @@ void AHomesteadController::RetryCheckpoint()
         Avatar->ResetSprint();
     }
     Appearance = SessionAppearance;
+    EndGroundSnap();
     PendingLocation = SessionLocation;
     PendingRotation = SessionRotation;
     bFreshTerrainSpawn = false;
@@ -386,6 +388,7 @@ void AHomesteadController::NewGame()
         Appearance.HairStyle = 1; Appearance.MetaHair = HomesteadLook::MetaHairForLegacy(1);
     }
     ResetHotbar();
+    EndGroundSnap();
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->ResetSprint();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);

@@ -203,10 +203,16 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
     {
         FStep& Arrive = Steps.AddDefaulted_GetRef();
         Arrive.Name = TEXT("Arrive on the ground at ") + Label;
-        Arrive.Action = [this, Target]() { Controller->HomesteadTeleport(Target.x, Target.y); };
+        Arrive.Action = [this, Target]()
+        {
+            Controller->HomesteadTeleport(Target.x, Target.y);
+            if (Controller->IsEstateMap() && !Controller->GroundSnapStreamingActor)
+                Finish(false, TEXT("Teleport did not register a destination streaming source."));
+        };
         Arrive.Check = [this, OnGround, Target]()
         {
-            return !Controller->bPendingGroundSnap && !Controller->bPendingSpawn && OnGround()
+            return !Controller->bPendingGroundSnap && !Controller->GroundSnapStreamingActor
+                && !Controller->bPendingSpawn && OnGround()
                 && EstateSmokeRoute::Distance2D(Controller->PlayerPoint(), Target) < EstateSmokeRoute::ArrivedWithinCm;
         };
         Arrive.Wait = EstateSmokeRoute::ArriveSeconds;

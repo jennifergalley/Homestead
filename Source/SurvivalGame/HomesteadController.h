@@ -13,7 +13,9 @@
 #include "HomesteadController.generated.h"
 
 class AHomesteadWorld;
+class AActor;
 class UHomesteadSave;
+class UWorldPartitionStreamingSourceComponent;
 class UAudioComponent;
 class USoundBase;
 namespace HomesteadMenus { class SHomesteadMenu; }
@@ -467,6 +469,17 @@ private:
     bool bPendingGroundSnap = false;
     FVector GroundSnapTarget = FVector::ZeroVector;
     float GroundSnapWait = 0;
+    FVector GroundSnapSafePosition = FVector::ZeroVector;
+    FRotator GroundSnapSafeRotation = FRotator::ZeroRotator;
+    double GroundSnapStartedAt = 0;
+    double GroundSnapLastReportAt = 0;
+    UPROPERTY(Transient)
+    TObjectPtr<AActor> GroundSnapStreamingActor;
+    UPROPERTY(Transient)
+    TObjectPtr<UWorldPartitionStreamingSourceComponent> GroundSnapStreamingSource;
+    void BeginGroundSnap(FVector Target);
+    void EndGroundSnap();
+    void AbortGroundSnap();
     // Oil lamp: the kneel to set it down at LampSpot, or take up the set-down lamp LampDropId,
     // commits when her hand reaches the ground (AHomesteadCharacter::ConsumeLampContact).
     enum class ELampHandoff : uint8 { None, SetDown, PickUp };
