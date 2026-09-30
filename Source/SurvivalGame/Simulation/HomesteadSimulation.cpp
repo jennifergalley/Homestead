@@ -850,15 +850,22 @@ void EraseResourceEdit(State& candidate, const Generation::GeneratedEntityKey& k
 int PackUsed(const State& state) { return ContainerUsed(state, 0); }
 bool AddWorldDrop(State& candidate, Point position, Item item, int quantity)
 {
+    // A stack on the ground never holds more than she can pick up in one go (PickUpDrop is whole-stack).
+    const int stack = Homestead::PackCapacity(candidate);
     for (auto& drop : candidate.worldDrops)
-        if (drop.wearableId == 0 && drop.item == item && drop.quantity <= MaxPackCapacity - quantity
+        if (drop.wearableId == 0 && drop.item == item && drop.quantity <= stack - quantity
             && DistanceSquared(position, drop.position) <= DropMergeReach * DropMergeReach)
         {
             drop.quantity += quantity;
             return true;
         }
-    if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1) return false;
-    candidate.worldDrops.push_back({candidate.nextId++, position, item, quantity, 0});
+    while (quantity > 0)
+    {
+        if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1) return false;
+        const int part = std::min(quantity, stack);
+        candidate.worldDrops.push_back({candidate.nextId++, position, item, part, 0});
+        quantity -= part;
+    }
     return true;
 }
 }
@@ -1708,8 +1715,9 @@ Result Simulation::DropGroup(int groupId, int amount, Point position, Point play
     double nearest = DropMergeReach * DropMergeReach;
     for (auto& drop : candidate.worldDrops)
     {
+        // Merged stacks stay small enough for her to pick up whole.
         if (drop.wearableId != 0 || drop.item != entry->item
-            || drop.quantity > MaxPackCapacity - amount) continue;
+            || drop.quantity > Homestead::PackCapacity(candidate) - amount) continue;
         const double distance = DistanceSquared(position, drop.position);
         if (distance <= nearest && (!merge || distance < nearest || drop.id < merge->id))
         { merge = &drop; nearest = distance; }
@@ -2451,25 +2459,27 @@ Result Simulation::Deconstruct(int structureId, Point player)
     const Point spot = ClearDropSpot(candidate, player);
     const Result crowded = Bad("Too many possessions are already resting in the world. Pick some up before taking this down.");
     int setDown = 0;
+    // Spilled stacks are no bigger than she can pick up whole (her pack, 120 or 240).
+    const int stack = Homestead::PackCapacity(candidate);
     const auto dropItems = [&](Item item, int quantity)
     {
         while (quantity > 0)
         {
             WorldDrop* merge = nullptr;
             for (auto& drop : candidate.worldDrops)
-                if (drop.wearableId == 0 && drop.item == item && drop.quantity < MaxPackCapacity
+                if (drop.wearableId == 0 && drop.item == item && drop.quantity < stack
                     && Near(spot, drop.position, DropMergeReach)) { merge = &drop; break; }
             int moved = 0;
             if (merge)
             {
-                moved = std::min(quantity, MaxPackCapacity - merge->quantity);
+                moved = std::min(quantity, stack - merge->quantity);
                 merge->quantity += moved;
             }
             else
             {
                 if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1)
                     return false;
-                moved = std::min(quantity, MaxPackCapacity);
+                moved = std::min(quantity, stack);
                 candidate.worldDrops.push_back({candidate.nextId++, spot, item, moved, 0});
             }
             quantity -= moved;

@@ -304,6 +304,20 @@ void LeatherBackpackUpgrade()
     CHECK(!sim.GrantItems(Item::Stone, 1).ok);
     const auto full = sim.Buy(store.shop, Item::Bread, 1, false, store.customer);
     CHECK(!full.ok && full.code == ResultCode::Capacity);
+    // With the backpack a ground stack may hold 240 (two drops merge up to it), and she picks it up whole.
+    const auto branchGroup = [&sim]()
+    {
+        for (const auto& entry : sim.GetState().inventoryLayout)
+            if (entry.wearableId == 0 && entry.item == Item::Branch) return entry;
+        return LayoutEntry{};
+    };
+    const int branches = sim.Count(Item::Branch);
+    CHECK(branches > InventoryCapacity + 60);
+    OK(sim.DropGroup(branchGroup().groupId, branches - 60, store.customer, store.customer, sim.GetRevision()));
+    OK(sim.DropGroup(branchGroup().groupId, 60, store.customer, store.customer, sim.GetRevision()));
+    CHECK(sim.GetState().worldDrops.size() == 1 && sim.GetState().worldDrops.front().quantity == branches);
+    OK(sim.PickUpDrop(sim.GetState().worldDrops.front().id, store.customer));
+    CHECK(sim.UsedCapacity() == 240 && sim.GetState().worldDrops.empty());
     // Hiding it is a look only: capacity stays.
     OK(sim.SetBackpackShown(false));
     CHECK(!sim.GetState().backpackShown && sim.PackCapacity() == 240);

@@ -61,7 +61,8 @@ constexpr double GardenCellSize = CellSize / GardenCellsPerCell;
 constexpr int InventoryCapacity = 120;
 constexpr int ChestCapacity = 1200;
 // Her pack holds InventoryCapacity until she buys the leather backpack (HomesteadBackpack.h), then
-// MaxPackCapacity. Validation limits that don't know her state (drops, saved stock) use the maximum.
+// MaxPackCapacity. Load-time validation that doesn't know her state yet (drops, saved stock) uses the
+// maximum; stacks set on the ground are never larger than her own PackCapacity, so she can pick them up.
 constexpr int MaxPackCapacity = 240;
 struct State;
 int PackCapacity(const State& state);
