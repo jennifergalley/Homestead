@@ -194,11 +194,13 @@ void AHomesteadController::MenuSetAutosaveInterval(int32 Minutes)
 
 void AHomesteadController::MenuSetGameSpeed(double DayMinutes)
 {
+    if (RejectPendingGroundSnapAction()) return;
     Notify(Sim.SetDayMinutes(DayMinutes));
 }
 
 void AHomesteadController::MenuAdjustSetting(int32 Id, int32 Direction)
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (!Direction) return;
     if (Id == 2)
     {

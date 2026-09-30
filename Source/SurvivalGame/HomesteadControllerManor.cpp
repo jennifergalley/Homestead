@@ -63,7 +63,10 @@ void AHomesteadController::BeginNewGameSetup()
     Notify(TEXT("Choose her look, then close the book to name her."));
 }
 
-void AHomesteadController::HomesteadNewGameSetup() { BeginNewGameSetup(); }
+void AHomesteadController::HomesteadNewGameSetup()
+{
+    if (!RejectPendingGroundSnapAction()) BeginNewGameSetup();
+}
 
 void AHomesteadController::ShowNames()
 {

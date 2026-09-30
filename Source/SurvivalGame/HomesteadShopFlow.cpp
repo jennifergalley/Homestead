@@ -85,6 +85,8 @@ void AHomesteadController::CloseShopScreen()
 Homestead::Result AHomesteadController::ShopTrade(int32 ShopId, Homestead::Item Item, int32 Quantity, bool bSell,
     bool bHeroineStock)
 {
+    if (RejectPendingGroundSnapAction())
+        return {false, "Still finding your footing. Wait a moment.", Homestead::ResultCode::Unavailable, Sim.GetRevision()};
     const int64 Before = State().money;
     const auto Result = bSell ? Sim.Sell(ShopId, Item, Quantity, PlayerPoint())
         : Sim.Buy(ShopId, Item, Quantity, bHeroineStock, PlayerPoint());
@@ -262,6 +264,7 @@ void AHomesteadController::InteractWithStore()
 
 void AHomesteadController::HomesteadOpenStore()
 {
+    if (RejectPendingGroundSnapAction()) return;
     const APawn* Heroine = GetPawn();
     if (!Heroine) return;
     const float Yaw = Heroine->GetActorRotation().Yaw;
@@ -278,6 +281,7 @@ void AHomesteadController::HomesteadOpenStore()
 
 void AHomesteadController::HomesteadMoney(int32 Cents)
 {
+    if (RejectPendingGroundSnapAction()) return;
     const int64 Before = State().money;
     const auto Result = Sim.GrantMoney(Cents);
     if (Result.ok) { LastWalletDelta = State().money - Before; WalletDeltaRemaining = 3.0f; }

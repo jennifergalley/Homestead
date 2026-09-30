@@ -362,7 +362,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     }
     if (bPendingGroundSnap && GetPawn())
     {
-        if (bEstateMap && FPlatformTime::Seconds() - GroundSnapStartedAt >= HomesteadControllerGroundSnap::TimeoutSeconds)
+        if (FPlatformTime::Seconds() - GroundSnapStartedAt >= HomesteadControllerGroundSnap::TimeoutSeconds)
         {
             AbortGroundSnap();
             return;

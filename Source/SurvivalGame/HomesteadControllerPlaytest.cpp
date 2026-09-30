@@ -10,6 +10,7 @@ using HomesteadControllerText::Text;
 
 void AHomesteadController::HomesteadPackMenu(int32 Tile, int32 Mode)
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (Mode == 2)
     {
         const auto Position = PlayerPoint();
@@ -38,30 +39,35 @@ void AHomesteadController::HomesteadPackMenu(int32 Tile, int32 Mode)
 
 void AHomesteadController::HomesteadMorning(float Hour)
 {
+    if (RejectPendingGroundSnapAction()) return;
     Sim.SkipToHourOfDay(Hour);
     RefreshRemaining = 0;
 }
 
 void AHomesteadController::HomesteadGrowCrops(float Days, int32 Tend)
 {
+    if (RejectPendingGroundSnapAction()) return;
     Notify(Sim.PassDaysForPlaytest(Days, Tend != 0, PlayerPoint()));
     RefreshRemaining = 0;
 }
 
 void AHomesteadController::HomesteadCropGrowth(float Growth)
 {
+    if (RejectPendingGroundSnapAction()) return;
     Notify(Sim.SetCropGrowthForPlaytest(Growth));
     RefreshRemaining = 0;
 }
 
 void AHomesteadController::HomesteadEnergy(float Energy)
 {
+    if (RejectPendingGroundSnapAction()) return;
     Notify(Sim.SetEnergy(Energy));
     RefreshRemaining = 0;
 }
 
 void AHomesteadController::HomesteadStandingRoom()
 {
+    if (RejectPendingGroundSnapAction()) return;
     const APawn* Avatar = GetPawn();
     if (!Avatar) return;
     // She wakes facing the doorway on the room's west side, so the grid heading is her yaw + 90.
@@ -76,11 +82,13 @@ void AHomesteadController::HomesteadStandingRoom()
 
 void AHomesteadController::HomesteadEmptyPail()
 {
+    if (RejectPendingGroundSnapAction()) return;
     Notify(Sim.EmptyPail());
 }
 
 void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
 {
+    if (RejectPendingGroundSnapAction()) return;
     const FString Wanted = ItemName.Replace(TEXT(" "), TEXT(""));
     for (int32 Index = 0; Index < static_cast<int32>(Homestead::Item::Count); ++Index)
     {
@@ -96,6 +104,7 @@ void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
 
 void AHomesteadController::HomesteadWear(const FString& Garment)
 {
+    if (RejectPendingGroundSnapAction()) return;
     const auto Key = [](FString Text) { return Text.Replace(TEXT(" "), TEXT("")).Replace(TEXT("-"), TEXT("")); };
     for (int32 Index = 0; Index < static_cast<int32>(Homestead::WearableDefinition::Count); ++Index)
     {

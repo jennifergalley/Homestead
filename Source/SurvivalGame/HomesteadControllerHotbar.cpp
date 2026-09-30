@@ -92,7 +92,7 @@ void AHomesteadController::HideHotbar()
 
 bool AHomesteadController::ShouldShowHotbar() const
 {
-    return bWorldReady && !bBookOpen && !bPlanning && !IsFailed() && !ShopScreen.IsValid();
+    return bWorldReady && !bPendingGroundSnap && !bBookOpen && !bPlanning && !IsFailed() && !ShopScreen.IsValid();
 }
 
 Homestead::Item AHomesteadController::HotbarItem(int32 Cell) const

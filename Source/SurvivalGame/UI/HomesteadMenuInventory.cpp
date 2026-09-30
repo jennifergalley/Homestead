@@ -166,6 +166,7 @@ bool AHomesteadController::MenuHotbarRow(int32 Cell, FHomesteadRow& Out) const
 bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action,
     int32 Amount, uint64 ExpectedRevision)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (bMenuSaveInProgress || IsFailed() || bTestResetRequired)
     { Notify(TEXT("This action is unavailable until you return to a playable world."), true); return false; }
     if (ExpectedRevision != Sim.GetRevision())
@@ -309,6 +310,7 @@ bool AHomesteadController::MenuWearableRow(int32 WearableId, FHomesteadRow& Out)
 
 bool AHomesteadController::MenuSortPack()
 {
+    if (RejectPendingGroundSnapAction()) return false;
     const auto Result = Sim.SortPack(Sim.GetRevision());
     Notify(Result);
     return Result.ok;
@@ -317,6 +319,7 @@ bool AHomesteadController::MenuSortPack()
 bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomesteadRow& Target,
     uint64 ExpectedRevision)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (ExpectedRevision != Sim.GetRevision())
     { Notify(TEXT("Your inventory changed. Pick up the item again."), true); return false; }
     // The hotbar is the first row of her pack: into, within and out of it (HomesteadPackRow.h).

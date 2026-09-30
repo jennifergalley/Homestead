@@ -190,7 +190,7 @@ public:
     bool MenuPhysicalInput(FKey Key, EInputEvent Event, float Amount = 1);
     bool MenuPointerButtonIntent(FKey Key);
     bool MenuPointerIntent(float X, float Y);
-    bool MenuAcceptsPhysicalInput() const { return !bAutomatedInputOnly || bSimulatedMenuEvent; }
+    bool MenuAcceptsPhysicalInput() const { return !bPendingGroundSnap && (!bAutomatedInputOnly || bSimulatedMenuEvent); }
     FString MenuSaveStatus() const;
     FString MenuLastError() const { return ToastText; }
     bool MenuNeedsTestReset() const { return bTestResetRequired; }
@@ -475,6 +475,7 @@ private:
     FRotator GroundSnapSafeActorRotation = FRotator::ZeroRotator;
     double GroundSnapStartedAt = 0;
     double GroundSnapLastReportAt = 0;
+    double GroundSnapLastInputNoticeAt = -1000.0;
     TUniquePtr<Homestead::Simulation> GroundSnapTravelBefore;
     UPROPERTY(Transient)
     TObjectPtr<AActor> GroundSnapStreamingActor;
@@ -483,6 +484,7 @@ private:
     void BeginGroundSnap(FVector Target);
     void EndGroundSnap();
     void AbortGroundSnap();
+    bool RejectPendingGroundSnapAction();
     // Oil lamp: the kneel to set it down at LampSpot, or take up the set-down lamp LampDropId,
     // commits when her hand reaches the ground (AHomesteadCharacter::ConsumeLampContact).
     enum class ELampHandoff : uint8 { None, SetDown, PickUp };

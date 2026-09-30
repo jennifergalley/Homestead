@@ -20,6 +20,7 @@ using HomesteadControllerText::Text;
 
 void AHomesteadController::Interact()
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (IsFailed()) { RetryCheckpoint(); return; }
     if (bBookOpen) { ActivateRow(); return; }
     const auto Position = PlayerPoint();
@@ -224,6 +225,7 @@ void AHomesteadController::OpenFocusedChestWithMouse()
 
 bool AHomesteadController::OpenChestStorage(int32 ChestId)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (bPlanning || IsFailed() || ChestId <= 0) return false;
     const auto Position = PlayerPoint();
     const Homestead::Structure* Target = nullptr;
@@ -244,6 +246,7 @@ bool AHomesteadController::OpenChestStorage(int32 ChestId)
 
 void AHomesteadController::Secondary()
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (IsFailed()) return;
     if (bBookOpen)
     {

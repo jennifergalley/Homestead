@@ -143,6 +143,7 @@ void AHomesteadController::EndGroundSnap()
     GroundSnapWait = 0;
     GroundSnapStartedAt = 0;
     GroundSnapLastReportAt = 0;
+    GroundSnapLastInputNoticeAt = -1000.0;
     GroundSnapTravelBefore.Reset();
     GroundSnapStreamingSource = nullptr;
     if (IsValid(GroundSnapStreamingActor))
@@ -150,6 +151,18 @@ void AHomesteadController::EndGroundSnap()
         GroundSnapStreamingActor->Destroy();
     }
     GroundSnapStreamingActor = nullptr;
+}
+
+bool AHomesteadController::RejectPendingGroundSnapAction()
+{
+    if (!bPendingGroundSnap) return false;
+    const double Now = FPlatformTime::Seconds();
+    if (Now - GroundSnapLastInputNoticeAt >= 2.0)
+    {
+        GroundSnapLastInputNoticeAt = Now;
+        Notify(TEXT("Still finding your footing. Wait a moment."), true);
+    }
+    return true;
 }
 
 void AHomesteadController::BeginGroundSnap(FVector Target)
@@ -167,6 +180,8 @@ void AHomesteadController::BeginGroundSnap(FVector Target)
         return;
     }
     const FVector SafePosition = LastSafeWorldPosition;
+    if (bBookOpen) CloseBook();
+    if (ShopScreen.IsValid()) CloseShopScreen();
     EndGroundSnap();
     GroundSnapTarget = Target;
     GroundSnapSafePosition = SafePosition;
@@ -174,11 +189,17 @@ void AHomesteadController::BeginGroundSnap(FVector Target)
     GroundSnapSafeActorRotation = GetPawn() ? GetPawn()->GetActorRotation() : FRotator::ZeroRotator;
     GroundSnapStartedAt = FPlatformTime::Seconds();
     bPendingGroundSnap = true;
+    bControlDown = false;
+    bSprintShiftDown = false;
+    bSprintShiftModifier = false;
+    FlushPressedKeys();
     if (!bEstateMap) return;
 
     if (APawn* Avatar = GetPawn())
     {
         Avatar->SetActorLocation(SafePosition, false, nullptr, ETeleportType::TeleportPhysics);
+        if (AHomesteadCharacter* Heroine = Cast<AHomesteadCharacter>(Avatar))
+            Heroine->ResetSprint();
         if (ACharacter* Body = Cast<ACharacter>(Avatar))
         {
             Body->GetCharacterMovement()->StopMovementImmediately();
@@ -224,11 +245,22 @@ void AHomesteadController::AbortGroundSnap()
     const FRotator SafeActorRotation = GroundSnapSafeActorRotation;
     TUniquePtr<Homestead::Simulation> BeforeTravel = MoveTemp(GroundSnapTravelBefore);
     EndGroundSnap();
+    FString EquipmentError;
+    bool bEquipmentRestored = true;
     if (BeforeTravel)
     {
         Sim = MoveTemp(*BeforeTravel);
         RefreshRemaining = 0;
+        if (AHomesteadCharacter* Heroine = Cast<AHomesteadCharacter>(GetPawn()))
+            if (!Heroine->PrepareEquipment(State(), Appearance, EquipmentError)
+                || !Heroine->ApplyPreparedEquipment(EquipmentError))
+            {
+                Heroine->ClearPreparedEquipment();
+                bEquipmentRestored = false;
+            }
     }
+    if (!bEquipmentRestored && EquipmentError.IsEmpty())
+        EquipmentError = TEXT("The owned clothing could not be displayed.");
     if (APawn* Avatar = GetPawn())
     {
         Avatar->SetActorLocation(SafePosition, false, nullptr, ETeleportType::TeleportPhysics);
@@ -248,9 +280,11 @@ void AHomesteadController::AbortGroundSnap()
     LastStepPosition = SafePosition;
     LastSafeWorldPosition = SafePosition;
     StepDistance = 0;
-    Notify(BeforeTravel
-        ? TEXT("The ground there did not load. Your walk was canceled without spending time.")
-        : TEXT("The ground there did not load. You are back where you started."), true);
+    Notify(!bEquipmentRestored
+        ? TEXT("Your walk was canceled, but her clothing could not be restored: ") + EquipmentError
+        : BeforeTravel
+            ? TEXT("The ground there did not load. Your walk was canceled without spending time.")
+            : TEXT("The ground there did not load. You are back where you started."), true);
 }
 
 void AHomesteadController::HomesteadTeleport(float X, float Y, float Z)

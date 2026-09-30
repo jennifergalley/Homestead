@@ -57,6 +57,7 @@ using HomesteadControllerBookDetail::RetiredGuidebookPage;
 
 void AHomesteadController::OpenBook(int32 TargetPage)
 {
+    if (RejectPendingGroundSnapAction()) return;
     EndPlacement();
     HoveredHotbarSlot = INDEX_NONE;
     bBookOpen = true;
@@ -398,6 +399,7 @@ void AHomesteadController::MenuFocusAppearance(int32 Id)
 
 void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (!bBookOpen || Page != 6 || bMenuSaveInProgress) return;
     if (IsFailed()) { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
     const int32 Count = AppearanceChoiceCount(Id);
@@ -474,6 +476,7 @@ bool AHomesteadController::CycleBedChoice(int32 Delta)
 
 void AHomesteadController::SleepAtBed(Homestead::Point Position)
 {
+    if (RejectPendingGroundSnapAction()) return;
     Notify(SleepInBed(Position));
     if (!IsFailed())
     {
@@ -486,6 +489,7 @@ void AHomesteadController::SleepAtBed(Homestead::Point Position)
 
 void AHomesteadController::HomesteadSleep(int32 Option)
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (bBookOpen || bPlanning || IsFailed()) return;
     UpdateFocus();
     if (Focus != EFocus::Bed) { Notify(TEXT("Stand beside a bed to sleep."), true); return; }
@@ -496,6 +500,7 @@ void AHomesteadController::HomesteadSleep(int32 Option)
 
 void AHomesteadController::HomesteadBedChoice(int32 Delta)
 {
+    if (RejectPendingGroundSnapAction()) return;
     UpdateFocus();
     CycleBedChoice(Delta);
 }

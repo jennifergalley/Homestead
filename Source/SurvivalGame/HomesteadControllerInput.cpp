@@ -58,6 +58,12 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         }
         return true;
     }
+    if (bPendingGroundSnap)
+    {
+        if (Params.Event == IE_Pressed && Params.Key == EKeys::F9) QuickLoad();
+        else if (Params.Event == IE_Pressed) RejectPendingGroundSnapAction();
+        return true;
+    }
     FInputAxisProperties AxisProperties;
     const bool HasAxisProperties = Params.Key.IsGamepadKey() && Params.Key.IsAnalog() && PlayerInput
         && PlayerInput->GetAxisProperties(Params.Key, AxisProperties);
