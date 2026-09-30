@@ -278,8 +278,9 @@ def main():
         raise RuntimeError("Could not save the imported rock material assignments.")
 
     import_asset("evening-harp/EveningHarp.mp3", "Audio/Music", "EveningHarp")
-    for pack, name in (("ascending-the-vale", "AscendingTheVale"), ("teller-of-the-tales", "TellerOfTheTales"),
-                       ("meditation-impromptu-02", "MeditationImpromptu02"), ("at-rest", "AtRest")):
+    # Public-domain (CC0) pieces, licence pages verified 2026-09-30 (docs/asset-credits.md).
+    for pack, name in (("whispers-of-the-glen", "WhispersOfTheGlen"), ("medieval-theme", "MedievalTheme"),
+                       ("a-new-town", "ANewTown")):
         import_asset(f"{pack}/{name}.mp3", "Audio/Music", name)
     ambience = import_asset("forest-ambience/ForestAmbience.mp3", "Audio/Ambience", "ForestAmbience")
     ambience.set_editor_property("looping", True)

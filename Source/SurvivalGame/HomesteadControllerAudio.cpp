@@ -3,6 +3,8 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadEstateGround.h"
 #include "HomesteadEstateTerrain.h"
+#include "HomesteadWorld.h"
+#include "Simulation/HomesteadRoomAudio.h"
 
 #include "AudioDevice.h"
 #include "Components/AudioComponent.h"
@@ -22,8 +24,40 @@ DEFINE_LOG_CATEGORY_STATIC(LogHomesteadFootsteps, Log, All);
 using HomesteadControllerPreferences::AudioSettingsSection;
 using HomesteadControllerPreferences::LastMusicTrackKey;
 
+namespace HomesteadAmbienceMix
+{
+// Indoors (UHomesteadWeather's roof check, eased) the woodland loop and the creek duck and dull
+// (Homestead::RoomAudio), keeping the Ambience setting as their ceiling. Set only when they move.
+void Apply(UAudioComponent* Loop, float Gain, float CutoffHz)
+{
+    if (!Loop) return;
+    if (!FMath::IsNearlyEqual(Loop->VolumeMultiplier, Gain, 1.0e-4f)) Loop->SetVolumeMultiplier(Gain);
+    const bool bMuffled = CutoffHz < static_cast<float>(Homestead::RoomAudio::OpenAirCutoffHz) - 1.0f;
+    // The setters only reach the playing sound, so record what was sent on the component too (it's what
+    // the next comparison reads, and a sound started later picks it up).
+    if ((Loop->bEnableLowPassFilter != 0) != bMuffled)
+    {
+        Loop->bEnableLowPassFilter = bMuffled;
+        Loop->SetLowPassFilterEnabled(bMuffled);
+    }
+    if (bMuffled && !FMath::IsNearlyEqual(Loop->LowPassFilterFrequency, CutoffHz, 1.0f))
+    {
+        Loop->LowPassFilterFrequency = CutoffHz;
+        Loop->SetLowPassFilterFrequency(CutoffHz);
+    }
+}
+}
+
 void AHomesteadController::UpdateCreekAudio()
 {
+    {
+        namespace RoomAudio = Homestead::RoomAudio;
+        const float Indoors = Landscape ? Landscape->GetIndoorMix() : 0.0f;
+        const float Gain = static_cast<float>(RoomAudio::AmbienceGain(AmbienceVolume, Indoors));
+        const float Cutoff = static_cast<float>(RoomAudio::AmbienceCutoffHz(Indoors));
+        HomesteadAmbienceMix::Apply(Ambience, Gain, Cutoff);
+        HomesteadAmbienceMix::Apply(Creek, Gain * CreekGain, Cutoff);
+    }
     if (!Creek->Sound || !bAudioEnabled) return;
     FVector Listener;
     FRotator View;
@@ -110,14 +144,15 @@ void AHomesteadController::InitializeAudio()
         Creek->SetVolumeMultiplier(AmbienceVolume * CreekGain);
     }
     else UE_LOG(LogTemp, Warning, TEXT("Creek loop is not imported. Run Scripts/bootstrap_unreal.py."));
-    // Kevin MacLeod tracks (CC BY 4.0), shuffled with no immediate repeat. Loudness is the gated,
-    // K-weighted level measured from each source file (dBFS); every track is matched to the same
-    // level, which sits about 14 dB under the old harp-only mix at the default 65% setting, so music
-    // stays under the woodland ambience and footsteps instead of dominating them.
+    // Kevin MacLeod's Evening Fall (CC BY 4.0) and verified public-domain (CC0) pieces, shuffled with no
+    // immediate repeat (docs/asset-credits.md). Loudness is the gated, K-weighted level (EBU R128
+    // integrated, LUFS) measured from each source file; every track is matched to the same level,
+    // which sits about 14 dB under the old harp-only mix at the default 65% setting, so music stays
+    // under the woodland ambience and footsteps instead of dominating them.
     struct FTrack { const TCHAR* Name; float Loudness; };
     static constexpr FTrack Tracks[] = {
-        {TEXT("EveningHarp"), -21.0f}, {TEXT("AscendingTheVale"), -21.3f}, {TEXT("TellerOfTheTales"), -23.4f},
-        {TEXT("MeditationImpromptu02"), -23.6f}, {TEXT("AtRest"), -28.6f}};
+        {TEXT("EveningHarp"), -21.0f}, {TEXT("WhispersOfTheGlen"), -14.7f}, {TEXT("MedievalTheme"), -15.7f},
+        {TEXT("ANewTown"), -15.6f}};
     constexpr float TargetLoudnessAtFullVolume = -35.0f;
     MusicTracks.Reset();
     MusicTrackGains.Reset();
@@ -139,6 +174,7 @@ void AHomesteadController::InitializeAudio()
     const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
     FConfigFile Disk;
     if (Branch && Disk.Combine(Branch->IniPath)) Disk.GetString(AudioSettingsSection, LastMusicTrackKey, LastTrack);
+    MusicGapRemaining = Homestead::MusicPacing::FirstDelay(FMath::FRand());
     MusicBag.Reset(MusicTracks.Num(), MusicTrackNames.IndexOfByKey(LastTrack),
         FPlatformTime::Cycles64() ^ static_cast<uint64>(FDateTime::UtcNow().GetTicks()) ^ FPlatformProcess::GetCurrentProcessId());
     if (MusicTracks.IsEmpty())
@@ -226,5 +262,5 @@ void AHomesteadController::MusicFinished()
 {
     bMusicFading = false;
     MusicElapsed = 0;
-    MusicGapRemaining = FMath::FRandRange(55.0f, 110.0f);
+    MusicGapRemaining = Homestead::MusicPacing::Gap(FMath::FRand());
 }

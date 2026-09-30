@@ -212,6 +212,8 @@ public:
     };
     bool FindUnderbrushNear(const Homestead::Simulation& Simulation, FVector2D Point, float Reach, FUnderbrushTarget& Out) const;
     static FString UnderbrushName(uint8 Species);
+    // 0 outdoors .. 1 indoors at the camera (UHomesteadWeather), for the ambience and hearth mixes.
+    float GetIndoorMix() const;
 
 private:
     friend class AHomesteadVisualPlaytest;
@@ -288,7 +290,6 @@ private:
         TArray<TWeakObjectPtr<UPrimitiveComponent>> Ignored;
         float Gate = -1.0f;
     };
-    static constexpr float HearthCrackleVolume = 0.2f;
     // Overcast (add-rain-weather): the sun's share and the sky light's lift under full cloud, the sun's
     // disc widened so what shadows remain are soft, the exposure held down (EV) and the colour taken out.
     static constexpr float OvercastSunScale = 0.12f;
@@ -298,6 +299,21 @@ private:
     static constexpr float OvercastSaturation = 0.72f;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
+    // The standing room's door (HomesteadWorldDoors.cpp, Simulation/HomesteadDoor): an oak leaf on a hinge
+    // pivot in the heritage stone doorway, swung open as she nears and shut behind her. Keyed by the
+    // doorway's structure id so a rebuild keeps its swing; presentation only, nothing saved.
+    struct FDoorLeaf
+    {
+        TWeakObjectPtr<USceneComponent> Hinge;
+        FVector Opening = FVector::ZeroVector;
+        float ClosedYaw = 0.0f;
+        float Openness = 0.0f;
+        bool bWanted = false;
+    };
+    TMap<int32, FDoorLeaf> DoorLeaves;
+    void AddDoorLeaf(FHomesteadWorldVisual& Visual, int32 StructureId, const FVector& Base, const FRotator& Rotation,
+        float HeightScale);
+    void UpdateDoors(float DeltaSeconds);
     UPROPERTY()
     TObjectPtr<UMaterialInterface> FieldMaterial;
     UPROPERTY()

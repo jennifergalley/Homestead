@@ -285,8 +285,8 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
     }
     else
     {
-        Result.Add({0, TEXT("Music by Kevin MacLeod (incompetech.com)"), TEXT("Evening Fall (Harp), Ascending the Vale, Teller of the Tales, Meditation Impromptu 02, At Rest")});
-        Result.Add({1, TEXT("Creative Commons Attribution 4.0"), TEXT("https://creativecommons.org/licenses/by/4.0/")});
+        Result.Add({0, TEXT("Evening Fall (Harp) by Kevin MacLeod (incompetech.com)"), TEXT("Creative Commons Attribution 4.0: https://creativecommons.org/licenses/by/4.0/")});
+        Result.Add({1, TEXT("Public-domain (CC0) music, with thanks"), TEXT("Whispers of the Glen and Medieval Theme by Maarten Schellekens; A New Town by cynicmusic (pixelsphere.org)")});
         Result.Add({2, TEXT("Music playback"), TEXT("Converted for game playback; playback fades and level matching applied.")});
         Result.Add({3, TEXT("Forest and creek ambience"), TEXT("TinyWorlds - OpenGameArt - CC0; creek: SamsterBirdies - Freesound - CC0; hearth: PagDev - OpenGameArt - CC0")});
         Result.Add({4, TEXT("Brown Mud Leaves 01"), TEXT("Rob Tuytel - Poly Haven - CC0")});

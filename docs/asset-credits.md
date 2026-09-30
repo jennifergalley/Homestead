@@ -116,16 +116,19 @@ the game unmodified. It isn't sold on its own.
 
 ## Music
 
-All music is by **Kevin MacLeod** (incompetech.com), licensed under
+**Evening Fall (Harp)** by **Kevin MacLeod** (incompetech.com), licensed under
 [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/):
+https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100236
 
-| Track | Official track page |
-| --- | --- |
-| Evening Fall (Harp) | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100236 |
-| Ascending the Vale | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1600064 |
-| Teller of the Tales | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1400020 |
-| Meditation Impromptu 02 | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100162 |
-| At Rest | https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100748 |
+Public-domain pieces, dedicated under [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)
+(no attribution required; credited with thanks). Each licence page was checked on 2026-09-30 and
+states CC0:
+
+| Track | Author | Licence page | Length |
+| --- | --- | --- | --- |
+| Whispers of the Glen | Maarten Schellekens | https://freemusicarchive.org/music/maarten-schellekens/public-domain-1/whispers-of-the-glen/ ("licensed under a CC0 1.0 Universal License") | 2:41 |
+| Medieval Theme | Maarten Schellekens | https://freemusicarchive.org/music/maarten-schellekens/public-domain-1/medieval-theme/ ("licensed under a CC0 1.0 Universal License") | 2:36 |
+| A New Town (RPG Theme) | cynicmusic (The Cynic Project / pixelsphere.org / cynicmusic.com) | https://opengameart.org/content/a-new-town-rpg-theme (License: CC0) | 1:02 |
 
 Converted for game playback; playback fades and level matching applied. The tracks play shuffled
 with gaps between them. The in-game field book includes this credit. Include this document in any

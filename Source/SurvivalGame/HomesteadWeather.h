@@ -33,8 +33,10 @@ public:
     // A roof piece's reach round its centre (a 3 m cell's half diagonal) and the height its rain stops.
     static constexpr float ShelterRadiusCm = 215.0f;
     static constexpr float ShelterTopCm = 520.0f;
-    // How far overhead a roof shelters the camera (and muffles the rain) when it isn't a building piece.
+    // How far overhead a roof shelters the camera (and muffles the rain and ambience) when it isn't a
+    // building piece. Checked every OverheadCheckSeconds in any weather.
     static constexpr float OverheadCheckCm = 2500.0f;
+    static constexpr float OverheadCheckSeconds = 0.25f;
     // Rain ambience volume: Homestead::RainAudioGain (the simulation, native-tested). Indoors it's also
     // muffled behind a low-pass at IndoorCutoffHz, like rain heard on a roof.
     static constexpr float IndoorCutoffHz = 900.0f;
@@ -46,10 +48,14 @@ public:
     void TickWeather(float DeltaSeconds);
     float GetOvercast() const { return Overcast; }
     float GetRain() const { return Rain; }
+    /** 0 outdoors .. 1 indoors at the camera, eased (under a roof piece or anything else overhead). The
+     *  rain, the woodland ambience, the creek and a roofed hearth all mix by it (HomesteadRoomAudio). */
+    float GetIndoorMix() const { return Indoors; }
+    /** Whether a point is under one of the building pieces' roofs. */
+    bool IsUnderShelter(const FVector& Point) const;
 
 private:
     bool LoadAssets();
-    bool IsUnderShelter(const FVector& Point) const;
 
     UPROPERTY() TObjectPtr<UStaticMeshComponent> Streaks;
     UPROPERTY() TObjectPtr<UStaticMeshComponent> Clouds;
