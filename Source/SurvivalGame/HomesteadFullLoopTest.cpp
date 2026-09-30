@@ -1194,8 +1194,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Return from the restored pack to the garden"),
         [this, Garden]() { Tap(EKeys::Gamepad_FaceButton_Right); Teleport(Garden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
-    Add(TEXT("Plant the next generation using the harvested seeds"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Plant the next generation using the harvested seeds (Seeds chosen on the hotbar)"),
+        [this]() { Controller->ChooseOnHotbar(Homestead::Item::Seeds); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);

@@ -342,7 +342,7 @@ void RequirementsMatchTransactions()
     CHECK(std::string(RecipeRequirements(static_cast<Recipe>(-1))) == "Unknown recipe");
     CHECK(std::string(PieceRequirements(Piece::Count)) == "Unknown structure");
     CHECK(std::string(RecipeRequirements(Recipe::HerbedRoots)) ==
-        "2 Roots + 1 Meadow herb; nearby fueled fire (no pot needed)");
+        "2 Roots + 1 Meadow herb + 1 Kindling; nearby fueled fire (no pot needed)");
     for (int i = 0; i < static_cast<int>(Recipe::Count); ++i)
     {
         const auto recipe = static_cast<Recipe>(i);
@@ -353,7 +353,7 @@ void RequirementsMatchTransactions()
         Stock(sim, {{Item::Hatchet, 1}, {Item::Branch, 40}, {Item::Stone, 20},
             {Item::RustedAxeHead, 1}, {Item::RustedHoeBlade, 1}, {Item::RustedScytheBlade, 1},
             {Item::RustedBillhookHead, 1}, {Item::RustedPickHead, 1},
-            {Item::Roots, 10}, {Item::Flowers, 10}, {Item::Timber, 1}});
+            {Item::Roots, 10}, {Item::Flowers, 10}, {Item::Kindling, 10}, {Item::Timber, 1}});
         const auto before = sim.GetState().inventory;
         const double hour = sim.GetState().hour;
         const char* description = RecipeRequirements(recipe);
@@ -417,7 +417,7 @@ void StructuredRecipeAssessment()
     const Point firePosition = CellCenter(-3, -1);
     OK(fire.Place(Piece::Fire, -3, -1, 0, firePosition));
     OK(fire.AddFuel(fire.GetState().structures.back().id, firePosition));
-    Stock(fire, {{Item::Roots, 2}});
+    Stock(fire, {{Item::Roots, 2}, {Item::Kindling, 1}});
     cooking = fire.AssessRecipe(Recipe::RoastedRoots, firePosition);
     CHECK(cooking.craftable && cooking.stationMet);
 
@@ -438,7 +438,7 @@ void StructuredRecipeAssessment()
     Stock(complete, {{Item::Hatchet, 1}, {Item::Branch, 40},
         {Item::RustedAxeHead, 1}, {Item::RustedHoeBlade, 1}, {Item::RustedScytheBlade, 1},
         {Item::RustedBillhookHead, 1}, {Item::RustedPickHead, 1}, {Item::Roots, 10},
-        {Item::Flowers, 10}, {Item::Timber, 4}});
+        {Item::Flowers, 10}, {Item::Kindling, 10}, {Item::Timber, 4}});
     const Item Outputs[] = {Item::Hatchet, Item::DiggingStick, Item::Scythe, Item::Billhook, Item::Pickaxe,
         Item::RoastedRoots, Item::HerbedRoots, Item::Firewood};
     const int OutputCounts[] = {1, 1, 1, 1, 1, 1, 1, 4};
@@ -2409,7 +2409,7 @@ void SelectedFoodGroupTransactions()
             CHECK(sim.GetLayout(0)->back().groupId == selected && sim.GetLayout(0)->back().quantity == 1);
             CHECK(sim.Serialize() == expected.Serialize());
             UnchangedFailure(sim, [&] { return sim.EatGroup(selected, revision); });
-            if (sim.GetState().hunger == 100.0)
+            if (sim.GetState().hunger == 100.0 && sim.GetState().energy == 100.0)
             {
                 UnchangedFailure(sim, [&] { return sim.EatGroup(selected, sim.GetRevision()); });
             }
@@ -3010,15 +3010,17 @@ void SparseEditScaleAndPayloadBounds()
             OK(sim.Harvest(branches.id, branches.position));
             ++actions;
             CHECK(static_cast<int>(sim.GetState().resourceEdits.size()) == actions);
-            if (actions % 20 == 0)
+            const auto size = sim.Serialize().size();
+            CHECK(size >= lastSize - 4);
+            lastSize = size;
+            // Each gather packs 5 branches and a kindling; empty the pack before it fills.
+            if (actions % 16 == 0)
             {
                 WorldStock(sim, {{Item::Knife, 1}, {Item::Hatchet, 1}});
                 // 256 harvests is far more work than one day's Energy; rest between batches.
                 Edit(sim, [](State& state) { state.energy = 100; }, false);
+                lastSize = sim.Serialize().size();
             }
-            const auto size = sim.Serialize().size();
-            CHECK(size >= lastSize - 4);
-            lastSize = size;
         }
     CHECK(actions == 256);
     CHECK(sim.GetState().resourceEdits.size() == 256);
@@ -4063,6 +4065,154 @@ void MvpWoodlandPlacements()
 
 }
 
+// A full stomach doesn't stop a snack that restores Energy she's short of.
+void SnackOnFullStomachRestoresEnergy()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Berries, 3}, {Item::Roots, 2}});
+    Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 40.0; });
+    const auto ate = sim.Eat(Item::Berries);
+    OK(ate);
+    CHECK(ate.message == "Ate Berries: Energy +6.");
+    CHECK(sim.GetState().hunger == 100.0 && Close(sim.GetState().energy, 46.0) && sim.Count(Item::Berries) == 2);
+    // Raw roots are still refused, full or not.
+    UnchangedFailure(sim, [&] { return sim.Eat(Item::Roots); });
+    // Eating a chosen food group follows the same rule.
+    OK(sim.EatGroup(Group(sim, Item::Berries), sim.GetRevision()));
+    CHECK(sim.Count(Item::Berries) == 1 && Close(sim.GetState().energy, 52.0));
+    // The last few points of Energy still count; the meal stops at 100.
+    Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 97.0; });
+    OK(sim.Eat(Item::Berries));
+    CHECK(sim.GetState().energy == 100.0 && sim.GetState().hunger == 100.0 && sim.Count(Item::Berries) == 0);
+    // Both meters full: nothing to gain, so the food is kept.
+    Stock(sim, {{Item::Berries, 1}, {Item::HerbedRoots, 1}});
+    Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 100.0; });
+    const auto full = sim.Eat(Item::Berries);
+    CHECK(!full.ok && full.message == "You are already full. Save this food for later.");
+    UnchangedFailure(sim, [&] { return sim.Eat(Item::HerbedRoots); });
+    UnchangedFailure(sim, [&] { return sim.EatGroup(Group(sim, Item::Berries), sim.GetRevision()); });
+    // Hungry but rested: food only, and the message says so.
+    Edit(sim, [](State& state) { state.hunger = 50.0; state.energy = 100.0; });
+    const auto fed = sim.Eat(Item::Berries);
+    OK(fed);
+    CHECK(fed.message == "Ate Berries: Food +12." && sim.GetState().hunger == 62.0);
+    // Full and tired with a cooked dish: Energy only.
+    Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 20.0; });
+    const auto dish = sim.Eat(Item::HerbedRoots);
+    OK(dish);
+    CHECK(dish.message == "Ate Herbed roots: Energy +18." && Close(sim.GetState().energy, 38.0));
+    Simulation loaded;
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(loaded.Serialize() == sim.Serialize());
+
+    Simulation failed;
+    Stock(failed, {{Item::Berries, 1}});
+    failed.AdvanceGameHours(120, Home);
+    CHECK(failed.GetState().failed);
+    UnchangedFailure(failed, [&] { return failed.Eat(Item::Berries); });
+}
+
+const RecipeIngredientAssessment* Ingredient(const RecipeAssessment& assessment, Item item)
+{
+    for (const auto& ingredient : assessment.ingredients) if (ingredient.item == item) return &ingredient;
+    return nullptr;
+}
+// Every successful cooked batch burns exactly one kindling; failures and other crafts burn none.
+void CookingBurnsOneKindlingPerBatch()
+{
+    CHECK(std::string(RecipeRequirements(Recipe::RoastedRoots)) ==
+        "2 Roots + 1 Kindling; nearby fueled fire (no pot needed)");
+    for (const Recipe recipe : {Recipe::RoastedRoots, Recipe::HerbedRoots})
+    {
+        const bool herbed = recipe == Recipe::HerbedRoots;
+        const Item dish = herbed ? Item::HerbedRoots : Item::RoastedRoots;
+        Simulation sim;
+        BuildingStock(sim);
+        const Point firePosition = CellCenter(-3, -1);
+        OK(sim.Place(Piece::Fire, -3, -1, 0, firePosition));
+        const int fireId = StructureId(sim, Piece::Fire, firePosition);
+        OK(sim.AddFuel(fireId, firePosition));
+        Stock(sim, {{Item::Roots, 4}, {Item::Flowers, 2}, {Item::Kindling, 1}});
+        auto assessment = sim.AssessRecipe(recipe, firePosition);
+        const auto* kindling = Ingredient(assessment, Item::Kindling);
+        CHECK(assessment.craftable && kindling && kindling->need == 1 && kindling->have == 1 && kindling->met);
+        CHECK(std::string(kindling->source) == "Fallen branches, saplings and old boughs");
+        const auto fuelOf = [&] {
+            for (const auto& piece : sim.GetState().structures) if (piece.id == fireId) return piece.fuelHours;
+            return -1.0;
+        };
+        const double fuel = fuelOf();
+        const double hour = sim.GetState().hour;
+        OK(sim.Craft(recipe, firePosition));
+        CHECK(sim.Count(Item::Kindling) == 0 && sim.Count(Item::Roots) == 2 && sim.Count(dish) == 1);
+        CHECK(sim.Count(Item::Flowers) == (herbed ? 1 : 2));
+        CHECK(sim.GetState().hour == hour && fuelOf() == fuel);
+
+        // Out of kindling: refused, nothing spent, and the book says why.
+        assessment = sim.AssessRecipe(recipe, firePosition);
+        kindling = Ingredient(assessment, Item::Kindling);
+        CHECK(!assessment.craftable && kindling && kindling->have == 0 && !kindling->met);
+        const auto refused = sim.Craft(recipe, firePosition);
+        CHECK(!refused.ok && refused.message.find("Kindling") != std::string::npos);
+        UnchangedFailure(sim, [&] { return sim.Craft(recipe, firePosition); });
+        // Kindling but too few roots, or no fire: nothing is burned.
+        Stock(sim, {{Item::Roots, 1}, {Item::Flowers, 2}, {Item::Kindling, 2}});
+        UnchangedFailure(sim, [&] { return sim.Craft(recipe, firePosition); });
+        Stock(sim, {{Item::Roots, 2}, {Item::Flowers, 2}, {Item::Kindling, 2}});
+        UnchangedFailure(sim, [&] { return sim.Craft(recipe, {firePosition.x + 5000.0, firePosition.y}); });
+        // A second batch takes the second kindling, and only that one.
+        OK(sim.Craft(recipe, firePosition));
+        CHECK(sim.Count(Item::Kindling) == 1 && sim.Count(Item::Roots) == 0);
+    }
+
+    Simulation hands;
+    Stock(hands, {{Item::Branch, 2}, {Item::RustedAxeHead, 1}, {Item::Kindling, 3}, {Item::Timber, 1}});
+    OK(hands.Craft(Recipe::HaftAxe, Home));
+    OK(hands.Craft(Recipe::SplitFirewood, Home));
+    CHECK(hands.Count(Item::Kindling) == 3 && hands.Count(Item::Firewood) == 4);
+}
+
+// Hand-gathered fallen branches come with one kindling each time they regrow, woodland and estate alike.
+void BranchesYieldRenewableKindling()
+{
+    Simulation sim;
+    Stock(sim, {});
+    const auto branch = Node(sim, ResourceKind::Branches);
+    CHECK(Close(sim.HarvestCost(branch.id), Exertion::GatherEnergy));
+    OK(sim.Harvest(branch.id, branch.position));
+    CHECK(sim.Count(Item::Branch) == 5 && sim.Count(Item::Kindling) == 1);
+    UnchangedFailure(sim, [&] { return sim.Harvest(branch.id, branch.position); });
+    Simulation loaded;
+    OK(loaded.Deserialize(sim.Serialize()));
+    UnchangedFailure(loaded, [&] { return loaded.Harvest(branch.id, branch.position); });
+    // Branches regrow after a day.
+    loaded.AdvanceGameHours(23.5, branch.position);
+    UnchangedFailure(loaded, [&] { return loaded.Harvest(branch.id, branch.position); });
+    loaded.AdvanceGameHours(1.0, branch.position);
+    CHECK(!loaded.GetState().failed);
+    OK(loaded.SetEnergy(100));
+    OK(loaded.Harvest(branch.id, branch.position));
+    CHECK(loaded.Count(Item::Branch) == 10 && loaded.Count(Item::Kindling) == 2);
+
+    // A save from before the item stocks carried their width loads, and gathering still gives kindling.
+    Simulation migrated;
+    Stock(sim, {{Item::Kindling, 4}});
+    OK(migrated.Deserialize(Encode(sim.GetState(), PositionalStockSaveVersion)));
+    CHECK(migrated.Count(Item::Kindling) == 4);
+    const auto other = Node(migrated, ResourceKind::Branches);
+    OK(migrated.Harvest(other.id, other.position));
+    CHECK(migrated.Count(Item::Kindling) == 5 && migrated.Count(Item::Branch) == 5);
+
+    Simulation estate;
+    estate.SetPlacements(ProvisionalEstatePlacements());
+    OK(estate.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const auto fallen = Node(estate, ResourceKind::Branches);
+    const int branches = estate.Count(Item::Branch);
+    const int kindling = estate.Count(Item::Kindling);
+    OK(estate.Harvest(fallen.id, fallen.position));
+    CHECK(estate.Count(Item::Branch) == branches + 5 && estate.Count(Item::Kindling) == kindling + 1);
+}
+
 int main()
 {
     Run("defaults and input validation", DefaultsAndValidation);
@@ -4084,6 +4234,9 @@ int main()
     Run("playtest skip to morning", SkipToMorning);
     Run("HUD requirements and zero-time action commits", RequirementsMatchTransactions);
     Run("pure structured recipe assessment", StructuredRecipeAssessment);
+    Run("a snack on a full stomach restores Energy", SnackOnFullStomachRestoresEnergy);
+    Run("each cooked batch burns exactly one kindling", CookingBurnsOneKindlingPerBatch);
+    Run("fallen branches give renewable kindling", BranchesYieldRenewableKindling);
     Run("default gameplay walkthrough", GameplayWalkthrough);
     Run("atomic inventory transactions", AtomicTransactions);
     Run("regrowth and persistent clearing", RegrowthAndClearing);
