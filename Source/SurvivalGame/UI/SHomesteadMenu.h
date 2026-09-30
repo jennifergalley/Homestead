@@ -83,7 +83,7 @@ public:
     bool IsPointerDraggingItem() const { return bPointerDraggingItem; }
     bool IsVirtualDraggingItem() const { return bVirtualDraggingItem; }
     // The hotbar row: the first row of her pack (Simulation/HomesteadPackRow.h), shown as ten cells
-    // above the pack grid (under both grids with a chest open), and what she has picked up to place
+    // above the pack grid (with a chest open, above the pack column's grid), and what she has picked up to place
     // in it (a pack or chest stack from "Move to a hotbar slot", or a cell being moved).
     int32 GetBookHotbarSlotCount() const { return HotbarCells.Num(); }
     TSharedPtr<SWidget> GetBookHotbarSlot(int32 Slot) const { return HotbarCells.IsValidIndex(Slot) ? HotbarCells[Slot] : nullptr; }
@@ -95,6 +95,9 @@ public:
     // "Move to a hotbar slot": hold this stack and move focus to the row to choose a cell.
     void BeginPlacingOnHotbar(const FHomesteadRow& Row);
     float GetContentScrollOffset() const { return Scroll ? Scroll->GetScrollOffset() : 0.0f; }
+    float GetContentScrollTop() const { return Scroll ? Scroll->GetCachedGeometry().GetAbsolutePosition().Y : 0.0f; }
+    // Left edge of the pack's grid column with a chest open (0 without one).
+    float GetPackColumnLeft() const { return PackDropArea ? PackDropArea->GetCachedGeometry().GetAbsolutePosition().X : 0.0f; }
     float GetContentScrollBottom() const
     {
         return Scroll ? Scroll->GetCachedGeometry().GetAbsolutePosition().Y

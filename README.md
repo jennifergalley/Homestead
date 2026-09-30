@@ -248,8 +248,8 @@ while TSR upscales the world.
 
 Gather berries and eat them from the Pack page, or keep food on the hotbar and eat it with the
 left mouse button / RT while it's selected. As in Coral Island, the hotbar is the first row of
-your pack: its ten cells (keys 1-0) hold real stacks, head the Pack page, and run under both
-grids with a chest open. New things land in the first empty cell. Drag any stack from your pack
+your pack: its ten cells (keys 1-0) hold real stacks, head the Pack page (and the pack column
+with a chest open). New things land in the first empty cell. Drag any stack from your pack
 or an open chest onto the cell you want, a cell onto another, or a cell back into your pack or the
 chest: onto an empty place it moves, onto the same item it merges, otherwise the two swap. A stack
 used up leaves its cell empty. On a controller, pick a stack with A and carry it up into the row,
