@@ -857,6 +857,15 @@ requirement.
   targeted EstateSmoke passes with lamp coverage, about 59.9 fps and zero log/asset errors, while
   targeted FullLoop and Smoke also pass. Integration is recutting distinct v4 Development and
   rerunning all six packaged suites; no delivery claim exists.
+
+  **v4 Development gate passed:** `Build\Playtest-0930-hotbar-top-v4-dev` held a 1.95 GB physical
+  minimum (above the 1.5 GB abort guard), native Release 10/10 and Editor/Game Unity pass, and all
+  six packaged suites passed first try: Smoke 57.51, Clearing 53.98, Hotbar 52.50, NativeMenu 56.91,
+  FullLoop 54.67 and EstateSmoke woods 60.00 fps. The corrected chest row is above the PACK grid in
+  the earlier NativeMenu 720/4K evidence. Directional navigation's first 52 steps pass; its later
+  Settings `visible=0` failure remains pre-existing. Remaining gates are a copied current-save
+  packaged first-row reorder/stock/F5/F9 check, then Shipping reuse-cooked zero-listener/save/shortcut
+  verification. No delivery has occurred yet.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
