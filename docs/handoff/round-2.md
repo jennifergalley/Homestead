@@ -874,6 +874,17 @@ requirement.
   Automated D-pad passed, while a manual physical gamepad was not observed; the later DirNav
   Settings step remains a pre-existing failure. Shipping reuse-cooked/hash-identical/no-listener,
   copied-save Shipping F5/F9 and any shortcut promotion remain pending.
+
+  **Shipping unity repair `67d6b961`:** moved `HomesteadWorldResources.cpp` called
+  `AHomesteadCharacter::LoadHandStone` / `StonePileSize` through an accidental unity neighbour,
+  failing monolithic Shipping with C2653 at lines 190/196. One direct
+  `#include "HomesteadCharacter.h"` fixes the dependency; no behavior, content or save change.
+  Combined Editor/Game and Shipping `-ReuseCooked` rebuilds now pass (candidate SHA begins
+  `7C65AAF0` and ends `281EB`; cooker/UnrealPak are clean). v4 six suites, targeted NativeMenu
+  720/4K chest-row screenshots and copied Jenny-save physical row swap/F5/F9 stock evidence still
+  pass; DirNav step 53 Settings `visible=0` remains known. This candidate is **not shipped**:
+  copied-save Shipping, no-listener, freshness and shortcut checks remain pending; hair is
+  inconclusive and manual human pad was not observed.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
