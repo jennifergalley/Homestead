@@ -82,18 +82,22 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / package snapshot (2026-09-29 17:40):** Integration delivered the evening playtest
-and closed its editor. Menu has the next exclusive editor slot for UI visual work; Props headless
-bramble syncs separately; Water remains paused. Partial bramble/sapling/under-tier, Menu pickup/pail
-gauge/store card, and Water no-pail prompt/lake trail/night-light work are excluded. The orchestrator
-continues to enforce the three-hands-on and two-Unreal-process caps.
+**Current slot / package snapshot (2026-09-29 18:39):** Integration pushed `main` `5d11ceed` with
+11 accepted picks, pail footer `d2c8b4b0` and docs merge `28cc8f6c`; Editor/Game builds are green and
+the editor is closed. UAT/cook package `Build\Playtest-0929night` is running; all other lanes keep
+Unreal/UBT/Blender off until `packaging done`. Six packaged suites plus copied-save smoke decide
+promotion. `Playtest-0929eve` remains the current `Homestead Estate.lnk` target until night evidence
+passes and retargeting is safe.
 
-**Integration local validation batch `c9481e38` (unshipped):** on local `main` `50b2+`, Integration
+**Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
+evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
+passes. The batch applied Water
 applied Water no-pail `20dd9cd1` + `069e493a` and forage freeze `1010aa2e`; Props bramble
 `1deb02ab` / `e37288ef` / `4d8bfecc`, sprint `7475b435`, Hoe hint `391f08f7`, Bed-v2 `aa375409`;
 and Menu Store `1b2b97eb` + pail gauge `9d5da35d`. Native passes 9/9, forage-id Python 7/7, and
-Editor/Game builds plus all exclusive PIE checks pass; editor is closed with zero UE. **No push or
-package has occurred.**
+Editor/Game builds plus all exclusive PIE checks pass; editor is closed with zero UE. The accepted
+delivery note must disclose that old canes-bed deconstruction refunds four Hay under intentional
+current-cost compatibility semantics, not a save migration.
 
 - Water prompt: no-pail/chest/empty/full carried states show the exact EmptyPailText; no-pail-anywhere
   remains native-only.
@@ -108,8 +112,8 @@ package has occurred.**
   Hay; old canes-bed deconstruct refunding four Hay is native-only intentional current-cost
   compatibility behavior. Forage-ID freeze remains source-only.
 
-Integration is authorized to cherry-pick only pail-footer `4545a8a2`, build and PIE-check mouse/pad,
-then, if it passes, push these verified picks and create a new separate Playtest package/six suites.
+Pail footer `4545a8a2` is accepted as `d2c8b4b0`: native 9/9, Editor/Game build and PIE verify
+`Pail (Carried) Water 5/6` footer with KBM and gamepad D-pad plus 60 px hotbar five-of-six state.
 Menu pickup `b2a49e36` + `cb3f40c7`, weed clip and scythe remain excluded.
 
 ## 4 PM playable build
