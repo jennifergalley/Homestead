@@ -419,6 +419,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
         ];
     }
+    if (SeenPage == 0)
+    {
+        // The same ten slots whenever the inventory is open; with a chest open they run across the
+        // book under both grids (only pack stacks can be put on them).
+        InventoryColumn->AddSlot().AutoHeight().Padding(0, Storage ? 8 : 10, 0, 4)
+        [ Text(Storage ? TEXT("Hotbar  (pack items only)") : TEXT("Hotbar"), 16) ];
+        InventoryColumn->AddSlot().AutoHeight().HAlign(Storage ? HAlign_Center : HAlign_Left)[ BuildBookHotbar() ];
+    }
     if (SeenPage == 0 && !Storage)
     {
         TSharedPtr<SHorizontalBox> EquipmentBar;

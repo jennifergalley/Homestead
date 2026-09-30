@@ -212,6 +212,12 @@ void SHomesteadMenu::Refresh()
     bRecovery = Controller->IsFailed() && !Controller->IsBookOpen();
     const FString OldKey = Entries.IsValidIndex(ContentSelection) ? RowKey(Entries[ContentSelection]) : FString();
     SeenPage = Controller->BookPage();
+    // A held pack stack or slot only means something on the inventory page.
+    HotbarCells.Reset();
+    if (bHotbarPointerDown) HeldHotbarSlot = INDEX_NONE;
+    bHotbarPointerDown = bHotbarPointerDragging = false;
+    PointerHotbarTarget = INDEX_NONE;
+    if (SeenPage != 0) CancelHotbarHolds();
     if (TabBar) TabBar->SetVisibility(SeenPage == 4 ? EVisibility::Collapsed : EVisibility::Visible);
     Controller->RefreshMenuPortrait();
     Entries.Reset(); RowIndices.Reset(); Cells.Reset();
