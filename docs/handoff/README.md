@@ -70,6 +70,23 @@ notification (async shells / `initial_wait`); a sleep loop isn't. For an editor 
 lane's Unreal process is already running, schedule a wake-up about 5 minutes out and end the turn. The orchestrator uses the same pattern: it checks in every 30 minutes
 through its own session automation.
 
+## Jenny's packaged game memory safety
+
+The two-Unreal-process cap is not sufficient by itself when Jenny launches a Shipping/packaged Estate
+game: an editor left open alongside it drove Windows available memory to **143 MB** on 2026-09-29.
+Treat a user-launched game as a memory-priority event:
+
+1. **Never touch Jenny's PID, save or shortcut.** Do not close, focus, kill or retarget her game.
+2. Send the editor owner an urgent `mailbox_send`; that owner closes **only its own** editor (normally
+   `Scripts\Stop-MyEditor.ps1`), then ends its turn. The coordinator/orchestrator may alert, but never
+   kills an arbitrary process.
+3. Do not launch another editor, UBT, UAT, Blender or packaged test until the owner has closed its
+   process and memory has recovered. If a command already owned by Integration is safely finishing,
+   let it finish, then pause future work.
+
+The reported low-memory symptom is operational contention, not a reason to weaken Windows firewall
+alerts, change the user's paging settings, or interfere with her playtest.
+
 ## Reaching a busy session fast: the mailbox
 
 `send_session_message` is delivered only when the target's turn ends. That can be hours for an
