@@ -202,6 +202,11 @@ FString AHomesteadController::FocusActions() const
                             + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
                     }
                     if (Overgrowth->byHand) return Hand;
+                    // Too worn for it: name the upgrade whichever tool is in hand, rather than
+                    // suggesting she select a tool that would only be refused (Jenny, 09-29).
+                    if (const Homestead::ToolTier Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
+                        Sim.GetToolTier(Overgrowth->tool) < Needed)
+                        return UTF8_TO_TCHAR(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str());
                     return ToolPrompt(Sim, Homestead::ToolItem(Overgrowth->tool), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
                 }
                 // Loose stones are small enough to pick up by hand, unlike the rocks the pickaxe breaks.

@@ -3945,6 +3945,43 @@ void WeedCreepNearOvergrowth()
     OK(loaded.ClearOvergrowth(regrownId, Item::Scythe, PlacedNode(loaded, regrownId).position));
 }
 
+void WrongOrUnderTierToolIsNonActionable()
+{
+    // Jenny, 2026-09-29: a wrong or too-worn tool must not look like it's doing anything. Every
+    // overgrowth kind on the estate, against every clearing tool at every tier: the swing is allowed
+    // only for its own tool at or above the tier it (or its placement) asks for; otherwise the
+    // attempt costs no energy, lands no swing and yields nothing.
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const Item tools[] = {Item::Hatchet, Item::Billhook, Item::Scythe, Item::Pickaxe};
+    for (Item tool : tools) OK(sim.GrantItems(tool, 1));
+    std::set<std::pair<int, int>> seen;
+    int refusals = 0;
+    for (const ResourceNode& node : std::vector<ResourceNode>(sim.GetState().resources))
+    {
+        const auto* info = FindOvergrowth(node.kind);
+        if (!info || node.cleared || !seen.insert({static_cast<int>(node.kind), static_cast<int>(node.minTier)}).second) continue;
+        const ToolTier needed = std::max(info->minTier, node.minTier);
+        for (int tier = 0; tier < ToolTierCount; ++tier)
+        {
+            for (Item tool : tools) OK(sim.SetToolTier(ToolForItem(tool), static_cast<ToolTier>(tier)));
+            for (Item tool : tools)
+            {
+                const bool fits = ToolForItem(tool) == info->tool && static_cast<ToolTier>(tier) >= needed;
+                const auto check = sim.CheckOvergrowth(node.id, tool, node.position);
+                CHECK(check.ok == fits);
+                if (fits) continue;
+                ++refusals;
+                if (ToolForItem(tool) == info->tool) CHECK(check.code == ResultCode::ToolTier && check.message == NeedsToolMessage(info->tool, needed));
+                const int swings = sim.OvergrowthSwings(node.id);
+                UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(node.id, tool, node.position); });
+                CHECK(sim.OvergrowthSwings(node.id) == swings && !PlacedNode(sim, node.id).cleared);
+            }
+        }
+    }
+    CHECK(seen.size() >= 20 && refusals > 100);
+}
+
 void EveryHandGatherHasItsOwnPose()
 {
     // Jenny, 2026-09-29: the generic slight-knee-bend gather looked wrong. Everything she can take
@@ -4576,6 +4613,7 @@ int main()
     Run("manor clear-out field placement", ManorClearoutField);
     Run("the ruin's loose slate and rubble can be cleared", RuinDebrisIsClearable);
     Run("every hand gather has its own pose", EveryHandGatherHasItsOwnPose);
+    Run("a wrong or under-tier tool is non-actionable", WrongOrUnderTierToolIsNonActionable);
     Run("clear-out rubbish, nettles, stumps and spoiled ground", ClearoutKindsAndSpoiledGround);
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);
