@@ -1,6 +1,23 @@
 # Design
 
-## Route constraints (Water, 2026-09-30, provisional until the route data lands)
+## Route data (Water, final: `jennifergalley-cove-route` @010c7003)
+
+The schedule is in `openspec/changes/add-cove-route/design.md` and the pivots in
+`Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.inc` (cm, this kit's conventions). The route
+runs 506 m from the manor's front door (-260.5, -654.5) m down to the sand west of the river mouth
+(-556, -521) m, falling from 86.5 m to 3.7 m.
+
+| Piece | Count | Sizes |
+| --- | --- | --- |
+| Flights | 18, 188 risers | rise 16.6-17.0 cm, going 30.0-34.1 cm, 7-12 risers each; pitches 26 (2 flights), 28 (11), 29.4 (5) |
+| Landings | 15, plus 2 corner landings | 1.23-2.30 m long; corner landings 1.5 m square, turning 18 and 21 degrees |
+| Kerbs | 148 | 1 m straights |
+| Rail bays | 82 | 39 level, 43 raked; 35 are mirrored (scale Y = -1) |
+| Fingerposts | 2 | front door, yaw 159; head of the cliff steps, yaw 153 |
+
+The first-draft constraints below are superseded where they differ.
+
+## First-draft constraints (Water, 2026-09-30)
 
 | Item | Value |
 | --- | --- |
@@ -31,8 +48,27 @@
   reading "To the Cove": incised letters painted white on the weathered oak. The arm points along the
   post's +X, so Water sets the yaw.
 
-## Pivots and orientation
+## Agreed with Water (2026-09-30)
 
+- **Treads.** A flight of n risers has n treads, i = 0..n-1, at foot nosing + i × (going along the yaw,
+  rise). The top tread is level with the landing or path above it: its top face is that landing's
+  surface.
+- **Landings.** Pivot on the top face at the centre of the downhill edge, +X uphill. Lengths run
+  1.23-2.30 m, so the kit provides a 0.6 m slab (`SM_CoveLandingSlab`) that Water tiles along X,
+  scaling each run by at most ±10% so the stone never stretches visibly. The 1.2 m `SM_CoveLanding`
+  stays for the stock lengths.
+- **Corner wedges.** `SM_CoveLandingWedge`: a granite wedge that closes the outside of a corner
+  landing's turn, where cut ground would otherwise show 5 cm down. It is authored for 21 degrees (pivot
+  at the inner corner on the top face, +X along the incoming leg) and scaled along Y for 18 degrees.
+- **Mirrored rails.** Water mirrors 35 raked bays with scale Y = -1 so their rake runs the right way on
+  the far side. Every rail piece is therefore symmetric across its rail line (the XZ plane): posts,
+  shoe plates, nails and chamfers all match on both faces, with no text, no one-sided wear and no
+  directional grain decal. Unreal flips the winding under a negative scale, so shading stays correct.
+- **Ground.** Water cuts the ground 5 cm under tread and landing tops for 2.2 m either side; the 20 cm
+  tread block with its 5 cm skirt covers the cut.
+- **Fingerposts.** Yaws of 159 degrees (front door) and 153 degrees (head of the cliff steps).
+
+## Pivots and orientation
 Blender recipes are authored in metres, Z up, and the kit puts the pivot at the bottom centre. The
 export mirrors Y, so the directions below are given in the engine's frame, which is what Water's
 generator uses.
@@ -45,7 +81,7 @@ generator uses.
 - **Rail.** Pivot at the foot of the downhill post, on the path surface. +X runs along the path (uphill on
   a raked bay) and +Y points to the drop. For the other side of the path, rotate the piece 180 degrees
   about Z at the other edge; the pieces are symmetric across their rail line, so one set serves both sides.
-- **Fingerpost.** Pivot at the foot of the post; the arm points along +X.
+- **Fingerpost.** Pivot at the foot of the post; the arm points along +X. The arm's lettering reads on both faces, so either side of the post is fine.
 
 ## Collision
 
