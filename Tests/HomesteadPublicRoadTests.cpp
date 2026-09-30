@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <string>
+#include <string>
 #include <vector>
 
 #include <cmath>
@@ -226,6 +227,43 @@ int main()
             Check(found, "an old placement moved or vanished", placement.id);
         }
         std::printf("wild roots: %d new, %d within 110 m of the standing room\n", roots, near);
+    }
+
+    // Save identity: every frozen forage row (Tests/Data/HomesteadForageManifest.inc) is still in the table
+    // with its kind and position, and a save that picked some of them keeps those edits on the same nodes.
+    {
+        struct Frozen { int id; ResourceKind kind; Point at; };
+        std::vector<Frozen> frozen;
+        auto manifest = [&](int id, ResourceKind kind, double x, double y) { frozen.push_back({id, kind, {x, y}}); };
+#include "Data/HomesteadForageManifest.inc"
+        Check(frozen.size() >= 59, "frozen forage rows", static_cast<double>(frozen.size()));
+        for (const Frozen& row : frozen)
+        {
+            const EstatePlacement* now = nullptr;
+            for (const EstatePlacement& placement : ProvisionalEstatePlacements().placements)
+                if (placement.id == row.id) now = &placement;
+            Check(now && now->kind == row.kind && Distance(now->position, row.at) < 0.05, "a frozen forage row moved, changed kind or vanished", row.id);
+        }
+        Simulation sim;
+        Check(sim.NewEstateGame(estateLayout, ProvisionalEstatePlacements()).ok, "forage save game");
+        std::vector<int> picked;
+        for (const Frozen& row : frozen)
+            if (picked.size() < 3 && (row.id == 582128 || row.id == 581005 || row.id == 582100))
+                if (sim.Harvest(row.id, row.at).ok) picked.push_back(row.id);
+        Check(picked.size() == 3, "picked a bramble, a root patch and a roadside stop", static_cast<double>(picked.size()));
+        const std::string saved = sim.Serialize();
+        Simulation loaded;
+        loaded.SetLayout(estateLayout);
+        loaded.SetPlacements(ProvisionalEstatePlacements());
+        Check(loaded.Deserialize(saved).ok, "forage save reloads");
+        for (const Frozen& row : frozen)
+        {
+            const bool wasPicked = std::find(picked.begin(), picked.end(), row.id) != picked.end();
+            Check(loaded.CanHarvest(row.id) != wasPicked, "a picked edit landed on the wrong node", row.id);
+            for (const auto& node : loaded.GetState().resources)
+                if (node.id == row.id)
+                    Check(node.kind == row.kind && Distance(node.position, row.at) < 0.05, "reloaded node moved", row.id);
+        }
     }
 
     std::printf("forage: %d new estate brambles, %d roadside nodes (%d brambles, to %.0f m), %zu brambles in all\n",
