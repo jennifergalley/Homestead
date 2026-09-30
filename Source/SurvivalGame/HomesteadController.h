@@ -94,7 +94,6 @@ public:
     const FHomesteadAppearance& GetAppearance() const { return Appearance; }
     bool HasHeroine() const;
     const Homestead::State& State() const { return Sim.GetState(); }
-    Homestead::Result SpendSprintEnergy(double RealSeconds);
     const Homestead::Simulation& Simulation() const { return Sim; }
     int32 BookPage() const { return Page; }
     int32 SelectedRow() const { return Selection; }

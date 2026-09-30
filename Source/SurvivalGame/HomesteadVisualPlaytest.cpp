@@ -1399,7 +1399,8 @@ void AHomesteadVisualPlaytest::Finish()
         && bStationarySprintSafe && bSprintMenuCancelled && bSprintReloaded
         && bPortraitReady
         && WalkDistance > 30.0 && SprintDistance / 3.0 > WalkDistance / 2.0 * 1.3
-        && SprintStartEnergy - SprintEndEnergy > 0.5 && SprintStartEnergy - SprintEndEnergy < 2.0
+        // Sprint is free: only the slow awake drain passes while she runs.
+        && SprintStartEnergy - SprintEndEnergy >= 0.0 && SprintStartEnergy - SprintEndEnergy < 0.5
         : bGaitReview ? PassIndex >= Passes.Num() && CaptureIndex > 0
         : bPresentationDiagnostics ? PassIndex >= Passes.Num() && !Passes.IsEmpty() && CaptureIndex > 0
         : bClearRoute ? bCleared && bObservedClear && bObservedHatchet && bClearRecovered

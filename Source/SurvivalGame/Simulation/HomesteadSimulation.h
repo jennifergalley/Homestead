@@ -399,6 +399,8 @@ constexpr double CookEnergy = 0.3;
 constexpr double SplitFirewoodEnergy = 1.5;
 constexpr double BuildEnergy = 1.5;
 constexpr double GarmentEnergy = 0.8;
+// Sprinting costs no Energy of its own (Jenny, round 2); she can only start or keep sprinting above this.
+constexpr double SprintFloor = 10.0;
 constexpr double TillEnergy = 2.0;
 constexpr double PlantEnergy = 0.4;
 constexpr double WaterEnergy = 0.4;
@@ -602,7 +604,9 @@ public:
     Result PassDaysForPlaytest(double days, bool tend, Point player);
     // Playtest aid for screenshots: set every planted plot's growth (0-1) directly.
     Result SetCropGrowthForPlaytest(double growth);
-    Result SpendSprintEnergy(double realSeconds);
+    // Whether she may sprint now: not failed and Energy above Exertion::SprintFloor. Running costs
+    // nothing extra; the ordinary awake drain and work costs are what bring her down to the floor.
+    Result CanSprint() const;
     // Whether she has the Energy for work costing `cost` (see Exertion); ok when she does.
     Result CheckExertion(double cost) const;
     // What harvesting or clearing a node would cost her.

@@ -705,22 +705,17 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Avatar->GetCharacterMovement()->IsMovingOnGround()
                 && !Controller->bPendingSpawn;
         }, 0.8f);
-    Add(TEXT("CONTROLLED Simulation exertion reaches exactly the 10-Energy reserve"),
+    Add(TEXT("CONTROLLED Simulation Energy set to exactly the 10-Energy sprint floor"),
         [this, ReserveEnergy]()
         {
-            for (int32 Index = 0; Index < 26; ++Index)
+            // Sprint costs nothing, so the fixture sets Energy directly instead of running it down.
+            const auto Result = Controller->Sim.SetEnergy(10.0);
+            if (!Result)
             {
-                const auto Result = Controller->Sim.SpendSprintEnergy(10);
-                if (!Result)
-                {
-                    Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
-                    return;
-                }
+                Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+                return;
             }
             *ReserveEnergy = Controller->State().energy;
-            if (!FMath::IsNearlyEqual(*ReserveEnergy, 10.0, 0.001))
-                Finish(false, FString::Printf(
-                    TEXT("Sprint authority did not clamp to 10 Energy: %.5f"), *ReserveEnergy));
         },
         [this, ReserveEnergy]() { return FMath::IsNearlyEqual(*ReserveEnergy, 10.0, 0.001)
             && Controller->State().energy <= 10.0 && Controller->State().energy > 9.9; });

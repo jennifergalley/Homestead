@@ -87,7 +87,7 @@ public:
     bool IsSprinting() const { return bSprintActive; }
     // Sprint is a toggle (Shift / L3): on until pressed again, a load or new game, or she tires.
     bool IsSprintOn() const { return bSprintOn; }
-    // Simulation::SpendSprintEnergy stops at this much Energy; below it she can't sprint.
+    // Sprint itself costs nothing; at or below this Energy (Simulation::CanSprint) she can't sprint.
     static constexpr double SprintEnergyFloor = 10.0;
     // L3 (on press) and a tap of Shift (on release; AHomesteadController::TrackSprintShift) flip it.
     void RequestSprintToggle();
