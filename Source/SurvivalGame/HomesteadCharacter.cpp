@@ -59,6 +59,8 @@ TAutoConsoleVariable<float> CVarCarryMachete(TEXT("homestead.CarryMachete"), -1.
 TAutoConsoleVariable<float> CVarCarryKnife(TEXT("homestead.CarryKnife"), -1.0f, TEXT("Knife carry tilt (deg)."));
 
 
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadHair, Log, All);
+
 const TCHAR* const MetaHumanRoot = TEXT("/Game/Characters/Heroine_MH");
 
 template <typename T>
@@ -715,7 +717,8 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         if (FCString::Strcmp(Spec.Component, TEXT("MetaHumanHair")) == 0)
         {
             // Calmer than the stock groom: less inherited body motion and more damping, so turns don't fling it.
-            // UpdateHairMotion raises the inherited motion a little at a sprint.
+            // UpdateHairMotion raises the inherited motion a little at a sprint. The material and force overrides
+            // below are tuned for this long groom only; ApplyMetaHumanLook turns them off for the other styles.
             FHairSimulationSettings& Sim = Groom->SimulationSettings;
             Sim.SimulationSetup.LinearVelocityScale = CVarHairLinearWalk.GetValueOnGameThread();
             Sim.SimulationSetup.AngularVelocityScale = CVarHairAngularWalk.GetValueOnGameThread();
@@ -901,6 +904,16 @@ void AHomesteadCharacter::ApplyMetaHumanLook()
             return;
         }
         MetaHumanHair->SetGroomAsset(Asset, Binding);
+        // The component's physics overrides (bend stiffness 0.15, collision radius 5 cm, air drag 1...)
+        // were tuned for the long assembled groom and replace every group's authored values. On the stock
+        // bobs, updos and ponytail they are 3-20x stiffer, 2-50x wider and 10x draggier than authored, so a
+        // few guides get shoved off the scalp and held there as rigid rods and fans (Jenny's playtest,
+        // 2026-09-29). Every other style simulates with its own asset physics; the calmer inherited
+        // motion (SimulationSetup velocity scales, UpdateHairMotion) still applies to all of them.
+        MetaHumanHair->SimulationSettings.bOverrideSettings = Style == 0;
+        MetaHumanHair->ResetSimulation();
+        UE_LOG(LogHomesteadHair, Log, TEXT("Heroine hairstyle %s: %s simulation settings."), *Groom,
+            Style == 0 ? TEXT("tuned override") : TEXT("the groom's own"));
         AppliedMetaHair = Style;
         bHairHasLastHead = false;
     }
