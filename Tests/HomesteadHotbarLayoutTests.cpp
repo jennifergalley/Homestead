@@ -145,7 +145,8 @@ void SavedLayoutsLoadBack()
     MoveHotbarSlot(slots, 0, 5);
     const std::vector<int> stored(slots.begin(), slots.end());
     CHECK(SanitizeHotbarLayout(stored, 3) == slots);
-    CHECK(SanitizeHotbarLayout(std::vector<int>(NewGameLayout().begin(), NewGameLayout().end()), 3) == NewGameLayout());
+    const HotbarLayout fresh = NewGameLayout();
+    CHECK(SanitizeHotbarLayout(std::vector<int>(fresh.begin(), fresh.end()), 3) == fresh);
     // A seed she has none of keeps its slot (the book shows it; the world hotbar shows it empty),
     // so it comes back when she buys more.
     Simulation sim;
@@ -163,6 +164,12 @@ void SavedLayoutsLoadBack()
     const HotbarLayout shortOne = SanitizeHotbarLayout({V(Item::Hatchet)}, 3);
     CHECK(shortOne[0] == V(Item::Hatchet));
     for (int slot = 1; slot < HotbarSize; ++slot) CHECK(shortOne[slot] == HotbarEmpty);
+    // An old save with no hotbar array at all: current layout stays empty; layout 0 gains the defaults.
+    const HotbarLayout none = SanitizeHotbarLayout({}, 3);
+    for (int slot = 0; slot < HotbarSize; ++slot) CHECK(none[slot] == HotbarEmpty);
+    const HotbarLayout aged = SanitizeHotbarLayout({}, 0);
+    CHECK(aged[7] == V(Item::OilLamp) && aged[0] == V(Item::Billhook) && aged[1] == V(Item::Scythe)
+        && aged[2] == V(Item::Pickaxe) && aged[3] == V(Item::Berries) && aged[4] == HotbarEmpty);
 }
 
 void OlderLayoutsMigrate()

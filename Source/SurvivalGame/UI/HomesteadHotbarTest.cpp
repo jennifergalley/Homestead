@@ -428,6 +428,34 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this]() { Tap(EKeys::One); Tap(EKeys::F9); },
         [this]() { return Controller->SelectedHotbarIndex() == 3
             && Controller->HotbarSnapshot()[3].Tool == Item::Pickaxe; });
+    // An old save written before the hotbar existed has an empty HotbarSlots array (no data pointer):
+    // applying it must not crash, and it gains the layout-0 migration without touching her stock.
+    const auto OldSaveWorld = MakeShared<std::string>();
+    Add(TEXT("An old save with an empty hotbar array loads and gains the default migration"),
+        [this, OldSaveWorld]()
+        {
+            UHomesteadSave* Save = Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual")));
+            if (!Save) { Finish(false, TEXT("The manual save to age is unavailable.")); return; }
+            Save->HotbarSlots.Empty();
+            Save->HotbarLayout = 0;
+            Save->SelectedHotbarSlot = 0;
+            *OldSaveWorld = TCHAR_TO_UTF8(*Save->SimulationData);
+            if (!Controller->ApplySave(*Save)) Finish(false, TEXT("The aged save with an empty hotbar did not apply."));
+        },
+        [this, OldSaveWorld]()
+        {
+            const auto Slots = Controller->HotbarSnapshot();
+            return Slots.Num() == 10 && Slots[7].Tool == Item::OilLamp && Slots[7].Assigned
+                && Slots[0].Tool == Item::Billhook && Slots[1].Tool == Item::Scythe
+                && Slots[2].Tool == Item::Pickaxe && Slots[3].Tool == Item::Berries
+                && !Slots[4].Assigned && !Slots[9].Assigned
+                && Controller->SelectedHotbarIndex() == 0
+                && Controller->Simulation().Serialize() == *OldSaveWorld;
+        });
+    Add(TEXT("Reloading the current save restores her own hotbar"),
+        [this]() { Tap(EKeys::F9); },
+        [this]() { return !Controller->bPendingSpawn && Controller->SelectedHotbarIndex() == 3
+            && Controller->HotbarSnapshot()[3].Tool == Item::Pickaxe; }, 0.8f);
     Add(TEXT("Settle the loaded pawn before ordinary tool approaches"),
         []() {}, [this]() { return !Controller->bPendingSpawn; }, 0.8f);
     Add(TEXT("Approach a sapling with the Billhook selected"),

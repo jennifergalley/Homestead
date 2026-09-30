@@ -680,8 +680,12 @@ void AHomesteadController::ResetHotbar()
 
 void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Selected, int32 Layout)
 {
-    // The rules (and their native tests) live in Simulation/HomesteadHotbarLayout.h.
-    const auto Clean = Homestead::SanitizeHotbarLayout(std::vector<int>(Slots.GetData(), Slots.GetData() + Slots.Num()), Layout);
+    // The rules (and their native tests) live in Simulation/HomesteadHotbarLayout.h. Copied element
+    // by element: an old save's empty array has no data pointer to take a range from.
+    std::vector<int> Saved;
+    Saved.reserve(Slots.Num());
+    for (const int32 Value : Slots) Saved.push_back(Value);
+    const auto Clean = Homestead::SanitizeHotbarLayout(Saved, Layout);
     HotbarSlots.Init(-1, 10);
     for (int32 Index = 0; Index < 10; ++Index) HotbarSlots[Index] = Clean[Index];
     SelectedHotbarSlot = FMath::Clamp(Selected, 0, 9);
