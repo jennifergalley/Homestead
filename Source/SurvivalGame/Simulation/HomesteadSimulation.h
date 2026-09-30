@@ -548,6 +548,11 @@ public:
     Result GrantItems(Item item, int count);
     // Till one garden square (garden coordinates, see GardenCell) with the stone hoe.
     Result Till(int cellX, int cellY, Point player);
+    // Side-effect-free: would Till, Water or Weed succeed now? The same refusal, or ok (the world's garden
+    // outline shows it before she acts). Till/Water/Weed call these first.
+    Result CheckTill(int cellX, int cellY, Point player) const;
+    Result CheckWater(int plotId, Point player) const;
+    Result CheckWeed(int plotId, Point player) const;
     Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
     Result Water(int plotId, Point player);
     Result Weed(int plotId, Point player);

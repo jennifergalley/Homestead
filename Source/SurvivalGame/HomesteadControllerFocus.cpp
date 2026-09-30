@@ -4,6 +4,7 @@
 #include "HomesteadControllerText.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadGardenTarget.h"
 #include "Simulation/HomesteadItems.h"
 #include "Simulation/HomesteadOvergrowth.h"
 
@@ -39,10 +40,9 @@ void AHomesteadController::UpdateFocus()
     // win): the square her reach lands in, 60 cm ahead of her, takes the focus.
     if (const APawn* Avatar = GetPawn(); Avatar && !State().plots.empty())
     {
-        constexpr double GardenReachAheadCm = 60.0;
         const FVector Forward = Avatar->GetActorForwardVector();
-        const int ReachX = Homestead::GardenCell(Position.x + Forward.X * GardenReachAheadCm);
-        const int ReachY = Homestead::GardenCell(Position.y + Forward.Y * GardenReachAheadCm);
+        const int ReachX = Homestead::GardenCell(Position.x + Forward.X * Homestead::GardenReach::PailAheadCm);
+        const int ReachY = Homestead::GardenCell(Position.y + Forward.Y * Homestead::GardenReach::PailAheadCm);
         for (const auto& Plot : State().plots)
             if (Plot.cellX == ReachX && Plot.cellY == ReachY)
             {
@@ -297,6 +297,9 @@ FString AHomesteadController::FocusActions() const
         // Food on the hotbar is eaten with A / E (or X / F) when there's nothing else to use them on.
         if (const auto Food = SelectedHotbarFood(); Food != Homestead::Item::Count && Sim.Count(Food) > 0)
             return A + TEXT(" Eat ") + Text(Homestead::ItemName(Food)).ToLower();
+        // With the hoe out, a red outline says why the square ahead can't be tilled (UpdateGardenOutline).
+        if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick && !GardenOutlineReason.IsEmpty())
+            return GardenOutlineReason;
         return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
