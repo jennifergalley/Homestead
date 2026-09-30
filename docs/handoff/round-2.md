@@ -113,6 +113,17 @@ target. Props has a headless targeted fix slot during UAT. Integration may finis
 but the night package remains **provisional, not delivered** until the fix has targeted native/PIE
 evidence and a repackage passes. Preserve the prior verified `Playtest-0929eve` build and shortcut.
 
+**Props headless fix `61957b51`:** cleanly based on `main` `144acc7b`, native 9/9, no UE/PIE or
+shipping claim. `HeldToolFocus` now chooses aimed forward overgrowth over a nearer matching-tool
+target behind while preserving forageables and non-overgrowth plots/drops/store/water. Swing uses
+`FindAimedOvergrowth` only, never overwrites with `FocusId`; a behind-only press says `Turn to face it`
+without a state change.
+
+Native covers bramble 70 cm behind versus valid front 200 cm prompt/clear/one charge, side under-tier
+thicket not blocking, berry prompt retained, no aimed behind clear, turn-around success and silent tier
+refusal. Integration waits for Menu editor release, then cherry-picks, builds and PIE-checks before the
+corrected Development repackage/six suites/copied-save smoke and final Shipping no-listener candidate.
+
 **Provisional night package evidence:** `Build\Playtest-0929night` at `main` `5d11ceed`
 (`JennysHomesteadGame.exe` SHA256
 `887EFD0254D2D9A98761CC4B65258878F635DEE5E0BDEB7222085F372EE18EC8`) passed all six packaged
