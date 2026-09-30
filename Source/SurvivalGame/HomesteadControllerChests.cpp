@@ -14,6 +14,7 @@ FString AHomesteadController::ChestDisplayName(int32 ChestId) const
 
 bool AHomesteadController::MenuStoreMatching()
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (!ActiveChestId.IsSet()) return false;
     const auto Result = Sim.StoreMatching(ActiveChestId.GetValue(), PlayerPoint(), Sim.GetRevision());
     Notify(Result);
@@ -22,6 +23,7 @@ bool AHomesteadController::MenuStoreMatching()
 
 bool AHomesteadController::MenuRenameChest(const FString& Name)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (!ActiveChestId.IsSet()) return false;
     const auto Result = Sim.RenameChest(ActiveChestId.GetValue(), TCHAR_TO_UTF8(*Name), PlayerPoint(), Sim.GetRevision());
     Notify(Result);

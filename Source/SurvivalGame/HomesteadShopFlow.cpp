@@ -105,6 +105,8 @@ Homestead::Result AHomesteadController::ShopTrade(int32 ShopId, Homestead::Item 
 
 Homestead::Result AHomesteadController::ShopBuyBackpack(int32 ShopId)
 {
+    if (RejectPendingGroundSnapAction())
+        return {false, "Still finding your footing. Wait a moment.", Homestead::ResultCode::Unavailable, Sim.GetRevision()};
     const int64 Before = State().money;
     const auto Result = Sim.BuyBackpack(ShopId, PlayerPoint());
     UE_LOG(LogTemp, Display, TEXT("SHOP_TRADE upgrade item=leather-backpack ok=%d purse=%lld capacity=%d message=\"%s\""),
