@@ -72,7 +72,16 @@ void AHomesteadController::InteractWithRoadSign()
     TArray<Homestead::TravelDestination> Destinations;
     for (const auto Destination : Homestead::RoadSignDestinations(Signs[FocusId].name)) Destinations.Add(Destination);
     if (Destinations.IsEmpty()) return;
+    // A single way she can't walk refuses with the reason (MenuTravel's notice) and changes nothing:
+    // no book, no pause.
+    if (Destinations.Num() == 1 && (!CanSetOut() || !MenuPlanTravel(Destinations[0]).ok))
+    {
+        MenuTravel(Destinations[0], Sim.GetRevision());
+        return;
+    }
     // The same confirm the Map tab asks, over the field book's Map page (paused while she decides).
     OpenBook(7);
     if (NativeMenu) NativeMenu->OpenSignTravelPrompt(UTF8_TO_TCHAR(Homestead::RoadSignLabel(Signs[FocusId].name).c_str()), Destinations);
+    // Nothing to decide after all: don't leave her in a book she didn't ask for.
+    if (!NativeMenu || !NativeMenu->IsTravelPromptOpen()) CloseBook();
 }

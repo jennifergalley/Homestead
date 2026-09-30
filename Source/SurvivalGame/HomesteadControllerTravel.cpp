@@ -9,6 +9,11 @@
 
 DEFINE_LOG_CATEGORY_STATIC(LogHomesteadTravel, Log, All);
 
+bool AHomesteadController::CanSetOut() const
+{
+    return Cast<AHomesteadCharacter>(GetPawn()) && bWorldReady && !bPendingSpawn && !bPendingGroundSnap;
+}
+
 Homestead::TravelPlan AHomesteadController::MenuPlanTravel(Homestead::TravelDestination Destination) const
 {
     return Homestead::PlanTravel(State(), PlayerPoint(), Destination, Sim.Layout());
@@ -17,7 +22,7 @@ Homestead::TravelPlan AHomesteadController::MenuPlanTravel(Homestead::TravelDest
 bool AHomesteadController::MenuTravel(Homestead::TravelDestination Destination, uint64 ExpectedRevision)
 {
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-    if (!Avatar || !bWorldReady || bPendingSpawn || bPendingGroundSnap)
+    if (!Avatar || !CanSetOut())
     {
         Notify(TEXT("You can't set out just now."), true);
         return false;
