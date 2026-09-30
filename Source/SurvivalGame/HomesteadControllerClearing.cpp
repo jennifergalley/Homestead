@@ -289,14 +289,10 @@ void AHomesteadController::LandOvergrowthSwing()
         // One sweep mows everything in the arc, each tuft its own transaction, with one summary.
         const int32 HayBefore = Sim.Count(Homestead::Item::Hay), WeedsBefore = Sim.Count(Homestead::Item::Weeds);
         const int32 SeedsBefore = Sim.Count(Homestead::Item::Seeds);
-        int32 Mown = 0;
-        FString Problem;
-        for (const int32 Id : ScytheTargets)
-        {
-            const auto Result = Sim.ClearOvergrowth(Id, Homestead::Item::Scythe, Position);
-            if (Result.ok) ++Mown;
-            else if (Problem.IsEmpty()) Problem = UTF8_TO_TCHAR(Result.message.c_str());
-        }
+        const auto Sweep = Sim.MowSweep(std::vector<int>(ScytheTargets.GetData(),
+            ScytheTargets.GetData() + ScytheTargets.Num()), Position);
+        const int32 Mown = Sweep.mown;
+        const FString Problem = UTF8_TO_TCHAR(Sweep.problem.c_str());
         ResetOvergrowthSwing();
         if (Mown == 0)
         {
@@ -311,7 +307,9 @@ void AHomesteadController::LandOvergrowthSwing()
         if (const int32 Seeds = Sim.Count(Homestead::Item::Seeds) - SeedsBefore; Seeds > 0)
             Summary += FString::Printf(TEXT(", +%d Seeds"), Seeds);
         Notify(Summary + TEXT("."));
-        PlayEffect(GrassStepA, 0.8f);
+        // One airy swish at blade contact for the whole sweep; nothing on a miss or a cancel. With the
+        // cue missing she mows in silence (InitializeAudio logged it) rather than with a footstep.
+        if (ScytheSwish) PlayEffect(ScytheSwish, 0.8f);
         return;
     }
     if (SwingNode == INDEX_NONE) return;

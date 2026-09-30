@@ -530,6 +530,18 @@ std::vector<int> Simulation::ScytheArcTargets(Point player, Point facing) const
     return result;
 }
 
+Simulation::MowSweepResult Simulation::MowSweep(const std::vector<int>& targets, Point player)
+{
+    MowSweepResult sweep;
+    for (const int id : targets)
+    {
+        const auto result = ClearOvergrowth(id, Item::Scythe, player);
+        if (result.ok) ++sweep.mown;
+        else if (sweep.problem.empty()) sweep.problem = result.message;
+    }
+    return sweep;
+}
+
 void Simulation::CreepWeeds(int day)
 {
     std::vector<const ResourceNode*> standing;

@@ -172,6 +172,10 @@ The MetaHuman heroine's bare-foot footsteps (`Assets\Audio\Footsteps`) are origi
 project. `Scripts\generate_bare_footsteps.py` synthesizes them from noise and decaying tones, with
 no third-party audio. The legacy heroine keeps the Kenney grass steps.
 
+The scythe's mowing swish (`Assets\Audio\Effects\ScytheSwish.wav`) is original to this project.
+`Scripts\generate_scythe_sound.py` synthesizes it in numpy from a fixed seed (filtered noise, stem
+clicks and a faint damped steel ring), with no third-party audio.
+
 The Fern 02 clearing candidate uses four separately imported meshes and the
 publisher's 1K diffuse, DirectX normal, roughness, ambient-occlusion and alpha
 maps. Source-axis/unit conversion was baked once; the project-authored masked,
