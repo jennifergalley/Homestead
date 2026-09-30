@@ -1,5 +1,6 @@
 #include "HomesteadWorld.h"
 #include "HomesteadWorldCommon.h"
+#include "HomesteadWorldLog.h"
 #include "HomesteadEstateTerrain.h"
 
 #include "Async/Async.h"
