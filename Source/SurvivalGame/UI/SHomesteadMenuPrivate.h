@@ -2,6 +2,7 @@
 
 #include "SHomesteadMenu.h"
 #include "HomesteadNoticeStyle.h"
+#include "../Simulation/HomesteadChests.h"
 #include "SHomesteadHudScale.h"
 #include "SHomesteadIcon.h"
 #include "SHomesteadMapView.h"
@@ -138,6 +139,11 @@ constexpr float KeyYawRate = 90.0f, KeyPitchRate = 45.0f;
 constexpr float StickYawRate = 120.0f, StickPitchRate = 60.0f;
 constexpr float StickDeadZone = 0.2f;
 constexpr float DragYawPerPixel = 0.35f, DragPitchPerPixel = 0.2f;
+}
+// Names offered in the chest's naming dialog, so a controller player can name one without typing.
+namespace MenuChestNames
+{
+inline const TCHAR* const Suggestions[] = {TEXT("Pantry"), TEXT("Tools"), TEXT("Seeds and garden"), TEXT("Timber and stone")};
 }
 // The dye chooser's colour chips (display colours for Homestead::DyeName's four plant dyes).
 namespace MenuDyeStyle

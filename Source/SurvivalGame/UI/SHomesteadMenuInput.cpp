@@ -48,6 +48,7 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     }
     if (Event != IE_Pressed || bSaving) return true;
     if (!Key.IsMouseButton()) Hover = INDEX_NONE;
+    if (HandleRenameKey(Key)) return true;
     if (Region == ERegion::Portrait && Dialog == EDialog::None
         && (Key == EKeys::Z || Key == EKeys::Gamepad_RightThumbstick))
     { Controller->ZoomMenuPortrait(); return true; }
@@ -118,6 +119,12 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     if (SeenPage == 0 && Key == EKeys::S)
     {
         if (Controller->MenuSortPack()) Refresh();
+        return true;
+    }
+    // Auto-store onto the open chest's matching stacks (gamepad: the item menu's option, since Y is taken).
+    if (SeenPage == 0 && Key == EKeys::T && Controller->ActiveStorageChest().IsSet())
+    {
+        if (Controller->MenuStoreMatching()) Refresh();
         return true;
     }
     if (Key == EKeys::Gamepad_FaceButton_Left)

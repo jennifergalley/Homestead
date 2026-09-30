@@ -129,6 +129,11 @@ public:
     // The menu row for one owned garment wherever it is (worn, carried or stored).
     bool MenuWearableRow(int32 WearableId, FHomesteadRow& Out) const;
     bool MenuSortPack();
+    // The open chest (HomesteadControllerChests.cpp): its name ("Storage chest" until she names it),
+    // auto-store onto its matching stacks, and naming it (empty puts the default back).
+    FString ChestDisplayName(int32 ChestId) const;
+    bool MenuStoreMatching();
+    bool MenuRenameChest(const FString& Name);
     bool MenuDrop(const FHomesteadRow& Source, const FHomesteadRow& Target, uint64 ExpectedRevision);
     bool OpenChestStorage(int32 ChestId);
     TOptional<int32> ActiveStorageChest() const { return ActiveChestId; }

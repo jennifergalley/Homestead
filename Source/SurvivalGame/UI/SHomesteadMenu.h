@@ -35,6 +35,7 @@ public:
     virtual FReply OnMouseButtonUp(const FGeometry&, const FPointerEvent& Event) override;
     virtual void OnMouseCaptureLost(const FCaptureLostEvent& Event) override;
     virtual FReply OnMouseWheel(const FGeometry&, const FPointerEvent& Event) override;
+    virtual FReply OnKeyChar(const FGeometry&, const FCharacterEvent& Event) override;
     bool HandleKey(FKey Key, EInputEvent Event, float InputAmount);
     void ChangePage(int32 Page);
     bool FocusLegacySubject(int32 Id);
@@ -118,10 +119,16 @@ public:
     bool IsDyeChooserOpen() const { return bDyeChooser && Dialog == EDialog::Context; }
     int32 GetDyePreview() const { return DyePreviewed; }
     int32 GetDyeChoice() const { return DyeChoice; }
+    // Naming the open chest: typed on the keyboard (OnKeyChar), or one of the suggestions.
+    void OpenRenameChest();
+    bool IsRenamingChest() const { return Dialog == EDialog::RenameChest; }
+    FString GetChestNameDraft() const { return RenameDraft; }
+    // Automation: types as the keyboard would.
+    void TypeChestName(const FString& Characters);
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery, Hotbar };
-    enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge, DropWearable, Context, Quantity };
+    enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge, DropWearable, Context, Quantity, RenameChest };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
     TSharedPtr<SHorizontalBox> TabBar;
@@ -203,6 +210,9 @@ private:
     uint64 DyeRevision = 0;
     int32 DyeOriginal = 0, DyeChoice = 0, DyePreviewed = INDEX_NONE;
     void OpenDyeChooser(int32 Choice);
+    FString RenameDraft;
+    bool TypeChestNameCharacter(TCHAR Character);
+    bool HandleRenameKey(FKey Key);
     void EndDyePreview();
     // Appearance camera input (page 6): held WASD, the right stick and a drag on the view orbit her.
     bool bOrbitLeft = false, bOrbitRight = false, bOrbitUp = false, bOrbitDown = false;

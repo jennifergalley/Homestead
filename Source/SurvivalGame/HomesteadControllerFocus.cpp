@@ -145,7 +145,7 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Fire: return TEXT("Cookfire");
     case EFocus::Hearth: return TEXT("Hearth");
     case EFocus::Bed: return TEXT("Bedroll");
-    case EFocus::Chest: return TEXT("Storage chest");
+    case EFocus::Chest: return ChestDisplayName(FocusId);
     case EFocus::Water: return TEXT("Fresh stream water");
     case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
     case EFocus::Shopkeeper:

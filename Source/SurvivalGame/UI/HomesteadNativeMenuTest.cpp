@@ -1411,6 +1411,44 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, Chest]() { return Controller->IsBookOpen()
             && Controller->ActiveStorageChest().IsSet()
             && Controller->ActiveStorageChest().GetValue() == *Chest; });
+    Add(TEXT("She names the chest from the keyboard; the name titles storage and its prompt"),
+        [this]() { Controller->NativeMenu->OpenRenameChest(); Controller->NativeMenu->TypeChestName(TEXT("Linen press")); },
+        [this]() { return Controller->NativeMenu->IsRenamingChest()
+            && Controller->NativeMenu->GetChestNameDraft() == TEXT("Linen press"); });
+    Add(TEXT("Capture the chest naming dialog"),
+        [this]() { Screenshot(TEXT("native-chest-naming")); },
+        [this]() { return Controller->NativeMenu->IsRenamingChest(); }, 0.8f);
+    Add(TEXT("Enter saves the chest's name"),
+        [this]() { Tap(EKeys::Enter); },
+        [this, Chest]() { return !Controller->NativeMenu->IsRenamingChest() && !Controller->ToastIsError()
+            && Controller->ChestDisplayName(*Chest) == TEXT("Linen press")
+            && Controller->MenuInventorySummary().StartsWith(TEXT("Linen press:")); });
+    const auto StoreExpected = MakeShared<Homestead::Simulation>();
+    Add(TEXT("T stores carried Stone onto the chest's Stone stack and nothing else"),
+        [this, Chest, StoreExpected]()
+        {
+            auto& Sim = Controller->Sim;
+            const Homestead::Point At = Controller->PlayerPoint();
+            if (!Sim.GrantItems(Homestead::Item::Stone, 3).ok) { Finish(false, TEXT("Could not grant the Stone fixture.")); return; }
+            int32 Stone = 0;
+            for (const auto& Entry : *Sim.GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Stone) { Stone = Entry.groupId; break; }
+            if (!Sim.TransferGroup(*Chest, Stone, 1, true, At, Sim.GetRevision()).ok)
+            { Finish(false, TEXT("Could not seed the chest's Stone stack.")); return; }
+            Controller->NativeMenu->Refresh();
+            *StoreExpected = Sim;
+            if (!StoreExpected->StoreMatching(*Chest, At, StoreExpected->GetRevision()).ok)
+            { Finish(false, TEXT("The independent auto-store expectation was invalid.")); return; }
+            Tap(EKeys::T);
+        },
+        [this, StoreExpected]() { return !Controller->ToastIsError()
+            && Controller->Simulation().Serialize() == StoreExpected->Serialize()
+            && Controller->Simulation().Count(Homestead::Item::Stone) == 0
+            && Controller->Simulation().Count(Homestead::Item::Branch) > 0; });
+    Add(TEXT("With nothing left to match, T explains and changes nothing"),
+        [this, StoreExpected]() { Tap(EKeys::T); },
+        [this, StoreExpected]() { return Controller->ToastIsError()
+            && Controller->Simulation().Serialize() == StoreExpected->Serialize(); });
     Add(TEXT("Back clears the exact storage session before ordinary Inventory"),
         [this, Branches]()
         {
