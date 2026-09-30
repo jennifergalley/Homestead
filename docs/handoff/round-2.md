@@ -112,27 +112,30 @@ failure or a shortcut retarget.
 **Props diagnosis/fix is top priority above the hotbar editor.** Jenny-provided attachment
 `5d457688...png` shows a single long diagonal rod emitted from the bob; `2e0ab511...png` shows
 flattened fan ribbons extending metres horizontally from its back. Do not copy attachments or large
-artifacts to `C:`. Jenny is currently playing Shipping PID 26828, so Props does no UE/UBT until a safe
-slot after natural exit; Integration coordinates only and Menu hotbar is paused.
+artifacts to `C:`. Props now has the exclusive editor/UBT slot, guarded at 4.8 GB physical / 27.6 GB
+commit; no shipped claim.
 
-Headless source clues: `HomesteadCharacter.cpp` applies MetaHuman groom override air drag 1, bend
-damping .05, stiffness .15 and stretch 1; passive groom LOD map `{1,3,5,7}`; `UpdateHairMotion`
-resets simulation on hitch/pause/head jump; motion-velocity CVars use `.5/.4 -> .65/.45`; styles call
-`SetGroomAsset` / Binding. Root cause is unknown. Reproduce in an isolated editor/copied-save session
-when safe, measure strand bounds, and validate any remedy across styles, LODs and simulation before a
-package. Existing hair reset guidance is not sufficient; no shipped claim.
+**Substantive diagnosis:** optional groom asset/binding existence is not the cause. A global long-hair
+simulation override (bend .15, radius 5 cm, drag 1) was imposed on stock BobStraight (bend .01, radius
+2.5 cm), UpdoBuns (bend .0075), UpdoBraids (radius .1 cm) and stock drag .1; clumped guides then
+stiffen/collide and push strands metres away. Clean checkpoint `95f4bfc3` sets
+`bOverrideSettings = (Style == 0)` and resets simulation on `SetGroomAsset`, leaving Style 0 unchanged.
+
+The remedy remains unverified until Props builds and empirically measures strand bounds across nine
+styles, LODs, rates and copied Estate save in the editor. Existing hair reset guidance is not
+sufficient; validate before a package.
 
 ### Overnight priority: split the four huge hot files
 
 **Jenny direct decision (2026-09-29 20:34):** split
 `Controller.cpp`, `World.cpp`, `Character.cpp` and `UI/SHomesteadMenu.cpp` overnight ASAP. This
-supersedes the earlier EHandAction-first plan. Architecture has a read-only inventory now; its
-exclusive edit window begins only after Props checkpoints/commits the emergency hair source work.
+supersedes the earlier EHandAction-first plan. Architecture has a read-only inventory now. It may
+pure-move `Controller` / `World` / `Menu` concurrently without UBT; `Character` waits until Props'
+hair empirical pass/checkpoint and Integration's hair commit.
 
 Menu and Water pause edits to those four files. Architecture stops on clean per-feature pure-move
 commits with verification; Integration reserves sequential merge, native and Editor/Game build after
-Jenny's game exits. No UE/UBT/UAT runs while Shipping PID 26828 plays under memory pressure. Hair
-retains priority for the visual fix after its checkpoint; hotbar and garden work remain paused.
+the hair checkpoint. Hair retains priority for the visual fix; hotbar and garden work remain paused.
 
 ### Development firewall prompts / offline Shipping candidate
 
