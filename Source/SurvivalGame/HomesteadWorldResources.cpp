@@ -1,4 +1,5 @@
 #include "HomesteadWorld.h"
+#include "HomesteadCharacter.h"
 #include "HomesteadWorldCommon.h"
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldLook.h"
