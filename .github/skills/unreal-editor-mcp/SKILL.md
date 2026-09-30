@@ -919,7 +919,9 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **`Test-Game.ps1` test overrides:** `-RenderScale 0` leaves the player resolution policy intact
   (at 4K, typically about 50% with TSR); 50-100 supplies `r.ScreenPercentage` for non-Shipping QA.
   `-ExtraExecCmds` appends comma-separated startup commands, while `-ExtraArguments` appends command-line
-  arguments; neither is admitted by `-ShippingQA`. The harness isolates user data with
+  arguments; neither is admitted by `-ShippingQA`. A dash-prefixed `-ExtraArguments` value is
+  misparsed by `pwsh -File` as another switch (`Missing an argument for parameter 'ExtraArguments'`);
+  invoke in-process instead: `& .\Scripts\Test-Game.ps1 ... -ExtraArguments "-Foo=bar"`. The harness isolates user data with
   `-UserDir <output>\EngineUser`, so its CSV output is
   `<output>\EngineUser\Saved\Profiling\CSV`, not the project-level `Saved\Profiling\CSV`.
 - Jenny's performance bar: the framerate must be **smooth**, not just high. Never report a
@@ -1076,7 +1078,11 @@ OpenSpec changes, not here.
 - 2026-09-27: When scripting the packaged suites, pass switches as a hashtable splat
   (`$p=@{Packaged=$true; NativeMenu=$true}; .\Scripts\Test-Game.ps1 @p`). An array splat such as
   `@('-NativeMenu')` binds as a positional string and silently runs only the default smoke test.
-  Move `Saved\Automation\Packaged\native-wardrobe-fixture*` into `History\` before a NativeMenu run. An empty switch string errors with "Generated resume requires...".
+  Use a fresh `-OutputDirectory` for every NativeMenu run: reusing one leaves
+  `native-wardrobe-fixture.sav` behind and fails with `A fresh explicit producer fixture could not
+  be prepared`. An empty switch string errors with "Generated resume requires...". For a real old
+  hotbar migration, pass `-HomesteadHotbarLegacySave <older-build .sav>`; the route emits
+  `LEGACY_SAVE_HOTBAR` after applying the one-time migration.
 - 2026-09-26: **Check the real heroine yourself.** `Test-Game.ps1 -Packaged` shows the legacy heroine
   (`-HomesteadSmokeTest`). To see the MetaHuman, launch
   `Build\Windows\...\JennysHomesteadGame.exe -Res=0x0wf` and bring it to the foreground. Use the

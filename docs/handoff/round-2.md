@@ -800,11 +800,14 @@ requirement.
   any new Editor/Game, automation, PIE or package work. `a9d2e86a`, the older `ac3fe239`, and the
   merge-tree compatibility with Water garden outline `6adb9842` remain historical evidence only.
 
-  **Current Coral milestone `111ebd91`:** actual-stack first-row simulation is pushed; native
-  Release 10/10 and `PackRow` 10 scenarios / 365 checks pass. Controller/UI rewrites are uncompiled.
-  At 00:25 Menu received the exclusive UBT/Editor slot after an 8.33 GB physical-memory preflight;
-  Integration retains UAT. This is source/native evidence only, not a delivery claim. Next gates are
-  UE suites, old-save behavior and 720p/4K proof.
+  **Current Coral branch `fd34975f`:** actual-stack first-row simulation passes native Release
+  10/10 and `PackRow` 10 scenarios / 370 checks. Editor and Game link, Hotbar 720 plus NativeMenu
+  720/4K routes pass, and a real pre-row old save migrates once with F5/F9 `stock_same=1`. The
+  directional-navigation row steps pass; the later Settings Down `visible=0` failure is pre-existing.
+  Manual real-gamepad PIE is still unverified.
+
+  Integration owns sole UAT/package work from the 01:20 handoff (9.97 GB preflight). This evidence
+  is **not a Shipping delivery claim**; package/smoke evidence and a manual pad pass remain required.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds

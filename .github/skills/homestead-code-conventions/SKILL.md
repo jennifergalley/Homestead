@@ -74,7 +74,8 @@ disagree, follow the code and tell the Architecture Agent.
   shows up once someone edits that file. The module's private PCH (`SurvivalGamePCH.h`) is the
   Build Speed Agent's: add to it only headers nearly every file needs, and never `UnrealEd`. Headers forward-declare classes they only point to; a header that every
   unity blob includes (`HomesteadController.h`, `HomesteadSimulation.h`) makes each edit rebuild the
-  whole module, so don't add includes to those two lightly.
+  whole module, so don't add includes to those two lightly. A helper called across translation units
+  needs a declaration in an owned header; never rely on a definition in a unity-build neighbour.
 - **Nothing at namespace scope may read runtime state.** Globals, file-scope statics, class static
   members and `TAutoConsoleVariable`/`FAutoConsoleCommand` arguments are constructed during static
   initialization, before the engine has set the command line, config, paths or `GEngine`. The
