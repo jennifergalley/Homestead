@@ -88,15 +88,29 @@ bramble syncs separately; Water remains paused. Partial bramble/sapling/under-ti
 gauge/store card, and Water no-pail prompt/lake trail/night-light work are excluded. The orchestrator
 continues to enforce the three-hands-on and two-Unreal-process caps.
 
-**Integration local validation batch (unshipped):** on local `main` `50b2+`, Integration applied Water
-no-pail `20dd9cd1` + `069e493a` and forage freeze `1010aa2e`; Props bramble
+**Integration local validation batch `c9481e38` (unshipped):** on local `main` `50b2+`, Integration
+applied Water no-pail `20dd9cd1` + `069e493a` and forage freeze `1010aa2e`; Props bramble
 `1deb02ab` / `e37288ef` / `4d8bfecc`, sprint `7475b435`, Hoe hint `391f08f7`, Bed-v2 `aa375409`;
-and Menu Store `1b2b97eb` + pail gauge `9d5da35d`. Native passes 9/9, forage-id Python passes 7/7,
-and Editor/Game builds are green. The exclusive editor now runs exact pail, Store card,
-bramble/sapling/tier, sprint, Hoe-hint and Bed PIE checks. **No push or package is authorized yet**;
-Integration reports per-commit pass/fail after editor close, then the orchestrator decides. Menu pickup
-`b2a49e36` + `cb3f40c7` remain excluded. Old canes-bed deconstruction refunding Hay is the intentional
-current-cost compatibility behavior.
+and Menu Store `1b2b97eb` + pail gauge `9d5da35d`. Native passes 9/9, forage-id Python 7/7, and
+Editor/Game builds plus all exclusive PIE checks pass; editor is closed with zero UE. **No push or
+package has occurred.**
+
+- Water prompt: no-pail/chest/empty/full carried states show the exact EmptyPailText; no-pail-anywhere
+  remains native-only.
+- Pail gauge: six=72 px, five=60 and two=24; F5 at 3 restores after watering to 2; one pail <=6 hides
+  the Water tile, while excess 8 or two pails shows it.
+- Store Map: counter/square says already there with no time change; Manor travel persists.
+- Bramble `550200` at 283 cm focuses over weed at 125 cm and one worn clear removes three canes for
+  1.2 Energy; Sapling `570143` clears on one click for 4 Branch +1 Kindling /1.5 Energy; Iron thicket
+  has no animation/sound; F5/F9 cleared state passes.
+- Sprint: run/walk changes about 0.03 Energy over 6 s, auto-off/refusal at <=10 and no resume at 50.
+- Hoe hint is dropped from this local batch and remains chest-native-only. Bed UI reads 4 Branch +4
+  Hay; old canes-bed deconstruct refunding four Hay is native-only intentional current-cost
+  compatibility behavior. Forage-ID freeze remains source-only.
+
+Integration is authorized to cherry-pick only pail-footer `4545a8a2`, build and PIE-check mouse/pad,
+then, if it passes, push these verified picks and create a new separate Playtest package/six suites.
+Menu pickup `b2a49e36` + `cb3f40c7`, weed clip and scythe remain excluded.
 
 ## 4 PM playable build
 
