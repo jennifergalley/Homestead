@@ -318,6 +318,16 @@ The native cases cover 0/1/6/7/1200, 0/1/2 pails and round-trip nine. Cherry-pic
 compile plus PIE gauge refill/water/chest/drop/F5/F9 and the copied-save packaged pail repro. The
 misleading fill prompt is unchanged.
 
+**Water pail-prompt partial `20dd9cd1`:** native 10/10, no UE or delivery claim. `FocusActions`
+shows carried empty fill / full pail full / chest pail take it / no pail requires one, and
+`FillWater` distinguishes in-chest, none, far-from-freshwater and full without changing mechanics,
+save or reach. The branch is synced through merge `4dcd3898` (lake trail preserved; `beach_belt`
+untracked).
+
+Before Integration can cherry-pick, replace Water's proposed EmptyPailText with Jenny's exact:
+`The pail is empty. Fill it at a body of water`. Far refusal may clarify river/lake, but no-pail
+focus also needs PIE coverage. This remains a pending text correction, not shipped.
+
 **Turnip planting regression:** Menu input is main-integrated in `1d1eebb5` and the copied-save PIE
 checkpoint passed three distinct Turnip sows, then a named no-seed fourth attempt, with sow/water state
 surviving F5/F9. Keep the copied-save **packaged** run as the remaining core-loop gate.
