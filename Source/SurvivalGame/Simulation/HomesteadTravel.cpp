@@ -128,4 +128,32 @@ Result Simulation::WalkRoad(TravelDestination destination, Point from)
     ++revision_;
     return TravelGood("You walk to " + where + ". It's " + FormatHour(state_.hour) + ".", revision_);
 }
+
+std::vector<TravelDestination> RoadSignDestinations(const std::string& signName)
+{
+    if (signName == "ManorRoadSign") return {TravelDestination::Town};
+    if (signName == "TownRoadSign") return {TravelDestination::Manor};
+    if (signName == "GatewayRoadSign") return {TravelDestination::Town, TravelDestination::Manor};
+    return {};
+}
+
+const PublicRoadSign* RoadSignNear(Point at, double reachCm)
+{
+    const PublicRoadSign* nearest = nullptr;
+    double best = reachCm;
+    for (const PublicRoadSign& sign : EstatePublicRoad().signs)
+    {
+        const double distance = std::hypot(at.x - sign.position.x, at.y - sign.position.y);
+        if (distance <= best && !RoadSignDestinations(sign.name).empty()) { best = distance; nearest = &sign; }
+    }
+    return nearest;
+}
+
+std::string RoadSignLabel(const std::string& signName)
+{
+    const auto destinations = RoadSignDestinations(signName);
+    if (destinations.size() == 2) return "Town / Manor";
+    if (destinations.size() == 1) return destinations[0] == TravelDestination::Town ? "To town" : "To the manor";
+    return {};
+}
 }

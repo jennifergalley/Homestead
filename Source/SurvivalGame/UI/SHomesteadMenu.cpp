@@ -159,6 +159,8 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     }
     else if (bOrbitLeft || bOrbitRight || bOrbitUp || bOrbitDown || OrbitStickX != 0.0f || OrbitStickY != 0.0f)
         ClearAppearanceOrbit();
+    if (bCenterPopup && !bPopupCentered && Dialog == EDialog::Context && Root && Root->GetCachedGeometry().GetLocalSize().X > 0)
+        BuildPopup();
     if (bPointerItemDown && PointerDragRevision != Controller->Simulation().GetRevision())
         CancelPointerItemDrag();
     if (bVirtualDraggingItem && VirtualDragRevision != Controller->Simulation().GetRevision())

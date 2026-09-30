@@ -210,6 +210,7 @@ void AHomesteadController::Interact()
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
+    case EFocus::RoadSign: InteractWithRoadSign(); break;
     default: if (!EatSelectedFoodInstead()) Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
 

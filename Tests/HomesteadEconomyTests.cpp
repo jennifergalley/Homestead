@@ -504,6 +504,38 @@ void NoWalkToTownFromTown()
     CHECK(!refused.ok && refused.message == "You're already at the general store." && sim.Serialize() == before);
 }
 
+void RoadSignsOfferTheWalk()
+{
+    const PublicRoad& road = EstatePublicRoad();
+    CHECK(road.signs.size() == 3);
+    CHECK(RoadSignDestinations("ManorRoadSign") == std::vector<TravelDestination>{TravelDestination::Town});
+    CHECK(RoadSignDestinations("TownRoadSign") == std::vector<TravelDestination>{TravelDestination::Manor});
+    CHECK(RoadSignDestinations("GatewayRoadSign").size() == 2 && RoadSignDestinations("Milestone").empty());
+    CHECK(RoadSignLabel("ManorRoadSign") == "To town" && RoadSignLabel("TownRoadSign") == "To the manor"
+        && RoadSignLabel("GatewayRoadSign") == "Town / Manor");
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    sim.SkipToHourOfDay(9.0);
+    for (const PublicRoadSign& sign : road.signs)
+    {
+        // She reads the sign she stands beside, and only within reach.
+        CHECK(RoadSignNear(sign.position) == &sign);
+        CHECK(RoadSignNear({sign.position.x + RoadSignReachCm + 50.0, sign.position.y}) == nullptr);
+        // Every walk it offers plans from the verge where it stands.
+        for (const TravelDestination destination : RoadSignDestinations(sign.name))
+        {
+            const TravelPlan plan = PlanTravel(sim.GetState(), sign.position, destination);
+            CHECK(plan.ok && plan.gameHours > 0.0 && plan.connectorMetres < 30.0);
+        }
+    }
+    // The walk from the manor's sign is the Map tab's walk: one transaction, time passes, she's in town.
+    const PublicRoadSign* manorSign = road.FindSign("ManorRoadSign");
+    const double before = sim.GetState().hour;
+    const TravelPlan plan = PlanTravel(sim.GetState(), manorSign->position, TravelDestination::Town);
+    OK(sim.WalkRoad(TravelDestination::Town, manorSign->position));
+    CHECK(std::abs(sim.GetState().hour - (before + plan.gameHours)) < 1e-6);
+}
+
 void WalkTheRoad()
 {
     CHECK(FormatHour(7.9999) == "8 AM" && FormatHour(23.999) == "12 AM" && FormatHour(19.2) == "7:12 PM");
@@ -799,6 +831,7 @@ int main(int argc, char** argv)
     Run("playtest shop placement", PlaytestShopPlacement);
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);
+    Run("the road signs offer the same walk", RoadSignsOfferTheWalk);
     Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);
     Run("pickup lines follow her actual stacks", PickupGainsFollowActualStacks);
     Run("pail water shows on the pail", PailWaterPresentation);

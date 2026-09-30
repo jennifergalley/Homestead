@@ -421,6 +421,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
         }
     }
     TickStores(DeltaSeconds);
+    TickRoadSigns();
     if (bPlanning && !bBookOpen) UpdatePlacement(false);
     UpdateGardenOutline();
     if (IsFailed() && !bWasFailed)

@@ -17,6 +17,9 @@ void SHomesteadMenu::BuildPopup()
     const FVector2D Size = Frame.GetLocalSize();
     FVector2D Local = Frame.AbsoluteToLocal(PopupAnchor) + FVector2D(8, 8);
     if (Size.X <= 0 || Size.Y <= 0 || !FSlateApplication::Get().IsInitialized()) Local = FVector2D(200, 150);
+    // A road sign's walk prompt sits in the middle of the book (rebuilt once the book has a size).
+    bPopupCentered = bCenterPopup && Size.X > 0 && Size.Y > 0;
+    if (bPopupCentered) Local = (FVector2D(Size) - FVector2D(Width, Height)) * 0.5f;
     Local.X = FMath::Clamp(Local.X, 8.0f, FMath::Max(8.0f, static_cast<float>(Size.X) - Width - 8.0f));
     Local.Y = FMath::Clamp(Local.Y, 8.0f, FMath::Max(8.0f, static_cast<float>(Size.Y) - Height - 8.0f));
     TSharedPtr<SVerticalBox> List;
@@ -173,6 +176,7 @@ void SHomesteadMenu::SetDialog(EDialog Value)
     StopCraftHold();
     Dialog = Value; DialogSelection = 0;
     if (Value == EDialog::None) PopupBody.Reset();
+    if (Value != EDialog::Context) { bTravelPrompt = false; bCenterPopup = false; }
     bEditingAmount = false;
     LeftStick.Reset();
     PendingDirection = {};

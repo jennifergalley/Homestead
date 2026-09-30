@@ -23,6 +23,7 @@ namespace HomesteadMenus { class SHomesteadHotbar; }
 using SHomesteadHotbar = HomesteadMenus::SHomesteadHotbar;
 namespace HomesteadMenus { class SHomesteadShop; }
 class AHomesteadGeneralStore;
+class AHomesteadRoadSign;
 namespace HomesteadMenus { class SHomesteadNames; class SHomesteadArrival; }
 class IInputProcessor;
 class AHomesteadMenuPortrait;
@@ -392,10 +393,17 @@ private:
     friend class AHomesteadSmokeTest;
     friend class AHomesteadGardenProbe;
     friend class UHomesteadMapComponent;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth, RoadSign };
     // General store (HomesteadShopFlow.cpp).
     TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
+    // The fingerposts on the public road (HomesteadControllerRoadSigns.cpp); FocusId indexes the road's signs.
+    UPROPERTY() TArray<TObjectPtr<AHomesteadRoadSign>> RoadSigns;
+    void TickRoadSigns();
+    void ConsiderRoadSignFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;
+    FString RoadSignTitle() const;
+    FString RoadSignActions() const;
+    void InteractWithRoadSign();
     int64 LastWalletDelta = 0;
     float WalletDeltaRemaining = 0.0f;
     FMealGain MealGain;

@@ -63,6 +63,7 @@ void AHomesteadController::UpdateFocus()
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
     }
     ConsiderStoreFocus(Consider);
+    ConsiderRoadSignFocus(Consider);
     FocusHeldToolTarget(Position);
     if (Sim.NearWater(Position))
     {
@@ -150,6 +151,7 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusTitle();
+    case EFocus::RoadSign: return RoadSignTitle();
     default: break;
     }
     if (Focus == EFocus::None && SelectedCarriedTool() == Homestead::Item::OilLamp)
@@ -290,6 +292,7 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
+    case EFocus::RoadSign: return RoadSignActions();
     default:
         if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
