@@ -69,7 +69,16 @@ void AHomesteadSmokeTest::PreparePromptChecks()
     Steps.Last().Repeat = [this]() { Axis(EKeys::Gamepad_LeftY, 0.8f); Axis(EKeys::MouseX, 0.01f); };
     Add(TEXT("Stick release and zero mouse leave controller context hints"),
         [this]() { Axis(EKeys::Gamepad_LeftY, 0); Axis(EKeys::MouseX, 0); },
-        [this]() { return Controller->UsesGamepad() && Controller->FocusActions().Contains(TEXT("[X]")); });
+        [this]()
+        {
+            // Whatever she ends up facing (in the default woodland, a tree that needs the axe she
+            // hasn't got, whose honest prompt is "Requires an axe" with no key), the hints stay in
+            // controller form: no keyboard or mouse glyph may appear.
+            const FString Actions = Controller->FocusActions();
+            Results.Add(FString::Printf(TEXT("OBSERVE stick-release focus_actions=\"%s\""), *Actions));
+            return Controller->UsesGamepad() && !Actions.Contains(TEXT("[E]")) && !Actions.Contains(TEXT("[F]"))
+                && !Actions.Contains(TEXT("[LMB]")) && !Actions.Contains(TEXT("[RMB]"));
+        });
     Add(TEXT("Subthreshold mouse still moves the actual camera without stealing hints"),
         [this]() { CameraStart = Controller->GetControlRotation().Yaw; Axis(EKeys::MouseX, 0.25f); },
         [this]()
@@ -81,8 +90,14 @@ void AHomesteadSmokeTest::PreparePromptChecks()
     Add(TEXT("Capture stable controller context"), [this]() { Screenshot(TEXT("prompts-context-gamepad")); }, []() { return true; });
     Add(TEXT("Deliberate mapped mouse camera movement selects keyboard hints"),
         [this]() { CameraStart = Controller->GetControlRotation().Yaw; Axis(EKeys::MouseX, 4); },
-        [this]() { return !Controller->UsesGamepad() && Controller->FocusActions().Contains(TEXT("[F]"))
-            && FMath::Abs(FMath::FindDeltaAngleDegrees(CameraStart, Controller->GetControlRotation().Yaw)) > 0.1f; });
+        [this]()
+        {
+            // Keyboard hints: no controller glyph remains in whatever she faces.
+            const FString Actions = Controller->FocusActions();
+            return !Controller->UsesGamepad() && !Actions.Contains(TEXT("[A]")) && !Actions.Contains(TEXT("[X]"))
+                && !Actions.Contains(TEXT("[RT]")) && !Actions.Contains(TEXT("[LT]"))
+                && FMath::Abs(FMath::FindDeltaAngleDegrees(CameraStart, Controller->GetControlRotation().Yaw)) > 0.1f;
+        });
     Add(TEXT("Controller drift and releases cannot steal keyboard context"),
         [this]() { Axis(EKeys::Gamepad_LeftX, 0.35f); Axis(EKeys::Gamepad_RightX, 0.35f);
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_FaceButton_Bottom, IE_Released, 0)); },
@@ -98,17 +113,16 @@ void AHomesteadSmokeTest::PreparePromptChecks()
     Add(TEXT("Diagonal release does not select keyboard"),
         [this]() { Axis(EKeys::Gamepad_LeftX, 0); Axis(EKeys::Gamepad_LeftY, 0); },
         [this]() { return Controller->UsesGamepad(); });
-    Add(TEXT("Controller page navigation selects controller Settings"),
-        [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this]() { return Controller->BookPage() == 4 && Controller->UsesGamepad(); });
+    // Settings isn't a field-book tab: B closes the book and Start opens Settings, both on the pad.
+    Add(TEXT("Controller B then Start opens controller Settings"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); Tap(EKeys::Gamepad_Special_Right); },
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 4 && Controller->UsesGamepad(); });
     Add(TEXT("Capture controller Settings"), [this]() { Screenshot(TEXT("prompts-settings-gamepad")); }, []() { return true; });
     Add(TEXT("Keyboard row navigation selects keyboard Settings"),
         [this]() { Tap(EKeys::Down); }, [this]() { return Controller->BookPage() == 4 && !Controller->UsesGamepad(); });
     Add(TEXT("Capture keyboard Settings"), [this]() { Screenshot(TEXT("prompts-settings-keyboard")); }, []() { return true; });
-    Add(TEXT("Navigate to Look through mapped controller pages"),
-        [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this]() { return Controller->BookPage() == 5; });
-    Add(TEXT("Controller Look page"), [this]() { Tap(EKeys::Gamepad_RightShoulder); },
+    // From Settings, LB enters the tab cycle at its end: Look (tabs 0, 1, 2, 7, 6).
+    Add(TEXT("Controller Look page"), [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
         [this]() { return Controller->BookPage() == 6 && Controller->UsesGamepad(); });
     Add(TEXT("Tiny mouse Look remains responsive without changing controller hints"),
         [this]() { CameraStart = Controller->GetControlRotation().Yaw; PausedHour = Controller->State().hour; Axis(EKeys::MouseX, 0.25f); },
