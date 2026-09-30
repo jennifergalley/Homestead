@@ -82,9 +82,11 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / build snapshot (2026-09-29 14:25):** Integration completed the 4 PM package and
-released Unreal, UBT and Blender. All slots are available; the orchestrator continues to enforce the
-three-hands-on and two-Unreal-process caps for post-package work.
+**Current slot / build snapshot (2026-09-29 16:54):** `main` is `1d1eebb5`; the Integration Agent
+owns editor/UAT for the Props food pair, build/PIE, then the copied-save packaged scratch run. Props is
+actively stacking food plus Bramble work and must not rebase mid-edit or duplicate food. Water/Menu
+paused partial branches rebase only at clean committed checkpoints before their next edit. The
+orchestrator continues to enforce the three-hands-on and two-Unreal-process caps.
 
 ## 4 PM playable build
 
@@ -124,6 +126,16 @@ dye/Appearance and night-light work remain bounded partial work, not substitutes
 
 Every step needs the owning slice's native/PIE evidence plus a packaged sandbox pass. A failed step
 blocks promotion of the core loop, not unrelated visual experiments.
+
+**Integration copied-save PIE checkpoint:** `main` `1d1eebb5` (Water food/roots, Menu input and Map
+travel) passed a copy of Jenny's 3:46 PM Manual save: four tilled plots; three distinct Turnip sows;
+a named no-seed fourth attempt; berry beside soil LMB eat / F weeds-only / E sow; grow/harvest +2;
+lake carried-pail LMB/E fill to six; Map Town about 7.5 h grounded; Pascoe sold one Turnip
+10.87 → 11.07, bought seed → 10.87; Map return at 11:10 PM; and pail water plus sow/water state
+survived F5/F9. This is **main-integrated PIE evidence, not packaged or shipped**. The no-pail prompt
+and honest old-save Hoe path remain untested. Integration next adds Props food, then runs copied-save
+packaged scratch and six suites; the inside-store map card's `X walk there 23 min`, bright
+11 PM–1:30 AM night and long 7.5 h walk are nonblocking follow-ups.
 
 ## Lanes and ownership
 
@@ -280,7 +292,8 @@ Energy or being >1.2 m off bank are other possibilities.
 
 Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save.
 The unique copied-save packaged run records pail/water/Energy/focus/edge distance/actor tag plus A/E/RT
-input and toast output, then becomes a core-loop acceptance test.
+input and toast output, then becomes a core-loop acceptance test. Its copied-save **PIE** precursor
+passed at fill six; no-pail prompt coverage remains untested.
 
 **Pail state core-loop requirement:** the first safe slice keeps positional v12/v13 `Item::Water`
 stock internally (pack, chest and drops; max 1200; `TakesSpace=false`) rather than silently migrating
@@ -305,10 +318,9 @@ The native cases cover 0/1/6/7/1200, 0/1/2 pails and round-trip nine. Cherry-pic
 compile plus PIE gauge refill/water/chest/drop/F5/F9 and the copied-save packaged pail repro. The
 misleading fill prompt is unchanged.
 
-**Turnip planting regression:** after the first turnip seed, remaining planting can fail. Integration
-reproduces it from a copied packaged save and records exact seed stock, focus, plot, moisture, season,
-Energy and toast state; trace and fix the root cause rather than silently refusing the action. This is
-an unshipped core-loop acceptance gate.
+**Turnip planting regression:** Menu input is main-integrated in `1d1eebb5` and the copied-save PIE
+checkpoint passed three distinct Turnip sows, then a named no-seed fourth attempt, with sow/water state
+surviving F5/F9. Keep the copied-save **packaged** run as the remaining core-loop gate.
 
 **Food and Cooking Kindling partial:** **Props branch
 `jennifergalley-food-kindling` off `a785a417`, native Release 9/9, not built/PIE/shipped.** `CanEat`
@@ -493,8 +505,8 @@ pending, so this does not claim early Energy is fully solved.
   without saving a drag. Consider a one-shot Effects preview and avoid reintroducing gain-squared
   behavior; verify at 1080p and 4K.
 - **Contextual hotbar eating and berry feedback** — **Menu `88180744` shipped in the 4 PM playable
-  build.** Menu core-input pair `60c6d6ba` + `a874d260` is `[ready]` for Integration, not merged or
-  shipped: native 9/9, Editor build and PIE verify F/X weeds without sowing, A/E seed-selection
+  build.** Menu core-input pair `60c6d6ba` + `a874d260` is main-integrated in `1d1eebb5`, not
+  packaged or shipped: native 9/9, Editor build and PIE verify F/X weeds without sowing, A/E seed-selection
   refusal when empty, no Turnip fallback after depletion, selected berry A/E sow, and five rapid berry
   taps consuming five during the chew. Berries remain edible beside tilled soil despite plant focus.
   The first planted plot still holds focus until squarely at the next plot; woodland UE suites remain
@@ -547,11 +559,17 @@ pending, so this does not claim early Energy is fully solved.
   200 cm-radius swing probe: a dead-ahead 285 cm cane can be in Simulation reach but show no prompt or
   swing target, while a nearer weed/grass steals focus.
 
-  After the core hoe/pail test, Props' next code slot makes targeting forward-biased at 300 cm and
-  arbitrates competing weeds. Integration verifies isolated copied-save PIE at 285 cm, an overlapping
-  weed and F5/F9; RT/LMB with worn billhook should clear 2–3 canes in one swing, while bare A/E cannot.
-  World mesh removal/save edits already should work. Add spring leaf-out or an appropriate cue and
-  resolve any missing prompt; this remains a plausible cause, not proof for Jenny's pictured cane.
+  **Props headless partial:** `bcf29b85` makes aim focus and swing share a forward-biased 300 cm
+  tool-kind target; `649336f4` makes worn Sapling one logical clear with two physical blows; and
+  `bccb9310` refuses under-tier targets without animation or SFX. Native 9/9 covers an aimed 285 cm
+  cane versus nearer weed/grass, behind/301 cm refusal, scythe choosing weed, gated iron thicket,
+  save, and one worn-Sapling 3–4 Branch + 1 Kindling / 1.5 Energy yield once through reload.
+
+  Food's test hunk conflicts with a naive cherry-pick, so Props supplied pre-resolved
+  food+bramble `42a63b8f`, native 9/9 with a dry-run clean merge on `main` `77ff5837`; Integration
+  must avoid duplicate food commits if they are already on main. Required before `[ready]`: PIE at
+  285 cm, a two-blow/one-logical sapling, silent under-tier refusal and F5/F9. This remains a plausible
+  cause, not proof for Jenny's pictured cane.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` shipped in the 4 PM playable build.** Clearable
   slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
@@ -669,10 +687,11 @@ pending, so this does not claim early Energy is fully solved.
   The old Seasons handoff would gate Blackberries from Summer 15 through Autumn 28; do not silently
   add that gate without spring food and clear player prompts. Acceptance is live-node density,
   seasonal readiness/regeneration, save safety and performance - never decorative instance count.
-  Water's partial food checkpoint is `fc758da4` (+28 live BerryBush: 18 woods, 10 hedges) followed
-  by `01bda38d` (+16 Roots near the manor, three within 110 m) and 15 roadside
-  bramble/herb/root placements at `581000+`. Old placements stay append-only; native 10/10 covers old
-  save, picked state and regrowth. It has no Editor/Game build, PIE fruit/harvest or delivery claim.
+  Water's `fc758da4` (+28 live BerryBush: 18 woods, 10 hedges) followed by `01bda38d` (+16 Roots
+  near the manor, three within 110 m) and 15 roadside bramble/herb/root placements at `581000+` are
+  main-integrated in `1d1eebb5`. Old placements stay append-only; native 10/10 covers old save,
+  picked state and regrowth. Integration's copied-save PIE grew/harvested +2; package scratch/suites
+  remain pending, so it is not player-shipped.
 - **Terrain-following road grade** — **Water Agent, pending and not shipped.** Eliminate artificial
   raised/lowered road segments. The road is Landscape paint/ruts, not a raised mesh: `reshape.py`
   grades a 2.8 m flat half-width plus 12 m falloff at ±11%, and its weightmap/rut SDF share the route.
@@ -769,8 +788,8 @@ pending, so this does not claim early Energy is fully solved.
   `ValidateInventory`. **Menu** owns the shop upgrade row, `bRucksackVisible`, the Appearance toggle
   and the 120-cap UI helpers. Tests cover malformed/duplicate entitlement sections, rebuy refusal,
   insufficient funds and capacity/save behavior.
-- **Town travel** — **core-loop priority; Menu Map travel `a4bb831f` is `[ready]` for Integration,
-  not merged or shipped.** Its PIE evidence shows cancel remains atomic; Town→Manor advances 7 h 27
+- **Town travel** — **core-loop priority; Menu Map travel `a4bb831f` is main-integrated in
+  `1d1eebb5`, not packaged or shipped.** Its PIE evidence shows cancel remains atomic; Town→Manor advances 7 h 27
   while grounded/awake with hunger loss; Manor→Town preview warns the next-day store will be closed.
   Signs are not wired. A wooden `Walk to town` sign outside the estate and a return sign by town still
   invoke the same action as clickable **Town** and **Manor** map destinations. Architecture traced the
@@ -783,8 +802,7 @@ pending, so this does not claim early Energy is fully solved.
   `SettleOnGround`; no unsafe fallback. On the Map, a single click selects and double-click/A zooms,
   so travel needs a separate explicit confirmation. The signs and map invoke the same action.
   **Water** owns the generated runtime route and endpoints, **Architecture** the read-only trace,
-  **Props** the original signs and **Menu** the shared travel/map UI; a future travel implementer owns
-  the action.
+  **Props** the original signs and **Menu** the shared travel/map UI; signs are still not wired.
 - **Wait for opening** — **Menu `88180744` shipped in the 4 PM playable build.** At a
   closed 19:00 store, B cancels with no time change; then A+A advances to the next 08:00 and returns
   Pascoe's Talk interaction. Follow-on `643a857a` rejects a candidate that would doze during
