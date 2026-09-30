@@ -1055,6 +1055,50 @@ void TimberAndFirewoodTransactions()
     CHECK(moved.GetState().plots[0].cellX == CellToGarden(-2) && moved.GetState().plots[0].cellY == CellToGarden(-1));
 }
 
+// Jenny's playtest: weeds in a square get an explicit [F]/[X] Pull weeds prompt whenever she can see
+// them (HasVisibleWeeds, the world's first drawn tuft), on bare, growing and ripe squares alike, and
+// F pulls them there: a bare weedy square is weeded, never sown; a clean one is left alone.
+void PullWeedsOnAnySquare()
+{
+    Plot plot;
+    plot.weeds = 0.0;
+    CHECK(!HasVisibleWeeds(plot));
+    plot.weeds = CropCare::VisibleWeeds - 0.001;
+    CHECK(!HasVisibleWeeds(plot));
+    plot.weeds = CropCare::VisibleWeeds;
+    CHECK(HasVisibleWeeds(plot));
+    plot.planted = true;
+    plot.growth = 1.0;
+    CHECK(IsRipe(plot) && HasVisibleWeeds(plot));
+
+    Simulation sim;
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::Seeds, 2}});
+    const Point square = CellCenter(-2, -1);
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), square));
+    const int plotId = sim.FindNearestPlot(square, 1);
+    CHECK(plotId != -1 && !sim.GetState().plots[0].planted);
+    // A bare square that's grown weeds: pulled, nothing sown, no items, Energy once.
+    Edit(sim, [](State& state) { state.plots[0].weeds = 0.4; }, false);
+    CHECK(HasVisibleWeeds(sim.GetState().plots[0]));
+    const auto stock = sim.GetState().inventory;
+    const double energy = sim.GetState().energy;
+    const auto bare = sim.Weed(plotId, square);
+    OK(bare);
+    CHECK(bare.message == "Weeds pulled. The square is clean for sowing.");
+    CHECK(!sim.GetState().plots[0].planted && sim.GetState().plots[0].weeds == 0.0);
+    CHECK(sim.GetState().inventory == stock && Close(sim.GetState().energy, energy - Exertion::WeedEnergy, 1e-9));
+    CHECK(!HasVisibleWeeds(sim.GetState().plots[0]));
+    UnchangedFailure(sim, [&] { return sim.Weed(plotId, square); });
+    // A ripe crop with weeds still pulls them (the crop message) and stays ripe.
+    OK(sim.Plant(plotId, square));
+    Edit(sim, [](State& state) { state.plots[0].growth = 1.0; state.plots[0].weeds = 0.6; }, false);
+    CHECK(IsRipe(sim.GetState().plots[0]) && HasVisibleWeeds(sim.GetState().plots[0]));
+    const auto ripe = sim.Weed(plotId, square);
+    OK(ripe);
+    CHECK(ripe.message == "Weeds removed. The crop has more room to grow.");
+    CHECK(IsRipe(sim.GetState().plots[0]) && sim.GetState().plots[0].weeds == 0.0);
+}
+
 void GardenSquares()
 {
     Simulation sim;
@@ -4521,6 +4565,7 @@ int main()
     Run("timber processing, dual fuel, storage and save version", TimberAndFirewoodTransactions);
     Run("farming, weeds, moisture and rain", FarmingAndRain);
     Run("small garden squares, per-square planting and plot migration", GardenSquares);
+    Run("weeds in any square offer and take a pull", PullWeedsOnAnySquare);
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
     Run("crop table, growing days, care modifiers, stages and status", CropTableAndStatus);
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);

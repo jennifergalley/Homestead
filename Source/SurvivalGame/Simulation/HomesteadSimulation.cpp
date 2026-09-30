@@ -2572,7 +2572,8 @@ Result Simulation::Weed(int plotId, Point player)
     if (plot->weeds <= 0.0) return Bad("This plot is already free of weeds.");
     if (auto ready = CheckExertion(Exertion::WeedEnergy); !ready) return ready;
     plot->weeds = 0.0;
-    return Exert(Exertion::WeedEnergy, Good("Weeds removed. The crop has more room to grow."));
+    return Exert(Exertion::WeedEnergy, Good(plot->planted ? "Weeds removed. The crop has more room to grow."
+        : "Weeds pulled. The square is clean for sowing."));
 }
 Result Simulation::HarvestCrop(int plotId, Point player)
 {
