@@ -3508,7 +3508,24 @@ void SleepOptionPolicy()
         previous = amount;
     }
     CHECK(lowest >= 0.29 && lowest < 0.45 && highest > 0.85 && highest <= 1.0 && biggestStep < 0.1);
-    // Recovery follows hours slept, not the clock: a daytime sleep until rested fills her up.
+    // Rain loudness (Jenny, 2026-09-29: too loud; halve it). Exactly half the previous gain, which was
+    // rain^0.7 * ambience * lerp(0.9 outdoors, 0.35 indoors), at every strength and indoors or out; it
+    // starts and stops at the same moments, and no rain is silent. Full rain at the default 0.7 ambience:
+    // 0.63 -> 0.315 outdoors, 0.245 -> 0.1225 indoors.
+    {
+        const auto previousGain = [](double rain, double ambience, double indoors)
+            { return std::pow(rain, 0.7) * ambience * (0.9 + (0.35 - 0.9) * indoors); };
+        for (const double rain : {1.0, 0.8, 0.3, 0.05})
+            for (const double indoors : {0.0, 0.5, 1.0})
+                for (const double ambience : {0.7, 1.0, 0.2})
+                {
+                    CHECK(Close(RainAudioGain(rain, ambience, indoors), 0.5 * previousGain(rain, ambience, indoors)));
+                    CHECK(RainAudible(rain, ambience, indoors) == (previousGain(rain, ambience, indoors) > 0.001));
+                }
+        CHECK(Close(RainAudioGain(1.0, 0.7, 0.0), 0.315) && Close(RainAudioGain(1.0, 0.7, 1.0), 0.1225));
+        CHECK(RainAudioGain(0.0, 0.7, 0.0) == 0.0 && !RainAudible(0.0, 0.7, 0.0));
+        CHECK(RainAudioGain(1.0, 0.0, 0.0) == 0.0 && !RainAudible(1.0, 0.0, 1.0));   // Ambience muted
+    }    // Recovery follows hours slept, not the clock: a daytime sleep until rested fills her up.
     Simulation owlSim;
     BuildingStock(owlSim);
     OK(owlSim.Place(Piece::Bed, -3, 0, 0, Home));

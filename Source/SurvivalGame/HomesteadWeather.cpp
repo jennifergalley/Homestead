@@ -183,8 +183,9 @@ void UHomesteadWeather::TickWeather(float DeltaSeconds)
     {
         const auto* Game = Cast<AHomesteadController>(Viewer);
         const float Setting = Game ? Game->AmbienceVolume : 0.7f;
-        const float Gain = FMath::Pow(Rain, 0.7f) * Setting * FMath::Lerp(OutdoorGain, IndoorGain, Indoors);
-        if (Gain > 0.001f)
+        // One gain, applied once: the loop fades in to full and this multiplier carries the rest.
+        const float Gain = static_cast<float>(Homestead::RainAudioGain(Rain, Setting, Indoors));
+        if (Homestead::RainAudible(Rain, Setting, Indoors))
         {
             // Fade to full and let the volume multiplier carry the gain: FadeIn's level multiplies it, so
             // fading to Gain as well played the rain at Gain squared (inaudible in drizzle).

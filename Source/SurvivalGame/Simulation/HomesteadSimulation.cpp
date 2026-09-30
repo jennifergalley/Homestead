@@ -1688,6 +1688,23 @@ double Overcast(double hour)
     return ease((ofDay - (RainStartHour - OvercastLeadHours)) / OvercastLeadHours)
         * ease((RainEndHour + OvercastLeadHours - ofDay) / OvercastLeadHours);
 }
+namespace
+{
+double RainAudioLevel(double rain, double ambience, double indoors)
+{
+    if (!(rain > 0.0)) return 0.0;
+    const double inside = Clamp(indoors, 0.0, 1.0);
+    return std::pow(Clamp(rain, 0.0, 1.0), 0.7) * ambience * (RainOutdoorGain + (RainIndoorGain - RainOutdoorGain) * inside);
+}
+}
+double RainAudioGain(double rain, double ambience, double indoors)
+{
+    return RainAudioLevel(rain, ambience, indoors) * RainLoudness;
+}
+bool RainAudible(double rain, double ambience, double indoors)
+{
+    return RainAudioLevel(rain, ambience, indoors) > 0.001;
+}
 int Simulation::DayNumber() const { return static_cast<int>(state_.hour / 24.0) + 1; }
 const char* Simulation::SeasonName() const
 {
