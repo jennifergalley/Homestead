@@ -284,6 +284,17 @@ after the north-west lake; town-entry/store acceptance, coordinate bridge, roads
 signs wait for the final road route. If the terrain or water work needs placement ids, the Water Agent
 claims them through this page before using them (the registry starts at 581000+).
 
+### Forage placement ID freeze blocker
+
+**Current saves are not corrupt; this blocks future forage/terrain/road rebakes and merges.**
+`forage.py` compactly enumerates accepted new-Estate brambles, then Roots `582128+`, then successful
+roadside stops `581000+`; its accepted brambles/roots span `582100+`. A future newly rejected
+candidate would shift many later IDs, causing old harvested/cleared `ResourceEdit`s to attach to the
+wrong kind or position despite `bakeVersion=2`. Water must preserve the committed id -> kind ->
+position mapping for every existing `581000+` and `582100+` node, reserve per candidate with holes,
+allocate additions only as new IDs, and prove old-save cleared/harvested mapping through a
+save-regeneration regression before the machine permits another forage/terrain/road rebake.
+
 **Packaged lake pail regression:** the diagnosis is inconclusive; do not make a speculative shore-range
 change. The shipped probe accepts lake shore <=120 cm, and PIE filled at landing (-79, -744) using an
 emptied carried pail. Current world focus misleadingly offers `[A] Fill carried Pail` even with no
@@ -327,6 +338,11 @@ untracked).
 Before Integration can cherry-pick, replace Water's proposed EmptyPailText with Jenny's exact:
 `The pail is empty. Fill it at a body of water`. Far refusal may clarify river/lake, but no-pail
 focus also needs PIE coverage. This remains a pending text correction, not shipped.
+
+**Corrected pail-prompt pair:** `069e493a` atop `20dd9cd1` now has the exact EmptyPailText and
+native 10/10; far refusal remains truthful about river/lake and excludes sea. It is still partial:
+no UE/PIE, not in package `a2607437`, and Integration must cherry-pick only this pair after packaging
+(not Water's unrelated night/lake-trail work).
 
 **Turnip planting regression:** Menu input is main-integrated in `1d1eebb5` and the copied-save PIE
 checkpoint passed three distinct Turnip sows, then a named no-seed fourth attempt, with sow/water state
@@ -501,9 +517,10 @@ sprint-specific Energy cost; this supersedes both current 0.35/real-second behav
 Refuse the sprint toggle at Energy <=10 and turn it off if other work/time reaches that threshold; do
 not auto-resume after recovery.
 
-Props implements this in an isolated slice after urgent Hoe work. Native tests cover 30/60/120 day
-lengths; PIE covers road sprint, clearing and farming. Starter food and abundant berry requests remain
-pending, so this does not claim early Energy is fully solved.
+Props now holds a headless UAT-window slot for this isolated slice from current main; no UE/UBT/Blender
+work occurs until packaging releases. Native tests must cover 30/60/120 day lengths; PIE then covers
+road sprint, clearing and farming. Starter food and abundant berry requests remain pending, so this
+does not claim early Energy is fully solved.
 - **Live sound sliders** — **symptom investigation pending, not shipped.** Mouse drag already calls
   `MenuPreviewAudioVolume` live through `SSlider.OnValueChanged`, then release writes INI; d-pad steps
   preview and persist. Jenny's symptom may instead be effects without a continuous audible source,
