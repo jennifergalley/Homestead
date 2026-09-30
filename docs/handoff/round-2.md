@@ -181,6 +181,22 @@ preview remains inconclusive, so catastrophic geometry cure remains unproven; th
 evidence is a holistic copied-save PIE and smoke pass, not a structural verification rerun. None of
 these source refactors changes the Shipping player build.
 
+**Pending holistic copied-save PIE/Shipping matrix (Integration-owned):**
+
+1. Focus a bramble at 285 cm from both front and behind; exercise a worn billhook through the
+   one-intent sapling clear and verify its saved-clear state.
+2. Till, sow, water and harvest a garden plot; verify held produce and plot timing.
+3. Navigate Field Book Inventory/Craft/Build/Map/Settings with gamepad and mouse focus; use the
+   shop and dialogs; verify F5/F9.
+4. Load the saved MetaHuman BobStraight (`MetaHair 1`) and long hair across LOD changes; exercise
+   gather, eat, held-tool animation and camera. The prior old/new groom A/B was inconclusive, so
+   this must not be reported as a visual cure unless it reproduces and eliminates the artifact.
+5. Confirm retained woodland spawn, resources and terrain.
+
+Only if that evidence is green may Integration build the new Development six-suite package and a
+Shipping no-listener candidate. The Estate shortcut remains unchanged until those separate package
+and save-safety checks pass.
+
 ### Development firewall prompts / offline Shipping candidate
 
 Development packaged automation can trigger recurring Windows Firewall prompts: UE5.8's in-process
