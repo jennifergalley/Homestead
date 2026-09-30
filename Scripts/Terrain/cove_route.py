@@ -564,12 +564,30 @@ def edges(stations, flights, landings, runs, ground_fn):
         for side_name in (leg[0]["railSides"] if leg else ["right"]):
             landing_rail(lnd, leg, 1.0 if side_name == "left" else -1.0)
 
-    # Nothing stands in the path's clear width anywhere (a kerb on the inside of a sharp corner would land on
-    # the next stretch).
-    tree = cKDTree(xy)
-    kerbs = [k for k in kerbs if tree.query((k["x"], k["y"]))[0] >= CLEAR_HALF_M - 0.02]
-    rails = [r for r in rails if r["pitch"] > 0 or tree.query((r["x"], r["y"]))[0] >= CLEAR_HALF_M - 0.02]
+    kerbs, rails = clear_of_path(xy, kerbs, rails)
     return kerbs, rails, s
+
+
+KERB_LENGTH_M = 1.0              # SM_CoveKerb_Straight, centred on its pivot
+CLEAR_SAMPLES = 11
+
+
+def clear_of_path(xy, kerbs, rails):
+    """Drop kerbs and level rail bays (whose pawn blockers have collision) that reach into the clear width of
+    any stretch of the route anywhere along them, not just at their pivots (review, 2026-09-30: at the bench
+    steps' hairpin a kerb's end stood 25 cm from the centreline, in front of the bottom tread)."""
+    tree = cKDTree(np.asarray(xy, np.float64))
+    limit = CLEAR_HALF_M - 0.01
+
+    def clear(x, y, yaw, start, end):
+        a = math.radians(yaw)
+        u = np.array([math.cos(a), math.sin(a)])
+        pts = np.array([x, y]) + np.outer(np.linspace(start, end, CLEAR_SAMPLES), u)
+        return tree.query(pts)[0].min() >= limit
+
+    kerbs = [k for k in kerbs if clear(k["x"], k["y"], k["yaw"], -KERB_LENGTH_M / 2, KERB_LENGTH_M / 2)]
+    rails = [r for r in rails if r["pitch"] > 0 or clear(r["x"], r["y"], r["yaw"], 0.0, r["length"])]
+    return kerbs, rails
 
 
 def estate_placements():
@@ -1112,6 +1130,9 @@ def main():
             np.save(npy_path, zn)
             print(f"cove route: work npy brought into step at {int(stale.sum())} cells ({npy_path})")
 
+    # Re-applied to the stored design too, so a graded route re-emits without pieces in the way.
+    xy_all = [(c[0], c[1]) for c in route["centreline"]]
+    route["kerbs"], route["rails"] = clear_of_path(xy_all, route["kerbs"], route["rails"])
     write_data(route)
     route = json.load(open(DATA))           # everything below reads what's committed, first run or re-run
     layout["coveRoute"] = {k: route[k] for k in ("graded", "control", "kinds", "length", "clearWidth", "maxPathGrade",

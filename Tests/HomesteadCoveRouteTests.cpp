@@ -247,7 +247,22 @@ int main()
         }
     }
 
-    // Kerbs and rails stand outside the 1.4 m clear width, on the path.
+    // Kerbs and rails stand outside the 1.4 m clear width, on the path, along their whole length (review,
+    // 2026-09-30: a kerb's pivot can be clear while its end reaches into the next stretch at a hairpin).
+    std::vector<Point> centreline;
+    for (const CoveRouteStation& s : route.stations) centreline.push_back(s.position);
+    auto clearAlong = [&](Point from, double yaw, double start, double end) {
+        double least = 1e300;
+        for (int i = 0; i <= 10; ++i) least = std::min(least, PolylineDistance(centreline, Along(from, yaw, start + (end - start) * i / 10.0)));
+        return least;
+    };
+    for (const CoveRouteKerb& k : route.kerbs)
+        Check(clearAlong(k.position, k.yaw, -50.0, 50.0) >= 0.5 * CoveRouteClearWidthCm - 2.0, "a kerb clear of the path along its length",
+              clearAlong(k.position, k.yaw, -50.0, 50.0));
+    for (const CoveRouteRail& r : route.rails)
+        if (r.pitch == 0.0)
+            Check(clearAlong(r.position, r.yaw, 0.0, r.length) >= 0.5 * CoveRouteClearWidthCm - 2.0, "a level rail bay clear of the path",
+                  clearAlong(r.position, r.yaw, 0.0, r.length));
     for (const CoveRouteKerb& k : route.kerbs)
     {
         const CoveRoute::Nearest n = route.NearestTo(k.position);
@@ -399,6 +414,14 @@ int main()
             Check(std::fabs(b.halfLength * 2.0 - r.length) < 0.01, "the blocker runs the bay's length", b.halfLength);
             const CoveRoute::Nearest n = route.NearestTo(b.centre);
             Check(n.distanceCm >= 0.5 * CoveRouteClearWidthCm, "no blocker in the clear width", n.distanceCm);
+            // Along its length too, for blockers beside a path (a flight's blockers sit over its own treads' edge).
+            if (r.pitch == 0.0)
+            {
+                double least = 1e300;
+                for (int k = 0; k <= 10; ++k)
+                    least = std::min(least, PolylineDistance(centreline, Along(b.centre, b.yaw, -b.halfLength + 2.0 * b.halfLength * k / 10.0)));
+                Check(least >= 0.5 * CoveRouteClearWidthCm - 2.0, "a path blocker clear of the path along its length", least);
+            }
         }
         std::printf("cove kit: %d treads, %d landing slabs (worst stretch %.2f), %d kerbs, %d rail bays (%d mirrored), %d end posts, %zu blockers\n",
                     treads, kit.Count(CoveKitPiece::LandingSlab), worst, kit.Count(CoveKitPiece::Kerb), rails, mirrored, endPosts, kit.blockers.size());

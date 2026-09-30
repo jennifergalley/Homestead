@@ -95,7 +95,7 @@ are the flights' own; the rail bay is the kit's nearest standard (26, 28 or 30 d
 | 17 | 8 | (-543.0, -492.0) | 45.0 | 9 | 16.3 / 33.4 | 26.0 (26) | 6.65 to 8.12 | +Y |
 | 18 | 8 | (-539.9, -488.9) | 45.0 | 8 | 16.3 / 33.4 | 26.0 (26) | 8.12 to 9.42 | +Y |
 
-Also 15 landings (1.23 to 1.60 m), 152 kerb pieces (1 m), 84 rail
+Also 15 landings (1.23 to 1.60 m), 140 kerb pieces (1 m), 84 rail
 bays (41 level, 43 raked, 39 of them mirrored) and 2 fingerposts: at (-266.8, -653.6) m, arm yaw 159
 degrees (down the path from the front door), and at (-493.0, -555.4) m, arm yaw 153 degrees (down the cliff
 steps).
