@@ -46,6 +46,17 @@ struct PublicRoadBridge
     double bedZ = 0.0;          // the river bed under it (cm)
     // The deck's ends (cm), toward the manor and toward town.
     Point End(double side) const;
+    // True over the walking slab (the deck's length plus DeckSlabOverrunCm each end, its clear width), grown by
+    // marginCm all round.
+    bool Covers(Point world, double marginCm = 0.0) const;
+    // The nearest point on the walking slab at least insetCm inside its edges (the point itself if it's there).
+    Point OntoDeck(Point world, double insetCm) const;
+    // Where a downward probe for footing should start: at least clearanceCm above the walking surface where
+    // the deck covers the point (grown by marginCm), else z. A save made at the old ford sits under the deck.
+    double ProbeStartZ(Point world, double z, double clearanceCm, double marginCm) const;
+    // What a dropped thing rests on: the walking surface where the deck covers it, else the ground.
+    double RestZ(Point world, double groundZ) const;
+    static constexpr double DeckSlabOverrunCm = 20.0;   // HomesteadWorldRoadBridge.cpp: slab 40 cm longer than the deck
 };
 
 struct PublicRoad

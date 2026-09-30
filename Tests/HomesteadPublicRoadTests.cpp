@@ -155,6 +155,31 @@ int main()
         }
         std::printf("bridge: %.1f m long, %.1f m wide, deck %.2f m, %.2f m over the water\n", deck.halfLength / 50.0,
             deck.halfWidth / 50.0, deck.deckZ / 100.0, (deck.deckZ - deck.waterZ) / 100.0);
+
+        // Saves from the old ford (review, 2026-09-30): a position 1.7 m either way of the channel's centre,
+        // at or below the deck, settles from above the deck's walking slab; dropped things rest on its
+        // planks, not on the river bed; away from the bridge nothing changes.
+        constexpr double HalfHeightCm = 90.0, RadiusCm = 34.0, MarginCm = 30.0;
+        const double radians = deck.yaw * 3.14159265358979323846 / 180.0;
+        for (const double along : {-170.0, 0.0, 170.0})
+            for (const double across : {-120.0, 0.0, 120.0, deck.halfWidth + 40.0})
+            {
+                const Point at{deck.centre.x + std::cos(radians) * along - std::sin(radians) * across,
+                               deck.centre.y + std::sin(radians) * along + std::cos(radians) * across};
+                Check(deck.Covers(at, RadiusCm + MarginCm), "the ford's saves are over the deck", along);
+                const Point on = deck.OntoDeck(at, RadiusCm + 5.0);
+                Check(deck.Covers(on) && Distance(on, at) <= std::max(0.0, std::abs(across) - (deck.halfWidth - RadiusCm - 5.0)) + 0.01,
+                      "settles onto the slab, moved only across", Distance(on, at));
+                for (const double savedZ : {deck.bedZ + 100.0, deck.deckZ - 25.0, deck.deckZ - 30.0 + HalfHeightCm})
+                    Check(deck.ProbeStartZ(on, savedZ, HalfHeightCm + MarginCm, 0.0) >= deck.deckZ + HalfHeightCm,
+                          "the settle probe starts above the slab", savedZ);
+                if (std::abs(across) <= deck.halfWidth)
+                    Check(deck.RestZ(at, deck.bedZ) == deck.deckZ, "a drop on the bridge rests on its planks", along);
+            }
+        const Point away = road.At(road.bridgeChainage + road.bridgeHalfAlong + 30.0);
+        Check(!deck.Covers(away, RadiusCm + MarginCm), "off the bridge is not over it");
+        Check(deck.ProbeStartZ(away, 1234.0, HalfHeightCm + MarginCm, 0.0) == 1234.0, "off the bridge the probe is unchanged");
+        Check(deck.RestZ(away, 1234.0) == 1234.0, "off the bridge a drop rests on the ground");
     }
 
     // The town (Scripts/Terrain/town_layout.py; Jenny, 2026-09-29: "bunched too tightly"): an open 60 x 45 m

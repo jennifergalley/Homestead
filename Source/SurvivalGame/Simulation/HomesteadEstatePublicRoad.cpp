@@ -68,6 +68,50 @@ Point PublicRoadBridge::End(double side) const
     return {centre.x + std::cos(radians) * along, centre.y + std::sin(radians) * along};
 }
 
+namespace
+{
+// The point in the deck's frame: (along toward town, across to the right), cm from its centre.
+void DeckFrame(const PublicRoadBridge& deck, Point world, double& along, double& across)
+{
+    const double radians = deck.yaw * 3.14159265358979323846 / 180.0;
+    const double dx = world.x - deck.centre.x, dy = world.y - deck.centre.y;
+    along = dx * std::cos(radians) + dy * std::sin(radians);
+    across = -dx * std::sin(radians) + dy * std::cos(radians);
+}
+}
+
+bool PublicRoadBridge::Covers(Point world, double marginCm) const
+{
+    if (!valid) return false;
+    double along = 0.0, across = 0.0;
+    DeckFrame(*this, world, along, across);
+    return std::abs(along) <= halfLength + DeckSlabOverrunCm + marginCm && std::abs(across) <= halfWidth + marginCm;
+}
+
+Point PublicRoadBridge::OntoDeck(Point world, double insetCm) const
+{
+    if (!valid) return world;
+    double along = 0.0, across = 0.0;
+    DeckFrame(*this, world, along, across);
+    const double maxAlong = std::max(0.0, halfLength + DeckSlabOverrunCm - insetCm);
+    const double maxAcross = std::max(0.0, halfWidth - insetCm);
+    along = std::clamp(along, -maxAlong, maxAlong);
+    across = std::clamp(across, -maxAcross, maxAcross);
+    const double radians = yaw * 3.14159265358979323846 / 180.0;
+    return {centre.x + along * std::cos(radians) - across * std::sin(radians),
+            centre.y + along * std::sin(radians) + across * std::cos(radians)};
+}
+
+double PublicRoadBridge::ProbeStartZ(Point world, double z, double clearanceCm, double marginCm) const
+{
+    return Covers(world, marginCm) ? std::max(z, deckZ + clearanceCm) : z;
+}
+
+double PublicRoadBridge::RestZ(Point world, double groundZ) const
+{
+    return Covers(world) ? std::max(groundZ, deckZ) : groundZ;
+}
+
 const PublicRoad& EstatePublicRoad()
 {
     static const PublicRoad Road = [] {

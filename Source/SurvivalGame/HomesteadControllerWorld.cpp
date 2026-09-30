@@ -4,12 +4,19 @@
 #include "HomesteadWorld.h"
 #include "HomesteadEstateTerrain.h"
 #include "Simulation/HomesteadEstate.h"
+#include "Simulation/HomesteadEstatePublicRoad.h"
 
 #include "Engine/World.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 using HomesteadControllerText::Text;
+
+namespace HomesteadSettleTuning
+{
+constexpr float BridgeSettleMarginCm = 30.0f;     // past her capsule: the deck counts as underfoot this far out
+constexpr float BridgeSettleHoldSeconds = 5.0f;   // wait this long for the bridge's walking slab before giving up on it
+}
 
 Homestead::Point AHomesteadController::PlayerPoint() const
 {
@@ -54,6 +61,18 @@ bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float 
     UCapsuleComponent* Capsule = Body ? Body->GetCapsuleComponent() : nullptr;
     UCharacterMovementComponent* Movement = Body ? Body->GetCharacterMovement() : nullptr;
     const float HalfHeight = Capsule ? Capsule->GetScaledCapsuleHalfHeight() : 90.0f;
+    const float Radius = Capsule ? Capsule->GetScaledCapsuleRadius() : 34.0f;
+    // Over the road bridge (a save from the old ford, or a teleport onto it) the probe starts above the deck's
+    // walking slab and she stands on it: from under the slab the trace would miss it and stand her in it.
+    const Homestead::PublicRoadBridge& Deck = Homestead::EstatePublicRoad().deck;
+    const bool bOnBridge = bEstateMap && Deck.Covers({Target.X, Target.Y}, Radius + HomesteadSettleTuning::BridgeSettleMarginCm);
+    if (bOnBridge)
+    {
+        const Homestead::Point On = Deck.OntoDeck({Target.X, Target.Y}, Radius + 5.0f);
+        Target.X = static_cast<float>(On.x);
+        Target.Y = static_cast<float>(On.y);
+        Target.Z = static_cast<float>(Deck.ProbeStartZ(On, Target.Z, HalfHeight + HomesteadSettleTuning::BridgeSettleMarginCm, 0.0));
+    }
     const float Ground = GroundHeight(Target.X, Target.Y);
     // Trace for exactly what her capsule collides with, down to well below the terrain.
     FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadSettleOnGround), false, Avatar);
@@ -65,8 +84,11 @@ bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float 
         Channel = Capsule->GetCollisionObjectType();
     }
     FHitResult Hit;
-    const bool bFound = GetWorld()->LineTraceSingleByChannel(Hit, Target,
+    bool bFound = GetWorld()->LineTraceSingleByChannel(Hit, Target,
         FVector(Target.X, Target.Y, FMath::Min(Target.Z, Ground) - 500.0f), Channel, Params, Responses);
+    // Over the bridge a hit below the deck is the river bed: its slab isn't built yet, so hold a moment
+    // (after HomesteadSettleTuning::BridgeSettleHoldSeconds she stands where the trace found, in case the bridge never builds).
+    if (bOnBridge && bFound && Hit.ImpactPoint.Z < Deck.deckZ - 10.0 && Waited < HomesteadSettleTuning::BridgeSettleHoldSeconds) bFound = false;
     if (!bFound && Waited < HoldLimitSeconds)
     {
         // Hold her where the terrain will be, not falling, until its collision arrives.
@@ -77,13 +99,14 @@ bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float 
             Movement->StopMovementImmediately();
             if (Movement->MovementMode != MOVE_None) Movement->DisableMovement();
         }
-        Avatar->SetActorLocation(FVector(Target.X, Target.Y, FMath::Min(Target.Z, Ground + HalfHeight + 2.0f)),
-            false, nullptr, ETeleportType::TeleportPhysics);
+        const float HoldZ = bOnBridge ? Target.Z : FMath::Min(Target.Z, Ground + HalfHeight + 2.0f);
+        Avatar->SetActorLocation(FVector(Target.X, Target.Y, HoldZ), false, nullptr, ETeleportType::TeleportPhysics);
         return false;
     }
-    const float Floor = bFound ? Hit.ImpactPoint.Z : Ground;
+    const float Floor = bFound ? Hit.ImpactPoint.Z : bOnBridge ? static_cast<float>(Deck.deckZ) : Ground;
     if (!bFound)
-        UE_LOG(LogTemp, Warning, TEXT("HOMESTEAD_GROUND_HOLD %s: gave up after %.1f s at (%.0f, %.0f); placing on the heightfield"), Why, Waited, Target.X, Target.Y);
+        UE_LOG(LogTemp, Warning, TEXT("HOMESTEAD_GROUND_HOLD %s: gave up after %.1f s at (%.0f, %.0f); placing on the %s"), Why, Waited,
+            Target.X, Target.Y, bOnBridge ? TEXT("bridge deck") : TEXT("heightfield"));
     UE_LOG(LogTemp, Display, TEXT("HOMESTEAD_GROUND_SETTLE %s: held %.1f s; feet at %.0f (heightfield %.0f) at (%.0f, %.0f)"),
         Why, Waited, Floor, Ground, Target.X, Target.Y);
     Target.Z = Floor + HalfHeight + 2.0f;
