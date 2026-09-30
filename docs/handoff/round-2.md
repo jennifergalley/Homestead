@@ -137,6 +137,14 @@ Menu and Water pause edits to those four files. Architecture stops on clean per-
 commits with verification; Integration reserves sequential merge, native and Editor/Game build after
 the hair checkpoint. Hair retains priority for the visual fix; hotbar and garden work remain paused.
 
+**Controller source-only checkpoint `7fbd3bff`:** based on `main` `4d16bded`,
+`HomesteadController.cpp` moves from 4,778 to 579 lines through 16 per-feature `.cpp` files and small
+named helper headers. All 185/185 member-definition bodies are byte-identical after newline
+normalization; `git diff --cached --check` is clean. There is **no native/Editor/Game compile** while
+Props owns the hair editor/UBT slot, so this is partial and unshipped. Architecture proceeds
+World-source-only; Integration later cherry-picks Controller alone, runs native Release plus
+Editor/Game unity, and returns the resulting base SHA before any World integration.
+
 ### Development firewall prompts / offline Shipping candidate
 
 Development packaged automation can trigger recurring Windows Firewall prompts: UE5.8's in-process
