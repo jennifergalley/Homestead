@@ -287,9 +287,9 @@ bool AHomesteadCharacter::PlayHarvest(Homestead::Point Target, bool bPick, UStat
 bool AHomesteadCharacter::PlayPullWeeds(Homestead::Point Target, UStaticMesh* Handful)
 {
     if (!CanPullWeeds()) return false;
-    UStaticMesh* Mesh = Handful ? Handful : PulledWeedDefault.Get();
+    UStaticMesh* HandfulMesh = Handful ? Handful : PulledWeedDefault.Get();
     for (UStaticMeshComponent* Prop : {PulledWeedL.Get(), PulledWeedR.Get()})
-        if (Prop && Mesh) Prop->SetStaticMesh(Mesh);
+        if (Prop && HandfulMesh) Prop->SetStaticMesh(HandfulMesh);
     return PlayKneelGather(EHomesteadKneelGather::PullWeeds, FVector2D(Target.x, Target.y));
 }
 

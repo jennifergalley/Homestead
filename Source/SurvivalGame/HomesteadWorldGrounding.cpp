@@ -108,11 +108,11 @@ void AHomesteadWorld::UpdateSoilGrounding(float DeltaSeconds)
         ++Checked;
         if (!Part) { PendingSoil.RemoveAtSwap(Index); continue; }
         bool bOnLandscape = false;
-        const float Soil = SoilHeight(Pending.Centre, Pending.Half, Pending.Yaw, bOnLandscape);
-        if (bOnLandscape && FMath::IsFinite(Soil))
+        const float SoilZ = SoilHeight(Pending.Centre, Pending.Half, Pending.Yaw, bOnLandscape);
+        if (bOnLandscape && FMath::IsFinite(SoilZ))
         {
-            if (!FMath::IsNearlyEqual(Soil, Pending.PlacedOn, 0.5f))
-                Part->AddWorldOffset(FVector(0, 0, Soil - Pending.PlacedOn));
+            if (!FMath::IsNearlyEqual(SoilZ, Pending.PlacedOn, 0.5f))
+                Part->AddWorldOffset(FVector(0, 0, SoilZ - Pending.PlacedOn));
             PendingSoil.RemoveAtSwap(Index);
         }
         else if (++Pending.Tries >= G::MaxTries)
