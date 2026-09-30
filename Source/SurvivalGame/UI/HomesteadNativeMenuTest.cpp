@@ -2018,6 +2018,16 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                     && Entry->quantity == 2 && !PastyBelowRow()
                     && Controller->SelectedHotbarIndex() == *SavedSelected && Holdings() == *HoldingsBefore;
             });
+        Add(TEXT("A pasty's hover text gives its Energy and no internal stack number"),
+            []() {},
+            [this, TargetCell]()
+            {
+                FHomesteadRow Row;
+                const bool Found = Controller->MenuHotbarRow(*TargetCell, Row);
+                Results.Add(TEXT("FOOD_HOVER ") + Row.Detail.Replace(TEXT("\n"), TEXT(" | ")));
+                return Found && Row.Detail.Contains(TEXT("+25 Energy")) && !Row.Detail.Contains(TEXT("Stack #"))
+                    && Row.Detail.Contains(TEXT(": 2"));
+            });
         Add(TEXT("Capture the chest view's hotbar row holding the pasties"),
             [this]() { Screenshot(TEXT("native-storage-hotbar-row-filled")); },
             [this]() { return Controller->ActiveStorageChest().IsSet(); }, 0.8f);

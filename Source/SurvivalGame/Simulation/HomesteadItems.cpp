@@ -1,5 +1,6 @@
 #include "HomesteadItems.h"
 
+#include <cmath>
 #include <cstring>
 namespace Homestead
 {
@@ -179,6 +180,12 @@ const char* ItemIcon(Item item) { return GetItemInfo(item).icon; }
 const char* ItemSource(Item item) { return GetItemInfo(item).source; }
 ItemCategory CategoryOf(Item item) { return GetItemInfo(item).category; }
 bool IsEdible(Item item) { return GetItemInfo(item).hunger > 0.0; }
+std::string FoodEnergyLabel(Item item)
+{
+    if (!ValidItem(item) || !IsEdible(item)) return {};
+    const long energy = std::lround(GetItemInfo(item).energy);
+    return energy > 0 ? "+" + std::to_string(energy) + " Energy" : std::string();
+}
 bool IsTool(Item item) { return ValidItem(item) && GetItemInfo(item).category == ItemCategory::Tool; }
 int ItemSortRank(Item item)
 {

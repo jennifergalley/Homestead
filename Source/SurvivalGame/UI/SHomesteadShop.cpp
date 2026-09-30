@@ -4,6 +4,7 @@
 #include "SHomesteadHudScale.h"
 #include "../HomesteadController.h"
 #include "../HomesteadShopkeeper.h"
+#include "../Simulation/HomesteadItems.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/CoreStyle.h"
@@ -292,7 +293,15 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
             [
                 SNew(SVerticalBox)
-                + SVerticalBox::Slot().AutoHeight()[Label(Utf8(Homestead::ItemName(Row.Item)), 17, bSelected ? ShopGold : ShopInk)]
+                + SVerticalBox::Slot().AutoHeight()
+                [
+                    // Food shows the Energy one restores before she buys it (Homestead::FoodEnergyLabel).
+                    SNew(SHorizontalBox)
+                    + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
+                    [ Label(Utf8(Homestead::ItemName(Row.Item)), 17, bSelected ? ShopGold : ShopInk) ]
+                    + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(10, 0, 0, 1)
+                    [ Label(Utf8(Homestead::FoodEnergyLabel(Row.Item).c_str()), 14, ShopGold) ]
+                ]
                 + SVerticalBox::Slot().AutoHeight()[Label(Utf8(Homestead::ItemDescription(Row.Item)), 12, ShopMuted)]
             ]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(16, 0)

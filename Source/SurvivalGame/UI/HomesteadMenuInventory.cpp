@@ -1,5 +1,6 @@
 #include "../HomesteadController.h"
 #include "../HomesteadCharacter.h"
+#include "../Simulation/HomesteadItems.h"
 #include "../Simulation/HomesteadPail.h"
 #include "../Simulation/HomesteadPackRow.h"
 
@@ -126,9 +127,14 @@ bool AHomesteadController::MenuEntryRow(const Homestead::LayoutEntry& Entry, int
         Row.Quantity = Entry.quantity;
         Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
         Row.Location = CurrentContainer == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), CurrentContainer);
-        Row.Detail = FString::Printf(TEXT("%s: %d\nStack #%d\n\n%s\n%s"), *Row.Location, Entry.quantity, Entry.groupId,
-            *FromUtf8(Homestead::ItemDescription(Entry.item)),
-            IsFood(Entry.item) ? TEXT("Food. Eat one from your pack.") : TEXT("Used in the world or in recipes."));
+        // Hover text: where and how many, what it is and (for food) the Energy one restores, from
+        // the catalogue (Homestead::FoodEnergyLabel). The internal stack id is not shown.
+        const std::string Energy = Homestead::FoodEnergyLabel(Entry.item);
+        const FString Use = !IsFood(Entry.item) ? FString(TEXT("Used in the world or in recipes."))
+            : Energy.empty() ? FString(TEXT("Food. Eat one from your pack."))
+            : FString::Printf(TEXT("Food: %s each. Eat one from your pack."), *FromUtf8(Energy.c_str()));
+        Row.Detail = FString::Printf(TEXT("%s: %d\n\n%s\n%s"), *Row.Location, Entry.quantity,
+            *FromUtf8(Homestead::ItemDescription(Entry.item)), *Use);
         Row.CanStore = false;
         Row.CanTake = false;
         Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : FString();

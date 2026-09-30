@@ -483,6 +483,25 @@ void WalkTheRoad()
     CHECK(sim.DozeCount() == 0);
 }
 
+// Shops and the pack show the canonical nominal Energy one food restores, from its catalogue row.
+void FoodEnergyLabels()
+{
+    CHECK(FoodEnergyLabel(Item::Pasty) == "+25 Energy");
+    CHECK(FoodEnergyLabel(Item::Bread) == "+8 Energy");
+    CHECK(FoodEnergyLabel(Item::Cheese) == "+12 Energy");
+    for (int i = 0; i < ItemCount; ++i)
+    {
+        const auto item = static_cast<Item>(i);
+        const std::string label = FoodEnergyLabel(item);
+        const long energy = std::lround(GetItemInfo(item).energy);
+        if (IsEdible(item) && energy > 0) CHECK(label == "+" + std::to_string(energy) + " Energy");
+        else CHECK(label.empty());
+    }
+    // Not food: tools, materials and raw produce that needs cooking show nothing.
+    CHECK(FoodEnergyLabel(Item::Hatchet).empty() && FoodEnergyLabel(Item::Stone).empty() && FoodEnergyLabel(Item::Potato).empty());
+    CHECK(FoodEnergyLabel(Item::Count).empty() && FoodEnergyLabel(static_cast<Item>(-1)).empty());
+}
+
 void PailWaterPresentation()
 {
     Simulation sim;
@@ -552,6 +571,7 @@ int main(int argc, char** argv)
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);
     Run("pail water shows on the pail", PailWaterPresentation);
+    Run("food shows its Energy", FoodEnergyLabels);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }
