@@ -31,7 +31,7 @@ bool AHomesteadController::MenuAssignHotbarSlot(const FHomesteadRow& Row, int32 
     }
     const auto Item = static_cast<Homestead::Item>(Row.Id);
     auto Layout = HotbarEditor::ToLayout(HotbarSlots);
-    const auto Edit = Homestead::AssignHotbarSlot(Layout, Item, Slot, Row.ContainerId == 0);
+    const auto Edit = Homestead::AssignHotbarSlot(Layout, Item, Slot, Row.ContainerId == 0 && Sim.Count(Item) > 0);
     if (Edit.Refused())
     {
         Notify(UTF8_TO_TCHAR(Edit.message.c_str()), true);

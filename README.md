@@ -247,7 +247,12 @@ while TSR upscales the world.
 ## First session
 
 Gather berries and eat them from the Pack page, or pin food to the hotbar (Pack page:
-Pin to hotbar) and eat it with the left mouse button / RT while it's selected. Gather branches, stones, and
+Pin to hotbar) and eat it with the left mouse button / RT while it's selected. The Pack page
+also shows all ten hotbar slots under the pack grid: drag a tool, food or seed stack onto the
+exact slot you want (a slot's old item is unpinned but stays in your pack), drag one slot onto
+another to move or swap them, and right-click (Y on a controller) a slot to clear it. On a
+controller, pick a stack with A and carry it down onto a slot, or use Y → Put on a hotbar slot.
+Gather branches, stones, and
 fiber from reeds. Make a hatchet, a stone hoe, and a watering can. Clear a
 small patch, build a floor/walls/doorway/roof, and add a bedroll, chest, and fire.
 Collect planting stock from wild roots, hoe a garden square (one 1 m square per stroke, just ahead of her), and kneel to plant it with the seed chosen on the hotbar (E). Refill the can

@@ -5,6 +5,7 @@
 #include "SHomesteadHudScale.h"
 #include "SHomesteadArrival.h"
 #include "../HomesteadMapComponent.h"
+#include "../Simulation/HomesteadHotbarLayout.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/CoreStyle.h"
 #include "Styling/SlateTypes.h"
@@ -173,6 +174,8 @@ const FSlateBrush& ShadowBrush()
 }
 }
 constexpr float ItemCellWidth = 76;
+// The pack page's hotbar strip: slightly smaller than a pack tile so ten fit under the pack grid.
+constexpr float BookHotbarSlotSize = 58;
 float LogicalBookWidth() { return static_cast<float>(HomesteadMenus::FullScreenLogicalSize().X); }
 float LogicalBookHeight() { return static_cast<float>(HomesteadMenus::FullScreenLogicalSize().Y); }
 float PortraitColumnWidth()
@@ -329,6 +332,7 @@ void SHomesteadMenu::AdoptFocus(ERegion TargetRegion, int32 Index)
     case ERegion::Inventory: InventorySelection = Index; break;
     case ERegion::Portrait: PortraitSelection = Index; break;
     case ERegion::Equipment: EquipmentSelection = Index; break;
+    case ERegion::Hotbar: HotbarSelection = Index; break;
     case ERegion::Actions: ActionSelection = Index; ScrollActionIntoView(); break;
     case ERegion::Recovery: RecoverySelection = Index; break;
     case ERegion::Details: DetailsSelection = Index; break;
@@ -350,6 +354,7 @@ TSharedPtr<SWidget> SHomesteadMenu::FocusWidget() const
     case ERegion::Portrait: Index = PortraitSelection; break;
     case ERegion::Content: Index = Entries.IsEmpty() ? -1 : ContentSelection; break;
     case ERegion::Equipment: Index = EquipmentSelection; break;
+    case ERegion::Hotbar: Index = HotbarSelection; break;
     case ERegion::Actions: Index = ActionSelection; break;
     case ERegion::Recovery: Index = RecoverySelection; break;
     case ERegion::Details: Index = DetailsSelection; break;
@@ -427,7 +432,7 @@ FString SHomesteadMenu::GetFocusedRegionName() const
 {
     if (Dialog != EDialog::None) return bEditingAmount ? TEXT("AmountEdit") : TEXT("Dialog");
     const TCHAR* Names[] = {TEXT("Tabs"), TEXT("Session"), TEXT("Inventory"), TEXT("Portrait"),
-        TEXT("Content"), TEXT("Equipment"), TEXT("Details"), TEXT("Actions"), TEXT("Recovery")};
+        TEXT("Content"), TEXT("Equipment"), TEXT("Details"), TEXT("Actions"), TEXT("Recovery"), TEXT("Hotbar")};
     return Names[static_cast<int32>(Region)];
 }
 
@@ -758,6 +763,12 @@ void SHomesteadMenu::Refresh()
     bRecovery = Controller->IsFailed() && !Controller->IsBookOpen();
     const FString OldKey = Entries.IsValidIndex(ContentSelection) ? RowKey(Entries[ContentSelection]) : FString();
     SeenPage = Controller->BookPage();
+    // A held pack stack or slot only means something on the plain pack page (not a chest's).
+    HotbarCells.Reset();
+    if (bHotbarPointerDown) HeldHotbarSlot = INDEX_NONE;
+    bHotbarPointerDown = bHotbarPointerDragging = false;
+    PointerHotbarTarget = INDEX_NONE;
+    if (SeenPage != 0 || Controller->ActiveStorageChest().IsSet()) CancelHotbarHolds();
     if (TabBar) TabBar->SetVisibility(SeenPage == 4 ? EVisibility::Collapsed : EVisibility::Visible);
     Controller->RefreshMenuPortrait();
     Entries.Reset(); RowIndices.Reset(); Cells.Reset();
@@ -1223,6 +1234,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     }
     if (SeenPage == 0 && !Storage)
     {
+        InventoryColumn->AddSlot().AutoHeight().Padding(0, 10, 0, 4)[ Text(TEXT("Hotbar"), 16) ];
+        InventoryColumn->AddSlot().AutoHeight().HAlign(HAlign_Left)[ BuildBookHotbar() ];
         TSharedPtr<SHorizontalBox> EquipmentBar;
         InventoryColumn->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Text(TEXT("Equipped slots"), 16) ];
         InventoryColumn->AddSlot().AutoHeight()[ SAssignNew(EquipmentBar, SHorizontalBox) ];
@@ -1948,6 +1961,10 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
             if (Known && AHomesteadController::CanPinToHotbar(Item))
                 Add(Controller->IsPinnedToHotbar(Item) ? TEXT("Unpin from hotbar") : TEXT("Pin to hotbar"),
                     Act(EHomesteadItemAction::Pin, 1), EHomesteadItemAction::Pin);
+            // Choose the exact slot on the book's hotbar strip (the keyboard/controller way to do
+            // what dragging onto a slot does).
+            if (Known && AHomesteadController::CanPinToHotbar(Item) && !Storage)
+                Add(TEXT("Put on a hotbar slot..."), [this, Row]() { BeginPlacingOnHotbar(Row); });
             if (Storage) Add(FString::Printf(TEXT("Move to chest %d"), Row.DestinationId), Move, EHomesteadItemAction::Transfer);
             Add(Row.Quantity > 1 ? TEXT("Drop 1") : TEXT("Drop"), Act(EHomesteadItemAction::Drop, 1), EHomesteadItemAction::Drop);
             if (Row.Quantity > 1)
@@ -2006,6 +2023,8 @@ void SHomesteadMenu::OpenItemContextMenu(int32 Index, bool bPointer)
 FString SHomesteadMenu::PackHint() const
 {
     if (!Controller.IsValid()) return {};
+    const bool bHotbarLine = Region == ERegion::Hotbar || HeldHotbarRow.IsSet() || HeldHotbarSlot != INDEX_NONE;
+    if (bHotbarLine && !HotbarCells.IsEmpty()) return HotbarHint();
     const int32 Index = DetailIndex();
     FString Subject;
     if (Entries.IsValidIndex(Index) && Entries[Index].Subject != EHomesteadMenuSubject::Legacy)
@@ -2167,7 +2186,9 @@ void SHomesteadMenu::EndPointerItemDrag()
 {
     const bool WasDragging = bPointerDraggingItem;
     const int32 Source = PointerDragSource;
+    const int32 HotbarTarget = PointerHotbarTarget;
     int32 Target = INDEX_NONE;
+    bool bOverSource = false;
     if (WasDragging && FSlateApplication::IsInitialized())
     {
         const FVector2D Position = FSlateApplication::Get().GetCursorPos();
@@ -2175,15 +2196,22 @@ void SHomesteadMenu::EndPointerItemDrag()
             if (Index != Source && Cells[Index]
                 && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position))
             { Target = Index; break; }
+        bOverSource = Cells.IsValidIndex(Source) && Cells[Source] && Cells[Source]->GetCachedGeometry().IsUnderLocation(Position);
     }
     bPointerItemDown = false;
     bPointerDraggingItem = false;
     PointerDragSource = INDEX_NONE;
     PointerDragTarget = INDEX_NONE;
-    bSuppressItemClick = WasDragging;
+    PointerHotbarTarget = INDEX_NONE;
+    // Only a release back over the tile she picked up clicks it; swallow that one click. Released
+    // anywhere else, no click follows, so the next real click mustn't be eaten.
+    bSuppressItemClick = WasDragging && bOverSource;
     if (WasDragging && Entries.IsValidIndex(Source) && Entries.IsValidIndex(Target)
         && Source != Target)
         Controller->MenuDrop(Entries[Source], Entries[Target], PointerDragRevision);
+    // Dropped on a hotbar slot: bind it there (stock stays where it is). Anywhere else, nothing.
+    else if (WasDragging && Entries.IsValidIndex(Source) && Target == INDEX_NONE && HotbarCells.IsValidIndex(HotbarTarget))
+        Controller->MenuAssignHotbarSlot(Entries[Source], HotbarTarget);
 }
 void SHomesteadMenu::CancelPointerItemDrag()
 {
@@ -2191,7 +2219,280 @@ void SHomesteadMenu::CancelPointerItemDrag()
     bPointerDraggingItem = false;
     PointerDragSource = INDEX_NONE;
     PointerDragTarget = INDEX_NONE;
+    PointerHotbarTarget = INDEX_NONE;
     bSuppressItemClick = false;
+}
+const FHomesteadRow* SHomesteadMenu::HotbarCandidateRow() const
+{
+    const FHomesteadRow* Row = HeldHotbarRow.IsSet() ? &HeldHotbarRow.GetValue()
+        : bPointerDraggingItem && Entries.IsValidIndex(PointerDragSource) ? &Entries[PointerDragSource]
+        : bVirtualDraggingItem && Entries.IsValidIndex(VirtualDragSource) ? &Entries[VirtualDragSource] : nullptr;
+    return Row && (Row->Subject == EHomesteadMenuSubject::ItemGroup || Row->Subject == EHomesteadMenuSubject::Wearable) ? Row : nullptr;
+}
+int32 SHomesteadMenu::HotbarCellAt(FVector2D Position) const
+{
+    for (int32 Slot = 0; Slot < HotbarCells.Num(); ++Slot)
+        if (HotbarCells[Slot] && HotbarCells[Slot]->GetCachedGeometry().IsUnderLocation(Position)) return Slot;
+    return INDEX_NONE;
+}
+bool SHomesteadMenu::IsHotbarDropTarget(int32 Slot) const
+{
+    if (PointerHotbarTarget != INDEX_NONE) return Slot == PointerHotbarTarget;
+    // Keyboard / controller: the focused slot is where A would put what she holds.
+    const bool Holding = HeldHotbarRow.IsSet() || HeldHotbarSlot != INDEX_NONE || bVirtualDraggingItem;
+    return Holding && Region == ERegion::Hotbar && Slot == HotbarSelection && Slot != HeldHotbarSlot;
+}
+FLinearColor SHomesteadMenu::HotbarCellColor(int32 Slot) const
+{
+    if (IsHotbarDropTarget(Slot))
+    {
+        // Gold where it will go; a rust wash for something the hotbar won't take (the drop says why).
+        const FHomesteadRow* Row = HeldHotbarSlot == INDEX_NONE ? HotbarCandidateRow() : nullptr;
+        const bool Refused = Row && (Row->Subject != EHomesteadMenuSubject::ItemGroup || Row->Id < 0
+            || Row->Id >= static_cast<int32>(Homestead::Item::Count)
+            || !AHomesteadController::CanPinToHotbar(static_cast<Homestead::Item>(Row->Id)));
+        return Refused ? FLinearColor(0.42f, 0.16f, 0.08f, 0.9f) : MenuGold;
+    }
+    if (Slot == HeldHotbarSlot) return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
+    return Region == ERegion::Hotbar && Slot == HotbarSelection ? Selected : FLinearColor(0.055f, 0.09f, 0.075f, 0.5f);
+}
+FHomesteadHotbarSlot SHomesteadMenu::BookHotbarSlot(int32 Slot) const
+{
+    if (HotbarSnapshotFrame != GFrameCounter)
+    {
+        HotbarSnapshotCache = Controller.IsValid() ? Controller->HotbarSnapshot() : TArray<FHomesteadHotbarSlot>();
+        HotbarSnapshotFrame = GFrameCounter;
+    }
+    return HotbarSnapshotCache.IsValidIndex(Slot) ? HotbarSnapshotCache[Slot] : FHomesteadHotbarSlot();
+}
+TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
+{
+    // The same ten numbered slots as the world hotbar, laid in the book so she can set them up:
+    // drop a pack stack on a slot, or drag one slot onto another. A seed or food she has run out
+    // of keeps its slot here (dimmed, "0") even though the world hotbar shows that slot empty.
+    TSharedRef<SHorizontalBox> Strip = SNew(SHorizontalBox);
+    HotbarCells.Reset();
+    for (int32 Slot = 0; Slot < Homestead::HotbarSize; ++Slot)
+    {
+        const auto SlotInfo = [this, Slot]() { return BookHotbarSlot(Slot); };
+        TSharedRef<SMenuButton> Button = SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(0)
+            .ButtonColorAndOpacity_Lambda([this, Slot]() { return HotbarCellColor(Slot); })
+            .ToolTipText(TAttribute<FText>::CreateLambda([SlotInfo, Slot]()
+            {
+                const auto Info = SlotInfo();
+                const FString Key = UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str());
+                if (!Info.Assigned)
+                    return FText::FromString(FString::Printf(TEXT("Slot %s: empty. Drag a tool, food or seed here."), *Key));
+                const FString Name = UTF8_TO_TCHAR(Homestead::ItemName(Info.Tool));
+                return FText::FromString(Info.Available ? FString::Printf(TEXT("Slot %s: %s"), *Key, *Name)
+                    : FString::Printf(TEXT("Slot %s: %s (none in your pack; it comes back when you have some)"), *Key, *Name));
+            }))
+            .OnPressed_Lambda([this, Slot, SlotInfo]()
+            {
+                // Pressing a used slot may start dragging it onto another.
+                if (!PointerAction() || Dialog != EDialog::None || HeldHotbarRow.IsSet() || !SlotInfo().Assigned) return;
+                CancelVirtualItemDrag();
+                HeldHotbarSlot = Slot;
+                HotbarDragStart = FSlateApplication::Get().GetCursorPos();
+                bHotbarPointerDown = true;
+                bHotbarPointerDragging = false;
+            })
+            .OnReleased_Lambda([this]() { if (bHotbarPointerDown) EndHotbarPointerDrag(); })
+            .OnClicked_Lambda([this, Slot]()
+            {
+                if (!PointerAction() || Dialog != EDialog::None) return FReply::Handled();
+                if (bSuppressHotbarClick) { bSuppressHotbarClick = false; return FReply::Handled(); }
+                Region = ERegion::Hotbar;
+                HotbarSelection = Slot;
+                // Holding a pack stack ("Put on a hotbar slot"): a click places it.
+                if (HeldHotbarRow.IsSet()) ActivateHotbarSlot(Slot);
+                bFocusPending = true;
+                return FReply::Handled();
+            });
+        Button->RightClick = [this, Slot]() { if (PointerAction() && Dialog == EDialog::None) OpenHotbarSlotMenu(Slot, true); };
+        Button->SetContent(
+            SNew(SBox).WidthOverride(BookHotbarSlotSize).HeightOverride(BookHotbarSlotSize)
+            [
+                SNew(SOverlay)
+                + SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)
+                [
+                    // Her selected slot keeps the world hotbar's gold frame.
+                    SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
+                    .BorderBackgroundColor_Lambda([this, Slot]()
+                    {
+                        return Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot ? MenuGold : FLinearColor::Transparent;
+                    })
+                    [ SNew(SBox) ]
+                ]
+                + SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
+                [
+                    SNew(SBox).WidthOverride(40).HeightOverride(40)
+                    .Visibility_Lambda([SlotInfo]() { return SlotInfo().Assigned ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+                    [
+                        SNew(SHomesteadIcon)
+                        .Kind_Lambda([SlotInfo]() { return SlotInfo().Icon; })
+                        .Tint_Lambda([this, Slot, SlotInfo]()
+                        {
+                            if (IsHotbarDropTarget(Slot)) return PineInk;
+                            return SlotInfo().Available ? MenuGold : Muted.CopyWithNewOpacity(0.45f);
+                        })
+                    ]
+                ]
+                + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(5, 3, 0, 0)
+                [
+                    SNew(STextBlock).Text(FText::FromString(UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str())))
+                    .Font(FCoreStyle::GetDefaultFontStyle("Bold", 13))
+                    .ColorAndOpacity_Lambda([this, Slot]() { return FSlateColor(IsHotbarDropTarget(Slot) ? PineInk : Ink); })
+                    .Visibility(EVisibility::HitTestInvisible)
+                ]
+                + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(0, 0, 5, 2)
+                [
+                    // How many of a pinned food or seed she carries; "0" when she has run out.
+                    SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Bold", 13))
+                    .Text_Lambda([SlotInfo]()
+                    {
+                        const auto Info = SlotInfo();
+                        return Info.Assigned && (Info.Food || Info.Seed) ? FText::AsNumber(Info.Count) : FText::GetEmpty();
+                    })
+                    .ColorAndOpacity_Lambda([this, Slot, SlotInfo]()
+                    {
+                        if (IsHotbarDropTarget(Slot)) return FSlateColor(PineInk);
+                        return FSlateColor(SlotInfo().Available ? Ink : Muted);
+                    })
+                    .Visibility(EVisibility::HitTestInvisible)
+                ]
+            ]);
+        HotbarCells.Add(Button);
+        Strip->AddSlot().AutoWidth().Padding(3, 0)[ RegisterButton(Button, ERegion::Hotbar, Slot) ];
+    }
+    return Strip;
+}
+void SHomesteadMenu::OpenHotbarSlotMenu(int32 Slot, bool bPointer)
+{
+    if (!Controller.IsValid() || Dialog != EDialog::None) return;
+    const auto Snapshot = Controller->HotbarSnapshot();
+    if (!Snapshot.IsValidIndex(Slot) || !Snapshot[Slot].Assigned) return;
+    CancelHotbarHolds();
+    Region = ERegion::Hotbar;
+    HotbarSelection = Slot;
+    const auto Item = Snapshot[Slot].Tool;
+    PopupTitle = FString::Printf(TEXT("Slot %s: %s"), UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str()),
+        UTF8_TO_TCHAR(Homestead::ItemName(Item)));
+    PopupOptions.Reset();
+    // Clearing only unbinds the slot; what she carries stays in her pack.
+    PopupOptions.Add({[]() { return FString(TEXT("Clear this slot")); },
+        [this, Item]() { if (Controller.IsValid() && Controller->IsPinnedToHotbar(Item)) Controller->TogglePinnedToHotbar(Item); }, nullptr});
+    PopupOptions.Add({[]() { return FString(TEXT("Cancel")); }, nullptr, nullptr});
+    PopupAnchor = PopupAnchorFor(HotbarCells.IsValidIndex(Slot) ? HotbarCells[Slot] : nullptr, bPointer);
+    SetDialog(EDialog::Context);
+}
+void SHomesteadMenu::EndHotbarPointerDrag()
+{
+    const bool WasDragging = bHotbarPointerDragging;
+    const int32 From = HeldHotbarSlot;
+    int32 To = INDEX_NONE;
+    bool bOverSource = false;
+    if (WasDragging && FSlateApplication::IsInitialized())
+    {
+        const FVector2D Position = FSlateApplication::Get().GetCursorPos();
+        To = HotbarCellAt(Position);
+        bOverSource = To == From;
+    }
+    bHotbarPointerDown = false;
+    bHotbarPointerDragging = false;
+    PointerHotbarTarget = INDEX_NONE;
+    HeldHotbarSlot = INDEX_NONE;
+    bSuppressHotbarClick = WasDragging && bOverSource;
+    // Onto another slot it moves or swaps; released off the strip, nothing changes.
+    if (WasDragging && To != INDEX_NONE && To != From && Controller.IsValid())
+    {
+        Controller->MenuMoveHotbarSlot(From, To);
+        Region = ERegion::Hotbar;
+        HotbarSelection = To;
+        bFocusPending = true;
+    }
+}
+void SHomesteadMenu::CancelHotbarHolds()
+{
+    HeldHotbarRow.Reset();
+    HeldHotbarSlot = INDEX_NONE;
+    bHotbarPointerDown = false;
+    bHotbarPointerDragging = false;
+    PointerHotbarTarget = INDEX_NONE;
+    bSuppressHotbarClick = false;
+}
+void SHomesteadMenu::BeginPlacingOnHotbar(const FHomesteadRow& Row)
+{
+    if (!Controller.IsValid() || SeenPage != 0 || Controller->ActiveStorageChest().IsSet()) return;
+    CancelPointerItemDrag();
+    CancelVirtualItemDrag();
+    CancelHotbarHolds();
+    HeldHotbarRow = Row;
+    // Start on the slot it already has, else the first empty one, else her selected slot.
+    const auto Item = static_cast<Homestead::Item>(Row.Id);
+    const auto Snapshot = Controller->HotbarSnapshot();
+    int32 Start = Snapshot.IndexOfByPredicate([Item](const FHomesteadHotbarSlot& Slot) { return Slot.Assigned && Slot.Tool == Item; });
+    if (Start == INDEX_NONE) Start = Snapshot.IndexOfByPredicate([](const FHomesteadHotbarSlot& Slot) { return !Slot.Assigned; });
+    if (Start == INDEX_NONE) Start = Controller->SelectedHotbarIndex();
+    Region = ERegion::Hotbar;
+    HotbarSelection = FMath::Clamp(Start, 0, Homestead::HotbarSize - 1);
+    bFocusPending = true;
+}
+void SHomesteadMenu::ActivateHotbarSlot(int32 Slot)
+{
+    if (!Controller.IsValid() || Slot < 0 || Slot >= Homestead::HotbarSize) return;
+    Region = ERegion::Hotbar;
+    HotbarSelection = Slot;
+    bFocusPending = true;
+    // A pack stack picked up in the grid (A) or with "Put on a hotbar slot": place it here.
+    if (bVirtualDraggingItem && Entries.IsValidIndex(VirtualDragSource))
+    {
+        const FHomesteadRow Row = Entries[VirtualDragSource];
+        CancelVirtualItemDrag();
+        Controller->MenuAssignHotbarSlot(Row, Slot);
+        return;
+    }
+    if (HeldHotbarRow.IsSet())
+    {
+        const FHomesteadRow Row = HeldHotbarRow.GetValue();
+        HeldHotbarRow.Reset();
+        Controller->MenuAssignHotbarSlot(Row, Slot);
+        return;
+    }
+    // A slot picked up with A: put it down here (moving, or swapping with what's here).
+    if (HeldHotbarSlot != INDEX_NONE)
+    {
+        const int32 From = HeldHotbarSlot;
+        HeldHotbarSlot = INDEX_NONE;
+        if (From != Slot) Controller->MenuMoveHotbarSlot(From, Slot);
+        return;
+    }
+    const auto Snapshot = Controller->HotbarSnapshot();
+    if (Snapshot.IsValidIndex(Slot) && Snapshot[Slot].Assigned) HeldHotbarSlot = Slot;
+}
+FString SHomesteadMenu::HotbarHint() const
+{
+    if (!Controller.IsValid()) return {};
+    const bool Pad = Controller->UsesGamepad();
+    const FHomesteadRow* Held = HeldHotbarRow.IsSet() ? &HeldHotbarRow.GetValue()
+        : bVirtualDraggingItem && Entries.IsValidIndex(VirtualDragSource) ? &Entries[VirtualDragSource] : nullptr;
+    if (Held)
+        return FString::Printf(TEXT("Choose a hotbar slot for %s\n%s"), *EntryName(*Held),
+            Pad ? TEXT("D-pad  choose slot     A  put it here     B  cancel")
+                : TEXT("Click a slot or press Enter to put it there     Esc  cancel"));
+    const auto Snapshot = Controller->HotbarSnapshot();
+    const auto Name = [&Snapshot](int32 Slot)
+    {
+        return Snapshot.IsValidIndex(Slot) && Snapshot[Slot].Assigned ? FString(UTF8_TO_TCHAR(Homestead::ItemName(Snapshot[Slot].Tool))) : FString(TEXT("Empty"));
+    };
+    if (HeldHotbarSlot != INDEX_NONE)
+        return FString::Printf(TEXT("Moving %s from slot %s\n%s"), *Name(HeldHotbarSlot),
+            UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(HeldHotbarSlot).c_str()),
+            Pad ? TEXT("D-pad  choose slot     A  put it here (swaps)     B  cancel")
+                : TEXT("Enter  put it here (swaps)     Esc  cancel"));
+    const FString Subject = FString::Printf(TEXT("Slot %s: %s\n"), UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(HotbarSelection).c_str()), *Name(HotbarSelection));
+    return Subject + (Pad ? TEXT("A  pick up and move     Y  clear slot     In the pack, Y  Put on a hotbar slot")
+        : TEXT("Drag a pack stack onto a slot     Drag slot onto slot to swap     Right-click  clear"));
 }
 void SHomesteadMenu::BeginOrCommitVirtualItemDrag()
 {
@@ -2277,6 +2578,7 @@ void SHomesteadMenu::Activate()
     if (Region == ERegion::Tabs) ChangePage(FocusedTab);
     else if (Region == ERegion::Inventory) ChangeInventoryView(InventorySelection);
     else if (Region == ERegion::Equipment) FocusEquipment(EquipmentSelection);
+    else if (Region == ERegion::Hotbar) ActivateHotbarSlot(HotbarSelection);
     else if (Region == ERegion::Session) { if (SessionSelection == 0) Back(); else SetSettingsTab(SessionSelection - 1); }
     else if (Region == ERegion::Recovery) { if (RecoverySelection == 0) Controller->MenuRetry(); else ChangePage(4); }
     else if (Region == ERegion::Portrait)
@@ -2304,6 +2606,7 @@ void SHomesteadMenu::ChangePage(int32 Page)
     if (!Controller.IsValid() || Dialog != EDialog::None) return;
     CancelPointerItemDrag();
     CancelVirtualItemDrag();
+    CancelHotbarHolds();
     StopCraftHold();
     Controller->MenuPage(Page);
     Refresh();
@@ -2401,6 +2704,7 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
     }
     if (Controller->MenuPortraitBrush() && SeenPage == 0) Regions.Add(ERegion::Portrait);
     Regions.Add(ERegion::Content);
+    if (SeenPage == 0 && !HotbarCells.IsEmpty()) Regions.Add(ERegion::Hotbar);
     if (SeenPage == 0) Regions.Add(ERegion::Equipment);
     if (SeenPage != 0 && SeenPage != 6 && SeenPage != 7) Regions.Add(ERegion::Details);
     if (!Actions.IsEmpty() && SeenPage != 0 && SeenPage != 6) Regions.Add(ERegion::Actions);
@@ -2568,6 +2872,7 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
     }
     case ERegion::Inventory: Moved = MoveWithin(InventorySelection, 3, 3, Direction); break;
     case ERegion::Equipment: Moved = MoveWithin(EquipmentSelection, VisibleEquipmentSlotCount, VisibleEquipmentSlotCount, Direction); break;
+    case ERegion::Hotbar: if (Direction.x) Moved = MoveWithin(HotbarSelection, Homestead::HotbarSize, Homestead::HotbarSize, Direction); break;
     case ERegion::Portrait:
         if (PortraitSelection >= 0) Moved = MoveWithin(PortraitSelection, 3, 3, Direction);
         break;
@@ -2891,6 +3196,11 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
         OpenItemContextMenu(ContentSelection, false);
         return true;
     }
+    if (SeenPage == 0 && (Key == EKeys::F || Key == EKeys::Gamepad_FaceButton_Top) && Region == ERegion::Hotbar)
+    {
+        OpenHotbarSlotMenu(HotbarSelection, false);
+        return true;
+    }
     if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top)
     {
         if (SeenPage == 0 && Key == EKeys::Gamepad_FaceButton_Top)
@@ -2930,6 +3240,17 @@ FReply SHomesteadMenu::OnMouseMove(const FGeometry&, const FPointerEvent& Event)
 }
 void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
 {
+    if (bHotbarPointerDown && HotbarCells.IsValidIndex(HeldHotbarSlot))
+    {
+        if (!bHotbarPointerDragging && FVector2D::Distance(Position, HotbarDragStart) >= 7.0f)
+            bHotbarPointerDragging = true;
+        if (bHotbarPointerDragging)
+        {
+            const int32 Over = HotbarCellAt(Position);
+            PointerHotbarTarget = Over != HeldHotbarSlot ? Over : INDEX_NONE;
+        }
+        return;
+    }
     if (bPointerItemDown && Entries.IsValidIndex(PointerDragSource))
     {
         if (!bPointerDraggingItem
@@ -2942,7 +3263,9 @@ void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
                 if (Index != PointerDragSource && Cells[Index]
                     && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position))
                 { PointerDragTarget = Index; break; }
-            if (Scroll)
+            // Off the grid, a pack stack can go onto one of the book's hotbar slots.
+            PointerHotbarTarget = PointerDragTarget == INDEX_NONE && HotbarCandidateRow() ? HotbarCellAt(Position) : INDEX_NONE;
+            if (Scroll && PointerHotbarTarget == INDEX_NONE)
             {
                 const auto Bounds = Scroll->GetCachedGeometry();
                 const float Top = Bounds.GetAbsolutePosition().Y;
@@ -2973,6 +3296,7 @@ void SHomesteadMenu::Back()
 {
     if (bSaving) return;
     if (bVirtualDraggingItem) { CancelVirtualItemDrag(); return; }
+    if (HeldHotbarRow.IsSet() || HeldHotbarSlot != INDEX_NONE) { CancelHotbarHolds(); return; }
     CancelPointerItemDrag();
     StopCraftHold();
     if (Dialog == EDialog::Amount && bEditingAmount) { bEditingAmount = false; BuildDialog(); return; }

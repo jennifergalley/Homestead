@@ -156,16 +156,22 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
     Add(TEXT("Device switching leaves a fresh stable native content focus"),
         [Open]() { Open(0); },
         [Focused]() { return Focused(TEXT("Content")); });
-    Add(TEXT("Real D-pad Down crosses final carried row into equipment without trigger"),
+    Add(TEXT("Real D-pad Down crosses final carried row into the book's hotbar strip without trigger"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+        [this, Focused, Before]() { return Focused(TEXT("Hotbar")) && Controller->Sim.Serialize() == *Before; });
+    Add(TEXT("Real D-pad Down continues from the hotbar strip into equipment"),
         [this]() { Tap(EKeys::Gamepad_DPad_Down); },
         [this, Focused, Before]() { return Focused(TEXT("Equipment")) && Controller->Sim.Serialize() == *Before; });
     Capture(TEXT("native-navigation-equipment"));
-    Add(TEXT("Real D-pad Up reverses from equipment into carried items"),
+    Add(TEXT("Real D-pad Up reverses from equipment into the hotbar strip"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Up); },
+        [Focused]() { return Focused(TEXT("Hotbar")); });
+    Add(TEXT("Real D-pad Up reverses from the hotbar strip into carried items"),
         [this]() { Tap(EKeys::Gamepad_DPad_Up); },
         [Focused]() { return Focused(TEXT("Content")); });
-    Add(TEXT("Focused-widget Slate D-pad routing reaches the same equipment boundary exactly once"),
+    Add(TEXT("Focused-widget Slate D-pad routing reaches the same hotbar boundary exactly once"),
         [SlateTap]() { SlateTap(EKeys::Gamepad_DPad_Down); },
-        [this, Focused, Before]() { return Focused(TEXT("Equipment")) && Controller->Sim.Serialize() == *Before; });
+        [this, Focused, Before]() { return Focused(TEXT("Hotbar")) && Controller->Sim.Serialize() == *Before; });
     Add(TEXT("Focused-widget Slate keyboard routing returns to content"),
         [SlateTap]() { SlateTap(EKeys::Up); },
         [Focused]() { return Focused(TEXT("Content")); });
@@ -179,7 +185,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         [Focused]() { return Focused(TEXT("Content")); });
     Add(TEXT("Real left-stick Down crosses the same boundary"),
         [SlateAxis]() { SlateAxis(EKeys::Gamepad_LeftY, -0.9f); },
-        [SlateAxis, Focused]() { SlateAxis(EKeys::Gamepad_LeftY, 0); return Focused(TEXT("Equipment")); }, 0.15f);
+        [SlateAxis, Focused]() { SlateAxis(EKeys::Gamepad_LeftY, 0); return Focused(TEXT("Hotbar")); }, 0.15f);
     Add(TEXT("Real left-stick Up returns without moving pawn or rotating portrait"),
         [this]()
         {
@@ -266,9 +272,9 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             [this, Row, ColumnCount, Focused]() { return Focused(TEXT("Content"))
                 && Controller->NativeMenu->GetSelectedContentIndex() == Row * *ColumnCount; });
     Capture(TEXT("native-navigation-scrolled"));
-    Add(TEXT("Only the actual final scrolled row exits downward"),
+    Add(TEXT("Only the actual final scrolled row exits downward, onto the hotbar strip"),
         [this]() { Tap(EKeys::Gamepad_DPad_Down); },
-        [this, Focused, Before]() { return Focused(TEXT("Equipment")) && Controller->Sim.Serialize() == *Before; });
+        [this, Focused, Before]() { return Focused(TEXT("Hotbar")) && Controller->Sim.Serialize() == *Before; });
     Add(TEXT("Select a real stack for controller virtual drag"),
         [this, Open, Before, SelectedId]()
         {
@@ -295,6 +301,103 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         [this, Before, Focused]() { return Controller->IsBookOpen()
             && !Controller->NativeMenu->IsVirtualDraggingItem() && Focused(TEXT("Content"))
             && Controller->Sim.Serialize() == *Before; });
+    // The book's hotbar strip by controller: carry a stack down onto a slot, choose a slot from the
+    // item menu, and move a slot with A. Only bindings change; stock, money and revision don't.
+    const auto Bindings = [this]()
+    {
+        TArray<int32> Result;
+        for (const auto& Slot : Controller->HotbarSnapshot()) Result.Add(Slot.Assigned ? static_cast<int32>(Slot.Tool) : -1);
+        return Result;
+    };
+    const auto BindingsBefore = MakeShared<TArray<int32>>();
+    const auto SelectedSlot = MakeShared<int32>(0);
+    const auto HeldItem = MakeShared<int32>(-1);
+    Add(TEXT("Controller A picks up a pack stack for the hotbar strip"),
+        [this, Bindings, BindingsBefore, SelectedSlot, HeldItem]()
+        {
+            *BindingsBefore = Bindings();
+            *SelectedSlot = Controller->SelectedHotbarIndex();
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            *HeldItem = Subject && Subject->Subject == EHomesteadMenuSubject::ItemGroup ? Subject->Id : -1;
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, Before]() { return Controller->NativeMenu->IsVirtualDraggingItem() && Controller->Sim.Serialize() == *Before; });
+    Add(TEXT("D-pad Down carries the held stack onto the hotbar strip"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+        [this, Focused, Before]() { return Focused(TEXT("Hotbar")) && Controller->NativeMenu->IsVirtualDraggingItem()
+            && Controller->Sim.Serialize() == *Before; });
+    Steps.Last().Repeat = [this]()
+    {
+        if (Controller->NativeMenu && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content")) Tap(EKeys::Gamepad_DPad_Down);
+    };
+    Capture(TEXT("native-navigation-hotbar-strip"));
+    Add(TEXT("A on a slot binds the held stack there, or refuses a material with the reason; stock untouched"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, Before, Bindings, BindingsBefore, HeldItem]()
+        {
+            if (Controller->NativeMenu->IsVirtualDraggingItem() || Controller->Sim.Serialize() != *Before) return false;
+            const bool Pinnable = *HeldItem >= 0 && AHomesteadController::CanPinToHotbar(static_cast<Homestead::Item>(*HeldItem));
+            const int32 FocusedSlot = Controller->NativeMenu->GetFocusedHotbarSlot();
+            const auto Now = Bindings();
+            return Pinnable ? Now.IsValidIndex(FocusedSlot) && Now[FocusedSlot] == *HeldItem
+                : Now == *BindingsBefore && Controller->MenuLastError().Contains(TEXT("Only tools, food and seeds"));
+        });
+    Add(TEXT("Disclosed fixture: two pasties in the pack"),
+        [this, Open, Before]()
+        {
+            if (!Controller->Sim.GrantItems(Homestead::Item::Pasty, 2)) { Finish(false, TEXT("Could not grant the pasty fixture.")); return; }
+            Open(0);
+            *Before = Controller->Sim.Serialize();
+        },
+        [this]() { return Controller->MenuRows().ContainsByPredicate([](const FHomesteadRow& Row)
+            { return Row.Id == static_cast<int32>(Homestead::Item::Pasty) && Row.ContainerId == 0; }); });
+    Add(TEXT("Put on a hotbar slot holds the pasty and focuses the strip"),
+        [this]()
+        {
+            for (const auto& Row : Controller->MenuRows())
+                if (Row.Id == static_cast<int32>(Homestead::Item::Pasty) && Row.ContainerId == 0)
+                { Controller->NativeMenu->BeginPlacingOnHotbar(Row); break; }
+        },
+        [this, Focused]() { return Controller->NativeMenu->IsPlacingOnHotbar() && Focused(TEXT("Hotbar")); });
+    Add(TEXT("D-pad to slot 0 and A binds the pasty there, stock untouched and selection kept"),
+        [this]()
+        {
+            for (int32 Step = 0; Step < 10; ++Step) Tap(EKeys::Gamepad_DPad_Right);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, Before, Bindings, SelectedSlot]()
+        {
+            const auto Now = Bindings();
+            const int32 Pasty = static_cast<int32>(Homestead::Item::Pasty);
+            return !Controller->NativeMenu->IsPlacingOnHotbar() && Now.IsValidIndex(9) && Now[9] == Pasty
+                && Now.FilterByPredicate([Pasty](int32 Value) { return Value == Pasty; }).Num() == 1
+                && Controller->HotbarSnapshot()[9].Count == 2
+                && Controller->SelectedHotbarIndex() == *SelectedSlot && Controller->Sim.Serialize() == *Before;
+        });
+    Add(TEXT("A picks up slot 0, Left and A swap it with slot 9"),
+        [this, Bindings, BindingsBefore]()
+        {
+            *BindingsBefore = Bindings();
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Tap(EKeys::Gamepad_DPad_Left);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, Before, Bindings, BindingsBefore]()
+        {
+            const auto Now = Bindings();
+            return Now.IsValidIndex(9) && Now[8] == (*BindingsBefore)[9] && Now[9] == (*BindingsBefore)[8]
+                && Controller->NativeMenu->GetHeldHotbarSlot() == INDEX_NONE && Controller->Sim.Serialize() == *Before;
+        });
+    Add(TEXT("B puts a held slot back down unchanged, book still open"),
+        [this, Bindings, BindingsBefore]()
+        {
+            *BindingsBefore = Bindings();
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Tap(EKeys::Gamepad_FaceButton_Right);
+        },
+        [this, Before, Bindings, BindingsBefore]() { return Controller->IsBookOpen()
+            && Controller->NativeMenu->GetHeldHotbarSlot() == INDEX_NONE
+            && Bindings() == *BindingsBefore && Controller->Sim.Serialize() == *Before; });
     Add(TEXT("Settings still begins on safe Resume control"),
         [this]() { Controller->CloseBook(); Tap(EKeys::Escape); },
         [Focused]() { return Focused(TEXT("Session")); });
