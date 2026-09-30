@@ -763,12 +763,12 @@ void SHomesteadMenu::Refresh()
     bRecovery = Controller->IsFailed() && !Controller->IsBookOpen();
     const FString OldKey = Entries.IsValidIndex(ContentSelection) ? RowKey(Entries[ContentSelection]) : FString();
     SeenPage = Controller->BookPage();
-    // A held pack stack or slot only means something on the plain pack page (not a chest's).
+    // A held pack stack or slot only means something on the inventory page.
     HotbarCells.Reset();
     if (bHotbarPointerDown) HeldHotbarSlot = INDEX_NONE;
     bHotbarPointerDown = bHotbarPointerDragging = false;
     PointerHotbarTarget = INDEX_NONE;
-    if (SeenPage != 0 || Controller->ActiveStorageChest().IsSet()) CancelHotbarHolds();
+    if (SeenPage != 0) CancelHotbarHolds();
     if (TabBar) TabBar->SetVisibility(SeenPage == 4 ? EVisibility::Collapsed : EVisibility::Visible);
     Controller->RefreshMenuPortrait();
     Entries.Reset(); RowIndices.Reset(); Cells.Reset();
@@ -1232,10 +1232,16 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
         ];
     }
+    if (SeenPage == 0)
+    {
+        // The same ten slots whenever the inventory is open; with a chest open they run across the
+        // book under both grids (only pack stacks can be put on them).
+        InventoryColumn->AddSlot().AutoHeight().Padding(0, Storage ? 8 : 10, 0, 4)
+        [ Text(Storage ? TEXT("Hotbar  (pack items only)") : TEXT("Hotbar"), 16) ];
+        InventoryColumn->AddSlot().AutoHeight().HAlign(Storage ? HAlign_Center : HAlign_Left)[ BuildBookHotbar() ];
+    }
     if (SeenPage == 0 && !Storage)
     {
-        InventoryColumn->AddSlot().AutoHeight().Padding(0, 10, 0, 4)[ Text(TEXT("Hotbar"), 16) ];
-        InventoryColumn->AddSlot().AutoHeight().HAlign(HAlign_Left)[ BuildBookHotbar() ];
         TSharedPtr<SHorizontalBox> EquipmentBar;
         InventoryColumn->AddSlot().AutoHeight().Padding(0, 8, 0, 4)[ Text(TEXT("Equipped slots"), 16) ];
         InventoryColumn->AddSlot().AutoHeight()[ SAssignNew(EquipmentBar, SHorizontalBox) ];
@@ -1963,7 +1969,7 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
                     Act(EHomesteadItemAction::Pin, 1), EHomesteadItemAction::Pin);
             // Choose the exact slot on the book's hotbar strip (the keyboard/controller way to do
             // what dragging onto a slot does).
-            if (Known && AHomesteadController::CanPinToHotbar(Item) && !Storage)
+            if (Known && AHomesteadController::CanPinToHotbar(Item))
                 Add(TEXT("Put on a hotbar slot..."), [this, Row]() { BeginPlacingOnHotbar(Row); });
             if (Storage) Add(FString::Printf(TEXT("Move to chest %d"), Row.DestinationId), Move, EHomesteadItemAction::Transfer);
             Add(Row.Quantity > 1 ? TEXT("Drop 1") : TEXT("Drop"), Act(EHomesteadItemAction::Drop, 1), EHomesteadItemAction::Drop);
@@ -2248,7 +2254,7 @@ FLinearColor SHomesteadMenu::HotbarCellColor(int32 Slot) const
     {
         // Gold where it will go; a rust wash for something the hotbar won't take (the drop says why).
         const FHomesteadRow* Row = HeldHotbarSlot == INDEX_NONE ? HotbarCandidateRow() : nullptr;
-        const bool Refused = Row && (Row->Subject != EHomesteadMenuSubject::ItemGroup || Row->Id < 0
+        const bool Refused = Row && (Row->Subject != EHomesteadMenuSubject::ItemGroup || Row->ContainerId != 0 || Row->Id < 0
             || Row->Id >= static_cast<int32>(Homestead::Item::Count)
             || !AHomesteadController::CanPinToHotbar(static_cast<Homestead::Item>(Row->Id)));
         return Refused ? FLinearColor(0.42f, 0.16f, 0.08f, 0.9f) : MenuGold;
@@ -2423,7 +2429,13 @@ void SHomesteadMenu::CancelHotbarHolds()
 }
 void SHomesteadMenu::BeginPlacingOnHotbar(const FHomesteadRow& Row)
 {
-    if (!Controller.IsValid() || SeenPage != 0 || Controller->ActiveStorageChest().IsSet()) return;
+    if (!Controller.IsValid() || SeenPage != 0) return;
+    // Chest goods come to the pack first; say so rather than moving them implicitly.
+    if (Row.Subject != EHomesteadMenuSubject::ItemGroup || Row.ContainerId != 0)
+    {
+        Controller->MenuAssignHotbarSlot(Row, FMath::Clamp(HotbarSelection, 0, Homestead::HotbarSize - 1));
+        return;
+    }
     CancelPointerItemDrag();
     CancelVirtualItemDrag();
     CancelHotbarHolds();
@@ -2476,6 +2488,9 @@ FString SHomesteadMenu::HotbarHint() const
     const bool Pad = Controller->UsesGamepad();
     const FHomesteadRow* Held = HeldHotbarRow.IsSet() ? &HeldHotbarRow.GetValue()
         : bVirtualDraggingItem && Entries.IsValidIndex(VirtualDragSource) ? &Entries[VirtualDragSource] : nullptr;
+    if (Held && Held->ContainerId != 0)
+        return FString::Printf(TEXT("%s is in the chest: take it to your pack first, then put it on the hotbar\n%s"), *EntryName(*Held),
+            Pad ? TEXT("B  cancel") : TEXT("Esc  cancel"));
     if (Held)
         return FString::Printf(TEXT("Choose a hotbar slot for %s\n%s"), *EntryName(*Held),
             Pad ? TEXT("D-pad  choose slot     A  put it here     B  cancel")
@@ -2837,11 +2852,24 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
                     Moved = true;
                     break;
                 }
+                // Below the last row of either grid: the hotbar strip that runs under both.
+                if (Direction.y > 0 && !HotbarCells.IsEmpty())
+                {
+                    Region = ERegion::Hotbar;
+                    Moved = true;
+                    break;
+                }
             }
         }
         int32 Next = ContentSelection;
         if (MoveWithin(Next, Entries.Num(), Columns(), Direction, DesiredColumn))
         { Select(Next, Direction.y != 0); Moved = true; }
+        else if (SeenPage == 0 && Direction.y > 0 && !HotbarCells.IsEmpty())
+        {
+            // Below the pack grid's last row: the hotbar strip (her selection in the grid is kept).
+            Region = ERegion::Hotbar;
+            Moved = true;
+        }
         break;
     }
     case ERegion::Tabs:
@@ -2872,7 +2900,11 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
     }
     case ERegion::Inventory: Moved = MoveWithin(InventorySelection, 3, 3, Direction); break;
     case ERegion::Equipment: Moved = MoveWithin(EquipmentSelection, VisibleEquipmentSlotCount, VisibleEquipmentSlotCount, Direction); break;
-    case ERegion::Hotbar: if (Direction.x) Moved = MoveWithin(HotbarSelection, Homestead::HotbarSize, Homestead::HotbarSize, Direction); break;
+    case ERegion::Hotbar:
+        if (Direction.x) Moved = MoveWithin(HotbarSelection, Homestead::HotbarSize, Homestead::HotbarSize, Direction);
+        // Up goes back to the grid tile she left (pack or chest), not wherever is nearest.
+        else if (Direction.y < 0 && !Entries.IsEmpty()) { Region = ERegion::Content; Select(ContentSelection, true); Moved = true; }
+        break;
     case ERegion::Portrait:
         if (PortraitSelection >= 0) Moved = MoveWithin(PortraitSelection, 3, 3, Direction);
         break;

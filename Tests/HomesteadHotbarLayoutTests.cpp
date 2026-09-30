@@ -84,7 +84,10 @@ void RefusalsChangeNothing()
     const HotbarLayout before = slots;
     // A stack in a chest has to come into her pack first.
     auto edit = AssignHotbarSlot(slots, Item::Pasty, 8, false);
-    CHECK(edit.Refused() && edit.code == HotbarEditCode::NotInPack && !edit.message.empty() && slots == before);
+    CHECK(edit.Refused() && edit.code == HotbarEditCode::NotInPack && slots == before);
+    CHECK(edit.message == "Take it to your pack first, then put it on the hotbar.");
+    // Even an item already on the hotbar can't be re-bound from a chest stack.
+    CHECK(AssignHotbarSlot(slots, Item::Berries, 9, false).code == HotbarEditCode::NotInPack && slots == before);
     edit = AssignHotbarSlot(slots, Item::Stone, 8, true);
     CHECK(edit.Refused() && edit.message == "Only tools, food and seeds can go on the hotbar." && slots == before);
     edit = AssignHotbarSlot(slots, Item::Water, 8, true);

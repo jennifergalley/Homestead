@@ -312,10 +312,12 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
     const auto BindingsBefore = MakeShared<TArray<int32>>();
     const auto SelectedSlot = MakeShared<int32>(0);
     const auto HeldItem = MakeShared<int32>(-1);
+    const auto SavedSlots = MakeShared<TArray<int32>>();
     Add(TEXT("Controller A picks up a pack stack for the hotbar strip"),
-        [this, Bindings, BindingsBefore, SelectedSlot, HeldItem]()
+        [this, Bindings, BindingsBefore, SelectedSlot, HeldItem, SavedSlots]()
         {
             *BindingsBefore = Bindings();
+            *SavedSlots = Controller->HotbarSlots;
             *SelectedSlot = Controller->SelectedHotbarIndex();
             const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             *HeldItem = Subject && Subject->Subject == EHomesteadMenuSubject::ItemGroup ? Subject->Id : -1;
@@ -398,6 +400,9 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         [this, Before, Bindings, BindingsBefore]() { return Controller->IsBookOpen()
             && Controller->NativeMenu->GetHeldHotbarSlot() == INDEX_NONE
             && Bindings() == *BindingsBefore && Controller->Sim.Serialize() == *Before; });
+    Add(TEXT("Restore the hotbar bindings the strip steps changed"),
+        [this, SavedSlots]() { Controller->HotbarSlots = *SavedSlots; },
+        [this, SavedSlots]() { return Controller->HotbarSlots == *SavedSlots; });
     Add(TEXT("Settings still begins on safe Resume control"),
         [this]() { Controller->CloseBook(); Tap(EKeys::Escape); },
         [Focused]() { return Focused(TEXT("Session")); });
