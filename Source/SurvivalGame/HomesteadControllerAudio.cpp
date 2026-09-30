@@ -33,7 +33,7 @@ void Apply(UAudioComponent* Loop, float Gain, float CutoffHz)
     if (!Loop) return;
     if (!FMath::IsNearlyEqual(Loop->VolumeMultiplier, Gain, 1.0e-4f)) Loop->SetVolumeMultiplier(Gain);
     const bool bMuffled = CutoffHz < static_cast<float>(Homestead::RoomAudio::OpenAirCutoffHz) - 1.0f;
-    if (Loop->bEnableLowPassFilter != bMuffled) Loop->SetLowPassFilterEnabled(bMuffled);
+    if ((Loop->bEnableLowPassFilter != 0) != bMuffled) Loop->SetLowPassFilterEnabled(bMuffled);
     if (bMuffled && !FMath::IsNearlyEqual(Loop->LowPassFilterFrequency, CutoffHz, 1.0f)) Loop->SetLowPassFilterFrequency(CutoffHz);
 }
 }

@@ -37,7 +37,7 @@ void AHomesteadWorld::AddDoorLeaf(FHomesteadWorldVisual& Visual, int32 Structure
     if (!Cube) return;
     // SM_StoneDoorway's opening is 220 cm clear, stretched with the wall to the roof deck.
     const float Height = 220.0f * HeightScale - FloorGapCm - HeadGapCm;
-    const FVector HingeLocal(-Door::OpeningHalfWidthCm, Door::HingeYCm, FloorGapCm);
+    const FVector HingeLocal(-Door::OpeningHalfWidthCm, Door::HingeYCm, static_cast<double>(FloorGapCm));
 
     USceneComponent* Hinge = NewObject<USceneComponent>(this);
     Hinge->SetupAttachment(GetRootComponent());
@@ -70,26 +70,27 @@ void AHomesteadWorld::AddDoorLeaf(FHomesteadWorldVisual& Visual, int32 Structure
         Part->RegisterComponent();
         Visual.Components.Add(Part);
     };
-    const float Thickness = Door::LeafThicknessCm;
-    const float BoardWidth = Door::LeafWidthCm / Boards;
+    const float Thickness = static_cast<float>(Door::LeafThicknessCm);
+    const float LeafWidth = static_cast<float>(Door::LeafWidthCm);
+    const float BoardWidth = LeafWidth / Boards;
     for (int32 Index = 0; Index < Boards; ++Index)
         Piece(FVector(BoardWidth * (Index + 0.5f), -Thickness * 0.5f, Height * 0.5f),
             FVector(BoardWidth - BoardGapCm, Thickness, Height), Index % 2 ? OakDark : Oak, FRotator::ZeroRotator, true);
     // Ledges and a brace on the room side, rising from the hinge's foot towards the latch's head.
     const float LedgeY = -Thickness - LedgeDepthCm * 0.5f;
-    const float LedgeLength = Door::LeafWidthCm - 12.0f;
+    const float LedgeLength = LeafWidth - 12.0f;
     const float LowZ = Height * 0.16f, HighZ = Height * 0.84f;
     for (const float Z : {LowZ, HighZ})
-        Piece(FVector(Door::LeafWidthCm * 0.5f, LedgeY, Z), FVector(LedgeLength, LedgeDepthCm, LedgeHeightCm), Oak,
+        Piece(FVector(LeafWidth * 0.5f, LedgeY, Z), FVector(LedgeLength, LedgeDepthCm, LedgeHeightCm), Oak,
             FRotator::ZeroRotator, false);
     const float Rise = HighZ - LowZ - LedgeHeightCm, Run = LedgeLength - 16.0f;
-    Piece(FVector(Door::LeafWidthCm * 0.5f, LedgeY, (LowZ + HighZ) * 0.5f),
+    Piece(FVector(LeafWidth * 0.5f, LedgeY, (LowZ + HighZ) * 0.5f),
         FVector(FMath::Sqrt(Rise * Rise + Run * Run), LedgeDepthCm, LedgeHeightCm * 0.8f), OakDark,
         FRotator(FMath::RadiansToDegrees(FMath::Atan2(Rise, Run)), 0.0f, 0.0f), false);
     // Strap hinges and a ring pull on the outer face.
     for (const float Z : {LowZ, HighZ})
         Piece(FVector(42.0f, 0.6f, Z), FVector(84.0f, 1.2f, 4.5f), Iron, FRotator::ZeroRotator, false);
-    Piece(FVector(Door::LeafWidthCm - 16.0f, 1.8f, Height * 0.47f), FVector(2.4f, 2.4f, 11.0f), Iron,
+    Piece(FVector(LeafWidth - 16.0f, 1.8f, Height * 0.47f), FVector(2.4f, 2.4f, 11.0f), Iron,
         FRotator::ZeroRotator, false);
 
     FDoorLeaf& Leaf = DoorLeaves.FindOrAdd(StructureId);
