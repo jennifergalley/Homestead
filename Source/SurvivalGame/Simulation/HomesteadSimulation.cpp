@@ -12,6 +12,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstdint>
+#include <cstdint>
 #include <iomanip>
 #include <limits>
 #include <locale>
@@ -1726,7 +1727,30 @@ bool Simulation::IsNight() const
     const double hour = std::fmod(state_.hour, 24.0);
     return hour < 6.0 || hour >= 19.0;
 }
-bool IsRainDay(double hour) { return static_cast<long long>(std::floor(hour / 24.0)) % 3 == 1; }
+namespace
+{
+// SplitMix64 of the block; the salt is fixed so block 0 rains on day 1 (as the old schedule did).
+constexpr std::uint64_t RainBlockSalt = 0x52A12026ull;
+std::uint64_t RainBlockHash(long long block)
+{
+    std::uint64_t z = (static_cast<std::uint64_t>(block) ^ RainBlockSalt) + 0x9E3779B97F4A7C15ull;
+    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
+    z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
+    return z ^ (z >> 31);
+}
+}
+int RainDayOffset(long long block, int which)
+{
+    const std::uint64_t hash = RainBlockHash(block);
+    return which == 0 ? 1 + static_cast<int>(hash & 1u) : 6 + static_cast<int>((hash >> 1) & 1u);
+}
+bool IsRainDay(double hour)
+{
+    const long long day = static_cast<long long>(std::floor(hour / 24.0));
+    const long long block = day >= 0 ? day / RainBlockDays : -((-day + RainBlockDays - 1) / RainBlockDays);
+    const int offset = static_cast<int>(day - block * RainBlockDays);
+    return offset == RainDayOffset(block, 0) || offset == RainDayOffset(block, 1);
+}
 bool IsRainingAt(double hour)
 {
     const double ofDay = std::fmod(hour, 24.0);

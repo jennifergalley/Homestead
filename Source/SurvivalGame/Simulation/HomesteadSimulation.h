@@ -425,10 +425,16 @@ constexpr double FuelEnergy = 0.2;
 constexpr double DeconstructEnergy = 1.0;
 }
 
-// The spring weather: it rains on the second of every three days, RainStartHour to RainEndHour.
+// The spring weather: it rains on two days in every ten, RainStartHour to RainEndHour (Jenny, 2026-09-29:
+// every third day was too often). A stable hash of each ten-day block picks one day from offsets 1-2
+// and one from 6-7, so it rains exactly 20% of days, the rains 4-6 days apart, day 0 is dry and the
+// first rain comes on day 1 as before. It depends on the hour alone: no seed, nothing saved.
 constexpr double RainStartHour = 9.0;
 constexpr double RainEndHour = 15.0;
+constexpr int RainBlockDays = 10;
 bool IsRainDay(double hour);
+// The two rainy day offsets (0-9) of the ten-day block starting on day block * RainBlockDays.
+int RainDayOffset(long long block, int which);
 bool IsRainingAt(double hour);
 // How hard it's raining at `hour`, 0-1 (add-rain-weather): nothing outside the rain window; inside
 // it a drizzle (0.3) that swells into passing showers (up to 1) every hour and a half or so, easing

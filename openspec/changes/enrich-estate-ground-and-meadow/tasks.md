@@ -29,7 +29,7 @@
 ## 5. Night and rain
 
 - [x] 5.1 `MPC_EstateGround` (Wetness, Daylight), set every refresh by `AHomesteadWorld::UpdateLighting`:
-  the ground wets through over the first half hour of the rain (day 2 of every 3, 09:00-15:00) and
+  the ground wets through over the first half hour of the rain (two days in ten, 09:00-15:00; see add-rain-weather 3.1) and
   dries over the next four hours.
 - [x] 5.2 Wet response: the landscape's soil, litter and stone darken (turf less) and turn glossy,
   with standing-water sheen on trodden ground; the grass blades darken and gloss.
