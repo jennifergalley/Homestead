@@ -827,6 +827,22 @@ void AHomesteadCharacter::ApplyMetaHumanGarments()
     ShowMaterialSlot(*MetaHumanOutfit, TEXT("M_PrimitiveTankTop"), MetaHumanGarmentMesh(0) == nullptr);
     ShowMaterialSlot(*MetaHumanOutfit, TEXT("M_PrimitiveShorts"), MetaHumanGarmentMesh(1) == nullptr);
     GetMesh()->SetRelativeLocation(FVector(0, 0, FootwearLift - GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
+    ApplyMetaHumanTunicDye();
+}
+
+void AHomesteadCharacter::ApplyMetaHumanTunicDye()
+{
+    if (!MetaHumanOutfit) return;
+    // M_HomespunDyeable's Tint multiplies the homespun albedo (import_primitive_outfit.py).
+    const FLinearColor Tint = MetaHumanTunicDye == INDEX_NONE ? FLinearColor::White : HomesteadLook::HomespunDyeTint(MetaHumanTunicDye);
+    const TArray<FName> Names = MetaHumanOutfit->GetMaterialSlotNames();
+    for (int32 Index = 0; Index < Names.Num(); ++Index)
+    {
+        if (Names[Index] != TEXT("M_PrimitiveTankTop") && Names[Index] != TEXT("M_PrimitiveShorts")) continue;
+        auto* Material = Cast<UMaterialInstanceDynamic>(MetaHumanOutfit->GetMaterial(Index));
+        if (!Material) Material = MetaHumanOutfit->CreateDynamicMaterialInstance(Index);
+        if (Material) Material->SetVectorParameterValue(TEXT("Tint"), Tint);
+    }
 }
 
 void AHomesteadCharacter::ApplyMetaHumanLook()
@@ -1025,10 +1041,14 @@ bool AHomesteadCharacter::PrepareEquipment(const Homestead::State& CandidateStat
     ClearPreparedEquipment();
     PendingMetaHumanLook = Look;
     PendingMetaHumanWorn.Init(INDEX_NONE, 4);
+    PendingMetaHumanTunicDye = INDEX_NONE;
     for (const auto& Item : CandidateState.wearables)
         if (Item.owner == Homestead::WearableOwner::Equipped)
+        {
             if (const int32 Slot = MetaHumanGarmentSlot(Item.definition); Slot != INDEX_NONE)
                 PendingMetaHumanWorn[Slot] = static_cast<int32>(Item.definition);
+            if (Item.definition == Homestead::WearableDefinition::LinenTunic) PendingMetaHumanTunicDye = Item.dye;
+        }
     if (!LoadHeroineAssets())
     {
         Error = TEXT("Original heroine skeleton or animations are unavailable.");
@@ -1061,6 +1081,7 @@ bool AHomesteadCharacter::ApplyPreparedEquipment(FString& Error)
         ClearPreparedEquipment();
         MetaHumanLook = PendingMetaHumanLook;
         MetaHumanWorn = PendingMetaHumanWorn;
+        MetaHumanTunicDye = PendingMetaHumanTunicDye;
         if (ApplyMetaHumanStack()) return true;
         Error = TEXT("MetaHuman heroine assets are unavailable.");
         return false;

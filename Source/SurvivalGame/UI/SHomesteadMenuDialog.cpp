@@ -74,6 +74,7 @@ void SHomesteadMenu::BuildPopup()
     for (int32 Index = 0; Index < PopupOptions.Num(); ++Index)
     {
         const TFunction<FString()> Label = PopupOptions[Index].Label;
+        const TOptional<FLinearColor> Swatch = PopupOptions[Index].Swatch;
         const TFunction<bool()> Enabled = PopupOptions[Index].Enabled;
         TSharedRef<SButton> Button = SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(12, 8))
             .ButtonColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? MenuGold : Selected; })
@@ -81,9 +82,23 @@ void SHomesteadMenu::BuildPopup()
             .OnHovered_Lambda([this, Index]() { DialogSelection = Index; })
             .OnClicked_Lambda([this, Index]() { if (PointerAction()) DialogAction(Index); return FReply::Handled(); })
             [
-                SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
-                .ColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? FSlateColor(PineInk) : FSlateColor(Ink); })
-                .Text_Lambda([Label]() { return FText::FromString(Label ? Label() : FString()); })
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 10, 0)
+                [
+                    SNew(SBox).WidthOverride(22).HeightOverride(22)
+                    .Visibility(Swatch.IsSet() ? EVisibility::Visible : EVisibility::Collapsed)
+                    [
+                        SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
+                        .BorderBackgroundColor(PineInk)
+                        [ SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(Swatch.Get(FLinearColor::White)) ]
+                    ]
+                ]
+                + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+                [
+                    SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+                    .ColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? FSlateColor(PineInk) : FSlateColor(Ink); })
+                    .Text_Lambda([Label]() { return FText::FromString(Label ? Label() : FString()); })
+                ]
             ];
         Button->SetOnFocusReceived(FSimpleDelegate::CreateLambda([this, Index]()
             { if (!bSynchronizingFocus) DialogSelection = Index; }));

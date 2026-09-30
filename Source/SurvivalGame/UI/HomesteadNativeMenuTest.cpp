@@ -1121,22 +1121,40 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
                 && Controller->State().equipment[static_cast<int32>(Homestead::EquipmentSlot::Legs)] == *Tunic
                 && Controller->Simulation().Serialize() == Expected->Serialize() && VerifyNativeMenuPresentation();
         });
-    Add(TEXT("Mapped UI dye changes only the owned item and its actual material tint"),
-        [this, Tunic, Expected, OpenInventory]()
+    const auto DyeTarget = MakeShared<int32>(0);
+    const auto DyeBefore = MakeShared<FString>();
+    Add(TEXT("Mapped UI opens the dye chooser for the owned tunic"),
+        [this, Tunic, Expected, OpenInventory, DyeTarget, DyeBefore]()
         {
             OpenInventory(2);
             const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             const auto* Owned = Controller->Simulation().GetWearable(*Tunic);
             if (!Subject || Subject->SubjectId != *Tunic || !Owned)
             { Finish(false, TEXT("The intended owned tunic is not selected for dye.")); return; }
+            if (Owned->dye >= 3) { Finish(false, TEXT("The dye fixture expects a tunic below the last dye.")); return; }
+            *DyeTarget = Owned->dye + 1;
+            *DyeBefore = FString(UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str()));
             *Expected = Controller->Simulation();
-            if (!Expected->RecolorWearable(*Tunic, (Owned->dye + 1) % 4, Controller->PlayerPoint(), Expected->GetRevision()))
+            if (!Expected->RecolorWearable(*Tunic, *DyeTarget, Controller->PlayerPoint(), Expected->GetRevision()))
             { Finish(false, TEXT("The independent dye expectation was invalid.")); return; }
             if (!Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Dye))
             { Finish(false, TEXT("Owned tunic dye action is unavailable.")); return; }
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
-        [this, Expected]() { return !Controller->ToastIsError()
+        [this]() { return Controller->NativeMenu->IsDyeChooserOpen(); });
+    Add(TEXT("Moving to the next dye previews it on her without changing the save"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+        [this, DyeTarget, DyeBefore]() { return Controller->NativeMenu->GetDyePreview() == *DyeTarget
+            && FString(UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str())) == *DyeBefore; });
+    Add(TEXT("Capture the dye chooser previewing the next dye"),
+        [this]() { Screenshot(TEXT("native-dye-chooser")); },
+        [this]() { return Controller->NativeMenu->IsDyeChooserOpen(); }, 0.8f);
+    Add(TEXT("A chooses the previewed dye"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, DyeTarget]() { return Controller->NativeMenu->IsDyeChooserOpen() && Controller->NativeMenu->GetDyeChoice() == *DyeTarget; });
+    Add(TEXT("Apply changes only the owned item and its actual material tint"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, Expected]() { return !Controller->ToastIsError() && !Controller->NativeMenu->IsDyeChooserOpen()
             && Controller->Simulation().Serialize() == Expected->Serialize() && VerifyNativeMenuPresentation(); });
     Add(TEXT("Capture admitted dyed wardrobe"),
         [this]() { Screenshot(TEXT("native-wardrobe-dyed")); },

@@ -150,6 +150,15 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
         }
         if (Action == EHomesteadItemAction::Drop && Row.Subject == EHomesteadMenuSubject::Wearable)
         { SetDialog(EDialog::DropWearable); return; }
+        if (Action == EHomesteadItemAction::Dye && Row.Subject == EHomesteadMenuSubject::Wearable)
+        {
+            const auto* Owned = Controller->Simulation().GetWearable(Row.SubjectId);
+            if (!Owned) return;
+            DyeRow = Row; DyeRevision = PendingRevision; DyeOriginal = Owned->dye;
+            PopupAnchor = PopupAnchorFor(Cells.IsValidIndex(ContentSelection) ? Cells[ContentSelection] : nullptr, false);
+            OpenDyeChooser(Owned->dye);
+            return;
+        }
         if (Action == EHomesteadItemAction::Merge)
         {
             MergeTargets.Reset();

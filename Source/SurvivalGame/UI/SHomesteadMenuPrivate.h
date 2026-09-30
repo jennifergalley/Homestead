@@ -130,6 +130,18 @@ const FLinearColor MenuPine(0.025f, 0.05f, 0.038f, 0.6f);
 const FLinearColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
 const FLinearColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
 const FLinearColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
+// The dye chooser's colour chips (display colours for Homestead::DyeName's four plant dyes).
+namespace MenuDyeStyle
+{
+constexpr int32 Count = 4;
+inline FLinearColor Swatch(int32 Dye)
+{
+    static const FLinearColor Values[] = {
+        FLinearColor(0.23f, 0.29f, 0.14f), FLinearColor(0.36f, 0.08f, 0.11f),
+        FLinearColor(0.20f, 0.25f, 0.33f), FLinearColor(0.70f, 0.60f, 0.42f)};
+    return Values[FMath::Clamp(Dye, 0, Count - 1)];
+}
+}
 // The notice card over the book (logical book units and seconds): a small parchment slip with a
 // double-ruled frame and Garamond ink, so it reads as a note laid on the book, not a dialog. Tuned
 // so a one-line notice reads at a glance and is gone before it gets in the way; errors linger a little.

@@ -137,6 +137,13 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
     UpdateNotice();
+    // The dye chooser previews whichever dye is under the cursor or focus, or the chosen one.
+    if (bDyeChooser && Dialog == EDialog::Context)
+    {
+        const int32 Want = DialogSelection >= 0 && DialogSelection < MenuDyeStyle::Count ? DialogSelection : DyeChoice;
+        if (Want != DyePreviewed && Controller->MenuPreviewDye(DyeRow.SubjectId, Want)) DyePreviewed = Want;
+    }
+    else if (DyePreviewed != INDEX_NONE || bDyeChooser) EndDyePreview();
     if (bPointerItemDown && PointerDragRevision != Controller->Simulation().GetRevision())
         CancelPointerItemDrag();
     if (bVirtualDraggingItem && VirtualDragRevision != Controller->Simulation().GetRevision())
