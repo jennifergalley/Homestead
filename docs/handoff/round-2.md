@@ -295,6 +295,14 @@ position mapping for every existing `581000+` and `582100+` node, reserve per ca
 allocate additions only as new IDs, and prove old-save cleared/harvested mapping through a
 save-regeneration regression before the machine permits another forage/terrain/road rebake.
 
+**Water headless partial `1010aa2e`:** a pure-Python allocator freezes committed `.inc` rows,
+rejects missing/malformed/duplicate/out-of-range entries, separates Estate/roadside reserved IDs
+including gaps and retirement, and produces byte-identical current scratch output. Synthetic Python
+tests pass 7/7; native `PublicRoad` passes 10/10 with all 59 frozen rows at id/kind/position 0.5 mm
+and saved picked `582100` / `582128` / `581005` reload coverage. It changes no save version or current
+save. Integration may cherry-pick only after the active UAT package; until then the rebake/merge block
+remains in force and this is not shipped.
+
 **Packaged lake pail regression:** the diagnosis is inconclusive; do not make a speculative shore-range
 change. The shipped probe accepts lake shore <=120 cm, and PIE filled at landing (-79, -744) using an
 emptied carried pail. Current world focus misleadingly offers `[A] Fill carried Pail` even with no
