@@ -175,8 +175,11 @@ public:
     // its toss, then flies back over her shoulder and lies there until the clip ends.
     bool PlayPullWeeds(Homestead::Point Target, UStaticMesh* Handful = nullptr);
     bool CanPullWeeds() const { return bMetaHumanActive && PullWeedsAnimation != nullptr; }
-    // Seconds into the weed pull while it plays, else -1.
+    // Seconds into the weed pull while it plays, else -1. That may still be an earlier pull's tail: a pull
+    // queued behind it only owns the phase once PullWeedsStarts() has moved on from where it was.
     float PullWeedsPhase() const;
+    // How many weed pulls have begun (counted when the queued kneel actually takes her hands).
+    uint32 PullWeedsStarts() const { return PullWeedsStartCount; }
     // kneel_pull_weeds WEED_CENTRE (cm ahead / to her right of her standing pose) and
     // EVENTS['pulled2']: the second root comes out of the ground, the pull's one commit.
     static constexpr float PullWeedsForward = 39.0f;
@@ -332,6 +335,7 @@ private:
     bool bPulledWeedHeld[2] = {false, false};
     bool bPulledWeedFlying[2] = {false, false};
     void UpdatePulledWeeds(float DeltaSeconds);
+    uint32 PullWeedsStartCount = 0;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherReedsAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherPlantAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherHarvestAnimation;

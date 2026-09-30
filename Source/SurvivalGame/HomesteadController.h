@@ -530,6 +530,7 @@ private:
     int32 PendingWeedPlot = INDEX_NONE;
     double PendingWeedSince = 0;
     bool bPendingWeedStarted = false;
+    uint32 PendingWeedStartsBefore = 0;
     // Felling in progress: the tree is already cleared; its standing copy topples after the last
     // stroke (or at once if she stops), with a chop sound per stroke.
     int32 FellResource = INDEX_NONE;

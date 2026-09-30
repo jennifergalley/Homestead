@@ -169,6 +169,7 @@ void AHomesteadCharacter::StartKneelGather(FPendingKneel& Kneel)
     Kneel.bApplied = true;
     HideKneelProps();
     KneelKind = Kind;
+    if (Kind == EHomesteadKneelGather::PullWeeds) ++PullWeedsStartCount;
     bForageBerries = bBerries;
     UStaticMesh* Produce = Kneel.Produce.Get();
     HarvestProduceMesh = Produce;

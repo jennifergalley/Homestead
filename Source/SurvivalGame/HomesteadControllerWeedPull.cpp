@@ -7,10 +7,11 @@
 
 #include "HomesteadCharacter.h"
 #include "HomesteadWorld.h"
+#include "Simulation/HomesteadWeedPull.h"
 
 #include "Engine/World.h"
 
-namespace WeedPull
+namespace WeedPullTuning
 {
 // Turning to the clump, the step and the drop to both knees come before the clip reports itself as
 // playing; past this, a pull that never started is dropped.
@@ -37,7 +38,10 @@ bool AHomesteadController::StartWeedPull(int32 NodeId, int32 PlotId, Homestead::
     }
     // Her fistfuls look like the clump she pulls; the garden square's weeds are nettle tufts.
     UStaticMesh* Handful = NodeId != INDEX_NONE && Landscape ? Landscape->ResourceVisualMesh(NodeId) : nullptr;
+    // Taken before the kneel is queued: if she's still finishing an earlier pull, its tail isn't this one's.
+    const uint32 StartsBefore = Avatar->PullWeedsStarts();
     if (!Avatar->PlayPullWeeds(Target, Handful)) return false;
+    PendingWeedStartsBefore = StartsBefore;
     PendingWeedNode = NodeId;
     PendingWeedPlot = PlotId;
     PendingWeedSince = GetWorld()->GetTimeSeconds();
@@ -58,19 +62,19 @@ void AHomesteadController::UpdatePendingWeedPull()
         PendingWeedPlot = INDEX_NONE;
         bPendingWeedStarted = false;
     };
-    if (Phase < 0.0f)
+    if (!Avatar) { Drop(); return; }
+    // Only this pull's own clip counts (Homestead::WeedPull::Advance): an earlier pull's tail never
+    // commits it, and a clip stopped before the second root (walking off, the book, another action)
+    // changes nothing.
+    Homestead::WeedPull::Pending Pending{PendingWeedStartsBefore, PendingWeedSince, bPendingWeedStarted};
+    const auto Step = Homestead::WeedPull::Advance(Pending, Avatar->PullWeedsStarts(), Phase, GetWorld()->GetTimeSeconds(),
+        AHomesteadCharacter::PullWeedsFirstPull, AHomesteadCharacter::PullWeedsCommit, WeedPullTuning::StartTimeoutSeconds);
+    bPendingWeedStarted = Pending.started;
+    if (Step == Homestead::WeedPull::Step::Drop) { Drop(); return; }
+    if (Step == Homestead::WeedPull::Step::Wait) return;
+    if (Step == Homestead::WeedPull::Step::Thin)
     {
-        // Not playing: it hasn't begun yet, or something (walking off, the book, another action)
-        // ended it before the second root came out, and then nothing happens.
-        if (!Avatar || bPendingWeedStarted || GetWorld()->GetTimeSeconds() - PendingWeedSince > WeedPull::StartTimeoutSeconds)
-            Drop();
-        return;
-    }
-    bPendingWeedStarted = true;
-    if (Phase < AHomesteadCharacter::PullWeedsCommit)
-    {
-        if (PendingWeedNode != INDEX_NONE && Landscape && Phase >= AHomesteadCharacter::PullWeedsFirstPull)
-            Landscape->ThinResource(PendingWeedNode, WeedPull::ThinnedFraction);
+        if (PendingWeedNode != INDEX_NONE && Landscape) Landscape->ThinResource(PendingWeedNode, WeedPullTuning::ThinnedFraction);
         return;
     }
     const int32 Node = PendingWeedNode, Plot = PendingWeedPlot;

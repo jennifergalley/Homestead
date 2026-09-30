@@ -4,6 +4,7 @@
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
 #include "HomesteadGatherPose.h"
+#include "HomesteadWeedPull.h"
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadRuinDebris.h"
@@ -4326,6 +4327,42 @@ void WeedPullCommitsOnce()
     UnchangedFailure(garden, [&] { return garden.Weed(plot, square); });
 }
 
+void WeedPullCommitsOnlyOnItsOwnClip()
+{
+    // Code review of the 09-29 port: a second pull pressed during the first one's tail (after its commit
+    // at the second root, while its clip still plays) committed at once, because the first clip's phase
+    // was already past the commit beat. A pull only owns the phase once its own kneel has begun.
+    using namespace WeedPull;
+    const float first = 56.0f / 30.0f, commit = 102.0f / 30.0f, end = 150.0f / 30.0f;
+    const double timeout = 4.5;
+    // Weed A: queued, starts (count 0 -> 1), thins at the first root, commits once at the second.
+    Pending a{0, 0.0, false};
+    CHECK(Advance(a, 0, -1.0f, 0.2, first, commit, timeout) == Step::Wait && !a.started);
+    CHECK(Advance(a, 1, -1.0f, 0.4, first, commit, timeout) == Step::Wait && !a.started); // Begun, not yet blended in.
+    CHECK(Advance(a, 1, 0.5f, 0.9, first, commit, timeout) == Step::Wait && a.started);
+    CHECK(Advance(a, 1, first + 0.1f, 2.4, first, commit, timeout) == Step::Thin);
+    CHECK(Advance(a, 1, commit, 3.9, first, commit, timeout) == Step::Commit);
+    // Weed B pressed during A's tail (A's clip still at 4 s): it waits through the whole tail.
+    Pending b{1, 4.0, false};
+    for (float tail = commit; tail < end; tail += 0.1f)
+        CHECK(Advance(b, 1, tail, 4.0 + (tail - commit), first, commit, timeout) == Step::Wait && !b.started);
+    CHECK(Advance(b, 1, -1.0f, 5.7, first, commit, timeout) == Step::Wait); // A ended, B not begun.
+    // B's own kneel begins: its early phase doesn't commit, only its own second root does.
+    CHECK(Advance(b, 2, 0.1f, 5.9, first, commit, timeout) == Step::Wait && b.started);
+    CHECK(Advance(b, 2, commit - 0.01f, 9.2, first, commit, timeout) == Step::Thin);
+    CHECK(Advance(b, 2, commit, 9.3, first, commit, timeout) == Step::Commit);
+    // Cancelled after it began (she walked off): dropped, nothing committed.
+    Pending c{2, 10.0, false};
+    CHECK(Advance(c, 3, 1.0f, 11.0, first, commit, timeout) == Step::Wait);
+    CHECK(Advance(c, 3, -1.0f, 11.1, first, commit, timeout) == Step::Drop);
+    // Never began, or stuck behind a tail that never ends: dropped after the timeout, never committed.
+    Pending d{3, 20.0, false};
+    CHECK(Advance(d, 3, -1.0f, 24.0, first, commit, timeout) == Step::Wait);
+    CHECK(Advance(d, 3, -1.0f, 24.6, first, commit, timeout) == Step::Drop);
+    Pending e{3, 30.0, false};
+    CHECK(Advance(e, 3, end, 34.6, first, commit, timeout) == Step::Drop);
+}
+
 void ClearoutKindsAndSpoiledGround()
 {
     const Point spawn = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
@@ -4815,6 +4852,7 @@ int main()
     Run("farming, weeds, moisture and rain", FarmingAndRain);
     Run("small garden squares, per-square planting and plot migration", GardenSquares);
     Run("weeding by hand commits once, and a probe changes nothing", WeedPullCommitsOnce);
+    Run("a weed pull commits only on its own clip, never an earlier tail", WeedPullCommitsOnlyOnItsOwnClip);
     Run("weeds in any square offer and take a pull", PullWeedsOnAnySquare);
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
     Run("crop table, growing days, care modifiers, stages and status", CropTableAndStatus);
