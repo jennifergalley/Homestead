@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
+#include "HomesteadTextEdit.h"
 #include "Widgets/SOverlay.h"
 #include "../HomesteadController.h"
 #include "HomesteadMenuNavigation.h"
@@ -216,6 +217,7 @@ private:
     int32 DyeOriginal = 0, DyeChoice = 0, DyePreviewed = INDEX_NONE;
     void OpenDyeChooser(int32 Choice);
     FString RenameDraft;
+    HomesteadTextEdit::Typer RenameTyper;
     bool TypeChestNameCharacter(TCHAR Character);
     bool HandleRenameKey(FKey Key);
     void EndDyePreview();

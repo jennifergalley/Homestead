@@ -232,7 +232,12 @@ void NamesPersistAndValidate()
     // Refusals change nothing.
     const std::uint64_t now = sim.GetRevision();
     CHECK(!sim.RenameChest(estate.chest, std::string(Chests::MaxNameLength + 1, 'a'), estate.at, now).ok);
-    CHECK(sim.RenameChest(estate.chest, std::string(Chests::MaxNameLength, 'a'), estate.at, now).ok);
+    // The limit counts characters: 23 letters and an emoji (four UTF-8 bytes) is exactly 24.
+    CHECK(sim.RenameChest(estate.chest, std::string(Chests::MaxNameLength - 1, 'a') + "\xF0\x9F\x8C\xBF", estate.at, now).ok);
+    CHECK(!sim.RenameChest(estate.chest, std::string(Chests::MaxNameLength, 'a') + "\xF0\x9F\x8C\xBF", estate.at, sim.GetRevision()).ok);
+    // A lone surrogate encoded into UTF-8 is not ordinary text.
+    CHECK(!sim.RenameChest(estate.chest, "ab\xED\xA0\xBC", estate.at, sim.GetRevision()).ok);
+    CHECK(sim.RenameChest(estate.chest, std::string(Chests::MaxNameLength, 'a'), estate.at, sim.GetRevision()).ok);
     const std::uint64_t after = sim.GetRevision();
     CHECK(!sim.RenameChest(estate.chest, "bad\x01name", estate.at, after).ok);
     CHECK(!sim.RenameChest(estate.chest, std::string(Chests::MaxNameLength, 'a'), estate.at, after).ok);

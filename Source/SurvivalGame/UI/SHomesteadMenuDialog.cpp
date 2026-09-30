@@ -395,6 +395,7 @@ void SHomesteadMenu::OpenRenameChest()
     if (!Controller.IsValid() || bSaving || SeenPage != 0 || !Controller->ActiveStorageChest().IsSet()) return;
     const FString Current = Controller->ChestDisplayName(Controller->ActiveStorageChest().GetValue());
     RenameDraft = Current == UTF8_TO_TCHAR(Homestead::Chests::DefaultName) ? FString() : Current;
+    RenameTyper.Reset();
     SetDialog(EDialog::RenameChest);
     // Enter saves what she types.
     DialogSelection = 1;
@@ -402,9 +403,14 @@ void SHomesteadMenu::OpenRenameChest()
 
 bool SHomesteadMenu::TypeChestNameCharacter(TCHAR Character)
 {
-    if (Dialog != EDialog::RenameChest || Character < 32 || Character == 127) return false;
-    if (RenameDraft.Len() >= Homestead::Chests::MaxNameLength) return true;
-    RenameDraft.AppendChar(Character);
+    if (Dialog != EDialog::RenameChest) return false;
+    // UTF-16 units arrive one per event: a surrogate pair is appended whole or not at all, and the
+    // limit counts characters (code points), like Homestead::Manor::NameLength.
+    std::uint32_t Units[2] = {};
+    const int32 Count = RenameTyper.Type(static_cast<std::uint32_t>(Character),
+        HomesteadTextEdit::CodePoints(*RenameDraft, RenameDraft.Len()), Homestead::Chests::MaxNameLength, Units);
+    if (Count == 0) return true;
+    for (int32 Index = 0; Index < Count; ++Index) RenameDraft.AppendChar(static_cast<TCHAR>(Units[Index]));
     const int32 Selection = DialogSelection;
     BuildDialog();
     DialogSelection = Selection;
@@ -425,7 +431,8 @@ bool SHomesteadMenu::HandleRenameKey(FKey Key)
     {
         if (!RenameDraft.IsEmpty())
         {
-            RenameDraft.LeftChopInline(1);
+            RenameDraft.LeftChopInline(HomesteadTextEdit::BackspaceUnits(*RenameDraft, RenameDraft.Len()));
+            RenameTyper.Reset();
             const int32 Selection = DialogSelection;
             BuildDialog();
             DialogSelection = Selection;
