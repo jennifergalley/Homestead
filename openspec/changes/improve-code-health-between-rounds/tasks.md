@@ -7,6 +7,11 @@
 
 ## 1. Split the big four (between rounds)
 
+Source and compile gates landed separately on `main` through `b3576693` (2026-09-29):
+Controller 185/185, World 71/71, Character 92/92 and field-book Menu 96/96 member bodies
+preserved; each passed native Release 9/9 and Editor+Game unity builds. Keep the tasks open
+until Integration's copied-save PIE and Shipping checks establish runtime behavior.
+
 - [ ] 1.1 `HomesteadController.cpp` → per-feature `HomesteadController<Feature>.cpp`; game target builds; PIE pass
 - [ ] 1.2 `HomesteadWorld.cpp` → `HomesteadWorld<Area>.cpp`
 - [ ] 1.3 `HomesteadCharacter.cpp` → `HomesteadCharacter<Area>.cpp`
