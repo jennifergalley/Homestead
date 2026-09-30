@@ -14,6 +14,8 @@
 - [x] 2.4 Integrate the bag with existing fade, randomized gap, Music volume/mute and ambience independence; verify one transition per finish, no reseed/reset on slider changes and no silent churn while muted (The volume slider only changes the level. Muted, no track starts. After each start the gap timer is held so a one-frame `IsPlaying` lag can't advance the bag twice.)
 - [x] 2.5 Skip missing tracks with one precise diagnostic and preserve explicit one-track/zero-track fallback; verify ambience/effects remain operational and no repeated load spam or false shuffle success appears
 
+- [x] 2.6 Pacing (Jenny, 2026-09-29): the first piece starts 45-120 s into a session, and each piece is followed by 3-8 minutes of ambience alone (was 18 s, then 55-110 s). `Homestead::MusicPacing` in `HomesteadMusicPlaylist.h`; `HomesteadMusicPlaylistTests` is now registered in CMake and covers it.
+
 ## 3. Integrated Acceptance and Promotion
 
 - [ ] 3.1 Run focused playlist/audio/config/attribution contracts, full relevant portable/native suites, strict OpenSpec validation and SurvivalGameEditor Win64 Development build from a clean integrated checkpoint

@@ -163,6 +163,7 @@ void AHomesteadController::InitializeAudio()
     const auto* Branch = GConfig ? GConfig->FindBranch(TEXT("GameUserSettings"), {}) : nullptr;
     FConfigFile Disk;
     if (Branch && Disk.Combine(Branch->IniPath)) Disk.GetString(AudioSettingsSection, LastMusicTrackKey, LastTrack);
+    MusicGapRemaining = Homestead::MusicPacing::FirstDelay(FMath::FRand());
     MusicBag.Reset(MusicTracks.Num(), MusicTrackNames.IndexOfByKey(LastTrack),
         FPlatformTime::Cycles64() ^ static_cast<uint64>(FDateTime::UtcNow().GetTicks()) ^ FPlatformProcess::GetCurrentProcessId());
     if (MusicTracks.IsEmpty())
@@ -250,5 +251,5 @@ void AHomesteadController::MusicFinished()
 {
     bMusicFading = false;
     MusicElapsed = 0;
-    MusicGapRemaining = FMath::FRandRange(55.0f, 110.0f);
+    MusicGapRemaining = Homestead::MusicPacing::Gap(FMath::FRand());
 }
