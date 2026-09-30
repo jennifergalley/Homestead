@@ -2,11 +2,13 @@
 #include "HomesteadController.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
+#include "HomesteadLampLook.h"
 
 #include "Animation/AnimSequence.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/LODSyncComponent.h"
+#include "Components/PointLightComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
