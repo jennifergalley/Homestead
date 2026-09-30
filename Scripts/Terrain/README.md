@@ -171,7 +171,8 @@ Scripts\Terrain\build_ocean.py` (McpHelpers). It imports the three textures and 
 the material graph in place and points `EstateSea` at the result. `place_water.py` updates
 `EstateSea` and `EstateRiver` in place (their external actor files keep their names), and places the
 spring's stones (`EstateSpringStone1-8`, folder `Water/Spring`). Neither the sea nor the river is
-spatially loaded, so both are drawn, and the pail probe finds the river, from anywhere on the map.
+spatially loaded, so both are drawn and the pail can probe their loaded water geometry; the player
+still must stand within the gameplay freshwater edge-distance reach to fill a carried pail.
 The river runs over the cove beach into the shore wash; its `HomesteadWater` tag (the pail refill)
 covers only the stream. The sea is tagged `HomesteadSea` only. Save the actors' packages afterwards
 (`set_course` alone doesn't dirty the package; the script calls `modify()` first).
