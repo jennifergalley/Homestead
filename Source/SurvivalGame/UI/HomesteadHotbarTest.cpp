@@ -444,13 +444,18 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this, OldSaveWorld]()
         {
+            // Her stock (not the whole world: the clock keeps running) is what the save held (woodland map, no placements).
+            Homestead::Simulation Saved;
+            const bool StockSame = Saved.Deserialize(*OldSaveWorld).ok && Saved.GetState().inventory == Controller->State().inventory;
             const auto Slots = Controller->HotbarSnapshot();
-            return Slots.Num() == 10 && Slots[7].Tool == Item::OilLamp && Slots[7].Assigned
+            FString Line;
+            for (const auto& Slot : Slots) Line += FString::Printf(TEXT("%d,"), Slot.Assigned ? static_cast<int32>(Slot.Tool) : -1);
+            Results.Add(FString::Printf(TEXT("OLD_SAVE_HOTBAR slots=%s selected=%d stock_same=%d"), *Line, Controller->SelectedHotbarIndex(), StockSame));
+            return StockSame && Slots.Num() == 10 && Slots[7].Tool == Item::OilLamp && Slots[7].Assigned
                 && Slots[0].Tool == Item::Billhook && Slots[1].Tool == Item::Scythe
                 && Slots[2].Tool == Item::Pickaxe && Slots[3].Tool == Item::Berries
                 && !Slots[4].Assigned && !Slots[9].Assigned
-                && Controller->SelectedHotbarIndex() == 0
-                && Controller->Simulation().Serialize() == *OldSaveWorld;
+                && Controller->SelectedHotbarIndex() == 0;
         });
     Add(TEXT("Reloading the current save restores her own hotbar"),
         [this]() { Tap(EKeys::F9); },
