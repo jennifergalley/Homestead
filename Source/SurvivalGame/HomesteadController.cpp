@@ -47,6 +47,7 @@
 #include "HomesteadMapComponent.h"
 #include "Simulation/HomesteadManor.h"
 #include "Simulation/HomesteadLamp.h"
+#include "Simulation/HomesteadPail.h"
 #include "UI/SHomesteadNames.h"
 #include "UI/SHomesteadArrival.h"
 #include "Framework/Application/SlateApplication.h"
@@ -828,6 +829,10 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
             Slot.Icon = HotbarIcon(Slot.Tool);
             if (Slot.Tool == Homestead::Item::OilLamp && Slot.Available)
                 Slot.Fill = static_cast<float>(Sim.LampOil() / Homestead::Lamp::CapacityHours);
+            // The pail's water shows on the pail (HomesteadPail.h), like the lamp's oil.
+            if (Slot.Tool == Homestead::Item::WateringCan && Slot.Available)
+                if (const auto Pail = Homestead::PresentPail(State()); Pail.gauge)
+                    Slot.Fill = static_cast<float>(Pail.charge) / Homestead::PailCapacity;
             Slot.Seed = IsSowingSeed(Slot.Tool);
             Slot.Pouch = Slot.Seed && OtherPouchSeeds(Index) > 0;
         }
@@ -1743,11 +1748,6 @@ bool AHomesteadController::PrepareWorldAt(Homestead::Point Position)
     return true;
 }
 
-Homestead::Result AHomesteadController::SpendSprintEnergy(double RealSeconds)
-{
-    return Sim.SpendSprintEnergy(RealSeconds);
-}
-
 bool AHomesteadController::HasHeroine() const
 {
     const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -2138,6 +2138,7 @@ void AHomesteadController::UpdateFocus()
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
     }
     ConsiderStoreFocus(Consider);
+    FocusHeldToolTarget(Position);
     if (Sim.NearWater(Position))
     {
         // With the watering can out and not full, the stream wins over a crop on the bank when she
@@ -2346,8 +2347,17 @@ FString AHomesteadController::FocusActions() const
         return Line;
     }
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
-    case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
-        ? Use + TEXT(" Fill Pail") : A + TEXT(" Fill carried Pail");
+    case EFocus::Water:
+        // Offer the fill only when it can happen: say where the pail is, or that it's already full.
+        switch (ToolWhereabouts(Sim, Homestead::Item::WateringCan))
+        {
+        case 2:
+            if (Sim.Count(Homestead::Item::Water) >= Homestead::PailPortions) return TEXT("Your pail is full");
+            return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
+                ? Use + TEXT(" Fill Pail") : A + TEXT(" Fill carried Pail");
+        case 1: return TEXT("Take your pail from the chest to fill it");
+        default: return TEXT("Requires a pail");
+        }
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
@@ -2619,9 +2629,8 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     }
     else
     {
-        // What she's aimed at wins; otherwise the nearest thing this tool handles just ahead of her.
-        const Homestead::Point Ahead{Position.x + Forward.X * 80.0, Position.y + Forward.Y * 80.0};
-        Target = Sim.FindNearestOvergrowth(Ahead, 200.0, Tool);
+        // What she's aimed at wins; otherwise what the focus would pick for this tool (same 300 cm reach).
+        Target = Sim.FindAimedOvergrowth(Position, Facing, Tool);
         if (Focus == EFocus::Resource)
             for (const auto& Node : State().resources)
                 if (Node.id == FocusId && Homestead::IsOvergrowth(Node.kind)
@@ -2650,13 +2659,8 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     const auto Ready = Sim.CheckOvergrowth(Target, Tool, Position);
     if (!Ready)
     {
+        // Out of tier (or otherwise refused): she doesn't swing at all, and nothing changes.
         Notify(Ready);
-        // Out of tier: the blade glances off with a dull knock, and nothing changes.
-        if (Ready.code == Homestead::ResultCode::ToolTier)
-        {
-            PlayEffect(WoodTapA, 0.45f);
-            if (Avatar) Avatar->PlayClear();
-        }
         return;
     }
     if (Target != SwingNode)

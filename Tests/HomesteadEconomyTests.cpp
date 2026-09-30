@@ -3,6 +3,7 @@
 #include "HomesteadEstatePublicRoad.h"
 #include "HomesteadHoldings.h"
 #include "HomesteadItems.h"
+#include "HomesteadPail.h"
 #include "HomesteadSimulation.h"
 #include "HomesteadTravel.h"
 
@@ -373,6 +374,42 @@ void WaitForTheStoreToOpen()
     OK(sim.CheckShopAccess(store.shop, store.customer));
 }
 
+void NoWalkToTownFromTown()
+{
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const Point counter = store.counter;
+    const Point door = layout.PointOr(Anchor::GeneralStoreDoor, {});
+    const Point square = layout.PointOr(Anchor::TownSquare, {});
+    const auto Refused = [&sim, &layout](Point from, const char* text)
+    {
+        const TravelPlan plan = PlanTravel(sim.GetState(), from, TravelDestination::Town, layout);
+        return !plan.ok && plan.error == text;
+    };
+    // Inside the store and on its step: already there, open or closed.
+    for (double hour : {9.0, 20.0})
+    {
+        sim.SkipToHourOfDay(hour);
+        CHECK(Refused(counter, "You're already at the general store."));
+        CHECK(Refused(store.customer, "You're already at the general store."));
+        CHECK(Refused(door, "You're already at the general store."));
+    }
+    // About the square: already in town.
+    CHECK(Refused(square, "You're already in town."));
+    // A little way off down the street she can still walk to the road's end in town, briefly.
+    const TravelPlan street = PlanTravel(sim.GetState(), {square.x, square.y - 6000.0}, TravelDestination::Town, layout);
+    CHECK(street.ok && street.gameHours < 1.0);
+    // From the gateway it's a real walk, and home to the manor from inside the store still is too.
+    const Point gateway = EstatePublicRoad().At(EstatePublicRoad().FindStop("Gateway")->chainage);
+    CHECK(PlanTravel(sim.GetState(), gateway, TravelDestination::Town, layout).ok);
+    CHECK(PlanTravel(sim.GetState(), counter, TravelDestination::Manor, layout).ok);
+    // Refused at the store: no time passes and nothing changes.
+    const std::string before = sim.Serialize();
+    const auto refused = sim.WalkRoad(TravelDestination::Town, counter);
+    CHECK(!refused.ok && refused.message == "You're already at the general store." && sim.Serialize() == before);
+}
+
 void WalkTheRoad()
 {
     CHECK(FormatHour(7.9999) == "8 AM" && FormatHour(23.999) == "12 AM" && FormatHour(19.2) == "7:12 PM");
@@ -507,6 +544,48 @@ void PickupGainsCountOnlyNewThings()
     CHECK(PickupGain(taken, CountHoldings(manor.GetState()), Item::WateringCan) == 0);
 }
 
+void PailWaterPresentation()
+{
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const auto With = [&sim](int pails, int water)
+    {
+        State state = sim.GetState();
+        state.inventory[static_cast<int>(Item::WateringCan)] = pails;
+        state.inventory[static_cast<int>(Item::Water)] = water;
+        return PresentPail(state);
+    };
+    // One carried pail: its water is a gauge and the pack's Water tile folds into it.
+    for (int water : {0, 1, 6})
+    {
+        const auto pail = With(1, water);
+        CHECK(pail.gauge && pail.charge == water && pail.hidePackWater);
+    }
+    // More than one pail holds (an older save), or 1200: the gauge is full and the tile shows every portion.
+    for (int water : {7, 1200})
+    {
+        const auto pail = With(1, water);
+        CHECK(pail.gauge && pail.charge == PailCapacity && !pail.hidePackWater);
+    }
+    // No pail carried (the starter pail is in a chest): no gauge, and any pack water shows as a tile.
+    CHECK(!With(0, 0).gauge && !With(0, 0).hidePackWater);
+    CHECK(!With(0, 4).gauge && !With(0, 4).hidePackWater);
+    // Two pails: the gauge shows, and the water stays an ordinary tile rather than be split between them.
+    CHECK(With(2, 4).gauge && With(2, 4).charge == 4 && !With(2, 4).hidePackWater);
+    // Presentation only: the stock itself round-trips through a save untouched.
+    OK(sim.GrantItems(Item::WateringCan, 1));
+    OK(sim.GrantItems(Item::Water, 9));
+    Simulation reloaded;
+    reloaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= 9);
+    const auto loaded = PresentPail(reloaded.GetState());
+    CHECK(loaded.gauge && loaded.charge == PailCapacity && !loaded.hidePackWater);
+    // The pack's footer names the charge (a controller has no hover for the tooltip).
+    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 6" && PailChargeLabel(With(1, 0)) == "Water 0 / 6");
+    CHECK(PailChargeLabel(With(1, 1200)) == "Water 6 / 6" && PailChargeLabel(With(0, 4)).empty());
+}
+
 const char* filter = nullptr;void Run(const char* name, void (*test)())
 {
     if (filter && !std::strstr(name, filter)) return;
@@ -529,10 +608,12 @@ int main(int argc, char** argv)
     Run("buy back and pack capacity", BuyBackAndCapacity);
     Run("her goods sell down each morning", StockSellsDownEachMorning);
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
+    Run("no walk to town from town", NoWalkToTownFromTown);
     Run("playtest shop placement", PlaytestShopPlacement);
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);
     Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);
+    Run("pail water shows on the pail", PailWaterPresentation);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

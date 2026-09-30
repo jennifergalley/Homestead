@@ -39,7 +39,7 @@ std::string FormatWalkDuration(double gameHours)
     return std::to_string(hours) + " h" + (rest ? " " + std::to_string(rest) + " min" : std::string());
 }
 
-TravelPlan PlanTravel(const State& state, Point from, TravelDestination destination)
+TravelPlan PlanTravel(const State& state, Point from, TravelDestination destination, const EstateLayout& layout)
 {
     TravelPlan plan;
     plan.destination = destination;
@@ -51,6 +51,23 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
     const PublicRoad& road = EstatePublicRoad();
     const PublicRoadStop* stop = road.FindStop(TravelStopName(destination));
     if (road.points.size() < 2 || !stop) { plan.error = "The road to " + where + " isn't mapped yet."; return plan; }
+    if (destination == TravelDestination::Town)
+    {
+        // Already in town there's no road to walk: inside the store or on its step, or about the square.
+        for (const Shop& shop : state.shops)
+            if (shop.kind == ShopKind::GeneralStore
+                && std::hypot(from.x - shop.counterX, from.y - shop.counterY) <= ShopWaitReach)
+            {
+                plan.error = "You're already at the general store.";
+                return plan;
+            }
+        if (const auto* square = layout.FindLandmark(Anchor::TownSquare);
+            square && std::hypot(from.x - square->position.x, from.y - square->position.y) <= TravelTownReachCm)
+        {
+            plan.error = "You're already in town.";
+            return plan;
+        }
+    }
     if (std::hypot(from.x - stop->position.x, from.y - stop->position.y) < TravelArrivedCm)
     {
         plan.error = destination == TravelDestination::Manor ? "You're already at the manor." : "You're already in town.";
@@ -93,7 +110,7 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
 
 Result Simulation::WalkRoad(TravelDestination destination, Point from)
 {
-    const TravelPlan plan = PlanTravel(state_, from, destination);
+    const TravelPlan plan = PlanTravel(state_, from, destination, Layout());
     if (!plan.ok)
         return TravelBad(plan.error, revision_, state_.failed ? ResultCode::Unavailable : ResultCode::Invalid);
     const std::string where = TravelDestinationName(destination);

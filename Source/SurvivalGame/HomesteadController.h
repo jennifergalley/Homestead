@@ -46,6 +46,8 @@ struct FHomesteadRow
     int32 Quantity = 0;
     FString Name;
     FString Location;
+    // A short state shown after the selected item's name in the pack's footer ("Water 5 / 6").
+    FString Status;
     FName Icon;
     FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
     Homestead::RecipeAssessment RecipeState;
@@ -95,7 +97,6 @@ public:
     const FHomesteadAppearance& GetAppearance() const { return Appearance; }
     bool HasHeroine() const;
     const Homestead::State& State() const { return Sim.GetState(); }
-    Homestead::Result SpendSprintEnergy(double RealSeconds);
     const Homestead::Simulation& Simulation() const { return Sim; }
     int32 BookPage() const { return Page; }
     int32 SelectedRow() const { return Selection; }
@@ -669,6 +670,8 @@ private:
     void OpenBook(int32 TargetPage);
     void CloseBook();
     void UpdateFocus();
+    // HomesteadControllerToolFocus.cpp: the held tool's aimed overgrowth, and the 280-300 cm band.
+    void FocusHeldToolTarget(Homestead::Point Position);
     void BeginPlacement(Homestead::Piece Kind);
     // Fill the watering pail at the nearest fresh water edge, with her kneeling fill when it succeeds.
     void FillPailAtStream(Homestead::Point Position);

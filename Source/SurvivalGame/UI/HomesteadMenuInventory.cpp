@@ -1,5 +1,6 @@
 #include "../HomesteadController.h"
 #include "../HomesteadCharacter.h"
+#include "../Simulation/HomesteadPail.h"
 
 namespace
 {
@@ -90,6 +91,8 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
         if (CurrentContainer < 0) return;
         const auto* Layout = Sim.GetLayout(CurrentContainer);
         if (!Layout) return;
+        // With her one pail carried, the pack's water shows on the pail instead (HomesteadPail.h).
+        const auto Pail = Homestead::PresentPail(State());
         for (const auto& Entry : *Layout)
         {
             if (Entry.wearableId)
@@ -97,6 +100,7 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
                 if (const auto* Instance = Sim.GetWearable(Entry.wearableId)) AddWearable(*Instance);
                 continue;
             }
+            if (CurrentContainer == 0 && Entry.item == Homestead::Item::Water && Pail.hidePackWater) continue;
             FHomesteadRow Row;
             Row.Id = static_cast<int>(Entry.item); Row.SubjectId = Entry.groupId;
             Row.Subject = EHomesteadMenuSubject::ItemGroup;
@@ -111,6 +115,12 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
             Row.CanStore = false;
             Row.CanTake = false;
             Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : FString();
+            if (CurrentContainer == 0 && Entry.item == Homestead::Item::WateringCan && Pail.gauge)
+            {
+                // Shown in the footer as well as the tooltip: a controller has no hover.
+                Row.Status = FromUtf8(Homestead::PailChargeLabel(Pail).c_str());
+                Row.Detail += TEXT("\n") + Row.Status;
+            }
             Result.Add(MoveTemp(Row));
         }
     };

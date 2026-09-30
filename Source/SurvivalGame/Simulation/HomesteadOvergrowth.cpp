@@ -29,7 +29,8 @@ const OvergrowthInfo OgTable[] = {
         {OgGives(Item::Weeds, 1, 2), OgGives(Item::Seeds, 1, 1, 10)}, 60.0},
     {ResourceKind::BrambleThin, ToolKind::Billhook, false, ToolTier::Worn, 1.2, OgSwings(1, 1, 1, 1),
         {OgGives(Item::BrambleCanes, 2, 3)}, 90.0},
-    {ResourceKind::Sapling, ToolKind::Billhook, false, ToolTier::Worn, 1.5, OgSwings(2, 1, 1, 1),
+    // One press fells a sapling even with the worn billhook: the hack clip already strikes twice.
+    {ResourceKind::Sapling, ToolKind::Billhook, false, ToolTier::Worn, 1.5, OgSwings(1, 1, 1, 1),
         {OgGives(Item::Branch, 3, 4), OgGives(Item::Kindling, 1, 1)}, 60.0},
     {ResourceKind::BrambleThicket, ToolKind::Billhook, false, ToolTier::Iron, 2.0, OgSwings(3, 2, 1, 1),
         {OgGives(Item::BrambleCanes, 4, 5)}, 150.0},
@@ -259,12 +260,56 @@ const char* SalvageWhereabouts(int pileId)
     }
 }
 
+namespace
+{
+enum class OgWhere { Nowhere, Pack, Chest, Ground };
+struct OgFound
+{
+    OgWhere where = OgWhere::Nowhere;
+    Point position;
+};
+// Where she keeps `item`, the same places NextSalvageHead counts as owned: her pack first, then the
+// nearest storage chest or spot on the ground she set it down.
+OgFound OgLocate(const State& state, Item item, Point player)
+{
+    const int index = static_cast<int>(item);
+    if (state.inventory[index] > 0) return {OgWhere::Pack, player};
+    OgFound found;
+    double best = 0.0;
+    const auto consider = [&](OgWhere where, Point position)
+    {
+        const double distance = OgDistanceSquared(player, position);
+        if (found.where == OgWhere::Nowhere || distance < best) { found = {where, position}; best = distance; }
+    };
+    for (const auto& piece : state.structures)
+        if (piece.kind == Piece::Chest && piece.storage[index] > 0) consider(OgWhere::Chest, StructureCenter(state, piece));
+    for (const auto& drop : state.worldDrops)
+        if (drop.wearableId == 0 && drop.item == item && drop.quantity > 0) consider(OgWhere::Ground, drop.position);
+    return found;
+}
+// "in a storage chest about 12 m away", "lying on the ground right here".
+std::string OgPlace(const OgFound& found, Point player)
+{
+    const double metres = std::sqrt(OgDistanceSquared(player, found.position)) / 100.0;
+    const std::string away = OgValid(player) && std::isfinite(metres) && metres >= 2.0
+        ? "about " + std::to_string(static_cast<long long>(std::lround(metres))) + " m away" : "right here";
+    return (found.where == OgWhere::Chest ? "in a storage chest " : "lying on the ground ") + away;
+}
+}
+
 std::string NoHoeMessage(const State& state, Point player)
 {
-    const int blade = static_cast<int>(Item::RustedHoeBlade);
-    bool hasBlade = state.inventory[blade] > 0;
-    for (const auto& piece : state.structures) hasBlade = hasBlade || (piece.kind == Piece::Chest && piece.storage[blade] > 0);
-    if (hasBlade) return "You need a hoe to till. Craft one from your rusted hoe blade and two branches on the Craft page.";
+    // She owns a hoe, just not in her pack: send her to it rather than to the salvage.
+    const OgFound hoe = OgLocate(state, Item::DiggingStick, player);
+    if (hoe.where == OgWhere::Chest) return "Your hoe is " + OgPlace(hoe, player) + ". Take it out to till.";
+    if (hoe.where == OgWhere::Ground) return "Your hoe is " + OgPlace(hoe, player) + ". Pick it up to till.";
+    const OgFound blade = OgLocate(state, Item::RustedHoeBlade, player);
+    if (blade.where == OgWhere::Pack)
+        return "You need a hoe to till. Craft one from your rusted hoe blade and two branches on the Craft page.";
+    if (blade.where != OgWhere::Nowhere)
+        return "You need a hoe to till. Your rusted hoe blade is " + OgPlace(blade, player)
+            + (blade.where == OgWhere::Chest ? ": take it out" : ": pick it up")
+            + " and craft a hoe with two branches on the Craft page.";
     if (!state.fixedEstate) return "Craft a hoe before tilling soil.";
     const ResourceNode* nearest = nullptr;
     for (const auto& node : state.resources)
@@ -407,6 +452,29 @@ int Simulation::FindNearestOvergrowth(Point position, double maxDistance, Item t
         }
     }
     return nearest;
+}
+
+int Simulation::FindAimedOvergrowth(Point player, Point facing, Item tool) const
+{
+    const ToolKind used = ToolForItem(tool);
+    const double length = std::sqrt(facing.x * facing.x + facing.y * facing.y);
+    if (!OgValid(player) || used == ToolKind::Count || !std::isfinite(length) || length < 1e-6) return -1;
+    const Point forward{facing.x / length, facing.y / length};
+    const double cosine = std::cos(Overgrowth::AimHalfAngleDegrees * 3.14159265358979323846 / 180.0);
+    int aimed = -1;
+    double best = Overgrowth::Reach;
+    for (const auto& node : state_.resources)
+    {
+        const auto* info = node.cleared ? nullptr : FindOvergrowth(node.kind);
+        if (!info || info->tool != used) continue;
+        const Point offset{node.position.x - player.x, node.position.y - player.y};
+        const double distance = std::sqrt(offset.x * offset.x + offset.y * offset.y);
+        if (distance > best || (distance == best && aimed != -1)) continue;
+        if (distance > Overgrowth::AimAnyDirection && (offset.x * forward.x + offset.y * forward.y) / distance < cosine) continue;
+        aimed = node.id;
+        best = distance;
+    }
+    return aimed;
 }
 
 double Simulation::ScytheArcRadius(ToolTier tier)

@@ -57,7 +57,9 @@ double MoistureGrowthFactor(double moisture);
 double WeedGrowthFactor(double weeds);
 inline bool NeedsWater(const Plot& plot) { return plot.moisture < CropCare::WellWatered; }
 // Shown on a dry plot's focus and returned by Water() when the pail she carries holds no water.
-inline constexpr const char* EmptyPailText = "The pail is empty. Fill it at the river.";
+inline constexpr const char* EmptyPailText = "The pail is empty. Fill it at a body of water.";
+// A full pail holds this many portions of water (Simulation::FillWater tops it up to this).
+inline constexpr int PailPortions = 6;
 inline bool IsWeedy(const Plot& plot) { return plot.weeds > CropCare::WeedyFrom; }
 inline bool IsRipe(const Plot& plot) { return plot.planted && plot.growth >= 1.0; }
 

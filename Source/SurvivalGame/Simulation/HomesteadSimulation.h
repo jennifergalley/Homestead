@@ -399,6 +399,8 @@ constexpr double CookEnergy = 0.3;
 constexpr double SplitFirewoodEnergy = 1.5;
 constexpr double BuildEnergy = 1.5;
 constexpr double GarmentEnergy = 0.8;
+// Sprinting costs no Energy of its own (Jenny, round 2); she can only start or keep sprinting above this.
+constexpr double SprintFloor = 10.0;
 constexpr double TillEnergy = 2.0;
 constexpr double PlantEnergy = 0.4;
 constexpr double WaterEnergy = 0.4;
@@ -470,6 +472,8 @@ public:
     // the game supplies the probe. Generated worlds keep the procedural stream test.
     void SetWaterProbe(std::function<bool(Point)> probe) { waterProbe_ = std::move(probe); }
     bool NearWater(Point position) const;
+    // True when a pail waits in a chest or other storage (and so can be fetched to fill).
+    bool PailStored() const;
     Result SetActiveWorldRegion(Point player,
         const PreparedWorldRegion* prepared = nullptr);
     Result ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const;
@@ -586,6 +590,10 @@ public:
     Result ClearOvergrowth(int nodeId, Item tool, Point player);
     // The uncleared overgrowth `tool` handles nearest to `position`, or -1.
     int FindNearestOvergrowth(Point position, double maxDistance, Item tool) const;
+    // What a swing of `tool` is aimed at: the nearest uncleared overgrowth of that tool's kind whose
+    // centre is within Overgrowth::Reach and roughly ahead of her (Overgrowth::AimHalfAngleDegrees), or -1. Tier and energy aren't checked
+    // here, so an under-tier target still gets named and refused. Focus and swing both use this.
+    int FindAimedOvergrowth(Point player, Point facing, Item tool) const;
     // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
     std::vector<int> ScytheArcTargets(Point player, Point facing) const;
     static double ScytheArcRadius(ToolTier tier);
@@ -602,7 +610,9 @@ public:
     Result PassDaysForPlaytest(double days, bool tend, Point player);
     // Playtest aid for screenshots: set every planted plot's growth (0-1) directly.
     Result SetCropGrowthForPlaytest(double growth);
-    Result SpendSprintEnergy(double realSeconds);
+    // Whether she may sprint now: not failed and Energy above Exertion::SprintFloor. Running costs
+    // nothing extra; the ordinary awake drain and work costs are what bring her down to the floor.
+    Result CanSprint() const;
     // Whether she has the Energy for work costing `cost` (see Exertion); ok when she does.
     Result CheckExertion(double cost) const;
     // What harvesting or clearing a node would cost her.

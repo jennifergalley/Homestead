@@ -82,21 +82,63 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / package snapshot (2026-09-29 17:40):** Integration delivered the evening playtest
-and closed its editor. Menu has the next exclusive editor slot for UI visual work; Props headless
-bramble syncs separately; Water remains paused. Partial bramble/sapling/under-tier, Menu pickup/pail
-gauge/store card, and Water no-pail prompt/lake trail/night-light work are excluded. The orchestrator
-continues to enforce the three-hands-on and two-Unreal-process caps.
+**Current slot / package snapshot (2026-09-29 18:39):** Integration pushed `main` `5d11ceed` with
+11 accepted picks, pail footer `d2c8b4b0` and docs merge `28cc8f6c`; Editor/Game builds are green and
+the editor is closed. UAT/cook package `Build\Playtest-0929night` is running; all other lanes keep
+Unreal/UBT/Blender off until `packaging done`. Six packaged suites plus copied-save smoke decide
+promotion. `Playtest-0929eve` remains the current `Homestead Estate.lnk` target until night evidence
+passes and retargeting is safe.
 
-**Integration local validation batch (unshipped):** on local `main` `50b2+`, Integration applied Water
-no-pail `20dd9cd1` + `069e493a` and forage freeze `1010aa2e`; Props bramble
+### Development firewall prompts / offline Shipping candidate
+
+Development packaged automation can trigger recurring Windows Firewall prompts: UE5.8's in-process
+TraceControl listens even with `-notraceserver` / `-traceautostart=0` (for example TCP 1985, with
+fallback ports), producing path-specific rules as each Playtest archive moves. This is unresolved for
+Development test archives. Do **not** open public Allow rules, and do **not** globally disable
+`NotifyOnListen`: it needs elevation and would silently suppress alerts for every Windows app.
+
+After the current package/suites, Integration may build a safe Shipping candidate only through the
+supported hash-compatible cooked path in [`docs/offline-startup.md`](../offline-startup.md):
+`Build-Game.ps1 -Configuration Shipping -ReuseCooked -Package`, with isolated sandbox
+test/game/save/network state. Shipping compiles out TraceControl. Only after its own validation may
+the Estate shortcut be reconsidered; the current shortcut stays untouched.
+
+### Urgent forward-aim shipment blocker
+
+**Do not ship or retarget the night package.** Architecture found `main` `5d11ceed` forward-aim bug
+`8df23ba3`: `FocusHeldToolTarget` skips the aimed lookup when the nearest current overgrowth matches
+the held tool, then `SwingAtOvergrowth` overwrites the aimed ID with `FocusId`. A bramble 70 cm behind
+can therefore beat a valid bramble 200 cm ahead; an under-tier thicket behind can block the front
+target. Props has a headless targeted fix slot during UAT. Integration may finish current UAT safely,
+but the night package remains **provisional, not delivered** until the fix has targeted native/PIE
+evidence and a repackage passes. Preserve the prior verified `Playtest-0929eve` build and shortcut.
+
+**Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
+evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
+passes. The batch applied Water
+applied Water no-pail `20dd9cd1` + `069e493a` and forage freeze `1010aa2e`; Props bramble
 `1deb02ab` / `e37288ef` / `4d8bfecc`, sprint `7475b435`, Hoe hint `391f08f7`, Bed-v2 `aa375409`;
-and Menu Store `1b2b97eb` + pail gauge `9d5da35d`. Native passes 9/9, forage-id Python passes 7/7,
-and Editor/Game builds are green. The exclusive editor now runs exact pail, Store card,
-bramble/sapling/tier, sprint, Hoe-hint and Bed PIE checks. **No push or package is authorized yet**;
-Integration reports per-commit pass/fail after editor close, then the orchestrator decides. Menu pickup
-`b2a49e36` + `cb3f40c7` remain excluded. Old canes-bed deconstruction refunding Hay is the intentional
-current-cost compatibility behavior.
+and Menu Store `1b2b97eb` + pail gauge `9d5da35d`. Native passes 9/9, forage-id Python 7/7, and
+Editor/Game builds plus all exclusive PIE checks pass; editor is closed with zero UE. The accepted
+delivery note must disclose that old canes-bed deconstruction refunds four Hay under intentional
+current-cost compatibility semantics, not a save migration.
+
+- Water prompt: no-pail/chest/empty/full carried states show the exact EmptyPailText; no-pail-anywhere
+  remains native-only.
+- Pail gauge: six=72 px, five=60 and two=24; F5 at 3 restores after watering to 2; one pail <=6 hides
+  the Water tile, while excess 8 or two pails shows it.
+- Store Map: counter/square says already there with no time change; Manor travel persists.
+- Bramble `550200` at 283 cm focuses over weed at 125 cm and one worn clear removes three canes for
+  1.2 Energy; Sapling `570143` clears on one click for 4 Branch +1 Kindling /1.5 Energy; Iron thicket
+  has no animation/sound; F5/F9 cleared state passes.
+- Sprint: run/walk changes about 0.03 Energy over 6 s, auto-off/refusal at <=10 and no resume at 50.
+- Hoe hint is dropped from this local batch and remains chest-native-only. Bed UI reads 4 Branch +4
+  Hay; old canes-bed deconstruct refunding four Hay is native-only intentional current-cost
+  compatibility behavior. Forage-ID freeze remains source-only.
+
+Pail footer `4545a8a2` is accepted as `d2c8b4b0`: native 9/9, Editor/Game build and PIE verify
+`Pail (Carried) Water 5/6` footer with KBM and gamepad D-pad plus 60 px hotbar five-of-six state.
+Menu pickup `b2a49e36` + `cb3f40c7`, weed clip and scythe remain excluded.
 
 ## 4 PM playable build
 
@@ -366,16 +408,18 @@ Cherry-pick after the `a4bb831f` travel test hunk; it is independent of the pick
 now owns editor/UAT to cherry-pick this, Store Map and Water's pail-prompt pair for a bounded next
 package only after targeted checks. The misleading fill prompt is unchanged here.
 
-**Pail hover / pickup helper HOLD:** Menu follow-up `8cebcc84` is native 9/9 (economy 16 / scenario
-670), no UE compile/PIE. It adds `FHomesteadRow.Status` footer so mouse and gamepad see `Water N/6`;
-gamepad lacked the grid-only hover tooltip by design. It also moves the pickup gain helper to
-`Simulation/HomesteadHoldings.h`, with native berry/buy/craft/no-owned-transfer/no-Water proof (the
-revision and pack+owned stock gain logic is not itself buggy).
+**Pail hover / pickup helper splits:** original mixed `8cebcc84` and Menu's main branch are preserved;
+no amend/reset occurred. Both new branches are partial, not ready or shipped:
 
-`8cebcc84` mixes pail `9d5da35d` and pickup `b2a49e36` + `cb3f40c7` stacks, while the next package
-excludes pickup. Integration therefore holds it. Menu must publish a pail-footer-only commit atop
-`9d5da35d` and a holdings-proof commit atop `b2a49e36` + `cb3f40c7`, preserving original `8cebcc84`
-without amend/reset. Both remain partial pending compile and 720p/4K PIE.
+- **Pail footer `4545a8a2`:** based on `main` `8c671873` plus pail `6b46a788`, native 9/9 and
+  clean merge tree with Integration local `c9481e38`, no UE compile. It adds
+  `PailChargeLabel` / `FHomesteadRow.Status` / `PackHint` footer so mouse and gamepad see
+  `Water N/6`; gamepad lacked the grid-only hover tooltip by design. Integration must compile and
+  PIE-check it after the current editor closes.
+- **Pickup helper `acd012f4`:** based on `main` `adef3a56` plus pickup `ae584b5a` and quiet
+  `79789c9a`, native 9/9 (economy 14 / scenario 639) across berry/buy/craft/drop+pickup/Water/chest
+  transfer. It moves the gain helper to `Simulation/HomesteadHoldings.h`; revision and pack+owned
+  stock logic is not itself buggy. UE compile and 720p/4K visual proof remain required.
 
 **Water pail-prompt partial `20dd9cd1`:** native 10/10, no UE or delivery claim. `FocusActions`
 shows carried empty fill / full pail full / chest pail take it / no pail requires one, and
@@ -418,14 +462,14 @@ fourth implementer.
 
 ## Open blockers and known bugs
 
-### Held planning OpenSpec correction
+### Final planning OpenSpec decision
 
-Planning's `b82eec53` OpenSpec docs briefly landed on `main` in `514c48c5`, with **no gameplay code
-changed**. **Final planning decision (2026-09-29):** Integration merges Planning `16f4ed5b`, not the
-tiered `e2159ea2`: flat **3 game hours** of Well Fed at ×0.85, Meals +25/+40/+60 energy, the
-full-energy ≥1-hour extension guard and explicit `CorruptSave` validation. Treat current `main` wording
-as pending correction until Integration reports the final merged SHA. Calendar must not implement stale
-`b82`; this handoff does not duplicate or revert the shared OpenSpec artifacts.
+The current farming artifacts reflect the final 2026-09-29 decision, superseding `b82eec53` and tiered
+`e2159ea2`: flat **3 game hours** of Well fed at ×0.85; Meals +25/+40/+60 Energy; a full-energy
+≥1-hour extension guard; and `CorruptSave` for non-finite or `hour + 3`-exceeding expiry. New Estate
+games default to 60-minute days, while Settings retain 30/60/120 and existing saves retain their
+stored value. Period dishes differ in Energy restoration but all grant the same flat 3-hour Well fed
+duration. Calendar must not implement stale `b82`.
 
 ### Calendar day-length / town-arrival blocker
 
@@ -549,11 +593,26 @@ requirement.
   rise, and one final-contact commit (cancel free, no double stock). Garden `Sim.Weed` stays instant
   and yieldless.
 
-  Props now holds a headless bilateral-kneel animation slice: original MetaHuman-compatible asset,
-  two knees/both hands grabbing two low weeds, left/right toss behind and stand. It keeps tool-free
-  Weeds/Nettles, garden yieldless behavior, one reward at final contact/cancel with no stock, and F/X
-  no-sow. It must follow `blender-assets`, keep scratch on `E:`, and avoids UE/UBT while Integration
-  owns the editor; it remains partial until PIE.
+  **Props bilateral partial:** `887a2dfb` adds Control Rig recipe
+  `Content/Python/homestead_agent/kneel_pull_weeds.py` (150 frames at 30 fps; both knees, two low
+  bilateral pulls, L/R toss, rise, 3.4 s contact; grip/knee/torso-clearance diagnostic report).
+  `f3584fa3` appends PullWeeds routing with skeleton guard and
+  `ControllerWeedPull.cpp` preflight/copy: one actual Harvest/Weed at the second root, cancellation
+  before beat with no stock/Energy, resource gain versus yieldless garden behavior, and F/X never sow.
+  Native 9/9 passes; there is no UE script build, bake, `.uasset`, Character Lab or PIE evidence.
+
+  **Visual follow-up `23289e9c`:** native 9/9 on `887a2dfb` + `f3584fa3`, no UE/UBT or clip bake.
+  Two transient no-collision/no-shadow handful props, derived from the clump mesh/garden NettlePatch,
+  appear on pulls, follow hands, toss left/right behind, tumble and hide on end/cancel. The first pull
+  is ThinResource 55%; cancel restores it; the final second root is the one Sim commit, with no save
+  change. This is excluded from the current pail package.
+
+  Editor/Game compile, `kneel_pull_weeds.build()` / report(), MetaHuman Character Lab, and PIE still
+  must cover grip/knees/toss, clump cancellation/one stock-Energy, garden F5/F9 and final-contact
+  transaction. Tossed props currently vanish abruptly at clip end; inspect that before polish. The
+  missing-asset fallback may preserve old behavior only during development and must never ship absent
+  the authored asset. It follows `blender-assets`, uses `E:` scratch, and stays out of UE/UBT while
+  Integration owns the editor.
 
   Keep tool-kind rules narrow: Weeds/Nettles are one hand-or-Scythe action and Billhook is wrong tool;
   `BrambleThin` with worn Billhook is one; only the common worn `Sapling` requires two logical swings.
