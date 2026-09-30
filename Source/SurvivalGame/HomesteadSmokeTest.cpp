@@ -184,7 +184,7 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
     }
     if (!FFileHelper::SaveStringToFile(Framing, *FPaths::Combine(Directory, Name + TEXT(".frame.txt"))))
         UE_LOG(LogTemp, Error, TEXT("Could not write screenshot framing evidence."));
-    const bool IncludeSlate = Controller->HasNativeMenu()
+    const bool IncludeSlate = Controller->HasNativeMenu() || Controller->GetShopScreen().IsValid()
         || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotbarTest"));
     FScreenshotRequest::RequestScreenshot(FPaths::Combine(Directory, Name + TEXT(".png")),
         IncludeSlate, false);

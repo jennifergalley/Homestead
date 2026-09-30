@@ -6,6 +6,9 @@
 #include "../HomesteadWorld.h"
 #include "../HomesteadTestPaths.h"
 #include "../Simulation/HomesteadPackRow.h"
+#include "../Simulation/HomesteadItems.h"
+#include "../Simulation/HomesteadShops.h"
+#include "SHomesteadShop.h"
 #include "SHomesteadMenu.h"
 #include "SHomesteadMapView.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -583,6 +586,33 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { return !Controller->IsPlanning() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
     // The Guidebook (page 3) is retired: its keys open nothing, a request for it opens the pack, and
     // the tabs run Inventory, Craft, Build, Map, Appearance.
+    // The shop: food shows its Energy and prices read as whole coins (Homestead::FoodEnergyLabel,
+    // Homestead::FormatMoney). A disclosed store is placed ahead of her at a known open hour.
+    Add(TEXT("Shop Buy lists food with its Energy and prices in whole coins"),
+        [this]()
+        {
+            Controller->CloseBook();
+            Controller->HomesteadMorning(10.0f);
+            Controller->HomesteadOpenStore();
+            if (Controller->State().shops.empty()) { Finish(false, TEXT("The disclosed store was not placed.")); return; }
+            Controller->OpenShopScreen(Controller->State().shops.front().id, false);
+            if (Controller->ShopScreen.IsValid()) Controller->ShopScreen->SetTab(1);
+        },
+        [this]()
+        {
+            if (!Controller->ShopScreen.IsValid() || Controller->ShopScreen->IsSellTab() || Controller->ShopScreen->RowCount() < 2) return false;
+            const FString Purse = UTF8_TO_TCHAR(Homestead::FormatMoney(Controller->State().money).c_str());
+            const FString Pasty = UTF8_TO_TCHAR(Homestead::FoodEnergyLabel(Homestead::Item::Pasty).c_str());
+            const FString Price = UTF8_TO_TCHAR(Homestead::FormatMoney(Homestead::BuyPrice(Homestead::Item::Pasty)).c_str());
+            Results.Add(FString::Printf(TEXT("SHOP_LABELS purse=%s pasty=%s price=%s"), *Purse, *Pasty, *Price));
+            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && Pasty == TEXT("+25 Energy")
+                && Price == TEXT("100 coins");
+        }, 0.8f);
+    Add(TEXT("Capture the shop's Buy page"), [this]() { Screenshot(TEXT("native-shop-buy")); },
+        [this]() { return Controller->ShopScreen.IsValid(); }, 0.8f);
+    Add(TEXT("Leave the shop and return to Settings, as before the shop check"),
+        [this]() { Controller->CloseShopScreen(); Controller->OpenBook(4); },
+        [this]() { return !Controller->ShopScreen.IsValid() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
     Add(TEXT("The retired Guidebook has no G / H shortcut"),
         [this]() { Tap(EKeys::Escape); Tap(EKeys::G); Tap(EKeys::H); },
         [this]() { return !Controller->IsBookOpen(); });
