@@ -4304,6 +4304,65 @@ void BranchesYieldRenewableKindling()
 
 // Jenny's playtest: a bare bramble 285 cm ahead showed no prompt, and a weed at her feet stole the
 // focus. The held tool now aims at what it clears, out to the full Overgrowth::Reach, never behind her.
+// Architecture review 8df23ba3: with the billhook in hand, a bramble 70 cm behind her kept the prompt
+// and took the swing from the one 200 cm straight ahead. The prompt (HeldToolFocus) and the swing
+// (FindAimedOvergrowth) now both name the one ahead; the one behind is only named when nothing is.
+void HeldToolNeverStrikesBehind()
+{
+    const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    EstatePlacements table;
+    table.bakeVersion = 7;
+    int next = EstatePlacementIdBase + 20400;
+    const auto add = [&](ResourceKind kind, double dx, double dy)
+    {
+        table.placements.push_back({next++, kind, {at.x + dx, at.y + dy}, 0, 0, 1, 0});
+        return table.placements.back().id;
+    };
+    const int behind = add(ResourceKind::BrambleThin, -70, 0);
+    const int ahead = add(ResourceKind::BrambleThin, 200, 0);
+    const int thicket = add(ResourceKind::BrambleThicket, 0, -70);
+    const int aheadNorth = add(ResourceKind::BrambleThin, 0, 220);
+    const int berries = add(ResourceKind::BerryBush, 40, 0);
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), table));
+    OK(sim.GrantItems(Item::Billhook, 1));
+    const Point east{1, 0}, west{-1, 0}, north{0, 1};
+
+    // The nearest-centre focus lands on the one behind (70 cm); held billhook, facing east.
+    CHECK(sim.HeldToolFocus(behind, at, east, Item::Billhook) == ahead);
+    CHECK(sim.FindAimedOvergrowth(at, east, Item::Billhook) == ahead);
+    // Whatever the nearest focus was, the prompt and the swing agree on the one ahead.
+    for (const int current : {-1, behind, thicket, ahead})
+        CHECK(sim.HeldToolFocus(current, at, east, Item::Billhook) == sim.FindAimedOvergrowth(at, east, Item::Billhook));
+    // A forageable she's standing at keeps its prompt (E still gathers it); the swing still aims ahead.
+    CHECK(sim.HeldToolFocus(berries, at, east, Item::Billhook) == berries);
+    // Pressing clears the one ahead only: the one behind is untouched, Energy spent once.
+    const double energy = sim.GetState().energy;
+    OK(sim.ClearOvergrowth(sim.FindAimedOvergrowth(at, east, Item::Billhook), Item::Billhook, at));
+    CHECK(PlacedNode(sim, ahead).cleared && !PlacedNode(sim, behind).cleared);
+    CHECK(Close(sim.GetState().energy, energy - FindOvergrowth(ResourceKind::BrambleThin)->energy, 1e-9));
+
+    // An under-tier thicket 70 cm to her side doesn't block the valid bramble she faces.
+    CHECK(sim.HeldToolFocus(thicket, at, north, Item::Billhook) == aheadNorth);
+    CHECK(sim.FindAimedOvergrowth(at, north, Item::Billhook) == aheadNorth);
+    OK(sim.CheckOvergrowth(aheadNorth, Item::Billhook, at));
+
+    // Nothing ahead any more: the prompt keeps naming the one behind, but the swing has no target,
+    // so a press changes nothing there (the controller says "Turn to face it.").
+    OK(sim.ClearOvergrowth(aheadNorth, Item::Billhook, at));
+    CHECK(sim.FindAimedOvergrowth(at, east, Item::Billhook) == -1);
+    CHECK(sim.HeldToolFocus(behind, at, east, Item::Billhook) == behind);
+    CHECK(!PlacedNode(sim, behind).cleared);
+    // Turning round aims at it; the under-tier thicket is refused silently (ToolTier, nothing changes).
+    CHECK(sim.FindAimedOvergrowth(at, west, Item::Billhook) == behind);
+    const auto gated = sim.CheckOvergrowth(thicket, Item::Billhook, at);
+    CHECK(!gated.ok && gated.code == ResultCode::ToolTier);
+    UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(thicket, Item::Billhook, at); });
+    // Nothing aimed and no nearest focus: nothing named. A tool with no overgrowth kind aims at nothing.
+    CHECK(sim.HeldToolFocus(-1, at, east, Item::Billhook) == -1);
+    CHECK(sim.HeldToolFocus(behind, at, east, Item::Count) == behind);
+}
+
 void AimedOvergrowthReach()
 {
     const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
@@ -4418,6 +4477,7 @@ int main()
     Run("overgrowth tools, tiers and prompts", OvergrowthTableAndPrompts);
     Run("salvage, hafting and tier-gated clearing by stable id", HaftingBootstrapAndClearing);
     Run("the held tool aims at what it clears, out to the full reach", AimedOvergrowthReach);
+    Run("the held tool's prompt and swing never pick a target behind her", HeldToolNeverStrikesBehind);
     Run("a worn billhook fells a sapling in one press", OneSwingWornSapling);
     Run("multi-swing clears, energy reserve and full-pack yields", MultiSwingTiersAndCapacity);
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);

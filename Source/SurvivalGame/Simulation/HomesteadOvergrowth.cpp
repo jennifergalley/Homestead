@@ -477,6 +477,14 @@ int Simulation::FindAimedOvergrowth(Point player, Point facing, Item tool) const
     return aimed;
 }
 
+int Simulation::HeldToolFocus(int current, Point player, Point facing, Item tool) const
+{
+    const auto* node = current >= 0 ? OgFindNode(state_.resources, current) : nullptr;
+    if (node && !node->cleared && !IsOvergrowth(node->kind)) return current;
+    const int aimed = FindAimedOvergrowth(player, facing, tool);
+    return aimed != -1 ? aimed : current;
+}
+
 double Simulation::ScytheArcRadius(ToolTier tier)
 {
     static const double radii[] = {160.0, 200.0, 240.0, 280.0};
