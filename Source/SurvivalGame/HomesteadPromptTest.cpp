@@ -124,10 +124,12 @@ void AHomesteadSmokeTest::PreparePromptChecks()
     // From Settings, LB enters the tab cycle at its end: Look (tabs 0, 1, 2, 7, 6).
     Add(TEXT("Controller Look page"), [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
         [this]() { return Controller->BookPage() == 6 && Controller->UsesGamepad(); });
-    Add(TEXT("Tiny mouse Look remains responsive without changing controller hints"),
+    // The Appearance view turns by drag, WASD or the right stick, not by a bare mouse move: a tiny
+    // one neither turns her nor steals the controller's hints.
+    Add(TEXT("Tiny mouse on Look keeps controller hints and the view"),
         [this]() { CameraStart = Controller->GetControlRotation().Yaw; PausedHour = Controller->State().hour; Axis(EKeys::MouseX, 0.25f); },
         [this]() { return Controller->UsesGamepad() && Controller->State().hour == PausedHour
-            && FMath::Abs(FMath::FindDeltaAngleDegrees(CameraStart, Controller->GetControlRotation().Yaw)) > 0.001f; });
+            && FMath::Abs(FMath::FindDeltaAngleDegrees(CameraStart, Controller->GetControlRotation().Yaw)) < 0.001f; }, 0.3f);
     Add(TEXT("Capture controller Look"), [this]() { Screenshot(TEXT("prompts-look-gamepad")); }, []() { return true; });
     Add(TEXT("Deliberate mouse orbit selects keyboard Look"),
         [this]() { Axis(EKeys::MouseX, 3); },

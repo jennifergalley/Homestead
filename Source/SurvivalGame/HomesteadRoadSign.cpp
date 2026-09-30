@@ -88,9 +88,9 @@ void AHomesteadRoadSign::Place(const FString& Name, const FVector& Location, flo
     const FText Text = FText::FromString(bStandIn ? Words + TEXT("\n(stand-in sign)") : Words);
     for (UTextRenderComponent* Face : {Front.Get(), Back.Get()})
     {
-        const float Yaw = Face == Front ? 0.0f : 180.0f;
+        const float FaceYaw = Face == Front ? 0.0f : 180.0f;
         Face->SetRelativeLocation(FVector(0, 0, RoadSignStyle::PostHeight - RoadSignStyle::BoardHeight * 0.5f)
-            + FRotator(0, Yaw, 0).Vector() * Standoff);
+            + FRotator(0, FaceYaw, 0).Vector() * Standoff);
         Face->SetWorldSize(RoadSignStyle::TextSize);
         Face->SetText(Text);
         // On the authored board, a longer label shrinks to stay inside the painted field.

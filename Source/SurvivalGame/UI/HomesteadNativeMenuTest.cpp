@@ -728,10 +728,13 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     // Road signs: a one-way sign she can't walk from here says why and changes nothing (no book, no
     // pause); the two-way Gateway sign opens the centred confirm over the Map page. The sign is focused
     // directly (disclosed); wherever the fixture stands her, one of the one-way signs is refused.
-    const auto BeforeSign = MakeShared<std::string>();
+    // With the book shut the clock runs, so "changes nothing" is her place, pack, purse and energy,
+    // and no walk's worth of time (a refused walk passes none).
+    const auto BeforeSign = MakeShared<Homestead::State>();
+    const auto SignSpot = MakeShared<Homestead::Point>();
     const auto SignRefusal = MakeShared<FString>();
     Add(TEXT("A road sign whose one way is refused says why and leaves the book shut"),
-        [this, BeforeSign, SignRefusal]()
+        [this, BeforeSign, SignRefusal, SignSpot]()
         {
             Controller->CloseBook();
             const auto& Signs = Homestead::EstatePublicRoad().signs;
@@ -746,15 +749,19 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             }
             if (Refused == INDEX_NONE) { Finish(false, TEXT("No one-way road sign is refused from the fixture's spot.")); return; }
             Results.Add(TEXT("SIGN_REFUSAL ") + *SignRefusal);
-            *BeforeSign = Controller->Simulation().Serialize();
+            *BeforeSign = Controller->State();
+            *SignSpot = Controller->PlayerPoint();
             Controller->Focus = AHomesteadController::EFocus::RoadSign;
             Controller->FocusId = Refused;
             Controller->InteractWithRoadSign();
         },
-        [this, BeforeSign, SignRefusal]()
+        [this, BeforeSign, SignRefusal, SignSpot]()
         {
+            const auto& Now = Controller->State();
             return !Controller->IsBookOpen() && Controller->ToastIsError() && Controller->Toast() == *SignRefusal
-                && Controller->Simulation().Serialize() == *BeforeSign;
+                && Now.inventory == BeforeSign->inventory && Now.money == BeforeSign->money
+                && Now.energy <= BeforeSign->energy && Now.hour - BeforeSign->hour < 0.05
+                && std::hypot(Controller->PlayerPoint().x - SignSpot->x, Controller->PlayerPoint().y - SignSpot->y) < 50.0;
         });
     Add(TEXT("The two-way Gateway sign opens the centred confirm over the Map page"),
         [this]()
