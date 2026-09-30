@@ -522,6 +522,15 @@ void GameplayWalkthrough()
     const int chestId = StructureId(sim, Piece::Chest, chestPosition);
     OK(sim.Transfer(chestId, Item::Stone, 1, chestPosition));
     OK(sim.Transfer(chestId, Item::Stone, -1, chestPosition));
+    // A pail left in the chest: the fill refusal says so, and taking it back lets her fill again.
+    CHECK(sim.Count(Item::WateringCan) == 1);
+    {
+        OK(sim.Transfer(chestId, Item::WateringCan, 1, chestPosition));
+        CHECK(sim.PailStored() && sim.Count(Item::WateringCan) == 0);
+        CHECK(sim.FillWater(WaterSource).message == "Your pail is in the chest. Take it to fill it.");
+        OK(sim.Transfer(chestId, Item::WateringCan, -1, chestPosition));
+        CHECK(!sim.PailStored() && sim.Count(Item::WateringCan) == 1);
+    }
     sim.AdvanceGameHours(4, Home);
     CHECK(sim.GetState().plots[0].growth > 0.0);
     OK(sim.Weed(plotId, garden));
@@ -579,7 +588,11 @@ void AtomicTransactions()
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::HaftAxe, Home); });
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, -3, 0, 0, Home); });
     UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
+    // With no pail carried, the refusal says where to get one (and a stored pail isn't "carried").
+    CHECK(!sim.PailStored());
+    CHECK(sim.FillWater(WaterSource).message == "You need a pail to carry water.");
     Stock(sim, {{Item::WateringCan, 1}, {Item::Water, 1}, {Item::Stone, 117}});
+    CHECK(sim.FillWater({WaterSource.x + 90000, WaterSource.y}).message == "Walk to the river or the lake to fill your pail.");
     OK(sim.FillWater(WaterSource));
     CHECK(sim.UsedCapacity() == 118);
     CHECK(sim.Count(Item::Water) == 6);
@@ -588,6 +601,8 @@ void AtomicTransactions()
     CHECK(sim.UsedCapacity() == 114);
     CHECK(sim.Count(Item::Water) == 6);
     UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
+    CHECK(sim.FillWater(WaterSource).message == "Your pail is already full.");
+    CHECK(sim.Count(Item::Water) == PailPortions);
     OK(sim.EmptyPail());
     CHECK(sim.Count(Item::Water) == 0);
     CHECK(sim.Count(Item::WateringCan) == 1);

@@ -2331,8 +2331,17 @@ FString AHomesteadController::FocusActions() const
         return Line;
     }
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
-    case EFocus::Water: return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
-        ? Use + TEXT(" Fill Pail") : A + TEXT(" Fill carried Pail");
+    case EFocus::Water:
+        // Offer the fill only when it can happen: say where the pail is, or that it's already full.
+        switch (ToolWhereabouts(Sim, Homestead::Item::WateringCan))
+        {
+        case 2:
+            if (Sim.Count(Homestead::Item::Water) >= Homestead::PailPortions) return TEXT("Your pail is full");
+            return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
+                ? Use + TEXT(" Fill Pail") : A + TEXT(" Fill carried Pail");
+        case 1: return TEXT("Take your pail from the chest to fill it");
+        default: return TEXT("Requires a pail");
+        }
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
