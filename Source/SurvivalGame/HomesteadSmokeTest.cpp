@@ -552,7 +552,10 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Eat forage through the actual inventory control"),
         [this]()
         {
-            const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+            FHomesteadRow HotbarRow;
+            const FHomesteadRow* Row = Controller->NativeMenu->GetFocusedRegionName() == TEXT("Hotbar")
+                && Controller->MenuHotbarRow(Controller->NativeMenu->GetFocusedHotbarSlot(), HotbarRow)
+                ? &HotbarRow : Controller->NativeMenu->GetSelectedSubject();
             if (!Row || !Controller->MenuItemAction(*Row, EHomesteadItemAction::Primary,
                 1, Controller->Simulation().GetRevision()))
                 Finish(false, TEXT("The harvested food action is unavailable."));
@@ -773,30 +776,53 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         const int32 Current = Native ? Controller->NativeMenu->GetSelectedContentIndex() : Controller->SelectedRow();
         const int32 Target = Rows.IndexOfByPredicate([&Step](const FHomesteadRow& Row)
             { return Row.Id == Step.NavigateToId && Row.Subject != EHomesteadMenuSubject::GarmentRecipe; });
-        if (Native && (!Controller->IsBookOpen() || Target == INDEX_NONE || !Rows.IsValidIndex(Current)
-            || Controller->NativeMenu->GetFocusedRegionName() != TEXT("Content")))
+        const int32 Cell = Native && Controller->BookPage() == 0
+            && Step.NavigateToId < Homestead::ItemCount
+            ? Controller->HotbarCellOf(static_cast<Homestead::Item>(Step.NavigateToId)) : INDEX_NONE;
+        if (Cell != INDEX_NONE)
         {
-            Finish(false, Step.Name + TEXT(" | Native content grid or requested subject is unavailable."));
-            return;
-        }
-        NavigationComplete = Current == Target && Target != INDEX_NONE;
-        if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
-        {
-            if (Native)
+            const FString Region = Controller->NativeMenu->GetFocusedRegionName();
+            const int32 FocusedCell = Controller->NativeMenu->GetFocusedHotbarSlot();
+            if (!Controller->IsBookOpen() || (Region != TEXT("Content") && Region != TEXT("Hotbar")))
             {
-                const int32 Columns = Controller->NativeMenu->GetContentColumnCount();
-                if (Columns <= 0)
-                {
-                    Finish(false, Step.Name + TEXT(" | Native content grid has no columns."));
-                    return;
-                }
-                if (Target / Columns != Current / Columns)
-                    Tap(Target > Current ? EKeys::Gamepad_DPad_Down : EKeys::Gamepad_DPad_Up);
-                else
-                    Tap(Target > Current ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
+                Finish(false, Step.Name + TEXT(" | Native pack focus cannot reach the hotbar row."));
+                return;
             }
-            else Tap(EKeys::Gamepad_DPad_Down);
-            LastNavigationAt = StepElapsed;
+            NavigationComplete = Region == TEXT("Hotbar") && FocusedCell == Cell;
+            if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
+            {
+                Tap(Region == TEXT("Content") ? EKeys::Gamepad_DPad_Up
+                    : FocusedCell < Cell ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
+                LastNavigationAt = StepElapsed;
+            }
+        }
+        else
+        {
+            if (Native && (!Controller->IsBookOpen() || Target == INDEX_NONE || !Rows.IsValidIndex(Current)
+                || Controller->NativeMenu->GetFocusedRegionName() != TEXT("Content")))
+            {
+                Finish(false, Step.Name + TEXT(" | Native content grid or requested subject is unavailable."));
+                return;
+            }
+            NavigationComplete = Current == Target && Target != INDEX_NONE;
+            if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
+            {
+                if (Native)
+                {
+                    const int32 Columns = Controller->NativeMenu->GetContentColumnCount();
+                    if (Columns <= 0)
+                    {
+                        Finish(false, Step.Name + TEXT(" | Native content grid has no columns."));
+                        return;
+                    }
+                    if (Target / Columns != Current / Columns)
+                        Tap(Target > Current ? EKeys::Gamepad_DPad_Down : EKeys::Gamepad_DPad_Up);
+                    else
+                        Tap(Target > Current ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
+                }
+                else Tap(EKeys::Gamepad_DPad_Down);
+                LastNavigationAt = StepElapsed;
+            }
         }
     }
     const bool CompletedEarly = Step.bCompleteWhenReady && Step.Check();

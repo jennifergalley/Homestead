@@ -105,6 +105,15 @@ void AHomesteadSmokeTest::QueueSelectRow(int32 Id)
         {
             if (Controller->HasNativeMenu())
             {
+                if (Controller->BookPage() == 0 && Id >= 0 && Id < Homestead::ItemCount)
+                {
+                    const int32 Cell = Controller->HotbarCellOf(static_cast<Homestead::Item>(Id));
+                    if (Cell != INDEX_NONE)
+                        return Controller->IsBookOpen()
+                            && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Hotbar")
+                            && Controller->NativeMenu->GetFocusedHotbarSlot() == Cell
+                            && Controller->NativeMenu->HasSynchronizedFocus();
+                }
                 const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
                 return Controller->IsBookOpen() && Subject && Subject->Id == Id
                     && Subject->Subject != EHomesteadMenuSubject::GarmentRecipe
