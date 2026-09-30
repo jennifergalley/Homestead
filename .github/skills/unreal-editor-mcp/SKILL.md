@@ -388,7 +388,8 @@ hk release_all; mcp $E StopPIE
   land around it streams in (table 0.1). `HomesteadMorning <h>` with `h` earlier than the current
   hour rolls to the next day, which can re-roll the weather to Rain; restart PIE for comparable day-1 stills.
 - **LB/RB outside the book change the hotbar slot**, not book pages. Open the book first:
-  `I` opens Inventory (page 0), Menu opens Settings (page 4).
+  `I` opens Inventory (page 0), **View** (`Gamepad_Special_Left`) opens the pack; use LB to page to
+  **Your pack**. Menu (`Gamepad_Special_Right`) opens the pause menu.
 - The field book opens on the Guidebook at start. Close it with B (`Gamepad_FaceButton_Right`).
   On the Estate map PIE also opens with the book (reported on Appearance, page 6, for the names
   step); close it (Escape or B) before captures.
@@ -413,7 +414,8 @@ immediately; observe with `get_play_state` and `shot`.
 
 Controller map (preferred; the game is controller-first): A `Gamepad_FaceButton_Bottom`,
 B `Gamepad_FaceButton_Right`, X `Gamepad_FaceButton_Left`, Y `Gamepad_FaceButton_Top`,
-Menu `Gamepad_Special_Right`, LB/RB `Gamepad_LeftShoulder`/`Gamepad_RightShoulder`,
+View `Gamepad_Special_Left` (pack), Menu `Gamepad_Special_Right` (pause),
+LB/RB `Gamepad_LeftShoulder`/`Gamepad_RightShoulder`,
 LT/RT `Gamepad_LeftTrigger`/`Gamepad_RightTrigger`, D-pad `Gamepad_DPad_Up/Down/Left/Right`,
 hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Controls.
 

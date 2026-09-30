@@ -113,6 +113,16 @@ target. Props has a headless targeted fix slot during UAT. Integration may finis
 but the night package remains **provisional, not delivered** until the fix has targeted native/PIE
 evidence and a repackage passes. Preserve the prior verified `Playtest-0929eve` build and shortcut.
 
+**Provisional night package evidence:** `Build\Playtest-0929night` at `main` `5d11ceed`
+(`JennysHomesteadGame.exe` SHA256
+`887EFD0254D2D9A98761CC4B65258878F635DEE5E0BDEB7222085F372EE18EC8`) passed all six packaged
+Development suites: Smoke 57.2 fps / p99 16.8 ms, Clearing 52.4 / 21.9, Hotbar 52.3 / 34, NativeMenu
+56.2, FullLoop 53.9 and EstateSmoke woods 58.7 / p95 18.9. Copied-save smoke was skipped because the
+aim blocker makes the package provisional. After the target fix, Integration reruns native/build/PIE,
+corrected Development package/six suites plus copied-save smoke, then stages the supported Shipping
+`-ReuseCooked` candidate and proves its PID has no TCP/UDP listener using isolated `-UserDir` save
+round-trip/offscreen tests. Only an accepted Shipping candidate may retarget the Estate shortcut.
+
 **Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
 evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
 passes. The batch applied Water
