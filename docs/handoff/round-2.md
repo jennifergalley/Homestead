@@ -157,11 +157,13 @@ exact copied BobStraight at the saved manor. F5 changed only the scratch Manual 
 save remained untouched and the log confirms scratch save routing and ground settle at
 `(-23970,-64935)`. PrintWindow remains black.
 
-The prior Shipping `-RenderOffscreen` HWND0 result remains distinct. A separate bounded old/new
-Development A/B grant is required before using this feasible hidden-window path; it must still
-distinguish no reproduction from a cure. Props also assesses a cheaper groom-bounds API. The
-delivered Shipping shortcut is unchanged by this attempted investigation. Existing hair reset
-guidance is not sufficient; never use a global bald/static fallback.
+The prior Shipping `-RenderOffscreen` HWND0 result remains distinct. Integration now has a bounded
+45-minute old/new **Development** hidden-window A/B grant: one process at a time, the same copied
+profile and camera, LOD/zoom/guides view modes, scythe, book, actual Map travel and sleep, with a
+1.5 GB free-memory guard. It must still distinguish no reproduction from a cure. Props also
+assesses a cheaper groom-bounds API. The delivered Shipping shortcut is unchanged by this attempted
+investigation. Existing hair reset guidance is not sufficient; never use a global bald/static
+fallback. Menu hotbar work is source-only during this run; no Menu UE/UBT work is permitted.
 
 ### Overnight priority: split the four huge hot files
 
@@ -876,15 +878,20 @@ requirement.
   soft 40 cm one-knee reeds saw. Iron+ `BrambleThicket` (3/2/1/1) and Steel+ Bank (4/3/2/1) gates stay
   unchanged. For the pictured missing bramble prompt, obtain actual `FocusId`, kind and toast before
   declaring this a root cause.
-- **Hoe/pail exact target** — **Water garden-outline partial `14cce349` + `9b69eca6`, not shipped or
-  in the current aim/firewall package.** Native 10/10 and Editor/Game builds pass. Side-effect-free
-  `CheckTill` / `Weed` / `Water` now feed both `PreviewGarden` and the mutators, with block errors
-  matching mutations; 50 repeated previews are byte-identical under Serialize.
+- **Hoe/pail exact target** — **Water garden-outline partial `6adb9842` on
+  `jennifergalley-garden-outline-port`, source-only and not shipped.** Native 9/9 passes; there is
+  no Editor/Game compile or PIE. Side-effect-free `CheckTill` / `CheckWeed` / `CheckWater` now feed
+  both `PreviewGarden` and the mutators, preserving refusal text; native tests prove previews do not
+  mutate state.
 
-  Hoe previews its exact 85 cm GardenCell; Pail previews the focused 60 cm plot. The world visual is
-  transient sampled-ground 4x4 thin 2.5 cm-raised segments at 100 cm, no collision/shadow, green/red,
-  and hides for book/shop/planning/failed/water focus with no save IDs. PIE still must cover slopes,
-  turned soil, adjacent plots, blocked cells, pad/HUD behavior and z-fighting before readiness.
+  With hoe or pail selected, a transient green/red sampled-ground border shows the exact next
+  action: hoe uses `Homestead::HoeCellAhead` at 85 cm (fresh till or existing-plot weed), while the
+  pail previews the focused 60 cm `GardenReach::PailAheadCm` plot. `SetGardenOutline` draws 16 thin
+  no-collision/no-shadow segments 2.5 cm above sampled ground and rebuilds only when `(cell, valid)`
+  changes. It hides with no tool, at water, book/shop/build planning or failed focus, saves nothing,
+  and replaces a failed hoe's `[LMB] Till ground` focus copy with the refusal. Required evidence:
+  Editor/Game compile and PIE slopes, adjacent/blocked/turned plots, dry/watered/at-water pail,
+  gamepad, HUD and z-fight behavior.
 - **Weedy crop-plot prompt `15b3927e`:** main-integrated in `af97075f`; native 9/9, Editor/Game and
   KBM/pad PIE pass, with no delivery claim.
   Whenever `Plot.weeds >= 0.125` is world-visible, the focused plot appends `[F] Pull weeds` /
