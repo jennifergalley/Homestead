@@ -461,6 +461,73 @@ void ToolRackIsSaveSafe()
     CHECK(NextSalvageHead(lost) == Item::RustedHoeBlade);
     // Once all six are searched, the refusal says so plainly.
     CHECK(NoHoeMessage(lost, Spawn()) == "You need a hoe to till, and the manor's salvage has all been searched.");
+    // The same exhausted estate with the blade set down 12 m off: she's sent to it, not told it's gone.
+    State dropped = lost;
+    dropped.worldDrops.push_back({dropped.nextId++, {Spawn().x + 1200.0, Spawn().y}, Item::RustedHoeBlade, 1, 0});
+    CHECK(NextSalvageHead(dropped) != Item::RustedHoeBlade);
+    CHECK(NoHoeMessage(dropped, Spawn()) == "You need a hoe to till. Your rusted hoe blade is lying on the ground "
+        "about 12 m away: pick it up and craft a hoe with two branches on the Craft page.");
+}
+
+// Architecture review: the till refusal looks where NextSalvageHead does (pack, chests, the ground)
+// and sends her to what she already owns before it mentions salvage.
+void HoeHintFindsWhatSheOwns()
+{
+    Simulation sim = NewEstate();
+    const State& state = sim.GetState();
+    const Structure* chest = Find(state, Piece::Chest);
+    const int chestId = chest->id;
+    const Point chestSide = StructureCenter(state, *chest);
+    const Point far{chestSide.x + 1500.0, chestSide.y};
+    CHECK(sim.Count(Item::DiggingStick) == 0 && sim.Count(Item::RustedHoeBlade) == 0);
+    CHECK(StartsWith(NoHoeMessage(state, chestSide), "You need a hoe to till. Search the old manor's salvage"));
+
+    // A blade in her pack: craft it.
+    OK(sim.GrantItems(Item::RustedHoeBlade, 1));
+    CHECK(NoHoeMessage(sim.GetState(), chestSide)
+        == "You need a hoe to till. Craft one from your rusted hoe blade and two branches on the Craft page.");
+    // Stored in the chest: take it out, and how far off the chest is.
+    OK(sim.Transfer(chestId, Item::RustedHoeBlade, 1, chestSide));
+    CHECK(sim.Count(Item::RustedHoeBlade) == 0);
+    CHECK(NoHoeMessage(sim.GetState(), chestSide) == "You need a hoe to till. Your rusted hoe blade is in a storage "
+        "chest right here: take it out and craft a hoe with two branches on the Craft page.");
+    CHECK(NoHoeMessage(sim.GetState(), far) == "You need a hoe to till. Your rusted hoe blade is in a storage "
+        "chest about 15 m away: take it out and craft a hoe with two branches on the Craft page.");
+
+    // A finished hoe in the chest, or set down on the ground, beats the blade and the salvage.
+    State stored = sim.GetState();
+    for (auto& piece : stored.structures)
+        if (piece.id == chestId) piece.storage[static_cast<int>(Item::DiggingStick)] = 1;
+    CHECK(NoHoeMessage(stored, far) == "Your hoe is in a storage chest about 15 m away. Take it out to till.");
+    State set = sim.GetState();
+    set.worldDrops.push_back({set.nextId++, {far.x + 300.0, far.y}, Item::DiggingStick, 1, 0});
+    CHECK(NoHoeMessage(set, far) == "Your hoe is lying on the ground about 3 m away. Pick it up to till.");
+    CHECK(NoHoeMessage(set, {far.x + 350.0, far.y}) == "Your hoe is lying on the ground right here. Pick it up to till.");
+    // Of two places, the nearer one is named; a wearable drop never counts.
+    set.worldDrops.push_back({set.nextId++, {far.x + 300.0, far.y}, Item::DiggingStick, 1, 7});
+    CHECK(NoHoeMessage(set, chestSide).find("Your hoe is lying on the ground about 18 m away") == 0);
+
+    // The refusal the Till transaction gives is this message, and it changes nothing.
+    const std::string before = sim.Serialize();
+    const int gardenX = GardenCell(far.x), gardenY = GardenCell(far.y);
+    const Point plot = GardenCellCenter(gardenX, gardenY);
+    const auto till = sim.Till(gardenX, gardenY, plot);
+    CHECK(!till.ok && till.message == NoHoeMessage(sim.GetState(), plot) && sim.Serialize() == before);
+    CHECK(till.message.find("in a storage chest about") != std::string::npos);
+
+    // An old save (the rack not yet in its table) with the blade in its chest loads and gives the same hint.
+    EstatePlacements older = ProvisionalEstatePlacements();
+    older.placements.pop_back();
+    Simulation loaded;
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    Simulation old;
+    old.SetPlacements(older);
+    OK(old.NewEstateGame(ProvisionalEstateLayout(), older));
+    OK(old.GrantItems(Item::RustedHoeBlade, 1));
+    OK(old.Transfer(Find(old.GetState(), Piece::Chest)->id, Item::RustedHoeBlade, 1, chestSide));
+    OK(loaded.Deserialize(old.Serialize()));
+    CHECK(NoHoeMessage(loaded.GetState(), chestSide) == NoHoeMessage(sim.GetState(), chestSide));
+    CHECK(NextSalvageHead(loaded.GetState()) == Item::RustedBillhookHead);
 }
 
 int main()
@@ -479,6 +546,8 @@ int main()
     std::cout << "PASS starter chest, hoe blade second and its clues\n";
     ToolRackIsSaveSafe();
     std::cout << "PASS the tool rack is save-safe and finds her a hoe\n";
+    HoeHintFindsWhatSheOwns();
+    std::cout << "PASS the till hint sends her to the hoe or blade she owns\n";
     std::cout << checks << " checks passed.\n";
     return 0;
 }

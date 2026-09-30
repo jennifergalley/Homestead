@@ -260,12 +260,56 @@ const char* SalvageWhereabouts(int pileId)
     }
 }
 
+namespace
+{
+enum class OgWhere { Nowhere, Pack, Chest, Ground };
+struct OgFound
+{
+    OgWhere where = OgWhere::Nowhere;
+    Point position;
+};
+// Where she keeps `item`, the same places NextSalvageHead counts as owned: her pack first, then the
+// nearest storage chest or spot on the ground she set it down.
+OgFound OgLocate(const State& state, Item item, Point player)
+{
+    const int index = static_cast<int>(item);
+    if (state.inventory[index] > 0) return {OgWhere::Pack, player};
+    OgFound found;
+    double best = 0.0;
+    const auto consider = [&](OgWhere where, Point position)
+    {
+        const double distance = OgDistanceSquared(player, position);
+        if (found.where == OgWhere::Nowhere || distance < best) { found = {where, position}; best = distance; }
+    };
+    for (const auto& piece : state.structures)
+        if (piece.kind == Piece::Chest && piece.storage[index] > 0) consider(OgWhere::Chest, StructureCenter(state, piece));
+    for (const auto& drop : state.worldDrops)
+        if (drop.wearableId == 0 && drop.item == item && drop.quantity > 0) consider(OgWhere::Ground, drop.position);
+    return found;
+}
+// "in a storage chest about 12 m away", "lying on the ground right here".
+std::string OgPlace(const OgFound& found, Point player)
+{
+    const double metres = std::sqrt(OgDistanceSquared(player, found.position)) / 100.0;
+    const std::string away = OgValid(player) && std::isfinite(metres) && metres >= 2.0
+        ? "about " + std::to_string(static_cast<long long>(std::lround(metres))) + " m away" : "right here";
+    return (found.where == OgWhere::Chest ? "in a storage chest " : "lying on the ground ") + away;
+}
+}
+
 std::string NoHoeMessage(const State& state, Point player)
 {
-    const int blade = static_cast<int>(Item::RustedHoeBlade);
-    bool hasBlade = state.inventory[blade] > 0;
-    for (const auto& piece : state.structures) hasBlade = hasBlade || (piece.kind == Piece::Chest && piece.storage[blade] > 0);
-    if (hasBlade) return "You need a hoe to till. Craft one from your rusted hoe blade and two branches on the Craft page.";
+    // She owns a hoe, just not in her pack: send her to it rather than to the salvage.
+    const OgFound hoe = OgLocate(state, Item::DiggingStick, player);
+    if (hoe.where == OgWhere::Chest) return "Your hoe is " + OgPlace(hoe, player) + ". Take it out to till.";
+    if (hoe.where == OgWhere::Ground) return "Your hoe is " + OgPlace(hoe, player) + ". Pick it up to till.";
+    const OgFound blade = OgLocate(state, Item::RustedHoeBlade, player);
+    if (blade.where == OgWhere::Pack)
+        return "You need a hoe to till. Craft one from your rusted hoe blade and two branches on the Craft page.";
+    if (blade.where != OgWhere::Nowhere)
+        return "You need a hoe to till. Your rusted hoe blade is " + OgPlace(blade, player)
+            + (blade.where == OgWhere::Chest ? ": take it out" : ": pick it up")
+            + " and craft a hoe with two branches on the Craft page.";
     if (!state.fixedEstate) return "Craft a hoe before tilling soil.";
     const ResourceNode* nearest = nullptr;
     for (const auto& node : state.resources)
