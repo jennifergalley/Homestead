@@ -7,10 +7,14 @@
 
 ## 1. Split the big four (between rounds)
 
-- [ ] 1.1 `HomesteadController.cpp` → per-feature `HomesteadController<Feature>.cpp`; game target builds; PIE pass
-- [ ] 1.2 `HomesteadWorld.cpp` → `HomesteadWorld<Area>.cpp`
-- [ ] 1.3 `HomesteadCharacter.cpp` → `HomesteadCharacter<Area>.cpp`
-- [ ] 1.4 `UI/SHomesteadMenu.cpp` → `UI/SHomesteadMenu<Page>.cpp`
+Delivered in refactored Shipping at `main` `b3576693`: all four source moves passed native Release
+9/9, Editor/Game Unity, copied-save PIE/trade, six Development packaged suites, Shipping
+no-listener/save checks and shortcut read-back. The separate groom visual investigation remains open.
+
+- [x] 1.1 `HomesteadController.cpp` → per-feature `HomesteadController<Feature>.cpp`; game target builds; PIE pass
+- [x] 1.2 `HomesteadWorld.cpp` → `HomesteadWorld<Area>.cpp`
+- [x] 1.3 `HomesteadCharacter.cpp` → `HomesteadCharacter<Area>.cpp`
+- [x] 1.4 `UI/SHomesteadMenu.cpp` → `UI/SHomesteadMenu<Page>.cpp`
 
 ## 2. Runtime cost
 
