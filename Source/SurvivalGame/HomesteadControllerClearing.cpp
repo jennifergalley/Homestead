@@ -4,6 +4,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "Simulation/HomesteadSwingTiming.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
@@ -204,6 +205,8 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     for (const auto& Node : State().resources) if (Node.id == Target) { Aim = Node.position; Kind = Node.kind; }
     bool bAnimated = false;
     bSwingFellTimed = false;
+    SwingStrokes = 1;
+    SwingStrokesLanded = 0;
     if (Avatar)
     {
         // Rough footprint radius (cm) of what she strikes, so the point or bit lands on its near side.
@@ -217,7 +220,11 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
             : Kind == Homestead::ResourceKind::Boulder ? 70.0f
             : Kind == Homestead::ResourceKind::SmallRock ? 30.0f
             // The ruin's fallen roof timbers (about 430 x 230 cm): she strikes the near beam from outside the pile.
-            : Kind == Homestead::ResourceKind::RuinTimbers ? 120.0f : 8.0f;
+            : Kind == Homestead::ResourceKind::RuinTimbers ? 120.0f
+            // Brambles for the billhook's cut to meet on their near side (the sapling's stem is the default).
+            : Kind == Homestead::ResourceKind::BrambleThin ? 35.0f
+            : Kind == Homestead::ResourceKind::BrambleThicket ? 55.0f
+            : Kind == Homestead::ResourceKind::BrambleBank ? 80.0f : 8.0f;
         if (Tool == Homestead::Item::Scythe)
         {
             // Mowing turns about her: she keeps facing the swath rather than the first tuft.
@@ -226,14 +233,18 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
         }
         else if (Tool == Homestead::Item::Hatchet || Tool == Homestead::Item::Pickaxe)
         {
-            bSwingFellTimed = Avatar->PlayStrike(Aim, Tool, 1, Radius);
+            // Jenny (09-29): one press on a rock plays every blow it still needs (the strike clip's two
+            // authored contacts, looped for more), each landing at its own contact, one reward at the end.
+            if (Tool == Homestead::Item::Pickaxe)
+                SwingStrokes = FMath::Clamp(Sim.OvergrowthSwings(Target) - SwingsLanded, 1, MaxPickStrokesPerPress);
+            bSwingFellTimed = Avatar->PlayStrike(Aim, Tool, SwingStrokes, Radius);
             // Without the strike clip the axe falls back to its felling chop.
             if (!bSwingFellTimed && Tool == Homestead::Item::Hatchet) bSwingFellTimed = Avatar->PlayFell(Aim, 1, 12.0f);
         }
         bAnimated = bSwingFellTimed;
         // The billhook reuses the machete hack; a scythe without its mowing clip borrows it too.
         if (!bAnimated && Tool != Homestead::Item::Pickaxe && Tool != Homestead::Item::Hatchet)
-            bAnimated = Avatar->PlayMacheteHack(Aim, Tool);
+            bAnimated = Avatar->PlayMacheteHack(Aim, Tool, Tool == Homestead::Item::Billhook ? Radius : -1.0f);
     }
     if (!bAnimated)
     {
@@ -244,7 +255,10 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     bSwingPending = true;
     SwingSince = GetWorld()->GetTimeSeconds();
     if (const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()))
+    {
         SwingFellStartsBefore = Animation->FellStarts();
+        SwingHackStartsBefore = Animation->MacheteStarts();
+    }
 }
 
 void AHomesteadController::UpdatePendingSwing()
@@ -256,12 +270,16 @@ void AHomesteadController::UpdatePendingSwing()
     if (bSwingFellTimed)
     {
         const bool Felling = Animation && Animation->IsFelling() && Animation->FellStarts() != SwingFellStartsBefore;
-        if (Felling && Animation->FellPhase() >= AHomesteadCharacter::FellStrikeSeconds(0))
+        // Each blow of the press lands at its own contact; the last one ends the swing.
+        while (Felling && bSwingPending && SwingStrokesLanded < SwingStrokes
+            && Animation->FellPhase() >= AHomesteadCharacter::FellStrikeSeconds(SwingStrokesLanded))
         {
-            bSwingPending = false;
-            LandOvergrowthSwing();
-            return;
+            ++SwingStrokesLanded;
+            const bool bMore = SwingStrokesLanded < SwingStrokes;
+            if (!bMore) bSwingPending = false;
+            LandOvergrowthSwing(bMore);
         }
+        if (Felling) return;
         // Still stepping into the stance, or the clip hasn't started yet.
         if (!Felling && Animation && (Avatar->IsApproachingFell() || Age < 0.5))
         {
@@ -271,17 +289,33 @@ void AHomesteadController::UpdatePendingSwing()
         if (!Felling) bSwingPending = false;
         return;
     }
-    if (Animation && Animation->IsHacking() && Animation->MachetePhase() >= AHomesteadCharacter::MacheteClearSeconds)
+    if (!Animation)
     {
         bSwingPending = false;
-        LandOvergrowthSwing();
         return;
     }
-    // Interrupted before the blow landed: this swing doesn't count.
-    if (!Animation || (!Animation->IsHacking() && Age > 0.4)) bSwingPending = false;
+    // Only this press's own hack lands, at its contact: a click during the last hack's follow-through
+    // mustn't count that old clip against the new target (Homestead::SwingTiming::Advance). Walking up
+    // to the stance keeps it waiting; a hack that never starts, or stops early, drops it.
+    const bool bApproaching = Avatar && Avatar->IsApproachingFell();
+    if (bApproaching) SwingSince = GetWorld()->GetTimeSeconds();
+    switch (Homestead::SwingTiming::Advance(SwingHackStartsBefore, Animation->MacheteStarts(), Animation->IsHacking(),
+        Animation->MachetePhase(), AHomesteadCharacter::MacheteClearSeconds, bApproaching,
+        GetWorld()->GetTimeSeconds() - SwingSince, 0.4))
+    {
+    case Homestead::SwingTiming::Step::Land:
+        bSwingPending = false;
+        LandOvergrowthSwing();
+        break;
+    case Homestead::SwingTiming::Step::Drop:
+        bSwingPending = false;
+        break;
+    default:
+        break;
+    }
 }
 
-void AHomesteadController::LandOvergrowthSwing()
+void AHomesteadController::LandOvergrowthSwing(bool bMoreComing)
 {
     const auto Position = PlayerPoint();
     if (SwingTool == Homestead::Item::Scythe)
@@ -314,12 +348,15 @@ void AHomesteadController::LandOvergrowthSwing()
     }
     if (SwingNode == INDEX_NONE) return;
     ++SwingsLanded;
+    // Blows count from where she actually stood when they landed (a billhook swing may walk her up first).
+    SwingFrom = FVector2D(Position.x, Position.y);
     const int32 Needed = Sim.OvergrowthSwings(SwingNode);
     if (SwingsLanded < Needed)
     {
         // A hit that doesn't break it yet: a chop or a crack, and how much is left.
         if (!ChopStrokes.IsEmpty()) PlayEffect(ChopStrokes[SwingsLanded % ChopStrokes.Num()].Get(), 0.75f);
         else PlayEffect(WoodTapA, 0.6f);
+        if (bMoreComing) return;
         const int32 Left = Needed - SwingsLanded;
         Notify(FString::Printf(TEXT("%d more %s."), Left, Left == 1 ? TEXT("swing") : TEXT("swings")));
         return;

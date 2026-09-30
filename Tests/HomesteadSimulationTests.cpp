@@ -9,6 +9,7 @@
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadRuinDebris.h"
+#include "HomesteadSwingTiming.h"
 
 #include <algorithm>
 #include <cmath>
@@ -4277,6 +4278,32 @@ void EveryHandGatherHasItsOwnPose()
     CHECK(HandGatherPose(ResourceKind::TallGrass) == GatherPose::None && HandGatherPose(ResourceKind::Sapling) == GatherPose::None);
 }
 
+void BillhookBlowLandsOnlyOnItsOwnHack()
+{
+    // Code review 0930: a click during the last hack's follow-through (its clip already past the
+    // contact) must not land on the new target. Only a hack started after the press counts, at its own
+    // contact; walking up keeps it waiting; a hack that never starts, or stops early, is dropped.
+    using namespace SwingTiming;
+    const float contact = 1.25f;
+    const double grace = 0.4;
+    // The old hack (start 4) is at 1.4 s when she clicks (starts recorded as 4): it never lands.
+    for (float phase : {1.3f, 1.5f, 1.8f})
+        CHECK(Advance(4, 4, true, phase, contact, false, 0.1, grace) == Step::Wait);
+    // It ends; her new request was refused while it played, so no new hack: dropped, no blow.
+    CHECK(Advance(4, 4, false, -1.0f, contact, false, 0.5, grace) == Step::Drop);
+    // The same click, but walking up first: waits through the approach, then its own hack lands.
+    CHECK(Advance(4, 4, true, 1.6f, contact, true, 0.0, grace) == Step::Wait);
+    CHECK(Advance(4, 4, false, -1.0f, contact, true, 0.0, grace) == Step::Wait);
+    CHECK(Advance(4, 5, true, 0.2f, contact, false, 0.1, grace) == Step::Wait);
+    CHECK(Advance(4, 5, true, 1.25f, contact, false, 1.2, grace) == Step::Land);
+    // A fresh press from rest: waits for the clip, lands at contact.
+    CHECK(Advance(9, 9, false, -1.0f, contact, false, 0.1, grace) == Step::Wait);
+    CHECK(Advance(9, 10, true, 1.0f, contact, false, 1.0, grace) == Step::Wait);
+    CHECK(Advance(9, 10, true, 1.3f, contact, false, 1.3, grace) == Step::Land);
+    // Its own hack cancelled before the contact (she moved): dropped.
+    CHECK(Advance(9, 10, false, -1.0f, contact, false, 0.9, grace) == Step::Drop);
+}
+
 void RuinDebrisIsClearable()
 {
     // Jenny saw slate and rubble heaps in the manor that looked clearable but weren't. The loose
@@ -5020,6 +5047,7 @@ int main()
     Run("every hand gather has its own pose", EveryHandGatherHasItsOwnPose);
     Run("a wrong or under-tier tool is non-actionable", WrongOrUnderTierToolIsNonActionable);
     Run("the ruin's fallen roof timbers are chopped with the axe", RuinTimbersAreChoppedWithTheAxe);
+    Run("a billhook blow lands only on its own hack", BillhookBlowLandsOnlyOnItsOwnHack);
     Run("clear-out rubbish, nettles, stumps and spoiled ground", ClearoutKindsAndSpoiledGround);
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);

@@ -585,6 +585,7 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         {Homestead::Item::Billhook, TEXT("Billhook/SM_Billhook"), MacheteCarryDegrees, false, FTransform::Identity},
         // The pick shares the hatchet's frame (knob grip pivot, head +Z, point -Y). Carried one-handed
         // she holds it partway up the haft, near its balance, head forward and low.
+        // It hung point-up (Jenny, 09-29): UpdateHeldTools turns it half round about the haft, like the hatchet.
         {Homestead::Item::Pickaxe, TEXT("Pickaxe/SM_Pickaxe"), 20, false, FTransform(FVector(0, 0, -34))},
         // The scythe is carried at the trail by its snath, gripped at the balance 15 cm below the lower
         // nib: the snath runs through her fist with its top end forward and up, and the blade trails
