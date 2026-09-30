@@ -1,4 +1,5 @@
 #include "HomesteadSimulation.h"
+#include "HomesteadChests.h"
 #include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadParcels.h"
@@ -1467,6 +1468,63 @@ Result Simulation::TransferGroup(int chestId, int groupId, int amount, bool toCh
     (*ContainerStock(candidate, source))[item] -= amount;
     (*ContainerStock(candidate, destination))[item] += amount;
     return CommitInventory(std::move(candidate), toChest ? "Selected quantity stored." : "Selected quantity taken.");
+}
+Result Simulation::StoreMatching(int chestId, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (chestId <= 0) return Bad("Choose a storage chest.");
+    const auto access = ContainerAccess(state_, chestId, player);
+    if (!access) return access;
+    State candidate = state_;
+    const Inventory& held = *ContainerStock(state_, chestId);
+    Inventory* chest = ContainerStock(candidate, chestId);
+    auto& pack = candidate.inventoryLayout;
+    // Below the row first, in pack order, then the row's cells left to right, so the hotbar gives
+    // up its stacks last.
+    std::vector<int> order;
+    for (int index = 0; index < static_cast<int>(pack.size()); ++index)
+        if (PackRowRules::CellOf(candidate.packRow, pack[index]) < 0) order.push_back(index);
+    for (const auto& cell : candidate.packRow)
+        if (const int index = PackRowRules::FindEntry(pack, cell); index >= 0) order.push_back(index);
+    int room = ChestCapacity - ContainerUsed(candidate, chestId);
+    int matched = 0, stored = 0;
+    for (const int index : order)
+    {
+        auto& entry = pack[index];
+        const int item = static_cast<int>(entry.item);
+        if (entry.wearableId != 0 || entry.quantity <= 0 || held[item] <= 0 || !Chests::AutoStores(entry.item)) continue;
+        matched += entry.quantity;
+        const int moved = std::min(entry.quantity, std::max(0, room));
+        if (moved <= 0) continue;
+        entry.quantity -= moved;
+        candidate.inventory[item] -= moved;
+        (*chest)[item] += moved;
+        room -= moved;
+        stored += moved;
+    }
+    if (matched == 0) return Bad("Nothing in your pack matches what's already in this chest.");
+    if (stored == 0) return {false, "The chest is full.", ResultCode::Capacity, revision_};
+    const std::string message = stored == matched
+        ? "Stored " + std::to_string(stored) + (stored == 1 ? " item" : " items") + " onto matching stacks."
+        : "Stored " + std::to_string(stored) + " of " + std::to_string(matched) + " matching items; the chest is full.";
+    return CommitInventory(std::move(candidate), message.c_str());
+}
+Result Simulation::RenameChest(int chestId, const std::string& name, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (chestId <= 0) return Bad("Choose a storage chest.");
+    const auto access = ContainerAccess(state_, chestId, player);
+    if (!access) return access;
+    const std::string trimmed = Manor::TrimName(name);
+    if (const std::string problem = Chests::NameProblem(trimmed); !problem.empty()) return Bad(problem.c_str());
+    auto* found = Find(state_.structures, chestId);
+    if (found->customName == trimmed) return Bad(trimmed.empty() ? "The chest has no name to clear." : "The chest already has that name.");
+    found->customName = trimmed;
+    ++revision_;
+    return {true, trimmed.empty() ? std::string("The chest is a ") + Chests::DefaultName + " again."
+        : "The chest is now called " + trimmed + ".", ResultCode::None, revision_};
 }
 Result Simulation::TransferGroupToPackRow(int chestId, int groupId, int amount, int cell, Point player,
     std::uint64_t expectedRevision)
@@ -3020,6 +3078,7 @@ std::string Simulation::Serialize() const
     Lamp::WriteSaveSection(body, state_);
     Crops::WriteSaveSection(body, state_);
     PackRowRules::WriteSaveSection(body, state_);
+    if (Chests::HasSaveSection(state_)) Chests::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3307,6 +3366,7 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Chests::SaveTag) { if (!Chests::ReadSaveSection(input, candidate)) return invalid(); }
         // A section this build doesn't know came from a newer build; it can't be skipped safely.
         else return newer;
         input >> std::ws;

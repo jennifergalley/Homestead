@@ -22,6 +22,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadLamp.cpp
     Source/SurvivalGame/Simulation/HomesteadRoomAudio.cpp
     Source/SurvivalGame/Simulation/HomesteadDoor.cpp
+    Source/SurvivalGame/Simulation/HomesteadChests.cpp
     Source/SurvivalGame/Simulation/HomesteadPackRow.cpp
     Source/SurvivalGame/Simulation/HomesteadEstatePublicRoad.cpp
     Source/SurvivalGame/Simulation/HomesteadTravel.cpp
@@ -112,6 +113,15 @@ else()
     target_compile_options(HomesteadManorTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadManorTests COMMAND HomesteadManorTests)
+
+add_executable(HomesteadChestTests Tests/HomesteadChestTests.cpp)
+target_link_libraries(HomesteadChestTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadChestTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadChestTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadChestTests COMMAND HomesteadChestTests)
 
 add_executable(HomesteadLampTests Tests/HomesteadLampTests.cpp)
 target_link_libraries(HomesteadLampTests PRIVATE HomesteadSimulation)

@@ -240,6 +240,8 @@ struct Structure
     StructureSkin skin = StructureSkin::Timber;
     // Part of the old manor (the standing room): not removable until the round-5 rebuild.
     bool heritage = false;
+    // A chest's name as she gave it (trimmed UTF-8), empty for the default (HomesteadChests.h).
+    std::string customName;
 };
 
 // A turned rectangle on the ground: centre, half extents along its own axes, Unreal yaw in degrees.
@@ -591,6 +593,12 @@ public:
     Result RecolorWearable(int id, int dye, Point player, std::uint64_t expectedRevision);
     Result TransferGroup(int chestId, int groupId, int amount, bool toChest, Point player,
         std::uint64_t expectedRevision);
+    // Auto-store: in one step, moves her carried goods onto stacks of the same item already in this
+    // chest (HomesteadChests.h AutoStores: never tools, the lamp, water or garments). Stacks below the
+    // hotbar row go first, then row cells, as far as the chest has room; the rest stays with her.
+    Result StoreMatching(int chestId, Point player, std::uint64_t expectedRevision);
+    // Names a chest (trimmed; empty puts back the default name). Nothing else changes.
+    Result RenameChest(int chestId, const std::string& name, Point player, std::uint64_t expectedRevision);
     Result SplitGroup(int containerId, int groupId, int amount, Point player, std::uint64_t expectedRevision);
     Result MergeGroups(int containerId, int sourceGroupId, int targetGroupId, Point player,
         std::uint64_t expectedRevision);
