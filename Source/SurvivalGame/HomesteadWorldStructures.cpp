@@ -14,7 +14,6 @@
 #include "Sound/SoundWave.h"
 
 using HomesteadWorldLook::Bark;
-using HomesteadWorldLook::Cloth;
 using HomesteadWorldLook::DeconstructColor;
 using HomesteadWorldLook::PreviewBlockedColor;
 using HomesteadWorldLook::PreviewColor;
@@ -238,9 +237,9 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         Part(Cube, FVector(107.5f, 144, 130), FVector(85, 12, 260), Wood, true);
         Part(Cube, FVector(0, 144, 247.5f), FVector(130, 16, 25), Bark, true);
         // Tied-back cloth suggests a simple shelter entrance without a hidden collider.
-        Part(Cube, FVector(-61, 133, 123), FVector(8, 8, 214), Cloth);
-        Part(Cube, FVector(61, 133, 123), FVector(8, 8, 214), Cloth);
-        Part(Cube, FVector(0, 137, 235), FVector(124, 5, 8), Cloth);
+        Part(Cube, FVector(-61, 133, 123), FVector(8, 8, 214), HomesteadWorldLook::Cloth);
+        Part(Cube, FVector(61, 133, 123), FVector(8, 8, 214), HomesteadWorldLook::Cloth);
+        Part(Cube, FVector(0, 137, 235), FVector(124, 5, 8), HomesteadWorldLook::Cloth);
         break;
     case Homestead::Piece::Roof:
         Part(Cube, FVector(0, 0, 273), FVector(310, 310, 22), FLinearColor(0.27f, 0.25f, 0.105f), true);
@@ -281,7 +280,7 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         break;
     }
     case Homestead::Piece::Bed:
-        Part(Cube, FVector(95, -10, 6), FVector(70, 155, 12), Cloth, true);
+        Part(Cube, FVector(95, -10, 6), FVector(70, 155, 12), HomesteadWorldLook::Cloth, true);
         Part(Cube, FVector(95, 46, 14), FVector(62, 32, 12), FLinearColor(0.7f, 0.65f, 0.46f));
         Part(Cube, FVector(95, -28, 14), FVector(68, 106, 8), FLinearColor(0.23f, 0.31f, 0.21f));
         break;

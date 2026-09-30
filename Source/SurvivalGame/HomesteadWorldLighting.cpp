@@ -1,5 +1,6 @@
 #include "HomesteadWorld.h"
 #include "HomesteadWorldLog.h"
+#include "HomesteadWeather.h"
 
 #include "Camera/PlayerCameraManager.h"
 #include "Components/DirectionalLightComponent.h"
