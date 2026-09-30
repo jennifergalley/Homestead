@@ -175,7 +175,8 @@ Inventory BuildCost(Piece kind)
     case Piece::Doorway: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -1}});
     case Piece::Roof: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -3}});
     case Piece::Fire: return Items({{Item::Branch, -3}, {Item::Stone, -4}});
-    case Piece::Bed: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -4}});
+    // A bedroll: a branch frame with a tick stuffed with hay (Jenny's playtest), not woven canes.
+    case Piece::Bed: return Items({{Item::Branch, -4}, {Item::Hay, -4}});
     case Piece::Chest: return Items({{Item::Branch, -5}, {Item::BrambleCanes, -2}});
     default: return {};
     }
