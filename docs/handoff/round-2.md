@@ -123,9 +123,17 @@ stiffen/collide and push strands metres away. Clean checkpoint `95f4bfc3` sets
 The groom asset data confirms optional Bob/Updo physics use bend .0075–.01, radius .1–2.5 cm and
 drag .1 before that assembled-style override.
 
-The remedy remains unverified until Props builds and empirically measures strand bounds across nine
-styles, LODs, rates and copied Estate save in the editor. Existing hair reset guidance is not
-sufficient; validate before a package.
+Props `95f4bfc3` passes Editor build and `8b6ba0dc` adds HairLab developer tools, but rods/fans did
+**not** reproduce in lab even with old `HairOverride=1`, LOD 1/2/3, motion, RT and 30/120 fps. Estate
+PIE accidentally used default style and HairExtent is unreliable, so do **not** claim Jenny's
+user-visible bug fixed. Props editor is closed (14.9 GB physical / 30.9 GB commit); Character.cpp is
+released.
+
+Integration exclusively reproduces an exact copy of Jenny's Shipping Estate save in isolated preview,
+verifying style/color and replaying chest, scythe, travel and sleep at override 1/0. If it still cannot
+reproduce, integrate the low-risk per-style physics correction with honest uncertainty and ask Jenny
+to playtest the next build; never use a global bald/static fallback. Existing hair reset guidance is
+not sufficient; validate before a package.
 
 ### Overnight priority: split the four huge hot files
 
@@ -152,9 +160,11 @@ Static-linkage followups are also source-only: Controller `2354d801` adds Map/Ca
 `e7b7101b` adds the Weather include and qualifies `Cloth` to avoid a Unity name collision with
 `HomesteadGeneralStore`. Body-identity checks remain intact.
 
-Controller/World/Menu remain Architecture's source lock; Character remains Props' hair lock.
-Integration waits for Props editor close, then cherry-picks and verifies each source move sequentially
-(native Release plus Editor/Game unity), returning a base SHA between commits before advancing.
+Controller/World/Menu remain Architecture's source lock. Props released Character after the hair build;
+Architecture now has the fourth pure-move Character source slot. Integration owns the exact copied-save
+hair preview first, then after its editor closes cherry-picks and verifies Controller/World/Menu/
+Character sequentially (native Release plus Editor/Game unity), returning a base SHA between commits
+before advancing.
 
 ### Development firewall prompts / offline Shipping candidate
 
