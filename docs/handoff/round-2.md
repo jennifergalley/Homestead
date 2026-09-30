@@ -1285,19 +1285,22 @@ not claim early Energy is fully solved.
   explicitly source destination streaming, emit periodic diagnostics, and wall-clock-bound the hold
   with safe-position restoration rather than placing her through missing collision.
 
-  **Ground-hold repair `2510023f` (Integration branch only):** replaces insufficient
-  `89e3a73f` guards. It adds a high-priority World Partition source at the destination and traces
+  **Ground-hold repair `48c4418a` (Integration branch only):** extends `2510023f`'s corrected
+  guards. It adds a high-priority World Partition source at the destination and traces
   Landscape Pawn collision/floor, but records `LastSafeWorldPosition` only while grounded and
   immediately returns the pawn there during the wait. Travel snapshots the Simulation before
   `WalkRoad` and restores its exact clock, needs and revision on timeout; pending snaps refuse all
-  `SaveSlot` writes, restore actor/control rotation, and reject overlapping teleports. It retains
-  10-second diagnostics, a real-time 90-second Tick timeout, cleanup on save/new/retry/end and
-  EstateSmoke source assertions for streaming-actor creation/release.
+  `SaveSlot` writes, restore actor/control rotation, and reject overlapping teleports. While pending,
+  menu/hotbar/shop/sleep/console inputs are throttled or refused, the UI closes, F9 load remains
+  allowed, and rollback re-prepares/restores owned clothing. The real-time 90-second Tick timeout
+  also covers invalid woodland destinations; it retains 10-second diagnostics, cleanup on
+  save/new/retry/end and EstateSmoke source assertions for streaming-actor creation/release.
 
   It is **not on main, compiled or runtime-verified**. The timeout cannot fire while the game
   thread itself is not ticking. In an isolated copied save, acceptance must prove delayed collision,
-  fall recovery, canceled-travel clock/needs/revision restoration and F5 refusal while a snap is
-  pending—without modifying Jenny's live save.
+  fall recovery, canceled-travel clock/needs/revision restoration, pending F5/sleep/equip refusal,
+  F9 allowance and wardrobe rollback. It must also prove invalid woodland teleport timeout and
+  ordinary EstateSmoke, without modifying Jenny's live save.
 - **Starter chest and wardrobe** — **main-integrated `a785a417`, not packaged or shipped.** Fresh-game
   PIE verified the standing-room chest's pail, four branches, 3 pasties, 2 bread and seven garments;
   the tunic stays worn. It runs only in `NewEstateGame`, never restocks on load and uses normal chest
