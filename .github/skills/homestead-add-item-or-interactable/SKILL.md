@@ -51,6 +51,10 @@ item) and `BrambleBank` (clearable overgrowth).
    `/Game/SurvivalGame/Environment/Props/<Folder>/SM_<Name>`. Author the mesh with a Blender recipe
    (`blender-assets` skill) and import it with `import_props.py`. A missing mesh logs an error and
    fails the refresh, so land the asset with the code.
+   A low clear-out blocker can be climbed when it is under the heroine's step height, even if it
+   blocks pawns. Set `CanCharacterStepUpOn = ECB_No` on every blocker she must stop at (the
+   RuinTimbers fix in `532eb7ab` is the reference), then PIE-walk into it and verify she stays at
+   the intended action standoff.
 4. **Prompt and actions:** the focus title comes from `ResourceName`; the verb and the required tool
    come from the rules above, so most kinds need no controller change. Only a new *kind of action*
    needs controller work (`UpdateFocus`, `FocusActions`, `Interact`/`UseSelectedTool`).
