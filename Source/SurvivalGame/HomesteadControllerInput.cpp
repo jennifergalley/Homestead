@@ -1,6 +1,7 @@
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadWorld.h"
+#include "UI/HomesteadMenuPortrait.h"
 #include "UI/SHomesteadArrival.h"
 #include "UI/SHomesteadMenu.h"
 #include "UI/SHomesteadNames.h"
@@ -9,6 +10,7 @@
 #include "Framework/Application/IInputProcessor.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 #include "GameFramework/PlayerInput.h"
 #include "InputKeyEventArgs.h"
 

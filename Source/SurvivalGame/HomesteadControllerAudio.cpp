@@ -1,6 +1,8 @@
 #include "HomesteadController.h"
 #include "HomesteadControllerPreferences.h"
 #include "HomesteadCharacter.h"
+#include "HomesteadEstateGround.h"
+#include "HomesteadEstateTerrain.h"
 
 #include "AudioDevice.h"
 #include "Components/AudioComponent.h"

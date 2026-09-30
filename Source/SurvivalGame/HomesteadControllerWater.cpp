@@ -1,12 +1,16 @@
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadWorld.h"
+#include "HomesteadEstateTerrain.h"
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadOvergrowth.h"
 
 #include "Components/SplineComponent.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
+
+// Defined in HomesteadController.cpp; declared here so this file doesn't rely on unity-build order.
+namespace HomesteadWaterProbe { bool ShoreContains(const USplineComponent& Spline, const FVector2D& Point); }
 
 Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Position) const
 {
