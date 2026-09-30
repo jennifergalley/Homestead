@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Simulation/HomesteadSimulation.h"
+#include "Simulation/HomesteadHoldings.h"
 #include "Simulation/HomesteadTravel.h"
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveRouting.h"
@@ -45,6 +46,8 @@ struct FHomesteadRow
     int32 Quantity = 0;
     FString Name;
     FString Location;
+    // A short state shown after the selected item's name in the pack's footer ("Water 5 / 6").
+    FString Status;
     FName Icon;
     FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
     Homestead::RecipeAssessment RecipeState;
@@ -367,7 +370,7 @@ private:
     TArray<FPickup> Pickups;
     // The pack and everything she owns (pack, chests, dropped) at PickupRevision: a gain raises both,
     // a move between them raises only the pack.
-    Homestead::Inventory PickupPack{}, PickupOwned{};
+    Homestead::Holdings PickupHoldings;
     uint64 PickupRevision = 0;
     bool bPickupsPrimed = false;
     void UpdatePickups(float DeltaSeconds);

@@ -30,4 +30,11 @@ inline PailPresentation PresentPail(const State& state)
     result.hidePackWater = pails == 1 && water <= PailCapacity;
     return result;
 }
+
+// The pail's charge in words, for the pack's selected-item line and its tooltip: "Water 5 / 6".
+inline std::string PailChargeLabel(const PailPresentation& pail)
+{
+    if (!pail.gauge) return {};
+    return "Water " + std::to_string(pail.charge) + " / " + std::to_string(PailCapacity);
+}
 }

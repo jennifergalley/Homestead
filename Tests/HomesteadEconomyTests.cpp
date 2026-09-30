@@ -1,6 +1,7 @@
 // Portable tests for the item catalogue, money and shops.
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
+#include "HomesteadHoldings.h"
 #include "HomesteadItems.h"
 #include "HomesteadPail.h"
 #include "HomesteadSimulation.h"
@@ -520,6 +521,69 @@ void PailWaterPresentation()
     CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= 9);
     const auto loaded = PresentPail(reloaded.GetState());
     CHECK(loaded.gauge && loaded.charge == PailCapacity && !loaded.hidePackWater);
+    // The pack's footer names the charge (a controller has no hover for the tooltip).
+    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 6" && PailChargeLabel(With(1, 0)) == "Water 0 / 6");
+    CHECK(PailChargeLabel(With(1, 1200)) == "Water 6 / 6" && PailChargeLabel(With(0, 4)).empty());
+}
+
+// The "+3 Berries" line counts only real gains: gathering, buying, crafting and grants, never a chest
+// move, a drop picked back up, spent ingredients or pail water.
+void PickupGainsCountOnlyNewThings()
+{
+    Store store = OpenStore();
+    auto& sim = store.sim;
+    const auto Gain = [&sim](const Holdings& before, Item item) { return PickupGain(before, CountHoldings(sim.GetState()), item); };
+    // Gathering berries at a bush on the estate.
+    const ResourceNode* bush = nullptr;
+    for (const auto& node : sim.GetState().resources)
+        if (node.kind == ResourceKind::BerryBush && !node.cleared && node.readyAtHour <= sim.GetState().hour) { bush = &node; break; }
+    CHECK(bush != nullptr);
+    const Point bushAt = bush->position;
+    Holdings before = CountHoldings(sim.GetState());
+    const int berries = sim.Count(Item::Berries);
+    OK(sim.Harvest(bush->id, bushAt));
+    CHECK(sim.Count(Item::Berries) > berries && Gain(before, Item::Berries) == sim.Count(Item::Berries) - berries);
+    // Buying at the store.
+    before = CountHoldings(sim.GetState());
+    OK(sim.Buy(store.shop, Item::Pasty, 2, false, store.customer));
+    CHECK(Gain(before, Item::Pasty) == 2);
+    // Crafting: the axe shows, the branch and stone it used don't (and never as a negative).
+    OK(sim.GrantItems(Item::RustedAxeHead, 1));
+    OK(sim.GrantItems(Item::Branch, 10));
+    OK(sim.GrantItems(Item::Stone, 10));
+    before = CountHoldings(sim.GetState());
+    CHECK(Gain(before, Item::Branch) == 0);
+    OK(sim.Craft(Recipe::HaftAxe, bushAt));
+    CHECK(Gain(before, Item::Hatchet) == 1);
+    for (int index = 0; index < ItemCount; ++index)
+        if (static_cast<Item>(index) != Item::Hatchet) CHECK(Gain(before, static_cast<Item>(index)) == 0);
+    // Setting branches down and picking them back up is a move.
+    int group = 0;
+    for (const auto& entry : *sim.GetLayout(0)) if (entry.item == Item::Branch) { group = entry.groupId; break; }
+    CHECK(group != 0);
+    OK(sim.DropGroup(group, 2, bushAt, bushAt, sim.GetRevision()));
+    before = CountHoldings(sim.GetState());
+    OK(sim.PickUpDrop(sim.GetState().worldDrops.back().id, bushAt));
+    CHECK(Gain(before, Item::Branch) == 0);
+    // Pail water fills the pail's gauge, not a pickup line.
+    before = CountHoldings(sim.GetState());
+    OK(sim.GrantItems(Item::Water, 3));
+    CHECK(Gain(before, Item::Water) == 0);
+    // Taking the pail from the manor chest and putting it back are moves, too.
+    Simulation manor;
+    manor.SetPlacements(ProvisionalEstatePlacements());
+    OK(manor.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const Structure* chest = nullptr;
+    for (const auto& piece : manor.GetState().structures) if (piece.kind == Piece::Chest) { chest = &piece; break; }
+    CHECK(chest != nullptr && chest->storage[static_cast<int>(Item::WateringCan)] >= 1);
+    const int chestId = chest->id;
+    const Point chestSide = manor.StructureCenter(*chest);
+    before = CountHoldings(manor.GetState());
+    OK(manor.Transfer(chestId, Item::WateringCan, -1, chestSide));
+    const Holdings taken = CountHoldings(manor.GetState());
+    CHECK(manor.Count(Item::WateringCan) == 1 && PickupGain(before, taken, Item::WateringCan) == 0);
+    OK(manor.Transfer(chestId, Item::WateringCan, 1, chestSide));
+    CHECK(PickupGain(taken, CountHoldings(manor.GetState()), Item::WateringCan) == 0);
 }
 
 const char* filter = nullptr;void Run(const char* name, void (*test)())
@@ -549,6 +613,7 @@ int main(int argc, char** argv)
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);
     Run("pail water shows on the pail", PailWaterPresentation);
+    Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }
