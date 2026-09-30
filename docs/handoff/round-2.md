@@ -101,6 +101,12 @@ MVP-untouched; Development late and evening builds remain rollback paths, and th
 in Integration `E:` scratch. Probe harness defects and visible human startup caveat remain (see
 offline-startup); Menu field-book hotbar and Water garden outline remain excluded partials.
 
+**Shared-memory warning (2026-09-29 20:19):** Jenny later launched the Shipping Estate while Menu
+editor PID 52420 remained open; Available MBytes fell to 143. Integration touched no process and used
+urgent mailbox to ask Menu to close only its own editor. The durable response is now
+[`docs/handoff/README.md`](README.md#jennys-packaged-game-memory-safety); this is not a user-build
+failure or a shortcut retarget.
+
 ### Development firewall prompts / offline Shipping candidate
 
 Development packaged automation can trigger recurring Windows Firewall prompts: UE5.8's in-process
