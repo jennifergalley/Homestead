@@ -862,9 +862,29 @@ requirement.
   six packaged suites passed first try: Smoke 57.51, Clearing 53.98, Hotbar 52.50, NativeMenu 56.91,
   FullLoop 54.67 and EstateSmoke woods 60.00 fps. The corrected chest row is above the PACK grid in
   the earlier NativeMenu 720/4K evidence. Directional navigation's first 52 steps pass; its later
-  Settings `visible=0` failure remains pre-existing. Remaining gates are a copied current-save
-  packaged first-row reorder/stock/F5/F9 check, then Shipping reuse-cooked zero-listener/save/shortcut
-  verification. No delivery has occurred yet.
+  Settings `visible=0` failure remains pre-existing. The copied current-save packaged first-row
+  reorder/stock/F5/F9 result is recorded next; Shipping reuse-cooked zero-listener/save/shortcut
+  verification remains pending. No delivery has occurred yet.
+
+  **Main integration `3a33820d`:** Coral actual-stack hotbar is pushed after all six Development
+  packaged suites passed first try and chest-top geometry captured at 720p/4K. A hidden owned
+  packaged run loaded the real copied Jenny Estate Manual save, physically swapped first-row group
+  IDs 9/34 with counts unchanged, verified F5 inverse-unsaved behavior, then F9 + F5 restored the
+  swapped row and stock. The original Shipping save remained untouched and owned PIDs closed.
+  Automated D-pad passed, while a manual physical gamepad was not observed; the later DirNav
+  Settings step remains a pre-existing failure. Shipping reuse-cooked/hash-identical/no-listener,
+  copied-save Shipping F5/F9 and any shortcut promotion remain pending.
+
+  **Shipping unity repair `67d6b961`:** moved `HomesteadWorldResources.cpp` called
+  `AHomesteadCharacter::LoadHandStone` / `StonePileSize` through an accidental unity neighbour,
+  failing monolithic Shipping with C2653 at lines 190/196. One direct
+  `#include "HomesteadCharacter.h"` fixes the dependency; no behavior, content or save change.
+  Combined Editor/Game and Shipping `-ReuseCooked` rebuilds now pass (candidate SHA begins
+  `7C65AAF0` and ends `281EB`; cooker/UnrealPak are clean). v4 six suites, targeted NativeMenu
+  720/4K chest-row screenshots and copied Jenny-save physical row swap/F5/F9 stock evidence still
+  pass; DirNav step 53 Settings `visible=0` remains known. This candidate is **not shipped**:
+  copied-save Shipping, no-listener, freshness and shortcut checks remain pending; hair is
+  inconclusive and manual human pad was not observed.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
