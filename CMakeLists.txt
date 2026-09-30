@@ -23,6 +23,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadRoomAudio.cpp
     Source/SurvivalGame/Simulation/HomesteadDoor.cpp
     Source/SurvivalGame/Simulation/HomesteadChests.cpp
+    Source/SurvivalGame/Simulation/HomesteadBackpack.cpp
     Source/SurvivalGame/Simulation/HomesteadPackRow.cpp
     Source/SurvivalGame/Simulation/HomesteadEstatePublicRoad.cpp
     Source/SurvivalGame/Simulation/HomesteadTravel.cpp

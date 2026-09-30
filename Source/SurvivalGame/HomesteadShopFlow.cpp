@@ -101,6 +101,21 @@ Homestead::Result AHomesteadController::ShopTrade(int32 ShopId, Homestead::Item 
     return Result;
 }
 
+Homestead::Result AHomesteadController::ShopBuyBackpack(int32 ShopId)
+{
+    const int64 Before = State().money;
+    const auto Result = Sim.BuyBackpack(ShopId, PlayerPoint());
+    UE_LOG(LogTemp, Display, TEXT("SHOP_TRADE upgrade item=leather-backpack ok=%d purse=%lld capacity=%d message=\"%s\""),
+        Result.ok ? 1 : 0, static_cast<long long>(State().money), Sim.PackCapacity(), *ShopText(Result.message));
+    if (Result.ok)
+    {
+        LastWalletDelta = State().money - Before;
+        WalletDeltaRemaining = 3.0f;
+        PlayEffect(WoodTapB, 0.35f);
+    }
+    return Result;
+}
+
 void AHomesteadController::ShopClick() { PlayEffect(UIClick, 0.05f); }
 
 void AHomesteadController::NoteShopDevice(bool bPad)

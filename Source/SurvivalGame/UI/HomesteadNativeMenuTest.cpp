@@ -8,6 +8,7 @@
 #include "../HomesteadWorld.h"
 #include "../HomesteadTestPaths.h"
 #include "../Simulation/HomesteadPackRow.h"
+#include "../Simulation/HomesteadBackpack.h"
 #include "../Simulation/HomesteadItems.h"
 #include "../Simulation/HomesteadShops.h"
 #include "SHomesteadShop.h"
@@ -668,6 +669,46 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         }, 0.8f);
     Add(TEXT("Capture the shop's Buy page"), [this]() { Screenshot(TEXT("native-shop-buy")); },
         [this]() { return Controller->ShopScreen.IsValid(); }, 0.8f);
+    // The leather backpack: a one-time upgrade row heading Buy. Bought once it doubles her pack and
+    // leaves the list; the whole simulation is put back afterwards so later checks see a plain pack.
+    const auto BeforeBackpack = MakeShared<Homestead::Simulation>();
+    Add(TEXT("The backpack upgrade heads Buy and is refused when she can't afford it"),
+        [this, BeforeBackpack]()
+        {
+            // A purse short of the price, whatever the fixture started with.
+            if (Controller->State().money >= Homestead::Backpack::Price)
+                Controller->Sim.GrantMoney(Homestead::Backpack::Price - 1 - Controller->State().money);
+            Controller->ShopScreen->Refresh();
+            *BeforeBackpack = Controller->Sim;
+            Controller->ShopScreen->Choose(Controller->ShopScreen->GetSelection());
+        },
+        [this, BeforeBackpack]()
+        {
+            const auto& Shop = Controller->ShopScreen;
+            return Shop.IsValid() && Shop->IsUpgradeRow(Shop->GetSelection()) && Shop->RowLabel(Shop->GetSelection()) == TEXT("Leather backpack")
+                && !Shop->IsChoosingQuantity() && Shop->GetStatus().StartsWith(TEXT("That's 1,500 coins;"))
+                && Controller->Simulation().Serialize() == BeforeBackpack->Serialize();
+        });
+    Add(TEXT("With 1,500 coins she buys it once: her pack holds 240 and the row is gone"),
+        [this]()
+        {
+            Controller->Sim.GrantMoney(Homestead::Backpack::Price);
+            Controller->ShopScreen->Refresh();
+            Controller->ShopScreen->Choose(Controller->ShopScreen->GetSelection());
+            Controller->ShopScreen->Confirm();
+        },
+        [this, BeforeBackpack]()
+        {
+            const auto& Shop = Controller->ShopScreen;
+            bool bRowGone = true;
+            for (int32 Index = 0; Index < Shop->RowCount(); ++Index) bRowGone &= !Shop->IsUpgradeRow(Index);
+            return Controller->State().leatherBackpack && Controller->Sim.PackCapacity() == Homestead::MaxPackCapacity
+                && Controller->State().money == BeforeBackpack->GetState().money && bRowGone
+                && Controller->MenuInventorySummary().Contains(TEXT("/ 240"));
+        });
+    Add(TEXT("Put the simulation back as it was before the backpack"),
+        [this, BeforeBackpack]() { Controller->Sim = *BeforeBackpack; Controller->ShopScreen->Refresh(); },
+        [this]() { return !Controller->State().leatherBackpack && Controller->Sim.PackCapacity() == Homestead::InventoryCapacity; });
     Add(TEXT("Leave the shop and return to Settings, as before the shop check"),
         [this]() { Controller->CloseShopScreen(); Controller->OpenBook(4); },
         [this]() { return !Controller->ShopScreen.IsValid() && Controller->IsBookOpen() && Controller->BookPage() == 4; });

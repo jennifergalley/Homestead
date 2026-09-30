@@ -1,4 +1,5 @@
 #include "HomesteadSimulation.h"
+#include "HomesteadBackpack.h"
 #include "HomesteadChests.h"
 #include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
@@ -732,7 +733,7 @@ Result ValidateInventory(const State& state)
     const auto validateContainer = [&](int container) -> Result {
         const auto* stock = ContainerStock(state, container);
         const auto* layout = ContainerLayout(state, container);
-        const int capacity = ContainerCapacity(container);
+        const int capacity = ContainerCapacity(state, container);
         if (!stock || !layout || !StockValid(*stock, capacity) || ContainerUsed(state, container) > capacity)
             return {false, container == 0 ? "Not enough pack space." : "The chest does not have enough space.", ResultCode::Capacity};
         if (layout->size() > static_cast<std::size_t>(capacity)) return Bad("Inventory layout has too many entries.");
@@ -782,7 +783,7 @@ Result ValidateInventory(const State& state)
         if (drop.wearableId == 0)
         {
             if (!ValidEnum(drop.item, Item::Count) || drop.quantity <= 0
-                || drop.quantity > InventoryCapacity)
+                || drop.quantity > MaxPackCapacity)
                 return Bad("A world item drop has an invalid payload.");
         }
         else
@@ -850,7 +851,7 @@ int PackUsed(const State& state) { return ContainerUsed(state, 0); }
 bool AddWorldDrop(State& candidate, Point position, Item item, int quantity)
 {
     for (auto& drop : candidate.worldDrops)
-        if (drop.wearableId == 0 && drop.item == item && drop.quantity <= InventoryCapacity - quantity
+        if (drop.wearableId == 0 && drop.item == item && drop.quantity <= MaxPackCapacity - quantity
             && DistanceSquared(position, drop.position) <= DropMergeReach * DropMergeReach)
         {
             drop.quantity += quantity;
@@ -1299,6 +1300,10 @@ int Simulation::UsedCapacity() const
 {
     return ContainerUsed(state_, 0);
 }
+int Simulation::PackCapacity() const
+{
+    return Homestead::PackCapacity(state_);
+}
 int Simulation::ChestUsedCapacity(int chestId) const
 {
     return chestId > 0 ? ContainerUsed(state_, chestId) : -1;
@@ -1311,10 +1316,10 @@ bool Simulation::TryAdjust(const Inventory& change)
     for (int i = 0; i < ItemCount; ++i)
     {
         const long long value = static_cast<long long>(state_.inventory[i]) + change[i];
-        if (value < 0 || value > InventoryCapacity) return false;
+        if (value < 0 || value > Homestead::PackCapacity(state_)) return false;
         updated[i] = static_cast<int>(value);
     }
-    if (!StockValid(updated)) return false;
+    if (!StockValid(updated, Homestead::PackCapacity(state_))) return false;
     State candidate = state_;
     candidate.inventory = updated;
     if (!ReconcileLayout(candidate, 0, fillPackRow_) || !ValidateInventory(candidate)) return false;
@@ -1704,7 +1709,7 @@ Result Simulation::DropGroup(int groupId, int amount, Point position, Point play
     for (auto& drop : candidate.worldDrops)
     {
         if (drop.wearableId != 0 || drop.item != entry->item
-            || drop.quantity > InventoryCapacity - amount) continue;
+            || drop.quantity > MaxPackCapacity - amount) continue;
         const double distance = DistanceSquared(position, drop.position);
         if (distance <= nearest && (!merge || distance < nearest || drop.id < merge->id))
         { merge = &drop; nearest = distance; }
@@ -1764,13 +1769,13 @@ Result Simulation::PickUpDrop(int dropId, Point player)
         [dropId](const WorldDrop& value) { return value.id == dropId; });
     if (drop->wearableId == 0)
     {
-        if (TakesSpace(drop->item) && ContainerUsed(candidate, 0) > InventoryCapacity - drop->quantity)
+        if (TakesSpace(drop->item) && ContainerUsed(candidate, 0) > Homestead::PackCapacity(candidate) - drop->quantity)
             return {false, "Not enough pack space to pick up the complete stack.", ResultCode::Capacity, revision_};
         candidate.inventory[static_cast<int>(drop->item)] += drop->quantity;
     }
     else
     {
-        if (ContainerUsed(candidate, 0) >= InventoryCapacity)
+        if (ContainerUsed(candidate, 0) >= Homestead::PackCapacity(candidate))
             return {false, "Not enough pack space to pick up this garment.", ResultCode::Capacity, revision_};
         auto* wearable = Find(candidate.wearables, drop->wearableId);
         if (!wearable || wearable->owner != WearableOwner::World)
@@ -2047,7 +2052,7 @@ Result Simulation::ClearUnderbrush(Generation::ChunkCoord chunk, int index, bool
         std::lower_bound(candidate.clearedUnderbrush.begin(), candidate.clearedUnderbrush.end(), key), key);
     // A full pack still clears; the cuttings are just left on the ground.
     ++candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
-    if (ContainerUsed(candidate, 0) > InventoryCapacity) --candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
+    if (ContainerUsed(candidate, 0) > Homestead::PackCapacity(candidate)) --candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
     return Exert(cost, CommitInventory(std::move(candidate), "Undergrowth cleared."));
 }
 Result Simulation::Eat(Item item)
@@ -2452,19 +2457,19 @@ Result Simulation::Deconstruct(int structureId, Point player)
         {
             WorldDrop* merge = nullptr;
             for (auto& drop : candidate.worldDrops)
-                if (drop.wearableId == 0 && drop.item == item && drop.quantity < InventoryCapacity
+                if (drop.wearableId == 0 && drop.item == item && drop.quantity < MaxPackCapacity
                     && Near(spot, drop.position, DropMergeReach)) { merge = &drop; break; }
             int moved = 0;
             if (merge)
             {
-                moved = std::min(quantity, InventoryCapacity - merge->quantity);
+                moved = std::min(quantity, MaxPackCapacity - merge->quantity);
                 merge->quantity += moved;
             }
             else
             {
                 if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1)
                     return false;
-                moved = std::min(quantity, InventoryCapacity);
+                moved = std::min(quantity, MaxPackCapacity);
                 candidate.worldDrops.push_back({candidate.nextId++, spot, item, moved, 0});
             }
             quantity -= moved;
@@ -2478,8 +2483,8 @@ Result Simulation::Deconstruct(int structureId, Point player)
             const int back = contents ? (chest ? piece.storage[i] : 0) : -cost[i];
             if (back <= 0) continue;
             const Item item = static_cast<Item>(i);
-            const int kept = TakesSpace(item) ? std::min(back, std::max(0, InventoryCapacity - ContainerUsed(candidate, 0)))
-                : std::min(back, InventoryCapacity - candidate.inventory[i]);
+            const int kept = TakesSpace(item) ? std::min(back, std::max(0, Homestead::PackCapacity(candidate) - ContainerUsed(candidate, 0)))
+                : std::min(back, Homestead::PackCapacity(candidate) - candidate.inventory[i]);
             candidate.inventory[i] += kept;
             if (!dropItems(item, back - kept)) return crowded;
         }
@@ -2487,7 +2492,7 @@ Result Simulation::Deconstruct(int structureId, Point player)
     {
         if (wearable.owner != WearableOwner::Chest || wearable.chestId != piece.id) continue;
         wearable.chestId = 0;
-        if (ContainerUsed(candidate, 0) < InventoryCapacity)
+        if (ContainerUsed(candidate, 0) < Homestead::PackCapacity(candidate))
         {
             wearable.owner = WearableOwner::Carried;
             continue;
@@ -3079,6 +3084,7 @@ std::string Simulation::Serialize() const
     Crops::WriteSaveSection(body, state_);
     PackRowRules::WriteSaveSection(body, state_);
     if (Chests::HasSaveSection(state_)) Chests::WriteSaveSection(body, state_);
+    if (Backpack::HasSaveSection(state_)) Backpack::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3145,7 +3151,7 @@ Result Simulation::Deserialize(const std::string& data)
         candidate.nextId >= TransientResourceIdBase) return invalid();
     const bool critical = candidate.hunger == 0 || candidate.energy == 0 || legacyWarmth == 0;
     if (critical != candidate.failed) return invalid();
-    switch (ReadSavedStock(input, candidate.inventory, version, storedItems, InventoryCapacity))
+    switch (ReadSavedStock(input, candidate.inventory, version, storedItems, MaxPackCapacity))
     {
     case SavedStock::Ok: break;
     case SavedStock::Newer: return newer;
@@ -3367,6 +3373,7 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Chests::SaveTag) { if (!Chests::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Backpack::SaveTag) { if (!Backpack::ReadSaveSection(input, candidate)) return invalid(); }
         // A section this build doesn't know came from a newer build; it can't be skipped safely.
         else return newer;
         input >> std::ws;

@@ -4,6 +4,7 @@
 #include "SHomesteadHudScale.h"
 #include "../HomesteadController.h"
 #include "../HomesteadShopkeeper.h"
+#include "../Simulation/HomesteadBackpack.h"
 #include "../Simulation/HomesteadItems.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Framework/Application/SlateApplication.h"
@@ -118,6 +119,18 @@ void SHomesteadShop::BuildRows()
         }
         return;
     }
+    // The leather backpack heads the Buy list until she owns it: one only, not a repeating good.
+    if (Homestead::Backpack::Offered(Sim.GetState(), Shop->kind))
+    {
+        FRow Upgrades;
+        Upgrades.Header = TEXT("Upgrades");
+        Rows.Add(Upgrades);
+        FRow Backpack;
+        Backpack.bUpgrade = true;
+        Backpack.Available = 1;
+        Backpack.Unit = Homestead::Backpack::Price;
+        Rows.Add(Backpack);
+    }
     FRow Goods;
     Goods.Header = TEXT("Shop goods");
     Rows.Add(Goods);
@@ -169,9 +182,10 @@ int32 SHomesteadShop::Limit(const FRow& Row) const
     if (!Controller.IsValid()) return 0;
     const auto& Sim = Controller->Simulation();
     if (Tab == 0) return Row.Available;
-    const int64 Affordable = Row.Unit > 0 ? Sim.GetState().money / Row.Unit : Homestead::InventoryCapacity;
-    int32 Room = Homestead::InventoryCapacity - Sim.UsedCapacity();
-    Room = FMath::Min(Room, Homestead::InventoryCapacity - Sim.Count(Row.Item));
+    if (Row.bUpgrade) return Sim.GetState().money >= Row.Unit ? 1 : 0;
+    const int64 Affordable = Row.Unit > 0 ? Sim.GetState().money / Row.Unit : Sim.PackCapacity();
+    int32 Room = Sim.PackCapacity() - Sim.UsedCapacity();
+    Room = FMath::Min(Room, Sim.PackCapacity() - Sim.Count(Row.Item));
     int64 Most = FMath::Min<int64>(Affordable, Room);
     if (Row.bHeroine) Most = FMath::Min<int64>(Most, Row.Available);
     return static_cast<int32>(FMath::Max<int64>(0, Most));
@@ -182,7 +196,12 @@ FString SHomesteadShop::RowLabel(int32 Index) const
     if (!Rows.IsValidIndex(Index)) return FString();
     const FRow& Row = Rows[Index];
     if (!Row.Header.IsEmpty()) return Row.Header;
-    return Utf8(Homestead::ItemName(Row.Item));
+    return RowName(Row);
+}
+
+FString SHomesteadShop::RowName(const FRow& Row) const
+{
+    return Utf8(Row.bUpgrade ? Homestead::Backpack::Name : Homestead::ItemName(Row.Item));
 }
 
 void SHomesteadShop::Refresh()
@@ -276,6 +295,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
     const bool bSelected = Index == Selection;
     FString Stock;
     if (Tab == 0) Stock = FString::Printf(TEXT("%d carried"), Row.Available);
+    else if (Row.bUpgrade) Stock = FString::Printf(TEXT("Carry %d"), Homestead::MaxPackCapacity);
     else if (Row.bHeroine) Stock = FString::Printf(TEXT("%d on the shelf"), Row.Available);
     else Stock = TEXT("In stock");
     auto Widget = SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(10, 5))
@@ -287,7 +307,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             [
                 SNew(SBox).WidthOverride(38).HeightOverride(38)
                 [
-                    SNew(SHomesteadIcon).Kind(FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Row.Item))))
+                    SNew(SHomesteadIcon).Kind(Row.bUpgrade ? FName(TEXT("pack")) : FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Row.Item))))
                 ]
             ]
             + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
@@ -298,11 +318,12 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
                     // Food shows the Energy one restores before she buys it (Homestead::FoodEnergyLabel).
                     SNew(SHorizontalBox)
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
-                    [ Label(Utf8(Homestead::ItemName(Row.Item)), 17, bSelected ? ShopGold : ShopInk, false) ]
+                    [ Label(RowName(Row), 17, bSelected ? ShopGold : ShopInk, false) ]
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(10, 0, 0, 1)
-                    [ Label(Utf8(Homestead::FoodEnergyLabel(Row.Item).c_str()), 14, ShopGold, false) ]
+                    [ Label(Row.bUpgrade ? FString() : Utf8(Homestead::FoodEnergyLabel(Row.Item).c_str()), 14, ShopGold, false) ]
                 ]
-                + SVerticalBox::Slot().AutoHeight()[Label(Utf8(Homestead::ItemDescription(Row.Item)), 12, ShopMuted)]
+                + SVerticalBox::Slot().AutoHeight()
+                [ Label(Utf8(Row.bUpgrade ? Homestead::Backpack::Description : Homestead::ItemDescription(Row.Item)), 12, ShopMuted) ]
             ]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(16, 0)
             [
@@ -311,7 +332,8 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
             [
                 // Wide enough for "1,000 coins each" on one line.
-                SNew(SBox).WidthOverride(170).HAlign(HAlign_Right)[Label(Money(Row.Unit) + TEXT(" each"), 16, ShopInk, false)]
+                SNew(SBox).WidthOverride(170).HAlign(HAlign_Right)
+                [ Label(Money(Row.Unit) + (Row.bUpgrade ? TEXT("") : TEXT(" each")), 16, ShopInk, false) ]
             ]
         ];
     RowWidgets[Index] = Widget;
@@ -336,7 +358,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildFooter()
             SNew(SHorizontalBox)
             + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
             [
-                Label(FString::Printf(TEXT("%s %s"), *Verb, UTF8_TO_TCHAR(Homestead::ItemName(Row->Item))), 18, ShopGold)
+                Label(FString::Printf(TEXT("%s %s"), *Verb, *RowName(*Row)), 18, ShopGold)
             ]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[Button(TEXT("-"), [this]() { AdjustQuantity(-1); }, false, 44)]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0)
@@ -507,7 +529,8 @@ void SHomesteadShop::Choose(int32 Index)
         bStatusError = true;
         const auto& Sim = Controller->Simulation();
         Status = Tab == 0 ? TEXT("You have none to sell.")
-            : Sim.GetState().money < Rows[Index].Unit ? FString::Printf(TEXT("That's %s each; you have %s."), *Money(Rows[Index].Unit), *Wallet())
+            : Sim.GetState().money < Rows[Index].Unit ? FString::Printf(TEXT("That's %s%s; you have %s."), *Money(Rows[Index].Unit),
+                Rows[Index].bUpgrade ? TEXT("") : TEXT(" each"), *Wallet())
             : TEXT("Your pack is full.");
         Refresh();
         return;
@@ -542,7 +565,8 @@ void SHomesteadShop::Confirm()
 {
     const FRow* Row = Chosen();
     if (!bQuantity || !Row || !Controller.IsValid()) return;
-    const auto Result = Controller->ShopTrade(ShopId, Row->Item, Quantity, Tab == 0, Row->bHeroine);
+    const auto Result = Row->bUpgrade ? Controller->ShopBuyBackpack(ShopId)
+        : Controller->ShopTrade(ShopId, Row->Item, Quantity, Tab == 0, Row->bHeroine);
     Status = UTF8_TO_TCHAR(Result.message.c_str());
     bStatusError = !Result.ok;
     if (Result.ok) bQuantity = false;

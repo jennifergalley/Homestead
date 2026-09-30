@@ -27,6 +27,14 @@
 #include "Misc/Parse.h"
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "RenderCore.h"
+#include "Misc/PackageName.h"
+
+// The worn leather backpack's mesh: an original asset Props authors (not yet made).
+namespace HeroineBackpackStyle
+{
+constexpr const TCHAR* PackagePath = TEXT("/Game/SurvivalGame/Environment/Props/LeatherBackpack/SM_LeatherBackpack");
+constexpr const TCHAR* ObjectPath = TEXT("/Game/SurvivalGame/Environment/Props/LeatherBackpack/SM_LeatherBackpack.SM_LeatherBackpack");
+}
 
 namespace
 {
@@ -509,6 +517,16 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         }
         ForagePouch->SetVisibility(true);
     }
+    // The leather backpack she can buy at the store (Simulation/HomesteadBackpack.h). Props authors
+    // the original mesh; until it exists she simply has no visible pack, and capacity is unaffected.
+    if (!Backpack && FPackageName::DoesPackageExist(HeroineBackpackStyle::PackagePath))
+        if (UStaticMesh* Pack = LoadObject<UStaticMesh>(nullptr, HeroineBackpackStyle::ObjectPath))
+        {
+            Backpack = MakeProp(TEXT("Backpack"), Pack);
+            // Props adds the reference-pose pivot (report.json attach.pivot_reference_pose_cm) with the import, as for CordBelt.
+            Backpack->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("spine_05"));
+            Backpack->SetVisibility(bBackpackShown);
+        }
     // The rawhide cord belt the pouch hangs from, tied on the shorts' waistband with the knot in
     // front. Its path is fitted to the shorts (Scripts/Blender/Recipes/cord_belt_fit.py) and
     // authored about its pivot in the skeleton's reference pose, so it rides the pelvis from there.
@@ -1264,4 +1282,11 @@ void AHomesteadCharacter::UpdateAppearanceFraming()
     Camera->PostProcessSettings.bOverride_AutoExposureBias = true;
     Camera->PostProcessSettings.AutoExposureBias =
         GameController && GameController->Simulation().IsNight() ? 0.5f : 0.0f;
+}
+
+void AHomesteadCharacter::SetBackpackShown(bool bShown)
+{
+    if (bShown == bBackpackShown) return;
+    bBackpackShown = bShown;
+    if (Backpack) Backpack->SetVisibility(bShown);
 }

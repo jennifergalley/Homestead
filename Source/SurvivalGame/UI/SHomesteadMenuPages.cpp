@@ -697,6 +697,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 const FString ChoiceName = Id == 0 ? HomesteadLook::MetaHairName(Value)
                     : Id == 1 ? HomesteadLook::HairColorName(Value) : Id == 2 ? HomesteadLook::SkinToneName(Value)
                     : Id == 3 ? HomesteadLook::EyeColorName(Value) : Id == 4 ? HomesteadLook::TunicColorName(Value)
+                    : Id == 6 ? (Value == 0 ? TEXT("Shown") : TEXT("Hidden"))
                     : HomesteadLook::OutfitName(Value);
                 const auto Choose = [this, Index, Id, Value]()
                 {

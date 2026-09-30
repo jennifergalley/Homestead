@@ -71,6 +71,10 @@ public:
     float WalkClipSpeed() const { return bMetaHumanActive ? 209.9f : 120.0f; }
     float SprintClipSpeed() const { return bMetaHumanActive ? 524.8f : 300.0f; }
     void SetAppearancePreview(bool Enabled);
+    // Shows the leather backpack on her back (the controller mirrors Simulation state each tick).
+    void SetBackpackShown(bool bShown);
+    // Whether Props' backpack mesh is imported (the upgrade and its toggle work without it).
+    bool HasBackpackMesh() const { return Backpack != nullptr; }
     // The Appearance page's own camera controls: orbit her (degrees) and zoom (+ closer, in wheel steps).
     void OrbitAppearance(float Yaw, float Pitch);
     void ZoomAppearance(float Steps);
@@ -383,6 +387,10 @@ private:
     UPROPERTY() TObjectPtr<UStaticMesh> HarvestProduceMesh;
     // The forage pouch on her right hip (shown on the MetaHuman heroine).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> ForagePouch;
+    // The leather backpack on her back when she owns it and shows it (SetBackpackShown); null until
+    // Props' mesh exists.
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Backpack;
+    bool bBackpackShown = false;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CordBelt;
     // The pouch hangs from the belt and lies on the outside of her right thigh, so it swings with
     // the thigh (forward and back about the belt, out and in about the hip) once her pose is final.

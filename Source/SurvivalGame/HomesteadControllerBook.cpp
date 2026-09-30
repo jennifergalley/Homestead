@@ -282,6 +282,10 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
                 Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), TEXT("Blue, green, hazel or grey. The view moves close to her face while you choose.")});
         Result.Add({4, FString::Printf(TEXT("Tunic dye: %s"), HomesteadLook::TunicColorName(Appearance.TunicColor)), TEXT("A color choice for the current original outfit.")});
         Result.Add({5, FString::Printf(TEXT("Outfit: %s"), HomesteadLook::OutfitName(Appearance.Outfit)), TEXT("Cosmetic linen choices.")});
+        // Only once she owns it; hiding it is a look, and she can still carry as much.
+        if (State().leatherBackpack)
+            Result.Add({6, FString::Printf(TEXT("Backpack: %s"), State().backpackShown ? TEXT("Shown") : TEXT("Hidden")),
+                TEXT("Show or hide the leather backpack on her back. It holds as much either way.")});
     }
     else
     {
@@ -371,7 +375,7 @@ int32 AHomesteadController::AppearanceChoiceCount(int32 Id)
     case 0: return HomesteadLook::MetaHairCount;
     case 1: return HomesteadLook::HairColorCount;
     case 2: case 3: case 4: return 4;
-    case 5: return 2;
+    case 5: case 6: return 2;
     default: return 0;
     }
 }
@@ -386,6 +390,7 @@ int32 AHomesteadController::AppearanceChoice(int32 Id) const
     case 3: return Appearance.EyeColor;
     case 4: return Appearance.TunicColor;
     case 5: return Appearance.Outfit;
+    case 6: return State().backpackShown ? 0 : 1;
     default: return 0;
     }
 }
@@ -404,6 +409,14 @@ void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
     if (Count <= 0 || Value < 0 || Value >= Count) return;
     MenuFocusAppearance(Id);
     if (AppearanceChoice(Id) == Value) return;
+    if (Id == 6)
+    {
+        // Saved with the game (Simulation/HomesteadBackpack.h); the character picks it up each tick.
+        const auto Result = Sim.SetBackpackShown(Value == 0);
+        if (!Result) Notify(Result);
+        else PlayEffect(UIClick, 0.08f);
+        return;
+    }
     FHomesteadAppearance Next = Appearance;
     switch (Id)
     {

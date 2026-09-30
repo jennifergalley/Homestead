@@ -1,4 +1,5 @@
 // Portable tests for the item catalogue, money and shops.
+#include "HomesteadBackpack.h"
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
 #include "HomesteadHoldings.h"
@@ -270,6 +271,73 @@ void BuyBackAndCapacity()
     CHECK(sim.UsedCapacity() == InventoryCapacity);
     const auto full = sim.Buy(store.shop, Item::Bread, 1, false, store.customer);
     CHECK(!full.ok && full.code == ResultCode::Capacity);
+}
+
+void LeatherBackpackUpgrade()
+{
+    Store store = OpenStore();
+    auto& sim = store.sim;
+    CHECK(sim.PackCapacity() == InventoryCapacity && !sim.GetState().leatherBackpack);
+    CHECK(Backpack::Offered(sim.GetState(), ShopKind::GeneralStore) && Backpack::Price == 1500);
+    const std::string before = sim.Serialize();
+    // No section until she owns one, so a new game saves exactly as before.
+    CHECK(before.find(std::string("\n") + Backpack::SaveTag + " ") == std::string::npos);
+    // 1,000 coins isn't enough; nothing changes.
+    const std::uint64_t revision = sim.GetRevision();
+    const auto poor = sim.BuyBackpack(store.shop, store.customer);
+    CHECK(!poor.ok && poor.message == "That costs 1,500 coins; you have 1,000 coins." && sim.GetRevision() == revision);
+    CHECK(!sim.SetBackpackShown(false).ok && sim.Serialize() == before);
+    // Too far from the counter is refused too.
+    OK(sim.GrantMoney(1000));
+    CHECK(!sim.BuyBackpack(store.shop, {store.counter.x + 5000.0, store.counter.y}).ok);
+    // Bought once: 2,000 - 1,500 leaves 500, and her pack doubles.
+    const auto bought = sim.BuyBackpack(store.shop, store.customer);
+    OK(bought);
+    CHECK(bought.message == "Bought the leather backpack for 1,500 coins. You can carry 240 now.");
+    CHECK(sim.GetState().money == 500 && sim.GetState().leatherBackpack && sim.GetState().backpackShown);
+    CHECK(sim.PackCapacity() == 240 && !Backpack::Offered(sim.GetState(), ShopKind::GeneralStore));
+    const auto again = sim.BuyBackpack(store.shop, store.customer);
+    CHECK(!again.ok && sim.GetState().money == 500);
+    // She can carry 240, but not 241.
+    OK(sim.GrantItems(Item::Branch, 240 - sim.UsedCapacity()));
+    CHECK(sim.UsedCapacity() == 240);
+    CHECK(!sim.GrantItems(Item::Stone, 1).ok);
+    const auto full = sim.Buy(store.shop, Item::Bread, 1, false, store.customer);
+    CHECK(!full.ok && full.code == ResultCode::Capacity);
+    // Hiding it is a look only: capacity stays.
+    OK(sim.SetBackpackShown(false));
+    CHECK(!sim.GetState().backpackShown && sim.PackCapacity() == 240);
+    // Saved and loaded with a full 240 pack and the backpack hidden.
+    const std::string saved = sim.Serialize();
+    CHECK(saved.find(std::string("\n") + Backpack::SaveTag + " 1 0\n") != std::string::npos);
+    Simulation loaded;
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.GetState().leatherBackpack && !loaded.GetState().backpackShown && loaded.PackCapacity() == 240);
+    CHECK(loaded.UsedCapacity() == 240 && loaded.Serialize() == saved);
+    // An older save (no section) loads with the plain pack.
+    Simulation older;
+    older.SetPlacements(ProvisionalEstatePlacements());
+    OK(older.Deserialize(before));
+    CHECK(!older.GetState().leatherBackpack && older.GetState().backpackShown && older.PackCapacity() == InventoryCapacity);
+    // A 240-item pack without the backpack is refused as corrupt, not truncated.
+    std::string stripped = saved;
+    const std::string payload = saved.substr(saved.find('\n') + 1);
+    const std::string line = std::string(Backpack::SaveTag) + " 1 0\n";
+    const auto at = payload.find(line);
+    CHECK(at != std::string::npos);
+    {
+        const std::string trimmed = payload.substr(0, at) + payload.substr(at + line.size());
+        std::uint64_t hash = UINT64_C(14695981039346656037);
+        for (unsigned char c : trimmed) { hash ^= c; hash *= UINT64_C(1099511628211); }
+        std::istringstream header(saved.substr(0, saved.find('\n')));
+        std::string magic, version;
+        header >> magic >> version;
+        stripped = magic + " " + version + " " + std::to_string(trimmed.size()) + " " + std::to_string(hash) + "\n" + trimmed;
+    }
+    Simulation truncated;
+    truncated.SetPlacements(ProvisionalEstatePlacements());
+    CHECK(!truncated.Deserialize(stripped).ok);
 }
 
 void StockSellsDownEachMorning()
@@ -710,6 +778,7 @@ int main(int argc, char** argv)
     Run("rejected trades change nothing", RejectedTradesChangeNothing);
     Run("buy and eat a pasty", BuyAndEatAPasty);
     Run("buy back and pack capacity", BuyBackAndCapacity);
+    Run("the leather backpack upgrade", LeatherBackpackUpgrade);
     Run("her goods sell down each morning", StockSellsDownEachMorning);
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
     Run("no walk to town from town", NoWalkToTownFromTown);

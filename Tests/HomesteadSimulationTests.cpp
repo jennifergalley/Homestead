@@ -2499,7 +2499,8 @@ void PersistentWorldDropTransactions()
     malformed.worldDrops.push_back({malformed.nextId++, {MaxWorldCoordinate + 1, 0}, Item::Branch, 1, 0});
     UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
     malformed = clothing.GetState();
-    malformed.worldDrops.push_back({malformed.nextId, Home, Item::Branch, 121, 0});
+    // A world drop stack holds at most what the largest pack (the leather backpack) can.
+    malformed.worldDrops.push_back({malformed.nextId, Home, Item::Branch, MaxPackCapacity + 1, 0});
     ++malformed.nextId;
     UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
     malformed = clothing.GetState();

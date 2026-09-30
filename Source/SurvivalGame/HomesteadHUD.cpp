@@ -488,7 +488,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     Panel(X, Y, Width, Height, Pine);
     ProtectFeedback(TEXT("book-panel"), X, Y, Width, Height);
     Write(PC.BookTitle(), X + 34, Y + 24, 38, Ink);
-    const FString Capacity = FString::Printf(TEXT("Carried %d / %d  |  World paused"), PC.Simulation().UsedCapacity(), Homestead::InventoryCapacity);
+    const FString Capacity = FString::Printf(TEXT("Carried %d / %d  |  World paused"), PC.Simulation().UsedCapacity(), PC.Simulation().PackCapacity());
     MeasureBookLine(Capacity, 331, 19, TEXT("capacity"));
     Write(Capacity,
         X + Width - 365, Y + 37, 19, Muted);

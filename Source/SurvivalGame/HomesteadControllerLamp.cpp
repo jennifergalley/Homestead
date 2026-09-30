@@ -83,7 +83,7 @@ bool AHomesteadController::StartLampPickUp(int32 DropId)
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
     const auto* Lamp = Sim.SetDownLampDrop();
     if (!Avatar || !Lamp || Lamp->id != DropId || LampHandoff != ELampHandoff::None) return false;
-    if (Sim.UsedCapacity() >= Homestead::InventoryCapacity)
+    if (Sim.UsedCapacity() >= Sim.PackCapacity())
     {
         Notify(TEXT("Not enough pack space to pick up the lamp."), true);
         return true;
