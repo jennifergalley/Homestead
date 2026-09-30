@@ -122,15 +122,17 @@ resets simulation on hitch/pause/head jump; motion-velocity CVars use `.5/.4 -> 
 when safe, measure strand bounds, and validate any remedy across styles, LODs and simulation before a
 package. Existing hair reset guidance is not sufficient; no shipped claim.
 
-### Scheduled next quiet headless slot: code health
+### Overnight priority: split the four huge hot files
 
-After the emergency hair fix is verified/checkpointed and Props has stopped animation hot-file edits,
-Architecture takes the next quiet headless implementer slot for approved
-`improve-code-health-between-rounds`. First increment is only the smallest conflict-safe
-`EHandAction` table or a cold-file extraction, with native plus Editor/Game build and a handoff.
-Splitting the big controller/world translation units waits for an explicit all-lanes-merged window; no
-overlapping hot-file edits. Severe hair diagnosis and Jenny's active Shipping game remain higher
-priority, so no UE/UBT runs while she plays and no code-health delivery claim yet.
+**Jenny direct decision (2026-09-29 20:34):** split
+`Controller.cpp`, `World.cpp`, `Character.cpp` and `UI/SHomesteadMenu.cpp` overnight ASAP. This
+supersedes the earlier EHandAction-first plan. Architecture has a read-only inventory now; its
+exclusive edit window begins only after Props checkpoints/commits the emergency hair source work.
+
+Menu and Water pause edits to those four files. Architecture stops on clean per-feature pure-move
+commits with verification; Integration reserves sequential merge, native and Editor/Game build after
+Jenny's game exits. No UE/UBT/UAT runs while Shipping PID 26828 plays under memory pressure. Hair
+retains priority for the visual fix after its checkpoint; hotbar and garden work remain paused.
 
 ### Development firewall prompts / offline Shipping candidate
 
