@@ -162,22 +162,23 @@ source/main verification only, **not a player Shipping delivery**; the verified 
 unchanged. **World verified integration gate `main` `4f9f6473`:** source move
 `cc20cee5` + `e7b7101b` + `2594e868` + `1bd7d555` plus pure-move include/helper fix `ca829f93`
 moves `HomesteadWorld.cpp` from 4,962 to about 188 lines, 71/71 bodies; native Release 9/9 and
-Editor/Game Unity pass with no intended save/placement/behavior change. **Menu source-only next gate
-`801c0329`:**
-`UI/SHomesteadMenu.cpp` moves from 3,206 to about 270 lines, 96/96 bodies. **Character
-`5811cb9` + `20dd44f3`:** cherry-picks hair fix `95f4bfc3`, moves `HomesteadCharacter.cpp` from
+Editor/Game Unity pass with no intended save/placement/behavior change. **Menu verified integration
+gate `main` `db414560`:** source move `801c0329` moves `UI/SHomesteadMenu.cpp` from 3,206 to about
+270 lines, 96/96 bodies; native Release 9/9 and Editor+Game Unity pass. **Character next gate
+`20dd44f3` + `6b77733d`:** hair runtime fix is already on main; Character moves from
 2,833 to 173 lines, 92/92 bodies, and keeps `LoadMetaHumanStack` / `ApplyMetaHumanLook` /
 `UpdateHairMotion` at the exact hair-fix baseline, including one `LogHomesteadHair` and two
-`ResetSimulation` calls. Menu/Character body-identity/diff checks are clean but have **no
-native/Editor/Game compile**; they remain partial and unshipped.
+`ResetSimulation` calls. Character body-identity/diff checks are clean but have **no
+native/Editor/Game compile**; it remains partial and unshipped.
 
 Static-linkage followups are also source-only: Controller `2354d801` adds Map/Capsule includes; World
 `e7b7101b` adds the Weather include and qualifies `Cloth` to avoid a Unity name collision with
 `HomesteadGeneralStore`. Body-identity checks remain intact.
 
-Menu/Character remain Architecture's source lock. The copied-save hair preview is complete but
-inconclusive. Integration now has the sole UBT slot to verify **Menu only** next (native Release plus
-Editor/Game unity), returns a base SHA, then advances Character.
+Character remains Architecture's source lock. The copied-save hair preview is complete but
+inconclusive; catastrophic geometry cure remains unproven. Integration now has the sole UBT slot to
+verify **Character only** next (native Release plus Editor/Game unity), returning a base SHA before
+any further work. None of these source refactors changes the Shipping player build.
 
 ### Development firewall prompts / offline Shipping candidate
 
