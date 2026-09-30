@@ -88,6 +88,16 @@ bramble syncs separately; Water remains paused. Partial bramble/sapling/under-ti
 gauge/store card, and Water no-pail prompt/lake trail/night-light work are excluded. The orchestrator
 continues to enforce the three-hands-on and two-Unreal-process caps.
 
+**Integration local validation batch (unshipped):** on local `main` `50b2+`, Integration applied Water
+no-pail `20dd9cd1` + `069e493a` and forage freeze `1010aa2e`; Props bramble
+`1deb02ab` / `e37288ef` / `4d8bfecc`, sprint `7475b435`, Hoe hint `391f08f7`, Bed-v2 `aa375409`;
+and Menu Store `1b2b97eb` + pail gauge `9d5da35d`. Native passes 9/9, forage-id Python passes 7/7,
+and Editor/Game builds are green. The exclusive editor now runs exact pail, Store card,
+bramble/sapling/tier, sprint, Hoe-hint and Bed PIE checks. **No push or package is authorized yet**;
+Integration reports per-commit pass/fail after editor close, then the orchestrator decides. Menu pickup
+`b2a49e36` + `cb3f40c7` remain excluded. Old canes-bed deconstruction refunding Hay is the intentional
+current-cost compatibility behavior.
+
 ## 4 PM playable build
 
 **[playtest] ready:** gameplay `9175e34b`, packaged from `main` `9a409e07` (including the
@@ -343,17 +353,18 @@ Props owns core compatibility and Menu the UI. Cover v12/v13 plus 0/1/6/7/1200, 
 no pail and round-trip cases. Stable per-pail IDs/tagged migration is a separate large follow-up.
 Prove packaged lake fill before calling the loop accepted.
 
-**Menu pail gauge partial `9d5da35d`:** native Release 9/9 (economy 14 / scenario 573), no UE
-compile/PIE or delivery claim. `Homestead::PresentPail` renders carried-pail hotbar Fill as
+**Menu pail gauge partial `9d5da35d`:** native Release 9/9 (economy 14 / scenario 573), 1080p PIE
+only, not ready or shipped. `Homestead::PresentPail` renders carried-pail hotbar Fill as
 `min(Water, 6) / 6`, blue when charged and red when empty. With exactly one pail and pack Water <=6,
 it hides the pack Water tile/detail as `Water N/6`; zero/multiple pails or overflow >=7 retain the
 tile. Chest/drop Water always remains visible; stowing/dropping the pail reveals the pack tile. v12/v13
 positional-stock/save mechanics remain unchanged.
 
-The native cases cover 0/1/6/7/1200, 0/1/2 pails and round-trip nine. Cherry-pick after the
-`a4bb831f` travel test hunk; it is independent of the pickup popup. Integration still needs Editor
-compile plus PIE gauge refill/water/chest/drop/F5/F9 and the copied-save packaged pail repro. The
-misleading fill prompt is unchanged.
+PIE verifies hotbar full blue 6/empty, pack 5 Water hidden and legacy 9 tile/full bar. Missing:
+hover `Water N/6` detail, 6→5 watering, chest stow/drop and F5/F9 in PIE (native covers them).
+Cherry-pick after the `a4bb831f` travel test hunk; it is independent of the pickup popup. Integration
+now owns editor/UAT to cherry-pick this, Store Map and Water's pail-prompt pair for a bounded next
+package only after targeted checks. The misleading fill prompt is unchanged here.
 
 **Water pail-prompt partial `20dd9cd1`:** native 10/10, no UE or delivery claim. `FocusActions`
 shows carried empty fill / full pail full / chest pail take it / no pail requires one, and
@@ -450,15 +461,16 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
-- **Pickup gain popup** — **Menu headless partial `b2a49e36`, not ready or shipped.** Based on common
-  Simulation revision gains across pack, owned chests and drops, it suppresses moves/reloads and Water,
-  then presents a brass/cream `+N` right of the projected chest for 2.6 visible seconds (maximum four)
-  while book/shop hold. It removes `Selected quantity stored/taken`, garment and drag success notices;
-  errors remain.
+- **Pickup gain popup** — **Menu partial `b2a49e36` + `cb3f40c7`, not ready or shipped.** Based on
+  common Simulation revision gains across pack, owned chests and drops, it suppresses moves/reloads and
+  Water, then presents a brass/cream `+N` right of the projected chest for 2.6 visible seconds
+  (maximum four) while book/shop hold. It removes `Selected quantity stored/taken`, garment and drag
+  success notices; errors remain.
 
-  The Editor module build passed, but no PIE 720p/4K or gather/harvest/craft/buy visual route ran.
-  Duplicate harvest/craft success toasts remain. The branch is rooted on `769500a5`; Menu released its
-  hands-on slot for Integration's core package priority.
+  Editor build and 1080p PIE verify `+5 Branch`, `+4 Stone` and `+1 Axe craft` right of the heroine,
+  with the craft toast removed. Berry popup is uncaptured; harvest/shop plus 720p/4K remain unverified,
+  and duplicate harvest/craft success toasts remain. The branch is rooted on `769500a5`; Menu released
+  its hands-on slot for Integration's core package priority.
 - **Zero-stock hotbar seed/food items** — **Menu plus Props Simulation, pending and not shipped.**
   `HotbarSnapshot` currently preserves a pinned item and icon even after `Sim.Count(pack)==0`, making
   planted/stored turnip seeds and strawberry runners look available. Hide zero-count consumable
@@ -618,17 +630,17 @@ not claim early Energy is fully solved.
   200 cm-radius swing probe: a dead-ahead 285 cm cane can be in Simulation reach but show no prompt or
   swing target, while a nearer weed/grass steals focus.
 
-  **Props headless partial:** `bcf29b85` makes aim focus and swing share a forward-biased 300 cm
-  tool-kind target; `649336f4` makes worn Sapling one logical clear with two physical blows; and
-  `bccb9310` refuses under-tier targets without animation or SFX. Native 9/9 covers an aimed 285 cm
+  **Props rebased headless partial:** branch `jennifergalley-bramble-focus-main` replays the three
+  commits as `1deb02ab` (forward-biased 300 cm aim focus/swing target), `e37288ef` (worn Sapling one
+  logical clear with two physical blows), and `4d8bfecc` (quiet under-tier refusal). Native 9/9 covers an aimed 285 cm
   cane versus nearer weed/grass, behind/301 cm refusal, scythe choosing weed, gated iron thicket,
   save, and one worn-Sapling 3–4 Branch + 1 Kindling / 1.5 Energy yield once through reload.
 
-  Food's test hunk conflicts with a naive cherry-pick, so Props supplied pre-resolved
-  food+bramble `42a63b8f`, native 9/9 with a dry-run clean merge on `main` `77ff5837`; Integration
-  must avoid duplicate food commits if they are already on main. Required before `[ready]`: PIE at
-  285 cm, a two-blow/one-logical sapling, silent under-tier refusal and F5/F9. This remains a plausible
-  cause, not proof for Jenny's pictured cane.
+  Old branches remain preserved; no reset/force occurred. Props' trial merge of current main,
+  bramble-main, sprint `7475b435`, Hoe hint `391f08f7` and Bed-v2 is clean/native 9/9. Required
+  before `[ready]`: UE/editor, packaged validation, PIE at 285 cm, a two-blow/one-logical sapling,
+  silent under-tier refusal and F5/F9. This remains a plausible cause, not proof for Jenny's pictured
+  cane.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` shipped in the 4 PM playable build.** Clearable
   slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
@@ -696,8 +708,12 @@ not claim early Energy is fully solved.
   retired Fiber text is also stale). Props replaces it with **4 Branch + 4 Hay**: the same eight units,
   with Hay from TallGrass using a worn scythe at 1–2 per tuft and no iron-tier upgrade. Existing built
   beds plus v12/v13 saves, Piece IDs and Item IDs stay unchanged; other cane recipes stay unchanged.
-  Props now holds a headless separate Bedroll slice for the change, with native proof required before
-  UE compile/PIE. Update the canonical progression doc only after the code lands.
+  **Bed-v2 partial `aa375409`:** native 9/9, one commit off `main` `46daf9dd`, with exact
+  requirements and v12 built bed/canes unchanged in saves. `BedrollTakesHay` covers missing-Hay refusal
+  and heritage; FullLoop has Hay but UE pack total is unverified. Compatibility tradeoff: deconstructing
+  an old canes bed refunds 4 Hay because normal current-cost deconstruct has no per-instance material
+  provenance - this is intentional, not a stock migration. UE/editor/package proof remains pending.
+  Update the canonical progression doc only after code lands.
 - **Starter rack placement save safety** — **Props urgent implementation guard; not shipped.** A new
   rack at placement ID `520006` must append after every existing placement section, not insert into an
   earlier numeric range and renumber later `550xxx` saved resources. Before `[ready]`, require a
@@ -870,12 +886,14 @@ not claim early Energy is fully solved.
   **Water** owns the generated runtime route and endpoints, **Architecture** the read-only trace,
   **Props** the original signs and **Menu** the shared travel/map UI; signs are still not wired.
 
-  **Store Map card partial `1b2b97eb`:** native 9/9 (economy 15 / scenario 588), no UE build/PIE or
-  delivery claim. Within 15 m of counter/step and 45 m of town square, Town/Store cards say already
+  **Store Map card `1b2b97eb` is `[ready]`, not merged or shipped:** native 9/9 (economy 15 /
+  scenario 588) and PIE verify counter/square/gateway plus Manor-from-store clock no-change. Within
+  15 m of counter/step and 45 m of town square, Town/Store cards say already
   there/in town rather than offering fake `X walk there 23 min`; T/X/click changes neither clock nor
   state. Manor travel from store remains available; street/gateway Town travel remains. Cherry-pick
   only this commit - not Menu's whole synced branch `d171526d` with unrelated partial dye/Appearance,
-  pickup and pail work. It is excluded from package `a2607437`.
+  pickup and pail work. It is excluded from package `a2607437`, but is included in Integration's
+  bounded next-package validation set.
 - **Wait for opening** — **Menu `88180744` shipped in the 4 PM playable build.** At a
   closed 19:00 store, B cancels with no time change; then A+A advances to the next 08:00 and returns
   Pascoe's Talk interaction. Follow-on `643a857a` rejects a candidate that would doze during
