@@ -173,9 +173,20 @@ void AHomesteadSmokeTest::PrepareHotkeyChecks()
         Action(EKeys::F9, true);
         Action(EKeys::F5, false);
         Action(EKeys::F9, true);
-        for (int32 Page = 1; Page <= 4; ++Page)
-            Add(TEXT("Controller opens Settings for ordinary menu save/load"),
+        // A load closes the book and the Action helper's Start then opens Settings.
+        Add(TEXT("The load's Start leaves Settings open"), []() {},
+            [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 4; });
+        // The five field-book tabs in order (Pack 0, Craft 1, Build 2, Map 7, Look 6; the Guidebook, 3,
+        // is retired). Settings (4) isn't a tab: RB from it enters the cycle at Craft, and after the
+        // round B closes the book and Start opens Settings again.
+        for (const int32 Page : {1, 2, 7, 6, 0})
+            Add(TEXT("Controller steps through the field-book tabs"),
                 [this]() { Tap(EKeys::Gamepad_RightShoulder); }, [this, Page]() { return Controller->BookPage() == Page; });
+        Add(TEXT("Controller B closes the book"), [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+            [this]() { return !Controller->IsBookOpen(); });
+        Add(TEXT("Controller opens Settings for ordinary menu save/load"),
+            [this]() { Tap(EKeys::Gamepad_Special_Right); },
+            [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 4; });
         Add(TEXT("Focus semantic Save progress in native Settings"),
             [this]()
             {
