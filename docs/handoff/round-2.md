@@ -148,6 +148,10 @@ normalization; `git diff --cached --check` is clean. **World source-only checkpo
 diff-check clean but have **no native/Editor/Game compile** while Props owns editor/UBT. They are
 partial and unshipped.
 
+Static-linkage followups are also source-only: Controller `2354d801` adds Map/Capsule includes; World
+`e7b7101b` adds the Weather include and qualifies `Cloth` to avoid a Unity name collision with
+`HomesteadGeneralStore`. Body-identity checks remain intact.
+
 Controller/World/Menu remain Architecture's source lock; Character remains Props' hair lock.
 Integration waits for Props editor close, then cherry-picks and verifies each source move sequentially
 (native Release plus Editor/Game unity), returning a base SHA between commits before advancing.
