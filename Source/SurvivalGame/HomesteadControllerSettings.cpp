@@ -23,6 +23,7 @@ using HomesteadControllerConfig::CameraInvertYKey;
 using HomesteadControllerConfig::CameraSensitivityKey;
 using HomesteadControllerConfig::CameraSettingsSection;
 using HomesteadControllerConfig::CaptureCameraConfig;
+using HomesteadControllerConfig::FCameraConfigSnapshot;
 using HomesteadControllerConfig::PersistBoolProperty;
 using HomesteadControllerConfig::PersistFloatProperty;
 using HomesteadControllerConfig::PersistIntProperty;
