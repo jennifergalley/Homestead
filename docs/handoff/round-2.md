@@ -344,17 +344,18 @@ Props owns core compatibility and Menu the UI. Cover v12/v13 plus 0/1/6/7/1200, 
 no pail and round-trip cases. Stable per-pail IDs/tagged migration is a separate large follow-up.
 Prove packaged lake fill before calling the loop accepted.
 
-**Menu pail gauge partial `9d5da35d`:** native Release 9/9 (economy 14 / scenario 573), no UE
-compile/PIE or delivery claim. `Homestead::PresentPail` renders carried-pail hotbar Fill as
+**Menu pail gauge partial `9d5da35d`:** native Release 9/9 (economy 14 / scenario 573), 1080p PIE
+only, not ready or shipped. `Homestead::PresentPail` renders carried-pail hotbar Fill as
 `min(Water, 6) / 6`, blue when charged and red when empty. With exactly one pail and pack Water <=6,
 it hides the pack Water tile/detail as `Water N/6`; zero/multiple pails or overflow >=7 retain the
 tile. Chest/drop Water always remains visible; stowing/dropping the pail reveals the pack tile. v12/v13
 positional-stock/save mechanics remain unchanged.
 
-The native cases cover 0/1/6/7/1200, 0/1/2 pails and round-trip nine. Cherry-pick after the
-`a4bb831f` travel test hunk; it is independent of the pickup popup. Integration still needs Editor
-compile plus PIE gauge refill/water/chest/drop/F5/F9 and the copied-save packaged pail repro. The
-misleading fill prompt is unchanged.
+PIE verifies hotbar full blue 6/empty, pack 5 Water hidden and legacy 9 tile/full bar. Missing:
+hover `Water N/6` detail, 6→5 watering, chest stow/drop and F5/F9 in PIE (native covers them). 
+Cherry-pick after the `a4bb831f` travel test hunk; it is independent of the pickup popup. Integration
+now owns editor/UAT to cherry-pick this, Store Map and Water's pail-prompt pair for a bounded next
+package only after targeted checks. The misleading fill prompt is unchanged here.
 
 **Water pail-prompt partial `20dd9cd1`:** native 10/10, no UE or delivery claim. `FocusActions`
 shows carried empty fill / full pail full / chest pail take it / no pail requires one, and
@@ -451,15 +452,16 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
-- **Pickup gain popup** — **Menu headless partial `b2a49e36`, not ready or shipped.** Based on common
-  Simulation revision gains across pack, owned chests and drops, it suppresses moves/reloads and Water,
-  then presents a brass/cream `+N` right of the projected chest for 2.6 visible seconds (maximum four)
-  while book/shop hold. It removes `Selected quantity stored/taken`, garment and drag success notices;
-  errors remain.
+- **Pickup gain popup** — **Menu partial `b2a49e36` + `cb3f40c7`, not ready or shipped.** Based on
+  common Simulation revision gains across pack, owned chests and drops, it suppresses moves/reloads and
+  Water, then presents a brass/cream `+N` right of the projected chest for 2.6 visible seconds
+  (maximum four) while book/shop hold. It removes `Selected quantity stored/taken`, garment and drag
+  success notices; errors remain.
 
-  The Editor module build passed, but no PIE 720p/4K or gather/harvest/craft/buy visual route ran.
-  Duplicate harvest/craft success toasts remain. The branch is rooted on `769500a5`; Menu released its
-  hands-on slot for Integration's core package priority.
+  Editor build and 1080p PIE verify `+5 Branch`, `+4 Stone` and `+1 Axe craft` right of the heroine,
+  with the craft toast removed. Berry popup is uncaptured; harvest/shop plus 720p/4K remain unverified,
+  and duplicate harvest/craft success toasts remain. The branch is rooted on `769500a5`; Menu released
+  its hands-on slot for Integration's core package priority.
 - **Zero-stock hotbar seed/food items** — **Menu plus Props Simulation, pending and not shipped.**
   `HotbarSnapshot` currently preserves a pinned item and icon even after `Sim.Count(pack)==0`, making
   planted/stored turnip seeds and strawberry runners look available. Hide zero-count consumable
@@ -875,12 +877,14 @@ not claim early Energy is fully solved.
   **Water** owns the generated runtime route and endpoints, **Architecture** the read-only trace,
   **Props** the original signs and **Menu** the shared travel/map UI; signs are still not wired.
 
-  **Store Map card partial `1b2b97eb`:** native 9/9 (economy 15 / scenario 588), no UE build/PIE or
-  delivery claim. Within 15 m of counter/step and 45 m of town square, Town/Store cards say already
+  **Store Map card `1b2b97eb` is `[ready]`, not merged or shipped:** native 9/9 (economy 15 /
+  scenario 588) and PIE verify counter/square/gateway plus Manor-from-store clock no-change. Within
+  15 m of counter/step and 45 m of town square, Town/Store cards say already
   there/in town rather than offering fake `X walk there 23 min`; T/X/click changes neither clock nor
   state. Manor travel from store remains available; street/gateway Town travel remains. Cherry-pick
   only this commit - not Menu's whole synced branch `d171526d` with unrelated partial dye/Appearance,
-  pickup and pail work. It is excluded from package `a2607437`.
+  pickup and pail work. It is excluded from package `a2607437`, but is included in Integration's
+  bounded next-package validation set.
 - **Wait for opening** — **Menu `88180744` shipped in the 4 PM playable build.** At a
   closed 19:00 store, B cancels with no time change; then A+A advances to the next 08:00 and returns
   Pascoe's Talk interaction. Follow-on `643a857a` rejects a candidate that would doze during
