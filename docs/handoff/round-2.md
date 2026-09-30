@@ -187,6 +187,14 @@ hotbar editor work remains paused. Integration will make one scheduled 23:25 che
 old-only probe only if physical free memory is at least 6 GB and no other Unreal process exists;
 otherwise it reports the blocker and releases Menu's slot.
 
+**23:25 result:** repeated read-only checks found only 4.95–5.0 GB free, below the 6 GB threshold.
+No old far-rear body LOD 2/3 / groom mesh LOD 5/7 process launched, no user desktop/save/shortcut was
+touched, and Integration released the UE slot with no rapid retry or user-process kill. The
+transfer-bound Legacy01 helmet geometry/mesh-card hypothesis remains untested; no new hair code or
+Shipping package follows from it. If the visual bug recurs, ask Jenny for the exact hairstyle,
+camera distance/zoom, preceding action and a short screen recording so the missing scenario can be
+reproduced deliberately.
+
 ### Overnight priority: split the four huge hot files
 
 **Jenny direct decision (2026-09-29 20:34):** split
