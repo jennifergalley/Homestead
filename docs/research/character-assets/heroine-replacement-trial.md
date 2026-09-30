@@ -51,7 +51,8 @@ and game-camera cost are established.
 playable slice** and its integrated build: one trial heroine, planted walk/stop,
 distinct sprint, held Knife and truthful Knife action, then Craft/hotbar
 presentation. This is the implementing owner for overlapping code and assets.
-It keeps the sprint contract (Shift/L3, 300 cm/s, 0.35 Energy/sec, reserve 10)
+It keeps the final sprint contract (toggle Shift/L3, 300 cm/s, zero
+sprint-specific Energy cost, refuse/auto-off at Energy <=10 and no auto-resume)
 from `improve-contextual-feedback-and-sprint`; it does not claim that plan's
 contextual HUD or full regression/promote tasks. Its sprint tasks 3.1-3.4
 remain unchecked pending their own exact evidence.
