@@ -304,6 +304,38 @@ re-emits the data; to move the route, restore the heightfield from before it and
 `scatter.py` clears a fresh scatter off it after the lake. Set `HOMESTEAD_TERRAIN_WORK` to your work folder
 (the script keeps its `game_reshaped_4033.npy` in step round the route).
 
+### Beach belt (`beach_belt.py`)
+
+A dry sand belt along the foot of the estate's south cliffs, from the west boundary (y = -1150 m) to the
+cove's west headland (y = -615 m), fading over 25 m at each end (`openspec/changes/widen-estate-beach`).
+It's built seaward of the old waterline and only ever raises ground, so the cliff faces stay as they were:
+a berm 1.7 m above the sea at the cliff foot falls to the swash line (0.3 m) over the local dry width, then a
+1 in 10 foreshore runs down to the seabed. The width is 17-38 m by design (wider in bays, narrower off
+headlands, varied along the coast from seeded knots, and smoothed over 6 m once carried out to sea so
+the berm has no scarp where the nearest shore switches); measured from the cliff foot to the swash line, 50 m
+sections have medians of 24-36 m (overall 30 m). `Tests/EstateBeachTests.py` checks the graded belt: dry
+sand across every 10 m of coast, one walkable stretch from the headland to the west boundary, no bank
+steeper than 1 in 2.9 over 1 m in the sand and swash zone, and the river mouth open. It keeps 9 m (ramping over 6 m) off the river's line and
+its run to the sea, so the mouth stays open.
+
+```powershell
+python Scripts\Terrain\beach_belt.py --dry     # design and measure only
+python Scripts\Terrain\beach_belt.py           # grade once ("beach.graded"); later runs only say so
+python -m unittest Tests/EstateBeachTests.py   # the graded belt
+python Scripts\Terrain\river_channel.py        # re-seats the channel (a no-op unless the belt reached it)
+python Scripts\Terrain\weightmaps.py           # the new sand paints as Beach (low ground by the water)
+python Scripts\Terrain\bake_ground.py
+python Scripts\Map\bake_estate_map.py
+```
+
+It raised 119,896 vertices (r16 rows 842-1425, columns 1196-1540, up to 5.0 m over the old seabed). In the
+editor: `ApplyEstateHeightfield` and `ApplyEstateWeightmaps` over that rectangle, then `bake_ocean.py` +
+`build_ocean.py` (the shore/depth texture must see the new waterline, or the swell treats the new
+shallows as deep water), `place_water.py`, `build_ground.py` and `ImportEstateMap`. It copies the graded
+heights into the work npy (`HOMESTEAD_TERRAIN_WORK`) wherever it raised the ground, so a work folder
+that already has the belt stays right. Once graded it neither redesigns nor re-measures (the design reads the
+old waterline, which the belt has moved), even with `--dry`.
+
 ## Ground and meadow (`bake_ground.py`, `build_ground.py`, `build_landscape_material.py`)
 
 `bake_ground.py` (about 90 s) reads the heightfield, the paint-layer weights, `estate_layout.json` and

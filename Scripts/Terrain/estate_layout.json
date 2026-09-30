@@ -10125,5 +10125,19 @@
     ]
    ]
   }
- ]
+ ],
+ "beach": {
+  "graded": true,
+  "yWest": -1150.0,
+  "yEast": -615.0,
+  "taper": 25.0,
+  "top": 1.7,
+  "swash": 0.3,
+  "foreshoreGrade": 0.1,
+  "dryWidth": [
+   17.0,
+   38.0
+  ],
+  "seed": 2026
+ }
 }
