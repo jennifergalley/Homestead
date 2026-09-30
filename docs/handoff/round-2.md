@@ -590,10 +590,18 @@ requirement.
   unrun. Assignments are references, never stock moves: replacement swaps, a move clears the source,
   bindings stay unique, cancel changes nothing and chest goods remain ineligible until taken.
 
-  **Gap:** the strip currently hides while a chest is open, but Jenny requires it on every Inventory
-  screen. Menu must follow up with a full-width chest-open strip, then prove 720p/4K fit and pad
-  navigation. README/DESIGN changes in the UI branch are shared; Docs verifies and owns canonical
-  updates only after code lands. This is excluded from the aim/rain/Shipping delivery.
+  **Chest-mode follow-up `a61a1c30`:** separate pushed commit atop the layout/controller/UI chain,
+  native layout seven scenarios / 80, no UE/UBT or delivery claim. The same editable 10-slot strip
+  appears on Page 0 with or without chest; chest mode is centered below both grids as **Hotbar** using
+  pack items only. Chest rows show rust/refused `Take it to your pack first...`; pack rows assign in
+  chest view. Pad Down goes grid -> strip, while Up returns to the exact origin tile.
+
+  `NativeMenuTest` chest automation is scripted for real mouse drag, slot swap, pad/Y/B,
+  save-form reload and a GEOMETRY line, but is unrun. Full 10 suites defer until after UAT (the last
+  full 10/10 predates this UI-only correction). Estimated 640 px strip fits a ~1250 px book and the
+  four-tile-row chest scroll is ~390 logical px; actual PIE 720p/4K, editor compile and pad navigation
+  remain required. README/DESIGN updates are shared-branch material; Docs verifies canonical guidance
+  only after code lands. This is excluded from the aim/rain/Shipping delivery.
 - **Human-readable save confirmation time** — **Menu, pending and not shipped.**
   `Controller::MenuSaveStatus` currently shows an ISO-like UTC timestamp. Present it as a localized,
   human-readable local date/time (for example, `September 28, 2026 12:01 PM`) without changing the
