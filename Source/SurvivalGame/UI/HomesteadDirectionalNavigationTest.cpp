@@ -101,7 +101,12 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         Open(0);
     };
     Add(TEXT("Directional navigation starts with actual native item focus"),
-        [this, Open, Before, Location]() { Open(0); *Before = Controller->Sim.Serialize(); *Location = Controller->GetPawn()->GetActorLocation(); },
+        [this, Open, Fixture, Before, Location]()
+        {
+            // A fresh woodland can open on an empty pack; gather a little real stock first (disclosed fixture).
+            if (Controller->Sim.GetLayout(0)->empty()) Fixture(2); else Open(0);
+            *Before = Controller->Sim.Serialize(); *Location = Controller->GetPawn()->GetActorLocation();
+        },
         [this, Focused, ColumnCount, PortraitRotation, PortraitPose]()
         {
             *ColumnCount = Controller->NativeMenu->GetContentColumnCount();
@@ -275,13 +280,27 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
     Add(TEXT("Only the actual final scrolled row exits downward, onto the hotbar strip"),
         [this]() { Tap(EKeys::Gamepad_DPad_Down); },
         [this, Focused, Before]() { return Focused(TEXT("Hotbar")) && Controller->Sim.Serialize() == *Before; });
+    // The fixture stack may be the last tile (Right has nowhere to go); then step Up a row instead.
+    const auto StepLeft = MakeShared<bool>(false);
     Add(TEXT("Select a real stack for controller virtual drag"),
-        [this, Open, Before, SelectedId]()
+        [this, Open, Before, SelectedId, StepLeft]()
         {
-            Open(0); Tap(EKeys::Right);
+            // The disclosed fixture splits everything to single units; add one real stack of five.
+            if (!Controller->MenuRows().ContainsByPredicate([](const FHomesteadRow& Row)
+                { return Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.Quantity > 2; }))
+                if (!Controller->Sim.GrantItems(Homestead::Item::Stone, 5)) { Finish(false, TEXT("Could not grant the drag fixture stack.")); return; }
+            Open(0);
+            // The largest real pack stack (the disclosed fixture leaves the gathered stack first, the
+            // single-unit splits after it), so Right below still has a neighbour to move to.
+            int32 Best = 0, Most = 0;
+            for (const auto& Row : Controller->MenuRows())
+                if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.Quantity > Most)
+                { Best = Row.SubjectId; Most = Row.Quantity; }
+            if (Best) Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Best, 0);
+            const auto Rows = Controller->MenuRows();
+            *StepLeft = !Rows.IsEmpty() && Rows.Last().SubjectId == Best;
             *Before = Controller->Sim.Serialize();
-            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
-            *SelectedId = Subject ? Subject->SubjectId : 0;
+            *SelectedId = Best;
         },
         [this, Focused]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             return Focused(TEXT("Content")) && Subject && Subject->Quantity > 2; });
@@ -290,7 +309,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         [this, Before]() { return Controller->NativeMenu->IsVirtualDraggingItem()
             && Controller->Sim.Serialize() == *Before; });
     Add(TEXT("Directional focus moves while virtual drag remains transient"),
-        [this]() { Tap(EKeys::Gamepad_DPad_Right); },
+        [this, StepLeft]() { Tap(*StepLeft ? EKeys::Gamepad_DPad_Up : EKeys::Gamepad_DPad_Right); },
         [this, Before, SelectedId, Focused]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             return Focused(TEXT("Content")) && Controller->NativeMenu->IsVirtualDraggingItem()
                 && Subject && Subject->SubjectId != *SelectedId
@@ -371,10 +390,20 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         {
             const auto Now = Bindings();
             const int32 Pasty = static_cast<int32>(Homestead::Item::Pasty);
-            return !Controller->NativeMenu->IsPlacingOnHotbar() && Now.IsValidIndex(9) && Now[9] == Pasty
+            const bool Passed = !Controller->NativeMenu->IsPlacingOnHotbar() && Now.IsValidIndex(9) && Now[9] == Pasty
                 && Now.FilterByPredicate([Pasty](int32 Value) { return Value == Pasty; }).Num() == 1
                 && Controller->HotbarSnapshot()[9].Count == 2
                 && Controller->SelectedHotbarIndex() == *SelectedSlot && Controller->Sim.Serialize() == *Before;
+            if (!Passed)
+            {
+                FString Slots;
+                for (const int32 Value : Now) Slots += FString::Printf(TEXT("%d,"), Value);
+                Results.Add(FString::Printf(TEXT("HOTBAR_CHECK placing=%d focused_slot=%d region=%s slots=%s count9=%d selected=%d/%d stock_same=%d"),
+                    Controller->NativeMenu->IsPlacingOnHotbar(), Controller->NativeMenu->GetFocusedHotbarSlot(),
+                    *Controller->NativeMenu->GetFocusedRegionName(), *Slots, Controller->HotbarSnapshot()[9].Count,
+                    Controller->SelectedHotbarIndex(), *SelectedSlot, Controller->Sim.Serialize() == *Before));
+            }
+            return Passed;
         });
     Add(TEXT("A picks up slot 0, Left and A swap it with slot 9"),
         [this, Bindings, BindingsBefore]()
