@@ -2330,6 +2330,10 @@ void DirectSplitAndDeterministicSort()
 
     const int used = sim.UsedCapacity();
     const auto totals = sim.GetState().inventory;
+    // Sorting orders what lies below the hotbar row (HomesteadPackRow.h); empty the row first.
+    std::array<int, PackRowSize> noRow;
+    noRow.fill(-1);
+    OK(sim.ArrangePackRow(noRow));
     OK(sim.SortPack(sim.GetRevision()));
     CHECK(sim.UsedCapacity() == used && sim.GetState().inventory == totals);
     CHECK(sim.GetLayout(0)->size() == 7);

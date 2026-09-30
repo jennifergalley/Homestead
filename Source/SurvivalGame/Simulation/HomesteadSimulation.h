@@ -136,6 +136,19 @@ struct LayoutEntry
 };
 using InventoryLayout = std::vector<LayoutEntry>;
 
+// The hotbar is the first row of her pack (HomesteadPackRow.h): ten cells, each naming one of her
+// carried layout entries (a stack's group id, or a garment's id) or empty.
+constexpr int PackRowSize = 10;
+struct PackRowCell
+{
+    int groupId = 0;
+    int wearableId = 0;
+    bool Empty() const { return groupId == 0 && wearableId == 0; }
+    bool operator==(const PackRowCell& other) const { return groupId == other.groupId && wearableId == other.wearableId; }
+    bool operator!=(const PackRowCell& other) const { return !(*this == other); }
+};
+using PackRow = std::array<PackRowCell, PackRowSize>;
+
 struct Point { double x = 0.0; double y = 0.0; };
 using Inventory = std::array<int, ItemCount>;
 
@@ -304,6 +317,7 @@ struct State
     std::vector<WearableInstance> wearables;
     std::array<int, EquipmentSlotCount> equipment{};
     InventoryLayout inventoryLayout;
+    PackRow packRow{};
     Generation::WorldDescriptor world{};
     Generation::ChunkCoord activeChunk{};
     std::vector<ResourceEdit> resourceEdits;
@@ -569,7 +583,23 @@ public:
         std::uint64_t expectedRevision);
     Result ReorderEntry(int containerId, int index, int targetIndex, Point player, std::uint64_t expectedRevision);
     Result SplitHalf(int containerId, int groupId, Point player, std::uint64_t expectedRevision);
+    // Sorts her pack below the hotbar row; the row stays as she arranged it.
     Result SortPack(std::uint64_t expectedRevision);
+    // The hotbar row (HomesteadPackRow.h). Puts one of her carried stacks (or garment `wearableId`),
+    // from the row or below it, in `cell`: onto an empty cell it moves, onto the same item it
+    // merges, onto anything else the two swap places.
+    Result MoveToPackRow(int groupId, int wearableId, int cell, std::uint64_t expectedRevision);
+    // Moves what is in `cell` below the row: onto that stack (or garment) there, merging with the
+    // same item or else swapping; with no target (0, 0) to the end of her pack.
+    Result MoveFromPackRow(int cell, int targetGroupId, int targetWearableId, std::uint64_t expectedRevision);
+    // Takes `amount` of a chest stack straight into `cell` in one step: onto the same item it
+    // merges, otherwise it becomes that cell's stack and whatever was there moves below the row.
+    Result TransferGroupToPackRow(int chestId, int groupId, int amount, int cell, Point player,
+        std::uint64_t expectedRevision);
+    // Sets the row from item ids (-1 for empty): each cell takes her first carried stack of that item
+    // not already placed, or stays empty. For saves from before the row (their old pinned hotbar)
+    // and new games.
+    Result ArrangePackRow(const std::array<int, PackRowSize>& items);
     Result DropGroup(int groupId, int amount, Point position, Point player,
         std::uint64_t expectedRevision);
     Result DropWearable(int wearableId, Point position, Point player,

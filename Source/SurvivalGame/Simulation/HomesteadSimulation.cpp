@@ -5,6 +5,7 @@
 #include "HomesteadManor.h"
 #include "HomesteadLamp.h"
 #include "HomesteadOvergrowth.h"
+#include "HomesteadPackRow.h"
 #include "HomesteadSimulationDetail.h"
 
 #include <algorithm>
@@ -622,19 +623,31 @@ bool ReconcileLayout(State& state, int container)
     auto* layout = ContainerLayout(state, container);
     const auto* stock = ContainerStock(state, container);
     if (!layout || !stock) return false;
+    // Her pack's first row is the hotbar (HomesteadPackRow.h): gains and uses visit its cells first,
+    // and new stacks and garments take its first empty cell.
+    const bool pack = container == 0;
     layout->erase(std::remove_if(layout->begin(), layout->end(), [&](const LayoutEntry& entry) {
         if (entry.wearableId == 0) return false;
         const auto* item = Find(state.wearables, entry.wearableId);
         return !item || !InContainer(*item, container);
     }), layout->end());
+    std::vector<int> order;
+    if (pack) order = PackRowRules::FillOrder(state.packRow, *layout);
+    else
+    {
+        order.resize(layout->size());
+        for (int index = 0; index < static_cast<int>(order.size()); ++index) order[index] = index;
+    }
+    std::vector<LayoutEntry> arrivals;
     for (int i = 0; i < ItemCount; ++i)
     {
         int displayed = 0;
         for (const auto& entry : *layout)
             if (entry.wearableId == 0 && static_cast<int>(entry.item) == i) displayed += entry.quantity;
         int difference = (*stock)[i] - displayed;
-        for (auto& entry : *layout)
+        for (const int index : order)
         {
+            auto& entry = (*layout)[index];
             if (entry.wearableId != 0 || static_cast<int>(entry.item) != i) continue;
             if (difference > 0) { entry.quantity += difference; difference = 0; }
             else if (difference < 0)
@@ -648,6 +661,8 @@ bool ReconcileLayout(State& state, int container)
         {
             if (!CanAllocate(state.nextGroupId)) return false;
             layout->push_back({state.nextGroupId++, static_cast<Item>(i), difference, 0});
+            // The pail's water shows on the pail (HomesteadPail.h), never in a hotbar cell.
+            if (pack && static_cast<Item>(i) != Item::Water) arrivals.push_back(layout->back());
         }
     }
     layout->erase(std::remove_if(layout->begin(), layout->end(), [](const LayoutEntry& entry) {
@@ -658,7 +673,16 @@ bool ReconcileLayout(State& state, int container)
         if (!InContainer(item, container)) continue;
         const auto found = std::find_if(layout->begin(), layout->end(),
             [&](const LayoutEntry& entry) { return entry.wearableId == item.id; });
-        if (found == layout->end()) layout->push_back({0, Item::Knife, 0, item.id});
+        if (found != layout->end()) continue;
+        layout->push_back({0, Item::Knife, 0, item.id});
+        if (pack) arrivals.push_back(layout->back());
+    }
+    if (pack)
+    {
+        // A stack used up leaves its cell empty; arrivals then fill the first empty cells.
+        PackRowRules::Prune(state.packRow, *layout);
+        for (const auto& entry : arrivals)
+            if (!PackRowRules::TakeFirstEmpty(state.packRow, entry)) break;
     }
     return true;
 }
@@ -732,6 +756,8 @@ Result ValidateInventory(const State& state)
     };
     auto result = validateContainer(0);
     if (!result) return result;
+    if (!PackRowRules::Valid(state.packRow, state.inventoryLayout))
+        return Bad("The hotbar row names a missing or repeated stack.");
     for (const auto& piece : state.structures)
     {
         if (piece.kind == Piece::Chest)
@@ -1292,6 +1318,7 @@ bool Simulation::TryAdjust(const Inventory& change)
     // Existing callers retain resource/plot/structure pointers across this helper.
     state_.inventory = candidate.inventory;
     state_.inventoryLayout = std::move(candidate.inventoryLayout);
+    state_.packRow = candidate.packRow;
     state_.nextGroupId = candidate.nextGroupId;
     ++revision_;
     return true;
@@ -1439,6 +1466,38 @@ Result Simulation::TransferGroup(int chestId, int groupId, int amount, bool toCh
     (*ContainerStock(candidate, destination))[item] += amount;
     return CommitInventory(std::move(candidate), toChest ? "Selected quantity stored." : "Selected quantity taken.");
 }
+Result Simulation::TransferGroupToPackRow(int chestId, int groupId, int amount, int cell, Point player,
+    std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (chestId <= 0) return Bad("Choose a storage chest.");
+    if (cell < 0 || cell >= PackRowSize) return Bad("Choose one of the ten hotbar slots.");
+    const auto access = ContainerAccess(state_, chestId, player);
+    if (!access) return access;
+    State candidate = state_;
+    auto* chest = ContainerLayout(candidate, chestId);
+    auto entry = std::find_if(chest->begin(), chest->end(),
+        [&](const LayoutEntry& value) { return value.groupId == groupId && value.wearableId == 0; });
+    if (entry == chest->end() || amount <= 0 || amount > entry->quantity)
+        return Bad("Choose an available quantity from the selected group.");
+    const Item item = entry->item;
+    entry->quantity -= amount;
+    (*ContainerStock(candidate, chestId))[static_cast<int>(item)] -= amount;
+    candidate.inventory[static_cast<int>(item)] += amount;
+    auto& pack = candidate.inventoryLayout;
+    const int held = PackRowRules::FindEntry(pack, candidate.packRow[cell]);
+    if (held >= 0 && pack[held].wearableId == 0 && pack[held].item == item) pack[held].quantity += amount;
+    else
+    {
+        // Whatever was in the cell stays in her pack, below the row.
+        if (!CanAllocate(candidate.nextGroupId)) return Bad("Inventory group identities are exhausted.");
+        pack.push_back({candidate.nextGroupId++, item, amount, 0});
+        candidate.packRow[cell] = {pack.back().groupId, 0};
+    }
+    return CommitInventory(std::move(candidate), ("Taken onto hotbar slot " +
+        std::to_string(PackRowRules::KeyNumber(cell)) + ".").c_str());
+}
 Result Simulation::SplitGroup(int containerId, int groupId, int amount, Point player, std::uint64_t expectedRevision)
 {
     const auto ready = CheckRevision(expectedRevision);
@@ -1511,7 +1570,11 @@ Result Simulation::SortPack(std::uint64_t expectedRevision)
     const auto ready = CheckRevision(expectedRevision);
     if (!ready) return ready;
     State candidate = state_;
-    auto& layout = candidate.inventoryLayout;
+    // Only what lies below the hotbar row is sorted (HomesteadPackRow.h); the row keeps its order.
+    InventoryLayout row, layout;
+    for (const auto& entry : state_.inventoryLayout)
+        (PackRowRules::CellOf(state_.packRow, entry) >= 0 ? row : layout).push_back(entry);
+    const InventoryLayout before = layout;
     for (auto first = layout.begin(); first != layout.end(); ++first)
     {
         if (first->wearableId != 0) continue;
@@ -1539,11 +1602,11 @@ Result Simulation::SortPack(std::uint64_t expectedRevision)
         [&](const LayoutEntry& left, const LayoutEntry& right) { return key(left) < key(right); });
     const auto sameLayout = [&]()
     {
-        if (layout.size() != state_.inventoryLayout.size()) return false;
+        if (layout.size() != before.size()) return false;
         for (std::size_t index = 0; index < layout.size(); ++index)
         {
             const auto& left = layout[index];
-            const auto& right = state_.inventoryLayout[index];
+            const auto& right = before[index];
             if (left.groupId != right.groupId || left.item != right.item
                 || left.quantity != right.quantity || left.wearableId != right.wearableId)
                 return false;
@@ -1552,6 +1615,8 @@ Result Simulation::SortPack(std::uint64_t expectedRevision)
     };
     if (sameLayout())
         return {true, "Pack is already sorted.", ResultCode::None, revision_};
+    candidate.inventoryLayout = std::move(row);
+    candidate.inventoryLayout.insert(candidate.inventoryLayout.end(), layout.begin(), layout.end());
     return CommitInventory(std::move(candidate), "Pack sorted.");
 }
 Result Simulation::DropGroup(int groupId, int amount, Point position, Point player,
@@ -2915,6 +2980,7 @@ std::string Simulation::Serialize() const
     if (Manor::HasSaveSection(state_)) Manor::WriteSaveSection(body, state_);
     Lamp::WriteSaveSection(body, state_);
     Crops::WriteSaveSection(body, state_);
+    PackRowRules::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3201,6 +3267,7 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Manor::SaveTag) { if (!Manor::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
         // A section this build doesn't know came from a newer build; it can't be skipped safely.
         else return newer;
         input >> std::ws;

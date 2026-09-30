@@ -20,6 +20,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadShops.cpp
     Source/SurvivalGame/Simulation/HomesteadManor.cpp
     Source/SurvivalGame/Simulation/HomesteadLamp.cpp
+    Source/SurvivalGame/Simulation/HomesteadPackRow.cpp
     Source/SurvivalGame/Simulation/HomesteadEstatePublicRoad.cpp
     Source/SurvivalGame/Simulation/HomesteadTravel.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
@@ -116,11 +117,11 @@ else()
 endif()
 add_test(NAME HomesteadPublicRoadTests COMMAND HomesteadPublicRoadTests)
 
-add_executable(HomesteadHotbarLayoutTests Tests/HomesteadHotbarLayoutTests.cpp)
-target_link_libraries(HomesteadHotbarLayoutTests PRIVATE HomesteadSimulation)
+add_executable(HomesteadPackRowTests Tests/HomesteadPackRowTests.cpp)
+target_link_libraries(HomesteadPackRowTests PRIVATE HomesteadSimulation)
 if(MSVC)
-    target_compile_options(HomesteadHotbarLayoutTests PRIVATE /W4 /EHs-c-)
+    target_compile_options(HomesteadPackRowTests PRIVATE /W4 /EHs-c-)
 else()
-    target_compile_options(HomesteadHotbarLayoutTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+    target_compile_options(HomesteadPackRowTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
-add_test(NAME HomesteadHotbarLayoutTests COMMAND HomesteadHotbarLayoutTests)
+add_test(NAME HomesteadPackRowTests COMMAND HomesteadPackRowTests)
