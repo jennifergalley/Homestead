@@ -24,10 +24,10 @@ namespace MowGround
 const FVector BladeSamples[] = {FVector(2.8f, 11.0f, -101.4f), FVector(45.8f, 9.3f, -98.3f), FVector(88.8f, -0.3f, -90.1f)};
 // Below this clearance (cm) the blade is lifted clear of the ground...
 constexpr float MinClearance = 3.0f;
-// ...and above this one (downhill) it is lowered back toward FollowClearance; in between it keeps
+// ...and above this one (downhill) it is lowered just to it (a continuous target, so gentle downslopes
+// don't set it bobbing across the threshold); in between it keeps
 // the clip's own lay, so level mowing looks exactly as authored.
 constexpr float MaxClearance = 20.0f;
-constexpr float FollowClearance = 10.0f;
 // The roll about the nib line never exceeds this (radians, about 20 degrees): past it the blade
 // would stand on its edge rather than lie on the swath.
 constexpr float MaxRoll = 0.35f;
@@ -365,7 +365,7 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
             }
             if (!bAny || FMath::Abs(LiftPerRadian) < 1.0f) break;
             const float Shortfall = Lowest < MowGround::MinClearance ? MowGround::MinClearance - Lowest
-                : Lowest > MowGround::MaxClearance ? MowGround::FollowClearance - Lowest : 0.0f;
+                : Lowest > MowGround::MaxClearance ? MowGround::MaxClearance - Lowest : 0.0f;
             if (Shortfall == 0.0f) break;
             WantRoll = FMath::Clamp(WantRoll + Shortfall / LiftPerRadian, -MowGround::MaxRoll, MowGround::MaxRoll);
         }
