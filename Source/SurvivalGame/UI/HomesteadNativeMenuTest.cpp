@@ -1,5 +1,7 @@
 #include "../HomesteadSmokeTest.h"
 #include "../HomesteadController.h"
+#include "../HomesteadControllerConfig.h"
+#include "../HomesteadControllerPreferences.h"
 #include "../HomesteadCharacter.h"
 #include "HomesteadMenuPortrait.h"
 #include "../HomesteadSave.h"
@@ -447,6 +449,55 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
                 return Valid;
             }, 0.2f);
     }
+    // Stepping a sound slider with the d-pad or keys: heard live, saved once when she moves on,
+    // and Back puts it back unsaved.
+    const auto StepStart = MakeShared<float>(0);
+    const auto StepWrites = MakeShared<int32>(0);
+    const auto StepDirection = MakeShared<int32>(1);
+    Add(TEXT("Focus the Music slider for keyboard steps"),
+        [this]() { Controller->NativeMenu->FocusLegacySubject(5); },
+        [this]() { return Controller->NativeMenu->IsFocusedControlVisible(); }, 0.2f);
+    Add(TEXT("Keyboard steps change Music live without saving each step"),
+        [this, StepStart, StepWrites, StepDirection]()
+        {
+            *StepStart = Controller->MenuAudioVolume(5);
+            *StepWrites = Controller->AudioPersistWrites;
+            *StepDirection = *StepStart > 0.5f ? -1 : 1;
+            for (int32 Step = 0; Step < 3; ++Step) Tap(*StepDirection > 0 ? EKeys::Right : EKeys::Left);
+        },
+        [this, StepStart, StepWrites, StepDirection]()
+        {
+            return FMath::IsNearlyEqual(Controller->MusicVolume, *StepStart + *StepDirection * 0.15f, 0.001f)
+                && Controller->AudioPersistWrites == *StepWrites && Controller->NativeMenu->HasPendingAudioStep();
+        });
+    Add(TEXT("Moving off the slider saves the stepped level once"),
+        [this]() { Tap(EKeys::Up); },
+        [this, StepStart, StepWrites, StepDirection]()
+        {
+            float Saved = -1;
+            GConfig->GetFloat(HomesteadControllerPreferences::AudioSettingsSection,
+                HomesteadControllerConfig::AudioKeys[HomesteadControllerConfig::AudioKeyIndex(5)], Saved, GGameUserSettingsIni);
+            return !Controller->NativeMenu->HasPendingAudioStep() && Controller->AudioPersistWrites == *StepWrites + 1
+                && FMath::IsNearlyEqual(Saved, *StepStart + *StepDirection * 0.15f, 0.001f)
+                && FMath::IsNearlyEqual(Controller->MusicVolume, *StepStart + *StepDirection * 0.15f, 0.001f);
+        });
+    Add(TEXT("Back after a step puts Music back unsaved and keeps Settings open"),
+        [this, StepWrites]()
+        {
+            Controller->NativeMenu->FocusLegacySubject(5);
+            *StepWrites = Controller->AudioPersistWrites;
+            Tap(EKeys::Left);
+            Tap(EKeys::Escape);
+        },
+        [this, StepStart, StepWrites, StepDirection]()
+        {
+            return !Controller->NativeMenu->HasPendingAudioStep() && Controller->AudioPersistWrites == *StepWrites
+                && FMath::IsNearlyEqual(Controller->MusicVolume, *StepStart + *StepDirection * 0.15f, 0.001f)
+                && Controller->IsBookOpen() && Controller->BookPage() == 4;
+        });
+    Add(TEXT("Put Music back where it started"),
+        [this, StepStart]() { Controller->MenuCommitAudioVolume(5, *StepStart, Controller->MenuAudioVolume(5)); },
+        [this, StepStart]() { return FMath::IsNearlyEqual(Controller->MusicVolume, *StepStart, 0.001f); });
     Add(TEXT("Quit game row opens one two-choice dialog"),
         [this]() { Controller->NativeMenu->FocusLegacySubject(9); Tap(EKeys::Enter); },
         [this]() { return Controller->NativeMenu && Controller->NativeMenu->IsExitPrompt(); });

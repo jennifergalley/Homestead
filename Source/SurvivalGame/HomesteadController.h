@@ -642,6 +642,8 @@ private:
     bool PersistCameraSensitivity(float Requested);
     bool PersistCameraInversion(bool Requested);
     bool PersistAudioVolume(int32 Id, float Requested, float Previous);
+    // Successful sound-level writes to GameUserSettings (for the menu automation).
+    int32 AudioPersistWrites = 0;
     bool PersistAutosaveEnabled(bool Requested);
     bool PersistAutosaveInterval(int32 Requested);
     bool PersistResolutionScale(float Requested);

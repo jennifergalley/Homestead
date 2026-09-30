@@ -121,6 +121,11 @@ public:
     int32 GetDyeChoice() const { return DyeChoice; }
     // Naming the open chest: typed on the keyboard (OnKeyChar), or one of the suggestions.
     void OpenRenameChest();
+    // Sound sliders stepped with the d-pad or keyboard: saved once when she confirms, moves to another
+    // row, page or region, or closes the book; Cancel (B/Esc) puts the level back unsaved.
+    void CommitAudioStep();
+    bool CancelAudioStep();
+    bool HasPendingAudioStep() const { return bAudioStepEdit; }
     bool IsRenamingChest() const { return Dialog == EDialog::RenameChest; }
     FString GetChestNameDraft() const { return RenameDraft; }
     // Automation: types as the keyboard would.
@@ -238,6 +243,9 @@ private:
     int32 SettingsTopCount() const;
     FString PackHint() const;
     int32 AudioEditId = -1;
+    // A d-pad/keyboard edit of a sound slider: steps preview live; CommitAudioStep saves it once.
+    bool bAudioStepEdit = false;
+    void StepAudio(int32 Id, int32 Direction);
     float AudioEditStart = 0;
     int32 PointerDragSource = INDEX_NONE;
     int32 PointerDragTarget = INDEX_NONE;

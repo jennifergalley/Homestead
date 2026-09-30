@@ -137,6 +137,10 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
     UpdateNotice();
+    // A stepped sound level is saved once she moves off its slider (another row, region or page).
+    if (bAudioStepEdit && (SeenPage != 4 || Region != ERegion::Content || Dialog != EDialog::None
+        || !Entries.IsValidIndex(ContentSelection) || Entries[ContentSelection].Id != AudioEditId))
+        CommitAudioStep();
     // The dye chooser previews whichever dye is under the cursor or focus, or the chosen one.
     if (bDyeChooser && Dialog == EDialog::Context)
     {

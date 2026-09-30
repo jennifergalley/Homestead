@@ -59,6 +59,12 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
         if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top || Key == EKeys::Escape
             || Key == EKeys::Gamepad_Special_Right || Key == EKeys::Gamepad_FaceButton_Right) return true;
     }
+    // A stepped sound level: Back puts it back unsaved; confirm saves it (and doesn't also step it).
+    if (bAudioStepEdit && Dialog == EDialog::None)
+    {
+        if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right) { CancelAudioStep(); return true; }
+        if (ActivateKey && !Key.IsMouseButton()) { CommitAudioStep(); Refresh(); return true; }
+    }
     if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right || Key == EKeys::I || Key == EKeys::Gamepad_Special_Right) { Back(); return true; }
     if (ActivateKey)
     {

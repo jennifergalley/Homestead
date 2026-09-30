@@ -193,6 +193,8 @@ void AHomesteadController::HideNativeMenu()
     if (MenuPointerInput.IsValid() && FSlateApplication::IsInitialized())
         FSlateApplication::Get().UnregisterInputPreProcessor(MenuPointerInput);
     MenuPointerInput.Reset();
+    // Closing the book keeps a sound level she stepped with the d-pad (saved once, here).
+    if (NativeMenu.IsValid()) NativeMenu->CommitAudioStep();
     if (NativeMenu.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(NativeMenu.ToSharedRef());
     NativeMenu.Reset();

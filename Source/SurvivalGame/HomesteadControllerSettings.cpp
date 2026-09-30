@@ -143,6 +143,7 @@ bool AHomesteadController::PersistAudioVolume(int32 Id, float Requested, float P
     }
     GConfig->SetFloat(AudioSettingsSection, AudioKeys[Index], Requested, GGameUserSettingsIni);
     MenuPreviewAudioVolume(Id, Requested);
+    ++AudioPersistWrites;
     return true;
 }
 

@@ -185,6 +185,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         .Value_Lambda([this, AudioId]() { return Controller->MenuAudioVolume(AudioId); })
                         .OnMouseCaptureBegin_Lambda([this, AudioId, Index]()
                         {
+                            CommitAudioStep();
                             AudioEditId = AudioId;
                             AudioEditStart = Controller->MenuAudioVolume(AudioId);
                             Region = ERegion::Content;
