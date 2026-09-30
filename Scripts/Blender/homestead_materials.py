@@ -538,6 +538,38 @@ def leather(name, color=(0.30, 0.19, 0.10), dark=(0.12, 0.07, 0.035), roughness=
     g.set("Normal", g.bump(height, strength=0.4, distance=0.0012))
     return g.mat
 
+def harness_leather(name, color=(0.20, 0.11, 0.05), dark=(0.065, 0.035, 0.018), roughness=0.55,
+                    scuff=0.5, dubbin=0.5, grime=0.3, seed=0.0):
+    """Oak-bark (vegetable) tanned, dubbined harness or bridle leather: a smooth grain face with
+    a fine pebbled pore texture, deep reddish-brown with darker oil-soaked mottling, pale scuffs
+    and dry cracking where it rubs (``scuff``), a waxy sheen from dubbin (lower roughness with
+    ``dubbin``) and dark grime in its creases. Harder and glossier than ``leather`` (buckskin)."""
+    g = Graph(name)
+    p = g.coord()
+    seeded = g.vmath("ADD", p, (seed * 0.37, seed * 0.29, seed * 0.13))
+    oil = g.noise(seeded, scale=9.0, detail=5.0, roughness=0.6).outputs["Fac"]
+    mottle = g.noise(seeded, scale=45.0, detail=4.0).outputs["Fac"]
+    pores = g.voronoi(seeded, scale=1800.0, feature="SMOOTH_F1").outputs["Distance"]
+    tone = g.math("ADD", g.math("MULTIPLY", oil, 0.7), g.math("MULTIPLY", mottle, 0.3))
+    base = g.ramp(tone, [(0.38, dark), (0.52, color), (0.64, tuple(min(1.0, c * 1.2) for c in color))])
+    # Creases: long soft folds where the leather has been bent over and over, with dirt in them.
+    fold = g.noise(g.vmath("MULTIPLY", seeded, (1.0, 1.0, 0.3)), scale=40.0, detail=3.0).outputs["Fac"]
+    crease = g.remap(fold, 0.46, 0.54, 1.0, 0.0)
+    base = g.mix(base, (0.045, 0.03, 0.02), g.math("MULTIPLY", crease, grime))
+    # Scuffs: the grain rubbed off in patches, lighter and dry.
+    rub = g.noise(g.vmath("ADD", seeded, (3.0, 7.0, 1.0)), scale=26.0, detail=6.0, roughness=0.7).outputs["Fac"]
+    worn = g.remap(rub, 0.64, 0.72, 0.0, scuff)
+    base = g.mix(base, tuple(min(1.0, c * 1.9 + 0.03) for c in color), worn)
+    g.set("Base Color", base)
+    rough = g.remap(oil, 0.3, 0.7, roughness - 0.12 * dubbin, roughness + 0.06)
+    rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=worn, A=rough, B=0.82).outputs[0]
+    g.set("Roughness", rough)
+    g.set("Sheen Weight", 0.1)
+    height = g.math("ADD", g.math("MULTIPLY", pores, 0.25), g.math("MULTIPLY", crease, -0.5))
+    height = g.math("ADD", height, g.math("MULTIPLY", worn, -0.2))
+    g.set("Normal", g.bump(height, strength=0.35, distance=0.0008))
+    return g.mat
+
 def blackberry(name, color=(0.016, 0.007, 0.013), glint=(0.040, 0.011, 0.028), crevice=(0.012, 0.003, 0.007),
                red=0.0, drupelet=0.0030, seed=0.0):
     """Aggregate berry (blackberry/raspberry) skin. pcoord is berry-local rest position
