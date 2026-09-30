@@ -285,6 +285,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     Super::Tick(DeltaSeconds);
     UpdateArrival();
     if (!Landscape) return;
+    UpdatePickups(DeltaSeconds);
     if (!StartupProbeDirectory.IsEmpty()) TickStartupProbe();
     UpdateCreekAudio();
 #if !UE_BUILD_SHIPPING

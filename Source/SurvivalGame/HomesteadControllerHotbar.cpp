@@ -12,6 +12,7 @@
 #include "Simulation/HomesteadPail.h"
 #include "UI/SHomesteadHotbar.h"
 #include "UI/SHomesteadHudScale.h"
+#include "UI/SHomesteadPickups.h"
 #include "UI/SHomesteadVitals.h"
 
 #include "Engine/Engine.h"
@@ -62,6 +63,16 @@ void AHomesteadController::ShowHotbar()
             SNew(HomesteadMenus::SHomesteadVitals).Controller(this)
         ];
     GEngine->GameViewport->AddViewportWidgetContent(VitalsRoot.ToSharedRef(), 50);
+    // Painted over the world without layout or hit testing, so nothing shifts and clicks pass through.
+    PickupsRoot = SNew(SBox)
+        .Visibility_Lambda([this]()
+        {
+            return PickupsVisible() && !Pickups.IsEmpty() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+        })
+        [
+            SNew(HomesteadMenus::SHomesteadPickups).Controller(this)
+        ];
+    GEngine->GameViewport->AddViewportWidgetContent(PickupsRoot.ToSharedRef(), 50);
 }
 
 void AHomesteadController::HideHotbar()
@@ -72,6 +83,9 @@ void AHomesteadController::HideHotbar()
     if (VitalsRoot.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(VitalsRoot.ToSharedRef());
     VitalsRoot.Reset();
+    if (PickupsRoot.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(PickupsRoot.ToSharedRef());
+    PickupsRoot.Reset();
     HotbarWidget.Reset();
     HotbarRoot.Reset();
 }

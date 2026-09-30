@@ -565,7 +565,7 @@ void AHomesteadController::ActivateRow()
     else if (Page == 1)
     {
         const auto Result = Sim.Craft(static_cast<Homestead::Recipe>(Id), PlayerPoint());
-        Notify(Result, WoodTapB);
+        NotifyResourceAction(Result, WoodTapB);
         if (Result.ok)
         {
             Sim.AdvanceGameHours(0.05, PlayerPoint());
