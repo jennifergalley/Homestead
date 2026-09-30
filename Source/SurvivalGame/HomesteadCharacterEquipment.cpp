@@ -21,8 +21,9 @@
 // soil uphill and hang in the air downhill.
 namespace MowGround
 {
-// Blade edge heel, middle and point, in SM_Scythe's local space as measured in PIE (the FBX export
-// mirrors Y, so the edge sits at -Y here although the Blender report lists it at +Y).
+// The blade's back (spine) at heel, middle and point, in SM_Scythe's local space as measured in PIE
+// (the FBX export mirrors Y). These are the back, not the edge (about (45.8, -5.3, -94.2) mid-blade):
+// in the mowing lay the back is the blade's lowest part, so it is what must clear the ground.
 const FVector BladeSamples[] = {FVector(2.8f, -10.8f, -101.2f), FVector(42.2f, -9.5f, -98.4f), FVector(88.8f, 0.3f, -89.7f)};
 // Below this clearance (cm) the blade is lifted clear of the ground...
 constexpr float MinClearance = 3.0f;

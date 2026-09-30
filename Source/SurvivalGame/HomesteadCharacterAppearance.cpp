@@ -541,16 +541,19 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     // The digging stick's pivot is its upper grip with the point toward -Z; she trail-carries it at
     // the balance point instead, point forward and down, the way a spear or staff is carried.
     const FTransform StickTrail(FQuat(FVector::XAxisVector, PI), FVector(0, 0, -25));
-    // SM_Scythe (scythe.py): pivot at the lower nib's grip, snath +Z, the snath itself 13 cm along +Y
-    // from that grip, blade +X from the heel. In the grip frame the handle runs along +Z (pinky to
+    // SM_Scythe (scythe.py): pivot at the lower nib's grip, snath +Z, the snath itself 13 cm along -Y
+    // from that grip in the engine (+Y in scythe.py: the FBX export mirrors Y), blade +X from the heel. In the grip frame the handle runs along +Z (pinky to
     // index, forward in a hanging hand), +Y is back toward the wrist and +X points out to her right,
     // so the snath goes along the fist tipped 25 degrees up, and the blade reaches out along +X.
     // Her fist closes on the wood itself (Jenny, 09-29: at rest the scythe must sit in her hand): the
     // snath's centreline 15 cm below the lower nib and its direction there, from scythe.py snath_point
     // (t = 0.519) relative to the grip. The crooked snath runs about 2 cm off and 6 degrees from the
     // straight line through the nib that the carry used before, so it stood out beside her fingers.
-    const FVector SnathInFist(-0.2f, 14.9f, -15.0f);
-    const FVector SnathAlong = FVector(0.0035f, -0.1032f, 0.9947f).GetSafeNormal();
+    // scythe.py gives (-0.2, 14.9, -15.0) along (0.0035, -0.1032, 0.9947); SM_Scythe's local space is
+    // Y-mirrored by the FBX export (PIE-measured on the blade), so both Y components are negated here.
+    // Unmirrored, the snath sat ~30 cm off her grip and ~12 degrees off its line.
+    const FVector SnathInFist(-0.2f, -14.9f, -15.0f);
+    const FVector SnathAlong = FVector(0.0035f, 0.1032f, 0.9947f).GetSafeNormal();
     // The carry keeps its old line through the fist (the 15 degrees 'in' it once asked for were squared
     // away by the frame, and it looked right that way).
     const FVector CarryAxis(0.0f, FMath::Sin(FMath::DegreesToRadians(25.0f)), FMath::Cos(FMath::DegreesToRadians(25.0f)));
