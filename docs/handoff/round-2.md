@@ -651,9 +651,15 @@ requirement.
   soft 40 cm one-knee reeds saw. Iron+ `BrambleThicket` (3/2/1/1) and Steel+ Bank (4/3/2/1) gates stay
   unchanged. For the pictured missing bramble prompt, obtain actual `FocusId`, kind and toast before
   declaring this a root cause.
-- **Hoe/pail exact target** — **Props World/Simulation plus Menu UI, pending and not shipped.** With
-  Hoe or Pail selected, highlight the exact 1 m target plot before action, showing current cell and
-  green/red validity. Verify target selection, validity and action remain consistent.
+- **Hoe/pail exact target** — **Water garden-outline partial `14cce349` + `9b69eca6`, not shipped or
+  in the current aim/firewall package.** Native 10/10 and Editor/Game builds pass. Side-effect-free
+  `CheckTill` / `Weed` / `Water` now feed both `PreviewGarden` and the mutators, with block errors
+  matching mutations; 50 repeated previews are byte-identical under Serialize.
+
+  Hoe previews its exact 85 cm GardenCell; Pail previews the focused 60 cm plot. The world visual is
+  transient sampled-ground 4x4 thin 2.5 cm-raised segments at 100 cm, no collision/shadow, green/red,
+  and hides for book/shop/planning/failed/water focus with no save IDs. PIE still must cover slopes,
+  turned soil, adjacent plots, blocked cells, pad/HUD behavior and z-fighting before readiness.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
