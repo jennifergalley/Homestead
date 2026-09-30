@@ -265,4 +265,54 @@ Vec Centroid(const std::vector<Vec>& ring)
     }
     return Mul(center, 1.0 / (6.0 * area));
 }
+
+double AtLeastPhysical(double local, double physicalPerLocal, double minPhysical)
+{
+    if (physicalPerLocal <= 0.0) return local;
+    return std::max(local, minPhysical / physicalPerLocal);
+}
+
+double SnapToPixel(double local, double physicalPerLocal)
+{
+    if (physicalPerLocal <= 0.0) return local;
+    return std::round(local * physicalPerLocal) / physicalPerLocal;
+}
+
+std::vector<int> SpacedCircles(const std::vector<Vec>& centers, const std::vector<double>& radii, double gap)
+{
+    std::vector<int> kept;
+    const std::size_t count = std::min(centers.size(), radii.size());
+    for (std::size_t i = 0; i < count; ++i)
+    {
+        bool clear = true;
+        for (int other : kept)
+            clear = clear && Length(Sub(centers[i], centers[other])) >= radii[i] + radii[other] + gap;
+        if (clear) kept.push_back(static_cast<int>(i));
+    }
+    return kept;
+}
+
+double BearingDegrees(Vec from, Vec to)
+{
+    const Vec d = Sub(to, from);
+    if (Length(d) < 1e-9) return 0.0;
+    const double degrees = std::atan2(d.y, d.x) * 180.0 / Pi;
+    return degrees < 0.0 ? degrees + 360.0 : degrees;
+}
+
+double RelativeDegrees(double bearing, double heading)
+{
+    double relative = std::fmod(bearing - heading, 360.0);
+    if (relative <= -180.0) relative += 360.0;
+    if (relative > 180.0) relative -= 360.0;
+    return relative;
+}
+
+bool CompassOffset(double bearing, double heading, double halfFieldDegrees, double halfWidth, double& offset)
+{
+    if (halfFieldDegrees <= 0.0) return false;
+    const double relative = RelativeDegrees(bearing, heading);
+    offset = relative / halfFieldDegrees * halfWidth;
+    return std::abs(relative) <= halfFieldDegrees;
+}
 }

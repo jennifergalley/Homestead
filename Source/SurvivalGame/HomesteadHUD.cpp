@@ -180,11 +180,8 @@ void AHomesteadHUD::DrawCalendar(const AHomesteadController& PC, float X, float 
         const FString Paused = TEXT("time paused");
         Write(Paused, X + Width - 16 - TextWidth(Paused, 16), Y + 16, 16, Muted);
     }
-    const int32 H = FMath::FloorToInt(Hour);
-    const int32 M = FMath::FloorToInt((Hour - H) * 60);
-    const FString Clock = FString::Printf(TEXT("%d:%02d"), H % 12 == 0 ? 12 : H % 12, M);
-    Write(Clock, TextX, Y + 42, 42, Ink);
-    Write(H < 12 ? TEXT("AM") : TEXT("PM"), TextX + TextWidth(Clock, 42) + 8, Y + 58, 24, HudGold);
+    // The time itself ("7:40 PM") is native Slate text laid over this spot (UI/SHomesteadClock),
+    // so it stays crisp where the Canvas font blurred at 42 units.
 
     // Weather: sun, rain cloud, or a clear night's moon.
     const float IconX = X + 350, IconY = Y + 68;
@@ -290,6 +287,12 @@ void AHomesteadHUD::DrawHUD()
         {
             const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth, ViewHeight);
             ProtectFeedback(TEXT("minimap"), Minimap.Min.X, Minimap.Min.Y, Minimap.GetSize().X, Minimap.GetSize().Y);
+        }
+        if (const UHomesteadMapComponent* Map = PC->MapPresenter(); Map && Map->IsCompassVisible())
+        {
+            const FBox2D Compass = UHomesteadMapComponent::CompassBox(ViewWidth, ViewHeight);
+            if (Compass.bIsValid)
+                ProtectFeedback(TEXT("compass"), Compass.Min.X, Compass.Min.Y, Compass.GetSize().X, Compass.GetSize().Y);
         }
         // The wheel picks the hotbar tool; Ctrl+wheel zooms the camera (AHomesteadController::InputKey).
         // Sprint is a toggle, so the hint says which way it's set.
