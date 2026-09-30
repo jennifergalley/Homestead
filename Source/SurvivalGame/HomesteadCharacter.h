@@ -213,9 +213,18 @@ public:
     // The billhook (and the scythe, if its mowing clip is missing) reuses the hack with its own
     // held prop; false when that prop is missing.
     bool PlayMacheteHack(Homestead::Point Target);
-    bool PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool);
+    // Radius (cm, the target's reach in front of its centre) walks or steps her into the stance where
+    // the blade crosses the stems (HackCut*) on the target's near side; below 0 she only turns to it.
+    bool PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool, float Radius = -1.0f);
     // Seconds into the hack when the second cut lands and the plant is cleared.
     static constexpr float MacheteClearSeconds = 1.25f;
+    // Where the blade's middle crosses the stems as the second cut lands (machete_hack.py HAND_R
+    // 'strike2' wrist (-13, 38, 86) plus about 28 cm down the blade along its (-0.5, 0.6, -0.6)
+    // direction): cm to her left and forward of her root. Estimated from the keys; check in PIE.
+    static constexpr float HackCutLeft = -27.0f;
+    static constexpr float HackCutForward = 55.0f;
+    // How much of the target's radius the cut reaches into before the blade meets stems.
+    static constexpr float HackBite = 0.4f;
     UAnimSequence* GetMacheteAnimation() const { return MacheteAnimation; }
     // Two-handed felling with the hatchet (MetaHuman only): Strokes cuts, then she recovers to the
     // carry. False when the clip or the held hatchet is unavailable, so the caller uses PlayClear.
@@ -472,6 +481,8 @@ private:
     FVector2D FellApproachTo = FVector2D::ZeroVector;
     float FellApproachYaw = 0, FellApproachTime = 0;
     int32 FellApproachStrokes = 0;
+    // The approach ends in the hack (the billhook) rather than a felling-timed swing.
+    bool bApproachHack = false;
     void UpdateFellApproach(float DeltaSeconds);
     // The Blender machete, held in the right hand's closed grip (pivot at the grip centre).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> HeldMachete;

@@ -217,7 +217,11 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
             : Kind == Homestead::ResourceKind::Boulder ? 70.0f
             : Kind == Homestead::ResourceKind::SmallRock ? 30.0f
             // The ruin's fallen roof timbers (about 430 x 230 cm): she strikes the near beam from outside the pile.
-            : Kind == Homestead::ResourceKind::RuinTimbers ? 120.0f : 8.0f;
+            : Kind == Homestead::ResourceKind::RuinTimbers ? 120.0f
+            // Brambles for the billhook's cut to meet on their near side (the sapling's stem is the default).
+            : Kind == Homestead::ResourceKind::BrambleThin ? 35.0f
+            : Kind == Homestead::ResourceKind::BrambleThicket ? 55.0f
+            : Kind == Homestead::ResourceKind::BrambleBank ? 80.0f : 8.0f;
         if (Tool == Homestead::Item::Scythe)
         {
             // Mowing turns about her: she keeps facing the swath rather than the first tuft.
@@ -227,13 +231,14 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
         else if (Tool == Homestead::Item::Hatchet || Tool == Homestead::Item::Pickaxe)
         {
             bSwingFellTimed = Avatar->PlayStrike(Aim, Tool, 1, Radius);
+
             // Without the strike clip the axe falls back to its felling chop.
             if (!bSwingFellTimed && Tool == Homestead::Item::Hatchet) bSwingFellTimed = Avatar->PlayFell(Aim, 1, 12.0f);
         }
         bAnimated = bSwingFellTimed;
         // The billhook reuses the machete hack; a scythe without its mowing clip borrows it too.
         if (!bAnimated && Tool != Homestead::Item::Pickaxe && Tool != Homestead::Item::Hatchet)
-            bAnimated = Avatar->PlayMacheteHack(Aim, Tool);
+            bAnimated = Avatar->PlayMacheteHack(Aim, Tool, Tool == Homestead::Item::Billhook ? Radius : -1.0f);
     }
     if (!bAnimated)
     {
@@ -277,6 +282,12 @@ void AHomesteadController::UpdatePendingSwing()
         LandOvergrowthSwing();
         return;
     }
+    // Still walking up to the billhook's stance: the hack hasn't been asked for yet.
+    if (Avatar && Avatar->IsApproachingFell())
+    {
+        SwingSince = GetWorld()->GetTimeSeconds();
+        return;
+    }
     // Interrupted before the blow landed: this swing doesn't count.
     if (!Animation || (!Animation->IsHacking() && Age > 0.4)) bSwingPending = false;
 }
@@ -314,6 +325,8 @@ void AHomesteadController::LandOvergrowthSwing()
     }
     if (SwingNode == INDEX_NONE) return;
     ++SwingsLanded;
+    // Blows count from where she actually stood when they landed (a billhook swing may walk her up first).
+    SwingFrom = FVector2D(Position.x, Position.y);
     const int32 Needed = Sim.OvergrowthSwings(SwingNode);
     if (SwingsLanded < Needed)
     {
