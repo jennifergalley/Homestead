@@ -1,6 +1,7 @@
 #include "SHomesteadVitals.h"
 
 #include "../HomesteadController.h"
+#include "../Simulation/HomesteadFood.h"
 #include "../Simulation/HomesteadShops.h"
 #include "SHomesteadHudScale.h"
 #include "SHomesteadIcon.h"
@@ -30,14 +31,29 @@ constexpr double MealPopupFadeIn = 0.15;
 constexpr double MealPopupFadeOut = 0.6;
 constexpr float MealPopupRise = 6.0f;
 const FLinearColor Gain(0.72f, 0.90f, 0.56f, 1);
+// The Well fed chip: a smaller pasty than the bars' icons, in the purse's warm gold.
+constexpr float ChipIconSize = 30, ChipTextSize = 17;
 
 const FSlateBrush* White() { return FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")); }
 }
 
-FBox2D SHomesteadVitals::LogicalBox(float ViewWidth)
+FBox2D SHomesteadVitals::LogicalBox(float ViewWidth, bool bFoodRow, bool bWellFedRow)
 {
-    const float Height = RowHeight * 3 + RowGap * 2;
+    const int32 Rows = bFoodRow ? 3 : 2;
+    const float Height = RowHeight * Rows + RowGap * (Rows - 1) + (bWellFedRow ? RowGap + ChipHeight : 0.0f);
     return FBox2D(FVector2D(ViewWidth - Right - Width, Top), FVector2D(ViewWidth - Right, Top + Height));
+}
+
+bool SHomesteadVitals::ShowsFoodRow(const AHomesteadController& Controller) { return !Controller.State().fixedEstate; }
+
+bool SHomesteadVitals::ShowsWellFed(const AHomesteadController& Controller)
+{
+    return Controller.State().fixedEstate && Controller.Simulation().IsWellFed();
+}
+
+FBox2D SHomesteadVitals::LogicalBox(float ViewWidth, const AHomesteadController& Controller)
+{
+    return LogicalBox(ViewWidth, ShowsFoodRow(Controller), ShowsWellFed(Controller));
 }
 
 void SHomesteadVitals::Construct(const FArguments& Args)
@@ -55,12 +71,19 @@ void SHomesteadVitals::Construct(const FArguments& Args)
             SNew(SBox).Padding(0, Top, Right, 0)
             [
                 SNew(SVerticalBox)
+                // The woodland's hunger; the estate has none (Homestead::Food), so the row goes.
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, RowGap)
+                [
+                    SNew(SBox)
+                    .Visibility_Lambda([this]() { return Controller.IsValid() && ShowsFoodRow(*Controller) ? EVisibility::Visible : EVisibility::Collapsed; })
+                    [ MeterRow(FName(TEXT("bread")), Food, FLinearColor(0.77f, 0.66f, 0.37f, 1), 0, TEXT("Food")) ]
+                ]
                 + SVerticalBox::Slot().AutoHeight()
-                [ MeterRow(FName(TEXT("bread")), Food, FLinearColor(0.77f, 0.66f, 0.37f, 1), 0, TEXT("Food")) ]
-                + SVerticalBox::Slot().AutoHeight().Padding(0, RowGap, 0, 0)
                 [ MeterRow(FName(TEXT("bed")), Energy, FLinearColor(0.66f, 0.76f, 0.52f, 1), 1, TEXT("Energy")) ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, RowGap, 0, 0)
                 [ PurseRow() ]
+                + SVerticalBox::Slot().AutoHeight().Padding(0, RowGap, 0, 0)
+                [ WellFedChip() ]
             ]
         ]
     ];
@@ -205,6 +228,40 @@ TSharedRef<SWidget> SHomesteadVitals::PurseRow()
                 {
                     if (!Controller.IsValid() || Controller->WalletDelta() == 0 || Controller->WalletDeltaAlpha() <= 0) return FText::GetEmpty();
                     return FText::FromString(UTF8_TO_TCHAR(Homestead::FormatMoneyDelta(Controller->WalletDelta()).c_str()));
+                })
+            ]
+        ]
+    ];
+}
+
+// Collapsed (and taking no room) unless she is Well fed on the estate; it sits under the purse so the
+// bars and balance above it never move. Slate collapses the slot's gap along with it.
+TSharedRef<SWidget> SHomesteadVitals::WellFedChip()
+{
+    return SNew(SBox).WidthOverride(Width).HeightOverride(ChipHeight)
+    .Visibility_Lambda([this]() { return Controller.IsValid() && ShowsWellFed(*Controller) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+    [
+        SNew(SOverlay)
+        + SOverlay::Slot()
+        [ SNew(SImage).Image(VitalsStyle::White()).ColorAndOpacity(VitalsStyle::Backing) ]
+        + SOverlay::Slot().Padding(VitalsStyle::SidePad, 0)
+        [
+            SNew(SHorizontalBox)
+            // Centred in the same column as the bars' icons.
+            + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+            [
+                SNew(SBox).WidthOverride(VitalsStyle::IconSize).HAlign(HAlign_Center)
+                [ SNew(SBox).WidthOverride(VitalsStyle::ChipIconSize).HeightOverride(VitalsStyle::ChipIconSize)[ SNew(SHomesteadIcon).Kind(FName(TEXT("pasty"))) ] ]
+            ]
+            + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(VitalsStyle::IconGap, 0, 0, 0)
+            [
+                SNew(STextBlock)
+                .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), VitalsStyle::ChipTextSize))
+                .ColorAndOpacity(VitalsStyle::Gold)
+                .Text_Lambda([this]()
+                {
+                    return Controller.IsValid()
+                        ? FText::FromString(UTF8_TO_TCHAR(Homestead::Food::WellFedBadge(Controller->State()).c_str())) : FText::GetEmpty();
                 })
             ]
         ]

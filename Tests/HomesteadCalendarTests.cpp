@@ -2,6 +2,7 @@
 #include "HomesteadCalendar.h"
 #include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
+#include "HomesteadFood.h"
 #include "HomesteadItems.h"
 #include "HomesteadSimulation.h"
 
@@ -514,6 +515,32 @@ void CropSeasonsAndWithering()
     const Result summerPotatoes = sim.Plant(plots[2], at(2), CropKind::Potatoes);
     CHECK(!summerPotatoes.ok && summerPotatoes.message == "Potatoes grow in Spring.");
 }
+
+// The shop and pack describe food by what eating it now would do, and the HUD badge reads the timer.
+void FoodLabelsAndWellFedBadge()
+{
+    Simulation sim = Estate();
+    sim.SkipToHourOfDay(11.5);
+    CHECK(Food::EffectLabel(sim.GetState(), Item::Bread) == "+12 Energy");
+    CHECK(Food::EffectLabel(sim.GetState(), Item::Pasty) == "+40 Energy \xC2\xB7 Well fed until 2:30 PM");
+    CHECK(Food::EffectLabel(sim.GetState(), Item::Stone).empty());
+    CHECK(Food::WellFedBadge(sim.GetState()).empty());
+    OK(sim.SetEnergy(50.0));
+    OK(sim.GrantItems(Item::Pasty, 1));
+    OK(sim.Eat(Item::Pasty));
+    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM");
+    // An hour on, a second meal would run to 3:30 PM; the badge still shows the live expiry.
+    sim.SkipToHourOfDay(12.5);
+    CHECK(Food::EffectLabel(sim.GetState(), Item::Pasty) == "+40 Energy \xC2\xB7 Well fed until 3:30 PM");
+    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM");
+    // Once it runs out the badge goes.
+    sim.SkipToHourOfDay(15.0);
+    CHECK(!sim.IsWellFed() && Food::WellFedBadge(sim.GetState()).empty());
+    // The woodland has no Well fed: a meal is only its Energy there.
+    State woodland = sim.GetState();
+    woodland.fixedEstate = false;
+    CHECK(Food::EffectLabel(woodland, Item::Pasty) == "+40 Energy");
+}
 }
 
 int main()
@@ -524,6 +551,7 @@ int main()
     Run("the estate has no hunger: ten days without food, no penalty or failure", NoHungerOnTheEstate);
     Run("snacks and meals restore Energy; meals make her Well fed", EatingForEnergy);
     Run("Well fed runs across midnight and saves only while active", WellFedAcrossMidnightAndSaves);
+    Run("food labels and the Well fed badge read what eating does now", FoodLabelsAndWellFedBadge);
     Run("crops grow in season and wither when it ends", CropSeasonsAndWithering);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;

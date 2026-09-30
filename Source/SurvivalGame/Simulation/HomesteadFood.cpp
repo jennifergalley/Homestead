@@ -42,6 +42,18 @@ std::string EatOnEstate(State& state, Item item)
     return wasFull ? "Your energy was already full. " + until + "." : energy + " \xC2\xB7 " + until;
 }
 
+std::string EffectLabel(const State& state, Item item)
+{
+    const std::string energy = FoodEnergyLabel(item);
+    if (energy.empty() || !state.fixedEstate || FoodClassOf(item) != FoodClass::Meal) return energy;
+    return energy + " \xC2\xB7 Well fed until " + FormatHour(state.hour + WellFedHours);
+}
+
+std::string WellFedBadge(const State& state)
+{
+    return IsWellFed(state) ? "Well fed until " + FormatHour(state.wellFedUntilHour) : std::string();
+}
+
 void WriteSaveSection(std::ostream& output, const State& state)
 {
     if (IsWellFed(state)) output << SaveTag << ' ' << state.wellFedUntilHour << '\n';

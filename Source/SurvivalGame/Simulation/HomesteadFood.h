@@ -35,6 +35,13 @@ std::string EstateRefusal(const State& state, Item item);
 // 2:30 PM." Call only after EstateRefusal came back empty.
 std::string EatOnEstate(State& state, Item item);
 
+// What one would do if she ate it now, for the shop and the pack before she eats: "+12 Energy" for a
+// Snack, and on the estate "+40 Energy · Well fed until 2:30 PM" for a Meal (the clock time is now +
+// WellFedHours; the book and shop pause the clock while she reads it). Empty for anything not food.
+std::string EffectLabel(const State& state, Item item);
+// The HUD's Well fed badge: "Well fed until 2:30 PM" while it lasts, otherwise empty.
+std::string WellFedBadge(const State& state);
+
 void WriteSaveSection(std::ostream& output, const State& state);
 // Reads the section after its tag. A non-finite expiry, or one past the save's hour + WellFedHours
 // (no meal lasts longer), is corrupt: returns false. One at or before the hour has simply run out.
