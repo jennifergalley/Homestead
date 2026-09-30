@@ -27,7 +27,8 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadEstatePublicRoad.cpp
     Source/SurvivalGame/Simulation/HomesteadTravel.cpp
     Source/SurvivalGame/Simulation/HomesteadGardenTarget.cpp
-    Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.cpp)
+    Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.cpp
+    Source/SurvivalGame/Simulation/HomesteadCoveRouteKit.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
 target_compile_features(HomesteadSimulation PUBLIC cxx_std_17)
 set_target_properties(HomesteadSimulation PROPERTIES CXX_EXTENSIONS OFF)

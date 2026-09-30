@@ -3,6 +3,7 @@
 // path grade and Props' step kit, protected wherever it's steep, and clear of the river, trees and forage.
 #include "../Source/SurvivalGame/Simulation/HomesteadEstate.h"
 #include "../Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.h"
+#include "../Source/SurvivalGame/Simulation/HomesteadCoveRouteKit.h"
 #include "../Source/SurvivalGame/Simulation/HomesteadSimulation.h"
 
 #include <algorithm>
@@ -300,6 +301,62 @@ int main()
     for (const CoveRouteFlight& f : route.flights)
         if (Distance(f.TreadPivot(f.treads), route.stations[head].position) < 150.0) pointsDown = YawDifference(cliff.yaw, f.yaw + 180.0) < 5.0;
     Check(pointsDown, "its arm points down the steps", cliff.yaw);
+
+    // Props' kit on the route (HomesteadCoveRouteKit): one block per tread, the landings covered end to end by
+    // whole slabs, every kerb, rail bay and fingerpost, and a pawn blocker along every rail bay.
+    {
+        const CoveKitLayout& kit = EstateCoveRouteKit();
+        const int treads = kit.Count(CoveKitPiece::StepA) + kit.Count(CoveKitPiece::StepB) + kit.Count(CoveKitPiece::StepC);
+        Check(treads == route.Steps(), "a block per tread", treads);
+        Check(kit.Count(CoveKitPiece::StepA) > 0 && kit.Count(CoveKitPiece::StepB) > 0 && kit.Count(CoveKitPiece::StepC) > 0,
+              "all three tread variants used");
+        Check(kit.Count(CoveKitPiece::Kerb) == static_cast<int>(route.kerbs.size()), "a piece per kerb");
+        const int rails = kit.Count(CoveKitPiece::RailLevel) + kit.Count(CoveKitPiece::Rail26) + kit.Count(CoveKitPiece::Rail28)
+            + kit.Count(CoveKitPiece::Rail30);
+        Check(rails == static_cast<int>(route.rails.size()), "a piece per rail bay", rails);
+        Check(kit.blockers.size() == route.rails.size(), "a blocker per rail bay", static_cast<double>(kit.blockers.size()));
+        Check(kit.Count(CoveKitPiece::Fingerpost) == 2, "two fingerposts");
+        double covered = 0.0, total = 0.0, worst = 1.0;
+        for (const CoveRouteLanding& l : route.landings) total += l.length;
+        for (const CoveKitPlacement& p : kit.pieces)
+        {
+            if (p.piece == CoveKitPiece::LandingSlab)
+            {
+                covered += p.scaleX * CoveKitLandingSlabCm;
+                worst = std::max(worst, std::max(p.scaleX, 1.0 / p.scaleX));
+            }
+            const bool rail = p.piece == CoveKitPiece::RailLevel || p.piece == CoveKitPiece::Rail26 || p.piece == CoveKitPiece::Rail28
+                || p.piece == CoveKitPiece::Rail30;
+            if (rail)
+            {
+                Check(std::fabs(p.scaleX - p.scaleZ) < 1e-9, "a rail bay scales X and Z together", p.scaleX);
+                Check(p.scaleX > 0.3 && p.scaleX < 1.9, "rail bay scale", p.scaleX);
+                Check(std::fabs(std::fabs(p.scaleY) - 1.0) < 1e-9, "rail bays mirrored, never stretched across", p.scaleY);
+            }
+            else
+                Check(p.scaleY == 1.0 && p.scaleZ == 1.0, "only rails mirror or stretch in Z", p.scaleY);
+        }
+        Check(std::fabs(covered - total) < 0.5, "the slabs cover every landing end to end", covered - total);
+        Check(worst <= 1.2, "no slab stretched or squeezed more than 20%", worst);
+        int mirrored = 0;
+        for (const CoveRouteRail& r : route.rails) mirrored += r.mirrored ? 1 : 0;
+        int mirroredPieces = 0;
+        for (const CoveKitPlacement& p : kit.pieces) mirroredPieces += p.scaleY < 0.0 ? 1 : 0;
+        Check(mirroredPieces == mirrored, "the flagged bays mirrored", mirroredPieces);
+        for (size_t i = 0; i < kit.blockers.size() && i < route.rails.size(); ++i)
+        {
+            const CoveKitBlocker& b = kit.blockers[i];
+            const CoveRouteRail& r = route.rails[i];
+            const double rise = r.length * std::tan(r.pitch * Pi / 180.0);
+            Check(b.z + b.halfHeight >= r.z + rise + 95.0, "the blocker stands above the top rail at its high end", b.z + b.halfHeight);
+            Check(b.z - b.halfHeight <= r.z, "the blocker reaches down to the path", b.z - b.halfHeight);
+            Check(std::fabs(b.halfLength * 2.0 - r.length) < 0.01, "the blocker runs the bay's length", b.halfLength);
+            const CoveRoute::Nearest n = route.NearestTo(b.centre);
+            Check(n.distanceCm >= 0.5 * CoveRouteClearWidthCm, "no blocker in the clear width", n.distanceCm);
+        }
+        std::printf("cove kit: %d treads, %d landing slabs (worst stretch %.2f), %d kerbs, %d rail bays (%d mirrored), %zu blockers\n",
+                    treads, kit.Count(CoveKitPiece::LandingSlab), worst, kit.Count(CoveKitPiece::Kerb), rails, mirrored, kit.blockers.size());
+    }
 
     std::printf("HomesteadCoveRouteTests: %zu stations, %.0f m, %zu flights, %d steps, %zu landings, %zu kerbs, "
                 "%zu rail bays; %d failures\n", route.stations.size(), route.Length(), route.flights.size(), route.Steps(),

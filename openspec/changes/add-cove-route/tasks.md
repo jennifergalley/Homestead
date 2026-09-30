@@ -18,5 +18,5 @@
 
 ## 3. Kit placement (Water, after Props' `add-cove-route-kit` import)
 
-- [ ] 3.1 Runtime builder: flights, landings, kerbs, rail bays (mirrored where flagged), pawn-only rail blockers and fingerposts from `EstateCoveRoute()`.
+- [x] 3.1 Runtime builder: flights, landings, kerbs, rail bays (mirrored where flagged), pawn-only rail blockers and fingerposts from `EstateCoveRoute()`. _Source 2026-09-30, uncompiled: `Simulation/HomesteadCoveRouteKit` lays the kit out (191 treads in three variants, 33 landing slabs covering each landing with the least stretch, worst 1.20; 152 kerbs; 84 rail bays, 39 mirrored, scaled X and Z to plan length; 84 pawn-only blockers from 20 cm under the path to 120 cm over the top rail; 2 fingerposts; native checks). `HomesteadWorldCoveRoute.cpp` places it after the road bridge when every mesh loads from `/Game/SurvivalGame/Environment/Props/{CoveSteps,CoveKerb,CoveRail,Fingerpost}`, and otherwise logs what's missing and leaves the graded path. Corner wedges aren't placed yet: the landing data doesn't record the turns. Once Props' import lands there's no editor step._
 - [ ] 3.2 PIE: walk it down and up with the gamepad and keyboard, walk into the rails and kerbs, and check the cove and gate views.

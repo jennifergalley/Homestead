@@ -361,6 +361,12 @@ private:
     bool bRoadBridgeBuilt = false;
     UPROPERTY()
     FHomesteadWorldVisual RoadBridgeVisual;
+    // The cove route's step kit (HomesteadWorldCoveRoute.cpp), built once with the estate scenery when Props'
+    // meshes are imported.
+    void BuildCoveRoute();
+    bool bCoveRouteBuilt = false;
+    UPROPERTY()
+    FHomesteadWorldVisual CoveRouteVisual;
     UPROPERTY()
     TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> EstateScenery;
     // Hides low cover (bushes, ferns, grass, cobbles) wherever a placed piece now stands, so none
