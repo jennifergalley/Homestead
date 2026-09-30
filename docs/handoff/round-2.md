@@ -1274,6 +1274,15 @@ not claim early Energy is fully solved.
   not proof of a hard hang. Likely destination-proxy streaming remains unproven. A later fix should
   explicitly source destination streaming, emit periodic diagnostics, and wall-clock-bound the hold
   with safe-position restoration rather than placing her through missing collision.
+
+  **Ground-hold repair `89e3a73f` (Integration branch only):** source now adds a high-priority
+  World Partition source at the destination, traces Landscape Pawn collision and floor, keeps the
+  heroine at her safe origin while collision arrives, emits 10-second diagnostics, and uses a
+  real-time 90-second Tick timeout to restore position, movement and camera rather than dropping
+  her onto the heightfield. It cleans up on save/new/retry/end; EstateSmoke has source assertions
+  for streaming-actor creation/release. It is **not on main, compiled or runtime-verified**. The
+  timeout cannot fire while the game thread itself is not ticking, so acceptance must demonstrate
+  delayed collision and safe restoration in an isolated save without modifying Jenny's live save.
 - **Starter chest and wardrobe** — **main-integrated `a785a417`, not packaged or shipped.** Fresh-game
   PIE verified the standing-room chest's pail, four branches, 3 pasties, 2 bread and seven garments;
   the tunic stays worn. It runs only in `NewEstateGame`, never restocks on load and uses normal chest
