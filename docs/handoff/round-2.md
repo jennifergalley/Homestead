@@ -107,6 +107,21 @@ urgent mailbox to ask Menu to close only its own editor. The durable response is
 [`docs/handoff/README.md`](README.md#jennys-packaged-game-memory-safety); this is not a user-build
 failure or a shortcut retarget.
 
+### Highest priority: catastrophic bob groom artifacts
+
+**Props diagnosis/fix is top priority above the hotbar editor.** Jenny-provided attachment
+`5d457688...png` shows a single long diagonal rod emitted from the bob; `2e0ab511...png` shows
+flattened fan ribbons extending metres horizontally from its back. Do not copy attachments or large
+artifacts to `C:`. Jenny is currently playing Shipping PID 26828, so Props does no UE/UBT until a safe
+slot after natural exit; Integration coordinates only and Menu hotbar is paused.
+
+Headless source clues: `HomesteadCharacter.cpp` applies MetaHuman groom override air drag 1, bend
+damping .05, stiffness .15 and stretch 1; passive groom LOD map `{1,3,5,7}`; `UpdateHairMotion`
+resets simulation on hitch/pause/head jump; motion-velocity CVars use `.5/.4 -> .65/.45`; styles call
+`SetGroomAsset` / Binding. Root cause is unknown. Reproduce in an isolated editor/copied-save session
+when safe, measure strand bounds, and validate any remedy across styles, LODs and simulation before a
+package. Existing hair reset guidance is not sufficient; no shipped claim.
+
 ### Development firewall prompts / offline Shipping candidate
 
 Development packaged automation can trigger recurring Windows Firewall prompts: UE5.8's in-process
