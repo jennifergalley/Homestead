@@ -189,6 +189,12 @@ Integration merge notes:
 - All worktrees share one `.git`, so a lane's local branch can be merged without a push. Lanes
   sometimes rewrite history before pushing (for example ocean `e777db71` became `8a407908`), so
   always merge the exact SHA named in the latest `[ready]`, not the branch tip you saw earlier.
+- **Generated placement safety:** any terrain/forage/road generator that emits saved placement IDs
+  freezes the committed `id -> kind -> position` mapping. Never compact accepted candidates when an
+  earlier candidate becomes rejected: retain reserved/skipped holes, allocate additions as new IDs and
+  provide a regeneration regression proving existing cleared/harvested old-save edits still map to the
+  same placement. Integration blocks the rebake/merge until that proof exists; current saves are not
+  retroactively corrupt merely because this gate was added.
 - Incidental `.uasset` re-saves block merges ("Your local changes ... would be overwritten"). Close
   the editor, then `git checkout -- Content` for files you didn't mean to change.
 - Run the integration check with `Scripts\Test-Native.ps1 -Configuration Release` (about 3 min).
