@@ -559,11 +559,17 @@ pending, so this does not claim early Energy is fully solved.
   200 cm-radius swing probe: a dead-ahead 285 cm cane can be in Simulation reach but show no prompt or
   swing target, while a nearer weed/grass steals focus.
 
-  After the core hoe/pail test, Props' next code slot makes targeting forward-biased at 300 cm and
-  arbitrates competing weeds. Integration verifies isolated copied-save PIE at 285 cm, an overlapping
-  weed and F5/F9; RT/LMB with worn billhook should clear 2–3 canes in one swing, while bare A/E cannot.
-  World mesh removal/save edits already should work. Add spring leaf-out or an appropriate cue and
-  resolve any missing prompt; this remains a plausible cause, not proof for Jenny's pictured cane.
+  **Props headless partial:** `bcf29b85` makes aim focus and swing share a forward-biased 300 cm
+  tool-kind target; `649336f4` makes worn Sapling one logical clear with two physical blows; and
+  `bccb9310` refuses under-tier targets without animation or SFX. Native 9/9 covers an aimed 285 cm
+  cane versus nearer weed/grass, behind/301 cm refusal, scythe choosing weed, gated iron thicket,
+  save, and one worn-Sapling 3–4 Branch + 1 Kindling / 1.5 Energy yield once through reload.
+
+  Food's test hunk conflicts with a naive cherry-pick, so Props supplied pre-resolved
+  food+bramble `42a63b8f`, native 9/9 with a dry-run clean merge on `main` `77ff5837`; Integration
+  must avoid duplicate food commits if they are already on main. Required before `[ready]`: PIE at
+  285 cm, a two-blow/one-logical sapling, silent under-tier refusal and F5/F9. This remains a plausible
+  cause, not proof for Jenny's pictured cane.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` shipped in the 4 PM playable build.** Clearable
   slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
