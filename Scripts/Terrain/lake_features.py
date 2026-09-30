@@ -13,7 +13,7 @@ import numpy as np
 # EstateSceneryKinds indices (HomesteadWorld.cpp): no new kinds are claimed.
 TALUS, BOULDER, GRASS_TALL, GRASS_MID = 5, 6, 10, 11
 CLEAR_WATER_M = 1.0        # nothing grows closer than this outside the shore (the wet lip)
-CLEAR_PATH_M = 1.6         # half width kept clear along the footpath
+CLEAR_PATH_M = 2.4         # half width kept clear along the footpath (a 2 m track plus its verges)
 MARGIN_SEED = 4119
 RECORD = np.dtype([("k", "u1"), ("pad", "V3"), ("x", "<f4"), ("y", "<f4"), ("yaw", "<f4"), ("s", "<f4")])
 

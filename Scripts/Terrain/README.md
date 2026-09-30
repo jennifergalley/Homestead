@@ -185,6 +185,11 @@ An upland pool north-west of the farm (up-left on the north-up estate map), cent
 - a cut bank with granite on the uphill side, and a low turfed pond bay on the downhill side;
 - a 1 in 10 landing on the farm side, and a footpath from the farm's north fence (-160, -688) to it.
 
+The footpath is the dashed trail on the field-book map, and it shows on the ground: `lake_features.py` clears
+the scatter 2.4 m either side (a 2 m track and its verges), and `bake_ground.py` wears a bare track about
+2 m wide (grass cut, straw-short verges) and lifts the canopy mask along it, so the trodden soil shows
+through the tree belt's leaf litter north of the farm instead of disappearing under it.
+
 It writes the heightfield, PNG and work npy, and "lake" in `estate_layout.json` (shore, level, landing,
 path, pathProfile, graded). Once "graded" is set it only reapplies the scenery: to regrade, restore the
 heightfield and remove "lake". `lake_features.py` clears the scatter from the water, its lip and the path
