@@ -389,7 +389,10 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
         {
             *Before = Controller->Simulation().Count(Item);
             *Hunger = Controller->State().hunger;
-            const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+            FHomesteadRow HotbarRow;
+            const FHomesteadRow* Row = Controller->NativeMenu->GetFocusedRegionName() == TEXT("Hotbar")
+                && Controller->MenuHotbarRow(Controller->NativeMenu->GetFocusedHotbarSlot(), HotbarRow)
+                ? &HotbarRow : Controller->NativeMenu->GetSelectedSubject();
             if (!Row || !Controller->MenuItemAction(*Row, EHomesteadItemAction::Primary,
                 1, Controller->Simulation().GetRevision()))
                 Finish(false, TEXT("The selected food action is unavailable."));
@@ -402,6 +405,20 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
     Add(TEXT("Close the pack after the meal"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsBookOpen(); });
+}
+
+bool AHomesteadSmokeTest::ChooseFullLoopHotbarItem(Homestead::Item Item)
+{
+    if (Controller->ChooseOnHotbar(Item)) return true;
+    // This fixture gathers more than ten distinct stacks. Free a cell using the same inventory
+    // authority a player uses, then select the seed/food through the real first-row hotbar.
+    if (Controller->FirstEmptyHotbarCell() != INDEX_NONE || Controller->Simulation().Count(Item) <= 0)
+        return false;
+    const auto Move = Controller->Sim.MoveFromPackRow(Homestead::PackRowSize - 1, 0, 0,
+        Controller->Sim.GetRevision());
+    if (!Move) return false;
+    Results.Add(TEXT("CONTROLLED moved hotbar slot 0 into the pack to make room for a required seed or food."));
+    return Controller->ChooseOnHotbar(Item);
 }
 
 void AHomesteadSmokeTest::PrepareFullLoop()
@@ -621,7 +638,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, SeedsBefore]()
         {
             *SeedsBefore = Controller->Simulation().Count(Homestead::Item::Seeds);
-            Controller->ChooseOnHotbar(Homestead::Item::Seeds);
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Seeds))
+            { Finish(false, TEXT("Could not put the foraged seeds in the real hotbar row.")); return; }
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, SeedsBefore]()
@@ -666,7 +684,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, StockBefore]()
         {
             *StockBefore = {Controller->Simulation().Count(Homestead::Item::Berries), Controller->Simulation().Count(Homestead::Item::Seeds)};
-            Controller->ChooseOnHotbar(Homestead::Item::Berries);
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Berries))
+            { Finish(false, TEXT("Could not put berries in the real hotbar row.")); return; }
             Tap(EKeys::Gamepad_FaceButton_Left);
         }, Unchanged);
     Add(TEXT("Gamepad A with no seed chosen sows nothing and spends nothing"),
@@ -686,7 +705,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             *BerrySeedStock = Controller->Simulation().Count(Homestead::Item::Seeds);
             *SecondaryStarts = PickingStarts();
             // X / F only weeds (Jenny); a berry is sown only when it's the chosen seed.
-            Controller->ChooseOnHotbar(Homestead::Item::Berries);
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Berries))
+            { Finish(false, TEXT("Could not put berries in the real hotbar row.")); return; }
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, BerryPlotId, FruitBefore, BerrySeedStock, SecondaryStarts, PickingStarts]()
@@ -1205,7 +1225,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, Garden]() { Tap(EKeys::Gamepad_FaceButton_Right); Teleport(Garden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
     Add(TEXT("Plant the next generation using the harvested seeds (Seeds chosen on the hotbar)"),
-        [this]() { Controller->ChooseOnHotbar(Homestead::Item::Seeds); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() {
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Seeds))
+            { Finish(false, TEXT("Could not put harvested seeds in the real hotbar row.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
         [this]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
