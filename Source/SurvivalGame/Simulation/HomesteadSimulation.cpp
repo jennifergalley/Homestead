@@ -618,7 +618,7 @@ Result ContainerAccess(const State& state, int container, Point player)
 bool CanAllocate(int next) { return next > 0 && next < std::numeric_limits<int>::max() - 1; }
 int InventoryCategory(Item item) { return ItemSortRank(item); }
 
-bool ReconcileLayout(State& state, int container)
+bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
 {
     auto* layout = ContainerLayout(state, container);
     const auto* stock = ContainerStock(state, container);
@@ -681,8 +681,9 @@ bool ReconcileLayout(State& state, int container)
     {
         // A stack used up leaves its cell empty; arrivals then fill the first empty cells.
         PackRowRules::Prune(state.packRow, *layout);
-        for (const auto& entry : arrivals)
-            if (!PackRowRules::TakeFirstEmpty(state.packRow, entry)) break;
+        if (fillPackRow)
+            for (const auto& entry : arrivals)
+                if (!PackRowRules::TakeFirstEmpty(state.packRow, entry)) break;
     }
     return true;
 }
@@ -1314,7 +1315,7 @@ bool Simulation::TryAdjust(const Inventory& change)
     if (!StockValid(updated)) return false;
     State candidate = state_;
     candidate.inventory = updated;
-    if (!ReconcileLayout(candidate, 0) || !ValidateInventory(candidate)) return false;
+    if (!ReconcileLayout(candidate, 0, fillPackRow_) || !ValidateInventory(candidate)) return false;
     // Existing callers retain resource/plot/structure pointers across this helper.
     state_.inventory = candidate.inventory;
     state_.inventoryLayout = std::move(candidate.inventoryLayout);
@@ -1332,7 +1333,7 @@ Result Simulation::CheckRevision(std::uint64_t expectedRevision) const
 }
 Result Simulation::CommitInventory(State&& candidate, const char* message)
 {
-    if (!ReconcileLayout(candidate, 0))
+    if (!ReconcileLayout(candidate, 0, fillPackRow_))
         return {false, "Inventory group identities are exhausted.", ResultCode::Unavailable, revision_};
     for (const auto& piece : candidate.structures)
         if (piece.kind == Piece::Chest && !ReconcileLayout(candidate, piece.id))
