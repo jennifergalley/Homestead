@@ -9,6 +9,9 @@
 // map to centimetres in the plane through her head; a strand shoved off the scalp shows as a long reach.
 #include "HomesteadCharacter.h"
 
+// Development only: none of this is compiled into Shipping builds.
+#if !UE_BUILD_SHIPPING
+
 #include "Components/SceneCaptureComponent2D.h"
 #include "Containers/Ticker.h"
 #include "Engine/TextureRenderTarget2D.h"
@@ -202,3 +205,5 @@ static FAutoConsoleCommandWithWorldAndArgs GHairWatchCommand(
             return false;
         }), HairLab::SampleSeconds);
     }));
+
+#endif // !UE_BUILD_SHIPPING
