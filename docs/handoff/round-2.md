@@ -112,8 +112,9 @@ failure or a shortcut retarget.
 **Props diagnosis/fix is top priority above the hotbar editor.** Jenny-provided attachment
 `5d457688...png` shows a single long diagonal rod emitted from the bob; `2e0ab511...png` shows
 flattened fan ribbons extending metres horizontally from its back. Do not copy attachments or large
-artifacts to `C:`. Props now has the exclusive editor/UBT slot, guarded at 4.8 GB physical / 27.6 GB
-commit; no shipped claim.
+artifacts to `C:`. Props is read-only advisor. Integration owns a bounded, one-Unreal-process-at-a-time
+old/new Shipping A/B on an isolated copied save; no user desktop, save, package or shortcut may be
+touched by that investigation.
 
 **Substantive diagnosis:** optional groom asset/binding existence is not the cause. A global long-hair
 simulation override (bend .15, radius 5 cm, drag 1) was imposed on stock BobStraight (bend .01, radius
@@ -136,11 +137,19 @@ The fast-travel attempt did not advance time/position, so it is untested; pixel 
 Evidence stays in `E:\CopilotScratch\e251051b-...\shots\bob-ab-contact.png` and
 `bob-lods-contact.png`, not copied into session/C: artifacts.
 
+The extended isolated A/B remains **blocked, not passed**. Old Shipping with RT on and
+`-RenderOffscreen` launched healthy for 25 seconds but exposed no HWND, so it accepted no input and
+yielded no image capture. In copied-save PIE with RT off, BobStraight loaded at the exact save
+location and LODSync reported body 0/groom 1; before allocating a 1024² orthographic depth mask,
+the editor had only 1,058 MB free RAM. Integration stopped its own editor under the pressure rule;
+free memory recovered to 8,679 MB. There is therefore no old/new visual reproduction, no bounds
+measurement and no RT-on PIE result.
+
 The real physics correction is on main, but catastrophic Jenny-visible groom failure remains
-empirically unproven: request her next-build playtest and plan a prolonged isolated Shipping repro
-after the split build window. No packaged player build or shortcut changed. Editor is closed/no Unreal,
-physical memory 14.9 GB. Existing hair reset guidance is not sufficient; never use a global
-bald/static fallback.
+empirically unproven. The next safe experiment is a LOD 1↔3 flip with a ShowOnly SceneDepth mask
+when memory is available; it must distinguish no reproduction from a cure. The delivered Shipping
+shortcut is unchanged by this attempted investigation. Existing hair reset guidance is not
+sufficient; never use a global bald/static fallback.
 
 ### Overnight priority: split the four huge hot files
 
