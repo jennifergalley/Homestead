@@ -189,8 +189,15 @@ greeting opened, Map Town → Manor advanced 7h30, bed sleep reached dawn, and F
 restored the saved position and Bob groom. Standalone Smoke passed at 57.3 fps p99 16.8 ms.
 
 No rods were seen, but this does **not** establish a groom cure: the earlier old/new A/B did not
-reproduce the failure. Shop trade was not confirmed because later door/shopkeeper focus failed.
-The report also does not separately prove front-and-behind bramble selection, saved-clear state,
+reproduce the failure. The original door/shopkeeper-focus failure was a `HomesteadOpenStore`
+relocation confound, not a trade regression: a fresh copied-save PIE check at the real counter
+passed `E` → greeting → Enter shop, sold one Meadow herb (6 → 5; $10.87 → $10.97), bought one
+Turnip seed ($10.97 → $10.77; new pack seed 1), then F5/F9 restored herb 5, seed 1 and $10.77
+while rejecting a transient +2 Branch grant. Evidence remains in Integration `E:` scratch
+(`shop-fresh-trade.png`, `shop-sale-settled.png`, `shop-seed-price.png`, `shop-after-f9.png`,
+`shop-purse-after-f9.png`), never copied to `C:`.
+
+The report still does not separately prove front-and-behind bramble selection, saved-clear state,
 harvest/held-produce timing, Field Book Build/gamepad-mouse focus, long-hair LOD/animation/camera
 coverage, or retained woodland resources/terrain. Those gaps remain required evidence.
 
@@ -206,20 +213,18 @@ coverage, or retained woodland resources/terrain. Those gaps remain required evi
    this must not be reported as a visual cure unless it reproduces and eliminates the artifact.
 5. Confirm retained woodland spawn, resources and terrain.
 
-Integration has started `Build\Playtest-0929split-dev`, the six Development suites and copied-save
-smoke under a machine-wide UAT lock, then will consider a Shipping `-ReuseCooked` no-listener
-candidate only if those pass. The original user save, current Shipping build and Estate shortcut
-remain untouched; no package or shortcut result exists yet.
+All six Development suites now pass in `Build\Playtest-0929split-dev` at `main` `b3576693`:
+Smoke 57.67, Clearing 54.06, Hotbar 53.97, NativeMenu 56.82, FullLoop 54.58 and EstateSmoke woods
+59.96 fps. Integration next runs the copied-save Development packaged smoke and Shipping
+`-ReuseCooked` no-listener proof. The original Shipping save remains unchanged (SHA begins
+`F816C870` and ends `5EB8`); current Shipping and the Estate shortcut remain untouched, with no
+Shipping package or shortcut result yet.
 
-**Development package status (partial):** `Build\Playtest-0929split-dev` succeeded; packaged
-Smoke, Clearing, Hotbar, NativeMenu and FullLoop pass. EstateSmoke is still running. NativeMenu and
-FullLoop do **not** cover Pascoe buy/sell (their trade coverage is storage-only), so those passes
-do not close the shop-trade gap. The earlier copied-save PIE focus failure followed
-`HomesteadOpenStore`, which deliberately relocates the shop until a save reload; treat it as a test
-setup confound, not a proven trade regression. After EstateSmoke, Integration will use a fresh
-scratch Estate-save copy to physically open the real counter, Continue, sell and buy, compare
-money/item deltas, and F5/F9—without touching Jenny's save. A dedicated packaged Pascoe trade
-route remains desirable after this evidence is collected.
+**Development package coverage:** the six suite passes above preserve the split's existing packaged
+coverage. NativeMenu and FullLoop remain storage-trade-only, so the dedicated fresh copied-save PIE
+real-counter sale/purchase/F5/F9 check above supplies the current Pascoe evidence. A dedicated
+packaged Pascoe trade route remains desirable, but the prior focus failure is no longer an open
+functional gap.
 
 ### Development firewall prompts / offline Shipping candidate
 
