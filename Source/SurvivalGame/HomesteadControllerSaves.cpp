@@ -76,6 +76,7 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
 {
     if (bTestResetRequired) { Notify(TEXT("Choose an explicit test reset before saving a new woodland."), true); return false; }
+    if (bPendingGroundSnap) { Notify(TEXT("Wait until she is safely on the ground before saving."), true); return false; }
     if (!bWorldReady) { Notify(TEXT("The world is not ready; no save files were changed."), true); return false; }
     if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
@@ -206,6 +207,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     Appearance.Outfit = Save.Outfit;
     Appearance.BodyPreset = Save.BodyPreset;
     SanitizeHotbar(Save.HotbarSlots, Save.SelectedHotbarSlot, Save.HotbarLayout);
+    EndGroundSnap();
     PendingLocation = Save.PlayerLocation;
     PendingRotation = Save.ViewRotation;
     bFreshTerrainSpawn = false;
@@ -346,6 +348,7 @@ void AHomesteadController::RetryCheckpoint()
         Avatar->ResetSprint();
     }
     Appearance = SessionAppearance;
+    EndGroundSnap();
     PendingLocation = SessionLocation;
     PendingRotation = SessionRotation;
     bFreshTerrainSpawn = false;
@@ -387,6 +390,7 @@ void AHomesteadController::NewGame()
     }
     ResetHotbar();
     ControlsHint.Restart();
+    EndGroundSnap();
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->ResetSprint();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);

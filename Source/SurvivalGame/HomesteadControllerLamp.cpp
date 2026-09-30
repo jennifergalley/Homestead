@@ -11,12 +11,14 @@ using HomesteadControllerText::Text;
 
 void AHomesteadController::MenuRefillLamp()
 {
+    if (RejectPendingGroundSnapAction()) return;
     Notify(Sim.RefillLamp());
     LastLampOil = Sim.LampOil();
 }
 
 void AHomesteadController::HomesteadLampOil(float Hours)
 {
+    if (RejectPendingGroundSnapAction()) return;
     Sim.SetLampOil(Hours);
     Notify(FString::Printf(TEXT("The lamp has %.1f hours of oil."), Sim.LampOil()));
 }

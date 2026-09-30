@@ -8,6 +8,7 @@
 
 bool AHomesteadController::MenuPlaceInHotbar(const FHomesteadRow& Row, int32 Cell)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (Cell < 0 || Cell >= Homestead::PackRowSize)
     {
         Notify(TEXT("Choose one of the ten hotbar slots."), true);
@@ -37,6 +38,7 @@ bool AHomesteadController::MenuPlaceInHotbar(const FHomesteadRow& Row, int32 Cel
 
 bool AHomesteadController::MenuMoveHotbarSlot(int32 From, int32 To)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     const auto* Entry = HotbarEntry(From);
     // Picking up an empty cell is just nothing to move.
     if (!Entry) return false;
@@ -49,6 +51,7 @@ bool AHomesteadController::MenuMoveHotbarSlot(int32 From, int32 To)
 
 bool AHomesteadController::MenuMoveHotbarToPack(int32 Cell, const FHomesteadRow* Target)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (!HotbarEntry(Cell)) return false;
     Homestead::Result Result;
     if (Target && Target->ContainerId > 0)
