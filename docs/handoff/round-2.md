@@ -837,6 +837,13 @@ requirement.
   through `MenuHotbarRow`. Editor/Game rebuild and targeted non-packaged Smoke pass all 48 steps,
   including berry navigation/eat. The distinct recut Development candidate and packaged six suites
   remain pending; the shortcut is unchanged.
+
+  **v2 Development UAT (partial):** minimum free memory was 2.57 GB; packaged Smoke and Clearing
+  pass. Hotbar hit a first-run known sprint flake, then passed on one rerun. FullLoop exposed a
+  second test fixture assumption: its first 10 real stacks fill the row, leaving no auto-pin slot
+  for seed. Test-only `f7f9c957` uses production `MoveFromPackRow` to make room without changing
+  stock; Editor/Game rebuild and targeted FullLoop pass. Integration is recutting a distinct v3
+  Development candidate and all six packaged suites; no Shipping or shortcut claim follows yet.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
