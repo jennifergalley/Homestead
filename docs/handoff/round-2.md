@@ -82,24 +82,22 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current Shipping delivery (2026-09-29):** corrected Development `Build\Playtest-0929late` at
-`main` `af97075f` passed six packaged suites (Smoke 57.8, Clearing 52.8, Hotbar 53.0, NativeMenu
-55.6, FullLoop 54.5, EstateSmoke woods 60 fps), and a copied 19:19 Estate save loaded offscreen at
-the manor with no new errors. Shipping candidate
-`Build\Releases\20260929-late-shipping\Windows` has five cooked pak/utoc/ucas containers
-hash-identical to Development, zero endpoints in 301 owned-PID TCP/UDP samples, `shipping=true` /
-`traceCompiled=false`, copied Estate F5/F9 MD5 match, Lit heroine 637 ticks and candidate-local
-`UserDir` writes only.
+**Current Shipping delivery (Phoenix, `main` `e5877da8`):** `Homestead Estate.lnk` is retargeted
+and ShellLink-read-back verified to
+`Build\Releases\20260930-phoenix-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
+(SHA `8B0410A4DBD9C801B9FFDBB33BBB872960C0853BBEFD38D55F84068DD102021F`). The
+`-ReuseCooked` staging output contains only `SurvivalGame-Win64-Shipping.exe`, so Integration made a
+candidate-local hard-link `JennysHomesteadGame.exe` alias and verified the same SHA before shortcut
+promotion. Estate-map arguments, candidate-local `-UserDir`, working directory and icon are retained;
+the prior link is backed up on `E:` and `Homestead.lnk` remains MVP-untouched.
 
-`Homestead Estate.lnk` is now retargeted and ShellLink-read-back verified to a hard link of Shipping
-SHA `5A446A744967172AAE9BAAD9598973742EB93CABD6F31594C0240EFF918C7171`, with Estate map and
-candidate-local `-UserDir`, original icon and Win64 working directory retained. Before the switch,
-Jenny's 0929eve Estate save and Windows config/Input were hash-identical to a staged 19:19 snapshot;
-the originals remain unchanged. A scratch `-UserDir` offscreen run confirmed the same hard link and
-shortcut args for 60 seconds with zero endpoints and writes only to scratch. `Homestead.lnk` remains
-MVP-untouched; Development late and evening builds remain rollback paths, and the old link is backed
-in Integration `E:` scratch. Probe harness defects and visible human startup caveat remain (see
-offline-startup); Menu field-book hotbar and Water garden outline remain excluded partials.
+Phoenix Development passed all six packaged suites. Shipping reuses five hash-identical cooked
+containers; copied-save F5/F9 passed; 175 owned-PID endpoint samples observed zero sockets. All 19
+saves plus GameUserSettings/Input match pre-promotion originals, including Manual
+`F816C870...5EB8`. The old Phoenix copied-save teleport ground-hold is a QA limitation, not visual
+door/forage acceptance or a proven Shipping bug. Visible human startup, manual physical gamepad and
+the hair rod/fan cure remain unobserved/inconclusive; the stale modular-equipment wrapper assertion
+is still not a full wrapper pass. Earlier Development/Shipping receipts remain rollback history.
 
 **Shared-memory warning (2026-09-29 20:19):** Jenny later launched the Shipping Estate while Menu
 editor PID 52420 remained open; Available MBytes fell to 143. Integration touched no process and used
@@ -933,7 +931,7 @@ requirement.
   720/4K chest-row screenshots and copied Jenny-save physical row swap/F5/F9 stock evidence still
   pass; DirNav step 53 Settings `visible=0` remains known.
 
-  **Coral Shipping delivered (`main` `e9c3d3d5`):** `Homestead Estate.lnk` now read-backs to
+  **Coral Shipping delivery (`main` `e9c3d3d5`, later superseded by Phoenix):** `Homestead Estate.lnk` then read-backs to
   `Build\Releases\20260930-coral-hotbar-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
   with SHA `7C65AAF0305556A74177B4C62D7C87FDFD5708ACAA95B388B432A54434B281EB`. Estate-map arguments,
   candidate-local `-UserDir`, working directory and icon are preserved; the prior link is backed up
@@ -1253,14 +1251,14 @@ not claim early Energy is fully solved.
   implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
   after its lane-A work.
 
-  **Approved recurrence branch `69827d75`, recook pending:** `IsRainDay` now uses SplitMix64 per
+  **Delivered recurrence (`69827d75`, included in Phoenix `main` `e5877da8`):** `IsRainDay` now uses SplitMix64 per
   ten-day block with one offset 1–2 and one 6–7 (day 0 dry; block 0's first rain remains day 1).
   Native coverage spans 10,000 days, spacing, all offset pairs, whole days, negative hours and
   save/reload. The first Development FullLoop failed only because its crop-wetting fixture skipped
   until `day % 3 == 1`; it now advances until `Homestead::IsRainDay(State.hour)` and retains the
   assertion that both plots become wet. Phoenix Development v2 subsequently passed all six packaged
-  suites. This remains branch-only until `69827d75` is integrated: it is a **test-fixture
-  correction, not a rain rollback or delivery claim**.
+  suites. This is a **test-fixture correction, not a rain rollback**; the 20% schedule is delivered
+  in Phoenix.
 
   A separate hidden copied-Estate-save QA run physically F5-saved (scratch hash changed), then
   key-7/F9 restored slot 1 and the prior game time; the source save remained untouched. Its later
