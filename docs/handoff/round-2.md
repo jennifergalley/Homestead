@@ -120,6 +120,8 @@ simulation override (bend .15, radius 5 cm, drag 1) was imposed on stock BobStra
 2.5 cm), UpdoBuns (bend .0075), UpdoBraids (radius .1 cm) and stock drag .1; clumped guides then
 stiffen/collide and push strands metres away. Clean checkpoint `95f4bfc3` sets
 `bOverrideSettings = (Style == 0)` and resets simulation on `SetGroomAsset`, leaving Style 0 unchanged.
+The groom asset data confirms optional Bob/Updo physics use bend .0075–.01, radius .1–2.5 cm and
+drag .1 before that assembled-style override.
 
 The remedy remains unverified until Props builds and empirically measures strand bounds across nine
 styles, LODs, rates and copied Estate save in the editor. Existing hair reset guidance is not
@@ -140,10 +142,15 @@ the hair checkpoint. Hair retains priority for the visual fix; hotbar and garden
 **Controller source-only checkpoint `7fbd3bff`:** based on `main` `4d16bded`,
 `HomesteadController.cpp` moves from 4,778 to 579 lines through 16 per-feature `.cpp` files and small
 named helper headers. All 185/185 member-definition bodies are byte-identical after newline
-normalization; `git diff --cached --check` is clean. There is **no native/Editor/Game compile** while
-Props owns the hair editor/UBT slot, so this is partial and unshipped. Architecture proceeds
-World-source-only; Integration later cherry-picks Controller alone, runs native Release plus
-Editor/Game unity, and returns the resulting base SHA before any World integration.
+normalization; `git diff --cached --check` is clean. **World source-only checkpoint `cc20cee5`** moves
+`HomesteadWorld.cpp` from 4,962 to about 188 lines with 71/71 bodies; **Menu source-only checkpoint
+`801c0329`** moves `UI/SHomesteadMenu.cpp` from 3,206 to about 270 lines with 96/96 bodies. All are
+diff-check clean but have **no native/Editor/Game compile** while Props owns editor/UBT. They are
+partial and unshipped.
+
+Controller/World/Menu remain Architecture's source lock; Character remains Props' hair lock.
+Integration waits for Props editor close, then cherry-picks and verifies each source move sequentially
+(native Release plus Editor/Game unity), returning a base SHA between commits before advancing.
 
 ### Development firewall prompts / offline Shipping candidate
 
