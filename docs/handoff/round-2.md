@@ -211,6 +211,16 @@ smoke under a machine-wide UAT lock, then will consider a Shipping `-ReuseCooked
 candidate only if those pass. The original user save, current Shipping build and Estate shortcut
 remain untouched; no package or shortcut result exists yet.
 
+**Development package status (partial):** `Build\Playtest-0929split-dev` succeeded; packaged
+Smoke, Clearing, Hotbar, NativeMenu and FullLoop pass. EstateSmoke is still running. NativeMenu and
+FullLoop do **not** cover Pascoe buy/sell (their trade coverage is storage-only), so those passes
+do not close the shop-trade gap. The earlier copied-save PIE focus failure followed
+`HomesteadOpenStore`, which deliberately relocates the shop until a save reload; treat it as a test
+setup confound, not a proven trade regression. After EstateSmoke, Integration will use a fresh
+scratch Estate-save copy to physically open the real counter, Continue, sell and buy, compare
+money/item deltas, and F5/F9—without touching Jenny's save. A dedicated packaged Pascoe trade
+route remains desirable after this evidence is collected.
+
 ### Development firewall prompts / offline Shipping candidate
 
 Development packaged automation can trigger recurring Windows Firewall prompts: UE5.8's in-process
