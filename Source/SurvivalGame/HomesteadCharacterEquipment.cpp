@@ -15,16 +15,19 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/IConsoleManager.h"
 
-// Where the scythe's blade lies, in the prop's frame (cm; scythe.py blade_rows relative to the lower
-// nib grip, the pivot): its heel, the middle of its back and its point. On level ground the mowing
-// clip (scythe_mow.py) carries it flat about 9 cm up; on a slope or a hump, it would cut into the
-// soil uphill and hang in the air downhill.
+// Where the scythe's blade lies, in scythe.py's coordinates (cm, relative to the lower nib grip, the
+// pivot): its back and its edge near the heel, in the middle and three quarters along, and its point
+// (scythe.py blade_rows). The mowing pose shows the prop mirrored (HomesteadScythe::Mirror), so these
+// hold as written: at the clip's 45 degree lean back and edge lie level, and on level ground the
+// clip (scythe_mow.py) carries the blade flat just above the soil. On a slope or a hump it would cut
+// into the soil uphill and hang in the air downhill.
 namespace MowGround
 {
-// The blade's back (spine) at heel, middle and point, in SM_Scythe's local space as measured in PIE
-// (the FBX export mirrors Y). These are the back, not the edge (about (45.8, -5.3, -94.2) mid-blade):
-// in the mowing lay the back is the blade's lowest part, so it is what must clear the ground.
-const FVector BladeSamples[] = {FVector(2.8f, -10.8f, -101.2f), FVector(42.2f, -9.5f, -98.4f), FVector(88.8f, 0.3f, -89.7f)};
+const FVector BladeSamples[] = {
+    FVector(6.3f, 11.0f, -100.9f), FVector(6.3f, 4.7f, -94.5f),
+    FVector(45.8f, 9.2f, -97.8f), FVector(45.8f, 5.2f, -93.8f),
+    FVector(67.3f, 5.5f, -94.5f), FVector(67.3f, 3.1f, -92.2f),
+    FVector(88.8f, -0.3f, -89.7f)};
 // Below this clearance (cm) the blade is lifted clear of the ground...
 constexpr float MinClearance = 3.0f;
 // ...and above this one (downhill) it is lowered just to it (a continuous target, so gentle downslopes
@@ -329,7 +332,11 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
     FVector Snath = Upper - Lower;
     Snath = (Snath - Nib * FVector::DotProduct(Snath, Nib)).GetSafeNormal();
     if (Nib.IsNearlyZero() || Snath.IsNearlyZero()) return;
-    FTransform TwoHanded(FRotationMatrix::MakeFromYZ(Nib, Snath).ToQuat(), Lower, Prop.GetComponentScale());
+    // scythe_mow.py's frame: the nib (prop +Y) along the right fist and the snath (+Z) toward the upper
+    // grip, in scythe.py's coordinates, so the prop is shown mirrored (HomesteadScythe::Mirror) as at
+    // rest; the ground probe (Rolled, below) places scythe.py points without the mirror.
+    const FVector Scale = Prop.GetComponentScale().GetAbs();
+    FTransform TwoHanded(FRotationMatrix::MakeFromYZ(Nib, Snath).ToQuat(), Lower, Scale * HomesteadScythe::Mirror);
     // Follow the ground: roll the whole scythe about the line through both nib grips, so both fists
     // stay on their nibs while the blade tilts clear of rising ground or down onto falling ground.
     const FVector NibLine = (Upper - Lower).GetSafeNormal();
@@ -349,7 +356,7 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
         // Solve on the unrolled lay, twice (the second pass corrects the first's small-angle guess).
         for (int32 Pass = 0; Pass < 2; ++Pass)
         {
-            const FTransform Rolled(FQuat(NibLine, WantRoll) * TwoHanded.GetRotation(), Lower, TwoHanded.GetScale3D());
+            const FTransform Rolled(FQuat(NibLine, WantRoll) * TwoHanded.GetRotation(), Lower, Scale);
             float Lowest = TNumericLimits<float>::Max(), LiftPerRadian = 0.0f;
             bool bAny = false;
             for (const FVector& Sample : MowGround::BladeSamples)

@@ -18,6 +18,8 @@ two fists while she mows (``AHomesteadCharacter::UpdateFellingHatchet``). SM_Scy
 (Scripts/Blender/Recipes/scythe.py): pivot at the lower nib's grip, the snath up +Z, the nibs out
 along -Y, the blade along +X from the heel with its edge toward -Y, and the blade set on the snath
 at the working lean (``LEAN``) so it lies flat when she holds the snath leaning back toward her.
+Everything here is in scythe.py's own coordinates. The Unreal import negates Y, so the game shows
+the prop mirrored in its local Y (``HomesteadScythe::Mirror``) to match.
 
 The clip has the felling clip's structure (``axe_fell.FRAMES``): the 'strike' keys are the blade
 crossing in front of her, where the grass falls, and the cycle from one stroke's end to the next

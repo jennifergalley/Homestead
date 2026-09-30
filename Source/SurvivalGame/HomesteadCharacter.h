@@ -29,6 +29,13 @@ namespace Homestead { struct Point; enum class Item : int; }
 
 enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds, Plant, Harvest, PullWeeds };
 
+// SM_Scythe is always shown with this local scale: the Unreal import negates Y, and the mowing clip
+// (scythe_mow.py) and both scythe poses are authored in scythe.py's own coordinates.
+namespace HomesteadScythe
+{
+inline const FVector Mirror(1.0f, -1.0f, 1.0f);
+}
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
 {
