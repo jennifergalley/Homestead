@@ -2253,10 +2253,15 @@ FString AHomesteadController::FocusActions() const
         for (const auto& Plot : State().plots)
             if (Plot.id == FocusId)
             {
+                // [F]/[X] pulls weeds by hand whatever is selected (the hoe's [LMB] works the square
+                // ahead instead), so the prompt says so on any square where weeds show: bare, growing
+                // or ripe. It never sows.
+                const FString Pull = Homestead::HasVisibleWeeds(Plot) ? X + TEXT(" Pull weeds") : FString();
+                const FString AndPull = Pull.IsEmpty() ? FString() : TEXT("   ") + Pull;
                 if (!Plot.planted)
                 {
                     // [A]/[E] sows the seed stack chosen on the hotbar (a berry sows berry seed; wild
-                    // roots are chosen as Seeds); [X]/[F] only weeds, and bare soil has none.
+                    // roots are chosen as Seeds).
                     if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
                         if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
                         {
@@ -2265,13 +2270,13 @@ FString AHomesteadController::FocusActions() const
                                 : Seed->kind == Homestead::CropKind::Roots ? FString(TEXT("roots")) : Text(Seed->lower);
                             if (Sim.Count(Chosen) <= 0)
                                 return TEXT("No ") + FString(UTF8_TO_TCHAR(Homestead::ItemName(Chosen))).ToLower()
-                                    + TEXT(" left") + SeedPouchHint();
+                                    + TEXT(" left") + AndPull + SeedPouchHint();
                             return A + TEXT(" Sow ") + What
-                                + (Chosen == Homestead::Item::Berries ? TEXT("   ") + Use + TEXT(" Eat") : FString()) + SeedPouchHint();
+                                + (Chosen == Homestead::Item::Berries ? TEXT("   ") + Use + TEXT(" Eat") : FString()) + AndPull + SeedPouchHint();
                         }
-                    return TEXT("Choose seeds on the hotbar to sow") + SeedPouchHint();
+                    return (Pull.IsEmpty() ? FString() : Pull + TEXT("   ")) + TEXT("Choose seeds on the hotbar to sow") + SeedPouchHint();
                 }
-                if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest");
+                if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest") + AndPull;
                 FString Actions;
                 if (Homestead::NeedsWater(Plot))
                 {
@@ -2281,9 +2286,7 @@ FString AHomesteadController::FocusActions() const
                         : Pail == 2 ? (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water")
                         : ToolPrompt(Sim, Homestead::Item::WateringCan, TEXT("pail"), TEXT(" to water"));
                 }
-                if (Plot.weeds > 0.1)
-                    Actions += (Actions.IsEmpty() ? TEXT("") : TEXT("   "))
-                        + (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick ? Use : X) + TEXT(" Weed");
+                if (!Pull.IsEmpty()) Actions += (Actions.IsEmpty() ? TEXT("") : TEXT("   ")) + Pull;
                 return Actions;
             }
         break;
@@ -2590,13 +2593,9 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     }
     else
     {
-        // What she's aimed at wins; otherwise what the focus would pick for this tool (same 300 cm reach).
+        // Only what she's aimed at (the prompt names the same target, HeldToolFocus): never overgrowth
+        // behind her or off to the side, even if it's nearer and this tool clears it.
         Target = Sim.FindAimedOvergrowth(Position, Facing, Tool);
-        if (Focus == EFocus::Resource)
-            for (const auto& Node : State().resources)
-                if (Node.id == FocusId && Homestead::IsOvergrowth(Node.kind)
-                    && Homestead::FindOvergrowth(Node.kind)->tool == Homestead::ToolForItem(Tool))
-                    Target = FocusId;
     }
     if (Target == INDEX_NONE)
     {
@@ -2606,8 +2605,9 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
                 if (Node.id == FocusId && Homestead::IsOvergrowth(Node.kind))
                 {
                     const auto Check = Sim.CheckOvergrowth(FocusId, Tool, Position);
-                    // This tool handles it, but it's past the swing's reach (the scythe's arc is short).
-                    if (Check) Notify(Tool == Homestead::Item::Scythe ? TEXT("Step closer to mow.") : TEXT("Step closer."), true);
+                    // This tool handles it, but it isn't ahead of her (or is past the scythe's short arc).
+                    if (Check) Notify(Tool == Homestead::Item::Scythe ? TEXT("Step closer and face it to mow.")
+                        : TEXT("Turn to face it."), true);
                     else Notify(Check);
                     return;
                 }
@@ -3040,9 +3040,9 @@ void AHomesteadController::Secondary()
         for (const auto& Plot : State().plots)
         {
             if (Plot.id != FocusId) continue;
-            if (!Plot.planted)
+            if (!Plot.planted && !Homestead::HasVisibleWeeds(Plot))
             {
-                // X / F only ever weeds (Jenny): bare soil has none, and nothing is sown by accident.
+                // X / F only ever weeds (Jenny): clean bare soil has none, and nothing is sown by accident.
                 Notify(TEXT("No weeds to pull here. Choose seeds on the hotbar and press ")
                     + FString(UsesGamepad() ? TEXT("A") : TEXT("E")) + TEXT(" to sow."), true);
                 break;

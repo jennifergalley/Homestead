@@ -1688,6 +1688,23 @@ double Overcast(double hour)
     return ease((ofDay - (RainStartHour - OvercastLeadHours)) / OvercastLeadHours)
         * ease((RainEndHour + OvercastLeadHours - ofDay) / OvercastLeadHours);
 }
+namespace
+{
+double RainAudioLevel(double rain, double ambience, double indoors)
+{
+    if (!(rain > 0.0)) return 0.0;
+    const double inside = Clamp(indoors, 0.0, 1.0);
+    return std::pow(Clamp(rain, 0.0, 1.0), 0.7) * ambience * (RainOutdoorGain + (RainIndoorGain - RainOutdoorGain) * inside);
+}
+}
+double RainAudioGain(double rain, double ambience, double indoors)
+{
+    return RainAudioLevel(rain, ambience, indoors) * RainLoudness;
+}
+bool RainAudible(double rain, double ambience, double indoors)
+{
+    return RainAudioLevel(rain, ambience, indoors) > 0.001;
+}
 int Simulation::DayNumber() const { return static_cast<int>(state_.hour / 24.0) + 1; }
 const char* Simulation::SeasonName() const
 {
@@ -2555,7 +2572,8 @@ Result Simulation::Weed(int plotId, Point player)
     if (plot->weeds <= 0.0) return Bad("This plot is already free of weeds.");
     if (auto ready = CheckExertion(Exertion::WeedEnergy); !ready) return ready;
     plot->weeds = 0.0;
-    return Exert(Exertion::WeedEnergy, Good("Weeds removed. The crop has more room to grow."));
+    return Exert(Exertion::WeedEnergy, Good(plot->planted ? "Weeds removed. The crop has more room to grow."
+        : "Weeds pulled. The square is clean for sowing."));
 }
 Result Simulation::HarvestCrop(int plotId, Point player)
 {

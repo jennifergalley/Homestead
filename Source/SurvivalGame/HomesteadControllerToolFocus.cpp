@@ -1,8 +1,8 @@
 // Tool focus (Jenny's playtest: a bare bramble in reach showed no prompt). The focus used to be the
 // nearest centre inside 280 cm while the simulation clears overgrowth out to 300 cm, and a weed or
-// grass tuft at her feet won over the bramble she faced. With a clearing tool in hand, focus and
-// swing now share Simulation::FindAimedOvergrowth; empty-handed, overgrowth in the 280-300 cm band
-// still gets its prompt. Plots, drops, structures, the store and water are never overridden.
+// grass tuft at her feet won over the bramble she faced. With a clearing tool in hand, the prompt and
+// the swing name the same aimed target (Simulation::HeldToolFocus / FindAimedOvergrowth), never one
+// behind her; empty-handed, overgrowth in the 280-300 cm band still gets its prompt. Plots, drops, structures, the store and water are never overridden.
 #include "HomesteadController.h"
 
 #include "Simulation/HomesteadOvergrowth.h"
@@ -11,35 +11,24 @@ namespace ToolFocus
 {
 // Everyday focus radius for anything she can use (cm); overgrowth reaches Homestead::Overgrowth::Reach.
 constexpr double FocusReachCm = 280.0;
-
-bool Handles(Homestead::Item Tool, const Homestead::ResourceNode& Node)
-{
-    if (const auto* Info = Homestead::FindOvergrowth(Node.kind))
-        return Info->tool != Homestead::ToolKind::Count && Info->tool == Homestead::ToolForItem(Tool);
-    return Node.kind == Homestead::ResourceKind::ForestTree && Tool == Homestead::Item::Hatchet;
-}
 }
 
 void AHomesteadController::FocusHeldToolTarget(Homestead::Point Position)
 {
     if (Focus != EFocus::None && Focus != EFocus::Resource) return;
-    const Homestead::ResourceNode* Current = nullptr;
-    if (Focus == EFocus::Resource)
-        for (const auto& Node : State().resources)
-            if (Node.id == FocusId) Current = &Node;
-    // A forageable she's standing at keeps the focus; only overgrowth the tool can't clear yields it.
-    if (Current && !Homestead::IsOvergrowth(Current->kind)) return;
-
+    // With a clearing tool in hand, what she's aimed at is what the prompt names and the swing strikes
+    // (Simulation::HeldToolFocus): nearer overgrowth behind her or to the side doesn't keep the focus,
+    // even when this tool clears it too. A forageable she's standing at keeps it.
     const Homestead::Item Tool = SelectedCarriedTool();
-    if (Tool != Homestead::Item::Count && Homestead::ToolForItem(Tool) != Homestead::ToolKind::Count
-        && !(Current && ToolFocus::Handles(Tool, *Current)))
+    if (Tool != Homestead::Item::Count && Homestead::ToolForItem(Tool) != Homestead::ToolKind::Count)
     {
         const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
-        const int Aimed = Sim.FindAimedOvergrowth(Position, {Forward.X, Forward.Y}, Tool);
-        if (Aimed != -1)
+        const int Current = Focus == EFocus::Resource ? FocusId : -1;
+        const int Chosen = Sim.HeldToolFocus(Current, Position, {Forward.X, Forward.Y}, Tool);
+        if (Chosen != -1)
         {
             Focus = EFocus::Resource;
-            FocusId = Aimed;
+            FocusId = Chosen;
             return;
         }
     }

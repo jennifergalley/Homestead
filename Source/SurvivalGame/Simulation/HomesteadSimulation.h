@@ -424,6 +424,15 @@ double RainAmount(double hour);
 // hour after it, so the sky greys before a drop falls.
 double Overcast(double hour);
 constexpr double OvercastLeadHours = 0.5;
+// The rain loop's volume multiplier (UHomesteadWeather applies it once, after a fade-in to full): rain
+// strength^0.7 times the Ambience setting, 0.9 outdoors and 0.35 indoors (0 outdoors .. 1 indoors),
+// times RainLoudness. Jenny, 2026-09-29: the rain was too loud, so RainLoudness halves it (-6 dB).
+constexpr double RainOutdoorGain = 0.9;
+constexpr double RainIndoorGain = 0.35;
+constexpr double RainLoudness = 0.5;
+double RainAudioGain(double rain, double ambience, double indoors);
+// Whether the loop plays at all: judged before RainLoudness, so it starts and stops at the same moments.
+bool RainAudible(double rain, double ambience, double indoors);
 
 // What the bed offers (flexible-sleep): each choice with its length and the hour of day she'd wake.
 enum class SleepChoice { UntilMorning, UntilRested, Nap };
@@ -594,7 +603,11 @@ public:
     // centre is within Overgrowth::Reach and roughly ahead of her (Overgrowth::AimHalfAngleDegrees), or -1. Tier and energy aren't checked
     // here, so an under-tier target still gets named and refused. Focus and swing both use this.
     int FindAimedOvergrowth(Point player, Point facing, Item tool) const;
-    // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
+    // The resource the prompt names with `tool` in hand, given the nearest resource `current` (-1 for
+    // none): a forageable keeps it; otherwise the aimed target wins, even over overgrowth the tool also
+    // clears behind her or off to the side, and `current` stays only when nothing is aimed at. The
+    // swing always strikes FindAimedOvergrowth, so the prompt and the blow agree.
+    int HeldToolFocus(int current, Point player, Point facing, Item tool) const;    // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
     std::vector<int> ScytheArcTargets(Point player, Point facing) const;
     static double ScytheArcRadius(ToolTier tier);
     static double ScytheArcHalfAngle(ToolTier tier);
