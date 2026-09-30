@@ -82,11 +82,11 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / package snapshot (2026-09-29 17:10):** Integration is packaging `main` `a2607437`
-(Props food pair included) and owns machine-wide UAT plus packaged suites; all other lanes keep Unreal,
-UBT and Blender off until `packaging done`. This package excludes partial bramble/sapling/under-tier,
-Menu pickup/pail gauge/store card, and Water no-pail prompt/lake trail/night-light work. The
-orchestrator continues to enforce the three-hands-on and two-Unreal-process caps after release.
+**Current slot / package snapshot (2026-09-29 17:40):** Integration delivered the evening playtest
+and closed its editor. Menu has the next exclusive editor slot for UI visual work; Props headless
+bramble syncs separately; Water remains paused. Partial bramble/sapling/under-tier, Menu pickup/pail
+gauge/store card, and Water no-pail prompt/lake trail/night-light work are excluded. The orchestrator
+continues to enforce the three-hands-on and two-Unreal-process caps.
 
 ## 4 PM playable build
 
@@ -105,6 +105,24 @@ Gait run, Menu toast/berry A-X Energy/Ctrl+wheel/wait changes, manor rubble and 
 crop, river, performance and save work. Rain remains audibly unproven; listen outdoors on day 2 from
 about 11:00 to 15:30.
 
+## Evening playtest build
+
+**[playtest] ready:** `Build\Playtest-0929eve` packages `main` `ca141b1f` / game code `a2607437`
+plus test-only `6556c1fe`, and is on `Homestead Estate.lnk` with a copied 3:46 PM Manual save.
+Integration retargeted only that shortcut with its existing icon/arguments; it never touched
+`Homestead.lnk` or Jenny's live save. Native passed 9/9; six packaged suites passed: Smoke 56.9 fps,
+Clearing 53.1, NativeMenu 55.2 and EstateSmoke woods 58.6 among them.
+
+The fresh-game packaged FullLoop exercises the core loop, so it is now **deliverable**. Food PIE also
+verified +5 Branch +1 Kindling, Hearth RoastedRoots at 2 Roots +1 Kindling, low-Energy berries without
+a centre toast, and Roots `582129` gathering through F5/F9. The copied-save loop passed only in PIE,
+not the packaged executable (desktop keystroke limitation); old-save Hoe and no-pail lake prompt
+remain untested. Sprint still drains in this build, the night remains daylight-blue, and the
+inside-store Map card still offers a false `23 min` walk.
+
+Input-policy changes must run packaged **both Hotbar and FullLoop** suites, which caught the silent
+stale assertions here. The playtest does not blanket-complete the separate partial bramble/sprint/bed/
+Hoe-hint, Water prompt/generator, or Menu pickup/pail/store-card work.
 ## Core-loop priority after 4 PM
 
 Jenny's next priority is a packaged, end-to-end first core loop, in this order: hoe/tool assembly;
