@@ -808,6 +808,17 @@ requirement.
 
   Integration owns sole UAT/package work from the 01:20 handoff (9.97 GB preflight). This evidence
   is **not a Shipping delivery claim**; package/smoke evidence and a manual pad pass remain required.
+  Integration then applied the ordered 11 first-row commits locally at `8470bd73`; native Release
+  10/10 and combined Editor+Game Unity pass. An exact copied Jenny Shipping Estate save loaded in
+  PIE, but editor-only free physical memory fell to 892 MB before any UI check. Integration stopped
+  only its PID 46284 immediately and memory recovered to 10.1 GB; no process, save or shortcut was
+  damaged. Treat this as **build-pass/UI-blocked**: use lower-memory packaged-standalone UI
+  verification before push or Shipping, not another Integration-worktree manual PIE attempt.
+
+  Integration has conditional authority for a new isolated Development package only with at least
+  6 GB physical free, monitored UAT abort below 1.5 GB, and one owned packaged game/copy-save test
+  at a time. Six suites and a Shipping/no-listener candidate follow only if that path stays safe.
+  The current Estate shortcut remains untouched until separately verified.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
