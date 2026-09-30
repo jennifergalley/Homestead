@@ -230,9 +230,10 @@ def end_handles(kit, leather, iron, parts):
 def build(kit):
     m = kit.mats
     paint = m.painted_wood("M_TrunkPaintedPine", paint=(0.075, 0.035, 0.022), under=(0.20, 0.13, 0.07), wear=0.5,
-                           grime=0.4, seed=41.0)
-    oak = m.wood("M_TrunkOak", light=(0.26, 0.18, 0.105), dark=(0.10, 0.065, 0.035), grain=1.0, roughness=0.7,
-                 weathering=0.15, grime=0.3, seed=42.0)
+                           grime=0.4, seed=41.0, rubs=0.0)
+    # Oak battens oiled and darkened with age, not raw or silvered.
+    oak = m.wood("M_TrunkOak", light=(0.15, 0.095, 0.05), dark=(0.055, 0.032, 0.016), grain=1.0, roughness=0.62,
+                 weathering=0.0, grime=0.35, seed=42.0)
     iron = m.wrought_iron("M_TrunkIron", rust=0.5, wear=0.4, seed=43.0)
     leather = m.harness_leather("M_TrunkHandleLeather", color=(0.14, 0.075, 0.035), dark=(0.05, 0.028, 0.015),
                                 roughness=0.58, scuff=0.6, dubbin=0.3, grime=0.45, seed=44.0)

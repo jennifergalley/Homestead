@@ -708,7 +708,7 @@ def soil(name, damp=(0.12, 0.085, 0.055), dry=(0.26, 0.20, 0.135), seed=0.0):
 
 
 def painted_wood(name, paint=(0.055, 0.095, 0.065), under=(0.18, 0.11, 0.055), wear=0.45,
-                 grime=0.45, seed=0.0):
+                 grime=0.45, seed=0.0, rubs=1.0):
     """Scuffed oil-painted pine for shop fixtures. pcoord is part-local meters:
     fine wood grain shows through the paint, with worn brown undercoat, scratches,
     rubbed hand-polished bands and soot/grime in recesses."""
@@ -738,7 +738,7 @@ def painted_wood(name, paint=(0.055, 0.095, 0.065), under=(0.18, 0.11, 0.055), w
                        scale=18.0, distortion=9.0, detail=2.0, kind="BANDS",
                        direction="Z").outputs["Fac"]
     # ``rubs`` scales these banded rub-throughs (0 turns them off: on long boards they read as stripes).
-    rub_mask = g.remap(long_rubs, 0.76, 0.92, 0.0, wear * 0.55)
+    rub_mask = g.remap(long_rubs, 0.76, 0.92, 0.0, wear * 0.55 * rubs)
     mask = g.math("MAXIMUM", scratch_mask, rub_mask)
     color = g.mix(paint_col, exposed, mask)
     dirt = g.noise(seeded, scale=38.0, detail=6.0, roughness=0.7).outputs["Fac"]
