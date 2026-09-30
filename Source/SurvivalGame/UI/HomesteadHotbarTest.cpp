@@ -4,11 +4,42 @@
 #include "../HomesteadAnimInstance.h"
 #include "../HomesteadController.h"
 #include "../HomesteadSave.h"
+#include "../HomesteadWorld.h"
 #include "SHomesteadHotbar.h"
 #include "Framework/Application/SlateApplication.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Input/Events.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "../Simulation/HomesteadHotbarLayout.h"
+#include "../Simulation/HomesteadPackRow.h"
+#include "../Simulation/HomesteadGardenTarget.h"
+
+#include <sstream>
+#include <string>
+
+namespace HotbarTestSaves
+{
+// The simulation text as builds before the hotbar row wrote it: its "packrow" section removed and the
+// header's size and checksum (FNV-1a, as Simulation::Serialize writes it) resealed.
+std::string WithoutPackRow(const std::string& Saved)
+{
+    const auto HeaderEnd = Saved.find('\n');
+    if (HeaderEnd == std::string::npos) return Saved;
+    std::string Payload = Saved.substr(HeaderEnd + 1);
+    const auto At = Payload.find("\npackrow ");
+    if (At == std::string::npos) return Saved;
+    const auto End = Payload.find('\n', At + 1);
+    Payload.erase(At + 1, End == std::string::npos ? std::string::npos : End - At);
+    uint64 Hash = 14695981039346656037ull;
+    for (const unsigned char C : Payload) { Hash ^= C; Hash *= 1099511628211ull; }
+    std::istringstream Header(Saved.substr(0, HeaderEnd));
+    std::string Magic, Version;
+    Header >> Magic >> Version;
+    return Magic + " " + Version + " " + std::to_string(Payload.size()) + " " + std::to_string(Hash) + "\n" + Payload;
+}
+}
 
 // The estate kit in hotbar order: 0 Billhook, 1 Axe, 2 Scythe, 3 Pickaxe, 4 Hoe, 5 Pail, 6 Berries.
 // The seeded woodland has no salvage, so a stand-in grant hands her the billhook the knife used to be.
@@ -25,6 +56,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
     const auto SaplingId = MakeShared<int32>(0);
     const auto HackStarts = MakeShared<uint32>(0);
     const auto ClearStarts = MakeShared<uint32>(0);
+    const auto BranchesBefore = MakeShared<int32>(0);
+    const auto KindlingBefore = MakeShared<int32>(0);
     const auto OldHairStyle = MakeShared<int32>(-1);
     const auto OldBodyPreset = MakeShared<int32>(-1);
     const auto AirborneEnergy = MakeShared<double>(0);
@@ -103,12 +136,14 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             EKeys::Invalid, 0, FModifierKeysState()));
     };
 
-    Add(TEXT("Close Guidebook to expose the gameplay hotbar"),
+    Add(TEXT("Close the opening field book to expose the gameplay hotbar"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return Controller->ShouldShowHotbar()
             && Controller->HotbarWidget.IsValid(); });
     QueueGrant(Item::Billhook, 1);
-    Add(TEXT("Default ten-slot references add no capacity, resolve only the carried Billhook, pin Berries and place the lamp in slot 8"),
+    // The hotbar is the first row of her pack (Simulation/HomesteadPackRow.h): the Billhook she was
+    // given took the first empty cell; with nothing else carried, the rest are empty.
+    Add(TEXT("The hotbar is her pack's first row: the carried Billhook fills cell 1, selected; the rest are empty"),
         [this, Capacity]()
         {
             *Capacity = Controller->Simulation().UsedCapacity();
@@ -116,15 +151,10 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this, Capacity]()
         {
             const auto Slots = Controller->HotbarSnapshot();
-            return Slots.Num() == 10 && Slots[0].Tool == Item::Billhook
-                && Slots[0].Available && Slots[0].Selected
-                && Slots[1].Tool == Item::Hatchet && !Slots[1].Available
-                && Slots[2].Tool == Item::Scythe && !Slots[2].Available
-                && Slots[3].Tool == Item::Pickaxe && !Slots[3].Available
-                && Slots[4].Tool == Item::DiggingStick && !Slots[4].Available
-                && Slots[5].Tool == Item::WateringCan && !Slots[5].Available
-                && Slots[6].Tool == Item::Berries && Slots[6].Assigned && Slots[6].Food
-                && Slots[7].Tool == Item::OilLamp && !Slots[9].Assigned
+            bool RestEmpty = Slots.Num() == 10;
+            for (int32 Index = 1; RestEmpty && Index < 10; ++Index) RestEmpty = !Slots[Index].Assigned;
+            return RestEmpty && Slots[0].Tool == Item::Billhook
+                && Slots[0].Available && Slots[0].Selected && Slots[0].Count == 1
                 && Controller->Simulation().UsedCapacity() == *Capacity;
         });
     Add(TEXT("Carried selected Billhook is presented in the heroine hand"),
@@ -191,15 +221,15 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
     Add(TEXT("Wheel down wraps slot ten to slot one exactly once"),
         [this]() { Axis(EKeys::MouseWheelAxis, -1); Axis(EKeys::MouseWheelAxis, 0); },
         [this]() { return Controller->SelectedHotbarIndex() == 0; });
-    Add(TEXT("Number two selects the assigned but uncarried Hatchet"),
+    Add(TEXT("Number two selects an empty cell"),
         [this]() { Tap(EKeys::Two); },
         [this]() { return Controller->SelectedHotbarIndex() == 1
-            && !Controller->HotbarSnapshot()[1].Available; });
-    Add(TEXT("Uncarried selected tool rejects left click without mutation"),
+            && !Controller->HotbarSnapshot()[1].Assigned; });
+    Add(TEXT("An empty selected cell rejects left click without mutation"),
         [this, Revision]() { *Revision = Controller->Simulation().GetRevision(); Tap(EKeys::LeftMouseButton); },
         [this, Revision]() { return Controller->ToastIsError()
             && Controller->Simulation().GetRevision() == *Revision; });
-    Add(TEXT("Duplicate invalid save references sanitize to Empty, gain the missing Scythe, Pickaxe and Berries and clamp selection"),
+    Add(TEXT("An old pinned list (repeats, junk, uncarried pins) moves only her carried stacks into the row and clamps selection"),
         [this]()
         {
             Controller->SanitizeHotbar({
@@ -210,25 +240,27 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this]()
         {
+            // Layout 0 would have pinned Scythe, Pickaxe, Berries and the lamp too; she carries none
+            // of them (or the can), so those cells are simply empty, with nothing held for them.
             const auto Slots = Controller->HotbarSnapshot();
-            const bool Passed = Slots[0].Tool == Item::Billhook && Slots[0].Assigned
-                && Slots[1].Tool == Item::Scythe && Slots[1].Assigned
-                && Slots[2].Tool == Item::Pickaxe && Slots[2].Assigned
-                && Slots[3].Tool == Item::WateringCan && Slots[3].Assigned
-                && Slots[4].Tool == Item::Berries && Slots[4].Food && !Slots[5].Assigned
+            bool RestEmpty = true;
+            for (int32 Index = 1; Index < 10; ++Index) RestEmpty = RestEmpty && !Slots[Index].Assigned;
+            const bool Passed = Slots[0].Tool == Item::Billhook && Slots[0].Assigned && RestEmpty
                 && Controller->SelectedHotbarIndex() == 9;
-            Controller->ResetHotbar();
+            Controller->SelectedHotbarSlot = 0;
             return Passed;
         });
-    Add(TEXT("CONTROLLED supply makes referenced crafted tools live without extra hotbar storage"),
+    Add(TEXT("CONTROLLED supply puts the crafted tools in cells 2-6 without extra storage"),
         [this]()
         {
             Homestead::Simulation Supplied = Controller->Simulation();
             auto& State = const_cast<Homestead::State&>(Supplied.GetState());
+            int32 Cell = 1;
             for (const Item Tool : {Item::Hatchet, Item::Scythe, Item::Pickaxe, Item::DiggingStick, Item::WateringCan})
             {
                 State.inventory[static_cast<int32>(Tool)] = 1;
                 State.inventoryLayout.push_back({State.nextGroupId++, Tool, 1, 0});
+                State.packRow[Cell++] = {State.inventoryLayout.back().groupId, 0};
             }
             const auto Result = Controller->Sim.Deserialize(Supplied.Serialize());
             if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
@@ -299,7 +331,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this, ChestId]() { return Controller->Simulation().FindNearestStructure(
                 Controller->PlayerPoint(), Homestead::Piece::Chest, 280) == *ChestId; });
-    Add(TEXT("Storing the referenced Hatchet ghosts its slot immediately"),
+    Add(TEXT("Storing the Hatchet empties its cell immediately (nothing is held for it)"),
         [this, ChestId]()
         {
             const auto Result = Controller->Sim.Transfer(*ChestId, Item::Hatchet, 1,
@@ -307,8 +339,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
         },
         [this]() { return Controller->Simulation().Count(Item::Hatchet) == 0
-            && !Controller->HotbarSnapshot()[1].Available; });
-    Add(TEXT("Returning the Hatchet restores the same hotbar reference"),
+            && !Controller->HotbarSnapshot()[1].Assigned; });
+    Add(TEXT("Taking the Hatchet back fills the first empty cell (cell 2)"),
         [this, ChestId]()
         {
             const auto Result = Controller->Sim.Transfer(*ChestId, Item::Hatchet, -1,
@@ -316,7 +348,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
         },
         [this]() { return Controller->Simulation().Count(Item::Hatchet) == 1
-            && Controller->HotbarSnapshot()[1].Available; });
+            && Controller->HotbarSnapshot()[1].Tool == Item::Hatchet && Controller->HotbarSnapshot()[1].Available; });
     Add(TEXT("Selected carried Billhook is visible before chest storage"),
         [this, PointerLeave]() { PointerLeave(); Tap(EKeys::One); },
         [this, BillhookShown]()
@@ -337,7 +369,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && !Controller->HotbarSnapshot()[0].Available
                 && !BillhookShown();
         });
-    Add(TEXT("Retrieving the Billhook restores its same numbered icon and held prop"),
+    Add(TEXT("Taking the Billhook back fills the first empty cell (cell 1) and her hand"),
         [this, ChestId]()
         {
             const auto Result = Controller->Sim.Transfer(*ChestId, Item::Billhook, -1,
@@ -426,6 +458,92 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this]() { Tap(EKeys::One); Tap(EKeys::F9); },
         [this]() { return Controller->SelectedHotbarIndex() == 3
             && Controller->HotbarSnapshot()[3].Tool == Item::Pickaxe; });
+    // An old save written before the hotbar existed has an empty HotbarSlots array (no data pointer):
+    // applying it must not crash. Its layout-0 migration pins Billhook, Scythe, Pickaxe, Berries and
+    // the lamp; the carried ones move into those cells of her pack's first row, uncarried pins
+    // (Berries, lamp) become ordinary empty cells, and her stock is untouched.
+    const auto OldSaveWorld = MakeShared<std::string>();
+    Add(TEXT("An old save with an empty hotbar array loads; its migrated pins move her carried stacks into the row"),
+        [this, OldSaveWorld]()
+        {
+            UHomesteadSave* Save = Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual")));
+            if (!Save) { Finish(false, TEXT("The manual save to age is unavailable.")); return; }
+            Save->HotbarSlots.Empty();
+            Save->HotbarLayout = 0;
+            Save->SelectedHotbarSlot = 0;
+            // Its simulation too, as those builds wrote it: no "packrow" section.
+            *OldSaveWorld = HotbarTestSaves::WithoutPackRow(TCHAR_TO_UTF8(*Save->SimulationData));
+            if (OldSaveWorld->find("packrow") != std::string::npos) { Finish(false, TEXT("Could not age the simulation text.")); return; }
+            Save->SimulationData = UTF8_TO_TCHAR(OldSaveWorld->c_str());
+            if (!Controller->ApplySave(*Save)) Finish(false, TEXT("The aged save with an empty hotbar did not apply."));
+        },
+        [this, OldSaveWorld]()
+        {
+            // Her stock (not the whole world: the clock keeps running) is what the save held (woodland map, no placements).
+            Homestead::Simulation Saved;
+            const bool StockSame = Saved.Deserialize(*OldSaveWorld).ok && Saved.GetState().inventory == Controller->State().inventory;
+            const auto Slots = Controller->HotbarSnapshot();
+            FString Line;
+            for (const auto& Slot : Slots) Line += FString::Printf(TEXT("%d,"), Slot.Assigned ? static_cast<int32>(Slot.Tool) : -1);
+            Results.Add(FString::Printf(TEXT("OLD_SAVE_HOTBAR slots=%s selected=%d stock_same=%d"), *Line, Controller->SelectedHotbarIndex(), StockSame));
+            bool RestEmpty = true;
+            for (int32 Index = 3; Index < 10; ++Index) RestEmpty = RestEmpty && !Slots[Index].Assigned;
+            return StockSame && Slots.Num() == 10 && RestEmpty
+                && Slots[0].Tool == Item::Billhook && Slots[1].Tool == Item::Scythe && Slots[2].Tool == Item::Pickaxe
+                && Controller->SelectedHotbarIndex() == 0;
+        });
+    // A real save written by an older (pinned-hotbar) build, when one is given with
+    // -HomesteadHotbarLegacySave=<path>: applied as a load would, each pin she carries moves her first
+    // stack of it into that cell once, pins she has none of become empty cells, and nothing she owns
+    // changes. The upgraded game then saves the row and reads it back exactly.
+    FString LegacySavePath;
+    if (FParse::Value(FCommandLine::Get(), TEXT("HomesteadHotbarLegacySave="), LegacySavePath))
+    {
+        const auto LegacyWorld = MakeShared<std::string>();
+        const auto LegacyPins = MakeShared<TArray<int32>>();
+        const auto LegacyLayout = MakeShared<int32>(-1);
+        Add(TEXT("A real older-build save migrates its pinned hotbar into the pack row once, stock untouched"),
+            [this, LegacySavePath, LegacyWorld, LegacyPins, LegacyLayout]()
+            {
+                UHomesteadSave* Save = Controller->ReadSave(LegacySavePath);
+                if (!Save) { Finish(false, TEXT("The older-build save could not be read.")); return; }
+                *LegacyWorld = TCHAR_TO_UTF8(*Save->SimulationData);
+                *LegacyPins = Save->HotbarSlots;
+                *LegacyLayout = Save->HotbarLayout;
+                if (LegacyWorld->find("packrow") != std::string::npos || Save->HotbarLayout >= UHomesteadSave::CurrentHotbarLayout)
+                { Finish(false, TEXT("The given save is not from before the pack row.")); return; }
+                if (!Controller->ApplySave(*Save)) Finish(false, TEXT("The older-build save did not apply."));
+            },
+            [this, LegacyWorld, LegacyPins, LegacyLayout]()
+            {
+                Homestead::Simulation Saved;
+                const bool StockSame = Saved.Deserialize(*LegacyWorld).ok && Saved.GetState().inventory == Controller->State().inventory;
+                std::vector<int> Pins;
+                for (const int32 Value : *LegacyPins) Pins.push_back(Value);
+                const auto Clean = Homestead::SanitizeHotbarLayout(Pins, *LegacyLayout);
+                bool Placed = true;
+                FString PinLine, RowLine;
+                for (int32 Cell = 0; Cell < 10; ++Cell)
+                {
+                    const auto Item = Controller->HotbarItem(Cell);
+                    const bool Carried = Clean[Cell] >= 0 && Controller->Simulation().Count(static_cast<Homestead::Item>(Clean[Cell])) > 0;
+                    Placed = Placed && (Carried ? Item == static_cast<Homestead::Item>(Clean[Cell]) : Controller->HotbarEntry(Cell) == nullptr);
+                    PinLine += FString::Printf(TEXT("%d,"), Clean[Cell]);
+                    RowLine += FString::Printf(TEXT("%d,"), Item == Homestead::Item::Count ? -1 : static_cast<int32>(Item));
+                }
+                Homestead::Simulation Reloaded;
+                const std::string Upgraded = Controller->Simulation().Serialize();
+                const bool RoundTrip = Upgraded.find("\npackrow 10 ") != std::string::npos && Reloaded.Deserialize(Upgraded).ok
+                    && Reloaded.GetState().packRow == Controller->State().packRow;
+                Results.Add(FString::Printf(TEXT("LEGACY_SAVE_HOTBAR layout=%d pins=%s row=%s stock_same=%d placed=%d round_trip=%d"),
+                    *LegacyLayout, *PinLine, *RowLine, StockSame, Placed, RoundTrip));
+                return StockSame && Placed && RoundTrip;
+            });
+    }
+    Add(TEXT("Reloading the current save restores her own hotbar"),
+        [this]() { Tap(EKeys::F9); },
+        [this]() { return !Controller->bPendingSpawn && Controller->SelectedHotbarIndex() == 3
+            && Controller->HotbarSnapshot()[3].Tool == Item::Pickaxe; }, 0.8f);
     Add(TEXT("Settle the loaded pawn before ordinary tool approaches"),
         []() {}, [this]() { return !Controller->bPendingSpawn; }, 0.8f);
     Add(TEXT("Approach a sapling with the Billhook selected"),
@@ -457,24 +575,30 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Controller->Simulation().GetRevision() == *Revision && !SaplingCleared()
                 && Animation && Animation->MacheteStarts() == *HackStarts;
         });
-    Add(TEXT("Number one then left click lands the first of two Billhook swings with the held prop"),
-        [this, Anim, HackStarts, ClearStarts]()
+    Add(TEXT("Number one then one left click fells the sapling with a single two-blow Billhook hack"),
+        [this, Anim, HackStarts, ClearStarts, BranchesBefore, KindlingBefore]()
         {
             const auto* Animation = Anim();
             if (!Animation) { Finish(false, TEXT("Billhook animation instance is missing.")); return; }
             *HackStarts = Animation->MacheteStarts();
             *ClearStarts = Animation->ClearStarts();
+            *BranchesBefore = Controller->Simulation().Count(Item::Branch);
+            *KindlingBefore = Controller->Simulation().Count(Item::Kindling);
             Tap(EKeys::One);
             Tap(EKeys::LeftMouseButton);
         },
-        [this, Anim, HackStarts, ClearStarts, BillhookShown, SaplingCleared]()
+        [this, Anim, HackStarts, ClearStarts, BillhookShown, SaplingCleared, BranchesBefore, KindlingBefore]()
         {
+            // Worn billhook, one press: the clip's second blow commits the clear, with one yield.
             const auto* Animation = Anim();
+            const int32 Branches = Controller->Simulation().Count(Item::Branch) - *BranchesBefore;
             return Controller->SelectedHotbarIndex() == 0 && Animation && BillhookShown()
                 && Animation->MacheteStarts() == *HackStarts + 1
                 && Animation->ClearStarts() == *ClearStarts
                 && Animation->MacheteWeight() > 0.3f
-                && Controller->ToastText.StartsWith(TEXT("1 more swing")) && !SaplingCleared();
+                && SaplingCleared() && Branches >= 3 && Branches <= 4
+                && Controller->Simulation().Count(Item::Kindling) == *KindlingBefore + 1
+                && !Controller->ToastIsError();
         }, 2.5f);
     // The blow lands 1.25 s into the hack; move on while the follow-through is still playing.
     Steps.Last().bCompleteWhenReady = true;
@@ -567,14 +691,6 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Controller->SelectedHotbarIndex() == 0 && BillhookShown()
                 && Animation->MacheteStarts() == *HackStarts + 1;
         }, 0.3f);
-    Add(TEXT("The second Billhook swing clears the sapling"),
-        [this]() { Tap(EKeys::LeftMouseButton); },
-        [this, Anim, HackStarts, SaplingCleared]()
-        {
-            const auto* Animation = Anim();
-            return SaplingCleared() && Animation && Animation->MacheteStarts() >= *HackStarts + 2;
-        }, 2.5f);
-    Steps.Last().bCompleteWhenReady = true;
     Add(TEXT("Find a valid nearby till cell using an authority copy"),
         [this, TillX, TillY]()
         {
@@ -596,8 +712,41 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             if (!Found) Finish(false, TEXT("No valid nearby hotbar till cell exists."));
         },
         [this]() { return !Controller->IsBookOpen(); }, 0.7f);
-    Add(TEXT("Number five selects the Hoe, which tills the forward cell through left click"),
-        [this]() { Tap(EKeys::Five); Tap(EKeys::LeftMouseButton); },
+    // The garden outline (HomesteadControllerGarden.cpp): 16 thin no-collision, shadowless segments round
+    // exactly the square the next hoe stroke or pail pour acts on; red carries the refusal to the focus line.
+    const auto OutlineIs = [this](int32 X, int32 Y, bool bValid)
+    {
+        const auto& Outline = Controller->Landscape->GardenOutline;
+        bool Thin = Outline.Components.Num() == 16;
+        for (const auto& Component : Outline.Components)
+        {
+            const auto* Part = Cast<UPrimitiveComponent>(Component.Get());
+            Thin = Thin && Part && Part->IsVisible() && !Part->CastShadow
+                && Part->GetCollisionEnabled() == ECollisionEnabled::NoCollision;
+        }
+        const bool Passed = Thin && Outline.Signature == FString::Printf(TEXT("%d:%d:%d"), X, Y, bValid ? 1 : 0)
+            && Controller->GardenOutlineReason.IsEmpty() == bValid
+            && (bValid || Controller->FocusActions().Contains(Controller->GardenOutlineReason)
+                || Controller->Focus != AHomesteadController::EFocus::None);
+        if (!Passed)
+            Results.Add(FString::Printf(TEXT("GARDEN_OUTLINE_DIAG want=%d:%d:%d got=%s parts=%d thin=%d reason='%s' focus='%s'"),
+                X, Y, bValid ? 1 : 0, *Outline.Signature, Outline.Components.Num(), Thin ? 1 : 0,
+                *Controller->GardenOutlineReason, *Controller->FocusActions()));
+        return Passed;
+    };
+    const auto PlotCount = MakeShared<int32>(0);
+    Add(TEXT("Number five selects the Hoe; a green outline marks the forward square without tilling it"),
+        [this, PlotCount]() { *PlotCount = Controller->State().plots.size(); Tap(EKeys::Five); },
+        [this, TillX, TillY, PlotCount, OutlineIs]()
+        {
+            return Controller->SelectedHotbarIndex() == 4 && OutlineIs(*TillX, *TillY, true)
+                && static_cast<int32>(Controller->State().plots.size()) == *PlotCount;
+        }, 0.7f);
+    Add(TEXT("Capture the hoe's green garden outline"),
+        [this]() { Screenshot(TEXT("garden-outline-hoe-valid")); },
+        [this, TillX, TillY, OutlineIs]() { return OutlineIs(*TillX, *TillY, true); }, 0.5f);
+    Add(TEXT("Left click tills the outlined forward cell with the selected Hoe"),
+        [this]() { Tap(EKeys::LeftMouseButton); },
         [this, TillX, TillY]()
         {
             return Controller->SelectedHotbarIndex() == 4
@@ -607,6 +756,46 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         }, 4.0f);
     // The MetaHuman heroine tills when the hoe bites, partway through its swing.
     Steps.Last().bCompleteWhenReady = true;
+    // A tilled plot soon grows a few weeds (so the hoe there is green: it would weed), so the hoe's red
+    // proof faces a nearby square the till refuses outright: a building, a resource or overgrowth.
+    const auto BlockedX = MakeShared<int32>(0);
+    const auto BlockedY = MakeShared<int32>(0);
+    Add(TEXT("Face a nearby square the hoe refuses; its outline turns red with the refusal"),
+        [this, TillX, TillY, BlockedX, BlockedY]()
+        {
+            const auto& Sim = Controller->Simulation();
+            bool Found = false;
+            for (int32 Ring = 1; Ring <= 24 && !Found; ++Ring)
+                for (int32 Y = *TillY - Ring; Y <= *TillY + Ring && !Found; ++Y)
+                    for (int32 X = *TillX - Ring; X <= *TillX + Ring && !Found; ++X)
+                    {
+                        if (FMath::Max(FMath::Abs(X - *TillX), FMath::Abs(Y - *TillY)) != Ring) continue;
+                        const auto Center = Homestead::GardenCellCenter(X, Y);
+                        const Homestead::Point Position{Center.x - Homestead::GardenCellSize, Center.y};
+                        int AheadX = 0, AheadY = 0;
+                        Homestead::HoeCellAhead(Position, 1.0, 0.0, AheadX, AheadY);
+                        if (AheadX != X || AheadY != Y) continue;
+                        if (std::any_of(Sim.GetState().plots.begin(), Sim.GetState().plots.end(),
+                                [X, Y](const auto& Plot) { return Plot.cellX == X && Plot.cellY == Y; })) continue;
+                        const auto Check = Sim.CheckTill(X, Y, Position);
+                        const FString Message = UTF8_TO_TCHAR(Check.message.c_str());
+                        if (Check.ok || Message.StartsWith(TEXT("Move closer")) || Message.Contains(TEXT("tired"))) continue;
+                        *BlockedX = X; *BlockedY = Y; Found = true;
+                        Teleport(Position);
+                        Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
+                    }
+            if (!Found) Finish(false, TEXT("No nearby square refuses the hoe."));
+        },
+        [this, BlockedX, BlockedY, OutlineIs]() { return Controller->SelectedHotbarIndex() == 4
+            && OutlineIs(*BlockedX, *BlockedY, false); }, 1.0f);
+    Add(TEXT("Capture the hoe's red garden outline"),
+        [this, BlockedX, BlockedY]()
+        {
+            Results.Add(FString::Printf(TEXT("GARDEN_OUTLINE_HOE_RED cell=%d:%d reason='%s' focus='%s'"), *BlockedX, *BlockedY,
+                *Controller->GardenOutlineReason, *Controller->FocusActions()));
+            Screenshot(TEXT("garden-outline-hoe-invalid"));
+        },
+        [this, BlockedX, BlockedY, OutlineIs]() { return OutlineIs(*BlockedX, *BlockedY, false); }, 0.5f);
     Add(TEXT("CONTROLLED seeds and water prepare one existing plot for selected-tool proof"),
         [this, TillX, TillY]()
         {
@@ -625,15 +814,22 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this]() { return Controller->Simulation().Count(Item::Seeds) >= 1
             && Controller->Simulation().Count(Item::Water) >= 6; }, 0.7f);
-    Add(TEXT("E remains independent and plants the focused plot"),
-        [this]() { Tap(EKeys::E); },
+    Add(TEXT("E remains independent and plants the focused plot (Seeds chosen on the hotbar)"),
+        [this]() { Controller->ChooseOnHotbar(Item::Seeds); Tap(EKeys::E); },
         [this, TillX, TillY]() { return std::any_of(
                 Controller->State().plots.begin(), Controller->State().plots.end(),
                 [TillX, TillY](const auto& Plot)
                 { return Plot.cellX == *TillX && Plot.cellY == *TillY && Plot.planted; }); }, 4.0f);
     Steps.Last().bCompleteWhenReady = true;
+    Add(TEXT("Number six selects the Watering Can; the focused dry plot is outlined green"),
+        [this]() { Tap(EKeys::Six); },
+        [this, TillX, TillY, OutlineIs]() { return Controller->SelectedHotbarIndex() == 5
+            && OutlineIs(*TillX, *TillY, true); }, 0.7f);
+    Add(TEXT("Capture the pail's green garden outline"),
+        [this]() { Screenshot(TEXT("garden-outline-pail-valid")); },
+        [this, TillX, TillY, OutlineIs]() { return OutlineIs(*TillX, *TillY, true); }, 0.5f);
     Add(TEXT("Controller right trigger with selected Watering Can waters the crop once"),
-        [this]() { Tap(EKeys::Six); Tap(EKeys::Gamepad_RightTrigger); },
+        [this]() { Tap(EKeys::Gamepad_RightTrigger); },
         [this, TillX, TillY]() { const auto Plot = std::find_if(
                 Controller->State().plots.begin(), Controller->State().plots.end(),
                 [TillX, TillY](const auto& Value)
@@ -641,6 +837,26 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             return Controller->SelectedHotbarIndex() == 5
                 && Plot != Controller->State().plots.end() && Plot->moisture > 0; }, 4.0f);
     Steps.Last().bCompleteWhenReady = true;
+    // Watered soil dries a little every game minute, so the pail's lasting refusal is an empty pail.
+    Add(TEXT("CONTROLLED emptying the pail turns its outline red with the empty-pail refusal"),
+        [this]()
+        {
+            Homestead::Simulation Drained = Controller->Simulation();
+            auto& State = const_cast<Homestead::State&>(Drained.GetState());
+            State.inventory[static_cast<int32>(Item::Water)] = 0;
+            State.inventoryLayout.erase(std::remove_if(State.inventoryLayout.begin(), State.inventoryLayout.end(),
+                [](const auto& Entry) { return Entry.item == Item::Water && Entry.wearableId == 0; }),
+                State.inventoryLayout.end());
+            Homestead::PackRowRules::Prune(State.packRow, State.inventoryLayout);
+            const auto Result = Controller->Sim.Deserialize(Drained.Serialize());
+            if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+        },
+        [this, TillX, TillY, OutlineIs]() { return Controller->Simulation().Count(Item::Water) == 0
+            && OutlineIs(*TillX, *TillY, false)
+            && Controller->GardenOutlineReason.Contains(TEXT("pail is empty")); }, 1.0f);
+    Add(TEXT("Capture the pail's red garden outline"),
+        [this]() { Screenshot(TEXT("garden-outline-pail-invalid")); },
+        [this, TillX, TillY, OutlineIs]() { return OutlineIs(*TillX, *TillY, false); }, 0.5f);
     Add(TEXT("CONTROLLED dropping the only Billhook removes its icon and held prop"),
         [this, BillhookDropId]()
         {
@@ -673,7 +889,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && !Controller->HotbarSnapshot()[0].Available
                 && !BillhookShown();
         }, 0.2f);
-    Add(TEXT("CONTROLLED pickup restores the same Billhook assignment and held prop"),
+    Add(TEXT("CONTROLLED pickup puts the Billhook in the first empty cell (cell 1) and her hand"),
         [this, BillhookDropId]()
         {
             const auto Result = Controller->Sim.PickUpDrop(*BillhookDropId,
@@ -686,15 +902,14 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Controller->HotbarSnapshot()[0].Available
                 && BillhookShown();
         }, 0.2f);
-    Add(TEXT("A new woodland resets world-specific hotbar references safely"),
+    Add(TEXT("A new woodland starts with an empty pack, so an empty hotbar row"),
         [this]() { Controller->NewGame(); },
         [this]()
         {
             const auto Slots = Controller->HotbarSnapshot();
-            return Controller->IsBookOpen() && Controller->SelectedHotbarIndex() == 0
-                && Slots.Num() == 10 && Slots[0].Tool == Item::Billhook
-                && !Slots[0].Available && !Slots[1].Available
-                && !Slots[2].Available && !Slots[3].Available && Slots[6].Food;
+            bool Empty = Slots.Num() == 10;
+            for (const auto& Slot : Slots) Empty = Empty && !Slot.Assigned;
+            return Controller->IsBookOpen() && Controller->SelectedHotbarIndex() == 0 && Empty;
         }, 0.8f);
     Add(TEXT("Close fresh notes and settle before sprint eligibility fixtures"),
         [this]() { Tap(EKeys::Escape); },
@@ -705,30 +920,26 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Avatar->GetCharacterMovement()->IsMovingOnGround()
                 && !Controller->bPendingSpawn;
         }, 0.8f);
-    Add(TEXT("CONTROLLED Simulation exertion reaches exactly the 10-Energy reserve"),
+    Add(TEXT("CONTROLLED Simulation Energy set to exactly the 10-Energy sprint floor"),
         [this, ReserveEnergy]()
         {
-            for (int32 Index = 0; Index < 26; ++Index)
+            // Sprint costs nothing, so the fixture sets Energy directly instead of running it down.
+            const auto Result = Controller->Sim.SetEnergy(10.0);
+            if (!Result)
             {
-                const auto Result = Controller->Sim.SpendSprintEnergy(10);
-                if (!Result)
-                {
-                    Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
-                    return;
-                }
+                Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+                return;
             }
             *ReserveEnergy = Controller->State().energy;
-            if (!FMath::IsNearlyEqual(*ReserveEnergy, 10.0, 0.001))
-                Finish(false, FString::Printf(
-                    TEXT("Sprint authority did not clamp to 10 Energy: %.5f"), *ReserveEnergy));
         },
         [this, ReserveEnergy]() { return FMath::IsNearlyEqual(*ReserveEnergy, 10.0, 0.001)
             && Controller->State().energy <= 10.0 && Controller->State().energy > 9.9; });
-    Add(TEXT("Held mapped Shift walks instead of sprinting below Energy reserve"),
+    Add(TEXT("A Shift tap below the Energy reserve is refused and she walks"),
         [this, ReserveEnergy]()
         {
             *ReserveEnergy = Controller->State().energy;
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
             Axis(EKeys::Gamepad_LeftY, 1);
         },
         [this, ReserveEnergy]()
@@ -758,10 +969,11 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             return Avatar && !Controller->IsBookOpen() && !Controller->bPendingSpawn
                 && Avatar->GetCharacterMovement()->IsMovingOnGround();
         }, 0.6f);
-    Add(TEXT("Held mapped Shift again reaches active grounded sprint"),
+    Add(TEXT("A Shift tap turns sprint on and she reaches a grounded sprint"),
         [this]()
         {
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
             Axis(EKeys::Gamepad_LeftY, 1);
         },
         [this]()
@@ -820,6 +1032,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             if (Avatar) Avatar->CancelAction(true);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
         },
         [this, WorkStarts]()
@@ -831,12 +1044,13 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Animation->ActionWeight() < 0.01f
                 && Animation->MacheteStarts() == *WorkStarts + 1;
         }, 0.3f);
-    Add(TEXT("Fresh mapped hold re-enters sprint after completed work"),
+    Add(TEXT("A fresh Shift tap turns sprint back on after completed work"),
         [this]()
         {
             // Back to the open ground the first sprint crossed, clear of the trees further on.
             Teleport({-1000, 0});
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
             Axis(EKeys::Gamepad_LeftY, 1);
         },
         [this]()
@@ -868,10 +1082,11 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, Avatar->WalkSpeed())
                 && FMath::Abs(Controller->State().energy - *AirborneEnergy) < 0.1;
         }, 0.45f);
-    Add(TEXT("Release airborne sprint input without queued restart"),
+    Add(TEXT("A Shift tap turns sprint off after the airborne check"),
         [this]()
         {
             Axis(EKeys::Gamepad_LeftY, 0);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
         },
         [this]()

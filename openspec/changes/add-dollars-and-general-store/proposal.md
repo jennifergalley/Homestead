@@ -11,17 +11,18 @@ count is about to grow a lot.
 ## What Changes
 
 - **Money.**
-  - Simulation holds money as integer cents (`int64`) and shows it as US dollars and cents,
-    for example `$12.40`.
+  - Simulation preserves money as its existing integer `int64` raw value, semantically one whole
+    coin per unit. It shows grouped whole coins, for example `12,400 coins`; no numeric migration
+    changes balances, prices or saves.
   - The HUD shows a wallet readout beside the energy and hunger meters. Every change animates
-    with a small delta, such as "+$3.20".
-  - A new game starts with **$10.00**, a placeholder for tuning.
+    with a small delta, such as "+320 coins".
+  - A new game starts with **1,000 coins**, a placeholder for tuning.
 - **Item catalogue foundation.** One authoritative table in `Simulation\HomesteadItems.*`,
   keyed by `Item`. For each item it holds:
   - a stable key, the display name and a description;
   - a category (Tool, Material, Forage, Food, Salvage…);
   - an icon reference;
-  - the base price in cents;
+  - the base price in whole coins;
   - a sellable flag and the shop kinds that buy it.
 
   Existing `ItemName` and similar lookups read from the table, and the scattered metadata is
@@ -127,7 +128,7 @@ None.
 ## Impact
 
 - `Homestead::Simulation`:
-  - `money` (cents).
+  - `money` (whole coins, retaining its raw saved integer).
   - `Shop { kind, openHour, closeHour, ownStock, heroineStock }`.
   - `Sell` and `Buy` transactions.
   - A daily sell-down at the rollover.

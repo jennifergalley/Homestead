@@ -29,6 +29,10 @@ enum class ResourceKind : int
     Primroses, Bluebells, WildDaffodils, WildGarlic,
     // add-coral-island-clearout: the manor clear-out's nettles, a middling stump and hand-cleared rubbish.
     Nettles, StumpMedium, BrokenCrate, BrokenBarrel, RubbishHeap, RottenPlanks,
+    // Slate slid off the manor's roofs, heaped in and round the ruin; cleared by hand.
+    SlateHeap,
+    // The manor's fallen roof timbers, chopped up with the worn axe.
+    RuinTimbers,
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
@@ -134,6 +138,19 @@ struct LayoutEntry
     int wearableId = 0;
 };
 using InventoryLayout = std::vector<LayoutEntry>;
+
+// The hotbar is the first row of her pack (HomesteadPackRow.h): ten cells, each naming one of her
+// carried layout entries (a stack's group id, or a garment's id) or empty.
+constexpr int PackRowSize = 10;
+struct PackRowCell
+{
+    int groupId = 0;
+    int wearableId = 0;
+    bool Empty() const { return groupId == 0 && wearableId == 0; }
+    bool operator==(const PackRowCell& other) const { return groupId == other.groupId && wearableId == other.wearableId; }
+    bool operator!=(const PackRowCell& other) const { return !(*this == other); }
+};
+using PackRow = std::array<PackRowCell, PackRowSize>;
 
 struct Point { double x = 0.0; double y = 0.0; };
 using Inventory = std::array<int, ItemCount>;
@@ -309,6 +326,7 @@ struct State
     std::vector<WearableInstance> wearables;
     std::array<int, EquipmentSlotCount> equipment{};
     InventoryLayout inventoryLayout;
+    PackRow packRow{};
     Generation::WorldDescriptor world{};
     Generation::ChunkCoord activeChunk{};
     std::vector<ResourceEdit> resourceEdits;
@@ -404,6 +422,8 @@ constexpr double CookEnergy = 0.3;
 constexpr double SplitFirewoodEnergy = 1.5;
 constexpr double BuildEnergy = 1.5;
 constexpr double GarmentEnergy = 0.8;
+// Sprinting costs no Energy of its own (Jenny, round 2); she can only start or keep sprinting above this.
+constexpr double SprintFloor = 10.0;
 constexpr double TillEnergy = 2.0;
 constexpr double PlantEnergy = 0.4;
 constexpr double WaterEnergy = 0.4;
@@ -431,10 +451,16 @@ double RecoveryFactor(HungerState state);
 double WorkCostFactor(HungerState state);
 }
 
-// The spring weather: it rains on the second of every three days, RainStartHour to RainEndHour.
+// The spring weather: it rains on two days in every ten, RainStartHour to RainEndHour (Jenny, 2026-09-29:
+// every third day was too often). A stable hash of each ten-day block picks one day from offsets 1-2
+// and one from 6-7, so it rains exactly 20% of days, the rains 4-6 days apart, day 0 is dry and the
+// first rain comes on day 1 as before. It depends on the hour alone: no seed, nothing saved.
 constexpr double RainStartHour = 9.0;
 constexpr double RainEndHour = 15.0;
+constexpr int RainBlockDays = 10;
 bool IsRainDay(double hour);
+// The two rainy day offsets (0-9) of the ten-day block starting on day block * RainBlockDays.
+int RainDayOffset(long long block, int which);
 bool IsRainingAt(double hour);
 // How hard it's raining at `hour`, 0-1 (add-rain-weather): nothing outside the rain window; inside
 // it a drizzle (0.3) that swells into passing showers (up to 1) every hour and a half or so, easing
@@ -444,6 +470,15 @@ double RainAmount(double hour);
 // hour after it, so the sky greys before a drop falls.
 double Overcast(double hour);
 constexpr double OvercastLeadHours = 0.5;
+// The rain loop's volume multiplier (UHomesteadWeather applies it once, after a fade-in to full): rain
+// strength^0.7 times the Ambience setting, 0.9 outdoors and 0.35 indoors (0 outdoors .. 1 indoors),
+// times RainLoudness. Jenny, 2026-09-29: the rain was too loud, so RainLoudness halves it (-6 dB).
+constexpr double RainOutdoorGain = 0.9;
+constexpr double RainIndoorGain = 0.35;
+constexpr double RainLoudness = 0.5;
+double RainAudioGain(double rain, double ambience, double indoors);
+// Whether the loop plays at all: judged before RainLoudness, so it starts and stops at the same moments.
+bool RainAudible(double rain, double ambience, double indoors);
 
 // What the bed offers (flexible-sleep): each choice with its length and the hour of day she'd wake.
 enum class SleepChoice { UntilMorning, UntilRested, Nap };
@@ -465,6 +500,9 @@ struct PreparedWorldRegion
     Generation::WorldDescriptor world;
     std::array<const Generation::ChunkBaseline*, 9> chunks{};
 };
+
+// Where the public road leads (HomesteadTravel.h).
+enum class TravelDestination : int;
 
 class Simulation
 {
@@ -489,6 +527,8 @@ public:
     // the game supplies the probe. Generated worlds keep the procedural stream test.
     void SetWaterProbe(std::function<bool(Point)> probe) { waterProbe_ = std::move(probe); }
     bool NearWater(Point position) const;
+    // True when a pail waits in a chest or other storage (and so can be fetched to fill).
+    bool PailStored() const;
     Result SetActiveWorldRegion(Point player,
         const PreparedWorldRegion* prepared = nullptr);
     Result ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const;
@@ -570,6 +610,11 @@ public:
     Result GrantItems(Item item, int count);
     // Till one garden square (garden coordinates, see GardenCell) with the stone hoe.
     Result Till(int cellX, int cellY, Point player);
+    // Side-effect-free: would Till, Water or Weed succeed now? The same refusal, or ok (the world's garden
+    // outline shows it before she acts). Till/Water/Weed call these first.
+    Result CheckTill(int cellX, int cellY, Point player) const;
+    Result CheckWater(int plotId, Point player) const;
+    Result CheckWeed(int plotId, Point player) const;
     Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
     Result Water(int plotId, Point player);
     Result Weed(int plotId, Point player);
@@ -577,6 +622,8 @@ public:
     Result ClearWithered(int plotId, Point player);
     Result HarvestCrop(int plotId, Point player);
     Result FillWater(Point player);
+    // Tip the water out of the pail (it stays in her pack, empty).
+    Result EmptyPail();
     Result AddFuel(int structureId, Point player);
     Result Transfer(int chestId, Item item, int amount, Point player);
     Result EquipWearable(int id, std::uint64_t expectedRevision);
@@ -591,7 +638,26 @@ public:
         std::uint64_t expectedRevision);
     Result ReorderEntry(int containerId, int index, int targetIndex, Point player, std::uint64_t expectedRevision);
     Result SplitHalf(int containerId, int groupId, Point player, std::uint64_t expectedRevision);
+    // Sorts her pack below the hotbar row; the row stays as she arranged it.
     Result SortPack(std::uint64_t expectedRevision);
+    // The hotbar row (HomesteadPackRow.h). Puts one of her carried stacks (or garment `wearableId`),
+    // from the row or below it, in `cell`: onto an empty cell it moves, onto the same item it
+    // merges, onto anything else the two swap places.
+    Result MoveToPackRow(int groupId, int wearableId, int cell, std::uint64_t expectedRevision);
+    // Moves what is in `cell` below the row: onto that stack (or garment) there, merging with the
+    // same item or else swapping; with no target (0, 0) to the end of her pack.
+    Result MoveFromPackRow(int cell, int targetGroupId, int targetWearableId, std::uint64_t expectedRevision);
+    // Takes `amount` of a chest stack straight into `cell` in one step: onto the same item it
+    // merges, otherwise it becomes that cell's stack and whatever was there moves below the row.
+    Result TransferGroupToPackRow(int chestId, int groupId, int amount, int cell, Point player,
+        std::uint64_t expectedRevision);
+    // Sets the row from item ids (-1 for empty): each cell takes her first carried stack of that item
+    // not already placed, or stays empty. For saves from before the row (their old pinned hotbar)
+    // and new games.
+    Result ArrangePackRow(const std::array<int, PackRowSize>& items);
+    // Test fixtures only (never saved): with this off, new stacks and garments go below the row
+    // instead of into its first empty cell, so grid-navigation suites keep their stock in the grid.
+    void SetPackRowAutoFill(bool fill) { fillPackRow_ = fill; }
     Result DropGroup(int groupId, int amount, Point position, Point player,
         std::uint64_t expectedRevision);
     Result DropWearable(int wearableId, Point position, Point player,
@@ -621,8 +687,24 @@ public:
     Result ClearOvergrowth(int nodeId, Item tool, Point player);
     // The uncleared overgrowth `tool` handles nearest to `position`, or -1.
     int FindNearestOvergrowth(Point position, double maxDistance, Item tool) const;
-    // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
+    // What a swing of `tool` is aimed at: the nearest uncleared overgrowth of that tool's kind whose
+    // centre is within Overgrowth::Reach and roughly ahead of her (Overgrowth::AimHalfAngleDegrees), or -1. Tier and energy aren't checked
+    // here, so an under-tier target still gets named and refused. Focus and swing both use this.
+    int FindAimedOvergrowth(Point player, Point facing, Item tool) const;
+    // The resource the prompt names with `tool` in hand, given the nearest resource `current` (-1 for
+    // none): a forageable keeps it; otherwise the aimed target wins, even over overgrowth the tool also
+    // clears behind her or off to the side, and `current` stays only when nothing is aimed at. The
+    // swing always strikes FindAimedOvergrowth, so the prompt and the blow agree.
+    int HeldToolFocus(int current, Point player, Point facing, Item tool) const;    // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
     std::vector<int> ScytheArcTargets(Point player, Point facing) const;
+    // One scythe sweep: each target mown as its own ClearOvergrowth, in order. The presentation plays
+    // one swish for the sweep when mown is above zero; problem is the first refusal, if any.
+    struct MowSweepResult
+    {
+        int mown = 0;
+        std::string problem;
+    };
+    MowSweepResult MowSweep(const std::vector<int>& targets, Point player);
     static double ScytheArcRadius(ToolTier tier);
     static double ScytheArcHalfAngle(ToolTier tier);
 
@@ -637,7 +719,9 @@ public:
     Result PassDaysForPlaytest(double days, bool tend, Point player);
     // Playtest aid for screenshots: set every planted plot's growth (0-1) directly.
     Result SetCropGrowthForPlaytest(double growth);
-    Result SpendSprintEnergy(double realSeconds);
+    // Whether she may sprint now: not failed and Energy above Exertion::SprintFloor. Running costs
+    // nothing extra; the ordinary awake drain and work costs are what bring her down to the floor.
+    Result CanSprint() const;
     // Whether she has the Energy for work costing `cost` (see Exertion); ok when she does.
     Result CheckExertion(double cost) const;
     // What harvesting or clearing a node would cost her.
@@ -654,6 +738,13 @@ public:
     Result Buy(int shopId, Item item, int quantity, bool fromHeroineStock, Point player);
     // Counts a shopkeeper greeting (a friendship stub).
     Result GreetShopkeeper(int shopId);
+    // Waits by a closed shop until it opens: the ordinary passage of time (crops, weather, vitals,
+    // the morning sell-down), refused before any time passes if she'd collapse first.
+    Result WaitForShop(int shopId, Point player);
+    // Walks the public road to the manor or town from `from` (HomesteadTravel.cpp): the ordinary
+    // passage of time for the walk's length, refused before any time passes if she'd collapse or
+    // doze off on the way. The caller stands her at PlanTravel's arrival point.
+    Result WalkRoad(TravelDestination destination, Point from);
     // Playtest aids: adjust the purse; open (or move) a shop with its counter at `counter`.
     Result GrantMoney(Cents cents);
     Result PlaceShop(ShopKind kind, Point counter, double yaw = 0.0);
@@ -678,6 +769,7 @@ public:
 
 private:
     State state_;
+    bool fillPackRow_ = true;
     std::shared_ptr<const EstateLayout> layout_;
     std::shared_ptr<const EstatePlacements> placements_;
     std::function<bool(Point)> waterProbe_;

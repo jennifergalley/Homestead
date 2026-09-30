@@ -1,8 +1,13 @@
 // Portable tests for the item catalogue, money and shops.
 #include "HomesteadEstate.h"
+#include "HomesteadEstatePublicRoad.h"
+#include "HomesteadHoldings.h"
 #include "HomesteadItems.h"
+#include "HomesteadPail.h"
 #include "HomesteadSimulation.h"
+#include "HomesteadTravel.h"
 
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -11,6 +16,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 
 using namespace Homestead;
 
@@ -106,14 +112,25 @@ void Edit(Simulation& sim, double hunger, double energy)
 
 void MoneyFormatting()
 {
-    CHECK(FormatMoney(0) == "$0.00");
-    CHECK(FormatMoney(5) == "$0.05");
-    CHECK(FormatMoney(1240) == "$12.40");
-    CHECK(FormatMoney(123456789) == "$1,234,567.89");
-    CHECK(FormatMoney(100000) == "$1,000.00");
-    CHECK(FormatMoney(-100) == "-$1.00");
-    CHECK(FormatMoney(INT64_MIN) == "-$92,233,720,368,547,758.08");
-    CHECK(FormatMoneyDelta(200) == "+$2.00" && FormatMoneyDelta(-40) == "-$0.40" && FormatMoneyDelta(0) == "+$0.00");
+    // Whole coins: the raw stored value is the number of coins (no x100 migration), grouped, with
+    // singular/plural and no currency sign or decimals.
+    CHECK(FormatMoney(0) == "0 coins");
+    CHECK(FormatMoney(1) == "1 coin");
+    CHECK(FormatMoney(5) == "5 coins");
+    CHECK(FormatMoney(40) == "40 coins");
+    CHECK(FormatMoney(999) == "999 coins");
+    CHECK(FormatMoney(1000) == "1,000 coins");
+    CHECK(FormatMoney(1240) == "1,240 coins");
+    CHECK(FormatMoney(2234) == "2,234 coins");
+    CHECK(FormatMoney(123456789) == "123,456,789 coins");
+    CHECK(FormatMoney(MaxMoney) == "100,000,000,000 coins");
+    CHECK(FormatMoney(-1) == "-1 coin" && FormatMoney(-100) == "-100 coins");
+    CHECK(FormatMoney(INT64_MIN) == "-9,223,372,036,854,775,808 coins");
+    CHECK(FormatMoney(INT64_MAX) == "9,223,372,036,854,775,807 coins");
+    CHECK(FormatMoneyDelta(200) == "+200 coins" && FormatMoneyDelta(-40) == "-40 coins" && FormatMoneyDelta(0) == "+0 coins"
+        && FormatMoneyDelta(1) == "+1 coin" && FormatMoneyDelta(-1) == "-1 coin");
+    for (const Cents raw : {Cents(0), Cents(1), Cents(80), Cents(1000), MaxMoney, Cents(INT64_MIN)})
+        CHECK(FormatMoney(raw).find('$') == std::string::npos && FormatMoney(raw).find('.') == std::string::npos);
     CHECK(BuyPrice(Item::Pasty) == 100 && SellPrice(Item::Stone) == 5 && BuyBackPrice(Item::Stone) == 5);
     CHECK(SellDownAmount(0) == 0 && SellDownAmount(1) == 1 && SellDownAmount(10) == 4 && SellDownAmount(3) == 2);
     CHECK(FormatHour(8) == "8 AM" && FormatHour(18) == "6 PM" && FormatHour(0) == "12 AM" && FormatHour(12.5) == "12:30 PM");
@@ -164,7 +181,7 @@ void SellAStack()
     const auto revision = sim.GetRevision();
     const auto sold = sim.Sell(store.shop, Item::Stone, 12, store.customer);
     OK(sold);
-    CHECK(sold.message == "Sold 12 Stone for $0.60.");
+    CHECK(sold.message == "Sold 12 Stone for 60 coins.");
     CHECK(sold.revision > revision);
     CHECK(sim.Count(Item::Stone) == 8);
     CHECK(sim.GetState().money == before + 12 * SellPrice(Item::Stone));
@@ -195,7 +212,7 @@ void RejectedTradesChangeNothing()
     unchanged(sim.Sell(store.shop, Item::Count, 1, store.customer));
     unchanged(sim.Sell(store.shop + 999, Item::Stone, 1, store.customer));
     unchanged(sim.Sell(store.shop, Item::Stone, 1, {store.counter.x, store.counter.y - 1000.0}));
-    unchanged(sim.Buy(store.shop, Item::Pasty, 11, false, store.customer)); // $11.00 of her $10.00.
+    unchanged(sim.Buy(store.shop, Item::Pasty, 11, false, store.customer)); // 1,100 coins of her 1,000.
     unchanged(sim.Buy(store.shop, Item::Stone, 1, false, store.customer));  // Not a shop good.
     unchanged(sim.Buy(store.shop, Item::Stone, 1, true, store.customer));   // She hasn't sold any.
     unchanged(sim.Buy(store.shop, Item::Pasty, 0, false, store.customer));
@@ -219,7 +236,7 @@ void BuyAndEatAPasty()
     Edit(sim, 40.0, 50.0);
     const auto bought = sim.Buy(store.shop, Item::Pasty, 1, false, store.customer);
     OK(bought);
-    CHECK(bought.message == "Bought 1 Cornish pasty for $1.00.");
+    CHECK(bought.message == "Bought 1 Cornish pasty for 100 coins.");
     CHECK(sim.GetState().money == StartingMoney - 100 && sim.Count(Item::Pasty) == 1);
     const double hunger = sim.GetState().hunger, energy = sim.GetState().energy;
     OK(sim.Eat(Item::Pasty));
@@ -228,7 +245,7 @@ void BuyAndEatAPasty()
     // Three loaves at 50 cents.
     const auto loaves = sim.Buy(store.shop, Item::Bread, 3, false, store.customer);
     OK(loaves);
-    CHECK(loaves.message == "Bought 3 loaves of bread for $1.50.");
+    CHECK(loaves.message == "Bought 3 loaves of bread for 150 coins.");
     CHECK(sim.GetState().money == StartingMoney - 100 - 150 && sim.Count(Item::Bread) == 3);
     // Everything she has left, exactly.
     OK(sim.GrantMoney(-sim.GetState().money + 25));
@@ -329,6 +346,347 @@ void PlaytestShopPlacement()
     CHECK(loaded.FindShop(ShopKind::GeneralStore)->counterYaw == 45.0);
 }
 
+void WaitForTheStoreToOpen()
+{
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    const Point door{store.counter.x, store.counter.y - 700.0};
+    CHECK(HoursUntilOpen(*sim.FindShop(store.shop), 9.0) == 0.0);
+    CHECK(std::abs(HoursUntilOpen(*sim.FindShop(store.shop), 19.0) - 13.0) < 1e-9);
+    CHECK(std::abs(HoursUntilOpen(*sim.FindShop(store.shop), 7.5) - 0.5) < 1e-9);
+    // Open now: nothing to wait for, and no time passes.
+    const std::string morning = sim.Serialize();
+    CHECK(!sim.WaitForShop(store.shop, door).ok && sim.Serialize() == morning);
+    // 7 PM: too far from the shop to wait for it.
+    sim.SkipToHourOfDay(19.0);
+    Edit(sim, 100.0, 100.0);
+    const std::string evening = sim.Serialize();
+    CHECK(!sim.WaitForShop(store.shop, {door.x, door.y - 5000.0}).ok && sim.Serialize() == evening);
+    CHECK(!sim.WaitForShop(store.shop + 999, door).ok && sim.Serialize() == evening);
+    // Hunger never fails her on the estate, so an empty belly doesn't stop the wait (tried on a copy).
+    Edit(sim, 5.0, 100.0);
+    Simulation hungry = sim;
+    OK(hungry.WaitForShop(store.shop, door));
+    // Too tired to last the night (she'd doze off in the street): refused before any time passes.
+    Edit(sim, 100.0, 3.0);
+    const std::string tired = sim.Serialize();
+    const auto sleepy = sim.WaitForShop(store.shop, door);
+    CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos);
+    CHECK(sim.Serialize() == tired);
+    // Fed: she waits the night through, across midnight and the 6 AM rollover, and it's open.
+    Edit(sim, 100.0, 100.0);
+    const double before = sim.GetState().hour;
+    OK(sim.WaitForShop(store.shop, door));
+    const double after = sim.GetState().hour;
+    CHECK(std::abs((after - before) - 13.0) < 0.01);
+    CHECK(IsShopOpen(*sim.FindShop(store.shop), after));
+    CHECK(sim.GetState().hunger < 100.0);
+    OK(sim.CheckShopAccess(store.shop, store.customer));
+}
+
+void NoWalkToTownFromTown()
+{
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const Point counter = store.counter;
+    const Point door = layout.PointOr(Anchor::GeneralStoreDoor, {});
+    const Point square = layout.PointOr(Anchor::TownSquare, {});
+    const auto Refused = [&sim, &layout](Point from, const char* text)
+    {
+        const TravelPlan plan = PlanTravel(sim.GetState(), from, TravelDestination::Town, layout);
+        return !plan.ok && plan.error == text;
+    };
+    // Inside the store and on its step: already there, open or closed.
+    for (double hour : {9.0, 20.0})
+    {
+        sim.SkipToHourOfDay(hour);
+        CHECK(Refused(counter, "You're already at the general store."));
+        CHECK(Refused(store.customer, "You're already at the general store."));
+        CHECK(Refused(door, "You're already at the general store."));
+    }
+    // About the square: already in town.
+    CHECK(Refused(square, "You're already in town."));
+    // A little way off down the street she can still walk to the road's end in town, briefly.
+    const TravelPlan street = PlanTravel(sim.GetState(), {square.x, square.y - 6000.0}, TravelDestination::Town, layout);
+    CHECK(street.ok && street.gameHours < 1.0);
+    // From the gateway it's a real walk, and home to the manor from inside the store still is too.
+    const Point gateway = EstatePublicRoad().At(EstatePublicRoad().FindStop("Gateway")->chainage);
+    CHECK(PlanTravel(sim.GetState(), gateway, TravelDestination::Town, layout).ok);
+    CHECK(PlanTravel(sim.GetState(), counter, TravelDestination::Manor, layout).ok);
+    // Refused at the store: no time passes and nothing changes.
+    const std::string before = sim.Serialize();
+    const auto refused = sim.WalkRoad(TravelDestination::Town, counter);
+    CHECK(!refused.ok && refused.message == "You're already at the general store." && sim.Serialize() == before);
+}
+
+void WalkTheRoad()
+{
+    CHECK(FormatHour(7.9999) == "8 AM" && FormatHour(23.999) == "12 AM" && FormatHour(19.2) == "7:12 PM");
+    CHECK(FormatWalkDuration(7.2) == "7 h 12 min" && FormatWalkDuration(0.5) == "30 min" && FormatWalkDuration(2.0) == "2 h");
+    const PublicRoad& road = EstatePublicRoad();
+    const PublicRoadStop* manor = road.FindStop("Manor");
+    const PublicRoadStop* town = road.FindStop("Town");
+    CHECK(manor && town);
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    // Noon at the manor, default 60-minute day: the whole road at the conservative pace, ~7 game hours.
+    sim.SkipToHourOfDay(12.0);
+    const TravelPlan noon = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
+    CHECK(noon.ok && noon.connectorMetres < 1.0);
+    CHECK(std::abs(noon.roadMetres - (town->chainage - manor->chainage)) < 1.0);
+    const double expected = noon.totalMetres * 100.0 / RoadWalkPaceCmPerSecond / 3600.0 * 24.0 * 60.0 / sim.GetState().dayMinutes;
+    CHECK(std::abs(noon.gameHours - expected) < 1e-9 && noon.gameHours > 6.8 && noon.gameHours < 7.4);
+    CHECK(noon.arrival.x == town->position.x && noon.arrival.y == town->position.y && noon.arrivalZ == town->z);
+    CHECK(noon.storeClosedOnArrival && noon.summary.find("closed") != std::string::npos && !noon.nextDay);
+    CHECK(noon.summary.find("1.9 km") != std::string::npos);
+    // The saved day length scales it: a 30-minute day doubles the game hours, 120 halves them.
+    OK(sim.SetDayMinutes(30.0));
+    CHECK(std::abs(PlanTravel(sim.GetState(), manor->position, TravelDestination::Town).gameHours - noon.gameHours * 2.0) < 1e-9);
+    OK(sim.SetDayMinutes(120.0));
+    CHECK(std::abs(PlanTravel(sim.GetState(), manor->position, TravelDestination::Town).gameHours - noon.gameHours / 2.0) < 1e-9);
+    // ...and survives a save and reload.
+    Simulation reloaded;
+    reloaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(std::abs(PlanTravel(reloaded.GetState(), manor->position, TravelDestination::Town).gameHours - noon.gameHours / 2.0) < 1e-9);
+    OK(sim.SetDayMinutes(60.0));
+    // Early enough, the store is open when she gets there.
+    sim.SkipToHourOfDay(6.5);
+    const TravelPlan morning = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
+    CHECK(morning.ok && !morning.storeClosedOnArrival && morning.summary.find("closed") == std::string::npos);
+    // Late: past midnight on the way.
+    sim.SkipToHourOfDay(22.0);
+    CHECK(PlanTravel(sim.GetState(), manor->position, TravelDestination::Town).nextDay);
+    // Partway along (the gateway), only the rest of the road counts; home to the manor never warns about the store.
+    const Point gateway = road.At(road.FindStop("Gateway")->chainage);
+    const TravelPlan half = PlanTravel(sim.GetState(), gateway, TravelDestination::Town);
+    CHECK(half.ok && half.gameHours < noon.gameHours * 0.7);
+    const TravelPlan home = PlanTravel(sim.GetState(), town->position, TravelDestination::Manor);
+    CHECK(home.ok && !home.storeClosedOnArrival && home.arrival.x == manor->position.x);
+    // Off the road: the straight walk back to it counts too, and far off she has to find it herself.
+    const TravelPlan field = PlanTravel(sim.GetState(), {gateway.x + 20000.0, gateway.y}, TravelDestination::Town);
+    CHECK(field.ok && field.connectorMetres > 150.0 && field.totalMetres > half.totalMetres);
+    CHECK(!PlanTravel(sim.GetState(), {gateway.x + 90000.0, gateway.y}, TravelDestination::Town).ok);
+    CHECK(!PlanTravel(sim.GetState(), town->position, TravelDestination::Town).ok);
+    Simulation woodland;
+    CHECK(!PlanTravel(woodland.GetState(), manor->position, TravelDestination::Town).ok);
+    // Refusals pass no time at all. Hunger never fails her on the estate, so an empty belly doesn't stop the walk.
+    sim.SkipToHourOfDay(12.0);
+    Edit(sim, 5.0, 100.0);
+    Simulation hungry = sim;
+    OK(hungry.WalkRoad(TravelDestination::Town, manor->position));
+    Edit(sim, 100.0, 3.0);
+    const std::string tired = sim.Serialize();
+    const auto sleepy = sim.WalkRoad(TravelDestination::Town, manor->position);
+    CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos && sim.Serialize() == tired);
+    const std::string there = sim.Serialize();
+    CHECK(!sim.WalkRoad(TravelDestination::Town, town->position).ok && sim.Serialize() == there);
+    // Fed and rested: the clock runs for the whole walk, and she's hungrier and a little more tired.
+    Edit(sim, 100.0, 100.0);
+    const double before = sim.GetState().hour;
+    const std::uint64_t revision = sim.GetRevision();
+    const TravelPlan plan = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
+    OK(sim.WalkRoad(TravelDestination::Town, manor->position));
+    CHECK(std::abs(sim.GetState().hour - before - plan.gameHours) < 1e-6);
+    CHECK(sim.GetRevision() > revision && sim.GetState().hunger < 100.0 && sim.GetState().energy < 100.0);
+    CHECK(sim.DozeCount() == 0);
+}
+
+// Shops and the pack show the canonical nominal Energy one food restores, from its catalogue row.
+void FoodEnergyLabels()
+{
+    CHECK(FoodEnergyLabel(Item::Pasty) == "+25 Energy");
+    CHECK(FoodEnergyLabel(Item::Bread) == "+8 Energy");
+    CHECK(FoodEnergyLabel(Item::Cheese) == "+12 Energy");
+    for (int i = 0; i < ItemCount; ++i)
+    {
+        const auto item = static_cast<Item>(i);
+        const std::string label = FoodEnergyLabel(item);
+        const long energy = std::lround(GetItemInfo(item).energy);
+        if (IsEdible(item) && energy > 0) CHECK(label == "+" + std::to_string(energy) + " Energy");
+        else CHECK(label.empty());
+    }
+    // Not food: tools, materials and raw produce that needs cooking show nothing.
+    CHECK(FoodEnergyLabel(Item::Hatchet).empty() && FoodEnergyLabel(Item::Stone).empty() && FoodEnergyLabel(Item::Potato).empty());
+    CHECK(FoodEnergyLabel(Item::Count).empty() && FoodEnergyLabel(static_cast<Item>(-1)).empty());
+}
+
+void PailWaterPresentation()
+{
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const auto With = [&sim](int pails, int water)
+    {
+        State state = sim.GetState();
+        state.inventory[static_cast<int>(Item::WateringCan)] = pails;
+        state.inventory[static_cast<int>(Item::Water)] = water;
+        return PresentPail(state);
+    };
+    // One carried pail: its water is a gauge and the pack's Water tile folds into it.
+    for (int water : {0, 1, 6})
+    {
+        const auto pail = With(1, water);
+        CHECK(pail.gauge && pail.charge == water && pail.hidePackWater);
+    }
+    // More than one pail holds (an older save), or 1200: the gauge is full and the tile shows every portion.
+    for (int water : {7, 1200})
+    {
+        const auto pail = With(1, water);
+        CHECK(pail.gauge && pail.charge == PailCapacity && !pail.hidePackWater);
+    }
+    // No pail carried (the starter pail is in a chest): no gauge, and any pack water shows as a tile.
+    CHECK(!With(0, 0).gauge && !With(0, 0).hidePackWater);
+    CHECK(!With(0, 4).gauge && !With(0, 4).hidePackWater);
+    // Two pails: the gauge shows, and the water stays an ordinary tile rather than be split between them.
+    CHECK(With(2, 4).gauge && With(2, 4).charge == 4 && !With(2, 4).hidePackWater);
+    // Presentation only: the stock itself round-trips through a save untouched.
+    OK(sim.GrantItems(Item::WateringCan, 1));
+    OK(sim.GrantItems(Item::Water, 9));
+    Simulation reloaded;
+    reloaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= 9);
+    const auto loaded = PresentPail(reloaded.GetState());
+    CHECK(loaded.gauge && loaded.charge == PailCapacity && !loaded.hidePackWater);
+    // The pack's footer names the charge (a controller has no hover for the tooltip).
+    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 6" && PailChargeLabel(With(1, 0)) == "Water 0 / 6");
+    CHECK(PailChargeLabel(With(1, 1200)) == "Water 6 / 6" && PailChargeLabel(With(0, 4)).empty());
+}
+
+// The "+3 Berries" line counts only real gains: gathering, buying, crafting and grants, never a chest
+// move, a drop picked back up, spent ingredients or pail water.
+void PickupGainsCountOnlyNewThings()
+{
+    Store store = OpenStore();
+    auto& sim = store.sim;
+    const auto Gain = [&sim](const Holdings& before, Item item) { return PickupGain(before, CountHoldings(sim.GetState()), item); };
+    // Gathering berries at a bush on the estate.
+    const ResourceNode* bush = nullptr;
+    for (const auto& node : sim.GetState().resources)
+        if (node.kind == ResourceKind::BerryBush && !node.cleared && node.readyAtHour <= sim.GetState().hour) { bush = &node; break; }
+    CHECK(bush != nullptr);
+    const Point bushAt = bush->position;
+    Holdings before = CountHoldings(sim.GetState());
+    const int berries = sim.Count(Item::Berries);
+    OK(sim.Harvest(bush->id, bushAt));
+    CHECK(sim.Count(Item::Berries) > berries && Gain(before, Item::Berries) == sim.Count(Item::Berries) - berries);
+    // Buying at the store.
+    before = CountHoldings(sim.GetState());
+    OK(sim.Buy(store.shop, Item::Pasty, 2, false, store.customer));
+    CHECK(Gain(before, Item::Pasty) == 2);
+    // Crafting: the axe shows, the branch and stone it used don't (and never as a negative).
+    OK(sim.GrantItems(Item::RustedAxeHead, 1));
+    OK(sim.GrantItems(Item::Branch, 10));
+    OK(sim.GrantItems(Item::Stone, 10));
+    before = CountHoldings(sim.GetState());
+    CHECK(Gain(before, Item::Branch) == 0);
+    OK(sim.Craft(Recipe::HaftAxe, bushAt));
+    CHECK(Gain(before, Item::Hatchet) == 1);
+    for (int index = 0; index < ItemCount; ++index)
+        if (static_cast<Item>(index) != Item::Hatchet) CHECK(Gain(before, static_cast<Item>(index)) == 0);
+    // Setting branches down and picking them back up is a move.
+    int group = 0;
+    for (const auto& entry : *sim.GetLayout(0)) if (entry.item == Item::Branch) { group = entry.groupId; break; }
+    CHECK(group != 0);
+    OK(sim.DropGroup(group, 2, bushAt, bushAt, sim.GetRevision()));
+    before = CountHoldings(sim.GetState());
+    OK(sim.PickUpDrop(sim.GetState().worldDrops.back().id, bushAt));
+    CHECK(Gain(before, Item::Branch) == 0);
+    // Pail water fills the pail's gauge, not a pickup line.
+    before = CountHoldings(sim.GetState());
+    OK(sim.GrantItems(Item::Water, 3));
+    CHECK(Gain(before, Item::Water) == 0);
+    // Taking the pail from the manor chest and putting it back are moves, too.
+    Simulation manor;
+    manor.SetPlacements(ProvisionalEstatePlacements());
+    OK(manor.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const Structure* chest = nullptr;
+    for (const auto& piece : manor.GetState().structures) if (piece.kind == Piece::Chest) { chest = &piece; break; }
+    CHECK(chest != nullptr && chest->storage[static_cast<int>(Item::WateringCan)] >= 1);
+    const int chestId = chest->id;
+    const Point chestSide = manor.StructureCenter(*chest);
+    before = CountHoldings(manor.GetState());
+    OK(manor.Transfer(chestId, Item::WateringCan, -1, chestSide));
+    const Holdings taken = CountHoldings(manor.GetState());
+    CHECK(manor.Count(Item::WateringCan) == 1 && PickupGain(before, taken, Item::WateringCan) == 0);
+    OK(manor.Transfer(chestId, Item::WateringCan, 1, chestSide));
+    CHECK(PickupGain(taken, CountHoldings(manor.GetState()), Item::WateringCan) == 0);
+}
+
+int PackStock(const Simulation& sim, Item item)
+{
+    int total = 0;
+    for (const auto& entry : *sim.GetLayout(0))
+        if (entry.wearableId == 0 && entry.item == item) total += entry.quantity;
+    return total;
+}
+
+// Stock truth on the actual-stack hotbar: a "+N" is exactly what her stacks gained, and arranging
+// those stacks (hotbar row, split, sort, back below the row), eating, garments and the lamp never
+// add a line or a second one for the same thing.
+void PickupGainsFollowActualStacks()
+{
+    Store store = OpenStore();
+    auto& sim = store.sim;
+    const Point here = store.customer;
+    const auto Gains = [&sim](const Holdings& before)
+    {
+        int lines = 0, total = 0;
+        const Holdings now = CountHoldings(sim.GetState());
+        for (int index = 0; index < ItemCount; ++index)
+            if (const int gain = PickupGain(before, now, static_cast<Item>(index)); gain > 0) { ++lines; total += gain; }
+        return std::make_pair(lines, total);
+    };
+    // Buying five pasties is one line of exactly what her stacks gained.
+    const int stacked = PackStock(sim, Item::Pasty);
+    Holdings before = CountHoldings(sim.GetState());
+    OK(sim.Buy(store.shop, Item::Pasty, 5, false, here));
+    CHECK(PackStock(sim, Item::Pasty) - stacked == 5 && sim.Count(Item::Pasty) == PackStock(sim, Item::Pasty));
+    CHECK(PickupGain(before, CountHoldings(sim.GetState()), Item::Pasty) == 5);
+    CHECK(Gains(before) == std::make_pair(1, 5));
+    int group = 0;
+    for (const auto& entry : *sim.GetLayout(0)) if (entry.item == Item::Pasty) group = entry.groupId;
+    CHECK(group != 0);
+    // Arranging stacks: into the hotbar row, split, sorted and back out again.
+    before = CountHoldings(sim.GetState());
+    OK(sim.MoveToPackRow(group, 0, 9, sim.GetRevision()));
+    OK(sim.MoveFromPackRow(9, 0, 0, sim.GetRevision()));
+    OK(sim.SplitHalf(0, group, here, sim.GetRevision()));
+    OK(sim.SortPack(sim.GetRevision()));
+    CHECK(Gains(before) == std::make_pair(0, 0) && sim.Count(Item::Pasty) == PackStock(sim, Item::Pasty));
+    // Eating one is a loss, never a line.
+    Edit(sim, 40.0, 100.0);
+    for (const auto& entry : *sim.GetLayout(0)) if (entry.item == Item::Pasty) { group = entry.groupId; break; }
+    before = CountHoldings(sim.GetState());
+    OK(sim.EatGroup(group, sim.GetRevision()));
+    CHECK(Gains(before) == std::make_pair(0, 0));
+    // A garment set down and picked back up (its drop has no item) is a move.
+    int garment = 0;
+    for (const auto& wearable : sim.GetState().wearables)
+        if (wearable.owner == WearableOwner::Carried) { garment = wearable.id; break; }
+    if (garment == 0)
+    {
+        OK(sim.GrantItems(Item::Fiber, 20));
+        if (sim.Count(Item::Knife) == 0) OK(sim.GrantItems(Item::Knife, 1));
+        before = CountHoldings(sim.GetState());
+        OK(sim.CraftGarment(WearableDefinition::LinenTunic, here, sim.GetRevision()));
+        CHECK(Gains(before) == std::make_pair(0, 0));
+        garment = sim.GetState().wearables.back().id;
+    }
+    before = CountHoldings(sim.GetState());
+    OK(sim.DropWearable(garment, here, here, sim.GetRevision()));
+    CHECK(sim.GetState().worldDrops.back().item == Item::Count);
+    OK(sim.PickUpDrop(sim.GetState().worldDrops.back().id, here));
+    CHECK(Gains(before) == std::make_pair(0, 0));
+    // So is the lamp set down and taken up again.
+    if (sim.Count(Item::OilLamp) == 0) OK(sim.GrantItems(Item::OilLamp, 1));
+    before = CountHoldings(sim.GetState());
+    OK(sim.SetDownLamp(here, here));
+    OK(sim.PickUpDrop(sim.SetDownLampDrop()->id, here));
+    CHECK(Gains(before) == std::make_pair(0, 0) && sim.Count(Item::OilLamp) == 1);
+}
+
 const char* filter = nullptr;void Run(const char* name, void (*test)())
 {
     if (filter && !std::strstr(name, filter)) return;
@@ -351,7 +709,14 @@ int main(int argc, char** argv)
     Run("buy back and pack capacity", BuyBackAndCapacity);
     Run("her goods sell down each morning", StockSellsDownEachMorning);
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
+    Run("no walk to town from town", NoWalkToTownFromTown);
     Run("playtest shop placement", PlaytestShopPlacement);
+    Run("wait for the store to open", WaitForTheStoreToOpen);
+    Run("walk the road to town and back", WalkTheRoad);
+    Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);
+    Run("pickup lines follow her actual stacks", PickupGainsFollowActualStacks);
+    Run("pail water shows on the pail", PailWaterPresentation);
+    Run("food shows its Energy", FoodEnergyLabels);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

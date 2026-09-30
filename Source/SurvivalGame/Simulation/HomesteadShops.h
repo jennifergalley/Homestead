@@ -8,13 +8,15 @@
 #include <vector>
 
 // Money, shops and their stock. The transactions themselves are Simulation members
-// (Simulation::Sell / Simulation::Buy, in HomesteadShops.cpp) so every cent moves with the goods.
+// (Simulation::Sell / Simulation::Buy, in HomesteadShops.cpp) so every coin moves with the goods.
 namespace Homestead
 {
-// Money is always whole cents.
+// Money is a whole number of coins: the smallest stored unit is one coin (the raw values and save
+// bytes are unchanged from when it read as cents, so buying power is too). The type keeps its old
+// name until the economy's semantic rename.
 using Cents = std::int64_t;
-constexpr Cents StartingMoney = 1000; // $10.00, a placeholder until Jenny tunes it.
-constexpr Cents MaxMoney = INT64_C(100000000000); // $1,000,000,000.00
+constexpr Cents StartingMoney = 1000; // 1,000 coins, a placeholder until Jenny tunes it.
+constexpr Cents MaxMoney = INT64_C(100000000000); // 100,000,000,000 coins
 // How near the counter she must stand to trade, in cm.
 constexpr double CounterReach = 400.0;
 // Shop goods cost their base price times this; her own goods sell back at what she was paid.
@@ -24,9 +26,10 @@ constexpr int SellDownPercent = 35;
 constexpr double DayRolloverHour = 6.0;
 constexpr int MaxShopStock = 9999;
 
-// "$1,234.05"; negative amounts read "-$1.00".
+// Whole coins, grouped: "1,234 coins", "1 coin", "0 coins"; negative amounts read "-100 coins".
+// No currency sign or decimals anywhere.
 std::string FormatMoney(Cents cents);
-// Always signed: "+$2.00", "-$0.40", "+$0.00".
+// Always signed: "+2 coins", "-40 coins", "+1 coin", "+0 coins".
 std::string FormatMoneyDelta(Cents cents);
 
 struct Shop
@@ -48,6 +51,11 @@ struct Shop
 const std::vector<Item>& ShopGoods(ShopKind kind);
 const char* ShopDisplayName(ShopKind kind);
 bool IsShopOpen(const Shop& shop, double hour);
+// Hours from `hour` until the shop next opens; 0 while it's open.
+double HoursUntilOpen(const Shop& shop, double hour);
+// How near the shop (its counter) she must be to wait for it to open, in cm: the door and the
+// street outside it.
+constexpr double ShopWaitReach = 1500.0;
 // "Closed - opens at 8 AM".
 std::string ClosedMessage(const Shop& shop);
 // What she is paid per unit.

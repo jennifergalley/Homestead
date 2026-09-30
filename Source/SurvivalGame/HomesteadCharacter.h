@@ -27,7 +27,7 @@ class AHomesteadWorld;
 class UHomesteadAnimInstance;
 namespace Homestead { struct Point; enum class Item : int; }
 
-enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds, Plant, Harvest };
+enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds, Plant, Harvest, PullWeeds };
 
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
@@ -85,7 +85,16 @@ public:
     UAnimSequence* GetSlowWalkAnimation() const { return SlowWalkAnimation; }
     UAnimSequence* GetSprintAnimation() const { return SprintAnimation; }
     bool IsSprinting() const { return bSprintActive; }
+    // Sprint is a toggle (Shift / L3): on until pressed again, a load or new game, or she tires.
+    bool IsSprintOn() const { return bSprintOn; }
+    // Sprint itself costs nothing; at or below this Energy (Simulation::CanSprint) she can't sprint.
+    static constexpr double SprintEnergyFloor = 10.0;
+    // L3 (on press) and a tap of Shift (on release; AHomesteadController::TrackSprintShift) flip it.
+    void RequestSprintToggle();
+    // Drops out of sprint speed for now (work, menus, falling) but leaves the toggle on.
     void CancelSprint();
+    // Turns the toggle off as well (a load, a new game, a teleport).
+    void ResetSprint();
     UAnimSequence* GetGatherAnimation() const { return GatherAnimation; }
     // MetaHuman only: the kneeling gather clip for the current kind (sticks and stones share the
     // arm-cradle clip; roots and berries use the hip-pouch clip; reeds are sawn free with the
@@ -159,6 +168,25 @@ public:
     // mesh shown in her hand (pivot at the grip). Like the other kneels, IsStickPileOnGround stays
     // true until the crop leaves the ground. False when no kneeling clip can play.
     bool PlayHarvest(Homestead::Point Target, bool bPick, UStaticMesh* Produce);
+    // Weeds pulled by hand on both knees, two fistfuls tossed back over each shoulder, no tool
+    // (AN_HeroineMH_KneelPullWeeds, homestead_agent.kneel_pull_weeds). False, and nothing plays,
+    // when the clip isn't loaded; the caller then uses the pouch kneel. Handful is the mesh of the
+    // clump she pulls (null: the garden's nettle tuft); each fistful shows in her hand from its pull to
+    // its toss, then flies back over her shoulder and lies there until the clip ends.
+    bool PlayPullWeeds(Homestead::Point Target, UStaticMesh* Handful = nullptr);
+    bool CanPullWeeds() const { return bMetaHumanActive && PullWeedsAnimation != nullptr; }
+    // Seconds into the weed pull while it plays, else -1. That may still be an earlier pull's tail: a pull
+    // queued behind it only owns the phase once PullWeedsStarts() has moved on from where it was.
+    float PullWeedsPhase() const;
+    // How many weed pulls have begun (counted when the queued kneel actually takes her hands).
+    uint32 PullWeedsStarts() const { return PullWeedsStartCount; }
+    // kneel_pull_weeds WEED_CENTRE (cm ahead / to her right of her standing pose) and
+    // EVENTS['pulled2']: the second root comes out of the ground, the pull's one commit.
+    static constexpr float PullWeedsForward = 39.0f;
+    static constexpr float PullWeedsRight = 0.0f;
+    static constexpr float PullWeedsCommit = 102.0f / 30.0f;
+    // EVENTS['pulled1']: the first fistful comes out, and the clump shows it (AHomesteadWorld::ThinResource).
+    static constexpr float PullWeedsFirstPull = 56.0f / 30.0f;
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
     // world keeps the gathered pile visible until then.
     bool IsStickPileOnGround() const { return PendingKneel.IsSet() || bStickPileOnGround; }
@@ -284,6 +312,7 @@ private:
     UPROPERTY() TObjectPtr<UInputMappingContext> Mapping;
     UPROPERTY() TObjectPtr<UInputAction> MoveAction;
     UPROPERTY() TObjectPtr<UInputAction> SprintAction;
+    UPROPERTY() TObjectPtr<UInputAction> ShiftSprintAction;
     UPROPERTY() TObjectPtr<UInputAction> MouseLookAction;
     UPROPERTY() TObjectPtr<UInputAction> StickLookAction;
     UPROPERTY() TObjectPtr<UInputAction> ZoomAction;
@@ -297,6 +326,16 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> GatherAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherSticksAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherPouchAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> PullWeedsAnimation;
+    // The two pulled fistfuls: left then right hand (kneel_pull_weeds), no collision or shadow.
+    UPROPERTY() TObjectPtr<UStaticMeshComponent> PulledWeedL;
+    UPROPERTY() TObjectPtr<UStaticMeshComponent> PulledWeedR;
+    UPROPERTY() TObjectPtr<UStaticMesh> PulledWeedDefault;
+    FVector PulledWeedVelocity[2] = {FVector::ZeroVector, FVector::ZeroVector};
+    bool bPulledWeedHeld[2] = {false, false};
+    bool bPulledWeedFlying[2] = {false, false};
+    void UpdatePulledWeeds(float DeltaSeconds);
+    uint32 PullWeedsStartCount = 0;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherReedsAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherPlantAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherHarvestAnimation;
@@ -497,7 +536,7 @@ private:
     float FaceFocusBlend = 0.0f;
     float FaceFocusBodyArm = 280.0f;
     TOptional<float> SavedNearClip;
-    bool bSprintHeld = false;
+    bool bSprintOn = false;
     bool bSprintActive = false;
     float SavedCameraDistance = 470;
     bool bRoomCamera = false;
@@ -520,8 +559,8 @@ private:
     void UpdateAppearanceFraming();
     void RestoreNearClip();
     void Move(const FInputActionValue& Value);
-    void BeginSprint(const FInputActionValue& Value);
-    void EndSprint(const FInputActionValue& Value);
+    void ToggleSprint(const FInputActionValue& Value) { RequestSprintToggle(); }
+    void LabShiftSprint(const FInputActionValue& Value);
     void MouseLook(const FInputActionValue& Value);
     void StickLook(const FInputActionValue& Value);
     void ZoomInput(const FInputActionValue& Value);

@@ -1,0 +1,430 @@
+{
+  "schema": 1,
+  "name": "WeedClump",
+  "description": "Three unmistakable spring weed clumps: broad-leaved dock with reddish seed spikes, a spiny thistle rosette with purple heads and bright yellow ragwort, and a low mixed dandelion/plantain/buttercup clump. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 15000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/weed_clump.py",
+  "source_sha256": "d8e65c631b04008b0cb403777e4c4add531b14ca6388c576d791bbd0095887d7",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_WeedClump_Dock": {
+      "vertices": 7173,
+      "triangles": 7805,
+      "size_cm": [
+        78.51,
+        78.34,
+        81.09
+      ],
+      "materials": [
+        {
+          "name": "M_WeedClump",
+          "textures": {
+            "basecolor": "T_WeedClump_basecolor.png",
+            "normal": "T_WeedClump_normal.png",
+            "roughness": "T_WeedClump_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.8,
+        "focus": [
+          0.009771544933319092,
+          -0.0006643629074096682,
+          0.27
+        ],
+        "detail_distance": 0.78,
+        "detail_fstop": 28.0
+      },
+      "fbx": "SM_WeedClump_Dock.fbx",
+      "sha256": "10a308201d8434881f304982ff991640b70219b3ed3ecccb9783a20ddf37dd7b",
+      "preview": "preview_SM_WeedClump_Dock.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WeedClump_Dock_hero.png",
+          "detail": "beauty_SM_WeedClump_Dock_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_WeedClump_Dock_LOD1": {
+      "vertices": 1312,
+      "triangles": 1164,
+      "size_cm": [
+        83.03,
+        82.32,
+        82.95
+      ],
+      "materials": [
+        {
+          "name": "M_WeedClump",
+          "textures": {
+            "basecolor": "T_WeedClump_basecolor.png",
+            "normal": "T_WeedClump_normal.png",
+            "roughness": "T_WeedClump_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.5
+      },
+      "fbx": "SM_WeedClump_Dock_LOD1.fbx",
+      "sha256": "b185ec1ddb03ad9fc9c28b717f520b1b6c8a771403b671ec7580c7e0734d25d3",
+      "preview": "preview_SM_WeedClump_Dock_LOD1.png"
+    },
+    "SM_WeedClump_Dock_LOD2": {
+      "vertices": 375,
+      "triangles": 256,
+      "size_cm": [
+        91.86,
+        82.2,
+        88.0
+      ],
+      "materials": [
+        {
+          "name": "M_WeedClump",
+          "textures": {
+            "basecolor": "T_WeedClump_basecolor.png",
+            "normal": "T_WeedClump_normal.png",
+            "roughness": "T_WeedClump_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.5
+      },
+      "fbx": "SM_WeedClump_Dock_LOD2.fbx",
+      "sha256": "974aaf0e79f2f842cfc4b583868319fcd80ab6218b79012cdaface8bb87ab995",
+      "preview": "preview_SM_WeedClump_Dock_LOD2.png"
+    },
+    "SM_WeedClump_Thistle": {
+      "vertices": 5328,
+      "triangles": 7482,
+      "size_cm": [
+        78.43,
+        65.88,
+        69.25
+      ],
+      "materials": [
+        {
+          "name": "M_WeedClump",
+          "textures": {
+            "basecolor": "T_WeedClump_basecolor.png",
+            "normal": "T_WeedClump_normal.png",
+            "roughness": "T_WeedClump_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.6,
+        "focus": [
+          0.04432403385639191,
+          -0.03355208456516266,
+          0.26
+        ],
+        "detail_distance": 1.65,
+        "detail_fstop": 32.0
+      },
+      "fbx": "SM_WeedClump_Thistle.fbx",
+      "sha256": "dc3c8a64573674f333fba0bd039192848c242b05615aae58adba4d418d2e5562",
+      "preview": "preview_SM_WeedClump_Thistle.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WeedClump_Thistle_hero.png",
+          "detail": "beauty_SM_WeedClump_Thistle_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_WeedClump_Thistle_LOD1": {
+      "vertices": 1405,
+      "triangles": 1686,
+      "size_cm": [
+        76.95,
+        66.72,
+        70.76
+      ],
+      "materials": [
+        {
+          "name": "M_WeedClump",
+          "textures": {
+            "basecolor": "T_WeedClump_basecolor.png",
+            "normal": "T_WeedClump_normal.png",
+            "roughness": "T_WeedClump_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.5
+      },
+      "fbx": "SM_WeedClump_Thistle_LOD1.fbx",
+      "sha256": "a51e54189c523f8b2ecb23d79bd1b275a804341c651db3ddc021cf403c171753",
+      "preview": "preview_SM_WeedClump_Thistle_LOD1.png"
+    },
+    "SM_WeedClump_Thistle_LOD2": {
+      "vertices": 374,
+      "triangles": 310,
+      "size_cm": [
+        80.4,
+        72.32,
+        73.36
+      ],
+      "materials": [
+        {
+          "name": "M_WeedClump",
+          "textures": {
+            "basecolor": "T_WeedClump_basecolor.png",
+            "normal": "T_WeedClump_normal.png",
+            "roughness": "T_WeedClump_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.5
+      },
+      "fbx": "SM_WeedClump_Thistle_LOD2.fbx",
+      "sha256": "87c1b91b2ba802637860e8d429e64ef1cf82b1a81aae981354ff3f486c9aa55f",
+      "preview": "preview_SM_WeedClump_Thistle_LOD2.png"
+    },
+    "SM_WeedClump_Dandelion": {
+      "vertices": 4753,
+      "triangles": 6636,
+      "size_cm": [
+        75.39,
+        59.27,
+        29.91
+      ],
+      "materials": [
+        {
+          "name": "M_WeedClump",
+          "textures": {
+            "basecolor": "T_WeedClump_basecolor.png",
+            "normal": "T_WeedClump_normal.png",
+            "roughness": "T_WeedClump_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 4.8,
+        "focus": [
+          -0.010755479335784912,
+          -0.00013168156147003174,
+          0.13
+        ],
+        "detail_distance": 0.62,
+        "detail_fstop": 28.0
+      },
+      "fbx": "SM_WeedClump_Dandelion.fbx",
+      "sha256": "96520ec8c2070370b2f4b217742e32a1cd13a33ff990559f915eabf62f734dcf",
+      "preview": "preview_SM_WeedClump_Dandelion.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WeedClump_Dandelion_hero.png",
+          "detail": "beauty_SM_WeedClump_Dandelion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_WeedClump_Dandelion_LOD1": {
+      "vertices": 1393,
+      "triangles": 1646,
+      "size_cm": [
+        76.62,
+        57.57,
+        30.54
+      ],
+      "materials": [
+        {
+          "name": "M_WeedClump",
+          "textures": {
+            "basecolor": "T_WeedClump_basecolor.png",
+            "normal": "T_WeedClump_normal.png",
+            "roughness": "T_WeedClump_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.5
+      },
+      "fbx": "SM_WeedClump_Dandelion_LOD1.fbx",
+      "sha256": "f18fd0ed8fa0331d7e9e7e35f16b0c48569855b95edaf78bf6fa63ef14332788",
+      "preview": "preview_SM_WeedClump_Dandelion_LOD1.png"
+    },
+    "SM_WeedClump_Dandelion_LOD2": {
+      "vertices": 388,
+      "triangles": 330,
+      "size_cm": [
+        78.17,
+        62.63,
+        31.79
+      ],
+      "materials": [
+        {
+          "name": "M_WeedClump",
+          "textures": {
+            "basecolor": "T_WeedClump_basecolor.png",
+            "normal": "T_WeedClump_normal.png",
+            "roughness": "T_WeedClump_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "eye_distance": 5.5
+      },
+      "fbx": "SM_WeedClump_Dandelion_LOD2.fbx",
+      "sha256": "ccf95c0eeab99542a66bbc9e310fe54c5ba0b9af354fe7b93c0bda1f30ed2f45",
+      "preview": "preview_SM_WeedClump_Dandelion_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / clump height",
+    "G": "per-stem or per-rosette random phase",
+    "B": "flutter 0 at leaf/stem base -> 1 at leaf or flower tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_WeedClump: T_WeedClump_basecolor (sRGB, alpha opacity mask), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency, B AO). Masked, two-sided foliage; roughness painted around 0.52-0.72.",
+  "textures": {
+    "T_WeedClump_basecolor.png": "f6ff706b887ef557d38255f3155c2519da22caca7aa957b3f6d2377949a28ceb",
+    "T_WeedClump_normal.png": "828fa5f17b7e3f31e5915ec63ffa20812fa093e531da34bade112deddd703c50",
+    "T_WeedClump_roughness.png": "364c4b4f706e3567e3d683775f816483bdb3d568d21e2f5f812e3f50c3e66a00"
+  }
+}

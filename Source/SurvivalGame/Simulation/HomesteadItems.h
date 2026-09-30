@@ -65,6 +65,9 @@ const char* ItemIcon(Item item);
 const char* ItemSource(Item item);
 ItemCategory CategoryOf(Item item);
 bool IsEdible(Item item);
+// The nominal Energy one of this food restores, rounded, from its catalogue row ("+25 Energy"); empty
+// for anything that isn't food or restores no Energy. Shops and the pack show this before she eats.
+std::string FoodEnergyLabel(Item item);
 bool IsTool(Item item);
 // Pack sort order: tools, then materials and salvage, forage and food, then supplies.
 int ItemSortRank(Item item);

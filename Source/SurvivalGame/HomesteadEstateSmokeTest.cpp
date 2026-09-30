@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/PlatformTime.h"
 #include "InputCoreTypes.h"
+#include "Misc/App.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInterface.h"
 #include "MaterialShared.h"
@@ -216,7 +217,8 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
             Add(TEXT("Capture ") + Label, [this, Capture]() { Screenshot(Capture); }, [OnGround]() { return OnGround(); }, 3.0f);
         }
     };
-    // Frame timing over TimingSampleSeconds after TimingSettleSeconds, reported as PERFORMANCE_AT.
+    // Frame timing over TimingSampleSeconds after TimingSettleSeconds, reported as PERFORMANCE_AT. The
+    // samples are the engine's frame times (FApp::GetDeltaTime), not this route's tick intervals.
     const auto Measure = [this](const FString& Place)
     {
         TSharedRef<double> Began = MakeShared<double>(0.0);
@@ -228,7 +230,7 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         Step.Repeat = [Began, Last, Frames]()
         {
             const double Now = FPlatformTime::Seconds();
-            if (Now - *Began >= EstateSmokeRoute::TimingSettleSeconds && Now > *Last) Frames->Add((Now - *Last) * 1000.0);
+            if (Now - *Began >= EstateSmokeRoute::TimingSettleSeconds && Now > *Last) Frames->Add(FApp::GetDeltaTime() * 1000.0);
             *Last = Now;
         };
         Step.Check = [this, Place, Frames]()
@@ -261,8 +263,17 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         Step.Wait = EstateSmokeRoute::ArriveSeconds;
         Step.bCompleteWhenReady = true;
     }
-    Add(TEXT("Hands free for the first actions"), [this]() { Controller->SelectHotbarSlot(0); },
-        [this]() { return Controller->SelectedCarriedTool() == Homestead::Item::Count; });
+    const auto StockBeforeHandsFree = MakeShared<Homestead::Inventory>();
+    Add(TEXT("Hands free for the first actions"), [this, StockBeforeHandsFree]()
+        {
+            *StockBeforeHandsFree = Controller->State().inventory;
+            for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell)
+                if (!Controller->HotbarEntry(Cell)) { Controller->SelectHotbarSlot(Cell); return; }
+            Finish(false, TEXT("The starter pack has no empty hotbar cell for hand gathering."));
+        },
+        [this, StockBeforeHandsFree]() { return Controller->State().inventory == *StockBeforeHandsFree
+                && Controller->HotbarEntry(Controller->SelectedHotbarIndex()) == nullptr
+                && Controller->SelectedCarriedTool() == Homestead::Item::Count; });
     LandscapeRenders(TEXT("the manor"));
     Add(TEXT("Capture the standing room"), [this]() { Screenshot(TEXT("estate-manor")); }, []() { return true; }, 3.0f);
     Measure(TEXT("manor"));
@@ -324,10 +335,18 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         Visit(TEXT("the general store door"), Store->position, TEXT("estate-store"));
     else { Finish(false, TEXT("The general store door anchor is missing.")); return; }
 
-    // 5. The lamp at night: select it on the hotbar (key 8) and it lights in her hand.
+    // 5. The lamp at night: select its actual first-row cell and it lights in her hand.
     Add(TEXT("Night falls"), [this]() { Controller->HomesteadEnergy(100.0f); Controller->HomesteadMorning(EstateSmokeRoute::NightHour); },
         [this]() { return FMath::Fmod(Controller->State().hour, 24.0) >= EstateSmokeRoute::NightHour - 0.01; }, 1.0f);
-    Add(TEXT("Select the oil lamp with key 8"), [this]() { Tap(EKeys::Eight); },
+    Add(TEXT("Select the oil lamp using its numbered hotbar cell"), [this]()
+        {
+            const int32 Cell = Controller->HotbarCellOf(Homestead::Item::OilLamp);
+            if (Cell == INDEX_NONE)
+            { Finish(false, TEXT("The carried oil lamp is not in the first row of the pack.")); return; }
+            const FKey Keys[] = {EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five,
+                EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine, EKeys::Zero};
+            Tap(Keys[Cell]);
+        },
         [this]()
         {
             return Controller->SelectedCarriedTool() == Homestead::Item::OilLamp

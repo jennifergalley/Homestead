@@ -90,7 +90,8 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `Invoke-ShippingQA.ps1` refuses to run while any Unreal process exists, so it needs an idle machine;
   coordinate through the orchestrator.
 - **Perf and frame-rate measurements need the machine to yourself** (Jenny, 2026-09-28): only ONE
-  Unreal process (the one you measure) and no UBT/`cl.exe` builds. With several editors and builds
+  Unreal process (the one you measure), no UBT/`cl.exe` builds, and **no Blender process** (headless
+  Blender batches skewed one run about 2x). With several editors and builds
   running, readings swung about 5x (render thread 20 ms vs 97-118 ms). Before measuring, run
   `Scripts\Start-PerfWindow.ps1 -Purpose '<what>'` (add `-ProcessId <pid>` for a standalone game you
   launched). It refuses, naming every other Unreal process and build, unless yours is the only one,
@@ -233,6 +234,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | A kit mesh placed from Python is 100 times too big, or rotated wrongly | `StaticMeshComponent` locations are centimetres at scale 1; `unreal.Rotator(a, b, c)` positional order is (roll, pitch, yaw) | Use cm, and pass rotators by keyword: `unreal.Rotator(roll=..., pitch=..., yaw=...)`. |
 | `LineTraceComponent` never hits a mesh (returns false), even in PIE, though world traces do | `UPrimitiveComponent::LineTraceComponent` doesn't hit **Nanite** static mesh components | Trace the world (`World->LineTraceSingleByChannel`, or `line_trace_single` in Python) with other components ignored, and check `Hit.GetComponent()`. The terrain `ProceduralMeshComponent`s aren't Nanite, so component traces still work on them. |
 | Estate traces return None or captures show missing land right after PIE starts | World Partition is still streaming (about 55 s on the Estate) | Wait about a minute after `worldReady` before tracing or capturing, or take Z from the heightmap (row below). |
+| A hidden/copied-save test logs `HOMESTEAD_GROUND_HOLD` with no collision after `HomesteadTeleport`, then render/log progress appears to stop | Likely destination World Partition proxy collision did not stream (a copied Estate teleport crossed about 21 m near a proxy boundary while the analytic heightfield remained valid); this is unproven. Settling traces the Pawn channel, so a Visibility-only door leaf cannot mask it. The controller logs only the first miss and can hold for up to 180 **game** seconds, so a long wall-clock interval alone is not a hard hang | Do not use the run for visual gameplay proof or infer a Shipping regression. Stop only the owned PID and retain prior save evidence. Future repair: explicitly source destination streaming, add periodic diagnostics, and use a wall-clock-bounded safe-position restore instead of heightfield placement through missing collision. |
 | `FMath::Max(SomeTArray)` doesn't compile | There's no TArray overload | Loop, or use `Algo::MaxElement`. |
 | `FVector2D` has no `Rotation()` | Only `FVector` does | Use `GetRotated(Degrees)`, or build the vector yourself. |
 | Every mesh of a runtime-built ISM actor shows twice in PIE | PIE duplicates the editor instance's instance components, but not a transient list of them (`AHomesteadManorRuin` / `AHomesteadDerelictFarm` pattern: a transient `Parts` array plus `AddInstanceComponent`) | See the `homestead-code-conventions` skill, "Unreal C++". |
@@ -372,9 +374,12 @@ hk release_all; mcp $E StopPIE
   about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
 - **Time and weather for tests:** `HomesteadMorning <h>` (console, with the player controller) jumps the
   clock without simulating the skipped hours. With `h` earlier than the current hour it goes to the next
-  day, which is the quick way to reach rain: it rains on days 2, 5, 8, ... from 9 to 15 h (`IsRainDay` in
-  `HomesteadSimulation.cpp`), so from a new game `HomesteadMorning 10` twice lands in day-2 rain. Time skips
-  don't grow crops or run day-rollover logic; only Advance or Sleep does.
+  day, which is the quick way to reach rain: `IsRainDay` chooses two stable hashed days per ten-day
+  block (offsets 1–2 and 6–7; day 0 is dry and block 0's first rain is day 1), from 09:00 to 15:00.
+  Use `Homestead::IsRainDay`/the active test route rather than assuming days 2, 5, 8. Time skips
+  don't grow crops or run day-rollover logic; only Advance or Sleep does. For deterministic crop tests,
+  use `HomesteadGrowCrops <days> [tend=1]` to advance crop days, or
+  `HomesteadCropGrowth <0-1>` to set the growth fraction directly.
 - **Sleep tests on the Estate:** the manor bedroll is next to (-25500, -63720), z about 8800.
   `Sim.Sleep` needs a bed within reach; the E prompt reads "Sleep 8 hours". Store testing
   shortcuts (`HomesteadOpenStore` and the counter snap-back on reload) are in
@@ -385,7 +390,8 @@ hk release_all; mcp $E StopPIE
   land around it streams in (table 0.1). `HomesteadMorning <h>` with `h` earlier than the current
   hour rolls to the next day, which can re-roll the weather to Rain; restart PIE for comparable day-1 stills.
 - **LB/RB outside the book change the hotbar slot**, not book pages. Open the book first:
-  `I` opens Inventory (page 0), Menu opens Settings (page 4).
+  `I` opens Inventory (page 0), **View** (`Gamepad_Special_Left`) opens the pack; use LB to page to
+  **Your pack**. Menu (`Gamepad_Special_Right`) opens the pause menu.
 - The field book opens on the Guidebook at start. Close it with B (`Gamepad_FaceButton_Right`).
   On the Estate map PIE also opens with the book (reported on Appearance, page 6, for the names
   step); close it (Escape or B) before captures.
@@ -410,7 +416,8 @@ immediately; observe with `get_play_state` and `shot`.
 
 Controller map (preferred; the game is controller-first): A `Gamepad_FaceButton_Bottom`,
 B `Gamepad_FaceButton_Right`, X `Gamepad_FaceButton_Left`, Y `Gamepad_FaceButton_Top`,
-Menu `Gamepad_Special_Right`, LB/RB `Gamepad_LeftShoulder`/`Gamepad_RightShoulder`,
+View `Gamepad_Special_Left` (pack), Menu `Gamepad_Special_Right` (pause),
+LB/RB `Gamepad_LeftShoulder`/`Gamepad_RightShoulder`,
 LT/RT `Gamepad_LeftTrigger`/`Gamepad_RightTrigger`, D-pad `Gamepad_DPad_Up/Down/Left/Right`,
 hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Controls.
 
@@ -693,6 +700,13 @@ foot placement, but no simulation, woodland, menus or saves. It doesn't touch Je
   `Time` follows the dilation too (`slomo 0.3` gives about 1.1 s of game time per still).
 - `homestead_agent.prop_clearance`: `start()`, play the action, then `print(stop())` reports the
   worst clearance per carried stick and body part in PIE (negative cm = inside her).
+- **Pose the lab heroine; don't spawn a new actor.** Python can't spawn actors into the PIE world.
+  Pose her own `CharacterMesh0`: set `ANIMATION_SINGLE_NODE`, call
+  `override_animation_data(anim, False, False, time, 0)`, then `set_position(time)`. Single-node
+  playback locks root motion, so no root offset is needed. Restore `ANIMATION_BLUEPRINT` and mesh
+  relative location `(0, 0, -86)` afterwards. For clean side/back captures, set the SpringArm
+  `do_collision_test` false. Use `LabTeleport 16297 3564` for the flat lab floor; (0, 0) is a
+  hillside that buries the camera.
 
 ### Author an animation with the MetaHuman Control Rig
 
@@ -717,6 +731,11 @@ C++. Details that cost time to find:
 - Spine controls: `roll` bends forward, `pitch` bends sideways, `yaw` twists.
 - Bake with `SequencerTools.export_anim_sequence`; the AnimSequence factory needs
   `target_skeleton` set, or creation fails.
+- `AnimationLibrary` / `AnimationDataController.set_bone_track_keys` translation keys are evaluated
+  with the retarget offset added. Writing an evaluated translation back lengthens the bone: measure
+  the shift and write `p - (evaluated - p)`. This is the same quirk handled by
+  `gasp_locomotion.straighten_root`.
+- `IKRetargetBatchOperation` produces nothing while PIE is running. Stop PIE before retargeting.
 - Reading bones from the rig hierarchy after `set_current_time` does **not** give the keyed pose;
   it keeps returning the rest pose. To key something in a moving bone's frame (for example, the
   stick bundle cradled against `spine_05` in `kneel_gather.py`), bake once, read the bone from the
@@ -746,8 +765,12 @@ C++. Details that cost time to find:
   clear of the forward knee); the C++ settle uses the same offsets. The arms can't reach lower
   than about 30 cm while kneeling, so keep grasp and cut heights around there.
 - A bake (`rig_authoring`, `craft_hands`, ...) leaves a `HeroineRigAuthoring` actor in the level and the
-  Sequencer open. Clean up afterwards: `unreal.get_editor_subsystem(unreal.EditorActorSubsystem).destroy_actor(a)`
-  and `unreal.LevelSequenceEditorBlueprintLibrary.close_level_sequence()`, and don't save the level.
+  Sequencer open, which dirties its `__ExternalActors__` package. The authored `LS_<Name>` sequence
+  is the durable output (save and commit it through LFS); do **not** save the Estate level or that
+  external-actor package. Clean up with
+  `unreal.get_editor_subsystem(unreal.EditorActorSubsystem).destroy_actor(a)` and
+  `unreal.LevelSequenceEditorBlueprintLibrary.close_level_sequence()`, or exit with
+  `Stop-MyEditor.ps1` to discard the unsaved actor cleanly.
 - Never bake a clip while PIE is running: the bake opens a hidden "Overwrite Existing Object"
   modal behind the PIE window that doesn't take input and blocks MCP. Stop PIE first; if it
   happens anyway, `Stop-Process` the editor by PID and restart it.
@@ -790,6 +813,15 @@ setup = s.simulation_setup; setup.linear_velocity_scale = 0.5; s.simulation_setu
   sprint values, so edit them with the CVars rather than Python: `homestead.HairLinearWalk`
   0.5, `homestead.HairLinearSprint` 0.65, `homestead.HairAngularWalk` 0.4,
   `homestead.HairAngularSprint` 0.45.
+- **Runtime groom swaps:** after `set_groom_asset`, `MetaHumanHair` renders bald while the groom
+  initializes. Wait about 3 s before capturing. `groom_groups_desc` edits from Python don't apply:
+  its struct array is a copy, and groom struct fields aren't ordinary Python attributes; inspect
+  with `group.export_text()` and assign a rebuilt value back instead.
+- **Query the active hair LOD through LODSync, not UGroomComponent.** In PIE:
+  `pawn.get_component_by_class(unreal.LODSyncComponent).get_lod_sync_debug_text()` prints current
+  per-component LODs (for example `MetaHumanHair : 4`), and
+  `custom_lod_mapping` exposes the mapping used to select them. `UGroomComponent` has no Python
+  LOD getter. Use this before attributing a far-view groom artifact to physics or an LOD mapping.
 
 ### Record a playtest video and measure motion
 
@@ -895,6 +927,14 @@ Extend it there when play needs a capability; prefer real input over state edits
   -startTime=19.5 -endTime=29.5` (seconds from trace start, about the `Capture Starting` log line). The render
   thread is `RenderThread 0`: `-threads=RenderThread` silently matches the GPU track. `ExportTimingEvents` with
   `-columns=ThreadName,TimerName,StartTime,EndTime,Duration,Depth` gives call trees.
+- **`Test-Game.ps1` test overrides:** `-RenderScale 0` leaves the player resolution policy intact
+  (at 4K, typically about 50% with TSR); 50-100 supplies `r.ScreenPercentage` for non-Shipping QA.
+  `-ExtraExecCmds` appends comma-separated startup commands, while `-ExtraArguments` appends command-line
+  arguments; neither is admitted by `-ShippingQA`. A dash-prefixed `-ExtraArguments` value is
+  misparsed by `pwsh -File` as another switch (`Missing an argument for parameter 'ExtraArguments'`);
+  invoke in-process instead: `& .\Scripts\Test-Game.ps1 ... -ExtraArguments "-Foo=bar"`. The harness isolates user data with
+  `-UserDir <output>\EngineUser`, so its CSV output is
+  `<output>\EngineUser\Saved\Profiling\CSV`, not the project-level `Saved\Profiling\CSV`.
 - Jenny's performance bar: the framerate must be **smooth**, not just high. Never report a
   performance result from average FPS alone. Check frame pacing on the `Playtest-Visual.ps1
   -PresentationDiagnostics` timing passes (median, p95, p99, max, frames over 20 ms and over
@@ -1047,7 +1087,11 @@ OpenSpec changes, not here.
 - 2026-09-27: When scripting the packaged suites, pass switches as a hashtable splat
   (`$p=@{Packaged=$true; NativeMenu=$true}; .\Scripts\Test-Game.ps1 @p`). An array splat such as
   `@('-NativeMenu')` binds as a positional string and silently runs only the default smoke test.
-  Move `Saved\Automation\Packaged\native-wardrobe-fixture*` into `History\` before a NativeMenu run. An empty switch string errors with "Generated resume requires...".
+  Use a fresh `-OutputDirectory` for every NativeMenu run: reusing one leaves
+  `native-wardrobe-fixture.sav` behind and fails with `A fresh explicit producer fixture could not
+  be prepared`. An empty switch string errors with "Generated resume requires...". For a real old
+  hotbar migration, pass `-HomesteadHotbarLegacySave <older-build .sav>`; the route emits
+  `LEGACY_SAVE_HOTBAR` after applying the one-time migration.
 - 2026-09-26: **Check the real heroine yourself.** `Test-Game.ps1 -Packaged` shows the legacy heroine
   (`-HomesteadSmokeTest`). To see the MetaHuman, launch
   `Build\Windows\...\JennysHomesteadGame.exe -Res=0x0wf` and bring it to the foreground. Use the

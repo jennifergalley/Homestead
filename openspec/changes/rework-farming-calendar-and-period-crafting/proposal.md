@@ -19,7 +19,8 @@ pivot design (`pivot-to-cozy-estate-life-sim`):
 - **Seasons are 14 days**, not the agreed 28 (`Simulation::SeasonName`), and crops ignore them.
 - **Days default to 60 real minutes**, not the agreed ~30 (`State::dayMinutes`).
 - **Empty hunger still fails the game** (`Step` sets `failed`) and sends her to a checkpoint. That
-  breaks the `estate-life-sim-direction` rule that hunger never causes fainting or loss.
+  breaks the `estate-life-sim-direction` rule that nothing fails her. Jenny's 2026-09-29
+  decision goes further, removing hunger entirely in favour of Coral Island's one energy bar.
 
 ## What Changes
 
@@ -27,16 +28,31 @@ pivot design (`pivot-to-cozy-estate-life-sim`):
   - Four 28-day seasons (Spring, Summer, Autumn, Winter) and a year counter starting in 1851.
   - Seven named weekdays. Spring 1, 1851 is a Monday.
   - The HUD calendar reads "Mon, Spring 12". In a season's last three days it adds "3 days left".
-  - The default day length is 30 real minutes. The existing Settings choice of 30, 60 or 120
-    minutes stays, so Jenny can slow it down.
+  - New Estate games default to 60 real minutes. The existing Settings choices of 30, 60 or 120
+    minutes stay, and existing saves retain their stored day length.
   - Sleep stays exactly as `flexible-sleep` made it. This supersedes the design's "2 AM
     pass-out" rule.
-- **Gentle hunger:**
-  - Hunger never fails the game or sends her to a checkpoint.
-  - Below 25 she's "Hungry": energy recovers at 75%, and work costs 25% more.
-  - At 0 she's "Famished": energy recovers at half speed, and work costs 50% more.
-  - Eating removes the penalty at once. Toasts announce each threshold once.
-  - Meals keep restoring both hunger and energy.
+- **Gentle hunger (superseded 2026-09-29):**
+  - Lane A delivered Hungry and Famished penalties that replace hunger failure (task 1.3).
+  - Jenny then chose the Coral Island one-bar model, so that work is interim.
+  - See **One energy bar** below and design §3a.
+- **One energy bar (Jenny, 2026-09-29):**
+  - Hunger is removed from gameplay and from the HUD. There's no drain, penalty, toast or
+    failure on the estate.
+  - Food restores energy only.
+  - **Snacks** restore a little: raw forage, bread, cheese, raw produce.
+  - **Meals** restore more and grant **Well fed**. Meals are the pasty, hearth dishes and, later,
+    fish dishes. While Well fed, every piece of work costs 15% less energy for a few game hours.
+    Better dishes last longer, and eating again refreshes the timer rather than stacking.
+  - The serialized `hunger` field stays in saves, read and ignored, until the next planned save
+    bump.
+- **A kinder start:** the standing-room chest also holds **3 Cornish pasties and 2 loaves of
+  bread**.
+- **Finding the hoe blade:**
+  - Salvage yields the hoe blade **second**, right after the billhook.
+  - Trying to till without a hoe says to search the old manor's salvage.
+  - The arrival journal note mentions that the garden tools hung in the west rooms by the
+    chimney.
 - **Seasonal crops:**
   - Every crop lists the seasons it grows in. Planting is refused out of season, with the
     reason.
@@ -114,8 +130,8 @@ pivot design (`pivot-to-cozy-estate-life-sim`):
 ## Smallest useful result and first playable demonstration
 
 **Smallest result:** in a new game, the HUD reads "Mon, Spring 1". Tregear's sells spring seed
-but no turnip seed, since turnips grow in autumn and winter. Letting her go hungry only slows her
-down, with a "Hungry" toast; nothing fails.
+but no turnip seed, since turnips grow in autumn and winter. The HUD shows only an energy
+meter, and a pasty from the standing-room chest restores energy and shows "Well fed".
 
 **First playable demonstration:**
 
@@ -155,8 +171,9 @@ down, with a "Hungry" toast; nothing fails.
 
 ### New Capabilities
 
-- `estate-calendar-and-farming`: The calendar, weekdays and seasons; gentle hunger; seasonal
-  crops and withering; the new crops; the seedsman shop; seasonal forage; and the seasonal look.
+- `estate-calendar-and-farming`: The calendar, weekdays and seasons; one energy meter with the
+  Well fed meal benefit; seasonal crops and withering; the new crops; the seedsman shop;
+  seasonal forage; the seasonal look; and the starter food and hoe signposting.
 - `period-crafting`: The workbench, sawhorse and planks; fences and gates; first furniture;
   hearth dishes; and craft categories.
 

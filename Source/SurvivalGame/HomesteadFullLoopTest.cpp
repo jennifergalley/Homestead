@@ -4,6 +4,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
+#include "Simulation/HomesteadCrops.h"
 #include "UI/SHomesteadMenu.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -104,6 +105,15 @@ void AHomesteadSmokeTest::QueueSelectRow(int32 Id)
         {
             if (Controller->HasNativeMenu())
             {
+                if (Controller->BookPage() == 0 && Id >= 0 && Id < Homestead::ItemCount)
+                {
+                    const int32 Cell = Controller->HotbarCellOf(static_cast<Homestead::Item>(Id));
+                    if (Cell != INDEX_NONE)
+                        return Controller->IsBookOpen()
+                            && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Hotbar")
+                            && Controller->NativeMenu->GetFocusedHotbarSlot() == Cell
+                            && Controller->NativeMenu->HasSynchronizedFocus();
+                }
                 const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
                 return Controller->IsBookOpen() && Subject && Subject->Id == Id
                     && Subject->Subject != EHomesteadMenuSubject::GarmentRecipe
@@ -367,8 +377,7 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
     const auto Before = MakeShared<int32>(0);
     const auto Hunger = MakeShared<double>(0);
     Add(FString::Printf(TEXT("Open pack to eat %s"), UTF8_TO_TCHAR(Homestead::ItemName(Item))),
-        [this]() { Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); },
+        [this]() { Tap(EKeys::Gamepad_Special_Left); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Use the carried inventory view for the selected meal"),
         [this]() { Controller->MenuInventoryView(0); Controller->OpenBook(0); },
@@ -379,7 +388,10 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
         {
             *Before = Controller->Simulation().Count(Item);
             *Hunger = Controller->State().hunger;
-            const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+            FHomesteadRow HotbarRow;
+            const FHomesteadRow* Row = Controller->NativeMenu->GetFocusedRegionName() == TEXT("Hotbar")
+                && Controller->MenuHotbarRow(Controller->NativeMenu->GetFocusedHotbarSlot(), HotbarRow)
+                ? &HotbarRow : Controller->NativeMenu->GetSelectedSubject();
             if (!Row || !Controller->MenuItemAction(*Row, EHomesteadItemAction::Primary,
                 1, Controller->Simulation().GetRevision()))
                 Finish(false, TEXT("The selected food action is unavailable."));
@@ -392,6 +404,20 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
     Add(TEXT("Close the pack after the meal"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsBookOpen(); });
+}
+
+bool AHomesteadSmokeTest::ChooseFullLoopHotbarItem(Homestead::Item Item)
+{
+    if (Controller->ChooseOnHotbar(Item)) return true;
+    // This fixture gathers more than ten distinct stacks. Free a cell using the same inventory
+    // authority a player uses, then select the seed/food through the real first-row hotbar.
+    if (Controller->FirstEmptyHotbarCell() != INDEX_NONE || Controller->Simulation().Count(Item) <= 0)
+        return false;
+    const auto Move = Controller->Sim.MoveFromPackRow(Homestead::PackRowSize - 1, 0, 0,
+        Controller->Sim.GetRevision());
+    if (!Move) return false;
+    Results.Add(TEXT("CONTROLLED moved hotbar slot 0 into the pack to make room for a required seed or food."));
+    return Controller->ChooseOnHotbar(Item);
 }
 
 void AHomesteadSmokeTest::PrepareFullLoop()
@@ -472,6 +498,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     QueueGatherTo(Homestead::Item::Branch, 48);
     QueueGatherTo(Homestead::Item::Stone, 8);
     QueueGrant(Homestead::Item::BrambleCanes, 20);
+    QueueGrant(Homestead::Item::Hay, 4);
     QueueGatherTo(Homestead::Item::Roots, 6);
     QueueGatherTo(Homestead::Item::Flowers, 2);
     QueueGatherTo(Homestead::Item::Berries, 1);
@@ -606,10 +633,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, Garden]() { Teleport(Garden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
     const auto SeedsBefore = MakeShared<int32>(0);
-    Add(TEXT("Plant the wild-root seeds through gamepad A"),
+    Add(TEXT("Plant the wild-root seeds through gamepad A (Seeds chosen on the hotbar)"),
         [this, SeedsBefore]()
         {
             *SeedsBefore = Controller->Simulation().Count(Homestead::Item::Seeds);
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Seeds))
+            { Finish(false, TEXT("Could not put the foraged seeds in the real hotbar row.")); return; }
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, SeedsBefore]()
@@ -642,15 +671,42 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Approach the bare berry garden"),
         [this, BerryGarden]() { Teleport(BerryGarden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
+    const auto StockBefore = MakeShared<TPair<int32, int32>>();
+    const auto Unchanged = [this, BerryPlotId, StockBefore]()
+    {
+        const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
+        return Plot && !Plot->planted && Controller->ToastIsError()
+            && Controller->Simulation().Count(Homestead::Item::Berries) == StockBefore->Key
+            && Controller->Simulation().Count(Homestead::Item::Seeds) == StockBefore->Value;
+    };
+    Add(TEXT("Gamepad X on bare soil only weeds: it sows nothing and spends nothing"),
+        [this, StockBefore]()
+        {
+            *StockBefore = {Controller->Simulation().Count(Homestead::Item::Berries), Controller->Simulation().Count(Homestead::Item::Seeds)};
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Berries))
+            { Finish(false, TEXT("Could not put berries in the real hotbar row.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Left);
+        }, Unchanged);
+    Add(TEXT("Gamepad A with no seed chosen sows nothing and spends nothing"),
+        [this, StockBefore]()
+        {
+            *StockBefore = {Controller->Simulation().Count(Homestead::Item::Berries), Controller->Simulation().Count(Homestead::Item::Seeds)};
+            for (const auto& Slot : Controller->HotbarSnapshot())
+                if (!Slot.Seed && Slot.Tool != Homestead::Item::Berries) { Controller->SelectHotbarSlot(Slot.Index); break; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        }, Unchanged);
     const auto FruitBefore = MakeShared<int32>(0);
     const auto BerrySeedStock = MakeShared<int32>(0);
-    Add(TEXT("Plant seeds from a foraged berry with gamepad X rather than the root action"),
+    Add(TEXT("Sow seeds from a foraged berry: berries chosen on the hotbar, then gamepad A"),
         [this, FruitBefore, BerrySeedStock, SecondaryStarts, PickingStarts]()
         {
             *FruitBefore = Controller->Simulation().Count(Homestead::Item::Berries);
             *BerrySeedStock = Controller->Simulation().Count(Homestead::Item::Seeds);
             *SecondaryStarts = PickingStarts();
-            Tap(EKeys::Gamepad_FaceButton_Left);
+            // X / F only weeds (Jenny); a berry is sown only when it's the chosen seed.
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Berries))
+            { Finish(false, TEXT("Could not put berries in the real hotbar row.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
         [this, BerryPlotId, FruitBefore, BerrySeedStock, SecondaryStarts, PickingStarts]()
         {
@@ -746,7 +802,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && !Controller->ToastIsError(); });
 
     // Each rest starts at 22:45, so the bed sleeps her the full eight hours to first light (6:45).
-    // The skipped evening is not simulated; the day-two rain is simulated explicitly before rest 4.
+    // The skipped evening is not simulated; a scheduled rainy day is simulated before rest 4.
     for (int32 Rest = 0; Rest < 6; ++Rest)
     {
         if (Rest == 2) QueueEat(Homestead::Item::RoastedRoots);
@@ -757,11 +813,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         const auto BeforeFuel = MakeShared<double>(0);
         const auto ExpectedSleep = MakeShared<double>(8);
         if (Rest == 3)
-            Add(TEXT("Day-two rain replenishes both crops' soil"),
+            Add(TEXT("Rain replenishes both crops' soil"),
                 [this, Home]()
                 {
                     do Controller->Sim.SkipToHourOfDay(9.0);
-                    while (static_cast<int64>(Controller->State().hour / 24.0) % 3 != 1);
+                    while (!Homestead::IsRainDay(Controller->State().hour));
                     Controller->Sim.AdvanceGameHours(6.0, Home);
                 },
                 [this, BerryPlotId]()
@@ -953,7 +1009,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, BerryPlotId, FruitBefore, BerrySeedStock, BerryHarvestRoots, WaterBefore, CropWaterStarts, WaterStarts]()
         {
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
-            return Plot && Plot->planted && Plot->kind == Homestead::CropKind::Berries && Plot->growth < 0.001
+            // A picked bush keeps its leaves and ripens again from the regrow stage (improve-crops-and-harvest).
+            const auto& Berry = Homestead::GetCropInfo(Homestead::CropKind::Berries);
+            const double RegrowStart = FMath::Max(0.0, 1.0 - Berry.regrowHours / Berry.growHours);
+            return Plot && Plot->planted && Plot->kind == Homestead::CropKind::Berries && Plot->picked
+                && FMath::Abs(Plot->growth - RegrowStart) < 0.001
                 && Controller->Simulation().Count(Homestead::Item::Berries) == *FruitBefore + 6
                 && Controller->Simulation().Count(Homestead::Item::Seeds) == *BerrySeedStock
                 && Controller->Simulation().Count(Homestead::Item::Roots) == *BerryHarvestRoots
@@ -979,8 +1039,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
             *RegrowthBefore = Plot ? Plot->growth : -1;
             Tap(EKeys::Gamepad_FaceButton_Bottom);
-            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
         },
         [this, RegrowthHour, RegrowthBefore, RegrowthSleep, BerryPlotId, ProtectedRecovery, RecoveryPosition]()
         {
@@ -1063,8 +1122,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Save the complete harvested homestead from the paused pack"),
         [this, SavedState, SavedLook]()
         {
-            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
             *SavedState = Controller->Simulation().Serialize();
             *SavedLook = Controller->GetAppearance();
             Tap(EKeys::F5);
@@ -1148,8 +1206,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             return Piece && Piece->fuelHours > 7.8 && !Controller->ToastIsError();
         });
     Add(TEXT("Restore harvested plot, depleted forage, buildings, fuel, chest, inventory and appearance"),
-        [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); },
+        [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder); },
         [this, SavedState, SavedLook, Home, BerryPlotId]()
         {
             const auto* BerryPlot = FindPlot(Controller->State(), *BerryPlotId);
@@ -1163,8 +1220,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Return from the restored pack to the garden"),
         [this, Garden]() { Tap(EKeys::Gamepad_FaceButton_Right); Teleport(Garden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
-    Add(TEXT("Plant the next generation using the harvested seeds"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Plant the next generation using the harvested seeds (Seeds chosen on the hotbar)"),
+        [this]() {
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Seeds))
+            { Finish(false, TEXT("Could not put harvested seeds in the real hotbar row.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
         [this]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
@@ -1173,8 +1234,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Save a living second-generation garden"),
         [this, SavedState]()
         {
-            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
             *SavedState = Controller->Simulation().Serialize();
             Tap(EKeys::F5);
         },
@@ -1187,8 +1247,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             return Plot && Plot->planted && Plot->moisture > 0.99 && !Controller->ToastIsError();
         });
     Add(TEXT("Reload retains the exact living crop and no offline progression"),
-        [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); },
+        [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder); },
         [this, SavedState, SavedLook, BerryPlotId]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
@@ -1209,7 +1268,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             return !Controller->IsBookOpen() && !Controller->IsFailed() && !ProtectedRecovery->empty();
         });
     QueueGatherTo(Homestead::Item::Branch, 4);
-    QueueGrant(Homestead::Item::BrambleCanes, 4);
+    QueueGrant(Homestead::Item::Hay, 4);
     QueueClearCell(0, 8);
     QueuePlace(Homestead::Piece::Bed, 0, 8);
     const Homestead::Point OutdoorBed = Homestead::CellCenter(0, 8);
@@ -1275,8 +1334,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]()
         {
             Tap(EKeys::Gamepad_FaceButton_Bottom);
-            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
         },
         [this, ProtectedRecovery, RecoveryPosition, SavedLook, Home, BerryPlotId]()
         {

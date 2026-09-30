@@ -26,6 +26,11 @@ bool NearCounter(const Shop& shop, Point player)
     return dx * dx + dy * dy <= CounterReach * CounterReach;
 }
 std::string Plural(int quantity, Item item) { return CountedName(item, quantity); }
+std::string ToLowerAscii(std::string text)
+{
+    for (char& c : text) if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
+    return text;
+}
 }
 
 std::string FormatMoney(Cents cents)
@@ -33,12 +38,9 @@ std::string FormatMoney(Cents cents)
     const bool negative = cents < 0;
     // Magnitude as unsigned so the most negative value still formats.
     const std::uint64_t magnitude = negative ? static_cast<std::uint64_t>(-(cents + 1)) + 1 : static_cast<std::uint64_t>(cents);
-    std::string dollars = std::to_string(magnitude / 100);
-    for (int i = static_cast<int>(dollars.size()) - 3; i > 0; i -= 3) dollars.insert(static_cast<std::size_t>(i), ",");
-    const unsigned rest = static_cast<unsigned>(magnitude % 100);
-    std::string text = std::string(negative ? "-$" : "$") + dollars + "." + static_cast<char>('0' + rest / 10)
-        + static_cast<char>('0' + rest % 10);
-    return text;
+    std::string coins = std::to_string(magnitude);
+    for (int i = static_cast<int>(coins.size()) - 3; i > 0; i -= 3) coins.insert(static_cast<std::size_t>(i), ",");
+    return std::string(negative ? "-" : "") + coins + (magnitude == 1 ? " coin" : " coins");
 }
 
 std::string FormatMoneyDelta(Cents cents)
@@ -66,10 +68,20 @@ bool IsShopOpen(const Shop& shop, double hour)
     return time >= shop.openHour && time < shop.closeHour;
 }
 
+double HoursUntilOpen(const Shop& shop, double hour)
+{
+    if (!std::isfinite(hour) || IsShopOpen(shop, hour)) return 0.0;
+    const double time = std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0);
+    const double wait = shop.openHour - time;
+    return wait > 0.0 ? wait : wait + 24.0;
+}
+
 std::string FormatHour(double hour)
 {
-    const int whole = static_cast<int>(std::floor(std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0)));
-    const int minutes = static_cast<int>(std::lround((hour - std::floor(hour)) * 60.0)) % 60;
+    // Round to the minute first, so 7:59:50 reads 8 AM rather than 7 AM.
+    const long total = std::lround(std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0) * 60.0) % (24 * 60);
+    const int whole = static_cast<int>(total / 60);
+    const int minutes = static_cast<int>(total % 60);
     const int twelve = whole % 12 == 0 ? 12 : whole % 12;
     std::string text = std::to_string(twelve);
     if (minutes) text += (minutes < 10 ? ":0" : ":") + std::to_string(minutes);
@@ -166,6 +178,41 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     candidate.money -= cost;
     const std::string message = "Bought " + Plural(quantity, item) + " for " + FormatMoney(cost) + ".";
     return CommitInventory(std::move(candidate), message.c_str());
+}
+
+Result Simulation::WaitForShop(int shopId, Point player)
+{
+    if (state_.failed) return ShopBad("You need to recover first.", revision_, ResultCode::Unavailable);
+    const Shop* shop = FindShop(shopId);
+    if (!shop) return ShopBad("There is no such shop.", revision_);
+    const std::string name = ShopDisplayName(shop->kind);
+    if (IsShopOpen(*shop, state_.hour)) return ShopBad("The " + ToLowerAscii(name) + " is open now.", revision_);
+    if (!std::isfinite(player.x) || !std::isfinite(player.y)
+        || std::hypot(player.x - shop->counterX, player.y - shop->counterY) > ShopWaitReach)
+        return ShopBad("Wait by the shop's door.", revision_);
+    const double openHour = shop->openHour;
+    // A hair past the hour, so the step boundaries can't leave the clock a rounding error short.
+    const double hours = HoursUntilOpen(*shop, state_.hour) + 1e-6;
+    // Try it on a copy first: if she'd collapse before it opens, she waits no time at all.
+    Simulation trial = *this;
+    trial.AdvanceGameHours(hours, player);
+    if (trial.state_.failed)
+        return ShopBad("You're too hungry to wait until " + FormatHour(openHour) + ". Eat something first.", revision_,
+            ResultCode::Unavailable);
+    // Worn out, she'd doze off in the street before it opens: that isn't the wait she agreed to.
+    if (trial.DozeCount() != DozeCount())
+        return ShopBad("You're too tired to wait until " + FormatHour(openHour) + ". Rest or eat first.", revision_,
+            ResultCode::Unavailable);
+    // AdvanceGameHours passes no time at all past the calendar's supported limit.
+    if (trial.state_.hour < state_.hour + hours - 1e-3)
+        return ShopBad("The calendar has reached its supported limit.", revision_);
+    // The ordinary passage of time: crops, weather, fires, vitals and the morning sell-down all run.
+    AdvanceGameHours(hours, player);
+    ++revision_;
+    const Shop* opened = FindShop(shopId);
+    if (!opened || !IsShopOpen(*opened, state_.hour))
+        return ShopBad("You waited, but the " + ToLowerAscii(name) + " is still closed.", revision_, ResultCode::Unavailable);
+    return ShopGood("You wait by the door until " + FormatHour(openHour) + ". The " + ToLowerAscii(name) + " is open.", revision_);
 }
 
 Result Simulation::GreetShopkeeper(int shopId)

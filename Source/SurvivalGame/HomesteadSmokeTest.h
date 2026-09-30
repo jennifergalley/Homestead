@@ -97,6 +97,7 @@ private:
     void QueuePlace(Homestead::Piece Kind, int32 CellX, int32 CellY, int32 Rotation = 0);
     void QueueClearCell(int32 CellX, int32 CellY);
     void QueueEat(Homestead::Item Item);
+    bool ChooseFullLoopHotbarItem(Homestead::Item Item);
     void Add(const FString& Name, TFunction<void()> Action, TFunction<bool()> Check, float Wait = 0.35f);
     void Tap(FKey Key);
     void Axis(FKey Key, float Value);

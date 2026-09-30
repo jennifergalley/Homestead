@@ -1,0 +1,211 @@
+#include "HomesteadPackRow.h"
+
+#include <algorithm>
+#include <istream>
+#include <ostream>
+#include <string>
+#include <utility>
+
+namespace Homestead
+{
+namespace PackRowRules
+{
+void WriteSaveSection(std::ostream& output, const State& state)
+{
+    output << SaveTag << ' ' << PackRowSize;
+    for (const auto& cell : state.packRow) output << ' ' << cell.groupId << ' ' << cell.wearableId;
+    output << '\n';
+}
+
+bool ReadSaveSection(std::istream& input, State& state)
+{
+    int count = 0;
+    if (!(input >> count) || count != PackRowSize) return false;
+    for (auto& cell : state.packRow)
+        if (!(input >> cell.groupId >> cell.wearableId) || cell.groupId < 0 || cell.wearableId < 0) return false;
+    // Whether each cell names a carried entry is checked with the rest of the inventory.
+    return true;
+}
+
+PackRowCell CellFor(const LayoutEntry& entry)
+{
+    return entry.wearableId != 0 ? PackRowCell{0, entry.wearableId} : PackRowCell{entry.groupId, 0};
+}
+
+int CellOf(const PackRow& row, const LayoutEntry& entry)
+{
+    const PackRowCell key = CellFor(entry);
+    for (int cell = 0; cell < PackRowSize; ++cell)
+        if (!row[cell].Empty() && row[cell] == key) return cell;
+    return -1;
+}
+
+int FindEntry(const InventoryLayout& layout, const PackRowCell& cell)
+{
+    if (cell.Empty()) return -1;
+    for (int index = 0; index < static_cast<int>(layout.size()); ++index)
+        if (CellFor(layout[index]) == cell) return index;
+    return -1;
+}
+
+const LayoutEntry* RowEntry(const State& state, int cell)
+{
+    if (cell < 0 || cell >= PackRowSize) return nullptr;
+    const int index = FindEntry(state.inventoryLayout, state.packRow[cell]);
+    return index < 0 ? nullptr : &state.inventoryLayout[index];
+}
+
+int RowCellOf(const State& state, int groupId, int wearableId)
+{
+    const PackRowCell key = wearableId != 0 ? PackRowCell{0, wearableId} : PackRowCell{groupId, 0};
+    if (key.Empty()) return -1;
+    for (int cell = 0; cell < PackRowSize; ++cell)
+        if (state.packRow[cell] == key) return cell;
+    return -1;
+}
+
+std::vector<int> FillOrder(const PackRow& row, const InventoryLayout& layout)
+{
+    std::vector<int> order;
+    order.reserve(layout.size());
+    for (const auto& cell : row)
+        if (const int index = FindEntry(layout, cell); index >= 0) order.push_back(index);
+    for (const int index : BelowRow(row, layout)) order.push_back(index);
+    return order;
+}
+
+std::vector<int> BelowRow(const PackRow& row, const InventoryLayout& layout)
+{
+    std::vector<int> below;
+    below.reserve(layout.size());
+    for (int index = 0; index < static_cast<int>(layout.size()); ++index)
+        if (CellOf(row, layout[index]) < 0) below.push_back(index);
+    return below;
+}
+
+void Prune(PackRow& row, const InventoryLayout& layout)
+{
+    for (auto& cell : row)
+        if (!cell.Empty() && FindEntry(layout, cell) < 0) cell = {};
+}
+
+bool TakeFirstEmpty(PackRow& row, const LayoutEntry& entry)
+{
+    if (CellOf(row, entry) >= 0) return true;
+    for (auto& cell : row)
+        if (cell.Empty()) { cell = CellFor(entry); return true; }
+    return false;
+}
+
+bool Valid(const PackRow& row, const InventoryLayout& layout)
+{
+    for (int cell = 0; cell < PackRowSize; ++cell)
+    {
+        const auto& value = row[cell];
+        if (value.Empty()) continue;
+        if ((value.groupId != 0) == (value.wearableId != 0) || FindEntry(layout, value) < 0) return false;
+        for (int other = cell + 1; other < PackRowSize; ++other)
+            if (row[other] == value) return false;
+    }
+    return true;
+}
+}
+
+namespace
+{
+Result RowBad(const std::string& text) { return {false, text, ResultCode::Invalid}; }
+bool Stackable(const LayoutEntry& left, const LayoutEntry& right)
+{
+    return left.wearableId == 0 && right.wearableId == 0 && left.item == right.item;
+}
+std::string SlotName(int cell) { return "hotbar slot " + std::to_string(PackRowRules::KeyNumber(cell)); }
+int FindCarried(const InventoryLayout& layout, int groupId, int wearableId)
+{
+    if (wearableId != 0) return PackRowRules::FindEntry(layout, {0, wearableId});
+    return groupId > 0 ? PackRowRules::FindEntry(layout, {groupId, 0}) : -1;
+}
+}
+
+Result Simulation::MoveToPackRow(int groupId, int wearableId, int cell, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (cell < 0 || cell >= PackRowSize) return RowBad("Choose one of the ten hotbar slots.");
+    State candidate = state_;
+    auto& layout = candidate.inventoryLayout;
+    auto& row = candidate.packRow;
+    const int source = FindCarried(layout, groupId, wearableId);
+    if (source < 0) return RowBad("Choose something in your pack. Take stored things into your pack first.");
+    const int from = PackRowRules::CellOf(row, layout[source]);
+    if (from == cell) return {true, "", ResultCode::None, revision_};
+    const PackRowCell occupant = row[cell];
+    const int held = PackRowRules::FindEntry(layout, occupant);
+    if (held >= 0 && Stackable(layout[held], layout[source]))
+    {
+        layout[held].quantity += layout[source].quantity;
+        layout.erase(layout.begin() + source);
+        if (from >= 0) row[from] = {};
+        return CommitInventory(std::move(candidate), ("Added to the stack in " + SlotName(cell) + ".").c_str());
+    }
+    row[cell] = PackRowRules::CellFor(layout[source]);
+    // Within the row the two cells trade places; from below, whatever was in the cell takes her
+    // stack's old place in the pack.
+    if (from >= 0) row[from] = held >= 0 ? occupant : PackRowCell{};
+    else if (held >= 0) std::swap(layout[source], layout[held]);
+    return CommitInventory(std::move(candidate),
+        ((held >= 0 ? "Swapped into " : "Moved to ") + SlotName(cell) + ".").c_str());
+}
+
+Result Simulation::MoveFromPackRow(int cell, int targetGroupId, int targetWearableId, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (cell < 0 || cell >= PackRowSize) return RowBad("Choose one of the ten hotbar slots.");
+    State candidate = state_;
+    auto& layout = candidate.inventoryLayout;
+    auto& row = candidate.packRow;
+    const int source = PackRowRules::FindEntry(layout, row[cell]);
+    if (source < 0) return RowBad("That hotbar slot is empty.");
+    if (targetGroupId == 0 && targetWearableId == 0)
+    {
+        const LayoutEntry entry = layout[source];
+        layout.erase(layout.begin() + source);
+        layout.push_back(entry);
+        row[cell] = {};
+        return CommitInventory(std::move(candidate), "Moved into your pack, below the hotbar.");
+    }
+    const int target = FindCarried(layout, targetGroupId, targetWearableId);
+    if (target < 0 || PackRowRules::CellOf(row, layout[target]) >= 0)
+        return RowBad("Choose a place in your pack below the hotbar.");
+    if (Stackable(layout[target], layout[source]))
+    {
+        layout[target].quantity += layout[source].quantity;
+        layout.erase(layout.begin() + source);
+        row[cell] = {};
+        return CommitInventory(std::move(candidate), "Added to the stack in your pack.");
+    }
+    row[cell] = PackRowRules::CellFor(layout[target]);
+    std::swap(layout[source], layout[target]);
+    return CommitInventory(std::move(candidate), ("Swapped with " + SlotName(cell) + ".").c_str());
+}
+
+Result Simulation::ArrangePackRow(const std::array<int, PackRowSize>& items)
+{
+    State candidate = state_;
+    PackRow row{};
+    for (int cell = 0; cell < PackRowSize; ++cell)
+    {
+        const int value = items[cell];
+        if (value < 0 || value >= ItemCount) continue;
+        for (const auto& entry : candidate.inventoryLayout)
+            if (entry.wearableId == 0 && static_cast<int>(entry.item) == value
+                && PackRowRules::CellOf(row, entry) < 0)
+            {
+                row[cell] = PackRowRules::CellFor(entry);
+                break;
+            }
+    }
+    candidate.packRow = row;
+    return CommitInventory(std::move(candidate), "Hotbar arranged.");
+}
+}

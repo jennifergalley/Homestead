@@ -64,36 +64,28 @@
     "license": "CC-BY-4.0"
   },
   {
-    "asset": "ascending-the-vale",
-    "file": "AscendingTheVale.mp3",
-    "bytes": 7926743,
-    "sha256": "A0AB3AAE9A942D797C381DF8D914DFEF453E7E455C1C6333D1916D59BA005353",
-    "source": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Ascending%20the%20Vale.mp3",
-    "license": "CC-BY-4.0"
+    "asset": "whispers-of-the-glen",
+    "file": "WhispersOfTheGlen.mp3",
+    "bytes": 2589184,
+    "sha256": "BBA42F8A7D828D3631B2ED66F05455B19C5F88B59B3895E4A28A8533B07B6AE4",
+    "source": "https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/GP2wACoXIlIsL0bq27muowQztPcRSZ3oVM85CUHJ.mp3",
+    "license": "CC0-1.0"
   },
   {
-    "asset": "teller-of-the-tales",
-    "file": "TellerOfTheTales.mp3",
-    "bytes": 6798250,
-    "sha256": "320B37A09FC37EC5962C975563541BEE9BCBF1208B0181789248780286F4C1D4",
-    "source": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Teller%20of%20the%20Tales.mp3",
-    "license": "CC-BY-4.0"
+    "asset": "medieval-theme",
+    "file": "MedievalTheme.mp3",
+    "bytes": 2512270,
+    "sha256": "C8E0F62C730001B881FDFF86FC52A262E1654E778382661F97CE78F39C681EA7",
+    "source": "https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/iuMMQc2RWtRrOV9HQHWKS4qB0RIVBuWz3y3lCgA0.mp3",
+    "license": "CC0-1.0"
   },
   {
-    "asset": "meditation-impromptu-02",
-    "file": "MeditationImpromptu02.mp3",
-    "bytes": 8261798,
-    "sha256": "4E7EAD76CFDDA0979FF7D771FBBC3DBB312CA80CE25B78F3CDCAEF07FCC7C2DA",
-    "source": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3",
-    "license": "CC-BY-4.0"
-  },
-  {
-    "asset": "at-rest",
-    "file": "AtRest.mp3",
-    "bytes": 8264831,
-    "sha256": "EC30F84D2ACD6DDAEFBB16246B050BA89E26E7396A2D48D7E0D0ECCAFF51F141",
-    "source": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/At%20Rest.mp3",
-    "license": "CC-BY-4.0"
+    "asset": "a-new-town",
+    "file": "ANewTown.mp3",
+    "bytes": 766291,
+    "sha256": "8A83B97F06CAD1052EEA0A3FA8F65966DB742E68275A1D82816773C820578AD2",
+    "source": "https://opengameart.org/sites/default/files/025_A_New_Town.mp3",
+    "license": "CC0-1.0"
   },
   {
     "asset": "forest-ambience",

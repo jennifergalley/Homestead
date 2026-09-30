@@ -258,7 +258,8 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         [this, Hidden]() { return !Controller->ToastIsError() && Hidden(); }, 0.8f);
     Add(TEXT("Approach and plant actual wild-root seeds"), [this, Garden]() { Teleport(Garden); },
         [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.7f);
-    Add(TEXT("Plant with gamepad A; no watering prop"), [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Plant with gamepad A (Seeds chosen on the hotbar); no watering prop"),
+        [this]() { Controller->ChooseOnHotbar(Homestead::Item::Seeds); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Hidden]() { return !Controller->ToastIsError() && Hidden() && Controller->FocusActions().Contains(TEXT("Water")); });
     Rejected(TEXT("No-can rejection neither debits water nor presents a free tool"));
     QueueGrant(Homestead::Item::WateringCan, 1);

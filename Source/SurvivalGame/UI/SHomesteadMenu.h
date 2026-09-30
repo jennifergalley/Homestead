@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
+#include "Widgets/SOverlay.h"
 #include "../HomesteadController.h"
 #include "HomesteadMenuNavigation.h"
 
@@ -70,6 +71,9 @@ public:
     FString GetDisplayedDetails() const { return DetailsText(); }
     FString GetFocusedRequirementHint() const;
     FString GetFocusedRegionName() const;
+    // The field book's tabs (automation): how many there are, and whether one opens `Page`.
+    int32 GetTabPageCount() const;
+    bool HasTabForPage(int32 Page) const;
     bool HasSynchronizedFocus() const;
     bool IsFocusedControlVisible() const;
     int32 GetSelectedContentIndex() const { return ContentSelection; }
@@ -81,7 +85,22 @@ public:
     int32 GetDraftQuantity() const { return Amount; }
     bool IsPointerDraggingItem() const { return bPointerDraggingItem; }
     bool IsVirtualDraggingItem() const { return bVirtualDraggingItem; }
+    // The hotbar row: the first row of her pack (Simulation/HomesteadPackRow.h), shown as ten cells
+    // above the pack grid (with a chest open, above the pack column's grid), and what she has picked up to place
+    // in it (a pack or chest stack from "Move to a hotbar slot", or a cell being moved).
+    int32 GetBookHotbarSlotCount() const { return HotbarCells.Num(); }
+    TSharedPtr<SWidget> GetBookHotbarSlot(int32 Slot) const { return HotbarCells.IsValidIndex(Slot) ? HotbarCells[Slot] : nullptr; }
+    int32 GetHeldHotbarSlot() const { return HeldHotbarSlot; }
+    bool IsPlacingOnHotbar() const { return HeldHotbarRow.IsSet(); }
+    int32 GetFocusedHotbarSlot() const { return Region == ERegion::Hotbar ? HotbarSelection : INDEX_NONE; }
+    // Keyboard / controller: A (or Enter) on a hotbar slot, as a player would.
+    void ActivateHotbarSlot(int32 Slot);
+    // "Move to a hotbar slot": hold this stack and move focus to the row to choose a cell.
+    void BeginPlacingOnHotbar(const FHomesteadRow& Row);
     float GetContentScrollOffset() const { return Scroll ? Scroll->GetScrollOffset() : 0.0f; }
+    float GetContentScrollTop() const { return Scroll ? Scroll->GetCachedGeometry().GetAbsolutePosition().Y : 0.0f; }
+    // Left edge of the pack's grid column with a chest open (0 without one).
+    float GetPackColumnLeft() const { return PackDropArea ? PackDropArea->GetCachedGeometry().GetAbsolutePosition().X : 0.0f; }
     float GetContentScrollBottom() const
     {
         return Scroll ? Scroll->GetCachedGeometry().GetAbsolutePosition().Y
@@ -89,9 +108,13 @@ public:
     }
     void PointerItemDragMove(FVector2D Position);
     float GetCraftProgress() const { return CraftHoldRecipe >= 0 ? CraftHoldElapsed / CraftCycleSeconds : 0.0f; }
+    // The notice card that floats over the book for the latest toast (never takes layout space).
+    bool IsNoticeShowing() const;
+    bool IsNoticeAtTop() const { return bNoticeTop; }
+    FString GetNoticeText() const { return IsNoticeShowing() ? NoticeText : FString(); }
 
 private:
-    enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery };
+    enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery, Hotbar };
     enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge, DropWearable, Context, Quantity };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
@@ -165,11 +188,17 @@ private:
     void BuildPopup();
     void AdjustQuantity(int32 Delta);
     bool BuildItemOptions(const FHomesteadRow& Row);
+    // A second line under the popup title (the walk's distance, time and arrival), wrapped.
+    FString PopupBody;
+    // The Map tab's walk to the focused place: Town (or its store) and the manor.
+    TOptional<Homestead::TravelDestination> MapTravelDestination() const;
+    FString MapTravelLine() const;
+    void OpenTravelPrompt(Homestead::TravelDestination Destination);
     void OpenItemContextMenuFor(const FHomesteadRow& Row, FVector2D Anchor);
     // Where a popup opens: at the pointer for mouse input, beside the focused tile otherwise.
     FVector2D PopupAnchorFor(const TSharedPtr<SWidget>& Widget, bool bPointer) const;
     // Shift+click: the whole stack or garment to the other side of an open chest; with no chest
-    // open, pins tools and food to the hotbar and puts on carried garments.
+    // open, moves a pack stack between the hotbar row and the rest of the pack, and puts on carried garments.
     void QuickMove(int32 Index);
     void ComputeActions();
     int32 StorageColumns() const;
@@ -187,6 +216,36 @@ private:
     int32 VirtualDragSource = INDEX_NONE;
     uint64 VirtualDragRevision = 0;
     bool bVirtualDraggingItem = false;
+    // The pack page's hotbar strip (see the public accessors). HotbarSelection is the focused slot;
+    // PointerHotbarTarget the slot under a drag; HeldHotbarSlot a slot picked up to move (pointer
+    // drag or A); HeldHotbarRow a pack stack waiting for a slot.
+    TArray<TSharedPtr<SWidget>> HotbarCells;
+    // Where a cell dragged out of the row can land: the rest of her pack, and the open chest.
+    TSharedPtr<SWidget> PackDropArea;
+    TSharedPtr<SWidget> ChestDropArea;
+    int32 HotbarSelection = 0;
+    int32 PointerHotbarTarget = INDEX_NONE;
+    int32 HeldHotbarSlot = INDEX_NONE;
+    FVector2D HotbarDragStart = FVector2D::ZeroVector;
+    bool bHotbarPointerDown = false;
+    bool bHotbarPointerDragging = false;
+    bool bSuppressHotbarClick = false;
+    TOptional<FHomesteadRow> HeldHotbarRow;
+    TSharedRef<SWidget> BuildBookHotbar();
+    // One hotbar snapshot per frame for the strip's many per-paint attributes.
+    FHomesteadHotbarSlot BookHotbarSlot(int32 Slot) const;
+    mutable TArray<FHomesteadHotbarSlot> HotbarSnapshotCache;
+    mutable uint64 HotbarSnapshotFrame = MAX_uint64;
+    int32 HotbarCellAt(FVector2D Position) const;
+    FLinearColor HotbarCellColor(int32 Slot) const;
+    bool IsHotbarDropTarget(int32 Slot) const;
+    // The pack or chest stack a drag or pick-up would put in the hotbar row, if any.
+    const FHomesteadRow* HotbarCandidateRow() const;
+    void EndHotbarPointerDrag();
+    // Right-click (or Y / F) on a used slot: "Clear this slot" / Cancel.
+    void OpenHotbarSlotMenu(int32 Slot, bool bPointer);
+    void CancelHotbarHolds();
+    FString HotbarHint() const;
     enum class ECraftInput { None, Pointer, Keyboard, Controller };
     static constexpr float CraftCycleSeconds = 1.2f;
     int32 CraftHoldRecipe = INDEX_NONE;
@@ -196,6 +255,19 @@ private:
     double CraftFlashStart = 0;
     int32 CraftBeat = 0;
     ECraftInput CraftInput = ECraftInput::None;
+    // The notice card: a brief, non-focusable card over the book at the bottom centre, or under the
+    // tabs when the focused control sits where the card would go.
+    TSharedPtr<SOverlay> BookOverlay;
+    TSharedPtr<SWidget> NoticeCard;
+    SOverlay::FOverlaySlot* NoticeSlot = nullptr;
+    FString NoticeText;
+    bool bNoticeError = false;
+    bool bNoticeTop = false;
+    bool bNoticePrimed = false;
+    uint32 NoticeSerialSeen = 0;
+    double NoticeShownAt = -1000.0;
+    void UpdateNotice();
+    void PlaceNotice();
 
     TSharedRef<SWidget> BuildBody();
     // The Map tab (page 7): one focusable map view that takes sticks, triggers and the D-pad.

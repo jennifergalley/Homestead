@@ -135,12 +135,13 @@ void UHomesteadWeather::TickWeather(float DeltaSeconds)
     if (Camera.ContainsNaN()) return;
 
     // Under a building piece's roof the material hides the streaks overhead and the rain outside
-    // stays in view; under any other roof (the store, a doorway) the camera sees none at all.
+    // stays in view; under any other roof (the store, a doorway) the camera sees none at all. The check
+    // runs in sun too: the woodland ambience and a roofed hearth mix by it as well as the rain.
     bInShelter = IsUnderShelter(Camera);
     OverheadCheckIn -= DeltaSeconds;
-    if (OverheadCheckIn <= 0.0f && (Rain > 0.0f || Overcast > 0.0f))
+    if (OverheadCheckIn <= 0.0f)
     {
-        OverheadCheckIn = 0.25f;
+        OverheadCheckIn = OverheadCheckSeconds;
         FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadWeatherOverhead), false);
         if (APawn* Pawn = Viewer->GetPawn()) Query.AddIgnoredActor(Pawn);
         bOverhead = World->LineTraceTestByChannel(Camera, Camera + FVector(0, 0, OverheadCheckCm), ECC_Visibility, Query);
@@ -183,10 +184,13 @@ void UHomesteadWeather::TickWeather(float DeltaSeconds)
     {
         const auto* Game = Cast<AHomesteadController>(Viewer);
         const float Setting = Game ? Game->AmbienceVolume : 0.7f;
-        const float Gain = FMath::Pow(Rain, 0.7f) * Setting * FMath::Lerp(OutdoorGain, IndoorGain, Indoors);
-        if (Gain > 0.001f)
+        // One gain, applied once: the loop fades in to full and this multiplier carries the rest.
+        const float Gain = static_cast<float>(Homestead::RainAudioGain(Rain, Setting, Indoors));
+        if (Homestead::RainAudible(Rain, Setting, Indoors))
         {
-            if (!Sound->IsPlaying()) Sound->FadeIn(2.0f, Gain, FMath::FRandRange(0.0f, 30.0f));
+            // Fade to full and let the volume multiplier carry the gain: FadeIn's level multiplies it, so
+            // fading to Gain as well played the rain at Gain squared (inaudible in drizzle).
+            if (!Sound->IsPlaying()) Sound->FadeIn(2.0f, 1.0f, FMath::FRandRange(0.0f, 30.0f));
             Sound->SetVolumeMultiplier(Gain);
             Sound->SetLowPassFilterFrequency(FMath::Lerp(20000.0f, IndoorCutoffHz, Indoors));
         }

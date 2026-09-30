@@ -55,13 +55,20 @@ constexpr double WellWatered = 0.4; // a full watering stays above this for a wh
 constexpr double DryFloor = 0.2;   // growth speed in bone-dry soil
 constexpr double WeedyFrom = 0.5;  // weeds below this don't slow the crop (about two days' creep)
 constexpr double WeedPenalty = 0.7;
+// The first weed tuft shows on a square from here (AHomesteadWorld draws one per eighth), so the
+// [F]/[X] Pull weeds prompt appears exactly when she can see something to pull.
+constexpr double VisibleWeeds = 0.125;
 }
 double MoistureGrowthFactor(double moisture);
 double WeedGrowthFactor(double weeds);
 inline bool NeedsWater(const Plot& plot) { return plot.moisture < CropCare::WellWatered; }
 // Shown on a dry plot's focus and returned by Water() when the pail she carries holds no water.
-inline constexpr const char* EmptyPailText = "The pail is empty. Fill it at the river.";
+inline constexpr const char* EmptyPailText = "The pail is empty. Fill it at a body of water.";
+// A full pail holds this many portions of water (Simulation::FillWater tops it up to this).
+inline constexpr int PailPortions = 6;
 inline bool IsWeedy(const Plot& plot) { return plot.weeds > CropCare::WeedyFrom; }
+// Weeds she can see on the square, sown or bare, ripe or not: [F]/[X] offers to pull them.
+inline bool HasVisibleWeeds(const Plot& plot) { return plot.weeds >= CropCare::VisibleWeeds; }
 inline bool IsRipe(const Plot& plot) { return plot.planted && !plot.withered && plot.growth >= 1.0; }
 
 // Crop seasons (design §4).

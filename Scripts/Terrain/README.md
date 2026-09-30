@@ -37,6 +37,7 @@ scikit-image.
 python Scripts\Terrain\mosaic.py               # tiles -> work\mosaic_E165000_N45000_1m.npy (+ overview_5m.png)
 python Scripts\Terrain\resample_game_frame.py  # -> work\game_raw_4033.npy in the game frame
 python Scripts\Terrain\reshape.py              # -> Estate_Heightmap_4033.png, estate_layout.json
+python Scripts\Terrain\public_road.py          # -> Simulation\HomesteadEstatePublicRoad.inc
 python Scripts\Terrain\preview_zoom.py game_reshaped_4033.npy overview.png -2016 2016 -2016 2016 4 Scripts\Terrain\estate_layout.json
 ```
 
@@ -48,6 +49,11 @@ JSON. Its arguments are `src out xmin xmax ymin ymax step [layout.json]`, in gam
 `Estate_Heightmap_4033.png`, `estate_layout.json` and the scenery scatter that `scatter.py` writes
 (`Content\SurvivalGame\Estate\Runtime\EstateScenery.bin`). After re-running `reshape.py` or
 `scatter.py`, re-bake and re-import it: see "Estate map (T_EstateMap)" in `docs\setup.md`.
+
+After a road, `roadProfile`, route sign/stop, or terrain-height change, also run
+`public_road.py`. It reads the layout plus `EstateHeightfield.r16` and generates the runtime 486-point
+public-road centreline, chainage, safe travel endpoints, sign anchors and bridge keep-out in
+`Simulation\HomesteadEstatePublicRoad.inc`. Verify its stops, signs and terrain heights before release.
 
 ## Game frame
 
@@ -165,11 +171,36 @@ Scripts\Terrain\build_ocean.py` (McpHelpers). It imports the three textures and 
 the material graph in place and points `EstateSea` at the result. `place_water.py` updates
 `EstateSea` and `EstateRiver` in place (their external actor files keep their names), and places the
 spring's stones (`EstateSpringStone1-8`, folder `Water/Spring`). Neither the sea nor the river is
-spatially loaded, so both are drawn, and the pail probe finds the river, from anywhere on the map.
+spatially loaded, so both are drawn and the pail can probe their loaded water geometry; the player
+still must stand within the gameplay freshwater edge-distance reach to fill a carried pail.
 The river runs over the cove beach into the shore wash; its `HomesteadWater` tag (the pail refill)
 covers only the stream. The sea is tagged `HomesteadSea` only. Save the actors' packages afterwards
 (`set_course` alone doesn't dirty the package; the script calls `modify()` first).
 
+### Estate lake (`lake_basin.py`, `lake_features.py`)
+
+An upland pool north-west of the farm (up-left on the north-up estate map), centred (-50, -745) m, about
+76 x 44 m. `python Scripts\Terrain\lake_basin.py` grades it once:
+- a bed shelving 1 in 4 to 1.8 m, a wet lip rising 0.3 per metre out of the water;
+- a cut bank with granite on the uphill side, and a low turfed pond bay on the downhill side;
+- a 1 in 10 landing on the farm side, and a footpath from the farm's north fence (-160, -688) to it.
+
+The footpath is the dashed trail on the field-book map, and it shows on the ground: `lake_features.py` clears
+the scatter 2.4 m either side (a 2 m track and its verges), and `bake_ground.py` wears a bare track about
+2 m wide (grass cut, straw-short verges) and lifts the canopy mask along it, so the trodden soil shows
+through the tree belt's leaf litter north of the farm instead of disappearing under it.
+
+It writes the heightfield, PNG and work npy, and "lake" in `estate_layout.json` (shore, level, landing,
+path, pathProfile, graded). Once "graded" is set it only reapplies the scenery: to regrade, restore the
+heightfield and remove "lake". `lake_features.py` clears the scatter from the water, its lip and the path
+and plants the margin (tussock grass, talus and boulders; fixed seed). `scatter.py` applies it after a
+fresh scatter. Then, in the editor: `apply_estate_heightfield` over the rectangle it printed, save only the
+proxies it touched, run `place_water.py` (`EstateLake`, an `AHomesteadWaterPool` with `MI_EstatePond`, not
+spatially loaded), `bake_ground.py` + `build_ground.py`, and `bake_estate_map.py` + `ImportEstateMap`.
+
+The pool's shoreline is a closed spline at the water level with scale Y 0: the controller's water probe
+treats its inside as in the water and the pail aims 25 cm inside it. An invisible pawn-only wall 2.2 m in
+from the shore (about knee deep) keeps her out of the deep water.
 ### River channel (`river_channel.py`)
 
 reshape.py's cut only lowers ground, so where the river runs along a valley side the downhill bank
@@ -193,14 +224,16 @@ reshape.py runs it last on fresh terrain. Afterwards, with the Estate level load
    their actor bounds.
 3. Run `place_water.py`, then `bake_ground.py` and `build_ground.py`. Don't re-run `scatter.py` for a local edit: a change in which cells pass its tests shifts its random draws, and about 3,900 cobbles and boulders move across the whole map. Scenery stores only X and Y (Z comes from the heightfield at runtime), so the committed scatter sits correctly on the regraded ground. Drop only the records that now fall in the water (this regrade dropped 10 plants within 30 cm of the waterline).
 
-The Landscape doesn't match the r16 everywhere: a full-map dry run finds about 3,000 vertices
-elsewhere that differ (a strip at some tile edges, worst 43 m). Apply only the rectangle you changed.
+The Landscape matches the r16 everywhere: a full-map dry run reports no differences, and the rendered
+heights (`editor_ground_height`) agree within 1.1 cm along the map edge and 0.15 cm at 4,000 random
+interior vertices. The tool skips the outermost row and column, because the landscape data
+interface misreads them there (GetData and GetDataFast both return a neighbour's value).
 
 The ribbon (`AHomesteadWaterRibbon`) reads spline scale Y as the waterline half-width and runs
 `BankOverlap` (45 cm) under each bank. It rounds off round the pool (`StartCap`, one pool radius,
 with the spline starting that far upstream of the pool centre) and tapers over `EndCap` (6 m) into
 the sea. Vertex colour B makes white water on grades over about 4 % and at the spring
-(`M_EstateRiver`, the creek graph plus a white-water layer). V restarts every 10 m, because
+(`M_EstateRiver`, the creek graph plus a white-water layer, through `MI_EstateRiver`: calmer ripples (RippleScale 0.12), Specular 0.9, Roughness 0.02, so at a grazing angle it reflects the banks and sky instead of reading as a streaked glass slab). V restarts every 10 m, because
 half-precision UVs smear the ripples into stripes at 1 km.
 
 Cost, from `ProfileGPU` in PIE at a 3054×1135 viewport with the sea filling the view from the western clifftop: `SLW::Draw` 0.23 ms, depth prepass 0.09 ms, and Lumen water reflections about 0.2 ms. The old one-plane creek-material sea cost 0.10, 0.07 and 0.2 ms. The mesh has about 89k vertices. Read the stable sub-passes: frame times and reflection spikes swing widely when other editors share the GPU.
@@ -230,7 +263,10 @@ the tree records in `EstateScenery.bin`, and writes:
 No grass grows in the manor footprint, within 3.9 m of the river, near the beach, within 140 m of
 the town square, or on the derelict farm's fence line. The farm's field itself is left overgrown.
 
-Then, in the editor with PIE stopped, run `pyfile Scripts\Terrain\build_ground.py` and then
+`build_ground.py` imports `Saved\Ground\` PNGs from its own checkout. Always run
+`bake_ground.py` in that same checkout immediately before importing; otherwise it can import a
+different worktree's stale ground bake. Then, in the editor with PIE stopped, run
+`pyfile Scripts\Terrain\build_ground.py` and then
 `pyfile Scripts\Terrain\build_landscape_material.py`. The first imports the data, the meshes and the
 CC0 ground sets (downloaded from Poly Haven to `HOMESTEAD_GROUND_DOWNLOADS`, default
 `Saved/Ground/Downloads`; not kept in git). It also authors `M_EstateGrass` / `MI_EstateGrass`. The
@@ -258,7 +294,7 @@ branches land: `scatter.py`, then `bake_ground.py` and `build_ground.py`.
 
 Weather and night: `build_ground.py` also makes `MPC_EstateGround` (Wetness, Daylight), which
 `AHomesteadWorld::UpdateLighting` sets every refresh. The ground wets through over the first half hour
-of the rain and dries over four hours after it. Wet soil, litter and stone darken and gloss (turf
+of the rain and dries over four hours after it. Wet soil and stone darken and gloss (leaf litter under trees and the MVP woodland floor darken but stay matt, with no puddles, or they read as a sheet of water beside the river; turf
 less), trodden ground holds a sheen of water, and grass blades darken and gloss. The blades' light
 transmission and gust sheen fade out at night so the meadow doesn't glow under the moon
 (`NightTransmission` on `MI_EstateGrass`: 0.3 keeps a little light through the blades so their shaded faces don't go black).

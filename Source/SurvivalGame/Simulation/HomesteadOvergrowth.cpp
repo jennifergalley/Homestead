@@ -29,7 +29,8 @@ const OvergrowthInfo OgTable[] = {
         {OgGives(Item::Weeds, 1, 2), OgGives(Item::Seeds, 1, 1, 10)}, 60.0},
     {ResourceKind::BrambleThin, ToolKind::Billhook, false, ToolTier::Worn, 1.2, OgSwings(1, 1, 1, 1),
         {OgGives(Item::BrambleCanes, 2, 3)}, 90.0},
-    {ResourceKind::Sapling, ToolKind::Billhook, false, ToolTier::Worn, 1.5, OgSwings(2, 1, 1, 1),
+    // One press fells a sapling even with the worn billhook: the hack clip already strikes twice.
+    {ResourceKind::Sapling, ToolKind::Billhook, false, ToolTier::Worn, 1.5, OgSwings(1, 1, 1, 1),
         {OgGives(Item::Branch, 3, 4), OgGives(Item::Kindling, 1, 1)}, 60.0},
     {ResourceKind::BrambleThicket, ToolKind::Billhook, false, ToolTier::Iron, 2.0, OgSwings(3, 2, 1, 1),
         {OgGives(Item::BrambleCanes, 4, 5)}, 150.0},
@@ -68,6 +69,15 @@ const OvergrowthInfo OgTable[] = {
         {OgGives(Item::ScrapIron, 1, 2), OgGives(Item::Stone, 1, 2), OgGives(Item::ScrapLead, 1, 1, 25)}, 130.0},
     {ResourceKind::RottenPlanks, ToolKind::Count, true, ToolTier::Worn, 0.6, OgSwings(1, 1, 1, 1),
         {OgGives(Item::Kindling, 1, 2), OgGives(Item::ScrapIron, 1, 1, 50)}, 90.0},
+    // Slate slid off the ruin's roofs, stacked aside by hand: the sound pieces as stone, and the lead
+    // flashing and roofing nails that came down with them.
+    {ResourceKind::SlateHeap, ToolKind::Count, true, ToolTier::Worn, 0.8, OgSwings(1, 1, 1, 1),
+        {OgGives(Item::Stone, 1, 2), OgGives(Item::ScrapLead, 1, 1, 30), OgGives(Item::ScrapIron, 1, 1, 30)}, 150.0},
+    // The manor's fallen roof timbers (Jenny's playtest: they looked clearable and weren't): old oak
+    // too heavy to lift, so the worn axe cuts them up. Sound heart as timber, the rest as firewood,
+    // and the odd hand-forged spike.
+    {ResourceKind::RuinTimbers, ToolKind::Axe, false, ToolTier::Worn, 3.0, OgSwings(3, 2, 1, 1),
+        {OgGives(Item::Timber, 1, 2), OgGives(Item::Firewood, 2, 3), OgGives(Item::ScrapIron, 1, 1, 30)}, 200.0},
 };
 const OvergrowthInfo* OgByKind(ResourceKind kind)
 {
@@ -146,7 +156,7 @@ const OvergrowthInfo* FindOvergrowth(ResourceKind kind) { return OgByKind(kind);
 bool IsRubbish(ResourceKind kind)
 {
     return kind == ResourceKind::BrokenCrate || kind == ResourceKind::BrokenBarrel || kind == ResourceKind::RubbishHeap
-        || kind == ResourceKind::RottenPlanks;
+        || kind == ResourceKind::RottenPlanks || kind == ResourceKind::SlateHeap;
 }
 
 const ResourceNode* OvergrowthSpoiling(const State& state, const Footprint& area)
@@ -232,13 +242,88 @@ Item NextSalvageHead(const State& state)
             if (drop.wearableId == 0 && drop.item == item) return true;
         return false;
     };
+    // The hoe comes second, so she can start a garden on her first morning (Jenny's playtest).
     const std::pair<Item, Item> order[] = {
-        {Item::RustedBillhookHead, Item::Billhook}, {Item::RustedAxeHead, Item::Hatchet},
-        {Item::RustedScytheBlade, Item::Scythe}, {Item::RustedPickHead, Item::Pickaxe},
-        {Item::RustedHoeBlade, Item::DiggingStick}};
+        {Item::RustedBillhookHead, Item::Billhook}, {Item::RustedHoeBlade, Item::DiggingStick},
+        {Item::RustedAxeHead, Item::Hatchet}, {Item::RustedScytheBlade, Item::Scythe},
+        {Item::RustedPickHead, Item::Pickaxe}};
     for (const auto& entry : order)
         if (!owned(entry.first) && !owned(entry.second)) return entry.first;
     return Item::Count;
+}
+const char* SalvageWhereabouts(int pileId)
+{
+    switch (pileId)
+    {
+    case 520001: return "in the south range, beside the standing room's door";
+    case 520002: return "just inside the fallen front door";
+    case 520003: return "in the west rooms, north of the chimney";
+    case 520004: return "outside the gap in the fallen rear wall";
+    case 520005: return "under the collapsed south-west corner";
+    case 520006: return "by the chimney in the west rooms, where Father's tools hung";
+    default: return "in the old manor";
+    }
+}
+
+namespace
+{
+enum class OgWhere { Nowhere, Pack, Chest, Ground };
+struct OgFound
+{
+    OgWhere where = OgWhere::Nowhere;
+    Point position;
+};
+// Where she keeps `item`, the same places NextSalvageHead counts as owned: her pack first, then the
+// nearest storage chest or spot on the ground she set it down.
+OgFound OgLocate(const State& state, Item item, Point player)
+{
+    const int index = static_cast<int>(item);
+    if (state.inventory[index] > 0) return {OgWhere::Pack, player};
+    OgFound found;
+    double best = 0.0;
+    const auto consider = [&](OgWhere where, Point position)
+    {
+        const double distance = OgDistanceSquared(player, position);
+        if (found.where == OgWhere::Nowhere || distance < best) { found = {where, position}; best = distance; }
+    };
+    for (const auto& piece : state.structures)
+        if (piece.kind == Piece::Chest && piece.storage[index] > 0) consider(OgWhere::Chest, StructureCenter(state, piece));
+    for (const auto& drop : state.worldDrops)
+        if (drop.wearableId == 0 && drop.item == item && drop.quantity > 0) consider(OgWhere::Ground, drop.position);
+    return found;
+}
+// "in a storage chest about 12 m away", "lying on the ground right here".
+std::string OgPlace(const OgFound& found, Point player)
+{
+    const double metres = std::sqrt(OgDistanceSquared(player, found.position)) / 100.0;
+    const std::string away = OgValid(player) && std::isfinite(metres) && metres >= 2.0
+        ? "about " + std::to_string(static_cast<long long>(std::lround(metres))) + " m away" : "right here";
+    return (found.where == OgWhere::Chest ? "in a storage chest " : "lying on the ground ") + away;
+}
+}
+
+std::string NoHoeMessage(const State& state, Point player)
+{
+    // She owns a hoe, just not in her pack: send her to it rather than to the salvage.
+    const OgFound hoe = OgLocate(state, Item::DiggingStick, player);
+    if (hoe.where == OgWhere::Chest) return "Your hoe is " + OgPlace(hoe, player) + ". Take it out to till.";
+    if (hoe.where == OgWhere::Ground) return "Your hoe is " + OgPlace(hoe, player) + ". Pick it up to till.";
+    const OgFound blade = OgLocate(state, Item::RustedHoeBlade, player);
+    if (blade.where == OgWhere::Pack)
+        return "You need a hoe to till. Craft one from your rusted hoe blade and two branches on the Craft page.";
+    if (blade.where != OgWhere::Nowhere)
+        return "You need a hoe to till. Your rusted hoe blade is " + OgPlace(blade, player)
+            + (blade.where == OgWhere::Chest ? ": take it out" : ": pick it up")
+            + " and craft a hoe with two branches on the Craft page.";
+    if (!state.fixedEstate) return "Craft a hoe before tilling soil.";
+    const ResourceNode* nearest = nullptr;
+    for (const auto& node : state.resources)
+        if (node.kind == ResourceKind::SalvagePile && !node.cleared
+            && (!nearest || OgDistanceSquared(node.position, player) < OgDistanceSquared(nearest->position, player)))
+            nearest = &node;
+    if (!nearest) return "You need a hoe to till, and the manor's salvage has all been searched.";
+    return std::string("You need a hoe to till. Search the old manor's salvage for a hoe blade: there's a pile ")
+        + SalvageWhereabouts(nearest->id) + ".";
 }
 
 ToolTier Simulation::GetToolTier(ToolKind tool) const
@@ -374,6 +459,37 @@ int Simulation::FindNearestOvergrowth(Point position, double maxDistance, Item t
     return nearest;
 }
 
+int Simulation::FindAimedOvergrowth(Point player, Point facing, Item tool) const
+{
+    const ToolKind used = ToolForItem(tool);
+    const double length = std::sqrt(facing.x * facing.x + facing.y * facing.y);
+    if (!OgValid(player) || used == ToolKind::Count || !std::isfinite(length) || length < 1e-6) return -1;
+    const Point forward{facing.x / length, facing.y / length};
+    const double cosine = std::cos(Overgrowth::AimHalfAngleDegrees * 3.14159265358979323846 / 180.0);
+    int aimed = -1;
+    double best = Overgrowth::Reach;
+    for (const auto& node : state_.resources)
+    {
+        const auto* info = node.cleared ? nullptr : FindOvergrowth(node.kind);
+        if (!info || info->tool != used) continue;
+        const Point offset{node.position.x - player.x, node.position.y - player.y};
+        const double distance = std::sqrt(offset.x * offset.x + offset.y * offset.y);
+        if (distance > best || (distance == best && aimed != -1)) continue;
+        if (distance > Overgrowth::AimAnyDirection && (offset.x * forward.x + offset.y * forward.y) / distance < cosine) continue;
+        aimed = node.id;
+        best = distance;
+    }
+    return aimed;
+}
+
+int Simulation::HeldToolFocus(int current, Point player, Point facing, Item tool) const
+{
+    const auto* node = current >= 0 ? OgFindNode(state_.resources, current) : nullptr;
+    if (node && !node->cleared && !IsOvergrowth(node->kind)) return current;
+    const int aimed = FindAimedOvergrowth(player, facing, tool);
+    return aimed != -1 ? aimed : current;
+}
+
 double Simulation::ScytheArcRadius(ToolTier tier)
 {
     static const double radii[] = {160.0, 200.0, 240.0, 280.0};
@@ -412,6 +528,18 @@ std::vector<int> Simulation::ScytheArcTargets(Point player, Point facing) const
     std::vector<int> result;
     for (const auto& entry : found) result.push_back(entry.second);
     return result;
+}
+
+Simulation::MowSweepResult Simulation::MowSweep(const std::vector<int>& targets, Point player)
+{
+    MowSweepResult sweep;
+    for (const int id : targets)
+    {
+        const auto result = ClearOvergrowth(id, Item::Scythe, player);
+        if (result.ok) ++sweep.mown;
+        else if (sweep.problem.empty()) sweep.problem = result.message;
+    }
+    return sweep;
 }
 
 void Simulation::CreepWeeds(int day)

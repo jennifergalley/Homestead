@@ -39,51 +39,39 @@
       ]
     },
     {
-      "id": "ascending-the-vale",
-      "author": "Kevin MacLeod (incompetech.com)",
-      "title": "Ascending the Vale",
-      "license": "CC-BY-4.0",
-      "source": "https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1600064",
-      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-      "credit": "Ascending the Vale by Kevin MacLeod (incompetech.com). Licensed under Creative Commons Attribution 4.0. Converted for game playback; playback fades and level matching applied.",
+      "id": "whispers-of-the-glen",
+      "author": "Maarten Schellekens",
+      "title": "Whispers of the Glen",
+      "license": "CC0-1.0",
+      "source": "https://freemusicarchive.org/music/maarten-schellekens/public-domain-1/whispers-of-the-glen/",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "credit": "Whispers of the Glen by Maarten Schellekens. Public domain (CC0 1.0); credited with thanks. Converted for game playback; playback fades and level matching applied.",
       "files": [
-        { "name": "AscendingTheVale.mp3", "bytes": 7926743, "url": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Ascending%20the%20Vale.mp3" }
+        { "name": "WhispersOfTheGlen.mp3", "bytes": 2589184, "url": "https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/GP2wACoXIlIsL0bq27muowQztPcRSZ3oVM85CUHJ.mp3" }
       ]
     },
     {
-      "id": "teller-of-the-tales",
-      "author": "Kevin MacLeod (incompetech.com)",
-      "title": "Teller of the Tales",
-      "license": "CC-BY-4.0",
-      "source": "https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1400020",
-      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-      "credit": "Teller of the Tales by Kevin MacLeod (incompetech.com). Licensed under Creative Commons Attribution 4.0. Converted for game playback; playback fades and level matching applied.",
+      "id": "medieval-theme",
+      "author": "Maarten Schellekens",
+      "title": "Medieval Theme",
+      "license": "CC0-1.0",
+      "source": "https://freemusicarchive.org/music/maarten-schellekens/public-domain-1/medieval-theme/",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "credit": "Medieval Theme by Maarten Schellekens. Public domain (CC0 1.0); credited with thanks. Converted for game playback; playback fades and level matching applied.",
       "files": [
-        { "name": "TellerOfTheTales.mp3", "bytes": 6798250, "url": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Teller%20of%20the%20Tales.mp3" }
+        { "name": "MedievalTheme.mp3", "bytes": 2512270, "url": "https://files.freemusicarchive.org/storage-freemusicarchive-org/tracks/iuMMQc2RWtRrOV9HQHWKS4qB0RIVBuWz3y3lCgA0.mp3" }
       ]
     },
     {
-      "id": "meditation-impromptu-02",
-      "author": "Kevin MacLeod (incompetech.com)",
-      "title": "Meditation Impromptu 02",
-      "license": "CC-BY-4.0",
-      "source": "https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100162",
-      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-      "credit": "Meditation Impromptu 02 by Kevin MacLeod (incompetech.com). Licensed under Creative Commons Attribution 4.0. Converted for game playback; playback fades and level matching applied.",
+      "id": "a-new-town",
+      "author": "cynicmusic (The Cynic Project / pixelsphere.org / cynicmusic.com)",
+      "title": "A New Town (RPG Theme)",
+      "license": "CC0-1.0",
+      "source": "https://opengameart.org/content/a-new-town-rpg-theme",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+      "credit": "A New Town (RPG Theme) by cynicmusic (The Cynic Project / pixelsphere.org / cynicmusic.com). Public domain (CC0 1.0); credited with thanks. Converted for game playback; playback fades and level matching applied.",
       "files": [
-        { "name": "MeditationImpromptu02.mp3", "bytes": 8261798, "url": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/Meditation%20Impromptu%2002.mp3" }
-      ]
-    },
-    {
-      "id": "at-rest",
-      "author": "Kevin MacLeod (incompetech.com)",
-      "title": "At Rest",
-      "license": "CC-BY-4.0",
-      "source": "https://www.incompetech.com/music/royalty-free/index.html?isrc=USUAN1100748",
-      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/",
-      "credit": "At Rest by Kevin MacLeod (incompetech.com). Licensed under Creative Commons Attribution 4.0. Converted for game playback; playback fades and level matching applied.",
-      "files": [
-        { "name": "AtRest.mp3", "bytes": 8264831, "url": "https://www.incompetech.com/music/royalty-free/mp3-royaltyfree/At%20Rest.mp3" }
+        { "name": "ANewTown.mp3", "bytes": 766291, "url": "https://opengameart.org/sites/default/files/025_A_New_Town.mp3" }
       ]
     },
     {
@@ -108,14 +96,38 @@
           "bytes": 800850,
           "url": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip",
           "extract": [
-            { "member": "License.txt", "name": "License.txt" },
-            { "member": "Audio/footstep_grass_000.ogg", "name": "GrassStepA.ogg" },
-            { "member": "Audio/footstep_grass_001.ogg", "name": "GrassStepB.ogg" },
-            { "member": "Audio/impactWood_light_000.ogg", "name": "WoodTapA.ogg" },
-            { "member": "Audio/impactWood_light_001.ogg", "name": "WoodTapB.ogg" },
-            { "member": "Audio/impactMetal_light_000.ogg", "name": "CraftStrikeA.ogg" },
-            { "member": "Audio/impactMetal_light_001.ogg", "name": "CraftStrikeB.ogg" },
-            { "member": "Audio/impactMetal_light_002.ogg", "name": "CraftStrikeC.ogg" }
+            {
+              "member": "License.txt",
+              "name": "License.txt"
+            },
+            {
+              "member": "Audio/footstep_grass_000.ogg",
+              "name": "GrassStepA.ogg"
+            },
+            {
+              "member": "Audio/footstep_grass_001.ogg",
+              "name": "GrassStepB.ogg"
+            },
+            {
+              "member": "Audio/impactWood_light_000.ogg",
+              "name": "WoodTapA.ogg"
+            },
+            {
+              "member": "Audio/impactWood_light_001.ogg",
+              "name": "WoodTapB.ogg"
+            },
+            {
+              "member": "Audio/impactMetal_light_000.ogg",
+              "name": "CraftStrikeA.ogg"
+            },
+            {
+              "member": "Audio/impactMetal_light_001.ogg",
+              "name": "CraftStrikeB.ogg"
+            },
+            {
+              "member": "Audio/impactMetal_light_002.ogg",
+              "name": "CraftStrikeC.ogg"
+            }
           ]
         }
       ]
@@ -132,8 +144,14 @@
           "bytes": 834536,
           "url": "https://kenney.nl/media/pages/assets/interface-sounds/fa43c1dd4d-1677589452/kenney_interface-sounds.zip",
           "extract": [
-            { "member": "License.txt", "name": "License.txt" },
-            { "member": "Audio/click_002.ogg", "name": "UIClick.ogg" }
+            {
+              "member": "License.txt",
+              "name": "License.txt"
+            },
+            {
+              "member": "Audio/click_002.ogg",
+              "name": "UIClick.ogg"
+            }
           ]
         }
       ]

@@ -5,6 +5,10 @@
 #include "../HomesteadSave.h"
 #include "../HomesteadWorld.h"
 #include "../HomesteadTestPaths.h"
+#include "../Simulation/HomesteadPackRow.h"
+#include "../Simulation/HomesteadItems.h"
+#include "../Simulation/HomesteadShops.h"
+#include "SHomesteadShop.h"
 #include "SHomesteadMenu.h"
 #include "SHomesteadMapView.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -449,6 +453,21 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Current-schema F5 writes a readable sandbox save"),
         [this]() { Tap(EKeys::F5); },
         [this]() { return !Controller->ToastIsError() && Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual"))) != nullptr; });
+    Add(TEXT("Save status shows the save's local date and time in words, not an ISO UTC stamp"),
+        []() {},
+        [this]()
+        {
+            // The save was written moments ago, so it shows today's local date (en test culture).
+            static const TCHAR* Months[] = {TEXT("January"), TEXT("February"), TEXT("March"), TEXT("April"), TEXT("May"),
+                TEXT("June"), TEXT("July"), TEXT("August"), TEXT("September"), TEXT("October"), TEXT("November"), TEXT("December")};
+            const FDateTime Local = FDateTime::Now();
+            const FString Status = Controller->MenuSaveStatus();
+            Results.Add(TEXT("SAVE_STATUS ") + Status.Replace(TEXT("\n"), TEXT(" | ")));
+            return !Status.Contains(TEXT("UTC")) && !Status.Contains(TEXT("not known"))
+                && !Status.Contains(FString::Printf(TEXT("%04d-%02d-%02d"), Local.GetYear(), Local.GetMonth(), Local.GetDay()))
+                && Status.Contains(FString::Printf(TEXT("%s %d, %d"), Months[Local.GetMonth() - 1], Local.GetDay(), Local.GetYear()))
+                && (Status.Contains(TEXT("AM")) || Status.Contains(TEXT("PM")));
+        });
     Add(TEXT("A real IO error does not quit or change inventory"),
         [this, Before, OriginalRoute, Blocker]()
         {
@@ -476,6 +495,12 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         },
         [this, Before]() { return !Controller->NativeMenu->HasActiveDialog()
             && Controller->Simulation().Serialize() == *Before; });
+    // Disclosed fixture: the hotbar is her pack's first row (Simulation/HomesteadPackRow.h) and new
+    // stacks normally fill it first. This suite exercises the pack grid, so new stock lands below the
+    // row here; the row itself is covered by the chest-view hotbar block and the Hotbar suite.
+    Add(TEXT("Disclosed fixture: new stock lands in the pack grid, below the hotbar row"),
+        [this]() { Controller->Sim.SetPackRowAutoFill(false); },
+        []() { return true; });
     QueueGrant(Homestead::Item::Billhook, 1);
     Add(TEXT("Controller tabs reach real carried inventory"),
         [this]() { Tap(EKeys::Escape); Tap(EKeys::I); },
@@ -542,8 +567,11 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Capture(TEXT("native-crafting"));
     Add(TEXT("Mapped tab opens purpose-specific building plans"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this]() { return Controller->BookPage() == 2
-            && Controller->BookTitle() == TEXT("Building plans"); });
+        [this]() { const auto Rows = Controller->Rows();
+            // The action says what activating a plan does: a placement preview, nothing spent yet.
+            return Controller->BookPage() == 2 && Controller->BookTitle() == TEXT("Building plans")
+                && Rows.Num() > 1 && Rows[0].Action == TEXT("Choose a spot to build")
+                && Rows.Last().Action == TEXT("Choose what to take down"); });
     Capture(TEXT("native-build"));
     Add(TEXT("Real building plan enters placement without charging"),
         [this, Before]()
@@ -556,33 +584,54 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Cancel placement and return to Settings"),
         [this]() { Tap(EKeys::Escape); Tap(EKeys::Escape); },
         [this]() { return !Controller->IsPlanning() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
-    Add(TEXT("Mapped tabs expose purpose-specific Guidebook content"),
-        [this]() { Tap(EKeys::Escape); Tap(EKeys::G); },
-        [this]() { return Controller->BookPage() == 3
-            && Controller->BookSummary().Contains(TEXT("Woodland seed")); });
-    Capture(TEXT("native-guidebook"));
-    Add(TEXT("Guidebook text is readable without an inert Read action"),
-        [this]() { Controller->NativeMenu->FocusLegacySubject(2); },
-        [this]() { return Controller->BookPage() == 3
-            && Controller->NativeMenu->GetActionCount() == 0
-            && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("salvage piles")); });
+    // The Guidebook (page 3) is retired: its keys open nothing, a request for it opens the pack, and
+    // the tabs run Inventory, Craft, Build, Map, Appearance.
+    // The shop: food shows its Energy and prices read as whole coins (Homestead::FoodEnergyLabel,
+    // Homestead::FormatMoney). A disclosed store is placed ahead of her at a known open hour.
+    Add(TEXT("Shop Buy lists food with its Energy and prices in whole coins"),
+        [this]()
+        {
+            Controller->CloseBook();
+            Controller->HomesteadMorning(10.0f);
+            Controller->HomesteadOpenStore();
+            if (Controller->State().shops.empty()) { Finish(false, TEXT("The disclosed store was not placed.")); return; }
+            Controller->OpenShopScreen(Controller->State().shops.front().id, false);
+            if (Controller->ShopScreen.IsValid()) Controller->ShopScreen->SetTab(1);
+        },
+        [this]()
+        {
+            if (!Controller->ShopScreen.IsValid() || Controller->ShopScreen->IsSellTab() || Controller->ShopScreen->RowCount() < 2) return false;
+            const FString Purse = UTF8_TO_TCHAR(Homestead::FormatMoney(Controller->State().money).c_str());
+            const FString Pasty = UTF8_TO_TCHAR(Homestead::FoodEnergyLabel(Homestead::Item::Pasty).c_str());
+            const FString Price = UTF8_TO_TCHAR(Homestead::FormatMoney(Homestead::BuyPrice(Homestead::Item::Pasty)).c_str());
+            Results.Add(FString::Printf(TEXT("SHOP_LABELS purse=%s pasty=%s price=%s"), *Purse, *Pasty, *Price));
+            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && Pasty == TEXT("+25 Energy")
+                && Price == TEXT("100 coins");
+        }, 0.8f);
+    Add(TEXT("Capture the shop's Buy page"), [this]() { Screenshot(TEXT("native-shop-buy")); },
+        [this]() { return Controller->ShopScreen.IsValid(); }, 0.8f);
+    Add(TEXT("Leave the shop and return to Settings, as before the shop check"),
+        [this]() { Controller->CloseShopScreen(); Controller->OpenBook(4); },
+        [this]() { return !Controller->ShopScreen.IsValid() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
+    Add(TEXT("The retired Guidebook has no G / H shortcut"),
+        [this]() { Tap(EKeys::Escape); Tap(EKeys::G); Tap(EKeys::H); },
+        [this]() { return !Controller->IsBookOpen(); });
+    Add(TEXT("A request for the retired Guidebook page opens the pack instead"),
+        [this]() { Controller->OpenBook(3); },
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Credits has no fabricated Read action"),
         [this]() { Controller->OpenBook(5); },
         [this]() { return Controller->BookPage() == 5
             && Controller->NativeMenu->GetActionCount() == 0; });
-    Add(TEXT("Return to Guidebook without losing informational focus"),
-        [this]() { Controller->OpenBook(3); },
-        [this]() { return Controller->BookPage() == 3
-            && Controller->NativeMenu->GetActionCount() == 0; });
-    Add(TEXT("Map tab sits between Build and Guidebook"),
+    Add(TEXT("Map tab sits between Build and Appearance"),
         [this, Before]()
         {
             *Before = Controller->Simulation().Serialize();
-            Tap(EKeys::Gamepad_LeftShoulder);
+            Controller->OpenBook(2);
+            Tap(EKeys::Gamepad_RightShoulder);
         },
         [this]() { return Controller->BookPage() == 7 && Controller->NativeMenu->GetMapView().IsValid()
-            && Controller->NativeMenu->GetMapView()->PixelsPerCm() > 0; });
-    Capture(TEXT("native-map"));
+            && Controller->NativeMenu->GetMapView()->PixelsPerCm() > 0; });    Capture(TEXT("native-map"));
     Add(TEXT("Controller triggers zoom the map in"),
         [this]() { Axis(EKeys::Gamepad_RightTriggerAxis, 1.0f); },
         [this]()
@@ -608,13 +657,14 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("D-pad steps between named landmarks"),
         [this]() { Tap(EKeys::Gamepad_DPad_Right); },
         [this]() { return !Controller->NativeMenu->GetMapView()->SelectedName().IsEmpty(); });
-    Add(TEXT("Map input stays in the book and LB / RB still switch tabs"),
+    Add(TEXT("Map input stays in the book and RB goes on to Appearance (no Guidebook between)"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this, Before]() { return Controller->BookPage() == 3 && Controller->IsBookOpen()
+        [this, Before]() { return Controller->BookPage() == 6 && Controller->IsBookOpen()
             && Controller->Simulation().Serialize() == *Before; });
-    Add(TEXT("Mapped tabs keep body and hair Appearance separate from owned clothing"),
-        [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this]() { return Controller->BookPage() == 6; });
+    Add(TEXT("The tab bar lists exactly Inventory, Craft, Build, Map, Appearance"),
+        []() {},
+        [this]() { return Controller->NativeMenu->GetTabPageCount() == 5
+            && !Controller->NativeMenu->HasTabForPage(3); });
     Capture(TEXT("native-appearance"));
     Add(TEXT("Return to Settings without changing simulation or camera"),
         [this, Before]()
@@ -1829,7 +1879,262 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     Add(TEXT("Capture real stored transaction result"),
         [this]() { Screenshot(TEXT("native-storage-transactions")); },
         [this]() { return Controller->BookPage() == 0 && Controller->InventoryView() == 1; }, 0.8f);
-    Add(TEXT("Prepare valid full Pack and Chest scrolling fixture"),
+    // The hotbar row with a chest open: the first row of her pack, ten cells heading the pack column,
+    // holding real stacks (Simulation/HomesteadPackRow.h). A chest stack goes straight into a cell in
+    // one transaction; stacks move, merge or swap between cells and the rest of the pack; what she
+    // owns in pack and chest together never changes. The stock is restored after.
+    {
+        const auto SavedSelected = MakeShared<int32>(0);
+        const auto PreStrip = MakeShared<std::string>();
+        const auto StripBindings = MakeShared<TArray<int32>>();
+        const auto HoldingsBefore = MakeShared<TArray<int32>>();
+        const auto ChestPasty = MakeShared<int32>(0);
+        const auto PackPasty = MakeShared<int32>(0);
+        const auto TargetCell = MakeShared<int32>(INDEX_NONE);
+        const auto BelowGroup = MakeShared<int32>(0);
+        const auto Bindings = [this]()
+        {
+            TArray<int32> Result;
+            for (const auto& Slot : Controller->HotbarSnapshot()) Result.Add(Slot.Assigned ? static_cast<int32>(Slot.Tool) : -1);
+            return Result;
+        };
+        // Everything she owns in her pack and this chest together, per item.
+        const auto Holdings = [this, Chest]()
+        {
+            TArray<int32> Result;
+            const auto& State = Controller->State();
+            for (int32 Index = 0; Index < Homestead::ItemCount; ++Index)
+            {
+                int32 Count = State.inventory[Index];
+                for (const auto& Piece : State.structures) if (Piece.id == *Chest) Count += Piece.storage[Index];
+                Result.Add(Count);
+            }
+            return Result;
+        };
+        const auto PastyGroup = [this](int32 Container)
+        {
+            const auto* Layout = Controller->Simulation().GetLayout(Container);
+            if (Layout) for (const auto& Entry : *Layout)
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Pasty) return Entry.groupId;
+            return 0;
+        };
+        const auto PastyBelowRow = [this]()
+        {
+            for (const auto& Entry : Controller->State().inventoryLayout)
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Pasty
+                    && Homestead::PackRowRules::RowCellOf(Controller->State(), Entry.groupId, 0) < 0) return true;
+            return false;
+        };
+        const auto Center = [](const TSharedPtr<SWidget>& Widget)
+        {
+            const auto Geometry = Widget->GetCachedGeometry();
+            return FVector2D(Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f);
+        };
+        const auto StripDrag = [this, Center](const TSharedPtr<SWidget>& FromWidget, const TSharedPtr<SWidget>& ToWidget)
+        {
+            if (!FromWidget || !ToWidget) { Finish(false, TEXT("A hotbar row drag end is unavailable.")); return; }
+            const FVector2D From = Center(FromWidget), To = Center(ToWidget);
+            TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+            auto& Slate = FSlateApplication::Get();
+            Slate.SetCursorPos(From);
+            TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
+            Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, From, From, Pressed,
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+            Slate.SetCursorPos(To);
+            Slate.ProcessMouseMoveEvent(FPointerEvent(0, To, From, Pressed, EKeys::Invalid, 0, FModifierKeysState()));
+            Controller->NativeMenu->PointerItemDragMove(To);
+            Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, To, To, TSet<FKey>(),
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        };
+        const auto PastyCell = [this]()
+        {
+            for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell)
+                if (Controller->HotbarItem(Cell) == Homestead::Item::Pasty) return Cell;
+            return static_cast<int32>(INDEX_NONE);
+        };
+        Add(TEXT("Chest view shows the hotbar row as the pack's first row: inside the book, heading the pack column above the grids"),
+            [this, SavedSelected, PreStrip]() { *SavedSelected = Controller->SelectedHotbarIndex(); *PreStrip = Controller->Simulation().Serialize(); },
+            [this]()
+            {
+                const auto Menu = Controller->NativeMenu;
+                if (!Menu || !Controller->ActiveStorageChest().IsSet() || Menu->GetBookHotbarSlotCount() != 10) return false;
+                const FGeometry Book = Menu->GetCachedGeometry();
+                const FVector2D BookMin = Book.GetAbsolutePosition(), BookMax = BookMin + Book.GetAbsoluteSize();
+                for (int32 Slot = 0; Slot < 10; ++Slot)
+                {
+                    const auto Widget = Menu->GetBookHotbarSlot(Slot);
+                    if (!Widget || !Widget->GetVisibility().IsVisible()) return false;
+                    const FGeometry Geometry = Widget->GetCachedGeometry();
+                    const FVector2D A = Geometry.GetAbsolutePosition(), B = A + Geometry.GetAbsoluteSize();
+                    if (Geometry.GetLocalSize().X < 20 || A.X < BookMin.X || A.Y < BookMin.Y || B.X > BookMax.X || B.Y > BookMax.Y) return false;
+                }
+                const FGeometry First = Menu->GetBookHotbarSlot(0)->GetCachedGeometry();
+                const FGeometry Last = Menu->GetBookHotbarSlot(9)->GetCachedGeometry();
+                const float RowBottom = Last.GetAbsolutePosition().Y + Last.GetAbsoluteSize().Y;
+                const float RowRight = Last.GetAbsolutePosition().X + Last.GetAbsoluteSize().X;
+                Results.Add(FString::Printf(TEXT("GEOMETRY chest-row viewport=%.0fx%.0f row=(%.0f,%.0f)-(%.0f,%.0f) cell=%.0f grids_top=%.0f pack_left=%.0f"),
+                    Book.GetAbsoluteSize().X, Book.GetAbsoluteSize().Y, First.GetAbsolutePosition().X, First.GetAbsolutePosition().Y,
+                    RowRight, RowBottom, First.GetAbsoluteSize().X, Menu->GetContentScrollTop(), Menu->GetPackColumnLeft()));
+                // The first row: above both grids, over the pack column (not the chest's), in one line.
+                return RowBottom <= Menu->GetContentScrollTop() + 1.0f
+                    && First.GetAbsolutePosition().X >= Menu->GetPackColumnLeft() - 12.0f
+                    && FMath::IsNearlyEqual(First.GetAbsolutePosition().Y, Last.GetAbsolutePosition().Y, 1.0f)
+                    && First.GetAbsoluteSize().X >= 30.0f * Book.GetAbsoluteSize().Y / 720.0f;
+            }, 0.5f);
+        Add(TEXT("Disclosed fixture: one pasty below the hotbar row and one in the chest"),
+            [this, Chest, PastyGroup, ChestPasty, PackPasty, HoldingsBefore, Holdings]()
+            {
+                if (!Controller->Sim.GrantItems(Homestead::Item::Pasty, 2)) { Finish(false, TEXT("Could not grant the pasty fixture.")); return; }
+                if (!Controller->Sim.TransferGroup(*Chest, PastyGroup(0), 1, true, Controller->PlayerPoint(), Controller->Sim.GetRevision()))
+                { Finish(false, TEXT("Could not stow the chest pasty fixture.")); return; }
+                // A new stack takes the first empty cell; this fixture wants the pack's pasty below the row.
+                const int32 Cell = Homestead::PackRowRules::RowCellOf(Controller->State(), PastyGroup(0), 0);
+                if (Cell >= 0 && !Controller->Sim.MoveFromPackRow(Cell, 0, 0, Controller->Sim.GetRevision()))
+                { Finish(false, TEXT("Could not move the pack pasty below the row.")); return; }
+                Controller->NativeMenu->Refresh();
+                *ChestPasty = PastyGroup(*Chest);
+                *PackPasty = PastyGroup(0);
+                *HoldingsBefore = Holdings();
+            },
+            [this, ChestPasty, PackPasty, PastyBelowRow]() { return *ChestPasty && *PackPasty && PastyBelowRow()
+                && Controller->Simulation().Count(Homestead::Item::Pasty) == 1; });
+        Add(TEXT("Capture the chest view's hotbar row"),
+            [this]() { Screenshot(TEXT("native-storage-hotbar-strip")); },
+            [this]() { return Controller->ActiveStorageChest().IsSet(); }, 0.8f);
+        Add(TEXT("Controller A picks up the chest pasty"),
+            [this, Chest, ChestPasty]()
+            {
+                Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *ChestPasty, *Chest);
+                Tap(EKeys::Gamepad_FaceButton_Bottom);
+            },
+            [this]() { return Controller->NativeMenu->IsVirtualDraggingItem(); });
+        Add(TEXT("D-pad Up from the chest grid's top row reaches the hotbar row above it"),
+            [this]() { Tap(EKeys::Gamepad_DPad_Up); },
+            [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Hotbar")
+                && Controller->NativeMenu->HasSynchronizedFocus(); });
+        Steps.Last().Repeat = [this]()
+        {
+            if (Controller->NativeMenu && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content")) Tap(EKeys::Gamepad_DPad_Up);
+        };
+        Add(TEXT("A on a cell takes the chest pasty straight into it in one step; nothing is lost or duplicated"),
+            [this, TargetCell]() { *TargetCell = Controller->NativeMenu->GetFocusedHotbarSlot(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [this, TargetCell, Chest, Holdings, HoldingsBefore, SavedSelected]()
+            {
+                return !Controller->NativeMenu->IsVirtualDraggingItem() && *TargetCell != INDEX_NONE
+                    && Controller->HotbarItem(*TargetCell) == Homestead::Item::Pasty
+                    && Controller->Simulation().Count(Homestead::Item::Pasty) == 2
+                    && Controller->Simulation().ChestUsedCapacity(*Chest) >= 0 && Holdings() == *HoldingsBefore
+                    && Controller->SelectedHotbarIndex() == *SavedSelected;
+            });
+        Add(TEXT("Down returns to the grids"),
+            [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+            [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content"); });
+        Add(TEXT("Move to a hotbar slot, then A on the chest pasty's cell merges the pack pasty into it"),
+            [this, PackPasty, TargetCell]()
+            {
+                for (const auto& Row : Controller->MenuRows())
+                    if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.SubjectId == *PackPasty)
+                    { Controller->NativeMenu->BeginPlacingOnHotbar(Row); break; }
+                // Walk the focus to the pasty's cell and put it down there.
+                const int32 From = Controller->NativeMenu->GetFocusedHotbarSlot();
+                for (int32 Step = From; Step < *TargetCell; ++Step) Tap(EKeys::Gamepad_DPad_Right);
+                for (int32 Step = From; Step > *TargetCell; --Step) Tap(EKeys::Gamepad_DPad_Left);
+                Tap(EKeys::Gamepad_FaceButton_Bottom);
+            },
+            [this, TargetCell, Holdings, HoldingsBefore, SavedSelected, PastyBelowRow]()
+            {
+                const auto* Entry = Controller->HotbarEntry(*TargetCell);
+                return !Controller->NativeMenu->IsPlacingOnHotbar() && Entry && Entry->item == Homestead::Item::Pasty
+                    && Entry->quantity == 2 && !PastyBelowRow()
+                    && Controller->SelectedHotbarIndex() == *SavedSelected && Holdings() == *HoldingsBefore;
+            });
+        Add(TEXT("A pasty's hover text gives its Energy and no internal stack number"),
+            []() {},
+            [this, TargetCell]()
+            {
+                FHomesteadRow Row;
+                const bool Found = Controller->MenuHotbarRow(*TargetCell, Row);
+                Results.Add(TEXT("FOOD_HOVER ") + Row.Detail.Replace(TEXT("\n"), TEXT(" | ")));
+                return Found && Row.Detail.Contains(TEXT("+25 Energy")) && !Row.Detail.Contains(TEXT("Stack #"))
+                    && Row.Detail.Contains(TEXT(": 2"));
+            });
+        Add(TEXT("Capture the chest view's hotbar row holding the pasties"),
+            [this]() { Screenshot(TEXT("native-storage-hotbar-row-filled")); },
+            [this]() { return Controller->ActiveStorageChest().IsSet(); }, 0.8f);
+        Add(TEXT("Y on the cell offers the stack's own options, Move into the pack among them"),
+            [this, Bindings, StripBindings]() { *StripBindings = Bindings(); Tap(EKeys::Gamepad_FaceButton_Top); },
+            [this]()
+            {
+                if (!Controller->NativeMenu->IsItemContextMenu()) return false;
+                for (int32 Option = 0; Option < 8; ++Option)
+                    if (Controller->NativeMenu->GetPopupOptionLabel(Option) == TEXT("Move into the pack")) return true;
+                return false;
+            });
+        Add(TEXT("B closes it with the row unchanged"),
+            [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+            [this, Bindings, StripBindings]() { return !Controller->NativeMenu->HasActiveDialog() && Controller->IsBookOpen()
+                && Bindings() == *StripBindings; });
+        Add(TEXT("Focus a pack stack below the row for a mouse drag"),
+            [this, BelowGroup]()
+            {
+                *BelowGroup = 0;
+                for (const auto& Row : Controller->MenuRows())
+                    if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.HotbarCell < 0
+                        && Row.Id != static_cast<int32>(Homestead::Item::Pasty)) { *BelowGroup = Row.SubjectId; break; }
+                if (!*BelowGroup) { Finish(false, TEXT("No pack stack below the row to drag against.")); return; }
+                Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *BelowGroup, 0);
+            },
+            [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+        Add(TEXT("Mouse drags the pasty's cell onto that stack below the row; the two swap places"),
+            [this, StripDrag, TargetCell]()
+            {
+                StripDrag(Controller->NativeMenu->GetBookHotbarSlot(*TargetCell), FSlateApplication::Get().GetKeyboardFocusedWidget());
+            },
+            [this, TargetCell, BelowGroup, Holdings, HoldingsBefore, PastyBelowRow]()
+            {
+                const auto* Entry = Controller->HotbarEntry(*TargetCell);
+                return Entry && Entry->groupId == *BelowGroup && PastyBelowRow() && Holdings() == *HoldingsBefore
+                    && Controller->NativeMenu->GetHeldHotbarSlot() == INDEX_NONE;
+            });
+        Add(TEXT("Focus the pasty below the row"),
+            [this, PastyGroup]() { Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, PastyGroup(0), 0); },
+            [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+        Add(TEXT("Mouse drags the pasty from the pack grid onto cell 1; it takes that cell (moving or swapping)"),
+            [this, StripDrag]() { StripDrag(FSlateApplication::Get().GetKeyboardFocusedWidget(), Controller->NativeMenu->GetBookHotbarSlot(0)); },
+            [this, Holdings, HoldingsBefore, PastyBelowRow]()
+            {
+                return !Controller->NativeMenu->IsPointerDraggingItem() && Controller->HotbarItem(0) == Homestead::Item::Pasty
+                    && !PastyBelowRow() && Holdings() == *HoldingsBefore;
+            });
+        Add(TEXT("Mouse drags cell 1 onto cell 10 (key 0); the two swap"),
+            [this, StripDrag, Bindings, StripBindings]()
+            {
+                *StripBindings = Bindings();
+                StripDrag(Controller->NativeMenu->GetBookHotbarSlot(0), Controller->NativeMenu->GetBookHotbarSlot(9));
+            },
+            [this, Bindings, StripBindings, Holdings, HoldingsBefore]()
+            {
+                const auto Now = Bindings();
+                return Now[0] == (*StripBindings)[9] && Now[9] == (*StripBindings)[0]
+                    && Controller->NativeMenu->GetHeldHotbarSlot() == INDEX_NONE && Holdings() == *HoldingsBefore;
+            });
+        Add(TEXT("The edited row reloads from its saved form unchanged"),
+            [this, Bindings, StripBindings]()
+            {
+                *StripBindings = Bindings();
+                if (!Controller->Sim.Deserialize(Controller->Sim.Serialize())) Finish(false, TEXT("The edited row did not reload."));
+            },
+            [this, Bindings, StripBindings]() { return Bindings() == *StripBindings; });
+        Add(TEXT("Restore the fixture's stock and the row as it was"),
+            [this, SavedSelected, PreStrip]()
+            {
+                if (!Controller->Sim.Deserialize(*PreStrip)) { Finish(false, TEXT("Could not restore the pre-strip stock.")); return; }
+                Controller->SelectedHotbarSlot = *SavedSelected;
+                Controller->ToastText.Reset(); Controller->bToastError = false; Controller->ToastRemaining = 0;
+                Controller->NativeMenu->Refresh();
+            },
+            [this, PreStrip]() { return Controller->Simulation().Serialize() == *PreStrip; });
+    }    Add(TEXT("Prepare valid full Pack and Chest scrolling fixture"),
         [this, Chest, FullSnapshot, FullPackGroup]()
         {
             *FullSnapshot = Controller->Simulation().Serialize();
@@ -1841,6 +2146,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             State.inventory[static_cast<int32>(Homestead::Item::Billhook)] = 1;
             State.inventory[static_cast<int32>(Homestead::Item::Branch)] = 119;
             State.inventoryLayout.clear();
+            State.packRow = {};
             Storage->storage.fill(0);
             Storage->storage[static_cast<int32>(Homestead::Item::Stone)] = 120;
             Storage->layout.clear();
@@ -2320,10 +2626,8 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
         {
             if (Controller->Simulation().Count(*DropItem) != *DropCount - 1
                 || Controller->State().worldDrops.size() != 1) return false;
-            const auto Slots = Controller->HotbarSnapshot();
-            const auto* Billhook = Slots.FindByPredicate([](const FHomesteadHotbarSlot& Slot)
-                { return Slot.Tool == Homestead::Item::Billhook; });
-            if (!Billhook || Billhook->Available) return false;
+            // The hotbar holds real stacks: nothing is kept in the row for a dropped tool.
+            if (Controller->HotbarCellOf(Homestead::Item::Billhook) != INDEX_NONE) return false;
             *DropId = Controller->State().worldDrops.front().id;
             return *DropId > 0;
         });
@@ -2426,9 +2730,7 @@ void AHomesteadSmokeTest::PrepareNativePresentationCoverageChecks()
         },
         [this, DropItem, DropCount, DropId]() { return Controller->Simulation().Count(*DropItem) == *DropCount
             && Controller->State().worldDrops.empty() && Controller->Landscape
-            && !Controller->Landscape->DropVisuals.Contains(*DropId)
-            && Controller->HotbarSnapshot().ContainsByPredicate([](const FHomesteadHotbarSlot& Slot)
-                { return Slot.Tool == Homestead::Item::Billhook && Slot.Available; }); }, 0.8f);
+            && !Controller->Landscape->DropVisuals.Contains(*DropId); }, 0.8f);
     const auto DropWearable = MakeShared<int32>(0);
     const auto DropWearableDye = MakeShared<int32>(0);
     const auto WearablePlayerLocation = MakeShared<FVector>(FVector::ZeroVector);

@@ -123,3 +123,14 @@ Task2.3 is complete from the combined exact evidence:
 The Bob reads as a short stock-based straight silhouette with layered strand
 contrast and a dark-golden Blonde tint. This is technical/runtime completion,
 not Jenny's aesthetic approval. OpenSpec progress is6/8.
+
+## Runtime groom fixes after the 09-29 playtest (unconfirmed)
+
+Jenny's 09-29 screenshots showed rods and fans of hair. The views were far, elevated and from behind. These fixes are shipped on her say-so; neither is confirmed until her next playtest.
+
+- Authored physics (95f4bfc3, main 5811cb9): the long-hair simulation override applies only to style 0, and changing style resets the simulation.
+- LOD cap (branch `jennifergalley-playtest-0929-props`): the scalp groom's LODSync mapping is `{1,3,4,4}` instead of `{1,3,5,7}`, so at body LOD 2 and 3 it stays on groom LOD 4 cards.
+  - Groom LODs 5 and 7 are Legacy01 helmet meshes bound by transfer. Pixie declares those mesh LODs with no mesh.
+  - Brows, lashes and fuzz keep `{1,3,5,7}`.
+  - Not reproduced in a lab run or in a 6-minute hidden far/rear run (Bob and Braided updo, forced body LOD 2/3, LOD flips).
+  - Planned check: far/rear view at `r.ForceLOD 2` and `3` on Bob and Pixie. Hair should stay visible and card-rendered, with no bald patches, no popping and no fps change.

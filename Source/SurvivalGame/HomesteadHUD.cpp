@@ -1,5 +1,6 @@
 #include "HomesteadHUD.h"
 #include "HomesteadController.h"
+#include "HomesteadCharacter.h"
 #include "HomesteadMapComponent.h"
 #include "UI/SHomesteadVitals.h"
 #include "Engine/Canvas.h"
@@ -297,11 +298,16 @@ void AHomesteadHUD::DrawHUD()
             const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth, ViewHeight);
             ProtectFeedback(TEXT("minimap"), Minimap.Min.X, Minimap.Min.Y, Minimap.GetSize().X, Minimap.GetSize().Y);
         }
-        const float HintsWidth = FMath::Min(686.0f, ViewWidth - 36);
+        // The wheel picks the hotbar tool; Ctrl+wheel zooms the camera (AHomesteadController::InputKey).
+        // Sprint is a toggle, so the hint says which way it's set.
+        const auto* Heroine = Cast<AHomesteadCharacter>(PC->GetPawn());
+        const TCHAR* Sprint = Heroine && Heroine->IsSprintOn() ? TEXT("Sprint: on") : TEXT("Sprint: off");
+        const FString Hints = PC->UsesGamepad()
+            ? FString::Printf(TEXT("[Menu] Field book   [L3] %s   [R3] Camera distance"), Sprint)
+            : FString::Printf(TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] %s   Wheel: tool   Ctrl+wheel: zoom"), Sprint);
+        const float HintsWidth = FMath::Max(120.0f, FMath::Min(TextWidth(Hints, 19) + 26, CalendarX - 16 - 30));
         Panel(30, 26, HintsWidth, 46, Pine);
-        Write(PC->UsesGamepad() ? TEXT("[Menu] Field book   [L3] Sprint   [R3] Camera distance")
-                : TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] Sprint   Ctrl+wheel: zoom"),
-            42, 38, 19, Ink);
+        Write(Hints, 42, 38, 19, Ink);
     }
     const FString Toast = PC->Toast();
     if (!Toast.IsEmpty())
@@ -471,6 +477,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     const float TabWidth = (Width - 68) / 7;
     for (int Index = 0; Index < 7; ++Index)
     {
+        if (Index == 3) continue; // The Guidebook page is retired.
         const float TabX = X + 34 + Index * TabWidth;
         Write(Tabs[Index], TabX + 4, Y + 88, 23, Index == PC.BookPage() ? HudGold : Muted);
         if (Index == PC.BookPage()) Panel(TabX, Y + 123, TabWidth - 20, 3, HudGold);

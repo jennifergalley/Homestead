@@ -35,6 +35,8 @@ struct FHomesteadWorldVisual
     TArray<TObjectPtr<USceneComponent>> Components;
 
     FString Signature;
+    // Resource visuals: whether this was built showing the node cleared (for the clear-pop).
+    bool bShownCleared = false;
 };
 
 USTRUCT()
@@ -151,6 +153,15 @@ public:
         const FTransform& PlantTransform);
     // Hide one component of the held produce (a stick she has already lifted from the pile).
     void HideHeldProducePart(int32 Index);
+    // The first mesh a resource's visual draws (what she pulls a handful of), or null.
+    UStaticMesh* ResourceVisualMesh(int32 Id) const;
+    // Presentation only, while she pulls weeds by hand: shrink one resource's visual to Fraction of
+    // its size (the first fistful is out) until RestoreThinnedResource puts it back (a cancelled pull)
+    // or ForgetThinnedResource lets the refresh remove it (the pull committed). One at a time; safe
+    // to call every tick.
+    void ThinResource(int32 Id, float Fraction);
+    void RestoreThinnedResource();
+    void ForgetThinnedResource();
     // Felling: call right after tree or sapling ResourceId is cleared. A standing copy stays up
     // (the rebuilt woodland no longer draws it) until DropFelledTree topples it away from AwayFrom;
     // it lies a few seconds, then sinks away. One at a time; a new felling finishes the last.
@@ -164,6 +175,9 @@ public:
     bool TreeChopTarget(int32 ResourceId, FVector2D& Centre, float& Radius) const;
     void SetPlacementPreview(bool Visible, const Homestead::PlacementTarget& Target, bool bValid);
     void SetDeconstructPreview(const Homestead::State& State, int32 StructureId, bool bValid);
+    // A thin ground outline round one garden square (HomesteadWorldGardenOutline.cpp): green when the hoe or
+    // pail would work there, red when not. Hidden when bVisible is false.
+    void SetGardenOutline(bool bVisible, int32 CellX, int32 CellY, bool bValid);
     static float GroundHeight(float X, float Y, Homestead::Generation::WorldDescriptor World);
     float GroundHeight(float X, float Y) const;
     bool IsPreparedFor(const Homestead::State& State) const;
@@ -198,10 +212,13 @@ public:
     };
     bool FindUnderbrushNear(const Homestead::Simulation& Simulation, FVector2D Point, float Reach, FUnderbrushTarget& Out) const;
     static FString UnderbrushName(uint8 Species);
+    // 0 outdoors .. 1 indoors at the camera (UHomesteadWeather), for the ambience and hearth mixes.
+    float GetIndoorMix() const;
 
 private:
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
+    friend class AHomesteadGardenProbe;
     static constexpr int32 ActiveMatureTreeMinLOD = 1;
     // The tree being felled or falling, as world-space parts pivoting about its base.
     UPROPERTY() TArray<TObjectPtr<USceneComponent>> FallingParts;
@@ -273,7 +290,6 @@ private:
         TArray<TWeakObjectPtr<UPrimitiveComponent>> Ignored;
         float Gate = -1.0f;
     };
-    static constexpr float HearthCrackleVolume = 0.2f;
     // Overcast (add-rain-weather): the sun's share and the sky light's lift under full cloud, the sun's
     // disc widened so what shadows remain are soft, the exposure held down (EV) and the colour taken out.
     static constexpr float OvercastSunScale = 0.12f;
@@ -283,6 +299,21 @@ private:
     static constexpr float OvercastSaturation = 0.72f;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
+    // The standing room's door (HomesteadWorldDoors.cpp, Simulation/HomesteadDoor): an oak leaf on a hinge
+    // pivot in the heritage stone doorway, swung open as she nears and shut behind her. Keyed by the
+    // doorway's structure id so a rebuild keeps its swing; presentation only, nothing saved.
+    struct FDoorLeaf
+    {
+        TWeakObjectPtr<USceneComponent> Hinge;
+        FVector Opening = FVector::ZeroVector;
+        float ClosedYaw = 0.0f;
+        float Openness = 0.0f;
+        bool bWanted = false;
+    };
+    TMap<int32, FDoorLeaf> DoorLeaves;
+    void AddDoorLeaf(FHomesteadWorldVisual& Visual, int32 StructureId, const FVector& Base, const FRotator& Rotation,
+        float HeightScale);
+    void UpdateDoors(float DeltaSeconds);
     UPROPERTY()
     TObjectPtr<UMaterialInterface> FieldMaterial;
     UPROPERTY()
@@ -344,7 +375,8 @@ private:
     UPROPERTY() TObjectPtr<class UHomesteadWeather> Weather;
     float AppliedSunSourceAngle = -1.0f;
     bool bGroundParametersTried = false;
-    FString EstateSceneryClearSignature;
+    uint64 EstateSceneryClearKey = 0;
+    bool bEstateSceneryClearKnown = false;
     UPROPERTY()
     TObjectPtr<USkyLightComponent> Sky;
     UPROPERTY()
@@ -382,14 +414,26 @@ private:
     TMap<int32, FHomesteadWorldVisual> DropVisuals;
     UPROPERTY()
     FHomesteadWorldVisual Preview;
+    UPROPERTY()
+    FHomesteadWorldVisual GardenOutline;
 
     bool bInitialized = false;
     FString ResourceLayoutSignature;
     int32 HeldProduceId = INDEX_NONE;
+    int32 ThinnedResourceId = INDEX_NONE;
+    TArray<TWeakObjectPtr<USceneComponent>> ThinnedComponents;
+    TArray<FVector> ThinnedScales;
     int32 HeldPlotId = INDEX_NONE;
     bool bHeldPlotHidden = false;
     int32 HeldHarvestPlotId = INDEX_NONE;
     Homestead::CropKind HeldHarvestKind = Homestead::CropKind::Roots;
+    // Refresh rebuilds visuals only when something they're built from changed: a hash of every input
+    // the per-object signatures read, including the time-driven ones (produce readiness, plot stages,
+    // fire fuel), which change without a simulation revision. The simulation revision is mixed in too.
+    uint64 RefreshInputsKey(const Homestead::Simulation& Simulation) const;
+    void UpdateEstateGrass(const Homestead::State& State);
+    uint64 LastRefreshInputs = 0;
+    bool bRefreshInputsKnown = false;
     FString OuterTreeLayoutSignature;
     FString ActiveTreeLayoutSignature;
     FString RegionalWaterSignature;
@@ -463,6 +507,26 @@ private:
         const FIntPoint* StageChunk = nullptr);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
     // The estate's overgrowth kinds, each placed through Place(mesh, offset, yaw, produce, scale, pivotOnGround).
+    // Soft ground cover drawn right on the soil (HomesteadWorldGrounding.cpp): weeds, nettles and tall
+    // grass. SoilHeight is the lowest drawn ground under the clump's footprint (the Landscape's own
+    // collision where it's loaded, else the runtime heightfield), never more than a hand's depth below
+    // its centre; bOnLandscape is false when the Landscape wasn't there to trace.
+    static bool IsSoilGrounded(Homestead::ResourceKind Kind);
+    float SoilHeight(FVector2D Centre, FVector2D Half, float Yaw, bool& bOnLandscape) const;
+    struct FPendingSoil
+    {
+        TWeakObjectPtr<USceneComponent> Part;
+        FVector2D Centre;
+        FVector2D Half;
+        float Yaw = 0.0f;
+        float PlacedOn = 0.0f; // The ground height it was placed on.
+        int32 Tries = 0;
+    };
+    TArray<FPendingSoil> PendingSoil;
+    float SoilRetryTimer = 0.0f;
+    int32 SoilRetryCursor = 0;
+    void QueueSoilGrounding(USceneComponent* Part, FVector2D Centre, FVector2D Half, float Yaw, float PlacedOn);
+    void UpdateSoilGrounding(float DeltaSeconds);
     void BuildOvergrowth(const Homestead::ResourceNode& Node, uint32 Variation,
         const TFunctionRef<void(UStaticMesh*, FVector2D, float, bool, float, bool)>& Place);
     bool ResolveGeneratedTreeVisual(const Homestead::ResourceNode& Node, UStaticMesh*& Mesh,

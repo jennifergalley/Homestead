@@ -16,8 +16,10 @@
 3. **The r16 is the source of truth**, and the Landscape gets a diff. A whole-landscape import
    would dirty all 230 proxies. `ApplyEstateHeightfield` compares tile by tile and writes only the
    tiles that differ. Only the proxies it touched are saved, because loading the region leaves the
-   others dirty with no real change. The dry run found about 3,000 vertices outside the river that
-   already differed from the r16 (worst 43 m, a strip per tile). Those were left alone.
+   others dirty with no real change. An early dry run seemed to find thousands of other
+   mismatches, but they were all on the landscape's outermost row and column, which the data
+   interface misreads. The rendered landscape matches the r16 there (within 1.1 cm), so the tool
+   now skips that edge.
 4. **Spline scale Y is the waterline**, as the controller already assumed. The mesh adds
    `BankOverlap`, and vertex colour is computed from the distance to the waterline, so the foam and
    shoreline highlight sit at the real edge.

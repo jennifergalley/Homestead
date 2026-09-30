@@ -13,7 +13,8 @@
 
 ## 3. Next batches
 
-- [ ] 3.1 Game thread: gate `AHomesteadWorld::Refresh` and integer signatures (with the Architecture Agent)
+- [x] 3.1 Game thread: gate `AHomesteadWorld::Refresh` on an integer key of its inputs; integer signatures (improve-code-health-between-rounds 2.2, reviewed by the Architecture Agent); PIE: plot rebuilds on time-only stage changes, clear pop plays
+- [x] 3.1a Smoke `PERFORMANCE`/`PERFORMANCE_AT` sample the engine frame time (`FApp::GetDeltaTime`)
 - [ ] 3.2 Manor occlusion queries (~1,300 per frame) and the RHI occlusion fence wait
 - [ ] 3.3 Woods GPU at 4K (ray-traced shadow any-hit on canopy, Nanite, TSR) without visible change
 - [ ] 3.4 Walking hitches: grass-field chunk rebuilds, scenery hide pass on clears
@@ -39,3 +40,18 @@
 The cells-on 1080p woods p99 comes from one 0.6 s burst where every thread slowed together (CPU
 contention in the uncooked run), not from the scenery. The 4K woods are GPU-bound (batch 3.3).
 `RayTracing_FinishGatherInstances` at the 4K manor: 4.5 ms → 0.8 ms.
+
+### Batch 2: refresh gate (uncooked, 4K at Jenny's settings unless noted; before = cells on)
+
+| Scene | Game thread p95 ms | Frame median / p95 / p99 ms | Mean fps |
+| --- | --- | --- | --- |
+| manor, before | 15.4 | 14.3 / 16.1 / 17.7 | 69.1 |
+| manor, gated | **8.1** | 14.3 / **15.5** / **16.6** | 69.7 |
+| woods, before | 14.9 | 16.7 / 17.7 / 18.1 | 59.8 |
+| woods, gated | **8.0** | 16.9 / 17.9 / 18.6 | 59.1 (GPU-bound) |
+| manor 1080p, gated | 7.9 | 14.3 / 15.3 / 15.9 | 69.9 |
+| woods 1080p, gated | 7.9 | 12.8 / 14.1 / 14.7 | 77.4 |
+
+GPU headroom (GPU ms vs 16.7): 4K at her settings (1080p internal + TSR): manor 10.3, woods 15.6.
+4K native 100%: manor 24.8 ms (38 fps), woods 41.2 ms (24 fps), so native 4K isn't viable on this GPU;
+her default (engine auto, 50% + TSR) is the right setting for 4K60.

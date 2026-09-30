@@ -186,7 +186,7 @@ if ($NativeMenu) {
         'native-inventory.png','native-crafting.png','native-recovery-exit.png',
         'native-storage-two-grid.png','native-storage-transactions.png','native-storage-full.png','native-test-reset.png',
         'native-world-drop.png',
-        'native-build.png','native-guidebook.png','native-appearance.png',
+        'native-build.png','native-appearance.png',
         'native-base-only-0.png','native-base-only-1.png','native-base-only-2.png',
         'native-wardrobe-layered.png','native-wardrobe-dyed.png','native-wardrobe-restored.png')
     foreach($style in @('wave','bob-blonde')) {
@@ -203,7 +203,7 @@ if ($DirectionalNavigation) {
 if ($NativeResumeFrom) { $captures = @('native-wardrobe-resumed.png') }
 if ($NativeMenuQuit) { $captures = @() }
 if ($NativeSaveRetry) { $captures = @() }
-if ($Hotbar) { $captures = @('hotbar-gameplay.png') }
+if ($Hotbar) { $captures = @('hotbar-gameplay.png','garden-outline-hoe-valid.png','garden-outline-hoe-invalid.png','garden-outline-pail-valid.png','garden-outline-pail-invalid.png') }
 if ($Crafting) { $captures = @('craft-requirements-ready.png','craft-hold-progress.png','craft-requirements-blocked.png') }
 if ($EstateSmoke) { $captures = @('estate-manor.png','estate-clearout.png','estate-farm.png','estate-woods.png','estate-drive.png','estate-store.png','estate-lamp-night.png') }
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })

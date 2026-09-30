@@ -776,8 +776,8 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Disc(28, 28, 19, Wood);
         P.Disc(28, 28, 16, Gold);
         P.Disc(28, 28, 12, RootOrange);
-        P.Line({{32, 20}, {24, 20}, {23, 27}, {33, 29}, {32, 36}, {23, 36}}, Cream, 2.5f);
-        P.Line({{28, 16}, {28, 40}}, Cream, 1.5f);
+        // A small stamped crown: money is whole coins, with no currency sign.
+        P.Line({{21, 33}, {21, 24}, {25, 29}, {28, 21}, {31, 29}, {35, 24}, {35, 33}, {21, 33}}, Cream, 2.0f);
         break;
     case EKind::Shop:
         P.Shape({{6, 22}, {28, 8}, {50, 22}}, Gold);

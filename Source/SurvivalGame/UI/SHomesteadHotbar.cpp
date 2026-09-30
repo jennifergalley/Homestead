@@ -81,36 +81,34 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             {
                                 if (!Weak.IsValid()) return FName();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                // Pinned food keeps its (faded) icon when the pack runs out.
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Available || Snapshot[Index].Food)
-                                    ? Snapshot[Index].Icon : FName();
+                                // The cell's stack (the hotbar is the first row of her pack).
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available ? Snapshot[Index].Icon : FName();
                             })
                             .Tint_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return FLinearColor(1, 1, 1, 0);
                                 const auto Snapshot = Weak->HotbarSnapshot();
                                 if (!Snapshot.IsValidIndex(Index)) return FLinearColor(1, 1, 1, 0);
-                                return Snapshot[Index].Available ? HotbarStyle::Gold
-                                    : Snapshot[Index].Food ? FLinearColor(HotbarStyle::Gold.R, HotbarStyle::Gold.G, HotbarStyle::Gold.B, 0.3f) : FLinearColor(1, 1, 1, 0);
+                                return Snapshot[Index].Available ? HotbarStyle::Gold : FLinearColor(1, 1, 1, 0);
                             })
                             .Visibility_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return EVisibility::Collapsed;
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Available || Snapshot[Index].Food)
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
                                     ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
                             })
                         ]
                         + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom)
                         .Padding(0, 0, 5, 2)
                         [
-                            // How many of a pinned food are left in the pack.
+                            // The stack's count (tools and garments are single).
                             SNew(STextBlock)
                             .Text_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return FText::GetEmpty();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || (Snapshot[Index].Seed && Snapshot[Index].Available))
+                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || Snapshot[Index].Seed || Snapshot[Index].Material) && Snapshot[Index].Available
                                     ? FText::AsNumber(Snapshot[Index].Count) : FText::GetEmpty();
                             })
                             .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
@@ -168,6 +166,8 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                                     {
                                         const auto Snapshot = Weak.IsValid() ? Weak->HotbarSnapshot() : TArray<FHomesteadHotbarSlot>();
                                         const bool bLow = Snapshot.IsValidIndex(Index) && Snapshot[Index].Fill < 1.0f / 6.0f;
+                                        const bool bWater = Snapshot.IsValidIndex(Index) && Snapshot[Index].Tool == Homestead::Item::WateringCan;
+                                        if (bWater) return FSlateColor(bLow ? FLinearColor(0.9f, 0.32f, 0.2f) : FLinearColor(0.36f, 0.66f, 0.92f));
                                         return FSlateColor(bLow ? FLinearColor(0.9f, 0.32f, 0.2f) : FLinearColor(0.98f, 0.68f, 0.28f));
                                     })
                                     .BackgroundImage(FCoreStyle::Get().GetBrush(TEXT("NoBrush")))

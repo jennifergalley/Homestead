@@ -5,6 +5,24 @@
 
 namespace Homestead
 {
+// Music is an occasional visitor, not a soundtrack (Jenny, 2026-09-29): the first piece starts 45-120 s
+// into a session and each piece is followed by 3-8 minutes of ambience alone. Unit is a uniform draw in
+// [0, 1] (FMath::FRand in production), so the ranges are testable.
+namespace MusicPacing
+{
+constexpr float FirstDelayMinSeconds = 45.0f;
+constexpr float FirstDelayMaxSeconds = 120.0f;
+constexpr float GapMinSeconds = 180.0f;
+constexpr float GapMaxSeconds = 480.0f;
+inline float Between(float Unit, float Min, float Max)
+{
+    const float T = Unit < 0.0f ? 0.0f : Unit > 1.0f ? 1.0f : Unit;
+    return Min + (Max - Min) * T;
+}
+inline float FirstDelay(float Unit) { return Between(Unit, FirstDelayMinSeconds, FirstDelayMaxSeconds); }
+inline float Gap(float Unit) { return Between(Unit, GapMinSeconds, GapMaxSeconds); }
+}
+
 // Shuffle bag over music track indices: each bag plays every track once in random order, and a
 // new bag never starts with the track that just played (or, for the first bag, the track the
 // previous launch last started) when another track exists. Engine-free so it can be unit tested

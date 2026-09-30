@@ -59,6 +59,20 @@ int main()
     bag.Reset(5, 2, 77);
     for (int track : a) Check(bag.Next() == track, "A fixed seed must reproduce the order");
 
+    // Pacing: the first piece 45-120 s in, then 3-8 minutes of ambience alone after each; draws outside
+    // [0, 1] are clamped, and the whole range is reachable.
+    namespace Pacing = Homestead::MusicPacing;
+    Check(Pacing::FirstDelay(0.0f) == 45.0f && Pacing::FirstDelay(1.0f) == 120.0f, "First delay must span 45-120 s");
+    Check(Pacing::Gap(0.0f) == 180.0f && Pacing::Gap(1.0f) == 480.0f, "Gap must span 3-8 minutes");
+    Check(Pacing::FirstDelay(-1.0f) == 45.0f && Pacing::Gap(7.0f) == 480.0f, "Out-of-range draws must clamp");
+    for (int step = 0; step <= 100; ++step)
+    {
+        const float unit = static_cast<float>(step) / 100.0f;
+        const float first = Pacing::FirstDelay(unit), gap = Pacing::Gap(unit);
+        Check(first >= 45.0f && first <= 120.0f && gap >= 180.0f && gap <= 480.0f, "Pacing out of range");
+        Check(step == 0 || gap > Pacing::Gap(static_cast<float>(step - 1) / 100.0f), "Gap must grow with the draw");
+    }
+
     std::cout << "HomesteadMusicPlaylistTests passed\n";
     return 0;
 }

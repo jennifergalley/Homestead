@@ -98,10 +98,20 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             if (!Group || !Controller->Sim.SplitGroup(0, Group, 1, Controller->PlayerPoint(), Controller->Sim.GetRevision()))
             { Finish(false, TEXT("Navigation fixture could not partition its existing stock.")); return; }
         }
+        // The hotbar is her pack's first row (Simulation/HomesteadPackRow.h) and new stacks fill it
+        // first; this grid-navigation fixture wants its stock in the grid below, so it empties the row.
+        std::array<int, Homestead::PackRowSize> NoRow;
+        NoRow.fill(-1);
+        Controller->Sim.ArrangePackRow(NoRow);
         Open(0);
     };
     Add(TEXT("Directional navigation starts with actual native item focus"),
-        [this, Open, Before, Location]() { Open(0); *Before = Controller->Sim.Serialize(); *Location = Controller->GetPawn()->GetActorLocation(); },
+        [this, Open, Fixture, Before, Location]()
+        {
+            // A fresh woodland can open on an empty pack; gather a little real stock first (disclosed fixture).
+            if (Controller->Sim.GetLayout(0)->empty()) Fixture(2); else Open(0);
+            *Before = Controller->Sim.Serialize(); *Location = Controller->GetPawn()->GetActorLocation();
+        },
         [this, Focused, ColumnCount, PortraitRotation, PortraitPose]()
         {
             *ColumnCount = Controller->NativeMenu->GetContentColumnCount();
@@ -156,18 +166,26 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
     Add(TEXT("Device switching leaves a fresh stable native content focus"),
         [Open]() { Open(0); },
         [Focused]() { return Focused(TEXT("Content")); });
-    Add(TEXT("Real D-pad Down crosses final carried row into equipment without trigger"),
+    // The hotbar is her pack's first row (Simulation/HomesteadPackRow.h), heading the pack grid:
+    // Up from the grid's first row reaches it, Down from the grid's last row reaches the equipment.
+    Add(TEXT("Real D-pad Up crosses the pack grid's first row into the hotbar row above it without trigger"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Up); },
+        [this, Focused, Before]() { return Focused(TEXT("Hotbar")) && Controller->Sim.Serialize() == *Before; });
+    Add(TEXT("Real D-pad Down returns from the hotbar row into carried items"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+        [Focused]() { return Focused(TEXT("Content")); });
+    Add(TEXT("Real D-pad Down crosses the final carried row into equipment"),
         [this]() { Tap(EKeys::Gamepad_DPad_Down); },
         [this, Focused, Before]() { return Focused(TEXT("Equipment")) && Controller->Sim.Serialize() == *Before; });
     Capture(TEXT("native-navigation-equipment"));
     Add(TEXT("Real D-pad Up reverses from equipment into carried items"),
         [this]() { Tap(EKeys::Gamepad_DPad_Up); },
         [Focused]() { return Focused(TEXT("Content")); });
-    Add(TEXT("Focused-widget Slate D-pad routing reaches the same equipment boundary exactly once"),
-        [SlateTap]() { SlateTap(EKeys::Gamepad_DPad_Down); },
-        [this, Focused, Before]() { return Focused(TEXT("Equipment")) && Controller->Sim.Serialize() == *Before; });
+    Add(TEXT("Focused-widget Slate D-pad routing reaches the same hotbar boundary exactly once"),
+        [SlateTap]() { SlateTap(EKeys::Gamepad_DPad_Up); },
+        [this, Focused, Before]() { return Focused(TEXT("Hotbar")) && Controller->Sim.Serialize() == *Before; });
     Add(TEXT("Focused-widget Slate keyboard routing returns to content"),
-        [SlateTap]() { SlateTap(EKeys::Up); },
+        [SlateTap]() { SlateTap(EKeys::Down); },
         [Focused]() { return Focused(TEXT("Content")); });
     Add(TEXT("Unadmitted focused-widget analog input cannot bypass automation isolation"),
         []()
@@ -177,17 +195,17 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
                     FAnalogInputEvent(EKeys::Gamepad_LeftY, FModifierKeysState(), static_cast<uint32>(0), false, 0, 0, Value));
         },
         [Focused]() { return Focused(TEXT("Content")); });
-    Add(TEXT("Real left-stick Down crosses the same boundary"),
-        [SlateAxis]() { SlateAxis(EKeys::Gamepad_LeftY, -0.9f); },
-        [SlateAxis, Focused]() { SlateAxis(EKeys::Gamepad_LeftY, 0); return Focused(TEXT("Equipment")); }, 0.15f);
-    Add(TEXT("Real left-stick Up returns without moving pawn or rotating portrait"),
+    Add(TEXT("Real left-stick Up crosses the same boundary"),
+        [SlateAxis]() { SlateAxis(EKeys::Gamepad_LeftY, 0.9f); },
+        [SlateAxis, Focused]() { SlateAxis(EKeys::Gamepad_LeftY, 0); return Focused(TEXT("Hotbar")); }, 0.15f);
+    Add(TEXT("Real left-stick Down returns without moving pawn or rotating portrait"),
         [this]()
         {
             const double At = FPlatformTime::Seconds();
             const FString BeforeRegion = Controller->NativeMenu->GetFocusedRegionName();
-            Axis(EKeys::Gamepad_LeftY, 0.9f);
+            Axis(EKeys::Gamepad_LeftY, -0.9f);
             const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
-            Results.Add(FString::Printf(TEXT("INPUT stick-up value=0.9 monotonic=%.9f before=%s after_dispatch=%s widget=%s"),
+            Results.Add(FString::Printf(TEXT("INPUT stick-down value=-0.9 monotonic=%.9f before=%s after_dispatch=%s widget=%s"),
                 At, *BeforeRegion, *Controller->NativeMenu->GetFocusedRegionName(),
                 Widget ? *Widget->GetTypeAsString() : TEXT("none")));
         },
@@ -206,7 +224,12 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             return Passed;
         }, 0.15f);
     Add(TEXT("Left boundary reaches visible portrait without rotation"),
-        [this]() { Tap(EKeys::Gamepad_DPad_Left); },
+        [this, ColumnCount]()
+        {
+            // From wherever the last step left her in the first grid row, Left walks to its edge and on.
+            const int32 Column = Controller->NativeMenu->GetSelectedContentIndex() % FMath::Max(1, *ColumnCount);
+            for (int32 Step = 0; Step <= Column; ++Step) Tap(EKeys::Gamepad_DPad_Left);
+        },
         [Focused, PortraitRotation, PortraitPose]() { return Focused(TEXT("Portrait")) && PortraitPose().Equals(*PortraitRotation, 0.01); });
     Add(TEXT("Right reverses from portrait into the carried content"),
         [this]()
@@ -266,16 +289,35 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             [this, Row, ColumnCount, Focused]() { return Focused(TEXT("Content"))
                 && Controller->NativeMenu->GetSelectedContentIndex() == Row * *ColumnCount; });
     Capture(TEXT("native-navigation-scrolled"));
-    Add(TEXT("Only the actual final scrolled row exits downward"),
+    Add(TEXT("Only the actual final scrolled row exits downward, onto the equipped slots (the hotbar row heads the grid)"),
         [this]() { Tap(EKeys::Gamepad_DPad_Down); },
         [this, Focused, Before]() { return Focused(TEXT("Equipment")) && Controller->Sim.Serialize() == *Before; });
+    // The fixture stack may be the last tile (Right has nowhere to go); then step Up a row instead.
+    const auto StepLeft = MakeShared<bool>(false);
     Add(TEXT("Select a real stack for controller virtual drag"),
-        [this, Open, Before, SelectedId]()
+        [this, Open, Before, SelectedId, StepLeft]()
         {
-            Open(0); Tap(EKeys::Right);
+            // The disclosed fixture splits everything to single units; add one real stack of five.
+            if (!Controller->MenuRows().ContainsByPredicate([](const FHomesteadRow& Row)
+                { return Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.Quantity > 2; }))
+            {
+                if (!Controller->Sim.GrantItems(Homestead::Item::Stone, 5)) { Finish(false, TEXT("Could not grant the drag fixture stack.")); return; }
+                // A new stack takes the first empty hotbar cell; this fixture wants it in the grid.
+                const int32 Cell = Controller->HotbarCellOf(Homestead::Item::Stone);
+                if (Cell != INDEX_NONE) Controller->Sim.MoveFromPackRow(Cell, 0, 0, Controller->Sim.GetRevision());
+            }
+            Open(0);
+            // The largest real pack stack (the disclosed fixture leaves the gathered stack first, the
+            // single-unit splits after it), so Right below still has a neighbour to move to.
+            int32 Best = 0, Most = 0;
+            for (const auto& Row : Controller->MenuRows())
+                if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.Quantity > Most)
+                { Best = Row.SubjectId; Most = Row.Quantity; }
+            if (Best) Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Best, 0);
+            const auto Rows = Controller->MenuRows();
+            *StepLeft = !Rows.IsEmpty() && Rows.Last().SubjectId == Best;
             *Before = Controller->Sim.Serialize();
-            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
-            *SelectedId = Subject ? Subject->SubjectId : 0;
+            *SelectedId = Best;
         },
         [this, Focused]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             return Focused(TEXT("Content")) && Subject && Subject->Quantity > 2; });
@@ -284,7 +326,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         [this, Before]() { return Controller->NativeMenu->IsVirtualDraggingItem()
             && Controller->Sim.Serialize() == *Before; });
     Add(TEXT("Directional focus moves while virtual drag remains transient"),
-        [this]() { Tap(EKeys::Gamepad_DPad_Right); },
+        [this, StepLeft]() { Tap(*StepLeft ? EKeys::Gamepad_DPad_Up : EKeys::Gamepad_DPad_Right); },
         [this, Before, SelectedId, Focused]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             return Focused(TEXT("Content")) && Controller->NativeMenu->IsVirtualDraggingItem()
                 && Subject && Subject->SubjectId != *SelectedId
@@ -295,7 +337,126 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         [this, Before, Focused]() { return Controller->IsBookOpen()
             && !Controller->NativeMenu->IsVirtualDraggingItem() && Focused(TEXT("Content"))
             && Controller->Sim.Serialize() == *Before; });
-    Add(TEXT("Settings still begins on safe Resume control"),
+    // The hotbar row by controller: the first row of her pack (Simulation/HomesteadPackRow.h), above
+    // the grid. Carry a stack up into a cell, choose a cell from the item menu, and move a cell with
+    // A. Stacks themselves move; what she owns never changes. The pack is restored after.
+    const auto Bindings = [this]()
+    {
+        TArray<int32> Result;
+        for (const auto& Slot : Controller->HotbarSnapshot()) Result.Add(Slot.Assigned ? static_cast<int32>(Slot.Tool) : -1);
+        return Result;
+    };
+    const auto BindingsBefore = MakeShared<TArray<int32>>();
+    const auto SelectedSlot = MakeShared<int32>(0);
+    const auto HeldGroup = MakeShared<int32>(0);
+    const auto PreRow = MakeShared<std::string>();
+    const auto Stock = MakeShared<Homestead::Inventory>();
+    Add(TEXT("Controller A picks up a pack stack for the hotbar row"),
+        [this, SelectedSlot, HeldGroup, PreRow, Stock]()
+        {
+            *PreRow = Controller->Sim.Serialize();
+            *Stock = Controller->State().inventory;
+            *SelectedSlot = Controller->SelectedHotbarIndex();
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            *HeldGroup = Subject && Subject->Subject == EHomesteadMenuSubject::ItemGroup ? Subject->SubjectId : 0;
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, Before]() { return Controller->NativeMenu->IsVirtualDraggingItem() && Controller->Sim.Serialize() == *Before; });
+    Add(TEXT("D-pad Up carries the held stack up onto the hotbar row"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Up); },
+        [this, Focused, Before]() { return Focused(TEXT("Hotbar")) && Controller->NativeMenu->IsVirtualDraggingItem()
+            && Controller->Sim.Serialize() == *Before; });
+    Steps.Last().Repeat = [this]()
+    {
+        if (Controller->NativeMenu && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content")) Tap(EKeys::Gamepad_DPad_Up);
+    };
+    Capture(TEXT("native-navigation-hotbar-strip"));
+    Add(TEXT("A on a cell moves the held stack itself into it; nothing she owns changes"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, HeldGroup, Stock, SelectedSlot]()
+        {
+            const int32 Cell = Controller->NativeMenu->GetFocusedHotbarSlot();
+            const auto* Entry = Controller->HotbarEntry(Cell);
+            const bool Passed = !Controller->NativeMenu->IsVirtualDraggingItem() && *HeldGroup && Entry
+                && Entry->groupId == *HeldGroup && Controller->State().inventory == *Stock
+                && Controller->SelectedHotbarIndex() == *SelectedSlot;
+            if (!Passed)
+                Results.Add(FString::Printf(TEXT("HOTBAR_CHECK held=%d cell=%d cell_group=%d region=%s stock_same=%d"),
+                    *HeldGroup, Cell, Entry ? Entry->groupId : 0, *Controller->NativeMenu->GetFocusedRegionName(),
+                    Controller->State().inventory == *Stock));
+            return Passed;
+        });
+    Add(TEXT("Disclosed fixture: two pasties in the pack, below the row"),
+        [this, Open, Before]()
+        {
+            if (!Controller->Sim.GrantItems(Homestead::Item::Pasty, 2)) { Finish(false, TEXT("Could not grant the pasty fixture.")); return; }
+            const int32 Cell = Controller->HotbarCellOf(Homestead::Item::Pasty);
+            if (Cell != INDEX_NONE) Controller->Sim.MoveFromPackRow(Cell, 0, 0, Controller->Sim.GetRevision());
+            Open(0);
+            *Before = Controller->Sim.Serialize();
+        },
+        [this]() { return Controller->MenuRows().ContainsByPredicate([](const FHomesteadRow& Row)
+            { return Row.Id == static_cast<int32>(Homestead::Item::Pasty) && Row.ContainerId == 0 && Row.HotbarCell < 0; }); });
+    Add(TEXT("Move to a hotbar slot holds the pasty and focuses the row"),
+        [this, Stock]()
+        {
+            *Stock = Controller->State().inventory;
+            for (const auto& Row : Controller->MenuRows())
+                if (Row.Id == static_cast<int32>(Homestead::Item::Pasty) && Row.ContainerId == 0)
+                { Controller->NativeMenu->BeginPlacingOnHotbar(Row); break; }
+        },
+        [this, Focused]() { return Controller->NativeMenu->IsPlacingOnHotbar() && Focused(TEXT("Hotbar")); });
+    Add(TEXT("D-pad to cell 10 (key 0) and A moves the pasty stack there; stock untouched, selection kept"),
+        [this]()
+        {
+            for (int32 Step = 0; Step < 10; ++Step) Tap(EKeys::Gamepad_DPad_Right);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, Bindings, SelectedSlot, Stock]()
+        {
+            const auto Now = Bindings();
+            const int32 Pasty = static_cast<int32>(Homestead::Item::Pasty);
+            const bool Passed = !Controller->NativeMenu->IsPlacingOnHotbar() && Now.IsValidIndex(9) && Now[9] == Pasty
+                && Controller->HotbarSnapshot()[9].Count == 2
+                && Controller->SelectedHotbarIndex() == *SelectedSlot && Controller->State().inventory == *Stock;
+            if (!Passed)
+            {
+                FString Slots;
+                for (const int32 Value : Now) Slots += FString::Printf(TEXT("%d,"), Value);
+                Results.Add(FString::Printf(TEXT("HOTBAR_CHECK placing=%d focused_slot=%d region=%s slots=%s count9=%d selected=%d/%d stock_same=%d"),
+                    Controller->NativeMenu->IsPlacingOnHotbar(), Controller->NativeMenu->GetFocusedHotbarSlot(),
+                    *Controller->NativeMenu->GetFocusedRegionName(), *Slots, Controller->HotbarSnapshot()[9].Count,
+                    Controller->SelectedHotbarIndex(), *SelectedSlot, Controller->State().inventory == *Stock));
+            }
+            return Passed;
+        });
+    Add(TEXT("A picks up cell 10, Left and A swap it with cell 9"),
+        [this, Bindings, BindingsBefore]()
+        {
+            *BindingsBefore = Bindings();
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Tap(EKeys::Gamepad_DPad_Left);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, Bindings, BindingsBefore, Stock]()
+        {
+            const auto Now = Bindings();
+            return Now.IsValidIndex(9) && Now[8] == (*BindingsBefore)[9] && Now[9] == (*BindingsBefore)[8]
+                && Controller->NativeMenu->GetHeldHotbarSlot() == INDEX_NONE && Controller->State().inventory == *Stock;
+        });
+    Add(TEXT("B puts a held cell back down unchanged, book still open"),
+        [this, Bindings, BindingsBefore]()
+        {
+            *BindingsBefore = Bindings();
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Tap(EKeys::Gamepad_FaceButton_Right);
+        },
+        [this, Bindings, BindingsBefore, Stock]() { return Controller->IsBookOpen()
+            && Controller->NativeMenu->GetHeldHotbarSlot() == INDEX_NONE
+            && Bindings() == *BindingsBefore && Controller->State().inventory == *Stock; });
+    Add(TEXT("Restore the pack the row steps changed"),
+        [this, PreRow]() { Controller->Sim.Deserialize(*PreRow); if (Controller->NativeMenu) Controller->NativeMenu->Refresh(); },
+        [this, PreRow]() { return Controller->Sim.Serialize() == *PreRow; });    Add(TEXT("Settings still begins on safe Resume control"),
         [this]() { Controller->CloseBook(); Tap(EKeys::Escape); },
         [Focused]() { return Focused(TEXT("Session")); });
     Add(TEXT("Down enters the first row of the vertical Settings list"),

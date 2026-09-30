@@ -137,9 +137,12 @@ is historical, not the current build/authorization status.
   - The estate boundary is shown on a minimap and world map. There are no pre-built fences.
 - **Start:** Spring day 1, in the one standing room of a ruined manor, on an estate buried in
   bramble, weeds, stumps and rubble.
-- **Meters:** energy and hunger only, both gentle. There's no cold, death or spoilage. Food
-  refills hunger and energy.
-- **Calendar:** days of about 30 real minutes, from 6 AM to 2 AM, and four 28-day seasons.
+- **Meters:** one gentle energy meter, as in Coral Island. There's no hunger, cold, death or
+  spoilage. Food restores energy, and proper meals make her Well fed, so work costs less for a
+  few hours.
+- **Calendar:** new Estate games default to days of about 60 real minutes, from 6 AM to 2 AM, and
+  four 28-day seasons. Settings retain 30/60/120-minute choices, and existing saves retain their
+  stored day length.
   It's sunny with occasional rain.
 - **Tools:** axe, hoe, pail or watering can, scythe, billhook and pickaxe, then a fishing
   pole. The first tools are hafted from salvaged heads, and a blacksmith takes them through
@@ -152,8 +155,8 @@ is historical, not the current build/authorization status.
   - Artisan processing and the water mill.
   - Hauling by hand, then handcart, then horse and wagon, to town shops with supply-sensitive
     prices.
-- **Money:** US dollars and cents. Sinks include rates and taxes, wages, upkeep, materials,
-  land and upgrades. She never loses the estate.
+- **Money:** whole coins, backed by stable integer units with no fractional display. Sinks include
+  rates and taxes, wages, upkeep, materials, land and upgrades. She never loses the estate.
 - **Manor:** a freeform wall-by-wall rebuild on the old footprint, and interior décor.
 - **Later:** hired workers, family reputation, town events, land purchase, a dog companion
   (pit bull or Great Dane), and courtship.

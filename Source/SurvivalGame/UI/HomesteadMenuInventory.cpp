@@ -1,5 +1,8 @@
 #include "../HomesteadController.h"
 #include "../HomesteadCharacter.h"
+#include "../Simulation/HomesteadItems.h"
+#include "../Simulation/HomesteadPail.h"
+#include "../Simulation/HomesteadPackRow.h"
 
 namespace
 {
@@ -74,15 +77,14 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
     const int Chest = ActiveChestId.Get(-1);
     const bool Storage = ActiveChestId.IsSet();
     const int Container = MenuInventoryViewIndex == 1 ? Chest : 0;
-    auto AddWearable = [&](const Homestead::WearableInstance& Instance)
-    {
-        FHomesteadRow Row;
-        if (WearableRow(Instance, Storage, Chest, Row)) Result.Add(MoveTemp(Row));
-    };
     if (!Storage && MenuInventoryViewIndex == 2)
     {
         for (const auto& Instance : State().wearables)
-            if (Instance.owner == Homestead::WearableOwner::Equipped) AddWearable(Instance);
+            if (Instance.owner == Homestead::WearableOwner::Equipped)
+            {
+                FHomesteadRow Row;
+                if (WearableRow(Instance, Storage, Chest, Row)) Result.Add(MoveTemp(Row));
+            }
         return Result;
     }
     const auto AddContainer = [&](int32 CurrentContainer)
@@ -92,31 +94,73 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
         if (!Layout) return;
         for (const auto& Entry : *Layout)
         {
-            if (Entry.wearableId)
-            {
-                if (const auto* Instance = Sim.GetWearable(Entry.wearableId)) AddWearable(*Instance);
-                continue;
-            }
+            // Her pack's first row is the hotbar, shown as its own ten cells (MenuHotbarRow).
+            if (CurrentContainer == 0 && Homestead::PackRowRules::CellOf(State().packRow, Entry) >= 0) continue;
             FHomesteadRow Row;
-            Row.Id = static_cast<int>(Entry.item); Row.SubjectId = Entry.groupId;
-            Row.Subject = EHomesteadMenuSubject::ItemGroup;
-            Row.ContainerId = CurrentContainer;
-            Row.DestinationId = Storage ? (CurrentContainer == 0 ? Chest : 0) : -1;
-            Row.Quantity = Entry.quantity;
-            Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
-            Row.Location = CurrentContainer == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), CurrentContainer);
-            Row.Detail = FString::Printf(TEXT("%s: %d\nStack #%d\n\n%s\n%s"), *Row.Location, Entry.quantity, Entry.groupId,
-                *FromUtf8(Homestead::ItemDescription(Entry.item)),
-                IsFood(Entry.item) ? TEXT("Food. Eat one from your pack.") : TEXT("Used in the world or in recipes."));
-            Row.CanStore = false;
-            Row.CanTake = false;
-            Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : FString();
-            Result.Add(MoveTemp(Row));
+            if (MenuEntryRow(Entry, CurrentContainer, Row)) Result.Add(MoveTemp(Row));
         }
     };
     if (Storage) { AddContainer(Chest); AddContainer(0); }
     else AddContainer(Container);
     return Result;
+}
+
+bool AHomesteadController::MenuEntryRow(const Homestead::LayoutEntry& Entry, int32 CurrentContainer, FHomesteadRow& Row) const
+{
+    const int Chest = ActiveChestId.Get(-1);
+    const bool Storage = ActiveChestId.IsSet();
+    Row = FHomesteadRow();
+    if (Entry.wearableId)
+    {
+        const auto* Instance = Sim.GetWearable(Entry.wearableId);
+        if (!Instance || !WearableRow(*Instance, Storage, Chest, Row)) return false;
+    }
+    else
+    {
+        // With her one pail carried, the pack's water shows on the pail instead (HomesteadPail.h).
+        const auto Pail = Homestead::PresentPail(State());
+        if (CurrentContainer == 0 && Entry.item == Homestead::Item::Water && Pail.hidePackWater) return false;
+        Row.Id = static_cast<int>(Entry.item); Row.SubjectId = Entry.groupId;
+        Row.Subject = EHomesteadMenuSubject::ItemGroup;
+        Row.ContainerId = CurrentContainer;
+        Row.DestinationId = Storage ? (CurrentContainer == 0 ? Chest : 0) : -1;
+        Row.Quantity = Entry.quantity;
+        Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
+        Row.Location = CurrentContainer == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), CurrentContainer);
+        // Hover text: where and how many, what it is and (for food) the Energy one restores, from
+        // the catalogue (Homestead::FoodEnergyLabel). The internal stack id is not shown.
+        const std::string Energy = Homestead::FoodEnergyLabel(Entry.item);
+        const FString Use = !IsFood(Entry.item) ? FString(TEXT("Used in the world or in recipes."))
+            : Energy.empty() ? FString(TEXT("Food. Eat one from your pack."))
+            : FString::Printf(TEXT("Food: %s each. Eat one from your pack."), *FromUtf8(Energy.c_str()));
+        Row.Detail = FString::Printf(TEXT("%s: %d\n\n%s\n%s"), *Row.Location, Entry.quantity,
+            *FromUtf8(Homestead::ItemDescription(Entry.item)), *Use);
+        Row.CanStore = false;
+        Row.CanTake = false;
+        Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : FString();
+        if (CurrentContainer == 0 && Entry.item == Homestead::Item::WateringCan && Pail.gauge)
+        {
+            // Shown in the footer as well as the tooltip: a controller has no hover.
+            Row.Status = FromUtf8(Homestead::PailChargeLabel(Pail).c_str());
+            Row.Detail += TEXT("\n") + Row.Status;
+        }
+    }
+    if (CurrentContainer == 0)
+    {
+        Row.HotbarCell = Homestead::PackRowRules::CellOf(State().packRow, Entry);
+        if (Row.HotbarCell >= 0)
+        {
+            Row.Location = FString::Printf(TEXT("Hotbar %d"), Homestead::PackRowRules::KeyNumber(Row.HotbarCell));
+            Row.Detail = Row.Location + TEXT(" (the first row of your pack)\n") + Row.Detail;
+        }
+    }
+    return true;
+}
+
+bool AHomesteadController::MenuHotbarRow(int32 Cell, FHomesteadRow& Out) const
+{
+    const auto* Entry = HotbarEntry(Cell);
+    return Entry && MenuEntryRow(*Entry, 0, Out);
 }
 
 bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action,
@@ -127,9 +171,15 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
     if (ExpectedRevision != Sim.GetRevision())
     { Notify(TEXT("Your inventory changed. Select the item again before confirming."), true); return false; }
     Homestead::Result Result{false, "That action is not available for this item."};
-    if (Action == EHomesteadItemAction::Pin && Row.Subject == EHomesteadMenuSubject::ItemGroup)
-        return Row.Id >= 0 && Row.Id < static_cast<int32>(Homestead::Item::Count)
-            && TogglePinnedToHotbar(static_cast<Homestead::Item>(Row.Id));
+    if (Action == EHomesteadItemAction::Pin)
+    {
+        // "Move to hotbar" / "Move to pack": the hotbar is the first row of her pack.
+        if (Row.HotbarCell >= 0) return MenuMoveHotbarToPack(Row.HotbarCell, nullptr);
+        const int32 Free = FirstEmptyHotbarCell();
+        if (Free == INDEX_NONE)
+        { Notify(TEXT("The hotbar is full. Drag this onto a hotbar slot to swap them."), true); return false; }
+        return MenuPlaceInHotbar(Row, Free);
+    }
     if (Row.Subject == EHomesteadMenuSubject::GarmentRecipe || Action == EHomesteadItemAction::Equip
         || Action == EHomesteadItemAction::Unequip || Action == EHomesteadItemAction::Dye)
     {
@@ -218,7 +268,9 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
                 }
         }
     }
-    Notify(Result);
+    // A move between pack and chest shows in the book itself; only a refusal needs words.
+    if (Action == EHomesteadItemAction::Transfer) NotifyResourceAction(Result, nullptr);
+    else Notify(Result);
     return Result.ok;
 }
 
@@ -267,6 +319,10 @@ bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomestea
 {
     if (ExpectedRevision != Sim.GetRevision())
     { Notify(TEXT("Your inventory changed. Pick up the item again."), true); return false; }
+    // The hotbar is the first row of her pack: into, within and out of it (HomesteadPackRow.h).
+    if (Source.HotbarCell >= 0 && Target.HotbarCell >= 0) return MenuMoveHotbarSlot(Source.HotbarCell, Target.HotbarCell);
+    if (Target.HotbarCell >= 0) return MenuPlaceInHotbar(Source, Target.HotbarCell);
+    if (Source.HotbarCell >= 0) return MenuMoveHotbarToPack(Source.HotbarCell, &Target);
     if (Source.ContainerId != Target.ContainerId)
     {
         if (!ActiveChestId.IsSet()
@@ -279,7 +335,7 @@ bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomestea
                 Source.ContainerId == 0, PlayerPoint(), ExpectedRevision);
         else if (Source.Subject == EHomesteadMenuSubject::Wearable)
             Result = Sim.MoveWearable(Source.SubjectId, Target.ContainerId, PlayerPoint(), ExpectedRevision);
-        Notify(Result);
+        NotifyResourceAction(Result, nullptr);
         return Result.ok;
     }
     if (Source.ContainerId < 0)

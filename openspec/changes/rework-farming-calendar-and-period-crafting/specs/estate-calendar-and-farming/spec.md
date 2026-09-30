@@ -29,16 +29,59 @@ A new game SHALL default to a 30-real-minute day. The Settings choice of 30, 60 
 - **WHEN** a new game runs for 15 real minutes unpaused
 - **THEN** about 12 game hours have passed
 
-### Requirement: Hunger slows her but never fails the game
-Empty hunger SHALL NOT fail the game, block actions or send the heroine to a checkpoint. Below 25 hunger, energy SHALL recover more slowly and work SHALL cost more energy. At 0 both effects SHALL be stronger. Eating SHALL remove the penalty at once.
+### Requirement: Energy is the only meter, and meals make her Well fed
+On the estate the heroine SHALL have no hunger meter, hunger drain, hunger penalty or hunger failure, and the HUD SHALL show no hunger meter. Food SHALL restore energy. Snacks (raw food, bread, cheese) SHALL restore a little and SHALL NOT grant Well fed. Meals (cooked dishes) SHALL restore more and SHALL grant Well fed for 3 game hours, shown as a clock time. While Well fed, every piece of work SHALL cost 15% less energy. Eating a meal SHALL set the Well fed expiry to 3 game hours from now, never stacking. Below full energy, any food SHALL restore its energy. At full energy, a snack SHALL be refused without being consumed. At full energy, a meal SHALL be eaten only if it starts Well fed or extends it by at least one game hour, and the game SHALL say that her energy was already full; otherwise the meal SHALL be refused without being consumed.
 
-#### Scenario: Famished but working
-- **WHEN** hunger is 0 and the heroine clears bramble
-- **THEN** the clear succeeds at a higher energy cost and no failure screen appears
+#### Scenario: Meal
+- **WHEN** she eats a Cornish pasty below full energy
+- **THEN** her energy rises by 40, she is Well fed for 3 game hours shown as a clock time, and clearing bramble costs 15% less energy until it expires
 
-#### Scenario: Eating restores normal pace
-- **WHEN** a famished heroine eats a meal
-- **THEN** hunger rises and her work costs return to normal immediately
+#### Scenario: Snack
+- **WHEN** she eats a loaf of bread below full energy
+- **THEN** her energy rises by 12 and no Well fed state begins
+
+#### Scenario: Second meal below full energy
+- **WHEN** she is Well fed for 2 more hours, is below full energy, and eats roast potatoes
+- **THEN** her energy rises by 25 and she is Well fed for 3 game hours from now
+
+#### Scenario: Full energy
+- **WHEN** her energy is full and she is not Well fed, and she tries to eat bread and then a Cornish pasty
+- **THEN** the bread is refused and kept, and the pasty is eaten with a message that her energy was already full and when Well fed ends
+
+#### Scenario: Already well fed at full energy
+- **WHEN** her energy is full, she ate a pasty 30 game minutes ago, and she tries to eat another pasty
+- **THEN** the pasty is refused and kept, because it would extend Well fed by less than one hour
+
+#### Scenario: Well fed across midnight
+- **WHEN** she eats a pasty at 11 PM
+- **THEN** she is still Well fed at 1:30 AM the next day, and it has ended by 2 AM
+
+#### Scenario: Tampered Well fed save
+- **WHEN** a save's Well fed expiry is not a finite number, or lies more than 3 game hours after the save's time
+- **THEN** loading fails with the corrupt-save message and the current game is unchanged
+
+#### Scenario: Expired Well fed save
+- **WHEN** a save's Well fed expiry is at or before the save's time
+- **THEN** the save loads normally and she is not Well fed
+
+#### Scenario: No hunger
+- **WHEN** she plays ten full days without eating
+- **THEN** no hunger toast, penalty or failure appears, and the HUD shows only energy among her vitals
+
+### Requirement: A new game starts with some food and a findable hoe
+A new game SHALL seed the standing-room chest with 3 Cornish pasties, 2 loaves of bread and one of every finished outfit piece she doesn't already wear. Loading a game SHALL NOT seed them again. Salvage piles SHALL yield the rusted hoe blade second, after the billhook blade. Trying to till without a hoe SHALL suggest searching the old manor's salvage. The arrival journal note SHALL hint where the garden tools were kept.
+
+#### Scenario: Starter wardrobe
+- **WHEN** a new game begins, and later she saves and reloads
+- **THEN** the standing-room chest holds one of each finished outfit piece except the tunic she wears, and reloading adds no second copy
+
+#### Scenario: Second salvage pile
+- **WHEN** she has hafted the billhook and searches any other salvage pile
+- **THEN** that pile yields the rusted hoe blade
+
+#### Scenario: Tilling without a hoe
+- **WHEN** she tries to till with no hoe
+- **THEN** the refusal suggests searching the salvage in the old manor for a hoe blade
 
 ### Requirement: Crops grow only in their seasons
 Every crop SHALL declare the seasons it grows in. Planting out of season SHALL be refused and SHALL name the crop's seasons. Planting a crop that cannot ripen before its last in-season day SHALL be allowed with a warning.
