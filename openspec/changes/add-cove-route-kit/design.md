@@ -43,7 +43,7 @@ The first-draft constraints below are superseded where they differ.
 - **Rails.** Oak posts 12 × 12 cm at bays of 160 to 180 cm, set 10 cm outside the clear width. A rounded
   oak top rail 95 cm above the path, or above the step nosing line on a flight; a mid-rail at 50 cm. Iron
   shoe plates at the post feet. A raked bay is built for a given pitch (atan of rise over going), so each
-  flight gets its own export or a small set of standard pitches (26, 28, 30 degrees).
+  flight gets its own export or a small set of standard pitches (26, 28, 30 degrees): `SM_CoveRail_Level` and `SM_CoveRail_Rake26/28/30`, 1.70 m in plan. Water's builder scales a bay's X and Z together to its plan length, so the pitch holds.
 - **Fingerpost.** A 210 cm oak post, 12 × 12 cm, with a capped finial. One arm, 60 × 12 × 3 cm, at 170 cm,
   reading "To the Cove": incised letters painted white on the weathered oak. The arm points along the
   post's +X, so Water sets the yaw.
@@ -69,6 +69,11 @@ The first-draft constraints below are superseded where they differ.
 - **Fingerposts.** Yaws of 159 degrees (front door) and 153 degrees (head of the cliff steps).
 
 ## Pivots and orientation
+
+The FBX export mirrors Y, so the recipes build the pieces' drop side (kerbs) and the wedge toward -Y and
+lay the fingerpost's letters mirror-image; they arrive in the engine as described here. The side cheek of
+the first draft is dropped: Water cuts the ground to the flights, and kerbs and rails edge them.
+
 Blender recipes are authored in metres, Z up, and the kit puts the pivot at the bottom centre. The
 export mirrors Y, so the directions below are given in the engine's frame, which is what Water's
 generator uses.

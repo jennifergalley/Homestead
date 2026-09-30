@@ -2,10 +2,10 @@
 
 ## 1. Recipes (Props; Blender slot)
 
-- [ ] 1.1 Author `cove_steps.py`: treads A/B/C, the 1.2 m landing, the 0.6 m landing slab, the corner-landing wedge and the side cheek, to the design's pivots and sizes. Critique the 4K hero and detail renders
-- [ ] 1.2 Author `cove_kerb.py`: straight, curve and end pieces
-- [ ] 1.3 Author `cove_handrail.py`: level bay, raked bays at 26/28/30 degrees, end and corner posts, each symmetric across its rail line so it can be mirrored (scale Y = -1)
-- [ ] 1.4 Author `fingerpost.py` with "To the Cove", after checking and recording the font's licence
+- [ ] 1.1 Author `cove_steps.py`: treads A/B/C, the 1.2 m landing, the 0.6 m landing slab and the corner-landing wedge, to the design's pivots and sizes (recipe written; build and review pending a Blender slot). Critique the 4K hero and detail renders
+- [ ] 1.2 Author `cove_kerb.py`: straight, curve and end pieces (recipe written; build pending)
+- [ ] 1.3 Author `cove_handrail.py`: level bay, raked bays at 26/28/30 degrees, end and corner posts, each symmetric across its rail line so it can be mirrored (scale Y = -1) (recipe written; build pending)
+- [ ] 1.4 Author `fingerpost.py` with "To the Cove", after checking and recording the font's licence (recipe written with Blender's bundled DejaVu Sans, Bitstream Vera licence; build pending)
 
 ## 2. Import (Props; Unreal slot)
 

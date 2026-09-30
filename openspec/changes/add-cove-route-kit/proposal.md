@@ -12,11 +12,11 @@ Water owns the route and places them at runtime from its route data, as the road
 
 - Four Blender recipes under `Scripts/Blender/Recipes/`, all original procedural geometry and baked PBR
   materials:
-  - `cove_steps.py`: granite treads `SM_CoveStep_A/B/C`, a landing slab `SM_CoveLanding` and a rubble
-    side cheek `SM_CoveStepCheek`.
+  - `cove_steps.py`: granite treads `SM_CoveStep_A/B/C`, a 1.2 m landing `SM_CoveLanding`, a 0.6 m slab
+    `SM_CoveLandingSlab` and a corner wedge `SM_CoveLandingWedge`.
   - `cove_kerb.py`: granite edge kerbs `SM_CoveKerb_Straight`, `_Curve15` and `_End`.
-  - `cove_handrail.py`: oak post-and-rail `SM_CoveRail_Level`, a raked bay `SM_CoveRail_Bay` for each
-    flight pitch, `_EndPost` and `_CornerPost`.
+  - `cove_handrail.py`: oak post-and-rail `SM_CoveRail_Level`, raked bays `SM_CoveRail_Rake26/28/30`,
+    `_EndPost` and `_CornerPost`, each symmetric so it can be mirrored.
   - `fingerpost.py`: an oak `SM_Fingerpost_ToTheCove`.
 - Each export lands in `Assets/Props/<Name>/` with its report and review renders, and is imported as a prop.
 - The pivots, sizes and collision in design.md are the interface Water's generator builds against.
