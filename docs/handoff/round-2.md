@@ -177,11 +177,24 @@ Static-linkage followups are also source-only: Controller `2354d801` adds Map/Ca
 `HomesteadGeneralStore`. Body-identity checks remain intact.
 
 All four hot-file source moves now pass their sequential native/Unity gates. The copied-save hair
-preview remains inconclusive, so catastrophic geometry cure remains unproven; the next relevant
-evidence is a holistic copied-save PIE and smoke pass, not a structural verification rerun. None of
-these source refactors changes the Shipping player build.
+preview remains inconclusive, so catastrophic geometry cure remains unproven. None of these source
+refactors changes the Shipping player build.
 
-**Pending holistic copied-save PIE/Shipping matrix (Integration-owned):**
+**Holistic copied-save PIE matrix (Integration-owned, partial 2026-09-29):** the copied current
+Shipping Estate save loaded at `(-23969,-64935)` with BobStraight / `MetaHair 1` and
+`override=false`. Inventory, Craft, Map and Settings rendered; a berry restored about 12 Food and
+6 Energy; hoe till/sow Roots, pail water and `[F]` ripe-weed behavior worked. Bramble `550200` at
+283 cm granted 3 canes; sapling `570143` cleared in one press for 4 Branch + Kindling. Pascoe's
+greeting opened, Map Town → Manor advanced 7h30, bed sleep reached dawn, and F5 → teleport → F9
+restored the saved position and Bob groom. Standalone Smoke passed at 57.3 fps p99 16.8 ms.
+
+No rods were seen, but this does **not** establish a groom cure: the earlier old/new A/B did not
+reproduce the failure. Shop trade was not confirmed because later door/shopkeeper focus failed.
+The report also does not separately prove front-and-behind bramble selection, saved-clear state,
+harvest/held-produce timing, Field Book Build/gamepad-mouse focus, long-hair LOD/animation/camera
+coverage, or retained woodland resources/terrain. Those gaps remain required evidence.
+
+**Remaining copied-save PIE/Shipping matrix:**
 
 1. Focus a bramble at 285 cm from both front and behind; exercise a worn billhook through the
    one-intent sapling clear and verify its saved-clear state.
@@ -193,9 +206,10 @@ these source refactors changes the Shipping player build.
    this must not be reported as a visual cure unless it reproduces and eliminates the artifact.
 5. Confirm retained woodland spawn, resources and terrain.
 
-Only if that evidence is green may Integration build the new Development six-suite package and a
-Shipping no-listener candidate. The Estate shortcut remains unchanged until those separate package
-and save-safety checks pass.
+Integration has started `Build\Playtest-0929split-dev`, the six Development suites and copied-save
+smoke under a machine-wide UAT lock, then will consider a Shipping `-ReuseCooked` no-listener
+candidate only if those pass. The original user save, current Shipping build and Estate shortcut
+remain untouched; no package or shortcut result exists yet.
 
 ### Development firewall prompts / offline Shipping candidate
 
