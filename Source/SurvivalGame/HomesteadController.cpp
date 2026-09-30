@@ -1911,6 +1911,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     }
     TickStores(DeltaSeconds);
     if (bPlanning && !bBookOpen) UpdatePlacement(false);
+    UpdateGardenOutline();
     if (IsFailed() && !bWasFailed)
     {
         EndPlacement();
@@ -2353,6 +2354,9 @@ FString AHomesteadController::FocusActions() const
         // Food on the hotbar is eaten with A / E (or X / F) when there's nothing else to use them on.
         if (const auto Food = SelectedHotbarFood(); Food != Homestead::Item::Count && Sim.Count(Food) > 0)
             return A + TEXT(" Eat ") + Text(Homestead::ItemName(Food)).ToLower();
+        // With the hoe out, a red outline says why the square ahead can't be tilled (UpdateGardenOutline).
+        if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick && !GardenOutlineReason.IsEmpty())
+            return GardenOutlineReason;
         return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
         ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
