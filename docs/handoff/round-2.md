@@ -686,10 +686,16 @@ requirement.
   transient sampled-ground 4x4 thin 2.5 cm-raised segments at 100 cm, no collision/shadow, green/red,
   and hides for book/shop/planning/failed/water focus with no save IDs. PIE still must cover slopes,
   turned soil, adjacent plots, blocked cells, pad/HUD behavior and z-fighting before readiness.
-- **Weedy crop-plot prompt** — **Props headless source slice, pending and not shipped.** A weedy
-  planted crop plot must offer `[F] Pull weeds` / gamepad `[X] Pull weeds`; F/X must never sow.
-  Props is extracting the focus copy/condition from current main and adds native planted/mature/clean/
-  tool-state checks. PIE after Jenny's game must verify the hint and action on the actual plot.
+- **Weedy crop-plot prompt partial `15b3927e`:** native 9/9, no UE/build/PIE or delivery claim.
+  Whenever `Plot.weeds >= 0.125` is world-visible, the focused plot appends `[F] Pull weeds` /
+  gamepad `[X] Pull weeds` alongside E/A sow/harvest/water/error, including ripe crops; clean plots
+  show no hint. F/X hand-weeds the focused plot, never sows. A bare weedy plot F-pull is yieldless,
+  costs one Energy and does not sow; clean bare F refuses; ripe crops remain ripe.
+
+  The misleading Hoe `[LMB] Weed` copy is removed because its 85 cm square differs from focus. Editor
+  build and PIE must cover KBM/pad with pail/hoe/empty selection, no clean tooltip and F5/F9. Integration
+  includes it after safe aim/rain PIE and before corrected Dev/Shipping package. Bilateral kneel-weeds
+  conflicts only in native-test `Run()` append and rebases later; it is not in this package.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
