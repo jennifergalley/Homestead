@@ -374,8 +374,9 @@ hk release_all; mcp $E StopPIE
   about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
 - **Time and weather for tests:** `HomesteadMorning <h>` (console, with the player controller) jumps the
   clock without simulating the skipped hours. With `h` earlier than the current hour it goes to the next
-  day, which is the quick way to reach rain: it rains on days 2, 5, 8, ... from 9 to 15 h (`IsRainDay` in
-  `HomesteadSimulation.cpp`), so from a new game `HomesteadMorning 10` twice lands in day-2 rain. Time skips
+  day, which is the quick way to reach rain: `IsRainDay` chooses two stable hashed days per ten-day
+  block (offsets 1–2 and 6–7; day 0 is dry and block 0's first rain is day 1), from 09:00 to 15:00.
+  Use `Homestead::IsRainDay`/the active test route rather than assuming days 2, 5, 8. Time skips
   don't grow crops or run day-rollover logic; only Advance or Sleep does. For deterministic crop tests,
   use `HomesteadGrowCrops <days> [tend=1]` to advance crop days, or
   `HomesteadCropGrowth <0-1>` to set the growth fraction directly.
