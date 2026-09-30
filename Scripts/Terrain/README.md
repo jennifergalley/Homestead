@@ -109,6 +109,22 @@ old cutting's banks lose their cliff paint), `bake_ground.py`, `bake_estate_map.
 `ApplyEstateWeightmaps` over the same rectangle with the seven layers from `<work>\weights`, then
 `build_ground.py` and `ImportEstateMap`.
 
+### Town square (`town_layout.py`)
+
+`python Scripts\Terrain\town_layout.py` lays out the town round the TownSquare anchor. It makes an open
+60 × 45 m square faced by terraces of two (sharing a party wall) and cottages, with 3–6 m side lanes
+between the groups, and puts the general store in the middle of the east side. A curved 5.5 m
+`townStreet` runs from the main road's last point into the square's north-west corner.
+
+The script refuses to write a layout that breaks those rules. It writes `town` (square, street,
+buildings, store footprint) and the GeneralStoreDoor/Counter anchors to `estate_layout.json`, and
+`Tests/Data/HomesteadTownLayout.inc` for the native checks. Mirror the anchors in `HomesteadEstate.cpp`.
+
+The town stands on reshape's plane pad, so the heightfield doesn't change. `weightmaps.py` paints the
+street and square as packed earth, `bake_ground.py` wears them, and `bake_estate_map.py` draws them
+with the buildings. In the editor, `Content/Python/homestead_agent/town_massing.py` places the
+blockouts from the layout and deletes stale ones.
+
 ## Heightmap export and import
 
 - `Estate_Heightmap_4033.png` is 4033×4033, 16-bit greyscale.

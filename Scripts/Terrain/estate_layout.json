@@ -59,14 +59,14 @@
   ],
   "GeneralStoreDoor": [
    -540.0,
-   1170.0,
-   91.53,
+   1179.5,
+   91.75,
    90.0
   ],
   "GeneralStoreCounter": [
    -540.0,
-   1176.0,
-   91.66,
+   1185.5,
+   91.88,
    -90.0
   ]
  },
@@ -8720,5 +8720,633 @@
   "deck": 34.738,
   "halfLength": 5.5,
   "halfWidth": 1.8
+ },
+ "town": {
+  "square": {
+   "centre": [
+    -540.0,
+    1150.0
+   ],
+   "halfX": 22.5,
+   "halfY": 30.0
+  },
+  "street": [
+   [
+    -499.77,
+    1089.81
+   ],
+   [
+    -500.55,
+    1090.44
+   ],
+   [
+    -501.34,
+    1091.05
+   ],
+   [
+    -502.14,
+    1091.65
+   ],
+   [
+    -502.95,
+    1092.23
+   ],
+   [
+    -503.77,
+    1092.81
+   ],
+   [
+    -504.6,
+    1093.37
+   ],
+   [
+    -505.43,
+    1093.92
+   ],
+   [
+    -506.27,
+    1094.46
+   ],
+   [
+    -507.12,
+    1094.99
+   ],
+   [
+    -507.98,
+    1095.51
+   ],
+   [
+    -508.84,
+    1096.02
+   ],
+   [
+    -509.7,
+    1096.53
+   ],
+   [
+    -510.57,
+    1097.02
+   ],
+   [
+    -511.44,
+    1097.52
+   ],
+   [
+    -512.31,
+    1098.01
+   ],
+   [
+    -513.18,
+    1098.49
+   ],
+   [
+    -514.05,
+    1098.98
+   ],
+   [
+    -514.93,
+    1099.47
+   ],
+   [
+    -515.8,
+    1099.96
+   ],
+   [
+    -516.66,
+    1100.46
+   ],
+   [
+    -517.52,
+    1100.97
+   ],
+   [
+    -518.38,
+    1101.49
+   ],
+   [
+    -519.22,
+    1102.03
+   ],
+   [
+    -520.05,
+    1102.58
+   ],
+   [
+    -520.87,
+    1103.16
+   ],
+   [
+    -521.67,
+    1103.76
+   ],
+   [
+    -522.45,
+    1104.38
+   ],
+   [
+    -523.21,
+    1105.04
+   ],
+   [
+    -523.94,
+    1105.72
+   ],
+   [
+    -524.63,
+    1106.45
+   ],
+   [
+    -525.28,
+    1107.2
+   ],
+   [
+    -525.89,
+    1107.99
+   ],
+   [
+    -526.46,
+    1108.82
+   ],
+   [
+    -526.97,
+    1109.68
+   ],
+   [
+    -527.43,
+    1110.56
+   ],
+   [
+    -527.84,
+    1111.47
+   ],
+   [
+    -528.2,
+    1112.41
+   ],
+   [
+    -528.51,
+    1113.36
+   ],
+   [
+    -528.77,
+    1114.32
+   ],
+   [
+    -528.99,
+    1115.3
+   ],
+   [
+    -529.16,
+    1116.28
+   ],
+   [
+    -529.3,
+    1117.28
+   ],
+   [
+    -529.39,
+    1118.27
+   ],
+   [
+    -529.46,
+    1119.27
+   ],
+   [
+    -529.49,
+    1120.27
+   ],
+   [
+    -529.5,
+    1121.0
+   ]
+  ],
+  "streetHalfWidth": 2.75,
+  "store": {
+   "footprint": [
+    [
+     -544.7,
+     1180.0
+    ],
+    [
+     -535.3,
+     1180.0
+    ],
+    [
+     -535.3,
+     1189.6
+    ],
+    [
+     -544.7,
+     1189.6
+    ]
+   ]
+  },
+  "buildings": [
+   {
+    "name": "NorthCottage",
+    "x": -517.1,
+    "y": 1127.0,
+    "yaw": 0.0,
+    "width": 8.0,
+    "depth": 6.5,
+    "storeys": 1,
+    "storeyHeight": 290,
+    "pitch": 50,
+    "roof": "RidgeAlongStreet",
+    "wall": "Rubble",
+    "tint": [
+     0.95,
+     0.93,
+     0.9
+    ],
+    "chimneys": 1,
+    "doorAt": -0.4,
+    "shopfront": false,
+    "sign": [
+     0.1,
+     0.07,
+     0.03
+    ],
+    "sideWindows": true
+   },
+   {
+    "name": "Baker",
+    "x": -517.5,
+    "y": 1135.6,
+    "yaw": 0.0,
+    "width": 9.0,
+    "depth": 7.5,
+    "storeys": 2,
+    "storeyHeight": 280,
+    "pitch": 45,
+    "roof": "GableToStreet",
+    "wall": "Render",
+    "tint": [
+     0.98,
+     0.97,
+     0.93
+    ],
+    "chimneys": -1,
+    "doorAt": 0.55,
+    "shopfront": true,
+    "sign": [
+     0.05,
+     0.08,
+     0.16
+    ],
+    "sideWindows": false
+   },
+   {
+    "name": "Draper",
+    "x": -517.3,
+    "y": 1149.1,
+    "yaw": 0.0,
+    "width": 10.0,
+    "depth": 8.0,
+    "storeys": 2,
+    "storeyHeight": 290,
+    "pitch": 40,
+    "roof": "RidgeAlongStreet",
+    "wall": "Rubble",
+    "tint": [
+     1,
+     1,
+     1
+    ],
+    "chimneys": 2,
+    "doorAt": 0.6,
+    "shopfront": true,
+    "sign": [
+     0.16,
+     0.05,
+     0.08
+    ],
+    "sideWindows": false
+   },
+   {
+    "name": "CornerHouse",
+    "x": -516.9,
+    "y": 1158.7,
+    "yaw": 0.0,
+    "width": 9.0,
+    "depth": 7.0,
+    "storeys": 2,
+    "storeyHeight": 300,
+    "pitch": 42,
+    "roof": "GableToStreet",
+    "wall": "Render",
+    "tint": [
+     1.0,
+     0.97,
+     0.9
+    ],
+    "chimneys": -1,
+    "doorAt": -0.5,
+    "shopfront": false,
+    "sign": [
+     0.05,
+     0.05,
+     0.05
+    ],
+    "sideWindows": true
+   },
+   {
+    "name": "Chandler",
+    "x": -517.2,
+    "y": 1172.45,
+    "yaw": 0.0,
+    "width": 8.5,
+    "depth": 7.0,
+    "storeys": 2,
+    "storeyHeight": 285,
+    "pitch": 44,
+    "roof": "RidgeAlongStreet",
+    "wall": "Render",
+    "tint": [
+     0.97,
+     0.95,
+     1.0
+    ],
+    "chimneys": 1,
+    "doorAt": 0.4,
+    "shopfront": true,
+    "sign": [
+     0.12,
+     0.09,
+     0.02
+    ],
+    "sideWindows": true
+   },
+   {
+    "name": "EastCottage",
+    "x": -553.5,
+    "y": 1180.3,
+    "yaw": 90.0,
+    "width": 9.0,
+    "depth": 6.5,
+    "storeys": 1,
+    "storeyHeight": 285,
+    "pitch": 48,
+    "roof": "GableToStreet",
+    "wall": "Rubble",
+    "tint": [
+     1,
+     1,
+     1
+    ],
+    "chimneys": 1,
+    "doorAt": -0.5,
+    "shopfront": false,
+    "sign": [
+     0.1,
+     0.07,
+     0.03
+    ],
+    "sideWindows": true
+   },
+   {
+    "name": "EastHouse",
+    "x": -526.2,
+    "y": 1180.0,
+    "yaw": 90.0,
+    "width": 10.0,
+    "depth": 8.0,
+    "storeys": 2,
+    "storeyHeight": 295,
+    "pitch": 40,
+    "roof": "RidgeAlongStreet",
+    "wall": "Render",
+    "tint": [
+     1.0,
+     0.95,
+     0.8
+    ],
+    "chimneys": 2,
+    "doorAt": 0.3,
+    "shopfront": false,
+    "sign": [
+     0.08,
+     0.04,
+     0.02
+    ],
+    "sideWindows": true
+   },
+   {
+    "name": "Butcher",
+    "x": -562.7,
+    "y": 1127.5,
+    "yaw": 180.0,
+    "width": 9.0,
+    "depth": 7.5,
+    "storeys": 2,
+    "storeyHeight": 290,
+    "pitch": 45,
+    "roof": "GableToStreet",
+    "wall": "Rubble",
+    "tint": [
+     0.92,
+     0.92,
+     0.9
+    ],
+    "chimneys": -1,
+    "doorAt": -0.55,
+    "shopfront": true,
+    "sign": [
+     0.05,
+     0.12,
+     0.06
+    ],
+    "sideWindows": true
+   },
+   {
+    "name": "SouthHouse",
+    "x": -563.0,
+    "y": 1136.6,
+    "yaw": 180.0,
+    "width": 9.0,
+    "depth": 7.0,
+    "storeys": 2,
+    "storeyHeight": 300,
+    "pitch": 38,
+    "roof": "RidgeAlongStreet",
+    "wall": "Render",
+    "tint": [
+     0.92,
+     0.95,
+     1.0
+    ],
+    "chimneys": 2,
+    "doorAt": 0.0,
+    "shopfront": false,
+    "sign": [
+     0.05,
+     0.05,
+     0.05
+    ],
+    "sideWindows": false
+   },
+   {
+    "name": "Chemist",
+    "x": -562.5,
+    "y": 1150.0,
+    "yaw": 180.0,
+    "width": 8.8,
+    "depth": 7.5,
+    "storeys": 2,
+    "storeyHeight": 310,
+    "pitch": 35,
+    "roof": "RidgeAlongStreet",
+    "wall": "Ashlar",
+    "tint": [
+     1.05,
+     1.0,
+     0.92
+    ],
+    "chimneys": 1,
+    "doorAt": 0.55,
+    "shopfront": true,
+    "sign": [
+     0.1,
+     0.06,
+     0.02
+    ],
+    "sideWindows": true
+   },
+   {
+    "name": "Ironmonger",
+    "x": -562.9,
+    "y": 1160.0,
+    "yaw": 180.0,
+    "width": 11.0,
+    "depth": 8.0,
+    "storeys": 2,
+    "storeyHeight": 300,
+    "pitch": 38,
+    "roof": "RidgeAlongStreet",
+    "wall": "Render",
+    "tint": [
+     1.0,
+     0.92,
+     0.85
+    ],
+    "chimneys": 2,
+    "doorAt": -0.5,
+    "shopfront": true,
+    "sign": [
+     0.2,
+     0.04,
+     0.04
+    ],
+    "sideWindows": false
+   },
+   {
+    "name": "SouthCottage",
+    "x": -562.8,
+    "y": 1173.75,
+    "yaw": 180.0,
+    "width": 7.5,
+    "depth": 6.5,
+    "storeys": 1,
+    "storeyHeight": 290,
+    "pitch": 48,
+    "roof": "GableToStreet",
+    "wall": "Rubble",
+    "tint": [
+     1.02,
+     1.0,
+     0.95
+    ],
+    "chimneys": -1,
+    "doorAt": 0.4,
+    "shopfront": false,
+    "sign": [
+     0.1,
+     0.07,
+     0.03
+    ],
+    "sideWindows": true
+   },
+   {
+    "name": "WestCottage",
+    "x": -555.0,
+    "y": 1119.7,
+    "yaw": -90.0,
+    "width": 9.0,
+    "depth": 6.5,
+    "storeys": 1,
+    "storeyHeight": 290,
+    "pitch": 45,
+    "roof": "GableToStreet",
+    "wall": "Rubble",
+    "tint": [
+     1.05,
+     1.02,
+     0.95
+    ],
+    "chimneys": -1,
+    "doorAt": 0.5,
+    "shopfront": false,
+    "sign": [
+     0.1,
+     0.07,
+     0.03
+    ],
+    "sideWindows": true
+   },
+   {
+    "name": "Inn",
+    "x": -544.4,
+    "y": 1120.0,
+    "yaw": -90.0,
+    "width": 12.0,
+    "depth": 8.5,
+    "storeys": 3,
+    "storeyHeight": 290,
+    "pitch": 32,
+    "roof": "RidgeAlongStreet",
+    "wall": "Ashlar",
+    "tint": [
+     1,
+     1,
+     1
+    ],
+    "chimneys": 2,
+    "doorAt": 0.0,
+    "shopfront": false,
+    "sign": [
+     0.03,
+     0.05,
+     0.12
+    ],
+    "sideWindows": false
+   },
+   {
+    "name": "LaneCottage",
+    "x": -520.5,
+    "y": 1119.7,
+    "yaw": -90.0,
+    "width": 6.0,
+    "depth": 6.0,
+    "storeys": 1,
+    "storeyHeight": 280,
+    "pitch": 50,
+    "roof": "GableToStreet",
+    "wall": "Rubble",
+    "tint": [
+     1.0,
+     0.98,
+     0.94
+    ],
+    "chimneys": 1,
+    "doorAt": 0.3,
+    "shopfront": false,
+    "sign": [
+     0.1,
+     0.07,
+     0.03
+    ],
+    "sideWindows": true
+   }
+  ]
  }
 }

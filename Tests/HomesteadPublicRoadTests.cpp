@@ -157,6 +157,82 @@ int main()
             deck.halfWidth / 50.0, deck.deckZ / 100.0, (deck.deckZ - deck.waterZ) / 100.0);
     }
 
+    // The town (Scripts/Terrain/town_layout.py; Jenny, 2026-09-29: "bunched too tightly"): an open 60 x 45 m
+    // square, buildings either sharing a party wall or 3 m or more apart, a 5.5 m street from the main road's
+    // end into the square, and the general store's door and counter where the layout's anchors put them.
+    {
+        struct Footprint { std::string name; std::vector<Point> corners; };
+        std::vector<Footprint> footprints;
+        std::vector<Point> street;
+        Point square{};
+        double halfX = 0.0, halfY = 0.0, streetHalf = 0.0;
+        auto townSquare = [&](double x, double y, double hx, double hy) { square = {x * 100.0, y * 100.0}; halfX = hx * 100.0; halfY = hy * 100.0; };
+        auto streetHalfWidth = [&](double metres) { streetHalf = metres * 100.0; };
+        auto streetPoint = [&](double x, double y) { street.push_back({x * 100.0, y * 100.0}); };
+        auto footprint = [&](const char* name, double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3) {
+            footprints.push_back({name, {{x0 * 100.0, y0 * 100.0}, {x1 * 100.0, y1 * 100.0}, {x2 * 100.0, y2 * 100.0}, {x3 * 100.0, y3 * 100.0}}});
+        };
+#define street streetPoint
+#include "Data/HomesteadTownLayout.inc"
+#undef street
+        const EstateLayout& townLayout = ProvisionalEstateLayout();
+        Check(footprints.size() >= 13 && footprints[0].name == "GeneralStore", "town footprints, the store first", static_cast<double>(footprints.size()));
+        Check(std::abs(2.0 * halfY - 6000.0) < 1.0 && std::abs(2.0 * halfX - 4500.0) < 1.0, "a 60 x 45 m square");
+        const Landmark* squareAnchor = townLayout.FindLandmark(Anchor::TownSquare);
+        Check(squareAnchor && Distance(squareAnchor->position, square) < 1.0, "the square round the TownSquare anchor");
+        auto inSquare = [&](Point p, double margin) { return std::abs(p.x - square.x) < halfX - margin && std::abs(p.y - square.y) < halfY - margin; };
+        for (const Footprint& building : footprints)
+        {
+            for (const Point& corner : building.corners) Check(!inSquare(corner, 1.0), "a building stands in the square");
+        }
+        // Nothing bunched: every pair shares a party wall (<= 15 cm) or leaves a 3 m lane or more.
+        for (size_t i = 0; i < footprints.size(); ++i)
+            for (size_t j = i + 1; j < footprints.size(); ++j)
+            {
+                double nearest = 1e300;
+                for (size_t a = 0; a < 4; ++a)
+                    for (size_t b = 0; b < 4; ++b)
+                    {
+                        nearest = std::min(nearest, PolylineDistance({footprints[j].corners[b], footprints[j].corners[(b + 1) % 4]}, footprints[i].corners[a]));
+                        nearest = std::min(nearest, PolylineDistance({footprints[i].corners[a], footprints[i].corners[(a + 1) % 4]}, footprints[j].corners[b]));
+                    }
+                Check(nearest <= 15.0 || nearest >= 300.0, "buildings bunched (0.15-3 m apart)", nearest);
+            }
+        // The street: from the main road's last point into the square, clear of every wall.
+        Check(street.size() > 20 && Distance(street.front(), road.points.back()) < 100.0, "the street leaves the main road's end");
+        Check(inSquare(street.back(), 50.0), "the street ends in the square");
+        for (const Point& p : street)
+            for (const Footprint& building : footprints)
+            {
+                std::vector<Point> ring = building.corners;
+                const bool inside = PointInPolygon(ring, p);
+                Check(!inside && PolylineDistance(ring, p, true) > streetHalf + 70.0, "the street passes a wall", PolylineDistance(ring, p, true));
+            }
+        // The store: its door on the square's edge facing in, the counter 6 m inside its footprint, and a clear
+        // walk from where the street arrives to the door.
+        const Landmark* door = townLayout.FindLandmark(Anchor::GeneralStoreDoor);
+        const Landmark* counter = townLayout.FindLandmark(Anchor::GeneralStoreCounter);
+        Check(door && counter, "store anchors");
+        if (door && counter)
+        {
+            Check(std::abs(std::abs(door->position.y - square.y) - halfY) < 100.0 && inSquare({door->position.x, square.y}, 0.0), "store door on the square's edge");
+            Check(std::abs(Distance(door->position, counter->position) - 600.0) < 1.0, "counter 6 m in from the door");
+            Check(PointInPolygon(footprints[0].corners, counter->position), "counter inside the store");
+            Check(!PointInPolygon(footprints[0].corners, door->position), "door anchor outside the store");
+            const double facing = std::atan2(counter->position.y - door->position.y, counter->position.x - door->position.x) * 180.0 / 3.14159265358979323846;
+            Check(std::abs(std::remainder(door->yaw - facing, 360.0)) < 1.0 && std::abs(std::remainder(counter->yaw - facing - 180.0, 360.0)) < 1.0,
+                "door faces the counter and the counter the customer");
+            for (int step = 0; step <= 50; ++step)
+            {
+                const double t = step / 50.0;
+                const Point p{street.back().x + (door->position.x - street.back().x) * t, street.back().y + (door->position.y - street.back().y) * t};
+                for (const Footprint& building : footprints) Check(!PointInPolygon(building.corners, p), "a building between the street and the store door");
+            }
+        }
+        std::printf("town: %zu buildings and the store round a %.0f x %.0f m square, street %.0f m\n", footprints.size() - 1,
+            2.0 * halfY / 100.0, 2.0 * halfX / 100.0, static_cast<double>(street.size()));
+    }
+
     // The signs stand on the verge, not the bed, and none in the bridge keep-out.
     Check(road.signs.size() == 3, "three signs", static_cast<double>(road.signs.size()));
     for (const PublicRoadSign& sign : road.signs)
@@ -346,15 +422,15 @@ int main()
         {
             if (!IsFood(placement.kind)) continue;
             food.push_back(placement.position);
-            const bool roadside = placement.id >= PublicRoadsideFirstId && placement.id < PublicRoadsideEndId;
-            if (roadside) ++alongRoad;
+            const bool onRoadside = placement.id >= PublicRoadsideFirstId && placement.id < PublicRoadsideEndId;
+            if (onRoadside) ++alongRoad;
             else if (PointInPolygon(boundary, placement.position))
             {
                 const double fromHome = Distance(placement.position, home);
                 (fromHome < 15000.0 ? manorGrounds : fromHome < 45000.0 ? nearWoods : farEstate) += 1;
             }
             if (!IsMoreFood(placement.id)) continue;
-            if (roadside)
+            if (onRoadside)
             {
                 ++moreRoadside;
                 moreRoadsideRoots += placement.kind == ResourceKind::Roots;
@@ -374,7 +450,7 @@ int main()
             for (const EstatePlacement& other : all)
                 if (other.id != placement.id && IsFood(other.kind))
                     Check(Distance(other.position, p) >= 2000.0, "new food 20 m from other food", placement.id);
-            if (!roadside)
+            if (!onRoadside)
             {
                 Check(PointInPolygon(boundary, p) && PolylineDistance(boundary, p, true) > 590.0, "new estate food inside the boundary", placement.id);
                 Check(road.NearestTo(p).distanceCm > 590.0, "new estate food off the road", placement.id);

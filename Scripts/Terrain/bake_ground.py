@@ -249,6 +249,15 @@ def ground_fields(h, w, layout):
         height *= 1.0 - 0.8 * tread
     tx, ty = lm["TownSquare"][:2]
     density *= smoothstep(100.0, 140.0, np.hypot(X - tx, Y - ty))
+    # The town's street and square (town_layout.py): trodden soil, worn most down the middle of the street.
+    town = layout.get("town")
+    if town:
+        d_street = line_distance(town["street"], h.shape)
+        hw = town["streetHalfWidth"]
+        wear = np.maximum(wear, 0.8 * smoothstep(hw + 0.8, hw - 0.8, d_street) * (0.7 + 0.3 * clump))
+        (cx, cy), hx, hy = town["square"]["centre"], town["square"]["halfX"], town["square"]["halfY"]
+        out = np.maximum(np.abs(X - cx) - hx, np.abs(Y - cy) - hy)
+        wear = np.maximum(wear, 0.55 * smoothstep(1.5, -1.0, out) * (0.6 + 0.4 * clump))
     # No blades up through the road bridge's planks (public_road.py records the deck).
     bridge = layout.get("roadBridge")
     if bridge:

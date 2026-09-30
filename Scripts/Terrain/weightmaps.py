@@ -58,6 +58,14 @@ def main():
     w["Moorland"] = smoothstep(125, 150, z + 20 * (rr - rr.mean())) + smoothstep(900, 1400, gxm) * 0.6
     w["WoodlandFloor"] = (1 - smoothstep(60, 140, river)) * (1 - smoothstep(0.0, 1.0, np.maximum(z - 95, 0) / 20))
     w["DirtRoad"] = 1 - smoothstep(2.0, 3.6, road)
+    # The town's street and its open square are packed earth too (town_layout.py).
+    town = L.get("town")
+    if town:
+        street = near_polyline(np.asarray(town["street"]), z.shape, 20.0)
+        w["DirtRoad"] = np.maximum(w["DirtRoad"], 1 - smoothstep(town["streetHalfWidth"] - 0.6, town["streetHalfWidth"] + 0.8, street))
+        (cx, cy), hx, hy = town["square"]["centre"], town["square"]["halfX"], town["square"]["halfY"]
+        out = np.maximum(np.abs(gxm - cx) - hx, np.abs((cols - H).astype(np.float32) - cy) - hy)
+        w["DirtRoad"] = np.maximum(w["DirtRoad"], 1 - smoothstep(-0.5, 1.5, out))
     w["Pasture"] = np.full(z.shape, 0.35, np.float32)
 
     # Priority stack: road over cliff over beach/dune over woodland/moor over pasture.
