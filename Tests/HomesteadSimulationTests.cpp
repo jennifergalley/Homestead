@@ -3916,6 +3916,67 @@ void ManorClearoutField()
     CHECK(present == field);
 }
 
+// Weeding by hand kneels and pulls, and commits once at the second root: the controller probes a copy
+// first (refusing before she kneels), then runs the real transaction at
+// AHomesteadCharacter::PullWeedsCommit; a pull cancelled before then never reaches the simulation.
+// This pins the two transactions it routes: a weed node's Harvest (its weeds, Energy once) and a garden
+// square's Weed (no yield).
+void WeedPullCommitsOnce()
+{
+    const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    EstatePlacements table;
+    table.bakeVersion = 7;
+    table.placements.push_back({EstatePlacementIdBase + 20300, ResourceKind::Weeds, {at.x, at.y + 39.0}, 0, 0, 1, 0});
+    table.placements.push_back({EstatePlacementIdBase + 20301, ResourceKind::Nettles, {at.x + 80.0, at.y}, 0, 0, 1, 0});
+    const int weed = EstatePlacementIdBase + 20300, nettle = EstatePlacementIdBase + 20301;
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), table));
+    const std::string untouched = sim.Serialize();
+    const auto revision = sim.GetRevision();
+    // The probe on a copy says yes and changes nothing (a cancelled pull leaves exactly this).
+    Simulation probe = sim;
+    OK(probe.Harvest(weed, at));
+    CHECK(sim.Serialize() == untouched && sim.GetRevision() == revision && !PlacedNode(sim, weed).cleared);
+
+    const double energy = sim.GetState().energy;
+    const int weeds = sim.Count(Item::Weeds);
+    OK(sim.Harvest(weed, at));
+    CHECK(PlacedNode(sim, weed).cleared && sim.Count(Item::Weeds) == weeds + 1);
+    CHECK(Close(sim.GetState().energy, energy - FindOvergrowth(ResourceKind::Weeds)->energy, 1e-9));
+    // Pulled once: the next press is refused up front, with nothing spent.
+    Simulation again = sim;
+    CHECK(!again.Harvest(weed, at));
+    UnchangedFailure(sim, [&] { return sim.Harvest(weed, at); });
+    // Nettles pull the same way, 1-2 weeds for their own Energy.
+    const double beforeNettle = sim.GetState().energy;
+    OK(sim.Harvest(nettle, at));
+    CHECK(sim.Count(Item::Weeds) >= weeds + 2 && sim.Count(Item::Weeds) <= weeds + 3);
+    CHECK(Close(sim.GetState().energy, beforeNettle - FindOvergrowth(ResourceKind::Nettles)->energy, 1e-9));
+    Simulation loaded;
+    loaded.SetPlacements(table);
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(loaded, weed).cleared && PlacedNode(loaded, nettle).cleared);
+
+    // A garden square: weeding by hand clears its weeds and gives nothing.
+    Simulation garden;
+    Stock(garden, {{Item::DiggingStick, 1}});
+    const Point square = CellCenter(-2, -1);
+    OK(garden.Till(CellToGarden(-2), CellToGarden(-1), square));
+    const int plot = garden.FindNearestPlot(square, 1);
+    CHECK(plot != -1);
+    UnchangedFailure(garden, [&] { return garden.Weed(plot, square); });
+    Edit(garden, [](State& state) { state.plots[0].weeds = 0.6; }, false);
+    const auto stock = garden.GetState().inventory;
+    const double gardenEnergy = garden.GetState().energy;
+    Simulation gardenProbe = garden;
+    OK(gardenProbe.Weed(plot, square));
+    CHECK(garden.GetState().plots[0].weeds == 0.6);
+    OK(garden.Weed(plot, square));
+    CHECK(garden.GetState().inventory == stock && garden.GetState().plots[0].weeds == 0.0);
+    CHECK(Close(garden.GetState().energy, gardenEnergy - Exertion::WeedEnergy, 1e-9));
+    UnchangedFailure(garden, [&] { return garden.Weed(plot, square); });
+}
+
 void ClearoutKindsAndSpoiledGround()
 {
     const Point spawn = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
@@ -4233,6 +4294,7 @@ int main()
     Run("timber processing, dual fuel, storage and save version", TimberAndFirewoodTransactions);
     Run("farming, weeds, moisture and rain", FarmingAndRain);
     Run("small garden squares, per-square planting and plot migration", GardenSquares);
+    Run("weeding by hand commits once, and a probe changes nothing", WeedPullCommitsOnce);
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
     Run("crop table, growing days, care modifiers, stages and status", CropTableAndStatus);
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);

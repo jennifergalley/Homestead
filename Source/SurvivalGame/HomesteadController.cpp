@@ -1942,6 +1942,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     ToastRemaining = FMath::Max(0.0f, ToastRemaining - DeltaSeconds);
     UpdatePendingHack();
     UpdatePendingSwing();
+    UpdatePendingWeedPull();
     UpdatePendingFell();
     if (HeldPlot != INDEX_NONE)
     {
@@ -2847,6 +2848,10 @@ void AHomesteadController::Interact()
         const int32 Harvested = FocusId;
         const auto* Feller = Cast<AHomesteadCharacter>(GetPawn());
         const bool bFell = Tree && Feller && Feller->CanFell();
+        // Weeds and nettles are pulled on both knees and only count once the second root is out.
+        if ((Kind == Homestead::ResourceKind::Weeds || Kind == Homestead::ResourceKind::Nettles)
+            && StartWeedPull(FocusId, INDEX_NONE, ActionTarget))
+            break;
         const auto Result = Sim.Harvest(FocusId, Position);
         // Salvage and fallen boughs say what she found; ordinary forage shows it in her hands instead.
         if (Homestead::IsOvergrowth(Kind)) Notify(Result, WoodTapA);
@@ -3067,6 +3072,8 @@ void AHomesteadController::Secondary()
                     + FString(UsesGamepad() ? TEXT("A") : TEXT("E")) + TEXT(" to sow."), true);
                 break;
             }
+            // By hand she kneels and pulls them, and the square is weeded when the second root is out.
+            if (StartWeedPull(INDEX_NONE, FocusId, Homestead::PlotCenter(Plot))) break;
             const auto Result = Sim.Weed(FocusId, PlayerPoint());
             Notify(Result, GrassStepA);
             if (Result.ok)
