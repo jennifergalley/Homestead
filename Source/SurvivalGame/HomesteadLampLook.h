@@ -17,9 +17,8 @@ namespace HomesteadLampLook
 constexpr float BailTopHeight = 34.1f;
 constexpr float FlameHeight = 13.55f;
 
-// The light: warm, small, about ten metres of useful reach at night.
-constexpr float LightIntensity = 1400.0f;
-constexpr float LightRadius = 1000.0f;
+// The light: warm, carrying about 13 m at night (Simulation/HomesteadLampLight.h has the profile and why;
+// homestead.LampIntensity, LampRadius, LampFalloff and LampLegacy tune or A/B it at runtime).
 const FLinearColor LightColor(1.0f, 0.62f, 0.30f);
 
 // Adds the lamp's parts under Parent, offset so the mesh's pivot (bottom centre) sits at Offset in
@@ -32,4 +31,7 @@ UPointLightComponent* AddLight(UObject* Outer, USceneComponent* Parent, const FV
 float Flicker(float Time);
 // Shows the flame and light when lit, animating both, and warms the glass (its "Glow").
 void SetLit(UStaticMeshComponent* Flame, UPointLightComponent* Light, bool bLit, float Time, UStaticMeshComponent* GlassPart = nullptr);
+// A lamp set down casts shadows only while the camera is near it (homestead.PlacedLampShadowDistance): its
+// 20 m pool would otherwise pay for shadows nobody is close enough to see.
+void UpdatePlacedShadows(UPointLightComponent* Light, const UObject* WorldContext);
 }

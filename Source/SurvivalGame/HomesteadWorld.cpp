@@ -35,6 +35,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     UpdateHearthFlicker(DeltaSeconds);
     LampDropFlickerTime += DeltaSeconds;
     HomesteadLampLook::SetLit(LampDropFlame.Get(), LampDropLight.Get(), bLampDropLit, LampDropFlickerTime, LampDropGlass.Get());
+    HomesteadLampLook::UpdatePlacedShadows(LampDropLight.Get(), this);
     UpdateHearthSound(DeltaSeconds);
     UpdateDoors(DeltaSeconds);
     UpdateClearPops(DeltaSeconds);
