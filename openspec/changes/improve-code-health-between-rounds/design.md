@@ -65,7 +65,7 @@ PCH) and the Performance Agent (step 4's measurement). Each step is its own `[re
 
 ## Verification per step
 
-- `Scripts\Test-Native.ps1 -Configuration Release` 7/7.
+- `Scripts\Test-Native.ps1 -Configuration Release` 9/9.
 - `Build.bat SurvivalGameEditor` and `Build.bat SurvivalGame` (game target, to catch unity clashes).
 - One PIE pass on the Estate: move, clear with two tools, craft, open the book and the shop, save and
   load.

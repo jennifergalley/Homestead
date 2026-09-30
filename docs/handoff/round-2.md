@@ -176,9 +176,10 @@ Static-linkage followups are also source-only: Controller `2354d801` adds Map/Ca
 `e7b7101b` adds the Weather include and qualifies `Cloth` to avoid a Unity name collision with
 `HomesteadGeneralStore`. Body-identity checks remain intact.
 
-All four hot-file source moves now pass their sequential native/Unity gates. The copied-save hair
-preview remains inconclusive, so catastrophic geometry cure remains unproven. None of these source
-refactors changes the Shipping player build.
+All four hot-file source moves passed their sequential native/Unity gates and the refactored
+Shipping delivery evidence below. Architecture released the hot-file lock at 22:27; Menu and Water
+may rebase and resume independent ownership. The copied-save hair preview remains inconclusive, so
+catastrophic geometry cure remains unproven.
 
 **Holistic copied-save PIE matrix (Integration-owned, partial 2026-09-29):** the copied current
 Shipping Estate save loaded at `(-23969,-64935)` with BobStraight / `MetaHair 1` and
@@ -197,11 +198,12 @@ while rejecting a transient +2 Branch grant. Evidence remains in Integration `E:
 (`shop-fresh-trade.png`, `shop-sale-settled.png`, `shop-seed-price.png`, `shop-after-f9.png`,
 `shop-purse-after-f9.png`), never copied to `C:`.
 
-The report still does not separately prove front-and-behind bramble selection, saved-clear state,
+The report does not separately isolate front-and-behind bramble selection, saved-clear state,
 harvest/held-produce timing, Field Book Build/gamepad-mouse focus, long-hair LOD/animation/camera
-coverage, or retained woodland resources/terrain. Those gaps remain required evidence.
+coverage, or retained woodland resources/terrain. These remain desirable focused regression coverage;
+they are not a claim that the newly delivered package exercised each subcase individually.
 
-**Remaining copied-save PIE/Shipping matrix:**
+**Focused regression matrix (future coverage):**
 
 1. Focus a bramble at 285 cm from both front and behind; exercise a worn billhook through the
    one-intent sapling clear and verify its saved-clear state.
@@ -215,10 +217,9 @@ coverage, or retained woodland resources/terrain. Those gaps remain required evi
 
 All six Development suites now pass in `Build\Playtest-0929split-dev` at `main` `b3576693`:
 Smoke 57.67, Clearing 54.06, Hotbar 53.97, NativeMenu 56.82, FullLoop 54.58 and EstateSmoke woods
-59.96 fps. Integration next runs the copied-save Development packaged smoke and Shipping
-`-ReuseCooked` no-listener proof. The original Shipping save remains unchanged (SHA begins
-`F816C870` and ends `5EB8`); current Shipping and the Estate shortcut remain untouched, with no
-Shipping package or shortcut result yet.
+59.96 fps. The copied-save Development offscreen load also passes at `(-23970,-64935)` with no
+fatal error. The original Shipping Manual save remains unchanged (SHA begins `F816C870` and ends
+`5EB8`).
 
 **Development package coverage:** the six suite passes above preserve the split's existing packaged
 coverage. NativeMenu and FullLoop remain storage-trade-only, so the dedicated fresh copied-save PIE
@@ -226,17 +227,24 @@ real-counter sale/purchase/F5/F9 check above supplies the current Pascoe evidenc
 packaged Pascoe trade route remains desirable, but the prior focus failure is no longer an open
 functional gap.
 
-**New split Shipping candidate (not promoted):** Development copied-save offscreen loading also
-passes. `Build\Releases\20260929-split-shipping` executable SHA begins `2A1834BC` and ends
-`3FA4`; it reuses five byte-identical cooked containers. Its startup probe against a copied Jenny
-Estate save reports `shipping=true`, `traceCompiled=false`, F5/F9 MD5 equality and zero endpoints
-in 43 samples. The wrapper reports failure only because of its known stale legacy modular-equipment
-check, not a current candidate failure. A separate candidate-local `UserDir` hard-link run remained
-alive for 65.2 seconds with zero endpoints in 108 samples. Visible user startup was not observed.
+**Refactored Shipping delivered:** `Homestead Estate.lnk` was retargeted only after confirming no
+Jenny game process, fresh staged data and no new blocker. ShellLink read-back resolves to
+`Build\Releases\20260929-split-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
+with SHA `2A1834BC5B667740F184AB949A147A3A14A7E00E0B8F8A8E1384554AF1CC3FA4`. Estate-map arguments,
+candidate-local `-UserDir`, icon and working directory are retained. The prior Shipping link is
+backed up on `E:`, Development remains a rollback path and `Homestead.lnk` remains MVP-untouched.
 
-The original Shipping save, current player build and Estate shortcut remain untouched. Integration
-must first verify whole-save freshness, no running process and no new blocker before it may promote
-this candidate; no shortcut decision or hair-cure claim exists yet.
+The Shipping package reuses five byte-identical cooked containers. Its copied-Estate-save startup
+probe reports `shipping=true`, `traceCompiled=false`, Lit 634 ticks, F5/F9 MD5 equality and zero
+endpoints in 43 samples. A separate candidate-local `UserDir` hard-link run stayed alive for
+65.2 seconds with zero endpoints in 108 samples. All 19 source SaveGames plus GameUserSettings and
+Input hashes match staged copies; the originals remain untouched. The wrapper reports failure only
+from the known obsolete `modularEquipmentReady` assertion, not a candidate failure—repair its
+`SaveGames\Estate` fixture routing and MetaHuman-aware equipment check separately, never rewrite
+this receipt. Visible human startup was not observed.
+
+The catastrophic hair rod/fan cure remains inconclusive despite the physics correction on `main`;
+ask Jenny to playtest Bob and updo styles, and plan a longer isolated Shipping reproduction.
 
 ### Development firewall prompts / offline Shipping candidate
 
