@@ -409,6 +409,18 @@ int Simulation::FindNearestOvergrowth(Point position, double maxDistance, Item t
     return nearest;
 }
 
+Simulation::MowSweepResult Simulation::MowSweep(const std::vector<int>& targets, Point player)
+{
+    MowSweepResult sweep;
+    for (const int id : targets)
+    {
+        const auto result = ClearOvergrowth(id, Item::Scythe, player);
+        if (result.ok) ++sweep.mown;
+        else if (sweep.problem.empty()) sweep.problem = result.message;
+    }
+    return sweep;
+}
+
 double Simulation::ScytheArcRadius(ToolTier tier)
 {
     static const double radii[] = {160.0, 200.0, 240.0, 280.0};
