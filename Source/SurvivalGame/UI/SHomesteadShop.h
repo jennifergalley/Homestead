@@ -87,7 +87,9 @@ private:
     TSharedRef<SWidget> BuildRow(int32 Index);
     TSharedRef<SWidget> BuildFooter();
     TSharedRef<SWidget> Button(const FString& Label, TFunction<void()> Action, bool bPrimary = false, float MinWidth = 0.0f);
-    TSharedRef<SWidget> Label(const FString& Value, int32 Size, const FLinearColor& Color) const;
+    // bWrap false for short single-line values (purse, prices, Energy): auto-wrap in an auto-width
+    // slot wraps at the last frame's width and can break "100 coins each" or "+25 Energy" in two.
+    TSharedRef<SWidget> Label(const FString& Value, int32 Size, const FLinearColor& Color, bool bWrap = true) const;
     FString Wallet() const;
     FString EstateName() const;
     void ScrollToSelection();
