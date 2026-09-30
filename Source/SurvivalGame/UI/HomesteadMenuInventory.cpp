@@ -116,7 +116,11 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
             Row.CanTake = false;
             Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : FString();
             if (CurrentContainer == 0 && Entry.item == Homestead::Item::WateringCan && Pail.gauge)
-                Row.Detail += FString::Printf(TEXT("\nWater: %d / %d"), Pail.charge, Homestead::PailCapacity);
+            {
+                // Shown in the footer as well as the tooltip: a controller has no hover.
+                Row.Status = FromUtf8(Homestead::PailChargeLabel(Pail).c_str());
+                Row.Detail += TEXT("\n") + Row.Status;
+            }
             Result.Add(MoveTemp(Row));
         }
     };

@@ -45,6 +45,8 @@ struct FHomesteadRow
     int32 Quantity = 0;
     FString Name;
     FString Location;
+    // A short state shown after the selected item's name in the pack's footer ("Water 5 / 6").
+    FString Status;
     FName Icon;
     FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
     Homestead::RecipeAssessment RecipeState;
