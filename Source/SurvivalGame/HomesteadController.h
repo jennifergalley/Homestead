@@ -393,7 +393,7 @@ private:
     // Hatchet biting a standing trunk, one per stroke in turn.
     UPROPERTY() TArray<TObjectPtr<USoundBase>> ChopStrokes;
     UPROPERTY() TObjectPtr<USoundBase> TreeFallThud;
-    // The scythe's one swish per sweep that cuts something (Scripts/generate_scythe_sound.py).
+    // The scythe's one swish per sweep that cuts something (Scripts/generate_scythe_sound.py); never a footstep in its place.
     UPROPERTY() TObjectPtr<USoundBase> ScytheSwish;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeA;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeB;

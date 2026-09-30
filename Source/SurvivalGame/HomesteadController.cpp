@@ -2757,8 +2757,9 @@ void AHomesteadController::LandOvergrowthSwing()
         if (const int32 Seeds = Sim.Count(Homestead::Item::Seeds) - SeedsBefore; Seeds > 0)
             Summary += FString::Printf(TEXT(", +%d Seeds"), Seeds);
         Notify(Summary + TEXT("."));
-        // One airy swish at blade contact for the whole sweep; nothing on a miss or a cancel.
-        PlayEffect(ScytheSwish ? ScytheSwish.Get() : GrassStepA.Get(), 0.8f);
+        // One airy swish at blade contact for the whole sweep; nothing on a miss or a cancel. With the
+        // cue missing she mows in silence (InitializeAudio logged it) rather than with a footstep.
+        if (ScytheSwish) PlayEffect(ScytheSwish, 0.8f);
         return;
     }
     if (SwingNode == INDEX_NONE) return;
@@ -4622,6 +4623,8 @@ void AHomesteadController::InitializeAudio()
         nullptr, LOAD_NoWarn | LOAD_Quiet);
     ScytheSwish = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/ScytheSwish.ScytheSwish"),
         nullptr, LOAD_NoWarn | LOAD_Quiet);
+    if (!ScytheSwish)
+        UE_LOG(LogTemp, Error, TEXT("The scythe's mowing cue (ScytheSwish) isn't imported, so mowing is silent. Run Scripts/bootstrap_unreal.py."));
     auto LoadPool = [](TArray<TObjectPtr<USoundBase>>& Pool, const TCHAR* Prefix, int32 Count)
     {
         Pool.Reset();
