@@ -356,6 +356,11 @@ private:
     // Baked decorative trees, shrubs and rocks for the Estate map (Content/SurvivalGame/Estate/Runtime).
     bool BuildEstateScenery();
     bool bEstateSceneryBuilt = false;
+    // The road bridge over the river (HomesteadWorldRoadBridge.cpp), built once with the estate scenery.
+    void BuildRoadBridge();
+    bool bRoadBridgeBuilt = false;
+    UPROPERTY()
+    FHomesteadWorldVisual RoadBridgeVisual;
     UPROPERTY()
     TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> EstateScenery;
     // Hides low cover (bushes, ferns, grass, cobbles) wherever a placed piece now stands, so none
@@ -503,6 +508,19 @@ private:
     void BuildLighting();
     bool LoadCameraSafeFoliageMaterials();
     bool ApplyCameraSafeFoliageMaterials(UMeshComponent& Component);
+    // Foliage shadow motion (HomesteadWorldFoliageMotion.cpp): the swaying shrubs' wind, shadows and the
+    // camera-safe dither, each behind a console variable for A/B; re-applied only when one changes.
+    void TagSwayingShrub(UMeshComponent& Component);
+    void UpdateFoliageMotion();
+    UPROPERTY()
+    TMap<TObjectPtr<UMaterialInterface>, TObjectPtr<UMaterialInstanceDynamic>> ShrubWindMaterials;
+    TMap<TWeakObjectPtr<UMaterialInstanceDynamic>, FVector2f> ShrubWindBase;   // authored WindStrength, LeafFlutter
+    TArray<TWeakObjectPtr<UMeshComponent>> SwayingShrubs;
+    UPROPERTY()
+    TObjectPtr<class UMaterialParameterCollection> CameraFoliageCollection;
+    float AppliedShrubWind = -1.0f;
+    int32 AppliedShrubShadows = -1;
+    int32 AppliedFoliageDither = -1;
     bool BuildDecorations(const Homestead::Simulation& Simulation,
         const FIntPoint* StageChunk = nullptr);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);

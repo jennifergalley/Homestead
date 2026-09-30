@@ -50,6 +50,14 @@ FORD_REACH = 18.0
 BEACH_CUT = 0.3               # across the beach the bed runs this far below the sand
 BEACH = dict(bed=1.8, depth=0.12, freeboard=0.12, slope=0.3)
 MOUTH_SURFACE = 0.08          # the stream ends at the first point whose surface is below this (sea level 0)
+# The mouth (Jenny/Integration: the river stopped a couple of metres short of the sea, with dry sand and
+# the ocean's shore wash between): cut the channel through the beach berm below sea level so the sea runs
+# up into it, carry the stream on until its bed is MOUTH_END_BED below the sea, and hold its surface just
+# under the ocean's there so the ribbon slides beneath the sea instead of fighting it.
+MOUTH_GROUND = 0.5            # where the beach is lower than this, the bed is cut below the sea
+MOUTH_BED = -0.3              # ... to at least this
+MOUTH_END_BED = -0.6          # the stream runs on until its bed is this far under the sea
+MOUTH_UNDER_SEA = -0.03       # its surface, where it has reached the sea
 REACH = 9.0                   # grading reach from the centreline
 DENSE_M = 0.5
 
@@ -116,6 +124,19 @@ def profile(z, layout):
     return dict(s=s, bed=bed, depth=depth, half=half, free=free, slope=slope, raise_ok=raise_ok, end=end)
 
 
+def cut_mouth(z, layout, prof):
+    """Once: lower the bed below the sea where the beach is lower than MOUTH_GROUND, and end the stream at
+    the first point whose bed is MOUTH_END_BED under the sea (kept in the stored profile afterwards)."""
+    pts = np.asarray(layout["river"], np.float64)
+    g = ground_at(z, pts[:, 0], pts[:, 1])
+    tail = np.arange(len(pts)) > len(pts) // 2          # the lower river only, never the spring
+    low = tail & (g < MOUTH_GROUND)
+    prof["bed"] = np.where(low, np.minimum(prof["bed"], MOUTH_BED), prof["bed"])
+    prof["bed"] = np.minimum.accumulate(prof["bed"])
+    deep = np.flatnonzero(tail & (prof["bed"] < MOUTH_END_BED))
+    prof["end"] = int(deep[0]) + 1 if len(deep) else len(pts)
+
+
 def carve(z, layout, prof, z_of_xy):
     """Grade the channel into z in place. z_of_xy(rows, cols) -> (x, y) maps array indices to game metres."""
     end = prof["end"]
@@ -155,6 +176,9 @@ def main():
         assert len(prof["bed"]) == n
     else:
         prof = profile(z, layout)
+    if not layout.get("riverMouth"):
+        cut_mouth(z, layout, prof)
+        layout["riverMouth"] = {"cut": True, "bed": MOUTH_BED, "endBed": MOUTH_END_BED, "underSea": MOUTH_UNDER_SEA}
 
     def r16_cells(lo, hi):
         c0, c1 = int(np.floor(lo[0])) + H, int(np.ceil(hi[0])) + H     # column = x + H
@@ -185,7 +209,7 @@ def main():
 
     end = prof["end"]
     layout["riverEnd"] = int(end)
-    layout["riverSurface"] = np.round((prof["bed"] + prof["depth"])[:end], 3).tolist()
+    layout["riverSurface"] = np.round(np.maximum(prof["bed"] + prof["depth"], MOUTH_UNDER_SEA)[:end], 3).tolist()
     layout["riverHalfWidth"] = np.round((prof["half"] + prof["depth"] / prof["slope"])[:end], 3).tolist()
     layout["riverChannel"] = {k: np.round(np.asarray(prof[k], np.float64), 4).tolist()
                               for k in ("bed", "depth", "half", "free", "slope", "raise_ok")}

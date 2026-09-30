@@ -20,14 +20,17 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadShops.cpp
     Source/SurvivalGame/Simulation/HomesteadManor.cpp
     Source/SurvivalGame/Simulation/HomesteadLamp.cpp
+    Source/SurvivalGame/Simulation/HomesteadLampLight.cpp
     Source/SurvivalGame/Simulation/HomesteadRoomAudio.cpp
     Source/SurvivalGame/Simulation/HomesteadDoor.cpp
     Source/SurvivalGame/Simulation/HomesteadChests.cpp
     Source/SurvivalGame/Simulation/HomesteadBackpack.cpp
+    Source/SurvivalGame/Simulation/HomesteadNightLight.cpp
     Source/SurvivalGame/Simulation/HomesteadPackRow.cpp
     Source/SurvivalGame/Simulation/HomesteadEstatePublicRoad.cpp
     Source/SurvivalGame/Simulation/HomesteadTravel.cpp
-    Source/SurvivalGame/Simulation/HomesteadGardenTarget.cpp)
+    Source/SurvivalGame/Simulation/HomesteadGardenTarget.cpp
+    Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
 target_compile_features(HomesteadSimulation PUBLIC cxx_std_17)
 set_target_properties(HomesteadSimulation PROPERTIES CXX_EXTENSIONS OFF)
@@ -153,6 +156,15 @@ else()
 endif()
 add_test(NAME HomesteadPublicRoadTests COMMAND HomesteadPublicRoadTests)
 
+add_executable(HomesteadCoveRouteTests Tests/HomesteadCoveRouteTests.cpp)
+target_link_libraries(HomesteadCoveRouteTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadCoveRouteTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadCoveRouteTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadCoveRouteTests COMMAND HomesteadCoveRouteTests)
+
 add_executable(HomesteadPackRowTests Tests/HomesteadPackRowTests.cpp)
 target_link_libraries(HomesteadPackRowTests PRIVATE HomesteadSimulation)
 if(MSVC)
@@ -179,3 +191,14 @@ else()
     target_compile_options(HomesteadMusicPlaylistTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
 endif()
 add_test(NAME HomesteadMusicPlaylistTests COMMAND HomesteadMusicPlaylistTests)
+
+add_executable(HomesteadNightLightTests Tests/HomesteadNightLightTests.cpp)
+target_link_libraries(HomesteadNightLightTests PRIVATE HomesteadSimulation)
+# The test also checks the world's console-variable defaults against the tuned schedule.
+target_compile_definitions(HomesteadNightLightTests PRIVATE HOMESTEAD_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+if(MSVC)
+    target_compile_options(HomesteadNightLightTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadNightLightTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadNightLightTests COMMAND HomesteadNightLightTests)
