@@ -351,7 +351,7 @@ tile. Chest/drop Water always remains visible; stowing/dropping the pail reveals
 positional-stock/save mechanics remain unchanged.
 
 PIE verifies hotbar full blue 6/empty, pack 5 Water hidden and legacy 9 tile/full bar. Missing:
-hover `Water N/6` detail, 6→5 watering, chest stow/drop and F5/F9 in PIE (native covers them). 
+hover `Water N/6` detail, 6→5 watering, chest stow/drop and F5/F9 in PIE (native covers them).
 Cherry-pick after the `a4bb831f` travel test hunk; it is independent of the pickup popup. Integration
 now owns editor/UAT to cherry-pick this, Store Map and Water's pail-prompt pair for a bounded next
 package only after targeted checks. The misleading fill prompt is unchanged here.
