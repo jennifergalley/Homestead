@@ -320,6 +320,12 @@ def main():
         if not LIB.save_loaded_asset(cue, only_if_is_dirty=False):
             raise RuntimeError(f"Could not save one-shot sound {name}.")
 
+    # The scythe's mowing swish, original: synthesized by Scripts/generate_scythe_sound.py.
+    cue = import_asset("ScytheSwish.wav", "Audio/Effects", "ScytheSwish", source_root=ROOT / "Assets" / "Audio" / "Effects")
+    cue.set_editor_property("looping", False)
+    if not LIB.save_loaded_asset(cue, only_if_is_dirty=False):
+        raise RuntimeError("Could not save one-shot sound ScytheSwish.")
+
     map_path = f"{CONTENT}/Maps/Homestead"
     if not LIB.does_asset_exist(map_path):
         LIB.make_directory(f"{CONTENT}/Maps")

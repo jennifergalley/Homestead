@@ -588,6 +588,14 @@ public:
     int FindNearestOvergrowth(Point position, double maxDistance, Item tool) const;
     // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
     std::vector<int> ScytheArcTargets(Point player, Point facing) const;
+    // One scythe sweep: each target mown as its own ClearOvergrowth, in order. The presentation plays
+    // one swish for the sweep when mown is above zero; problem is the first refusal, if any.
+    struct MowSweepResult
+    {
+        int mown = 0;
+        std::string problem;
+    };
+    MowSweepResult MowSweep(const std::vector<int>& targets, Point player);
     static double ScytheArcRadius(ToolTier tier);
     static double ScytheArcHalfAngle(ToolTier tier);
 
