@@ -10,5 +10,5 @@
 
 ## 2. Editor (Water; Unreal slot)
 
-- [ ] 2.1 `ApplyEstateHeightfield` and `ApplyEstateWeightmaps` over r16 rows 842-1425, columns 1196-1540; `bake_ocean.py` + `build_ocean.py`; `place_water.py`; `build_ground.py`; `ImportEstateMap`.
-- [ ] 2.2 PIE: walk the beach from the west boundary to the cove's headland at midday and dusk; the swell and swash foam run up the new sand, not through it; the cliffs above are unchanged; the river mouth is open.
+- [x] 2.1 `ApplyEstateHeightfield` and `ApplyEstateWeightmaps` over r16 rows 842-1425, columns 1196-1540; `bake_ocean.py` + `build_ocean.py`; `place_water.py`; `build_ground.py`; `ImportEstateMap`. _Done 2026-09-30: bands A and B of the stack's pass, `build_ocean.py` (from this checkout's `bake_ocean.py`), `place_water.py`, `build_ground.py`, `ImportEstateMap`._
+- [x] 2.2 PIE: walk the beach from the west boundary to the cove's headland at midday and dusk; the swell and swash foam run up the new sand, not through it; the cliffs above are unchanged; the river mouth is open. _Done at midday on foot, west boundary to the headland (35 points, feet 0.9-1.3 m: dry sand the whole way); cliffs unchanged, swash foam on the sand (`beach_*`). Dusk not captured._

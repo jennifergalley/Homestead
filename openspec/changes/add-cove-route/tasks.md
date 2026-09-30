@@ -13,8 +13,8 @@
 
 ## 2. Editor (Water; Unreal slot)
 
-- [ ] 2.1 `ApplyEstateHeightfield` over r16 rows 1338-1541, columns 1457-1755; `ApplyEstateWeightmaps` if needed; `build_ground.py`; `ImportEstateMap`.
-- [ ] 2.2 PIE: walk the route down and back up from the front door on the graded ground, and look at it from the cove and the manor.
+- [x] 2.1 `ApplyEstateHeightfield` over r16 rows 1338-1541, columns 1457-1755; `ApplyEstateWeightmaps` if needed; `build_ground.py`; `ImportEstateMap`. _Done 2026-09-30 in band B of the stack's pass._
+- [x] 2.2 PIE: walk the route down and back up from the front door on the graded ground, and look at it from the cove and the manor. _Done: down on foot from the front door to the sand (53 points), back up (137 points at 3 m), no stalls; captures from the sand, the hairpin and the head of the cliff steps (`cove_*`). The stair legs are graded ramps until the kit is placed._
 
 ## 3. Kit placement (Water, after Props' `add-cove-route-kit` import)
 
