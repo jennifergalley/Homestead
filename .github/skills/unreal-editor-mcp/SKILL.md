@@ -763,8 +763,12 @@ C++. Details that cost time to find:
   clear of the forward knee); the C++ settle uses the same offsets. The arms can't reach lower
   than about 30 cm while kneeling, so keep grasp and cut heights around there.
 - A bake (`rig_authoring`, `craft_hands`, ...) leaves a `HeroineRigAuthoring` actor in the level and the
-  Sequencer open. Clean up afterwards: `unreal.get_editor_subsystem(unreal.EditorActorSubsystem).destroy_actor(a)`
-  and `unreal.LevelSequenceEditorBlueprintLibrary.close_level_sequence()`, and don't save the level.
+  Sequencer open, which dirties its `__ExternalActors__` package. The authored `LS_<Name>` sequence
+  is the durable output (save and commit it through LFS); do **not** save the Estate level or that
+  external-actor package. Clean up with
+  `unreal.get_editor_subsystem(unreal.EditorActorSubsystem).destroy_actor(a)` and
+  `unreal.LevelSequenceEditorBlueprintLibrary.close_level_sequence()`, or exit with
+  `Stop-MyEditor.ps1` to discard the unsaved actor cleanly.
 - Never bake a clip while PIE is running: the bake opens a hidden "Overwrite Existing Object"
   modal behind the PIE window that doesn't take input and blocks MCP. Stop PIE first; if it
   happens anyway, `Stop-Process` the editor by PID and restart it.
@@ -811,6 +815,11 @@ setup = s.simulation_setup; setup.linear_velocity_scale = 0.5; s.simulation_setu
   initializes. Wait about 3 s before capturing. `groom_groups_desc` edits from Python don't apply:
   its struct array is a copy, and groom struct fields aren't ordinary Python attributes; inspect
   with `group.export_text()` and assign a rebuilt value back instead.
+- **Query the active hair LOD through LODSync, not UGroomComponent.** In PIE:
+  `pawn.get_component_by_class(unreal.LODSyncComponent).get_lod_sync_debug_text()` prints current
+  per-component LODs (for example `MetaHumanHair : 4`), and
+  `custom_lod_mapping` exposes the mapping used to select them. `UGroomComponent` has no Python
+  LOD getter. Use this before attributing a far-view groom artifact to physics or an LOD mapping.
 
 ### Record a playtest video and measure motion
 
