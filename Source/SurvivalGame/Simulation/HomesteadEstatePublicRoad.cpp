@@ -97,4 +97,29 @@ const PublicRoad& EstatePublicRoad()
     }();
     return Road;
 }
+
+bool IsPublicRoadsidePlacement(const EstatePlacement& placement)
+{
+    if (placement.id < PublicRoadsideFirstId || placement.id >= PublicRoadsideEndId) return false;
+    switch (placement.kind)
+    {
+    case ResourceKind::BerryBush:
+    case ResourceKind::Flowers:
+    case ResourceKind::Roots:
+    case ResourceKind::Primroses:
+    case ResourceKind::WildDaffodils:
+        break;
+    default:
+        return false;
+    }
+    const PublicRoad& road = EstatePublicRoad();
+    const PublicRoad::Nearest nearest = road.NearestTo(placement.position);
+    return nearest.distanceCm >= 320.0 && nearest.distanceCm <= 1200.0 && !road.InBridgeKeepOut(placement.position);
+}
+
+bool EstatePlacementAllowed(const EstateLayout& layout, const EstatePlacement& placement)
+{
+    const LandmarkPolygon* boundary = layout.FindPolygon(Anchor::EstateBoundary);
+    return (boundary && PointInPolygon(boundary->points, placement.position)) || IsPublicRoadsidePlacement(placement);
+}
 }

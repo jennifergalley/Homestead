@@ -383,7 +383,9 @@ std::uint64_t PlacementHashWithout(int skippedId, int& count)
     char line[256];
     for (const auto& p : ProvisionalEstatePlacements().placements)
     {
-        if (p.id == skippedId) continue;
+        // The rack, and the later forage sections appended after it was pinned (roadside 581000-581999,
+        // woods and hedges 582100-582299), so the hash still covers exactly the placements older saves know.
+        if (p.id == skippedId || (p.id >= 581000 && p.id < 582000) || (p.id >= 582100 && p.id < 582300)) continue;
         std::snprintf(line, sizeof line, "%d %d %.3f %.3f %.3f %.3f %.3f %d\n", p.id, static_cast<int>(p.kind),
             p.position.x, p.position.y, p.z, p.yaw, p.scale, p.minTier);
         for (const char* c = line; *c; ++c) { hash ^= static_cast<unsigned char>(*c); hash *= UINT64_C(1099511628211); }
