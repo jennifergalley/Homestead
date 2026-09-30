@@ -150,8 +150,11 @@ bool SHomesteadMenu::IsFocusedControlVisible() const
 {
     const auto Target = FocusWidget();
     if (!Target) return false;
+    // Settings' Save / Load / Quit row sits above the scrolling list (SettingsTopCount), so it is
+    // measured against the book, not the list's scroll box.
+    const bool bSettingsTopRow = SeenPage == 4 && Region == ERegion::Content && ContentSelection < SettingsTopCount();
     const auto Container = Dialog != EDialog::None ? StaticCastSharedPtr<SWidget>(DialogScroll)
-        : Region == ERegion::Content ? StaticCastSharedPtr<SWidget>(Scroll)
+        : Region == ERegion::Content && !bSettingsTopRow ? StaticCastSharedPtr<SWidget>(Scroll)
         : Region == ERegion::Actions ? StaticCastSharedPtr<SWidget>(DetailsScroll) : TSharedPtr<SWidget>();
     const FGeometry Bounds = Container ? Container->GetCachedGeometry() : GetCachedGeometry();
     const auto Geometry = Target->GetCachedGeometry();
