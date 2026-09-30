@@ -24,6 +24,7 @@
 #include "Misc/Paths.h"
 #include "Misc/Parse.h"
 #include "Rendering/SkeletalMeshRenderData.h"
+#include "RenderCore.h"
 
 namespace
 {

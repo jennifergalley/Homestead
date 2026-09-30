@@ -15,6 +15,7 @@
 #include "InputMappingContext.h"
 #include "InputModifiers.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
+#include "RenderCore.h"
 
 static_assert(AHomesteadCharacter::SprintEnergyFloor == Homestead::Exertion::SprintFloor, "The sprint floor lives in the simulation.");
 
