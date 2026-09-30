@@ -4,6 +4,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "Simulation/HomesteadSwingTiming.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
@@ -254,7 +255,10 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     bSwingPending = true;
     SwingSince = GetWorld()->GetTimeSeconds();
     if (const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()))
+    {
         SwingFellStartsBefore = Animation->FellStarts();
+        SwingHackStartsBefore = Animation->MacheteStarts();
+    }
 }
 
 void AHomesteadController::UpdatePendingSwing()
@@ -285,20 +289,30 @@ void AHomesteadController::UpdatePendingSwing()
         if (!Felling) bSwingPending = false;
         return;
     }
-    if (Animation && Animation->IsHacking() && Animation->MachetePhase() >= AHomesteadCharacter::MacheteClearSeconds)
+    if (!Animation)
     {
         bSwingPending = false;
-        LandOvergrowthSwing();
         return;
     }
-    // Still walking up to the billhook's stance: the hack hasn't been asked for yet.
-    if (Avatar && Avatar->IsApproachingFell())
+    // Only this press's own hack lands, at its contact: a click during the last hack's follow-through
+    // mustn't count that old clip against the new target (Homestead::SwingTiming::Advance). Walking up
+    // to the stance keeps it waiting; a hack that never starts, or stops early, drops it.
+    const bool bApproaching = Avatar && Avatar->IsApproachingFell();
+    if (bApproaching) SwingSince = GetWorld()->GetTimeSeconds();
+    switch (Homestead::SwingTiming::Advance(SwingHackStartsBefore, Animation->MacheteStarts(), Animation->IsHacking(),
+        Animation->MachetePhase(), AHomesteadCharacter::MacheteClearSeconds, bApproaching,
+        GetWorld()->GetTimeSeconds() - SwingSince, 0.4))
     {
-        SwingSince = GetWorld()->GetTimeSeconds();
-        return;
+    case Homestead::SwingTiming::Step::Land:
+        bSwingPending = false;
+        LandOvergrowthSwing();
+        break;
+    case Homestead::SwingTiming::Step::Drop:
+        bSwingPending = false;
+        break;
+    default:
+        break;
     }
-    // Interrupted before the blow landed: this swing doesn't count.
-    if (!Animation || (!Animation->IsHacking() && Age > 0.4)) bSwingPending = false;
 }
 
 void AHomesteadController::LandOvergrowthSwing(bool bMoreComing)

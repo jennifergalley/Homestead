@@ -535,6 +535,8 @@ private:
     bool bSwingFellTimed = false;
     double SwingSince = 0;
     uint32 SwingFellStartsBefore = 0;
+    // The hack clip's start counter at the press: only a hack started after it lands this swing.
+    uint32 SwingHackStartsBefore = 0;
     // Blows this press plays in one go (the pickaxe strikes every blow a rock still needs), and how many
     // have landed so far; each counts at its own contact, and the rock clears on the last.
     int32 SwingStrokes = 1;
