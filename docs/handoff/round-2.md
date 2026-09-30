@@ -123,11 +123,13 @@ Native covers bramble 70 cm behind versus valid front 200 cm prompt/clear/one ch
 thicket not blocking, berry prompt retained, no aimed behind clear, turn-around success and silent tier
 refusal. Integration cherry-picked it locally as `798ce775` atop merged `main` `144acc7b`; native
 Release 9/9 passes and review confirms Swing uses only `FindAimedOvergrowth`, never `FocusId`.
-Menu editor PID 15448 is still open, so Integration correctly holds UBT/UE.
+Editor/Game UBT succeeded in 362 seconds before the memory override; no Integration editor/PIE/UAT
+process started. Jenny is playing verified Estate PID 2328 untouched, so Integration now wakes/waits
+until her game closes and an explicit process/memory-safe grant resumes the chain.
 
-After the editor closes, required evidence is Editor/Game build plus PIE behind/front, side thicket,
-`Turn to face it` and F5/F9, then corrected Development repackage/six suites/copied-save smoke and
-final Shipping no-listener candidate. The provisional night build remains withheld and
+Required remaining evidence is PIE behind/front, side thicket, `Turn to face it` and F5/F9, then
+corrected Development repackage/six suites/copied-save smoke and final Shipping no-listener candidate.
+The provisional night build remains withheld and
 `Playtest-0929eve` remains the verified shortcut.
 
 **Provisional night package evidence:** `Build\Playtest-0929night` at `main` `5d11ceed`
@@ -140,10 +142,14 @@ corrected Development package/six suites plus copied-save smoke, then stages the
 `-ReuseCooked` candidate and proves its PID has no TCP/UDP listener using isolated `-UserDir` save
 round-trip/offscreen tests. Only an accepted Shipping candidate may retarget the Estate shortcut.
 
-**Final rain loudness decision:** rain is about half as loud in the next build (gain 0.5, -6 dB).
-Water has a headless native slot for that one change, preserving `FadeIn(2, 1)` versus the prior
-`Gain²` bug, effects slider, indoors mix and mute behavior. It integrates only after Jenny exits and
-the editor is safe, together with the aim fix before the corrected Development/Shipping package.
+**Final rain loudness partial `734813ad`:** native 10/10, no UE build or delivery claim. Rain
+`RainAudioGain` is multiplied by 0.5 linear (-6.02 dB): full default AmbienceVolume 0.7 becomes
+outdoor 0.315 / indoor 0.1225. `FadeIn(2, 1)` remains, `RainAudible` start/stop threshold is not
+halved, and indoor LPF/mute stay unchanged. The controlling user slider is **AmbienceVolume**, not
+Effects; native tests cover the 0.5 ratio across rain, indoors and slider values.
+
+It integrates only after Jenny exits and the editor is safe, together with the aim fix before the
+corrected Development/Shipping package. It does not affect the current game.
 
 **Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
 evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
@@ -678,6 +684,10 @@ requirement.
   transient sampled-ground 4x4 thin 2.5 cm-raised segments at 100 cm, no collision/shadow, green/red,
   and hides for book/shop/planning/failed/water focus with no save IDs. PIE still must cover slopes,
   turned soil, adjacent plots, blocked cells, pad/HUD behavior and z-fighting before readiness.
+- **Weedy crop-plot prompt** — **Props headless source slice, pending and not shipped.** A weedy
+  planted crop plot must offer `[F] Pull weeds` / gamepad `[X] Pull weeds`; F/X must never sow.
+  Props is extracting the focus copy/condition from current main and adds native planted/mature/clean/
+  tool-state checks. PIE after Jenny's game must verify the hint and action on the actual plot.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
