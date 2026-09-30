@@ -213,6 +213,12 @@ public:
     static bool CanPinToHotbar(Homestead::Item Item);
     bool IsPinnedToHotbar(Homestead::Item Item) const;
     bool TogglePinnedToHotbar(Homestead::Item Item);
+    // The field book's hotbar editor (HomesteadControllerHotbarEditor.cpp, rules in
+    // Simulation/HomesteadHotbarLayout.h): put a pack stack on a slot, or move/swap two slots. Only
+    // bindings change - never stock - and the selected slot index stays where it is. False (with an
+    // explanatory notice) when refused.
+    bool MenuAssignHotbarSlot(const FHomesteadRow& Row, int32 Slot);
+    bool MenuMoveHotbarSlot(int32 From, int32 To);
     // Pins `Item` if it isn't already and selects its slot, as a player would (tests, and choosing
     // seed to sow). False when it can't go on the hotbar or the hotbar is full.
     bool ChooseOnHotbar(Homestead::Item Item);
