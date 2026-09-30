@@ -366,6 +366,17 @@ Cherry-pick after the `a4bb831f` travel test hunk; it is independent of the pick
 now owns editor/UAT to cherry-pick this, Store Map and Water's pail-prompt pair for a bounded next
 package only after targeted checks. The misleading fill prompt is unchanged here.
 
+**Pail hover / pickup helper HOLD:** Menu follow-up `8cebcc84` is native 9/9 (economy 16 / scenario
+670), no UE compile/PIE. It adds `FHomesteadRow.Status` footer so mouse and gamepad see `Water N/6`;
+gamepad lacked the grid-only hover tooltip by design. It also moves the pickup gain helper to
+`Simulation/HomesteadHoldings.h`, with native berry/buy/craft/no-owned-transfer/no-Water proof (the
+revision and pack+owned stock gain logic is not itself buggy).
+
+`8cebcc84` mixes pail `9d5da35d` and pickup `b2a49e36` + `cb3f40c7` stacks, while the next package
+excludes pickup. Integration therefore holds it. Menu must publish a pail-footer-only commit atop
+`9d5da35d` and a holdings-proof commit atop `b2a49e36` + `cb3f40c7`, preserving original `8cebcc84`
+without amend/reset. Both remain partial pending compile and 720p/4K PIE.
+
 **Water pail-prompt partial `20dd9cd1`:** native 10/10, no UE or delivery claim. `FocusActions`
 shows carried empty fill / full pail full / chest pail take it / no pail requires one, and
 `FillWater` distinguishes in-chest, none, far-from-freshwater and full without changing mechanics,
