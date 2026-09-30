@@ -525,6 +525,11 @@ void FoodLabelsAndWellFedBadge()
     CHECK(Food::EffectLabel(sim.GetState(), Item::Pasty) == "+40 Energy \xC2\xB7 Well fed until 2:30 PM");
     CHECK(Food::EffectLabel(sim.GetState(), Item::Stone).empty());
     CHECK(Food::WellFedBadge(sim.GetState()).empty());
+    // The pack hover: Energy "each" belongs to the Energy, before the Well fed time.
+    CHECK(Food::PackUseText(sim.GetState(), Item::Bread) == "Food: +12 Energy each. Eat one from your pack.");
+    CHECK(Food::PackUseText(sim.GetState(), Item::Pasty)
+        == "Food: +40 Energy each. Well fed until 2:30 PM. Eat one from your pack.");
+    CHECK(Food::PackUseText(sim.GetState(), Item::Stone).empty());
     OK(sim.SetEnergy(50.0));
     OK(sim.GrantItems(Item::Pasty, 1));
     OK(sim.Eat(Item::Pasty));
@@ -540,6 +545,7 @@ void FoodLabelsAndWellFedBadge()
     State woodland = sim.GetState();
     woodland.fixedEstate = false;
     CHECK(Food::EffectLabel(woodland, Item::Pasty) == "+40 Energy");
+    CHECK(Food::PackUseText(woodland, Item::Pasty) == "Food: +40 Energy each. Eat one from your pack.");
 }
 }
 

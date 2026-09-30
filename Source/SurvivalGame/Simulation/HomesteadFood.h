@@ -39,6 +39,10 @@ std::string EatOnEstate(State& state, Item item);
 // Snack, and on the estate "+40 Energy · Well fed until 2:30 PM" for a Meal (the clock time is now +
 // WellFedHours; the book and shop pause the clock while she reads it). Empty for anything not food.
 std::string EffectLabel(const State& state, Item item);
+// The pack hover's use line for food: "Food: +12 Energy each. Eat one from your pack.", and for a
+// Meal on the estate "Food: +40 Energy each. Well fed until 2:30 PM. Eat one from your pack." Empty
+// for anything that isn't food.
+std::string PackUseText(const State& state, Item item);
 // The HUD's Well fed badge: "Well fed until 2:30 PM" while it lasts, otherwise empty.
 std::string WellFedBadge(const State& state);
 

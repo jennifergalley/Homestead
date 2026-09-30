@@ -129,12 +129,10 @@ bool AHomesteadController::MenuEntryRow(const Homestead::LayoutEntry& Entry, int
         Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
         Row.Location = CurrentContainer == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), CurrentContainer);
         // Hover text: where and how many, what it is and (for food) what eating one now would do: its
-        // Energy, and for a Meal on the estate until when she'd be Well fed (Homestead::Food::EffectLabel;
-        // the book pauses the clock). The internal stack id is not shown.
-        const std::string Energy = Homestead::Food::EffectLabel(State(), Entry.item);
+        // Energy each, and for a Meal on the estate until when she'd be Well fed (Homestead::Food::
+        // PackUseText; the book pauses the clock). The internal stack id is not shown.
         const FString Use = !IsFood(Entry.item) ? FString(TEXT("Used in the world or in recipes."))
-            : Energy.empty() ? FString(TEXT("Food. Eat one from your pack."))
-            : FString::Printf(TEXT("Food: %s each. Eat one from your pack."), *FromUtf8(Energy.c_str()));
+            : FromUtf8(Homestead::Food::PackUseText(State(), Entry.item).c_str());
         Row.Detail = FString::Printf(TEXT("%s: %d\n\n%s\n%s"), *Row.Location, Entry.quantity,
             *FromUtf8(Homestead::ItemDescription(Entry.item)), *Use);
         Row.CanStore = false;

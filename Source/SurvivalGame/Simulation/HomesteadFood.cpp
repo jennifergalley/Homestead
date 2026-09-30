@@ -49,6 +49,16 @@ std::string EffectLabel(const State& state, Item item)
     return energy + " \xC2\xB7 Well fed until " + FormatHour(state.hour + WellFedHours);
 }
 
+std::string PackUseText(const State& state, Item item)
+{
+    if (!IsEdible(item)) return {};
+    const std::string energy = FoodEnergyLabel(item);
+    std::string text = energy.empty() ? std::string("Food.") : "Food: " + energy + " each.";
+    if (state.fixedEstate && FoodClassOf(item) == FoodClass::Meal)
+        text += " Well fed until " + FormatHour(state.hour + WellFedHours) + ".";
+    return text + " Eat one from your pack.";
+}
+
 std::string WellFedBadge(const State& state)
 {
     return IsWellFed(state) ? "Well fed until " + FormatHour(state.wellFedUntilHour) : std::string();
