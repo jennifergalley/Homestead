@@ -321,15 +321,14 @@ FString AHomesteadController::BookSummary() const
     case 2: return TEXT("Choose a plan to start placing it. Materials are spent when you place it.");
     case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. She changes as you choose.")
         : TEXT("Click a swatch or style to wear it. She changes as you choose.");
-    case 3: return FString::Printf(TEXT("Woodland seed %llu | generation %u | trees you fell stay cleared."),
-        static_cast<unsigned long long>(State().world.seed), State().world.generationVersion);
+
     default: return {};
     }
 }
 
 FString AHomesteadController::BookFooter() const
 {
-    if (Page == 3 || Page == 5)
+    if (Page == 5)
         return bGamepad ? TEXT("D-pad: scroll   LB / RB: pages   B: close")
             : TEXT("Up / Down: scroll   Left / Right: pages   Esc: close");
     if (Page == 4 && Rows().IsValidIndex(Selection) && Rows()[Selection].Id == 11)

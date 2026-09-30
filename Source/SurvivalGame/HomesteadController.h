@@ -474,7 +474,7 @@ private:
     bool bConfirmRestart = false;
     bool bMusicFading = false;
     bool bWasFailed = false;
-    int32 Page = 3;
+    int32 Page = 0;
     int32 Selection = 0;
     int32 AutoSaveIndex = 0;
     // Quarter turns for pieces snapped onto a building; free-standing pieces turn by BuildYawOffset.
