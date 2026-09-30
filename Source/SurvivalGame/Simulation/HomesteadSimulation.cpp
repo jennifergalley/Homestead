@@ -2491,7 +2491,7 @@ Result Simulation::GrantItems(Item item, int count)
     ++revision_;
     return Good(std::string("Added ") + std::to_string(count) + " " + ItemName(item) + ".");
 }
-Result Simulation::Till(int cellX, int cellY, Point player)
+Result Simulation::CheckTill(int cellX, int cellY, Point player) const
 {
     if (state_.failed) return Failed();
     const int buildingX = GardenToCell(cellX), buildingY = GardenToCell(cellY);
@@ -2510,7 +2510,11 @@ Result Simulation::Till(int cellX, int cellY, Point player)
             return Bad("Choose soil away from buildings.");
     for (const auto& plot : state_.plots)
         if (plot.cellX == cellX && plot.cellY == cellY) return Bad("This cell is already tilled.");
-    if (auto ready = CheckExertion(Exertion::TillEnergy); !ready) return ready;
+    return CheckExertion(Exertion::TillEnergy);
+}
+Result Simulation::Till(int cellX, int cellY, Point player)
+{
+    if (auto ready = CheckTill(cellX, cellY, player); !ready) return ready;
     state_.plots.push_back({state_.nextId++, cellX, cellY, false, 0.0, 0.35, 0.0});
     return Exert(Exertion::TillEnergy, Good("Soil tilled. Choose seeds or a berry on your hotbar to plant here."));
 }
@@ -2533,26 +2537,36 @@ Result Simulation::Plant(int plotId, Point player, CropKind kind)
     plot->growth = 0.0;
     return Exert(Exertion::PlantEnergy, Good(std::string("Planted ") + crop.lower + ". " + ReadyInText(kind)));
 }
-Result Simulation::Water(int plotId, Point player)
+Result Simulation::CheckWater(int plotId, Point player) const
 {
     if (state_.failed) return Failed();
-    auto* plot = Find(state_.plots, plotId);
+    const auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to water it.");
     if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to water crops.");
     if (plot->moisture >= 1.0) return Bad("This soil is already fully watered.");
     if (Count(Item::Water) <= 0) return Bad(EmptyPailText);
-    if (auto ready = CheckExertion(Exertion::WaterEnergy); !ready) return ready;
+    return CheckExertion(Exertion::WaterEnergy);
+}
+Result Simulation::Water(int plotId, Point player)
+{
+    if (auto ready = CheckWater(plotId, player); !ready) return ready;
+    auto* plot = Find(state_.plots, plotId);
     if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad(EmptyPailText);
     plot->moisture = 1.0;
     return Exert(Exertion::WaterEnergy, Good("Soil watered."));
 }
-Result Simulation::Weed(int plotId, Point player)
+Result Simulation::CheckWeed(int plotId, Point player) const
 {
     if (state_.failed) return Failed();
-    auto* plot = Find(state_.plots, plotId);
+    const auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to weed it.");
     if (plot->weeds <= 0.0) return Bad("This plot is already free of weeds.");
-    if (auto ready = CheckExertion(Exertion::WeedEnergy); !ready) return ready;
+    return CheckExertion(Exertion::WeedEnergy);
+}
+Result Simulation::Weed(int plotId, Point player)
+{
+    if (auto ready = CheckWeed(plotId, player); !ready) return ready;
+    auto* plot = Find(state_.plots, plotId);
     plot->weeds = 0.0;
     return Exert(Exertion::WeedEnergy, Good("Weeds removed. The crop has more room to grow."));
 }

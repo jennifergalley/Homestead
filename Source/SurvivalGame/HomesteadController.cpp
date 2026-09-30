@@ -2,6 +2,7 @@
 #include "HomesteadEstateGround.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadGardenTarget.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
@@ -2099,10 +2100,9 @@ void AHomesteadController::UpdateFocus()
     // win): the square her reach lands in, 60 cm ahead of her, takes the focus.
     if (const APawn* Avatar = GetPawn(); Avatar && !State().plots.empty())
     {
-        constexpr double GardenReachAheadCm = 60.0;
         const FVector Forward = Avatar->GetActorForwardVector();
-        const int ReachX = Homestead::GardenCell(Position.x + Forward.X * GardenReachAheadCm);
-        const int ReachY = Homestead::GardenCell(Position.y + Forward.Y * GardenReachAheadCm);
+        const int ReachX = Homestead::GardenCell(Position.x + Forward.X * Homestead::GardenReach::PailAheadCm);
+        const int ReachY = Homestead::GardenCell(Position.y + Forward.Y * Homestead::GardenReach::PailAheadCm);
         for (const auto& Plot : State().plots)
             if (Plot.cellX == ReachX && Plot.cellY == ReachY)
             {
@@ -3091,11 +3091,12 @@ void AHomesteadController::Secondary()
 
 void AHomesteadController::TillSquareAhead(int32& X, int32& Y) const
 {
-    // The hoe's blade bites about 85 cm out; probing there keeps the bite inside the chosen square.
-    const auto Position = PlayerPoint();
+    // The hoe's blade bites about 85 cm out (Homestead::HoeCellAhead, shared with the garden outline).
     const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
-    X = Homestead::GardenCell(Position.x + Forward.X * 85);
-    Y = Homestead::GardenCell(Position.y + Forward.Y * 85);
+    int CellX = 0, CellY = 0;
+    Homestead::HoeCellAhead(PlayerPoint(), Forward.X, Forward.Y, CellX, CellY);
+    X = CellX;
+    Y = CellY;
 }
 
 void AHomesteadController::HoeSquareAhead()
