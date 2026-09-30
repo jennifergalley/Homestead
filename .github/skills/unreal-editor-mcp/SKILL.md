@@ -108,7 +108,12 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `t.FPSChart.OpenFolderOnDump 0` first (`ChartCreation.cpp`).
 - **Scratch and helper files** go in the worktree's `Saved\` (git-ignored) or
   `E:\CopilotScratch\<session-id>\`, never `%TEMP%` (on C:, and shared between sessions) or a shared
-  fixed filename. See the disk rules in `~\.copilot\copilot-instructions.md`.
+  fixed filename. Long-running sessions must periodically check
+  `~\.copilot\session-state\<session-id>\files` size: transcript images and other bulky artifacts
+  can silently fill C:. Move only the identified bulky subfolder to
+  `E:\CopilotScratch\<session-id>\` with
+  `robocopy "<source>" "<destination>" /E /MOVE`—never bulk-delete the session folder. See the
+  disk rules in `~\.copilot\copilot-instructions.md`.
 - **Jenny's playable builds.** Never retarget or overwrite `Desktop\Homestead.lnk` or anything
   under `E:\Repos\HomesteadMVP\`. The estate build gets its own "Homestead Estate" shortcut. Never
   merge the `mvp-survival` branch with `main`, in either direction.
