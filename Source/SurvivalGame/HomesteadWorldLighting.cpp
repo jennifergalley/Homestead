@@ -12,6 +12,7 @@
 #include "HAL/IConsoleManager.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
+#include "RenderUtils.h"
 
 namespace HomesteadWorldLighting
 {
