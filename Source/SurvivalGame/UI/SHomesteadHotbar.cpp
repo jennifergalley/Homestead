@@ -81,8 +81,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             {
                                 if (!Weak.IsValid()) return FName();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                // A pinned seed or food she has none of in her pack shows an empty slot
-                                // (the pin is kept, so it comes back when she has some again).
+                                // The cell's stack (the hotbar is the first row of her pack).
                                 return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available ? Snapshot[Index].Icon : FName();
                             })
                             .Tint_Lambda([Weak = Controller, Index]()
@@ -103,13 +102,13 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                         + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom)
                         .Padding(0, 0, 5, 2)
                         [
-                            // How many of a pinned food are left in the pack.
+                            // The stack's count (tools and garments are single).
                             SNew(STextBlock)
                             .Text_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return FText::GetEmpty();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || Snapshot[Index].Seed) && Snapshot[Index].Available
+                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || Snapshot[Index].Seed || Snapshot[Index].Material) && Snapshot[Index].Available
                                     ? FText::AsNumber(Snapshot[Index].Count) : FText::GetEmpty();
                             })
                             .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))

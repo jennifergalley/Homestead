@@ -418,10 +418,19 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
         int32 Next = ContentSelection;
         if (MoveWithin(Next, Entries.Num(), Columns(), Direction, DesiredColumn))
         { Select(Next, Direction.y != 0); Moved = true; }
-        else if (SeenPage == 0 && Direction.y > 0 && !HotbarCells.IsEmpty())
+        else if (SeenPage == 0 && Direction.y < 0 && !HotbarCells.IsEmpty() && !Controller->ActiveStorageChest().IsSet())
         {
-            // Below the pack grid's last row: the hotbar strip (her selection in the grid is kept).
+            // Above the pack grid's first row: the hotbar, her pack's first row (her selection in
+            // the grid is kept).
             Region = ERegion::Hotbar;
+            Moved = true;
+        }
+        else if (SeenPage == 0 && Direction.x < 0 && Controller->MenuPortraitBrush() && !Controller->ActiveStorageChest().IsSet())
+        {
+            // The pack's left edge: her portrait beside it, whatever row she is on (spatial
+            // navigation can miss the tall image from rows it doesn't overlap).
+            Region = ERegion::Portrait;
+            PortraitSelection = -1;
             Moved = true;
         }
         break;
@@ -462,8 +471,10 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
             // she is holding) off into the grid above.
             if (!Moved) return;
         }
-        // Up goes back to the grid tile she left (pack or chest), not wherever is nearest.
-        else if (Direction.y < 0 && !Entries.IsEmpty()) { Region = ERegion::Content; Select(ContentSelection, true); Moved = true; }
+        // Back to the grid tile she left (pack or chest), not wherever is nearest: up from the row
+        // under both grids with a chest open, down from the row heading the pack page.
+        else if (Direction.y == (Controller->ActiveStorageChest().IsSet() ? -1 : 1) && !Entries.IsEmpty())
+        { Region = ERegion::Content; Select(ContentSelection, true); Moved = true; }
         break;
     case ERegion::Portrait:
         if (PortraitSelection >= 0) Moved = MoveWithin(PortraitSelection, 3, 3, Direction);

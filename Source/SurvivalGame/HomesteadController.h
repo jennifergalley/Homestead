@@ -47,6 +47,8 @@ struct FHomesteadRow
     FString Location;
     // A short state shown after the selected item's name in the pack's footer ("Water 5 / 6").
     FString Status;
+    // The hotbar cell (0-9) holding this pack row, the first row of her pack; INDEX_NONE below it.
+    int32 HotbarCell = INDEX_NONE;
     FName Icon;
     FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
     Homestead::RecipeAssessment RecipeState;
@@ -60,9 +62,13 @@ struct FHomesteadHotbarSlot
     bool Assigned = false;
     bool Available = false;
     bool Selected = false;
-    // Food pinned to the hotbar: left-click eats one. Count is how many are in the pack.
+    // Food in the cell: left-click eats one. Count is the cell's stack.
     bool Food = false;
     int32 Count = 0;
+    // A material (or anything else that isn't a tool, food or seed): shows its count, does nothing.
+    bool Material = false;
+    // A garment carried in the cell (Tool stays Item::Count).
+    bool Garment = false;
     FName Icon;
     // A level shown as a thin bar along the slot's foot (the lamp's oil), 0-1; negative for none.
     float Fill = -1.0f;
@@ -209,21 +215,29 @@ public:
     int32 SelectedHotbarIndex() const { return SelectedHotbarSlot; }
     void SelectHotbarSlot(int32 Index);
     void CycleHotbar(int32 Direction);
-    // Tools and food can be pinned to the hotbar from the pack.
-    static bool CanPinToHotbar(Homestead::Item Item);
-    bool IsPinnedToHotbar(Homestead::Item Item) const;
-    bool TogglePinnedToHotbar(Homestead::Item Item);
-    // The field book's hotbar editor (HomesteadControllerHotbarEditor.cpp, rules in
-    // Simulation/HomesteadHotbarLayout.h): put a pack stack on a slot, or move/swap two slots. Only
-    // bindings change - never stock - and the selected slot index stays where it is. False (with an
-    // explanatory notice) when refused.
-    bool MenuAssignHotbarSlot(const FHomesteadRow& Row, int32 Slot);
+    // The hotbar is the first row of her pack, as in Coral Island (Simulation/HomesteadPackRow.h):
+    // ten cells holding her real carried stacks, no pins. The item in a cell (Item::Count when empty
+    // or holding a garment), the carried entry itself, and the first cell holding an item.
+    Homestead::Item HotbarItem(int32 Cell) const;
+    const Homestead::LayoutEntry* HotbarEntry(int32 Cell) const;
+    int32 HotbarCellOf(Homestead::Item Item) const;
+    int32 FirstEmptyHotbarCell() const;
+    // The field book's hotbar (HomesteadControllerHotbarEditor.cpp): put a pack or chest row in a
+    // cell (onto an empty cell it moves, onto the same item it merges, else the two swap), move one
+    // cell onto another, or move a cell's stack below the row (onto a stack there, or to the end
+    // with no target). Stock is only ever moved, and the selected cell index stays where it is.
+    // False (with an explanatory notice) when refused.
+    bool MenuPlaceInHotbar(const FHomesteadRow& Row, int32 Cell);
     bool MenuMoveHotbarSlot(int32 From, int32 To);
-    // Pins `Item` if it isn't already and selects its slot, as a player would (tests, and choosing
-    // seed to sow). False when it can't go on the hotbar or the hotbar is full.
+    bool MenuMoveHotbarToPack(int32 Cell, const FHomesteadRow* Target);
+    // The menu row for what `Cell` holds; false when it is empty.
+    bool MenuHotbarRow(int32 Cell, FHomesteadRow& Out) const;
+    // The menu row for one layout entry of `Container` (0 = her pack); false for the pail's hidden water.
+    bool MenuEntryRow(const Homestead::LayoutEntry& Entry, int32 Container, FHomesteadRow& Row) const;
+    // Moves her first stack of `Item` into the first empty cell if it isn't in the row, and selects
+    // its cell, as a player would (tests, and choosing seed to sow). False when she has none or the
+    // row is full.
     bool ChooseOnHotbar(Homestead::Item Item);
-    // Pins newly bought or given crop seed to a free hotbar slot (no-op if pinned or full).
-    void PinNewSeed(Homestead::Item Item);
     // Seed pouch: a hotbar slot holding sowing seed steps through every seed type in her pack
     // (D-pad up/down, or Q / Shift+Q), so one slot carries them all. Returns false when the selected
     // slot isn't seed, so the D-pad can do its other jobs.
@@ -586,8 +600,12 @@ private:
     void HideNativeMenu();
     void ShowHotbar();
     void HideHotbar();
+    // A new game's row: the lamp in cell 8 (key 8) if she carries it, the rest empty for the tools
+    // she hafts; selects cell 1.
     void ResetHotbar();
-    // Layout is the save's HotbarLayout: older hotbars gain the machete and berries once.
+    // Applies a save's hotbar. Saves from before the row (HotbarLayout 3 or older) kept a pinned
+    // list: her first carried stack of each pinned item moves into that cell once; pins she has
+    // none of become ordinary empty cells.
     void SanitizeHotbar(const TArray<int32>& Slots, int32 Selected, int32 Layout);
     void EatFromHotbar(Homestead::Item Food);
     // The garden square the hoe lands on, just ahead of her.
@@ -601,11 +619,15 @@ private:
     // Jenny's playtest kit (tools, bed, two chests; seeds on new games). Skipped in automation.
     void GrantPlaytestKit(bool bNewGame);
     void UseSelectedTool();
-    // Pins a newly hafted tool to the hotbar (if needed) and selects it.
+    // Selects a newly hafted tool's hotbar cell (it arrives in the first empty one).
     void SlotHaftedTool(Homestead::Recipe Recipe);
     void NotifyResourceAction(const Homestead::Result& Result, USoundBase* SuccessCue);
-    TArray<int32> HotbarSlots;
     int32 SelectedHotbarSlot = 0;
+    TArray<FHomesteadHotbarSlot> BuildHotbarSnapshot() const;
+    mutable TArray<FHomesteadHotbarSlot> HotbarSnapshotCache;
+    mutable uint64 HotbarSnapshotFrame = MAX_uint64;
+    mutable uint64 HotbarSnapshotRevision = 0;
+    mutable int32 HotbarSnapshotSelected = INDEX_NONE;
     int32 HoveredHotbarSlot = INDEX_NONE;
     FHomesteadSaveRoute SaveRoute;
     bool bSaveRoutingReady = false;

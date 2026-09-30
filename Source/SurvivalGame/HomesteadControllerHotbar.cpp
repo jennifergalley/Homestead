@@ -5,7 +5,10 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadCrops.h"
+#include "HomesteadSave.h"
 #include "Simulation/HomesteadHotbarLayout.h"
+#include "Simulation/HomesteadLamp.h"
+#include "Simulation/HomesteadPackRow.h"
 #include "Simulation/HomesteadPail.h"
 #include "UI/SHomesteadHotbar.h"
 #include "UI/SHomesteadHudScale.h"
@@ -22,6 +25,8 @@ using HomesteadControllerHelpers::IsFoodItem;
 using HomesteadControllerHelpers::IsHotbarTool;
 using HomesteadControllerHelpers::PlantingCrop;
 using HomesteadControllerText::Text;
+
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadHotbar, Log, All);
 
 void AHomesteadController::ShowHotbar()
 {
@@ -76,103 +81,76 @@ bool AHomesteadController::ShouldShowHotbar() const
     return bWorldReady && !bBookOpen && !bPlanning && !IsFailed() && !ShopScreen.IsValid();
 }
 
+Homestead::Item AHomesteadController::HotbarItem(int32 Cell) const
+{
+    const auto* Entry = HotbarEntry(Cell);
+    return Entry && Entry->wearableId == 0 ? Entry->item : Homestead::Item::Count;
+}
+
+const Homestead::LayoutEntry* AHomesteadController::HotbarEntry(int32 Cell) const
+{
+    return Homestead::PackRowRules::RowEntry(State(), Cell);
+}
+
+int32 AHomesteadController::HotbarCellOf(Homestead::Item Item) const
+{
+    for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell)
+        if (HotbarItem(Cell) == Item) return Cell;
+    return INDEX_NONE;
+}
+
+int32 AHomesteadController::FirstEmptyHotbarCell() const
+{
+    for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell)
+        if (State().packRow[Cell].Empty()) return Cell;
+    return INDEX_NONE;
+}
+
 void AHomesteadController::ResetHotbar()
 {
-    HotbarSlots.Init(-1, 10);
-    // In the order she hafts them: the billhook first, for the bramble at the door.
-    HotbarSlots[0] = static_cast<int32>(Homestead::Item::Billhook);
-    HotbarSlots[1] = static_cast<int32>(Homestead::Item::Hatchet);
-    HotbarSlots[2] = static_cast<int32>(Homestead::Item::Scythe);
-    HotbarSlots[3] = static_cast<int32>(Homestead::Item::Pickaxe);
-    HotbarSlots[4] = static_cast<int32>(Homestead::Item::DiggingStick);
-    HotbarSlots[5] = static_cast<int32>(Homestead::Item::WateringCan);
-    HotbarSlots[6] = static_cast<int32>(Homestead::Item::Berries);
-    HotbarSlots[7] = static_cast<int32>(Homestead::Item::OilLamp);
+    // The row holds real stacks now (Simulation/HomesteadPackRow.h): she starts with the lamp on
+    // key 8 and the cells before it free for the tools she hafts, which arrive in the first empty
+    // cell. Anything else she starts with sits below the row.
+    std::array<int, Homestead::PackRowSize> Start;
+    Start.fill(-1);
+    Start[7] = static_cast<int>(Homestead::Item::OilLamp);
+    Sim.ArrangePackRow(Start);
     SelectedHotbarSlot = 0;
     HoveredHotbarSlot = INDEX_NONE;
 }
 
 void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Selected, int32 Layout)
 {
-    // The rules (and their native tests) live in Simulation/HomesteadHotbarLayout.h. Copied element
-    // by element: an old save's empty array has no data pointer to take a range from.
+    SelectedHotbarSlot = FMath::Clamp(Selected, 0, Homestead::PackRowSize - 1);
+    // A save that already carries the row (layout 4 on) needs nothing more.
+    if (Layout >= UHomesteadSave::CurrentHotbarLayout) return;
+    // The old pinned hotbar (Simulation/HomesteadHotbarLayout.h). Copied element by element: an old
+    // save's empty array has no data pointer to take a range from.
     std::vector<int> Saved;
     Saved.reserve(Slots.Num());
     for (const int32 Value : Slots) Saved.push_back(Value);
     const auto Clean = Homestead::SanitizeHotbarLayout(Saved, Layout);
-    HotbarSlots.Init(-1, 10);
-    for (int32 Index = 0; Index < 10; ++Index) HotbarSlots[Index] = Clean[Index];
-    SelectedHotbarSlot = FMath::Clamp(Selected, 0, 9);
-}
-
-bool AHomesteadController::CanPinToHotbar(Homestead::Item Item)
-{
-    return Homestead::CanPinToHotbar(Item);
-}
-
-void AHomesteadController::PinNewSeed(Homestead::Item Item)
-{
-    // Bought or given crop seed goes straight onto the hotbar, ready to sow: into a free slot, or
-    // else into the slot of a seed she has run out of.
-    const auto* Crop = Homestead::CropForSeed(Item);
-    if (!Crop || Item == Homestead::Item::Berries || IsPinnedToHotbar(Item)) return;
-    if (HotbarSlots.IndexOfByKey(-1) != INDEX_NONE)
-    {
-        TogglePinnedToHotbar(Item);
-        return;
-    }
-    for (int32& Slot : HotbarSlots)
-        if (Slot >= 0 && static_cast<Homestead::Item>(Slot) != Homestead::Item::Berries
-            && Homestead::CropForSeed(static_cast<Homestead::Item>(Slot)) && Sim.Count(static_cast<Homestead::Item>(Slot)) <= 0)
-        {
-            Slot = static_cast<int32>(Item);
-            return;
-        }
-}
-
-bool AHomesteadController::IsPinnedToHotbar(Homestead::Item Item) const
-{
-    return HotbarSlots.Contains(static_cast<int32>(Item));
-}
-
-bool AHomesteadController::TogglePinnedToHotbar(Homestead::Item Item)
-{
-    const FString Name = UTF8_TO_TCHAR(Homestead::ItemName(Item));
-    if (!CanPinToHotbar(Item))
-    {
-        Notify(TEXT("Only tools, food and seeds can go on the hotbar."), true);
-        return false;
-    }
-    const int32 Value = static_cast<int32>(Item);
-    const int32 Pinned = HotbarSlots.IndexOfByKey(Value);
-    if (Pinned != INDEX_NONE)
-    {
-        HotbarSlots[Pinned] = -1;
-        Notify(Name + TEXT(" unpinned from the hotbar."));
-        return true;
-    }
-    // Food goes to the right-hand slots first, leaving 1-5 for tools.
-    int32 Free = INDEX_NONE;
-    for (int32 Step = 0; Step < 10 && Free == INDEX_NONE; ++Step)
-    {
-        const int32 Index = (Step + 5) % 10;
-        if (HotbarSlots.IsValidIndex(Index) && HotbarSlots[Index] < 0) Free = Index;
-    }
-    if (Free == INDEX_NONE)
-    {
-        Notify(TEXT("The hotbar is full. Unpin something first."), true);
-        return false;
-    }
-    HotbarSlots[Free] = Value;
-    Notify(FString::Printf(TEXT("%s pinned to hotbar slot %d."), *Name, Free == 9 ? 0 : Free + 1));
-    return true;
+    std::array<int, Homestead::PackRowSize> Items;
+    for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell) Items[Cell] = Clean[Cell];
+    const auto Result = Sim.ArrangePackRow(Items);
+    UE_LOG(LogHomesteadHotbar, Display, TEXT("Old pinned hotbar moved into the pack row (layout %d): %s"),
+        Layout, UTF8_TO_TCHAR(Result.message.c_str()));
 }
 
 bool AHomesteadController::ChooseOnHotbar(Homestead::Item Item)
 {
-    if (!IsPinnedToHotbar(Item) && !TogglePinnedToHotbar(Item)) return false;
-    SelectHotbarSlot(HotbarSlots.IndexOfByKey(static_cast<int32>(Item)));
-    return SelectedHotbarSlot == HotbarSlots.IndexOfByKey(static_cast<int32>(Item));
+    int32 Cell = HotbarCellOf(Item);
+    if (Cell == INDEX_NONE)
+    {
+        const int32 Free = FirstEmptyHotbarCell();
+        const Homestead::LayoutEntry* Stack = nullptr;
+        for (const auto& Entry : State().inventoryLayout)
+            if (Entry.wearableId == 0 && Entry.item == Item) { Stack = &Entry; break; }
+        if (Free == INDEX_NONE || !Stack || !Sim.MoveToPackRow(Stack->groupId, 0, Free, Sim.GetRevision())) return false;
+        Cell = Free;
+    }
+    SelectHotbarSlot(Cell);
+    return SelectedHotbarSlot == Cell;
 }
 
 void AHomesteadController::EatFromHotbar(Homestead::Item Food)
@@ -181,7 +159,10 @@ void AHomesteadController::EatFromHotbar(Homestead::Item Food)
     // Every deliberate press is a mouthful, even mid-chew: the meal lands now and the one bite clip
     // already playing stands for them all (PlayEat won't restart or stack it).
     const double FoodBefore = State().hunger, EnergyBefore = State().energy;
-    const auto Result = Sim.Eat(Food);
+    // The selected cell's own stack goes down (the row holds real stacks); otherwise any.
+    const auto* Stack = HotbarEntry(SelectedHotbarSlot);
+    const auto Result = Stack && Stack->wearableId == 0 && Stack->item == Food
+        ? Sim.EatGroup(Stack->groupId, Sim.GetRevision()) : Sim.Eat(Food);
     // Success shows as the vitals' +N popups (MealGain); only refusals need words.
     NotifyResourceAction(Result, nullptr);
     if (!Result.ok) return;
@@ -193,6 +174,20 @@ void AHomesteadController::EatFromHotbar(Homestead::Item Food)
 
 TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
 {
+    // The HUD and the book ask many times a frame; build it once per frame, pack revision and
+    // selection (the row names real stacks, so each cell is a lookup in her pack).
+    if (HotbarSnapshotCache.Num() == Homestead::PackRowSize && HotbarSnapshotFrame == GFrameCounter
+        && HotbarSnapshotRevision == Sim.GetRevision() && HotbarSnapshotSelected == SelectedHotbarSlot)
+        return HotbarSnapshotCache;
+    HotbarSnapshotCache = BuildHotbarSnapshot();
+    HotbarSnapshotFrame = GFrameCounter;
+    HotbarSnapshotRevision = Sim.GetRevision();
+    HotbarSnapshotSelected = SelectedHotbarSlot;
+    return HotbarSnapshotCache;
+}
+
+TArray<FHomesteadHotbarSlot> AHomesteadController::BuildHotbarSnapshot() const
+{
     TArray<FHomesteadHotbarSlot> Result;
     Result.Reserve(10);
     for (int32 Index = 0; Index < 10; ++Index)
@@ -200,22 +195,33 @@ TArray<FHomesteadHotbarSlot> AHomesteadController::HotbarSnapshot() const
         FHomesteadHotbarSlot Slot;
         Slot.Index = Index;
         Slot.Selected = Index == SelectedHotbarSlot;
-        if (HotbarSlots.IsValidIndex(Index) && HotbarSlots[Index] >= 0)
+        if (const auto* Entry = HotbarEntry(Index))
         {
-            Slot.Tool = static_cast<Homestead::Item>(HotbarSlots[Index]);
-            Slot.Assigned = CanPinToHotbar(Slot.Tool);
+            Slot.Assigned = true;
+            Slot.Available = true;
+            if (Entry->wearableId != 0)
+            {
+                Slot.Garment = true;
+                if (const auto* Instance = Sim.GetWearable(Entry->wearableId))
+                    if (const auto* Info = Homestead::GetWearableDefinition(Instance->definition))
+                        Slot.Icon = Instance->definition == Homestead::WearableDefinition::LeatherShoes
+                            ? FName(TEXT("leather-shoes")) : FName(UTF8_TO_TCHAR(Info->key));
+                Result.Add(Slot);
+                continue;
+            }
+            Slot.Tool = Entry->item;
             Slot.Food = IsFoodItem(Slot.Tool);
-            Slot.Count = Slot.Assigned ? Sim.Count(Slot.Tool) : 0;
-            Slot.Available = Slot.Assigned && Slot.Count > 0;
+            Slot.Count = Entry->quantity;
             Slot.Icon = HotbarIcon(Slot.Tool);
-            if (Slot.Tool == Homestead::Item::OilLamp && Slot.Available)
+            if (Slot.Tool == Homestead::Item::OilLamp)
                 Slot.Fill = static_cast<float>(Sim.LampOil() / Homestead::Lamp::CapacityHours);
             // The pail's water shows on the pail (HomesteadPail.h), like the lamp's oil.
-            if (Slot.Tool == Homestead::Item::WateringCan && Slot.Available)
+            if (Slot.Tool == Homestead::Item::WateringCan)
                 if (const auto Pail = Homestead::PresentPail(State()); Pail.gauge)
                     Slot.Fill = static_cast<float>(Pail.charge) / Homestead::PailCapacity;
             Slot.Seed = IsSowingSeed(Slot.Tool);
             Slot.Pouch = Slot.Seed && OtherPouchSeeds(Index) > 0;
+            Slot.Material = !Slot.Food && !Slot.Seed && !IsHotbarTool(Slot.Tool);
         }
 
         Result.Add(Slot);
@@ -232,16 +238,14 @@ Homestead::Item AHomesteadController::PresentedTool() const
 {
     if (!ShouldShowHotbar()) return Homestead::Item::Count;
     const int32 Slot = HoveredHotbarSlot != INDEX_NONE ? HoveredHotbarSlot : SelectedHotbarSlot;
-    if (!HotbarSlots.IsValidIndex(Slot) || HotbarSlots[Slot] < 0) return Homestead::Item::Count;
-    const auto Tool = static_cast<Homestead::Item>(HotbarSlots[Slot]);
-    return IsHotbarTool(Tool) && Sim.Count(Tool) > 0 ? Tool : Homestead::Item::Count;
+    const auto Tool = HotbarItem(Slot);
+    return Tool != Homestead::Item::Count && IsHotbarTool(Tool) ? Tool : Homestead::Item::Count;
 }
 
 Homestead::Item AHomesteadController::SelectedCarriedTool() const
 {
-    if (!HotbarSlots.IsValidIndex(SelectedHotbarSlot) || HotbarSlots[SelectedHotbarSlot] < 0) return Homestead::Item::Count;
-    const auto Tool = static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]);
-    return IsHotbarTool(Tool) && Sim.Count(Tool) > 0 ? Tool : Homestead::Item::Count;
+    const auto Tool = HotbarItem(SelectedHotbarSlot);
+    return Tool != Homestead::Item::Count && IsHotbarTool(Tool) ? Tool : Homestead::Item::Count;
 }
 
 void AHomesteadController::SelectHotbarSlot(int32 Index)
@@ -251,10 +255,8 @@ void AHomesteadController::SelectHotbarSlot(int32 Index)
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
             Avatar->CancelAction(true);
     SelectedHotbarSlot = Index;
-    const auto Snapshot = HotbarSnapshot();
-    ToastText = !Snapshot[Index].Assigned ? FString(TEXT("Empty slot"))
-        : Snapshot[Index].Available || IsHotbarTool(Snapshot[Index].Tool) ? Text(Homestead::ItemName(Snapshot[Index].Tool))
-        : FString::Printf(TEXT("Empty slot (no %s left)"), *Text(Homestead::ItemName(Snapshot[Index].Tool)).ToLower());
+    FHomesteadRow Held;
+    ToastText = MenuHotbarRow(Index, Held) ? Held.Name : FString(TEXT("Empty slot"));
     bToastError = false;
     ToastRemaining = 1.0f;
     PlayEffect(UIClick, 0.05f);
@@ -270,8 +272,9 @@ void AHomesteadController::UseSelectedTool()
 {
     // While planning, the left mouse button or right trigger places the piece, as E / A does.
     if (bPlanning && !bBookOpen) { Interact(); return; }
-    if (!ShouldShowHotbar() || !HotbarSlots.IsValidIndex(SelectedHotbarSlot)) return;
-    const int32 ToolValue = HotbarSlots[SelectedHotbarSlot];
+    if (!ShouldShowHotbar() || SelectedHotbarSlot < 0 || SelectedHotbarSlot >= Homestead::PackRowSize) return;
+    const auto Selected = HotbarItem(SelectedHotbarSlot);
+    const int32 ToolValue = Selected == Homestead::Item::Count ? -1 : static_cast<int32>(Selected);
     // Seeds on bare tilled soil: plant them there. A selected berry is always eaten (X / F sows
     // berry seed into a bare plot), so she can snack beside her own garden.
     if (ToolValue >= 0 && static_cast<Homestead::Item>(ToolValue) != Homestead::Item::Berries)

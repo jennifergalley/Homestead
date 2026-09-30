@@ -353,6 +353,16 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     const FString Summary = SeenPage == 0 ? Controller->MenuInventorySummary() : Controller->BookSummary();
     if (!Summary.IsEmpty())
         InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 12)[ Text(Summary, 17) ];
+    PackDropArea.Reset();
+    ChestDropArea.Reset();
+    if (SeenPage == 0 && !Storage)
+    {
+        // The hotbar is the pack's first row (Simulation/HomesteadPackRow.h): its ten keyed cells
+        // head the pack, and the grid below holds the rest.
+        InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 4)
+        [ Text(TEXT("Hotbar  -  the first row of your pack (keys 1-0)"), 16) ];
+        InventoryColumn->AddSlot().AutoHeight().HAlign(HAlign_Left).Padding(0, 0, 0, 10)[ BuildBookHotbar() ];
+    }
     if (Storage)
     {
         TSharedPtr<SVerticalBox> ChestColumn;
@@ -400,6 +410,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 ]
             ]
         ];
+        PackDropArea = PackColumn;
+        ChestDropArea = ChestColumn;
     }
     else if (SeenPage == 6)
     {
@@ -418,14 +430,15 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             + SScrollBox::Slot().HAlign(SeenPage <= 2 ? HAlign_Left : HAlign_Fill)
             [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
         ];
+        if (SeenPage == 0) PackDropArea = Scroll;
     }
-    if (SeenPage == 0)
+    if (SeenPage == 0 && Storage)
     {
-        // The same ten slots whenever the inventory is open; with a chest open they run across the
-        // book under both grids (only pack stacks can be put on them).
-        InventoryColumn->AddSlot().AutoHeight().Padding(0, Storage ? 8 : 10, 0, 4)
-        [ Text(Storage ? TEXT("Hotbar  (pack items only)") : TEXT("Hotbar"), 16) ];
-        InventoryColumn->AddSlot().AutoHeight().HAlign(Storage ? HAlign_Center : HAlign_Left)[ BuildBookHotbar() ];
+        // With a chest open the pack's first row runs across the book under both grids; chest
+        // stacks can be dragged straight into it.
+        InventoryColumn->AddSlot().AutoHeight().Padding(0, 8, 0, 4)
+        [ Text(TEXT("Hotbar  -  the first row of your pack (keys 1-0)"), 16) ];
+        InventoryColumn->AddSlot().AutoHeight().HAlign(HAlign_Center)[ BuildBookHotbar() ];
     }
     if (SeenPage == 0 && !Storage)
     {

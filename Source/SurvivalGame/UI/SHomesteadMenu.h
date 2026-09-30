@@ -82,8 +82,9 @@ public:
     int32 GetDraftQuantity() const { return Amount; }
     bool IsPointerDraggingItem() const { return bPointerDraggingItem; }
     bool IsVirtualDraggingItem() const { return bVirtualDraggingItem; }
-    // The pack page's hotbar strip: its ten slot buttons, and what she has picked up to place on it
-    // (a pack stack from "Put on a hotbar slot", or a slot being moved).
+    // The hotbar row: the first row of her pack (Simulation/HomesteadPackRow.h), shown as ten cells
+    // above the pack grid (under both grids with a chest open), and what she has picked up to place
+    // in it (a pack or chest stack from "Move to a hotbar slot", or a cell being moved).
     int32 GetBookHotbarSlotCount() const { return HotbarCells.Num(); }
     TSharedPtr<SWidget> GetBookHotbarSlot(int32 Slot) const { return HotbarCells.IsValidIndex(Slot) ? HotbarCells[Slot] : nullptr; }
     int32 GetHeldHotbarSlot() const { return HeldHotbarSlot; }
@@ -91,7 +92,7 @@ public:
     int32 GetFocusedHotbarSlot() const { return Region == ERegion::Hotbar ? HotbarSelection : INDEX_NONE; }
     // Keyboard / controller: A (or Enter) on a hotbar slot, as a player would.
     void ActivateHotbarSlot(int32 Slot);
-    // "Put on a hotbar slot": hold this pack stack and move focus to the strip to choose a slot.
+    // "Move to a hotbar slot": hold this stack and move focus to the row to choose a cell.
     void BeginPlacingOnHotbar(const FHomesteadRow& Row);
     float GetContentScrollOffset() const { return Scroll ? Scroll->GetScrollOffset() : 0.0f; }
     float GetContentScrollBottom() const
@@ -191,7 +192,7 @@ private:
     // Where a popup opens: at the pointer for mouse input, beside the focused tile otherwise.
     FVector2D PopupAnchorFor(const TSharedPtr<SWidget>& Widget, bool bPointer) const;
     // Shift+click: the whole stack or garment to the other side of an open chest; with no chest
-    // open, pins tools and food to the hotbar and puts on carried garments.
+    // open, moves a pack stack between the hotbar row and the rest of the pack, and puts on carried garments.
     void QuickMove(int32 Index);
     void ComputeActions();
     int32 StorageColumns() const;
@@ -213,6 +214,9 @@ private:
     // PointerHotbarTarget the slot under a drag; HeldHotbarSlot a slot picked up to move (pointer
     // drag or A); HeldHotbarRow a pack stack waiting for a slot.
     TArray<TSharedPtr<SWidget>> HotbarCells;
+    // Where a cell dragged out of the row can land: the rest of her pack, and the open chest.
+    TSharedPtr<SWidget> PackDropArea;
+    TSharedPtr<SWidget> ChestDropArea;
     int32 HotbarSelection = 0;
     int32 PointerHotbarTarget = INDEX_NONE;
     int32 HeldHotbarSlot = INDEX_NONE;
@@ -229,7 +233,7 @@ private:
     int32 HotbarCellAt(FVector2D Position) const;
     FLinearColor HotbarCellColor(int32 Slot) const;
     bool IsHotbarDropTarget(int32 Slot) const;
-    // The pack stack a drag or pick-up would put on the hotbar, if any.
+    // The pack or chest stack a drag or pick-up would put in the hotbar row, if any.
     const FHomesteadRow* HotbarCandidateRow() const;
     void EndHotbarPointerDrag();
     // Right-click (or Y / F) on a used slot: "Clear this slot" / Cancel.

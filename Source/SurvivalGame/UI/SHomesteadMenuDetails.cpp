@@ -294,8 +294,7 @@ FString SHomesteadMenu::ActionLabel(EHomesteadItemAction Action) const
     case EHomesteadItemAction::Dye: return TEXT("Change dye");
     case EHomesteadItemAction::Drop: return TEXT("Drop...");
     case EHomesteadItemAction::Pin:
-        return Controller.IsValid() && Row.Id >= 0 && Row.Id < static_cast<int32>(Homestead::Item::Count)
-            && Controller->IsPinnedToHotbar(static_cast<Homestead::Item>(Row.Id)) ? TEXT("Unpin from hotbar") : TEXT("Pin to hotbar");
+        return Row.HotbarCell >= 0 ? TEXT("Move into the pack") : TEXT("Move to the hotbar");
     default: return Row.Action.IsEmpty() ? TEXT("Change / activate") : Row.Action;
     }
 }
@@ -334,6 +333,6 @@ FString SHomesteadMenu::PackHint() const
         return Subject + TEXT("A  pick up / place     Y  item actions     X  split in half     LB / RB  pages");
     return Subject + (Chest
         ? TEXT("Shift+click  move across     Right-click  actions     Ctrl+click  amount     Drag  move")
-        : TEXT("Right-click  actions     Shift+click  pin / wear     Ctrl+click  amount     Drag  rearrange"));
+        : TEXT("Right-click  actions     Shift+click  hotbar / wear     Ctrl+click  amount     Drag  rearrange"));
 }
 }

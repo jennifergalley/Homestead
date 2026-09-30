@@ -49,10 +49,10 @@ inline FName HotbarIcon(Homestead::Item Item)
     case Homestead::Item::Pickaxe: return TEXT("pickaxe");
     case Homestead::Item::OilLamp: return TEXT("oil-lamp");
     default:
-        // Crop seeds and produce use their catalogue glyph.
-        if (Homestead::CropForSeed(Item) || (Item >= Homestead::Item::Turnip && Item <= Homestead::Item::Strawberries))
-            return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item)));
-        return NAME_None;
+        // Everything else (seed, produce, food, materials: the hotbar is her pack's first row and
+        // holds any stack) uses its catalogue glyph, as the pack grid does.
+        if (static_cast<int>(Item) < 0 || static_cast<int>(Item) >= Homestead::ItemCount) return NAME_None;
+        return FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Item)));
     }
 }
 

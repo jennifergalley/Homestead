@@ -68,8 +68,7 @@ void AHomesteadController::UpdateFocus()
     {
         // With the watering can out and not full, the stream wins over a crop on the bank when she
         // is at least as close to the water's edge, and always once the can is empty.
-        const bool bCan = HotbarSlots.IsValidIndex(SelectedHotbarSlot)
-            && HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::WateringCan)
+        const bool bCan = HotbarItem(SelectedHotbarSlot) == Homestead::Item::WateringCan
             && Sim.Count(Homestead::Item::WateringCan) > 0;
         const int32 Water = Sim.Count(Homestead::Item::Water);
         const double Edge = FMath::Max(0.0, WaterEdgeDistance(Position, false));
@@ -80,8 +79,7 @@ void AHomesteadController::UpdateFocus()
         }
     }
     // With the machete out, the nearest bush or bramble within arm's reach takes the focus.
-    const bool bMachete = HotbarSlots.IsValidIndex(SelectedHotbarSlot)
-        && HotbarSlots[SelectedHotbarSlot] == static_cast<int32>(Homestead::Item::Machete)
+    const bool bMachete = HotbarItem(SelectedHotbarSlot) == Homestead::Item::Machete
         && Sim.Count(Homestead::Item::Machete) > 0;
     AHomesteadWorld::FUnderbrushTarget Brush;
     if (bMachete && Landscape && Landscape->FindUnderbrushNear(Sim, FVector2D(Position.x, Position.y), 110.0f, Brush))
@@ -170,10 +168,8 @@ FString AHomesteadController::FocusActions() const
     const FString X = bGamepad ? TEXT("[X]") : TEXT("[F]");
     const FString Use = bGamepad ? TEXT("[RT]") : TEXT("[LMB]");
     Homestead::Item SelectedTool = Homestead::Item::Count;
-    const bool ToolAvailable = HotbarSlots.IsValidIndex(SelectedHotbarSlot)
-        && HotbarSlots[SelectedHotbarSlot] >= 0
-        && IsHotbarTool(SelectedTool = static_cast<Homestead::Item>(
-            HotbarSlots[SelectedHotbarSlot]))
+    const bool ToolAvailable = HotbarItem(SelectedHotbarSlot) != Homestead::Item::Count
+        && IsHotbarTool(SelectedTool = HotbarItem(SelectedHotbarSlot))
         && Sim.Count(SelectedTool) > 0;
     switch (Focus)
     {
@@ -226,10 +222,10 @@ FString AHomesteadController::FocusActions() const
                 {
                     // [A]/[E] sows the seed stack chosen on the hotbar (a berry sows berry seed; wild
                     // roots are chosen as Seeds).
-                    if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
-                        if (const auto* Seed = Homestead::CropForSeed(static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot])))
+                    if (HotbarItem(SelectedHotbarSlot) != Homestead::Item::Count)
+                        if (const auto* Seed = Homestead::CropForSeed(HotbarItem(SelectedHotbarSlot)))
                         {
-                            const auto Chosen = static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]);
+                            const auto Chosen = HotbarItem(SelectedHotbarSlot);
                             const FString What = Seed->kind == Homestead::CropKind::Berries ? FString(TEXT("berry seeds"))
                                 : Seed->kind == Homestead::CropKind::Roots ? FString(TEXT("roots")) : Text(Seed->lower);
                             if (Sim.Count(Chosen) <= 0)

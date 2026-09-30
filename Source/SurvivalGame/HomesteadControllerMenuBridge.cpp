@@ -121,15 +121,10 @@ void AHomesteadController::SlotHaftedTool(Homestead::Recipe Recipe)
     case Homestead::Recipe::HaftPickaxe: Tool = Homestead::Item::Pickaxe; break;
     default: return;
     }
-    // A newly hafted tool goes straight to hand: onto the hotbar if it isn't there, and selected.
-    const int32 Value = static_cast<int32>(Tool);
-    int32 Slot = HotbarSlots.IndexOfByKey(Value);
-    if (Slot == INDEX_NONE)
-    {
-        Slot = HotbarSlots.IndexOfByKey(-1);
-        if (Slot == INDEX_NONE) return;
-        HotbarSlots[Slot] = Value;
-    }
+    // A newly hafted tool goes straight to hand: it arrived in the first empty hotbar cell (the row
+    // is the first row of her pack), so select that cell; with the row full it waits below.
+    const int32 Slot = HotbarCellOf(Tool);
+    if (Slot == INDEX_NONE) return;
     SelectedHotbarSlot = Slot;
 }
 

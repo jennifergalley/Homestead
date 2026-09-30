@@ -10,6 +10,7 @@
 
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
+#include "Components/AudioComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformProcess.h"
@@ -99,7 +100,10 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     Save->MusicVolume = MusicVolume;
     Save->AmbienceVolume = AmbienceVolume;
     Save->EffectsVolume = EffectsVolume;
-    Save->HotbarSlots = HotbarSlots;
+    // Written for reference only: the row itself is saved with the simulation (layout 4 on).
+    Save->HotbarSlots.Init(-1, Homestead::PackRowSize);
+    for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell)
+        if (const auto Item = HotbarItem(Cell); Item != Homestead::Item::Count) Save->HotbarSlots[Cell] = static_cast<int32>(Item);
     Save->SelectedHotbarSlot = SelectedHotbarSlot;
     Save->HotbarLayout = UHomesteadSave::CurrentHotbarLayout;
     Save->SaveLabel = CurrentSaveLabel();
@@ -235,14 +239,7 @@ void AHomesteadController::GrantPlaytestKit(bool bNewGame)
         UE_LOG(LogTemp, Warning, TEXT("Playtest kit was not granted: %s"), UTF8_TO_TCHAR(Result.message.c_str()));
         return;
     }
-    for (const auto Tool : {Homestead::Item::Billhook, Homestead::Item::Hatchet, Homestead::Item::Scythe,
-        Homestead::Item::Pickaxe, Homestead::Item::DiggingStick, Homestead::Item::WateringCan, Homestead::Item::Seeds})
-    {
-        const int32 Value = static_cast<int32>(Tool);
-        if (HotbarSlots.Contains(Value)) continue;
-        const int32 Empty = HotbarSlots.IndexOfByKey(-1);
-        if (Empty != INDEX_NONE) HotbarSlots[Empty] = Value;
-    }
+    // The tools arrive in the first empty hotbar cells (the row is the first row of her pack).
     if (Landscape) Landscape->Refresh(Sim);
     UE_LOG(LogTemp, Display, TEXT("Playtest kit granted (new game %d): %s"), bNewGame, UTF8_TO_TCHAR(Result.message.c_str()));
 }

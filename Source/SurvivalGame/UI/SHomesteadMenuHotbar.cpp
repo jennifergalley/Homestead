@@ -1,9 +1,11 @@
-// The field book's hotbar strip: the ten numbered slots shown whenever the inventory is open (on the
-// Pack page under the grid, or under both grids with a chest open). She drops a pack stack on a slot
-// or drags one slot onto another; the rules live in Simulation/HomesteadHotbarLayout.h and the
-// controller applies them (HomesteadControllerHotbarEditor.cpp). Bindings only, never stock.
+// The field book's hotbar row: her pack's first row (Simulation/HomesteadPackRow.h), ten keyed cells
+// holding real stacks, shown whenever the inventory is open (heading the Pack page, or under both
+// grids with a chest open). She drags a pack or chest stack into a cell, a cell onto another, or a
+// cell back down into her pack or the chest: onto an empty place it moves, onto the same item it
+// merges, onto anything else the two swap (HomesteadControllerHotbarEditor.cpp).
 #include "SHomesteadMenuPrivate.h"
 #include "../Simulation/HomesteadHotbarLayout.h"
+#include "../Simulation/HomesteadPackRow.h"
 
 namespace HomesteadMenus
 {
@@ -36,11 +38,9 @@ FLinearColor SHomesteadMenu::HotbarCellColor(int32 Slot) const
 {
     if (IsHotbarDropTarget(Slot))
     {
-        // Gold where it will go; a rust wash for something the hotbar won't take (the drop says why).
+        // Gold where it will go; a rust wash for something worn, which has to come off first.
         const FHomesteadRow* Row = HeldHotbarSlot == INDEX_NONE ? HotbarCandidateRow() : nullptr;
-        const bool Refused = Row && (Row->Subject != EHomesteadMenuSubject::ItemGroup || Row->ContainerId != 0 || Row->Id < 0
-            || Row->Id >= static_cast<int32>(Homestead::Item::Count)
-            || !AHomesteadController::CanPinToHotbar(static_cast<Homestead::Item>(Row->Id)));
+        const bool Refused = Row && Row->ContainerId < 0;
         return Refused ? FLinearColor(0.42f, 0.16f, 0.08f, 0.9f) : MenuGold;
     }
     if (Slot == HeldHotbarSlot) return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
@@ -57,9 +57,8 @@ FHomesteadHotbarSlot SHomesteadMenu::BookHotbarSlot(int32 Slot) const
 }
 TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
 {
-    // The same ten numbered slots as the world hotbar, laid in the book so she can set them up:
-    // drop a pack stack on a slot, or drag one slot onto another. A seed or food she has run out
-    // of keeps its slot here (dimmed, "0") even though the world hotbar shows that slot empty.
+    // The same ten numbered cells as the world hotbar: the first row of her pack, holding the very
+    // stacks the world hotbar shows. A stack used up leaves its cell empty.
     TSharedRef<SHorizontalBox> Strip = SNew(SHorizontalBox);
     HotbarCells.Reset();
     for (int32 Slot = 0; Slot < Homestead::HotbarSize; ++Slot)
@@ -67,15 +66,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
         const auto SlotInfo = [this, Slot]() { return BookHotbarSlot(Slot); };
         TSharedRef<SMenuButton> Button = SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(0)
             .ButtonColorAndOpacity_Lambda([this, Slot]() { return HotbarCellColor(Slot); })
-            .ToolTipText(TAttribute<FText>::CreateLambda([SlotInfo, Slot]()
+            .ToolTipText(TAttribute<FText>::CreateLambda([this, Slot]()
             {
-                const auto Info = SlotInfo();
                 const FString Key = UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str());
-                if (!Info.Assigned)
-                    return FText::FromString(FString::Printf(TEXT("Slot %s: empty. Drag a tool, food or seed here."), *Key));
-                const FString Name = UTF8_TO_TCHAR(Homestead::ItemName(Info.Tool));
-                return FText::FromString(Info.Available ? FString::Printf(TEXT("Slot %s: %s"), *Key, *Name)
-                    : FString::Printf(TEXT("Slot %s: %s (none in your pack; it comes back when you have some)"), *Key, *Name));
+                FHomesteadRow Held;
+                if (!Controller.IsValid() || !Controller->MenuHotbarRow(Slot, Held))
+                    return FText::FromString(FString::Printf(TEXT("Slot %s: empty. Drag anything from your pack or the chest here."), *Key));
+                return FText::FromString(Held.Quantity > 1 ? FString::Printf(TEXT("Slot %s: %s  x%d"), *Key, *Held.Name, Held.Quantity)
+                    : FString::Printf(TEXT("Slot %s: %s"), *Key, *Held.Name));
             }))
             .OnPressed_Lambda([this, Slot, SlotInfo]()
             {
@@ -94,7 +92,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                 if (bSuppressHotbarClick) { bSuppressHotbarClick = false; return FReply::Handled(); }
                 Region = ERegion::Hotbar;
                 HotbarSelection = Slot;
-                // Holding a pack stack ("Put on a hotbar slot"): a click places it.
+                // Holding a stack ("Move to a hotbar slot"): a click places it.
                 if (HeldHotbarRow.IsSet()) ActivateHotbarSlot(Slot);
                 bFocusPending = true;
                 return FReply::Handled();
@@ -104,6 +102,22 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
             SNew(SBox).WidthOverride(MenuHotbarStyle::SlotSize).HeightOverride(MenuHotbarStyle::SlotSize)
             [
                 SNew(SOverlay)
+                + SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)
+                [
+                    // The same thin ink outline and pale fill as an empty pack tile, so an empty cell
+                    // reads as a slot of her pack (the fill steps aside for focus and drop colours).
+                    SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(1.5f)
+                    .BorderBackgroundColor(FLinearColor(Ink.R, Ink.G, Ink.B, 0.2f)).Visibility(EVisibility::HitTestInvisible)
+                    [
+                        SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                        .BorderBackgroundColor_Lambda([this, Slot]()
+                        {
+                            const bool Lit = IsHotbarDropTarget(Slot) || Slot == HeldHotbarSlot
+                                || (Region == ERegion::Hotbar && Slot == HotbarSelection);
+                            return Lit ? FLinearColor::Transparent : FLinearColor(0.2f, 0.3f, 0.24f, 0.25f);
+                        })
+                    ]
+                ]
                 + SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)
                 [
                     // Her selected slot keeps the world hotbar's gold frame.
@@ -123,7 +137,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                         .Kind_Lambda([SlotInfo]() { return SlotInfo().Icon; })
                         .Tint_Lambda([this, Slot, SlotInfo]()
                         {
-                            if (IsHotbarDropTarget(Slot)) return PineInk;
+                            // Pine on the gold of her selected cell, as on the world hotbar.
+                            if (IsHotbarDropTarget(Slot) || (Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot)) return PineInk;
                             return SlotInfo().Available ? MenuGold : Muted.CopyWithNewOpacity(0.45f);
                         })
                     ]
@@ -132,21 +147,21 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                 [
                     SNew(STextBlock).Text(FText::FromString(UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str())))
                     .Font(FCoreStyle::GetDefaultFontStyle("Bold", 13))
-                    .ColorAndOpacity_Lambda([this, Slot]() { return FSlateColor(IsHotbarDropTarget(Slot) ? PineInk : Ink); })
+                    .ColorAndOpacity_Lambda([this, Slot]() { return FSlateColor(IsHotbarDropTarget(Slot) || (Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot) ? PineInk : Ink); })
                     .Visibility(EVisibility::HitTestInvisible)
                 ]
                 + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(0, 0, 5, 2)
                 [
-                    // How many of a pinned food or seed she carries; "0" when she has run out.
+                    // The stack's count (tools and garments are single).
                     SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Bold", 13))
                     .Text_Lambda([SlotInfo]()
                     {
                         const auto Info = SlotInfo();
-                        return Info.Assigned && (Info.Food || Info.Seed) ? FText::AsNumber(Info.Count) : FText::GetEmpty();
+                        return Info.Assigned && (Info.Food || Info.Seed || Info.Material) ? FText::AsNumber(Info.Count) : FText::GetEmpty();
                     })
                     .ColorAndOpacity_Lambda([this, Slot, SlotInfo]()
                     {
-                        if (IsHotbarDropTarget(Slot)) return FSlateColor(PineInk);
+                        if (IsHotbarDropTarget(Slot) || (Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot)) return FSlateColor(PineInk);
                         return FSlateColor(SlotInfo().Available ? Ink : Muted);
                     })
                     .Visibility(EVisibility::HitTestInvisible)
@@ -160,47 +175,58 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
 void SHomesteadMenu::OpenHotbarSlotMenu(int32 Slot, bool bPointer)
 {
     if (!Controller.IsValid() || Dialog != EDialog::None) return;
-    const auto Snapshot = Controller->HotbarSnapshot();
-    if (!Snapshot.IsValidIndex(Slot) || !Snapshot[Slot].Assigned) return;
+    FHomesteadRow Row;
+    if (!Controller->MenuHotbarRow(Slot, Row)) return;
     CancelHotbarHolds();
     Region = ERegion::Hotbar;
     HotbarSelection = Slot;
-    const auto Item = Snapshot[Slot].Tool;
-    PopupTitle = FString::Printf(TEXT("Slot %s: %s"), UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str()),
-        UTF8_TO_TCHAR(Homestead::ItemName(Item)));
-    PopupOptions.Reset();
-    // Clearing only unbinds the slot; what she carries stays in her pack.
-    PopupOptions.Add({[]() { return FString(TEXT("Clear this slot")); },
-        [this, Item]() { if (Controller.IsValid() && Controller->IsPinnedToHotbar(Item)) Controller->TogglePinnedToHotbar(Item); }, nullptr});
-    PopupOptions.Add({[]() { return FString(TEXT("Cancel")); }, nullptr, nullptr});
-    PopupAnchor = PopupAnchorFor(HotbarCells.IsValidIndex(Slot) ? HotbarCells[Slot] : nullptr, bPointer);
-    SetDialog(EDialog::Context);
+    // A cell holds a real stack, so it offers what that stack does anywhere in her pack (eat, drop,
+    // split, store, "Move into the pack").
+    OpenItemContextMenuFor(Row, PopupAnchorFor(HotbarCells.IsValidIndex(Slot) ? HotbarCells[Slot] : nullptr, bPointer));
 }
 void SHomesteadMenu::EndHotbarPointerDrag()
 {
     const bool WasDragging = bHotbarPointerDragging;
     const int32 From = HeldHotbarSlot;
     int32 To = INDEX_NONE;
-    bool bOverSource = false;
+    int32 Onto = INDEX_NONE;
+    bool bOverSource = false, bOverPack = false, bOverChest = false;
     if (WasDragging && FSlateApplication::IsInitialized())
     {
         const FVector2D Position = FSlateApplication::Get().GetCursorPos();
         To = HotbarCellAt(Position);
         bOverSource = To == From;
+        if (To == INDEX_NONE)
+        {
+            for (int32 Index = 0; Index < Cells.Num() && Onto == INDEX_NONE; ++Index)
+                if (Cells[Index] && Entries.IsValidIndex(Index) && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position)) Onto = Index;
+            bOverPack = PackDropArea && PackDropArea->GetCachedGeometry().IsUnderLocation(Position);
+            bOverChest = ChestDropArea && ChestDropArea->GetCachedGeometry().IsUnderLocation(Position);
+        }
     }
     bHotbarPointerDown = false;
     bHotbarPointerDragging = false;
     PointerHotbarTarget = INDEX_NONE;
     HeldHotbarSlot = INDEX_NONE;
     bSuppressHotbarClick = WasDragging && bOverSource;
-    // Onto another slot it moves or swaps; released off the strip, nothing changes.
-    if (WasDragging && To != INDEX_NONE && To != From && Controller.IsValid())
+    if (!WasDragging || !Controller.IsValid()) return;
+    // Onto another cell it moves, merges or swaps; onto a stack below it merges or swaps; onto the
+    // rest of her pack it goes to its end; onto the chest it is stored. Anywhere else, nothing.
+    if (To != INDEX_NONE && To != From)
     {
         Controller->MenuMoveHotbarSlot(From, To);
         Region = ERegion::Hotbar;
         HotbarSelection = To;
         bFocusPending = true;
     }
+    else if (Onto != INDEX_NONE) Controller->MenuMoveHotbarToPack(From, &Entries[Onto]);
+    else if (bOverChest && Controller->ActiveStorageChest().IsSet())
+    {
+        FHomesteadRow Chest;
+        Chest.ContainerId = Controller->ActiveStorageChest().GetValue();
+        Controller->MenuMoveHotbarToPack(From, &Chest);
+    }
+    else if (bOverPack) Controller->MenuMoveHotbarToPack(From, nullptr);
 }
 void SHomesteadMenu::CancelHotbarHolds()
 {
@@ -214,48 +240,44 @@ void SHomesteadMenu::CancelHotbarHolds()
 void SHomesteadMenu::BeginPlacingOnHotbar(const FHomesteadRow& Row)
 {
     if (!Controller.IsValid() || SeenPage != 0) return;
-    // Chest goods come to the pack first; say so rather than moving them implicitly.
-    if (Row.Subject != EHomesteadMenuSubject::ItemGroup || Row.ContainerId != 0)
+    if (Row.ContainerId < 0 || (Row.Subject != EHomesteadMenuSubject::ItemGroup && Row.Subject != EHomesteadMenuSubject::Wearable))
     {
-        Controller->MenuAssignHotbarSlot(Row, FMath::Clamp(HotbarSelection, 0, Homestead::HotbarSize - 1));
+        // Worn: the controller refuses it with the reason.
+        Controller->MenuPlaceInHotbar(Row, FMath::Clamp(HotbarSelection, 0, Homestead::PackRowSize - 1));
         return;
     }
     CancelPointerItemDrag();
     CancelVirtualItemDrag();
     CancelHotbarHolds();
     HeldHotbarRow = Row;
-    // Start on the slot it already has, else the first empty one, else her selected slot.
-    const auto Item = static_cast<Homestead::Item>(Row.Id);
-    const auto Snapshot = Controller->HotbarSnapshot();
-    int32 Start = Snapshot.IndexOfByPredicate([Item](const FHomesteadHotbarSlot& Slot) { return Slot.Assigned && Slot.Tool == Item; });
-    if (Start == INDEX_NONE) Start = Snapshot.IndexOfByPredicate([](const FHomesteadHotbarSlot& Slot) { return !Slot.Assigned; });
-    if (Start == INDEX_NONE) Start = Controller->SelectedHotbarIndex();
+    // Start on the first empty cell, else her selected one.
+    const int32 Free = Controller->FirstEmptyHotbarCell();
     Region = ERegion::Hotbar;
-    HotbarSelection = FMath::Clamp(Start, 0, Homestead::HotbarSize - 1);
+    HotbarSelection = FMath::Clamp(Free != INDEX_NONE ? Free : Controller->SelectedHotbarIndex(), 0, Homestead::PackRowSize - 1);
     bFocusPending = true;
 }
 void SHomesteadMenu::ActivateHotbarSlot(int32 Slot)
 {
-    if (!Controller.IsValid() || Slot < 0 || Slot >= Homestead::HotbarSize) return;
+    if (!Controller.IsValid() || Slot < 0 || Slot >= Homestead::PackRowSize) return;
     Region = ERegion::Hotbar;
     HotbarSelection = Slot;
     bFocusPending = true;
-    // A pack stack picked up in the grid (A) or with "Put on a hotbar slot": place it here.
+    // A stack picked up in a grid (A) or with "Move to a hotbar slot": place it here.
     if (bVirtualDraggingItem && Entries.IsValidIndex(VirtualDragSource))
     {
         const FHomesteadRow Row = Entries[VirtualDragSource];
         CancelVirtualItemDrag();
-        Controller->MenuAssignHotbarSlot(Row, Slot);
+        Controller->MenuPlaceInHotbar(Row, Slot);
         return;
     }
     if (HeldHotbarRow.IsSet())
     {
         const FHomesteadRow Row = HeldHotbarRow.GetValue();
         HeldHotbarRow.Reset();
-        Controller->MenuAssignHotbarSlot(Row, Slot);
+        Controller->MenuPlaceInHotbar(Row, Slot);
         return;
     }
-    // A slot picked up with A: put it down here (moving, or swapping with what's here).
+    // A cell picked up with A: put it down here (moving, merging, or swapping with what's here).
     if (HeldHotbarSlot != INDEX_NONE)
     {
         const int32 From = HeldHotbarSlot;
@@ -263,8 +285,7 @@ void SHomesteadMenu::ActivateHotbarSlot(int32 Slot)
         if (From != Slot) Controller->MenuMoveHotbarSlot(From, Slot);
         return;
     }
-    const auto Snapshot = Controller->HotbarSnapshot();
-    if (Snapshot.IsValidIndex(Slot) && Snapshot[Slot].Assigned) HeldHotbarSlot = Slot;
+    if (Controller->HotbarEntry(Slot)) HeldHotbarSlot = Slot;
 }
 FString SHomesteadMenu::HotbarHint() const
 {
@@ -272,25 +293,23 @@ FString SHomesteadMenu::HotbarHint() const
     const bool Pad = Controller->UsesGamepad();
     const FHomesteadRow* Held = HeldHotbarRow.IsSet() ? &HeldHotbarRow.GetValue()
         : bVirtualDraggingItem && Entries.IsValidIndex(VirtualDragSource) ? &Entries[VirtualDragSource] : nullptr;
-    if (Held && Held->ContainerId != 0)
-        return FString::Printf(TEXT("%s is in the chest: take it to your pack first, then put it on the hotbar\n%s"), *EntryName(*Held),
-            Pad ? TEXT("B  cancel") : TEXT("Esc  cancel"));
     if (Held)
         return FString::Printf(TEXT("Choose a hotbar slot for %s\n%s"), *EntryName(*Held),
-            Pad ? TEXT("D-pad  choose slot     A  put it here     B  cancel")
-                : TEXT("Click a slot or press Enter to put it there     Esc  cancel"));
-    const auto Snapshot = Controller->HotbarSnapshot();
-    const auto Name = [&Snapshot](int32 Slot)
+            Pad ? TEXT("D-pad  choose slot     A  put it here (swaps)     B  cancel")
+                : TEXT("Click a slot or press Enter to put it there (swaps)     Esc  cancel"));
+    const auto Name = [this](int32 Slot)
     {
-        return Snapshot.IsValidIndex(Slot) && Snapshot[Slot].Assigned ? FString(UTF8_TO_TCHAR(Homestead::ItemName(Snapshot[Slot].Tool))) : FString(TEXT("Empty"));
+        FHomesteadRow Row;
+        return Controller->MenuHotbarRow(Slot, Row) ? Row.Name : FString(TEXT("Empty"));
     };
     if (HeldHotbarSlot != INDEX_NONE)
         return FString::Printf(TEXT("Moving %s from slot %s\n%s"), *Name(HeldHotbarSlot),
             UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(HeldHotbarSlot).c_str()),
             Pad ? TEXT("D-pad  choose slot     A  put it here (swaps)     B  cancel")
                 : TEXT("Enter  put it here (swaps)     Esc  cancel"));
-    const FString Subject = FString::Printf(TEXT("Slot %s: %s\n"), UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(HotbarSelection).c_str()), *Name(HotbarSelection));
-    return Subject + (Pad ? TEXT("A  pick up and move     Y  clear slot     In the pack, Y  Put on a hotbar slot")
-        : TEXT("Drag a pack stack onto a slot     Drag slot onto slot to swap     Right-click  clear"));
+    const FString Subject = FString::Printf(TEXT("Slot %s: %s  (the first row of your pack)\n"),
+        UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(HotbarSelection).c_str()), *Name(HotbarSelection));
+    return Subject + (Pad ? TEXT("A  pick up and move     Y  options     In the pack, Y  Move to a hotbar slot")
+        : TEXT("Drag stacks in, out and between slots     Right-click  options"));
 }
 }
