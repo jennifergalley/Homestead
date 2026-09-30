@@ -233,7 +233,7 @@ void AHomesteadController::BeginPlay()
     if (!Loaded) GrantPlaytestKit(true);
     bHasPlayableSession = !bTestResetRequired;
     if (!Loaded && bEstateMap && !bTestResetRequired && (!SmokeTest || EstateSmoke) && !VisualPlaytest) BeginNewGameSetup();
-    else if (!Loaded) OpenBook(bTestResetRequired ? 4 : 3);
+    else if (!Loaded) OpenBook(bTestResetRequired ? 4 : 0);
     ShowHotbar();
     if (!StartupProbeDirectory.IsEmpty() && !Loaded) { FinishStartupProbe(TEXT("The isolated prepared save did not load.")); return; }
     InitializeAudio();

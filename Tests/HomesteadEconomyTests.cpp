@@ -110,14 +110,25 @@ void Edit(Simulation& sim, double hunger, double energy)
 
 void MoneyFormatting()
 {
-    CHECK(FormatMoney(0) == "$0.00");
-    CHECK(FormatMoney(5) == "$0.05");
-    CHECK(FormatMoney(1240) == "$12.40");
-    CHECK(FormatMoney(123456789) == "$1,234,567.89");
-    CHECK(FormatMoney(100000) == "$1,000.00");
-    CHECK(FormatMoney(-100) == "-$1.00");
-    CHECK(FormatMoney(INT64_MIN) == "-$92,233,720,368,547,758.08");
-    CHECK(FormatMoneyDelta(200) == "+$2.00" && FormatMoneyDelta(-40) == "-$0.40" && FormatMoneyDelta(0) == "+$0.00");
+    // Whole coins: the raw stored value is the number of coins (no x100 migration), grouped, with
+    // singular/plural and no currency sign or decimals.
+    CHECK(FormatMoney(0) == "0 coins");
+    CHECK(FormatMoney(1) == "1 coin");
+    CHECK(FormatMoney(5) == "5 coins");
+    CHECK(FormatMoney(40) == "40 coins");
+    CHECK(FormatMoney(999) == "999 coins");
+    CHECK(FormatMoney(1000) == "1,000 coins");
+    CHECK(FormatMoney(1240) == "1,240 coins");
+    CHECK(FormatMoney(2234) == "2,234 coins");
+    CHECK(FormatMoney(123456789) == "123,456,789 coins");
+    CHECK(FormatMoney(MaxMoney) == "100,000,000,000 coins");
+    CHECK(FormatMoney(-1) == "-1 coin" && FormatMoney(-100) == "-100 coins");
+    CHECK(FormatMoney(INT64_MIN) == "-9,223,372,036,854,775,808 coins");
+    CHECK(FormatMoney(INT64_MAX) == "9,223,372,036,854,775,807 coins");
+    CHECK(FormatMoneyDelta(200) == "+200 coins" && FormatMoneyDelta(-40) == "-40 coins" && FormatMoneyDelta(0) == "+0 coins"
+        && FormatMoneyDelta(1) == "+1 coin" && FormatMoneyDelta(-1) == "-1 coin");
+    for (const Cents raw : {Cents(0), Cents(1), Cents(80), Cents(1000), MaxMoney, Cents(INT64_MIN)})
+        CHECK(FormatMoney(raw).find('$') == std::string::npos && FormatMoney(raw).find('.') == std::string::npos);
     CHECK(BuyPrice(Item::Pasty) == 100 && SellPrice(Item::Stone) == 5 && BuyBackPrice(Item::Stone) == 5);
     CHECK(SellDownAmount(0) == 0 && SellDownAmount(1) == 1 && SellDownAmount(10) == 4 && SellDownAmount(3) == 2);
     CHECK(FormatHour(8) == "8 AM" && FormatHour(18) == "6 PM" && FormatHour(0) == "12 AM" && FormatHour(12.5) == "12:30 PM");
@@ -168,7 +179,7 @@ void SellAStack()
     const auto revision = sim.GetRevision();
     const auto sold = sim.Sell(store.shop, Item::Stone, 12, store.customer);
     OK(sold);
-    CHECK(sold.message == "Sold 12 Stone for $0.60.");
+    CHECK(sold.message == "Sold 12 Stone for 60 coins.");
     CHECK(sold.revision > revision);
     CHECK(sim.Count(Item::Stone) == 8);
     CHECK(sim.GetState().money == before + 12 * SellPrice(Item::Stone));
@@ -199,7 +210,7 @@ void RejectedTradesChangeNothing()
     unchanged(sim.Sell(store.shop, Item::Count, 1, store.customer));
     unchanged(sim.Sell(store.shop + 999, Item::Stone, 1, store.customer));
     unchanged(sim.Sell(store.shop, Item::Stone, 1, {store.counter.x, store.counter.y - 1000.0}));
-    unchanged(sim.Buy(store.shop, Item::Pasty, 11, false, store.customer)); // $11.00 of her $10.00.
+    unchanged(sim.Buy(store.shop, Item::Pasty, 11, false, store.customer)); // 1,100 coins of her 1,000.
     unchanged(sim.Buy(store.shop, Item::Stone, 1, false, store.customer));  // Not a shop good.
     unchanged(sim.Buy(store.shop, Item::Stone, 1, true, store.customer));   // She hasn't sold any.
     unchanged(sim.Buy(store.shop, Item::Pasty, 0, false, store.customer));
@@ -223,7 +234,7 @@ void BuyAndEatAPasty()
     Edit(sim, 40.0, 50.0);
     const auto bought = sim.Buy(store.shop, Item::Pasty, 1, false, store.customer);
     OK(bought);
-    CHECK(bought.message == "Bought 1 Cornish pasty for $1.00.");
+    CHECK(bought.message == "Bought 1 Cornish pasty for 100 coins.");
     CHECK(sim.GetState().money == StartingMoney - 100 && sim.Count(Item::Pasty) == 1);
     const double hunger = sim.GetState().hunger, energy = sim.GetState().energy;
     OK(sim.Eat(Item::Pasty));
@@ -232,7 +243,7 @@ void BuyAndEatAPasty()
     // Three loaves at 50 cents.
     const auto loaves = sim.Buy(store.shop, Item::Bread, 3, false, store.customer);
     OK(loaves);
-    CHECK(loaves.message == "Bought 3 loaves of bread for $1.50.");
+    CHECK(loaves.message == "Bought 3 loaves of bread for 150 coins.");
     CHECK(sim.GetState().money == StartingMoney - 100 - 150 && sim.Count(Item::Bread) == 3);
     // Everything she has left, exactly.
     OK(sim.GrantMoney(-sim.GetState().money + 25));
@@ -483,6 +494,25 @@ void WalkTheRoad()
     CHECK(sim.DozeCount() == 0);
 }
 
+// Shops and the pack show the canonical nominal Energy one food restores, from its catalogue row.
+void FoodEnergyLabels()
+{
+    CHECK(FoodEnergyLabel(Item::Pasty) == "+25 Energy");
+    CHECK(FoodEnergyLabel(Item::Bread) == "+8 Energy");
+    CHECK(FoodEnergyLabel(Item::Cheese) == "+12 Energy");
+    for (int i = 0; i < ItemCount; ++i)
+    {
+        const auto item = static_cast<Item>(i);
+        const std::string label = FoodEnergyLabel(item);
+        const long energy = std::lround(GetItemInfo(item).energy);
+        if (IsEdible(item) && energy > 0) CHECK(label == "+" + std::to_string(energy) + " Energy");
+        else CHECK(label.empty());
+    }
+    // Not food: tools, materials and raw produce that needs cooking show nothing.
+    CHECK(FoodEnergyLabel(Item::Hatchet).empty() && FoodEnergyLabel(Item::Stone).empty() && FoodEnergyLabel(Item::Potato).empty());
+    CHECK(FoodEnergyLabel(Item::Count).empty() && FoodEnergyLabel(static_cast<Item>(-1)).empty());
+}
+
 void PailWaterPresentation()
 {
     Simulation sim;
@@ -552,6 +582,7 @@ int main(int argc, char** argv)
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);
     Run("pail water shows on the pail", PailWaterPresentation);
+    Run("food shows its Energy", FoodEnergyLabels);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

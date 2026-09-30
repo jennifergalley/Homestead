@@ -377,8 +377,7 @@ void AHomesteadSmokeTest::QueueEat(Homestead::Item Item)
     const auto Before = MakeShared<int32>(0);
     const auto Hunger = MakeShared<double>(0);
     Add(FString::Printf(TEXT("Open pack to eat %s"), UTF8_TO_TCHAR(Homestead::ItemName(Item))),
-        [this]() { Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); },
+        [this]() { Tap(EKeys::Gamepad_Special_Left); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Use the carried inventory view for the selected meal"),
         [this]() { Controller->MenuInventoryView(0); Controller->OpenBook(0); },
@@ -1040,8 +1039,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
             *RegrowthBefore = Plot ? Plot->growth : -1;
             Tap(EKeys::Gamepad_FaceButton_Bottom);
-            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
         },
         [this, RegrowthHour, RegrowthBefore, RegrowthSleep, BerryPlotId, ProtectedRecovery, RecoveryPosition]()
         {
@@ -1124,8 +1122,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Save the complete harvested homestead from the paused pack"),
         [this, SavedState, SavedLook]()
         {
-            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
             *SavedState = Controller->Simulation().Serialize();
             *SavedLook = Controller->GetAppearance();
             Tap(EKeys::F5);
@@ -1209,8 +1206,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             return Piece && Piece->fuelHours > 7.8 && !Controller->ToastIsError();
         });
     Add(TEXT("Restore harvested plot, depleted forage, buildings, fuel, chest, inventory and appearance"),
-        [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); },
+        [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder); },
         [this, SavedState, SavedLook, Home, BerryPlotId]()
         {
             const auto* BerryPlot = FindPlot(Controller->State(), *BerryPlotId);
@@ -1238,8 +1234,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Save a living second-generation garden"),
         [this, SavedState]()
         {
-            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
             *SavedState = Controller->Simulation().Serialize();
             Tap(EKeys::F5);
         },
@@ -1252,8 +1247,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             return Plot && Plot->planted && Plot->moisture > 0.99 && !Controller->ToastIsError();
         });
     Add(TEXT("Reload retains the exact living crop and no offline progression"),
-        [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); },
+        [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder); },
         [this, SavedState, SavedLook, BerryPlotId]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
@@ -1340,8 +1334,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]()
         {
             Tap(EKeys::Gamepad_FaceButton_Bottom);
-            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_LeftShoulder);
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
+            Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
         },
         [this, ProtectedRecovery, RecoveryPosition, SavedLook, Home, BerryPlotId]()
         {

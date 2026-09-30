@@ -21,7 +21,8 @@ using HomesteadControllerText::SleepClockText;
 
 namespace HomesteadControllerBookDetail
 {
-constexpr int32 FieldBookPages[] = {0, 1, 2, 7, 3, 6};
+constexpr int32 FieldBookPages[] = {0, 1, 2, 7, 6}; // As SHomesteadMenuPrivate.h: page 3 (Guidebook) is retired.
+constexpr int32 RetiredGuidebookPage = 3;
 
 int32 ShiftFieldBookPage(int32 Page, int32 Direction)
 {
@@ -52,13 +53,15 @@ const TCHAR* RecipeDescription(Homestead::Recipe Recipe)
 using HomesteadControllerBookDetail::Edible;
 using HomesteadControllerBookDetail::RecipeDescription;
 using HomesteadControllerBookDetail::ShiftFieldBookPage;
+using HomesteadControllerBookDetail::RetiredGuidebookPage;
 
 void AHomesteadController::OpenBook(int32 TargetPage)
 {
     EndPlacement();
     HoveredHotbarSlot = INDEX_NONE;
     bBookOpen = true;
-    Page = FMath::Clamp(TargetPage, 0, 7);
+    // The Guidebook (page 3) is retired: anything still asking for it gets the pack.
+    Page = TargetPage == RetiredGuidebookPage ? 0 : FMath::Clamp(TargetPage, 0, 7);
     Selection = 0;
     bConfirmRestart = false;
     PlayEffect(UIClick, 0.08f);
@@ -108,8 +111,6 @@ void AHomesteadController::OpenSettings() { if (bBookOpen && Page == 4) CloseBoo
 void AHomesteadController::OpenCraft() { if (!IsFailed()) OpenBook(1); }
 
 void AHomesteadController::OpenBuild() { if (!IsFailed()) OpenBook(2); }
-
-void AHomesteadController::OpenJournal() { if (!IsFailed()) OpenBook(3); }
 
 void AHomesteadController::OpenMap() { if (!IsFailed()) OpenBook(7); }
 
@@ -211,35 +212,20 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         {
             const auto Piece = static_cast<Homestead::Piece>(Index);
             if (!Homestead::IsBuildable(Piece)) continue;
+            // Activating a plan closes the book and starts a placement preview (BeginPlacement): she
+            // aims it in the world and confirms there, and only then are the materials spent.
             Result.Add({ Index, Text(Homestead::PieceName(Piece)),
-                FString::Printf(TEXT("Needs: %s"), *Text(Homestead::PieceRequirements(Piece))), TEXT("plan") });
+                FString::Printf(TEXT("Needs: %s\nChoose a spot in the world, then place it. Nothing is spent until you place it."),
+                    *Text(Homestead::PieceRequirements(Piece))), TEXT("Choose a spot to build") });
         }
         FHomesteadRow TakeDown{ static_cast<int>(Homestead::Piece::Count), TEXT("Take down"),
             TEXT("Aim at anything you built and take it apart for its full cost. A chest's contents come with it; "
                  "a floor must be bare first. In build mode Y / X switches between building and taking down."),
-            TEXT("plan") };
+            TEXT("Choose what to take down") };
         TakeDown.Icon = FName(TEXT("hatchet"));
         Result.Add(MoveTemp(TakeDown));
     }
-    else if (Page == 3)
-    {
-        // Journal entries head the guidebook once there are any (the arrival note on the estate).
-        for (int32 Entry = 0; Entry < static_cast<int32>(State().journal.size()); ++Entry)
-        {
-            const std::string& Key = State().journal[Entry];
-            Result.Add({100 + Entry, FString(TEXT("Journal: ")) + UTF8_TO_TCHAR(Homestead::Manor::JournalTitle(Key).c_str()),
-                UTF8_TO_TCHAR(Homestead::Manor::JournalText(Key, State()).c_str())});
-        }
-        Result.Add({0, TEXT("Choose your own home"), TEXT("Explore the seeded woodland. There is no prepared house clearing; find a place you like and make room.")});
-        Result.Add({1, TEXT("1. Find a little breakfast"), TEXT("Gather berries, then eat them from the Pack page.")});
-        Result.Add({2, TEXT("2. Make your first tools"), TEXT("Search the salvage piles around the manor for rusted heads, then craft each into a tool with two branches on the Craft page.")});
-        Result.Add({3, TEXT("3. Make a home"), TEXT("Fell the trees at your chosen site with the axe. Place a floor, walls, doorway and roof. Felled trees stay gone when you return.")});
-        Result.Add({4, TEXT("4. Tend a little garden"), TEXT("Search the old manor's salvage for a hoe blade (the second head you'll find) and craft a hoe. Each swing tills one small square; choose seeds on the hotbar (Seeds for wild roots, a berry for berry seed) and sow each square with A/E. X/F pulls weeds.")});
-        Result.Add({5, TEXT("5. Water and weed"), TEXT("Fill your pail at the stream. F/X removes weeds from a plot.")});
-        Result.Add({6, TEXT("6. Cook and rest"), TEXT("Split timber with a carried axe. Cookfires use prepared firewood first, then branches. Roast roots; sleep in a sheltered bedroll.")});
-        Result.Add({7, TEXT("Make this place your own"), TEXT("Inventory manages carried, stored and worn items. Appearance changes your hair, colors and body preset; clothing is cosmetic.")});
-        Result.Add({8, TEXT("Move naturally through the menu"), TEXT("Use the D-pad, left stick, or arrow keys within lists and across their edges to nearby sections. A/Enter activates; B/Esc backs out. LB/RB change tabs. Triggers or Tab are optional section shortcuts. Choose Amount and activate it before editing a quantity.")});
-    }
+
     else if (Page == 4)
     {
         Result.Add({0, TEXT("Save"), TEXT("Write a manual save and remain in Settings.")});
@@ -335,15 +321,14 @@ FString AHomesteadController::BookSummary() const
     case 2: return TEXT("Choose a plan to start placing it. Materials are spent when you place it.");
     case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. She changes as you choose.")
         : TEXT("Click a swatch or style to wear it. She changes as you choose.");
-    case 3: return FString::Printf(TEXT("Woodland seed %llu | generation %u | trees you fell stay cleared."),
-        static_cast<unsigned long long>(State().world.seed), State().world.generationVersion);
+
     default: return {};
     }
 }
 
 FString AHomesteadController::BookFooter() const
 {
-    if (Page == 3 || Page == 5)
+    if (Page == 5)
         return bGamepad ? TEXT("D-pad: scroll   LB / RB: pages   B: close")
             : TEXT("Up / Down: scroll   Left / Right: pages   Esc: close");
     if (Page == 4 && Rows().IsValidIndex(Selection) && Rows()[Selection].Id == 11)

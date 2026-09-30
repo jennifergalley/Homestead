@@ -254,7 +254,9 @@ constexpr Homestead::EquipmentSlot VisibleEquipmentSlots[] = {
 constexpr int32 VisibleEquipmentSlotCount = UE_ARRAY_COUNT(VisibleEquipmentSlots);
 inline const TCHAR* EquipmentSlotNames[] = {TEXT("Top"), TEXT("Legs"), TEXT("Coat"), TEXT("Feet")};
 inline const TCHAR* EquipmentSlotIcons[] = {TEXT("slot-torso"), TEXT("trousers"), TEXT("fur-coat"), TEXT("slot-feet")};
-constexpr int32 FieldBookPages[] = {0, 1, 2, 7, 3, 6};
+// The pages the tab bar, LB/RB and Ctrl+Tab cycle through. Page 3 (the old Guidebook) is retired but
+// keeps its number, so the other page IDs (and anything that opens them) are unchanged.
+constexpr int32 FieldBookPages[] = {0, 1, 2, 7, 6};
 
 inline int32 ShiftFieldBookPage(int32 Page, int32 Direction)
 {

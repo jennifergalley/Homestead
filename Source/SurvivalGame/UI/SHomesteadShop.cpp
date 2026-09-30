@@ -4,6 +4,7 @@
 #include "SHomesteadHudScale.h"
 #include "../HomesteadController.h"
 #include "../HomesteadShopkeeper.h"
+#include "../Simulation/HomesteadItems.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/CoreStyle.h"
@@ -65,10 +66,10 @@ void SHomesteadShop::Construct(const FArguments& Args)
     Refresh();
 }
 
-TSharedRef<SWidget> SHomesteadShop::Label(const FString& Value, int32 Size, const FLinearColor& Color) const
+TSharedRef<SWidget> SHomesteadShop::Label(const FString& Value, int32 Size, const FLinearColor& Color, bool bWrap) const
 {
     return SNew(STextBlock).Text(FText::FromString(Value)).ColorAndOpacity(Color)
-        .Font(FCoreStyle::GetDefaultFontStyle("Regular", Size)).AutoWrapText(true);
+        .Font(FCoreStyle::GetDefaultFontStyle("Regular", Size)).AutoWrapText(bWrap);
 }
 
 TSharedRef<SWidget> SHomesteadShop::Button(const FString& Text, TFunction<void()> Action, bool bPrimary, float MinWidth)
@@ -292,7 +293,15 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
             [
                 SNew(SVerticalBox)
-                + SVerticalBox::Slot().AutoHeight()[Label(Utf8(Homestead::ItemName(Row.Item)), 17, bSelected ? ShopGold : ShopInk)]
+                + SVerticalBox::Slot().AutoHeight()
+                [
+                    // Food shows the Energy one restores before she buys it (Homestead::FoodEnergyLabel).
+                    SNew(SHorizontalBox)
+                    + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
+                    [ Label(Utf8(Homestead::ItemName(Row.Item)), 17, bSelected ? ShopGold : ShopInk, false) ]
+                    + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(10, 0, 0, 1)
+                    [ Label(Utf8(Homestead::FoodEnergyLabel(Row.Item).c_str()), 14, ShopGold, false) ]
+                ]
                 + SVerticalBox::Slot().AutoHeight()[Label(Utf8(Homestead::ItemDescription(Row.Item)), 12, ShopMuted)]
             ]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(16, 0)
@@ -301,7 +310,8 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             ]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
             [
-                SNew(SBox).WidthOverride(120).HAlign(HAlign_Right)[Label(Money(Row.Unit) + TEXT(" each"), 16, ShopInk)]
+                // Wide enough for "1,000 coins each" on one line.
+                SNew(SBox).WidthOverride(170).HAlign(HAlign_Right)[Label(Money(Row.Unit) + TEXT(" each"), 16, ShopInk, false)]
             ]
         ];
     RowWidgets[Index] = Widget;
@@ -418,7 +428,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
                     ]
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 18, 0)
                     [
-                        Label(Wallet(), 22, ShopGold)
+                        Label(Wallet(), 22, ShopGold, false)
                     ]
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
                     [

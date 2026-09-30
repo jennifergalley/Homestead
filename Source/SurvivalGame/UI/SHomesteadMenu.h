@@ -71,6 +71,9 @@ public:
     FString GetDisplayedDetails() const { return DetailsText(); }
     FString GetFocusedRequirementHint() const;
     FString GetFocusedRegionName() const;
+    // The field book's tabs (automation): how many there are, and whether one opens `Page`.
+    int32 GetTabPageCount() const;
+    bool HasTabForPage(int32 Page) const;
     bool HasSynchronizedFocus() const;
     bool IsFocusedControlVisible() const;
     int32 GetSelectedContentIndex() const { return ContentSelection; }

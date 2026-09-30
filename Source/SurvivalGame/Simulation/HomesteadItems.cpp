@@ -1,5 +1,6 @@
 #include "HomesteadItems.h"
 
+#include <cmath>
 #include <cstring>
 namespace Homestead
 {
@@ -8,7 +9,7 @@ namespace
 constexpr ShopMask StoreBuys = ShopBit(ShopKind::GeneralStore);
 constexpr ShopMask NoBuyers = 0;
 
-// One row per Item, in enum order. Prices are in cents.
+// One row per Item, in enum order. Prices are in whole coins (basePriceCents keeps its old name).
 constexpr ItemInfo ItemCatalogue[] = {
     // The knife, fibre, machete and fur are retired from new games (add-overgrown-estate-clearing).
     {Item::Knife, "knife", "Knife", "A plain belt knife for cutting cord, cloth and hide.",
@@ -179,6 +180,12 @@ const char* ItemIcon(Item item) { return GetItemInfo(item).icon; }
 const char* ItemSource(Item item) { return GetItemInfo(item).source; }
 ItemCategory CategoryOf(Item item) { return GetItemInfo(item).category; }
 bool IsEdible(Item item) { return GetItemInfo(item).hunger > 0.0; }
+std::string FoodEnergyLabel(Item item)
+{
+    if (!ValidItem(item) || !IsEdible(item)) return {};
+    const long energy = std::lround(GetItemInfo(item).energy);
+    return energy > 0 ? "+" + std::to_string(energy) + " Energy" : std::string();
+}
 bool IsTool(Item item) { return ValidItem(item) && GetItemInfo(item).category == ItemCategory::Tool; }
 int ItemSortRank(Item item)
 {

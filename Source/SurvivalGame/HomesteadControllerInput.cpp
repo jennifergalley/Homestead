@@ -216,7 +216,6 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Gamepad_RightTrigger, IE_Pressed, this, &AHomesteadController::UseSelectedTool);
     InputComponent->BindKey(EKeys::RightMouseButton, IE_Pressed, this, &AHomesteadController::OpenFocusedChestWithMouse);
     InputComponent->BindKey(EKeys::X, IE_Pressed, this, &AHomesteadController::ToggleDeconstruct);
-    InputComponent->BindKey(EKeys::G, IE_Pressed, this, &AHomesteadController::OpenJournal);
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Top, IE_Pressed, this, &AHomesteadController::Withdraw);
     InputComponent->BindKey(EKeys::Escape, IE_Pressed, this, &AHomesteadController::Back);
     InputComponent->BindKey(EKeys::Gamepad_FaceButton_Right, IE_Pressed, this, &AHomesteadController::Back);
@@ -225,9 +224,9 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Gamepad_Special_Right, IE_Pressed, this, &AHomesteadController::OpenSettings);
     InputComponent->BindKey(EKeys::C, IE_Pressed, this, &AHomesteadController::OpenCraft);
     InputComponent->BindKey(EKeys::B, IE_Pressed, this, &AHomesteadController::OpenBuild);
-    InputComponent->BindKey(EKeys::H, IE_Pressed, this, &AHomesteadController::OpenJournal);
     InputComponent->BindKey(EKeys::M, IE_Pressed, this, &AHomesteadController::OpenMap);
-    InputComponent->BindKey(EKeys::Gamepad_Special_Left, IE_Pressed, this, &AHomesteadController::OpenJournal);
+    // View opens the field book at the pack (it opened the retired Guidebook).
+    InputComponent->BindKey(EKeys::Gamepad_Special_Left, IE_Pressed, this, &AHomesteadController::ToggleBook);
     InputComponent->BindKey(EKeys::Left, IE_Pressed, this, &AHomesteadController::PreviousPage);
     InputComponent->BindKey(EKeys::Right, IE_Pressed, this, &AHomesteadController::NextPage);
     InputComponent->BindKey(EKeys::Gamepad_LeftShoulder, IE_Pressed, this, &AHomesteadController::PreviousPage);

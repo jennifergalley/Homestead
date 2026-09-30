@@ -24,8 +24,8 @@ lanes and known issues are in `docs\handoff\round-2.md` (round 1: `round-1.md`);
 - **What you can do there:** arrive at the ruined manor's standing room (bed, hearth, chest) and
   name your family and estate; clear overgrowth with tiered tools you salvage and haft (billhook,
   axe, scythe, pickaxe, hoe; the pail comes too); see your estate boundary on the minimap and the
-  field book's Map tab; walk to town and buy and sell at the general store with money in dollars and
-  cents.
+  field book's Map tab; walk to town and buy and sell at the general store with money counted in whole
+  coins.
 - **Heroine:** a MetaHuman with authored work animations (gathering, felling, tilling, watering,
   eating) and appearance options (hairstyle, hair, skin and eye colour).
 - **Jenny's builds:** the integration session packages the estate build to `Build\Windows` in its worktree,
@@ -202,8 +202,8 @@ use the explicit procedure in `docs\offline-startup.md` for this release.
 | Sprint on / off (a toggle) | Left stick click (L3) | Tap Shift |
 | Contextual interaction (or eat the selected hotbar food) | A | E or Enter |
 | Clear / weed / fuel / till (or eat the selected hotbar food) | X | F |
-| Field book | Menu | I or Tab |
-| Notes | View | H |
+| Field book (opens on the pack) | View | I or Tab |
+| Settings | Menu | Escape |
 | Craft / build pages | D-pad left / right | C / B |
 | Book selection | D-pad up / down | Up / down |
 | Book pages | LB / RB | Left / right |

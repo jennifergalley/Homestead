@@ -273,4 +273,10 @@ void SHomesteadMenu::Refresh()
     bFocusPending = true;
 }
 
+int32 SHomesteadMenu::GetTabPageCount() const { return UE_ARRAY_COUNT(FieldBookPages); }
+bool SHomesteadMenu::HasTabForPage(int32 Page) const
+{
+    for (const int32 Tab : FieldBookPages) if (Tab == Page) return true;
+    return false;
+}
 }

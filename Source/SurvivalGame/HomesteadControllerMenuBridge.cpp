@@ -82,7 +82,7 @@ void AHomesteadController::MenuActivate()
     if (bTestResetRequired && (Page != 4 || !Rows().IsValidIndex(Selection)
         || (Rows()[Selection].Id != 1 && Rows()[Selection].Id != 8 && Rows()[Selection].Id != 9)))
     { Notify(LoadProblem, true); return; }
-    if (IsFailed() && Page != 4 && Page != 3 && Page != 5)
+    if (IsFailed() && Page != 4 && Page != 5)
     { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
     if (IsFailed() && Page == 4 && Rows().IsValidIndex(Selection) && Rows()[Selection].Id == 0)
     { Notify(TEXT("A failed state cannot replace your checkpoint. Retry or quit without saving."), true); return; }
@@ -165,8 +165,12 @@ void AHomesteadController::MenuSave() { if (!bMenuSaveInProgress) QuickSave(); }
 
 FString AHomesteadController::MenuSaveStatus() const
 {
+    // LastSuccessfulSave is UTC (FDateTime::UtcNow / the save's SavedAtUtc). FText converts it once
+    // to her local time zone (DST included) in her culture: "September 28, 2026 12:01 PM" in en-US.
     const FString When = LastSuccessfulSave.GetTicks() > 0
-        ? LastSuccessfulSave.ToString(TEXT("%Y-%m-%d %H:%M:%S UTC")) : TEXT("not known in this session");
+        ? FText::AsDate(LastSuccessfulSave, EDateTimeStyle::Long).ToString() + TEXT(" ")
+            + FText::AsTime(LastSuccessfulSave, EDateTimeStyle::Short).ToString()
+        : TEXT("not known in this session");
     const FString Label = CurrentSaveLabel();
     return FString::Printf(TEXT("%s\nLast successful save: %s"),
         !Label.IsEmpty() ? *Label : PreviewLabel().IsEmpty() ? TEXT("Current homestead") : *PreviewLabel(), *When);

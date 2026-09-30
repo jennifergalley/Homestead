@@ -470,6 +470,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     const float TabWidth = (Width - 68) / 7;
     for (int Index = 0; Index < 7; ++Index)
     {
+        if (Index == 3) continue; // The Guidebook page is retired.
         const float TabX = X + 34 + Index * TabWidth;
         Write(Tabs[Index], TabX + 4, Y + 88, 23, Index == PC.BookPage() ? HudGold : Muted);
         if (Index == PC.BookPage()) Panel(TabX, Y + 123, TabWidth - 20, 3, HudGold);

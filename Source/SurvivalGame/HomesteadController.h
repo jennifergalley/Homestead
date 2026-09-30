@@ -320,7 +320,7 @@ public:
     Homestead::Item SelectedHotbarFood() const;
     // Console playtest aid: open the general store on the ground ahead of her (moving it if it exists).
     UFUNCTION(Exec) void HomesteadOpenStore();
-    // Console playtest aid: add (or with a negative amount remove) cents from her purse.
+    // Console playtest aid: add (or with a negative amount remove) coins from her purse.
     UFUNCTION(Exec) void HomesteadMoney(int32 Cents = 1000);
     // Playtest aid: set her Energy (0-100), e.g. to try dozing off or the bed's "until rested".
     UFUNCTION(Exec) void HomesteadEnergy(float Energy = 100.0f);
@@ -475,7 +475,7 @@ private:
     bool bConfirmRestart = false;
     bool bMusicFading = false;
     bool bWasFailed = false;
-    int32 Page = 3;
+    int32 Page = 0;
     int32 Selection = 0;
     int32 AutoSaveIndex = 0;
     // Quarter turns for pieces snapped onto a building; free-standing pieces turn by BuildYawOffset.
@@ -657,7 +657,6 @@ private:
     void OpenSettings();
     void OpenCraft();
     void OpenBuild();
-    void OpenJournal();
     void OpenMap();
     void PreviousPage();
     void NextPage();
