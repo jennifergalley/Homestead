@@ -38,6 +38,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     HomesteadLampLook::UpdatePlacedShadows(LampDropLight.Get(), this);
     UpdateHearthSound(DeltaSeconds);
     UpdateDoors(DeltaSeconds);
+    UpdateFoliageMotion();
     UpdateClearPops(DeltaSeconds);
     UpdateSoilGrounding(DeltaSeconds);
     if (Weather) Weather->TickWeather(DeltaSeconds);
