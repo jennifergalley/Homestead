@@ -3,6 +3,7 @@
 #include "HomesteadControllerPreferences.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadCharacter.h"
+#include "HomesteadMapComponent.h"
 
 #include "AudioDevice.h"
 #include "Components/AudioComponent.h"
