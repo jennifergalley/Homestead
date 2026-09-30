@@ -10,6 +10,7 @@
 #include "HomesteadPromptIntent.h"
 #include "HomesteadMusicPlaylist.h"
 #include "Styling/SlateBrush.h"
+#include "Templates/UniquePtr.h"
 #include "HomesteadController.generated.h"
 
 class AHomesteadWorld;
@@ -471,8 +472,10 @@ private:
     float GroundSnapWait = 0;
     FVector GroundSnapSafePosition = FVector::ZeroVector;
     FRotator GroundSnapSafeRotation = FRotator::ZeroRotator;
+    FRotator GroundSnapSafeActorRotation = FRotator::ZeroRotator;
     double GroundSnapStartedAt = 0;
     double GroundSnapLastReportAt = 0;
+    TUniquePtr<Homestead::Simulation> GroundSnapTravelBefore;
     UPROPERTY(Transient)
     TObjectPtr<AActor> GroundSnapStreamingActor;
     UPROPERTY(Transient)

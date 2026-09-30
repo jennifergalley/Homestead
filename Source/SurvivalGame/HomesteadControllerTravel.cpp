@@ -34,8 +34,9 @@ bool AHomesteadController::MenuTravel(Homestead::TravelDestination Destination, 
         Notify(UTF8_TO_TCHAR(Plan.error.c_str()), true);
         return false;
     }
-    // The ground there must be ready before any time passes (the fixed estate is always ready).
+    // The Estate's world actor is prepared here; the destination Landscape may still need to stream.
     if (!PrepareWorldAt(Plan.arrival)) return false;
+    TUniquePtr<Homestead::Simulation> BeforeWalk = MakeUnique<Homestead::Simulation>(Sim);
     const auto Result = Sim.WalkRoad(Destination, From);
     if (!Result.ok)
     {
@@ -49,6 +50,13 @@ bool AHomesteadController::MenuTravel(Homestead::TravelDestination Destination, 
     // Stood on the road bed facing the way she walked; the ground snap holds her until the
     // destination's collision has streamed in.
     BeginGroundSnap(FVector(Plan.arrival.x, Plan.arrival.y, Plan.arrivalZ + 150.0));
+    if (!bPendingGroundSnap)
+    {
+        Sim = MoveTemp(*BeforeWalk);
+        RefreshRemaining = 0;
+        return false;
+    }
+    GroundSnapTravelBefore = MoveTemp(BeforeWalk);
     const FRotator Facing(0, Plan.arrivalYaw, 0);
     Avatar->SetActorRotation(Facing);
     if (bBookOpen) CloseBook();

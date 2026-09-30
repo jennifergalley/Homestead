@@ -22,8 +22,8 @@
 
 namespace EstateSmokeRoute
 {
-// She arrives through the controller's ground settle, which holds her up to 180 s while World
-// Partition streams the collision in, so an arrival may take that long in a cold package.
+// Estate ground snap gives World Partition up to 90 real seconds for collision; allow a cold
+// packaged map some additional time for the surrounding materials and automation steps.
 constexpr float ArriveSeconds = 190.0f;
 // Frame timing: let streaming and shader work settle after she arrives, then sample.
 constexpr double TimingSettleSeconds = 6.0;

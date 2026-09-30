@@ -143,6 +143,7 @@ void AHomesteadController::EndGroundSnap()
     GroundSnapWait = 0;
     GroundSnapStartedAt = 0;
     GroundSnapLastReportAt = 0;
+    GroundSnapTravelBefore.Reset();
     GroundSnapStreamingSource = nullptr;
     if (IsValid(GroundSnapStreamingActor))
     {
@@ -153,20 +154,37 @@ void AHomesteadController::EndGroundSnap()
 
 void AHomesteadController::BeginGroundSnap(FVector Target)
 {
+    if (bPendingGroundSnap)
+    {
+        UE_LOG(LogHomesteadGroundSnap, Warning, TEXT("Refusing another ground snap while one is pending."));
+        Notify(TEXT("Wait until she is safely on the ground before setting out again."), true);
+        return;
+    }
     if (Target.ContainsNaN())
     {
         UE_LOG(LogHomesteadGroundSnap, Error, TEXT("Refusing ground snap to a non-finite destination."));
         Notify(TEXT("The destination is invalid. You are still where you started."), true);
         return;
     }
-    const FVector SafePosition = bPendingGroundSnap ? GroundSnapSafePosition : LastSafeWorldPosition;
+    const FVector SafePosition = LastSafeWorldPosition;
     EndGroundSnap();
     GroundSnapTarget = Target;
     GroundSnapSafePosition = SafePosition;
     GroundSnapSafeRotation = GetControlRotation();
+    GroundSnapSafeActorRotation = GetPawn() ? GetPawn()->GetActorRotation() : FRotator::ZeroRotator;
     GroundSnapStartedAt = FPlatformTime::Seconds();
     bPendingGroundSnap = true;
     if (!bEstateMap) return;
+
+    if (APawn* Avatar = GetPawn())
+    {
+        Avatar->SetActorLocation(SafePosition, false, nullptr, ETeleportType::TeleportPhysics);
+        if (ACharacter* Body = Cast<ACharacter>(Avatar))
+        {
+            Body->GetCharacterMovement()->StopMovementImmediately();
+            Body->GetCharacterMovement()->DisableMovement();
+        }
+    }
 
     FActorSpawnParameters Spawn;
     Spawn.ObjectFlags |= RF_Transient;
@@ -203,10 +221,18 @@ void AHomesteadController::AbortGroundSnap()
         GroundSnapSafePosition.X, GroundSnapSafePosition.Y);
     const FVector SafePosition = GroundSnapSafePosition;
     const FRotator SafeRotation = GroundSnapSafeRotation;
+    const FRotator SafeActorRotation = GroundSnapSafeActorRotation;
+    TUniquePtr<Homestead::Simulation> BeforeTravel = MoveTemp(GroundSnapTravelBefore);
     EndGroundSnap();
+    if (BeforeTravel)
+    {
+        Sim = MoveTemp(*BeforeTravel);
+        RefreshRemaining = 0;
+    }
     if (APawn* Avatar = GetPawn())
     {
         Avatar->SetActorLocation(SafePosition, false, nullptr, ETeleportType::TeleportPhysics);
+        Avatar->SetActorRotation(SafeActorRotation);
         if (ACharacter* Body = Cast<ACharacter>(Avatar))
         {
             Body->GetCharacterMovement()->StopMovementImmediately();
@@ -222,12 +248,20 @@ void AHomesteadController::AbortGroundSnap()
     LastStepPosition = SafePosition;
     LastSafeWorldPosition = SafePosition;
     StepDistance = 0;
-    Notify(TEXT("The ground there did not load. You are back where you started."), true);
+    Notify(BeforeTravel
+        ? TEXT("The ground there did not load. Your walk was canceled without spending time.")
+        : TEXT("The ground there did not load. You are back where you started."), true);
 }
 
 void AHomesteadController::HomesteadTeleport(float X, float Y, float Z)
 {
     if (!GetPawn()) return;
+    if (bPendingGroundSnap)
+    {
+        UE_LOG(LogHomesteadGroundSnap, Warning, TEXT("Refusing teleport while the previous destination is still streaming."));
+        Notify(TEXT("Wait until she is safely on the ground before teleporting again."), true);
+        return;
+    }
     const bool bOnTerrain = Z <= -100000.0f;
     BeginGroundSnap(FVector(X, Y, bOnTerrain ? GroundHeight(X, Y) + 150.0f : Z + 100.0f));
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))

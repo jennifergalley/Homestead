@@ -410,7 +410,9 @@ void AHomesteadController::Tick(float DeltaSeconds)
             ControlledPawn->SetActorLocation(FVector(Position.X, Position.Y, Surface + 100),
                 false, nullptr, ETeleportType::TeleportPhysics);
         }
-        LastSafeWorldPosition = ControlledPawn->GetActorLocation();
+        if (const ACharacter* Body = Cast<ACharacter>(ControlledPawn);
+            Body && Body->GetCharacterMovement()->IsMovingOnGround())
+            LastSafeWorldPosition = ControlledPawn->GetActorLocation();
     }
 
     UpdateLamp();
