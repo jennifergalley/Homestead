@@ -186,6 +186,13 @@ void NewThingsFillTheFirstEmptyCell()
         CHECK(FirstEmpty(sim) == 0);
         CHECK(PackRowRules::RowCellOf(sim.GetState(), Group(sim, Item::Water), 0) == -1);
     }
+    // Test fixtures can switch the filling off (never saved): new stock then lands below the row.
+    sim.SetPackRowAutoFill(false);
+    OK(sim.GrantItems(Item::Kindling, 1));
+    CHECK(FirstEmpty(sim) == 0 && PackRowRules::RowCellOf(sim.GetState(), Group(sim, Item::Kindling), 0) == -1);
+    sim.SetPackRowAutoFill(true);
+    OK(sim.GrantItems(Item::Hay, 1));
+    CHECK(CellItem(sim, 0) == Item::Hay);
 }
 
 void UsesDrawFromTheRowAndLeaveItEmpty()

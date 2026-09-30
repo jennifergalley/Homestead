@@ -600,6 +600,9 @@ public:
     // not already placed, or stays empty. For saves from before the row (their old pinned hotbar)
     // and new games.
     Result ArrangePackRow(const std::array<int, PackRowSize>& items);
+    // Test fixtures only (never saved): with this off, new stacks and garments go below the row
+    // instead of into its first empty cell, so grid-navigation suites keep their stock in the grid.
+    void SetPackRowAutoFill(bool fill) { fillPackRow_ = fill; }
     Result DropGroup(int groupId, int amount, Point position, Point player,
         std::uint64_t expectedRevision);
     Result DropWearable(int wearableId, Point position, Point player,
@@ -703,6 +706,7 @@ public:
 
 private:
     State state_;
+    bool fillPackRow_ = true;
     std::shared_ptr<const EstateLayout> layout_;
     std::shared_ptr<const EstatePlacements> placements_;
     std::function<bool(Point)> waterProbe_;
