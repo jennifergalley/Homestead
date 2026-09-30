@@ -100,7 +100,8 @@ bool AHomesteadController::MenuCraftRecipe(Homestead::Recipe Recipe)
         return false;
     }
     const auto Result = Sim.Craft(Recipe, PlayerPoint());
-    Notify(Result);
+    // What she made shows as the "+1 Hatchet" pickup beside her; only a refusal needs words.
+    NotifyResourceAction(Result, nullptr);
     if (Result.ok)
     {
         Sim.AdvanceGameHours(0.05, PlayerPoint());

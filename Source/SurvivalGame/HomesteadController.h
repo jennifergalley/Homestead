@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Simulation/HomesteadSimulation.h"
+#include "Simulation/HomesteadHoldings.h"
 #include "Simulation/HomesteadTravel.h"
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveRouting.h"
@@ -311,6 +312,14 @@ public:
     // vitals' "+N" popups; Serial counts meals so a repeat of the same gain still shows.
     struct FMealGain { double Food = 0, Energy = 0; uint32 Serial = 0; };
     const FMealGain& LastMealGain() const { return MealGain; }
+    // Items she has just gained (gathered, harvested, crafted, bought; not moved out of a chest or
+    // picked back up), for the "+3 Berries" popup beside her (HomesteadControllerPickups.cpp,
+    // UI/SHomesteadPickups). Shown is how long each has been on screen, in real seconds.
+    struct FPickup { Homestead::Item Item = Homestead::Item::Count; int32 Amount = 0; float Shown = 0.0f; };
+    const TArray<FPickup>& RecentPickups() const { return Pickups; }
+    bool PickupsVisible() const;
+    // Where the popup hangs from: her upper body projected to the viewport, in pixels.
+    bool PickupAnchor(FVector2D& Pixel, FVector2D& ViewportPixels) const;
     // Sprint was asked for (or ran out) with too little Energy: a gentle notice, not a failure.
     void SprintTooTired();
     // Keyboard sprint: a tap of Shift toggles it on release, unless Shift was a modifier (Shift+Q,
@@ -371,6 +380,14 @@ private:
     int64 LastWalletDelta = 0;
     float WalletDeltaRemaining = 0.0f;
     FMealGain MealGain;
+    TArray<FPickup> Pickups;
+    // The pack and everything she owns (pack, chests, dropped) at PickupRevision: a gain raises both,
+    // a move between them raises only the pack.
+    Homestead::Holdings PickupHoldings;
+    uint64 PickupRevision = 0;
+    bool bPickupsPrimed = false;
+    void UpdatePickups(float DeltaSeconds);
+    TSharedPtr<SWidget> PickupsRoot;
     bool bSprintShiftDown = false;
     bool bSprintShiftModifier = false;
     // A/X with food selected and nothing to interact with: eat one (or say none is left).

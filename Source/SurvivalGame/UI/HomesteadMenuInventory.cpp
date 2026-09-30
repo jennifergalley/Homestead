@@ -268,7 +268,9 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
                 }
         }
     }
-    Notify(Result);
+    // A move between pack and chest shows in the book itself; only a refusal needs words.
+    if (Action == EHomesteadItemAction::Transfer) NotifyResourceAction(Result, nullptr);
+    else Notify(Result);
     return Result.ok;
 }
 
@@ -333,7 +335,7 @@ bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomestea
                 Source.ContainerId == 0, PlayerPoint(), ExpectedRevision);
         else if (Source.Subject == EHomesteadMenuSubject::Wearable)
             Result = Sim.MoveWearable(Source.SubjectId, Target.ContainerId, PlayerPoint(), ExpectedRevision);
-        Notify(Result);
+        NotifyResourceAction(Result, nullptr);
         return Result.ok;
     }
     if (Source.ContainerId < 0)

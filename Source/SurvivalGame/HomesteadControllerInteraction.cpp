@@ -187,7 +187,9 @@ void AHomesteadController::Interact()
             const Homestead::CropKind Harvested = Plot.kind;
             const Homestead::Point Center = Homestead::PlotCenter(Plot);
             const auto Result = Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
-            Notify(Result, GrassStepB);
+            // A harvest shows as its "+N" pickups beside her; watering and refusals still say so.
+            if (Mature) NotifyResourceAction(Result, GrassStepB);
+            else Notify(Result, GrassStepB);
             if (Result.ok && Mature) PresentHarvest(FocusId, Harvested, Center);
             if (Result.ok && !Mature)
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))

@@ -1,6 +1,7 @@
 // Portable tests for the item catalogue, money and shops.
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
+#include "HomesteadHoldings.h"
 #include "HomesteadItems.h"
 #include "HomesteadPail.h"
 #include "HomesteadSimulation.h"
@@ -15,6 +16,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 
 using namespace Homestead;
 
@@ -555,6 +557,139 @@ void PailWaterPresentation()
     CHECK(PailChargeLabel(With(1, 1200)) == "Water 6 / 6" && PailChargeLabel(With(0, 4)).empty());
 }
 
+// The "+3 Berries" line counts only real gains: gathering, buying, crafting and grants, never a chest
+// move, a drop picked back up, spent ingredients or pail water.
+void PickupGainsCountOnlyNewThings()
+{
+    Store store = OpenStore();
+    auto& sim = store.sim;
+    const auto Gain = [&sim](const Holdings& before, Item item) { return PickupGain(before, CountHoldings(sim.GetState()), item); };
+    // Gathering berries at a bush on the estate.
+    const ResourceNode* bush = nullptr;
+    for (const auto& node : sim.GetState().resources)
+        if (node.kind == ResourceKind::BerryBush && !node.cleared && node.readyAtHour <= sim.GetState().hour) { bush = &node; break; }
+    CHECK(bush != nullptr);
+    const Point bushAt = bush->position;
+    Holdings before = CountHoldings(sim.GetState());
+    const int berries = sim.Count(Item::Berries);
+    OK(sim.Harvest(bush->id, bushAt));
+    CHECK(sim.Count(Item::Berries) > berries && Gain(before, Item::Berries) == sim.Count(Item::Berries) - berries);
+    // Buying at the store.
+    before = CountHoldings(sim.GetState());
+    OK(sim.Buy(store.shop, Item::Pasty, 2, false, store.customer));
+    CHECK(Gain(before, Item::Pasty) == 2);
+    // Crafting: the axe shows, the branch and stone it used don't (and never as a negative).
+    OK(sim.GrantItems(Item::RustedAxeHead, 1));
+    OK(sim.GrantItems(Item::Branch, 10));
+    OK(sim.GrantItems(Item::Stone, 10));
+    before = CountHoldings(sim.GetState());
+    CHECK(Gain(before, Item::Branch) == 0);
+    OK(sim.Craft(Recipe::HaftAxe, bushAt));
+    CHECK(Gain(before, Item::Hatchet) == 1);
+    for (int index = 0; index < ItemCount; ++index)
+        if (static_cast<Item>(index) != Item::Hatchet) CHECK(Gain(before, static_cast<Item>(index)) == 0);
+    // Setting branches down and picking them back up is a move.
+    int group = 0;
+    for (const auto& entry : *sim.GetLayout(0)) if (entry.item == Item::Branch) { group = entry.groupId; break; }
+    CHECK(group != 0);
+    OK(sim.DropGroup(group, 2, bushAt, bushAt, sim.GetRevision()));
+    before = CountHoldings(sim.GetState());
+    OK(sim.PickUpDrop(sim.GetState().worldDrops.back().id, bushAt));
+    CHECK(Gain(before, Item::Branch) == 0);
+    // Pail water fills the pail's gauge, not a pickup line.
+    before = CountHoldings(sim.GetState());
+    OK(sim.GrantItems(Item::Water, 3));
+    CHECK(Gain(before, Item::Water) == 0);
+    // Taking the pail from the manor chest and putting it back are moves, too.
+    Simulation manor;
+    manor.SetPlacements(ProvisionalEstatePlacements());
+    OK(manor.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const Structure* chest = nullptr;
+    for (const auto& piece : manor.GetState().structures) if (piece.kind == Piece::Chest) { chest = &piece; break; }
+    CHECK(chest != nullptr && chest->storage[static_cast<int>(Item::WateringCan)] >= 1);
+    const int chestId = chest->id;
+    const Point chestSide = manor.StructureCenter(*chest);
+    before = CountHoldings(manor.GetState());
+    OK(manor.Transfer(chestId, Item::WateringCan, -1, chestSide));
+    const Holdings taken = CountHoldings(manor.GetState());
+    CHECK(manor.Count(Item::WateringCan) == 1 && PickupGain(before, taken, Item::WateringCan) == 0);
+    OK(manor.Transfer(chestId, Item::WateringCan, 1, chestSide));
+    CHECK(PickupGain(taken, CountHoldings(manor.GetState()), Item::WateringCan) == 0);
+}
+
+int PackStock(const Simulation& sim, Item item)
+{
+    int total = 0;
+    for (const auto& entry : *sim.GetLayout(0))
+        if (entry.wearableId == 0 && entry.item == item) total += entry.quantity;
+    return total;
+}
+
+// Stock truth on the actual-stack hotbar: a "+N" is exactly what her stacks gained, and arranging
+// those stacks (hotbar row, split, sort, back below the row), eating, garments and the lamp never
+// add a line or a second one for the same thing.
+void PickupGainsFollowActualStacks()
+{
+    Store store = OpenStore();
+    auto& sim = store.sim;
+    const Point here = store.customer;
+    const auto Gains = [&sim](const Holdings& before)
+    {
+        int lines = 0, total = 0;
+        const Holdings now = CountHoldings(sim.GetState());
+        for (int index = 0; index < ItemCount; ++index)
+            if (const int gain = PickupGain(before, now, static_cast<Item>(index)); gain > 0) { ++lines; total += gain; }
+        return std::make_pair(lines, total);
+    };
+    // Buying five pasties is one line of exactly what her stacks gained.
+    const int stacked = PackStock(sim, Item::Pasty);
+    Holdings before = CountHoldings(sim.GetState());
+    OK(sim.Buy(store.shop, Item::Pasty, 5, false, here));
+    CHECK(PackStock(sim, Item::Pasty) - stacked == 5 && sim.Count(Item::Pasty) == PackStock(sim, Item::Pasty));
+    CHECK(PickupGain(before, CountHoldings(sim.GetState()), Item::Pasty) == 5);
+    CHECK(Gains(before) == std::make_pair(1, 5));
+    int group = 0;
+    for (const auto& entry : *sim.GetLayout(0)) if (entry.item == Item::Pasty) group = entry.groupId;
+    CHECK(group != 0);
+    // Arranging stacks: into the hotbar row, split, sorted and back out again.
+    before = CountHoldings(sim.GetState());
+    OK(sim.MoveToPackRow(group, 0, 9, sim.GetRevision()));
+    OK(sim.MoveFromPackRow(9, 0, 0, sim.GetRevision()));
+    OK(sim.SplitHalf(0, group, here, sim.GetRevision()));
+    OK(sim.SortPack(sim.GetRevision()));
+    CHECK(Gains(before) == std::make_pair(0, 0) && sim.Count(Item::Pasty) == PackStock(sim, Item::Pasty));
+    // Eating one is a loss, never a line.
+    Edit(sim, 40.0, 100.0);
+    for (const auto& entry : *sim.GetLayout(0)) if (entry.item == Item::Pasty) { group = entry.groupId; break; }
+    before = CountHoldings(sim.GetState());
+    OK(sim.EatGroup(group, sim.GetRevision()));
+    CHECK(Gains(before) == std::make_pair(0, 0));
+    // A garment set down and picked back up (its drop has no item) is a move.
+    int garment = 0;
+    for (const auto& wearable : sim.GetState().wearables)
+        if (wearable.owner == WearableOwner::Carried) { garment = wearable.id; break; }
+    if (garment == 0)
+    {
+        OK(sim.GrantItems(Item::Fiber, 20));
+        if (sim.Count(Item::Knife) == 0) OK(sim.GrantItems(Item::Knife, 1));
+        before = CountHoldings(sim.GetState());
+        OK(sim.CraftGarment(WearableDefinition::LinenTunic, here, sim.GetRevision()));
+        CHECK(Gains(before) == std::make_pair(0, 0));
+        garment = sim.GetState().wearables.back().id;
+    }
+    before = CountHoldings(sim.GetState());
+    OK(sim.DropWearable(garment, here, here, sim.GetRevision()));
+    CHECK(sim.GetState().worldDrops.back().item == Item::Count);
+    OK(sim.PickUpDrop(sim.GetState().worldDrops.back().id, here));
+    CHECK(Gains(before) == std::make_pair(0, 0));
+    // So is the lamp set down and taken up again.
+    if (sim.Count(Item::OilLamp) == 0) OK(sim.GrantItems(Item::OilLamp, 1));
+    before = CountHoldings(sim.GetState());
+    OK(sim.SetDownLamp(here, here));
+    OK(sim.PickUpDrop(sim.SetDownLampDrop()->id, here));
+    CHECK(Gains(before) == std::make_pair(0, 0) && sim.Count(Item::OilLamp) == 1);
+}
+
 const char* filter = nullptr;void Run(const char* name, void (*test)())
 {
     if (filter && !std::strstr(name, filter)) return;
@@ -581,6 +716,8 @@ int main(int argc, char** argv)
     Run("playtest shop placement", PlaytestShopPlacement);
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);
+    Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);
+    Run("pickup lines follow her actual stacks", PickupGainsFollowActualStacks);
     Run("pail water shows on the pail", PailWaterPresentation);
     Run("food shows its Energy", FoodEnergyLabels);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
