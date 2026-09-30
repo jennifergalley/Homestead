@@ -54,4 +54,4 @@ Jenny decided on 2026-09-29 to replace task 1.3's interim Hungry/Famished work (
 
 - [ ] 7.1 Do the single `SimulationSaveVersion` bump with the reset notice at final integration. It also drops the unused `hunger` field. Retarget the packaged FullLoop and Smoke suites to the seasonal year and the one-meter model
 - [ ] 7.2 Run the full-acceptance route in a packaged build, one continuous run. Harvest one crop per season, pick blackberries, find mushrooms, sell grain to Tregear's, fence a plot, furnish the room, cook and eat each dish (checking Well fed), and find both shops closed on a Sunday. Check mouse and controller parity
-- [ ] 7.3 Jenny playtests. Confirm the day length (30 or 60), Sunday closing, the shop and keeper names, and the energy and Well fed values, and fold in her feedback
+- [ ] 7.3 Jenny playtests. Confirm the adopted 60-minute default day feel, Sunday closing, the shop and keeper names, and the energy and flat 3-hour Well fed values, and fold in her feedback
