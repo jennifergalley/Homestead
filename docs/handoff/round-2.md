@@ -562,6 +562,19 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
   `Scripts\Terrain\public_road.py` from `estate_layout.json` road/roadProfile plus
   `EstateHeightfield.r16`. Do not invent another C++ path; regenerate the include whenever those
   inputs move.
+- **Pending Water road-grade/bridge pipeline (unmerged `jennifergalley-road-bridge-night`):**
+  `road_grade.py` replaces the old 1-in-9 causeway/cutting profile with an idempotent, ground-following
+  1-in-5 maximum grade and a river bridge deck; it records `roadGrade` plus the prior profile in
+  `estate_layout.json` and only resynchronizes a stale work `.npy` on rerun. Afterwards regenerate
+  `public_road.py` (which emits `deck(...)`, records `roadBridge` and clears bridge scatter), run
+  `weightmaps.py` to remove obsolete cliff paint from flattened slopes, then `bake_ground.py` and
+  map baking. In the editor apply both the printed heightfield rectangle and
+  `ApplyEstateWeightmaps(<work>\weights, seven layers, same rect, ...)` before ground/map imports.
+  This is branch-only pipeline guidance: no road grade, bridge or generated artifact has merged.
+- **Private terrain-work isolation:** a lane may point `HOMESTEAD_TERRAIN_WORK` at an `E:` private
+  copy containing `game_raw`, `game_reshaped` and `weights` to prevent unmerged terrain from
+  contaminating `E:\TerrainSource\work`. After merge, rerun the idempotent scripts against the
+  shared work folder before committing generated artifacts.
 - **Field-book map destination names reserved:** **Town** and **Manor**. The future travel action and
   UI use these exact user-facing names; other map work must not reuse them.
 - **Seedsman anchors claimed (C; branch `4f21a2d8`, not on `main` yet):** `Anchor::SeedsmanDoor`
@@ -607,6 +620,10 @@ then stage **beach → route**. Night lighting and the town-road layout are sepa
 after the north-west lake; town-entry/store acceptance, coordinate bridge, roadside forage and travel
 signs wait for the final road route. If the terrain or water work needs placement ids, the Water Agent
 claims them through this page before using them (the registry starts at 581000+).
+
+**Night tuning remains pending:** Water's unmerged `fix-night-brightness` defaults are
+`NightMoonLux=0.2`, `NightSky=0.3` and `NightMinExposure=-1`. Do not update the editor skill or
+claim a brightness fix until Integration has packaged RT-on sign-off.
 
 ### Forage placement ID freeze blocker
 
