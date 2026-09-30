@@ -96,6 +96,33 @@ int main()
         Check(manor->z > 0.0 && town->z > 0.0, "stop heights above the sea");
     }
 
+    // The road follows the ground (Scripts/Terrain/road_grade.py): never steeper than 1 in 5 between its
+    // 4 m points, and no long straight earthwork (the old 1 in 9 clamp ran 250-530 m at one exact grade).
+    {
+        double steepest = 0.0;
+        int straightRun = 0, longestStraight = 0;
+        for (size_t i = 1; i < road.points.size(); ++i)
+        {
+            const double mid = (road.chainage[i] + road.chainage[i - 1]) * 0.5;
+            const double grade = (road.groundZ[i] - road.groundZ[i - 1]) / 100.0 / (road.chainage[i] - road.chainage[i - 1]);
+            if (std::abs(mid - road.bridgeChainage) > road.bridgeHalfAlong) steepest = std::max(steepest, std::abs(grade));
+            const double previous = i > 1 ? (road.groundZ[i - 1] - road.groundZ[i - 2]) / 100.0 / (road.chainage[i - 1] - road.chainage[i - 2]) : 1e9;
+            straightRun = std::abs(grade) > 0.03 && std::abs(grade - previous) < 0.002 ? straightRun + 1 : 0;
+            longestStraight = std::max(longestStraight, straightRun);
+        }
+        Check(steepest <= 0.2005, "road no steeper than 1 in 5", steepest);
+        Check(longestStraight < 20, "no long straight-graded earthwork", longestStraight);
+        // Over the river it holds one level (the bridge deck) either side of the crossing.
+        double lowest = 1e300, highest = -1e300;
+        for (size_t i = 0; i < road.points.size(); ++i)
+            if (std::abs(road.chainage[i] - road.bridgeChainage) <= 5.0)
+            {
+                lowest = std::min(lowest, road.groundZ[i]);
+                highest = std::max(highest, road.groundZ[i]);
+            }
+        Check(highest - lowest < 1.0, "the road is level over the river", highest - lowest);
+    }
+
     // The signs stand on the verge, not the bed, and none in the bridge keep-out.
     Check(road.signs.size() == 3, "three signs", static_cast<double>(road.signs.size()));
     for (const PublicRoadSign& sign : road.signs)

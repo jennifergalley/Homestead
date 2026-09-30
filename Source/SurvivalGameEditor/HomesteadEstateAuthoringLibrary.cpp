@@ -250,3 +250,98 @@ FString UHomesteadEstateAuthoringLibrary::ApplyEstateHeightfield(const FString& 
         bDryRun ? TEXT("dry run") : TEXT("applied"), TilesChanged, Tiles, VerticesChanged, WorstDelta / 128.0,
         bDryRun ? TEXT("") : TEXT("; let the editor tick, then save the dirty landscape proxies"));
 }
+
+FString UHomesteadEstateAuthoringLibrary::ApplyEstateWeightmaps(const FString& WeightmapFolder, const TArray<FName>& LayerNames,
+    int32 MinX, int32 MinY, int32 MaxX, int32 MaxY, int32 TileSize, bool bDryRun)
+{
+    UWorld* World = GEditor ? GEditor->GetEditorWorldContext().World() : nullptr;
+    if (!World)
+        return TEXT("error: no editor world");
+    ALandscape* Landscape = nullptr;
+    for (TActorIterator<ALandscape> It(World); It && !Landscape; ++It)
+        Landscape = *It;
+    ULandscapeInfo* Info = Landscape ? Landscape->GetLandscapeInfo() : nullptr;
+    if (!Info)
+        return TEXT("error: no landscape");
+    const ULandscapeEditLayerBase* BaseLayer = Landscape->GetEditLayer(0);
+    if (!BaseLayer)
+        return TEXT("error: the landscape has no edit layer 0");
+
+    // Every map first, so a missing or malformed one changes nothing.
+    TArray<ULandscapeLayerInfoObject*> Infos;
+    TArray<TArray64<uint8>> Maps;
+    for (const FName& Name : LayerNames)
+    {
+        ULandscapeLayerInfoObject* LayerInfo = Info->GetLayerInfoByName(Name);
+        if (!LayerInfo)
+            return FString::Printf(TEXT("error: the landscape has no paint layer %s"), *Name.ToString());
+        int32 Width = 0, Height = 0;
+        TArray64<uint8>& Map = Maps.AddDefaulted_GetRef();
+        const FString Path = WeightmapFolder / (Name.ToString() + TEXT(".png"));
+        if (!EstateLoadGreyPng(Path, 8, Width, Height, Map) || Width != EstateAuthoringVerts || Height != EstateAuthoringVerts)
+            return FString::Printf(TEXT("error: %s is not a %d^2 8-bit weightmap"), *Path, EstateAuthoringVerts);
+        Infos.Add(LayerInfo);
+    }
+
+    MinX = FMath::Clamp(MinX, 0, EstateAuthoringVerts - 1);
+    MinY = FMath::Clamp(MinY, 0, EstateAuthoringVerts - 1);
+    MaxX = FMath::Clamp(MaxX, MinX, EstateAuthoringVerts - 2);
+    MaxY = FMath::Clamp(MaxY, MinY, EstateAuthoringVerts - 2);   // the outermost row and column stay as they are
+    TileSize = FMath::Max(8, TileSize);
+
+    UWorldPartitionEditorLoaderAdapter* Loader = nullptr;
+    if (UWorldPartition* Partition = World->GetWorldPartition())
+    {
+        const FTransform ToWorld = Landscape->LandscapeActorToWorld();
+        const FBox Region(ToWorld.TransformPosition(FVector(MinX - 1, MinY - 1, -1e5)),
+            ToWorld.TransformPosition(FVector(MaxX + 1, MaxY + 1, 1e5)));
+        Loader = Partition->CreateEditorLoaderAdapter<FLoaderAdapterShape>(World, Region, TEXT("Homestead weightmap patch"));
+        Loader->GetLoaderAdapter()->Load();
+    }
+
+    int32 LandscapeMinX = 0, LandscapeMinY = 0, LandscapeMaxX = 0, LandscapeMaxY = 0;
+    Info->GetLandscapeExtent(LandscapeMinX, LandscapeMinY, LandscapeMaxX, LandscapeMaxY);
+    int32 TilesChanged = 0;
+    int64 VerticesChanged = 0;
+    FString Report;
+    {
+        FLandscapeEditDataInterface Edit(Info, BaseLayer->GetGuid());
+        TArray<uint8> Current, Wanted;
+        for (int32 Layer = 0; Layer < Infos.Num(); ++Layer)
+        {
+            int64 LayerChanged = 0;
+            for (int32 Y0 = MinY; Y0 <= MaxY; Y0 += TileSize)
+                for (int32 X0 = MinX; X0 <= MaxX; X0 += TileSize)
+                {
+                    const int32 X1 = FMath::Min(X0 + TileSize - 1, MaxX), Y1 = FMath::Min(Y0 + TileSize - 1, MaxY);
+                    const int32 Width = X1 - X0 + 1, Height = Y1 - Y0 + 1;
+                    Current.SetNumZeroed(Width * Height);
+                    Wanted.SetNumUninitialized(Width * Height);
+                    Edit.GetWeightDataFast(Infos[Layer], X0 + LandscapeMinX, Y0 + LandscapeMinY, X1 + LandscapeMinX,
+                        Y1 + LandscapeMinY, Current.GetData(), 0);
+                    int32 Differ = 0;
+                    for (int32 Y = 0; Y < Height; ++Y)
+                        for (int32 X = 0; X < Width; ++X)
+                        {
+                            const uint8 Value = Maps[Layer][int64(Y0 + Y) * EstateAuthoringVerts + X0 + X];
+                            Wanted[Y * Width + X] = Value;
+                            Differ += Value != Current[Y * Width + X];
+                        }
+                    if (Differ == 0)
+                        continue;
+                    ++TilesChanged;
+                    LayerChanged += Differ;
+                    if (!bDryRun)
+                        Edit.SetAlphaData(Infos[Layer], X0 + LandscapeMinX, Y0 + LandscapeMinY, X1 + LandscapeMinX,
+                            Y1 + LandscapeMinY, Wanted.GetData(), 0, ELandscapeLayerPaintingRestriction::None, false, false);
+                }
+            VerticesChanged += LayerChanged;
+            Report += FString::Printf(TEXT(" %s %lld"), *LayerNames[Layer].ToString(), LayerChanged);
+        }
+    }
+    if (Loader && bDryRun)
+        if (UWorldPartition* Partition = World->GetWorldPartition())
+            Partition->ReleaseEditorLoaderAdapter(Loader);
+    return FString::Printf(TEXT("%s: %d layer tiles differ, %lld weights (%s )%s"), bDryRun ? TEXT("dry run") : TEXT("applied"),
+        TilesChanged, VerticesChanged, *Report, bDryRun ? TEXT("") : TEXT("; let the editor tick, then save the dirty landscape proxies"));
+}

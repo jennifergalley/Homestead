@@ -77,7 +77,8 @@ The script applies these steps in order:
    - The town: a plane fit on the spur above the estuary, about 91 m.
 4. **Road.** The road runs from the manor forecourt, fords the river by the mill, climbs the east
    bank at the estate gateway, and continues about 1.7 km east to the town. It's graded to a 5 m bed
-   with 12 m verges, and its gradient is capped at 11%.
+   with 12 m verges. Its first profile was capped at 11%, which built a 10 m causeway and a 13 m
+   cutting in the river valley; `road_grade.py` has replaced it (see "Road grade" below).
 5. **River.** A least-cost path finds the floor of the wooded valley. The river is cut into it as a
    channel 0.9 m deep and about 4.5 m wide, with its bed forced to run downhill. At the end of the
    run `river_channel.py` grades it to its finished channel (see "River channel" below).
@@ -89,6 +90,24 @@ layout in `Source/SurvivalGame/Simulation/HomesteadEstate.cpp` (`ProvisionalEsta
 it in centimetres. Update both together.
 
 Later hand edits go on Landscape Edit Layers in the editor, so re-importing this base keeps them.
+
+### Road grade (`road_grade.py`)
+
+The road follows the ground. `python Scripts\Terrain\road_grade.py` re-grades its long profile once:
+the ground it was graded over, lightly smoothed, held to 1 in 5 at most (the smallest-worst-deviation
+profile within that grade), with a level bridge deck 0.9 m over the river at chainage 683-684 m and
+1 in 12 approach ramps inside the 20 m bridge keep-out. The manor forecourt and town end keep their
+levels, and the centreline, chainage and anchors don't move. Cut and fill against the natural ground
+fell from +9.9 / -12.8 m to +1.6 / -1.4 m (p95 0.7 m).
+
+It changes only the road corridor (reshape.py's grading is linear in the profile, so the change is
+exact), re-seats the river under the bridge with `river_channel.py`, and records `roadProfile` and
+`roadGrade` (with the previous profile) in `estate_layout.json`. Run again, it leaves the heightfield
+alone and only brings a stale work npy into step. Afterwards: `public_road.py`, `weightmaps.py` (the
+old cutting's banks lose their cliff paint), `bake_ground.py`, `bake_estate_map.py`; in the editor
+`ApplyEstateHeightfield` over the rectangle it prints (r16 rows 1382-3111, columns 1513-2052),
+`ApplyEstateWeightmaps` over the same rectangle with the seven layers from `<work>\weights`, then
+`build_ground.py` and `ImportEstateMap`.
 
 ## Heightmap export and import
 
