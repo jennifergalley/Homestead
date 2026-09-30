@@ -33,8 +33,18 @@ void Apply(UAudioComponent* Loop, float Gain, float CutoffHz)
     if (!Loop) return;
     if (!FMath::IsNearlyEqual(Loop->VolumeMultiplier, Gain, 1.0e-4f)) Loop->SetVolumeMultiplier(Gain);
     const bool bMuffled = CutoffHz < static_cast<float>(Homestead::RoomAudio::OpenAirCutoffHz) - 1.0f;
-    if ((Loop->bEnableLowPassFilter != 0) != bMuffled) Loop->SetLowPassFilterEnabled(bMuffled);
-    if (bMuffled && !FMath::IsNearlyEqual(Loop->LowPassFilterFrequency, CutoffHz, 1.0f)) Loop->SetLowPassFilterFrequency(CutoffHz);
+    // The setters only reach the playing sound, so record what was sent on the component too (it's what
+    // the next comparison reads, and a sound started later picks it up).
+    if ((Loop->bEnableLowPassFilter != 0) != bMuffled)
+    {
+        Loop->bEnableLowPassFilter = bMuffled;
+        Loop->SetLowPassFilterEnabled(bMuffled);
+    }
+    if (bMuffled && !FMath::IsNearlyEqual(Loop->LowPassFilterFrequency, CutoffHz, 1.0f))
+    {
+        Loop->LowPassFilterFrequency = CutoffHz;
+        Loop->SetLowPassFilterFrequency(CutoffHz);
+    }
 }
 }
 
