@@ -597,12 +597,14 @@ requirement.
   seed/food visuals and actions while retaining optional pin mapping for reacquisition; Props guards
   against any zero-stock implicit fallback. Cover sow, stow, F5/F9, old-save pinned zero,
   reacquisition and no accidental planting.
-- **Field-book hotbar editor partial `bd0d928c`:** native 10/10, including
-  `HomesteadHotbarLayoutTests` seven scenarios / 78, no UE compile/PIE or delivery claim. It is based
-  on `main` `7662207c`: `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/
-  Water refusal with no Sim revision or stock mutation and save round-trip/layout 1/2 migration;
-  `ce3c0479` adds controller MenuAssign/MoveHotbarSlot plus sanitize; `bd0d928c` adds Inventory Page
-  0's 10-slot strip.
+- **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
+  shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
+  with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
+  controller MenuAssign/MoveHotbarSlot plus sanitize; `bd0d928c` adds Inventory Page 0's 10-slot strip.
+  Compile fix `4dbb6484` makes `Controller::SanitizeHotbar` avoid null+0 pointer arithmetic on empty
+  saved slots, with a UE old-save ApplySave/F9 fixture. Editor module builds; native
+  `HotbarLayoutTests` passes 91 checks after the fix. The last full 10/10 native result predates it and
+  must rerun after Jenny exits.
 
   The strip supports mouse pack drag, slot reorder/right-click clear, pad A carry/Y clear/B cancel,
   dim zero-count pins and gold/rust target states; DirectionalNavigation automation is updated but
@@ -616,11 +618,13 @@ requirement.
   chest view. Pad Down goes grid -> strip, while Up returns to the exact origin tile.
 
   `NativeMenuTest` chest automation is scripted for real mouse drag, slot swap, pad/Y/B,
-  save-form reload and a GEOMETRY line, but is unrun. Full 10 suites defer until after UAT (the last
-  full 10/10 predates this UI-only correction). Estimated 640 px strip fits a ~1250 px book and the
-  four-tile-row chest scroll is ~390 logical px; actual PIE 720p/4K, editor compile and pad navigation
-  remain required. README/DESIGN updates are shared-branch material; Docs verifies canonical guidance
-  only after code lands. This is excluded from the aim/rain/Shipping delivery.
+  save-form reload and a GEOMETRY line. Offscreen `DirectionalNavigation` at 720 failed on its first
+  `starts with actual native item focus` step with a blank reason **before** any strip test, coincident
+  with the 143 MB Shipping+editor memory event; it cannot be attributed to hotbar code. Menu's
+  offscreen `-game` PID 52420 exited and Jenny was untouched. NativeMenu chest GEOMETRY, UE old-save,
+  PIE 720p/4K and pad navigation remain unrun. Estimated 640 px strip fits a ~1250 px book and the
+  four-tile-row chest scroll is ~390 logical px. Hold UI acceptance until Jenny exits and rerun under
+  safe memory; no UE/UBT meanwhile. This is excluded from the aim/rain/Shipping delivery.
 - **Human-readable save confirmation time** — **Menu, pending and not shipped.**
   `Controller::MenuSaveStatus` currently shows an ISO-like UTC timestamp. Present it as a localized,
   human-readable local date/time (for example, `September 28, 2026 12:01 PM`) without changing the
