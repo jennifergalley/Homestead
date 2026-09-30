@@ -1267,6 +1267,14 @@ not claim early Energy is fully solved.
   stalled render/log progress for about 164 seconds before Integration stopped only its own PID.
   Do not use that run for door/forage visual evidence or infer a Shipping gameplay bug. The test
   wrapper already treats a ground hold that gives up as invalid collision placement evidence.
+  Read-only trace rules out the new door leaf: ground settling traces the Pawn channel, while the
+  door is Visibility-only. The teleport crossed about 21 m from `(-23970,-64935)` toward a likely
+  World Partition proxy boundary near x `-25200`; the analytic heightfield remained valid at z 8652
+  while the screenshot showed missing nearby terrain. The controller logs only the first collision
+  miss and can hold for up to 180 **game** seconds, so 164 wall seconds without a follow-up line is
+  not proof of a hard hang. Likely destination-proxy streaming remains unproven. A later fix should
+  explicitly source destination streaming, emit periodic diagnostics, and wall-clock-bound the hold
+  with safe-position restoration rather than placing her through missing collision.
 - **Starter chest and wardrobe** — **main-integrated `a785a417`, not packaged or shipped.** Fresh-game
   PIE verified the standing-room chest's pail, four branches, 3 pasties, 2 bread and seven garments;
   the tunic stays worn. It runs only in `NewEstateGame`, never restocks on load and uses normal chest
