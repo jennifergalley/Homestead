@@ -134,14 +134,15 @@ void AHomesteadController::InitializeAudio()
         Creek->SetVolumeMultiplier(AmbienceVolume * CreekGain);
     }
     else UE_LOG(LogTemp, Warning, TEXT("Creek loop is not imported. Run Scripts/bootstrap_unreal.py."));
-    // Kevin MacLeod tracks (CC BY 4.0), shuffled with no immediate repeat. Loudness is the gated,
-    // K-weighted level measured from each source file (dBFS); every track is matched to the same
-    // level, which sits about 14 dB under the old harp-only mix at the default 65% setting, so music
-    // stays under the woodland ambience and footsteps instead of dominating them.
+    // Kevin MacLeod's Evening Fall (CC BY 4.0) and verified public-domain (CC0) pieces, shuffled with no
+    // immediate repeat (docs/asset-credits.md). Loudness is the gated, K-weighted level (EBU R128
+    // integrated, LUFS) measured from each source file; every track is matched to the same level,
+    // which sits about 14 dB under the old harp-only mix at the default 65% setting, so music stays
+    // under the woodland ambience and footsteps instead of dominating them.
     struct FTrack { const TCHAR* Name; float Loudness; };
     static constexpr FTrack Tracks[] = {
-        {TEXT("EveningHarp"), -21.0f}, {TEXT("AscendingTheVale"), -21.3f}, {TEXT("TellerOfTheTales"), -23.4f},
-        {TEXT("MeditationImpromptu02"), -23.6f}, {TEXT("AtRest"), -28.6f}};
+        {TEXT("EveningHarp"), -21.0f}, {TEXT("WhispersOfTheGlen"), -14.7f}, {TEXT("MedievalTheme"), -15.7f},
+        {TEXT("ANewTown"), -15.6f}};
     constexpr float TargetLoudnessAtFullVolume = -35.0f;
     MusicTracks.Reset();
     MusicTrackGains.Reset();
