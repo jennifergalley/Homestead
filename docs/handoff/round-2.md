@@ -799,11 +799,72 @@ requirement.
   any new Editor/Game, automation, PIE or package work. `a9d2e86a`, the older `ac3fe239`, and the
   merge-tree compatibility with Water garden outline `6adb9842` remain historical evidence only.
 
-  **Current Coral milestone `111ebd91`:** actual-stack first-row simulation is pushed; native
-  Release 10/10 and `PackRow` 10 scenarios / 365 checks pass. Controller/UI rewrites are uncompiled.
-  At 00:25 Menu received the exclusive UBT/Editor slot after an 8.33 GB physical-memory preflight;
-  Integration retains UAT. This is source/native evidence only, not a delivery claim. Next gates are
-  UE suites, old-save behavior and 720p/4K proof.
+  **Current Coral branch `fd34975f`:** actual-stack first-row simulation passes native Release
+  10/10 and `PackRow` 10 scenarios / 370 checks. Editor and Game link, Hotbar 720 plus NativeMenu
+  720/4K routes pass, and a real pre-row old save migrates once with F5/F9 `stock_same=1`. The
+  directional-navigation row steps pass; the later Settings Down `visible=0` failure is pre-existing.
+  Manual real-gamepad PIE is still unverified.
+
+  Integration owns sole UAT/package work from the 01:20 handoff (9.97 GB preflight). This evidence
+  is **not a Shipping delivery claim**; package/smoke evidence and a manual pad pass remain required.
+  Integration then applied the ordered 11 first-row commits locally at `8470bd73`; native Release
+  10/10 and combined Editor+Game Unity pass. An exact copied Jenny Shipping Estate save loaded in
+  PIE, but editor-only free physical memory fell to 892 MB before any UI check. Integration stopped
+  only its PID 46284 immediately and memory recovered to 10.1 GB; no process, save or shortcut was
+  damaged. Treat this as **build-pass/UI-blocked**: use lower-memory packaged-standalone UI
+  verification before push or Shipping, not another Integration-worktree manual PIE attempt.
+
+  Integration has conditional authority for a new isolated Development package only with at least
+  6 GB physical free, monitored UAT abort below 1.5 GB, and one owned packaged game/copy-save test
+  at a time. Six suites and a Shipping/no-listener candidate follow only if that path stays safe.
+  The current Estate shortcut remains untouched until separately verified.
+
+  **Release hold — chest view:** Development native 10/10 plus packaged Hotbar 720 and NativeMenu
+  720/4K pass, but the actual screenshot shows a chest-open inventory placing the row at the
+  **bottom**. That conflicts with Jenny's "first inventory row" requirement even though the
+  pack-only view is correct. Menu must move the row above the PACK grid in chest view and update
+  tests. Shipping promotion is held; this is not ready or delivered.
+
+  **Correction `acb8e4bd`:** the pack-column top row now sits above its grid at 720p and 4K.
+  Editor/Game compile, NativeMenu 720/4K and Hotbar 720 pass; 53 directional-navigation row steps
+  pass before the pre-existing Settings `visible=0` failure. It changes no simulation, so native was
+  not rerun after `fd34975f`. This supersedes the bottom-strip candidate. Menu released its slot;
+  Integration resumed at 01:58 after a 7.24 GB/no-Unreal preflight to recut Development/package and
+  consider Shipping only if complete. No Shipping delivery claim exists yet.
+
+  **Packaged Smoke adaptation `89cbe13e` (test-only):** `QueueSelectRow` now navigates the actual
+  first-row hotbar for auto-filled items and the lower Content grid otherwise; berry eating acts
+  through `MenuHotbarRow`. Editor/Game rebuild and targeted non-packaged Smoke pass all 48 steps,
+  including berry navigation/eat. The distinct recut Development candidate and packaged six suites
+  remain pending; the shortcut is unchanged.
+
+  **v2 Development UAT (partial):** minimum free memory was 2.57 GB; packaged Smoke and Clearing
+  pass. Hotbar hit a first-run known sprint flake, then passed on one rerun. FullLoop exposed a
+  second test fixture assumption: its first 10 real stacks fill the row, leaving no auto-pin slot
+  for seed. Test-only `f7f9c957` uses production `MoveFromPackRow` to make room without changing
+  stock; Editor/Game rebuild and targeted FullLoop pass. Integration is recutting a distinct v3
+  Development candidate and all six packaged suites; no Shipping or shortcut claim follows yet.
+
+  **v3 Development UAT (partial):** packaged Smoke, Clearing, Hotbar, NativeMenu and FullLoop pass.
+  EstateSmoke fails early in hands-free setup because Coral correctly auto-fills slot 0 with the oil
+  lamp while the fixture assumes it is empty. The approved test-only adaptation chooses an actual
+  empty row cell and asserts no selected tool plus unchanged stock. Integration is recutting another
+  distinct Development candidate and rerunning all six suites; the current shortcut remains untouched.
+
+  **EstateSmoke fixture `0954ddad` (test-only):** selects an actual empty cell with unchanged stock
+  and uses the real numbered lamp key instead of slot 0/key 8 assumptions. Editor/Game rebuild pass;
+  targeted EstateSmoke passes with lamp coverage, about 59.9 fps and zero log/asset errors, while
+  targeted FullLoop and Smoke also pass. Integration is recutting distinct v4 Development and
+  rerunning all six packaged suites; no delivery claim exists.
+
+  **v4 Development gate passed:** `Build\Playtest-0930-hotbar-top-v4-dev` held a 1.95 GB physical
+  minimum (above the 1.5 GB abort guard), native Release 10/10 and Editor/Game Unity pass, and all
+  six packaged suites passed first try: Smoke 57.51, Clearing 53.98, Hotbar 52.50, NativeMenu 56.91,
+  FullLoop 54.67 and EstateSmoke woods 60.00 fps. The corrected chest row is above the PACK grid in
+  the earlier NativeMenu 720/4K evidence. Directional navigation's first 52 steps pass; its later
+  Settings `visible=0` failure remains pre-existing. Remaining gates are a copied current-save
+  packaged first-row reorder/stock/F5/F9 check, then Shipping reuse-cooked zero-listener/save/shortcut
+  verification. No delivery has occurred yet.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
