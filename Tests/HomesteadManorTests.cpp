@@ -5,6 +5,7 @@
 #include "HomesteadOvergrowth.h"
 #include "HomesteadSimulation.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -186,6 +187,109 @@ void ManorFootprintReservation()
     Simulation woodland;
     CHECK(!Manor::BlockedByManor(woodland.GetState(), ProvisionalEstateLayout(),
         woodland.ResolvePlacement(Piece::Foundation, hall, 0.0, 0), Footprint{hall, {150, 150}, 0}));
+}
+
+// The ruin's frame (HomesteadManorRuin): U east from the footprint's west end, V north from its south front.
+Point ManorPoint(double u, double v)
+{
+    double west = 1e18, south = 1e18;
+    for (const Point& corner : ProvisionalEstateLayout().FindPolygon(Anchor::ManorFootprint)->points)
+    {
+        west = std::min(west, corner.y);
+        south = std::min(south, corner.x);
+    }
+    return {south + v, west + u};
+}
+
+void BuildingInsideTheRooflessHall()
+{
+    // Jenny owns the estate but couldn't set anything down inside the ruin. The roofless hall east of the
+    // cross wall takes her own foundations and a fire, bed or chest, clear of the masonry and of the way
+    // out from the standing room's door; walls and roofs still never go up inside the ruin.
+    Simulation sim = NewEstate();
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    // Clear the hall's loose debris first (the placement rules keep off anything still lying there).
+    for (Item tool : {Item::Hatchet, Item::Billhook, Item::Scythe, Item::Pickaxe}) OK(sim.GrantItems(tool, 1));
+    for (int tool = 0; tool < static_cast<int>(ToolKind::Count); ++tool) OK(sim.SetToolTier(static_cast<ToolKind>(tool), ToolTier::Master));
+    const Point hallMin = ManorPoint(Manor::SafeHallMinU - 300.0, Manor::SafeHallMinV - 300.0);
+    const Point hallMax = ManorPoint(Manor::SafeHallMaxU + 300.0, Manor::SafeHallMaxV + 300.0);
+    for (const ResourceNode node : std::vector<ResourceNode>(sim.GetState().resources))
+    {
+        const auto* info = FindOvergrowth(node.kind);
+        if (node.cleared || !info || node.position.x < hallMin.x || node.position.x > hallMax.x
+            || node.position.y < hallMin.y || node.position.y > hallMax.y) continue;
+        const Item tool = info->byHand ? Item::Count : ToolItem(info->tool);
+        const auto cleared = sim.ClearOvergrowth(node.id, tool, node.position);
+        if (!cleared.ok) std::cerr << "note: couldn't clear " << node.id << ": " << cleared.message << '\n';
+        OK(cleared);
+    }
+    CHECK(Manor::InSafeHall(layout, ManorPoint(2030.0, 870.0)));
+    CHECK(!Manor::InSafeHall(layout, ManorPoint(2100.0, 350.0)));  // In front of the room's door.
+    CHECK(!Manor::InSafeHall(layout, ManorPoint(1800.0, 1000.0))); // On the cross wall.
+    CHECK(!Manor::InSafeHall(layout, ManorPoint(2100.0, 1760.0))); // Against the rear wall.
+    CHECK(!Manor::InSafeHall(layout, ManorPoint(1000.0, 1000.0))); // The west rooms.
+
+    // A new foundation of her own in the hall: allowed, previewed and placed through the same check.
+    const Point cell = ManorPoint(2030.0, 870.0);
+    const auto foundation = sim.ResolvePlacement(Piece::Foundation, cell, 0.0, 0);
+    CHECK(foundation.buildingId != Manor::HeritageBuildingId(sim.GetState()));
+    OK(sim.CheckPlacement(foundation, cell));
+    OK(sim.GrantItems(Item::Timber, 20));
+    OK(sim.GrantItems(Item::Branch, 20));
+    OK(sim.GrantItems(Item::Stone, 20));
+    OK(sim.Place(foundation, cell));
+    const Structure placed = sim.GetState().structures.back();
+    CHECK(placed.kind == Piece::Foundation && !placed.heritage);
+    // A chest on it is fine; a wall along its edge or a roof over it is not (the ruin's masonry stays).
+    const auto chest = sim.ResolvePlacement(Piece::Chest, cell, 0.0, 0);
+    CHECK(chest.buildingId == placed.buildingId);
+    OK(sim.CheckPlacement(chest, cell));
+    OK(sim.Place(chest, cell));
+    for (Piece kind : {Piece::Wall, Piece::Doorway, Piece::Roof})
+    {
+        const auto target = sim.ResolvePlacement(kind, cell, 0.0, 0);
+        const auto refused = sim.CheckPlacement(target, cell);
+        CHECK(!refused && refused.message == Manor::FootprintBlocked);
+    }
+    // A fire and a bed straight on the hall floor.
+    const Point hearthSpot = ManorPoint(2750.0, 1600.0);
+    OK(sim.CheckPlacement(sim.ResolvePlacement(Piece::Fire, hearthSpot, 0.0, 0), hearthSpot));
+    const Point bedSpot = ManorPoint(2000.0, 1500.0);
+    OK(sim.CheckPlacement(sim.ResolvePlacement(Piece::Bed, bedSpot, 90.0, 0), bedSpot));
+
+    // Refused: the door's corridor, a foundation reaching the rear wall or the cross wall, the west
+    // rooms, and the old house's own grid run out into the hall.
+    for (const Point& spot : {ManorPoint(2100.0, 350.0), ManorPoint(2100.0, 1600.0), ManorPoint(1900.0, 1300.0),
+             ManorPoint(1000.0, 1000.0)})
+    {
+        const auto refused = sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, spot, 0.0, 0), spot);
+        CHECK(!refused && refused.message == Manor::FootprintBlocked);
+    }
+    const int room = Manor::HeritageBuildingId(sim.GetState());
+    // Where the fallen roof timbers lie: ruin scenery, or clearable debris once that lands; either way refused.
+    const Point timbers = ManorPoint(Manor::HallTimbersU, Manor::HallTimbersV);
+    CHECK(!sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, timbers, 0.0, 0), timbers));
+    PlacementTarget extension = foundation;
+    extension.buildingId = room;
+    extension.cellX = 2;
+    extension.cellY = 0;
+    extension.blocker.clear();
+    for (Piece kind : {Piece::Foundation, Piece::Chest})
+    {
+        extension.kind = kind;
+        CHECK(Manor::BlockedByManor(sim.GetState(), layout, extension,
+            Footprint{StructureCenter(sim.GetState(), placed), {150, 150}, 0}));
+    }
+
+    // The new floor and chest survive a save and reload.
+    const std::string saved = sim.Serialize();
+    Simulation loaded;
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.Serialize() == saved);
+    int hallPieces = 0;
+    for (const auto& piece : loaded.GetState().structures) hallPieces += piece.buildingId == placed.buildingId;
+    CHECK(hallPieces == 2);
 }
 
 void NamesValidationAndPersistence()
@@ -540,6 +644,8 @@ int main()
     std::cout << "PASS sleep, chest and hearth cooking\n";
     ManorFootprintReservation();
     std::cout << "PASS manor footprint reservation\n";
+    BuildingInsideTheRooflessHall();
+    std::cout << "PASS building inside the roofless hall\n";
     NamesValidationAndPersistence();
     std::cout << "PASS names validation and persistence\n";
     DerelictFarmAndDisrepair();
