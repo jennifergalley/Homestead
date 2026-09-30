@@ -882,9 +882,23 @@ requirement.
   Combined Editor/Game and Shipping `-ReuseCooked` rebuilds now pass (candidate SHA begins
   `7C65AAF0` and ends `281EB`; cooker/UnrealPak are clean). v4 six suites, targeted NativeMenu
   720/4K chest-row screenshots and copied Jenny-save physical row swap/F5/F9 stock evidence still
-  pass; DirNav step 53 Settings `visible=0` remains known. This candidate is **not shipped**:
-  copied-save Shipping, no-listener, freshness and shortcut checks remain pending; hair is
-  inconclusive and manual human pad was not observed.
+  pass; DirNav step 53 Settings `visible=0` remains known.
+
+  **Coral Shipping delivered (`main` `e9c3d3d5`):** `Homestead Estate.lnk` now read-backs to
+  `Build\Releases\20260930-coral-hotbar-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
+  with SHA `7C65AAF0305556A74177B4C62D7C87FDFD5708ACAA95B388B432A54434B281EB`. Estate-map arguments,
+  candidate-local `-UserDir`, working directory and icon are preserved; the prior link is backed up
+  on `E:` and `Homestead.lnk` remains MVP-untouched. The candidate reuses five hash-identical cooked
+  containers. All 19 source SaveGames plus GameUserSettings/Input match their pre-promotion hashes;
+  Manual `F816C870...5EB8` remains unchanged.
+
+  Copied-Estate-save Shipping F5/F9 MD5 matches with Lit 666 ticks and `traceCompiled=false`; 38
+  owned-PID samples and an independent 66-second hard-link run with 40 samples observed zero
+  endpoints. The wrapper still reports `status=failed` only from the obsolete modular-equipment
+  assertion—do not call it a full wrapper pass. Visible human Shipping startup and manual physical
+  gamepad use were not observed; the later DirNav Settings failure remains pre-existing, and hair
+  rods/fans remain visually inconclusive. Integration closed all owned processes and released the
+  UAT/UE/UBT lock.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
