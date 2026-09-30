@@ -141,6 +141,10 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
             if (Known && AHomesteadController::CanPinToHotbar(Item))
                 Add(Controller->IsPinnedToHotbar(Item) ? TEXT("Unpin from hotbar") : TEXT("Pin to hotbar"),
                     Act(EHomesteadItemAction::Pin, 1), EHomesteadItemAction::Pin);
+            // Choose the exact slot on the book's hotbar strip (the keyboard/controller way to do
+            // what dragging onto a slot does).
+            if (Known && AHomesteadController::CanPinToHotbar(Item))
+                Add(TEXT("Put on a hotbar slot..."), [this, Row]() { BeginPlacingOnHotbar(Row); });
             if (Storage) Add(FString::Printf(TEXT("Move to chest %d"), Row.DestinationId), Move, EHomesteadItemAction::Transfer);
             Add(Row.Quantity > 1 ? TEXT("Drop 1") : TEXT("Drop"), Act(EHomesteadItemAction::Drop, 1), EHomesteadItemAction::Drop);
             if (Row.Quantity > 1)
@@ -258,7 +262,9 @@ void SHomesteadMenu::EndPointerItemDrag()
 {
     const bool WasDragging = bPointerDraggingItem;
     const int32 Source = PointerDragSource;
+    const int32 HotbarTarget = PointerHotbarTarget;
     int32 Target = INDEX_NONE;
+    bool bOverSource = false;
     if (WasDragging && FSlateApplication::IsInitialized())
     {
         const FVector2D Position = FSlateApplication::Get().GetCursorPos();
@@ -266,15 +272,22 @@ void SHomesteadMenu::EndPointerItemDrag()
             if (Index != Source && Cells[Index]
                 && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position))
             { Target = Index; break; }
+        bOverSource = Cells.IsValidIndex(Source) && Cells[Source] && Cells[Source]->GetCachedGeometry().IsUnderLocation(Position);
     }
     bPointerItemDown = false;
     bPointerDraggingItem = false;
     PointerDragSource = INDEX_NONE;
     PointerDragTarget = INDEX_NONE;
-    bSuppressItemClick = WasDragging;
+    PointerHotbarTarget = INDEX_NONE;
+    // Only a release back over the tile she picked up clicks it; swallow that one click. Released
+    // anywhere else, no click follows, so the next real click mustn't be eaten.
+    bSuppressItemClick = WasDragging && bOverSource;
     if (WasDragging && Entries.IsValidIndex(Source) && Entries.IsValidIndex(Target)
         && Source != Target)
         Controller->MenuDrop(Entries[Source], Entries[Target], PointerDragRevision);
+    // Dropped on a hotbar slot: bind it there (stock stays where it is). Anywhere else, nothing.
+    else if (WasDragging && Entries.IsValidIndex(Source) && Target == INDEX_NONE && HotbarCells.IsValidIndex(HotbarTarget))
+        Controller->MenuAssignHotbarSlot(Entries[Source], HotbarTarget);
 }
 
 void SHomesteadMenu::CancelPointerItemDrag()
@@ -283,6 +296,7 @@ void SHomesteadMenu::CancelPointerItemDrag()
     bPointerDraggingItem = false;
     PointerDragSource = INDEX_NONE;
     PointerDragTarget = INDEX_NONE;
+    PointerHotbarTarget = INDEX_NONE;
     bSuppressItemClick = false;
 }
 
@@ -320,6 +334,17 @@ void SHomesteadMenu::CancelVirtualItemDrag()
 
 void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
 {
+    if (bHotbarPointerDown && HotbarCells.IsValidIndex(HeldHotbarSlot))
+    {
+        if (!bHotbarPointerDragging && FVector2D::Distance(Position, HotbarDragStart) >= 7.0f)
+            bHotbarPointerDragging = true;
+        if (bHotbarPointerDragging)
+        {
+            const int32 Over = HotbarCellAt(Position);
+            PointerHotbarTarget = Over != HeldHotbarSlot ? Over : INDEX_NONE;
+        }
+        return;
+    }
     if (bPointerItemDown && Entries.IsValidIndex(PointerDragSource))
     {
         if (!bPointerDraggingItem
@@ -332,7 +357,9 @@ void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
                 if (Index != PointerDragSource && Cells[Index]
                     && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position))
                 { PointerDragTarget = Index; break; }
-            if (Scroll)
+            // Off the grid, a pack stack can go onto one of the book's hotbar slots.
+            PointerHotbarTarget = PointerDragTarget == INDEX_NONE && HotbarCandidateRow() ? HotbarCellAt(Position) : INDEX_NONE;
+            if (Scroll && PointerHotbarTarget == INDEX_NONE)
             {
                 const auto Bounds = Scroll->GetCachedGeometry();
                 const float Top = Bounds.GetAbsolutePosition().Y;

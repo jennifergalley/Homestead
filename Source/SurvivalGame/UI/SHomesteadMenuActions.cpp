@@ -175,6 +175,7 @@ void SHomesteadMenu::Activate()
     if (Region == ERegion::Tabs) ChangePage(FocusedTab);
     else if (Region == ERegion::Inventory) ChangeInventoryView(InventorySelection);
     else if (Region == ERegion::Equipment) FocusEquipment(EquipmentSelection);
+    else if (Region == ERegion::Hotbar) ActivateHotbarSlot(HotbarSelection);
     else if (Region == ERegion::Session) { if (SessionSelection == 0) Back(); else SetSettingsTab(SessionSelection - 1); }
     else if (Region == ERegion::Recovery) { if (RecoverySelection == 0) Controller->MenuRetry(); else ChangePage(4); }
     else if (Region == ERegion::Portrait)
@@ -203,6 +204,7 @@ void SHomesteadMenu::ChangePage(int32 Page)
     if (!Controller.IsValid() || Dialog != EDialog::None) return;
     CancelPointerItemDrag();
     CancelVirtualItemDrag();
+    CancelHotbarHolds();
     StopCraftHold();
     Controller->MenuPage(Page);
     Refresh();

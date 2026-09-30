@@ -318,6 +318,8 @@ FString SHomesteadMenu::EquipmentLabel(int32 Index) const
 FString SHomesteadMenu::PackHint() const
 {
     if (!Controller.IsValid()) return {};
+    const bool bHotbarLine = Region == ERegion::Hotbar || HeldHotbarRow.IsSet() || HeldHotbarSlot != INDEX_NONE;
+    if (bHotbarLine && !HotbarCells.IsEmpty()) return HotbarHint();
     const int32 Index = DetailIndex();
     FString Subject;
     if (Entries.IsValidIndex(Index) && Entries[Index].Subject != EHomesteadMenuSubject::Legacy)

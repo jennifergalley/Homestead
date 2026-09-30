@@ -117,6 +117,7 @@ void SHomesteadMenu::Back()
 {
     if (bSaving) return;
     if (bVirtualDraggingItem) { CancelVirtualItemDrag(); return; }
+    if (HeldHotbarRow.IsSet() || HeldHotbarSlot != INDEX_NONE) { CancelHotbarHolds(); return; }
     CancelPointerItemDrag();
     StopCraftHold();
     if (Dialog == EDialog::Amount && bEditingAmount) { bEditingAmount = false; BuildDialog(); return; }

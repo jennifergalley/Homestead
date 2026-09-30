@@ -130,6 +130,11 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
         OpenItemContextMenu(ContentSelection, false);
         return true;
     }
+    if (SeenPage == 0 && (Key == EKeys::F || Key == EKeys::Gamepad_FaceButton_Top) && Region == ERegion::Hotbar)
+    {
+        OpenHotbarSlotMenu(HotbarSelection, false);
+        return true;
+    }
     if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top)
     {
         if (SeenPage == 0 && Key == EKeys::Gamepad_FaceButton_Top)

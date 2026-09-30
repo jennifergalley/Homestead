@@ -1,4 +1,5 @@
 #include "SHomesteadMenuPrivate.h"
+#include "../Simulation/HomesteadHotbarLayout.h"
 
 namespace HomesteadMenus
 {
@@ -63,6 +64,7 @@ void SHomesteadMenu::AdoptFocus(ERegion TargetRegion, int32 Index)
     case ERegion::Inventory: InventorySelection = Index; break;
     case ERegion::Portrait: PortraitSelection = Index; break;
     case ERegion::Equipment: EquipmentSelection = Index; break;
+    case ERegion::Hotbar: HotbarSelection = Index; break;
     case ERegion::Actions: ActionSelection = Index; ScrollActionIntoView(); break;
     case ERegion::Recovery: RecoverySelection = Index; break;
     case ERegion::Details: DetailsSelection = Index; break;
@@ -84,6 +86,7 @@ TSharedPtr<SWidget> SHomesteadMenu::FocusWidget() const
     case ERegion::Portrait: Index = PortraitSelection; break;
     case ERegion::Content: Index = Entries.IsEmpty() ? -1 : ContentSelection; break;
     case ERegion::Equipment: Index = EquipmentSelection; break;
+    case ERegion::Hotbar: Index = HotbarSelection; break;
     case ERegion::Actions: Index = ActionSelection; break;
     case ERegion::Recovery: Index = RecoverySelection; break;
     case ERegion::Details: Index = DetailsSelection; break;
@@ -161,7 +164,7 @@ FString SHomesteadMenu::GetFocusedRegionName() const
 {
     if (Dialog != EDialog::None) return bEditingAmount ? TEXT("AmountEdit") : TEXT("Dialog");
     const TCHAR* Names[] = {TEXT("Tabs"), TEXT("Session"), TEXT("Inventory"), TEXT("Portrait"),
-        TEXT("Content"), TEXT("Equipment"), TEXT("Details"), TEXT("Actions"), TEXT("Recovery")};
+        TEXT("Content"), TEXT("Equipment"), TEXT("Details"), TEXT("Actions"), TEXT("Recovery"), TEXT("Hotbar")};
     return Names[static_cast<int32>(Region)];
 }
 
@@ -270,6 +273,7 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
     }
     if (Controller->MenuPortraitBrush() && SeenPage == 0) Regions.Add(ERegion::Portrait);
     Regions.Add(ERegion::Content);
+    if (SeenPage == 0 && !HotbarCells.IsEmpty()) Regions.Add(ERegion::Hotbar);
     if (SeenPage == 0) Regions.Add(ERegion::Equipment);
     if (SeenPage != 0 && SeenPage != 6 && SeenPage != 7) Regions.Add(ERegion::Details);
     if (!Actions.IsEmpty() && SeenPage != 0 && SeenPage != 6) Regions.Add(ERegion::Actions);
@@ -402,11 +406,24 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
                     Moved = true;
                     break;
                 }
+                // Below the last row of either grid: the hotbar strip that runs under both.
+                if (Direction.y > 0 && !HotbarCells.IsEmpty())
+                {
+                    Region = ERegion::Hotbar;
+                    Moved = true;
+                    break;
+                }
             }
         }
         int32 Next = ContentSelection;
         if (MoveWithin(Next, Entries.Num(), Columns(), Direction, DesiredColumn))
         { Select(Next, Direction.y != 0); Moved = true; }
+        else if (SeenPage == 0 && Direction.y > 0 && !HotbarCells.IsEmpty())
+        {
+            // Below the pack grid's last row: the hotbar strip (her selection in the grid is kept).
+            Region = ERegion::Hotbar;
+            Moved = true;
+        }
         break;
     }
     case ERegion::Tabs:
@@ -437,6 +454,11 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
     }
     case ERegion::Inventory: Moved = MoveWithin(InventorySelection, 3, 3, Direction); break;
     case ERegion::Equipment: Moved = MoveWithin(EquipmentSelection, VisibleEquipmentSlotCount, VisibleEquipmentSlotCount, Direction); break;
+    case ERegion::Hotbar:
+        if (Direction.x) Moved = MoveWithin(HotbarSelection, Homestead::HotbarSize, Homestead::HotbarSize, Direction);
+        // Up goes back to the grid tile she left (pack or chest), not wherever is nearest.
+        else if (Direction.y < 0 && !Entries.IsEmpty()) { Region = ERegion::Content; Select(ContentSelection, true); Moved = true; }
+        break;
     case ERegion::Portrait:
         if (PortraitSelection >= 0) Moved = MoveWithin(PortraitSelection, 3, 3, Direction);
         break;
