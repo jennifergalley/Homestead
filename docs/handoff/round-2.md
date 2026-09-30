@@ -226,6 +226,18 @@ real-counter sale/purchase/F5/F9 check above supplies the current Pascoe evidenc
 packaged Pascoe trade route remains desirable, but the prior focus failure is no longer an open
 functional gap.
 
+**New split Shipping candidate (not promoted):** Development copied-save offscreen loading also
+passes. `Build\Releases\20260929-split-shipping` executable SHA begins `2A1834BC` and ends
+`3FA4`; it reuses five byte-identical cooked containers. Its startup probe against a copied Jenny
+Estate save reports `shipping=true`, `traceCompiled=false`, F5/F9 MD5 equality and zero endpoints
+in 43 samples. The wrapper reports failure only because of its known stale legacy modular-equipment
+check, not a current candidate failure. A separate candidate-local `UserDir` hard-link run remained
+alive for 65.2 seconds with zero endpoints in 108 samples. Visible user startup was not observed.
+
+The original Shipping save, current player build and Estate shortcut remain untouched. Integration
+must first verify whole-save freshness, no running process and no new blocker before it may promote
+this candidate; no shortcut decision or hair-cure claim exists yet.
+
 ### Development firewall prompts / offline Shipping candidate
 
 Development packaged automation can trigger recurring Windows Firewall prompts: UE5.8's in-process
