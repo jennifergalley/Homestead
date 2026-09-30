@@ -10,6 +10,12 @@ manor, the drive and the woods within 450 m of home; the woodland lane's 43 are 
 adds brambles where she goes next: woodland edges and field hedges further out, and the road beyond the
 gateway, where there was no pickable forage at all past chainage 800 m.
 
+Later the same day ("abundant live berry bushes"): a second pass on its own random streams adds MORE_BRAMBLES
+brambles and MORE_ROOTS root patches across the whole estate, each where the nearest food is furthest away
+(woods, hedges and field scrub; roots under the trees; clear of the ruin, the farm, the lake trail and the
+beach), and a second roadside stop half way between each pair of the first. Earlier rows and ids never move.
+It also writes Tests/Data/HomesteadForageKeepOuts.inc (river, lake shore, lake trail) for the native tests.
+
 Rows land in ProvisionalEstatePlacements after every other section, and a row within 3 m of an earlier
 placement is skipped (its id stays unused), so nothing existing moves or renumbers. The roadside rows sit
 3.2-6 m off the road's centreline, outside the bridge keep-out: Homestead::IsPublicRoadsidePlacement
@@ -48,9 +54,28 @@ ESTATE_FIELD_HEDGE = 10           # field hedges: open pasture with a tree or tw
 ROOTS_NEAR = 3                    # 40-110 m from the standing room, for her first day
 ROOTS_WOODS = 13                  # 110-350 m, in the woods
 ROOTS_GAP_M = 14.0
+# More food everywhere (Jenny's playtest, 2026-09-29: "abundant live berry bushes"): brambles on woodland
+# edges, hedges and field scrub and roots under the trees across the whole estate, each placed where food
+# is furthest away (so the gaps fill first), after every earlier pick so none of those moves.
+MORE_BRAMBLES = 48
+MORE_ROOTS = 24
+MORE_GAP_M = 20.0                 # from any other bramble or root patch
+MORE_COVER_M = 80.0               # a bramble or root patch "feeds" the ground within this
+MORE_CANDIDATES = 6000            # candidate spots scored per pass (a random sample of the open ground)
+MORE_JITTER_CELLS = 12.0          # random tie-break (in 10 m cells) so the fill looks natural, not a lattice
+MORE_MIN_Z_M = 6.0                # off the beach and the salt-marsh edge
+MORE_MANOR_CLEAR_M = 30.0         # the ruin's grounds stay as they are
+MORE_FARM_CLEAR_M = 8.0           # outside the derelict farm's walls and her garden plots in it
+COVE_CLEAR_M = 60.0
+MORE_BOUNDARY_CLEAR_M = 6.0       # inside the estate's edge, not on its line
+# Matches Anchor::DerelictFarm (HomesteadEstate.cpp) in metres, x0 x1 y0 y1.
+FARM = (-222.0, -162.0, -705.0, -645.0)
 
 # Roadside: a stop every ROAD_SPACING_M from ROAD_FROM_M to ROAD_TO_M, alternating verges.
 ROAD_FROM_M, ROAD_TO_M, ROAD_SPACING_M = 830.0, 1900.0, 63.0
+# ...and a second stop half way between each pair (their own slots, odd on the half-spacing grid).
+ROAD_INFILL_KINDS = ["BerryBush", "BerryBush", "Roots"]
+ROAD_MIN_APART_M = 20.0
 ROAD_OFFSET_M = (3.4, 5.6)        # off the centreline (the bed is 2.8 m half wide)
 BRIDGE_CHAINAGE_M, BRIDGE_HALF_M = 684.0, 25.0
 RIVER_CLEAR_M = 12.0
@@ -184,54 +209,132 @@ def main():
             n += 1
     estate += roots
 
-    # --- The road to town: a stop every ~63 m beyond the gateway, alternating verges.
+    # --- More food across the whole estate (own random stream, after every earlier pick): each new bramble
+    # or root patch goes where the nearest food is furthest away, so the empty woods and fields fill first.
+    import forage_ids
+    sim = os.path.join(ROOT, "Source", "SurvivalGame", "Simulation")
+    committed_food = []
+    for name, macro, first, end in (("HomesteadEstateForagePlacements.inc", "forage", ESTATE_FIRST_ID, ESTATE_END_ID),
+                                    ("HomesteadEstateRoadsidePlacements.inc", "roadside", ROADSIDE_FIRST_ID, ROADSIDE_END_ID)):
+        committed_food += [(r.x / 100.0, r.y / 100.0) for r in forage_ids.read_rows(os.path.join(sim, name), macro, first, end)[1]
+                           if r.kind in ("BerryBush", "Roots")]
+    food = np.array([p for p, k in zip(placed, placed_kinds) if k in ("BerryBush", "Roots")] + committed_food,
+                    np.float64).reshape(-1, 2)
+    more_rng = np.random.default_rng(SEED + 2)
+    lo, hi = boundary.min(axis=0), boundary.max(axis=0)
+    mc = np.c_[more_rng.uniform(lo[0], hi[0], 200000), more_rng.uniform(lo[1], hi[1], 200000)]
+    mc = mc[points_in_poly(mc, boundary)]
+    mc = mc[cKDTree(densify(np.vstack([boundary, boundary[:1]]).tolist(), 1.0)).query(mc)[0] > MORE_BOUNDARY_CLEAR_M]
+    mc = mc[road_tree.query(mc)[0] > 6.0]
+    mc = mc[sample(z, mc[:, 0], mc[:, 1]) > MORE_MIN_Z_M]
+    mc = mc[common(mc)]
+    cove = np.array(L["landmarks"]["CoveBeach"][:2], np.float64)
+    mc = mc[np.linalg.norm(mc - cove, axis=1) > COVE_CLEAR_M]
+
+    def in_box(p, x0, x1, y0, y1, margin):
+        return (p[:, 0] > x0 - margin) & (p[:, 0] < x1 + margin) & (p[:, 1] > y0 - margin) & (p[:, 1] < y1 + margin)
+
+    mc = mc[~in_box(mc, manor[:, 0].min(), manor[:, 0].max(), manor[:, 1].min(), manor[:, 1].max(), MORE_MANOR_CLEAR_M)]
+    mc = mc[~in_box(mc, *FARM, MORE_FARM_CLEAR_M)]
+    if lake:
+        mc = mc[cKDTree(densify(lake["path"], 1.0)).query(mc)[0] > 4.0]   # off the lake trail
+    trunk_d = trees.query(mc)[0]
+    near10 = np.array([len(n) for n in trees.query_ball_point(mc, 10.0)])
+    near30 = np.array([len(n) for n in trees.query_ball_point(mc, 30.0)])
+    bramble_ground = mc[(trunk_d > 4.0) & (near30 >= 1)]          # woodland edge, hedge or field scrub, in light
+    root_ground = mc[(trunk_d > 1.6) & (near10 >= 2)]             # under the trees
+
+    # Land cells (10 m) on the estate, for coverage: a cell is fed when food is within MORE_COVER_M.
+    gx, gy = np.meshgrid(np.arange(lo[0], hi[0], 10.0), np.arange(lo[1], hi[1], 10.0), indexing="ij")
+    cells = np.c_[gx.ravel(), gy.ravel()]
+    cells = cells[points_in_poly(cells, boundary)]
+    cells = cells[sample(z, cells[:, 0], cells[:, 1]) > 1.5]
+    cell_tree = cKDTree(cells)
+
+    def spread(pool, count, kind):
+        """Greedy coverage: each pick is the candidate that feeds the most still-hungry land cells, so the
+        empty woods and fields fill first without the picks crowding the estate's edge."""
+        nonlocal food
+        pool = pool[more_rng.permutation(len(pool))[:MORE_CANDIDATES]]
+        hungry = cKDTree(food).query(cells)[0] > MORE_COVER_M
+        reach = cell_tree.query_ball_point(pool, MORE_COVER_M)
+        jitter = more_rng.uniform(0.0, MORE_JITTER_CELLS, len(pool))
+        gap = cKDTree(food).query(pool)[0]
+        out = []
+        for _ in range(count):
+            score = np.array([hungry[r].sum() for r in reach], np.float64) + jitter
+            score[gap < MORE_GAP_M] = -1.0
+            i = int(np.argmax(score))
+            if score[i] < 0.0:
+                break
+            out.append((kind, pool[i].copy()))
+            food = np.vstack([food, pool[i]])
+            hungry[reach[i]] = False
+            gap = np.minimum(gap, np.linalg.norm(pool - pool[i], axis=1))
+        return out
+
+    more_brambles = spread(bramble_ground, MORE_BRAMBLES, "BerryBush")
+    more_roots = spread(root_ground, MORE_ROOTS, "Roots")
+    print(f"more food: {len(more_brambles)} brambles, {len(more_roots)} root patches")
+
+    # --- The road to town: a stop every ~63 m beyond the gateway, alternating verges, then a second stop
+    # half way between each pair (own random stream). Slots count half-spacings: the first set even, infill odd.
     seg = np.hypot(*np.diff(road, axis=0).T)
     chain = np.r_[0.0, np.cumsum(seg)]
     roadside = []
-    kinds = ["BerryBush", "BerryBush", "Flowers", "BerryBush", "Roots"]
-    for i, ch in enumerate(np.arange(ROAD_FROM_M, ROAD_TO_M, ROAD_SPACING_M)):
+
+    def verge(slot, ch, first_side, kind, draw):
         if abs(ch - BRIDGE_CHAINAGE_M) < BRIDGE_HALF_M:
-            continue
+            return
         k = int(np.clip(np.searchsorted(chain, ch), 1, len(road) - 2))
         d = road[k + 1] - road[k - 1]
         d /= np.linalg.norm(d)
         normal = np.array([-d[1], d[0]])
         base = road[k - 1] + (road[k] - road[k - 1]) * np.clip((ch - chain[k - 1]) / max(seg[k - 1], 1e-9), 0, 1)
-        placed_here = False
         for attempt in range(12):
-            side = (1.0 if i % 2 == 0 else -1.0) * (1.0 if attempt < 6 else -1.0)
-            p = base + normal * side * rng.uniform(*ROAD_OFFSET_M) + d * rng.uniform(-6.0, 6.0)
+            side = first_side * (1.0 if attempt < 6 else -1.0)
+            p = base + normal * side * draw.uniform(*ROAD_OFFSET_M) + d * draw.uniform(-6.0, 6.0)
             pp = p[None, :]
             if not common(pp)[0]:
                 continue
             off = road_tree.query(p)[0]
             if off < ROAD_OFFSET_M[0] - 0.1 or off > 6.0:
                 continue
-            if roadside and min(np.linalg.norm(np.array([r[2] for r in roadside]) - p, axis=1)) < 20.0:
+            gap = 20.0 if slot % 2 == 0 else ROAD_MIN_APART_M
+            if roadside and min(np.linalg.norm(np.array([r[2] for r in roadside]) - p, axis=1)) < gap:
                 continue
-            roadside.append((i, kinds[i % len(kinds)], p))
-            placed_here = True
-            break
-        if not placed_here:
-            print(f"roadside: no safe verge at chainage {ch:.0f} m")
+            roadside.append((slot, kind, p))
+            return
+        print(f"roadside: no safe verge at chainage {ch:.0f} m")
+
+    kinds = ["BerryBush", "BerryBush", "Flowers", "BerryBush", "Roots"]
+    for i, ch in enumerate(np.arange(ROAD_FROM_M, ROAD_TO_M, ROAD_SPACING_M)):
+        verge(2 * i, ch, 1.0 if i % 2 == 0 else -1.0, kinds[i % len(kinds)], rng)
+    infill_rng = np.random.default_rng(SEED + 3)
+    for i, ch in enumerate(np.arange(ROAD_FROM_M + ROAD_SPACING_M / 2, ROAD_TO_M, ROAD_SPACING_M)):
+        verge(2 * i + 1, ch, -1.0 if i % 2 == 0 else 1.0, ROAD_INFILL_KINDS[i % len(ROAD_INFILL_KINDS)], infill_rng)
 
     # Ids are save identity: keep every committed row, add only genuinely new picks with fresh ids
     # (forage_ids.py). Each output keeps to its own reserved range.
-    import forage_ids
-    sim = os.path.join(ROOT, "Source", "SurvivalGame", "Simulation")
     out_dir = os.environ.get("HOMESTEAD_FORAGE_OUT", sim)
     estate_path = os.path.join(sim, "HomesteadEstateForagePlacements.inc")
     road_path = os.path.join(sim, "HomesteadEstateRoadsidePlacements.inc")
     estate_header, estate_rows = forage_ids.read_rows(estate_path, "forage", ESTATE_FIRST_ID, ESTATE_END_ID)
     road_header, road_rows = forage_ids.read_rows(road_path, "roadside", ROADSIDE_FIRST_ID, ROADSIDE_END_ID)
+    # Two pools, so the later passes' larger targets never let an earlier pass's drifted pick in.
     targets = {"BerryBush": ESTATE_WOOD_EDGE + ESTATE_FIELD_HEDGE, "Roots": ROOTS_NEAR + ROOTS_WOODS}
     picks = [(kind, x * 100.0, y * 100.0) for kind, (x, y) in estate]
     estate_rows, estate_added = forage_ids.allocate_pool(estate_rows, picks, targets, "forage", ESTATE_FIRST_ID,
                                                          ESTATE_END_ID, RETIRED_ESTATE_IDS, ESTATE_GAP_M * 100.0)
+    targets = {kind: n + {"BerryBush": MORE_BRAMBLES, "Roots": MORE_ROOTS}[kind] for kind, n in targets.items()}
+    picks = [(kind, x * 100.0, y * 100.0) for kind, (x, y) in more_brambles + more_roots]
+    estate_rows, more_added = forage_ids.allocate_pool(estate_rows, picks, targets, "forage", ESTATE_FIRST_ID,
+                                                       ESTATE_END_ID, RETIRED_ESTATE_IDS, ESTATE_GAP_M * 100.0)
+    estate_added += more_added
 
     def slot_of(row):
         k = int(np.argmin(np.hypot(road[:, 0] - row.x / 100.0, road[:, 1] - row.y / 100.0)))
-        return int(round((chain[k] - ROAD_FROM_M) / ROAD_SPACING_M))
+        return int(round((chain[k] - ROAD_FROM_M) / (ROAD_SPACING_M / 2)))
 
     road_picks = {slot: (kind, p[0] * 100.0, p[1] * 100.0) for slot, kind, p in roadside}
     road_rows, road_added = forage_ids.allocate_slots(road_rows, slot_of, road_picks, "roadside", ROADSIDE_FIRST_ID,
@@ -239,6 +342,17 @@ def main():
     os.makedirs(out_dir, exist_ok=True)
     forage_ids.write_rows(os.path.join(out_dir, "HomesteadEstateForagePlacements.inc"), estate_header, estate_rows)
     forage_ids.write_rows(os.path.join(out_dir, "HomesteadEstateRoadsidePlacements.inc"), road_header, road_rows)
+    # The water and trail the forage keeps clear of, for the native tests (the Simulation has no estate water).
+    keep_dir = os.path.join(ROOT, "Tests", "Data") if out_dir == sim else out_dir
+    lines = ["// Generated by Scripts/Terrain/forage.py from estate_layout.json - do not edit by hand.",
+             f"// HomesteadPublicRoadTests checks new forage keeps {RIVER_CLEAR_M:g} m off the river's centreline, out of the",
+             "// lake and off its footpath. Points in cm."]
+    lines += [f"river({x * 100.0:.1f}, {y * 100.0:.1f});" for x, y in L["river"]]
+    if lake:
+        lines += [f"lakeShore({x * 100.0:.1f}, {y * 100.0:.1f});" for x, y in lake["shore"]]
+        lines += [f"lakePath({x * 100.0:.1f}, {y * 100.0:.1f});" for x, y in lake["path"]]
+    with open(os.path.join(keep_dir, "HomesteadForageKeepOuts.inc"), "w", newline="\n") as fh:
+        fh.write("\n".join(lines) + "\n")
     print(f"estate: {len(estate_rows)} rows ({len(estate_added)} new: {[r.id for r in estate_added]}); "
           f"roadside: {len(road_rows)} rows ({len(road_added)} new: {[r.id for r in road_added]}) -> {out_dir}")
 

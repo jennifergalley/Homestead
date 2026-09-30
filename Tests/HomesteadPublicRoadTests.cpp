@@ -26,6 +26,37 @@ void Check(bool ok, const char* what, double value = 0.0)
     }
 }
 double Distance(Point a, Point b) { return std::hypot(a.x - b.x, a.y - b.y); }
+double PolylineDistance(const std::vector<Point>& line, Point p, bool closed = false)
+{
+    double best = 1e300;
+    const size_t n = line.size();
+    for (size_t i = 0; i + (closed ? 0 : 1) < n; ++i)
+    {
+        const Point a = line[i], b = line[(i + 1) % n];
+        const double dx = b.x - a.x, dy = b.y - a.y, len2 = dx * dx + dy * dy;
+        const double t = len2 > 0.0 ? std::clamp(((p.x - a.x) * dx + (p.y - a.y) * dy) / len2, 0.0, 1.0) : 0.0;
+        best = std::min(best, Distance(p, {a.x + t * dx, a.y + t * dy}));
+    }
+    return best;
+}
+bool NearBox(const std::vector<Point>& ring, Point p, double marginCm)
+{
+    double x0 = 1e300, x1 = -1e300, y0 = 1e300, y1 = -1e300;
+    for (const Point& q : ring)
+    {
+        x0 = std::min(x0, q.x); x1 = std::max(x1, q.x);
+        y0 = std::min(y0, q.y); y1 = std::max(y1, q.y);
+    }
+    return p.x > x0 - marginCm && p.x < x1 + marginCm && p.y > y0 - marginCm && p.y < y1 + marginCm;
+}
+bool IsFood(ResourceKind kind) { return kind == ResourceKind::BerryBush || kind == ResourceKind::Roots; }
+// forage.py's abundance passes (Jenny's playtest, 2026-09-29): estate rows from here up, roadside infill from here up.
+constexpr int MoreEstateFoodFirstId = 582144;
+constexpr int MoreRoadsideFoodFirstId = 581015;
+bool IsMoreFood(int id)
+{
+    return (id >= MoreEstateFoodFirstId && id < 582300) || (id >= MoreRoadsideFoodFirstId && id < PublicRoadsideEndId);
+}
 }
 
 int main()
@@ -227,6 +258,128 @@ int main()
             Check(found, "an old placement moved or vanished", placement.id);
         }
         std::printf("wild roots: %d new, %d within 110 m of the standing room\n", roots, near);
+    }
+
+    // More food (Jenny's playtest, 2026-09-29: "abundant live berry bushes"): live brambles and root patches
+    // fill the estate's empty woods and fields and the road between the first stops. Counts by zone, coverage,
+    // and every new row on open ground clear of the water, the lake trail, the road bed, the bridge, the ruin
+    // and the farm.
+    {
+        std::vector<Point> riverPts, shorePts, pathPts;
+        auto river = [&](double x, double y) { riverPts.push_back({x, y}); };
+        auto lakeShore = [&](double x, double y) { shorePts.push_back({x, y}); };
+        auto lakePath = [&](double x, double y) { pathPts.push_back({x, y}); };
+#include "Data/HomesteadForageKeepOuts.inc"
+        Check(riverPts.size() > 100 && shorePts.size() > 10 && pathPts.size() >= 2, "keep-out data", static_cast<double>(riverPts.size()));
+
+        const std::vector<Point>& boundary = estateLayout.FindPolygon(Anchor::EstateBoundary)->points;
+        const std::vector<Point>& manorRing = estateLayout.FindPolygon(Anchor::ManorFootprint)->points;
+        const LandmarkPolygon* farm = estateLayout.FindPolygon(Anchor::DerelictFarm);
+        const Point home = estateLayout.PointOr(Anchor::StandingRoomOrigin, {});
+        const std::vector<EstatePlacement>& all = ProvisionalEstatePlacements().placements;
+
+        int moreBrambles = 0, moreRoots = 0, moreRoadside = 0, moreRoadsideRoots = 0;
+        int manorGrounds = 0, nearWoods = 0, farEstate = 0, alongRoad = 0;
+        std::vector<Point> food;
+        for (const EstatePlacement& placement : all)
+        {
+            if (!IsFood(placement.kind)) continue;
+            food.push_back(placement.position);
+            const bool roadside = placement.id >= PublicRoadsideFirstId && placement.id < PublicRoadsideEndId;
+            if (roadside) ++alongRoad;
+            else if (PointInPolygon(boundary, placement.position))
+            {
+                const double fromHome = Distance(placement.position, home);
+                (fromHome < 15000.0 ? manorGrounds : fromHome < 45000.0 ? nearWoods : farEstate) += 1;
+            }
+            if (!IsMoreFood(placement.id)) continue;
+            if (roadside)
+            {
+                ++moreRoadside;
+                moreRoadsideRoots += placement.kind == ResourceKind::Roots;
+            }
+            else (placement.kind == ResourceKind::BerryBush ? moreBrambles : moreRoots) += 1;
+
+            const Point p = placement.position;
+            Check(EstatePlacementAllowed(estateLayout, placement), "new food row allowed", placement.id);
+            Check(PolylineDistance(riverPts, p) > 1190.0, "new food 12 m off the river", placement.id);
+            Check(!PointInPolygon(shorePts, p) && PolylineDistance(shorePts, p, true) > 100.0, "new food out of the lake", placement.id);
+            Check(PolylineDistance(pathPts, p) > 160.0, "new food off the lake trail", placement.id);
+            Check(!road.InBridgeKeepOut(p), "new food clear of the bridge", placement.id);
+            int crowded = 0;
+            for (const EstatePlacement& other : all)
+                crowded += other.id != placement.id && Distance(other.position, p) < 400.0;
+            Check(crowded == 0, "new food on open ground, 4 m from every other placement", placement.id);
+            for (const EstatePlacement& other : all)
+                if (other.id != placement.id && IsFood(other.kind))
+                    Check(Distance(other.position, p) >= 2000.0, "new food 20 m from other food", placement.id);
+            if (!roadside)
+            {
+                Check(PointInPolygon(boundary, p) && PolylineDistance(boundary, p, true) > 590.0, "new estate food inside the boundary", placement.id);
+                Check(road.NearestTo(p).distanceCm > 590.0, "new estate food off the road", placement.id);
+                Check(PolylineDistance(pathPts, p) > 390.0, "new estate food 4 m off the lake trail", placement.id);
+                Check(!NearBox(manorRing, p, 3000.0), "new food clear of the ruin's grounds", placement.id);
+                Check(!farm || !NearBox(farm->points, p, 800.0), "new food clear of the farm and its plots", placement.id);
+            }
+        }
+        Check(moreBrambles >= 45, "more estate brambles", moreBrambles);
+        Check(moreRoots >= 22, "more estate root patches", moreRoots);
+        Check(moreRoadside >= 15 && moreRoadsideRoots >= 4, "more roadside food", moreRoadside);
+        // By zone, across every section of the table (the manor's berries, the MVP wood, the forage passes).
+        Check(manorGrounds >= 38, "food round the manor (under 150 m)", manorGrounds);
+        Check(nearWoods >= 180, "food in the near woods and fields (150-450 m)", nearWoods);
+        Check(farEstate >= 55, "food in the far woods and fields (over 450 m)", farEstate);
+        Check(alongRoad >= 28, "food along the public road", alongRoad);
+        // Coverage: from almost anywhere on the estate, food within 150 m (it was 85% before this pass).
+        int cells = 0, covered = 0;
+        for (double x = -76000.0; x <= 16000.0; x += 2500.0)
+            for (double y = -115000.0; y <= 11000.0; y += 2500.0)
+            {
+                if (!PointInPolygon(boundary, {x, y})) continue;
+                ++cells;
+                for (const Point& f : food)
+                    if (Distance(f, {x, y}) < 15000.0)
+                    {
+                        ++covered;
+                        break;
+                    }
+            }
+        Check(cells > 1000 && covered >= 0.9 * cells, "food within 150 m of 90% of the estate", cells ? 100.0 * covered / cells : 0.0);
+
+        // An old save from before these rows loads them fresh and ready, keeps its own edits, and they pick and grow.
+        EstatePlacements old;
+        old.bakeVersion = ProvisionalEstatePlacements().bakeVersion;
+        const EstatePlacement* newBramble = nullptr;
+        const EstatePlacement* newRoots = nullptr;
+        for (const EstatePlacement& placement : all)
+        {
+            if (!IsMoreFood(placement.id)) old.placements.push_back(placement);
+            else if (placement.kind == ResourceKind::BerryBush && !newBramble) newBramble = &placement;
+            else if (placement.kind == ResourceKind::Roots && !newRoots) newRoots = &placement;
+        }
+        Check(newBramble && newRoots, "a new bramble and a new root patch");
+        Simulation before;
+        Check(before.NewEstateGame(estateLayout, old).ok, "pre-abundance game");
+        const EstatePlacement* oldBramble = nullptr;
+        for (const EstatePlacement& placement : old.placements)
+            if (placement.id == 582100) oldBramble = &placement;
+        Check(oldBramble && before.Harvest(oldBramble->id, oldBramble->position).ok, "picked an older bramble");
+        Simulation after;
+        after.SetLayout(estateLayout);
+        after.SetPlacements(ProvisionalEstatePlacements());
+        Check(after.Deserialize(before.Serialize()).ok, "pre-abundance save loads with the new food");
+        Check(oldBramble && !after.CanHarvest(oldBramble->id), "the older bramble stays picked");
+        if (newBramble && newRoots)
+        {
+            Check(after.CanHarvest(newBramble->id) && after.CanHarvest(newRoots->id), "new food ready in an old save");
+            const int berries = after.Count(Item::Berries), roots = after.Count(Item::Roots);
+            Check(after.Harvest(newBramble->id, newBramble->position).ok && after.Count(Item::Berries) > berries, "picked a new bramble");
+            Check(after.Harvest(newRoots->id, newRoots->position).ok && after.Count(Item::Roots) > roots, "dug a new root patch");
+        }
+        std::printf("more food: %d estate brambles, %d estate root patches, %d roadside (%d roots); zones: manor %d, near %d, far %d, road %d; "
+                    "coverage %.1f%% of %d cells\n",
+            moreBrambles, moreRoots, moreRoadside, moreRoadsideRoots, manorGrounds, nearWoods, farEstate, alongRoad,
+            cells ? 100.0 * covered / cells : 0.0, cells);
     }
 
     // Save identity: every frozen forage row (Tests/Data/HomesteadForageManifest.inc) is still in the table
