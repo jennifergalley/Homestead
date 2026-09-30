@@ -258,7 +258,10 @@ the tree records in `EstateScenery.bin`, and writes:
 No grass grows in the manor footprint, within 3.9 m of the river, near the beach, within 140 m of
 the town square, or on the derelict farm's fence line. The farm's field itself is left overgrown.
 
-Then, in the editor with PIE stopped, run `pyfile Scripts\Terrain\build_ground.py` and then
+`build_ground.py` imports `Saved\Ground\` PNGs from its own checkout. Always run
+`bake_ground.py` in that same checkout immediately before importing; otherwise it can import a
+different worktree's stale ground bake. Then, in the editor with PIE stopped, run
+`pyfile Scripts\Terrain\build_ground.py` and then
 `pyfile Scripts\Terrain\build_landscape_material.py`. The first imports the data, the meshes and the
 CC0 ground sets (downloaded from Poly Haven to `HOMESTEAD_GROUND_DOWNLOADS`, default
 `Saved/Ground/Downloads`; not kept in git). It also authors `M_EstateGrass` / `MI_EstateGrass`. The
