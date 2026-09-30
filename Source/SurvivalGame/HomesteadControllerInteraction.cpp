@@ -12,6 +12,7 @@
 #include "Misc/ScopeExit.h"
 
 using HomesteadControllerHelpers::FindPlotWhere;
+using HomesteadControllerHelpers::PlantingCrop;
 using HomesteadControllerText::Text;
 
 void AHomesteadController::Interact()
