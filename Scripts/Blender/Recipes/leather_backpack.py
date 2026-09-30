@@ -43,7 +43,7 @@ COLLISION = "none"
 TRIANGLE_BUDGET = 18000
 PROVENANCE = "Original project-authored procedural geometry and materials; no third-party asset or texture."
 BAKE = {"size": 2048, "samples": 96, "maps": ("basecolor", "roughness", "normal", "ao", "metallic")}
-BEAUTY = {"pose": (0, 0, 180), "focus": (0.06, 0.0, 0.04)}
+BEAUTY = {"pose": (0, 0, 180), "focus": (0.085, 0.14, -0.18)}
 
 _FIT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', '..',
                          'Assets', 'Props', 'LeatherBackpack', 'leather_backpack_fit.json')
@@ -394,8 +394,13 @@ def rivet(kit, name, at, normal, brass):
     n = Vector(normal).normalized()
     rot = Vector((0, 0, 1)).rotation_difference(n).to_euler()
     deg = tuple(math.degrees(a) for a in rot)
-    return kit.cylinder(name, 0.0042, 0.0025, location=tuple(Vector(at) + n * 0.001), rotation=deg,
-                        material=brass, sides=14, radius_top=0.0032, bevel=0.0006)
+    obj = kit.cylinder(name, 0.0042, 0.0025, location=tuple(Vector(at) + n * 0.001), rotation=deg,
+                       material=brass, sides=14, radius_top=0.0032, bevel=0.0006)
+    # Bake the placement into the mesh: build() moves every part to the pivot by warping mesh-local
+    # vertices, which a rotated object transform would otherwise swing metres away.
+    obj.data.transform(obj.matrix_basis)
+    obj.matrix_basis = Matrix.Identity(4)
+    return obj
 
 
 def front_point(x, z, lift):
@@ -474,8 +479,19 @@ def shoulder_path(side):
     pts.append(Vector((side * 0.172, 0.0, 1.12)))
     pts.append(Vector((side * 0.17, 0.07, 1.07)))
     pts.append(Vector((side * (HALF_W - 0.015), back_y(Z_BOT + 0.05) + 0.02, Z_BOT + 0.05)))
-    # Resample evenly so the strap's section doesn't pinch at the joins.
-    return _resample(pts, 0.012)
+    # Resample evenly so the strap's section doesn't pinch at the joins, then relax the polyline's
+    # corners (and the fit's sampling noise) into one smooth run, as a strap under tension lies.
+    pts = _resample(pts, 0.012)
+    return _relax(pts, 10, keep=2)
+
+
+def _relax(pts, iterations, keep):
+    """Laplacian smoothing with the first and last ``keep`` points pinned."""
+    pts = [Vector(p) for p in pts]
+    for _ in range(iterations):
+        pts = pts[:keep] + [pts[i - 1] * 0.25 + pts[i] * 0.5 + pts[i + 1] * 0.25
+                            for i in range(keep, len(pts) - keep)] + pts[len(pts) - keep:]
+    return pts
 
 
 def _resample(pts, step):
@@ -499,13 +515,19 @@ def build_shoulder_straps(kit, strap, iron, brass):
         pts = shoulder_path(side)
         centre = Vector((0.0, 0.0, 1.25))
 
-        def outward(i, pts=pts):
-            # Away from her torso's axis (a vertical line through her chest), so the strap lies flat on her.
-            p = pts[i]
-            away = Vector((p.x - centre.x, p.y - centre.y, 0.0))
-            if p.z > 1.37:
-                away = away * 0.3 + Vector((0, 0, 1))
-            return tuple(away.normalized())
+        def raw_outward(p):
+            # Away from her torso's axis (a vertical line through her chest), so the strap lies flat on
+            # her, turning face-up over the shoulder with a smooth blend rather than a twist.
+            away = Vector((p.x - centre.x, p.y - centre.y, 0.0)).normalized()
+            w = smoothstep(1.33, 1.40, p.z)
+            return (away * (1.0 - 0.7 * w) + Vector((0, 0, 1)) * w).normalized()
+        normals = [raw_outward(p) for p in pts]
+        for _ in range(6):
+            normals = [(normals[max(i - 1, 0)] + normals[i] * 2 + normals[min(i + 1, len(normals) - 1)]).normalized()
+                       for i in range(len(normals))]
+
+        def outward(i, normals=normals):
+            return tuple(normals[i])
         parts.append(band(kit, "ShoulderStrap_%d" % (side > 0), pts, outward, STRAP_W, STRAP_T, strap))
         parts.append(rivet(kit, "YokeRivet_%d" % (side > 0), pts[0] + Vector((0, -0.002, 0.012)), (0, -1, 0), brass))
         # Adjusting buckle where the strap meets the bag's lower corner.

@@ -551,7 +551,8 @@ def harness_leather(name, color=(0.20, 0.11, 0.05), dark=(0.065, 0.035, 0.018), 
     mottle = g.noise(seeded, scale=45.0, detail=4.0).outputs["Fac"]
     pores = g.voronoi(seeded, scale=1800.0, feature="SMOOTH_F1").outputs["Distance"]
     tone = g.math("ADD", g.math("MULTIPLY", oil, 0.7), g.math("MULTIPLY", mottle, 0.3))
-    base = g.ramp(tone, [(0.38, dark), (0.52, color), (0.64, tuple(min(1.0, c * 1.2) for c in color))])
+    # A wide ramp: oil darkens the leather in soft, broad patches, not cloudy camouflage blotches.
+    base = g.ramp(tone, [(0.26, dark), (0.50, color), (0.72, tuple(min(1.0, c * 1.15) for c in color))])
     # Creases: long soft folds where the leather has been bent over and over, with dirt in them.
     fold = g.noise(g.vmath("MULTIPLY", seeded, (1.0, 1.0, 0.3)), scale=40.0, detail=3.0).outputs["Fac"]
     crease = g.remap(fold, 0.46, 0.54, 1.0, 0.0)
@@ -736,6 +737,7 @@ def painted_wood(name, paint=(0.055, 0.095, 0.065), under=(0.18, 0.11, 0.055), w
     long_rubs = g.wave(g.combine(g.math("MULTIPLY", x, 1.5), g.math("MULTIPLY", y, 1.5), z),
                        scale=18.0, distortion=9.0, detail=2.0, kind="BANDS",
                        direction="Z").outputs["Fac"]
+    # ``rubs`` scales these banded rub-throughs (0 turns them off: on long boards they read as stripes).
     rub_mask = g.remap(long_rubs, 0.76, 0.92, 0.0, wear * 0.55)
     mask = g.math("MAXIMUM", scratch_mask, rub_mask)
     color = g.mix(paint_col, exposed, mask)
