@@ -164,21 +164,22 @@ unchanged. **World verified integration gate `main` `4f9f6473`:** source move
 moves `HomesteadWorld.cpp` from 4,962 to about 188 lines, 71/71 bodies; native Release 9/9 and
 Editor/Game Unity pass with no intended save/placement/behavior change. **Menu verified integration
 gate `main` `db414560`:** source move `801c0329` moves `UI/SHomesteadMenu.cpp` from 3,206 to about
-270 lines, 96/96 bodies; native Release 9/9 and Editor+Game Unity pass. **Character next gate
-`20dd44f3` + `6b77733d`:** hair runtime fix is already on main; Character moves from
-2,833 to 173 lines, 92/92 bodies, and keeps `LoadMetaHumanStack` / `ApplyMetaHumanLook` /
-`UpdateHairMotion` at the exact hair-fix baseline, including one `LogHomesteadHair` and two
-`ResetSimulation` calls. Character body-identity/diff checks are clean but have **no
-native/Editor/Game compile**; it remains partial and unshipped.
+270 lines, 96/96 bodies; native Release 9/9 and Editor+Game Unity pass. **Character verified
+integration gate `main` `b3576693`:** source moves `20dd44f3` + `6b77733d`, with direct
+`HomesteadLampLook` / `PointLight` header fixes, move `HomesteadCharacter.cpp` from 2,833 to
+173 lines, 92/92 bodies. Native Release 9/9 and Editor+Game Unity pass; it keeps
+`LoadMetaHumanStack` / `ApplyMetaHumanLook` / `UpdateHairMotion` at the exact hair-fix baseline,
+including one `LogHomesteadHair` and two `ResetSimulation` calls. This is a pure source move:
+no intended behavior, save or placement change, and **not a player Shipping delivery**.
 
 Static-linkage followups are also source-only: Controller `2354d801` adds Map/Capsule includes; World
 `e7b7101b` adds the Weather include and qualifies `Cloth` to avoid a Unity name collision with
 `HomesteadGeneralStore`. Body-identity checks remain intact.
 
-Character remains Architecture's source lock. The copied-save hair preview is complete but
-inconclusive; catastrophic geometry cure remains unproven. Integration now has the sole UBT slot to
-verify **Character only** next (native Release plus Editor/Game unity), returning a base SHA before
-any further work. None of these source refactors changes the Shipping player build.
+All four hot-file source moves now pass their sequential native/Unity gates. The copied-save hair
+preview remains inconclusive, so catastrophic geometry cure remains unproven; the next relevant
+evidence is a holistic copied-save PIE and smoke pass, not a structural verification rerun. None of
+these source refactors changes the Shipping player build.
 
 ### Development firewall prompts / offline Shipping candidate
 
