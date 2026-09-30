@@ -2580,13 +2580,19 @@ Result Simulation::HarvestCrop(int plotId, Point player)
         : ". This plot is ready to replant.";
     return Exert(Exertion::HarvestCropEnergy, Good(message));
 }
+bool Simulation::PailStored() const
+{
+    for (const auto& structure : state_.structures)
+        if (structure.storage[static_cast<int>(Item::WateringCan)] > 0) return true;
+    return false;
+}
 Result Simulation::FillWater(Point player)
 {
     if (state_.failed) return Failed();
-    if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to collect water.");
-    if (!NearWater(player)) return Bad("Walk to the stream to refill your pail.");
-    if (Count(Item::Water) >= 6) return Bad("Your pail is already full.");
-    const Inventory change = Items({{Item::Water, 6 - Count(Item::Water)}});
+    if (Count(Item::WateringCan) == 0) return Bad(PailStored() ? "Your pail is in the chest. Take it to fill it." : "You need a pail to carry water.");
+    if (!NearWater(player)) return Bad("Walk to the river or the lake to fill your pail.");
+    if (Count(Item::Water) >= PailPortions) return Bad("Your pail is already full.");
+    const Inventory change = Items({{Item::Water, PailPortions - Count(Item::Water)}});
     if (auto ready = CheckExertion(Exertion::FillWaterEnergy); !ready) return ready;
     if (!TryAdjust(change)) return Bad("Make enough room in your pack for six water portions.");
     return Exert(Exertion::FillWaterEnergy, Good("Pail filled with six water portions."));

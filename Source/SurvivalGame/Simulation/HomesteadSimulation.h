@@ -470,6 +470,8 @@ public:
     // the game supplies the probe. Generated worlds keep the procedural stream test.
     void SetWaterProbe(std::function<bool(Point)> probe) { waterProbe_ = std::move(probe); }
     bool NearWater(Point position) const;
+    // True when a pail waits in a chest or other storage (and so can be fetched to fill).
+    bool PailStored() const;
     Result SetActiveWorldRegion(Point player,
         const PreparedWorldRegion* prepared = nullptr);
     Result ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const;
