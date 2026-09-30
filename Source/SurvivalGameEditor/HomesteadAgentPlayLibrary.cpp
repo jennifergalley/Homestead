@@ -182,6 +182,7 @@ namespace
         case Homestead::ResourceKind::RubbishHeap: return TEXT("RubbishHeap");
         case Homestead::ResourceKind::RottenPlanks: return TEXT("RottenPlanks");
         case Homestead::ResourceKind::SlateHeap: return TEXT("SlateHeap");
+        case Homestead::ResourceKind::RuinTimbers: return TEXT("RuinTimbers");
         default: return TEXT("Unknown");
         }
     }

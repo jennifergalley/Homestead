@@ -170,7 +170,7 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         const bool bSolid = Kind == ResourceKind::StumpSmall || Kind == ResourceKind::StumpMedium
             || Kind == ResourceKind::StumpLarge || Kind == ResourceKind::StumpAncient || Kind == ResourceKind::FallenLog
             || Kind == ResourceKind::GiantLog || Kind == ResourceKind::Boulder || Kind == ResourceKind::BrokenBarrel
-            || Kind == ResourceKind::BrokenCrate || Kind == ResourceKind::RubbishHeap;
+            || Kind == ResourceKind::BrokenCrate || Kind == ResourceKind::RubbishHeap || Kind == ResourceKind::RuinTimbers;
         if (bSolid && !bProduce && !bStagingResourceBuild)
         {
             const FVector Extent = Bounds.GetExtent() * Scale;
@@ -199,6 +199,13 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             Blocker->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
             Blocker->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
             Blocker->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+            // The ruin's fallen roof timbers used to block as ruin scenery; as a resource they stop
+            // only her (a pawn), so nothing else (felled trees, drops, traces) snags on the proxy.
+            if (Kind == ResourceKind::RuinTimbers)
+            {
+                Blocker->SetCollisionResponseToAllChannels(ECR_Ignore);
+                Blocker->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+            }
             Blocker->SetGenerateOverlapEvents(false);
             Blocker->SetCanEverAffectNavigation(false);
             Blocker->SetHiddenInGame(true);
@@ -669,7 +676,7 @@ void AHomesteadWorld::StartClearPop(FHomesteadWorldVisual& Visual, const Homeste
     UStaticMesh* ChipMesh = LoadObject<UStaticMesh>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
     if (!ChipMesh) return;
     const float Size = Kind == ResourceKind::Boulder || Kind == ResourceKind::StumpLarge || Kind == ResourceKind::StumpAncient
-        || Kind == ResourceKind::RubbishHeap || Kind == ResourceKind::BrambleThicket ? 1.5f : 1.0f;
+        || Kind == ResourceKind::RubbishHeap || Kind == ResourceKind::BrambleThicket || Kind == ResourceKind::RuinTimbers ? 1.5f : 1.0f;
     FRandomStream Random(Node.id * 7919 + static_cast<int32>(GetWorld() ? GetWorld()->GetTimeSeconds() * 10.0 : 0.0));
     FClearPop Chips;
     Chips.bChips = true;

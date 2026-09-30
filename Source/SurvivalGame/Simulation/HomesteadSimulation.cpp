@@ -916,7 +916,7 @@ const char* ResourceName(ResourceKind kind)
         "Small stump", "Large stump", "Ancient stump", "Fallen log", "Giant log", "Rubble", "Small rock", "Boulder",
         "Salvage pile", "Primroses", "Bluebells", "Wild daffodils", "Wild garlic",
         "Nettles", "Stump", "Broken crate", "Broken barrel", "Rubbish heap", "Rotten planks",
-        "Fallen slates"};
+        "Fallen slates", "Fallen roof timbers"};
     static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(ResourceKind::Count), "Every resource needs a name.");
     return ValidEnum(kind, ResourceKind::Count) ? names[static_cast<int>(kind)] : "Unknown resource";
 }

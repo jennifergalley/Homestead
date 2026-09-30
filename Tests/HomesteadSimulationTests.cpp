@@ -3945,6 +3945,87 @@ void WeedCreepNearOvergrowth()
     OK(loaded.ClearOvergrowth(regrownId, Item::Scythe, PlacedNode(loaded, regrownId).position));
 }
 
+void RuinTimbersAreChoppedWithTheAxe()
+{
+    // The manor's fallen roof timbers looked clearable but were scenery. They're estate placements
+    // now (582012-582013), placed after every earlier section so no other id, spot or skip moves,
+    // and cut up with the worn axe in a few blows.
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const auto& table = ProvisionalEstatePlacements().placements;
+    double manorX = 1e18, manorY = 1e18;
+    for (const Point& corner : layout.FindPolygon(Anchor::ManorFootprint)->points)
+    {
+        manorX = std::min(manorX, corner.x);
+        manorY = std::min(manorY, corner.y);
+    }
+    std::size_t lastForage = 0, firstTimber = table.size();
+    for (std::size_t i = 0; i < table.size(); ++i)
+    {
+        if (table[i].id >= 582100 && table[i].id < 582300) lastForage = i;
+        if (table[i].kind == ResourceKind::RuinTimbers) firstTimber = std::min(firstTimber, i);
+    }
+    CHECK(firstTimber > lastForage && firstTimber < table.size() && table.back().id == 520006);
+    Simulation sim;
+    OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
+    for (int id : {582012, 582013})
+    {
+        const RuinDebris::Spot* spot = RuinDebris::Find(id);
+        CHECK(spot && spot->kind == ResourceKind::RuinTimbers && std::string(spot->mesh) == "RuinFallenTimbers");
+        CHECK(RuinDebris::Replaces("RuinFallenTimbers", spot->u, spot->v));
+        const ResourceNode& node = PlacedNode(sim, id);
+        CHECK(node.kind == ResourceKind::RuinTimbers && !node.cleared);
+        CHECK(std::hypot(node.position.x - (manorX + spot->v), node.position.y - (manorY + spot->u)) <= 150.0 + 1e-6);
+    }
+    CHECK(std::string(ResourceName(ResourceKind::RuinTimbers)) == "Fallen roof timbers");
+    CHECK(HandGatherPose(ResourceKind::RuinTimbers) == GatherPose::None);
+
+    // Too heavy to lift by hand, and the billhook and pickaxe don't cut oak: nothing changes.
+    const ResourceNode hall = PlacedNode(sim, 582012);
+    OK(sim.GrantItems(Item::Billhook, 1));
+    OK(sim.GrantItems(Item::Pickaxe, 1));
+    for (Item tool : {Item::Count, Item::Billhook, Item::Pickaxe})
+        UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(hall.id, tool, hall.position); });
+    // The worn axe: three blows, then timber and firewood once.
+    OK(sim.GrantItems(Item::Hatchet, 1));
+    OK(sim.CheckOvergrowth(hall.id, Item::Hatchet, hall.position));
+    CHECK(sim.OvergrowthSwings(hall.id) == 3);
+    const int timber = sim.Count(Item::Timber), firewood = sim.Count(Item::Firewood);
+    const double energy = sim.GetState().energy;
+    OK(sim.ClearOvergrowth(hall.id, Item::Hatchet, hall.position));
+    CHECK(PlacedNode(sim, hall.id).cleared);
+    CHECK(sim.Count(Item::Timber) >= timber + 1 && sim.Count(Item::Timber) <= timber + 2);
+    CHECK(sim.Count(Item::Firewood) >= firewood + 2 && sim.Count(Item::Firewood) <= firewood + 3);
+    CHECK(Close(sim.GetState().energy, energy - FindOvergrowth(ResourceKind::RuinTimbers)->energy));
+    UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(hall.id, Item::Hatchet, hall.position); });
+    OK(sim.SetToolTier(ToolKind::Axe, ToolTier::Iron));
+    CHECK(sim.OvergrowthSwings(582013) == 2);
+
+    // Cleared stays cleared across a reload; the other still lies there.
+    Simulation loaded;
+    loaded.SetLayout(layout);
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(loaded, 582012).cleared && !PlacedNode(loaded, 582013).cleared);
+
+    // A save from before (no timbers in its table, a slate heap cleared) loads with both lying there
+    // and exactly its own clearances.
+    EstatePlacements older = ProvisionalEstatePlacements();
+    older.placements.erase(std::remove_if(older.placements.begin(), older.placements.end(),
+        [](const EstatePlacement& placement) { return placement.kind == ResourceKind::RuinTimbers; }), older.placements.end());
+    Simulation original;
+    original.SetPlacements(older);
+    OK(original.NewEstateGame(layout, older));
+    OK(original.ClearOvergrowth(582000, Item::Count, PlacedNode(original, 582000).position));
+    Simulation upgraded;
+    upgraded.SetLayout(layout);
+    upgraded.SetPlacements(ProvisionalEstatePlacements());
+    OK(upgraded.Deserialize(original.Serialize()));
+    CHECK(!PlacedNode(upgraded, 582012).cleared && !PlacedNode(upgraded, 582013).cleared && PlacedNode(upgraded, 582000).cleared);
+    int cleared = 0;
+    for (const auto& node : upgraded.GetState().resources) cleared += node.cleared;
+    CHECK(cleared == 1);
+}
+
 void WrongOrUnderTierToolIsNonActionable()
 {
     // Jenny, 2026-09-29: a wrong or too-worn tool must not look like it's doing anything. Every
@@ -4024,7 +4105,7 @@ void RuinDebrisIsClearable()
     Simulation sim;
     OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
     const Point room = layout.PointOr(Anchor::StandingRoomOrigin, {});
-    int slate = 0, granite = 0;
+    int slate = 0, granite = 0, timbers = 0;
     for (const RuinDebris::Spot& spot : RuinDebris::Spots)
     {
         CHECK(spot.id >= RuinDebris::FirstId && spot.id <= RuinDebris::LastId);
@@ -4037,9 +4118,14 @@ void RuinDebrisIsClearable()
         const auto* info = FindOvergrowth(node.kind);
         CHECK(info);
         if (node.kind == ResourceKind::SlateHeap) { ++slate; CHECK(info->byHand && IsRubbish(node.kind)); }
+        else if (node.kind == ResourceKind::RuinTimbers)
+        {
+            ++timbers;
+            CHECK(!info->byHand && info->tool == ToolKind::Axe && info->minTier == ToolTier::Worn);
+        }
         else { ++granite; CHECK(node.kind == ResourceKind::Rubble && info->tool == ToolKind::Pickaxe && info->minTier == ToolTier::Worn); }
     }
-    CHECK(slate == 6 && granite == 6 && RuinDebris::SpotCount == 12);
+    CHECK(slate == 6 && granite == 6 && timbers == 2 && RuinDebris::SpotCount == 14);
     CHECK(std::string(ResourceName(ResourceKind::SlateHeap)) == "Fallen slates");
     // Standing at any salvage pile, the pile itself is what her hands find.
     for (int pile = 520001; pile <= 520005; ++pile)
@@ -4675,6 +4761,7 @@ int main()
     Run("the ruin's loose slate and rubble can be cleared", RuinDebrisIsClearable);
     Run("every hand gather has its own pose", EveryHandGatherHasItsOwnPose);
     Run("a wrong or under-tier tool is non-actionable", WrongOrUnderTierToolIsNonActionable);
+    Run("the ruin's fallen roof timbers are chopped with the axe", RuinTimbersAreChoppedWithTheAxe);
     Run("clear-out rubbish, nettles, stumps and spoiled ground", ClearoutKindsAndSpoiledGround);
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);

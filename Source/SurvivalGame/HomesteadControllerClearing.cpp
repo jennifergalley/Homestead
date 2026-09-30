@@ -215,7 +215,9 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
             : Kind == Homestead::ResourceKind::GiantLog ? 38.0f
             : Kind == Homestead::ResourceKind::Rubble ? 42.0f
             : Kind == Homestead::ResourceKind::Boulder ? 70.0f
-            : Kind == Homestead::ResourceKind::SmallRock ? 30.0f : 8.0f;
+            : Kind == Homestead::ResourceKind::SmallRock ? 30.0f
+            // The ruin's fallen roof timbers: she strikes the near beam, at the edge of their blocker.
+            : Kind == Homestead::ResourceKind::RuinTimbers ? 95.0f : 8.0f;
         if (Tool == Homestead::Item::Scythe)
         {
             // Mowing turns about her: she keeps facing the swath rather than the first tuft.
