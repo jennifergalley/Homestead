@@ -38,14 +38,14 @@ void SHomesteadClock::Construct(const FArguments& Args)
                 [
                     SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle(TEXT("Regular"), ClockStyle::TimeSize))
                     .ColorAndOpacity(HomesteadPalette::Cream)
-                    .Text_Raw(this, &SHomesteadClock::HourText)
+                    .Text_Lambda([this]() { return HourText(); })
                 ]
                 + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
                     .Padding(ClockStyle::MeridiemGap, 0, 0, ClockStyle::MeridiemBaseline)
                 [
                     SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), ClockStyle::MeridiemSize))
                     .ColorAndOpacity(HomesteadPalette::Brass)
-                    .Text_Raw(this, &SHomesteadClock::MeridiemText)
+                    .Text_Lambda([this]() { return MeridiemText(); })
                 ]
             ]
         ]
