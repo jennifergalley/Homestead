@@ -159,22 +159,25 @@ the hair checkpoint. Hair retains priority for the visual fix; hotbar and garden
 4,778 to 579 lines through 16 per-feature `.cpp` files and small named helper headers, 185/185 bodies;
 native Release 9/9 and Editor+Game Unity (`Module.SurvivalGame.2.cpp`) builds pass. This is
 source/main verification only, **not a player Shipping delivery**; the verified Estate shortcut remains
-unchanged. **World source-only next gate `cc20cee5` + `e7b7101b` + `2594e868` + `1bd7d555`:**
-`HomesteadWorld.cpp` moves from 4,962 to about 188 lines, 71/71 bodies. **Menu `801c0329`:**
+unchanged. **World verified integration gate `main` `4f9f6473`:** source move
+`cc20cee5` + `e7b7101b` + `2594e868` + `1bd7d555` plus pure-move include/helper fix `ca829f93`
+moves `HomesteadWorld.cpp` from 4,962 to about 188 lines, 71/71 bodies; native Release 9/9 and
+Editor/Game Unity pass with no intended save/placement/behavior change. **Menu source-only next gate
+`801c0329`:**
 `UI/SHomesteadMenu.cpp` moves from 3,206 to about 270 lines, 96/96 bodies. **Character
 `5811cb9` + `20dd44f3`:** cherry-picks hair fix `95f4bfc3`, moves `HomesteadCharacter.cpp` from
 2,833 to 173 lines, 92/92 bodies, and keeps `LoadMetaHumanStack` / `ApplyMetaHumanLook` /
 `UpdateHairMotion` at the exact hair-fix baseline, including one `LogHomesteadHair` and two
-`ResetSimulation` calls. World/Menu/Character body-identity/diff checks are clean but have **no
+`ResetSimulation` calls. Menu/Character body-identity/diff checks are clean but have **no
 native/Editor/Game compile**; they remain partial and unshipped.
 
 Static-linkage followups are also source-only: Controller `2354d801` adds Map/Capsule includes; World
 `e7b7101b` adds the Weather include and qualifies `Cloth` to avoid a Unity name collision with
 `HomesteadGeneralStore`. Body-identity checks remain intact.
 
-World/Menu/Character remain Architecture's source lock. The copied-save hair preview is complete but
-inconclusive. Integration now has the sole UBT slot to verify **World only** next (native Release plus
-Editor/Game unity), returns a base SHA, then advances Menu -> Character sequentially.
+Menu/Character remain Architecture's source lock. The copied-save hair preview is complete but
+inconclusive. Integration now has the sole UBT slot to verify **Menu only** next (native Release plus
+Editor/Game unity), returns a base SHA, then advances Character.
 
 ### Development firewall prompts / offline Shipping candidate
 
