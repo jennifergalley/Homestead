@@ -578,9 +578,18 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
   writes the full per-station route to `Scripts\Terrain\cove_route.json` and emits
   `Simulation\HomesteadEstateCoveRoute.inc`; the indent-1 layout keeps only a summary because a
   full centreline would add about 19,000 lines. `scatter.py` reapplies route clearing after lake
-  clearing. This is branch-only: no terrain, map, route include or native test result is an
-  integration claim. For Props' raked handrail kit, mirror far-side bays with scale Y `-1`; do not
-  rotate them 180 degrees.
+  clearing. Follow-up `6a987b7b` adds generated `ground(...)` and `flightEnds(...)` samples for
+  native route tests and keeps paths level for 2 m at a flight junction. Heightfield cutters must
+  derive headings per leg: `np.gradient` over a filtered station list points across leg ends. This
+  is branch-only: no terrain, map, route include or native test result is an integration claim. For
+  Props' raked handrail kit, mirror far-side bays with scale Y `-1`; do not rotate them 180 degrees.
+- **Pending wider-beach pipeline (unmerged `jennifergalley-wider-beach` at `f0eb8fc1`):**
+  `beach_belt.py` grades the belt only once (`beach.graded`); later runs report only. Run it after
+  `cove_route.py`, then `river_channel.py`, `weightmaps.py`, `bake_ground.py` and
+  `bake_estate_map.py`; run `python -m unittest Tests/EstateBeachTests.py` against the graded
+  artifact. In the editor, follow `ApplyEstateHeightfield` / `ApplyEstateWeightmaps` with
+  `bake_ocean.py` and `build_ocean.py` before water/ground/map imports, otherwise the swell's
+  shore/depth data treats new shallows as deep water. It is unmerged and unshipped.
 - **Field-book map destination names reserved:** **Town** and **Manor**. The future travel action and
   UI use these exact user-facing names; other map work must not reuse them.
 - **Seedsman anchors claimed (C; branch `4f21a2d8`, not on `main` yet):** `Anchor::SeedsmanDoor`
@@ -1391,10 +1400,19 @@ not claim early Energy is fully solved.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
-- **Oil-lamp reach** — **pending behind the core loop, not shipped.** Held and placed lamps share
-  `LightIntensity=1400` and `radius=1000 cm`, use inverse-square point lights with shadows, and flicker
-  at 0.9–1.05. A literal +300% radius reaches 4000 cm but is only 1/16 as bright at 40 m versus 10 m
-  and can expand shadow-caster volume about 64x; do not assume radius alone produces a useful throw.
+- **Oil-lamp reach** — **pending behind the core loop, not shipped.** Current held and placed lamps
+  share `LightIntensity=1400` and `radius=1000 cm`, use inverse-square point lights with shadows,
+  and flicker at 0.9–1.05. A literal +300% radius reaches 4000 cm but is only 1/16 as bright at
+  40 m versus 10 m and can expand shadow-caster volume about 64x; do not assume radius alone
+  produces a useful throw.
+
+  **Unmerged lamp profile `45728ba5`:** native `Simulation\HomesteadLampLight.h` defines a
+  four-times-reach gentle-falloff profile, with tuning CVars `homestead.LampIntensity`,
+  `LampRadius` (m), `LampFalloff`, `LampLegacy` (1 = old-light A/B) and
+  `PlacedLampShadowDistance` (m). C++ point lights are Unitless; inverse-square illuminance is
+  `E(1 m) = 16 * I / 10000` lux. The new held/placed/lab path and nearby-only placed shadows are
+  source-only; retain the existing packaged RT-on visual, light-leak, p95/p99 and oil-use
+  acceptance gates before integrating.
 
   Props/Integration first trial measured low-gain broad fill or bounded falloff that avoids near glare
   and wall leak. Compare held and placed lamps in packaged RT-on 4K manor/woods fixed cameras at
