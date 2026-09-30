@@ -579,17 +579,22 @@ requirement.
   seed/food visuals and actions while retaining optional pin mapping for reacquisition; Props guards
   against any zero-stock implicit fallback. Cover sow, stow, F5/F9, old-save pinned zero,
   reacquisition and no accidental planting.
-- **Field-book hotbar editor** — **Menu headless source slice, pending and not shipped.** While the
-  Inventory field book is open (the world hotbar is intentionally hidden by
-  `Controller::ShouldShowHotbar`), show all 10 saved `HotbarSlots`. Drag a carried tool/item to an
-  exact slot and drag slot-to-slot to reorder; reuse the menu's pointer drag grid and virtual
-  controller drag, with a pad alternative.
+- **Field-book hotbar editor partial `bd0d928c`:** native 10/10, including
+  `HomesteadHotbarLayoutTests` seven scenarios / 78, no UE compile/PIE or delivery claim. It is based
+  on `main` `7662207c`: `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/
+  Water refusal with no Sim revision or stock mutation and save round-trip/layout 1/2 migration;
+  `ce3c0479` adds controller MenuAssign/MoveHotbarSlot plus sanitize; `bd0d928c` adds Inventory Page
+  0's 10-slot strip.
 
-  Assignments are references, never stock moves: replacing an occupied slot swaps; a move clears the
-  source; bindings stay unique; cancel changes nothing; chest rows must transfer to pack first. Preserve
-  old saves and depleted pins. Require native assignment/save-uniqueness coverage, then PIE 720p/4K
-  mouse and controller proof. Menu works headless during Jenny's PID 2328/memory hold; no UE/UBT.
-  This remains behind the aim/rain/Shipping path.
+  The strip supports mouse pack drag, slot reorder/right-click clear, pad A carry/Y clear/B cancel,
+  dim zero-count pins and gold/rust target states; DirectionalNavigation automation is updated but
+  unrun. Assignments are references, never stock moves: replacement swaps, a move clears the source,
+  bindings stay unique, cancel changes nothing and chest goods remain ineligible until taken.
+
+  **Gap:** the strip currently hides while a chest is open, but Jenny requires it on every Inventory
+  screen. Menu must follow up with a full-width chest-open strip, then prove 720p/4K fit and pad
+  navigation. README/DESIGN changes in the UI branch are shared; Docs verifies and owns canonical
+  updates only after code lands. This is excluded from the aim/rain/Shipping delivery.
 - **Human-readable save confirmation time** — **Menu, pending and not shipped.**
   `Controller::MenuSaveStatus` currently shows an ISO-like UTC timestamp. Present it as a localized,
   human-readable local date/time (for example, `September 28, 2026 12:01 PM`) without changing the
