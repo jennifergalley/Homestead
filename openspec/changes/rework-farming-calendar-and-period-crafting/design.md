@@ -13,7 +13,9 @@
   style) and the plot status helpers. Plots grow in `Step()` from moisture and weed factors.
 - **Shops.** `HomesteadShops` seeds the general store, and its stock includes the six seeds. The
   sell-down runs at the 06:00 rollover.
-- **Weather.** Rain is deterministic: `IsRainDay` is every third day, 09:00–15:00.
+- **Weather.** Rain is deterministic: the current baseline is every third day, 09:00–15:00.
+  Approved recurrence branch `69827d75` changes it to two stable hashed days in every ten while
+  preserving the 09:00–15:00 window; it remains pending integration/package verification.
 - **Crafting.** Recipes are hand recipes: the five hafts, RoastedRoots, HerbedRoots and
   SplitFirewood. The pieces are Foundation, Wall, Doorway, Roof, Fire, Bed, Chest and Hearth.
 
