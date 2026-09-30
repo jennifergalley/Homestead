@@ -2010,6 +2010,8 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 if (!Controller->Sim.Deserialize(*PreStrip)) { Finish(false, TEXT("Could not restore the pre-strip stock.")); return; }
                 Controller->HotbarSlots = *SavedHotbar;
                 Controller->SelectedHotbarSlot = *SavedSelected;
+                // The chest refusal's error notice mustn't leak into the next steps' toast checks.
+                Controller->ToastText.Reset(); Controller->bToastError = false; Controller->ToastRemaining = 0;
                 Controller->NativeMenu->Refresh();
             },
             [this, SavedHotbar, PreStrip]() { return Controller->HotbarSlots == *SavedHotbar && Controller->Simulation().Serialize() == *PreStrip; });
