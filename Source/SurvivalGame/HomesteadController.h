@@ -119,6 +119,9 @@ public:
     // path without changing anything saved; MenuEndDyePreview puts her own clothes back.
     bool MenuPreviewDye(int32 WearableId, int32 Dye);
     void MenuEndDyePreview();
+    // The Appearance page's camera (orbit in degrees, zoom in wheel steps); nothing outside it.
+    void MenuOrbitAppearance(float Yaw, float Pitch);
+    void MenuZoomAppearance(float Steps);
     bool MenuSplitHalf(const FHomesteadRow& Row);
     // Moves a whole stack or garment between the pack and the open chest (as much as fits).
     bool MenuMoveWhole(const FHomesteadRow& Row);

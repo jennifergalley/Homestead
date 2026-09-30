@@ -71,6 +71,9 @@ public:
     float WalkClipSpeed() const { return bMetaHumanActive ? 209.9f : 120.0f; }
     float SprintClipSpeed() const { return bMetaHumanActive ? 524.8f : 300.0f; }
     void SetAppearancePreview(bool Enabled);
+    // The Appearance page's own camera controls: orbit her (degrees) and zoom (+ closer, in wheel steps).
+    void OrbitAppearance(float Yaw, float Pitch);
+    void ZoomAppearance(float Steps);
     // The view the appearance preview returns to (a spawn placed while it was open).
     void SetRestingViewRotation(const FRotator& Rotation) { SavedViewRotation = Rotation; }
     // While previewing appearance, bring the camera in close on her face (eye choices).
@@ -537,6 +540,16 @@ private:
     bool bHeroineAssetsValid = false;
     bool bAppearancePreview = false;
     bool bAppearanceFaceFocus = false;
+    // The preview's full-length arm (ZoomAppearance), and the chase arm's collision setting to give back.
+    float AppearanceArm = 280.0f;
+    bool bSavedArmCollision = true;
+    // Appearance camera limits (cm, degrees): full length at the default, her face at the closest.
+    static constexpr float AppearanceArmDefault = 280.0f;
+    static constexpr float AppearanceArmMin = 90.0f;
+    static constexpr float AppearanceArmMax = 340.0f;
+    static constexpr float AppearanceZoomStep = 30.0f;
+    static constexpr float AppearancePitchMin = -40.0f;
+    static constexpr float AppearancePitchMax = 25.0f;
     float FaceFocusBlend = 0.0f;
     float FaceFocusBodyArm = 280.0f;
     TOptional<float> SavedNearClip;

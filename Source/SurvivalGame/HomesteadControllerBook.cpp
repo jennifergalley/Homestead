@@ -319,8 +319,8 @@ FString AHomesteadController::BookSummary() const
         : TEXT("Carried items and equipped clothing.");
     case 1: return FString();
     case 2: return TEXT("Choose a plan to start placing it. Materials are spent when you place it.");
-    case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. She changes as you choose.")
-        : TEXT("Click a swatch or style to wear it. She changes as you choose.");
+    case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. Right stick: look around her.")
+        : TEXT("Click a swatch or style to wear it. Drag or WASD: look around her. Wheel: zoom.");
 
     default: return {};
     }

@@ -130,6 +130,14 @@ const FLinearColor MenuPine(0.025f, 0.05f, 0.038f, 0.6f);
 const FLinearColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
 const FLinearColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
 const FLinearColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
+// The Appearance page's camera input (degrees per second, degrees per pixel dragged).
+namespace MenuAppearanceInput
+{
+constexpr float KeyYawRate = 90.0f, KeyPitchRate = 45.0f;
+constexpr float StickYawRate = 120.0f, StickPitchRate = 60.0f;
+constexpr float StickDeadZone = 0.2f;
+constexpr float DragYawPerPixel = 0.35f, DragPitchPerPixel = 0.2f;
+}
 // The dye chooser's colour chips (display colours for Homestead::DyeName's four plant dyes).
 namespace MenuDyeStyle
 {
