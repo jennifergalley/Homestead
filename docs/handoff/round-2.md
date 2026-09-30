@@ -123,17 +123,24 @@ stiffen/collide and push strands metres away. Clean checkpoint `95f4bfc3` sets
 The groom asset data confirms optional Bob/Updo physics use bend .0075–.01, radius .1–2.5 cm and
 drag .1 before that assembled-style override.
 
-Props `95f4bfc3` passes Editor build and `8b6ba0dc` adds HairLab developer tools, but rods/fans did
-**not** reproduce in lab even with old `HairOverride=1`, LOD 1/2/3, motion, RT and 30/120 fps. Estate
-PIE accidentally used default style and HairExtent is unreliable, so do **not** claim Jenny's
-user-visible bug fixed. Props editor is closed (14.9 GB physical / 30.9 GB commit); Character.cpp is
-released.
+Props `95f4bfc3` is integrated as `main` `7f546925` (Integration cherry-pick `99f8fb82`): Source-only
+`Character.cpp`, native Release 9/9 and Editor/Game compile pass. HairLab `8b6ba0dc` tools support the
+investigation. This corrects the per-style physics misconfiguration but is **not a user-visible fix
+claim**.
 
-Integration exclusively reproduces an exact copy of Jenny's Shipping Estate save in isolated preview,
-verifying style/color and replaying chest, scythe, travel and sleep at override 1/0. If it still cannot
-reproduce, integrate the low-risk per-style physics correction with honest uncertainty and ask Jenny
-to playtest the next build; never use a global bald/static fallback. Existing hair reset guidance is
-not sufficient; validate before a package.
+Integration used an exact copy of Jenny's current Shipping Estate Manual save: HairStyle 1 /
+MetaHair 1 BobStraight / HairColor 0 at (-23969,-64935). PIE loaded the correct groom and exercised
+new `override=false` versus old `override=true`, ResetSimulation at 30/60/120, walk/turn,
+chest/pack, two scythe mows, sleep and groom LOD 1/2/3. **No rods/fans reproduced in either setting.**
+The fast-travel attempt did not advance time/position, so it is untested; pixel extent is unreliable.
+Evidence stays in `E:\CopilotScratch\e251051b-...\shots\bob-ab-contact.png` and
+`bob-lods-contact.png`, not copied into session/C: artifacts.
+
+The real physics correction is on main, but catastrophic Jenny-visible groom failure remains
+empirically unproven: request her next-build playtest and plan a prolonged isolated Shipping repro
+after the split build window. No packaged player build or shortcut changed. Editor is closed/no Unreal,
+physical memory 14.9 GB. Existing hair reset guidance is not sufficient; never use a global
+bald/static fallback.
 
 ### Overnight priority: split the four huge hot files
 
@@ -161,10 +168,10 @@ Static-linkage followups are also source-only: Controller `2354d801` adds Map/Ca
 `e7b7101b` adds the Weather include and qualifies `Cloth` to avoid a Unity name collision with
 `HomesteadGeneralStore`. Body-identity checks remain intact.
 
-Controller/World/Menu/Character remain Architecture's source lock. Integration owns the exact
-copied-save hair preview first; its result is still inconclusive. Then, after its editor closes,
-Integration cherry-picks and verifies Controller -> World -> Menu -> Character sequentially (native
-Release plus Editor/Game unity), returning a base SHA between commits before advancing.
+Controller/World/Menu/Character remain Architecture's source lock. The copied-save hair preview is
+complete but inconclusive. Integration now has the sole UBT slot to verify the Controller pair/triple
+first (native Release plus Editor/Game unity); then it returns a base SHA before advancing
+World -> Menu -> Character sequentially.
 
 ### Development firewall prompts / offline Shipping candidate
 
