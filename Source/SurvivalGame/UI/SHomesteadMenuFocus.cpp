@@ -455,7 +455,13 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
     case ERegion::Inventory: Moved = MoveWithin(InventorySelection, 3, 3, Direction); break;
     case ERegion::Equipment: Moved = MoveWithin(EquipmentSelection, VisibleEquipmentSlotCount, VisibleEquipmentSlotCount, Direction); break;
     case ERegion::Hotbar:
-        if (Direction.x) Moved = MoveWithin(HotbarSelection, Homestead::HotbarSize, Homestead::HotbarSize, Direction);
+        if (Direction.x)
+        {
+            Moved = MoveWithin(HotbarSelection, Homestead::HotbarSize, Homestead::HotbarSize, Direction);
+            // The strip's ends are its edges: don't let spatial navigation carry focus (and whatever
+            // she is holding) off into the grid above.
+            if (!Moved) return;
+        }
         // Up goes back to the grid tile she left (pack or chest), not wherever is nearest.
         else if (Direction.y < 0 && !Entries.IsEmpty()) { Region = ERegion::Content; Select(ContentSelection, true); Moved = true; }
         break;
