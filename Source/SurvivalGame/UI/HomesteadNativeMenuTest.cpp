@@ -1834,7 +1834,8 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     {
         const auto SavedHotbar = MakeShared<TArray<int32>>();
         const auto SavedSelected = MakeShared<int32>(0);
-        const auto StripBefore = MakeShared<FString>();
+        const auto StripBefore = MakeShared<std::string>();
+        const auto PreStrip = MakeShared<std::string>();
         const auto StripBindings = MakeShared<TArray<int32>>();
         const auto ChestPasty = MakeShared<int32>(0);
         const auto PackPasty = MakeShared<int32>(0);
@@ -1856,7 +1857,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             const auto Geometry = Widget->GetCachedGeometry();
             return FVector2D(Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f);
         };
-        const auto PointerDrag = [this, Center](const TSharedPtr<SWidget>& FromWidget, const TSharedPtr<SWidget>& ToWidget)
+        const auto StripDrag = [this, Center](const TSharedPtr<SWidget>& FromWidget, const TSharedPtr<SWidget>& ToWidget)
         {
             if (!FromWidget || !ToWidget) { Finish(false, TEXT("A hotbar strip drag end is unavailable.")); return; }
             const FVector2D From = Center(FromWidget), To = Center(ToWidget);
@@ -1966,10 +1967,10 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             [this, PackPasty]() { Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *PackPasty, 0); },
             [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
         Add(TEXT("Mouse drags the pack pasty onto slot 1; it moves there, stock untouched"),
-            [this, PointerDrag, Bindings, StripBindings]()
+            [this, StripDrag, Bindings, StripBindings]()
             {
                 *StripBindings = Bindings();
-                PointerDrag(FSlateApplication::Get().GetKeyboardFocusedWidget(), Controller->NativeMenu->GetBookHotbarSlot(0));
+                StripDrag(FSlateApplication::Get().GetKeyboardFocusedWidget(), Controller->NativeMenu->GetBookHotbarSlot(0));
             },
             [this, Bindings, StripBefore]()
             {
@@ -1980,10 +1981,10 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                     && Controller->Simulation().Serialize() == *StripBefore;
             });
         Add(TEXT("Mouse drags slot 1 onto slot 0 (the tenth); the two swap"),
-            [this, PointerDrag, Bindings, StripBindings]()
+            [this, StripDrag, Bindings, StripBindings]()
             {
                 *StripBindings = Bindings();
-                PointerDrag(Controller->NativeMenu->GetBookHotbarSlot(0), Controller->NativeMenu->GetBookHotbarSlot(9));
+                StripDrag(Controller->NativeMenu->GetBookHotbarSlot(0), Controller->NativeMenu->GetBookHotbarSlot(9));
             },
             [this, Bindings, StripBindings, StripBefore]()
             {
