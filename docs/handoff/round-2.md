@@ -183,7 +183,9 @@ First assess a short, low-memory old-build diagnostic from that matched rear/ele
 normal and ViewMode 17 captures, body LOD 2/3, BobStraight and optional updo; run new only if old
 reproduces. Do **not** change the passive LOD map `{1,3,5,7}` to `{1,3,4,4}` or alter bindings until
 reproduced evidence identifies the cause. With only about 5 GB free below the 6 GB safety bar, Menu
-hotbar editor work remains paused until the diagnostic order and memory window are confirmed.
+hotbar editor work remains paused. Integration will make one scheduled 23:25 check and launch the
+old-only probe only if physical free memory is at least 6 GB and no other Unreal process exists;
+otherwise it reports the blocker and releases Menu's slot.
 
 ### Overnight priority: split the four huge hot files
 
