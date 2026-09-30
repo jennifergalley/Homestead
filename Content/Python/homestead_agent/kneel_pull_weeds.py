@@ -67,6 +67,9 @@ TOSS_R = (-32.0, -26.0, 98.0)
 # A hand not pulling or tossing rests on top of its own thigh, just behind the knee.
 THIGH_REST_L = (14.0, 12.0, 46.0)
 THIGH_REST_R = (-14.0, 12.0, 46.0)
+# While the chest turns right for the second toss, the resting left hand slides out along its thigh so the
+# forearm stays clear of the turning torso.
+THIGH_OUT_L = (22.0, 14.0, 48.0)
 
 
 def build():
@@ -210,16 +213,16 @@ def _author(chest_anim):
     s.key_world(F['toss1'], 'hand_l_ik_ctrl', on_chest(F['toss1'], TOSS_L), chest_turn(F['toss1'], toss_l))
     s.key_world(F['back1'], 'hand_l_ik_ctrl', on_chest(F['back1'], (26.0, 14.0, 70.0)), chest_turn(F['back1'], hang_l))
     # Meanwhile the right hand lets go and drops toward the second weed.
-    s.key_world(F['swing1'], 'hand_r_ik_ctrl', kg._add(WEED_2, (-4.0, -6.0, 30.0)), grip_r)
-    s.key_world(F['back1'], 'hand_r_ik_ctrl', kg._add(WEED_2, (-3.0, -4.0, 20.0)), grip_r)
+    s.key_world(F['swing1'], 'hand_r_ik_ctrl', kg._add(WEED_2, (-11.0, -4.0, 30.0)), grip_r)
+    s.key_world(F['back1'], 'hand_r_ik_ctrl', kg._add(WEED_2, (-8.0, -3.0, 20.0)), grip_r)
 
     # Second weed: right hand low, left hand high; the right hand tosses it back over her shoulder.
     pull(2, WEED_2, 'r')
     s.key_world(F['swing2'], 'hand_r_ik_ctrl', on_chest(F['swing2'], SWING_R), chest_turn(F['swing2'], toss_r))
     s.key_world(F['toss2'], 'hand_r_ik_ctrl', on_chest(F['toss2'], TOSS_R), chest_turn(F['toss2'], toss_r))
     s.key_world(F['back2'], 'hand_r_ik_ctrl', on_chest(F['back2'], (-26.0, 14.0, 70.0)), chest_turn(F['back2'], hang_r))
-    s.key_world(F['swing2'], 'hand_l_ik_ctrl', THIGH_REST_L, rest_l)
-    s.key_world(F['back2'], 'hand_l_ik_ctrl', THIGH_REST_L, rest_l)
+    s.key_world(F['swing2'], 'hand_l_ik_ctrl', THIGH_OUT_L, rest_l)
+    s.key_world(F['back2'], 'hand_l_ik_ctrl', THIGH_OUT_L, rest_l)
 
     # Rising: the left hand braces on the forward knee as she comes up, the right swings free.
     s.key_world(F['half'], 'hand_l_ik_ctrl', kg.KNEE_WRIST_L, kg.knee_turn(s))
