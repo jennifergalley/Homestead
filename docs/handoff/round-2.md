@@ -82,19 +82,24 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current package snapshot (2026-09-29 19:55):** corrected Development
-`Build\Playtest-0929late` at `main` `af97075f` passed six packaged suites (Smoke 57.8, Clearing 52.8,
-Hotbar 53.0, NativeMenu 55.6, FullLoop 54.5, EstateSmoke woods 60 fps); a copied 19:19 Estate save
-loaded offscreen at the manor with no new errors. The Shipping candidate
+**Current Shipping delivery (2026-09-29):** corrected Development `Build\Playtest-0929late` at
+`main` `af97075f` passed six packaged suites (Smoke 57.8, Clearing 52.8, Hotbar 53.0, NativeMenu
+55.6, FullLoop 54.5, EstateSmoke woods 60 fps), and a copied 19:19 Estate save loaded offscreen at
+the manor with no new errors. Shipping candidate
 `Build\Releases\20260929-late-shipping\Windows` has five cooked pak/utoc/ucas containers
 hash-identical to Development, zero endpoints in 301 owned-PID TCP/UDP samples, `shipping=true` /
 `traceCompiled=false`, copied Estate F5/F9 MD5 match, Lit heroine 637 ticks and candidate-local
 `UserDir` writes only.
 
-Probe harness defects remain (see offline-startup note), and visible human UI startup was not observed.
-Integration is authorized to check latest save freshness/no game and retarget **only**
-`Homestead Estate.lnk`, preserving rollback, but has not yet reported completion. Menu field-book
-hotbar `bd0d928c` and Water garden outline remain excluded partials.
+`Homestead Estate.lnk` is now retargeted and ShellLink-read-back verified to a hard link of Shipping
+SHA `5A446A744967172AAE9BAAD9598973742EB93CABD6F31594C0240EFF918C7171`, with Estate map and
+candidate-local `-UserDir`, original icon and Win64 working directory retained. Before the switch,
+Jenny's 0929eve Estate save and Windows config/Input were hash-identical to a staged 19:19 snapshot;
+the originals remain unchanged. A scratch `-UserDir` offscreen run confirmed the same hard link and
+shortcut args for 60 seconds with zero endpoints and writes only to scratch. `Homestead.lnk` remains
+MVP-untouched; Development late and evening builds remain rollback paths, and the old link is backed
+in Integration `E:` scratch. Probe harness defects and visible human startup caveat remain (see
+offline-startup); Menu field-book hotbar and Water garden outline remain excluded partials.
 
 ### Development firewall prompts / offline Shipping candidate
 
@@ -104,22 +109,22 @@ fallback ports), producing path-specific rules as each Playtest archive moves. T
 Development test archives. Do **not** open public Allow rules, and do **not** globally disable
 `NotifyOnListen`: it needs elevation and would silently suppress alerts for every Windows app.
 
-After the current package/suites, Integration may build a safe Shipping candidate only through the
-supported hash-compatible cooked path in [`docs/offline-startup.md`](../offline-startup.md):
+The accepted Shipping candidate used the supported hash-compatible cooked path in
+[`docs/offline-startup.md`](../offline-startup.md):
 `Build-Game.ps1 -Configuration Shipping -ReuseCooked -Package`, with isolated sandbox
-test/game/save/network state. Shipping compiles out TraceControl. Only after its own validation may
-the Estate shortcut be reconsidered; the current shortcut stays untouched.
+test/game/save/network state. Shipping compiles out TraceControl and is now the Estate player path;
+Development suite processes can still prompt path-by-path as their archives move.
 
-### Urgent forward-aim shipment blocker
+### Resolved forward-aim shipment blocker
 
-**Forward-aim shipment blocker (corrected Dev evidence):** Architecture found `main` `5d11ceed` forward-aim bug
+**Resolved forward-aim shipment blocker:** Architecture found `main` `5d11ceed` forward-aim bug
 `8df23ba3`: `FocusHeldToolTarget` skips the aimed lookup when the nearest current overgrowth matches
 the held tool, then `SwingAtOvergrowth` overwrites the aimed ID with `FocusId`. A bramble 70 cm behind
 can therefore beat a valid bramble 200 cm ahead; an under-tier thicket behind can block the front
-target. Props has a headless targeted fix slot during UAT. Integration has now completed targeted native/PIE evidence and corrected Development suites/copied-save
-smoke at `af97075f`; the prior night package remains **provisional, not delivered**. Shipping probe
-harness defects and the actual safe Estate-link retarget still require explicit Integration completion
-before player delivery is claimed. Preserve rollback until that report.
+target. Props has a headless targeted fix slot during UAT. Integration completed targeted native/PIE evidence, corrected Development suites/copied-save smoke at
+`af97075f`, Shipping no-listener/save evidence, and the safe Estate-link retarget described above.
+The prior night package remains historical/provisional evidence; retain rollback paths and fix the
+probe harness before calling its wrapper a clean pass.
 
 **Props headless fix `61957b51`:** cleanly based on `main` `144acc7b`, native 9/9, no UE/PIE or
 shipping claim. `HeldToolFocus` now chooses aimed forward overgrowth over a nearer matching-tool
@@ -137,11 +142,10 @@ for one charge. With nothing ahead it says `Turn to face it` with no stock/clear
 drain); turning clears the behind target. Side thicket `550312` stays untouched while forward thin
 `550263` clears, and F5/F9 is exact.
 
-Corrected Development six suites and copied-save smoke now pass at `af97075f`; the Shipping candidate
-has zero endpoint and save-round-trip evidence. Remaining work is to repair the stale offline-probe
-fixture/MetaHuman checks, retain honest visible-human-startup uncertainty, and receive explicit safe
-Estate-link retarget completion. The provisional night build remains withheld and `Playtest-0929eve`
-remains the verified shortcut until then.
+Corrected Development six suites and copied-save smoke pass at `af97075f`; the Shipping candidate has
+zero endpoint and save-round-trip evidence. Remaining probe work is to repair the stale fixture/
+MetaHuman checks and retain honest visible-human-startup uncertainty; this does not invalidate the
+verified Shipping delivery and rollback paths.
 
 **Provisional night package evidence:** `Build\Playtest-0929night` at `main` `5d11ceed`
 (`JennysHomesteadGame.exe` SHA256
@@ -162,12 +166,11 @@ Effects; native tests cover the 0.5 ratio across rain, indoors and slider values
 half, with no Gain². The reflected LPF field is 20000 indoors but LPF code was untouched, so this is
 not audible LPF/listening proof.
 
-It is included with the aim fix in the corrected Development/Shipping candidate. It does not affect
-the current game until safe shortcut retarget is explicitly completed.
+It is included with the aim fix in the corrected Development/Shipping player candidate. Audible
+LPF/listening remains unproven, but the final half-volume component behavior is delivered.
 
-**Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
-evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
-passes. The batch applied Water
+**Integration validation batch (main-integrated/player-delivered):** Integration's local `c9481e38`
+evidence is included in the delivered `af97075f` Shipping path. The batch applied Water
 applied Water no-pail `20dd9cd1` + `069e493a` and forage freeze `1010aa2e`; Props bramble
 `1deb02ab` / `e37288ef` / `4d8bfecc`, sprint `7475b435`, Hoe hint `391f08f7`, Bed-v2 `aa375409`;
 and Menu Store `1b2b97eb` + pail gauge `9d5da35d`. Native passes 9/9, forage-id Python 7/7, and
