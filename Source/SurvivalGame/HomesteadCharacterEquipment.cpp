@@ -11,8 +11,31 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
+#include "CollisionQueryParams.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/IConsoleManager.h"
+
+// Where the scythe's blade lies, in the prop's frame (cm; scythe.py blade_rows relative to the lower
+// nib grip, the pivot): its heel, the middle of its back and its point. On level ground the mowing
+// clip (scythe_mow.py) carries it flat about 9 cm up; on a slope or a hump, it would cut into the
+// soil uphill and hang in the air downhill.
+namespace MowGround
+{
+const FVector BladeSamples[] = {FVector(2.8f, 11.0f, -101.4f), FVector(45.8f, 9.3f, -98.3f), FVector(88.8f, -0.3f, -90.1f)};
+// Below this clearance (cm) the blade is lifted clear of the ground...
+constexpr float MinClearance = 3.0f;
+// ...and above this one (downhill) it is lowered back toward FollowClearance; in between it keeps
+// the clip's own lay, so level mowing looks exactly as authored.
+constexpr float MaxClearance = 20.0f;
+constexpr float FollowClearance = 10.0f;
+// The roll about the nib line never exceeds this (radians, about 20 degrees): past it the blade
+// would stand on its edge rather than lie on the swath.
+constexpr float MaxRoll = 0.35f;
+// How quickly the roll eases toward what the ground asks (per second).
+constexpr float RollRate = 8.0f;
+// How far above and below the blade to look for the ground (cm).
+constexpr float TraceReach = 150.0f;
+}
 
 namespace
 {
@@ -240,7 +263,11 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     UStaticMeshComponent* Prop = GetHeldProp(FellTool);
     if (!Animation || !Prop || !Prop->IsVisible()) return;
     const float Weight = Animation->FellWeight();
-    if (Weight <= 0.01f) return;
+    if (Weight <= 0.01f)
+    {
+        MowGroundRoll = 0.0f;
+        return;
+    }
     if (FellTool == Homestead::Item::Scythe)
     {
         UpdateMowingScythe(*Prop, Weight);
@@ -299,7 +326,53 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
     FVector Snath = Upper - Lower;
     Snath = (Snath - Nib * FVector::DotProduct(Snath, Nib)).GetSafeNormal();
     if (Nib.IsNearlyZero() || Snath.IsNearlyZero()) return;
-    const FTransform TwoHanded(FRotationMatrix::MakeFromYZ(Nib, Snath).ToQuat(), Lower, Prop.GetComponentScale());
+    FTransform TwoHanded(FRotationMatrix::MakeFromYZ(Nib, Snath).ToQuat(), Lower, Prop.GetComponentScale());
+    // Follow the ground: roll the whole scythe about the line through both nib grips, so both fists
+    // stay on their nibs while the blade tilts clear of rising ground or down onto falling ground.
+    const FVector NibLine = (Upper - Lower).GetSafeNormal();
+    UWorld* World = GetWorld();
+    float WantRoll = 0.0f;
+    if (World && !NibLine.IsNearlyZero())
+    {
+        FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadMowGround), false, this);
+        const auto GroundUnder = [World, &Query](const FVector& At, float& Height)
+        {
+            FHitResult Hit;
+            if (!World->LineTraceSingleByChannel(Hit, At + FVector(0, 0, MowGround::TraceReach),
+                At - FVector(0, 0, MowGround::TraceReach), ECC_Visibility, Query)) return false;
+            Height = static_cast<float>(Hit.ImpactPoint.Z);
+            return true;
+        };
+        // Solve on the unrolled lay, twice (the second pass corrects the first's small-angle guess).
+        for (int32 Pass = 0; Pass < 2; ++Pass)
+        {
+            const FTransform Rolled(FQuat(NibLine, WantRoll) * TwoHanded.GetRotation(), Lower, TwoHanded.GetScale3D());
+            float Lowest = TNumericLimits<float>::Max(), LiftPerRadian = 0.0f;
+            bool bAny = false;
+            for (const FVector& Sample : MowGround::BladeSamples)
+            {
+                const FVector At = Rolled.TransformPosition(Sample);
+                float Height = 0.0f;
+                if (!GroundUnder(At, Height)) continue;
+                const float Clearance = static_cast<float>(At.Z) - Height;
+                if (Clearance < Lowest)
+                {
+                    Lowest = Clearance;
+                    // How fast this sample rises per radian of roll about the nib line.
+                    LiftPerRadian = static_cast<float>(FVector::CrossProduct(NibLine, At - Lower).Z);
+                    bAny = true;
+                }
+            }
+            if (!bAny || FMath::Abs(LiftPerRadian) < 1.0f) break;
+            const float Shortfall = Lowest < MowGround::MinClearance ? MowGround::MinClearance - Lowest
+                : Lowest > MowGround::MaxClearance ? MowGround::FollowClearance - Lowest : 0.0f;
+            if (Shortfall == 0.0f) break;
+            WantRoll = FMath::Clamp(WantRoll + Shortfall / LiftPerRadian, -MowGround::MaxRoll, MowGround::MaxRoll);
+        }
+    }
+    const float Dt = World ? World->GetDeltaSeconds() : 0.0f;
+    MowGroundRoll = FMath::FInterpTo(MowGroundRoll, WantRoll, Dt, MowGround::RollRate);
+    TwoHanded.SetRotation(FQuat(NibLine, MowGroundRoll) * TwoHanded.GetRotation());
     FTransform Blended;
     Blended.Blend(Prop.GetComponentTransform(), TwoHanded, FMath::SmoothStep(0.0f, 1.0f, Weight));
     Prop.SetWorldTransform(Blended);

@@ -451,8 +451,11 @@ private:
     bool bStrikeHatchet = false;
     bool BeginTwoHanded(Homestead::Point Target, int32 Strokes, float Radius, float BitLeft, float BitForward,
         float CutLeft, float CutForward);
-    // The mowing scythe, laid from both fists on its nibs.
+    // The mowing scythe, laid from both fists on its nibs, then rolled about the line through both nib
+    // grips so its blade follows the ground under the swath (both fists stay on their nibs).
     void UpdateMowingScythe(UStaticMeshComponent& Prop, float Weight);
+    // That roll (radians), eased from tick to tick so the blade doesn't chatter over bumps.
+    float MowGroundRoll = 0.0f;
     // Eases her into a work stance (felling, hacking) instead of snapping: a snapped turn flings
     // the simulated hair.
     FVector FellStepFrom = FVector::ZeroVector, FellStepTo = FVector::ZeroVector;

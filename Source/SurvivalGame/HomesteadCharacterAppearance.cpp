@@ -544,12 +544,19 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     // SM_Scythe (scythe.py): pivot at the lower nib's grip, snath +Z, the snath itself 13 cm along +Y
     // from that grip, blade +X from the heel. In the grip frame the handle runs along +Z (pinky to
     // index, forward in a hanging hand), +Y is back toward the wrist and +X points out to her right,
-    // so the snath goes along the fist tipped 25 degrees up and 15 degrees in (its trailing end
-    // clears her legs), and the blade reaches out along +X.
-    const FQuat ScytheTurn = FRotationMatrix::MakeFromXZ(FVector(1, 0, 0),
-        FVector(-FMath::Sin(FMath::DegreesToRadians(15.0f)), FMath::Sin(FMath::DegreesToRadians(25.0f)),
-            FMath::Cos(FMath::DegreesToRadians(25.0f)))).ToQuat();
-    const FTransform ScytheTrail(ScytheTurn, -ScytheTurn.RotateVector(FVector(-2, 13, -15)));
+    // so the snath goes along the fist tipped 25 degrees up, and the blade reaches out along +X.
+    // Her fist closes on the wood itself (Jenny, 09-29: at rest the scythe must sit in her hand): the
+    // snath's centreline 15 cm below the lower nib and its direction there, from scythe.py snath_point
+    // (t = 0.519) relative to the grip. The crooked snath runs about 2 cm off and 6 degrees from the
+    // straight line through the nib that the carry used before, so it stood out beside her fingers.
+    const FVector SnathInFist(-0.2f, 14.9f, -15.0f);
+    const FVector SnathAlong = FVector(0.0035f, -0.1032f, 0.9947f).GetSafeNormal();
+    // The carry keeps its old line through the fist (the 15 degrees 'in' it once asked for were squared
+    // away by the frame, and it looked right that way).
+    const FVector CarryAxis(0.0f, FMath::Sin(FMath::DegreesToRadians(25.0f)), FMath::Cos(FMath::DegreesToRadians(25.0f)));
+    const FQuat ScytheTurn = FRotationMatrix::MakeFromZX(CarryAxis, FVector(1, 0, 0)).ToQuat()
+        * FRotationMatrix::MakeFromZX(SnathAlong, FVector(1, 0, 0)).ToQuat().Inverse();
+    const FTransform ScytheTrail(ScytheTurn, -ScytheTurn.RotateVector(SnathInFist));
     const FHeldToolAsset Assets[] = {
         {Homestead::Item::Knife, TEXT("FlintKnife/SM_FlintKnife"), 30, false, FTransform::Identity},
         // The estate axe (estate_axe.py) and draw hoe (draw_hoe.py) are authored in the flint hatchet's
