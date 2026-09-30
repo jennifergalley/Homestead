@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HomesteadEstate.h"
 #include "HomesteadSimulation.h"
 
 #include <string>
@@ -18,6 +19,9 @@ constexpr double RoadWalkPaceCmPerSecond = 180.0;
 constexpr double TravelArrivedCm = 3000.0;
 // Farther than this from the road, she walks back to it herself first, cm.
 constexpr double TravelMaxConnectorCm = 60000.0;
+// Within this of the town square she is already in town (the square, its streets and the general
+// store 26 m off it), cm; beside the store (ShopWaitReach of its counter) she's "at the store".
+constexpr double TravelTownReachCm = 4500.0;
 
 enum class TravelDestination : int { Manor, Town };
 
@@ -48,8 +52,10 @@ struct TravelPlan
 };
 
 // The walk from `from` to `destination` under the saved day length. Fails (with `error`) away
-// from the estate's road, when she's already there, or while she needs to recover.
-TravelPlan PlanTravel(const State& state, Point from, TravelDestination destination);
+// from the estate's road, when she's already there (in town or at the general store, for Town),
+// or while she needs to recover.
+TravelPlan PlanTravel(const State& state, Point from, TravelDestination destination,
+    const EstateLayout& layout = ProvisionalEstateLayout());
 // "7 h 12 min", "45 min".
 std::string FormatWalkDuration(double gameHours);
 }
