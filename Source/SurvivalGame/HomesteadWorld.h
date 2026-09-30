@@ -286,6 +286,21 @@ private:
     static constexpr float OvercastSaturation = 0.72f;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
+    // The standing room's door (HomesteadWorldDoors.cpp, Simulation/HomesteadDoor): an oak leaf on a hinge
+    // pivot in the heritage stone doorway, swung open as she nears and shut behind her. Keyed by the
+    // doorway's structure id so a rebuild keeps its swing; presentation only, nothing saved.
+    struct FDoorLeaf
+    {
+        TWeakObjectPtr<USceneComponent> Hinge;
+        FVector Opening = FVector::ZeroVector;
+        float ClosedYaw = 0.0f;
+        float Openness = 0.0f;
+        bool bWanted = false;
+    };
+    TMap<int32, FDoorLeaf> DoorLeaves;
+    void AddDoorLeaf(FHomesteadWorldVisual& Visual, int32 StructureId, const FVector& Base, const FRotator& Rotation,
+        float HeightScale);
+    void UpdateDoors(float DeltaSeconds);
     UPROPERTY()
     TObjectPtr<UMaterialInterface> FieldMaterial;
     UPROPERTY()

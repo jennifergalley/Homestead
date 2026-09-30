@@ -3,6 +3,7 @@
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldLook.h"
 #include "HomesteadLampLook.h"
+#include "Simulation/HomesteadDoor.h"
 #include "Simulation/HomesteadRoomAudio.h"
 #include "Simulation/HomesteadRuinDebris.h"
 
@@ -155,7 +156,12 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         // underside (279 cm): the joist ends bed into the masonry instead of leaving daylight between them.
         const bool bWallPiece = Structure.kind == Homestead::Piece::Wall || Structure.kind == Homestead::Piece::Doorway;
         const float HeightScale = bWallPiece ? 1.085f : 1.0f;
-        if (Kit && KitPart(Kit, HeightScale)) return;
+        if (Kit && KitPart(Kit, HeightScale))
+        {
+            if (!bPreview && !bDeconstruct && Homestead::Door::HasLeaf(Structure))
+                AddDoorLeaf(Visual, Structure.id, Base, Rotation, HeightScale);
+            return;
+        }
     }
     if (Structure.kind == Homestead::Piece::Hearth)
     {
