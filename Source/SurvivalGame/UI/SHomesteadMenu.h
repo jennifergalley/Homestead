@@ -135,6 +135,18 @@ public:
     FString GetChestNameDraft() const { return RenameDraft; }
     // Automation: types as the keyboard would.
     void TypeChestName(const FString& Characters);
+    bool IsNoticeError() const { return bNoticeError; }
+    // Automation (the Feedback suite): the notice card as laid out, in absolute window pixels, with
+    // the book's bounds and the regions it must keep clear of (the tabs and the focused control).
+    struct FNoticeLayout
+    {
+        bool bShowing = false;
+        FBox2D Card = FBox2D(ForceInit);
+        FBox2D Book = FBox2D(ForceInit);
+        FVector2D CardDesired = FVector2D::ZeroVector;
+        TArray<TPair<FString, FBox2D>> Protected;
+    };
+    FNoticeLayout GetNoticeLayout() const;
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery, Hotbar };

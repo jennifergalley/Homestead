@@ -10,6 +10,8 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Serialization/JsonSerializer.h"
+#include "UI/SHomesteadMenu.h"
 
 void AHomesteadSmokeTest::PrepareFeedbackChecks()
 {
@@ -33,18 +35,74 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     const auto Geometry = MakeShared<FString>();
     Results.Add(TEXT("GRAPHICS_CONFIG=") + FPaths::ConvertRelativePathToFull(Branch->IniPath));
     Results.Add(TEXT("DISCLOSURE synthetic fresh world; mapped UI actions. Final coverage deliberately corrupts only its sandbox manual save to exercise real backup-recovery feedback."));
-    const auto Capture = [this, Output, Baseline](const FString& Name)
+    // With the field book open, feedback is the book's own notice card (UI/SHomesteadMenu), not the
+    // Canvas toast (the HUD draws nothing over the native book): the same checks, measured on it.
+    const auto NativeNotice = [this]() -> TSharedPtr<FJsonObject>
+    {
+        if (!Controller->NativeMenu.IsValid() || !Controller->IsBookOpen()) return nullptr;
+        const auto Layout = Controller->NativeMenu->GetNoticeLayout();
+        const auto BoxJson = [](const FBox2D& Box)
+        {
+            auto Result = MakeShared<FJsonObject>();
+            Result->SetNumberField(TEXT("left"), Box.Min.X); Result->SetNumberField(TEXT("top"), Box.Min.Y);
+            Result->SetNumberField(TEXT("right"), Box.Max.X); Result->SetNumberField(TEXT("bottom"), Box.Max.Y);
+            return Result;
+        };
+        const auto Overlaps = [](const FBox2D& A, const FBox2D& B)
+            { return A.Min.X < B.Max.X && A.Max.X > B.Min.X && A.Min.Y < B.Max.Y && A.Max.Y > B.Min.Y; };
+        const FString Text = Controller->NativeMenu->GetNoticeText();
+        bool bOverlap = false;
+        TArray<TSharedPtr<FJsonValue>> Protected;
+        for (const auto& Region : Layout.Protected)
+        {
+            auto Entry = BoxJson(Region.Value);
+            Entry->SetStringField(TEXT("role"), Region.Key);
+            Entry->SetBoolField(TEXT("overlap"), Layout.bShowing && Overlaps(Layout.Card, Region.Value));
+            bOverlap |= Layout.bShowing && Overlaps(Layout.Card, Region.Value);
+            Protected.Add(MakeShared<FJsonValueObject>(Entry));
+        }
+        const FVector2D Drawn = Layout.Card.GetSize();
+        auto Object = MakeShared<FJsonObject>();
+        Object->SetStringField(TEXT("surface"), TEXT("native-notice-card"));
+        Object->SetStringField(TEXT("source"), Text);
+        // The whole wrapped text fits: the card got at least the size it asked for.
+        Object->SetBoolField(TEXT("fullTextRendered"), Layout.bShowing && Text == Controller->Toast()
+            && Drawn.X + 1.0 >= Layout.CardDesired.X && Drawn.Y + 1.0 >= Layout.CardDesired.Y);
+        Object->SetBoolField(TEXT("overlap"), bOverlap);
+        Object->SetBoolField(TEXT("insideViewport"), Layout.bShowing && Layout.Card.Min.X >= Layout.Book.Min.X - 1
+            && Layout.Card.Min.Y >= Layout.Book.Min.Y - 1 && Layout.Card.Max.X <= Layout.Book.Max.X + 1 && Layout.Card.Max.Y <= Layout.Book.Max.Y + 1);
+        Object->SetBoolField(TEXT("error"), Controller->NativeMenu->IsNoticeError());
+        Object->SetNumberField(TEXT("viewportWidth"), Layout.Book.GetSize().X);
+        Object->SetNumberField(TEXT("viewportHeight"), Layout.Book.GetSize().Y);
+        Object->SetObjectField(TEXT("toastPanel"), BoxJson(Layout.Card));
+        TArray<TSharedPtr<FJsonValue>> Lines;
+        auto Line = BoxJson(Layout.Card); Line->SetStringField(TEXT("text"), Text);
+        Lines.Add(MakeShared<FJsonValueObject>(Line));
+        Object->SetArrayField(TEXT("drawnToastLines"), Lines);
+        Object->SetArrayField(TEXT("protected"), Protected);
+        return Object;
+    };
+    const auto Capture = [this, Output, Baseline, NativeNotice](const FString& Name)
     {
         Add(TEXT("Capture while actual feedback is active: ") + Name,
-            [this, Output, Name]()
+            [this, Output, Name, NativeNotice]()
             {
-                if (const auto* HUD = Controller->GetHUD<AHomesteadHUD>())
-                    if (!FFileHelper::SaveStringToFile(HUD->FeedbackMeasurements(), *FPaths::Combine(Output, Name + TEXT(".layout.json"))))
-                        UE_LOG(LogTemp, Error, TEXT("Could not write feedback Canvas measurements."));
+                FString Measurements;
+                if (const auto Native = NativeNotice()) FJsonSerializer::Serialize(Native.ToSharedRef(), TJsonWriterFactory<>::Create(&Measurements));
+                else if (const auto* HUD = Controller->GetHUD<AHomesteadHUD>()) Measurements = HUD->FeedbackMeasurements();
+                if (!FFileHelper::SaveStringToFile(Measurements, *FPaths::Combine(Output, Name + TEXT(".layout.json"))))
+                    UE_LOG(LogTemp, Error, TEXT("Could not write feedback measurements."));
                 Screenshot(Name);
             },
-            [this, Baseline]()
+            [this, Baseline, NativeNotice]()
             {
+                if (const auto Native = NativeNotice())
+                {
+                    Results.Add(TEXT("NOTICE ") + Native->GetStringField(TEXT("source")));
+                    return !Controller->Toast().IsEmpty() && Native->GetStringField(TEXT("source")) == Controller->Toast()
+                        && Native->GetBoolField(TEXT("fullTextRendered")) && Native->GetBoolField(TEXT("insideViewport"))
+                        && !Native->GetBoolField(TEXT("overlap")) && Native->GetBoolField(TEXT("error")) == Controller->ToastIsError();
+                }
                 const auto* HUD = Controller->GetHUD<AHomesteadHUD>();
                 const bool ExpectedOverlap = Baseline && Controller->IsBookOpen() && Controller->BookPage() != 6;
                 const FLinearColor ExpectedColor = Controller->ToastIsError()

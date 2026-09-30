@@ -194,9 +194,7 @@ void AHomesteadSmokeTest::PrepareHotkeyChecks()
                     Finish(false, TEXT("Native Settings Save progress is unavailable."));
             },
             [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content"); });
-        Add(TEXT("Enter native Save progress actions"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-            [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
+        // A on Save progress saves at once (there is no separate actions step any more).
         Action(EKeys::Gamepad_FaceButton_Bottom, false);
         Add(TEXT("Focus semantic Load latest in native Settings"),
             [this]()
@@ -205,9 +203,7 @@ void AHomesteadSmokeTest::PrepareHotkeyChecks()
                     Finish(false, TEXT("Native Settings Load latest is unavailable."));
             },
             [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content"); });
-        Add(TEXT("Enter native Load latest actions"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-            [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Actions"); });
+        // And A on Load latest loads at once.
         Action(EKeys::Gamepad_FaceButton_Bottom, true);
         const FString Temporary = Controller->SavePath(TEXT("Homestead_Manual")) + TEXT(".tmp");
         const auto SavedHash = MakeShared<FString>();

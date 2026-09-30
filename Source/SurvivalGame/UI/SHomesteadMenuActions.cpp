@@ -45,6 +45,31 @@ void SHomesteadMenu::UpdateNotice()
     NoticeCard->SetRenderTransform(FSlateRenderTransform(FVector2f(0.0f, bNoticeTop ? -Rise : Rise)));
 }
 
+SHomesteadMenu::FNoticeLayout SHomesteadMenu::GetNoticeLayout() const
+{
+    FNoticeLayout Layout;
+    const auto Box = [](const SWidget& Widget)
+    {
+        const FGeometry& Geometry = Widget.GetCachedGeometry();
+        const FVector2D Position = Geometry.GetAbsolutePosition();
+        return FBox2D(Position, Position + FVector2D(Geometry.GetAbsoluteSize()));
+    };
+    Layout.bShowing = IsNoticeShowing() && NoticeCard.IsValid();
+    Layout.Book = Box(*this);
+    if (NoticeCard)
+    {
+        // Where it is drawn, including the settle-in offset.
+        FBox2D Card = Box(*NoticeCard);
+        const FVector2D Offset = FVector2D(NoticeCard->GetRenderTransform().Get(FSlateRenderTransform()).GetTranslation())
+            * NoticeCard->GetCachedGeometry().Scale;
+        Layout.Card = FBox2D(Card.Min + Offset, Card.Max + Offset);
+        Layout.CardDesired = NoticeCard->GetDesiredSize() * NoticeCard->GetCachedGeometry().Scale;
+    }
+    if (TabBar && TabBar->GetVisibility().IsVisible()) Layout.Protected.Emplace(TEXT("tabs"), Box(*TabBar));
+    if (const auto Focused = FocusWidget()) Layout.Protected.Emplace(TEXT("focused-control"), Box(*Focused));
+    return Layout;
+}
+
 void SHomesteadMenu::PlaceNotice()
 {
     if (!BookOverlay || !NoticeSlot || !NoticeCard) return;
