@@ -148,11 +148,20 @@ reproduction, no bounds measurement and no RT-on PIE result.
 
 The real physics correction is on main, but catastrophic Jenny-visible groom failure remains
 empirically unproven. The next safe experiment is a LOD 1↔3 flip with a ShowOnly SceneDepth mask
-when memory is available; it must distinguish no reproduction from a cure. Before another editor
-launch, Integration assesses lower-memory Development game-window PostMessage/capture/console support
-via `Scripts\GameWindow.ps1`, while Props assesses a cheaper groom-bounds API. The delivered Shipping
-shortcut is unchanged by this attempted investigation. Existing hair reset guidance is not
-sufficient; never use a global bald/static fallback.
+when memory is available; it must distinguish no reproduction from a cure. The lower-memory
+**Development** feasibility assessment is now successful (not a Shipping result): old
+`Playtest-0929eve` ran under its own hidden 800×600 scratch-`UserDir` process for 23 seconds with
+4.4 GB free RAM, a hidden per-PID HWND and no foreground change. Process-specific PostMessage keys
+opened the console and `SHOT SHOWUI` wrote a non-black 800×600 RGB capture (775,286 bytes) of the
+exact copied BobStraight at the saved manor. F5 changed only the scratch Manual hash; the source
+save remained untouched and the log confirms scratch save routing and ground settle at
+`(-23970,-64935)`. PrintWindow remains black.
+
+The prior Shipping `-RenderOffscreen` HWND0 result remains distinct. A separate bounded old/new
+Development A/B grant is required before using this feasible hidden-window path; it must still
+distinguish no reproduction from a cure. Props also assesses a cheaper groom-bounds API. The
+delivered Shipping shortcut is unchanged by this attempted investigation. Existing hair reset
+guidance is not sufficient; never use a global bald/static fallback.
 
 ### Overnight priority: split the four huge hot files
 
