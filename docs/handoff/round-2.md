@@ -147,31 +147,34 @@ bald/static fallback.
 **Jenny direct decision (2026-09-29 20:34):** split
 `Controller.cpp`, `World.cpp`, `Character.cpp` and `UI/SHomesteadMenu.cpp` overnight ASAP. This
 supersedes the earlier EHandAction-first plan. Architecture now has all four source-only checkpoints;
-no native/Editor/Game/unity compile has run and nothing is ready or shipped.
+Controller is the first verified integration gate; World, Menu and Character remain source-only.
 
 Menu and Water pause edits to those four files. Architecture stops on clean per-feature pure-move
 commits with verification; Integration reserves sequential merge, native and Editor/Game build after
 the hair checkpoint. Hair retains priority for the visual fix; hotbar and garden work remain paused.
 
-**Controller source-only checkpoint `7fbd3bff` + `2354d801` + `944c8d97`:**
-`HomesteadController.cpp` moves from 4,778 to 579 lines through 16 per-feature `.cpp` files and small
-named helper headers, 185/185 bodies. **World `cc20cee5` + `e7b7101b` + `2594e868`:**
+**Controller verified integration gate `main` `05a4781d`:** pure-move commits
+`7fbd3bff` + `2354d801` + `944c8d97` + `8ee97d65` map to integration commits
+`c712c3ac`, `b13b67d2`, `eeaec424` and `3731291e`. `HomesteadController.cpp` moves from
+4,778 to 579 lines through 16 per-feature `.cpp` files and small named helper headers, 185/185 bodies;
+native Release 9/9 and Editor+Game Unity (`Module.SurvivalGame.2.cpp`) builds pass. This is
+source/main verification only, **not a player Shipping delivery**; the verified Estate shortcut remains
+unchanged. **World source-only next gate `cc20cee5` + `e7b7101b` + `2594e868` + `1bd7d555`:**
 `HomesteadWorld.cpp` moves from 4,962 to about 188 lines, 71/71 bodies. **Menu `801c0329`:**
 `UI/SHomesteadMenu.cpp` moves from 3,206 to about 270 lines, 96/96 bodies. **Character
 `5811cb9` + `20dd44f3`:** cherry-picks hair fix `95f4bfc3`, moves `HomesteadCharacter.cpp` from
 2,833 to 173 lines, 92/92 bodies, and keeps `LoadMetaHumanStack` / `ApplyMetaHumanLook` /
 `UpdateHairMotion` at the exact hair-fix baseline, including one `LogHomesteadHair` and two
-`ResetSimulation` calls. All body-identity/diff checks are clean but there is **no native/Editor/Game
-compile**; all four are partial and unshipped.
+`ResetSimulation` calls. World/Menu/Character body-identity/diff checks are clean but have **no
+native/Editor/Game compile**; they remain partial and unshipped.
 
 Static-linkage followups are also source-only: Controller `2354d801` adds Map/Capsule includes; World
 `e7b7101b` adds the Weather include and qualifies `Cloth` to avoid a Unity name collision with
 `HomesteadGeneralStore`. Body-identity checks remain intact.
 
-Controller/World/Menu/Character remain Architecture's source lock. The copied-save hair preview is
-complete but inconclusive. Integration now has the sole UBT slot to verify the Controller pair/triple
-first (native Release plus Editor/Game unity); then it returns a base SHA before advancing
-World -> Menu -> Character sequentially.
+World/Menu/Character remain Architecture's source lock. The copied-save hair preview is complete but
+inconclusive. Integration now has the sole UBT slot to verify **World only** next (native Release plus
+Editor/Game unity), returns a base SHA, then advances Menu -> Character sequentially.
 
 ### Development firewall prompts / offline Shipping candidate
 
