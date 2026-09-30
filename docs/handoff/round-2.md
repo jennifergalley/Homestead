@@ -124,14 +124,15 @@ Native covers bramble 70 cm behind versus valid front 200 cm prompt/clear/one ch
 thicket not blocking, berry prompt retained, no aimed behind clear, turn-around success and silent tier
 refusal. Integration cherry-picked it locally as `798ce775` atop merged `main` `144acc7b`; native
 Release 9/9 passes and review confirms Swing uses only `FindAimedOvergrowth`, never `FocusId`.
-Editor/Game UBT succeeded in 362 seconds before the memory override; no Integration editor/PIE/UAT
-process started. Jenny is playing verified Estate PID 2328 untouched, so Integration now wakes/waits
-until her game closes and an explicit process/memory-safe grant resumes the chain.
+Editor/Game UBT and PIE now pass; editor is closed after a memory-tight one-editor run (~3 GB free).
+Behind thin bramble `550248` at 73 cm loses focus to forward bramble `570132` at 188 cm, and a press
+clears only the forward target for one charge. With nothing ahead it says `Turn to face it` with no
+stock/clear (normal 0.01 Energy drain); turning clears the behind target. Side thicket `550312` stays
+untouched while forward thin `550263` clears, and F5/F9 is exact.
 
-Required remaining evidence is PIE behind/front, side thicket, `Turn to face it` and F5/F9, then
-corrected Development repackage/six suites/copied-save smoke and final Shipping no-listener candidate.
-The provisional night build remains withheld and
-`Playtest-0929eve` remains the verified shortcut.
+Remaining work is corrected Development repackage/six suites/copied-save smoke and final Shipping
+no-listener candidate. The provisional night build remains withheld and `Playtest-0929eve` remains the
+verified shortcut.
 
 **Provisional night package evidence:** `Build\Playtest-0929night` at `main` `5d11ceed`
 (`JennysHomesteadGame.exe` SHA256
@@ -143,14 +144,18 @@ corrected Development package/six suites plus copied-save smoke, then stages the
 `-ReuseCooked` candidate and proves its PID has no TCP/UDP listener using isolated `-UserDir` save
 round-trip/offscreen tests. Only an accepted Shipping candidate may retarget the Estate shortcut.
 
-**Final rain loudness partial `734813ad`:** native 10/10, no UE build or delivery claim. Rain
+**Final rain loudness partial `734813ad`:** native 10/10 plus local Editor/Game/PIE pass, no delivery
+claim. Rain
 `RainAudioGain` is multiplied by 0.5 linear (-6.02 dB): full default AmbienceVolume 0.7 becomes
 outdoor 0.315 / indoor 0.1225. `FadeIn(2, 1)` remains, `RainAudible` start/stop threshold is not
 halved, and indoor LPF/mute stay unchanged. The controlling user slider is **AmbienceVolume**, not
-Effects; native tests cover the 0.5 ratio across rain, indoors and slider values.
+Effects; native tests cover the 0.5 ratio across rain, indoors and slider values. PIE at rain amount
+0.30 / Ambience 0.7 measured component outdoor 0.1356 versus old 0.2712 and indoor 0.0527: exactly
+half, with no Gain². The reflected LPF field is 20000 indoors but LPF code was untouched, so this is
+not audible LPF/listening proof.
 
-It integrates only after Jenny exits and the editor is safe, together with the aim fix before the
-corrected Development/Shipping package. It does not affect the current game.
+It integrates with the aim fix before the corrected Development/Shipping package. It does not affect
+the current game.
 
 **Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
 evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
@@ -686,7 +691,8 @@ requirement.
   transient sampled-ground 4x4 thin 2.5 cm-raised segments at 100 cm, no collision/shadow, green/red,
   and hides for book/shop/planning/failed/water focus with no save IDs. PIE still must cover slopes,
   turned soil, adjacent plots, blocked cells, pad/HUD behavior and z-fighting before readiness.
-- **Weedy crop-plot prompt partial `15b3927e`:** native 9/9, no UE/build/PIE or delivery claim.
+- **Weedy crop-plot prompt partial `15b3927e`:** Integration cherry-picked locally as `d54a14ae`;
+  native 9/9, Editor/Game build and KBM/pad PIE remain pending, with no delivery claim.
   Whenever `Plot.weeds >= 0.125` is world-visible, the focused plot appends `[F] Pull weeds` /
   gamepad `[X] Pull weeds` alongside E/A sow/harvest/water/error, including ripe crops; clean plots
   show no hint. F/X hand-weeds the focused plot, never sows. A bare weedy plot F-pull is yieldless,
