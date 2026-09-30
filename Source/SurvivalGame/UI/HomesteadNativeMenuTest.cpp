@@ -1829,6 +1829,191 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
     Add(TEXT("Capture real stored transaction result"),
         [this]() { Screenshot(TEXT("native-storage-transactions")); },
         [this]() { return Controller->BookPage() == 0 && Controller->InventoryView() == 1; }, 0.8f);
+    // The book's hotbar strip with a chest open: the same ten slots under both grids. Only pack
+    // stacks bind; chest stacks are refused with the reason and never move. Bindings are restored after.
+    {
+        const auto SavedHotbar = MakeShared<TArray<int32>>();
+        const auto SavedSelected = MakeShared<int32>(0);
+        const auto StripBefore = MakeShared<std::string>();
+        const auto PreStrip = MakeShared<std::string>();
+        const auto StripBindings = MakeShared<TArray<int32>>();
+        const auto ChestPasty = MakeShared<int32>(0);
+        const auto PackPasty = MakeShared<int32>(0);
+        const auto Bindings = [this]()
+        {
+            TArray<int32> Result;
+            for (const auto& Slot : Controller->HotbarSnapshot()) Result.Add(Slot.Assigned ? static_cast<int32>(Slot.Tool) : -1);
+            return Result;
+        };
+        const auto PastyGroup = [this](int32 Container)
+        {
+            const auto* Layout = Controller->Simulation().GetLayout(Container);
+            if (Layout) for (const auto& Entry : *Layout)
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Pasty) return Entry.groupId;
+            return 0;
+        };
+        const auto Center = [](const TSharedPtr<SWidget>& Widget)
+        {
+            const auto Geometry = Widget->GetCachedGeometry();
+            return FVector2D(Geometry.GetAbsolutePosition() + Geometry.GetAbsoluteSize() * 0.5f);
+        };
+        const auto StripDrag = [this, Center](const TSharedPtr<SWidget>& FromWidget, const TSharedPtr<SWidget>& ToWidget)
+        {
+            if (!FromWidget || !ToWidget) { Finish(false, TEXT("A hotbar strip drag end is unavailable.")); return; }
+            const FVector2D From = Center(FromWidget), To = Center(ToWidget);
+            TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+            auto& Slate = FSlateApplication::Get();
+            Slate.SetCursorPos(From);
+            TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
+            Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, From, From, Pressed,
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+            Slate.SetCursorPos(To);
+            Slate.ProcessMouseMoveEvent(FPointerEvent(0, To, From, Pressed, EKeys::Invalid, 0, FModifierKeysState()));
+            Controller->NativeMenu->PointerItemDragMove(To);
+            Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, To, To, TSet<FKey>(),
+                EKeys::LeftMouseButton, 0, FModifierKeysState()));
+        };
+        Add(TEXT("Chest view shows the same ten hotbar slots, inside the book, under both grids"),
+            [this, SavedHotbar, SavedSelected, PreStrip]() { *SavedHotbar = Controller->HotbarSlots; *SavedSelected = Controller->SelectedHotbarIndex(); *PreStrip = Controller->Simulation().Serialize(); },
+            [this]()
+            {
+                const auto Menu = Controller->NativeMenu;
+                if (!Menu || !Controller->ActiveStorageChest().IsSet() || Menu->GetBookHotbarSlotCount() != 10) return false;
+                const FGeometry Book = Menu->GetCachedGeometry();
+                const FVector2D BookMin = Book.GetAbsolutePosition(), BookMax = BookMin + Book.GetAbsoluteSize();
+                for (int32 Slot = 0; Slot < 10; ++Slot)
+                {
+                    const auto Widget = Menu->GetBookHotbarSlot(Slot);
+                    if (!Widget || !Widget->GetVisibility().IsVisible()) return false;
+                    const FGeometry Geometry = Widget->GetCachedGeometry();
+                    const FVector2D A = Geometry.GetAbsolutePosition(), B = A + Geometry.GetAbsoluteSize();
+                    if (Geometry.GetLocalSize().X < 20 || A.X < BookMin.X || A.Y < BookMin.Y || B.X > BookMax.X || B.Y > BookMax.Y) return false;
+                }
+                const FGeometry First = Menu->GetBookHotbarSlot(0)->GetCachedGeometry();
+                const FGeometry Last = Menu->GetBookHotbarSlot(9)->GetCachedGeometry();
+                Results.Add(FString::Printf(TEXT("GEOMETRY chest-strip viewport=%.0fx%.0f strip=(%.0f,%.0f)-(%.0f,%.0f) grids_bottom=%.0f"),
+                    Book.GetAbsoluteSize().X, Book.GetAbsoluteSize().Y, First.GetAbsolutePosition().X, First.GetAbsolutePosition().Y,
+                    Last.GetAbsolutePosition().X + Last.GetAbsoluteSize().X, Last.GetAbsolutePosition().Y + Last.GetAbsoluteSize().Y,
+                    Menu->GetContentScrollBottom()));
+                return First.GetAbsolutePosition().Y >= Menu->GetContentScrollBottom() - 1.0f;
+            }, 0.5f);
+        Add(TEXT("Capture the chest view's hotbar strip"),
+            [this]() { Screenshot(TEXT("native-storage-hotbar-strip")); },
+            [this]() { return Controller->ActiveStorageChest().IsSet(); }, 0.8f);
+        Add(TEXT("Disclosed fixture: one pasty in the pack and one in the chest"),
+            [this, Chest, PastyGroup, ChestPasty, PackPasty, StripBefore]()
+            {
+                if (!Controller->Sim.GrantItems(Homestead::Item::Pasty, 2)) { Finish(false, TEXT("Could not grant the pasty fixture.")); return; }
+                if (!Controller->Sim.TransferGroup(*Chest, PastyGroup(0), 1, true, Controller->PlayerPoint(), Controller->Sim.GetRevision()))
+                { Finish(false, TEXT("Could not stow the chest pasty fixture.")); return; }
+                Controller->NativeMenu->Refresh();
+                *ChestPasty = PastyGroup(*Chest);
+                *PackPasty = PastyGroup(0);
+                *StripBefore = Controller->Simulation().Serialize();
+            },
+            [this, ChestPasty, PackPasty]() { return *ChestPasty && *PackPasty && Controller->Simulation().Count(Homestead::Item::Pasty) == 1; });
+        Add(TEXT("Controller A picks up the chest pasty"),
+            [this, Chest, ChestPasty, Bindings, StripBindings]()
+            {
+                *StripBindings = Bindings();
+                Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *ChestPasty, *Chest);
+                Tap(EKeys::Gamepad_FaceButton_Bottom);
+            },
+            [this]() { return Controller->NativeMenu->IsVirtualDraggingItem(); });
+        Add(TEXT("D-pad Down from the chest grid reaches the strip under it"),
+            [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+            [this]() { return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Hotbar")
+                && Controller->NativeMenu->HasSynchronizedFocus(); });
+        Steps.Last().Repeat = [this]()
+        {
+            if (Controller->NativeMenu && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content")) Tap(EKeys::Gamepad_DPad_Down);
+        };
+        Add(TEXT("A on a slot refuses the chest pasty: take it to your pack first; nothing moves"),
+            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [this, Bindings, StripBindings, StripBefore]() { return !Controller->NativeMenu->IsVirtualDraggingItem()
+                && Bindings() == *StripBindings && Controller->Simulation().Serialize() == *StripBefore
+                && Controller->MenuLastError().Contains(TEXT("Take it to your pack first")); });
+        Add(TEXT("Up returns to the chest tile she left"),
+            [this]() { Tap(EKeys::Gamepad_DPad_Up); },
+            [this, ChestPasty]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+                return Controller->NativeMenu->GetFocusedRegionName() == TEXT("Content") && Subject && Subject->SubjectId == *ChestPasty; });
+        Add(TEXT("Put on a hotbar slot, D-pad and A bind the pack pasty; stock untouched, selection kept"),
+            [this, PackPasty]()
+            {
+                for (const auto& Row : Controller->MenuRows())
+                    if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.SubjectId == *PackPasty)
+                    { Controller->NativeMenu->BeginPlacingOnHotbar(Row); break; }
+                Tap(EKeys::Gamepad_DPad_Right);
+                Tap(EKeys::Gamepad_FaceButton_Bottom);
+            },
+            [this, Bindings, StripBefore, SavedSelected]()
+            {
+                const auto Now = Bindings();
+                const int32 Pasty = static_cast<int32>(Homestead::Item::Pasty);
+                return !Controller->NativeMenu->IsPlacingOnHotbar()
+                    && Now.FilterByPredicate([Pasty](int32 Value) { return Value == Pasty; }).Num() == 1
+                    && Controller->SelectedHotbarIndex() == *SavedSelected
+                    && Controller->Simulation().Serialize() == *StripBefore;
+            });
+        Add(TEXT("Y on the slot offers Clear this slot"),
+            [this, Bindings, StripBindings]() { *StripBindings = Bindings(); Tap(EKeys::Gamepad_FaceButton_Top); },
+            [this]() { return Controller->NativeMenu->IsItemContextMenu()
+                && Controller->NativeMenu->GetPopupOptionLabel(0) == TEXT("Clear this slot"); });
+        Add(TEXT("B closes it with the slot unchanged"),
+            [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+            [this, Bindings, StripBindings]() { return !Controller->NativeMenu->HasActiveDialog() && Controller->IsBookOpen()
+                && Bindings() == *StripBindings; });
+        Add(TEXT("Focus the pack pasty tile for a mouse drag"),
+            [this, PackPasty]() { Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *PackPasty, 0); },
+            [this]() { return Controller->NativeMenu->HasSynchronizedFocus(); });
+        Add(TEXT("Mouse drags the pack pasty onto slot 1; it moves there, stock untouched"),
+            [this, StripDrag, Bindings, StripBindings]()
+            {
+                *StripBindings = Bindings();
+                StripDrag(FSlateApplication::Get().GetKeyboardFocusedWidget(), Controller->NativeMenu->GetBookHotbarSlot(0));
+            },
+            [this, Bindings, StripBefore]()
+            {
+                const auto Now = Bindings();
+                const int32 Pasty = static_cast<int32>(Homestead::Item::Pasty);
+                return !Controller->NativeMenu->IsPointerDraggingItem() && Now[0] == Pasty
+                    && Now.FilterByPredicate([Pasty](int32 Value) { return Value == Pasty; }).Num() == 1
+                    && Controller->Simulation().Serialize() == *StripBefore;
+            });
+        Add(TEXT("Mouse drags slot 1 onto slot 0 (the tenth); the two swap"),
+            [this, StripDrag, Bindings, StripBindings]()
+            {
+                *StripBindings = Bindings();
+                StripDrag(Controller->NativeMenu->GetBookHotbarSlot(0), Controller->NativeMenu->GetBookHotbarSlot(9));
+            },
+            [this, Bindings, StripBindings, StripBefore]()
+            {
+                const auto Now = Bindings();
+                return Now[0] == (*StripBindings)[9] && Now[9] == (*StripBindings)[0]
+                    && Controller->NativeMenu->GetHeldHotbarSlot() == INDEX_NONE
+                    && Controller->Simulation().Serialize() == *StripBefore;
+            });
+        Add(TEXT("The edited hotbar reloads from its saved form unchanged"),
+            [this, SavedSelected]()
+            {
+                const TArray<int32> Stored = Controller->HotbarSlots;
+                Controller->SanitizeHotbar(Stored, *SavedSelected, UHomesteadSave::CurrentHotbarLayout);
+            },
+            [this, Bindings, StripBindings]()
+            {
+                const auto Now = Bindings();
+                return Now[0] == (*StripBindings)[9] && Now[9] == (*StripBindings)[0];
+            });
+        Add(TEXT("Restore the fixture's stock and the hotbar as it was"),
+            [this, SavedHotbar, SavedSelected, PreStrip]()
+            {
+                if (!Controller->Sim.Deserialize(*PreStrip)) { Finish(false, TEXT("Could not restore the pre-strip stock.")); return; }
+                Controller->HotbarSlots = *SavedHotbar;
+                Controller->SelectedHotbarSlot = *SavedSelected;
+                Controller->NativeMenu->Refresh();
+            },
+            [this, SavedHotbar, PreStrip]() { return Controller->HotbarSlots == *SavedHotbar && Controller->Simulation().Serialize() == *PreStrip; });
+    }
     Add(TEXT("Prepare valid full Pack and Chest scrolling fixture"),
         [this, Chest, FullSnapshot, FullPackGroup]()
         {
