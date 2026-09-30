@@ -574,11 +574,17 @@ requirement.
   before beat with no stock/Energy, resource gain versus yieldless garden behavior, and F/X never sow.
   Native 9/9 passes; there is no UE script build, bake, `.uasset`, Character Lab or PIE evidence.
 
-  Missing asset logs an error and temporarily preserves old behavior, but that fallback must never
-  ship absent the authored asset. The current toss uses invisible fists while weeds/clump remain
-  unchanged; Props must add visible transient uprooted-weed handful props and first-patch feedback
-  before `[ready]`. PIE must cover the script report, cancellation, F5/F9 and the final-contact
-  transaction. It follows `blender-assets`, uses `E:` scratch, and stays out of UE/UBT while
+  **Visual follow-up `23289e9c`:** native 9/9 on `887a2dfb` + `f3584fa3`, no UE/UBT or clip bake.
+  Two transient no-collision/no-shadow handful props, derived from the clump mesh/garden NettlePatch,
+  appear on pulls, follow hands, toss left/right behind, tumble and hide on end/cancel. The first pull
+  is ThinResource 55%; cancel restores it; the final second root is the one Sim commit, with no save
+  change. This is excluded from the current pail package.
+
+  Editor/Game compile, `kneel_pull_weeds.build()` / report(), MetaHuman Character Lab, and PIE still
+  must cover grip/knees/toss, clump cancellation/one stock-Energy, garden F5/F9 and final-contact
+  transaction. Tossed props currently vanish abruptly at clip end; inspect that before polish. The
+  missing-asset fallback may preserve old behavior only during development and must never ship absent
+  the authored asset. It follows `blender-assets`, uses `E:` scratch, and stays out of UE/UBT while
   Integration owns the editor.
 
   Keep tool-kind rules narrow: Weeds/Nettles are one hand-or-Scythe action and Billhook is wrong tool;
