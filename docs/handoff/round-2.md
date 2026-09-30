@@ -1232,6 +1232,14 @@ not claim early Energy is fully solved.
   section. Old saves' forecast can change, while accrued plot moisture persists; document that at
   implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
   after its lane-A work.
+
+  **Approved recurrence branch `69827d75`, recook pending:** `IsRainDay` now uses SplitMix64 per
+  ten-day block with one offset 1–2 and one 6–7 (day 0 dry; block 0's first rain remains day 1).
+  Native coverage spans 10,000 days, spacing, all offset pairs, whole days, negative hours and
+  save/reload. The first Development FullLoop failed only because its crop-wetting fixture skipped
+  until `day % 3 == 1`; it now advances until `Homestead::IsRainDay(State.hour)` and retains the
+  assertion that both plots become wet. Four prior Development suites passed; recook/retest is in
+  progress. This is a **test-fixture correction, not a rain rollback or delivery claim**.
 - **Starter chest and wardrobe** — **main-integrated `a785a417`, not packaged or shipped.** Fresh-game
   PIE verified the standing-room chest's pail, four branches, 3 pasties, 2 bread and seven garments;
   the tunic stays worn. It runs only in `NewEstateGame`, never restocks on load and uses normal chest
