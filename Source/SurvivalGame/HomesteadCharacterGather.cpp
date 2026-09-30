@@ -4,11 +4,14 @@
 #include "HomesteadWorld.h"
 
 #include "Animation/AnimSequence.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadGather, Log, All);
 
 // Stick moments in AN_HeroineMH_KneelGatherSticks (seconds; homestead_agent.kneel_gather STICK_EVENTS).
 // Stones share this clip.
@@ -27,6 +30,20 @@ constexpr float Pick1 = 36.0f / 30.0f, Stow1 = 56.0f / 30.0f, Pick2 = 74.0f / 30
 namespace GatherReedsTiming
 {
 constexpr float Grab = 38.0f / 30.0f, Cut = 72.0f / 30.0f;
+}
+
+// Moments in AN_HeroineMH_KneelPullWeeds (seconds; homestead_agent.kneel_pull_weeds EVENTS): each
+// root comes out of the ground, then leaves her hand behind her shoulder.
+namespace PullWeedsTiming
+{
+constexpr float Pulled[2] = {56.0f / 30.0f, 102.0f / 30.0f};
+constexpr float Toss[2] = {68.0f / 30.0f, 114.0f / 30.0f};
+// A fistful's largest dimension in her hand (cm), whatever the clump's mesh.
+constexpr float HandfulSizeCm = 24.0f;
+// Let go behind the shoulder (actor frame: X forward, Y right): back, out to that side and up.
+constexpr float TossBack = 260.0f, TossOut = 110.0f, TossUp = 150.0f, Gravity = 980.0f;
+// Tumbling end over end while it flies (degrees per second).
+constexpr float TossSpin = 240.0f;
 }
 
 // Moments in AN_HeroineMH_KneelPlant (seconds; homestead_agent.kneel_plant EVENTS).
@@ -67,6 +84,7 @@ UAnimSequence* AHomesteadCharacter::KneelClip(EHomesteadKneelGather Kind) const
     case EHomesteadKneelGather::Reeds: return GatherReedsAnimation.Get();
     case EHomesteadKneelGather::Plant: return GatherPlantAnimation.Get();
     case EHomesteadKneelGather::Harvest: return GatherHarvestAnimation.Get();
+    case EHomesteadKneelGather::PullWeeds: return PullWeedsAnimation.Get();
     default: return GatherSticksAnimation.Get();
     }
 }
@@ -75,7 +93,7 @@ void AHomesteadCharacter::HideKneelProps()
 {
     for (UStaticMeshComponent* Prop : CarriedSticks) if (Prop) Prop->SetVisibility(false);
     for (UStaticMeshComponent* Prop : CarriedStones) if (Prop) Prop->SetVisibility(false);
-    for (UStaticMeshComponent* Prop : {CarriedForage.Get(), CarriedReeds.Get(), CarriedSeed.Get()})
+    for (UStaticMeshComponent* Prop : {CarriedForage.Get(), CarriedReeds.Get(), CarriedSeed.Get(), PulledWeedL.Get(), PulledWeedR.Get()})
         if (Prop) Prop->SetVisibility(false);
 }
 
@@ -87,11 +105,19 @@ bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<
         : Kind == EHomesteadKneelGather::Stones ? CarriedStones.Num() >= 2
         : Kind == EHomesteadKneelGather::Reeds ? CarriedReeds && GetHeldProp(Homestead::Item::Knife)
         : Kind == EHomesteadKneelGather::Plant ? CarriedSeed != nullptr
+        : Kind == EHomesteadKneelGather::PullWeeds ? PulledWeedL && PulledWeedR
         : CarriedForage != nullptr;
     if (!KneelClip(Kind) || !bPropsReady || !Animation)
     {
-        const bool bQuiet = Kind == EHomesteadKneelGather::Reeds || Kind == EHomesteadKneelGather::Plant;
-        if (!bQuiet) PlayGather();
+        const bool bQuiet = Kind == EHomesteadKneelGather::Reeds || Kind == EHomesteadKneelGather::Plant
+            || Kind == EHomesteadKneelGather::PullWeeds;
+        // Only the legacy mannequin still has the generic knee-bend gather. On the MetaHuman a missing
+        // kneel clip or prop is a broken build, not a reason to play the pose Jenny rejected (09-29).
+        if (!bMetaHumanActive) { if (!bQuiet) PlayGather(); }
+        else if (!bQuiet)
+            UE_LOG(LogHomesteadGather, Error, TEXT("Kneeling gather %d can't play (clip %s, props %s, anim instance %s)."),
+                static_cast<int32>(Kind), KneelClip(Kind) ? TEXT("ok") : TEXT("missing"), bPropsReady ? TEXT("ok") : TEXT("missing"),
+                Animation ? TEXT("ok") : TEXT("missing"));
         return false;
     }
     CancelSprint();
@@ -143,6 +169,7 @@ void AHomesteadCharacter::StartKneelGather(FPendingKneel& Kneel)
     Kneel.bApplied = true;
     HideKneelProps();
     KneelKind = Kind;
+    if (Kind == EHomesteadKneelGather::PullWeeds) ++PullWeedsStartCount;
     bForageBerries = bBerries;
     UStaticMesh* Produce = Kneel.Produce.Get();
     HarvestProduceMesh = Produce;
@@ -179,10 +206,11 @@ void AHomesteadCharacter::StartKneelGather(FPendingKneel& Kneel)
         // first step so that spot lands on the pile.
         // Her forefinger presses the seed in 32 cm ahead and 9 cm to her right (kneel_plant.SPOT, as baked).
         const bool bReeds = Kind == EHomesteadKneelGather::Reeds, bPlant = Kind == EHomesteadKneelGather::Plant;
-        const bool bHarvest = Kind == EHomesteadKneelGather::Harvest;
-        // Both hands close on the crop's crown 36 cm ahead and 6 cm to her right (kneel_harvest.CROWN).
-        const float GrabForward = bReeds ? 34.0f : bHarvest ? HarvestCrownForward : 32.0f;
-        const float GrabRight = bReeds ? 10.0f : bPlant ? 9.0f : bHarvest ? HarvestCrownRight : 26.0f;
+        const bool bHarvest = Kind == EHomesteadKneelGather::Harvest, bWeeds = Kind == EHomesteadKneelGather::PullWeeds;
+        // Both hands close on the crop's crown 36 cm ahead and 6 cm to her right (kneel_harvest.CROWN);
+        // the weed clump sits straight ahead of her knees, between her two pulls (kneel_pull_weeds).
+        const float GrabForward = bReeds ? 34.0f : bHarvest ? HarvestCrownForward : bWeeds ? PullWeedsForward : 32.0f;
+        const float GrabRight = bReeds ? 10.0f : bPlant ? 9.0f : bHarvest ? HarvestCrownRight : bWeeds ? PullWeedsRight : 26.0f;
         const FVector Here = GetActorLocation();
         const FVector2D ToPile = *Pile - FVector2D(Here);
         if (ToPile.Size() > 1.0f && ToPile.Size() < 150.0f)
@@ -256,6 +284,91 @@ bool AHomesteadCharacter::PlayHarvest(Homestead::Point Target, bool bPick, UStat
     return PlayKneelGather(EHomesteadKneelGather::Pouch, Pick, bPick, Produce);
 }
 
+bool AHomesteadCharacter::PlayPullWeeds(Homestead::Point Target, UStaticMesh* Handful)
+{
+    if (!CanPullWeeds()) return false;
+    UStaticMesh* HandfulMesh = Handful ? Handful : PulledWeedDefault.Get();
+    for (UStaticMeshComponent* Prop : {PulledWeedL.Get(), PulledWeedR.Get()})
+        if (Prop && HandfulMesh) Prop->SetStaticMesh(HandfulMesh);
+    return PlayKneelGather(EHomesteadKneelGather::PullWeeds, FVector2D(Target.x, Target.y));
+}
+
+float AHomesteadCharacter::PullWeedsPhase() const
+{
+    const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    return KneelKind == EHomesteadKneelGather::PullWeeds && Animation && Animation->IsGatheringSticks()
+        ? Animation->GatherSticksPhase() : -1.0f;
+}
+
+void AHomesteadCharacter::UpdatePulledWeeds(float DeltaSeconds)
+{
+    UStaticMeshComponent* Props[2] = {PulledWeedL.Get(), PulledWeedR.Get()};
+    if (!Props[0] || !Props[1]) return;
+    USkeletalMeshComponent* Body = GetMesh();
+    const float Phase = PullWeedsPhase();
+    for (int32 Hand = 0; Hand < 2; ++Hand)
+    {
+        UStaticMeshComponent* Prop = Props[Hand];
+        // Before its pull, or once the clip has ended or been cancelled: nothing in her hand or the air.
+        if (Phase < 0.0f || Phase < PullWeedsTiming::Pulled[Hand])
+        {
+            if (Prop->IsVisible()) Prop->SetVisibility(false);
+            bPulledWeedHeld[Hand] = bPulledWeedFlying[Hand] = false;
+            continue;
+        }
+        if (Phase < PullWeedsTiming::Toss[Hand])
+        {
+            if (bPulledWeedHeld[Hand] || !Prop->GetStaticMesh()) continue;
+            // Uprooted in her fist: the tuft's base in her grip, its leaves out past the thumb side,
+            // sized to a handful whatever the clump's mesh. Placed from the hand's own frame, so it
+            // doesn't depend on the bone's axes.
+            const TCHAR* Side = Hand == 0 ? TEXT("l") : TEXT("r");
+            const FName HandBone(*FString::Printf(TEXT("hand_%s"), Side));
+            const FVector Wrist = Body->GetSocketLocation(HandBone);
+            const FVector Knuckles = Body->GetSocketLocation(*FString::Printf(TEXT("middle_01_%s"), Side));
+            const FVector Fingers = (Knuckles - Wrist).GetSafeNormal();
+            const FVector Thumbward = (Body->GetSocketLocation(*FString::Printf(TEXT("index_01_%s"), Side))
+                - Body->GetSocketLocation(*FString::Printf(TEXT("pinky_01_%s"), Side))).GetSafeNormal();
+            if (Thumbward.IsNearlyZero() || Fingers.IsNearlyZero()) continue;
+            const FBoxSphereBounds Bounds = Prop->GetStaticMesh()->GetBounds();
+            const float Scale = FMath::Clamp(PullWeedsTiming::HandfulSizeCm / FMath::Max(1.0f, Bounds.BoxExtent.GetMax() * 2.0f), 0.05f, 1.0f);
+            const FRotator Turn = FRotationMatrix::MakeFromZX(Thumbward, Fingers).Rotator();
+            const FVector Grip = Knuckles + Fingers * 3.0f;
+            Prop->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+            Prop->SetWorldLocationAndRotation(Grip - Thumbward * 3.0f, Turn);
+            Prop->SetWorldScale3D(FVector(Scale));
+            Prop->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, HandBone);
+            Prop->SetVisibility(true);
+            bPulledWeedHeld[Hand] = true;
+            continue;
+        }
+        if (bPulledWeedHeld[Hand])
+        {
+            // Let go behind her shoulder: it carries on back and out to that side, then falls.
+            Prop->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+            const float Out = Hand == 0 ? -PullWeedsTiming::TossOut : PullWeedsTiming::TossOut;
+            PulledWeedVelocity[Hand] = GetActorRotation().RotateVector(
+                FVector(-PullWeedsTiming::TossBack, Out, PullWeedsTiming::TossUp));
+            bPulledWeedHeld[Hand] = false;
+            bPulledWeedFlying[Hand] = Prop->IsVisible();
+        }
+        if (!bPulledWeedFlying[Hand]) continue;
+        const float Ground = GetActorLocation().Z - GetCapsuleComponent()->GetScaledCapsuleHalfHeight() + 1.0f;
+        FVector Location = Prop->GetComponentLocation();
+        if (Location.Z <= Ground)
+        {
+            // Landed: it lies where it fell until the clip ends.
+            bPulledWeedFlying[Hand] = false;
+            continue;
+        }
+        PulledWeedVelocity[Hand].Z -= PullWeedsTiming::Gravity * DeltaSeconds;
+        Location += PulledWeedVelocity[Hand] * DeltaSeconds;
+        Location.Z = FMath::Max(Location.Z, Ground);
+        const FQuat Tumble(GetActorRightVector(), FMath::DegreesToRadians(PullWeedsTiming::TossSpin * DeltaSeconds));
+        Prop->SetWorldLocationAndRotation(Location, Tumble * Prop->GetComponentQuat());
+    }
+}
+
 bool AHomesteadCharacter::IsCuttingReeds() const
 {
     const auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
@@ -274,6 +387,13 @@ void AHomesteadCharacter::UpdateCarriedSticks()
     const bool Active = Animation && Animation->IsGatheringSticks();
     // Whatever ended the gather (its clip, a cancel, another action), nothing stays in her hands.
     if (!Active) HideKneelProps();
+    // Pulled weeds are tossed aside, never carried (UpdatePulledWeeds); the clump leaves the ground with the commit.
+    if (KneelKind == EHomesteadKneelGather::PullWeeds)
+    {
+        bStickGatherStarted |= Active;
+        bStickPileOnGround = false;
+        return;
+    }
     if (bPlant ? !CarriedSeed : bReeds ? !CarriedReeds : (bPouch || bHarvest) ? !CarriedForage : Props.Num() < 2) return;
     const float Time = Active ? Animation->GatherSticksPhase() : 0.0f;
     // Reeds come off the clump all at once, with the cut.

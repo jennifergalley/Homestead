@@ -6,7 +6,7 @@
 // looked clearable but weren't). These heaps left AHomesteadManorRuin's static plan and became
 // estate placements (ids 582000-582099, registry: docs/handoff/round-2.md), drawn with the same
 // meshes at the same spots. The fallen masonry under the front door and the collapsed south-west
-// corner, the big fallen blocks and the roof timbers stay part of the ruin.
+// corner and the big fallen blocks stay part of the ruin; the fallen roof timbers joined the list later.
 namespace Homestead
 {
 namespace RuinDebris
@@ -26,7 +26,8 @@ struct Spot
 constexpr int FirstId = 582000;
 constexpr int LastId = 582099;
 
-// Slate first (hand-cleared), then the loose granite (worn pickaxe). Append only; ids never reused.
+// Slate first (hand-cleared), then the loose granite (worn pickaxe), then the roof timbers (worn axe).
+// Append only; ids never reused.
 constexpr Spot Spots[] = {
     {582000, ResourceKind::SlateHeap, 1500, 195, 0, 1.0, "RuinSlateScatter"},
     {582001, ResourceKind::SlateHeap, 2150, 1600, 180, 1.0, "RuinSlateScatter"},
@@ -40,6 +41,9 @@ constexpr Spot Spots[] = {
     {582009, ResourceKind::Rubble, 2700, 900, 10, 1.0, "GraniteSpalls"},
     {582010, ResourceKind::Rubble, 700, 1000, 160, 1.0, "GraniteRubble"},
     {582011, ResourceKind::Rubble, 2500, 1650, 310, 0.9, "GraniteRubble"},
+    // Fallen roof timbers in the hall and the west rooms (worn axe), placed after the forage sections.
+    {582012, ResourceKind::RuinTimbers, 2450, 1300, 35, 1.0, "RuinFallenTimbers"},
+    {582013, ResourceKind::RuinTimbers, 900, 1350, 110, 1.0, "RuinFallenTimbers"},
 };
 constexpr int SpotCount = static_cast<int>(sizeof(Spots) / sizeof(Spots[0]));
 

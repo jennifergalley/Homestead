@@ -449,6 +449,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     ToastRemaining = FMath::Max(0.0f, ToastRemaining - DeltaSeconds);
     UpdatePendingHack();
     UpdatePendingSwing();
+    UpdatePendingWeedPull();
     UpdatePendingFell();
     if (HeldPlot != INDEX_NONE)
     {

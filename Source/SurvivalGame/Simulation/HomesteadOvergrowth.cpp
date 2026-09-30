@@ -73,6 +73,11 @@ const OvergrowthInfo OgTable[] = {
     // flashing and roofing nails that came down with them.
     {ResourceKind::SlateHeap, ToolKind::Count, true, ToolTier::Worn, 0.8, OgSwings(1, 1, 1, 1),
         {OgGives(Item::Stone, 1, 2), OgGives(Item::ScrapLead, 1, 1, 30), OgGives(Item::ScrapIron, 1, 1, 30)}, 150.0},
+    // The manor's fallen roof timbers (Jenny's playtest: they looked clearable and weren't): old oak
+    // too heavy to lift, so the worn axe cuts them up. Sound heart as timber, the rest as firewood,
+    // and the odd hand-forged spike.
+    {ResourceKind::RuinTimbers, ToolKind::Axe, false, ToolTier::Worn, 3.0, OgSwings(3, 2, 1, 1),
+        {OgGives(Item::Timber, 1, 2), OgGives(Item::Firewood, 2, 3), OgGives(Item::ScrapIron, 1, 1, 30)}, 200.0},
 };
 const OvergrowthInfo* OgByKind(ResourceKind kind)
 {

@@ -454,6 +454,17 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     GatherHarvestAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelHarvest"));
     if (GatherHarvestAnimation && GatherHarvestAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
         GatherHarvestAnimation = nullptr;
+    // Optional: authored with homestead_agent.kneel_pull_weeds. Missing, weeds keep the pouch kneel.
+    PullWeedsAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelPullWeeds"));
+    if (PullWeedsAnimation && PullWeedsAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        PullWeedsAnimation = nullptr;
+    // Pulled weed fistfuls: meshed like the clump she pulls (PlayPullWeeds), else the garden's nettle tuft.
+    PulledWeedDefault = LoadObject<UStaticMesh>(nullptr,
+        TEXT("/Game/SurvivalGame/Environment/Props/Nettle/SM_NettlePatch.SM_NettlePatch"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+    PulledWeedL = MakeProp(TEXT("PulledWeedL"), PulledWeedDefault.Get());
+    PulledWeedR = MakeProp(TEXT("PulledWeedR"), PulledWeedDefault.Get());
+    PulledWeedL->SetCastShadow(false);
+    PulledWeedR->SetCastShadow(false);
     if (UStaticMesh* Seeds = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/SurvivalGame/Environment/Props/Seeds/SM_Seeds.SM_Seeds")))
         CarriedSeed = MakeProp(TEXT("CarriedSeed"), Seeds);
     // Optional: authored with homestead_agent.eat_berry.
@@ -732,7 +743,12 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     {
         MetaHumanLODSync->ComponentsToSync.Add(FComponentSync(Groom->GetFName(), ESyncOption::Passive));
         FLODMappingData GroomMapping;
-        GroomMapping.Mapping = {1, 3, 5, 7};
+        // Scalp hair stops at groom LOD 4 (cards) instead of the stock 5 and 7. Those are Legacy01 helmet
+        // meshes bound by transfer, and Pixie declares them with no mesh at all. Jenny saw rods and fans in
+        // far and rear views (09-29). This is an unconfirmed fix: it didn't reproduce in the lab.
+        // Brows, lashes and fuzz keep the stock mapping.
+        const bool bScalp = Groom == MetaHumanHair;
+        GroomMapping.Mapping = bScalp ? TArray<int32>{1, 3, 4, 4} : TArray<int32>{1, 3, 5, 7};
         MetaHumanLODSync->CustomLODMapping.Add(Groom->GetFName(), GroomMapping);
     }
     MetaHumanLODSync->RegisterComponent();

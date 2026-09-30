@@ -37,6 +37,7 @@ void AHomesteadWorld::Tick(float DeltaSeconds)
     HomesteadLampLook::SetLit(LampDropFlame.Get(), LampDropLight.Get(), bLampDropLit, LampDropFlickerTime, LampDropGlass.Get());
     UpdateHearthSound(DeltaSeconds);
     UpdateClearPops(DeltaSeconds);
+    UpdateSoilGrounding(DeltaSeconds);
     if (Weather) Weather->TickWeather(DeltaSeconds);
     if (ChunkBaselineBuild && ChunkBaselineBuild->IsReady())
     {

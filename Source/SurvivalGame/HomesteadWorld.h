@@ -153,6 +153,15 @@ public:
         const FTransform& PlantTransform);
     // Hide one component of the held produce (a stick she has already lifted from the pile).
     void HideHeldProducePart(int32 Index);
+    // The first mesh a resource's visual draws (what she pulls a handful of), or null.
+    UStaticMesh* ResourceVisualMesh(int32 Id) const;
+    // Presentation only, while she pulls weeds by hand: shrink one resource's visual to Fraction of
+    // its size (the first fistful is out) until RestoreThinnedResource puts it back (a cancelled pull)
+    // or ForgetThinnedResource lets the refresh remove it (the pull committed). One at a time; safe
+    // to call every tick.
+    void ThinResource(int32 Id, float Fraction);
+    void RestoreThinnedResource();
+    void ForgetThinnedResource();
     // Felling: call right after tree or sapling ResourceId is cleared. A standing copy stays up
     // (the rebuilt woodland no longer draws it) until DropFelledTree topples it away from AwayFrom;
     // it lies a few seconds, then sinks away. One at a time; a new felling finishes the last.
@@ -395,6 +404,9 @@ private:
     bool bInitialized = false;
     FString ResourceLayoutSignature;
     int32 HeldProduceId = INDEX_NONE;
+    int32 ThinnedResourceId = INDEX_NONE;
+    TArray<TWeakObjectPtr<USceneComponent>> ThinnedComponents;
+    TArray<FVector> ThinnedScales;
     int32 HeldPlotId = INDEX_NONE;
     bool bHeldPlotHidden = false;
     int32 HeldHarvestPlotId = INDEX_NONE;
@@ -479,6 +491,26 @@ private:
         const FIntPoint* StageChunk = nullptr);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);
     // The estate's overgrowth kinds, each placed through Place(mesh, offset, yaw, produce, scale, pivotOnGround).
+    // Soft ground cover drawn right on the soil (HomesteadWorldGrounding.cpp): weeds, nettles and tall
+    // grass. SoilHeight is the lowest drawn ground under the clump's footprint (the Landscape's own
+    // collision where it's loaded, else the runtime heightfield), never more than a hand's depth below
+    // its centre; bOnLandscape is false when the Landscape wasn't there to trace.
+    static bool IsSoilGrounded(Homestead::ResourceKind Kind);
+    float SoilHeight(FVector2D Centre, FVector2D Half, float Yaw, bool& bOnLandscape) const;
+    struct FPendingSoil
+    {
+        TWeakObjectPtr<USceneComponent> Part;
+        FVector2D Centre;
+        FVector2D Half;
+        float Yaw = 0.0f;
+        float PlacedOn = 0.0f; // The ground height it was placed on.
+        int32 Tries = 0;
+    };
+    TArray<FPendingSoil> PendingSoil;
+    float SoilRetryTimer = 0.0f;
+    int32 SoilRetryCursor = 0;
+    void QueueSoilGrounding(USceneComponent* Part, FVector2D Centre, FVector2D Half, float Yaw, float PlacedOn);
+    void UpdateSoilGrounding(float DeltaSeconds);
     void BuildOvergrowth(const Homestead::ResourceNode& Node, uint32 Variation,
         const TFunctionRef<void(UStaticMesh*, FVector2D, float, bool, float, bool)>& Place);
     bool ResolveGeneratedTreeVisual(const Homestead::ResourceNode& Node, UStaticMesh*& Mesh,

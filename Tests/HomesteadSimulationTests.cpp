@@ -4,6 +4,8 @@
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
 #include "HomesteadGardenTarget.h"
+#include "HomesteadGatherPose.h"
+#include "HomesteadWeedPull.h"
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadRuinDebris.h"
@@ -4011,6 +4013,149 @@ void WeedCreepNearOvergrowth()
     OK(loaded.ClearOvergrowth(regrownId, Item::Scythe, PlacedNode(loaded, regrownId).position));
 }
 
+void RuinTimbersAreChoppedWithTheAxe()
+{
+    // The manor's fallen roof timbers looked clearable but were scenery. They're estate placements
+    // now (582012-582013), placed after every earlier section so no other id, spot or skip moves,
+    // and cut up with the worn axe in a few blows.
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const auto& table = ProvisionalEstatePlacements().placements;
+    double manorX = 1e18, manorY = 1e18;
+    for (const Point& corner : layout.FindPolygon(Anchor::ManorFootprint)->points)
+    {
+        manorX = std::min(manorX, corner.x);
+        manorY = std::min(manorY, corner.y);
+    }
+    std::size_t lastForage = 0, firstTimber = table.size();
+    for (std::size_t i = 0; i < table.size(); ++i)
+    {
+        if (table[i].id >= 582100 && table[i].id < 582300) lastForage = i;
+        if (table[i].kind == ResourceKind::RuinTimbers) firstTimber = std::min(firstTimber, i);
+    }
+    CHECK(firstTimber > lastForage && firstTimber < table.size() && table.back().id == 520006);
+    Simulation sim;
+    OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
+    for (int id : {582012, 582013})
+    {
+        const RuinDebris::Spot* spot = RuinDebris::Find(id);
+        CHECK(spot && spot->kind == ResourceKind::RuinTimbers && std::string(spot->mesh) == "RuinFallenTimbers");
+        CHECK(RuinDebris::Replaces("RuinFallenTimbers", spot->u, spot->v));
+        const ResourceNode& node = PlacedNode(sim, id);
+        CHECK(node.kind == ResourceKind::RuinTimbers && !node.cleared);
+        CHECK(std::hypot(node.position.x - (manorX + spot->v), node.position.y - (manorY + spot->u)) <= 150.0 + 1e-6);
+    }
+    CHECK(std::string(ResourceName(ResourceKind::RuinTimbers)) == "Fallen roof timbers");
+    CHECK(HandGatherPose(ResourceKind::RuinTimbers) == GatherPose::None);
+
+    // Too heavy to lift by hand, and the billhook and pickaxe don't cut oak: nothing changes.
+    const ResourceNode hall = PlacedNode(sim, 582012);
+    OK(sim.GrantItems(Item::Billhook, 1));
+    OK(sim.GrantItems(Item::Pickaxe, 1));
+    for (Item tool : {Item::Count, Item::Billhook, Item::Pickaxe})
+        UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(hall.id, tool, hall.position); });
+    // The worn axe: three blows, then timber and firewood once.
+    OK(sim.GrantItems(Item::Hatchet, 1));
+    OK(sim.CheckOvergrowth(hall.id, Item::Hatchet, hall.position));
+    CHECK(sim.OvergrowthSwings(hall.id) == 3);
+    const int timber = sim.Count(Item::Timber), firewood = sim.Count(Item::Firewood);
+    const double energy = sim.GetState().energy;
+    OK(sim.ClearOvergrowth(hall.id, Item::Hatchet, hall.position));
+    CHECK(PlacedNode(sim, hall.id).cleared);
+    CHECK(sim.Count(Item::Timber) >= timber + 1 && sim.Count(Item::Timber) <= timber + 2);
+    CHECK(sim.Count(Item::Firewood) >= firewood + 2 && sim.Count(Item::Firewood) <= firewood + 3);
+    CHECK(Close(sim.GetState().energy, energy - FindOvergrowth(ResourceKind::RuinTimbers)->energy));
+    UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(hall.id, Item::Hatchet, hall.position); });
+    OK(sim.SetToolTier(ToolKind::Axe, ToolTier::Iron));
+    CHECK(sim.OvergrowthSwings(582013) == 2);
+
+    // Cleared stays cleared across a reload; the other still lies there.
+    Simulation loaded;
+    loaded.SetLayout(layout);
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(loaded, 582012).cleared && !PlacedNode(loaded, 582013).cleared);
+
+    // A save from before (no timbers in its table, a slate heap cleared) loads with both lying there
+    // and exactly its own clearances.
+    EstatePlacements older = ProvisionalEstatePlacements();
+    older.placements.erase(std::remove_if(older.placements.begin(), older.placements.end(),
+        [](const EstatePlacement& placement) { return placement.kind == ResourceKind::RuinTimbers; }), older.placements.end());
+    Simulation original;
+    original.SetPlacements(older);
+    OK(original.NewEstateGame(layout, older));
+    OK(original.ClearOvergrowth(582000, Item::Count, PlacedNode(original, 582000).position));
+    Simulation upgraded;
+    upgraded.SetLayout(layout);
+    upgraded.SetPlacements(ProvisionalEstatePlacements());
+    OK(upgraded.Deserialize(original.Serialize()));
+    CHECK(!PlacedNode(upgraded, 582012).cleared && !PlacedNode(upgraded, 582013).cleared && PlacedNode(upgraded, 582000).cleared);
+    int cleared = 0;
+    for (const auto& node : upgraded.GetState().resources) cleared += node.cleared;
+    CHECK(cleared == 1);
+}
+
+void WrongOrUnderTierToolIsNonActionable()
+{
+    // Jenny, 2026-09-29: a wrong or too-worn tool must not look like it's doing anything. Every
+    // overgrowth kind on the estate, against every clearing tool at every tier: the swing is allowed
+    // only for its own tool at or above the tier it (or its placement) asks for; otherwise the
+    // attempt costs no energy, lands no swing and yields nothing.
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const Item tools[] = {Item::Hatchet, Item::Billhook, Item::Scythe, Item::Pickaxe};
+    for (Item tool : tools) OK(sim.GrantItems(tool, 1));
+    std::set<std::pair<int, int>> seen;
+    int refusals = 0;
+    for (const ResourceNode& node : std::vector<ResourceNode>(sim.GetState().resources))
+    {
+        const auto* info = FindOvergrowth(node.kind);
+        if (!info || node.cleared || !seen.insert({static_cast<int>(node.kind), static_cast<int>(node.minTier)}).second) continue;
+        const ToolTier needed = std::max(info->minTier, node.minTier);
+        for (int tier = 0; tier < ToolTierCount; ++tier)
+        {
+            for (Item tool : tools) OK(sim.SetToolTier(ToolForItem(tool), static_cast<ToolTier>(tier)));
+            for (Item tool : tools)
+            {
+                const bool fits = ToolForItem(tool) == info->tool && static_cast<ToolTier>(tier) >= needed;
+                const auto check = sim.CheckOvergrowth(node.id, tool, node.position);
+                CHECK(check.ok == fits);
+                if (fits) continue;
+                ++refusals;
+                if (ToolForItem(tool) == info->tool) CHECK(check.code == ResultCode::ToolTier && check.message == NeedsToolMessage(info->tool, needed));
+                const int swings = sim.OvergrowthSwings(node.id);
+                UnchangedFailure(sim, [&] { return sim.ClearOvergrowth(node.id, tool, node.position); });
+                CHECK(sim.OvergrowthSwings(node.id) == swings && !PlacedNode(sim, node.id).cleared);
+            }
+        }
+    }
+    CHECK(seen.size() >= 20 && refusals > 100);
+}
+
+void EveryHandGatherHasItsOwnPose()
+{
+    // Jenny, 2026-09-29: the generic slight-knee-bend gather looked wrong. Everything she can take
+    // by hand has a real pose (sticks, the stone kneel or the hip pouch, or the reed knife), and the
+    // things only a tool clears have none, so no path falls back to the old bend.
+    for (int i = 0; i < static_cast<int>(ResourceKind::Count); ++i)
+    {
+        const auto kind = static_cast<ResourceKind>(i);
+        const GatherPose pose = HandGatherPose(kind);
+        if (const auto* info = FindOvergrowth(kind)) CHECK(info->byHand == (pose != GatherPose::None));
+        else CHECK((kind == ResourceKind::ForestTree) == (pose == GatherPose::None));
+    }
+    for (auto kind : {ResourceKind::Stones, ResourceKind::SalvagePile, ResourceKind::RubbishHeap, ResourceKind::SlateHeap})
+        CHECK(HandGatherPose(kind) == GatherPose::Stones);
+    for (auto kind : {ResourceKind::Branches, ResourceKind::FallenBranch, ResourceKind::BrokenCrate,
+             ResourceKind::BrokenBarrel, ResourceKind::RottenPlanks})
+        CHECK(HandGatherPose(kind) == GatherPose::Sticks);
+    for (auto kind : {ResourceKind::BerryBush, ResourceKind::Roots, ResourceKind::Flowers, ResourceKind::Primroses,
+             ResourceKind::Bluebells, ResourceKind::WildDaffodils, ResourceKind::WildGarlic, ResourceKind::Weeds,
+             ResourceKind::Nettles})
+        CHECK(HandGatherPose(kind) == GatherPose::Pouch);
+    CHECK(HandGatherPose(ResourceKind::Reeds) == GatherPose::Reeds);
+    CHECK(HandGatherPose(ResourceKind::TallGrass) == GatherPose::None && HandGatherPose(ResourceKind::Sapling) == GatherPose::None);
+}
+
 void RuinDebrisIsClearable()
 {
     // Jenny saw slate and rubble heaps in the manor that looked clearable but weren't. The loose
@@ -4028,7 +4173,7 @@ void RuinDebrisIsClearable()
     Simulation sim;
     OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
     const Point room = layout.PointOr(Anchor::StandingRoomOrigin, {});
-    int slate = 0, granite = 0;
+    int slate = 0, granite = 0, timbers = 0;
     for (const RuinDebris::Spot& spot : RuinDebris::Spots)
     {
         CHECK(spot.id >= RuinDebris::FirstId && spot.id <= RuinDebris::LastId);
@@ -4041,9 +4186,14 @@ void RuinDebrisIsClearable()
         const auto* info = FindOvergrowth(node.kind);
         CHECK(info);
         if (node.kind == ResourceKind::SlateHeap) { ++slate; CHECK(info->byHand && IsRubbish(node.kind)); }
+        else if (node.kind == ResourceKind::RuinTimbers)
+        {
+            ++timbers;
+            CHECK(!info->byHand && info->tool == ToolKind::Axe && info->minTier == ToolTier::Worn);
+        }
         else { ++granite; CHECK(node.kind == ResourceKind::Rubble && info->tool == ToolKind::Pickaxe && info->minTier == ToolTier::Worn); }
     }
-    CHECK(slate == 6 && granite == 6 && RuinDebris::SpotCount == 12);
+    CHECK(slate == 6 && granite == 6 && timbers == 2 && RuinDebris::SpotCount == 14);
     CHECK(std::string(ResourceName(ResourceKind::SlateHeap)) == "Fallen slates");
     // Standing at any salvage pile, the pile itself is what her hands find.
     for (int pile = 520001; pile <= 520005; ++pile)
@@ -4084,6 +4234,37 @@ void RuinDebrisIsClearable()
     upgraded.SetPlacements(ProvisionalEstatePlacements());
     OK(upgraded.Deserialize(original.Serialize()));
     for (const RuinDebris::Spot& spot : RuinDebris::Spots) CHECK(!PlacedNode(upgraded, spot.id).cleared);
+}
+
+void EveryLiveWeedIsOnOpenGround()
+{
+    // Jenny saw "Weeds [E] Pull" with nothing on the ground. Every pullable weed or nettle on a new
+    // estate stands on open estate ground where its clump can be drawn: outside the ruin's footprint,
+    // clear of the standing room and every other structure, pulled by hand, and no two stacked on
+    // one spot. Pulling one takes it (and its prompt) away for good.
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const auto& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
+    const auto& manor = layout.FindPolygon(Anchor::ManorFootprint)->points;
+    std::vector<const ResourceNode*> weeds;
+    for (const auto& node : sim.GetState().resources)
+    {
+        if (node.cleared || (node.kind != ResourceKind::Weeds && node.kind != ResourceKind::Nettles)) continue;
+        weeds.push_back(&node);
+        CHECK(FindOvergrowth(node.kind) && FindOvergrowth(node.kind)->byHand);
+        CHECK(PointInPolygon(boundary, node.position) && !PointInPolygon(manor, node.position));
+        const Footprint spot{node.position, {1.0, 1.0}, 0.0};
+        for (const auto& piece : sim.GetState().structures) CHECK(!FootprintsOverlap(spot, StructureFootprint(sim.GetState(), piece)));
+    }
+    CHECK(weeds.size() >= 100);
+    for (std::size_t i = 0; i < weeds.size(); ++i)
+        for (std::size_t j = i + 1; j < weeds.size(); ++j)
+            CHECK(std::hypot(weeds[i]->position.x - weeds[j]->position.x, weeds[i]->position.y - weeds[j]->position.y) >= 20.0);
+    const ResourceNode weed = *weeds.front();
+    OK(sim.ClearOvergrowth(weed.id, Item::Count, weed.position));
+    CHECK(PlacedNode(sim, weed.id).cleared);
+    CHECK(sim.FindNearestOvergrowth(weed.position, 1.0, Item::Count) != weed.id);
 }
 
 void ManorClearoutField()
@@ -4150,6 +4331,103 @@ void ManorClearoutField()
     int present = 0;
     for (const auto& node : estate.GetState().resources) present += node.id >= 570000 && node.id < 580000 && !node.cleared;
     CHECK(present == field);
+}
+
+// Weeding by hand kneels and pulls, and commits once at the second root: the controller probes a copy
+// first (refusing before she kneels), then runs the real transaction at
+// AHomesteadCharacter::PullWeedsCommit; a pull cancelled before then never reaches the simulation.
+// This pins the two transactions it routes: a weed node's Harvest (its weeds, Energy once) and a garden
+// square's Weed (no yield).
+void WeedPullCommitsOnce()
+{
+    const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    EstatePlacements table;
+    table.bakeVersion = 7;
+    table.placements.push_back({EstatePlacementIdBase + 20300, ResourceKind::Weeds, {at.x, at.y + 39.0}, 0, 0, 1, 0});
+    table.placements.push_back({EstatePlacementIdBase + 20301, ResourceKind::Nettles, {at.x + 80.0, at.y}, 0, 0, 1, 0});
+    const int weed = EstatePlacementIdBase + 20300, nettle = EstatePlacementIdBase + 20301;
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), table));
+    const std::string untouched = sim.Serialize();
+    const auto revision = sim.GetRevision();
+    // The probe on a copy says yes and changes nothing (a cancelled pull leaves exactly this).
+    Simulation probe = sim;
+    OK(probe.Harvest(weed, at));
+    CHECK(sim.Serialize() == untouched && sim.GetRevision() == revision && !PlacedNode(sim, weed).cleared);
+
+    const double energy = sim.GetState().energy;
+    const int weeds = sim.Count(Item::Weeds);
+    OK(sim.Harvest(weed, at));
+    CHECK(PlacedNode(sim, weed).cleared && sim.Count(Item::Weeds) == weeds + 1);
+    CHECK(Close(sim.GetState().energy, energy - FindOvergrowth(ResourceKind::Weeds)->energy, 1e-9));
+    // Pulled once: the next press is refused up front, with nothing spent.
+    Simulation again = sim;
+    CHECK(!again.Harvest(weed, at));
+    UnchangedFailure(sim, [&] { return sim.Harvest(weed, at); });
+    // Nettles pull the same way, 1-2 weeds for their own Energy.
+    const double beforeNettle = sim.GetState().energy;
+    OK(sim.Harvest(nettle, at));
+    CHECK(sim.Count(Item::Weeds) >= weeds + 2 && sim.Count(Item::Weeds) <= weeds + 3);
+    CHECK(Close(sim.GetState().energy, beforeNettle - FindOvergrowth(ResourceKind::Nettles)->energy, 1e-9));
+    Simulation loaded;
+    loaded.SetPlacements(table);
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(PlacedNode(loaded, weed).cleared && PlacedNode(loaded, nettle).cleared);
+
+    // A garden square: weeding by hand clears its weeds and gives nothing.
+    Simulation garden;
+    Stock(garden, {{Item::DiggingStick, 1}});
+    const Point square = CellCenter(-2, -1);
+    OK(garden.Till(CellToGarden(-2), CellToGarden(-1), square));
+    const int plot = garden.FindNearestPlot(square, 1);
+    CHECK(plot != -1);
+    UnchangedFailure(garden, [&] { return garden.Weed(plot, square); });
+    Edit(garden, [](State& state) { state.plots[0].weeds = 0.6; }, false);
+    const auto stock = garden.GetState().inventory;
+    const double gardenEnergy = garden.GetState().energy;
+    Simulation gardenProbe = garden;
+    OK(gardenProbe.Weed(plot, square));
+    CHECK(garden.GetState().plots[0].weeds == 0.6);
+    OK(garden.Weed(plot, square));
+    CHECK(garden.GetState().inventory == stock && garden.GetState().plots[0].weeds == 0.0);
+    CHECK(Close(garden.GetState().energy, gardenEnergy - Exertion::WeedEnergy, 1e-9));
+    UnchangedFailure(garden, [&] { return garden.Weed(plot, square); });
+}
+
+void WeedPullCommitsOnlyOnItsOwnClip()
+{
+    // Code review of the 09-29 port: a second pull pressed during the first one's tail (after its commit
+    // at the second root, while its clip still plays) committed at once, because the first clip's phase
+    // was already past the commit beat. A pull only owns the phase once its own kneel has begun.
+    using namespace WeedPull;
+    const float first = 56.0f / 30.0f, commit = 102.0f / 30.0f, end = 150.0f / 30.0f;
+    const double timeout = 4.5;
+    // Weed A: queued, starts (count 0 -> 1), thins at the first root, commits once at the second.
+    Pending a{0, 0.0, false};
+    CHECK(Advance(a, 0, -1.0f, 0.2, first, commit, timeout) == Step::Wait && !a.started);
+    CHECK(Advance(a, 1, -1.0f, 0.4, first, commit, timeout) == Step::Wait && !a.started); // Begun, not yet blended in.
+    CHECK(Advance(a, 1, 0.5f, 0.9, first, commit, timeout) == Step::Wait && a.started);
+    CHECK(Advance(a, 1, first + 0.1f, 2.4, first, commit, timeout) == Step::Thin);
+    CHECK(Advance(a, 1, commit, 3.9, first, commit, timeout) == Step::Commit);
+    // Weed B pressed during A's tail (A's clip still at 4 s): it waits through the whole tail.
+    Pending b{1, 4.0, false};
+    for (float tail = commit; tail < end; tail += 0.1f)
+        CHECK(Advance(b, 1, tail, 4.0 + (tail - commit), first, commit, timeout) == Step::Wait && !b.started);
+    CHECK(Advance(b, 1, -1.0f, 5.7, first, commit, timeout) == Step::Wait); // A ended, B not begun.
+    // B's own kneel begins: its early phase doesn't commit, only its own second root does.
+    CHECK(Advance(b, 2, 0.1f, 5.9, first, commit, timeout) == Step::Wait && b.started);
+    CHECK(Advance(b, 2, commit - 0.01f, 9.2, first, commit, timeout) == Step::Thin);
+    CHECK(Advance(b, 2, commit, 9.3, first, commit, timeout) == Step::Commit);
+    // Cancelled after it began (she walked off): dropped, nothing committed.
+    Pending c{2, 10.0, false};
+    CHECK(Advance(c, 3, 1.0f, 11.0, first, commit, timeout) == Step::Wait);
+    CHECK(Advance(c, 3, -1.0f, 11.1, first, commit, timeout) == Step::Drop);
+    // Never began, or stuck behind a tail that never ends: dropped after the timeout, never committed.
+    Pending d{3, 20.0, false};
+    CHECK(Advance(d, 3, -1.0f, 24.0, first, commit, timeout) == Step::Wait);
+    CHECK(Advance(d, 3, -1.0f, 24.6, first, commit, timeout) == Step::Drop);
+    Pending e{3, 30.0, false};
+    CHECK(Advance(e, 3, end, 34.6, first, commit, timeout) == Step::Drop);
 }
 
 void ClearoutKindsAndSpoiledGround()
@@ -4615,7 +4893,11 @@ int main()
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
     Run("manor clear-out field placement", ManorClearoutField);
+    Run("every live weed is on open ground", EveryLiveWeedIsOnOpenGround);
     Run("the ruin's loose slate and rubble can be cleared", RuinDebrisIsClearable);
+    Run("every hand gather has its own pose", EveryHandGatherHasItsOwnPose);
+    Run("a wrong or under-tier tool is non-actionable", WrongOrUnderTierToolIsNonActionable);
+    Run("the ruin's fallen roof timbers are chopped with the axe", RuinTimbersAreChoppedWithTheAxe);
     Run("clear-out rubbish, nettles, stumps and spoiled ground", ClearoutKindsAndSpoiledGround);
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);
@@ -4636,6 +4918,8 @@ int main()
     Run("timber processing, dual fuel, storage and save version", TimberAndFirewoodTransactions);
     Run("farming, weeds, moisture and rain", FarmingAndRain);
     Run("small garden squares, per-square planting and plot migration", GardenSquares);
+    Run("weeding by hand commits once, and a probe changes nothing", WeedPullCommitsOnce);
+    Run("a weed pull commits only on its own clip, never an earlier tail", WeedPullCommitsOnlyOnItsOwnClip);
     Run("weeds in any square offer and take a pull", PullWeedsOnAnySquare);
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
     Run("crop table, growing days, care modifiers, stages and status", CropTableAndStatus);

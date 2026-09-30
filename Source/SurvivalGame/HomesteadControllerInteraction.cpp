@@ -5,11 +5,14 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadGatherPose.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "UI/SHomesteadMenu.h"
 
 #include "Engine/World.h"
 #include "Misc/ScopeExit.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadInteract, Log, All);
 
 using HomesteadControllerHelpers::FindPlotWhere;
 using HomesteadControllerHelpers::PlantingCrop;
@@ -55,7 +58,6 @@ void AHomesteadController::Interact()
         bool Forage = false;
         bool Tree = false;
         bool Reeds = false;
-        bool Sticks = false;
         auto Kind = Homestead::ResourceKind::Count;
         Homestead::Point ActionTarget = Position;
         for (const auto& Node : State().resources)
@@ -63,15 +65,19 @@ void AHomesteadController::Interact()
             {
                 Tree = Node.kind == Homestead::ResourceKind::ForestTree;
                 Reeds = Node.kind == Homestead::ResourceKind::Reeds;
-                Sticks = Node.kind == Homestead::ResourceKind::Branches;
                 Kind = Node.kind;
                 Forage = !Tree && Node.kind != Homestead::ResourceKind::Sapling;
                 ActionTarget = Node.position;
                 break;
             }
         const int32 Harvested = FocusId;
+        const Homestead::GatherPose Pose = Homestead::HandGatherPose(Kind);
         const auto* Feller = Cast<AHomesteadCharacter>(GetPawn());
         const bool bFell = Tree && Feller && Feller->CanFell();
+        // Weeds and nettles are pulled on both knees and only count once the second root is out.
+        if ((Kind == Homestead::ResourceKind::Weeds || Kind == Homestead::ResourceKind::Nettles)
+            && StartWeedPull(FocusId, INDEX_NONE, ActionTarget))
+            break;
         const auto Result = Sim.Harvest(FocusId, Position);
         // Salvage and fallen boughs say what she found; ordinary forage shows it in her hands instead.
         if (Homestead::IsOvergrowth(Kind)) Notify(Result, WoodTapA);
@@ -91,23 +97,17 @@ void AHomesteadController::Interact()
                     }
                     else if (!Avatar->IsCuttingReeds()) Avatar->PlayKnifeCut(ActionTarget);
                 }
-                else if (Kind == Homestead::ResourceKind::DeerRemains)
+                else if (Pose == Homestead::GatherPose::KnifeCut)
                     Avatar->PlayKnifeCut(ActionTarget); // Work the dried hide free with the knife.
-                else if (Sticks || Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::Roots
-                    || Kind == Homestead::ResourceKind::BerryBush || Kind == Homestead::ResourceKind::FallenBranch
-                    || Kind == Homestead::ResourceKind::SalvagePile || Kind == Homestead::ResourceKind::Weeds
-                    || Kind == Homestead::ResourceKind::Nettles || Homestead::IsRubbish(Kind))
+                else if (Pose == Homestead::GatherPose::Sticks || Pose == Homestead::GatherPose::Stones
+                    || Pose == Homestead::GatherPose::Pouch)
                 {
                     const bool Berries = Kind == Homestead::ResourceKind::BerryBush;
-                    // A fallen bough gathered by hand is broken into sticks, and so are the rotten
-                    // boards of a crate, barrel or plank pile; searching a salvage pile or a midden
-                    // lifts its stones aside, so it plays the stone gather. Weeds are pulled like roots.
-                    const bool Boards = Kind == Homestead::ResourceKind::BrokenCrate || Kind == Homestead::ResourceKind::BrokenBarrel
-                        || Kind == Homestead::ResourceKind::RottenPlanks;
-                    const auto Gather = Sticks || Kind == Homestead::ResourceKind::FallenBranch || Boards ? EHomesteadKneelGather::Sticks
-                        : Kind == Homestead::ResourceKind::Stones || Kind == Homestead::ResourceKind::SalvagePile
-                            || Kind == Homestead::ResourceKind::RubbishHeap || Kind == Homestead::ResourceKind::SlateHeap
-                        ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
+                    // Homestead::HandGatherPose: boughs and rotten boards are broken into sticks;
+                    // stones, salvage, middens and slates are lifted with the stone kneel; anything
+                    // that grows (roots, berries, flowers, weeds) is picked into the hip pouch.
+                    const auto Gather = Pose == Homestead::GatherPose::Sticks ? EHomesteadKneelGather::Sticks
+                        : Pose == Homestead::GatherPose::Stones ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
                     FVector2D Target(ActionTarget.x, ActionTarget.y);
                     // Berries are picked from the near side of the bush, not its centre; an estate
                     // blackberry bramble is a metre across, so she reaches in at its edge.
@@ -139,7 +139,9 @@ void AHomesteadController::Interact()
                         HeldPartsCount = Berries ? 4 : 1;
                     }
                 }
-                else Avatar->PlayGather();
+                else
+                    UE_LOG(LogHomesteadInteract, Warning, TEXT("Resource %d (%s) was gathered by hand but has no gather pose."),
+                        Harvested, UTF8_TO_TCHAR(Homestead::ResourceName(Kind)));
         if (Result.ok && Tree) PresentFelling(Harvested, ActionTarget, true);
         break;
     }
@@ -292,10 +294,15 @@ void AHomesteadController::Secondary()
                     + FString(UsesGamepad() ? TEXT("A") : TEXT("E")) + TEXT(" to sow."), true);
                 break;
             }
+            // By hand she kneels and pulls them, and the square is weeded when the second root is out;
+            // without that clip she pulls them into the hip pouch like the estate's.
+            if (StartWeedPull(INDEX_NONE, FocusId, Homestead::PlotCenter(Plot))) break;
             const auto Result = Sim.Weed(FocusId, PlayerPoint());
             Notify(Result, GrassStepA);
             if (Result.ok)
-                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayGather();
+                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+                    Avatar->PlayKneelGather(EHomesteadKneelGather::Pouch,
+                        FVector2D(Homestead::PlotCenter(Plot).x, Homestead::PlotCenter(Plot).y));
             break;
         }
     }

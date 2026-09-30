@@ -30,6 +30,8 @@ enum class ResourceKind : int
     Nettles, StumpMedium, BrokenCrate, BrokenBarrel, RubbishHeap, RottenPlanks,
     // Slate slid off the manor's roofs, heaped in and round the ruin; cleared by hand.
     SlateHeap,
+    // The manor's fallen roof timbers, chopped up with the worn axe.
+    RuinTimbers,
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
