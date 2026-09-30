@@ -619,17 +619,17 @@ not claim early Energy is fully solved.
   200 cm-radius swing probe: a dead-ahead 285 cm cane can be in Simulation reach but show no prompt or
   swing target, while a nearer weed/grass steals focus.
 
-  **Props headless partial:** `bcf29b85` makes aim focus and swing share a forward-biased 300 cm
-  tool-kind target; `649336f4` makes worn Sapling one logical clear with two physical blows; and
-  `bccb9310` refuses under-tier targets without animation or SFX. Native 9/9 covers an aimed 285 cm
+  **Props rebased headless partial:** branch `jennifergalley-bramble-focus-main` replays the three
+  commits as `1deb02ab` (forward-biased 300 cm aim focus/swing target), `e37288ef` (worn Sapling one
+  logical clear with two physical blows), and `4d8bfecc` (quiet under-tier refusal). Native 9/9 covers an aimed 285 cm
   cane versus nearer weed/grass, behind/301 cm refusal, scythe choosing weed, gated iron thicket,
   save, and one worn-Sapling 3–4 Branch + 1 Kindling / 1.5 Energy yield once through reload.
 
-  Food's test hunk conflicts with a naive cherry-pick, so Props supplied pre-resolved
-  food+bramble `42a63b8f`, native 9/9 with a dry-run clean merge on `main` `77ff5837`; Integration
-  must avoid duplicate food commits if they are already on main. Required before `[ready]`: PIE at
-  285 cm, a two-blow/one-logical sapling, silent under-tier refusal and F5/F9. This remains a plausible
-  cause, not proof for Jenny's pictured cane.
+  Old branches remain preserved; no reset/force occurred. Props' trial merge of current main,
+  bramble-main, sprint `7475b435`, Hoe hint `391f08f7` and Bed-v2 is clean/native 9/9. Required
+  before `[ready]`: UE/editor, packaged validation, PIE at 285 cm, a two-blow/one-logical sapling,
+  silent under-tier refusal and F5/F9. This remains a plausible cause, not proof for Jenny's pictured
+  cane.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` shipped in the 4 PM playable build.** Clearable
   slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
@@ -697,8 +697,12 @@ not claim early Energy is fully solved.
   retired Fiber text is also stale). Props replaces it with **4 Branch + 4 Hay**: the same eight units,
   with Hay from TallGrass using a worn scythe at 1–2 per tuft and no iron-tier upgrade. Existing built
   beds plus v12/v13 saves, Piece IDs and Item IDs stay unchanged; other cane recipes stay unchanged.
-  Props now holds a headless separate Bedroll slice for the change, with native proof required before
-  UE compile/PIE. Update the canonical progression doc only after the code lands.
+  **Bed-v2 partial `aa375409`:** native 9/9, one commit off `main` `46daf9dd`, with exact
+  requirements and v12 built bed/canes unchanged in saves. `BedrollTakesHay` covers missing-Hay refusal
+  and heritage; FullLoop has Hay but UE pack total is unverified. Compatibility tradeoff: deconstructing
+  an old canes bed refunds 4 Hay because normal current-cost deconstruct has no per-instance material
+  provenance - this is intentional, not a stock migration. UE/editor/package proof remains pending.
+  Update the canonical progression doc only after code lands.
 - **Starter rack placement save safety** — **Props urgent implementation guard; not shipped.** A new
   rack at placement ID `520006` must append after every existing placement section, not insert into an
   earlier numeric range and renumber later `550xxx` saved resources. Before `[ready]`, require a
