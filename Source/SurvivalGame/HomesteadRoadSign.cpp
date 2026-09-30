@@ -12,6 +12,13 @@ namespace RoadSignStyle
 constexpr float PostHeight = 190.0f, PostWidth = 12.0f;
 constexpr float BoardWidth = 110.0f, BoardHeight = 30.0f, BoardDepth = 5.0f;
 constexpr float TextSize = 11.0f;
+// Props' SM_RoadSign (Content/Python road_sign.py): same board height and width, pivot at the post
+// foot, a 4 cm board whose painted face is 2 cm off the centreline with a bead frame 0.6 cm proud,
+// and a painted field of 98 x 20 cm inside the bead that the words must stay within.
+constexpr float AuthoredBoardDepth = 4.0f, AuthoredFaceProud = 0.6f;
+constexpr float PaintedWidth = 98.0f, PaintedHeight = 20.0f;
+// Words sit just proud of the board's face (or the authored bead) so they never z-fight it.
+constexpr float StandInFaceProud = 0.6f;
 const FColor Paint(238, 226, 196);
 const TCHAR* Cube = TEXT("/Engine/BasicShapes/Cube.Cube");
 const TCHAR* Cylinder = TEXT("/Engine/BasicShapes/Cylinder.Cylinder");
@@ -38,9 +45,7 @@ AHomesteadRoadSign::AHomesteadRoadSign()
     {
         auto* Text = CreateDefaultSubobject<UTextRenderComponent>(Name);
         Text->SetupAttachment(Root);
-        Text->SetRelativeLocation(FVector(0, 0, RoadSignStyle::PostHeight - RoadSignStyle::BoardHeight * 0.5f));
         Text->SetRelativeRotation(FRotator(0, Yaw, 0));
-        Text->AddRelativeLocation(FRotator(0, Yaw, 0).Vector() * (RoadSignStyle::BoardDepth * 0.5f + 0.6f));
         Text->SetHorizontalAlignment(EHTA_Center);
         Text->SetVerticalAlignment(EVRTA_TextCenter);
         Text->SetWorldSize(RoadSignStyle::TextSize);
@@ -78,7 +83,23 @@ void AHomesteadRoadSign::Place(const FString& Name, const FVector& Location, flo
         if (Material) { Post->SetMaterial(0, Material); Board->SetMaterial(0, Material); }
         if (!Cylinder || !Cube) UE_LOG(LogTemp, Warning, TEXT("Road sign stand-in shapes are missing."));
     }
+    const float Standoff = bStandIn ? RoadSignStyle::BoardDepth * 0.5f + RoadSignStyle::StandInFaceProud
+        : RoadSignStyle::AuthoredBoardDepth * 0.5f + RoadSignStyle::AuthoredFaceProud;
     const FText Text = FText::FromString(bStandIn ? Words + TEXT("\n(stand-in sign)") : Words);
-    Front->SetText(Text);
-    Back->SetText(Text);
+    for (UTextRenderComponent* Face : {Front.Get(), Back.Get()})
+    {
+        const float Yaw = Face == Front ? 0.0f : 180.0f;
+        Face->SetRelativeLocation(FVector(0, 0, RoadSignStyle::PostHeight - RoadSignStyle::BoardHeight * 0.5f)
+            + FRotator(0, Yaw, 0).Vector() * Standoff);
+        Face->SetWorldSize(RoadSignStyle::TextSize);
+        Face->SetText(Text);
+        // On the authored board, a longer label shrinks to stay inside the painted field.
+        if (!bStandIn)
+        {
+            const FVector Size = Face->GetTextLocalSize();
+            const float Fit = FMath::Min(Size.Y > 0 ? RoadSignStyle::PaintedWidth / Size.Y : 1.0f,
+                Size.Z > 0 ? RoadSignStyle::PaintedHeight / Size.Z : 1.0f);
+            if (Fit < 1.0f) Face->SetWorldSize(RoadSignStyle::TextSize * Fit);
+        }
+    }
 }
