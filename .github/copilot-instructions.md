@@ -61,8 +61,7 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
 - **Only the integration session runs UAT** during multi-session rounds: `Scripts\Build-Game.ps1 -Package`
   or `-PackageOnly`, `RunUAT BuildCookRun`, and packaged-game tests. Several worktrees packaging at
   once fought over the machine-wide build mutex and the shared Zen server, and each package costs
-  20-40 minutes of CPU, disk and VRAM. The separate `mvp-survival` line packages its own
-  deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
+  20-40 minutes of CPU, disk and VRAM.
 - If the packaged game is running from `Build\Windows` when you (the integration session) need to
   repackage, close it and build in place. She is only experimenting in it for now and prefers
   getting the newest build.
@@ -133,8 +132,12 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   worktree's editor.
 - Close your editor before `git pull`/`rebase`, and before building your editor module
   (`Scripts\Stop-MyEditor.ps1` closes only this worktree's editor).
-- Never retarget or overwrite `Desktop\Homestead.lnk` or anything under `E:\Repos\HomesteadMVP\`.
-  Never merge `mvp-survival` with `main`.
+- **Estate-only delivery (Jenny, 2026-09-30):** `Homestead Estate.lnk` is the only active game
+  shortcut and is retargeted by Integration only after its save-safety and package checks. The
+  survival MVP was retired at tag `archive/mvp-survival-20260930` (`93612cdf`); its retained
+  `E:\Repos\HomesteadMVP` package/saves are archive data, not a delivery target. The
+  `jennifergalley-mvp-woodland-biome` branch is **not** the retired line: it is Water's active
+  Estate Seasons handoff (`b19a0ad0`).
 - No worktrees, builds, renders, videos or big binaries on C:. See the user-level disk rules.
 
 ## Code practices (owned by the Architecture Agent)

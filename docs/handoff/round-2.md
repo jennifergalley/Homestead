@@ -89,7 +89,9 @@ and ShellLink-read-back verified to
 `-ReuseCooked` staging output contains only `SurvivalGame-Win64-Shipping.exe`, so Integration made a
 candidate-local hard-link `JennysHomesteadGame.exe` alias and verified the same SHA before shortcut
 promotion. Estate-map arguments, candidate-local `-UserDir`, working directory and icon are retained;
-the prior link is backed up on `E:` and `Homestead.lnk` remains MVP-untouched.
+the prior Estate link is backed up on `E:`. MVP survival was retired on 2026-09-30 as
+`archive/mvp-survival-20260930` (`93612cdf`); `Homestead.lnk` was removed and
+`Homestead Estate.lnk` is the only active game shortcut.
 
 Phoenix Development passed all six packaged suites. Shipping reuses five hash-identical cooked
 containers; copied-save F5/F9 passed; 175 owned-PID endpoint samples observed zero sockets. All 19
@@ -283,7 +285,8 @@ Jenny game process, fresh staged data and no new blocker. ShellLink read-back re
 `Build\Releases\20260929-split-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
 with SHA `2A1834BC5B667740F184AB949A147A3A14A7E00E0B8F8A8E1384554AF1CC3FA4`. Estate-map arguments,
 candidate-local `-UserDir`, icon and working directory are retained. The prior Shipping link is
-backed up on `E:`, Development remains a rollback path and `Homestead.lnk` remains MVP-untouched.
+backed up on `E:` and Development remains a rollback path. Historical receipt: `Homestead.lnk` was
+then left untouched; it was removed during the 2026-09-30 MVP retirement.
 
 The Shipping package reuses five byte-identical cooked containers. Its copied-Estate-save startup
 probe reports `shipping=true`, `traceCompiled=false`, Lit 634 ticks, F5/F9 MD5 equality and zero
@@ -397,7 +400,8 @@ Menu pickup `b2a49e36` + `cb3f40c7`, weed clip and scythe remain excluded.
 FullLoop berry-regrowth assertion correction). After Jenny quit and asked, Integration retargeted only
 `Homestead Estate.lnk` to
 `jennifergalley-literate-eureka\Build\Playtest-0929pm\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`;
-`Homestead.lnk` and the morning `Playtest-0929` build remain untouched. The latest Estate save
+Historical receipt: `Homestead.lnk` and the morning `Playtest-0929` build then remained untouched.
+The latest Estate save
 (`Manual`, 2:01 PM) carried over and is scratch-backed.
 
 All packaged 1080p suites passed: Smoke 57.9 fps, Clearing 52.1, Hotbar 53.5, NativeMenu 56.6 and
@@ -413,7 +417,8 @@ about 11:00 to 15:30.
 **[playtest] ready:** `Build\Playtest-0929eve` packages `main` `ca141b1f` / game code `a2607437`
 plus test-only `6556c1fe`, and is on `Homestead Estate.lnk` with a copied 3:46 PM Manual save.
 Integration retargeted only that shortcut with its existing icon/arguments; it never touched
-`Homestead.lnk` or Jenny's live save. Native passed 9/9; six packaged suites passed: Smoke 56.9 fps,
+Jenny's live save. Historical receipt: `Homestead.lnk` was then retained and was later removed in
+the 2026-09-30 MVP retirement. Native passed 9/9; six packaged suites passed: Smoke 56.9 fps,
 Clearing 53.1, NativeMenu 55.2 and EstateSmoke woods 58.6 among them.
 
 The fresh-game packaged FullLoop exercises the core loop, so it is now **deliverable**. Food PIE also
@@ -945,7 +950,8 @@ requirement.
   `Build\Releases\20260930-coral-hotbar-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
   with SHA `7C65AAF0305556A74177B4C62D7C87FDFD5708ACAA95B388B432A54434B281EB`. Estate-map arguments,
   candidate-local `-UserDir`, working directory and icon are preserved; the prior link is backed up
-  on `E:` and `Homestead.lnk` remains MVP-untouched. The candidate reuses five hash-identical cooked
+  on `E:`; historical receipt: `Homestead.lnk` was then retained and was later removed in the
+  2026-09-30 MVP retirement. The candidate reuses five hash-identical cooked
   containers. All 19 source SaveGames plus GameUserSettings/Input match their pre-promotion hashes;
   Manual `F816C870...5EB8` remains unchanged.
 
