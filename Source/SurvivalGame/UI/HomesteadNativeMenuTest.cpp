@@ -578,33 +578,27 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Cancel placement and return to Settings"),
         [this]() { Tap(EKeys::Escape); Tap(EKeys::Escape); },
         [this]() { return !Controller->IsPlanning() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
-    Add(TEXT("Mapped tabs expose purpose-specific Guidebook content"),
-        [this]() { Tap(EKeys::Escape); Tap(EKeys::G); },
-        [this]() { return Controller->BookPage() == 3
-            && Controller->BookSummary().Contains(TEXT("Woodland seed")); });
-    Capture(TEXT("native-guidebook"));
-    Add(TEXT("Guidebook text is readable without an inert Read action"),
-        [this]() { Controller->NativeMenu->FocusLegacySubject(2); },
-        [this]() { return Controller->BookPage() == 3
-            && Controller->NativeMenu->GetActionCount() == 0
-            && Controller->NativeMenu->GetDisplayedDetails().Contains(TEXT("salvage piles")); });
+    // The Guidebook (page 3) is retired: its keys open nothing, a request for it opens the pack, and
+    // the tabs run Inventory, Craft, Build, Map, Appearance.
+    Add(TEXT("The retired Guidebook has no G / H shortcut"),
+        [this]() { Tap(EKeys::Escape); Tap(EKeys::G); Tap(EKeys::H); },
+        [this]() { return !Controller->IsBookOpen(); });
+    Add(TEXT("A request for the retired Guidebook page opens the pack instead"),
+        [this]() { Controller->OpenBook(3); },
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Credits has no fabricated Read action"),
         [this]() { Controller->OpenBook(5); },
         [this]() { return Controller->BookPage() == 5
             && Controller->NativeMenu->GetActionCount() == 0; });
-    Add(TEXT("Return to Guidebook without losing informational focus"),
-        [this]() { Controller->OpenBook(3); },
-        [this]() { return Controller->BookPage() == 3
-            && Controller->NativeMenu->GetActionCount() == 0; });
-    Add(TEXT("Map tab sits between Build and Guidebook"),
+    Add(TEXT("Map tab sits between Build and Appearance"),
         [this, Before]()
         {
             *Before = Controller->Simulation().Serialize();
-            Tap(EKeys::Gamepad_LeftShoulder);
+            Controller->OpenBook(2);
+            Tap(EKeys::Gamepad_RightShoulder);
         },
         [this]() { return Controller->BookPage() == 7 && Controller->NativeMenu->GetMapView().IsValid()
-            && Controller->NativeMenu->GetMapView()->PixelsPerCm() > 0; });
-    Capture(TEXT("native-map"));
+            && Controller->NativeMenu->GetMapView()->PixelsPerCm() > 0; });    Capture(TEXT("native-map"));
     Add(TEXT("Controller triggers zoom the map in"),
         [this]() { Axis(EKeys::Gamepad_RightTriggerAxis, 1.0f); },
         [this]()
@@ -630,13 +624,14 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("D-pad steps between named landmarks"),
         [this]() { Tap(EKeys::Gamepad_DPad_Right); },
         [this]() { return !Controller->NativeMenu->GetMapView()->SelectedName().IsEmpty(); });
-    Add(TEXT("Map input stays in the book and LB / RB still switch tabs"),
+    Add(TEXT("Map input stays in the book and RB goes on to Appearance (no Guidebook between)"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this, Before]() { return Controller->BookPage() == 3 && Controller->IsBookOpen()
+        [this, Before]() { return Controller->BookPage() == 6 && Controller->IsBookOpen()
             && Controller->Simulation().Serialize() == *Before; });
-    Add(TEXT("Mapped tabs keep body and hair Appearance separate from owned clothing"),
-        [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this]() { return Controller->BookPage() == 6; });
+    Add(TEXT("The tab bar lists exactly Inventory, Craft, Build, Map, Appearance"),
+        []() {},
+        [this]() { return Controller->NativeMenu->GetTabPageCount() == 5
+            && !Controller->NativeMenu->HasTabForPage(3); });
     Capture(TEXT("native-appearance"));
     Add(TEXT("Return to Settings without changing simulation or camera"),
         [this, Before]()

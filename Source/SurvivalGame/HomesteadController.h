@@ -652,7 +652,6 @@ private:
     void OpenSettings();
     void OpenCraft();
     void OpenBuild();
-    void OpenJournal();
     void OpenMap();
     void PreviousPage();
     void NextPage();

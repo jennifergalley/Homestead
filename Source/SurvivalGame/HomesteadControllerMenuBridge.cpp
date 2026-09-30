@@ -82,7 +82,7 @@ void AHomesteadController::MenuActivate()
     if (bTestResetRequired && (Page != 4 || !Rows().IsValidIndex(Selection)
         || (Rows()[Selection].Id != 1 && Rows()[Selection].Id != 8 && Rows()[Selection].Id != 9)))
     { Notify(LoadProblem, true); return; }
-    if (IsFailed() && Page != 4 && Page != 3 && Page != 5)
+    if (IsFailed() && Page != 4 && Page != 5)
     { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
     if (IsFailed() && Page == 4 && Rows().IsValidIndex(Selection) && Rows()[Selection].Id == 0)
     { Notify(TEXT("A failed state cannot replace your checkpoint. Retry or quit without saving."), true); return; }

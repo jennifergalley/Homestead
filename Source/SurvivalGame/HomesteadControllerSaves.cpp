@@ -400,7 +400,7 @@ void AHomesteadController::NewGame()
     EndPlacement();
     GrantPlaytestKit(true);
     if (bEstateMap) { BeginNewGameSetup(); return; }
-    OpenBook(3);
+    OpenBook(0);
     Notify(TEXT("A new seeded woodland. Choose where to build; previous save files are still available."));
 }
 

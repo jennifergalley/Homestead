@@ -6,15 +6,15 @@
 
 void AHomesteadSmokeTest::PreparePromptChecks()
 {
-    Add(TEXT("Controller notes start with controller hints"),
+    Add(TEXT("Controller field book starts with controller hints"),
         [this]() { Tap(EKeys::Gamepad_DPad_Up); },
-        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3 && Controller->UsesGamepad(); });
-    Add(TEXT("Capture controller notes before incidental mouse input"),
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0 && Controller->UsesGamepad(); });
+    Add(TEXT("Capture the controller field book before incidental mouse input"),
         [this]() { Screenshot(TEXT("prompts-book-before")); }, []() { return true; });
-    Add(TEXT("Accepted tiny mouse delta while controller notes are paused"),
+    Add(TEXT("Accepted tiny mouse delta while the controller field book is paused"),
         [this]() { Axis(EKeys::MouseX, 0.01f); },
-        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3; });
-    Add(TEXT("Capture the actual notes labels after the tiny mouse delta"),
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
+    Add(TEXT("Capture the actual field-book labels after the tiny mouse delta"),
         [this]() { Screenshot(TEXT("prompts-book-after")); }, []() { return true; });
     Add(TEXT("Tiny mouse camera input must not steal paused controller hints"),
         []() {}, [this]() { return Controller->UsesGamepad(); });
@@ -88,9 +88,9 @@ void AHomesteadSmokeTest::PreparePromptChecks()
             Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_FaceButton_Bottom, IE_Released, 0)); },
         [this]() { return !Controller->UsesGamepad(); });
     Add(TEXT("Capture intentional keyboard context"), [this]() { Screenshot(TEXT("prompts-context-keyboard")); }, []() { return true; });
-    Add(TEXT("Open keyboard notes; subthreshold stick stays keyboard"),
-        [this]() { Axis(EKeys::Gamepad_LeftX, 0); Axis(EKeys::Gamepad_RightX, 0); Tap(EKeys::H); },
-        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3 && !Controller->UsesGamepad(); });
+    Add(TEXT("Open the keyboard field book; subthreshold stick stays keyboard"),
+        [this]() { Axis(EKeys::Gamepad_LeftX, 0); Axis(EKeys::Gamepad_RightX, 0); Tap(EKeys::I); },
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0 && !Controller->UsesGamepad(); });
     Add(TEXT("Capture intentional keyboard book"), [this]() { Screenshot(TEXT("prompts-book-keyboard")); }, []() { return true; });
     Add(TEXT("Actual diagonal stick intent respects inherited axis shaping plus radial modifier"),
         [this]() { Axis(EKeys::Gamepad_LeftX, 0.36f); Axis(EKeys::Gamepad_LeftY, 0.36f); },

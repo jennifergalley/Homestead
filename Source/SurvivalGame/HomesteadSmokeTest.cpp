@@ -357,9 +357,9 @@ void AHomesteadSmokeTest::Prepare()
         });
     Add(TEXT("Baseline skin and eyes retain Default Lit shading and saved color controls"),
         []() {}, [this]() { return VerifyPresentationMaterials(); });
-    Add(TEXT("Initial notes page is open"),
+    Add(TEXT("The field book opens on the pack (the Guidebook is retired)"),
         []() {},
-        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3; });
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Automation ignores physical-source menu input"),
         [this]()
         {
@@ -371,7 +371,7 @@ void AHomesteadSmokeTest::Prepare()
                     IE_Released, 0, false, FPlatformTime::Cycles64()));
             }
         },
-        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3; });
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Gamepad closes the field book"),
         [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this]() { return !Controller->IsBookOpen(); });
@@ -399,13 +399,8 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Capture the settled clearing exposure"),
         [this]() { Screenshot(TEXT("clearing")); },
         []() { return true; }, 1.0f);
-    Add(TEXT("Gamepad Guidebook route reaches the pack through field-book tabs"),
-        [this]()
-        {
-            Tap(EKeys::Gamepad_Special_Left);
-            // Guidebook back to the pack: Map, Structures, Craft, Pack.
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
-        },
+    Add(TEXT("Gamepad View opens the field book at the pack"),
+        [this]() { Tap(EKeys::Gamepad_Special_Left); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Menu pauses simulation"),
         [this]() { PausedHour = Controller->State().hour; },
@@ -420,12 +415,7 @@ void AHomesteadSmokeTest::Prepare()
         [this]() { Tap(EKeys::Escape); },
         [this]() { return !Controller->IsBookOpen(); });
     Add(TEXT("Open the pack before appearance changes"),
-        [this]()
-        {
-            Tap(EKeys::Gamepad_Special_Left);
-            // Guidebook back to the pack: Map, Structures, Craft, Pack.
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
-        },
+        [this]() { Tap(EKeys::Gamepad_Special_Left); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Open the appearance page with the controller"),
         [this]() { CameraStart = Controller->GetControlRotation().Yaw; Tap(EKeys::Gamepad_LeftShoulder); },

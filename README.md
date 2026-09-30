@@ -202,8 +202,8 @@ use the explicit procedure in `docs\offline-startup.md` for this release.
 | Sprint on / off (a toggle) | Left stick click (L3) | Tap Shift |
 | Contextual interaction (or eat the selected hotbar food) | A | E or Enter |
 | Clear / weed / fuel / till (or eat the selected hotbar food) | X | F |
-| Field book | Menu | I or Tab |
-| Notes | View | H |
+| Field book (opens on the pack) | View | I or Tab |
+| Settings | Menu | Escape |
 | Craft / build pages | D-pad left / right | C / B |
 | Book selection | D-pad up / down | Up / down |
 | Book pages | LB / RB | Left / right |

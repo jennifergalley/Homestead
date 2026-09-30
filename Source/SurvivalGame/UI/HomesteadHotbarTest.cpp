@@ -133,7 +133,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             EKeys::Invalid, 0, FModifierKeysState()));
     };
 
-    Add(TEXT("Close Guidebook to expose the gameplay hotbar"),
+    Add(TEXT("Close the opening field book to expose the gameplay hotbar"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return Controller->ShouldShowHotbar()
             && Controller->HotbarWidget.IsValid(); });
