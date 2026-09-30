@@ -91,6 +91,26 @@ boundary plus actual sampling address the observed persistent TraceControl
 listener. No firewall settings, permission dialogs, driver settings or other
 processes were changed.
 
+### Current probe-harness defects (2026-09-29)
+
+The Shipping runtime evidence can be valid even when the automation wrapper reports a stale
+application-specific failure; do not call such a run a clean harness pass until these are fixed:
+
+- `Scripts\Test-OfflineStartup.ps1` prepares
+  `PreviewProfiles\profile-X\SaveGames\Homestead_Manual.sav`, but Estate save routing now reads
+  `SaveGames\Estate\`. The fixture needs the added `Estate` directory and its existence guard must
+  inspect the profile directory two levels above.
+- `HomesteadStartupProbe.cpp` case 4 requires legacy
+  `AHomesteadCharacter::IsEquipmentPresentationReady`; the MetaHuman heroine never sets it. Replace
+  that condition with a MetaHuman-aware rendered-heroine check (for example `HasHeroine()`).
+
+The supported current Shipping recipe remains `Build-Game.ps1 -Configuration Shipping -ReuseCooked
+-Package` with hash-identical cooked containers, isolated candidate `-UserDir` and owned-PID endpoint
+sampling. On the late candidate it observed zero TCP/UDP endpoints in 301 samples across three runs,
+`shipping=true` / `traceCompiled=false`, copied Estate save F5/F9 MD5 equality, Lit heroine ticks and
+candidate-local writes. A bounded `Development-Run.ps1 -Action Start` prerequisite is still required
+by the wrapper; do not treat a temporary test-run patch as a committed script fix.
+
 ## Human borderless launch and preferences
 
 `Preview.cmd` now requests native **windowed fullscreen** with `-Res=0x0wf`.

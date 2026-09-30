@@ -82,12 +82,19 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current package snapshot (2026-09-29 19:40):** `main` `af97075f` contains the accepted local
-aim/rain/crop-weeding picks plus docs merge. Integration's editor is closed; UAT/cook Development
-package `Build\Playtest-0929late` is running, so every lane keeps Unreal/UBT/Blender off until
-`packaging done`. Six suites plus copied-save smoke remain pending; Shipping `-ReuseCooked` no-listener
-validation follows only after Development passes. Only then may the Estate shortcut retarget. Menu
-field-book hotbar `bd0d928c` and Water garden outline remain excluded partials.
+**Current package snapshot (2026-09-29 19:55):** corrected Development
+`Build\Playtest-0929late` at `main` `af97075f` passed six packaged suites (Smoke 57.8, Clearing 52.8,
+Hotbar 53.0, NativeMenu 55.6, FullLoop 54.5, EstateSmoke woods 60 fps); a copied 19:19 Estate save
+loaded offscreen at the manor with no new errors. The Shipping candidate
+`Build\Releases\20260929-late-shipping\Windows` has five cooked pak/utoc/ucas containers
+hash-identical to Development, zero endpoints in 301 owned-PID TCP/UDP samples, `shipping=true` /
+`traceCompiled=false`, copied Estate F5/F9 MD5 match, Lit heroine 637 ticks and candidate-local
+`UserDir` writes only.
+
+Probe harness defects remain (see offline-startup note), and visible human UI startup was not observed.
+Integration is authorized to check latest save freshness/no game and retarget **only**
+`Homestead Estate.lnk`, preserving rollback, but has not yet reported completion. Menu field-book
+hotbar `bd0d928c` and Water garden outline remain excluded partials.
 
 ### Development firewall prompts / offline Shipping candidate
 
@@ -105,13 +112,14 @@ the Estate shortcut be reconsidered; the current shortcut stays untouched.
 
 ### Urgent forward-aim shipment blocker
 
-**Do not ship or retarget the night package.** Architecture found `main` `5d11ceed` forward-aim bug
+**Forward-aim shipment blocker (corrected Dev evidence):** Architecture found `main` `5d11ceed` forward-aim bug
 `8df23ba3`: `FocusHeldToolTarget` skips the aimed lookup when the nearest current overgrowth matches
 the held tool, then `SwingAtOvergrowth` overwrites the aimed ID with `FocusId`. A bramble 70 cm behind
 can therefore beat a valid bramble 200 cm ahead; an under-tier thicket behind can block the front
-target. Props has a headless targeted fix slot during UAT. Integration may finish current UAT safely,
-but the night package remains **provisional, not delivered** until the fix has targeted native/PIE
-evidence and a repackage passes. Preserve the prior verified `Playtest-0929eve` build and shortcut.
+target. Props has a headless targeted fix slot during UAT. Integration has now completed targeted native/PIE evidence and corrected Development suites/copied-save
+smoke at `af97075f`; the prior night package remains **provisional, not delivered**. Shipping probe
+harness defects and the actual safe Estate-link retarget still require explicit Integration completion
+before player delivery is claimed. Preserve rollback until that report.
 
 **Props headless fix `61957b51`:** cleanly based on `main` `144acc7b`, native 9/9, no UE/PIE or
 shipping claim. `HeldToolFocus` now chooses aimed forward overgrowth over a nearer matching-tool
@@ -129,19 +137,20 @@ for one charge. With nothing ahead it says `Turn to face it` with no stock/clear
 drain); turning clears the behind target. Side thicket `550312` stays untouched while forward thin
 `550263` clears, and F5/F9 is exact.
 
-Remaining work is corrected Development repackage/six suites/copied-save smoke and final Shipping
-no-listener candidate. The provisional night build remains withheld and `Playtest-0929eve` remains the
-verified shortcut.
+Corrected Development six suites and copied-save smoke now pass at `af97075f`; the Shipping candidate
+has zero endpoint and save-round-trip evidence. Remaining work is to repair the stale offline-probe
+fixture/MetaHuman checks, retain honest visible-human-startup uncertainty, and receive explicit safe
+Estate-link retarget completion. The provisional night build remains withheld and `Playtest-0929eve`
+remains the verified shortcut until then.
 
 **Provisional night package evidence:** `Build\Playtest-0929night` at `main` `5d11ceed`
 (`JennysHomesteadGame.exe` SHA256
 `887EFD0254D2D9A98761CC4B65258878F635DEE5E0BDEB7222085F372EE18EC8`) passed all six packaged
 Development suites: Smoke 57.2 fps / p99 16.8 ms, Clearing 52.4 / 21.9, Hotbar 52.3 / 34, NativeMenu
 56.2, FullLoop 53.9 and EstateSmoke woods 58.7 / p95 18.9. Copied-save smoke was skipped because the
-aim blocker makes the package provisional. After the target fix, Integration reruns native/build/PIE,
-corrected Development package/six suites plus copied-save smoke, then stages the supported Shipping
-`-ReuseCooked` candidate and proves its PID has no TCP/UDP listener using isolated `-UserDir` save
-round-trip/offscreen tests. Only an accepted Shipping candidate may retarget the Estate shortcut.
+aim blocker makes the package provisional. It is historical evidence only: the corrected Development
+and Shipping candidate evidence is recorded above. Only an explicitly completed safe Estate-link
+retarget may replace the evening shortcut.
 
 **Final rain loudness `734813ad`:** main-integrated in `af97075f`, Editor/Game/PIE pass, no delivery
 claim. Rain
@@ -153,8 +162,8 @@ Effects; native tests cover the 0.5 ratio across rain, indoors and slider values
 half, with no Gain². The reflected LPF field is 20000 indoors but LPF code was untouched, so this is
 not audible LPF/listening proof.
 
-It integrates with the aim fix before the corrected Development/Shipping package. It does not affect
-the current game.
+It is included with the aim fix in the corrected Development/Shipping candidate. It does not affect
+the current game until safe shortcut retarget is explicitly completed.
 
 **Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
 evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
