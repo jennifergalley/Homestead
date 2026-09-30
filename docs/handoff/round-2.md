@@ -525,10 +525,16 @@ sprint-specific Energy cost; this supersedes both current 0.35/real-second behav
 Refuse the sprint toggle at Energy <=10 and turn it off if other work/time reaches that threshold; do
 not auto-resume after recovery.
 
-Props now holds a headless UAT-window slot for this isolated slice from current main; no UE/UBT/Blender
-work occurs until packaging releases. Native tests must cover 30/60/120 day lengths; PIE then covers
-road sprint, clearing and farming. Starter food and abundant berry requests remain pending, so this
-does not claim early Energy is fully solved.
+**Props partial `7475b435`:** native 9/9 on `jennifergalley-sprint-zero`, based on `4b8d6edd` and
+cleanly merging `main` `4463086d`, not built/PIE/packaged or shipped. It removes the 0.35/s charge,
+uses `Sim.CanSprint(Energy > 10)`, toggles off at <=10 with no auto-resume, and leaves speed/awake
+drain unchanged. Native coverage spans 30/60/120 FPS and day lengths, floor/refeeding/work/reload, plus
+Hotbar/Creek/Visual routes. Integration's UAT lock on `a2607437` remains ahead of UE validation.
+
+The bramble-on-food `42a63b8f` conflict is separate from sprint; Props rebases it only after the
+package and Integration confirmation. Props' next headless slice is a separate `NoHoeMessage`
+chest/drop blade-location hint. Starter food and abundant berry requests remain pending, so this does
+not claim early Energy is fully solved.
 - **Live sound sliders** — **symptom investigation pending, not shipped.** Mouse drag already calls
   `MenuPreviewAudioVolume` live through `SSlider.OnValueChanged`, then release writes INI; d-pad steps
   preview and persist. Jenny's symptom may instead be effects without a continuous audible source,
