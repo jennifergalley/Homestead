@@ -24,8 +24,8 @@ lanes and known issues are in `docs\handoff\round-2.md` (round 1: `round-1.md`);
 - **What you can do there:** arrive at the ruined manor's standing room (bed, hearth, chest) and
   name your family and estate; clear overgrowth with tiered tools you salvage and haft (billhook,
   axe, scythe, pickaxe, hoe; the pail comes too); see your estate boundary on the minimap and the
-  field book's Map tab; walk to town and buy and sell at the general store with money in dollars and
-  cents.
+  field book's Map tab; walk to town and buy and sell at the general store with money counted in whole
+  coins.
 - **Heroine:** a MetaHuman with authored work animations (gathering, felling, tilling, watering,
   eating) and appearance options (hairstyle, hair, skin and eye colour).
 - **Jenny's builds:** the integration session packages the estate build to `Build\Windows` in its worktree,
