@@ -979,7 +979,9 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **Packaged smoke and route tests (integration session only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
-  the MetaHuman heroine yourself (field notes).
+  the MetaHuman heroine yourself (field notes). **Any input-policy change** (hotbar selection, sow/eat/
+  weed bindings, sprint input or controller priority) runs packaged **both** `-Hotbar` and `-FullLoop`;
+  otherwise stale assertions can pass silently until the package route breaks.
 - **Blender props into Unreal:** import them in your running editor with `py` (see Props in the
   field notes), not with the headless `Import-Props.ps1`, which drops LODs and collision.
 - **C++ conventions that bite** (unity-build names, C2487/C4458/C4459, forward-declared enums, `UPROPERTY`

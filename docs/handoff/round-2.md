@@ -82,11 +82,11 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / package snapshot (2026-09-29 17:10):** Integration is packaging `main` `a2607437`
-(Props food pair included) and owns machine-wide UAT plus packaged suites; all other lanes keep Unreal,
-UBT and Blender off until `packaging done`. This package excludes partial bramble/sapling/under-tier,
-Menu pickup/pail gauge/store card, and Water no-pail prompt/lake trail/night-light work. The
-orchestrator continues to enforce the three-hands-on and two-Unreal-process caps after release.
+**Current slot / package snapshot (2026-09-29 17:36):** Integration completed the evening package
+from `main` `ca141b1f` (game code `a2607437`) and released its editor. The Props food pair is in
+`Build\Playtest-0929eve` on `Homestead Estate.lnk` with Jenny's saves; partial bramble/sapling/
+under-tier, Menu pickup/pail gauge/store card, and Water no-pail prompt/lake trail/night-light work are
+excluded. The orchestrator continues to enforce the three-hands-on and two-Unreal-process caps.
 
 ## 4 PM playable build
 
@@ -104,6 +104,20 @@ rendering, and the pond default material/usage checks; manor measured 59.2 fps (
 Gait run, Menu toast/berry A-X Energy/Ctrl+wheel/wait changes, manor rubble and sprint, plus earlier
 crop, river, performance and save work. Rain remains audibly unproven; listen outdoors on day 2 from
 about 11:00 to 15:30.
+
+## Evening playtest build
+
+**[playtest] ready:** `Build\Playtest-0929eve` packages `main` `ca141b1f` / game code `a2607437`
+(`1d1eebb5` plus Props food `c919ff60` / `8b9f1b94`) and is on `Homestead Estate.lnk` with Jenny's
+saves. Native passed 9/9; food PIE verified +5 Branch +1 Kindling, one Kindling for Hearth Roasted
+Roots, tired-snack Energy +6 and Wild Roots persisting through F5/F9. Six packaged suites passed after
+`6556c1fe` updated Hotbar/FullLoop for the new seed-selection policy.
+
+This does **not** complete the core loop: copied-save flow ran only in PIE, not the packaged executable;
+the old-save Hoe path and no-pail lake prompt remain untested. Sprint still drains in this build, the
+night remains daylight-blue, and the inside-store Map card still offers a false `23 min` walk. Input
+policy changes must run packaged **both Hotbar and FullLoop** suites, which caught the silent stale
+asserts here.
 
 ## Core-loop priority after 4 PM
 
