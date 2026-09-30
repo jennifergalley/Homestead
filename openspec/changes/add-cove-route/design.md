@@ -4,7 +4,7 @@
 
 The route starts 1.5 m outside the fallen front door on the ruin's south front (EstateManorFrontDoor, where
 the thin bramble chokes the gap) and ends on the sand at the head of the cove, just west of the river
-mouth. It is **509 m long and falls 82.8 m** (86.5 m to 3.7 m), 187 steps in all.
+mouth. It is **509 m long and falls 82.8 m** (86.5 m to 3.7 m), 191 steps in all.
 
 1. **The meadow (0-349 m, 86.5 to 44.7 m).** A graded earth path, 1.4 m wide, down the open south slope in
    three switchbacks, never steeper than 1 in 7 (average 1 in 8.3). Kerbs stand on its downhill edge where
@@ -39,18 +39,18 @@ Every drop steeper than 1 in 7 is on steps with a rail: the final descent is nev
 | 6 | Second switchback | (-372.0, -676.0) | 156 | 69.0 | path |
 | 7 |  | (-389.0, -662.0) | 177 | 66.4 | path |
 | 8 |  | (-404.0, -632.0) | 210 | 62.3 | path |
-| 9 |  | (-431.0, -607.0) | 247 | 58.8 | path |
-| 10 |  | (-460.0, -580.0) | 285 | 53.5 | path |
-| 11 | Third switchback, head of the valley side | (-461.0, -541.0) | 319 | 48.9 | path |
-| 12 | Head of the cliff steps (fingerpost) | (-493.0, -557.0) | 349 | 44.7 | stairs |
-| 13 | Corner landing | (-511.0, -548.0) | 369 | 36.6 | stairs |
-| 14 | Corner landing | (-526.0, -533.0) | 390 | 28.3 | stairs |
-| 15 | Bench above the valley floor | (-536.0, -511.0) | 414 | 18.6 | path |
-| 16 | Head of the bench steps | (-524.0, -487.0) | 441 | 14.8 | stairs |
-| 17 | Foot of the bench steps, valley floor | (-521.0, -480.0) | 448 | 11.7 | path |
-| 18 | Run-off from the foot | (-520.5, -478.9) | 450 | 11.4 | path (sharp corner) |
-| 19 | Turn back south-west | (-522.7, -478.0) | 452 | 11.0 | path (sharp corner) |
-| 20 | Head of the last steps | (-538.0, -487.0) | 470 | 8.8 | stairs |
+| 9 |  | (-431.0, -607.0) | 247 | 58.2 | path |
+| 10 |  | (-460.0, -580.0) | 285 | 52.9 | path |
+| 11 | Third switchback, head of the valley side | (-461.0, -541.0) | 319 | 48.2 | path |
+| 12 | Head of the cliff steps (fingerpost) | (-493.0, -557.0) | 349 | 44.4 | stairs |
+| 13 | Corner landing | (-511.0, -548.0) | 369 | 36.3 | stairs |
+| 14 | Corner landing | (-526.0, -533.0) | 390 | 28.0 | stairs |
+| 15 | Bench above the valley floor | (-536.0, -511.0) | 414 | 18.4 | path |
+| 16 | Head of the bench steps | (-524.0, -487.0) | 441 | 15.0 | stairs |
+| 17 | Foot of the bench steps, valley floor | (-521.0, -480.0) | 448 | 12.0 | path |
+| 18 | Run-off from the foot | (-520.5, -478.9) | 450 | 11.8 | path (sharp corner) |
+| 19 | Turn back south-west | (-522.7, -478.0) | 452 | 11.6 | path (sharp corner) |
+| 20 | Head of the last steps | (-538.0, -487.0) | 470 | 9.4 | stairs |
 | 21 | Foot of the last steps | (-543.0, -492.0) | 477 | 6.8 | path |
 | 22 | Sand west of the river mouth | (-556.0, -521.0) | 509 | 3.7 | end |
 
@@ -58,14 +58,14 @@ Every drop steeper than 1 in 7 is on steps with a rail: the final descent is nev
 
 | # | Way | From (x, y) m | Length m | Top z m | Foot z m | Fall m | Grade | Steps |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | path | (-260, -654) | 348.7 | 86.52 | 44.73 | 41.79 | 1 in 8.3 |  |
-| 2 | stairs | (-493, -557) | 20.1 | 44.73 | 36.59 | 8.14 | 1 in 2.5 | 4 flights, 48 risers at 17.0 / 31.9 cm, 28 deg rail, landings 1.36 m |
-| 3 | stairs | (-511, -548) | 21.2 | 36.59 | 28.31 | 8.28 | 1 in 2.6 | 5 flights, 49 risers at 16.9 / 30.0 cm, 30 deg rail, landings 1.25 m |
-| 4 | stairs | (-526, -533) | 24.2 | 28.31 | 18.48 | 9.84 | 1 in 2.5 | 5 flights, 58 risers at 17.0 / 31.9 cm, 28 deg rail, landings 1.23 m |
-| 5 | path | (-536, -511) | 26.8 | 18.48 | 14.76 | 3.72 | 1 in 7.2 |  |
-| 6 | stairs | (-524, -487) | 7.6 | 14.76 | 11.56 | 3.20 | 1 in 2.4 | 2 flights, 19 risers at 16.8 / 31.7 cm, 28 deg rail, landings 1.60 m |
-| 7 | path | (-521, -480) | 21.3 | 11.56 | 8.78 | 2.78 | 1 in 7.7 |  |
-| 8 | stairs | (-538, -487) | 7.1 | 8.78 | 6.65 | 2.13 | 1 in 3.3 | 2 flights, 13 risers at 16.4 / 33.6 cm, 26 deg rail, landings 2.71 m |
+| 1 | path | (-260, -654) | 348.7 | 86.52 | 44.44 | 42.09 | 1 in 8.3 |  |
+| 2 | stairs | (-493, -557) | 20.1 | 44.44 | 36.30 | 8.14 | 1 in 2.5 | 4 flights, 48 risers at 17.0 / 31.9 cm, 28 deg rail, landings 1.36 m |
+| 3 | stairs | (-511, -548) | 21.2 | 36.30 | 28.02 | 8.28 | 1 in 2.6 | 5 flights, 49 risers at 16.9 / 30.0 cm, 30 deg rail, landings 1.25 m |
+| 4 | stairs | (-526, -533) | 24.2 | 28.02 | 18.18 | 9.84 | 1 in 2.5 | 5 flights, 58 risers at 17.0 / 31.9 cm, 28 deg rail, landings 1.23 m |
+| 5 | path | (-536, -511) | 26.8 | 18.18 | 15.02 | 3.16 | 1 in 8.5 |  |
+| 6 | stairs | (-524, -487) | 7.6 | 15.02 | 11.82 | 3.20 | 1 in 2.4 | 2 flights, 19 risers at 16.8 / 31.7 cm, 28 deg rail, landings 1.60 m |
+| 7 | path | (-521, -480) | 21.3 | 11.82 | 9.42 | 2.40 | 1 in 8.9 |  |
+| 8 | stairs | (-538, -487) | 7.1 | 9.42 | 6.65 | 2.77 | 1 in 2.6 | 2 flights, 17 risers at 16.3 / 33.4 cm, 26 deg rail, landings 1.39 m |
 | 9 | path | (-543, -492) | 31.8 | 6.65 | 3.70 | 2.95 | 1 in 10.8 |  |
 
 ### Flights
@@ -76,27 +76,27 @@ are the flights' own; the rail bay is the kit's nearest standard (26, 28 or 30 d
 
 | Flight | Leg | Foot nosing (x, y) m | Yaw up | Risers | Rise / going (cm) | Pitch (rail bay) | Foot to top z (m) | Rail |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 2 | (-510.3, -548.3) | -26.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 36.59 to 38.63 | -Y (mirrored) |
-| 2 | 2 | (-505.7, -550.7) | -26.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 38.63 to 40.66 | -Y (mirrored) |
-| 3 | 2 | (-501.1, -553.0) | -26.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 40.66 to 42.69 | -Y (mirrored) |
-| 4 | 2 | (-496.4, -555.3) | -26.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 42.69 to 44.73 | -Y (mirrored) |
-| 5 | 3 | (-525.5, -533.5) | -45.0 | 10 | 16.9 / 30.0 | 29.4 (30) | 28.31 to 30.00 | -Y (mirrored) |
-| 6 | 3 | (-522.5, -536.5) | -45.0 | 10 | 16.9 / 30.0 | 29.4 (30) | 30.00 to 31.69 | -Y (mirrored) |
-| 7 | 3 | (-519.5, -539.5) | -45.0 | 10 | 16.9 / 30.0 | 29.4 (30) | 31.69 to 33.38 | -Y (mirrored) |
-| 8 | 3 | (-516.4, -542.6) | -45.0 | 10 | 16.9 / 30.0 | 29.4 (30) | 33.38 to 35.07 | -Y (mirrored) |
-| 9 | 3 | (-513.4, -545.6) | -45.0 | 9 | 16.9 / 30.0 | 29.4 (30) | 35.07 to 36.59 | -Y (mirrored) |
-| 10 | 4 | (-536.0, -511.0) | -65.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 18.48 to 20.51 | -Y (mirrored) |
-| 11 | 4 | (-533.9, -515.6) | -65.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 20.51 to 22.55 | -Y (mirrored) |
-| 12 | 4 | (-531.8, -520.2) | -65.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 22.55 to 24.58 | -Y (mirrored) |
-| 13 | 4 | (-529.7, -524.8) | -65.6 | 11 | 17.0 / 31.9 | 28.0 (28) | 24.58 to 26.45 | -Y (mirrored) |
-| 14 | 4 | (-527.8, -529.1) | -65.6 | 11 | 17.0 / 31.9 | 28.0 (28) | 26.45 to 28.31 | -Y (mirrored) |
-| 15 | 6 | (-521.0, -480.0) | -113.2 | 10 | 16.8 / 31.7 | 28.0 (28) | 11.56 to 13.24 | -Y (mirrored) |
-| 16 | 6 | (-522.9, -484.4) | -113.2 | 9 | 16.8 / 31.7 | 28.0 (28) | 13.24 to 14.76 | -Y (mirrored) |
-| 17 | 8 | (-543.0, -492.0) | 45.0 | 7 | 16.4 / 33.6 | 26.0 (26) | 6.65 to 7.80 | +Y |
-| 18 | 8 | (-539.4, -488.4) | 45.0 | 6 | 16.4 / 33.6 | 26.0 (26) | 7.80 to 8.78 | +Y |
+| 1 | 2 | (-510.3, -548.3) | -26.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 36.30 to 38.33 | -Y (mirrored) |
+| 2 | 2 | (-505.7, -550.7) | -26.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 38.33 to 40.37 | -Y (mirrored) |
+| 3 | 2 | (-501.1, -553.0) | -26.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 40.37 to 42.40 | -Y (mirrored) |
+| 4 | 2 | (-496.4, -555.3) | -26.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 42.40 to 44.44 | -Y (mirrored) |
+| 5 | 3 | (-525.5, -533.5) | -45.0 | 10 | 16.9 / 30.0 | 29.4 (30) | 28.02 to 29.71 | -Y (mirrored) |
+| 6 | 3 | (-522.5, -536.5) | -45.0 | 10 | 16.9 / 30.0 | 29.4 (30) | 29.71 to 31.40 | -Y (mirrored) |
+| 7 | 3 | (-519.5, -539.5) | -45.0 | 10 | 16.9 / 30.0 | 29.4 (30) | 31.40 to 33.09 | -Y (mirrored) |
+| 8 | 3 | (-516.4, -542.6) | -45.0 | 10 | 16.9 / 30.0 | 29.4 (30) | 33.09 to 34.78 | -Y (mirrored) |
+| 9 | 3 | (-513.4, -545.6) | -45.0 | 9 | 16.9 / 30.0 | 29.4 (30) | 34.78 to 36.30 | -Y (mirrored) |
+| 10 | 4 | (-536.0, -511.0) | -65.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 18.19 to 20.22 | -Y (mirrored) |
+| 11 | 4 | (-533.9, -515.6) | -65.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 20.22 to 22.26 | -Y (mirrored) |
+| 12 | 4 | (-531.8, -520.2) | -65.6 | 12 | 17.0 / 31.9 | 28.0 (28) | 22.25 to 24.29 | -Y (mirrored) |
+| 13 | 4 | (-529.7, -524.8) | -65.6 | 11 | 17.0 / 31.9 | 28.0 (28) | 24.29 to 26.16 | -Y (mirrored) |
+| 14 | 4 | (-527.8, -529.1) | -65.6 | 11 | 17.0 / 31.9 | 28.0 (28) | 26.15 to 28.02 | -Y (mirrored) |
+| 15 | 6 | (-521.0, -480.0) | -113.2 | 10 | 16.8 / 31.7 | 28.0 (28) | 11.82 to 13.51 | -Y (mirrored) |
+| 16 | 6 | (-522.9, -484.4) | -113.2 | 9 | 16.8 / 31.7 | 28.0 (28) | 13.51 to 15.02 | -Y (mirrored) |
+| 17 | 8 | (-543.0, -492.0) | 45.0 | 9 | 16.3 / 33.4 | 26.0 (26) | 6.65 to 8.12 | +Y |
+| 18 | 8 | (-539.9, -488.9) | 45.0 | 8 | 16.3 / 33.4 | 26.0 (26) | 8.12 to 9.42 | +Y |
 
-Also 15 landings (1.23 to 2.71 m), 146 kerb pieces (1 m), 83 rail
-bays (40 level, 43 raked, 39 of them mirrored) and 2 fingerposts: at (-266.8, -653.6) m, arm yaw 159
+Also 15 landings (1.23 to 1.60 m), 152 kerb pieces (1 m), 84 rail
+bays (41 level, 43 raked, 39 of them mirrored) and 2 fingerposts: at (-266.8, -653.6) m, arm yaw 159
 degrees (down the path from the front door), and at (-493.0, -555.4) m, arm yaw 153 degrees (down the cliff
 steps).
 
@@ -139,6 +139,16 @@ steps).
    flight rises off a landing). The native tests now read the graded heightfield itself: no path station
    beside or under a flight, the path neither buried nor sunk, level across (1 in 4 at most) and within
    1 in 7 along, and the ground under every tread and landing at least 4 cm down.
+9. **Second review (2026-09-30).** The tread-clearance pass took its across-samples' heading from the
+   stair stations alone, so at each leg's ends it pointed at the neighbouring leg and lowered path-bed
+   vertices: a 12-17 cm pit in front of the bench steps' bottom riser. Now each stair station takes its
+   leg's own heading, and only vertices under a stair leg's own footprint are lowered, never a path's bed.
+   A path is also level for 2 m where it meets a flight (a step-off, round a turn-off just in front of a
+   riser), and kerbs and level rails never stand in any stretch's clear width (the inside of a sharp
+   corner). The tests sample the graded ground 0.3 m beyond every flight's foot and head (centre and
+   0.6 m either side): the path's level within -8/+2 cm where it meets a path, 4-40 cm under the slab where
+   it meets a landing (only the slab's front edge and sides show); and path stations from 25 cm past a
+   flight's end are held to the path's level like any other.
 
 ## Kit interface notes for Props
 

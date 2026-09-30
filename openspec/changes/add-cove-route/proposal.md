@@ -12,7 +12,7 @@ steep descent is never an exposed dirt slope.
 
 - `Scripts/Terrain/cove_route.py` designs the route from committed turning points: a 349 m graded earth
   path from the manor's fallen south front door down the meadow in three switchbacks (never steeper than
-  1 in 7), 187 granite steps in 18 flights down the valley side with landings and rails, a bench and two
+  1 in 7), 191 granite steps in 18 flights down the valley side with landings and rails, a bench and two
   short flights onto the valley floor, and a gentle path to the sand west of the river mouth: 509 m and
   83 m of fall in all.
 - It cuts the heightfield to the design (the path's bed, and 5 cm or more under every tread and landing),
@@ -27,7 +27,7 @@ steep descent is never an exposed dirt slope.
 
 ## Impact
 
-- Heightfield: 3,761 vertices in r16 rows 1338-1541, columns 1457-1755 (cut up to 2.5 m into the bank at
+- Heightfield: 3,772 vertices in r16 rows 1338-1541, columns 1457-1755 (cut up to 2.5 m into the bank at
   the steps, filled up to 2.7 m on the bench). Needs `ApplyEstateHeightfield` over that rectangle,
   `build_ground.py` and `ImportEstateMap` in the editor.
 - Scenery: 328 scatter records cleared. No placement ids change; no save format change.

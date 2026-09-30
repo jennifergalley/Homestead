@@ -119,8 +119,12 @@ SIDE_PROBE_M = 2.0
 MIN_RUN_M = 3.0                  # kerb and rail runs shorter than this are dropped, gaps shorter bridged
 CLEAR_SCENERY_M = 2.4            # half width of the scatter cleared along the route
 STATION_M = 0.25
+END_SAMPLE_M = 0.3               # ... and this far beyond each flight's foot and head
+END_SIDE_M = 0.6
 GROUND_SAMPLE_M = TREAD_HALF_M   # the tests read the graded ground at the centre and this far either side
 CHAIKIN_PASSES = 3
+STEP_OFF_M = 2.0                 # a path meeting a flight is level this far from it (stepping on and off,
+                                 # and round a turn-off just in front of a riser)
 SMOOTH_GROUND_M = 1.5            # the heightfield's lumps the path's bed evens out
 
 
@@ -192,6 +196,12 @@ def stair_allowances(runs, i):
     return (CORNER_HALF_M if before else 0.0), (CORNER_HALF_M if after else 0.0)
 
 
+def step_off(runs, i):
+    """Level lengths at a path run's start and end: STEP_OFF_M where it meets a stair leg."""
+    return (STEP_OFF_M if i > 0 and runs[i - 1]["kind"] == "stairs" else 0.0,
+            STEP_OFF_M if i + 1 < len(runs) and runs[i + 1]["kind"] == "stairs" else 0.0)
+
+
 def solve_nodes(runs, ground):
     """Heights at the runs' ends: nearest the ground in least squares, within every run's limits."""
     nodes = [runs[0]["from"]] + [r["to"] for r in runs]
@@ -200,7 +210,7 @@ def solve_nodes(runs, ground):
     for i, r in enumerate(runs):
         length = float(np.hypot(*np.diff(r["points"], axis=0).T).sum())
         if r["kind"] == "path":
-            lim = MAX_PATH_GRADE * DESIGN_MARGIN * length
+            lim = MAX_PATH_GRADE * DESIGN_MARGIN * (length - sum(step_off(runs, i)))
             cons += [{"type": "ineq", "fun": (lambda z, i=i, lim=lim: lim - (z[i + 1] - z[i]))},
                      {"type": "ineq", "fun": (lambda z, i=i, lim=lim: lim + (z[i + 1] - z[i]))}]
         else:
@@ -282,7 +292,11 @@ def design(runs, ground_fn):
         if r["kind"] == "path":
             pts, s = resample(r["points"], STATION_M)
             tgt = gaussian_filter1d(ground_fn(pts[:, 0], pts[:, 1]), 3.0 / STATION_M, mode="nearest")
-            prof = pinned_lipschitz(tgt, s[1] - s[0], MAX_PATH_GRADE * DESIGN_MARGIN, za, zb)
+            # Level where it meets a flight, then graded between.
+            pad0, pad1 = step_off(runs, i)
+            mid = (s >= pad0 - 1e-9) & (s <= s[-1] - pad1 + 1e-9)
+            prof = np.where(s < pad0, za, zb).astype(np.float64)
+            prof[mid] = pinned_lipschitz(tgt[mid], s[1] - s[0], MAX_PATH_GRADE * DESIGN_MARGIN, za, zb)
             for k, ((x, y), z) in enumerate(zip(pts, prof)):
                 if k == 0 and stations:
                     continue                                      # the join is the previous run's last station
@@ -550,6 +564,11 @@ def edges(stations, flights, landings, runs, ground_fn):
         for side_name in (leg[0]["railSides"] if leg else ["right"]):
             landing_rail(lnd, leg, 1.0 if side_name == "left" else -1.0)
 
+    # Nothing stands in the path's clear width anywhere (a kerb on the inside of a sharp corner would land on
+    # the next stretch).
+    tree = cKDTree(xy)
+    kerbs = [k for k in kerbs if tree.query((k["x"], k["y"]))[0] >= CLEAR_HALF_M - 0.02]
+    rails = [r for r in rails if r["pitch"] > 0 or tree.query((r["x"], r["y"]))[0] >= CLEAR_HALF_M - 0.02]
     return kerbs, rails, s
 
 
@@ -664,37 +683,65 @@ def corridor_change(stations, z, layout):
 def clear_treads(z, stations):
     """Lower just the heightfield vertices whose interpolated ground rises within TREAD_CLEARANCE_M of a tread
     or landing top: across a flight's kinks (where it rises off a landing) the 1 m grid overshoots the cut line.
-    Each vertex goes down by the most any sample under the steps asks of it, repeated until none is short."""
-    pts, req = [], []
-    for st in stations:
-        if st[4] != "stairs":
-            continue
-        pts.append((st[0], st[1]))
-        req.append(st[3] - TREAD_CLEARANCE_M - CLEARANCE_MARGIN_M)
-    if not pts:
+    Each vertex goes down by the most any sample under the steps asks of it, repeated until none is short.
+    Samples run across each tread along its own leg (review, 2026-09-30: a heading taken across two legs
+    swung the samples onto the path at a flight's foot), and no vertex of a path's bed is ever lowered."""
+    xy_all = np.array([(st[0], st[1]) for st in stations])
+    legs = np.array([st[5] for st in stations])
+    stair = np.array([st[4] == "stairs" for st in stations])
+    if not stair.any():
         return 0.0
-    xy = np.array(pts)
-    hd = np.radians(headings(xy))
-    nrm = np.c_[-np.sin(hd), np.cos(hd)]
+    # Each stair leg is straight: every station on it takes the leg's own heading.
+    hd = np.zeros(len(stations))
+    for leg in np.unique(legs[stair]):
+        k = np.flatnonzero(stair & (legs == leg))
+        d = xy_all[k[-1]] - xy_all[k[0]]
+        hd[k] = math.atan2(d[1], d[0])
+    k = np.flatnonzero(stair)
+    xy = xy_all[k]
+    req = np.array([stations[q][3] for q in k]) - TREAD_CLEARANCE_M - CLEARANCE_MARGIN_M
+    nrm = np.c_[-np.sin(hd[k]), np.cos(hd[k])]
     offsets = np.linspace(-TREAD_HALF_M, TREAD_HALF_M, 5)
     P = np.concatenate([xy + nrm * o for o in offsets])
-    R = np.tile(np.array(req), len(offsets))
+    R = np.tile(req, len(offsets))
+    c = P[:, 0] + H
+    r = P[:, 1] + H
+    c0, r0 = np.floor(c).astype(int), np.floor(r).astype(int)
+    fc, fr = c - c0, r - r0
+    corners = [(r0, c0, (1 - fr) * (1 - fc)), (r0, c0 + 1, (1 - fr) * fc),
+               (r0 + 1, c0, fr * (1 - fc)), (r0 + 1, c0 + 1, fr * fc)]
+    # Only vertices under a stair leg's own footprint go down (from its first station to its last, within a
+    # tread's bilinear reach), and never one nearer a path station, within the path's bed: where she steps
+    # off a flight onto a path, the path keeps its level.
+    tree = cKDTree(xy_all)
+    spans = []
+    for leg in np.unique(legs[stair]):
+        q = np.flatnonzero(stair & (legs == leg))
+        a0, a1 = xy_all[q[0]], xy_all[q[-1]]
+        u = (a1 - a0) / max(np.hypot(*(a1 - a0)), 1e-9)
+        spans.append((a0, u, float(np.hypot(*(a1 - a0)))))
+    free = []
+    for a, b, _ in corners:
+        v = np.c_[b - H, a - H].astype(np.float64)
+        dist, near = tree.query(v)
+        inside = np.zeros(len(v), bool)
+        for a0, u, length in spans:
+            rel = v - a0
+            along = rel @ u
+            across = np.abs(rel @ np.array([-u[1], u[0]]))
+            inside |= (along >= 0.0) & (along <= length) & (across <= STAIR_BED_HALF_M)
+        free.append(inside & ~((~stair[near]) & (dist <= PATH_BED_HALF_M)))
     before = z.copy()
     for _ in range(60):
-        c = P[:, 0] + H
-        r = P[:, 1] + H
-        c0, r0 = np.floor(c).astype(int), np.floor(r).astype(int)
-        fc, fr = c - c0, r - r0
-        corners = [(r0, c0, (1 - fr) * (1 - fc)), (r0, c0 + 1, (1 - fr) * fc),
-                   (r0 + 1, c0, fr * (1 - fc)), (r0 + 1, c0 + 1, fr * fc)]
         g = sum(z[a, b] * w for a, b, w in corners)
         excess = g - R
         bad = excess > 0.001
         if not bad.any():
             break
         norm = sum(w[bad] ** 2 for _, _, w in corners)
-        for a, b, w in corners:
-            np.minimum.at(z, (a[bad], b[bad]), z[a[bad], b[bad]] - w[bad] * excess[bad] / norm)
+        for (a, b, w), ok in zip(corners, free):
+            m = bad & ok
+            np.minimum.at(z, (a[m], b[m]), z[a[m], b[m]] - w[m] * excess[m] / norm[m[bad]])
     return float((before - z).max())
 
 
@@ -783,6 +830,17 @@ def write_inc(route):
     for f in route["flights"]:
         L.append(f"flight({f['x'] * 100:.1f}, {f['y'] * 100:.1f}, {f['z'] * 100:.1f}, {f['yaw']:.2f}, "
                  f"{f['rise'] * 100:.2f}, {f['going'] * 100:.2f}, {f['treads']}, {f['pitch']:.0f});")
+    L.append(f"// flightEnds(foot left, centre, right, head left, centre, right): the graded ground {END_SAMPLE_M:g} m")
+    L.append(f"// beyond each flight's foot and head, on its axis and {END_SIDE_M:g} m either side (cm; one per flight, in order)")
+    for f in route["flights"]:
+        yaw = math.radians(f["yaw"])
+        up = np.array([math.cos(yaw), math.sin(yaw)])
+        side = np.array([-math.sin(yaw), math.cos(yaw)])
+        start = np.array([f["x"], f["y"]])
+        foot = start - up * END_SAMPLE_M
+        head = start + up * (f["treads"] * f["going"] + END_SAMPLE_M)
+        vals = [float(bilinear(zg, *(p + side * o))) * 100 for p in (foot, head) for o in (-END_SIDE_M, 0.0, END_SIDE_M)]
+        L.append("flightEnds(" + ", ".join(f"{v:.1f}" for v in vals) + ");")
     L.append("// landing(x, y, z, yaw, length): pivot at its front (downhill) edge's centre, top; +X up the steps")
     for lnd in route["landings"]:
         L.append(f"landing({lnd['x'] * 100:.1f}, {lnd['y'] * 100:.1f}, {lnd['z'] * 100:.1f}, {lnd['yaw']:.2f}, "

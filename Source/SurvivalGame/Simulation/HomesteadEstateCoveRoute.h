@@ -78,6 +78,14 @@ struct CoveRouteGround
     double rightZ = 0.0;
 };
 
+// The graded ground just beyond a flight's foot and head (cove_route.py's END_SAMPLE_M along its axis, on the
+// axis and END_SIDE_M either side): where she steps on and off it.
+struct CoveRouteFlightEnds
+{
+    double foot[3] = {0.0, 0.0, 0.0};
+    double head[3] = {0.0, 0.0, 0.0};
+};
+
 // "To the Cove": pivot at the post's foot; the arm points along yaw.
 struct CoveRouteFingerpost
 {
@@ -91,6 +99,7 @@ struct CoveRoute
     std::vector<CoveRouteStation> stations;
     std::vector<CoveRouteGround> ground;      // one per station, in step
     std::vector<CoveRouteFlight> flights;
+    std::vector<CoveRouteFlightEnds> flightEnds;   // one per flight, in step
     std::vector<CoveRouteLanding> landings;
     std::vector<CoveRouteKerb> kerbs;
     std::vector<CoveRouteRail> rails;

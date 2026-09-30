@@ -155,6 +155,36 @@ int main()
     for (const CoveRouteLanding& l : route.landings) Check(l.length >= CoveRouteMinLandingCm, "landings at least 1.2 m", l.length);
     Check(route.Steps() >= 100, "steps down the valley side", route.Steps());
 
+    // Where she steps on and off each flight, the graded ground is the level she steps from: no pit in front
+    // of the bottom riser (review, 2026-09-30: 12-17 cm, a 30 cm first step), nothing standing proud at the top.
+    Check(route.flightEnds.size() == route.flights.size(), "ground sampled at every flight's ends",
+          static_cast<double>(route.flightEnds.size()));
+    for (size_t i = 0; i < std::min(route.flightEnds.size(), route.flights.size()); ++i)
+    {
+        const CoveRouteFlight& f = route.flights[i];
+        const double footZ = f.z - f.rise, topZ = f.TreadZ(f.treads - 1);
+        // Onto a landing, the ground lies under its slab, 4-40 cm down (only its front edge and sides show, and
+        // those sit on the 25 cm block's skirt); onto a path, it's the path's own level.
+        bool footLanding = false, headLanding = false;
+        for (const CoveRouteLanding& l : route.landings)
+        {
+            footLanding = footLanding || Distance(Along(l.position, l.yaw, l.length), f.start) < 40.0;
+            headLanding = headLanding || Distance(l.position, f.TreadPivot(f.treads)) < 5.0;
+        }
+        for (int k = 0; k < 3; ++k)
+        {
+            const double foot = route.flightEnds[i].foot[k] - footZ, head = route.flightEnds[i].head[k] - topZ;
+            if (footLanding)
+                Check(foot >= -40.0 && foot <= -4.0, "ground under the landing at a flight's foot", foot);
+            else
+                Check(foot >= -8.0 && foot <= 2.0, "the path's level in front of a flight's bottom riser", foot);
+            if (headLanding)
+                Check(head >= -40.0 && head <= -4.0, "ground under the landing at a flight's head", head);
+            else
+                Check(head >= -8.0 && head <= 2.0, "the path's level off a flight's top tread", head);
+        }
+    }
+
     // No path runs beside or under a flight's treads (review, 2026-09-30: the path from the bench steps' foot
     // doubled back under them): every path station stays outside each flight's footprint plus the path's
     // own clear half-width, except where it meets the flight at its foot or head.
@@ -190,8 +220,12 @@ int main()
                 Check(std::max({g.leftZ, g.centreZ, g.rightZ}) <= s.walkZ - 4.0, "the graded ground clear of the treads", s.metres);
                 continue;
             }
-            const bool nearSteps = (i > 0 && route.stations[i - 1].onSteps) || (i + 1 < route.stations.size() && route.stations[i + 1].onSteps);
-            if (nearSteps) continue;      // the foot or head of a flight: the ground meets its bottom riser
+            // At a flight's foot or head the ground meets its riser; from 25 cm on, the path's own level holds
+            // (review, 2026-09-30: a pit in front of a bottom step made a 30 cm first step).
+            bool atJoin = false;
+            for (const CoveRouteFlight& f : route.flights)
+                atJoin = atJoin || Distance(s.position, f.start) < 25.0 || Distance(s.position, f.TreadPivot(f.treads)) < 25.0;
+            if (atJoin) continue;
             Check(g.centreZ <= s.walkZ + 3.0, "the path not buried", g.centreZ - s.walkZ);
             Check(g.centreZ >= s.walkZ - 10.0, "the path not sunk", g.centreZ - s.walkZ);
             const double across = std::max(std::fabs(g.leftZ - g.centreZ), std::fabs(g.rightZ - g.centreZ));

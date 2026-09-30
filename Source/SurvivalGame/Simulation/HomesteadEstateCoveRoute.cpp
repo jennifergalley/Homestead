@@ -60,6 +60,9 @@ const CoveRoute& EstateCoveRoute()
         auto flight = [&](double x, double y, double z, double yaw, double rise, double going, int treads, double pitch) {
             route.flights.push_back({{x, y}, z, yaw, rise, going, treads, pitch});
         };
+        auto flightEnds = [&](double footLeft, double foot, double footRight, double headLeft, double head, double headRight) {
+            route.flightEnds.push_back({{footLeft, foot, footRight}, {headLeft, head, headRight}});
+        };
         auto landing = [&](double x, double y, double z, double yaw, double length) {
             route.landings.push_back({{x, y}, z, yaw, length});
         };

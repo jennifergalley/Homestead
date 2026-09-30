@@ -283,7 +283,7 @@ The mouth is cut once (`cut_mouth`, recorded as `riverMouth` in the layout). Whe
 
 The on-foot way from the manor's south front door down to the sand at the head of the cove
 (`openspec/changes/add-cove-route`): 509 m and 83 m of fall, a graded path at 1 in 7 or gentler through the
-meadow's three switchbacks, then 187 granite steps in 18 flights down the valley side, and paths along the
+meadow's three switchbacks, then 191 granite steps in 18 flights down the valley side, and paths along the
 bench and valley floor to the sand. `CONTROL` in the script holds its turning points and the kind of way
 leaving each ("path" or "stairs"); `--search` re-runs the least-cost search they came from, and `--dry`
 designs and writes only `Saved/CoveRoute/` (plan and profile, leg table).
