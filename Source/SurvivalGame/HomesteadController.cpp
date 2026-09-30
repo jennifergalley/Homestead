@@ -2614,13 +2614,9 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
     }
     else
     {
-        // What she's aimed at wins; otherwise what the focus would pick for this tool (same 300 cm reach).
+        // Only what she's aimed at (the prompt names the same target, HeldToolFocus): never overgrowth
+        // behind her or off to the side, even if it's nearer and this tool clears it.
         Target = Sim.FindAimedOvergrowth(Position, Facing, Tool);
-        if (Focus == EFocus::Resource)
-            for (const auto& Node : State().resources)
-                if (Node.id == FocusId && Homestead::IsOvergrowth(Node.kind)
-                    && Homestead::FindOvergrowth(Node.kind)->tool == Homestead::ToolForItem(Tool))
-                    Target = FocusId;
     }
     if (Target == INDEX_NONE)
     {
@@ -2630,8 +2626,9 @@ void AHomesteadController::SwingAtOvergrowth(Homestead::Item Tool)
                 if (Node.id == FocusId && Homestead::IsOvergrowth(Node.kind))
                 {
                     const auto Check = Sim.CheckOvergrowth(FocusId, Tool, Position);
-                    // This tool handles it, but it's past the swing's reach (the scythe's arc is short).
-                    if (Check) Notify(Tool == Homestead::Item::Scythe ? TEXT("Step closer to mow.") : TEXT("Step closer."), true);
+                    // This tool handles it, but it isn't ahead of her (or is past the scythe's short arc).
+                    if (Check) Notify(Tool == Homestead::Item::Scythe ? TEXT("Step closer and face it to mow.")
+                        : TEXT("Turn to face it."), true);
                     else Notify(Check);
                     return;
                 }

@@ -594,7 +594,11 @@ public:
     // centre is within Overgrowth::Reach and roughly ahead of her (Overgrowth::AimHalfAngleDegrees), or -1. Tier and energy aren't checked
     // here, so an under-tier target still gets named and refused. Focus and swing both use this.
     int FindAimedOvergrowth(Point player, Point facing, Item tool) const;
-    // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
+    // The resource the prompt names with `tool` in hand, given the nearest resource `current` (-1 for
+    // none): a forageable keeps it; otherwise the aimed target wins, even over overgrowth the tool also
+    // clears behind her or off to the side, and `current` stays only when nothing is aimed at. The
+    // swing always strikes FindAimedOvergrowth, so the prompt and the blow agree.
+    int HeldToolFocus(int current, Point player, Point facing, Item tool) const;    // Grass and weeds whose centres lie in the scythe's forward arc (wider at higher tiers).
     std::vector<int> ScytheArcTargets(Point player, Point facing) const;
     static double ScytheArcRadius(ToolTier tier);
     static double ScytheArcHalfAngle(ToolTier tier);
