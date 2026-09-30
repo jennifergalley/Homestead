@@ -126,7 +126,14 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         const FRotator Rotation(0, Yaw, 0);
         const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, bPivotGround ? 0.0 : Bounds.Min.Z);
-        const FVector Ground = AtGround(Base.X + Offset.X, Base.Y + Offset.Y) + FVector(0, 0, Lift);
+        FVector Ground = AtGround(Base.X + Offset.X, Base.Y + Offset.Y) + FVector(0, 0, Lift);
+        // Soft ground cover (weeds, nettles, tall grass) sits on the soil actually drawn under its whole
+        // clump, so none of it hovers on a slope or where the Landscape differs from the heightfield.
+        const bool bSoil = !bProduce && IsSoilGrounded(Node.kind);
+        bool bOnLandscape = true;
+        const FVector2D ClumpCentre(Base.X + Offset.X, Base.Y + Offset.Y);
+        const FVector2D ClumpHalf(Bounds.GetExtent().X * Scale, Bounds.GetExtent().Y * Scale);
+        if (bSoil) Ground.Z = SoilHeight(ClumpCentre, ClumpHalf, Yaw, bOnLandscape) + Lift;
         auto* Component = NewObject<UStaticMeshComponent>(this);
         Component->SetupAttachment(GetRootComponent());
         Component->SetMobility(EComponentMobility::Movable);
@@ -162,6 +169,8 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         Component->RegisterComponent();
         Visual.Components.Add(Component);
+        // Landscape collision not streamed in yet: settle it onto the drawn soil once it is.
+        if (bSoil && !bOnLandscape) QueueSoilGrounding(Component, ClumpCentre, ClumpHalf, Yaw, Ground.Z - Lift);
         // Solid clear-out obstacles (stumps, logs, boulders, barrels, crates, middens) block her
         // until they're cleared: a box a little inside the mesh's bounds, removed with the visual.
         // It ignores the camera and visibility traces, so neither the view nor her focus snags on it.
@@ -498,9 +507,24 @@ void AHomesteadWorld::BuildOvergrowth(const Homestead::ResourceNode& Node, uint3
                 FVector2D(FMath::Cos(I * 2.1f) * 16, FMath::Sin(I * 2.1f) * 16), I * 97.0f, Random.FRandRange(1.05f, 1.3f));
         break;
     case Homestead::ResourceKind::Weeds:
-        Whole(Load(TEXT("GrassYarrowTuft"), TEXT("SM_GrassYarrowTuft")), FVector2D::ZeroVector, 0, Random.FRandRange(0.7f, 0.85f));
-        Whole(Load(TEXT("Thimbleberry"), TEXT("SM_Thimbleberry")), FVector2D(10, -6), 140, 0.35f);
+    {
+        // A pullable weed must read as a weed, never as the pasture round it (Jenny's playtest: "Weeds
+        // [E] Pull" with nothing to see). Dock, thistle-and-ragwort, or dandelion-and-plantain clumps
+        // (weed_clump.py). Until they're imported, a young nettle patch with a coarse tuft stands in:
+        // dark toothed leaves, taller than the grazed ring. Every live node draws one at its point.
+        static const TCHAR* const Clumps[] = {TEXT("SM_WeedClump_Dock"), TEXT("SM_WeedClump_Thistle"), TEXT("SM_WeedClump_Dandelion")};
+        if (UStaticMesh* Clump = QuietProp(TEXT("WeedClump"), Clumps[Variation % UE_ARRAY_COUNT(Clumps)]))
+            // Authored with the rosette's base at z 0 and a few leaf tips dipping below it: the pivot
+            // goes on the soil, so the rosette sits on it rather than hovering on its lowest leaf. Its
+            // pivot is also where the pull's thinning (ThinResource) shrinks it, so it stays seated.
+            Place(Clump, FVector2D::ZeroVector, Yaw, false, Random.FRandRange(0.95f, 1.15f), true);
+        else
+        {
+            Whole(Load(TEXT("Nettle"), TEXT("SM_NettlePatch")), FVector2D::ZeroVector, 0, Random.FRandRange(0.7f, 0.8f));
+            Whole(Load(TEXT("GrassYarrowTuft"), TEXT("SM_GrassYarrowTuft")), FVector2D(14, -10), 140, Random.FRandRange(0.9f, 1.0f));
+        }
         break;
+    }
     case Homestead::ResourceKind::Sapling:
         Whole(Load(TEXT("Hazel"), TEXT("SM_Hazel")), FVector2D::ZeroVector, 0, Random.FRandRange(0.45f, 0.6f));
         break;
