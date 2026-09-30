@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Simulation/HomesteadSimulation.h"
+#include "Simulation/HomesteadHoldings.h"
 #include "Simulation/HomesteadTravel.h"
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveRouting.h"
@@ -360,7 +361,7 @@ private:
     TArray<FPickup> Pickups;
     // The pack and everything she owns (pack, chests, dropped) at PickupRevision: a gain raises both,
     // a move between them raises only the pack.
-    Homestead::Inventory PickupPack{}, PickupOwned{};
+    Homestead::Holdings PickupHoldings;
     uint64 PickupRevision = 0;
     bool bPickupsPrimed = false;
     void UpdatePickups(float DeltaSeconds);
