@@ -153,6 +153,15 @@ public:
         const FTransform& PlantTransform);
     // Hide one component of the held produce (a stick she has already lifted from the pile).
     void HideHeldProducePart(int32 Index);
+    // The first mesh a resource's visual draws (what she pulls a handful of), or null.
+    UStaticMesh* ResourceVisualMesh(int32 Id) const;
+    // Presentation only, while she pulls weeds by hand: shrink one resource's visual to Fraction of
+    // its size (the first fistful is out) until RestoreThinnedResource puts it back (a cancelled pull)
+    // or ForgetThinnedResource lets the refresh remove it (the pull committed). One at a time; safe
+    // to call every tick.
+    void ThinResource(int32 Id, float Fraction);
+    void RestoreThinnedResource();
+    void ForgetThinnedResource();
     // Felling: call right after tree or sapling ResourceId is cleared. A standing copy stays up
     // (the rebuilt woodland no longer draws it) until DropFelledTree topples it away from AwayFrom;
     // it lies a few seconds, then sinks away. One at a time; a new felling finishes the last.
@@ -389,6 +398,9 @@ private:
     bool bInitialized = false;
     FString ResourceLayoutSignature;
     int32 HeldProduceId = INDEX_NONE;
+    int32 ThinnedResourceId = INDEX_NONE;
+    TArray<TWeakObjectPtr<USceneComponent>> ThinnedComponents;
+    TArray<FVector> ThinnedScales;
     int32 HeldPlotId = INDEX_NONE;
     bool bHeldPlotHidden = false;
     int32 HeldHarvestPlotId = INDEX_NONE;

@@ -6,12 +6,16 @@
 #include "HomesteadController.h"
 
 #include "HomesteadCharacter.h"
+#include "HomesteadWorld.h"
 
 namespace WeedPull
 {
 // Turning to the clump, the step and the drop to both knees come before the clip reports itself as
 // playing; past this, a pull that never started is dropped.
 constexpr double StartTimeoutSeconds = 4.5;
+// With the first fistful out the clump she pulls from shows at this share of its size (presentation
+// only; the simulation changes at the second root).
+constexpr float ThinnedFraction = 0.55f;
 }
 
 bool AHomesteadController::StartWeedPull(int32 NodeId, int32 PlotId, Homestead::Point Target)
@@ -29,7 +33,9 @@ bool AHomesteadController::StartWeedPull(int32 NodeId, int32 PlotId, Homestead::
         Notify(Ready);
         return true;
     }
-    if (!Avatar->PlayPullWeeds(Target)) return false;
+    // Her fistfuls look like the clump she pulls; the garden square's weeds are nettle tufts.
+    UStaticMesh* Handful = NodeId != INDEX_NONE && Landscape ? Landscape->ResourceVisualMesh(NodeId) : nullptr;
+    if (!Avatar->PlayPullWeeds(Target, Handful)) return false;
     PendingWeedNode = NodeId;
     PendingWeedPlot = PlotId;
     PendingWeedSince = GetWorld()->GetTimeSeconds();
@@ -44,6 +50,8 @@ void AHomesteadController::UpdatePendingWeedPull()
     const float Phase = Avatar ? Avatar->PullWeedsPhase() : -1.0f;
     const auto Drop = [this]()
     {
+        // A pull that never got to the second root puts the clump back as it was.
+        if (Landscape) Landscape->RestoreThinnedResource();
         PendingWeedNode = INDEX_NONE;
         PendingWeedPlot = INDEX_NONE;
         bPendingWeedStarted = false;
@@ -57,10 +65,18 @@ void AHomesteadController::UpdatePendingWeedPull()
         return;
     }
     bPendingWeedStarted = true;
-    if (Phase < AHomesteadCharacter::PullWeedsCommit) return;
+    if (Phase < AHomesteadCharacter::PullWeedsCommit)
+    {
+        if (PendingWeedNode != INDEX_NONE && Landscape && Phase >= AHomesteadCharacter::PullWeedsFirstPull)
+            Landscape->ThinResource(PendingWeedNode, WeedPull::ThinnedFraction);
+        return;
+    }
     const int32 Node = PendingWeedNode, Plot = PendingWeedPlot;
-    Drop();
     const auto Position = PlayerPoint();
-    if (Node != INDEX_NONE) Notify(Sim.Harvest(Node, Position), WoodTapA);
-    else Notify(Sim.Weed(Plot, Position), GrassStepA);
+    const auto Result = Node != INDEX_NONE ? Sim.Harvest(Node, Position) : Sim.Weed(Plot, Position);
+    // Pulled: the refresh removes the clump, so leave it thinned rather than pop it back for a frame.
+    if (Result.ok && Landscape) Landscape->ForgetThinnedResource();
+    Drop();
+    Notify(Result, Node != INDEX_NONE ? WoodTapA.Get() : GrassStepA.Get());
 }
+

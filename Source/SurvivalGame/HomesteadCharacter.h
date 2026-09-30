@@ -170,8 +170,10 @@ public:
     bool PlayHarvest(Homestead::Point Target, bool bPick, UStaticMesh* Produce);
     // Weeds pulled by hand on both knees, two fistfuls tossed back over each shoulder, no tool
     // (AN_HeroineMH_KneelPullWeeds, homestead_agent.kneel_pull_weeds). False, and nothing plays,
-    // when the clip isn't loaded; the caller then commits at once, as before.
-    bool PlayPullWeeds(Homestead::Point Target);
+    // when the clip isn't loaded; the caller then commits at once, as before. Handful is the mesh of the
+    // clump she pulls (null: the garden's nettle tuft); each fistful shows in her hand from its pull to
+    // its toss, then flies back over her shoulder and lies there until the clip ends.
+    bool PlayPullWeeds(Homestead::Point Target, UStaticMesh* Handful = nullptr);
     bool CanPullWeeds() const { return bMetaHumanActive && PullWeedsAnimation != nullptr; }
     // Seconds into the weed pull while it plays, else -1.
     float PullWeedsPhase() const;
@@ -180,6 +182,8 @@ public:
     static constexpr float PullWeedsForward = 39.0f;
     static constexpr float PullWeedsRight = 0.0f;
     static constexpr float PullWeedsCommit = 102.0f / 30.0f;
+    // EVENTS['pulled1']: the first fistful comes out, and the clump shows it (AHomesteadWorld::ThinResource).
+    static constexpr float PullWeedsFirstPull = 56.0f / 30.0f;
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
     // world keeps the gathered pile visible until then.
     bool IsStickPileOnGround() const { return PendingKneel.IsSet() || bStickPileOnGround; }
@@ -320,6 +324,14 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> GatherSticksAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherPouchAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> PullWeedsAnimation;
+    // The two pulled fistfuls: left then right hand (kneel_pull_weeds), no collision or shadow.
+    UPROPERTY() TObjectPtr<UStaticMeshComponent> PulledWeedL;
+    UPROPERTY() TObjectPtr<UStaticMeshComponent> PulledWeedR;
+    UPROPERTY() TObjectPtr<UStaticMesh> PulledWeedDefault;
+    FVector PulledWeedVelocity[2];
+    bool bPulledWeedHeld[2] = {false, false};
+    bool bPulledWeedFlying[2] = {false, false};
+    void UpdatePulledWeeds(float DeltaSeconds);
     UPROPERTY() TObjectPtr<UAnimSequence> GatherReedsAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherPlantAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> GatherHarvestAnimation;

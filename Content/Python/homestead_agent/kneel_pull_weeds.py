@@ -16,7 +16,9 @@ Timings (30 fps) are in FRAMES. The game commits the pull once, at EVENTS['pulle
 root coming out of the ground); if she's interrupted before then nothing happens in the simulation
 (AHomesteadController::UpdatePendingWeedPull, AHomesteadCharacter::PullWeedsCommit). The weed
 clump's centre lands at WEED_CENTRE (AHomesteadCharacter::PullWeedsForward / PullWeedsRight), and
-the two fistfuls come from either side of it.
+the two fistfuls come from either side of it. The game shows each fistful in the pulling hand from
+EVENTS['pulled<n>'] to EVENTS['toss<n>'], then throws it back from there (AHomesteadCharacter::UpdatePulledWeeds),
+and shrinks the clump when the first comes out.
 
 Anatomy it follows: kneeling, the thighs stand near vertical under the pelvis, so the pelvis sits
 only ~55 cm up; sitting back toward the heels drops it to ~50 cm and moves it back. A two-handed
