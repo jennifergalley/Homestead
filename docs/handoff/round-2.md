@@ -742,6 +742,24 @@ main-integrated work is not player-shipped until its stated gate passes. The orc
 implementer slot before any owner starts hands-on work; no one edits a busy lane's files or starts a
 fourth implementer.
 
+### 2026-09-29 feedback delivery ownership
+
+**Record only — no item in this snapshot is player-shipped until Integration posts its delivery
+receipt.**
+
+- **4 PM batch, integrating at `ec1a4d3b`:** garden-square outline, pickup `+N` lines, original
+  scythe swish, readable save time, Guidebook removal, Build wording, food `+N Energy`, whole coins,
+  gather poses, under-tier refusal, bilateral weed pull/clumps, manor timbers, unconfirmed
+  far-LOD hair cap, more live food, farm-to-lake trail, hearth/ambience ducking, standing-room
+  door, CC0 music/pacing and 20% rain.
+- **Next build, source-ready but awaiting Unreal evidence:** Menu chest work (dye/long bob,
+  Appearance camera, minimap/compass/clock, unified notices, auto-store, chest names and live
+  sliders; backpack in progress); Props 0930b (coins/`GrantMoney`, safe manor hall and
+  scythe grip/ground mow); Water road-grade/bridge/night/town-square/river-mouth stack, with
+  foliage motion separate.
+- **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
+  stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
+
 ## Open blockers and known bugs
 
 ### Final planning OpenSpec decision
@@ -811,12 +829,6 @@ requirement.
   three Water gives none; legacy 9 Water tile remains visible and the pail bar is full. Earlier craft
   `+1 Axe` also has no toast. Drop/chest/shop-buy plus 720p/4K remain unverified; Menu closed its
   editor before Jenny's game startup rather than attempting a 4K capture under memory pressure.
-- **Zero-stock hotbar seed/food items** — **Menu plus Props Simulation, pending and not shipped.**
-  `HotbarSnapshot` currently preserves a pinned item and icon even after `Sim.Count(pack)==0`, making
-  planted/stored turnip seeds and strawberry runners look available. Hide zero-count consumable
-  seed/food visuals and actions while retaining optional pin mapping for reacquisition; Props guards
-  against any zero-stock implicit fallback. Cover sow, stow, F5/F9, old-save pinned zero,
-  reacquisition and no accidental planting.
 - **Post-split field-book hotbar editor `a9d2e86a` is superseded, not user-accepted.** Its separate
   pinned-reference strip model (`33a4f9e5` layout/save, `102e9c87` UI, `a9d2e86a` declarations)
   has headless Native Release 10/10 and `HotbarLayoutTests` 7 scenarios / 91 checks, but is neither
