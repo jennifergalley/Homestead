@@ -450,6 +450,21 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Current-schema F5 writes a readable sandbox save"),
         [this]() { Tap(EKeys::F5); },
         [this]() { return !Controller->ToastIsError() && Controller->ReadSave(Controller->SavePath(TEXT("Homestead_Manual"))) != nullptr; });
+    Add(TEXT("Save status shows the save's local date and time in words, not an ISO UTC stamp"),
+        []() {},
+        [this]()
+        {
+            // The save was written moments ago, so it shows today's local date (en test culture).
+            static const TCHAR* Months[] = {TEXT("January"), TEXT("February"), TEXT("March"), TEXT("April"), TEXT("May"),
+                TEXT("June"), TEXT("July"), TEXT("August"), TEXT("September"), TEXT("October"), TEXT("November"), TEXT("December")};
+            const FDateTime Local = FDateTime::Now();
+            const FString Status = Controller->MenuSaveStatus();
+            Results.Add(TEXT("SAVE_STATUS ") + Status.Replace(TEXT("\n"), TEXT(" | ")));
+            return !Status.Contains(TEXT("UTC")) && !Status.Contains(TEXT("not known"))
+                && !Status.Contains(FString::Printf(TEXT("%04d-%02d-%02d"), Local.GetYear(), Local.GetMonth(), Local.GetDay()))
+                && Status.Contains(FString::Printf(TEXT("%s %d, %d"), Months[Local.GetMonth() - 1], Local.GetDay(), Local.GetYear()))
+                && (Status.Contains(TEXT("AM")) || Status.Contains(TEXT("PM")));
+        });
     Add(TEXT("A real IO error does not quit or change inventory"),
         [this, Before, OriginalRoute, Blocker]()
         {

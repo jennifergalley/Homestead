@@ -165,8 +165,12 @@ void AHomesteadController::MenuSave() { if (!bMenuSaveInProgress) QuickSave(); }
 
 FString AHomesteadController::MenuSaveStatus() const
 {
+    // LastSuccessfulSave is UTC (FDateTime::UtcNow / the save's SavedAtUtc). FText converts it once
+    // to her local time zone (DST included) in her culture: "September 28, 2026 12:01 PM" in en-US.
     const FString When = LastSuccessfulSave.GetTicks() > 0
-        ? LastSuccessfulSave.ToString(TEXT("%Y-%m-%d %H:%M:%S UTC")) : TEXT("not known in this session");
+        ? FText::AsDate(LastSuccessfulSave, EDateTimeStyle::Long).ToString() + TEXT(" ")
+            + FText::AsTime(LastSuccessfulSave, EDateTimeStyle::Short).ToString()
+        : TEXT("not known in this session");
     const FString Label = CurrentSaveLabel();
     return FString::Printf(TEXT("%s\nLast successful save: %s"),
         !Label.IsEmpty() ? *Label : PreviewLabel().IsEmpty() ? TEXT("Current homestead") : *PreviewLabel(), *When);
