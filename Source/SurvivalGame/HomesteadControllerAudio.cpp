@@ -3,6 +3,8 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadEstateGround.h"
 #include "HomesteadEstateTerrain.h"
+#include "HomesteadWorld.h"
+#include "Simulation/HomesteadRoomAudio.h"
 
 #include "AudioDevice.h"
 #include "Components/AudioComponent.h"
@@ -22,8 +24,30 @@ DEFINE_LOG_CATEGORY_STATIC(LogHomesteadFootsteps, Log, All);
 using HomesteadControllerPreferences::AudioSettingsSection;
 using HomesteadControllerPreferences::LastMusicTrackKey;
 
+namespace HomesteadAmbienceMix
+{
+// Indoors (UHomesteadWeather's roof check, eased) the woodland loop and the creek duck and dull
+// (Homestead::RoomAudio), keeping the Ambience setting as their ceiling. Set only when they move.
+void Apply(UAudioComponent* Loop, float Gain, float CutoffHz)
+{
+    if (!Loop) return;
+    if (!FMath::IsNearlyEqual(Loop->VolumeMultiplier, Gain, 1.0e-4f)) Loop->SetVolumeMultiplier(Gain);
+    const bool bMuffled = CutoffHz < static_cast<float>(Homestead::RoomAudio::OpenAirCutoffHz) - 1.0f;
+    if (Loop->bEnableLowPassFilter != bMuffled) Loop->SetLowPassFilterEnabled(bMuffled);
+    if (bMuffled && !FMath::IsNearlyEqual(Loop->LowPassFilterFrequency, CutoffHz, 1.0f)) Loop->SetLowPassFilterFrequency(CutoffHz);
+}
+}
+
 void AHomesteadController::UpdateCreekAudio()
 {
+    {
+        namespace RoomAudio = Homestead::RoomAudio;
+        const float Indoors = Landscape ? Landscape->GetIndoorMix() : 0.0f;
+        const float Gain = static_cast<float>(RoomAudio::AmbienceGain(AmbienceVolume, Indoors));
+        const float Cutoff = static_cast<float>(RoomAudio::AmbienceCutoffHz(Indoors));
+        HomesteadAmbienceMix::Apply(Ambience, Gain, Cutoff);
+        HomesteadAmbienceMix::Apply(Creek, Gain * CreekGain, Cutoff);
+    }
     if (!Creek->Sound || !bAudioEnabled) return;
     FVector Listener;
     FRotator View;

@@ -200,6 +200,8 @@ public:
     };
     bool FindUnderbrushNear(const Homestead::Simulation& Simulation, FVector2D Point, float Reach, FUnderbrushTarget& Out) const;
     static FString UnderbrushName(uint8 Species);
+    // 0 outdoors .. 1 indoors at the camera (UHomesteadWeather), for the ambience and hearth mixes.
+    float GetIndoorMix() const;
 
 private:
     friend class AHomesteadVisualPlaytest;
@@ -275,7 +277,6 @@ private:
         TArray<TWeakObjectPtr<UPrimitiveComponent>> Ignored;
         float Gate = -1.0f;
     };
-    static constexpr float HearthCrackleVolume = 0.2f;
     // Overcast (add-rain-weather): the sun's share and the sky light's lift under full cloud, the sun's
     // disc widened so what shadows remain are soft, the exposure held down (EV) and the colour taken out.
     static constexpr float OvercastSunScale = 0.12f;

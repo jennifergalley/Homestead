@@ -1,7 +1,9 @@
 #include "HomesteadWorld.h"
+#include "HomesteadWeather.h"
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldLook.h"
 #include "HomesteadLampLook.h"
+#include "Simulation/HomesteadRoomAudio.h"
 #include "Simulation/HomesteadRuinDebris.h"
 
 #include "Components/AudioComponent.h"
@@ -47,6 +49,11 @@ void AHomesteadWorld::UpdateHearthFlicker(float DeltaSeconds)
     }
 }
 
+float AHomesteadWorld::GetIndoorMix() const
+{
+    return Weather ? Weather->GetIndoorMix() : 0.0f;
+}
+
 void AHomesteadWorld::UpdateHearthSound(float DeltaSeconds)
 {
     HearthSounds.RemoveAll([](const FHearthSound& Sound) { return !Sound.Audio.IsValid(); });
@@ -72,7 +79,11 @@ void AHomesteadWorld::UpdateHearthSound(float DeltaSeconds)
         }
         const float Target = bHeard ? 1.0f : 0.0f;
         Sound.Gate = Sound.Gate < 0.0f ? Target : FMath::FInterpConstantTo(Sound.Gate, Target, DeltaSeconds, 2.5f);
-        Sound.Audio->SetVolumeMultiplier(FMath::Max(HearthCrackleVolume * Sound.Gate, 0.001f));
+        // A roofed hearth (the standing room's) stays in its room: heard from outside through the open
+        // door it keeps only RoomAudio::HearthOutdoorLeak.
+        const bool bRoofed = Weather && Weather->IsUnderShelter(Sound.Mouth);
+        const float Gain = static_cast<float>(Homestead::RoomAudio::HearthGainFor(Sound.Gate, GetIndoorMix(), bRoofed));
+        Sound.Audio->SetVolumeMultiplier(FMath::Max(Gain, 0.001f));
     }
 }
 
@@ -143,7 +154,8 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         // The roof's joists run one way only, so the walls rise past their coping (258 cm) to the deck
         // underside (279 cm): the joist ends bed into the masonry instead of leaving daylight between them.
         const bool bWallPiece = Structure.kind == Homestead::Piece::Wall || Structure.kind == Homestead::Piece::Doorway;
-        if (Kit && KitPart(Kit, bWallPiece ? 1.085f : 1.0f)) return;
+        const float HeightScale = bWallPiece ? 1.085f : 1.0f;
+        if (Kit && KitPart(Kit, HeightScale)) return;
     }
     if (Structure.kind == Homestead::Piece::Hearth)
     {
@@ -201,7 +213,7 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
             Crackle->AttenuationOverrides.dBAttenuationAtMax = -60.0f;
             Crackle->AttenuationOverrides.AttenuationShapeExtents = FVector(150.0f);
             Crackle->AttenuationOverrides.FalloffDistance = 550.0f;
-            Crackle->SetVolumeMultiplier(HearthCrackleVolume);
+            Crackle->SetVolumeMultiplier(static_cast<float>(Homestead::RoomAudio::HearthGain));
             Crackle->RegisterComponent();
             Crackle->Play(FMath::FRandRange(0.0f, 20.0f));
             Visual.Components.Add(Crackle);

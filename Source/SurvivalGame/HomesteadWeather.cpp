@@ -135,12 +135,13 @@ void UHomesteadWeather::TickWeather(float DeltaSeconds)
     if (Camera.ContainsNaN()) return;
 
     // Under a building piece's roof the material hides the streaks overhead and the rain outside
-    // stays in view; under any other roof (the store, a doorway) the camera sees none at all.
+    // stays in view; under any other roof (the store, a doorway) the camera sees none at all. The check
+    // runs in sun too: the woodland ambience and a roofed hearth mix by it as well as the rain.
     bInShelter = IsUnderShelter(Camera);
     OverheadCheckIn -= DeltaSeconds;
-    if (OverheadCheckIn <= 0.0f && (Rain > 0.0f || Overcast > 0.0f))
+    if (OverheadCheckIn <= 0.0f)
     {
-        OverheadCheckIn = 0.25f;
+        OverheadCheckIn = OverheadCheckSeconds;
         FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadWeatherOverhead), false);
         if (APawn* Pawn = Viewer->GetPawn()) Query.AddIgnoredActor(Pawn);
         bOverhead = World->LineTraceTestByChannel(Camera, Camera + FVector(0, 0, OverheadCheckCm), ECC_Visibility, Query);
