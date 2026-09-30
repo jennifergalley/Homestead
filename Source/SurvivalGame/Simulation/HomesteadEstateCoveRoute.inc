@@ -1066,6 +1066,11 @@ flightEnds(1177.0, 1176.0, 1179.1, 1341.6, 1340.3, 1337.1);
 flightEnds(1329.6, 1326.4, 1335.4, 1502.3, 1502.3, 1496.6);
 flightEnds(663.6, 661.9, 665.1, 798.8, 796.4, 798.8);
 flightEnds(794.1, 779.2, 794.1, 939.0, 942.2, 938.9);
+// corner(x, y, z, landing yaw, other yaw): where two stair legs meet at a corner landing: the turning point
+// on the landing's top, the landing's leg's up direction (the landing runs CORNER_HALF past the point along it)
+// and the other leg's up direction from the point
+corner(-51100.0, -54800.0, 3629.9, -45.00, -26.57);
+corner(-52600.0, -53300.0, 2802.0, -65.56, -45.00);
 // landing(x, y, z, yaw, length): pivot at its front (downhill) edge's centre, top; +X up the steps
 landing(-50690.7, -55004.7, 3833.4, -26.57, 135.7);
 landing(-50227.1, -55236.4, 4036.8, -26.57, 135.7);

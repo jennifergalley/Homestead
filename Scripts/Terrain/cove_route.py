@@ -841,6 +841,26 @@ def write_inc(route):
         head = start + up * (f["treads"] * f["going"] + END_SAMPLE_M)
         vals = [float(bilinear(zg, *(p + side * o))) * 100 for p in (foot, head) for o in (-END_SIDE_M, 0.0, END_SIDE_M)]
         L.append("flightEnds(" + ", ".join(f"{v:.1f}" for v in vals) + ");")
+    L.append("// corner(x, y, z, landing yaw, other yaw): where two stair legs meet at a corner landing: the turning point")
+    L.append("// on the landing's top, the landing's leg's up direction (the landing runs CORNER_HALF past the point along it)")
+    L.append("// and the other leg's up direction from the point")
+    legs = route["legs"]
+    ends = [(g["x"], g["y"]) for g in legs[1:]] + [tuple(route["control"][-1])]
+    for j in range(1, len(legs)):
+        if legs[j - 1]["kind"] != "stairs" or legs[j]["kind"] != "stairs":
+            continue
+        p = np.array([legs[j]["x"], legs[j]["y"]])
+        before = np.array([legs[j - 1]["x"], legs[j - 1]["y"]])
+        after = np.array(ends[j])
+        z = legs[j]["fromZ"]
+        # The landing belongs to the leg whose higher end is the point; the other leg climbs away from it.
+        if legs[j]["fromZ"] >= legs[j]["toZ"]:
+            u, u1 = p - after, before - p        # route descending: leg j's head, leg j-1 rises back up
+        else:
+            u, u1 = p - before, after - p
+        yaw = math.degrees(math.atan2(u[1], u[0]))
+        yaw1 = math.degrees(math.atan2(u1[1], u1[0]))
+        L.append(f"corner({p[0] * 100:.1f}, {p[1] * 100:.1f}, {z * 100:.1f}, {yaw:.2f}, {yaw1:.2f});")
     L.append("// landing(x, y, z, yaw, length): pivot at its front (downhill) edge's centre, top; +X up the steps")
     for lnd in route["landings"]:
         L.append(f"landing({lnd['x'] * 100:.1f}, {lnd['y'] * 100:.1f}, {lnd['z'] * 100:.1f}, {lnd['yaw']:.2f}, "

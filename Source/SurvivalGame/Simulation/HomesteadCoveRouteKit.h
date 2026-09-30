@@ -20,6 +20,10 @@ enum class CoveKitPiece : std::uint8_t
     Kerb,                       // SM_CoveKerb_Straight: 1 m; pivot on the path-side top edge, +Y to the drop
     RailLevel, Rail26, Rail28, Rail30,  // SM_CoveRail_*: a 1.70 m bay; pivot at the downhill post's foot
     Fingerpost,                 // SM_Fingerpost_ToTheCove: pivot at the post's foot, arm along +X
+    RailEndPost,                // SM_CoveRail_EndPost: closes a rail run's free (uphill) end; pivot at its foot
+    LandingSlab75,              // SM_CoveLandingSlab75: 0.75 m, as LandingSlab
+    LandingWedge,               // SM_CoveLandingWedge: a 21-degree sector 1.5 m long; pivot at its apex (the turn's
+                                // inner corner) on top, +X along the landing's uphill end edge, opening toward +Y
     Count
 };
 
@@ -53,10 +57,14 @@ struct CoveKitLayout
 };
 
 constexpr double CoveKitLandingSlabCm = 60.0;   // cove_steps.py
+constexpr double CoveKitLandingSlab75Cm = 75.0;
+constexpr double CoveKitWedgeDegrees = 21.0;
 constexpr double CoveKitRailBayCm = 170.0;      // cove_handrail.py BAY, in plan
 constexpr double CoveKitBlockerThicknessCm = 10.0;
 constexpr double CoveKitBlockerAboveCm = 120.0; // above the rail's pivot (the top rail is at 95 cm)
 constexpr double CoveKitBlockerBelowCm = 20.0;
+constexpr double CoveKitRailJoinCm = 45.0;      // a bay's far end this near another bay's post (its pivot) continues
+constexpr double CoveKitRailJoinZCm = 40.0;     // ... and this near in height (level bays step up a 1 in 7 path)
 
 // The layout for a route (EstateCoveRoute() by default).
 CoveKitLayout BuildCoveKitLayout(const CoveRoute& route);

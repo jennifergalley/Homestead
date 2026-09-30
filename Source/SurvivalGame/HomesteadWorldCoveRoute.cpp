@@ -34,6 +34,9 @@ const FKitMesh KitMeshes[] = {
     {TEXT("CoveRail"), TEXT("SM_CoveRail_Rake28")},
     {TEXT("CoveRail"), TEXT("SM_CoveRail_Rake30")},
     {TEXT("Fingerpost"), TEXT("SM_Fingerpost_ToTheCove")},
+    {TEXT("CoveRail"), TEXT("SM_CoveRail_EndPost")},
+    {TEXT("CoveSteps"), TEXT("SM_CoveLandingSlab75")},
+    {TEXT("CoveSteps"), TEXT("SM_CoveLandingWedge")},
 };
 static_assert(UE_ARRAY_COUNT(KitMeshes) == static_cast<int32>(Homestead::CoveKitPiece::Count), "a mesh per kit piece");
 
@@ -81,7 +84,9 @@ void AHomesteadWorld::BuildCoveRoute()
     {
         const int32 Index = static_cast<int32>(Piece.piece);
         UStaticMesh* Mesh = Meshes[Index];
-        if (IsRail(Piece.piece) || Piece.piece == Homestead::CoveKitPiece::Fingerpost)
+        // A mirrored wedge (a left-hand turn) has negative Y scale too.
+        if (IsRail(Piece.piece) || Piece.piece == Homestead::CoveKitPiece::Fingerpost || Piece.piece == Homestead::CoveKitPiece::RailEndPost
+            || Piece.piece == Homestead::CoveKitPiece::LandingWedge)
         {
             // Rails and fingerposts one component each: a mirrored rail bay's negative scale flips its winding,
             // which a component handles and an instance batch doesn't.
@@ -90,10 +95,15 @@ void AHomesteadWorld::BuildCoveRoute()
             Part->SetMobility(EComponentMobility::Movable);
             Part->SetStaticMesh(Mesh);
             Part->SetWorldTransform(Transform(Piece));
-            if (IsRail(Piece.piece))
+            if (IsRail(Piece.piece) || Piece.piece == Homestead::CoveKitPiece::RailEndPost)
             {
                 Part->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
                 Part->SetCanEverAffectNavigation(false);
+            }
+            else if (Piece.piece == Homestead::CoveKitPiece::LandingWedge)
+            {
+                Part->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+                Part->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
             }
             else
             {
