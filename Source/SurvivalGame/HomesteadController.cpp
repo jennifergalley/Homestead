@@ -2,6 +2,7 @@
 #include "HomesteadEstateGround.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadHotbarLayout.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
@@ -679,41 +680,16 @@ void AHomesteadController::ResetHotbar()
 
 void AHomesteadController::SanitizeHotbar(const TArray<int32>& Slots, int32 Selected, int32 Layout)
 {
+    // The rules (and their native tests) live in Simulation/HomesteadHotbarLayout.h.
+    const auto Clean = Homestead::SanitizeHotbarLayout(std::vector<int>(Slots.GetData(), Slots.GetData() + Slots.Num()), Layout);
     HotbarSlots.Init(-1, 10);
-    TSet<int32> Seen;
-    for (int32 Index = 0; Index < FMath::Min(10, Slots.Num()); ++Index)
-    {
-        if (Slots[Index] >= 0 && Slots[Index] < static_cast<int32>(Homestead::Item::Count)
-            && CanPinToHotbar(static_cast<Homestead::Item>(Slots[Index])) && !Seen.Contains(Slots[Index]))
-        {
-            HotbarSlots[Index] = Slots[Index];
-            Seen.Add(Slots[Index]);
-        }
-    }
-    // Older hotbars get the oil lamp once (layout 3), in the first free slot from 8.
-    if (Layout < 3 && !Seen.Contains(static_cast<int32>(Homestead::Item::OilLamp)))
-        for (int32 Step = 0; Step < 10; ++Step)
-            if (const int32 Index = (Step + 7) % 10; HotbarSlots[Index] < 0)
-            {
-                HotbarSlots[Index] = static_cast<int32>(Homestead::Item::OilLamp);
-                Seen.Add(HotbarSlots[Index]);
-                break;
-            }
-    // Older hotbars get the estate tools and pinned food once, in free slots.
-    if (Layout < 2)
-        for (const auto Item : {Homestead::Item::Billhook, Homestead::Item::Scythe, Homestead::Item::Pickaxe,
-            Homestead::Item::Berries})
-        {
-            const int32 Value = static_cast<int32>(Item);
-            const int32 Free = HotbarSlots.IndexOfByKey(-1);
-            if (!Seen.Contains(Value) && Free != INDEX_NONE) HotbarSlots[Free] = Value;
-        }
+    for (int32 Index = 0; Index < 10; ++Index) HotbarSlots[Index] = Clean[Index];
     SelectedHotbarSlot = FMath::Clamp(Selected, 0, 9);
 }
 
 bool AHomesteadController::CanPinToHotbar(Homestead::Item Item)
 {
-    return IsHotbarTool(Item) || IsFoodItem(Item) || PlantingCrop(Item).IsSet();
+    return Homestead::CanPinToHotbar(Item);
 }
 
 void AHomesteadController::PinNewSeed(Homestead::Item Item)
