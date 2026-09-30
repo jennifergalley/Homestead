@@ -72,8 +72,10 @@ constexpr double HallTimbersU = 2450.0, HallTimbersV = 1300.0, HallTimbersCleara
 bool InSafeHall(const EstateLayout& layout, Point point);
 // Whether building over `area` is refused because it lies on the ruined manor's footprint. Inside the
 // footprint only three things are allowed: furnishing the heritage standing room's own floor; a new
-// foundation of her own; and a fire, bed or chest. The last two need the whole footprint in the safe hall.
-// Walls, doorways and roofs never go up inside the ruin.
+// foundation (of her own, or the standing room's grid extended into the hall); and a fire, bed or chest.
+// The last two need the whole footprint in the safe hall. Walls, doorways and roofs never go up inside the
+// ruin. Anything wholly outside the footprint, including the standing room's grid extended south or east,
+// isn't the manor's concern.
 bool BlockedByManor(const State& state, const EstateLayout& layout, const PlacementTarget& target,
     const Footprint& area);
 

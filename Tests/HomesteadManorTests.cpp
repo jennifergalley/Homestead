@@ -269,17 +269,59 @@ void BuildingInsideTheRooflessHall()
     // Where the fallen roof timbers lie: ruin scenery, or clearable debris once that lands; either way refused.
     const Point timbers = ManorPoint(Manor::HallTimbersU, Manor::HallTimbersV);
     CHECK(!sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, timbers, 0.0, 0), timbers));
-    PlacementTarget extension = foundation;
-    extension.buildingId = room;
-    extension.cellX = 2;
-    extension.cellY = 0;
-    extension.blocker.clear();
-    for (Piece kind : {Piece::Foundation, Piece::Chest})
+    // The standing room's own grid (code review 0930b): extended south or east it lies outside the ruin
+    // and is hers to build on as before; extended north into the hall it follows the same safe hall.
+    const Building* roomFrame = FindBuilding(sim.GetState(), room);
+    const LandmarkPolygon* manor = layout.FindPolygon(Anchor::ManorFootprint);
+    CHECK(roomFrame != nullptr);
+    const auto roomCell = [&](Piece kind, int x, int y)
     {
-        extension.kind = kind;
-        CHECK(Manor::BlockedByManor(sim.GetState(), layout, extension,
-            Footprint{StructureCenter(sim.GetState(), placed), {150, 150}, 0}));
+        PlacementTarget target;
+        target.kind = kind;
+        target.buildingId = room;
+        target.cellX = x;
+        target.cellY = y;
+        target.rotation = 0;
+        return target;
+    };
+    const auto cellArea = [&](int x, int y) { return PieceFootprint(*roomFrame, Piece::Foundation, x, y, 0, true); };
+    const auto allInHall = [&](const Footprint& area)
+    {
+        for (double sx : {-1.0, 0.0, 1.0})
+            for (double sy : {-1.0, 0.0, 1.0})
+            {
+                const Point offset = RotateYaw({sx * (area.half.x - 1.0), sy * (area.half.y - 1.0)}, area.yaw);
+                if (!Manor::InSafeHall(layout, {area.center.x + offset.x, area.center.y + offset.y})) return false;
+            }
+        return true;
+    };
+    int outside = 0;
+    for (const auto& cell : {std::pair<int, int>{-1, 0}, {-1, 1}, {0, 2}, {1, 2}})
+    {
+        const Footprint area = cellArea(cell.first, cell.second);
+        CHECK(!PointInPolygon(manor->points, area.center));
+        for (Piece kind : {Piece::Foundation, Piece::Wall, Piece::Roof, Piece::Chest})
+            CHECK(!Manor::BlockedByManor(sim.GetState(), layout, roomCell(kind, cell.first, cell.second), area));
+        const Point stand = area.center;
+        const auto check = sim.CheckPlacement(roomCell(Piece::Foundation, cell.first, cell.second), stand);
+        CHECK(check.message != Manor::FootprintBlocked);
+        ++outside;
     }
+    CHECK(outside == 4);
+    int governed = 0;
+    for (int x = 2; x <= 5; ++x)
+        for (int y = 0; y <= 1; ++y)
+        {
+            const Footprint area = cellArea(x, y);
+            if (!PointInPolygon(manor->points, area.center)) continue;
+            ++governed;
+            CHECK(Manor::BlockedByManor(sim.GetState(), layout, roomCell(Piece::Foundation, x, y), area) == !allInHall(area));
+            CHECK(Manor::BlockedByManor(sim.GetState(), layout, roomCell(Piece::Wall, x, y), area));
+            CHECK(Manor::BlockedByManor(sim.GetState(), layout, roomCell(Piece::Roof, x, y), area));
+        }
+    CHECK(governed >= 6);
+    // The cell right against the room's north wall is in front of its door strip: refused.
+    CHECK(Manor::BlockedByManor(sim.GetState(), layout, roomCell(Piece::Foundation, 2, 0), cellArea(2, 0)));
 
     // The new floor and chest survive a save and reload.
     const std::string saved = sim.Serialize();

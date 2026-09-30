@@ -228,9 +228,8 @@ bool BlockedByManor(const State& state, const EstateLayout& layout, const Placem
     if (!manor || manor->points.size() < 3) return false;
     // She may still furnish the standing room itself: only on one of its own heritage floors.
     const int room = HeritageBuildingId(state);
-    if (room != 0 && target.buildingId == room)
+    if (room != 0 && target.buildingId == room && target.kind != Piece::Foundation)
     {
-        if (target.kind == Piece::Foundation) return true;
         for (const auto& piece : state.structures)
             if (piece.heritage && piece.kind == Piece::Foundation && piece.buildingId == room
                 && piece.cellX == target.cellX && piece.cellY == target.cellY) return false;
@@ -245,12 +244,13 @@ bool BlockedByManor(const State& state, const EstateLayout& layout, const Placem
         inside = inside || PointInPolygon(manor->points, at);
         allInHall = allInHall && InSafeHall(layout, at);
     }
+    // Wholly outside the ruin, including the standing room's own grid extended south or east: as before.
     if (!inside) return false;
-    // In the roofless hall: her own foundations, and a fire, bed or chest, never on the old house's
-    // building (its grid runs out into the hall) and never walls, doorways or roofs.
+    // In the roofless hall: a foundation, fire, bed or chest, whether on her own building or the standing
+    // room's grid extended north into it, and never walls, doorways or roofs.
     const bool hallPiece = target.kind == Piece::Foundation || target.kind == Piece::Fire || target.kind == Piece::Bed
         || target.kind == Piece::Chest;
-    return !(allInHall && hallPiece && (room == 0 || target.buildingId != room));
+    return !(allInHall && hallPiece);
 }
 
 std::string SaveLabel(const State& state, const char* season, int day)
