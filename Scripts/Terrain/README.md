@@ -278,6 +278,32 @@ values you settle on into the defaults in `build_ocean.py`.
 
 
 The mouth is cut once (`cut_mouth`, recorded as `riverMouth` in the layout). Where the beach is lower than 0.5 m, the bed goes to at least -0.3 m, so the sea runs up into the channel. The stream carries on to the first point whose bed is 0.6 m under the sea. Its surface there is held 3 cm under the sea, so the river ribbon slides beneath the ocean instead of stopping on dry sand or fighting the ocean surface. Afterwards: `bake_ocean.py` + `build_ocean.py` (the shore texture sees the channel), `place_water.py`, `bake_ground.py`, `bake_estate_map.py`.
+
+### Cove route (`cove_route.py`)
+
+The on-foot way from the manor's south front door down to the sand at the head of the cove
+(`openspec/changes/add-cove-route`): 506 m and 83 m of fall, a graded path at 1 in 7 or gentler through the
+meadow's three switchbacks, then 188 granite steps in 18 flights down the valley side, and paths along the
+bench and valley floor to the sand. `CONTROL` in the script holds its turning points and the kind of way
+leaving each ("path" or "stairs"); `--search` re-runs the least-cost search they came from, and `--dry`
+designs and writes only `Saved/CoveRoute/` (plan and profile, leg table).
+
+```powershell
+python Scripts\Terrain\cove_route.py            # grade once; then re-emits the route data
+python Scripts\Terrain\bake_ground.py           # wears the path, no grass on the steps
+python Scripts\Map\bake_estate_map.py           # the dashed footpath
+```
+
+It grades the heightfield once (`coveRoute.graded` in the layout): a path's bed over 1.2 m either side,
+5 cm under every tread and landing over 2.2 m, blending back over 2.5 m, never into the river channel.
+The run prints the `ApplyEstateHeightfield` rectangle (rows 1338-1540, columns 1457-1755). The full
+design lives in `cove_route.json` (the layout keeps a summary and the map's `footpaths`), and
+`Simulation\HomesteadEstateCoveRoute.inc` carries the centreline, flights, landings, kerbs, rail bays and
+fingerposts at Props' kit pivots (`add-cove-route-kit`). A later run leaves the heightfield alone and
+re-emits the data; to move the route, restore the heightfield from before it and remove `coveRoute`.
+`scatter.py` clears a fresh scatter off it after the lake. Set `HOMESTEAD_TERRAIN_WORK` to your work folder
+(the script keeps its `game_reshaped_4033.npy` in step round the route).
+
 ## Ground and meadow (`bake_ground.py`, `build_ground.py`, `build_landscape_material.py`)
 
 `bake_ground.py` (about 90 s) reads the heightfield, the paint-layer weights, `estate_layout.json` and

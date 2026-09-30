@@ -1,0 +1,111 @@
+#pragma once
+
+#include "HomesteadEstate.h"
+
+#include <vector>
+
+// The cove route: an on-foot path from the manor's fallen south front door down to the sand at the head of
+// the cove, with granite steps down the steep valley side (Scripts/Terrain/cove_route.py designs it, grades
+// the heightfield to it and generates HomesteadEstateCoveRoute.inc). The runtime builder places Props'
+// add-cove-route-kit pieces from this data; the pivots and axes below are the kit's.
+//
+// World frame as HomesteadEstate.h: Unreal centimetres, +X north, +Y east; yaw in degrees from +X toward +Y.
+namespace Homestead
+{
+struct CoveRouteStation
+{
+    Point position;           // on the centreline (cm)
+    double walkZ = 0.0;       // what she stands on: the path, or the tread or landing there (cm)
+    double bedZ = 0.0;        // the graded ground (cm): under a tread or landing, a few cm below it
+    double metres = 0.0;      // along the route from the front door
+    bool onSteps = false;
+};
+
+// A straight flight. Tread i's pivot (top face, centre of its front nosing) is start + i * (going along
+// yaw, rise); +X runs up the flight. The top tread is level with the landing or path above it.
+struct CoveRouteFlight
+{
+    Point start;              // tread 0's pivot (cm)
+    double z = 0.0;           // tread 0's top (cm)
+    double yaw = 0.0;         // up the flight
+    double rise = 0.0;        // cm
+    double going = 0.0;       // cm
+    int treads = 0;
+    double railPitch = 0.0;   // the raked rail bay it takes: 26, 28 or 30 degrees
+
+    Point TreadPivot(int i) const;
+    double TreadZ(int i) const { return z + i * rise; }
+    double PitchDegrees() const;
+};
+
+// A granite landing: pivot at its front (downhill) edge's centre on its top; +X up the steps.
+struct CoveRouteLanding
+{
+    Point position;
+    double z = 0.0;
+    double yaw = 0.0;
+    double length = 0.0;      // cm along yaw
+};
+
+// A 1 m kerb piece: pivot on its path-side top edge; +X along the path, +Y toward the drop.
+struct CoveRouteKerb
+{
+    Point position;
+    double z = 0.0;
+    double yaw = 0.0;
+};
+
+// An oak rail bay: pivot at its downhill post's foot on the path (on a flight, on the nosing line); +X along
+// the path (uphill when raked), +Y toward the drop. A mirrored bay has the drop on its -Y: scale it by -1 in
+// Y (a raked bay turned round would slope the wrong way).
+struct CoveRouteRail
+{
+    Point position;
+    double z = 0.0;
+    double yaw = 0.0;
+    double pitch = 0.0;       // 0 level, else 26, 28 or 30 degrees
+    double length = 0.0;      // cm in plan
+    bool mirrored = false;
+};
+
+// "To the Cove": pivot at the post's foot; the arm points along yaw.
+struct CoveRouteFingerpost
+{
+    Point position;
+    double z = 0.0;
+    double yaw = 0.0;
+};
+
+struct CoveRoute
+{
+    std::vector<CoveRouteStation> stations;
+    std::vector<CoveRouteFlight> flights;
+    std::vector<CoveRouteLanding> landings;
+    std::vector<CoveRouteKerb> kerbs;
+    std::vector<CoveRouteRail> rails;
+    std::vector<CoveRouteFingerpost> fingerposts;
+
+    double Length() const { return stations.empty() ? 0.0 : stations.back().metres; }
+    int Steps() const;
+    // Nearest centreline station: its index and distance (cm).
+    struct Nearest
+    {
+        int station = -1;
+        double distanceCm = 0.0;
+    };
+    Nearest NearestTo(Point world) const;
+};
+
+const CoveRoute& EstateCoveRoute();
+
+// Props' kit limits (add-cove-route-kit design.md), in cm and degrees.
+constexpr double CoveRouteMinRiseCm = 15.0;
+constexpr double CoveRouteMaxRiseCm = 17.0;
+constexpr double CoveRouteMinGoingCm = 30.0;
+constexpr double CoveRouteMaxGoingCm = 35.0;
+constexpr int CoveRouteMaxRisers = 12;
+constexpr double CoveRouteMinLandingCm = 120.0;
+constexpr double CoveRouteClearWidthCm = 140.0;
+// The route's own limit: steeper than this is on steps.
+constexpr double CoveRouteMaxPathGrade = 1.0 / 7.0;
+}
