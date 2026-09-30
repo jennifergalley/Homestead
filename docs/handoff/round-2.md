@@ -139,15 +139,18 @@ Evidence stays in `E:\CopilotScratch\e251051b-...\shots\bob-ab-contact.png` and
 
 The extended isolated A/B remains **blocked, not passed**. Old Shipping with RT on and
 `-RenderOffscreen` launched healthy for 25 seconds but exposed no HWND, so it accepted no input and
-yielded no image capture. In copied-save PIE with RT off, BobStraight loaded at the exact save
-location and LODSync reported body 0/groom 1; before allocating a 1024² orthographic depth mask,
-the editor had only 1,058 MB free RAM. Integration stopped its own editor under the pressure rule;
-free memory recovered to 8,679 MB. There is therefore no old/new visual reproduction, no bounds
-measurement and no RT-on PIE result.
+yielded no image capture, MCP or console path (working set 2.78 GB). Old/new Shipping used isolated
+UserDirs; the copied Manual save stayed unchanged. In copied-save PIE with RT off, BobStraight loaded
+at the exact save location and LODSync reported body 0/groom 1; before allocating a 1024²
+orthographic depth mask, the editor had only 1,058 MB free RAM. Integration stopped its own editor
+under the pressure rule; free memory recovered to 8,679 MB. There is therefore no old/new visual
+reproduction, no bounds measurement and no RT-on PIE result.
 
 The real physics correction is on main, but catastrophic Jenny-visible groom failure remains
 empirically unproven. The next safe experiment is a LOD 1↔3 flip with a ShowOnly SceneDepth mask
-when memory is available; it must distinguish no reproduction from a cure. The delivered Shipping
+when memory is available; it must distinguish no reproduction from a cure. Before another editor
+launch, Integration assesses lower-memory Development game-window PostMessage/capture/console support
+via `Scripts\GameWindow.ps1`, while Props assesses a cheaper groom-bounds API. The delivered Shipping
 shortcut is unchanged by this attempted investigation. Existing hair reset guidance is not
 sufficient; never use a global bald/static fallback.
 
