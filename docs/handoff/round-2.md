@@ -788,18 +788,16 @@ requirement.
   seed/food visuals and actions while retaining optional pin mapping for reacquisition; Props guards
   against any zero-stock implicit fallback. Cover sow, stow, F5/F9, old-save pinned zero,
   reacquisition and no accidental planting.
-- **Post-split field-book hotbar editor partial `a9d2e86a`** on
-  `jennifergalley-menu-hotbar-editor-split` — headless-complete, not merged or shipped. `33a4f9e5`
-  carries layout/save behavior, `102e9c87` the UI strip, and `a9d2e86a` only two
-  `HomesteadController.h` declarations; `TogglePinnedToHotbar` at line 215 stays clear of Water's
-  block. Its merge tree is conflict-free with Water garden outline `6adb9842`, but neither branch
-  is merged together. Native Release 10/10 and `HotbarLayoutTests` 7 scenarios / 91 checks pass.
+- **Post-split field-book hotbar editor `a9d2e86a` is superseded, not user-accepted.** Its separate
+  pinned-reference strip model (`33a4f9e5` layout/save, `102e9c87` UI, `a9d2e86a` declarations)
+  has headless Native Release 10/10 and `HotbarLayoutTests` 7 scenarios / 91 checks, but is neither
+  merged nor shipped. Do **not** package or complete its UE/UI validation as the accepted feature.
 
-  No Editor/Game compile, automation or PIE has run. After Integration closes the low-RAM hair A/B,
-  Menu's dedicated UI slot must run, in order: Editor compile, DirectionalNavigation baseline
-  comparison, NativeMenu chest GEOMETRY, old-save hotbar test, then 720p/4K mouse and gamepad proof.
-  Menu released Controller/header ownership; the older `ac3fe239` branch remains preserved as
-  historical partial evidence.
+  **User direction (2026-09-29 23:53):** the first inventory row *is* the Coral Island-style
+  hotbar. It is managed by moving actual item stacks into and out of that row, not by a separate
+  pinned-reference strip. Menu must revise the branch and reevaluate save/layout migration before
+  any new Editor/Game, automation, PIE or package work. `a9d2e86a`, the older `ac3fe239`, and the
+  merge-tree compatibility with Water garden outline `6adb9842` remain historical evidence only.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
