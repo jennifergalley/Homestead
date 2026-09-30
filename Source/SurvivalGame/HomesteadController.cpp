@@ -410,6 +410,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
     }
     TickStores(DeltaSeconds);
     if (bPlanning && !bBookOpen) UpdatePlacement(false);
+    UpdateGardenOutline();
     if (IsFailed() && !bWasFailed)
     {
         EndPlacement();

@@ -612,6 +612,10 @@ private:
     void TillSquareAhead(int32& X, int32& Y) const;
     // Till the square ahead with the hoe, or hoe out its weeds if it is already tilled.
     void HoeSquareAhead();
+    // The garden outline for the selected hoe or pail (HomesteadControllerGarden.cpp), every tick.
+    void UpdateGardenOutline();
+    // Why the outlined square is red (the check's refusal), for the focus line; empty when it's green.
+    FString GardenOutlineReason;
     // Plant the focused bare plot with Crop; she kneels to press in the seed.
     void PlantFocusedPlot(Homestead::CropKind Crop);
     // After HarvestCrop succeeds: she pulls or picks the crop, which stays in the ground until lifted.

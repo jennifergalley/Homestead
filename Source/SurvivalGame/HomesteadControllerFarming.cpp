@@ -4,6 +4,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadGardenTarget.h"
 
 #include "Engine/World.h"
 
@@ -12,11 +13,12 @@ using HomesteadControllerText::Text;
 
 void AHomesteadController::TillSquareAhead(int32& X, int32& Y) const
 {
-    // The hoe's blade bites about 85 cm out; probing there keeps the bite inside the chosen square.
-    const auto Position = PlayerPoint();
+    // The hoe's blade bites about 85 cm out (Homestead::HoeCellAhead, shared with the garden outline).
     const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ForwardVector;
-    X = Homestead::GardenCell(Position.x + Forward.X * 85);
-    Y = Homestead::GardenCell(Position.y + Forward.Y * 85);
+    int CellX = 0, CellY = 0;
+    Homestead::HoeCellAhead(PlayerPoint(), Forward.X, Forward.Y, CellX, CellY);
+    X = CellX;
+    Y = CellY;
 }
 
 void AHomesteadController::HoeSquareAhead()
