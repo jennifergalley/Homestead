@@ -82,11 +82,11 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / build snapshot (2026-09-29 16:54):** `main` is `1d1eebb5`; the Integration Agent
-owns editor/UAT for the Props food pair, build/PIE, then the copied-save packaged scratch run. Props is
-actively stacking food plus Bramble work and must not rebase mid-edit or duplicate food. Water/Menu
-paused partial branches rebase only at clean committed checkpoints before their next edit. The
-orchestrator continues to enforce the three-hands-on and two-Unreal-process caps.
+**Current slot / package snapshot (2026-09-29 17:10):** Integration is packaging `main` `a2607437`
+(Props food pair included) and owns machine-wide UAT plus packaged suites; all other lanes keep Unreal,
+UBT and Blender off until `packaging done`. This package excludes partial bramble/sapling/under-tier,
+Menu pickup/pail gauge/store card, and Water no-pail prompt/lake trail/night-light work. The
+orchestrator continues to enforce the three-hands-on and two-Unreal-process caps after release.
 
 ## 4 PM playable build
 
@@ -332,12 +332,12 @@ focus also needs PIE coverage. This remains a pending text correction, not shipp
 checkpoint passed three distinct Turnip sows, then a named no-seed fourth attempt, with sow/water state
 surviving F5/F9. Keep the copied-save **packaged** run as the remaining core-loop gate.
 
-**Food and Cooking Kindling partial:** **Props branch
-`jennifergalley-food-kindling` off `a785a417`, native Release 9/9, not built/PIE/shipped.** `CanEat`
-now permits a full-Food/low-Energy benefit while both-full refuses. RoastedRoots uses 2 Roots + 1
-Kindling; HerbedRoots uses 2 Roots + 1 MeadowHerb + 1 Kindling, at a lit Hearth/fire through canonical
-`CraftChange` / requirements / `AssessRecipe`. One Kindling debits only for a successful cooked batch,
-never for failed/canceled recipes, other crafts or fire fuel.
+**Food and Cooking Kindling:** **main-integrated/package-pending in `a2607437`, not shipped.**
+Props' branch was native Release 9/9 before merge. `CanEat` now permits a full-Food/low-Energy benefit
+while both-full refuses. RoastedRoots uses 2 Roots + 1 Kindling; HerbedRoots uses 2 Roots + 1
+MeadowHerb + 1 Kindling, at a lit Hearth/fire through canonical `CraftChange` / requirements /
+`AssessRecipe`. One Kindling debits only for a successful cooked batch, never for failed/canceled
+recipes, other crafts or fire fuel.
 
 Branches hand-gather as 5 Branch + 1 renewable Kindling (24-hour regrow); source text is `Fallen
 branches, saplings and old boughs`. Native coverage includes failures, no stock, fire, Energy, v12
@@ -813,6 +813,13 @@ pending, so this does not claim early Energy is fully solved.
   so travel needs a separate explicit confirmation. The signs and map invoke the same action.
   **Water** owns the generated runtime route and endpoints, **Architecture** the read-only trace,
   **Props** the original signs and **Menu** the shared travel/map UI; signs are still not wired.
+
+  **Store Map card partial `1b2b97eb`:** native 9/9 (economy 15 / scenario 588), no UE build/PIE or
+  delivery claim. Within 15 m of counter/step and 45 m of town square, Town/Store cards say already
+  there/in town rather than offering fake `X walk there 23 min`; T/X/click changes neither clock nor
+  state. Manor travel from store remains available; street/gateway Town travel remains. Cherry-pick
+  only this commit - not Menu's whole synced branch `d171526d` with unrelated partial dye/Appearance,
+  pickup and pail work. It is excluded from package `a2607437`.
 - **Wait for opening** — **Menu `88180744` shipped in the 4 PM playable build.** At a
   closed 19:00 store, B cancels with no time change; then A+A advances to the next 08:00 and returns
   Pascoe's Talk interaction. Follow-on `643a857a` rejects a candidate that would doze during
