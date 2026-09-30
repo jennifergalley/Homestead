@@ -2012,7 +2012,8 @@ FString SHomesteadMenu::PackHint() const
     {
         const auto& Row = Entries[Index];
         Subject = EntryName(Row) + (Row.Quantity > 1 ? FString::Printf(TEXT(" x%d"), Row.Quantity) : FString())
-            + TEXT("  (") + Row.Location + TEXT(")\n");
+            + TEXT("  (") + Row.Location + TEXT(")") + (Row.Status.IsEmpty() ? FString() : TEXT("   ") + Row.Status)
+            + TEXT("\n");
     }
     const bool Chest = Controller->ActiveStorageChest().IsSet();
     if (Controller->UsesGamepad())

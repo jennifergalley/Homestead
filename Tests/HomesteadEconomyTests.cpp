@@ -520,6 +520,9 @@ void PailWaterPresentation()
     CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= 9);
     const auto loaded = PresentPail(reloaded.GetState());
     CHECK(loaded.gauge && loaded.charge == PailCapacity && !loaded.hidePackWater);
+    // The pack's footer names the charge (a controller has no hover for the tooltip).
+    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 6" && PailChargeLabel(With(1, 0)) == "Water 0 / 6");
+    CHECK(PailChargeLabel(With(1, 1200)) == "Water 6 / 6" && PailChargeLabel(With(0, 4)).empty());
 }
 
 const char* filter = nullptr;void Run(const char* name, void (*test)())
