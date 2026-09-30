@@ -82,6 +82,17 @@ public:
     int32 GetDraftQuantity() const { return Amount; }
     bool IsPointerDraggingItem() const { return bPointerDraggingItem; }
     bool IsVirtualDraggingItem() const { return bVirtualDraggingItem; }
+    // The pack page's hotbar strip: its ten slot buttons, and what she has picked up to place on it
+    // (a pack stack from "Put on a hotbar slot", or a slot being moved).
+    int32 GetBookHotbarSlotCount() const { return HotbarCells.Num(); }
+    TSharedPtr<SWidget> GetBookHotbarSlot(int32 Slot) const { return HotbarCells.IsValidIndex(Slot) ? HotbarCells[Slot] : nullptr; }
+    int32 GetHeldHotbarSlot() const { return HeldHotbarSlot; }
+    bool IsPlacingOnHotbar() const { return HeldHotbarRow.IsSet(); }
+    int32 GetFocusedHotbarSlot() const { return Region == ERegion::Hotbar ? HotbarSelection : INDEX_NONE; }
+    // Keyboard / controller: A (or Enter) on a hotbar slot, as a player would.
+    void ActivateHotbarSlot(int32 Slot);
+    // "Put on a hotbar slot": hold this pack stack and move focus to the strip to choose a slot.
+    void BeginPlacingOnHotbar(const FHomesteadRow& Row);
     float GetContentScrollOffset() const { return Scroll ? Scroll->GetScrollOffset() : 0.0f; }
     float GetContentScrollBottom() const
     {
@@ -96,7 +107,7 @@ public:
     FString GetNoticeText() const { return IsNoticeShowing() ? NoticeText : FString(); }
 
 private:
-    enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery };
+    enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery, Hotbar };
     enum class EDialog { None, Exit, SaveFailed, GraphicsFailed, Unsaved, Restart, TestReset, Amount, Merge, DropWearable, Context, Quantity };
     TWeakObjectPtr<AHomesteadController> Controller;
     TSharedPtr<SVerticalBox> Root;
@@ -198,6 +209,33 @@ private:
     int32 VirtualDragSource = INDEX_NONE;
     uint64 VirtualDragRevision = 0;
     bool bVirtualDraggingItem = false;
+    // The pack page's hotbar strip (see the public accessors). HotbarSelection is the focused slot;
+    // PointerHotbarTarget the slot under a drag; HeldHotbarSlot a slot picked up to move (pointer
+    // drag or A); HeldHotbarRow a pack stack waiting for a slot.
+    TArray<TSharedPtr<SWidget>> HotbarCells;
+    int32 HotbarSelection = 0;
+    int32 PointerHotbarTarget = INDEX_NONE;
+    int32 HeldHotbarSlot = INDEX_NONE;
+    FVector2D HotbarDragStart = FVector2D::ZeroVector;
+    bool bHotbarPointerDown = false;
+    bool bHotbarPointerDragging = false;
+    bool bSuppressHotbarClick = false;
+    TOptional<FHomesteadRow> HeldHotbarRow;
+    TSharedRef<SWidget> BuildBookHotbar();
+    // One hotbar snapshot per frame for the strip's many per-paint attributes.
+    FHomesteadHotbarSlot BookHotbarSlot(int32 Slot) const;
+    mutable TArray<FHomesteadHotbarSlot> HotbarSnapshotCache;
+    mutable uint64 HotbarSnapshotFrame = MAX_uint64;
+    int32 HotbarCellAt(FVector2D Position) const;
+    FLinearColor HotbarCellColor(int32 Slot) const;
+    bool IsHotbarDropTarget(int32 Slot) const;
+    // The pack stack a drag or pick-up would put on the hotbar, if any.
+    const FHomesteadRow* HotbarCandidateRow() const;
+    void EndHotbarPointerDrag();
+    // Right-click (or Y / F) on a used slot: "Clear this slot" / Cancel.
+    void OpenHotbarSlotMenu(int32 Slot, bool bPointer);
+    void CancelHotbarHolds();
+    FString HotbarHint() const;
     enum class ECraftInput { None, Pointer, Keyboard, Controller };
     static constexpr float CraftCycleSeconds = 1.2f;
     int32 CraftHoldRecipe = INDEX_NONE;
