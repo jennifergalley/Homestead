@@ -212,13 +212,16 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         {
             const auto Piece = static_cast<Homestead::Piece>(Index);
             if (!Homestead::IsBuildable(Piece)) continue;
+            // Activating a plan closes the book and starts a placement preview (BeginPlacement): she
+            // aims it in the world and confirms there, and only then are the materials spent.
             Result.Add({ Index, Text(Homestead::PieceName(Piece)),
-                FString::Printf(TEXT("Needs: %s"), *Text(Homestead::PieceRequirements(Piece))), TEXT("plan") });
+                FString::Printf(TEXT("Needs: %s\nChoose a spot in the world, then place it. Nothing is spent until you place it."),
+                    *Text(Homestead::PieceRequirements(Piece))), TEXT("Choose a spot to build") });
         }
         FHomesteadRow TakeDown{ static_cast<int>(Homestead::Piece::Count), TEXT("Take down"),
             TEXT("Aim at anything you built and take it apart for its full cost. A chest's contents come with it; "
                  "a floor must be bare first. In build mode Y / X switches between building and taking down."),
-            TEXT("plan") };
+            TEXT("Choose what to take down") };
         TakeDown.Icon = FName(TEXT("hatchet"));
         Result.Add(MoveTemp(TakeDown));
     }
