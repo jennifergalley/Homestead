@@ -489,6 +489,9 @@ road(-49670.0, 108724.0, 9246.0, 1935.99);
 road(-49977.0, 108981.0, 9241.0, 1940.00);
 // bridge(chainage m, half length m along the road, half width m across it): no placements here
 bridge(684.00, 20.0, 6.0);
+// deck(x cm, y cm, yaw deg, deck z cm, half length cm, half clear width cm, water z cm, bed z cm):
+// the road bridge over the river, centred where the road crosses it
+deck(-1233.0, -4117.5, 102.99, 3473.8, 550.0, 180.0, 3383.8, 3357.0);
 // stop(name, chainage m): travel endpoints on the walkable road bed
 stop("Manor", 12.00);
 stop("Gateway", 820.00);

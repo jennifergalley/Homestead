@@ -356,6 +356,11 @@ private:
     // Baked decorative trees, shrubs and rocks for the Estate map (Content/SurvivalGame/Estate/Runtime).
     bool BuildEstateScenery();
     bool bEstateSceneryBuilt = false;
+    // The road bridge over the river (HomesteadWorldRoadBridge.cpp), built once with the estate scenery.
+    void BuildRoadBridge();
+    bool bRoadBridgeBuilt = false;
+    UPROPERTY()
+    FHomesteadWorldVisual RoadBridgeVisual;
     UPROPERTY()
     TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> EstateScenery;
     // Hides low cover (bushes, ferns, grass, cobbles) wherever a placed piece now stands, so none

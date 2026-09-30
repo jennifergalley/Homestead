@@ -249,6 +249,14 @@ def ground_fields(h, w, layout):
         height *= 1.0 - 0.8 * tread
     tx, ty = lm["TownSquare"][:2]
     density *= smoothstep(100.0, 140.0, np.hypot(X - tx, Y - ty))
+    # No blades up through the road bridge's planks (public_road.py records the deck).
+    bridge = layout.get("roadBridge")
+    if bridge:
+        bx, by = bridge["centre"]
+        yaw = np.radians(bridge["yaw"])
+        along = (X - bx) * np.cos(yaw) + (Y - by) * np.sin(yaw)
+        across = -(X - bx) * np.sin(yaw) + (Y - by) * np.cos(yaw)
+        density *= 1.0 - ((np.abs(along) < bridge["halfLength"] + 1.0) & (np.abs(across) < bridge["halfWidth"] + 1.4))
 
     # The derelict farm (manor lane): overgrown inside, but keep the fence line clear.
     fx0, fx1, fy0, fy1 = FARM

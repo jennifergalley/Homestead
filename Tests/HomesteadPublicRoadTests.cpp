@@ -123,6 +123,40 @@ int main()
         Check(highest - lowest < 1.0, "the road is level over the river", highest - lowest);
     }
 
+    // The road bridge: over the river where the road crosses it, on the road's line and level, clear of
+    // the water, spanning the channel into the keep-out's ramps, a cart's width between its railings.
+    {
+        const PublicRoadBridge& deck = road.deck;
+        Check(deck.valid, "the road has a bridge");
+        const PublicRoad::Nearest onRoad = road.NearestTo(deck.centre);
+        Check(onRoad.distanceCm < 50.0 && std::abs(onRoad.chainage - road.bridgeChainage) < 3.0, "bridge on the road at the crossing",
+            onRoad.distanceCm);
+        const Point ahead = road.At(onRoad.chainage + 2.0), behind = road.At(onRoad.chainage - 2.0);
+        const double roadYaw = std::atan2(ahead.y - behind.y, ahead.x - behind.x) * 180.0 / 3.14159265358979323846;
+        const double turn = std::remainder(deck.yaw - roadYaw, 360.0);
+        Check(std::abs(turn) < 5.0, "bridge along the road toward town", turn);
+        Check(deck.deckZ - deck.waterZ >= 80.0, "deck clear of the water", deck.deckZ - deck.waterZ);
+        Check(deck.waterZ > deck.bedZ, "water over the bed under the bridge", deck.waterZ - deck.bedZ);
+        Check(deck.halfLength >= 400.0 && deck.halfLength <= road.bridgeHalfAlong * 100.0 - 200.0, "deck spans the channel inside the keep-out",
+            deck.halfLength);
+        Check(deck.halfWidth >= 160.0 && deck.halfWidth <= road.bridgeHalfAcross * 100.0, "a cart's width", deck.halfWidth);
+        for (const double side : {-1.0, 1.0})
+        {
+            const Point end = deck.End(side);
+            Check(road.InBridgeKeepOut(end), "deck end in the keep-out");
+            const PublicRoad::Nearest at = road.NearestTo(end);
+            Check(at.distanceCm < 60.0, "deck end on the road's line", at.distanceCm);
+            // The road meets the deck: its graded level at each end is within a small step of the deck.
+            const auto upper = std::upper_bound(road.chainage.begin(), road.chainage.end(), at.chainage);
+            const size_t i = std::clamp<size_t>(static_cast<size_t>(upper - road.chainage.begin()), 1, road.points.size() - 1);
+            const double t = (at.chainage - road.chainage[i - 1]) / (road.chainage[i] - road.chainage[i - 1]);
+            const double level = road.groundZ[i - 1] + (road.groundZ[i] - road.groundZ[i - 1]) * t;
+            Check(std::abs(level - deck.deckZ) < 25.0, "road meets the deck without a step", level - deck.deckZ);
+        }
+        std::printf("bridge: %.1f m long, %.1f m wide, deck %.2f m, %.2f m over the water\n", deck.halfLength / 50.0,
+            deck.halfWidth / 50.0, deck.deckZ / 100.0, (deck.deckZ - deck.waterZ) / 100.0);
+    }
+
     // The signs stand on the verge, not the bed, and none in the bridge keep-out.
     Check(road.signs.size() == 3, "three signs", static_cast<double>(road.signs.size()));
     for (const PublicRoadSign& sign : road.signs)

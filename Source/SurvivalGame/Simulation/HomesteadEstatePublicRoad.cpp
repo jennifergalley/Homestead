@@ -61,6 +61,13 @@ bool PublicRoad::InBridgeKeepOut(Point world) const
     return std::abs(nearest.chainage - bridgeChainage) <= bridgeHalfAlong && nearest.distanceCm <= bridgeHalfAcross * 100.0;
 }
 
+Point PublicRoadBridge::End(double side) const
+{
+    const double radians = yaw * 3.14159265358979323846 / 180.0;
+    const double along = (side < 0.0 ? -1.0 : 1.0) * halfLength;
+    return {centre.x + std::cos(radians) * along, centre.y + std::sin(radians) * along};
+}
+
 const PublicRoad& EstatePublicRoad()
 {
     static const PublicRoad Road = [] {
@@ -79,6 +86,9 @@ const PublicRoad& EstatePublicRoad()
         auto stop = [&](const char* name, double metres) { stopChainages.emplace_back(name, metres); };
         auto sign = [&](const char* name, double metres, double x, double y, double z, double yaw) {
             road.signs.push_back({name, metres, {x, y}, z, yaw});
+        };
+        auto deck = [&](double x, double y, double yaw, double z, double halfLength, double halfWidth, double water, double bed) {
+            road.deck = {true, {x, y}, yaw, z, halfLength, halfWidth, water, bed};
         };
 #define road roadPoint
 #include "HomesteadEstatePublicRoad.inc"

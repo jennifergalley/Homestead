@@ -6,5 +6,5 @@
 - [x] 1.4 Native: 1 in 5 limit, no long straight earthwork, level over the river.
 - [x] 1.5 `ApplyEstateWeightmaps` editor helper (source; needs the editor build).
 - [ ] 1.6 Editor: `ApplyEstateHeightfield` (r16 rows 1382-3111, columns 1513-2052), `ApplyEstateWeightmaps` over the same rectangle, save proxies; `build_ground.py`; `ImportEstateMap`. Then walk the road from the manor to the gateway in PIE, with no teleports.
-- [ ] 2.1 Period wooden road bridge at the crossing (runtime-built), with native geometry tests.
+- [x] 2.1 Period wooden road bridge at the crossing: `public_road.py` measures the deck (11 m x 3.6 m, 0.9 m over the water), records `roadBridge` and clears the scatter under it; `bake_ground.py` cuts grass there; `HomesteadWorldRoadBridge.cpp` builds oak stringers, planks, kerbs, posted two-rail railings and granite abutments, with an invisible walk slab and pawn-only rail walls; native geometry tests. (Unreal code uncompiled; elevation sketch `road_bridge_elevation.png`.)
 - [ ] 2.2 PIE: cross the bridge both ways, try the railings, and look at it from both banks and from the water.

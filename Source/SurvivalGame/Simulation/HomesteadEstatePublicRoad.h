@@ -31,6 +31,23 @@ struct PublicRoadSign
     double yaw = 0.0;       // degrees; the sign's face points along this heading
 };
 
+// The road bridge over the river (Scripts/Terrain/road_grade.py holds the road level across it; public_road.py
+// measures the deck). The deck's walking surface is at deckZ, level along its length; it runs halfLength
+// either way of centre along yaw and is 2 * halfWidth wide between its railings.
+struct PublicRoadBridge
+{
+    bool valid = false;
+    Point centre;               // where the road crosses the river (cm)
+    double yaw = 0.0;           // along the road, toward town (degrees)
+    double deckZ = 0.0;         // walking surface (cm)
+    double halfLength = 0.0;    // cm
+    double halfWidth = 0.0;     // clear, between the railings (cm)
+    double waterZ = 0.0;        // the river's surface under it (cm)
+    double bedZ = 0.0;          // the river bed under it (cm)
+    // The deck's ends (cm), toward the manor and toward town.
+    Point End(double side) const;
+};
+
 struct PublicRoad
 {
     std::vector<Point> points;       // centreline (cm)
@@ -41,6 +58,7 @@ struct PublicRoad
     double bridgeHalfAcross = 0.0;   // keep-out half width across it (m)
     std::vector<PublicRoadStop> stops;
     std::vector<PublicRoadSign> signs;
+    PublicRoadBridge deck;
 
     double Length() const { return chainage.empty() ? 0.0 : chainage.back(); }
     // Point on the centreline at a chainage (clamped to the road's ends).
