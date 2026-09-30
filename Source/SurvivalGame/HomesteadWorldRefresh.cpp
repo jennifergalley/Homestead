@@ -4,6 +4,7 @@
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldVisualHelpers.h"
 #include "HomesteadGrassField.h"
+#include "Simulation/HomesteadOvergrowth.h"
 
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"

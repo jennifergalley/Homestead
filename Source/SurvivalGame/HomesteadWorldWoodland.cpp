@@ -84,10 +84,29 @@ const FRockKind RockKinds[] = {
     {TEXT("GraniteSplitBoulder/SM_GraniteSplitBoulder"), 400, 0.9f, 1.1f, 3},
 };
 constexpr int32 RockKindCount = UE_ARRAY_COUNT(RockKinds);
+
+Homestead::ResourceKind ResourceKindFor(Homestead::Generation::EntityKind Kind)
+{
+    using Entity = Homestead::Generation::EntityKind;
+    using Resource = Homestead::ResourceKind;
+    switch (Kind)
+    {
+    case Entity::Branches: return Resource::Branches;
+    case Entity::Stones: return Resource::Stones;
+    case Entity::BerryBush: return Resource::BerryBush;
+    case Entity::Roots: return Resource::Roots;
+    case Entity::Flowers: return Resource::Flowers;
+    case Entity::Reeds: return Resource::Reeds;
+    case Entity::Sapling: return Resource::Sapling;
+    case Entity::ForestTree: return Resource::ForestTree;
+    default: return Resource::Count;
+    }
+}
 }
 
 using HomesteadWorldCommon::ProfileChunkPublishing;
 using HomesteadWorldWoodland::FRockKind;
+using HomesteadWorldWoodland::FUnderbrushSpecies;
 using HomesteadWorldWoodland::RockKindCount;
 using HomesteadWorldWoodland::RockKinds;
 using HomesteadWorldWoodland::UnderbrushSpecies;
@@ -96,6 +115,7 @@ using HomesteadWorldWoodland::StartingClearing;
 using HomesteadWorldWoodland::StartingClearingBlockingRadius;
 using HomesteadWorldWoodland::StartingClearingShrubRadius;
 using HomesteadWorldWoodland::PickUnderbrush;
+using HomesteadWorldWoodland::ResourceKindFor;
 
 float AHomesteadWorld::RockRadius(uint8 Kind)
 {
