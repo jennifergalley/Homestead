@@ -818,6 +818,12 @@ requirement.
   6 GB physical free, monitored UAT abort below 1.5 GB, and one owned packaged game/copy-save test
   at a time. Six suites and a Shipping/no-listener candidate follow only if that path stays safe.
   The current Estate shortcut remains untouched until separately verified.
+
+  **Release hold — chest view:** Development native 10/10 plus packaged Hotbar 720 and NativeMenu
+  720/4K pass, but the actual screenshot shows a chest-open inventory placing the row at the
+  **bottom**. That conflicts with Jenny's "first inventory row" requirement even though the
+  pack-only view is correct. Menu must move the row above the PACK grid in chest view and update
+  tests. Shipping promotion is held; this is not ready or delivered.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
