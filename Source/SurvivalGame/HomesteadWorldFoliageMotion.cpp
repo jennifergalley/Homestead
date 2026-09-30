@@ -48,7 +48,7 @@ bool IsSwayingShrub(const UStaticMesh* Mesh)
 void AHomesteadWorld::TagSwayingShrub(UMeshComponent& Component)
 {
     using namespace HomesteadFoliageMotion;
-    const UStaticMeshComponent* Static = Cast<UStaticMeshComponent>(&Component);
+    UStaticMeshComponent* Static = Cast<UStaticMeshComponent>(&Component);
     if (!Static || !IsSwayingShrub(Static->GetStaticMesh())) return;
     Component.ComponentTags.AddUnique(SwayingShrubTag());
     SwayingShrubs.Add(&Component);
@@ -80,7 +80,7 @@ void AHomesteadWorld::TagSwayingShrub(UMeshComponent& Component)
         Component.SetMaterial(Slot, Dynamic);
     }
     if (AppliedShrubShadows == 0) Component.SetCastShadow(false);
-    if (AppliedShrubWind == 0.0f) Component.SetEvaluateWorldPositionOffset(false);
+    if (AppliedShrubWind == 0.0f) Static->SetEvaluateWorldPositionOffset(false);
 }
 
 void AHomesteadWorld::UpdateFoliageMotion()
@@ -104,7 +104,8 @@ void AHomesteadWorld::UpdateFoliageMotion()
         for (const TWeakObjectPtr<UMeshComponent>& Shrub : SwayingShrubs)
         {
             Shrub->SetCastShadow(Shadows != 0);
-            Shrub->SetEvaluateWorldPositionOffset(Wind > 0.0f);
+            // Shrubs are instanced static meshes: world position offset is a static-mesh setting.
+            if (UStaticMeshComponent* Static = Cast<UStaticMeshComponent>(Shrub.Get())) Static->SetEvaluateWorldPositionOffset(Wind > 0.0f);
         }
     }
     if (Dither != AppliedFoliageDither && GetWorld())
