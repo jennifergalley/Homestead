@@ -79,6 +79,10 @@ void AHomesteadController::InitializeAudio()
             ChopStrokes.Add(Cue);
     TreeFallThud = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/TreeFall.TreeFall"),
         nullptr, LOAD_NoWarn | LOAD_Quiet);
+    ScytheSwish = LoadObject<USoundBase>(nullptr, TEXT("/Game/SurvivalGame/Audio/Effects/ScytheSwish.ScytheSwish"),
+        nullptr, LOAD_NoWarn | LOAD_Quiet);
+    if (!ScytheSwish)
+        UE_LOG(LogTemp, Error, TEXT("The scythe's mowing cue (ScytheSwish) isn't imported, so mowing is silent. Run Scripts/bootstrap_unreal.py."));
     auto LoadPool = [](TArray<TObjectPtr<USoundBase>>& Pool, const TCHAR* Prefix, int32 Count)
     {
         Pool.Reset();

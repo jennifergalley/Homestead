@@ -3763,6 +3763,49 @@ void HaftingBootstrapAndClearing()
     CHECK(rejected.GetToolTier(ToolKind::Billhook) == ToolTier::Iron);
 }
 
+// The scythe's swish plays once per sweep that cuts something (the controller keys it on MowSweep's
+// count, at blade contact): one call mows every tuft in the arc; the same sweep again cuts nothing.
+void ScytheSweepMowsEachTuftOnce()
+{
+    const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    EstatePlacements table;
+    table.bakeVersion = 7;
+    int next = EstatePlacementIdBase + 20200;
+    const auto add = [&](ResourceKind kind, double dx, double dy)
+    {
+        table.placements.push_back({next++, kind, {at.x + dx, at.y + dy}, 0, 0, 1, 0});
+        return table.placements.back().id;
+    };
+    add(ResourceKind::TallGrass, 60, 0);
+    add(ResourceKind::Weeds, 100, 30);
+    add(ResourceKind::TallGrass, 130, -40);
+    const int bramble = add(ResourceKind::BrambleThin, 90, 0);
+    const int behind = add(ResourceKind::TallGrass, -120, 0);
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), table));
+    OK(sim.GrantItems(Item::Scythe, 1));
+    const auto arc = sim.ScytheArcTargets(at, {1, 0});
+    CHECK(arc.size() == 3);
+    const double energy = sim.GetState().energy;
+    const int hay = sim.Count(Item::Hay);
+    const auto sweep = sim.MowSweep(arc, at);
+    CHECK(sweep.mown == 3 && sweep.problem.empty());
+    for (const int id : arc) CHECK(PlacedNode(sim, id).cleared);
+    CHECK(Close(sim.GetState().energy, energy - 0.9, 1e-9));
+    CHECK(sim.Count(Item::Hay) >= hay + 2 && sim.Count(Item::Weeds) >= 1);
+
+    // The same sweep again cuts nothing, spends nothing and names why: no swish.
+    const std::string before = sim.Serialize();
+    const auto again = sim.MowSweep(arc, at);
+    CHECK(again.mown == 0 && !again.problem.empty() && sim.Serialize() == before);
+    CHECK(sim.MowSweep({}, at).mown == 0 && sim.Serialize() == before);
+
+    // A target the scythe can't cut is refused on its own; the rest of the sweep still mows.
+    const auto mixed = sim.MowSweep({bramble, behind}, at);
+    CHECK(mixed.mown == 1 && mixed.problem.find("scythe won't clear") != std::string::npos);
+    CHECK(PlacedNode(sim, behind).cleared && !PlacedNode(sim, bramble).cleared);
+}
+
 void MultiSwingTiersAndCapacity()
 {
     const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
@@ -4545,6 +4588,7 @@ int main()
     Run("the held tool's prompt and swing never pick a target behind her", HeldToolNeverStrikesBehind);
     Run("a worn billhook fells a sapling in one press", OneSwingWornSapling);
     Run("multi-swing clears, energy reserve and full-pack yields", MultiSwingTiersAndCapacity);
+    Run("one scythe sweep mows each tuft once", ScytheSweepMowsEachTuftOnce);
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
     Run("manor clear-out field placement", ManorClearoutField);
