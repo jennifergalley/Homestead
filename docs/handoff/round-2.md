@@ -82,13 +82,12 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current play/package snapshot (2026-09-29 19:20):** Jenny closed verified `Playtest-0929eve`;
-packaged PID 2328 exited naturally, there are no Unreal processes and physical free memory is 9.2 GB.
-Integration now has the exclusive editor/UBT slot (with memory watch) to build local aim `798ce775` plus
-half-rain `c8765f72` (native 9/9), then PIE behind/front target and rain component behavior. It includes
-Props' pending `[F] Pull weeds` hint before corrected Development package/six suites/copied-save smoke,
-then Shipping `-ReuseCooked` zero-listener proof. Only after that chain may the Estate shortcut retarget.
-Menu field-book hotbar and Water garden outline remain headless/partial and excluded.
+**Current package snapshot (2026-09-29 19:40):** `main` `af97075f` contains the accepted local
+aim/rain/crop-weeding picks plus docs merge. Integration's editor is closed; UAT/cook Development
+package `Build\Playtest-0929late` is running, so every lane keeps Unreal/UBT/Blender off until
+`packaging done`. Six suites plus copied-save smoke remain pending; Shipping `-ReuseCooked` no-listener
+validation follows only after Development passes. Only then may the Estate shortcut retarget. Menu
+field-book hotbar `bd0d928c` and Water garden outline remain excluded partials.
 
 ### Development firewall prompts / offline Shipping candidate
 
@@ -124,11 +123,11 @@ Native covers bramble 70 cm behind versus valid front 200 cm prompt/clear/one ch
 thicket not blocking, berry prompt retained, no aimed behind clear, turn-around success and silent tier
 refusal. Integration cherry-picked it locally as `798ce775` atop merged `main` `144acc7b`; native
 Release 9/9 passes and review confirms Swing uses only `FindAimedOvergrowth`, never `FocusId`.
-Editor/Game UBT and PIE now pass; editor is closed after a memory-tight one-editor run (~3 GB free).
-Behind thin bramble `550248` at 73 cm loses focus to forward bramble `570132` at 188 cm, and a press
-clears only the forward target for one charge. With nothing ahead it says `Turn to face it` with no
-stock/clear (normal 0.01 Energy drain); turning clears the behind target. Side thicket `550312` stays
-untouched while forward thin `550263` clears, and F5/F9 is exact.
+It is main-integrated in `af97075f`; Editor/Game build and PIE pass. Behind thin bramble `550248` at
+73 cm loses focus to forward bramble `570132` at 188 cm, and a press clears only the forward target
+for one charge. With nothing ahead it says `Turn to face it` with no stock/clear (normal 0.01 Energy
+drain); turning clears the behind target. Side thicket `550312` stays untouched while forward thin
+`550263` clears, and F5/F9 is exact.
 
 Remaining work is corrected Development repackage/six suites/copied-save smoke and final Shipping
 no-listener candidate. The provisional night build remains withheld and `Playtest-0929eve` remains the
@@ -144,7 +143,7 @@ corrected Development package/six suites plus copied-save smoke, then stages the
 `-ReuseCooked` candidate and proves its PID has no TCP/UDP listener using isolated `-UserDir` save
 round-trip/offscreen tests. Only an accepted Shipping candidate may retarget the Estate shortcut.
 
-**Final rain loudness partial `734813ad`:** native 10/10 plus local Editor/Game/PIE pass, no delivery
+**Final rain loudness `734813ad`:** main-integrated in `af97075f`, Editor/Game/PIE pass, no delivery
 claim. Rain
 `RainAudioGain` is multiplied by 0.5 linear (-6.02 dB): full default AmbienceVolume 0.7 becomes
 outdoor 0.315 / indoor 0.1225. `FadeIn(2, 1)` remains, `RainAudible` start/stop threshold is not
@@ -695,17 +694,20 @@ requirement.
   transient sampled-ground 4x4 thin 2.5 cm-raised segments at 100 cm, no collision/shadow, green/red,
   and hides for book/shop/planning/failed/water focus with no save IDs. PIE still must cover slopes,
   turned soil, adjacent plots, blocked cells, pad/HUD behavior and z-fighting before readiness.
-- **Weedy crop-plot prompt partial `15b3927e`:** Integration cherry-picked locally as `d54a14ae`;
-  native 9/9, Editor/Game build and KBM/pad PIE remain pending, with no delivery claim.
+- **Weedy crop-plot prompt `15b3927e`:** main-integrated in `af97075f`; native 9/9, Editor/Game and
+  KBM/pad PIE pass, with no delivery claim.
   Whenever `Plot.weeds >= 0.125` is world-visible, the focused plot appends `[F] Pull weeds` /
   gamepad `[X] Pull weeds` alongside E/A sow/harvest/water/error, including ripe crops; clean plots
   show no hint. F/X hand-weeds the focused plot, never sows. A bare weedy plot F-pull is yieldless,
   costs one Energy and does not sow; clean bare F refuses; ripe crops remain ripe.
 
-  The misleading Hoe `[LMB] Weed` copy is removed because its 85 cm square differs from focus. Editor
-  build and PIE must cover KBM/pad with pail/hoe/empty selection, no clean tooltip and F5/F9. Integration
-  includes it after safe aim/rain PIE and before corrected Dev/Shipping package. Bilateral kneel-weeds
-  conflicts only in native-test `Run()` append and rebases later; it is not in this package.
+  The misleading Hoe `[LMB] Weed` copy is removed because its 85 cm square differs from focus. PIE
+  verifies growing pad with pail `[RT] Water [X] Pull weeds`, hoe `[A] Water [X] Pull weeds`, and KBM
+  `[LMB] Water [F] Pull weeds`; F removes weeds for 0.8 Energy and the hint disappears. Ripe
+  `[E] Harvest [F] Pull weeds` remains ripe after weed/F5/F9; bare weedy with seeds shows
+  sow, pull-weeds and other-seed actions, and F clears yieldlessly without sowing or pack change.
+  Bilateral kneel-weeds conflicts only in native-test `Run()` append and rebases later; it is not in
+  this package.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
