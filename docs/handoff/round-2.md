@@ -574,6 +574,15 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
   copy containing `game_raw`, `game_reshaped` and `weights` to prevent unmerged terrain from
   contaminating `E:\TerrainSource\work`. After merge, rerun the idempotent scripts against the
   shared work folder before committing generated artifacts.
+- **Pending cove-route pipeline (unmerged `jennifergalley-cove-route` at `010c7003`):**
+  `cove_route.py` must run after `river_channel.py` / `road_grade.py` and before
+  `bake_ground.py` / `bake_estate_map.py`. It grades once (`coveRoute.graded` in the layout),
+  writes the full per-station route to `Scripts\Terrain\cove_route.json` and emits
+  `Simulation\HomesteadEstateCoveRoute.inc`; the indent-1 layout keeps only a summary because a
+  full centreline would add about 19,000 lines. `scatter.py` reapplies route clearing after lake
+  clearing. This is branch-only: no terrain, map, route include or native test result is an
+  integration claim. For Props' raked handrail kit, mirror far-side bays with scale Y `-1`; do not
+  rotate them 180 degrees.
 - **Field-book map destination names reserved:** **Town** and **Manor**. The future travel action and
   UI use these exact user-facing names; other map work must not reuse them.
 - **Seedsman anchors claimed (C; branch `4f21a2d8`, not on `main` yet):** `Anchor::SeedsmanDoor`
