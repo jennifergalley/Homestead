@@ -4,14 +4,15 @@ How the game's code fits together, where each feature lives, and where the known
 the Architecture Agent; coding rules are in `.github/copilot-instructions.md` ("Code practices") and
 the `homestead-*` skills under `.github/skills/`. Line numbers drift; search for the symbol.
 
-Surveyed on `main` at `8762ba46` (2026-09-28).
+Surveyed on `main` at `8762ba46` (2026-09-28); four-file split updated at `b3576693`
+(2026-09-29).
 
 ## 1. Modules at a glance
 
 | Area | Where | What it is |
 | --- | --- | --- |
 | Simulation core | `Source/SurvivalGame/Simulation/` | Plain C++17, no Unreal headers. All game rules and state: time, vitals, inventory, resources, building, crops, estate placements, overgrowth, parcels, shops, manor, save format. Built twice: into the game module by UBT and into `HomesteadSimulation.lib` by CMake for the native tests. |
-| Game module | `Source/SurvivalGame/` | Unreal presentation and input around the simulation. The big four: `AHomesteadController` (owns the simulation, input, menus, saves, audio), `AHomesteadWorld` (turns state into meshes), `AHomesteadCharacter` (heroine, MetaHuman stack, held tools), `UHomesteadAnimInstance` (code-built anim graph). |
+| Game module | `Source/SurvivalGame/` | Unreal presentation and input around the simulation. `AHomesteadController` (owns the simulation, input, menus, saves, audio), `AHomesteadWorld` (turns state into meshes), `AHomesteadCharacter` (heroine, MetaHuman stack, held tools), `UHomesteadAnimInstance` (code-built anim graph). Each of the first three classes now spans feature-specific `.cpp` files. |
 | Slate UI | `Source/SurvivalGame/UI/` | Field book (`SHomesteadMenu`), shop, hotbar, vitals, minimap/map, icons, new-game names, arrival title. |
 | Canvas HUD | `HomesteadHUD.cpp` | Calendar, key hints, toasts, focus cues, drawn every frame with `UCanvas`. |
 | In-game test routes | `Homestead*Test.cpp`, `Homestead*Playtest.cpp`, `UI/Homestead*Test.cpp` | Scripted input routes run by `AHomesteadSmokeTest` / `AHomesteadVisualPlaytest` in `-game` processes. Compiled into Development builds. |
@@ -21,6 +22,16 @@ Surveyed on `main` at `8762ba46` (2026-09-28).
 | Build/test scripts | `Scripts/*.ps1` | `Start-EditorMcp`, `Build-Game`, `Test-Native`, `Test-Game`, MCP helpers, perf lock. |
 | Native tests | `Tests/*.cpp`, `CMakeLists.txt` | CTest suites against the simulation library (eight on 2026-09-29; count them with `ctest -N`) (`Scripts\Test-Native.ps1`). `Tests/` also holds older policy/evidence scripts that nothing runs routinely. |
 | Plans | `openspec/changes/` | One change per feature, bug or refactor. |
+
+The formerly oversized presentation files are now small lifecycle entry points; members remain on
+the same classes, with no save or gameplay rule moved:
+
+| Class | Feature files to edit |
+| --- | --- |
+| `AHomesteadController` | `HomesteadController{Hotbar,Focus,Clearing,Interaction,Farming,Placement,Book,Settings,Saves,Audio,World,Water,Lamp,Input,MenuBridge,Playtest}.cpp`; existing `HomesteadControllerManor.cpp`, `HomesteadControllerSeedPouch.cpp`, `HomesteadShopFlow.cpp` and other focused files remain separate. The private `HomesteadController{Config,Helpers,Preferences,Text}.h` headers share the former file-local helpers. |
+| `AHomesteadWorld` | `HomesteadWorld{Woodland,Estate,Terrain,Regional,Trees,Resources,Structures,Garden,Lighting,Refresh,Preview,Geometry}.cpp`; `HomesteadWorld{Common,Keys,Log,Look,VisualHelpers}.h` share only presentation data and helpers. |
+| `AHomesteadCharacter` | `HomesteadCharacter{Appearance,Gather,Equipment,Actions,Movement}.cpp`; hair and groom setup live in `Appearance.cpp`. |
+| `SHomesteadMenu` | `UI/SHomesteadMenu{Pages,Details,Inventory,Map,Dialog,Focus,Input,Actions}.cpp`; `SHomesteadMenuPrivate.h` holds the existing internal Slate styles and widgets. |
 
 ## 2. Runtime flow
 
@@ -50,13 +61,15 @@ flowchart LR
   held-produce bookkeeping, then every 0.25 s `Landscape->Refresh(Sim)` and `UpdateFocus()`, then
   woodland chunk-edge preparation and autosave.
 - **Actions.** Input → controller verb (`Interact`, `Secondary`, `UseSelectedTool`,
-  `SwingAtOvergrowth`...) → animation request on the character → at the clip's contact beat the
-  controller commits the simulation command (`Sim.ClearOvergrowth(...)` etc.). A
+  `SwingAtOvergrowth`...) → simulation command and character presentation. Timed tool swings
+  commit at the clip's contact beat (`Sim.ClearOvergrowth(...)`); some hand gathers commit before
+  the kneeling presentation. A
   `Homestead::Result` comes back with `ok`, a player-facing `message` (shown as a toast) and the new
   `revision`. Commands that change state bump `Simulation::GetRevision()`.
-- **World presentation** (`AHomesteadWorld::Refresh`). No events: the world diffs state against
-  per-object **signature strings** (`FHomesteadWorldVisual::Signature`) and rebuilds the visuals whose
-  signature changed. Resources, structures, plots and drops are individual `UStaticMeshComponent`s;
+- **World presentation** (`AHomesteadWorld::Refresh` in `HomesteadWorldRefresh.cpp`). No events:
+  a revision/visual-input integer key skips unchanged refreshes; per-object signatures
+  (`FHomesteadWorldVisual::Signature`) rebuild only visuals whose inputs changed. Resources,
+  structures, plots and drops are individual `UStaticMeshComponent`s;
   scenery, ground cover and trees are HISM batches. Estate scenery comes from
   `Content/SurvivalGame/Estate/Runtime/EstateScenery.bin` (`HSC1`, `BuildEstateScenery`) and is
   hidden under built pieces and live resources.
@@ -76,8 +89,9 @@ flowchart LR
 | Saves | `<SaveGames>\Estate\` | `<SaveGames>\` |
 
 Woodland-only code: chunk generation and regional descriptors (all of `Simulation/HomesteadWorldGeneration*`,
-`HomesteadRegional*`), `AHomesteadWorld::BuildTerrain/BuildTerrainChunk/BuildDecorations/*TreeBatches/Stage*`,
-`GenerateRocks/GenerateUnderbrush`, the controller's chunk-edge preparation, and most in-game test
+`HomesteadRegional*`), the terrain, regional, woodland and tree-batch methods in
+`HomesteadWorld{Terrain,Regional,Woodland,Trees}.cpp`, the controller's chunk-edge preparation,
+and most in-game test
 routes (they still load the woodland map and its knife/reeds content). The MVP survival line
 (`mvp-survival`) and the MVP woodland biome (placement ids 560000+) depend on it. **Ask the
 orchestrator before removing any of it.**
@@ -150,19 +164,19 @@ reads only values the game thread copied into the proxy.
 | Vitals, time, weather, sleep | `HomesteadSimulation.cpp` (`Advance`, `Step`, `Sleep`) | `SHomesteadVitals`, HUD calendar |
 | Items, pack, chests | `HomesteadItems`, `HomesteadSimulation.cpp` (transfers, layout) | `UI/HomesteadMenuInventory.cpp`, `SHomesteadMenu`, `SHomesteadIcon` glyphs |
 | Crafting and hafting | `CraftChange`, `Recipe` | `MenuCraftRecipe`/`MenuCraftBeat`, craft animation layer |
-| Estate clearing | `HomesteadOvergrowth` | `SwingAtOvergrowth`/`LandOvergrowthSwing` (controller), `BuildOvergrowth` (world) |
-| Foraging, berries, spring flowers | `Regrowth`/`Yield` in `HomesteadSimulation.cpp` | `BuildResource` |
-| Trees and felling | resources `ForestTree` | `PresentFelling`/`UpdatePendingFell`, `BeginFelling`/`UpdateFallingTree` |
-| Building and furniture | `Place`, `Deconstruct`, `BuildCost` | `BeginPlacement`/`UpdatePlacement`, `BuildStructure` |
-| Garden plots | `Till`, `Plant`, `Water`, `Weed` | `TillSquareAhead`, `BuildPlot` |
-| Tools and hotbar | `ToolKind`, `toolTiers` | `HotbarSnapshot`, `SHomesteadHotbar`, held-tool attachment in `AHomesteadCharacter` |
+| Estate clearing | `HomesteadOvergrowth` | `HomesteadControllerClearing.cpp` (`SwingAtOvergrowth`, `LandOvergrowthSwing`), `HomesteadWorldResources.cpp` (`BuildOvergrowth`) |
+| Foraging, berries, spring flowers | `Regrowth`/`Yield` in `HomesteadSimulation.cpp` | `HomesteadWorldResources.cpp` (`BuildResource`) |
+| Trees and felling | resources `ForestTree` | `HomesteadControllerClearing.cpp` (`PresentFelling`), `HomesteadWorldTrees.cpp` (`BeginFelling`, `UpdateFallingTree`) |
+| Building and furniture | `Place`, `Deconstruct`, `BuildCost` | `HomesteadControllerPlacement.cpp`, `HomesteadWorldStructures.cpp` (`BuildStructure`) |
+| Garden plots | `Till`, `Plant`, `Water`, `Weed` | `HomesteadControllerFarming.cpp` (`TillSquareAhead`), `HomesteadWorldGarden.cpp` (`BuildPlot`) |
+| Tools and hotbar | `ToolKind`, `toolTiers` | `HomesteadControllerHotbar.cpp` (`HotbarSnapshot`), `SHomesteadHotbar`, held-tool attachment in `HomesteadCharacterEquipment.cpp` |
 | Money and shop | `HomesteadShops` | `SHomesteadShop`, `AHomesteadGeneralStore`, `AHomesteadShopkeeper`, `HomesteadShopFlow.cpp` |
 | Manor, names, journal | `HomesteadManor` | `HomesteadControllerManor.cpp`, `AHomesteadManorRuin`, `SHomesteadNames`, `SHomesteadArrival` |
 | Parcels, map, minimap | `HomesteadParcels` | `UHomesteadMapComponent`, `UI/HomesteadMap*`, `SHomesteadMinimap`, `SHomesteadMapView` |
-| Water, creek, pail | water probe (`SetWaterProbe`) | `WaterEdgeDistance`, `AHomesteadWaterRibbon`, creek audio |
-| Heroine look and wardrobe | wearables | `AHomesteadCharacter::LoadMetaHumanStack`, `HomesteadAppearance`, `HomesteadWardrobe*` |
+| Water, creek, pail | water probe (`SetWaterProbe`) | `HomesteadControllerWater.cpp` (`WaterEdgeDistance`), `AHomesteadWaterRibbon`, `HomesteadControllerAudio.cpp` (creek audio) |
+| Heroine look and wardrobe | wearables | `HomesteadCharacterAppearance.cpp` (`LoadMetaHumanStack`), `HomesteadAppearance`, `HomesteadWardrobe*` |
 | Animation | none | `UHomesteadAnimInstance`, clips authored by `homestead_agent/*.py` |
-| Audio | none | controller `InitializeAudio`, music playlist, footsteps via `UHomesteadFootstepNotify` |
+| Audio | none | `HomesteadControllerAudio.cpp` (`InitializeAudio`, playlist), footsteps via `UHomesteadFootstepNotify` |
 | Character lab | none | `HomesteadLab.{h,cpp}` (`-HomesteadCharacterLab`) |
 
 ## 8. Offline pipelines and baked data
@@ -184,7 +198,7 @@ Re-bake order after `scatter.py` changes: `bake_ground.py`, `build_ground.py`, t
 
 ## 9. Tests
 
-- **Native (authoritative, fast):** `Scripts\Test-Native.ps1 -Configuration Release`, every suite (8 after the lamp), about
+- **Native (authoritative, fast):** `Scripts\Test-Native.ps1 -Configuration Release`, every suite (9 at the four-file split), about
   3 minutes. Add a suite with `add_executable` + `add_test` in `CMakeLists.txt`. New simulation `.cpp`
   files must also be added to the `HomesteadSimulation` library there.
 - **In-game routes:** `Scripts\Test-Game.ps1` launches `-game -HomesteadSmokeTest` with a route flag
@@ -195,13 +209,16 @@ Re-bake order after `scatter.py` changes: `bake_ground.py`, `build_ground.py`, t
   (for example `Test-AuthoringProbePolicy.ps1` for the packaged QA guard). Nothing runs them
   routinely. That process's receipts stay in `docs/research/`.
 
-## 10. Size, hotspots and debt (measured 2026-09-28)
+## 10. Size, hotspots and debt (surveyed 2026-09-28; split 2026-09-29)
 
-Largest files (lines): `HomesteadWorld.cpp` 4009, `HomesteadController.cpp` 3965,
-`HomesteadSimulation.cpp` 2992, `SHomesteadMenu.cpp` 2983, `HomesteadNativeMenuTest.cpp` 2549,
-`HomesteadCharacter.cpp` 2337 (the 3336-line `FernSpike.cpp` editor probe was removed the same day).
-`HomesteadController.h` declares about 440 members (some 300 of them functions). Churn in the last 14
-days: controller 79 commits, world 59, character 48, menu 46.
+Immediately before the split, `HomesteadController.cpp` was 4778 lines, `HomesteadWorld.cpp`
+4962, `HomesteadCharacter.cpp` 2833 and `UI/SHomesteadMenu.cpp` 3206; their lifecycle files
+now contain 579, 188, 173 and 270 lines respectively. All 185 controller, 71 world, 92 character
+and 96 menu member-function bodies were preserved. Each family passed native Release 9/9 and
+the Editor and Game unity targets separately before being integrated on `main` through `b3576693`.
+The classes and their broad headers are still large; moving the methods reduced hot-file churn
+and translation-unit size, not their public surface. `HomesteadController.h` declared about
+440 members at the original survey.
 
 Longest functions: test route builders (`PrepareGeneratedWorldChecks` 1049 lines, `PrepareFullLoop`
 919, `PrepareHotbarChecks` 867), `AHomesteadWorld::BuildDecorations` 474,
@@ -211,12 +228,10 @@ Longest functions: test route builders (`PrepareGeneratedWorldChecks` 1049 lines
 Known debt, highest payoff first (the plan is in `openspec/changes/improve-code-health-between-rounds`):
 
 1. ~~Positional item stocks in saves~~: fixed by `harden-save-item-stocks` (version 13).
-2. **God classes on the hottest files.** Controller, world and character mix many features; every
-   lane edits them, so they cause most merge conflicts and every change recompiles ~4k lines. Split
-   by feature into more `.cpp` files of the same class (as `HomesteadControllerManor.cpp` already
-   does) between rounds.
-3. **World refresh cost.** `Refresh` runs 4× a second and formats a signature `FString` for every
-   resource, structure, plot and drop, even when the simulation revision hasn't changed.
+2. ~~Oversized hot translation units~~: split by feature through `b3576693`; the broad class
+   headers and cross-feature interfaces remain candidates for the separate header-fan-out step.
+3. ~~Unconditional world refresh work~~: the Performance Agent's revision/visual-input key and
+   integer signatures reduced measured game-thread p95 from about 15 ms to 8 ms.
 4. **Colour and font constants are copied**, not shared: the brass gold `(0.92, 0.74, 0.43)` is
    defined 14 times under different names (`MenuGold`, `ShopGold`, `NameGold`, `MvGold`...) to dodge
    unity-build clashes. `UI/HomesteadPalette.h` is the shared home.
