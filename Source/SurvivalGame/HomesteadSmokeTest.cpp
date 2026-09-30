@@ -835,8 +835,10 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         return;
     }
     // The legacy skin/eye material contract doesn't apply to routes that run the MetaHuman heroine.
+    // Nor while the dye chooser dresses her in an unsaved preview (checked after Apply or Cancel).
     const bool MaterialsValid = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
         || FParse::Param(FCommandLine::Get(), TEXT("HomesteadMetaHuman"))
+        || (Controller->NativeMenu.IsValid() && Controller->NativeMenu->IsDyeChooserOpen())
         || (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
             ? VerifyNativeMenuPresentation() : VerifyPresentationMaterials());
     if (!MaterialsValid)

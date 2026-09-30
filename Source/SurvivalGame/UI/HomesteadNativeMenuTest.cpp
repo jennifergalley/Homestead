@@ -689,9 +689,15 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
                 && !Shop->IsChoosingQuantity() && Shop->GetStatus().StartsWith(TEXT("That's 1,500 coins;"))
                 && Controller->Simulation().Serialize() == BeforeBackpack->Serialize();
         });
+    const auto BeforeCounter = MakeShared<Homestead::Point>();
     Add(TEXT("With 1,500 coins she buys it once: her pack holds 240 and the row is gone"),
-        [this]()
+        [this, BeforeCounter]()
         {
+            // Trading needs her at the counter; she goes back afterwards.
+            *BeforeCounter = Controller->PlayerPoint();
+            const auto& Shop = Controller->State().shops.front();
+            Teleport({Shop.counterX + std::cos(FMath::DegreesToRadians(Shop.counterYaw)) * 150.0,
+                Shop.counterY + std::sin(FMath::DegreesToRadians(Shop.counterYaw)) * 150.0});
             Controller->Sim.GrantMoney(Homestead::Backpack::Price);
             Controller->ShopScreen->Refresh();
             Controller->ShopScreen->Choose(Controller->ShopScreen->GetSelection());
@@ -707,7 +713,12 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
                 && Controller->MenuInventorySummary().Contains(TEXT("/ 240"));
         });
     Add(TEXT("Put the simulation back as it was before the backpack"),
-        [this, BeforeBackpack]() { Controller->Sim = *BeforeBackpack; Controller->ShopScreen->Refresh(); },
+        [this, BeforeBackpack, BeforeCounter]()
+        {
+            Controller->Sim = *BeforeBackpack;
+            Controller->ShopScreen->Refresh();
+            Teleport(*BeforeCounter);
+        },
         [this]() { return !Controller->State().leatherBackpack && Controller->Sim.PackCapacity() == Homestead::InventoryCapacity; });
     Add(TEXT("Leave the shop and return to Settings, as before the shop check"),
         [this]() { Controller->CloseShopScreen(); Controller->OpenBook(4); },
@@ -765,6 +776,27 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { return Controller->NativeMenu->GetTabPageCount() == 5
             && !Controller->NativeMenu->HasTabForPage(3); });
     Capture(TEXT("native-appearance"));
+    // One real wheel notch over the book zooms Appearance exactly once (the preprocessor route only).
+    const auto ArmBefore = MakeShared<float>(0.0f);
+    Add(TEXT("One wheel notch over the book zooms Appearance by exactly one step"),
+        [this, ArmBefore]()
+        {
+            auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            if (!Avatar) { Finish(false, TEXT("No heroine for the Appearance zoom check.")); return; }
+            *ArmBefore = Avatar->AppearanceArm;
+            const auto Geometry = Controller->NativeMenu->GetCachedGeometry();
+            const FVector2D Over = Geometry.GetAbsolutePosition() + FVector2D(Geometry.GetAbsoluteSize().X * 0.15f, Geometry.GetAbsoluteSize().Y * 0.5f);
+            TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+            auto& Slate = FSlateApplication::Get();
+            Slate.SetCursorPos(Over);
+            Slate.ProcessMouseWheelOrGestureEvent(FPointerEvent(0, Over, Over, TSet<FKey>(), EKeys::MouseWheelAxis, 1.0f, FModifierKeysState()), nullptr);
+        },
+        [this, ArmBefore]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && FMath::IsNearlyEqual(Avatar->AppearanceArm,
+                FMath::Clamp(*ArmBefore - AHomesteadCharacter::AppearanceZoomStep, AHomesteadCharacter::AppearanceArmMin, AHomesteadCharacter::AppearanceArmMax));
+        });
     Add(TEXT("Return to Settings without changing simulation or camera"),
         [this, Before]()
         {
@@ -1258,6 +1290,35 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
     Add(TEXT("Capture admitted dyed wardrobe"),
         [this]() { Screenshot(TEXT("native-wardrobe-dyed")); },
         [this]() { return VerifyNativeMenuPresentation(); }, 0.8f);
+    // A garment in her pack previews too: she tries it on in the copy, and nothing is saved.
+    const auto PackDyeBefore = MakeShared<FString>();
+    const auto PackDyeTarget = MakeShared<int32>(0);
+    const auto PackDyeRestore = MakeShared<Homestead::Simulation>();
+    const auto PackDyeShown = MakeShared<int32>(INDEX_NONE);
+    const auto PackDyeSaveKept = MakeShared<bool>(false);
+    Add(TEXT("Previewing a dye on the tunic while it's in her pack dresses her in it without saving"),
+        [this, Tunic, PackDyeBefore, PackDyeTarget, PackDyeRestore, PackDyeShown, PackDyeSaveKept]()
+        {
+            *PackDyeRestore = Controller->Sim;
+            if (!Controller->Sim.UnequipWearable(*Tunic, Controller->Sim.GetRevision()).ok)
+            { Finish(false, TEXT("Could not put the tunic in her pack for the preview check.")); return; }
+            *PackDyeBefore = FString(UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str()));
+            *PackDyeTarget = (Controller->Simulation().GetWearable(*Tunic)->dye + 1) % 4;
+            if (!Controller->MenuPreviewDye(*Tunic, *PackDyeTarget)) { Finish(false, TEXT("The pack-garment dye preview was refused.")); return; }
+            // What the preview dressed her in, then her own clothes back in the same frame, so the
+            // saved-look contract holds between steps.
+            if (const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn())) *PackDyeShown = Avatar->PendingMetaHumanTunicDye;
+            *PackDyeSaveKept = Controller->Simulation().GetWearable(*Tunic)->owner == Homestead::WearableOwner::Carried
+                && FString(UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str())) == *PackDyeBefore;
+            Controller->Sim = *PackDyeRestore;
+            Controller->MenuEndDyePreview();
+            Controller->NativeMenu->Refresh();
+        },
+        [PackDyeTarget, PackDyeShown, PackDyeSaveKept]() { return *PackDyeShown == *PackDyeTarget && *PackDyeSaveKept; });
+    Add(TEXT("Ending the preview puts her own clothes back, and she wears the tunic again"),
+        []() {},
+        [this, Tunic]() { return Controller->State().equipment[static_cast<int32>(Homestead::EquipmentSlot::Torso)] == *Tunic
+            && VerifyNativeMenuPresentation(); });
 
     for (int32 Id : {0, 1, 1, 1, 1, 2, 3})
     {
@@ -1516,10 +1577,12 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             && Controller->ChestDisplayName(*Chest) == TEXT("Linen press")
             && Controller->MenuInventorySummary().StartsWith(TEXT("Linen press:")); });
     const auto StoreExpected = MakeShared<Homestead::Simulation>();
+    const auto BeforeStore = MakeShared<Homestead::Simulation>();
     Add(TEXT("T stores carried Stone onto the chest's Stone stack and nothing else"),
-        [this, Chest, StoreExpected]()
+        [this, Chest, StoreExpected, BeforeStore]()
         {
             auto& Sim = Controller->Sim;
+            *BeforeStore = Sim;
             const Homestead::Point At = Controller->PlayerPoint();
             if (!Sim.GrantItems(Homestead::Item::Stone, 3).ok) { Finish(false, TEXT("Could not grant the Stone fixture.")); return; }
             int32 Stone = 0;
@@ -1541,6 +1604,10 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, StoreExpected]() { Tap(EKeys::T); },
         [this, StoreExpected]() { return Controller->ToastIsError()
             && Controller->Simulation().Serialize() == StoreExpected->Serialize(); });
+    Add(TEXT("Put the chest back as it was before the auto-store checks (keeping its name)"),
+        [this, BeforeStore]() { Controller->Sim = *BeforeStore; Controller->NativeMenu->Refresh(); },
+        [this, Chest]() { return Controller->Simulation().ChestUsedCapacity(*Chest) == 0
+            && Controller->ChestDisplayName(*Chest) == TEXT("Linen press"); });
     Add(TEXT("Back clears the exact storage session before ordinary Inventory"),
         [this, Branches]()
         {

@@ -260,14 +260,9 @@ void SHomesteadMenu::ClearAppearanceOrbit()
 
 FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event)
 {
-    // On Appearance the wheel zooms. Handling it here stops it reaching the viewport, so this is
-    // the zoom route whenever the pointer is over the book (HandleAppearanceKey covers the rest).
-    if (SeenPage == 6 && Dialog == EDialog::None)
-    {
-        if (Controller.IsValid() && Controller->MenuAcceptsPhysicalInput() && Event.GetWheelDelta() != 0.0f)
-            Controller->MenuZoomAppearance(Event.GetWheelDelta() > 0 ? 1.0f : -1.0f);
-        return FReply::Handled();
-    }
+    // On Appearance the wheel zooms through one route only: the menu's input preprocessor sends every
+    // notch to HandleAppearanceKey (as the Map tab does), so here it's only kept from scrolling.
+    if (SeenPage == 6 && Dialog == EDialog::None) return FReply::Handled();
     if (Dialog == EDialog::Quantity)
     {
         if (Controller.IsValid() && Controller->MenuAcceptsPhysicalInput())
