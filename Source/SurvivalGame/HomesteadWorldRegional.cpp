@@ -4,6 +4,7 @@
 #include "HomesteadEstateTerrain.h"
 
 #include "Async/Async.h"
+#include "Async/ParallelFor.h"
 #include "Components/SceneComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/World.h"
