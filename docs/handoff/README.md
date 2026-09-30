@@ -217,9 +217,12 @@ Integration merge notes:
 - Run the integration check with `Scripts\Test-Native.ps1 -Configuration Release` (about 3 min).
   Debug takes 16-19 min here.
 
-The separate MVP survival line (`mvp-survival`) packages its own build to
-`E:\Repos\HomesteadMVP\Windows`, only for real deliverables, and tells the orchestrator before
-starting.
+**Estate-only delivery (Jenny, 2026-09-30):** `Homestead Estate.lnk` is the only active game
+shortcut. The retired survival MVP is archived at
+`archive/mvp-survival-20260930` (`93612cdf`); its `E:\Repos\HomesteadMVP` package and saves are
+preserved archive data, not a packaging target. The retained
+`jennifergalley-mvp-woodland-biome` branch is Water's active Estate Seasons handoff
+(`b19a0ad0`), despite its historical name.
 
 ## Playtest builds (schedule)
 
@@ -233,7 +236,7 @@ On weekends, also cut one as soon as features she'd notice land.
    process slots.
 3. The integration session packages `main` (`Build-Game.ps1 -Package`), runs the packaged suites, and
    retargets the shortcut to its `Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
-   keeping the Homestead icon. It never touches `Homestead.lnk`.
+   keeping the Homestead icon. `Homestead Estate.lnk` is the only active desktop game shortcut.
    **Before retargeting to a new package folder, copy Jenny's saves and settings across:** packaged
    Development builds keep them inside the package (`<package>\SurvivalGame\Saved\SaveGames`, with an
    `Estate\` subfolder, and `Saved\Config`). Copy both from the old package into the new one, or she

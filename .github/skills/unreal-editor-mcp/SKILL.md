@@ -36,8 +36,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests, compile-check
   with `Scripts\Invoke-UnrealBuild.ps1`, commit and push, then send `[ready]` to the
   orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The orchestrator only
-  coordinates and never builds. The separate `mvp-survival` line packages its own deliverables to
-  `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
+  coordinates and never builds.
 - **At most 2 Unreal processes on the machine** (Jenny, 2026-09-28; it was 3), counting editors,
   packaged games and commandlets (`UnrealEditor-Cmd` imports and bootstraps too). Each editor commits
   15-17 GB of memory: with three open, the 32 GB machine ran out of RAM and the pagefile on C: grew to
@@ -114,9 +113,11 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `E:\CopilotScratch\<session-id>\` with
   `robocopy "<source>" "<destination>" /E /MOVE`—never bulk-delete the session folder. See the
   disk rules in `~\.copilot\copilot-instructions.md`.
-- **Jenny's playable builds.** Never retarget or overwrite `Desktop\Homestead.lnk` or anything
-  under `E:\Repos\HomesteadMVP\`. The estate build gets its own "Homestead Estate" shortcut. Never
-  merge the `mvp-survival` branch with `main`, in either direction.
+- **Jenny's playable build.** `Homestead Estate.lnk` is the only active game shortcut; Integration
+  retargets it only after save-safety and package checks. Jenny retired the survival MVP at
+  `archive/mvp-survival-20260930` (`93612cdf`); leave its retained
+  `E:\Repos\HomesteadMVP` archive untouched. Do not confuse the active
+  `jennifergalley-mvp-woodland-biome` Estate Seasons handoff (`b19a0ad0`) with the retired line.
 - **Saves.** Lanes never change `SimulationSaveVersion`; the orchestrator bumps it once per
   integration. It's **13** (stocks carry their width; v12 saves migrate; version 11 is refused with a reset notice;
   7-10 still migrate). If your branch adds anything to the save format, tell the orchestrator
