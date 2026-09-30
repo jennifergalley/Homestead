@@ -276,6 +276,8 @@ Cost, from `ProfileGPU` in PIE at a 3054×1135 viewport with the sea filling the
 The tuning parameters are on `MI_EstateOcean`, grouped Waves, Foam, Colour and Data. Bake the
 values you settle on into the defaults in `build_ocean.py`.
 
+
+The mouth is cut once (`cut_mouth`, recorded as `riverMouth` in the layout). Where the beach is lower than 0.5 m, the bed goes to at least -0.3 m, so the sea runs up into the channel. The stream carries on to the first point whose bed is 0.6 m under the sea. Its surface there is held 3 cm under the sea, so the river ribbon slides beneath the ocean instead of stopping on dry sand or fighting the ocean surface. Afterwards: `bake_ocean.py` + `build_ocean.py` (the shore texture sees the channel), `place_water.py`, `bake_ground.py`, `bake_estate_map.py`.
 ## Ground and meadow (`bake_ground.py`, `build_ground.py`, `build_landscape_material.py`)
 
 `bake_ground.py` (about 90 s) reads the heightfield, the paint-layer weights, `estate_layout.json` and
