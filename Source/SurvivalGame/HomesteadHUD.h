@@ -59,9 +59,12 @@ private:
     void MoonIcon(float CX, float CY, float Radius, FLinearColor Color, FLinearColor Behind);
     void RainIcon(float CX, float CY, float Size);
     void DrawBook(const AHomesteadController& PC);
-    // The focus prompt, floating just above the heroine's head: key badges and verbs ("E  Gather")
-    // with the target's name small above, on a soft dark backing for contrast.
-    void DrawInteractCue(const AHomesteadController& PC);
+    // The focus prompt at the top centre, under the compass: key badges and verbs ("E  Gather") with
+    // the target's name small above, on the shared parchment notice. Returns its bottom edge (HUD
+    // units), or 0 when nothing is focused, so the toast can stack under it.
+    float DrawInteractCue(const AHomesteadController& PC);
+    // The parchment notice card (UI/HomesteadNoticeStyle.h) in HUD units; a rust frame for errors.
+    void NoticeCard(float X, float Y, float Width, float Height, bool bError);
     float TextWidth(const FString& Text, float Size) const;
     void DrawAppearanceBook(const AHomesteadController& PC);
 };

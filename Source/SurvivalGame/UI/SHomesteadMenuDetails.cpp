@@ -291,7 +291,7 @@ FString SHomesteadMenu::ActionLabel(EHomesteadItemAction Action) const
     case EHomesteadItemAction::MoveLater: return TEXT("Move later in grid");
     case EHomesteadItemAction::Equip: return TEXT("Equip");
     case EHomesteadItemAction::Unequip: return TEXT("Unequip to pack");
-    case EHomesteadItemAction::Dye: return TEXT("Change dye");
+    case EHomesteadItemAction::Dye: return TEXT("Change dye...");
     case EHomesteadItemAction::Drop: return TEXT("Drop...");
     case EHomesteadItemAction::Pin:
         return Row.HotbarCell >= 0 ? TEXT("Move into the pack") : TEXT("Move to the hotbar");

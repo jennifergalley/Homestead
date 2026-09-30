@@ -71,6 +71,13 @@ public:
     float WalkClipSpeed() const { return bMetaHumanActive ? 209.9f : 120.0f; }
     float SprintClipSpeed() const { return bMetaHumanActive ? 524.8f : 300.0f; }
     void SetAppearancePreview(bool Enabled);
+    // Shows the leather backpack on her back (the controller mirrors Simulation state each tick).
+    void SetBackpackShown(bool bShown);
+    // Whether Props' backpack mesh is imported (the upgrade and its toggle work without it).
+    bool HasBackpackMesh() const { return Backpack != nullptr; }
+    // The Appearance page's own camera controls: orbit her (degrees) and zoom (+ closer, in wheel steps).
+    void OrbitAppearance(float Yaw, float Pitch);
+    void ZoomAppearance(float Steps);
     // The view the appearance preview returns to (a spawn placed while it was open).
     void SetRestingViewRotation(const FRotator& Rotation) { SavedViewRotation = Rotation; }
     // While previewing appearance, bring the camera in close on her face (eye choices).
@@ -380,6 +387,10 @@ private:
     UPROPERTY() TObjectPtr<UStaticMesh> HarvestProduceMesh;
     // The forage pouch on her right hip (shown on the MetaHuman heroine).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> ForagePouch;
+    // The leather backpack on her back when she owns it and shows it (SetBackpackShown); null until
+    // Props' mesh exists.
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Backpack;
+    bool bBackpackShown = false;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CordBelt;
     // The pouch hangs from the belt and lies on the outside of her right thigh, so it swings with
     // the thigh (forward and back about the belt, out and in about the hip) once her pose is final.
@@ -519,6 +530,10 @@ private:
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> MetaHumanGarments;
     // Wearable definition per MetaHuman garment slot (-1 when nothing is worn there).
     TArray<int32> MetaHumanWorn, PendingMetaHumanWorn;
+    // The equipped linen tunic's dye (INDEX_NONE when none): on the MetaHuman the tunic is the
+    // homespun tank top and shorts, tinted to match.
+    int32 MetaHumanTunicDye = INDEX_NONE, PendingMetaHumanTunicDye = INDEX_NONE;
+    void ApplyMetaHumanTunicDye();
     // How far soled footwear lifts her off the ground, in cm.
     float FootwearLift = 0;
     void ApplyMetaHumanGarments();
@@ -533,6 +548,16 @@ private:
     bool bHeroineAssetsValid = false;
     bool bAppearancePreview = false;
     bool bAppearanceFaceFocus = false;
+    // The preview's full-length arm (ZoomAppearance), and the chase arm's collision setting to give back.
+    float AppearanceArm = 280.0f;
+    bool bSavedArmCollision = true;
+    // Appearance camera limits (cm, degrees): full length at the default, her face at the closest.
+    static constexpr float AppearanceArmDefault = 280.0f;
+    static constexpr float AppearanceArmMin = 90.0f;
+    static constexpr float AppearanceArmMax = 340.0f;
+    static constexpr float AppearanceZoomStep = 30.0f;
+    static constexpr float AppearancePitchMin = -40.0f;
+    static constexpr float AppearancePitchMax = 25.0f;
     float FaceFocusBlend = 0.0f;
     float FaceFocusBodyArm = 280.0f;
     TOptional<float> SavedNearClip;

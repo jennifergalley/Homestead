@@ -74,6 +74,7 @@ void SHomesteadMenu::BuildPopup()
     for (int32 Index = 0; Index < PopupOptions.Num(); ++Index)
     {
         const TFunction<FString()> Label = PopupOptions[Index].Label;
+        const TOptional<FLinearColor> Swatch = PopupOptions[Index].Swatch;
         const TFunction<bool()> Enabled = PopupOptions[Index].Enabled;
         TSharedRef<SButton> Button = SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(12, 8))
             .ButtonColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? MenuGold : Selected; })
@@ -81,9 +82,23 @@ void SHomesteadMenu::BuildPopup()
             .OnHovered_Lambda([this, Index]() { DialogSelection = Index; })
             .OnClicked_Lambda([this, Index]() { if (PointerAction()) DialogAction(Index); return FReply::Handled(); })
             [
-                SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
-                .ColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? FSlateColor(PineInk) : FSlateColor(Ink); })
-                .Text_Lambda([Label]() { return FText::FromString(Label ? Label() : FString()); })
+                SNew(SHorizontalBox)
+                + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 10, 0)
+                [
+                    SNew(SBox).WidthOverride(22).HeightOverride(22)
+                    .Visibility(Swatch.IsSet() ? EVisibility::Visible : EVisibility::Collapsed)
+                    [
+                        SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
+                        .BorderBackgroundColor(PineInk)
+                        [ SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(Swatch.Get(FLinearColor::White)) ]
+                    ]
+                ]
+                + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+                [
+                    SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+                    .ColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? FSlateColor(PineInk) : FSlateColor(Ink); })
+                    .Text_Lambda([Label]() { return FText::FromString(Label ? Label() : FString()); })
+                ]
             ];
         Button->SetOnFocusReceived(FSimpleDelegate::CreateLambda([this, Index]()
             { if (!bSynchronizingFocus) DialogSelection = Index; }));
@@ -173,6 +188,7 @@ int32 SHomesteadMenu::DialogCount() const
     if (Dialog == EDialog::Context || Dialog == EDialog::Quantity) return PopupOptions.Num();
     if (Dialog == EDialog::Merge) return MergeTargets.Num() + 1;
     if (Dialog == EDialog::Exit) return 2;
+    if (Dialog == EDialog::RenameChest) return 3 + UE_ARRAY_COUNT(MenuChestNames::Suggestions);
     return Dialog == EDialog::SaveFailed || Dialog == EDialog::GraphicsFailed ? 3 : 2;
 }
 
@@ -188,10 +204,19 @@ void SHomesteadMenu::BuildDialog()
             : PendingAction == EHomesteadItemAction::Drop ? TEXT("Drop items") : TEXT("Transfer items");
         const FString Destination = PendingAction == EHomesteadItemAction::Split ? TEXT("A new stack in the same container")
             : PendingAction == EHomesteadItemAction::Drop ? TEXT("Nearby ground")
-            : PendingRow.ContainerId > 0 ? TEXT("Your pack") : FString::Printf(TEXT("Chest %d"), PendingRow.DestinationId);
+            : PendingRow.ContainerId > 0 ? FString(TEXT("Your pack")) : Controller->ChestDisplayName(PendingRow.DestinationId);
         Description = FString::Printf(TEXT("%s\nFrom: %s\nTo: %s\n\nAmount: %d / %d\nChoose Amount and activate to edit. While editing: Left/Right one, LB/RB ten; Back finishes editing."),
             *PendingRow.Name, *PendingRow.Location, *Destination, Amount, MaximumAmount);
         Labels = {TEXT("Cancel"), TEXT("Confirm"), TEXT("One"), TEXT("All available")};
+    }
+    else if (Dialog == EDialog::RenameChest)
+    {
+        Title = TEXT("Name this chest");
+        Description = FString::Printf(TEXT("Type a name of up to %d letters and press Enter, or choose one below. ")
+            TEXT("You'll see it when you walk up to the chest.\n\nName:  %s_"),
+            Homestead::Chests::MaxNameLength, *RenameDraft);
+        Labels = {TEXT("Cancel"), TEXT("Save name"), FString::Printf(TEXT("Clear name (%s)"), UTF8_TO_TCHAR(Homestead::Chests::DefaultName))};
+        for (const TCHAR* Suggestion : MenuChestNames::Suggestions) Labels.Add(FString::Printf(TEXT("Call it %s"), Suggestion));
     }
     else if (Dialog == EDialog::DropWearable)
     {
@@ -346,6 +371,14 @@ void SHomesteadMenu::DialogAction(int32 Index)
         Controller->MenuItemAction(PendingRow, PendingAction, 1, PendingRevision);
         SetDialog(EDialog::None); Refresh(); return;
     }
+    if (Dialog == EDialog::RenameChest)
+    {
+        const FString Name = Index == 1 ? RenameDraft : Index == 2 ? FString()
+            : FString(MenuChestNames::Suggestions[FMath::Clamp(Index - 3, 0, static_cast<int32>(UE_ARRAY_COUNT(MenuChestNames::Suggestions)) - 1)]);
+        // A refused name (too long, unchanged) keeps the dialog open with the reason in the notice.
+        if (Controller->MenuRenameChest(Name)) { SetDialog(EDialog::None); Refresh(); }
+        return;
+    }
     if (Dialog == EDialog::SaveFailed && Index == 2) { Controller->MenuQuitWithoutSaving(); return; }
     if (Dialog == EDialog::GraphicsFailed && Index == 2) { Controller->MenuQuitWithoutSaving(); return; }
     if (Dialog == EDialog::Unsaved) Controller->MenuQuitWithoutSaving();
@@ -355,5 +388,71 @@ void SHomesteadMenu::DialogAction(int32 Index)
         bSaving = true;
         Controller->MenuSaveAndQuit();
     }
+}
+
+void SHomesteadMenu::OpenRenameChest()
+{
+    if (!Controller.IsValid() || bSaving || SeenPage != 0 || !Controller->ActiveStorageChest().IsSet()) return;
+    const FString Current = Controller->ChestDisplayName(Controller->ActiveStorageChest().GetValue());
+    RenameDraft = Current == UTF8_TO_TCHAR(Homestead::Chests::DefaultName) ? FString() : Current;
+    RenameTyper.Reset();
+    SetDialog(EDialog::RenameChest);
+    // Enter saves what she types.
+    DialogSelection = 1;
+}
+
+bool SHomesteadMenu::TypeChestNameCharacter(TCHAR Character)
+{
+    if (Dialog != EDialog::RenameChest) return false;
+    // UTF-16 units arrive one per event: a surrogate pair is appended whole or not at all, and the
+    // limit counts characters (code points), like Homestead::Manor::NameLength.
+    std::uint32_t Units[2] = {};
+    const int32 Count = RenameTyper.Type(static_cast<std::uint32_t>(Character),
+        HomesteadTextEdit::CodePoints(*RenameDraft, RenameDraft.Len()), Homestead::Chests::MaxNameLength, Units);
+    if (Count == 0) return true;
+    for (int32 Index = 0; Index < Count; ++Index) RenameDraft.AppendChar(static_cast<TCHAR>(Units[Index]));
+    const int32 Selection = DialogSelection;
+    BuildDialog();
+    DialogSelection = Selection;
+    return true;
+}
+
+void SHomesteadMenu::TypeChestName(const FString& Characters)
+{
+    for (const TCHAR Character : Characters) TypeChestNameCharacter(Character);
+}
+
+bool SHomesteadMenu::HandleRenameKey(FKey Key)
+{
+    // Keyboard keys belong to the name while it's being typed; the pad drives the choices as usual.
+    if (Dialog != EDialog::RenameChest || Key.IsGamepadKey() || Key.IsMouseButton()) return false;
+    if (Key == EKeys::Escape) { SetDialog(EDialog::None); return true; }
+    if (Key == EKeys::BackSpace)
+    {
+        if (!RenameDraft.IsEmpty())
+        {
+            RenameDraft.LeftChopInline(HomesteadTextEdit::BackspaceUnits(*RenameDraft, RenameDraft.Len()));
+            RenameTyper.Reset();
+            const int32 Selection = DialogSelection;
+            BuildDialog();
+            DialogSelection = Selection;
+        }
+        return true;
+    }
+    if (Key == EKeys::Enter) { DialogAction(DialogSelection); return true; }
+    if (Key == EKeys::Up || Key == EKeys::Down || Key == EKeys::Tab)
+    {
+        NavigateDialog({0, Key == EKeys::Up || (Key == EKeys::Tab && bShift) ? -1 : 1});
+        return true;
+    }
+    // Letters arrive as characters (OnKeyChar); nothing else acts while she types.
+    return true;
+}
+
+FReply SHomesteadMenu::OnKeyChar(const FGeometry&, const FCharacterEvent& Event)
+{
+    if (Dialog != EDialog::RenameChest || !Controller.IsValid() || !Controller->MenuAcceptsPhysicalInput()) return FReply::Unhandled();
+    TypeChestNameCharacter(Event.GetCharacter());
+    return FReply::Handled();
 }
 }

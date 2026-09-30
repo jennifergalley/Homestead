@@ -418,12 +418,12 @@ Result Simulation::ClearOvergrowth(int nodeId, Item tool, Point player)
         return OgBad("The world has reached its 16384 persistent resource edit limit.");
 
     std::string gained, dropped;
-    int room = InventoryCapacity - Detail::PackUsed(candidate);
+    int room = Homestead::PackCapacity(candidate) - Detail::PackUsed(candidate);
     for (int i = 0; i < ItemCount; ++i)
     {
         if (yield[i] <= 0) continue;
         const Item item = static_cast<Item>(i);
-        const int fits = std::max(0, std::min({yield[i], room, InventoryCapacity - candidate.inventory[i]}));
+        const int fits = std::max(0, std::min({yield[i], room, Homestead::PackCapacity(candidate) - candidate.inventory[i]}));
         candidate.inventory[i] += fits;
         room -= fits;
         const std::string line = std::to_string(yield[i]) + " " + ItemName(item);

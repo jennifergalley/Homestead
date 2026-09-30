@@ -10,6 +10,7 @@
 #include "Simulation/HomesteadLamp.h"
 #include "Simulation/HomesteadPackRow.h"
 #include "Simulation/HomesteadPail.h"
+#include "UI/SHomesteadClock.h"
 #include "UI/SHomesteadHotbar.h"
 #include "UI/SHomesteadHudScale.h"
 #include "UI/SHomesteadPickups.h"
@@ -73,6 +74,17 @@ void AHomesteadController::ShowHotbar()
             SNew(HomesteadMenus::SHomesteadPickups).Controller(this)
         ];
     GEngine->GameViewport->AddViewportWidgetContent(PickupsRoot.ToSharedRef(), 50);
+    // The calendar's time of day, as Slate text over the Canvas calendar panel (which the HUD
+    // draws whenever the native book is closed; the failure screen covers it).
+    ClockRoot = SNew(SBox)
+        .Visibility_Lambda([this]()
+        {
+            return !HasNativeMenu() && !bBookOpen && !IsFailed() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+        })
+        [
+            SNew(HomesteadMenus::SHomesteadClock).Controller(this)
+        ];
+    GEngine->GameViewport->AddViewportWidgetContent(ClockRoot.ToSharedRef(), 50);
 }
 
 void AHomesteadController::HideHotbar()
@@ -82,6 +94,9 @@ void AHomesteadController::HideHotbar()
         GEngine->GameViewport->RemoveViewportWidgetContent(HotbarRoot.ToSharedRef());
     if (VitalsRoot.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(VitalsRoot.ToSharedRef());
+    if (ClockRoot.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(ClockRoot.ToSharedRef());
+    ClockRoot.Reset();
     VitalsRoot.Reset();
     if (PickupsRoot.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(PickupsRoot.ToSharedRef());

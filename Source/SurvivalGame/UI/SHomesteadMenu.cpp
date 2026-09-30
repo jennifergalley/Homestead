@@ -137,6 +137,28 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
     UpdateNotice();
+    // A stepped sound level is saved once she moves off its slider (another row, region or page).
+    if (bAudioStepEdit && (SeenPage != 4 || Region != ERegion::Content || Dialog != EDialog::None
+        || !Entries.IsValidIndex(ContentSelection) || Entries[ContentSelection].Id != AudioEditId))
+        CommitAudioStep();
+    // The dye chooser previews whichever dye is under the cursor or focus, or the chosen one.
+    if (bDyeChooser && Dialog == EDialog::Context)
+    {
+        const int32 Want = DialogSelection >= 0 && DialogSelection < MenuDyeStyle::Count ? DialogSelection : DyeChoice;
+        if (Want != DyePreviewed && Controller->MenuPreviewDye(DyeRow.SubjectId, Want)) DyePreviewed = Want;
+    }
+    else if (DyePreviewed != INDEX_NONE || bDyeChooser) EndDyePreview();
+    // Held WASD and the right stick turn the Appearance view at a steady rate.
+    if (SeenPage == 6 && Dialog == EDialog::None)
+    {
+        const float Yaw = ((bOrbitRight ? 1.0f : 0.0f) - (bOrbitLeft ? 1.0f : 0.0f)) * MenuAppearanceInput::KeyYawRate
+            + OrbitStickX * MenuAppearanceInput::StickYawRate;
+        const float Pitch = ((bOrbitDown ? 1.0f : 0.0f) - (bOrbitUp ? 1.0f : 0.0f)) * MenuAppearanceInput::KeyPitchRate
+            + OrbitStickY * MenuAppearanceInput::StickPitchRate;
+        if (Yaw != 0.0f || Pitch != 0.0f) Controller->MenuOrbitAppearance(Yaw * Delta, Pitch * Delta);
+    }
+    else if (bOrbitLeft || bOrbitRight || bOrbitUp || bOrbitDown || OrbitStickX != 0.0f || OrbitStickY != 0.0f)
+        ClearAppearanceOrbit();
     if (bPointerItemDown && PointerDragRevision != Controller->Simulation().GetRevision())
         CancelPointerItemDrag();
     if (bVirtualDraggingItem && VirtualDragRevision != Controller->Simulation().GetRevision())

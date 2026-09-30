@@ -142,7 +142,7 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
                 const int32 Used = Row.ContainerId > 0 ? Controller->Simulation().UsedCapacity()
                     : Controller->Simulation().ChestUsedCapacity(Row.DestinationId);
                 MaximumAmount = Used < 0 ? 0 : FMath::Min(MaximumAmount,
-                    Homestead::ContainerCapacity(Row.ContainerId > 0 ? 0 : Row.DestinationId) - Used);
+                    Homestead::ContainerCapacity(Controller->State(), Row.ContainerId > 0 ? 0 : Row.DestinationId) - Used);
             }
             if (MaximumAmount < 1)
             { Controller->MenuItemAction(Row, Action, 1, PendingRevision); return; }
@@ -150,6 +150,15 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
         }
         if (Action == EHomesteadItemAction::Drop && Row.Subject == EHomesteadMenuSubject::Wearable)
         { SetDialog(EDialog::DropWearable); return; }
+        if (Action == EHomesteadItemAction::Dye && Row.Subject == EHomesteadMenuSubject::Wearable)
+        {
+            const auto* Owned = Controller->Simulation().GetWearable(Row.SubjectId);
+            if (!Owned) return;
+            DyeRow = Row; DyeRevision = PendingRevision; DyeOriginal = Owned->dye;
+            PopupAnchor = PopupAnchorFor(Cells.IsValidIndex(ContentSelection) ? Cells[ContentSelection] : nullptr, false);
+            OpenDyeChooser(Owned->dye);
+            return;
+        }
         if (Action == EHomesteadItemAction::Merge)
         {
             MergeTargets.Reset();

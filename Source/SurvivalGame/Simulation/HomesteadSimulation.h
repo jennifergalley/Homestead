@@ -60,7 +60,13 @@ constexpr int GardenCellsPerCell = 3;
 constexpr double GardenCellSize = CellSize / GardenCellsPerCell;
 constexpr int InventoryCapacity = 120;
 constexpr int ChestCapacity = 1200;
-constexpr int ContainerCapacity(int containerId) { return containerId > 0 ? ChestCapacity : InventoryCapacity; }
+// Her pack holds InventoryCapacity until she buys the leather backpack (HomesteadBackpack.h), then
+// MaxPackCapacity. Load-time validation that doesn't know her state yet (drops, saved stock) uses the
+// maximum; stacks set on the ground are never larger than her own PackCapacity, so she can pick them up.
+constexpr int MaxPackCapacity = 240;
+struct State;
+int PackCapacity(const State& state);
+int ContainerCapacity(const State& state, int containerId);
 // 12 is the estate pivot: no warmth in the vitals, estate items, tool tiers, parcels, money and the manor.
 // 13 writes each item stock (and the equipment slots) with its width first, so appending an Item or a
 // slot no longer changes the save format. Enums that name data stay append-only.
@@ -240,6 +246,8 @@ struct Structure
     StructureSkin skin = StructureSkin::Timber;
     // Part of the old manor (the standing room): not removable until the round-5 rebuild.
     bool heritage = false;
+    // A chest's name as she gave it (trimmed UTF-8), empty for the default (HomesteadChests.h).
+    std::string customName;
 };
 
 // A turned rectangle on the ground: centre, half extents along its own axes, Unreal yaw in degrees.
@@ -343,6 +351,10 @@ struct State
     // lamp kit (new estate games start with it; older saves get it once on load).
     double lampOilHours = 0.0;
     bool lampKitGranted = false;
+    // The leather backpack (HomesteadBackpack.h): bought once, doubling her pack; and whether it
+    // shows on her back (a look only: it never changes capacity).
+    bool leatherBackpack = false;
+    bool backpackShown = true;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -510,6 +522,8 @@ public:
     Result ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const;
     int Count(Item item) const;
     int UsedCapacity() const;
+    // What her pack holds now: InventoryCapacity, or MaxPackCapacity with the leather backpack.
+    int PackCapacity() const;
     int ChestUsedCapacity(int chestId) const;
     std::uint64_t GetRevision() const { return revision_; }
     const WearableInstance* GetWearable(int id) const;
@@ -591,6 +605,12 @@ public:
     Result RecolorWearable(int id, int dye, Point player, std::uint64_t expectedRevision);
     Result TransferGroup(int chestId, int groupId, int amount, bool toChest, Point player,
         std::uint64_t expectedRevision);
+    // Auto-store: in one step, moves her carried goods onto stacks of the same item already in this
+    // chest (HomesteadChests.h AutoStores: never tools, the lamp, water or garments). Stacks below the
+    // hotbar row go first, then row cells, as far as the chest has room; the rest stays with her.
+    Result StoreMatching(int chestId, Point player, std::uint64_t expectedRevision);
+    // Names a chest (trimmed; empty puts back the default name). Nothing else changes.
+    Result RenameChest(int chestId, const std::string& name, Point player, std::uint64_t expectedRevision);
     Result SplitGroup(int containerId, int groupId, int amount, Point player, std::uint64_t expectedRevision);
     Result MergeGroups(int containerId, int sourceGroupId, int targetGroupId, Point player,
         std::uint64_t expectedRevision);
@@ -694,6 +714,10 @@ public:
     Result Sell(int shopId, Item item, int quantity, Point player);
     // Buys the shop's own goods, or with `fromHeroineStock` her own sold goods back.
     Result Buy(int shopId, Item item, int quantity, bool fromHeroineStock, Point player);
+    // The leather backpack: a one-time upgrade at an open General Store (HomesteadBackpack.h).
+    Result BuyBackpack(int shopId, Point player);
+    // Shows or hides the backpack on her back; capacity is unchanged either way.
+    Result SetBackpackShown(bool shown);
     // Counts a shopkeeper greeting (a friendship stub).
     Result GreetShopkeeper(int shopId);
     // Waits by a closed shop until it opens: the ordinary passage of time (crops, weather, vitals,

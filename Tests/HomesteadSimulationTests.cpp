@@ -2499,7 +2499,8 @@ void PersistentWorldDropTransactions()
     malformed.worldDrops.push_back({malformed.nextId++, {MaxWorldCoordinate + 1, 0}, Item::Branch, 1, 0});
     UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
     malformed = clothing.GetState();
-    malformed.worldDrops.push_back({malformed.nextId, Home, Item::Branch, 121, 0});
+    // A world drop stack holds at most what the largest pack (the leather backpack) can.
+    malformed.worldDrops.push_back({malformed.nextId, Home, Item::Branch, MaxPackCapacity + 1, 0});
     ++malformed.nextId;
     UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
     malformed = clothing.GetState();
@@ -3537,6 +3538,49 @@ void DeconstructChestContentsAndOverflow()
     int dropped = 0;
     for (const auto& drop : overflow.GetState().worldDrops) dropped += drop.quantity;
     CHECK(dropped == 67);
+}
+
+// Ground stacks never outgrow her pack (120 without the leather backpack), since PickUpDrop takes a
+// stack whole: drops in one spot and a chest's spill both split at her capacity.
+void GroundStacksStayPickable()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Branch, 100}});
+    OK(sim.DropGroup(Group(sim, Item::Branch), 100, Home, Home, sim.GetRevision()));
+    OK(sim.GrantItems(Item::Branch, 100));
+    OK(sim.DropGroup(Group(sim, Item::Branch), 100, Home, Home, sim.GetRevision()));
+    CHECK(sim.GetState().worldDrops.size() == 2);
+    for (const auto& drop : sim.GetState().worldDrops) CHECK(drop.quantity == 100);
+    OK(sim.PickUpDrop(sim.GetState().worldDrops.front().id, Home));
+    CHECK(sim.Count(Item::Branch) == 100);
+    // A small drop still joins a stack when it fits.
+    OK(sim.DropGroup(Group(sim, Item::Branch), 20, Home, Home, sim.GetRevision()));
+    CHECK(sim.GetState().worldDrops.size() == 1 && sim.GetState().worldDrops.front().quantity == 120);
+
+    // A chest of 300 stone taken down with a full pack spills 120 / 120 / 60.
+    Simulation spill;
+    Stock(spill, {{Item::Branch, 105}, {Item::BrambleCanes, 2}});
+    const Point chestSite = CellCenter(2, 0);
+    OK(spill.Place(Piece::Chest, 2, 0, 0, chestSite));
+    const int chest = StructureIdAt(spill, Piece::Chest, 2, 0);
+    OK(spill.Transfer(chest, Item::Branch, spill.Count(Item::Branch), chestSite));
+    for (int put = 0; put < 300; put += 100)
+    {
+        OK(spill.GrantItems(Item::Stone, 100));
+        OK(spill.Transfer(chest, Item::Stone, 100, chestSite));
+    }
+    OK(spill.GrantItems(Item::Fiber, InventoryCapacity - spill.UsedCapacity()));
+    CHECK(spill.UsedCapacity() == InventoryCapacity);
+    OK(spill.Deconstruct(chest, chestSite));
+    std::vector<int> stones;
+    for (const auto& drop : spill.GetState().worldDrops)
+    {
+        CHECK(drop.quantity <= InventoryCapacity);
+        if (drop.wearableId == 0 && drop.item == Item::Stone) stones.push_back(drop.quantity);
+    }
+    std::sort(stones.begin(), stones.end());
+    CHECK((stones == std::vector<int>{60, 120, 120}));
+    InventoryRoundTrip(spill);
 }
 
 void HeritageManorPiecesCannotBeDeconstructed()
@@ -5019,6 +5063,7 @@ int main()
     Run("persistent atomic world drop transactions", PersistentWorldDropTransactions);
     Run("selected carried food groups and atomic eating", SelectedFoodGroupTransactions);
     Run("strict wardrobe ownership and current-schema save rejection", WardrobeSaveRejection);
+    Run("ground stacks stay small enough to pick up whole", GroundStacksStayPickable);
     Run("seeded resource identity and bounded region activation", GeneratedWorldIdentityAndActivation);
     Run("permanent generated felling and persistent renewable timers", GeneratedFellingAndPersistentTimers);
     Run("cross-cell trunk footprint, chosen building sites and reload", GeneratedBuildingFootprintAndReload);

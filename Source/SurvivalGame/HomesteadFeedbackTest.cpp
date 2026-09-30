@@ -2,6 +2,7 @@
 #include "HomesteadController.h"
 #include "HomesteadHUD.h"
 #include "HomesteadTestPaths.h"
+#include "UI/HomesteadNoticeStyle.h"
 #include "Engine/Engine.h"
 #include "GameFramework/GameUserSettings.h"
 #include "HAL/FileManager.h"
@@ -47,7 +48,7 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
                 const auto* HUD = Controller->GetHUD<AHomesteadHUD>();
                 const bool ExpectedOverlap = Baseline && Controller->IsBookOpen() && Controller->BookPage() != 6;
                 const FLinearColor ExpectedColor = Controller->ToastIsError()
-                    ? FLinearColor(1, 0.67f, 0.48f, 1) : FLinearColor(0.93f, 0.93f, 0.84f, 1);
+                    ? HomesteadNoticeStyle::RustInk : HomesteadNoticeStyle::InkBrown;
                 return HUD && !Controller->Toast().IsEmpty() && HUD->FeedbackSource() == Controller->Toast()
                     && HUD->FeedbackFullText() && HUD->FeedbackInsideViewport()
                     && HUD->FeedbackOverlaps() == ExpectedOverlap && HUD->FeedbackColor().Equals(ExpectedColor);
@@ -91,9 +92,18 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
             return Controller->Toast().IsEmpty() && HUD->FeedbackSource().IsEmpty()
                 && HUD->FeedbackCriticalGeometry() == *Geometry && Controller->Simulation().Serialize() == *Before;
         }, 1.2f);
-    for (int32 Page = 2; Page <= 4; ++Page)
+    // The five field-book tabs in order (Pack 0, Craft 1, Build 2, Map 7, Look 6; the Guidebook, 3, is
+    // retired). Settings (4) isn't a tab: Start opens it from the world.
+    for (const int32 Page : {2, 7, 6})
         Add(TEXT("Preserve controller page navigation"), [this]() { Tap(EKeys::Gamepad_RightShoulder); },
             [this, Page]() { return Controller->BookPage() == Page; });
+    Add(TEXT("Controller B closes the book"), [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+        [this]() { return !Controller->IsBookOpen(); });
+    Add(TEXT("Controller Start opens Settings"), [this]() { Tap(EKeys::Gamepad_Special_Right); },
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 4; });
+    // The world ran for a moment between closing the book and opening Settings.
+    Add(TEXT("Record the paused simulation in Settings"),
+        [this, Before]() { *Before = Controller->Simulation().Serialize(); }, []() { return true; });
     QueueSelectRow(11);
     Add(TEXT("Make only synthetic graphics file read-only"),
         [Config]() { FPlatformFileManager::Get().GetPlatformFile().SetReadOnly(*Config, true); },
@@ -117,9 +127,10 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
         [this]() { return !Controller->ToastIsError() && !GEngine->GetGameUserSettings()->IsVSyncEnabled()
             && Controller->BookFooter().Contains(TEXT("Enter: toggle")); });
     Capture(TEXT("feedback-settings-keyboard"));
-    for (int32 Page = 3; Page >= 0; --Page)
-        Add(TEXT("Return to pack without unpausing via keyboard page-left"),
-            [this]() { Tap(EKeys::Left); },
+    // Page-left from Settings enters the tab cycle at its end (Look) and walks back to the pack.
+    for (const int32 Page : {6, 7, 2, 1, 0})
+        Add(TEXT("Return to pack without unpausing via controller page-left"),
+            [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
             [this, Page]() { return Controller->IsBookOpen() && Controller->BookPage() == Page; });
     Add(TEXT("Create real backup through second mapped manual save"), [this]() { Tap(EKeys::F5); },
         [this, Output]() { return Controller->Toast() == TEXT("Your homestead is saved.")

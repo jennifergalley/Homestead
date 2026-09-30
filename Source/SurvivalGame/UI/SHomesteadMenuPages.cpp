@@ -185,6 +185,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         .Value_Lambda([this, AudioId]() { return Controller->MenuAudioVolume(AudioId); })
                         .OnMouseCaptureBegin_Lambda([this, AudioId, Index]()
                         {
+                            CommitAudioStep();
                             AudioEditId = AudioId;
                             AudioEditStart = Controller->MenuAudioVolume(AudioId);
                             Region = ERegion::Content;
@@ -374,7 +375,49 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         [
             SNew(SHorizontalBox)
             + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 8, 0)
-            [ SNew(SBox).Padding(4, 0, 4, 6)[ Text(TEXT("Chest"), 20) ] ]
+            [
+                // The chest's own name, with naming and auto-store beside it.
+                SNew(SBox).Padding(4, 0, 4, 6)
+                [
+                    SNew(SHorizontalBox)
+                    + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+                    [
+                        SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 20)).ColorAndOpacity(Ink)
+                        .Text_Lambda([this]()
+                        {
+                            return FText::FromString(Controller.IsValid() && Controller->ActiveStorageChest().IsSet()
+                                ? Controller->ChestDisplayName(Controller->ActiveStorageChest().GetValue()) : FString());
+                        })
+                    ]
+                    + SHorizontalBox::Slot().AutoWidth().Padding(0, 0, 6, 0)
+                    [
+                        SNew(SBox).HeightOverride(34)
+                        [
+                            SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false)
+                            .ContentPadding(FMargin(10, 4)).ButtonColorAndOpacity(Selected)
+                            .ToolTipText(FText::FromString(TEXT("Name this chest")))
+                            .OnClicked_Lambda([this]() { if (PointerAction()) OpenRenameChest(); return FReply::Handled(); })
+                            [ SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 15)).ColorAndOpacity(MenuGold)
+                                .Text(FText::FromString(TEXT("Name..."))) ]
+                        ]
+                    ]
+                    + SHorizontalBox::Slot().AutoWidth()
+                    [
+                        SNew(SBox).WidthOverride(34).HeightOverride(34)
+                        [
+                            SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false)
+                            .ContentPadding(4).ButtonColorAndOpacity(Selected)
+                            .ToolTipText(FText::FromString(TEXT("Store matching stacks (T): put what you carry onto the same items already in this chest")))
+                            .OnClicked_Lambda([this]()
+                            {
+                                if (PointerAction() && Controller->MenuStoreMatching()) Refresh();
+                                return FReply::Handled();
+                            })
+                            [ SNew(SHomesteadIcon).Kind(FName(TEXT("chest"))).Tint(MenuGold) ]
+                        ]
+                    ]
+                ]
+            ]
             + SHorizontalBox::Slot().FillWidth(1).Padding(8, 0, 0, 0)
             [
                 SNew(SVerticalBox)
@@ -654,6 +697,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 const FString ChoiceName = Id == 0 ? HomesteadLook::MetaHairName(Value)
                     : Id == 1 ? HomesteadLook::HairColorName(Value) : Id == 2 ? HomesteadLook::SkinToneName(Value)
                     : Id == 3 ? HomesteadLook::EyeColorName(Value) : Id == 4 ? HomesteadLook::TunicColorName(Value)
+                    : Id == 6 ? (Value == 0 ? TEXT("Shown") : TEXT("Hidden"))
                     : HomesteadLook::OutfitName(Value);
                 const auto Choose = [this, Index, Id, Value]()
                 {

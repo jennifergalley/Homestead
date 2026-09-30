@@ -1,11 +1,14 @@
 #include "../HomesteadSmokeTest.h"
 #include "../HomesteadController.h"
+#include "../HomesteadControllerConfig.h"
+#include "../HomesteadControllerPreferences.h"
 #include "../HomesteadCharacter.h"
 #include "HomesteadMenuPortrait.h"
 #include "../HomesteadSave.h"
 #include "../HomesteadWorld.h"
 #include "../HomesteadTestPaths.h"
 #include "../Simulation/HomesteadPackRow.h"
+#include "../Simulation/HomesteadBackpack.h"
 #include "../Simulation/HomesteadItems.h"
 #include "../Simulation/HomesteadShops.h"
 #include "SHomesteadShop.h"
@@ -308,9 +311,16 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Close initial guide through mapped Back"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsBookOpen(); });
+    const auto HintLeft = MakeShared<double>(0.0);
+    Add(TEXT("The first-minute controls strip counts down while it is on screen"),
+        [this, HintLeft]() { *HintLeft = Controller->ControlsHintSecondsLeft(); },
+        [this, HintLeft]() { return Controller->IsControlsHintOnScreen() && Controller->ControlsHintSecondsLeft() < *HintLeft - 0.5; }, 1.0f);
     Add(TEXT("First exit-path press opens Settings"),
         [this]() { Tap(EKeys::Escape); PausedHour = Controller->State().hour; },
         [this]() { return Controller->HasNativeMenu() && Controller->BookPage() == 4; });
+    Add(TEXT("The controls strip's minute is frozen while the book is open"),
+        [this, HintLeft]() { *HintLeft = Controller->ControlsHintSecondsLeft(); },
+        [this, HintLeft]() { return !Controller->IsControlsHintOnScreen() && Controller->ControlsHintSecondsLeft() == *HintLeft; }, 1.0f);
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeSaveRetryTest")))
     {
         Add(TEXT("Prepare an existing valid manual save before retry fixture"),
@@ -440,6 +450,55 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
                 return Valid;
             }, 0.2f);
     }
+    // Stepping a sound slider with the d-pad or keys: heard live, saved once when she moves on,
+    // and Back puts it back unsaved.
+    const auto StepStart = MakeShared<float>(0);
+    const auto StepWrites = MakeShared<int32>(0);
+    const auto StepDirection = MakeShared<int32>(1);
+    Add(TEXT("Focus the Music slider for keyboard steps"),
+        [this]() { Controller->NativeMenu->FocusLegacySubject(5); },
+        [this]() { return Controller->NativeMenu->IsFocusedControlVisible(); }, 0.2f);
+    Add(TEXT("Keyboard steps change Music live without saving each step"),
+        [this, StepStart, StepWrites, StepDirection]()
+        {
+            *StepStart = Controller->MenuAudioVolume(5);
+            *StepWrites = Controller->AudioPersistWrites;
+            *StepDirection = *StepStart > 0.5f ? -1 : 1;
+            for (int32 Step = 0; Step < 3; ++Step) Tap(*StepDirection > 0 ? EKeys::Right : EKeys::Left);
+        },
+        [this, StepStart, StepWrites, StepDirection]()
+        {
+            return FMath::IsNearlyEqual(Controller->MusicVolume, *StepStart + *StepDirection * 0.15f, 0.001f)
+                && Controller->AudioPersistWrites == *StepWrites && Controller->NativeMenu->HasPendingAudioStep();
+        });
+    Add(TEXT("Moving off the slider saves the stepped level once"),
+        [this]() { Tap(EKeys::Up); },
+        [this, StepStart, StepWrites, StepDirection]()
+        {
+            float Saved = -1;
+            GConfig->GetFloat(HomesteadControllerPreferences::AudioSettingsSection,
+                HomesteadControllerConfig::AudioKeys[HomesteadControllerConfig::AudioKeyIndex(5)], Saved, GGameUserSettingsIni);
+            return !Controller->NativeMenu->HasPendingAudioStep() && Controller->AudioPersistWrites == *StepWrites + 1
+                && FMath::IsNearlyEqual(Saved, *StepStart + *StepDirection * 0.15f, 0.001f)
+                && FMath::IsNearlyEqual(Controller->MusicVolume, *StepStart + *StepDirection * 0.15f, 0.001f);
+        });
+    Add(TEXT("Back after a step puts Music back unsaved and keeps Settings open"),
+        [this, StepWrites]()
+        {
+            Controller->NativeMenu->FocusLegacySubject(5);
+            *StepWrites = Controller->AudioPersistWrites;
+            Tap(EKeys::Left);
+            Tap(EKeys::Escape);
+        },
+        [this, StepStart, StepWrites, StepDirection]()
+        {
+            return !Controller->NativeMenu->HasPendingAudioStep() && Controller->AudioPersistWrites == *StepWrites
+                && FMath::IsNearlyEqual(Controller->MusicVolume, *StepStart + *StepDirection * 0.15f, 0.001f)
+                && Controller->IsBookOpen() && Controller->BookPage() == 4;
+        });
+    Add(TEXT("Put Music back where it started"),
+        [this, StepStart]() { Controller->MenuCommitAudioVolume(5, *StepStart, Controller->MenuAudioVolume(5)); },
+        [this, StepStart]() { return FMath::IsNearlyEqual(Controller->MusicVolume, *StepStart, 0.001f); });
     Add(TEXT("Quit game row opens one two-choice dialog"),
         [this]() { Controller->NativeMenu->FocusLegacySubject(9); Tap(EKeys::Enter); },
         [this]() { return Controller->NativeMenu && Controller->NativeMenu->IsExitPrompt(); });
@@ -610,6 +669,57 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         }, 0.8f);
     Add(TEXT("Capture the shop's Buy page"), [this]() { Screenshot(TEXT("native-shop-buy")); },
         [this]() { return Controller->ShopScreen.IsValid(); }, 0.8f);
+    // The leather backpack: a one-time upgrade row heading Buy. Bought once it doubles her pack and
+    // leaves the list; the whole simulation is put back afterwards so later checks see a plain pack.
+    const auto BeforeBackpack = MakeShared<Homestead::Simulation>();
+    Add(TEXT("The backpack upgrade heads Buy and is refused when she can't afford it"),
+        [this, BeforeBackpack]()
+        {
+            // A purse short of the price, whatever the fixture started with.
+            if (Controller->State().money >= Homestead::Backpack::Price)
+                Controller->Sim.GrantMoney(Homestead::Backpack::Price - 1 - Controller->State().money);
+            Controller->ShopScreen->Refresh();
+            *BeforeBackpack = Controller->Sim;
+            Controller->ShopScreen->Choose(Controller->ShopScreen->GetSelection());
+        },
+        [this, BeforeBackpack]()
+        {
+            const auto& Shop = Controller->ShopScreen;
+            return Shop.IsValid() && Shop->IsUpgradeRow(Shop->GetSelection()) && Shop->RowLabel(Shop->GetSelection()) == TEXT("Leather backpack")
+                && !Shop->IsChoosingQuantity() && Shop->GetStatus().StartsWith(TEXT("That's 1,500 coins;"))
+                && Controller->Simulation().Serialize() == BeforeBackpack->Serialize();
+        });
+    const auto BeforeCounter = MakeShared<Homestead::Point>();
+    Add(TEXT("With 1,500 coins she buys it once: her pack holds 240 and the row is gone"),
+        [this, BeforeCounter]()
+        {
+            // Trading needs her at the counter; she goes back afterwards.
+            *BeforeCounter = Controller->PlayerPoint();
+            const auto& Shop = Controller->State().shops.front();
+            Teleport({Shop.counterX + std::cos(FMath::DegreesToRadians(Shop.counterYaw)) * 150.0,
+                Shop.counterY + std::sin(FMath::DegreesToRadians(Shop.counterYaw)) * 150.0});
+            Controller->Sim.GrantMoney(Homestead::Backpack::Price);
+            Controller->ShopScreen->Refresh();
+            Controller->ShopScreen->Choose(Controller->ShopScreen->GetSelection());
+            Controller->ShopScreen->Confirm();
+        },
+        [this, BeforeBackpack]()
+        {
+            const auto& Shop = Controller->ShopScreen;
+            bool bRowGone = true;
+            for (int32 Index = 0; Index < Shop->RowCount(); ++Index) bRowGone &= !Shop->IsUpgradeRow(Index);
+            return Controller->State().leatherBackpack && Controller->Sim.PackCapacity() == Homestead::MaxPackCapacity
+                && Controller->State().money == BeforeBackpack->GetState().money && bRowGone
+                && Controller->MenuInventorySummary().Contains(TEXT("/ 240"));
+        });
+    Add(TEXT("Put the simulation back as it was before the backpack"),
+        [this, BeforeBackpack, BeforeCounter]()
+        {
+            Controller->Sim = *BeforeBackpack;
+            Controller->ShopScreen->Refresh();
+            Teleport(*BeforeCounter);
+        },
+        [this]() { return !Controller->State().leatherBackpack && Controller->Sim.PackCapacity() == Homestead::InventoryCapacity; });
     Add(TEXT("Leave the shop and return to Settings, as before the shop check"),
         [this]() { Controller->CloseShopScreen(); Controller->OpenBook(4); },
         [this]() { return !Controller->ShopScreen.IsValid() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
@@ -666,6 +776,27 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { return Controller->NativeMenu->GetTabPageCount() == 5
             && !Controller->NativeMenu->HasTabForPage(3); });
     Capture(TEXT("native-appearance"));
+    // One real wheel notch over the book zooms Appearance exactly once (the preprocessor route only).
+    const auto ArmBefore = MakeShared<float>(0.0f);
+    Add(TEXT("One wheel notch over the book zooms Appearance by exactly one step"),
+        [this, ArmBefore]()
+        {
+            auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            if (!Avatar) { Finish(false, TEXT("No heroine for the Appearance zoom check.")); return; }
+            *ArmBefore = Avatar->AppearanceArm;
+            const auto Geometry = Controller->NativeMenu->GetCachedGeometry();
+            const FVector2D Over = Geometry.GetAbsolutePosition() + FVector2D(Geometry.GetAbsoluteSize().X * 0.15f, Geometry.GetAbsoluteSize().Y * 0.5f);
+            TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
+            auto& Slate = FSlateApplication::Get();
+            Slate.SetCursorPos(Over);
+            Slate.ProcessMouseWheelOrGestureEvent(FPointerEvent(0, Over, Over, TSet<FKey>(), EKeys::MouseWheelAxis, 1.0f, FModifierKeysState()), nullptr);
+        },
+        [this, ArmBefore]()
+        {
+            const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
+            return Avatar && FMath::IsNearlyEqual(Avatar->AppearanceArm,
+                FMath::Clamp(*ArmBefore - AHomesteadCharacter::AppearanceZoomStep, AHomesteadCharacter::AppearanceArmMin, AHomesteadCharacter::AppearanceArmMax));
+        });
     Add(TEXT("Return to Settings without changing simulation or camera"),
         [this, Before]()
         {
@@ -1121,26 +1252,73 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
                 && Controller->State().equipment[static_cast<int32>(Homestead::EquipmentSlot::Legs)] == *Tunic
                 && Controller->Simulation().Serialize() == Expected->Serialize() && VerifyNativeMenuPresentation();
         });
-    Add(TEXT("Mapped UI dye changes only the owned item and its actual material tint"),
-        [this, Tunic, Expected, OpenInventory]()
+    const auto DyeTarget = MakeShared<int32>(0);
+    const auto DyeBefore = MakeShared<FString>();
+    Add(TEXT("Mapped UI opens the dye chooser for the owned tunic"),
+        [this, Tunic, Expected, OpenInventory, DyeTarget, DyeBefore]()
         {
             OpenInventory(2);
             const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             const auto* Owned = Controller->Simulation().GetWearable(*Tunic);
             if (!Subject || Subject->SubjectId != *Tunic || !Owned)
             { Finish(false, TEXT("The intended owned tunic is not selected for dye.")); return; }
+            if (Owned->dye >= 3) { Finish(false, TEXT("The dye fixture expects a tunic below the last dye.")); return; }
+            *DyeTarget = Owned->dye + 1;
+            *DyeBefore = FString(UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str()));
             *Expected = Controller->Simulation();
-            if (!Expected->RecolorWearable(*Tunic, (Owned->dye + 1) % 4, Controller->PlayerPoint(), Expected->GetRevision()))
+            if (!Expected->RecolorWearable(*Tunic, *DyeTarget, Controller->PlayerPoint(), Expected->GetRevision()))
             { Finish(false, TEXT("The independent dye expectation was invalid.")); return; }
             if (!Controller->NativeMenu->FocusItemAction(EHomesteadItemAction::Dye))
             { Finish(false, TEXT("Owned tunic dye action is unavailable.")); return; }
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         },
-        [this, Expected]() { return !Controller->ToastIsError()
+        [this]() { return Controller->NativeMenu->IsDyeChooserOpen(); });
+    Add(TEXT("Moving to the next dye previews it on her without changing the save"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Down); },
+        [this, DyeTarget, DyeBefore]() { return Controller->NativeMenu->GetDyePreview() == *DyeTarget
+            && FString(UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str())) == *DyeBefore; });
+    Add(TEXT("Capture the dye chooser previewing the next dye"),
+        [this]() { Screenshot(TEXT("native-dye-chooser")); },
+        [this]() { return Controller->NativeMenu->IsDyeChooserOpen(); }, 0.8f);
+    Add(TEXT("A chooses the previewed dye"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, DyeTarget]() { return Controller->NativeMenu->IsDyeChooserOpen() && Controller->NativeMenu->GetDyeChoice() == *DyeTarget; });
+    Add(TEXT("Apply changes only the owned item and its actual material tint"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, Expected]() { return !Controller->ToastIsError() && !Controller->NativeMenu->IsDyeChooserOpen()
             && Controller->Simulation().Serialize() == Expected->Serialize() && VerifyNativeMenuPresentation(); });
     Add(TEXT("Capture admitted dyed wardrobe"),
         [this]() { Screenshot(TEXT("native-wardrobe-dyed")); },
         [this]() { return VerifyNativeMenuPresentation(); }, 0.8f);
+    // A garment in her pack previews too: she tries it on in the copy, and nothing is saved.
+    const auto PackDyeBefore = MakeShared<FString>();
+    const auto PackDyeTarget = MakeShared<int32>(0);
+    const auto PackDyeRestore = MakeShared<Homestead::Simulation>();
+    const auto PackDyeShown = MakeShared<int32>(INDEX_NONE);
+    const auto PackDyeSaveKept = MakeShared<bool>(false);
+    Add(TEXT("Previewing a dye on the tunic while it's in her pack dresses her in it without saving"),
+        [this, Tunic, PackDyeBefore, PackDyeTarget, PackDyeRestore, PackDyeShown, PackDyeSaveKept]()
+        {
+            *PackDyeRestore = Controller->Sim;
+            if (!Controller->Sim.UnequipWearable(*Tunic, Controller->Sim.GetRevision()).ok)
+            { Finish(false, TEXT("Could not put the tunic in her pack for the preview check.")); return; }
+            *PackDyeBefore = FString(UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str()));
+            *PackDyeTarget = (Controller->Simulation().GetWearable(*Tunic)->dye + 1) % 4;
+            if (!Controller->MenuPreviewDye(*Tunic, *PackDyeTarget)) { Finish(false, TEXT("The pack-garment dye preview was refused.")); return; }
+            // What the preview dressed her in, then her own clothes back in the same frame, so the
+            // saved-look contract holds between steps.
+            if (const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn())) *PackDyeShown = Avatar->PendingMetaHumanTunicDye;
+            *PackDyeSaveKept = Controller->Simulation().GetWearable(*Tunic)->owner == Homestead::WearableOwner::Carried
+                && FString(UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str())) == *PackDyeBefore;
+            Controller->Sim = *PackDyeRestore;
+            Controller->MenuEndDyePreview();
+            Controller->NativeMenu->Refresh();
+        },
+        [PackDyeTarget, PackDyeShown, PackDyeSaveKept]() { return *PackDyeShown == *PackDyeTarget && *PackDyeSaveKept; });
+    Add(TEXT("Ending the preview puts her own clothes back, and she wears the tunic again"),
+        []() {},
+        [this, Tunic]() { return Controller->State().equipment[static_cast<int32>(Homestead::EquipmentSlot::Torso)] == *Tunic
+            && VerifyNativeMenuPresentation(); });
 
     for (int32 Id : {0, 1, 1, 1, 1, 2, 3})
     {
@@ -1386,6 +1564,50 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, Chest]() { return Controller->IsBookOpen()
             && Controller->ActiveStorageChest().IsSet()
             && Controller->ActiveStorageChest().GetValue() == *Chest; });
+    Add(TEXT("She names the chest from the keyboard; the name titles storage and its prompt"),
+        [this]() { Controller->NativeMenu->OpenRenameChest(); Controller->NativeMenu->TypeChestName(TEXT("Linen press")); },
+        [this]() { return Controller->NativeMenu->IsRenamingChest()
+            && Controller->NativeMenu->GetChestNameDraft() == TEXT("Linen press"); });
+    Add(TEXT("Capture the chest naming dialog"),
+        [this]() { Screenshot(TEXT("native-chest-naming")); },
+        [this]() { return Controller->NativeMenu->IsRenamingChest(); }, 0.8f);
+    Add(TEXT("Enter saves the chest's name"),
+        [this]() { Tap(EKeys::Enter); },
+        [this, Chest]() { return !Controller->NativeMenu->IsRenamingChest() && !Controller->ToastIsError()
+            && Controller->ChestDisplayName(*Chest) == TEXT("Linen press")
+            && Controller->MenuInventorySummary().StartsWith(TEXT("Linen press:")); });
+    const auto StoreExpected = MakeShared<Homestead::Simulation>();
+    const auto BeforeStore = MakeShared<Homestead::Simulation>();
+    Add(TEXT("T stores carried Stone onto the chest's Stone stack and nothing else"),
+        [this, Chest, StoreExpected, BeforeStore]()
+        {
+            auto& Sim = Controller->Sim;
+            *BeforeStore = Sim;
+            const Homestead::Point At = Controller->PlayerPoint();
+            if (!Sim.GrantItems(Homestead::Item::Stone, 3).ok) { Finish(false, TEXT("Could not grant the Stone fixture.")); return; }
+            int32 Stone = 0;
+            for (const auto& Entry : *Sim.GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Stone) { Stone = Entry.groupId; break; }
+            if (!Sim.TransferGroup(*Chest, Stone, 1, true, At, Sim.GetRevision()).ok)
+            { Finish(false, TEXT("Could not seed the chest's Stone stack.")); return; }
+            Controller->NativeMenu->Refresh();
+            *StoreExpected = Sim;
+            if (!StoreExpected->StoreMatching(*Chest, At, StoreExpected->GetRevision()).ok)
+            { Finish(false, TEXT("The independent auto-store expectation was invalid.")); return; }
+            Tap(EKeys::T);
+        },
+        [this, StoreExpected]() { return !Controller->ToastIsError()
+            && Controller->Simulation().Serialize() == StoreExpected->Serialize()
+            && Controller->Simulation().Count(Homestead::Item::Stone) == 0
+            && Controller->Simulation().Count(Homestead::Item::Branch) > 0; });
+    Add(TEXT("With nothing left to match, T explains and changes nothing"),
+        [this, StoreExpected]() { Tap(EKeys::T); },
+        [this, StoreExpected]() { return Controller->ToastIsError()
+            && Controller->Simulation().Serialize() == StoreExpected->Serialize(); });
+    Add(TEXT("Put the chest back as it was before the auto-store checks (keeping its name)"),
+        [this, BeforeStore]() { Controller->Sim = *BeforeStore; Controller->NativeMenu->Refresh(); },
+        [this, Chest]() { return Controller->Simulation().ChestUsedCapacity(*Chest) == 0
+            && Controller->ChestDisplayName(*Chest) == TEXT("Linen press"); });
     Add(TEXT("Back clears the exact storage session before ordinary Inventory"),
         [this, Branches]()
         {

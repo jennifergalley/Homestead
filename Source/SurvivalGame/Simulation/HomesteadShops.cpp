@@ -1,4 +1,5 @@
 #include "HomesteadShops.h"
+#include "HomesteadBackpack.h"
 #include "HomesteadEstate.h"
 #include "HomesteadSimulation.h"
 
@@ -156,7 +157,7 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     const auto access = CheckShopAccess(shopId, player);
     if (!access) return access;
     const Shop* shop = FindShop(shopId);
-    if (!ValidShopItem(item) || quantity <= 0 || quantity > InventoryCapacity)
+    if (!ValidShopItem(item) || quantity <= 0 || quantity > MaxPackCapacity)
         return ShopBad("Choose something to buy and how many.", revision_);
     const auto& goods = ShopGoods(shop->kind);
     if (fromHeroineStock)
@@ -169,7 +170,7 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     const Cents cost = (fromHeroineStock ? BuyBackPrice(item) : BuyPrice(item)) * quantity;
     if (cost > state_.money)
         return ShopBad("That costs " + FormatMoney(cost) + "; you have " + FormatMoney(state_.money) + ".", revision_);
-    if (UsedCapacity() + quantity > InventoryCapacity || Count(item) + quantity > InventoryCapacity)
+    if (UsedCapacity() + quantity > PackCapacity() || Count(item) + quantity > PackCapacity())
         return ShopBad("Not enough pack space for " + Plural(quantity, item) + ".", revision_, ResultCode::Capacity);
     State candidate = state_;
     for (auto& value : candidate.shops)
@@ -178,6 +179,33 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     candidate.money -= cost;
     const std::string message = "Bought " + Plural(quantity, item) + " for " + FormatMoney(cost) + ".";
     return CommitInventory(std::move(candidate), message.c_str());
+}
+
+Result Simulation::BuyBackpack(int shopId, Point player)
+{
+    const auto access = CheckShopAccess(shopId, player);
+    if (!access) return access;
+    const Shop* shop = FindShop(shopId);
+    if (state_.leatherBackpack) return ShopBad("You already have the leather backpack.", revision_);
+    if (!Backpack::Offered(state_, shop->kind))
+        return ShopBad(std::string(ShopDisplayName(shop->kind)) + " doesn't sell backpacks.", revision_);
+    if (Backpack::Price > state_.money)
+        return ShopBad("That costs " + FormatMoney(Backpack::Price) + "; you have " + FormatMoney(state_.money) + ".", revision_);
+    State candidate = state_;
+    candidate.leatherBackpack = true;
+    candidate.backpackShown = true;
+    candidate.money -= Backpack::Price;
+    const std::string message = "Bought the leather backpack for " + FormatMoney(Backpack::Price)
+        + ". You can carry " + std::to_string(MaxPackCapacity) + " now.";
+    return CommitInventory(std::move(candidate), message.c_str());
+}
+
+Result Simulation::SetBackpackShown(bool shown)
+{
+    if (!state_.leatherBackpack) return ShopBad("You don't have a backpack yet.", revision_);
+    if (state_.backpackShown == shown) return ShopBad(shown ? "Your backpack is already showing." : "Your backpack is already hidden.", revision_);
+    state_.backpackShown = shown;
+    return ShopGood(shown ? "Your backpack shows on your back." : "Your backpack is hidden. You can still carry as much.", ++revision_);
 }
 
 Result Simulation::WaitForShop(int shopId, Point player)

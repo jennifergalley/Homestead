@@ -62,4 +62,19 @@ bool Contains(const std::vector<Vec>& ring, Vec point);
 // Distance from a point to the nearest edge of a closed ring.
 double DistanceToRing(const std::vector<Vec>& ring, Vec point);
 Vec Centroid(const std::vector<Vec>& ring);
+
+// HUD legibility: a length in local units raised so it is at least `minPhysical` physical pixels on
+// screen, and a coordinate snapped to the physical pixel grid (so glyph edges stay crisp).
+double AtLeastPhysical(double local, double physicalPerLocal, double minPhysical);
+double SnapToPixel(double local, double physicalPerLocal);
+// Greedy spacing for badges given in priority order: the indices kept, where no kept circle comes
+// within `gap` of another.
+std::vector<int> SpacedCircles(const std::vector<Vec>& centers, const std::vector<double>& radii, double gap);
+
+// The compass: the Unreal yaw from one world point to another (0 = north/+X, 90 = east/+Y), a
+// bearing relative to a heading in (-180, 180], and where a bearing falls across a strip whose
+// middle is the heading and whose half-width shows `halfFieldDegrees`. False when it's off the strip.
+double BearingDegrees(Vec from, Vec to);
+double RelativeDegrees(double bearing, double heading);
+bool CompassOffset(double bearing, double heading, double halfFieldDegrees, double halfWidth, double& offset);
 }

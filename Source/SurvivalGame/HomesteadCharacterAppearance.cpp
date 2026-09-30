@@ -27,6 +27,14 @@
 #include "Misc/Parse.h"
 #include "Rendering/SkeletalMeshRenderData.h"
 #include "RenderCore.h"
+#include "Misc/PackageName.h"
+
+// The worn leather backpack's mesh: an original asset Props authors (not yet made).
+namespace HeroineBackpackStyle
+{
+constexpr const TCHAR* PackagePath = TEXT("/Game/SurvivalGame/Environment/Props/LeatherBackpack/SM_LeatherBackpack");
+constexpr const TCHAR* ObjectPath = TEXT("/Game/SurvivalGame/Environment/Props/LeatherBackpack/SM_LeatherBackpack.SM_LeatherBackpack");
+}
 
 namespace
 {
@@ -509,6 +517,16 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         }
         ForagePouch->SetVisibility(true);
     }
+    // The leather backpack she can buy at the store (Simulation/HomesteadBackpack.h). Props authors
+    // the original mesh; until it exists she simply has no visible pack, and capacity is unaffected.
+    if (!Backpack && FPackageName::DoesPackageExist(HeroineBackpackStyle::PackagePath))
+        if (UStaticMesh* Pack = LoadObject<UStaticMesh>(nullptr, HeroineBackpackStyle::ObjectPath))
+        {
+            Backpack = MakeProp(TEXT("Backpack"), Pack);
+            // Props adds the reference-pose pivot (report.json attach.pivot_reference_pose_cm) with the import, as for CordBelt.
+            Backpack->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("spine_05"));
+            Backpack->SetVisibility(bBackpackShown);
+        }
     // The rawhide cord belt the pouch hangs from, tied on the shorts' waistband with the knot in
     // front. Its path is fitted to the shorts (Scripts/Blender/Recipes/cord_belt_fit.py) and
     // authored about its pivot in the skeleton's reference pose, so it rides the pelvis from there.
@@ -827,6 +845,22 @@ void AHomesteadCharacter::ApplyMetaHumanGarments()
     ShowMaterialSlot(*MetaHumanOutfit, TEXT("M_PrimitiveTankTop"), MetaHumanGarmentMesh(0) == nullptr);
     ShowMaterialSlot(*MetaHumanOutfit, TEXT("M_PrimitiveShorts"), MetaHumanGarmentMesh(1) == nullptr);
     GetMesh()->SetRelativeLocation(FVector(0, 0, FootwearLift - GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
+    ApplyMetaHumanTunicDye();
+}
+
+void AHomesteadCharacter::ApplyMetaHumanTunicDye()
+{
+    if (!MetaHumanOutfit) return;
+    // M_HomespunDyeable's Tint multiplies the homespun albedo (import_primitive_outfit.py).
+    const FLinearColor Tint = MetaHumanTunicDye == INDEX_NONE ? FLinearColor::White : HomesteadLook::HomespunDyeTint(MetaHumanTunicDye);
+    const TArray<FName> Names = MetaHumanOutfit->GetMaterialSlotNames();
+    for (int32 Index = 0; Index < Names.Num(); ++Index)
+    {
+        if (Names[Index] != TEXT("M_PrimitiveTankTop") && Names[Index] != TEXT("M_PrimitiveShorts")) continue;
+        auto* Material = Cast<UMaterialInstanceDynamic>(MetaHumanOutfit->GetMaterial(Index));
+        if (!Material) Material = MetaHumanOutfit->CreateDynamicMaterialInstance(Index);
+        if (Material) Material->SetVectorParameterValue(TEXT("Tint"), Tint);
+    }
 }
 
 void AHomesteadCharacter::ApplyMetaHumanLook()
@@ -1025,10 +1059,14 @@ bool AHomesteadCharacter::PrepareEquipment(const Homestead::State& CandidateStat
     ClearPreparedEquipment();
     PendingMetaHumanLook = Look;
     PendingMetaHumanWorn.Init(INDEX_NONE, 4);
+    PendingMetaHumanTunicDye = INDEX_NONE;
     for (const auto& Item : CandidateState.wearables)
         if (Item.owner == Homestead::WearableOwner::Equipped)
+        {
             if (const int32 Slot = MetaHumanGarmentSlot(Item.definition); Slot != INDEX_NONE)
                 PendingMetaHumanWorn[Slot] = static_cast<int32>(Item.definition);
+            if (Item.definition == Homestead::WearableDefinition::LinenTunic) PendingMetaHumanTunicDye = Item.dye;
+        }
     if (!LoadHeroineAssets())
     {
         Error = TEXT("Original heroine skeleton or animations are unavailable.");
@@ -1061,6 +1099,7 @@ bool AHomesteadCharacter::ApplyPreparedEquipment(FString& Error)
         ClearPreparedEquipment();
         MetaHumanLook = PendingMetaHumanLook;
         MetaHumanWorn = PendingMetaHumanWorn;
+        MetaHumanTunicDye = PendingMetaHumanTunicDye;
         if (ApplyMetaHumanStack()) return true;
         Error = TEXT("MetaHuman heroine assets are unavailable.");
         return false;
@@ -1158,33 +1197,18 @@ void AHomesteadCharacter::SetAppearancePreview(bool Enabled)
     {
         SavedViewRotation = Controller->GetControlRotation();
         SavedCameraDistance = CameraArm->TargetArmLength;
-        CameraArm->TargetArmLength = 280;
+        AppearanceArm = AppearanceArmDefault;
+        CameraArm->TargetArmLength = AppearanceArm;
+        // Always face her from the front, even with a wall behind the camera: the arm stops testing
+        // collision while the page is open (restored on close), so nothing pulls it in onto her back.
+        bSavedArmCollision = CameraArm->bDoCollisionTest;
+        CameraArm->bDoCollisionTest = false;
         UpdateAppearanceFraming();
-        // Face her from the front, but swing around a trunk or wall that would pull the arm in close.
-        const float Front = GetActorRotation().Yaw + 180;
-        float Yaw = Front;
-        if (UWorld* World = GetWorld())
-        {
-            const FVector Pivot = CameraArm->GetComponentLocation();
-            FCollisionQueryParams Query(SCENE_QUERY_STAT(AppearancePreview), false, this);
-            const float Swings[] = {0, 25, -25, 50, -50, 80, -80, 115, -115};
-            for (const float Swing : Swings)
-            {
-                const FRotator View(-6, Front + Swing, 0);
-                const FVector End = Pivot - View.Vector() * CameraArm->TargetArmLength
-                    + View.Quaternion().RotateVector(CameraArm->SocketOffset);
-                if (!World->SweepTestByChannel(Pivot, End, FQuat::Identity, ECC_Camera,
-                    FCollisionShape::MakeSphere(CameraArm->ProbeSize), Query))
-                {
-                    Yaw = Front + Swing;
-                    break;
-                }
-            }
-        }
-        Controller->SetControlRotation(FRotator(-6, Yaw, 0));
+        Controller->SetControlRotation(FRotator(-6, GetActorRotation().Yaw + 180, 0));
     }
     else
     {
+        CameraArm->bDoCollisionTest = bSavedArmCollision;
         CameraArm->TargetArmLength = SavedCameraDistance;
         CameraArm->SocketOffset = FVector(0, 45, 55);
         CameraArm->TargetOffset = FVector::ZeroVector;
@@ -1199,6 +1223,20 @@ void AHomesteadCharacter::SetAppearancePreview(bool Enabled)
 void AHomesteadCharacter::SetAppearanceFaceFocus(bool bFace)
 {
     bAppearanceFaceFocus = bAppearancePreview && bFace;
+}
+
+void AHomesteadCharacter::OrbitAppearance(float Yaw, float Pitch)
+{
+    if (!bAppearancePreview || !Controller) return;
+    const FRotator View = Controller->GetControlRotation();
+    Controller->SetControlRotation(FRotator(FMath::Clamp(FRotator::NormalizeAxis(View.Pitch + Pitch),
+        AppearancePitchMin, AppearancePitchMax), View.Yaw + Yaw, 0));
+}
+
+void AHomesteadCharacter::ZoomAppearance(float Steps)
+{
+    if (!bAppearancePreview) return;
+    AppearanceArm = FMath::Clamp(AppearanceArm - Steps * AppearanceZoomStep, AppearanceArmMin, AppearanceArmMax);
 }
 
 void AHomesteadCharacter::UpdateAppearanceFraming()
@@ -1217,7 +1255,16 @@ void AHomesteadCharacter::UpdateAppearanceFraming()
         CameraArm->TargetArmLength = FMath::Lerp(FaceFocusBodyArm, 70.0f, FaceFocusBlend);
         CameraArm->TargetOffset = FVector(0, 0, (66.0f + GetFootwearLift()) * FaceFocusBlend);
     }
-    else FaceFocusBlend = 0.0f;
+    else
+    {
+        FaceFocusBlend = 0.0f;
+        // The wheel's zoom eases in rather than jumping.
+        CameraArm->TargetArmLength = FMath::FInterpTo(CameraArm->TargetArmLength, AppearanceArm, Delta, 10.0f);
+        // Closer in, the view drifts up from her middle toward her face.
+        const float Close = FMath::GetMappedRangeValueClamped(FVector2f(AppearanceArmDefault, AppearanceArmMin),
+            FVector2f(0.0f, 1.0f), CameraArm->TargetArmLength);
+        CameraArm->TargetOffset = FVector(0, 0, (60.0f + GetFootwearLift()) * Close);
+    }
     const float Scale = FMath::Clamp(Height / 1080.0f, 0.4f, 3.0f);
     const float VirtualWidth = Width / Scale;
     const float PanelRight = (32.0f + FMath::Min(500.0f, VirtualWidth * 0.35f)) * Scale;
@@ -1235,4 +1282,11 @@ void AHomesteadCharacter::UpdateAppearanceFraming()
     Camera->PostProcessSettings.bOverride_AutoExposureBias = true;
     Camera->PostProcessSettings.AutoExposureBias =
         GameController && GameController->Simulation().IsNight() ? 0.5f : 0.0f;
+}
+
+void AHomesteadCharacter::SetBackpackShown(bool bShown)
+{
+    if (bShown == bBackpackShown) return;
+    bBackpackShown = bShown;
+    if (Backpack) Backpack->SetVisibility(bShown);
 }

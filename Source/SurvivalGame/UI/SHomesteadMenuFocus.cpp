@@ -355,7 +355,8 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
             }
             if (Direction.x)
             {
-                Controller->MenuAdjustSetting(Entries[ContentSelection].Id, Direction.x);
+                if (IsAudioSetting(Entries[ContentSelection].Id)) StepAudio(Entries[ContentSelection].Id, Direction.x);
+                else Controller->MenuAdjustSetting(Entries[ContentSelection].Id, Direction.x);
                 Refresh();
                 return;
             }
@@ -535,5 +536,40 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
         SynchronizeFocus();
     }
     else NavigateSpatial(Direction);
+}
+
+void SHomesteadMenu::StepAudio(int32 Id, int32 Direction)
+{
+    if (!Controller.IsValid()) return;
+    if (AudioEditId != Id || !bAudioStepEdit)
+    {
+        CommitAudioStep();
+        AudioEditId = Id;
+        AudioEditStart = Controller->MenuAudioVolume(Id);
+        bAudioStepEdit = true;
+    }
+    // One step is a twentieth of the slider, the same as before; she hears it as it changes.
+    Controller->MenuPreviewAudioVolume(Id, Controller->MenuAudioVolume(Id) + Direction * 0.05f);
+}
+
+void SHomesteadMenu::CommitAudioStep()
+{
+    if (!bAudioStepEdit) return;
+    bAudioStepEdit = false;
+    const int32 Id = AudioEditId;
+    AudioEditId = -1;
+    if (!Controller.IsValid()) return;
+    const float Current = Controller->MenuAudioVolume(Id);
+    if (!FMath::IsNearlyEqual(Current, AudioEditStart)) Controller->MenuCommitAudioVolume(Id, Current, AudioEditStart);
+}
+
+bool SHomesteadMenu::CancelAudioStep()
+{
+    if (!bAudioStepEdit) return false;
+    bAudioStepEdit = false;
+    if (Controller.IsValid()) Controller->MenuPreviewAudioVolume(AudioEditId, AudioEditStart);
+    AudioEditId = -1;
+    Refresh();
+    return true;
 }
 }

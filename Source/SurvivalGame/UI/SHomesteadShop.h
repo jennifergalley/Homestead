@@ -40,6 +40,8 @@ public:
     int32 GetQuantity() const { return Quantity; }
     int32 RowCount() const { return Rows.Num(); }
     FString RowLabel(int32 Index) const;
+    // Whether the row is the one-time backpack upgrade (for playtests).
+    bool IsUpgradeRow(int32 Index) const { return Rows.IsValidIndex(Index) && Rows[Index].bUpgrade; }
     FString GetStatus() const { return Status; }
 
     // Actions shared by every input route.
@@ -59,6 +61,8 @@ private:
         int32 Available = 0;
         int64 Unit = 0;
         bool bHeroine = false;
+        // A one-time upgrade (the leather backpack) rather than goods: bought once, never a quantity.
+        bool bUpgrade = false;
         FString Header; // Set for section headings, which can't be chosen.
     };
     TWeakObjectPtr<AHomesteadController> Controller;
@@ -91,6 +95,7 @@ private:
     // slot wraps at the last frame's width and can break "100 coins each" or "+25 Energy" in two.
     TSharedRef<SWidget> Label(const FString& Value, int32 Size, const FLinearColor& Color, bool bWrap = true) const;
     FString Wallet() const;
+    FString RowName(const FRow& Row) const;
     FString EstateName() const;
     void ScrollToSelection();
 };

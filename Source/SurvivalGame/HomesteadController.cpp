@@ -39,6 +39,7 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Misc/Crc.h"
+#include "Misc/App.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Sound/SoundBase.h"
@@ -289,6 +290,10 @@ void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
 void AHomesteadController::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    // Real seconds, so a slowed or paused world still retires the strip on time.
+    ControlsHint.Advance(FApp::GetDeltaTime(), IsControlsHintOnScreen());
+    // The leather backpack on her back mirrors the saved choice (a no-op unless it changed).
+    if (auto* Heroine = Cast<AHomesteadCharacter>(GetPawn())) Heroine->SetBackpackShown(State().leatherBackpack && State().backpackShown);
     UpdateArrival();
     if (!Landscape) return;
     UpdatePickups(DeltaSeconds);

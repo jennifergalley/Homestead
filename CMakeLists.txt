@@ -22,6 +22,8 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadLamp.cpp
     Source/SurvivalGame/Simulation/HomesteadRoomAudio.cpp
     Source/SurvivalGame/Simulation/HomesteadDoor.cpp
+    Source/SurvivalGame/Simulation/HomesteadChests.cpp
+    Source/SurvivalGame/Simulation/HomesteadBackpack.cpp
     Source/SurvivalGame/Simulation/HomesteadPackRow.cpp
     Source/SurvivalGame/Simulation/HomesteadEstatePublicRoad.cpp
     Source/SurvivalGame/Simulation/HomesteadTravel.cpp
@@ -93,6 +95,28 @@ else()
 endif()
 add_test(NAME HomesteadMapGeometryTests COMMAND HomesteadMapGeometryTests)
 
+add_executable(HomesteadTextEditTests Tests/HomesteadTextEditTests.cpp)
+target_include_directories(HomesteadTextEditTests PRIVATE Source/SurvivalGame/UI)
+target_compile_features(HomesteadTextEditTests PRIVATE cxx_std_17)
+if(MSVC)
+    target_compile_options(HomesteadTextEditTests PRIVATE /W4 /EHs-c-)
+    target_compile_definitions(HomesteadTextEditTests PRIVATE _HAS_EXCEPTIONS=0)
+else()
+    target_compile_options(HomesteadTextEditTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadTextEditTests COMMAND HomesteadTextEditTests)
+
+add_executable(HomesteadHudTimingTests Tests/HomesteadHudTimingTests.cpp)
+target_include_directories(HomesteadHudTimingTests PRIVATE Source/SurvivalGame/UI)
+target_compile_features(HomesteadHudTimingTests PRIVATE cxx_std_17)
+if(MSVC)
+    target_compile_options(HomesteadHudTimingTests PRIVATE /W4 /EHs-c-)
+    target_compile_definitions(HomesteadHudTimingTests PRIVATE _HAS_EXCEPTIONS=0)
+else()
+    target_compile_options(HomesteadHudTimingTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadHudTimingTests COMMAND HomesteadHudTimingTests)
+
 add_executable(HomesteadManorTests Tests/HomesteadManorTests.cpp)
 target_link_libraries(HomesteadManorTests PRIVATE HomesteadSimulation)
 if(MSVC)
@@ -101,6 +125,15 @@ else()
     target_compile_options(HomesteadManorTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadManorTests COMMAND HomesteadManorTests)
+
+add_executable(HomesteadChestTests Tests/HomesteadChestTests.cpp)
+target_link_libraries(HomesteadChestTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadChestTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadChestTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadChestTests COMMAND HomesteadChestTests)
 
 add_executable(HomesteadLampTests Tests/HomesteadLampTests.cpp)
 target_link_libraries(HomesteadLampTests PRIVATE HomesteadSimulation)

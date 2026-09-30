@@ -9,6 +9,7 @@
 #include "HomesteadSaveRouting.h"
 #include "HomesteadPromptIntent.h"
 #include "HomesteadMusicPlaylist.h"
+#include "UI/HomesteadHudTiming.h"
 #include "Styling/SlateBrush.h"
 #include "HomesteadController.generated.h"
 
@@ -115,12 +116,24 @@ public:
     // where she stands, and the walk itself (the clock runs for its length; she's stood at the end).
     Homestead::TravelPlan MenuPlanTravel(Homestead::TravelDestination Destination) const;
     bool MenuTravel(Homestead::TravelDestination Destination, uint64 ExpectedRevision);
+    // The dye chooser's live preview: shows her wearing the garment in `Dye` through the real wardrobe
+    // path without changing anything saved; MenuEndDyePreview puts her own clothes back.
+    bool MenuPreviewDye(int32 WearableId, int32 Dye);
+    void MenuEndDyePreview();
+    // The Appearance page's camera (orbit in degrees, zoom in wheel steps); nothing outside it.
+    void MenuOrbitAppearance(float Yaw, float Pitch);
+    void MenuZoomAppearance(float Steps);
     bool MenuSplitHalf(const FHomesteadRow& Row);
     // Moves a whole stack or garment between the pack and the open chest (as much as fits).
     bool MenuMoveWhole(const FHomesteadRow& Row);
     // The menu row for one owned garment wherever it is (worn, carried or stored).
     bool MenuWearableRow(int32 WearableId, FHomesteadRow& Out) const;
     bool MenuSortPack();
+    // The open chest (HomesteadControllerChests.cpp): its name ("Storage chest" until she names it),
+    // auto-store onto its matching stacks, and naming it (empty puts the default back).
+    FString ChestDisplayName(int32 ChestId) const;
+    bool MenuStoreMatching();
+    bool MenuRenameChest(const FString& Name);
     bool MenuDrop(const FHomesteadRow& Source, const FHomesteadRow& Target, uint64 ExpectedRevision);
     bool OpenChestStorage(int32 ChestId);
     TOptional<int32> ActiveStorageChest() const { return ActiveChestId; }
@@ -140,6 +153,10 @@ public:
     bool IsHintRetired(const FString& Verb) const;
     int32 HintUseCount(const FString& Verb) const;
     void ResetActionHints();
+    // The top-left controls strip shows for its first minute on screen (UI/HomesteadHudTiming.h).
+    bool ShowsControlsHint() const { return ControlsHint.Showing(); }
+    double ControlsHintSecondsLeft() const { return ControlsHint.Remaining(); }
+    bool IsControlsHintOnScreen() const;
     bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }
     FString Toast() const { return ToastRemaining > 0 ? ToastText : FString(); }
     // Seconds the current toast has left, and a count of Notify calls (tells a repeated message apart).
@@ -301,6 +318,8 @@ public:
     void CloseShopScreen();
     // One Sell or Buy at the shop's counter; shows the wallet delta on success.
     Homestead::Result ShopTrade(int32 ShopId, Homestead::Item Item, int32 Quantity, bool bSell, bool bHeroineStock);
+    // The one-time leather backpack (Simulation/HomesteadBackpack.h).
+    Homestead::Result ShopBuyBackpack(int32 ShopId);
     void ShopClick();
     void NoteShopDevice(bool bPad);
     // The name she gave the estate ("the estate" in woodland games), for "From {Estate}" and toasts.
@@ -563,6 +582,7 @@ private:
     void UpdatePendingFell();
     float RefreshRemaining = 0;
     float ToastRemaining = 0;
+    HomesteadHud::ControlsHintWindow ControlsHint;
     float AutosaveRemaining = 240;
     bool bAutosaveEnabled = true;
     int32 AutosaveMinutes = 5;
@@ -601,6 +621,7 @@ private:
     TSharedPtr<SWidget> HotbarRoot;
     // Food, energy and the purse (UI/SHomesteadVitals), shown and removed with the hotbar.
     TSharedPtr<SWidget> VitalsRoot;
+    TSharedPtr<SWidget> ClockRoot;
     // add-ruined-manor-and-arrival: the Names step and the arrival title card.
     bool bNewGameSetup = false;
     TSharedPtr<HomesteadMenus::SHomesteadNames> NamesWidget;
@@ -623,6 +644,8 @@ private:
     bool PersistCameraSensitivity(float Requested);
     bool PersistCameraInversion(bool Requested);
     bool PersistAudioVolume(int32 Id, float Requested, float Previous);
+    // Successful sound-level writes to GameUserSettings (for the menu automation).
+    int32 AudioPersistWrites = 0;
     bool PersistAutosaveEnabled(bool Requested);
     bool PersistAutosaveInterval(int32 Requested);
     bool PersistResolutionScale(float Requested);

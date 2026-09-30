@@ -1,5 +1,6 @@
 #include "../HomesteadController.h"
 #include "../HomesteadCharacter.h"
+#include "../Simulation/HomesteadChests.h"
 #include "../Simulation/HomesteadItems.h"
 #include "../Simulation/HomesteadPail.h"
 #include "../Simulation/HomesteadPackRow.h"
@@ -8,7 +9,7 @@ namespace
 {
 bool IsFood(Homestead::Item Item) { return Homestead::IsEdible(Item); }
 FString FromUtf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
-bool WearableRow(const Homestead::WearableInstance& Instance, bool Storage, int Chest, FHomesteadRow& Row)
+bool WearableRow(const Homestead::State& State, const Homestead::WearableInstance& Instance, bool Storage, int Chest, FHomesteadRow& Row)
 {
     const auto* Info = Homestead::GetWearableDefinition(Instance.definition);
     if (!Info) return false;
@@ -21,7 +22,7 @@ bool WearableRow(const Homestead::WearableInstance& Instance, bool Storage, int 
     Row.Quantity = 1;
     Row.Name = Row.Label = FromUtf8(Info->name);
     Row.Location = Row.ContainerId < 0 ? TEXT("Wearing") : Row.ContainerId == 0 ? TEXT("Carried")
-        : FString::Printf(TEXT("Chest %d"), Row.ContainerId);
+        : FromUtf8(Homestead::Chests::DisplayName(State, Row.ContainerId).c_str());
     Row.Detail = FromUtf8(Homestead::WearableDescription(Instance.definition));
     if (Info->dyeable)
     {
@@ -55,11 +56,11 @@ void AHomesteadController::MenuInventoryView(int32 View)
 FString AHomesteadController::MenuInventorySummary() const
 {
     if (ActiveChestId.IsSet())
-        return FString::Printf(TEXT("Chest %d: %d / %d  |  Pack: %d / %d"),
-            ActiveChestId.GetValue(), Sim.ChestUsedCapacity(ActiveChestId.GetValue()), Homestead::ChestCapacity,
-            Sim.UsedCapacity(), Homestead::InventoryCapacity);
+        return FString::Printf(TEXT("%s: %d / %d  |  Pack: %d / %d"),
+            *ChestDisplayName(ActiveChestId.GetValue()), Sim.ChestUsedCapacity(ActiveChestId.GetValue()), Homestead::ChestCapacity,
+            Sim.UsedCapacity(), Sim.PackCapacity());
     if (MenuInventoryViewIndex == 2) return TEXT("Equipped clothing");
-    return FString::Printf(TEXT("Your pack  |  %d / %d units"), Sim.UsedCapacity(), Homestead::InventoryCapacity);
+    return FString::Printf(TEXT("Your pack  |  %d / %d units"), Sim.UsedCapacity(), Sim.PackCapacity());
 }
 
 TArray<FHomesteadRow> AHomesteadController::MenuRows() const
@@ -83,7 +84,7 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
             if (Instance.owner == Homestead::WearableOwner::Equipped)
             {
                 FHomesteadRow Row;
-                if (WearableRow(Instance, Storage, Chest, Row)) Result.Add(MoveTemp(Row));
+                if (WearableRow(State(), Instance, Storage, Chest, Row)) Result.Add(MoveTemp(Row));
             }
         return Result;
     }
@@ -113,7 +114,7 @@ bool AHomesteadController::MenuEntryRow(const Homestead::LayoutEntry& Entry, int
     if (Entry.wearableId)
     {
         const auto* Instance = Sim.GetWearable(Entry.wearableId);
-        if (!Instance || !WearableRow(*Instance, Storage, Chest, Row)) return false;
+        if (!Instance || !WearableRow(State(), *Instance, Storage, Chest, Row)) return false;
     }
     else
     {
@@ -126,7 +127,7 @@ bool AHomesteadController::MenuEntryRow(const Homestead::LayoutEntry& Entry, int
         Row.DestinationId = Storage ? (CurrentContainer == 0 ? Chest : 0) : -1;
         Row.Quantity = Entry.quantity;
         Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
-        Row.Location = CurrentContainer == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), CurrentContainer);
+        Row.Location = CurrentContainer == 0 ? FString(TEXT("Carried")) : ChestDisplayName(CurrentContainer);
         // Hover text: where and how many, what it is and (for food) the Energy one restores, from
         // the catalogue (Homestead::FoodEnergyLabel). The internal stack id is not shown.
         const std::string Energy = Homestead::FoodEnergyLabel(Entry.item);
@@ -191,7 +192,9 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
             if (Action == EHomesteadItemAction::Unequip) return Target.UnequipWearable(Row.SubjectId, ExpectedRevision);
             const auto* Item = Target.GetWearable(Row.SubjectId);
             if (!Item) return {false, "That owned garment no longer exists."};
-            return Target.RecolorWearable(Row.SubjectId, (Item->dye + 1) % 4, PlayerPoint(), ExpectedRevision);
+            // The dye chooser passes the chosen dye + 1; older callers without one step to the next.
+            const int32 Dye = Amount >= 1 && Amount <= 4 ? Amount - 1 : (Item->dye + 1) % 4;
+            return Target.RecolorWearable(Row.SubjectId, Dye, PlayerPoint(), ExpectedRevision);
         };
         Homestead::Simulation Candidate = Sim;
         const auto Proposed = Transaction(Candidate);
@@ -295,7 +298,7 @@ bool AHomesteadController::MenuMoveWhole(const FHomesteadRow& Row)
         return MenuItemAction(Target, EHomesteadItemAction::Transfer, 1, Sim.GetRevision());
     if (Row.Subject != EHomesteadMenuSubject::ItemGroup) return false;
     const int32 Used = Row.ContainerId > 0 ? Sim.UsedCapacity() : Sim.ChestUsedCapacity(ActiveChestId.GetValue());
-    const int32 Room = Used < 0 ? 0 : Homestead::ContainerCapacity(Target.DestinationId) - Used;
+    const int32 Room = Used < 0 ? 0 : Homestead::ContainerCapacity(State(), Target.DestinationId) - Used;
     // Move what fits; with no room at all the transfer reports why.
     const int32 Count = Room > 0 ? FMath::Min(Row.Quantity, Room) : Row.Quantity;
     return MenuItemAction(Target, EHomesteadItemAction::Transfer, Count, Sim.GetRevision());
@@ -304,7 +307,7 @@ bool AHomesteadController::MenuMoveWhole(const FHomesteadRow& Row)
 bool AHomesteadController::MenuWearableRow(int32 WearableId, FHomesteadRow& Out) const
 {
     const auto* Instance = Sim.GetWearable(WearableId);
-    return Instance && WearableRow(*Instance, ActiveChestId.IsSet(), ActiveChestId.Get(-1), Out);
+    return Instance && WearableRow(State(), *Instance, ActiveChestId.IsSet(), ActiveChestId.Get(-1), Out);
 }
 
 bool AHomesteadController::MenuSortPack()
