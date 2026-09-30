@@ -743,7 +743,12 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     {
         MetaHumanLODSync->ComponentsToSync.Add(FComponentSync(Groom->GetFName(), ESyncOption::Passive));
         FLODMappingData GroomMapping;
-        GroomMapping.Mapping = {1, 3, 5, 7};
+        // Scalp hair stops at groom LOD 4 (cards) instead of the stock 5 and 7. Those are Legacy01 helmet
+        // meshes bound by transfer, and Pixie declares them with no mesh at all. Jenny saw rods and fans in
+        // far and rear views (09-29). This is an unconfirmed fix: it didn't reproduce in the lab.
+        // Brows, lashes and fuzz keep the stock mapping.
+        const bool bScalp = Groom == MetaHumanHair;
+        GroomMapping.Mapping = bScalp ? TArray<int32>{1, 3, 4, 4} : TArray<int32>{1, 3, 5, 7};
         MetaHumanLODSync->CustomLODMapping.Add(Groom->GetFName(), GroomMapping);
     }
     MetaHumanLODSync->RegisterComponent();
