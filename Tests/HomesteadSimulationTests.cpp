@@ -3,6 +3,7 @@
 #include "HomesteadShops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
+#include "HomesteadGatherPose.h"
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadRuinDebris.h"
@@ -3944,6 +3945,31 @@ void WeedCreepNearOvergrowth()
     OK(loaded.ClearOvergrowth(regrownId, Item::Scythe, PlacedNode(loaded, regrownId).position));
 }
 
+void EveryHandGatherHasItsOwnPose()
+{
+    // Jenny, 2026-09-29: the generic slight-knee-bend gather looked wrong. Everything she can take
+    // by hand has a real pose (sticks, the stone kneel or the hip pouch, or the reed knife), and the
+    // things only a tool clears have none, so no path falls back to the old bend.
+    for (int i = 0; i < static_cast<int>(ResourceKind::Count); ++i)
+    {
+        const auto kind = static_cast<ResourceKind>(i);
+        const GatherPose pose = HandGatherPose(kind);
+        if (const auto* info = FindOvergrowth(kind)) CHECK(info->byHand == (pose != GatherPose::None));
+        else CHECK((kind == ResourceKind::ForestTree) == (pose == GatherPose::None));
+    }
+    for (auto kind : {ResourceKind::Stones, ResourceKind::SalvagePile, ResourceKind::RubbishHeap, ResourceKind::SlateHeap})
+        CHECK(HandGatherPose(kind) == GatherPose::Stones);
+    for (auto kind : {ResourceKind::Branches, ResourceKind::FallenBranch, ResourceKind::BrokenCrate,
+             ResourceKind::BrokenBarrel, ResourceKind::RottenPlanks})
+        CHECK(HandGatherPose(kind) == GatherPose::Sticks);
+    for (auto kind : {ResourceKind::BerryBush, ResourceKind::Roots, ResourceKind::Flowers, ResourceKind::Primroses,
+             ResourceKind::Bluebells, ResourceKind::WildDaffodils, ResourceKind::WildGarlic, ResourceKind::Weeds,
+             ResourceKind::Nettles})
+        CHECK(HandGatherPose(kind) == GatherPose::Pouch);
+    CHECK(HandGatherPose(ResourceKind::Reeds) == GatherPose::Reeds);
+    CHECK(HandGatherPose(ResourceKind::TallGrass) == GatherPose::None && HandGatherPose(ResourceKind::Sapling) == GatherPose::None);
+}
+
 void RuinDebrisIsClearable()
 {
     // Jenny saw slate and rubble heaps in the manor that looked clearable but weren't. The loose
@@ -4549,6 +4575,7 @@ int main()
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
     Run("manor clear-out field placement", ManorClearoutField);
     Run("the ruin's loose slate and rubble can be cleared", RuinDebrisIsClearable);
+    Run("every hand gather has its own pose", EveryHandGatherHasItsOwnPose);
     Run("clear-out rubbish, nettles, stumps and spoiled ground", ClearoutKindsAndSpoiledGround);
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);

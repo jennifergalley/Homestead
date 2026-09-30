@@ -10,6 +10,8 @@
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadGather, Log, All);
+
 // Stick moments in AN_HeroineMH_KneelGatherSticks (seconds; homestead_agent.kneel_gather STICK_EVENTS).
 // Stones share this clip.
 namespace GatherSticksTiming
@@ -91,7 +93,13 @@ bool AHomesteadCharacter::PlayKneelGather(EHomesteadKneelGather Kind, TOptional<
     if (!KneelClip(Kind) || !bPropsReady || !Animation)
     {
         const bool bQuiet = Kind == EHomesteadKneelGather::Reeds || Kind == EHomesteadKneelGather::Plant;
-        if (!bQuiet) PlayGather();
+        // Only the legacy mannequin still has the generic knee-bend gather. On the MetaHuman a missing
+        // kneel clip or prop is a broken build, not a reason to play the pose Jenny rejected (09-29).
+        if (!bMetaHumanActive) { if (!bQuiet) PlayGather(); }
+        else if (!bQuiet)
+            UE_LOG(LogHomesteadGather, Error, TEXT("Kneeling gather %d can't play (clip %s, props %s, anim instance %s)."),
+                static_cast<int32>(Kind), KneelClip(Kind) ? TEXT("ok") : TEXT("missing"), bPropsReady ? TEXT("ok") : TEXT("missing"),
+                Animation ? TEXT("ok") : TEXT("missing"));
         return false;
     }
     CancelSprint();
