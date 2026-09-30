@@ -82,12 +82,13 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current play/package snapshot (2026-09-29 19:05):** Integration's provisional night package has
-finished its suites but remains withheld by the aim blocker. Jenny is actively playing verified
-`Playtest-0929eve` (packaged PID 2328); Menu closed its editor early at roughly 4 GB free RAM.
-Integration holds editor/PIE/UBT/UAT while her game runs; if a process had already begun, it may finish
-safely then pauses. Never touch Jenny's process or save. The evening `Homestead Estate.lnk` target
-remains protected until the aim fix and Shipping acceptance chain pass.
+**Current play/package snapshot (2026-09-29 19:20):** Jenny closed verified `Playtest-0929eve`;
+packaged PID 2328 exited naturally, there are no Unreal processes and physical free memory is 9.2 GB.
+Integration now has the exclusive editor/UBT slot (with memory watch) to build local aim `798ce775` plus
+half-rain `c8765f72` (native 9/9), then PIE behind/front target and rain component behavior. It includes
+Props' pending `[F] Pull weeds` hint before corrected Development package/six suites/copied-save smoke,
+then Shipping `-ReuseCooked` zero-listener proof. Only after that chain may the Estate shortcut retarget.
+Menu field-book hotbar and Water garden outline remain headless/partial and excluded.
 
 ### Development firewall prompts / offline Shipping candidate
 
