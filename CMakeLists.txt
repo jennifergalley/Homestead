@@ -22,6 +22,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadLamp.cpp
     Source/SurvivalGame/Simulation/HomesteadRoomAudio.cpp
     Source/SurvivalGame/Simulation/HomesteadDoor.cpp
+    Source/SurvivalGame/Simulation/HomesteadNightLight.cpp
     Source/SurvivalGame/Simulation/HomesteadPackRow.cpp
     Source/SurvivalGame/Simulation/HomesteadEstatePublicRoad.cpp
     Source/SurvivalGame/Simulation/HomesteadTravel.cpp
@@ -146,3 +147,14 @@ else()
     target_compile_options(HomesteadMusicPlaylistTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
 endif()
 add_test(NAME HomesteadMusicPlaylistTests COMMAND HomesteadMusicPlaylistTests)
+
+add_executable(HomesteadNightLightTests Tests/HomesteadNightLightTests.cpp)
+target_link_libraries(HomesteadNightLightTests PRIVATE HomesteadSimulation)
+# The test also checks the world's console-variable defaults against the tuned schedule.
+target_compile_definitions(HomesteadNightLightTests PRIVATE HOMESTEAD_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+if(MSVC)
+    target_compile_options(HomesteadNightLightTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadNightLightTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadNightLightTests COMMAND HomesteadNightLightTests)
