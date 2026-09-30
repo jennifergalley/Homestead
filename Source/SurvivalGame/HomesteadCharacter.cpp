@@ -1189,27 +1189,16 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     if (Blocked) CancelSprint();
     const bool Moving = Movement->GetCurrentAcceleration().SizeSquared2D() > 1.0f
         && GetVelocity().SizeSquared2D() > 144.0f;
-    // Too tired to go on: the toggle goes off with one gentle notice, and she walks.
-    if (bSprintOn && !Lab && PC && PC->State().energy <= SprintEnergyFloor)
+    // Too tired to go on (work and the hours awake wore her down; running itself is free): the
+    // toggle goes off with one gentle notice, and she walks. It never turns itself back on.
+    if (bSprintOn && !Lab && PC && !PC->Simulation().CanSprint())
     {
         ResetSprint();
         PC->SprintTooTired();
     }
     bSprintActive = bSprintOn && !Blocked && Moving
-        && (Lab || PC->State().energy > SprintEnergyFloor) && SprintAnimation != nullptr;
+        && (Lab || PC->Simulation().CanSprint()) && SprintAnimation != nullptr;
     Movement->MaxWalkSpeed = bSprintActive ? SprintSpeed() : WalkSpeed();
-    if (bSprintActive && !Lab)
-    {
-        const auto Result = PC->SpendSprintEnergy(DeltaSeconds);
-        if (!Result.ok || PC->State().energy <= SprintEnergyFloor)
-        {
-            if (!Result.ok && PC->State().energy > SprintEnergyFloor)
-                UE_LOG(LogTemp, Error, TEXT("Sprint Energy update failed: %s"),
-                    UTF8_TO_TCHAR(Result.message.c_str()));
-            ResetSprint();
-            if (PC->State().energy <= SprintEnergyFloor) PC->SprintTooTired();
-        }
-    }
     if (bAppearancePreview) UpdateAppearanceFraming();
     UpdatePendingKneel();
     UpdateCarriedSticks();
@@ -2591,6 +2580,8 @@ void AHomesteadCharacter::Move(const FInputActionValue& Value)
     AddMovementInput(FRotationMatrix(Facing).GetUnitAxis(EAxis::Y), Axis.X);
 }
 
+static_assert(AHomesteadCharacter::SprintEnergyFloor == Homestead::Exertion::SprintFloor, "The sprint floor lives in the simulation.");
+
 void AHomesteadCharacter::RequestSprintToggle()
 {
     auto* PC = Cast<AHomesteadController>(Controller);
@@ -2599,7 +2590,7 @@ void AHomesteadCharacter::RequestSprintToggle()
         && !PC->IsShopScreenOpen() && !bAppearancePreview : InCharacterLab();
     if (!Allowed) return;
     if (bSprintOn) { ResetSprint(); return; }
-    if (PC && PC->State().energy <= SprintEnergyFloor) { PC->SprintTooTired(); return; }
+    if (PC && !PC->Simulation().CanSprint()) { PC->SprintTooTired(); return; }
     bSprintOn = true;
 }
 

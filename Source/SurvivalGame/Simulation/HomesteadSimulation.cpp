@@ -2725,14 +2725,10 @@ void Simulation::Advance(double realSeconds, Point player, bool paused)
     if (paused || !FiniteRange(realSeconds, 0.0, 31536000.0)) return;
     AdvanceGameHours(realSeconds * 24.0 / (state_.dayMinutes * 60.0), player);
 }
-Result Simulation::SpendSprintEnergy(double realSeconds)
+Result Simulation::CanSprint() const
 {
     if (state_.failed) return Failed();
-    if (!FiniteRange(realSeconds, 0.0, 10.0) || realSeconds <= 0)
-        return Bad("Sprint requires a positive finite time step.");
-    if (state_.energy <= 10.0)
-        return Bad("Rest to regain enough energy to sprint.");
-    state_.energy = std::max(10.0, state_.energy - 0.35 * realSeconds);
+    if (state_.energy <= Exertion::SprintFloor) return Bad("Too tired to run. Eat something or rest.");
     return {true, "", ResultCode::None, revision_};
 }
 Result Simulation::CheckExertion(double cost) const

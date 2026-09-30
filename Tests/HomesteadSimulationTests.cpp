@@ -3092,26 +3092,66 @@ void SparseEditScaleAndPayloadBounds()
         << MaxResourceEdits << ", fullSaveBytes=" << fullSave.size() << ".\n";
 }
 
+// Sprint is free (Jenny, round 2): no Energy of its own at any frame rate or day length. She may
+// start or keep sprinting only above 10 Energy; the awake drain and work are what bring her there.
 void SprintEnergyContract()
 {
     Simulation sim;
+    CHECK(Exertion::SprintFloor == 10.0);
+    const std::string before = sim.Serialize();
     const auto revision = sim.GetRevision();
-    const double before = sim.GetState().energy;
-    UnchangedFailure(sim, [&] { return sim.SpendSprintEnergy(-1); });
-    UnchangedFailure(sim, [&] { return sim.SpendSprintEnergy(0); });
-    UnchangedFailure(sim, [&] {
-        return sim.SpendSprintEnergy(std::numeric_limits<double>::quiet_NaN());
-    });
-    OK(sim.SpendSprintEnergy(1));
-    CHECK(std::abs(sim.GetState().energy - (before - 0.35)) < 0.00001);
-    CHECK(sim.GetRevision() == revision);
-    for (int i = 0; i < 30 && sim.GetState().energy > 10; ++i)
-        OK(sim.SpendSprintEnergy(10));
-    CHECK(sim.GetState().energy == 10.0);
-    UnchangedFailure(sim, [&] { return sim.SpendSprintEnergy(1); });
+    OK(sim.CanSprint());
+    // Asking never changes anything.
+    CHECK(sim.Serialize() == before && sim.GetRevision() == revision);
+
+    // A sprinting tick is an ordinary tick: the energy after N seconds matches walking exactly, for
+    // 30, 60 and 120 fps and 30, 60 and 120-minute days.
+    for (const double dayMinutes : {30.0, 60.0, 120.0})
+        for (const int fps : {30, 60, 120})
+        {
+            Simulation walking;
+            OK(walking.SetDayMinutes(dayMinutes));
+            Simulation running = walking;
+            const double step = 1.0 / fps;
+            for (int tick = 0; tick < fps * 20; ++tick)
+            {
+                OK(running.CanSprint());
+                running.Advance(step, Home);
+                walking.Advance(step, Home);
+            }
+            CHECK(running.Serialize() == walking.Serialize());
+            // Only the slow awake drain: 20 s is well under a tenth of an Energy point.
+            const double hours = 20.0 * 24.0 / (dayMinutes * 60.0);
+            CHECK(Close(running.GetState().energy, 100.0 - hours * Exertion::AwakePerHour, 1e-6));
+        }
+
+    // The floor: above 10 she may run, at or below it she can't, and a failed run can't either.
+    OK(sim.SetEnergy(10.01));
+    OK(sim.CanSprint());
+    OK(sim.SetEnergy(10.0));
+    const auto tired = sim.CanSprint();
+    CHECK(!tired.ok && tired.message == "Too tired to run. Eat something or rest.");
+    OK(sim.SetEnergy(4.0));
+    CHECK(!sim.CanSprint());
+    // Eating brings her back over the floor; nothing turns the toggle back on here (that's the pawn's
+    // job, and it never does it by itself), but she may ask again.
+    Stock(sim, {{Item::Berries, 2}});
+    OK(sim.Eat(Item::Berries));
+    OK(sim.Eat(Item::Berries));
+    OK(sim.CanSprint());
+    // Work that wears her down to the floor stops her sprinting.
+    OK(sim.SetEnergy(10.4));
+    const auto branch = Node(sim, ResourceKind::Branches);
+    OK(sim.Harvest(branch.id, branch.position));
+    CHECK(sim.GetState().energy <= 10.0 && !sim.CanSprint());
+    // Energy survives a save exactly; the toggle itself is never saved.
     Simulation loaded;
     OK(loaded.Deserialize(sim.Serialize()));
-    CHECK(loaded.GetState().energy == 10.0);
+    CHECK(loaded.GetState().energy == sim.GetState().energy && !loaded.CanSprint());
+
+    Simulation failed;
+    failed.AdvanceGameHours(120, Home);
+    CHECK(failed.GetState().failed && !failed.CanSprint());
 }
 
 void ActionEnergyContract()
@@ -3647,8 +3687,8 @@ void MultiSwingTiersAndCapacity()
     OK(tired.NewEstateGame(ProvisionalEstateLayout(), placements));
     OK(tired.GrantItems(Item::Hatchet, 1));
     OK(tired.SetToolTier(ToolKind::Axe, ToolTier::Iron));
-    while (tired.GetState().energy > 10.0) OK(tired.SpendSprintEnergy(10));
-    // Sprint stops at 10 energy, above a large stump's reserve line, so let the hours wear her down.
+    OK(tired.SetEnergy(10.0));
+    // 10 Energy is above a large stump's reserve line, so let the hours wear her down.
     while (tired.GetState().energy - tired.OvergrowthCost(large) >= Exertion::Reserve)
         tired.AdvanceGameHours(0.5, at);
     UnchangedFailure(tired, [&] { return tired.ClearOvergrowth(large, Item::Hatchet, at); });
@@ -4359,7 +4399,7 @@ int main()
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);
     Run("item stocks carry their width; version 12 saves migrate", ItemStockWidthCompatibility);
     Run("clock, pause and batching consistency", ClockPauseAndBatching);
-    Run("sprint consumes existing Energy with a reserve", SprintEnergyContract);
+    Run("sprint is free and needs more than 10 Energy", SprintEnergyContract);
     Run("work spends Energy and time drains it slowly", ActionEnergyContract);
     Run("sleep and failure recovery without cold", SleepAndFailure);
     Run("retired fur and reeds, and cosmetic clothing", CosmeticClothingAndRetiredFur);

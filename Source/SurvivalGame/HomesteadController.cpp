@@ -1729,11 +1729,6 @@ bool AHomesteadController::PrepareWorldAt(Homestead::Point Position)
     return true;
 }
 
-Homestead::Result AHomesteadController::SpendSprintEnergy(double RealSeconds)
-{
-    return Sim.SpendSprintEnergy(RealSeconds);
-}
-
 bool AHomesteadController::HasHeroine() const
 {
     const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());

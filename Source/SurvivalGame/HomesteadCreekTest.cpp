@@ -216,8 +216,9 @@ void AHomesteadSmokeTest::PrepareCreekChecks()
                     Position.X, *SprintStartEnergy - Controller->State().energy));
             return Position.X >= 1720 && Controller->GetPawn()->GetVelocity().Size2D() < 5
                 && FMath::IsNearlyEqual(Position.Z, Controller->GroundHeight(Position.X, Position.Y), 100)
-                && (!HeroineSequence || (*SprintStartEnergy - Controller->State().energy > .15
-                    && *SprintStartEnergy - Controller->State().energy < 2.0));
+                // Sprint is free: only the slow awake drain (0.6 an hour) passes during the crossing.
+                && (!HeroineSequence || (*SprintStartEnergy - Controller->State().energy >= 0.0
+                    && *SprintStartEnergy - Controller->State().energy < .15));
         }, 0.5f);
     Add(TEXT("Capture completed creek crossing"),
         [this]() { Screenshot(TEXT("creek-crossed")); }, []() { return true; }, 0.8f);
