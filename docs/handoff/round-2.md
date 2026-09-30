@@ -89,6 +89,16 @@ Unreal/UBT/Blender off until `packaging done`. Six packaged suites plus copied-s
 promotion. `Playtest-0929eve` remains the current `Homestead Estate.lnk` target until night evidence
 passes and retargeting is safe.
 
+### Urgent forward-aim shipment blocker
+
+**Do not ship or retarget the night package.** Architecture found `main` `5d11ceed` forward-aim bug
+`8df23ba3`: `FocusHeldToolTarget` skips the aimed lookup when the nearest current overgrowth matches
+the held tool, then `SwingAtOvergrowth` overwrites the aimed ID with `FocusId`. A bramble 70 cm behind
+can therefore beat a valid bramble 200 cm ahead; an under-tier thicket behind can block the front
+target. Props has a headless targeted fix slot during UAT. Integration may finish current UAT safely,
+but the night package remains **provisional, not delivered** until the fix has targeted native/PIE
+evidence and a repackage passes. Preserve the prior verified `Playtest-0929eve` build and shortcut.
+
 **Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
 evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
 passes. The batch applied Water
