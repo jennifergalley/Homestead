@@ -333,7 +333,7 @@ FString UHomesteadEstateAuthoringLibrary::ApplyEstateWeightmaps(const FString& W
                     LayerChanged += Differ;
                     if (!bDryRun)
                         Edit.SetAlphaData(Infos[Layer], X0 + LandscapeMinX, Y0 + LandscapeMinY, X1 + LandscapeMinX,
-                            Y1 + LandscapeMinY, Wanted.GetData(), 0, ELandscapeLayerPaintingRestriction::None, false, false);
+                            Y1 + LandscapeMinY, Wanted.GetData(), 0, ELandscapeLayerPaintingRestriction::None);
                 }
             VerticesChanged += LayerChanged;
             Report += FString::Printf(TEXT(" %s %lld"), *LayerNames[Layer].ToString(), LayerChanged);
