@@ -135,8 +135,8 @@ void AHomesteadWorld::BuildRoadBridge()
             for (const float DY : {-1.0f, 0.0f, 1.0f})
             {
                 const FVector Foot = World(FVector(X + DX * AbutmentLengthCm, DY * AbutmentHalfWidth, 0.0f));
-                const float Ground = HomesteadEstateTerrain::Height(Foot.X, Foot.Y);
-                if (FMath::IsFinite(Ground)) Lowest = FMath::Min(Lowest, Ground);
+                const float FootZ = HomesteadEstateTerrain::Height(Foot.X, Foot.Y);
+                if (FMath::IsFinite(FootZ)) Lowest = FMath::Min(Lowest, FootZ);
             }
         if (Lowest == TNumericLimits<float>::Max()) Lowest = static_cast<float>(Deck.bedZ);
         const float Bottom = Lowest - AbutmentFootingCm - static_cast<float>(Deck.deckZ);
