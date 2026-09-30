@@ -832,6 +832,12 @@ requirement.
   not rerun after `fd34975f`. This supersedes the bottom-strip candidate. Menu released its slot;
   Integration resumed at 01:58 after a 7.24 GB/no-Unreal preflight to recut Development/package and
   consider Shipping only if complete. No Shipping delivery claim exists yet.
+
+  **Packaged Smoke adaptation `89cbe13e` (test-only):** `QueueSelectRow` now navigates the actual
+  first-row hotbar for auto-filled items and the lower Content grid otherwise; berry eating acts
+  through `MenuHotbarRow`. Editor/Game rebuild and targeted non-packaged Smoke pass all 48 steps,
+  including berry navigation/eat. The distinct recut Development candidate and packaged six suites
+  remain pending; the shortcut is unchanged.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
