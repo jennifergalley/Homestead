@@ -96,10 +96,8 @@ void SHomesteadMenu::QuickMove(int32 Index)
         Changed = Controller->MenuMoveWhole(Row);
     else if (Row.Subject == EHomesteadMenuSubject::Wearable)
         Changed = Controller->MenuItemAction(Row, EHomesteadItemAction::Equip, 1, Controller->Simulation().GetRevision());
-    else if (Row.Id >= 0 && Row.Id < static_cast<int32>(Homestead::Item::Count)
-        && AHomesteadController::CanPinToHotbar(static_cast<Homestead::Item>(Row.Id)))
-        Changed = Controller->MenuItemAction(Row, EHomesteadItemAction::Pin, 1, Controller->Simulation().GetRevision());
-    else Changed = Controller->MenuMoveWhole(Row);
+    // Otherwise a pack stack hops between the hotbar row and the rest of her pack.
+    else Changed = Controller->MenuItemAction(Row, EHomesteadItemAction::Pin, 1, Controller->Simulation().GetRevision());
     if (Changed) Refresh();
 }
 
@@ -126,6 +124,28 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
             { Controller->MenuItemAction(Row, Action, Count, Controller->Simulation().GetRevision()); };
     };
     const TFunction<void()> Move = [this, Row]() { Controller->MenuMoveWhole(Row); };
+    // The hotbar is her pack's first row (Simulation/HomesteadPackRow.h): a stack moves up into it
+    // or back down into the rest of the pack.
+    const auto HotbarOptions = [&]()
+    {
+        if (Row.HotbarCell >= 0)
+        {
+            Add(TEXT("Move into the pack"), Act(EHomesteadItemAction::Pin, 1), EHomesteadItemAction::Pin);
+            Add(TEXT("Move to another hotbar slot..."), [this, Cell = Row.HotbarCell]()
+            {
+                CancelHotbarHolds();
+                HeldHotbarSlot = Cell;
+                Region = ERegion::Hotbar;
+                HotbarSelection = Cell;
+                bFocusPending = true;
+            });
+        }
+        else
+        {
+            Add(TEXT("Move to the hotbar"), Act(EHomesteadItemAction::Pin, 1), EHomesteadItemAction::Pin);
+            Add(TEXT("Move to a hotbar slot..."), [this, Row]() { BeginPlacingOnHotbar(Row); });
+        }
+    };
     const bool Storage = Controller->ActiveStorageChest().IsSet();
     PopupTitle = Row.Name + (Row.Quantity > 1 ? FString::Printf(TEXT("  x%d"), Row.Quantity) : FString());
     if (Row.Subject == EHomesteadMenuSubject::ItemGroup)
@@ -138,13 +158,7 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
                 Add(TEXT("Eat 1"), Act(EHomesteadItemAction::Primary, 1), EHomesteadItemAction::Primary);
             if (Known && (Item == Homestead::Item::OilFlask || Item == Homestead::Item::OilLamp))
                 Add(TEXT("Fill the lamp"), [this]() { Controller->MenuRefillLamp(); });
-            if (Known && AHomesteadController::CanPinToHotbar(Item))
-                Add(Controller->IsPinnedToHotbar(Item) ? TEXT("Unpin from hotbar") : TEXT("Pin to hotbar"),
-                    Act(EHomesteadItemAction::Pin, 1), EHomesteadItemAction::Pin);
-            // Choose the exact slot on the book's hotbar strip (the keyboard/controller way to do
-            // what dragging onto a slot does).
-            if (Known && AHomesteadController::CanPinToHotbar(Item))
-                Add(TEXT("Put on a hotbar slot..."), [this, Row]() { BeginPlacingOnHotbar(Row); });
+            HotbarOptions();
             if (Storage) Add(FString::Printf(TEXT("Move to chest %d"), Row.DestinationId), Move, EHomesteadItemAction::Transfer);
             Add(Row.Quantity > 1 ? TEXT("Drop 1") : TEXT("Drop"), Act(EHomesteadItemAction::Drop, 1), EHomesteadItemAction::Drop);
             if (Row.Quantity > 1)
@@ -156,6 +170,7 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
         else if (Row.ContainerId > 0)
         {
             Add(TEXT("Take to pack"), Move, EHomesteadItemAction::Transfer);
+            Add(TEXT("Take to a hotbar slot..."), [this, Row]() { BeginPlacingOnHotbar(Row); });
             if (Row.Quantity > 1)
                 Add(TEXT("Take or split some..."), [this, Row]() { OpenQuantityPrompt(Row); }, EHomesteadItemAction::Split);
         }
@@ -166,6 +181,7 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
         else if (Row.ContainerId == 0)
         {
             Add(TEXT("Equip"), Act(EHomesteadItemAction::Equip, 1), EHomesteadItemAction::Equip);
+            HotbarOptions();
             if (Storage) Add(FString::Printf(TEXT("Move to chest %d"), Row.DestinationId), Move, EHomesteadItemAction::Transfer);
             // A garment is one owned thing, so dropping it asks first.
             Add(TEXT("Drop..."), [this, Row]()
@@ -285,9 +301,10 @@ void SHomesteadMenu::EndPointerItemDrag()
     if (WasDragging && Entries.IsValidIndex(Source) && Entries.IsValidIndex(Target)
         && Source != Target)
         Controller->MenuDrop(Entries[Source], Entries[Target], PointerDragRevision);
-    // Dropped on a hotbar slot: bind it there (stock stays where it is). Anywhere else, nothing.
+    // Dropped on a hotbar cell: the stack itself moves into her pack's first row (from a chest in
+    // one step), merging or swapping with what is there. Anywhere else, nothing.
     else if (WasDragging && Entries.IsValidIndex(Source) && Target == INDEX_NONE && HotbarCells.IsValidIndex(HotbarTarget))
-        Controller->MenuAssignHotbarSlot(Entries[Source], HotbarTarget);
+        Controller->MenuPlaceInHotbar(Entries[Source], HotbarTarget);
 }
 
 void SHomesteadMenu::CancelPointerItemDrag()

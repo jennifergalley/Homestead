@@ -224,10 +224,10 @@ wardrobe delivery deliberately uses the separate `jenny-review-v5` profile.
 The field book and construction preview pause simulation. The book is
 translucent so the woodland shows through, and the pack and chest pages have no
 details pane: every item action is on a click. Right-click any pack or chest tile
-(F or controller Y) for its actions: eat, pin/unpin, wear, move to or take from
+(F or controller Y) for its actions: eat, move to/from the hotbar, wear, move to or take from
 the open chest, drop 1, drop all, pick an amount, or sort. Shift+click moves the
-whole stack between pack and chest; with no chest open it pins a tool to the
-hotbar or wears a garment. Ctrl+click a stack opens an amount slider (drag,
+whole stack between pack and chest; with no chest open it moves a stack between
+the hotbar row and the rest of the pack, or wears a garment. Ctrl+click a stack opens an amount slider (drag,
 mouse wheel, or Left/Right; LB/RB step by 10) to split off, drop, or move exactly
 that many. Drag a tile to rearrange or move it; X splits a stack in half. Click
 an equipped slot to take off or swap what she's wearing. The portrait beside the
@@ -246,13 +246,15 @@ while TSR upscales the world.
 
 ## First session
 
-Gather berries and eat them from the Pack page, or pin food to the hotbar (Pack page:
-Pin to hotbar) and eat it with the left mouse button / RT while it's selected. Whenever the
-inventory is open (with or without a chest), all ten hotbar slots show under the grids: drag a
-tool, food or seed stack from your pack onto the exact slot you want (a slot's old item is unpinned
-but stays in your pack; chest goods have to come into your pack first), drag one slot onto
-another to move or swap them, and right-click (Y on a controller) a slot to clear it. On a
-controller, pick a stack with A and carry it down onto a slot, or use Y → Put on a hotbar slot.
+Gather berries and eat them from the Pack page, or keep food on the hotbar and eat it with the
+left mouse button / RT while it's selected. As in Coral Island, the hotbar is the first row of
+your pack: its ten cells (keys 1-0) hold real stacks, head the Pack page, and run under both
+grids with a chest open. New things land in the first empty cell. Drag any stack from your pack
+or an open chest onto the cell you want, a cell onto another, or a cell back into your pack or the
+chest: onto an empty place it moves, onto the same item it merges, otherwise the two swap. A stack
+used up leaves its cell empty. On a controller, pick a stack with A and carry it up into the row,
+or use Y → Move to the hotbar / Move to a hotbar slot; Y on a cell offers that stack's options.
+Sort pack sorts only the stacks below the row.
 Gather branches, stones, and
 fiber from reeds. Make a hatchet, a stone hoe, and a watering can. Clear a
 small patch, build a floor/walls/doorway/roof, and add a bedroll, chest, and fire.

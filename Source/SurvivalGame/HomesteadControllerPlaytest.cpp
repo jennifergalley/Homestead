@@ -89,7 +89,6 @@ void AHomesteadController::HomesteadGive(const FString& ItemName, int32 Amount)
             continue;
         const auto Result = Sim.GrantItems(Item, Amount);
         Notify(UTF8_TO_TCHAR(Result.message.c_str()), !Result);
-        if (Result) PinNewSeed(Item);
         return;
     }
     Notify(FString::Printf(TEXT("No item called %s."), *ItemName), true);

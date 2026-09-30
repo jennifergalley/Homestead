@@ -1,66 +1,71 @@
-// The field book's hotbar editor: she drags a pack stack onto one of the ten slots, or one slot onto
-// another. The rules are plain C++ in Simulation/HomesteadHotbarLayout.h (native-tested); this only
-// applies them to the controller's bindings and says why when something can't go there.
+// The field book's hotbar: the first row of her pack (Simulation/HomesteadPackRow.h, native-tested).
+// She drags a pack or chest stack into a cell, one cell onto another, or a cell's stack back down into
+// her pack; onto an empty cell it moves, onto the same item it merges, onto anything else the two
+// swap. Stock only ever moves, all in one simulation transaction; this says why when it can't.
 #include "HomesteadController.h"
 
-#include "Simulation/HomesteadHotbarLayout.h"
+#include "Simulation/HomesteadPackRow.h"
 
-namespace HotbarEditor
+bool AHomesteadController::MenuPlaceInHotbar(const FHomesteadRow& Row, int32 Cell)
 {
-Homestead::HotbarLayout ToLayout(const TArray<int32>& Slots)
-{
-    Homestead::HotbarLayout Layout;
-    Layout.fill(Homestead::HotbarEmpty);
-    for (int32 Index = 0; Index < FMath::Min(Slots.Num(), Homestead::HotbarSize); ++Index) Layout[Index] = Slots[Index];
-    return Layout;
-}
-
-void FromLayout(const Homestead::HotbarLayout& Layout, TArray<int32>& Slots)
-{
-    Slots.Init(-1, Homestead::HotbarSize);
-    for (int32 Index = 0; Index < Homestead::HotbarSize; ++Index) Slots[Index] = Layout[Index];
-}
-}
-
-bool AHomesteadController::MenuAssignHotbarSlot(const FHomesteadRow& Row, int32 Slot)
-{
-    if (Row.Subject != EHomesteadMenuSubject::ItemGroup || Row.Id < 0 || Row.Id >= Homestead::ItemCount)
+    if (Cell < 0 || Cell >= Homestead::PackRowSize)
     {
-        Notify(TEXT("Only tools, food and seeds can go on the hotbar."), true);
+        Notify(TEXT("Choose one of the ten hotbar slots."), true);
         return false;
     }
-    const auto Item = static_cast<Homestead::Item>(Row.Id);
-    auto Layout = HotbarEditor::ToLayout(HotbarSlots);
-    const auto Edit = Homestead::AssignHotbarSlot(Layout, Item, Slot, Row.ContainerId == 0 && Sim.Count(Item) > 0);
-    if (Edit.Refused())
+    if (Row.HotbarCell == Cell) return true;
+    Homestead::Result Result{false, "That can't go on the hotbar."};
+    const bool Garment = Row.Subject == EHomesteadMenuSubject::Wearable;
+    if (Row.Subject != EHomesteadMenuSubject::ItemGroup && !Garment)
+        Result = {false, "That can't go on the hotbar."};
+    else if (Row.ContainerId == 0)
+        Result = Sim.MoveToPackRow(Garment ? 0 : Row.SubjectId, Garment ? Row.SubjectId : 0, Cell, Sim.GetRevision());
+    else if (Row.ContainerId > 0 && !Garment)
+        Result = Sim.TransferGroupToPackRow(Row.ContainerId, Row.SubjectId, Row.Quantity, Cell, PlayerPoint(), Sim.GetRevision());
+    else if (Row.ContainerId > 0)
     {
-        Notify(UTF8_TO_TCHAR(Edit.message.c_str()), true);
-        return false;
+        // A garment from the chest: into her pack, then into the cell. Each step is whole on its own;
+        // if the second can't happen it simply waits in her pack.
+        Result = Sim.MoveWearable(Row.SubjectId, 0, PlayerPoint(), Sim.GetRevision());
+        if (Result) Result = Sim.MoveToPackRow(0, Row.SubjectId, Cell, Sim.GetRevision());
     }
-    if (Edit.code == Homestead::HotbarEditCode::Unchanged) return true;
-    HotbarEditor::FromLayout(Layout, HotbarSlots);
+    else Result = {false, "Take that garment off before putting it on the hotbar."};
+    if (!Result) { Notify(Result); return false; }
     PlayEffect(UIClick, 0.05f);
-    // A slot she filled over something else: say where that went, since it's no longer on show.
-    if (Edit.unpinned >= 0 && Edit.unpinned < Homestead::ItemCount)
-        Notify(FString::Printf(TEXT("%s is off the hotbar (still in your pack)."),
-            UTF8_TO_TCHAR(Homestead::ItemName(static_cast<Homestead::Item>(Edit.unpinned)))));
     return true;
 }
 
 bool AHomesteadController::MenuMoveHotbarSlot(int32 From, int32 To)
 {
-    auto Layout = HotbarEditor::ToLayout(HotbarSlots);
-    const auto Edit = Homestead::MoveHotbarSlot(Layout, From, To);
-    if (Edit.Refused())
+    const auto* Entry = HotbarEntry(From);
+    // Picking up an empty cell is just nothing to move.
+    if (!Entry) return false;
+    if (From == To) return true;
+    const auto Result = Sim.MoveToPackRow(Entry->wearableId ? 0 : Entry->groupId, Entry->wearableId, To, Sim.GetRevision());
+    if (!Result) { Notify(Result); return false; }
+    PlayEffect(UIClick, 0.05f);
+    return true;
+}
+
+bool AHomesteadController::MenuMoveHotbarToPack(int32 Cell, const FHomesteadRow* Target)
+{
+    if (!HotbarEntry(Cell)) return false;
+    Homestead::Result Result;
+    if (Target && Target->ContainerId > 0)
     {
-        // Picking up an empty slot is just nothing to move; only a bad slot index is worth saying.
-        if (Edit.code != Homestead::HotbarEditCode::EmptySource) Notify(UTF8_TO_TCHAR(Edit.message.c_str()), true);
-        return false;
+        // Onto the open chest: store the whole stack (or garment) there.
+        const auto* Entry = HotbarEntry(Cell);
+        Result = Entry->wearableId
+            ? Sim.MoveWearable(Entry->wearableId, Target->ContainerId, PlayerPoint(), Sim.GetRevision())
+            : Sim.TransferGroup(Target->ContainerId, Entry->groupId, Entry->quantity, true, PlayerPoint(), Sim.GetRevision());
     }
-    if (Edit.code == Homestead::HotbarEditCode::Changed)
+    else
     {
-        HotbarEditor::FromLayout(Layout, HotbarSlots);
-        PlayEffect(UIClick, 0.05f);
+        const bool Garment = Target && Target->Subject == EHomesteadMenuSubject::Wearable;
+        const bool Stack = Target && Target->Subject == EHomesteadMenuSubject::ItemGroup;
+        Result = Sim.MoveFromPackRow(Cell, Stack ? Target->SubjectId : 0, Garment ? Target->SubjectId : 0, Sim.GetRevision());
     }
+    if (!Result) { Notify(Result); return false; }
+    PlayEffect(UIClick, 0.05f);
     return true;
 }

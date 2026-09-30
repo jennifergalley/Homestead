@@ -9,9 +9,9 @@
 
 Homestead::Item AHomesteadController::SelectedHotbarFood() const
 {
-    if (!ShouldShowHotbar() || !HotbarSlots.IsValidIndex(SelectedHotbarSlot) || HotbarSlots[SelectedHotbarSlot] < 0)
+    if (!ShouldShowHotbar() || HotbarItem(SelectedHotbarSlot) == Homestead::Item::Count)
         return Homestead::Item::Count;
-    const auto Item = static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]);
+    const auto Item = HotbarItem(SelectedHotbarSlot);
     return Homestead::IsEdible(Item) ? Item : Homestead::Item::Count;
 }
 

@@ -1,4 +1,4 @@
-// The seed pouch: a hotbar slot holding sowing seed switches between every seed type in her pack
+// The seed pouch: a hotbar cell holding sowing seed swaps in each other seed stack from her pack
 // (D-pad up/down on a gamepad, Q / Shift+Q on the keyboard), so newly bought seed is one press
 // away however full the hotbar is. Sowing still takes the seed shown in the selected slot, and only
 // while she has some (the crops lane's rule, AHomesteadController::Interact on a bare plot).
@@ -6,21 +6,23 @@
 
 #include "HomesteadCharacter.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadPackRow.h"
 
 namespace SeedPouch
 {
 // Every seed type she could sow, in catalogue order, that she has at least one of and that isn't
-// already pinned to another slot (the hotbar never shows one item twice).
-TArray<Homestead::Item> Choices(const Homestead::Simulation& Sim, const TArray<int32>& Slots, int32 SlotIndex)
+// already in another hotbar cell.
+TArray<Homestead::Item> Choices(const AHomesteadController& Controller, const Homestead::Simulation& Sim, int32 Cell)
 {
     TArray<Homestead::Item> Result;
     for (int32 Value = 0; Value < static_cast<int32>(Homestead::Item::Count); ++Value)
     {
         const auto Item = static_cast<Homestead::Item>(Value);
         if (!AHomesteadController::IsSowingSeed(Item) || Sim.Count(Item) <= 0) continue;
-        const int32 Pinned = Slots.IndexOfByKey(Value);
-        if (Pinned != INDEX_NONE && Pinned != SlotIndex) continue;
-        Result.Add(Item);
+        bool Elsewhere = false;
+        for (int32 Other = 0; Other < Homestead::PackRowSize; ++Other)
+            Elsewhere = Elsewhere || (Other != Cell && Controller.HotbarItem(Other) == Item);
+        if (!Elsewhere) Result.Add(Item);
     }
     return Result;
 }
@@ -34,21 +36,18 @@ bool AHomesteadController::IsSowingSeed(Homestead::Item Item)
 
 int32 AHomesteadController::OtherPouchSeeds(int32 SlotIndex) const
 {
-    if (!HotbarSlots.IsValidIndex(SlotIndex) || HotbarSlots[SlotIndex] < 0) return 0;
-    const auto Current = static_cast<Homestead::Item>(HotbarSlots[SlotIndex]);
-    if (!IsSowingSeed(Current)) return 0;
-    const auto Choices = SeedPouch::Choices(Sim, HotbarSlots, SlotIndex);
+    const auto Current = HotbarItem(SlotIndex);
+    if (Current == Homestead::Item::Count || !IsSowingSeed(Current)) return 0;
+    const auto Choices = SeedPouch::Choices(*this, Sim, SlotIndex);
     return Choices.Num() - (Choices.Contains(Current) ? 1 : 0);
 }
 
 bool AHomesteadController::CycleSeedPouch(int32 Direction)
 {
-    if (!ShouldShowHotbar() || Direction == 0 || !HotbarSlots.IsValidIndex(SelectedHotbarSlot)
-        || HotbarSlots[SelectedHotbarSlot] < 0)
-        return false;
-    const auto Current = static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]);
-    if (!IsSowingSeed(Current)) return false;
-    const auto Choices = SeedPouch::Choices(Sim, HotbarSlots, SelectedHotbarSlot);
+    if (!ShouldShowHotbar() || Direction == 0) return false;
+    const auto Current = HotbarItem(SelectedHotbarSlot);
+    if (Current == Homestead::Item::Count || !IsSowingSeed(Current)) return false;
+    const auto Choices = SeedPouch::Choices(*this, Sim, SelectedHotbarSlot);
     const int32 At = Choices.IndexOfByKey(Current);
     if (Choices.Num() == 0 || (Choices.Num() == 1 && At == 0))
     {
@@ -59,7 +58,13 @@ bool AHomesteadController::CycleSeedPouch(int32 Direction)
     const int32 Next = At == INDEX_NONE ? (Direction > 0 ? 0 : Count - 1)
         : (At + (Direction > 0 ? 1 : Count - 1)) % Count;
     const auto Chosen = Choices[Next];
-    HotbarSlots[SelectedHotbarSlot] = static_cast<int32>(Chosen);
+    // The row holds real stacks: the chosen seed's stack comes up from her pack into this cell and
+    // the seed that was here goes down in its place.
+    int32 Group = 0;
+    for (const auto& Entry : State().inventoryLayout)
+        if (Entry.wearableId == 0 && Entry.item == Chosen) { Group = Entry.groupId; break; }
+    const auto Moved = Sim.MoveToPackRow(Group, 0, SelectedHotbarSlot, Sim.GetRevision());
+    if (!Moved) { Notify(Moved); return true; }
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->CancelAction(true);
     ToastText = FString::Printf(TEXT("%s (%d)  %d of %d"), UTF8_TO_TCHAR(Homestead::ItemName(Chosen)),
         Sim.Count(Chosen), Next + 1, Count);

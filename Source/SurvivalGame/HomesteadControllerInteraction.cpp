@@ -160,9 +160,9 @@ void AHomesteadController::Interact()
                 // that has run out says so, and with no seed chosen nothing is sown: nothing is ever
                 // taken from the pack unasked (wild roots too are chosen as Seeds on the hotbar).
                 TOptional<Homestead::CropKind> Seed;
-                if (HotbarSlots.IsValidIndex(SelectedHotbarSlot) && HotbarSlots[SelectedHotbarSlot] >= 0)
+                if (HotbarItem(SelectedHotbarSlot) != Homestead::Item::Count)
                 {
-                    const auto Chosen = static_cast<Homestead::Item>(HotbarSlots[SelectedHotbarSlot]);
+                    const auto Chosen = HotbarItem(SelectedHotbarSlot);
                     if (const auto Crop = PlantingCrop(Chosen))
                     {
                         if (Sim.Count(Chosen) <= 0)
