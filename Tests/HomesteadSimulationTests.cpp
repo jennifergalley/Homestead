@@ -3604,8 +3604,42 @@ void SleepOptionPolicy()
     CHECK(Close(SleepOptions(12.0, 0.0)[0].hours, Exertion::MaxRestHours));
     CHECK(Close(SleepOptions(18.0, 50.0)[0].hours, 12.75));
     CHECK(Close(SleepOptions(12.0, 97.0)[0].hours, Exertion::MinRestHours));
-    // One rain schedule for the rules, the lighting and the wet ground: day 2 of every 3, 09:00-15:00.
-    CHECK(!IsRainDay(12.0) && IsRainDay(24.0 + 1.0) && !IsRainDay(48.0 + 12.0) && IsRainDay(96.0 + 23.0));
+    // One rain schedule for the rules, the lighting and the wet ground: two days in ten, 09:00-15:00. Day 0 is
+    // dry and day 1 rains (as before); every ten-day block rains on one of offsets 1-2 and one of 6-7, so
+    // exactly 20% of days with rains 4-6 days apart, and all four combinations occur.
+    CHECK(!IsRainDay(12.0) && IsRainDay(24.0 + 1.0) && IsRainDay(24.0 + 23.9) && !IsRainDay(48.0 + 12.0));
+    {
+        int rainy = 0, lastRain = -1, shortestGap = 1000, longestGap = 0;
+        bool combos[2][2] = {};
+        for (int day = 0; day < 10000; ++day)
+        {
+            const bool wet = IsRainDay(day * 24.0 + 12.0);
+            CHECK(wet == IsRainDay(day * 24.0) && wet == IsRainDay(day * 24.0 + 23.99));   // whole days
+            if (!wet) continue;
+            ++rainy;
+            const int offset = day % RainBlockDays;
+            CHECK(offset == 1 || offset == 2 || offset == 6 || offset == 7);
+            if (lastRain >= 0)
+            {
+                shortestGap = std::min(shortestGap, day - lastRain);
+                longestGap = std::max(longestGap, day - lastRain);
+            }
+            lastRain = day;
+        }
+        for (long long block = 0; block < 1000; ++block)
+            combos[RainDayOffset(block, 0) - 1][RainDayOffset(block, 1) - 6] = true;
+        CHECK(rainy == 2000);
+        CHECK(shortestGap == 4 && longestGap == 6);
+        CHECK(combos[0][0] && combos[0][1] && combos[1][0] && combos[1][1]);
+        CHECK(IsRainDay(-24.0 * 3 + 1.0) == IsRainDay(-24.0 * 3 + 22.0));   // a negative hour's day is still whole
+        // It depends on the hour alone, so a save and reload keeps the forecast.
+        Simulation before;
+        BuildingStock(before);
+        Edit(before, [](State& state) { state.hour = 24.0 * 17 + 11.0; });
+        Simulation after;
+        OK(after.Deserialize(before.Serialize()));
+        CHECK(after.IsRaining() == before.IsRaining() && after.IsRaining() == IsRainingAt(24.0 * 17 + 11.0));
+    }
     CHECK(IsRainingAt(24.0 + RainStartHour) && !IsRainingAt(24.0 + RainEndHour) && !IsRainingAt(24.0 + 8.99) && !IsRainingAt(10.0));
     // Rain and cloud: none on dry days; the cloud builds half an hour ahead and clears half an hour
     // after; the rain eases in and out and swells between drizzle and showers without jumps.
