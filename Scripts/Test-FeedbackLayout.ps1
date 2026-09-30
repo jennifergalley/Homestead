@@ -43,7 +43,9 @@ try {
         if (-not $layout.source -or -not $layout.fullTextRendered -or -not $layout.insideViewport) {
             throw "Incomplete or out-of-bounds rendered feedback: $($file.Name)"
         }
-        if ([bool]$layout.overlap -ne [bool]$Baseline) { throw "Unexpected feedback intersection: $($file.Name)" }
+        # The native book's notice card never had the legacy Canvas overlap the baseline demonstrated.
+        $expectOverlap = [bool]$Baseline -and $layout.surface -ne 'native-notice-card'
+        if ([bool]$layout.overlap -ne $expectOverlap) { throw "Unexpected feedback intersection: $($file.Name)" }
         $image = [Drawing.Image]::FromFile($file.FullName.Replace('.layout.json','.png'))
         try {
             if ($image.Width -ne $Width -or $image.Height -ne $Height) { throw 'Wrong actual screenshot dimensions.' }

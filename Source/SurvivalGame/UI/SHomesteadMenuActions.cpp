@@ -48,10 +48,13 @@ void SHomesteadMenu::UpdateNotice()
 SHomesteadMenu::FNoticeLayout SHomesteadMenu::GetNoticeLayout() const
 {
     FNoticeLayout Layout;
-    const auto Box = [](const SWidget& Widget)
+    // Window pixels measured from the menu's own corner (it fills the viewport), so a windowed run
+    // reads the same as fullscreen.
+    const FVector2D Origin = GetCachedGeometry().GetAbsolutePosition();
+    const auto Box = [&Origin](const SWidget& Widget)
     {
         const FGeometry& Geometry = Widget.GetCachedGeometry();
-        const FVector2D Position = Geometry.GetAbsolutePosition();
+        const FVector2D Position = Geometry.GetAbsolutePosition() - Origin;
         return FBox2D(Position, Position + FVector2D(Geometry.GetAbsoluteSize()));
     };
     Layout.bShowing = IsNoticeShowing() && NoticeCard.IsValid();

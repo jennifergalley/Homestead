@@ -136,7 +136,7 @@ public:
     // Automation: types as the keyboard would.
     void TypeChestName(const FString& Characters);
     bool IsNoticeError() const { return bNoticeError; }
-    // Automation (the Feedback suite): the notice card as laid out, in absolute window pixels, with
+    // Automation (the Feedback suite): the notice card as laid out, in pixels from the menu's corner, with
     // the book's bounds and the regions it must keep clear of (the tabs and the focused control).
     struct FNoticeLayout
     {
