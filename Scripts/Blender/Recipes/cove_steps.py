@@ -10,17 +10,20 @@ Real-object research (written before modeling):
 - Landings between flights are one or two long slabs; where a stair turns, a wedge-shaped stone fills
   the outside of the turn.
 
-Pieces and pivots (meters, Z up, given in the engine's frame; the FBX export mirrors Y, so the recipe builds\nthe wedge toward -Y):
+Pieces and pivots (meters, Z up, given in the engine's frame; the FBX export mirrors Y, so the recipe builds
+the wedge toward Blender's -Y for it to open toward the engine's +Y):
 - SM_CoveStep_A/B/C: one tread block, 1.50 m wide (the 1.4 m clear width plus 5 cm bedding each side),
   0.36-0.38 m from nosing to back, 0.20 m thick with a 5 cm skirt below it (0.25 m), so a 30-34 cm going
   laps the next block by a few cm. Pivot on the top face at the centre of the front nosing, +X up the
   flight (the back of the block), Y across.
-- SM_CoveLanding: a 1.2 m landing of two slabs; SM_CoveLandingSlab: one 0.6 m slab, for Water to tile the
-  1.23-2.30 m landings (each run scaled by at most +-10%). Pivot on the top face at the centre of the
+- SM_CoveLanding: a 1.2 m landing of two slabs; SM_CoveLandingSlab (0.6 m) and SM_CoveLandingSlab75 (0.75 m):
+  single slabs for Water to mix and tile the 1.23-2.30 m landings (each run scaled by at most +-10%). Pivot on the top face at the centre of the
   downhill edge, +X uphill.
 - SM_CoveLandingWedge: fills the outside of a corner landing's turn: a 21-degree sector 1.5 m long from
-  its apex. Pivot at the apex (the inner corner) on the top face, +X along the incoming leg; scale Y by
-  tan(18)/tan(21) for the 18-degree turn.
+  its apex. Pivot at the apex (the turn's inner corner) on the top face. Its +X edge is the incoming
+  landing's uphill END edge (across the leg, 1.5 m = the tread width, from the inner to the outer corner);
+  the sector opens 21 degrees from it toward the engine's +Y, which must point uphill into the outgoing
+  leg (scale Y by -1 for the other hand). Scale Y by tan(18)/tan(21) for the 18-degree turns.
 Original procedural geometry and materials only.
 """
 import math
@@ -29,7 +32,7 @@ import random
 from mathutils import Vector, noise
 
 NAME = "CoveSteps"
-DESCRIPTION = ("Cut granite treads (3 variants), a 1.2 m landing, a 0.6 m landing slab and a 21-degree corner "
+DESCRIPTION = ("Cut granite treads (3 variants), a 1.2 m landing, 0.6 and 0.75 m landing slabs and a 21-degree corner "
                "wedge for the cove route (original). Pivots on the top face at the front nosing / downhill edge "
                "centre, +X up the flight.")
 COLLISION = "convex"
@@ -47,6 +50,7 @@ NOSING_OVER = 0.012          # the nosing's round overhangs the riser a little
 TREADS = {"A": (0.37, 11), "B": (0.36, 12), "C": (0.38, 13)}
 LANDING = 1.20
 SLAB = 0.60
+SLAB75 = 0.75
 WEDGE_DEG = 21.0
 WEDGE_LEN = 1.50
 
@@ -103,6 +107,11 @@ def build_slab(kit, mat):
                     "SM_CoveLandingSlab", pivot=None, unwrap=True, reshade=True, smooth_angle=35)
 
 
+def build_slab75(kit, mat):
+    return kit.join([dressed_block(kit, "Slab75", SLAB75 - 0.002, WIDTH, mat, 32, dish=False)],
+                    "SM_CoveLandingSlab75", pivot=None, unwrap=True, reshade=True, smooth_angle=35)
+
+
 def build_wedge(kit, mat):
     """A sector of granite from the apex: rows of the sector's arc lofted from a thin sliver at the apex."""
     depth = THICK + SKIRT
@@ -128,5 +137,5 @@ def build_wedge(kit, mat):
 def build(kit):
     mat = granite(kit, "M_CoveGranite", 40.0)
     meshes = [build_tread(kit, key, mat) for key in TREADS]
-    meshes += [build_landing(kit, mat), build_slab(kit, mat), build_wedge(kit, mat)]
+    meshes += [build_landing(kit, mat), build_slab(kit, mat), build_slab75(kit, mat), build_wedge(kit, mat)]
     return meshes
