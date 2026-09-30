@@ -35,10 +35,8 @@ public:
     static constexpr float ShelterTopCm = 520.0f;
     // How far overhead a roof shelters the camera (and muffles the rain) when it isn't a building piece.
     static constexpr float OverheadCheckCm = 2500.0f;
-    // Rain ambience at full strength outdoors, before the Ambience volume setting; indoors it drops to
-    // IndoorGain behind a low-pass at IndoorCutoffHz, like rain heard on a roof.
-    static constexpr float OutdoorGain = 0.9f;
-    static constexpr float IndoorGain = 0.35f;
+    // Rain ambience volume: Homestead::RainAudioGain (the simulation, native-tested). Indoors it's also
+    // muffled behind a low-pass at IndoorCutoffHz, like rain heard on a roof.
     static constexpr float IndoorCutoffHz = 900.0f;
 
     UHomesteadWeather();
