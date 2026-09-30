@@ -850,6 +850,12 @@ requirement.
   lamp while the fixture assumes it is empty. The approved test-only adaptation chooses an actual
   empty row cell and asserts no selected tool plus unchanged stock. Integration is recutting another
   distinct Development candidate and rerunning all six suites; the current shortcut remains untouched.
+
+  **EstateSmoke fixture `0954ddad` (test-only):** selects an actual empty cell with unchanged stock
+  and uses the real numbered lamp key instead of slot 0/key 8 assumptions. Editor/Game rebuild pass;
+  targeted EstateSmoke passes with lamp coverage, about 59.9 fps and zero log/asset errors, while
+  targeted FullLoop and Smoke also pass. Integration is recutting distinct v4 Development and
+  rerunning all six packaged suites; no delivery claim exists.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
