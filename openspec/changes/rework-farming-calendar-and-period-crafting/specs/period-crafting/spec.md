@@ -40,11 +40,12 @@ The workbench SHALL craft a stool, table, chair and shelf, each placeable on fou
 - **THEN** the table stands on the floor and stays there after reload
 
 ### Requirement: Hearth dishes from her own crops
-The hearth SHALL cook period dishes from estate crops. Each dish SHALL be a meal that restores energy and grants Well fed, and dishes with more ingredients SHALL restore more and keep her Well fed longer.
+The hearth SHALL cook period dishes from estate crops. Each dish SHALL be a meal that restores its
+defined Energy amount and grants the same flat 3 game hours of Well fed.
 
 #### Scenario: Vegetable stew
 - **WHEN** she cooks vegetable stew with a potato, carrot, turnip and leek and eats it
-- **THEN** her energy rises more, and she stays Well fed longer, than with roast potatoes
+- **THEN** her energy rises more than with roast potatoes, and both meals grant 3 game hours of Well fed
 
 ### Requirement: Craft recipes are grouped
 The Craft page SHALL group recipes into Tools, Stations, Farm, Furniture and Cooking categories, reachable by mouse and by controller directional focus.

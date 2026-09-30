@@ -420,14 +420,14 @@ fourth implementer.
 
 ## Open blockers and known bugs
 
-### Held planning OpenSpec correction
+### Final planning OpenSpec decision
 
-Planning's `b82eec53` OpenSpec docs briefly landed on `main` in `514c48c5`, with **no gameplay code
-changed**. **Final planning decision (2026-09-29):** Integration merges Planning `16f4ed5b`, not the
-tiered `e2159ea2`: flat **3 game hours** of Well Fed at ×0.85, Meals +25/+40/+60 energy, the
-full-energy ≥1-hour extension guard and explicit `CorruptSave` validation. Treat current `main` wording
-as pending correction until Integration reports the final merged SHA. Calendar must not implement stale
-`b82`; this handoff does not duplicate or revert the shared OpenSpec artifacts.
+The current farming artifacts reflect the final 2026-09-29 decision, superseding `b82eec53` and tiered
+`e2159ea2`: flat **3 game hours** of Well fed at ×0.85; Meals +25/+40/+60 Energy; a full-energy
+≥1-hour extension guard; and `CorruptSave` for non-finite or `hour + 3`-exceeding expiry. New Estate
+games default to 60-minute days, while Settings retain 30/60/120 and existing saves retain their
+stored value. Period dishes differ in Energy restoration but all grant the same flat 3-hour Well fed
+duration. Calendar must not implement stale `b82`.
 
 ### Calendar day-length / town-arrival blocker
 
