@@ -136,6 +136,7 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     if (bAppearancePreview) UpdateAppearanceFraming();
     UpdatePendingKneel();
     UpdateCarriedSticks();
+    UpdatePulledWeeds(DeltaSeconds);
     UpdateEating();
     UpdateHeldTools(DeltaSeconds);
     UpdateFellApproach(DeltaSeconds);

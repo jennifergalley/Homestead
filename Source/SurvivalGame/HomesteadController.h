@@ -521,6 +521,15 @@ private:
     void UpdatePendingSwing();
     void LandOvergrowthSwing();
     void ResetOvergrowthSwing();
+    // HomesteadControllerWeedPull.cpp: weeds pulled by hand on both knees (a weed node, or a garden
+    // square's weeds), committed once at the second root (AHomesteadCharacter::PullWeedsCommit). A
+    // cancel before then changes nothing. False when the clip can't play, so the caller uses the pouch kneel.
+    bool StartWeedPull(int32 NodeId, int32 PlotId, Homestead::Point Target);
+    void UpdatePendingWeedPull();
+    int32 PendingWeedNode = INDEX_NONE;
+    int32 PendingWeedPlot = INDEX_NONE;
+    double PendingWeedSince = 0;
+    bool bPendingWeedStarted = false;
     // Felling in progress: the tree is already cleared; its standing copy topples after the last
     // stroke (or at once if she stops), with a chop sound per stroke.
     int32 FellResource = INDEX_NONE;

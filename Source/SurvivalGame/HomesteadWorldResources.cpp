@@ -39,6 +39,48 @@ void AHomesteadWorld::HideHeldProducePart(int32 Index)
             Produce->Components[Index]->SetVisibility(false);
 }
 
+UStaticMesh* AHomesteadWorld::ResourceVisualMesh(int32 Id) const
+{
+    if (const auto* Visual = ResourceVisuals.Find(Id))
+        for (const auto& Component : Visual->Components)
+            if (const auto* Mesh = Cast<UStaticMeshComponent>(Component.Get()); Mesh && Mesh->GetStaticMesh())
+                return Mesh->GetStaticMesh();
+    return nullptr;
+}
+
+void AHomesteadWorld::ThinResource(int32 Id, float Fraction)
+{
+    const auto* Visual = ResourceVisuals.Find(Id);
+    if (!Visual) return;
+    // Already thinned, and the visual hasn't been rebuilt under us: nothing to do.
+    const bool bSame = Id == ThinnedResourceId && ThinnedComponents.Num() == Visual->Components.Num()
+        && (ThinnedComponents.IsEmpty() || ThinnedComponents[0].Get() == Visual->Components[0].Get());
+    if (bSame) return;
+    RestoreThinnedResource();
+    ThinnedResourceId = Id;
+    for (const auto& Component : Visual->Components)
+    {
+        USceneComponent* Scene = Component.Get();
+        ThinnedComponents.Add(Scene);
+        ThinnedScales.Add(Scene ? Scene->GetRelativeScale3D() : FVector::OneVector);
+        if (Scene) Scene->SetRelativeScale3D(Scene->GetRelativeScale3D() * Fraction);
+    }
+}
+
+void AHomesteadWorld::RestoreThinnedResource()
+{
+    for (int32 Index = 0; Index < ThinnedComponents.Num(); ++Index)
+        if (USceneComponent* Scene = ThinnedComponents[Index].Get()) Scene->SetRelativeScale3D(ThinnedScales[Index]);
+    ForgetThinnedResource();
+}
+
+void AHomesteadWorld::ForgetThinnedResource()
+{
+    ThinnedResourceId = INDEX_NONE;
+    ThinnedComponents.Reset();
+    ThinnedScales.Reset();
+}
+
 void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly)
 {
     if (Node.cleared)
