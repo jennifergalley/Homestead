@@ -574,6 +574,15 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
   copy containing `game_raw`, `game_reshaped` and `weights` to prevent unmerged terrain from
   contaminating `E:\TerrainSource\work`. After merge, rerun the idempotent scripts against the
   shared work folder before committing generated artifacts.
+- **Pending cove-route pipeline (unmerged `jennifergalley-cove-route` at `010c7003`):**
+  `cove_route.py` must run after `river_channel.py` / `road_grade.py` and before
+  `bake_ground.py` / `bake_estate_map.py`. It grades once (`coveRoute.graded` in the layout),
+  writes the full per-station route to `Scripts\Terrain\cove_route.json` and emits
+  `Simulation\HomesteadEstateCoveRoute.inc`; the indent-1 layout keeps only a summary because a
+  full centreline would add about 19,000 lines. `scatter.py` reapplies route clearing after lake
+  clearing. This is branch-only: no terrain, map, route include or native test result is an
+  integration claim. For Props' raked handrail kit, mirror far-side bays with scale Y `-1`; do not
+  rotate them 180 degrees.
 - **Field-book map destination names reserved:** **Town** and **Manor**. The future travel action and
   UI use these exact user-facing names; other map work must not reuse them.
 - **Seedsman anchors claimed (C; branch `4f21a2d8`, not on `main` yet):** `Anchor::SeedsmanDoor`
@@ -741,6 +750,24 @@ main-integrated work is not player-shipped until its stated gate passes. The orc
 implementer slot before any owner starts hands-on work; no one edits a busy lane's files or starts a
 fourth implementer.
 
+### 2026-09-29 feedback delivery ownership
+
+**Record only — no item in this snapshot is player-shipped until Integration posts its delivery
+receipt.**
+
+- **4 PM batch, integrating at `ec1a4d3b`:** garden-square outline, pickup `+N` lines, original
+  scythe swish, readable save time, Guidebook removal, Build wording, food `+N Energy`, whole coins,
+  gather poses, under-tier refusal, bilateral weed pull/clumps, manor timbers, unconfirmed
+  far-LOD hair cap, more live food, farm-to-lake trail, hearth/ambience ducking, standing-room
+  door, CC0 music/pacing and 20% rain.
+- **Next build, source-ready but awaiting Unreal evidence:** Menu chest work (dye/long bob,
+  Appearance camera, minimap/compass/clock, unified notices, auto-store, chest names and live
+  sliders; backpack in progress); Props 0930b (coins/`GrantMoney`, safe manor hall and
+  scythe grip/ground mow); Water road-grade/bridge/night/town-square/river-mouth stack, with
+  foliage motion separate.
+- **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
+  stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
+
 ## Open blockers and known bugs
 
 ### Final planning OpenSpec decision
@@ -810,12 +837,6 @@ requirement.
   three Water gives none; legacy 9 Water tile remains visible and the pail bar is full. Earlier craft
   `+1 Axe` also has no toast. Drop/chest/shop-buy plus 720p/4K remain unverified; Menu closed its
   editor before Jenny's game startup rather than attempting a 4K capture under memory pressure.
-- **Zero-stock hotbar seed/food items** — **Menu plus Props Simulation, pending and not shipped.**
-  `HotbarSnapshot` currently preserves a pinned item and icon even after `Sim.Count(pack)==0`, making
-  planted/stored turnip seeds and strawberry runners look available. Hide zero-count consumable
-  seed/food visuals and actions while retaining optional pin mapping for reacquisition; Props guards
-  against any zero-stock implicit fallback. Cover sow, stow, F5/F9, old-save pinned zero,
-  reacquisition and no accidental planting.
 - **Post-split field-book hotbar editor `a9d2e86a` is superseded, not user-accepted.** Its separate
   pinned-reference strip model (`33a4f9e5` layout/save, `102e9c87` UI, `a9d2e86a` declarations)
   has headless Native Release 10/10 and `HotbarLayoutTests` 7 scenarios / 91 checks, but is neither
@@ -1231,6 +1252,14 @@ not claim early Energy is fully solved.
   section. Old saves' forecast can change, while accrued plot moisture persists; document that at
   implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
   after its lane-A work.
+
+  **Approved recurrence branch `69827d75`, recook pending:** `IsRainDay` now uses SplitMix64 per
+  ten-day block with one offset 1–2 and one 6–7 (day 0 dry; block 0's first rain remains day 1).
+  Native coverage spans 10,000 days, spacing, all offset pairs, whole days, negative hours and
+  save/reload. The first Development FullLoop failed only because its crop-wetting fixture skipped
+  until `day % 3 == 1`; it now advances until `Homestead::IsRainDay(State.hour)` and retains the
+  assertion that both plots become wet. Four prior Development suites passed; recook/retest is in
+  progress. This is a **test-fixture correction, not a rain rollback or delivery claim**.
 - **Starter chest and wardrobe** — **main-integrated `a785a417`, not packaged or shipped.** Fresh-game
   PIE verified the standing-room chest's pail, four branches, 3 pasties, 2 bread and seven garments;
   the tunic stays worn. It runs only in `NewEstateGame`, never restocks on load and uses normal chest

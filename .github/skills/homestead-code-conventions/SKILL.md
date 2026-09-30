@@ -87,7 +87,10 @@ disagree, follow the code and tell the Architecture Agent.
   `HomesteadControllerManor.cpp` does); `FPaths::`, `GConfig`, `FParse`, `FApp::`, `IFileManager`,
   `LoadObject` and `GEngine` belong inside functions (a function-local `static` runs on first call,
   which is fine). Plain `constexpr` values, `FLinearColor`s, `TEXT()` strings and `FName`s are safe.
-- Warnings are errors, including `C4458` (a local hides a member) and `C4459` (hides a global).
+- Warnings are errors, including `C4458` (a local hides a member) and `C4459` (hides a global or
+  another unity-visible file-scope name). Avoid generic local names such as `Mesh` in an
+  `ACharacter` method and file-scope names such as `Soil` in world code: both passed native tests
+  but broke the first Editor unity build.
 - In an `_API`-exported `UCLASS`, declare one `static constexpr` per line (several declarators on one
   line give `C2487`).
 - Headers that only forward-declare a `Homestead::` enum can't use it in a default argument; use an
