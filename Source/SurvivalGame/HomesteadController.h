@@ -535,11 +535,18 @@ private:
     bool bSwingFellTimed = false;
     double SwingSince = 0;
     uint32 SwingFellStartsBefore = 0;
+    // Blows this press plays in one go (the pickaxe strikes every blow a rock still needs), and how many
+    // have landed so far; each counts at its own contact, and the rock clears on the last.
+    int32 SwingStrokes = 1;
+    // A tier-1 boulder needs five: every blow of it in one press would be too long a clip to cancel into.
+    static constexpr int32 MaxPickStrokesPerPress = 3;
+    int32 SwingStrokesLanded = 0;
     // The scythe's sweep: every grass and weed tuft in the forward arc when it began.
     TArray<int32> ScytheTargets;
     void SwingAtOvergrowth(Homestead::Item Tool);
     void UpdatePendingSwing();
-    void LandOvergrowthSwing();
+    // bMoreComing: another blow of the same press follows, so no 'N more swings' notice in between.
+    void LandOvergrowthSwing(bool bMoreComing = false);
     void ResetOvergrowthSwing();
     // HomesteadControllerWeedPull.cpp: weeds pulled by hand on both knees (a weed node, or a garden
     // square's weeds), committed once at the second root (AHomesteadCharacter::PullWeedsCommit). A
