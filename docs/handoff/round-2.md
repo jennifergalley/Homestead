@@ -88,6 +88,16 @@ bramble syncs separately; Water remains paused. Partial bramble/sapling/under-ti
 gauge/store card, and Water no-pail prompt/lake trail/night-light work are excluded. The orchestrator
 continues to enforce the three-hands-on and two-Unreal-process caps.
 
+**Integration local validation batch (unshipped):** on local `main` `50b2+`, Integration applied Water
+no-pail `20dd9cd1` + `069e493a` and forage freeze `1010aa2e`; Props bramble
+`1deb02ab` / `e37288ef` / `4d8bfecc`, sprint `7475b435`, Hoe hint `391f08f7`, Bed-v2 `aa375409`;
+and Menu Store `1b2b97eb` + pail gauge `9d5da35d`. Native passes 9/9, forage-id Python passes 7/7,
+and Editor/Game builds are green. The exclusive editor now runs exact pail, Store card,
+bramble/sapling/tier, sprint, Hoe-hint and Bed PIE checks. **No push or package is authorized yet**;
+Integration reports per-commit pass/fail after editor close, then the orchestrator decides. Menu pickup
+`b2a49e36` + `cb3f40c7` remain excluded. Old canes-bed deconstruction refunding Hay is the intentional
+current-cost compatibility behavior.
+
 ## 4 PM playable build
 
 **[playtest] ready:** gameplay `9175e34b`, packaged from `main` `9a409e07` (including the
