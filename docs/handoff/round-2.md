@@ -157,13 +157,23 @@ exact copied BobStraight at the saved manor. F5 changed only the scratch Manual 
 save remained untouched and the log confirms scratch save routing and ground settle at
 `(-23970,-64935)`. PrintWindow remains black.
 
-The prior Shipping `-RenderOffscreen` HWND0 result remains distinct. Integration now has a bounded
-45-minute old/new **Development** hidden-window A/B grant: one process at a time, the same copied
-profile and camera, LOD/zoom/guides view modes, scythe, book, actual Map travel and sleep, with a
-1.5 GB free-memory guard. It must still distinguish no reproduction from a cure. Props also
-assesses a cheaper groom-bounds API. The delivered Shipping shortcut is unchanged by this attempted
-investigation. Existing hair reset guidance is not sufficient; never use a global bald/static
-fallback. Menu hotbar work is source-only during this run; no Menu UE/UBT work is permitted.
+The prior Shipping `-RenderOffscreen` HWND0 result remains distinct. The bounded old/new
+**Development** hidden-window A/B completed against the same copied Manual save, `MetaHair 1`
+BobStraight / colour 0 and identical scratch settings: old `Playtest-0929eve` / new
+`Playtest-0929split-dev` each ran hidden at 800×600 for 179/180 seconds, with 22 non-black
+PID-specific `SHOT SHOWUI` captures and no foreground or visible-window change. Minimum free RAM
+was 11.9 / 6.0 GB. Normal and `r.HairStrands.ViewMode 17/1/15` captures plus six
+`r.ForceLOD 0↔1` toggles showed no visually obvious >1 m rod/fan in either version.
+
+This is **no reproduction, not a cure**: Development cannot query actual groom LOD or produce a
+reliable hair-only >40 cm bound. Pack and walking were exercised, but the scythe target missed; old
+bed sleep succeeded without matched post-movement captures; Map travel refused in both runs because
+of hunger. Evidence remains in `E:\CopilotScratch\e251051b-...\hair-ab\captures-old` /
+`captures-new` and `old-new-hair-contact.png`, not `C:`. The slot is released, the Shipping shortcut
+and package remain unchanged, and the Shipping HWND0 limitation still applies. Props' cheaper
+groom-bounds path and a future user Bob/updo playtest remain the way to distinguish no reproduction
+from a cure. Existing hair reset guidance is not sufficient; never use a global bald/static fallback.
+Menu may now use its dedicated UI slot.
 
 ### Overnight priority: split the four huge hot files
 
