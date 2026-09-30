@@ -982,6 +982,13 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **Keep packaged or standalone test runs off Jenny's saves:** launch with
   `-userdir=E:\CopilotScratch\<session-id>\pkguser -log=<name>.log`, so saves, config and logs go
   under that folder instead of the package's own `Saved\`.
+- **Hidden owned-game automation safety:** pass `-unattended` so game errors/crashes cannot raise
+  dialogs on Jenny's desktop. Before `Add-Type` or `Start-Process`, set `TEMP` and `TMP` to an
+  `E:\CopilotScratch\<session-id>\tmp` directory. Put the owned child in a Win32 job object with
+  `KILL_ON_JOB_CLOSE`, so a dead PowerShell host cannot orphan an invisible multi-GB game. Guard
+  **every** top-level window belonging to the child PID—not only an `UnrealWindow` class—and sample
+  the foreground PID from launch to prove it never stole focus. `-nosound` suppresses
+  `ActiveSound` logs, so never use audio logs as an acceptance gate in a run that passes it.
 - **UI at real resolutions and DPI (standalone window, not PIE):** launch
   `UnrealEditor.exe "<worktree>\SurvivalGame.uproject" /Game/SurvivalGame/Maps/Estate -game -windowed
   -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720; for 4K use `-fullscreen` instead of
