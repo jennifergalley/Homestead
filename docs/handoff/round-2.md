@@ -89,6 +89,20 @@ Unreal/UBT/Blender off until `packaging done`. Six packaged suites plus copied-s
 promotion. `Playtest-0929eve` remains the current `Homestead Estate.lnk` target until night evidence
 passes and retargeting is safe.
 
+### Development firewall prompts / offline Shipping candidate
+
+Development packaged automation can trigger recurring Windows Firewall prompts: UE5.8's in-process
+TraceControl listens even with `-notraceserver` / `-traceautostart=0` (for example TCP 1985, with
+fallback ports), producing path-specific rules as each Playtest archive moves. This is unresolved for
+Development test archives. Do **not** open public Allow rules, and do **not** globally disable
+`NotifyOnListen`: it needs elevation and would silently suppress alerts for every Windows app.
+
+After the current package/suites, Integration may build a safe Shipping candidate only through the
+supported hash-compatible cooked path in [`docs/offline-startup.md`](../offline-startup.md):
+`Build-Game.ps1 -Configuration Shipping -ReuseCooked -Package`, with isolated sandbox
+test/game/save/network state. Shipping compiles out TraceControl. Only after its own validation may
+the Estate shortcut be reconsidered; the current shortcut stays untouched.
+
 ### Urgent forward-aim shipment blocker
 
 **Do not ship or retarget the night package.** Architecture found `main` `5d11ceed` forward-aim bug
