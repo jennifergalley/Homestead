@@ -625,8 +625,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         },
         [this]() { return Controller->Simulation().Count(Item::Seeds) >= 1
             && Controller->Simulation().Count(Item::Water) >= 6; }, 0.7f);
-    Add(TEXT("E remains independent and plants the focused plot"),
-        [this]() { Tap(EKeys::E); },
+    Add(TEXT("E remains independent and plants the focused plot (Seeds chosen on the hotbar)"),
+        [this]() { Controller->ChooseOnHotbar(Item::Seeds); Tap(EKeys::E); },
         [this, TillX, TillY]() { return std::any_of(
                 Controller->State().plots.begin(), Controller->State().plots.end(),
                 [TillX, TillY](const auto& Plot)
