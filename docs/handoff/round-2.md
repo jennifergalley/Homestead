@@ -630,6 +630,12 @@ not claim early Energy is fully solved.
   `520001` billhook then `520002` hoe, crafting/tilling, and F5/F9 search flags. Native 9/9 covers
   reward order and old saves. Honest old-save PIE has not separately run; Integration's copied-save
   packaged core-loop test remains the gate.
+
+  **Props hint partial `391f08f7`:** native Release 9/9, clean off `afe57121`, no UE/PIE or delivery
+  claim. `NoHoeMessage` now searches owned Hoe/HoeBlade in pack, chest and ground before salvage-rack
+  guidance, giving the nearer location, distance and action; old-save chest blade/rack-absent cases are
+  native-covered. Till refusal state, save and quantities stay unchanged. It is excluded from package
+  `a2607437`; Editor compile and PIE still gate it.
 - **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
   visible **Energy** meter later, rather than a visible hunger-plus-energy pair. Keep serialized hunger
   compatibility; revise gentle-hunger penalties into energy/food balance and modest **Well Fed** meals.
@@ -672,7 +678,8 @@ not claim early Energy is fully solved.
   retired Fiber text is also stale). Props replaces it with **4 Branch + 4 Hay**: the same eight units,
   with Hay from TallGrass using a worn scythe at 1–2 per tuft and no iron-tier upgrade. Existing built
   beds plus v12/v13 saves, Piece IDs and Item IDs stay unchanged; other cane recipes stay unchanged.
-  Update the canonical progression doc only after the code lands.
+  Props now holds a headless separate Bedroll slice for the change, with native proof required before
+  UE compile/PIE. Update the canonical progression doc only after the code lands.
 - **Starter rack placement save safety** — **Props urgent implementation guard; not shipped.** A new
   rack at placement ID `520006` must append after every existing placement section, not insert into an
   earlier numeric range and renumber later `550xxx` saved resources. Before `[ready]`, require a
