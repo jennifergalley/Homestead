@@ -845,6 +845,12 @@ requirement.
   for seed. Test-only `f7f9c957` uses production `MoveFromPackRow` to make room without changing
   stock; Editor/Game rebuild and targeted FullLoop pass. Integration is recutting a distinct v3
   Development candidate and all six packaged suites; no Shipping or shortcut claim follows yet.
+
+  **v3 Development UAT (partial):** packaged Smoke, Clearing, Hotbar, NativeMenu and FullLoop pass.
+  EstateSmoke fails early in hands-free setup because Coral correctly auto-fills slot 0 with the oil
+  lamp while the fixture assumes it is empty. The approved test-only adaptation chooses an actual
+  empty row cell and asserts no selected tool plus unchanged stock. Integration is recutting another
+  distinct Development candidate and rerunning all six suites; the current shortcut remains untouched.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
