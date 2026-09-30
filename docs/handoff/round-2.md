@@ -533,11 +533,28 @@ requirement.
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
   Replace the scythe cue with an original or verified CC0 airy grass/steel `shhhhnk`, timed to the
   blade pass.
+
+  **Scythe audio partial v2 `4818a3b0` + fallback `3383e29e`:** native 9/9, no import/audition/UE
+  build/package or shipped claim; do not use conflicting v1 `9e119415`. Original project-authored
+  `Assets/Audio/Effects/ScytheSwish.wav` is deterministic `Scripts/generate_scythe_sound.py` NumPy
+  seed 7307 output (0.72 s, 48 kHz/16-bit mono, peak -6 dBFS, RMS -22.2): airy 1.3–3.6 kHz band noise,
+  stem clicks, grass rustle and faint damped steel partials, with no third-party audio. Bootstrap
+  imports `/Game/SurvivalGame/Audio/Effects/ScytheSwish`; mowing plays it once per successful
+  `mown > 0` sweep. Missing cue now logs bootstrap import guidance once and remains silent - it must
+  never fall back to CC0 `GrassStepA` footstep audio. PIE still needs cue count at 30/60/120 fps,
+  miss/cancel, rain/music mix/headroom and cooked asset proof. Add provenance to `docs/asset-credits`
+  only when shipped.
 - **Bilateral ground-pull and sapling action count** — **Props, pending and not shipped.** By-hand
   Resource Weeds/Nettles already resolve in one `Sim.Harvest`; replace right-knee-only
   `KneelGather(Pouch)` with a dedicated bilateral kneel: two hand grabs, left/right toss behind,
   rise, and one final-contact commit (cancel free, no double stock). Garden `Sim.Weed` stays instant
   and yieldless.
+
+  Props now holds a headless bilateral-kneel animation slice: original MetaHuman-compatible asset,
+  two knees/both hands grabbing two low weeds, left/right toss behind and stand. It keeps tool-free
+  Weeds/Nettles, garden yieldless behavior, one reward at final contact/cancel with no stock, and F/X
+  no-sow. It must follow `blender-assets`, keep scratch on `E:`, and avoids UE/UBT while Integration
+  owns the editor; it remains partial until PIE.
 
   Keep tool-kind rules narrow: Weeds/Nettles are one hand-or-Scythe action and Billhook is wrong tool;
   `BrambleThin` with worn Billhook is one; only the common worn `Sapling` requires two logical swings.
