@@ -386,6 +386,7 @@ void AHomesteadController::NewGame()
         Appearance.HairStyle = 1; Appearance.MetaHair = HomesteadLook::MetaHairForLegacy(1);
     }
     ResetHotbar();
+    ControlsHint.Restart();
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->ResetSprint();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);

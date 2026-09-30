@@ -2,6 +2,7 @@
 #include "HomesteadController.h"
 #include "HomesteadHUD.h"
 #include "HomesteadTestPaths.h"
+#include "UI/HomesteadNoticeStyle.h"
 #include "Engine/Engine.h"
 #include "GameFramework/GameUserSettings.h"
 #include "HAL/FileManager.h"
@@ -47,7 +48,7 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
                 const auto* HUD = Controller->GetHUD<AHomesteadHUD>();
                 const bool ExpectedOverlap = Baseline && Controller->IsBookOpen() && Controller->BookPage() != 6;
                 const FLinearColor ExpectedColor = Controller->ToastIsError()
-                    ? FLinearColor(1, 0.67f, 0.48f, 1) : FLinearColor(0.93f, 0.93f, 0.84f, 1);
+                    ? HomesteadNoticeStyle::RustInk : HomesteadNoticeStyle::InkBrown;
                 return HUD && !Controller->Toast().IsEmpty() && HUD->FeedbackSource() == Controller->Toast()
                     && HUD->FeedbackFullText() && HUD->FeedbackInsideViewport()
                     && HUD->FeedbackOverlaps() == ExpectedOverlap && HUD->FeedbackColor().Equals(ExpectedColor);

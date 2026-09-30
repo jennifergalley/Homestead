@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SHomesteadMenu.h"
+#include "HomesteadNoticeStyle.h"
 #include "SHomesteadHudScale.h"
 #include "SHomesteadIcon.h"
 #include "SHomesteadMapView.h"
@@ -168,29 +169,31 @@ constexpr double ErrorSeconds = 3.8;
 constexpr double FadeInSeconds = 0.14;
 constexpr double FadeOutSeconds = 0.35;
 constexpr float RiseDistance = 8.0f;
-// Aged paper, iron-gall brown ink, and a rust ink for things that went wrong.
-constexpr FLinearColor Paper(0.62f, 0.54f, 0.38f, 0.97f);
-constexpr FLinearColor InkBrown(0.03f, 0.022f, 0.014f, 1.0f);
-constexpr FLinearColor RustInk(0.22f, 0.03f, 0.015f, 1.0f);
+// Aged paper, iron-gall brown ink, and a rust ink for things that went wrong (shared with the HUD's
+// world notices through HomesteadNoticeStyle).
+constexpr FLinearColor Paper = HomesteadNoticeStyle::Paper;
+constexpr FLinearColor InkBrown = HomesteadNoticeStyle::InkBrown;
+constexpr FLinearColor RustInk = HomesteadNoticeStyle::RustInk;
 inline const FSlateBrush& CardBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, FLinearColor(0.2f, 0.12f, 0.05f, 1.0f), 2.0f);
+    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, HomesteadNoticeStyle::Frame, HomesteadNoticeStyle::FrameWidth);
     return Brush;
 }
 inline const FSlateBrush& ErrorCardBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, RustInk, 2.0f);
+    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, RustInk, HomesteadNoticeStyle::FrameWidth);
     return Brush;
 }
 // The inner rule of the double frame.
 inline const FSlateBrush& RuleBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(FLinearColor::Transparent, 3.0f, InkBrown.CopyWithNewOpacity(0.45f), 1.0f);
+    static const FSlateRoundedBoxBrush Brush(FLinearColor::Transparent, 3.0f,
+        InkBrown.CopyWithNewOpacity(HomesteadNoticeStyle::RuleOpacity), HomesteadNoticeStyle::RuleWidth);
     return Brush;
 }
 inline const FSlateBrush& ShadowBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(FLinearColor(0, 0, 0, 0.4f), 8.0f);
+    static const FSlateRoundedBoxBrush Brush(HomesteadNoticeStyle::Shadow, 8.0f);
     return Brush;
 }
 }

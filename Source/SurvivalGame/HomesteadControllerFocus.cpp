@@ -386,7 +386,15 @@ void AHomesteadController::ResetActionHints()
         if (Branch && PersistIntProperty(Branch->IniPath, ActionHintSection, *Pair.Key, 0))
             GConfig->SetInt(ActionHintSection, *Pair.Key, 0, GGameUserSettingsIni);
     HintUses.Reset();
+    ControlsHint.Restart();
     Notify(TEXT("Action hints will show again for your next few tries."));
+}
+
+bool AHomesteadController::IsControlsHintOnScreen() const
+{
+    // Where AHomesteadHUD::DrawHUD draws the strip: the open world, not a book, shop, setup or failure.
+    return bWorldReady && ControlsHint.Showing() && !HasNativeMenu() && !bBookOpen && !ShopScreen.IsValid()
+        && !IsFailed() && !IsNewGameSetup() && !IsNamingSetup();
 }
 
 void AHomesteadController::Notify(const Homestead::Result& Result, USoundBase* SuccessCue)

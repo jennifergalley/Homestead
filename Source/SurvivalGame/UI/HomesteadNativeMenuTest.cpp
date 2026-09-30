@@ -308,9 +308,16 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Close initial guide through mapped Back"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsBookOpen(); });
+    const auto HintLeft = MakeShared<double>(0.0);
+    Add(TEXT("The first-minute controls strip counts down while it is on screen"),
+        [this, HintLeft]() { *HintLeft = Controller->ControlsHintSecondsLeft(); },
+        [this, HintLeft]() { return Controller->IsControlsHintOnScreen() && Controller->ControlsHintSecondsLeft() < *HintLeft - 0.5; }, 1.0f);
     Add(TEXT("First exit-path press opens Settings"),
         [this]() { Tap(EKeys::Escape); PausedHour = Controller->State().hour; },
         [this]() { return Controller->HasNativeMenu() && Controller->BookPage() == 4; });
+    Add(TEXT("The controls strip's minute is frozen while the book is open"),
+        [this, HintLeft]() { *HintLeft = Controller->ControlsHintSecondsLeft(); },
+        [this, HintLeft]() { return !Controller->IsControlsHintOnScreen() && Controller->ControlsHintSecondsLeft() == *HintLeft; }, 1.0f);
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeSaveRetryTest")))
     {
         Add(TEXT("Prepare an existing valid manual save before retry fixture"),
