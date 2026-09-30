@@ -82,12 +82,13 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / package snapshot (2026-09-29 18:39):** Integration pushed `main` `5d11ceed` with
-11 accepted picks, pail footer `d2c8b4b0` and docs merge `28cc8f6c`; Editor/Game builds are green and
-the editor is closed. UAT/cook package `Build\Playtest-0929night` is running; all other lanes keep
-Unreal/UBT/Blender off until `packaging done`. Six packaged suites plus copied-save smoke decide
-promotion. `Playtest-0929eve` remains the current `Homestead Estate.lnk` target until night evidence
-passes and retargeting is safe.
+**Current play/package snapshot (2026-09-29 19:20):** Jenny closed verified `Playtest-0929eve`;
+packaged PID 2328 exited naturally, there are no Unreal processes and physical free memory is 9.2 GB.
+Integration now has the exclusive editor/UBT slot (with memory watch) to build local aim `798ce775` plus
+half-rain `c8765f72` (native 9/9), then PIE behind/front target and rain component behavior. It includes
+Props' pending `[F] Pull weeds` hint before corrected Development package/six suites/copied-save smoke,
+then Shipping `-ReuseCooked` zero-listener proof. Only after that chain may the Estate shortcut retarget.
+Menu field-book hotbar and Water garden outline remain headless/partial and excluded.
 
 ### Development firewall prompts / offline Shipping candidate
 
@@ -113,6 +114,26 @@ target. Props has a headless targeted fix slot during UAT. Integration may finis
 but the night package remains **provisional, not delivered** until the fix has targeted native/PIE
 evidence and a repackage passes. Preserve the prior verified `Playtest-0929eve` build and shortcut.
 
+**Props headless fix `61957b51`:** cleanly based on `main` `144acc7b`, native 9/9, no UE/PIE or
+shipping claim. `HeldToolFocus` now chooses aimed forward overgrowth over a nearer matching-tool
+target behind while preserving forageables and non-overgrowth plots/drops/store/water. Swing uses
+`FindAimedOvergrowth` only, never overwrites with `FocusId`; a behind-only press says `Turn to face it`
+without a state change.
+
+Native covers bramble 70 cm behind versus valid front 200 cm prompt/clear/one charge, side under-tier
+thicket not blocking, berry prompt retained, no aimed behind clear, turn-around success and silent tier
+refusal. Integration cherry-picked it locally as `798ce775` atop merged `main` `144acc7b`; native
+Release 9/9 passes and review confirms Swing uses only `FindAimedOvergrowth`, never `FocusId`.
+Editor/Game UBT and PIE now pass; editor is closed after a memory-tight one-editor run (~3 GB free).
+Behind thin bramble `550248` at 73 cm loses focus to forward bramble `570132` at 188 cm, and a press
+clears only the forward target for one charge. With nothing ahead it says `Turn to face it` with no
+stock/clear (normal 0.01 Energy drain); turning clears the behind target. Side thicket `550312` stays
+untouched while forward thin `550263` clears, and F5/F9 is exact.
+
+Remaining work is corrected Development repackage/six suites/copied-save smoke and final Shipping
+no-listener candidate. The provisional night build remains withheld and `Playtest-0929eve` remains the
+verified shortcut.
+
 **Provisional night package evidence:** `Build\Playtest-0929night` at `main` `5d11ceed`
 (`JennysHomesteadGame.exe` SHA256
 `887EFD0254D2D9A98761CC4B65258878F635DEE5E0BDEB7222085F372EE18EC8`) passed all six packaged
@@ -122,6 +143,19 @@ aim blocker makes the package provisional. After the target fix, Integration rer
 corrected Development package/six suites plus copied-save smoke, then stages the supported Shipping
 `-ReuseCooked` candidate and proves its PID has no TCP/UDP listener using isolated `-UserDir` save
 round-trip/offscreen tests. Only an accepted Shipping candidate may retarget the Estate shortcut.
+
+**Final rain loudness partial `734813ad`:** native 10/10 plus local Editor/Game/PIE pass, no delivery
+claim. Rain
+`RainAudioGain` is multiplied by 0.5 linear (-6.02 dB): full default AmbienceVolume 0.7 becomes
+outdoor 0.315 / indoor 0.1225. `FadeIn(2, 1)` remains, `RainAudible` start/stop threshold is not
+halved, and indoor LPF/mute stay unchanged. The controlling user slider is **AmbienceVolume**, not
+Effects; native tests cover the 0.5 ratio across rain, indoors and slider values. PIE at rain amount
+0.30 / Ambience 0.7 measured component outdoor 0.1356 versus old 0.2712 and indoor 0.0527: exactly
+half, with no Gain². The reflected LPF field is 20000 indoors but LPF code was untouched, so this is
+not audible LPF/listening proof.
+
+It integrates with the aim fix before the corrected Development/Shipping package. It does not affect
+the current game.
 
 **Integration validation batch (main-integrated/package-pending):** Integration's local `c9481e38`
 evidence is now included in `main` `5d11ceed`; it is **not shipped** until the current night package
@@ -526,22 +560,36 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
-- **Pickup gain popup** — **Menu partial `b2a49e36` + `cb3f40c7`, not ready or shipped.** Based on
-  common Simulation revision gains across pack, owned chests and drops, it suppresses moves/reloads and
-  Water, then presents a brass/cream `+N` right of the projected chest for 2.6 visible seconds
-  (maximum four) while book/shop hold. It removes `Selected quantity stored/taken`, garment and drag
-  success notices; errors remain.
+- **Pickup gain popup** — **Menu acceptance `04959978` is main-integrated in `23aba36a`, but excluded
+  from the next aim/rain/Shipping package and not shipped.** Based on common Simulation revision gains
+  across pack, owned chests and drops, it suppresses moves/reloads and Water, then presents a
+  brass/cream `+N` right of the projected chest for 2.6 visible seconds (maximum four) while
+  book/shop hold. It removes `Selected quantity stored/taken`, garment and drag success notices;
+  errors remain.
 
-  Editor build and 1080p PIE verify `+5 Branch`, `+4 Stone` and `+1 Axe craft` right of the heroine,
-  with the craft toast removed. Berry popup is uncaptured; harvest/shop plus 720p/4K remain unverified,
-  and duplicate harvest/craft success toasts remain. The branch is rooted on `769500a5`; Menu released
-  its hands-on slot for Integration's core package priority.
+  Native passes economy 16 / scenario 670 and Editor build is green. 1080-class PIE verifies a real
+  BerryBush `+5 Berries` beside the heroine from 0.8–2.6 s, gone at 3.5 with no toast; crop harvest
+  `+4 Roots` and `+2 Seeds` separately with no toast; two quick `+3 Branch` grants combine `+6`;
+  three Water gives none; legacy 9 Water tile remains visible and the pail bar is full. Earlier craft
+  `+1 Axe` also has no toast. Drop/chest/shop-buy plus 720p/4K remain unverified; Menu closed its
+  editor before Jenny's game startup rather than attempting a 4K capture under memory pressure.
 - **Zero-stock hotbar seed/food items** — **Menu plus Props Simulation, pending and not shipped.**
   `HotbarSnapshot` currently preserves a pinned item and icon even after `Sim.Count(pack)==0`, making
   planted/stored turnip seeds and strawberry runners look available. Hide zero-count consumable
   seed/food visuals and actions while retaining optional pin mapping for reacquisition; Props guards
   against any zero-stock implicit fallback. Cover sow, stow, F5/F9, old-save pinned zero,
   reacquisition and no accidental planting.
+- **Field-book hotbar editor** — **Menu headless source slice, pending and not shipped.** While the
+  Inventory field book is open (the world hotbar is intentionally hidden by
+  `Controller::ShouldShowHotbar`), show all 10 saved `HotbarSlots`. Drag a carried tool/item to an
+  exact slot and drag slot-to-slot to reorder; reuse the menu's pointer drag grid and virtual
+  controller drag, with a pad alternative.
+
+  Assignments are references, never stock moves: replacing an occupied slot swaps; a move clears the
+  source; bindings stay unique; cancel changes nothing; chest rows must transfer to pack first. Preserve
+  old saves and depleted pins. Require native assignment/save-uniqueness coverage, then PIE 720p/4K
+  mouse and controller proof. Menu works headless during Jenny's PID 2328/memory hold; no UE/UBT.
+  This remains behind the aim/rain/Shipping path.
 - **Human-readable save confirmation time** — **Menu, pending and not shipped.**
   `Controller::MenuSaveStatus` currently shows an ISO-like UTC timestamp. Present it as a localized,
   human-readable local date/time (for example, `September 28, 2026 12:01 PM`) without changing the
@@ -633,9 +681,26 @@ requirement.
   soft 40 cm one-knee reeds saw. Iron+ `BrambleThicket` (3/2/1/1) and Steel+ Bank (4/3/2/1) gates stay
   unchanged. For the pictured missing bramble prompt, obtain actual `FocusId`, kind and toast before
   declaring this a root cause.
-- **Hoe/pail exact target** — **Props World/Simulation plus Menu UI, pending and not shipped.** With
-  Hoe or Pail selected, highlight the exact 1 m target plot before action, showing current cell and
-  green/red validity. Verify target selection, validity and action remain consistent.
+- **Hoe/pail exact target** — **Water garden-outline partial `14cce349` + `9b69eca6`, not shipped or
+  in the current aim/firewall package.** Native 10/10 and Editor/Game builds pass. Side-effect-free
+  `CheckTill` / `Weed` / `Water` now feed both `PreviewGarden` and the mutators, with block errors
+  matching mutations; 50 repeated previews are byte-identical under Serialize.
+
+  Hoe previews its exact 85 cm GardenCell; Pail previews the focused 60 cm plot. The world visual is
+  transient sampled-ground 4x4 thin 2.5 cm-raised segments at 100 cm, no collision/shadow, green/red,
+  and hides for book/shop/planning/failed/water focus with no save IDs. PIE still must cover slopes,
+  turned soil, adjacent plots, blocked cells, pad/HUD behavior and z-fighting before readiness.
+- **Weedy crop-plot prompt partial `15b3927e`:** Integration cherry-picked locally as `d54a14ae`;
+  native 9/9, Editor/Game build and KBM/pad PIE remain pending, with no delivery claim.
+  Whenever `Plot.weeds >= 0.125` is world-visible, the focused plot appends `[F] Pull weeds` /
+  gamepad `[X] Pull weeds` alongside E/A sow/harvest/water/error, including ripe crops; clean plots
+  show no hint. F/X hand-weeds the focused plot, never sows. A bare weedy plot F-pull is yieldless,
+  costs one Energy and does not sow; clean bare F refuses; ripe crops remain ripe.
+
+  The misleading Hoe `[LMB] Weed` copy is removed because its 85 cm square differs from focus. Editor
+  build and PIE must cover KBM/pad with pail/hoe/empty selection, no clean tooltip and F5/F9. Integration
+  includes it after safe aim/rain PIE and before corrected Dev/Shipping package. Bilateral kneel-weeds
+  conflicts only in native-test `Run()` append and rebases later; it is not in this package.
 - **Long/tousled hair at angles** — **temporary Gait Agent** (`65a2408b`), while testing in its
   editor after the run rebake and before sprint: investigate the screenshot's disappearing hair and
   side patches at some camera angles. Pending; not shipped.
