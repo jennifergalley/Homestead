@@ -473,6 +473,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     QueueGatherTo(Homestead::Item::Branch, 48);
     QueueGatherTo(Homestead::Item::Stone, 8);
     QueueGrant(Homestead::Item::BrambleCanes, 20);
+    QueueGrant(Homestead::Item::Hay, 4);
     QueueGatherTo(Homestead::Item::Roots, 6);
     QueueGatherTo(Homestead::Item::Flowers, 2);
     QueueGatherTo(Homestead::Item::Berries, 1);
@@ -1240,7 +1241,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             return !Controller->IsBookOpen() && !Controller->IsFailed() && !ProtectedRecovery->empty();
         });
     QueueGatherTo(Homestead::Item::Branch, 4);
-    QueueGrant(Homestead::Item::BrambleCanes, 4);
+    QueueGrant(Homestead::Item::Hay, 4);
     QueueClearCell(0, 8);
     QueuePlace(Homestead::Piece::Bed, 0, 8);
     const Homestead::Point OutdoorBed = Homestead::CellCenter(0, 8);

@@ -244,7 +244,8 @@ void GatherUntil(Simulation& sim, Item item, ResourceKind kind, int count)
 }
 void BuildingStock(Simulation& sim)
 {
-    Stock(sim, {{Item::Branch, 65}, {Item::Stone, 24}, {Item::BrambleCanes, 25}});
+    // A bed takes 4 Hay now instead of 4 canes; the pack stays within its 120.
+    Stock(sim, {{Item::Branch, 65}, {Item::Stone, 24}, {Item::BrambleCanes, 21}, {Item::Hay, 8}});
 }
 void BuildRoom(Simulation& sim, int x = -3, int y = 0)
 {
@@ -507,6 +508,8 @@ void GameplayWalkthrough()
     OK(sim.GrantItems(Item::BrambleCanes, 15));
     BuildRoom(sim);
     CHECK(sim.IsSheltered(Home));
+    // The woodland walk carries no scythe; hand her the mown hay the bedroll is stuffed with.
+    OK(sim.GrantItems(Item::Hay, 4));
     OK(sim.Place(Piece::Bed, -3, 0, 0, Home));
     const Point firePosition = CellCenter(-3, -1);
     OK(sim.Place(Piece::Fire, -3, -1, 0, firePosition));
@@ -4198,6 +4201,52 @@ void BranchesYieldRenewableKindling()
     CHECK(estate.Count(Item::Branch) == branches + 5 && estate.Count(Item::Kindling) == kindling + 1);
 }
 
+// Jenny's playtest: the bedroll is a branch frame and a hay-stuffed tick, 4 Branch + 4 Hay. Walls,
+// doorways, roofs and chests still take canes; beds already built and canes already carried stay as
+// they are.
+void BedrollTakesHay()
+{
+    const std::string cost = std::string("4 ") + ItemName(Item::Branch) + " + 4 " + ItemName(Item::Hay);
+    CHECK(PieceRequirements(Piece::Bed) == cost);
+    CHECK(std::string(PieceRequirements(Piece::Wall)).find(ItemName(Item::BrambleCanes)) != std::string::npos);
+    CHECK(std::string(PieceRequirements(Piece::Chest)).find(ItemName(Item::BrambleCanes)) != std::string::npos);
+
+    // Canes alone, or too little hay, are refused and spend nothing.
+    Simulation canes;
+    Stock(canes, {{Item::Branch, 4}, {Item::BrambleCanes, 4}});
+    const auto noHay = canes.Place(Piece::Bed, -3, 0, 0, Home);
+    CHECK(!noHay.ok && noHay.message == "Gather 4 Hay first.");
+    UnchangedFailure(canes, [&] { return canes.Place(Piece::Bed, -3, 0, 0, Home); });
+    Stock(canes, {{Item::Branch, 4}, {Item::Hay, 3}, {Item::BrambleCanes, 4}});
+    UnchangedFailure(canes, [&] { return canes.Place(Piece::Bed, -3, 0, 0, Home); });
+
+    // Exactly 4 Branch + 4 Hay builds it; carried canes are left alone.
+    Simulation sim;
+    Stock(sim, {{Item::Branch, 4}, {Item::Hay, 4}, {Item::BrambleCanes, 7}});
+    OK(sim.Place(Piece::Bed, -3, 0, 0, Home));
+    CHECK(sim.Count(Item::Branch) == 0 && sim.Count(Item::Hay) == 0 && sim.Count(Item::BrambleCanes) == 7);
+    CHECK(sim.FindNearestStructure(Home, Piece::Bed, 300) != -1);
+
+    // A save with a bed already standing (however it was paid for) and canes in the pack loads as is,
+    // current and version-12 stocks alike: no canes are turned into hay.
+    Simulation loaded;
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(loaded.FindNearestStructure(Home, Piece::Bed, 300) != -1);
+    CHECK(loaded.Count(Item::BrambleCanes) == 7 && loaded.Count(Item::Hay) == 0);
+    Simulation migrated;
+    OK(migrated.Deserialize(Encode(sim.GetState(), PositionalStockSaveVersion)));
+    CHECK(migrated.FindNearestStructure(Home, Piece::Bed, 300) != -1);
+    CHECK(migrated.Count(Item::BrambleCanes) == 7 && migrated.Count(Item::Hay) == 0);
+
+    // The manor's heritage bed is already there on a new estate; nothing about it costs hay.
+    Simulation estate;
+    estate.SetPlacements(ProvisionalEstatePlacements());
+    OK(estate.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    int beds = 0;
+    for (const auto& piece : estate.GetState().structures) beds += piece.kind == Piece::Bed;
+    CHECK(beds == 1 && estate.Count(Item::Hay) == 0);
+}
+
 int main()
 {
     Run("defaults and input validation", DefaultsAndValidation);
@@ -4218,6 +4267,7 @@ int main()
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);
     Run("HUD requirements and zero-time action commits", RequirementsMatchTransactions);
+    Run("the bedroll takes 4 Branch and 4 Hay", BedrollTakesHay);
     Run("pure structured recipe assessment", StructuredRecipeAssessment);
     Run("a snack on a full stomach restores Energy", SnackOnFullStomachRestoresEnergy);
     Run("each cooked batch burns exactly one kindling", CookingBurnsOneKindlingPerBatch);
