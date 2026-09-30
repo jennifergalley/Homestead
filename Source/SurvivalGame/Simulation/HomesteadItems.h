@@ -43,7 +43,7 @@ struct ItemInfo
     const char* description;
     ItemCategory category;
     const char* icon;        // SHomesteadIcon glyph key.
-    std::int64_t basePriceCents;
+    std::int64_t basePriceCoins;
     ShopMask buyers;         // Shops that buy it from her.
     double hunger = 0.0;     // Eating restores these; zero hunger means not edible.
     double energy = 0.0;

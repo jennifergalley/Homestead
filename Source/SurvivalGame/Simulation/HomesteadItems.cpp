@@ -9,7 +9,7 @@ namespace
 constexpr ShopMask StoreBuys = ShopBit(ShopKind::GeneralStore);
 constexpr ShopMask NoBuyers = 0;
 
-// One row per Item, in enum order. Prices are in whole coins (basePriceCents keeps its old name).
+// One row per Item, in enum order. Prices are in whole coins (HomesteadShops.h).
 constexpr ItemInfo ItemCatalogue[] = {
     // The knife, fibre, machete and fur are retired from new games (add-overgrown-estate-clearing).
     {Item::Knife, "knife", "Knife", "A plain belt knife for cutting cord, cloth and hide.",
@@ -142,7 +142,7 @@ constexpr bool CatalogueComplete()
     for (const auto& info : ItemCatalogue)
     {
         if (!info.key || !*info.key || !info.name || !*info.name || !info.description || !*info.description
-            || !info.icon || !*info.icon || info.basePriceCents < 0
+            || !info.icon || !*info.icon || info.basePriceCoins < 0
             || static_cast<int>(info.category) < 0 || info.category >= ItemCategory::Count
             || info.hunger < 0.0 || info.energy < 0.0 || !info.source)
             return false;
@@ -201,6 +201,6 @@ int ItemSortRank(Item item)
     default: return 5;
     }
 }
-std::int64_t BasePrice(Item item) { return GetItemInfo(item).basePriceCents; }
+std::int64_t BasePrice(Item item) { return GetItemInfo(item).basePriceCoins; }
 bool ShopBuys(ShopKind shop, Item item) { return ValidItem(item) && (GetItemInfo(item).buyers & ShopBit(shop)) != 0; }
 }

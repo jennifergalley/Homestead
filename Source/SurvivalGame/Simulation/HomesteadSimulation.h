@@ -329,7 +329,7 @@ struct State
     bool fixedEstate = false;
     int placementBakeVersion = 0;
     std::vector<Parcel> parcels; // Fixed estate only; empty in the seeded woodland.
-    Cents money = 0; // HomesteadShops.h; changes only through Sell, Buy and playtest grants.
+    Coins money = 0; // HomesteadShops.h; changes only through Sell, Buy and playtest grants.
     std::vector<Shop> shops;
     // Every tool starts worn; the blacksmith (round 3) raises them.
     std::array<ToolTier, ToolKindCount> toolTiers{};
@@ -704,7 +704,9 @@ public:
     // doze off on the way. The caller stands her at PlanTravel's arrival point.
     Result WalkRoad(TravelDestination destination, Point from);
     // Playtest aids: adjust the purse; open (or move) a shop with its counter at `counter`.
-    Result GrantMoney(Cents cents);
+    // Playtest grant (or take, when negative). Refused, changing nothing, if the purse would go below
+    // zero or past MaxMoney; overflow-safe for any int64 amount.
+    Result GrantMoney(Coins coins);
     Result PlaceShop(ShopKind kind, Point counter, double yaw = 0.0);
     // Oil lamp (HomesteadLamp.cpp). One lamp, one reservoir of oil wherever the lamp is.
     double LampOil() const { return state_.lampOilHours; }
