@@ -175,6 +175,16 @@ groom-bounds path and a future user Bob/updo playtest remain the way to distingu
 from a cure. Existing hair reset guidance is not sufficient; never use a global bald/static fallback.
 Menu may now use its dedicated UI slot.
 
+**New unverified lead:** the completed hidden A/B was close/front and only forced body LOD 0/1 to
+groom LOD 1/3. Jenny's screenshots are far, elevated and rear-facing, plausibly exercising body
+LOD 2/3 → groom LOD 5/7 Meshes where a static textured rod/fan or mesh binding could be insensitive
+to the physics override. Hidden unfocused hitches may also reset the hair simulation frequently.
+First assess a short, low-memory old-build diagnostic from that matched rear/elevated view, with
+normal and ViewMode 17 captures, body LOD 2/3, BobStraight and optional updo; run new only if old
+reproduces. Do **not** change the passive LOD map `{1,3,5,7}` to `{1,3,4,4}` or alter bindings until
+reproduced evidence identifies the cause. With only about 5 GB free below the 6 GB safety bar, Menu
+hotbar editor work remains paused until the diagnostic order and memory window are confirmed.
+
 ### Overnight priority: split the four huge hot files
 
 **Jenny direct decision (2026-09-29 20:34):** split
