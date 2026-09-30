@@ -551,11 +551,20 @@ requirement.
   rise, and one final-contact commit (cancel free, no double stock). Garden `Sim.Weed` stays instant
   and yieldless.
 
-  Props now holds a headless bilateral-kneel animation slice: original MetaHuman-compatible asset,
-  two knees/both hands grabbing two low weeds, left/right toss behind and stand. It keeps tool-free
-  Weeds/Nettles, garden yieldless behavior, one reward at final contact/cancel with no stock, and F/X
-  no-sow. It must follow `blender-assets`, keep scratch on `E:`, and avoids UE/UBT while Integration
-  owns the editor; it remains partial until PIE.
+  **Props bilateral partial:** `887a2dfb` adds Control Rig recipe
+  `Content/Python/homestead_agent/kneel_pull_weeds.py` (150 frames at 30 fps; both knees, two low
+  bilateral pulls, L/R toss, rise, 3.4 s contact; grip/knee/torso-clearance diagnostic report).
+  `f3584fa3` appends PullWeeds routing with skeleton guard and
+  `ControllerWeedPull.cpp` preflight/copy: one actual Harvest/Weed at the second root, cancellation
+  before beat with no stock/Energy, resource gain versus yieldless garden behavior, and F/X never sow.
+  Native 9/9 passes; there is no UE script build, bake, `.uasset`, Character Lab or PIE evidence.
+
+  Missing asset logs an error and temporarily preserves old behavior, but that fallback must never
+  ship absent the authored asset. The current toss uses invisible fists while weeds/clump remain
+  unchanged; Props must add visible transient uprooted-weed handful props and first-patch feedback
+  before `[ready]`. PIE must cover the script report, cancellation, F5/F9 and the final-contact
+  transaction. It follows `blender-assets`, uses `E:` scratch, and stays out of UE/UBT while
+  Integration owns the editor.
 
   Keep tool-kind rules narrow: Weeds/Nettles are one hand-or-Scythe action and Billhook is wrong tool;
   `BrambleThin` with worn Billhook is one; only the common worn `Sapling` requires two logical swings.
