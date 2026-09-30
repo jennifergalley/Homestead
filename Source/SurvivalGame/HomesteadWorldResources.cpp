@@ -209,11 +209,13 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             Blocker->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
             Blocker->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
             // The ruin's fallen roof timbers used to block as ruin scenery; as a resource they stop
-            // only her (a pawn), so nothing else (felled trees, drops, traces) snags on the proxy.
+            // only her (a pawn), so nothing else (felled trees, drops, traces) snags on the proxy. The
+            // pile is under 60 cm, within her step height: without this she walked up onto it (PIE).
             if (Kind == ResourceKind::RuinTimbers)
             {
                 Blocker->SetCollisionResponseToAllChannels(ECR_Ignore);
                 Blocker->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+                Blocker->CanCharacterStepUpOn = ECB_No;
             }
             Blocker->SetGenerateOverlapEvents(false);
             Blocker->SetCanEverAffectNavigation(false);
