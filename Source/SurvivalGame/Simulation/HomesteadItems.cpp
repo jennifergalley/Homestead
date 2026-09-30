@@ -9,7 +9,7 @@ namespace
 constexpr ShopMask StoreBuys = ShopBit(ShopKind::GeneralStore);
 constexpr ShopMask NoBuyers = 0;
 
-// One row per Item, in enum order. Prices are in cents.
+// One row per Item, in enum order. Prices are in whole coins (basePriceCents keeps its old name).
 constexpr ItemInfo ItemCatalogue[] = {
     // The knife, fibre, machete and fur are retired from new games (add-overgrown-estate-clearing).
     {Item::Knife, "knife", "Knife", "A plain belt knife for cutting cord, cloth and hide.",

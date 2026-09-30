@@ -155,7 +155,7 @@ void FlasksAreSoldInTown()
     sim.SkipToHourOfDay(9.0);
     const auto bought = sim.Buy(shop->id, Item::OilFlask, 2, false, {counter.x, counter.y - 150.0});
     OK(bought);
-    CHECK(bought.message == "Bought 2 oil flasks for $0.30.");
+    CHECK(bought.message == "Bought 2 oil flasks for 30 coins.");
     CHECK(sim.Count(Item::OilFlask) == 5 && sim.GetState().money == StartingMoney - 30);
 }
 

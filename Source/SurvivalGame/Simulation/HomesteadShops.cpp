@@ -38,12 +38,9 @@ std::string FormatMoney(Cents cents)
     const bool negative = cents < 0;
     // Magnitude as unsigned so the most negative value still formats.
     const std::uint64_t magnitude = negative ? static_cast<std::uint64_t>(-(cents + 1)) + 1 : static_cast<std::uint64_t>(cents);
-    std::string dollars = std::to_string(magnitude / 100);
-    for (int i = static_cast<int>(dollars.size()) - 3; i > 0; i -= 3) dollars.insert(static_cast<std::size_t>(i), ",");
-    const unsigned rest = static_cast<unsigned>(magnitude % 100);
-    std::string text = std::string(negative ? "-$" : "$") + dollars + "." + static_cast<char>('0' + rest / 10)
-        + static_cast<char>('0' + rest % 10);
-    return text;
+    std::string coins = std::to_string(magnitude);
+    for (int i = static_cast<int>(coins.size()) - 3; i > 0; i -= 3) coins.insert(static_cast<std::size_t>(i), ",");
+    return std::string(negative ? "-" : "") + coins + (magnitude == 1 ? " coin" : " coins");
 }
 
 std::string FormatMoneyDelta(Cents cents)
