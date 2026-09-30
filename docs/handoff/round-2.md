@@ -121,8 +121,14 @@ without a state change.
 
 Native covers bramble 70 cm behind versus valid front 200 cm prompt/clear/one charge, side under-tier
 thicket not blocking, berry prompt retained, no aimed behind clear, turn-around success and silent tier
-refusal. Integration waits for Menu editor release, then cherry-picks, builds and PIE-checks before the
-corrected Development repackage/six suites/copied-save smoke and final Shipping no-listener candidate.
+refusal. Integration cherry-picked it locally as `798ce775` atop merged `main` `144acc7b`; native
+Release 9/9 passes and review confirms Swing uses only `FindAimedOvergrowth`, never `FocusId`.
+Menu editor PID 15448 is still open, so Integration correctly holds UBT/UE.
+
+After the editor closes, required evidence is Editor/Game build plus PIE behind/front, side thicket,
+`Turn to face it` and F5/F9, then corrected Development repackage/six suites/copied-save smoke and
+final Shipping no-listener candidate. The provisional night build remains withheld and
+`Playtest-0929eve` remains the verified shortcut.
 
 **Provisional night package evidence:** `Build\Playtest-0929night` at `main` `5d11ceed`
 (`JennysHomesteadGame.exe` SHA256
