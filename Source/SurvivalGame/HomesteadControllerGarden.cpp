@@ -11,10 +11,10 @@ void AHomesteadController::UpdateGardenOutline()
 {
     Homestead::GardenTarget Target;
     const APawn* Avatar = GetPawn();
-    if (Avatar && Landscape && ShouldShowHotbar() && !HasNativeMenu() && HotbarSlots.IsValidIndex(SelectedHotbarSlot))
+    if (Avatar && Landscape && ShouldShowHotbar() && !HasNativeMenu())
     {
-        const int32 Value = HotbarSlots[SelectedHotbarSlot];
-        const auto Tool = Value >= 0 ? static_cast<Homestead::Item>(Value) : Homestead::Item::Count;
+        // The selected cell of her pack's first row (the Coral hotbar); wearables and empty cells show nothing.
+        const auto Tool = HotbarItem(SelectedHotbarSlot);
         const FVector Forward = Avatar->GetActorForwardVector().GetSafeNormal2D();
         if (Tool == Homestead::Item::DiggingStick && Sim.Count(Tool) > 0)
             Target = Homestead::PreviewGarden(Sim, Homestead::GardenTool::Hoe, PlayerPoint(), Forward.X, Forward.Y);

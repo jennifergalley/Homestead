@@ -362,6 +362,7 @@ private:
         std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
+    friend class AHomesteadGardenProbe;
     friend class UHomesteadMapComponent;
     enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth };
     // General store (HomesteadShopFlow.cpp).

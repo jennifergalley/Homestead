@@ -203,7 +203,7 @@ if ($DirectionalNavigation) {
 if ($NativeResumeFrom) { $captures = @('native-wardrobe-resumed.png') }
 if ($NativeMenuQuit) { $captures = @() }
 if ($NativeSaveRetry) { $captures = @() }
-if ($Hotbar) { $captures = @('hotbar-gameplay.png') }
+if ($Hotbar) { $captures = @('hotbar-gameplay.png','garden-outline-hoe-valid.png','garden-outline-hoe-invalid.png','garden-outline-pail-valid.png','garden-outline-pail-invalid.png') }
 if ($Crafting) { $captures = @('craft-requirements-ready.png','craft-hold-progress.png','craft-requirements-blocked.png') }
 if ($EstateSmoke) { $captures = @('estate-manor.png','estate-clearout.png','estate-farm.png','estate-woods.png','estate-drive.png','estate-store.png','estate-lamp-night.png') }
 $frameReports = @($captures | ForEach-Object { $_ -replace '\.png$', '.frame.txt' })

@@ -4,6 +4,7 @@
 #include "../HomesteadAnimInstance.h"
 #include "../HomesteadController.h"
 #include "../HomesteadSave.h"
+#include "../HomesteadWorld.h"
 #include "SHomesteadHotbar.h"
 #include "Framework/Application/SlateApplication.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -12,6 +13,8 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "../Simulation/HomesteadHotbarLayout.h"
+#include "../Simulation/HomesteadPackRow.h"
+#include "../Simulation/HomesteadGardenTarget.h"
 
 #include <sstream>
 #include <string>
@@ -709,8 +712,41 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             if (!Found) Finish(false, TEXT("No valid nearby hotbar till cell exists."));
         },
         [this]() { return !Controller->IsBookOpen(); }, 0.7f);
-    Add(TEXT("Number five selects the Hoe, which tills the forward cell through left click"),
-        [this]() { Tap(EKeys::Five); Tap(EKeys::LeftMouseButton); },
+    // The garden outline (HomesteadControllerGarden.cpp): 16 thin no-collision, shadowless segments round
+    // exactly the square the next hoe stroke or pail pour acts on; red carries the refusal to the focus line.
+    const auto OutlineIs = [this](int32 X, int32 Y, bool bValid)
+    {
+        const auto& Outline = Controller->Landscape->GardenOutline;
+        bool Thin = Outline.Components.Num() == 16;
+        for (const auto& Component : Outline.Components)
+        {
+            const auto* Part = Cast<UPrimitiveComponent>(Component.Get());
+            Thin = Thin && Part && Part->IsVisible() && !Part->CastShadow
+                && Part->GetCollisionEnabled() == ECollisionEnabled::NoCollision;
+        }
+        const bool Passed = Thin && Outline.Signature == FString::Printf(TEXT("%d:%d:%d"), X, Y, bValid ? 1 : 0)
+            && Controller->GardenOutlineReason.IsEmpty() == bValid
+            && (bValid || Controller->FocusActions().Contains(Controller->GardenOutlineReason)
+                || Controller->Focus != AHomesteadController::EFocus::None);
+        if (!Passed)
+            Results.Add(FString::Printf(TEXT("GARDEN_OUTLINE_DIAG want=%d:%d:%d got=%s parts=%d thin=%d reason='%s' focus='%s'"),
+                X, Y, bValid ? 1 : 0, *Outline.Signature, Outline.Components.Num(), Thin ? 1 : 0,
+                *Controller->GardenOutlineReason, *Controller->FocusActions()));
+        return Passed;
+    };
+    const auto PlotCount = MakeShared<int32>(0);
+    Add(TEXT("Number five selects the Hoe; a green outline marks the forward square without tilling it"),
+        [this, PlotCount]() { *PlotCount = Controller->State().plots.size(); Tap(EKeys::Five); },
+        [this, TillX, TillY, PlotCount, OutlineIs]()
+        {
+            return Controller->SelectedHotbarIndex() == 4 && OutlineIs(*TillX, *TillY, true)
+                && static_cast<int32>(Controller->State().plots.size()) == *PlotCount;
+        }, 0.7f);
+    Add(TEXT("Capture the hoe's green garden outline"),
+        [this]() { Screenshot(TEXT("garden-outline-hoe-valid")); },
+        [this, TillX, TillY, OutlineIs]() { return OutlineIs(*TillX, *TillY, true); }, 0.5f);
+    Add(TEXT("Left click tills the outlined forward cell with the selected Hoe"),
+        [this]() { Tap(EKeys::LeftMouseButton); },
         [this, TillX, TillY]()
         {
             return Controller->SelectedHotbarIndex() == 4
@@ -720,6 +756,46 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         }, 4.0f);
     // The MetaHuman heroine tills when the hoe bites, partway through its swing.
     Steps.Last().bCompleteWhenReady = true;
+    // A tilled plot soon grows a few weeds (so the hoe there is green: it would weed), so the hoe's red
+    // proof faces a nearby square the till refuses outright: a building, a resource or overgrowth.
+    const auto BlockedX = MakeShared<int32>(0);
+    const auto BlockedY = MakeShared<int32>(0);
+    Add(TEXT("Face a nearby square the hoe refuses; its outline turns red with the refusal"),
+        [this, TillX, TillY, BlockedX, BlockedY]()
+        {
+            const auto& Sim = Controller->Simulation();
+            bool Found = false;
+            for (int32 Ring = 1; Ring <= 24 && !Found; ++Ring)
+                for (int32 Y = *TillY - Ring; Y <= *TillY + Ring && !Found; ++Y)
+                    for (int32 X = *TillX - Ring; X <= *TillX + Ring && !Found; ++X)
+                    {
+                        if (FMath::Max(FMath::Abs(X - *TillX), FMath::Abs(Y - *TillY)) != Ring) continue;
+                        const auto Center = Homestead::GardenCellCenter(X, Y);
+                        const Homestead::Point Position{Center.x - Homestead::GardenCellSize, Center.y};
+                        int AheadX = 0, AheadY = 0;
+                        Homestead::HoeCellAhead(Position, 1.0, 0.0, AheadX, AheadY);
+                        if (AheadX != X || AheadY != Y) continue;
+                        if (std::any_of(Sim.GetState().plots.begin(), Sim.GetState().plots.end(),
+                                [X, Y](const auto& Plot) { return Plot.cellX == X && Plot.cellY == Y; })) continue;
+                        const auto Check = Sim.CheckTill(X, Y, Position);
+                        const FString Message = UTF8_TO_TCHAR(Check.message.c_str());
+                        if (Check.ok || Message.StartsWith(TEXT("Move closer")) || Message.Contains(TEXT("tired"))) continue;
+                        *BlockedX = X; *BlockedY = Y; Found = true;
+                        Teleport(Position);
+                        Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
+                    }
+            if (!Found) Finish(false, TEXT("No nearby square refuses the hoe."));
+        },
+        [this, BlockedX, BlockedY, OutlineIs]() { return Controller->SelectedHotbarIndex() == 4
+            && OutlineIs(*BlockedX, *BlockedY, false); }, 1.0f);
+    Add(TEXT("Capture the hoe's red garden outline"),
+        [this, BlockedX, BlockedY]()
+        {
+            Results.Add(FString::Printf(TEXT("GARDEN_OUTLINE_HOE_RED cell=%d:%d reason='%s' focus='%s'"), *BlockedX, *BlockedY,
+                *Controller->GardenOutlineReason, *Controller->FocusActions()));
+            Screenshot(TEXT("garden-outline-hoe-invalid"));
+        },
+        [this, BlockedX, BlockedY, OutlineIs]() { return OutlineIs(*BlockedX, *BlockedY, false); }, 0.5f);
     Add(TEXT("CONTROLLED seeds and water prepare one existing plot for selected-tool proof"),
         [this, TillX, TillY]()
         {
@@ -745,8 +821,15 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 [TillX, TillY](const auto& Plot)
                 { return Plot.cellX == *TillX && Plot.cellY == *TillY && Plot.planted; }); }, 4.0f);
     Steps.Last().bCompleteWhenReady = true;
+    Add(TEXT("Number six selects the Watering Can; the focused dry plot is outlined green"),
+        [this]() { Tap(EKeys::Six); },
+        [this, TillX, TillY, OutlineIs]() { return Controller->SelectedHotbarIndex() == 5
+            && OutlineIs(*TillX, *TillY, true); }, 0.7f);
+    Add(TEXT("Capture the pail's green garden outline"),
+        [this]() { Screenshot(TEXT("garden-outline-pail-valid")); },
+        [this, TillX, TillY, OutlineIs]() { return OutlineIs(*TillX, *TillY, true); }, 0.5f);
     Add(TEXT("Controller right trigger with selected Watering Can waters the crop once"),
-        [this]() { Tap(EKeys::Six); Tap(EKeys::Gamepad_RightTrigger); },
+        [this]() { Tap(EKeys::Gamepad_RightTrigger); },
         [this, TillX, TillY]() { const auto Plot = std::find_if(
                 Controller->State().plots.begin(), Controller->State().plots.end(),
                 [TillX, TillY](const auto& Value)
@@ -754,6 +837,26 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             return Controller->SelectedHotbarIndex() == 5
                 && Plot != Controller->State().plots.end() && Plot->moisture > 0; }, 4.0f);
     Steps.Last().bCompleteWhenReady = true;
+    // Watered soil dries a little every game minute, so the pail's lasting refusal is an empty pail.
+    Add(TEXT("CONTROLLED emptying the pail turns its outline red with the empty-pail refusal"),
+        [this]()
+        {
+            Homestead::Simulation Drained = Controller->Simulation();
+            auto& State = const_cast<Homestead::State&>(Drained.GetState());
+            State.inventory[static_cast<int32>(Item::Water)] = 0;
+            State.inventoryLayout.erase(std::remove_if(State.inventoryLayout.begin(), State.inventoryLayout.end(),
+                [](const auto& Entry) { return Entry.item == Item::Water && Entry.wearableId == 0; }),
+                State.inventoryLayout.end());
+            Homestead::PackRowRules::Prune(State.packRow, State.inventoryLayout);
+            const auto Result = Controller->Sim.Deserialize(Drained.Serialize());
+            if (!Result) Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
+        },
+        [this, TillX, TillY, OutlineIs]() { return Controller->Simulation().Count(Item::Water) == 0
+            && OutlineIs(*TillX, *TillY, false)
+            && Controller->GardenOutlineReason.Contains(TEXT("pail is empty")); }, 1.0f);
+    Add(TEXT("Capture the pail's red garden outline"),
+        [this]() { Screenshot(TEXT("garden-outline-pail-invalid")); },
+        [this, TillX, TillY, OutlineIs]() { return OutlineIs(*TillX, *TillY, false); }, 0.5f);
     Add(TEXT("CONTROLLED dropping the only Billhook removes its icon and held prop"),
         [this, BillhookDropId]()
         {

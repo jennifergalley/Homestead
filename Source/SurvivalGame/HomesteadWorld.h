@@ -207,6 +207,7 @@ public:
 private:
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
+    friend class AHomesteadGardenProbe;
     static constexpr int32 ActiveMatureTreeMinLOD = 1;
     // The tree being felled or falling, as world-space parts pivoting about its base.
     UPROPERTY() TArray<TObjectPtr<USceneComponent>> FallingParts;
