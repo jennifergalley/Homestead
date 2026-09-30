@@ -802,7 +802,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && !Controller->ToastIsError(); });
 
     // Each rest starts at 22:45, so the bed sleeps her the full eight hours to first light (6:45).
-    // The skipped evening is not simulated; the day-two rain is simulated explicitly before rest 4.
+    // The skipped evening is not simulated; a scheduled rainy day is simulated before rest 4.
     for (int32 Rest = 0; Rest < 6; ++Rest)
     {
         if (Rest == 2) QueueEat(Homestead::Item::RoastedRoots);
@@ -813,11 +813,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         const auto BeforeFuel = MakeShared<double>(0);
         const auto ExpectedSleep = MakeShared<double>(8);
         if (Rest == 3)
-            Add(TEXT("Day-two rain replenishes both crops' soil"),
+            Add(TEXT("Rain replenishes both crops' soil"),
                 [this, Home]()
                 {
                     do Controller->Sim.SkipToHourOfDay(9.0);
-                    while (static_cast<int64>(Controller->State().hour / 24.0) % 3 != 1);
+                    while (!Homestead::IsRainDay(Controller->State().hour));
                     Controller->Sim.AdvanceGameHours(6.0, Home);
                 },
                 [this, BerryPlotId]()
