@@ -82,11 +82,11 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current slot / build snapshot (2026-09-29 16:54):** `main` is `1d1eebb5`; the Integration Agent
-owns editor/UAT for the Props food pair, build/PIE, then the copied-save packaged scratch run. Props is
-actively stacking food plus Bramble work and must not rebase mid-edit or duplicate food. Water/Menu
-paused partial branches rebase only at clean committed checkpoints before their next edit. The
-orchestrator continues to enforce the three-hands-on and two-Unreal-process caps.
+**Current slot / package snapshot (2026-09-29 17:10):** Integration is packaging `main` `a2607437`
+(Props food pair included) and owns machine-wide UAT plus packaged suites; all other lanes keep Unreal,
+UBT and Blender off until `packaging done`. This package excludes partial bramble/sapling/under-tier,
+Menu pickup/pail gauge/store card, and Water no-pail prompt/lake trail/night-light work. The
+orchestrator continues to enforce the three-hands-on and two-Unreal-process caps after release.
 
 ## 4 PM playable build
 
@@ -284,6 +284,25 @@ after the north-west lake; town-entry/store acceptance, coordinate bridge, roads
 signs wait for the final road route. If the terrain or water work needs placement ids, the Water Agent
 claims them through this page before using them (the registry starts at 581000+).
 
+### Forage placement ID freeze blocker
+
+**Current saves are not corrupt; this blocks future forage/terrain/road rebakes and merges.**
+`forage.py` compactly enumerates accepted new-Estate brambles, then Roots `582128+`, then successful
+roadside stops `581000+`; its accepted brambles/roots span `582100+`. A future newly rejected
+candidate would shift many later IDs, causing old harvested/cleared `ResourceEdit`s to attach to the
+wrong kind or position despite `bakeVersion=2`. Water must preserve the committed id -> kind ->
+position mapping for every existing `581000+` and `582100+` node, reserve per candidate with holes,
+allocate additions only as new IDs, and prove old-save cleared/harvested mapping through a
+save-regeneration regression before the machine permits another forage/terrain/road rebake.
+
+**Water headless partial `1010aa2e`:** a pure-Python allocator freezes committed `.inc` rows,
+rejects missing/malformed/duplicate/out-of-range entries, separates Estate/roadside reserved IDs
+including gaps and retirement, and produces byte-identical current scratch output. Synthetic Python
+tests pass 7/7; native `PublicRoad` passes 10/10 with all 59 frozen rows at id/kind/position 0.5 mm
+and saved picked `582100` / `582128` / `581005` reload coverage. It changes no save version or current
+save. Integration may cherry-pick only after the active UAT package; until then the rebake/merge block
+remains in force and this is not shipped.
+
 **Packaged lake pail regression:** the diagnosis is inconclusive; do not make a speculative shore-range
 change. The shipped probe accepts lake shore <=120 cm, and PIE filled at landing (-79, -744) using an
 emptied carried pail. Current world focus misleadingly offers `[A] Fill carried Pail` even with no
@@ -318,16 +337,31 @@ The native cases cover 0/1/6/7/1200, 0/1/2 pails and round-trip nine. Cherry-pic
 compile plus PIE gauge refill/water/chest/drop/F5/F9 and the copied-save packaged pail repro. The
 misleading fill prompt is unchanged.
 
+**Water pail-prompt partial `20dd9cd1`:** native 10/10, no UE or delivery claim. `FocusActions`
+shows carried empty fill / full pail full / chest pail take it / no pail requires one, and
+`FillWater` distinguishes in-chest, none, far-from-freshwater and full without changing mechanics,
+save or reach. The branch is synced through merge `4dcd3898` (lake trail preserved; `beach_belt`
+untracked).
+
+Before Integration can cherry-pick, replace Water's proposed EmptyPailText with Jenny's exact:
+`The pail is empty. Fill it at a body of water`. Far refusal may clarify river/lake, but no-pail
+focus also needs PIE coverage. This remains a pending text correction, not shipped.
+
+**Corrected pail-prompt pair:** `069e493a` atop `20dd9cd1` now has the exact EmptyPailText and
+native 10/10; far refusal remains truthful about river/lake and excludes sea. It is still partial:
+no UE/PIE, not in package `a2607437`, and Integration must cherry-pick only this pair after packaging
+(not Water's unrelated night/lake-trail work).
+
 **Turnip planting regression:** Menu input is main-integrated in `1d1eebb5` and the copied-save PIE
 checkpoint passed three distinct Turnip sows, then a named no-seed fourth attempt, with sow/water state
 surviving F5/F9. Keep the copied-save **packaged** run as the remaining core-loop gate.
 
-**Food and Cooking Kindling partial:** **Props branch
-`jennifergalley-food-kindling` off `a785a417`, native Release 9/9, not built/PIE/shipped.** `CanEat`
-now permits a full-Food/low-Energy benefit while both-full refuses. RoastedRoots uses 2 Roots + 1
-Kindling; HerbedRoots uses 2 Roots + 1 MeadowHerb + 1 Kindling, at a lit Hearth/fire through canonical
-`CraftChange` / requirements / `AssessRecipe`. One Kindling debits only for a successful cooked batch,
-never for failed/canceled recipes, other crafts or fire fuel.
+**Food and Cooking Kindling:** **main-integrated/package-pending in `a2607437`, not shipped.**
+Props' branch was native Release 9/9 before merge. `CanEat` now permits a full-Food/low-Energy benefit
+while both-full refuses. RoastedRoots uses 2 Roots + 1 Kindling; HerbedRoots uses 2 Roots + 1
+MeadowHerb + 1 Kindling, at a lit Hearth/fire through canonical `CraftChange` / requirements /
+`AssessRecipe`. One Kindling debits only for a successful cooked batch, never for failed/canceled
+recipes, other crafts or fire fuel.
 
 Branches hand-gather as 5 Branch + 1 renewable Kindling (24-hour regrow); source text is `Fallen
 branches, saplings and old boughs`. Native coverage includes failures, no stock, fire, Energy, v12
@@ -491,9 +525,16 @@ sprint-specific Energy cost; this supersedes both current 0.35/real-second behav
 Refuse the sprint toggle at Energy <=10 and turn it off if other work/time reaches that threshold; do
 not auto-resume after recovery.
 
-Props implements this in an isolated slice after urgent Hoe work. Native tests cover 30/60/120 day
-lengths; PIE covers road sprint, clearing and farming. Starter food and abundant berry requests remain
-pending, so this does not claim early Energy is fully solved.
+**Props partial `7475b435`:** native 9/9 on `jennifergalley-sprint-zero`, based on `4b8d6edd` and
+cleanly merging `main` `4463086d`, not built/PIE/packaged or shipped. It removes the 0.35/s charge,
+uses `Sim.CanSprint(Energy > 10)`, toggles off at <=10 with no auto-resume, and leaves speed/awake
+drain unchanged. Native coverage spans 30/60/120 FPS and day lengths, floor/refeeding/work/reload, plus
+Hotbar/Creek/Visual routes. Integration's UAT lock on `a2607437` remains ahead of UE validation.
+
+The bramble-on-food `42a63b8f` conflict is separate from sprint; Props rebases it only after the
+package and Integration confirmation. Props' next headless slice is a separate `NoHoeMessage`
+chest/drop blade-location hint. Starter food and abundant berry requests remain pending, so this does
+not claim early Energy is fully solved.
 - **Live sound sliders** — **symptom investigation pending, not shipped.** Mouse drag already calls
   `MenuPreviewAudioVolume` live through `SSlider.OnValueChanged`, then release writes INI; d-pad steps
   preview and persist. Jenny's symptom may instead be effects without a continuous audible source,
@@ -559,11 +600,17 @@ pending, so this does not claim early Energy is fully solved.
   200 cm-radius swing probe: a dead-ahead 285 cm cane can be in Simulation reach but show no prompt or
   swing target, while a nearer weed/grass steals focus.
 
-  After the core hoe/pail test, Props' next code slot makes targeting forward-biased at 300 cm and
-  arbitrates competing weeds. Integration verifies isolated copied-save PIE at 285 cm, an overlapping
-  weed and F5/F9; RT/LMB with worn billhook should clear 2–3 canes in one swing, while bare A/E cannot.
-  World mesh removal/save edits already should work. Add spring leaf-out or an appropriate cue and
-  resolve any missing prompt; this remains a plausible cause, not proof for Jenny's pictured cane.
+  **Props headless partial:** `bcf29b85` makes aim focus and swing share a forward-biased 300 cm
+  tool-kind target; `649336f4` makes worn Sapling one logical clear with two physical blows; and
+  `bccb9310` refuses under-tier targets without animation or SFX. Native 9/9 covers an aimed 285 cm
+  cane versus nearer weed/grass, behind/301 cm refusal, scythe choosing weed, gated iron thicket,
+  save, and one worn-Sapling 3–4 Branch + 1 Kindling / 1.5 Energy yield once through reload.
+
+  Food's test hunk conflicts with a naive cherry-pick, so Props supplied pre-resolved
+  food+bramble `42a63b8f`, native 9/9 with a dry-run clean merge on `main` `77ff5837`; Integration
+  must avoid duplicate food commits if they are already on main. Required before `[ready]`: PIE at
+  285 cm, a two-blow/one-logical sapling, silent under-tier refusal and F5/F9. This remains a plausible
+  cause, not proof for Jenny's pictured cane.
 - **Manor rubble** — **`53fe97d5` → `9ecb08ad` shipped in the 4 PM playable build.** Clearable
   slate heaps and granite/hall cobbles use reserved placement
   IDs `582000–582099`. Integration's PIE cleared slate `582001` with E/A (pack 102 → 104, mesh gone);
@@ -583,6 +630,12 @@ pending, so this does not claim early Energy is fully solved.
   `520001` billhook then `520002` hoe, crafting/tilling, and F5/F9 search flags. Native 9/9 covers
   reward order and old saves. Honest old-save PIE has not separately run; Integration's copied-save
   packaged core-loop test remains the gate.
+
+  **Props hint partial `391f08f7`:** native Release 9/9, clean off `afe57121`, no UE/PIE or delivery
+  claim. `NoHoeMessage` now searches owned Hoe/HoeBlade in pack, chest and ground before salvage-rack
+  guidance, giving the nearer location, distance and action; old-save chest blade/rack-absent cases are
+  native-covered. Till refusal state, save and quantities stay unchanged. It is excluded from package
+  `a2607437`; Editor compile and PIE still gate it.
 - **Energy and food balance** — **Calendar Agent** (lane A, task 1.3): the chosen direction is one
   visible **Energy** meter later, rather than a visible hunger-plus-energy pair. Keep serialized hunger
   compatibility; revise gentle-hunger penalties into energy/food balance and modest **Well Fed** meals.
@@ -625,7 +678,8 @@ pending, so this does not claim early Energy is fully solved.
   retired Fiber text is also stale). Props replaces it with **4 Branch + 4 Hay**: the same eight units,
   with Hay from TallGrass using a worn scythe at 1–2 per tuft and no iron-tier upgrade. Existing built
   beds plus v12/v13 saves, Piece IDs and Item IDs stay unchanged; other cane recipes stay unchanged.
-  Update the canonical progression doc only after the code lands.
+  Props now holds a headless separate Bedroll slice for the change, with native proof required before
+  UE compile/PIE. Update the canonical progression doc only after the code lands.
 - **Starter rack placement save safety** — **Props urgent implementation guard; not shipped.** A new
   rack at placement ID `520006` must append after every existing placement section, not insert into an
   earlier numeric range and renumber later `550xxx` saved resources. Before `[ready]`, require a
@@ -797,6 +851,13 @@ pending, so this does not claim early Energy is fully solved.
   so travel needs a separate explicit confirmation. The signs and map invoke the same action.
   **Water** owns the generated runtime route and endpoints, **Architecture** the read-only trace,
   **Props** the original signs and **Menu** the shared travel/map UI; signs are still not wired.
+
+  **Store Map card partial `1b2b97eb`:** native 9/9 (economy 15 / scenario 588), no UE build/PIE or
+  delivery claim. Within 15 m of counter/step and 45 m of town square, Town/Store cards say already
+  there/in town rather than offering fake `X walk there 23 min`; T/X/click changes neither clock nor
+  state. Manor travel from store remains available; street/gateway Town travel remains. Cherry-pick
+  only this commit - not Menu's whole synced branch `d171526d` with unrelated partial dye/Appearance,
+  pickup and pail work. It is excluded from package `a2607437`.
 - **Wait for opening** — **Menu `88180744` shipped in the 4 PM playable build.** At a
   closed 19:00 store, B cancels with no time change; then A+A advances to the next 08:00 and returns
   Pascoe's Talk interaction. Follow-on `643a857a` rejects a candidate that would doze during

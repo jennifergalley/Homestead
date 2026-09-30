@@ -81,7 +81,7 @@ constexpr ItemInfo ItemCatalogue[] = {
     {Item::BrambleCanes, "bramble-canes", "Bramble canes", "Long, prickly canes, stripped for wattle and lashing.",
         ItemCategory::Material, "bramble-canes", 3, NoBuyers, 0.0, 0.0, "Bramble, with the billhook"},
     {Item::Kindling, "kindling", "Kindling", "Dry twigs and splinters for starting a fire.",
-        ItemCategory::Material, "kindling", 3, StoreBuys, 0.0, 0.0, "Saplings and fallen boughs"},
+        ItemCategory::Material, "kindling", 3, StoreBuys, 0.0, 0.0, "Fallen branches, saplings and old boughs"},
     {Item::ScrapIron, "scrap-iron", "Scrap iron", "Rusted nails, hinges and hoops. The smith and the rag-and-bone men buy it.",
         ItemCategory::Salvage, "scrap-iron", 25, StoreBuys, 0.0, 0.0, "Rubble, with the pickaxe, and salvage piles"},
     {Item::ScrapLead, "scrap-lead", "Scrap lead", "Old roof flashing and pipe from the ruin, worth more than iron.",
