@@ -3,6 +3,7 @@
 #include "HomesteadEstate.h"
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
+#include "HomesteadRuinDebris.h"
 #include "HomesteadSimulation.h"
 
 #include <algorithm>
@@ -257,18 +258,27 @@ void BuildingInsideTheRooflessHall()
     const Point bedSpot = ManorPoint(2000.0, 1500.0);
     OK(sim.CheckPlacement(sim.ResolvePlacement(Piece::Bed, bedSpot, 90.0, 0), bedSpot));
 
-    // Refused: the door's corridor, a foundation reaching the rear wall or the cross wall, the west
-    // rooms, and the old house's own grid run out into the hall.
-    for (const Point& spot : {ManorPoint(2100.0, 350.0), ManorPoint(2100.0, 1600.0), ManorPoint(1900.0, 1300.0),
+    // Refused: a 3 m foundation of a new building over the door's corridor, reaching the rear wall or the
+    // cross wall, or in the west rooms (asked of the rule itself: the planner would snap a nearby aim onto
+    // her placed floor's grid instead).
+    PlacementTarget fresh;
+    fresh.kind = Piece::Foundation;
+    fresh.buildingId = -1;
+    for (const Point& spot : {ManorPoint(2100.0, 350.0), ManorPoint(2100.0, 1600.0), ManorPoint(1850.0, 1300.0),
              ManorPoint(1000.0, 1000.0)})
-    {
-        const auto refused = sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, spot, 0.0, 0), spot);
-        CHECK(!refused && refused.message == Manor::FootprintBlocked);
-    }
+        CHECK(Manor::BlockedByManor(sim.GetState(), layout, fresh, Footprint{spot, {150.0, 150.0}, 0.0}));
+    CHECK(!Manor::BlockedByManor(sim.GetState(), layout, fresh, Footprint{ManorPoint(2300.0, 1200.0), {150.0, 150.0}, 0.0}));
     const int room = Manor::HeritageBuildingId(sim.GetState());
-    // Where the fallen roof timbers lie: ruin scenery, or clearable debris once that lands; either way refused.
+    // Where the hall's fallen roof timbers lie: while they are ruin scenery the safe hall keeps off them;
+    // as clearable debris (582012) they refuse building until she chops them up, then it's hall floor.
     const Point timbers = ManorPoint(Manor::HallTimbersU, Manor::HallTimbersV);
-    CHECK(!sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, timbers, 0.0, 0), timbers));
+    if (RuinDebris::Replaces("RuinFallenTimbers", Manor::HallTimbersU, Manor::HallTimbersV))
+    {
+        CHECK(Manor::InSafeHall(layout, timbers));
+        Simulation untouched = NewEstate();
+        CHECK(!untouched.CheckPlacement(untouched.ResolvePlacement(Piece::Foundation, timbers, 0.0, 0), timbers));
+    }
+    else CHECK(!sim.CheckPlacement(sim.ResolvePlacement(Piece::Foundation, timbers, 0.0, 0), timbers));
     // The standing room's own grid (code review 0930b): extended south or east it lies outside the ruin
     // and is hers to build on as before; extended north into the hall it follows the same safe hall.
     const Building* roomFrame = FindBuilding(sim.GetState(), room);

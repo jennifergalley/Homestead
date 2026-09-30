@@ -42,7 +42,7 @@ const FButtonStyle& ShopButtonStyle()
     return Style;
 }
 FString Utf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
-FString Money(int64 Coins) { return Utf8(Homestead::FormatMoney(Coins).c_str()); }
+FString Money(int64 Amount) { return Utf8(Homestead::FormatMoney(Amount).c_str()); }
 }
 
 void SHomesteadShop::Construct(const FArguments& Args)
