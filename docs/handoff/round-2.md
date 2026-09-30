@@ -139,32 +139,32 @@ not sufficient; validate before a package.
 
 **Jenny direct decision (2026-09-29 20:34):** split
 `Controller.cpp`, `World.cpp`, `Character.cpp` and `UI/SHomesteadMenu.cpp` overnight ASAP. This
-supersedes the earlier EHandAction-first plan. Architecture has a read-only inventory now. It may
-pure-move `Controller` / `World` / `Menu` concurrently without UBT; `Character` waits until Props'
-hair empirical pass/checkpoint and Integration's hair commit.
+supersedes the earlier EHandAction-first plan. Architecture now has all four source-only checkpoints;
+no native/Editor/Game/unity compile has run and nothing is ready or shipped.
 
 Menu and Water pause edits to those four files. Architecture stops on clean per-feature pure-move
 commits with verification; Integration reserves sequential merge, native and Editor/Game build after
 the hair checkpoint. Hair retains priority for the visual fix; hotbar and garden work remain paused.
 
-**Controller source-only checkpoint `7fbd3bff`:** based on `main` `4d16bded`,
+**Controller source-only checkpoint `7fbd3bff` + `2354d801` + `944c8d97`:**
 `HomesteadController.cpp` moves from 4,778 to 579 lines through 16 per-feature `.cpp` files and small
-named helper headers. All 185/185 member-definition bodies are byte-identical after newline
-normalization; `git diff --cached --check` is clean. **World source-only checkpoint `cc20cee5`** moves
-`HomesteadWorld.cpp` from 4,962 to about 188 lines with 71/71 bodies; **Menu source-only checkpoint
-`801c0329`** moves `UI/SHomesteadMenu.cpp` from 3,206 to about 270 lines with 96/96 bodies. All are
-diff-check clean but have **no native/Editor/Game compile** while Props owns editor/UBT. They are
-partial and unshipped.
+named helper headers, 185/185 bodies. **World `cc20cee5` + `e7b7101b` + `2594e868`:**
+`HomesteadWorld.cpp` moves from 4,962 to about 188 lines, 71/71 bodies. **Menu `801c0329`:**
+`UI/SHomesteadMenu.cpp` moves from 3,206 to about 270 lines, 96/96 bodies. **Character
+`5811cb9` + `20dd44f3`:** cherry-picks hair fix `95f4bfc3`, moves `HomesteadCharacter.cpp` from
+2,833 to 173 lines, 92/92 bodies, and keeps `LoadMetaHumanStack` / `ApplyMetaHumanLook` /
+`UpdateHairMotion` at the exact hair-fix baseline, including one `LogHomesteadHair` and two
+`ResetSimulation` calls. All body-identity/diff checks are clean but there is **no native/Editor/Game
+compile**; all four are partial and unshipped.
 
 Static-linkage followups are also source-only: Controller `2354d801` adds Map/Capsule includes; World
 `e7b7101b` adds the Weather include and qualifies `Cloth` to avoid a Unity name collision with
 `HomesteadGeneralStore`. Body-identity checks remain intact.
 
-Controller/World/Menu remain Architecture's source lock. Props released Character after the hair build;
-Architecture now has the fourth pure-move Character source slot. Integration owns the exact copied-save
-hair preview first, then after its editor closes cherry-picks and verifies Controller/World/Menu/
-Character sequentially (native Release plus Editor/Game unity), returning a base SHA between commits
-before advancing.
+Controller/World/Menu/Character remain Architecture's source lock. Integration owns the exact
+copied-save hair preview first; its result is still inconclusive. Then, after its editor closes,
+Integration cherry-picks and verifies Controller -> World -> Menu -> Character sequentially (native
+Release plus Editor/Game unity), returning a base SHA between commits before advancing.
 
 ### Development firewall prompts / offline Shipping candidate
 
