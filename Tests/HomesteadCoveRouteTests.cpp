@@ -155,6 +155,63 @@ int main()
     for (const CoveRouteLanding& l : route.landings) Check(l.length >= CoveRouteMinLandingCm, "landings at least 1.2 m", l.length);
     Check(route.Steps() >= 100, "steps down the valley side", route.Steps());
 
+    // No path runs beside or under a flight's treads (review, 2026-09-30: the path from the bench steps' foot
+    // doubled back under them): every path station stays outside each flight's footprint plus the path's
+    // own clear half-width, except where it meets the flight at its foot or head.
+    for (const CoveRouteStation& s : route.stations)
+    {
+        if (s.onSteps) continue;
+        for (const CoveRouteFlight& f : route.flights)
+        {
+            const double a = f.yaw * Pi / 180.0;
+            const double dx = s.position.x - f.start.x, dy = s.position.y - f.start.y;
+            const double along = dx * std::cos(a) + dy * std::sin(a);
+            const double across = -dx * std::sin(a) + dy * std::cos(a);
+            const bool beside = along > 5.0 && along < f.treads * f.going - 5.0;
+            Check(!beside || std::fabs(across) >= 0.5 * (CoveRouteTreadWidthCm + CoveRouteClearWidthCm),
+                  "no path beside or under a flight", s.metres);
+        }
+    }
+
+    // The graded heightfield itself (not just the design): the path's ground is its walking surface, level
+    // across and within the grade along; under the steps it stays clear of every tread.
+    Check(route.ground.size() == route.stations.size(), "graded ground sampled at every station",
+          static_cast<double>(route.ground.size()));
+    if (route.ground.size() == route.stations.size())
+    {
+        for (size_t i = 0; i < route.stations.size(); ++i)
+        {
+            const CoveRouteStation& s = route.stations[i];
+            const CoveRouteGround& g = route.ground[i];
+            Check(std::fabs(g.metres - s.metres) < 0.01, "ground samples in step with the stations", s.metres);
+            if (s.onSteps)
+            {
+                // 1/128 m heightfield steps: at least 4 cm under the tread top on the centreline and at its edges.
+                Check(std::max({g.leftZ, g.centreZ, g.rightZ}) <= s.walkZ - 4.0, "the graded ground clear of the treads", s.metres);
+                continue;
+            }
+            const bool nearSteps = (i > 0 && route.stations[i - 1].onSteps) || (i + 1 < route.stations.size() && route.stations[i + 1].onSteps);
+            if (nearSteps) continue;      // the foot or head of a flight: the ground meets its bottom riser
+            Check(g.centreZ <= s.walkZ + 3.0, "the path not buried", g.centreZ - s.walkZ);
+            Check(g.centreZ >= s.walkZ - 10.0, "the path not sunk", g.centreZ - s.walkZ);
+            const double across = std::max(std::fabs(g.leftZ - g.centreZ), std::fabs(g.rightZ - g.centreZ));
+            Check(across <= 0.25 * CoveRouteGroundSampleCm, "the path level across (1 in 4 at most)", across);
+        }
+        for (size_t i = 0; i < route.stations.size(); ++i)
+        {
+            size_t j = i + 1;
+            while (j < route.stations.size() && route.stations[j].metres - route.stations[i].metres < 2.0) ++j;
+            if (j >= route.stations.size()) break;
+            bool path = true;
+            for (size_t k = (i > 0 ? i - 1 : i); k <= std::min(j + 1, route.stations.size() - 1); ++k)
+                path = path && !route.stations[k].onSteps;
+            if (!path) continue;
+            const double grade = std::fabs(route.ground[j].centreZ - route.ground[i].centreZ)
+                / ((route.stations[j].metres - route.stations[i].metres) * 100.0);
+            Check(grade <= CoveRouteMaxPathGrade + 0.02, "the graded path within 1 in 7", grade);
+        }
+    }
+
     // Kerbs and rails stand outside the 1.4 m clear width, on the path.
     for (const CoveRouteKerb& k : route.kerbs)
     {

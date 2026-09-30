@@ -68,6 +68,16 @@ struct CoveRouteRail
     bool mirrored = false;
 };
 
+// The graded heightfield under a station (cove_route.py reads it back from the r16 it cut): on the centreline
+// and CoveRouteGroundSampleCm either side (left and right looking along the route).
+struct CoveRouteGround
+{
+    double metres = 0.0;
+    double leftZ = 0.0;
+    double centreZ = 0.0;
+    double rightZ = 0.0;
+};
+
 // "To the Cove": pivot at the post's foot; the arm points along yaw.
 struct CoveRouteFingerpost
 {
@@ -79,6 +89,7 @@ struct CoveRouteFingerpost
 struct CoveRoute
 {
     std::vector<CoveRouteStation> stations;
+    std::vector<CoveRouteGround> ground;      // one per station, in step
     std::vector<CoveRouteFlight> flights;
     std::vector<CoveRouteLanding> landings;
     std::vector<CoveRouteKerb> kerbs;
@@ -106,6 +117,8 @@ constexpr double CoveRouteMaxGoingCm = 35.0;
 constexpr int CoveRouteMaxRisers = 12;
 constexpr double CoveRouteMinLandingCm = 120.0;
 constexpr double CoveRouteClearWidthCm = 140.0;
+constexpr double CoveRouteTreadWidthCm = 150.0;
+constexpr double CoveRouteGroundSampleCm = 75.0;
 // The route's own limit: steeper than this is on steps.
 constexpr double CoveRouteMaxPathGrade = 1.0 / 7.0;
 }

@@ -56,7 +56,8 @@ DATA = os.path.join(HERE, "cove_route.json")     # the full design (generated; t
 SAVED = os.path.join(REPO, "Saved", "CoveRoute")
 SIZE, H = 4033, 2016
 
-# (x, y) metres (+X north, +Y east), and the kind of way that leaves the point toward the next one.
+# (x, y) metres (+X north, +Y east), the kind of way that leaves the point toward the next one, and optionally
+# "sharp": a path corner kept as it is (a path otherwise rounds its corners).
 CONTROL = [
     (-260.5, -654.5, "path"),     # outside the fallen front door on the ruin's south front
     (-280.0, -647.0, "path"),
@@ -75,7 +76,12 @@ CONTROL = [
     (-526.0, -533.0, "stairs"),
     (-536.0, -511.0, "path"),     # a bench above the valley floor
     (-524.0, -487.0, "stairs"),
-    (-521.0, -480.0, "path"),     # the valley floor, 7 m off the river
+    (-521.0, -480.0, "path"),     # the foot of the bench steps, on the valley floor
+    # The path runs straight on 1.2 m off the flight's foot, then 2.4 m out to the side, before doubling
+    # back, so it passes 3 m or more off the flight's axis with its rail between (review, 2026-09-30: it ran
+    # under the treads).
+    (-520.5, -478.9, "path", "sharp"),
+    (-522.7, -478.0, "path", "sharp"),
     (-538.0, -487.0, "stairs"),
     (-543.0, -492.0, "path"),     # the foot of the last steps, onto the sand
     (-556.0, -521.0, None),       # the sand at the head of the cove, west of the river mouth
@@ -99,8 +105,10 @@ KERB_OFFSET_M = CLEAR_HALF_M     # kerb pivot: the path-side top edge
 KERB_PROUD_M = 0.20
 RAIL_OFFSET_M = CLEAR_HALF_M + 0.10
 RAIL_BAY_M = (1.6, 1.8)
+MAX_BLOCKED_BAYS = 0.4          # of a leg's rail bays that may be left out where they'd stand in another leg's way
 RAIL_CLEAR_M = 0.0               # a rail stands outside another leg's clear width too
 TREAD_CLEARANCE_M = 0.05         # the ground stays at least this far under a tread's or landing's top
+CLEARANCE_MARGIN_M = 0.006       # ... plus this, for the r16's 1/128 m steps
 PATH_BED_HALF_M = 1.2            # heightfield cells set to the path's bed this far out
 STAIR_BED_HALF_M = 2.2           # ... and to the stairs' (a tread edge's bilinear cell reaches 0.75 + 1.42 m)
 VERGE_M = 2.5                    # then blended back to the ground
@@ -111,6 +119,7 @@ SIDE_PROBE_M = 2.0
 MIN_RUN_M = 3.0                  # kerb and rail runs shorter than this are dropped, gaps shorter bridged
 CLEAR_SCENERY_M = 2.4            # half width of the scatter cleared along the route
 STATION_M = 0.25
+GROUND_SAMPLE_M = TREAD_HALF_M   # the tests read the graded ground at the centre and this far either side
 CHAIKIN_PASSES = 3
 SMOOTH_GROUND_M = 1.5            # the heightfield's lumps the path's bed evens out
 
@@ -163,7 +172,10 @@ def pieces():
         if kind == "path":
             while j < len(CONTROL) - 1 and CONTROL[j][2] == "path":
                 j += 1
-            pts = chaikin([c[:2] for c in CONTROL[k:j + 1]], CHAIKIN_PASSES)
+            # Round the corners, except at "sharp" ones (each stretch between them is rounded on its own).
+            cut = [k] + [q for q in range(k + 1, j) if len(CONTROL[q]) > 3 and CONTROL[q][3] == "sharp"] + [j]
+            parts = [chaikin([c[:2] for c in CONTROL[a:b + 1]], CHAIKIN_PASSES) for a, b in zip(cut[:-1], cut[1:])]
+            pts = np.concatenate([parts[0]] + [q[1:] for q in parts[1:]])
         else:
             j = k + 1
             pts = np.array([CONTROL[k][:2], CONTROL[j][:2]], np.float64)
@@ -334,8 +346,10 @@ def design(runs, ground_fn):
                     if f0 - 1e-9 <= s <= f0 + n * gg + 1e-9:
                         k = min(int((s - f0) / gg), n - 1)
                         walk = fz + (k + 1) * rr                              # tread k's top
-                        line = fz + (s - f0) / gg * rr - rr - TREAD_CLEARANCE_M
-                        return walk, max(fz, line) if s - f0 < gg else line
+                        # The ground follows the line from the foot's level to the top's, TREAD_CLEARANCE_M
+                        # down: at each tread's back edge that's the clearance under its top, at its front
+                        # nosing one rise more (inside the block's 20 cm and 5 cm skirt).
+                        return walk, fz + (s - f0) / gg * rr - TREAD_CLEARANCE_M
                 elif item[0] - 1e-9 <= s <= item[1] + 1e-9:
                     return item[2], item[3]
             return (zf, zf) if s <= 0 else (zh, zh)
@@ -432,14 +446,24 @@ def edges(stations, flights, landings, runs, ground_fn):
         n = max(1, int(round(span / RAIL_BAY_M[1] + 0.49)))
         return n, span / n
 
+    walk_all = np.array([st[3] for st in stations])
+    leg_all = np.array([st[5] for st in stations])
+    every = cKDTree(xy)
+
     def flight_drop(f, sgn):
-        """How far the ground 2 m out on this side lies below the flight's nosing line (mean, m)."""
+        """How far the ground 2 m out on this side lies below the flight's nosing line (mean, m); a path of
+        another leg running alongside counts as the ground there (a hairpin at the flight's foot)."""
         lft, up = flight_frame(f)
         span = f["treads"] * f["going"]
         drops = []
         for u in (0.25, 0.5, 0.75):
             m = np.array([f["x"], f["y"]]) + up * span * u
-            drops.append(f["z"] + f["rise"] * f["treads"] * u - ground_fn(*(m + lft * sgn * (CLEAR_HALF_M + SIDE_PROBE_M))))
+            probe = m + lft * sgn * (CLEAR_HALF_M + SIDE_PROBE_M)
+            below = float(ground_fn(*probe))
+            for k in every.query_ball_point(probe, SIDE_PROBE_M):
+                if leg_all[k] != f["leg"]:
+                    below = min(below, float(walk_all[k]))
+            drops.append(f["z"] + f["rise"] * f["treads"] * u - below)
         return float(np.mean(drops))
 
     def flight_clashes(f, sgn, other):
@@ -453,30 +477,41 @@ def edges(stations, flights, landings, runs, ground_fn):
             out.append(d < CLEAR_HALF_M + RAIL_CLEAR_M)
         return out
 
-    # One rail side per stair leg, so it never swaps sides partway down: the side clear of the other legs
-    # (where the path doubles back at a flight's foot it takes the other side), then the bigger drop.
+    # Rails per stair leg, never swapping sides partway down: the side with the bigger drop (a lower path of
+    # another leg alongside counts), unless more than MAX_BLOCKED_BAYS of its bays would stand in another
+    # leg's clear width (those bays are left out; at a hairpin that's the one by the path's turn-off). The
+    # other side is railed too where it also drops more than RAIL_DROP_M.
     for leg in sorted({f["leg"] for f in flights}):
         mine = [f for f in flights if f["leg"] == leg]
         others = xy[np.array([st[5] != leg for st in stations])]
         other = cKDTree(others) if len(others) else None
-        score = {}
-        for sgn in (1.0, -1.0):
-            score[sgn] = (sum(sum(flight_clashes(f, sgn, other)) for f in mine), -sum(flight_drop(f, sgn) for f in mine))
-        sign = min((1.0, -1.0), key=lambda s: score[s])
+        bays = sum(flight_bays(f)[0] for f in mine)
+        blocked_share = {s: sum(sum(flight_clashes(f, s, other)) for f in mine) / bays for s in (1.0, -1.0)}
+        drop = {s: float(np.mean([flight_drop(f, s) for f in mine])) for s in (1.0, -1.0)}
+        # A side that falls away (past KERB_DROP_M) wins; between two that do, or two that don't (both cut
+        # into the slope), the one with fewer bays in another leg's way, then the bigger drop.
+        sign = min((1.0, -1.0), key=lambda s: (blocked_share[s] > MAX_BLOCKED_BAYS, drop[s] <= KERB_DROP_M,
+                                              blocked_share[s], -drop[s]))
+        sides = [sign]
+        if drop[-sign] > RAIL_DROP_M and blocked_share[-sign] <= MAX_BLOCKED_BAYS:
+            sides.append(-sign)
         for f in mine:
             lft, up = flight_frame(f)
             n, bay = flight_bays(f)
-            blocked = flight_clashes(f, sign, other)
             f["railSide"] = "left" if sign > 0 else "right"
-            f["sideDrop"] = max(flight_drop(f, 1.0), flight_drop(f, -1.0))
-            for q in range(n):
-                if blocked[q]:
-                    continue
-                base = np.array([f["x"], f["y"]]) + up * q * bay + lft * sign * RAIL_OFFSET_M
-                # Posts stand on the nosing line: the rail's pivot rises with the flight.
-                rails.append({"x": base[0], "y": base[1], "z": f["z"] + q * bay / f["going"] * f["rise"],
-                              "yaw": f["yaw"] % 360.0, "pitch": f["pitch"], "length": bay,
-                              "mirror": 0 if sign > 0 else 1})
+            f["railSides"] = ["left" if s > 0 else "right" for s in sides]
+            f["drops"] = [round(flight_drop(f, 1.0), 2), round(flight_drop(f, -1.0), 2)]
+            for rail_sign in sides:
+                blocked = flight_clashes(f, rail_sign, other)
+                for q in range(n):
+                    if blocked[q]:
+                        continue
+                    base = np.array([f["x"], f["y"]]) + up * q * bay + lft * rail_sign * RAIL_OFFSET_M
+                    # Posts stand on the nosing line: the rail's pivot rises with the flight.
+                    rails.append({"x": base[0], "y": base[1], "z": f["z"] + q * bay / f["going"] * f["rise"],
+                                  "yaw": f["yaw"] % 360.0, "pitch": f["pitch"], "length": bay,
+                                  "mirror": 0 if rail_sign > 0 else 1})
+
     def level_rail(p, q, z, drop_dir):
         """A level bay from p to q (plan, m) whose +Y faces drop_dir."""
         d = q - p
@@ -486,11 +521,9 @@ def edges(stations, flights, landings, runs, ground_fn):
         rails.append({"x": p[0], "y": p[1], "z": z, "yaw": yaw % 360.0, "pitch": 0.0,
                       "length": float(np.hypot(*d)), "mirror": 0})
 
-    for lnd in landings:
-        # Carry the flight's rail across the landing on the same side; on a corner landing only as far as the
-        # turn, then across to the next leg's rail (no gap to slip through, nothing in its clear width).
-        leg = [f for f in flights if f["leg"] == lnd["leg"]]
-        sign = 1.0 if leg and leg[0]["railSide"] == "left" else -1.0
+    def landing_rail(lnd, leg, sign):
+        """Carry a flight's rail across a landing on one side; on a corner landing only as far as the turn,
+        then across to the next leg's rail on that side (no gap to slip through, nothing in its clear width)."""
         yaw = math.radians(lnd["yaw"])
         up = np.array([math.cos(yaw), math.sin(yaw)])
         lft = np.array([-math.sin(yaw), math.cos(yaw)])
@@ -504,11 +537,19 @@ def edges(stations, flights, landings, runs, ground_fn):
             turn = base + up * span
             nxt = min((f for f in flights if f["leg"] != lnd["leg"]),
                       key=lambda f: math.hypot(f["x"] - turn[0], f["y"] - turn[1]))
-            if nxt["railSide"] == (leg[0]["railSide"] if leg else None):
+            if ("left" if sign > 0 else "right") in nxt["railSides"]:
                 ny = math.radians(nxt["yaw"])
                 nlft = np.array([-math.sin(ny), math.cos(ny)])
                 q = np.array([nxt["x"], nxt["y"]]) + nlft * sign * RAIL_OFFSET_M
                 level_rail(p1, q, lnd["z"], lft * sign)
+
+    for lnd in landings:
+        # Carry the flight's rail across the landing on the same side; on a corner landing only as far as the
+        # turn, then across to the next leg's rail (no gap to slip through, nothing in its clear width).
+        leg = [f for f in flights if f["leg"] == lnd["leg"]]
+        for side_name in (leg[0]["railSides"] if leg else ["right"]):
+            landing_rail(lnd, leg, 1.0 if side_name == "left" else -1.0)
+
     return kerbs, rails, s
 
 
@@ -565,10 +606,27 @@ def fingerposts(stations, runs, flights):
 
 
 # ---- heightfield grade ------------------------------------------------------------------------------
+def along_bed(xy, bed, leg, pts, i):
+    """The bed at each point's foot on the centreline: interpolated between the nearest station and the
+    neighbour on its side (the nearest station's own bed would step up to 7 cm on a flight's line)."""
+    n = len(bed)
+    out = bed[i].copy()
+    for step in (1, -1):
+        j = np.clip(i + step, 0, n - 1)
+        a, b = xy[i], xy[j]
+        ab = b - a
+        L2 = np.maximum((ab ** 2).sum(1), 1e-12)
+        u = ((pts - a) * ab).sum(1) / L2
+        use = (u > 0) & (j != i) & (leg[j] == leg[i])
+        out = np.where(use, bed[i] + np.clip(u, 0, 1) * (bed[j] - bed[i]), out)
+    return out
+
+
 def corridor_change(stations, z, layout):
     xy = np.array([(st[0], st[1]) for st in stations])
     bed = np.array([st[2] for st in stations])
     stair = np.array([st[4] == "stairs" for st in stations])
+    leg = np.array([st[5] for st in stations])
     flat = np.where(stair, STAIR_BED_HALF_M, PATH_BED_HALF_M)
     reach = STAIR_BED_HALF_M + VERGE_M
     x0, x1 = int(math.floor(xy[:, 0].min() - reach)), int(math.ceil(xy[:, 0].max() + reach))
@@ -580,6 +638,18 @@ def corridor_change(stations, z, layout):
     pts, d, i = pts[keep], d[keep], i[keep]
     t = np.clip((d - flat[i]) / VERGE_M, 0.0, 1.0)
     w = 1.0 - t * t * (3 - 2 * t)
+    target = along_bed(xy, bed, leg, pts, i)
+    # A path's own bed has priority over its flat width: where another leg's steps are nearer (a hairpin at a
+    # flight's foot), their higher bed would bury the path. Only lower it there (the treads keep their
+    # clearance), never raise it.
+    on_path = ~stair
+    if on_path.any():
+        path_idx = np.flatnonzero(on_path)
+        dp, ip = cKDTree(xy[on_path]).query(pts)
+        ip = path_idx[ip]
+        own = (dp <= PATH_BED_HALF_M) & (leg[ip] != leg[i])
+        target = np.where(own, np.minimum(target, along_bed(xy, bed, leg, pts, ip)), target)
+        w = np.where(own, 1.0, w)
     # Never into the river's channel.
     riv = np.asarray(layout["river"][:layout.get("riverEnd", len(layout["river"]))], np.float64)
     half = np.asarray(layout["riverHalfWidth"][:len(riv)], np.float64)
@@ -587,8 +657,45 @@ def corridor_change(stations, z, layout):
     w *= np.clip((dr - half[j] - RIVER_MARGIN_M) / 1.0, 0.0, 1.0)
     rows = (pts[:, 1] + H).astype(int)
     cols = (pts[:, 0] + H).astype(int)
-    change = (bed[i] - z[rows, cols]) * w
+    change = (target - z[rows, cols]) * w
     return rows, cols, change
+
+
+def clear_treads(z, stations):
+    """Lower just the heightfield vertices whose interpolated ground rises within TREAD_CLEARANCE_M of a tread
+    or landing top: across a flight's kinks (where it rises off a landing) the 1 m grid overshoots the cut line.
+    Each vertex goes down by the most any sample under the steps asks of it, repeated until none is short."""
+    pts, req = [], []
+    for st in stations:
+        if st[4] != "stairs":
+            continue
+        pts.append((st[0], st[1]))
+        req.append(st[3] - TREAD_CLEARANCE_M - CLEARANCE_MARGIN_M)
+    if not pts:
+        return 0.0
+    xy = np.array(pts)
+    hd = np.radians(headings(xy))
+    nrm = np.c_[-np.sin(hd), np.cos(hd)]
+    offsets = np.linspace(-TREAD_HALF_M, TREAD_HALF_M, 5)
+    P = np.concatenate([xy + nrm * o for o in offsets])
+    R = np.tile(np.array(req), len(offsets))
+    before = z.copy()
+    for _ in range(60):
+        c = P[:, 0] + H
+        r = P[:, 1] + H
+        c0, r0 = np.floor(c).astype(int), np.floor(r).astype(int)
+        fc, fr = c - c0, r - r0
+        corners = [(r0, c0, (1 - fr) * (1 - fc)), (r0, c0 + 1, (1 - fr) * fc),
+                   (r0 + 1, c0, fr * (1 - fc)), (r0 + 1, c0 + 1, fr * fc)]
+        g = sum(z[a, b] * w for a, b, w in corners)
+        excess = g - R
+        bad = excess > 0.001
+        if not bad.any():
+            break
+        norm = sum(w[bad] ** 2 for _, _, w in corners)
+        for a, b, w in corners:
+            np.minimum.at(z, (a[bad], b[bad]), z[a[bad], b[bad]] - w[bad] * excess[bad] / norm)
+    return float((before - z).max())
 
 
 # ---- scenery ----------------------------------------------------------------------------------------
@@ -660,6 +767,17 @@ def write_inc(route):
     if (len(stations) - 1) % step:
         x, y, walk, bed, s, stair = stations[-1]
         L.append(f"station({x * 100:.1f}, {y * 100:.1f}, {walk * 100:.1f}, {bed * 100:.1f}, {s:.2f}, {int(stair)});")
+    # The graded heightfield under the route (read back from the r16), so the tests check the ground itself.
+    _, zg = load_r16()
+    c = np.asarray(stations, np.float64)
+    pick = list(range(0, len(c), step)) + ([len(c) - 1] if (len(c) - 1) % step else [])
+    hd = np.radians(headings(c[:, :2]))
+    L.append(f"// ground(metres along, z {GROUND_SAMPLE_M:g} m to the left, z on the centreline, z {GROUND_SAMPLE_M:g} m to the right):")
+    L.append("// the graded heightfield (cm), left and right looking along the route")
+    for k in pick:
+        nrm = np.array([-np.sin(hd[k]), np.cos(hd[k])])            # the route's +Y: her right going down
+        zl, zc, zr = (float(bilinear(zg, *(c[k, :2] + nrm * off))) for off in (-GROUND_SAMPLE_M, 0.0, GROUND_SAMPLE_M))
+        L.append(f"ground({c[k, 4]:.2f}, {zl * 100:.1f}, {zc * 100:.1f}, {zr * 100:.1f});")
     L.append("// flight(x, y, z, yaw, rise, going, treads, rail pitch deg): tread i's pivot (top, front nosing centre)")
     L.append("// is (x, y, z) + i * (going along yaw, rise); +X runs up the flight")
     for f in route["flights"]:
@@ -886,6 +1004,7 @@ def main():
                  "rails": rnd(rails), "fingerposts": rnd(posts)}
         rows, cols, change = rows_, cols_, change_
         z[rows, cols] += change
+        lowered = clear_treads(z, stations)
         u16 = np.clip(np.round(32768 + z * 128.0), 0, 65535).astype(np.uint16)
         moved = np.argwhere(u16 != raw_r16)
         if not dry:
@@ -894,7 +1013,8 @@ def main():
         z = (u16.astype(np.float64) - 32768.0) / 128.0
         (r0, c0), (r1, c1) = moved.min(0), moved.max(0)
         print(f"cove route: {len(moved)} heightfield vertices changed; max cut {change.min():+.2f} m, max fill "
-              f"{change.max():+.2f} m; ApplyEstateHeightfield rows {r0}-{r1}, cols {c0}-{c1}")
+              f"{change.max():+.2f} m (vertices lowered up to {lowered * 100:.0f} cm more to clear the steps); "
+              f"ApplyEstateHeightfield rows {r0}-{r1}, cols {c0}-{c1}")
     # Bring the work npy ([row = H - x, col = H + y]) into step where it differs from the graded heightfield
     # round the route (a work folder that missed the cut).
     if dry:

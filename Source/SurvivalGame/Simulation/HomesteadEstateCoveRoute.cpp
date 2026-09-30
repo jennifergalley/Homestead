@@ -54,6 +54,9 @@ const CoveRoute& EstateCoveRoute()
         auto station = [&](double x, double y, double walk, double bed, double metres, int steps) {
             route.stations.push_back({{x, y}, walk, bed, metres, steps != 0});
         };
+        auto ground = [&](double metres, double left, double centre, double right) {
+            route.ground.push_back({metres, left, centre, right});
+        };
         auto flight = [&](double x, double y, double z, double yaw, double rise, double going, int treads, double pitch) {
             route.flights.push_back({{x, y}, z, yaw, rise, going, treads, pitch});
         };

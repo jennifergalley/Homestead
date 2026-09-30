@@ -282,8 +282,8 @@ The mouth is cut once (`cut_mouth`, recorded as `riverMouth` in the layout). Whe
 ### Cove route (`cove_route.py`)
 
 The on-foot way from the manor's south front door down to the sand at the head of the cove
-(`openspec/changes/add-cove-route`): 506 m and 83 m of fall, a graded path at 1 in 7 or gentler through the
-meadow's three switchbacks, then 188 granite steps in 18 flights down the valley side, and paths along the
+(`openspec/changes/add-cove-route`): 509 m and 83 m of fall, a graded path at 1 in 7 or gentler through the
+meadow's three switchbacks, then 187 granite steps in 18 flights down the valley side, and paths along the
 bench and valley floor to the sand. `CONTROL` in the script holds its turning points and the kind of way
 leaving each ("path" or "stairs"); `--search` re-runs the least-cost search they came from, and `--dry`
 designs and writes only `Saved/CoveRoute/` (plan and profile, leg table).
@@ -296,7 +296,7 @@ python Scripts\Map\bake_estate_map.py           # the dashed footpath
 
 It grades the heightfield once (`coveRoute.graded` in the layout): a path's bed over 1.2 m either side,
 5 cm under every tread and landing over 2.2 m, blending back over 2.5 m, never into the river channel.
-The run prints the `ApplyEstateHeightfield` rectangle (rows 1338-1540, columns 1457-1755). The full
+The run prints the `ApplyEstateHeightfield` rectangle (rows 1338-1541, columns 1457-1755). The full
 design lives in `cove_route.json` (the layout keeps a summary and the map's `footpaths`), and
 `Simulation\HomesteadEstateCoveRoute.inc` carries the centreline, flights, landings, kerbs, rail bays and
 fingerposts at Props' kit pivots (`add-cove-route-kit`). A later run leaves the heightfield alone and
