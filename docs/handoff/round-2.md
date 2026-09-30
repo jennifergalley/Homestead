@@ -824,6 +824,13 @@ requirement.
   **bottom**. That conflicts with Jenny's "first inventory row" requirement even though the
   pack-only view is correct. Menu must move the row above the PACK grid in chest view and update
   tests. Shipping promotion is held; this is not ready or delivered.
+
+  **Correction `acb8e4bd`:** the pack-column top row now sits above its grid at 720p and 4K.
+  Editor/Game compile, NativeMenu 720/4K and Hotbar 720 pass; 53 directional-navigation row steps
+  pass before the pre-existing Settings `visible=0` failure. It changes no simulation, so native was
+  not rerun after `fd34975f`. This supersedes the bottom-strip candidate. Menu released its slot;
+  Integration resumed at 01:58 after a 7.24 GB/no-Unreal preflight to recut Development/package and
+  consider Shipping only if complete. No Shipping delivery claim exists yet.
 - **Field-book hotbar editor partial `ac3fe239`:** main-integrated atop `af97075f` with docs, but not
   shipped. `605d68fb` adds pure C++17 layout/unique binding/swaps/moves/chest/material/Water refusal
   with no Sim revision or stock mutation and save round-trip/layout 1/2 migration; `ce3c0479` adds
