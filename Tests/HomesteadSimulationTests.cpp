@@ -4684,11 +4684,11 @@ void SnackOnFullStomachRestoresEnergy()
     const auto fed = sim.Eat(Item::Berries);
     OK(fed);
     CHECK(fed.message == "Ate Berries: Food +12." && sim.GetState().hunger == 62.0);
-    // Full and tired with a cooked dish: Energy only.
+    // Full and tired with a cooked dish: Energy only (the §3a table's +40 applies in the woodland too).
     Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 20.0; });
     const auto dish = sim.Eat(Item::HerbedRoots);
     OK(dish);
-    CHECK(dish.message == "Ate Herbed roots: Energy +18." && Close(sim.GetState().energy, 38.0));
+    CHECK(dish.message == "Ate Herbed roots: Energy +40." && Close(sim.GetState().energy, 60.0));
     Simulation loaded;
     OK(loaded.Deserialize(sim.Serialize()));
     CHECK(loaded.Serialize() == sim.Serialize());

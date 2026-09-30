@@ -1,18 +1,11 @@
-// rework-farming-calendar-and-period-crafting (lane A): the hunger and season-change toasts.
+// rework-farming-calendar-and-period-crafting (lane A): the season-change toast. The estate has no
+// hunger (Simulation/HomesteadFood.h), so there are no hunger toasts.
 #include "HomesteadController.h"
 
 #include "Simulation/HomesteadCalendar.h"
 
 void AHomesteadController::TickCalendarNotices()
 {
-    // Hunger toasts fire once each time she drops into a hungrier band; eating resets them.
-    const Homestead::HungerState Hunger = Sim.GetHungerState();
-    if (static_cast<int32>(Hunger) > static_cast<int32>(SeenHunger) && !IsFailed())
-        Notify(Hunger == Homestead::HungerState::Famished
-            ? TEXT("You're famished. Everything's slower until you eat.")
-            : TEXT("You're getting hungry. Eat something soon."));
-    SeenHunger = Hunger;
-
     if (Sim.SeasonChanges() > SeenSeasonChanges)
     {
         const auto& Change = Sim.LastSeasonChange();

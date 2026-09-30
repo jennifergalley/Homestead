@@ -12,6 +12,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadWorldGeneration.cpp
     Source/SurvivalGame/Simulation/HomesteadSimulation.cpp
     Source/SurvivalGame/Simulation/HomesteadCrops.cpp
+    Source/SurvivalGame/Simulation/HomesteadFood.cpp
     Source/SurvivalGame/Simulation/HomesteadCalendar.cpp
     Source/SurvivalGame/Simulation/HomesteadCalendarHooks.cpp
     Source/SurvivalGame/Simulation/HomesteadOvergrowth.cpp

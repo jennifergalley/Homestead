@@ -1,14 +1,17 @@
-// Calendar, gentle hunger and crop seasons (rework-farming-calendar-and-period-crafting, lane A).
+// Calendar, Energy and Well fed (no hunger on the estate) and crop seasons (rework-farming-calendar-and-period-crafting, lane A).
 #include "HomesteadCalendar.h"
 #include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
+#include "HomesteadItems.h"
 #include "HomesteadSimulation.h"
 
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
+#include <sstream>
 #include <string>
+#include <utility>
 
 using namespace Homestead;
 
@@ -90,15 +93,6 @@ const Plot& PlotById(const Simulation& sim, int id)
         if (plot.id == id) return plot;
     CHECK(false);
     return sim.GetState().plots.front();
-}
-
-void EatUntilFed(Simulation& sim)
-{
-    while (sim.GetState().hunger < 90.0)
-    {
-        if (sim.Count(Item::Berries) == 0) OK(sim.GrantItems(Item::Berries, 4));
-        OK(sim.Eat(Item::Berries));
-    }
 }
 
 // The hour of the given 1-based day of a season in 1851 (Spring = 0), at `hourOfDay`.
@@ -200,7 +194,40 @@ void SeasonRolloverHook()
     CHECK(sim.Today().weekday == Weekday::Monday);
 }
 
-void GentleHunger()
+Simulation Reload(const std::string& save, Result* result = nullptr)
+{
+    Simulation loaded;
+    EstatePlacements none;
+    none.bakeVersion = 7;
+    loaded.SetLayout(SquareLayout());
+    loaded.SetPlacements(none);
+    const Result done = loaded.Deserialize(save);
+    if (result) *result = done;
+    else OK(done);
+    return loaded;
+}
+
+// The save's vitals line with one field replaced (hour, dayMinutes, hunger, energy, failed, nextId).
+std::string WithVital(const std::string& save, int field, const std::string& value)
+{
+    std::string body = Payload(save);
+    const auto lineEnd = body.find('\n');
+    std::string fields[6];
+    std::size_t start = 0;
+    for (int i = 0; i < 6; ++i)
+    {
+        const auto space = body.find(' ', start);
+        fields[i] = body.substr(start, (i == 5 ? lineEnd : space) - start);
+        start = space + 1;
+    }
+    fields[field] = value;
+    std::string vitals = fields[0];
+    for (int i = 1; i < 6; ++i) vitals += " " + fields[i];
+    body.replace(0, lineEnd, vitals);
+    return Rewrap(save, body);
+}
+
+void NoHungerOnTheEstate()
 {
     Simulation sim = Estate();
     OK(sim.GrantStarterKit(Spawn, {1.0, 0.0}, false));
@@ -208,81 +235,181 @@ void GentleHunger()
     for (const auto& piece : sim.GetState().structures) if (piece.kind == Piece::Bed) bed = &piece;
     CHECK(bed != nullptr);
     const Point bedSide = sim.StructureCenter(*bed);
-    CHECK(sim.GetHungerState() == HungerState::Fed && Close(sim.WorkCost(2.0), 2.0));
-    // Two and a half days without food: she's famished but never fails, and time keeps passing.
-    sim.AdvanceGameHours(60.0, bedSide);
-    CHECK(!sim.GetState().failed && sim.GetState().hunger == 0.0);
-    CHECK(sim.GetHungerState() == HungerState::Famished && Close(sim.WorkCost(2.0), 3.0));
-    const double hour = sim.GetState().hour;
-    sim.AdvanceGameHours(72.0, bedSide);
-    CHECK(!sim.GetState().failed && Close(sim.GetState().hour, hour + 72.0));
-    // Famished sleep recovers at half the rate.
+    CHECK(sim.GetState().hunger == 100.0 && Close(sim.WorkCost(2.0), 2.0));
+    // Ten days without eating: hunger never moves, nothing fails, and work and sleep cost what they always did.
+    sim.AdvanceGameHours(240.0, bedSide);
+    CHECK(!sim.GetState().failed && sim.GetState().hunger == 100.0);
     OK(sim.SetEnergy(20.0));
     OK(sim.Sleep(2.0, bedSide));
-    CHECK(Close(sim.GetState().energy, 20.0 + 2.0 * Exertion::SleepPerHour * 0.5));
-    // Work costs half as much again: tilling a square.
+    CHECK(Close(sim.GetState().energy, 20.0 + 2.0 * Exertion::SleepPerHour));
     OK(sim.GrantItems(Item::DiggingStick, 1));
     const int gx = GardenCell(Spawn.x) - 20, gy = GardenCell(Spawn.y) - 20;
     OK(sim.SetEnergy(50.0));
     OK(sim.Till(gx, gy, GardenCellCenter(gx, gy)));
-    CHECK(Close(sim.GetState().energy, 50.0 - Exertion::TillEnergy * 1.5));
-    // A saved famished estate game loads as it is, not failed.
-    {
-        Simulation loaded;
-        EstatePlacements none;
-        none.bakeVersion = 7;
-        loaded.SetLayout(SquareLayout());
-        loaded.SetPlacements(none);
-        OK(loaded.Deserialize(sim.Serialize()));
-        CHECK(!loaded.GetState().failed && loaded.GetState().hunger == 0.0);
-        // An estate save from before gentle hunger, failed for hunger alone, carries on unfailed.
-        const std::string saved = sim.Serialize();
-        std::string body = Payload(saved);
-        const auto lineEnd = body.find('\n');
-        std::string vitals = body.substr(0, lineEnd);
-        std::string fields[6];
-        {
-            std::size_t start = 0;
-            for (int i = 0; i < 6; ++i)
-            {
-                const auto space = vitals.find(' ', start);
-                fields[i] = vitals.substr(start, space == std::string::npos ? std::string::npos : space - start);
-                start = space + 1;
-            }
-        }
-        CHECK(fields[2] == "0" && fields[4] == "0");
-        fields[4] = "1";
-        vitals = fields[0];
-        for (int i = 1; i < 6; ++i) vitals += " " + fields[i];
-        body.replace(0, lineEnd, vitals);
-        OK(loaded.Deserialize(Rewrap(saved, body)));
-        CHECK(!loaded.GetState().failed);
-    }
-    // A little food lifts her to Hungry: three-quarter recovery and a quarter more work.
-    OK(sim.GrantItems(Item::Berries, 1));
-    OK(sim.Eat(Item::Berries));
-    CHECK(sim.GetHungerState() == HungerState::Hungry && Close(sim.WorkCost(2.0), 2.5));
-    OK(sim.SetEnergy(20.0));
-    OK(sim.Sleep(2.0, bedSide));
-    CHECK(sim.GetHungerState() == HungerState::Hungry);
-    CHECK(Close(sim.GetState().energy, 20.0 + 2.0 * Exertion::SleepPerHour * 0.75));
-    // Eating a meal lifts the penalty at once.
-    EatUntilFed(sim);
-    CHECK(sim.GetHungerState() == HungerState::Fed);
-    OK(sim.SetEnergy(50.0));
-    OK(sim.Till(gx + 1, gy, GardenCellCenter(gx + 1, gy)));
     CHECK(Close(sim.GetState().energy, 50.0 - Exertion::TillEnergy));
-    OK(sim.SetEnergy(20.0));
-    OK(sim.Sleep(2.0, bedSide));
-    CHECK(Close(sim.GetState().energy, 20.0 + 2.0 * Exertion::SleepPerHour));
-    // The seeded woodland keeps its legacy rule: no penalties, and hunger at 0 still fails her.
+    // Hunger is still saved (always 100); an older estate save that drained it, even one failed for
+    // hunger alone, loads at 100 and carries on.
+    const std::string saved = sim.Serialize();
+    CHECK(!Reload(WithVital(saved, 2, "0")).GetState().failed);
+    const Simulation starved = Reload(WithVital(WithVital(saved, 2, "0"), 4, "1"));
+    CHECK(!starved.GetState().failed && starved.GetState().hunger == 100.0);
+    CHECK(Reload(WithVital(saved, 2, "12.5")).GetState().hunger == 100.0);
+    // The seeded woodland keeps its legacy rule: hunger drains, and at 0 it fails her.
     Simulation woodland;
-    CHECK(woodland.GetHungerState() == HungerState::Fed);
     woodland.AdvanceGameHours(60.0, {-750, 150});
     CHECK(woodland.GetState().failed && woodland.GetState().hunger == 0.0);
-    CHECK(woodland.GetHungerState() == HungerState::Fed);
 }
 
+void EatingForEnergy()
+{
+    // The food classes and the final Energy table (design §3a).
+    CHECK(FoodClassOf(Item::Pasty) == FoodClass::Meal && FoodClassOf(Item::HerbedRoots) == FoodClass::Meal);
+    CHECK(FoodClassOf(Item::RoastedRoots) == FoodClass::Meal && FoodClassOf(Item::Bread) == FoodClass::Snack);
+    CHECK(FoodClassOf(Item::Cheese) == FoodClass::Snack && FoodClassOf(Item::Berries) == FoodClass::Snack);
+    CHECK(!IsEdible(Item::Potato) && !IsEdible(Item::Roots) && !IsEdible(Item::Seeds));
+    const std::pair<Item, double> energy[] = {
+        {Item::BroadBeans, 4}, {Item::Berries, 6}, {Item::Turnip, 6}, {Item::Carrot, 6}, {Item::Strawberries, 8},
+        {Item::Cabbage, 10}, {Item::Bread, 12}, {Item::Cheese, 15}, {Item::RoastedRoots, 25}, {Item::Pasty, 40},
+        {Item::HerbedRoots, 40}};
+    for (const auto& [item, restores] : energy) CHECK(IsEdible(item) && GetItemInfo(item).energy == restores);
+    CHECK(FoodEnergyLabel(Item::Pasty) == "+40 Energy");
+
+    Simulation sim = Estate();
+    OK(sim.GrantItems(Item::Bread, 2));
+    OK(sim.GrantItems(Item::Pasty, 3));
+    // A Snack at full Energy is refused and nothing is used.
+    CHECK(sim.GetState().energy == 100.0);
+    const std::string full = sim.Serialize();
+    const Result snack = sim.Eat(Item::Bread);
+    CHECK(!snack.ok && snack.message == "You're full of energy. Save it for later.");
+    CHECK(sim.Serialize() == full && sim.Count(Item::Bread) == 2);
+    // The pack's own stack (the hotbar's quick-eat) follows the same rules.
+    int breadGroup = -1;
+    for (const auto& entry : sim.GetState().inventoryLayout) if (entry.item == Item::Bread) breadGroup = entry.groupId;
+    CHECK(breadGroup >= 0);
+    CHECK(!sim.EatGroup(breadGroup, sim.GetRevision()).ok && sim.Count(Item::Bread) == 2);
+    // Below full, a Snack restores its Energy and nothing more; hunger never moves.
+    OK(sim.SetEnergy(50.0));
+    const Result bread = sim.Eat(Item::Bread);
+    CHECK(bread.ok && bread.message == "+12 Energy" && Close(sim.GetState().energy, 62.0));
+    CHECK(!sim.IsWellFed() && sim.GetState().hunger == 100.0 && sim.Count(Item::Bread) == 1);
+    // Capped at full.
+    OK(sim.SetEnergy(95.0));
+    OK(sim.EatGroup(breadGroup, sim.GetRevision()));
+    CHECK(sim.GetState().energy == 100.0);
+    // A Meal restores its Energy and makes her Well fed for three hours: work costs 15% less.
+    sim.SkipToHourOfDay(11.5);
+    OK(sim.SetEnergy(50.0));
+    const Result pasty = sim.Eat(Item::Pasty);
+    CHECK(pasty.ok && pasty.message == "+40 Energy \xC2\xB7 Well fed until 2:30 PM");
+    CHECK(Close(sim.GetState().energy, 90.0) && sim.IsWellFed());
+    CHECK(Close(sim.GetState().wellFedUntilHour, sim.GetState().hour + 3.0));
+    CHECK(Close(sim.WorkCost(2.0), 1.7) && Close(sim.WorkCost(Exertion::TillEnergy), Exertion::TillEnergy * 0.85));
+    OK(sim.GrantItems(Item::DiggingStick, 1));
+    const int gx = GardenCell(Spawn.x) - 20, gy = GardenCell(Spawn.y) - 20;
+    const double before = sim.GetState().energy;
+    OK(sim.Till(gx, gy, GardenCellCenter(gx, gy)));
+    CHECK(Close(sim.GetState().energy, before - Exertion::TillEnergy * 0.85));
+    // At full Energy, a Meal that wouldn't extend Well fed by an hour is refused and not eaten.
+    OK(sim.SetEnergy(100.0));
+    const std::string wellFed = sim.Serialize();
+    const Result early = sim.Eat(Item::Pasty);
+    CHECK(!early.ok && early.message == "You're full, and already well fed until 2:30 PM. Save it for later.");
+    CHECK(sim.Serialize() == wellFed && sim.Count(Item::Pasty) == 2);
+    sim.SkipToHourOfDay(12.25);
+    OK(sim.SetEnergy(100.0));
+    CHECK(!sim.Eat(Item::Pasty).ok && sim.Count(Item::Pasty) == 2);
+    // An hour on, it extends Well fed by an hour: eaten, and the toast says her energy was full.
+    sim.SkipToHourOfDay(12.5);
+    OK(sim.SetEnergy(100.0));
+    const Result topUp = sim.Eat(Item::Pasty);
+    CHECK(topUp.ok && topUp.message == "Your energy was already full. Well fed until 3:30 PM.");
+    CHECK(sim.Count(Item::Pasty) == 1 && Close(sim.GetState().wellFedUntilHour, sim.GetState().hour + 3.0));
+    // Refresh, never stack: a Meal always sets it to now + 3.
+    OK(sim.SetEnergy(20.0));
+    OK(sim.Eat(Item::Pasty));
+    CHECK(Close(sim.GetState().energy, 60.0) && Close(sim.GetState().wellFedUntilHour, sim.GetState().hour + 3.0));
+    // Once it has run out, a Meal at full Energy starts it again.
+    sim.SkipToHourOfDay(16.0);
+    CHECK(!sim.IsWellFed() && Close(sim.WorkCost(2.0), 2.0));
+    OK(sim.GrantItems(Item::HerbedRoots, 1));
+    OK(sim.SetEnergy(100.0));
+    const Result starts = sim.Eat(Item::HerbedRoots);
+    CHECK(starts.ok && starts.message == "Your energy was already full. Well fed until 7 PM." && sim.IsWellFed());
+}
+
+void WellFedAcrossMidnightAndSaves()
+{
+    Simulation sim = Estate();
+    OK(sim.GrantItems(Item::Pasty, 1));
+    // A pasty at 23:00 lasts until 02:00 the next day: the timer runs on the unwrapped game hour.
+    sim.SkipToHourOfDay(23.0);
+    OK(sim.SetEnergy(50.0));
+    const Result late = sim.Eat(Item::Pasty);
+    CHECK(late.ok && late.message == "+40 Energy \xC2\xB7 Well fed until 2 AM");
+    const double eaten = sim.GetState().hour;
+    sim.SkipToHourOfDay(1.5);
+    CHECK(Close(sim.GetState().hour, eaten + 2.5) && sim.IsWellFed());
+    // Saved while Well fed, it loads Well fed until the same hour.
+    const std::string saved = sim.Serialize();
+    CHECK(Payload(saved).find("\nwellfed ") != std::string::npos);
+    Simulation loaded = Reload(saved);
+    CHECK(loaded.IsWellFed() && loaded.GetState().wellFedUntilHour == sim.GetState().wellFedUntilHour);
+    CHECK(loaded.Serialize() == saved);
+    sim.SkipToHourOfDay(2.0);
+    CHECK(Close(sim.GetState().hour, eaten + 3.0) && !sim.IsWellFed());
+    // No section once it has run out; a save without one loads not Well fed.
+    CHECK(Payload(sim.Serialize()).find("wellfed") == std::string::npos);
+    CHECK(!Reload(sim.Serialize()).IsWellFed());
+    // A section whose expiry is at or before the save's hour has simply run out.
+    std::string body = Payload(saved);
+    const auto at = body.find("wellfed ");
+    const auto end = body.find('\n', at);
+    const auto withExpiry = [&](const std::string& value)
+    {
+        std::string edited = body;
+        edited.replace(at, end - at, "wellfed " + value);
+        return Rewrap(saved, edited);
+    };
+    std::ostringstream hour;
+    hour.precision(17);
+    hour << sim.GetState().hour - 1.0;
+    const Simulation ranOut = Reload(withExpiry(hour.str()));
+    CHECK(!ranOut.IsWellFed() && Payload(ranOut.Serialize()).find("wellfed") == std::string::npos);
+    // Longer than any meal lasts, or not a number: the whole load is rejected as corrupt.
+    std::ostringstream tooLong;
+    tooLong.precision(17);
+    tooLong << eaten + 2.5 + 3.5;
+    for (const std::string& bad : {tooLong.str(), std::string("nan"), std::string("inf"), std::string("1e999")})
+    {
+        Result result;
+        Simulation corrupt = Estate();
+        const std::string mine = corrupt.Serialize();
+        EstatePlacements none;
+        none.bakeVersion = 7;
+        corrupt.SetLayout(SquareLayout());
+        corrupt.SetPlacements(none);
+        result = corrupt.Deserialize(withExpiry(bad));
+        CHECK(!result.ok && result.code == ResultCode::CorruptSave);
+        CHECK(result.message == "This save is corrupt or incomplete. Your current game was not changed.");
+        CHECK(corrupt.Serialize() == mine);
+    }
+    // Sleep moves the same clock: a meal before bed has run out when she wakes.
+    Simulation sleeper = Estate();
+    OK(sleeper.GrantStarterKit(Spawn, {1.0, 0.0}, false));
+    const Structure* bed = nullptr;
+    for (const auto& piece : sleeper.GetState().structures) if (piece.kind == Piece::Bed) bed = &piece;
+    CHECK(bed != nullptr);
+    const Point bedSide = sleeper.StructureCenter(*bed);
+    OK(sleeper.GrantItems(Item::Pasty, 1));
+    sleeper.SkipToHourOfDay(23.0);
+    OK(sleeper.SetEnergy(30.0));
+    OK(sleeper.Eat(Item::Pasty));
+    OK(sleeper.Sleep(2.0, bedSide));
+    CHECK(sleeper.IsWellFed());
+    OK(sleeper.Sleep(1.5, bedSide));
+    CHECK(!sleeper.IsWellFed());
+}
 void CropSeasonsAndWithering()
 {
     CHECK(GrowsIn(CropKind::Potatoes, Season::Spring) && !GrowsIn(CropKind::Potatoes, Season::Summer));
@@ -394,7 +521,9 @@ int main()
     Run("calendar math: 28-day seasons, weekdays and years", CalendarMath);
     Run("a new game starts Mon, Spring 1 with 60-minute days", NewGameDateAndDayLength);
     Run("the season rollover hook fires once per season", SeasonRolloverHook);
-    Run("hunger slows her but never fails the estate", GentleHunger);
+    Run("the estate has no hunger: ten days without food, no penalty or failure", NoHungerOnTheEstate);
+    Run("snacks and meals restore Energy; meals make her Well fed", EatingForEnergy);
+    Run("Well fed runs across midnight and saves only while active", WellFedAcrossMidnightAndSaves);
     Run("crops grow in season and wither when it ends", CropSeasonsAndWithering);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;

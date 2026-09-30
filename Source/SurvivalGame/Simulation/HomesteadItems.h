@@ -31,6 +31,10 @@ constexpr int ItemCount = static_cast<int>(Item::Count);
 
 enum class ItemCategory : int { Tool, Material, Forage, Food, Salvage, Supply, Count };
 
+// What eating it does (rework-farming-calendar-and-period-crafting design §3a): a Snack restores
+// Energy only; a Meal (a cooked dish, hearth-made or bought ready) also makes her Well fed.
+enum class FoodClass : int { None, Snack, Meal };
+
 enum class ShopKind : int { GeneralStore, Count };
 using ShopMask = unsigned;
 constexpr ShopMask ShopBit(ShopKind kind) { return 1u << static_cast<int>(kind); }
@@ -45,11 +49,12 @@ struct ItemInfo
     const char* icon;        // SHomesteadIcon glyph key.
     std::int64_t basePriceCents;
     ShopMask buyers;         // Shops that buy it from her.
-    double hunger = 0.0;     // Eating restores these; zero hunger means not edible.
-    double energy = 0.0;
+    double hunger = 0.0;     // Woodland only (the estate has no hunger); above zero exactly for food.
+    double energy = 0.0;     // Energy one restores.
     const char* source = ""; // Where to find it, for recipe requirements.
     bool hiddenFromNewGames = false;
     const char* plural = nullptr; // For counts above one; the name when unset ("12 Stone").
+    FoodClass food = FoodClass::None; // None means not edible.
 };
 
 // The catalogue row for an item; an "Unknown item" row for values outside the enum.
@@ -64,8 +69,10 @@ const char* ItemDescription(Item item);
 const char* ItemIcon(Item item);
 const char* ItemSource(Item item);
 ItemCategory CategoryOf(Item item);
+FoodClass FoodClassOf(Item item);
+// Snacks and Meals; raw potatoes, roots and the like are cooked or sold instead.
 bool IsEdible(Item item);
-// The nominal Energy one of this food restores, rounded, from its catalogue row ("+25 Energy"); empty
+// The nominal Energy one of this food restores, rounded, from its catalogue row ("+40 Energy"); empty
 // for anything that isn't food or restores no Energy. Shops and the pack show this before she eats.
 std::string FoodEnergyLabel(Item item);
 bool IsTool(Item item);

@@ -1,6 +1,7 @@
 #include "HomesteadSimulation.h"
 #include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
+#include "HomesteadFood.h"
 #include "HomesteadParcels.h"
 #include "HomesteadManor.h"
 #include "HomesteadLamp.h"
@@ -85,6 +86,11 @@ std::string ApplyMeal(State& state, Item item)
 Result CanEat(const State& state, Item item)
 {
     if (state.failed) return Failed();
+    if (state.fixedEstate)
+    {
+        const std::string refusal = Food::EstateRefusal(state, item);
+        return refusal.empty() ? Good("") : Bad(refusal);
+    }
     if (FoodNutrition(item) == 0.0) return Bad(item == Item::Roots ? std::string("Raw roots need cooking first.")
         : std::string(ItemName(item)) + " isn't something to eat.");
     // A snack is still worth eating on a full stomach when it restores energy she's short of.
@@ -92,6 +98,11 @@ Result CanEat(const State& state, Item item)
     const bool restores = state.energy < 100.0 && FoodEnergy(item) > 0.0;
     if (!feeds && !restores) return Bad("You are already full. Save this food for later.");
     return Good("");
+}
+// Eats one (after CanEat): Energy only and Well fed on the estate, hunger and energy in the woodland.
+std::string Consume(State& state, Item item)
+{
+    return state.fixedEstate ? Food::EatOnEstate(state, item) : ApplyMeal(state, item);
 }
 Inventory Items(std::initializer_list<std::pair<Item, int>> values)
 {
@@ -1166,6 +1177,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
 {
     State candidate;
     candidate.fixedEstate = true;
+    candidate.hunger = 100.0; // The estate has no hunger (HomesteadFood.h).
     candidate.placementBakeVersion = placements.bakeVersion;
     // She arrives in her tunic; clothing is cosmetic on the estate.
     candidate.wearables = {{1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0}};
@@ -1993,7 +2005,7 @@ Result Simulation::Eat(Item item)
     const auto allowed = CanEat(state_, item);
     if (!allowed) return allowed;
     if (!TryAdjust(Items({{item, -1}}))) return Bad(std::string("Gather or cook some ") + ItemName(item) + " first.");
-    return Good(ApplyMeal(state_, item));
+    return Good(Consume(state_, item));
 }
 Result Simulation::EatGroup(int groupId, std::uint64_t expectedRevision)
 {
@@ -2009,7 +2021,7 @@ Result Simulation::EatGroup(int groupId, std::uint64_t expectedRevision)
     const Item item = entry->item;
     --entry->quantity;
     --candidate.inventory[static_cast<int>(item)];
-    const std::string message = ApplyMeal(candidate, item);
+    const std::string message = Consume(candidate, item);
     return CommitInventory(std::move(candidate), message.c_str());
 }
 Result Simulation::Craft(Recipe recipe, Point player)
@@ -2807,11 +2819,11 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
 {
     (void)player;
     const bool rain = IsRaining();
-    // The seeded woodland keeps its legacy rule: hunger at 0 fails her. On the estate it never does.
+    // The seeded woodland keeps its legacy rule: hunger drains and at 0 fails her. The estate has no
+    // hunger (HomesteadFood.h): it stays at 100.
     const bool hungerFails = !state_.fixedEstate;
-    const double hungerRate = sleeping ? -Hunger::AsleepPerHour : -Hunger::AwakePerHour;
-    const double energyRate = sleeping ? recoveryPerHour * Hunger::RecoveryFactor(GetHungerState())
-        : -Exertion::AwakePerHour;
+    const double hungerRate = !hungerFails ? 0.0 : sleeping ? -Hunger::AsleepPerHour : -Hunger::AwakePerHour;
+    const double energyRate = sleeping ? recoveryPerHour : -Exertion::AwakePerHour;
     // Stop at the first failed vital, rather than consuming hours beyond the checkpoint boundary.
     double elapsed = hours;
     if (hungerFails) elapsed = std::min(elapsed, state_.hunger / -hungerRate);
@@ -2893,26 +2905,8 @@ Result Simulation::Exert(double cost, Result done)
     if (done.ok) state_.energy = Clamp(state_.energy - WorkCost(cost), 0.0, 100.0);
     return done;
 }
-HungerState Simulation::GetHungerState() const
-{
-    return state_.fixedEstate ? Hunger::StateOf(state_.hunger) : HungerState::Fed;
-}
-double Simulation::WorkCost(double base) const { return base * Hunger::WorkCostFactor(GetHungerState()); }
-namespace Hunger
-{
-HungerState StateOf(double hunger)
-{
-    return hunger <= 1e-9 ? HungerState::Famished : hunger < HungryBelow ? HungerState::Hungry : HungerState::Fed;
-}
-double RecoveryFactor(HungerState state)
-{
-    return state == HungerState::Famished ? 0.5 : state == HungerState::Hungry ? 0.75 : 1.0;
-}
-double WorkCostFactor(HungerState state)
-{
-    return state == HungerState::Famished ? 1.5 : state == HungerState::Hungry ? 1.25 : 1.0;
-}
-}
+bool Simulation::IsWellFed() const { return Food::IsWellFed(state_); }
+double Simulation::WorkCost(double base) const { return IsWellFed() ? base * Food::WellFedWorkFactor : base; }
 double Simulation::HarvestCost(int nodeId) const
 {
     const auto* node = Find(state_.resources, nodeId);
@@ -3069,6 +3063,7 @@ std::string Simulation::Serialize() const
     Crops::WriteSaveSection(body, state_);
     Crops::WriteWitheredSection(body, state_);
     PackRowRules::WriteSaveSection(body, state_);
+    Food::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3361,6 +3356,7 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::WitheredSaveTag) { if (!Crops::ReadWitheredSection(input, candidate)) return invalid(); }
         else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Food::SaveTag) { if (!Food::ReadSaveSection(input, candidate)) return invalid(); }
         // A section this build doesn't know came from a newer build; it can't be skipped safely.
         else return newer;
         input >> std::ws;
@@ -3377,6 +3373,7 @@ Result Simulation::Deserialize(const std::string& data)
     {
         // Estate saves made before gentle hunger could fail her for hunger alone; she carries on.
         if (candidate.failed && candidate.hunger == 0 && !spent) candidate.failed = false;
+        candidate.hunger = 100.0; // The estate has no hunger (HomesteadFood.h); older saves drained it.
         const auto estate = MaterializeEstate(candidate, *placements_);
         if (!estate) return estate;
         // Overgrowth baked after this save was made (the manor clear-out) can land on her plots or

@@ -5,6 +5,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadItems.h"
 #include "HomesteadSave.h"
 #include "Simulation/HomesteadHotbarLayout.h"
 #include "Simulation/HomesteadLamp.h"
@@ -177,9 +178,11 @@ void AHomesteadController::EatFromHotbar(Homestead::Item Food)
     const auto* Stack = HotbarEntry(SelectedHotbarSlot);
     const auto Result = Stack && Stack->wearableId == 0 && Stack->item == Food
         ? Sim.EatGroup(Stack->groupId, Sim.GetRevision()) : Sim.Eat(Food);
-    // Success shows as the vitals' +N popups (MealGain); only refusals need words.
+    // Success shows as the vitals' +N popups (MealGain); refusals need words, and so does a Meal on the
+    // estate, whose toast says until when she's Well fed.
     NotifyResourceAction(Result, nullptr);
     if (!Result.ok) return;
+    if (State().fixedEstate && Homestead::FoodClassOf(Food) == Homestead::FoodClass::Meal) Notify(Result);
     if (Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
     MealGain.Food = State().hunger - FoodBefore;
     MealGain.Energy = State().energy - EnergyBefore;

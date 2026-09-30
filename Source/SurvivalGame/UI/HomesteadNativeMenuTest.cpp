@@ -605,7 +605,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             const FString Pasty = UTF8_TO_TCHAR(Homestead::FoodEnergyLabel(Homestead::Item::Pasty).c_str());
             const FString Price = UTF8_TO_TCHAR(Homestead::FormatMoney(Homestead::BuyPrice(Homestead::Item::Pasty)).c_str());
             Results.Add(FString::Printf(TEXT("SHOP_LABELS purse=%s pasty=%s price=%s"), *Purse, *Pasty, *Price));
-            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && Pasty == TEXT("+25 Energy")
+            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && Pasty == TEXT("+40 Energy")
                 && Price == TEXT("100 coins");
         }, 0.8f);
     Add(TEXT("Capture the shop's Buy page"), [this]() { Screenshot(TEXT("native-shop-buy")); },
@@ -2055,7 +2055,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 FHomesteadRow Row;
                 const bool Found = Controller->MenuHotbarRow(*TargetCell, Row);
                 Results.Add(TEXT("FOOD_HOVER ") + Row.Detail.Replace(TEXT("\n"), TEXT(" | ")));
-                return Found && Row.Detail.Contains(TEXT("+25 Energy")) && !Row.Detail.Contains(TEXT("Stack #"))
+                return Found && Row.Detail.Contains(TEXT("+40 Energy")) && !Row.Detail.Contains(TEXT("Stack #"))
                     && Row.Detail.Contains(TEXT(": 2"));
             });
         Add(TEXT("Capture the chest view's hotbar row holding the pasties"),

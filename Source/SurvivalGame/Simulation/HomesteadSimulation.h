@@ -350,6 +350,9 @@ struct State
     // lamp kit (new estate games start with it; older saves get it once on load).
     double lampOilHours = 0.0;
     bool lampKitGranted = false;
+    // Estate only (HomesteadFood.h): the game hour her Well fed runs out; she is Well fed while hour is
+    // below it. Saved in the optional "wellfed" section only while active.
+    double wellFedUntilHour = 0.0;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -434,21 +437,13 @@ constexpr double FuelEnergy = 0.2;
 constexpr double DeconstructEnergy = 1.0;
 }
 
-// Gentle hunger (design §3): on the estate an empty stomach never fails her. Below HungryBelow she
-// is Hungry, at 0 Famished; both slow her sleep recovery and make every piece of work cost more,
-// and eating lifts the penalty at once. The seeded woodland keeps its legacy rule (hunger at 0
-// fails her and she retries a checkpoint) and has no penalties.
-enum class HungerState : int { Fed, Hungry, Famished };
+// Hunger belongs to the seeded woodland only: there it drains at these rates and at 0 fails her (she
+// retries a checkpoint). The estate has no hunger (HomesteadFood.h): `State::hunger` stays at 100 and
+// is still saved, until the next planned save-version bump drops it.
 namespace Hunger
 {
-constexpr double HungryBelow = 25.0;
 constexpr double AwakePerHour = 2.0;
 constexpr double AsleepPerHour = 1.3;
-HungerState StateOf(double hunger);
-// Multiplies sleep and doze recovery: x1, x0.75, x0.5.
-double RecoveryFactor(HungerState state);
-// Multiplies every Exertion work cost: x1, x1.25, x1.5.
-double WorkCostFactor(HungerState state);
 }
 
 // The spring weather: it rains on two days in every ten, RainStartHour to RainEndHour (Jenny, 2026-09-29:
@@ -555,8 +550,9 @@ public:
     };
     int SeasonChanges() const { return seasonChanges_; }
     const SeasonChange& LastSeasonChange() const { return lastSeasonChange_; }
-    // Her hunger band (always Fed in the seeded woodland) and what work costing `base` costs her now.
-    HungerState GetHungerState() const;
+    // Well fed after a Meal on the estate (HomesteadFood.h), and what work costing `base` costs her
+    // now: base x Food::WellFedWorkFactor while Well fed, otherwise base.
+    bool IsWellFed() const;
     double WorkCost(double base) const;
     bool IsSheltered(Point position) const;
     bool IsNearFire(Point position) const;
