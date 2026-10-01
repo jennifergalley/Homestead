@@ -569,6 +569,8 @@ def edges(stations, flights, landings, runs, ground_fn):
 
 
 KERB_LENGTH_M = 1.0              # SM_CoveKerb_Straight, centred on its pivot
+CLEAR_MARGIN_M = 0.05            # a piece may reach this far inside the clear half-width: a joint kerb on a
+                                 # gentle curve turns ~1 degree and its ends dip 1-2 cm in (review, 2026-09-30)
 CLEAR_SAMPLES = 11
 
 
@@ -577,7 +579,7 @@ def clear_of_path(xy, kerbs, rails):
     any stretch of the route anywhere along them, not just at their pivots (review, 2026-09-30: at the bench
     steps' hairpin a kerb's end stood 25 cm from the centreline, in front of the bottom tread)."""
     tree = cKDTree(np.asarray(xy, np.float64))
-    limit = CLEAR_HALF_M - 0.01
+    limit = CLEAR_HALF_M - CLEAR_MARGIN_M
 
     def clear(x, y, yaw, start, end):
         a = math.radians(yaw)

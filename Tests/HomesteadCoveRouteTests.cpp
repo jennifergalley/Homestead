@@ -256,13 +256,53 @@ int main()
         for (int i = 0; i <= 10; ++i) least = std::min(least, PolylineDistance(centreline, Along(from, yaw, start + (end - start) * i / 10.0)));
         return least;
     };
+    // cove_route.py CLEAR_MARGIN_M: a joint kerb on a gentle curve dips 1-2 cm inside; nothing reaches 5 cm in.
+    constexpr double ClearMarginCm = 5.0;
     for (const CoveRouteKerb& k : route.kerbs)
-        Check(clearAlong(k.position, k.yaw, -50.0, 50.0) >= 0.5 * CoveRouteClearWidthCm - 2.0, "a kerb clear of the path along its length",
-              clearAlong(k.position, k.yaw, -50.0, 50.0));
+        Check(clearAlong(k.position, k.yaw, -50.0, 50.0) >= 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
+              "a kerb clear of the path along its length", clearAlong(k.position, k.yaw, -50.0, 50.0));
     for (const CoveRouteRail& r : route.rails)
         if (r.pitch == 0.0)
-            Check(clearAlong(r.position, r.yaw, 0.0, r.length) >= 0.5 * CoveRouteClearWidthCm - 2.0, "a level rail bay clear of the path",
-                  clearAlong(r.position, r.yaw, 0.0, r.length));
+            Check(clearAlong(r.position, r.yaw, 0.0, r.length) >= 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
+                  "a level rail bay clear of the path", clearAlong(r.position, r.yaw, 0.0, r.length));
+    // A kerb line has no short holes: along each side of the path, kerbs follow at about 1 m, and a gap
+    // under 3 m (which the generator bridges) never appears (review: dropped joint kerbs left 1 m holes).
+    {
+        struct Placed { double metres; int side; };
+        std::vector<Placed> placed;
+        // Each kerb's chainage by projection onto the nearest centreline segment (stations are 1 m apart and
+        // kerbs sit between them, so snapping to a station would invent 2 m gaps).
+        for (const CoveRouteKerb& k : route.kerbs)
+        {
+            double best = 1e300, metres = 0.0;
+            int side = 1;
+            for (size_t i = 0; i + 1 < route.stations.size(); ++i)
+            {
+                const Point a = route.stations[i].position, b = route.stations[i + 1].position;
+                const double dx = b.x - a.x, dy = b.y - a.y, len2 = dx * dx + dy * dy;
+                const double u = len2 > 0.0 ? std::clamp(((k.position.x - a.x) * dx + (k.position.y - a.y) * dy) / len2, 0.0, 1.0) : 0.0;
+                const double d = Distance(k.position, {a.x + u * dx, a.y + u * dy});
+                if (d < best)
+                {
+                    best = d;
+                    metres = route.stations[i].metres + u * (route.stations[i + 1].metres - route.stations[i].metres);
+                    side = dx * (k.position.y - a.y) - dy * (k.position.x - a.x) > 0.0 ? 1 : -1;
+                }
+            }
+            placed.push_back({metres, side});
+        }
+        for (const int side : {1, -1})
+        {
+            std::vector<double> along;
+            for (const Placed& p : placed) if (p.side == side) along.push_back(p.metres);
+            std::sort(along.begin(), along.end());
+            for (size_t i = 1; i < along.size(); ++i)
+            {
+                const double gap = along[i] - along[i - 1];
+                Check(gap < 1.6 || gap >= 3.0, "no short hole in a kerb line", along[i - 1]);
+            }
+        }
+    }
     for (const CoveRouteKerb& k : route.kerbs)
     {
         const CoveRoute::Nearest n = route.NearestTo(k.position);
