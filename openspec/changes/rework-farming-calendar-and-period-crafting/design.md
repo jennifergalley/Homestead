@@ -433,7 +433,9 @@ Test saves reset with the existing notice, and old Estate saves move to `Retired
 - **Winter canopy masks on Nanite foliage.** Masked Nanite has a cost. → The Performance agent
   measures winter. If needed, the fallback is a reduced-leaf LOD in winter instead of opacity
   masking.
-- **Sunday closing annoys.** → It's a data flag per shop. Jenny can veto it at the playtest.
+- **Sunday closing annoys.** → Jenny decided on 2026-09-30 that both shops close all day Sunday;
+  this is required, not playtest-vetoable. The per-shop data flag keeps implementation explicit and
+  testable.
 - **Many lanes append catalogue rows.** → Small, rebased, append-only commits. The static
   completeness check catches gaps.
 
@@ -441,4 +443,4 @@ Test saves reset with the existing notice, and old Estate saves move to `Retired
 
 - Day length: is 30 minutes right, or does Jenny prefer 60? Confirm at the playtest.
 - Tregear's name and keeper are placeholders.
-- Is Sunday closing wanted?
+- Sunday closing is required for both shops.

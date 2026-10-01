@@ -606,7 +606,15 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 - **Day length:** resolved 2026-09-29 — new Estate games default to **60-minute days**. Settings
   continue to offer 30 and 120 minutes, and existing saves retain their stored value. The source
   OpenSpec is updated only after Props implements and verifies the corrective commit held below.
-- **Sunday closing:** should shops close on Sundays? (A per-shop data flag, so easy to turn off.)
+- **Sunset/day length:** resolved 2026-09-30 — an 18:00 sunset is accepted; do not change day
+  length for it.
+- **Sunday closing:** resolved 2026-09-30 — both shops close all day Sunday. Water implements this
+  on `jennifergalley-sunday-closing`; it remains unmerged and unshipped.
+- **UI theme:** resolved direction, pending screenshot approval — parchment cards plus EB Garamond
+  become the consistent menu/HUD theme if Jenny approves Menu's `homestead.UITheme` screenshot
+  trial.
+- **Night review:** Water supplies a side-by-side screenshot sheet; Jenny's Shipping build has no
+  console, so do not request CVar trials from her.
 - **Names:** Tregear's and its keeper are placeholders.
 
 ## Lane status
@@ -836,6 +844,11 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
+
+  **UI theme decision (Jenny, 2026-09-30):** parchment cards plus EB Garamond become the consistent
+  menu and HUD theme if she approves Menu's screenshot trial. Menu is evaluating the
+  `homestead.UITheme` switch; do not roll it out or call it shipped before that visual approval and
+  the normal resolution/input checks.
 - **Pickup gain popup** — **Menu acceptance `04959978` is main-integrated in `23aba36a`, but excluded
   from the next aim/rain/Shipping package and not shipped.** Based on common Simulation revision gains
   across pack, owned chests and drops, it suppresses moves/reloads and Water, then presents a
@@ -1456,6 +1469,8 @@ not claim early Energy is fully solved.
   Lumen hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to
   calibrate smooth dusk and lamp/hearth readability. Neither the trace nor the wired schedule
   establishes a visual fix; do not update the editor skill's default row before this sign-off.
+  **Jenny's review method (2026-09-30):** Water provides a side-by-side screenshot sheet; her
+  Shipping build has no console, so no player-side CVar trial is assumed.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
