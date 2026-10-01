@@ -467,6 +467,8 @@ private:
     // The extra roll about the same grip line that keeps the blade out of the ground where the eased roll above
     // can't (radians; HomesteadCharacterEquipment.cpp MowGround::MaxClearRoll), eased the same way.
     float MowClearRoll = 0.0f;
+    // What that roll can't reach (radians, eased): the blade tipped up about the lower nib.
+    float MowTipUp = 0.0f;
     // Eases her into a work stance (felling, hacking) instead of snapping: a snapped turn flings
     // the simulated hair.
     FVector FellStepFrom = FVector::ZeroVector, FellStepTo = FVector::ZeroVector;

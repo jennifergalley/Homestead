@@ -46,6 +46,10 @@ constexpr float TraceReach = 150.0f;
 constexpr float MaxClearRoll = 0.6f;
 constexpr float ClearRollUpRate = 20.0f;
 constexpr float ClearRollDownRate = 6.0f;
+// Where the blade lies nearly in the vertical plane through the grip line (the wind-up's fast yaw), no roll
+// lifts it: the rest is a tip up about the lower nib, at most ~35 degrees, eased like the roll. Its axis
+// follows the blade's mean direction, so a change of lowest sample can't jump it.
+constexpr float MaxTipUp = 0.6f;
 // A hit this far above a blade sample is foliage or a branch overhead, not the ground under it (cm): the trace
 // carries on below it. Deeper than the worst cut into the ground the clip ever made (38 cm).
 constexpr float MaxGroundAbove = 60.0f;
@@ -279,7 +283,7 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     const float Weight = Animation->FellWeight();
     if (Weight <= 0.01f)
     {
-        MowGroundRoll = MowClearRoll = 0.0f;
+        MowGroundRoll = MowClearRoll = MowTipUp = 0.0f;
         return;
     }
     if (FellTool == Homestead::Item::Scythe)
@@ -436,6 +440,35 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
         const FQuat Extra(NibLine, MowClearRoll);
         Blended.SetLocation(Lower + Extra.RotateVector(Blended.GetLocation() - Lower));
         Blended.SetRotation(Extra * Blended.GetRotation());
+    }
+    {
+        const FTransform Laid(Blended.GetRotation(), Blended.GetLocation(), Scale);
+        FVector Mean = FVector::ZeroVector;
+        float Lowest = TNumericLimits<float>::Max();
+        FVector LowestAt = FVector::ZeroVector;
+        for (const FVector& Sample : MowGround::BladeSamples)
+        {
+            const FVector At = Laid.TransformPosition(Sample);
+            Mean += At / UE_ARRAY_COUNT(MowGround::BladeSamples);
+            float Height = 0.0f;
+            if (GroundUnder(At, Height) && At.Z - Height < Lowest)
+            {
+                Lowest = static_cast<float>(At.Z - Height);
+                LowestAt = At;
+            }
+        }
+        const FVector Out = FVector(Mean.X - Lower.X, Mean.Y - Lower.Y, 0.0).GetSafeNormal();
+        const float Lever = static_cast<float>(FVector::DotProduct(LowestAt - Lower, Out));
+        float WantTip = 0.0f;
+        if (!Out.IsNearlyZero() && Lowest < MowGround::MinClearance && Lever > 20.0f)
+            WantTip = FMath::Min(FMath::Asin(FMath::Min(1.0f, (MowGround::MinClearance - Lowest) / Lever)), MowGround::MaxTipUp);
+        MowTipUp = FMath::FInterpTo(MowTipUp, WantTip, Dt, WantTip > MowTipUp ? MowGround::ClearRollUpRate : MowGround::ClearRollDownRate);
+        if (!Out.IsNearlyZero() && MowTipUp > 0.0f)
+        {
+            const FQuat Tip(FVector::CrossProduct(Out, FVector::UpVector).GetSafeNormal(), MowTipUp);
+            Blended.SetLocation(Lower + Tip.RotateVector(Blended.GetLocation() - Lower));
+            Blended.SetRotation(Tip * Blended.GetRotation());
+        }
     }
     Prop.SetWorldTransform(Blended);
 }
