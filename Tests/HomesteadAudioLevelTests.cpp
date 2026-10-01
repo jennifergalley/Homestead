@@ -47,11 +47,21 @@ double BusVolume(Bus bus)
     }
 }
 
-// The cue's level at its in-game gain, as Measure-Loudness.py computes it.
+// A music cue's stated loudness (MusicTracks, by the source file's stem); NaN when it has none.
+double StatedLoudness(const Cue& cue)
+{
+    for (const MusicTrack& track : MusicTracks)
+        if (std::strstr(cue.source, (std::string("/") + track.name + ".").c_str())) return track.loudnessLufs;
+    return std::nan("");
+}
+
+// The cue's level at its in-game gain, as Measure-Loudness.py computes it. Music plays at its measured
+// loudness moved by the track gain the game applies (target - stated), so a wrong stated loudness shows.
 double Effective(const Cue& cue, const Measurement& measured)
 {
     const Band& band = Bands[static_cast<int>(cue.category)];
-    if (cue.category == Category::Music) return MusicTargetLufs + 20.0 * std::log10(BusVolume(cue.bus));
+    if (cue.category == Category::Music)
+        return measured.integratedLufs + (MusicTargetLufs - StatedLoudness(cue)) + 20.0 * std::log10(BusVolume(cue.bus));
     const double base = band.integrated ? measured.integratedLufs : measured.momentaryMaxLufs;
     return base + 20.0 * std::log10(cue.gain * BusVolume(cue.bus));
 }
@@ -99,7 +109,7 @@ int main()
             Check(used.count(relative) == 1, relative + " has no cue row (no category) in HomesteadAudioLevels.h");
         }
 
-    // Each music track's stated loudness (which sets its gain) matches its measurement within 2 LU.
+    // Each music track's stated loudness (which sets its gain) matches its measurement within 0.5 LU.
     for (const MusicTrack& track : MusicTracks)
     {
         bool found = false;
@@ -108,8 +118,8 @@ int main()
                 if (const Measurement* measured = Find(cue.source))
                 {
                     found = true;
-                    Check(std::abs(measured->integratedLufs - track.loudnessLufs) <= 2.0,
-                        std::string(track.name) + "'s stated loudness is off its measurement by more than 2 LU");
+                    Check(std::abs(measured->integratedLufs - track.loudnessLufs) <= 0.5,
+                        std::string(track.name) + "'s stated loudness is off its measurement by more than 0.5 LU");
                 }
         Check(found, std::string(track.name) + " has no music cue row");
     }

@@ -92,7 +92,8 @@ constexpr double RainFullGain = 0.45;     // RainOutdoorGain x RainLoudness at f
 constexpr double HearthCrackleGain = 0.32; // RoomAudio::HearthGain, inside the room
 
 // Music: every track is matched to this integrated loudness at full slider (the per-track gain is
-// 10^((MusicTargetLufs - loudness) / 20)), from each track's measured integrated loudness.
+// 10^((MusicTargetLufs - loudness) / 20)), from each track's stated loudness. The gate holds each stated
+// loudness within 0.5 LU of its measurement and judges the track at measured + (target - stated) + slider.
 constexpr double MusicTargetLufs = -35.0;
 struct MusicTrack
 {
@@ -100,10 +101,10 @@ struct MusicTrack
     double loudnessLufs;
 };
 inline constexpr MusicTrack MusicTracks[] = {
-    {"EveningHarp", -21.0}, {"WhispersOfTheGlen", -14.7}, {"MedievalTheme", -15.7}, {"ANewTown", -15.6}};
+    {"EveningHarp", -19.4}, {"WhispersOfTheGlen", -14.7}, {"MedievalTheme", -15.7}, {"ANewTown", -15.6}};
 
 // One row per use of a sound. `source` is relative to Assets/ (tracked under Audio/, or fetched under
-// Source/ by Fetch-Assets.ps1). Music rows carry gain 0: they play at MusicTargetLufs. Keep one row per
+// Source/ by Fetch-Assets.ps1). Music rows carry gain 0: their gain comes from MusicTracks. Keep one row per
 // line in this exact shape: Measure-Loudness.py reads it.
 struct Cue
 {

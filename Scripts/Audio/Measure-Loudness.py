@@ -63,6 +63,11 @@ def parse_levels(text):
         else:
             value = float(gain)
         cues.append({"use": use, "source": source, "category": category, "bus": bus, "gain": value})
+    music = {name: float(value) for name, value in
+             re.findall(r'\{"(\w+)",\s*(-?[\d.]+)\}', text[text.index("MusicTracks[]"):text.index("};", text.index("MusicTracks[]"))])}
+    for cue in cues:
+        if cue["category"] == "Music":
+            cue["stated"] = music.get(pathlib.Path(cue["source"]).stem)
     return constants, dict(zip(categories, bands)), cues
 
 
@@ -101,7 +106,8 @@ def effective(cue, levels, constants, music_target):
     measured = levels[cue["source"]]
     bus = constants[BUSES[cue["bus"]]] if cue["bus"] in BUSES else 1.0
     if cue["category"] == "Music":
-        return music_target + 20 * math.log10(bus)
+        # Measured, moved by the gain the game applies from the stated loudness, so a wrong statement shows.
+        return measured["integrated"] + (music_target - cue["stated"]) + 20 * math.log10(bus)
     integrated_band = cue["integrated"]
     base = measured["integrated"] if integrated_band else measured["momentary"]
     return base + 20 * math.log10(cue["gain"] * bus)
@@ -169,6 +175,13 @@ def main():
     reference = effective(reference_cue, levels, constants, music_target)
     rows = []
     for cue in cues:
+        if cue["category"] == "Music":
+            if cue.get("stated") is None:
+                problems.append(f'{cue["source"]} has no MusicTracks loudness')
+                continue
+            if abs(levels[cue["source"]]["integrated"] - cue["stated"]) > 0.5:
+                problems.append(f'{cue["source"]} measures {levels[cue["source"]]["integrated"]:.1f} LUFS but MusicTracks '
+                                f'states {cue["stated"]:.1f}: set it to the measurement')
         lo, hi, _ = bands[cue["category"]]
         level = effective(cue, levels, constants, music_target)
         relative = level - reference
