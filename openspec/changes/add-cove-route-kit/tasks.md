@@ -5,7 +5,8 @@
 - [ ] 1.1 Author `cove_steps.py`: treads A/B/C, the 1.2 m landing, the 0.6 m landing slab and the corner-landing wedge, to the design's pivots and sizes (recipe written; build and review pending a Blender slot). Critique the 4K hero and detail renders
 - [ ] 1.2 Author `cove_kerb.py`: straight, curve and end pieces (recipe written; build pending)
 - [ ] 1.3 Author `cove_handrail.py`: level bay, raked bays at 26/28/30 degrees, end and corner posts, each symmetric across its rail line so it can be mirrored (scale Y = -1) (recipe written; build pending)
-- [ ] 1.4 Author `fingerpost.py` with "To the Cove", after checking and recording the font's licence (recipe written with Blender's bundled DejaVu Sans, Bitstream Vera licence; build pending)
+- [x] 1.4 Author `fingerpost.py` with "To the Cove", after checking and recording the font's licence (recipe written with Blender's bundled DejaVu Sans, Bitstream Vera licence)
+  - Status: built and imported 2026-10-01 (5,048 tris, one box collision). The lettering reads true on both faces in Blender and in the engine (FBX export's Y flip is a handedness change, not a mirror). The parked "mirror-image" review was the review camera. Paint lightened to 0.80 for legibility.
 
 ## 2. Import (Props; Unreal slot)
 

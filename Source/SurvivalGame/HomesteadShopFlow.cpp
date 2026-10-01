@@ -1,6 +1,7 @@
 // The general store in the game: its building and shopkeeper actors, the interaction focus, the
 // shop screen and the wallet readout. Trading itself is Simulation::Sell / Simulation::Buy.
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 
 #include "HomesteadCharacter.h"
 #include "HomesteadGeneralStore.h"
@@ -66,7 +67,7 @@ void AHomesteadController::OpenShopScreen(int32 ShopId, bool bGreet)
     Mode.SetHideCursorDuringCapture(false);
     Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
     SetInputMode(Mode);
-    PlayEffect(UIClick, 0.08f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
     UE_LOG(LogTemp, Display, TEXT("SHOP_OPEN shop=%d greeted=%d purse=%lld"), ShopId, bGreet ? 1 : 0,
         static_cast<long long>(State().money));
 }
@@ -79,7 +80,7 @@ void AHomesteadController::CloseShopScreen()
     FlushPressedKeys();
     bShowMouseCursor = false;
     SetInputMode(FInputModeGameOnly());
-    PlayEffect(UIClick, 0.08f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
 }
 
 Homestead::Result AHomesteadController::ShopTrade(int32 ShopId, Homestead::Item Item, int32 Quantity, bool bSell,
@@ -97,7 +98,7 @@ Homestead::Result AHomesteadController::ShopTrade(int32 ShopId, Homestead::Item 
     {
         LastWalletDelta = State().money - Before;
         WalletDeltaRemaining = 3.0f;
-        PlayEffect(bSell ? WoodTapA : WoodTapB, 0.35f);
+        PlayEffect(bSell ? WoodTapA : WoodTapB, Homestead::AudioLevels::Gain::ShopSale);
         // Bought goods land in the first empty hotbar cell, else below it (HomesteadPackRow.h).
     }
     return Result;
@@ -115,12 +116,12 @@ Homestead::Result AHomesteadController::ShopBuyBackpack(int32 ShopId)
     {
         LastWalletDelta = State().money - Before;
         WalletDeltaRemaining = 3.0f;
-        PlayEffect(WoodTapB, 0.35f);
+        PlayEffect(WoodTapB, Homestead::AudioLevels::Gain::ShopSale);
     }
     return Result;
 }
 
-void AHomesteadController::ShopClick() { PlayEffect(UIClick, 0.05f); }
+void AHomesteadController::ShopClick() { PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint); }
 
 void AHomesteadController::NoteShopDevice(bool bPad)
 {
@@ -279,7 +280,7 @@ void AHomesteadController::InteractWithStore()
             // First press asks; the prompt shows the question and how to answer it.
             WaitShopId = FocusId;
             WaitAskedAt = FPlatformTime::Seconds();
-            PlayEffect(UIClick, 0.05f);
+            PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
             return;
         }
         if (FPlatformTime::Seconds() - WaitAskedAt < ShopWait::MinAnswerSeconds) return;

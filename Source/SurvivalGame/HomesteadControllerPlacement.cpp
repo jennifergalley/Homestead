@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadWorld.h"
@@ -44,7 +45,7 @@ void AHomesteadController::ToggleDeconstruct()
     bDeconstructing = !bDeconstructing;
     DeconstructId = INDEX_NONE;
     BuildCheckKey.Reset();
-    PlayEffect(UIClick, 0.08f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
     if (Landscape) Landscape->SetPlacementPreview(false, BuildTarget, false);
     UpdatePlacement(true);
 }

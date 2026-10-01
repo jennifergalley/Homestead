@@ -14,11 +14,15 @@ back up into the carry. The game shows the square's turned soil from EVENTS['cho
 The keys name where the blade's tip is and the direction the haft points toward the blade; the
 right wrist follows from the hoe's carried placement in her hand (``HELD``, read from the running
 game's ``Held_SM_StoneHoe`` component relative to ``hand_r`` with ``homestead.CarryHoe`` at its
-default). SM_StoneHoe (Assets/Props/StoneHoe/report.json "attach"): pivot at the old working grip,
-haft along +Z toward its top end, blade tip at (0, -EDGE_OUT, EDGE_ALONG).
+default). SM_StoneHoe and SM_DrawHoe (Assets/Props/*/report.json): pivot at the working grip,
+haft along +Z toward its top end. Blender authors the blade on -Y, but the FBX export mirrors Y, so
+the imported tip is at (0, +EDGE_OUT, EDGE_ALONG). Authoring for -Y left her right hand folded
+about 150 degrees back on the forearm while the game spun the hoe half a turn in her fist to fix the
+blade (the anatomy audit's HoeTill wrist break); the hand is now solved for the hoe as it is.
 
 Component space: forward +Y, her left +X, up +Z, floor z = 0.
 """
+import math
 import unreal
 from homestead_agent import rig_authoring as ra
 from homestead_agent import kneel_gather as kg
@@ -37,8 +41,24 @@ EDGE_OUT = 19.31
 # The hoe's transform relative to hand_r while carried (AHomesteadCharacter::UpdateHeldTools):
 # location (cm) and rotation (x, y, z, w).
 HELD = ((-10.8226, -1.6719, 26.0197), (-0.709149, 0.694266, 0.003177, 0.122849))
+# While she tills, the hoe turns this far (deg) in her right fist about the palm's normal, so the haft lies
+# across her palm on the diagonal of a working grip instead of the carry's; carried straight, her right
+# wrist bent 74 degrees toward the little finger (joint_limits). The game turns it the same way as she sets
+# the hoe (HoeWorkTurnDegrees in HomesteadCharacterEquipment.cpp). The hand_r-space palm normal, finger
+# direction and the palm's centre (cm along the fingers and off the palm) are measured on her rig.
+WORK_TURN = -45.0
+PALM_NORMAL_R = (-0.036, 0.984, 0.175)
+PALM_ALONG_R = (-0.998, -0.043, 0.036)
+PALM_REACH_R = 6.0
+PALM_DEPTH_R = 2.6
 # Where her left hand closes on the haft, from the prop pivot toward the blade (cm).
 LEFT_ALONG = -4.0
+# The left hand's roll on the haft (deg about the haft toward the blade) away from knuckles down the blade's
+# hang, per key; the game doesn't read the left hand, so it can roll freely. Rolled on the raises, its
+# 65-degree ulnar deviation there clears (joint_limits); elsewhere a roll trades its forearm twist for
+# wrist flexion one for one, so it stays near the grip.
+LEFT_ROLL = {'set': 30.0, 'raise1': 60.0, 'chop1': 30.0, 'bite1': 30.0, 'draw1': 30.0, 'raise2': 60.0, 'chop2': 30.0,
+             'bite2': 30.0, 'draw2': 30.0, 'recover': 30.0}
 
 # Blade tip (cm) and the haft's direction toward the blade at each key. The strokes stay low:
 # the blade lifts under half a metre, chops into the square and drags back along the soil with
@@ -83,16 +103,27 @@ def _frame(key):
 
 
 def prop_transform(key):
-    """Component-space transform of the hoe: +Z toward the top end (-h), -Y along the blade (b)."""
+    """Component-space transform of the imported hoe: +Z toward the top end (-h), +Y along the blade (b)."""
     tip, h, b = _frame(key)
     origin = tip - h * (-EDGE_ALONG) - b * EDGE_OUT
-    rot = unreal.MathLibrary.make_rot_from_zy(h * -1.0, b * -1.0)
+    rot = unreal.MathLibrary.make_rot_from_zy(h * -1.0, b)
     return unreal.Transform(origin, rot, unreal.Vector(1, 1, 1))
 
 
-def _held():
+def _held(work=True):
+    """The hoe in her right hand: carried (``HELD``) or, while she tills, turned ``WORK_TURN`` degrees in her
+    fist about the palm's normal through the point of the haft nearest her palm (the grip's centre)."""
     loc, q = HELD
-    return unreal.Transform(_v(loc), unreal.Quat(*q).rotator(), unreal.Vector(1, 1, 1))
+    loc, rot = _v(loc), unreal.Quat(*q)
+    if work and WORK_TURN:
+        n = _v(PALM_NORMAL_R).normal()
+        palm = _v(PALM_ALONG_R) * PALM_REACH_R + n * PALM_DEPTH_R
+        haft = rot.rotate_vector(unreal.Vector(0, 0, 1))
+        grip = loc + haft * (palm - loc).dot(haft)
+        half = math.radians(WORK_TURN) * 0.5
+        turn = unreal.Quat(n.x * math.sin(half), n.y * math.sin(half), n.z * math.sin(half), math.cos(half))
+        loc, rot = grip + turn.rotate_vector(loc - grip), turn * rot
+    return unreal.Transform(loc, rot.rotator(), unreal.Vector(1, 1, 1))
 
 
 def right_hand(s, key):
@@ -122,7 +153,17 @@ def build():
         if name in ('stand', 'end'):
             position, blade, edge = af.WRIST_R_STAND
             b, e = af._norm(blade), af._norm(edge)
-            s.key_world(frame, 'hand_r_ik_ctrl', position, right.turn(b, (e - b * e.dot(b)).normal()))
+            turn = right.turn(b, (e - b * e.dot(b)).normal())
+            if WORK_TURN:
+                # The carry's hoe exactly where it rides, her fist already on the work grip: the game turns
+                # the hoe in her hand as the clip blends in and out, so she regrips without moving it.
+                rest = s.bone('hand_r').rotation
+                hand = unreal.Transform(_v(position), (turn.quaternion() * rest).rotator(), unreal.Vector(1, 1, 1))
+                carried = unreal.MathLibrary.compose_transforms(_held(False), hand)
+                work = unreal.MathLibrary.compose_transforms(unreal.MathLibrary.invert_transform(_held()), carried)
+                position = (work.translation.x, work.translation.y, work.translation.z)
+                turn = (work.rotation * rest.inversed()).rotator()
+            s.key_world(frame, 'hand_r_ik_ctrl', position, turn)
             s.key_world(frame, 'hand_l_ik_ctrl', af.WRIST_L_STAND, s.hand_turn('l', (0, 0.2, -1), (-1, 0, 0)))
             continue
         position, turn = right_hand(s, name)
@@ -130,7 +171,8 @@ def build():
         _, h, b = _frame(name)
         grip = prop_transform(name).translation + h * LEFT_ALONG
         # Left hand overhand on the haft: index toward the blade, knuckles down its hang.
-        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist((grip.x, grip.y, grip.z), h, b), left.turn(h, b))
+        b_l = af.rolled(b, h, LEFT_ROLL.get(name, 0.0))
+        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist((grip.x, grip.y, grip.z), h, b_l), left.turn(h, b_l))
     s.key_world(F['stand'], 'foot_l_ik_ctrl', kg.FOOT_L)
     s.key_world(5, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (0, 9, 6)))
     s.key_world(F['set'], 'foot_l_ik_ctrl', FOOT_L_FORWARD)
@@ -149,7 +191,7 @@ def build():
 def report(anim):
     """Baked blade tip (through the carried hoe in the baked right hand) vs keyed, and hand spacing."""
     bones = ['hand_r', 'hand_l']
-    tip_local = unreal.Vector(0, -EDGE_OUT, EDGE_ALONG)
+    tip_local = unreal.Vector(0, EDGE_OUT, EDGE_ALONG)
     lines = []
     for name, frame in FRAMES.items():
         b = ra.bone_positions(anim, bones, frame / 30)

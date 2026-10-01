@@ -552,9 +552,9 @@ std::uint64_t PlacementHashWithout(int skippedId, int& count)
     for (const auto& p : ProvisionalEstatePlacements().placements)
     {
         // The rack, and the later forage sections appended after it was pinned (roadside 581000-581999,
-        // woods and hedges 582100-582299, the ruin's fallen roof timbers 582012-582013), so the hash still
-        // covers exactly the placements older saves know.
-        if (p.id == skippedId || (p.id >= 581000 && p.id < 582000) || (p.id >= 582100 && p.id < 582300)
+        // woods and hedges 582100-582299, the lake trail 582300-582399, the ruin's fallen roof timbers
+        // 582012-582013), so the hash still covers exactly the placements older saves know.
+        if (p.id == skippedId || (p.id >= 581000 && p.id < 582000) || (p.id >= 582100 && p.id < 582400)
             || p.id == 582012 || p.id == 582013) continue;
         std::snprintf(line, sizeof line, "%d %d %.3f %.3f %.3f %.3f %.3f %d\n", p.id, static_cast<int>(p.kind),
             p.position.x, p.position.y, p.z, p.yaw, p.scale, p.minTier);
@@ -573,8 +573,13 @@ void ToolRackIsSaveSafe()
     const std::uint64_t before = PlacementHashWithout(520006, count);
     CHECK(count == 2197 && before == UINT64_C(12311480322052281513));
     const auto& all = ProvisionalEstatePlacements().placements;
-    CHECK(all.back().id == 520006 && all.back().kind == ResourceKind::SalvagePile);
-    const Point rack = all.back().position;
+    // The rack is the last placement but for the lake trail's forage (582300-582399), appended after it.
+    std::size_t rackAt = all.size();
+    for (std::size_t i = 0; i < all.size(); ++i)
+        if (all[i].id == 520006) rackAt = i;
+    CHECK(rackAt < all.size() && all[rackAt].kind == ResourceKind::SalvagePile);
+    for (std::size_t i = rackAt + 1; i < all.size(); ++i) CHECK(all[i].id >= 582300 && all[i].id < 582400);
+    const Point rack = all[rackAt].position;
     CHECK(PointInPolygon(ProvisionalEstateLayout().FindPolygon(Anchor::ManorFootprint)->points, rack));
     for (const auto& other : all)
         if (other.id != 520006) CHECK(std::hypot(other.position.x - rack.x, other.position.y - rack.y) >= 150.0);

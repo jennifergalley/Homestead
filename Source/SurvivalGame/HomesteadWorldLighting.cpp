@@ -128,8 +128,8 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float SolarAngle = (Hour - 6.0f) / 24.0f * 2.0f * PI;
     const float Elevation = FMath::Sin(SolarAngle);
     const float Daylight = FMath::SmoothStep(-0.1f, 0.25f, Elevation);
-    // The simulation's three-day spring weather: cloud builds half an hour before the rain and clears
-    // half an hour after it (Homestead::Overcast), the rain swells and eases (Homestead::RainAmount).
+    // The simulation's rain spells (Simulation/HomesteadRain.h): cloud builds before each and clears after
+    // it (Homestead::Overcast), the rain swells and eases (Homestead::RainAmount), at any hour.
     if (Weather) Weather->Update(State, Daylight);
     const float Cloud = Weather ? Weather->GetOvercast() : 0.0f;
     const float Shower = Weather ? Weather->GetRain() : 0.0f;
@@ -177,18 +177,20 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     NightTuning.nightSky = CVarNightSky.GetValueOnGameThread();
     NightTuning.nightMinExposureEV = CVarNightMinExposure.GetValueOnGameThread();
     const Homestead::NightLight Night = Homestead::NightLightAt(Hour, NightTuning);
-    Moon->SetIntensity(static_cast<float>(Night.moonLux));
+    Moon->SetIntensity(static_cast<float>(Night.moonLux) * FMath::Lerp(1.0f, OvercastMoonScale, Cloud));
     // Only while she is inside a roofed room (her position, eased), so the outdoors keeps its sky fill when
     // the camera passes a doorway or an overhang.
     const float IndoorDay = GetRoomMix() * Daylight;
-    Sky->SetIntensity(static_cast<float>(Night.skyScale) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud)
+    // By day the cloud lifts the sky light (the sun's light scattered); by night it keeps the night floor.
+    Sky->SetIntensity(static_cast<float>(Night.skyScale) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud * Daylight)
         * FMath::Lerp(1.0f, CVarIndoorDaySky.GetValueOnGameThread(), IndoorDay));
     // The real-time sky capture still sees the clear blue atmosphere under the cloud layer, so warm it
     // back towards a neutral grey overcast.
     Sky->SetLightColor(FMath::Lerp(FLinearColor::White, FLinearColor(1.0f, 0.93f, 0.84f), Cloud));
     Exposure->Settings.AutoExposureMinBrightness = static_cast<float>(Night.minExposureEV);
     // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
-    Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud
+    // The overcast hold only by day: at night the exposure already sits on its floor, and lower would go black.
+    Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud * Daylight
         + IndoorDayExposureBias * IndoorDay;
     const float Saturation = FMath::Lerp(1.0f, OvercastSaturation, Cloud);
     Exposure->Settings.ColorSaturation = FVector4(Saturation, Saturation, Saturation, 1.0f);
@@ -199,7 +201,7 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     Fog->SetFogInscatteringColor(FMath::Lerp(ClearHaze, FLinearColor(0.43f, 0.47f, 0.5f) * FMath::Lerp(0.15f, 1.0f, Daylight), Cloud));
 
     // The ground and meadow wet through in the first half hour of rain and dry over the four hours
-    // after it stops; the rain days follow Homestead::IsRainDay.
+    // after it stops (Homestead::GroundWetness).
     if (!bGroundParametersTried)
     {
         bGroundParametersTried = true;
@@ -209,11 +211,7 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     if (GroundParameters && GetWorld())
         if (UMaterialParameterCollectionInstance* GroundValues = GetWorld()->GetParameterCollectionInstance(GroundParameters))
         {
-            constexpr float RainStart = static_cast<float>(Homestead::RainStartHour);
-            constexpr float RainEnd = static_cast<float>(Homestead::RainEndHour);
-            const float Wetness = !Homestead::IsRainDay(State.hour) ? 0.0f
-                : FMath::SmoothStep(RainStart, RainStart + 0.5f, Hour) * (1.0f - FMath::SmoothStep(RainEnd, RainEnd + 4.0f, Hour));
-            GroundValues->SetScalarParameterValue(TEXT("Wetness"), Wetness);
+            GroundValues->SetScalarParameterValue(TEXT("Wetness"), static_cast<float>(Homestead::GroundWetness(State.hour)));
             GroundValues->SetScalarParameterValue(TEXT("Daylight"), Daylight);
         }
 }

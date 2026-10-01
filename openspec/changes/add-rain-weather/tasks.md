@@ -14,14 +14,38 @@
 ## 3. Historical daytime recurrence
 
 - [x] 3.1 Rain on two days in ten instead of every third day (Jenny, 2026-09-29: too often). A stable SplitMix64 hash of each ten-day block picks offsets 1 or 2 and 6 or 7: exactly 20% of days, rains 4-6 days apart, day 0 dry, and day 1 still the first rain. The 09:00-15:00 window, overcast, moisture and audio are unchanged, and there's no seed or save section. Old saves keep their plots' moisture, but their forecast from the current day on follows the new schedule. Native: counts over 10,000 days, gaps, all four offset pairs, whole days, save/reload.
-- [ ] 3.2 Historical PIE/package evidence for the former daytime schedule. Do not use this as
-  acceptance for the superseding full-cycle design.
+- [ ] 3.2 PIE/package, superseded by section 4's spells:
+  - days 0-5 stay dry;
+  - the first spell rains from about 18:27 on day 6 (Sunday, Spring 7) through midnight to about 01:46, a night spell;
+  - the next falls 15:07-16:52 on day 8, then 12:41-20:33 on day 9.
+  Checked in 4.4.
 
-## 4. Full-cycle recurrence (Jenny, 2026-09-30)
+## 4. Rain at any hour (Jenny, 2026-09-30: "let it randomize throughout the day/night cycle")
 
-- [ ] 4.1 Replace the daytime-only window with a seasonally weighted, reload-stable schedule that
-  selects rain at random times through the full day/night cycle.
-- [ ] 4.2 Drive coherent night-rain lighting, overcast, wet ground and ambience without turning
-  night into day.
-- [ ] 4.3 Verify save/reload stability, daytime and night events, roof shelter, wet ground/audio
-  behavior and packaged RT-on night evidence.
+- [x] 4.1 `Simulation/HomesteadRain`: one possible spell per calendar day, from a hash of the day.
+  - Any start hour; 1-8 h long; 0.5-1.5 h of cloud build-up and clearing.
+  - Weighted by season (spring 5.0% of hours, summer 3.2%, autumn 6.0%, winter 6.8%; year 5.3%, against 5%
+    before). Spells never merge, and they cross midnight and 06:00.
+  - `IsRainingAt`, `RainAmount`, `Overcast`, `GroundWetness`, `IsRainDay`, `RainSpellOfDay`, `NextRainSpell`
+    and `NextRainChange`. `Step` stops at a rain change.
+  - No save data: the clock alone decides it, and old saves load with the new forecast from their hour on.
+- [x] 4.2 Readers updated:
+  - the landscape wetness reads `GroundWetness`;
+  - night cloud dims the moon to 35%, keeping the sky light and exposure on their night floors;
+  - the full-loop test and the UI gallery's `hud-rain`/`toast-rain` fixtures find the next spell (`NextRainSpell`).
+  - Rain audio, plot watering and the HUD's Rain label were already hour-agnostic.
+- [x] 4.3 Native tests:
+  - spell lengths, cloud times, spacing and determinism over 20 years;
+  - starts in every hour, about 43% at night and some in every season, crossing midnight and 06:00;
+  - the wet share by season and year;
+  - a reload during night rain;
+  - one spell's cloud, rain, wetness and change points;
+  - night rain watering a plot;
+  - a step split at the rain's start.
+- [x] 4.4 PIE (2026-10-01, RT on): a night spell (day 42, 00:11-06:27): rain falls and sounds at the town square
+  (gain 0.12) and in the meadow, the moon dimmed to 0.08 lux, the town readable by the held lamp, the hearth lit.
+  The ground (MPC Wetness) wets through in half an hour and dries over four hours after the day-44 spell: 18:30 1.0,
+  19:30 0.87, 20:36 0.50, 21:36 0.16, 22:48 0. Captures: E:\CopilotScratch\89914e30-...\rain44.
+  - the first spell (day 6, from 18:27 through midnight) at the town square and the meadow: rain, sound, the moon dimmed, and the lamp and hearth still readable;
+  - the night A/B sheet's rain row;
+  - the wet ground drying over the next four hours.

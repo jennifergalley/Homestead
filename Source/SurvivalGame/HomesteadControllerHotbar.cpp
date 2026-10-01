@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 #include "HomesteadControllerHelpers.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadCharacter.h"
@@ -293,7 +294,7 @@ void AHomesteadController::SelectHotbarSlot(int32 Index)
     ToastText = MenuHotbarRow(Index, Held) ? Held.Name : FString(TEXT("Empty slot"));
     bToastError = false;
     ToastRemaining = 1.0f;
-    PlayEffect(UIClick, 0.05f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
 }
 
 void AHomesteadController::RotateHotbarRow()

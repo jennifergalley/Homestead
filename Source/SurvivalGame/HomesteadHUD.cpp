@@ -301,7 +301,13 @@ void AHomesteadHUD::DrawHUD()
     if (!Canvas) return;
     const AHomesteadController* PC = Cast<AHomesteadController>(PlayerOwner);
     if (!PC) return;
-    if (PC->HasNativeMenu()) return;
+    if (PC->HasNativeMenu())
+    {
+        // The book draws its own notice (Slate); nothing measured here is on screen while it's open.
+        ToastSource.Reset(); ToastLines.Reset(); ToastTextBounds.Reset();
+        ToastBounds = FBox2D(ForceInit);
+        return;
+    }
     UiScale = FMath::Clamp(Canvas->ClipY / 1080.0f, 0.4f, 1.5f);
     // The theme trial: in parchment every Canvas word is the book's serif (key glyphs excepted).
     bThemeSerif = HomesteadUITheme::IsParchment();

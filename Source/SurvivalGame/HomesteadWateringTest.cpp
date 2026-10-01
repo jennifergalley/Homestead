@@ -50,8 +50,17 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     };
     auto Approach = [this, Garden, Hidden]()
     {
-        Add(TEXT("Return beside the real planted fixture plot"), [this, Garden]() { Teleport(Garden); },
-            [this, Hidden]() { return Controller->FocusActions().Contains(TEXT("Water")) && Hidden(); }, 0.7f);
+        // Beside the plot, the pail's reach west of its middle and facing it, so the pour has a direction
+        // (standing on the middle, "toward the plot" is undefined). The pail is chosen: the card offers
+        // Water only with it in hand.
+        Add(TEXT("Return beside the real planted fixture plot"), [this, Garden]()
+            {
+                Teleport({Garden.x - Homestead::GardenReach::PailAheadCm, Garden.y});
+                Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
+                Controller->SetControlRotation(FRotator(-20, 0, 0));
+                Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
+            },
+            [this, Hidden]() { return Controller->Focus == AHomesteadController::EFocus::Plot && Hidden(); }, 0.7f);
     };
     auto Refill = [this, Stream, Hidden, Approach]()
     {
@@ -400,7 +409,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             Avatar->ApplyPreparedEquipment(Error);
         }, Hidden);
     Refill();
-    for (int32 Portion = 0; Portion < 6; ++Portion)
+    for (int32 Portion = 0; Portion < Homestead::PailPortions; ++Portion)
         Add(TEXT("Each allowed repeat consumes exactly one real water portion"),
             [this, Probe]()
             {

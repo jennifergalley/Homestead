@@ -171,8 +171,14 @@ void NewGameDateAndDayLength()
     leisurely.SetPlacements(none);
     OK(leisurely.Deserialize(sim.Serialize()));
     CHECK(leisurely.GetState().dayMinutes == 120.0);
-    // The rain schedule keeps every third day, keyed off the calendar day.
-    CHECK(!IsRainingAt(HourOf(0, 1, 12.0)) && IsRainingAt(HourOf(0, 2, 12.0)) && !IsRainingAt(HourOf(0, 3, 12.0)));
+    // Rain spells are keyed off the calendar day: the spell a day draws starts within it (06:00 to 06:00).
+    for (int day = 0; day < 400; ++day)
+    {
+        RainSpell spell;
+        if (!RainSpellOfDay(day, spell)) continue;
+        CHECK(spell.day == day && spell.start >= day * 24.0 + Calendar::DayStartHour - 1e-9
+            && spell.start < (day + 1) * 24.0 + Calendar::DayStartHour);
+    }
 }
 
 void SeasonRolloverHook()

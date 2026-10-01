@@ -29,9 +29,8 @@
 ## 5. Night and rain
 
 - [x] 5.1 `MPC_EstateGround` (Wetness, Daylight), set every refresh by `AHomesteadWorld::UpdateLighting`:
-  the ground wets through over the first half hour of any rain event and dries over the next four
-  hours. The former daytime-only schedule is historical; Water's pending full-cycle schedule must
-  drive the same response at night.
+  the ground wets through over the first half hour of the rain (spells of rain at any hour; see add-rain-weather 4.1) and
+  dries over the next four hours.
 - [x] 5.2 Wet response: the landscape's soil, litter and stone darken (turf less) and turn glossy,
   with standing-water sheen on trodden ground; the grass blades darken and gloss.
 - [x] 5.3 No grass glow at night: blade transmission and the gust sheen scale with daylight.

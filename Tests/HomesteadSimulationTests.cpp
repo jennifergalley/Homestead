@@ -873,7 +873,9 @@ void GameplayWalkthrough()
     }
     sim.AdvanceGameHours(4, Home);
     CHECK(sim.GetState().plots[0].growth > 0.0);
-    OK(sim.Weed(plotId, garden));
+    // Weeds come up once a day (at 6 AM or on waking), never in the hours between.
+    CHECK(sim.GetState().plots[0].weeds == 0.0);
+    CHECK(sim.Weed(plotId, garden).message == "This plot is already free of weeds.");
     const double energyBeforeMeal = sim.GetState().energy;
     CHECK(energyBeforeMeal < 100);
     OK(sim.Eat(Item::HerbedRoots));
@@ -1423,6 +1425,111 @@ void GardenSquares()
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, -2, -1, 0, garden); });
 }
 
+// Jenny (2026-09-30): weeds come up once a day, so there's something to clear each morning but never
+// twice a day. Awake, the pass runs at 6 AM; asleep across 6 AM, on waking; never in the hours between,
+// and each calendar day gets one pass however it comes.
+void DailyWeedPass()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Seeds, 1}, {Item::DiggingStick, 1}, {Item::Branch, 4}, {Item::Hay, 4}});
+    OK(sim.Place(Piece::Bed, -3, 0, 0, Home));
+    const Point garden = CellCenter(-2, -1);
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
+    OK(sim.Plant(sim.FindNearestPlot(garden, 1), garden));
+    const auto weeds = [](const Simulation& s) { return s.GetState().plots[0].weeds; };
+    // Day 0 = 06:00 on the first morning; hour 30 is the next 6 AM. Fed and rested, plot clean.
+    const auto set = [](Simulation& s, double hour, double plotWeeds = 0.0, double energy = 100.0) {
+        Edit(s, [=](State& state) {
+            state.hour = hour;
+            state.hunger = 100.0;
+            state.energy = energy;
+            state.plots[0].weeds = plotWeeds;
+        });
+    };
+    CHECK(Crops::WeedDay(6.0) == 0 && Crops::WeedDay(29.99) == 0 && Crops::WeedDay(30.0) == 1);
+
+    // 18 awake hours from noon: nothing until 6 AM, then one pass.
+    Simulation awake = sim;
+    set(awake, 12.0);
+    awake.AdvanceGameHours(17.9, Home);
+    CHECK(weeds(awake) == 0.0 && awake.GetState().hour < 30.0);
+    awake.AdvanceGameHours(0.2, Home);
+    CHECK(Close(weeds(awake), CropCare::DailyWeeds));
+    awake.AdvanceGameHours(20.0, Home);
+    CHECK(Close(weeds(awake), CropCare::DailyWeeds));
+
+    // A night's sleep (22:00 to 06:00): exactly one pass, on waking.
+    Simulation night = sim;
+    set(night, 22.0);
+    OK(night.Sleep(8.0, Home, {1, 0}));
+    CHECK(Close(night.GetState().hour, 30.0) && Close(weeds(night), CropCare::DailyWeeds));
+    // Awake for the rest of that day: no second pass.
+    night.AdvanceGameHours(10.0, Home);
+    CHECK(Close(weeds(night), CropCare::DailyWeeds));
+    // A nap that doesn't cross 6 AM adds nothing.
+    OK(night.Sleep(2.0, Home, {1, 0}));
+    CHECK(Close(weeds(night), CropCare::DailyWeeds));
+
+    // Sleeping across 6 AM (03:00 to 09:00): one pass, then nothing until the next 6 AM.
+    Simulation across = sim;
+    set(across, 27.0);
+    OK(across.Sleep(6.0, Home, {1, 0}));
+    CHECK(Close(weeds(across), CropCare::DailyWeeds));
+    across.AdvanceGameHours(20.0, Home);
+    CHECK(Close(weeds(across), CropCare::DailyWeeds) && across.GetState().hour < 54.0);
+    // Woken before 6 AM (22:00 to 05:00): no pass on waking; it comes at 6 AM with her up.
+    Simulation early = sim;
+    set(early, 22.0);
+    OK(early.Sleep(7.0, Home, {1, 0}));
+    CHECK(weeds(early) == 0.0);
+    early.AdvanceGameHours(1.5, Home);
+    CHECK(Close(weeds(early), CropCare::DailyWeeds));
+    // The book's long sleep is two halves; a 16 hour sleep from 22:00 still gets one pass.
+    Simulation longSleep = sim;
+    set(longSleep, 22.0);
+    OK(longSleep.Sleep(8.0, Home, {1, 0}));
+    OK(longSleep.Sleep(8.0, Home, {1, 0}));
+    CHECK(Close(weeds(longSleep), CropCare::DailyWeeds));
+
+    // Dozing off where she stands across 6 AM: one pass when she comes to.
+    Simulation doze = sim;
+    set(doze, 29.0, 0.0, 0.3);
+    doze.AdvanceGameHours(0.6, Home);
+    CHECK(doze.GetState().hour > 30.0 && Close(weeds(doze), CropCare::DailyWeeds));
+
+    // Three days without sleep: three passes, one each 6 AM.
+    Simulation days = sim;
+    set(days, 7.0);
+    for (int chunk = 0; chunk < 12; ++chunk)
+    {
+        Edit(days, [](State& state) { state.hunger = 100.0; state.energy = 100.0; });
+        days.AdvanceGameHours(6.0, Home);
+        const int passes = Crops::WeedDay(days.GetState().hour);
+        CHECK(Close(weeds(days), std::min(1.0, CropCare::DailyWeeds * passes)));
+    }
+    CHECK(Close(days.GetState().hour, 79.0) && Close(weeds(days), CropCare::DailyWeeds * 3));
+    // Capped at fully weedy.
+    set(days, 29.5, 0.9);
+    days.AdvanceGameHours(1.0, Home);
+    CHECK(weeds(days) == 1.0);
+
+    // Reload stability: an old save keeps its weeds, and a reload either side of 6 AM changes nothing.
+    Simulation saved = sim;
+    set(saved, 29.0, 0.37);
+    CHECK(Close(weeds(saved), 0.37));
+    Simulation reloaded;
+    OK(reloaded.Deserialize(saved.Serialize()));
+    CHECK(reloaded.Serialize() == saved.Serialize());
+    saved.AdvanceGameHours(2.0, Home);
+    reloaded.AdvanceGameHours(2.0, Home);
+    CHECK(Close(weeds(saved), 0.37 + CropCare::DailyWeeds) && weeds(reloaded) == weeds(saved));
+    Simulation afterPass;
+    OK(afterPass.Deserialize(saved.Serialize()));
+    afterPass.AdvanceGameHours(5.0, Home);
+    saved.AdvanceGameHours(5.0, Home);
+    CHECK(weeds(afterPass) == weeds(saved) && Close(weeds(afterPass), 0.37 + CropCare::DailyWeeds));
+}
+
 void FarmingAndRain()
 {
     Simulation sim;
@@ -1449,7 +1556,7 @@ void FarmingAndRain()
     dry.AdvanceGameHours(4, Home);
     weedy.AdvanceGameHours(4, Home);
     CHECK(sim.GetState().plots[0].moisture < 1);
-    CHECK(sim.GetState().plots[0].weeds > 0 && sim.GetState().plots[0].weeds < 0.1);
+    CHECK(sim.GetState().plots[0].weeds == 0); // no weeds until the next 6 AM pass (DailyWeedPass)
     CHECK(dry.GetState().plots[0].planted);
     CHECK(dry.GetState().plots[0].growth > 0);
     CHECK(sim.GetState().plots[0].growth > dry.GetState().plots[0].growth);
@@ -1458,13 +1565,34 @@ void FarmingAndRain()
     OK(weedy.Weed(id, garden));
     CHECK(weedy.GetState().plots[0].growth == growth);
     CHECK(weedy.GetState().plots[0].weeds == 0);
-    Edit(dry, [](State& state) { state.hour = 33; });
+    // The first spell of rain at least 2.5 h long (Simulation/HomesteadRain.h): it waters the dry plot.
+    RainSpell spell;
+    for (double from = 30.0; NextRainSpell(from, spell) && spell.end - spell.start < 2.5;) from = spell.end;
+    CHECK(spell.end - spell.start >= 2.5);
+    Edit(dry, [&spell](State& state) { state.hour = spell.start + 0.01; });
     CHECK(dry.IsRaining());
     dry.AdvanceGameHours(2, Home);
     CHECK(dry.GetState().plots[0].moisture > 0.5);
     CHECK(dry.GetState().plots[0].growth > 0);
-    Edit(dry, [](State& state) { state.hour = 39; });
+    Edit(dry, [&spell](State& state) { state.hour = spell.end + 0.01; });
     CHECK(!dry.IsRaining());
+    // Rain waters the garden at night too (Jenny, 2026-09-30): a spell that starts after dark.
+    {
+        RainSpell night;
+        for (double from = 30.0; NextRainSpell(from, night)
+            && (night.end - night.start < 2.5 || (std::fmod(night.start, 24.0) < 21.0 && std::fmod(night.start, 24.0) >= 3.0));)
+            from = night.end;
+        Simulation dark = dry;
+        Edit(dark, [&night](State& state) { state.hour = night.start + 0.01; state.plots[0].moisture = 0.0; });
+        CHECK(dark.IsRaining() && dark.IsNight());
+        dark.AdvanceGameHours(2, Home);
+        CHECK(dark.GetState().plots[0].moisture > 0.5);
+        // A step never spans the rain's start: half an hour dry, then half an hour of rain.
+        Simulation edge = dry;
+        Edit(edge, [&night](State& state) { state.hour = night.start - 0.5; state.plots[0].moisture = 0.0; });
+        edge.AdvanceGameHours(1.0, Home);
+        CHECK(std::abs(edge.GetState().plots[0].moisture - 0.3 * 0.5) < 0.01);
+    }
     Edit(dry, [](State& state) { state.plots[0].growth = 1; });
     Stock(dry, {{Item::Stone, 115}});
     UnchangedFailure(dry, [&] { return dry.HarvestCrop(id, garden); });
@@ -1554,7 +1682,9 @@ void BerryCropCycle()
     CHECK(dry.GetState().plots[0].growth < sim.GetState().plots[0].growth);
     CHECK(weedy.GetState().plots[0].growth < sim.GetState().plots[0].growth);
     CHECK(dry.GetState().plots[0].planted && weedy.GetState().plots[0].planted);
-    Edit(rain, [](State& state) { state.hour = 33; state.plots[0].moisture = 0; });
+    RainSpell shower;
+    for (double from = 30.0; NextRainSpell(from, shower) && shower.end - shower.start < 2.5;) from = shower.end;
+    Edit(rain, [&shower](State& state) { state.hour = shower.start; state.plots[0].moisture = 0; });
     rain.AdvanceGameHours(2, Home);
     CHECK(rain.GetState().plots[0].moisture > 0.59);
     CHECK(rain.GetState().plots[0].growth > 0);
@@ -3966,62 +4096,99 @@ void SleepOptionPolicy()
     OK(sleeper.Sleep(shortRest->hours, Home, {1, 0}, true));
     CHECK(Close(sleeper.GetState().hour, 30.0) && Close(sleeper.GetState().energy, 51.25));
     UnchangedFailure(sleeper, [&] { return sleeper.Sleep(0.125, Home, {1, 0}, true); });
-    // One rain schedule for the rules, the lighting and the wet ground: two days in ten, 09:00-15:00. Day 0 is
-    // dry and day 1 rains (as before); every ten-day block rains on one of offsets 1-2 and one of 6-7, so
-    // exactly 20% of days with rains 4-6 days apart, and all four combinations occur.
-    CHECK(!IsRainDay(12.0) && IsRainDay(24.0 + 1.0) && IsRainDay(24.0 + 23.9) && !IsRainDay(48.0 + 12.0));
+    // Rain at any hour (Jenny, 2026-09-30: "let it randomize throughout the day/night cycle"). Each calendar
+    // day may draw one spell of 1-8 h starting at any hour, free to run past midnight and past 06:00, with
+    // cloud building before it and clearing after; spells never merge; autumn and winter are wetter; the
+    // year keeps about the old 5% of hours wet. The hour alone decides it (Simulation/HomesteadRain.h).
     {
-        int rainy = 0, lastRain = -1, shortestGap = 1000, longestGap = 0;
-        bool combos[2][2] = {};
-        for (int day = 0; day < 10000; ++day)
+        const int days = Calendar::DaysPerYear * 20;
+        int spells = 0, nightStarts = 0, pastMidnight = 0, pastRollover = 0;
+        double shortest = 1e9, longest = 0.0;
+        int startHour[24] = {}, nightRainBySeason[4] = {};
+        RainSpell previous;
+        bool havePrevious = false;
+        CHECK(!RainSpellOfDay(0, previous));   // a new game's first day is dry
+        for (int day = 0; day < days; ++day)
         {
-            const bool wet = IsRainDay(day * 24.0 + 12.0);
-            CHECK(wet == IsRainDay(day * 24.0) && wet == IsRainDay(day * 24.0 + 23.99));   // whole days
-            if (!wet) continue;
-            ++rainy;
-            const int offset = day % RainBlockDays;
-            CHECK(offset == 1 || offset == 2 || offset == 6 || offset == 7);
-            if (lastRain >= 0)
+            RainSpell spell;
+            if (!RainSpellOfDay(day, spell)) continue;
+            ++spells;
+            const double length = spell.end - spell.start;
+            shortest = std::min(shortest, length);
+            longest = std::max(longest, length);
+            CHECK(length >= Rain::MinSpellHours - 1e-9 && length <= Rain::MaxSpellHours + 1e-9);
+            CHECK(spell.buildUp >= Rain::MinCloudHours && spell.buildUp <= Rain::MaxCloudHours
+                && spell.clearing >= Rain::MinCloudHours && spell.clearing <= Rain::MaxCloudHours);
+            if (havePrevious)   // apart: the sky clears between spells, so none runs longer than the max
+                CHECK(spell.start - spell.buildUp >= previous.end + previous.clearing + Rain::MinClearHours - 1e-9);
+            previous = spell;
+            havePrevious = true;
+            const double startOfDay = std::fmod(spell.start, 24.0);
+            ++startHour[static_cast<int>(startOfDay)];
+            if (startOfDay >= 19.0 || startOfDay < 6.0)
             {
-                shortestGap = std::min(shortestGap, day - lastRain);
-                longestGap = std::max(longestGap, day - lastRain);
+                ++nightStarts;
+                ++nightRainBySeason[static_cast<int>(Calendar::DateOfDay(day).season)];
             }
-
-            lastRain = day;
+            if (std::floor(spell.end / 24.0) > std::floor(spell.start / 24.0)) ++pastMidnight;
+            if (Calendar::DayIndex(spell.end - 1e-6) > spell.day) ++pastRollover;
+            // Same answer every time it's asked: nothing random at run time.
+            RainSpell again;
+            CHECK(RainSpellOfDay(day, again) && again.start == spell.start && again.end == spell.end);
         }
-        for (long long block = 0; block < 1000; ++block)
-            combos[RainDayOffset(block, 0) - 1][RainDayOffset(block, 1) - 6] = true;
-        CHECK(rainy == 2000);
-        CHECK(shortestGap == 4 && longestGap == 6);
-        CHECK(combos[0][0] && combos[0][1] && combos[1][0] && combos[1][1]);
-        CHECK(IsRainDay(-24.0 * 3 + 1.0) == IsRainDay(-24.0 * 3 + 22.0));   // a negative hour's day is still whole
-        // It depends on the hour alone, so a save and reload keeps the forecast.
+        CHECK(shortest < 1.5 && longest > 7.5);
+        for (int hour = 0; hour < 24; ++hour) CHECK(startHour[hour] > 0);   // any hour of the day or night
+        CHECK(nightStarts > spells / 4 && pastMidnight > 0 && pastRollover > 0);
+        for (int season = 0; season < 4; ++season) CHECK(nightRainBySeason[season] > 0);
+        // The share of hours wet, by season (sampled every ten minutes over twenty years).
+        double wet[4] = {}, all[4] = {}, wetTotal = 0.0, allTotal = 0.0;
+        for (double hour = Calendar::DayStartHour; hour < days * 24.0; hour += 1.0 / 6.0)
+        {
+            const int season = static_cast<int>(Calendar::DateAt(hour).season);
+            const bool raining = IsRainingAt(hour);
+            all[season] += 1.0;
+            allTotal += 1.0;
+            if (raining) { wet[season] += 1.0; wetTotal += 1.0; }
+        }
+        std::printf("RAIN wet share spring %.4f summer %.4f autumn %.4f winter %.4f year %.4f; %d spells, %d at night\n",
+            wet[0] / all[0], wet[1] / all[1], wet[2] / all[2], wet[3] / all[3], wetTotal / allTotal, spells, nightStarts);
+        CHECK(wet[1] / all[1] < wet[0] / all[0] && wet[0] / all[0] < wet[2] / all[2] && wet[2] / all[2] < wet[3] / all[3]);
+        CHECK(wetTotal / allTotal > 0.04 && wetTotal / allTotal < 0.065);   // the old schedule: 6 h on 20% of days = 5%
+        // It depends on the hour alone, so a save and reload keeps the weather, at night as by day.
+        RainSpell nightSpell;
+        for (double from = 30.0; NextRainSpell(from, nightSpell) && std::fmod(nightSpell.start, 24.0) < 21.0;) from = nightSpell.end;
         Simulation before;
         BuildingStock(before);
-        Edit(before, [](State& state) { state.hour = 24.0 * 17 + 11.0; });
+        Edit(before, [&nightSpell](State& state) { state.hour = nightSpell.start + 0.2; });
         Simulation after;
         OK(after.Deserialize(before.Serialize()));
-        CHECK(after.IsRaining() == before.IsRaining() && after.IsRaining() == IsRainingAt(24.0 * 17 + 11.0));
+        CHECK(before.IsRaining() && after.IsRaining() && after.GetState().hour == before.GetState().hour);
     }
-    CHECK(IsRainingAt(24.0 + RainStartHour) && !IsRainingAt(24.0 + RainEndHour) && !IsRainingAt(24.0 + 8.99) && !IsRainingAt(10.0));
-    // Rain and cloud: none on dry days; the cloud builds half an hour ahead and clears half an hour
-    // after; the rain eases in and out and swells between drizzle and showers without jumps.
-    CHECK(RainAmount(10.0) == 0.0 && Overcast(10.0) == 0.0);
-    CHECK(Overcast(24.0 + RainStartHour - 0.6) == 0.0 && Overcast(24.0 + RainStartHour - 0.25) > 0.2
-        && Overcast(24.0 + RainStartHour) == 1.0 && Overcast(24.0 + 12.0) == 1.0);
-    CHECK(Overcast(24.0 + RainEndHour + 0.25) > 0.2 && Overcast(24.0 + RainEndHour + 0.6) == 0.0);
-    CHECK(RainAmount(24.0 + RainStartHour) == 0.0 && RainAmount(24.0 + RainStartHour - 0.1) == 0.0
-        && RainAmount(24.0 + RainEndHour) == 0.0);
-    double lowest = 1.0, highest = 0.0, biggestStep = 0.0, previous = RainAmount(24.0 + RainStartHour + 0.3);
-    for (double h = RainStartHour + 0.3; h < RainEndHour - 0.2; h += 1.0 / 60.0)
+    // One spell's shape: cloud builds over its build-up and clears over its clearing; the rain eases in and
+    // out and swells between drizzle and showers without jumps; the ground wets through and dries after.
     {
-        const double amount = RainAmount(24.0 + h);
-        lowest = std::min(lowest, amount);
-        highest = std::max(highest, amount);
-        biggestStep = std::max(biggestStep, std::abs(amount - previous));
-        previous = amount;
+        RainSpell spell;
+        for (double from = 30.0; NextRainSpell(from, spell) && spell.end - spell.start < 5.0;) from = spell.end;
+        const double a = spell.start, b = spell.end;
+        CHECK(Overcast(a - spell.buildUp - 0.01) == 0.0 && Overcast(a - spell.buildUp * 0.5) > 0.2 && Overcast(a) == 1.0
+            && Overcast((a + b) * 0.5) == 1.0 && Overcast(b + spell.clearing * 0.5) > 0.2 && Overcast(b + spell.clearing + 0.01) == 0.0);
+        CHECK(RainAmount(a) == 0.0 && RainAmount(a - 0.1) == 0.0 && RainAmount(b) == 0.0 && !IsRainingAt(b) && IsRainingAt(a));
+        CHECK(NextRainChange(a - 0.25) == a && NextRainChange(a + 0.25) == b);
+        double lowest = 1.0, highest = 0.0, biggestStep = 0.0, previous = RainAmount(a + 0.3);
+        for (double h = a + 0.3; h < b - 0.2; h += 1.0 / 60.0)
+        {
+            const double amount = RainAmount(h);
+            lowest = std::min(lowest, amount);
+            highest = std::max(highest, amount);
+            biggestStep = std::max(biggestStep, std::abs(amount - previous));
+            previous = amount;
+        }
+        CHECK(lowest >= 0.29 && lowest < 0.45 && highest > 0.85 && highest <= 1.0 && biggestStep < 0.1);
+        CHECK(GroundWetness(a - 0.01) == 0.0 && GroundWetness(a + 0.6) == 1.0 && GroundWetness(b) == 1.0
+            && GroundWetness(b + 2.0) > 0.2 && GroundWetness(b + 2.0) < 0.8);
+        RainSpell next;
+        if (!NextRainSpell(b, next) || next.start > b + Rain::DryHours) CHECK(GroundWetness(b + Rain::DryHours + 0.01) == 0.0);
     }
-    CHECK(lowest >= 0.29 && lowest < 0.45 && highest > 0.85 && highest <= 1.0 && biggestStep < 0.1);
     // Rain loudness (Jenny, 2026-09-29: too loud; halve it). Exactly half the previous gain, which was
     // rain^0.7 * ambience * lerp(0.9 outdoors, 0.35 indoors), at every strength and indoors or out; it
     // starts and stops at the same moments, and no rain is silent. Full rain at the default 0.7 ambience:
@@ -4703,7 +4870,12 @@ void RuinTimbersAreChoppedWithTheAxe()
         if (table[i].id >= 582100 && table[i].id < 582300) lastForage = i;
         if (table[i].kind == ResourceKind::RuinTimbers) firstTimber = std::min(firstTimber, i);
     }
-    CHECK(firstTimber > lastForage && firstTimber < table.size() && table.back().id == 520006);
+    std::size_t rackAt = table.size();
+    for (std::size_t i = 0; i < table.size(); ++i)
+        if (table[i].id == 520006) rackAt = i;
+    CHECK(firstTimber > lastForage && firstTimber < rackAt && rackAt < table.size());
+    // Only the lake trail's forage (582300-582399) comes after the rack.
+    for (std::size_t i = rackAt + 1; i < table.size(); ++i) CHECK(table[i].id >= 582300 && table[i].id < 582400);
     Simulation sim;
     OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
     for (int id : {582012, 582013})
@@ -5608,6 +5780,7 @@ int main()
     Run("each cooked batch burns exactly one kindling", CookingBurnsOneKindlingPerBatch);
     Run("fallen branches give renewable kindling", BranchesYieldRenewableKindling);
     Run("default gameplay walkthrough", GameplayWalkthrough);
+    Run("weeds come up once a day, on waking or at 6 AM", DailyWeedPass);
     Run("atomic inventory transactions", AtomicTransactions);
     Run("regrowth and persistent clearing", RegrowthAndClearing);
     Run("placement and enclosure", PlacementAndShelter);

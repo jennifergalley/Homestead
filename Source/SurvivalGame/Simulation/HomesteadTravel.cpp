@@ -68,7 +68,8 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
             return plan;
         }
     }
-    if (std::hypot(from.x - stop->position.x, from.y - stop->position.y) < TravelArrivedCm)
+    if (std::hypot(from.x - stop->position.x, from.y - stop->position.y) < TravelArrivedCm
+        || (stop->hasArrival && std::hypot(from.x - stop->arrival.x, from.y - stop->arrival.y) < TravelArrivedCm))
     {
         plan.error = destination == TravelDestination::Manor ? "You're already at the manor." : "You're already in town.";
         return plan;
@@ -81,7 +82,10 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
     }
     plan.connectorMetres = nearest.distanceCm / 100.0;
     plan.roadMetres = road.WalkMetres(nearest.chainage, stop->chainage);
-    plan.totalMetres = plan.connectorMetres + plan.roadMetres;
+    // Off the road at the far end (the manor: up to the ruin's front door), that stretch is walked too.
+    const double offRoadMetres = stop->hasArrival
+        ? std::hypot(stop->arrival.x - stop->position.x, stop->arrival.y - stop->position.y) / 100.0 : 0.0;
+    plan.totalMetres = plan.connectorMetres + plan.roadMetres + offRoadMetres;
     const double realSeconds = plan.totalMetres * 100.0 / RoadWalkPaceCmPerSecond;
     plan.gameHours = realSeconds * 24.0 / (state.dayMinutes * 60.0);
     plan.arrival = stop->position;
@@ -90,6 +94,12 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
     const double ahead = destination == TravelDestination::Town ? -5.0 : 5.0;
     const Point behind = road.At(stop->chainage + ahead);
     plan.arrivalYaw = std::atan2(stop->position.y - behind.y, stop->position.x - behind.x) * 180.0 / 3.14159265358979323846;
+    if (stop->hasArrival)
+    {
+        plan.arrival = stop->arrival;
+        plan.arrivalZ = stop->arrivalZ;
+        plan.arrivalYaw = stop->arrivalYaw;
+    }
     plan.arrivalHour = state.hour + plan.gameHours;
     plan.nextDay = std::floor(plan.arrivalHour / 24.0) > std::floor(state.hour / 24.0);
     std::string summary = "Walk to " + where + " along the road: " + TravelKilometres(plan.totalMetres) + ", about "

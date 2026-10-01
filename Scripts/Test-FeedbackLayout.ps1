@@ -12,8 +12,11 @@ $root = Split-Path $PSScriptRoot -Parent
 $output = [IO.Path]::GetFullPath($OutputDirectory, $root)
 if (Test-Path -LiteralPath $output) { throw 'Feedback fixtures require a fresh output directory.' }
 if (($Width -eq 1280) -ne ($Height -eq 720)) { throw 'Use matching720p or4K dimensions.' }
-$package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
-$exe = Join-Path $package 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+$package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
+if ($package.configuration -ne 'Development') {
+    throw 'Feedback runs on the Woodland map, which genuine Shipping cannot select by command line.'
+}
+$exe = $package.executable
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 $null = New-Item -ItemType Directory -Path (Join-Path $output 'Graphics')
 $config = Join-Path $output 'Graphics\GameUserSettings.ini'
@@ -22,8 +25,8 @@ Copy-Item -LiteralPath (Join-Path $root 'Config\DefaultGameUserSettings.ini') -D
 (Get-Content -LiteralPath $config -Raw) -replace 'bUseVSync=True','bUseVSync=False' | Set-Content -LiteralPath $config -NoNewline
 $baselineFlag = if ($Baseline) { '-HomesteadFeedbackBaseline' } else { '' }
 $litFlag = if ($RequireLit) { '-HomesteadRequireLit' } else { '' }
-$arguments = "-HomesteadSmokeTest -HomesteadFeedbackTest $baselineFlag $litFlag -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$config`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -nosound -nosplash -abslog=`"$(Join-Path $output 'engine.log')`""
-$process = Start-Process -FilePath $exe -WorkingDirectory $package -ArgumentList $arguments -PassThru
+$arguments = "/Game/SurvivalGame/Maps/Homestead -HomesteadSmokeTest -HomesteadFeedbackTest $baselineFlag $litFlag -HomesteadTestOutput=`"$output`" -GameUserSettingsINI=`"$config`" -UserDir=`"$(Join-Path $output 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=$Width -ResY=$Height -nosound -nosplash -abslog=`"$(Join-Path $output 'engine.log')`""
+$process = Start-Process -FilePath $exe -WorkingDirectory $package.packageDirectory -ArgumentList $arguments -WindowStyle Hidden -PassThru
 Write-Host "Owned feedback fixture PID$($process.Id): $output"
 try {
     if (-not $process.WaitForExit(300000)) { throw 'Feedback fixture exceeded its five-minute bound.' }

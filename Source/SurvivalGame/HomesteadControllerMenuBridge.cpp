@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadWorld.h"
@@ -142,7 +143,7 @@ void AHomesteadController::MenuCraftBeat(int32 Beat)
     USoundBase* Strike = Strikes[FMath::Abs(Beat) % UE_ARRAY_COUNT(Strikes)];
     ++TestCraftBeatRequests;
     if (Strike && bAudioEnabled && EffectsVolume > 0) ++TestAudibleCraftBeats;
-    PlayEffect(Strike, 0.16f);
+    PlayEffect(Strike, Homestead::AudioLevels::Gain::CraftStrike);
 }
 
 void AHomesteadController::MenuStore() { if (!RejectPendingGroundSnapAction() && !bMenuSaveInProgress) Secondary(); }

@@ -47,6 +47,11 @@ from homestead_agent import axe_fell as af
 BLADE_CLEARANCE = 3.0
 LIFT_MARGIN = 1.0
 LIFT_PASSES = 3
+# The game lays the scythe from her fists whenever the action is blended in (UpdateMowingScythe blends by
+# FellWeight): fully from 0.12 s after the clip starts until 0.16 s before it ends (UHomesteadAnimInstance's
+# ActionBlend rates), so the getting-into and out-of-grip transitions must clear the ground too.
+BLEND_IN_FRAMES = 4
+BLEND_OUT_FRAMES = 5
 BLADE_SAMPLES = ((6.3, 11.0, -100.9), (6.3, 4.7, -94.5), (45.8, 9.2, -97.8), (45.8, 5.2, -93.8),
                  (67.3, 5.5, -94.5), (67.3, 3.1, -92.2), (88.8, -0.3, -89.7))
 _GAME_BONES = [f'{b}_{side}' for side in 'lr' for b in ('hand', 'middle_01', 'index_01', 'pinky_01')]
@@ -150,17 +155,24 @@ def grips(name):
 
 def build():
     """Bake, then lift both hands wherever the blade (laid from her fists as the game does) dips below
-    BLADE_CLEARANCE, and bake again; a few passes settle it."""
+    BLADE_CLEARANCE, and bake again; a few passes settle it. That covers the whole stretch the game lays the
+    scythe from her fists, the carry-to-address and recovery transitions included (PIE 10-01: they dug in
+    30-40 cm once MaxTipUp no longer tipped it out)."""
     lifts = {}
     anim = _author(lifts)
     for _ in range(LIFT_PASSES):
-        low = {f: h for f, h in blade_heights(anim).items() if h < BLADE_CLEARANCE}
+        low = {f: h for f, h in blade_heights(anim, *laid_frames()).items() if h < BLADE_CLEARANCE}
         if not low:
             break
         for frame, height in low.items():
             lifts[frame] = _lifted_hands(anim, frame, BLADE_CLEARANCE + LIFT_MARGIN - height)
         anim = _author(lifts)
     return anim
+
+
+def laid_frames():
+    """First and last frame the game lays the scythe wholly from her fists."""
+    return FRAMES['stand'] + BLEND_IN_FRAMES, FRAMES['end'] - BLEND_OUT_FRAMES
 
 
 def _author(lifts):
@@ -269,14 +281,14 @@ def report(anim):
         miss_l = (centre_l - af._vec(lc)).length()
         lines.append(f"{name:8s} right miss {miss_r:4.1f} left miss {miss_l:4.1f} nib dot {across_r.dot(rn):5.2f} "
                      f"heel ({heel[0]:6.1f},{heel[1]:6.1f},{heel[2]:5.1f})")
-    heights = blade_heights(anim)
+    heights = blade_heights(anim, *laid_frames())
     worst = min(heights, key=heights.get)
     low = [f for f, h in heights.items() if h < BLADE_CLEARANCE]
-    lines.append(f"blade lowest {heights[worst]:5.1f} cm at frame {worst}; frames below {BLADE_CLEARANCE:.0f} cm: {low or 'none'}")
-    # Getting into and out of the grips, where the game is still blending the one-handed carry in or out: for
-    # information (the hands aren't both on the scythe yet, so this frame isn't the one she holds).
-    for first, last in ((FRAMES['stand'] + 1, FRAMES['address'] - 1), (FRAMES['recover'] + 1, FRAMES['end'] - 1)):
-        part = blade_heights(anim, first, last)
+    first, last = laid_frames()
+    lines.append(f"blade lowest {heights[worst]:5.1f} cm at frame {worst} (frames {first}-{last}, transitions included); "
+                 f"frames below {BLADE_CLEARANCE:.0f} cm: {low or 'none'}")
+    for first, last in ((first, FRAMES['address'] - 1), (FRAMES['recover'] + 1, last)):
+        part = {f: heights[f] for f in range(first, last + 1)}
         at = min(part, key=part.get)
         lines.append(f"  transition {first}-{last}: lowest {part[at]:6.1f} cm at frame {at}")
     return '\n'.join(lines)

@@ -1,4 +1,5 @@
 #include "HomesteadLab.h"
+#include "Simulation/HomesteadAudioLevels.h"
 
 #include "Animation/AnimSequence.h"
 #include "Components/DirectionalLightComponent.h"
@@ -591,7 +592,7 @@ void AHomesteadLabController::PlayFootstep(bool bLeftFoot, bool bRun)
     if (Pool.Num() > 1 && Pick == LastStep) Pick = (Pick + 1) % Pool.Num();
     LastStep = Pick;
     // Same levels as the game at its default 80% effects volume.
-    UGameplayStatics::PlaySound2D(this, Pool[Pick].Get(), 0.8f * (bRun ? 0.07f : 0.04f) * FMath::FRandRange(0.85f, 1.15f),
+    UGameplayStatics::PlaySound2D(this, Pool[Pick].Get(), 0.8f * (bRun ? Homestead::AudioLevels::Gain::FootstepRun : Homestead::AudioLevels::Gain::FootstepWalk) * FMath::FRandRange(0.85f, 1.15f),
         FMath::FRandRange(0.96f, 1.04f));
 }
 

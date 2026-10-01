@@ -134,6 +134,9 @@ const PublicRoad& EstatePublicRoad()
         auto deck = [&](double x, double y, double yaw, double z, double halfLength, double halfWidth, double water, double bed) {
             road.deck = {true, {x, y}, yaw, z, halfLength, halfWidth, water, bed};
         };
+        struct Arrival { std::string stop; Point at; double z, yaw; };
+        std::vector<Arrival> arrivals;
+        auto arrival = [&](const char* name, double x, double y, double z, double yaw) { arrivals.push_back({name, {x, y}, z, yaw}); };
 #define road roadPoint
 #include "HomesteadEstatePublicRoad.inc"
 #undef road
@@ -147,6 +150,15 @@ const PublicRoad& EstatePublicRoad()
             const double t = std::clamp((metres - road.chainage[i - 1]) / span, 0.0, 1.0);
             road.stops.push_back({name, metres, at, road.groundZ[i - 1] + (road.groundZ[i] - road.groundZ[i - 1]) * t});
         }
+        for (const Arrival& off : arrivals)
+            for (PublicRoadStop& endpoint : road.stops)
+                if (endpoint.name == off.stop)
+                {
+                    endpoint.hasArrival = true;
+                    endpoint.arrival = off.at;
+                    endpoint.arrivalZ = off.z;
+                    endpoint.arrivalYaw = off.yaw;
+                }
         return road;
     }();
     return Road;
