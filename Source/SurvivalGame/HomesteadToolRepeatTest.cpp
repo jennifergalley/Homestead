@@ -19,7 +19,7 @@ namespace ToolRepeatRoute
 constexpr float ArriveSeconds = 190.0f;
 // Where she stands before pressing; a strike or hack walks her into its own stance from here.
 constexpr double ApproachCm = 110.0;
-// Targets with other overgrowth this close are skipped, so "it never moved on" is unambiguous.
+// Targets with other overgrowth the same tool clears this close are skipped, so "it never moved on" is unambiguous.
 constexpr double IsolationCm = 300.0;
 // Long enough for a worn axe's held blows (36 frames apart) plus the walk-up and recovery.
 constexpr float HoldSeconds = 20.0f;
@@ -32,22 +32,29 @@ double Distance2D(Homestead::Point A, Homestead::Point B)
 }
 
 // The uncleared node of `Kind` nearest `From` that a tool of tier Tier may clear (its placement asks
-// for no more), with no other uncleared resource within IsolationCm.
+// for no more), preferring one with no other overgrowth that tool clears within IsolationCm.
 const Homestead::ResourceNode* FindTarget(const Homestead::State& State, Homestead::ResourceKind Kind,
     Homestead::ToolTier Tier, Homestead::Point From)
 {
     const Homestead::ResourceNode* Best = nullptr;
+    const Homestead::ResourceNode* Crowded = nullptr;
     for (const auto& Node : State.resources)
     {
         if (Node.kind != Kind || Node.cleared || Node.minTier > Tier) continue;
+        // Only neighbours the same tool clears could be struck instead; anything else can stay close.
+        const auto* Info = Homestead::FindOvergrowth(Kind);
         bool bCrowded = false;
         for (const auto& Other : State.resources)
-            if (Other.id != Node.id && !Other.cleared && Distance2D(Other.position, Node.position) < IsolationCm)
+        {
+            const auto* OtherInfo = Homestead::FindOvergrowth(Other.kind);
+            if (Other.id != Node.id && !Other.cleared && Info && OtherInfo && OtherInfo->tool == Info->tool
+                && Distance2D(Other.position, Node.position) < IsolationCm)
             { bCrowded = true; break; }
-        if (bCrowded) continue;
-        if (!Best || Distance2D(Node.position, From) < Distance2D(Best->position, From)) Best = &Node;
+        }
+        auto*& Pick = bCrowded ? Crowded : Best;
+        if (!Pick || Distance2D(Node.position, From) < Distance2D(Pick->position, From)) Pick = &Node;
     }
-    return Best;
+    return Best ? Best : Crowded;
 }
 
 bool Cleared(const Homestead::State& State, int32 Id)
