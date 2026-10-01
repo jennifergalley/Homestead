@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SHomesteadMenu.h"
+#include "HomesteadUITheme.h"
 #include "HomesteadNoticeStyle.h"
 #include "../Simulation/HomesteadChests.h"
 #include "SHomesteadHudScale.h"
@@ -124,14 +125,14 @@ private:
     TAttribute<float> Progress;
     TAttribute<float> Flash;
 };
-const FLinearColor Ink(0.93f, 0.93f, 0.84f);
-const FLinearColor Muted(0.71f, 0.77f, 0.69f);
-const FLinearColor MenuGold(0.92f, 0.74f, 0.43f);
+inline HomesteadUITheme::FThemeColor Ink(0.93f, 0.93f, 0.84f);
+inline HomesteadUITheme::FThemeColor Muted(0.71f, 0.77f, 0.69f);
+inline HomesteadUITheme::FThemeColor MenuGold(0.92f, 0.74f, 0.43f);
 // Panels are translucent so the book reads as laid over the living world.
-const FLinearColor MenuPine(0.025f, 0.05f, 0.038f, 0.6f);
-const FLinearColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
-const FLinearColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
-const FLinearColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
+inline HomesteadUITheme::FThemeColor MenuPine(0.025f, 0.05f, 0.038f, 0.6f);
+inline HomesteadUITheme::FThemeColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
+inline HomesteadUITheme::FThemeColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
+inline HomesteadUITheme::FThemeColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
 // The Appearance page's camera input (degrees per second, degrees per pixel dragged).
 namespace MenuAppearanceInput
 {

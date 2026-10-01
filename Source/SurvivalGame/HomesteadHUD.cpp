@@ -1,4 +1,5 @@
 #include "HomesteadHUD.h"
+#include "UI/HomesteadUITheme.h"
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadMapComponent.h"
@@ -18,11 +19,11 @@
 
 namespace
 {
-const FLinearColor Ink(0.93f, 0.93f, 0.84f, 1);
-const FLinearColor Muted(0.71f, 0.77f, 0.69f, 1);
-const FLinearColor HudGold(0.92f, 0.74f, 0.43f, 1);
-const FLinearColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
-const FLinearColor HudWarning(1.0f, 0.67f, 0.48f, 1);
+HomesteadUITheme::FThemeColor Ink(0.93f, 0.93f, 0.84f, 1);
+HomesteadUITheme::FThemeColor Muted(0.71f, 0.77f, 0.69f, 1);
+HomesteadUITheme::FThemeColor HudGold(0.92f, 0.74f, 0.43f, 1);
+HomesteadUITheme::FThemeColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
+HomesteadUITheme::FThemeColor HudWarning(1.0f, 0.67f, 0.48f, 1);
 }
 
 // The world notices at the top centre (HUD units): the focus actions card sits just under the
@@ -294,6 +295,9 @@ void AHomesteadHUD::DrawHUD()
     if (!PC) return;
     if (PC->HasNativeMenu()) return;
     UiScale = FMath::Clamp(Canvas->ClipY / 1080.0f, 0.4f, 1.5f);
+    // The theme trial: in parchment every Canvas word is the book's serif (key glyphs excepted).
+    bThemeSerif = HomesteadUITheme::IsParchment();
+    bNoticeText = bThemeSerif;
     ViewWidth = Canvas->ClipX / UiScale;
     ViewHeight = Canvas->ClipY / UiScale;
     static const bool MeasureFeedback = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))
@@ -409,7 +413,7 @@ void AHomesteadHUD::DrawHUD()
         for (int32 Index = 0; Index < Lines.Num(); ++Index)
             Write(Lines[Index], X + PadX, Y + PadTop + Index * Step, TextSize, TextInk);
         bDrawingToast = false;
-        bNoticeText = false;
+        bNoticeText = bThemeSerif;
     }
 }
 
@@ -455,8 +459,10 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     // The words are the notices' EB Garamond (as the toast and the book's card); the key and pad
     // glyphs stay in the crisp sans on their pine stamps.
     constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 8, Space = 9;
-    const auto KeyWidth = [this](const FString& Key) { bNoticeText = false; return TextWidth(Key, KeySize); };
-    const auto WordsWidth = [this](const FString& Words, float WordsSize) { bNoticeText = true; const float W = TextWidth(Words, WordsSize); bNoticeText = false; return W; };
+    const auto KeyWidth = [this](const FString& Key) { bNoticeText = false; const float W = TextWidth(Key, KeySize); bNoticeText = bThemeSerif; return W; };
+    const auto WordsWidth = [this](const FString& Words, float WordsSize) { bNoticeText = true; const float W = TextWidth(Words, WordsSize); bNoticeText = bThemeSerif; return W; };
+    // Key and pad glyphs: a pine stamp with brass lettering in either theme, in the crisp sans.
+    const FLinearColor KeyStamp(0.055f, 0.09f, 0.075f, 0.96f), KeyLetter(0.92f, 0.74f, 0.43f, 1.0f);
     float Width = 0;
     for (int32 Index = 0; Index < Cues.Num(); ++Index)
     {
@@ -490,7 +496,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     {
         bNoticeText = true;
         Write(Title, CenterX - TitleWidth * 0.5f, Y, TitleSize, HomesteadNoticeStyle::InkBrown.CopyWithNewOpacity(0.72f));
-        bNoticeText = false;
+        bNoticeText = bThemeSerif;
         Y += TitleLine + 2;
     }
     float X = CenterX - Width * 0.5f;
@@ -502,13 +508,15 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
         {
             const float BadgeW = FMath::Max(BadgeH, KeyWidth(Cue.Key) + KeyPad * 2);
             // The key or pad glyph as a pine stamp with brass lettering.
-            Panel(X, Y, BadgeW, BadgeH, Pine);
-            Write(Cue.Key, X + (BadgeW - KeyWidth(Cue.Key)) * 0.5f, Y + (BadgeH - KeySize) * 0.5f - 1, KeySize, HudGold);
+            Panel(X, Y, BadgeW, BadgeH, KeyStamp);
+            bNoticeText = false;
+            Write(Cue.Key, X + (BadgeW - KeyWidth(Cue.Key)) * 0.5f, Y + (BadgeH - KeySize) * 0.5f - 1, KeySize, KeyLetter);
+            bNoticeText = bThemeSerif;
             X += BadgeW + Space;
         }
         bNoticeText = true;
         Write(Cue.Verb, X, Y + (BadgeH - VerbLine) * 0.5f, Size, HomesteadNoticeStyle::InkBrown);
-        bNoticeText = false;
+        bNoticeText = bThemeSerif;
         X += WordsWidth(Cue.Verb, Size);
     }
     return Top + BoxHeight;

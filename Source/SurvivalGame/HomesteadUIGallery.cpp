@@ -60,17 +60,18 @@ Homestead::Point Ahead(Homestead::Point From, double YawDegrees, double Cm)
 
 namespace HomesteadUIGalleryBackdrop
 {
-// Sky, fog and effects off on the plain backdrop (FEngineShowFlags names; any missing are skipped).
+// Fog and effects off on the plain backdrop (FEngineShowFlags names; any missing are skipped). The sky
+// stays on so its light and the exposure stay as in the game (with it off, auto-exposure blew her out).
 const TCHAR* const HiddenFlags[] = {
-    TEXT("Atmosphere"), TEXT("Cloud"), TEXT("Fog"), TEXT("VolumetricFog"), TEXT("Particles"), TEXT("Decals"),
+    TEXT("Fog"), TEXT("VolumetricFog"), TEXT("Particles"), TEXT("Decals"),
     TEXT("Landscape"), TEXT("InstancedGrass"), TEXT("InstancedFoliage")};
-// A calm warm grey (linear), unlit, so edges and contrast read alike on every screen.
-const FLinearColor Neutral(0.20f, 0.19f, 0.17f, 1.0f);
+// A calm warm grey, lit like any surface in the scene, so the exposure matches the game.
+const FLinearColor Neutral(0.30f, 0.28f, 0.25f, 1.0f);
 // The plane stands this far beyond the camera, wide enough to fill any view.
 constexpr float DistanceCm = 6000.0f;
 constexpr float ScaleOfBasicPlane = 400.0f; // the basic plane is 100 cm across
 const TCHAR* const PlaneMesh = TEXT("/Engine/BasicShapes/Plane.Plane");
-const TCHAR* const UnlitMaterial = TEXT("/Engine/EngineMaterials/EmissiveMeshMaterial.EmissiveMeshMaterial");
+const TCHAR* const UnlitMaterial = TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial");
 TWeakObjectPtr<AStaticMeshActor> Plane;
 TWeakObjectPtr<UWorld> PlaneWorld;
 }
@@ -158,6 +159,8 @@ void FHomesteadUIGallery::Prepare(AHomesteadController& PC, bool bPad)
     {
         Homestead::Simulation& Sim = PC.Sim;
         Sim.SkipToHourOfDay(10.0);
+        // A trading day: the shops close on Sundays (Water's close-shops-on-sundays).
+        if (Sim.Today().weekday == Homestead::Weekday::Sunday) Sim.SkipToHourOfDay(10.0);
         const TPair<Homestead::Item, int32> Kit[] = {
             {Homestead::Item::Pasty, 3}, {Homestead::Item::Bread, 2}, {Homestead::Item::Berries, 5},
             {Homestead::Item::Branch, 6}, {Homestead::Item::Stone, 4}, {Homestead::Item::Fiber, 3},
@@ -430,8 +433,6 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             if (PC.State().shops.empty()) return;
             PC.Sim.GrantMoney(Homestead::Backpack::Price - PC.State().money);
             PC.Sim.BuyBackpack(PC.State().shops.front().id, PC.PlayerPoint());
-            // From behind her, so the pack shows.
-            if (const APawn* Pawn = PC.GetPawn()) PC.SetControlRotation(FRotator(-12.0f, Pawn->GetActorRotation().Yaw + 160.0f, 0.0f));
         }, 1.5f);
     Add(TEXT("shop-quantity"), TEXT("Buy tab, choosing bread: the how-many dialog."), ECover::Shop, 3, Counter, Shop(1, -1, TEXT("Bread")));
 
@@ -514,6 +515,19 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             Out.Face = Ahead(Door->position, Door->yaw, 300.0);
             return true;
         }, nullptr);
+    Add(TEXT("focus-door-sunday"), TEXT("The general store's door at 10:00 on a Sunday: 'Closed today (Sunday) - opens Monday at 8 AM', no wait key, the CLOSED board, no shopkeeper."),
+        ECover::Focus, 15, [](AHomesteadController& PC, FStage& Out, FString& Why)
+        {
+            const auto* Door = PC.Sim.Layout().FindLandmark(Homestead::Anchor::GeneralStoreDoor);
+            if (!Door) { Why = TEXT("No general store door."); return false; }
+            for (int32 Step = 0; Step < 7 && PC.Sim.Today().weekday != Homestead::Weekday::Sunday; ++Step) PC.Sim.SkipToHourOfDay(10.0);
+            Out.bMove = true;
+            Out.Stand = Ahead(Door->position, Door->yaw, -60.0);
+            Out.Face = Ahead(Door->position, Door->yaw, 300.0);
+            return true;
+        }, nullptr);
+    List.Last().Pending = TEXT("Water's Sunday closing (jennifergalley-sunday-closing @077a7a3c)");
+    List.Last().bKeepWorld = true;
     Add(TEXT("focus-shopkeeper"), TEXT("At the counter facing the shopkeeper: her name and the keyed talk/trade hint."),
         ECover::Focus, 4, Counter, nullptr);
     Add(TEXT("focus-sign"), TEXT("Facing the Gateway road sign: 'Road sign | Town / Manor' and the keyed 'Choose a way'."),
@@ -590,7 +604,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     // The garden outlines are world geometry, and night and rain are about the world's look: these keep
     // the world on the plain backdrop.
     for (FEntry& Entry : List)
-        Entry.bKeepWorld = Entry.Id.StartsWith(TEXT("garden-")) || Entry.Id == TEXT("focus-plant")
+        Entry.bKeepWorld = Entry.bKeepWorld || Entry.Id.StartsWith(TEXT("garden-")) || Entry.Id == TEXT("focus-plant")
             || Entry.Id.EndsWith(TEXT("-night")) || Entry.Id.EndsWith(TEXT("-rain"));
     return List;
 }

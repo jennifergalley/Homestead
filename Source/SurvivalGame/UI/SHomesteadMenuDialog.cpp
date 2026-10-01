@@ -1,4 +1,5 @@
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 
 namespace HomesteadMenus
 {
@@ -45,19 +46,19 @@ void SHomesteadMenu::BuildPopup()
     List->AddSlot().AutoHeight().Padding(4, 0, 4, 8)
     [
         SNew(STextBlock).Text(FText::FromString(PopupTitle)).ColorAndOpacity(MenuGold)
-        .Font(FCoreStyle::GetDefaultFontStyle("Bold", 16))
+        .Font(HomesteadUITheme::Font("Bold", 16))
     ];
     if (Body)
         List->AddSlot().AutoHeight().Padding(4, 0, 4, 10)
         [
             SNew(STextBlock).Text(FText::FromString(PopupBody)).ColorAndOpacity(Ink).AutoWrapText(true)
-            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14)).LineHeightPercentage(1.1f)
+            .Font(HomesteadUITheme::Font("Regular", 14)).LineHeightPercentage(1.1f)
         ];
     if (Quantity)
     {
         List->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 2)
         [
-            SNew(STextBlock).ColorAndOpacity(Ink).Font(FCoreStyle::GetDefaultFontStyle("Bold", 28))
+            SNew(STextBlock).ColorAndOpacity(Ink).Font(HomesteadUITheme::Font("Bold", 28))
             .Text_Lambda([this]() { return FText::FromString(FString::Printf(TEXT("%d  of  %d"), Amount, MaximumAmount)); })
         ];
         List->AddSlot().AutoHeight().Padding(4, 6)
@@ -71,7 +72,7 @@ void SHomesteadMenu::BuildPopup()
         List->AddSlot().AutoHeight().Padding(4, 0, 4, 8)
         [
             SNew(STextBlock).Text(FText::FromString(TEXT("Drag, scroll the wheel, or press Left / Right.")))
-            .ColorAndOpacity(Muted).Font(FCoreStyle::GetDefaultFontStyle("Regular", 13)).AutoWrapText(true)
+            .ColorAndOpacity(Muted).Font(HomesteadUITheme::Font("Regular", 13)).AutoWrapText(true)
         ];
     }
     for (int32 Index = 0; Index < PopupOptions.Num(); ++Index)
@@ -98,7 +99,7 @@ void SHomesteadMenu::BuildPopup()
                 ]
                 + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
                 [
-                    SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+                    SNew(STextBlock).Font(HomesteadUITheme::Font("Regular", 16))
                     .ColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? FSlateColor(PineInk) : FSlateColor(Ink); })
                     .Text_Lambda([Label]() { return FText::FromString(Label ? Label() : FString()); })
                 ]
@@ -293,7 +294,7 @@ void SHomesteadMenu::BuildDialog()
             .MaxDesiredHeight(820)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                .BorderBackgroundColor(FLinearColor(0.01f, 0.025f, 0.015f, 0.92f)).Padding(FMargin(44, 34))
+                .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.01f, 0.025f, 0.015f, 0.92f))).Padding(FMargin(44, 34))
                 [
                     SNew(SVerticalBox)
                     + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ Text(Title, 30) ]

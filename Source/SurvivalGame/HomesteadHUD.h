@@ -36,6 +36,8 @@ private:
     bool bMeasureFeedback = false, bDrawingToast = false;
     // While set, Write / TextWidth / WrappedLines set words in the field book's display serif (the toast).
     bool bNoticeText = false;
+    // The UI theme trial's Canvas default: the serif in parchment (UI/HomesteadUITheme.h).
+    bool bThemeSerif = false;
     FString ToastSource;
     TArray<FString> ToastLines;
     TArray<FBox2D> ToastTextBounds;

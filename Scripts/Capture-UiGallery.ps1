@@ -28,6 +28,8 @@ param(
     # backdrop with the world hidden, the heroine kept for scale. World: over the game scene.
     [ValidateSet('Plain', 'World')][string[]]$Backdrop = @('Plain'),
     [switch]$NoHeroine,
+    # The UI theme trial: parchment (the branch default) and/or classic.
+    [ValidateSet('parchment', 'classic')][string[]]$Theme = @('parchment'),
     # Where the stamp folders go; defaults to E:\CopilotScratch\<SessionId>\ui-gallery.
     [string]$OutputRoot,
     [string]$SessionId = $(if ($env:COPILOT_SESSION_ID) { $env:COPILOT_SESSION_ID } else { 'ui-gallery' }),
@@ -47,17 +49,18 @@ $failures = @()
 foreach ($resolution in $Res) {
     foreach ($mode in $InputMode) {
       foreach ($scene in $Backdrop) {
+       foreach ($look in $Theme) {
         $running = @(Get-Process UnrealEditor*, SurvivalGame*, JennysHomestead* -ErrorAction SilentlyContinue)
         $freeGB = (Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB
         if ($running.Count -ge 2) { throw "Two Unreal processes are already running ($($running.Name -join ', ')); try again later." }
         if ($freeGB -lt $MinFreeGB) { throw ("Only {0:N1} GB of memory is free (need {1}); try again later." -f $freeGB, $MinFreeGB) }
-        $name = $resolution + $(if ($mode -eq 'Pad') { '-pad' } else { '' }) + $(if ($scene -eq 'World') { '-world' } else { '' }) + $(if ($NoHeroine) { '-noheroine' } else { '' })
+        $name = $resolution + "-$look" + $(if ($mode -eq 'Pad') { '-pad' } else { '' }) + $(if ($scene -eq 'World') { '-world' } else { '' }) + $(if ($NoHeroine) { '-noheroine' } else { '' })
         $folder = Join-Path $stamp $name
         $size = $sizes[$resolution]
         Write-Host "UI gallery $resolution $mode -> $folder"
         try {
             & (Join-Path $PSScriptRoot 'Test-Game.ps1') -UIGallery -UIGalleryIds ($Ids -join ',') -UIGalleryInput $mode `
-                -UIGalleryBackdrop $scene -UIGalleryNoHeroine:$NoHeroine `
+                -UIGalleryBackdrop $scene -UIGalleryNoHeroine:$NoHeroine -UITheme $look `
                 -Width $size[0] -Height $size[1] -OutputDirectory $folder -TimeoutSeconds $TimeoutSeconds | Out-Null
         } catch {
             $failures += "$resolution $mode`: $($_.Exception.Message)"
@@ -67,6 +70,7 @@ foreach ($resolution in $Res) {
         if (Test-Path -LiteralPath $result) {
             Select-String -LiteralPath $result -Pattern '^UI_GALLERY_(SKIPPED|MISSING|PENDING)' | ForEach-Object { Write-Warning $_.Line }
         }
+       }
       }
     }
 }

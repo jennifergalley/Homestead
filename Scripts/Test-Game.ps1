@@ -19,7 +19,9 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [switch]$UIGallery, [string]$UIGalleryIds = 'all', [ValidateSet('KBM','Pad')][string]$UIGalleryInput = 'KBM',
     # Plain: the UI over a flat warm-grey backdrop with the world hidden (the heroine stays unless
     # -UIGalleryNoHeroine); World: over the game.
-    [ValidateSet('Plain','World')][string]$UIGalleryBackdrop = 'Plain', [switch]$UIGalleryNoHeroine)
+    [ValidateSet('Plain','World')][string]$UIGalleryBackdrop = 'Plain', [switch]$UIGalleryNoHeroine,
+    # The UI theme trial (UI/HomesteadUITheme.h): parchment or classic.
+    [ValidateSet('','parchment','classic')][string]$UITheme = '')
 $ErrorActionPreference = 'Stop'
 if ($UIGallery -and $Packaged) { throw 'The UI gallery runs the Development editor binary (-game), not a packaged build.' }
 if ($EstateSmoke -and ($FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or $Creek -or $Crafting -or
@@ -271,6 +273,7 @@ if ($UIGallery) {
     $realSaves = Join-Path $root 'Saved\SaveGames\Estate'
     $loopArguments = "-HomesteadUIGallery=$UIGalleryIds -HomesteadUIGalleryInput=$UIGalleryInput -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRealSaveDir=`"$realSaves`" -HomesteadUIGalleryBackdrop=$UIGalleryBackdrop"
     if ($UIGalleryNoHeroine) { $loopArguments += ' -HomesteadUIGalleryNoHeroine' }
+    if ($UITheme) { $loopArguments += " -HomesteadUITheme=$UITheme" }
 }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $execCommands = @()

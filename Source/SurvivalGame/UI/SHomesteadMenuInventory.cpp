@@ -1,4 +1,5 @@
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 
 namespace HomesteadMenus
 {
@@ -51,15 +52,15 @@ void SHomesteadMenu::FocusEquipment(int32 Index, bool bPointer)
 FLinearColor SHomesteadMenu::CellColor(int32 Index) const
 {
     if (bVirtualDraggingItem && Index == VirtualDragSource)
-        return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
+        return HomesteadUITheme::Themed(FLinearColor(0.045f, 0.055f, 0.05f, 0.72f));
     if (bVirtualDraggingItem && Index == ContentSelection)
         return MenuGold;
     if (bPointerDraggingItem && Index == PointerDragSource)
-        return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
+        return HomesteadUITheme::Themed(FLinearColor(0.045f, 0.055f, 0.05f, 0.72f));
     if (bPointerDraggingItem && Index == PointerDragTarget)
         return MenuGold;
     return Index == ContentSelection ? Selected
-        : Index == Hover ? Selected : FLinearColor(0.055f, 0.09f, 0.075f, 0.5f);
+        : Index == Hover ? Selected : HomesteadUITheme::Themed(FLinearColor(0.055f, 0.09f, 0.075f, 0.5f));
 }
 
 void SHomesteadMenu::Select(int32 Index, bool KeepDesiredColumn)

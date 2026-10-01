@@ -1,7 +1,17 @@
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 
 namespace HomesteadMenus
 {
+namespace MenuDetailStyle
+{
+// A recipe's requirement rows: met (green) and missing (red) in classic; in parchment an olive-tinted
+// and a rose-tinted paper with dark marks, so the ink text keeps its contrast.
+HomesteadUITheme::FThemeColor MetRow(FLinearColor(0.075f, 0.16f, 0.10f, 0.75f), FLinearColor(0.50f, 0.50f, 0.30f, 0.98f));
+HomesteadUITheme::FThemeColor MissingRow(FLinearColor(0.24f, 0.075f, 0.055f, 0.8f), FLinearColor(0.66f, 0.40f, 0.30f, 0.98f));
+HomesteadUITheme::FThemeColor MetMark(FLinearColor(0.92f, 0.74f, 0.43f, 1.0f), FLinearColor(0.12f, 0.18f, 0.04f, 1.0f));
+HomesteadUITheme::FThemeColor MissingMark(FLinearColor(1.0f, 0.66f, 0.52f, 1.0f), FLinearColor(0.30f, 0.03f, 0.01f, 1.0f));
+}
 TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
 {
     FocusTargets.RemoveAll([](const FFocusTarget& Target) { return Target.region == ERegion::Details || Target.region == ERegion::Actions; });
@@ -32,7 +42,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 + SVerticalBox::Slot().AutoHeight()
                 [
                     SNew(STextBlock).WrapTextAt(DetailsColumnWidth() - 100).ColorAndOpacity(Ink)
-                    .Font(FCoreStyle::GetDefaultFontStyle("Bold", 22))
+                    .Font(HomesteadUITheme::Font("Bold", 22))
                     .Text_Lambda([this]()
                     {
                         const int32 Index = DetailIndex();
@@ -42,7 +52,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 0)
                 [
                     SNew(STextBlock).WrapTextAt(DetailsColumnWidth() - 100).ColorAndOpacity(Muted)
-                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
+                    .Font(HomesteadUITheme::Font("Regular", 17))
                     .Text_Lambda([this]()
                     {
                         const int32 Index = DetailIndex();
@@ -62,7 +72,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 16)
                 [
                     FocusAnchor(SNew(STextBlock).WrapTextAt(DetailsColumnWidth() - 56).ColorAndOpacity(Ink)
-                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 18))
+                    .Font(HomesteadUITheme::Font("Regular", 18))
                     .Text_Lambda([this]() { return FText::FromString(DetailsBodyText()); }), ERegion::Details, 1)
                 ]
             ]
@@ -83,8 +93,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                 Met ? TEXT("Requirement met") : Source.IsEmpty()
                     ? TEXT("No other requirement") : *Source);
             auto Box = SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                .BorderBackgroundColor(Met ? FLinearColor(0.075f, 0.16f, 0.10f, 0.75f)
-                    : FLinearColor(0.24f, 0.075f, 0.055f, 0.8f))
+                .BorderBackgroundColor(Met ? FLinearColor(MenuDetailStyle::MetRow) : FLinearColor(MenuDetailStyle::MissingRow))
                 .Padding(FMargin(8, 5)).ToolTipText(FText::FromString(FullDetail))
                 [
                     SNew(SVerticalBox)
@@ -96,19 +105,19 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                             [ SNew(SHomesteadIcon).Kind(Icon).Tint(Met ? MenuGold : Ink) ] ]
                         + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
                         [ SNew(STextBlock).Text(FText::FromString(Label)).ColorAndOpacity(Ink)
-                            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16)) ]
+                            .Font(HomesteadUITheme::Font("Regular", 16)) ]
                         + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(5, 0)
                         [ SNew(STextBlock).Text(FText::FromString(Status)).ColorAndOpacity(Ink)
-                            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16)) ]
+                            .Font(HomesteadUITheme::Font("Regular", 16)) ]
                         + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
                         [ SNew(STextBlock).Text(FText::FromString(Met ? TEXT("[+]") : TEXT("[-]")))
-                            .ColorAndOpacity(Met ? MenuGold : FLinearColor(1.0f, 0.66f, 0.52f))
-                            .Font(FCoreStyle::GetDefaultFontStyle("Bold", 16)) ]
+                            .ColorAndOpacity(Met ? FLinearColor(MenuDetailStyle::MetMark) : FLinearColor(MenuDetailStyle::MissingMark))
+                            .Font(HomesteadUITheme::Font("Bold", 16)) ]
                     ]
                     + SVerticalBox::Slot().AutoHeight()
                     [
                         SNew(STextBlock).Text(FText::FromString(Source)).ColorAndOpacity(Muted)
-                        .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14))
+                        .Font(HomesteadUITheme::Font("Regular", 14))
                         .Visibility_Lambda([this, FocusIndex, Met, Source]()
                         {
                             return !Met && !Source.IsEmpty() && Region == ERegion::Details
@@ -159,7 +168,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
             [
                 SNew(STextBlock).WrapTextAt(120)
                 .ColorAndOpacity_Lambda([this, Index]() { return Region == ERegion::Actions && ActionSelection == Index ? FSlateColor(PineInk) : FSlateColor(Ink); })
-                .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+                .Font(HomesteadUITheme::Font("Regular", 16))
                 .Text_Lambda([this, Action]()
                 {
                     return FText::FromString(ActionLabel(Action));

@@ -1,4 +1,5 @@
 #include "SHomesteadVitals.h"
+#include "HomesteadUITheme.h"
 
 #include "../HomesteadController.h"
 #include "../Simulation/HomesteadFood.h"
@@ -18,10 +19,10 @@ namespace HomesteadMenus
 namespace VitalsStyle
 {
 // The calendar panel's pine, so the stack reads as one column with it.
-const FLinearColor Backing(0.055f, 0.09f, 0.075f, 0.9f);
-const FLinearColor Track(0.2f, 0.25f, 0.2f, 1);
-const FLinearColor Gold(0.92f, 0.74f, 0.43f, 1);
-const FLinearColor Warning(1.0f, 0.67f, 0.48f, 1);
+HomesteadUITheme::FThemeColor Backing(0.055f, 0.09f, 0.075f, 0.9f);
+HomesteadUITheme::FThemeColor Track(0.2f, 0.25f, 0.2f, 1);
+HomesteadUITheme::FThemeColor Gold(0.92f, 0.74f, 0.43f, 1);
+HomesteadUITheme::FThemeColor Warning(1.0f, 0.67f, 0.48f, 1);
 constexpr float IconSize = 40, IconGap = 14, SidePad = 12, BarHeight = 14;
 constexpr float BarWidth = SHomesteadVitals::Width - SidePad * 2 - IconSize - IconGap;
 // A meal's bar fill and "+N" popup (seconds; the popup rises this many units as it appears).
@@ -30,7 +31,10 @@ constexpr double MealPopupSeconds = 2.0;
 constexpr double MealPopupFadeIn = 0.15;
 constexpr double MealPopupFadeOut = 0.6;
 constexpr float MealPopupRise = 6.0f;
-const FLinearColor Gain(0.72f, 0.90f, 0.56f, 1);
+HomesteadUITheme::FThemeColor Gain(0.72f, 0.90f, 0.56f, 1);
+// The bars' fills: in parchment an olive ink for Energy and an ochre for the woodland's Food.
+HomesteadUITheme::FThemeColor EnergyFill(FLinearColor(0.66f, 0.76f, 0.52f, 1), FLinearColor(0.16f, 0.23f, 0.07f, 1));
+HomesteadUITheme::FThemeColor FoodFill(FLinearColor(0.77f, 0.66f, 0.37f, 1), FLinearColor(0.42f, 0.25f, 0.05f, 1));
 // The Well fed chip: a smaller pasty than the bars' icons, in the purse's warm gold.
 constexpr float ChipIconSize = 30, ChipTextSize = 17;
 
@@ -76,10 +80,10 @@ void SHomesteadVitals::Construct(const FArguments& Args)
                 [
                     SNew(SBox)
                     .Visibility_Lambda([this]() { return Controller.IsValid() && ShowsFoodRow(*Controller) ? EVisibility::Visible : EVisibility::Collapsed; })
-                    [ MeterRow(FName(TEXT("bread")), Food, FLinearColor(0.77f, 0.66f, 0.37f, 1), 0, TEXT("Food")) ]
+                    [ MeterRow(FName(TEXT("bread")), Food, VitalsStyle::FoodFill, 0, TEXT("Food")) ]
                 ]
                 + SVerticalBox::Slot().AutoHeight()
-                [ MeterRow(FName(TEXT("bed")), Energy, FLinearColor(0.66f, 0.76f, 0.52f, 1), 1, TEXT("Energy")) ]
+                [ MeterRow(FName(TEXT("bed")), Energy, VitalsStyle::EnergyFill, 1, TEXT("Energy")) ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, RowGap, 0, 0)
                 [ PurseRow() ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, RowGap, 0, 0)
@@ -135,7 +139,7 @@ float SHomesteadVitals::PopupAlpha(int32 Meter) const
 TSharedRef<SWidget> SHomesteadVitals::MeterRow(FName Icon, TFunction<double()> Value, FLinearColor Fill, int32 Meter, const TCHAR* Label)
 {
     const FString Name(Label);
-    FSlateFontInfo PopupFont = FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 17);
+    FSlateFontInfo PopupFont = HomesteadUITheme::Font(TEXT("Bold"), 17);
     PopupFont.OutlineSettings.OutlineSize = 2;
     PopupFont.OutlineSettings.OutlineColor = FLinearColor(0.01f, 0.02f, 0.015f, 0.9f);
     return SNew(SBox).WidthOverride(Width).HeightOverride(RowHeight)
@@ -204,7 +208,7 @@ TSharedRef<SWidget> SHomesteadVitals::PurseRow()
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(VitalsStyle::IconGap, 0, 0, 0)
             [
                 SNew(STextBlock)
-                .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 20))
+                .Font(HomesteadUITheme::Font(TEXT("Bold"), 20))
                 .ColorAndOpacity(VitalsStyle::Gold)
                 .Text_Lambda([this]()
                 {
@@ -216,7 +220,7 @@ TSharedRef<SWidget> SHomesteadVitals::PurseRow()
             + SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Right).VAlign(VAlign_Center)
             [
                 SNew(STextBlock)
-                .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 17))
+                .Font(HomesteadUITheme::Font(TEXT("Bold"), 17))
                 .ColorAndOpacity_Lambda([this]()
                 {
                     const float Alpha = Controller.IsValid() ? Controller->WalletDeltaAlpha() : 0.0f;
@@ -256,7 +260,7 @@ TSharedRef<SWidget> SHomesteadVitals::WellFedChip()
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(VitalsStyle::IconGap, 0, 0, 0)
             [
                 SNew(STextBlock)
-                .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), VitalsStyle::ChipTextSize))
+                .Font(HomesteadUITheme::Font(TEXT("Bold"), VitalsStyle::ChipTextSize))
                 .ColorAndOpacity(VitalsStyle::Gold)
                 .Text_Lambda([this]()
                 {

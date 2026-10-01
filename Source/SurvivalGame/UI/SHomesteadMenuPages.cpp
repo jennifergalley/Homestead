@@ -1,4 +1,5 @@
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 
 namespace HomesteadMenus
 {
@@ -88,7 +89,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     })
                     [
                         SNew(STextBlock).Text(FText::FromString(TabNames[Tab]))
-                        .Font(FCoreStyle::GetDefaultFontStyle("Bold", 19))
+                        .Font(HomesteadUITheme::Font("Bold", 19))
                         .ColorAndOpacity_Lambda([this, Tab]() { return SettingsTab == Tab ? FSlateColor(PineInk) : FSlateColor(Ink); })
                     ],
                     ERegion::Session, Session)
@@ -102,7 +103,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 .OnClicked_Lambda([this, Action]() { if (PointerAction()) Action(); return FReply::Handled(); })
                 [
                     SNew(STextBlock).Text(FText::FromString(Label))
-                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 15))
+                    .Font(HomesteadUITheme::Font("Regular", 15))
                     .ColorAndOpacity(SelectedOption ? FSlateColor(PineInk) : FSlateColor(Ink))
                 ];
         };
@@ -122,7 +123,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 })
                 [
                     SNew(STextBlock).Text(FText::FromString(Row.Label)).Justification(ETextJustify::Center)
-                    .ColorAndOpacity(Ink).Font(FCoreStyle::GetDefaultFontStyle("Bold", 15))
+                    .ColorAndOpacity(Ink).Font(HomesteadUITheme::Font("Bold", 15))
                 ],
                 ERegion::Content, Index);
             Cells.Add(Cell);
@@ -150,12 +151,12 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [
                     SNew(STextBlock).Text(RowLabel)
                     .ColorAndOpacity(Row.Id == 13 && !Controller->IsAutosaveEnabled() ? Muted : Ink)
-                    .Font(FCoreStyle::GetDefaultFontStyle("Bold", 18))
+                    .Font(HomesteadUITheme::Font("Bold", 18))
                 ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 3, 0, 0)
                 [
                     SNew(STextBlock).Text(FText::FromString(Row.Detail)).ColorAndOpacity(Muted)
-                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14)).AutoWrapText(true)
+                    .Font(HomesteadUITheme::Font("Regular", 14)).AutoWrapText(true)
                 ];
             RowContent = Content;
 
@@ -269,7 +270,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     const bool Storage = SeenPage == 0 && Controller->ActiveStorageChest().IsSet();
     const bool PackOnly = SeenPage == 0 && !Storage;
     TSharedPtr<SHorizontalBox> ColumnsBox;
-    Body->AddSlot().FillHeight(1).HAlign(PackOnly ? HAlign_Center : HAlign_Fill)[ SAssignNew(ColumnsBox, SHorizontalBox) ];
+    // Every page spans the tab row's full width, so the tabs sit square above it (Jenny, 2026-09-30).
+    Body->AddSlot().FillHeight(1).HAlign(HAlign_Fill)[ SAssignNew(ColumnsBox, SHorizontalBox) ];
     if (SeenPage == 0 && !Storage && Controller->MenuPortraitBrush())
     {
         ColumnsBox->AddSlot().AutoWidth().Padding(0, 0, 12, 0)
@@ -288,7 +290,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     + SVerticalBox::Slot().AutoHeight().Padding(8)
                     [
                         SNew(STextBlock).AutoWrapText(true).ColorAndOpacity(Ink)
-                        .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+                        .Font(HomesteadUITheme::Font("Regular", 16))
                         .Text_Lambda([this]() { return FText::FromString(Controller->MenuPortraitStatus()); })
                     ]
                     + SVerticalBox::Slot().AutoHeight().Padding(8, 0, 8, 8)
@@ -320,7 +322,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         [
             SAssignNew(InventoryColumn, SVerticalBox)
         ];
-    if (PackOnly) ColumnsBox->AddSlot().AutoWidth()[ InventoryPanel ];
+    if (PackOnly) ColumnsBox->AddSlot().FillWidth(1)[ InventoryPanel ];
     // Appearance is a narrow column at the left; she stands in the world to its right.
     else if (SeenPage == 6) ColumnsBox->AddSlot().AutoWidth()[ SNew(SBox).WidthOverride(AppearancePanelWidth)[ InventoryPanel ] ];
     else ColumnsBox->AddSlot().FillWidth(1).Padding(0, 0, SeenPage == 0 ? 0 : 16, 0)[ InventoryPanel ];
@@ -362,7 +364,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         // head the pack, and the grid below holds the rest.
         InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 4)
         [ Text(TEXT("Hotbar  -  the first row of your pack (keys 1-0)"), 16) ];
-        InventoryColumn->AddSlot().AutoHeight().HAlign(HAlign_Left).Padding(0, 0, 0, 10)[ BuildBookHotbar() ];
+        InventoryColumn->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 10)[ BuildBookHotbar() ];
     }
     if (Storage)
     {
@@ -382,7 +384,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     SNew(SHorizontalBox)
                     + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
                     [
-                        SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 20)).ColorAndOpacity(Ink)
+                        SNew(STextBlock).Font(HomesteadUITheme::Font("Regular", 20)).ColorAndOpacity(Ink)
                         .Text_Lambda([this]()
                         {
                             return FText::FromString(Controller.IsValid() && Controller->ActiveStorageChest().IsSet()
@@ -397,7 +399,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                             .ContentPadding(FMargin(10, 4)).ButtonColorAndOpacity(Selected)
                             .ToolTipText(FText::FromString(TEXT("Name this chest")))
                             .OnClicked_Lambda([this]() { if (PointerAction()) OpenRenameChest(); return FReply::Handled(); })
-                            [ SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Regular", 15)).ColorAndOpacity(MenuGold)
+                            [ SNew(STextBlock).Font(HomesteadUITheme::Font("Regular", 15)).ColorAndOpacity(MenuGold)
                                 .Text(FText::FromString(TEXT("Name..."))) ]
                         ]
                     ]
@@ -488,7 +490,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         InventoryColumn->AddSlot().FillHeight(1)
         [
             SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
-            + SScrollBox::Slot().HAlign(SeenPage <= 2 ? HAlign_Left : HAlign_Fill)
+            // The pack's grid spreads across the full-width page; recipe and plan grids stay left.
+            + SScrollBox::Slot().HAlign(SeenPage == 1 || SeenPage == 2 ? HAlign_Left : HAlign_Fill)
             [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
         ];
         if (SeenPage == 0) PackDropArea = Scroll;
@@ -529,7 +532,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         DetailsScroll.Reset();
         InventoryColumn->AddSlot().AutoHeight().Padding(4, 10, 4, 0)
         [
-            SNew(STextBlock).ColorAndOpacity(Muted).Font(FCoreStyle::GetDefaultFontStyle("Regular", 14))
+            SNew(STextBlock).ColorAndOpacity(Muted).Font(HomesteadUITheme::Font("Regular", 14))
             .WrapTextAt(Storage ? 0.0f : Columns() * (ItemCellWidth + 12.0f))
             .AutoWrapText(Storage)
             .Text_Lambda([this]() { return FText::FromString(PackHint()); })
@@ -558,7 +561,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 .BorderBackgroundColor(FLinearColor(Ink.R, Ink.G, Ink.B, 0.2f))
                 [
                     SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                    .BorderBackgroundColor(FLinearColor(0.2f, 0.3f, 0.24f, 0.25f))
+                    .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.2f, 0.3f, 0.24f, 0.25f)))
                 ]
             ];
     };
@@ -655,7 +658,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         [
                             SNew(STextBlock).Text(FText::AsNumber(FMath::Max(1, Row.Quantity)))
                             .ColorAndOpacity(Ink)
-                            .Font(FCoreStyle::GetDefaultFontStyle("Bold", 15))
+                            .Font(HomesteadUITheme::Font("Bold", 15))
                         ]
                     ]
                 ]
@@ -712,14 +715,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     ? StaticCastSharedRef<SWidget>(SNew(SBox).WidthOverride(38).HeightOverride(38)
                         [
                             SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                            .BorderBackgroundColor(Chosen ? MenuGold : FLinearColor(0.02f, 0.04f, 0.03f, 0.85f)).Padding(Chosen ? 4 : 2)
+                            .BorderBackgroundColor(Chosen ? FLinearColor(MenuGold) : HomesteadUITheme::Themed(FLinearColor(0.02f, 0.04f, 0.03f, 0.85f))).Padding(Chosen ? 4 : 2)
                             [
                                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
                                 .BorderBackgroundColor(AppearanceSwatchColor(Id, Value))
                             ]
                         ])
                     : StaticCastSharedRef<SWidget>(SNew(STextBlock).Text(FText::FromString(ChoiceName))
-                        .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14))
+                        .Font(HomesteadUITheme::Font("Regular", 14))
                         .ColorAndOpacity(Chosen ? FSlateColor(PineInk) : FSlateColor(Ink)));
                 Choices->AddSlot()
                 [
