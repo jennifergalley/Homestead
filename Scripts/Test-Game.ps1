@@ -13,7 +13,10 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA,
     [switch]$DisableChunkPreparation,
     # The Estate route (what Jenny plays): new game, each part of the estate, a few actions, fps.
-    [switch]$EstateSmoke, [ValidateRange(0,1000)][int]$MaxLogErrors = 0)
+    [switch]$EstateSmoke, [ValidateRange(0,1000)][int]$MaxLogErrors = 0,
+    # The UI gallery (Development): each listed state captured with Slate (Source/SurvivalGame/HomesteadUIGallery.h).
+    # Scripts\Capture-UiGallery.ps1 drives this per resolution and input.
+    [switch]$UIGallery, [string]$UIGalleryIds = 'all', [ValidateSet('KBM','Pad')][string]$UIGalleryInput = 'KBM')
 $ErrorActionPreference = 'Stop'
 if ($EstateSmoke -and ($FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or $Creek -or $Crafting -or
     $Weeding -or $Clearing -or $GeneratedWoodland -or $Prompts -or $BookClarity -or $Hotbar -or $NativeMenu -or $WithAudio -or $FixtureSave)) {
@@ -103,7 +106,7 @@ $output = Join-Path $root 'Saved\Automation'
 # Map per suite. The default game map is the Estate, but every suite here still plays the seeded
 # woodland (estate tools with stand-in salvage grants). Once a suite is retargeted to the fixed
 # estate, add its switch here, for example @($Clearing); a run with any of them uses the Estate.
-$estateSuites = @($EstateSmoke)
+$estateSuites = @($EstateSmoke, $UIGallery)
 $suiteMap = if ($estateSuites | Where-Object { $_ }) { '/Game/SurvivalGame/Maps/Estate' } else { '/Game/SurvivalGame/Maps/Homestead' }
 if ($Packaged) {
     $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
@@ -259,6 +262,7 @@ if ($Hotbar) { $loopArguments = '-HomesteadHotbarTest -HomesteadMetaHuman -Homes
 if ($Crafting) { $loopArguments = '-HomesteadCraftingTest -HomesteadRequireLit' }
 # The Estate route plays the MetaHuman heroine Jenny plays, and skips the Names step.
 if ($EstateSmoke) { $loopArguments = '-HomesteadEstateSmoke -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRequireLit' }
+if ($UIGallery) { $loopArguments = "-HomesteadUIGallery=$UIGalleryIds -HomesteadUIGalleryInput=$UIGalleryInput -HomesteadMetaHuman -HomesteadSkipNewGameSetup" }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $execCommands = @()
 if (-not $ShippingQA -and $RenderScale -gt 0) { $execCommands += "r.ScreenPercentage $RenderScale" }
@@ -328,7 +332,13 @@ if ($RequireLit -and $result -notmatch '(?m)^LIT_GUARD samples=[1-9]\d* final_mo
 # Suites selected only through -ExtraArguments have their own capture rules, not the full loop's:
 # the Hotkey safety fixture takes none (Test-HotkeySafety.ps1 expects 0 screenshots), and the
 # Feedback fixture takes one screenshot per measured notice (Test-FeedbackLayout.ps1).
-if ($ExtraArguments -match '(^|\s)-HomesteadHotkeyTest(\s|$)') { $captures = @() }
+if ($UIGallery) {
+    # Each captured entry is listed in gallery-index.tsv; skipped entries are reported, not captured.
+    $galleryIndex = Join-Path $output 'gallery-index.tsv'
+    $captures = if (Test-Path -LiteralPath $galleryIndex) { @(Get-Content -LiteralPath $galleryIndex -Encoding utf8 | Where-Object { $_ } | ForEach-Object { ($_ -split "`t")[0] + '.png' }) } else { @() }
+    if (-not $captures) { throw 'The UI gallery captured nothing.' }
+}
+elseif ($ExtraArguments -match '(^|\s)-HomesteadHotkeyTest(\s|$)') { $captures = @() }
 elseif ($ExtraArguments -match '(^|\s)-HomesteadFeedbackTest(\s|$)') {
     $captures = @(Get-ChildItem -LiteralPath $output -Filter '*.layout.json' | ForEach-Object { $_.Name -replace '\.layout\.json$', '.png' })
     if ($captures.Count -lt 2) { throw 'The Feedback fixture measured fewer than two active notices.' }

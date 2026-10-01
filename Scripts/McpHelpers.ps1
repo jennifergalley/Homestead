@@ -110,6 +110,16 @@ function pie() {
     'PIE requested; StartPIE may report a timeout while it loads. Poll st until worldReady.'
 }
 
+# UI gallery in the running PIE (homestead.UIGallery): gallery <id> [Pad|KBM] [waitSeconds], then
+# the editor capture path. 'gallery list' logs the ids. Every state at several resolutions:
+# Scripts\Capture-UiGallery.ps1.
+function gallery([string]$id = 'list', [string]$inputMode = 'KBM', [double]$wait = 6) {
+    if ($id -eq 'list') { $null = con 'homestead.UIGallery list'; return 'Listed in the Output Log (LogHomesteadUIGallery).' }
+    $null = con "homestead.UIGallery $id $inputMode"
+    Start-Sleep -Milliseconds ([int]($wait * 1000))
+    shot
+}
+
 function unpie() { py 'unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).editor_request_end_play()' }
 
 function quit() {
