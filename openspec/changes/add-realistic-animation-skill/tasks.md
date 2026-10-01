@@ -22,11 +22,16 @@
     - To refine in the checker: the kneels' foot "slides" look like low steps read as planted.
     - The GASP locomotion clips weren't found at the expected path.
 - [ ] 3.2 Fix the clear violations in the recipes, re-bake, verify each in PIE at gameplay speed, and report what changed. Highest severity first (the Orchestrator, 2026-10-01): the HoeTill, AxeFell and WaterRefined wrist breaks, checked in the Animation Inspector before and after; then the scythe's carry and recovery transitions (the blade dips 30-40 cm into the ground), before capping MaxTipUp
+  - Status: 2026-10-01 slot (props-0930b).
+    - Scythe: transitions re-baked with the blade at least 4 cm up on every laid frame; MaxTipUp capped at 0.2 rad (0ee02e34).
+    - HoeTill: the recipe authored the blade on -Y while the imported hoe has it on +Y, and the game spun the hoe half a turn in her fist. Fixed in hoe_till.py and the runtime roll is removed: forearm-to-knuckle bend 115-157 to 31-59 degrees, the 180-degree wrist and forearm errors and every speed error cleared (ad7dabb7). Remaining: ulnar deviation (right 73, left 65) and left forearm supination 108.
+    - AxeFell: each fist rolls on the haft (knob constant 105 degrees, which the game undoes for the edge; right per key), rig_authoring unwinds Euler keys (the haft had flipped 100-150 degrees mid-swing), and the game squares the fists' haft axes. Speed errors 28 to 16, ROM errors 342 to 279, right wrist 179 and right forearm 176 to 108, and the bit meets the authored strike within 3-5 cm instead of about 10 (24b74f21 on the slot branch). Remaining: left wrist 99 degrees of flexion and right forearm supination 108; a per-frame knob roll would need an anim curve.
+    - Not yet: WaterRefined, GroundStrike, and verifying both fixes in PIE at gameplay speed (the Clearing and ToolRepeat routes pass).
 
 ## 4. Animation Inspector
 
 - [x] 4.1 C++ `HomesteadAnimInspector` in the Character Lab. It plays a lab action at a fixed 1/30 s step, records bone and prop transforms per frame to JSON, and captures front, side, top and three-quarter views through scene captures. The lab gains weed pull, mow, pickaxe and billhook actions
-  - Status: source only (`HomesteadAnimInspector.h/.cpp`, lab actions Weeds, Mow, Pickaxe, AxeStrike, Billhook, and LabHold for the estate tools). Not compiled yet: lanes were held to source during the build window. Compile and first run are in the next Unreal slot.
+  - Status: compiled and run on Till and Fell (2026-10-01). `-Views` with commas needs FParse's bShouldStopOnSeparator=false. Prop transforms are in actor space and bone poses in component space; `mesh` gives the transform between them.
 - [x] 4.2 `Scripts/anim_inspector_sheet.py`: overlays (a skeleton coloured by `joint_limits` status, contacts and penetration, prop clearance, the CoM over the support), contact sheets per view, a key-frame sheet, a GIF and `index.md` of flagged frames, with images sized for review
   - Status: `Tests/AnimInspectorSheetTests.py` passes on a synthetic recording. Prop bounds are drawn, but clearance distance isn't measured yet.
 - [x] 4.3 `Scripts\Inspect-Animation.ps1 -Clip -Every -Views` (hidden, `-unattended`, TEMP on E:, its own process only) and an `editor_mcp` `animinspect` verb
