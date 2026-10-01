@@ -575,6 +575,8 @@ public:
     Result CheckTill(int cellX, int cellY, Point player) const;
     Result CheckWater(int plotId, Point player) const;
     Result CheckWeed(int plotId, Point player) const;
+    // Whether Plant(plotId, player, kind) would sow now, with its refusal, changing nothing.
+    Result CheckSow(int plotId, Point player, CropKind kind) const;
     Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
     Result Water(int plotId, Point player);
     Result Weed(int plotId, Point player);

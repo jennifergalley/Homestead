@@ -589,6 +589,113 @@ void GardenTargetPreview()
     CHECK(!PreviewGarden(sim, GardenTool::None, garden, 1.0, 0.0, plotId).shown);
 }
 
+// Seeds on the hotbar: the outline previews exactly the plot the [A]/[E] sow acts on (the focused plot), with
+// Plant's own refusals (Simulation::CheckSow), and the focus line's cue (Homestead::DescribeSow). Previewing
+// never sows or spends seed. (Main has no crop seasons or withering yet, so neither refuses.)
+void SeedSowPreview()
+{
+    Simulation sim;
+    Edit(sim, [](State&) {});
+    OK(sim.GrantItems(Item::RustedHoeBlade, 1));
+    GatherUntil(sim, Item::Branch, ResourceKind::Branches, 5);
+    OK(sim.Craft(Recipe::HaftHoe, Home));
+    const int gx = CellToGarden(-2), gy = CellToGarden(-1);
+    const Point stand{GardenCellCenter(gx, gy).x - 85.0, GardenCellCenter(gx, gy).y};
+    OK(sim.Till(gx, gy, stand));
+    const int plotId = sim.FindNearestPlot(GardenCellCenter(gx, gy), 1);
+    CHECK(plotId != -1);
+    OK(sim.GrantItems(Item::TurnipSeed, 2));
+    const Point beside = GardenCellCenter(gx, gy);
+
+    // Valid: green on the focused plot, "Plant Turnip seed" keyed, and nothing changes however often it's asked.
+    const std::string before = sim.Serialize();
+    GardenTarget seed = PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::TurnipSeed);
+    CHECK(seed.shown && seed.valid && seed.reason.empty() && seed.plotId == plotId && seed.cellX == gx && seed.cellY == gy);
+    std::vector<Item> row(PackRowSize, Item::Count);
+    row[3] = Item::TurnipSeed;
+    SowCue cue = DescribeSow(sim, plotId, beside, Item::TurnipSeed, row);
+    CHECK(cue.keyed && cue.text == "Plant Turnip seed");
+    for (int repeat = 0; repeat < 50; ++repeat)
+    {
+        PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::TurnipSeed);
+        DescribeSow(sim, plotId, beside, Item::TurnipSeed, row);
+        (void)sim.CheckSow(plotId, beside, CropKind::Turnips);
+    }
+    CHECK(sim.Serialize() == before);
+
+    // Invalid cases give Plant's own refusal, unkeyed; each agrees with what Plant would do on a copy.
+    const auto Refused = [&](const Simulation& at, Point player, int plot, Item item, const std::string& want)
+    {
+        const GardenTarget target = PreviewGarden(at, GardenTool::Seed, player, 1.0, 0.0, plot, item);
+        const SowCue refusal = DescribeSow(at, plot, player, item, row);
+        Simulation copy = at;
+        const Result planted = copy.Plant(plot, player, CropForSeed(item)->kind);
+        CHECK(target.shown && !target.valid && target.reason == want);
+        CHECK(!refusal.keyed && refusal.text == want);
+        CHECK(!planted.ok && planted.message == want);
+    };
+    Refused(sim, beside, plotId, Item::CarrotSeed, "You have no Carrot seed to sow.");
+    Refused(sim, {beside.x + 2000.0, beside.y}, plotId, Item::TurnipSeed, "Move beside a tilled plot to plant.");
+    {
+        Simulation tired = sim;
+        Edit(tired, [](State& state) { state.energy = 0.5; });
+        const GardenTarget exhausted = PreviewGarden(tired, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::TurnipSeed);
+        CHECK(exhausted.shown && !exhausted.valid && exhausted.reason.find("exhausted") != std::string::npos);
+        CHECK(exhausted.reason == tired.CheckSow(plotId, beside, CropKind::Turnips).message);
+    }
+    if (sim.Count(Item::Berries) == 0) Refused(sim, beside, plotId, Item::Berries, "Gather a berry to plant the seeds from its fruit.");
+    if (sim.Count(Item::Seeds) == 0) Refused(sim, beside, plotId, Item::Seeds, "Gather seeds from wild roots before planting.");
+
+    // Nothing to show without a seed, for a non-seed, or for a plot that isn't there.
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::Count).shown);
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::Stone).shown);
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, 987654, Item::TurnipSeed).shown);
+    CHECK(!sim.CheckSow(987654, beside, CropKind::Turnips).ok);
+
+    // Untilled: with no plot in focus, the square her reach lands on is red until it's tilled; a berry, held
+    // more often to eat, outlines nothing there.
+    const Point edge{GardenCellCenter(gx, gy).x + GardenCellSize * 0.5 - 10.0, GardenCellCenter(gx, gy).y};
+    const GardenTarget untilled = PreviewGarden(sim, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::TurnipSeed);
+    CHECK(untilled.shown && !untilled.valid && untilled.reason == UntilledSowText && untilled.plotId == -1);
+    CHECK(untilled.cellX == gx + 1 && untilled.cellY == gy);
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::Berries).shown);
+    // Facing back onto her own plot without it in focus shows nothing (the plot would take the focus).
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, edge, -1.0, 0.0, -1, Item::TurnipSeed).shown);
+    CHECK(sim.Serialize() == before);
+
+    // No seed selected: name a seed in the hotbar row and its number key; a berry only when no seed is there.
+    std::vector<Item> none(PackRowSize, Item::Count);
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, none).text == "Choose seeds on the hotbar to sow");
+    CHECK(!DescribeSow(sim, plotId, beside, Item::Count, row).keyed);
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, row).text == "Select Turnip seed (4) to plant");
+    CHECK(DescribeSow(sim, plotId, beside, Item::Hatchet, row).text == "Select Turnip seed (4) to plant");
+    std::vector<Item> last(PackRowSize, Item::Count);
+    last[PackRowSize - 1] = Item::TurnipSeed;
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, last).text == "Select Turnip seed (0) to plant");
+    std::vector<Item> spent(PackRowSize, Item::Count);
+    spent[2] = Item::CarrotSeed;  // none in the pack: not offered
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, spent).text == "Choose seeds on the hotbar to sow");
+    {
+        Simulation berried = sim;
+        OK(berried.GrantItems(Item::Berries, 1));
+        std::vector<Item> fruit(PackRowSize, Item::Count);
+        fruit[1] = Item::Berries;
+        CHECK(DescribeSow(berried, plotId, beside, Item::Count, fruit).text == "Select Berries (2) to plant their seeds");
+        fruit[6] = Item::TurnipSeed;
+        CHECK(DescribeSow(berried, plotId, beside, Item::Count, fruit).text == "Select Turnip seed (7) to plant");
+        const SowCue berry = DescribeSow(berried, plotId, beside, Item::Berries, fruit);
+        CHECK(berry.keyed && berry.text == "Plant berry seeds");
+    }
+
+    // The action sows exactly the previewed plot, spending one seed; then the plot is occupied.
+    const int seedsBefore = sim.Count(Item::TurnipSeed);
+    OK(sim.Plant(seed.plotId, beside, CropForSeed(Item::TurnipSeed)->kind));
+    CHECK(sim.Count(Item::TurnipSeed) == seedsBefore - 1);
+    for (const Plot& plot : sim.GetState().plots)
+        if (plot.id == seed.plotId) CHECK(plot.planted && plot.kind == CropKind::Turnips);
+    Refused(sim, beside, plotId, Item::TurnipSeed, "A crop is already growing here.");
+}
+
 void GameplayWalkthrough()
 {
     Simulation sim;
@@ -5028,6 +5135,7 @@ int main()
     Run("sparse edit scale, payload bounds and atomic rejection", SparseEditScaleAndPayloadBounds);
     Run("MVP woodland placements", MvpWoodlandPlacements);
     Run("garden outline preview matches the hoe and pail", GardenTargetPreview);
+    Run("seed outline and plant cue match the sow action", SeedSowPreview);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

@@ -223,25 +223,26 @@ FString AHomesteadController::FocusActions() const
                 // or ripe. It never sows.
                 const FString Pull = Homestead::HasVisibleWeeds(Plot) ? X + TEXT(" Pull weeds") : FString();
                 const FString AndPull = Pull.IsEmpty() ? FString() : TEXT("   ") + Pull;
+                // With seed out over a growing plot, the red outline's reason (UpdateGardenOutline).
+                const auto SowReason = [this]()
+                {
+                    return Homestead::CropForSeed(HotbarItem(SelectedHotbarSlot)) && !GardenOutlineReason.IsEmpty()
+                        ? TEXT("   ") + GardenOutlineReason : FString();
+                };
                 if (!Plot.planted)
                 {
-                    // [A]/[E] sows the seed stack chosen on the hotbar (a berry sows berry seed; wild
-                    // roots are chosen as Seeds).
-                    if (HotbarItem(SelectedHotbarSlot) != Homestead::Item::Count)
-                        if (const auto* Seed = Homestead::CropForSeed(HotbarItem(SelectedHotbarSlot)))
-                        {
-                            const auto Chosen = HotbarItem(SelectedHotbarSlot);
-                            const FString What = Seed->kind == Homestead::CropKind::Berries ? FString(TEXT("berry seeds"))
-                                : Seed->kind == Homestead::CropKind::Roots ? FString(TEXT("roots")) : Text(Seed->lower);
-                            if (Sim.Count(Chosen) <= 0)
-                                return TEXT("No ") + FString(UTF8_TO_TCHAR(Homestead::ItemName(Chosen))).ToLower()
-                                    + TEXT(" left") + AndPull + SeedPouchHint();
-                            return A + TEXT(" Sow ") + What
-                                + (Chosen == Homestead::Item::Berries ? TEXT("   ") + Use + TEXT(" Eat") : FString()) + AndPull + SeedPouchHint();
-                        }
-                    return (Pull.IsEmpty() ? FString() : Pull + TEXT("   ")) + TEXT("Choose seeds on the hotbar to sow") + SeedPouchHint();
+                    // [A]/[E] sows only the seed stack chosen on the hotbar (a berry sows berry seed; wild
+                    // roots are chosen as Seeds): "Plant <seed>" when it would, else why not, or which
+                    // cell to select (Homestead::DescribeSow, the same CheckSow as the outline).
+                    const auto Chosen = HotbarItem(SelectedHotbarSlot);
+                    std::vector<Homestead::Item> Row;
+                    for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell) Row.push_back(HotbarItem(Cell));
+                    const auto Cue = Homestead::DescribeSow(Sim, Plot.id, PlayerPoint(), Chosen, Row);
+                    FString Line = Cue.keyed ? A + TEXT(" ") + Text(Cue.text.c_str()) : Text(Cue.text.c_str());
+                    if (Chosen == Homestead::Item::Berries && Sim.Count(Chosen) > 0) Line += TEXT("   ") + Use + TEXT(" Eat");
+                    return Line + AndPull + SeedPouchHint();
                 }
-                if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest") + AndPull;
+                if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest") + AndPull + SowReason();
                 FString Actions;
                 if (Homestead::NeedsWater(Plot))
                 {
@@ -252,7 +253,7 @@ FString AHomesteadController::FocusActions() const
                         : ToolPrompt(Sim, Homestead::Item::WateringCan, TEXT("pail"), TEXT(" to water"));
                 }
                 if (!Pull.IsEmpty()) Actions += (Actions.IsEmpty() ? TEXT("") : TEXT("   ")) + Pull;
-                return Actions;
+                return (Actions + SowReason()).TrimStart();
             }
         break;
     case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
@@ -293,6 +294,9 @@ FString AHomesteadController::FocusActions() const
     default:
         if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
+        // With seed out over untilled ground, the red outline says to till it first (UpdateGardenOutline).
+        if (Homestead::CropForSeed(HotbarItem(SelectedHotbarSlot)) && !GardenOutlineReason.IsEmpty())
+            return GardenOutlineReason + SeedPouchHint();
         if (!SeedPouchHint().IsEmpty())
             return (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book")) + SeedPouchHint();
         // Food on the hotbar is eaten with A / E (or X / F) when there's nothing else to use them on.
