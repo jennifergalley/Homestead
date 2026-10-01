@@ -42,7 +42,7 @@ void HoeCellAhead(Point player, double forwardX, double forwardY, int& cellX, in
 // Pail: the plot `focusPlotId` (the controller's focus), or nothing when there is none.
 // Seed: `seed` (a seed item, or a berry) sown into the plot `focusPlotId` (Simulation::CheckSow). With no
 // plot in focus, the square the hoe would till next (HoeCellAhead), refused with UntilledSowText when it
-// could be tilled (CheckTillGround) and not shown otherwise; a berry, which she more often holds to eat,
+// could be tilled (CheckTillGround) and the seed is in season, and not shown otherwise; a berry, which she more often holds to eat,
 // outlines only a focused plot.
 GardenTarget PreviewGarden(const Simulation& sim, GardenTool tool, Point player, double forwardX, double forwardY,
     int focusPlotId = -1, Item seed = Item::Count);

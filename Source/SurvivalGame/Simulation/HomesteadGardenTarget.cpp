@@ -59,6 +59,8 @@ GardenTarget PreviewGarden(const Simulation& sim, GardenTool tool, Point player,
         return target;
     }
     if (crop->kind == CropKind::Berries) return target;
+    // Out of its seasons, tilling first wouldn't help (Plant would still refuse): nothing to outline.
+    if (!GrowsIn(crop->kind, sim.Today().season)) return target;
     // No plot in focus: the square the hoe would till next (HoeCellAhead) is untilled, so it's red until she
     // tills it, but only where it could be tilled (a missing hoe or tiredness aside); over a building,
     // resource, spoiling overgrowth or a plot, or out of reach, there's nothing to outline.

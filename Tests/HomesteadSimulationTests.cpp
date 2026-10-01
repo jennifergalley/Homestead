@@ -683,6 +683,12 @@ void SeedSowPreview()
     CHECK(untilled.shown && !untilled.valid && untilled.reason == UntilledSowText && untilled.plotId == -1);
     CHECK(untilled.cellX == gx + 1 && untilled.cellY == gy);
     CHECK(!PreviewGarden(sim, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::Berries).shown);
+    // An out-of-season seed (turnips in Spring) doesn't ask her to till first only to be refused (review).
+    {
+        Simulation turnips = sim;
+        OK(turnips.GrantItems(Item::TurnipSeed, 1));
+        CHECK(!PreviewGarden(turnips, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::TurnipSeed).shown);
+    }
     // Facing back onto her own plot without it in focus shows nothing: it's tilled.
     CHECK(!PreviewGarden(sim, GardenTool::Seed, edge, -1.0, 0.0, -1, Item::CarrotSeed).shown);
     // The same square the hoe tills, wherever she stands in hers (review: the pail's 60 cm pointed at her own
