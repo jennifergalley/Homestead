@@ -124,7 +124,7 @@ FString AHomesteadController::FocusTitle() const
         {
             if (Plot.id != FocusId) continue;
             if (!Plot.planted) return TEXT("A little patch of earth");
-            return Text(Homestead::PlotStatus(Plot).c_str());
+            return Text(Homestead::PlotStatus(Plot, State().hour).c_str());
         }
         break;
     case EFocus::Drop:
@@ -243,6 +243,10 @@ FString AHomesteadController::FocusActions() const
                         }
                     return (Pull.IsEmpty() ? FString() : Pull + TEXT("   ")) + TEXT("Choose seeds on the hotbar to sow") + SeedPouchHint();
                 }
+                if (Plot.withered)
+                    return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick ? Use + TEXT(" Hoe out")
+                        : Sim.Count(Homestead::Item::DiggingStick) > 0 ? A + TEXT(" Hoe out")
+                        : ToolPrompt(Sim, Homestead::Item::DiggingStick, TEXT("hoe"), TEXT(" to clear it"));
                 if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest") + AndPull;
                 FString Actions;
                 if (Homestead::NeedsWater(Plot))

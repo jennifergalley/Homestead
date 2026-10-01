@@ -221,8 +221,9 @@ void UsesDrawFromTheRowAndLeaveItEmpty()
     // More berries top up the stack she still has below; they don't come back into the row.
     OK(sim.GrantItems(Item::Berries, 2));
     CHECK(sim.Count(Item::Berries) == 3 && CellItem(sim, 1) == Item::Count);
-    // Eating a chosen stack (the hotbar's selected cell) spends that stack.
+    // Eating a chosen stack (the hotbar's selected cell) spends that stack (a snack needs room for Energy).
     OK(sim.MoveToPackRow(Group(sim, Item::Berries), 0, 4, sim.GetRevision()));
+    OK(sim.SetEnergy(50.0));
     OK(sim.EatGroup(sim.GetState().packRow[4].groupId, sim.GetRevision()));
     CHECK(CellQuantity(sim, 4) == 2);
 }

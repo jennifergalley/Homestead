@@ -492,7 +492,8 @@ void AHomesteadController::SleepAtBed(Homestead::Point Position)
     {
         if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
             AutoSaveIndex = (AutoSaveIndex + 1) % 3;
-        if (Sim.IsSheltered(Position) && State().hunger >= 35)
+        // The woodland's recovery checkpoint wants her fed; the estate has no hunger, so no gate there.
+        if (Sim.IsSheltered(Position) && (State().fixedEstate || State().hunger >= 35))
             SaveSlot(TEXT("Homestead_Recovery"), true);
     }
 }

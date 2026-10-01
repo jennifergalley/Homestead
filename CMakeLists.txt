@@ -12,6 +12,9 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadWorldGeneration.cpp
     Source/SurvivalGame/Simulation/HomesteadSimulation.cpp
     Source/SurvivalGame/Simulation/HomesteadCrops.cpp
+    Source/SurvivalGame/Simulation/HomesteadFood.cpp
+    Source/SurvivalGame/Simulation/HomesteadCalendar.cpp
+    Source/SurvivalGame/Simulation/HomesteadCalendarHooks.cpp
     Source/SurvivalGame/Simulation/HomesteadOvergrowth.cpp
     Source/SurvivalGame/Simulation/HomesteadEstate.cpp
     Source/SurvivalGame/Simulation/HomesteadEstateDisrepair.cpp
@@ -143,6 +146,15 @@ else()
     target_compile_options(HomesteadLampTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadLampTests COMMAND HomesteadLampTests)
+
+add_executable(HomesteadCalendarTests Tests/HomesteadCalendarTests.cpp)
+target_link_libraries(HomesteadCalendarTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadCalendarTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadCalendarTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadCalendarTests COMMAND HomesteadCalendarTests)
 
 add_executable(HomesteadPublicRoadTests Tests/HomesteadPublicRoadTests.cpp)
 target_link_libraries(HomesteadPublicRoadTests PRIVATE HomesteadSimulation)

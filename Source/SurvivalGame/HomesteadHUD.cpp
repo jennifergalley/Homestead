@@ -232,11 +232,18 @@ void AHomesteadHUD::DrawCalendar(const AHomesteadController& PC, float X, float 
     Stroke(CX - R - 16, CY, CX + R + 16, CY, 2.5f, Muted);
 
     const float TextX = X + 140;
-    Write(FString::Printf(TEXT("%s  /  Day %d"), UTF8_TO_TCHAR(Sim.SeasonName()), Sim.DayNumber()), TextX, Y + 10, 24, Ink);
+    // "Mon, Spring 12", with the days left in the season's last three days (lane A calendar).
+    const Homestead::Calendar::Date Today = Sim.Today();
+    Write(UTF8_TO_TCHAR(Homestead::Calendar::ShortDate(Today).c_str()), TextX, Y + 10, 24, Ink);
     if (PC.IsPlanning() || PC.IsBookOpen() || PC.IsShopScreenOpen())
     {
         const FString Paused = TEXT("time paused");
         Write(Paused, X + Width - 16 - TextWidth(Paused, 16), Y + 16, 16, Muted);
+    }
+    else if (const std::string Warning = Homestead::Calendar::SeasonWarning(Today); !Warning.empty())
+    {
+        const FString Left = UTF8_TO_TCHAR(Warning.c_str());
+        Write(Left, X + Width - 16 - TextWidth(Left, 16), Y + 16, 16, HudGold);
     }
     // The time itself ("7:40 PM") is native Slate text laid over this spot (UI/SHomesteadClock),
     // so it stays crisp where the Canvas font blurred at 42 units.
@@ -321,8 +328,8 @@ void AHomesteadHUD::DrawHUD()
     else
     {
         if (PC->IsShopScreenOpen()) return;
-        // Food, energy and the purse are the Slate vitals stack (UI/SHomesteadVitals) under the calendar.
-        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth);
+        // Energy (and the woodland's food), the purse and Well fed are the Slate vitals stack (UI/SHomesteadVitals) under the calendar.
+        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth, *PC);
         ProtectFeedback(TEXT("vitals"), Vitals.Min.X, Vitals.Min.Y, Vitals.GetSize().X, Vitals.GetSize().Y);
         const float Width = FMath::Min(880.0f, ViewWidth - 80);
         const float X = (ViewWidth - Width) * 0.5f;
@@ -375,7 +382,7 @@ void AHomesteadHUD::DrawHUD()
         // Outside the book the toast is a parchment slip at the top centre (under the focus actions
         // when they're showing), sized to its text. It never runs under the vitals stack at the
         // top-right (narrow windows): it gives up width, then slides left.
-        const float VitalsLeft = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth).Min.X - 16;
+        const float VitalsLeft = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth, *PC).Min.X - 16;
         if (!InBook) Width = FMath::Min(Width, FMath::Max(300.0f, VitalsLeft - 30));
         bNoticeText = true;
         const auto Lines = WrappedLines(Toast, Width - PadX * 2, TextSize);
@@ -464,7 +471,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     {
         // And clear of the vitals stack under the calendar at the top-right.
         constexpr float Margin = 10;
-        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth);
+        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth, PC);
         if (Top < Vitals.Max.Y + Margin && CenterX + BoxWidth * 0.5f + Margin > Vitals.Min.X)
             CenterX = FMath::Max(BoxWidth * 0.5f + 12, Vitals.Min.X - Margin - BoxWidth * 0.5f);
     }

@@ -5,6 +5,7 @@
 #include "../HomesteadController.h"
 #include "../HomesteadShopkeeper.h"
 #include "../Simulation/HomesteadBackpack.h"
+#include "../Simulation/HomesteadFood.h"
 #include "../Simulation/HomesteadItems.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Framework/Application/SlateApplication.h"
@@ -315,12 +316,14 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
                 SNew(SVerticalBox)
                 + SVerticalBox::Slot().AutoHeight()
                 [
-                    // Food shows the Energy one restores before she buys it (Homestead::FoodEnergyLabel).
+                    // Food shows what eating one now would do before she buys it: its Energy, and for a
+                    // Meal on the estate until when she'd be Well fed (Homestead::Food::EffectLabel; the
+                    // clock is paused while the shop is open).
                     SNew(SHorizontalBox)
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
                     [ Label(RowName(Row), 17, bSelected ? ShopGold : ShopInk, false) ]
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(10, 0, 0, 1)
-                    [ Label(Row.bUpgrade ? FString() : Utf8(Homestead::FoodEnergyLabel(Row.Item).c_str()), 14, ShopGold, false) ]
+                    [ Label(Row.bUpgrade || !Controller.IsValid() ? FString() : Utf8(Homestead::Food::EffectLabel(Controller->Simulation().GetState(), Row.Item).c_str()), 14, ShopGold, false) ]
                 ]
                 + SVerticalBox::Slot().AutoHeight()
                 [ Label(Utf8(Row.bUpgrade ? Homestead::Backpack::Description : Homestead::ItemDescription(Row.Item)), 12, ShopMuted) ]

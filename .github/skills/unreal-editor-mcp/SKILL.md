@@ -234,7 +234,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | A kit mesh placed from Python is 100 times too big, or rotated wrongly | `StaticMeshComponent` locations are centimetres at scale 1; `unreal.Rotator(a, b, c)` positional order is (roll, pitch, yaw) | Use cm, and pass rotators by keyword: `unreal.Rotator(roll=..., pitch=..., yaw=...)`. |
 | `LineTraceComponent` never hits a mesh (returns false), even in PIE, though world traces do | `UPrimitiveComponent::LineTraceComponent` doesn't hit **Nanite** static mesh components | Trace the world (`World->LineTraceSingleByChannel`, or `line_trace_single` in Python) with other components ignored, and check `Hit.GetComponent()`. The terrain `ProceduralMeshComponent`s aren't Nanite, so component traces still work on them. |
 | Estate traces return None or captures show missing land right after PIE starts | World Partition is still streaming (about 55 s on the Estate) | Wait about a minute after `worldReady` before tracing or capturing, or take Z from the heightmap (row below). |
-| A hidden/copied-save test logs `HOMESTEAD_GROUND_HOLD` with no collision after `HomesteadTeleport`, then stops advancing | The target World Partition collision did not stream for that owned run; the wrapper regards a `gave up` hold as placement on the heightfield, not collision | Do not use the run for visual gameplay proof or infer a Shipping regression. Stop only the owned PID, retain prior save evidence, and retry only through a route that confirms `HOMESTEAD_GROUND_SETTLE`. |
+| A hidden/copied-save test logs `HOMESTEAD_GROUND_HOLD` with no collision after `HomesteadTeleport`, then render/log progress appears to stop | Likely destination World Partition proxy collision did not stream (a copied Estate teleport crossed about 21 m near a proxy boundary while the analytic heightfield remained valid); this is unproven. Settling traces the Pawn channel, so a Visibility-only door leaf cannot mask it. The controller logs only the first miss and can hold for up to 180 **game** seconds, so a long wall-clock interval alone is not a hard hang | Do not use the run for visual gameplay proof or infer a Shipping regression. Stop only the owned PID and retain prior save evidence. Future repair: explicitly source destination streaming, add periodic diagnostics, and use a wall-clock-bounded safe-position restore instead of heightfield placement through missing collision. |
 | `FMath::Max(SomeTArray)` doesn't compile | There's no TArray overload | Loop, or use `Algo::MaxElement`. |
 | `FVector2D` has no `Rotation()` | Only `FVector` does | Use `GetRotated(Degrees)`, or build the vector yourself. |
 | Every mesh of a runtime-built ISM actor shows twice in PIE | PIE duplicates the editor instance's instance components, but not a transient list of them (`AHomesteadManorRuin` / `AHomesteadDerelictFarm` pattern: a transient `Parts` array plus `AddInstanceComponent`) | See the `homestead-code-conventions` skill, "Unreal C++". |
@@ -374,8 +374,9 @@ hk release_all; mcp $E StopPIE
   about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
 - **Time and weather for tests:** `HomesteadMorning <h>` (console, with the player controller) jumps the
   clock without simulating the skipped hours. With `h` earlier than the current hour it goes to the next
-  day, which is the quick way to reach rain: it rains on days 2, 5, 8, ... from 9 to 15 h (`IsRainDay` in
-  `HomesteadSimulation.cpp`), so from a new game `HomesteadMorning 10` twice lands in day-2 rain. Time skips
+  day, which is the quick way to reach rain: `IsRainDay` chooses two stable hashed days per ten-day
+  block (offsets 1–2 and 6–7; day 0 is dry and block 0's first rain is day 1), from 09:00 to 15:00.
+  Use `Homestead::IsRainDay`/the active test route rather than assuming days 2, 5, 8. Time skips
   don't grow crops or run day-rollover logic; only Advance or Sleep does. For deterministic crop tests,
   use `HomesteadGrowCrops <days> [tend=1]` to advance crop days, or
   `HomesteadCropGrowth <0-1>` to set the growth fraction directly.

@@ -739,6 +739,10 @@ private:
     Homestead::SleepChoice BedChoice = Homestead::SleepChoice::UntilMorning;
     int32 BedChoiceBed = INDEX_NONE;
     int32 SeenDozes = 0;
+    // Calendar toasts (HomesteadControllerCalendar.cpp): once per season change, compared against the
+    // simulation after each Advance.
+    int32 SeenSeasonChanges = 0;
+    void TickCalendarNotices();
     void CycleZoom();
     void QuickSave();
     void QuickLoad();

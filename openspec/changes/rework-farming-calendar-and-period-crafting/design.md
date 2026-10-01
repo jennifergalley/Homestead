@@ -14,7 +14,8 @@
 - **Shops.** `HomesteadShops` seeds the general store, and its stock includes the six seeds. The
   sell-down runs at the 06:00 rollover.
 - **Weather.** Rain is deterministic: since add-rain-weather 3.1, `IsRainDay` selects two stable
-  hashed days in every ten, preserving the 09:00–15:00 window.
+  hashed days in every ten, preserving the 09:00–15:00 window. The schedule is pure from `hour`;
+  it stores no seed or save section.
 - **Crafting.** Recipes are hand recipes: the five hafts, RoastedRoots, HerbedRoots and
   SplitFirewood. The pieces are Foundation, Wall, Doorway, Roof, Fire, Bed, Chest and Hearth.
 
