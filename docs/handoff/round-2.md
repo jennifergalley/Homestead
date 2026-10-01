@@ -1496,6 +1496,11 @@ not claim early Energy is fully solved.
   landing through ground-material wear, then verify it visually and on foot. Water's separate
   `1d5b90a9` trail PNG/bin is committed but requires `build_ground.py`, importing `T_EstateGround` /
   `T_EstateCanopy`, `ImportEstateMap`, and a visual check before any delivery claim.
+- **Water selective source merge `4324515d` (next batch only):** includes Water `d1fe4850`'s
+  concise pail-fill change (no success toast; refusals remain visible) and native Release 18/18
+  source evidence. The rejected global indoor `r.HairStrands.SkyLighting` toggle and black-hair
+  image are omitted. Water's `00fd` follow-up is not UE-verified; no Water visual or package
+  acceptance claim follows from this merge.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
