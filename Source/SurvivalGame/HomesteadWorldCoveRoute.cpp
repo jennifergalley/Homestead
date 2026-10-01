@@ -85,11 +85,14 @@ void AHomesteadWorld::BuildCoveRoute()
     };
     TMap<int32, TObjectPtr<UInstancedStaticMeshComponent>> Batches;
     int32 Placed = 0;
+    int32 PlacedOf[static_cast<int32>(Homestead::CoveKitPiece::Count)] = {};
+    int32 Blockers = 0;
     for (const Homestead::CoveKitPlacement& Piece : Kit.pieces)
     {
         const int32 Index = static_cast<int32>(Piece.piece);
         UStaticMesh* Mesh = Meshes[Index];
         if (!Groups[static_cast<int32>(Homestead::CoveKitGroupOf(Piece.piece))]) continue;
+        ++PlacedOf[Index];
         // A mirrored wedge (a left-hand turn) has negative Y scale too.
         if (IsRail(Piece.piece) || Piece.piece == Homestead::CoveKitPiece::Fingerpost || Piece.piece == Homestead::CoveKitPiece::RailEndPost
             || Piece.piece == Homestead::CoveKitPiece::LandingWedge)
@@ -162,8 +165,13 @@ void AHomesteadWorld::BuildCoveRoute()
         Blocker->SetHiddenInGame(true);
         Blocker->RegisterComponent();
         CoveRouteVisual.Components.Add(Blocker);
+        ++Blockers;
     }
-    UE_LOG(LogHomesteadWorld, Log, TEXT("Cove route: %d kit pieces (%d treads, %d landing slabs, %d kerbs), %d rail blockers."),
-        Placed, Kit.Count(Homestead::CoveKitPiece::StepA) + Kit.Count(Homestead::CoveKitPiece::StepB) + Kit.Count(Homestead::CoveKitPiece::StepC),
-        Kit.Count(Homestead::CoveKitPiece::LandingSlab), Kit.Count(Homestead::CoveKitPiece::Kerb), static_cast<int32>(Kit.blockers.size()));
+    // What actually went down (a group left out counts nothing).
+    const auto Of = [&PlacedOf](Homestead::CoveKitPiece Piece) { return PlacedOf[static_cast<int32>(Piece)]; };
+    UE_LOG(LogHomesteadWorld, Log, TEXT("Cove route: %d kit pieces (%d treads, %d landing slabs, %d kerbs, %d rail bays), %d rail blockers."),
+        Placed, Of(Homestead::CoveKitPiece::StepA) + Of(Homestead::CoveKitPiece::StepB) + Of(Homestead::CoveKitPiece::StepC),
+        Of(Homestead::CoveKitPiece::LandingSlab) + Of(Homestead::CoveKitPiece::LandingSlab75), Of(Homestead::CoveKitPiece::Kerb),
+        Of(Homestead::CoveKitPiece::RailLevel) + Of(Homestead::CoveKitPiece::Rail26) + Of(Homestead::CoveKitPiece::Rail28)
+            + Of(Homestead::CoveKitPiece::Rail30), Blockers);
 }
