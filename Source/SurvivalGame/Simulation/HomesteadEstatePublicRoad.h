@@ -20,13 +20,19 @@ struct PublicRoadStop
     double chainage = 0.0;  // metres from the manor end
     Point position;         // on the road's centreline (cm)
     double z = 0.0;         // ground height there (cm)
+    // Where a walk to this stop leaves her when that isn't the road itself (the manor: by the ruin's front
+    // door, beside its "To town" sign; public_road.py arrival()). The walk adds the way there from the stop.
+    bool hasArrival = false;
+    Point arrival;
+    double arrivalZ = 0.0;
+    double arrivalYaw = 0.0;
 };
 
 struct PublicRoadSign
 {
     std::string name;       // "ManorRoadSign", "GatewayRoadSign", "TownRoadSign"
-    double chainage = 0.0;
-    Point position;         // on the verge, off the road bed (cm)
+    double chainage = 0.0;  // 0 for the manor's sign, which stands by the ruin rather than on the road
+    Point position;         // on the verge, off the road bed (cm); the manor's by the ruin's front door
     double z = 0.0;
     double yaw = 0.0;       // degrees; the sign's face points along this heading
 };
