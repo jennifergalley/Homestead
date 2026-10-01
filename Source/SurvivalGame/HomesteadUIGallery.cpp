@@ -3,6 +3,7 @@
 #if !UE_BUILD_SHIPPING
 #include "HomesteadCharacter.h"
 #include "HomesteadController.h"
+#include "Simulation/HomesteadBackpack.h"
 #include "Simulation/HomesteadEstatePublicRoad.h"
 #include "Simulation/HomesteadShops.h"
 #include "Simulation/HomesteadTravel.h"
@@ -423,6 +424,15 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Notice, static_cast<int32>(ENotice::ShopStatus), Counter, Shop(1, 30, TEXT("pasty")));
     Add(TEXT("shop-backpack"), TEXT("Buy tab with 1,500 coins, choosing the leather backpack: its confirm."), ECover::Shop, 2, Counter,
         Shop(1, 1500, TEXT("upgrade")));
+    Add(TEXT("hud-backpack"), TEXT("After buying the leather backpack at the counter: the knapsack on her back, her pack now 240."),
+        ECover::Shop, 4, Counter, [](AHomesteadController& PC)
+        {
+            if (PC.State().shops.empty()) return;
+            PC.Sim.GrantMoney(Homestead::Backpack::Price - PC.State().money);
+            PC.Sim.BuyBackpack(PC.State().shops.front().id, PC.PlayerPoint());
+            // From behind her, so the pack shows.
+            if (const APawn* Pawn = PC.GetPawn()) PC.SetControlRotation(FRotator(-12.0f, Pawn->GetActorRotation().Yaw + 160.0f, 0.0f));
+        }, 1.5f);
     Add(TEXT("shop-quantity"), TEXT("Buy tab, choosing bread: the how-many dialog."), ECover::Shop, 3, Counter, Shop(1, -1, TEXT("Bread")));
 
     // Road signs.
@@ -725,8 +735,8 @@ void Run(const TArray<FString>& Args, UWorld* World)
             const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
             if (bOk && WeakPC.IsValid())
                 FHomesteadUIGallery::SetBackdrop(*WeakPC.Get(), bLivePlain && !(Entry && Entry->bKeepWorld), true);
-            if (bOk) UE_LOG(LogHomesteadUIGallery, Display, TEXT("UI_GALLERY_READY %s"), *Id);
-            else UE_LOG(LogHomesteadUIGallery, Warning, TEXT("UI_GALLERY_SKIPPED %s: %s"), *Id, *Why);
+            if (bOk) { UE_LOG(LogHomesteadUIGallery, Display, TEXT("UI_GALLERY_READY %s"), *Id); }
+            else { UE_LOG(LogHomesteadUIGallery, Warning, TEXT("UI_GALLERY_SKIPPED %s: %s"), *Id, *Why); }
         };
     };
     if (Verb.Equals(TEXT("all"), ESearchCase::IgnoreCase))

@@ -139,12 +139,12 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
             const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
             FHomesteadUIGallery::SetBackdrop(*Controller, bPlain && !(Entry && Entry->bKeepWorld), bHeroine);
         };
-        FStep& Backdrop = Steps.AddDefaulted_GetRef();
-        Backdrop.Name = TEXT("Backdrop for ") + Id;
-        Backdrop.Skip = [Status]() { return *Status <= 0; };
-        Backdrop.Action = ApplyBackdrop;
-        Backdrop.Check = []() { return true; };
-        Backdrop.Wait = UIGalleryRun::BackdropSeconds;
+        FStep& Settle = Steps.AddDefaulted_GetRef();
+        Settle.Name = TEXT("Backdrop for ") + Id;
+        Settle.Skip = [Status]() { return *Status <= 0; };
+        Settle.Action = ApplyBackdrop;
+        Settle.Check = []() { return true; };
+        Settle.Wait = UIGalleryRun::BackdropSeconds;
         FStep& Capture = Steps.AddDefaulted_GetRef();
         Capture.Name = TEXT("Capture ") + Id;
         Capture.Skip = [Status]() { return *Status <= 0; };
