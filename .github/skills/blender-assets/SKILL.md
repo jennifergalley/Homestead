@@ -149,7 +149,9 @@ before each pass.
     (the bramble overgrowth set needed this).
   - Blender exports mirror Y: props authored facing -Y arrive facing +Y, and blade edges that the
     report lists on -Y are on +Y in the engine (`SM_FlintHatchet`, `SM_StoneHoe`). Check in the
-    engine before keying grips.
+    engine before keying grips. Animation clips must author for those imported axes; do not conceal
+    an authoring-axis error with a runtime half-turn, because the tool can look aligned while the
+    gripping wrist is solved incorrectly.
   - A Blender render is not in-game evidence.
 - **Live window on a shared machine.** `Start-BlenderLive.ps1` listens on port 9876 by default; if
   another worktree's live Blender holds it, pass `-Port`. A stale `Saved\BlenderLive\session.json`

@@ -33,6 +33,17 @@ for layers). Keep in the module, as constants:
 - the held prop's transform in the hand (`HELD`), read from the running game;
 - a `report()` that prints the contact point against its target at each key.
 
+**Audit imported prop axes before posing a tool.** Blender FBX props mirror Y on Unreal import:
+the report's blade-facing `-Y` is engine `+Y`. Read the imported prop and running-game grip before
+authoring, then bake the intended engine-facing motion. Do not leave a wrong authoring axis in the
+clip and compensate with a runtime half-turn: that can place the blade correctly while folding the
+wrist wrong.
+
+For a two-handed haft, do not take `index_01` → `pinky_01` as square across the fist: it slants
+about 16° toward the fingers. Square it against wrist → `middle_01` before using it as the haft
+line. If a gripping wrist folds, search the fist's free roll about that haft first, re-solving the
+forearm-to-knuckle angle at each key, before changing the arm pose.
+
 It bakes `/Game/Characters/Heroine_MH/Animations/AN_HeroineMH_<Name>`. Save the asset, clean up the
 authoring actor and sequence, and commit the `.uasset` with the `.py`.
 

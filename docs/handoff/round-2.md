@@ -1148,10 +1148,11 @@ requirement.
   Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
   two-swing clearing animation and awards/clears once, without a second click or double reward.
   Architecture traces tool tier, input and reward paths before native/PIE proof.
-- **Animation anatomy and inspection** — **Props source-only `ded05f62`, not on `main`.** It adds
-  `.github/skills/realistic-animation/` with MetaHuman per-joint comfortable/extreme ROM tables,
-  coupling, joint speeds, tool grips, posture/failure rules, review checklist and sources.
-  `rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` now runs
+- **Animation anatomy and inspection** — **Props source-only `ded05f62`, not on `main`; current
+follow-up branches `props-0930b` `46b70ba3` and `realistic-animation` `8e40f725`.** It adds
+`.github/skills/realistic-animation/` with MetaHuman per-joint comfortable/extreme ROM tables,
+coupling, joint speeds, tool grips, posture/failure rules, review checklist and sources.
+`rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` now runs
   `joint_limits.py` after every bake and logs advisory `[anatomy AN_...]` lines; errors never block
   a bake. `anim_audit.run()` writes a whole-cast report to
   `E:\CopilotScratch\anim-audit\<stamp>\audit.md`. It also contains
@@ -1167,6 +1168,22 @@ requirement.
   via `Scripts\Inspect-Animation.ps1` and `editor_mcp animinspect`. Cross-link it from canonical
   `blender-assets` only after this branch lands and validates; none of this is animation acceptance
   evidence yet.
+
+  **Animation-slot findings awaiting branch landing:** Blender FBX import mirrors Y, so a
+  report's blade-at-`-Y` is engine `+Y`; author clips for imported axes rather than repairing them
+  with a runtime half-turn, which can leave a roughly 150° folded wrist (`hoe_till.py` did this).
+  `rig_authoring.key_euler` on the branch winds raw roll/pitch/yaw keys to the nearest Euler
+  solution of their neighbour, preventing ±180° long sweeps, 100–150° tool flips and
+  2,500–4,500°/s pops on re-bake. `index_01` → `pinky_01` slants about 16° toward the fingers:
+  square it against wrist → `middle_01` before using a fist line as a haft axis. A gripping fist
+  can freely roll around that axis, so solve per-key roll first when a wrist folds, using the
+  forearm-to-knuckle angle as the check.
+
+  Inspector contract on the branch: `frames.json` prop transforms are actor-space while bone poses
+  are component-space, with `mesh` mapping between them; `-Views` comma lists require
+  `FParse::Value(..., bShouldStopOnSeparator=false)`. The Inspector needs at least 6 GB free, so
+  close the editor before running it. Promote these source-bound implementation details to the
+  canonical realism/inspector skills only after the branch lands and validates.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
