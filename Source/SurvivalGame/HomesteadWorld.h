@@ -214,6 +214,9 @@ public:
     static FString UnderbrushName(uint8 Species);
     // 0 outdoors .. 1 indoors at the camera (UHomesteadWeather), for the ambience and hearth mixes.
     float GetIndoorMix() const;
+    // Her own position inside a roofed building cell, eased (UHomesteadWeather::GetRoomMix): the interior
+    // daylight follows this, not the camera, so doorways and overhangs outside don't dim the day.
+    float GetRoomMix() const;
 
 private:
     friend class AHomesteadVisualPlaytest;
@@ -298,7 +301,7 @@ private:
     static constexpr float OvercastExposureBias = -0.8f;
     static constexpr float OvercastSaturation = 0.72f;
     // Under a roof by day, eye adaptation would lift a shaded room back to outdoor brightness. Hold it
-    // down (EV, scaled by the indoor mix and daylight) so the room reads as dim, with daylight at the
+    // down (EV, scaled by the room mix and daylight) so the room reads as dim, with daylight at the
     // door and the hearth as the key; at night the lamp and hearth already set the level.
     static constexpr float IndoorDayExposureBias = -0.7f;
     // The hearth as a settled low fire: a warm key low in front of the opening, oil-lamp strength

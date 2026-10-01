@@ -56,6 +56,11 @@ float AHomesteadWorld::GetIndoorMix() const
     return Weather ? Weather->GetIndoorMix() : 0.0f;
 }
 
+float AHomesteadWorld::GetRoomMix() const
+{
+    return Weather ? Weather->GetRoomMix() : 0.0f;
+}
+
 void AHomesteadWorld::UpdateHearthSound(float DeltaSeconds)
 {
     HearthSounds.RemoveAll([](const FHearthSound& Sound) { return !Sound.Audio.IsValid(); });
@@ -165,7 +170,8 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
             if (Structure.kind == Homestead::Piece::Roof && !bPreview && !bDeconstruct)
                 Part(Cube, FVector(0, 4, 283), FVector(312, 316, 2.4f), HomesteadWorldLook::RoofUnderlay);
             // Between the joists the coping left a sky-bright slot along every wall top: a timber wall
-            // plate inside the wall's thickness (faces at Y 130 and 158) fills it without showing on either face.
+            // plate inside the wall's thickness (faces at Y 130 and 158) fills it without showing on either
+            // face, from the coping (258 cm) up to the raised wall top under the deck (279 cm).
             if (bWallPiece && !bPreview && !bDeconstruct)
                 Part(Cube, FVector(0, 144, 268.5f), FVector(300, 24, 21), HomesteadWorldLook::RoofUnderlay);
             if (!bPreview && !bDeconstruct && Homestead::Door::HasLeaf(Structure))

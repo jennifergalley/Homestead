@@ -5,6 +5,7 @@
 #include "HomesteadActionTestState.h"
 #include "Simulation/HomesteadCrops.h"
 #include "UI/SHomesteadMenu.h"
+#include "Simulation/HomesteadCrops.h"
 
 bool AHomesteadVisualPlaytest::WalkWaterTarget(FVector2D Target, float Tolerance, float Delta, FVector2D& Move, FVector2D& Look)
 {
