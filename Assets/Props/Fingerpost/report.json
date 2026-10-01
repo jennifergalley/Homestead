@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Fingerpost",
+  "description": "Silvered oak fingerpost with a pointed arm reading 'To the Cove' on both faces (original; lettering in Blender's bundled DejaVu Sans). Pivot = post foot; the arm points +X.",
+  "collision": "box",
+  "triangle_budget": 12000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/fingerpost.py",
+  "source_sha256": "22b1d3f781be7445ff2893828bc3d9169df1ae9b7383ae4efff6919d465be1cc",
+  "provenance": "Original project-authored procedural geometry and materials. Lettering: Blender's bundled default font (DejaVu Sans, Bitstream Vera licence, permits embedding and modification).",
+  "meshes": {
+    "SM_Fingerpost_ToTheCove": {
+      "vertices": 2550,
+      "triangles": 5048,
+      "size_cm": [
+        72.25,
+        13.08,
+        252.0
+      ],
+      "materials": [
+        {
+          "name": "M_Fingerpost_ToTheCove",
+          "textures": {
+            "basecolor": "T_Fingerpost_ToTheCove_basecolor.png",
+            "roughness": "T_Fingerpost_ToTheCove_roughness.png",
+            "normal": "T_Fingerpost_ToTheCove_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Fingerpost_ToTheCove_basecolor.png",
+          "roughness": "T_Fingerpost_ToTheCove_roughness.png",
+          "normal": "T_Fingerpost_ToTheCove_normal.png",
+          "ao": "T_Fingerpost_ToTheCove_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "focus": [
+          0.35,
+          0.0,
+          1.7
+        ]
+      },
+      "fbx": "SM_Fingerpost_ToTheCove.fbx",
+      "sha256": "ed700d92622fbffb45363a871bf66a2824a0da35c29b89c50c17f75e926665c1",
+      "preview": "preview_SM_Fingerpost_ToTheCove.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Fingerpost_ToTheCove_hero.png",
+          "detail": "beauty_SM_Fingerpost_ToTheCove_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -20
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "pivot": "foot of the post on the ground; the arm points along +X",
+  "arm_height_m": 1.7,
+  "text": "To the Cove",
+  "yaws_deg": {
+    "front door": 159,
+    "head of the cliff steps": 153
+  },
+  "textures": {
+    "T_Fingerpost_ToTheCove_basecolor.png": "26c81eb310481a99fc88c820f6a65c4921590cc0190e393187eb24425873235a",
+    "T_Fingerpost_ToTheCove_roughness.png": "de8703e3a1d0f79fe897b9cffe38175ce11dcdb15d37ce5fd767002faf4d1586",
+    "T_Fingerpost_ToTheCove_normal.png": "0ecd5f6c96a87f32a39a09820ef135b0a54871ed01e656fc813f69a8e4cd035c"
+  }
+}
