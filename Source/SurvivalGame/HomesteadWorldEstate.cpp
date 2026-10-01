@@ -75,6 +75,17 @@ const FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/SurvivalGame/Environment/Props/WildStrawberry/SM_WildStrawberry.SM_WildStrawberry"), false, 3800, false, 4, 0},
     {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_b.SM_Fern02_b"), false, 7000, false, 0, 0},
     {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_c.SM_Fern02_c"), false, 7000, false, 0, 0},
+    // The lake trail's wildflowers (Scripts/Terrain/lake_path_plants.py; Jenny, 2026-09-30), decorative only: no
+    // collision or shadow, culled within a short walk. Bluebells, primroses and wild garlic reuse the forage
+    // clumps' meshes; anemone, campion, foxglove and cow parsley come from Props' recipes (a missing mesh logs
+    // once and its records are skipped until it's imported).
+    {TEXT("/Game/SurvivalGame/Environment/Props/Bluebell/SM_BluebellClump.SM_BluebellClump"), false, 4500, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/Primrose/SM_PrimroseClump.SM_PrimroseClump"), false, 4500, false, 1, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/WildGarlic/SM_WildGarlic.SM_WildGarlic"), false, 4500, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/WoodAnemone/SM_WoodAnemoneClump.SM_WoodAnemoneClump"), false, 4500, false, 1, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/RedCampion/SM_RedCampionClump.SM_RedCampionClump"), false, 5500, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/Foxglove/SM_Foxglove.SM_Foxglove"), false, 6500, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/CowParsley/SM_CowParsley.SM_CowParsley"), false, 6000, false, 2, 0},
     {TEXT("/Game/Trials/Fern02_20260920_01/Meshes/SM_Fern02_d.SM_Fern02_d"), false, 7000, false, 0, 0},
     {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_small_b.SM_GrassMedium01_small_b"), false, 4500, false, 0, 0},
     {TEXT("/Game/Trials/GrassGround_20260921_01/Meshes/SM_GrassMedium01_tiny_a.SM_GrassMedium01_tiny_a"), false, 4500, false, 0, 0},

@@ -4703,7 +4703,12 @@ void RuinTimbersAreChoppedWithTheAxe()
         if (table[i].id >= 582100 && table[i].id < 582300) lastForage = i;
         if (table[i].kind == ResourceKind::RuinTimbers) firstTimber = std::min(firstTimber, i);
     }
-    CHECK(firstTimber > lastForage && firstTimber < table.size() && table.back().id == 520006);
+    std::size_t rackAt = table.size();
+    for (std::size_t i = 0; i < table.size(); ++i)
+        if (table[i].id == 520006) rackAt = i;
+    CHECK(firstTimber > lastForage && firstTimber < rackAt && rackAt < table.size());
+    // Only the lake trail's forage (582300-582399) comes after the rack.
+    for (std::size_t i = rackAt + 1; i < table.size(); ++i) CHECK(table[i].id >= 582300 && table[i].id < 582400);
     Simulation sim;
     OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
     for (int id : {582012, 582013})

@@ -484,6 +484,36 @@ int main()
                 Check(!farm || !NearBox(farm->points, p, 800.0), "new food clear of the farm and its plots", placement.id);
             }
         }
+        // The lake trail's forage (582300-582399, lake_path_plants.py; Jenny, 2026-09-30): every row placed, live
+        // brambles and roots in the woods either side of the trail, beside it (not on its walk width) and deeper
+        // in, out of the lake and clear of every other placement.
+        {
+            int lakeRows = 0, lakeBrambles = 0, lakeRoots = 0, besidePath = 0, deeper = 0, left = 0, right = 0;
+            for (const EstatePlacement& placement : all)
+            {
+                if (placement.id < 582300 || placement.id >= 582400) continue;
+                ++lakeRows;
+                (placement.kind == ResourceKind::BerryBush ? lakeBrambles : lakeRoots) += 1;
+                Check(IsFood(placement.kind), "lake-trail forage is a bramble or wild roots", placement.id);
+                const Point p = placement.position;
+                const double fromPath = PolylineDistance(pathPts, p);
+                Check(fromPath >= 300.0, "lake-trail forage off the walk width", placement.id);
+                Check(fromPath <= 3100.0, "lake-trail forage in the woods along the trail", placement.id);
+                Check(!PointInPolygon(shorePts, p) && PolylineDistance(shorePts, p, true) > 290.0, "lake-trail forage out of the lake", placement.id);
+                Check(EstatePlacementAllowed(estateLayout, placement), "lake-trail forage allowed", placement.id);
+                for (const EstatePlacement& other : all)
+                    if (other.id != placement.id) Check(Distance(other.position, p) >= 300.0, "lake-trail forage 3 m from every placement", placement.id);
+                besidePath += fromPath <= 950.0;
+                deeper += fromPath >= 1200.0;
+                // Which side: the cross product with the trail's overall direction (farm to landing).
+                const Point a = pathPts.front(), b = pathPts.back();
+                ((b.x - a.x) * (p.y - a.y) - (b.y - a.y) * (p.x - a.x) > 0.0 ? left : right) += 1;
+            }
+            Check(lakeRows >= 20, "lake-trail forage rows all placed", lakeRows);
+            Check(lakeBrambles >= 8 && lakeRoots >= 8, "lake-trail brambles and roots", lakeBrambles);
+            Check(besidePath >= 10 && deeper >= 4, "lake-trail forage beside the path and deeper in", besidePath);
+            Check(left >= 6 && right >= 6, "lake-trail forage on both sides", left);
+        }
         Check(moreBrambles >= 45, "more estate brambles", moreBrambles);
         Check(moreRoots >= 22, "more estate root patches", moreRoots);
         Check(moreRoadside >= 15 && moreRoadsideRoots >= 4, "more roadside food", moreRoadside);
