@@ -872,6 +872,19 @@ receipt.**
   navigation. That comment is stale: the implemented contract is zero-argument direct bed sleep
   with no picker. Do not edit the header during the active UBT/editor acceptance slot; correct it
   in a docs-only source cleanup after today's build evidence is complete.
+
+  **Integration acceptance diagnostics (pending final tests and commit):** `SaveRoutingTest` under
+  packaged `-nullrhi` rejects valid Woodland grass meshes because
+  `UStaticMesh::GetRenderData()` has no LODs even though the mesh and material load. Do not weaken
+  production mesh admission for that headless rendering absence: the hidden offscreen rendered-RHI
+  route passes runtime routing with 196 writes and 148 cross-process reads. After close and
+  immediate reopen, DirNav can select pack index 54 while its offscreen `SMenuButton` has cached
+  `(0,0)` geometry; one layout wait is insufficient. The pending `SHomesteadMenu::Tick` fix seeds
+  `ScrollOffset` from the selected uniform-grid row fraction until tile geometry exists, then calls
+  `ScrollDescendantIntoView`; packaged 720 DirNav has passed that route provisionally. The FullLoop
+  midday fixture must use `SetEnergy(39)`, not 40: awake Energy drain plus quarter-hour sleep
+  rounding advances the first tick from 6.0 to 6.25 hours. Promote these to the editor skill only
+  after Integration posts its final acceptance tests and commit.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
