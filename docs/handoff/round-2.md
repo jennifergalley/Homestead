@@ -82,24 +82,22 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current Shipping delivery (Phoenix, `main` `e5877da8`):** `Homestead Estate.lnk` is retargeted
-and ShellLink-read-back verified to
-`Build\Releases\20260930-phoenix-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
-(SHA `8B0410A4DBD9C801B9FFDBB33BBB872960C0853BBEFD38D55F84068DD102021F`). The
-`-ReuseCooked` staging output contains only `SurvivalGame-Win64-Shipping.exe`, so Integration made a
-candidate-local hard-link `JennysHomesteadGame.exe` alias and verified the same SHA before shortcut
-promotion. Estate-map arguments, candidate-local `-UserDir`, working directory and icon are retained;
-the prior Estate link is backed up on `E:`. MVP survival was retired on 2026-09-30 as
-`archive/mvp-survival-20260930` (`93612cdf`); `Homestead.lnk` was removed and
-`Homestead Estate.lnk` is the only active game shortcut.
+**Current Shipping delivery (morning 2026-10-01, `main` `20ad66e9`):** `Homestead Estate.lnk` was
+ShellLink-read-back promoted to
+`Build\Releases\20261001-morning-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
+(SHA `F713BEB99F5907CC2FDCEBE9480C3001A7789E1FC72F69E5EDAA0692B4EFF564`). The shortcut retains its
+approved icon and has a candidate-local `-UserDir`; `estate-shortcut-before-oct01.lnk` preserves the
+Phoenix target as rollback. The delivery receipt at
+`E:\CopilotScratch\e251051b-8674-4ef0-a3ed-03830407f8b6\delivery\oct01-shortcut-receipt.json`
+records promotion and SHA evidence. It copied and hash-recorded all 18 current save/backup files
+before promotion, including Estate Recovery; `Homestead.lnk` remains retired and `Homestead Estate.lnk`
+is the only active game shortcut.
 
-Phoenix Development passed all six packaged suites. Shipping reuses five hash-identical cooked
-containers; copied-save F5/F9 passed; 175 owned-PID endpoint samples observed zero sockets. All 19
-saves plus GameUserSettings/Input match pre-promotion originals, including Manual
-`F816C870...5EB8`. The old Phoenix copied-save teleport ground-hold is a QA limitation, not visual
-door/forage acceptance or a proven Shipping bug. Visible human startup, manual physical gamepad and
-the hair rod/fan cure remain unobserved/inconclusive; the stale modular-equipment wrapper assertion
-is still not a full wrapper pass. Earlier Development/Shipping receipts remain rollback history.
+Known non-gates for this delivery: Feedback and Watering failures are test-side; UE 5.8 Shipping
+cannot route the Estate-default package to Woodland; the cove fingerpost is deliberately parked;
+and indoor daytime hair remains visually unresolved. These do not invalidate the stated delivery, but
+none is a claim of acceptance for its separate behavior. Earlier Phoenix Development/Shipping receipts
+remain rollback history.
 
 **Shipping map-gate correction (UE 5.8):** an Estate-default Shipping client always loads
 `GameDefaultMap` and ignores `Test-Game.ps1`'s old Woodland positional map: `GameInstance.cpp`
@@ -1763,6 +1761,8 @@ not claim early Energy is fully solved.
 
 ## Decisions during the round
 
+- **4 PM round:** starts from delivered `main` `20ad66e9`; lanes rebase onto that baseline before
+  resuming their independently owned work.
 - **4 PM playtest package:** only independently verified `[ready]` slices are eligible. Pending
   feedback above is not included merely because it has an owner.
 - **Calendar A package hold:** raw `a3c7e04d` is excluded. Its 60-minute-default correction must be
