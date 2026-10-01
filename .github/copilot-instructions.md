@@ -144,9 +144,12 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
 - **Project storage hygiene (every lane):** delete your own scratch, render, recording and test-output
   artifacts when their task ends. Keep large transient artifacts under
   `E:\CopilotScratch\<session-id>`, never session-state `files`; retain only the active shortcut
-  Shipping release and one rollback (plus a named Development reference only while needed). When
-  uncertain, delete unnecessary project-owned artifacts, but never Jenny's current save game. The
-  Disk Cleanup Agent runs the daily broader project sweep at 10:00 AM.
+  Shipping release and one rollback, deleting Development releases after the Shipping cut. Remove a
+  secondary per-task worktree as soon as its slice lands or is parked: push the branch if needed,
+  then `git worktree remove <path>` and `git worktree prune`; reuse one secondary worktree per lane,
+  and never remove another session's active worktree. Delete stale `Saved\Automation` sandboxes
+  after their tests. When uncertain, delete unnecessary project-owned artifacts, but never Jenny's
+  current save game. The Disk Cleanup Agent runs the daily broader project sweep at 10:00 AM.
 
 ## Code practices (owned by the Architecture Agent)
 

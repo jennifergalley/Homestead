@@ -63,6 +63,15 @@ recipe. Canonical measurements and the non-adopted UBA cache decision remain in
 `SurvivalGamePCH.h` only when common across the runtime module, never UnrealEd. The UBT mutex is per
 engine installation; compile throughput hinges on physical free memory and UBA's 85% commit threshold.
 
+**Disk Cleanup finding (2026-10-01):** 29 abandoned secondary task worktrees consumed about 480 GB
+(roughly 14–25 GB each, plus about 5 GB each of DDC and Intermediate after builds). A lane removes
+its own per-task secondary worktree in the same turn its slice lands or is parked, after pushing any
+branch it needs to retain; reuse one secondary worktree per lane rather than one per task. Integration
+also removes Development releases and `Saved\Automation` test sandboxes after the Shipping cut,
+retaining only the shortcut target and one Shipping rollback. Jenny's current save game remains the
+protected boundary; the Cleanup Agent's daily 10:00 AM sweep is enforcement, not a substitute for
+lane cleanup.
+
 ## Model, reasoning and implementer slots
 
 Jenny's standing team preference (2026-09-29). These are **required settings for future session

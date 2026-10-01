@@ -192,7 +192,13 @@ A lane delivers an increment like this:
 4. Commit only your files. Push to `main` when you're rebased and tested; otherwise commit to your
    lane branch. All worktrees share one local repository, so the integration session can read
    unpushed lane branches directly.
-5. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
+5. **Retire secondary worktrees in the same turn:** after a per-task worktree's slice lands or is
+   parked, push its branch if it must survive remotely, then run
+   `git worktree remove <secondary-worktree-path>` and `git worktree prune`. Never remove a lane's
+   active primary worktree or another session's worktree. Reuse one secondary worktree per lane
+   rather than creating one per task; abandoned `props-*`, `water-*` and `*-0930-*` worktrees cost
+   14–25 GB each, with about 5 GB each of DDC and Intermediate after a build.
+6. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
 
    ```text
    [ready] <lane> — branch <branch> @ <sha> (pushed to main: yes/no)
@@ -256,8 +262,9 @@ everything else waits for the next slot. The first evening build under this poli
 2026 (the 9 PM window on September 30 had already passed).
 
 **Before every Shipping build, reclaim dated release space safely:** retain the current
-Estate-shortcut Shipping release, at most its immediately previous Shipping rollback, and a named
-Development reference only while it is needed. Before pruning older dated releases,
+Estate-shortcut Shipping release and at most its immediately previous Shipping rollback. A named
+Development reference is only temporary during active QA and is deleted after the Shipping cut.
+Before pruning older dated releases,
 `Playtest-09xx` folders or stale `Build\Windows` staging, verify no process path or shortcut target
 uses them. Do not delete the current shortcut target, live save data, or the one retained rollback.
 
@@ -265,8 +272,9 @@ uses them. Do not delete the current shortcut target, live save data, or the one
 test output when the task that needed them ends. Keep no large binary in
 `C:\Users\Jenny\.copilot\session-state\...\files`; use `E:\CopilotScratch\<session-id>` while it is
 needed, then clean only the paths you own. Keep only the current shortcut Shipping release and its
-immediately previous rollback; a named Development reference survives only while actively needed.
-When in doubt, delete unnecessary project-owned artifacts—but never Jenny's current save game.
+immediately previous rollback; delete Development releases and `Saved\Automation` test sandboxes
+after the Shipping cut unless they are actively needed. When in doubt, delete unnecessary
+project-owned artifacts—but never Jenny's current save game.
 The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
 
 1. The orchestrator notifies lanes at the freeze; lanes close their editors
