@@ -866,6 +866,12 @@ receipt.**
   Feedback VSync and Watering-facing failures are known test-side failures, not product acceptance.
   Unreal compile, PIE, package and Shipping evidence remain pending in Integration's exclusive
   slot; this does not clear the chest-view/UI hold or establish a playable delivery.
+
+  **Post-build source-comment cleanup:** `Source\SurvivalGame\HomesteadController.h:363` still
+  describes `HomesteadSleep` as accepting choice `N` and `HomesteadBedChoice` as Up/Down picker
+  navigation. That comment is stale: the implemented contract is zero-argument direct bed sleep
+  with no picker. Do not edit the header during the active UBT/editor acceptance slot; correct it
+  in a docs-only source cleanup after today's build evidence is complete.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
