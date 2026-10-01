@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <string>
 #include <vector>
 
 using namespace Homestead;
@@ -414,6 +415,32 @@ int main()
         Check(rails == static_cast<int>(route.rails.size()), "a piece per rail bay", rails);
         Check(kit.blockers.size() == route.rails.size(), "a blocker per rail bay", static_cast<double>(kit.blockers.size()));
         Check(kit.Count(CoveKitPiece::Fingerpost) == 2, "two fingerposts");
+        // Groups place independently and whole (HomesteadWorldCoveRoute.cpp): a parked fingerpost leaves the steps,
+        // kerbs and rails down; one missing tread variant takes out the steps group only; nothing missing, all.
+        {
+            CoveKitMeshesLoaded loaded;
+            loaded.fill(true);
+            CoveKitGroupsPlaced all = CoveKitPlaceableGroups(loaded);
+            Check(all[0] && all[1] && all[2] && all[3], "every group placed with every mesh");
+            loaded[static_cast<std::size_t>(CoveKitPiece::Fingerpost)] = false;
+            const CoveKitGroupsPlaced noSign = CoveKitPlaceableGroups(loaded);
+            Check(noSign[static_cast<std::size_t>(CoveKitGroup::Steps)] && noSign[static_cast<std::size_t>(CoveKitGroup::Kerbs)]
+                && noSign[static_cast<std::size_t>(CoveKitGroup::Rails)] && !noSign[static_cast<std::size_t>(CoveKitGroup::Fingerposts)],
+                "a missing fingerpost leaves the rest placed");
+            loaded.fill(true);
+            loaded[static_cast<std::size_t>(CoveKitPiece::StepB)] = false;
+            const CoveKitGroupsPlaced noStepB = CoveKitPlaceableGroups(loaded);
+            Check(!noStepB[static_cast<std::size_t>(CoveKitGroup::Steps)] && noStepB[static_cast<std::size_t>(CoveKitGroup::Kerbs)]
+                && noStepB[static_cast<std::size_t>(CoveKitGroup::Rails)] && noStepB[static_cast<std::size_t>(CoveKitGroup::Fingerposts)],
+                "a missing tread variant drops the whole steps group, only");
+            loaded.fill(true);
+            loaded[static_cast<std::size_t>(CoveKitPiece::RailEndPost)] = false;
+            Check(!CoveKitPlaceableGroups(loaded)[static_cast<std::size_t>(CoveKitGroup::Rails)], "end posts belong to the rails");
+            Check(CoveKitGroupOf(CoveKitPiece::LandingWedge) == CoveKitGroup::Steps && CoveKitGroupOf(CoveKitPiece::LandingSlab75) == CoveKitGroup::Steps,
+                "landings and wedges belong to the steps");
+            for (int p = 0; p < static_cast<int>(CoveKitPiece::Count); ++p)
+                Check(std::string(CoveKitGroupName(CoveKitGroupOf(static_cast<CoveKitPiece>(p)))) != "?", "every piece in a named group", p);
+        }
         // An end post closes every rail run, and none stands where a bay continues.
         const int endPosts = kit.Count(CoveKitPiece::RailEndPost);
         Check(endPosts >= 4 && endPosts <= 30, "an end post per free rail end", endPosts);

@@ -2,6 +2,8 @@
 
 #include "HomesteadEstateCoveRoute.h"
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 #include <vector>
 
@@ -55,6 +57,17 @@ struct CoveKitLayout
     std::vector<CoveKitBlocker> blockers;
     int Count(CoveKitPiece piece) const;
 };
+
+// Props' kit folders. Each group goes down whole or not at all (half a flight of steps, or a rail run with
+// gaps, is worse than none), but independently of the others: the steps don't wait on a parked fingerpost.
+// The pawn blockers go with the rails they stand behind.
+enum class CoveKitGroup : std::uint8_t { Steps, Kerbs, Rails, Fingerposts, Count };
+CoveKitGroup CoveKitGroupOf(CoveKitPiece piece);
+const char* CoveKitGroupName(CoveKitGroup group);   // "CoveSteps", "CoveKerb", "CoveRail", "Fingerpost"
+using CoveKitMeshesLoaded = std::array<bool, static_cast<std::size_t>(CoveKitPiece::Count)>;
+using CoveKitGroupsPlaced = std::array<bool, static_cast<std::size_t>(CoveKitGroup::Count)>;
+// The groups whose every piece's mesh loaded.
+CoveKitGroupsPlaced CoveKitPlaceableGroups(const CoveKitMeshesLoaded& loaded);
 
 constexpr double CoveKitLandingSlabCm = 60.0;   // cove_steps.py
 constexpr double CoveKitLandingSlab75Cm = 75.0;
