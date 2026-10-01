@@ -286,7 +286,7 @@ void AHomesteadCharacter::UpdateFellingHatchet()
         return;
     }
     // The left fist holds the knob and the right closes just above it (axe_fell.py): the haft
-    // runs up from the left grip centre, the edge along the left knuckles.
+    // runs up from the left grip centre, the edge from the left knuckles.
     USkeletalMeshComponent* Body = GetMesh();
     const auto GripCentre = [Body](const TCHAR* Side, FVector& Along)
     {
@@ -301,12 +301,29 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     };
     FVector AlongL;
     const FVector Knob = GripCentre(TEXT("l"), AlongL);
+    // The knob fist sits rolled on the haft through the felling clip so her wrist stays in line
+    // with the forearm, and the right fist rolls with the swing (axe_fell.py KNOB_ROLL, ROLL_R);
+    // turning the knob's knuckles back by its roll gives the edge. The strike clips (stumps, logs,
+    // the pickaxe) keep the knuckles on the edge.
+    constexpr float KnobRollDegrees = 105.0f;
+    const bool bFellingTree = FellTool == Homestead::Item::Hatchet && !bStrikeHatchet;
     // Both fists stay together at the base of the haft (axe_fell.py), so their spacing can't set
-    // the line; each closed fist's pinky-to-index axis runs along the haft.
-    const FVector AcrossL = (Body->GetSocketLocation(TEXT("index_01_l")) - Body->GetSocketLocation(TEXT("pinky_01_l"))).GetSafeNormal();
-    const FVector AcrossR = (Body->GetSocketLocation(TEXT("index_01_r")) - Body->GetSocketLocation(TEXT("pinky_01_r"))).GetSafeNormal();
+    // the line; each closed fist's pinky-to-index axis runs along the haft. That axis slants
+    // about 16 degrees toward the fingers, so with the fists rolled differently the felling clip
+    // squares it to each hand's fingers first, as axe_fell.py authors it.
+    const auto Across = [Body, bFellingTree](const TCHAR* Side)
+    {
+        const FVector Hand = Body->GetSocketLocation(*FString::Printf(TEXT("hand_%s"), Side));
+        const FVector Along = (Body->GetSocketLocation(*FString::Printf(TEXT("middle_01_%s"), Side)) - Hand).GetSafeNormal();
+        const FVector Raw = (Body->GetSocketLocation(*FString::Printf(TEXT("index_01_%s"), Side))
+            - Body->GetSocketLocation(*FString::Printf(TEXT("pinky_01_%s"), Side))).GetSafeNormal();
+        return bFellingTree ? (Raw - Along * FVector::DotProduct(Raw, Along)).GetSafeNormal() : Raw;
+    };
+    const FVector AcrossL = Across(TEXT("l"));
+    const FVector AcrossR = Across(TEXT("r"));
     const FVector Haft = (AcrossL + AcrossR).GetSafeNormal().IsNearlyZero() ? AcrossL : (AcrossL + AcrossR).GetSafeNormal();
-    const FVector Edge = (AlongL - Haft * FVector::DotProduct(AlongL, Haft)).GetSafeNormal();
+    const FVector Knuckles = bFellingTree ? AlongL.RotateAngleAxis(-KnobRollDegrees, Haft) : AlongL;
+    const FVector Edge = (Knuckles - Haft * FVector::DotProduct(Knuckles, Haft)).GetSafeNormal();
     if (Edge.IsNearlyZero()) return;
     // The imported hatchet's edge is on +Y (the Blender export mirrors Y; the report says -Y), so
     // +Y goes along the edge to face the tree.
