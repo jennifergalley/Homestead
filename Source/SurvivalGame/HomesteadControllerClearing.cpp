@@ -476,7 +476,9 @@ void AHomesteadController::PlayStrikeCue(Homestead::Item Tool, int32 Swing, bool
         {
             const bool bFelling = Animation->IsFelling();
             Phase = bFelling ? Animation->FellPhase() : Animation->MachetePhase();
-            Contact = bFelling ? AHomesteadCharacter::FellStrikeSeconds(0) : AHomesteadCharacter::MacheteClearSeconds;
+            // The stroke this cue belongs to in the running strike (held blows loop its stroke cycle).
+            Contact = bFelling ? AHomesteadCharacter::FellStrikeSeconds(FMath::Max(0, SwingStrokesLanded - 1))
+                : AHomesteadCharacter::MacheteClearSeconds;
         }
     UE_LOG(LogHomesteadStrikeSound, Log, TEXT("STRIKE_CUE tool=%s swing=%d final=%d cue=%s gain=%.2f phase=%.3f contact=%.3f t=%.3f"),
         UTF8_TO_TCHAR(Homestead::ItemName(Tool)), Swing, bFinal ? 1 : 0, Cue ? *Cue->GetName() : TEXT("none"), Gain,
