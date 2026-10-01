@@ -14,8 +14,11 @@
 ## 3. Historical daytime recurrence
 
 - [x] 3.1 Rain on two days in ten instead of every third day (Jenny, 2026-09-29: too often). A stable SplitMix64 hash of each ten-day block picks offsets 1 or 2 and 6 or 7: exactly 20% of days, rains 4-6 days apart, day 0 dry, and day 1 still the first rain. The 09:00-15:00 window, overcast, moisture and audio are unchanged, and there's no seed or save section. Old saves keep their plots' moisture, but their forecast from the current day on follows the new schedule. Native: counts over 10,000 days, gaps, all four offset pairs, whole days, save/reload.
-- [ ] 3.2 Historical PIE/package evidence for the former daytime schedule. Do not use this as
-  acceptance for the superseding full-cycle design.
+- [ ] 3.2 PIE/package, superseded by section 4's spells:
+  - days 0-5 stay dry;
+  - the first spell rains from about 18:27 on day 6 (Sunday, Spring 7) through midnight to about 01:46, a night spell;
+  - the next falls 15:07-16:52 on day 8, then 12:41-20:33 on day 9.
+  Checked in 4.4.
 
 ## 4. Rain at any hour (Jenny, 2026-09-30: "let it randomize throughout the day/night cycle")
 
@@ -39,4 +42,7 @@
   - one spell's cloud, rain, wetness and change points;
   - night rain watering a plot;
   - a step split at the rain's start.
-- [ ] 4.4 PIE (low priority, after the night A/B slot): a night spell at the town square and the meadow (rain, sound, moon dimmed, lamp and hearth readable), the night A/B sheet's rain row, and the wet ground drying over the next four hours.
+- [ ] 4.4 PIE (low priority, after the night A/B slot):
+  - the first spell (day 6, from 18:27 through midnight) at the town square and the meadow: rain, sound, the moon dimmed, and the lamp and hearth still readable;
+  - the night A/B sheet's rain row;
+  - the wet ground drying over the next four hours.

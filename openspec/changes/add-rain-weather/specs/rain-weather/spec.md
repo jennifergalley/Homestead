@@ -35,11 +35,12 @@ The sky SHALL cloud over, the light SHALL soften and the scene SHALL read darker
 `Homestead::Overcast`, building over half an hour to an hour and a half before each spell and clearing as
 long after it.
 
-#### Scenario: Night rain
+#### Scenario: Cloud before a spell
 
 - **WHEN** a spell of rain is a few minutes away
 - **THEN** the sky is part clouded and no rain falls yet
 
 #### Scenario: Night rain
+
 - **WHEN** a scheduled rain event occurs at night
 - **THEN** rain, overcast and night lighting remain visually coherent without turning night into day
