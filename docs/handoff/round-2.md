@@ -832,6 +832,12 @@ receipt.**
   and backups without short-circuiting to an older Recovery. Native comparator/Estate-72-hour tests
   and an isolated `SaveRoutingTest` write/read/corrupt-fallback fixture cover it. Menu HUD `d246`
   still awaits its UE `[ready]`; controller/UI, PIE, packaged and Shipping acceptance are pending.
+
+  **Dawn edge `192e0d52` / branch head `b1a6abda`:** ordinary `Sim.Sleep` keeps its original
+  0.25–12 hour interval and refusal. Only a dawn-limited bed rest may be shorter than 0.25 hours,
+  with a positive interval ending exactly at 06:00; `BedSleepOption` presents it at 05:52 and
+  `Sleep(..., dawnLimited=true)` validates it. Native 18/18 and FullLoop cover single A at
+  05:52 → 06:00. UE/PIE/package proof remains pending.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 

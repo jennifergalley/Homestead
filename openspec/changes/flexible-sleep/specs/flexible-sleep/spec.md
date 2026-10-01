@@ -24,6 +24,12 @@ rested during the day, it SHALL expose no sleep verb.
 - **WHEN** she presses E/A at 21:00 with Energy below full
 - **THEN** she sleeps until Energy is full or 06:00, whichever comes first
 
+#### Scenario: Final minutes to dawn
+
+- **WHEN** she presses E/A at 05:52 on a focused bed
+- **THEN** the positive short sleep ends exactly at 06:00
+- **AND** an ordinary non-bed `Simulation::Sleep` interval below 0.25 hours remains refused
+
 ### Requirement: Recovery by hours slept
 
 Sleep SHALL restore Energy by hours slept at a fixed rate, capped at full, whatever the hour.
