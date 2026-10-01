@@ -209,6 +209,13 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         PC.InputKey(FInputKeyEventArgs::CreateSimulated(Key, IE_Released, 0));
     };
     const auto Accept = [Press](AHomesteadController& PC) { Press(PC, PC.UsesGamepad() ? EKeys::Gamepad_FaceButton_Bottom : EKeys::Enter); };
+    // After the book has built its rows (it builds on the frame after it opens).
+    const auto Later = [](AHomesteadController& PC, TFunction<void(AHomesteadController&)> Then)
+    {
+        TWeakObjectPtr<AHomesteadController> Weak(&PC);
+        FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([Weak, Then](float)
+            { if (Weak.IsValid()) Then(*Weak.Get()); return false; }), 0.3f);
+    };
     const auto Notify = [](const TCHAR* Text, bool bError)
     { return [Text, bError](AHomesteadController& PC) { PC.Notify(Text, bError); }; };
     const auto Book = [](int32 Page) { return [Page](AHomesteadController& PC) { PC.OpenBook(Page); }; };
@@ -393,22 +400,28 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Notice, static_cast<int32>(ENotice::BookNoticeError), nullptr,
         [](AHomesteadController& PC) { PC.OpenBook(0); PC.Notify(TEXT("You can't carry any more. Store something in a chest first."), true); });
     Add(TEXT("book-item-menu"), TEXT("Pack, a Cornish pasty's item menu: Eat, Move, Drop and the like."), ECover::Dialog, 3, nullptr,
-        [](AHomesteadController& PC)
+        [Later](AHomesteadController& Opened)
         {
-            PC.OpenBook(0);
+            Opened.OpenBook(0);
+            Later(Opened, [](AHomesteadController& PC)
+            {
             const auto Rows = PC.MenuRows();
             for (int32 Index = 0; Index < Rows.Num(); ++Index)
                 if (Rows[Index].Subject == EHomesteadMenuSubject::ItemGroup && Rows[Index].Id == static_cast<int32>(Item::Pasty))
                 { if (PC.NativeMenu.IsValid()) PC.NativeMenu->OpenItemContextMenu(Index, !PC.UsesGamepad()); return; }
-        });
+            });
+        }, 1.3f);
     Add(TEXT("book-quantity"), TEXT("Pack, the how-many popover for a stack of branches."), ECover::Dialog, 4, nullptr,
-        [](AHomesteadController& PC)
+        [Later](AHomesteadController& Opened)
         {
-            PC.OpenBook(0);
-            for (const auto& Row : PC.MenuRows())
-                if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Id == static_cast<int32>(Item::Branch))
-                { if (PC.NativeMenu.IsValid()) PC.NativeMenu->OpenQuantityPrompt(Row); return; }
-        });
+            Opened.OpenBook(0);
+            Later(Opened, [](AHomesteadController& PC)
+            {
+                for (const auto& Row : PC.MenuRows())
+                    if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Id == static_cast<int32>(Item::Branch))
+                    { if (PC.NativeMenu.IsValid()) PC.NativeMenu->OpenQuantityPrompt(Row); return; }
+            });
+        }, 1.3f);
     Add(TEXT("book-chest"), TEXT("A storage chest open beside her pack, with its name and Store matching."), ECover::Dialog, 5, Chest,
         [ChestId](AHomesteadController& PC) { PC.OpenChestStorage(ChestId(PC)); });
     Add(TEXT("book-chest-rename"), TEXT("Naming the chest: the name being typed and the suggestions."), ECover::Dialog, 6, Chest,

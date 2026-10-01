@@ -1,4 +1,5 @@
 #include "HomesteadMapPainter.h"
+#include "HomesteadUITheme.h"
 #include "HomesteadPalette.h"
 
 #include "Fonts/FontMeasure.h"
@@ -31,7 +32,7 @@ FColor Vertex(const FLinearColor& Color) { return Color.ToFColor(true); }
 
 FSlateFontInfo Font(float Size, bool bBold)
 {
-    FSlateFontInfo Info = FCoreStyle::GetDefaultFontStyle(bBold ? TEXT("Bold") : TEXT("Regular"), 10);
+    FSlateFontInfo Info = HomesteadUITheme::Font(bBold ? TEXT("Bold") : TEXT("Regular"), 10);
     Info.Size = FMath::Max(1.0f, Size);
     return Info;
 }

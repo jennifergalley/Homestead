@@ -28,4 +28,13 @@
 ## 5. Seed Outline and Plant Cue (Jenny's playtest)
 
 - [x] 5.1 Add side-effect-free `Simulation::CheckSow` (`Plant` calls it first), `GardenTool::Seed` in `PreviewGarden` on the focused plot the A/E sow uses (red `Till this square before sowing.` on the hoe's next square where `CheckTillGround` passes), and `DescribeSow` for the bare-plot focus line (`Plant <seed>` keyed; refusal or `Select <seed> (<key>) to plant` unkeyed); native `SeedSowPreview` covers the valid/invalid matrix, cue text, no mutation and preview-plot == sown plot
-- [ ] 5.2 Build SurvivalGameEditor and run the Hotbar suite's seed steps (`garden-outline-seed-{valid,invalid}.png`) in the next Unreal slot; inspect the green/red outline and the Plant/Select cues on keyboard and gamepad
+- [x] 5.2 Build SurvivalGameEditor and run the Hotbar suite's seed steps (`garden-outline-seed-{valid,invalid}.png`) in the next Unreal slot; inspect the green/red outline and the Plant/Select cues on keyboard and gamepad _2026-09-30 slot (water-slot-1001 + Menu a37d693d):
+  - The Hotbar route (editor -game) passes all steps, including the seed outline: green with "[E] Plant Seeds" before E sows, red with "A crop is already growing here." after.
+  - In PIE, Spring:
+    - carrot seed over untilled ground: "Till this square before sowing.";
+    - turnip seed (out of season) over untilled ground: nothing;
+    - tilled with the hoe, then carrot seed: "[E] Plant Carrot seed";
+    - turnip seed on the tilled plot: "Turnips grow in Autumn and Winter.";
+    - nothing selected: "Select Carrot seed (4) to plant", and E only repeats it without sowing;
+    - carrot seed + E sows, then the red "A crop is already growing here."
+  - Captures are in the Water lane's scratch (hotbar-run, slot-pie)._

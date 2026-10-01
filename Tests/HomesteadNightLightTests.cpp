@@ -87,6 +87,11 @@ int main()
         lastSky = sky;
     }
 
+    // Jenny chose set A on 2026-09-30, comparing it with B, C and the old daylight-bright nights
+    // (docs/night-ab/2026-09-30, fix-night-brightness 2.3). The defaults stay A: moon 0.2, sky 0.3, floor -1.
+    Check(defaults.moonGroundLux == 0.2 && defaults.nightSky == 0.3 && defaults.nightMinExposureEV == -1.0,
+          "defaults are Jenny's set A", defaults.moonGroundLux);
+
     // The console variables start at the tuned defaults (AHomesteadWorld reads them every refresh).
     {
         std::ifstream file(HOMESTEAD_SOURCE_DIR "/Source/SurvivalGame/HomesteadWorldLighting.cpp");

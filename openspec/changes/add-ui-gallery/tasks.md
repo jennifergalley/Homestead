@@ -9,5 +9,6 @@
 - [x] 1.5b Review fixes: runs only on the sandbox or a preview save route, with a check that the normal Estate saves are untouched; coverage from SHomesteadMenu::TabPages, SettingsTabCount and HomesteadNoticeStyle::ESurface; carrot seed (in season); setup-new-game shown despite -HomesteadSkipNewGameSetup; Test-Game runs the game in a kill-on-close job, matched by its image
 - [x] 1.5c Plain backdrop (default) with the heroine kept, -NoHeroine, -Backdrop World; world kept for garden outlines and night/rain
 - [ ] 1.6 Compile, then a first full pass at 720p and 4K. Look at the captures, fix what looks wrong, re-capture once (awaiting an Unreal slot)
-- [ ] 1.6b Commit the downscaled 1080p plain set to docs/ui-gallery/<date>/ (index.md, contact sheet, view JPEGs, under 50 MB) as the reference for a cohesive period-themed UI
+- [x] 1.6a Theme trial: parchment and EB Garamond across the UI (homestead.UITheme), full-width book, AA contrast; captured 1080p classic + parchment (plain and World day/night/rain) and 720p + 4K parchment, viewed and fixed once, recaptured
+- [x] 1.6b Commit the downscaled 1080p plain set to docs/ui-gallery/<date>/ (index.md, contact sheet, view JPEGs, under 50 MB) as the reference for a cohesive period-themed UI
 - [ ] 1.7 Docs agent: a "Seeing every UI" section in the unreal-editor-mcp skill
