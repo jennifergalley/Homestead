@@ -409,7 +409,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             Avatar->ApplyPreparedEquipment(Error);
         }, Hidden);
     Refill();
-    for (int32 Portion = 0; Portion < 6; ++Portion)
+    for (int32 Portion = 0; Portion < Homestead::PailPortions; ++Portion)
         Add(TEXT("Each allowed repeat consumes exactly one real water portion"),
             [this, Probe]()
             {

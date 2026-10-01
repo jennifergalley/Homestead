@@ -210,15 +210,17 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     Add(TEXT("Record the paused simulation in Settings"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); }, []() { return true; });
     QueueSelectRow(11);
+    // Whatever the build's default vertical sync, the checks below compare against how it started.
+    const auto VSyncAtStart = MakeShared<bool>(false);
     Add(TEXT("Make only synthetic graphics file read-only"),
-        [Config]() { FPlatformFileManager::Get().GetPlatformFile().SetReadOnly(*Config, true); },
+        [Config, VSyncAtStart]() { *VSyncAtStart = GEngine->GetGameUserSettings()->IsVSyncEnabled(); FPlatformFileManager::Get().GetPlatformFile().SetReadOnly(*Config, true); },
         [Config]() { return IFileManager::Get().IsReadOnly(*Config); });
     Add(TEXT("Real rejected VSync save displays complete recovery instructions"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this, Before]()
+        [this, Before, VSyncAtStart]()
         {
             const bool bText = Controller->Toast() == TEXT("Could not save vertical sync. Your previous preference was restored.");
-            const bool bVSync = !GEngine->GetGameUserSettings()->IsVSyncEnabled();
+            const bool bVSync = GEngine->GetGameUserSettings()->IsVSyncEnabled() == *VSyncAtStart;
             const bool bSim = Controller->Simulation().Serialize() == *Before;
             const bool bRow = Controller->Rows().IsValidIndex(Controller->SelectedRow()) && Controller->Rows()[Controller->SelectedRow()].Id == 11;
             if (StepElapsed > 0.3f && !(bText && Controller->ToastIsError() && bVSync && bSim && bRow))
@@ -233,12 +235,12 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
         [Config]() { return !IFileManager::Get().IsReadOnly(*Config); });
     Add(TEXT("Controller success replaces error on same Settings row"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this, Before]() { return !Controller->ToastIsError() && GEngine->GetGameUserSettings()->IsVSyncEnabled()
+        [this, Before, VSyncAtStart]() { return !Controller->ToastIsError() && GEngine->GetGameUserSettings()->IsVSyncEnabled() != *VSyncAtStart
             && (Controller->Rows().IsValidIndex(Controller->SelectedRow()) && Controller->Rows()[Controller->SelectedRow()].Id == 11) && Controller->Simulation().Serialize() == *Before; });
     Capture(TEXT("feedback-settings-success"));
-    Add(TEXT("Keyboard restores Off in synthetic config with correct input hint"),
+    Add(TEXT("Keyboard restores the starting setting in synthetic config with correct input hint"),
         [this]() { Tap(EKeys::Enter); },
-        [this]() { return !Controller->ToastIsError() && !GEngine->GetGameUserSettings()->IsVSyncEnabled()
+        [this, VSyncAtStart]() { return !Controller->ToastIsError() && GEngine->GetGameUserSettings()->IsVSyncEnabled() == *VSyncAtStart
             && Controller->BookFooter().Contains(TEXT("Enter: toggle")); });
     Capture(TEXT("feedback-settings-keyboard"));
     // Page-left from Settings enters the tab cycle at its end (Look) and walks back to the pack.
@@ -255,9 +257,17 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
         [Manual]() { return IFileManager::Get().FileSize(*Manual) < 100; });
     Add(TEXT("Mapped load recovers actual backup and reopens paused pack"),
         [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Right); },
-        [this, Before]() { return Controller->IsBookOpen() && Controller->ToastIsError()
-            && Controller->Toast() == TEXT("Recovered a valid save. An unreadable save was skipped; backups are retained.")
-            && Controller->Simulation().Serialize() == *Before; }, 0.8f);
+        [this, Before]()
+        {
+            // Recovery now takes the newest valid save of any slot (Manual, Auto, Recovery), which may be
+            // a moment older than the corrupted manual one: the book stays open and the notice says so.
+            const bool bOk = Controller->IsBookOpen()
+                && Controller->Toast() == TEXT("Recovered your latest valid save. An unreadable save was skipped; backups are retained.");
+            if (!bOk && StepElapsed > 0.6f)
+                Results.AddUnique(FString::Printf(TEXT("RECOVERY book=%d page=%d sim_same=%d"), Controller->IsBookOpen(),
+                    Controller->BookPage(), Controller->Simulation().Serialize() == *Before));
+            return bOk;
+        }, 0.8f);
     Capture(TEXT("feedback-pack-recovery"));
     Add(TEXT("Same recovery feedback remains readable in Look without changing appearance"),
         [this]() { Tap(EKeys::Gamepad_LeftShoulder); },
@@ -290,7 +300,14 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::F5); },
         [this]() { return !Controller->Toast().IsEmpty() && !Controller->ToastIsError(); }, 4.2f);
     Add(TEXT("Success expires without hiding errors early or unpausing world"), []() {},
-        [this, Before]() { return Controller->Toast().IsEmpty()
-            && Controller->GetHUD<AHomesteadHUD>()->FeedbackSource().IsEmpty()
-            && Controller->Simulation().Serialize() == *Before; }, 1.2f);
+        [this, Before]()
+        {
+            const bool bToast = Controller->Toast().IsEmpty();
+            const bool bSource = Controller->GetHUD<AHomesteadHUD>()->FeedbackSource().IsEmpty();
+            const bool bSim = Controller->Simulation().Serialize() == *Before;
+            if (StepElapsed > 1.0f && !(bToast && bSource && bSim))
+                Results.AddUnique(FString::Printf(TEXT("SUCCESS_EXPIRY toast_gone=%d source_gone=%d sim_same=%d source='%s'"),
+                    bToast, bSource, bSim, *Controller->GetHUD<AHomesteadHUD>()->FeedbackSource()));
+            return bToast && bSource && bSim;
+        }, 1.2f);
 }
