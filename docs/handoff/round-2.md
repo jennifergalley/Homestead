@@ -1581,6 +1581,10 @@ not claim early Energy is fully solved.
   tilled-square controls: A/E sows the hotbar-selected seed; no seed selected says `Choose seeds on
   the hotbar to sow`; selected Wild Roots sow roots; F/X weeds only; selected zero stock gives the
   seed-specific refusal. The Menu README changes with the commit already describe the behavior.
+- Seed-outline planting cues (`aa18d0e5`, not on `main`): after it lands, replace any historical
+  `[A] Sow turnips` copy with `[E]/[A] Plant Turnip seed`; with no selection, use
+  `Select Turnip seed (4) to plant`. Keep this pending until the branch's simulation/controller/UI
+  behavior and new `CheckSow` / `PreviewGarden(Seed)` tests are integrated.
 
 ## Tooling requests (unassigned)
 
