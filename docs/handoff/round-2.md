@@ -1332,8 +1332,16 @@ not claim early Energy is fully solved.
   loads must choose the newest valid save by timestamp and revision, never an older Recovery file
   over a newer autosave **on the Estate**. Legacy woodland still has lethal hunger and outdoor
   autosaves: recovery prefers a valid sheltered Recovery with hunger/Energy >=20, otherwise the
-  newest eligible file. The high-priority source correction is queued; no code acceptance claim
-  exists until its SHA and verification arrive.
+  newest eligible file. The high-priority source correction is recorded below; UE, package and
+  delivery acceptance remain pending.
+
+  **Recovery/chest correction `fdf69690` (not on `main`):** native Release 18/18 now confirms
+  Woodland recovery prefers a valid **same-world** sheltered Recovery with hunger/Energy >=20,
+  then falls back to the newest eligible candidate; Estate stays newest-valid by
+  timestamp/`SavedRevision`. FullLoop again expects the protected Woodland checkpoint. Chest focus,
+  `OpenChestStorage`, transfer, `ContainerAccess` and `FindNearestStructure` now all measure the
+  placed footprint centre; native coverage includes an on-foundation chest and an isolated two-mode
+  runtime-routing fixture. UE/PIE/package/Shipping evidence remains pending.
 - **Whole-number currency** — **agreed design, pending and not 4 PM content.** Preserve the current
   `int64` raw values and save bytes: semantically relabel the smallest stored unit as one whole
   `coin`, with **no numeric x100 migration**. Thus raw 1000 (formerly $10) becomes 1,000 coins and
