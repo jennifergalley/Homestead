@@ -840,6 +840,13 @@ receipt.**
   with a positive interval ending exactly at 06:00; `BedSleepOption` presents it at 05:52 and
   `Sleep(..., dawnLimited=true)` validates it. Native 18/18 and FullLoop cover single A at
   05:52 → 06:00. UE/PIE/package proof remains pending.
+
+  **Accepted source heads `645d55a7` (not on `main`):** Integration separately merged Props
+  hold-to-repeat `2d1a4fed`, baked scythe `5ec5df04`, imported cove-kit assets `b5b55fb8`, Water
+  cove placement `c11458c9`, and canonical audio-loudness docs `4eb5a6b7`; all are ancestors of the
+  clean batch and native Release 18/18 passes. The rejected global hair-sky toggle remains
+  excluded. Unreal compile, PIE, package and Shipping acceptance await the exclusive integration
+  slot; there is no playable-delivery claim.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
