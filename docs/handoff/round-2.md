@@ -409,8 +409,9 @@ FullLoop 54.5. `EstateSmoke` passed with zero material compile/errors, all six l
 rendering, and the pond default material/usage checks; manor measured 59.2 fps (p99 20.2 ms) and woods
 60 fps (p99 16.7 ms). The build includes the north-west lake and map-label removal, rain gain fix,
 Gait run, Menu toast/berry A-X Energy/Ctrl+wheel/wait changes, manor rubble and sprint, plus earlier
-crop, river, performance and save work. Rain remains audibly unproven; listen outdoors on day 2 from
-about 11:00 to 15:30.
+crop, river, performance and save work. Historical daytime rain audio remains audibly unproven; do
+not use its day-2 11:00–15:30 window as a current test recipe. After Water's full-cycle schedule
+lands, listen outdoors during a scheduled rain event instead.
 
 ## Evening playtest build
 
@@ -1271,22 +1272,16 @@ not claim early Energy is fully solved.
   cap-overflow guard after an explicit slot; **Menu** owns the coordinated shop/HUD/toast/UI formatter
   slice. Avoid a half release. Validate Economy, Lamp, legacy v12/v13 saves, raw 0/1/`INT64_MIN` and
   cap behavior; package a 720p/4K purchase such as 1,000 → 900 coins for a pasty.
-- **Weather recurrence** — **Water Agent** (retained lane; supersedes the broader Calendar proposal):
-  rain every third day is too frequent. The smallest traced change is a stable hash selecting offsets
-  **1 or 2** and **6 or 7** in every 10-day block: exactly 20% rain, 4–6-day gaps and day 0 dry. Keep
-  the current 09:00–15:00 rain window, overcast, moisture and audio behavior; no seed or new save
-  section. Old saves' forecast can change, while accrued plot moisture persists; document that at
-  implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
-  after its lane-A work.
+- **Full-cycle rain** — **Water Agent** (Jenny decision, 2026-09-30): rain falls at random times
+  through the entire day/night cycle, with seasonal weighting, reload-stable scheduling and
+  coherent night-rain lighting. No day-length change follows. Water implements it; it is **pending
+  and unshipped**. Acceptance includes save/reload stability, roof shelter, ground/audio response,
+  daylight and real night-rain events, plus packaged RT-on night evidence.
 
-  **Delivered recurrence (`69827d75`, included in Phoenix `main` `e5877da8`):** `IsRainDay` now uses SplitMix64 per
-  ten-day block with one offset 1–2 and one 6–7 (day 0 dry; block 0's first rain remains day 1).
-  Native coverage spans 10,000 days, spacing, all offset pairs, whole days, negative hours and
-  save/reload. The first Development FullLoop failed only because its crop-wetting fixture skipped
-  until `day % 3 == 1`; it now advances until `Homestead::IsRainDay(State.hour)` and retains the
-  assertion that both plots become wet. Phoenix Development v2 subsequently passed all six packaged
-  suites. This is a **test-fixture correction, not a rain rollback**; the 20% schedule is delivered
-  in Phoenix.
+  **Historical recurrence (`69827d75`, Phoenix):** the delivered SplitMix64 two-days-in-ten
+  schedule and its 09:00–15:00 window are superseded by this decision. Its native count/gap/save
+  checks and semantic FullLoop rain-day fixture remain useful regression evidence, but daytime
+  window captures do not accept the replacement schedule.
 
   A separate hidden copied-Estate-save QA run physically F5-saved (scratch hash changed), then
   key-7/F9 restored slot 1 and the prior game time; the source save remained untouched. Its later
@@ -1545,8 +1540,9 @@ not claim early Energy is fully solved.
   `UHomesteadWeather`. Water's headless trace found the cause: `FadeIn(2, Gain)` followed by
   `SetVolumeMultiplier(Gain)` applies rain gain twice, leaving roughly 0.40 for a default shower and
   0.07 for drizzle, while source RMS is a healthy -24 dBFS. Its narrow branch correction uses
-  `FadeIn(2, 1)` and leaves gain solely to the multiplier. Rain is intentionally silent on dry
-  days/times (currently only day 2/3, 09:00–15:00).
+  `FadeIn(2, 1)` and leaves gain solely to the multiplier. Historical Phoenix behavior is silent
+  outside its day-2/3 daytime windows; Water's pending full-cycle schedule must keep audio silent
+  whenever no rain event is scheduled.
 
   **The isolated code fix shipped** as `65726628` → `545e057b` on `main` `76b316a3` and is included
   in the 4 PM package. Editor and game builds, native tests (8/8), and the static-init check pass.
@@ -1556,9 +1552,9 @@ not claim early Energy is fully solved.
   excluded.
 
   **Audible resolution remains unproven.** Low RAM and the Menu editor prevented Water's ears-on
-  capture, and packaged `AudioProof` covers only legacy audio. Jenny can listen outdoors during rain
-  on day 2, roughly 11:00–15:30, in the 4 PM package. Do not describe the subjective rain sound as
-  conclusively fixed without ears-on or recorded Estate-rain evidence.
+  capture, and packaged `AudioProof` covers only legacy audio. After the full-cycle schedule lands,
+  Jenny can listen outdoors during any scheduled rain event. Do not describe the subjective rain
+  sound as conclusively fixed without ears-on or recorded Estate-rain evidence.
 
   The heritage-stone west doorway is a 130 × 220 cm gap with no leaf. **Props** queues an original
   oak-plank mesh and frame after the cove stairs. The later audio/door implementer makes the leaf

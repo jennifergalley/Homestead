@@ -4,20 +4,22 @@
 
 ### Requirement: Visible rain
 
-On a rain day, rain SHALL fall visibly round the camera while `Homestead::IsRainingAt` is true, with
-its strength following `Homestead::RainAmount`, and SHALL NOT fall inside roofed buildings.
+During a scheduled rain event, rain SHALL fall visibly round the camera while
+`Homestead::IsRainingAt` is true, with its strength following `Homestead::RainAmount`, and SHALL
+NOT fall inside roofed buildings. Rain events SHALL occur at random times through the full
+day/night cycle with seasonal weighting and a reload-stable schedule.
 
 #### Scenario: Rain day
 
-- **WHEN** it's 11:00 on a rain day and she stands outdoors
+- **WHEN** a scheduled rain event occurs and she stands outdoors
 - **THEN** rain streaks fall round her and the rain loop plays
 
 ### Requirement: Overcast sky
 
 The sky SHALL cloud over, the light SHALL soften and the scene SHALL read darker and greyer with
-`Homestead::Overcast`, blending over half an hour before and after the rain.
+`Homestead::Overcast`, blending before and after the rain, including during night events.
 
-#### Scenario: Before the rain
+#### Scenario: Night rain
 
-- **WHEN** it's 08:45 on a rain day
-- **THEN** the sky is part clouded and no rain falls yet
+- **WHEN** a scheduled rain event occurs at night
+- **THEN** rain, overcast and night lighting remain visually coherent without turning night into day
