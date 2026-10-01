@@ -259,9 +259,9 @@ public:
     bool MenuHotbarRow(int32 Cell, FHomesteadRow& Out) const;
     // The menu row for one layout entry of `Container` (0 = her pack); false for the pail's hidden water.
     bool MenuEntryRow(const Homestead::LayoutEntry& Entry, int32 Container, FHomesteadRow& Row) const;
-    // Moves her first stack of `Item` into the first empty cell if it isn't in the row, and selects
-    // its cell, as a player would (tests, and choosing seed to sow). False when she has none or the
-    // row is full.
+    // Moves her first stack of `Item` into the first empty cell if it isn't in the row (with the row full,
+    // onto the selected cell, swapping), and selects its cell, as a player would (tests, the UI gallery).
+    // False when she has none in her pack.
     bool ChooseOnHotbar(Homestead::Item Item);
     // Seed pouch: a hotbar slot holding sowing seed steps through every seed type in her pack
     // (D-pad up/down, or Q / Shift+Q), so one slot carries them all. Returns false when the selected

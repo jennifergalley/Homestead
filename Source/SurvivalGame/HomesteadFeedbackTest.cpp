@@ -187,8 +187,12 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
         [this, Before, Geometry]()
         {
             const auto* HUD = Controller->GetHUD<AHomesteadHUD>();
-            return Controller->Toast().IsEmpty() && HUD->FeedbackSource().IsEmpty()
-                && HUD->FeedbackCriticalGeometry() == *Geometry && Controller->Simulation().Serialize() == *Before;
+            const bool bToast = Controller->Toast().IsEmpty(), bSource = HUD->FeedbackSource().IsEmpty();
+            const bool bGeometry = HUD->FeedbackCriticalGeometry() == *Geometry, bSim = Controller->Simulation().Serialize() == *Before;
+            if (StepElapsed > 0.3f && !(bToast && bSource && bGeometry && bSim))
+                Results.AddUnique(FString::Printf(TEXT("TOAST_EXPIRY toast_gone=%d source_gone=%d geometry_same=%d sim_same=%d toast='%s' source='%s'"),
+                    bToast, bSource, bGeometry, bSim, *Controller->Toast(), *HUD->FeedbackSource()));
+            return bToast && bSource && bGeometry && bSim;
         }, 1.2f);
     // The five field-book tabs in order (Pack 0, Craft 1, Build 2, Map 7, Look 6; the Guidebook, 3, is
     // retired). Settings (4) isn't a tab: Start opens it from the world.

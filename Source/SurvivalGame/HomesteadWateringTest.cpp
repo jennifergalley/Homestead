@@ -112,22 +112,29 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 const auto Target = Homestead::GardenCellCenter(-13, 1);
                 const float ExpectedYaw = FMath::RadiansToDegrees(FMath::Atan2(
                     Target.y - Probe->Actor.Y, Target.x - Probe->Actor.X));
-                return Probe->Ready && Matches() && Controller->ToastIsError() == DoubleTap
-                    && Animation()->WaterStarts() == Probe->Starts + 1 && Animation()->GatherStarts() == Probe->GatherStarts
+                const bool bState = Probe->Ready && Matches() && Controller->ToastIsError() == DoubleTap;
+                const bool bStarts = Animation()->WaterStarts() == Probe->Starts + 1 && Animation()->GatherStarts() == Probe->GatherStarts
                     && Animation()->ClearStarts() == Probe->ClearStarts && !Avatar->GetHatchet()->IsPresented()
-                    && Animation()->WaterWeight() > 0.99f && Animation()->GatherWeight() < 0.001f && Tool->IsPresented()
+                    && Animation()->WaterWeight() > 0.99f && Animation()->GatherWeight() < 0.001f;
+                const bool bTool = Tool->IsPresented()
                     && Tool->GetAttachParent() == Avatar->GetMesh() && Tool->GetAttachSocketName() == TEXT("hand_r")
                     && Tool->GetCollisionEnabled() == ECollisionEnabled::NoCollision && Tool->GetNumSections() == 2
                     && Tool->GetComponentScale().Equals(FVector::OneVector, 0.001f)
                     && Tool->Bounds.SphereRadius > 10 && Tool->Bounds.SphereRadius < 60
-                    && FVector::Dist(Tool->GripPosition(), Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))) < 10
-                    && FVector::Dist(Probe->Hand, Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))) > 20
+                    && FVector::Dist(Tool->GripPosition(), Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))) < 10;
+                const bool bPose = FVector::Dist(Probe->Hand, Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))) > 20
                     && FVector::Dist(Probe->Actor, Avatar->GetActorLocation()) < 1
                     && FVector::Dist(Probe->Toe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"))) < 2
                     && Probe->View.Equals(Controller->GetControlRotation(), 0.01f)
                     && FMath::Abs(FMath::FindDeltaAngleDegrees(
                         Avatar->WaterTargetYaw(), ExpectedYaw)) < 0.1f
                     && Controller->State().hour - Probe->Hour < 0.02;
+                if (StepElapsed > 0.5f && !(bState && bStarts && bTool && bPose))
+                    Results.AddUnique(FString::Printf(TEXT("POUR_CHECK ready=%d matches=%d toast_err=%d starts=%d tool=%d pose=%d water=%u/%u weight=%.2f hand_moved=%.1f toast='%s'"),
+                        Probe->Ready, Matches(), Controller->ToastIsError(), bStarts, bTool, bPose,
+                        Animation()->WaterStarts(), Probe->Starts, Animation()->WaterWeight(),
+                        FVector::Dist(Probe->Hand, Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))), *Controller->Toast()));
+                return bState && bStarts && bTool && bPose;
             }, 0.55f);
     };
     // A refused watering on the tool button: with the pail chosen, the simulation's own refusal (worked

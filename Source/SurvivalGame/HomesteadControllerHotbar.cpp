@@ -172,12 +172,14 @@ bool AHomesteadController::ChooseOnHotbar(Homestead::Item Item)
     int32 Cell = HotbarCellOf(Item);
     if (Cell == INDEX_NONE)
     {
+        // Into the first empty cell; with the row full, onto the selected cell (the two swap).
         const int32 Free = FirstEmptyHotbarCell();
+        const int32 Target = Free != INDEX_NONE ? Free : FMath::Clamp(SelectedHotbarSlot, 0, Homestead::PackRowSize - 1);
         const Homestead::LayoutEntry* Stack = nullptr;
         for (const auto& Entry : State().inventoryLayout)
             if (Entry.wearableId == 0 && Entry.item == Item) { Stack = &Entry; break; }
-        if (Free == INDEX_NONE || !Stack || !Sim.MoveToPackRow(Stack->groupId, 0, Free, Sim.GetRevision())) return false;
-        Cell = Free;
+        if (!Stack || !Sim.MoveToPackRow(Stack->groupId, 0, Target, Sim.GetRevision())) return false;
+        Cell = Target;
     }
     SelectHotbarSlot(Cell);
     return SelectedHotbarSlot == Cell;

@@ -4,6 +4,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadController.h"
 #include "Simulation/HomesteadBackpack.h"
+#include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadEstatePublicRoad.h"
 #include "Simulation/HomesteadShops.h"
 #include "Simulation/HomesteadTravel.h"
@@ -665,6 +666,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         {
             WeedyPlot(PC, 0.4);
             PC.Sim.GrantItems(Item::WateringCan, 1);
+            PC.Sim.GrantItems(Item::Water, Homestead::PailPortions);
             PC.ChooseOnHotbar(Item::WateringCan);
         });
 
