@@ -1028,6 +1028,31 @@ Extend it there when play needs a capability; prefer real input over state edits
   `FontFace` needs `loading_policy` INLINE, and an `FTypefaceEntry` is built with `Emplace_GetRef(name)`
   then `.Font = FFontData(Face)`.
 
+### Seeing every UI (pending UI gallery)
+
+**Source-only at `jennifergalley-menu-gallery-0930` `d34a03f9`; do not claim gallery coverage until
+it compiles and runs.** `FHomesteadUIGallery` is a Development-only list of named, deterministic UI
+states. Each state begins from an isolated 10:00 fixture—known pack, 1,000 coins, Energy 80, no
+notices/pickups and no surface open—then shows exactly one book page, settings tab, dialog, shop,
+sign confirmation/refusal, notice, focus hint/outline or HUD state. The coverage check fails if any
+book tab, settings tab or notice style lacks an entry; add one whenever a surface is added.
+
+- **Multi-resolution capture:** after integration, run
+  `pwsh -File Scripts\Capture-UiGallery.ps1 [-Ids a,b] [-Res 720p,1080p,1440p,4K] [-Input KBM,Pad]`.
+  Output is `E:\CopilotScratch\<session>\ui-gallery\<stamp>\<res>[-pad]\<id>.png`, plus
+  viewable `view\<id>.jpg`, per-resolution `contact.jpg` and a stamp-level `index.md`. It starts
+  one hidden Development game per resolution/input (about 10 minutes each), refuses to start with
+  two Unreal processes or under 6 GB free, and keeps saves sandboxed through
+  `-HomesteadSmokeTest`. `setup-new-game` owns the screen, so it must run last in `all`.
+- **One hidden route:** `Scripts\Test-Game.ps1 -UIGallery -UIGalleryIds all -UIGalleryInput KBM
+  -Width <n> -Height <n> -OutputDirectory <dir>`. It captures the game window through
+  `FScreenshotRequest` with Slate UI, not the desktop. Never omit `-HomesteadSmokeTest`: without
+  it the run is not save-isolated.
+- **Live PIE:** use `homestead.UIGallery list | <id> | next | prev | all [Pad|KBM]`,
+  `python Scripts\editor_mcp.py gallery <id> [--input Pad] [--wait 6]`, or the McpHelpers
+  `gallery <id> [Pad] [wait]` helper. This mutates the running PIE fixture, so never point it at a
+  real save. Use `shot`; `hshot`/HighResShot omit Slate.
+
 ## 9. Field notes
 
 Grouped by topic, dated, newest first within a topic where it matters. Promote anything durable
