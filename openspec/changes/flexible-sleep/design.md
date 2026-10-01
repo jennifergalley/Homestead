@@ -6,8 +6,11 @@
    policy.
 2. **No controller choice state.** There is no `BedChoice`, picker or confirmation dialog. The
    same focused bed immediately executes the simulation-derived outcome on E/A.
-3. **Doze in the simulation.** `AdvanceGameHours` calls `DozeOff` the moment awake Energy reaches
-   zero. That's six hours of sleep `Step`s at 6 Energy an hour (a bed gives 10), counted against the
-   time asked. `DozeCount()` is a session counter, never saved; the controller toasts when it rises.
-   Hunger during the doze can still fail her, as in any sleep.
-4. **Sleep over 12 hours** runs as halves if needed because `Simulation::Sleep` accepts at most 12.
+3. **Low Energy is nonfatal.** `Step` never dozes, fails or recovers a checkpoint because Energy is
+   low. Below about 25% the sprint admission turns off; below about 10% walking slows and tools
+   refuse with `Too tired`. The HUD owns the colour/pulse plus `Getting tired` / `Exhausted`
+   warnings. Food and bed sleep are the only recovery actions.
+4. **Newest valid recovery.** Any recovery/checkpoint load evaluates valid candidate saves by
+   timestamp then simulation revision, selecting the newest rather than privileging an older
+   `Recovery` slot over newer autosaves.
+5. **Sleep over 12 hours** runs as halves if needed because `Simulation::Sleep` accepts at most 12.

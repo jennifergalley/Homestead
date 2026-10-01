@@ -54,6 +54,11 @@ Menus and construction planning pause simulation. No online gameplay services.
 - **Bed sleep is one press.** Within its tight bed focus, E/A immediately sleeps until Energy is
   full, capped at 06:00 when sleeping overnight. If she is already rested at night it sleeps until
   06:00; a rested daytime bed has no sleep verb. There is no confirm dialog or nap-hours picker.
+- **Estate Energy is never fatal.** Below roughly 25% Energy she cannot sprint; below roughly 10%
+  she walks more slowly and tool work says `Too tired`. The Energy bar changes colour and pulses,
+  with `Getting tired` and `Exhausted` warnings. Eating or sleeping restores her; she never faints,
+  dies, fails, or loses progress from low Energy. Any recovery/checkpoint load chooses the newest
+  valid save by timestamp and revision.
 - **Respect farming-sim fluency.** Assume the player knows the genre: UI is concise rather than
   instructional. No toasts for obvious outcomes; focus cards show only a name and keyed verbs;
   details/tooltips show stats, requirements and price rather than rules explanations; settings show

@@ -18,7 +18,7 @@ At the gameplay camera, the heroine SHALL show natural weight transfer, coordina
 - **THEN** the heroine resumes a valid pose without stale animation or garment separation
 
 ### Requirement: Sprint has a distinct grounded gait and safe low-Energy cutoff
-The heroine SHALL enter a visibly different faster gait on toggled Shift or controller left-stick click while grounded, moving and eligible under the existing `sprint-locomotion` contract. A second toggle or loss of eligibility MUST return smoothly to walking without a queued animation. Sprint has zero sprint-specific Energy cost, is refused/turned off at Energy <=10, and never auto-resumes after recovery.
+The heroine SHALL enter a visibly different faster gait on toggled Shift or controller left-stick click while grounded, moving and eligible under the existing `sprint-locomotion` contract. A second toggle or loss of eligibility MUST return smoothly to walking without a queued animation. Sprint has zero sprint-specific Energy cost, is refused/turned off below about 25% Energy, and never auto-resumes after recovery.
 
 #### Scenario: Compare equivalent travel
 - **WHEN** ordinary walk and toggled sprint cover the same valid level route for the same real duration

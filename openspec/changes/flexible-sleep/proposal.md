@@ -13,10 +13,10 @@ Energy out failed the game like starving.
 
 ## What Changes
 
-- **No bedtime by the clock.** She can stay up all night. Running out of Energy no longer fails her:
-  she dozes off where she stands for six hours of rough sleep at a slower recovery rate and wakes
-  stiff and only part rested, with a toast saying so. Only hunger fails her. The doze can't happen
-  while a menu is open, because time is paused there.
+- **No failure or fainting.** She can stay up all night. Low Energy never forces sleep, failure,
+  death or checkpoint recovery: below roughly 25% sprint is unavailable; below roughly 10% she
+  walks more slowly and tool work says `Too tired`. Eating or bed sleep restores her. The Energy
+  meter changes colour and pulses, with short `Getting tired` and `Exhausted` warnings.
 - **One-press bed sleep (Jenny, 2026-09-30).** E/A immediately sleeps; there is no confirmation
   dialog, choice picker or nap-hours control:
   - When not rested, `Sleep until rested` recovers Energy to full, but an overnight sleep stops at
@@ -37,10 +37,10 @@ None.
 
 ## Impact
 
-- `Simulation/HomesteadSimulation.*`: `SleepOptions`, the `Exertion` sleep and doze constants,
-  `Simulation::DozeCount`, Energy no longer fails `Step`, `AdvanceGameHours` dozes. `BedSleepHours(hour)` is removed.
-- `HomesteadController.*`: the bed prompt, one-press admission and wake messages, with no choice
-  cycling or confirmation dialog; plus the doze toast.
-- `SHomesteadMenu.cpp`: the failure text says food only.
-- Tests: native `SleepOptionPolicy`, the doze cases, and FullLoop's outdoor sleeps (now night after
-  night). No save change (SimulationSaveVersion stays 12).
+- `Simulation/HomesteadSimulation.*`: the sleep outcome and Energy thresholds; `Step` does not
+  fail/doze at low Energy. `BedSleepHours(hour)` is removed.
+- `HomesteadController.*`: the bed prompt, one-press admission and wake messages, low-Energy movement/
+  tool gates, and newest-valid recovery/checkpoint selection.
+- HUD/menu: Energy colour/pulse plus concise threshold warnings.
+- Tests: native low-Energy/no-failure, sprint/tool/walk thresholds, newest-valid recovery by
+  timestamp/revision, and FullLoop sleep/input routes. No save version bump.
