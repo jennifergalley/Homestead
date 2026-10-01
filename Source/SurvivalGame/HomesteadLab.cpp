@@ -14,6 +14,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HAL/IConsoleManager.h"
 #include "HomesteadAnimInstance.h"
+#include "HomesteadAnimInspector.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadLampLook.h"
 #include "Components/PointLightComponent.h"
@@ -321,6 +322,7 @@ void AHomesteadLabController::BeginPlay()
     LoadPool(WalkSteps, TEXT("BareStepWalk"), 6);
     LoadPool(RunSteps, TEXT("BareStepRun"), 4);
     LabTeleport(0, 0);
+    if (HomesteadAnimInspector::Requested()) GetWorld()->SpawnActor<AHomesteadAnimInspector>();
     UE_LOG(LogTemp, Display, TEXT("CHARACTER_LAB ready: flat grid floor, course at x=%.0f; console: LabAction, LabProp, LabSun, LabTeleport, LabCourse, slomo."),
         AHomesteadLabWorld::CourseX);
 }
@@ -389,6 +391,30 @@ void AHomesteadLabController::LabAction(const FString& Name)
     else if (Name.Equals(TEXT("Till"), ESearchCase::IgnoreCase)) Avatar->PlayTill(Target);
     else if (Name.Equals(TEXT("Machete"), ESearchCase::IgnoreCase)) Avatar->PlayMacheteHack(Target);
     else if (Name.Equals(TEXT("Fell"), ESearchCase::IgnoreCase)) Avatar->PlayFell(Target, 2);
+    // The estate tools (each held first, as the hotbar would): the weed pull on both knees, one scythe
+    // sweep, two pickaxe or axe strikes at a rock or stump 70 cm ahead, and the billhook's hack.
+    else if (Name.Equals(TEXT("Weeds"), ESearchCase::IgnoreCase))
+    {
+        const FVector Tuft = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 45.0f;
+        Avatar->PlayPullWeeds(Homestead::Point{Tuft.X, Tuft.Y});
+    }
+    else if (Name.Equals(TEXT("Mow"), ESearchCase::IgnoreCase))
+    {
+        Avatar->SetLabHeldTool(Homestead::Item::Scythe);
+        Avatar->PlayStrike(Target, Homestead::Item::Scythe, 1, -1.0f);
+    }
+    else if (Name.Equals(TEXT("Pickaxe"), ESearchCase::IgnoreCase) || Name.Equals(TEXT("AxeStrike"), ESearchCase::IgnoreCase))
+    {
+        const auto Tool = Name.Equals(TEXT("Pickaxe"), ESearchCase::IgnoreCase) ? Homestead::Item::Pickaxe : Homestead::Item::Hatchet;
+        Avatar->SetLabHeldTool(Tool);
+        const FVector Rock = Avatar->GetActorLocation() + Avatar->GetActorForwardVector() * 70.0f;
+        Avatar->PlayStrike(Homestead::Point{Rock.X, Rock.Y}, Tool, 2, 30.0f);
+    }
+    else if (Name.Equals(TEXT("Billhook"), ESearchCase::IgnoreCase))
+    {
+        Avatar->SetLabHeldTool(Homestead::Item::Billhook);
+        Avatar->PlayMacheteHack(Target, Homestead::Item::Billhook);
+    }
     else if (Name.Equals(TEXT("LampDown"), ESearchCase::IgnoreCase))
     {
         // She sets the lamp she's holding (LabHold Lamp) on the floor at arm's length.
@@ -410,7 +436,7 @@ void AHomesteadLabController::LabAction(const FString& Name)
         Avatar->SetLabHeldTool(Homestead::Item::OilLamp);
         LampKneel = Avatar->PlayLampKneel({LampSpot.X, LampSpot.Y}, false) ? 2 : 0;
     }
-    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Reeds, Pull, Pick, Eat, Craft, Water, Fill, Chop, Knife, Till, Machete, Fell, LampDown or LampUp."));
+    else UE_LOG(LogTemp, Warning, TEXT("LabAction takes Gather, Sticks, Stones, Roots, Berries, Reeds, Pull, Pick, Eat, Craft, Water, Fill, Chop, Knife, Till, Machete, Fell, Weeds, Mow, Pickaxe, AxeStrike, Billhook, LampDown or LampUp."));
 }
 
 void AHomesteadLabController::PlaceGroundLamp(const FVector& At)
@@ -460,12 +486,13 @@ void AHomesteadLabController::LabHold(const FString& Name)
     using Homestead::Item;
     const TPair<const TCHAR*, Item> Tools[] = {{TEXT("Knife"), Item::Knife}, {TEXT("Hatchet"), Item::Hatchet},
         {TEXT("DiggingStick"), Item::DiggingStick}, {TEXT("Pail"), Item::WateringCan}, {TEXT("Machete"), Item::Machete},
-        {TEXT("Lamp"), Item::OilLamp}};
+        {TEXT("Lamp"), Item::OilLamp}, {TEXT("Scythe"), Item::Scythe}, {TEXT("Billhook"), Item::Billhook},
+        {TEXT("Pickaxe"), Item::Pickaxe}};
     for (const auto& Tool : Tools)
         if (Name.Equals(Tool.Key, ESearchCase::IgnoreCase)) { Avatar->SetLabHeldTool(Tool.Value); return; }
     Avatar->SetLabHeldTool(Item::Count);
     if (!Name.Equals(TEXT("None"), ESearchCase::IgnoreCase))
-        UE_LOG(LogTemp, Warning, TEXT("LabHold takes Knife, Hatchet, DiggingStick, Pail, Machete, Lamp or None."));
+        UE_LOG(LogTemp, Warning, TEXT("LabHold takes Knife, Hatchet, DiggingStick, Pail, Machete, Lamp, Scythe, Billhook, Pickaxe or None."));
 }
 
 void AHomesteadLabController::LabLoop(const FString& Name)

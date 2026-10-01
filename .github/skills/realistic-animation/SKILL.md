@@ -305,9 +305,9 @@ dict (contact beats, extremes, transitions) plus the first and last frame:
 
 - **Status:** the checker (`Content/Python/homestead_agent/joint_limits.py`, tests in
   `Tests/JointLimitsTests.py`) and the clip audit (`anim_audit.py`) are on branch
-  `jennifergalley-realistic-animation`. The in-engine calibration (twist signs on the real skeleton) and
-  the first full audit happen in an Unreal slot. The Animation Inspector (multi-view frame captures with
-  overlays) is planned under the same OpenSpec change, `add-realistic-animation-skill`.
+  `jennifergalley-realistic-animation`, calibrated against the real skeleton (2026-10-01: its readings match
+  the raw forearm and hand geometry). The Animation Inspector's source is on the same branch, with its first
+  in-engine run due in the next Unreal slot.
 - **Every bake is checked.** `rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` runs the
   checker on the new clip and logs `[anatomy AN_...]` lines: a count by kind and severity, then the worst
   issue per joint with its frame and `FRAMES` key. Pass the recipe's `FRAMES` and its strike or impact
@@ -333,15 +333,25 @@ dict (contact beats, extremes, transitions) plus the first and last frame:
     of a listed contact), ground penetration, planted foot or knee slides (over 0.5 cm a frame) and the
     centre of mass outside the support in held frames (de Leva female segment fractions).
   - It never reads raw local Euler channels, because MetaHuman's local axes differ per bone and side.
-- **Seeing every frame:** the Animation Inspector (planned) plays a clip at a fixed 1/30 s step in
-  the Character Lab with props. It captures front, side, top and three-quarter views, with:
-  - the skeleton coloured by ROM status;
-  - contact and penetration markers;
-  - the CoM over the support polygon.
-
-  It writes per-frame PNGs, contact sheets and an `index.md` of flagged frames under
-  `E:\CopilotScratch\<session>\anim-inspector\<clip>\<stamp>\`. Until it lands, review with PIE
-  captures from `unreal-editor-mcp` at the clip's key frames.
+- **Seeing every frame (Animation Inspector):**
+  - Run `pwsh -NoProfile -File .\Scripts\Inspect-Animation.ps1 -Clip <LabAction> -Recipe <module>`, adding
+    `-Contacts strike1,bite1` for a strike, `-Every 1` for every frame, `-Views front,left,right,top,threequarter`,
+    `-Hold <tool>` and `-Lit` when needed. From an MCP shell: `python Scripts/editor_mcp.py animinspect <LabAction>`.
+  - Lab actions include the gathers (`Sticks`, `Stones`, `Roots`, `Berries`, `Reeds`), `Pull`, `Pick`, `Eat`,
+    `Craft`, `Water`, `Fill`, `Till`, `Fell`, `Weeds`, `Mow`, `Pickaxe`, `AxeStrike`, `Billhook`, `LampDown` and
+    `LampUp`.
+  - It starts a hidden, unattended game in the Character Lab, a separate process from any editor: it
+    refuses with two Unreal processes running or under 6 GB free. It plays the action at a fixed 1/30 s
+    step (`AHomesteadAnimInspector`) and records every frame: the body's final pose after the MetaHuman
+    post-process, held props and the ground under her feet. Each view is captured every `-Every` frames
+    as base colour (or lit).
+  - `Scripts/anim_inspector_sheet.py` then judges every frame with `joint_limits` and draws overlays on
+    each capture: the skeleton coloured green, amber or red by status, rings on sinking or sliding
+    contacts, the CoM over the support polygon, and held props' bounds. It writes `sheet_<view>.png`,
+    `keyframes.png` (the recipe's beats and the worst frames, all views), `motion.gif` and `index.md`
+    (the summary and every flagged frame) under `E:\CopilotScratch\anim-inspector\<clip>\<stamp>\`.
+    Sheets stay under about 2000 px, so an image viewer can open them.
+  - Check a clip in the inspector before and after a fix, and attach `keyframes.png` to the report.
 - **Coordinate frames:**
   - The authoring component frame is +Y forward, +X her left, +Z up (`rig_authoring.py`).
   - The UE world frame is X forward, Y right, Z up.

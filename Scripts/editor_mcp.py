@@ -8,6 +8,7 @@ Examples:
     python Scripts/editor_mcp.py call list_toolsets
     python Scripts/editor_mcp.py call describe_toolset "{\"toolset\": \"EditorAppToolset\"}"
     python Scripts/editor_mcp.py call call_tool @args.json --images Saved/McpCaptures
+    python Scripts/editor_mcp.py animinspect Weeds --recipe kneel_pull_weeds
 """
 from __future__ import annotations
 
@@ -117,7 +118,28 @@ def main() -> int:
     call = sub.add_parser("call", help="call an MCP tool")
     call.add_argument("tool")
     call.add_argument("arguments", nargs="?", default="{}", help="JSON object, or @file.json")
+    inspect = sub.add_parser("animinspect", help="record a heroine action frame by frame (Scripts/Inspect-Animation.ps1)")
+    inspect.add_argument("clip", help="a Character Lab LabAction name, e.g. Weeds, Mow, Sticks")
+    inspect.add_argument("--recipe", help="homestead_agent recipe whose FRAMES name the beats")
+    inspect.add_argument("--contacts", default="", help="comma-separated FRAMES keys of strikes or impacts")
+    inspect.add_argument("--every", type=int, default=2)
+    inspect.add_argument("--views", default="front,left,right,top,threequarter")
+    inspect.add_argument("--hold", help="a LabHold tool to carry first")
     args = parser.parse_args()
+
+    if args.command == "animinspect":
+        # Runs its own hidden game process (not this editor), so no MCP connection is needed.
+        import subprocess
+        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Inspect-Animation.ps1")
+        command = ["pwsh", "-NoProfile", "-File", script, "-Clip", args.clip, "-Every", str(args.every),
+                   "-Views", args.views]
+        if args.recipe:
+            command += ["-Recipe", args.recipe]
+        if args.contacts:
+            command += ["-Contacts", args.contacts]
+        if args.hold:
+            command += ["-Hold", args.hold]
+        return subprocess.call(command)
 
     client = McpClient(args.url, args.timeout)
     try:
