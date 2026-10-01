@@ -42,8 +42,8 @@ def _paint_leaf(atlas, key, nrng, pal, **extra):
     a = X.max()
     w = a * 0.9
     # One of the three leaf segments: wedge-based and deeply, coarsely toothed toward the tip.
-    shape = F.ovate(width=w, widest=0.62, tip_sharp=0.8, base_round=1.8, base=0.02, tip=0.98,
-                    teeth=7, tooth_depth=0.16, double=0.5)
+    shape = F.ovate(width=w, widest=0.66, tip_sharp=0.7, base_round=2.2, base=0.02, tip=0.98,
+                    teeth=5, tooth_depth=0.30, double=0.6)
     veins = F.pinnate_veins(count=4, angle=0.7, curve=0.4, reach=0.85, base=0.02, tip=0.98, width=w,
                             widest=0.62, start=0.25, stop=0.85, rng=nrng)
     layer = F.paint_blade(X, Y, nrng, shape, veins, pal, px, vein_width=w * 0.04, vein_depth=0.0002,
@@ -55,7 +55,7 @@ def paint_atlas():
     atlas = F.Atlas(NAME, size=2048, seed=SEED)
     atlas.column("stem", 48)
     for key in ("leaf", "leaf2"):
-        atlas.tile(key, 360, 520)
+        atlas.tile(key, 260, 520)
     for key in ("flower", "flower2", "bud"):
         atlas.tile(key, 360, 360)
     if atlas.cached():

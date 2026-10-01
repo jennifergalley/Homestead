@@ -30,7 +30,7 @@ DESCRIPTION = ("A clump of red campion in flower, 50 cm tall and 40 cm across: h
 COLLISION = "none"
 TRIANGLE_BUDGET = 12000
 PROVENANCE = "Original project-authored procedural geometry and numpy-painted textures; no third-party asset."
-BEAUTY = {"pose": (0, 0, 0), "focus": (0.0, 0.0, 0.28)}
+BEAUTY = {"pose": (0, 0, 0), "focus": (0.0, 0.03, 0.44)}
 REPORT = W.report(NAME)
 
 SEED = 8302
@@ -65,11 +65,11 @@ def paint_atlas():
                  margin=(0.040, 0.070, 0.024), brown=(0.09, 0.05, 0.02))
     _paint_leaf(atlas, "leaf", nrng, green, 0.10)
     _paint_leaf(atlas, "leaf_old", nrng, dict(green, base=(0.05, 0.075, 0.025)), 0.10, yellow=0.25, holes=0.2)
-    W.paint_flower_face(atlas, "flower", nrng, petals=5, inner=(0.62, 0.26, 0.38), outer=(0.55, 0.06, 0.20),
-                        eye=(0.70, 0.40, 0.48), centre=(0.70, 0.62, 0.62), size_m=0.024, notch=0.38,
+    W.paint_flower_face(atlas, "flower", nrng, petals=5, inner=(0.50, 0.12, 0.26), outer=(0.50, 0.04, 0.17),
+                        eye=(0.60, 0.26, 0.36), centre=(0.55, 0.44, 0.46), size_m=0.024, notch=0.38,
                         notch_width=0.05, rim=0.95, waist=0.42, veins=0.25, eye_radius=0.22, centre_radius=0.07)
-    W.paint_flower_face(atlas, "flower2", nrng, petals=5, inner=(0.66, 0.30, 0.42), outer=(0.60, 0.09, 0.25),
-                        eye=(0.72, 0.44, 0.50), centre=(0.72, 0.64, 0.64), size_m=0.022, notch=0.34,
+    W.paint_flower_face(atlas, "flower2", nrng, petals=5, inner=(0.54, 0.15, 0.30), outer=(0.55, 0.06, 0.21),
+                        eye=(0.62, 0.28, 0.38), centre=(0.56, 0.45, 0.47), size_m=0.022, notch=0.34,
                         notch_width=0.05, rim=0.93, waist=0.40, veins=0.25, eye_radius=0.22, centre_radius=0.07)
     W.paint_stem(atlas, "stem", nrng, (0.10, 0.05, 0.04), (0.06, 0.09, 0.035), hair=0.35, length_m=0.5)
     # The calyx tube: hairy red-purple with darker ribs.
@@ -94,16 +94,16 @@ def describe(rng):
                             elev=math.radians(rng.uniform(15, 40)), droop=rng.uniform(0.2, 0.5),
                             key=rng.choices(("leaf", "leaf_old"), (75, 25))[0], keep=rng.random()))
     stems = []
-    for i in range(5):
-        az = rng.uniform(0, math.tau)
-        r = 0.06 * rng.random() ** 0.5
+    for i in range(8):
+        az = i * 2.39996 + rng.uniform(-0.3, 0.3)
+        r = 0.03 + 0.05 * rng.random() ** 0.5
         heads = []
-        for k in range(rng.randint(3, 5)):
+        for k in range(rng.randint(4, 7)):
             heads.append(dict(az=rng.uniform(0, math.tau), out=rng.uniform(0.02, 0.06), up=rng.uniform(0.01, 0.06),
                               size=rng.uniform(0.019, 0.025), key=rng.choice(("flower", "flower2")),
                               bud=rng.random() < 0.25, tilt=rng.uniform(0.3, 0.8), spin=rng.uniform(0, math.tau)))
         stems.append(dict(base=Vector((math.cos(az) * r, math.sin(az) * r, 0.0)), length=rng.uniform(0.36, 0.50),
-                          lean=rng.uniform(0, math.tau), tilt=rng.uniform(0.08, 0.25), pairs=rng.randint(2, 3),
+                          lean=az + rng.uniform(-0.4, 0.4), tilt=rng.uniform(0.10, 0.28), pairs=rng.randint(3, 4),
                           spin=rng.uniform(0, math.pi), heads=heads, phase=rng.random(), keep=rng.random()))
     return dict(rosette=rosette, stems=stems)
 
@@ -137,12 +137,12 @@ def emit(desc, atlas, lod, height):
         t0 = b.triangles
         acc = S.arclength(pts)
         for p in range(st["pairs"]):
-            node, _, _ = S.at(pts, acc, acc[-1] * (0.22 + 0.2 * p))
+            node, _, _ = S.at(pts, acc, acc[-1] * (0.16 + 0.17 * p))
             for s in (0, math.pi):
                 a = st["spin"] + p * math.pi / 2 + s
                 h = Vector((math.cos(a), math.sin(a), 0))
                 d = (h + Vector((0, 0, 0.55))).normalized()
-                length = 0.07 - 0.012 * p
+                length = 0.085 - 0.014 * p
                 b.card(node, d, Vector((0, 0, 1)), length, length * S.tile_aspect(atlas, "leaf"), atlas.uv("leaf"),
                        rows=(3, 2, 1)[lod], cols=(2, 1, 1)[lod], fold=0.2, droop=0.3, phase=st["phase"], flutter=0.7)
         stats["leaves"] += b.triangles - t0

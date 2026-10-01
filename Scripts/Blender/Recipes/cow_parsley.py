@@ -30,7 +30,7 @@ DESCRIPTION = ("Cow parsley in flower, 80 cm tall and 55 cm across: a mound of f
 COLLISION = "none"
 TRIANGLE_BUDGET = 14000
 PROVENANCE = "Original project-authored procedural geometry and numpy-painted textures; no third-party asset."
-BEAUTY = {"pose": (0, 0, 0), "focus": (0.0, 0.0, 0.45)}
+BEAUTY = {"pose": (0, 0, 0), "focus": (0.0, 0.0, 0.72)}
 REPORT = W.report(NAME)
 
 SEED = 5547
@@ -83,18 +83,18 @@ def describe(rng):
                           elev=math.radians(rng.uniform(25, 55)), droop=rng.uniform(0.4, 0.9),
                           key=rng.choices(("frond", "frond2", "frond_old"), (45, 40, 15))[0], keep=rng.random()))
     stems = []
-    for i in range(3):
-        az = rng.uniform(0, math.tau)
+    for i in range(5):
+        az = i * 2.39996 + rng.uniform(-0.3, 0.3)
         branches = []
         for k in range(rng.randint(2, 3)):
             umbel_rays = []
-            for r in range(rng.randint(8, 11)):
-                umbel_rays.append(dict(az=r * math.tau / 10 + rng.uniform(-0.2, 0.2), length=rng.uniform(0.028, 0.045),
+            for r in range(rng.randint(10, 13)):
+                umbel_rays.append(dict(az=r * math.tau / 12 + rng.uniform(-0.2, 0.2), length=rng.uniform(0.035, 0.055),
                                        rise=rng.uniform(0.35, 0.7), key=rng.choice(("umbellet", "umbellet2")),
-                                       size=rng.uniform(0.018, 0.026), spin=rng.uniform(0, math.tau)))
+                                       size=rng.uniform(0.024, 0.032), spin=rng.uniform(0, math.tau)))
             branches.append(dict(az=rng.uniform(0, math.tau), length=rng.uniform(0.08, 0.16),
                                  spread=rng.uniform(0.35, 0.7), rays=umbel_rays))
-        stems.append(dict(base=Vector((math.cos(az) * 0.04, math.sin(az) * 0.04, 0.0)), length=rng.uniform(0.58, 0.70),
+        stems.append(dict(base=Vector((math.cos(az) * 0.04, math.sin(az) * 0.04, 0.0)), length=rng.uniform(0.66, 0.80),
                           lean=az, tilt=rng.uniform(0.08, 0.2), branches=branches, phase=rng.random(),
                           frond_az=rng.uniform(0, math.tau)))
     return dict(mound=mound, stems=stems)
