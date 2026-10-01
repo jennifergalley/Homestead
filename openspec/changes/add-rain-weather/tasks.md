@@ -17,11 +17,26 @@
 - [ ] 3.2 Historical PIE/package evidence for the former daytime schedule. Do not use this as
   acceptance for the superseding full-cycle design.
 
-## 4. Full-cycle recurrence (Jenny, 2026-09-30)
+## 4. Rain at any hour (Jenny, 2026-09-30: "let it randomize throughout the day/night cycle")
 
-- [ ] 4.1 Replace the daytime-only window with a seasonally weighted, reload-stable schedule that
-  selects rain at random times through the full day/night cycle.
-- [ ] 4.2 Drive coherent night-rain lighting, overcast, wet ground and ambience without turning
-  night into day.
-- [ ] 4.3 Verify save/reload stability, daytime and night events, roof shelter, wet ground/audio
-  behavior and packaged RT-on night evidence.
+- [x] 4.1 `Simulation/HomesteadRain`: one possible spell per calendar day, from a hash of the day.
+  - Any start hour; 1-8 h long; 0.5-1.5 h of cloud build-up and clearing.
+  - Weighted by season (spring 5.0% of hours, summer 3.2%, autumn 6.0%, winter 6.8%; year 5.3%, against 5%
+    before). Spells never merge, and they cross midnight and 06:00.
+  - `IsRainingAt`, `RainAmount`, `Overcast`, `GroundWetness`, `IsRainDay`, `RainSpellOfDay`, `NextRainSpell`
+    and `NextRainChange`. `Step` stops at a rain change.
+  - No save data: the clock alone decides it, and old saves load with the new forecast from their hour on.
+- [x] 4.2 Readers updated:
+  - the landscape wetness reads `GroundWetness`;
+  - night cloud dims the moon to 35%, keeping the sky light and exposure on their night floors;
+  - the full-loop test and the UI gallery's `hud-rain`/`toast-rain` fixtures find the next spell (`NextRainSpell`).
+  - Rain audio, plot watering and the HUD's Rain label were already hour-agnostic.
+- [x] 4.3 Native tests:
+  - spell lengths, cloud times, spacing and determinism over 20 years;
+  - starts in every hour, about 43% at night and some in every season, crossing midnight and 06:00;
+  - the wet share by season and year;
+  - a reload during night rain;
+  - one spell's cloud, rain, wetness and change points;
+  - night rain watering a plot;
+  - a step split at the rain's start.
+- [ ] 4.4 PIE (low priority, after the night A/B slot): a night spell at the town square and the meadow (rain, sound, moon dimmed, lamp and hearth readable), the night A/B sheet's rain row, and the wet ground drying over the next four hours.

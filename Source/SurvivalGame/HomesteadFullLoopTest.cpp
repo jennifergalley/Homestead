@@ -938,9 +938,13 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             Add(TEXT("Rain replenishes both crops' soil"),
                 [this, Home]()
                 {
-                    do Controller->Sim.SkipToHourOfDay(9.0);
-                    while (!Homestead::IsRainDay(Controller->State().hour));
-                    Controller->Sim.AdvanceGameHours(6.0, Home);
+                    // A spell of rain at least four hours long (Simulation/HomesteadRain.h); rain falls at any hour.
+                    Homestead::RainSpell Spell;
+                    for (double From = Controller->State().hour;
+                        Homestead::NextRainSpell(From, Spell) && Spell.end - Spell.start < 4.0;) From = Spell.end;
+                    for (int32 Day = 0; Day < 40 && Controller->State().hour < Spell.start - 1e-6; ++Day)
+                        Controller->Sim.SkipToHourOfDay(FMath::Fmod(Spell.start, 24.0));
+                    Controller->Sim.AdvanceGameHours(Spell.end - Spell.start, Home);
                 },
                 [this, BerryPlotId]()
                 {
