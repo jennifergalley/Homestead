@@ -150,9 +150,13 @@ void AHomesteadController::RunSaveRoutingChecks()
                 Fixture.Name + TEXT(" recovery load never crosses profile"));
         }
         const FFixture& RecoveryFixture = Fixtures[3];
+        const bool MapWasEstate = bEstateMap;
         SaveRoute = RecoveryFixture.Route;
         SaveRoute.Directory = FPaths::Combine(Output, TEXT("RecoveryChoice"));
         WorldId = RecoveryFixture.World;
+        // This actor runs on the Woodland map. Switch the routing mode for the Estate policy check;
+        // the synthetic world/save stays isolated and is restored before the rest of the route.
+        bEstateMap = true;
         if (!ReadOnly)
         {
             Check(!IFileManager::Get().DirectoryExists(*SaveRoute.Directory),
@@ -163,13 +167,35 @@ void AHomesteadController::RunSaveRoutingChecks()
                 && SaveSlot(TEXT("Homestead_Auto_1"), true), TEXT("Newer autosave fixture saved"));
             Sim.NewGame();
             Check(LoadLatest(true) && UTF8_TO_TCHAR(Sim.Serialize().c_str()) == RecoveryFixture.After,
-                TEXT("Recovery chooses the newer auto instead of the older recovery slot"));
+                TEXT("Estate recovery chooses the newer auto instead of the older recovery slot"));
+            bEstateMap = false;
+            Sim.NewGame();
+            Check(LoadLatest(true) && UTF8_TO_TCHAR(Sim.Serialize().c_str()) == RecoveryFixture.Before
+                && Toast().Contains(TEXT("sheltered recovery checkpoint")),
+                TEXT("Woodland recovery prefers its safe sheltered checkpoint to a newer auto"));
+            bEstateMap = MapWasEstate;
             Check(FFileHelper::SaveStringToFile(TEXT("corrupt newest save"), *SavePath(TEXT("Homestead_Auto_1"))),
                 TEXT("Corrupt only the isolated newest autosave fixture"));
         }
+        bEstateMap = true;
         Sim.NewGame();
         Check(LoadLatest(true) && UTF8_TO_TCHAR(Sim.Serialize().c_str()) == RecoveryFixture.Before,
-            TEXT("Corrupt newest auto falls back to the last valid recovery slot"));
+            TEXT("Estate corrupt newest auto falls back to the last valid recovery slot"));
+        SaveRoute.Directory = FPaths::Combine(Output, TEXT("UnsafeRecovery"));
+        bEstateMap = false;
+        if (!ReadOnly)
+        {
+            Sim.NewGame();
+            Check(Sim.SetEnergy(50).ok && SaveSlot(TEXT("Homestead_Auto_0"), true),
+                TEXT("Woodland fallback has a safe autosave"));
+            Check(Sim.SetEnergy(10).ok && SaveSlot(TEXT("Homestead_Recovery"), true),
+                TEXT("Woodland fixture has a newer but unsafe sheltered recovery"));
+        }
+        bEstateMap = false;
+        Sim.NewGame();
+        Check(LoadLatest(true) && FMath::IsNearlyEqual(Sim.GetState().energy, 50.0),
+            TEXT("Woodland skips unsafe recovery and chooses the safe autosave"));
+        bEstateMap = MapWasEstate;
         SaveRoute = Fixtures[1].Route;
         Check(PreviewLabel().Contains(Fixtures[1].Route.Profile), TEXT("Preview identification includes active isolated profile"));
         const uint32 IgnoredBefore = IgnoredExternalInputs;

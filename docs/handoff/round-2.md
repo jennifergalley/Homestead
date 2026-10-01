@@ -828,9 +828,17 @@ receipt.**
 
   `UHomesteadSave::SavedRevision` is an optional SaveGame field (old saves default 0) used after
   `SavedAtUtc` as the newest-valid tie-breaker. `LoadLatest(true)` scans Manual, Auto 0–2, Recovery
-  and backups without short-circuiting to an older Recovery. Native comparator/Estate-72-hour tests
+  and backups without short-circuiting to an older Recovery **on the Estate**. Woodland recovery
+  instead must prefer a valid sheltered Recovery with hunger/Energy >=20 before the newest eligible
+  candidate; the required correction is queued. Native comparator/Estate-72-hour tests
   and an isolated `SaveRoutingTest` write/read/corrupt-fallback fixture cover it. Menu HUD `d246`
   still awaits its UE `[ready]`; controller/UI, PIE, packaged and Shipping acceptance are pending.
+
+  **Dawn edge `192e0d52` / branch head `b1a6abda`:** ordinary `Sim.Sleep` keeps its original
+  0.25–12 hour interval and refusal. Only a dawn-limited bed rest may be shorter than 0.25 hours,
+  with a positive interval ending exactly at 06:00; `BedSleepOption` presents it at 05:52 and
+  `Sleep(..., dawnLimited=true)` validates it. Native 18/18 and FullLoop cover single A at
+  05:52 → 06:00. UE/PIE/package proof remains pending.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
@@ -1321,7 +1329,18 @@ not claim early Energy is fully solved.
   `Exhausted` warnings. Food and one-press bed sleep recover Energy. Integration owns simulation
   and Menu owns HUD for the 7:30 AM batch; this remains source/package pending. Recovery/checkpoint
   loads must choose the newest valid save by timestamp and revision, never an older Recovery file
-  over a newer autosave.
+  over a newer autosave **on the Estate**. Legacy woodland still has lethal hunger and outdoor
+  autosaves: recovery prefers a valid sheltered Recovery with hunger/Energy >=20, otherwise the
+  newest eligible file. The high-priority source correction is recorded below; UE, package and
+  delivery acceptance remain pending.
+
+  **Recovery/chest correction `fdf69690` (not on `main`):** native Release 18/18 now confirms
+  Woodland recovery prefers a valid **same-world** sheltered Recovery with hunger/Energy >=20,
+  then falls back to the newest eligible candidate; Estate stays newest-valid by
+  timestamp/`SavedRevision`. FullLoop again expects the protected Woodland checkpoint. Chest focus,
+  `OpenChestStorage`, transfer, `ContainerAccess` and `FindNearestStructure` now all measure the
+  placed footprint centre; native coverage includes an on-foundation chest and an isolated two-mode
+  runtime-routing fixture. UE/PIE/package/Shipping evidence remains pending.
 - **Whole-number currency** — **agreed design, pending and not 4 PM content.** Preserve the current
   `int64` raw values and save bytes: semantically relabel the smallest stored unit as one whole
   `coin`, with **no numeric x100 migration**. Thus raw 1000 (formerly $10) becomes 1,000 coins and
@@ -1529,6 +1548,13 @@ not claim early Energy is fully solved.
   establishes an integrated delivery; package/RT-on acceptance remains required. **Jenny's review
   method (2026-09-30):** Water provides a side-by-side screenshot sheet; her Shipping build has
   no console, so no player-side CVar trial is assumed.
+
+  **Interior review exclusion:** Water's `ea6acb99` tries to disable
+  `r.HairStrands.SkyLighting` indoors by day. It makes the heroine's hair black and is **not
+  approved** for integration. The independent wall-top timber plate in
+  `HomesteadWorldStructures.cpp` is separable; Integration may take approved Water work minus the
+  global hair-sky toggle, or use Water's follow-up fix reference. No interior/hair delivery claim
+  follows from this review.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of

@@ -10,15 +10,26 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Sound/SoundBase.h"
 
 using HomesteadControllerText::Text;
 
-namespace HomesteadClearingMix
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadStrikeSound, Log, All);
+
+namespace HomesteadStrikeSound
 {
-// The scythe's airy swish (Assets/Audio/Effects/ScytheSwish.wav, loudest 100 ms about -17 dBFS) at
-// about -31 dBFS with default Effects 0.8: a few dB over the ambience and music, about 9 dB under an
-// axe chop (0.75) and still about 20 dB over her bare steps on grass. At 0.8 it was as loud as a chop.
-constexpr float ScytheSwishGain = 0.25f;
+// Effect gains (PlayEffect, times the Effects volume). The pickaxe's ping plays at the level the breaking
+// strike always had (Notify's default 0.12: the one Jenny likes), the final a touch louder (+2 dB); the cane
+// cuts are mastered like the chops (loudest 100 ms at -18 dBFS RMS) and play 1.6 dB over the chops' gain
+// (Jenny: the billhook was almost too quiet).
+constexpr float PingGain = 0.12f;
+constexpr float FinalPingGain = 0.15f;
+constexpr float CaneCutGain = 0.9f;
+constexpr float ChopGain = 0.75f;
+constexpr float WoodTapGain = 0.6f;
+// Jenny (2026-09-30): the swish was about twice as loud as it needed to be, well over the birds; -6 dB.
+constexpr float ScytheSwishGain = 0.4f;
+constexpr float FinalTapGain = 0.12f;
 }
 
 void AHomesteadController::StartMacheteHack()
@@ -410,7 +421,7 @@ void AHomesteadController::LandOvergrowthSwing(bool bMoreComing)
         Notify(Summary + TEXT("."));
         // One airy swish at blade contact for the whole sweep; nothing on a miss or a cancel. With the
         // cue missing she mows in silence (InitializeAudio logged it) rather than with a footstep.
-        if (ScytheSwish) PlayEffect(ScytheSwish, HomesteadClearingMix::ScytheSwishGain);
+        if (ScytheSwish) PlayEffect(ScytheSwish, HomesteadStrikeSound::ScytheSwishGain);
         return;
     }
     if (SwingNode == INDEX_NONE) return;
@@ -420,15 +431,55 @@ void AHomesteadController::LandOvergrowthSwing(bool bMoreComing)
     const int32 Needed = Sim.OvergrowthSwings(SwingNode);
     if (SwingsLanded < Needed)
     {
-        // A hit that doesn't break it yet: a chop or a crack, and how much is left.
-        if (!ChopStrokes.IsEmpty()) PlayEffect(ChopStrokes[SwingsLanded % ChopStrokes.Num()].Get(), 0.75f);
-        else PlayEffect(WoodTapA, 0.6f);
+        // A hit that doesn't break it yet: its strike, and how much is left.
+        PlayStrikeCue(SwingTool, SwingsLanded, false);
         if (bMoreComing) return;
         const int32 Left = Needed - SwingsLanded;
         Notify(FString::Printf(TEXT("%d more %s."), Left, Left == 1 ? TEXT("swing") : TEXT("swings")));
         return;
     }
     const auto Result = Sim.ClearOvergrowth(SwingNode, SwingTool, Position);
+    const int32 Swing = SwingsLanded;
     ResetOvergrowthSwing();
-    Notify(Result, SwingTool == Homestead::Item::Pickaxe ? CraftStrikeA.Get() : WoodTapB.Get());
+    Notify(Result);
+    // The breaking strike sounds only when it clears (a refusal gets no reward).
+    if (Result.ok) PlayStrikeCue(SwingTool, Swing, true);
+}
+
+void AHomesteadController::PlayStrikeCue(Homestead::Item Tool, int32 Swing, bool bFinal)
+{
+    using namespace HomesteadStrikeSound;
+    // Jenny, 2026-09-30: every pickaxe strike rings like the last one did (the stone "ping"), not the wood
+    // chop; the billhook cuts canes with its own woody snap and rustle. Both land on the clip's contact
+    // (UpdatePendingSwing: FellStrikeSeconds / MacheteClearSeconds), and PlayEffect varies pitch +/-4%.
+    USoundBase* Cue = nullptr;
+    float Gain = ChopGain;
+    if (Tool == Homestead::Item::Pickaxe)
+    {
+        USoundBase* Pings[] = {CraftStrikeA.Get(), CraftStrikeB.Get(), CraftStrikeC.Get()};
+        // The final strike is the one she knew: CraftStrikeA, a touch louder; the others rotate all three.
+        Cue = bFinal ? Pings[0] : Pings[(Swing - 1) % static_cast<int32>(UE_ARRAY_COUNT(Pings))];
+        Gain = bFinal ? FinalPingGain : PingGain;
+    }
+    else if (Tool == Homestead::Item::Billhook && !CaneCuts.IsEmpty())
+    {
+        Cue = CaneCuts[(Swing - 1) % CaneCuts.Num()].Get();
+        Gain = CaneCutGain;
+    }
+    else if (bFinal) { Cue = WoodTapB; Gain = FinalTapGain; }        // other tools: as before
+    else if (!ChopStrokes.IsEmpty()) Cue = ChopStrokes[Swing % ChopStrokes.Num()].Get();
+    else { Cue = WoodTapA; Gain = WoodTapGain; }
+    // The ear-proxy check: the clip's phase when the cue fires, against its contact time.
+    float Phase = -1.0f, Contact = -1.0f;
+    if (const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
+        if (const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()))
+        {
+            const bool bFelling = Animation->IsFelling();
+            Phase = bFelling ? Animation->FellPhase() : Animation->MachetePhase();
+            Contact = bFelling ? AHomesteadCharacter::FellStrikeSeconds(0) : AHomesteadCharacter::MacheteClearSeconds;
+        }
+    UE_LOG(LogHomesteadStrikeSound, Log, TEXT("STRIKE_CUE tool=%s swing=%d final=%d cue=%s gain=%.2f phase=%.3f contact=%.3f t=%.3f"),
+        UTF8_TO_TCHAR(Homestead::ItemName(Tool)), Swing, bFinal ? 1 : 0, Cue ? *Cue->GetName() : TEXT("none"), Gain,
+        Phase, Contact, GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0);
+    PlayEffect(Cue, Gain);
 }

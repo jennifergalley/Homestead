@@ -6,6 +6,7 @@
 #include "HomesteadHatchet.h"
 #include "HomesteadDiggingStick.h"
 #include "HomesteadActionTestState.h"
+#include "Simulation/HomesteadCrops.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -79,7 +80,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             [this, Hidden]() { return Controller->FocusTitle() == TEXT("Fresh stream water") && Hidden(); }, 0.7f);
         Add(TEXT("Refill changes water stock but does not start a watering pose"),
             [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-            [this, Hidden]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && Hidden(); });
+            [this, Hidden]() { return Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions && Hidden(); });
         Approach();
     };
     auto Water = [this, Avatar, Probe, Animation, Matches](FKey Key, bool DoubleTap = false)

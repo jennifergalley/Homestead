@@ -4,6 +4,7 @@
 #include "HomesteadEstateTerrain.h"
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "Simulation/HomesteadPail.h"
 
 #include "Components/SplineComponent.h"
 #include "Engine/World.h"
@@ -53,11 +54,21 @@ Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Posit
 void AHomesteadController::FillPailAtStream(Homestead::Point Position)
 {
     const auto Result = Sim.FillWater(Position);
-    Notify(Result);
-    // She kneels at the bank and dips the pail into the nearest authored fresh-water ribbon.
+    // Jenny's concise rule: the gauge and the dip show a full pail, so only a refusal toasts.
+    NotifyResourceAction(Result);
+    // She kneels at the bank and dips the pail into the nearest authored fresh-water ribbon; standing in
+    // the shallows, she dips where she stands instead (Jenny, 2026-09-30: fill in the water, not from the bank).
     if (Result.ok)
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-            Avatar->PlayFillPail(FreshWaterDipPoint(Position));
+            Avatar->PlayFillPail(WaterEdgeDistance(Position, false) < 0.0
+                ? InWaterDipPoint(Position, Avatar->GetActorRotation().Yaw) : FreshWaterDipPoint(Position));
+}
+
+Homestead::Point AHomesteadController::InWaterDipPoint(Homestead::Point Position, double Yaw) const
+{
+    // Anywhere in the water (review: a threshold left her turning back to the bank from 0-30 cm in).
+    return Homestead::InWaterDipPoint(Position, Yaw, AHomesteadCharacter::FillForward, AHomesteadCharacter::FillRight,
+        PailDipInsideCm, [this](Homestead::Point Point) { return WaterEdgeDistance(Point, false); });
 }
 
 double AHomesteadController::WaterEdgeDistance(Homestead::Point Position, bool bIncludeSea) const

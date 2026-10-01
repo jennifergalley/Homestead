@@ -873,7 +873,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]() { return Controller->GetPawn()->GetVelocity().Size2D() < 1.0; });
     Add(TEXT("Fill the crafted watering can from the actual stream"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && !Controller->ToastIsError(); });
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions && !Controller->ToastIsError(); });
     Add(TEXT("Return to the planted garden"),
         [this, Garden]() { Teleport(Garden); },
         [this]() { return Controller->FocusTitle().StartsWith(TEXT("Roots")); }, 0.65f);
@@ -882,7 +882,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
-            return Plot && Plot->moisture > 0.99 && Controller->Simulation().Count(Homestead::Item::Water) == 5
+            return Plot && Plot->moisture > 0.99 && Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions - 1
                 && !Controller->ToastIsError();
         });
     Add(TEXT("Approach the planted berry bush"),
@@ -894,16 +894,16 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         {
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
             return Plot && Plot->kind == Homestead::CropKind::Berries && Plot->moisture > 0.99
-                && Controller->Simulation().Count(Homestead::Item::Water) == 4 && !Controller->ToastIsError();
+                && Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions - 2 && !Controller->ToastIsError();
         });
     Add(TEXT("Return to the stream for a partial-can refill"),
         [RevalidateStreamBank]() { RevalidateStreamBank(); },
         [this]() { return Controller->FocusTitle() == TEXT("Fresh stream water"); }, 0.65f);
-    Add(TEXT("Refilling tops the carried water back up to six"),
+    Add(TEXT("Refilling tops the carried pail up to capacity"),
         [this, RevalidateStreamBank]() { RevalidateStreamBank(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && !Controller->ToastIsError(); });
+        [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions && !Controller->ToastIsError(); });
 
-    // Each rest starts at 22:45, so the bed sleeps her the full eight hours to first light (6:45).
+    // From 22:45, a rested heroine sleeps 7h15 to the 06:00 morning rollover.
     // The skipped evening is not simulated; a scheduled rainy day is simulated before rest 4.
     for (int32 Rest = 0; Rest < 6; ++Rest)
     {
@@ -1001,7 +1001,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         Steps.Last().Skip = [this]() { return Controller->Simulation().Count(Homestead::Item::Water) >= 2; };
         Add(TEXT("Refill the watering can while tending both food crops"),
             [this, RevalidateStreamBank]() { RevalidateStreamBank(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
-            [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && !Controller->ToastIsError(); });
+            [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions && !Controller->ToastIsError(); });
         Steps.Last().Skip = [this]() { return Controller->Simulation().Count(Homestead::Item::Water) >= 2; };
         Add(FString::Printf(TEXT("Inspect the living crop after rest %d"), Rest + 1),
             [this, Garden]() { Teleport(Garden); },

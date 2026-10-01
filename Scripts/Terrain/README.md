@@ -234,7 +234,7 @@ proxies it touched, run `place_water.py` (`EstateLake`, an `AHomesteadWaterPool`
 spatially loaded), `bake_ground.py` + `build_ground.py`, and `bake_estate_map.py` + `ImportEstateMap`.
 
 The pool's shoreline is a closed spline at the water level with scale Y 0: the controller's water probe
-treats its inside as in the water and the pail aims 25 cm inside it. An invisible pawn-only wall 2.2 m in
+treats its inside as in the water and the pail aims 25 cm inside it. An invisible pawn-only wall 3.8 m in
 from the shore (about knee deep) keeps her out of the deep water.
 ### River channel (`river_channel.py`)
 

@@ -233,7 +233,7 @@ bool AHomesteadController::OpenChestStorage(int32 ChestId)
         { Target = &Structure; break; }
     if (!Target)
     { Notify(TEXT("That storage chest is no longer available."), true); return false; }
-    const auto Center = Homestead::StructureCenter(State(), *Target);
+    const auto Center = Homestead::StructureFootprint(State(), *Target).center;
     if (FMath::Square(Center.x - Position.x) + FMath::Square(Center.y - Position.y)
         > FMath::Square(Homestead::ChestReach))
     { Notify(TEXT("Move within 280 cm of this chest."), true); return false; }

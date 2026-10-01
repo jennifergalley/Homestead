@@ -809,8 +809,9 @@ void GameplayWalkthrough()
     CHECK(plotId != -1);
     OK(sim.Plant(plotId, garden));
     OK(sim.FillWater(WaterSource));
-    CHECK(sim.Count(Item::Water) == 6);
+    CHECK(sim.Count(Item::Water) == PailPortions);
     OK(sim.Water(plotId, garden));
+    CHECK(sim.Count(Item::Water) == PailPortions - 1);   // each watering spends one
     GatherUntil(sim, Item::Branch, ResourceKind::Branches, 40);
     GatherUntil(sim, Item::Stone, ResourceKind::Stones, 8);
     OK(sim.GrantItems(Item::BrambleCanes, 15));
@@ -905,12 +906,12 @@ void AtomicTransactions()
     Stock(sim, {{Item::WateringCan, 1}, {Item::Water, 1}, {Item::Stone, 117}});
     CHECK(sim.FillWater({WaterSource.x + 90000, WaterSource.y}).message == "Walk to the river or the lake to fill your pail.");
     OK(sim.FillWater(WaterSource));
-    CHECK(sim.UsedCapacity() == 118);
-    CHECK(sim.Count(Item::Water) == 6);
+    CHECK(sim.UsedCapacity() == 118);   // water takes no pack space
+    CHECK(sim.Count(Item::Water) == 15);
     Stock(sim, {{Item::Knife, 1}, {Item::WateringCan, 1}, {Item::Branch, 112}});
     OK(sim.FillWater(WaterSource));
     CHECK(sim.UsedCapacity() == 114);
-    CHECK(sim.Count(Item::Water) == 6);
+    CHECK(sim.Count(Item::Water) == 15);   // Jenny, 2026-09-30: a pail holds 15, up from 6
     UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
     CHECK(sim.FillWater(WaterSource).message == "Your pail is already full.");
     CHECK(sim.Count(Item::Water) == PailPortions);
@@ -919,7 +920,14 @@ void AtomicTransactions()
     CHECK(sim.Count(Item::WateringCan) == 1);
     UnchangedFailure(sim, [&] { return sim.EmptyPail(); });
     OK(sim.FillWater(WaterSource));
-    CHECK(sim.Count(Item::Water) == 6);
+    CHECK(sim.Count(Item::Water) == 15);
+    // An old save's six-portion pail, part used, loads with its four portions; the next fill tops it to 15.
+    Stock(sim, {{Item::Knife, 1}, {Item::WateringCan, 1}, {Item::Water, 4}});
+    Simulation reloaded;
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(reloaded.Count(Item::Water) == 4);
+    OK(reloaded.FillWater(WaterSource));
+    CHECK(reloaded.Count(Item::Water) == 15);
     Stock(sim, {{Item::Knife, 1}, {Item::Roots, 2}});
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::RoastedRoots, Home); });
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::HerbedRoots, Home); });
@@ -3877,7 +3885,7 @@ void ChestCapacityAndWaterSpace()
     OK(waterSim.GrantItems(Item::Branch, InventoryCapacity - 1));
     CHECK(waterSim.UsedCapacity() == InventoryCapacity);
     OK(waterSim.FillWater(WaterSource));
-    CHECK(waterSim.Count(Item::Water) == 6);
+    CHECK(waterSim.Count(Item::Water) == PailPortions);
     CHECK(waterSim.UsedCapacity() == InventoryCapacity);
 }
 

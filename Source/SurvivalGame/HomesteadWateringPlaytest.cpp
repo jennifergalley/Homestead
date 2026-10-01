@@ -3,6 +3,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadActionTestState.h"
+#include "Simulation/HomesteadCrops.h"
 #include "UI/SHomesteadMenu.h"
 
 bool AHomesteadVisualPlaytest::WalkWaterTarget(FVector2D Target, float Tolerance, float Delta, FVector2D& Move, FVector2D& Look)
@@ -179,7 +180,8 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         if (bWaterInputPending)
         {
             if (WaterStageElapsed < 0.3f) break;
-            if (PC->ToastIsError() || PC->Simulation().Count(Homestead::Item::Water) != 6) { Fail(PC->Toast()); return; }
+            if (PC->ToastIsError() || PC->Simulation().Count(Homestead::Item::Water) != Homestead::PailPortions)
+            { Fail(TEXT("Pail did not fill to capacity.")); return; }
             bWaterInputPending = false;
             ++WaterStage;
             bWaterTargetReady = false;
