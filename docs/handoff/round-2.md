@@ -1236,7 +1236,7 @@ coupling, joint speeds, tool grips, posture/failure rules, review checklist and 
   frames for a 39 cm lifted step. The Inspector may transiently crash at startup with D3D device
   removed; retry once before debugging an animation. In PowerShell, do not name helper functions
   `r` or `n` (aliases are case-insensitive; `R` is `Invoke-History`), and do not embed a Python
-  `\"\"\"` docstring in a double-quoted PowerShell string—use the edit tool or `[char]34`.
+  `"""` docstring in a double-quoted PowerShell string—use the edit tool or `[char]34`.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
