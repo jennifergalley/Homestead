@@ -190,7 +190,9 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
         Descriptor = State.world;
         PreparedChunk = State.activeChunk;
         bTerrainReady = true;
-        return BuildEstateScenery();
+        const bool bScenery = BuildEstateScenery();
+        BuildRoadBridge();
+        return bScenery;
     }
     if (bFixedEstate)
     {

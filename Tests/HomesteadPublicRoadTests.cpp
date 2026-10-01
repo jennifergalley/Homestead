@@ -96,6 +96,168 @@ int main()
         Check(manor->z > 0.0 && town->z > 0.0, "stop heights above the sea");
     }
 
+    // The road follows the ground (Scripts/Terrain/road_grade.py): never steeper than 1 in 5 between its
+    // 4 m points, and no long straight earthwork (the old 1 in 9 clamp ran 250-530 m at one exact grade).
+    {
+        double steepest = 0.0;
+        int straightRun = 0, longestStraight = 0;
+        for (size_t i = 1; i < road.points.size(); ++i)
+        {
+            const double mid = (road.chainage[i] + road.chainage[i - 1]) * 0.5;
+            const double grade = (road.groundZ[i] - road.groundZ[i - 1]) / 100.0 / (road.chainage[i] - road.chainage[i - 1]);
+            if (std::abs(mid - road.bridgeChainage) > road.bridgeHalfAlong) steepest = std::max(steepest, std::abs(grade));
+            const double previous = i > 1 ? (road.groundZ[i - 1] - road.groundZ[i - 2]) / 100.0 / (road.chainage[i - 1] - road.chainage[i - 2]) : 1e9;
+            straightRun = std::abs(grade) > 0.03 && std::abs(grade - previous) < 0.002 ? straightRun + 1 : 0;
+            longestStraight = std::max(longestStraight, straightRun);
+        }
+        Check(steepest <= 0.2005, "road no steeper than 1 in 5", steepest);
+        Check(longestStraight < 20, "no long straight-graded earthwork", longestStraight);
+        // Over the river it holds one level (the bridge deck) either side of the crossing.
+        double lowest = 1e300, highest = -1e300;
+        for (size_t i = 0; i < road.points.size(); ++i)
+            if (std::abs(road.chainage[i] - road.bridgeChainage) <= 5.0)
+            {
+                lowest = std::min(lowest, road.groundZ[i]);
+                highest = std::max(highest, road.groundZ[i]);
+            }
+        Check(highest - lowest < 1.0, "the road is level over the river", highest - lowest);
+    }
+
+    // The road bridge: over the river where the road crosses it, on the road's line and level, clear of
+    // the water, spanning the channel into the keep-out's ramps, a cart's width between its railings.
+    {
+        const PublicRoadBridge& deck = road.deck;
+        Check(deck.valid, "the road has a bridge");
+        const PublicRoad::Nearest onRoad = road.NearestTo(deck.centre);
+        Check(onRoad.distanceCm < 50.0 && std::abs(onRoad.chainage - road.bridgeChainage) < 3.0, "bridge on the road at the crossing",
+            onRoad.distanceCm);
+        const Point ahead = road.At(onRoad.chainage + 2.0), behind = road.At(onRoad.chainage - 2.0);
+        const double roadYaw = std::atan2(ahead.y - behind.y, ahead.x - behind.x) * 180.0 / 3.14159265358979323846;
+        const double turn = std::remainder(deck.yaw - roadYaw, 360.0);
+        Check(std::abs(turn) < 5.0, "bridge along the road toward town", turn);
+        Check(deck.deckZ - deck.waterZ >= 80.0, "deck clear of the water", deck.deckZ - deck.waterZ);
+        Check(deck.waterZ > deck.bedZ, "water over the bed under the bridge", deck.waterZ - deck.bedZ);
+        Check(deck.halfLength >= 400.0 && deck.halfLength <= road.bridgeHalfAlong * 100.0 - 200.0, "deck spans the channel inside the keep-out",
+            deck.halfLength);
+        Check(deck.halfWidth >= 160.0 && deck.halfWidth <= road.bridgeHalfAcross * 100.0, "a cart's width", deck.halfWidth);
+        for (const double side : {-1.0, 1.0})
+        {
+            const Point end = deck.End(side);
+            Check(road.InBridgeKeepOut(end), "deck end in the keep-out");
+            const PublicRoad::Nearest at = road.NearestTo(end);
+            Check(at.distanceCm < 60.0, "deck end on the road's line", at.distanceCm);
+            // The road meets the deck: its graded level at each end is within a small step of the deck.
+            const auto upper = std::upper_bound(road.chainage.begin(), road.chainage.end(), at.chainage);
+            const size_t i = std::clamp<size_t>(static_cast<size_t>(upper - road.chainage.begin()), 1, road.points.size() - 1);
+            const double t = (at.chainage - road.chainage[i - 1]) / (road.chainage[i] - road.chainage[i - 1]);
+            const double level = road.groundZ[i - 1] + (road.groundZ[i] - road.groundZ[i - 1]) * t;
+            Check(std::abs(level - deck.deckZ) < 25.0, "road meets the deck without a step", level - deck.deckZ);
+        }
+        std::printf("bridge: %.1f m long, %.1f m wide, deck %.2f m, %.2f m over the water\n", deck.halfLength / 50.0,
+            deck.halfWidth / 50.0, deck.deckZ / 100.0, (deck.deckZ - deck.waterZ) / 100.0);
+
+        // Saves from the old ford (review, 2026-09-30): a position 1.7 m either way of the channel's centre,
+        // at or below the deck, settles from above the deck's walking slab; dropped things rest on its
+        // planks, not on the river bed; away from the bridge nothing changes.
+        constexpr double HalfHeightCm = 90.0, RadiusCm = 34.0, MarginCm = 30.0;
+        const double radians = deck.yaw * 3.14159265358979323846 / 180.0;
+        for (const double along : {-170.0, 0.0, 170.0})
+            for (const double across : {-120.0, 0.0, 120.0, deck.halfWidth + 40.0})
+            {
+                const Point at{deck.centre.x + std::cos(radians) * along - std::sin(radians) * across,
+                               deck.centre.y + std::sin(radians) * along + std::cos(radians) * across};
+                Check(deck.Covers(at, RadiusCm + MarginCm), "the ford's saves are over the deck", along);
+                const Point on = deck.OntoDeck(at, RadiusCm + 5.0);
+                Check(deck.Covers(on) && Distance(on, at) <= std::max(0.0, std::abs(across) - (deck.halfWidth - RadiusCm - 5.0)) + 0.01,
+                      "settles onto the slab, moved only across", Distance(on, at));
+                for (const double savedZ : {deck.bedZ + 100.0, deck.deckZ - 25.0, deck.deckZ - 30.0 + HalfHeightCm})
+                    Check(deck.ProbeStartZ(on, savedZ, HalfHeightCm + MarginCm, 0.0) >= deck.deckZ + HalfHeightCm,
+                          "the settle probe starts above the slab", savedZ);
+                if (std::abs(across) <= deck.halfWidth)
+                    Check(deck.RestZ(at, deck.bedZ) == deck.deckZ, "a drop on the bridge rests on its planks", along);
+            }
+        const Point away = road.At(road.bridgeChainage + road.bridgeHalfAlong + 30.0);
+        Check(!deck.Covers(away, RadiusCm + MarginCm), "off the bridge is not over it");
+        Check(deck.ProbeStartZ(away, 1234.0, HalfHeightCm + MarginCm, 0.0) == 1234.0, "off the bridge the probe is unchanged");
+        Check(deck.RestZ(away, 1234.0) == 1234.0, "off the bridge a drop rests on the ground");
+    }
+
+    // The town (Scripts/Terrain/town_layout.py; Jenny, 2026-09-29: "bunched too tightly"): an open 60 x 45 m
+    // square, buildings either sharing a party wall or 3 m or more apart, a 5.5 m street from the main road's
+    // end into the square, and the general store's door and counter where the layout's anchors put them.
+    {
+        struct Footprint { std::string name; std::vector<Point> corners; };
+        std::vector<Footprint> footprints;
+        std::vector<Point> street;
+        Point square{};
+        double halfX = 0.0, halfY = 0.0, streetHalf = 0.0;
+        auto townSquare = [&](double x, double y, double hx, double hy) { square = {x * 100.0, y * 100.0}; halfX = hx * 100.0; halfY = hy * 100.0; };
+        auto streetHalfWidth = [&](double metres) { streetHalf = metres * 100.0; };
+        auto streetPoint = [&](double x, double y) { street.push_back({x * 100.0, y * 100.0}); };
+        auto footprint = [&](const char* name, double x0, double y0, double x1, double y1, double x2, double y2, double x3, double y3) {
+            footprints.push_back({name, {{x0 * 100.0, y0 * 100.0}, {x1 * 100.0, y1 * 100.0}, {x2 * 100.0, y2 * 100.0}, {x3 * 100.0, y3 * 100.0}}});
+        };
+#define street streetPoint
+#include "Data/HomesteadTownLayout.inc"
+#undef street
+        const EstateLayout& townLayout = ProvisionalEstateLayout();
+        Check(footprints.size() >= 13 && footprints[0].name == "GeneralStore", "town footprints, the store first", static_cast<double>(footprints.size()));
+        Check(std::abs(2.0 * halfY - 6000.0) < 1.0 && std::abs(2.0 * halfX - 4500.0) < 1.0, "a 60 x 45 m square");
+        const Landmark* squareAnchor = townLayout.FindLandmark(Anchor::TownSquare);
+        Check(squareAnchor && Distance(squareAnchor->position, square) < 1.0, "the square round the TownSquare anchor");
+        auto inSquare = [&](Point p, double margin) { return std::abs(p.x - square.x) < halfX - margin && std::abs(p.y - square.y) < halfY - margin; };
+        for (const Footprint& building : footprints)
+        {
+            for (const Point& corner : building.corners) Check(!inSquare(corner, 1.0), "a building stands in the square");
+        }
+        // Nothing bunched: every pair shares a party wall (<= 15 cm) or leaves a 3 m lane or more.
+        for (size_t i = 0; i < footprints.size(); ++i)
+            for (size_t j = i + 1; j < footprints.size(); ++j)
+            {
+                double nearest = 1e300;
+                for (size_t a = 0; a < 4; ++a)
+                    for (size_t b = 0; b < 4; ++b)
+                    {
+                        nearest = std::min(nearest, PolylineDistance({footprints[j].corners[b], footprints[j].corners[(b + 1) % 4]}, footprints[i].corners[a]));
+                        nearest = std::min(nearest, PolylineDistance({footprints[i].corners[a], footprints[i].corners[(a + 1) % 4]}, footprints[j].corners[b]));
+                    }
+                Check(nearest <= 15.0 || nearest >= 300.0, "buildings bunched (0.15-3 m apart)", nearest);
+            }
+        // The street: from the main road's last point into the square, clear of every wall.
+        Check(street.size() > 20 && Distance(street.front(), road.points.back()) < 100.0, "the street leaves the main road's end");
+        Check(inSquare(street.back(), 50.0), "the street ends in the square");
+        for (const Point& p : street)
+            for (const Footprint& building : footprints)
+            {
+                std::vector<Point> ring = building.corners;
+                const bool inside = PointInPolygon(ring, p);
+                Check(!inside && PolylineDistance(ring, p, true) > streetHalf + 70.0, "the street passes a wall", PolylineDistance(ring, p, true));
+            }
+        // The store: its door on the square's edge facing in, the counter 6 m inside its footprint, and a clear
+        // walk from where the street arrives to the door.
+        const Landmark* door = townLayout.FindLandmark(Anchor::GeneralStoreDoor);
+        const Landmark* counter = townLayout.FindLandmark(Anchor::GeneralStoreCounter);
+        Check(door && counter, "store anchors");
+        if (door && counter)
+        {
+            Check(std::abs(std::abs(door->position.y - square.y) - halfY) < 100.0 && inSquare({door->position.x, square.y}, 0.0), "store door on the square's edge");
+            Check(std::abs(Distance(door->position, counter->position) - 600.0) < 1.0, "counter 6 m in from the door");
+            Check(PointInPolygon(footprints[0].corners, counter->position), "counter inside the store");
+            Check(!PointInPolygon(footprints[0].corners, door->position), "door anchor outside the store");
+            const double facing = std::atan2(counter->position.y - door->position.y, counter->position.x - door->position.x) * 180.0 / 3.14159265358979323846;
+            Check(std::abs(std::remainder(door->yaw - facing, 360.0)) < 1.0 && std::abs(std::remainder(counter->yaw - facing - 180.0, 360.0)) < 1.0,
+                "door faces the counter and the counter the customer");
+            for (int step = 0; step <= 50; ++step)
+            {
+                const double t = step / 50.0;
+                const Point p{street.back().x + (door->position.x - street.back().x) * t, street.back().y + (door->position.y - street.back().y) * t};
+                for (const Footprint& building : footprints) Check(!PointInPolygon(building.corners, p), "a building between the street and the store door");
+            }
+        }
+        std::printf("town: %zu buildings and the store round a %.0f x %.0f m square, street %.0f m\n", footprints.size() - 1,
+            2.0 * halfY / 100.0, 2.0 * halfX / 100.0, static_cast<double>(street.size()));
+    }
+
     // The signs stand on the verge, not the bed, and none in the bridge keep-out.
     Check(road.signs.size() == 3, "three signs", static_cast<double>(road.signs.size()));
     for (const PublicRoadSign& sign : road.signs)
@@ -285,15 +447,15 @@ int main()
         {
             if (!IsFood(placement.kind)) continue;
             food.push_back(placement.position);
-            const bool roadside = placement.id >= PublicRoadsideFirstId && placement.id < PublicRoadsideEndId;
-            if (roadside) ++alongRoad;
+            const bool onRoadside = placement.id >= PublicRoadsideFirstId && placement.id < PublicRoadsideEndId;
+            if (onRoadside) ++alongRoad;
             else if (PointInPolygon(boundary, placement.position))
             {
                 const double fromHome = Distance(placement.position, home);
                 (fromHome < 15000.0 ? manorGrounds : fromHome < 45000.0 ? nearWoods : farEstate) += 1;
             }
             if (!IsMoreFood(placement.id)) continue;
-            if (roadside)
+            if (onRoadside)
             {
                 ++moreRoadside;
                 moreRoadsideRoots += placement.kind == ResourceKind::Roots;
@@ -313,7 +475,7 @@ int main()
             for (const EstatePlacement& other : all)
                 if (other.id != placement.id && IsFood(other.kind))
                     Check(Distance(other.position, p) >= 2000.0, "new food 20 m from other food", placement.id);
-            if (!roadside)
+            if (!onRoadside)
             {
                 Check(PointInPolygon(boundary, p) && PolylineDistance(boundary, p, true) > 590.0, "new estate food inside the boundary", placement.id);
                 Check(road.NearestTo(p).distanceCm > 590.0, "new estate food off the road", placement.id);

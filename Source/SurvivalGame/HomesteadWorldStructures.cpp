@@ -5,6 +5,7 @@
 #include "HomesteadLampLook.h"
 #include "Simulation/HomesteadDoor.h"
 #include "Simulation/HomesteadRoomAudio.h"
+#include "Simulation/HomesteadEstatePublicRoad.h"
 #include "Simulation/HomesteadRuinDebris.h"
 
 #include "Components/AudioComponent.h"
@@ -327,6 +328,9 @@ bool AHomesteadWorld::BuildLampDrop(FHomesteadWorldVisual& Visual, const Homeste
     // Stand it on whatever is underfoot: the terrain outdoors, a floor or hearthstone indoors. Start
     // low enough to miss lintels and roofs, and skip starts inside a wall's collision.
     FVector Base = AtGround(Drop.position.x, Drop.position.y, 0.0f);
+    // On the road bridge the traces start from its deck, not the river bed under it.
+    if (bRoadBridgeBuilt && RoadBridgeVisual.Components.Num() > 0)
+        Base.Z = static_cast<float>(Homestead::EstatePublicRoad().deck.RestZ(Drop.position, Base.Z));
     FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadLampDrop), false, UGameplayStatics::GetPlayerPawn(this, 0));
     for (const float Lift : {90.0f, 45.0f, 15.0f})
     {
@@ -376,7 +380,10 @@ void AHomesteadWorld::BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::
         default: break;
         }
     }
-    const FVector Base = AtGround(Drop.position.x, Drop.position.y, 7);
+    FVector Base = AtGround(Drop.position.x, Drop.position.y, 7);
+    // Dropped on the road bridge: it lies on the planks, not on the river bed under them.
+    if (bRoadBridgeBuilt && RoadBridgeVisual.Components.Num() > 0)
+        Base.Z = static_cast<float>(Homestead::EstatePublicRoad().deck.RestZ(Drop.position, Base.Z - 7.0)) + 7.0f;
     AddPart(Visual, Cylinder, Base, FVector(48, 48, 14), Wood, false);
     AddPart(Visual, Cube, Base + FVector(0, 0, 16), FVector(44, 34, 14), Tint,
         false, FRotator(0, Drop.id * 37 % 360, 8), 0.75f);

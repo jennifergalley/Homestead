@@ -241,6 +241,25 @@ def bake(heights, layout, size, capture=None, scenery=None, seed=7):
         rgb = blend(rgb, [0.28, 0.20, 0.13], line_mask(road, size, 7.0 / metres_per_px + 2.0) * 0.75)
         rgb = blend(rgb, [0.97, 0.93, 0.81], line_mask(road, size, 7.0 / metres_per_px) * 0.95)
 
+    # The town (town_layout.py): its open square and street in the road's colours, the buildings as blocks.
+    town = layout.get("town")
+    if town:
+        sq = town["square"]
+        (cx, cy), hx, hy = sq["centre"], sq["halfX"], sq["halfY"]
+        square = polygon_mask([(cx - hx, cy - hy), (cx + hx, cy - hy), (cx + hx, cy + hy), (cx - hx, cy + hy)], size)
+        street = line_mask(town["street"], size, 2 * town["streetHalfWidth"] / metres_per_px)
+        rgb = blend(rgb, [0.28, 0.20, 0.13], np.clip(ndimage.grey_dilation(np.maximum(square, street), size=3) - np.maximum(square, street), 0, 1) * 0.6)
+        rgb = blend(rgb, [0.97, 0.93, 0.81], np.maximum(square, street) * 0.95)
+        blocks = [town["store"]["footprint"]]
+        for b in town["buildings"]:
+            t = np.radians(b["yaw"])
+            out, along = np.array([np.cos(t), np.sin(t)]), np.array([-np.sin(t), np.cos(t)])
+            front = np.array([b["x"], b["y"]])
+            blocks.append([front + along * a + out * d for a, d in ((-b["width"] / 2, 0), (b["width"] / 2, 0),
+                                                                  (b["width"] / 2, b["depth"]), (-b["width"] / 2, b["depth"]))])
+        for block in blocks:
+            rgb = blend(rgb, [0.36, 0.33, 0.30], polygon_mask(block, size) * 0.9)
+
     # Darken the far edges of the sheet slightly, like an old estate plan.
     yy, xx = np.mgrid[0:size, 0:size] / (size - 1.0) * 2.0 - 1.0
     edge = np.clip((np.maximum(np.abs(xx), np.abs(yy)) - 0.86) / 0.14, 0.0, 1.0)
