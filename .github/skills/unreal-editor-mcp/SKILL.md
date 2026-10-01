@@ -1016,6 +1016,15 @@ Extend it there when play needs a capability; prefer real input over state edits
   **every** top-level window belonging to the child PID—not only an `UnrealWindow` class—and sample
   the foreground PID from launch to prove it never stole focus. `-nosound` suppresses
   `ActiveSound` logs, so never use audio logs as an acceptance gate in a run that passes it.
+- **Copied-save F5/F9 and RT-on night evidence:** `-RenderOffscreen -WindowStyle Hidden` can load an
+  isolated copy of an Estate save and emit `SAVE_LOAD_AUDIT`, but it has no top-level HWND. It cannot
+  receive physical-source F5/F9 input or provide a normal window capture. For those checks, launch
+  the owned package with `-windowed -WindowStyle Hidden` **without** `-RenderOffscreen`, retain the
+  job-object/per-PID window-hide/foreground guard above, and post `GameWin::Key(VK_F5)` /
+  `GameWin::Key(VK_F9)` to that owned hidden HWND. Verify matching before/after
+  `SAVE_LOAD_AUDIT` hashes and unchanged hashes for every original backup before calling copied-save
+  preservation proven. `HomesteadMorning 21` plus `shot showui` from the same hidden owned window
+  captures actual RT-on night without focusing or modifying Jenny's desktop session.
 - **UI at real resolutions and DPI (standalone window, not PIE):** launch
   `UnrealEditor.exe "<worktree>\SurvivalGame.uproject" /Game/SurvivalGame/Maps/Estate -game -windowed
   -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720; for 4K use `-fullscreen` instead of
