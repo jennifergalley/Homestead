@@ -30,14 +30,14 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
   sends `[ready]` instead; see "Delivering lane work" in `docs/handoff/README.md`), then report what
   to try. Don't batch several improvements into one delivery. Packaging now follows the playtest
   schedule below rather than every improvement.
-- **Playtest builds on a schedule** (Jenny, standing preference). A packaged build must be on the
-  "Homestead Estate" desktop shortcut by **7:30 AM every day** (weekends too) and by **4:00 PM on
-  weekdays**, after her work. On weekends, also cut one as soon as features she'd notice land. The
-  orchestrator triggers the integration session at about 5:30 AM and 2:00 PM. It packages `main`,
-  runs the packaged suites, retargets the shortcut (keeping the Homestead icon) and reports
-  `[playtest] ready @ <sha>` with what's new and what to try. Lanes close their editors while a
-  build is being cut. If packaging or the suites fail, the last good build stays on the shortcut.
-  **`main` must stay playable:** push only verified work.
+- **Playtest builds on a schedule** (Jenny, 2026-09-30). Two Estate builds are cut every day:
+  **morning** is on the "Homestead Estate" shortcut by **7:30 AM** (freeze 4:30 AM; Integration
+  gets its exclusive slot at 5:00 AM), and **evening** is ready by **9:00 PM** (freeze 6:00 PM;
+  Integration gets its exclusive Unreal slot at 6:30 PM). At either freeze, only work already
+  UE-verified and code-reviewed is admitted; everything else waits for the next build. Integration
+  merges, runs UBT/suites, makes the Shipping acceptance check and retargets the shortcut while
+  preserving its icon. Lanes close editors during the build. If verification fails, the last good
+  build stays on the shortcut. **`main` must stay playable:** push only verified work.
 - **When Jenny pauses development to play,** every session stops launching editors and builds until
   she says to resume. Finish or park your current step, close your editor, and wait by ending your
   turn (see "Waiting means ending your turn" below).

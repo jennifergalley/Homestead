@@ -503,8 +503,11 @@ The design's "Lanes and ownership" table is authoritative. In short:
 - **`SimulationSaveVersion` is bumped once, at final integration** (design §10: `Plot::withered`, the new
   enum values, gate state, the second shop, `dayMinutes`). Lanes never bump it; tell the orchestrator
   before your `[ready]` if you add to the save format.
-- **Playtest builds** on the "Homestead Estate" shortcut by 7:30 AM daily and 4:00 PM on weekdays
-  (`docs\handoff\README.md`, "Playtest builds"). `main` must stay playable.
+- **Playtest builds** on the "Homestead Estate" shortcut twice daily: 7:30 AM (freeze 4:30 AM;
+  Integration slot 5:00 AM) and 9:00 PM (freeze 6:00 PM; Integration slot 6:30 PM). At freeze,
+  only UE-verified, code-reviewed work enters; the rest waits for the next slot
+  (`docs\handoff\README.md`, "Playtest builds"). `main` must stay playable. The first evening
+  build is October 1, 2026.
 - **Jenny's playtest feedback takes priority** over round-2 lane work.
 - **Launching with ray tracing off:** `Start-EditorMcp.ps1` also turns virtual shadow maps off; any other
   RT-off launch must too, or a new Estate game hangs the GPU (editor skill, table 0.1).
