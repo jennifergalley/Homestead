@@ -261,6 +261,13 @@ int main()
     for (const CoveRouteKerb& k : route.kerbs)
         Check(clearAlong(k.position, k.yaw, -50.0, 50.0) >= 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
               "a kerb clear of the path along its length", clearAlong(k.position, k.yaw, -50.0, 50.0));
+    // Each designed kerb left out (cove_route.py keeps "designKerbs") really reaches into the clear width, so a
+    // kerb dropped wrongly from a line's end, or two together, fails here though no short hole shows (review,
+    // 2026-09-30). At this design: the three at the bench steps' hairpin.
+    for (const CoveRouteKerb& k : route.droppedKerbs)
+        Check(clearAlong(k.position, k.yaw, -50.0, 50.0) < 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
+              "a dropped kerb reaches into the clear width", clearAlong(k.position, k.yaw, -50.0, 50.0));
+    Check(route.droppedKerbs.size() == 3, "the hairpin's three kerbs dropped", static_cast<double>(route.droppedKerbs.size()));
     for (const CoveRouteRail& r : route.rails)
         if (r.pitch == 0.0)
             Check(clearAlong(r.position, r.yaw, 0.0, r.length) >= 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
@@ -301,6 +308,37 @@ int main()
                 const double gap = along[i] - along[i - 1];
                 Check(gap < 1.6 || gap >= 3.0, "no short hole in a kerb line", along[i - 1]);
             }
+        }
+        // A kerb wherever the graded ground clearly falls away beside a path (cove_route.py edges() probes
+        // CLEAR_HALF_M + SIDE_PROBE_M out for KERB_DROP_M 0.45 m), unless one there would reach into the clear
+        // width (the hairpin's dropped ones). The hole check above can't see a kerb dropped from a line's end
+        // or two dropped together (review, 2026-09-30).
+        if (route.ground.size() == route.stations.size())
+        {
+            constexpr double ClearDropCm = 50.0;   // KERB_DROP_M plus room for the grading since design
+            constexpr size_t Around = 1;           // the drop holds a metre either side, inside a run (MIN_RUN_M 3 m)
+            int required = 0;
+            for (size_t i = Around; i + Around < route.stations.size(); ++i)
+                for (const int side : {1, -1})
+                {
+                    bool falls = true;
+                    for (size_t j = i - Around; j <= i + Around && falls; ++j)
+                        falls = !route.stations[j].onSteps && route.stations[j].walkZ
+                            - (side > 0 ? route.ground[j].plusYOutZ : route.ground[j].minusYOutZ) > ClearDropCm;
+                    if (!falls) continue;
+                    const CoveRouteStation& s = route.stations[i];
+                    const Point a = route.stations[i - 1].position, b = route.stations[i + 1].position;
+                    const double heading = std::atan2(b.y - a.y, b.x - a.x);
+                    const double offset = side * 0.5 * CoveRouteClearWidthCm;
+                    const Point would{s.position.x - std::sin(heading) * offset, s.position.y + std::cos(heading) * offset};
+                    const double yaw = heading * 180.0 / 3.14159265358979323846 + (side > 0 ? 0.0 : 180.0);
+                    if (clearAlong(would, yaw, -50.0, 50.0) < 0.5 * CoveRouteClearWidthCm - ClearMarginCm) continue;
+                    ++required;
+                    const bool kerbed = std::any_of(placed.begin(), placed.end(), [&](const Placed& p)
+                        { return p.side == side && std::fabs(p.metres - s.metres) <= 1.0; });
+                    Check(kerbed, "a kerb where the ground falls away beside the path", s.metres);
+                }
+            Check(required >= 60, "kerb coverage checked along the falling stretches", required);
         }
     }
     for (const CoveRouteKerb& k : route.kerbs)

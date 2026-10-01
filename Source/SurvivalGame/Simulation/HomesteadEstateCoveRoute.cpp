@@ -54,8 +54,8 @@ const CoveRoute& EstateCoveRoute()
         auto station = [&](double x, double y, double walk, double bed, double metres, int steps) {
             route.stations.push_back({{x, y}, walk, bed, metres, steps != 0});
         };
-        auto ground = [&](double metres, double left, double centre, double right) {
-            route.ground.push_back({metres, left, centre, right});
+        auto ground = [&](double metres, double left, double centre, double right, double plusY, double minusY) {
+            route.ground.push_back({metres, left, centre, right, plusY, minusY});
         };
         auto flight = [&](double x, double y, double z, double yaw, double rise, double going, int treads, double pitch) {
             route.flights.push_back({{x, y}, z, yaw, rise, going, treads, pitch});
@@ -70,6 +70,7 @@ const CoveRoute& EstateCoveRoute()
             route.landings.push_back({{x, y}, z, yaw, length});
         };
         auto kerb = [&](double x, double y, double z, double yaw) { route.kerbs.push_back({{x, y}, z, yaw}); };
+        auto droppedKerb = [&](double x, double y, double z, double yaw) { route.droppedKerbs.push_back({{x, y}, z, yaw}); };
         auto rail = [&](double x, double y, double z, double yaw, double pitch, double length, int mirrored) {
             route.rails.push_back({{x, y}, z, yaw, pitch, length, mirrored != 0});
         };

@@ -76,6 +76,9 @@ struct CoveRouteGround
     double leftZ = 0.0;
     double centreZ = 0.0;
     double rightZ = 0.0;
+    // Further out, where the generator probes for a drop beside the path (kerbs, rails): its +Y and -Y sides.
+    double plusYOutZ = 0.0;
+    double minusYOutZ = 0.0;
 };
 
 // The graded ground just beyond a flight's foot and head (cove_route.py's END_SAMPLE_M along its axis, on the
@@ -113,6 +116,8 @@ struct CoveRoute
     std::vector<CoveRouteLanding> landings;
     std::vector<CoveRouteCorner> corners;
     std::vector<CoveRouteKerb> kerbs;
+    // Designed kerbs left out because they'd reach into the clear width (never placed; the tests check each).
+    std::vector<CoveRouteKerb> droppedKerbs;
     std::vector<CoveRouteRail> rails;
     std::vector<CoveRouteFingerpost> fingerposts;
 
