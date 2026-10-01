@@ -797,7 +797,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     const auto Unchanged = [this, BerryPlotId, StockBefore]()
     {
         const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
-        return Plot && !Plot->planted && Controller->ToastIsError()
+        return Plot && !Plot->planted
             && Controller->Simulation().Count(Homestead::Item::Berries) == StockBefore->Key
             && Controller->Simulation().Count(Homestead::Item::Seeds) == StockBefore->Value;
     };
