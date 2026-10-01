@@ -76,6 +76,12 @@ BODY = {
     'rock': ((0, 5, -13), -2, 26), 'recover': ((0, 3, -8), 0, 10), 'end': ((0, 0, 0), 0, 0),
 }
 TWIST_SIGN = af.TWIST_SIGN
+# Each fist's roll on the haft (deg, as axe_fell.KNOB_ROLL / ROLL_R). Unrolled, both wrists folded 72-117
+# degrees back on the forearms; rolled, the knob hand stays at 23-56 and the right at 22-70. The knob's is constant because
+# the game reads the point's direction from its knuckles (KnobRollDegrees in HomesteadCharacterEquipment.cpp).
+KNOB_ROLL = 90.0
+ROLL_R = {'address': -15.0, 'lift': -75.0, 'back': -75.0, 'strike': -45.0, 'bite': -45.0, 'rock': -45.0,
+          'recover': -30.0}
 FOOT_L_FORWARD = (15.0, 12.0, 8.6)
 FOOT_R_BACK = (-15.0, -6.0, 8.6)
 
@@ -129,9 +135,10 @@ def build():
         centre, haft, slide = GRIP[name]
         h = af._norm(haft)
         e = edge_for(h)
-        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist(centre, h, e), left.turn(h, e))
+        e_l, e_r = af.rolled(e, h, KNOB_ROLL), af.rolled(e, h, ROLL_R[part])
+        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist(centre, h, e_l), left.turn(h, e_l))
         top = af._vec(centre) + h * slide
-        s.key_world(frame, 'hand_r_ik_ctrl', right.wrist((top.x, top.y, top.z), h, e), right.turn(h, e))
+        s.key_world(frame, 'hand_r_ik_ctrl', right.wrist((top.x, top.y, top.z), h, e_r), right.turn(h, e_r))
     s.key_world(F['stand'], 'foot_l_ik_ctrl', kg.FOOT_L)
     s.key_world(5, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (1, 7, 6)))
     s.key_world(F['address'], 'foot_l_ik_ctrl', FOOT_L_FORWARD)
