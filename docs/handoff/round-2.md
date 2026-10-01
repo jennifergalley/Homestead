@@ -1096,14 +1096,25 @@ requirement.
   Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
   two-swing clearing animation and awards/clears once, without a second click or double reward.
   Architecture traces tool tier, input and reward paths before native/PIE proof.
-- **Animation anatomy and inspection** — **Props overnight research, pending and unshipped.** Jenny
-  directed a `realistic-animation` repo skill with a MetaHuman per-joint anatomy/range-of-motion
-  table, review checklist, ROM checks in `report()` and an audit of heroine clips. Its planned
-  Animation Inspector is the animation counterpart to the UI Gallery: deterministic frame-by-frame
-  multi-view captures with ROM, contact and centre-of-mass overlays, exposed through
-  `Scripts\Inspect-Animation.ps1` and `editor_mcp animinspect`. Cross-link the resulting
-  `realistic-animation` and Animation Inspector from `blender-assets` only after they land; until
-  then this is a research/tooling direction, not an animation acceptance claim.
+- **Animation anatomy and inspection** — **Props source-only `ded05f62`, not on `main`.** It adds
+  `.github/skills/realistic-animation/` with MetaHuman per-joint comfortable/extreme ROM tables,
+  coupling, joint speeds, tool grips, posture/failure rules, review checklist and sources.
+  `rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` now runs
+  `joint_limits.py` after every bake and logs advisory `[anatomy AN_...]` lines; errors never block
+  a bake. `anim_audit.run()` writes a whole-cast report to
+  `E:\CopilotScratch\anim-audit\<stamp>\audit.md`. It also contains
+  `add-realistic-animation-skill` and cross-links from `homestead-animation-layer` / `blender-assets`
+  on the branch.
+
+  Rig facts for future inspection: twist/corrective upperarm/lowerarm/thigh/calf bones are RigLogic
+  followers in `ABP_Body_PostProcess`, not keyable/limited joints; fingers have
+  `*_metacarpal_*` bones between hand and `*_01`; the reference A-pose is not anatomical shoulder
+  zero; judge angles in UE component space (+Y forward, +X her left, +Z up), never Blender armature
+  axes. The planned Animation Inspector remains the animation counterpart to the UI Gallery:
+  deterministic frame-by-frame multi-view captures with ROM, contact and centre-of-mass overlays,
+  via `Scripts\Inspect-Animation.ps1` and `editor_mcp animinspect`. Cross-link it from canonical
+  `blender-assets` only after this branch lands and validates; none of this is animation acceptance
+  evidence yet.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
