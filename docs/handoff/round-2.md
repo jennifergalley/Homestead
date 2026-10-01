@@ -812,11 +812,11 @@ receipt.**
 
   **Bed interaction `15227420`:** source-only in the same next batch. Simulation and focus share a
   90 cm footprint-edge / 30° half-cone admission so the bed loses to every existing focus target.
-  E/A opens a concise parchment confirmation—`Sleep until morning?` with Sleep/Cancel—then
-  revalidates id and revision. First press never advances time; cancel/refusal writes no save.
-  Native tests cover reach, facing, chest priority and confirmation, while FullLoop asserts first
-  press/no hour change, cancel, then explicit confirmation. UE, PIE, packaged and delivery evidence
-  remain pending.
+  Jenny superseded its confirm/picker at 22:46: E/A immediately sleeps until Energy is full, capped
+  at 06:00 when overnight; if already rested at night it sleeps until 06:00; a rested daytime bed
+  has no verb. There is no context dialog, Cancel or nap-hours picker. Integration is implementing
+  this replacement; prior `15227420` confirmation tests do not accept it. UE, PIE, packaged and
+  delivery evidence remain pending.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
