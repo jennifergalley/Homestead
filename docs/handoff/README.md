@@ -227,24 +227,30 @@ only retained MVP archive reference. The retained
 
 ## Playtest builds (schedule)
 
-Jenny's standing preference. A packaged playtest build is on the **"Homestead Estate"** desktop
-shortcut by **7:30 AM every day** (weekends included) and by **4:00 PM on weekdays**, after her work.
-On weekends, also cut one as soon as features she'd notice land.
+Jenny's standing preference (2026-09-30): two packaged Estate builds every day.
 
-1. The orchestrator triggers the integration session at about **5:30 AM** and **2:00 PM** (its session
-   automation), and tells lanes a build is being cut.
-2. Lanes close their editors (`Stop-MyEditor.ps1`) until the build is done: packaging needs the
-   process slots.
-3. The integration session packages `main` (`Build-Game.ps1 -Package`), runs the packaged suites, and
+| Slot | Freeze | Integration exclusive slot | Shortcut ready |
+| --- | --- | --- | --- |
+| Morning | 4:30 AM | 5:00 AM | 7:30 AM |
+| Evening | 6:00 PM | 6:30 PM | 9:00 PM |
+
+At either freeze, only work that is already **UE-verified and code-reviewed** enters the build;
+everything else waits for the next slot. The first evening build under this policy is October 1,
+2026 (the 9 PM window on September 30 had already passed).
+
+1. The orchestrator notifies lanes at the freeze; lanes close their editors
+   (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.
+2. The integration session merges admitted `main` work, runs UBT and packaged suites, makes the
+   Shipping acceptance check, and
    retargets the shortcut to its `Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
    keeping the Homestead icon. `Homestead Estate.lnk` is the only active desktop game shortcut.
    **Before retargeting to a new package folder, copy Jenny's saves and settings across:** packaged
    Development builds keep them inside the package (`<package>\SurvivalGame\Saved\SaveGames`, with an
    `Estate\` subfolder, and `Saved\Config`). Copy both from the old package into the new one, or she
    loses her game.
-4. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
+3. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
    orchestrator relays that to Jenny.
-5. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
+4. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
 
 Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.
 This replaces the old "package after every improvement" step of the Interactive Loop.
