@@ -1,0 +1,236 @@
+{
+  "schema": 1,
+  "name": "CoveKerb",
+  "description": "Split granite edge kerbs: 1 m straight, 1 m 15-degree curve, 0.5 m end (original). Pivot on the path-side top edge, +X along the path, +Y to the drop.",
+  "collision": "box",
+  "triangle_budget": 13000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/cove_kerb.py",
+  "source_sha256": "54beb7348545ed65e2db5952cc1f5888dd0532dba182f599c4d5824cdcce4a86",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_CoveKerb_Straight": {
+      "vertices": 6145,
+      "triangles": 12286,
+      "size_cm": [
+        99.33,
+        15.25,
+        30.22
+      ],
+      "materials": [
+        {
+          "name": "M_CoveKerb_Straight",
+          "textures": {
+            "basecolor": "T_CoveKerb_Straight_basecolor.png",
+            "roughness": "T_CoveKerb_Straight_roughness.png",
+            "normal": "T_CoveKerb_Straight_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveKerb_Straight_basecolor.png",
+          "roughness": "T_CoveKerb_Straight_roughness.png",
+          "normal": "T_CoveKerb_Straight_normal.png",
+          "ao": "T_CoveKerb_Straight_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          30
+        ],
+        "focus": [
+          0.0,
+          0.07,
+          -0.1
+        ]
+      },
+      "fbx": "SM_CoveKerb_Straight.fbx",
+      "sha256": "d874e9fefdba0752556ae65955f66118bad5fbe072494d033d2edf630d260b80",
+      "preview": "preview_SM_CoveKerb_Straight.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveKerb_Straight_hero.png",
+          "detail": "beauty_SM_CoveKerb_Straight_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          30
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveKerb_Curve15": {
+      "vertices": 6146,
+      "triangles": 12288,
+      "size_cm": [
+        100.51,
+        18.16,
+        30.23
+      ],
+      "materials": [
+        {
+          "name": "M_CoveKerb_Curve15",
+          "textures": {
+            "basecolor": "T_CoveKerb_Curve15_basecolor.png",
+            "roughness": "T_CoveKerb_Curve15_roughness.png",
+            "normal": "T_CoveKerb_Curve15_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveKerb_Curve15_basecolor.png",
+          "roughness": "T_CoveKerb_Curve15_roughness.png",
+          "normal": "T_CoveKerb_Curve15_normal.png",
+          "ao": "T_CoveKerb_Curve15_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          30
+        ],
+        "focus": [
+          0.0,
+          0.07,
+          -0.1
+        ]
+      },
+      "fbx": "SM_CoveKerb_Curve15.fbx",
+      "sha256": "73d8501ed01005f079456dd7cd134c324cdc4c3a717a555416f3516bb2db737f",
+      "preview": "preview_SM_CoveKerb_Curve15.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveKerb_Curve15_hero.png",
+          "detail": "beauty_SM_CoveKerb_Curve15_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          30
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveKerb_End": {
+      "vertices": 6146,
+      "triangles": 12288,
+      "size_cm": [
+        49.37,
+        15.22,
+        30.17
+      ],
+      "materials": [
+        {
+          "name": "M_CoveKerb_End",
+          "textures": {
+            "basecolor": "T_CoveKerb_End_basecolor.png",
+            "roughness": "T_CoveKerb_End_roughness.png",
+            "normal": "T_CoveKerb_End_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveKerb_End_basecolor.png",
+          "roughness": "T_CoveKerb_End_roughness.png",
+          "normal": "T_CoveKerb_End_normal.png",
+          "ao": "T_CoveKerb_End_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          30
+        ],
+        "focus": [
+          0.0,
+          0.07,
+          -0.1
+        ]
+      },
+      "fbx": "SM_CoveKerb_End.fbx",
+      "sha256": "15cb12ea72b2234a274e1d3220ae1f65709fd95876fd0a9b2488e15fc6564d0b",
+      "preview": "preview_SM_CoveKerb_End.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveKerb_End_hero.png",
+          "detail": "beauty_SM_CoveKerb_End_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          30
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "pivot": "path-side top edge at the centre; +X along the path, +Y to the drop",
+  "proud_m": 0.2,
+  "bedded_m": 0.1,
+  "thick_m": 0.15,
+  "textures": {
+    "T_CoveKerb_Straight_basecolor.png": "27b10246b9bc04ba343efa8450216fd082c7ca20034781f17044f8a17094bd52",
+    "T_CoveKerb_Straight_roughness.png": "cedfa71c773123bd8a4182ee60f1bd86778cc3e66d57464c82e388f1cdfdc31d",
+    "T_CoveKerb_Straight_normal.png": "b36e6c1cca5fc487679e0c23cb759ff03c58b88929c621f57f75be53d411f816",
+    "T_CoveKerb_Curve15_basecolor.png": "dd803b3808cb527759327da811570a2f3e0bb417ca78b9d86eea3d8924eeebfd",
+    "T_CoveKerb_Curve15_roughness.png": "228dec41e1322f6abc53118f8e74c4c8504c92e48bb71fd55ee253dabcbd9e61",
+    "T_CoveKerb_Curve15_normal.png": "5408cdca19f029bc86118a19a1ab76113bc7730f4116049c661828a2f33c2956",
+    "T_CoveKerb_End_basecolor.png": "6d89a0a2145adae03a486e2809b38a73d8016712c35608220d448555a48bc6cf",
+    "T_CoveKerb_End_roughness.png": "15e6761f5f72e5157a6ef96b990ae15af691e0eb2eb822153ec098878fb9ac14",
+    "T_CoveKerb_End_normal.png": "b811005667fb1d45b2506f29faa6d5e829c632e9f3abd1028aa08c334e2ee63f"
+  }
+}
