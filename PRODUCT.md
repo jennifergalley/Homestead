@@ -48,6 +48,11 @@ Menus and construction planning pause simulation. No online gameplay services.
 - Preserve progress reliably.
 - Keep repeated tool work immediate through a visible ten-slot carried-tool hotbar, with
   mouse/keyboard and controller parity.
+- **Respect farming-sim fluency.** Assume the player knows the genre: UI is concise rather than
+  instructional. No toasts for obvious outcomes; focus cards show only a name and keyed verbs;
+  details/tooltips show stats, requirements and price rather than rules explanations; settings show
+  a label and value; refusals are short (about 4–6 words). Review new copy against this principle
+  before it ships.
 - Ship small playable increments. Don't build the entire roadmap at once.
 
 ## Evidence and constraints
