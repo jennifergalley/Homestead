@@ -115,8 +115,8 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   disk rules in `~\.copilot\copilot-instructions.md`.
 - **Jenny's playable build.** `Homestead Estate.lnk` is the only active game shortcut; Integration
   retargets it only after save-safety and package checks. Jenny retired the survival MVP at
-  `archive/mvp-survival-20260930` (`93612cdf`); leave its retained
-  `E:\Repos\HomesteadMVP` archive untouched. Do not confuse the active
+  `archive/mvp-survival-20260930` (`93612cdf`); its old package, saves and retired shortcut backup
+  were deleted with her approval, leaving the Git tag as the only MVP archive reference. Do not confuse the active
   `jennifergalley-mvp-woodland-biome` Estate Seasons handoff (`b19a0ad0`) with the retired line.
 - **Saves.** Lanes never change `SimulationSaveVersion`; the orchestrator bumps it once per
   integration. It's **13** (stocks carry their width; v12 saves migrate; version 11 is refused with a reset notice;
@@ -176,6 +176,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Editor startup hangs with no log output after `Waiting for ZenServer to be ready`; a native "Wait for ZenServer?" Yes/No dialog is up | The log shows `Found existing instance running on port 8558 with different data directory, will attempt shutdown`: this worktree's `DerivedDataCache\Zen` differs from the running zenserver, so the editor restarts zenserver on its own data dir. That can also pull Zen out from under another worktree's editor | `Start-EditorMcp.ps1` now answers Yes automatically while it waits (it sends the dialog's `IDC_YES` command). By hand: find the window titled "Wait for ZenServer?" for the editor PID with `EnumWindows` and post `WM_COMMAND` 1003 to it (UIA Invoke isn't available). Warn other lanes if you see the shutdown line. |
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
+| PIE says `pie:true` but has no `worldReady`/location/control yaw, the viewport is black, and `shot` says `Failed to capture any editor windows` | The editor main window is minimized (`IsIconic`), so PIE never brings up the world despite the session starting | Restore the editor window, then restart PIE: use `ShowWindow((Get-Process -Id <editor-pid>).MainWindowHandle, 4)`, then `unpie; pie`. Verify `worldReady` and pawn spawn before testing. |
 | The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
 | `hshot` / `HighResShot` captures come out black | The editor window is minimised | Keep it restored (it can be behind other windows). |
 | On the first PIE after launch, a floating "Message Log" window (Asset Check, Map Check, Localization Service) covers PIE in `shot` captures | The editor reports load-time checks | Close it: post `WM_CLOSE` to the editor-PID window titled "Message Log", or `click` its X (scale capture coordinates; see the helper table). `hshot` (HighResShot) isn't affected. |

@@ -219,8 +219,9 @@ Integration merge notes:
 
 **Estate-only delivery (Jenny, 2026-09-30):** `Homestead Estate.lnk` is the only active game
 shortcut. The retired survival MVP is archived at
-`archive/mvp-survival-20260930` (`93612cdf`); its `E:\Repos\HomesteadMVP` package and saves are
-preserved archive data, not a packaging target. The retained
+`archive/mvp-survival-20260930` (`93612cdf`); Jenny approved deletion of its
+`E:\Repos\HomesteadMVP` package/saves and the retired shortcut backup, leaving the Git tag as the
+only retained MVP archive reference. The retained
 `jennifergalley-mvp-woodland-biome` branch is Water's active Estate Seasons handoff
 (`b19a0ad0`), despite its historical name.
 

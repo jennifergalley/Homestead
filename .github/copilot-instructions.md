@@ -134,8 +134,9 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   (`Scripts\Stop-MyEditor.ps1` closes only this worktree's editor).
 - **Estate-only delivery (Jenny, 2026-09-30):** `Homestead Estate.lnk` is the only active game
   shortcut and is retargeted by Integration only after its save-safety and package checks. The
-  survival MVP was retired at tag `archive/mvp-survival-20260930` (`93612cdf`); its retained
-  `E:\Repos\HomesteadMVP` package/saves are archive data, not a delivery target. The
+  survival MVP was retired at tag `archive/mvp-survival-20260930` (`93612cdf`); its old package,
+  saves and desktop shortcut backup were deleted with Jenny's approval, leaving the Git tag as
+  the only MVP archive reference. The
   `jennifergalley-mvp-woodland-biome` branch is **not** the retired line: it is Water's active
   Estate Seasons handoff (`b19a0ad0`).
 - No worktrees, builds, renders, videos or big binaries on C:. See the user-level disk rules.
