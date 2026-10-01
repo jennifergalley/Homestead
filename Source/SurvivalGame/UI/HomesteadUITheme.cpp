@@ -10,15 +10,17 @@
 namespace HomesteadUIThemeTuning
 {
 // Paper for the lightest and the darkest classic surfaces (list plates read lighter, selections darker).
+// Contrast (WCAG relative luminance): PaperLight ~0.64, PaperDark ~0.48; ink ~0.02, MutedInk ~0.07 and
+// Accent ~0.06 keep body text and labels at 4.5:1 or better on both (Orchestrator review, 2026-09-30).
 const FLinearColor PaperLight(0.70f, 0.62f, 0.45f, 1.0f);
-const FLinearColor PaperDark(0.46f, 0.38f, 0.24f, 1.0f);
+const FLinearColor PaperDark(0.56f, 0.47f, 0.31f, 1.0f);
 // Classic surface luminance mapped across that range (pine panels sit near 0.08).
 constexpr float SurfaceDark = 0.03f, SurfaceSpan = 0.12f, SurfaceTop = 0.3f;
 // A translucent pine panel becomes near-opaque paper; nearly transparent fills stay faint.
 constexpr float PaperMinAlpha = 0.98f, FaintAlpha = 0.3f;
 // Text: the brightest becomes full ink, secondary text muted ink.
-const FLinearColor MutedInk(0.16f, 0.11f, 0.065f, 1.0f);
-const FLinearColor Accent(0.34f, 0.11f, 0.03f, 1.0f);
+const FLinearColor MutedInk(0.10f, 0.07f, 0.04f, 1.0f);
+const FLinearColor Accent(0.16f, 0.035f, 0.01f, 1.0f);
 constexpr float MutedBelow = 0.86f;
 // The serif's x-height is small: the same point size reads about this much smaller than the sans.
 constexpr float SerifScale = 1.12f;

@@ -458,7 +458,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     if (Cues.IsEmpty()) return 0;
     // The words are the notices' EB Garamond (as the toast and the book's card); the key and pad
     // glyphs stay in the crisp sans on their pine stamps.
-    constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 8, Space = 9;
+    constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 11, Space = 9;
     const auto KeyWidth = [this](const FString& Key) { bNoticeText = false; const float W = TextWidth(Key, KeySize); bNoticeText = bThemeSerif; return W; };
     const auto WordsWidth = [this](const FString& Words, float WordsSize) { bNoticeText = true; const float W = TextWidth(Words, WordsSize); bNoticeText = bThemeSerif; return W; };
     // Key and pad glyphs: a pine stamp with brass lettering in either theme, in the crisp sans.

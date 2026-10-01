@@ -81,7 +81,7 @@ TSharedRef<SWidget> SHomesteadShop::Button(const FString& Text, TFunction<void()
     [
         SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(14, 8))
         .HAlign(HAlign_Center)
-        .ButtonColorAndOpacity(bPrimary ? ShopGold : FLinearColor(0.10f, 0.16f, 0.12f, 1))
+        .ButtonColorAndOpacity(bPrimary ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
         .OnClicked_Lambda([Action]() { Action(); return FReply::Handled(); })
         [
             SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 15))
@@ -414,7 +414,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
         return SNew(SBox).MinDesiredWidth(150)
         [
             SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(16, 7)).HAlign(HAlign_Center)
-            .ButtonColorAndOpacity(Tab == Index ? ShopGold : FLinearColor(0.10f, 0.16f, 0.12f, 1))
+            .ButtonColorAndOpacity(Tab == Index ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
             .OnClicked_Lambda([this, Index]() { SetTab(Index); return FReply::Handled(); })
             [
                 SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 17))
@@ -475,7 +475,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 12, 0, 0)
                 [
                     SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                    .BorderBackgroundColor(FLinearColor(0.04f, 0.07f, 0.055f, 0.95f)).Padding(FMargin(14, 10))
+                    .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.04f, 0.07f, 0.055f, 0.95f))).Padding(FMargin(14, 10))
                     [
                         BuildFooter()
                     ]

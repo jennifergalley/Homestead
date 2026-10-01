@@ -18,6 +18,7 @@
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
 #include "UnrealClient.h"
+#include "Engine/Engine.h"
 
 namespace UIGalleryRun
 {
@@ -81,6 +82,8 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
     const FString Index = FPaths::Combine(Output, TEXT("gallery-index.tsv"));
     IFileManager::Get().Delete(*Index, false, true, true);
     FHomesteadUIGallery::ResetFixture();
+    // The engine's own on-screen notes ("Preparing Shaders (19)") aren't part of her UI.
+    if (GEngine) GEngine->Exec(GetWorld(), TEXT("DisableAllScreenMessages"));
     Results.Add(FString::Printf(TEXT("UI_GALLERY ids=%d input=%s backdrop=%s heroine=%d"), Ids.Num(), bPad ? TEXT("Pad") : TEXT("KBM"),
         bPlain ? TEXT("plain") : TEXT("world"), bHeroine));
 

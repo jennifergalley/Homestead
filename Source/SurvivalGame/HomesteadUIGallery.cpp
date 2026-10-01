@@ -427,13 +427,30 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Notice, static_cast<int32>(ENotice::ShopStatus), Counter, Shop(1, 30, TEXT("pasty")));
     Add(TEXT("shop-backpack"), TEXT("Buy tab with 1,500 coins, choosing the leather backpack: its confirm."), ECover::Shop, 2, Counter,
         Shop(1, 1500, TEXT("upgrade")));
-    Add(TEXT("hud-backpack"), TEXT("After buying the leather backpack at the counter: the knapsack on her back, her pack now 240."),
-        ECover::Shop, 4, Counter, [](AHomesteadController& PC)
+    // The leather knapsack on her back (Props' SM_LeatherBackpack), bought through the store's own rule
+    // (from the counter: the gallery passes the counter's spot), seen in the open from several sides so
+    // the attach can be judged: the pack behind her back, the straps over her shoulders, nothing through
+    // her torso. The camera's yaw is relative to her facing (0 = behind her).
+    const auto Knapsack = [](float CameraYaw)
+    {
+        return [CameraYaw](AHomesteadController& PC)
         {
             if (PC.State().shops.empty()) return;
+            const auto& Shop = PC.State().shops.front();
             PC.Sim.GrantMoney(Homestead::Backpack::Price - PC.State().money);
-            PC.Sim.BuyBackpack(PC.State().shops.front().id, PC.PlayerPoint());
-        }, 1.5f);
+            PC.Sim.BuyBackpack(Shop.id, Ahead({Shop.counterX, Shop.counterY}, Shop.counterYaw, 120.0));
+            if (const APawn* Pawn = PC.GetPawn())
+                PC.SetControlRotation(FRotator(-8.0f, Pawn->GetActorRotation().Yaw + CameraYaw, 0.0f));
+        };
+    };
+    Add(TEXT("hud-backpack"), TEXT("The leather knapsack on her back, from behind: the pack between her shoulder blades, her pack now 240."),
+        ECover::Shop, 4, nullptr, Knapsack(0.0f), 1.5f);
+    Add(TEXT("hud-backpack-side"), TEXT("The knapsack from her left side (90 degrees): the pack against her back, nothing through her torso."),
+        ECover::Hud, 12, nullptr, Knapsack(90.0f), 1.5f);
+    Add(TEXT("hud-backpack-three-quarter"), TEXT("The knapsack from behind her left shoulder (three-quarter): the straps over her shoulder."),
+        ECover::Hud, 13, nullptr, Knapsack(45.0f), 1.5f);
+    Add(TEXT("hud-backpack-front"), TEXT("The knapsack from the front three-quarter: the straps down her chest."),
+        ECover::Hud, 14, nullptr, Knapsack(150.0f), 1.5f);
     Add(TEXT("shop-quantity"), TEXT("Buy tab, choosing bread: the how-many dialog."), ECover::Shop, 3, Counter, Shop(1, -1, TEXT("Bread")));
 
     // Road signs.
@@ -444,21 +461,22 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             PC.FocusId = SignIndex(TEXT("GatewayRoadSign"));
             PC.InteractWithRoadSign();
         });
-    Add(TEXT("sign-refused"), TEXT("A one-way road sign she can't walk from here: only a rust-edged notice saying why, no book."),
-        ECover::Dialog, 8, nullptr, [](AHomesteadController& PC)
+    // At the manor's stop, the town sign's one way (to the manor) is refused: she's already there.
+    Add(TEXT("sign-refused"), TEXT("A one-way road sign she can't walk from here: only a rust-edged notice saying why ('You're already at the manor.'), no book."),
+        ECover::Dialog, 8, [](AHomesteadController&, FStage& Out, FString& Why)
         {
-            const auto& Signs = Homestead::EstatePublicRoad().signs;
-            for (int32 Index = 0; Index < static_cast<int32>(Signs.size()); ++Index)
-            {
-                const auto Ways = Homestead::RoadSignDestinations(Signs[Index].name);
-                if (Ways.size() != 1 || (PC.CanSetOut() && PC.MenuPlanTravel(Ways[0]).ok)) continue;
-                PC.Focus = AHomesteadController::EFocus::RoadSign;
-                PC.FocusId = Index;
-                PC.InteractWithRoadSign();
-                return;
-            }
+            const auto* Manor = Homestead::EstatePublicRoad().FindStop("Manor");
+            if (!Manor) { Why = TEXT("No manor stop on the public road."); return false; }
+            Out.bMove = true;
+            Out.Stand = Manor->position;
+            Out.Face = {Manor->position.x + 500.0, Manor->position.y};
+            return true;
+        }, [SignIndex](AHomesteadController& PC)
+        {
+            PC.Focus = AHomesteadController::EFocus::RoadSign;
+            PC.FocusId = SignIndex(TEXT("TownRoadSign"));
+            PC.InteractWithRoadSign();
         });
-
     // World notices.
     Add(TEXT("toast-success"), TEXT("World notice: a parchment slip at the top centre in the book's serif."),
         ECover::Notice, Toast, nullptr, Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false));
@@ -505,11 +523,14 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         [](AHomesteadController& PC) { PC.Sim.GrantItems(Item::Hatchet, 1); PC.ChooseOnHotbar(Item::Hatchet); });
     Add(TEXT("focus-plant"), TEXT("A tilled square ahead with seed chosen: the green outline and the keyed 'Sow' hint."),
         ECover::Focus, 2, Garden, [TillAhead](AHomesteadController& PC) { TillAhead(PC); PC.ChooseOnHotbar(Item::Seeds); });
-    Add(TEXT("focus-door"), TEXT("At the general store's door: the keyed door hint."), ECover::Focus, 3,
+    List.Last().Pending = TEXT("Water's seed outline and 'Plant <seed>' cue (jennifergalley-seed-outline @6408cdd7)");
+    // The door only offers a hint while the store is shut (open, it simply opens): after closing time.
+    Add(TEXT("focus-door"), TEXT("At the general store's door after closing (7 PM): 'General store | Closed' and the wait hint."), ECover::Focus, 3,
         [](AHomesteadController& PC, FStage& Out, FString& Why)
         {
             const auto* Door = PC.Sim.Layout().FindLandmark(Homestead::Anchor::GeneralStoreDoor);
             if (!Door) { Why = TEXT("No general store door."); return false; }
+            PC.Sim.SkipToHourOfDay(19.0);
             Out.bMove = true;
             Out.Stand = Ahead(Door->position, Door->yaw, -60.0);
             Out.Face = Ahead(Door->position, Door->yaw, 300.0);
@@ -526,7 +547,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             Out.Face = Ahead(Door->position, Door->yaw, 300.0);
             return true;
         }, nullptr);
-    List.Last().Pending = TEXT("Water's Sunday closing (jennifergalley-sunday-closing @077a7a3c)");
+    List.Last().Pending = TEXT("Water's Sunday closing (jennifergalley-sunday-closing @077a7a3c / water-slot-1001)");
     List.Last().bKeepWorld = true;
     Add(TEXT("focus-shopkeeper"), TEXT("At the counter facing the shopkeeper: her name and the keyed talk/trade hint."),
         ECover::Focus, 4, Counter, nullptr);

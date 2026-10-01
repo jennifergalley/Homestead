@@ -15,9 +15,9 @@ constexpr double MvMaxPixelsPerCm = 0.06;  // 6 px per metre: close enough to re
 constexpr double MvPlacePixelsPerCm = 0.025;
 constexpr float MvStickDeadZone = 0.2f;
 constexpr double MvStaleAxisSeconds = 0.25;
-const FLinearColor MvBackdrop(0.05f, 0.075f, 0.065f, 0.95f);
+HomesteadUITheme::FThemeColor MvBackdrop(0.05f, 0.075f, 0.065f, 0.95f);
 HomesteadUITheme::FThemeColor MvPlate(0.025f, 0.05f, 0.038f, 0.82f);
-const FLinearColor MvCream(0.95f, 0.92f, 0.82f, 1.0f);
+HomesteadUITheme::FThemeColor MvCream(0.95f, 0.92f, 0.82f, 1.0f);
 const FLinearColor& MvGold = HomesteadPalette::Brass;
 FVector2D MvToLocal(HomesteadMap::Vec Value) { return FVector2D(Value.x, Value.y); }
 HomesteadMap::Vec MvToVec(FVector2D Value) { return {Value.X, Value.Y}; }
