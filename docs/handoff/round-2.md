@@ -857,6 +857,15 @@ receipt.**
   clean batch and native Release 18/18 passes. The rejected global hair-sky toggle remains
   excluded. Unreal compile, PIE, package and Shipping acceptance await the exclusive integration
   slot; there is no playable-delivery claim.
+
+  **Menu integration source `2f76fc14` (not on `main`):** Integration resolved eight conflicts
+  while merging approved Menu `91fefd64` plus docs `5a12e461`; the branch is clean and native
+  Release is 18/18. `PackRow` now has 11 scenarios / 560 checks, covering absent optional
+  `packrowsparked` in old saves, rotated-save reload, and duplicate/malformed-section rejection.
+  The E/click tool split, 15-portion pail, direct bed action and audio cues remain present.
+  Feedback VSync and Watering-facing failures are known test-side failures, not product acceptance.
+  Unreal compile, PIE, package and Shipping evidence remain pending in Integration's exclusive
+  slot; this does not clear the chest-view/UI hold or establish a playable delivery.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
