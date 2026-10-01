@@ -61,10 +61,13 @@ DEEP_CLUSTERS = 3
 CLUSTER_RADIUS_M = 4.5
 FLOWER_PATH_CLEAR_M = 2.6    # verge drifts start just off the walk width
 VERGE_MAX_M = 5.5
-VERGE_STEP_M = 0.55
+VERGE_STEP_M = 0.35          # PIE 2026-10-01: at 0.55 the drifts read as scattered specks in the tall grass
 FLOOR_PATCHES = 30
-FLOOR_PATCH_CLUMPS = (8, 18)
+FLOOR_PATCH_CLUMPS = (14, 28)
 FLOWER_TRUNK_CLEAR_M = 0.6
+# Clumps are drawn larger than life so they read above the trail's tall grass (the margin grass is scaled 1.6-2.5;
+# PIE 2026-10-01: at 1x, bluebells and cow parsley were specks from her camera). Per kind, times a 0.85-1.2 spread.
+FLOWER_SCALE = {42: 1.9, 43: 1.8, 44: 1.6, 45: 2.0, 46: 1.35, 47: 1.15, 48: 1.3}
 END_MARGIN_M = 1.0           # beside the trail only, not past its ends (the farm, the far shore)
 # Matches Anchor::DerelictFarm (HomesteadEstate.cpp) in metres, x0 x1 y0 y1, as forage.py; kept 8 m clear.
 FARM = (-222.0, -162.0, -705.0, -645.0)
@@ -215,7 +218,7 @@ def bake(scenery_path=SCENERY, replan=False):
     flowers = []
 
     def plant(kind, p, scale):
-        flowers.append((kind, float(p[0]), float(p[1]), float(rng.uniform(0.0, 360.0)), float(scale)))
+        flowers.append((kind, float(p[0]), float(p[1]), float(rng.uniform(0.0, 360.0)), float(scale * FLOWER_SCALE[kind])))
 
     # Verge drifts: walk both verges; each drift is one species for a few metres, with gaps between drifts.
     verge_species = [(PRIMROSE, 0.28), (RED_CAMPION, 0.22), (COW_PARSLEY, 0.24), (BLUEBELL, 0.14), (FOXGLOVE, 0.12)]
@@ -241,8 +244,7 @@ def bake(scenery_path=SCENERY, replan=False):
                     p = a + u * (t - start) + normal * rng.uniform(FLOWER_PATH_CLEAR_M + 0.1, VERGE_MAX_M)
                     j = cand_tree.query(p)[1]
                     if flower_ok[j] and abs(np.hypot(*(cand[j] - p))) < 0.5:
-                        tall = kind in (FOXGLOVE, COW_PARSLEY, RED_CAMPION)
-                        plant(kind, p, rng.uniform(0.85, 1.25) if tall else rng.uniform(0.9, 1.3))
+                        plant(kind, p, rng.uniform(0.85, 1.2))
                 t += VERGE_STEP_M
             s += length + gap
 
@@ -261,7 +263,7 @@ def bake(scenery_path=SCENERY, replan=False):
             p = centre + rng.normal(0.0, radius * 0.5, 2)
             j = cand_tree.query(p)[1]
             if flower_ok[j] and np.hypot(*(cand[j] - p)) < 0.5:
-                plant(kind, p, rng.uniform(0.8, 1.2))
+                plant(kind, p, rng.uniform(0.85, 1.2))
 
     extra = np.zeros(len(flowers), lake_features.RECORD)
     for i, (k, x, y, yaw, s) in enumerate(flowers):
