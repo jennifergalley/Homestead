@@ -227,11 +227,12 @@ only retained MVP archive reference. The retained
 
 ## Playtest builds (schedule)
 
-Jenny's standing preference (2026-09-30): two packaged Estate builds every day.
+Jenny's standing preference (2026-09-30): three packaged Estate builds every day.
 
 | Slot | Freeze | Integration exclusive slot | Shortcut ready |
 | --- | --- | --- | --- |
 | Morning | 4:30 AM | 5:00 AM | 7:30 AM |
+| Afternoon | 1:00 PM | 1:30 PM | 4:00 PM |
 | Evening | 6:00 PM | 6:30 PM | 9:00 PM |
 
 At either freeze, only work that is already **UE-verified and code-reviewed** enters the build;
