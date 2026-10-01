@@ -1519,6 +1519,13 @@ not claim early Energy is fully solved.
   explicitly toggles `bEstateMap` for policy cases on the Woodland test actor and restores it.
   The independent wall plate is lowered to 279 cm. Native merged baseline remains 18/18; these
   Unreal-only routing/interior changes still require UBT and runtime verification.
+
+  **7:30 AM build hold — Menu chest tiles:** `3bc08d9a`, already an ancestor of this integration
+  batch through `5fb7de6f`, makes chest stack tiles invisible at 720p. Native 18/18 does not catch
+  this UI regression. Menu's unmerged fix `62f7c645` is not in the batch, and its branch is not
+  UE-ready beyond `7cd69683`. Do not admit the batch to the 7:30 AM Shipping build until Menu
+  supplies a visual fix with re-run evidence, or Integration deliberately rolls back the offending
+  change.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
