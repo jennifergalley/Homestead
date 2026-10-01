@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "UI/HomesteadNoticeStyle.h"
 #include "HomesteadHUD.generated.h"
 
 class AHomesteadController;
@@ -33,6 +34,10 @@ private:
     FString BookTextOverflow;
     FString BookMeasurements;
     bool bMeasureFeedback = false, bDrawingToast = false;
+    // While set, Write / TextWidth / WrappedLines set words in the field book's display serif (the toast).
+    bool bNoticeText = false;
+    // The UI theme trial's Canvas default: the serif in parchment (UI/HomesteadUITheme.h).
+    bool bThemeSerif = false;
     FString ToastSource;
     TArray<FString> ToastLines;
     TArray<FBox2D> ToastTextBounds;
@@ -64,7 +69,7 @@ private:
     // units), or 0 when nothing is focused, so the toast can stack under it.
     float DrawInteractCue(const AHomesteadController& PC);
     // The parchment notice card (UI/HomesteadNoticeStyle.h) in HUD units; a rust frame for errors.
-    void NoticeCard(float X, float Y, float Width, float Height, bool bError);
+    void NoticeCard(float X, float Y, float Width, float Height, HomesteadNoticeStyle::ESurface Surface);
     float TextWidth(const FString& Text, float Size) const;
     void DrawAppearanceBook(const AHomesteadController& PC);
 };

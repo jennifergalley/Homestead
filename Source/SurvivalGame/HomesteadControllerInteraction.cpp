@@ -187,6 +187,14 @@ void AHomesteadController::Interact()
             }
             const Homestead::CropKind Harvested = Plot.kind;
             const Homestead::Point Center = Homestead::PlotCenter(Plot);
+            if (Plot.withered)
+            {
+                const auto Result = Sim.ClearWithered(FocusId, Position);
+                Notify(Result, GrassStepA);
+                if (Result.ok)
+                    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayTill(Center);
+                break;
+            }
             const auto Result = Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
             // A harvest shows as its "+N" pickups beside her; watering and refusals still say so.
             if (Mature) NotifyResourceAction(Result, GrassStepB);
@@ -211,6 +219,7 @@ void AHomesteadController::Interact()
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
+    case EFocus::RoadSign: InteractWithRoadSign(); break;
     default: if (!EatSelectedFoodInstead()) Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
     }
 

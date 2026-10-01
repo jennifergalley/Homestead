@@ -35,6 +35,9 @@ struct CropInfo
     HarvestStyle style = HarvestStyle::Pull;
     // Stem of the plant meshes: /Game/SurvivalGame/Environment/Props/<visual>/SM_<visual>_<Stage>.
     const char* visual = "";
+    // The seasons it grows in (design §4): planting outside them is refused, and a crop still in the
+    // ground when they end withers at the season rollover.
+    SeasonMask seasons = AllSeasons;
 };
 
 const CropInfo& GetCropInfo(CropKind kind);
@@ -66,18 +69,31 @@ inline constexpr int PailPortions = 6;
 inline bool IsWeedy(const Plot& plot) { return plot.weeds > CropCare::WeedyFrom; }
 // Weeds she can see on the square, sown or bare, ripe or not: [F]/[X] offers to pull them.
 inline bool HasVisibleWeeds(const Plot& plot) { return plot.weeds >= CropCare::VisibleWeeds; }
-inline bool IsRipe(const Plot& plot) { return plot.planted && plot.growth >= 1.0; }
+inline bool IsRipe(const Plot& plot) { return plot.planted && !plot.withered && plot.growth >= 1.0; }
 
-// Visible growth stages. Sown is the soil mound; the rest map to the plant meshes.
-enum class CropStage : int { Bare, Sown, Sprout, Young, Growing, Mature, Ripe, Count };
+// Crop seasons (design §4).
+bool GrowsIn(CropKind kind, Season season);
+// "Turnips grow in Autumn and Winter."
+std::string OutOfSeasonText(CropKind kind);
+// Game hours from `hour` until its crop's growing seasons end (the 06:00 rollover into the first
+// season it doesn't grow in); 0 when out of season now.
+double HoursLeftInSeasons(CropKind kind, double hour);
+// "Won't ripen before Summer ends." when a crop needing `hoursToRipe` more hours at full care
+// can't make it at `hour`; empty when it can.
+std::string TooLateText(CropKind kind, double hoursToRipe, double hour);
+
+// Visible growth stages. Sown is the soil mound; the rest map to the plant meshes. Withered is the
+// dead plant left when the crop's seasons ended (Harvest lane supplies SM_CropWithered_* meshes).
+enum class CropStage : int { Bare, Sown, Sprout, Young, Growing, Mature, Ripe, Withered, Count };
 CropStage StageOf(const Plot& plot);
 const char* StageName(CropStage stage); // "Sprout", ... (the mesh suffix)
 
 // Day of growth she's on (1-based, capped at CropDays) for a growing crop.
 int CropDay(const Plot& plot);
 // The focus line for a plot: "Turnips: day 2 of 4  |  needs water, growing slowly",
-// "Turnips: ready to harvest", "Tilled soil: ready to plant".
-std::string PlotStatus(const Plot& plot);
+// "Turnips: ready to harvest", "Tilled soil: ready to plant", "Potatoes: withered. Clear it with the
+// hoe". With the hour (hour >= 0), a crop that can't ripen before its seasons end says so.
+std::string PlotStatus(const Plot& plot, double hour = -1.0);
 // "Ready in about 4 days if watered."
 std::string ReadyInText(CropKind kind);
 
@@ -89,5 +105,13 @@ constexpr const char* SaveTag = "picked";
 void WriteSaveSection(std::ostream& output, const State& state);
 // Reads the section after its tag. Refuses ids that aren't planted regrowing plots, and repeats.
 bool ReadSaveSection(std::istream& input, State& state);
+// Optional trailing save section (tag "withered"): the ids of withered plots, count first. Written
+// only when there are some; older saves load every plot living.
+constexpr const char* WitheredSaveTag = "withered";
+void WriteWitheredSection(std::ostream& output, const State& state);
+bool ReadWitheredSection(std::istream& input, State& state);
+// The season rollover into `season`: every planted crop that doesn't grow in it withers. Returns
+// how many plots withered.
+int WitherOutOfSeason(State& state, Season season);
 }
 }

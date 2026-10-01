@@ -456,16 +456,23 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             && Bindings() == *BindingsBefore && Controller->State().inventory == *Stock; });
     Add(TEXT("Restore the pack the row steps changed"),
         [this, PreRow]() { Controller->Sim.Deserialize(*PreRow); if (Controller->NativeMenu) Controller->NativeMenu->Refresh(); },
-        [this, PreRow]() { return Controller->Sim.Serialize() == *PreRow; });    Add(TEXT("Settings still begins on safe Resume control"),
+        [this, PreRow]() { return Controller->Sim.Serialize() == *PreRow; });
+    Add(TEXT("Settings still begins on safe Resume control"),
         [this]() { Controller->CloseBook(); Tap(EKeys::Escape); },
         [Focused]() { return Focused(TEXT("Session")); });
+    // The world ran for a moment between closing the book and opening Settings: the paused state
+    // from here on is the one directional input must leave alone.
+    Add(TEXT("Record the paused simulation in Settings"),
+        [this, Before]() { *Before = Controller->Sim.Serialize(); }, []() { return true; });
     Add(TEXT("Down enters the first row of the vertical Settings list"),
         [this]() { Tap(EKeys::Gamepad_DPad_Down); },
         [this, Focused, Before]()
         {
             const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
-            return Focused(TEXT("Content")) && Subject && Subject->Id == 0
-                && Controller->Sim.Serialize() == *Before;
+            const bool bSame = Controller->Sim.Serialize() == *Before;
+            if (!(Subject && Subject->Id == 0) || !bSame)
+                Results.Add(FString::Printf(TEXT("SETTINGS_ROW subject=%d unchanged=%d"), Subject ? Subject->Id : -1, bSame));
+            return Focused(TEXT("Content")) && Subject && Subject->Id == 0 && bSame;
         });
     Add(TEXT("Directional input reaches the direct Quit game row"),
         [this]()

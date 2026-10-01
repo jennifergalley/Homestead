@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HomesteadCalendar.h"
 #include "HomesteadItems.h"
 #include "HomesteadShops.h"
 #include "HomesteadWorldGeneration.h"
@@ -287,6 +288,10 @@ struct Plot
     // regrowth days ("ripening again, day 1 of 3") instead of the first growth. Saved in the optional
     // "picked" section; older saves default to false.
     bool picked = false;
+    // Still planted when its crop's seasons ended (Crops::WitherOutOfSeason): it keeps its kind for
+    // the dead plant's look, yields nothing and grows no further until the hoe clears it. Saved in
+    // the optional "withered" section.
+    bool withered = false;
 };
 
 struct WorldDrop
@@ -311,6 +316,8 @@ struct Parcel
 struct State
 {
     double hour = 6.0;
+    // Real minutes per game day. New games start at 60 ("Balanced"), long enough to walk to town
+    // and back while the shops are open; Settings offers 30, 60 and 120, and saves keep their own.
     double dayMinutes = 60.0;
     double hunger = 85.0;
     double energy = 100.0;
@@ -355,6 +362,9 @@ struct State
     // shows on her back (a look only: it never changes capacity).
     bool leatherBackpack = false;
     bool backpackShown = true;
+    // Estate only (HomesteadFood.h): the game hour her Well fed runs out; she is Well fed while hour is
+    // below it. Saved in the optional "wellfed" section only while active.
+    double wellFedUntilHour = 0.0;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -437,6 +447,15 @@ constexpr double HarvestCropEnergy = 0.6;
 constexpr double FillWaterEnergy = 0.3;
 constexpr double FuelEnergy = 0.2;
 constexpr double DeconstructEnergy = 1.0;
+}
+
+// Hunger belongs to the seeded woodland only: there it drains at these rates and at 0 fails her (she
+// retries a checkpoint). The estate has no hunger (HomesteadFood.h): `State::hunger` stays at 100 and
+// is still saved, until the next planned save-version bump drops it.
+namespace Hunger
+{
+constexpr double AwakePerHour = 2.0;
+constexpr double AsleepPerHour = 1.3;
 }
 
 // The spring weather: it rains on two days in every ten, RainStartHour to RainEndHour (Jenny, 2026-09-29:
@@ -530,8 +549,25 @@ public:
     const InventoryLayout* GetLayout(int containerId) const;
     bool IsRaining() const;
     bool IsNight() const;
+    // The calendar date now (HomesteadCalendar.h): "Mon, Spring 12".
+    Calendar::Date Today() const { return Calendar::DateAt(state_.hour); }
+    // Day of the season, 1-28.
     int DayNumber() const;
     const char* SeasonName() const;
+    // What the last season change did, for the game's toast. Step fills it at each season rollover;
+    // SeasonChanges() counts them this session (never saved), so the game compares the count.
+    struct SeasonChange
+    {
+        Season from = Season::Spring;
+        Season to = Season::Spring;
+        int witheredPlots = 0;
+    };
+    int SeasonChanges() const { return seasonChanges_; }
+    const SeasonChange& LastSeasonChange() const { return lastSeasonChange_; }
+    // Well fed after a Meal on the estate (HomesteadFood.h), and what work costing `base` costs her
+    // now: base x Food::WellFedWorkFactor while Well fed, otherwise base.
+    bool IsWellFed() const;
+    double WorkCost(double base) const;
     bool IsSheltered(Point position) const;
     bool IsNearFire(Point position) const;
     RecipeAssessment AssessRecipe(Recipe recipe, Point player) const;
@@ -592,6 +628,8 @@ public:
     Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
     Result Water(int plotId, Point player);
     Result Weed(int plotId, Point player);
+    // Hoes a withered plant out, back to tilled soil (needs the hoe).
+    Result ClearWithered(int plotId, Point player);
     Result HarvestCrop(int plotId, Point player);
     Result FillWater(Point player);
     // Tip the water out of the pail (it stays in her pack, empty).
@@ -758,6 +796,8 @@ private:
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
     int dozes_ = 0;
+    int seasonChanges_ = 0;
+    SeasonChange lastSeasonChange_;
     bool TryAdjust(const Inventory& change);
     Result CheckRevision(std::uint64_t expectedRevision) const;
     // CheckPlacement without the reach and exertion rules (the starter kit places from afar).
@@ -778,6 +818,11 @@ private:
     static bool ReadEconomy(std::istream& input, State& candidate, std::set<int>& ids);
     // Once a day at the 6 AM rollover: cleared grass and weeds near remaining overgrowth may regrow.
     void CreepWeeds(int day);
+    // Calendar hooks (HomesteadCalendarHooks.cpp). Step calls OnNewDay once for every 06:00 rollover
+    // it crosses, and OnNewDay calls OnNewSeason first when that day begins a season. Features that
+    // change with the day or the season add their call there rather than in Step.
+    void OnNewDay(const Calendar::Date& today);
+    void OnNewSeason(const Calendar::Date& today, Season from);
     // Oil lamp (HomesteadLamp.cpp).
     bool lampInHand_ = false;
     void BurnLamp(double hours, bool sleeping);

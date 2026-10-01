@@ -192,6 +192,11 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FCString::Strifind(FCommandLine::Get(), TEXT("-HomesteadUIGallery")))
+    {
+        PrepareUIGalleryChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadEstateSmoke")))
     {
         PrepareEstateSmokeChecks();

@@ -82,6 +82,8 @@ private:
     void PrepareVideoSyncChecks();
     void PrepareFeedbackChecks();
     void PrepareHotkeyChecks();
+    // HomesteadUIGalleryTest.cpp (Development): capture each UI gallery state (-HomesteadUIGallery).
+    void PrepareUIGalleryChecks();
     void PrepareHotbarChecks();
     void PrepareBookClarityChecks();
     void PrepareBookStorageChecks();

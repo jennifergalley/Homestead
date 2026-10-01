@@ -1,4 +1,5 @@
 #include "SHomesteadHotbar.h"
+#include "HomesteadUITheme.h"
 #include "Widgets/Notifications/SProgressBar.h"
 
 #include "../HomesteadController.h"
@@ -17,10 +18,10 @@ namespace HomesteadMenus
 {
 namespace HotbarStyle
 {
-const FLinearColor Pine = HomesteadPalette::Pine.CopyWithNewOpacity(0.96f);
-const FLinearColor MutedPine(0.035f, 0.055f, 0.046f, 0.82f);
-constexpr FLinearColor Cream = HomesteadPalette::Cream;
-constexpr FLinearColor Gold = HomesteadPalette::Brass;
+HomesteadUITheme::FThemeColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
+HomesteadUITheme::FThemeColor MutedPine(0.035f, 0.055f, 0.046f, 0.82f);
+const FLinearColor& Cream = HomesteadPalette::Cream;
+const FLinearColor& Gold = HomesteadPalette::Brass;
 constexpr float HotbarSlotSize = 64.0f;
 }
 
@@ -111,7 +112,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                                 return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || Snapshot[Index].Seed || Snapshot[Index].Material) && Snapshot[Index].Available
                                     ? FText::AsNumber(Snapshot[Index].Count) : FText::GetEmpty();
                             })
-                            .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
+                            .Font(HomesteadUITheme::Font(TEXT("Bold"), 13))
                             .ColorAndOpacity(HotbarStyle::Cream)
                             .ShadowOffset(FVector2D(1, 1))
                             .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
@@ -152,7 +153,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             [
                                 SNew(SBorder)
                                 .BorderImage(FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
-                                .BorderBackgroundColor(FLinearColor(0.02f, 0.03f, 0.025f, 0.85f))
+                                .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.02f, 0.03f, 0.025f, 0.85f)))
                                 .Padding(0)
                                 [
                                     SNew(SProgressBar)
@@ -181,7 +182,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             SNew(STextBlock)
                             .Text(FText::FromString(Index == 9
                                 ? TEXT("0") : FString::FromInt(Index + 1)))
-                            .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
+                            .Font(HomesteadUITheme::KeyFont(TEXT("Bold"), 13))
                             .ColorAndOpacity(HotbarStyle::Cream)
                             .ShadowOffset(FVector2D(1, 1))
                             .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))

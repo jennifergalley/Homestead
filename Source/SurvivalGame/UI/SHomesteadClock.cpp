@@ -1,4 +1,5 @@
 #include "SHomesteadClock.h"
+#include "HomesteadUITheme.h"
 
 #include "../HomesteadController.h"
 #include "../HomesteadHUD.h"
@@ -36,14 +37,14 @@ void SHomesteadClock::Construct(const FArguments& Args)
                 SNew(SHorizontalBox)
                 + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
                 [
-                    SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle(TEXT("Regular"), ClockStyle::TimeSize))
+                    SNew(STextBlock).Font(HomesteadUITheme::Font(TEXT("Regular"), ClockStyle::TimeSize))
                     .ColorAndOpacity(HomesteadPalette::Cream)
                     .Text_Lambda([this]() { return HourText(); })
                 ]
                 + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
                     .Padding(ClockStyle::MeridiemGap, 0, 0, ClockStyle::MeridiemBaseline)
                 [
-                    SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), ClockStyle::MeridiemSize))
+                    SNew(STextBlock).Font(HomesteadUITheme::Font(TEXT("Bold"), ClockStyle::MeridiemSize))
                     .ColorAndOpacity(HomesteadPalette::Brass)
                     .Text_Lambda([this]() { return MeridiemText(); })
                 ]

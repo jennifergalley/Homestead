@@ -1,0 +1,185 @@
+// UI gallery capture run (Development builds): -HomesteadSmokeTest -HomesteadUIGallery[=<ids>|all]
+// [-HomesteadUIGalleryInput=Pad] on the Estate map. Checks the gallery covers every book tab,
+// settings tab and notice style, then puts each entry on screen (HomesteadUIGallery.h) and captures
+// the window with Slate included as <id>.png, listing it in gallery-index.tsv (id, description).
+// Scripts\Capture-UiGallery.ps1 runs this at each resolution and builds the contact sheet.
+#include "HomesteadSmokeTest.h"
+#include "HomesteadController.h"
+#include "HomesteadSaveRouting.h"
+#include "HomesteadTestPaths.h"
+#include "HomesteadUIGallery.h"
+
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "HAL/FileManager.h"
+#include "Misc/CommandLine.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Parse.h"
+#include "Misc/Paths.h"
+#include "HAL/PlatformProcess.h"
+#include "UnrealClient.h"
+#include "Engine/Engine.h"
+
+namespace UIGalleryRun
+{
+// Seconds for the estate to stream in around her before the first entry.
+constexpr float StreamInSeconds = 20.0f;
+// Longest one entry may take to settle (a teleport across the estate plus its settle time).
+constexpr float EntrySeconds = 75.0f;
+// Time for the requested screenshot to be written before the next entry changes the screen.
+constexpr float CaptureSeconds = 0.8f;
+// Time for auto-exposure to settle on the backdrop (plain or world) before the capture.
+constexpr float BackdropSeconds = 1.5f;
+
+// Every file under the normal (non-sandbox) Estate save folder, with its size and time: the run proves
+// nothing there changed. The run's -UserDir moves ProjectSavedDir() into the sandbox, so the normal
+// folder is taken from the project itself (or -HomesteadRealSaveDir=<folder>, which Test-Game passes).
+TMap<FString, FString> SnapshotRealEstateSaves()
+{
+    TMap<FString, FString> Files;
+    FString Folder;
+    if (!FParse::Value(FCommandLine::Get(), TEXT("HomesteadRealSaveDir="), Folder) || Folder.IsEmpty())
+    {
+        FHomesteadSaveRoute Route;
+        FString Error;
+        if (!ResolveHomesteadSaveRoute(TEXT(""), FPaths::Combine(FPaths::ProjectDir(), TEXT("Saved")),
+            FPlatformProcess::UserSettingsDir(), HomesteadTestOutputDirectory(), Route, Error)) return Files;
+        Folder = FPaths::Combine(Route.Directory, TEXT("Estate"));
+    }
+    Folder = FPaths::ConvertRelativePathToFull(Folder);
+    TArray<FString> Found;
+    IFileManager::Get().FindFilesRecursive(Found, *Folder, TEXT("*"), true, false);
+    for (const FString& File : Found)
+        Files.Add(File, FString::Printf(TEXT("%lld %s"), IFileManager::Get().FileSize(*File),
+            *IFileManager::Get().GetTimeStamp(*File).ToString()));
+    Files.Add(TEXT("<folder>"), Folder);
+    return Files;
+}
+}
+
+void AHomesteadSmokeTest::PrepareUIGalleryChecks()
+{
+#if UE_BUILD_SHIPPING
+    Finish(false, TEXT("The UI gallery is a Development-build tool."));
+#else
+    FString Spec, Input;
+    FParse::Value(FCommandLine::Get(), TEXT("HomesteadUIGallery="), Spec, false);
+    FParse::Value(FCommandLine::Get(), TEXT("HomesteadUIGalleryInput="), Input);
+    const bool bPad = Input.Equals(TEXT("Pad"), ESearchCase::IgnoreCase);
+    // Plain (the default) hides the world behind the UI; World keeps the game scene.
+    FString Backdrop;
+    FParse::Value(FCommandLine::Get(), TEXT("HomesteadUIGalleryBackdrop="), Backdrop);
+    const bool bPlain = !Backdrop.Equals(TEXT("World"), ESearchCase::IgnoreCase);
+    const bool bHeroine = !FParse::Param(FCommandLine::Get(), TEXT("HomesteadUIGalleryNoHeroine"));
+    FString Error;
+    const TArray<FString> Ids = FHomesteadUIGallery::Resolve(Spec, Error);
+    if (!Error.IsEmpty() || Ids.IsEmpty())
+    {
+        Finish(false, Error.IsEmpty() ? FString(TEXT("No UI gallery ids to capture.")) : Error);
+        return;
+    }
+    const FString Output = HomesteadTestOutputDirectory();
+    const FString Index = FPaths::Combine(Output, TEXT("gallery-index.tsv"));
+    IFileManager::Get().Delete(*Index, false, true, true);
+    FHomesteadUIGallery::ResetFixture();
+    // The engine's own on-screen notes ("Preparing Shaders (19)") aren't part of her UI.
+    if (GEngine) GEngine->Exec(GetWorld(), TEXT("DisableAllScreenMessages"));
+    Results.Add(FString::Printf(TEXT("UI_GALLERY ids=%d input=%s backdrop=%s heroine=%d"), Ids.Num(), bPad ? TEXT("Pad") : TEXT("KBM"),
+        bPlain ? TEXT("plain") : TEXT("world"), bHeroine));
+
+    // It never runs on a real save: the sandbox route, and nothing written to the normal Estate saves.
+    const auto RealSaves = MakeShared<TMap<FString, FString>>(UIGalleryRun::SnapshotRealEstateSaves());
+    Add(TEXT("The gallery runs on the sandboxed save route"), []() {},
+        [this]()
+        {
+            const FString Refusal = FHomesteadUIGallery::RefusalFor(*Controller);
+            if (!Refusal.IsEmpty()) { Finish(false, Refusal); return false; }
+            return Controller->SaveRoute.Mode == TEXT("test-sandbox");
+        });
+    Add(TEXT("Every book tab, settings tab and notice style has a gallery entry"), []() {},
+        [this]()
+        {
+            const TArray<FString> Missing = FHomesteadUIGallery::MissingCoverage(*Controller);
+            if (!Missing.IsEmpty()) Results.Add(TEXT("UI_GALLERY_MISSING ") + FString::Join(Missing, TEXT(" ")));
+            return Missing.IsEmpty();
+        });
+    Add(TEXT("Let the estate stream in around her"), []() {},
+        [this]()
+        {
+            const auto* Avatar = Cast<ACharacter>(Controller->GetPawn());
+            return Avatar && Avatar->GetCharacterMovement() && Avatar->GetCharacterMovement()->IsMovingOnGround()
+                && !Controller->bPendingGroundSnap && !Controller->bPendingSpawn;
+        }, UIGalleryRun::StreamInSeconds);
+    for (const FString& Id : Ids)
+    {
+        const auto Status = MakeShared<int32>(0);
+        const auto Reason = MakeShared<FString>();
+        FStep& Show = Steps.AddDefaulted_GetRef();
+        Show.Name = TEXT("Show ") + Id;
+        Show.Action = [this, Id, bPad, Status, Reason]()
+        {
+            *Status = 0;
+            FHomesteadUIGallery::Show(*Controller, Id, bPad, [Status, Reason](bool bOk, const FString& Why)
+            {
+                *Status = bOk ? 1 : -1;
+                *Reason = Why;
+            });
+        };
+        Show.Check = [this, Id, Status, Reason]()
+        {
+            if (*Status < 0 && !Reason->StartsWith(TEXT("REPORTED ")))
+            {
+                Results.Add(FString::Printf(TEXT("UI_GALLERY_SKIPPED %s: %s"), *Id, **Reason));
+                *Reason = TEXT("REPORTED ") + *Reason;
+            }
+            return *Status != 0;
+        };
+        Show.Wait = UIGalleryRun::EntrySeconds;
+        Show.bCompleteWhenReady = true;
+        // The backdrop goes up first and the exposure settles on it before the capture.
+        const auto ApplyBackdrop = [this, Id, bPlain, bHeroine]()
+        {
+            const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
+            FHomesteadUIGallery::SetBackdrop(*Controller, bPlain && !(Entry && Entry->bKeepWorld), bHeroine);
+        };
+        FStep& Settle = Steps.AddDefaulted_GetRef();
+        Settle.Name = TEXT("Backdrop for ") + Id;
+        Settle.Skip = [Status]() { return *Status <= 0; };
+        Settle.Action = ApplyBackdrop;
+        Settle.Check = []() { return true; };
+        Settle.Wait = UIGalleryRun::BackdropSeconds;
+        FStep& Capture = Steps.AddDefaulted_GetRef();
+        Capture.Name = TEXT("Capture ") + Id;
+        Capture.Skip = [Status]() { return *Status <= 0; };
+        Capture.Action = [this, Id, Output, Index, ApplyBackdrop]()
+        {
+            // Again, for anything that streamed in meanwhile.
+            ApplyBackdrop();
+            const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
+            // The window as she sees it: the 3D view, the Canvas HUD and every Slate widget.
+            FScreenshotRequest::RequestScreenshot(FPaths::Combine(Output, Id + TEXT(".png")), true, false);
+            FString Description = Entry ? Entry->Description.Replace(TEXT("\t"), TEXT(" ")) : FString();
+            if (Entry && !Entry->Pending.IsEmpty())
+            {
+                Description += TEXT(" (pending: ") + Entry->Pending + TEXT(")");
+                Results.Add(FString::Printf(TEXT("UI_GALLERY_PENDING %s: %s"), *Id, *Entry->Pending));
+            }
+            const FString Line = Id + TEXT("\t") + Description + TEXT("\n");
+            FFileHelper::SaveStringToFile(Line, *Index, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM,
+                &IFileManager::Get(), FILEWRITE_Append);
+            Results.Add(TEXT("UI_GALLERY_CAPTURED ") + Id);
+        };
+        Capture.Check = []() { return true; };
+        Capture.Wait = UIGalleryRun::CaptureSeconds;
+    }
+    Add(TEXT("Nothing under the normal Estate saves was written during the gallery"), []() {},
+        [this, RealSaves]()
+        {
+            const TMap<FString, FString> Now = UIGalleryRun::SnapshotRealEstateSaves();
+            const bool bSame = Now.OrderIndependentCompareEqual(*RealSaves);
+            Results.Add(FString::Printf(TEXT("UI_GALLERY_REAL_SAVES files=%d unchanged=%d folder=%s"),
+                FMath::Max(0, Now.Num() - 1), bSame, *Now.FindRef(TEXT("<folder>"))));
+            return bSame;
+        });
+#endif
+}

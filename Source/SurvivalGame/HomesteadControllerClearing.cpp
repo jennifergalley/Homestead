@@ -12,6 +12,14 @@
 
 using HomesteadControllerText::Text;
 
+namespace HomesteadClearingMix
+{
+// The scythe's airy swish (Assets/Audio/Effects/ScytheSwish.wav, loudest 100 ms about -17 dBFS) at
+// about -31 dBFS with default Effects 0.8: a few dB over the ambience and music, about 9 dB under an
+// axe chop (0.75) and still about 20 dB over her bare steps on grass. At 0.8 it was as loud as a chop.
+constexpr float ScytheSwishGain = 0.25f;
+}
+
 void AHomesteadController::StartMacheteHack()
 {
     if (bHackPending || Focus != EFocus::Underbrush) return;
@@ -343,7 +351,7 @@ void AHomesteadController::LandOvergrowthSwing(bool bMoreComing)
         Notify(Summary + TEXT("."));
         // One airy swish at blade contact for the whole sweep; nothing on a miss or a cancel. With the
         // cue missing she mows in silence (InitializeAudio logged it) rather than with a footstep.
-        if (ScytheSwish) PlayEffect(ScytheSwish, 0.8f);
+        if (ScytheSwish) PlayEffect(ScytheSwish, HomesteadClearingMix::ScytheSwishGain);
         return;
     }
     if (SwingNode == INDEX_NONE) return;

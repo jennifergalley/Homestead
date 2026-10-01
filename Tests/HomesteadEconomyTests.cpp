@@ -62,7 +62,7 @@ void CatalogueMatchesLegacyMetadata()
     CHECK(std::string(ItemIcon(Item::Fur)) == "fur");
     CHECK(IsEdible(Item::Berries) && IsEdible(Item::RoastedRoots) && IsEdible(Item::HerbedRoots));
     CHECK(!IsEdible(Item::Roots) && !IsEdible(Item::Seeds));
-    CHECK(GetItemInfo(Item::HerbedRoots).hunger == 38.0 && GetItemInfo(Item::HerbedRoots).energy == 18.0);
+    CHECK(GetItemInfo(Item::HerbedRoots).hunger == 38.0 && GetItemInfo(Item::HerbedRoots).energy == 40.0);
     for (Item tool : {Item::Knife, Item::Hatchet, Item::DiggingStick, Item::WateringCan, Item::Machete})
         CHECK(IsTool(tool) && ItemSortRank(tool) == 0);
     CHECK(ItemSortRank(Item::Fur) == 1 && ItemSortRank(Item::Flowers) == 2 && ItemSortRank(Item::Water) == 3);
@@ -239,9 +239,10 @@ void BuyAndEatAPasty()
     OK(bought);
     CHECK(bought.message == "Bought 1 Cornish pasty for 100 coins.");
     CHECK(sim.GetState().money == StartingMoney - 100 && sim.Count(Item::Pasty) == 1);
-    const double hunger = sim.GetState().hunger, energy = sim.GetState().energy;
+    const double energy = sim.GetState().energy;
     OK(sim.Eat(Item::Pasty));
-    CHECK(sim.GetState().hunger > hunger && sim.GetState().energy > energy);
+    // A Meal: +40 Energy and Well fed; the estate has no hunger.
+    CHECK(std::abs(sim.GetState().energy - (energy + 40.0)) < 1e-9 && sim.IsWellFed() && sim.GetState().hunger == 100.0);
     CHECK(sim.Count(Item::Pasty) == 0);
     // Three loaves at 50 cents.
     const auto loaves = sim.Buy(store.shop, Item::Bread, 3, false, store.customer);
@@ -445,12 +446,10 @@ void WaitForTheStoreToOpen()
     const std::string evening = sim.Serialize();
     CHECK(!sim.WaitForShop(store.shop, {door.x, door.y - 5000.0}).ok && sim.Serialize() == evening);
     CHECK(!sim.WaitForShop(store.shop + 999, door).ok && sim.Serialize() == evening);
-    // Too hungry to last the night: refused before any time passes.
+    // Hunger never fails her on the estate, so an empty belly doesn't stop the wait (tried on a copy).
     Edit(sim, 5.0, 100.0);
-    const std::string hungry = sim.Serialize();
-    const auto refused = sim.WaitForShop(store.shop, door);
-    CHECK(!refused.ok && refused.message.find("too hungry") != std::string::npos);
-    CHECK(sim.Serialize() == hungry);
+    Simulation hungry = sim;
+    OK(hungry.WaitForShop(store.shop, door));
     // Too tired to last the night (she'd doze off in the street): refused before any time passes.
     Edit(sim, 100.0, 3.0);
     const std::string tired = sim.Serialize();
@@ -464,7 +463,7 @@ void WaitForTheStoreToOpen()
     const double after = sim.GetState().hour;
     CHECK(std::abs((after - before) - 13.0) < 0.01);
     CHECK(IsShopOpen(*sim.FindShop(store.shop), after));
-    CHECK(sim.GetState().hunger < 100.0);
+    CHECK(sim.GetState().hunger == 100.0); // No hunger on the estate.
     OK(sim.CheckShopAccess(store.shop, store.customer));
 }
 
@@ -502,6 +501,38 @@ void NoWalkToTownFromTown()
     const std::string before = sim.Serialize();
     const auto refused = sim.WalkRoad(TravelDestination::Town, counter);
     CHECK(!refused.ok && refused.message == "You're already at the general store." && sim.Serialize() == before);
+}
+
+void RoadSignsOfferTheWalk()
+{
+    const PublicRoad& road = EstatePublicRoad();
+    CHECK(road.signs.size() == 3);
+    CHECK(RoadSignDestinations("ManorRoadSign") == std::vector<TravelDestination>{TravelDestination::Town});
+    CHECK(RoadSignDestinations("TownRoadSign") == std::vector<TravelDestination>{TravelDestination::Manor});
+    CHECK(RoadSignDestinations("GatewayRoadSign").size() == 2 && RoadSignDestinations("Milestone").empty());
+    CHECK(RoadSignLabel("ManorRoadSign") == "To town" && RoadSignLabel("TownRoadSign") == "To the manor"
+        && RoadSignLabel("GatewayRoadSign") == "Town / Manor");
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    sim.SkipToHourOfDay(9.0);
+    for (const PublicRoadSign& sign : road.signs)
+    {
+        // She reads the sign she stands beside, and only within reach.
+        CHECK(RoadSignNear(sign.position) == &sign);
+        CHECK(RoadSignNear({sign.position.x + RoadSignReachCm + 50.0, sign.position.y}) == nullptr);
+        // Every walk it offers plans from the verge where it stands.
+        for (const TravelDestination destination : RoadSignDestinations(sign.name))
+        {
+            const TravelPlan plan = PlanTravel(sim.GetState(), sign.position, destination);
+            CHECK(plan.ok && plan.gameHours > 0.0 && plan.connectorMetres < 30.0);
+        }
+    }
+    // The walk from the manor's sign is the Map tab's walk: one transaction, time passes, she's in town.
+    const PublicRoadSign* manorSign = road.FindSign("ManorRoadSign");
+    const double before = sim.GetState().hour;
+    const TravelPlan plan = PlanTravel(sim.GetState(), manorSign->position, TravelDestination::Town);
+    OK(sim.WalkRoad(TravelDestination::Town, manorSign->position));
+    CHECK(std::abs(sim.GetState().hour - (before + plan.gameHours)) < 1e-6);
 }
 
 void WalkTheRoad()
@@ -555,35 +586,34 @@ void WalkTheRoad()
     CHECK(!PlanTravel(sim.GetState(), town->position, TravelDestination::Town).ok);
     Simulation woodland;
     CHECK(!PlanTravel(woodland.GetState(), manor->position, TravelDestination::Town).ok);
-    // Refusals pass no time at all.
+    // Refusals pass no time at all. Hunger never fails her on the estate, so an empty belly doesn't stop the walk.
     sim.SkipToHourOfDay(12.0);
     Edit(sim, 5.0, 100.0);
-    const std::string hungry = sim.Serialize();
-    const auto starving = sim.WalkRoad(TravelDestination::Town, manor->position);
-    CHECK(!starving.ok && starving.message.find("too hungry") != std::string::npos && sim.Serialize() == hungry);
+    Simulation hungry = sim;
+    OK(hungry.WalkRoad(TravelDestination::Town, manor->position));
     Edit(sim, 100.0, 3.0);
     const std::string tired = sim.Serialize();
     const auto sleepy = sim.WalkRoad(TravelDestination::Town, manor->position);
     CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos && sim.Serialize() == tired);
     const std::string there = sim.Serialize();
     CHECK(!sim.WalkRoad(TravelDestination::Town, town->position).ok && sim.Serialize() == there);
-    // Fed and rested: the clock runs for the whole walk, and she's hungrier and a little more tired.
+    // Rested: the clock runs for the whole walk, and she's a little more tired (the estate has no hunger).
     Edit(sim, 100.0, 100.0);
     const double before = sim.GetState().hour;
     const std::uint64_t revision = sim.GetRevision();
     const TravelPlan plan = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
     OK(sim.WalkRoad(TravelDestination::Town, manor->position));
     CHECK(std::abs(sim.GetState().hour - before - plan.gameHours) < 1e-6);
-    CHECK(sim.GetRevision() > revision && sim.GetState().hunger < 100.0 && sim.GetState().energy < 100.0);
+    CHECK(sim.GetRevision() > revision && sim.GetState().hunger == 100.0 && sim.GetState().energy < 100.0);
     CHECK(sim.DozeCount() == 0);
 }
 
 // Shops and the pack show the canonical nominal Energy one food restores, from its catalogue row.
 void FoodEnergyLabels()
 {
-    CHECK(FoodEnergyLabel(Item::Pasty) == "+25 Energy");
-    CHECK(FoodEnergyLabel(Item::Bread) == "+8 Energy");
-    CHECK(FoodEnergyLabel(Item::Cheese) == "+12 Energy");
+    CHECK(FoodEnergyLabel(Item::Pasty) == "+40 Energy");
+    CHECK(FoodEnergyLabel(Item::Bread) == "+12 Energy");
+    CHECK(FoodEnergyLabel(Item::Cheese) == "+15 Energy");
     for (int i = 0; i < ItemCount; ++i)
     {
         const auto item = static_cast<Item>(i);
@@ -799,6 +829,7 @@ int main(int argc, char** argv)
     Run("playtest shop placement", PlaytestShopPlacement);
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);
+    Run("the road signs offer the same walk", RoadSignsOfferTheWalk);
     Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);
     Run("pickup lines follow her actual stacks", PickupGainsFollowActualStacks);
     Run("pail water shows on the pail", PailWaterPresentation);

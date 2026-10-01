@@ -1,5 +1,6 @@
 #include "HomesteadController.h"
 #include "HomesteadControllerText.h"
+#include "UI/HomesteadUITheme.h"
 #include "HomesteadControllerPreferences.h"
 #include "HomesteadControllerConfig.h"
 #include "HomesteadControllerHelpers.h"
@@ -121,6 +122,8 @@ AHomesteadController::AHomesteadController()
 void AHomesteadController::BeginPlay()
 {
     Super::BeginPlay();
+    // The UI theme trial (UI/HomesteadUITheme.h): every themed colour set before any widget is built.
+    HomesteadUITheme::Apply();
     const bool SmokeTest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"));
     const bool VisualPlaytest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest"));
 #if UE_BUILD_SHIPPING
@@ -435,6 +438,8 @@ void AHomesteadController::Tick(float DeltaSeconds)
         }
     }
     TickStores(DeltaSeconds);
+    TickRoadSigns();
+    TickCalendarNotices();
     if (bPlanning && !bBookOpen) UpdatePlacement(false);
     UpdateGardenOutline();
     if (IsFailed() && !bWasFailed)

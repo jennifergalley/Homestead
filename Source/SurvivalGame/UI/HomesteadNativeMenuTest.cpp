@@ -9,8 +9,11 @@
 #include "../HomesteadTestPaths.h"
 #include "../Simulation/HomesteadPackRow.h"
 #include "../Simulation/HomesteadBackpack.h"
+#include "../Simulation/HomesteadFood.h"
 #include "../Simulation/HomesteadItems.h"
 #include "../Simulation/HomesteadShops.h"
+#include "../Simulation/HomesteadEstatePublicRoad.h"
+#include "../Simulation/HomesteadTravel.h"
 #include "SHomesteadShop.h"
 #include "SHomesteadMenu.h"
 #include "SHomesteadMapView.h"
@@ -619,7 +622,11 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Unavailable quick presses are atomic and expose structured requirements"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Enter); Tap(EKeys::Enter); },
         [this, Before]() { const FString Details = Controller->NativeMenu->GetDisplayedDetails();
-            return !Controller->ToastIsError() && Controller->Simulation().Serialize() == *Before
+            // The press explains itself in the book's notice, with the recipe's own reason, and
+            // nothing changes.
+            return Controller->ToastIsError() && Controller->Toast().StartsWith(TEXT("Gather "))
+                && Controller->NativeMenu->GetNoticeText() == Controller->Toast()
+                && Controller->Simulation().Serialize() == *Before
                 && Details.Contains(TEXT("Branch: Have")) && Details.Contains(TEXT("/ Need 2"))
                 && Details.Contains(TEXT("Rusted axe head: Have"))
                 && Details.Contains(TEXT("Salvage piles around the manor")); });
@@ -645,7 +652,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { return !Controller->IsPlanning() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
     // The Guidebook (page 3) is retired: its keys open nothing, a request for it opens the pack, and
     // the tabs run Inventory, Craft, Build, Map, Appearance.
-    // The shop: food shows its Energy and prices read as whole coins (Homestead::FoodEnergyLabel,
+    // The shop: food shows its Energy (a Meal also until when she'd be Well fed) and prices read as whole coins (Homestead::Food::EffectLabel,
     // Homestead::FormatMoney). A disclosed store is placed ahead of her at a known open hour.
     Add(TEXT("Shop Buy lists food with its Energy and prices in whole coins"),
         [this]()
@@ -661,10 +668,10 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         {
             if (!Controller->ShopScreen.IsValid() || Controller->ShopScreen->IsSellTab() || Controller->ShopScreen->RowCount() < 2) return false;
             const FString Purse = UTF8_TO_TCHAR(Homestead::FormatMoney(Controller->State().money).c_str());
-            const FString Pasty = UTF8_TO_TCHAR(Homestead::FoodEnergyLabel(Homestead::Item::Pasty).c_str());
+            const FString Pasty = UTF8_TO_TCHAR(Homestead::Food::EffectLabel(Controller->State(), Homestead::Item::Pasty).c_str());
             const FString Price = UTF8_TO_TCHAR(Homestead::FormatMoney(Homestead::BuyPrice(Homestead::Item::Pasty)).c_str());
             Results.Add(FString::Printf(TEXT("SHOP_LABELS purse=%s pasty=%s price=%s"), *Purse, *Pasty, *Price));
-            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && Pasty == TEXT("+25 Energy")
+            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && (Controller->State().fixedEstate ? Pasty.StartsWith(UTF8_TO_TCHAR("+40 Energy \xC2\xB7 Well fed until ")) : Pasty == TEXT("+40 Energy"))
                 && Price == TEXT("100 coins");
         }, 0.8f);
     Add(TEXT("Capture the shop's Buy page"), [this]() { Screenshot(TEXT("native-shop-buy")); },
@@ -723,6 +730,62 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Leave the shop and return to Settings, as before the shop check"),
         [this]() { Controller->CloseShopScreen(); Controller->OpenBook(4); },
         [this]() { return !Controller->ShopScreen.IsValid() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
+    // Road signs: a one-way sign she can't walk from here says why and changes nothing (no book, no
+    // pause); the two-way Gateway sign opens the centred confirm over the Map page. The sign is focused
+    // directly (disclosed); wherever the fixture stands her, one of the one-way signs is refused.
+    // With the book shut the clock runs, so "changes nothing" is her place, pack, purse and energy,
+    // and no walk's worth of time (a refused walk passes none).
+    const auto BeforeSign = MakeShared<Homestead::State>();
+    const auto SignSpot = MakeShared<Homestead::Point>();
+    const auto SignRefusal = MakeShared<FString>();
+    Add(TEXT("A road sign whose one way is refused says why and leaves the book shut"),
+        [this, BeforeSign, SignRefusal, SignSpot]()
+        {
+            Controller->CloseBook();
+            const auto& Signs = Homestead::EstatePublicRoad().signs;
+            int32 Refused = INDEX_NONE;
+            for (int32 Index = 0; Index < static_cast<int32>(Signs.size()) && Refused == INDEX_NONE; ++Index)
+            {
+                const auto Ways = Homestead::RoadSignDestinations(Signs[Index].name);
+                if (Ways.size() != 1) continue;
+                if (!Controller->CanSetOut()) { Refused = Index; *SignRefusal = TEXT("You can't set out just now."); }
+                else if (const auto Plan = Controller->MenuPlanTravel(Ways[0]); !Plan.ok)
+                { Refused = Index; *SignRefusal = UTF8_TO_TCHAR(Plan.error.c_str()); }
+            }
+            if (Refused == INDEX_NONE) { Finish(false, TEXT("No one-way road sign is refused from the fixture's spot.")); return; }
+            Results.Add(TEXT("SIGN_REFUSAL ") + *SignRefusal);
+            *BeforeSign = Controller->State();
+            *SignSpot = Controller->PlayerPoint();
+            Controller->Focus = AHomesteadController::EFocus::RoadSign;
+            Controller->FocusId = Refused;
+            Controller->InteractWithRoadSign();
+        },
+        [this, BeforeSign, SignRefusal, SignSpot]()
+        {
+            const auto& Now = Controller->State();
+            return !Controller->IsBookOpen() && Controller->ToastIsError() && Controller->Toast() == *SignRefusal
+                && Now.inventory == BeforeSign->inventory && Now.money == BeforeSign->money
+                && Now.energy <= BeforeSign->energy && Now.hour - BeforeSign->hour < 0.05
+                && std::hypot(Controller->PlayerPoint().x - SignSpot->x, Controller->PlayerPoint().y - SignSpot->y) < 50.0;
+        });
+    Add(TEXT("The two-way Gateway sign opens the centred confirm over the Map page"),
+        [this]()
+        {
+            const auto& Signs = Homestead::EstatePublicRoad().signs;
+            for (int32 Index = 0; Index < static_cast<int32>(Signs.size()); ++Index)
+                if (Homestead::RoadSignDestinations(Signs[Index].name).size() > 1)
+                {
+                    Controller->Focus = AHomesteadController::EFocus::RoadSign;
+                    Controller->FocusId = Index;
+                    Controller->InteractWithRoadSign();
+                    return;
+                }
+            Finish(false, TEXT("No two-way road sign."));
+        },
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 7 && Controller->NativeMenu->IsTravelPromptOpen(); });
+    Add(TEXT("Stay here, and back to Settings as before"),
+        [this]() { Controller->CloseBook(); Controller->OpenBook(4); },
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 4 && !Controller->NativeMenu->IsTravelPromptOpen(); });
     Add(TEXT("The retired Guidebook has no G / H shortcut"),
         [this]() { Tap(EKeys::Escape); Tap(EKeys::G); Tap(EKeys::H); },
         [this]() { return !Controller->IsBookOpen(); });
@@ -2277,7 +2340,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 FHomesteadRow Row;
                 const bool Found = Controller->MenuHotbarRow(*TargetCell, Row);
                 Results.Add(TEXT("FOOD_HOVER ") + Row.Detail.Replace(TEXT("\n"), TEXT(" | ")));
-                return Found && Row.Detail.Contains(TEXT("+25 Energy")) && !Row.Detail.Contains(TEXT("Stack #"))
+                return Found && Row.Detail.Contains(TEXT("+40 Energy")) && !Row.Detail.Contains(TEXT("Stack #"))
                     && Row.Detail.Contains(TEXT(": 2"));
             });
         Add(TEXT("Capture the chest view's hotbar row holding the pasties"),

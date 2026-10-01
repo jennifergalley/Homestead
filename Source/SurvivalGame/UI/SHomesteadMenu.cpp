@@ -1,4 +1,5 @@
 #include "SHomesteadMenu.h"
+#include "HomesteadUITheme.h"
 #include "SHomesteadMenuPrivate.h"
 
 namespace HomesteadMenus
@@ -7,7 +8,7 @@ namespace HomesteadMenus
 TSharedRef<SWidget> SHomesteadMenu::Text(const FString& Value, int32 Size) const
 {
     return SNew(STextBlock).Text(FText::FromString(Value)).ColorAndOpacity(Ink)
-        .Font(FCoreStyle::GetDefaultFontStyle("Regular", Size)).AutoWrapText(true);
+        .Font(HomesteadUITheme::Font("Regular", Size)).AutoWrapText(true);
 }
 
 void SHomesteadMenu::Construct(const FArguments& Args)
@@ -46,7 +47,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                             .BorderBackgroundColor(MenuPine).Padding(12, 10)
                             [
                                 SNew(STextBlock).AutoWrapText(true).ColorAndOpacity(MenuGold)
-                                .Font(FCoreStyle::GetDefaultFontStyle("Regular", 16))
+                                .Font(HomesteadUITheme::Font("Regular", 16))
                                 .Text_Lambda([this]() { return FText::FromString(Footer()); })
                             ]
                         ]
@@ -99,7 +100,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                 + SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)
                 [
                     SNew(STextBlock).Text(FText::FromString(Tabs[Page]))
-                    .Font(FCoreStyle::GetDefaultFontStyle("Bold", 16))
+                    .Font(HomesteadUITheme::Font("Bold", 16))
                     .ColorAndOpacity_Lambda([this, Page]() { return SeenPage == Page ? FSlateColor(MenuGold) : FSlateColor(Ink); })
                 ]
                 + SVerticalBox::Slot().AutoHeight().Padding(8, 4, 8, 0)
@@ -112,12 +113,17 @@ void SHomesteadMenu::Construct(const FArguments& Args)
             ], ERegion::Tabs, Page)
         ];
     }
-    TabBar->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)
+    // The date closes the row on a panel of its own, so the tabs and it make one band as wide as the
+    // page beneath (Jenny, 2026-09-30: no offset).
+    TabBar->AddSlot().AutoWidth().Padding(3, 0)
     [
+        SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(MenuPine)
+        .Padding(FMargin(12, 4)).VAlign(VAlign_Center)
+        [
         SNew(SBox).WidthOverride(145)
         [
             SNew(STextBlock).AutoWrapText(true).ColorAndOpacity(Ink)
-            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 15))
+            .Font(HomesteadUITheme::Font("Regular", 15))
             .Text_Lambda([this]()
             {
                 if (!Controller.IsValid()) return FText();
@@ -127,6 +133,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                     FMath::FloorToInt(Hour), FMath::FloorToInt((Hour - FMath::FloorToInt(Hour)) * 60),
                     Controller->Simulation().IsRaining() ? TEXT("Rain") : TEXT("Clear")));
             })
+        ]
         ]
     ];
     Refresh();
@@ -159,6 +166,8 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     }
     else if (bOrbitLeft || bOrbitRight || bOrbitUp || bOrbitDown || OrbitStickX != 0.0f || OrbitStickY != 0.0f)
         ClearAppearanceOrbit();
+    if (bCenterPopup && !bPopupCentered && Dialog == EDialog::Context && Root && Root->GetCachedGeometry().GetLocalSize().X > 0)
+        BuildPopup();
     if (bPointerItemDown && PointerDragRevision != Controller->Simulation().GetRevision())
         CancelPointerItemDrag();
     if (bVirtualDraggingItem && VirtualDragRevision != Controller->Simulation().GetRevision())
@@ -296,6 +305,7 @@ void SHomesteadMenu::Refresh()
 }
 
 int32 SHomesteadMenu::GetTabPageCount() const { return UE_ARRAY_COUNT(FieldBookPages); }
+TConstArrayView<int32> SHomesteadMenu::TabPages() { return MakeArrayView(FieldBookPages); }
 bool SHomesteadMenu::HasTabForPage(int32 Page) const
 {
     for (const int32 Tab : FieldBookPages) if (Tab == Page) return true;

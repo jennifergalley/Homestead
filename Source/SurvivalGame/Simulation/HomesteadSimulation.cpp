@@ -3,6 +3,7 @@
 #include "HomesteadChests.h"
 #include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
+#include "HomesteadFood.h"
 #include "HomesteadParcels.h"
 #include "HomesteadManor.h"
 #include "HomesteadLamp.h"
@@ -87,6 +88,11 @@ std::string ApplyMeal(State& state, Item item)
 Result CanEat(const State& state, Item item)
 {
     if (state.failed) return Failed();
+    if (state.fixedEstate)
+    {
+        const std::string refusal = Food::EstateRefusal(state, item);
+        return refusal.empty() ? Good("") : Bad(refusal);
+    }
     if (FoodNutrition(item) == 0.0) return Bad(item == Item::Roots ? std::string("Raw roots need cooking first.")
         : std::string(ItemName(item)) + " isn't something to eat.");
     // A snack is still worth eating on a full stomach when it restores energy she's short of.
@@ -94,6 +100,11 @@ Result CanEat(const State& state, Item item)
     const bool restores = state.energy < 100.0 && FoodEnergy(item) > 0.0;
     if (!feeds && !restores) return Bad("You are already full. Save this food for later.");
     return Good("");
+}
+// Eats one (after CanEat): Energy only and Well fed on the estate, hunger and energy in the woodland.
+std::string Consume(State& state, Item item)
+{
+    return state.fixedEstate ? Food::EatOnEstate(state, item) : ApplyMeal(state, item);
 }
 Inventory Items(std::initializer_list<std::pair<Item, int>> values)
 {
@@ -1175,6 +1186,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
 {
     State candidate;
     candidate.fixedEstate = true;
+    candidate.hunger = 100.0; // The estate has no hunger (HomesteadFood.h).
     candidate.placementBakeVersion = placements.bakeVersion;
     // She arrives in her tunic; clothing is cosmetic on the estate.
     candidate.wearables = {{1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0}};
@@ -1866,12 +1878,8 @@ bool RainAudible(double rain, double ambience, double indoors)
 {
     return RainAudioLevel(rain, ambience, indoors) > 0.001;
 }
-int Simulation::DayNumber() const { return static_cast<int>(state_.hour / 24.0) + 1; }
-const char* Simulation::SeasonName() const
-{
-    static const char* names[] = {"Spring", "Summer", "Autumn", "Winter"};
-    return names[((DayNumber() - 1) / 14) % 4];
-}
+int Simulation::DayNumber() const { return Today().dayOfSeason; }
+const char* Simulation::SeasonName() const { return Calendar::SeasonName(Today().season); }
 bool Simulation::IsSheltered(Point position) const
 {
     if (!ValidPoint(position)) return false;
@@ -2068,7 +2076,7 @@ Result Simulation::Eat(Item item)
     const auto allowed = CanEat(state_, item);
     if (!allowed) return allowed;
     if (!TryAdjust(Items({{item, -1}}))) return Bad(std::string("Gather or cook some ") + ItemName(item) + " first.");
-    return Good(ApplyMeal(state_, item));
+    return Good(Consume(state_, item));
 }
 Result Simulation::EatGroup(int groupId, std::uint64_t expectedRevision)
 {
@@ -2084,7 +2092,7 @@ Result Simulation::EatGroup(int groupId, std::uint64_t expectedRevision)
     const Item item = entry->item;
     --entry->quantity;
     --candidate.inventory[static_cast<int>(item)];
-    const std::string message = ApplyMeal(candidate, item);
+    const std::string message = Consume(candidate, item);
     return CommitInventory(std::move(candidate), message.c_str());
 }
 Result Simulation::Craft(Recipe recipe, Point player)
@@ -2705,8 +2713,9 @@ Result Simulation::Plant(int plotId, Point player, CropKind kind)
     if (!ValidEnum(kind, CropKind::Count)) return Bad("Choose seeds to plant.");
     auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a tilled plot to plant.");
-    if (plot->planted) return Bad("A crop is already growing here.");
+    if (plot->planted) return Bad(plot->withered ? "Hoe out the withered plant before planting." : "A crop is already growing here.");
     const auto& crop = GetCropInfo(kind);
+    if (!GrowsIn(kind, Today().season)) return Bad(OutOfSeasonText(kind));
     if (auto ready = CheckExertion(Exertion::PlantEnergy); !ready) return ready;
     if (!TryAdjust(Items({{crop.seed, -1}})))
         return Bad(kind == CropKind::Berries ? "Gather a berry to plant the seeds from its fruit."
@@ -2715,14 +2724,19 @@ Result Simulation::Plant(int plotId, Point player, CropKind kind)
     plot->kind = kind;
     plot->planted = true;
     plot->picked = false;
+    plot->withered = false;
     plot->growth = 0.0;
-    return Exert(Exertion::PlantEnergy, Good(std::string("Planted ") + crop.lower + ". " + ReadyInText(kind)));
+    // Planting too late in its seasons is allowed, with a warning.
+    const auto late = TooLateText(kind, crop.growHours, state_.hour);
+    return Exert(Exertion::PlantEnergy, Good(std::string("Planted ") + crop.lower + ". "
+        + (late.empty() ? ReadyInText(kind) : late)));
 }
 Result Simulation::CheckWater(int plotId, Point player) const
 {
     if (state_.failed) return Failed();
     const auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to water it.");
+    if (plot->withered) return Bad("Nothing living to water. Hoe out the withered plant.");
     if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to water crops.");
     if (plot->moisture >= 1.0) return Bad("This soil is already fully watered.");
     if (Count(Item::Water) <= 0) return Bad(EmptyPailText);
@@ -2741,6 +2755,12 @@ Result Simulation::CheckWeed(int plotId, Point player) const
     if (state_.failed) return Failed();
     const auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to weed it.");
+    if (plot->withered)
+    {
+        // Weeding a withered plot hoes the dead plant out (ClearWithered).
+        if (Count(Item::DiggingStick) == 0) return Bad("Carry your hoe to clear the withered plant.");
+        return CheckExertion(Exertion::TillEnergy);
+    }
     if (plot->weeds <= 0.0) return Bad("This plot is already free of weeds.");
     return CheckExertion(Exertion::WeedEnergy);
 }
@@ -2748,15 +2768,35 @@ Result Simulation::Weed(int plotId, Point player)
 {
     if (auto ready = CheckWeed(plotId, player); !ready) return ready;
     auto* plot = Find(state_.plots, plotId);
+    if (plot->withered) return ClearWithered(plotId, player);
     plot->weeds = 0.0;
     return Exert(Exertion::WeedEnergy, Good(plot->planted ? "Weeds removed. The crop has more room to grow."
         : "Weeds pulled. The square is clean for sowing."));
+}
+Result Simulation::ClearWithered(int plotId, Point player)
+{
+    if (state_.failed) return Failed();
+    auto* plot = Find(state_.plots, plotId);
+    if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside the plot to clear it.");
+    if (!plot->planted || !plot->withered) return Bad("Nothing withered grows here.");
+    if (Count(Item::DiggingStick) == 0) return Bad("Carry your hoe to clear the withered plant.");
+    if (auto ready = CheckExertion(Exertion::TillEnergy); !ready) return ready;
+    const std::string name = GetCropInfo(plot->kind).lower;
+    plot->planted = false;
+    plot->withered = false;
+    plot->picked = false;
+    plot->growth = 0.0;
+    plot->weeds = 0.0;
+    // A cleared plot keeps the neutral kind (saves require it for bare soil).
+    plot->kind = CropKind::Roots;
+    return Exert(Exertion::TillEnergy, Good("Hoed out the withered " + name + ". The soil is ready to plant."));
 }
 Result Simulation::HarvestCrop(int plotId, Point player)
 {
     if (state_.failed) return Failed();
     auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside your crop to harvest.");
+    if (plot->planted && plot->withered) return Bad(PlotStatus(*plot) + ".");
     if (!plot->planted || plot->growth < 1.0)
         return Bad(plot->planted ? PlotStatus(*plot) + "." : std::string("Nothing is growing here yet."));
     const auto& crop = GetCropInfo(plot->kind);
@@ -2852,11 +2892,14 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
 {
     (void)player;
     const bool rain = IsRaining();
-    const double hungerRate = sleeping ? -1.3 : -2.0;
+    // The seeded woodland keeps its legacy rule: hunger drains and at 0 fails her. The estate has no
+    // hunger (HomesteadFood.h): it stays at 100.
+    const bool hungerFails = !state_.fixedEstate;
+    const double hungerRate = !hungerFails ? 0.0 : sleeping ? -Hunger::AsleepPerHour : -Hunger::AwakePerHour;
     const double energyRate = sleeping ? recoveryPerHour : -Exertion::AwakePerHour;
     // Stop at the first failed vital, rather than consuming hours beyond the checkpoint boundary.
     double elapsed = hours;
-    elapsed = std::min(elapsed, state_.hunger / -hungerRate);
+    if (hungerFails) elapsed = std::min(elapsed, state_.hunger / -hungerRate);
     if (energyRate < 0) elapsed = std::min(elapsed, state_.energy / -energyRate);
     state_.hunger = Clamp(state_.hunger + hungerRate * elapsed, 0.0, 100.0);
     state_.energy = Clamp(state_.energy + energyRate * elapsed, 0.0, 100.0);
@@ -2867,27 +2910,24 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
     {
         plot.moisture = Clamp(plot.moisture + (rain ? 0.3 : -0.025) * elapsed, 0.0, 1.0);
         plot.weeds = Clamp(plot.weeds + 0.009 * elapsed, 0.0, 1.0);
-        if (plot.planted)
+        if (plot.planted && !plot.withered)
         {
             const double growingHours = GetCropInfo(plot.kind).growHours;
             const double rate = MoistureGrowthFactor(plot.moisture) * WeedGrowthFactor(plot.weeds) / growingHours;
             plot.growth = Clamp(plot.growth + elapsed * rate, 0.0, 1.0);
         }
     }
-    const double before = state_.hour;
-    const int dayBefore = static_cast<int>(std::floor((before - DayRolloverHour) / 24.0));
+    const int dayBefore = Calendar::DayIndex(state_.hour);
     state_.hour += elapsed;
-    // Townsfolk buy down her goods in the shops each morning.
-    if (std::floor((state_.hour - DayRolloverHour) / 24.0) > std::floor((before - DayRolloverHour) / 24.0))
-        SellDownShops();
-    // Only hunger fails her. Energy running out makes her doze off (AdvanceGameHours).
+    // The 06:00 rollover: the shops sell down, weeds creep and the seasons turn (OnNewDay).
+    for (int day = dayBefore + 1; day <= Calendar::DayIndex(state_.hour); ++day) OnNewDay(Calendar::DateOfDay(day));
+    // Energy running out makes her doze off (AdvanceGameHours); only in the woodland does hunger fail her.
     if (state_.energy <= 1e-10) state_.energy = 0.0;
     if (state_.hunger <= 1e-10)
     {
         state_.hunger = 0.0;
-        state_.failed = true;
+        if (hungerFails) state_.failed = true;
     }
-    if (const int day = static_cast<int>(std::floor((state_.hour - DayRolloverHour) / 24.0)); day > dayBefore) CreepWeeds(day);
     return elapsed;
 }
 Result Simulation::SetEnergy(double energy)
@@ -2930,14 +2970,16 @@ Result Simulation::CanSprint() const
 Result Simulation::CheckExertion(double cost) const
 {
     if (state_.failed) return Failed();
-    if (state_.energy - cost < Exertion::Reserve) return Bad("You're too exhausted to keep working. Eat something or rest.");
+    if (state_.energy - WorkCost(cost) < Exertion::Reserve) return Bad("You're too exhausted to keep working. Eat something or rest.");
     return {true, "", ResultCode::None, revision_};
 }
 Result Simulation::Exert(double cost, Result done)
 {
-    if (done.ok) state_.energy = Clamp(state_.energy - cost, 0.0, 100.0);
+    if (done.ok) state_.energy = Clamp(state_.energy - WorkCost(cost), 0.0, 100.0);
     return done;
 }
+bool Simulation::IsWellFed() const { return Food::IsWellFed(state_); }
+double Simulation::WorkCost(double base) const { return IsWellFed() ? base * Food::WellFedWorkFactor : base; }
 double Simulation::HarvestCost(int nodeId) const
 {
     const auto* node = Find(state_.resources, nodeId);
@@ -3092,9 +3134,11 @@ std::string Simulation::Serialize() const
     if (Manor::HasSaveSection(state_)) Manor::WriteSaveSection(body, state_);
     Lamp::WriteSaveSection(body, state_);
     Crops::WriteSaveSection(body, state_);
+    Crops::WriteWitheredSection(body, state_);
     PackRowRules::WriteSaveSection(body, state_);
     if (Chests::HasSaveSection(state_)) Chests::WriteSaveSection(body, state_);
     if (Backpack::HasSaveSection(state_)) Backpack::WriteSaveSection(body, state_);
+    Food::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3159,8 +3203,12 @@ Result Simulation::Deserialize(const std::string& data)
         !FiniteRange(candidate.hunger, 0.0, 100.0) || !FiniteRange(candidate.energy, 0.0, 100.0) ||
         !FiniteRange(legacyWarmth, 0.0, 100.0) || candidate.nextId < 1 ||
         candidate.nextId >= TransientResourceIdBase) return invalid();
-    const bool critical = candidate.hunger == 0 || candidate.energy == 0 || legacyWarmth == 0;
-    if (critical != candidate.failed) return invalid();
+    // Out of energy (or, in older saves, warmth) is a critical vital, and so is hunger at 0 in the
+    // woodland. On the estate hunger at 0 only slows her (gentle hunger), so it may be saved unfailed.
+    const bool spent = candidate.energy == 0 || legacyWarmth == 0;
+    const bool critical = spent || candidate.hunger == 0;
+    const bool starvedUnfailed = candidate.hunger == 0 && !spent && !candidate.failed;
+    if (critical != candidate.failed && !starvedUnfailed) return invalid();
     switch (ReadSavedStock(input, candidate.inventory, version, storedItems, MaxPackCapacity))
     {
     case SavedStock::Ok: break;
@@ -3381,9 +3429,11 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Manor::SaveTag) { if (!Manor::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Crops::WitheredSaveTag) { if (!Crops::ReadWitheredSection(input, candidate)) return invalid(); }
         else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Chests::SaveTag) { if (!Chests::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Backpack::SaveTag) { if (!Backpack::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Food::SaveTag) { if (!Food::ReadSaveSection(input, candidate)) return invalid(); }
         // A section this build doesn't know came from a newer build; it can't be skipped safely.
         else return newer;
         input >> std::ws;
@@ -3394,8 +3444,13 @@ Result Simulation::Deserialize(const std::string& data)
     int nextHandle = nextResourceHandle_;
     const bool sameWorld = candidate.world.seed == state_.world.seed &&
         candidate.world.generationVersion == state_.world.generationVersion;
+    // Only the estate has gentle hunger; a woodland save at 0 hunger must be failed.
+    if (starvedUnfailed && !candidate.fixedEstate) return invalid();
     if (candidate.fixedEstate)
     {
+        // Estate saves made before gentle hunger could fail her for hunger alone; she carries on.
+        if (candidate.failed && candidate.hunger == 0 && !spent) candidate.failed = false;
+        candidate.hunger = 100.0; // The estate has no hunger (HomesteadFood.h); older saves drained it.
         const auto estate = MaterializeEstate(candidate, *placements_);
         if (!estate) return estate;
         // Overgrowth baked after this save was made (the manor clear-out) can land on her plots or

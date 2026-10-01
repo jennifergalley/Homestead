@@ -1,4 +1,5 @@
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 #include "../Simulation/HomesteadHotbarLayout.h"
 
 namespace HomesteadMenus
@@ -11,7 +12,7 @@ TSharedRef<SButton> SHomesteadMenu::MakeButton(const FString& Label, TFunction<v
         .OnClicked_Lambda([this, Action]() { if (PointerAction()) Action(); return FReply::Handled(); })
         [
             SNew(STextBlock).Text(FText::FromString(Label)).AutoWrapText(true)
-            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
+            .Font(HomesteadUITheme::Font("Regular", 17))
             .ColorAndOpacity_Lambda([Color]() { return Color.Get().GetSpecifiedColor() == MenuGold ? FSlateColor(PineInk) : FSlateColor(Ink); })
         ];
 }
@@ -150,8 +151,11 @@ bool SHomesteadMenu::IsFocusedControlVisible() const
 {
     const auto Target = FocusWidget();
     if (!Target) return false;
+    // Settings' Save / Load / Quit row sits above the scrolling list (SettingsTopCount), so it is
+    // measured against the book, not the list's scroll box.
+    const bool bSettingsTopRow = SeenPage == 4 && Region == ERegion::Content && ContentSelection < SettingsTopCount();
     const auto Container = Dialog != EDialog::None ? StaticCastSharedPtr<SWidget>(DialogScroll)
-        : Region == ERegion::Content ? StaticCastSharedPtr<SWidget>(Scroll)
+        : Region == ERegion::Content && !bSettingsTopRow ? StaticCastSharedPtr<SWidget>(Scroll)
         : Region == ERegion::Actions ? StaticCastSharedPtr<SWidget>(DetailsScroll) : TSharedPtr<SWidget>();
     const FGeometry Bounds = Container ? Container->GetCachedGeometry() : GetCachedGeometry();
     const auto Geometry = Target->GetCachedGeometry();
@@ -187,7 +191,7 @@ int32 SHomesteadMenu::SettingsTabOf(int32 SettingId)
 
 void SHomesteadMenu::SetSettingsTab(int32 Tab)
 {
-    Tab = FMath::Clamp(Tab, 0, 2);
+    Tab = FMath::Clamp(Tab, 0, SettingsTabCount - 1);
     if (Tab == SettingsTab || Dialog != EDialog::None) return;
     SettingsTab = Tab;
     if (Scroll) Scroll->ScrollToStart();

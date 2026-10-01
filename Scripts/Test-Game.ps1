@@ -13,8 +13,17 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [ValidateRange(300,3600)][int]$TimeoutSeconds = 1200, [switch]$ShippingQA,
     [switch]$DisableChunkPreparation,
     # The Estate route (what Jenny plays): new game, each part of the estate, a few actions, fps.
-    [switch]$EstateSmoke, [ValidateRange(0,1000)][int]$MaxLogErrors = 0)
+    [switch]$EstateSmoke, [ValidateRange(0,1000)][int]$MaxLogErrors = 0,
+    # The UI gallery (Development): each listed state captured with Slate (Source/SurvivalGame/HomesteadUIGallery.h).
+    # Scripts\Capture-UiGallery.ps1 drives this per resolution and input.
+    [switch]$UIGallery, [string]$UIGalleryIds = 'all', [ValidateSet('KBM','Pad')][string]$UIGalleryInput = 'KBM',
+    # Plain: the UI over a flat warm-grey backdrop with the world hidden (the heroine stays unless
+    # -UIGalleryNoHeroine); World: over the game.
+    [ValidateSet('Plain','World')][string]$UIGalleryBackdrop = 'Plain', [switch]$UIGalleryNoHeroine,
+    # The UI theme trial (UI/HomesteadUITheme.h): parchment or classic.
+    [ValidateSet('','parchment','classic')][string]$UITheme = '')
 $ErrorActionPreference = 'Stop'
+if ($UIGallery -and $Packaged) { throw 'The UI gallery runs the Development editor binary (-game), not a packaged build.' }
 if ($EstateSmoke -and ($FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or $Creek -or $Crafting -or
     $Weeding -or $Clearing -or $GeneratedWoodland -or $Prompts -or $BookClarity -or $Hotbar -or $NativeMenu -or $WithAudio -or $FixtureSave)) {
     throw 'The Estate smoke route runs on its own.'
@@ -103,7 +112,7 @@ $output = Join-Path $root 'Saved\Automation'
 # Map per suite. The default game map is the Estate, but every suite here still plays the seeded
 # woodland (estate tools with stand-in salvage grants). Once a suite is retargeted to the fixed
 # estate, add its switch here, for example @($Clearing); a run with any of them uses the Estate.
-$estateSuites = @($EstateSmoke)
+$estateSuites = @($EstateSmoke, $UIGallery)
 $suiteMap = if ($estateSuites | Where-Object { $_ }) { '/Game/SurvivalGame/Maps/Estate' } else { '/Game/SurvivalGame/Maps/Homestead' }
 if ($Packaged) {
     $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
@@ -259,6 +268,13 @@ if ($Hotbar) { $loopArguments = '-HomesteadHotbarTest -HomesteadMetaHuman -Homes
 if ($Crafting) { $loopArguments = '-HomesteadCraftingTest -HomesteadRequireLit' }
 # The Estate route plays the MetaHuman heroine Jenny plays, and skips the Names step.
 if ($EstateSmoke) { $loopArguments = '-HomesteadEstateSmoke -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRequireLit' }
+if ($UIGallery) {
+    # The normal Estate saves the run proves it never touched (-UserDir moves Saved\ into the sandbox).
+    $realSaves = Join-Path $root 'Saved\SaveGames\Estate'
+    $loopArguments = "-HomesteadUIGallery=$UIGalleryIds -HomesteadUIGalleryInput=$UIGalleryInput -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRealSaveDir=`"$realSaves`" -HomesteadUIGalleryBackdrop=$UIGalleryBackdrop"
+    if ($UIGalleryNoHeroine) { $loopArguments += ' -HomesteadUIGalleryNoHeroine' }
+    if ($UITheme) { $loopArguments += " -HomesteadUITheme=$UITheme" }
+}
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $execCommands = @()
 if (-not $ShippingQA -and $RenderScale -gt 0) { $execCommands += "r.ScreenPercentage $RenderScale" }
@@ -271,10 +287,55 @@ if ($ShippingQA) {
     $process = & (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments -CompletionDriven:($GeneratedWoodland -or $FullLoop -or $NativeMenu)
 } else {
     $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
-    Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
+    # Only the process this script started, matched by its image: never Jenny's Build\Windows or
+    # Releases game. It runs in a kill-on-close job, so an aborted or timed-out run takes it (and the
+    # shader workers it starts) down when this script's process ends.
+    $image = try { $process.MainModule.FileName } catch { $process.Path }
+    if ($image -and -not [string]::Equals([IO.Path]::GetFullPath($image), [IO.Path]::GetFullPath($executable), [StringComparison]::OrdinalIgnoreCase)) {
+        Stop-Process -Id $process.Id
+        throw "Started $image instead of $executable; stopped it."
+    }
+    if (-not ('HomesteadGameJob' -as [type])) {
+        Add-Type -TypeDefinition @"
+using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+public static class HomesteadGameJob
+{
+    [StructLayout(LayoutKind.Sequential)] struct Basic { public long PerProcessUserTimeLimit, PerJobUserTimeLimit; public uint LimitFlags; public UIntPtr MinimumWorkingSetSize, MaximumWorkingSetSize; public uint ActiveProcessLimit; public UIntPtr Affinity; public uint PriorityClass, SchedulingClass; }
+    [StructLayout(LayoutKind.Sequential)] struct Counters { public ulong ReadOperations, WriteOperations, OtherOperations, ReadBytes, WriteBytes, OtherBytes; }
+    [StructLayout(LayoutKind.Sequential)] struct Extended { public Basic BasicLimits; public Counters Io; public UIntPtr ProcessMemoryLimit, JobMemoryLimit, PeakProcessMemoryUsed, PeakJobMemoryUsed; }
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern IntPtr CreateJobObject(IntPtr attributes, string name);
+    [DllImport("kernel32.dll", SetLastError = true)] static extern bool SetInformationJobObject(IntPtr job, int infoClass, ref Extended info, uint length);
+    [DllImport("kernel32.dll", SetLastError = true)] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+    [DllImport("kernel32.dll", SetLastError = true)] static extern bool CloseHandle(IntPtr handle);
+    // Closing the job ends everything still in it.
+    public static void Close(IntPtr job) { if (job != IntPtr.Zero) CloseHandle(job); }
+    const uint KillOnJobClose = 0x2000;
+    const int ExtendedLimitInformation = 9;
+    // The job handle stays open for this PowerShell process's life; closing it kills everything in it.
+    public static IntPtr Adopt(IntPtr process)
+    {
+        IntPtr job = CreateJobObject(IntPtr.Zero, null);
+        if (job == IntPtr.Zero) throw new Win32Exception();
+        Extended info = new Extended();
+        info.BasicLimits.LimitFlags = KillOnJobClose;
+        if (!SetInformationJobObject(job, ExtendedLimitInformation, ref info, (uint)Marshal.SizeOf(typeof(Extended)))) throw new Win32Exception();
+        if (!AssignProcessToJobObject(job, process)) throw new Win32Exception();
+        return job;
+    }
+}
+"@
+    }
+    $script:gameJob = [HomesteadGameJob]::Adopt($process.Handle)
+    Write-Host "Engine smoke-test PID: $($process.Id) (kill-on-close job). Log: $log"
 }
 Write-Host "Requested output: ${Width}x${Height}; 3D resolution policy: $(if($ShippingQA){'unchanged Shipping defaults'}elseif($RenderScale -eq 0){'player default'}else{$RenderScale})."
-if (-not $ShippingQA -and -not $process.WaitForExit($TimeoutSeconds * 1000)) {
+# Ctrl+C or a failure while waiting closes the job, which ends the game with it.
+$exited = $true
+try { if (-not $ShippingQA) { $exited = $process.WaitForExit($TimeoutSeconds * 1000) } }
+finally { if ($script:gameJob -and -not $process.HasExited -and $exited) { [HomesteadGameJob]::Close($script:gameJob); $script:gameJob = $null } }
+if (-not $exited) {
     Stop-Process -Id $process.Id
     throw "Engine smoke test exceeded $TimeoutSeconds seconds. Stopped only its process $($process.Id)."
 }
@@ -324,6 +385,20 @@ if ($EstateSmoke) {
 }
 if ($RequireLit -and $result -notmatch '(?m)^LIT_GUARD samples=[1-9]\d* final_mode=3 shader_complexity=0 ') {
     throw 'The requested sustained Lit guard did not produce successful runtime evidence.'
+}
+# Suites selected only through -ExtraArguments have their own capture rules, not the full loop's:
+# the Hotkey safety fixture takes none (Test-HotkeySafety.ps1 expects 0 screenshots), and the
+# Feedback fixture takes one screenshot per measured notice (Test-FeedbackLayout.ps1).
+if ($UIGallery) {
+    # Each captured entry is listed in gallery-index.tsv; skipped entries are reported, not captured.
+    $galleryIndex = Join-Path $output 'gallery-index.tsv'
+    $captures = if (Test-Path -LiteralPath $galleryIndex) { @(Get-Content -LiteralPath $galleryIndex -Encoding utf8 | Where-Object { $_ } | ForEach-Object { ($_ -split "`t")[0] + '.png' }) } else { @() }
+    if (-not $captures) { throw 'The UI gallery captured nothing.' }
+}
+elseif ($ExtraArguments -match '(^|\s)-HomesteadHotkeyTest(\s|$)') { $captures = @() }
+elseif ($ExtraArguments -match '(^|\s)-HomesteadFeedbackTest(\s|$)') {
+    $captures = @(Get-ChildItem -LiteralPath $output -Filter '*.layout.json' | ForEach-Object { $_.Name -replace '\.layout\.json$', '.png' })
+    if ($captures.Count -lt 2) { throw 'The Feedback fixture measured fewer than two active notices.' }
 }
 foreach ($name in $captures) {
     $image = Join-Path $output $name

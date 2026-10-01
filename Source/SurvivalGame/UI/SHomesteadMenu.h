@@ -78,6 +78,9 @@ public:
     FString GetFocusedRegionName() const;
     // The field book's tabs (automation): how many there are, and whether one opens `Page`.
     int32 GetTabPageCount() const;
+    // The pages the tab bar cycles through (MenuDetail::FieldBookPages), and how many tabs Settings has.
+    static TConstArrayView<int32> TabPages();
+    static constexpr int32 SettingsTabCount = 3;
     bool HasTabForPage(int32 Page) const;
     bool HasSynchronizedFocus() const;
     bool IsFocusedControlVisible() const;
@@ -116,6 +119,10 @@ public:
     // The notice card that floats over the book for the latest toast (never takes layout space).
     bool IsNoticeShowing() const;
     bool IsNoticeAtTop() const { return bNoticeTop; }
+    // A road sign's offer (AHomesteadController::InteractWithRoadSign): the Map tab's walk confirm, one
+    // "Walk to ..." per way the sign points, centred over the book.
+    void OpenSignTravelPrompt(const FString& SignWords, const TArray<Homestead::TravelDestination>& Destinations);
+    bool IsTravelPromptOpen() const { return Dialog == EDialog::Context && bTravelPrompt; }
     FString GetNoticeText() const { return IsNoticeShowing() ? NoticeText : FString(); }
     bool IsDyeChooserOpen() const { return bDyeChooser && Dialog == EDialog::Context; }
     int32 GetDyePreview() const { return DyePreviewed; }
@@ -131,6 +138,18 @@ public:
     FString GetChestNameDraft() const { return RenameDraft; }
     // Automation: types as the keyboard would.
     void TypeChestName(const FString& Characters);
+    bool IsNoticeError() const { return bNoticeError; }
+    // Automation (the Feedback suite): the notice card as laid out, in pixels from the menu's corner, with
+    // the book's bounds and the regions it must keep clear of (the tabs and the focused control).
+    struct FNoticeLayout
+    {
+        bool bShowing = false;
+        FBox2D Card = FBox2D(ForceInit);
+        FBox2D Book = FBox2D(ForceInit);
+        FVector2D CardDesired = FVector2D::ZeroVector;
+        TArray<TPair<FString, FBox2D>> Protected;
+    };
+    FNoticeLayout GetNoticeLayout() const;
 
 private:
     enum class ERegion { Tabs, Session, Inventory, Portrait, Content, Equipment, Details, Actions, Recovery, Hotbar };
@@ -234,6 +253,10 @@ private:
     TOptional<Homestead::TravelDestination> MapTravelDestination() const;
     FString MapTravelLine() const;
     void OpenTravelPrompt(Homestead::TravelDestination Destination);
+    // The travel prompt is open (Map tab or a road sign); a sign's is centred once the book has a size.
+    bool bTravelPrompt = false;
+    bool bCenterPopup = false;
+    bool bPopupCentered = false;
     void OpenItemContextMenuFor(const FHomesteadRow& Row, FVector2D Anchor);
     // Where a popup opens: at the pointer for mouse input, beside the focused tile otherwise.
     FVector2D PopupAnchorFor(const TSharedPtr<SWidget>& Widget, bool bPointer) const;

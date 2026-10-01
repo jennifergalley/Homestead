@@ -26,6 +26,7 @@ namespace HomesteadMenus { class SHomesteadHotbar; }
 using SHomesteadHotbar = HomesteadMenus::SHomesteadHotbar;
 namespace HomesteadMenus { class SHomesteadShop; }
 class AHomesteadGeneralStore;
+class AHomesteadRoadSign;
 namespace HomesteadMenus { class SHomesteadNames; class SHomesteadArrival; }
 class IInputProcessor;
 class AHomesteadMenuPortrait;
@@ -119,6 +120,8 @@ public:
     // where she stands, and the walk itself (the clock runs for its length; she's stood at the end).
     Homestead::TravelPlan MenuPlanTravel(Homestead::TravelDestination Destination) const;
     bool MenuTravel(Homestead::TravelDestination Destination, uint64 ExpectedRevision);
+    // Whether she's in a state to set out at all (her body is there and settled on the ground).
+    bool CanSetOut() const;
     // The dye chooser's live preview: shows her wearing the garment in `Dye` through the real wardrobe
     // path without changing anything saved; MenuEndDyePreview puts her own clothes back.
     bool MenuPreviewDye(int32 WearableId, int32 Dye);
@@ -394,11 +397,20 @@ private:
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
     friend class AHomesteadGardenProbe;
+    // The UI gallery (Development builds) sets up isolated states for each UI surface.
+    friend struct FHomesteadUIGallery;
     friend class UHomesteadMapComponent;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth, RoadSign };
     // General store (HomesteadShopFlow.cpp).
     TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
+    // The fingerposts on the public road (HomesteadControllerRoadSigns.cpp); FocusId indexes the road's signs.
+    UPROPERTY() TArray<TObjectPtr<AHomesteadRoadSign>> RoadSigns;
+    void TickRoadSigns();
+    void ConsiderRoadSignFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;
+    FString RoadSignTitle() const;
+    FString RoadSignActions() const;
+    void InteractWithRoadSign();
     int64 LastWalletDelta = 0;
     float WalletDeltaRemaining = 0.0f;
     FMealGain MealGain;
@@ -756,6 +768,10 @@ private:
     Homestead::SleepChoice BedChoice = Homestead::SleepChoice::UntilMorning;
     int32 BedChoiceBed = INDEX_NONE;
     int32 SeenDozes = 0;
+    // Calendar toasts (HomesteadControllerCalendar.cpp): once per season change, compared against the
+    // simulation after each Advance.
+    int32 SeenSeasonChanges = 0;
+    void TickCalendarNotices();
     void CycleZoom();
     void QuickSave();
     void QuickLoad();
