@@ -10,4 +10,6 @@
 
 ## 2. Verification
 
-- [ ] 2.1 PIE by ear-proxy: scythe, billhook, pickaxe, chops, shop sale at their new gains (STRIKE_CUE log)
+- [x] 2.1 PIE ear-proxy (2026-10-01): STRIKE_CUE billhook CaneCutA 0.90 at phase 1.252 (contact 1.250); pickaxe
+      CraftStrikeA 0.12 then final 0.15 at 1.148/1.142 (contact 1.133); the scythe mowed nettles 570085 (swish
+      at 0.25, compiled from the catalogue; no log line for it).
