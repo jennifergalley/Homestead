@@ -41,9 +41,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         return SNew(SVerticalBox)
             + SVerticalBox::Slot().AutoHeight().Padding(24)[ Text(TEXT("Time to try again"), 32) ]
             + SVerticalBox::Slot().FillHeight(1).Padding(24)
-            [ Text(TEXT("You ran out of food.\n\nReturn to a recovery checkpoint, or open Settings to quit. No failed state will replace your usable checkpoint."), 23) ]
+            [ Text(TEXT("You ran out of food."), 23) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
-            [ RegisterButton(MakeButton(TEXT("Retry checkpoint  [A / Enter]"), [this]() { Controller->MenuRetry(); }), ERegion::Recovery, 0) ]
+            [ RegisterButton(MakeButton(TEXT("Return to latest save  [A / Enter]"), [this]() { Controller->MenuRetry(); }), ERegion::Recovery, 0) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
             [ RegisterButton(MakeButton(TEXT("Settings / Quit  [Y / G]"), [this]() { ChangePage(4); }), ERegion::Recovery, 1) ];
     }
@@ -178,7 +178,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 1, 0, 0)
                 [
+                    // A label and its value; a short line only where a setting isn't obvious.
                     SNew(STextBlock).Text(FText::FromString(Row.Detail)).ColorAndOpacity(Muted)
+                    .Visibility(Row.Detail.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible)
                     .Font(HomesteadUITheme::Font("Regular", MenuSettingsStyle::DetailSize)).AutoWrapText(true)
                 ];
             RowContent = Content;

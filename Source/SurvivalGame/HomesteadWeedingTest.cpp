@@ -95,7 +95,12 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
             return bOk;
         }, 0.3f);
     Add(TEXT("E on an unripe crop with the pail out does not water it"),
-        [this, Snapshot]() { Controller->ChooseOnHotbar(Homestead::Item::WateringCan); Snapshot(); Tap(EKeys::E); },
+        [this, Snapshot]()
+        {
+            if (Controller->Simulation().Count(Homestead::Item::WateringCan) <= 0) Controller->Sim.GrantItems(Homestead::Item::WateringCan, 1);
+            if (!Controller->ChooseOnHotbar(Homestead::Item::WateringCan)) { Finish(false, TEXT("Could not put the pail in her hand.")); return; }
+            Snapshot(); Tap(EKeys::E);
+        },
         [this, Probe, Animation, Hidden, Matches]()
         {
             return Matches() && Hidden() && Animation()->WaterStarts() == Probe->WaterStarts
@@ -104,7 +109,14 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
     for (const Homestead::Item Tool : {Homestead::Item::WateringCan, Homestead::Item::DiggingStick, Homestead::Item::Hatchet,
         Homestead::Item::Pickaxe, Homestead::Item::Billhook, Homestead::Item::Scythe})
         Add(FString::Printf(TEXT("E never uses the tool in hand: %s"), UTF8_TO_TCHAR(Homestead::ItemName(Tool))),
-            [this, Snapshot, Tool]() { Controller->ChooseOnHotbar(Tool); Snapshot(); Tap(EKeys::E); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [this, Snapshot, Tool]()
+            {
+                // Every tool is really in her hand for this check (granted if the fixture has none).
+                if (Controller->Simulation().Count(Tool) <= 0) Controller->Sim.GrantItems(Tool, 1);
+                if (!Controller->ChooseOnHotbar(Tool) || Controller->HotbarItem(Controller->SelectedHotbarIndex()) != Tool)
+                { Finish(false, TEXT("Could not put the tool in her hand for the E check.")); return; }
+                Snapshot(); Tap(EKeys::E); Tap(EKeys::Gamepad_FaceButton_Bottom);
+            },
             [Probe, Animation, Hidden, Matches]()
             { return Matches() && Hidden() && Animation()->WaterStarts() == Probe->WaterStarts && Animation()->GatherStarts() == Probe->Starts; },
             0.4f);

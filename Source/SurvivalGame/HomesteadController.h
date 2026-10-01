@@ -56,6 +56,8 @@ struct FHomesteadRow
     FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
     Homestead::RecipeAssessment RecipeState;
     bool HasRecipeState = false;
+    // A build plan's conditions beyond its materials ("Foundation required"), listed under them.
+    TArray<FString> Conditions;
 };
 
 struct FHomesteadHotbarSlot
@@ -177,6 +179,8 @@ public:
     static FString SleepOptionLabel(const Homestead::SleepOption& Option);
     FString PreviewLabel() const;
     bool ToastIsError() const { return bToastError; }
+    // A short HUD notice from outside the controller (the vitals stack's low-Energy warnings).
+    void PostHudNotice(const FString& Text, bool bWarning) { Notify(Text, bWarning); }
     Homestead::Point PlayerPoint() const;
     float GroundHeight(float X, float Y) const;
     bool PrepareWorldAt(Homestead::Point Position);

@@ -636,8 +636,8 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { const auto Rows = Controller->Rows();
             // The action says what activating a plan does: a placement preview, nothing spent yet.
             return Controller->BookPage() == 2 && Controller->BookTitle() == TEXT("Building plans")
-                && Rows.Num() > 1 && Rows[0].Action == TEXT("Choose a spot to build")
-                && Rows.Last().Action == TEXT("Choose what to take down"); });
+                && Rows.Num() > 1 && Rows[0].Action == TEXT("Build")
+                && Rows.Last().Action == TEXT("Take down"); });
     Capture(TEXT("native-build"));
     Add(TEXT("Real building plan enters placement without charging"),
         [this, Before]()

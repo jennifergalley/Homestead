@@ -27,18 +27,30 @@ void AHomesteadController::HoeSquareAhead()
     TillSquareAhead(X, Y);
     const auto Position = PlayerPoint();
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    // The focused withered crop is the one the card offers to hoe out ("[LMB] Hoe out"), so the hoe
+    // takes that one even when the square ahead of her is its neighbour.
+    if (Focus == EFocus::Plot)
+        if (const auto* Withered = FindPlotWhere(State().plots, [this](const Homestead::Plot& Plot)
+            { return Plot.id == FocusId && Plot.planted && Plot.withered; }))
+        {
+            const Homestead::Point Center = Homestead::PlotCenter(*Withered);
+            const auto Result = Sim.ClearWithered(Withered->id, Position);
+            NotifyResourceAction(Result, GrassStepA);
+            if (Result.ok && Avatar) Avatar->PlayTill(Center);
+            return;
+        }
     // Already tilled: a withered crop is hoed out, otherwise the hoe takes out its weeds.
     if (const auto* Tilled = FindPlotWhere(State().plots, [X, Y](const Homestead::Plot& Plot)
         { return Plot.cellX == X && Plot.cellY == Y; }))
     {
         const Homestead::Point Center = Homestead::PlotCenter(*Tilled);
         const auto Result = Tilled->withered ? Sim.ClearWithered(Tilled->id, Position) : Sim.Weed(Tilled->id, Position);
-        Notify(Result, GrassStepA);
+        NotifyResourceAction(Result, GrassStepA);
         if (Result.ok && Avatar) Avatar->PlayTill(Center);
         return;
     }
     const auto Result = Sim.Till(X, Y, Position);
-    Notify(Result, GrassStepB);
+    NotifyResourceAction(Result, GrassStepB);
     if (!Result.ok || !Avatar) return;
     Avatar->PlayTill(Homestead::GardenCellCenter(X, Y));
     // The turned soil appears when the hoe first bites.
@@ -71,7 +83,7 @@ void AHomesteadController::PlantFocusedPlot(Homestead::CropKind Crop)
     if (!Plot) return;
     const auto Target = Homestead::PlotCenter(*Plot);
     const auto Result = Sim.Plant(FocusId, PlayerPoint(), Crop);
-    Notify(Result, GrassStepB);
+    NotifyResourceAction(Result, GrassStepB);
     if (!Result.ok) return;
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
     if (Avatar && Avatar->PlayPlant(Target) && Landscape)

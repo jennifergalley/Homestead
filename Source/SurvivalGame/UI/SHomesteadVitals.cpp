@@ -152,7 +152,7 @@ void SHomesteadVitals::UpdateLowWarnings()
         // jump from loading or sleeping, not while she's failed or a menu has the screen.
         const bool bWornDown = bWarnPrimed && FMath::Abs(Values[Meter] - WarnLast[Meter]) < JumpLimit;
         if (bWornDown && Shown[Meter] && Band > WarnBand[Meter] && !Controller->IsFailed())
-            Controller->Notify(WarningText(Meter, Band), Band >= 2);
+            Controller->PostHudNotice(WarningText(Meter, Band), Band >= 2);
         WarnBand[Meter] = Band;
         WarnLast[Meter] = Values[Meter];
     }

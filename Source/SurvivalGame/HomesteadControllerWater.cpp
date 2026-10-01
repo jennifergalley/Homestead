@@ -53,7 +53,7 @@ Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Posit
 void AHomesteadController::FillPailAtStream(Homestead::Point Position)
 {
     const auto Result = Sim.FillWater(Position);
-    Notify(Result);
+    NotifyResourceAction(Result, nullptr);
     // She kneels at the bank and dips the pail into the nearest authored fresh-water ribbon.
     if (Result.ok)
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))

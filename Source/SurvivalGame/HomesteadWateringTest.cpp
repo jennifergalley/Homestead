@@ -78,7 +78,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         },
             [this, Hidden]() { return Controller->FocusTitle() == TEXT("Fresh stream water") && Hidden(); }, 0.7f);
         Add(TEXT("Refill changes water stock but does not start a watering pose"),
-            [this]() { Controller->ChooseOnHotbar(Homestead::Item::WateringCan); Tap(EKeys::Gamepad_RightTrigger); },
+            [this]() { if (!Controller->ChooseOnHotbar(Homestead::Item::WateringCan)) { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; } Tap(EKeys::Gamepad_RightTrigger); },
             [this, Hidden]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && Hidden(); });
         Approach();
     };
@@ -98,7 +98,8 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 Probe->Toe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
                 Probe->View = Controller->GetControlRotation();
                 // Watering is the pail on the tool button (LMB / RT); E / A never waters (Jenny 2026-09-30).
-                Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
+                if (!Controller->ChooseOnHotbar(Homestead::Item::WateringCan))
+                { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; }
                 const FKey Use = Key == EKeys::E ? EKeys::LeftMouseButton : Key == EKeys::Gamepad_FaceButton_Bottom ? EKeys::Gamepad_RightTrigger : Key;
                 Tap(Use);
                 if (DoubleTap) Tap(Use);
@@ -127,18 +128,36 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                     && Controller->State().hour - Probe->Hour < 0.02;
             }, 0.55f);
     };
-    auto Rejected = [this, Probe, Animation, Hidden, Matches](const FString& Reason)
+    // A refused watering on the tool button: with the pail chosen, the simulation's own refusal (worked
+    // out on a copy); with no pail, an empty hotbar cell chosen, so the press has no tool at all.
+    auto Rejected = [this, Probe, Animation, Hidden, Matches](const FString& Reason, bool bHasPail)
     {
-        Add(Reason, [this, Probe, Animation]()
+        const auto ExpectedToast = MakeShared<FString>();
+        Add(Reason, [this, Probe, Animation, bHasPail, ExpectedToast]()
             {
                 Probe->Expected = Controller->Simulation();
                 Probe->Hour = Controller->State().hour;
                 Probe->Starts = Animation()->WaterStarts();
-                Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
+                if (bHasPail)
+                {
+                    if (!Controller->ChooseOnHotbar(Homestead::Item::WateringCan))
+                    { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; }
+                    Homestead::Simulation Copy = Controller->Simulation();
+                    *ExpectedToast = UTF8_TO_TCHAR(Copy.Water(GardenPlotId, Controller->PlayerPoint()).message.c_str());
+                }
+                else
+                {
+                    const int32 Empty = Controller->FirstEmptyHotbarCell();
+                    if (Controller->Simulation().Count(Homestead::Item::WateringCan) > 0 || Empty == INDEX_NONE)
+                    { Finish(false, TEXT("The no-pail fixture has a pail or no empty hotbar cell.")); return; }
+                    Controller->SelectHotbarSlot(Empty);
+                    *ExpectedToast = TEXT("Choose a carried tool first.");
+                }
                 Tap(EKeys::LeftMouseButton);
-            }, [this, Probe, Animation, Hidden, Matches]()
+            }, [this, Probe, Animation, Hidden, Matches, ExpectedToast]()
             {
-                return Controller->ToastIsError() && Matches() && Hidden() && Animation()->WaterStarts() == Probe->Starts;
+                return Controller->ToastIsError() && Controller->Toast() == *ExpectedToast && !ExpectedToast->IsEmpty()
+                    && Matches() && Hidden() && Animation()->WaterStarts() == Probe->Starts;
             });
     };
 
@@ -266,9 +285,9 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     Add(TEXT("Plant with gamepad A (Seeds chosen on the hotbar); no watering prop"),
         [this]() { Controller->ChooseOnHotbar(Homestead::Item::Seeds); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Hidden]() { return !Controller->ToastIsError() && Hidden() && Controller->FocusTitle() != TEXT("Tilled soil"); });
-    Rejected(TEXT("No-can rejection neither debits water nor presents a free tool"));
+    Rejected(TEXT("No pail: the tool button on an empty cell neither debits water nor presents a free tool"), false);
     QueueGrant(Homestead::Item::WateringCan, 1);
-    Rejected(TEXT("Empty-can rejection has no pose, prop or moisture reward"));
+    Rejected(TEXT("Empty-pail rejection has no pose, prop or moisture reward"), true);
     Refill();
     Water(EKeys::Gamepad_FaceButton_Bottom, true);
     Add(TEXT("Capture watering with the real hand-held tool"), [this]() { Screenshot(TEXT("watering-pour")); },
@@ -358,7 +377,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 Tap(EKeys::LeftMouseButton);
             }, [this, Probe, Matches]() { return Probe->Ready && !Controller->ToastIsError() && Matches(); }, 0.12f);
     Add(TEXT("Wait for repeated watering to recover"), []() {}, Hidden, 2.3f);
-    Rejected(TEXT("Exhausted water follows the existing refill rejection without a pose"));
+    Rejected(TEXT("Exhausted water follows the existing refill rejection without a pose"), true);
     Add(TEXT("Move to a valid empty context beyond all plot/resource focus"),
         [this, Garden]()
         {

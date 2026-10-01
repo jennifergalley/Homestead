@@ -994,6 +994,16 @@ const char* PieceRequirements(Piece piece)
     return ValidEnum(piece, Piece::Count) ? descriptions[static_cast<int>(piece)].c_str() : "Unknown structure";
 }
 bool IsBuildable(Piece piece) { return ValidEnum(piece, Piece::Count) && piece != Piece::Hearth; }
+Inventory PieceCost(Piece piece)
+{
+    // BuildCost is the change to her stock (negative); the cost is what it takes.
+    Inventory cost{};
+    if (!ValidEnum(piece, Piece::Count)) return cost;
+    const Inventory change = BuildCost(piece);
+    for (int i = 0; i < ItemCount; ++i) cost[i] = change[i] < 0 ? -change[i] : 0;
+    return cost;
+}
+bool PieceNeedsFoundation(Piece piece) { return EdgePiece(piece) || piece == Piece::Roof; }
 bool IsFurniture(Piece piece)
 {
     return piece == Piece::Fire || piece == Piece::Bed || piece == Piece::Chest || piece == Piece::Hearth;

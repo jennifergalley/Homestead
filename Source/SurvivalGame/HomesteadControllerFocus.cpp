@@ -183,8 +183,6 @@ FString AHomesteadController::FocusActions() const
                 // Trees are felled with the axe on the tool button; nothing else is offered on them.
                 if (Node.kind == Homestead::ResourceKind::ForestTree)
                     return ToolAvailable && SelectedTool == Homestead::Item::Hatchet ? Use + TEXT(" Fell") : FString();
-                if (Node.kind == Homestead::ResourceKind::Sapling)
-                    return A + TEXT(" Gather") + (ToolAvailable && SelectedTool == Homestead::Item::Hatchet ? TEXT("   ") + Use + TEXT(" Fell") : FString());
                 if (Node.kind == Homestead::ResourceKind::DeerRemains || Node.kind == Homestead::ResourceKind::Reeds)
                     return FString();
                 if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind))

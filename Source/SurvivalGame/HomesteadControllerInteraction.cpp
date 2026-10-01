@@ -31,7 +31,7 @@ void AHomesteadController::Interact()
             UpdateDeconstruct(true);
             const int32 Removed = DeconstructId;
             const auto Result = Sim.Deconstruct(Removed, Position);
-            Notify(Result, WoodTapB);
+            NotifyResourceAction(Result, WoodTapB);
             if (Result.ok)
             {
                 if (ActiveChestId.IsSet() && ActiveChestId.GetValue() == Removed) ActiveChestId.Reset();
@@ -43,7 +43,7 @@ void AHomesteadController::Interact()
         }
         UpdatePlacement(true);
         const auto Result = Sim.Place(BuildTarget, Position);
-        Notify(Result, WoodTapA);
+        NotifyResourceAction(Result, WoodTapA);
         if (Result.ok) Sim.AdvanceGameHours(0.1, Position);
         UpdatePlacement(true);
         return;
@@ -83,7 +83,7 @@ void AHomesteadController::Interact()
             break;
         const auto Result = Sim.Harvest(FocusId, Position);
         // Salvage and fallen boughs say what she found; ordinary forage shows it in her hands instead.
-        if (Homestead::IsOvergrowth(Kind)) Notify(Result, WoodTapA);
+        if (Homestead::IsOvergrowth(Kind)) NotifyResourceAction(Result, WoodTapA);
         else NotifyResourceAction(Result, bFell ? nullptr : Tree ? WoodTapB.Get() : GrassStepA.Get());
         if (Result.ok && Forage)
             if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
@@ -151,7 +151,7 @@ void AHomesteadController::Interact()
     case EFocus::Drop:
         // The lamp is taken up with a kneel; it reaches her hand when her fingers close on the bail.
         if (const auto* Lamp = Sim.SetDownLampDrop(); Lamp && Lamp->id == FocusId && StartLampPickUp(FocusId)) break;
-        Notify(Sim.PickUpDrop(FocusId, Position));
+        NotifyResourceAction(Sim.PickUpDrop(FocusId, Position), nullptr);
         break;
     case EFocus::Plot:
         for (const auto& Plot : State().plots)
@@ -277,7 +277,7 @@ void AHomesteadController::Secondary()
             if (Node.id == FocusId) { Kind = Node.kind; ActionTarget = Node.position; break; }
         if (Kind != Homestead::ResourceKind::Weeds && Kind != Homestead::ResourceKind::Nettles) return;
         if (StartWeedPull(FocusId, INDEX_NONE, ActionTarget)) return;
-        Notify(Sim.Harvest(FocusId, PlayerPoint()), GrassStepA);
+        NotifyResourceAction(Sim.Harvest(FocusId, PlayerPoint()), GrassStepA);
     }
     else if (Focus == EFocus::Plot)
     {
@@ -290,7 +290,7 @@ void AHomesteadController::Secondary()
             // without that clip she pulls them into the hip pouch like the estate's.
             if (StartWeedPull(INDEX_NONE, FocusId, Homestead::PlotCenter(Plot))) break;
             const auto Result = Sim.Weed(FocusId, PlayerPoint());
-            Notify(Result, GrassStepA);
+            NotifyResourceAction(Result, GrassStepA);
             if (Result.ok)
                 if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
                     Avatar->PlayKneelGather(EHomesteadKneelGather::Pouch,
@@ -298,7 +298,7 @@ void AHomesteadController::Secondary()
             break;
         }
     }
-    else if (Focus == EFocus::Fire) Notify(Sim.AddFuel(FocusId, PlayerPoint()), WoodTapA);
+    else if (Focus == EFocus::Fire) NotifyResourceAction(Sim.AddFuel(FocusId, PlayerPoint()), WoodTapA);
     else if (SelectedCarriedTool() == Homestead::Item::OilLamp) MenuRefillLamp();
     else if (Focus == EFocus::None) EatSelectedFoodInstead();
 }

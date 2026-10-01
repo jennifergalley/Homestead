@@ -404,6 +404,12 @@ void BedrollTakesHay()
     CHECK(PieceRequirements(Piece::Bed) == cost);
     CHECK(std::string(PieceRequirements(Piece::Wall)).find(ItemName(Item::BrambleCanes)) != std::string::npos);
     CHECK(std::string(PieceRequirements(Piece::Chest)).find(ItemName(Item::BrambleCanes)) != std::string::npos);
+    // The Build tab lists the same cost as rows (PieceCost) and the foundation as a condition.
+    CHECK(PieceCost(Piece::Bed)[static_cast<int>(Item::Branch)] == 4 && PieceCost(Piece::Bed)[static_cast<int>(Item::Hay)] == 4);
+    CHECK(PieceCost(Piece::Wall)[static_cast<int>(Item::BrambleCanes)] > 0);
+    CHECK(PieceNeedsFoundation(Piece::Wall) && PieceNeedsFoundation(Piece::Doorway) && PieceNeedsFoundation(Piece::Roof));
+    CHECK(!PieceNeedsFoundation(Piece::Bed) && !PieceNeedsFoundation(Piece::Chest) && !PieceNeedsFoundation(Piece::Foundation));
+    CHECK(PieceCost(Piece::Count) == Inventory{});
 
     // Canes alone, or too little hay, are refused and spend nothing.
     Simulation canes;

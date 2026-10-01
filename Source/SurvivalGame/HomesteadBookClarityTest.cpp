@@ -96,12 +96,12 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
             const auto Rows = Controller->Rows();
             // Every buildable piece in enum order; the hearth belongs to the old house.
             if (Controller->BookPage() != 2 || Rows.Num() != static_cast<int32>(Homestead::Piece::Hearth)
-                || Controller->BookTitle() != TEXT("Building plans") || !Controller->BookFooter().Contains(TEXT("A: Choose a spot to build"))) return false;
+                || Controller->BookTitle() != TEXT("Building plans") || !Controller->BookFooter().Contains(TEXT("A: Build"))) return false;
             for (int32 Id = 0; Id < Rows.Num(); ++Id)
             {
                 const auto Piece = static_cast<Homestead::Piece>(Id);
                 if (Rows[Id].Id != Id || Rows[Id].Label != UTF8_TO_TCHAR(Homestead::PieceName(Piece))
-                    || !Rows[Id].Detail.StartsWith(FString(TEXT("Needs: ")) + UTF8_TO_TCHAR(Homestead::PieceRequirements(Piece)))) return false;
+                    || !Rows[Id].HasRecipeState) return false;
             }
             return true;
         });
@@ -113,7 +113,7 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
         [this]() { return !Controller->IsPlanning(); });
     Add(TEXT("Keyboard reopens the same building plan page"), [this]() { Tap(EKeys::B); },
         [this]() { return Controller->BookPage() == 2 && Controller->SelectedRow() == 0
-            && Controller->BookFooter().Contains(TEXT("Enter: Choose a spot to build")); });
+            && Controller->BookFooter().Contains(TEXT("Enter: Build")); });
     QueueBookCapture(TEXT("book-plans-keyboard"));
     Add(TEXT("Menus pause the simulation and preserve the camera"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); CameraStart = Controller->GetControlRotation().Yaw; },

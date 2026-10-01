@@ -334,5 +334,5 @@ void AHomesteadController::LandOvergrowthSwing()
     }
     const auto Result = Sim.ClearOvergrowth(SwingNode, SwingTool, Position);
     ResetOvergrowthSwing();
-    Notify(Result, SwingTool == Homestead::Item::Pickaxe ? CraftStrikeA.Get() : WoodTapB.Get());
+    NotifyResourceAction(Result, SwingTool == Homestead::Item::Pickaxe ? CraftStrikeA.Get() : WoodTapB.Get());
 }

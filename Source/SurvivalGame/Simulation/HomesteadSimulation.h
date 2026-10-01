@@ -378,6 +378,9 @@ const char* PieceName(Piece piece);
 const char* CropName(CropKind kind);
 const char* RecipeRequirements(Recipe recipe);
 const char* PieceRequirements(Piece piece);
+// What a piece costs to build, and whether it stands on a foundation (walls, doorways and roofs).
+Inventory PieceCost(Piece piece);
+bool PieceNeedsFoundation(Piece piece);
 // Whether the Build page offers the piece (the hearth belongs to the old house).
 bool IsBuildable(Piece piece);
 // Beds, chests, cookfires and the hearth: one per building cell, set inside it.

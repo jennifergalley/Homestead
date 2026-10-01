@@ -399,7 +399,28 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
                     return;
                 }
         });
-    Add(TEXT("book-build"), TEXT("Build tab: building plans with their materials."), ECover::BookPage, 2, nullptr, Book(2));
+    Add(TEXT("book-build"), TEXT("Build tab: building plans; the details list 'Requires:' with each material's have/need, as Craft does."), ECover::BookPage, 2, nullptr, Book(2));
+    Add(TEXT("book-build-unaffordable"), TEXT("Build tab, a plan she can't afford yet (a wall if so): its short material in the missing colour, and 'Foundation required'."),
+        ECover::Dialog, 11, nullptr, [Later](AHomesteadController& Opened)
+        {
+            Opened.OpenBook(2);
+            Later(Opened, [](AHomesteadController& PC)
+            {
+                if (!PC.NativeMenu.IsValid()) return;
+                int32 Chosen = INDEX_NONE;
+                for (int32 Index = 0; Index < static_cast<int32>(Homestead::Piece::Count); ++Index)
+                {
+                    const auto Piece = static_cast<Homestead::Piece>(Index);
+                    if (!Homestead::IsBuildable(Piece)) continue;
+                    const Homestead::Inventory Cost = Homestead::PieceCost(Piece);
+                    bool bShort = false;
+                    for (int32 Material = 0; Material < Homestead::ItemCount; ++Material)
+                        bShort = bShort || PC.Sim.Count(static_cast<Item>(Material)) < Cost[Material];
+                    if (bShort && (Chosen == INDEX_NONE || Piece == Homestead::Piece::Wall)) Chosen = Index;
+                }
+                if (Chosen != INDEX_NONE) PC.NativeMenu->FocusSubject(EHomesteadMenuSubject::Legacy, Chosen, 0);
+            });
+        }, 1.3f);
     Add(TEXT("book-map"), TEXT("Map tab: the estate map with her marker, places and the key."), ECover::BookPage, 7, nullptr, Book(7));
     Add(TEXT("book-appearance"), TEXT("Appearance tab: her full-length view and the look choices."), ECover::BookPage, 6, nullptr, Book(6));
     Add(TEXT("book-credits"), TEXT("Credits page."), ECover::BookPage, 5, nullptr, Book(5));
@@ -535,7 +556,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         });
     // World notices.
     Add(TEXT("toast-success"), TEXT("World notice: a parchment slip at the top centre in the book's serif."),
-        ECover::Notice, Toast, nullptr, Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false));
+        ECover::Notice, Toast, nullptr, Notify(TEXT("Summer has come"), false));
     Add(TEXT("toast-error"), TEXT("World error notice: the rust-edged slip."),
         ECover::Notice, ToastError, nullptr, Notify(TEXT("Not ready yet"), true));
     Add(TEXT("toast-long"), TEXT("A long world notice wrapping to two or three lines."), ECover::Hud, 11, nullptr,
@@ -683,7 +704,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("hud-night"), TEXT("The world HUD at 10:30 PM: the moon in the calendar, the night-lit world."), ECover::Hud, 7, nullptr, Night, 1.5f);
     Add(TEXT("hud-rain"), TEXT("The world HUD in the rain: the rain cloud in the calendar, rain falling."), ECover::Hud, 8, nullptr, Rain, 1.5f);
     Add(TEXT("toast-night"), TEXT("A world notice at night: the parchment slip over the dark scene."), ECover::Hud, 9, nullptr,
-        [Night](AHomesteadController& PC) { Night(PC); PC.Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false); }, 1.5f);
+        [Night](AHomesteadController& PC) { Night(PC); PC.Notify(TEXT("Summer has come"), false); }, 1.5f);
     Add(TEXT("toast-rain"), TEXT("A world error notice in the rain."), ECover::Hud, 10, nullptr,
         [Rain](AHomesteadController& PC) { Rain(PC); PC.Notify(TEXT("Not ready yet"), true); }, 1.5f);
 

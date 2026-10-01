@@ -131,11 +131,12 @@ bool AHomesteadController::MenuEntryRow(const Homestead::LayoutEntry& Entry, int
         Row.Location = CurrentContainer == 0 ? FString(TEXT("Carried")) : ChestDisplayName(CurrentContainer);
         // Hover text: where and how many, what it is and (for food) what eating one now would do: its
         // Energy each, and for a Meal on the estate until when she'd be Well fed (Homestead::Food::
-        // PackUseText; the book pauses the clock). The internal stack id is not shown.
-        const FString Use = !IsFood(Entry.item) ? FString(TEXT("Used in the world or in recipes."))
-            : FromUtf8(Homestead::Food::PackUseText(State(), Entry.item).c_str());
-        Row.Detail = FString::Printf(TEXT("%s: %d\n\n%s\n%s"), *Row.Location, Entry.quantity,
-            *FromUtf8(Homestead::ItemDescription(Entry.item)), *Use);
+        // PackUseText; the book pauses the clock). Stats only, no how-to (Jenny 2026-09-30); the
+        // internal stack id is not shown.
+        FString Use = IsFood(Entry.item) ? FromUtf8(Homestead::Food::PackUseText(State(), Entry.item).c_str()) : FString();
+        Use.RemoveFromEnd(TEXT(" Eat one from your pack."));
+        Row.Detail = FString::Printf(TEXT("%s: %d\n\n%s"), *Row.Location, Entry.quantity,
+            *FromUtf8(Homestead::ItemDescription(Entry.item))) + (Use.IsEmpty() ? FString() : TEXT("\n") + Use);
         Row.CanStore = false;
         Row.CanTake = false;
         Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : FString();
