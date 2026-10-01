@@ -41,9 +41,11 @@ constexpr float MaxRoll = 0.35f;
 constexpr float RollRate = 8.0f;
 // How far above and below the blade to look for the ground (cm).
 constexpr float TraceReach = 150.0f;
-// The most the scythe tips up about the lower nib to keep its point out of the ground (radians, ~35 degrees),
-// and how fast that eases back down once clear (per second).
-constexpr float MaxTipUp = 0.6f;
+// The most the scythe tips up about the lower nib to keep its point out of the ground (radians, ~11 degrees),
+// and how fast that eases back down once clear (per second). Enough for a 13-degree uphill swath: the baked mow
+// (scythe_mow.py, c7e22276) keeps the blade 4 cm above level ground on every frame it's laid from her fists,
+// and a larger tip pulled the upper nib off her left fist.
+constexpr float MaxTipUp = 0.2f;
 constexpr float TipDownRate = 6.0f;
 // A hit this far above a blade sample is foliage or a branch overhead, not the ground under it (cm): the trace
 // carries on below it. Deeper than the worst cut into the ground the clip ever made (38 cm).
@@ -147,18 +149,32 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         // The pickaxe too: the two-handed strike lays it from both fists regardless.
         const float TurnWeight = StoneHoe || Spec.Tool == Homestead::Item::Hatchet || Spec.Tool == Homestead::Item::Pickaxe
             ? 1.0f : HeldToolTilt;
-        // The imported props have their blades on +Y (the Blender export mirrors Y), but
-        // hoe_till.py authored the strokes for a blade on -Y. As she sets the hoe she rolls the
-        // haft half a turn so the blade bites down into the soil instead of facing up.
-        const float Roll = StoneHoe && Hoeing ? FMath::SmoothStep(0.0f, 1.0f, Animation->TillWeight()) : 0.0f;
-        const FTransform Turn = FTransform(FQuat(FVector::ZAxisVector, PI * Roll))
-            * FTransform(FVector(0, 0, Slide * TurnWeight))
+        // hoe_till.py solves her right hand for the imported blade on +Y, so the hoe no longer
+        // rolls in her fist as she sets it (that half-turn folded her wrist back on the forearm).
+        const FTransform Turn = FTransform(FVector(0, 0, Slide * TurnWeight))
             * FTransform(FQuat::Slerp(FQuat::Identity, Flip, TurnWeight));
         const float Lean = CarryDegrees - (StoneHoe ? FMath::Min(CarryDegrees, RestWristDegrees) : Carry);
         const FTransform HeldPose = StoneHoe
             ? FTransform(FQuat(FVector::XAxisVector, FMath::DegreesToRadians(Lean))) * Spec.Rest
             : Tilt(Spec.Rest, Lean);
-        if (!Spec.bHangs) Prop->SetRelativeTransform(Turn * HeldPose);
+        FTransform Placed = Turn * HeldPose;
+        if (StoneHoe && Hoeing)
+        {
+            // Setting the hoe to till, she turns it in her fist about the palm's normal so the haft
+            // crosses her palm on a working grip's diagonal; carried straight, her wrist bent 74
+            // degrees toward the little finger (hoe_till.py WORK_TURN and the hand_r-space palm).
+            // The clip holds the work grip from its first frame to its last (its stand and end keys
+            // put the hoe where the carry has it), so the turn eases in and out with the blend.
+            constexpr float HoeWorkTurnDegrees = -45.0f;
+            const FVector PalmNormal = FVector(-0.036f, 0.984f, 0.175f).GetSafeNormal();
+            const FVector PalmCentre = FVector(-0.998f, -0.043f, 0.036f) * 6.0f + PalmNormal * 2.6f;
+            const float Work = FMath::SmoothStep(0.0f, 1.0f, Animation->TillWeight());
+            const FVector Haft = Placed.GetRotation().GetAxisZ();
+            const FVector HaftGrip = Placed.GetLocation() + Haft * FVector::DotProduct(PalmCentre - Placed.GetLocation(), Haft);
+            Placed = Placed * (FTransform(-HaftGrip)
+                * FTransform(FQuat(PalmNormal, FMath::DegreesToRadians(HoeWorkTurnDegrees * Work))) * FTransform(HaftGrip));
+        }
+        if (!Spec.bHangs) Prop->SetRelativeTransform(Placed);
         if (Spec.bHangs)
         {
             // Hanging from the fist unless the pour lays it in both hands (UpdateWaterPail).
@@ -289,7 +305,7 @@ void AHomesteadCharacter::UpdateFellingHatchet()
         return;
     }
     // The left fist holds the knob and the right closes just above it (axe_fell.py): the haft
-    // runs up from the left grip centre, the edge along the left knuckles.
+    // runs up from the left grip centre, the edge from the left knuckles.
     USkeletalMeshComponent* Body = GetMesh();
     const auto GripCentre = [Body](const TCHAR* Side, FVector& Along)
     {
@@ -304,12 +320,27 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     };
     FVector AlongL;
     const FVector Knob = GripCentre(TEXT("l"), AlongL);
+    // The knob fist sits rolled on the haft so her wrist stays in line with the forearm, and the
+    // right fist rolls with the swing (axe_fell.py and ground_strike.py KNOB_ROLL, ROLL_R); turning
+    // the knob's knuckles back by its roll gives the edge (or the pick's point).
+    constexpr float KnobRollDegrees = 90.0f;
     // Both fists stay together at the base of the haft (axe_fell.py), so their spacing can't set
-    // the line; each closed fist's pinky-to-index axis runs along the haft.
-    const FVector AcrossL = (Body->GetSocketLocation(TEXT("index_01_l")) - Body->GetSocketLocation(TEXT("pinky_01_l"))).GetSafeNormal();
-    const FVector AcrossR = (Body->GetSocketLocation(TEXT("index_01_r")) - Body->GetSocketLocation(TEXT("pinky_01_r"))).GetSafeNormal();
+    // the line; each closed fist's pinky-to-index axis runs along the haft. That axis slants
+    // about 16 degrees toward the fingers, so with the fists rolled differently each is squared
+    // to its hand's fingers first, as the recipes author it.
+    const auto Across = [Body](const TCHAR* Side)
+    {
+        const FVector Hand = Body->GetSocketLocation(*FString::Printf(TEXT("hand_%s"), Side));
+        const FVector Along = (Body->GetSocketLocation(*FString::Printf(TEXT("middle_01_%s"), Side)) - Hand).GetSafeNormal();
+        const FVector Raw = (Body->GetSocketLocation(*FString::Printf(TEXT("index_01_%s"), Side))
+            - Body->GetSocketLocation(*FString::Printf(TEXT("pinky_01_%s"), Side))).GetSafeNormal();
+        return (Raw - Along * FVector::DotProduct(Raw, Along)).GetSafeNormal();
+    };
+    const FVector AcrossL = Across(TEXT("l"));
+    const FVector AcrossR = Across(TEXT("r"));
     const FVector Haft = (AcrossL + AcrossR).GetSafeNormal().IsNearlyZero() ? AcrossL : (AcrossL + AcrossR).GetSafeNormal();
-    const FVector Edge = (AlongL - Haft * FVector::DotProduct(AlongL, Haft)).GetSafeNormal();
+    const FVector Knuckles = AlongL.RotateAngleAxis(-KnobRollDegrees, Haft);
+    const FVector Edge = (Knuckles - Haft * FVector::DotProduct(Knuckles, Haft)).GetSafeNormal();
     if (Edge.IsNearlyZero()) return;
     // The imported hatchet's edge is on +Y (the Blender export mirrors Y; the report says -Y), so
     // +Y goes along the edge to face the tree.
@@ -506,14 +537,21 @@ void AHomesteadCharacter::UpdateWaterPail(UStaticMeshComponent& Pail, float Delt
     if (Hold > 0.001f)
     {
         // Between the take and the give the pail rides against her left palm like a pot: its
-        // side at the palm, its axis up her fingers, the lip ahead (the right hand mirrors it).
+        // side at the palm, its axis along her fingers turned back by the finger lead, the lip
+        // ahead (the right hand mirrors it). On the upright holds her fingers lead the axis
+        // forward (pail_pour.py LEAD) so her wrists stay straight; the lead eases out as she
+        // tips it to pour, and back in as she rights it, so the pail pivots between her palms.
+        constexpr float FingerLeadDegrees = 100.0f;
+        constexpr float TakeSeconds = 26.0f / 30.0f, LevelSeconds = 72.0f / 30.0f;
+        const float Lead = FingerLeadDegrees * (1.0f - FMath::SmoothStep(TakeSeconds, PailPourStart, Time)
+            + FMath::SmoothStep(PailPourStop, LevelSeconds, Time));
         USkeletalMeshComponent* Body = GetMesh();
         const FVector HandL = Body->GetSocketLocation(TEXT("hand_l"));
         const FVector KnuckleL = Body->GetSocketLocation(TEXT("middle_01_l"));
         const FVector FingersL = (KnuckleL - HandL).GetSafeNormal();
         const FVector AcrossL = Body->GetSocketLocation(TEXT("index_01_l")) - Body->GetSocketLocation(TEXT("pinky_01_l"));
         const FVector PalmL = FVector::CrossProduct(AcrossL, FingersL).GetSafeNormal();
-        const FVector Up = FVector::VectorPlaneProject(FingersL, PalmL).GetSafeNormal();
+        const FVector Up = FVector::VectorPlaneProject(FingersL.RotateAngleAxis(-Lead, PalmL), PalmL).GetSafeNormal();
         if (!PalmL.IsNearlyZero() && !Up.IsNearlyZero())
         {
             const FVector PalmPoint = HandL + (KnuckleL - HandL) * 0.6f + PalmL * 2.0f;
