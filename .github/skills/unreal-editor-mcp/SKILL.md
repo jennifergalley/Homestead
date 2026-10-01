@@ -436,6 +436,10 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 
 ### Interacting with the world
 
+- **Input contract:** E/the interact button only interacts (harvest, plant, pick up, open, talk,
+  eat or sleep). Tools act only through click/the gamepad tool button. Never make E on an unripe
+  crop water it; hold-to-repeat is tool-input-only. Verify this split with mouse/keyboard and
+  gamepad whenever interaction or tool routing changes.
 - **Focus is the nearest interactable within 2.8 m, regardless of facing** (`UpdateFocus`). To target
   a node, get closer to it than to anything else: `walk_to` with `stop_distance_cm` about 45, then
   confirm `nearbyResources[].focused` on your target before pressing the action.

@@ -25,6 +25,11 @@ new player-facing copy against this rule before it ships. The approved parchment
 does not change this content rule. The forthcoming `realistic-animation` skill and Animation
 Inspector must carry the same concise review standard once they land.
 
+**Control rule (Jenny, 2026-09-30):** E/the interact button only interacts—harvest, plant, pick
+up, open, talk, eat or sleep. Tools act only through click/the gamepad tool button. Never cross
+these paths: E on an unripe crop must not water it. Hold-to-repeat belongs only to tool input.
+Menu's control audit and Props' repeat bindings verify this before delivery.
+
 ## Model, reasoning and implementer slots
 
 Jenny's standing team preference (2026-09-29). These are **required settings for future session

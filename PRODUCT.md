@@ -48,6 +48,9 @@ Menus and construction planning pause simulation. No online gameplay services.
 - Preserve progress reliably.
 - Keep repeated tool work immediate through a visible ten-slot carried-tool hotbar, with
   mouse/keyboard and controller parity.
+- **Keep interaction and tools distinct.** E/the interact button only interacts—harvest, plant,
+  pick up, open, talk, eat or sleep. Tools act only through click/the gamepad tool button. No
+  crossover: E on an unripe crop never waters it. Hold-to-repeat binds only to tool input.
 - **Respect farming-sim fluency.** Assume the player knows the genre: UI is concise rather than
   instructional. No toasts for obvious outcomes; focus cards show only a name and keyed verbs;
   details/tooltips show stats, requirements and price rather than rules explanations; settings show
