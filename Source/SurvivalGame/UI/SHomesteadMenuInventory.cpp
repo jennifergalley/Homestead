@@ -72,7 +72,13 @@ void SHomesteadMenu::Select(int32 Index, bool KeepDesiredColumn)
         RememberedKeys[SeenPage] = RowKey(Entries[ContentSelection]);
         if (RowIndices[ContentSelection] != INDEX_NONE) Controller->MenuSelect(RowIndices[ContentSelection]);
         if (Scroll && Cells.IsValidIndex(ContentSelection))
-            Scroll->ScrollDescendantIntoView(Cells[ContentSelection], false, EDescendantScrollDestination::IntoView);
+        {
+            // A tile built this frame has no layout yet; scrolling to it now would leave the scroll offset
+            // NaN. Its scroll waits for the first layout (Tick).
+            if (Cells[ContentSelection]->GetCachedGeometry().GetLocalSize().X > 0)
+                Scroll->ScrollDescendantIntoView(Cells[ContentSelection], false, EDescendantScrollDestination::IntoView);
+            else bScrollSelectionPending = true;
+        }
         if (DetailsHost) DetailsHost->SetContent(BuildDetails());
         else ComputeActions();
         ScrollActionIntoView();

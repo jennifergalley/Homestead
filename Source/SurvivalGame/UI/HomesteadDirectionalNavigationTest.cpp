@@ -90,6 +90,10 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
                 if (!Controller->Sim.Harvest(Node.id, Node.position))
                 { Finish(false, TEXT("Navigation fixture could not gather its real branch stock.")); return; }
         }
+        // Not enough branches lying about for a ten-column pack's six rows: top up by authority.
+        if (const int32 Short = Groups + 3 - Controller->Sim.UsedCapacity(); Short > 0)
+            if (!Controller->Sim.GrantItems(Homestead::Item::Branch, Short))
+            { Finish(false, TEXT("Navigation fixture could not top up its branch stock.")); return; }
         while (static_cast<int32>(Controller->Sim.GetLayout(0)->size()) < Groups)
         {
             int32 Group = 0;
@@ -299,7 +303,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         {
             // The disclosed fixture splits everything to single units; add one real stack of five.
             if (!Controller->MenuRows().ContainsByPredicate([](const FHomesteadRow& Row)
-                { return Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.Quantity > 2; }))
+                { return Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.HotbarCell < 0 && Row.Quantity > 2; }))
             {
                 if (!Controller->Sim.GrantItems(Homestead::Item::Stone, 5)) { Finish(false, TEXT("Could not grant the drag fixture stack.")); return; }
                 // A new stack takes the first empty hotbar cell; this fixture wants it in the grid.
@@ -311,7 +315,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             // single-unit splits after it), so Right below still has a neighbour to move to.
             int32 Best = 0, Most = 0;
             for (const auto& Row : Controller->MenuRows())
-                if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.Quantity > Most)
+                if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.HotbarCell < 0 && Row.Quantity > Most)
                 { Best = Row.SubjectId; Most = Row.Quantity; }
             if (Best) Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Best, 0);
             const auto Rows = Controller->MenuRows();

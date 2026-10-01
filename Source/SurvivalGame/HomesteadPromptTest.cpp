@@ -152,7 +152,7 @@ void AHomesteadSmokeTest::PreparePromptChecks()
         [this]() { Axis(EKeys::Gamepad_RightX, 0); Tap(EKeys::B); },
         [this]() { return Controller->BookPage() == 2 && !Controller->UsesGamepad(); });
     Add(TEXT("Controller enters planning without committing a structure"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { AffordPlan(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsPlanning() && Controller->UsesGamepad(); });
     Add(TEXT("Tiny mouse cannot steal controller planning hints"),
         [this]() { Axis(EKeys::MouseY, 0.01f); },

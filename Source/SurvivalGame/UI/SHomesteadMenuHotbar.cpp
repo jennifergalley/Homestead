@@ -97,10 +97,24 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar(bool bGridRow)
                 bHotbarPointerDragging = false;
             })
             .OnReleased_Lambda([this]() { if (bHotbarPointerDown) EndHotbarPointerDrag(); })
-            .OnClicked_Lambda([this, Slot]()
+            .OnClicked_Lambda([this, Slot, SlotInfo]()
             {
                 if (!PointerAction() || Dialog != EDialog::None) return FReply::Handled();
                 if (bSuppressHotbarClick) { bSuppressHotbarClick = false; return FReply::Handled(); }
+                // Shift+click, as on any pack stack: straight into the open chest, or else down into the
+                // rest of her pack (Jenny 2026-09-30: the row acts like any other row).
+                if (SlotInfo().Assigned && !HeldHotbarRow.IsSet()
+                    && (bShift || FSlateApplication::Get().GetModifierKeys().IsShiftDown()))
+                {
+                    if (Controller->ActiveStorageChest().IsSet())
+                    {
+                        FHomesteadRow Chest;
+                        Chest.ContainerId = Controller->ActiveStorageChest().GetValue();
+                        Controller->MenuMoveHotbarToPack(Slot, &Chest);
+                    }
+                    else Controller->MenuMoveHotbarToPack(Slot, nullptr);
+                    return FReply::Handled();
+                }
                 Region = ERegion::Hotbar;
                 HotbarSelection = Slot;
                 // Holding a stack ("Move to a hotbar slot"): a click places it.

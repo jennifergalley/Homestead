@@ -161,7 +161,7 @@ void SHomesteadShop::BuildRows()
     if (Rows.Num() == HeaderIndex + 1)
     {
         FRow Empty;
-        Empty.Header = TEXT("Nothing yet. Goods you sell here are set out for townsfolk, and you can buy them back.");
+        Empty.Header = TEXT("Nothing yet.");
         Empty.Available = -2;
         Rows.Add(Empty);
     }

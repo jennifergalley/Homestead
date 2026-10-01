@@ -98,6 +98,12 @@ private:
     void QueueGatherTo(Homestead::Item Item, int32 TargetCount);
     void QueueCraft(Homestead::Recipe Recipe);
     void QueueGrant(Homestead::Item Item, int32 Count);
+    // Tops up her pack so `Kind` is affordable (unaffordable plans don't start placing), for fixtures
+    // that press A on a plan only to test planning itself.
+    void AffordPlan(Homestead::Piece Kind = Homestead::Piece::Foundation);
+    // Puts back the stock AffordPlan topped up (planning stays open), so a placement can be refused for cost.
+    void UndoAffordPlan();
+    FString AffordPlanBefore;
     void QueuePlace(Homestead::Piece Kind, int32 CellX, int32 CellY, int32 Rotation = 0);
     void QueueClearCell(int32 CellX, int32 CellY);
     void QueueEat(Homestead::Item Item);

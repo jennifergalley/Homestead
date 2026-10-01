@@ -1001,6 +1001,16 @@ const char* PieceRequirements(Piece piece)
     return ValidEnum(piece, Piece::Count) ? descriptions[static_cast<int>(piece)].c_str() : "Unknown structure";
 }
 bool IsBuildable(Piece piece) { return ValidEnum(piece, Piece::Count) && piece != Piece::Hearth; }
+Inventory PieceCost(Piece piece)
+{
+    // BuildCost is the change to her stock (negative); the cost is what it takes.
+    Inventory cost{};
+    if (!ValidEnum(piece, Piece::Count)) return cost;
+    const Inventory change = BuildCost(piece);
+    for (int i = 0; i < ItemCount; ++i) cost[i] = change[i] < 0 ? -change[i] : 0;
+    return cost;
+}
+bool PieceNeedsFoundation(Piece piece) { return EdgePiece(piece) || piece == Piece::Roof; }
 bool IsFurniture(Piece piece)
 {
     return piece == Piece::Fire || piece == Piece::Bed || piece == Piece::Chest || piece == Piece::Hearth;
@@ -2534,9 +2544,10 @@ Result Simulation::Deconstruct(int structureId, Point player)
     if (chest) message += ", and its contents";
     message += ".";
     if (setDown > 0)
-        message += " Your pack is full, so " + std::to_string(setDown) + (setDown == 1 ? " thing is" : " things are")
-            + " set down beside you.";
-    return Exert(Exertion::DeconstructEnergy, CommitInventory(std::move(candidate), message.c_str()));
+        message = "Pack full: " + std::to_string(setDown) + (setDown == 1 ? " thing" : " things") + " set down beside you.";
+    auto done = Exert(Exertion::DeconstructEnergy, CommitInventory(std::move(candidate), message.c_str()));
+    if (done.ok && setDown > 0) done.code = ResultCode::PackOverflow;
+    return done;
 }
 Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds)
 {
@@ -2795,14 +2806,19 @@ Result Simulation::Weed(int plotId, Point player)
     return Exert(Exertion::WeedEnergy, Good(plot->planted ? "Weeds removed. The crop has more room to grow."
         : "Weeds pulled. The square is clean for sowing."));
 }
-Result Simulation::ClearWithered(int plotId, Point player)
+Result Simulation::CheckClearWithered(int plotId, Point player) const
 {
     if (state_.failed) return Failed();
-    auto* plot = Find(state_.plots, plotId);
+    const auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside the plot to clear it.");
     if (!plot->planted || !plot->withered) return Bad("Nothing withered grows here.");
     if (Count(Item::DiggingStick) == 0) return Bad("Carry your hoe to clear the withered plant.");
-    if (auto ready = CheckExertion(Exertion::TillEnergy); !ready) return ready;
+    return CheckExertion(Exertion::TillEnergy);
+}
+Result Simulation::ClearWithered(int plotId, Point player)
+{
+    if (auto ready = CheckClearWithered(plotId, player); !ready) return ready;
+    auto* plot = Find(state_.plots, plotId);
     const std::string name = GetCropInfo(plot->kind).lower;
     plot->planted = false;
     plot->withered = false;
@@ -3172,6 +3188,7 @@ std::string Simulation::Serialize() const
     Crops::WriteSaveSection(body, state_);
     Crops::WriteWitheredSection(body, state_);
     PackRowRules::WriteSaveSection(body, state_);
+    PackRowRules::WriteParkedSection(body, state_);
     if (Chests::HasSaveSection(state_)) Chests::WriteSaveSection(body, state_);
     if (Backpack::HasSaveSection(state_)) Backpack::WriteSaveSection(body, state_);
     Food::WriteSaveSection(body, state_);
@@ -3446,6 +3463,7 @@ Result Simulation::Deserialize(const std::string& data)
     RefreshShopCounters(candidate, Layout());
     input >> std::ws;
     // Optional tagged trailing sections, each introduced by its tag word.
+    bool parkedRowsSeen = false;
     while (!input.eof())
     {
         std::string tag;
@@ -3466,6 +3484,11 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::WitheredSaveTag) { if (!Crops::ReadWitheredSection(input, candidate)) return invalid(); }
         else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == PackRowRules::ParkedSaveTag)
+        {
+            if (parkedRowsSeen || !PackRowRules::ReadParkedSection(input, candidate)) return invalid();
+            parkedRowsSeen = true;
+        }
         else if (tag == Chests::SaveTag) { if (!Chests::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Backpack::SaveTag) { if (!Backpack::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Food::SaveTag) { if (!Food::ReadSaveSection(input, candidate)) return invalid(); }

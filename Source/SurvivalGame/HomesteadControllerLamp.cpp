@@ -12,7 +12,7 @@ using HomesteadControllerText::Text;
 void AHomesteadController::MenuRefillLamp()
 {
     if (RejectPendingGroundSnapAction()) return;
-    Notify(Sim.RefillLamp());
+    NotifyResourceAction(Sim.RefillLamp(), nullptr);
     LastLampOil = Sim.LampOil();
 }
 
@@ -33,12 +33,11 @@ void AHomesteadController::UpdateLamp()
     // Her hand has reached the ground: the lamp changes hands now.
     if (Avatar && Avatar->ConsumeLampContact())
     {
-        if (LampHandoff == ELampHandoff::SetDown) Notify(Sim.SetDownLamp(LampSpot, PlayerPoint()));
+        if (LampHandoff == ELampHandoff::SetDown) NotifyResourceAction(Sim.SetDownLamp(LampSpot, PlayerPoint()), nullptr);
         else if (LampHandoff == ELampHandoff::PickUp)
         {
             const auto Result = Sim.PickUpDrop(LampDropId, PlayerPoint());
-            if (Result.ok) Notify(TEXT("Picked up the lamp."));
-            else Notify(Result);
+            NotifyResourceAction(Result, nullptr);
         }
         LampHandoff = ELampHandoff::None;
         RefreshRemaining = 0;
@@ -76,7 +75,7 @@ void AHomesteadController::StartLampSetDown()
         LampSpot = Spot;
         return;
     }
-    Notify(Sim.SetDownLamp(Spot, Position));
+    NotifyResourceAction(Sim.SetDownLamp(Spot, Position), nullptr);
     RefreshRemaining = 0;
 }
 

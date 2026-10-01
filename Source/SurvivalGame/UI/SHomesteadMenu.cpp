@@ -146,6 +146,12 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
     UpdateNotice();
+    if (bScrollSelectionPending && Scroll && Cells.IsValidIndex(ContentSelection)
+        && Cells[ContentSelection]->GetCachedGeometry().GetLocalSize().X > 0)
+    {
+        bScrollSelectionPending = false;
+        Scroll->ScrollDescendantIntoView(Cells[ContentSelection], false, EDescendantScrollDestination::IntoView);
+    }
     // A stepped sound level is saved once she moves off its slider (another row, region or page).
     if (bAudioStepEdit && (SeenPage != 4 || Region != ERegion::Content || Dialog != EDialog::None
         || !Entries.IsValidIndex(ContentSelection) || Entries[ContentSelection].Id != AudioEditId))

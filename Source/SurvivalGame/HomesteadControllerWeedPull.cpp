@@ -83,5 +83,5 @@ void AHomesteadController::UpdatePendingWeedPull()
     // Pulled: the refresh removes the clump, so leave it thinned rather than pop it back for a frame.
     if (Result.ok && Landscape) Landscape->ForgetThinnedResource();
     Drop();
-    Notify(Result, Node != INDEX_NONE ? WoodTapA.Get() : GrassStepA.Get());
+    NotifyResourceAction(Result, Node != INDEX_NONE ? WoodTapA.Get() : GrassStepA.Get());
 }

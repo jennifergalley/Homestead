@@ -69,7 +69,7 @@ void SHomesteadNames::Construct(const FArguments& Args)
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 22)
                 [
                     SNew(STextBlock)
-                    .Text(FText::FromString(TEXT("Name her, her family and the estate. You can keep these or type your own.")))
+                    .Text(FText::FromString(TEXT("Name her, her family and the estate.")))
                     .Font(HomesteadUITheme::Font("Regular", 15)).ColorAndOpacity(NameMuted).AutoWrapText(true)
                 ]
                 + SVerticalBox::Slot().AutoHeight()[Fields]

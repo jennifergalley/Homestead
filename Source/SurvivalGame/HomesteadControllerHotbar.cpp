@@ -172,12 +172,14 @@ bool AHomesteadController::ChooseOnHotbar(Homestead::Item Item)
     int32 Cell = HotbarCellOf(Item);
     if (Cell == INDEX_NONE)
     {
+        // Into the first empty cell; with the row full, onto the selected cell (the two swap).
         const int32 Free = FirstEmptyHotbarCell();
+        const int32 Target = Free != INDEX_NONE ? Free : FMath::Clamp(SelectedHotbarSlot, 0, Homestead::PackRowSize - 1);
         const Homestead::LayoutEntry* Stack = nullptr;
         for (const auto& Entry : State().inventoryLayout)
             if (Entry.wearableId == 0 && Entry.item == Item) { Stack = &Entry; break; }
-        if (Free == INDEX_NONE || !Stack || !Sim.MoveToPackRow(Stack->groupId, 0, Free, Sim.GetRevision())) return false;
-        Cell = Free;
+        if (!Stack || !Sim.MoveToPackRow(Stack->groupId, 0, Target, Sim.GetRevision())) return false;
+        Cell = Target;
     }
     SelectHotbarSlot(Cell);
     return SelectedHotbarSlot == Cell;
@@ -294,6 +296,15 @@ void AHomesteadController::SelectHotbarSlot(int32 Index)
     PlayEffect(UIClick, 0.05f);
 }
 
+void AHomesteadController::RotateHotbarRow()
+{
+    if (bPlanning) { RotatePlacement(); return; }
+    if (bBookOpen || IsFailed() || !bWorldReady || !ShouldShowHotbar()) return;
+    // The world hotbar now shows the pack's next row (it reads the row); refusals say why.
+    const auto Result = Sim.RotatePackRow(Sim.GetRevision());
+    NotifyResourceAction(Result, Result.ok ? UIClick.Get() : nullptr);
+}
+
 void AHomesteadController::CycleHotbar(int32 Direction)
 {
     if (!ShouldShowHotbar() || Direction == 0) return;
@@ -367,7 +378,8 @@ void AHomesteadController::UseSelectedTool()
         for (const auto& Node : State().resources)
             if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::ForestTree)
             {
-                // Standing trees keep the axe's felling presentation.
+                // The axe fells a standing tree, keeping its felling presentation. (Saplings are
+                // overgrowth, cut with the billhook below.)
                 const Homestead::Point Target = Node.position;
                 const int32 Cleared = FocusId;
                 auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -400,7 +412,7 @@ void AHomesteadController::UseSelectedTool()
             if (Plot.id == FocusId)
             {
                 const auto Result = Sim.Water(FocusId, Position);
-                Notify(Result, GrassStepB);
+                NotifyResourceAction(Result, GrassStepB);
                 if (Result.ok)
                     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
                         Avatar->PlayWater(Homestead::PlotCenter(Plot));

@@ -9,6 +9,10 @@ using HomesteadControllerText::Text;
 
 void AHomesteadController::BeginPlacement(Homestead::Piece Kind)
 {
+    // A plan she can't afford yet says what's short in the book, as Craft does ("Gather 2 Branch
+    // first."), and doesn't start placing (Jenny 2026-09-30). The spot is judged once placing.
+    if (Kind != Homestead::Piece::Count)
+        if (const auto Afford = Sim.CheckBuildCost(Kind); !Afford) { Notify(Afford); return; }
     CloseBook();
     HoveredHotbarSlot = INDEX_NONE;
     bPlanning = true;

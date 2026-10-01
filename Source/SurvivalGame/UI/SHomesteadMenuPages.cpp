@@ -24,6 +24,8 @@ const FMargin ResumePadding(14, 6);
 }
 
 int32 SHomesteadMenu::StorageColumns() const { return LogicalBookWidth() >= 1800 ? 8 : 6; }
+// Beside a chest the pack grid is as wide as the hotbar row heading it.
+int32 SHomesteadMenu::StoragePackColumns() const { return Homestead::PackRowSize; }
 
 int32 SHomesteadMenu::Columns() const
 {
@@ -41,9 +43,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         return SNew(SVerticalBox)
             + SVerticalBox::Slot().AutoHeight().Padding(24)[ Text(TEXT("Time to try again"), 32) ]
             + SVerticalBox::Slot().FillHeight(1).Padding(24)
-            [ Text(TEXT("You ran out of food.\n\nReturn to a recovery checkpoint, or open Settings to quit. No failed state will replace your usable checkpoint."), 23) ]
+            [ Text(TEXT("You ran out of food."), 23) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
-            [ RegisterButton(MakeButton(TEXT("Retry checkpoint  [A / Enter]"), [this]() { Controller->MenuRetry(); }), ERegion::Recovery, 0) ]
+            [ RegisterButton(MakeButton(TEXT("Return to latest save  [A / Enter]"), [this]() { Controller->MenuRetry(); }), ERegion::Recovery, 0) ]
             + SVerticalBox::Slot().AutoHeight().Padding(24, 8)
             [ RegisterButton(MakeButton(TEXT("Settings / Quit  [Y / G]"), [this]() { ChangePage(4); }), ERegion::Recovery, 1) ];
     }
@@ -178,7 +180,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 1, 0, 0)
                 [
+                    // A label and its value; a short line only where a setting isn't obvious.
                     SNew(STextBlock).Text(FText::FromString(Row.Detail)).ColorAndOpacity(Muted)
+                    .Visibility(Row.Detail.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible)
                     .Font(HomesteadUITheme::Font("Regular", MenuSettingsStyle::DetailSize)).AutoWrapText(true)
                 ];
             RowContent = Content;
@@ -385,9 +389,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     {
         TSharedPtr<SVerticalBox> ChestColumn;
         TSharedPtr<SVerticalBox> PackColumn;
-        // The headings stay put above the scrolling grids. On the pack side the hotbar, her pack's
-        // first row (Simulation/HomesteadPackRow.h), heads the pack grid, scaled down to the pack
-        // column's width when ten cells don't fit (720p); the chest side is left clear beside it.
+        // The headings stay put above the scrolling grids; the hotbar, her pack's first row
+        // (Simulation/HomesteadPackRow.h), heads the pack column inside them (below).
         InventoryColumn->AddSlot().AutoHeight()
         [
             SNew(SHorizontalBox)
@@ -459,13 +462,6 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         ]
                     ]
                 ]
-                + SVerticalBox::Slot().AutoHeight().Padding(4, 0, 4, 4)
-                [ Text(TEXT("Hotbar"), 15) ]
-                + SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Left).Padding(0, 0, 0, 8)
-                [
-                    SNew(SScaleBox).Stretch(EStretch::ScaleToFitX).StretchDirection(EStretchDirection::DownOnly)
-                    [ BuildBookHotbar() ]
-                ]
             ]
         ];
         InventoryColumn->AddSlot().FillHeight(1)
@@ -478,13 +474,30 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [
                     SAssignNew(ChestColumn, SVerticalBox)
                     + SVerticalBox::Slot().AutoHeight()
-                    [ SAssignNew(ChestGrid, SUniformGridPanel).SlotPadding(FMargin(3)) ]
+                    [ SAssignNew(ChestGrid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
                 ]
                 + SHorizontalBox::Slot().FillWidth(1).Padding(8, 0, 0, 0)
                 [
+                    // The hotbar heads the pack column as its first row (Jenny 2026-09-30: "it should look and
+                    // act like any other row"): the pack grid is as wide as it, ten cells, and the row's
+                    // cells are the grid's own size; stacks drag and Shift+click between it and the chest.
                     SAssignNew(PackColumn, SVerticalBox)
+                    + SVerticalBox::Slot().AutoHeight().Padding(4, 0, 4, 0)
+                    [
+                        SNew(STextBlock).Text(FText::FromString(TEXT("Hotbar"))).ColorAndOpacity(Muted)
+                        .Font(HomesteadUITheme::Font("Regular", 13))
+                    ]
+                    + SVerticalBox::Slot().AutoHeight()[ BuildBookHotbar(true) ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(4, 2, 4, 4)
+                    [
+                        SNew(SBox).HeightOverride(1.5f)
+                        [
+                            SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                            .BorderBackgroundColor(FLinearColor(Ink.R, Ink.G, Ink.B, 0.35f))
+                        ]
+                    ]
                     + SVerticalBox::Slot().AutoHeight()
-                    [ SAssignNew(PackGrid, SUniformGridPanel).SlotPadding(FMargin(3)) ]
+                    [ SAssignNew(PackGrid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
                 ]
             ]
         ];
@@ -809,7 +822,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             const bool InChest = Row.ContainerId > 0;
             const int32 CellIndex = InChest ? ChestCell++ : PackCell++;
             auto TargetGrid = InChest ? ChestGrid : PackGrid;
-            TargetGrid->AddSlot(CellIndex % StorageColumns(), CellIndex / StorageColumns())[ Cell.ToSharedRef() ];
+            const int32 Width = InChest ? StorageColumns() : StoragePackColumns();
+            TargetGrid->AddSlot(CellIndex % Width, CellIndex / Width)[ Cell.ToSharedRef() ];
         }
         else if (AppearanceList) AppearanceList->AddSlot().AutoHeight().Padding(4)[ Cell.ToSharedRef() ];
         else Grid->AddSlot(Index % Columns(), Index / Columns())[ Cell.ToSharedRef() ];
@@ -825,7 +839,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     if (Storage)
     {
         Pad(ChestGrid, ChestCell, StorageColumns());
-        Pad(PackGrid, PackCell, StorageColumns());
+        Pad(PackGrid, PackCell, StoragePackColumns());
     }
     else if (bPackGrid) Pad(Grid, FMath::Max(Entries.Num(), 1), Columns());
     return Result;

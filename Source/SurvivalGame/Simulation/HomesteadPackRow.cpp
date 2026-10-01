@@ -27,6 +27,30 @@ bool ReadSaveSection(std::istream& input, State& state)
     return true;
 }
 
+// The most rows she could park: every carried stack in a row of its own.
+constexpr int MaxParkedRows = 1024;
+
+void WriteParkedSection(std::ostream& output, const State& state)
+{
+    if (state.parkedRows.empty()) return;
+    output << ParkedSaveTag << ' ' << state.parkedRows.size() << ' ' << PackRowSize;
+    for (const auto& row : state.parkedRows)
+        for (const auto& cell : row) output << ' ' << cell.groupId << ' ' << cell.wearableId;
+    output << '\n';
+}
+
+bool ReadParkedSection(std::istream& input, State& state)
+{
+    int rows = 0, width = 0;
+    if (!(input >> rows >> width) || rows < 0 || rows > MaxParkedRows || width != PackRowSize) return false;
+    state.parkedRows.assign(static_cast<size_t>(rows), PackRow{});
+    for (auto& row : state.parkedRows)
+        for (auto& cell : row)
+            if (!(input >> cell.groupId >> cell.wearableId) || cell.groupId < 0 || cell.wearableId < 0) return false;
+    // Stale cells (stacks since used up or moved) are dropped as a row comes back (RotatePackRow).
+    return true;
+}
+
 PackRowCell CellFor(const LayoutEntry& entry)
 {
     return entry.wearableId != 0 ? PackRowCell{0, entry.wearableId} : PackRowCell{entry.groupId, 0};
@@ -187,6 +211,59 @@ Result Simulation::MoveFromPackRow(int cell, int targetGroupId, int targetWearab
     row[cell] = PackRowRules::CellFor(layout[target]);
     std::swap(layout[source], layout[target]);
     return CommitInventory(std::move(candidate), ("Swapped with " + SlotName(cell) + ".").c_str());
+}
+
+Result Simulation::RotatePackRow(std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    State candidate = state_;
+    const auto& layout = candidate.inventoryLayout;
+    PackRow& row = candidate.packRow;
+    auto& parked = candidate.parkedRows;
+    const auto named = [&layout](const PackRowCell& cell) { return !cell.Empty() && PackRowRules::FindEntry(layout, cell) >= 0; };
+    const auto inRow = [](const PackRow& in, const PackRowCell& cell)
+    {
+        for (const auto& each : in) if (!cell.Empty() && each == cell) return true;
+        return false;
+    };
+    // Stacks below the hotbar that no parked row names come up first, ten at a time in pack order;
+    // once every stack belongs to a row, the parked rows come back in turn, gaps and all.
+    PackRow incoming{};
+    bool found = false;
+    int cell = 0;
+    for (const int index : PackRowRules::BelowRow(row, layout))
+    {
+        const PackRowCell key = PackRowRules::CellFor(layout[index]);
+        bool isParked = false;
+        for (const auto& other : parked) isParked = isParked || inRow(other, key);
+        if (isParked) continue;
+        incoming[cell++] = key;
+        found = true;
+        if (cell == PackRowSize) break;
+    }
+    while (!found && !parked.empty())
+    {
+        incoming = parked.front();
+        parked.erase(parked.begin());
+        // A cell whose stack was used up, or now sits in the hotbar going down, stays empty.
+        for (auto& each : incoming) if (!named(each) || inRow(row, each)) each = {};
+        for (const auto& each : incoming) found = found || !each.Empty();
+    }
+    if (!found) return RowBad("Nothing else in your pack.");
+    // Each stack belongs to one row: the incoming row's stacks leave any other parked row.
+    for (auto& other : parked)
+        for (auto& each : other) if (inRow(incoming, each)) each = {};
+    bool rowUsed = false;
+    for (const auto& each : row) rowUsed = rowUsed || named(each);
+    if (rowUsed) parked.push_back(row);
+    parked.erase(std::remove_if(parked.begin(), parked.end(), [&named](const PackRow& other)
+        {
+            for (const auto& each : other) if (named(each)) return false;
+            return true;
+        }), parked.end());
+    row = incoming;
+    return CommitInventory(std::move(candidate), "");
 }
 
 Result Simulation::ArrangePackRow(const std::array<int, PackRowSize>& items)

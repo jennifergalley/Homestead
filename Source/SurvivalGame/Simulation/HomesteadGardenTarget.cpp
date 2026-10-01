@@ -17,11 +17,27 @@ GardenTarget PreviewGarden(const Simulation& sim, GardenTool tool, Point player,
     GardenTarget target;
     if (tool == GardenTool::Hoe)
     {
-        HoeCellAhead(player, forwardX, forwardY, target.cellX, target.cellY);
+        // The same square the hoe takes (AHomesteadController::HoeSquareAhead): a focused withered crop
+        // first, else the square ahead, where a withered crop is hoed out, a plot weeded, open ground tilled.
         for (const Plot& plot : sim.GetState().plots)
-            if (plot.cellX == target.cellX && plot.cellY == target.cellY) target.plotId = plot.id;
-        const Result check = target.plotId >= 0 ? sim.CheckWeed(target.plotId, player)
-                                                : sim.CheckTill(target.cellX, target.cellY, player);
+            if (plot.id == focusPlotId && plot.planted && plot.withered)
+            {
+                const Result check = sim.CheckClearWithered(plot.id, player);
+                target.shown = true;
+                target.cellX = plot.cellX;
+                target.cellY = plot.cellY;
+                target.plotId = plot.id;
+                target.valid = check.ok;
+                if (!check.ok) target.reason = check.message;
+                return target;
+            }
+        HoeCellAhead(player, forwardX, forwardY, target.cellX, target.cellY);
+        const Plot* ahead = nullptr;
+        for (const Plot& plot : sim.GetState().plots)
+            if (plot.cellX == target.cellX && plot.cellY == target.cellY) { target.plotId = plot.id; ahead = &plot; }
+        const Result check = !ahead ? sim.CheckTill(target.cellX, target.cellY, player)
+            : ahead->planted && ahead->withered ? sim.CheckClearWithered(ahead->id, player)
+            : sim.CheckWeed(ahead->id, player);
         target.shown = true;
         target.valid = check.ok;
         if (!check.ok) target.reason = check.message;

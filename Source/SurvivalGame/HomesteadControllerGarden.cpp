@@ -18,7 +18,8 @@ void AHomesteadController::UpdateGardenOutline()
         const auto Tool = HotbarItem(SelectedHotbarSlot);
         const FVector Forward = Avatar->GetActorForwardVector().GetSafeNormal2D();
         if (Tool == Homestead::Item::DiggingStick && Sim.Count(Tool) > 0)
-            Target = Homestead::PreviewGarden(Sim, Homestead::GardenTool::Hoe, PlayerPoint(), Forward.X, Forward.Y);
+            Target = Homestead::PreviewGarden(Sim, Homestead::GardenTool::Hoe, PlayerPoint(), Forward.X, Forward.Y,
+                Focus == EFocus::Plot ? FocusId : -1);
         // The pail waters the focused plot; at the water it fills instead, so no square then.
         else if (Tool == Homestead::Item::WateringCan && Sim.Count(Tool) > 0 && Focus == EFocus::Plot)
             Target = Homestead::PreviewGarden(Sim, Homestead::GardenTool::Pail, PlayerPoint(), Forward.X, Forward.Y, FocusId);

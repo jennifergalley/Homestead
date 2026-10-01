@@ -441,7 +441,7 @@ void AHomesteadController::LandOvergrowthSwing(bool bMoreComing)
     const auto Result = Sim.ClearOvergrowth(SwingNode, SwingTool, Position);
     const int32 Swing = SwingsLanded;
     ResetOvergrowthSwing();
-    Notify(Result);
+    NotifyResourceAction(Result, nullptr);
     // The breaking strike sounds only when it clears (a refusal gets no reward).
     if (Result.ok) PlayStrikeCue(SwingTool, Swing, true);
 }
@@ -466,17 +466,15 @@ void AHomesteadController::PlayStrikeCue(Homestead::Item Tool, int32 Swing, bool
         Cue = CaneCuts[(Swing - 1) % CaneCuts.Num()].Get();
         Gain = CaneCutGain;
     }
-    else if (bFinal) { Cue = WoodTapB; Gain = FinalTapGain; }        // other tools: as before
+    else if (bFinal) { Cue = WoodTapB; Gain = FinalTapGain; }
     else if (!ChopStrokes.IsEmpty()) Cue = ChopStrokes[Swing % ChopStrokes.Num()].Get();
     else { Cue = WoodTapA; Gain = WoodTapGain; }
-    // The ear-proxy check: the clip's phase when the cue fires, against its contact time.
     float Phase = -1.0f, Contact = -1.0f;
     if (const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
         if (const auto* Animation = Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()))
         {
             const bool bFelling = Animation->IsFelling();
             Phase = bFelling ? Animation->FellPhase() : Animation->MachetePhase();
-            // The stroke this cue belongs to in the running strike (held blows loop its stroke cycle).
             Contact = bFelling ? AHomesteadCharacter::FellStrikeSeconds(FMath::Max(0, SwingStrokesLanded - 1))
                 : AHomesteadCharacter::MacheteClearSeconds;
         }

@@ -408,6 +408,12 @@ void BedrollTakesHay()
     CHECK(PieceRequirements(Piece::Bed) == cost);
     CHECK(std::string(PieceRequirements(Piece::Wall)).find(ItemName(Item::BrambleCanes)) != std::string::npos);
     CHECK(std::string(PieceRequirements(Piece::Chest)).find(ItemName(Item::BrambleCanes)) != std::string::npos);
+    // The Build tab lists the same cost as rows (PieceCost) and the foundation as a condition.
+    CHECK(PieceCost(Piece::Bed)[static_cast<int>(Item::Branch)] == 4 && PieceCost(Piece::Bed)[static_cast<int>(Item::Hay)] == 4);
+    CHECK(PieceCost(Piece::Wall)[static_cast<int>(Item::BrambleCanes)] > 0);
+    CHECK(PieceNeedsFoundation(Piece::Wall) && PieceNeedsFoundation(Piece::Doorway) && PieceNeedsFoundation(Piece::Roof));
+    CHECK(!PieceNeedsFoundation(Piece::Bed) && !PieceNeedsFoundation(Piece::Chest) && !PieceNeedsFoundation(Piece::Foundation));
+    CHECK(PieceCost(Piece::Count) == Inventory{});
 
     // Canes alone, or too little hay, are refused and spend nothing.
     Simulation canes;
@@ -598,6 +604,28 @@ void GardenTargetPreview()
     pail = PreviewGarden(sim, GardenTool::Pail, garden, 1.0, 0.0, plotId);
     CHECK(!pail.valid && pail.reason == "This soil is already fully watered.");
     CHECK(!PreviewGarden(sim, GardenTool::None, garden, 1.0, 0.0, plotId).shown);
+
+    // A withered crop: the hoe's outline is the plot it hoes out (the focused one first, else the one
+    // ahead), judged by ClearWithered, even when it has no weeds to pull.
+    {
+        Simulation dead = sim;
+        Edit(dead, [plotId](State& state)
+        {
+            for (auto& plot : state.plots)
+                if (plot.id == plotId) { plot.planted = true; plot.withered = true; plot.weeds = 0.0; plot.growth = 0.5; }
+        });
+        const Point beside{GardenCellCenter(gx, gy).x - 60.0, GardenCellCenter(gx, gy).y};
+        const GardenTarget focused = PreviewGarden(dead, GardenTool::Hoe, beside, 0.0, 1.0, plotId);
+        CHECK(focused.shown && focused.plotId == plotId && focused.valid && focused.reason.empty());
+        CHECK(focused.valid == dead.CheckClearWithered(plotId, beside).ok);
+        const GardenTarget ahead = PreviewGarden(dead, GardenTool::Hoe, stand, 1.0, 0.0);
+        CHECK(ahead.shown && ahead.plotId == plotId && ahead.valid);
+        const std::string untouched = dead.Serialize();
+        CHECK(dead.CheckClearWithered(plotId, beside).ok && dead.Serialize() == untouched);
+        OK(dead.ClearWithered(plotId, beside));
+        CHECK(!dead.CheckClearWithered(plotId, beside).ok
+            && dead.CheckClearWithered(plotId, beside).message == "Nothing withered grows here.");
+    }
 }
 
 // Seeds on the hotbar: the outline previews exactly the plot the [A]/[E] sow acts on (the focused plot), with
@@ -3796,7 +3824,10 @@ void DeconstructChestContentsAndOverflow()
     OK(overflow.Transfer(fullChest, Item::Branch, 60, chestSite));
     OK(overflow.GrantItems(Item::Stone, 80));
     CHECK(overflow.UsedCapacity() == InventoryCapacity);
-    OK(overflow.Deconstruct(fullChest, chestSite));
+    const auto tookDown = overflow.Deconstruct(fullChest, chestSite);
+    OK(tookDown);
+    // What didn't fit is worth a short notice (ResultCode::PackOverflow), not the full story.
+    CHECK(tookDown.code == ResultCode::PackOverflow && tookDown.message.rfind("Pack full: ", 0) == 0);
     CHECK(overflow.UsedCapacity() == InventoryCapacity);
     int dropped = 0;
     for (const auto& drop : overflow.GetState().worldDrops) dropped += drop.quantity;
@@ -5124,7 +5155,7 @@ void ClearoutKindsAndSpoiledGround()
     for (int id : {crate, barrel, heap, planks, nettles, weeds}) CHECK(sim.CanHarvest(id));
     const auto cleared = sim.Harvest(crate, at);
     OK(cleared);
-    CHECK(cleared.message.find("Cleared the broken crate") == 0);
+    CHECK(cleared.message.find("Cleared the broken crate") == 0 && cleared.code != ResultCode::PackOverflow);
     CHECK(sim.Count(Item::Kindling) >= 2 && sim.Count(Item::Kindling) <= 3);
     UnchangedFailure(sim, [&] { return sim.Harvest(crate, at); });
     OK(sim.Harvest(barrel, at));

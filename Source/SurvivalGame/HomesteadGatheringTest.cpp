@@ -164,7 +164,7 @@ void AHomesteadSmokeTest::PrepareGatheringChecks()
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this, Animation]() { return !Controller->IsBookOpen() && Animation()->GatherWeight() < 0.001f; });
     Add(TEXT("Build planning stays free of the interrupted action"),
-        [this]() { Tap(EKeys::B); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { AffordPlan(); Tap(EKeys::B); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Animation]() { return Controller->IsPlanning() && Animation()->GatherWeight() < 0.001f; });
     Add(TEXT("Leave planning"), [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsPlanning(); });
