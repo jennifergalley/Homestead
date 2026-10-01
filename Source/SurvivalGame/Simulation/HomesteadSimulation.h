@@ -750,7 +750,7 @@ public:
     // Playtest aid: jump the clock forward to the next occurrence of hourOfDay (0-24) without
     // simulating the skipped interval, so needs, crops and fires are left as they were.
     void SkipToHourOfDay(double hourOfDay);
-    // Playtest aid: let `days` whole days pass hour by hour (crops grow, soil dries, weeds creep,
+    // Playtest aid: let `days` whole days pass hour by hour (crops grow, soil dries, weeds come up at 6 AM,
     // shops sell down, just as if she'd lived them), keeping her fed and rested. With `tend`, every
     // plot is watered and weeded each hour, so crops grow at full speed.
     Result PassDaysForPlaytest(double days, bool tend, Point player);

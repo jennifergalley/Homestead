@@ -873,7 +873,9 @@ void GameplayWalkthrough()
     }
     sim.AdvanceGameHours(4, Home);
     CHECK(sim.GetState().plots[0].growth > 0.0);
-    OK(sim.Weed(plotId, garden));
+    // Weeds come up once a day (at 6 AM or on waking), never in the hours between.
+    CHECK(sim.GetState().plots[0].weeds == 0.0);
+    CHECK(sim.Weed(plotId, garden).message == "This plot is already free of weeds.");
     const double energyBeforeMeal = sim.GetState().energy;
     CHECK(energyBeforeMeal < 100);
     OK(sim.Eat(Item::HerbedRoots));
@@ -1423,6 +1425,111 @@ void GardenSquares()
     UnchangedFailure(sim, [&] { return sim.Place(Piece::Foundation, -2, -1, 0, garden); });
 }
 
+// Jenny (2026-09-30): weeds come up once a day, so there's something to clear each morning but never
+// twice a day. Awake, the pass runs at 6 AM; asleep across 6 AM, on waking; never in the hours between,
+// and each calendar day gets one pass however it comes.
+void DailyWeedPass()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Seeds, 1}, {Item::DiggingStick, 1}, {Item::Branch, 4}, {Item::Hay, 4}});
+    OK(sim.Place(Piece::Bed, -3, 0, 0, Home));
+    const Point garden = CellCenter(-2, -1);
+    OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
+    OK(sim.Plant(sim.FindNearestPlot(garden, 1), garden));
+    const auto weeds = [](const Simulation& s) { return s.GetState().plots[0].weeds; };
+    // Day 0 = 06:00 on the first morning; hour 30 is the next 6 AM. Fed and rested, plot clean.
+    const auto set = [](Simulation& s, double hour, double plotWeeds = 0.0, double energy = 100.0) {
+        Edit(s, [=](State& state) {
+            state.hour = hour;
+            state.hunger = 100.0;
+            state.energy = energy;
+            state.plots[0].weeds = plotWeeds;
+        });
+    };
+    CHECK(Crops::WeedDay(6.0) == 0 && Crops::WeedDay(29.99) == 0 && Crops::WeedDay(30.0) == 1);
+
+    // 18 awake hours from noon: nothing until 6 AM, then one pass.
+    Simulation awake = sim;
+    set(awake, 12.0);
+    awake.AdvanceGameHours(17.9, Home);
+    CHECK(weeds(awake) == 0.0 && awake.GetState().hour < 30.0);
+    awake.AdvanceGameHours(0.2, Home);
+    CHECK(Close(weeds(awake), CropCare::DailyWeeds));
+    awake.AdvanceGameHours(20.0, Home);
+    CHECK(Close(weeds(awake), CropCare::DailyWeeds));
+
+    // A night's sleep (22:00 to 06:00): exactly one pass, on waking.
+    Simulation night = sim;
+    set(night, 22.0);
+    OK(night.Sleep(8.0, Home, {1, 0}));
+    CHECK(Close(night.GetState().hour, 30.0) && Close(weeds(night), CropCare::DailyWeeds));
+    // Awake for the rest of that day: no second pass.
+    night.AdvanceGameHours(10.0, Home);
+    CHECK(Close(weeds(night), CropCare::DailyWeeds));
+    // A nap that doesn't cross 6 AM adds nothing.
+    OK(night.Sleep(2.0, Home, {1, 0}));
+    CHECK(Close(weeds(night), CropCare::DailyWeeds));
+
+    // Sleeping across 6 AM (03:00 to 09:00): one pass, then nothing until the next 6 AM.
+    Simulation across = sim;
+    set(across, 27.0);
+    OK(across.Sleep(6.0, Home, {1, 0}));
+    CHECK(Close(weeds(across), CropCare::DailyWeeds));
+    across.AdvanceGameHours(20.0, Home);
+    CHECK(Close(weeds(across), CropCare::DailyWeeds) && across.GetState().hour < 54.0);
+    // Woken before 6 AM (22:00 to 05:00): no pass on waking; it comes at 6 AM with her up.
+    Simulation early = sim;
+    set(early, 22.0);
+    OK(early.Sleep(7.0, Home, {1, 0}));
+    CHECK(weeds(early) == 0.0);
+    early.AdvanceGameHours(1.5, Home);
+    CHECK(Close(weeds(early), CropCare::DailyWeeds));
+    // The book's long sleep is two halves; a 16 hour sleep from 22:00 still gets one pass.
+    Simulation longSleep = sim;
+    set(longSleep, 22.0);
+    OK(longSleep.Sleep(8.0, Home, {1, 0}));
+    OK(longSleep.Sleep(8.0, Home, {1, 0}));
+    CHECK(Close(weeds(longSleep), CropCare::DailyWeeds));
+
+    // Dozing off where she stands across 6 AM: one pass when she comes to.
+    Simulation doze = sim;
+    set(doze, 29.0, 0.0, 0.3);
+    doze.AdvanceGameHours(0.6, Home);
+    CHECK(doze.GetState().hour > 30.0 && Close(weeds(doze), CropCare::DailyWeeds));
+
+    // Three days without sleep: three passes, one each 6 AM.
+    Simulation days = sim;
+    set(days, 7.0);
+    for (int chunk = 0; chunk < 12; ++chunk)
+    {
+        Edit(days, [](State& state) { state.hunger = 100.0; state.energy = 100.0; });
+        days.AdvanceGameHours(6.0, Home);
+        const int passes = Crops::WeedDay(days.GetState().hour);
+        CHECK(Close(weeds(days), std::min(1.0, CropCare::DailyWeeds * passes)));
+    }
+    CHECK(Close(days.GetState().hour, 79.0) && Close(weeds(days), CropCare::DailyWeeds * 3));
+    // Capped at fully weedy.
+    set(days, 29.5, 0.9);
+    days.AdvanceGameHours(1.0, Home);
+    CHECK(weeds(days) == 1.0);
+
+    // Reload stability: an old save keeps its weeds, and a reload either side of 6 AM changes nothing.
+    Simulation saved = sim;
+    set(saved, 29.0, 0.37);
+    CHECK(Close(weeds(saved), 0.37));
+    Simulation reloaded;
+    OK(reloaded.Deserialize(saved.Serialize()));
+    CHECK(reloaded.Serialize() == saved.Serialize());
+    saved.AdvanceGameHours(2.0, Home);
+    reloaded.AdvanceGameHours(2.0, Home);
+    CHECK(Close(weeds(saved), 0.37 + CropCare::DailyWeeds) && weeds(reloaded) == weeds(saved));
+    Simulation afterPass;
+    OK(afterPass.Deserialize(saved.Serialize()));
+    afterPass.AdvanceGameHours(5.0, Home);
+    saved.AdvanceGameHours(5.0, Home);
+    CHECK(weeds(afterPass) == weeds(saved) && Close(weeds(afterPass), 0.37 + CropCare::DailyWeeds));
+}
+
 void FarmingAndRain()
 {
     Simulation sim;
@@ -1449,7 +1556,7 @@ void FarmingAndRain()
     dry.AdvanceGameHours(4, Home);
     weedy.AdvanceGameHours(4, Home);
     CHECK(sim.GetState().plots[0].moisture < 1);
-    CHECK(sim.GetState().plots[0].weeds > 0 && sim.GetState().plots[0].weeds < 0.1);
+    CHECK(sim.GetState().plots[0].weeds == 0); // no weeds until the next 6 AM pass (DailyWeedPass)
     CHECK(dry.GetState().plots[0].planted);
     CHECK(dry.GetState().plots[0].growth > 0);
     CHECK(sim.GetState().plots[0].growth > dry.GetState().plots[0].growth);
@@ -5608,6 +5715,7 @@ int main()
     Run("each cooked batch burns exactly one kindling", CookingBurnsOneKindlingPerBatch);
     Run("fallen branches give renewable kindling", BranchesYieldRenewableKindling);
     Run("default gameplay walkthrough", GameplayWalkthrough);
+    Run("weeds come up once a day, on waking or at 6 AM", DailyWeedPass);
     Run("atomic inventory transactions", AtomicTransactions);
     Run("regrowth and persistent clearing", RegrowthAndClearing);
     Run("placement and enclosure", PlacementAndShelter);

@@ -2950,7 +2950,6 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
     for (auto& plot : state_.plots)
     {
         plot.moisture = Clamp(plot.moisture + (rain ? 0.3 : -0.025) * elapsed, 0.0, 1.0);
-        plot.weeds = Clamp(plot.weeds + 0.009 * elapsed, 0.0, 1.0);
         if (plot.planted && !plot.withered)
         {
             const double growingHours = GetCropInfo(plot.kind).growHours;
@@ -2962,6 +2961,8 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
     state_.hour += elapsed;
     // The 06:00 rollover: the shops sell down, weeds creep and the seasons turn (OnNewDay).
     for (int day = dayBefore + 1; day <= Calendar::DayIndex(state_.hour); ++day) OnNewDay(Calendar::DateOfDay(day));
+    // Awake at 6 AM, the day's plot weeds come up now; asleep, they wait for her to wake (Sleep, DozeOff).
+    if (!sleeping) Crops::GrowDailyWeeds(state_, Calendar::DayIndex(state_.hour) - dayBefore);
     // Energy running out makes her doze off (AdvanceGameHours); only in the woodland does hunger fail her.
     if (state_.energy <= 1e-10) state_.energy = 0.0;
     if (state_.hunger <= 1e-10)
@@ -2983,6 +2984,7 @@ double Simulation::DozeOff(Point player)
 {
     double left = std::min(Exertion::DozeHours, MaxHour - state_.hour);
     double slept = 0.0;
+    const int weedDay = Crops::WeedDay(state_.hour);
     while (left > 1e-12 && !state_.failed)
     {
         double step = std::min(left, TimeStep);
@@ -2993,6 +2995,7 @@ double Simulation::DozeOff(Point player)
         left -= done;
         slept += done;
     }
+    if (!state_.failed) Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
     ++dozes_;
     ++revision_;
     return slept;
@@ -3116,6 +3119,7 @@ Result Simulation::Sleep(double hours, Point player, Point facing, bool dawnLimi
     }
     if (ReachableBed(state_, player, facing) == -1) return Bad("Place a bed and move beside it before sleeping.");
     if (state_.hour + hours > MaxHour) return Bad("The calendar has reached its supported limit.");
+    const int weedDay = Crops::WeedDay(state_.hour);
     while (hours > 1e-12 && !state_.failed)
     {
         double step = std::min(hours, TimeStep);
@@ -3126,6 +3130,8 @@ Result Simulation::Sleep(double hours, Point player, Point facing, bool dawnLimi
         hours -= done;
     }
     if (state_.failed) return Bad("Your rest was interrupted by a critical need. Load your recent checkpoint.");
+    // Slept through 6 AM: the day's weeds are up when she wakes.
+    Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
     return Good("You wake rested. Your garden and fires continued through the night.");
 }
 

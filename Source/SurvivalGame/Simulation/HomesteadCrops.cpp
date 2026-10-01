@@ -1,4 +1,5 @@
 #include "HomesteadCrops.h"
+#include "HomesteadCalendar.h"
 
 #include <algorithm>
 #include <cmath>
@@ -186,6 +187,18 @@ std::string PlotStatus(const Plot& plot, double hour)
 
 namespace Crops
 {
+int WeedDay(double hour)
+{
+    return Calendar::DayIndex(hour); // the calendar's own day, with its tolerance at 06:00
+}
+
+void GrowDailyWeeds(State& state, int days)
+{
+    if (days <= 0) return;
+    for (auto& plot : state.plots)
+        plot.weeds = std::min(1.0, plot.weeds + CropCare::DailyWeeds * days);
+}
+
 void WriteSaveSection(std::ostream& output, const State& state)
 {
     std::vector<int> picked;
