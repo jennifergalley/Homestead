@@ -431,6 +431,8 @@ private:
     UPROPERTY() TObjectPtr<USoundBase> WoodTapB;
     // Hatchet biting a standing trunk, one per stroke in turn.
     UPROPERTY() TArray<TObjectPtr<USoundBase>> ChopStrokes;
+    // The billhook's cane cuts (Scripts/generate_billhook_sound.py: CaneCutA/B/C), one per landed swing.
+    UPROPERTY() TArray<TObjectPtr<USoundBase>> CaneCuts;
     UPROPERTY() TObjectPtr<USoundBase> TreeFallThud;
     // The scythe's one swish per sweep that cuts something (Scripts/generate_scythe_sound.py); never a footstep in its place.
     UPROPERTY() TObjectPtr<USoundBase> ScytheSwish;
@@ -540,6 +542,9 @@ private:
     void SwingAtOvergrowth(Homestead::Item Tool);
     void UpdatePendingSwing();
     void LandOvergrowthSwing();
+    // The sound of a landed swing at its contact (HomesteadControllerClearing.cpp): the pickaxe's stone
+    // ping, the billhook's cane cut, other tools' chop; `Swing` counts from 1, `bFinal` is the clearing one.
+    void PlayStrikeCue(Homestead::Item Tool, int32 Swing, bool bFinal);
     void ResetOvergrowthSwing();
     // HomesteadControllerWeedPull.cpp: weeds pulled by hand on both knees (a weed node, or a garden
     // square's weeds), committed once at the second root (AHomesteadCharacter::PullWeedsCommit). A

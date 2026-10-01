@@ -695,6 +695,15 @@ emptied carried pail. Current world focus misleadingly offers `[A] Fill carried 
 carried pail (the starter pail remains in its chest), then errors `Carry your pail`; a full pail, low
 Energy or being >1.2 m off bank are other possibilities.
 
+**Lake shallows / swimming backlog (`f34c0a4f`, Water branch only):** Jenny asked to wade into the
+lake and fill the pail **in** the water. Source-only `f34c0a4f` changes successful fills more than
+30 cm inside the fresh-water line to use `InWaterDipPoint`: the pail reaches ahead if that is water,
+otherwise turns toward deepest water and never steps back onto the bank. It still needs PIE
+reproduction of the actual waterline blocker, collision/wade-wall/slope diagnosis, in-water kneel
+proof and normal integration/package validation. `add-swimming` is created as a separate **backlog,
+not scheduled** OpenSpec: fresh-water wade/deep-wade/swim movement and animation, Energy cost,
+tool/pail restrictions and lake-crossing acceptance. Do not broaden the lake fix into swimming.
+
 Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save.
 The unique copied-save packaged run records pail/water/Energy/focus/edge distance/actor tag plus A/E/RT
 input and toast output, then becomes a core-loop acceptance test. Its copied-save **PIE** precursor
@@ -1056,6 +1065,14 @@ requirement.
   Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
   two-swing clearing animation and awards/clears once, without a second click or double reward.
   Architecture traces tool tier, input and reward paths before native/PIE proof.
+- **Animation anatomy and inspection** — **Props overnight research, pending and unshipped.** Jenny
+  directed a `realistic-animation` repo skill with a MetaHuman per-joint anatomy/range-of-motion
+  table, review checklist, ROM checks in `report()` and an audit of heroine clips. Its planned
+  Animation Inspector is the animation counterpart to the UI Gallery: deterministic frame-by-frame
+  multi-view captures with ROM, contact and centre-of-mass overlays, exposed through
+  `Scripts\Inspect-Animation.ps1` and `editor_mcp animinspect`. Cross-link the resulting
+  `realistic-animation` and Animation Inspector from `blender-assets` only after they land; until
+  then this is a research/tooling direction, not an animation acceptance claim.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.

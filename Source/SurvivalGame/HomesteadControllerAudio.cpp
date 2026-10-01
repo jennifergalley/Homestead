@@ -117,6 +117,13 @@ void AHomesteadController::InitializeAudio()
         nullptr, LOAD_NoWarn | LOAD_Quiet);
     if (!ScytheSwish)
         UE_LOG(LogTemp, Error, TEXT("The scythe's mowing cue (ScytheSwish) isn't imported, so mowing is silent. Run Scripts/bootstrap_unreal.py."));
+    CaneCuts.Reset();
+    for (const TCHAR* Cut : {TEXT("CaneCutA"), TEXT("CaneCutB"), TEXT("CaneCutC")})
+        if (USoundBase* Cue = LoadObject<USoundBase>(nullptr,
+            *FString::Printf(TEXT("/Game/SurvivalGame/Audio/Effects/%s.%s"), Cut, Cut), nullptr, LOAD_NoWarn | LOAD_Quiet))
+            CaneCuts.Add(Cue);
+    if (CaneCuts.IsEmpty())
+        UE_LOG(LogTemp, Warning, TEXT("The billhook's cane cuts (CaneCutA-C) aren't imported; it falls back to the chop. Run Scripts/bootstrap_unreal.py."));
     auto LoadPool = [](TArray<TObjectPtr<USoundBase>>& Pool, const TCHAR* Prefix, int32 Count)
     {
         Pool.Reset();
