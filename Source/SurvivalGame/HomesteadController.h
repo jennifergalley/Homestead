@@ -720,9 +720,7 @@ private:
     // Fill the watering pail at the nearest fresh water edge, with her kneeling fill when it succeeds.
     void FillPailAtStream(Homestead::Point Position);
     Homestead::Point FreshWaterDipPoint(Homestead::Point Position) const;
-    // Standing this far inside the waterline she fills the pail where she stands (InWaterDipPoint).
-    static constexpr double PailInWaterCm = 30.0;
-    // Her pail's reach turned toward open water, from where she stands in the shallows.
+    // In the water at all she fills the pail where she stands (Homestead::InWaterDipPoint, HomesteadPail.h).
     Homestead::Point InWaterDipPoint(Homestead::Point Position, double Yaw) const;
     // The pail goes in this far inside the waterline, so it visibly dips into the water.
     static constexpr double PailDipInsideCm = 25.0;

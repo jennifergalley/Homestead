@@ -4,6 +4,7 @@
 #include "HomesteadEstateTerrain.h"
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadOvergrowth.h"
+#include "Simulation/HomesteadPail.h"
 
 #include "Components/SplineComponent.h"
 #include "Engine/World.h"
@@ -58,31 +59,15 @@ void AHomesteadController::FillPailAtStream(Homestead::Point Position)
     // the shallows, she dips where she stands instead (Jenny, 2026-09-30: fill in the water, not from the bank).
     if (Result.ok)
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-            Avatar->PlayFillPail(WaterEdgeDistance(Position, false) <= -PailInWaterCm
+            Avatar->PlayFillPail(WaterEdgeDistance(Position, false) < 0.0
                 ? InWaterDipPoint(Position, Avatar->GetActorRotation().Yaw) : FreshWaterDipPoint(Position));
 }
 
 Homestead::Point AHomesteadController::InWaterDipPoint(Homestead::Point Position, double Yaw) const
 {
-    // The pail's reach from where she stands (AHomesteadCharacter::FillForward/FillRight), turned to the
-    // heading that puts it in the deepest water: ahead of her when that's water, else toward open water,
-    // never back onto the bank.
-    const auto ReachAt = [Position](double Heading)
-    {
-        const FVector Reach = FRotator(0.0, Heading, 0.0).RotateVector(
-            FVector(AHomesteadCharacter::FillForward, AHomesteadCharacter::FillRight, 0.0));
-        return Homestead::Point{Position.x + Reach.X, Position.y + Reach.Y};
-    };
-    Homestead::Point Best = ReachAt(Yaw);
-    double BestEdge = WaterEdgeDistance(Best, false);
-    if (BestEdge <= -PailDipInsideCm) return Best;
-    for (int32 Step = 1; Step < 8; ++Step)
-    {
-        const Homestead::Point Candidate = ReachAt(Yaw + Step * 45.0);
-        const double Edge = WaterEdgeDistance(Candidate, false);
-        if (Edge < BestEdge) { Best = Candidate; BestEdge = Edge; }
-    }
-    return Best;
+    // Anywhere in the water (review: a threshold left her turning back to the bank from 0-30 cm in).
+    return Homestead::InWaterDipPoint(Position, Yaw, AHomesteadCharacter::FillForward, AHomesteadCharacter::FillRight,
+        PailDipInsideCm, [this](Homestead::Point Point) { return WaterEdgeDistance(Point, false); });
 }
 
 double AHomesteadController::WaterEdgeDistance(Homestead::Point Position, bool bIncludeSea) const
