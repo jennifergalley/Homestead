@@ -13,16 +13,23 @@ game.
 - **WHEN** she stays up until 05:00 and sleeps "until rested" with little Energy left
 - **THEN** she sleeps into the afternoon and wakes with full Energy
 
-### Requirement: Sleep choices at the bed
+### Requirement: One-press sleep at the bed
 
-The bed SHALL offer "until morning" (wake 06:45) in the evening and at night, "until rested" at any
-hour, and a one-hour nap, each showing its wake time, chosen with Up/Down and confirmed with A.
+Within the bed's focused interaction range, E/A SHALL immediately sleep without a confirmation
+dialog, choice picker or nap-hours control. When Energy is not full, it sleeps until full but stops
+at 06:00 when sleeping overnight. When already rested at night, it sleeps until 06:00. When already
+rested during the day, it SHALL expose no sleep verb.
 
-#### Scenario: Early night
+#### Scenario: Tired early night
 
-- **WHEN** she goes to bed at 21:00 with some Energy left and chooses "until morning"
-- **THEN** she wakes at 06:45
+- **WHEN** she presses E/A at 21:00 with Energy below full
+- **THEN** she sleeps until Energy is full or 06:00, whichever comes first
 
 ### Requirement: Recovery by hours slept
 
 Sleep SHALL restore Energy by hours slept at a fixed rate, capped at full, whatever the hour.
+
+#### Scenario: Tired daytime recovery
+
+- **WHEN** she presses E/A at a focused bed during the day with Energy below full
+- **THEN** she sleeps until Energy is full and never exceeds full Energy

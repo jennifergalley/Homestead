@@ -17,14 +17,12 @@ Energy out failed the game like starving.
   she dozes off where she stands for six hours of rough sleep at a slower recovery rate and wakes
   stiff and only part rested, with a toast saying so. Only hunger fails her. The doze can't happen
   while a menu is open, because time is paused there.
-- **Choose at the bed.** The prompt shows one sleep choice with its wake time; Up/Down (D-pad) steps
-  through the others and A (E) confirms:
-  - "Sleep until morning (wake 06:45)" in the evening and at night (18:00-05:00), for getting back on
-    schedule. It's the default then.
-  - "Sleep until rested (wake ~HH:MM)": her Energy deficit at 10 an hour, 1-10 h. It's the default
-    by day, so a night owl sleeps through into the afternoon. It's folded into "until morning" when
-    they'd wake within 45 minutes of each other.
-  - "Nap 1 h": left out when "until rested" is already that short.
+- **One-press bed sleep (Jenny, 2026-09-30).** E/A immediately sleeps; there is no confirmation
+  dialog, choice picker or nap-hours control:
+  - When not rested, `Sleep until rested` recovers Energy to full, but an overnight sleep stops at
+    06:00 rather than advancing into the morning.
+  - When already rested at night, `Sleep until morning` advances to 06:00.
+  - When already rested during the day, the bed has no sleep verb.
 - **Recovery follows hours slept**, 10 Energy an hour capped at full, at any hour.
 
 ## Capabilities
@@ -41,7 +39,8 @@ None.
 
 - `Simulation/HomesteadSimulation.*`: `SleepOptions`, the `Exertion` sleep and doze constants,
   `Simulation::DozeCount`, Energy no longer fails `Step`, `AdvanceGameHours` dozes. `BedSleepHours(hour)` is removed.
-- `HomesteadController.*`: the bed prompt, the choice cycling, the wake messages and the doze toast.
+- `HomesteadController.*`: the bed prompt, one-press admission and wake messages, with no choice
+  cycling or confirmation dialog; plus the doze toast.
 - `SHomesteadMenu.cpp`: the failure text says food only.
 - Tests: native `SleepOptionPolicy`, the doze cases, and FullLoop's outdoor sleeps (now night after
   night). No save change (SimulationSaveVersion stays 12).

@@ -51,6 +51,9 @@ Menus and construction planning pause simulation. No online gameplay services.
 - **Keep interaction and tools distinct.** E/the interact button only interacts—harvest, plant,
   pick up, open, talk, eat or sleep. Tools act only through click/the gamepad tool button. No
   crossover: E on an unripe crop never waters it. Hold-to-repeat binds only to tool input.
+- **Bed sleep is one press.** Within its tight bed focus, E/A immediately sleeps until Energy is
+  full, capped at 06:00 when sleeping overnight. If she is already rested at night it sleeps until
+  06:00; a rested daytime bed has no sleep verb. There is no confirm dialog or nap-hours picker.
 - **Respect farming-sim fluency.** Assume the player knows the genre: UI is concise rather than
   instructional. No toasts for obvious outcomes; focus cards show only a name and keyed verbs;
   details/tooltips show stats, requirements and price rather than rules explanations; settings show
