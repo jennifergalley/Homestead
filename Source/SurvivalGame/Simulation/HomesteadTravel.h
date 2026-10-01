@@ -4,6 +4,7 @@
 #include "HomesteadSimulation.h"
 
 #include <string>
+#include <vector>
 
 // Walking the public road between the manor and town ("fast travel"): how far and how long the walk
 // is from where she stands, measured along the road (HomesteadEstatePublicRoad.h), and the preview
@@ -46,6 +47,8 @@ struct TravelPlan
     // She'd arrive after midnight.
     bool nextDay = false;
     bool storeClosedOnArrival = false;
+    // She'd arrive on a day the shops keep closed (ShopClosedDay), in what would be their hours.
+    bool storeClosedAllDay = false;
     double storeOpenHour = 8.0;
     // The preview: distance, time, arrival and any closed-shop warning, one fact per line.
     std::string summary;
@@ -58,4 +61,14 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
     const EstateLayout& layout = ProvisionalEstateLayout());
 // "7 h 12 min", "45 min".
 std::string FormatWalkDuration(double gameHours);
+
+// The road signs (HomesteadEstatePublicRoad.h PublicRoad::signs) offer the same walk as the Map tab:
+// the manor's sign points to town, town's points home, and the gateway's both ways.
+// How near she stands to read a sign and set off from it, cm.
+constexpr double RoadSignReachCm = 280.0;
+std::vector<TravelDestination> RoadSignDestinations(const std::string& signName);
+// The sign within reach of t, nearest first, or null.
+const struct PublicRoadSign* RoadSignNear(Point at, double reachCm = RoadSignReachCm);
+// The words painted on it ("To town", "To the manor", "Town / Manor").
+std::string RoadSignLabel(const std::string& signName);
 }

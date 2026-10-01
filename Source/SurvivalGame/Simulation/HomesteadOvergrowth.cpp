@@ -418,12 +418,12 @@ Result Simulation::ClearOvergrowth(int nodeId, Item tool, Point player)
         return OgBad("The world has reached its 16384 persistent resource edit limit.");
 
     std::string gained, dropped;
-    int room = InventoryCapacity - Detail::PackUsed(candidate);
+    int room = Homestead::PackCapacity(candidate) - Detail::PackUsed(candidate);
     for (int i = 0; i < ItemCount; ++i)
     {
         if (yield[i] <= 0) continue;
         const Item item = static_cast<Item>(i);
-        const int fits = std::max(0, std::min({yield[i], room, InventoryCapacity - candidate.inventory[i]}));
+        const int fits = std::max(0, std::min({yield[i], room, Homestead::PackCapacity(candidate) - candidate.inventory[i]}));
         candidate.inventory[i] += fits;
         room -= fits;
         const std::string line = std::to_string(yield[i]) + " " + ItemName(item);
@@ -434,8 +434,11 @@ Result Simulation::ClearOvergrowth(int nodeId, Item tool, Point player)
     std::string message = std::string(node->kind == ResourceKind::SalvagePile ? "Searched the " : "Cleared the ")
         + OgLower(ResourceName(node->kind));
     message += gained.empty() ? "." : ": +" + gained + ".";
-    if (!dropped.empty()) message += " Your pack is full, so " + dropped + " lie on the ground.";
-    return Exert(cost, CommitInventory(std::move(candidate), message.c_str()));
+    // A full pack is worth saying, briefly; the rest she can see.
+    if (!dropped.empty()) message = "Pack full: " + dropped + " left on the ground.";
+    auto done = Exert(cost, CommitInventory(std::move(candidate), message.c_str()));
+    if (done.ok && !dropped.empty()) done.code = ResultCode::PackOverflow;
+    return done;
 }
 
 int Simulation::FindNearestOvergrowth(Point position, double maxDistance, Item tool) const

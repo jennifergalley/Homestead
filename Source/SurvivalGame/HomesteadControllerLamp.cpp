@@ -11,12 +11,14 @@ using HomesteadControllerText::Text;
 
 void AHomesteadController::MenuRefillLamp()
 {
-    Notify(Sim.RefillLamp());
+    if (RejectPendingGroundSnapAction()) return;
+    NotifyResourceAction(Sim.RefillLamp(), nullptr);
     LastLampOil = Sim.LampOil();
 }
 
 void AHomesteadController::HomesteadLampOil(float Hours)
 {
+    if (RejectPendingGroundSnapAction()) return;
     Sim.SetLampOil(Hours);
     Notify(FString::Printf(TEXT("The lamp has %.1f hours of oil."), Sim.LampOil()));
 }
@@ -31,12 +33,11 @@ void AHomesteadController::UpdateLamp()
     // Her hand has reached the ground: the lamp changes hands now.
     if (Avatar && Avatar->ConsumeLampContact())
     {
-        if (LampHandoff == ELampHandoff::SetDown) Notify(Sim.SetDownLamp(LampSpot, PlayerPoint()));
+        if (LampHandoff == ELampHandoff::SetDown) NotifyResourceAction(Sim.SetDownLamp(LampSpot, PlayerPoint()), nullptr);
         else if (LampHandoff == ELampHandoff::PickUp)
         {
             const auto Result = Sim.PickUpDrop(LampDropId, PlayerPoint());
-            if (Result.ok) Notify(TEXT("Picked up the lamp."));
-            else Notify(Result);
+            NotifyResourceAction(Result, nullptr);
         }
         LampHandoff = ELampHandoff::None;
         RefreshRemaining = 0;
@@ -74,7 +75,7 @@ void AHomesteadController::StartLampSetDown()
         LampSpot = Spot;
         return;
     }
-    Notify(Sim.SetDownLamp(Spot, Position));
+    NotifyResourceAction(Sim.SetDownLamp(Spot, Position), nullptr);
     RefreshRemaining = 0;
 }
 
@@ -83,7 +84,7 @@ bool AHomesteadController::StartLampPickUp(int32 DropId)
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
     const auto* Lamp = Sim.SetDownLampDrop();
     if (!Avatar || !Lamp || Lamp->id != DropId || LampHandoff != ELampHandoff::None) return false;
-    if (Sim.UsedCapacity() >= Homestead::InventoryCapacity)
+    if (Sim.UsedCapacity() >= Sim.PackCapacity())
     {
         Notify(TEXT("Not enough pack space to pick up the lamp."), true);
         return true;

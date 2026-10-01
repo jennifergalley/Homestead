@@ -1,6 +1,7 @@
 #include "HomesteadWorld.h"
 #include "HomesteadWorldLog.h"
 #include "HomesteadWeather.h"
+#include "Simulation/HomesteadNightLight.h"
 
 #include "Camera/PlayerCameraManager.h"
 #include "Components/DirectionalLightComponent.h"
@@ -19,18 +20,24 @@ namespace HomesteadWorldLighting
 TAutoConsoleVariable<int32> CVarRayTracedSun(TEXT("homestead.RayTracedSun"), 1,
     TEXT("1 = ray-traced sun/moon shadows with continuous sun movement (default when hardware ray "
          "tracing is on). 0 = Virtual Shadow Maps with the sun stepped by 0.5 degrees."));
-TAutoConsoleVariable<float> CVarNightMoonLux(TEXT("homestead.NightMoonLux"), 2.0f,
-    TEXT("Moonlight lux at full night."));
-TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.6f,
+// Night light (Simulation/HomesteadNightLight; defaults match Homestead::NightLightTuning, which
+// HomesteadNightLightTests checks against this file).
+TAutoConsoleVariable<float> CVarNightMoonLux(TEXT("homestead.NightMoonLux"), 0.2f,
+    TEXT("Moonlit level ground (lux) at full night; the moon's intensity compensates for its altitude."));
+TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.3f,
     TEXT("Sky light intensity at full night."));
-TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -2.0f,
-    TEXT("Auto exposure min brightness at full night."));
+TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -1.0f,
+    TEXT("Auto exposure min brightness (EV100) at full night."));
+TAutoConsoleVariable<float> CVarIndoorDaySky(TEXT("homestead.IndoorDaySky"), 0.3f,
+    TEXT("Sky light scale while she is inside a roofed room by day (times the room mix and daylight). Groom sky lighting sees the "
+         "open sky capture through a roof, so a full sky light blew her hair out white under one."));
 }
 
 using HomesteadWorldLighting::CVarRayTracedSun;
 using HomesteadWorldLighting::CVarNightMoonLux;
 using HomesteadWorldLighting::CVarNightSky;
 using HomesteadWorldLighting::CVarNightMinExposure;
+using HomesteadWorldLighting::CVarIndoorDaySky;
 
 void AHomesteadWorld::BuildLighting()
 {
@@ -161,17 +168,28 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // extra tint so dawn stays golden instead of saturating to orange.
     Sun->SetLightColor(FMath::Lerp(FLinearColor(1.0f, 0.9f, 0.8f),
         FLinearColor(1.0f, 0.99f, 0.95f), FMath::Clamp(Elevation * 2, 0.0f, 1.0f)));
-    const float NightMoonLux = CVarNightMoonLux.GetValueOnGameThread();
-    const float NightSkyIntensity = CVarNightSky.GetValueOnGameThread();
-    const float NightMinExposure = CVarNightMinExposure.GetValueOnGameThread();
-    Moon->SetIntensity(NightMoonLux * (1.0f - Daylight));
-    Sky->SetIntensity(FMath::Lerp(NightSkyIntensity, 1.0f, Daylight) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud));
+    // Night (Jenny, 2026-09-29: "around 9 PM it brightens and the moon lights like the sun"): the moonlit
+    // ground holds level from dusk to dawn instead of brightening threefold as the moon climbs, and the
+    // exposure floor keeps auto-exposure from adapting moonlight up to a daylight grey
+    // (Homestead::NightLightAt, native-tested).
+    Homestead::NightLightTuning NightTuning;
+    NightTuning.moonGroundLux = CVarNightMoonLux.GetValueOnGameThread();
+    NightTuning.nightSky = CVarNightSky.GetValueOnGameThread();
+    NightTuning.nightMinExposureEV = CVarNightMinExposure.GetValueOnGameThread();
+    const Homestead::NightLight Night = Homestead::NightLightAt(Hour, NightTuning);
+    Moon->SetIntensity(static_cast<float>(Night.moonLux));
+    // Only while she is inside a roofed room (her position, eased), so the outdoors keeps its sky fill when
+    // the camera passes a doorway or an overhang.
+    const float IndoorDay = GetRoomMix() * Daylight;
+    Sky->SetIntensity(static_cast<float>(Night.skyScale) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud)
+        * FMath::Lerp(1.0f, CVarIndoorDaySky.GetValueOnGameThread(), IndoorDay));
     // The real-time sky capture still sees the clear blue atmosphere under the cloud layer, so warm it
     // back towards a neutral grey overcast.
     Sky->SetLightColor(FMath::Lerp(FLinearColor::White, FLinearColor(1.0f, 0.93f, 0.84f), Cloud));
-    Exposure->Settings.AutoExposureMinBrightness = FMath::Lerp(NightMinExposure, 0.0f, Daylight);
+    Exposure->Settings.AutoExposureMinBrightness = static_cast<float>(Night.minExposureEV);
     // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
-    Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud;
+    Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud
+        + IndoorDayExposureBias * IndoorDay;
     const float Saturation = FMath::Lerp(1.0f, OvercastSaturation, Cloud);
     Exposure->Settings.ColorSaturation = FVector4(Saturation, Saturation, Saturation, 1.0f);
     const float ClearFog = FMath::Lerp(0.016f, 0.007f, Daylight);

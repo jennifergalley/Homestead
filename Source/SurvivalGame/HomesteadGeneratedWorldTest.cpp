@@ -760,14 +760,16 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
                         && Controller->Landscape->ActiveTreeInstances.Contains(KeyText)
                         && Controller->Landscape->ActiveTreeCollisions.Contains(KeyText);
                 });
-        Add(Primary ? TEXT("Fell mature build-site tree through production primary A")
-                    : TEXT("Clear actual worksite obstruction through production secondary X"),
+        Add(Primary ? TEXT("Fell mature build-site tree with the axe on RT")
+                    : TEXT("Clear actual worksite obstruction with the axe on RT"),
             [this, Primary, BranchBefore, FiberBefore, TimberBefore]()
             {
                 *BranchBefore = Controller->Simulation().Count(Item::Branch);
                 *FiberBefore = Controller->Simulation().Count(Item::Fiber);
                 *TimberBefore = Controller->Simulation().Count(Item::Timber);
-                Tap(Primary ? EKeys::Gamepad_FaceButton_Bottom : EKeys::Gamepad_FaceButton_Left);
+                // Felling and clearing are the axe on the tool button (RT); A and X never fell (Jenny 2026-09-30).
+                Controller->ChooseOnHotbar(Item::Hatchet);
+                Tap(EKeys::Gamepad_RightTrigger);
             },
             [this, Key, KeyText, Mature, BranchBefore, FiberBefore, TimberBefore, ActiveBatchSnapshot,
                 ActiveInstancesBefore, ActivePointersBefore]()
@@ -856,8 +858,8 @@ void AHomesteadSmokeTest::PrepareGeneratedWorldChecks()
             Controller->SetControlRotation(FRotator(-20, 0, 0));
         },
         [this]() { return Controller->Focus == AHomesteadController::EFocus::None; }, 0.8f);
-    Add(TEXT("Till the actually felled garden cell through mapped X"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
+    Add(TEXT("Till the actually felled garden cell with the digging stick on RT"),
+        [this]() { Controller->ChooseOnHotbar(Homestead::Item::DiggingStick); Tap(EKeys::Gamepad_RightTrigger); },
         [this, Fixture]() { const auto* Plot = FixturePlot(Controller->State(), *Fixture);
             return Plot && !Plot->planted && !Controller->ToastIsError(); });
     Add(TEXT("CONTROLLED short plot approach"),

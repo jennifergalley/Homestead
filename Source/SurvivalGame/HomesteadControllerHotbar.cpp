@@ -5,11 +5,13 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadItems.h"
 #include "HomesteadSave.h"
 #include "Simulation/HomesteadHotbarLayout.h"
 #include "Simulation/HomesteadLamp.h"
 #include "Simulation/HomesteadPackRow.h"
 #include "Simulation/HomesteadPail.h"
+#include "UI/SHomesteadClock.h"
 #include "UI/SHomesteadHotbar.h"
 #include "UI/SHomesteadHudScale.h"
 #include "UI/SHomesteadPickups.h"
@@ -73,6 +75,17 @@ void AHomesteadController::ShowHotbar()
             SNew(HomesteadMenus::SHomesteadPickups).Controller(this)
         ];
     GEngine->GameViewport->AddViewportWidgetContent(PickupsRoot.ToSharedRef(), 50);
+    // The calendar's time of day, as Slate text over the Canvas calendar panel (which the HUD
+    // draws whenever the native book is closed; the failure screen covers it).
+    ClockRoot = SNew(SBox)
+        .Visibility_Lambda([this]()
+        {
+            return !HasNativeMenu() && !bBookOpen && !IsFailed() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+        })
+        [
+            SNew(HomesteadMenus::SHomesteadClock).Controller(this)
+        ];
+    GEngine->GameViewport->AddViewportWidgetContent(ClockRoot.ToSharedRef(), 50);
 }
 
 void AHomesteadController::HideHotbar()
@@ -82,6 +95,9 @@ void AHomesteadController::HideHotbar()
         GEngine->GameViewport->RemoveViewportWidgetContent(HotbarRoot.ToSharedRef());
     if (VitalsRoot.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(VitalsRoot.ToSharedRef());
+    if (ClockRoot.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(ClockRoot.ToSharedRef());
+    ClockRoot.Reset();
     VitalsRoot.Reset();
     if (PickupsRoot.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(PickupsRoot.ToSharedRef());
@@ -92,7 +108,7 @@ void AHomesteadController::HideHotbar()
 
 bool AHomesteadController::ShouldShowHotbar() const
 {
-    return bWorldReady && !bBookOpen && !bPlanning && !IsFailed() && !ShopScreen.IsValid();
+    return bWorldReady && !bPendingGroundSnap && !bBookOpen && !bPlanning && !IsFailed() && !ShopScreen.IsValid();
 }
 
 Homestead::Item AHomesteadController::HotbarItem(int32 Cell) const
@@ -156,12 +172,14 @@ bool AHomesteadController::ChooseOnHotbar(Homestead::Item Item)
     int32 Cell = HotbarCellOf(Item);
     if (Cell == INDEX_NONE)
     {
+        // Into the first empty cell; with the row full, onto the selected cell (the two swap).
         const int32 Free = FirstEmptyHotbarCell();
+        const int32 Target = Free != INDEX_NONE ? Free : FMath::Clamp(SelectedHotbarSlot, 0, Homestead::PackRowSize - 1);
         const Homestead::LayoutEntry* Stack = nullptr;
         for (const auto& Entry : State().inventoryLayout)
             if (Entry.wearableId == 0 && Entry.item == Item) { Stack = &Entry; break; }
-        if (Free == INDEX_NONE || !Stack || !Sim.MoveToPackRow(Stack->groupId, 0, Free, Sim.GetRevision())) return false;
-        Cell = Free;
+        if (!Stack || !Sim.MoveToPackRow(Stack->groupId, 0, Target, Sim.GetRevision())) return false;
+        Cell = Target;
     }
     SelectHotbarSlot(Cell);
     return SelectedHotbarSlot == Cell;
@@ -177,9 +195,11 @@ void AHomesteadController::EatFromHotbar(Homestead::Item Food)
     const auto* Stack = HotbarEntry(SelectedHotbarSlot);
     const auto Result = Stack && Stack->wearableId == 0 && Stack->item == Food
         ? Sim.EatGroup(Stack->groupId, Sim.GetRevision()) : Sim.Eat(Food);
-    // Success shows as the vitals' +N popups (MealGain); only refusals need words.
+    // Success shows as the vitals' +N popups (MealGain); refusals need words, and so does a Meal on the
+    // estate, whose toast says until when she's Well fed.
     NotifyResourceAction(Result, nullptr);
     if (!Result.ok) return;
+    if (State().fixedEstate && Homestead::FoodClassOf(Food) == Homestead::FoodClass::Meal) Notify(Result);
     if (Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
     MealGain.Food = State().hunger - FoodBefore;
     MealGain.Energy = State().energy - EnergyBefore;
@@ -276,6 +296,15 @@ void AHomesteadController::SelectHotbarSlot(int32 Index)
     PlayEffect(UIClick, 0.05f);
 }
 
+void AHomesteadController::RotateHotbarRow()
+{
+    if (bPlanning) { RotatePlacement(); return; }
+    if (bBookOpen || IsFailed() || !bWorldReady || !ShouldShowHotbar()) return;
+    // The world hotbar now shows the pack's next row (it reads the row); refusals say why.
+    const auto Result = Sim.RotatePackRow(Sim.GetRevision());
+    NotifyResourceAction(Result, Result.ok ? UIClick.Get() : nullptr);
+}
+
 void AHomesteadController::CycleHotbar(int32 Direction)
 {
     if (!ShouldShowHotbar() || Direction == 0) return;
@@ -349,7 +378,8 @@ void AHomesteadController::UseSelectedTool()
         for (const auto& Node : State().resources)
             if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::ForestTree)
             {
-                // Standing trees keep the axe's felling presentation.
+                // The axe fells a standing tree, keeping its felling presentation. (Saplings are
+                // overgrowth, cut with the billhook below.)
                 const Homestead::Point Target = Node.position;
                 const int32 Cleared = FocusId;
                 auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -382,7 +412,7 @@ void AHomesteadController::UseSelectedTool()
             if (Plot.id == FocusId)
             {
                 const auto Result = Sim.Water(FocusId, Position);
-                Notify(Result, GrassStepB);
+                NotifyResourceAction(Result, GrassStepB);
                 if (Result.ok)
                     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
                         Avatar->PlayWater(Homestead::PlotCenter(Plot));

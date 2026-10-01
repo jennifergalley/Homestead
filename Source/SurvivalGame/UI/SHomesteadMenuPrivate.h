@@ -1,6 +1,9 @@
 #pragma once
 
 #include "SHomesteadMenu.h"
+#include "HomesteadUITheme.h"
+#include "HomesteadNoticeStyle.h"
+#include "../Simulation/HomesteadChests.h"
 #include "SHomesteadHudScale.h"
 #include "SHomesteadIcon.h"
 #include "SHomesteadMapView.h"
@@ -122,14 +125,39 @@ private:
     TAttribute<float> Progress;
     TAttribute<float> Flash;
 };
-const FLinearColor Ink(0.93f, 0.93f, 0.84f);
-const FLinearColor Muted(0.71f, 0.77f, 0.69f);
-const FLinearColor MenuGold(0.92f, 0.74f, 0.43f);
+inline HomesteadUITheme::FThemeColor Ink(0.93f, 0.93f, 0.84f);
+inline HomesteadUITheme::FThemeColor Muted(0.71f, 0.77f, 0.69f);
+inline HomesteadUITheme::FThemeColor MenuGold(0.92f, 0.74f, 0.43f);
 // Panels are translucent so the book reads as laid over the living world.
-const FLinearColor MenuPine(0.025f, 0.05f, 0.038f, 0.6f);
-const FLinearColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
-const FLinearColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
-const FLinearColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
+inline HomesteadUITheme::FThemeColor MenuPine(0.025f, 0.05f, 0.038f, 0.6f);
+inline HomesteadUITheme::FThemeColor PopupPine(0.025f, 0.05f, 0.038f, 0.88f);
+inline HomesteadUITheme::FThemeColor PineInk(0.025f, 0.05f, 0.038f, 1.0f);
+inline HomesteadUITheme::FThemeColor Selected(0.09f, 0.14f, 0.105f, 0.78f);
+// The Appearance page's camera input (degrees per second, degrees per pixel dragged).
+namespace MenuAppearanceInput
+{
+constexpr float KeyYawRate = 90.0f, KeyPitchRate = 45.0f;
+constexpr float StickYawRate = 120.0f, StickPitchRate = 60.0f;
+constexpr float StickDeadZone = 0.2f;
+constexpr float DragYawPerPixel = 0.35f, DragPitchPerPixel = 0.2f;
+}
+// Names offered in the chest's naming dialog, so a controller player can name one without typing.
+namespace MenuChestNames
+{
+inline const TCHAR* const Suggestions[] = {TEXT("Pantry"), TEXT("Tools"), TEXT("Seeds and garden"), TEXT("Timber and stone")};
+}
+// The dye chooser's colour chips (display colours for Homestead::DyeName's four plant dyes).
+namespace MenuDyeStyle
+{
+constexpr int32 Count = 4;
+inline FLinearColor Swatch(int32 Dye)
+{
+    static const FLinearColor Values[] = {
+        FLinearColor(0.23f, 0.29f, 0.14f), FLinearColor(0.36f, 0.08f, 0.11f),
+        FLinearColor(0.20f, 0.25f, 0.33f), FLinearColor(0.70f, 0.60f, 0.42f)};
+    return Values[FMath::Clamp(Dye, 0, Count - 1)];
+}
+}
 // The notice card over the book (logical book units and seconds): a small parchment slip with a
 // double-ruled frame and Garamond ink, so it reads as a note laid on the book, not a dialog. Tuned
 // so a one-line notice reads at a glance and is gone before it gets in the way; errors linger a little.
@@ -148,29 +176,31 @@ constexpr double ErrorSeconds = 3.8;
 constexpr double FadeInSeconds = 0.14;
 constexpr double FadeOutSeconds = 0.35;
 constexpr float RiseDistance = 8.0f;
-// Aged paper, iron-gall brown ink, and a rust ink for things that went wrong.
-constexpr FLinearColor Paper(0.62f, 0.54f, 0.38f, 0.97f);
-constexpr FLinearColor InkBrown(0.03f, 0.022f, 0.014f, 1.0f);
-constexpr FLinearColor RustInk(0.22f, 0.03f, 0.015f, 1.0f);
+// Aged paper, iron-gall brown ink, and a rust ink for things that went wrong (shared with the HUD's
+// world notices through HomesteadNoticeStyle).
+constexpr FLinearColor Paper = HomesteadNoticeStyle::Paper;
+constexpr FLinearColor InkBrown = HomesteadNoticeStyle::InkBrown;
+constexpr FLinearColor RustInk = HomesteadNoticeStyle::RustInk;
 inline const FSlateBrush& CardBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, FLinearColor(0.2f, 0.12f, 0.05f, 1.0f), 2.0f);
+    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, HomesteadNoticeStyle::Frame, HomesteadNoticeStyle::FrameWidth);
     return Brush;
 }
 inline const FSlateBrush& ErrorCardBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, RustInk, 2.0f);
+    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, RustInk, HomesteadNoticeStyle::FrameWidth);
     return Brush;
 }
 // The inner rule of the double frame.
 inline const FSlateBrush& RuleBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(FLinearColor::Transparent, 3.0f, InkBrown.CopyWithNewOpacity(0.45f), 1.0f);
+    static const FSlateRoundedBoxBrush Brush(FLinearColor::Transparent, 3.0f,
+        InkBrown.CopyWithNewOpacity(HomesteadNoticeStyle::RuleOpacity), HomesteadNoticeStyle::RuleWidth);
     return Brush;
 }
 inline const FSlateBrush& ShadowBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(FLinearColor(0, 0, 0, 0.4f), 8.0f);
+    static const FSlateRoundedBoxBrush Brush(HomesteadNoticeStyle::Shadow, 8.0f);
     return Brush;
 }
 }
@@ -278,6 +308,9 @@ using MenuDetail::PopupPine;
 using MenuDetail::PineInk;
 using MenuDetail::Selected;
 namespace MenuNoticeStyle = MenuDetail::MenuNoticeStyle;
+namespace MenuAppearanceInput = MenuDetail::MenuAppearanceInput;
+namespace MenuChestNames = MenuDetail::MenuChestNames;
+namespace MenuDyeStyle = MenuDetail::MenuDyeStyle;
 using MenuDetail::ItemCellWidth;
 using MenuDetail::LogicalBookWidth;
 using MenuDetail::LogicalBookHeight;

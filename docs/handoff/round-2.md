@@ -82,24 +82,24 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current Shipping delivery (2026-09-29):** corrected Development `Build\Playtest-0929late` at
-`main` `af97075f` passed six packaged suites (Smoke 57.8, Clearing 52.8, Hotbar 53.0, NativeMenu
-55.6, FullLoop 54.5, EstateSmoke woods 60 fps), and a copied 19:19 Estate save loaded offscreen at
-the manor with no new errors. Shipping candidate
-`Build\Releases\20260929-late-shipping\Windows` has five cooked pak/utoc/ucas containers
-hash-identical to Development, zero endpoints in 301 owned-PID TCP/UDP samples, `shipping=true` /
-`traceCompiled=false`, copied Estate F5/F9 MD5 match, Lit heroine 637 ticks and candidate-local
-`UserDir` writes only.
+**Current Shipping delivery (Phoenix, `main` `e5877da8`):** `Homestead Estate.lnk` is retargeted
+and ShellLink-read-back verified to
+`Build\Releases\20260930-phoenix-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
+(SHA `8B0410A4DBD9C801B9FFDBB33BBB872960C0853BBEFD38D55F84068DD102021F`). The
+`-ReuseCooked` staging output contains only `SurvivalGame-Win64-Shipping.exe`, so Integration made a
+candidate-local hard-link `JennysHomesteadGame.exe` alias and verified the same SHA before shortcut
+promotion. Estate-map arguments, candidate-local `-UserDir`, working directory and icon are retained;
+the prior Estate link is backed up on `E:`. MVP survival was retired on 2026-09-30 as
+`archive/mvp-survival-20260930` (`93612cdf`); `Homestead.lnk` was removed and
+`Homestead Estate.lnk` is the only active game shortcut.
 
-`Homestead Estate.lnk` is now retargeted and ShellLink-read-back verified to a hard link of Shipping
-SHA `5A446A744967172AAE9BAAD9598973742EB93CABD6F31594C0240EFF918C7171`, with Estate map and
-candidate-local `-UserDir`, original icon and Win64 working directory retained. Before the switch,
-Jenny's 0929eve Estate save and Windows config/Input were hash-identical to a staged 19:19 snapshot;
-the originals remain unchanged. A scratch `-UserDir` offscreen run confirmed the same hard link and
-shortcut args for 60 seconds with zero endpoints and writes only to scratch. `Homestead.lnk` remains
-MVP-untouched; Development late and evening builds remain rollback paths, and the old link is backed
-in Integration `E:` scratch. Probe harness defects and visible human startup caveat remain (see
-offline-startup); Menu field-book hotbar and Water garden outline remain excluded partials.
+Phoenix Development passed all six packaged suites. Shipping reuses five hash-identical cooked
+containers; copied-save F5/F9 passed; 175 owned-PID endpoint samples observed zero sockets. All 19
+saves plus GameUserSettings/Input match pre-promotion originals, including Manual
+`F816C870...5EB8`. The old Phoenix copied-save teleport ground-hold is a QA limitation, not visual
+door/forage acceptance or a proven Shipping bug. Visible human startup, manual physical gamepad and
+the hair rod/fan cure remain unobserved/inconclusive; the stale modular-equipment wrapper assertion
+is still not a full wrapper pass. Earlier Development/Shipping receipts remain rollback history.
 
 **Shared-memory warning (2026-09-29 20:19):** Jenny later launched the Shipping Estate while Menu
 editor PID 52420 remained open; Available MBytes fell to 143. Integration touched no process and used
@@ -285,7 +285,8 @@ Jenny game process, fresh staged data and no new blocker. ShellLink read-back re
 `Build\Releases\20260929-split-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
 with SHA `2A1834BC5B667740F184AB949A147A3A14A7E00E0B8F8A8E1384554AF1CC3FA4`. Estate-map arguments,
 candidate-local `-UserDir`, icon and working directory are retained. The prior Shipping link is
-backed up on `E:`, Development remains a rollback path and `Homestead.lnk` remains MVP-untouched.
+backed up on `E:` and Development remains a rollback path. Historical receipt: `Homestead.lnk` was
+then left untouched; it was removed during the 2026-09-30 MVP retirement.
 
 The Shipping package reuses five byte-identical cooked containers. Its copied-Estate-save startup
 probe reports `shipping=true`, `traceCompiled=false`, Lit 634 ticks, F5/F9 MD5 equality and zero
@@ -384,7 +385,8 @@ current-cost compatibility semantics, not a save migration.
 - Bramble `550200` at 283 cm focuses over weed at 125 cm and one worn clear removes three canes for
   1.2 Energy; Sapling `570143` clears on one click for 4 Branch +1 Kindling /1.5 Energy; Iron thicket
   has no animation/sound; F5/F9 cleared state passes.
-- Sprint: run/walk changes about 0.03 Energy over 6 s, auto-off/refusal at <=10 and no resume at 50.
+- Historical sprint receipt: run/walk changed about 0.03 Energy over 6 s, auto-off/refusal at <=10
+  and no resume at 50. Jenny's 2026-09-30 25% sprint / 10% exhausted policy supersedes this.
 - Hoe hint is dropped from this local batch and remains chest-native-only. Bed UI reads 4 Branch +4
   Hay; old canes-bed deconstruct refunding four Hay is native-only intentional current-cost
   compatibility behavior. Forage-ID freeze remains source-only.
@@ -399,7 +401,8 @@ Menu pickup `b2a49e36` + `cb3f40c7`, weed clip and scythe remain excluded.
 FullLoop berry-regrowth assertion correction). After Jenny quit and asked, Integration retargeted only
 `Homestead Estate.lnk` to
 `jennifergalley-literate-eureka\Build\Playtest-0929pm\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`;
-`Homestead.lnk` and the morning `Playtest-0929` build remain untouched. The latest Estate save
+Historical receipt: `Homestead.lnk` and the morning `Playtest-0929` build then remained untouched.
+The latest Estate save
 (`Manual`, 2:01 PM) carried over and is scratch-backed.
 
 All packaged 1080p suites passed: Smoke 57.9 fps, Clearing 52.1, Hotbar 53.5, NativeMenu 56.6 and
@@ -407,15 +410,17 @@ FullLoop 54.5. `EstateSmoke` passed with zero material compile/errors, all six l
 rendering, and the pond default material/usage checks; manor measured 59.2 fps (p99 20.2 ms) and woods
 60 fps (p99 16.7 ms). The build includes the north-west lake and map-label removal, rain gain fix,
 Gait run, Menu toast/berry A-X Energy/Ctrl+wheel/wait changes, manor rubble and sprint, plus earlier
-crop, river, performance and save work. Rain remains audibly unproven; listen outdoors on day 2 from
-about 11:00 to 15:30.
+crop, river, performance and save work. Historical daytime rain audio remains audibly unproven; do
+not use its day-2 11:00–15:30 window as a current test recipe. After Water's full-cycle schedule
+lands, listen outdoors during a scheduled rain event instead.
 
 ## Evening playtest build
 
 **[playtest] ready:** `Build\Playtest-0929eve` packages `main` `ca141b1f` / game code `a2607437`
 plus test-only `6556c1fe`, and is on `Homestead Estate.lnk` with a copied 3:46 PM Manual save.
 Integration retargeted only that shortcut with its existing icon/arguments; it never touched
-`Homestead.lnk` or Jenny's live save. Native passed 9/9; six packaged suites passed: Smoke 56.9 fps,
+Jenny's live save. Historical receipt: `Homestead.lnk` was then retained and was later removed in
+the 2026-09-30 MVP retirement. Native passed 9/9; six packaged suites passed: Smoke 56.9 fps,
 Clearing 53.1, NativeMenu 55.2 and EstateSmoke woods 58.6 among them.
 
 The fresh-game packaged FullLoop exercises the core loop, so it is now **deliverable**. Food PIE also
@@ -499,8 +504,12 @@ The design's "Lanes and ownership" table is authoritative. In short:
 - **`SimulationSaveVersion` is bumped once, at final integration** (design §10: `Plot::withered`, the new
   enum values, gate state, the second shop, `dayMinutes`). Lanes never bump it; tell the orchestrator
   before your `[ready]` if you add to the save format.
-- **Playtest builds** on the "Homestead Estate" shortcut by 7:30 AM daily and 4:00 PM on weekdays
-  (`docs\handoff\README.md`, "Playtest builds"). `main` must stay playable.
+- **Playtest builds** on the "Homestead Estate" shortcut three times daily: 7:30 AM (freeze 4:30
+  AM; Integration slot 5:00 AM), 4:00 PM (freeze 1:00 PM; Integration slot 1:30 PM) and 9:00 PM
+  (freeze 6:00 PM; Integration slot 6:30 PM). At freeze, only UE-verified, code-reviewed work
+  enters; the rest waits for the next slot
+  (`docs\handoff\README.md`, "Playtest builds"). `main` must stay playable. The first evening
+  build is October 1, 2026.
 - **Jenny's playtest feedback takes priority** over round-2 lane work.
 - **Launching with ray tracing off:** `Start-EditorMcp.ps1` also turns virtual shadow maps off; any other
   RT-off launch must too, or a new Estate game hangs the GPU (editor skill, table 0.1).
@@ -533,13 +542,15 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 | 581000-581099 | **reserved exclusively** for Water roadside forage (approval 2026-09-29; `Scripts\Terrain\forage.py` → `HomesteadEstateRoadsidePlacements.inc`) |
 | 582000-582099 | clearable manor ruin rubble (Props; `HomesteadEstateRuinRubblePlacements` in `HomesteadEstate.cpp`) |
 | 582100-582299 | extra pickable forage in Estate woods and fields (Water; `Scripts\Terrain\forage.py` → `Simulation\HomesteadEstateForagePlacements.inc`) |
-| *next free: 582300+* | *claim here* |
+| 582300-582399 | **reserved exclusively** for Water lake-trail forage (approval 2026-10-01; `Scripts\Terrain\lake_path_plants.py` → `Simulation\HomesteadEstateLakePathPlacements.inc`; appended last after tool rack 520006) |
+| *next free: 582400+* | *claim here* |
 
 | Scenery kinds (`EstateSceneryKinds`; `scatter.py` kind bytes must match) | Owner |
 | --- | --- |
 | 13-18 | trees (oak, beech, sycamore, hawthorn, holly, hazel coppice) |
 | 19-41 | MVP woodland biome |
-| *next free: 42+* | *claim here* |
+| 42-48 | **reserved exclusively** for Water lake-trail wildflowers (`lake_path_plants.py`): bluebell, primrose, wild garlic, wood anemone, red campion, foxglove and cow parsley |
+| *next free: 49+* | *claim here* |
 
 ## Shared interfaces this round
 
@@ -580,9 +591,18 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
   writes the full per-station route to `Scripts\Terrain\cove_route.json` and emits
   `Simulation\HomesteadEstateCoveRoute.inc`; the indent-1 layout keeps only a summary because a
   full centreline would add about 19,000 lines. `scatter.py` reapplies route clearing after lake
-  clearing. This is branch-only: no terrain, map, route include or native test result is an
-  integration claim. For Props' raked handrail kit, mirror far-side bays with scale Y `-1`; do not
-  rotate them 180 degrees.
+  clearing. Follow-up `6a987b7b` adds generated `ground(...)` and `flightEnds(...)` samples for
+  native route tests and keeps paths level for 2 m at a flight junction. Heightfield cutters must
+  derive headings per leg: `np.gradient` over a filtered station list points across leg ends. This
+  is branch-only: no terrain, map, route include or native test result is an integration claim. For
+  Props' raked handrail kit, mirror far-side bays with scale Y `-1`; do not rotate them 180 degrees.
+- **Pending wider-beach pipeline (unmerged `jennifergalley-wider-beach` at `f0eb8fc1`):**
+  `beach_belt.py` grades the belt only once (`beach.graded`); later runs report only. Run it after
+  `cove_route.py`, then `river_channel.py`, `weightmaps.py`, `bake_ground.py` and
+  `bake_estate_map.py`; run `python -m unittest Tests/EstateBeachTests.py` against the graded
+  artifact. In the editor, follow `ApplyEstateHeightfield` / `ApplyEstateWeightmaps` with
+  `bake_ocean.py` and `build_ocean.py` before water/ground/map imports, otherwise the swell's
+  shore/depth data treats new shallows as deep water. It is unmerged and unshipped.
 - **Field-book map destination names reserved:** **Town** and **Manor**. The future travel action and
   UI use these exact user-facing names; other map work must not reuse them.
 - **Seedsman anchors claimed (C; branch `4f21a2d8`, not on `main` yet):** `Anchor::SeedsmanDoor`
@@ -594,7 +614,16 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 - **Day length:** resolved 2026-09-29 — new Estate games default to **60-minute days**. Settings
   continue to offer 30 and 120 minutes, and existing saves retain their stored value. The source
   OpenSpec is updated only after Props implements and verifies the corrective commit held below.
-- **Sunday closing:** should shops close on Sundays? (A per-shop data flag, so easy to turn off.)
+- **Sunset/day length:** resolved 2026-09-30 — an 18:00 sunset is accepted; do not change day
+  length for it.
+- **Sunday closing:** resolved 2026-09-30 — both shops close all day Sunday. Water implements this
+  on `jennifergalley-sunday-closing`; it remains unmerged and unshipped.
+- **UI theme:** approved 2026-09-30 — parchment cards plus EB Garamond are the standing menu/HUD
+  theme and are scheduled for the 7:30 AM Estate build. The `homestead.UITheme` implementation
+  still needs its Integration/package receipt before it is called shipped; every future UI surface
+  needs a gallery entry.
+- **Night review:** Water supplies a side-by-side screenshot sheet; Jenny's Shipping build has no
+  console, so do not request CVar trials from her.
 - **Names:** Tregear's and its keeper are placeholders.
 
 ## Lane status
@@ -629,9 +658,9 @@ after the north-west lake; town-entry/store acceptance, coordinate bridge, roads
 signs wait for the final road route. If the terrain or water work needs placement ids, the Water Agent
 claims them through this page before using them (the registry starts at 581000+).
 
-**Night tuning remains pending:** Water's unmerged `fix-night-brightness` defaults are
-`NightMoonLux=0.2`, `NightSky=0.3` and `NightMinExposure=-1`. Do not update the editor skill or
-claim a brightness fix until Integration has packaged RT-on sign-off.
+**Night tuning values are final:** Jenny approved Water's Set A:
+`NightMoonLux=0.2`, `NightSky=0.3` and `NightMinExposure=-1`. Its source/integration and packaged
+RT-on receipt remain pending; Water's side-by-side screenshot sheet is the player-review method.
 
 ### Forage placement ID freeze blocker
 
@@ -663,11 +692,28 @@ with 2.4 m cleared verges. Its terrain import requires `bake_ground.py` and then
 `build_ground.py` from the **same checkout**, because `Saved\Ground` PNGs are per-worktree. It
 remains unintegrated and needs the terrain/import verification described on Water's branch.
 
+**Lake-trail forage `bbea5da8` (unmerged):** claimed ids `582300–582399` are appended last through
+`lake_path_plants.py`; the generator emits live BerryBush/Roots to
+`HomesteadEstateLakePathPlacements.inc` and decorative wildflowers using scenery kinds 42–48.
+Once its forage include exists, rows are read back as save identity and never replanned; `--replan`
+is permitted only before shipment. `scatter.py` reruns `lake_path_plants.bake()` after
+`lake_features` so a fresh scatter preserves the flower clearing/records. This remains branch-only
+until save-stability, native, editor and package evidence admits it.
+
 **Packaged lake pail regression:** the diagnosis is inconclusive; do not make a speculative shore-range
 change. The shipped probe accepts lake shore <=120 cm, and PIE filled at landing (-79, -744) using an
 emptied carried pail. Current world focus misleadingly offers `[A] Fill carried Pail` even with no
 carried pail (the starter pail remains in its chest), then errors `Carry your pail`; a full pail, low
 Energy or being >1.2 m off bank are other possibilities.
+
+**Lake shallows / swimming backlog (`f34c0a4f`, Water branch only):** Jenny asked to wade into the
+lake and fill the pail **in** the water. Source-only `f34c0a4f` changes successful fills more than
+30 cm inside the fresh-water line to use `InWaterDipPoint`: the pail reaches ahead if that is water,
+otherwise turns toward deepest water and never steps back onto the bank. It still needs PIE
+reproduction of the actual waterline blocker, collision/wade-wall/slope diagnosis, in-water kneel
+proof and normal integration/package validation. `add-swimming` is created as a separate **backlog,
+not scheduled** OpenSpec: fresh-water wade/deep-wade/swim movement and animation, Energy cost,
+tool/pail restrictions and lake-crossing acceptance. Do not broaden the lake fix into swimming.
 
 Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save.
 The unique copied-save packaged run records pail/water/Energy/focus/edge distance/actor tag plus A/E/RT
@@ -765,6 +811,51 @@ receipt.**
   sliders; backpack in progress); Props 0930b (coins/`GrantMoney`, safe manor hall and
   scythe grip/ground mow); Water road-grade/bridge/night/town-square/river-mouth stack, with
   foliage motion separate.
+- **Integration next-batch source `68c6f883` (not on `main`):** merges accepted Menu
+  gallery/theme/signs/Energy `3d993f81`, Props 0930b `65385ba3`, Energy fix `1a3f3261`, Water
+  October `190eb04c` (including Sunday closure) and cove kit `d3826435` onto the current
+  chest/tools/teleport/Water base. Native Release 18/18 passes. Combined native compilation exposed
+  stale backpack `constexpr Cents Price` and fixes it as whole-coin `Coins` in `6df4e916`.
+  Controller/UI, Editor/Game, PIE, package and delivery evidence are still absent. `32ecce62`
+  kept classic as the temporary default during review; Jenny has now approved the
+  `homestead.UITheme` parchment/EB Garamond style for the 7:30 AM build. The default flip still
+  needs integration/package evidence; every future surface must have a UI-gallery entry.
+
+  **Bed interaction `15227420`:** source-only in the same next batch. Simulation and focus share a
+  90 cm footprint-edge / 30° half-cone admission so the bed loses to every existing focus target.
+  Jenny superseded its confirm/picker at 22:46: E/A immediately sleeps until Energy is full, capped
+  at 06:00 when overnight; if already rested at night it sleeps until 06:00; a rested daytime bed
+  has no verb. There is no context dialog, Cancel or nap-hours picker. Integration is implementing
+  this replacement; prior `15227420` confirmation tests do not accept it. UE, PIE, packaged and
+  delivery evidence remain pending.
+
+  **Canonical next-batch source `9c981907` (not on `main`):** native Release 18/18 passes. Estate
+  Energy 0 is nonfatal with no doze; old failed Estate saves reopen unfailed at hunger 100 / Energy
+  0. Below 25% sprint is unavailable; below 10% walking is 75% speed and tool work says
+  `Too tired`; food and bed sleep recover Energy. Bed behavior now uses one E/A press until rested
+  (capped at 06:00 overnight), then until morning when already rested at night; it includes
+  chest-offset/facing/footprint-ray and focus-hysteresis fixes.
+
+  `UHomesteadSave::SavedRevision` is an optional SaveGame field (old saves default 0) used after
+  `SavedAtUtc` as the newest-valid tie-breaker. `LoadLatest(true)` scans Manual, Auto 0–2, Recovery
+  and backups without short-circuiting to an older Recovery **on the Estate**. Woodland recovery
+  instead must prefer a valid sheltered Recovery with hunger/Energy >=20 before the newest eligible
+  candidate; the required correction is queued. Native comparator/Estate-72-hour tests
+  and an isolated `SaveRoutingTest` write/read/corrupt-fallback fixture cover it. Menu HUD `d246`
+  still awaits its UE `[ready]`; controller/UI, PIE, packaged and Shipping acceptance are pending.
+
+  **Dawn edge `192e0d52` / branch head `b1a6abda`:** ordinary `Sim.Sleep` keeps its original
+  0.25–12 hour interval and refusal. Only a dawn-limited bed rest may be shorter than 0.25 hours,
+  with a positive interval ending exactly at 06:00; `BedSleepOption` presents it at 05:52 and
+  `Sleep(..., dawnLimited=true)` validates it. Native 18/18 and FullLoop cover single A at
+  05:52 → 06:00. UE/PIE/package proof remains pending.
+
+  **Accepted source heads `645d55a7` (not on `main`):** Integration separately merged Props
+  hold-to-repeat `2d1a4fed`, baked scythe `5ec5df04`, imported cove-kit assets `b5b55fb8`, Water
+  cove placement `c11458c9`, and canonical audio-loudness docs `4eb5a6b7`; all are ancestors of the
+  clean batch and native Release 18/18 passes. The rejected global hair-sky toggle remains
+  excluded. Unreal compile, PIE, package and Shipping acceptance await the exclusive integration
+  slot; there is no playable-delivery claim.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
@@ -824,6 +915,11 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
+
+  **UI theme decision (Jenny approved 2026-09-30):** parchment cards plus EB Garamond are the
+  consistent menu/HUD theme for the 7:30 AM build. Menu's `homestead.UITheme` switch remains
+  package-pending; retain normal resolution/input checks and require a gallery entry for every new
+  surface before calling it shipped.
 - **Pickup gain popup** — **Menu acceptance `04959978` is main-integrated in `23aba36a`, but excluded
   from the next aim/rain/Shipping package and not shipped.** Based on common Simulation revision gains
   across pack, owned chests and drops, it suppresses moves/reloads and Water, then presents a
@@ -933,11 +1029,12 @@ requirement.
   720/4K chest-row screenshots and copied Jenny-save physical row swap/F5/F9 stock evidence still
   pass; DirNav step 53 Settings `visible=0` remains known.
 
-  **Coral Shipping delivered (`main` `e9c3d3d5`):** `Homestead Estate.lnk` now read-backs to
+  **Coral Shipping delivery (`main` `e9c3d3d5`, later superseded by Phoenix):** `Homestead Estate.lnk` then read-backs to
   `Build\Releases\20260930-coral-hotbar-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
   with SHA `7C65AAF0305556A74177B4C62D7C87FDFD5708ACAA95B388B432A54434B281EB`. Estate-map arguments,
   candidate-local `-UserDir`, working directory and icon are preserved; the prior link is backed up
-  on `E:` and `Homestead.lnk` remains MVP-untouched. The candidate reuses five hash-identical cooked
+  on `E:`; historical receipt: `Homestead.lnk` was then retained and was later removed in the
+  2026-09-30 MVP retirement. The candidate reuses five hash-identical cooked
   containers. All 19 source SaveGames plus GameUserSettings/Input match their pre-promotion hashes;
   Manual `F816C870...5EB8` remains unchanged.
 
@@ -1015,6 +1112,25 @@ requirement.
   Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
   two-swing clearing animation and awards/clears once, without a second click or double reward.
   Architecture traces tool tier, input and reward paths before native/PIE proof.
+- **Animation anatomy and inspection** — **Props source-only `ded05f62`, not on `main`.** It adds
+  `.github/skills/realistic-animation/` with MetaHuman per-joint comfortable/extreme ROM tables,
+  coupling, joint speeds, tool grips, posture/failure rules, review checklist and sources.
+  `rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` now runs
+  `joint_limits.py` after every bake and logs advisory `[anatomy AN_...]` lines; errors never block
+  a bake. `anim_audit.run()` writes a whole-cast report to
+  `E:\CopilotScratch\anim-audit\<stamp>\audit.md`. It also contains
+  `add-realistic-animation-skill` and cross-links from `homestead-animation-layer` / `blender-assets`
+  on the branch.
+
+  Rig facts for future inspection: twist/corrective upperarm/lowerarm/thigh/calf bones are RigLogic
+  followers in `ABP_Body_PostProcess`, not keyable/limited joints; fingers have
+  `*_metacarpal_*` bones between hand and `*_01`; the reference A-pose is not anatomical shoulder
+  zero; judge angles in UE component space (+Y forward, +X her left, +Z up), never Blender armature
+  axes. The planned Animation Inspector remains the animation counterpart to the UI Gallery:
+  deterministic frame-by-frame multi-view captures with ROM, contact and centre-of-mass overlays,
+  via `Scripts\Inspect-Animation.ps1` and `editor_mcp animinspect`. Cross-link it from canonical
+  `blender-assets` only after this branch lands and validates; none of this is animation acceptance
+  evidence yet.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
@@ -1031,6 +1147,15 @@ requirement.
   never fall back to CC0 `GrassStepA` footstep audio. PIE still needs cue count at 30/60/120 fps,
   miss/cancel, rain/music mix/headroom and cooked asset proof. Add provenance to `docs/asset-credits`
   only when shipped.
+
+  **Audio loudness standard `95f4ea14` (Water branch only):** every new or changed cue is measured
+  against the forest ambience bed before shipping. `HomesteadAudioLevels.h` owns cue use/source/
+  category/bus/gain rows and named gain constants; `Measure-Loudness.py` (after
+  `Fetch-Assets.ps1` and `soundfile`/`pyloudnorm`) regenerates
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; native
+  `HomesteadAudioLevelTests` rejects out-of-band or unregistered audio. The generated header must
+  not use `*.generated.h` because that collides with UHT. This pipeline is unmerged and is not yet
+  an acceptance gate.
 - **Bilateral ground-pull and sapling action count** — **Props, pending and not shipped.** By-hand
   Resource Weeds/Nettles already resolve in one `Sim.Harvest`; replace right-knee-only
   `KneelGather(Pouch)` with a dedicated bilateral kneel: two hand grabs, left/right toss behind,
@@ -1100,21 +1225,23 @@ requirement.
   side patches at some camera angles. Pending; not shipped.
 - **Sprint toggle** — **Menu `af7831b1` shipped in the 4 PM playable build.** Commit
   `8e0516a0` toggles sprint with L3 or a released Shift tap: Shift+Q/click does not toggle, work/book/
-  shop pause speed while preserving intent, and load/new/retry/teleport reset it. At <=10 Energy it
-  gives a notice; exhaustion disables sprint. Native 8/8 plus economy 12 / scenario 521 checks and
+  shop pause speed while preserving intent, and load/new/retry/teleport reset it. Historical
+  behavior at <=10 Energy gave a notice and disabled sprint; Jenny's 25% sprint / 10% exhausted
+  policy supersedes that threshold. Native 8/8 plus economy 12 / scenario 521 checks and
   Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
   210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture; packaged NativeMenu
   and Hotbar suites passed.
 - **Sprint Energy cost** — **final product direction, pending and not shipped.** Sprint has **zero**
 sprint-specific Energy cost; this supersedes both current 0.35/real-second behavior and the tentative
 0.05/s/regen proposal. Baseline awake time drain remains -0.6/game-hour and ordinary work costs remain.
-Refuse the sprint toggle at Energy <=10 and turn it off if other work/time reaches that threshold; do
-not auto-resume after recovery.
+Refuse/turn off sprint below about 25% Energy; below about 10% walking slows and tool work says
+`Too tired`. Do not auto-resume after recovery.
 
 **Props partial `7475b435`:** native 9/9 on `jennifergalley-sprint-zero`, based on `4b8d6edd` and
 cleanly merging `main` `4463086d`, not built/PIE/packaged or shipped. It removes the 0.35/s charge,
 uses `Sim.CanSprint(Energy > 10)`, toggles off at <=10 with no auto-resume, and leaves speed/awake
-drain unchanged. Native coverage spans 30/60/120 FPS and day lengths, floor/refeeding/work/reload, plus
+drain unchanged. This historical partial is superseded by Jenny's 25% sprint / 10% exhausted
+policy. Native coverage spans 30/60/120 FPS and day lengths, floor/refeeding/work/reload, plus
 Hotbar/Creek/Visual routes. Integration's UAT lock on `a2607437` remains ahead of UE validation.
 
 The bramble-on-food `42a63b8f` conflict is separate from sprint; Props rebases it only after the
@@ -1233,6 +1360,24 @@ not claim early Energy is fully solved.
   hover text; retain tile quantity and controls. **Menu** owns the UI after active dye/Appearance work;
   source values from `ItemInfo` so future Energy-only lane-F values flow through automatically.
   Require native coverage and PIE checks at 1080p and 4K.
+- **Estate Energy safety (Jenny, 2026-09-30):** no death, fainting or failure state on the Estate.
+  Below about 25% Energy sprint is unavailable; below about 10% she walks more slowly and tool work
+  refuses with `Too tired`. The Energy bar shifts colour and pulses with `Getting tired` and
+  `Exhausted` warnings. Food and one-press bed sleep recover Energy. Integration owns simulation
+  and Menu owns HUD for the 7:30 AM batch; this remains source/package pending. Recovery/checkpoint
+  loads must choose the newest valid save by timestamp and revision, never an older Recovery file
+  over a newer autosave **on the Estate**. Legacy woodland still has lethal hunger and outdoor
+  autosaves: recovery prefers a valid sheltered Recovery with hunger/Energy >=20, otherwise the
+  newest eligible file. The high-priority source correction is recorded below; UE, package and
+  delivery acceptance remain pending.
+
+  **Recovery/chest correction `fdf69690` (not on `main`):** native Release 18/18 now confirms
+  Woodland recovery prefers a valid **same-world** sheltered Recovery with hunger/Energy >=20,
+  then falls back to the newest eligible candidate; Estate stays newest-valid by
+  timestamp/`SavedRevision`. FullLoop again expects the protected Woodland checkpoint. Chest focus,
+  `OpenChestStorage`, transfer, `ContainerAccess` and `FindNearestStructure` now all measure the
+  placed footprint centre; native coverage includes an on-foundation chest and an isolated two-mode
+  runtime-routing fixture. UE/PIE/package/Shipping evidence remains pending.
 - **Whole-number currency** — **agreed design, pending and not 4 PM content.** Preserve the current
   `int64` raw values and save bytes: semantically relabel the smallest stored unit as one whole
   `coin`, with **no numeric x100 migration**. Thus raw 1000 (formerly $10) becomes 1,000 coins and
@@ -1245,22 +1390,16 @@ not claim early Energy is fully solved.
   cap-overflow guard after an explicit slot; **Menu** owns the coordinated shop/HUD/toast/UI formatter
   slice. Avoid a half release. Validate Economy, Lamp, legacy v12/v13 saves, raw 0/1/`INT64_MIN` and
   cap behavior; package a 720p/4K purchase such as 1,000 → 900 coins for a pasty.
-- **Weather recurrence** — **Water Agent** (retained lane; supersedes the broader Calendar proposal):
-  rain every third day is too frequent. The smallest traced change is a stable hash selecting offsets
-  **1 or 2** and **6 or 7** in every 10-day block: exactly 20% rain, 4–6-day gaps and day 0 dry. Keep
-  the current 09:00–15:00 rain window, overcast, moisture and audio behavior; no seed or new save
-  section. Old saves' forecast can change, while accrued plot moisture persists; document that at
-  implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
-  after its lane-A work.
+- **Full-cycle rain** — **Water Agent** (Jenny decision, 2026-09-30): rain falls at random times
+  through the entire day/night cycle, with seasonal weighting, reload-stable scheduling and
+  coherent night-rain lighting. No day-length change follows. Water implements it; it is **pending
+  and unshipped**. Acceptance includes save/reload stability, roof shelter, ground/audio response,
+  daylight and real night-rain events, plus packaged RT-on night evidence.
 
-  **Approved recurrence branch `69827d75`, recook pending:** `IsRainDay` now uses SplitMix64 per
-  ten-day block with one offset 1–2 and one 6–7 (day 0 dry; block 0's first rain remains day 1).
-  Native coverage spans 10,000 days, spacing, all offset pairs, whole days, negative hours and
-  save/reload. The first Development FullLoop failed only because its crop-wetting fixture skipped
-  until `day % 3 == 1`; it now advances until `Homestead::IsRainDay(State.hour)` and retains the
-  assertion that both plots become wet. Phoenix Development v2 subsequently passed all six packaged
-  suites. This remains branch-only until `69827d75` is integrated: it is a **test-fixture
-  correction, not a rain rollback or delivery claim**.
+  **Historical recurrence (`69827d75`, Phoenix):** the delivered SplitMix64 two-days-in-ten
+  schedule and its 09:00–15:00 window are superseded by this decision. Its native count/gap/save
+  checks and semantic FullLoop rain-day fixture remain useful regression evidence, but daytime
+  window captures do not accept the replacement schedule.
 
   A separate hidden copied-Estate-save QA run physically F5-saved (scratch hash changed), then
   key-7/F9 restored slot 1 and the prior game time; the source save remained untouched. Its later
@@ -1268,6 +1407,31 @@ not claim early Energy is fully solved.
   stalled render/log progress for about 164 seconds before Integration stopped only its own PID.
   Do not use that run for door/forage visual evidence or infer a Shipping gameplay bug. The test
   wrapper already treats a ground hold that gives up as invalid collision placement evidence.
+  Read-only trace rules out the new door leaf: ground settling traces the Pawn channel, while the
+  door is Visibility-only. The teleport crossed about 21 m from `(-23970,-64935)` toward a likely
+  World Partition proxy boundary near x `-25200`; the analytic heightfield remained valid at z 8652
+  while the screenshot showed missing nearby terrain. The controller logs only the first collision
+  miss and can hold for up to 180 **game** seconds, so 164 wall seconds without a follow-up line is
+  not proof of a hard hang. Likely destination-proxy streaming remains unproven. A later fix should
+  explicitly source destination streaming, emit periodic diagnostics, and wall-clock-bound the hold
+  with safe-position restoration rather than placing her through missing collision.
+
+  **Ground-hold repair `48c4418a` (Integration branch only):** extends `2510023f`'s corrected
+  guards. It adds a high-priority World Partition source at the destination and traces
+  Landscape Pawn collision/floor, but records `LastSafeWorldPosition` only while grounded and
+  immediately returns the pawn there during the wait. Travel snapshots the Simulation before
+  `WalkRoad` and restores its exact clock, needs and revision on timeout; pending snaps refuse all
+  `SaveSlot` writes, restore actor/control rotation, and reject overlapping teleports. While pending,
+  menu/hotbar/shop/sleep/console inputs are throttled or refused, the UI closes, F9 load remains
+  allowed, and rollback re-prepares/restores owned clothing. The real-time 90-second Tick timeout
+  also covers invalid woodland destinations; it retains 10-second diagnostics, cleanup on
+  save/new/retry/end and EstateSmoke source assertions for streaming-actor creation/release.
+
+  It is **not on main, compiled or runtime-verified**. The timeout cannot fire while the game
+  thread itself is not ticking. In an isolated copied save, acceptance must prove delayed collision,
+  fall recovery, canceled-travel clock/needs/revision restoration, pending F5/sleep/equip refusal,
+  F9 allowance and wardrobe rollback. It must also prove invalid woodland teleport timeout and
+  ordinary EstateSmoke, without modifying Jenny's live save.
 - **Starter chest and wardrobe** — **main-integrated `a785a417`, not packaged or shipped.** Fresh-game
   PIE verified the standing-room chest's pail, four branches, 3 pasties, 2 bread and seven garments;
   the tunic stays worn. It runs only in `NewEstateGame`, never restocks on load and uses normal chest
@@ -1368,13 +1532,41 @@ not claim early Energy is fully solved.
   landing through ground-material wear, then verify it visually and on foot. Water's separate
   `1d5b90a9` trail PNG/bin is committed but requires `build_ground.py`, importing `T_EstateGround` /
   `T_EstateCanopy`, `ImportEstateMap`, and a visual check before any delivery claim.
+- **Water selective source merge `4324515d` (next batch only):** includes Water `d1fe4850`'s
+  concise pail-fill change (no success toast; refusals remain visible) and native Release 18/18
+  source evidence. The rejected global indoor `r.HairStrands.SkyLighting` toggle and black-hair
+  image are omitted. Water's `00fd` follow-up is not UE-verified; no Water visual or package
+  acceptance claim follows from this merge.
+
+  **Review follow-up `855a91cc` (not on `main`):** partial pails stay water-focusable until
+  `PailPortions` capacity; `NotifyResourceAction` clears stale refusal copy while retaining
+  refusal feedback; watering playtest asserts the named capacity. The isolated routing fixture
+  explicitly toggles `bEstateMap` for policy cases on the Woodland test actor and restores it.
+  The independent wall plate is lowered to 279 cm. Native merged baseline remains 18/18; these
+  Unreal-only routing/interior changes still require UBT and runtime verification.
+
+  **7:30 AM build hold — Menu chest tiles:** the invisible 720p chest-stack regression is from
+  Menu's unmerged `62f7c645` (a dropped `AddSlot`), **not** `3bc08d9a` or current batch
+  `855a91cc`. Native 18/18 does not catch this UI failure. Menu fixes it in `cc001d62`; the hold
+  remains until its 01:45 slot confirms chest view and directional navigation, followed by
+  Integration batch UI testing. No rollback is planned. One-line pail compile fix `c0a9e97a` is
+  source-only and does not clear this UI gate.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
-- **Oil-lamp reach** — **pending behind the core loop, not shipped.** Held and placed lamps share
-  `LightIntensity=1400` and `radius=1000 cm`, use inverse-square point lights with shadows, and flicker
-  at 0.9–1.05. A literal +300% radius reaches 4000 cm but is only 1/16 as bright at 40 m versus 10 m
-  and can expand shadow-caster volume about 64x; do not assume radius alone produces a useful throw.
+- **Oil-lamp reach** — **pending behind the core loop, not shipped.** Current held and placed lamps
+  share `LightIntensity=1400` and `radius=1000 cm`, use inverse-square point lights with shadows,
+  and flicker at 0.9–1.05. A literal +300% radius reaches 4000 cm but is only 1/16 as bright at
+  40 m versus 10 m and can expand shadow-caster volume about 64x; do not assume radius alone
+  produces a useful throw.
+
+  **Unmerged lamp profile `45728ba5`:** native `Simulation\HomesteadLampLight.h` defines a
+  four-times-reach gentle-falloff profile, with tuning CVars `homestead.LampIntensity`,
+  `LampRadius` (m), `LampFalloff`, `LampLegacy` (1 = old-light A/B) and
+  `PlacedLampShadowDistance` (m). C++ point lights are Unitless; inverse-square illuminance is
+  `E(1 m) = 16 * I / 10000` lux. The new held/placed/lab path and nearby-only placed shadows are
+  source-only; retain the existing packaged RT-on visual, light-leak, p95/p99 and oil-use
+  acceptance gates before integrating.
 
   Props/Integration first trial measured low-gain broad fill or bounded falloff that avoids near glare
   and wall leak. Compare held and placed lamps in packaged RT-on 4K manor/woods fixed cameras at
@@ -1397,7 +1589,8 @@ not claim early Energy is fully solved.
   intensity is 0.6 (day 1), and night auto-exposure has a -2 EV100 floor (day 0). The combined
   moon/sky/adaptation cause is plausible, not visually proven.
 
-  **Water wired partial `71cffeaa` is unshipped and outside the 4 PM build.** It wires
+  **Water wired partial `71cffeaa` is unshipped.** Jenny's final night Set A is
+  `NightMoonLux=0.2`, `NightSky=0.3` and `NightMinExposure=-1`; it wires
   `HomesteadNightLight` into `UpdateLighting`; CVar defaults `NightMoonLux=0.2`, `NightSky=0.3` and
   `NightMinExposure=-1` match `NightLightTuning`. The schedule holds 0.2 lux moonlit ground after
   dusk (altitude compensation capped at 1 lux low), uses night sky 0.3 rather than 0.6 and leaves noon
@@ -1408,7 +1601,16 @@ not claim early Energy is fully solved.
   It still needs PIE after the Menu/Props editor turns, then Integration's fixed-camera packaged RT-on
   Lumen hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to
   calibrate smooth dusk and lamp/hearth readability. Neither the trace nor the wired schedule
-  establishes a visual fix; do not update the editor skill's default row before this sign-off.
+  establishes an integrated delivery; package/RT-on acceptance remains required. **Jenny's review
+  method (2026-09-30):** Water provides a side-by-side screenshot sheet; her Shipping build has
+  no console, so no player-side CVar trial is assumed.
+
+  **Interior review exclusion:** Water's `ea6acb99` tries to disable
+  `r.HairStrands.SkyLighting` indoors by day. It makes the heroine's hair black and is **not
+  approved** for integration. The independent wall-top timber plate in
+  `HomesteadWorldStructures.cpp` is separable; Integration may take approved Water work minus the
+  global hair-sky toggle, or use Water's follow-up fix reference. No interior/hair delivery claim
+  follows from this review.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
@@ -1483,8 +1685,9 @@ not claim early Energy is fully solved.
   `UHomesteadWeather`. Water's headless trace found the cause: `FadeIn(2, Gain)` followed by
   `SetVolumeMultiplier(Gain)` applies rain gain twice, leaving roughly 0.40 for a default shower and
   0.07 for drizzle, while source RMS is a healthy -24 dBFS. Its narrow branch correction uses
-  `FadeIn(2, 1)` and leaves gain solely to the multiplier. Rain is intentionally silent on dry
-  days/times (currently only day 2/3, 09:00–15:00).
+  `FadeIn(2, 1)` and leaves gain solely to the multiplier. Historical Phoenix behavior is silent
+  outside its day-2/3 daytime windows; Water's pending full-cycle schedule must keep audio silent
+  whenever no rain event is scheduled.
 
   **The isolated code fix shipped** as `65726628` → `545e057b` on `main` `76b316a3` and is included
   in the 4 PM package. Editor and game builds, native tests (8/8), and the static-init check pass.
@@ -1494,9 +1697,9 @@ not claim early Energy is fully solved.
   excluded.
 
   **Audible resolution remains unproven.** Low RAM and the Menu editor prevented Water's ears-on
-  capture, and packaged `AudioProof` covers only legacy audio. Jenny can listen outdoors during rain
-  on day 2, roughly 11:00–15:30, in the 4 PM package. Do not describe the subjective rain sound as
-  conclusively fixed without ears-on or recorded Estate-rain evidence.
+  capture, and packaged `AudioProof` covers only legacy audio. After the full-cycle schedule lands,
+  Jenny can listen outdoors during any scheduled rain event. Do not describe the subjective rain
+  sound as conclusively fixed without ears-on or recorded Estate-rain evidence.
 
   The heritage-stone west doorway is a 130 × 220 cm gap with no leaf. **Props** queues an original
   oak-plank mesh and frame after the cove stairs. The later audio/door implementer makes the leaf
@@ -1534,6 +1737,10 @@ not claim early Energy is fully solved.
   tilled-square controls: A/E sows the hotbar-selected seed; no seed selected says `Choose seeds on
   the hotbar to sow`; selected Wild Roots sow roots; F/X weeds only; selected zero stock gives the
   seed-specific refusal. The Menu README changes with the commit already describe the behavior.
+- Seed-outline planting cues (`aa18d0e5`, not on `main`): after it lands, replace any historical
+  `[A] Sow turnips` copy with `[E]/[A] Plant Turnip seed`; with no selection, use
+  `Select Turnip seed (4) to plant`. Keep this pending until the branch's simulation/controller/UI
+  behavior and new `CheckSow` / `PreviewGarden(Seed)` tests are integrated.
 
 ## Tooling requests (unassigned)
 

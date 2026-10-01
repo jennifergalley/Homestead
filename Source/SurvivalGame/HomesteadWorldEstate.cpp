@@ -176,6 +176,7 @@ bool AHomesteadWorld::BuildEstateScenery()
         Batch->SetWorldPositionOffsetDisableDistance(6000);
         Batch->ComponentTags.Add(TEXT("EstateScenery"));
         ApplyCameraSafeFoliageMaterials(*Batch);
+        TagSwayingShrub(*Batch);
         Batches.Add(Batch);
         BatchKinds.Add(KindIndex);
         Transforms.AddDefaulted();

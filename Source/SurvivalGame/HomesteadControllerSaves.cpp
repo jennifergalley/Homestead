@@ -1,5 +1,6 @@
 #include "HomesteadController.h"
 #include "HomesteadControllerText.h"
+#include "HomesteadSavePreference.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadWorld.h"
 #include "HomesteadSave.h"
@@ -41,7 +42,7 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::LoadGameFromMemory(Data));
     FGuid ParsedWorld;
     if (Save && !Save->IsCurrentVersion()) { bReadIncompatible = true; return nullptr; }
-    if (!Save || Save->SavedAtUtc < 0 || Save->SavedAtUtc > 253402300799LL
+    if (!Save || Save->SavedAtUtc < 0 || Save->SavedAtUtc > 253402300799LL || Save->SavedRevision < 0
         || Save->PlayerLocation.ContainsNaN() || Save->ViewRotation.ContainsNaN()
         || !FGuid::Parse(Save->WorldId, ParsedWorld) || !ParsedWorld.IsValid()
         || FMath::Abs(Save->PlayerLocation.X) > Homestead::MaxWorldCoordinate
@@ -76,6 +77,7 @@ UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
 bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
 {
     if (bTestResetRequired) { Notify(TEXT("Choose an explicit test reset before saving a new woodland."), true); return false; }
+    if (bPendingGroundSnap) { Notify(TEXT("Wait until she is safely on the ground before saving."), true); return false; }
     if (!bWorldReady) { Notify(TEXT("The world is not ready; no save files were changed."), true); return false; }
     if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
@@ -95,6 +97,7 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
     Save->ViewRotation = Avatar ? Avatar->GameplayViewRotation() : GetControlRotation();
     Save->SavedAtUtc = FDateTime::UtcNow().ToUnixTimestamp();
+    Save->SavedRevision = static_cast<int64>(Sim.GetRevision());
     Save->CameraSensitivity = Sensitivity;
     Save->InvertCameraY = bInvertY;
     Save->MusicVolume = MusicVolume;
@@ -206,6 +209,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     Appearance.Outfit = Save.Outfit;
     Appearance.BodyPreset = Save.BodyPreset;
     SanitizeHotbar(Save.HotbarSlots, Save.SelectedHotbarSlot, Save.HotbarLayout);
+    EndGroundSnap();
     PendingLocation = Save.PlayerLocation;
     PendingRotation = Save.ViewRotation;
     bFreshTerrainSpawn = false;
@@ -247,16 +251,21 @@ void AHomesteadController::GrantPlaytestKit(bool bNewGame)
 bool AHomesteadController::LoadLatest(bool RecoveryOnly)
 {
     if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
-    const TArray<FString> Slots = RecoveryOnly
-        ? TArray<FString>{TEXT("Homestead_Recovery"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"), TEXT("Homestead_Auto_2"), TEXT("Homestead_Manual")}
-        : TArray<FString>{TEXT("Homestead_Manual"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"), TEXT("Homestead_Auto_2"), TEXT("Homestead_Recovery")};
+    const bool WoodlandRecovery = RecoveryOnly && !bEstateMap;
+    const TArray<FString> Slots = WoodlandRecovery
+        ? TArray<FString>{TEXT("Homestead_Recovery"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"),
+            TEXT("Homestead_Auto_2"), TEXT("Homestead_Manual")}
+        : TArray<FString>{TEXT("Homestead_Manual"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"),
+            TEXT("Homestead_Auto_2"), TEXT("Homestead_Recovery")};
     UHomesteadSave* Best = nullptr;
+    FHomesteadSavePreference BestPreference;
     bool Corrupt = false;
     bool Incompatible = false;
     bool Newer = false;
     TArray<FString> IncompatiblePaths;
-    for (const auto& Slot : Slots)
+    for (int32 SlotIndex = 0; SlotIndex < Slots.Num(); ++SlotIndex)
     {
+        const FString& Slot = Slots[SlotIndex];
         for (const FString& Suffix : { FString(), FString(TEXT(".bak")) })
         {
             const FString Path = SavePath(Slot) + Suffix;
@@ -273,18 +282,24 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
                 continue;
             }
             Homestead::Simulation Candidate;
-    if (bEstateMap) PrepareEstateSimulation(Candidate);
+            if (bEstateMap) PrepareEstateSimulation(Candidate);
             const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
             if (!Decoded || Candidate.GetState().failed) continue;
-            if (RecoveryOnly && (Save->WorldId != WorldId || Candidate.GetState().hunger < 20
-                || Candidate.GetState().energy < 20)) continue;
-            if (RecoveryOnly && Slot == TEXT("Homestead_Recovery"))
+            if (RecoveryOnly && Save->WorldId != WorldId) continue;
+            if (WoodlandRecovery && (Candidate.GetState().hunger < 20 || Candidate.GetState().energy < 20)) continue;
+            if (WoodlandRecovery && Slot == TEXT("Homestead_Recovery"))
             {
                 if (!ApplySave(*Save)) return false;
                 Notify(TEXT("Returned to your sheltered recovery checkpoint."));
                 return true;
             }
-            if (!Best || Save->SavedAtUtc > Best->SavedAtUtc) Best = Save;
+            const FHomesteadSavePreference Preference{
+                Save->SavedAtUtc, Save->SavedRevision, SlotIndex * 2 + (Suffix.IsEmpty() ? 0 : 1)};
+            if (!Best || IsNewerHomesteadSave(Preference, BestPreference))
+            {
+                Best = Save;
+                BestPreference = Preference;
+            }
         }
     }
     if (Best)
@@ -297,7 +312,8 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
                 Appearance.HairStyle, Appearance.HairColor, Appearance.SkinTone, Appearance.EyeColor,
                 Appearance.TunicColor, Appearance.Outfit, Appearance.BodyPreset,
                 GEngine->GameViewport->ViewModeIndex, static_cast<int32>(GEngine->GameViewport->EngineShowFlags.ShaderComplexity));
-        Notify(Corrupt ? TEXT("Recovered a valid save. An unreadable save was skipped; backups are retained.") : TEXT("Welcome back to your homestead."), Corrupt);
+        Notify(Corrupt ? TEXT("Recovered your latest valid save. An unreadable save was skipped; backups are retained.")
+            : RecoveryOnly ? TEXT("Returned to your latest save.") : TEXT("Welcome back to your homestead."), Corrupt);
         return true;
     }
     if (bEstateMap && Incompatible && !Corrupt && !RecoveryOnly && !bHasPlayableSession)
@@ -346,6 +362,7 @@ void AHomesteadController::RetryCheckpoint()
         Avatar->ResetSprint();
     }
     Appearance = SessionAppearance;
+    EndGroundSnap();
     PendingLocation = SessionLocation;
     PendingRotation = SessionRotation;
     bFreshTerrainSpawn = false;
@@ -386,6 +403,8 @@ void AHomesteadController::NewGame()
         Appearance.HairStyle = 1; Appearance.MetaHair = HomesteadLook::MetaHairForLegacy(1);
     }
     ResetHotbar();
+    ControlsHint.Restart();
+    EndGroundSnap();
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->ResetSprint();
     WorldId = FGuid::NewGuid().ToString(EGuidFormats::Digits);
     PendingLocation = FVector(-1000, 0, 180);

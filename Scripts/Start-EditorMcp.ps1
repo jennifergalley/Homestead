@@ -35,7 +35,10 @@ param(
     [switch]$SkipBuild,
     [switch]$ForceBuild,
     [switch]$Force,
-    [int]$TimeoutSeconds = 600
+    [int]$TimeoutSeconds = 600,
+    # An isolated preview save profile for PIE (-HomesteadPreviewProfile): PIE games save under it, never
+    # to the worktree's normal saves. The UI gallery (homestead.UIGallery) runs only on such a route.
+    [ValidatePattern('^[a-z][a-z0-9-]{0,31}$')][string]$PreviewProfile
 )
 $ErrorActionPreference = 'Stop'
 $root = Split-Path $PSScriptRoot -Parent
@@ -194,6 +197,7 @@ $arguments += @(
 # 5, taking every Unreal process down. So VSM goes off with RT. -DPCVars takes a comma-separated list
 # (DeviceProfileManager.cpp).
 if (-not $RayTracing) { $arguments += '-DPCVars=r.RayTracing.Enable=0,r.Shadow.Virtual.Enable=0' }
+if ($PreviewProfile) { $arguments += "-HomesteadPreviewProfile=$PreviewProfile" }
 # Opt-in: registers homestead_agent.toolset.HomesteadEditorPython.run_python (arbitrary editor Python).
 if ($AllowPython) { $arguments += '-HomesteadAgentPython' }
 

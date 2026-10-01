@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "VictorianTrunk",
+  "description": "Victorian painted-pine travelling trunk, iron-bound with oak battens, hasp and lock plate (original). 0.70 x 0.55 x 0.58 m, the storage chest's footprint; front (-Y) = hasp.",
+  "collision": "box",
+  "triangle_budget": 16000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/victorian_trunk.py",
+  "source_sha256": "2d0d19fd7730a6a278153a362132087f94b5f5752bf41fd32408c6b41a1b1df2",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_VictorianTrunk": {
+      "vertices": 12505,
+      "triangles": 24512,
+      "size_cm": [
+        70.2,
+        56.6,
+        58.54
+      ],
+      "materials": [
+        {
+          "name": "M_VictorianTrunk",
+          "textures": {
+            "basecolor": "T_VictorianTrunk_basecolor.png",
+            "roughness": "T_VictorianTrunk_roughness.png",
+            "metallic": "T_VictorianTrunk_metallic.png",
+            "normal": "T_VictorianTrunk_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VictorianTrunk_basecolor.png",
+          "roughness": "T_VictorianTrunk_roughness.png",
+          "normal": "T_VictorianTrunk_normal.png",
+          "ao": "T_VictorianTrunk_ao.png",
+          "metallic": "T_VictorianTrunk_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -25
+        ],
+        "focus": [
+          0.0,
+          -0.2804999935626984,
+          0.4002834890037775
+        ]
+      },
+      "fbx": "SM_VictorianTrunk.fbx",
+      "sha256": "df1c63e0c74c4fab6a2bd14963f1b12df9ed21230dde58c0446f508d59fd5375",
+      "preview": "preview_SM_VictorianTrunk.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_VictorianTrunk_hero.png",
+          "detail": "beauty_SM_VictorianTrunk_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -25
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [
+    "SM_VictorianTrunk: 24512 triangles exceeds budget 16000"
+  ],
+  "dimensions_m": {
+    "width": 0.7,
+    "depth": 0.55,
+    "height": 0.58
+  },
+  "front": "hasp and lock plate face -Y (+Y in the engine), as the old chest's latch",
+  "replaces": "AHomesteadWorld Piece::Chest box (70 x 55 x 58 cm); same footprint and collision box",
+  "textures": {
+    "T_VictorianTrunk_basecolor.png": "b833c00863196b1e338c9c9ca10ecd5c1c387f485b70a673ab7d4076051d1455",
+    "T_VictorianTrunk_roughness.png": "a635113db4e5868fe5357e5e8358f73b4092089ecf69a3f8c4619cdb52f109ec",
+    "T_VictorianTrunk_metallic.png": "a16166795f9ccf1d4f656cc0136986cf67dde3707ebaf87fbe56a716c547f74a",
+    "T_VictorianTrunk_normal.png": "433d1722dda2b5cf163673b0772955ee072d201a19824624eb11ccb0593bec42"
+  }
+}

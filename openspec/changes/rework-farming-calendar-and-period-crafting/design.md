@@ -8,13 +8,16 @@
 - **Hunger.** `Step()` drains hunger at 2.0 an hour awake and 1.3 asleep, and it sets
   `failed = true` at 0. Nearly every transaction then refuses with "You need to recover. Load your
   recent checkpoint".
-- **Sleep.** `flexible-sleep` removed the clock bedtime: energy exhaustion only makes her doze off.
+- **Sleep.** `flexible-sleep` removed the clock bedtime. Low Energy never forces doze, failure or
+  recovery on the Estate; one-press bed sleep and food restore it.
 - **Crops.** `HomesteadCrops` holds the crop table (grow and regrow hours, visuals, harvest
   style) and the plot status helpers. Plots grow in `Step()` from moisture and weed factors.
 - **Shops.** `HomesteadShops` seeds the general store, and its stock includes the six seeds. The
   sell-down runs at the 06:00 rollover.
-- **Weather.** Rain is deterministic: since add-rain-weather 3.1, `IsRainDay` selects two stable
-  hashed days in every ten, preserving the 09:00–15:00 window.
+- **Weather.** `69827d75` delivered a stable hashed recurrence, but its daytime-only
+  09:00–15:00 window is superseded by Jenny's 2026-09-30 direction: Water implements a seasonally
+  weighted, reload-stable schedule with rain at random times through the full day/night cycle and
+  coherent night-rain lighting.
 - **Crafting.** Recipes are hand recipes: the five hafts, RoastedRoots, HerbedRoots and
   SplitFirewood. The pieces are Foundation, Wall, Doorway, Roof, Fire, Bed, Chest and Hearth.
 
@@ -85,10 +88,9 @@ Original design, kept for reference:
   never drops below it.
 - Controller toasts fire once per downward threshold crossing: "You're getting hungry" and
   "You're famished. Everything's slower until you eat."
-- The `failed` flag and the checkpoint UI stay in the code for the legacy woodland path only.
-  Removing them is logged for the Architecture agent's between-rounds cleanup, not done here.
-- A native test drives hunger to 0 over several days and asserts no failure, slower recovery and
-  higher costs.
+- The Estate has no failure/checkpoint path from hunger or Energy. Legacy woodland behavior is
+  isolated until that path is explicitly retired.
+- A native test drives hunger to 0 over several days and asserts no Estate failure.
 
 ### 3a. One energy bar with Well fed (Jenny, 2026-09-29)
 
@@ -147,7 +149,7 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
     a Meal, and bread and cheese are Snacks.
 - **Well fed (final):**
   - While she's Well fed, `WorkCost(base)` returns `base × 0.85`, the 15% reduction. Tests, toasts
-    and descriptions all use 0.85. It never changes the doze or sleep rules.
+    and descriptions all use 0.85. It never changes the nonfatal Energy thresholds or sleep rules.
   - **Every Meal grants the same flat 3 game hours of Well fed.** The Orchestrator settled this on
     2026-09-29 for simplicity, and the earlier 2/3/4-hour tiers are dropped. Meals still differ in
     energy.
@@ -176,7 +178,7 @@ temporary buffs. Stardew Valley and Dreamlight Valley work the same way. Jenny c
     - `hour` only moves forward. `SkipToHourOfDay` always moves to a later hour, and load accepts
       `hour` in `[6, MaxHour]`.
     - So a meal at 11 PM (hour 41) expires at hour 44, 2 AM the next day, with no special case.
-    - Sleep, dozing and `HomesteadGrowCrops` all advance `hour` consistently, so the timer expires
+    - Bed sleep and `HomesteadGrowCrops` advance `hour` consistently, so the timer expires
       correctly across them and across day-length settings.
     - Add a native test: a meal (pasty) at 23:00 is still Well fed at 01:30 the next day and
       expired by 02:00.
@@ -432,7 +434,9 @@ Test saves reset with the existing notice, and old Estate saves move to `Retired
 - **Winter canopy masks on Nanite foliage.** Masked Nanite has a cost. → The Performance agent
   measures winter. If needed, the fallback is a reduced-leaf LOD in winter instead of opacity
   masking.
-- **Sunday closing annoys.** → It's a data flag per shop. Jenny can veto it at the playtest.
+- **Sunday closing annoys.** → Jenny decided on 2026-09-30 that both shops close all day Sunday;
+  this is required, not playtest-vetoable. The per-shop data flag keeps implementation explicit and
+  testable.
 - **Many lanes append catalogue rows.** → Small, rebased, append-only commits. The static
   completeness check catches gaps.
 
@@ -440,4 +444,4 @@ Test saves reset with the existing notice, and old Estate saves move to `Retired
 
 - Day length: is 30 minutes right, or does Jenny prefer 60? Confirm at the playtest.
 - Tregear's name and keeper are placeholders.
-- Is Sunday closing wanted?
+- Sunday closing is required for both shops.

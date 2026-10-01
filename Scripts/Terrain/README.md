@@ -77,7 +77,8 @@ The script applies these steps in order:
    - The town: a plane fit on the spur above the estuary, about 91 m.
 4. **Road.** The road runs from the manor forecourt, fords the river by the mill, climbs the east
    bank at the estate gateway, and continues about 1.7 km east to the town. It's graded to a 5 m bed
-   with 12 m verges, and its gradient is capped at 11%.
+   with 12 m verges. Its first profile was capped at 11%, which built a 10 m causeway and a 13 m
+   cutting in the river valley; `road_grade.py` has replaced it (see "Road grade" below).
 5. **River.** A least-cost path finds the floor of the wooded valley. The river is cut into it as a
    channel 0.9 m deep and about 4.5 m wide, with its bed forced to run downhill. At the end of the
    run `river_channel.py` grades it to its finished channel (see "River channel" below).
@@ -89,6 +90,40 @@ layout in `Source/SurvivalGame/Simulation/HomesteadEstate.cpp` (`ProvisionalEsta
 it in centimetres. Update both together.
 
 Later hand edits go on Landscape Edit Layers in the editor, so re-importing this base keeps them.
+
+### Road grade (`road_grade.py`)
+
+The road follows the ground. `python Scripts\Terrain\road_grade.py` re-grades its long profile once:
+the ground it was graded over, lightly smoothed, held to 1 in 5 at most (the smallest-worst-deviation
+profile within that grade), with a level bridge deck 0.9 m over the river at chainage 683-684 m and
+1 in 12 approach ramps inside the 20 m bridge keep-out. The manor forecourt and town end keep their
+levels, and the centreline, chainage and anchors don't move. Cut and fill against the natural ground
+fell from +9.9 / -12.8 m to +1.6 / -1.4 m (p95 0.7 m).
+
+It changes only the road corridor (reshape.py's grading is linear in the profile, so the change is
+exact), re-seats the river under the bridge with `river_channel.py`, and records `roadProfile` and
+`roadGrade` (with the previous profile) in `estate_layout.json`. Run again, it leaves the heightfield
+alone and only brings a stale work npy into step. Afterwards: `public_road.py`, `weightmaps.py` (the
+old cutting's banks lose their cliff paint), `bake_ground.py`, `bake_estate_map.py`; in the editor
+`ApplyEstateHeightfield` over the rectangle it prints (r16 rows 1382-3111, columns 1513-2052),
+`ApplyEstateWeightmaps` over the same rectangle with the seven layers from `<work>\weights`, then
+`build_ground.py` and `ImportEstateMap`.
+
+### Town square (`town_layout.py`)
+
+`python Scripts\Terrain\town_layout.py` lays out the town round the TownSquare anchor. It makes an open
+60 × 45 m square faced by terraces of two (sharing a party wall) and cottages, with 3–6 m side lanes
+between the groups, and puts the general store in the middle of the east side. A curved 5.5 m
+`townStreet` runs from the main road's last point into the square's north-west corner.
+
+The script refuses to write a layout that breaks those rules. It writes `town` (square, street,
+buildings, store footprint) and the GeneralStoreDoor/Counter anchors to `estate_layout.json`, and
+`Tests/Data/HomesteadTownLayout.inc` for the native checks. Mirror the anchors in `HomesteadEstate.cpp`.
+
+The town stands on reshape's plane pad, so the heightfield doesn't change. `weightmaps.py` paints the
+street and square as packed earth, `bake_ground.py` wears them, and `bake_estate_map.py` draws them
+with the buildings. In the editor, `Content/Python/homestead_agent/town_massing.py` places the
+blockouts from the layout and deletes stale ones.
 
 ## Heightmap export and import
 
@@ -199,7 +234,7 @@ proxies it touched, run `place_water.py` (`EstateLake`, an `AHomesteadWaterPool`
 spatially loaded), `bake_ground.py` + `build_ground.py`, and `bake_estate_map.py` + `ImportEstateMap`.
 
 The pool's shoreline is a closed spline at the water level with scale Y 0: the controller's water probe
-treats its inside as in the water and the pail aims 25 cm inside it. An invisible pawn-only wall 2.2 m in
+treats its inside as in the water and the pail aims 25 cm inside it. An invisible pawn-only wall 3.8 m in
 from the shore (about knee deep) keeps her out of the deep water.
 ### River channel (`river_channel.py`)
 
@@ -240,6 +275,66 @@ Cost, from `ProfileGPU` in PIE at a 3054×1135 viewport with the sea filling the
 
 The tuning parameters are on `MI_EstateOcean`, grouped Waves, Foam, Colour and Data. Bake the
 values you settle on into the defaults in `build_ocean.py`.
+
+
+The mouth is cut once (`cut_mouth`, recorded as `riverMouth` in the layout). Where the beach is lower than 0.5 m, the bed goes to at least -0.3 m, so the sea runs up into the channel. The stream carries on to the first point whose bed is 0.6 m under the sea. Its surface there is held 3 cm under the sea, so the river ribbon slides beneath the ocean instead of stopping on dry sand or fighting the ocean surface. Afterwards: `bake_ocean.py` + `build_ocean.py` (the shore texture sees the channel), `place_water.py`, `bake_ground.py`, `bake_estate_map.py`.
+
+### Cove route (`cove_route.py`)
+
+The on-foot way from the manor's south front door down to the sand at the head of the cove
+(`openspec/changes/add-cove-route`): 509 m and 83 m of fall, a graded path at 1 in 7 or gentler through the
+meadow's three switchbacks, then 191 granite steps in 18 flights down the valley side, and paths along the
+bench and valley floor to the sand. `CONTROL` in the script holds its turning points and the kind of way
+leaving each ("path" or "stairs"); `--search` re-runs the least-cost search they came from, and `--dry`
+designs and writes only `Saved/CoveRoute/` (plan and profile, leg table).
+
+```powershell
+python Scripts\Terrain\cove_route.py            # grade once; then re-emits the route data
+python Scripts\Terrain\bake_ground.py           # wears the path, no grass on the steps
+python Scripts\Map\bake_estate_map.py           # the dashed footpath
+```
+
+It grades the heightfield once (`coveRoute.graded` in the layout): a path's bed over 1.2 m either side,
+5 cm under every tread and landing over 2.2 m, blending back over 2.5 m, never into the river channel.
+The run prints the `ApplyEstateHeightfield` rectangle (rows 1338-1541, columns 1457-1755). The full
+design lives in `cove_route.json` (the layout keeps a summary and the map's `footpaths`), and
+`Simulation\HomesteadEstateCoveRoute.inc` carries the centreline, flights, landings, kerbs, rail bays and
+fingerposts at Props' kit pivots (`add-cove-route-kit`). A later run leaves the heightfield alone and
+re-emits the data; to move the route, restore the heightfield from before it and remove `coveRoute`.
+`scatter.py` clears a fresh scatter off it after the lake. Set `HOMESTEAD_TERRAIN_WORK` to your work folder
+(the script keeps its `game_reshaped_4033.npy` in step round the route).
+
+### Beach belt (`beach_belt.py`)
+
+A dry sand belt along the foot of the estate's south cliffs, from the west boundary (y = -1150 m) to the
+cove's west headland (y = -615 m), fading over 25 m at each end (`openspec/changes/widen-estate-beach`).
+It's built seaward of the old waterline and only ever raises ground, so the cliff faces stay as they were:
+a berm 1.7 m above the sea at the cliff foot falls to the swash line (0.3 m) over the local dry width, then a
+1 in 10 foreshore runs down to the seabed. The width is 17-38 m by design (wider in bays, narrower off
+headlands, varied along the coast from seeded knots, and smoothed over 6 m once carried out to sea so
+the berm has no scarp where the nearest shore switches); measured from the cliff foot to the swash line, 50 m
+sections have medians of 24-36 m (overall 30 m). `Tests/EstateBeachTests.py` checks the graded belt: dry
+sand across every 10 m of coast, one walkable stretch from the headland to the west boundary, no bank
+steeper than 1 in 2.9 over 1 m in the sand and swash zone, and the river mouth open. It keeps 9 m (ramping over 6 m) off the river's line and
+its run to the sea, so the mouth stays open.
+
+```powershell
+python Scripts\Terrain\beach_belt.py --dry     # design and measure only
+python Scripts\Terrain\beach_belt.py           # grade once ("beach.graded"); later runs only say so
+python -m unittest Tests/EstateBeachTests.py   # the graded belt
+python Scripts\Terrain\river_channel.py        # re-seats the channel (a no-op unless the belt reached it)
+python Scripts\Terrain\weightmaps.py           # the new sand paints as Beach (low ground by the water)
+python Scripts\Terrain\bake_ground.py
+python Scripts\Map\bake_estate_map.py
+```
+
+It raised 119,896 vertices (r16 rows 842-1425, columns 1196-1540, up to 5.0 m over the old seabed). In the
+editor: `ApplyEstateHeightfield` and `ApplyEstateWeightmaps` over that rectangle, then `bake_ocean.py` +
+`build_ocean.py` (the shore/depth texture must see the new waterline, or the swell treats the new
+shallows as deep water), `place_water.py`, `build_ground.py` and `ImportEstateMap`. It copies the graded
+heights into the work npy (`HOMESTEAD_TERRAIN_WORK`) wherever it raised the ground, so a work folder
+that already has the belt stays right. Once graded it neither redesigns nor re-measures (the design reads the
+old waterline, which the belt has moved), even with `--dry`.
 
 ## Ground and meadow (`bake_ground.py`, `build_ground.py`, `build_landscape_material.py`)
 

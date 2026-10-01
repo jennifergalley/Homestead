@@ -57,4 +57,7 @@ namespace HomesteadLook
     FLinearColor SkinTint(int32 Index);
     FLinearColor IrisColor(int32 Index);
     FLinearColor TunicTint(int32 Index);
+    // The same four dyes (Homestead::DyeName) as a Tint over the MetaHuman's homespun tank top and
+    // shorts; dye 0 leaves the cloth as woven.
+    FLinearColor HomespunDyeTint(int32 Dye);
 }

@@ -1,6 +1,6 @@
 // Sprint is a toggle (Jenny, round 2): L3 flips it on press (AHomesteadCharacter::ToggleSprint);
 // on the keyboard a tap of Shift flips it on release, so Shift can still be a modifier (Shift+Q in
-// the seed pouch). When she's too tired to run the toggle turns itself off and says so once, and she
+// the seed pouch). When she's too tired to run the toggle turns itself off, and she
 // walks on; nothing forces a collapse.
 #include "HomesteadController.h"
 
@@ -17,7 +17,7 @@ bool IsMovementKey(const FKey& Key)
 
 void AHomesteadController::SprintTooTired()
 {
-    Notify(TEXT("Too tired to run. Sprint is off until you've eaten or rested."), true);
+    Notify(TEXT("Too tired to sprint."), true);
 }
 
 void AHomesteadController::TrackSprintShift(const FInputKeyEventArgs& Params)

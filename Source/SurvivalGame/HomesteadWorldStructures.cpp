@@ -5,6 +5,7 @@
 #include "HomesteadLampLook.h"
 #include "Simulation/HomesteadDoor.h"
 #include "Simulation/HomesteadRoomAudio.h"
+#include "Simulation/HomesteadEstatePublicRoad.h"
 #include "Simulation/HomesteadRuinDebris.h"
 
 #include "Components/AudioComponent.h"
@@ -46,13 +47,18 @@ void AHomesteadWorld::UpdateHearthFlicker(float DeltaSeconds)
         // Layered slow breathing and quick licks, like a settled wood fire.
         const float Flicker = 0.82f + 0.1f * FMath::PerlinNoise1D(T * 1.3f) + 0.08f * FMath::PerlinNoise1D(T * 7.1f)
             + 0.05f * FMath::PerlinNoise1D(T * 17.0f);
-        HearthLights[Index]->SetIntensity(5200.0f * Flicker);
+        HearthLights[Index]->SetIntensity(HearthIntensity * Flicker);
     }
 }
 
 float AHomesteadWorld::GetIndoorMix() const
 {
     return Weather ? Weather->GetIndoorMix() : 0.0f;
+}
+
+float AHomesteadWorld::GetRoomMix() const
+{
+    return Weather ? Weather->GetRoomMix() : 0.0f;
 }
 
 void AHomesteadWorld::UpdateHearthSound(float DeltaSeconds)
@@ -158,6 +164,16 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         const float HeightScale = bWallPiece ? 1.085f : 1.0f;
         if (Kit && KitPart(Kit, HeightScale))
         {
+            // The kit's deck boards have hairline seams and the tilted slates lap open at an angle, so
+            // the noon sun drew bright lines across the ceiling. A felt underlay between the deck
+            // (top 281.5 cm) and the slates seals it, inset under the eaves and verges so it never shows.
+            if (Structure.kind == Homestead::Piece::Roof && !bPreview && !bDeconstruct)
+                Part(Cube, FVector(0, 4, 283), FVector(312, 316, 2.4f), HomesteadWorldLook::RoofUnderlay);
+            // Between the joists the coping left a sky-bright slot along every wall top: a timber wall
+            // plate inside the wall's thickness (faces at Y 130 and 158) fills it without showing on either
+            // face, from the coping (258 cm) up to the raised wall top under the deck (279 cm).
+            if (bWallPiece && !bPreview && !bDeconstruct)
+                Part(Cube, FVector(0, 144, 268.5f), FVector(300, 24, 21), HomesteadWorldLook::RoofUnderlay);
             if (!bPreview && !bDeconstruct && Homestead::Door::HasLeaf(Structure))
                 AddDoorLeaf(Visual, Structure.id, Base, Rotation, HeightScale);
             return;
@@ -191,12 +207,13 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         UPointLightComponent* Light = NewObject<UPointLightComponent>(this);
         Light->SetupAttachment(GetRootComponent());
         Light->SetMobility(EComponentMobility::Movable);
-        // Just in front of the opening, so the room (not the firebox) takes the light.
-        Light->SetRelativeLocation(Base + Rotation.RotateVector(FVector(0, 55, 55)));
+        // Low, just in front of the opening, so the room (not the firebox) takes the light and the
+        // floor and her lower half catch it first, like a fire seen from the settle.
+        Light->SetRelativeLocation(Base + Rotation.RotateVector(FVector(0, 50, 38)));
         Light->SetLightColor(FLinearColor(1.0f, 0.45f, 0.16f));
-        Light->SetIntensity(5200.0f);
-        Light->SetAttenuationRadius(900.0f);
-        Light->SetSourceRadius(30.0f);
+        Light->SetIntensity(HearthIntensity);
+        Light->SetAttenuationRadius(HearthRadiusCm);
+        Light->SetSourceRadius(20.0f);
         Light->SetCastShadows(true);
         Light->RegisterComponent();
         Visual.Components.Add(Light);
@@ -303,6 +320,16 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         Part(Cube, FVector(95, -28, 14), FVector(68, 106, 8), FLinearColor(0.23f, 0.31f, 0.21f));
         break;
     case Homestead::Piece::Chest:
+        // The Victorian trunk (victorian_trunk.py: 70 x 57 x 59 cm, pivot bottom centre, hasp on +Y like the
+        // blockout's lock), on the blockout chest's own footprint so placements, collision and saves are unchanged.
+        if (UStaticMesh* Trunk = ManorMesh(TEXT("VictorianTrunk")))
+        {
+            UStaticMeshComponent* Placed = Part(Trunk, FVector(-100, -100, 0), FVector(100.0f), FLinearColor::White, true);
+            if (Placed && !bPreview)
+                for (int32 Slot = 0; Slot < Trunk->GetStaticMaterials().Num(); ++Slot)
+                    Placed->SetMaterial(Slot, Trunk->GetMaterial(Slot));
+            break;
+        }
         Part(Cube, FVector(-100, -100, 27), FVector(70, 55, 54), Wood, true);
         Part(Cube, FVector(-100, -100, 55), FVector(74, 59, 6), Bark);
         Part(Cube, FVector(-100, -71, 35), FVector(12, 4, 12), Stone);
@@ -327,6 +354,9 @@ bool AHomesteadWorld::BuildLampDrop(FHomesteadWorldVisual& Visual, const Homeste
     // Stand it on whatever is underfoot: the terrain outdoors, a floor or hearthstone indoors. Start
     // low enough to miss lintels and roofs, and skip starts inside a wall's collision.
     FVector Base = AtGround(Drop.position.x, Drop.position.y, 0.0f);
+    // On the road bridge the traces start from its deck, not the river bed under it.
+    if (bRoadBridgeBuilt && RoadBridgeVisual.Components.Num() > 0)
+        Base.Z = static_cast<float>(Homestead::EstatePublicRoad().deck.RestZ(Drop.position, Base.Z));
     FCollisionQueryParams Params(SCENE_QUERY_STAT(HomesteadLampDrop), false, UGameplayStatics::GetPlayerPawn(this, 0));
     for (const float Lift : {90.0f, 45.0f, 15.0f})
     {
@@ -376,7 +406,10 @@ void AHomesteadWorld::BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::
         default: break;
         }
     }
-    const FVector Base = AtGround(Drop.position.x, Drop.position.y, 7);
+    FVector Base = AtGround(Drop.position.x, Drop.position.y, 7);
+    // Dropped on the road bridge: it lies on the planks, not on the river bed under them.
+    if (bRoadBridgeBuilt && RoadBridgeVisual.Components.Num() > 0)
+        Base.Z = static_cast<float>(Homestead::EstatePublicRoad().deck.RestZ(Drop.position, Base.Z - 7.0)) + 7.0f;
     AddPart(Visual, Cylinder, Base, FVector(48, 48, 14), Wood, false);
     AddPart(Visual, Cube, Base + FVector(0, 0, 16), FVector(44, 34, 14), Tint,
         false, FRotator(0, Drop.id * 37 % 360, 8), 0.75f);

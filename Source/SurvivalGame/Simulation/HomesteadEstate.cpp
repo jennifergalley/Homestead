@@ -43,15 +43,15 @@ const EstateLayout& ProvisionalEstateLayout()
             // corner; she wakes in line with its doorway on the west side, facing it.
             {Anchor::StandingRoomOrigin, {-25600.0, -63800.0}, 8652.6, 0.0},
             {Anchor::StandingRoomSpawn, {-25750.0, -63800.0}, 8652.6, -90.0},
-            {Anchor::EstateGateway, {-5500.0, 9000.0}, 4916.0, 60.0},
+            {Anchor::EstateGateway, {-5500.0, 9000.0}, 5632.0, 60.0},
             {Anchor::CoveBeach, {-65000.0, -51500.0}, 178.0, 215.0},
             {Anchor::MineEntrance, {-40500.0, -100000.0}, 7224.0, 0.0},
             {Anchor::MillSite, {-11800.0, -9200.0}, 3113.1, 0.0},
-            {Anchor::RoadEstateEnd, {-5500.0, 9000.0}, 4916.0, 60.0},
+            {Anchor::RoadEstateEnd, {-5500.0, 9000.0}, 5632.0, 60.0},
             {Anchor::RoadTownEnd, {-50000.0, 109000.0}, 9241.0, 45.0},
             {Anchor::TownSquare, {-54000.0, 115000.0}, 9109.0, 0.0},
-            {Anchor::GeneralStoreDoor, {-54000.0, 117000.0}, 9153.0, 90.0},
-            {Anchor::GeneralStoreCounter, {-54000.0, 117600.0}, 9166.0, -90.0},
+            {Anchor::GeneralStoreDoor, {-54000.0, 117950.0}, 9175.0, 90.0},
+            {Anchor::GeneralStoreCounter, {-54000.0, 118550.0}, 9188.0, -90.0},
             // The derelict farm's broken gate, on its south fence facing the ruin's rear-wall gap.
             {Anchor::DerelictFarmGate, {-22200.0, -65700.0}, 8720.6, 180.0},
         };

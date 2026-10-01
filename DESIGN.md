@@ -50,8 +50,9 @@ Optional textured `M_Ground` and `M_Rock` supersede flat ground/rock treatment; 
   bottom. It retains the Knife, Hatchet, Stone Hoe, and Watering Can slot
   assignments without adding capacity, but hides uncarried tool icons.
   At 4K its physical size is bounded independently of 3D resolution.
-- Normal focus/action context sits lower right: width `min(650, 38% of virtual width)`, right inset 32, top at `height−225`.
-- Planning instead uses a lower centered panel up to 880 wide. World/planning toasts remain centered below the top band, up to 900 wide. While the book or Look is open, feedback moves to the free upper-right band at Y26/right inset30, beside the calendar rather than across the book heading. The existing 92-high backing grows if measured lines require it; book rows and footer never move with feedback.
+- World notices share the field book's parchment NoticeCard style (`UI/HomesteadNoticeStyle.h`: paper, double-ruled frame, brown ink, rust for errors). The focus actions card sits at the top centre at Y110, under the compass band; the toast stacks 10 under it (or takes Y110 alone), sized to its text up to 900 wide. Key and pad glyphs are pine stamps with brass lettering.
+- The top-left controls strip shows only for its first 60 seconds on screen after boot, a new game or "Reset action hints"; time in the book, shop, setup or failure screens doesn't count. The compass (top centre, Y26, up to 460 wide, beside the calendar) waits until the strip retires.
+- Planning instead uses a lower centered panel up to 880 wide. While the book or Look is open, feedback moves to the free upper-right band at Y26/right inset30, beside the calendar rather than across the book heading. The existing 92-high backing grows if measured lines require it; book rows and footer never move with feedback.
 - The legacy Canvas field-book fallback is centered, up to `1180×810`, with six tabs (the retired Guidebook/Notes page is skipped), 74-high rows and a selected-row-following visible window; the normal game uses the native Slate menu described below.
 - The actual native Slate field book uses the viewport rather than a miniature
   centered book: 1280x720 logical at 720p, expanding toward 2560x1440 logical

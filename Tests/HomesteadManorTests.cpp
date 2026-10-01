@@ -125,7 +125,7 @@ void SleepChestAndHearth()
     const Point bedSide = StructureCenter(state, *bed);
     const int day = sim.DayNumber();
     sim.SkipToHourOfDay(22.0);
-    OK(sim.Sleep(8.0, bedSide));
+    OK(sim.Sleep(8.0, bedSide, {1, 0}));
     CHECK(sim.DayNumber() == day + 1);
     // Take the pail and branches out of the seeded chest.
     OK(sim.Transfer(chestId, Item::WateringCan, -1, chestSide));
@@ -359,8 +359,8 @@ void NamesValidationAndPersistence()
     OK(sim.SetNames("Clara", "Pendarves", std::string(24, 'a')));
     OK(sim.SetNames("  Clara ", "Pendarves", " Trevennor"));
     CHECK(sim.GetState().heroineName == "Clara" && sim.GetState().estateName == "Trevennor");
-    CHECK(Manor::SaveLabel(sim.GetState(), sim.SeasonName(), sim.DayNumber())
-        == "Clara Pendarves \xE2\x80\x94 Trevennor, Spring 1");
+    CHECK(Manor::SaveLabel(sim.GetState())
+        == "Clara Pendarves \xE2\x80\x94 Trevennor, Spring 1, 1851");
     OK(sim.SetNames("\xC3\x89lise", "Tr\xC3\xA9vose", "Chy an Mor"));
     const std::string saved = sim.Serialize();
     Simulation loaded;
@@ -387,7 +387,7 @@ void NamesValidationAndPersistence()
     Simulation plainLoaded;
     OK(plainLoaded.Deserialize(plain));
     CHECK(plainLoaded.GetState().estateName.empty() && plainLoaded.EstateName() == "the estate");
-    CHECK(Manor::SaveLabel(plainLoaded.GetState(), "Spring", 1).empty());
+    CHECK(Manor::SaveLabel(plainLoaded.GetState()).empty());
     // The woodland playtest aid raises the same room wherever the ground is clear.
     Simulation aid;
     Result raised;

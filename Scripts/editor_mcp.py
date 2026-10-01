@@ -8,6 +8,14 @@ Examples:
     python Scripts/editor_mcp.py call list_toolsets
     python Scripts/editor_mcp.py call describe_toolset "{\"toolset\": \"EditorAppToolset\"}"
     python Scripts/editor_mcp.py call call_tool @args.json --images Saved/McpCaptures
+    python Scripts/editor_mcp.py gallery list
+    python Scripts/editor_mcp.py gallery shop-buy --input Pad --wait 6
+
+`gallery <id>` puts one UI gallery state on screen in the running in-viewport PIE
+(homestead.UIGallery, Source/SurvivalGame/HomesteadUIGallery.h) and captures the editor window,
+Slate included. It runs only on an isolated save route: start the editor with
+Start-EditorMcp.ps1 -PreviewProfile gallery. For every state at several resolutions use
+Scripts/Capture-UiGallery.ps1.
 """
 from __future__ import annotations
 
@@ -21,6 +29,15 @@ import urllib.error
 import urllib.request
 
 PROTOCOL_VERSION = "2025-06-18"
+EDITOR_TOOLSET = "EditorToolset.EditorAppToolset"
+PYTHON_TOOLSET = "homestead_agent.toolset.HomesteadEditorPython"
+# Runs a console command in the PIE world (or the editor world when PIE isn't running).
+CONSOLE_CODE = """import unreal
+sub = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
+w = sub.get_game_world() or sub.get_editor_world()
+pc = unreal.GameplayStatics.get_player_controller(w, 0) if sub.get_game_world() else None
+unreal.SystemLibrary.execute_console_command(w, {command!r}, pc)
+"""
 
 
 class McpClient:
@@ -117,6 +134,11 @@ def main() -> int:
     call = sub.add_parser("call", help="call an MCP tool")
     call.add_argument("tool")
     call.add_argument("arguments", nargs="?", default="{}", help="JSON object, or @file.json")
+    gallery = sub.add_parser("gallery", help="show a UI gallery state in PIE and capture it (or 'list')")
+    gallery.add_argument("id")
+    gallery.add_argument("--input", choices=["KBM", "Pad"], default="KBM")
+    gallery.add_argument("--wait", type=float, default=6.0,
+                         help="seconds to let it settle (teleports across the estate can take 20+)")
     args = parser.parse_args()
 
     client = McpClient(args.url, args.timeout)
@@ -124,6 +146,16 @@ def main() -> int:
         client.initialize()
         if args.command == "tools":
             result = client.request("tools/list")
+        elif args.command == "gallery":
+            command = "homestead.UIGallery list" if args.id == "list" else f"homestead.UIGallery {args.id} {args.input}"
+            result = client.request("tools/call", {"name": "call_tool", "arguments": {
+                "toolset_name": PYTHON_TOOLSET, "tool_name": "run_python",
+                "arguments": {"code": CONSOLE_CODE.format(command=command)}}})
+            if args.id != "list" and not result.get("isError"):
+                time.sleep(args.wait)
+                result = client.request("tools/call", {"name": "call_tool", "arguments": {
+                    "toolset_name": EDITOR_TOOLSET, "tool_name": "CaptureEditorImage", "arguments": {}}})
+                save_images(result, args.images)
         else:
             raw = args.arguments
             if raw.startswith("@"):

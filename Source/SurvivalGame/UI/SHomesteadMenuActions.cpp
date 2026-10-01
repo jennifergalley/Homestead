@@ -45,6 +45,34 @@ void SHomesteadMenu::UpdateNotice()
     NoticeCard->SetRenderTransform(FSlateRenderTransform(FVector2f(0.0f, bNoticeTop ? -Rise : Rise)));
 }
 
+SHomesteadMenu::FNoticeLayout SHomesteadMenu::GetNoticeLayout() const
+{
+    FNoticeLayout Layout;
+    // Window pixels measured from the menu's own corner (it fills the viewport), so a windowed run
+    // reads the same as fullscreen.
+    const FVector2D Origin = GetCachedGeometry().GetAbsolutePosition();
+    const auto Box = [&Origin](const SWidget& Widget)
+    {
+        const FGeometry& Geometry = Widget.GetCachedGeometry();
+        const FVector2D Position = Geometry.GetAbsolutePosition() - Origin;
+        return FBox2D(Position, Position + FVector2D(Geometry.GetAbsoluteSize()));
+    };
+    Layout.bShowing = IsNoticeShowing() && NoticeCard.IsValid();
+    Layout.Book = Box(*this);
+    if (NoticeCard)
+    {
+        // Where it is drawn, including the settle-in offset.
+        FBox2D Card = Box(*NoticeCard);
+        const FVector2D Offset = FVector2D(NoticeCard->GetRenderTransform().Get(FSlateRenderTransform()).GetTranslation())
+            * NoticeCard->GetCachedGeometry().Scale;
+        Layout.Card = FBox2D(Card.Min + Offset, Card.Max + Offset);
+        Layout.CardDesired = NoticeCard->GetDesiredSize() * NoticeCard->GetCachedGeometry().Scale;
+    }
+    if (TabBar && TabBar->GetVisibility().IsVisible()) Layout.Protected.Emplace(TEXT("tabs"), Box(*TabBar));
+    if (const auto Focused = FocusWidget()) Layout.Protected.Emplace(TEXT("focused-control"), Box(*Focused));
+    return Layout;
+}
+
 void SHomesteadMenu::PlaceNotice()
 {
     if (!BookOverlay || !NoticeSlot || !NoticeCard) return;
@@ -89,9 +117,14 @@ bool SHomesteadMenu::StartCraftHold(ECraftInput Input)
         || Region != ERegion::Content || !Entries.IsValidIndex(ContentSelection))
         return false;
     const auto& Row = Entries[ContentSelection];
-    if (Row.Subject != EHomesteadMenuSubject::Recipe || !Row.HasRecipeState
-        || !Row.RecipeState.craftable)
+    if (Row.Subject != EHomesteadMenuSubject::Recipe || !Row.HasRecipeState) return false;
+    // A press on a recipe she can't make yet says why, in the book's notice ("Gather 2 Branch first."),
+    // and changes nothing (MenuCraftRecipe refuses atomically with the assessment's own reason).
+    if (!Row.RecipeState.craftable)
+    {
+        Controller->MenuCraftRecipe(static_cast<Homestead::Recipe>(Row.SubjectId));
         return false;
+    }
     CraftHoldRecipe = Row.SubjectId;
     CraftHoldElapsed = 0;
     CraftBeat = 0;
@@ -142,7 +175,7 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
                 const int32 Used = Row.ContainerId > 0 ? Controller->Simulation().UsedCapacity()
                     : Controller->Simulation().ChestUsedCapacity(Row.DestinationId);
                 MaximumAmount = Used < 0 ? 0 : FMath::Min(MaximumAmount,
-                    Homestead::ContainerCapacity(Row.ContainerId > 0 ? 0 : Row.DestinationId) - Used);
+                    Homestead::ContainerCapacity(Controller->State(), Row.ContainerId > 0 ? 0 : Row.DestinationId) - Used);
             }
             if (MaximumAmount < 1)
             { Controller->MenuItemAction(Row, Action, 1, PendingRevision); return; }
@@ -150,6 +183,15 @@ void SHomesteadMenu::RunAction(EHomesteadItemAction Action)
         }
         if (Action == EHomesteadItemAction::Drop && Row.Subject == EHomesteadMenuSubject::Wearable)
         { SetDialog(EDialog::DropWearable); return; }
+        if (Action == EHomesteadItemAction::Dye && Row.Subject == EHomesteadMenuSubject::Wearable)
+        {
+            const auto* Owned = Controller->Simulation().GetWearable(Row.SubjectId);
+            if (!Owned) return;
+            DyeRow = Row; DyeRevision = PendingRevision; DyeOriginal = Owned->dye;
+            PopupAnchor = PopupAnchorFor(Cells.IsValidIndex(ContentSelection) ? Cells[ContentSelection] : nullptr, false);
+            OpenDyeChooser(Owned->dye);
+            return;
+        }
         if (Action == EHomesteadItemAction::Merge)
         {
             MergeTargets.Reset();

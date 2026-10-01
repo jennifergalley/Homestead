@@ -22,8 +22,8 @@
 
 namespace EstateSmokeRoute
 {
-// She arrives through the controller's ground settle, which holds her up to 180 s while World
-// Partition streams the collision in, so an arrival may take that long in a cold package.
+// Estate ground snap gives World Partition up to 90 real seconds for collision; allow a cold
+// packaged map some additional time for the surrounding materials and automation steps.
 constexpr float ArriveSeconds = 190.0f;
 // Frame timing: let streaming and shader work settle after she arrives, then sample.
 constexpr double TimingSettleSeconds = 6.0;
@@ -203,10 +203,16 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
     {
         FStep& Arrive = Steps.AddDefaulted_GetRef();
         Arrive.Name = TEXT("Arrive on the ground at ") + Label;
-        Arrive.Action = [this, Target]() { Controller->HomesteadTeleport(Target.x, Target.y); };
+        Arrive.Action = [this, Target]()
+        {
+            Controller->HomesteadTeleport(Target.x, Target.y);
+            if (Controller->IsEstateMap() && !Controller->GroundSnapStreamingActor)
+                Finish(false, TEXT("Teleport did not register a destination streaming source."));
+        };
         Arrive.Check = [this, OnGround, Target]()
         {
-            return !Controller->bPendingGroundSnap && !Controller->bPendingSpawn && OnGround()
+            return !Controller->bPendingGroundSnap && !Controller->GroundSnapStreamingActor
+                && !Controller->bPendingSpawn && OnGround()
                 && EstateSmokeRoute::Distance2D(Controller->PlayerPoint(), Target) < EstateSmokeRoute::ArrivedWithinCm;
         };
         Arrive.Wait = EstateSmokeRoute::ArriveSeconds;

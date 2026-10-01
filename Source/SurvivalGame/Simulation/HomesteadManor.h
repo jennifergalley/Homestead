@@ -79,8 +79,8 @@ bool InSafeHall(const EstateLayout& layout, Point point);
 bool BlockedByManor(const State& state, const EstateLayout& layout, const PlacementTarget& target,
     const Footprint& area);
 
-// "Eleanor Cavendish — Trevennor, Spring 1" (an empty string for unnamed woodland games).
-std::string SaveLabel(const State& state, const char* season, int day);
+// "Eleanor Cavendish — Trevennor, Spring 1, 1851" (an empty string for unnamed woodland games).
+std::string SaveLabel(const State& state);
 
 // Journal entries: the arrival note is written when she first comes home.
 constexpr const char* ArrivalEntry = "arrival";

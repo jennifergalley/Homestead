@@ -143,6 +143,7 @@ bool AHomesteadController::PersistAudioVolume(int32 Id, float Requested, float P
     }
     GConfig->SetFloat(AudioSettingsSection, AudioKeys[Index], Requested, GGameUserSettingsIni);
     MenuPreviewAudioVolume(Id, Requested);
+    ++AudioPersistWrites;
     return true;
 }
 
@@ -194,11 +195,13 @@ void AHomesteadController::MenuSetAutosaveInterval(int32 Minutes)
 
 void AHomesteadController::MenuSetGameSpeed(double DayMinutes)
 {
+    if (RejectPendingGroundSnapAction()) return;
     Notify(Sim.SetDayMinutes(DayMinutes));
 }
 
 void AHomesteadController::MenuAdjustSetting(int32 Id, int32 Direction)
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (!Direction) return;
     if (Id == 2)
     {

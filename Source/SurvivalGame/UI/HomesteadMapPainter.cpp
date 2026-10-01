@@ -1,4 +1,5 @@
 #include "HomesteadMapPainter.h"
+#include "HomesteadUITheme.h"
 #include "HomesteadPalette.h"
 
 #include "Fonts/FontMeasure.h"
@@ -13,7 +14,7 @@ const FLinearColor Parchment(0.80f, 0.70f, 0.50f, 1.0f);
 const FLinearColor Ink(0.12f, 0.075f, 0.04f, 1.0f);
 const FLinearColor BoundaryInk(0.46f, 0.07f, 0.05f, 1.0f);
 const FLinearColor Halo(0.95f, 0.90f, 0.76f, 0.85f);
-constexpr FLinearColor Brass = HomesteadPalette::Brass;
+const FLinearColor Brass(0.92f, 0.74f, 0.43f, 1.0f); // the map is its own parchment in either theme
 const FLinearColor RimShadow(0.02f, 0.03f, 0.025f, 0.75f);
 
 namespace
@@ -31,7 +32,7 @@ FColor Vertex(const FLinearColor& Color) { return Color.ToFColor(true); }
 
 FSlateFontInfo Font(float Size, bool bBold)
 {
-    FSlateFontInfo Info = FCoreStyle::GetDefaultFontStyle(bBold ? TEXT("Bold") : TEXT("Regular"), 10);
+    FSlateFontInfo Info = HomesteadUITheme::Font(bBold ? TEXT("Bold") : TEXT("Regular"), 10);
     Info.Size = FMath::Max(1.0f, Size);
     return Info;
 }

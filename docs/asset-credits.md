@@ -176,6 +176,13 @@ The scythe's mowing swish (`Assets\Audio\Effects\ScytheSwish.wav`) is original t
 `Scripts\generate_scythe_sound.py` synthesizes it in numpy from a fixed seed (filtered noise, stem
 clicks and a faint damped steel ring), with no third-party audio.
 
+The billhook's cane cuts (`Assets\Audio\Effects\CaneCutA.wav`, `CaneCutB.wav`, `CaneCutC.wav`; Jenny,
+2026-09-30) are original to this project. `Scripts\generate_billhook_sound.py` synthesizes them in numpy from
+fixed seeds: a short hooked slash, a woody snap (a click, damped cane resonances and a bright crack), a
+tearing run of fibre clicks, and a leaf rustle as the cane falls. There's no third-party audio, and the cues
+are mastered to the chops' loudness. The pickaxe's strikes reuse Kenney's Impact Sounds pings
+(`CraftStrikeA`-`C`, `impactMetal_light_000`-`002`, CC0), listed above.
+
 The Fern 02 clearing candidate uses four separately imported meshes and the
 publisher's 1K diffuse, DirectX normal, roughness, ambient-occlusion and alpha
 maps. Source-axis/unit conversion was baked once; the project-authored masked,

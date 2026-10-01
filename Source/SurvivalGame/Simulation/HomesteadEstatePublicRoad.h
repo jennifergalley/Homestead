@@ -31,6 +31,34 @@ struct PublicRoadSign
     double yaw = 0.0;       // degrees; the sign's face points along this heading
 };
 
+// The road bridge over the river (Scripts/Terrain/road_grade.py holds the road level across it; public_road.py
+// measures the deck). The deck's walking surface is at deckZ, level along its length; it runs halfLength
+// either way of centre along yaw and is 2 * halfWidth wide between its railings.
+struct PublicRoadBridge
+{
+    bool valid = false;
+    Point centre;               // where the road crosses the river (cm)
+    double yaw = 0.0;           // along the road, toward town (degrees)
+    double deckZ = 0.0;         // walking surface (cm)
+    double halfLength = 0.0;    // cm
+    double halfWidth = 0.0;     // clear, between the railings (cm)
+    double waterZ = 0.0;        // the river's surface under it (cm)
+    double bedZ = 0.0;          // the river bed under it (cm)
+    // The deck's ends (cm), toward the manor and toward town.
+    Point End(double side) const;
+    // True over the walking slab (the deck's length plus DeckSlabOverrunCm each end, its clear width), grown by
+    // marginCm all round.
+    bool Covers(Point world, double marginCm = 0.0) const;
+    // The nearest point on the walking slab at least insetCm inside its edges (the point itself if it's there).
+    Point OntoDeck(Point world, double insetCm) const;
+    // Where a downward probe for footing should start: at least clearanceCm above the walking surface where
+    // the deck covers the point (grown by marginCm), else z. A save made at the old ford sits under the deck.
+    double ProbeStartZ(Point world, double z, double clearanceCm, double marginCm) const;
+    // What a dropped thing rests on: the walking surface where the deck covers it, else the ground.
+    double RestZ(Point world, double groundZ) const;
+    static constexpr double DeckSlabOverrunCm = 20.0;   // HomesteadWorldRoadBridge.cpp: slab 40 cm longer than the deck
+};
+
 struct PublicRoad
 {
     std::vector<Point> points;       // centreline (cm)
@@ -41,6 +69,7 @@ struct PublicRoad
     double bridgeHalfAcross = 0.0;   // keep-out half width across it (m)
     std::vector<PublicRoadStop> stops;
     std::vector<PublicRoadSign> signs;
+    PublicRoadBridge deck;
 
     double Length() const { return chainage.empty() ? 0.0 : chainage.back(); }
     // Point on the centreline at a chainage (clamped to the road's ends).

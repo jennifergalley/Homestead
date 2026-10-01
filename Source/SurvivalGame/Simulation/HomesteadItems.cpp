@@ -21,7 +21,7 @@ constexpr ItemInfo ItemCatalogue[] = {
     {Item::Fiber, "fiber", "Fiber", "Stripped reed fiber for binding and weaving.",
         ItemCategory::Material, "fiber", 3, NoBuyers, 0.0, 0.0, "Reeds near water", true},
     {Item::Berries, "berries", "Berries", "A handful of wild berries. A quick bite on the go.",
-        ItemCategory::Forage, "berries", 6, NoBuyers, 12.0, 6.0},
+        ItemCategory::Forage, "berries", 6, NoBuyers, 12.0, 6.0, "", false, nullptr, FoodClass::Snack},
     {Item::Roots, "roots", "Roots", "Wild roots. Too tough to eat raw; roast them over a fire.",
         ItemCategory::Forage, "roots", 4, NoBuyers, 0.0, 0.0, "Wild roots"},
     {Item::Flowers, "flowers", "Meadow herb", "A fragrant meadow herb for seasoning and posies.",
@@ -38,9 +38,9 @@ constexpr ItemInfo ItemCatalogue[] = {
     {Item::Water, "water", "Water", "Fresh stream water for the garden.",
         ItemCategory::Supply, "water", 0, NoBuyers},
     {Item::RoastedRoots, "roasted-roots", "Roasted roots", "Wild roots softened over a cookfire.",
-        ItemCategory::Food, "roasted-roots", 15, NoBuyers, 28.0, 12.0},
+        ItemCategory::Food, "roasted-roots", 15, NoBuyers, 28.0, 25.0, "", false, nullptr, FoodClass::Meal},
     {Item::HerbedRoots, "herbed-roots", "Herbed roots", "Roasted roots brightened with meadow herbs.",
-        ItemCategory::Food, "herbed-roots", 25, NoBuyers, 38.0, 18.0},
+        ItemCategory::Food, "herbed-roots", 25, NoBuyers, 38.0, 40.0, "", false, nullptr, FoodClass::Meal},
     {Item::Timber, "timber", "Timber", "A sawn length of trunk for heavy building or splitting.",
         ItemCategory::Material, "timber", 40, NoBuyers, 0.0, 0.0, "Mature trees, large stumps and fallen logs, with the axe"},
     {Item::Firewood, "firewood", "Firewood", "Split, seasoned firewood. Every kitchen in town wants it.",
@@ -50,11 +50,11 @@ constexpr ItemInfo ItemCatalogue[] = {
     {Item::Fur, "fur", "Fur", "A cured deer hide.",
         ItemCategory::Material, "fur", 60, NoBuyers, 0.0, 0.0, "", true},
     {Item::Pasty, "pasty", "Cornish pasty", "Beef, potato, swede and onion in a crimped crust. A proper meal.",
-        ItemCategory::Food, "pasty", 80, NoBuyers, 45.0, 25.0, "", false, "Cornish pasties"},
+        ItemCategory::Food, "pasty", 80, NoBuyers, 45.0, 40.0, "", false, "Cornish pasties", FoodClass::Meal},
     {Item::Bread, "bread", "Bread", "A round loaf from the town bakehouse.",
-        ItemCategory::Food, "bread", 40, NoBuyers, 20.0, 8.0, "", false, "loaves of bread"},
+        ItemCategory::Food, "bread", 40, NoBuyers, 20.0, 12.0, "", false, "loaves of bread", FoodClass::Snack},
     {Item::Cheese, "cheese", "Cheese", "A wedge of hard farmhouse cheese.",
-        ItemCategory::Food, "cheese", 60, NoBuyers, 15.0, 12.0, "", false, "wedges of cheese"},
+        ItemCategory::Food, "cheese", 60, NoBuyers, 15.0, 15.0, "", false, "wedges of cheese", FoodClass::Snack},
     {Item::Twine, "twine", "Twine", "A hank of hemp twine for binding and tying.",
         ItemCategory::Material, "twine", 20, NoBuyers, 0.0, 0.0, "", false, "hanks of twine"},
     // Estate clearing: the hafted tools, the rusted heads salvaged from the ruin, what clearing
@@ -115,17 +115,17 @@ constexpr ItemInfo ItemCatalogue[] = {
     {Item::StrawberryRunner, "strawberry-runner", "Strawberry runner", "A rooted strawberry runner. Fruits in about 8 days if watered, then every 3 days.",
         ItemCategory::Supply, "seeds", 48, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "strawberry runners"},
     {Item::Turnip, "turnip", "Turnip", "A white turnip with a purple shoulder. Crisp and peppery raw.",
-        ItemCategory::Food, "roots", 20, StoreBuys, 8.0, 4.0, "Grown from turnip seed", false, "turnips"},
+        ItemCategory::Food, "roots", 20, StoreBuys, 8.0, 6.0, "Grown from turnip seed", false, "turnips", FoodClass::Snack},
     {Item::Carrot, "carrot", "Carrot", "A sweet orange carrot, earth still on it.",
-        ItemCategory::Food, "roots", 16, StoreBuys, 6.0, 4.0, "Grown from carrot seed", false, "carrots"},
+        ItemCategory::Food, "roots", 16, StoreBuys, 6.0, 6.0, "Grown from carrot seed", false, "carrots", FoodClass::Snack},
     {Item::Potato, "potato", "Potato", "A floury potato. Best sold, or cooked once there's a pot to boil it in.",
         ItemCategory::Food, "roots", 14, StoreBuys, 0.0, 0.0, "Grown from seed potatoes", false, "potatoes"},
     {Item::Cabbage, "cabbage", "Cabbage", "A firm drumhead cabbage. It fetches a good price in town.",
-        ItemCategory::Food, "wild-garlic", 90, StoreBuys, 14.0, 6.0, "Grown from cabbage seed", false, "cabbages"},
+        ItemCategory::Food, "wild-garlic", 90, StoreBuys, 14.0, 10.0, "Grown from cabbage seed", false, "cabbages", FoodClass::Snack},
     {Item::BroadBeans, "broad-beans", "Broad bean pods", "Fat green pods of young broad beans.",
-        ItemCategory::Food, "wild-garlic", 8, StoreBuys, 5.0, 3.0, "Picked from broad bean plants", false, "broad bean pods"},
+        ItemCategory::Food, "wild-garlic", 8, StoreBuys, 5.0, 4.0, "Picked from broad bean plants", false, "broad bean pods", FoodClass::Snack},
     {Item::Strawberries, "strawberries", "Strawberries", "Sweet red strawberries, warm from the sun.",
-        ItemCategory::Food, "berries", 13, StoreBuys, 8.0, 8.0, "Picked from strawberry plants", false, "strawberries"},
+        ItemCategory::Food, "berries", 13, StoreBuys, 8.0, 8.0, "Picked from strawberry plants", false, "strawberries", FoodClass::Snack},
 };
 static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 
@@ -144,12 +144,13 @@ constexpr bool CatalogueComplete()
         if (!info.key || !*info.key || !info.name || !*info.name || !info.description || !*info.description
             || !info.icon || !*info.icon || info.basePriceCoins < 0
             || static_cast<int>(info.category) < 0 || info.category >= ItemCategory::Count
-            || info.hunger < 0.0 || info.energy < 0.0 || !info.source)
+            || info.hunger < 0.0 || info.energy < 0.0 || !info.source
+            || (info.food != FoodClass::None) != (info.hunger > 0.0))
             return false;
     }
     return true;
 }
-static_assert(CatalogueComplete(), "Every ItemCatalogue row needs a key, name, description, icon and valid values.");
+static_assert(CatalogueComplete(), "Every ItemCatalogue row needs a key, name, description, icon and valid values; food rows a food class.");
 
 constexpr ItemInfo UnknownItemInfo{Item::Count, "unknown", "Unknown item", "Unknown item",
     ItemCategory::Material, "pack", 0, NoBuyers};
@@ -179,7 +180,8 @@ const char* ItemDescription(Item item) { return GetItemInfo(item).description; }
 const char* ItemIcon(Item item) { return GetItemInfo(item).icon; }
 const char* ItemSource(Item item) { return GetItemInfo(item).source; }
 ItemCategory CategoryOf(Item item) { return GetItemInfo(item).category; }
-bool IsEdible(Item item) { return GetItemInfo(item).hunger > 0.0; }
+FoodClass FoodClassOf(Item item) { return GetItemInfo(item).food; }
+bool IsEdible(Item item) { return FoodClassOf(item) != FoodClass::None; }
 std::string FoodEnergyLabel(Item item)
 {
     if (!ValidItem(item) || !IsEdible(item)) return {};

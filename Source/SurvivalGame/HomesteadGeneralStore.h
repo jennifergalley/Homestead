@@ -28,6 +28,8 @@ public:
     // Opens or shuts the door and puts the shopkeeper on or off duty. The door stays open while the
     // heroine is still inside at closing.
     void SetOpen(bool bOpen, const FVector& HeroineLocation);
+    // The words on the board hung on the shut door (Homestead::ClosedSignText); set only when they change.
+    void SetClosedText(const FString& Text);
     int32 GetShopId() const { return ShopId; }
     bool IsBuilt() const { return bBuilt; }
     FVector2D CounterPoint() const { return Counter2D; }
@@ -61,6 +63,7 @@ private:
     float Floor = 0.0f;
     bool bBuilt = false;
     bool bDoorOpen = true;
+    FString ClosedSignWords;
     int32 PartCount = 0;
     UMaterialInterface* Tint(const FLinearColor& Color, float Roughness = 0.8f);
     UMaterialInterface* Surface(const TCHAR* Name, const FLinearColor& Fallback, float Roughness);

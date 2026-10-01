@@ -214,6 +214,9 @@ public:
     static FString UnderbrushName(uint8 Species);
     // 0 outdoors .. 1 indoors at the camera (UHomesteadWeather), for the ambience and hearth mixes.
     float GetIndoorMix() const;
+    // Her own position inside a roofed building cell, eased (UHomesteadWeather::GetRoomMix): the interior
+    // daylight follows this, not the camera, so doorways and overhangs outside don't dim the day.
+    float GetRoomMix() const;
 
 private:
     friend class AHomesteadVisualPlaytest;
@@ -297,6 +300,14 @@ private:
     static constexpr float OvercastSunSourceAngle = 12.0f;
     static constexpr float OvercastExposureBias = -0.8f;
     static constexpr float OvercastSaturation = 0.72f;
+    // Under a roof by day, eye adaptation would lift a shaded room back to outdoor brightness. Hold it
+    // down (EV, scaled by the room mix and daylight) so the room reads as dim, with daylight at the
+    // door and the hearth as the key; at night the lamp and hearth already set the level.
+    static constexpr float IndoorDayExposureBias = -0.7f;
+    // The hearth as a settled low fire: a warm key low in front of the opening, oil-lamp strength
+    // (HomesteadLampLook's lamp is 1400 / 1000 cm), rather than a floodlight filling the room.
+    static constexpr float HearthIntensity = 2600.0f;
+    static constexpr float HearthRadiusCm = 800.0f;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
     // The standing room's door (HomesteadWorldDoors.cpp, Simulation/HomesteadDoor): an oak leaf on a hinge
@@ -356,6 +367,17 @@ private:
     // Baked decorative trees, shrubs and rocks for the Estate map (Content/SurvivalGame/Estate/Runtime).
     bool BuildEstateScenery();
     bool bEstateSceneryBuilt = false;
+    // The road bridge over the river (HomesteadWorldRoadBridge.cpp), built once with the estate scenery.
+    void BuildRoadBridge();
+    bool bRoadBridgeBuilt = false;
+    UPROPERTY()
+    FHomesteadWorldVisual RoadBridgeVisual;
+    // The cove route's step kit (HomesteadWorldCoveRoute.cpp), built once with the estate scenery when Props'
+    // meshes are imported.
+    void BuildCoveRoute();
+    bool bCoveRouteBuilt = false;
+    UPROPERTY()
+    FHomesteadWorldVisual CoveRouteVisual;
     UPROPERTY()
     TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> EstateScenery;
     // Hides low cover (bushes, ferns, grass, cobbles) wherever a placed piece now stands, so none
@@ -503,6 +525,19 @@ private:
     void BuildLighting();
     bool LoadCameraSafeFoliageMaterials();
     bool ApplyCameraSafeFoliageMaterials(UMeshComponent& Component);
+    // Foliage shadow motion (HomesteadWorldFoliageMotion.cpp): the swaying shrubs' wind, shadows and the
+    // camera-safe dither, each behind a console variable for A/B; re-applied only when one changes.
+    void TagSwayingShrub(UMeshComponent& Component);
+    void UpdateFoliageMotion();
+    UPROPERTY()
+    TMap<TObjectPtr<UMaterialInterface>, TObjectPtr<UMaterialInstanceDynamic>> ShrubWindMaterials;
+    TMap<TWeakObjectPtr<UMaterialInstanceDynamic>, FVector2f> ShrubWindBase;   // authored WindStrength, LeafFlutter
+    TArray<TWeakObjectPtr<UMeshComponent>> SwayingShrubs;
+    UPROPERTY()
+    TObjectPtr<class UMaterialParameterCollection> CameraFoliageCollection;
+    float AppliedShrubWind = -1.0f;
+    int32 AppliedShrubShadows = -1;
+    int32 AppliedFoliageDither = -1;
     bool BuildDecorations(const Homestead::Simulation& Simulation,
         const FIntPoint* StageChunk = nullptr);
     void BuildResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly);

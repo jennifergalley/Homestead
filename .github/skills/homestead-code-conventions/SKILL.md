@@ -129,8 +129,13 @@ disagree, follow the code and tell the Architecture Agent.
 - Widgets take `SLATE_ARGUMENT(TWeakObjectPtr<AHomesteadController>, Controller)` and read it in
   `*_Lambda` attributes; actions call controller methods. Keep lambdas cheap: they run every paint.
   Snapshot structs (`HotbarSnapshot`) are fine; rebuilding whole rows per paint isn't.
-- Colours come from `UI/HomesteadPalette.h` (`Brass`, `Pine`, `DeepPine`, `Cream`, `Sage`,
-  `Warning`); widget-specific shades and sizes go in a named `<Widget>Style` namespace.
+- **UI theme:** Jenny's standing style is parchment plus EB Garamond. Use
+  `HomesteadUITheme::Font()` (EB Garamond, ×1.12) for text and `KeyFont()` for key glyphs. Declare
+  theme colours as `FThemeColor` values in named namespaces (`inline` in headers), never locals;
+  wrap inline literals with `HomesteadUITheme::Themed(FLinearColor)`. Meet WCAG AA 4.5:1 contrast
+  on parchment; Canvas HUD serif text is at least 15 font units at 720p. Every new UI surface gets
+  an `Add(...)` entry in `HomesteadUIGallery.cpp`, whose coverage check rejects missing book pages,
+  settings tabs and notice styles.
 - HUD-anchored widgets are wrapped in `SHomesteadHudScale` so one unit is one Canvas HUD unit.
 - See the `homestead-add-hud-element` skill for the full recipe.
 

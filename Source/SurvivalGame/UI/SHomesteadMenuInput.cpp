@@ -11,6 +11,8 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
 {
     if (SeenPage == 7 && MapView && Dialog == EDialog::None && !bRecovery && !bSaving
         && HandleMapKey(Key, Event, InputAmount)) return true;
+    if (SeenPage == 6 && Dialog == EDialog::None && !bRecovery && !bSaving
+        && HandleAppearanceKey(Key, Event, InputAmount)) return true;
     if (Key == EKeys::LeftControl || Key == EKeys::RightControl) bControl = Event != IE_Released;
     if (Key == EKeys::LeftShift || Key == EKeys::RightShift) bShift = Event != IE_Released;
     if (Event == IE_Axis)
@@ -46,6 +48,7 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     }
     if (Event != IE_Pressed || bSaving) return true;
     if (!Key.IsMouseButton()) Hover = INDEX_NONE;
+    if (HandleRenameKey(Key)) return true;
     if (Region == ERegion::Portrait && Dialog == EDialog::None
         && (Key == EKeys::Z || Key == EKeys::Gamepad_RightThumbstick))
     { Controller->ZoomMenuPortrait(); return true; }
@@ -55,6 +58,12 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
             || Key == EKeys::Gamepad_Special_Right || Key == EKeys::Gamepad_FaceButton_Right) ChangePage(4);
         if (Key == EKeys::G || Key == EKeys::Gamepad_FaceButton_Top || Key == EKeys::Escape
             || Key == EKeys::Gamepad_Special_Right || Key == EKeys::Gamepad_FaceButton_Right) return true;
+    }
+    // A stepped sound level: Back puts it back unsaved; confirm saves it (and doesn't also step it).
+    if (bAudioStepEdit && Dialog == EDialog::None)
+    {
+        if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right) { CancelAudioStep(); return true; }
+        if (ActivateKey && !Key.IsMouseButton()) { CommitAudioStep(); Refresh(); return true; }
     }
     if (Key == EKeys::Escape || Key == EKeys::Gamepad_FaceButton_Right || Key == EKeys::I || Key == EKeys::Gamepad_Special_Right) { Back(); return true; }
     if (ActivateKey)
@@ -105,6 +114,9 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     }
     if (Key == EKeys::Gamepad_LeftShoulder) { ChangePage(ShiftFieldBookPage(SeenPage, -1)); return true; }
     if (Key == EKeys::Gamepad_RightShoulder) { ChangePage(ShiftFieldBookPage(SeenPage, 1)); return true; }
+    // The world's book shortcuts work inside it too, as the controls strip says: C crafting, B building.
+    if (Key == EKeys::C && !bControl) { ChangePage(1); return true; }
+    if (Key == EKeys::B && !bControl) { ChangePage(2); return true; }
     if (Key == EKeys::Tab)
     {
         if (bControl) ChangePage(ShiftFieldBookPage(SeenPage, bShift ? -1 : 1));
@@ -116,6 +128,12 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     if (SeenPage == 0 && Key == EKeys::S)
     {
         if (Controller->MenuSortPack()) Refresh();
+        return true;
+    }
+    // Auto-store onto the open chest's matching stacks (gamepad: the item menu's option, since Y is taken).
+    if (SeenPage == 0 && Key == EKeys::T && Controller->ActiveStorageChest().IsSet())
+    {
+        if (Controller->MenuStoreMatching()) Refresh();
         return true;
     }
     if (Key == EKeys::Gamepad_FaceButton_Left)
@@ -174,12 +192,80 @@ FReply SHomesteadMenu::OnAnalogValueChanged(const FGeometry&, const FAnalogInput
 
 FReply SHomesteadMenu::OnMouseMove(const FGeometry&, const FPointerEvent& Event)
 {
+    if (bOrbitDragging && HasMouseCapture())
+    {
+        const FVector2D Position = Event.GetScreenSpacePosition();
+        const FVector2D Delta = Position - OrbitDragLast;
+        OrbitDragLast = Position;
+        if (Controller.IsValid())
+            Controller->MenuOrbitAppearance(Delta.X * MenuAppearanceInput::DragYawPerPixel, -Delta.Y * MenuAppearanceInput::DragPitchPerPixel);
+        return FReply::Handled();
+    }
     PointerItemDragMove(Event.GetScreenSpacePosition());
     return FReply::Handled();
 }
 
+FReply SHomesteadMenu::OnMouseButtonDown(const FGeometry&, const FPointerEvent& Event)
+{
+    // A left drag anywhere the Appearance page has no control of its own turns her around.
+    if (SeenPage == 6 && Dialog == EDialog::None && Event.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        bOrbitDragging = true;
+        OrbitDragLast = Event.GetScreenSpacePosition();
+        return FReply::Handled().CaptureMouse(SharedThis(this));
+    }
+    return FReply::Unhandled();
+}
+
+FReply SHomesteadMenu::OnMouseButtonUp(const FGeometry&, const FPointerEvent& Event)
+{
+    if (bOrbitDragging && Event.GetEffectingButton() == EKeys::LeftMouseButton)
+    {
+        bOrbitDragging = false;
+        return FReply::Handled().ReleaseMouseCapture();
+    }
+    return FReply::Unhandled();
+}
+
+void SHomesteadMenu::OnMouseCaptureLost(const FCaptureLostEvent& Event)
+{
+    SCompoundWidget::OnMouseCaptureLost(Event);
+    bOrbitDragging = false;
+}
+
+bool SHomesteadMenu::HandleAppearanceKey(FKey Key, EInputEvent Event, float InputAmount)
+{
+    if (Key == EKeys::MouseWheelAxis)
+    {
+        // The wheel zooms here, wherever the pointer is, instead of scrolling or picking a tool.
+        if (Event == IE_Axis && InputAmount != 0.0f && Controller.IsValid()) Controller->MenuZoomAppearance(InputAmount > 0 ? 1.0f : -1.0f);
+        return true;
+    }
+    if (Event == IE_Axis && (Key == EKeys::Gamepad_RightX || Key == EKeys::Gamepad_RightY))
+    {
+        const float Value = FMath::Abs(InputAmount) > MenuAppearanceInput::StickDeadZone ? InputAmount : 0.0f;
+        (Key == EKeys::Gamepad_RightX ? OrbitStickX : OrbitStickY) = Value;
+        return true;
+    }
+    bool* Held = Key == EKeys::A ? &bOrbitLeft : Key == EKeys::D ? &bOrbitRight
+        : Key == EKeys::W ? &bOrbitUp : Key == EKeys::S ? &bOrbitDown : nullptr;
+    if (!Held) return false;
+    if (Event == IE_Pressed || Event == IE_Repeat) *Held = true;
+    else if (Event == IE_Released) *Held = false;
+    return true;
+}
+
+void SHomesteadMenu::ClearAppearanceOrbit()
+{
+    bOrbitLeft = bOrbitRight = bOrbitUp = bOrbitDown = false;
+    OrbitStickX = OrbitStickY = 0.0f;
+}
+
 FReply SHomesteadMenu::OnMouseWheel(const FGeometry&, const FPointerEvent& Event)
 {
+    // On Appearance the wheel zooms through one route only: the menu's input preprocessor sends every
+    // notch to HandleAppearanceKey (as the Map tab does), so here it's only kept from scrolling.
+    if (SeenPage == 6 && Dialog == EDialog::None) return FReply::Handled();
     if (Dialog == EDialog::Quantity)
     {
         if (Controller.IsValid() && Controller->MenuAcceptsPhysicalInput())

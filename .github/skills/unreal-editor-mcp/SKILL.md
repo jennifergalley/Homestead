@@ -36,8 +36,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests, compile-check
   with `Scripts\Invoke-UnrealBuild.ps1`, commit and push, then send `[ready]` to the
   orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The orchestrator only
-  coordinates and never builds. The separate `mvp-survival` line packages its own deliverables to
-  `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
+  coordinates and never builds.
 - **At most 2 Unreal processes on the machine** (Jenny, 2026-09-28; it was 3), counting editors,
   packaged games and commandlets (`UnrealEditor-Cmd` imports and bootstraps too). Each editor commits
   15-17 GB of memory: with three open, the 32 GB machine ran out of RAM and the pagefile on C: grew to
@@ -108,10 +107,17 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `t.FPSChart.OpenFolderOnDump 0` first (`ChartCreation.cpp`).
 - **Scratch and helper files** go in the worktree's `Saved\` (git-ignored) or
   `E:\CopilotScratch\<session-id>\`, never `%TEMP%` (on C:, and shared between sessions) or a shared
-  fixed filename. See the disk rules in `~\.copilot\copilot-instructions.md`.
-- **Jenny's playable builds.** Never retarget or overwrite `Desktop\Homestead.lnk` or anything
-  under `E:\Repos\HomesteadMVP\`. The estate build gets its own "Homestead Estate" shortcut. Never
-  merge the `mvp-survival` branch with `main`, in either direction.
+  fixed filename. Long-running sessions must periodically check
+  `~\.copilot\session-state\<session-id>\files` size: transcript images and other bulky artifacts
+  can silently fill C:. Move only the identified bulky subfolder to
+  `E:\CopilotScratch\<session-id>\` with
+  `robocopy "<source>" "<destination>" /E /MOVE`—never bulk-delete the session folder. See the
+  disk rules in `~\.copilot\copilot-instructions.md`.
+- **Jenny's playable build.** `Homestead Estate.lnk` is the only active game shortcut; Integration
+  retargets it only after save-safety and package checks. Jenny retired the survival MVP at
+  `archive/mvp-survival-20260930` (`93612cdf`); its old package, saves and retired shortcut backup
+  were deleted with her approval, leaving the Git tag as the only MVP archive reference. Do not confuse the active
+  `jennifergalley-mvp-woodland-biome` Estate Seasons handoff (`b19a0ad0`) with the retired line.
 - **Saves.** Lanes never change `SimulationSaveVersion`; the orchestrator bumps it once per
   integration. It's **13** (stocks carry their width; v12 saves migrate; version 11 is refused with a reset notice;
   7-10 still migrate). If your branch adds anything to the save format, tell the orchestrator
@@ -170,6 +176,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Editor startup hangs with no log output after `Waiting for ZenServer to be ready`; a native "Wait for ZenServer?" Yes/No dialog is up | The log shows `Found existing instance running on port 8558 with different data directory, will attempt shutdown`: this worktree's `DerivedDataCache\Zen` differs from the running zenserver, so the editor restarts zenserver on its own data dir. That can also pull Zen out from under another worktree's editor | `Start-EditorMcp.ps1` now answers Yes automatically while it waits (it sends the dialog's `IDC_YES` command). By hand: find the window titled "Wait for ZenServer?" for the editor PID with `EnumWindows` and post `WM_COMMAND` 1003 to it (UIA Invoke isn't available). Warn other lanes if you see the shutdown line. |
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
+| PIE says `pie:true` but has no `worldReady`/location/control yaw, the viewport is black, and `shot` says `Failed to capture any editor windows` | The editor main window is minimized (`IsIconic`), so PIE never brings up the world despite the session starting | Restore the editor window, then restart PIE: use `ShowWindow((Get-Process -Id <editor-pid>).MainWindowHandle, 4)`, then `unpie; pie`. Verify `worldReady` and pawn spawn before testing. |
 | The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
 | `hshot` / `HighResShot` captures come out black | The editor window is minimised | Keep it restored (it can be behind other windows). |
 | On the first PIE after launch, a floating "Message Log" window (Asset Check, Map Check, Localization Service) covers PIE in `shot` captures | The editor reports load-time checks | Close it: post `WM_CLOSE` to the editor-PID window titled "Message Log", or `click` its X (scale capture coordinates; see the helper table). `hshot` (HighResShot) isn't affected. |
@@ -195,6 +202,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | See the `homestead-code-conventions` skill, "Unreal C++". |
 | `C4458: declaration of '<name>' hides class member` (for example a local `Ground` in `AHomesteadWorld`) | A local variable shadows a member; warnings are errors in this project | See the `homestead-code-conventions` skill, "Unreal C++". |
 | `C4459: declaration of '<Name>' hides global declaration` inside engine headers (for example Chaos) | A file-scope name in your `.cpp` (such as `constexpr ... Face`) leaks into the unity blob; anonymous namespaces don't help | See the `homestead-code-conventions` skill, "Unreal C++". |
+| UE 5.8 build: `SetEvaluateWorldPositionOffset` is missing on `UMeshComponent` | The API belongs to `UStaticMeshComponent`, not its base mesh-component type | Call it on a `UStaticMeshComponent` (or cast safely); don't add a compatibility shim that hides the concrete component requirement. |
+| UE 5.8 build warns on five-argument `FLandscapeEditDataInterface::SetAlphaData`, then fails because warnings are errors | The `bWeightAdjust` / `bTotalWeightAdjust` overload is deprecated since UE 5.7 | Use the current overload without those flags, e.g. `SetAlphaData(layer, x0, y0, x1, y1, data, stride, restriction)`. |
 | `error C2027: use of undefined type 'X'` (or C2065) in a file that used to compile | `SurvivalGame` now has a private PCH (`SurvivalGamePCH.h`) instead of the UnrealEd shared one, so headers it used to pull in aren't there | Include the engine header for X in that file. See section 8, "Private PCH". |
 | The packaged game exits at once with code **777006** and writes no log | `CrashDuringStaticInit` (`GenericPlatformCrashContext.h`): code ran during static initialisation that needs the engine. The case on 2026-09-28: a namespace-scope `TAutoConsoleVariable` whose default called `FParse::Param(FCommandLine::Get(), ...)`. That works in the editor, where the module DLL loads late, but is fatal in the monolithic game, and every package from `a725ff1d` to `7c5fdc28` crashed at launch | See the `homestead-code-conventions` skill, "Unreal C++" ("Nothing at namespace scope may read runtime state"). To find such a crash, `python Scripts\Examples\dbgrun.py "<exe and args>"` runs the game under a minimal debugger and prints debug output, exceptions and a symbolised stack. |
 | `Build-Game.ps1 -Package -SkipAssets` fails: `Missing licensed source asset ... forest-ground\GroundColor.jpg` | `-SkipAssets` only skips the asset fetch; the content bootstrap still runs and needs `Assets\Source`, which new worktrees don't have | When generated content is committed and current, use `-PackageOnly`. |
@@ -213,7 +222,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | After `build_ground.py` or `build_landscape_material.py` in the editor, `M_EstateGrass`/`MI_EstateGrass`, `SM_GrassPatch_LOD0-2`, `T_GrassWind`, `T_Ground_Stony`/`Trodden_*` and `M_EstateLandscape` show as modified | The bake re-saves them byte-different with identical content | Close the editor, then `git checkout -- Content` unless you actually changed the bake's inputs. |
 | `scatter.py` leaves a diff in the placement `.inc` that is only line endings | It writes LF, and the checkout uses `core.autocrlf` | Harmless. Check with `git diff --ignore-cr-at-eol` (or `-w`) and don't commit a line-ending-only change. |
 | PIE woodland forest floor near-black at noon; terrain half streamed | Agent editors run with ray tracing off; the game's lighting is tuned for RT | Don't judge brightness, night lighting or shadows in PIE. Use the packaged build (RT on), or `-RayTracing` when process limits allow. |
-| Estate nights look like a bright moonlit day | `homestead.NightMinExposure` (default -2, `HomesteadWorld.cpp`) lets auto-exposure brighten the night | At `homestead.NightMinExposure 1`, point lights (lamp, hearth) read as night lighting. Judge night lighting in the packaged build (RT on), and tell the orchestrator before changing the default. |
+| Estate nights look like a bright moonlit day | Current main still has the pre-review exposure path; Jenny's final pending Set A is `NightMoonLux=0.2`, `NightSky=0.3`, `NightMinExposure=-1` | Do not judge night/lamp balance in agent PIE (RT off). Water supplies a side-by-side screenshot sheet; Integration must verify the approved set in packaged RT-on before its 7:30 AM delivery receipt. Jenny's Shipping build has no console, so do not ask her to trial CVars. |
+| PIE says `pie:true` but has no `worldReady`/location/control yaw, the viewport is black, and `shot` says `Failed to capture any editor windows` | The editor main window is minimized (`IsIconic`), so PIE never brings up the world despite the session starting | Restore the editor window, then restart PIE: use `ShowWindow((Get-Process -Id <editor-pid>).MainWindowHandle, 4)`, then `unpie; pie`. Verify `worldReady` and pawn spawn before testing. |
 | A red on-screen warning in Development builds: "Cached lighting in Lumen ... going to be clipped ... r.EyeAdaptation.CachedLightingPreExposure", in full sun (about EV 13.5) | The cached-lighting pre-exposure range didn't cover bright sun | `DefaultEngine.ini` `[SystemSettings]` sets `r.EyeAdaptation.CachedLightingPreExposure=8` (about EV -4 to 16). If it returns, adjust that value, not the exposure. |
 | `'HomesteadLabController' object has no attribute 'get_pawn'` | Not exposed to Python | `unreal.GameplayStatics.get_player_pawn(world, 0)`. |
 | `NameError: name '__file__' is not defined` in `run_python` | `run_python` executes a code string, not a file | `pyfile <path>` (McpHelpers), or `exec(compile(open(p).read(), p, 'exec'), {'__file__': p, '__name__': '__main__'})`. |
@@ -225,6 +235,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | PowerShell ``.Replace("a`nb", ...)`` silently changes nothing | Working copies are CRLF (`core.autocrlf=true`); agent-written files may be LF | Detect the newline first (``$t.Contains("`r`n")``), or use the edit tool. |
 | ctest reports `HomesteadSimulationTests` failed or timed out | The Debug build takes about 10 min | `Scripts\Test-Native.ps1 -Configuration Release` (about 3 min). Redirect a single test exe's output to a file; stdout is buffered. |
 | `HomesteadEstateAuthoringLibrary.editor_ground_height` returns -1e9 | That World Partition cell isn't loaded in the editor | Load the region first. In game, `GroundHeight()` uses the runtime heightfield everywhere. |
+| PIE begins with only about 1 GB free after `ApplyEstateHeightfield` / `ApplyEstateWeightmaps` | Applying many landscape bands keeps their World Partition regions resident; PIE adds enough pressure to make the result unsafe | Save the intended proxies, quit the editor and relaunch before PIE. Do not test under memory pressure; a fresh editor plus PIE was about 8.6 GB in the Water slot. |
 | `Test-Game.ps1` runs only the default smoke test, or errors "Generated resume requires..." | Switches passed as an array or as empty strings | Use a hashtable splat: `$p=@{Packaged=$true; Hotbar=$true}; .\Scripts\Test-Game.ps1 @p`. |
 | `tap_key` letters type nothing into a text box (for example the Names card); BackSpace works | `HomesteadPlayTools` sends key events through `InputKey`, which produces no character events for Slate text boxes | Use real Win32 keys: bring the editor's main window forward (the Alt `keybd_event` trick, as in `click`), then send `keybd_event` VK codes, with Shift for capitals. |
 | `hk tap_key` / `hold_key` of bound actions (E, Enter, Gamepad A, Tab, D-pad) do nothing in Estate PIE, while Escape and `con` commands still work | Usually a state that owns input. `AHomesteadController::InputKey` (`HomesteadController.cpp` ~411) routes keys away from gameplay bindings while the **Names step** is up (`NamesWidget`), while the **field book or failure screen** is open, or while the **shop** is open, and returns before `Super::InputKey`. Other causes: mixing keyboard and gamepad taps (prompts and bindings follow the last device), acting while she's still moving, or a pending spawn. Not window focus: three lanes confirmed taps work in unfocused, restored Estate PIE (2026-09-28) | Check `st`: `bookOpen`, `planning`, a shop or Names screen, `speedCmPerSec` 0. Close whatever owns input (Escape/B), stay on one device, then tap. If none of those apply, drive the same code path with a `UFUNCTION(Exec)` playtest command (for sleep, `HomesteadSleep` / `HomesteadBedChoice`) and report it to the docs agent. The Sleep/Ground lane's failure most likely was the Names step: it had deleted its saves, so a fresh Estate game opened on Names, and `st` showed the book closed. `st` doesn't report the Names step or the shop yet, so check the screen too. Agent editors skip Names since `b340143c` (`homestead.SkipNewGameSetup`). |
@@ -234,7 +245,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | A kit mesh placed from Python is 100 times too big, or rotated wrongly | `StaticMeshComponent` locations are centimetres at scale 1; `unreal.Rotator(a, b, c)` positional order is (roll, pitch, yaw) | Use cm, and pass rotators by keyword: `unreal.Rotator(roll=..., pitch=..., yaw=...)`. |
 | `LineTraceComponent` never hits a mesh (returns false), even in PIE, though world traces do | `UPrimitiveComponent::LineTraceComponent` doesn't hit **Nanite** static mesh components | Trace the world (`World->LineTraceSingleByChannel`, or `line_trace_single` in Python) with other components ignored, and check `Hit.GetComponent()`. The terrain `ProceduralMeshComponent`s aren't Nanite, so component traces still work on them. |
 | Estate traces return None or captures show missing land right after PIE starts | World Partition is still streaming (about 55 s on the Estate) | Wait about a minute after `worldReady` before tracing or capturing, or take Z from the heightmap (row below). |
-| A hidden/copied-save test logs `HOMESTEAD_GROUND_HOLD` with no collision after `HomesteadTeleport`, then stops advancing | The target World Partition collision did not stream for that owned run; the wrapper regards a `gave up` hold as placement on the heightfield, not collision | Do not use the run for visual gameplay proof or infer a Shipping regression. Stop only the owned PID, retain prior save evidence, and retry only through a route that confirms `HOMESTEAD_GROUND_SETTLE`. |
+| A hidden/copied-save test logs `HOMESTEAD_GROUND_HOLD` with no collision after `HomesteadTeleport`, then render/log progress appears to stop | Likely destination World Partition proxy collision did not stream (a copied Estate teleport crossed about 21 m near a proxy boundary while the analytic heightfield remained valid); this is unproven. Settling traces the Pawn channel, so a Visibility-only door leaf cannot mask it. The controller logs only the first miss and can hold for up to 180 **game** seconds, so a long wall-clock interval alone is not a hard hang | Do not use the run for visual gameplay proof or infer a Shipping regression. Stop only the owned PID and retain prior save evidence. Future repair: explicitly source destination streaming, add periodic diagnostics, and use a wall-clock-bounded safe-position restore instead of heightfield placement through missing collision. |
 | `FMath::Max(SomeTArray)` doesn't compile | There's no TArray overload | Loop, or use `Algo::MaxElement`. |
 | `FVector2D` has no `Rotation()` | Only `FVector` does | Use `GetRotated(Degrees)`, or build the vector yourself. |
 | Every mesh of a runtime-built ISM actor shows twice in PIE | PIE duplicates the editor instance's instance components, but not a transient list of them (`AHomesteadManorRuin` / `AHomesteadDerelictFarm` pattern: a transient `Parts` array plus `AddInstanceComponent`) | See the `homestead-code-conventions` skill, "Unreal C++". |
@@ -374,8 +385,11 @@ hk release_all; mcp $E StopPIE
   about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
 - **Time and weather for tests:** `HomesteadMorning <h>` (console, with the player controller) jumps the
   clock without simulating the skipped hours. With `h` earlier than the current hour it goes to the next
-  day, which is the quick way to reach rain: it rains on days 2, 5, 8, ... from 9 to 15 h (`IsRainDay` in
-  `HomesteadSimulation.cpp`), so from a new game `HomesteadMorning 10` twice lands in day-2 rain. Time skips
+  day, which is the quick way to reach rain. The current main schedule chooses two stable hashed
+  days per ten-day block (offsets 1–2 and 6–7; day 0 is dry and block 0's first rain is day 1),
+  from 09:00 to 15:00. **Jenny's 2026-09-30 full-cycle seasonal, reload-stable rain direction is
+  pending Water implementation**; do not write new routes that assume the daytime window. Use the
+  active `IsRainDay`/rain test route rather than hard-coded days or hours. Time skips
   don't grow crops or run day-rollover logic; only Advance or Sleep does. For deterministic crop tests,
   use `HomesteadGrowCrops <days> [tend=1]` to advance crop days, or
   `HomesteadCropGrowth <0-1>` to set the growth fraction directly.
@@ -422,11 +436,18 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 
 ### Interacting with the world
 
+- **Input contract:** E/the interact button only interacts (harvest, plant, pick up, open, talk,
+  eat or sleep). Tools act only through click/the gamepad tool button. Never make E on an unripe
+  crop water it; hold-to-repeat is tool-input-only. Verify this split with mouse/keyboard and
+  gamepad whenever interaction or tool routing changes.
 - **Focus is the nearest interactable within 2.8 m, regardless of facing** (`UpdateFocus`). To target
   a node, get closer to it than to anything else: `walk_to` with `stop_distance_cm` about 45, then
   confirm `nearbyResources[].focused` on your target before pressing the action.
 - `walk_to` reports `arrived` about 150 cm short of the target and stops in doorways; check
   `location` and walk again, or finish with a short `set_sticks`.
+- **Verify sharp terrain routes at tight spacing.** Sample `walk_to` waypoints every 3 m or less
+  around hairpins and switchbacks. A 12 m segment can cut across a bank and get stuck climbing even
+  though the authored route is walkable; that is a driver-path failure, not proof of a route bug.
 - Trees block movement, so `walk_to` a tree usually ends `stuck` at the trunk. That's fine if the
   tree is `focused`.
 - Depleted nodes stay focusable with no actions (`cleared: false`, `ready: false`) and can steal focus.
@@ -447,6 +468,9 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 - **Test clearing anywhere without the salvage route:** `HomesteadGive Scythe 1` or `HomesteadGive Billhook 1`
   (console, with the player controller) grants the tool directly. Then tap `Three` or `One` and
   `LeftMouseButton` (keyboard mode throughout). Verified on the derelict farm's 550000+ weeds and a thin bramble.
+- **Lamp placement is dry-ground-only.** `ResolveDropPoint` rejects points within 60 cm of water,
+  and `SetLampDown` reports `Set the lamp on dry ground.` over water. On a bridge, expect a drop to
+  resolve only onto dry-bank deck ends; do not use a water/bridge refusal as collision evidence.
 - **Gather props (clearing lane, `bb6eb697`):** kneel-gather props are hidden on cancel, on a chained gather
   and whenever her hands are idle, and a gather requested while her hands are busy is queued rather than
   refused. A prop left stuck to her hand or arm is a regression; report it.
@@ -981,6 +1005,13 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **Keep packaged or standalone test runs off Jenny's saves:** launch with
   `-userdir=E:\CopilotScratch\<session-id>\pkguser -log=<name>.log`, so saves, config and logs go
   under that folder instead of the package's own `Saved\`.
+- **Hidden owned-game automation safety:** pass `-unattended` so game errors/crashes cannot raise
+  dialogs on Jenny's desktop. Before `Add-Type` or `Start-Process`, set `TEMP` and `TMP` to an
+  `E:\CopilotScratch\<session-id>\tmp` directory. Put the owned child in a Win32 job object with
+  `KILL_ON_JOB_CLOSE`, so a dead PowerShell host cannot orphan an invisible multi-GB game. Guard
+  **every** top-level window belonging to the child PID—not only an `UnrealWindow` class—and sample
+  the foreground PID from launch to prove it never stole focus. `-nosound` suppresses
+  `ActiveSound` logs, so never use audio logs as an acceptance gate in a run that passes it.
 - **UI at real resolutions and DPI (standalone window, not PIE):** launch
   `UnrealEditor.exe "<worktree>\SurvivalGame.uproject" /Game/SurvivalGame/Maps/Estate -game -windowed
   -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720; for 4K use `-fullscreen` instead of
@@ -993,7 +1024,29 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **Packaged smoke and route tests (integration session only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
-  the MetaHuman heroine yourself (field notes).
+  the MetaHuman heroine yourself (field notes). **Any input-policy change** (hotbar selection, sow/eat/
+  weed bindings, sprint input or controller priority) runs packaged **both** `-Hotbar` and `-FullLoop`;
+  otherwise stale assertions can pass silently until the package route breaks.
+- **Audio cue loudness (pending standard):** source-only branch `jennifergalley-loudness` `95f4ea14`
+  establishes Jenny's rule: measure every new or changed cue against the forest ambience bed before
+  shipping it. Add a row to `Simulation/HomesteadAudioLevels.h` with use, source, category, bus and
+  gain; use a named `Gain` constant at every new `PlayEffect` call, never a literal. Run
+  `Scripts\Fetch-Assets.ps1`, install `soundfile`/`pyloudnorm`, then run
+  `python Scripts/Audio/Measure-Loudness.py` to regenerate
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; run
+  `Scripts\Test-Native.ps1` so `HomesteadAudioLevelTests` rejects out-of-band cues or audio files
+  with no registry row. The generated header must remain `HomesteadAudioMeasurements.h`, **not**
+  `*.generated.h`, which collides with UHT naming. Do not rely on this gate until the branch lands.
+- **Audio cue loudness (pending standard):** source-only branch `jennifergalley-loudness` `95f4ea14`
+  establishes Jenny's rule: measure every new or changed cue against the forest ambience bed before
+  shipping it. Add a row to `Simulation/HomesteadAudioLevels.h` with use, source, category, bus and
+  gain; use a named `Gain` constant at every new `PlayEffect` call, never a literal. Run
+  `Scripts\Fetch-Assets.ps1`, install `soundfile`/`pyloudnorm`, then run
+  `python Scripts/Audio/Measure-Loudness.py` to regenerate
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; run
+  `Scripts\Test-Native.ps1` so `HomesteadAudioLevelTests` rejects out-of-band cues or audio files
+  with no registry row. The generated header must remain `HomesteadAudioMeasurements.h`, **not**
+  `*.generated.h`, which collides with UHT naming. Do not rely on this gate until the branch lands.
 - **Blender props into Unreal:** import them in your running editor with `py` (see Props in the
   field notes), not with the headless `Import-Props.ps1`, which drops LODs and collision.
 - **C++ conventions that bite** (unity-build names, C2487/C4458/C4459, forward-declared enums, `UPROPERTY`
@@ -1002,6 +1055,38 @@ Extend it there when play needs a capability; prefer real input over state edits
   vertex colours (`ToFColor(true)`), and `FGeometry::GetLocalSize()` returns `FVector2f`. Font assets: a
   `FontFace` needs `loading_policy` INLINE, and an `FTypefaceEntry` is built with `Emplace_GetRef(name)`
   then `.Font = FFontData(Face)`.
+
+### Seeing every UI (pending UI gallery)
+
+**Jenny approved the parchment/EB Garamond UI theme on 2026-09-30 for the 7:30 AM build.** The
+gallery implementation remains source-only at `jennifergalley-menu-gallery-0930` `fdbd50ac`; do
+not claim gallery coverage until it compiles and runs. Every new UI surface must use the approved
+theme and add a gallery entry. `FHomesteadUIGallery` is a Development-only list of named, deterministic UI
+states. Each state begins from an isolated 10:00 fixture—known pack, 1,000 coins, Energy 80, no
+notices/pickups and no surface open—then shows exactly one book page, settings tab, dialog, shop,
+sign confirmation/refusal, notice, focus hint/outline or HUD state. The coverage check fails if any
+book tab, settings tab or notice style lacks an entry; add one whenever a surface is added.
+
+**Copy review rule:** assume the player knows farming sims. Do not add toasts for obvious outcomes.
+Focus cards show only a name and keyed verbs; details/tooltips show stats, requirements and price
+without rules explanations; Settings show label plus value; refusals are about 4–6 words. Check every
+new player-facing string against this rule before its gallery entry is accepted.
+
+- **Multi-resolution capture:** after integration, run
+  `pwsh -File Scripts\Capture-UiGallery.ps1 [-Ids a,b] [-Res 720p,1080p,1440p,4K] [-Input KBM,Pad]`.
+  Output is `E:\CopilotScratch\<session>\ui-gallery\<stamp>\<res>[-pad]\<id>.png`, plus
+  viewable `view\<id>.jpg`, per-resolution `contact.jpg` and a stamp-level `index.md`. It starts
+  one hidden Development game per resolution/input (about 10 minutes each), refuses to start with
+  two Unreal processes or under 6 GB free, and keeps saves sandboxed through
+  `-HomesteadSmokeTest`. `setup-new-game` owns the screen, so it must run last in `all`.
+- **One hidden route:** `Scripts\Test-Game.ps1 -UIGallery -UIGalleryIds all -UIGalleryInput KBM
+  -Width <n> -Height <n> -OutputDirectory <dir>`. It captures the game window through
+  `FScreenshotRequest` with Slate UI, not the desktop. Never omit `-HomesteadSmokeTest`: without
+  it the run is not save-isolated.
+- **Live PIE:** use `homestead.UIGallery list | <id> | next | prev | all [Pad|KBM]`,
+  `python Scripts\editor_mcp.py gallery <id> [--input Pad] [--wait 6]`, or the McpHelpers
+  `gallery <id> [Pad] [wait]` helper. This mutates the running PIE fixture, so never point it at a
+  real save. Use `shot`; `hshot`/HighResShot omit Slate.
 
 ## 9. Field notes
 

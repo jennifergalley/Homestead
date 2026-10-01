@@ -130,12 +130,12 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         const float CarryDegrees = Tuned >= 0 ? Tuned : Spec.CarryDegrees;
         // The authored saw stroke drives the wrist; the resting carry deviation would skew the blade.
         Carry = CuttingReeds || Hoeing ? 0.0f : Hacking ? RestWristDegrees : FMath::Min(CarryDegrees, RestWristDegrees);
-        // Resting carries that differ from the working grip: the hatchet and knife hang edge-down
-        // (turned about the haft) and the hoe is carried blade-low in front, turned end for end from
+        // Resting carries that differ from the working grip: the hatchet and knife hang edge-down and the
+        // pickaxe point-down (Jenny, 09-29: it rode point-up), turned about the haft; the hoe is carried blade-low in front, turned end for end from
         // how she works it. The turn eases out with the tilt when an authored action takes over.
         FQuat Flip = FQuat::Identity;
         float Slide = 0;
-        if (Spec.Tool == Homestead::Item::Hatchet || Spec.Tool == Homestead::Item::Knife)
+        if (Spec.Tool == Homestead::Item::Hatchet || Spec.Tool == Homestead::Item::Knife || Spec.Tool == Homestead::Item::Pickaxe)
             Flip = FQuat(FVector::ZAxisVector, PI);
         else if (StoneHoe)
         {
@@ -146,7 +146,9 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         // The hoe keeps its carried grip through the tilling clip (hoe_till.py is authored for
         // it), so nothing turns in her hand as she starts or stops. The hatchet keeps its turn
         // too: turned, its edge runs along her knuckles, which is how she swings it.
-        const float TurnWeight = StoneHoe || Spec.Tool == Homestead::Item::Hatchet ? 1.0f : HeldToolTilt;
+        // The pickaxe too: the two-handed strike lays it from both fists regardless.
+        const float TurnWeight = StoneHoe || Spec.Tool == Homestead::Item::Hatchet || Spec.Tool == Homestead::Item::Pickaxe
+            ? 1.0f : HeldToolTilt;
         // hoe_till.py solves her right hand for the imported blade on +Y, so the hoe no longer
         // rolls in her fist as she sets it (that half-turn folded her wrist back on the forearm).
         const FTransform Turn = FTransform(FVector(0, 0, Slide * TurnWeight))

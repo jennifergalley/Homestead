@@ -530,7 +530,13 @@ bool AHomesteadWorld::BuildDecorations(const Homestead::Simulation& Simulation,
             || !Mesh->GetRenderData() || Mesh->GetRenderData()->LODResources.Num() != 1
             || Mesh->GetRenderData()->LODResources[0].GetNumTriangles() != GrassTriangles[Index])
         {
-            UE_LOG(LogHomesteadWorld, Error, TEXT("Admitted authored grass is missing or differs: %s"), *Path);
+            const int32 Lods = Mesh && Mesh->GetRenderData() ? Mesh->GetRenderData()->LODResources.Num() : -1;
+            const int32 Triangles = Lods > 0 ? Mesh->GetRenderData()->LODResources[0].GetNumTriangles() : -1;
+            UE_LOG(LogHomesteadWorld, Error,
+                TEXT("Admitted authored grass is missing or differs: %s mesh=%d slots=%d material=%s lods=%d triangles=%d expected=%d"),
+                *Path, Mesh != nullptr, Mesh ? Mesh->GetStaticMaterials().Num() : -1,
+                Mesh && Mesh->GetMaterial(0) ? *Mesh->GetMaterial(0)->GetPathName() : TEXT("missing"),
+                Lods, Triangles, GrassTriangles[Index]);
             GrassMeshes.Reset();
             return false;
         }

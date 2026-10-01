@@ -22,7 +22,7 @@ def main():
             drawn = " ".join(line["text"] for line in data["drawnToastLines"])
             if data["source"].split() != drawn.split():
                 raise ValueError(f"Draw calls omitted feedback text: {path}")
-            if not data["insideViewport"] or data["overlap"] != result["baseline"]:
+            if not data["insideViewport"] or data["overlap"] != (result["baseline"] and data.get("surface") != "native-notice-card"):
                 raise ValueError(f"Unexpected bounds/intersection: {path}")
             panel = data["toastPanel"]
             if not (0 <= panel["left"] < panel["right"] <= data["viewportWidth"]

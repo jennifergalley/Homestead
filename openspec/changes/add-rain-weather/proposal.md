@@ -2,9 +2,11 @@
 
 ## Why
 
-Jenny playtested a rain day: "I don't see any rain." On a rain day (the second of every three,
-09:00-15:00) the HUD said Rain and the ground got wet, but the sky stayed clear blue with sharp
-shadows, auto-exposure undid the dimmer sun, nothing fell and there was no sound.
+Jenny playtested a rain day: "I don't see any rain." The historical daytime-only schedule reported
+Rain and wet ground while the sky stayed clear blue with sharp shadows, auto-exposure undid the
+dimmer sun, nothing fell and there was no sound. Jenny's 2026-09-30 direction supersedes that
+window: rain occurs at random times through the full day/night cycle, with seasonal weighting,
+reload-stable scheduling and night-rain lighting.
 
 ## What Changes
 
@@ -22,7 +24,9 @@ shadows, auto-exposure undid the dimmer sun, nothing fell and there was no sound
   Ambience setting. It's muffled by a low-pass and quieter indoors (under a building piece's roof or
   any overhead cover).
 - The simulation owns the schedule: `Homestead::RainAmount(hour)` (a drizzle swelling into showers)
-  and `Homestead::Overcast(hour)`, beside `IsRainDay` and `IsRainingAt`.
+  and `Homestead::Overcast(hour)`, beside `IsRainDay` and `IsRainingAt`. Its full-cycle schedule
+  is reload-stable and seasonally weighted; rain/overcast lighting must work at night as well as
+  daylight.
 
 ## Capabilities
 

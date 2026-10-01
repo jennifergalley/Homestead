@@ -15,6 +15,21 @@ agent keeps both current.
 - The current round: [round-2.md](round-2.md) (the farming year and period crafting). Round 1, "Walk
   your estate", is recorded in [round-1.md](round-1.md).
 
+## Product copy and UI principle
+
+Jenny's standing direction (2026-09-30): assume the player is familiar with farming sims and avoid
+explaining mechanics on every screen. Do not toast obvious outcomes. Focus cards contain the name
+and keyed verbs only; detail panes/tooltips contain stats, requirements and price, not rules
+explanations; Settings contain a label and value; refusal reasons stay about 4–6 words. Review all
+new player-facing copy against this rule before it ships. The approved parchment/EB Garamond theme
+does not change this content rule. The forthcoming `realistic-animation` skill and Animation
+Inspector must carry the same concise review standard once they land.
+
+**Control rule (Jenny, 2026-09-30):** E/the interact button only interacts—harvest, plant, pick
+up, open, talk, eat or sleep. Tools act only through click/the gamepad tool button. Never cross
+these paths: E on an unripe crop must not water it. Hold-to-repeat belongs only to tool input.
+Menu's control audit and Props' repeat bindings verify this before delivery.
+
 ## Model, reasoning and implementer slots
 
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
@@ -217,30 +232,47 @@ Integration merge notes:
 - Run the integration check with `Scripts\Test-Native.ps1 -Configuration Release` (about 3 min).
   Debug takes 16-19 min here.
 
-The separate MVP survival line (`mvp-survival`) packages its own build to
-`E:\Repos\HomesteadMVP\Windows`, only for real deliverables, and tells the orchestrator before
-starting.
+**Estate-only delivery (Jenny, 2026-09-30):** `Homestead Estate.lnk` is the only active game
+shortcut. The retired survival MVP is archived at
+`archive/mvp-survival-20260930` (`93612cdf`); Jenny approved deletion of its
+`E:\Repos\HomesteadMVP` package/saves and the retired shortcut backup, leaving the Git tag as the
+only retained MVP archive reference. The retained
+`jennifergalley-mvp-woodland-biome` branch is Water's active Estate Seasons handoff
+(`b19a0ad0`), despite its historical name.
 
 ## Playtest builds (schedule)
 
-Jenny's standing preference. A packaged playtest build is on the **"Homestead Estate"** desktop
-shortcut by **7:30 AM every day** (weekends included) and by **4:00 PM on weekdays**, after her work.
-On weekends, also cut one as soon as features she'd notice land.
+Jenny's standing preference (2026-09-30): three packaged Estate builds every day.
 
-1. The orchestrator triggers the integration session at about **5:30 AM** and **2:00 PM** (its session
-   automation), and tells lanes a build is being cut.
-2. Lanes close their editors (`Stop-MyEditor.ps1`) until the build is done: packaging needs the
-   process slots.
-3. The integration session packages `main` (`Build-Game.ps1 -Package`), runs the packaged suites, and
+| Slot | Freeze | Integration exclusive slot | Shortcut ready |
+| --- | --- | --- | --- |
+| Morning | 4:30 AM | 5:00 AM | 7:30 AM |
+| Afternoon | 1:00 PM | 1:30 PM | 4:00 PM |
+| Evening | 6:00 PM | 6:30 PM | 9:00 PM |
+
+At either freeze, only work that is already **UE-verified and code-reviewed** enters the build;
+everything else waits for the next slot. The first evening build under this policy is October 1,
+2026 (the 9 PM window on September 30 had already passed).
+
+**Before every Shipping build, reclaim dated release space safely:** retain the current
+Estate-shortcut Shipping release, at most its immediately previous Shipping rollback, and a named
+Development reference only while it is needed. Before pruning older dated releases,
+`Playtest-09xx` folders or stale `Build\Windows` staging, verify no process path or shortcut target
+uses them. Do not delete the current shortcut target, live save data, or the one retained rollback.
+
+1. The orchestrator notifies lanes at the freeze; lanes close their editors
+   (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.
+2. The integration session merges admitted `main` work, runs UBT and packaged suites, makes the
+   Shipping acceptance check, and
    retargets the shortcut to its `Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
-   keeping the Homestead icon. It never touches `Homestead.lnk`.
+   keeping the Homestead icon. `Homestead Estate.lnk` is the only active desktop game shortcut.
    **Before retargeting to a new package folder, copy Jenny's saves and settings across:** packaged
    Development builds keep them inside the package (`<package>\SurvivalGame\Saved\SaveGames`, with an
    `Estate\` subfolder, and `Saved\Config`). Copy both from the old package into the new one, or she
    loses her game.
-4. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
+3. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
    orchestrator relays that to Jenny.
-5. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
+4. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
 
 Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.
 This replaces the old "package after every improvement" step of the Interactive Loop.

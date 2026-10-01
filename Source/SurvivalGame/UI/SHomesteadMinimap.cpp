@@ -1,4 +1,5 @@
 #include "SHomesteadMinimap.h"
+#include "HomesteadUITheme.h"
 
 #include "../HomesteadMapComponent.h"
 #include "HomesteadMapPainter.h"
@@ -9,9 +10,19 @@ namespace
 {
 constexpr float MmLogicalRadius = 110.0f;
 constexpr int32 MmRimSegments = 72;
-const FLinearColor MmBezel(0.035f, 0.055f, 0.046f, 0.96f);
+HomesteadUITheme::FThemeColor MmBezel(0.035f, 0.055f, 0.046f, 0.96f);
 FVector2D MmToLocal(HomesteadMap::Vec Value) { return FVector2D(Value.x, Value.y); }
 HomesteadMap::Vec MmToVec(FVector2D Value) { return {Value.X, Value.Y}; }
+}
+// Glyph sizes in HUD units, each with a floor in physical pixels so they still read at 720p
+// (0.667 px per unit there, where an 8.5-unit badge had shrunk to under 6 px).
+namespace MmStyle
+{
+constexpr float NearBadge = 12.5f, NearBadgeMinPx = 11.0f;
+constexpr float FarBadge = 9.5f, FarBadgeMinPx = 9.0f;
+constexpr float BadgeGap = 3.0f;
+constexpr float NorthLetter = 11.0f, NorthLetterMinPx = 10.0f;
+constexpr float Arrow = 11.0f, ArrowMinPx = 10.0f;
 }
 
 void SHomesteadMinimap::Construct(const FArguments& Args)
@@ -85,40 +96,55 @@ int32 SHomesteadMinimap::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
         }
     }
 
-    // Landmarks: in view where they are, otherwise waiting on the rim in their direction.
-    const float Inner = Radius - 13 * U;
-    TArray<TPair<const FHomesteadMapLandmark*, FVector2D>> Near, Far;
+    // Landmarks: in view where they are, otherwise waiting on the rim in their direction. Near ones
+    // come first, closest first, and a badge that would cover one already placed waits its turn.
+    const double PhysicalPerLocal = FMath::Max(0.01f, Geometry.Scale);
+    const auto Legible = [PhysicalPerLocal](float Local, float MinPhysical)
+        { return static_cast<float>(HomesteadMap::AtLeastPhysical(Local, PhysicalPerLocal, MinPhysical)); };
+    const float NearRadius = Legible(MmStyle::NearBadge * U, MmStyle::NearBadgeMinPx);
+    const float FarRadius = Legible(MmStyle::FarBadge * U, MmStyle::FarBadgeMinPx);
+    const float Inner = Radius - FMath::Max(13 * U, NearRadius + 2 * U);
+    struct FPlaced { const FHomesteadMapLandmark* Place; FVector2D At; float Radius; bool bNear; double Order; };
+    TArray<FPlaced> Candidates;
     for (const FHomesteadMapLandmark& Place : Frame.Model->Landmarks)
     {
         const FVector2D Offset = MmToLocal(HomesteadMap::WorldToScreen(View, Place.Position)) - Center;
-        if (Offset.Size() <= Inner) Near.Emplace(&Place, Center + Offset);
-        else Far.Emplace(&Place, Center + MmToLocal(HomesteadMap::ClampToRadius(MmToVec(Offset), Inner)));
+        const bool bNear = Offset.Size() <= Inner;
+        const FVector2D At = bNear ? Center + Offset : Center + MmToLocal(HomesteadMap::ClampToRadius(MmToVec(Offset), Inner));
+        Candidates.Add({&Place, At, bNear ? NearRadius : FarRadius, bNear, (bNear ? 0.0 : 1e12) + Offset.Size()});
     }
-    // Off-crop places share the rim; one that would cover another there waits its turn.
-    TArray<FVector2D> RimTaken;
-    for (const auto& Place : Far)
-    {
-        bool bClear = true;
-        for (const FVector2D& Other : RimTaken) bClear &= FVector2D::Distance(Other, Place.Value) > 17.0f * U;
-        if (!bClear) continue;
-        RimTaken.Add(Place.Value);
-        Paint.Badge(Place.Key->Glyph, Place.Value, 8.5f * U, 0.78f);
-    }
-    for (const auto& Place : Near) Paint.Badge(Place.Key->Glyph, Place.Value, 11.0f * U);
+    Candidates.Sort([](const FPlaced& A, const FPlaced& B) { return A.Order < B.Order; });
+    std::vector<HomesteadMap::Vec> Centers;
+    std::vector<double> Radii;
+    for (const FPlaced& Candidate : Candidates) { Centers.push_back(MmToVec(Candidate.At)); Radii.push_back(Candidate.Radius); }
+    const std::vector<int> Kept = HomesteadMap::SpacedCircles(Centers, Radii, MmStyle::BadgeGap * U);
+    // Far ones draw under near ones, each centred on a whole physical pixel so its ink stays sharp.
+    for (const bool bNearPass : {false, true})
+        for (const int Index : Kept)
+        {
+            const FPlaced& Placed = Candidates[Index];
+            if (Placed.bNear != bNearPass) continue;
+            const FVector2D Snapped(HomesteadMap::SnapToPixel(Placed.At.X, PhysicalPerLocal),
+                HomesteadMap::SnapToPixel(Placed.At.Y, PhysicalPerLocal));
+            Paint.Badge(Placed.Place->Glyph, Snapped, Placed.Radius, Placed.bNear ? 1.0f : 0.82f);
+        }
 
     Paint.Circle(Center, Radius, HomesteadMapPaint::Brass, 2.5f * U, MmRimSegments);
     Paint.Circle(Center, Radius + 4.5f * U, FLinearColor(0, 0, 0, 0.6f), 1.2f * U, MmRimSegments);
 
     // North sits on the rim; it moves only when the map turns with the camera.
-    const FVector2D North = Center + MmToLocal(HomesteadMap::ScreenDirection(View, 0.0)) * (Radius + 1.0f * U);
-    Paint.Disc(North, 10.5f * U, MmBezel, 20);
-    Paint.Circle(North, 10.5f * U, HomesteadMapPaint::Brass, 1.6f * U, 20);
-    const float LetterSize = 10.0f * U;
+    const float LetterSize = Legible(MmStyle::NorthLetter * U, MmStyle::NorthLetterMinPx);
+    const float NorthRadius = FMath::Max(10.5f * U, LetterSize * 1.05f);
+    const FVector2D NorthAt = Center + MmToLocal(HomesteadMap::ScreenDirection(View, 0.0)) * (Radius + 1.0f * U);
+    const FVector2D North(HomesteadMap::SnapToPixel(NorthAt.X, PhysicalPerLocal), HomesteadMap::SnapToPixel(NorthAt.Y, PhysicalPerLocal));
+    Paint.Disc(North, NorthRadius, MmBezel, 20);
+    Paint.Circle(North, NorthRadius, HomesteadMapPaint::Brass, 1.6f * U, 20);
     const FVector2D Letter = HomesteadMapPaint::FPainter::MeasureText(TEXT("N"), LetterSize);
     Paint.Text(TEXT("N"), North - Letter * 0.5f, LetterSize, HomesteadMapPaint::Brass, true, false);
 
     // Her arrow last, always on top at the centre.
-    Paint.PlayerArrow(Center, MmToLocal(HomesteadMap::ScreenDirection(View, Frame.FacingYaw)), 10.0f * U);
+    Paint.PlayerArrow(Center, MmToLocal(HomesteadMap::ScreenDirection(View, Frame.FacingYaw)),
+        Legible(MmStyle::Arrow * U, MmStyle::ArrowMinPx));
     return Paint.GetLayer();
 }
 }

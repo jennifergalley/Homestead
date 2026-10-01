@@ -7,6 +7,7 @@
 #include "Simulation/HomesteadManor.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadFood.h"
 #include "UI/SHomesteadMenu.h"
 #include "UI/SHomesteadShop.h"
 
@@ -57,6 +58,7 @@ using HomesteadControllerBookDetail::RetiredGuidebookPage;
 
 void AHomesteadController::OpenBook(int32 TargetPage)
 {
+    if (RejectPendingGroundSnapAction()) return;
     EndPlacement();
     HoveredHotbarSlot = INDEX_NONE;
     bBookOpen = true;
@@ -143,7 +145,7 @@ void AHomesteadController::NextPage()
 
 void AHomesteadController::PreviousRow()
 {
-    if (!bBookOpen) { if (!CycleBedChoice(-1)) CycleSeedPouch(-1); return; }
+    if (!bBookOpen) { CycleSeedPouch(-1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + Count - 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -152,7 +154,7 @@ void AHomesteadController::PreviousRow()
 
 void AHomesteadController::NextRow()
 {
-    if (!bBookOpen) { if (!CycleBedChoice(1)) CycleSeedPouch(1); return; }
+    if (!bBookOpen) { CycleSeedPouch(1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -213,41 +215,55 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
             const auto Piece = static_cast<Homestead::Piece>(Index);
             if (!Homestead::IsBuildable(Piece)) continue;
             // Activating a plan closes the book and starts a placement preview (BeginPlacement): she
-            // aims it in the world and confirms there, and only then are the materials spent.
-            Result.Add({ Index, Text(Homestead::PieceName(Piece)),
-                FString::Printf(TEXT("Needs: %s\nChoose a spot in the world, then place it. Nothing is spent until you place it."),
-                    *Text(Homestead::PieceRequirements(Piece))), TEXT("Choose a spot to build") });
+            // aims it in the world and confirms there, and only then are the materials spent. The
+            // details list what it takes as the Craft tab does (Jenny 2026-09-30); nothing more.
+            FHomesteadRow Row{ Index, Text(Homestead::PieceName(Piece)), FString(), TEXT("Build") };
+            Row.SubjectId = Index;
+            const Homestead::Inventory Cost = Homestead::PieceCost(Piece);
+            Row.RecipeState.craftable = true;
+            for (int32 Material = 0; Material < Homestead::ItemCount; ++Material)
+            {
+                if (Cost[Material] <= 0) continue;
+                Homestead::RecipeIngredientAssessment Need;
+                Need.item = static_cast<Homestead::Item>(Material);
+                Need.need = Cost[Material];
+                Need.have = Sim.Count(Need.item);
+                Need.met = Need.have >= Need.need;
+                Row.RecipeState.craftable = Row.RecipeState.craftable && Need.met;
+                Row.RecipeState.ingredients.push_back(Need);
+            }
+            Row.HasRecipeState = true;
+            // Dimmed on the grid when she can't afford it yet, like a recipe.
+            Row.IconTint = Row.RecipeState.craftable ? FLinearColor(0.92f, 0.74f, 0.43f) : FLinearColor(0.34f, 0.36f, 0.34f);
+            if (Homestead::PieceNeedsFoundation(Piece)) Row.Conditions.Add(TEXT("Foundation required"));
+            Result.Add(MoveTemp(Row));
         }
-        FHomesteadRow TakeDown{ static_cast<int>(Homestead::Piece::Count), TEXT("Take down"),
-            TEXT("Aim at anything you built and take it apart for its full cost. A chest's contents come with it; "
-                 "a floor must be bare first. In build mode Y / X switches between building and taking down."),
-            TEXT("Choose what to take down") };
+        FHomesteadRow TakeDown{ static_cast<int>(Homestead::Piece::Count), TEXT("Take down"), FString(), TEXT("Take down") };
         TakeDown.Icon = FName(TEXT("hatchet"));
         Result.Add(MoveTemp(TakeDown));
     }
 
     else if (Page == 4)
     {
-        Result.Add({0, TEXT("Save"), TEXT("Write a manual save and remain in Settings.")});
-        Result.Add({1, TEXT("Load latest save"), LatestSaveLabel.IsEmpty()
-            ? FString(TEXT("Resume the newest valid manual or automatic save."))
-            : FString::Printf(TEXT("Resume the newest valid manual or automatic save: %s."), *LatestSaveLabel)});
+        Result.Add({0, TEXT("Save"), FString()});
+        Result.Add({1, TEXT("Load latest save"), LatestSaveLabel});
         const FString Speed = State().dayMinutes >= 119 ? TEXT("Leisurely") : State().dayMinutes <= 31 ? TEXT("Fast") : TEXT("Balanced");
-        Result.Add({2, TEXT("Game speed: ") + Speed, TEXT("Leisurely, Balanced, or Fast.")});
-        Result.Add({3, FString::Printf(TEXT("Camera sensitivity: %.1f"), Sensitivity), TEXT("Cycle a comfortable turn speed.")});
-        Result.Add({4, FString::Printf(TEXT("Invert camera Y: %s"), bInvertY ? TEXT("On") : TEXT("Off")), TEXT("Change vertical look direction.")});
-        Result.Add({16, FString::Printf(TEXT("Overall volume: %d%%"), FMath::RoundToInt(MasterVolume * 100)), TEXT("Scales every sound in the game.")});
-        Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), TEXT("Music playback level.")});
-        Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), TEXT("Wind, woodland and creek ambience.")});
-        Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), TEXT("Footsteps, gathering, crafting, and interface sounds.")});
-        Result.Add({8, TEXT("Start a new woodland"), TEXT("Create a new seed after confirmation. Cancel keeps your current woodland. This build uses a new test-save version.")});
-        Result.Add({9, TEXT("Quit game"), TEXT("Choose Save & Quit or Quit without Saving.")});
+        Result.Add({2, TEXT("Game speed: ") + Speed, FString()});
+        Result.Add({3, FString::Printf(TEXT("Camera sensitivity: %.1f"), Sensitivity), FString()});
+        Result.Add({4, FString::Printf(TEXT("Invert camera Y: %s"), bInvertY ? TEXT("On") : TEXT("Off")), FString()});
+        Result.Add({16, FString::Printf(TEXT("Overall volume: %d%%"), FMath::RoundToInt(MasterVolume * 100)), FString()});
+        Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), FString()});
+        Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), FString()});
+        Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), FString()});
+        Result.Add({8, TEXT("Start a new woodland"), FString()});
+        Result.Add({9, TEXT("Quit game"), FString()});
         if (UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
         {
             float Normalized = 0, Scale = 100, Minimum = 0, Maximum = 100;
             Settings->GetResolutionScaleInformationEx(Normalized, Scale, Minimum, Maximum);
-            Result.Add({10, FString::Printf(TEXT("3D resolution scale: %.0f%%"), Scale),
-                TEXT("Cycle 100 / 85 / 70 percent. UI stays sharp; TSR upscales the scene.")});
+            // An unset scale reads 0: the engine's own default screen percentage (cycling goes to 100 from it).
+            Result.Add({10, Scale > 0 ? FString::Printf(TEXT("3D resolution scale: %.0f%%"), Scale) : FString(TEXT("3D resolution scale: Automatic")),
+                TEXT("Lower is faster; the UI stays sharp.")});
             const auto* VSync = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VSync"));
             const bool Requested = Settings->IsVSyncEnabled();
             FString Label = FString::Printf(TEXT("Vertical sync: %s"), Requested ? TEXT("On") : TEXT("Off"));
@@ -256,32 +272,36 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
                 Label += FString::Printf(TEXT(" | active %s (override)"), VSync->GetInt() ? TEXT("On") : TEXT("Off"));
             else if ((VSync->GetFlags() & ECVF_SetByMask) > ECVF_SetByGameSetting)
                 Label += TEXT(" (engine override)");
-            Result.Add({11, Label, TEXT("May reduce tearing, but can add input delay. Does not fix every flicker.")});
+            Result.Add({11, Label, TEXT("Less tearing, a little more input delay.")});
         }
         Result.Add({12, FString::Printf(TEXT("Autosave: %s"), bAutosaveEnabled ? TEXT("On") : TEXT("Off")),
-            TEXT("Periodic rotating saves. Recovery checkpoints remain separate.")});
+            FString()});
         Result.Add({13, FString::Printf(TEXT("Autosave interval: %d minutes"), AutosaveMinutes),
-            bAutosaveEnabled ? TEXT("Counts only unpaused gameplay time.") : TEXT("Stored interval; Autosave is Off.")});
+            FString()});
         if (Map)
             Result.Add({17, FString::Printf(TEXT("Minimap: %s"), Map->RotatesWithCamera() ? TEXT("turns with your view") : TEXT("north up")),
-                TEXT("North up keeps the map still; turning with your view keeps ahead at the top, and the N marker shows north.")});
+                FString()});
         Result.Add({15, TEXT("Show action hints again"),
-            FString::Printf(TEXT("Each floating action hint retires after you've done that action %d times. This brings them all back."), HintRetireUses)});
+            FString()});
         if (!PreviewLabel().IsEmpty())
             Result.Add({14, PreviewLabel(), TEXT("This preview uses isolated saves.")});
     }
     else if (Page == 7)
     {
-        Result.Add({0, TEXT("Map"), TEXT("The estate and the country around it.")});
+        Result.Add({0, TEXT("Map"), FString()});
     }
     else if (Page == 6)
     {
-        Result.Add({0, FString::Printf(TEXT("Hair: %s"), HomesteadLook::MetaHairName(Appearance.MetaHair)), TEXT("MetaHuman hairstyles: long, bobbed, tied back, braided or cropped.")});
-        Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), TEXT("Chestnut, dark brown, black, copper, or blonde. Hair color is independent of hairstyle.")});
-        Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)),         TEXT("Natural, warm, deep or light. Her face and body change together.")});
-                Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), TEXT("Blue, green, hazel or grey. The view moves close to her face while you choose.")});
-        Result.Add({4, FString::Printf(TEXT("Tunic dye: %s"), HomesteadLook::TunicColorName(Appearance.TunicColor)), TEXT("A color choice for the current original outfit.")});
-        Result.Add({5, FString::Printf(TEXT("Outfit: %s"), HomesteadLook::OutfitName(Appearance.Outfit)), TEXT("Cosmetic linen choices.")});
+        Result.Add({0, FString::Printf(TEXT("Hair: %s"), HomesteadLook::MetaHairName(Appearance.MetaHair)), FString()});
+        Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), FString()});
+        Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)),         FString()});
+                Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), FString()});
+        Result.Add({4, FString::Printf(TEXT("Tunic dye: %s"), HomesteadLook::TunicColorName(Appearance.TunicColor)), FString()});
+        Result.Add({5, FString::Printf(TEXT("Outfit: %s"), HomesteadLook::OutfitName(Appearance.Outfit)), FString()});
+        // Only once she owns it; hiding it is a look, and she can still carry as much.
+        if (State().leatherBackpack)
+            Result.Add({6, FString::Printf(TEXT("Backpack: %s"), State().backpackShown ? TEXT("Shown") : TEXT("Hidden")),
+                FString()});
     }
     else
     {
@@ -314,13 +334,11 @@ FString AHomesteadController::BookSummary() const
 {
     switch (Page)
     {
-    case 0: return ActiveChestId.IsSet()
-        ? TEXT("Move whole stacks between this chest and your pack.")
-        : TEXT("Carried items and equipped clothing.");
+    case 0: return FString();
     case 1: return FString();
-    case 2: return TEXT("Choose a plan to start placing it. Materials are spent when you place it.");
-    case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. She changes as you choose.")
-        : TEXT("Click a swatch or style to wear it. She changes as you choose.");
+    case 2: return FString();
+    case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. Right stick: look around her.")
+        : TEXT("Click a swatch or style to wear it. Drag or WASD: look around her. Wheel: zoom.");
 
     default: return {};
     }
@@ -371,7 +389,7 @@ int32 AHomesteadController::AppearanceChoiceCount(int32 Id)
     case 0: return HomesteadLook::MetaHairCount;
     case 1: return HomesteadLook::HairColorCount;
     case 2: case 3: case 4: return 4;
-    case 5: return 2;
+    case 5: case 6: return 2;
     default: return 0;
     }
 }
@@ -386,6 +404,7 @@ int32 AHomesteadController::AppearanceChoice(int32 Id) const
     case 3: return Appearance.EyeColor;
     case 4: return Appearance.TunicColor;
     case 5: return Appearance.Outfit;
+    case 6: return State().backpackShown ? 0 : 1;
     default: return 0;
     }
 }
@@ -398,12 +417,21 @@ void AHomesteadController::MenuFocusAppearance(int32 Id)
 
 void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (!bBookOpen || Page != 6 || bMenuSaveInProgress) return;
     if (IsFailed()) { Notify(TEXT("Retry a checkpoint before changing possessions or appearance."), true); return; }
     const int32 Count = AppearanceChoiceCount(Id);
     if (Count <= 0 || Value < 0 || Value >= Count) return;
     MenuFocusAppearance(Id);
     if (AppearanceChoice(Id) == Value) return;
+    if (Id == 6)
+    {
+        // Saved with the game (Simulation/HomesteadBackpack.h); the character picks it up each tick.
+        const auto Result = Sim.SetBackpackShown(Value == 0);
+        if (!Result) Notify(Result);
+        else PlayEffect(UIClick, 0.08f);
+        return;
+    }
     FHomesteadAppearance Next = Appearance;
     switch (Id)
     {
@@ -429,98 +457,54 @@ void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
     PlayEffect(UIClick, 0.08f);
 }
 
-std::vector<Homestead::SleepOption> AHomesteadController::BedSleepOptions() const
+std::optional<Homestead::SleepOption> AHomesteadController::BedSleepOffer() const
 {
-    return Homestead::SleepOptions(State().hour, State().energy);
-}
-
-int32 AHomesteadController::BedSleepIndex() const
-{
-    if (Focus != EFocus::Bed || FocusId != BedChoiceBed) return 0;
-    const auto Options = BedSleepOptions();
-    for (int32 Index = 0; Index < static_cast<int32>(Options.size()); ++Index)
-        if (Options[Index].choice == BedChoice) return Index;
-    return 0;
+    return Homestead::BedSleepOption(State().hour, State().energy);
 }
 
 double AHomesteadController::BedSleepHours() const
 {
-    const auto Options = BedSleepOptions();
-    return Options.empty() ? 0.0 : Options[BedSleepIndex()].hours;
-}
-
-FString AHomesteadController::SleepOptionLabel(const Homestead::SleepOption& Option)
-{
-    switch (Option.choice)
-    {
-    case Homestead::SleepChoice::UntilMorning: return TEXT("Sleep until morning (wake ") + SleepClockText(Option.wakeHour) + TEXT(")");
-    case Homestead::SleepChoice::UntilRested: return TEXT("Sleep until rested (wake ~") + SleepClockText(Option.wakeHour) + TEXT(")");
-    default: return FString::Printf(TEXT("Nap %g h (wake "), Option.hours) + SleepClockText(Option.wakeHour) + TEXT(")");
-    }
-}
-
-bool AHomesteadController::CycleBedChoice(int32 Delta)
-{
-    if (bBookOpen || bPlanning || IsFailed() || Focus != EFocus::Bed) return false;
-    const auto Options = BedSleepOptions();
-    if (Options.size() < 2) return true;
-    const int32 Count = static_cast<int32>(Options.size());
-    const int32 Index = (BedSleepIndex() + Delta % Count + Count) % Count;
-    BedChoice = Options[Index].choice;
-    BedChoiceBed = FocusId;
-    PlayEffect(UIClick, 0.06f);
-    return true;
+    const auto Offer = BedSleepOffer();
+    return Offer ? Offer->hours : 0.0;
 }
 
 void AHomesteadController::SleepAtBed(Homestead::Point Position)
 {
-    Notify(SleepInBed(Position));
-    if (!IsFailed())
+    if (RejectPendingGroundSnapAction()) return;
+    const Homestead::Result Result = SleepInBed(Position);
+    Notify(Result);
+    if (Result.ok)
     {
         if (bAutosaveEnabled && SaveSlot(FString::Printf(TEXT("Homestead_Auto_%d"), AutoSaveIndex), true))
             AutoSaveIndex = (AutoSaveIndex + 1) % 3;
-        if (Sim.IsSheltered(Position) && State().hunger >= 35)
+        // The woodland's recovery checkpoint wants her fed; the estate has no hunger, so no gate there.
+        if (Sim.IsSheltered(Position) && (State().fixedEstate || State().hunger >= 35))
             SaveSlot(TEXT("Homestead_Recovery"), true);
     }
 }
 
-void AHomesteadController::HomesteadSleep(int32 Option)
+void AHomesteadController::HomesteadSleep()
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (bBookOpen || bPlanning || IsFailed()) return;
     UpdateFocus();
     if (Focus != EFocus::Bed) { Notify(TEXT("Stand beside a bed to sleep."), true); return; }
-    const auto Options = BedSleepOptions();
-    if (Option >= 0 && Option < static_cast<int32>(Options.size())) { BedChoice = Options[Option].choice; BedChoiceBed = FocusId; }
     SleepAtBed(PlayerPoint());
-}
-
-void AHomesteadController::HomesteadBedChoice(int32 Delta)
-{
-    UpdateFocus();
-    CycleBedChoice(Delta);
 }
 
 Homestead::Result AHomesteadController::SleepInBed(Homestead::Point Position)
 {
-    const auto Options = BedSleepOptions();
-    if (Options.empty()) return {false, "There's nothing to sleep on here.", Homestead::ResultCode::Unavailable, Sim.GetRevision()};
-    const Homestead::SleepOption Option = Options[BedSleepIndex()];
-    const double Hours = Option.hours;
-    // Sleep takes at most twelve hours at a time; an early night from 18:00 is two halves.
-    Homestead::Result Slept = Sim.Sleep(Hours > 12.0 ? Hours * 0.5 : Hours, Position);
-    if (Slept && Hours > 12.0) Slept = Sim.Sleep(Hours * 0.5, Position);
-    BedChoiceBed = INDEX_NONE;
+    const auto Offer = BedSleepOffer();
+    if (!Offer) return {false, State().energy < Homestead::Food::FullEnergyAt ? "Morning is nearly here." : "Not tired.",
+        Homestead::ResultCode::Unavailable, Sim.GetRevision()};
+    const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ZeroVector;
+    const Homestead::Point Facing{Forward.X, Forward.Y};
+    Homestead::Result Slept = Sim.Sleep(Offer->hours, Position, Facing,
+        Offer->hours < Homestead::Exertion::MinRestHours);
     if (!Slept) return Slept;
-    const FString Now = SleepClockText(State().hour);
-    FString Message;
-    if (Option.choice == Homestead::SleepChoice::Nap)
-        Message = TEXT("You nap for an hour and get up at ") + Now + TEXT(".");
-    else if (Option.choice == Homestead::SleepChoice::UntilMorning)
-        Message = State().energy >= 99.0
-            ? TEXT("You wake at first light, rested. Your garden and fires carried on through the night.")
-            : TEXT("You wake at first light, though still a little tired. An earlier night would leave you fully rested.");
-    else
-        Message = TEXT("You wake rested at ") + Now + TEXT(". Your garden and fires carried on while you slept.");
+    const FString Message = State().energy >= 99.0
+        ? TEXT("You wake rested at ") + SleepClockText(State().hour) + TEXT(".")
+        : TEXT("Morning comes, but you're still tired.");
     Slept.message = TCHAR_TO_UTF8(*Message);
     return Slept;
 }

@@ -78,6 +78,13 @@ public:
     float WalkClipSpeed() const { return bMetaHumanActive ? 209.9f : 120.0f; }
     float SprintClipSpeed() const { return bMetaHumanActive ? 524.8f : 300.0f; }
     void SetAppearancePreview(bool Enabled);
+    // Shows the leather backpack on her back (the controller mirrors Simulation state each tick).
+    void SetBackpackShown(bool bShown);
+    // Whether Props' backpack mesh is imported (the upgrade and its toggle work without it).
+    bool HasBackpackMesh() const { return Backpack != nullptr; }
+    // The Appearance page's own camera controls: orbit her (degrees) and zoom (+ closer, in wheel steps).
+    void OrbitAppearance(float Yaw, float Pitch);
+    void ZoomAppearance(float Steps);
     // The view the appearance preview returns to (a spawn placed while it was open).
     void SetRestingViewRotation(const FRotator& Rotation) { SavedViewRotation = Rotation; }
     // While previewing appearance, bring the camera in close on her face (eye choices).
@@ -94,8 +101,8 @@ public:
     bool IsSprinting() const { return bSprintActive; }
     // Sprint is a toggle (Shift / L3): on until pressed again, a load or new game, or she tires.
     bool IsSprintOn() const { return bSprintOn; }
-    // Sprint itself costs nothing; at or below this Energy (Simulation::CanSprint) she can't sprint.
-    static constexpr double SprintEnergyFloor = 10.0;
+    // Sprint itself costs nothing; below this Energy (Simulation::CanSprint) she can't sprint.
+    static constexpr double SprintEnergyFloor = 25.0;
     // L3 (on press) and a tap of Shift (on release; AHomesteadController::TrackSprintShift) flip it.
     void RequestSprintToggle();
     // Drops out of sprint speed for now (work, menus, falling) but leaves the toggle on.
@@ -221,9 +228,18 @@ public:
     // The billhook (and the scythe, if its mowing clip is missing) reuses the hack with its own
     // held prop; false when that prop is missing.
     bool PlayMacheteHack(Homestead::Point Target);
-    bool PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool);
+    // Radius (cm, the target's reach in front of its centre) walks or steps her into the stance where
+    // the blade crosses the stems (HackCut*) on the target's near side; below 0 she only turns to it.
+    bool PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool, float Radius = -1.0f);
     // Seconds into the hack when the second cut lands and the plant is cleared.
     static constexpr float MacheteClearSeconds = 1.25f;
+    // Where the blade's middle crosses the stems as the second cut lands (machete_hack.py HAND_R
+    // 'strike2' wrist (-13, 38, 86) plus about 28 cm down the blade along its (-0.5, 0.6, -0.6)
+    // direction): cm to her left and forward of her root. Estimated from the keys; check in PIE.
+    static constexpr float HackCutLeft = -27.0f;
+    static constexpr float HackCutForward = 55.0f;
+    // How much of the target's radius the cut reaches into before the blade meets stems.
+    static constexpr float HackBite = 0.4f;
     UAnimSequence* GetMacheteAnimation() const { return MacheteAnimation; }
     // Two-handed felling with the hatchet (MetaHuman only): Strokes cuts, then she recovers to the
     // carry. False when the clip or the held hatchet is unavailable, so the caller uses PlayClear.
@@ -388,6 +404,10 @@ private:
     UPROPERTY() TObjectPtr<UStaticMesh> HarvestProduceMesh;
     // The forage pouch on her right hip (shown on the MetaHuman heroine).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> ForagePouch;
+    // The leather backpack on her back when she owns it and shows it (SetBackpackShown); null until
+    // Props' mesh exists.
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Backpack;
+    bool bBackpackShown = false;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CordBelt;
     // The pouch hangs from the belt and lies on the outside of her right thigh, so it swings with
     // the thigh (forward and back about the belt, out and in about the hip) once her pose is final.
@@ -485,6 +505,8 @@ private:
     FVector2D FellApproachTo = FVector2D::ZeroVector;
     float FellApproachYaw = 0, FellApproachTime = 0;
     int32 FellApproachStrokes = 0;
+    // The approach ends in the hack (the billhook) rather than a felling-timed swing.
+    bool bApproachHack = false;
     void UpdateFellApproach(float DeltaSeconds);
     // The Blender machete, held in the right hand's closed grip (pivot at the grip centre).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> HeldMachete;
@@ -532,6 +554,10 @@ private:
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> MetaHumanGarments;
     // Wearable definition per MetaHuman garment slot (-1 when nothing is worn there).
     TArray<int32> MetaHumanWorn, PendingMetaHumanWorn;
+    // The equipped linen tunic's dye (INDEX_NONE when none): on the MetaHuman the tunic is the
+    // homespun tank top and shorts, tinted to match.
+    int32 MetaHumanTunicDye = INDEX_NONE, PendingMetaHumanTunicDye = INDEX_NONE;
+    void ApplyMetaHumanTunicDye();
     // How far soled footwear lifts her off the ground, in cm.
     float FootwearLift = 0;
     void ApplyMetaHumanGarments();
@@ -546,6 +572,16 @@ private:
     bool bHeroineAssetsValid = false;
     bool bAppearancePreview = false;
     bool bAppearanceFaceFocus = false;
+    // The preview's full-length arm (ZoomAppearance), and the chase arm's collision setting to give back.
+    float AppearanceArm = 280.0f;
+    bool bSavedArmCollision = true;
+    // Appearance camera limits (cm, degrees): full length at the default, her face at the closest.
+    static constexpr float AppearanceArmDefault = 280.0f;
+    static constexpr float AppearanceArmMin = 90.0f;
+    static constexpr float AppearanceArmMax = 340.0f;
+    static constexpr float AppearanceZoomStep = 30.0f;
+    static constexpr float AppearancePitchMin = -40.0f;
+    static constexpr float AppearancePitchMax = 25.0f;
     float FaceFocusBlend = 0.0f;
     float FaceFocusBodyArm = 280.0f;
     TOptional<float> SavedNearClip;

@@ -39,10 +39,13 @@ hints or toasts themselves.
 2. **Scale:** wrap the content in `SHomesteadHudScale` so one Slate unit is one Canvas HUD unit
    (the vitals and hotbar do this). Then positions and sizes in your constants mean the same thing
    as the calendar's, at 1080p and at 4K.
-3. **Style:** colours from `UI/HomesteadPalette.h`; the widget's own shades, sizes and fonts in a
-   named `<Name>Style` namespace (not an anonymous one, which can clash in unity builds). Fonts are
-   `FCoreStyle::GetDefaultFontStyle("Bold"|"Regular", size)`; the period display face is used for
-   titles only (`SHomesteadArrival`).
+3. **Style:** Jenny's standing UI theme is parchment plus EB Garamond. Use
+   `HomesteadUITheme::Font()` (EB Garamond, ×1.12) for text and `KeyFont()` for crisp sans key
+   glyphs. Theme colours are `FThemeColor` declarations in a named namespace and `inline` in
+   headers, never local variables; wrap inline literals with
+   `HomesteadUITheme::Themed(FLinearColor)`. Preserve WCAG AA (4.5:1) contrast on parchment, and
+   keep Canvas-HUD serif text at least 15 font units at 720p. Widget-specific layout/sizes still
+   live in a named `<Name>Style` namespace (not an anonymous one, which can clash in unity builds).
 4. **Data:** read the controller in `*_Lambda` attributes (`Text_Lambda`, `ColorAndOpacity_Lambda`,
    `Visibility_Lambda`, `WidthOverride_Lambda`). Lambdas run every paint: read a value or two from
    `Controller->State()` or a small controller accessor; don't rebuild lists or format large
@@ -61,6 +64,8 @@ hints or toasts themselves.
    Canvas element must avoid yours, have `AHomesteadHUD` read your `LogicalBox` (as it does for
    the vitals).
 7. **Gamepad and 4K:** match the existing text sizes (hotbar counts 13 pt, the purse 20 pt, in HUD\n   units), and don't rely on hover: she may be on a controller.
+8. **Gallery:** add an `Add(...)` entry in `HomesteadUIGallery.cpp` for every new surface. The
+   gallery coverage check must fail when a book page, settings tab or notice style has no entry.
 
 ## Verify
 

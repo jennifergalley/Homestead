@@ -57,7 +57,46 @@ void SHomesteadMenu::OpenTravelPrompt(Homestead::TravelDestination Destination)
     PopupAnchor = MapView ? MapView->GetCachedGeometry().LocalToAbsolute(MapView->GetCachedGeometry().GetLocalSize() * 0.5f
         - FVector2D(200, 110)) : FVector2D::ZeroVector;
     SetDialog(EDialog::Context);
+    bTravelPrompt = true;
     DialogSelection = 0;
+    bFocusPending = true;
+}
+
+void SHomesteadMenu::OpenSignTravelPrompt(const FString& SignWords, const TArray<Homestead::TravelDestination>& Destinations)
+{
+    if (!Controller.IsValid() || Dialog != EDialog::None || Destinations.IsEmpty()) return;
+    // A single way that can't be walked refuses with the reason, as the Map tab does, and changes nothing.
+    if (Destinations.Num() == 1 && !Controller->MenuPlanTravel(Destinations[0]).ok)
+    {
+        Controller->MenuTravel(Destinations[0], Controller->Simulation().GetRevision());
+        return;
+    }
+    const uint64 Revision = Controller->Simulation().GetRevision();
+    PopupOptions.Reset();
+    PopupTitle = FString::Printf(TEXT("The sign reads \"%s\""), *SignWords);
+    TArray<FString> Lines;
+    for (const auto Destination : Destinations)
+    {
+        const Homestead::TravelPlan Plan = Controller->MenuPlanTravel(Destination);
+        const FString Where = UTF8_TO_TCHAR(Homestead::TravelDestinationName(Destination));
+        if (Plan.ok) Lines.Add(UTF8_TO_TCHAR(Plan.summary.c_str()));
+        PopupOptions.Add({[Where, Plan]()
+            {
+                return Plan.ok ? FString::Printf(TEXT("Walk to %s (%s)"), *Where, UTF8_TO_TCHAR(Homestead::FormatWalkDuration(Plan.gameHours).c_str()))
+                    : FString::Printf(TEXT("Walk to %s"), *Where);
+            },
+            [this, Destination, Revision]() { Controller->MenuTravel(Destination, Revision); },
+            [Plan]() { return Plan.ok; }});
+    }
+    PopupOptions.Add({[]() { return FString(TEXT("Stay here")); }, nullptr, nullptr});
+    PopupBody = FString::Join(Lines, TEXT("\n\n"));
+    bCenterPopup = true;
+    SetDialog(EDialog::Context);
+    bTravelPrompt = true;
+    // Start on the first way she can walk.
+    DialogSelection = 0;
+    for (int32 Index = 0; Index < PopupOptions.Num(); ++Index)
+        if (!PopupOptions[Index].Enabled || PopupOptions[Index].Enabled()) { DialogSelection = Index; break; }
     bFocusPending = true;
 }
 

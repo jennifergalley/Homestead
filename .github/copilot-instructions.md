@@ -30,14 +30,15 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
   sends `[ready]` instead; see "Delivering lane work" in `docs/handoff/README.md`), then report what
   to try. Don't batch several improvements into one delivery. Packaging now follows the playtest
   schedule below rather than every improvement.
-- **Playtest builds on a schedule** (Jenny, standing preference). A packaged build must be on the
-  "Homestead Estate" desktop shortcut by **7:30 AM every day** (weekends too) and by **4:00 PM on
-  weekdays**, after her work. On weekends, also cut one as soon as features she'd notice land. The
-  orchestrator triggers the integration session at about 5:30 AM and 2:00 PM. It packages `main`,
-  runs the packaged suites, retargets the shortcut (keeping the Homestead icon) and reports
-  `[playtest] ready @ <sha>` with what's new and what to try. Lanes close their editors while a
-  build is being cut. If packaging or the suites fail, the last good build stays on the shortcut.
-  **`main` must stay playable:** push only verified work.
+- **Playtest builds on a schedule** (Jenny, 2026-09-30). Three Estate builds are cut every day:
+  **morning** is on the "Homestead Estate" shortcut by **7:30 AM** (freeze 4:30 AM; Integration
+  gets its exclusive slot at 5:00 AM), **afternoon** by **4:00 PM** (freeze 1:00 PM; Integration
+  slot at 1:30 PM), and **evening** by **9:00 PM** (freeze 6:00 PM; Integration slot at 6:30 PM).
+  At each freeze, only work already UE-verified and code-reviewed is admitted; everything else
+  waits for the next build. Integration merges, runs UBT/suites, makes the Shipping acceptance
+  check and retargets the shortcut while preserving its icon. Lanes close editors during the build.
+  If verification fails, the last good build stays on the shortcut. **`main` must stay playable:**
+  push only verified work.
 - **When Jenny pauses development to play,** every session stops launching editors and builds until
   she says to resume. Finish or park your current step, close your editor, and wait by ending your
   turn (see "Waiting means ending your turn" below).
@@ -61,8 +62,7 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
 - **Only the integration session runs UAT** during multi-session rounds: `Scripts\Build-Game.ps1 -Package`
   or `-PackageOnly`, `RunUAT BuildCookRun`, and packaged-game tests. Several worktrees packaging at
   once fought over the machine-wide build mutex and the shared Zen server, and each package costs
-  20-40 minutes of CPU, disk and VRAM. The separate `mvp-survival` line packages its own
-  deliverables to `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
+  20-40 minutes of CPU, disk and VRAM.
 - If the packaged game is running from `Build\Windows` when you (the integration session) need to
   repackage, close it and build in place. She is only experimenting in it for now and prefers
   getting the newest build.
@@ -133,8 +133,13 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   worktree's editor.
 - Close your editor before `git pull`/`rebase`, and before building your editor module
   (`Scripts\Stop-MyEditor.ps1` closes only this worktree's editor).
-- Never retarget or overwrite `Desktop\Homestead.lnk` or anything under `E:\Repos\HomesteadMVP\`.
-  Never merge `mvp-survival` with `main`.
+- **Estate-only delivery (Jenny, 2026-09-30):** `Homestead Estate.lnk` is the only active game
+  shortcut and is retargeted by Integration only after its save-safety and package checks. The
+  survival MVP was retired at tag `archive/mvp-survival-20260930` (`93612cdf`); its old package,
+  saves and desktop shortcut backup were deleted with Jenny's approval, leaving the Git tag as
+  the only MVP archive reference. The
+  `jennifergalley-mvp-woodland-biome` branch is **not** the retired line: it is Water's active
+  Estate Seasons handoff (`b19a0ad0`).
 - No worktrees, builds, renders, videos or big binaries on C:. See the user-level disk rules.
 
 ## Code practices (owned by the Architecture Agent)

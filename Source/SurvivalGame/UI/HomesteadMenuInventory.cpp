@@ -1,5 +1,7 @@
 #include "../HomesteadController.h"
 #include "../HomesteadCharacter.h"
+#include "../Simulation/HomesteadChests.h"
+#include "../Simulation/HomesteadFood.h"
 #include "../Simulation/HomesteadItems.h"
 #include "../Simulation/HomesteadPail.h"
 #include "../Simulation/HomesteadPackRow.h"
@@ -8,7 +10,7 @@ namespace
 {
 bool IsFood(Homestead::Item Item) { return Homestead::IsEdible(Item); }
 FString FromUtf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
-bool WearableRow(const Homestead::WearableInstance& Instance, bool Storage, int Chest, FHomesteadRow& Row)
+bool WearableRow(const Homestead::State& State, const Homestead::WearableInstance& Instance, bool Storage, int Chest, FHomesteadRow& Row)
 {
     const auto* Info = Homestead::GetWearableDefinition(Instance.definition);
     if (!Info) return false;
@@ -21,7 +23,7 @@ bool WearableRow(const Homestead::WearableInstance& Instance, bool Storage, int 
     Row.Quantity = 1;
     Row.Name = Row.Label = FromUtf8(Info->name);
     Row.Location = Row.ContainerId < 0 ? TEXT("Wearing") : Row.ContainerId == 0 ? TEXT("Carried")
-        : FString::Printf(TEXT("Chest %d"), Row.ContainerId);
+        : FromUtf8(Homestead::Chests::DisplayName(State, Row.ContainerId).c_str());
     Row.Detail = FromUtf8(Homestead::WearableDescription(Instance.definition));
     if (Info->dyeable)
     {
@@ -55,11 +57,11 @@ void AHomesteadController::MenuInventoryView(int32 View)
 FString AHomesteadController::MenuInventorySummary() const
 {
     if (ActiveChestId.IsSet())
-        return FString::Printf(TEXT("Chest %d: %d / %d  |  Pack: %d / %d"),
-            ActiveChestId.GetValue(), Sim.ChestUsedCapacity(ActiveChestId.GetValue()), Homestead::ChestCapacity,
-            Sim.UsedCapacity(), Homestead::InventoryCapacity);
+        return FString::Printf(TEXT("%s: %d / %d  |  Pack: %d / %d"),
+            *ChestDisplayName(ActiveChestId.GetValue()), Sim.ChestUsedCapacity(ActiveChestId.GetValue()), Homestead::ChestCapacity,
+            Sim.UsedCapacity(), Sim.PackCapacity());
     if (MenuInventoryViewIndex == 2) return TEXT("Equipped clothing");
-    return FString::Printf(TEXT("Your pack  |  %d / %d units"), Sim.UsedCapacity(), Homestead::InventoryCapacity);
+    return FString::Printf(TEXT("Your pack  |  %d / %d units"), Sim.UsedCapacity(), Sim.PackCapacity());
 }
 
 TArray<FHomesteadRow> AHomesteadController::MenuRows() const
@@ -83,7 +85,7 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
             if (Instance.owner == Homestead::WearableOwner::Equipped)
             {
                 FHomesteadRow Row;
-                if (WearableRow(Instance, Storage, Chest, Row)) Result.Add(MoveTemp(Row));
+                if (WearableRow(State(), Instance, Storage, Chest, Row)) Result.Add(MoveTemp(Row));
             }
         return Result;
     }
@@ -113,7 +115,7 @@ bool AHomesteadController::MenuEntryRow(const Homestead::LayoutEntry& Entry, int
     if (Entry.wearableId)
     {
         const auto* Instance = Sim.GetWearable(Entry.wearableId);
-        if (!Instance || !WearableRow(*Instance, Storage, Chest, Row)) return false;
+        if (!Instance || !WearableRow(State(), *Instance, Storage, Chest, Row)) return false;
     }
     else
     {
@@ -126,15 +128,15 @@ bool AHomesteadController::MenuEntryRow(const Homestead::LayoutEntry& Entry, int
         Row.DestinationId = Storage ? (CurrentContainer == 0 ? Chest : 0) : -1;
         Row.Quantity = Entry.quantity;
         Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
-        Row.Location = CurrentContainer == 0 ? TEXT("Carried") : FString::Printf(TEXT("Chest %d"), CurrentContainer);
-        // Hover text: where and how many, what it is and (for food) the Energy one restores, from
-        // the catalogue (Homestead::FoodEnergyLabel). The internal stack id is not shown.
-        const std::string Energy = Homestead::FoodEnergyLabel(Entry.item);
-        const FString Use = !IsFood(Entry.item) ? FString(TEXT("Used in the world or in recipes."))
-            : Energy.empty() ? FString(TEXT("Food. Eat one from your pack."))
-            : FString::Printf(TEXT("Food: %s each. Eat one from your pack."), *FromUtf8(Energy.c_str()));
-        Row.Detail = FString::Printf(TEXT("%s: %d\n\n%s\n%s"), *Row.Location, Entry.quantity,
-            *FromUtf8(Homestead::ItemDescription(Entry.item)), *Use);
+        Row.Location = CurrentContainer == 0 ? FString(TEXT("Carried")) : ChestDisplayName(CurrentContainer);
+        // Hover text: where and how many, what it is and (for food) what eating one now would do: its
+        // Energy each, and for a Meal on the estate until when she'd be Well fed (Homestead::Food::
+        // PackUseText; the book pauses the clock). Stats only, no how-to (Jenny 2026-09-30); the
+        // internal stack id is not shown.
+        FString Use = IsFood(Entry.item) ? FromUtf8(Homestead::Food::PackUseText(State(), Entry.item).c_str()) : FString();
+        Use.RemoveFromEnd(TEXT(" Eat one from your pack."));
+        Row.Detail = FString::Printf(TEXT("%s: %d\n\n%s"), *Row.Location, Entry.quantity,
+            *FromUtf8(Homestead::ItemDescription(Entry.item))) + (Use.IsEmpty() ? FString() : TEXT("\n") + Use);
         Row.CanStore = false;
         Row.CanTake = false;
         Row.Action = CurrentContainer > 0 ? TEXT("Take to pack") : IsFood(Entry.item) ? TEXT("Eat 1") : FString();
@@ -166,6 +168,7 @@ bool AHomesteadController::MenuHotbarRow(int32 Cell, FHomesteadRow& Out) const
 bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action,
     int32 Amount, uint64 ExpectedRevision)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (bMenuSaveInProgress || IsFailed() || bTestResetRequired)
     { Notify(TEXT("This action is unavailable until you return to a playable world."), true); return false; }
     if (ExpectedRevision != Sim.GetRevision())
@@ -191,7 +194,9 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
             if (Action == EHomesteadItemAction::Unequip) return Target.UnequipWearable(Row.SubjectId, ExpectedRevision);
             const auto* Item = Target.GetWearable(Row.SubjectId);
             if (!Item) return {false, "That owned garment no longer exists."};
-            return Target.RecolorWearable(Row.SubjectId, (Item->dye + 1) % 4, PlayerPoint(), ExpectedRevision);
+            // The dye chooser passes the chosen dye + 1; older callers without one step to the next.
+            const int32 Dye = Amount >= 1 && Amount <= 4 ? Amount - 1 : (Item->dye + 1) % 4;
+            return Target.RecolorWearable(Row.SubjectId, Dye, PlayerPoint(), ExpectedRevision);
         };
         Homestead::Simulation Candidate = Sim;
         const auto Proposed = Transaction(Candidate);
@@ -295,7 +300,7 @@ bool AHomesteadController::MenuMoveWhole(const FHomesteadRow& Row)
         return MenuItemAction(Target, EHomesteadItemAction::Transfer, 1, Sim.GetRevision());
     if (Row.Subject != EHomesteadMenuSubject::ItemGroup) return false;
     const int32 Used = Row.ContainerId > 0 ? Sim.UsedCapacity() : Sim.ChestUsedCapacity(ActiveChestId.GetValue());
-    const int32 Room = Used < 0 ? 0 : Homestead::ContainerCapacity(Target.DestinationId) - Used;
+    const int32 Room = Used < 0 ? 0 : Homestead::ContainerCapacity(State(), Target.DestinationId) - Used;
     // Move what fits; with no room at all the transfer reports why.
     const int32 Count = Room > 0 ? FMath::Min(Row.Quantity, Room) : Row.Quantity;
     return MenuItemAction(Target, EHomesteadItemAction::Transfer, Count, Sim.GetRevision());
@@ -304,11 +309,12 @@ bool AHomesteadController::MenuMoveWhole(const FHomesteadRow& Row)
 bool AHomesteadController::MenuWearableRow(int32 WearableId, FHomesteadRow& Out) const
 {
     const auto* Instance = Sim.GetWearable(WearableId);
-    return Instance && WearableRow(*Instance, ActiveChestId.IsSet(), ActiveChestId.Get(-1), Out);
+    return Instance && WearableRow(State(), *Instance, ActiveChestId.IsSet(), ActiveChestId.Get(-1), Out);
 }
 
 bool AHomesteadController::MenuSortPack()
 {
+    if (RejectPendingGroundSnapAction()) return false;
     const auto Result = Sim.SortPack(Sim.GetRevision());
     Notify(Result);
     return Result.ok;
@@ -317,6 +323,7 @@ bool AHomesteadController::MenuSortPack()
 bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomesteadRow& Target,
     uint64 ExpectedRevision)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (ExpectedRevision != Sim.GetRevision())
     { Notify(TEXT("Your inventory changed. Pick up the item again."), true); return false; }
     // The hotbar is the first row of her pack: into, within and out of it (HomesteadPackRow.h).
