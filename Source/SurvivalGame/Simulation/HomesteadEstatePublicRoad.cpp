@@ -151,13 +151,13 @@ const PublicRoad& EstatePublicRoad()
             road.stops.push_back({name, metres, at, road.groundZ[i - 1] + (road.groundZ[i] - road.groundZ[i - 1]) * t});
         }
         for (const Arrival& off : arrivals)
-            for (PublicRoadStop& stop : road.stops)
-                if (stop.name == off.stop)
+            for (PublicRoadStop& endpoint : road.stops)
+                if (endpoint.name == off.stop)
                 {
-                    stop.hasArrival = true;
-                    stop.arrival = off.at;
-                    stop.arrivalZ = off.z;
-                    stop.arrivalYaw = off.yaw;
+                    endpoint.hasArrival = true;
+                    endpoint.arrival = off.at;
+                    endpoint.arrivalZ = off.z;
+                    endpoint.arrivalYaw = off.yaw;
                 }
         return road;
     }();
