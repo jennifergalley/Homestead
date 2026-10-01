@@ -3,6 +3,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
 #include "HomesteadActionTestState.h"
+#include "Simulation/HomesteadCrops.h"
 #include "Components/SkeletalMeshComponent.h"
 
 namespace
@@ -77,6 +78,36 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
             }, 0.3f);
     };
     Approach();
+    // Controls are separate (Jenny 2026-09-30): E / A interacts (plant, harvest, pick up, open), the
+    // tool button uses the tool in hand, and neither falls through to the other.
+    Add(TEXT("The card lists each action with its own key: F pulls weeds; the pail waters on the tool button, never E"),
+        [this]() { Controller->ChooseOnHotbar(Homestead::Item::WateringCan); },
+        [this]()
+        {
+            const FString Actions = Controller->FocusActions();
+            const Homestead::Plot* Plot = nullptr;
+            for (const auto& Candidate : Controller->State().plots) if (Candidate.id == GardenPlotId) Plot = &Candidate;
+            const bool bCanWater = Plot && Homestead::NeedsWater(*Plot) && Controller->Simulation().Count(Homestead::Item::Water) > 0
+                && Controller->Simulation().Count(Homestead::Item::WateringCan) > 0;
+            const bool bOk = Actions.Contains(TEXT("Pull weeds")) && !Actions.Contains(TEXT("[E] Water")) && !Actions.Contains(TEXT("[A] Water"))
+                && (!bCanWater || Actions.Contains(TEXT("[LMB] Water")) || Actions.Contains(TEXT("[RT] Water")));
+            if (!bOk) Results.Add(TEXT("FOCUS_ACTIONS ") + Actions);
+            return bOk;
+        }, 0.3f);
+    Add(TEXT("E on an unripe crop with the pail out does not water it"),
+        [this, Snapshot]() { Controller->ChooseOnHotbar(Homestead::Item::WateringCan); Snapshot(); Tap(EKeys::E); },
+        [this, Probe, Animation, Hidden, Matches]()
+        {
+            return Matches() && Hidden() && Animation()->WaterStarts() == Probe->WaterStarts
+                && Animation()->GatherStarts() == Probe->Starts && Controller->Toast() == TEXT("Not ready yet");
+        }, 0.4f);
+    for (const Homestead::Item Tool : {Homestead::Item::WateringCan, Homestead::Item::DiggingStick, Homestead::Item::Hatchet,
+        Homestead::Item::Pickaxe, Homestead::Item::Billhook, Homestead::Item::Scythe})
+        Add(FString::Printf(TEXT("E never uses the tool in hand: %s"), UTF8_TO_TCHAR(Homestead::ItemName(Tool))),
+            [this, Snapshot, Tool]() { Controller->ChooseOnHotbar(Tool); Snapshot(); Tap(EKeys::E); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [Probe, Animation, Hidden, Matches]()
+            { return Matches() && Hidden() && Animation()->WaterStarts() == Probe->WaterStarts && Animation()->GatherStarts() == Probe->Starts; },
+            0.4f);
     Weed(EKeys::Gamepad_FaceButton_Left, true);
     Add(TEXT("Capture pull; same-frame already-clean rejection did not restart it"),
         [this]() { Screenshot(TEXT("weeding-pull")); },
@@ -98,7 +129,9 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
             Snapshot();
             Probe->Ready = Probe->Expected.Water(GardenPlotId, Controller->PlayerPoint()).ok
                 && Probe->Expected.Weed(GardenPlotId, Controller->PlayerPoint()).ok;
-            Tap(EKeys::E); Tap(EKeys::F);
+            // Watering is the pail on the tool button (E never waters, Jenny 2026-09-30).
+            Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
+            Tap(EKeys::LeftMouseButton); Tap(EKeys::F);
         }, [this, Avatar, Probe, Animation, Matches]()
         {
             return Probe->Ready && !Controller->ToastIsError() && Matches()
@@ -112,7 +145,8 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
         {
             Snapshot();
             Probe->Ready = Probe->Expected.Water(GardenPlotId, Controller->PlayerPoint()).ok;
-            Tap(EKeys::E);
+            Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
+            Tap(EKeys::LeftMouseButton);
         }, [Avatar, Probe, Animation, Matches]()
         {
             return Probe->Ready && Matches() && Animation()->WaterStarts() == Probe->WaterStarts + 1
@@ -180,14 +214,14 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
             Tap(EKeys::E);
         }, [Probe, Animation, Matches]()
         { return Probe->Ready && Matches() && Animation()->GatherStarts() == Probe->Starts + 1; }, 0.3f);
-    Add(TEXT("Resource clearing on X remains clearing, not another weed/pick request"),
+    Add(TEXT("X on forage does nothing: clearing is a tool's job, never X / F"),
         [this, Probe, Snapshot, Forage]()
         {
-            Snapshot(); Probe->Ready = Probe->Expected.Clear(Forage.id, Controller->PlayerPoint()).ok;
+            Snapshot(); Probe->Ready = true;
             Tap(EKeys::Gamepad_FaceButton_Left);
         }, [this, Probe, Animation, Matches]()
         { return Probe->Ready && !Controller->ToastIsError() && Matches() && Animation()->GatherStarts() == Probe->Starts; }, 0.12f);
-    Add(TEXT("Cleared patch leaves no delayed pose"), []() {}, Hidden, 2.0f);
+    Add(TEXT("Untouched patch leaves no delayed pose"), []() {}, Hidden, 2.0f);
     Add(TEXT("Stand outside the garden and map to reject secondary tilling"),
         [this]() { Teleport({3900, 3900}); }, Hidden, 0.7f);
     Add(TEXT("No-plot/out-of-bounds secondary failure has no weeding delta or animation"),

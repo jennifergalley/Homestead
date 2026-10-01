@@ -365,16 +365,22 @@ void AHomesteadController::UseSelectedTool()
     }
     if (Tool == Homestead::Item::Hatchet && Focus == EFocus::Resource)
         for (const auto& Node : State().resources)
-            if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::ForestTree)
+            if (Node.id == FocusId && (Node.kind == Homestead::ResourceKind::ForestTree || Node.kind == Homestead::ResourceKind::Sapling))
             {
-                // Standing trees keep the axe's felling presentation.
+                // The axe fells a standing tree (keeping its felling presentation) and cuts down a sapling,
+                // as F used to; overgrowth is swung at below.
                 const Homestead::Point Target = Node.position;
+                const bool bTree = Node.kind == Homestead::ResourceKind::ForestTree;
                 const int32 Cleared = FocusId;
                 auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-                const bool bFell = Avatar && Avatar->CanFell();
+                const bool bFell = bTree && Avatar && Avatar->CanFell();
                 const auto Result = Sim.Clear(FocusId, Position);
                 NotifyResourceAction(Result, bFell ? nullptr : WoodTapB.Get());
-                if (Result.ok && Avatar) PresentFelling(Cleared, Target, true);
+                if (Result.ok && Avatar)
+                {
+                    if (bTree) PresentFelling(Cleared, Target, true);
+                    else Avatar->PlayClear(Target);
+                }
                 return;
             }
     if (Tool == Homestead::Item::Hatchet || Tool == Homestead::Item::Billhook

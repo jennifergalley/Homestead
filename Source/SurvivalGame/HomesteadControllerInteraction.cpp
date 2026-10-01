@@ -72,6 +72,9 @@ void AHomesteadController::Interact()
             }
         const int32 Harvested = FocusId;
         const Homestead::GatherPose Pose = Homestead::HandGatherPose(Kind);
+        // A standing tree is felled with the axe on the tool button, never on E / A (Jenny 2026-09-30:
+        // no crossover between interacting and using a tool).
+        if (Tree) break;
         const auto* Feller = Cast<AHomesteadCharacter>(GetPawn());
         const bool bFell = Tree && Feller && Feller->CanFell();
         // Weeds and nettles are pulled on both knees and only count once the second root is out.
@@ -169,39 +172,32 @@ void AHomesteadController::Interact()
                     {
                         if (Sim.Count(Chosen) <= 0)
                         {
-                            Notify(FString::Printf(TEXT("No %s left. Choose another seed on the hotbar."),
+                            Notify(FString::Printf(TEXT("No %s left"),
                                 *FString(UTF8_TO_TCHAR(Homestead::ItemName(Chosen))).ToLower()), true);
                             break;
                         }
                         Seed = Crop;
                     }
                 }
-                if (!Seed)
-                {
-                    Notify(TEXT("Choose seeds on the hotbar to sow."), true);
-                    break;
-                }
+                // Nothing chosen to sow: E does nothing here.
+                if (!Seed) break;
                 PlantFocusedPlot(*Seed);
                 break;
             }
             const Homestead::CropKind Harvested = Plot.kind;
             const Homestead::Point Center = Homestead::PlotCenter(Plot);
-            if (Plot.withered)
+            // E only harvests. A withered crop is hoed out and a growing one watered with the tool button
+            // (the hoe or the pail), never on E / A (Jenny 2026-09-30).
+            if (Plot.withered) break;
+            if (!Mature)
             {
-                const auto Result = Sim.ClearWithered(FocusId, Position);
-                Notify(Result, GrassStepA);
-                if (Result.ok)
-                    if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->PlayTill(Center);
+                Notify(TEXT("Not ready yet"), true);
                 break;
             }
-            const auto Result = Mature ? Sim.HarvestCrop(FocusId, Position) : Sim.Water(FocusId, Position);
-            // A harvest shows as its "+N" pickups beside her; watering and refusals still say so.
-            if (Mature) NotifyResourceAction(Result, GrassStepB);
-            else Notify(Result, GrassStepB);
-            if (Result.ok && Mature) PresentHarvest(FocusId, Harvested, Center);
-            if (Result.ok && !Mature)
-                if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-                    Avatar->PlayWater(Center);
+            const auto Result = Sim.HarvestCrop(FocusId, Position);
+            // A harvest shows as its "+N" pickups beside her; refusals still say why.
+            NotifyResourceAction(Result, GrassStepB);
+            if (Result.ok) PresentHarvest(FocusId, Harvested, Center);
             break;
         }
         break;
@@ -214,12 +210,13 @@ void AHomesteadController::Interact()
         break;
     case EFocus::Bed: SleepAtBed(Position); break;
     case EFocus::Chest: OpenChestStorage(FocusId); break;
-    case EFocus::Water: FillPailAtStream(Position); break;
+    // The pail is filled with the tool button (UseSelectedTool), not on E / A.
+    case EFocus::Water: break;
     case EFocus::Underbrush: StartMacheteHack(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
     case EFocus::RoadSign: InteractWithRoadSign(); break;
-    default: if (!EatSelectedFoodInstead()) Notify(TEXT("Walk closer to a plant, resource, or work area.")); break;
+    default: EatSelectedFoodInstead(); break;
     }
 
 }
@@ -273,38 +270,22 @@ void AHomesteadController::Secondary()
     ON_SCOPE_EXIT { EndHintUse(Hint); };
     if (Focus == EFocus::Resource)
     {
-        bool Sapling = false;
+        // F / X pulls weeds and nettles by hand; it never fells, clears or hoes (that's the tool button).
+        Homestead::ResourceKind Kind = Homestead::ResourceKind::Count;
         Homestead::Point ActionTarget = PlayerPoint();
         for (const auto& Node : State().resources)
-            if (Node.id == FocusId)
-            {
-                Sapling = Node.kind == Homestead::ResourceKind::ForestTree;
-                ActionTarget = Node.position;
-                break;
-            }
-        const int32 Cleared = FocusId;
-        auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-        const bool bFell = Sapling && Avatar && Avatar->CanFell();
-        const auto Result = Sim.Clear(FocusId, PlayerPoint());
-        NotifyResourceAction(Result, bFell ? nullptr : WoodTapB.Get());
-        if (Result.ok && Avatar)
-        {
-            if (Sapling) PresentFelling(Cleared, ActionTarget, true);
-            else Avatar->PlayClear(ActionTarget);
-        }
+            if (Node.id == FocusId) { Kind = Node.kind; ActionTarget = Node.position; break; }
+        if (Kind != Homestead::ResourceKind::Weeds && Kind != Homestead::ResourceKind::Nettles) return;
+        if (StartWeedPull(FocusId, INDEX_NONE, ActionTarget)) return;
+        Notify(Sim.Harvest(FocusId, PlayerPoint()), GrassStepA);
     }
     else if (Focus == EFocus::Plot)
     {
         for (const auto& Plot : State().plots)
         {
             if (Plot.id != FocusId) continue;
-            if (!Plot.planted && !Homestead::HasVisibleWeeds(Plot))
-            {
-                // X / F only ever weeds (Jenny): clean bare soil has none, and nothing is sown by accident.
-                Notify(TEXT("No weeds to pull here. Choose seeds on the hotbar and press ")
-                    + FString(UsesGamepad() ? TEXT("A") : TEXT("E")) + TEXT(" to sow."), true);
-                break;
-            }
+            // X / F only ever weeds (Jenny): with none showing it does nothing, and never sows.
+            if (!Homestead::HasVisibleWeeds(Plot)) break;
             // By hand she kneels and pulls them, and the square is weeded when the second root is out;
             // without that clip she pulls them into the hip pouch like the estate's.
             if (StartWeedPull(INDEX_NONE, FocusId, Homestead::PlotCenter(Plot))) break;
@@ -319,6 +300,5 @@ void AHomesteadController::Secondary()
     }
     else if (Focus == EFocus::Fire) Notify(Sim.AddFuel(FocusId, PlayerPoint()), WoodTapA);
     else if (SelectedCarriedTool() == Homestead::Item::OilLamp) MenuRefillLamp();
-    else if (Focus == EFocus::None && EatSelectedFoodInstead()) {}
-    else HoeSquareAhead();
+    else if (Focus == EFocus::None) EatSelectedFoodInstead();
 }

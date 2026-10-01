@@ -639,8 +639,8 @@ void AHomesteadSmokeTest::Prepare()
                 *CurrentId = Current.id;
             },
             [this, CurrentId]() { return Controller->IsResourceFocused(*CurrentId); }, 0.65f);
-        Add(TEXT("Clear the generated building-site tree through gamepad X"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
+        Add(TEXT("Fell the generated building-site tree with the axe on RT"),
+            [this]() { Controller->ChooseOnHotbar(Homestead::Item::Hatchet); Tap(EKeys::Gamepad_RightTrigger); },
             [this, Key]()
             {
                 Homestead::ResourceNode Current;

@@ -27,13 +27,14 @@ void AHomesteadController::HoeSquareAhead()
     TillSquareAhead(X, Y);
     const auto Position = PlayerPoint();
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-    // Already tilled: hoe out its weeds instead.
+    // Already tilled: a withered crop is hoed out, otherwise the hoe takes out its weeds.
     if (const auto* Tilled = FindPlotWhere(State().plots, [X, Y](const Homestead::Plot& Plot)
         { return Plot.cellX == X && Plot.cellY == Y; }))
     {
-        const auto Result = Sim.Weed(Tilled->id, Position);
+        const Homestead::Point Center = Homestead::PlotCenter(*Tilled);
+        const auto Result = Tilled->withered ? Sim.ClearWithered(Tilled->id, Position) : Sim.Weed(Tilled->id, Position);
         Notify(Result, GrassStepA);
-        if (Result.ok && Avatar) Avatar->PlayTill(Homestead::PlotCenter(*Tilled));
+        if (Result.ok && Avatar) Avatar->PlayTill(Center);
         return;
     }
     const auto Result = Sim.Till(X, Y, Position);

@@ -530,7 +530,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("toast-success"), TEXT("World notice: a parchment slip at the top centre in the book's serif."),
         ECover::Notice, Toast, nullptr, Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false));
     Add(TEXT("toast-error"), TEXT("World error notice: the rust-edged slip."),
-        ECover::Notice, ToastError, nullptr, Notify(TEXT("Walk closer to a plant, resource, or work area."), true));
+        ECover::Notice, ToastError, nullptr, Notify(TEXT("Not ready yet"), true));
     Add(TEXT("toast-long"), TEXT("A long world notice wrapping to two or three lines."), ECover::Hud, 11, nullptr,
         Notify(TEXT("Mowed 6 tufts: +4 Hay, +3 Weeds, +1 Seeds. The old orchard meadow is opening up; come back with the scythe tomorrow for the rest."), false));
     Add(TEXT("toast-error-long"), TEXT("A long error notice wrapping to more than one line."), ECover::Hud, 0, nullptr,
@@ -616,6 +616,25 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             if (Plot >= 0) PC.Sim.Plant(Plot, PC.PlayerPoint());
             PC.ChooseOnHotbar(Item::WateringCan);
         });
+    // Every action on the card (Jenny 2026-09-30): a ripe, weedy plot offers "[E] Harvest" and "[F] Pull
+    // weeds"; a dry, weedy growing one "[F] Pull weeds" and, with the pail in hand, its tool-button Water.
+    const auto WeedyPlot = [TillAhead](AHomesteadController& PC, double Growth)
+    {
+        const int32 Plot = TillAhead(PC);
+        if (Plot >= 0) PC.Sim.Plant(Plot, PC.PlayerPoint());
+        PC.Sim.PassDaysForPlaytest(3.0, false, PC.PlayerPoint());
+        PC.Sim.SetCropGrowthForPlaytest(Growth);
+        PC.Sim.SkipToHourOfDay(10.0);
+    };
+    Add(TEXT("focus-plot-ripe-weedy"), TEXT("A ripe, weedy plot: '[E] Harvest' and '[F] Pull weeds' side by side."),
+        ECover::Focus, 16, Garden, [WeedyPlot](AHomesteadController& PC) { WeedyPlot(PC, 1.0); });
+    Add(TEXT("focus-plot-water-weed"), TEXT("A dry, weedy growing plot with the pail in hand: '[F] Pull weeds' and '[LMB] Water'."),
+        ECover::Focus, 17, Garden, [WeedyPlot](AHomesteadController& PC)
+        {
+            WeedyPlot(PC, 0.4);
+            PC.Sim.GrantItems(Item::WateringCan, 1);
+            PC.ChooseOnHotbar(Item::WateringCan);
+        });
 
     // Seed outlines and the sowing cue (Water's seed-outline, jennifergalley-seed-outline @6408cdd7:
     // Simulation::CheckSow, PreviewGarden(Seed), DescribeSow). Until it is on this line these show the
@@ -655,7 +674,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("toast-night"), TEXT("A world notice at night: the parchment slip over the dark scene."), ECover::Hud, 9, nullptr,
         [Night](AHomesteadController& PC) { Night(PC); PC.Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false); }, 1.5f);
     Add(TEXT("toast-rain"), TEXT("A world error notice in the rain."), ECover::Hud, 10, nullptr,
-        [Rain](AHomesteadController& PC) { Rain(PC); PC.Notify(TEXT("Walk closer to a plant, resource, or work area."), true); }, 1.5f);
+        [Rain](AHomesteadController& PC) { Rain(PC); PC.Notify(TEXT("Not ready yet"), true); }, 1.5f);
 
     // The new-game setup: the Names step on its own, then the whole flow (it takes over the screen).
     Add(TEXT("setup-names"), TEXT("New-game Names step: her name, family and estate fields with the suggestions."), ECover::Setup, 1, nullptr,
