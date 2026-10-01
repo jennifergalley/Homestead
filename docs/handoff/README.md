@@ -254,6 +254,12 @@ At either freeze, only work that is already **UE-verified and code-reviewed** en
 everything else waits for the next slot. The first evening build under this policy is October 1,
 2026 (the 9 PM window on September 30 had already passed).
 
+**Before every Shipping build, reclaim dated release space safely:** retain the current
+Estate-shortcut Shipping release, at most its immediately previous Shipping rollback, and a named
+Development reference only while it is needed. Before pruning older dated releases,
+`Playtest-09xx` folders or stale `Build\Windows` staging, verify no process path or shortcut target
+uses them. Do not delete the current shortcut target, live save data, or the one retained rollback.
+
 1. The orchestrator notifies lanes at the freeze; lanes close their editors
    (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.
 2. The integration session merges admitted `main` work, runs UBT and packaged suites, makes the
