@@ -33,7 +33,7 @@ Active sprint SHALL move the heroine materially faster than the existing 180 cm/
 - **THEN** forward lean, stride, arm motion, and cadence visibly differ from walking while root motion remains disabled
 
 ### Requirement: Sprint respects an Energy threshold without extra cost
-Active sprint SHALL NOT consume the existing Energy resource beyond its baseline awake-time drain and ordinary work costs. Sprint MUST be refused at Energy <=10 and MUST turn off when those other costs reach that threshold. A toggled sprint state while stationary MUST NOT mutate Energy, and sprint MUST NOT auto-resume when Energy later recovers.
+Active sprint SHALL NOT consume the existing Energy resource beyond its baseline awake-time drain and ordinary work costs. Sprint MUST be refused below about 25% Energy and MUST turn off when those other costs reach that threshold. A toggled sprint state while stationary MUST NOT mutate Energy, and sprint MUST NOT auto-resume when Energy later recovers.
 
 #### Scenario: Moving sprint does not spend extra Energy
 - **WHEN** the player sprints continuously while grounded and moving
@@ -44,7 +44,7 @@ Active sprint SHALL NOT consume the existing Energy resource beyond its baseline
 - **THEN** sprint animation does not play and Energy does not change
 
 #### Scenario: Low Energy
-- **WHEN** Energy is at or falls to 10 through ordinary work or time
+- **WHEN** Energy is below about 25% through ordinary work or time
 - **THEN** sprint is refused or turns off, walking remains available, and sprint does not auto-resume after Energy recovers
 
 ### Requirement: Sprint respects gameplay state

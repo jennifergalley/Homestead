@@ -4,14 +4,13 @@
 
 ### Requirement: No bedtime by the clock
 
-The game SHALL NOT force or shorten sleep by the time of day. Only running out of Energy SHALL force
-rest: she dozes off where she stands and wakes part rested. Running out of Energy SHALL NOT fail the
-game.
+The game SHALL NOT force or shorten bed sleep by the time of day. Low Energy SHALL NOT force rest,
+fainting, failure, death or checkpoint recovery on the Estate.
 
 #### Scenario: Night owl
 
-- **WHEN** she stays up until 05:00 and sleeps "until rested" with little Energy left
-- **THEN** she sleeps into the afternoon and wakes with full Energy
+- **WHEN** she stays up until 05:00 with low Energy
+- **THEN** she remains in play with no forced sleep or failure until she eats or uses a bed
 
 ### Requirement: One-press sleep at the bed
 
@@ -33,3 +32,24 @@ Sleep SHALL restore Energy by hours slept at a fixed rate, capped at full, whate
 
 - **WHEN** she presses E/A at a focused bed during the day with Energy below full
 - **THEN** she sleeps until Energy is full and never exceeds full Energy
+
+### Requirement: Low Energy constrains play without failure
+
+Below about 25% Energy, sprint SHALL be unavailable. Below about 10%, walking SHALL slow and tool
+work SHALL refuse with `Too tired`. The Energy bar SHALL change colour and pulse, with concise
+`Getting tired` and `Exhausted` warnings. Eating and bed sleep SHALL recover Energy.
+
+#### Scenario: Exhausted tool work
+
+- **WHEN** Energy is below about 10% and she attempts tool work
+- **THEN** no tool action occurs and the refusal says `Too tired`
+
+### Requirement: Recovery loads the newest valid save
+
+Any recovery or checkpoint load SHALL choose the newest valid candidate by timestamp and simulation
+revision, rather than selecting an older Recovery save over a newer autosave.
+
+#### Scenario: Newer autosave beats recovery
+
+- **WHEN** a valid autosave is newer than a valid Recovery save
+- **THEN** recovery loads the autosave

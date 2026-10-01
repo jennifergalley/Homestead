@@ -385,7 +385,8 @@ current-cost compatibility semantics, not a save migration.
 - Bramble `550200` at 283 cm focuses over weed at 125 cm and one worn clear removes three canes for
   1.2 Energy; Sapling `570143` clears on one click for 4 Branch +1 Kindling /1.5 Energy; Iron thicket
   has no animation/sound; F5/F9 cleared state passes.
-- Sprint: run/walk changes about 0.03 Energy over 6 s, auto-off/refusal at <=10 and no resume at 50.
+- Historical sprint receipt: run/walk changed about 0.03 Energy over 6 s, auto-off/refusal at <=10
+  and no resume at 50. Jenny's 2026-09-30 25% sprint / 10% exhausted policy supersedes this.
 - Hoe hint is dropped from this local batch and remains chest-native-only. Bed UI reads 4 Branch +4
   Hay; old canes-bed deconstruct refunding four Hay is native-only intentional current-cost
   compatibility behavior. Forage-ID freeze remains source-only.
@@ -1167,21 +1168,23 @@ requirement.
   side patches at some camera angles. Pending; not shipped.
 - **Sprint toggle** — **Menu `af7831b1` shipped in the 4 PM playable build.** Commit
   `8e0516a0` toggles sprint with L3 or a released Shift tap: Shift+Q/click does not toggle, work/book/
-  shop pause speed while preserving intent, and load/new/retry/teleport reset it. At <=10 Energy it
-  gives a notice; exhaustion disables sprint. Native 8/8 plus economy 12 / scenario 521 checks and
+  shop pause speed while preserving intent, and load/new/retry/teleport reset it. Historical
+  behavior at <=10 Energy gave a notice and disabled sprint; Jenny's 25% sprint / 10% exhausted
+  policy supersedes that threshold. Native 8/8 plus economy 12 / scenario 521 checks and
   Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
   210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture; packaged NativeMenu
   and Hotbar suites passed.
 - **Sprint Energy cost** — **final product direction, pending and not shipped.** Sprint has **zero**
 sprint-specific Energy cost; this supersedes both current 0.35/real-second behavior and the tentative
 0.05/s/regen proposal. Baseline awake time drain remains -0.6/game-hour and ordinary work costs remain.
-Refuse the sprint toggle at Energy <=10 and turn it off if other work/time reaches that threshold; do
-not auto-resume after recovery.
+Refuse/turn off sprint below about 25% Energy; below about 10% walking slows and tool work says
+`Too tired`. Do not auto-resume after recovery.
 
 **Props partial `7475b435`:** native 9/9 on `jennifergalley-sprint-zero`, based on `4b8d6edd` and
 cleanly merging `main` `4463086d`, not built/PIE/packaged or shipped. It removes the 0.35/s charge,
 uses `Sim.CanSprint(Energy > 10)`, toggles off at <=10 with no auto-resume, and leaves speed/awake
-drain unchanged. Native coverage spans 30/60/120 FPS and day lengths, floor/refeeding/work/reload, plus
+drain unchanged. This historical partial is superseded by Jenny's 25% sprint / 10% exhausted
+policy. Native coverage spans 30/60/120 FPS and day lengths, floor/refeeding/work/reload, plus
 Hotbar/Creek/Visual routes. Integration's UAT lock on `a2607437` remains ahead of UE validation.
 
 The bramble-on-food `42a63b8f` conflict is separate from sprint; Props rebases it only after the
@@ -1300,6 +1303,13 @@ not claim early Energy is fully solved.
   hover text; retain tile quantity and controls. **Menu** owns the UI after active dye/Appearance work;
   source values from `ItemInfo` so future Energy-only lane-F values flow through automatically.
   Require native coverage and PIE checks at 1080p and 4K.
+- **Estate Energy safety (Jenny, 2026-09-30):** no death, fainting or failure state on the Estate.
+  Below about 25% Energy sprint is unavailable; below about 10% she walks more slowly and tool work
+  refuses with `Too tired`. The Energy bar shifts colour and pulses with `Getting tired` and
+  `Exhausted` warnings. Food and one-press bed sleep recover Energy. Integration owns simulation
+  and Menu owns HUD for the 7:30 AM batch; this remains source/package pending. Recovery/checkpoint
+  loads must choose the newest valid save by timestamp and revision, never an older Recovery file
+  over a newer autosave.
 - **Whole-number currency** — **agreed design, pending and not 4 PM content.** Preserve the current
   `int64` raw values and save bytes: semantically relabel the smallest stored unit as one whole
   `coin`, with **no numeric x100 migration**. Thus raw 1000 (formerly $10) becomes 1,000 coins and
