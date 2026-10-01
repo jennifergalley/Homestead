@@ -522,14 +522,21 @@ void AHomesteadCharacter::UpdateWaterPail(UStaticMeshComponent& Pail, float Delt
     if (Hold > 0.001f)
     {
         // Between the take and the give the pail rides against her left palm like a pot: its
-        // side at the palm, its axis up her fingers, the lip ahead (the right hand mirrors it).
+        // side at the palm, its axis along her fingers turned back by the finger lead, the lip
+        // ahead (the right hand mirrors it). On the upright holds her fingers lead the axis
+        // forward (pail_pour.py LEAD) so her wrists stay straight; the lead eases out as she
+        // tips it to pour, and back in as she rights it, so the pail pivots between her palms.
+        constexpr float FingerLeadDegrees = 100.0f;
+        constexpr float TakeSeconds = 26.0f / 30.0f, LevelSeconds = 72.0f / 30.0f;
+        const float Lead = FingerLeadDegrees * (1.0f - FMath::SmoothStep(TakeSeconds, PailPourStart, Time)
+            + FMath::SmoothStep(PailPourStop, LevelSeconds, Time));
         USkeletalMeshComponent* Body = GetMesh();
         const FVector HandL = Body->GetSocketLocation(TEXT("hand_l"));
         const FVector KnuckleL = Body->GetSocketLocation(TEXT("middle_01_l"));
         const FVector FingersL = (KnuckleL - HandL).GetSafeNormal();
         const FVector AcrossL = Body->GetSocketLocation(TEXT("index_01_l")) - Body->GetSocketLocation(TEXT("pinky_01_l"));
         const FVector PalmL = FVector::CrossProduct(AcrossL, FingersL).GetSafeNormal();
-        const FVector Up = FVector::VectorPlaneProject(FingersL, PalmL).GetSafeNormal();
+        const FVector Up = FVector::VectorPlaneProject(FingersL.RotateAngleAxis(-Lead, PalmL), PalmL).GetSafeNormal();
         if (!PalmL.IsNearlyZero() && !Up.IsNearlyZero())
         {
             const FVector PalmPoint = HandL + (KnuckleL - HandL) * 0.6f + PalmL * 2.0f;
