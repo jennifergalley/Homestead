@@ -20,6 +20,9 @@ constexpr double WellFedHours = 3.0;
 constexpr double WellFedWorkFactor = 0.85;
 // At full Energy a Meal is still eaten if it starts Well fed or extends it by at least this much.
 constexpr double MinExtensionHours = 1.0;
+// "Full" for eating: the bar reads 100. Awake, Energy drains 0.6 an hour (Exertion::AwakePerHour), so an
+// exact 100 lasts a moment and a snack at 99.99 would be eaten for nothing (PIE, 09-30).
+constexpr double FullEnergyAt = 99.5;
 // Optional trailing save section, written only while she is Well fed: "wellfed <expiry hour>".
 constexpr const char* SaveTag = "wellfed";
 
