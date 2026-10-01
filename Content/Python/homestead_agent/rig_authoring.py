@@ -119,13 +119,36 @@ class Session:
         channel.add_key(unreal.FrameNumber(int(frame)), value, 0.0, unreal.MovieSceneTimeUnit.DISPLAY_RATE,
                         unreal.MovieSceneKeyInterpolation.AUTO)
 
+    def _unwound(self, control, frame, rot):
+        """``rot`` as the equivalent (roll, pitch, yaw) nearest the control's previous key.
+
+        The channels interpolate each angle on its own, so a key at yaw 170 followed by one at
+        -170 would sweep 340 degrees the long way round mid-motion (the axe swing's 100-degree
+        haft flips and 2500-4500 deg/s wrist pops). Both Euler solutions are wound to the
+        neighbouring key and the closer one is keyed."""
+        keys = self.__dict__.setdefault('_euler_keys', {}).setdefault(control, {})
+        before = [f for f in keys if f < frame]
+        after = [f for f in keys if f > frame]
+        near = keys[max(before)] if before else keys[min(after)] if after else None
+        candidates = [(rot.roll, rot.pitch, rot.yaw), (rot.roll + 180.0, 180.0 - rot.pitch, rot.yaw + 180.0)]
+        if near is not None:
+            wound = []
+            for c in candidates:
+                w = tuple(v + 360.0 * round((n - v) / 360.0) for v, n in zip(c, near))
+                wound.append((max(abs(a - b) for a, b in zip(w, near)), w))
+            best = min(wound)[1]
+        else:
+            best = candidates[0]
+        keys[frame] = best
+        return best
+
     def key_euler(self, frame, control, location=(0, 0, 0), rotation=None):
         """Key an Euler-transform control's local value (relative to its rest/offset)."""
         loc = location if isinstance(location, unreal.Vector) else unreal.Vector(*location)
         rot = rotation if isinstance(rotation, unreal.Rotator) else unreal.Rotator(*(rotation or (0, 0, 0)))
         for axis, value in zip('XYZ', (loc.x, loc.y, loc.z)):
             self._add(f'{control}.Location.{axis}', frame, float(value))
-        for axis, value in zip('XYZ', (rot.roll, rot.pitch, rot.yaw)):
+        for axis, value in zip('XYZ', self._unwound(control, frame, rot)):
             self._add(f'{control}.Rotation.{axis}', frame, float(value))
 
     def key_rotation(self, frame, control, roll=0.0, pitch=0.0, yaw=0.0):
