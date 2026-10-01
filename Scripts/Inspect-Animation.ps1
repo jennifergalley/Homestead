@@ -9,8 +9,9 @@ each view every -Every frames, then runs Scripts\anim_inspector_sheet.py for ove
 keyframes.png, motion.gif and index.md (realistic-animation skill, "Seeing every frame").
 
 It refuses to start when two Unreal processes are already running or free memory is under 6 GB, never
-touches other windows or processes, and stops only the process it started. Output defaults to
-E:\CopilotScratch\anim-inspector\<Clip>\<stamp>\.
+touches other windows or processes, and runs the game in its own kill-on-close job (Scripts\KillOnCloseJob.cs),
+so a timeout or an interrupted run leaves no shader worker or crash reporter behind. Output defaults to
+E:\CopilotScratch\anim-inspector\<Clip>\<stamp>\; the engine's TEMP/TMP is always under E:\CopilotScratch.
 
 .EXAMPLE
 pwsh -NoProfile -File .\Scripts\Inspect-Animation.ps1 -Clip Weeds -Recipe kneel_pull_weeds
@@ -49,7 +50,8 @@ if (-not $OutputDirectory) {
 }
 $OutputDirectory = [IO.Path]::GetFullPath($OutputDirectory)
 $null = New-Item -ItemType Directory -Path $OutputDirectory -Force
-$scratch = Join-Path $OutputDirectory 'tmp'
+# The engine's temp files stay on E: wherever the output goes (C: is nearly full).
+$scratch = Join-Path 'E:\CopilotScratch\anim-inspector\tmp' ([Guid]::NewGuid().ToString('N'))
 $null = New-Item -ItemType Directory -Path $scratch -Force
 $env:TEMP = $scratch
 $env:TMP = $scratch
@@ -65,15 +67,27 @@ if ($Lit) { $inspector += ' -HomesteadAnimInspectorLit' }
 $arguments = "`"$project`" /Game/SurvivalGame/Maps/Homestead -game $offline -HomesteadCharacterLab -HomesteadMetaHuman $inspector " +
     "-UserDir=`"$(Join-Path $OutputDirectory 'EngineUser')`" -unattended -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720 " +
     "-nosplash -nosound -abslog=`"$log`""
-$process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
-Write-Host "Animation Inspector PID $($process.Id): $Clip -> $OutputDirectory"
-if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
-    Stop-Process -Id $process.Id
-    throw "The inspector ran past $TimeoutSeconds s; stopped only its process $($process.Id). See $log."
+Add-Type -Path (Join-Path $PSScriptRoot 'KillOnCloseJob.cs')
+# Its own kill-on-close job: shader workers and the crash reporter it starts end with it, also on a timeout
+# or if this script is stopped. A Zen server it may have launched is spared (other sessions share it).
+$spare = [string[]]@('zenserver.exe')
+$job = [Homestead.Tools.KillOnCloseJob]::new($executable, "`"$executable`" $arguments", $root)
+try {
+    Write-Host "Animation Inspector PID $($job.ProcessId): $Clip -> $OutputDirectory"
+    if (-not $job.WaitForExit($TimeoutSeconds * 1000)) {
+        $ended = $job.Stop($spare)
+        throw "The inspector ran past $TimeoutSeconds s; stopped its own processes ($($ended -join ', ')). See $log."
+    }
+    $exitCode = $job.ExitCode
+}
+finally {
+    $null = $job.Stop($spare)
+    $job.Release()
 }
 $result = Join-Path $OutputDirectory 'result.txt'
 if (-not (Test-Path -LiteralPath (Join-Path $OutputDirectory 'frames.json'))) {
-    $why = if (Test-Path -LiteralPath $result) { Get-Content -LiteralPath $result -Raw } else { "no result (exit $($process.ExitCode))" }
+    Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
+    $why = if (Test-Path -LiteralPath $result) { Get-Content -LiteralPath $result -Raw } else { "no result (exit $exitCode)" }
     throw "Nothing was recorded: $why See $log."
 }
 Get-Content -LiteralPath $result | Write-Host
@@ -81,6 +95,7 @@ $sheetArgs = @((Join-Path $PSScriptRoot 'anim_inspector_sheet.py'), $OutputDirec
 if ($Recipe) { $sheetArgs += @('--recipe', $Recipe) }
 if ($Contacts) { $sheetArgs += @('--contacts', ($Contacts -join ',')) }
 & python @sheetArgs
-if ($LASTEXITCODE -ne 0) { throw "anim_inspector_sheet.py failed ($LASTEXITCODE)." }
+$sheetExit = $LASTEXITCODE
 Remove-Item -LiteralPath $scratch -Recurse -Force -ErrorAction SilentlyContinue
+if ($sheetExit -ne 0) { throw "anim_inspector_sheet.py failed ($sheetExit)." }
 Write-Output (Join-Path $OutputDirectory 'index.md')

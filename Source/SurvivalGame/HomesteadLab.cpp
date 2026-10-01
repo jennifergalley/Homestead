@@ -323,7 +323,10 @@ void AHomesteadLabController::BeginPlay()
     LoadPool(WalkSteps, TEXT("BareStepWalk"), 6);
     LoadPool(RunSteps, TEXT("BareStepRun"), 4);
     LabTeleport(0, 0);
+#if !UE_BUILD_SHIPPING
+    // The Animation Inspector is a development tool (Scripts\Inspect-Animation.ps1); Shipping never spawns it.
     if (HomesteadAnimInspector::Requested()) GetWorld()->SpawnActor<AHomesteadAnimInspector>();
+#endif
     UE_LOG(LogTemp, Display, TEXT("CHARACTER_LAB ready: flat grid floor, course at x=%.0f; console: LabAction, LabProp, LabSun, LabTeleport, LabCourse, slomo."),
         AHomesteadLabWorld::CourseX);
 }
