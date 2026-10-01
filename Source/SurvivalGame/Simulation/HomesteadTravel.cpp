@@ -111,11 +111,17 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
                     summary += std::string("\nYou'd arrive on a ") + Calendar::WeekdayName(arrives.weekday)
                         + ", when the general store is closed all day (it opens " + Calendar::WeekdayName(reopens.weekday)
                         + " at " + FormatHour(opens) + ").";
-                else if (reopens.dayIndex > arrives.dayIndex + 1)
-                    summary += std::string("\nThe general store will be closed then (it opens ") + Calendar::WeekdayName(reopens.weekday)
-                        + " at " + FormatHour(opens) + ").";
                 else
-                    summary += "\nThe general store will be closed then (it opens at " + FormatHour(opens) + ").";
+                {
+                    // "(it opens at 8 AM)" means the next 8 AM on the clock; anything later names its day (review:
+                    // a Sunday 07:30 arrival waits 25 h, for Monday).
+                    const double nextOnClock = std::floor(plan.arrivalHour / 24.0) * 24.0
+                        + (ofDay < shop.openHour ? 0.0 : 24.0) + shop.openHour;
+                    summary += std::fabs(opens - nextOnClock) < 1e-6
+                        ? "\nThe general store will be closed then (it opens at " + FormatHour(opens) + ")."
+                        : std::string("\nThe general store will be closed then (it opens ") + Calendar::WeekdayName(reopens.weekday)
+                            + " at " + FormatHour(opens) + ").";
+                }
             }
     plan.summary = summary;
     plan.ok = true;

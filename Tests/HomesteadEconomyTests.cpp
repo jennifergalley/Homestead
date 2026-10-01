@@ -562,6 +562,17 @@ void ShopsCloseOnSundays()
     CHECK(monday9.ok && !monday9.storeClosedOnArrival && !monday9.storeClosedAllDay);
     Simulation saturdayNoon = sim;
     Seek(saturdayNoon, Weekday::Saturday, 12.0);  // Saturday noon: she'd arrive after closing, and it opens Monday
+    // Early on Sunday, before what would be opening time (review): it opens Monday, not "at 8 AM".
+    {
+        Simulation early = saturdayNoon;
+        const double walk = PlanTravel(early.GetState(), manor->position, TravelDestination::Town).gameHours;
+        early.SkipToHourOfDay(7.5 - walk);  // just after midnight: she'd arrive about 07:30 on Sunday
+        const TravelPlan dawn = PlanTravel(early.GetState(), manor->position, TravelDestination::Town);
+        CHECK(Calendar::DateAt(dawn.arrivalHour).weekday == Weekday::Sunday
+            && std::abs(std::fmod(dawn.arrivalHour, 24.0) - 7.5) < 1e-6);
+        CHECK(dawn.storeClosedOnArrival && !dawn.storeClosedAllDay
+            && dawn.summary.find("(it opens Monday at 8 AM)") != std::string::npos);
+    }
     const TravelPlan evening = PlanTravel(saturdayNoon.GetState(), manor->position, TravelDestination::Town);
     CHECK(evening.storeClosedOnArrival && !evening.storeClosedAllDay
         && evening.summary.find("(it opens Monday at 8 AM)") != std::string::npos);
