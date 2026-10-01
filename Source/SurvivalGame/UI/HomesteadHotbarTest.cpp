@@ -843,7 +843,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         [this, TillX, TillY, OutlineIs]() { return Controller->Simulation().Count(Item::Seeds) > 0
             && OutlineIs(*TillX, *TillY, false)
             && Controller->GardenOutlineReason == TEXT("A crop is already growing here.")
-            && Controller->FocusActions().Contains(Controller->GardenOutlineReason); }, 4.0f);
+            // The red outline retains the refusal, but the concise focus card no longer repeats it.
+            && !Controller->FocusActions().Contains(Controller->GardenOutlineReason); }, 4.0f);
     Add(TEXT("Capture the seed's red garden outline"),
         [this]() { Screenshot(TEXT("garden-outline-seed-invalid")); },
         [this, TillX, TillY, OutlineIs]() { return OutlineIs(*TillX, *TillY, false); }, 0.5f);
@@ -946,11 +947,11 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Avatar->GetCharacterMovement()->IsMovingOnGround()
                 && !Controller->bPendingSpawn;
         }, 0.8f);
-    Add(TEXT("CONTROLLED Simulation Energy set to exactly the 10-Energy sprint floor"),
+    Add(TEXT("CONTROLLED Simulation Energy set below the 10-Energy slow-walk floor"),
         [this, ReserveEnergy]()
         {
             // Sprint costs nothing, so the fixture sets Energy directly instead of running it down.
-            const auto Result = Controller->Sim.SetEnergy(10.0);
+            const auto Result = Controller->Sim.SetEnergy(9.0);
             if (!Result)
             {
                 Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
@@ -958,9 +959,9 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             }
             *ReserveEnergy = Controller->State().energy;
         },
-        [this, ReserveEnergy]() { return FMath::IsNearlyEqual(*ReserveEnergy, 10.0, 0.001)
-            && Controller->State().energy <= 10.0 && Controller->State().energy > 9.9; });
-    Add(TEXT("A Shift tap below the Energy reserve is refused and she walks"),
+        [this, ReserveEnergy]() { return FMath::IsNearlyEqual(*ReserveEnergy, 9.0, 0.001)
+            && Controller->State().energy <= 9.0 && Controller->State().energy > 8.9; });
+    Add(TEXT("A Shift tap below the Energy reserve is refused and she walks slowly"),
         [this, ReserveEnergy]()
         {
             *ReserveEnergy = Controller->State().energy;
@@ -973,7 +974,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             return Avatar && Avatar->GetVelocity().Size2D() > 60
                 && !Avatar->IsSprinting()
-                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, Avatar->WalkSpeed())
+                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed,
+                    Avatar->WalkSpeed() * Homestead::Exertion::SlowWalkFactor)
                 && Controller->State().energy <= *ReserveEnergy
                 && Controller->State().energy > *ReserveEnergy - 0.1;
         }, 0.9f);

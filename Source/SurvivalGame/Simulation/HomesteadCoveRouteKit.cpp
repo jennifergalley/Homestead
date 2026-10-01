@@ -20,6 +20,42 @@ int CoveKitLayout::Count(CoveKitPiece piece) const
     return static_cast<int>(std::count_if(pieces.begin(), pieces.end(), [piece](const CoveKitPlacement& p) { return p.piece == piece; }));
 }
 
+CoveKitGroup CoveKitGroupOf(CoveKitPiece piece)
+{
+    switch (piece)
+    {
+    case CoveKitPiece::Kerb: return CoveKitGroup::Kerbs;
+    case CoveKitPiece::RailLevel:
+    case CoveKitPiece::Rail26:
+    case CoveKitPiece::Rail28:
+    case CoveKitPiece::Rail30:
+    case CoveKitPiece::RailEndPost: return CoveKitGroup::Rails;
+    case CoveKitPiece::Fingerpost: return CoveKitGroup::Fingerposts;
+    default: return CoveKitGroup::Steps;   // treads, landing slabs, corner wedges
+    }
+}
+
+const char* CoveKitGroupName(CoveKitGroup group)
+{
+    switch (group)
+    {
+    case CoveKitGroup::Steps: return "CoveSteps";
+    case CoveKitGroup::Kerbs: return "CoveKerb";
+    case CoveKitGroup::Rails: return "CoveRail";
+    case CoveKitGroup::Fingerposts: return "Fingerpost";
+    default: return "?";
+    }
+}
+
+CoveKitGroupsPlaced CoveKitPlaceableGroups(const CoveKitMeshesLoaded& loaded)
+{
+    CoveKitGroupsPlaced placed;
+    placed.fill(true);
+    for (std::size_t index = 0; index < loaded.size(); ++index)
+        if (!loaded[index]) placed[static_cast<std::size_t>(CoveKitGroupOf(static_cast<CoveKitPiece>(index)))] = false;
+    return placed;
+}
+
 CoveKitLayout BuildCoveKitLayout(const CoveRoute& route)
 {
     CoveKitLayout layout;

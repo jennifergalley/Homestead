@@ -215,42 +215,55 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
             const auto Piece = static_cast<Homestead::Piece>(Index);
             if (!Homestead::IsBuildable(Piece)) continue;
             // Activating a plan closes the book and starts a placement preview (BeginPlacement): she
-            // aims it in the world and confirms there, and only then are the materials spent.
-            Result.Add({ Index, Text(Homestead::PieceName(Piece)),
-                FString::Printf(TEXT("Needs: %s\nChoose a spot in the world, then place it. Nothing is spent until you place it."),
-                    *Text(Homestead::PieceRequirements(Piece))), TEXT("Choose a spot to build") });
+            // aims it in the world and confirms there, and only then are the materials spent. The
+            // details list what it takes as the Craft tab does (Jenny 2026-09-30); nothing more.
+            FHomesteadRow Row{ Index, Text(Homestead::PieceName(Piece)), FString(), TEXT("Build") };
+            Row.SubjectId = Index;
+            const Homestead::Inventory Cost = Homestead::PieceCost(Piece);
+            Row.RecipeState.craftable = true;
+            for (int32 Material = 0; Material < Homestead::ItemCount; ++Material)
+            {
+                if (Cost[Material] <= 0) continue;
+                Homestead::RecipeIngredientAssessment Need;
+                Need.item = static_cast<Homestead::Item>(Material);
+                Need.need = Cost[Material];
+                Need.have = Sim.Count(Need.item);
+                Need.met = Need.have >= Need.need;
+                Row.RecipeState.craftable = Row.RecipeState.craftable && Need.met;
+                Row.RecipeState.ingredients.push_back(Need);
+            }
+            Row.HasRecipeState = true;
+            // Dimmed on the grid when she can't afford it yet, like a recipe.
+            Row.IconTint = Row.RecipeState.craftable ? FLinearColor(0.92f, 0.74f, 0.43f) : FLinearColor(0.34f, 0.36f, 0.34f);
+            if (Homestead::PieceNeedsFoundation(Piece)) Row.Conditions.Add(TEXT("Foundation required"));
+            Result.Add(MoveTemp(Row));
         }
-        FHomesteadRow TakeDown{ static_cast<int>(Homestead::Piece::Count), TEXT("Take down"),
-            TEXT("Aim at anything you built and take it apart for its full cost. A chest's contents come with it; "
-                 "a floor must be bare first. In build mode Y / X switches between building and taking down."),
-            TEXT("Choose what to take down") };
+        FHomesteadRow TakeDown{ static_cast<int>(Homestead::Piece::Count), TEXT("Take down"), FString(), TEXT("Take down") };
         TakeDown.Icon = FName(TEXT("hatchet"));
         Result.Add(MoveTemp(TakeDown));
     }
 
     else if (Page == 4)
     {
-        Result.Add({0, TEXT("Save"), TEXT("Write a manual save and remain in Settings.")});
-        Result.Add({1, TEXT("Load latest save"), LatestSaveLabel.IsEmpty()
-            ? FString(TEXT("Resume the newest valid manual or automatic save."))
-            : FString::Printf(TEXT("Resume the newest valid manual or automatic save: %s."), *LatestSaveLabel)});
+        Result.Add({0, TEXT("Save"), FString()});
+        Result.Add({1, TEXT("Load latest save"), LatestSaveLabel});
         const FString Speed = State().dayMinutes >= 119 ? TEXT("Leisurely") : State().dayMinutes <= 31 ? TEXT("Fast") : TEXT("Balanced");
-        Result.Add({2, TEXT("Game speed: ") + Speed, TEXT("Leisurely, Balanced, or Fast.")});
-        Result.Add({3, FString::Printf(TEXT("Camera sensitivity: %.1f"), Sensitivity), TEXT("Cycle a comfortable turn speed.")});
-        Result.Add({4, FString::Printf(TEXT("Invert camera Y: %s"), bInvertY ? TEXT("On") : TEXT("Off")), TEXT("Change vertical look direction.")});
-        Result.Add({16, FString::Printf(TEXT("Overall volume: %d%%"), FMath::RoundToInt(MasterVolume * 100)), TEXT("Scales every sound in the game.")});
-        Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), TEXT("Music playback level.")});
-        Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), TEXT("Wind, woodland and creek ambience.")});
-        Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), TEXT("Footsteps, gathering, crafting, and interface sounds.")});
-        Result.Add({8, TEXT("Start a new woodland"), TEXT("Create a new seed after confirmation. Cancel keeps your current woodland. This build uses a new test-save version.")});
-        Result.Add({9, TEXT("Quit game"), TEXT("Choose Save & Quit or Quit without Saving.")});
+        Result.Add({2, TEXT("Game speed: ") + Speed, FString()});
+        Result.Add({3, FString::Printf(TEXT("Camera sensitivity: %.1f"), Sensitivity), FString()});
+        Result.Add({4, FString::Printf(TEXT("Invert camera Y: %s"), bInvertY ? TEXT("On") : TEXT("Off")), FString()});
+        Result.Add({16, FString::Printf(TEXT("Overall volume: %d%%"), FMath::RoundToInt(MasterVolume * 100)), FString()});
+        Result.Add({5, FString::Printf(TEXT("Music volume: %d%%"), FMath::RoundToInt(MusicVolume * 100)), FString()});
+        Result.Add({6, FString::Printf(TEXT("Ambience volume: %d%%"), FMath::RoundToInt(AmbienceVolume * 100)), FString()});
+        Result.Add({7, FString::Printf(TEXT("Effects volume: %d%%"), FMath::RoundToInt(EffectsVolume * 100)), FString()});
+        Result.Add({8, TEXT("Start a new woodland"), FString()});
+        Result.Add({9, TEXT("Quit game"), FString()});
         if (UGameUserSettings* Settings = GEngine ? GEngine->GetGameUserSettings() : nullptr)
         {
             float Normalized = 0, Scale = 100, Minimum = 0, Maximum = 100;
             Settings->GetResolutionScaleInformationEx(Normalized, Scale, Minimum, Maximum);
             // An unset scale reads 0: the engine's own default screen percentage (cycling goes to 100 from it).
             Result.Add({10, Scale > 0 ? FString::Printf(TEXT("3D resolution scale: %.0f%%"), Scale) : FString(TEXT("3D resolution scale: Automatic")),
-                TEXT("Cycle 100 / 85 / 70 percent. UI stays sharp; TSR upscales the scene.")});
+                TEXT("Lower is faster; the UI stays sharp.")});
             const auto* VSync = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VSync"));
             const bool Requested = Settings->IsVSyncEnabled();
             FString Label = FString::Printf(TEXT("Vertical sync: %s"), Requested ? TEXT("On") : TEXT("Off"));
@@ -259,36 +272,36 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
                 Label += FString::Printf(TEXT(" | active %s (override)"), VSync->GetInt() ? TEXT("On") : TEXT("Off"));
             else if ((VSync->GetFlags() & ECVF_SetByMask) > ECVF_SetByGameSetting)
                 Label += TEXT(" (engine override)");
-            Result.Add({11, Label, TEXT("May reduce tearing, but can add input delay. Does not fix every flicker.")});
+            Result.Add({11, Label, TEXT("Less tearing, a little more input delay.")});
         }
         Result.Add({12, FString::Printf(TEXT("Autosave: %s"), bAutosaveEnabled ? TEXT("On") : TEXT("Off")),
-            TEXT("Periodic rotating saves. Recovery checkpoints remain separate.")});
+            FString()});
         Result.Add({13, FString::Printf(TEXT("Autosave interval: %d minutes"), AutosaveMinutes),
-            bAutosaveEnabled ? TEXT("Counts only unpaused gameplay time.") : TEXT("Stored interval; Autosave is Off.")});
+            FString()});
         if (Map)
             Result.Add({17, FString::Printf(TEXT("Minimap: %s"), Map->RotatesWithCamera() ? TEXT("turns with your view") : TEXT("north up")),
-                TEXT("North up keeps the map still; turning with your view keeps ahead at the top, and the N marker shows north.")});
+                FString()});
         Result.Add({15, TEXT("Show action hints again"),
-            FString::Printf(TEXT("Each floating action hint retires after you've done that action %d times. This brings them all back."), HintRetireUses)});
+            FString()});
         if (!PreviewLabel().IsEmpty())
             Result.Add({14, PreviewLabel(), TEXT("This preview uses isolated saves.")});
     }
     else if (Page == 7)
     {
-        Result.Add({0, TEXT("Map"), TEXT("The estate and the country around it.")});
+        Result.Add({0, TEXT("Map"), FString()});
     }
     else if (Page == 6)
     {
-        Result.Add({0, FString::Printf(TEXT("Hair: %s"), HomesteadLook::MetaHairName(Appearance.MetaHair)), TEXT("MetaHuman hairstyles: long, bobbed, tied back, braided or cropped.")});
-        Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), TEXT("Chestnut, dark brown, black, copper, or blonde. Hair color is independent of hairstyle.")});
-        Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)),         TEXT("Natural, warm, deep or light. Her face and body change together.")});
-                Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), TEXT("Blue, green, hazel or grey. The view moves close to her face while you choose.")});
-        Result.Add({4, FString::Printf(TEXT("Tunic dye: %s"), HomesteadLook::TunicColorName(Appearance.TunicColor)), TEXT("A color choice for the current original outfit.")});
-        Result.Add({5, FString::Printf(TEXT("Outfit: %s"), HomesteadLook::OutfitName(Appearance.Outfit)), TEXT("Cosmetic linen choices.")});
+        Result.Add({0, FString::Printf(TEXT("Hair: %s"), HomesteadLook::MetaHairName(Appearance.MetaHair)), FString()});
+        Result.Add({1, FString::Printf(TEXT("Hair color: %s"), HomesteadLook::HairColorName(Appearance.HairColor)), FString()});
+        Result.Add({2, FString::Printf(TEXT("Skin: %s"), HomesteadLook::SkinToneName(Appearance.SkinTone)),         FString()});
+                Result.Add({3, FString::Printf(TEXT("Eyes: %s"), HomesteadLook::EyeColorName(Appearance.EyeColor)), FString()});
+        Result.Add({4, FString::Printf(TEXT("Tunic dye: %s"), HomesteadLook::TunicColorName(Appearance.TunicColor)), FString()});
+        Result.Add({5, FString::Printf(TEXT("Outfit: %s"), HomesteadLook::OutfitName(Appearance.Outfit)), FString()});
         // Only once she owns it; hiding it is a look, and she can still carry as much.
         if (State().leatherBackpack)
             Result.Add({6, FString::Printf(TEXT("Backpack: %s"), State().backpackShown ? TEXT("Shown") : TEXT("Hidden")),
-                TEXT("Show or hide the leather backpack on her back. It holds as much either way.")});
+                FString()});
     }
     else
     {
@@ -321,11 +334,9 @@ FString AHomesteadController::BookSummary() const
 {
     switch (Page)
     {
-    case 0: return ActiveChestId.IsSet()
-        ? TEXT("Move whole stacks between this chest and your pack.")
-        : TEXT("Carried items and equipped clothing.");
+    case 0: return FString();
     case 1: return FString();
-    case 2: return TEXT("Choose a plan to start placing it. Materials are spent when you place it.");
+    case 2: return FString();
     case 6: return bGamepad ? TEXT("D-pad Left / Right: change the highlighted choice. Right stick: look around her.")
         : TEXT("Click a swatch or style to wear it. Drag or WASD: look around her. Wheel: zoom.");
 

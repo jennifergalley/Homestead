@@ -163,10 +163,13 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         Add(TEXT("One authoritative tree clear with scale-one held hatchet: ") + Key.ToString(),
             [this, Avatar, Probe, Snapshot, Node, Key]()
             {
+                // Felling is the axe on the tool button (LMB / RT); F / X and E never fell (Jenny 2026-09-30).
+                Controller->ChooseOnHotbar(Homestead::Item::Hatchet);
                 Snapshot(); Probe->Ready = Probe->Expected.Clear(Node->id, Controller->PlayerPoint()).ok;
                 Probe->Actor = Avatar->GetActorLocation(); Probe->Hand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"));
                 Probe->LeftToe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_l")); Probe->RightToe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
-                Probe->View = Controller->GetControlRotation(); Tap(Key);
+                Probe->View = Controller->GetControlRotation();
+                Tap(Key == EKeys::F ? EKeys::LeftMouseButton : Key == EKeys::Gamepad_FaceButton_Left ? EKeys::Gamepad_RightTrigger : Key);
             }, [this, Avatar, Probe, Animation, Matches, Node]()
             {
                 const auto* Tool = Avatar->GetHatchet();
@@ -197,10 +200,10 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     Add(TEXT("Close notes for actual gather/craft setup"), [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this, Hidden]() { return !Controller->IsBookOpen() && Hidden(); });
     Approach(Tree);
-    Add(TEXT("No-hatchet rejection gives no reward, energy cost, clear or prop"),
+    Add(TEXT("F never fells: no reward, energy cost, clear or prop"),
         [this, Snapshot]() { Snapshot(); Tap(EKeys::F); },
         [this, Probe, Animation, Hidden, Matches]()
-        { return Controller->ToastIsError() && Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
+        { return Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
     QueueGatherTo(Homestead::Item::Branch, 4);
     QueueGatherTo(Homestead::Item::Stone, 3);
     QueueGrant(Homestead::Item::RustedAxeHead, 1);
@@ -420,7 +423,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
             [this]() { Screenshot(TEXT("camera-safe-sapling")); },
             [CameraCanopy]() { return CameraCanopy(true, false); }, 0.8f);
         Add(TEXT("Mapped sapling harvest removes camera-safe produce without gameplay changes"),
-            [this, Probe, Decorations]() { Probe->DecorationsBeforeHarvest = Decorations(); Tap(EKeys::E); },
+            [this, Probe, Decorations]() { Probe->DecorationsBeforeHarvest = Decorations(); Controller->ChooseOnHotbar(Homestead::Item::Hatchet); Tap(EKeys::LeftMouseButton); },
             [this, Tree, CameraCanopy, Probe, Decorations]() { return !Controller->ToastIsError()
                 && !Controller->Simulation().CanHarvest(Tree->id) && CameraCanopy(false, false)
                 && Decorations() == Probe->DecorationsBeforeHarvest; });
@@ -480,19 +483,17 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         [this, Branch, OtherTree]() { Teleport({Branch.position.x * 0.6 + OtherTree.position.x * 0.4,
             Branch.position.y * 0.6 + OtherTree.position.y * 0.4}); },
         [this, Branch, Hidden]() { return Controller->IsResourceFocused(Branch.id) && Hidden(); }, 0.7f);
-    Add(TEXT("Rapid mapped E/F/F preserves branch gather, branch clear and tree yield once, with one pose"),
-        [this, Probe, Snapshot, Branch, OtherTree]()
+    Add(TEXT("Rapid mapped E/F/F gathers the branch once; F neither clears it nor fells the tree"),
+        [this, Probe, Snapshot, Branch]()
         {
             Snapshot();
-            Probe->Ready = Probe->Expected.Harvest(Branch.id, Controller->PlayerPoint()).ok
-                && Probe->Expected.Clear(Branch.id, Controller->PlayerPoint()).ok
-                && Probe->Expected.Clear(OtherTree.id, Controller->PlayerPoint()).ok;
+            Probe->Ready = Probe->Expected.Harvest(Branch.id, Controller->PlayerPoint()).ok;
             Tap(EKeys::E); Tap(EKeys::F); Tap(EKeys::F);
         }, [this, Avatar, Probe, Animation, Matches]()
         {
             return Probe->Ready && !Controller->ToastIsError() && Matches()
-                && Animation()->ClearStarts() == Probe->Starts + 1 && Animation()->GatherStarts() == Probe->GatherStarts
-                && Animation()->WaterStarts() == Probe->WaterStarts && Avatar->GetHatchet()->IsPresented()
+                && Animation()->ClearStarts() == Probe->Starts
+                && Animation()->WaterStarts() == Probe->WaterStarts && !Avatar->GetHatchet()->IsPresented()
                 && !Avatar->GetWateringTool()->IsPresented();
         }, 1.2f);
     // Felling commits a frame or two after the press on slow frames; pass as soon as the state agrees.
@@ -528,7 +529,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
             Snapshot(); Probe->Ready = !Probe->Expected.Clear(Tree->id, Controller->PlayerPoint()).ok;
             Tap(EKeys::F); Tap(EKeys::Gamepad_FaceButton_Left);
         }, [this, Probe, Animation, Matches]()
-        { return Probe->Ready && Controller->ToastIsError() && Matches() && Animation()->ClearStarts() == Probe->Starts; }, 0.12f);
+        { return Probe->Ready && Matches() && Animation()->ClearStarts() == Probe->Starts; }, 0.12f);
     Add(TEXT("Other pending hand requests cannot stack or grant transactions"),
         [Animation]() { Animation()->RequestWater(); Animation()->RequestGather(); },
         [Avatar, Probe, Animation, Matches]() { return Matches() && Animation()->ClearStarts() == Probe->Starts
@@ -605,10 +606,10 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         { return !Controller->ToastIsError() && Hidden() && Matches(); }, 0.8f);
     Add(TEXT("Current empty-context input is not tree felling"),
         [this, EmptyContext]() { Teleport(EmptyContext); }, Hidden, 0.7f);
-    Add(TEXT("Empty-context secondary rejection preserves state and clearing starts"),
+    Add(TEXT("Empty-context F does nothing: state and clearing starts unchanged"),
         [this, Snapshot]() { Snapshot(); Tap(EKeys::F); },
         [this, Probe, Animation, Hidden, Matches]()
-        { return Controller->ToastIsError() && Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
+        { return Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
 
     if (bShippingQA) return;
     const auto Reserved = MakeShared<Homestead::ResourceNode>(FocusableMatureTrees[2]);
@@ -630,7 +631,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     Approach(Reserved);
     Add(TEXT("Ready tree capacity rejection has no clear, yield, energy debit or swing"),
         [this, Probe, Snapshot, Reserved]()
-        { Snapshot(); Probe->Ready = !Probe->Expected.Clear(Reserved->id, Controller->PlayerPoint()).ok; Tap(EKeys::F); },
+        { Controller->ChooseOnHotbar(Homestead::Item::Hatchet); Snapshot(); Probe->Ready = !Probe->Expected.Clear(Reserved->id, Controller->PlayerPoint()).ok; Tap(EKeys::LeftMouseButton); },
         [this, Probe, Animation, Hidden, Matches]()
         { return Probe->Ready && Controller->ToastIsError() && Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
 }

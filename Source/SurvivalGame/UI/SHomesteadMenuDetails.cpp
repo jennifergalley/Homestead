@@ -78,11 +78,17 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
             ]
         ];
     RequirementHints.Reset();
-    if (Entries.IsValidIndex(ContentSelection)
-        && Entries[ContentSelection].Subject == EHomesteadMenuSubject::Recipe
-        && Entries[ContentSelection].HasRecipeState)
+    // A recipe's or a build plan's requirements: a "Requires:" heading, a row per material with what she
+    // has against what it takes, then any conditions (a plan's "Foundation required").
+    if (Entries.IsValidIndex(ContentSelection) && Entries[ContentSelection].HasRecipeState)
     {
         const auto& Assessment = Entries[ContentSelection].RecipeState;
+        if (!Assessment.ingredients.empty() || !Entries[ContentSelection].Conditions.IsEmpty())
+            DetailsContent->AddSlot().AutoHeight().Padding(0, 0, 0, 6)
+            [
+                SNew(STextBlock).Text(FText::FromString(TEXT("Requires:"))).ColorAndOpacity(Ink)
+                .Font(HomesteadUITheme::Font("Bold", 17))
+            ];
         const auto AddRequirement = [this, &DetailsContent](FName Icon, const FString& Label,
             const FString& Status, const FString& Source, bool Met)
         {
@@ -153,6 +159,12 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
         if (!Assessment.capacityMet)
             AddRequirement(FName(TEXT("pack")), TEXT("Pack space"), TEXT("Full"),
                 TEXT("Make room for the crafted output"), false);
+        for (const FString& Condition : Entries[ContentSelection].Conditions)
+            DetailsContent->AddSlot().AutoHeight().Padding(2, 4, 0, 2)
+            [
+                SNew(STextBlock).Text(FText::FromString(Condition)).ColorAndOpacity(Ink)
+                .Font(HomesteadUITheme::Font("Regular", 16))
+            ];
     }
     ComputeActions();
     if (Actions.IsEmpty() && Region == ERegion::Actions) Region = ERegion::Details;
@@ -190,7 +202,7 @@ void SHomesteadMenu::ComputeActions()
     {
         const auto& Row = Entries[ContentSelection];
         if (Row.Subject != EHomesteadMenuSubject::Recipe && Row.Subject != EHomesteadMenuSubject::ItemGroup
-            && Row.Subject != EHomesteadMenuSubject::Wearable && SeenPage != 3
+            && Row.Subject != EHomesteadMenuSubject::Wearable && SeenPage != 2 && SeenPage != 3
             && SeenPage != 5 && !IsDirectCameraSetting(Row))
             Actions.Add(EHomesteadItemAction::Primary);
     }
@@ -263,7 +275,7 @@ FString SHomesteadMenu::DetailsBodyText() const
     if (Row.Subject == EHomesteadMenuSubject::Recipe) return FString();
     FString Detail = Row.Detail;
     if (SeenPage == 4 && Controller.IsValid() && Controller->IsFailed())
-        Detail += TEXT("\n\nRecovery: saving a failed state is disabled. Retry a checkpoint or quit explicitly.");
+        Detail += TEXT("\n\nSaving is off until you return to your latest save.");
     return Detail;
 }
 

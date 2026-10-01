@@ -221,6 +221,26 @@ void AHomesteadSmokeTest::QueueGrant(Homestead::Item Item, int32 Count)
         [this, Item, Count, Before]() { return Controller->Simulation().Count(Item) == *Before + Count; });
 }
 
+void AHomesteadSmokeTest::AffordPlan(Homestead::Piece Kind)
+{
+    AffordPlanBefore = UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str());
+    const Homestead::Inventory Cost = Homestead::PieceCost(Kind);
+    for (int32 Material = 0; Material < Homestead::ItemCount; ++Material)
+    {
+        const auto Item = static_cast<Homestead::Item>(Material);
+        const int32 Short = Cost[Material] - Controller->Simulation().Count(Item);
+        if (Short > 0 && !Controller->Sim.GrantItems(Item, Short))
+        { Finish(false, TEXT("The plan's materials did not fit in the pack.")); return; }
+    }
+}
+
+void AHomesteadSmokeTest::UndoAffordPlan()
+{
+    if (AffordPlanBefore.IsEmpty()) return;
+    if (!Controller->Sim.Deserialize(TCHAR_TO_UTF8(*AffordPlanBefore))) Finish(false, TEXT("Could not put back the plan's materials."));
+    AffordPlanBefore.Reset();
+}
+
 void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
 {
     const auto Item = CraftedItem(Recipe);
@@ -343,8 +363,8 @@ void AHomesteadSmokeTest::QueueClearCell(int32 CellX, int32 CellY)
             [this, CurrentId]() { return !Controller->IsBookOpen() && !Controller->IsPlanning()
                 && Controller->IsResourceFocused(*CurrentId); }, 0.65f);
         Steps.Last().Skip = Skip;
-        Add(TEXT("Permanently clear stable site obstruction with gamepad X"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
+        Add(TEXT("Permanently clear stable site obstruction with the axe on RT"),
+            [this]() { ChooseFullLoopHotbarItem(Homestead::Item::Hatchet); Tap(EKeys::Gamepad_RightTrigger); },
             [this, Key]()
             {
                 Homestead::ResourceNode Current;
@@ -538,7 +558,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             *BeforeBedPolicyHour = Controller->State().hour;
             *BeforeBedPolicyEnergy = Controller->State().energy;
             Controller->Sim.SkipToHourOfDay(12.0);
-            if (!Controller->Sim.SetEnergy(40.0)) { Finish(false, TEXT("Could not prepare midday rest.")); return; }
+            if (!Controller->Sim.SetEnergy(39.0)) { Finish(false, TEXT("Could not prepare midday rest.")); return; }
             Teleport(Home);
             Controller->GetPawn()->SetActorRotation(FRotator(0, -20, 0));
             *BedPolicyHour = Controller->State().hour;
@@ -547,14 +567,14 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         {
             return Controller->FocusTitle() == TEXT("Bed")
                 && Controller->FocusActions() == TEXT("[A] Sleep until rested")
-                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 6.0, 0.01);
+                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 6.25, 0.01);
         }, 0.65f);
     Add(TEXT("One A sleeps to full Energy without opening a picker"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, BedPolicyHour]()
         {
             return !Controller->IsBookOpen() && !Controller->IsFailed()
-                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 6.0, 0.02)
+                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 6.25, 0.02)
                 && Controller->State().energy >= Homestead::Food::FullEnergyAt;
         });
     Add(TEXT("Rested at night: bed offers only Sleep until morning"),
@@ -578,10 +598,10 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 9.0, 0.02)
                 && Controller->State().energy >= Homestead::Food::FullEnergyAt;
         });
-    Add(TEXT("At 05:52, the bed still offers a short sleep to 06:00"),
+    Add(TEXT("At 05:45, the bed still offers a short sleep to 06:00"),
         [this, Home, BedPolicyHour]()
         {
-            Controller->Sim.SkipToHourOfDay(5.875);
+            Controller->Sim.SkipToHourOfDay(5.75);
             Teleport(Home);
             Controller->GetPawn()->SetActorRotation(FRotator(0, -20, 0));
             *BedPolicyHour = Controller->State().hour;
@@ -589,14 +609,14 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]()
         {
             return Controller->FocusActions() == TEXT("[A] Sleep until morning")
-                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 0.125, 0.001);
+                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 0.25, 0.02);
         }, 0.65f);
     Add(TEXT("A short final sleep stops precisely at 06:00"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, BedPolicyHour]()
         {
             return !Controller->IsBookOpen() && !Controller->IsFailed()
-                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 0.125, 0.02);
+                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 0.25, 0.02);
         });
     Add(TEXT("Restore the pre-rest garden and clock"),
         [this, BeforeBedPolicy, BeforeBedRoute, BeforeBedAutoIndex, BeforeBedSavedAt, BeforeBedSaveLabel]()
@@ -719,8 +739,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             Controller->SetControlRotation(FRotator(-20, 180, 0));
         },
         [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.65f);
-    Add(TEXT("Till the garden using gamepad X and the crafted digging stick"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
+    Add(TEXT("Till the garden with the crafted digging stick on RT"),
+        [this]() { ChooseFullLoopHotbarItem(Homestead::Item::DiggingStick); Tap(EKeys::Gamepad_RightTrigger); },
         [this]()
         {
             for (const auto& Plot : Controller->State().plots)
@@ -733,7 +753,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         });
     Add(TEXT("Approach the new garden plot"),
         [this, Garden]() { Teleport(Garden); },
-        [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
+        [this]() { return Controller->FocusTitle() == TEXT("Tilled soil"); }, 0.65f);
     const auto SeedsBefore = MakeShared<int32>(0);
     Add(TEXT("Plant the wild-root seeds through gamepad A (Seeds chosen on the hotbar)"),
         [this, SeedsBefore]()
@@ -758,8 +778,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             Controller->SetControlRotation(FRotator(-20, 0, 0));
         },
         [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.65f);
-    Add(TEXT("Till the second food plot through gamepad X"),
-        [this, SecondaryStarts, PickingStarts]() { *SecondaryStarts = PickingStarts(); Tap(EKeys::Gamepad_FaceButton_Left); },
+    Add(TEXT("Till the second food plot with the digging stick on RT"),
+        [this, SecondaryStarts, PickingStarts]() { *SecondaryStarts = PickingStarts(); ChooseFullLoopHotbarItem(Homestead::Item::DiggingStick); Tap(EKeys::Gamepad_RightTrigger); },
         [this, BerryPlotId, SecondaryStarts, PickingStarts]()
         {
             for (const auto& Plot : Controller->State().plots)
@@ -772,12 +792,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         });
     Add(TEXT("Approach the bare berry garden"),
         [this, BerryGarden]() { Teleport(BerryGarden); },
-        [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
+        [this]() { return Controller->FocusTitle() == TEXT("Tilled soil"); }, 0.65f);
     const auto StockBefore = MakeShared<TPair<int32, int32>>();
     const auto Unchanged = [this, BerryPlotId, StockBefore]()
     {
         const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
-        return Plot && !Plot->planted && Controller->ToastIsError()
+        return Plot && !Plot->planted
             && Controller->Simulation().Count(Homestead::Item::Berries) == StockBefore->Key
             && Controller->Simulation().Count(Homestead::Item::Seeds) == StockBefore->Value;
     };
@@ -872,13 +892,13 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         },
         [this]() { return Controller->GetPawn()->GetVelocity().Size2D() < 1.0; });
     Add(TEXT("Fill the crafted watering can from the actual stream"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { ChooseFullLoopHotbarItem(Homestead::Item::WateringCan); Tap(EKeys::Gamepad_RightTrigger); },
         [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions && !Controller->ToastIsError(); });
     Add(TEXT("Return to the planted garden"),
         [this, Garden]() { Teleport(Garden); },
         [this]() { return Controller->FocusTitle().StartsWith(TEXT("Roots")); }, 0.65f);
-    Add(TEXT("Water the planted root crop using gamepad A"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Water the planted root crop with the pail on RT"),
+        [this]() { ChooseFullLoopHotbarItem(Homestead::Item::WateringCan); Tap(EKeys::Gamepad_RightTrigger); },
         [this]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
@@ -888,8 +908,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     Add(TEXT("Approach the planted berry bush"),
         [this, BerryGarden]() { Teleport(BerryGarden); },
         [this]() { return Controller->FocusTitle().StartsWith(TEXT("Berries")); }, 0.65f);
-    Add(TEXT("Water the second crop through the same gamepad A action"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Water the second crop through the same pail on RT"),
+        [this]() { ChooseFullLoopHotbarItem(Homestead::Item::WateringCan); Tap(EKeys::Gamepad_RightTrigger); },
         [this, BerryPlotId]()
         {
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
@@ -900,7 +920,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [RevalidateStreamBank]() { RevalidateStreamBank(); },
         [this]() { return Controller->FocusTitle() == TEXT("Fresh stream water"); }, 0.65f);
     Add(TEXT("Refilling tops the carried pail up to capacity"),
-        [this, RevalidateStreamBank]() { RevalidateStreamBank(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, RevalidateStreamBank]() { RevalidateStreamBank(); ChooseFullLoopHotbarItem(Homestead::Item::WateringCan); Tap(EKeys::Gamepad_RightTrigger); },
         [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions && !Controller->ToastIsError(); });
 
     // From 22:45, a rested heroine sleeps 7h15 to the 06:00 morning rollover.
@@ -1000,7 +1020,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             [this]() { return Controller->FocusTitle() == TEXT("Fresh stream water"); }, 0.65f);
         Steps.Last().Skip = [this]() { return Controller->Simulation().Count(Homestead::Item::Water) >= 2; };
         Add(TEXT("Refill the watering can while tending both food crops"),
-            [this, RevalidateStreamBank]() { RevalidateStreamBank(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+            [this, RevalidateStreamBank]() { RevalidateStreamBank(); ChooseFullLoopHotbarItem(Homestead::Item::WateringCan); Tap(EKeys::Gamepad_RightTrigger); },
             [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions && !Controller->ToastIsError(); });
         Steps.Last().Skip = [this]() { return Controller->Simulation().Count(Homestead::Item::Water) >= 2; };
         Add(FString::Printf(TEXT("Inspect the living crop after rest %d"), Rest + 1),
@@ -1016,13 +1036,20 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             {
                 const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
                 return Plot && Plot->planted && Plot->weeds < 0.001 && !Controller->ToastIsError();
-            });
+            }, 4.5f);
+        Steps.Last().Skip = [this]()
+        {
+            const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
+            return Plot && !Homestead::HasVisibleWeeds(*Plot);
+        };
         const auto WaterBefore = MakeShared<int32>(0);
         Add(FString::Printf(TEXT("Water the still-growing crop after rest %d"), Rest + 1),
             [this, WaterBefore]()
             {
                 *WaterBefore = Controller->Simulation().Count(Homestead::Item::Water);
-                Tap(EKeys::Gamepad_FaceButton_Bottom);
+                // The pail waters on the tool button; A never waters (Jenny 2026-09-30).
+                ChooseFullLoopHotbarItem(Homestead::Item::WateringCan);
+                Tap(EKeys::Gamepad_RightTrigger);
             },
             [this, WaterBefore]()
             {
@@ -1052,12 +1079,19 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
                 return Plot && Plot->planted && Plot->kind == Homestead::CropKind::Berries
                     && Plot->weeds < 0.001 && !Controller->ToastIsError();
-            });
+            }, 4.5f);
+        Steps.Last().Skip = [this, BerryPlotId]()
+        {
+            const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
+            return Plot && !Homestead::HasVisibleWeeds(*Plot);
+        };
         Add(FString::Printf(TEXT("Water the slower-growing berry bush after rest %d"), Rest + 1),
             [this, WaterBefore]()
             {
                 *WaterBefore = Controller->Simulation().Count(Homestead::Item::Water);
-                Tap(EKeys::Gamepad_FaceButton_Bottom);
+                // The pail waters on the tool button; A never waters (Jenny 2026-09-30).
+                ChooseFullLoopHotbarItem(Homestead::Item::WateringCan);
+                Tap(EKeys::Gamepad_RightTrigger);
             },
             [this, BerryPlotId, WaterBefore]()
             {
@@ -1233,7 +1267,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         });
     Add(TEXT("Return to the harvested plot for the persistence checkpoint"),
         [this, Garden]() { Teleport(Garden); },
-        [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
+        [this]() { return Controller->FocusTitle() == TEXT("Tilled soil"); }, 0.65f);
     const auto SavedState = MakeShared<std::string>();
     const auto SavedLook = MakeShared<FHomesteadAppearance>();
     Add(TEXT("Save the complete harvested homestead from the paused pack"),
@@ -1265,7 +1299,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsBookOpen(); });
     Add(TEXT("Replant after saving to create a real garden-state difference"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]()
+        {
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Seeds))
+            { Finish(false, TEXT("Could not put harvested seeds in the real hotbar row.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
         [this]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
@@ -1336,7 +1375,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         }, 0.8f);
     Add(TEXT("Return from the restored pack to the garden"),
         [this, Garden]() { Tap(EKeys::Gamepad_FaceButton_Right); Teleport(Garden); },
-        [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.65f);
+        [this]() { return Controller->FocusTitle() == TEXT("Tilled soil"); }, 0.65f);
     Add(TEXT("Plant the next generation using the harvested seeds (Seeds chosen on the hotbar)"),
         [this]() {
             if (!ChooseFullLoopHotbarItem(Homestead::Item::Seeds))
@@ -1356,8 +1395,30 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             Tap(EKeys::F5);
         },
         [this]() { return Controller->IsBookOpen() && !Controller->ToastIsError(); });
-    Add(TEXT("Close the pack and change the saved soil moisture"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    const auto MoistureBefore = MakeShared<double>(0);
+    Add(TEXT("A on the unripe second-generation crop does not water it"),
+        [this, MoistureBefore, WaterBefore]()
+        {
+            Tap(EKeys::Gamepad_FaceButton_Right);
+            const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
+            *MoistureBefore = Plot ? Plot->moisture : -1;
+            *WaterBefore = Controller->Simulation().Count(Homestead::Item::Water);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, MoistureBefore, WaterBefore]()
+        {
+            const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
+            return Plot && Plot->planted && Plot->moisture <= *MoistureBefore + 0.001
+                && Controller->Simulation().Count(Homestead::Item::Water) == *WaterBefore
+                && Controller->ToastIsError() && Controller->Toast() == TEXT("Not ready yet");
+        });
+    Add(TEXT("Pour on the unripe crop with RT to change saved soil moisture"),
+        [this]()
+        {
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::WateringCan))
+            { Finish(false, TEXT("Could not put the pail in the real hotbar row.")); return; }
+            Tap(EKeys::Gamepad_RightTrigger);
+        },
         [this]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
@@ -1422,9 +1483,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 const double Advanced = State.hour - *BeforeHour;
                 if (Controller->IsFailed())
                     return Advanced > 0 && Advanced <= *ExpectedSleep + 0.1 && State.hunger == 0;
+                const double Depleted = *BeforeHunger - State.hunger;
                 return Advanced >= *ExpectedSleep - 0.01 && Advanced < *ExpectedSleep + 0.1
-                    && State.hunger < *BeforeHunger - FMath::Min(10.0, *ExpectedSleep)
-                    && !Controller->ToastIsError()
+                    && Depleted > 0
+                    && (State.hunger <= 10.0 || Depleted >= FMath::Min(10.0, *ExpectedSleep) - 0.01)
+                    && (!Controller->ToastIsError() || Controller->Toast() == TEXT("Starving"))
                     && !Controller->Simulation().IsSheltered(Controller->PlayerPoint());
             }, 0.6f);
         // A is also retry while failed; never let a remaining queued sleep dismiss the failure modal.

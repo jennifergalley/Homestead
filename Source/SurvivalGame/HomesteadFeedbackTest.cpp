@@ -114,6 +114,31 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     };
     Add(TEXT("Close initial Notes with existing toggle"), [this]() { Tap(EKeys::I); },
         [this]() { return !Controller->IsBookOpen(); });
+    // Low Energy warns once per crossing (Jenny 2026-09-30: she starved "with zero warning"): a short
+    // notice as it falls past 25 and past 10, never again while it hovers, never for a loaded/slept jump.
+    // A marker notice in between proves nothing new was said.
+    const auto Marker = TEXT("energy-warning-marker");
+    const auto EnergyStep = [this, Marker](const TCHAR* Name, double Energy, bool bMark, const TCHAR* Expected, bool bError)
+    {
+        Add(Name, [this, Marker, Energy, bMark]()
+            {
+                if (bMark) Controller->Notify(Marker, false);
+                Controller->Sim.SetEnergy(Energy);
+            },
+            [this, Expected, bError]() { return Controller->Toast() == Expected && Controller->ToastIsError() == bError; }, 0.3f);
+    };
+    EnergyStep(TEXT("A jump down to 40 (as from a load) says nothing"), 40.0, true, Marker, false);
+    EnergyStep(TEXT("Wearing down to 30 says nothing"), 30.0, true, Marker, false);
+    EnergyStep(TEXT("Crossing 25 says 'Getting tired' once"), 23.0, true, TEXT("Getting tired"), false);
+    EnergyStep(TEXT("Hovering below 25 says nothing more"), 22.0, true, Marker, false);
+    EnergyStep(TEXT("Back to 27 (inside the re-arm margin) and down to 24 again says nothing"), 27.0, true, Marker, false);
+    EnergyStep(TEXT("Down again to 24 still says nothing"), 24.0, true, Marker, false);
+    EnergyStep(TEXT("Crossing 10 says 'Exhausted' as a warning"), 9.0, true, TEXT("Exhausted"), true);
+    EnergyStep(TEXT("Hovering below 10 says nothing more"), 8.0, true, Marker, false);
+    EnergyStep(TEXT("Restoring her Energy in one jump says nothing"), 100.0, true, Marker, false);
+    Add(TEXT("Clear the marker notice before the feedback checks"),
+        [this]() { Controller->ToastText.Reset(); Controller->bToastError = false; Controller->ToastRemaining = 0; },
+        [this]() { return Controller->Toast().IsEmpty(); });
     Add(TEXT("Open pack with mapped keyboard I"), [this]() { Tap(EKeys::I); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Save success comes from actual sandbox F5"),
@@ -165,8 +190,12 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
         [this, Before, Geometry]()
         {
             const auto* HUD = Controller->GetHUD<AHomesteadHUD>();
-            return Controller->Toast().IsEmpty() && HUD->FeedbackSource().IsEmpty()
-                && HUD->FeedbackCriticalGeometry() == *Geometry && Controller->Simulation().Serialize() == *Before;
+            const bool bToast = Controller->Toast().IsEmpty(), bSource = HUD->FeedbackSource().IsEmpty();
+            const bool bGeometry = HUD->FeedbackCriticalGeometry() == *Geometry, bSim = Controller->Simulation().Serialize() == *Before;
+            if (StepElapsed > 0.3f && !(bToast && bSource && bGeometry && bSim))
+                Results.AddUnique(FString::Printf(TEXT("TOAST_EXPIRY toast_gone=%d source_gone=%d geometry_same=%d sim_same=%d toast='%s' source='%s'"),
+                    bToast, bSource, bGeometry, bSim, *Controller->Toast(), *HUD->FeedbackSource()));
+            return bToast && bSource && bGeometry && bSim;
         }, 1.2f);
     // The five field-book tabs in order (Pack 0, Craft 1, Build 2, Map 7, Look 6; the Guidebook, 3, is
     // retired). Settings (4) isn't a tab: Start opens it from the world.
@@ -188,7 +217,7 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return Controller->Toast() == TEXT("Could not save vertical sync. Your previous preference was restored.")
             && Controller->ToastIsError() && !GEngine->GetGameUserSettings()->IsVSyncEnabled()
-            && Controller->Simulation().Serialize() == *Before && Controller->SelectedRow() == 11; });
+            && Controller->Simulation().Serialize() == *Before && (Controller->Rows().IsValidIndex(Controller->SelectedRow()) && Controller->Rows()[Controller->SelectedRow()].Id == 11); });
     Capture(TEXT("feedback-settings-error"));
     Add(TEXT("Restore synthetic graphics file write permission"),
         [Config]() { FPlatformFileManager::Get().GetPlatformFile().SetReadOnly(*Config, false); },
@@ -196,7 +225,7 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     Add(TEXT("Controller success replaces error on same Settings row"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return !Controller->ToastIsError() && GEngine->GetGameUserSettings()->IsVSyncEnabled()
-            && Controller->SelectedRow() == 11 && Controller->Simulation().Serialize() == *Before; });
+            && (Controller->Rows().IsValidIndex(Controller->SelectedRow()) && Controller->Rows()[Controller->SelectedRow()].Id == 11) && Controller->Simulation().Serialize() == *Before; });
     Capture(TEXT("feedback-settings-success"));
     Add(TEXT("Keyboard restores Off in synthetic config with correct input hint"),
         [this]() { Tap(EKeys::Enter); },
@@ -233,10 +262,10 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     Add(TEXT("Real save feedback on building-plan page"), [this]() { Tap(EKeys::F5); },
         [this]() { return Controller->Toast() == TEXT("Your homestead is saved."); });
     Capture(TEXT("feedback-plans-success"));
-    Add(TEXT("Select actual plan with controller"), [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Select actual plan with controller"), [this]() { AffordPlan(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsPlanning() && !Controller->IsBookOpen(); });
     Add(TEXT("Real rejected placement leaves simulation and planning controls intact"),
-        [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, Before]() { UndoAffordPlan(); *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return Controller->IsPlanning() && Controller->ToastIsError()
             && Controller->Simulation().Serialize() == *Before && !Controller->Toast().IsEmpty(); });
     Capture(TEXT("feedback-planning-error"));

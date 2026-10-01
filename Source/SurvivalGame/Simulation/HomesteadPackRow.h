@@ -25,6 +25,11 @@ namespace PackRowRules
 constexpr const char* SaveTag = "packrow";
 void WriteSaveSection(std::ostream& output, const State& state);
 bool ReadSaveSection(std::istream& input, State& state);
+// Optional trailing section (tag "packrowsparked") for the rows rotated out of the hotbar; written only
+// when there are any, so saves without it load with none.
+constexpr const char* ParkedSaveTag = "packrowsparked";
+void WriteParkedSection(std::ostream& output, const State& state);
+bool ReadParkedSection(std::istream& input, State& state);
 
 // The cell naming `entry`.
 PackRowCell CellFor(const LayoutEntry& entry);

@@ -28,12 +28,16 @@ TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.3f,
     TEXT("Sky light intensity at full night."));
 TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -1.0f,
     TEXT("Auto exposure min brightness (EV100) at full night."));
+TAutoConsoleVariable<float> CVarIndoorDaySky(TEXT("homestead.IndoorDaySky"), 0.3f,
+    TEXT("Sky light scale while she is inside a roofed room by day (times the room mix and daylight). Groom sky lighting sees the "
+         "open sky capture through a roof, so a full sky light blew her hair out white under one."));
 }
 
 using HomesteadWorldLighting::CVarRayTracedSun;
 using HomesteadWorldLighting::CVarNightMoonLux;
 using HomesteadWorldLighting::CVarNightSky;
 using HomesteadWorldLighting::CVarNightMinExposure;
+using HomesteadWorldLighting::CVarIndoorDaySky;
 
 void AHomesteadWorld::BuildLighting()
 {
@@ -174,14 +178,18 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     NightTuning.nightMinExposureEV = CVarNightMinExposure.GetValueOnGameThread();
     const Homestead::NightLight Night = Homestead::NightLightAt(Hour, NightTuning);
     Moon->SetIntensity(static_cast<float>(Night.moonLux));
-    Sky->SetIntensity(static_cast<float>(Night.skyScale) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud));
+    // Only while she is inside a roofed room (her position, eased), so the outdoors keeps its sky fill when
+    // the camera passes a doorway or an overhang.
+    const float IndoorDay = GetRoomMix() * Daylight;
+    Sky->SetIntensity(static_cast<float>(Night.skyScale) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud)
+        * FMath::Lerp(1.0f, CVarIndoorDaySky.GetValueOnGameThread(), IndoorDay));
     // The real-time sky capture still sees the clear blue atmosphere under the cloud layer, so warm it
     // back towards a neutral grey overcast.
     Sky->SetLightColor(FMath::Lerp(FLinearColor::White, FLinearColor(1.0f, 0.93f, 0.84f), Cloud));
     Exposure->Settings.AutoExposureMinBrightness = static_cast<float>(Night.minExposureEV);
     // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
     Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud
-        + IndoorDayExposureBias * GetIndoorMix() * Daylight;
+        + IndoorDayExposureBias * IndoorDay;
     const float Saturation = FMath::Lerp(1.0f, OvercastSaturation, Cloud);
     Exposure->Settings.ColorSaturation = FVector4(Saturation, Saturation, Saturation, 1.0f);
     const float ClearFog = FMath::Lerp(0.016f, 0.007f, Daylight);

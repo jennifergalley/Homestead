@@ -4,6 +4,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadController.h"
 #include "Simulation/HomesteadBackpack.h"
+#include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadEstatePublicRoad.h"
 #include "Simulation/HomesteadShops.h"
 #include "Simulation/HomesteadTravel.h"
@@ -399,7 +400,28 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
                     return;
                 }
         });
-    Add(TEXT("book-build"), TEXT("Build tab: building plans with their materials."), ECover::BookPage, 2, nullptr, Book(2));
+    Add(TEXT("book-build"), TEXT("Build tab: building plans; the details list 'Requires:' with each material's have/need, as Craft does."), ECover::BookPage, 2, nullptr, Book(2));
+    Add(TEXT("book-build-unaffordable"), TEXT("Build tab, a plan she can't afford yet (a wall if so): its short material in the missing colour, and 'Foundation required'."),
+        ECover::Dialog, 11, nullptr, [Later](AHomesteadController& Opened)
+        {
+            Opened.OpenBook(2);
+            Later(Opened, [](AHomesteadController& PC)
+            {
+                if (!PC.NativeMenu.IsValid()) return;
+                int32 Chosen = INDEX_NONE;
+                for (int32 Index = 0; Index < static_cast<int32>(Homestead::Piece::Count); ++Index)
+                {
+                    const auto Piece = static_cast<Homestead::Piece>(Index);
+                    if (!Homestead::IsBuildable(Piece)) continue;
+                    const Homestead::Inventory Cost = Homestead::PieceCost(Piece);
+                    bool bShort = false;
+                    for (int32 Material = 0; Material < Homestead::ItemCount; ++Material)
+                        bShort = bShort || PC.Sim.Count(static_cast<Item>(Material)) < Cost[Material];
+                    if (bShort && (Chosen == INDEX_NONE || Piece == Homestead::Piece::Wall)) Chosen = Index;
+                }
+                if (Chosen != INDEX_NONE) PC.NativeMenu->FocusSubject(EHomesteadMenuSubject::Legacy, Chosen, 0);
+            });
+        }, 1.3f);
     Add(TEXT("book-map"), TEXT("Map tab: the estate map with her marker, places and the key."), ECover::BookPage, 7, nullptr, Book(7));
     Add(TEXT("book-appearance"), TEXT("Appearance tab: her full-length view and the look choices."), ECover::BookPage, 6, nullptr, Book(6));
     Add(TEXT("book-credits"), TEXT("Credits page."), ECover::BookPage, 5, nullptr, Book(5));
@@ -460,6 +482,13 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         }, 1.3f);
     Add(TEXT("book-chest"), TEXT("A storage chest open beside her pack, with its name and Store matching."), ECover::Dialog, 5, Chest,
         [ChestId](AHomesteadController& PC) { PC.OpenChestStorage(ChestId(PC)); });
+    Add(TEXT("chest-hotbar-store"), TEXT("A chest open: the hotbar row heads the pack column as one of its rows, the same cells as the pack grid, ready to Shift+click or drag into the chest."),
+        ECover::Dialog, 10, Chest,
+        [ChestId](AHomesteadController& PC)
+        {
+            PC.OpenChestStorage(ChestId(PC));
+            if (PC.NativeMenu.IsValid()) PC.NativeMenu->ActivateHotbarSlot(0);
+        });
     Add(TEXT("book-chest-rename"), TEXT("Naming the chest: the name being typed and the suggestions."), ECover::Dialog, 6, Chest,
         [ChestId](AHomesteadController& PC)
         {
@@ -528,9 +557,9 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         });
     // World notices.
     Add(TEXT("toast-success"), TEXT("World notice: a parchment slip at the top centre in the book's serif."),
-        ECover::Notice, Toast, nullptr, Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false));
+        ECover::Notice, Toast, nullptr, Notify(TEXT("Summer has come"), false));
     Add(TEXT("toast-error"), TEXT("World error notice: the rust-edged slip."),
-        ECover::Notice, ToastError, nullptr, Notify(TEXT("Walk closer to a plant, resource, or work area."), true));
+        ECover::Notice, ToastError, nullptr, Notify(TEXT("Not ready yet"), true));
     Add(TEXT("toast-long"), TEXT("A long world notice wrapping to two or three lines."), ECover::Hud, 11, nullptr,
         Notify(TEXT("Mowed 6 tufts: +4 Hay, +3 Weeds, +1 Seeds. The old orchard meadow is opening up; come back with the scythe tomorrow for the rest."), false));
     Add(TEXT("toast-error-long"), TEXT("A long error notice wrapping to more than one line."), ECover::Hud, 0, nullptr,
@@ -540,8 +569,12 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
 
     // The HUD.
     Add(TEXT("hud-overview"), TEXT("World HUD: calendar and clock, Energy bar, purse, compass, minimap and the hotbar."), ECover::Hud, 2, nullptr, nullptr);
-    Add(TEXT("hud-energy-low"), TEXT("Energy low: the bar short and warm-coloured."), ECover::Hud, 3, nullptr,
-        [](AHomesteadController& PC) { PC.Sim.SetEnergy(14.0); });
+    Add(TEXT("hud-energy-low"), TEXT("Energy below 25: the bar amber and pulsing gently, and the 'Getting tired' notice it gave on crossing."),
+        ECover::Hud, 3, nullptr,
+        [](AHomesteadController& PC) { PC.Sim.SetEnergy(18.0); PC.Notify(TEXT("Getting tired"), false); });
+    Add(TEXT("hud-energy-exhausted"), TEXT("Energy below 10: the bar a muted red and pulsing, and the 'Exhausted' notice."),
+        ECover::Hud, 15, nullptr,
+        [](AHomesteadController& PC) { PC.Sim.SetEnergy(6.0); PC.Notify(TEXT("Exhausted"), true); });
     Add(TEXT("hud-wellfed"), TEXT("Well fed: the pasty chip 'Well fed until …' under the purse, no toast."), ECover::Hud, 4, nullptr,
         [](AHomesteadController& PC)
         {
@@ -616,6 +649,26 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             if (Plot >= 0) PC.Sim.Plant(Plot, PC.PlayerPoint());
             PC.ChooseOnHotbar(Item::WateringCan);
         });
+    // Every action on the card (Jenny 2026-09-30): a ripe, weedy plot offers "[E] Harvest" and "[F] Pull
+    // weeds"; a dry, weedy growing one "[F] Pull weeds" and, with the pail in hand, its tool-button Water.
+    const auto WeedyPlot = [TillAhead](AHomesteadController& PC, double Growth)
+    {
+        const int32 Plot = TillAhead(PC);
+        if (Plot >= 0) PC.Sim.Plant(Plot, PC.PlayerPoint());
+        PC.Sim.PassDaysForPlaytest(3.0, false, PC.PlayerPoint());
+        PC.Sim.SetCropGrowthForPlaytest(Growth);
+        PC.Sim.SkipToHourOfDay(10.0);
+    };
+    Add(TEXT("focus-plot-ripe-weedy"), TEXT("A ripe, weedy plot: '[E] Harvest' and '[F] Pull weeds' side by side."),
+        ECover::Focus, 16, Garden, [WeedyPlot](AHomesteadController& PC) { WeedyPlot(PC, 1.0); });
+    Add(TEXT("focus-plot-water-weed"), TEXT("A dry, weedy growing plot with the pail in hand: '[F] Pull weeds' and '[LMB] Water'."),
+        ECover::Focus, 17, Garden, [WeedyPlot](AHomesteadController& PC)
+        {
+            WeedyPlot(PC, 0.4);
+            PC.Sim.GrantItems(Item::WateringCan, 1);
+            PC.Sim.GrantItems(Item::Water, Homestead::PailPortions);
+            PC.ChooseOnHotbar(Item::WateringCan);
+        });
 
     // Seed outlines and the sowing cue (Water's seed-outline, jennifergalley-seed-outline @6408cdd7:
     // Simulation::CheckSow, PreviewGarden(Seed), DescribeSow). Until it is on this line these show the
@@ -653,9 +706,9 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("hud-night"), TEXT("The world HUD at 10:30 PM: the moon in the calendar, the night-lit world."), ECover::Hud, 7, nullptr, Night, 1.5f);
     Add(TEXT("hud-rain"), TEXT("The world HUD in the rain: the rain cloud in the calendar, rain falling."), ECover::Hud, 8, nullptr, Rain, 1.5f);
     Add(TEXT("toast-night"), TEXT("A world notice at night: the parchment slip over the dark scene."), ECover::Hud, 9, nullptr,
-        [Night](AHomesteadController& PC) { Night(PC); PC.Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false); }, 1.5f);
+        [Night](AHomesteadController& PC) { Night(PC); PC.Notify(TEXT("Summer has come"), false); }, 1.5f);
     Add(TEXT("toast-rain"), TEXT("A world error notice in the rain."), ECover::Hud, 10, nullptr,
-        [Rain](AHomesteadController& PC) { Rain(PC); PC.Notify(TEXT("Walk closer to a plant, resource, or work area."), true); }, 1.5f);
+        [Rain](AHomesteadController& PC) { Rain(PC); PC.Notify(TEXT("Not ready yet"), true); }, 1.5f);
 
     // The new-game setup: the Names step on its own, then the whole flow (it takes over the screen).
     Add(TEXT("setup-names"), TEXT("New-game Names step: her name, family and estate fields with the suggestions."), ECover::Setup, 1, nullptr,

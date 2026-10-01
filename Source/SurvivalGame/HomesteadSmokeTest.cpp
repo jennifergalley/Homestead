@@ -644,8 +644,8 @@ void AHomesteadSmokeTest::Prepare()
                 *CurrentId = Current.id;
             },
             [this, CurrentId]() { return Controller->IsResourceFocused(*CurrentId); }, 0.65f);
-        Add(TEXT("Clear the generated building-site tree through gamepad X"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
+        Add(TEXT("Fell the generated building-site tree with the axe on RT"),
+            [this]() { Controller->ChooseOnHotbar(Homestead::Item::Hatchet); Tap(EKeys::Gamepad_RightTrigger); },
             [this, Key]()
             {
                 Homestead::ResourceNode Current;
@@ -779,7 +779,23 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         const int32 Cell = Native && Controller->BookPage() == 0
             && Step.NavigateToId < Homestead::ItemCount
             ? Controller->HotbarCellOf(static_cast<Homestead::Item>(Step.NavigateToId)) : INDEX_NONE;
-        if (Cell != INDEX_NONE)
+        if (Native && Controller->BookPage() == 4)
+        {
+            // Settings rows sit on their tabs (Game / Sound / Video), with Resume and the tabs above them:
+            // focus the row as a player would pick its tab and then the row.
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            NavigationComplete = Controller->IsBookOpen() && Subject && Subject->Id == Step.NavigateToId;
+            if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
+            {
+                if (!Controller->IsBookOpen() || !Controller->NativeMenu->FocusLegacySubject(Step.NavigateToId))
+                {
+                    Finish(false, Step.Name + TEXT(" | That Settings row is unavailable."));
+                    return;
+                }
+                LastNavigationAt = StepElapsed;
+            }
+        }
+        else if (Cell != INDEX_NONE)
         {
             const FString Region = Controller->NativeMenu->GetFocusedRegionName();
             const int32 FocusedCell = Controller->NativeMenu->GetFocusedHotbarSlot();
@@ -798,20 +814,13 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         }
         else
         {
-            // Settings opens on Resume (the Session region); step down into its rows first.
-            const bool bLeaveSession = Native && Controller->IsBookOpen() && Target != INDEX_NONE
-                && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Session");
-            if (bLeaveSession)
-            {
-                if (StepElapsed - LastNavigationAt >= 0.18f) { Tap(EKeys::Gamepad_DPad_Down); LastNavigationAt = StepElapsed; }
-            }
-            else if (Native && (!Controller->IsBookOpen() || Target == INDEX_NONE || !Rows.IsValidIndex(Current)
+            if (Native && (!Controller->IsBookOpen() || Target == INDEX_NONE || !Rows.IsValidIndex(Current)
                 || Controller->NativeMenu->GetFocusedRegionName() != TEXT("Content")))
             {
                 Finish(false, Step.Name + TEXT(" | Native content grid or requested subject is unavailable."));
                 return;
             }
-            NavigationComplete = !bLeaveSession && Current == Target && Target != INDEX_NONE;
+            NavigationComplete = Current == Target && Target != INDEX_NONE;
             if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
             {
                 if (Native)

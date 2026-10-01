@@ -5,6 +5,7 @@
 #include "HomesteadActionTestState.h"
 #include "Simulation/HomesteadCrops.h"
 #include "UI/SHomesteadMenu.h"
+#include "Simulation/HomesteadCrops.h"
 
 bool AHomesteadVisualPlaytest::WalkWaterTarget(FVector2D Target, float Tolerance, float Delta, FVector2D& Move, FVector2D& Look)
 {
@@ -188,7 +189,9 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
             break;
         }
         if (PC->FocusTitle() != TEXT("Fresh stream water")) { Fail(TEXT("Stream approach has another focus.")); return; }
-        Tap(EKeys::Gamepad_FaceButton_Bottom);
+        // The pail is filled and used on the tool button (RT); A never fills or waters (Jenny 2026-09-30).
+        PC->ChooseOnHotbar(Homestead::Item::WateringCan);
+        Tap(EKeys::Gamepad_RightTrigger);
         bWaterInputPending = true;
         WaterStageElapsed = 0;
         break;
@@ -224,7 +227,8 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
     case 8:
         if (WaterPlotId < 0 && !bWaterInputPending)
         {
-            Tap(EKeys::Gamepad_FaceButton_Left);
+            PC->ChooseOnHotbar(Homestead::Item::DiggingStick);
+            Tap(EKeys::Gamepad_RightTrigger);
             bWaterInputPending = true;
             WaterStageElapsed = 0;
             break;
@@ -264,7 +268,7 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
             ++WaterStage;
             break;
         }
-        if (PC->FocusTitle() != TEXT("A little patch of earth")) { Fail(TEXT("Plant focus was not the new plot.")); return; }
+        if (PC->FocusTitle() != TEXT("Tilled soil")) { Fail(TEXT("Plant focus was not the new plot.")); return; }
         Tap(EKeys::Gamepad_FaceButton_Bottom);
         bWaterInputPending = true;
         WaterStageElapsed = 0;
@@ -284,8 +288,10 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
         if (Entered)
         {
             WaterBefore = PC->Simulation().Count(Homestead::Item::Water);
+            PC->ChooseOnHotbar(Homestead::Item::WateringCan);
+            PC->UpdateFocus();
             if (!PC->FocusActions().Contains(TEXT("Water"))) { Fail(TEXT("Plot does not offer watering.")); return; }
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Tap(EKeys::Gamepad_RightTrigger);
             bWaterInputPending = true;
         }
         if (bWaterInputPending && WaterStageElapsed > 0.3f)
@@ -382,7 +388,8 @@ void AHomesteadVisualPlaytest::TickWatering(float WallDelta)
             ClearingExpected = PC->Simulation(); ClearingHour = PC->State().hour;
             if (!PC->IsResourceFocused(ForageId) || !ClearingExpected.Clear(ForageId, PC->PlayerPoint()).ok)
             { Fail(TEXT("Actual sapling transaction not available.")); return; }
-            Tap(EKeys::Gamepad_FaceButton_Left);
+            PC->ChooseOnHotbar(Homestead::Item::Hatchet);
+            Tap(EKeys::Gamepad_RightTrigger);
         }
         if (WaterStageElapsed > 0.3f)
         {

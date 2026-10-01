@@ -406,8 +406,9 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
             }
             if (Direction.y && Local >= 0)
             {
+                const int32 Width = CurrentContainer == 0 ? StoragePackColumns() : StorageColumns();
                 const auto LocalMove = HomesteadMenuNavigation::Move(
-                    Local, CurrentGrid.Num(), StorageColumns(), Direction, Local % StorageColumns());
+                    Local, CurrentGrid.Num(), Width, Direction, Local % Width);
                 if (!LocalMove.boundary && LocalMove.index >= 0)
                 {
                     Select(CurrentGrid[LocalMove.index], true);

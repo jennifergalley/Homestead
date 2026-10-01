@@ -114,7 +114,8 @@ enum class WearableOwner : int { Carried, Chest, Equipped, World };
 // UnsupportedVersion: a save from an older build this one can't read. NewerBuild: a save written by a
 // newer build (a later version, wider item stocks or a section this build doesn't know); the game
 // must leave it untouched so that build can still open it.
-enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable, ToolTier, NewerBuild };
+// PackOverflow: it worked, but what didn't fit in her pack was left on the ground (worth a notice).
+enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable, ToolTier, NewerBuild, PackOverflow };
 constexpr int EquipmentSlotCount = static_cast<int>(EquipmentSlot::Count);
 
 struct WearableDefinitionInfo
@@ -336,6 +337,10 @@ struct State
     std::array<int, EquipmentSlotCount> equipment{};
     InventoryLayout inventoryLayout;
     PackRow packRow{};
+    // Rows of her pack rotated out of the hotbar (R / LT, RotatePackRow), each kept as it was, gaps and
+    // all, so its stacks come back to the same number keys. Cells may name stacks since used up or
+    // moved; RotatePackRow drops those as the row comes back. Saved in the optional "packrowsparked" section.
+    std::vector<PackRow> parkedRows;
     Generation::WorldDescriptor world{};
     Generation::ChunkCoord activeChunk{};
     std::vector<ResourceEdit> resourceEdits;
@@ -379,6 +384,9 @@ const char* PieceName(Piece piece);
 const char* CropName(CropKind kind);
 const char* RecipeRequirements(Recipe recipe);
 const char* PieceRequirements(Piece piece);
+// What a piece costs to build, and whether it stands on a foundation (walls, doorways and roofs).
+Inventory PieceCost(Piece piece);
+bool PieceNeedsFoundation(Piece piece);
 // Whether the Build page offers the piece (the hearth belongs to the old house).
 bool IsBuildable(Piece piece);
 // Beds, chests, cookfires and the hearth: one per building cell, set inside it.
@@ -637,6 +645,8 @@ public:
     Result Weed(int plotId, Point player);
     // Hoes a withered plant out, back to tilled soil (needs the hoe).
     Result ClearWithered(int plotId, Point player);
+    // Whether ClearWithered would succeed now, changing nothing.
+    Result CheckClearWithered(int plotId, Point player) const;
     Result HarvestCrop(int plotId, Point player);
     Result FillWater(Point player);
     // Tip the water out of the pail (it stays in her pack, empty).
@@ -670,6 +680,10 @@ public:
     // Moves what is in `cell` below the row: onto that stack (or garment) there, merging with the
     // same item or else swapping; with no target (0, 0) to the end of her pack.
     Result MoveFromPackRow(int cell, int targetGroupId, int targetWearableId, std::uint64_t expectedRevision);
+    // The hotbar steps on to the next row of her pack, as in Coral Island: the first ten stacks below
+    // the row become the row, in order, and the row's stacks go to the end of her pack in cell order,
+    // so pressing again carries each row of her pack through the hotbar in turn.
+    Result RotatePackRow(std::uint64_t expectedRevision);
     // Takes `amount` of a chest stack straight into `cell` in one step: onto the same item it
     // merges, otherwise it becomes that cell's stack and whatever was there moves below the row.
     Result TransferGroupToPackRow(int chestId, int groupId, int amount, int cell, Point player,

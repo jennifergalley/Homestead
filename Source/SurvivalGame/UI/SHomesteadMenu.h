@@ -265,6 +265,7 @@ private:
     void QuickMove(int32 Index);
     void ComputeActions();
     int32 StorageColumns() const;
+    int32 StoragePackColumns() const;
     int32 SettingsTopCount() const;
     FString PackHint() const;
     int32 AudioEditId = -1;
@@ -301,6 +302,7 @@ private:
     // or as a strip of fixed cells (heading the pack column beside an open chest).
     TSharedRef<SWidget> BuildBookHotbar(bool bGridRow = false);
     bool bHotbarInScroll = false;
+    bool bScrollSelectionPending = false;
     // One hotbar snapshot per frame for the strip's many per-paint attributes.
     FHomesteadHotbarSlot BookHotbarSlot(int32 Slot) const;
     mutable TArray<FHomesteadHotbarSlot> HotbarSnapshotCache;

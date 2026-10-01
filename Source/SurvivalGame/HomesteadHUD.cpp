@@ -459,10 +459,15 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
             Cue.Verb = Part.Mid(Close + 1).TrimStart();
         }
         else Cue.Verb = Part;
-        // A keyed hint retires once she's done that action a few times; guidance text stays.
-        if (!Cue.Key.IsEmpty() && PC.IsHintRetired(Cue.Verb)) continue;
         if (!Cue.Verb.IsEmpty() || !Cue.Key.IsEmpty()) Cues.Add(Cue);
     }
+    // A lone keyed hint retires once she's done that action a few times. Where the target offers more
+    // than one action they all stay, so the choice is always on the card (Jenny 2026-09-30: a ripe,
+    // weedy plot shows "[F] Pull weeds" and "[E] Harvest", never only one of them).
+    int32 Keyed = 0;
+    for (const FCue& Cue : Cues) Keyed += Cue.Key.IsEmpty() ? 0 : 1;
+    if (Keyed == 1)
+        Cues.RemoveAll([&PC](const FCue& Cue) { return !Cue.Key.IsEmpty() && PC.IsHintRetired(Cue.Verb); });
     if (Cues.IsEmpty()) return 0;
     // The words are the notices' EB Garamond (as the toast and the book's card); the key and pad
     // glyphs stay in the crisp sans on their pine stamps.

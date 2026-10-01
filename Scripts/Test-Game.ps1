@@ -299,7 +299,29 @@ if ($ShippingQA) {
     # Only the process this script started, matched by its image: never Jenny's Build\Windows or
     # Releases game. It runs in a kill-on-close job, so an aborted or timed-out run takes it (and the
     # shader workers it starts) down when this script's process ends.
-    $image = try { $process.MainModule.FileName } catch { $process.Path }
+    # MainModule can briefly report ntdll.dll during startup; ask the OS for the process image.
+    if (-not ('HomesteadGameImage' -as [type])) {
+        Add-Type -TypeDefinition @"
+using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Text;
+public static class HomesteadGameImage
+{
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    static extern bool QueryFullProcessImageName(IntPtr process, uint flags, StringBuilder image, ref uint length);
+    public static string Path(IntPtr process)
+    {
+        var image = new StringBuilder(32768);
+        uint length = (uint)image.Capacity;
+        if (!QueryFullProcessImageName(process, 0, image, ref length))
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+        return image.ToString();
+    }
+}
+"@
+    }
+    $image = [HomesteadGameImage]::Path($process.Handle)
     if ($image -and -not [string]::Equals([IO.Path]::GetFullPath($image), [IO.Path]::GetFullPath($executable), [StringComparison]::OrdinalIgnoreCase)) {
         Stop-Process -Id $process.Id
         throw "Started $image instead of $executable; stopped it."
@@ -363,7 +385,9 @@ if ($process.ExitCode -ne 0 -or $result -notmatch '(?m)^SUCCESS ') {
 if ($EstateSmoke) {
     # Estate-only regressions the woodland suites never load: materials drawn with the Default Material
     # in the package, her failing to settle on the ground, and new Error lines.
-    $logText = Get-Content -LiteralPath $log
+    $logAvailable = (Test-Path -LiteralPath $log -PathType Leaf) -and (Get-Item -LiteralPath $log).Length -gt 0
+    if (-not $logAvailable -and -not $ShippingQA) { throw "Development Estate log is missing: $log" }
+    $logText = if ($logAvailable) { Get-Content -LiteralPath $log } else { @() }
     $problems = @()
     $usage = @($logText | Select-String -SimpleMatch 'missing usage flag')
     $fallback = @($logText | Select-String -SimpleMatch 'Default Material will be used')
@@ -380,12 +404,22 @@ if ($EstateSmoke) {
     $landscape = @($result -split '\r?\n' | Where-Object { $_ -like 'LANDSCAPE_MATERIAL *' })
     if ($landscape.Count -lt 6) { $problems += "landscape material checked at $($landscape.Count) of 6 places" }
     if ($gaveUp.Count) { $problems += "$($gaveUp.Count) ground hold(s) gave up (she was placed on the heightfield, not on collision)" }
-    if (-not $settled.Count) { $problems += 'no HOMESTEAD_GROUND_SETTLE line: her spawn never settled on the ground' }
+    if ($logAvailable -and -not $settled.Count) { $problems += 'no HOMESTEAD_GROUND_SETTLE line: her spawn never settled on the ground' }
     if ($errors.Count -gt $MaxLogErrors) { $problems += "$($errors.Count) Error line(s), above the baseline of $MaxLogErrors" }
     $evidence = Join-Path $output 'estate-log-findings.txt'
-    (@('ESTATE_LOG usage_flags={0} default_material={1} material_compile={2} ground_gave_up={3} ground_settles={4} errors={5} baseline={6}' -f
-        $usage.Count, $fallback.Count, $compile.Count, $gaveUp.Count, $settled.Count, $errors.Count, $MaxLogErrors) +
-        ($usage + $fallback + $compile + $gaveUp + $errors | ForEach-Object { $_.Line })) | Set-Content -LiteralPath $evidence
+    if ($logAvailable) {
+        (@('ESTATE_LOG usage_flags={0} default_material={1} material_compile={2} ground_gave_up={3} ground_settles={4} errors={5} baseline={6}' -f
+            $usage.Count, $fallback.Count, $compile.Count, $gaveUp.Count, $settled.Count, $errors.Count, $MaxLogErrors) +
+            ($usage + $fallback + $compile + $gaveUp + $errors | ForEach-Object { $_.Line })) | Set-Content -LiteralPath $evidence
+    } else {
+        $guard = Get-Content -LiteralPath (Join-Path $output 'qa-guard-result.json') -Raw | ConvertFrom-Json
+        if ($guard.status -ne 'passed' -or @($guard.endpointSamples).Count -lt 1 -or
+            @($guard.endpointSamples | Where-Object { @($_.endpoints).Count -gt 0 }).Count) {
+            throw 'Shipping Estate guard did not prove successful zero-endpoint runtime sampling.'
+        }
+        'ESTATE_LOG not_emitted_in_shipping=1; material-fallback and ground-settle log checks require the Development package built from the same cooked containers.' |
+            Set-Content -LiteralPath $evidence
+    }
     Get-Content -LiteralPath $evidence | Select-Object -First 1 | Write-Output
     $result -split '\r?\n' | Where-Object { $_ -like 'PERFORMANCE_AT *' -or $_ -like 'LANDSCAPE_MATERIAL *' } | Write-Output
     if ($problems) { throw "Estate smoke log check failed: $($problems -join '; '). Lines: $evidence" }
