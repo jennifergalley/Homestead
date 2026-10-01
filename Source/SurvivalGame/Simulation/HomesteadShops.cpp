@@ -62,19 +62,41 @@ const char* ShopDisplayName(ShopKind kind)
     return kind == ShopKind::GeneralStore ? "General store" : "Shop";
 }
 
+bool IsShopDay(double hour)
+{
+    return std::isfinite(hour) && Calendar::DateAt(hour).weekday != ShopClosedDay;
+}
+
 bool IsShopOpen(const Shop& shop, double hour)
 {
     if (!std::isfinite(hour)) return false;
     const double time = std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0);
-    return time >= shop.openHour && time < shop.closeHour;
+    return time >= shop.openHour && time < shop.closeHour && IsShopDay(hour);
+}
+
+double NextShopOpening(const Shop& shop, double hour)
+{
+    if (!std::isfinite(hour) || IsShopOpen(shop, hour)) return hour;
+    const double midnight = std::floor(hour / 24.0) * 24.0;
+    // Today's opening or a later one, past any closed day (a week covers every weekday).
+    for (int day = 0; day <= Calendar::DaysPerWeek + 1; ++day)
+    {
+        const double opening = midnight + day * 24.0 + shop.openHour;
+        if (opening > hour && IsShopOpen(shop, opening)) return opening;
+    }
+    return hour;
 }
 
 double HoursUntilOpen(const Shop& shop, double hour)
 {
-    if (!std::isfinite(hour) || IsShopOpen(shop, hour)) return 0.0;
-    const double time = std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0);
-    const double wait = shop.openHour - time;
-    return wait > 0.0 ? wait : wait + 24.0;
+    return std::isfinite(hour) ? NextShopOpening(shop, hour) - hour : 0.0;
+}
+
+bool CanWaitForShop(const Shop& shop, double hour)
+{
+    if (!std::isfinite(hour) || IsShopOpen(shop, hour)) return false;
+    // Only the ordinary night's closure (closing to opening, 14 h): never through a closed day's hours.
+    return HoursUntilOpen(shop, hour) <= 24.0 - (shop.closeHour - shop.openHour) + 1e-6;
 }
 
 std::string FormatHour(double hour)
@@ -89,9 +111,25 @@ std::string FormatHour(double hour)
     return text + (whole < 12 ? " AM" : " PM");
 }
 
-std::string ClosedMessage(const Shop& shop)
+std::string ClosedMessage(const Shop& shop, double hour)
 {
-    return "Closed - opens at " + FormatHour(shop.openHour);
+    const double next = NextShopOpening(shop, hour);
+    const Calendar::Date today = Calendar::DateAt(hour), opens = Calendar::DateAt(next);
+    const std::string at = FormatHour(next);
+    if (!IsShopDay(hour))
+        return std::string("Closed today (") + Calendar::WeekdayName(today.weekday) + ") - opens "
+            + Calendar::WeekdayName(opens.weekday) + " at " + at;
+    if (opens.dayIndex > today.dayIndex + 1) return std::string("Closed - opens ") + Calendar::WeekdayName(opens.weekday) + " at " + at;
+    return "Closed - opens at " + at;
+}
+
+std::string ClosedSignText(const Shop& shop, double hour)
+{
+    const double next = NextShopOpening(shop, hour);
+    if (!IsShopDay(hour)) return std::string("CLOSED\non ") + Calendar::WeekdayName(ShopClosedDay) + "s";
+    if (Calendar::DateAt(next).dayIndex > Calendar::DateAt(hour).dayIndex + 1)
+        return std::string("CLOSED\nopens ") + Calendar::WeekdayShort(Calendar::DateAt(next).weekday) + " " + FormatHour(next);
+    return "CLOSED\nopens at " + FormatHour(next);
 }
 
 Coins SellPrice(Item item) { return BasePrice(item); }
@@ -122,7 +160,7 @@ Result Simulation::CheckShopAccess(int shopId, Point player) const
     if (state_.failed) return ShopBad("You need to recover first.", revision_, ResultCode::Unavailable);
     const Shop* shop = FindShop(shopId);
     if (!shop) return ShopBad("There is no such shop.", revision_);
-    if (!IsShopOpen(*shop, state_.hour)) return ShopBad(ClosedMessage(*shop), revision_, ResultCode::Unavailable);
+    if (!IsShopOpen(*shop, state_.hour)) return ShopBad(ClosedMessage(*shop, state_.hour), revision_, ResultCode::Unavailable);
     if (!NearCounter(*shop, player)) return ShopBad("Step up to the counter to trade.", revision_);
     return ShopGood("", revision_);
 }
@@ -215,6 +253,14 @@ Result Simulation::WaitForShop(int shopId, Point player)
     if (!shop) return ShopBad("There is no such shop.", revision_);
     const std::string name = ShopDisplayName(shop->kind);
     if (IsShopOpen(*shop, state_.hour)) return ShopBad("The " + ToLowerAscii(name) + " is open now.", revision_);
+    // No waiting out a whole closed day in the street: only the ordinary night's closure.
+    if (!CanWaitForShop(*shop, state_.hour))
+    {
+        const double next = NextShopOpening(*shop, state_.hour);
+        return ShopBad("The " + ToLowerAscii(name) + " is closed on " + Calendar::WeekdayName(ShopClosedDay) + "s. It opens "
+            + Calendar::WeekdayName(Calendar::DateAt(next).weekday) + " at " + FormatHour(next) + ".", revision_,
+            ResultCode::Unavailable);
+    }
     if (!std::isfinite(player.x) || !std::isfinite(player.y)
         || std::hypot(player.x - shop->counterX, player.y - shop->counterY) > ShopWaitReach)
         return ShopBad("Wait by the shop's door.", revision_);

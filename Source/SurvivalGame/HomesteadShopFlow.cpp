@@ -43,7 +43,7 @@ void AHomesteadController::OpenShopScreen(int32 ShopId, bool bGreet)
     if (!Shop || !GEngine || !GEngine->GameViewport) return;
     if (!Homestead::IsShopOpen(*Shop, State().hour))
     {
-        Notify(ShopText(Homestead::ClosedMessage(*Shop)), true);
+        Notify(ShopText(Homestead::ClosedMessage(*Shop, State().hour)), true);
         return;
     }
     if (bBookOpen) CloseBook();
@@ -152,7 +152,7 @@ void AHomesteadController::SyncStores()
         auto* Store = GetWorld()->SpawnActor<AHomesteadGeneralStore>(Parameters);
         if (!Store) continue;
         Store->Build(Shop.id, FVector2D(Shop.counterX, Shop.counterY), static_cast<float>(Shop.counterYaw),
-            [this](float X, float Y) { return GroundHeight(X, Y); }, TEXT("CLOSED\nopens at ") + ShopText(Homestead::FormatHour(Shop.openHour)));
+            [this](float X, float Y) { return GroundHeight(X, Y); }, ShopText(Homestead::ClosedSignText(Shop, State().hour)));
         Stores.Add(Store);
         UE_LOG(LogTemp, Display, TEXT("STORE_BUILT shop=%d counter=(%.0f, %.0f) yaw=%.0f"), Shop.id, Shop.counterX, Shop.counterY,
             Shop.counterYaw);
@@ -172,7 +172,12 @@ void AHomesteadController::TickStores(float DeltaSeconds)
     const FVector Heroine = GetPawn() ? GetPawn()->GetActorLocation() : FVector(1e9);
     for (const auto& Store : Stores)
         if (const Homestead::Shop* Shop = Store ? Sim.FindShop(Store->GetShopId()) : nullptr)
-            Store->SetOpen(Homestead::IsShopOpen(*Shop, State().hour), Heroine);
+        {
+            const bool bOpen = Homestead::IsShopOpen(*Shop, State().hour);
+            Store->SetOpen(bOpen, Heroine);
+            // The board names the day it reopens (a Sunday, or a Saturday evening); SetText only on a change.
+            if (!bOpen) Store->SetClosedText(ShopText(Homestead::ClosedSignText(*Shop, State().hour)));
+        }
 }
 
 void AHomesteadController::ConsiderStoreFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const
@@ -239,6 +244,8 @@ FString AHomesteadController::StoreFocusActions() const
     const FString A = bGamepad ? TEXT("[A]") : TEXT("[E]");
     if (Focus == EFocus::StoreDoor)
     {
+        // Across a closed day there's no waiting at the door: just when it opens.
+        if (!Homestead::CanWaitForShop(*Shop, State().hour)) return ShopText(Homestead::ClosedMessage(*Shop, State().hour));
         const FString Opens = ShopText(Homestead::FormatHour(Shop->openHour));
         const double Wait = Homestead::HoursUntilOpen(*Shop, State().hour);
         // Past midnight is a night out in the street; say so before she agrees.
@@ -247,7 +254,7 @@ FString AHomesteadController::StoreFocusActions() const
         if (IsShopWaitArmed())
             return FString::Printf(TEXT("Wait %s until %s?   %s Wait   %s Cancel"), *Hours, *Opens, *A,
                 bGamepad ? TEXT("[B]") : TEXT("[Esc]"));
-        return ShopText(Homestead::ClosedMessage(*Shop)) + TEXT("   ") + A + TEXT(" Wait until ") + Opens
+        return ShopText(Homestead::ClosedMessage(*Shop, State().hour)) + TEXT("   ") + A + TEXT(" Wait until ") + Opens
             + TEXT(" (") + ShopWait::Duration(Wait) + TEXT(")");
     }
     return A + FString(TEXT(" Talk to ")) + AHomesteadShopkeeper::DisplayName();
@@ -259,7 +266,14 @@ void AHomesteadController::InteractWithStore()
     if (!Shop) return;
     if (Focus == EFocus::StoreDoor || !Homestead::IsShopOpen(*Shop, State().hour))
     {
-        if (Focus != EFocus::StoreDoor) { Notify(ShopText(Homestead::ClosedMessage(*Shop)), true); return; }
+        if (Focus != EFocus::StoreDoor) { Notify(ShopText(Homestead::ClosedMessage(*Shop, State().hour)), true); return; }
+        // Nothing to wait for across a closed day: E says when it opens (WaitForShop's refusal).
+        if (!Homestead::CanWaitForShop(*Shop, State().hour))
+        {
+            WaitShopId = INDEX_NONE;
+            Notify(ShopText(Sim.WaitForShop(FocusId, PlayerPoint()).message), true);
+            return;
+        }
         if (!IsShopWaitArmed())
         {
             // First press asks; the prompt shows the question and how to answer it.

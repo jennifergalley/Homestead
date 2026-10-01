@@ -5,6 +5,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWorld.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadGardenTarget.h"
 #include "Simulation/HomesteadGatherPose.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "UI/SHomesteadMenu.h"
@@ -159,30 +160,17 @@ void AHomesteadController::Interact()
             const bool Mature = Plot.growth >= 1;
             if (!Planted)
             {
-                // The seed stack chosen on the hotbar (a chosen berry sows berry seed). A chosen seed
-                // that has run out says so, and with no seed chosen nothing is sown: nothing is ever
-                // taken from the pack unasked (wild roots too are chosen as Seeds on the hotbar).
-                TOptional<Homestead::CropKind> Seed;
-                if (HotbarItem(SelectedHotbarSlot) != Homestead::Item::Count)
+                // Only the seed stack chosen on the hotbar is sown (a chosen berry sows berry seed; wild
+                // roots too are chosen as Seeds): nothing is ever taken from the pack unasked. A refusal is
+                // CheckSow's, the reason the red outline shows; with no seed chosen, say which to select.
+                if (const auto Crop = PlantingCrop(HotbarItem(SelectedHotbarSlot)))
                 {
-                    const auto Chosen = HotbarItem(SelectedHotbarSlot);
-                    if (const auto Crop = PlantingCrop(Chosen))
-                    {
-                        if (Sim.Count(Chosen) <= 0)
-                        {
-                            Notify(FString::Printf(TEXT("No %s left. Choose another seed on the hotbar."),
-                                *FString(UTF8_TO_TCHAR(Homestead::ItemName(Chosen))).ToLower()), true);
-                            break;
-                        }
-                        Seed = Crop;
-                    }
-                }
-                if (!Seed)
-                {
-                    Notify(TEXT("Choose seeds on the hotbar to sow."), true);
+                    PlantFocusedPlot(*Crop);
                     break;
                 }
-                PlantFocusedPlot(*Seed);
+                std::vector<Homestead::Item> Row;
+                for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell) Row.push_back(HotbarItem(Cell));
+                Notify(Text(Homestead::DescribeSow(Sim, FocusId, Position, Homestead::Item::Count, Row).text.c_str()) + TEXT("."), true);
                 break;
             }
             const Homestead::CropKind Harvested = Plot.kind;

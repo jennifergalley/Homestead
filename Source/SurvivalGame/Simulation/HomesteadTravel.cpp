@@ -101,7 +101,27 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
             {
                 plan.storeClosedOnArrival = true;
                 plan.storeOpenHour = shop.openHour;
-                summary += "\nThe general store will be closed then (it opens at " + FormatHour(shop.openHour) + ").";
+                const double opens = NextShopOpening(shop, plan.arrivalHour);
+                const Calendar::Date arrives = Calendar::DateAt(plan.arrivalHour), reopens = Calendar::DateAt(opens);
+                // "Closed all day" only when she'd arrive in what would be its hours on a closed day: before
+                // or after them it's just shut for the night, as the clock-based "the next day" says (review).
+                const double ofDay = std::fmod(std::fmod(plan.arrivalHour, 24.0) + 24.0, 24.0);
+                plan.storeClosedAllDay = !IsShopDay(plan.arrivalHour) && ofDay >= shop.openHour && ofDay < shop.closeHour;
+                if (plan.storeClosedAllDay)
+                    summary += std::string("\nYou'd arrive on a ") + Calendar::WeekdayName(arrives.weekday)
+                        + ", when the general store is closed all day (it opens " + Calendar::WeekdayName(reopens.weekday)
+                        + " at " + FormatHour(opens) + ").";
+                else
+                {
+                    // "(it opens at 8 AM)" means the next 8 AM on the clock; anything later names its day (review:
+                    // a Sunday 07:30 arrival waits 25 h, for Monday).
+                    const double nextOnClock = std::floor(plan.arrivalHour / 24.0) * 24.0
+                        + (ofDay < shop.openHour ? 0.0 : 24.0) + shop.openHour;
+                    summary += std::fabs(opens - nextOnClock) < 1e-6
+                        ? "\nThe general store will be closed then (it opens at " + FormatHour(opens) + ")."
+                        : std::string("\nThe general store will be closed then (it opens ") + Calendar::WeekdayName(reopens.weekday)
+                            + " at " + FormatHour(opens) + ").";
+                }
             }
     plan.summary = summary;
     plan.ok = true;

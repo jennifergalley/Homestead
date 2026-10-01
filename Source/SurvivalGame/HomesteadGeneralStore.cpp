@@ -167,6 +167,7 @@ void AHomesteadGeneralStore::Build(int32 InShopId, const FVector2D& Counter, flo
     BuildInterior();
     ClosedBoard = Box(FVector(-10, DoorHalfWidth - 8, 150), FVector(3, 70, 36), Tint(Cream), false, 0, DoorHinge);
     ClosedSign = Words(ClosedText, FVector(-12, DoorHalfWidth - 8, 150), 180.0f, 7.0f, FColor(40, 24, 12), DoorHinge);
+    ClosedSignWords = ClosedText;
     if (UWorld* World = GetWorld())
     {
         FActorSpawnParameters Parameters;
@@ -413,6 +414,13 @@ void AHomesteadGeneralStore::SetOpen(bool bOpen, const FVector& HeroineLocation)
     }
     if (ClosedBoard) ClosedBoard->SetVisibility(!bOpen);
     if (ClosedSign) ClosedSign->SetVisibility(!bOpen);
+}
+
+void AHomesteadGeneralStore::SetClosedText(const FString& Text)
+{
+    if (!ClosedSign || ClosedSignWords == Text) return;
+    ClosedSignWords = Text;
+    ClosedSign->SetText(FText::FromString(Text));
 }
 
 void AHomesteadGeneralStore::Destroyed()
