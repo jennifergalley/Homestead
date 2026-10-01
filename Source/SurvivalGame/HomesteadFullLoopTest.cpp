@@ -903,7 +903,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, RevalidateStreamBank]() { RevalidateStreamBank(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && !Controller->ToastIsError(); });
 
-    // Each rest starts at 22:45, so the bed sleeps her the full eight hours to first light (6:45).
+    // From 22:45, a rested heroine sleeps 7h15 to the 06:00 morning rollover.
     // The skipped evening is not simulated; a scheduled rainy day is simulated before rest 4.
     for (int32 Rest = 0; Rest < 6; ++Rest)
     {

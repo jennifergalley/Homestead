@@ -632,7 +632,7 @@ Result ContainerAccess(const State& state, int container, Point player)
     if (container == 0) return Good("");
     const auto* chest = Find(state.structures, container);
     if (!chest || chest->kind != Piece::Chest) return Bad("Choose an existing storage chest.");
-    if (!Near(player, Homestead::StructureCenter(state, *chest), ChestReach))
+    if (!Near(player, Homestead::StructureFootprint(state, *chest).center, ChestReach))
         return Bad("Move within 280 cm of this chest.");
     return Good("");
 }
@@ -1997,8 +1997,11 @@ int Simulation::FindNearestStructure(Point position, Piece kind, double maxDista
     double distance = maxDistance * maxDistance;
     for (const auto& piece : state_.structures)
     {
-        const double current = DistanceSquared(position, Homestead::StructureCenter(state_, piece));
-        if (piece.kind == kind && current <= distance && !(current == distance && nearest != -1))
+        if (piece.kind != kind) continue;
+        const Point target = kind == Piece::Chest ? Homestead::StructureFootprint(state_, piece).center
+            : Homestead::StructureCenter(state_, piece);
+        const double current = DistanceSquared(position, target);
+        if (current <= distance && !(current == distance && nearest != -1))
         { nearest = piece.id; distance = current; }
     }
     return nearest;
@@ -2889,7 +2892,8 @@ Result Simulation::Transfer(int chestId, Item item, int amount, Point player)
     if (state_.failed) return Failed();
     auto* chest = Find(state_.structures, chestId);
     if (!chest || chest->kind != Piece::Chest) return Bad("Choose a storage chest.");
-    if (!Near(player, Homestead::StructureCenter(state_, *chest), ChestReach)) return Bad("Move within 280 cm of this chest.");
+    if (!Near(player, Homestead::StructureFootprint(state_, *chest).center, ChestReach))
+        return Bad("Move within 280 cm of this chest.");
     if (!ValidEnum(item, Item::Count) || amount == 0 || amount < -ChestCapacity || amount > ChestCapacity)
         return Bad("Choose an item and a transfer amount this pack or chest can hold.");
     const int index = static_cast<int>(item);

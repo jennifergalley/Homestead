@@ -251,9 +251,12 @@ void AHomesteadController::GrantPlaytestKit(bool bNewGame)
 bool AHomesteadController::LoadLatest(bool RecoveryOnly)
 {
     if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
-    const TArray<FString> Slots{
-        TEXT("Homestead_Manual"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"),
-        TEXT("Homestead_Auto_2"), TEXT("Homestead_Recovery")};
+    const bool WoodlandRecovery = RecoveryOnly && !bEstateMap;
+    const TArray<FString> Slots = WoodlandRecovery
+        ? TArray<FString>{TEXT("Homestead_Recovery"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"),
+            TEXT("Homestead_Auto_2"), TEXT("Homestead_Manual")}
+        : TArray<FString>{TEXT("Homestead_Manual"), TEXT("Homestead_Auto_0"), TEXT("Homestead_Auto_1"),
+            TEXT("Homestead_Auto_2"), TEXT("Homestead_Recovery")};
     UHomesteadSave* Best = nullptr;
     FHomesteadSavePreference BestPreference;
     bool Corrupt = false;
@@ -283,6 +286,13 @@ bool AHomesteadController::LoadLatest(bool RecoveryOnly)
             const auto Decoded = Candidate.Deserialize(TCHAR_TO_UTF8(*Save->SimulationData));
             if (!Decoded || Candidate.GetState().failed) continue;
             if (RecoveryOnly && Save->WorldId != WorldId) continue;
+            if (WoodlandRecovery && (Candidate.GetState().hunger < 20 || Candidate.GetState().energy < 20)) continue;
+            if (WoodlandRecovery && Slot == TEXT("Homestead_Recovery"))
+            {
+                if (!ApplySave(*Save)) return false;
+                Notify(TEXT("Returned to your sheltered recovery checkpoint."));
+                return true;
+            }
             const FHomesteadSavePreference Preference{
                 Save->SavedAtUtc, Save->SavedRevision, SlotIndex * 2 + (Suffix.IsEmpty() ? 0 : 1)};
             if (!Best || IsNewerHomesteadSave(Preference, BestPreference))

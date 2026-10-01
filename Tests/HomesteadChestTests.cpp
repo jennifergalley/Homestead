@@ -6,6 +6,7 @@
 #include "HomesteadSimulation.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -66,6 +67,34 @@ Estate NewEstate()
         if (piece.kind == Piece::Chest) { estate.chest = piece.id; estate.at = StructureCenter(estate.sim.GetState(), piece); break; }
     CHECK(estate.chest > 0);
     return estate;
+}
+
+int ChestCount(const Estate& estate, Item item);
+
+void PlacedChestFocusMatchesTransactions()
+{
+    Estate estate = NewEstate();
+    Simulation& sim = estate.sim;
+    const Structure* chest = nullptr;
+    for (const auto& piece : sim.GetState().structures)
+        if (piece.id == estate.chest) { chest = &piece; break; }
+    CHECK(chest != nullptr);
+    const Point cell = StructureCenter(sim.GetState(), *chest);
+    const Point placed = StructureFootprint(sim.GetState(), *chest).center;
+    const double offset = std::hypot(placed.x - cell.x, placed.y - cell.y);
+    CHECK(offset > 100.0);
+    const Point outward{(placed.x - cell.x) / offset, (placed.y - cell.y) / offset};
+    const Point near{placed.x + outward.x * (ChestReach - 1), placed.y + outward.y * (ChestReach - 1)};
+    const Point far{placed.x + outward.x * (ChestReach + 1), placed.y + outward.y * (ChestReach + 1)};
+    CHECK(std::hypot(near.x - cell.x, near.y - cell.y) > ChestReach);
+    CHECK(sim.FindNearestStructure(near, Piece::Chest, ChestReach) == estate.chest);
+    CHECK(ChestCount(estate, Item::Branch) > 0);
+    OK(sim.Transfer(estate.chest, Item::Branch, -1, near));
+    OK(sim.StoreMatching(estate.chest, near, sim.GetRevision()));
+    CHECK(sim.FindNearestStructure(far, Piece::Chest, ChestReach) == -1);
+    const std::string before = sim.Serialize();
+    CHECK(!sim.Transfer(estate.chest, Item::Branch, -1, far).ok && sim.Serialize() == before);
+    CHECK(!sim.StoreMatching(estate.chest, far, sim.GetRevision()).ok && sim.Serialize() == before);
 }
 
 int ChestCount(const Estate& estate, Item item)
@@ -277,6 +306,7 @@ void NamesPersistAndValidate()
 
 int main()
 {
+    PlacedChestFocusMatchesTransactions();
     StoresOnlyMatchingGoods();
     NothingToStoreChangesNothing();
     PartialWhenFullAndRowLast();
