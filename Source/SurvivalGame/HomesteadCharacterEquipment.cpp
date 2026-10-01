@@ -147,12 +147,9 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         // it), so nothing turns in her hand as she starts or stops. The hatchet keeps its turn
         // too: turned, its edge runs along her knuckles, which is how she swings it.
         const float TurnWeight = StoneHoe || Spec.Tool == Homestead::Item::Hatchet ? 1.0f : HeldToolTilt;
-        // The imported props have their blades on +Y (the Blender export mirrors Y), but
-        // hoe_till.py authored the strokes for a blade on -Y. As she sets the hoe she rolls the
-        // haft half a turn so the blade bites down into the soil instead of facing up.
-        const float Roll = StoneHoe && Hoeing ? FMath::SmoothStep(0.0f, 1.0f, Animation->TillWeight()) : 0.0f;
-        const FTransform Turn = FTransform(FQuat(FVector::ZAxisVector, PI * Roll))
-            * FTransform(FVector(0, 0, Slide * TurnWeight))
+        // hoe_till.py solves her right hand for the imported blade on +Y, so the hoe no longer
+        // rolls in her fist as she sets it (that half-turn folded her wrist back on the forearm).
+        const FTransform Turn = FTransform(FVector(0, 0, Slide * TurnWeight))
             * FTransform(FQuat::Slerp(FQuat::Identity, Flip, TurnWeight));
         const float Lean = CarryDegrees - (StoneHoe ? FMath::Min(CarryDegrees, RestWristDegrees) : Carry);
         const FTransform HeldPose = StoneHoe
