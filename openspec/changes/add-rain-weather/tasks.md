@@ -42,7 +42,10 @@
   - one spell's cloud, rain, wetness and change points;
   - night rain watering a plot;
   - a step split at the rain's start.
-- [ ] 4.4 PIE (low priority, after the night A/B slot):
+- [x] 4.4 PIE (2026-10-01, RT on): a night spell (day 42, 00:11-06:27): rain falls and sounds at the town square
+  (gain 0.12) and in the meadow, the moon dimmed to 0.08 lux, the town readable by the held lamp, the hearth lit.
+  The ground (MPC Wetness) wets through in half an hour and dries over four hours after the day-44 spell: 18:30 1.0,
+  19:30 0.87, 20:36 0.50, 21:36 0.16, 22:48 0. Captures: E:\CopilotScratch\89914e30-...\rain44.
   - the first spell (day 6, from 18:27 through midnight) at the town square and the meadow: rain, sound, the moon dimmed, and the lamp and hearth still readable;
   - the night A/B sheet's rain row;
   - the wet ground drying over the next four hours.
