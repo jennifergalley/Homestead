@@ -823,6 +823,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             const int32 CellIndex = InChest ? ChestCell++ : PackCell++;
             auto TargetGrid = InChest ? ChestGrid : PackGrid;
             const int32 Width = InChest ? StorageColumns() : StoragePackColumns();
+            TargetGrid->AddSlot(CellIndex % Width, CellIndex / Width)[ Cell.ToSharedRef() ];
         }
         else if (AppearanceList) AppearanceList->AddSlot().AutoHeight().Padding(4)[ Cell.ToSharedRef() ];
         else Grid->AddSlot(Index % Columns(), Index / Columns())[ Cell.ToSharedRef() ];
