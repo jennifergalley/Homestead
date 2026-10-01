@@ -1043,6 +1043,11 @@ notices/pickups and no surface open—then shows exactly one book page, settings
 sign confirmation/refusal, notice, focus hint/outline or HUD state. The coverage check fails if any
 book tab, settings tab or notice style lacks an entry; add one whenever a surface is added.
 
+**Copy review rule:** assume the player knows farming sims. Do not add toasts for obvious outcomes.
+Focus cards show only a name and keyed verbs; details/tooltips show stats, requirements and price
+without rules explanations; Settings show label plus value; refusals are about 4–6 words. Check every
+new player-facing string against this rule before its gallery entry is accepted.
+
 - **Multi-resolution capture:** after integration, run
   `pwsh -File Scripts\Capture-UiGallery.ps1 [-Ids a,b] [-Res 720p,1080p,1440p,4K] [-Input KBM,Pad]`.
   Output is `E:\CopilotScratch\<session>\ui-gallery\<stamp>\<res>[-pad]\<id>.png`, plus

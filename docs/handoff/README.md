@@ -15,6 +15,16 @@ agent keeps both current.
 - The current round: [round-2.md](round-2.md) (the farming year and period crafting). Round 1, "Walk
   your estate", is recorded in [round-1.md](round-1.md).
 
+## Product copy and UI principle
+
+Jenny's standing direction (2026-09-30): assume the player is familiar with farming sims and avoid
+explaining mechanics on every screen. Do not toast obvious outcomes. Focus cards contain the name
+and keyed verbs only; detail panes/tooltips contain stats, requirements and price, not rules
+explanations; Settings contain a label and value; refusal reasons stay about 4–6 words. Review all
+new player-facing copy against this rule before it ships. The approved parchment/EB Garamond theme
+does not change this content rule. The forthcoming `realistic-animation` skill and Animation
+Inspector must carry the same concise review standard once they land.
+
 ## Model, reasoning and implementer slots
 
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
