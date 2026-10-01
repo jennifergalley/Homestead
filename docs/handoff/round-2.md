@@ -810,6 +810,14 @@ receipt.**
   kept classic as the temporary default during review; Jenny has now approved the
   `homestead.UITheme` parchment/EB Garamond style for the 7:30 AM build. The default flip still
   needs integration/package evidence; every future surface must have a UI-gallery entry.
+
+  **Bed interaction `15227420`:** source-only in the same next batch. Simulation and focus share a
+  90 cm footprint-edge / 30° half-cone admission so the bed loses to every existing focus target.
+  E/A opens a concise parchment confirmation—`Sleep until morning?` with Sleep/Cancel—then
+  revalidates id and revision. First press never advances time; cancel/refusal writes no save.
+  Native tests cover reach, facing, chest priority and confirmation, while FullLoop asserts first
+  press/no hour change, cancel, then explicit confirmation. UE, PIE, packaged and delivery evidence
+  remain pending.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
