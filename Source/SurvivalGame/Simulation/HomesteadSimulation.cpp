@@ -2608,11 +2608,19 @@ Result Simulation::GrantItems(Item item, int count)
 Result Simulation::CheckTill(int cellX, int cellY, Point player) const
 {
     if (state_.failed) return Failed();
-    const int buildingX = GardenToCell(cellX), buildingY = GardenToCell(cellY);
-    if (!ValidCell(buildingX, buildingY) || !Near(player, GardenCellCenter(cellX, cellY)))
+    if (!ValidCell(GardenToCell(cellX), GardenToCell(cellY)) || !Near(player, GardenCellCenter(cellX, cellY)))
         return Bad("Move closer to a valid garden square.");
     if (Count(Item::DiggingStick) == 0)
         return Bad(NoHoeMessage(state_, player));
+    if (auto ground = CheckTillGround(cellX, cellY, player); !ground) return ground;
+    return CheckExertion(Exertion::TillEnergy);
+}
+Result Simulation::CheckTillGround(int cellX, int cellY, Point player) const
+{
+    if (state_.failed) return Failed();
+    const int buildingX = GardenToCell(cellX), buildingY = GardenToCell(cellY);
+    if (!ValidCell(buildingX, buildingY) || !Near(player, GardenCellCenter(cellX, cellY)))
+        return Bad("Move closer to a valid garden square.");
     if (state_.plots.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
         return Bad("The garden has reached its plot limit.");
     const auto space = CheckGardenResources(state_, cellX, cellY);
@@ -2624,7 +2632,7 @@ Result Simulation::CheckTill(int cellX, int cellY, Point player) const
             return Bad("Choose soil away from buildings.");
     for (const auto& plot : state_.plots)
         if (plot.cellX == cellX && plot.cellY == cellY) return Bad("This cell is already tilled.");
-    return CheckExertion(Exertion::TillEnergy);
+    return Good("");
 }
 Result Simulation::Till(int cellX, int cellY, Point player)
 {

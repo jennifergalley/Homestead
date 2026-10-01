@@ -59,14 +59,11 @@ GardenTarget PreviewGarden(const Simulation& sim, GardenTool tool, Point player,
         return target;
     }
     if (crop->kind == CropKind::Berries) return target;
-    // No plot in focus: the square her reach lands on is untilled (a plot there would hold the focus). Off
-    // the garden grid, or out of reach, there's no square to outline.
-    target.cellX = GardenCell(player.x + forwardX * GardenReach::PailAheadCm);
-    target.cellY = GardenCell(player.y + forwardY * GardenReach::PailAheadCm);
-    for (const Plot& plot : sim.GetState().plots)
-        if (plot.cellX == target.cellX && plot.cellY == target.cellY) return GardenTarget{};
-    if (sim.CheckTill(target.cellX, target.cellY, player).message == "Move closer to a valid garden square.")
-        return GardenTarget{};
+    // No plot in focus: the square the hoe would till next (HoeCellAhead) is untilled, so it's red until she
+    // tills it, but only where it could be tilled (a missing hoe or tiredness aside); over a building,
+    // resource, spoiling overgrowth or a plot, or out of reach, there's nothing to outline.
+    HoeCellAhead(player, forwardX, forwardY, target.cellX, target.cellY);
+    if (!sim.CheckTillGround(target.cellX, target.cellY, player)) return GardenTarget{};
     target.shown = true;
     target.reason = UntilledSowText;
     return target;

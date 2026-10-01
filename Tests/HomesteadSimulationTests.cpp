@@ -652,15 +652,57 @@ void SeedSowPreview()
     CHECK(!PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, 987654, Item::TurnipSeed).shown);
     CHECK(!sim.CheckSow(987654, beside, CropKind::Turnips).ok);
 
-    // Untilled: with no plot in focus, the square her reach lands on is red until it's tilled; a berry, held
-    // more often to eat, outlines nothing there.
+    // Untilled: with no plot in focus, the square the hoe would till next is red until it's tilled; a berry,
+    // held more often to eat, outlines nothing there.
     const Point edge{GardenCellCenter(gx, gy).x + GardenCellSize * 0.5 - 10.0, GardenCellCenter(gx, gy).y};
     const GardenTarget untilled = PreviewGarden(sim, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::TurnipSeed);
     CHECK(untilled.shown && !untilled.valid && untilled.reason == UntilledSowText && untilled.plotId == -1);
     CHECK(untilled.cellX == gx + 1 && untilled.cellY == gy);
     CHECK(!PreviewGarden(sim, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::Berries).shown);
-    // Facing back onto her own plot without it in focus shows nothing (the plot would take the focus).
+    // Facing back onto her own plot without it in focus shows nothing: it's tilled.
     CHECK(!PreviewGarden(sim, GardenTool::Seed, edge, -1.0, 0.0, -1, Item::TurnipSeed).shown);
+    // The same square the hoe tills, wherever she stands in hers (review: the pail's 60 cm pointed at her own
+    // square from 15-40 cm in, while the hoe's 85 cm tills the next one).
+    for (const double into : {15.0, 25.0, 40.0, 60.0, 90.0})
+    {
+        const Point at{GardenCellCenter(gx + 1, gy).x - GardenCellSize * 0.5 + into, GardenCellCenter(gx + 1, gy).y};
+        int hoeX = 0, hoeY = 0;
+        HoeCellAhead(at, 1.0, 0.0, hoeX, hoeY);
+        const GardenTarget ahead = PreviewGarden(sim, GardenTool::Seed, at, 1.0, 0.0, -1, Item::TurnipSeed);
+        const GardenTarget hoe = PreviewGarden(sim, GardenTool::Hoe, at, 1.0, 0.0);
+        CHECK(ahead.cellX == hoeX && ahead.cellY == hoeY && hoe.cellX == hoeX && hoe.cellY == hoeY);
+        CHECK(ahead.shown == sim.CheckTillGround(hoeX, hoeY, at).ok);
+    }
+    // Tillable but for the hoe or her energy: still "till this square first".
+    {
+        Simulation unready = sim;
+        Edit(unready, [](State& state)
+        {
+            state.energy = 0.5;
+            state.inventory[static_cast<int>(Item::DiggingStick)] = 0;
+            state.inventoryLayout.erase(std::remove_if(state.inventoryLayout.begin(), state.inventoryLayout.end(),
+                [](const LayoutEntry& entry) { return entry.item == Item::DiggingStick; }), state.inventoryLayout.end());
+        });
+        CHECK(!unready.CheckTill(gx + 1, gy, edge).ok);
+        CHECK(PreviewGarden(unready, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::TurnipSeed).reason == UntilledSowText);
+    }
+    // Ground that can't be tilled (a building, a resource, spoiling overgrowth) shows nothing.
+    Simulation built = sim;
+    BuildingStock(built);
+    OK(built.Place(Piece::Fire, -3, -1, 0, CellCenter(-3, -1)));
+    int refused = 0;
+    bool building = false;
+    for (int y = gy - 30; y <= gy + 30; ++y)
+        for (int x = gx - 30; x <= gx + 30; ++x)
+        {
+            const Point from{GardenCellCenter(x, y).x - 85.0, GardenCellCenter(x, y).y};
+            const Result ground = built.CheckTillGround(x, y, from);
+            if (ground.ok || ground.message == "Move closer to a valid garden square." || ground.message == "This cell is already tilled.") continue;
+            ++refused;
+            building = building || ground.message == "Choose soil away from buildings.";
+            CHECK(!PreviewGarden(built, GardenTool::Seed, from, 1.0, 0.0, -1, Item::TurnipSeed).shown);
+        }
+    CHECK(refused > 0 && building);
     CHECK(sim.Serialize() == before);
 
     // No seed selected: name a seed in the hotbar row and its number key; a berry only when no seed is there.
