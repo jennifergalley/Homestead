@@ -85,7 +85,7 @@ PAIRS_PER_PAGE = 8
 
 def build_side_by_side(stamp: pathlib.Path, order: list[str], descriptions: dict[str, str]) -> list[pathlib.Path]:
     pages = []
-    for classic in sorted(stamp.glob("*-classic")):
+    for classic in sorted(path for path in stamp.glob("*-classic*") if path.is_dir()):
         parchment = stamp / classic.name.replace("-classic", "-parchment")
         if not parchment.is_dir():
             continue
