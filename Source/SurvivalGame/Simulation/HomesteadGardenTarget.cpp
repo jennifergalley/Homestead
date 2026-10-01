@@ -88,6 +88,7 @@ SowCue DescribeSow(const Simulation& sim, int plotId, Point player, Item selecte
     {
         const Item item = row[cell];
         if (item == Item::Count || !CropForSeed(item) || sim.Count(item) <= 0) continue;
+        if (!GrowsIn(CropForSeed(item)->kind, sim.Today().season)) continue;  // out of season: not worth naming
         if (item == Item::Berries)
         {
             if (berryCell < 0) berryCell = cell;

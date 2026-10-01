@@ -54,7 +54,7 @@ constexpr const char* UntilledSowText = "Till this square before sowing.";
 // guidance that always shows.
 // - A seed selected, and the press would sow: "Plant <seed>" (keyed).
 // - A seed selected, and it wouldn't: CheckSow's refusal (plain).
-// - No seed selected, but one in the hotbar row: "Select <seed> (<key>) to plant" (plain).
+// - No seed selected, but one in the hotbar row she has and that's in season: "Select <seed> (<key>) to plant" (plain).
 // - Otherwise: "Choose seeds on the hotbar to sow" (plain).
 // `row` holds the hotbar's items by cell (Item::Count for an empty cell or a garment).
 struct SowCue
