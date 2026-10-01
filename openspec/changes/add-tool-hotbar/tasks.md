@@ -24,3 +24,8 @@
 - [x] 4.2 Run controller parity, storage/craft/save/reload/new-world, menu/planning/recovery and full-loop routes; verify LB/RB/R3/RT behavior, authoritative state, current settings and unrelated UI remain stable
 - [x] 4.3 Run focused hotbar/input/save/source contracts, full portable simulation/world/regional suites, strict OpenSpec validation and SurvivalGameEditor Win64 Development build from a clean integrated checkpoint
 - [x] 4.4 Build one immutable Shipping candidate under the serialized engine slot, run fresh consumer and comparable cadence routes, update PRODUCT/DESIGN/setup/playtest docs, and promote only if the bar is useful without clutter, input conflict, copied styling or performance regression
+
+## 5. Seed Outline and Plant Cue (Jenny's playtest)
+
+- [x] 5.1 Add side-effect-free `Simulation::CheckSow` (`Plant` calls it first), `GardenTool::Seed` in `PreviewGarden` on the focused plot the A/E sow uses (red `Till this square before sowing.` on untilled ground ahead), and `DescribeSow` for the bare-plot focus line (`Plant <seed>` keyed; refusal or `Select <seed> (<key>) to plant` unkeyed); native `SeedSowPreview` covers the valid/invalid matrix, cue text, no mutation and preview-plot == sown plot
+- [ ] 5.2 Build SurvivalGameEditor and run the Hotbar suite's seed steps (`garden-outline-seed-{valid,invalid}.png`) in the next Unreal slot; inspect the green/red outline and the Plant/Select cues on keyboard and gamepad

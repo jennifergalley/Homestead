@@ -69,6 +69,12 @@ double Clamp(double value, double low, double high) { return std::max(low, std::
 Result Good(const std::string& text) { return {true, text}; }
 Result Bad(const std::string& text) { return {false, text, ResultCode::Invalid}; }
 Result Failed() { return Bad("You need to recover. Load your recent checkpoint to continue."); }
+std::string NoSeedMessage(CropKind kind)
+{
+    return kind == CropKind::Berries ? "Gather a berry to plant the seeds from its fruit."
+        : kind == CropKind::Roots ? "Gather seeds from wild roots before planting."
+        : std::string("You have no ") + ItemName(GetCropInfo(kind).seed) + " to sow.";
+}
 double FoodNutrition(Item item) { return GetItemInfo(item).hunger; }
 // Stamina from a meal: a handful of berries is a quick pick-me-up, cooked roots a real rest.
 double FoodEnergy(Item item) { return GetItemInfo(item).energy; }
@@ -2707,20 +2713,25 @@ Result Simulation::Till(int cellX, int cellY, Point player)
     state_.plots.push_back({state_.nextId++, cellX, cellY, false, 0.0, 0.35, 0.0});
     return Exert(Exertion::TillEnergy, Good("Soil tilled. Choose seeds or a berry on your hotbar to plant here."));
 }
-Result Simulation::Plant(int plotId, Point player, CropKind kind)
+Result Simulation::CheckSow(int plotId, Point player, CropKind kind) const
 {
     if (state_.failed) return Failed();
     if (!ValidEnum(kind, CropKind::Count)) return Bad("Choose seeds to plant.");
-    auto* plot = Find(state_.plots, plotId);
+    const auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a tilled plot to plant.");
     if (plot->planted) return Bad(plot->withered ? "Hoe out the withered plant before planting." : "A crop is already growing here.");
     const auto& crop = GetCropInfo(kind);
     if (!GrowsIn(kind, Today().season)) return Bad(OutOfSeasonText(kind));
     if (auto ready = CheckExertion(Exertion::PlantEnergy); !ready) return ready;
-    if (!TryAdjust(Items({{crop.seed, -1}})))
-        return Bad(kind == CropKind::Berries ? "Gather a berry to plant the seeds from its fruit."
-            : kind == CropKind::Roots ? "Gather seeds from wild roots before planting."
-            : std::string("You have no ") + ItemName(crop.seed) + " to sow.");
+    if (Count(crop.seed) <= 0) return Bad(NoSeedMessage(kind));
+    return Good("");
+}
+Result Simulation::Plant(int plotId, Point player, CropKind kind)
+{
+    if (auto ready = CheckSow(plotId, player, kind); !ready) return ready;
+    auto* plot = Find(state_.plots, plotId);
+    const auto& crop = GetCropInfo(kind);
+    if (!TryAdjust(Items({{crop.seed, -1}}))) return Bad(NoSeedMessage(kind));
     plot->kind = kind;
     plot->planted = true;
     plot->picked = false;
