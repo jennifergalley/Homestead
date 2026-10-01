@@ -673,11 +673,28 @@ void RoadSignsOfferTheWalk()
         for (const TravelDestination destination : RoadSignDestinations(sign.name))
         {
             const TravelPlan plan = PlanTravel(sim.GetState(), sign.position, destination);
-            CHECK(plan.ok && plan.gameHours > 0.0 && plan.connectorMetres < 30.0);
+            CHECK(plan.ok && plan.gameHours > 0.0 && plan.connectorMetres < (sign.name == "ManorRoadSign" ? 60.0 : 30.0));
         }
     }
-    // The walk from the manor's sign is the Map tab's walk: one transaction, time passes, she's in town.
+    // Jenny, 2026-10-01: the "To town" sign stands by the manor ruins, within 20 m of the ruin's front door and
+    // of her standing room, with the walk home landing on the path beside it. She can't walk "to the manor" from
+    // there, and the sign and her arrival spot are 2 m clear of every placement (the clear-out field crowds the door).
     const PublicRoadSign* manorSign = road.FindSign("ManorRoadSign");
+    const EstateLayout& layout = ProvisionalEstateLayout();
+    const Point frontDoor = EstateManorFrontDoor(layout);
+    const Point standingRoom = layout.PointOr(Anchor::StandingRoomOrigin, {});
+    CHECK(manorSign && std::hypot(manorSign->position.x - frontDoor.x, manorSign->position.y - frontDoor.y) < 2000.0);
+    CHECK(std::hypot(manorSign->position.x - standingRoom.x, manorSign->position.y - standingRoom.y) < 2000.0);
+    const PublicRoadStop* manorStop = road.FindStop("Manor");
+    CHECK(manorStop && manorStop->hasArrival
+        && std::hypot(manorStop->arrival.x - manorSign->position.x, manorStop->arrival.y - manorSign->position.y) < 500.0);
+    CHECK(!PlanTravel(sim.GetState(), manorSign->position, TravelDestination::Manor).ok);
+    for (const EstatePlacement& placement : ProvisionalEstatePlacements().placements)
+    {
+        CHECK(std::hypot(placement.position.x - manorStop->arrival.x, placement.position.y - manorStop->arrival.y) > 200.0);
+        CHECK(std::hypot(placement.position.x - manorSign->position.x, placement.position.y - manorSign->position.y) > 200.0);
+    }
+    // The walk from the manor's sign is the Map tab's walk: one transaction, time passes, she's in town.
     const double before = sim.GetState().hour;
     const TravelPlan plan = PlanTravel(sim.GetState(), manorSign->position, TravelDestination::Town);
     OK(sim.WalkRoad(TravelDestination::Town, manorSign->position));
@@ -727,7 +744,10 @@ void WalkTheRoad()
     const TravelPlan half = PlanTravel(sim.GetState(), gateway, TravelDestination::Town);
     CHECK(half.ok && half.gameHours < noon.gameHours * 0.7);
     const TravelPlan home = PlanTravel(sim.GetState(), town->position, TravelDestination::Manor);
-    CHECK(home.ok && !home.storeClosedOnArrival && home.arrival.x == manor->position.x);
+    // Home to the manor lands her by the ruin's front door (Jenny, 2026-10-01), the way there walked too.
+    CHECK(home.ok && !home.storeClosedOnArrival && manor->hasArrival && home.arrival.x == manor->arrival.x
+        && home.arrival.y == manor->arrival.y && home.arrivalZ == manor->arrivalZ);
+    CHECK(home.totalMetres > road.WalkMetres(town->chainage, manor->chainage) + 30.0);
     // Off the road: the straight walk back to it counts too, and far off she has to find it herself.
     const TravelPlan field = PlanTravel(sim.GetState(), {gateway.x + 20000.0, gateway.y}, TravelDestination::Town);
     CHECK(field.ok && field.connectorMetres > 150.0 && field.totalMetres > half.totalMetres);

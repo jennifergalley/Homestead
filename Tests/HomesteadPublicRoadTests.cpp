@@ -258,12 +258,14 @@ int main()
             2.0 * halfY / 100.0, 2.0 * halfX / 100.0, static_cast<double>(street.size()));
     }
 
-    // The signs stand on the verge, not the bed, and none in the bridge keep-out.
+    // The road's signs stand on the verge, not the bed, and none in the bridge keep-out. The manor's stands by
+    // the ruin's front door instead (Jenny, 2026-10-01), off the road and within a short walk of it.
     Check(road.signs.size() == 3, "three signs", static_cast<double>(road.signs.size()));
     for (const PublicRoadSign& sign : road.signs)
     {
         const double off = road.NearestTo(sign.position).distanceCm;
-        Check(off > 320.0 && off < 600.0, "sign on the verge", off);
+        if (sign.name == "ManorRoadSign") Check(off > 600.0 && off < 6000.0, "manor sign by the ruin, a short walk from the road", off);
+        else Check(off > 320.0 && off < 600.0, "sign on the verge", off);
         Check(!road.InBridgeKeepOut(sign.position), "sign clear of the bridge");
         Check(sign.yaw >= 0.0 && sign.yaw < 360.0, "sign yaw normalised", sign.yaw);
     }

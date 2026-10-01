@@ -37,6 +37,12 @@ BRIDGE_CLEAR_HALF_WIDTH_M = 1.8
 # The signs: (name, chainage m or None for the gateway, side (+1 = right of travel toward town), facing).
 # "toTown" signs face walkers coming from the manor; "toManor" faces those leaving town.
 GATEWAY = (-55.0, 90.0)
+# Jenny, 2026-10-01: the "To town" sign belongs by the manor ruins, not 40 m away at the road's end. It stands
+# just outside the ruin's front door (EstateManorFrontDoor, (-259, -654.5)), on the east side of the cove path
+# its face turned to the door; the walk home from town lands her on the path beside it, facing the door.
+MANOR_SIGN_M = (-264.5, -650.25)        # 7 m from the door, 2.5 m off the cove path, 2.4 m clear of the clear-out
+MANOR_ARRIVAL_M = (-263.4, -649.2)      # 1.5 m from the sign, 2.3 m clear of the clear-out
+MANOR_FRONT_DOOR_M = (-259.0, -654.5)
 
 
 def bilinear(z, x, y):
@@ -133,6 +139,10 @@ def main():
         q = p + right * side * SIGN_OFFSET_M
         heading = math.degrees(math.atan2(d[1], d[0]))
         yaw = heading if toward == "town" else heading + 180.0
+        if name == "ManorRoadSign":
+            q = np.array(MANOR_SIGN_M)
+            ch = 0.0
+            yaw = math.degrees(math.atan2(MANOR_FRONT_DOOR_M[1] - q[1], MANOR_FRONT_DOOR_M[0] - q[0]))
         signs.append((name, ch, q, ground(*q), (yaw + 360.0) % 360.0))
 
     lines = [
@@ -152,6 +162,10 @@ def main():
     lines.append(f"stop(\"Manor\", {12.0:.2f});")
     lines.append(f"stop(\"Gateway\", {gate_ch:.2f});")
     lines.append(f"stop(\"Town\", {float(chain[-1]) - 6.0:.2f});")
+    lines.append("// arrival(stop, x cm, y cm, ground z cm, yaw deg): where a walk to that stop leaves her, off the road")
+    ax, ay = MANOR_ARRIVAL_M
+    arrival_yaw = math.degrees(math.atan2(MANOR_FRONT_DOOR_M[1] - ay, MANOR_FRONT_DOOR_M[0] - ax))
+    lines.append(f"arrival(\"Manor\", {ax * 100.0:.1f}, {ay * 100.0:.1f}, {ground(ax, ay) * 100.0:.1f}, {(arrival_yaw + 360.0) % 360.0:.1f});")
     lines.append("// sign(name, chainage m, x cm, y cm, ground z cm, yaw deg): the face points along yaw")
     for name, ch, q, gz, yaw in signs:
         lines.append(f"sign(\"{name}\", {ch:.2f}, {q[0] * 100.0:.1f}, {q[1] * 100.0:.1f}, {gz * 100.0:.1f}, {yaw:.1f});")

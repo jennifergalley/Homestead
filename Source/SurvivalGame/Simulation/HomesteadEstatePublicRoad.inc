@@ -496,7 +496,9 @@ deck(-1233.0, -4117.5, 102.99, 3473.8, 550.0, 180.0, 3383.8, 3357.0);
 stop("Manor", 12.00);
 stop("Gateway", 820.00);
 stop("Town", 1934.00);
+// arrival(stop, x cm, y cm, ground z cm, yaw deg): where a walk to that stop leaves her, off the road
+arrival("Manor", -26340.0, -64920.0, 8652.3, 309.7);
 // sign(name, chainage m, x cm, y cm, ground z cm, yaw deg): the face points along yaw
-sign("ManorRoadSign", 12.00, -22008.4, -62380.5, 8643.0, 37.6);
+sign("ManorRoadSign", 0.00, -26450.0, -65025.0, 8651.6, 322.3);
 sign("GatewayRoadSign", 834.00, -5764.7, 10313.7, 5818.8, 122.1);
 sign("TownRoadSign", 1926.00, -49131.6, 107777.4, 9253.1, 323.0);
