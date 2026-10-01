@@ -526,13 +526,13 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         {
             Backpack = MakeProp(TEXT("Backpack"), Pack);
             // leather_backpack.py's pivot is her back between the shoulder blades in the reference pose
-            // (report.json attach.pivot_reference_pose_cm, already in Unreal's frame). The mesh itself keeps
-            // the recipe's Blender Y (her forward -Y), so it is mirrored in Y here; unmirrored, its body sat
-            // in her chest (mesh-local Y -12.7..+25.2, the pack on +Y).
+            // (report.json attach.pivot_reference_pose_cm). The export already turns the recipe's frame into
+            // Unreal's: mesh-local -Y is the pack (up to 13 cm deep, behind her) and +Y the shoulder straps
+            // reaching down her chest (to +25 cm), so it attaches unmirrored.
             Backpack->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("spine_05"));
             const FReferenceSkeleton& Skeleton = MetaHumanBody->GetRefSkeleton();
             const int32 Spine = Skeleton.FindBoneIndex(TEXT("spine_05"));
-            const FTransform PackPivot(FQuat::Identity, HeroineBackpackStyle::PivotRefPose, FVector(1.0f, -1.0f, 1.0f));
+            const FTransform PackPivot(HeroineBackpackStyle::PivotRefPose);
             if (Spine != INDEX_NONE) Backpack->SetRelativeTransform(PackPivot.GetRelativeTransform(RefComponentTransform(Skeleton, Spine)));
             Backpack->SetVisibility(bBackpackShown);
         }
