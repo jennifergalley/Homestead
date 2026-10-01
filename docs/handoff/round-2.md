@@ -103,11 +103,11 @@ records promotion and SHA evidence. It copied and hash-recorded all 18 current s
 before promotion, including Estate Recovery; `Homestead.lnk` remains retired and `Homestead Estate.lnk`
 is the only active game shortcut.
 
-Known non-gates for this delivery: Feedback and Watering failures are test-side; UE 5.8 Shipping
-cannot route the Estate-default package to Woodland; the cove fingerpost is deliberately parked;
-and indoor daytime hair remains visually unresolved. These do not invalidate the stated delivery, but
-none is a claim of acceptance for its separate behavior. Earlier Phoenix Development/Shipping receipts
-remain rollback history.
+Known non-gates for this delivery: Watering failure is test-side; UE 5.8 Shipping cannot route the
+Estate-default package to Woodland; the cove fingerpost is deliberately parked; and indoor daytime
+hair remains visually unresolved. These do not invalidate the stated delivery, but none is a claim
+of acceptance for its separate behavior. Earlier Phoenix Development/Shipping receipts remain
+rollback history.
 
 **Shipping map-gate correction (UE 5.8):** an Estate-default Shipping client always loads
 `GameDefaultMap` and ignores `Test-Game.ps1`'s old Woodland positional map: `GameInstance.cpp`
@@ -117,6 +117,19 @@ also disables `-ini` override. Shipping Hotbar, NativeMenu and FullLoop conseque
 but they are not Shipping acceptance gates until adapted to Estate. Do not enable map override just
 for QA. For Estate-default Shipping, use Estate-targeted guarded zero-network routes such as
 EstateSmoke and ToolRepeat; those currently pass.
+
+**Feedback test correction:** `Scripts\Test-FeedbackLayout.ps1` omitted its Woodland positional map,
+so its Energy/VSync fixture launched the default Estate and failed from 30 to 23. The corrected
+wrapper passes `/Game/SurvivalGame/Maps/Homestead`, rejects Shipping, and now passes packaged
+Feedback with 63 checks and 13 captures. The prior Feedback failure was harness-only, not a
+delivery non-gate.
+
+**Hidden-window safety correction:** a Development copied-Estate run launched with
+`-WindowStyle Hidden -unattended -windowed` still briefly foregrounded before the `EnumWindows`
+guard could hide it. The guard stopped only its owned PID; no live saves were touched. Until a
+`CreateProcess`-suspended launcher installs per-PID window-hide and foreground guards before resume,
+do not use hidden-window physical-key F5/F9 or capture evidence. Use `-RenderOffscreen` for
+old-save load auditing and packaged FullLoop for F5/F9 instead.
 
 **Shared-memory warning (2026-09-29 20:19):** Jenny later launched the Shipping Estate while Menu
 editor PID 52420 remained open; Available MBytes fell to 143. Integration touched no process and used
