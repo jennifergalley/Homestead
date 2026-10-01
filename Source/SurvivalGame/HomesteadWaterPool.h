@@ -35,9 +35,10 @@ public:
     UPROPERTY(VisibleAnywhere, Category = "Water")
     TObjectPtr<UProceduralMeshComponent> WadeLimit;
 
-    /** How far in from the shore she can wade (cm): about knee deep over lake_basin.py's shelving bed. */
+    /** How far in from the shore she can wade (cm): about knee deep (50-70 cm) over lake_basin.py's shelving bed. At 2.2 m
+     *  she stopped in clear shallows that read as wet bank (Jenny, 2026-09-30: "I am not able to walk into the lake"). */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water", meta = (ClampMin = "0"))
-    float WadeInset = 220.0f;
+    float WadeInset = 380.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water")
     TObjectPtr<UMaterialInterface> Material;
