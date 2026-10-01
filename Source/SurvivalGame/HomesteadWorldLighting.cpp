@@ -171,7 +171,8 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     Sky->SetLightColor(FMath::Lerp(FLinearColor::White, FLinearColor(1.0f, 0.93f, 0.84f), Cloud));
     Exposure->Settings.AutoExposureMinBrightness = FMath::Lerp(NightMinExposure, 0.0f, Daylight);
     // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
-    Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud;
+    Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud
+        + IndoorDayExposureBias * GetIndoorMix() * Daylight;
     const float Saturation = FMath::Lerp(1.0f, OvercastSaturation, Cloud);
     Exposure->Settings.ColorSaturation = FVector4(Saturation, Saturation, Saturation, 1.0f);
     const float ClearFog = FMath::Lerp(0.016f, 0.007f, Daylight);
