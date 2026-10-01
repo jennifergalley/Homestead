@@ -584,11 +584,10 @@ private:
     uint32 SwingFellStartsBefore = 0;
     // The hack clip's start counter at the press: only a hack started after it lands this swing.
     uint32 SwingHackStartsBefore = 0;
-    // Blows this press plays in one go (the pickaxe strikes every blow a rock still needs), and how many
-    // have landed so far; each counts at its own contact, and the rock clears on the last.
+    // Blows this swing plays in one go and how many have landed so far; each counts at its own
+    // contact, and the target clears on the last. A press starts with one; holding the tool button
+    // adds one at a time to the running strike (HomesteadControllerToolRepeat.cpp).
     int32 SwingStrokes = 1;
-    // A tier-1 boulder needs five: every blow of it in one press would be too long a clip to cancel into.
-    static constexpr int32 MaxPickStrokesPerPress = 3;
     int32 SwingStrokesLanded = 0;
     // The scythe's sweep: every grass and weed tuft in the forward arc when it began.
     TArray<int32> ScytheTargets;
@@ -600,6 +599,21 @@ private:
     // ping, the billhook's cane cut, other tools' chop; `Swing` counts from 1, `bFinal` is the clearing one.
     void PlayStrikeCue(Homestead::Item Tool, int32 Swing, bool bFinal);
     void ResetOvergrowthSwing();
+    // Hold-to-repeat (HomesteadControllerToolRepeat.cpp, rule in Simulation/HomesteadToolRepeat.h):
+    // while the left mouse button or right trigger stays down, each landed blow is followed by another
+    // on the same target until it clears. Strike clips loop on (ExtendFell); the billhook's hack
+    // starts again once its clip has finished (HeldRepeatNode, UpdateHeldRepeat).
+    bool IsToolButtonHeld() const;
+    // Whether another blow follows the one that just landed on Node. Shows the refusal (Too tired.) or
+    // the swings still needed when it stops.
+    bool ContinueHeldStrike(int32 Node, Homestead::Item Tool);
+    void UpdateHeldRepeat();
+    // A held strike's next blow, waiting for the end of this blow's follow-through to join the clip.
+    int32 HeldStrokeNode = INDEX_NONE;
+    int32 HeldRepeatNode = INDEX_NONE;
+    Homestead::Item HeldRepeatTool = Homestead::Item::Count;
+    // Every overgrowth blow landed this session (the tool-repeat route counts a held run's blows).
+    uint32 OvergrowthBlowsLanded = 0;
     // HomesteadControllerWeedPull.cpp: weeds pulled by hand on both knees (a weed node, or a garden
     // square's weeds), committed once at the second root (AHomesteadCharacter::PullWeedsCommit). A
     // cancel before then changes nothing. False when the clip can't play, so the caller uses the pouch kneel.

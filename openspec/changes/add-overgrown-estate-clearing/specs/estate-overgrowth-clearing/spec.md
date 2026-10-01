@@ -35,6 +35,21 @@ Each tool SHALL have a tier of Worn, Iron, Steel or Master-forged. A target whos
 - **WHEN** the heroine strikes a small stump with a worn axe until it breaks
 - **THEN** the stump is cleared and yields firewood once, only on the final swing
 
+### Requirement: Holding the tool button repeats strikes on one target
+Holding the tool button (left mouse button or the gamepad's right trigger) SHALL keep striking the aimed overgrowth with the axe, billhook, pickaxe or scythe until it clears, then stop. Releasing SHALL finish the blow under way. A click SHALL be exactly one blow. The repeat SHALL stop when energy falls below the tired floor ("Too tired."), when the tool is put away, when she turns from the target or moves out of reach, or when a menu opens. It SHALL never move on to another target after a clear. E and the interact button SHALL never perform a tool action, and the focus card SHALL show only the keyed verb.
+
+#### Scenario: Holding the axe on a stump
+- **WHEN** the heroine holds the left mouse button with a worn axe aimed at a medium stump
+- **THEN** each blow lands in turn within one continuous strike until the stump clears, the stump yields once, and no other target is struck while the button stays held
+
+#### Scenario: Letting go mid-swing
+- **WHEN** the heroine releases the button after a blow lands but before the next wind-up
+- **THEN** that blow finishes, she recovers, and the toast says how many swings remain
+
+#### Scenario: Too tired to continue
+- **WHEN** her energy falls below the tired floor during a held run
+- **THEN** no further blow starts and the toast says "Too tired."
+
 ### Requirement: First tools are hafted from salvage
 Salvage piles SHALL yield rusted heads for the axe, scythe, billhook, pickaxe and hoe. A hand recipe SHALL combine a rusted head with branches to make the worn tool. No station and no knife SHALL be required. A new game SHALL provide the pail and a reachable supply of branches.
 

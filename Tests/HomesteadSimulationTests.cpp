@@ -12,6 +12,7 @@
 #include "HomesteadOvergrowth.h"
 #include "HomesteadRuinDebris.h"
 #include "HomesteadSwingTiming.h"
+#include "HomesteadToolRepeat.h"
 
 #include <algorithm>
 #include <cmath>
@@ -4322,6 +4323,157 @@ void ScytheSweepMowsEachTuftOnce()
     CHECK(PlacedNode(sim, behind).cleared && !PlacedNode(sim, bramble).cleared);
 }
 
+// Hold-to-repeat (Homestead::ToolRepeat): plays a held press the way AHomesteadController does. Each blow
+// is counted, the last one clears (ClearOvergrowth), and AfterBlow decides whether another follows.
+// heldFor: how many blows the button stays down through (-1: never released); between(blows) runs
+// after each blow so a test can drain energy or turn her away.
+struct HeldRun
+{
+    int blows = 0;
+    Result cleared;
+    Result refusal{true, "", ResultCode::None, 0};
+};
+
+HeldRun HoldTool(Simulation& sim, int target, Item tool, Point at, Point facing, int heldFor,
+    const std::function<void(int)>& between = {})
+{
+    HeldRun run;
+    int landed = 0;
+    for (;;)
+    {
+        ++run.blows;
+        if (++landed >= sim.OvergrowthSwings(target))
+        {
+            run.cleared = sim.ClearOvergrowth(target, tool, at);
+            landed = 0;
+        }
+        if (between) between(run.blows);
+        ToolRepeat::Held now;
+        now.held = heldFor < 0 || run.blows < heldFor;
+        now.sameTool = sim.Count(tool) > 0;
+        now.aimed = sim.FindAimedOvergrowth(at, facing, tool);
+        const auto decision = ToolRepeat::AfterBlow(sim, target, tool, at, now);
+        if (!decision.more || run.blows > 50)
+        {
+            run.refusal = decision.refusal;
+            return run;
+        }
+    }
+}
+
+void HeldToolRepeatsUntilClear()
+{
+    const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    const Point ahead{1, 0};
+    EstatePlacements table;
+    table.bakeVersion = 7;
+    int next = EstatePlacementIdBase + 20500;
+    const auto add = [&](ResourceKind kind, double dx, double dy)
+    {
+        table.placements.push_back({next++, kind, {at.x + dx, at.y + dy}, 0, 0, 1, 0});
+        return table.placements.back().id;
+    };
+    const int stump = add(ResourceKind::StumpMedium, 70, 0);
+    const int beside = add(ResourceKind::StumpMedium, 110, 25);
+    const int rubble = add(ResourceKind::Rubble, 0, -90);
+    const auto fresh = [&](Simulation& sim)
+    {
+        OK(sim.NewEstateGame(ProvisionalEstateLayout(), table));
+        OK(sim.GrantItems(Item::Hatchet, 1));
+        OK(sim.GrantItems(Item::Pickaxe, 1));
+        OK(sim.SetEnergy(100.0));
+    };
+
+    // Only the overgrowth tools repeat; the hoe, can, lamp and food never do.
+    CHECK(ToolRepeat::Repeats(Item::Hatchet) && ToolRepeat::Repeats(Item::Billhook)
+        && ToolRepeat::Repeats(Item::Pickaxe) && ToolRepeat::Repeats(Item::Scythe));
+    CHECK(!ToolRepeat::Repeats(Item::DiggingStick) && !ToolRepeat::Repeats(Item::WateringCan)
+        && !ToolRepeat::Repeats(Item::OilLamp) && !ToolRepeat::Repeats(Item::Berries));
+
+    // Held: blow after blow on the stump she aimed at, exactly as many as it needs, cleared once, then stop.
+    {
+        Simulation sim;
+        fresh(sim);
+        CHECK(sim.FindAimedOvergrowth(at, ahead, Item::Hatchet) == stump);
+        const int needed = sim.OvergrowthSwings(stump);
+        CHECK(needed == 5);
+        const int wood = sim.Count(Item::Firewood) + sim.Count(Item::Branch) + sim.Count(Item::Kindling);
+        const auto run = HoldTool(sim, stump, Item::Hatchet, at, ahead, -1);
+        CHECK(run.blows == needed && run.cleared.ok && run.refusal.ok);
+        CHECK(PlacedNode(sim, stump).cleared);
+        CHECK(sim.Count(Item::Firewood) + sim.Count(Item::Branch) + sim.Count(Item::Kindling) > wood);
+        // Never on to the next stump, even though it's now the one ahead of her and still held.
+        CHECK(!PlacedNode(sim, beside).cleared);
+        CHECK(sim.FindAimedOvergrowth(at, ahead, Item::Hatchet) == beside);
+        ToolRepeat::Held still;
+        still.held = still.sameTool = true;
+        still.aimed = beside;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, still).more);
+    }
+    // A click is exactly one blow, and letting go mid-swing finishes only that blow: nothing clears,
+    // nothing is spent, and she stops quietly (the controller then says how many swings are left).
+    for (const int heldFor : {0, 1, 3})
+    {
+        Simulation sim;
+        fresh(sim);
+        const double energy = sim.GetState().energy;
+        const auto run = HoldTool(sim, stump, Item::Hatchet, at, ahead, heldFor);
+        CHECK(run.blows == std::max(1, heldFor) && run.refusal.ok && !PlacedNode(sim, stump).cleared);
+        CHECK(sim.GetState().energy == energy);
+    }
+    // Below the 10% energy floor the next blow is refused with Integration's "Too tired." and she stops.
+    {
+        Simulation sim;
+        fresh(sim);
+        const auto run = HoldTool(sim, stump, Item::Hatchet, at, ahead, -1,
+            [&](int blows) { if (blows == 2) OK(sim.SetEnergy(9.5)); });
+        CHECK(run.blows == 2 && !run.refusal.ok && run.refusal.message == "Too tired.");
+        CHECK(!PlacedNode(sim, stump).cleared);
+    }
+    // Turning away, putting the tool down or opening the book ends the run.
+    {
+        Simulation sim;
+        fresh(sim);
+        ToolRepeat::Held now;
+        now.held = now.sameTool = true;
+        now.aimed = stump;
+        CHECK(ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, now).more);
+        now.aimed = -1;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, now).more);
+        now.aimed = stump;
+        now.sameTool = false;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, now).more);
+        now.sameTool = true;
+        now.menuOpen = true;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, now).more);
+        // The hoe doesn't repeat even if held on something.
+        now.menuOpen = false;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::DiggingStick, at, now).more);
+    }
+    // The pickaxe on rubble: two blows held, one reward.
+    {
+        Simulation sim;
+        fresh(sim);
+        const Point down{0, -1};
+        CHECK(sim.FindAimedOvergrowth(at, down, Item::Pickaxe) == rubble);
+        const int stone = sim.Count(Item::Stone);
+        const auto run = HoldTool(sim, rubble, Item::Pickaxe, at, down, -1);
+        CHECK(run.blows == sim.OvergrowthSwings(rubble) && run.blows == 2 && run.cleared.ok);
+        CHECK(PlacedNode(sim, rubble).cleared && sim.Count(Item::Stone) > stone);
+    }
+
+    // The strike clips loop one stroke cycle (axe_fell.FRAMES: loop 44-80, contacts at 34 and 70). A held
+    // blow can join only before the clip leaves its last cycle for the recovery.
+    const float loopStart = 44.0f / 30.0f, loop = 36.0f / 30.0f, margin = 2.0f / 30.0f;
+    CHECK(ToolRepeat::CanAddStroke(34.0f / 30.0f, 1, loopStart, loop, margin));
+    CHECK(ToolRepeat::CanAddStroke(41.0f / 30.0f, 1, loopStart, loop, margin));
+    CHECK(!ToolRepeat::CanAddStroke(42.0f / 30.0f, 1, loopStart, loop, margin));
+    CHECK(!ToolRepeat::CanAddStroke(50.0f / 30.0f, 1, loopStart, loop, margin));
+    CHECK(ToolRepeat::CanAddStroke(70.0f / 30.0f, 2, loopStart, loop, margin));
+    CHECK(!ToolRepeat::CanAddStroke(79.0f / 30.0f, 2, loopStart, loop, margin));
+    CHECK(Close(ToolRepeat::JoinDeadline(3, loopStart, loop, 0.0f), 116.0 / 30.0, 1e-5));
+}
+
 void MultiSwingTiersAndCapacity()
 {
     const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
@@ -5405,6 +5557,7 @@ int main()
     Run("a worn billhook fells a sapling in one press", OneSwingWornSapling);
     Run("multi-swing clears, energy reserve and full-pack yields", MultiSwingTiersAndCapacity);
     Run("one scythe sweep mows each tuft once", ScytheSweepMowsEachTuftOnce);
+    Run("a held tool strikes its target until it clears, then stops", HeldToolRepeatsUntilClear);
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
     Run("manor clear-out field placement", ManorClearoutField);
