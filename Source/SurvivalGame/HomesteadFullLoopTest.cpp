@@ -5,11 +5,13 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadFood.h"
 #include "UI/SHomesteadMenu.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Pawn.h"
 #include "InputCoreTypes.h"
+#include "Misc/Paths.h"
 #include <algorithm>
 #include <set>
 
@@ -513,6 +515,86 @@ void AHomesteadSmokeTest::PrepareFullLoop()
     QueuePlace(Homestead::Piece::Roof, -4, -2);
     QueuePlace(Homestead::Piece::Bed, -4, -2);
     QueuePlace(Homestead::Piece::Fire, -3, -2);
+    const auto BeforeBedPolicy = MakeShared<std::string>();
+    const auto BeforeBedRoute = MakeShared<FHomesteadSaveRoute>();
+    const auto BeforeBedAutoIndex = MakeShared<int32>(0);
+    const auto BeforeBedSavedAt = MakeShared<FDateTime>();
+    const auto BeforeBedSaveLabel = MakeShared<FString>();
+    const auto BeforeBedPolicyHour = MakeShared<double>(0);
+    const auto BeforeBedPolicyEnergy = MakeShared<double>(0);
+    const auto BedPolicyHour = MakeShared<double>(0);
+    Add(TEXT("Tired at midday: bed offers only Sleep until rested"),
+        [this, Home, BeforeBedPolicy, BeforeBedRoute, BeforeBedAutoIndex, BeforeBedSavedAt, BeforeBedSaveLabel,
+            BeforeBedPolicyHour, BeforeBedPolicyEnergy, BedPolicyHour]()
+        {
+            if (Controller->SaveRoute.Mode != TEXT("test-sandbox"))
+            { Finish(false, TEXT("The bed policy fixture needs isolated test saves.")); return; }
+            *BeforeBedPolicy = Controller->Sim.Serialize();
+            *BeforeBedRoute = Controller->SaveRoute;
+            *BeforeBedAutoIndex = Controller->AutoSaveIndex;
+            *BeforeBedSavedAt = Controller->LastSuccessfulSave;
+            *BeforeBedSaveLabel = Controller->LatestSaveLabel;
+            Controller->SaveRoute.Directory = FPaths::Combine(BeforeBedRoute->Directory, TEXT("BedPolicyProbe"));
+            *BeforeBedPolicyHour = Controller->State().hour;
+            *BeforeBedPolicyEnergy = Controller->State().energy;
+            Controller->Sim.SkipToHourOfDay(12.0);
+            if (!Controller->Sim.SetEnergy(40.0)) { Finish(false, TEXT("Could not prepare midday rest.")); return; }
+            Teleport(Home);
+            Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
+            *BedPolicyHour = Controller->State().hour;
+        },
+        [this]()
+        {
+            return Controller->FocusTitle() == TEXT("Bed")
+                && Controller->FocusActions() == TEXT("[A] Sleep until rested")
+                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 6.0, 0.01);
+        }, 0.65f);
+    Add(TEXT("One A sleeps to full Energy without opening a picker"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, BedPolicyHour]()
+        {
+            return !Controller->IsBookOpen() && !Controller->IsFailed()
+                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 6.0, 0.02)
+                && Controller->State().energy >= Homestead::Food::FullEnergyAt;
+        });
+    Add(TEXT("Rested at night: bed offers only Sleep until morning"),
+        [this, Home, BedPolicyHour]()
+        {
+            Controller->Sim.SkipToHourOfDay(21.0);
+            Teleport(Home);
+            Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
+            *BedPolicyHour = Controller->State().hour;
+        },
+        [this]()
+        {
+            return Controller->FocusActions() == TEXT("[A] Sleep until morning")
+                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 9.0, 0.01);
+        }, 0.65f);
+    Add(TEXT("One A passes the night to 06:00 without opening a picker"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, BedPolicyHour]()
+        {
+            return !Controller->IsBookOpen() && !Controller->IsFailed()
+                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 9.0, 0.02)
+                && Controller->State().energy >= Homestead::Food::FullEnergyAt;
+        });
+    Add(TEXT("Restore the pre-rest garden and clock"),
+        [this, BeforeBedPolicy, BeforeBedRoute, BeforeBedAutoIndex, BeforeBedSavedAt, BeforeBedSaveLabel]()
+        {
+            const auto Restored = Controller->Sim.Deserialize(*BeforeBedPolicy);
+            Controller->SaveRoute = *BeforeBedRoute;
+            Controller->AutoSaveIndex = *BeforeBedAutoIndex;
+            Controller->LastSuccessfulSave = *BeforeBedSavedAt;
+            Controller->LatestSaveLabel = *BeforeBedSaveLabel;
+            if (!Restored) Finish(false, UTF8_TO_TCHAR(Restored.message.c_str()));
+        },
+        [this, BeforeBedPolicy, BeforeBedPolicyHour, BeforeBedPolicyEnergy]()
+        {
+            return Controller->State().structures.size() > 0
+                && FMath::IsNearlyEqual(Controller->State().hour, *BeforeBedPolicyHour, 0.05)
+                && FMath::IsNearlyEqual(Controller->State().energy, *BeforeBedPolicyEnergy, 0.05)
+                && !BeforeBedPolicy->empty();
+        });
     Add(TEXT("Position outside the west doorway"),
         [this, Home]()
         {
@@ -828,10 +910,16 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                         && Plot->moisture > 0.90 && BerryPlot->moisture > 0.90;
                 });
         Add(FString::Printf(TEXT("Return to the sheltered bed at night for rest %d"), Rest + 1),
-            [this, Home]() { Controller->Sim.SkipToHourOfDay(22.75); Teleport(Home); },
+            [this, Home]()
+            {
+                Controller->Sim.SkipToHourOfDay(22.75);
+                if (!Controller->Sim.SetEnergy(100)) { Finish(false, TEXT("Could not prepare night rest.")); return; }
+                Teleport(Home);
+            },
             [this]()
             {
                 return Controller->FocusTitle() == TEXT("Bed")
+                    && Controller->FocusActions() == TEXT("[A] Sleep until morning")
                     && Controller->Simulation().IsSheltered(Controller->PlayerPoint());
             }, 0.65f);
         Add(FString::Printf(TEXT("Sleep in the cabin until first light, rest %d"), Rest + 1),
@@ -846,7 +934,6 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Fire, -3, -2);
                 *BeforeFuel = Piece ? Piece->fuelHours : -1;
                 Tap(EKeys::Gamepad_FaceButton_Bottom);
-                Tap(EKeys::Gamepad_FaceButton_Bottom);
             },
             [this, BeforeHour, BeforeGrowth, BeforeBerryGrowth, BeforeFuel, ExpectedSleep, BerryPlotId]()
             {
@@ -855,10 +942,10 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 const auto* BerryPlot = FindPlot(State, *BerryPlotId);
                 const auto* Piece = FindPiece(State, Homestead::Piece::Fire, -3, -2);
                 return !Controller->IsFailed() && !Controller->ToastIsError() && Plot && Piece && BerryPlot
-                    && FMath::Abs(*ExpectedSleep - 8.0) < 0.02
+                    && FMath::Abs(*ExpectedSleep - 7.25) < 0.02
                     && State.hour >= *BeforeHour + *ExpectedSleep - 0.01
                     && State.hour < *BeforeHour + *ExpectedSleep + 0.1
-                    && FMath::Abs(FMath::Fmod(State.hour, 24.0) - 6.75) < 0.02
+                    && FMath::Abs(FMath::Fmod(State.hour, 24.0) - 6.0) < 0.02
                     && State.energy > 99 && State.hunger > 40
                     && Plot->planted && Plot->growth >= *BeforeGrowth && Plot->weeds > 0.05
                     && BerryPlot->planted && BerryPlot->kind == Homestead::CropKind::Berries
@@ -1023,48 +1110,33 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 && !Controller->ToastIsError();
         });
     Add(TEXT("Return to the cabin to checkpoint actual berry regrowth"),
-        [this, Home]() { Teleport(Home); },
+        [this, Home]()
+        {
+            if (!Controller->Sim.SetEnergy(20)) { Finish(false, TEXT("Could not prepare berry-regrowth rest.")); return; }
+            Teleport(Home);
+        },
         [this]()
         {
             return Controller->FocusTitle() == TEXT("Bed")
+                && Controller->FocusActions() == TEXT("[A] Sleep until rested")
                 && Controller->Simulation().IsSheltered(Controller->PlayerPoint());
         }, 0.65f);
     const auto RegrowthHour = MakeShared<double>(0);
     const auto RegrowthBefore = MakeShared<double>(0);
     const auto RegrowthSleep = MakeShared<double>(8);
-    Add(TEXT("First bed press asks before changing the clock"),
-        [this, RegrowthHour, RegrowthBefore, RegrowthSleep, BerryPlotId]()
+    const auto RegrowthEnergy = MakeShared<double>(0);
+    Add(TEXT("One bed press rests and protects a mixed-crop checkpoint"),
+        [this, RegrowthHour, RegrowthBefore, RegrowthSleep, RegrowthEnergy, BerryPlotId]()
         {
             *RegrowthHour = Controller->State().hour;
             *RegrowthSleep = Controller->BedSleepHours();
+            *RegrowthEnergy = Controller->State().energy;
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
             *RegrowthBefore = Plot ? Plot->growth : -1;
             Tap(EKeys::Gamepad_FaceButton_Bottom);
-        },
-        [this, RegrowthHour]()
-        {
-            return Controller->IsBookOpen() && Controller->NativeMenu
-                && Controller->NativeMenu->IsBedSleepPromptOpen()
-                && FMath::IsNearlyEqual(Controller->State().hour, *RegrowthHour, 0.01);
-        });
-    Add(TEXT("Canceling sleep returns to the world without resting"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
-        [this, RegrowthHour]()
-        {
-            return !Controller->IsBookOpen() && !Controller->ToastIsError()
-                && FMath::IsNearlyEqual(Controller->State().hour, *RegrowthHour, 0.02);
-        });
-    Add(TEXT("Ask for sleep again"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this]() { return Controller->IsBookOpen() && Controller->NativeMenu
-            && Controller->NativeMenu->IsBedSleepPromptOpen(); });
-    Add(TEXT("Confirm sheltered sleep and protect the mixed-crop checkpoint"),
-        [this]()
-        {
-            Tap(EKeys::Gamepad_FaceButton_Bottom);
             Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
         },
-        [this, RegrowthHour, RegrowthBefore, RegrowthSleep, BerryPlotId, ProtectedRecovery, RecoveryPosition]()
+        [this, RegrowthHour, RegrowthBefore, RegrowthSleep, RegrowthEnergy, BerryPlotId, ProtectedRecovery, RecoveryPosition]()
         {
             const auto& State = Controller->State();
             const auto* Plot = FindPlot(State, *BerryPlotId);
@@ -1072,7 +1144,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 || !Plot || !Plot->planted || Plot->kind != Homestead::CropKind::Berries
                 || Plot->growth <= *RegrowthBefore || Plot->growth >= 1
                 || FMath::Abs(State.hour - *RegrowthHour - *RegrowthSleep) > 0.01
-                || State.hunger <= 40 || (*RegrowthSleep >= 6.0 && State.energy <= 99)) return false;
+                || State.hunger <= 40 || State.energy < *RegrowthEnergy) return false;
             // Input dispatch has completed and the pack pauses time at the saved sleep checkpoint.
             *ProtectedRecovery = Controller->Simulation().Serialize();
             *RecoveryPosition = Controller->PlayerPoint();
@@ -1314,13 +1386,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         Add(FString::Printf(TEXT("Outdoor sleep %d advances real survival needs until failure"), Rest + 1),
             [this, BeforeHour, BeforeHunger, ExpectedSleep]()
             {
-                // Beds no longer cap daytime sleep by the clock, and "until rested" is short when she
-                // is rested, so go to bed at night each time: "until morning" is a full night.
+                // Start rested at night to exercise the single until-morning action each time.
                 Controller->Sim.SkipToHourOfDay(22.75);
+                if (!Controller->Sim.SetEnergy(100)) { Finish(false, TEXT("Could not prepare outdoor rest.")); return; }
                 *BeforeHour = Controller->State().hour;
                 *BeforeHunger = Controller->State().hunger;
                 *ExpectedSleep = Controller->BedSleepHours();
-                Tap(EKeys::Gamepad_FaceButton_Bottom);
                 Tap(EKeys::Gamepad_FaceButton_Bottom);
             },
             [this, BeforeHour, BeforeHunger, ExpectedSleep]()

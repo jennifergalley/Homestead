@@ -7,6 +7,7 @@
 #include "Simulation/HomesteadManor.h"
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadFood.h"
 #include "UI/SHomesteadMenu.h"
 #include "UI/SHomesteadShop.h"
 
@@ -144,7 +145,7 @@ void AHomesteadController::NextPage()
 
 void AHomesteadController::PreviousRow()
 {
-    if (!bBookOpen) { if (!CycleBedChoice(-1)) CycleSeedPouch(-1); return; }
+    if (!bBookOpen) { CycleSeedPouch(-1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + Count - 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -153,7 +154,7 @@ void AHomesteadController::PreviousRow()
 
 void AHomesteadController::NextRow()
 {
-    if (!bBookOpen) { if (!CycleBedChoice(1)) CycleSeedPouch(1); return; }
+    if (!bBookOpen) { CycleSeedPouch(1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + 1) % Count;
     PlayEffect(UIClick, 0.06f);
@@ -445,47 +446,15 @@ void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
     PlayEffect(UIClick, 0.08f);
 }
 
-std::vector<Homestead::SleepOption> AHomesteadController::BedSleepOptions() const
+std::optional<Homestead::SleepOption> AHomesteadController::BedSleepOffer() const
 {
-    return Homestead::SleepOptions(State().hour, State().energy);
-}
-
-int32 AHomesteadController::BedSleepIndex() const
-{
-    if (Focus != EFocus::Bed || FocusId != BedChoiceBed) return 0;
-    const auto Options = BedSleepOptions();
-    for (int32 Index = 0; Index < static_cast<int32>(Options.size()); ++Index)
-        if (Options[Index].choice == BedChoice) return Index;
-    return 0;
+    return Homestead::BedSleepOption(State().hour, State().energy);
 }
 
 double AHomesteadController::BedSleepHours() const
 {
-    const auto Options = BedSleepOptions();
-    return Options.empty() ? 0.0 : Options[BedSleepIndex()].hours;
-}
-
-FString AHomesteadController::SleepOptionLabel(const Homestead::SleepOption& Option)
-{
-    switch (Option.choice)
-    {
-    case Homestead::SleepChoice::UntilMorning: return TEXT("Sleep until morning (wake ") + SleepClockText(Option.wakeHour) + TEXT(")");
-    case Homestead::SleepChoice::UntilRested: return TEXT("Sleep until rested (wake ~") + SleepClockText(Option.wakeHour) + TEXT(")");
-    default: return FString::Printf(TEXT("Nap %g h (wake "), Option.hours) + SleepClockText(Option.wakeHour) + TEXT(")");
-    }
-}
-
-bool AHomesteadController::CycleBedChoice(int32 Delta)
-{
-    if (bBookOpen || bPlanning || IsFailed() || Focus != EFocus::Bed) return false;
-    const auto Options = BedSleepOptions();
-    if (Options.size() < 2) return true;
-    const int32 Count = static_cast<int32>(Options.size());
-    const int32 Index = (BedSleepIndex() + Delta % Count + Count) % Count;
-    BedChoice = Options[Index].choice;
-    BedChoiceBed = FocusId;
-    PlayEffect(UIClick, 0.06f);
-    return true;
+    const auto Offer = BedSleepOffer();
+    return Offer ? Offer->hours : 0.0;
 }
 
 void AHomesteadController::SleepAtBed(Homestead::Point Position)
@@ -503,75 +472,27 @@ void AHomesteadController::SleepAtBed(Homestead::Point Position)
     }
 }
 
-void AHomesteadController::RequestBedSleep(bool bKeepChoice)
-{
-    if (RejectPendingGroundSnapAction() || bBookOpen || bPlanning || IsFailed() || Focus != EFocus::Bed) return;
-    if (!bKeepChoice) { BedChoice = Homestead::SleepChoice::UntilMorning; BedChoiceBed = FocusId; }
-    const int32 Bed = FocusId;
-    const uint64 Revision = Sim.GetRevision();
-    const auto Options = BedSleepOptions();
-    if (Options.empty()) return;
-    const FString Choice = SleepOptionLabel(Options[BedSleepIndex()]);
-    OpenBook(0);
-    if (NativeMenu) NativeMenu->OpenBedSleepPrompt(Bed, Revision, Choice);
-    if (!NativeMenu || !NativeMenu->IsBedSleepPromptOpen()) CloseBook();
-}
-
-void AHomesteadController::MenuConfirmBedSleep(int32 BedId, uint64 Revision)
-{
-    if (!bBookOpen) return;
-    CloseBook();
-    if (RejectPendingGroundSnapAction()) return;
-    UpdateFocus();
-    if (Revision != Sim.GetRevision() || Focus != EFocus::Bed || FocusId != BedId)
-    {
-        Notify(TEXT("Move beside the bed and face it to sleep."), true);
-        return;
-    }
-    SleepAtBed(PlayerPoint());
-}
-
-void AHomesteadController::HomesteadSleep(int32 Option)
+void AHomesteadController::HomesteadSleep()
 {
     if (RejectPendingGroundSnapAction()) return;
     if (bBookOpen || bPlanning || IsFailed()) return;
     UpdateFocus();
     if (Focus != EFocus::Bed) { Notify(TEXT("Stand beside a bed to sleep."), true); return; }
-    const auto Options = BedSleepOptions();
-    if (Option >= 0 && Option < static_cast<int32>(Options.size())) { BedChoice = Options[Option].choice; BedChoiceBed = FocusId; }
-    RequestBedSleep(true);
-}
-
-void AHomesteadController::HomesteadBedChoice(int32 Delta)
-{
-    if (RejectPendingGroundSnapAction()) return;
-    UpdateFocus();
-    CycleBedChoice(Delta);
+    SleepAtBed(PlayerPoint());
 }
 
 Homestead::Result AHomesteadController::SleepInBed(Homestead::Point Position)
 {
-    const auto Options = BedSleepOptions();
-    if (Options.empty()) return {false, "There's nothing to sleep on here.", Homestead::ResultCode::Unavailable, Sim.GetRevision()};
-    const Homestead::SleepOption Option = Options[BedSleepIndex()];
-    const double Hours = Option.hours;
-    // Sleep takes at most twelve hours at a time; an early night from 18:00 is two halves.
+    const auto Offer = BedSleepOffer();
+    if (!Offer) return {false, State().energy < Homestead::Food::FullEnergyAt ? "Morning is nearly here." : "Not tired.",
+        Homestead::ResultCode::Unavailable, Sim.GetRevision()};
     const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ZeroVector;
     const Homestead::Point Facing{Forward.X, Forward.Y};
-    Homestead::Result Slept = Sim.Sleep(Hours > 12.0 ? Hours * 0.5 : Hours, Position, Facing, true);
-    if (Slept && Hours > 12.0) Slept = Sim.Sleep(Hours * 0.5, Position, Facing, true);
-    BedChoiceBed = INDEX_NONE;
+    Homestead::Result Slept = Sim.Sleep(Offer->hours, Position, Facing);
     if (!Slept) return Slept;
-    const FString Now = SleepClockText(State().hour);
-    FString Message;
-    if (Option.choice == Homestead::SleepChoice::Nap)
-        Message = TEXT("You nap for an hour and get up at ") + Now + TEXT(".");
-    else if (Option.choice == Homestead::SleepChoice::UntilMorning)
-        Message = State().energy >= 99.0
-            ? TEXT("You wake at first light, rested. Your garden and fires carried on through the night.")
-            : TEXT("You wake at first light, though still a little tired. An earlier night would leave you fully rested.");
-    else
-        Message = TEXT("You wake rested at ") + Now + TEXT(". Your garden and fires carried on while you slept.");
+    const FString Message = State().energy >= 99.0
+        ? TEXT("You wake rested at ") + SleepClockText(State().hour) + TEXT(".")
+        : TEXT("Morning comes, but you're still tired.");
     Slept.message = TCHAR_TO_UTF8(*Message);
     return Slept;
 }

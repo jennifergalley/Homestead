@@ -149,6 +149,27 @@ void AHomesteadController::RunSaveRoutingChecks()
             Check(LoadLatest(true) && WorldId == Fixture.World && UTF8_TO_TCHAR(Sim.Serialize().c_str()) == Fixture.After,
                 Fixture.Name + TEXT(" recovery load never crosses profile"));
         }
+        const FFixture& RecoveryFixture = Fixtures[3];
+        SaveRoute = RecoveryFixture.Route;
+        SaveRoute.Directory = FPaths::Combine(Output, TEXT("RecoveryChoice"));
+        WorldId = RecoveryFixture.World;
+        if (!ReadOnly)
+        {
+            Check(!IFileManager::Get().DirectoryExists(*SaveRoute.Directory),
+                TEXT("Recovery preference uses a fresh isolated test directory"));
+            Check(Sim.Deserialize(TCHAR_TO_UTF8(*RecoveryFixture.Before)).ok
+                && SaveSlot(TEXT("Homestead_Recovery"), true), TEXT("Older recovery fixture saved"));
+            Check(Sim.Deserialize(TCHAR_TO_UTF8(*RecoveryFixture.After)).ok
+                && SaveSlot(TEXT("Homestead_Auto_1"), true), TEXT("Newer autosave fixture saved"));
+            Sim.NewGame();
+            Check(LoadLatest(true) && UTF8_TO_TCHAR(Sim.Serialize().c_str()) == RecoveryFixture.After,
+                TEXT("Recovery chooses the newer auto instead of the older recovery slot"));
+            Check(FFileHelper::SaveStringToFile(TEXT("corrupt newest save"), *SavePath(TEXT("Homestead_Auto_1"))),
+                TEXT("Corrupt only the isolated newest autosave fixture"));
+        }
+        Sim.NewGame();
+        Check(LoadLatest(true) && UTF8_TO_TCHAR(Sim.Serialize().c_str()) == RecoveryFixture.Before,
+            TEXT("Corrupt newest auto falls back to the last valid recovery slot"));
         SaveRoute = Fixtures[1].Route;
         Check(PreviewLabel().Contains(Fixtures[1].Route.Profile), TEXT("Preview identification includes active isolated profile"));
         const uint32 IgnoredBefore = IgnoredExternalInputs;

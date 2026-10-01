@@ -171,14 +171,9 @@ public:
     FString PlacementLabel() const;
     // Whether the preview snaps, stands free, or why it can't be built there.
     FString PlacementStatus() const;
-    // The bed's choices (Homestead::SleepOptions) for her Energy now, and the one the prompt shows:
-    // the default first, or what she picked with the D-pad (Up/Down) while at this bed.
-    std::vector<Homestead::SleepOption> BedSleepOptions() const;
-    int32 BedSleepIndex() const;
+    // The single bed action for her current Energy and time of day.
+    std::optional<Homestead::SleepOption> BedSleepOffer() const;
     double BedSleepHours() const;
-    void MenuConfirmBedSleep(int32 BedId, uint64 Revision);
-    // "Sleep until morning (wake 06:45)", "Sleep until rested (wake ~14:30)", "Nap 1 h (wake 23:15)".
-    static FString SleepOptionLabel(const Homestead::SleepOption& Option);
     FString PreviewLabel() const;
     bool ToastIsError() const { return bToastError; }
     Homestead::Point PlayerPoint() const;
@@ -363,8 +358,7 @@ public:
     UFUNCTION(Exec) void HomesteadEmptyPail();
     // Playtest aids for the bed (stand beside one): sleep with choice N as listed in the prompt (-1 =
     // the one shown), or step the shown choice by Delta, as Up/Down (D-pad) do.
-    UFUNCTION(Exec) void HomesteadSleep(int32 Option = -1);
-    UFUNCTION(Exec) void HomesteadBedChoice(int32 Delta = 1);
+    UFUNCTION(Exec) void HomesteadSleep();
     // Console playtest aid: move her to world X,Y and stand her on the ground there (waiting for the
     // ground's collision to stream in). Give Z to land on the first surface at or below Z instead
     // (an upper floor, say); omit it for the terrain.
@@ -558,6 +552,7 @@ private:
     Homestead::Piece BuildKind = Homestead::Piece::Foundation;
     EFocus Focus = EFocus::None;
     int32 FocusId = -1;
+    bool bBedFocusActionable = false;
     // The underbrush plant in focus while the machete is selected (EFocus::Underbrush).
     FIntPoint FocusBrushChunk = FIntPoint::ZeroValue;
     int32 FocusBrushIndex = INDEX_NONE;
@@ -762,13 +757,9 @@ private:
     // second unless forced).
     void UpdatePlacement(bool bForce);
     Homestead::Result SleepInBed(Homestead::Point Position);
-    void RequestBedSleep(bool bKeepChoice = false);
-    // Sleeps with the chosen option and makes the usual autosave and recovery checkpoint.
+    // Sleeps with the single offered action and makes the usual autosave and recovery checkpoint.
     void SleepAtBed(Homestead::Point Position);
-    // At the bed, Up/Down (D-pad) steps through the sleep choices. False when not at a bed.
-    bool CycleBedChoice(int32 Delta);
-    Homestead::SleepChoice BedChoice = Homestead::SleepChoice::UntilMorning;
-    int32 BedChoiceBed = INDEX_NONE;
+    bool bBedSleepHeld = false;
     int32 SeenDozes = 0;
     // Calendar toasts (HomesteadControllerCalendar.cpp): once per season change, compared against the
     // simulation after each Advance.

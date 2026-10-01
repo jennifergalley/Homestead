@@ -22,14 +22,23 @@ using HomesteadControllerText::Text;
 
 void AHomesteadController::UpdateFocus()
 {
+    const bool bHeldBed = Focus == EFocus::Bed;
     Focus = EFocus::None;
     FocusId = -1;
+    bBedFocusActionable = false;
     const auto Position = PlayerPoint();
     double Best = 280.0;
+    constexpr double FurnitureBroadphaseCm = 425.0; // 280 cm focus plus the largest furniture offset.
+    Homestead::Point FocusTarget{};
+    bool bHasFocusTarget = false;
     auto Consider = [&](EFocus Kind, int Id, Homestead::Point Target)
     {
         const double Distance = FMath::Sqrt(FMath::Square(Target.x - Position.x) + FMath::Square(Target.y - Position.y));
-        if (Distance < Best) { Best = Distance; Focus = Kind; FocusId = Id; }
+        if (Distance < Best)
+        {
+            Best = Distance; Focus = Kind; FocusId = Id;
+            FocusTarget = Target; bHasFocusTarget = true;
+        }
     };
     for (const auto& Node : State().resources)
         if (!Node.cleared) Consider(EFocus::Resource, Node.id, Node.position);
@@ -51,6 +60,8 @@ void AHomesteadController::UpdateFocus()
                     + FMath::Square(Homestead::PlotCenter(Plot).y - Position.y)));
                 Focus = EFocus::Plot;
                 FocusId = Plot.id;
+                FocusTarget = Homestead::PlotCenter(Plot);
+                bHasFocusTarget = true;
                 break;
             }
     }
@@ -60,11 +71,20 @@ void AHomesteadController::UpdateFocus()
         if (Structure.kind == Homestead::Piece::Fire) Kind = EFocus::Fire;
         if (Structure.kind == Homestead::Piece::Hearth) Kind = EFocus::Hearth;
         if (Structure.kind == Homestead::Piece::Chest) Kind = EFocus::Chest;
-        if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
+        if (Kind != EFocus::None)
+        {
+            // The furthest furniture offset is 142 cm; avoid footprint/foundation scans far from her.
+            const auto Cell = Homestead::StructureCenter(State(), Structure);
+            if (FMath::Square(Cell.x - Position.x) + FMath::Square(Cell.y - Position.y) < FMath::Square(FurnitureBroadphaseCm))
+                Consider(Kind, Structure.id, Homestead::StructureFootprint(State(), Structure).center);
+        }
     }
     ConsiderStoreFocus(Consider);
     ConsiderRoadSignFocus(Consider);
+    const EFocus BeforeHeldTool = Focus;
+    const int BeforeHeldId = FocusId;
     FocusHeldToolTarget(Position);
+    if (Focus != BeforeHeldTool || FocusId != BeforeHeldId) bHasFocusTarget = false;
     if (Sim.NearWater(Position))
     {
         // With the watering can out and not full, the stream wins over a crop on the bank when she
@@ -77,6 +97,7 @@ void AHomesteadController::UpdateFocus()
         {
             Focus = EFocus::Water;
             FocusId = -1;
+            bHasFocusTarget = false;
         }
     }
     // With the machete out, the nearest bush or bramble within arm's reach takes the focus.
@@ -92,10 +113,23 @@ void AHomesteadController::UpdateFocus()
         FocusBrushSpecies = Brush.Species;
         FocusBrushPosition = Brush.Position;
         bFocusBrushWoody = Brush.bWoody;
+        bHasFocusTarget = false;
     }
     const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ZeroVector;
-    const int Bed = Homestead::BedFocusCandidate(State(), Position, {Forward.X, Forward.Y}, Focus != EFocus::None);
-    if (Bed != -1) { Focus = EFocus::Bed; FocusId = Bed; }
+    bool bOtherFacing = Focus != EFocus::None;
+    if (bOtherFacing && bHasFocusTarget)
+    {
+        const double X = FocusTarget.x - Position.x, Y = FocusTarget.y - Position.y;
+        const double Distance = FMath::Sqrt(X * X + Y * Y);
+        bOtherFacing = Distance < 1e-6
+            || (Forward.X * X + Forward.Y * Y) >= Homestead::BedFacingCosine * Distance;
+    }
+    const int Bed = Homestead::BedFocusCandidate(State(), Position, {Forward.X, Forward.Y}, bOtherFacing, bHeldBed);
+    if (Bed != -1)
+    {
+        Focus = EFocus::Bed; FocusId = Bed;
+        bBedFocusActionable = Homestead::ReachableBed(State(), Position, {Forward.X, Forward.Y}) == Bed;
+    }
 }
 
 FString AHomesteadController::FocusTitle() const
@@ -269,7 +303,11 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Hearth: return A + TEXT(" Cook");
     case EFocus::Drop: return A + TEXT(" Pick up");
     case EFocus::Bed:
-        return A + TEXT(" Sleep");
+        if (!bBedFocusActionable) return FString();
+        if (const auto Offer = BedSleepOffer())
+            return A + (Offer->choice == Homestead::SleepChoice::UntilMorning
+                ? TEXT(" Sleep until morning") : TEXT(" Sleep until rested"));
+        return FString();
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
     case EFocus::Water:
         // Offer the fill only when it can happen: say where the pail is, or that it's already full.

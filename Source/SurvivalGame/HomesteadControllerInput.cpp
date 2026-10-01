@@ -58,6 +58,8 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         }
         return true;
     }
+    if (Params.Event == IE_Released && (Params.Key == EKeys::E || Params.Key == EKeys::Enter
+        || Params.Key == EKeys::Gamepad_FaceButton_Bottom)) bBedSleepHeld = false;
     if (bPendingGroundSnap)
     {
         if (Params.Event == IE_Pressed && Params.Key == EKeys::F9) QuickLoad();

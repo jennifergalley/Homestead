@@ -201,7 +201,9 @@ void AHomesteadController::Interact()
         if (NativeMenu && !NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe, Selection, 0))
             Notify(TEXT("The cookfire recipe could not be selected."), true);
         break;
-    case EFocus::Bed: RequestBedSleep(); break;
+    case EFocus::Bed:
+        if (bBedFocusActionable && !bBedSleepHeld) { bBedSleepHeld = true; SleepAtBed(Position); }
+        break;
     case EFocus::Chest: OpenChestStorage(FocusId); break;
     case EFocus::Water: FillPailAtStream(Position); break;
     case EFocus::Underbrush: StartMacheteHack(); break;

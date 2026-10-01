@@ -100,23 +100,6 @@ void SHomesteadMenu::OpenSignTravelPrompt(const FString& SignWords, const TArray
     bFocusPending = true;
 }
 
-void SHomesteadMenu::OpenBedSleepPrompt(int32 BedId, uint64 Revision, const FString& Choice)
-{
-    if (!Controller.IsValid() || Dialog != EDialog::None) return;
-    PopupOptions.Reset();
-    PopupTitle = Choice.StartsWith(TEXT("Sleep until morning")) ? TEXT("Sleep until morning?") : Choice + TEXT("?");
-    PopupBody.Reset();
-    PopupOptions.Add({[this]() { return Controller->UsesGamepad() ? FString(TEXT("[A] Sleep")) : FString(TEXT("[E] Sleep")); },
-        [this, BedId, Revision]() { Controller->MenuConfirmBedSleep(BedId, Revision); }, nullptr});
-    PopupOptions.Add({[this]() { return Controller->UsesGamepad() ? FString(TEXT("[B] Cancel")) : FString(TEXT("[Esc] Cancel")); },
-        [this]() { Controller->MenuBack(); }, nullptr});
-    bCenterPopup = true;
-    SetDialog(EDialog::Context);
-    bBedSleepPrompt = true;
-    DialogSelection = 0;
-    bFocusPending = true;
-}
-
 bool SHomesteadMenu::HandleMapKey(FKey Key, EInputEvent Event, float InputAmount)
 {
     if (Event == IE_Axis)

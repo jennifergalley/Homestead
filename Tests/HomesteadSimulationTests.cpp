@@ -1,4 +1,5 @@
 #include "HomesteadSimulation.h"
+#include "../Source/SurvivalGame/HomesteadSavePreference.h"
 #include "HomesteadBed.h"
 #include "HomesteadCrops.h"
 #include "HomesteadShops.h"
@@ -577,7 +578,7 @@ void GardenTargetPreview()
         Simulation tired = sim;
         Edit(tired, [](State& state) { state.energy = 0.5; });
         const GardenTarget exhausted = PreviewGarden(tired, GardenTool::Hoe, {stand.x - 300.0, stand.y}, 1.0, 0.0);
-        CHECK(exhausted.shown && !exhausted.valid && exhausted.reason.find("exhausted") != std::string::npos);
+        CHECK(exhausted.shown && !exhausted.valid && exhausted.reason.find("Too tired") != std::string::npos);
     }
 
     // The pail: nothing without a focused plot; no pail, then empty, then fillable, then fully watered.
@@ -666,7 +667,7 @@ void SeedSowPreview()
         Simulation tired = sim;
         Edit(tired, [](State& state) { state.energy = 0.5; });
         const GardenTarget exhausted = PreviewGarden(tired, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::CarrotSeed);
-        CHECK(exhausted.shown && !exhausted.valid && exhausted.reason.find("exhausted") != std::string::npos);
+        CHECK(exhausted.shown && !exhausted.valid && exhausted.reason.find("Too tired") != std::string::npos);
         CHECK(exhausted.reason == tired.CheckSow(plotId, beside, CropKind::Carrots).message);
     }
     if (sim.Count(Item::Berries) == 0) Refused(sim, beside, plotId, Item::Berries, "Gather a berry to plant the seeds from its fruit.");
@@ -849,7 +850,7 @@ void GameplayWalkthrough()
     // A cooked meal restores some energy as well as food.
     CHECK(sim.GetState().energy > energyBeforeMeal || sim.GetState().energy == 100);
     const double beforeSleep = sim.GetState().hour;
-    OK(sim.Sleep(8, Home, {1, 0}, true));
+    OK(sim.Sleep(8, Home, {1, 0}));
     CHECK(Close(sim.GetState().hour, beforeSleep + 8));
     CHECK(sim.GetState().energy == 100);
     CHECK(!sim.IsNearFire(firePosition));
@@ -861,7 +862,7 @@ void GameplayWalkthrough()
         if (sim.Count(Item::Berries) < 3) GatherUntil(sim, Item::Berries, ResourceKind::BerryBush, 10);
         while (sim.GetState().hunger < 85) OK(sim.Eat(Item::Berries));
         sim.AdvanceGameHours(4, Home);
-        OK(sim.Sleep(8, Home, {1, 0}, true));
+        OK(sim.Sleep(8, Home, {1, 0}));
     }
     CHECK(sim.GetState().plots[0].growth == 1);
     const int roots = sim.Count(Item::Roots);
@@ -1451,7 +1452,7 @@ void GrowBerryBush(Simulation& sim, int plotId, Point garden)
                 GatherUntil(sim, Item::Berries, ResourceKind::BerryBush, 5);
             OK(sim.Eat(Item::Berries));
         }
-        OK(sim.Sleep(8, Home, {1, 0}, true));
+        OK(sim.Sleep(8, Home, {1, 0}));
         CHECK(!sim.GetState().failed);
         CHECK(sim.GetState().plots[0].kind == CropKind::Berries);
         CHECK(sim.GetState().plots[0].planted);
@@ -2143,16 +2144,16 @@ void SleepAndFailure()
     CHECK(Close(energies[0] - bare.GetState().energy, 3 * Exertion::AwakePerHour));
     CHECK(Close(energies[1] - indoor.GetState().energy, 3 * Exertion::AwakePerHour));
     CHECK(Close(energies[2] - fire.GetState().energy, 3 * Exertion::AwakePerHour));
-    UnchangedFailure(bare, [&] { return bare.Sleep(8, Home, {1, 0}, true); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(8, Home, {1, 0}); });
     BuildingStock(bare);
     OK(bare.Place(Piece::Bed, -3, 0, 0, Home));
-    UnchangedFailure(bare, [&] { return bare.Sleep(13, Home, {1, 0}, true); });
-    UnchangedFailure(bare, [&] { return bare.Sleep(-1, Home, {1, 0}, true); });
-    UnchangedFailure(bare, [&] { return bare.Sleep(std::numeric_limits<double>::quiet_NaN(), Home, {1, 0}, true); });
-    UnchangedFailure(bare, [&] { return bare.Sleep(8, {3900, 3900}, {1, 0}, true); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(13, Home, {1, 0}); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(-1, Home, {1, 0}); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(std::numeric_limits<double>::quiet_NaN(), Home, {1, 0}); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(8, {3900, 3900}, {1, 0}); });
     Edit(bare, [](State& state) { state.hour = 19; state.hunger = 0.65; state.energy = 10; });
     const auto checkpoint = bare.Serialize();
-    CHECK(!bare.Sleep(8, Home, {1, 0}, true).ok);
+    CHECK(!bare.Sleep(8, Home, {1, 0}).ok);
     CHECK(bare.GetState().failed);
     CHECK(Close(bare.GetState().hour, 19.5));
     CHECK(Close(bare.GetState().energy, 15));
@@ -2162,7 +2163,7 @@ void SleepAndFailure()
     CHECK(failed == bare.Serialize());
     UnchangedFailure(bare, [&] { return bare.Eat(Item::Berries); });
     UnchangedFailure(bare, [&] { return bare.SetDayMinutes(30); });
-    UnchangedFailure(bare, [&] { return bare.Sleep(1, Home, {1, 0}, true); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(1, Home, {1, 0}); });
     UnchangedFailure(bare, [&] { return bare.Craft(Recipe::HaftAxe, Home); });
     Simulation savedFailure;
     OK(savedFailure.Deserialize(failed));
@@ -2171,7 +2172,7 @@ void SleepAndFailure()
     CHECK(!bare.GetState().failed);
     // A cold night in bed is simply rest now.
     Edit(bare, [](State& state) { state.hour = 84 * 24 + 20; state.hunger = 80; state.energy = 60; });
-    OK(bare.Sleep(8, Home, {1, 0}, true));
+    OK(bare.Sleep(8, Home, {1, 0}));
     CHECK(!bare.GetState().failed && bare.GetState().energy == 100);
     // Time awake drains Energy slowly (1.2 points last two hours). Running out doesn't fail her: she
     // dozes off where she stands for DozeHours at the slower rate, then carries on awake.
@@ -2204,8 +2205,8 @@ void SleepAndFiniteBoundaries()
     Edit(once, [](State& state) { state.hour = 31; state.energy = 15; });
     Simulation split;
     OK(split.Deserialize(once.Serialize()));
-    OK(once.Sleep(8, Home, {1, 0}, true));
-    for (int i = 0; i < 16; ++i) OK(split.Sleep(0.5, Home, {1, 0}, true));
+    OK(once.Sleep(8, Home, {1, 0}));
+    for (int i = 0; i < 16; ++i) OK(split.Sleep(0.5, Home, {1, 0}));
     CHECK(Close(once.GetState().hour, split.GetState().hour, 1e-7));
     CHECK(Close(once.GetState().hunger, split.GetState().hunger, 1e-7));
     CHECK(Close(once.GetState().energy, split.GetState().energy, 1e-7));
@@ -2218,7 +2219,7 @@ void SleepAndFiniteBoundaries()
     const std::string before = once.Serialize();
     once.AdvanceGameHours(1, Home);
     CHECK(once.Serialize() == before);
-    UnchangedFailure(once, [&] { return once.Sleep(1, Home, {1, 0}, true); });
+    UnchangedFailure(once, [&] { return once.Sleep(1, Home, {1, 0}); });
     Edit(once, [](State& state) { state.nextId = TransientResourceIdBase - 1; });
     UnchangedFailure(once, [&] { return once.Till(CellToGarden(-1), CellToGarden(-1), CellCenter(-1, -1)); });
     UnchangedFailure(once, [&] { return once.Place(Piece::Foundation, -1, -1, 0, CellCenter(-1, -1)); });
@@ -2226,7 +2227,7 @@ void SleepAndFiniteBoundaries()
     OK(restored.Deserialize(once.Serialize()));
 }
 
-void BedSleepReachAndConfirmation()
+void BedSleepReachAndPriority()
 {
     Simulation sim;
     BuildingStock(sim);
@@ -2251,17 +2252,34 @@ void BedSleepReachAndConfirmation()
     CHECK(ReachableBed(state, approach(91), toward) == -1);
     CHECK(ReachableBed(state, near, away) == -1);
     CHECK(ReachableBed(state, near, RotateYaw({-0.87, 0.49}, box.yaw)) == bedId);
-    CHECK(ReachableBed(state, near, RotateYaw({-0.85, 0.53}, box.yaw)) == -1);
-    UnchangedFailure(sim, [&] { return sim.Sleep(1, approach(91), toward, true); });
-    UnchangedFailure(sim, [&] { return sim.Sleep(1, near, away, true); });
-    UnchangedFailure(sim, [&] { return sim.Sleep(1, near, toward, false); });
-    CHECK(sim.Sleep(1, near, toward, false).message == "Confirm that you want to sleep before resting.");
+    CHECK(ReachableBed(state, near, RotateYaw({-0.85, 0.53}, box.yaw)) == bedId);
+    CHECK(ReachableBed(state, near, RotateYaw({-0.25, 0.97}, box.yaw)) == -1);
+    const Point headOffset = RotateYaw({box.half.x + 85, box.half.y + 20}, box.yaw);
+    const Point nearHead{box.center.x + headOffset.x, box.center.y + headOffset.y};
+    CHECK(ReachableBed(state, nearHead,
+        RotateYaw({-2 * box.half.x - 85, -2 * box.half.y - 20}, box.yaw)) == bedId);
+    CHECK(ReachableBed(state, approach(94), toward) == -1);
+    CHECK(BedFocusCandidate(state, approach(94), toward, false, true) == bedId);
+    CHECK(BedFocusCandidate(state, approach(94), toward, false, false) == -1);
+    UnchangedFailure(sim, [&] { return sim.Sleep(1, approach(91), toward); });
+    UnchangedFailure(sim, [&] { return sim.Sleep(1, near, away); });
 
-    OK(sim.Place(Piece::Chest, -2, 0, 0, Home));
+    OK(sim.Place(Piece::Foundation, -2, 0, 0, CellCenter(-2, 0)));
+    OK(sim.Place(Piece::Chest, -2, 0, 0, CellCenter(-2, 0)));
     CHECK(sim.FindNearestStructure(near, Piece::Chest, 280) != -1);
+    const Structure* chest = nullptr;
+    for (const auto& structure : sim.GetState().structures)
+        if (structure.kind == Piece::Chest) chest = &structure;
+    CHECK(chest != nullptr);
+    const Point chestCenter = StructureFootprint(sim.GetState(), *chest).center;
+    CHECK(chestCenter.x != StructureCenter(sim.GetState(), *chest).x
+        && chestCenter.y != StructureCenter(sim.GetState(), *chest).y);
+    const Point chestDirection{chestCenter.x - near.x, chestCenter.y - near.y};
+    CHECK(toward.x * chestDirection.x + toward.y * chestDirection.y
+        < BedFacingCosine * std::hypot(chestDirection.x, chestDirection.y));
     CHECK(BedFocusCandidate(sim.GetState(), near, toward, true) == -1);
     CHECK(BedFocusCandidate(sim.GetState(), near, toward, false) == bedId);
-    OK(sim.Sleep(1, near, toward, true));
+    OK(sim.Sleep(1, near, toward));
 }
 
 void PersistenceRejection()
@@ -3494,11 +3512,11 @@ void SparseEditScaleAndPayloadBounds()
 }
 
 // Sprint is free (Jenny, round 2): no Energy of its own at any frame rate or day length. She may
-// start or keep sprinting only above 10 Energy; the awake drain and work are what bring her there.
+// start or keep sprinting from 25 Energy; the awake drain and work are what bring her there.
 void SprintEnergyContract()
 {
     Simulation sim;
-    CHECK(Exertion::SprintFloor == 10.0);
+    CHECK(Exertion::SprintFloor == 25.0);
     const std::string before = sim.Serialize();
     const auto revision = sim.GetRevision();
     OK(sim.CanSprint());
@@ -3526,13 +3544,13 @@ void SprintEnergyContract()
             CHECK(Close(running.GetState().energy, 100.0 - hours * Exertion::AwakePerHour, 1e-6));
         }
 
-    // The floor: above 10 she may run, at or below it she can't, and a failed run can't either.
-    OK(sim.SetEnergy(10.01));
+    // The floor: from 25 she may run, below it she can't, and a failed run can't either.
+    OK(sim.SetEnergy(25.0));
     OK(sim.CanSprint());
-    OK(sim.SetEnergy(10.0));
+    OK(sim.SetEnergy(24.99));
     const auto tired = sim.CanSprint();
-    CHECK(!tired.ok && tired.message == "Too tired to run. Eat something or rest.");
-    OK(sim.SetEnergy(4.0));
+    CHECK(!tired.ok && tired.message == "Too tired to sprint.");
+    OK(sim.SetEnergy(20.0));
     CHECK(!sim.CanSprint());
     // Eating brings her back over the floor; nothing turns the toggle back on here (that's the pawn's
     // job, and it never does it by itself), but she may ask again.
@@ -3541,10 +3559,10 @@ void SprintEnergyContract()
     OK(sim.Eat(Item::Berries));
     OK(sim.CanSprint());
     // Work that wears her down to the floor stops her sprinting.
-    OK(sim.SetEnergy(10.4));
+    OK(sim.SetEnergy(25.4));
     const auto branch = Node(sim, ResourceKind::Branches);
     OK(sim.Harvest(branch.id, branch.position));
-    CHECK(sim.GetState().energy <= 10.0 && !sim.CanSprint());
+    CHECK(sim.GetState().energy < 25.0 && !sim.CanSprint());
     // Energy survives a save exactly; the toggle itself is never saved.
     Simulation loaded;
     OK(loaded.Deserialize(sim.Serialize()));
@@ -3574,9 +3592,11 @@ void ActionEnergyContract()
     UnchangedFailure(sim, [&] { return sim.Till(CellToGarden(-3), CellToGarden(-1), CellCenter(-3, -1)); });
     Simulation probe;
     OK(probe.Deserialize(sim.Serialize()));
-    CHECK(probe.Till(CellToGarden(-3), CellToGarden(-1), CellCenter(-3, -1)).message.find("exhausted") != std::string::npos);
-    // Light work is still possible at the same Energy, and exertion never drops her below the reserve.
+    CHECK(probe.Till(CellToGarden(-3), CellToGarden(-1), CellCenter(-3, -1)).message.find("Too tired") != std::string::npos);
+    // Even light work waits until she is back above the exhausted band.
     const int plot = sim.GetState().plots[0].id;
+    UnchangedFailure(sim, [&] { return sim.Plant(plot, CellCenter(-2, -1)); });
+    OK(sim.SetEnergy(10.5));
     OK(sim.Plant(plot, CellCenter(-2, -1)));
     CHECK(sim.GetState().energy >= Exertion::Reserve);
     CHECK(!sim.GetState().failed);
@@ -3862,26 +3882,40 @@ void ChestCapacityAndWaterSpace()
 
 void SleepOptionPolicy()
 {
-    // 21:00 with part of her energy left: "until morning" leads and wakes her at 06:45; "until
-    // rested" (40 short, 4 h) and a nap follow.
-    const auto night = SleepOptions(21.0, 60.0);
-    CHECK(night.size() == 3);
-    CHECK(night[0].choice == SleepChoice::UntilMorning && Close(night[0].hours, 9.75) && Close(night[0].wakeHour, 6.75));
-    CHECK(night[1].choice == SleepChoice::UntilRested && Close(night[1].hours, 4.0) && Close(night[1].wakeHour, 1.0));
-    CHECK(night[2].choice == SleepChoice::Nap && Close(night[2].hours, 1.0) && Close(night[2].wakeHour, 22.0));
-    // A night owl going to bed at 05:00 nearly spent sleeps through into the afternoon.
-    const auto owl = SleepOptions(5.0, 5.0);
-    CHECK(owl[0].choice == SleepChoice::UntilRested && Close(owl[0].hours, 9.5) && Close(owl[0].wakeHour, 14.5));
-    // Rested at noon: one short rest, no separate nap.
-    const auto noon = SleepOptions(12.0, 100.0);
-    CHECK(noon.size() == 1 && noon[0].choice == SleepChoice::UntilRested && Close(noon[0].hours, 1.0));
-    // "Until rested" that would wake her near morning is folded into "until morning".
-    const auto late = SleepOptions(22.75, 20.0);
-    CHECK(late.size() == 2 && late[0].choice == SleepChoice::UntilMorning && late[1].choice == SleepChoice::Nap);
-    // Bounds: at most ten hours to rest, an early night from 18:00 runs to morning.
-    CHECK(Close(SleepOptions(12.0, 0.0)[0].hours, Exertion::MaxRestHours));
-    CHECK(Close(SleepOptions(18.0, 50.0)[0].hours, 12.75));
-    CHECK(Close(SleepOptions(12.0, 97.0)[0].hours, Exertion::MinRestHours));
+    const auto tiredNight = BedSleepOption(21.0, 60.0);
+    CHECK(tiredNight && tiredNight->choice == SleepChoice::UntilRested
+        && Close(tiredNight->hours, 4.0) && Close(tiredNight->wakeHour, 1.0));
+    const auto restedNight = BedSleepOption(25.0, 100.0);
+    CHECK(restedNight && restedNight->choice == SleepChoice::UntilMorning
+        && Close(restedNight->hours, 5.0) && Close(restedNight->wakeHour, 6.0));
+    const auto late = BedSleepOption(22.75, 20.0);
+    CHECK(late && late->choice == SleepChoice::UntilRested
+        && Close(late->hours, 7.25) && Close(late->wakeHour, 6.0));
+    const auto owl = BedSleepOption(5.0, 5.0);
+    CHECK(owl && owl->choice == SleepChoice::UntilRested && Close(owl->hours, 1.0) && Close(owl->wakeHour, 6.0));
+    const auto midday = BedSleepOption(12.0, 97.0);
+    CHECK(midday && midday->choice == SleepChoice::UntilRested && Close(midday->hours, 0.5));
+    CHECK(!BedSleepOption(12.0, 100.0));
+    CHECK(!BedSleepOption(12.0, 99.6));
+    CHECK(BedSleepOption(21.0, 99.6)->choice == SleepChoice::UntilMorning);
+    CHECK(!BedSleepOption(6.0, 100.0));
+    CHECK(!BedSleepOption(5.875, 100.0));
+    CHECK(Close(BedSleepOption(12.0, 0.0)->hours, Exertion::MaxRestHours));
+    CHECK(Close(BedSleepOption(18.0, 50.0)->hours, 5.0));
+    CHECK(Close(BedSleepOption(18.0, 100.0)->hours, 12.0));
+    CHECK(!BedSleepOption(std::numeric_limits<double>::quiet_NaN(), 50.0));
+    CHECK(!BedSleepOption(12.0, std::numeric_limits<double>::quiet_NaN()));
+    Simulation sleeper;
+    BuildingStock(sleeper);
+    OK(sleeper.Place(Piece::Bed, -3, 0, 0, Home));
+    Edit(sleeper, [](State& state) { state.hour = 21.0; state.energy = 60.0; });
+    OK(sleeper.Sleep(BedSleepOption(sleeper.GetState().hour, sleeper.GetState().energy)->hours, Home, {1, 0}));
+    CHECK(Close(sleeper.GetState().hour, 25.0) && sleeper.GetState().energy == 100.0);
+    OK(sleeper.Sleep(BedSleepOption(sleeper.GetState().hour, sleeper.GetState().energy)->hours, Home, {1, 0}));
+    if (!Close(sleeper.GetState().hour, 30.0) || !Close(sleeper.GetState().energy, 100.0))
+        std::cerr << "Bed policy at sunrise: hour=" << sleeper.GetState().hour
+            << " energy=" << sleeper.GetState().energy << '\n';
+    CHECK(Close(sleeper.GetState().hour, 30.0) && Close(sleeper.GetState().energy, 100.0));
     // One rain schedule for the rules, the lighting and the wet ground: two days in ten, 09:00-15:00. Day 0 is
     // dry and day 1 rains (as before); every ten-day block rains on one of offsets 1-2 and one of 6-7, so
     // exactly 20% of days with rains 4-6 days apart, and all four combinations occur.
@@ -3902,6 +3936,7 @@ void SleepOptionPolicy()
                 shortestGap = std::min(shortestGap, day - lastRain);
                 longestGap = std::max(longestGap, day - lastRain);
             }
+
             lastRain = day;
         }
         for (long long block = 0; block < 1000; ++block)
@@ -3954,14 +3989,96 @@ void SleepOptionPolicy()
         CHECK(Close(RainAudioGain(1.0, 0.7, 0.0), 0.315) && Close(RainAudioGain(1.0, 0.7, 1.0), 0.1225));
         CHECK(RainAudioGain(0.0, 0.7, 0.0) == 0.0 && !RainAudible(0.0, 0.7, 0.0));
         CHECK(RainAudioGain(1.0, 0.0, 0.0) == 0.0 && !RainAudible(1.0, 0.0, 1.0));   // Ambience muted
-    }    // Recovery follows hours slept, not the clock: a daytime sleep until rested fills her up.
+    }
+    // At 05:00, rest stops at 06:00 even when she still needs more sleep; daytime can finish it.
     Simulation owlSim;
     BuildingStock(owlSim);
     OK(owlSim.Place(Piece::Bed, -3, 0, 0, Home));
     Edit(owlSim, [](State& state) { state.hour = 29.0; state.energy = 5.0; state.hunger = 90.0; });
-    OK(owlSim.Sleep(SleepOptions(owlSim.GetState().hour, owlSim.GetState().energy)[0].hours, Home, {1, 0}, true));
-    CHECK(Close(owlSim.GetState().hour, 38.5));
-    CHECK(Close(owlSim.GetState().energy, 100.0) && !owlSim.GetState().failed);
+    const auto owlRest = BedSleepOption(owlSim.GetState().hour, owlSim.GetState().energy);
+    CHECK(owlRest && Close(owlRest->hours, 1.0));
+    OK(owlSim.Sleep(owlRest->hours, Home, {1, 0}));
+    CHECK(Close(owlSim.GetState().hour, 30.0));
+    CHECK(Close(owlSim.GetState().energy, 15.0) && !owlSim.GetState().failed);
+    const auto afterDawn = BedSleepOption(owlSim.GetState().hour, owlSim.GetState().energy);
+    if (!afterDawn || !Close(afterDawn->hours, 8.5))
+        std::cerr << "After dawn: hour=" << owlSim.GetState().hour
+            << " energy=" << owlSim.GetState().energy
+            << " offer=" << (afterDawn ? afterDawn->hours : -1) << '\n';
+    CHECK(afterDawn && Close(afterDawn->hours, 8.5));
+    OK(owlSim.Sleep(afterDawn->hours, Home, {1, 0}));
+    CHECK(Close(owlSim.GetState().hour, 38.5) && Close(owlSim.GetState().energy, 100.0));
+}
+
+void EstateExhaustionIsNonlethal()
+{
+    const auto makeEstate = []()
+    {
+        Simulation estate;
+        OK(estate.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+        return estate;
+    };
+    Simulation sim = makeEstate();
+    OK(sim.SetEnergy(0.0));
+    const double started = sim.GetState().hour;
+    const int dozes = sim.DozeCount();
+    CHECK(Exertion::SprintFloor == 25.0 && Exertion::SlowWalkFloor == 10.0);
+    CHECK(Close(Exertion::WalkSpeedFactor(0), 0.75));
+    CHECK(Close(Exertion::WalkSpeedFactor(9.99), 0.75));
+    CHECK(Close(Exertion::WalkSpeedFactor(10), 1.0));
+    CHECK(!sim.CanSprint() && sim.CheckExertion(0.5).message == "Too tired.");
+    sim.AdvanceGameHours(72.0, ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {}));
+    CHECK(Close(sim.GetState().hour, started + 72.0) && !sim.GetState().failed
+        && sim.GetState().hunger == 100.0 && sim.GetState().energy == 0.0 && sim.DozeCount() == dozes);
+    Simulation loaded = makeEstate();
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(!loaded.GetState().failed && loaded.GetState().energy == 0);
+    OK(sim.GrantItems(Item::Berries, 2));
+    OK(sim.Eat(Item::Berries));
+    CHECK(sim.GetState().energy > 0 && !sim.GetState().failed);
+    OK(sim.SetEnergy(9.99));
+    CHECK(!sim.CanSprint() && sim.CheckExertion(0.5).message == "Too tired.");
+    OK(sim.SetEnergy(10.0));
+    CHECK(Close(Exertion::WalkSpeedFactor(sim.GetState().energy), 1.0) && !sim.CanSprint());
+    OK(sim.SetEnergy(24.99));
+    CHECK(!sim.CanSprint());
+    OK(sim.SetEnergy(25.0));
+    OK(sim.CanSprint());
+    OK(sim.CheckExertion(0.5));
+
+    std::string payload = sim.Serialize();
+    payload.erase(0, payload.find('\n') + 1);
+    const State& state = sim.GetState();
+    payload.replace(0, payload.find('\n'), std::to_string(state.hour) + " " + std::to_string(state.dayMinutes)
+        + " 0 0 1 " + std::to_string(state.nextId));
+    Simulation recovered = makeEstate();
+    OK(recovered.Deserialize(Envelope(payload)));
+    CHECK(!recovered.GetState().failed && recovered.GetState().hunger == 100
+        && recovered.GetState().energy == 0);
+}
+
+void NewestValidRecoveryPreference()
+{
+    const FHomesteadSavePreference oldRecovery{100, 18, 8};
+    const FHomesteadSavePreference newerAuto{200, 10, 2};
+    CHECK(IsNewerHomesteadSave(newerAuto, oldRecovery));
+    CHECK(!IsNewerHomesteadSave(oldRecovery, newerAuto));
+    CHECK(IsNewerHomesteadSave({200, 11, 8}, newerAuto));
+    CHECK(!IsNewerHomesteadSave({200, 9, 0}, newerAuto));
+    CHECK(IsNewerHomesteadSave({200, 10, 0}, newerAuto));
+
+    const std::pair<FHomesteadSavePreference, bool> files[] = {
+        {{300, 19, 0}, false}, // corrupt newest file
+        {oldRecovery, true},
+        {newerAuto, true},
+        {{150, 2, 4}, true}
+    };
+    const FHomesteadSavePreference* best = nullptr;
+    for (const auto& file : files)
+        if (file.second && (!best || IsNewerHomesteadSave(file.first, *best)))
+            best = &file.first;
+    CHECK(best && best->SavedAtUtc == newerAuto.SavedAtUtc
+        && best->SavedRevision == newerAuto.SavedRevision);
 }
 
 void OvergrowthTableAndPrompts()
@@ -4220,17 +4337,14 @@ void MultiSwingTiersAndCapacity()
     // An iron axe takes a large stump in four swings.
     OK(sim.SetToolTier(ToolKind::Axe, ToolTier::Iron));
     CHECK(sim.OvergrowthSwings(large) == 4);
-    // Too tired: refused before the reserve, unchanged.
+    // Below 10 Energy, even a tier-qualified swing is refused without a state change.
     Simulation tired;
     OK(tired.NewEstateGame(ProvisionalEstateLayout(), placements));
     OK(tired.GrantItems(Item::Hatchet, 1));
     OK(tired.SetToolTier(ToolKind::Axe, ToolTier::Iron));
-    OK(tired.SetEnergy(10.0));
-    // 10 Energy is above a large stump's reserve line, so let the hours wear her down.
-    while (tired.GetState().energy - tired.OvergrowthCost(large) >= Exertion::Reserve)
-        tired.AdvanceGameHours(0.5, at);
+    OK(tired.SetEnergy(9.9));
     UnchangedFailure(tired, [&] { return tired.ClearOvergrowth(large, Item::Hatchet, at); });
-    CHECK(tired.CheckOvergrowth(large, Item::Hatchet, at).message.find("exhausted") != std::string::npos);
+    CHECK(tired.CheckOvergrowth(large, Item::Hatchet, at).message == "Too tired.");
 
     // A full pack still clears; what doesn't fit lies on the ground as one pickable drop.
     Simulation full;
@@ -4365,6 +4479,7 @@ void WeedCreepNearOvergrowth()
     for (const auto& node : loaded.GetState().resources)
         if (!node.cleared && node.kind == ResourceKind::TallGrass) { regrownId = node.id; break; }
     CHECK(regrownId != -1);
+    OK(loaded.SetEnergy(30.0));
     OK(loaded.ClearOvergrowth(regrownId, Item::Scythe, PlacedNode(loaded, regrownId).position));
 }
 
@@ -5309,10 +5424,12 @@ int main()
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);
     Run("item stocks carry their width; version 12 saves migrate", ItemStockWidthCompatibility);
     Run("clock, pause and batching consistency", ClockPauseAndBatching);
-    Run("sprint is free and needs more than 10 Energy", SprintEnergyContract);
+    Run("sprint is free and needs at least 25 Energy", SprintEnergyContract);
     Run("work spends Energy and time drains it slowly", ActionEnergyContract);
     Run("sleep and failure recovery without cold", SleepAndFailure);
-    Run("bed reach, facing, focus priority and sleep confirmation", BedSleepReachAndConfirmation);
+    Run("estate exhaustion never fails or faints, including old saves", EstateExhaustionIsNonlethal);
+    Run("newest valid autosave beats older recovery and corrupt newest", NewestValidRecoveryPreference);
+    Run("bed reach, facing and focus priority", BedSleepReachAndPriority);
     Run("retired fur and reeds, and cosmetic clothing", CosmeticClothingAndRetiredFur);
     Run("sleep integration and finite boundaries", SleepAndFiniteBoundaries);
     Run("strict atomic persistence", PersistenceRejection);

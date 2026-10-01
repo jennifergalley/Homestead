@@ -30,17 +30,7 @@ void SHomesteadMenu::BuildPopup()
         [
             SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false)
             .ButtonColorAndOpacity(FLinearColor(0, 0, 0, 0.2f))
-            .OnClicked_Lambda([this]()
-                {
-                    [[maybe_unused]] const TSharedRef<SHomesteadMenu> KeepAlive = SharedThis(this);
-                    const bool bWasBedPrompt = bBedSleepPrompt;
-                    if (PointerAction())
-                    {
-                        SetDialog(EDialog::None);
-                        if (bWasBedPrompt && Controller.IsValid()) Controller->MenuBack();
-                    }
-                    return FReply::Handled();
-                })
+            .OnClicked_Lambda([this]() { if (PointerAction()) SetDialog(EDialog::None); return FReply::Handled(); })
         ]
         + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(FMargin(Local.X, Local.Y, 0, 0))
         [
@@ -147,13 +137,6 @@ void SHomesteadMenu::NavigateDialog(HomesteadMenuNavigation::Direction Direction
 void SHomesteadMenu::Back()
 {
     if (bSaving) return;
-    if (bBedSleepPrompt && Dialog == EDialog::Context)
-    {
-        [[maybe_unused]] const TSharedRef<SHomesteadMenu> KeepAlive = SharedThis(this);
-        SetDialog(EDialog::None);
-        if (Controller.IsValid()) Controller->MenuBack();
-        return;
-    }
     if (bVirtualDraggingItem) { CancelVirtualItemDrag(); return; }
     if (HeldHotbarRow.IsSet() || HeldHotbarSlot != INDEX_NONE) { CancelHotbarHolds(); return; }
     CancelPointerItemDrag();
@@ -196,7 +179,7 @@ void SHomesteadMenu::SetDialog(EDialog Value)
     StopCraftHold();
     Dialog = Value; DialogSelection = 0;
     if (Value == EDialog::None) PopupBody.Reset();
-    if (Value != EDialog::Context) { bTravelPrompt = false; bBedSleepPrompt = false; bCenterPopup = false; }
+    if (Value != EDialog::Context) { bTravelPrompt = false; bCenterPopup = false; }
     bEditingAmount = false;
     LeftStick.Reset();
     PendingDirection = {};
@@ -363,14 +346,13 @@ void SHomesteadMenu::DialogAction(int32 Index)
     if (Dialog == EDialog::Context || Dialog == EDialog::Quantity)
     {
         if (!PopupOptions.IsValidIndex(Index) || (PopupOptions[Index].Enabled && !PopupOptions[Index].Enabled())) return;
-        [[maybe_unused]] const TSharedRef<SHomesteadMenu> KeepAlive = SharedThis(this);
         const TFunction<void()> Run = PopupOptions[Index].Run;
         SetDialog(EDialog::None);
         {
             TGuardValue<bool> KeepAnchor(bKeepPopupAnchor, true);
             if (Run) Run();
         }
-        if (Dialog == EDialog::None && Controller.IsValid() && Controller->IsBookOpen()) Refresh();
+        if (Dialog == EDialog::None) Refresh();
         return;
     }
     if (Index == 0)

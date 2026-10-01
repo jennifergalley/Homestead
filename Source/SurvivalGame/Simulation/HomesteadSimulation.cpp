@@ -1123,25 +1123,24 @@ bool FootprintsOverlap(const Footprint& a, const Footprint& b)
         if (std::abs(delta.x * axis.x + delta.y * axis.y) >= radius(a, axis) + radius(b, axis)) return false;
     return true;
 }
-std::vector<SleepOption> SleepOptions(double hour, double energy)
+std::optional<SleepOption> BedSleepOption(double hour, double energy)
 {
+    if (!std::isfinite(hour) || !std::isfinite(energy) || hour < 0.0 || energy < 0.0 || energy > 100.0)
+        return std::nullopt;
     double current = std::fmod(hour, 24.0);
-    if (current < 0.0) current += 24.0;
-    const auto wake = [current](double hours) { return std::fmod(current + hours, 24.0); };
-    std::vector<SleepOption> options;
-    const bool evening = current >= 18.0 || current < 5.0;
-    const double toMorning = std::fmod(MorningWakeHour - current + 48.0, 24.0);
-    if (evening && toMorning >= Exertion::NapHours)
-        options.push_back({SleepChoice::UntilMorning, toMorning, MorningWakeHour});
-    const double deficit = Clamp(100.0 - (std::isfinite(energy) ? energy : 0.0), 0.0, 100.0);
-    const double rested = Clamp(std::ceil(deficit / Exertion::SleepPerHour * 4.0 - 1e-9) / 4.0,
+    if (std::abs(current - MorningWakeHour) < 1e-6) current = MorningWakeHour;
+    const bool night = current >= 18.0 || current < MorningWakeHour;
+    const double toMorning = night ? std::fmod(MorningWakeHour - current + 48.0, 24.0) : 0.0;
+    if (energy >= Food::FullEnergyAt)
+        return night && toMorning >= Exertion::MinRestHours
+            ? std::optional<SleepOption>{{SleepChoice::UntilMorning, toMorning, MorningWakeHour}}
+            : std::nullopt;
+    const double deficit = 100.0 - energy;
+    const double rest = Clamp(std::ceil(deficit / Exertion::SleepPerHour * 4.0 - 1e-9) / 4.0,
         Exertion::MinRestHours, Exertion::MaxRestHours);
-    if (options.empty() || std::abs(rested - options.front().hours) > 0.75)
-        options.push_back({SleepChoice::UntilRested, rested, wake(rested)});
-    bool shortOffered = false;
-    for (const auto& option : options) shortOffered |= option.hours <= Exertion::NapHours + 0.01;
-    if (!shortOffered) options.push_back({SleepChoice::Nap, Exertion::NapHours, wake(Exertion::NapHours)});
-    return options;
+    const double hours = night ? std::min(rest, toMorning) : rest;
+    if (hours < Exertion::MinRestHours) return std::nullopt;
+    return SleepOption{SleepChoice::UntilRested, hours, std::fmod(current + hours, 24.0)};
 }
 
 Simulation::Simulation() { NewGame(); }
@@ -2920,9 +2919,11 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
     // Stop at the first failed vital, rather than consuming hours beyond the checkpoint boundary.
     double elapsed = hours;
     if (hungerFails) elapsed = std::min(elapsed, state_.hunger / -hungerRate);
-    if (energyRate < 0) elapsed = std::min(elapsed, state_.energy / -energyRate);
+    if (energyRate < 0 && !state_.fixedEstate) elapsed = std::min(elapsed, state_.energy / -energyRate);
     state_.hunger = Clamp(state_.hunger + hungerRate * elapsed, 0.0, 100.0);
     state_.energy = Clamp(state_.energy + energyRate * elapsed, 0.0, 100.0);
+    constexpr double FullEnergyRoundoff = 1e-6;
+    if (sleeping && state_.energy >= 100.0 - FullEnergyRoundoff) state_.energy = 100.0;
     for (auto& piece : state_.structures)
         if (piece.kind == Piece::Fire) piece.fuelHours = std::max(0.0, piece.fuelHours - elapsed);
     BurnLamp(elapsed, sleeping);
@@ -2984,13 +2985,14 @@ void Simulation::Advance(double realSeconds, Point player, bool paused)
 Result Simulation::CanSprint() const
 {
     if (state_.failed) return Failed();
-    if (state_.energy <= Exertion::SprintFloor) return Bad("Too tired to run. Eat something or rest.");
+    if (state_.energy < Exertion::SprintFloor) return Bad("Too tired to sprint.");
     return {true, "", ResultCode::None, revision_};
 }
 Result Simulation::CheckExertion(double cost) const
 {
     if (state_.failed) return Failed();
-    if (state_.energy - WorkCost(cost) < Exertion::Reserve) return Bad("You're too exhausted to keep working. Eat something or rest.");
+    if (state_.energy < Exertion::SlowWalkFloor) return Bad("Too tired.");
+    if (state_.energy - WorkCost(cost) < Exertion::Reserve) return Bad("Too tired.");
     return {true, "", ResultCode::None, revision_};
 }
 Result Simulation::Exert(double cost, Result done)
@@ -3027,8 +3029,9 @@ void Simulation::AdvanceGameHours(double hours, Point player)
         for (const auto& piece : state_.structures)
             if (piece.kind == Piece::Fire && piece.fuelHours > 0) step = std::min(step, piece.fuelHours);
         hours -= Step(step, player, false);
-        // Worn out: she dozes off where she stands, and the rough sleep counts against the time asked.
-        if (!state_.failed && state_.energy <= 1e-10) hours = std::max(0.0, hours - DozeOff(player));
+        // Only the woodland forces a doze at zero Energy; estate time continues while she walks slowly.
+        if (!state_.fixedEstate && !state_.failed && state_.energy <= 1e-10)
+            hours = std::max(0.0, hours - DozeOff(player));
     }
 }
 void Simulation::SkipToHourOfDay(double hourOfDay)
@@ -3078,12 +3081,11 @@ Result Simulation::PassDaysForPlaytest(double days, bool tend, Point player)
     const int whole = static_cast<int>(std::lround(days));
     return Good(std::to_string(whole) + (whole == 1 ? " day passes" : " days pass") + (tend ? "; the garden was tended." : "."));
 }
-Result Simulation::Sleep(double hours, Point player, Point facing, bool confirmed)
+Result Simulation::Sleep(double hours, Point player, Point facing)
 {
     if (state_.failed) return Failed();
     if (!FiniteRange(hours, 0.25, 12.0)) return Bad("Choose between a quarter hour and twelve hours of sleep.");
     if (ReachableBed(state_, player, facing) == -1) return Bad("Place a bed and move beside it before sleeping.");
-    if (!confirmed) return Bad("Confirm that you want to sleep before resting.");
     if (state_.hour + hours > MaxHour) return Bad("The calendar has reached its supported limit.");
     while (hours > 1e-12 && !state_.failed)
     {
@@ -3224,12 +3226,6 @@ Result Simulation::Deserialize(const std::string& data)
         !FiniteRange(candidate.hunger, 0.0, 100.0) || !FiniteRange(candidate.energy, 0.0, 100.0) ||
         !FiniteRange(legacyWarmth, 0.0, 100.0) || candidate.nextId < 1 ||
         candidate.nextId >= TransientResourceIdBase) return invalid();
-    // Out of energy (or, in older saves, warmth) is a critical vital, and so is hunger at 0 in the
-    // woodland. On the estate hunger at 0 only slows her (gentle hunger), so it may be saved unfailed.
-    const bool spent = candidate.energy == 0 || legacyWarmth == 0;
-    const bool critical = spent || candidate.hunger == 0;
-    const bool starvedUnfailed = candidate.hunger == 0 && !spent && !candidate.failed;
-    if (critical != candidate.failed && !starvedUnfailed) return invalid();
     switch (ReadSavedStock(input, candidate.inventory, version, storedItems, MaxPackCapacity))
     {
     case SavedStock::Ok: break;
@@ -3242,6 +3238,11 @@ Result Simulation::Deserialize(const std::string& data)
     std::uint64_t generationVersion = 0;
     if (!ReadUnsigned(input, candidate.world.seed) || !ReadUnsigned(input, generationVersion)) return invalid();
     candidate.fixedEstate = generationVersion == EstateWorldMarker;
+    // Woodland saves retain the original failure invariant. Estate saves, even older ones that
+    // failed at zero hunger or Energy, reopen playable after all other save validation succeeds.
+    if (!candidate.fixedEstate
+        && ((candidate.energy == 0 || legacyWarmth == 0 || candidate.hunger == 0) != candidate.failed))
+        return invalid();
     if (candidate.fixedEstate)
     {
         if (!placements_ || candidate.world.seed != static_cast<std::uint64_t>(placements_->bakeVersion)) return {false,
@@ -3465,12 +3466,9 @@ Result Simulation::Deserialize(const std::string& data)
     int nextHandle = nextResourceHandle_;
     const bool sameWorld = candidate.world.seed == state_.world.seed &&
         candidate.world.generationVersion == state_.world.generationVersion;
-    // Only the estate has gentle hunger; a woodland save at 0 hunger must be failed.
-    if (starvedUnfailed && !candidate.fixedEstate) return invalid();
     if (candidate.fixedEstate)
     {
-        // Estate saves made before gentle hunger could fail her for hunger alone; she carries on.
-        if (candidate.failed && candidate.hunger == 0 && !spent) candidate.failed = false;
+        candidate.failed = false;
         candidate.hunger = 100.0; // The estate has no hunger (HomesteadFood.h); older saves drained it.
         const auto estate = MaterializeEstate(candidate, *placements_);
         if (!estate) return estate;

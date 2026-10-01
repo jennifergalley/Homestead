@@ -486,13 +486,15 @@ void WaitForTheStoreToOpen()
     Edit(sim, 5.0, 100.0);
     Simulation hungry = sim;
     OK(hungry.WaitForShop(store.shop, door));
-    // Too tired to last the night (she'd doze off in the street): refused before any time passes.
+    // Exhaustion does not strand her outside the estate shop or force a doze.
     Edit(sim, 100.0, 3.0);
-    const std::string tired = sim.Serialize();
-    const auto sleepy = sim.WaitForShop(store.shop, door);
-    CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos);
-    CHECK(sim.Serialize() == tired);
+    const int dozes = sim.DozeCount();
+    const double tiredHour = sim.GetState().hour;
+    OK(sim.WaitForShop(store.shop, door));
+    CHECK(!sim.GetState().failed && sim.GetState().energy == 0.0
+        && sim.DozeCount() == dozes && std::abs(sim.GetState().hour - tiredHour - 13.0) < 0.01);
     // Fed: she waits the night through, across midnight and the 6 AM rollover, and it's open.
+    sim.SkipToHourOfDay(19.0);
     Edit(sim, 100.0, 100.0);
     const double before = sim.GetState().hour;
     OK(sim.WaitForShop(store.shop, door));
@@ -733,15 +735,18 @@ void WalkTheRoad()
     CHECK(!PlanTravel(sim.GetState(), town->position, TravelDestination::Town).ok);
     Simulation woodland;
     CHECK(!PlanTravel(woodland.GetState(), manor->position, TravelDestination::Town).ok);
-    // Refusals pass no time at all. Hunger never fails her on the estate, so an empty belly doesn't stop the walk.
+    // Hunger and exhaustion never strand her on the estate road.
     sim.SkipToHourOfDay(12.0);
     Edit(sim, 5.0, 100.0);
     Simulation hungry = sim;
     OK(hungry.WalkRoad(TravelDestination::Town, manor->position));
     Edit(sim, 100.0, 3.0);
-    const std::string tired = sim.Serialize();
-    const auto sleepy = sim.WalkRoad(TravelDestination::Town, manor->position);
-    CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos && sim.Serialize() == tired);
+    const double tiredHour = sim.GetState().hour;
+    const int dozes = sim.DozeCount();
+    const TravelPlan tiredWalk = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
+    OK(sim.WalkRoad(TravelDestination::Town, manor->position));
+    CHECK(!sim.GetState().failed && sim.DozeCount() == dozes
+        && std::abs(sim.GetState().hour - tiredHour - tiredWalk.gameHours) < 1e-6);
     const std::string there = sim.Serialize();
     CHECK(!sim.WalkRoad(TravelDestination::Town, town->position).ok && sim.Serialize() == there);
     // Rested: the clock runs for the whole walk, and she's a little more tired (the estate has no hunger).

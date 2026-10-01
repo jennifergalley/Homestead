@@ -10,6 +10,7 @@
 #include <functional>
 #include <iosfwd>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -411,9 +412,8 @@ Point FurnitureOffset(Piece kind);
 Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation);
 Footprint StructureFootprint(const State& state, const Structure& structure);
 bool FootprintsOverlap(const Footprint& a, const Footprint& b);
-// Energy: time awake drains it slowly; work spends it. Work is refused when it would leave her
-// below Reserve. Nothing enforces a bedtime: sleep restores SleepPerHour for each hour slept at any
-// hour, and only running Energy out forces rest, when she dozes off where she stands.
+// Energy: time awake drains it slowly; work spends it. On the estate she keeps walking at zero
+// Energy rather than fainting, and food or bed rest restores it.
 namespace Exertion
 {
 constexpr double AwakePerHour = 0.6;
@@ -423,8 +423,7 @@ constexpr double SleepPerHour = 10.0;
 // and only part rested.
 constexpr double DozeHours = 6.0;
 constexpr double DozePerHour = 6.0;
-constexpr double NapHours = 1.0;
-constexpr double MinRestHours = 1.0;
+constexpr double MinRestHours = 0.25;
 constexpr double MaxRestHours = 10.0;
 constexpr double GatherEnergy = 0.5;
 constexpr double ClearEnergy = 1.0;
@@ -437,8 +436,11 @@ constexpr double CookEnergy = 0.3;
 constexpr double SplitFirewoodEnergy = 1.5;
 constexpr double BuildEnergy = 1.5;
 constexpr double GarmentEnergy = 0.8;
-// Sprinting costs no Energy of its own (Jenny, round 2); she can only start or keep sprinting above this.
-constexpr double SprintFloor = 10.0;
+// Sprinting costs no Energy of its own; below 25 she walks, below 10 she walks at 75% speed.
+constexpr double SprintFloor = 25.0;
+constexpr double SlowWalkFloor = 10.0;
+constexpr double SlowWalkFactor = 0.75;
+inline double WalkSpeedFactor(double energy) { return energy < SlowWalkFloor ? SlowWalkFactor : 1.0; }
 constexpr double TillEnergy = 2.0;
 constexpr double PlantEnergy = 0.4;
 constexpr double WaterEnergy = 0.4;
@@ -487,20 +489,18 @@ double RainAudioGain(double rain, double ambience, double indoors);
 // Whether the loop plays at all: judged before RainLoudness, so it starts and stops at the same moments.
 bool RainAudible(double rain, double ambience, double indoors);
 
-// What the bed offers (flexible-sleep): each choice with its length and the hour of day she'd wake.
-enum class SleepChoice { UntilMorning, UntilRested, Nap };
+// One bed action at a time: restore Energy, or pass the night when she is already rested.
+enum class SleepChoice { UntilMorning, UntilRested };
 struct SleepOption
 {
     SleepChoice choice = SleepChoice::UntilRested;
     double hours = 0.0;
     double wakeHour = 0.0; // Hour of day, 0-24.
 };
-constexpr double MorningWakeHour = 6.75;
-// The choices at `hour` with `energy`, the default first: "until morning" (06:45) in the evening and
-// at night (18:00-05:00), "until rested" (her Energy deficit at SleepPerHour, a quarter hour up,
-// MinRestHours to MaxRestHours; left out when it would wake her within 45 minutes of morning) and a
-// NapHours nap (left out when "until rested" is already that short).
-std::vector<SleepOption> SleepOptions(double hour, double energy);
+constexpr double MorningWakeHour = 6.0;
+// Night runs 18:00-06:00. Rest stops at 06:00 if it would pass dawn; daytime with full
+// Energy has no bed action. The minimum sleep interval is a quarter hour.
+std::optional<SleepOption> BedSleepOption(double hour, double energy);
 
 struct PreparedWorldRegion
 {
@@ -684,7 +684,7 @@ public:
     Result DropWearable(int wearableId, Point position, Point player,
         std::uint64_t expectedRevision);
     Result PickUpDrop(int dropId, Point player);
-    Result Sleep(double hours, Point player, Point facing, bool confirmed);
+    Result Sleep(double hours, Point player, Point facing);
     // How many times she has dozed off from exhaustion in this session (never saved); the game
     // compares it to tell her when she wakes.
     int DozeCount() const { return dozes_; }
@@ -740,7 +740,7 @@ public:
     Result PassDaysForPlaytest(double days, bool tend, Point player);
     // Playtest aid for screenshots: set every planted plot's growth (0-1) directly.
     Result SetCropGrowthForPlaytest(double growth);
-    // Whether she may sprint now: not failed and Energy above Exertion::SprintFloor. Running costs
+    // Whether she may sprint now: not failed and Energy at least Exertion::SprintFloor. Running costs
     // nothing extra; the ordinary awake drain and work costs are what bring her down to the floor.
     Result CanSprint() const;
     // Whether she has the Energy for work costing `cost` (see Exertion); ok when she does.

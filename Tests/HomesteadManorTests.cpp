@@ -125,7 +125,7 @@ void SleepChestAndHearth()
     const Point bedSide = StructureCenter(state, *bed);
     const int day = sim.DayNumber();
     sim.SkipToHourOfDay(22.0);
-    OK(sim.Sleep(8.0, bedSide, {1, 0}, true));
+    OK(sim.Sleep(8.0, bedSide, {1, 0}));
     CHECK(sim.DayNumber() == day + 1);
     // Take the pail and branches out of the seeded chest.
     OK(sim.Transfer(chestId, Item::WateringCan, -1, chestSide));
