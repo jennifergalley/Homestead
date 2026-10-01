@@ -160,7 +160,7 @@ void AHomesteadSmokeTest::PrepareToolRepeatChecks()
             {
                 const FRotator Facing(0, FMath::RadiansToDegrees(FMath::Atan2(Target.y - Controller->PlayerPoint().y,
                     Target.x - Controller->PlayerPoint().x)), 0);
-                if (auto* Pawn = Controller->GetPawn()) Pawn->SetActorRotation(Facing);
+                if (APawn* Pawn = Controller->GetPawn()) Pawn->SetActorRotation(Facing);
                 Controller->SetControlRotation(Facing);
                 Controller->HomesteadEnergy(100.0f);
                 const int32 Cell = Controller->HotbarCellOf(Tool);
