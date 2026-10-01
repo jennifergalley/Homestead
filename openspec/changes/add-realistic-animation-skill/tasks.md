@@ -26,7 +26,12 @@
     - Scythe: transitions re-baked with the blade at least 4 cm up on every laid frame; MaxTipUp capped at 0.2 rad (0ee02e34).
     - HoeTill: the recipe authored the blade on -Y while the imported hoe has it on +Y, and the game spun the hoe half a turn in her fist. Fixed in hoe_till.py and the runtime roll is removed: forearm-to-knuckle bend 115-157 to 31-59 degrees, the 180-degree wrist and forearm errors and every speed error cleared (ad7dabb7). Remaining: ulnar deviation (right 73, left 65) and left forearm supination 108.
     - AxeFell: each fist rolls on the haft (knob constant 105 degrees, which the game undoes for the edge; right per key), rig_authoring unwinds Euler keys (the haft had flipped 100-150 degrees mid-swing), and the game squares the fists' haft axes. Speed errors 28 to 16, ROM errors 342 to 279, right wrist 179 and right forearm 176 to 108, and the bit meets the authored strike within 3-5 cm instead of about 10 (24b74f21 on the slot branch). Remaining: left wrist 99 degrees of flexion and right forearm supination 108; a per-frame knob roll would need an anim curve.
-    - Not yet: WaterRefined, GroundStrike, and verifying both fixes in PIE at gameplay speed (the Clearing and ToolRepeat routes pass).
+    - 2026-10-01 second slot (jennifergalley-props-wrists-1001):
+      - Watering: WaterRefined is only the no-MetaHuman fallback; in game she plays PailPour. Its upright holds pointed her fingers up the pail's axis (wrists 146 degrees back). Her fingers now lead the axis by 100 degrees and UpdateWaterPail turns them back on the same beats: inspector wrist pops 9 -> 0, ROM errors 208 -> 99.
+      - GroundStrike: fists rolled on the haft (knob 90, right per key): the 175-177 degree wrist flexions, 80 degree ulnar deviation and wrist pops are gone.
+      - AxeFell: knob roll 90 shared with the strike, left elbow pole 15 cm forward and up: left wrist flexion 99 -> 77, no wrist errors left.
+      - HoeTill: left hand rolled (ulnar 65 -> 9); the right hand takes a working grip (the game turns the hoe 45 degrees in her fist as the clip blends in, the clip solved for that grip on every key): ulnar 74 -> 23, ROM errors 364 -> 211.
+      - Remaining: forearm supination around 95-112 on the fell, strike and hoe (the swings' geometry); WaterRefined itself is untouched as it never plays with the MetaHuman.
 
 ## 4. Animation Inspector
 
