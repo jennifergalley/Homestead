@@ -299,7 +299,29 @@ if ($ShippingQA) {
     # Only the process this script started, matched by its image: never Jenny's Build\Windows or
     # Releases game. It runs in a kill-on-close job, so an aborted or timed-out run takes it (and the
     # shader workers it starts) down when this script's process ends.
-    $image = try { $process.MainModule.FileName } catch { $process.Path }
+    # MainModule can briefly report ntdll.dll during startup; ask the OS for the process image.
+    if (-not ('HomesteadGameImage' -as [type])) {
+        Add-Type -TypeDefinition @"
+using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Text;
+public static class HomesteadGameImage
+{
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    static extern bool QueryFullProcessImageName(IntPtr process, uint flags, StringBuilder image, ref uint length);
+    public static string Path(IntPtr process)
+    {
+        var image = new StringBuilder(32768);
+        uint length = (uint)image.Capacity;
+        if (!QueryFullProcessImageName(process, 0, image, ref length))
+            throw new Win32Exception(Marshal.GetLastWin32Error());
+        return image.ToString();
+    }
+}
+"@
+    }
+    $image = [HomesteadGameImage]::Path($process.Handle)
     if ($image -and -not [string]::Equals([IO.Path]::GetFullPath($image), [IO.Path]::GetFullPath($executable), [StringComparison]::OrdinalIgnoreCase)) {
         Stop-Process -Id $process.Id
         throw "Started $image instead of $executable; stopped it."

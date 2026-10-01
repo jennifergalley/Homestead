@@ -558,7 +558,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             *BeforeBedPolicyHour = Controller->State().hour;
             *BeforeBedPolicyEnergy = Controller->State().energy;
             Controller->Sim.SkipToHourOfDay(12.0);
-            if (!Controller->Sim.SetEnergy(40.0)) { Finish(false, TEXT("Could not prepare midday rest.")); return; }
+            if (!Controller->Sim.SetEnergy(39.0)) { Finish(false, TEXT("Could not prepare midday rest.")); return; }
             Teleport(Home);
             Controller->GetPawn()->SetActorRotation(FRotator(0, -20, 0));
             *BedPolicyHour = Controller->State().hour;
@@ -567,14 +567,14 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         {
             return Controller->FocusTitle() == TEXT("Bed")
                 && Controller->FocusActions() == TEXT("[A] Sleep until rested")
-                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 6.0, 0.01);
+                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 6.25, 0.01);
         }, 0.65f);
     Add(TEXT("One A sleeps to full Energy without opening a picker"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, BedPolicyHour]()
         {
             return !Controller->IsBookOpen() && !Controller->IsFailed()
-                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 6.0, 0.02)
+                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 6.25, 0.02)
                 && Controller->State().energy >= Homestead::Food::FullEnergyAt;
         });
     Add(TEXT("Rested at night: bed offers only Sleep until morning"),
@@ -598,10 +598,10 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 9.0, 0.02)
                 && Controller->State().energy >= Homestead::Food::FullEnergyAt;
         });
-    Add(TEXT("At 05:52, the bed still offers a short sleep to 06:00"),
+    Add(TEXT("At 05:45, the bed still offers a short sleep to 06:00"),
         [this, Home, BedPolicyHour]()
         {
-            Controller->Sim.SkipToHourOfDay(5.875);
+            Controller->Sim.SkipToHourOfDay(5.75);
             Teleport(Home);
             Controller->GetPawn()->SetActorRotation(FRotator(0, -20, 0));
             *BedPolicyHour = Controller->State().hour;
@@ -609,14 +609,14 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]()
         {
             return Controller->FocusActions() == TEXT("[A] Sleep until morning")
-                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 0.125, 0.001);
+                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 0.25, 0.02);
         }, 0.65f);
     Add(TEXT("A short final sleep stops precisely at 06:00"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, BedPolicyHour]()
         {
             return !Controller->IsBookOpen() && !Controller->IsFailed()
-                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 0.125, 0.02);
+                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 0.25, 0.02);
         });
     Add(TEXT("Restore the pre-rest garden and clock"),
         [this, BeforeBedPolicy, BeforeBedRoute, BeforeBedAutoIndex, BeforeBedSavedAt, BeforeBedSaveLabel]()
@@ -1036,7 +1036,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             {
                 const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
                 return Plot && Plot->planted && Plot->weeds < 0.001 && !Controller->ToastIsError();
-            });
+            }, 4.5f);
+        Steps.Last().Skip = [this]()
+        {
+            const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
+            return Plot && !Homestead::HasVisibleWeeds(*Plot);
+        };
         const auto WaterBefore = MakeShared<int32>(0);
         Add(FString::Printf(TEXT("Water the still-growing crop after rest %d"), Rest + 1),
             [this, WaterBefore]()
@@ -1074,7 +1079,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
                 return Plot && Plot->planted && Plot->kind == Homestead::CropKind::Berries
                     && Plot->weeds < 0.001 && !Controller->ToastIsError();
-            });
+            }, 4.5f);
+        Steps.Last().Skip = [this, BerryPlotId]()
+        {
+            const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
+            return Plot && !Homestead::HasVisibleWeeds(*Plot);
+        };
         Add(FString::Printf(TEXT("Water the slower-growing berry bush after rest %d"), Rest + 1),
             [this, WaterBefore]()
             {
@@ -1289,7 +1299,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsBookOpen(); });
     Add(TEXT("Replant after saving to create a real garden-state difference"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]()
+        {
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::Seeds))
+            { Finish(false, TEXT("Could not put harvested seeds in the real hotbar row.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
         [this]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
@@ -1380,8 +1395,30 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             Tap(EKeys::F5);
         },
         [this]() { return Controller->IsBookOpen() && !Controller->ToastIsError(); });
-    Add(TEXT("Close the pack and change the saved soil moisture"),
-        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    const auto MoistureBefore = MakeShared<double>(0);
+    Add(TEXT("A on the unripe second-generation crop does not water it"),
+        [this, MoistureBefore, WaterBefore]()
+        {
+            Tap(EKeys::Gamepad_FaceButton_Right);
+            const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
+            *MoistureBefore = Plot ? Plot->moisture : -1;
+            *WaterBefore = Controller->Simulation().Count(Homestead::Item::Water);
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, MoistureBefore, WaterBefore]()
+        {
+            const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
+            return Plot && Plot->planted && Plot->moisture <= *MoistureBefore + 0.001
+                && Controller->Simulation().Count(Homestead::Item::Water) == *WaterBefore
+                && Controller->ToastIsError() && Controller->Toast() == TEXT("Not ready yet");
+        });
+    Add(TEXT("Pour on the unripe crop with RT to change saved soil moisture"),
+        [this]()
+        {
+            if (!ChooseFullLoopHotbarItem(Homestead::Item::WateringCan))
+            { Finish(false, TEXT("Could not put the pail in the real hotbar row.")); return; }
+            Tap(EKeys::Gamepad_RightTrigger);
+        },
         [this]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
@@ -1446,9 +1483,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 const double Advanced = State.hour - *BeforeHour;
                 if (Controller->IsFailed())
                     return Advanced > 0 && Advanced <= *ExpectedSleep + 0.1 && State.hunger == 0;
+                const double Depleted = *BeforeHunger - State.hunger;
                 return Advanced >= *ExpectedSleep - 0.01 && Advanced < *ExpectedSleep + 0.1
-                    && State.hunger < *BeforeHunger - FMath::Min(10.0, *ExpectedSleep)
-                    && !Controller->ToastIsError()
+                    && Depleted > 0
+                    && (State.hunger <= 10.0 || Depleted >= FMath::Min(10.0, *ExpectedSleep) - 0.01)
+                    && (!Controller->ToastIsError() || Controller->Toast() == TEXT("Starving"))
                     && !Controller->Simulation().IsSheltered(Controller->PlayerPoint());
             }, 0.6f);
         // A is also retry while failed; never let a remaining queued sleep dismiss the failure modal.

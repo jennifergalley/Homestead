@@ -152,6 +152,17 @@ void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
         bScrollSelectionPending = false;
         Scroll->ScrollDescendantIntoView(Cells[ContentSelection], false, EDescendantScrollDestination::IntoView);
     }
+    else if (bScrollSelectionPending && SeenPage == 0 && Controller->InventoryView() == 0
+        && Scroll && Scroll->GetCachedGeometry().GetLocalSize().Y > 0)
+    {
+        // Offscreen pack tiles have no cached geometry until scrolled into view.
+        const int32 RowCount = FMath::DivideAndRoundUp(Entries.Num(), Columns());
+        const float RowFraction = static_cast<float>(ContentSelection / Columns())
+            / FMath::Max(1, RowCount - 1);
+        const float Offset = RowFraction * Scroll->GetScrollOffsetOfEnd();
+        if (!FMath::IsNearlyEqual(Scroll->GetScrollOffset(), Offset, 1.0f))
+            Scroll->SetScrollOffset(Offset);
+    }
     // A stepped sound level is saved once she moves off its slider (another row, region or page).
     if (bAudioStepEdit && (SeenPage != 4 || Region != ERegion::Content || Dialog != EDialog::None
         || !Entries.IsValidIndex(ContentSelection) || Entries[ContentSelection].Id != AudioEditId))

@@ -298,7 +298,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         [this, Focused, Before]() { return Focused(TEXT("Equipment")) && Controller->Sim.Serialize() == *Before; });
     // The fixture stack may be the last tile (Right has nowhere to go); then step Up a row instead.
     const auto StepLeft = MakeShared<bool>(false);
-    Add(TEXT("Select a real stack for controller virtual drag"),
+    Add(TEXT("Reopen and lay out the pack before selecting a drag stack"),
         [this, Open, Before, SelectedId, StepLeft]()
         {
             // The disclosed fixture splits everything to single units; add one real stack of five.
@@ -317,11 +317,18 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             for (const auto& Row : Controller->MenuRows())
                 if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.HotbarCell < 0 && Row.Quantity > Most)
                 { Best = Row.SubjectId; Most = Row.Quantity; }
-            if (Best) Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Best, 0);
             const auto Rows = Controller->MenuRows();
             *StepLeft = !Rows.IsEmpty() && Rows.Last().SubjectId == Best;
             *Before = Controller->Sim.Serialize();
             *SelectedId = Best;
+        },
+        [this]() { return Controller->NativeMenu
+            && Controller->NativeMenu->GetCachedGeometry().GetLocalSize().X > 0; });
+    Add(TEXT("Select a real stack for controller virtual drag"),
+        [this, SelectedId]()
+        {
+            if (*SelectedId)
+                Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *SelectedId, 0);
         },
         [this, Focused]() { const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
             return Focused(TEXT("Content")) && Subject && Subject->Quantity > 2; });

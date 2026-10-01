@@ -75,19 +75,26 @@ void AHomesteadController::RunSaveRoutingChecks()
         FFixture Fixture;
         Fixture.Name = FString::Printf(TEXT("route-%d"), Index);
         Fixture.World = FMD5::HashAnsiString(*(Output + Fixture.Name));
-        Safe &= Resolve(Commands[Index], Fixture.Route, FixtureSaved);
-        Safe &= !Fixture.Route.Directory.IsEmpty() && Fixture.Route.Directory != ActualDefault.Directory;
+        const bool Routed = Resolve(Commands[Index], Fixture.Route, FixtureSaved);
+        Check(Routed && !Fixture.Route.Directory.IsEmpty() && Fixture.Route.Directory != ActualDefault.Directory,
+            Fixture.Name + TEXT(" resolves to its isolated namespace"));
+        Safe &= Routed && !Fixture.Route.Directory.IsEmpty() && Fixture.Route.Directory != ActualDefault.Directory;
         const bool Exists = IFileManager::Get().DirectoryExists(*Fixture.Route.Directory);
+        Check(ReadOnly ? Exists : !Exists, Fixture.Name + TEXT(" has the expected fresh or existing namespace"));
         Safe &= ReadOnly ? Exists : !Exists;
         Report += FString::Printf(TEXT("FIXTURE_%d=%s\n"), Index, *Fixture.Route.Directory);
-        Sim.NewGame();
+        Safe &= Sim.NewGame().ok;
         int32 Harvests = 0;
         for (const auto Node : Sim.GetState().resources)
         {
             if (Node.kind != Homestead::ResourceKind::Branches) continue;
             Safe &= Sim.Harvest(Node.id, Node.position).ok;
-            if (++Harvests == Index + 1) break;
+            ++Harvests;
+            break;
         }
+        // The initial woodland currently has one reachable branch node; use synthetic stock to
+        // keep all four save namespaces distinguishable without depending on extra generated nodes.
+        if (Index > 0) Safe &= Sim.GrantItems(Homestead::Item::Stone, Index).ok;
         Fixture.Before = UTF8_TO_TCHAR(Sim.Serialize().c_str());
         bool Berry = false;
         for (const auto Node : Sim.GetState().resources)
@@ -96,7 +103,10 @@ void AHomesteadController::RunSaveRoutingChecks()
             Berry = Sim.Harvest(Node.id, Node.position).ok;
             break;
         }
-        Safe &= Berry && Harvests == Index + 1;
+        Check(Berry && Harvests == 1 && Sim.Count(Homestead::Item::Stone) == Index,
+            FString::Printf(TEXT("%s has berry, one branch and %d synthetic stones (branches %d, berry %d)"),
+                *Fixture.Name, Index, Harvests, Berry));
+        Safe &= Berry && Harvests == 1 && Sim.Count(Homestead::Item::Stone) == Index;
         Fixture.After = UTF8_TO_TCHAR(Sim.Serialize().c_str());
         Fixtures.Add(MoveTemp(Fixture));
     }
