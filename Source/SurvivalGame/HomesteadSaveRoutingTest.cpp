@@ -151,10 +151,12 @@ void AHomesteadController::RunSaveRoutingChecks()
         }
         const FFixture& RecoveryFixture = Fixtures[3];
         const bool MapWasEstate = bEstateMap;
-        Check(MapWasEstate, TEXT("Recovery preference fixture runs on the Estate map"));
         SaveRoute = RecoveryFixture.Route;
         SaveRoute.Directory = FPaths::Combine(Output, TEXT("RecoveryChoice"));
         WorldId = RecoveryFixture.World;
+        // This actor runs on the Woodland map. Switch the routing mode for the Estate policy check;
+        // the synthetic world/save stays isolated and is restored before the rest of the route.
+        bEstateMap = true;
         if (!ReadOnly)
         {
             Check(!IFileManager::Get().DirectoryExists(*SaveRoute.Directory),
@@ -175,10 +177,12 @@ void AHomesteadController::RunSaveRoutingChecks()
             Check(FFileHelper::SaveStringToFile(TEXT("corrupt newest save"), *SavePath(TEXT("Homestead_Auto_1"))),
                 TEXT("Corrupt only the isolated newest autosave fixture"));
         }
+        bEstateMap = true;
         Sim.NewGame();
         Check(LoadLatest(true) && UTF8_TO_TCHAR(Sim.Serialize().c_str()) == RecoveryFixture.Before,
             TEXT("Estate corrupt newest auto falls back to the last valid recovery slot"));
         SaveRoute.Directory = FPaths::Combine(Output, TEXT("UnsafeRecovery"));
+        bEstateMap = false;
         if (!ReadOnly)
         {
             Sim.NewGame();

@@ -167,7 +167,7 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
             // Between the joists the coping left a sky-bright slot along every wall top: a timber wall
             // plate inside the wall's thickness (faces at Y 130 and 158) fills it without showing on either face.
             if (bWallPiece && !bPreview && !bDeconstruct)
-                Part(Cube, FVector(0, 144, 270), FVector(300, 24, 24), HomesteadWorldLook::RoofUnderlay);
+                Part(Cube, FVector(0, 144, 268.5f), FVector(300, 24, 21), HomesteadWorldLook::RoofUnderlay);
             if (!bPreview && !bDeconstruct && Homestead::Door::HasLeaf(Structure))
                 AddDoorLeaf(Visual, Structure.id, Base, Rotation, HeightScale);
             return;
