@@ -14,6 +14,8 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [switch]$DisableChunkPreparation,
     # The Estate route (what Jenny plays): new game, each part of the estate, a few actions, fps.
     [switch]$EstateSmoke, [ValidateRange(0,1000)][int]$MaxLogErrors = 0,
+    # Hold-to-repeat tool strikes on the Estate (Source/SurvivalGame/HomesteadToolRepeatTest.cpp).
+    [switch]$ToolRepeat,
     # The UI gallery (Development): each listed state captured with Slate (Source/SurvivalGame/HomesteadUIGallery.h).
     # Scripts\Capture-UiGallery.ps1 drives this per resolution and input.
     [switch]$UIGallery, [string]$UIGalleryIds = 'all', [ValidateSet('KBM','Pad')][string]$UIGalleryInput = 'KBM',
@@ -27,6 +29,10 @@ if ($UIGallery -and $Packaged) { throw 'The UI gallery runs the Development edit
 if ($EstateSmoke -and ($FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or $Creek -or $Crafting -or
     $Weeding -or $Clearing -or $GeneratedWoodland -or $Prompts -or $BookClarity -or $Hotbar -or $NativeMenu -or $WithAudio -or $FixtureSave)) {
     throw 'The Estate smoke route runs on its own.'
+}
+if ($ToolRepeat -and ($EstateSmoke -or $UIGallery -or $FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or $Creek -or
+    $Crafting -or $Weeding -or $Clearing -or $GeneratedWoodland -or $Prompts -or $BookClarity -or $Hotbar -or $NativeMenu -or $FixtureSave)) {
+    throw 'The tool-repeat route runs on its own.'
 }
 if ($LivingIdle -and -not $NativeMenu) {
     throw 'The living-idle proof requires the native-menu route.'
@@ -112,7 +118,7 @@ $output = Join-Path $root 'Saved\Automation'
 # Map per suite. The default game map is the Estate, but every suite here still plays the seeded
 # woodland (estate tools with stand-in salvage grants). Once a suite is retargeted to the fixed
 # estate, add its switch here, for example @($Clearing); a run with any of them uses the Estate.
-$estateSuites = @($EstateSmoke, $UIGallery)
+$estateSuites = @($EstateSmoke, $UIGallery, $ToolRepeat)
 $suiteMap = if ($estateSuites | Where-Object { $_ }) { '/Game/SurvivalGame/Maps/Estate' } else { '/Game/SurvivalGame/Maps/Homestead' }
 if ($Packaged) {
     $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory -Details
@@ -268,6 +274,8 @@ if ($Hotbar) { $loopArguments = '-HomesteadHotbarTest -HomesteadMetaHuman -Homes
 if ($Crafting) { $loopArguments = '-HomesteadCraftingTest -HomesteadRequireLit' }
 # The Estate route plays the MetaHuman heroine Jenny plays, and skips the Names step.
 if ($EstateSmoke) { $loopArguments = '-HomesteadEstateSmoke -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRequireLit' }
+# Hold-to-repeat on the estate's own stumps, rubble, thickets and grass, with the MetaHuman's strike clips.
+if ($ToolRepeat) { $loopArguments = '-HomesteadToolRepeatTest -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRequireLit' }
 if ($UIGallery) {
     # The normal Estate saves the run proves it never touched (-UserDir moves Saved\ into the sandbox).
     $realSaves = Join-Path $root 'Saved\SaveGames\Estate'

@@ -92,6 +92,8 @@ private:
     void PrepareFullLoop();
     // HomesteadEstateSmokeTest.cpp: the packaged Estate route (-HomesteadEstateSmoke).
     void PrepareEstateSmokeChecks();
+    // HomesteadToolRepeatTest.cpp: hold-to-repeat tool strikes on the Estate map (-HomesteadToolRepeatTest).
+    void PrepareToolRepeatChecks();
     void QueueSelectRow(int32 Id);
     void QueueGatherTo(Homestead::Item Item, int32 TargetCount);
     void QueueCraft(Homestead::Recipe Recipe);
