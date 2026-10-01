@@ -176,6 +176,7 @@ public:
     std::vector<Homestead::SleepOption> BedSleepOptions() const;
     int32 BedSleepIndex() const;
     double BedSleepHours() const;
+    void MenuConfirmBedSleep(int32 BedId, uint64 Revision);
     // "Sleep until morning (wake 06:45)", "Sleep until rested (wake ~14:30)", "Nap 1 h (wake 23:15)".
     static FString SleepOptionLabel(const Homestead::SleepOption& Option);
     FString PreviewLabel() const;
@@ -761,6 +762,7 @@ private:
     // second unless forced).
     void UpdatePlacement(bool bForce);
     Homestead::Result SleepInBed(Homestead::Point Position);
+    void RequestBedSleep(bool bKeepChoice = false);
     // Sleeps with the chosen option and makes the usual autosave and recovery checkpoint.
     void SleepAtBed(Homestead::Point Position);
     // At the bed, Up/Down (D-pad) steps through the sleep choices. False when not at a bed.

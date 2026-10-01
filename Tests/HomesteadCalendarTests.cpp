@@ -241,7 +241,7 @@ void NoHungerOnTheEstate()
     sim.AdvanceGameHours(240.0, bedSide);
     CHECK(!sim.GetState().failed && sim.GetState().hunger == 100.0);
     OK(sim.SetEnergy(20.0));
-    OK(sim.Sleep(2.0, bedSide));
+    OK(sim.Sleep(2.0, bedSide, {1, 0}, true));
     CHECK(Close(sim.GetState().energy, 20.0 + 2.0 * Exertion::SleepPerHour));
     OK(sim.GrantItems(Item::DiggingStick, 1));
     const int gx = GardenCell(Spawn.x) - 20, gy = GardenCell(Spawn.y) - 20;
@@ -414,9 +414,9 @@ void WellFedAcrossMidnightAndSaves()
     sleeper.SkipToHourOfDay(23.0);
     OK(sleeper.SetEnergy(30.0));
     OK(sleeper.Eat(Item::Pasty));
-    OK(sleeper.Sleep(2.0, bedSide));
+    OK(sleeper.Sleep(2.0, bedSide, {1, 0}, true));
     CHECK(sleeper.IsWellFed());
-    OK(sleeper.Sleep(1.5, bedSide));
+    OK(sleeper.Sleep(1.5, bedSide, {1, 0}, true));
     CHECK(!sleeper.IsWellFed());
 }
 void CropSeasonsAndWithering()

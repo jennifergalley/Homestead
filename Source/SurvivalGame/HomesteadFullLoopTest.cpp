@@ -831,7 +831,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             [this, Home]() { Controller->Sim.SkipToHourOfDay(22.75); Teleport(Home); },
             [this]()
             {
-                return Controller->FocusTitle() == TEXT("Bedroll")
+                return Controller->FocusTitle() == TEXT("Bed")
                     && Controller->Simulation().IsSheltered(Controller->PlayerPoint());
             }, 0.65f);
         Add(FString::Printf(TEXT("Sleep in the cabin until first light, rest %d"), Rest + 1),
@@ -845,6 +845,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 *BeforeBerryGrowth = BerryPlot ? BerryPlot->growth : -1;
                 const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Fire, -3, -2);
                 *BeforeFuel = Piece ? Piece->fuelHours : -1;
+                Tap(EKeys::Gamepad_FaceButton_Bottom);
                 Tap(EKeys::Gamepad_FaceButton_Bottom);
             },
             [this, BeforeHour, BeforeGrowth, BeforeBerryGrowth, BeforeFuel, ExpectedSleep, BerryPlotId]()
@@ -1025,19 +1026,41 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, Home]() { Teleport(Home); },
         [this]()
         {
-            return Controller->FocusTitle() == TEXT("Bedroll")
+            return Controller->FocusTitle() == TEXT("Bed")
                 && Controller->Simulation().IsSheltered(Controller->PlayerPoint());
         }, 0.65f);
     const auto RegrowthHour = MakeShared<double>(0);
     const auto RegrowthBefore = MakeShared<double>(0);
     const auto RegrowthSleep = MakeShared<double>(8);
-    Add(TEXT("Sheltered sleep regrows the harvested bush and protects a mixed-crop checkpoint"),
+    Add(TEXT("First bed press asks before changing the clock"),
         [this, RegrowthHour, RegrowthBefore, RegrowthSleep, BerryPlotId]()
         {
             *RegrowthHour = Controller->State().hour;
             *RegrowthSleep = Controller->BedSleepHours();
             const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
             *RegrowthBefore = Plot ? Plot->growth : -1;
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, RegrowthHour]()
+        {
+            return Controller->IsBookOpen() && Controller->NativeMenu
+                && Controller->NativeMenu->IsBedSleepPromptOpen()
+                && FMath::IsNearlyEqual(Controller->State().hour, *RegrowthHour, 0.01);
+        });
+    Add(TEXT("Canceling sleep returns to the world without resting"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
+        [this, RegrowthHour]()
+        {
+            return !Controller->IsBookOpen() && !Controller->ToastIsError()
+                && FMath::IsNearlyEqual(Controller->State().hour, *RegrowthHour, 0.02);
+        });
+    Add(TEXT("Ask for sleep again"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this]() { return Controller->IsBookOpen() && Controller->NativeMenu
+            && Controller->NativeMenu->IsBedSleepPromptOpen(); });
+    Add(TEXT("Confirm sheltered sleep and protect the mixed-crop checkpoint"),
+        [this]()
+        {
             Tap(EKeys::Gamepad_FaceButton_Bottom);
             Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder);
         },
@@ -1276,7 +1299,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, OutdoorBed]() { Teleport(OutdoorBed); },
         [this]()
         {
-            return Controller->FocusTitle() == TEXT("Bedroll")
+            return Controller->FocusTitle() == TEXT("Bed")
                 && !Controller->Simulation().IsSheltered(Controller->PlayerPoint())
                 && !Controller->Simulation().IsNearFire(Controller->PlayerPoint())
                 && !Controller->IsFailed();
@@ -1297,6 +1320,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 *BeforeHour = Controller->State().hour;
                 *BeforeHunger = Controller->State().hunger;
                 *ExpectedSleep = Controller->BedSleepHours();
+                Tap(EKeys::Gamepad_FaceButton_Bottom);
                 Tap(EKeys::Gamepad_FaceButton_Bottom);
             },
             [this, BeforeHour, BeforeHunger, ExpectedSleep]()

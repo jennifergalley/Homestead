@@ -1,4 +1,5 @@
 #include "HomesteadSimulation.h"
+#include "HomesteadBed.h"
 #include "HomesteadBackpack.h"
 #include "HomesteadChests.h"
 #include "HomesteadCrops.h"
@@ -3077,11 +3078,12 @@ Result Simulation::PassDaysForPlaytest(double days, bool tend, Point player)
     const int whole = static_cast<int>(std::lround(days));
     return Good(std::to_string(whole) + (whole == 1 ? " day passes" : " days pass") + (tend ? "; the garden was tended." : "."));
 }
-Result Simulation::Sleep(double hours, Point player)
+Result Simulation::Sleep(double hours, Point player, Point facing, bool confirmed)
 {
     if (state_.failed) return Failed();
     if (!FiniteRange(hours, 0.25, 12.0)) return Bad("Choose between a quarter hour and twelve hours of sleep.");
-    if (FindNearestStructure(player, Piece::Bed, Reach) == -1) return Bad("Place a bed and move beside it before sleeping.");
+    if (ReachableBed(state_, player, facing) == -1) return Bad("Place a bed and move beside it before sleeping.");
+    if (!confirmed) return Bad("Confirm that you want to sleep before resting.");
     if (state_.hour + hours > MaxHour) return Bad("The calendar has reached its supported limit.");
     while (hours > 1e-12 && !state_.failed)
     {

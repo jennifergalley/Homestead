@@ -122,6 +122,8 @@ public:
     // A road sign's offer (AHomesteadController::InteractWithRoadSign): the Map tab's walk confirm, one
     // "Walk to ..." per way the sign points, centred over the book.
     void OpenSignTravelPrompt(const FString& SignWords, const TArray<Homestead::TravelDestination>& Destinations);
+    void OpenBedSleepPrompt(int32 BedId, uint64 Revision, const FString& Choice);
+    bool IsBedSleepPromptOpen() const { return Dialog == EDialog::Context && bBedSleepPrompt; }
     bool IsTravelPromptOpen() const { return Dialog == EDialog::Context && bTravelPrompt; }
     FString GetNoticeText() const { return IsNoticeShowing() ? NoticeText : FString(); }
     bool IsDyeChooserOpen() const { return bDyeChooser && Dialog == EDialog::Context; }
@@ -255,6 +257,7 @@ private:
     void OpenTravelPrompt(Homestead::TravelDestination Destination);
     // The travel prompt is open (Map tab or a road sign); a sign's is centred once the book has a size.
     bool bTravelPrompt = false;
+    bool bBedSleepPrompt = false;
     bool bCenterPopup = false;
     bool bPopupCentered = false;
     void OpenItemContextMenuFor(const FHomesteadRow& Row, FVector2D Anchor);

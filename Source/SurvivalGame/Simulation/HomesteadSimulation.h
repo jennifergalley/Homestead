@@ -684,7 +684,7 @@ public:
     Result DropWearable(int wearableId, Point position, Point player,
         std::uint64_t expectedRevision);
     Result PickUpDrop(int dropId, Point player);
-    Result Sleep(double hours, Point player);
+    Result Sleep(double hours, Point player, Point facing, bool confirmed);
     // How many times she has dozed off from exhaustion in this session (never saved); the game
     // compares it to tell her when she wakes.
     int DozeCount() const { return dozes_; }

@@ -3,6 +3,7 @@
 #include "HomesteadControllerHelpers.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadWorld.h"
+#include "Simulation/HomesteadBed.h"
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadGardenTarget.h"
 #include "Simulation/HomesteadItems.h"
@@ -58,7 +59,6 @@ void AHomesteadController::UpdateFocus()
         EFocus Kind = EFocus::None;
         if (Structure.kind == Homestead::Piece::Fire) Kind = EFocus::Fire;
         if (Structure.kind == Homestead::Piece::Hearth) Kind = EFocus::Hearth;
-        if (Structure.kind == Homestead::Piece::Bed) Kind = EFocus::Bed;
         if (Structure.kind == Homestead::Piece::Chest) Kind = EFocus::Chest;
         if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
     }
@@ -93,6 +93,9 @@ void AHomesteadController::UpdateFocus()
         FocusBrushPosition = Brush.Position;
         bFocusBrushWoody = Brush.bWoody;
     }
+    const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ZeroVector;
+    const int Bed = Homestead::BedFocusCandidate(State(), Position, {Forward.X, Forward.Y}, Focus != EFocus::None);
+    if (Bed != -1) { Focus = EFocus::Bed; FocusId = Bed; }
 }
 
 FString AHomesteadController::FocusTitle() const
@@ -145,7 +148,7 @@ FString AHomesteadController::FocusTitle() const
         break;
     case EFocus::Fire: return TEXT("Cookfire");
     case EFocus::Hearth: return TEXT("Hearth");
-    case EFocus::Bed: return TEXT("Bedroll");
+    case EFocus::Bed: return TEXT("Bed");
     case EFocus::Chest: return ChestDisplayName(FocusId);
     case EFocus::Water: return TEXT("Fresh stream water");
     case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
@@ -266,22 +269,7 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Hearth: return A + TEXT(" Cook");
     case EFocus::Drop: return A + TEXT(" Pick up");
     case EFocus::Bed:
-    {
-        const auto Options = BedSleepOptions();
-        const int32 Index = BedSleepIndex();
-        if (!Options.size()) return FString();
-        FString Line = A + TEXT(" ") + SleepOptionLabel(Options[Index]);
-        if (Options.size() > 1)
-        {
-            TArray<FString> Others;
-            for (int32 Other = 0; Other < static_cast<int32>(Options.size()); ++Other)
-                if (Other != Index)
-                    Others.Add(Options[Other].choice == Homestead::SleepChoice::UntilMorning ? TEXT("until morning")
-                        : Options[Other].choice == Homestead::SleepChoice::UntilRested ? TEXT("until rested") : TEXT("nap"));
-            Line += FString(TEXT("   ")) + (bGamepad ? TEXT("[D-pad]") : TEXT("[Up/Down]")) + TEXT(" ") + FString::Join(Others, TEXT(" / "));
-        }
-        return Line;
-    }
+        return A + TEXT(" Sleep");
     case EFocus::Chest: return A + TEXT(" Open pack / storage");
     case EFocus::Water:
         // Offer the fill only when it can happen: say where the pail is, or that it's already full.
