@@ -23,6 +23,9 @@ Energy out failed the game like starving.
     06:00 rather than advancing into the morning.
   - When already rested at night, `Sleep until morning` advances to 06:00.
   - When already rested during the day, the bed has no sleep verb.
+- **Dawn edge:** ordinary `Simulation::Sleep` retains its 0.25–12 hour interval. A positive
+  sub-quarter-hour interval is valid only for a dawn-limited bed outcome ending exactly at 06:00,
+  so a bed action at 05:52 still reaches morning.
 - **Recovery follows hours slept**, 10 Energy an hour capped at full, at any hour.
 
 ## Capabilities
@@ -42,5 +45,6 @@ None.
 - `HomesteadController.*`: the bed prompt, one-press admission and wake messages, low-Energy movement/
   tool gates, and newest-valid recovery/checkpoint selection.
 - HUD/menu: Energy colour/pulse plus concise threshold warnings.
-- Tests: native low-Energy/no-failure, sprint/tool/walk thresholds, newest-valid recovery by
-  timestamp/revision, and FullLoop sleep/input routes. No save version bump.
+- Tests: native low-Energy/no-failure, sprint/tool/walk thresholds, newest-valid Estate recovery by
+  timestamp/revision, woodland sheltered-recovery preference, ordinary short-sleep refusal,
+  dawn-limited short sleep, and FullLoop sleep/input routes. No save version bump.
