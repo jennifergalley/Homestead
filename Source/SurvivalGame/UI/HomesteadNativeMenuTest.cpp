@@ -659,6 +659,8 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         {
             Controller->CloseBook();
             Controller->HomesteadMorning(10.0f);
+            // Shops keep Sundays closed (Homestead::ShopClosedDay): the next morning instead.
+            if (!Homestead::IsShopDay(Controller->State().hour)) Controller->HomesteadMorning(10.0f);
             Controller->HomesteadOpenStore();
             if (Controller->State().shops.empty()) { Finish(false, TEXT("The disclosed store was not placed.")); return; }
             Controller->OpenShopScreen(Controller->State().shops.front().id, false);

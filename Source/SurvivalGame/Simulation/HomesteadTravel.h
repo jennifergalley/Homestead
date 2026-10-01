@@ -47,6 +47,8 @@ struct TravelPlan
     // She'd arrive after midnight.
     bool nextDay = false;
     bool storeClosedOnArrival = false;
+    // She'd arrive on a day the shops keep closed (ShopClosedDay).
+    bool storeClosedAllDay = false;
     double storeOpenHour = 8.0;
     // The preview: distance, time, arrival and any closed-shop warning, one fact per line.
     std::string summary;

@@ -467,6 +467,98 @@ void WaitForTheStoreToOpen()
     OK(sim.CheckShopAccess(store.shop, store.customer));
 }
 
+// Every shop is closed all day Sunday (Jenny, 2026-09-30): at every hour, with the reopening day in each refusal,
+// the door sign and the walk-to-town warning, and no waiting at the door across it. Nothing is saved for it.
+void ShopsCloseOnSundays()
+{
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    const Shop& shop = *sim.FindShop(store.shop);
+    const Point door{store.counter.x, store.counter.y - 700.0};
+    // Day 0 (Monday, Spring 1, 1851) at 9 AM; the calendar day runs 06:00 to 06:00.
+    const double monday = 0.0, saturday = 5 * 24.0, sunday = 6 * 24.0, nextMonday = 7 * 24.0;
+    CHECK(Calendar::DateAt(sunday + 6.0).weekday == Weekday::Sunday && Calendar::DateAt(saturday + 6.0).weekday == Weekday::Saturday);
+    CHECK(Calendar::DateAt(nextMonday + 6.0).weekday == Weekday::Monday);
+    for (double hour = 6.0; hour < 30.0; hour += 0.25)
+        CHECK(!IsShopOpen(shop, sunday + hour) && !IsShopDay(sunday + hour));
+    // Saturday keeps its hours to the minute; Monday opens on the stroke of 8.
+    CHECK(IsShopOpen(shop, saturday + 8.0) && IsShopOpen(shop, saturday + 17.0 + 59.0 / 60.0) && !IsShopOpen(shop, saturday + 18.0));
+    CHECK(!IsShopOpen(shop, nextMonday + 7.99) && IsShopOpen(shop, nextMonday + 8.0) && IsShopOpen(shop, monday + 8.0));
+    for (const double weekday : {0.0, 1.0, 2.0, 3.0, 4.0, 5.0})
+        CHECK(IsShopOpen(shop, weekday * 24.0 + 12.0));
+    // When it next opens, past Sunday.
+    CHECK(NextShopOpening(shop, sunday + 12.0) == nextMonday + 8.0 && NextShopOpening(shop, saturday + 19.0) == nextMonday + 8.0);
+    CHECK(NextShopOpening(shop, nextMonday + 3.0) == nextMonday + 8.0 && NextShopOpening(shop, monday + 19.0) == 24.0 + 8.0);
+    CHECK(std::abs(HoursUntilOpen(shop, saturday + 19.0) - 37.0) < 1e-9);
+    // The words: the closed day, a Saturday evening, an ordinary night.
+    CHECK(ClosedMessage(shop, sunday + 12.0) == "Closed today (Sunday) - opens Monday at 8 AM");
+    CHECK(ClosedMessage(shop, nextMonday + 3.0) == "Closed today (Sunday) - opens Monday at 8 AM");  // still Sunday's day
+    CHECK(ClosedMessage(shop, saturday + 19.0) == "Closed - opens Monday at 8 AM");
+    CHECK(ClosedMessage(shop, monday + 19.0) == "Closed - opens at 8 AM" && ClosedMessage(shop, saturday + 7.0) == "Closed - opens at 8 AM");
+    CHECK(ClosedSignText(shop, sunday + 12.0) == "CLOSED\non Sundays");
+    CHECK(ClosedSignText(shop, saturday + 19.0) == "CLOSED\nopens Mon 8 AM");
+    CHECK(ClosedSignText(shop, monday + 19.0) == "CLOSED\nopens at 8 AM");
+    // Waiting at the door: the night's closure only (at most 14 h), never through a closed day's hours.
+    CHECK(CanWaitForShop(shop, monday + 19.0) && CanWaitForShop(shop, saturday + 7.0) && CanWaitForShop(shop, nextMonday + 3.0));
+    CHECK(CanWaitForShop(shop, 4 * 24.0 + 18.0));  // Friday at closing: the full 14 h night
+    CHECK(CanWaitForShop(shop, sunday + 19.0));    // Sunday evening: just the night to Monday's opening
+    CHECK(!CanWaitForShop(shop, sunday + 7.0) && !CanWaitForShop(shop, sunday + 12.0) && !CanWaitForShop(shop, saturday + 19.0));
+    CHECK(!CanWaitForShop(shop, saturday + 12.0));  // open: nothing to wait for
+
+    // Through the Simulation on Sunday at noon: no trade, no wait, nothing changes.
+    for (int day = 0; day < 6; ++day) sim.SkipToHourOfDay(9.0);
+    sim.SkipToHourOfDay(12.0);
+    CHECK(sim.Today().weekday == Weekday::Sunday);
+    Edit(sim, 100.0, 100.0);
+    const std::string sundayNoon = sim.Serialize();
+    const auto access = sim.CheckShopAccess(store.shop, store.customer);
+    CHECK(!access.ok && access.code == ResultCode::Unavailable && access.message == "Closed today (Sunday) - opens Monday at 8 AM");
+    CHECK(!sim.Sell(store.shop, Item::Stone, 1, store.customer).ok && !sim.Buy(store.shop, Item::Pasty, 1, false, store.customer).ok);
+    const auto wait = sim.WaitForShop(store.shop, door);
+    CHECK(!wait.ok && wait.code == ResultCode::Unavailable
+        && wait.message == "The general store is closed on Sundays. It opens Monday at 8 AM.");
+    CHECK(sim.Serialize() == sundayNoon);
+    // Old saves (no weekday anywhere in them) load and keep the rule: it comes from the clock alone.
+    Simulation loaded;
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(sundayNoon));
+    CHECK(loaded.Serialize() == sundayNoon && !loaded.CheckShopAccess(store.shop, store.customer).ok);
+    // Monday 8 AM: open again.
+    sim.SkipToHourOfDay(8.0);
+    CHECK(sim.Today().weekday == Weekday::Monday);
+    OK(sim.CheckShopAccess(store.shop, store.customer));
+
+    // The walk to town warns when she'd arrive on a Sunday (about 7 game hours on the road).
+    const PublicRoadStop* manor = EstatePublicRoad().FindStop("Manor");
+    CHECK(manor != nullptr);
+    // Forward to `hourOfDay` on the next calendar day that's `day` (02:00 belongs to the day before).
+    const auto Seek = [](Simulation& at, Weekday day, double hourOfDay)
+    {
+        for (int step = 0; step < 9; ++step)
+        {
+            at.SkipToHourOfDay(hourOfDay);
+            if (Calendar::DateAt(at.GetState().hour).weekday == day) return;
+        }
+        CHECK(false);
+    };
+    Simulation walker = sim;
+    Seek(walker, Weekday::Saturday, 1.0);  // 1 AM, still Saturday's day: she'd arrive about 8 AM on Sunday
+    const TravelPlan late = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
+    CHECK(late.ok && late.storeClosedOnArrival && late.storeClosedAllDay);
+    CHECK(late.summary.find("You'd arrive on a Sunday, when the general store is closed all day (it opens Monday at 8 AM).")
+        != std::string::npos);
+    walker.SkipToHourOfDay(12.0);  // Sunday noon: she'd arrive Sunday evening, still closed all day
+    CHECK(PlanTravel(walker.GetState(), manor->position, TravelDestination::Town).storeClosedAllDay);
+    walker.SkipToHourOfDay(6.5);   // Monday morning: open when she gets there
+    const TravelPlan monday9 = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
+    CHECK(monday9.ok && !monday9.storeClosedOnArrival && !monday9.storeClosedAllDay);
+    Simulation saturdayNoon = sim;
+    Seek(saturdayNoon, Weekday::Saturday, 12.0);  // Saturday noon: she'd arrive after closing, and it opens Monday
+    const TravelPlan evening = PlanTravel(saturdayNoon.GetState(), manor->position, TravelDestination::Town);
+    CHECK(evening.storeClosedOnArrival && !evening.storeClosedAllDay
+        && evening.summary.find("(it opens Monday at 8 AM)") != std::string::npos);
+}
+
 void NoWalkToTownFromTown()
 {
     Store store = OpenStore();
@@ -828,6 +920,7 @@ int main(int argc, char** argv)
     Run("no walk to town from town", NoWalkToTownFromTown);
     Run("playtest shop placement", PlaytestShopPlacement);
     Run("wait for the store to open", WaitForTheStoreToOpen);
+    Run("shops close on Sundays", ShopsCloseOnSundays);
     Run("walk the road to town and back", WalkTheRoad);
     Run("the road signs offer the same walk", RoadSignsOfferTheWalk);
     Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);

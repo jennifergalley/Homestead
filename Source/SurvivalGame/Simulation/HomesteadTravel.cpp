@@ -101,7 +101,18 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
             {
                 plan.storeClosedOnArrival = true;
                 plan.storeOpenHour = shop.openHour;
-                summary += "\nThe general store will be closed then (it opens at " + FormatHour(shop.openHour) + ").";
+                const double opens = NextShopOpening(shop, plan.arrivalHour);
+                const Calendar::Date arrives = Calendar::DateAt(plan.arrivalHour), reopens = Calendar::DateAt(opens);
+                plan.storeClosedAllDay = !IsShopDay(plan.arrivalHour);
+                if (plan.storeClosedAllDay)
+                    summary += std::string("\nYou'd arrive on a ") + Calendar::WeekdayName(arrives.weekday)
+                        + ", when the general store is closed all day (it opens " + Calendar::WeekdayName(reopens.weekday)
+                        + " at " + FormatHour(opens) + ").";
+                else if (reopens.dayIndex > arrives.dayIndex + 1)
+                    summary += std::string("\nThe general store will be closed then (it opens ") + Calendar::WeekdayName(reopens.weekday)
+                        + " at " + FormatHour(opens) + ").";
+                else
+                    summary += "\nThe general store will be closed then (it opens at " + FormatHour(opens) + ").";
             }
     plan.summary = summary;
     plan.ok = true;
