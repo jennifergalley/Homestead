@@ -42,6 +42,12 @@ EDGE_OUT = 19.31
 HELD = ((-10.8226, -1.6719, 26.0197), (-0.709149, 0.694266, 0.003177, 0.122849))
 # Where her left hand closes on the haft, from the prop pivot toward the blade (cm).
 LEFT_ALONG = -4.0
+# The left hand's roll on the haft (deg about the haft toward the blade) away from knuckles down the blade's
+# hang, per key; the game doesn't read the left hand, so it can roll freely. Rolled on the raises, its
+# 65-degree ulnar deviation there clears (joint_limits); elsewhere a roll trades its forearm twist for
+# wrist flexion one for one, so it stays near the grip.
+LEFT_ROLL = {'set': 30.0, 'raise1': 60.0, 'chop1': 30.0, 'bite1': 30.0, 'draw1': 30.0, 'raise2': 60.0, 'chop2': 30.0,
+             'bite2': 30.0, 'draw2': 30.0, 'recover': 30.0}
 
 # Blade tip (cm) and the haft's direction toward the blade at each key. The strokes stay low:
 # the blade lifts under half a metre, chops into the square and drags back along the soil with
@@ -133,7 +139,8 @@ def build():
         _, h, b = _frame(name)
         grip = prop_transform(name).translation + h * LEFT_ALONG
         # Left hand overhand on the haft: index toward the blade, knuckles down its hang.
-        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist((grip.x, grip.y, grip.z), h, b), left.turn(h, b))
+        b_l = af.rolled(b, h, LEFT_ROLL.get(name, 0.0))
+        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist((grip.x, grip.y, grip.z), h, b_l), left.turn(h, b_l))
     s.key_world(F['stand'], 'foot_l_ik_ctrl', kg.FOOT_L)
     s.key_world(5, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (0, 9, 6)))
     s.key_world(F['set'], 'foot_l_ik_ctrl', FOOT_L_FORWARD)
