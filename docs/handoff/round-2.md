@@ -1184,6 +1184,18 @@ coupling, joint speeds, tool grips, posture/failure rules, review checklist and 
   `FParse::Value(..., bShouldStopOnSeparator=false)`. The Inspector needs at least 6 GB free, so
   close the editor before running it. Promote these source-bound implementation details to the
   canonical realism/inspector skills only after the branch lands and validates.
+
+  **Additional animation-slot findings awaiting branch landing:** a hand-bone-laid prop couples
+  finger direction to prop orientation. `UpdateWaterPail` lays the pail along left fingers, so
+  fingers authored up the pail axis fold the wrist about 146°; keep a constant authoring lead
+  (`pail_pour.LEAD`) over the prop axis and apply its equal/opposite runtime rotation on the same
+  beats. The hoe's `UpdateHeldTools` work-grip turn is about the palm normal (hand-r measurement
+  `(-0.036, 0.984, 0.175)`), pivoting at the haft point nearest the palm. Ease carry-to-work
+  placement with the action blend weight, not clip phase: phase lags pose evaluation by a frame and
+  previously dipped the blade 15 cm into ground. For free haft roll, score each candidate with
+  `joint_limits` across wrist flex/side/forearm twist; elbow-pole changes also trade those against
+  shoulder internal rotation, so include shoulder in the score. The Inspector lab clip end time
+  varies by about ±0.2 s between runs and is not a valid clip-length source.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.

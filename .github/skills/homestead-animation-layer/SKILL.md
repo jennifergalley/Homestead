@@ -44,6 +44,14 @@ about 16° toward the fingers. Square it against wrist → `middle_01` before us
 line. If a gripping wrist folds, search the fist's free roll about that haft first, re-solving the
 forearm-to-knuckle angle at each key, before changing the arm pose.
 
+**Treat a hand-bone-laid prop and finger direction as one constraint.** If gameplay lays a prop
+along the fingers, do not author fingers directly up its axis: that can fold the wrist even if the
+prop appears aligned. Define a constant finger lead over the prop axis in the recipe and apply the
+equal, opposite lead in the runtime placement on the same beats (`pail_pour.LEAD` is the pattern).
+For an action that changes a held-tool grip, use the action's blend weight to ease between carry and
+work placement—not the clip phase. The clip's standing/end keys are authored for the work grip and
+pose evaluation can lag phase by one frame.
+
 It bakes `/Game/Characters/Heroine_MH/Animations/AN_HeroineMH_<Name>`. Save the asset, clean up the
 authoring actor and sequence, and commit the `.uasset` with the `.py`.
 
