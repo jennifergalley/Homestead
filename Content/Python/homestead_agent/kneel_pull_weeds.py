@@ -10,10 +10,10 @@ left, and sits back a little over her heels. Then each weed is one hand's own be
 hand at a time, and the hand that dug is the one that throws it"):
 - Her left hand reaches in to the first weed (front-left), digs its fingers in round the root, grips
   it low on the stem, rocks back to draw it out and tosses it back over her left shoulder. All the
-  while her right palm is planted on the ground beside her right knee, taking her weight as she leans
-  in, and it comes back up onto her right thigh as she straightens for the toss.
+  while her right palm is braced on the front of her right thigh just above the knee, taking her
+  weight as she leans in, and it slides back up the thigh as she straightens for the toss.
 - Then the right hand does the same with the second weed (front-right), tossing it over her right
-  shoulder, while her left palm braces on the ground and then slides out along her left thigh as her
+  shoulder, while her left palm braces on her left thigh and then slides out along her left thigh as her
   chest turns right (the forearm-clearance fix: it stays clear of the turning torso).
 She brings her left foot forward into a half-kneel and rises. Nothing stays in her hands: there is no
 hip pouch, no stones, no tool. The two-handed toss is unchanged (Jenny: "10/10, keep it").
@@ -29,7 +29,7 @@ shrinks the clump when the first comes out.
 
 Anatomy it follows: kneeling, the thighs stand near vertical under the pelvis, so the pelvis sits
 only ~55 cm up; sitting back toward the heels drops it to ~50 cm and moves it back. Leaning in to
-reach the ground with one arm, the other takes the weight on a flat palm, as people weeding do; the
+reach the ground with one arm, the other takes the weight on its thigh just above the knee; the
 pull comes from rocking the pelvis back, not from yanking with the arm. A one-handed pull is quicker
 than the two-fisted one it replaces (FRAMES). A backhand toss swings the arm out to the side and back
 at shoulder height, with the chest turning with it, so the forearm never passes through the torso.
@@ -84,10 +84,11 @@ THIGH_REST_R = (-14.0, 12.0, 46.0)
 # forearm stays clear of the turning torso.
 THIGH_OUT_L = (22.0, 14.0, 48.0)
 THIGH_OUT_R = (-22.0, 14.0, 48.0)
-# While the other hand leans in to dig, this one takes her weight on a flat palm on the ground, out
-# beside its knee and a little ahead of it (the wrist a palm's thickness up).
-GROUND_BRACE_L = (25.0, 30.0, 6.0)
-GROUND_BRACE_R = (-25.0, 30.0, 6.0)
+# While the other hand leans in to dig, this one takes her weight on a flat palm pressed on the front of its
+# own thigh just above the knee (knee ~(+-15, 11, 6), hip ~(+-10, -7, 47) as baked). The ground is out of reach:
+# kneeling, her shoulder is ~79 cm up and the arm ~53 cm long, so the wrist bottoms out ~26 cm up.
+THIGH_BRACE_L = (16.0, 13.0, 31.0)
+THIGH_BRACE_R = (-16.0, 13.0, 31.0)
 # Elbow poles: out round the stem for the pulling arm; back and out for the bracing arm, so the elbow
 # stays soft and points behind her rather than locking or folding into the thigh.
 POLE_PULL_GRAB = (70.0, 10.0, 70.0)
@@ -209,9 +210,9 @@ def _author(chest_anim):
     rest_l = s.hand_turn('l', (0.0, 1.0, -0.5), (0, 0, -1))
     rest_r = s.hand_turn('r', (0.0, 1.0, -0.5), (0, 0, -1))
 
-    # Bracing: palm flat on the ground, fingers forward and a little out.
-    brace_l = s.hand_turn('l', (0.15, 1.0, -0.05), (0, 0, -1))
-    brace_r = s.hand_turn('r', (-0.15, 1.0, -0.05), (0, 0, -1))
+    # Bracing: palm pressed down and back onto the thigh, fingers draped forward over the knee.
+    brace_l = s.hand_turn('l', (0.1, 0.6, -0.8), (0, -0.8, -0.6))
+    brace_r = s.hand_turn('r', (-0.1, 0.6, -0.8), (0, -0.8, -0.6))
 
     def pull(n, stem):
         """One hand's dig, grip and draw on its own weed (PULL_HAND[n]); the other is left to the caller."""
@@ -225,12 +226,12 @@ def _author(chest_anim):
             s.key_world(F[f'{beat}{n}'], f'hand_{side}_ik_ctrl', kg._add(kg._add(stem, offset), spread), rot)
 
     def brace(n, rest_point, out_point):
-        """The hand that isn't pulling weed n: from its thigh down onto the ground as she leans in, back up
-        onto the thigh as she rocks back, and out along it while her chest turns away for the toss."""
+        """The hand that isn't pulling weed n: from the top of its thigh down to brace just above the knee as she
+        leans in, back up the thigh as she rocks back, and out along it while her chest turns away for the toss."""
         side = 'r' if PULL_HAND[n] == 'l' else 'l'
         control = f'hand_{side}_ik_ctrl'
-        ground, flat, rest = ((GROUND_BRACE_L, brace_l, rest_l) if side == 'l' else (GROUND_BRACE_R, brace_r, rest_r))
-        s.key_world(F[f'reach{n}'] - 4, control, kg._add(ground, (0, -6, 12)), flat)
+        ground, flat, rest = ((THIGH_BRACE_L, brace_l, rest_l) if side == 'l' else (THIGH_BRACE_R, brace_r, rest_r))
+        s.key_world(F[f'reach{n}'] - 4, control, kg._add(ground, (0, -2, 8)), flat)
         for beat in ('reach', 'grab', 'tug'):
             s.key_world(F[f'{beat}{n}'], control, ground, flat)
         s.key_world(F[f'pulled{n}'], control, kg._add(rest_point, (0, 4, 4)), rest)
@@ -293,7 +294,7 @@ def _author(chest_anim):
 
 
 def report(anim):
-    """The pulling fist against its weed at each grab and the other palm on the ground, both knees on the
+    """The pulling fist against its weed at each grab and the other palm on its thigh, both knees on the
     ground while kneeling, each toss hand behind the shoulder, and the worst forearm-to-torso clearance
     (under ~16 cm is inside her)."""
     lines = []
@@ -304,7 +305,7 @@ def report(anim):
         grip = bones[f'middle_01_{side}'].translation
         palm = bones[f'hand_{other}'].translation
         lines.append(f"grab{n}  {side} fist=({grip.x:6.1f},{grip.y:6.1f},{grip.z:6.1f}) weed={stem}  "
-                     f"{other} brace wrist z={palm.z:5.1f}")
+                     f"{other} brace wrist=({palm.x:5.1f},{palm.y:5.1f},{palm.z:5.1f}) target={THIGH_BRACE_L if other == 'l' else THIGH_BRACE_R}")
     for name in ('settle', 'grab1', 'pulled2', 'back2'):
         bones = ra.bone_positions(anim, ('calf_l', 'calf_r', 'pelvis'), FRAMES[name] / 30)
         knees = ' '.join(f"{b}.z={bones[b].translation.z:5.1f}" for b in ('calf_l', 'calf_r'))
