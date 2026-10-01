@@ -1131,6 +1131,15 @@ requirement.
   never fall back to CC0 `GrassStepA` footstep audio. PIE still needs cue count at 30/60/120 fps,
   miss/cancel, rain/music mix/headroom and cooked asset proof. Add provenance to `docs/asset-credits`
   only when shipped.
+
+  **Audio loudness standard `95f4ea14` (Water branch only):** every new or changed cue is measured
+  against the forest ambience bed before shipping. `HomesteadAudioLevels.h` owns cue use/source/
+  category/bus/gain rows and named gain constants; `Measure-Loudness.py` (after
+  `Fetch-Assets.ps1` and `soundfile`/`pyloudnorm`) regenerates
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; native
+  `HomesteadAudioLevelTests` rejects out-of-band or unregistered audio. The generated header must
+  not use `*.generated.h` because that collides with UHT. This pipeline is unmerged and is not yet
+  an acceptance gate.
 - **Bilateral ground-pull and sapling action count** — **Props, pending and not shipped.** By-hand
   Resource Weeds/Nettles already resolve in one `Sim.Harvest`; replace right-knee-only
   `KneelGather(Pouch)` with a dedicated bilateral kneel: two hand grabs, left/right toss behind,
