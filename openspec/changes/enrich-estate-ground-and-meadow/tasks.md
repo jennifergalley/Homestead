@@ -29,12 +29,13 @@
 ## 5. Night and rain
 
 - [x] 5.1 `MPC_EstateGround` (Wetness, Daylight), set every refresh by `AHomesteadWorld::UpdateLighting`:
-  the ground wets through over the first half hour of the rain (day 2 of every 3, 09:00-15:00) and
-  dries over the next four hours.
+  the ground wets through over the first half hour of any rain event and dries over the next four
+  hours. The former daytime-only day-2 schedule is historical; Water's pending full-cycle schedule
+  must drive the same response at night.
 - [x] 5.2 Wet response: the landscape's soil, litter and stone darken (turf less) and turn glossy,
   with standing-water sheen on trodden ground; the grass blades darken and gloss.
 - [x] 5.3 No grass glow at night: blade transmission and the gust sheen scale with daylight.
-- [ ] 5.4 Verify night and rain in PIE (and in the package, since agent editors run without ray tracing). _PIE checked at 22:00 and in the day-2 rain at 11:00: no grass glow at night, blades wet-dark and glossy in rain. The packaged look with ray tracing is still to check._
+- [ ] 5.4 Verify night and rain in PIE (and in the package, since agent editors run without ray tracing). _Historical PIE checked at 22:00 and in day-2 rain at 11:00: no grass glow at night, blades wet-dark and glossy in rain. The superseding full-cycle schedule needs a real night-rain check; the packaged RT-on look is still to check._
 
 ## 6. Open follow-ups
 
@@ -46,4 +47,3 @@
   fold her notes into `MI_EstateGrass` (`GrassShape`, `GrassFade`, `GrassWind`) and the ground-finish parameters.
 - [ ] 6.4 Decide whether LandscapeGrass is still wanted now that the meadow is runtime instances (it
   stays off; `LANDSCAPE_GRASS` in `build_landscape_material.py`).
-
