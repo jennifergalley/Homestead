@@ -14,7 +14,7 @@ namespace Homestead
 namespace Backpack
 {
 // Tentative (round-2.md): above the 1,000-coin start, about thirty cabbage harvests.
-constexpr Cents Price = 1500;
+constexpr Coins Price = 1500;
 constexpr const char* Name = "Leather backpack";
 constexpr const char* Description = "A sturdy leather rucksack. Doubles what you can carry.";
 static_assert(MaxPackCapacity == 2 * InventoryCapacity, "The backpack doubles her pack.");
