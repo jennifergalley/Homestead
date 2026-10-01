@@ -104,7 +104,11 @@ class Arms(unittest.TestCase):
         self.assertAlmostEqual(measured({"upperarm_l": [(X, 90)]})["shoulder_l.flex"], 90, delta=0.5)
         self.assertAlmostEqual(measured({"upperarm_l": [(NY, 90)]})["shoulder_l.abd"], 90, delta=0.5)
         self.assertAlmostEqual(measured({"upperarm_r": [(Y, 90)]})["shoulder_r.abd"], 90, delta=0.5)
-        self.assertNotIn("shoulder_l.flex", measured({"upperarm_l": [(NY, 90)]}))
+        self.assertAlmostEqual(measured({"upperarm_l": [(NY, 90)]})["shoulder_l.flex"], 0, delta=0.5)
+        # Deep hip flexion (a kneel sitting back) reads as flexion, not as abduction.
+        deep = measured({"thigh_l": [(X, 115)], "calf_l": [(NX, 140)]})
+        self.assertAlmostEqual(deep["hip_l.abd"], 0, delta=0.5)
+        self.assertAlmostEqual(deep["hip_l.flex"], 115, delta=0.5)
         # Overhead on a still clavicle: a rhythm warning; with the clavicle elevated it reads right.
         still = issues([pose({"upperarm_l": [(X, 170)]})])
         self.assertIn("shoulder_l.rhythm", keys(still, "coupling"))

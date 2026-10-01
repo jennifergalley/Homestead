@@ -397,10 +397,17 @@ def absolute_angles(cal, pose):
             f, l, u = fr
             d = norm(sub(pose[f"{b}_{side}"][0], pose[f"{a}_{side}"][0]))
             df, dl, du = dot(d, f), dot(d, l) * sign, dot(d, u)
-            if math.hypot(df, du) >= PLANE_MIN:
+            # Each angle is read in its own plane (sagittal for flexion, coronal for abduction) while the
+            # limb lies near that plane; far out of it (a thigh flexed forward, an arm out to the side) the
+            # projection would swing wildly, so the angle out of the other plane is read instead.
+            if abs(dl) <= 0.5 and math.hypot(df, du) >= PLANE_MIN:
                 out[f"{limb}_{side}.flex"] = math.degrees(math.atan2(df, -du))
-            if math.hypot(dl, du) >= PLANE_MIN:
+            else:
+                out[f"{limb}_{side}.flex"] = math.degrees(math.asin(max(-1.0, min(1.0, df))))
+            if abs(df) <= 0.5 and math.hypot(dl, du) >= PLANE_MIN:
                 out[f"{limb}_{side}.abd"] = math.degrees(math.atan2(dl, -du))
+            else:
+                out[f"{limb}_{side}.abd"] = math.degrees(math.asin(max(-1.0, min(1.0, dl))))
             out[f"{limb}_{side}.elevation"] = angle_between(d, scale(u, -1.0))
         for key, (top, mid, end) in (("elbow", ("upperarm", "lowerarm", "hand")), ("knee", ("thigh", "calf", "foot"))):
             name = f"{key}_{side}"
