@@ -41,15 +41,10 @@ constexpr float MaxRoll = 0.35f;
 constexpr float RollRate = 8.0f;
 // How far above and below the blade to look for the ground (cm).
 constexpr float TraceReach = 150.0f;
-// The extra roll about the grip line that keeps the blade out of the ground wherever the eased ground roll can't
-// (radians, ~35 degrees; the clip's opening and closing swings), and how fast it eases in and back out (per second).
-constexpr float MaxClearRoll = 0.6f;
-constexpr float ClearRollUpRate = 20.0f;
-constexpr float ClearRollDownRate = 6.0f;
-// Where the blade lies nearly in the vertical plane through the grip line (the wind-up's fast yaw), no roll
-// lifts it: the rest is a tip up about the lower nib, at most ~35 degrees, eased like the roll. Its axis
-// follows the blade's mean direction, so a change of lowest sample can't jump it.
+// The most the scythe tips up about the lower nib to keep its point out of the ground (radians, ~35 degrees),
+// and how fast that eases back down once clear (per second).
 constexpr float MaxTipUp = 0.6f;
+constexpr float TipDownRate = 6.0f;
 // A hit this far above a blade sample is foliage or a branch overhead, not the ground under it (cm): the trace
 // carries on below it. Deeper than the worst cut into the ground the clip ever made (38 cm).
 constexpr float MaxGroundAbove = 60.0f;
@@ -283,7 +278,7 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     const float Weight = Animation->FellWeight();
     if (Weight <= 0.01f)
     {
-        MowGroundRoll = MowClearRoll = MowTipUp = 0.0f;
+        MowGroundRoll = MowTipUp = 0.0f;
         return;
     }
     if (FellTool == Homestead::Item::Scythe)
@@ -408,39 +403,11 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
     TwoHanded.SetRotation(FQuat(NibLine, MowGroundRoll) * TwoHanded.GetRotation());
     FTransform Blended;
     Blended.Blend(Prop.GetComponentTransform(), TwoHanded, FMath::SmoothStep(0.0f, 1.0f, Weight));
-    // The eased roll can't catch everything: as the clip opens and closes, her hands swing the blade through a
-    // wide arc and its point went up to 38 cm into the ground (PIE, 09-30). Wherever a blade sample is still
-    // below MinClearance, roll further about the same grip line (both fists stay on their nibs), solved twice
-    // like the ground roll and eased in quickly and out slowly, so a switch of lowest sample doesn't pop.
-    float WantClear = 0.0f;
-    if (!NibLine.IsNearlyZero())
-        for (int32 Pass = 0; Pass < 2; ++Pass)
-        {
-            const FQuat Extra(NibLine, WantClear);
-            const FTransform Laid(Extra * Blended.GetRotation(), Lower + Extra.RotateVector(Blended.GetLocation() - Lower), Scale);
-            float Lowest = TNumericLimits<float>::Max(), LiftPerRadian = 0.0f;
-            for (const FVector& Sample : MowGround::BladeSamples)
-            {
-                const FVector At = Laid.TransformPosition(Sample);
-                float Height = 0.0f;
-                if (GroundUnder(At, Height) && At.Z - Height < Lowest)
-                {
-                    Lowest = static_cast<float>(At.Z - Height);
-                    LiftPerRadian = static_cast<float>(FVector::CrossProduct(NibLine, At - Lower).Z);
-                }
-            }
-            if (Lowest >= MowGround::MinClearance || FMath::Abs(LiftPerRadian) < 1.0f) break;
-            WantClear = FMath::Clamp(WantClear + (MowGround::MinClearance - Lowest) / LiftPerRadian,
-                -MowGround::MaxClearRoll, MowGround::MaxClearRoll);
-        }
-    const float ClearRate = FMath::Abs(WantClear) > FMath::Abs(MowClearRoll) ? MowGround::ClearRollUpRate : MowGround::ClearRollDownRate;
-    MowClearRoll = FMath::FInterpTo(MowClearRoll, WantClear, Dt, ClearRate);
-    if (!NibLine.IsNearlyZero() && MowClearRoll != 0.0f)
-    {
-        const FQuat Extra(NibLine, MowClearRoll);
-        Blended.SetLocation(Lower + Extra.RotateVector(Blended.GetLocation() - Lower));
-        Blended.SetRotation(Extra * Blended.GetRotation());
-    }
+    // The eased ground roll can't catch everything: in the wind-up the nib line yaws fast and the blade's point
+    // lies nearly in the vertical plane through the grip line, where no roll about it lifts the point, and it
+    // went up to 38 cm into the ground (PIE, 09-30). Tip the scythe up about the lower nib (her right fist stays
+    // on it) just enough to clear: at once on the way up, easing back down slowly. Its axis follows the blade's
+    // mean direction, so a change of lowest sample can't jump it; hits far overhead are skipped (GroundUnder).
     {
         const FTransform Laid(Blended.GetRotation(), Blended.GetLocation(), Scale);
         FVector Mean = FVector::ZeroVector;
@@ -462,7 +429,7 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
         float WantTip = 0.0f;
         if (!Out.IsNearlyZero() && Lowest < MowGround::MinClearance && Lever > 20.0f)
             WantTip = FMath::Min(FMath::Asin(FMath::Min(1.0f, (MowGround::MinClearance - Lowest) / Lever)), MowGround::MaxTipUp);
-        MowTipUp = FMath::FInterpTo(MowTipUp, WantTip, Dt, WantTip > MowTipUp ? MowGround::ClearRollUpRate : MowGround::ClearRollDownRate);
+        MowTipUp = FMath::Max(WantTip, FMath::FInterpTo(MowTipUp, WantTip, Dt, MowGround::TipDownRate));
         if (!Out.IsNearlyZero() && MowTipUp > 0.0f)
         {
             const FQuat Tip(FVector::CrossProduct(Out, FVector::UpVector).GetSafeNormal(), MowTipUp);
