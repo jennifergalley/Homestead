@@ -46,12 +46,11 @@ void AHomesteadController::UpdateLamp()
         LampHandoff = ELampHandoff::None; // She stood up before her hand reached the ground.
     const double Oil = Sim.LampOil();
     if (bInHand && !bLampWasInHand && Oil <= 0.0)
-        Notify(bGamepad ? TEXT("The lamp is empty. Press X to fill it from an oil flask.")
-            : TEXT("The lamp is empty. Press F to fill it from an oil flask."));
+        Notify(TEXT("Lamp empty"));
     else if (LastLampOil > Homestead::Lamp::LowHours && Oil <= Homestead::Lamp::LowHours && Oil > 0.0)
-        Notify(TEXT("The lamp is burning low."));
+        Notify(TEXT("Lamp burning low"));
     else if (LastLampOil > 0.0 && Oil <= 0.0)
-        Notify(TEXT("The lamp has gone out. Fill it from an oil flask."));
+        Notify(TEXT("Lamp out"));
     LastLampOil = Oil;
     bLampWasInHand = bInHand;
 }
