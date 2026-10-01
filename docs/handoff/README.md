@@ -58,6 +58,7 @@ a slot by sleeping or polling.
 | **Integration session** | Does all hands-on integration: merges the lane work the orchestrator forwards, resolves conflicts, builds, runs native and packaged tests, PIE and perf checks, and **is the only session that packages** (the only one running UAT). Reports `[integrated] <what> @ <sha>` to the orchestrator | The round page's registry ("Integration Agent") |
 | **Docs agent** | Standing session for the whole round. It receives findings and blockers from every session and records each once in the canonical doc. It keeps this folder, the skills and the setup docs current, and relays cross-lane blockers to the orchestrator | The round page's registry ("Documentation Agent") |
 | **Architecture agent** (code steward) | Long-lived. Owns how the code is written: `docs\architecture.md`, the "Code practices" section of `.github\copilot-instructions.md`, and the code-convention skills under `.github\skills`. Makes small, safe refactors in files no lane is editing, proposes larger ones as OpenSpec changes for between rounds, and reviews each integrated batch. The docs agent owns process docs (this folder, the editor/Blender skills' shared-machine and failure sections, setup); the two keep each other's docs consistent | The round page's registry ("Architecture agent") |
+| **Disk Cleanup Agent** | Daily 10:00 AM project-storage steward. Removes unnecessary project-owned scratch, renders, test output, stale build staging and excess releases from `C:`/`E:`; Jenny's current save game is the protected boundary. It verifies process paths and shortcut targets before deleting a release, and preserves the current shortcut Shipping target plus one rollback. | The round page's registry ("Disk Cleanup Agent") |
 | **Lanes** | One worktree and one OpenSpec change each. They own the files named in their design's "Lanes and ownership" | The round page's registry |
 
 **Session names:** every session keeps its app name as "<one or two words> Agent", describing its
@@ -259,6 +260,14 @@ Estate-shortcut Shipping release, at most its immediately previous Shipping roll
 Development reference only while it is needed. Before pruning older dated releases,
 `Playtest-09xx` folders or stale `Build\Windows` staging, verify no process path or shortcut target
 uses them. Do not delete the current shortcut target, live save data, or the one retained rollback.
+
+**Project disk stewardship (every lane):** delete your own project scratch, renders, recordings and
+test output when the task that needed them ends. Keep no large binary in
+`C:\Users\Jenny\.copilot\session-state\...\files`; use `E:\CopilotScratch\<session-id>` while it is
+needed, then clean only the paths you own. Keep only the current shortcut Shipping release and its
+immediately previous rollback; a named Development reference survives only while actively needed.
+When in doubt, delete unnecessary project-owned artifacts—but never Jenny's current save game.
+The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
 
 1. The orchestrator notifies lanes at the freeze; lanes close their editors
    (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.

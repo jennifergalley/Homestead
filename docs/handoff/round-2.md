@@ -16,6 +16,7 @@ session's **mailbox address**; session IDs are for `send_session_message`.
 | Integration Agent | `e251051b` | `jennifergalley-literate-eureka` (MCP 8775) | merges batches, builds, tests, packages; the reserved Unreal slot |
 | Documentation Agent | `a9f10974` (project session `d99bb15c`) | `jennifergalley-stunning-dollop` | process docs, this page, findings from every lane |
 | Architecture Agent | `a1648ae7` | `jennifergalley-cuddly-invention` | code steward: `docs\architecture.md`, code conventions, safe refactors, batch reviews |
+| Disk Cleanup Agent | `9fc4e210` | `jennifergalley-congenial-engine` | daily 10:00 AM project-storage cleanup; Jenny's current save game is protected |
 | **A. Calendar Agent** | `f8b77021` | `jennifergalley-studious-doodle` | `Homestead::Calendar`, gentle hunger, crop seasons and withering; **lands first** |
 | **B. Harvest Agent / temporary Gait Agent** | `65a2408b` | `jennifergalley-vigilant-fishstick` | peas, wheat, barley, leeks, winter broccoli; withered silhouettes; temporarily lowers the running foot swing apex |
 | **C. Seedsman Agent** | `5cf73757` | `jennifergalley-fluffy-broccoli` | Tregear's shop, the watering can, Sunday closing |
@@ -35,7 +36,7 @@ three-hands-on-implementer cap (including Integration) and the two-Unreal-proces
 
 | Current session / role | Planned disposition | Handoff condition |
 | --- | --- | --- |
-| Documentation Agent, Integration Agent, Architecture Agent | **Retain** | Long-lived team roles |
+| Documentation Agent, Integration Agent, Architecture Agent, Disk Cleanup Agent | **Retain** | Long-lived team roles; Disk Cleanup runs daily at 10:00 AM |
 | UI Agent / temporary Menu Agent (`5cf73757`) | **Retain** | Menu/UI feature owner |
 | Weather Agent / Water (`89914e30`) | **Retain** | Water and terrain owner |
 | Props Agent | **Retain role; session TBD** | Receives props and character asset recipes |

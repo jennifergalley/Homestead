@@ -141,6 +141,12 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   `jennifergalley-mvp-woodland-biome` branch is **not** the retired line: it is Water's active
   Estate Seasons handoff (`b19a0ad0`).
 - No worktrees, builds, renders, videos or big binaries on C:. See the user-level disk rules.
+- **Project storage hygiene (every lane):** delete your own scratch, render, recording and test-output
+  artifacts when their task ends. Keep large transient artifacts under
+  `E:\CopilotScratch\<session-id>`, never session-state `files`; retain only the active shortcut
+  Shipping release and one rollback (plus a named Development reference only while needed). When
+  uncertain, delete unnecessary project-owned artifacts, but never Jenny's current save game. The
+  Disk Cleanup Agent runs the daily broader project sweep at 10:00 AM.
 
 ## Code practices (owned by the Architecture Agent)
 
