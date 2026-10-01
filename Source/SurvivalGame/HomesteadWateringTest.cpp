@@ -130,10 +130,12 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                         Avatar->WaterTargetYaw(), ExpectedYaw)) < 0.1f
                     && Controller->State().hour - Probe->Hour < 0.02;
                 if (StepElapsed > 0.5f && !(bState && bStarts && bTool && bPose))
-                    Results.AddUnique(FString::Printf(TEXT("POUR_CHECK ready=%d matches=%d toast_err=%d starts=%d tool=%d pose=%d water=%u/%u weight=%.2f hand_moved=%.1f toast='%s'"),
+                    Results.AddUnique(FString::Printf(TEXT("POUR_CHECK ready=%d matches=%d toast_err=%d starts=%d tool=%d pose=%d water=%u/%u weight=%.2f hand_moved=%.1f actor_moved=%.2f toe_moved=%.2f view_same=%d yaw_err=%.2f hours=%.4f toast='%s'"),
                         Probe->Ready, Matches(), Controller->ToastIsError(), bStarts, bTool, bPose,
                         Animation()->WaterStarts(), Probe->Starts, Animation()->WaterWeight(),
-                        FVector::Dist(Probe->Hand, Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))), *Controller->Toast()));
+                        FVector::Dist(Probe->Hand, Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))), FVector::Dist(Probe->Actor, Avatar->GetActorLocation()),
+                        FVector::Dist(Probe->Toe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"))), Probe->View.Equals(Controller->GetControlRotation(), 0.01f),
+                        FMath::Abs(FMath::FindDeltaAngleDegrees(Avatar->WaterTargetYaw(), ExpectedYaw)), Controller->State().hour - Probe->Hour, *Controller->Toast()));
                 return bState && bStarts && bTool && bPose;
             }, 0.55f);
     };

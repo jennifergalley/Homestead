@@ -2437,16 +2437,20 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             [this, Chest, ShiftCell, ShiftItem, ShiftCarried, ShiftChestUsed]()
             {
                 *ShiftCell = INDEX_NONE;
+                // A plain stack (not the lamp she carries lit, nor the cell in her hand).
                 for (int32 Cell = 0; Cell < Homestead::PackRowSize && *ShiftCell == INDEX_NONE; ++Cell)
-                    if (Controller->HotbarItem(Cell) != Homestead::Item::Count) *ShiftCell = Cell;
+                    if (const auto Held = Controller->HotbarItem(Cell); Held != Homestead::Item::Count && Held != Homestead::Item::OilLamp
+                        && Cell != Controller->SelectedHotbarIndex() && !Homestead::IsTool(Held)) *ShiftCell = Cell;
                 const auto Widget = *ShiftCell != INDEX_NONE ? Controller->NativeMenu->GetBookHotbarSlot(*ShiftCell) : nullptr;
                 if (!Widget) { Finish(false, TEXT("No stocked hotbar cell to Shift+click.")); return; }
                 *ShiftItem = Controller->HotbarItem(*ShiftCell);
                 *ShiftCarried = Controller->Simulation().Count(*ShiftItem);
                 *ShiftChestUsed = Controller->Simulation().ChestUsedCapacity(*Chest);
                 const FVector2D Position = Widget->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D(0.5f, 0.5f));
+                TGuardValue<bool> Admission(Controller->bSimulatedMenuEvent, true);
                 auto& Slate = FSlateApplication::Get();
                 Slate.SetCursorPos(Position);
+                Slate.ProcessMouseMoveEvent(FPointerEvent(0, Position, Position, TSet<FKey>(), EKeys::Invalid, 0, FModifierKeysState()));
                 Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
                 TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
                 Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
@@ -2457,10 +2461,16 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
             },
             [this, Chest, ShiftCell, ShiftItem, ShiftCarried, ShiftChestUsed]()
             {
-                return Controller->HotbarItem(*ShiftCell) == Homestead::Item::Count
+                const bool bOk = Controller->HotbarItem(*ShiftCell) == Homestead::Item::Count
                     && Controller->Simulation().Count(*ShiftItem) < *ShiftCarried
                     && Controller->Simulation().ChestUsedCapacity(*Chest) > *ShiftChestUsed
                     && !Controller->NativeMenu->HasActiveDialog();
+                if (!bOk && StepElapsed > 0.3f)
+                    Results.AddUnique(FString::Printf(TEXT("SHIFT_HOTBAR cell=%d item=%s now=%s carried=%d/%d chest=%d/%d dialog=%d held=%d toast='%s'"),
+                        *ShiftCell, UTF8_TO_TCHAR(Homestead::ItemName(*ShiftItem)), UTF8_TO_TCHAR(Homestead::ItemName(Controller->HotbarItem(*ShiftCell))),
+                        Controller->Simulation().Count(*ShiftItem), *ShiftCarried, Controller->Simulation().ChestUsedCapacity(*Chest), *ShiftChestUsed,
+                        Controller->NativeMenu->HasActiveDialog(), Controller->NativeMenu->GetHeldHotbarSlot(), *Controller->Toast()));
+                return bOk;
             }, 0.4f);
         Add(TEXT("Restore the fixture's stock and the row as it was"),
             [this, SavedSelected, PreStrip]()

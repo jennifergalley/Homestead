@@ -136,6 +136,9 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     EnergyStep(TEXT("Crossing 10 says 'Exhausted' as a warning"), 9.0, true, TEXT("Exhausted"), true);
     EnergyStep(TEXT("Hovering below 10 says nothing more"), 8.0, true, Marker, false);
     EnergyStep(TEXT("Restoring her Energy in one jump says nothing"), 100.0, true, Marker, false);
+    Add(TEXT("Clear the marker notice before the feedback checks"),
+        [this]() { Controller->ToastText.Reset(); Controller->bToastError = false; Controller->ToastRemaining = 0; },
+        [this]() { return Controller->Toast().IsEmpty(); });
     Add(TEXT("Open pack with mapped keyboard I"), [this]() { Tap(EKeys::I); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Save success comes from actual sandbox F5"),
