@@ -3,6 +3,26 @@
 
 namespace HomesteadMenus
 {
+// Settings (Jenny 2026-09-30 21:59: "too large, compact it"): one size step below the book's pages, with
+// tight padding, so a tab's rows fit on screen at 1080p. Details stay at 13, the book's smallest size,
+// so they read at 720p.
+namespace MenuSettingsStyle
+{
+constexpr float ResumeSize = 15.0f;
+constexpr float SessionSize = 14.0f;   // Save / Load / Quit
+constexpr float TabSize = 16.0f;       // Game / Sound / Video
+constexpr float TitleSize = 15.0f;     // "Game speed: Balanced"
+constexpr float DetailSize = 13.0f;
+constexpr float OptionSize = 13.0f;    // Leisurely / Balanced / Fast
+constexpr float SliderHeight = 26.0f;
+constexpr float RowGap = 4.0f;
+const FMargin RowPadding(12, 7);
+const FMargin OptionPadding(8, 3);
+const FMargin TabPadding(8, 5);
+const FMargin SessionPadding(4, 6);
+const FMargin ResumePadding(14, 6);
+}
+
 int32 SHomesteadMenu::StorageColumns() const { return LogicalBookWidth() >= 1800 ? 8 : 6; }
 
 int32 SHomesteadMenu::Columns() const
@@ -42,22 +62,23 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         TSharedPtr<SHorizontalBox> TopRow;
         TSharedPtr<SHorizontalBox> TabStrip;
         const int32 TopCount = SettingsTopCount();
-        // Settings sits in a centred column about a third of the screen wide.
+        // Settings sits in a centred column a little under a third of the screen wide.
         auto Result = SNew(SBox).HAlign(HAlign_Center)
         [
             SNew(SBox).WidthOverride_Lambda([]()
-                { return FOptionalSize(FMath::Clamp(LogicalBookWidth() * 0.33f, 460.0f, 820.0f)); })
+                { return FOptionalSize(FMath::Clamp(LogicalBookWidth() * 0.30f, 440.0f, 720.0f)); })
             [
                 SNew(SVerticalBox)
-                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 6)
                 [
                     RegisterButton(MakeButton(Controller->IsFailed() ? TEXT("Return to recovery") : TEXT("Resume"),
                         [this]() { Back(); }, TAttribute<FSlateColor>::CreateLambda([this]()
-                            { return Region == ERegion::Session && SessionSelection == 0 ? MenuGold : MenuPine; })),
+                            { return Region == ERegion::Session && SessionSelection == 0 ? MenuGold : MenuPine; }),
+                        FString(), MenuSettingsStyle::ResumePadding, MenuSettingsStyle::ResumeSize),
                         ERegion::Session, 0)
                 ]
-                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ SAssignNew(TopRow, SHorizontalBox) ]
-                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)[ SAssignNew(TabStrip, SHorizontalBox) ]
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 8)[ SAssignNew(TopRow, SHorizontalBox) ]
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 6)[ SAssignNew(TabStrip, SHorizontalBox) ]
                 + SVerticalBox::Slot().FillHeight(1)
                 [
                     SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
@@ -75,7 +96,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             TabStrip->AddSlot().FillWidth(1).Padding(Tab ? 4 : 0, 0, 0, 0)
             [
                 FocusAnchor(
-                    SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(FMargin(10, 9))
+                    SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(MenuSettingsStyle::TabPadding)
                     .HAlign(HAlign_Center)
                     .ButtonColorAndOpacity_Lambda([this, Tab, Session]()
                     {
@@ -89,7 +110,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     })
                     [
                         SNew(STextBlock).Text(FText::FromString(TabNames[Tab]))
-                        .Font(HomesteadUITheme::Font("Bold", 19))
+                        .Font(HomesteadUITheme::Font("Bold", MenuSettingsStyle::TabSize))
                         .ColorAndOpacity_Lambda([this, Tab]() { return SettingsTab == Tab ? FSlateColor(PineInk) : FSlateColor(Ink); })
                     ],
                     ERegion::Session, Session)
@@ -98,12 +119,12 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
 
         const auto OptionButton = [this](const FString& Label, bool SelectedOption, TFunction<void()> Action)
         {
-            return SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(FMargin(10, 6))
+            return SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(MenuSettingsStyle::OptionPadding)
                 .ButtonColorAndOpacity(SelectedOption ? MenuGold : Selected)
                 .OnClicked_Lambda([this, Action]() { if (PointerAction()) Action(); return FReply::Handled(); })
                 [
                     SNew(STextBlock).Text(FText::FromString(Label))
-                    .Font(HomesteadUITheme::Font("Regular", 15))
+                    .Font(HomesteadUITheme::Font("Regular", MenuSettingsStyle::OptionSize))
                     .ColorAndOpacity(SelectedOption ? FSlateColor(PineInk) : FSlateColor(Ink))
                 ];
         };
@@ -112,7 +133,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         {
             const FHomesteadRow& Row = Entries[Index];
             const TSharedRef<SWidget> Cell = FocusAnchor(
-                SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(FMargin(4, 12))
+                SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(MenuSettingsStyle::SessionPadding)
                 .HAlign(HAlign_Center)
                 .ToolTipText(FText::FromString(Row.Detail))
                 .ButtonColorAndOpacity_Lambda([this, Index]() { return ContentSelection == Index && Region == ERegion::Content ? Selected : MenuPine; })
@@ -123,7 +144,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 })
                 [
                     SNew(STextBlock).Text(FText::FromString(Row.Label)).Justification(ETextJustify::Center)
-                    .ColorAndOpacity(Ink).Font(HomesteadUITheme::Font("Bold", 15))
+                    .ColorAndOpacity(Ink).Font(HomesteadUITheme::Font("Bold", MenuSettingsStyle::SessionSize))
                 ],
                 ERegion::Content, Index);
             Cells.Add(Cell);
@@ -151,19 +172,19 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [
                     SNew(STextBlock).Text(RowLabel)
                     .ColorAndOpacity(Row.Id == 13 && !Controller->IsAutosaveEnabled() ? Muted : Ink)
-                    .Font(HomesteadUITheme::Font("Bold", 18))
+                    .Font(HomesteadUITheme::Font("Bold", MenuSettingsStyle::TitleSize))
                 ]
-                + SVerticalBox::Slot().AutoHeight().Padding(0, 3, 0, 0)
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 1, 0, 0)
                 [
                     SNew(STextBlock).Text(FText::FromString(Row.Detail)).ColorAndOpacity(Muted)
-                    .Font(HomesteadUITheme::Font("Regular", 14)).AutoWrapText(true)
+                    .Font(HomesteadUITheme::Font("Regular", MenuSettingsStyle::DetailSize)).AutoWrapText(true)
                 ];
             RowContent = Content;
 
             if (Row.Id == 2)
             {
                 TSharedPtr<SHorizontalBox> Choices;
-                RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[SAssignNew(Choices, SHorizontalBox)];
+                RowContent->AddSlot().AutoHeight().Padding(0, 5, 0, 0)[SAssignNew(Choices, SHorizontalBox)];
                 const double Current = Controller->State().dayMinutes;
                 const TPair<const TCHAR*, double> Options[] = {
                     {TEXT("Leisurely"), 120}, {TEXT("Balanced"), 60}, {TEXT("Fast"), 30}};
@@ -175,9 +196,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             else if (IsAudioSetting(Row.Id))
             {
                 const int32 AudioId = Row.Id;
-                RowContent->AddSlot().AutoHeight().Padding(0, 10, 0, 2)
+                RowContent->AddSlot().AutoHeight().Padding(0, 6, 0, 0)
                 [
-                    SNew(SBox).HeightOverride(40)
+                    SNew(SBox).HeightOverride(MenuSettingsStyle::SliderHeight)
                     [
                         SAssignNew(AudioSliders[AudioSliderSlot(AudioId)], SSlider)
                         .Style(&MenuSliderStyle())
@@ -209,7 +230,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             else if (Row.Id == 12)
             {
                 TSharedPtr<SHorizontalBox> Choices;
-                RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[SAssignNew(Choices, SHorizontalBox)];
+                RowContent->AddSlot().AutoHeight().Padding(0, 5, 0, 0)[SAssignNew(Choices, SHorizontalBox)];
                 Choices->AddSlot().AutoWidth().Padding(0, 0, 6, 0)
                 [OptionButton(TEXT("On"), Controller->IsAutosaveEnabled(),
                     [this]() { Controller->MenuSetAutosaveEnabled(true); Refresh(); })];
@@ -220,7 +241,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             else if (Row.Id == 17 && Controller->MapPresenter())
             {
                 TSharedPtr<SHorizontalBox> Choices;
-                RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)[SAssignNew(Choices, SHorizontalBox)];
+                RowContent->AddSlot().AutoHeight().Padding(0, 5, 0, 0)[SAssignNew(Choices, SHorizontalBox)];
                 Choices->AddSlot().AutoWidth().Padding(0, 0, 6, 0)
                 [OptionButton(TEXT("North up"), !Controller->MapPresenter()->RotatesWithCamera(),
                     [this]() { Controller->MapPresenter()->SetRotatesWithCamera(false); Refresh(); })];
@@ -231,7 +252,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             else if (Row.Id == 13)
             {
                 TSharedPtr<SHorizontalBox> Choices;
-                RowContent->AddSlot().AutoHeight().Padding(0, 8, 0, 0)
+                RowContent->AddSlot().AutoHeight().Padding(0, 5, 0, 0)
                 [
                     SAssignNew(Choices, SHorizontalBox)
                     .IsEnabled(Controller->IsAutosaveEnabled())
@@ -244,9 +265,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
 
             TSharedRef<SWidget> RowWidget = Row.Id == 14
                 ? StaticCastSharedRef<SWidget>(SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                    .BorderBackgroundColor(MenuPine).Padding(14)[RowContent.ToSharedRef()])
+                    .BorderBackgroundColor(MenuPine).Padding(MenuSettingsStyle::RowPadding)[RowContent.ToSharedRef()])
                 : FocusAnchor(
-                    SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(14)
+                    SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(false).ContentPadding(MenuSettingsStyle::RowPadding)
                     .ButtonColorAndOpacity_Lambda([this, Index]() { return ContentSelection == Index ? Selected : MenuPine; })
                     .OnClicked_Lambda([this, Index, Id = Row.Id]()
                     {
@@ -261,7 +282,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     })[RowContent.ToSharedRef()],
                     ERegion::Content, Index);
             Cells.Add(RowWidget);
-            RowsBox->AddSlot().AutoHeight().Padding(0, 0, 0, 7)[RowWidget];
+            RowsBox->AddSlot().AutoHeight().Padding(0, 0, 0, MenuSettingsStyle::RowGap)[RowWidget];
         }
         return Result;
     };

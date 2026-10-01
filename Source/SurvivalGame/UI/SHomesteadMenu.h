@@ -343,7 +343,7 @@ private:
     TSharedRef<SWidget> BuildDetails();
     TSharedRef<SButton> MakeButton(const FString& Label, TFunction<void()> Action,
         TAttribute<FSlateColor> Color = FSlateColor(FLinearColor(0.025f, 0.05f, 0.038f, 0.6f)),
-        const FString& AccessibleLabel = FString(), FMargin Padding = FMargin(14, 10));
+        const FString& AccessibleLabel = FString(), FMargin Padding = FMargin(14, 10), float FontSize = 17.0f);
     TSharedRef<SWidget> Text(const FString& Value, int32 Size = 18) const;
     FString EntryName(const FHomesteadRow& Row) const;
     FName EntryIcon(const FHomesteadRow& Row) const;
