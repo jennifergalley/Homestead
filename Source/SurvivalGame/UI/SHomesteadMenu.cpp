@@ -79,6 +79,8 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                                 ]
                             ]
                         ]
+                        // What she's dragging or holding, above everything else in the book.
+                        + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top)[ BuildDragGhost() ]
                     ]
                 ]
             ]

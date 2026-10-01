@@ -247,7 +247,8 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         {
             float Normalized = 0, Scale = 100, Minimum = 0, Maximum = 100;
             Settings->GetResolutionScaleInformationEx(Normalized, Scale, Minimum, Maximum);
-            Result.Add({10, FString::Printf(TEXT("3D resolution scale: %.0f%%"), Scale),
+            // An unset scale reads 0: the engine's own default screen percentage (cycling goes to 100 from it).
+            Result.Add({10, Scale > 0 ? FString::Printf(TEXT("3D resolution scale: %.0f%%"), Scale) : FString(TEXT("3D resolution scale: Automatic")),
                 TEXT("Cycle 100 / 85 / 70 percent. UI stays sharp; TSR upscales the scene.")});
             const auto* VSync = IConsoleManager::Get().FindConsoleVariable(TEXT("r.VSync"));
             const bool Requested = Settings->IsVSyncEnabled();

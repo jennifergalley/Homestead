@@ -93,7 +93,9 @@ void SHomesteadMenu::BuildPopup()
         TSharedRef<SButton> Button = SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(12, 8))
             .ButtonColorAndOpacity_Lambda([this, Index]() { return DialogSelection == Index ? MenuGold : Selected; })
             .IsEnabled_Lambda([Enabled]() { return !Enabled || Enabled(); })
-            .OnHovered_Lambda([this, Index]() { DialogSelection = Index; })
+            // The pointer picks an option only while she's using it: a list scrolled by the pad or keys can slide
+            // a button under a resting cursor, and that hover mustn't take the selection back (the dye chooser).
+            .OnHovered_Lambda([this, Index]() { if (Controller.IsValid() && !Controller->UsesGamepad() && PointerAction()) DialogSelection = Index; })
             .OnClicked_Lambda([this, Index]() { if (PointerAction()) DialogAction(Index); return FReply::Handled(); })
             [
                 SNew(SHorizontalBox)

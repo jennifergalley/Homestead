@@ -11,6 +11,7 @@
 #include "UI/SHomesteadShop.h"
 
 #include "Containers/Ticker.h"
+#include "Framework/Application/SlateApplication.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
 #include "ShowFlags.h"
@@ -216,6 +217,16 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([Weak, Then](float)
             { if (Weak.IsValid()) Then(*Weak.Get()); return false; }), 0.3f);
     };
+    // The fixture's stacks start in the hotbar row; the pack grid's popovers need one below it.
+    const auto ToPack = [](AHomesteadController& PC, Item Wanted)
+    {
+        for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell)
+        {
+            FHomesteadRow Held;
+            if (PC.MenuHotbarRow(Cell, Held) && Held.Subject == EHomesteadMenuSubject::ItemGroup && Held.Id == static_cast<int32>(Wanted))
+            { PC.MenuMoveHotbarToPack(Cell, nullptr); return; }
+        }
+    };
     const auto Notify = [](const TCHAR* Text, bool bError)
     { return [Text, bError](AHomesteadController& PC) { PC.Notify(Text, bError); }; };
     const auto Book = [](int32 Page) { return [Page](AHomesteadController& PC) { PC.OpenBook(Page); }; };
@@ -352,6 +363,29 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     // The field book.
     Add(TEXT("book-pack"), TEXT("Field book, Inventory tab: the hotbar row over the pack grid, her portrait and equipped slots."),
         ECover::BookPage, 0, nullptr, Book(0));
+    Add(TEXT("book-pack-rows"), TEXT("Pack page: the hotbar row as the grid's first row, its cells the same size and spacing as the rows beneath."),
+        ECover::BookPage, 0, nullptr, Book(0));
+    Add(TEXT("book-pack-dragging"), TEXT("Pack page, holding a stack of branches over the hotbar row: its icon and count ride with the pointer (on the pad, on the focused cell's corner)."),
+        ECover::Dialog, 9, nullptr,
+        [Later, ToPack](AHomesteadController& Opened)
+        {
+            ToPack(Opened, Item::Branch);
+            Opened.OpenBook(0);
+            Later(Opened, [Later](AHomesteadController& PC)
+            {
+                if (!PC.NativeMenu.IsValid()) return;
+                for (const auto& Row : PC.MenuRows())
+                    if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Id == static_cast<int32>(Item::Branch))
+                    { PC.NativeMenu->BeginPlacingOnHotbar(Row); break; }
+                // The pointer over the cell she's aiming at (a capture shows no cursor of its own).
+                Later(PC, [](AHomesteadController& Aimed)
+                {
+                    if (!Aimed.NativeMenu.IsValid() || Aimed.UsesGamepad() || !FSlateApplication::IsInitialized()) return;
+                    if (const auto Cell = Aimed.NativeMenu->GetBookHotbarSlot(FMath::Max(0, Aimed.NativeMenu->GetFocusedHotbarSlot())))
+                        FSlateApplication::Get().SetCursorPos(Cell->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D(0.55f, 0.6f)));
+                });
+            });
+        }, 1.6f);
     Add(TEXT("book-craft"), TEXT("Craft tab: recipes with what each needs, the ones she can make now first."),
         ECover::BookPage, 1, nullptr, Book(1));
     Add(TEXT("book-craft-unaffordable"), TEXT("Craft tab, pressing a recipe she can't make yet: a rust-edged parchment notice saying what to gather."),
@@ -400,20 +434,22 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Notice, static_cast<int32>(ENotice::BookNoticeError), nullptr,
         [](AHomesteadController& PC) { PC.OpenBook(0); PC.Notify(TEXT("You can't carry any more. Store something in a chest first."), true); });
     Add(TEXT("book-item-menu"), TEXT("Pack, a Cornish pasty's item menu: Eat, Move, Drop and the like."), ECover::Dialog, 3, nullptr,
-        [Later](AHomesteadController& Opened)
+        [Later, ToPack](AHomesteadController& Opened)
         {
+            ToPack(Opened, Item::Pasty);
             Opened.OpenBook(0);
             Later(Opened, [](AHomesteadController& PC)
             {
-            const auto Rows = PC.MenuRows();
-            for (int32 Index = 0; Index < Rows.Num(); ++Index)
-                if (Rows[Index].Subject == EHomesteadMenuSubject::ItemGroup && Rows[Index].Id == static_cast<int32>(Item::Pasty))
-                { if (PC.NativeMenu.IsValid()) PC.NativeMenu->OpenItemContextMenu(Index, !PC.UsesGamepad()); return; }
+                const auto Rows = PC.MenuRows();
+                for (int32 Index = 0; Index < Rows.Num(); ++Index)
+                    if (Rows[Index].Subject == EHomesteadMenuSubject::ItemGroup && Rows[Index].Id == static_cast<int32>(Item::Pasty))
+                    { if (PC.NativeMenu.IsValid()) PC.NativeMenu->OpenItemContextMenu(Index, !PC.UsesGamepad()); return; }
             });
         }, 1.3f);
     Add(TEXT("book-quantity"), TEXT("Pack, the how-many popover for a stack of branches."), ECover::Dialog, 4, nullptr,
-        [Later](AHomesteadController& Opened)
+        [Later, ToPack](AHomesteadController& Opened)
         {
+            ToPack(Opened, Item::Branch);
             Opened.OpenBook(0);
             Later(Opened, [](AHomesteadController& PC)
             {

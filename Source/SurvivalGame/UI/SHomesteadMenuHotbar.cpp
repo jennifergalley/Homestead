@@ -12,8 +12,15 @@ namespace HomesteadMenus
 {
 namespace MenuHotbarStyle
 {
-// Slightly smaller than a pack tile so ten fit under the pack grid.
+// Beside an open chest: slightly smaller than a pack tile so ten fit over the pack column.
 constexpr float SlotSize = 58;
+// As a pack grid row: the grid's slot padding and its cell height (a pack tile is 80 tall with a
+// 2-unit inset, SHomesteadMenuPages.cpp EmptyCell), and a pack tile's icon size.
+constexpr float GridSlotPadding = 4;
+constexpr float GridCellHeight = 80;
+constexpr float GridCellInset = 2;
+constexpr float GridIconSize = 48;
+constexpr float StripIconSize = 40;
 }
 const FHomesteadRow* SHomesteadMenu::HotbarCandidateRow() const
 {
@@ -56,11 +63,14 @@ FHomesteadHotbarSlot SHomesteadMenu::BookHotbarSlot(int32 Slot) const
     }
     return HotbarSnapshotCache.IsValidIndex(Slot) ? HotbarSnapshotCache[Slot] : FHomesteadHotbarSlot();
 }
-TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
+TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar(bool bGridRow)
 {
     // The same ten numbered cells as the world hotbar: the first row of her pack, holding the very
-    // stacks the world hotbar shows. A stack used up leaves its cell empty.
+    // stacks the world hotbar shows. A stack used up leaves its cell empty. On the Pack page it is
+    // laid out as one of the pack grid's rows (Jenny 2026-09-30, "like Coral Island"): the same
+    // columns, spacing and cell height as the rows below it.
     TSharedRef<SHorizontalBox> Strip = SNew(SHorizontalBox);
+    TSharedRef<SUniformGridPanel> GridRow = SNew(SUniformGridPanel).SlotPadding(FMargin(MenuHotbarStyle::GridSlotPadding));
     HotbarCells.Reset();
     for (int32 Slot = 0; Slot < Homestead::HotbarSize; ++Slot)
     {
@@ -100,7 +110,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
             });
         Button->RightClick = [this, Slot]() { if (PointerAction() && Dialog == EDialog::None) OpenHotbarSlotMenu(Slot, true); };
         Button->SetContent(
-            SNew(SBox).WidthOverride(MenuHotbarStyle::SlotSize).HeightOverride(MenuHotbarStyle::SlotSize)
+            SNew(SBox)
+            .WidthOverride(bGridRow ? FOptionalSize() : FOptionalSize(MenuHotbarStyle::SlotSize))
+            .HeightOverride(bGridRow ? FOptionalSize() : FOptionalSize(MenuHotbarStyle::SlotSize))
             [
                 SNew(SOverlay)
                 + SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)
@@ -131,7 +143,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                 ]
                 + SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
                 [
-                    SNew(SBox).WidthOverride(40).HeightOverride(40)
+                    SNew(SBox)
+                    .WidthOverride(bGridRow ? MenuHotbarStyle::GridIconSize : MenuHotbarStyle::StripIconSize)
+                    .HeightOverride(bGridRow ? MenuHotbarStyle::GridIconSize : MenuHotbarStyle::StripIconSize)
                     .Visibility_Lambda([SlotInfo]() { return SlotInfo().Assigned ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
                     [
                         SNew(SHomesteadIcon)
@@ -169,8 +183,16 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                 ]
             ]);
         HotbarCells.Add(Button);
-        Strip->AddSlot().AutoWidth().Padding(3, 0)[ RegisterButton(Button, ERegion::Hotbar, Slot) ];
+        if (bGridRow)
+            GridRow->AddSlot(Slot, 0)
+            [
+                SNew(SBox).HeightOverride(MenuHotbarStyle::GridCellHeight).Padding(MenuHotbarStyle::GridCellInset)
+                [ RegisterButton(Button, ERegion::Hotbar, Slot) ]
+            ];
+        else Strip->AddSlot().AutoWidth().Padding(3, 0)[ RegisterButton(Button, ERegion::Hotbar, Slot) ];
     }
+    bHotbarInScroll = bGridRow;
+    if (bGridRow) return GridRow;
     return Strip;
 }
 void SHomesteadMenu::OpenHotbarSlotMenu(int32 Slot, bool bPointer)

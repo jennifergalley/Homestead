@@ -1,6 +1,6 @@
 # UI gallery, 2026-09-30: the parchment theme trial
 
-Every UI surface, captured by `Scripts\Capture-UiGallery.ps1` (hidden Development game, sandboxed saves) with Slate included, on the plain backdrop: the world hidden, the heroine kept for scale. The parchment theme (the notice card's paper and the field book's EB Garamond everywhere) is trialled on `jennifergalley-menu-gallery-0930` and switched by `homestead.UITheme parchment|classic`; it ships only once Jenny approves it.
+Every UI surface, captured by `Scripts\Capture-UiGallery.ps1` (hidden Development game, sandboxed saves) with Slate included, on the plain backdrop: the world hidden, the heroine kept for scale. The parchment theme (the notice card's paper and the field book's EB Garamond everywhere) was trialled on `jennifergalley-menu-gallery-0930`. Jenny approved it on 2026-09-30 at 21:54 ("I prefer the parchment UI. Ship it!"), so it is now the game's default. `homestead.UITheme classic` keeps the old look for comparison. Every new UI surface uses parchment and gets a gallery entry.
 
 - `side-by-side/side-by-side-1080p-NN.jpg`: each screen, classic beside parchment (plain backdrop). `side-by-side-1080p-world-NN.jpg`: key screens over the game by day, night and in rain.
 - `parchment-1080p/<id>.jpg`: the 1080p parchment set; `parchment-1080p-contact.jpg` shows them all.

@@ -26,7 +26,7 @@ constexpr float MutedBelow = 0.86f;
 constexpr float SerifScale = 1.12f;
 
 TAutoConsoleVariable<FString> CVarTheme(TEXT("homestead.UITheme"), TEXT(""),
-    TEXT("UI theme trial: parchment (the parchment card and EB Garamond everywhere) or classic (pine and cream). ")
+    TEXT("UI theme: parchment (the game's look: parchment card and EB Garamond everywhere) or classic (old pine and cream, for comparison). ")
     TEXT("Empty: -HomesteadUITheme=<name> from the command line, else parchment. Reopen menus after changing."),
     FConsoleVariableDelegate::CreateLambda([](IConsoleVariable*) { HomesteadUITheme::Apply(); }));
 

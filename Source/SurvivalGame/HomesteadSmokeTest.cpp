@@ -793,13 +793,20 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         }
         else
         {
-            if (Native && (!Controller->IsBookOpen() || Target == INDEX_NONE || !Rows.IsValidIndex(Current)
+            // Settings opens on Resume (the Session region); step down into its rows first.
+            const bool bLeaveSession = Native && Controller->IsBookOpen() && Target != INDEX_NONE
+                && Controller->NativeMenu->GetFocusedRegionName() == TEXT("Session");
+            if (bLeaveSession)
+            {
+                if (StepElapsed - LastNavigationAt >= 0.18f) { Tap(EKeys::Gamepad_DPad_Down); LastNavigationAt = StepElapsed; }
+            }
+            else if (Native && (!Controller->IsBookOpen() || Target == INDEX_NONE || !Rows.IsValidIndex(Current)
                 || Controller->NativeMenu->GetFocusedRegionName() != TEXT("Content")))
             {
                 Finish(false, Step.Name + TEXT(" | Native content grid or requested subject is unavailable."));
                 return;
             }
-            NavigationComplete = Current == Target && Target != INDEX_NONE;
+            NavigationComplete = !bLeaveSession && Current == Target && Target != INDEX_NONE;
             if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
             {
                 if (Native)

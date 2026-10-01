@@ -5,14 +5,14 @@
 namespace HomesteadMenus
 {
 TSharedRef<SButton> SHomesteadMenu::MakeButton(const FString& Label, TFunction<void()> Action,
-    TAttribute<FSlateColor> Color, const FString& AccessibleLabel, FMargin Padding)
+    TAttribute<FSlateColor> Color, const FString& AccessibleLabel, FMargin Padding, float FontSize)
 {
     return SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(Padding)
         .ButtonColorAndOpacity(Color).ToolTipText(FText::FromString(AccessibleLabel.IsEmpty() ? Label : AccessibleLabel))
         .OnClicked_Lambda([this, Action]() { if (PointerAction()) Action(); return FReply::Handled(); })
         [
             SNew(STextBlock).Text(FText::FromString(Label)).AutoWrapText(true)
-            .Font(HomesteadUITheme::Font("Regular", 17))
+            .Font(HomesteadUITheme::Font("Regular", FontSize))
             .ColorAndOpacity_Lambda([Color]() { return Color.Get().GetSpecifiedColor() == MenuGold ? FSlateColor(PineInk) : FSlateColor(Ink); })
         ];
 }
@@ -128,6 +128,9 @@ void SHomesteadMenu::SynchronizeFocus()
     FSlateApplication::Get().SetKeyboardFocus(Target, EFocusCause::Navigation);
     bFocusPending = FSlateApplication::Get().GetKeyboardFocusedWidget() != Target;
     if (Dialog != EDialog::None && DialogScroll) DialogScroll->ScrollDescendantIntoView(Target, false);
+    // On the Pack page the hotbar row is the grid's first row, inside the scrolling pack.
+    if (Dialog == EDialog::None && Region == ERegion::Hotbar && Scroll && bHotbarInScroll)
+        Scroll->ScrollDescendantIntoView(Target, false, EDescendantScrollDestination::IntoView);
     ScrollActionIntoView();
 }
 
