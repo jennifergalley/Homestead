@@ -132,6 +132,7 @@ public:
     static constexpr double CreekSurfaceHalfSpanCm = 240.0;
     static constexpr double CreekSurfaceDropCm = 6.0;
     virtual void Tick(float DeltaSeconds) override;
+    virtual void EndPlay(const EEndPlayReason::Type Reason) override;
     bool Initialize(const Homestead::Simulation& Simulation);
     bool Refresh(const Homestead::Simulation& Simulation);
     // Keep one gathered resource's produce visible (as if still ready) until released, so the
@@ -305,6 +306,10 @@ private:
     // (HomesteadLampLook's lamp is 1400 / 1000 cm), rather than a floodlight filling the room.
     static constexpr float HearthIntensity = 2600.0f;
     static constexpr float HearthRadiusCm = 800.0f;
+    // Groom sky lighting samples the sky capture with only the hair's own occlusion, so under a roof
+    // by day her hair glowed white. Switch it off indoors by day (with hysteresis on the indoor mix
+    // times daylight); the hair then takes direct and hearth light only, like the room around her.
+    bool bHairSkyLightingOff = false;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
     // The standing room's door (HomesteadWorldDoors.cpp, Simulation/HomesteadDoor): an oak leaf on a hinge

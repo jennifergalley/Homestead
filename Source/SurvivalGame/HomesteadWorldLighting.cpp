@@ -173,6 +173,13 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
     Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud
         + IndoorDayExposureBias * GetIndoorMix() * Daylight;
+    const float IndoorDay = GetIndoorMix() * Daylight;
+    if (bHairSkyLightingOff ? IndoorDay < 0.35f : IndoorDay > 0.65f)
+        if (IConsoleVariable* HairSky = IConsoleManager::Get().FindConsoleVariable(TEXT("r.HairStrands.SkyLighting")))
+        {
+            bHairSkyLightingOff = !bHairSkyLightingOff;
+            HairSky->Set(bHairSkyLightingOff ? 0 : 1, ECVF_SetByCode);
+        }
     const float Saturation = FMath::Lerp(1.0f, OvercastSaturation, Cloud);
     Exposure->Settings.ColorSaturation = FVector4(Saturation, Saturation, Saturation, 1.0f);
     const float ClearFog = FMath::Lerp(0.016f, 0.007f, Daylight);

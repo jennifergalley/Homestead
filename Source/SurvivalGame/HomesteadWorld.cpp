@@ -3,6 +3,7 @@
 #include "HomesteadLampLook.h"
 #include "HomesteadWeather.h"
 
+#include "HAL/IConsoleManager.h"
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "Engine/StaticMesh.h"
@@ -26,6 +27,16 @@ AHomesteadWorld::AHomesteadWorld()
     Sphere = SphereAsset.Object;
     Cylinder = CylinderAsset.Object;
     Cone = ConeAsset.Object;
+}
+
+void AHomesteadWorld::EndPlay(const EEndPlayReason::Type Reason)
+{
+    // The hair sky-lighting switch is a global render setting; never leave it off behind us.
+    if (bHairSkyLightingOff)
+        if (IConsoleVariable* HairSky = IConsoleManager::Get().FindConsoleVariable(TEXT("r.HairStrands.SkyLighting")))
+            HairSky->Set(1, ECVF_SetByCode);
+    bHairSkyLightingOff = false;
+    Super::EndPlay(Reason);
 }
 
 void AHomesteadWorld::Tick(float DeltaSeconds)

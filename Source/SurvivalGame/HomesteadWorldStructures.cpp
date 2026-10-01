@@ -163,6 +163,10 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
             // (top 281.5 cm) and the slates seals it, inset under the eaves and verges so it never shows.
             if (Structure.kind == Homestead::Piece::Roof && !bPreview && !bDeconstruct)
                 Part(Cube, FVector(0, 4, 283), FVector(312, 316, 2.4f), HomesteadWorldLook::RoofUnderlay);
+            // Between the joists the coping left a sky-bright slot along every wall top: a timber wall
+            // plate inside the wall's thickness (faces at Y 130 and 158) fills it without showing on either face.
+            if (bWallPiece && !bPreview && !bDeconstruct)
+                Part(Cube, FVector(0, 144, 270), FVector(300, 24, 24), HomesteadWorldLook::RoofUnderlay);
             if (!bPreview && !bDeconstruct && Homestead::Door::HasLeaf(Structure))
                 AddDoorLeaf(Visual, Structure.id, Base, Rotation, HeightScale);
             return;
