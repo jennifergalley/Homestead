@@ -29,7 +29,7 @@ COLLISION = "none"
 TRIANGLE_BUDGET = 8000
 PROVENANCE = "Original project-authored procedural geometry and materials; no third-party asset or texture."
 BAKE = {"size": 2048, "samples": 96, "maps": ("basecolor", "roughness", "normal", "ao")}
-BEAUTY = {"pose": (0, 0, -30), "focus": (0.0, 0.3, 1.75)}
+BEAUTY = {"pose": (0, 0, -65), "focus": (0.0, 0.3, 1.75)}
 
 POST = 0.125
 BURY = 0.35

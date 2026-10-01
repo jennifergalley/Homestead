@@ -32,7 +32,7 @@ COLLISION = "none"
 TRIANGLE_BUDGET = 16000
 PROVENANCE = "Original project-authored procedural geometry and materials; no third-party asset or texture."
 BAKE = {"size": 2048, "samples": 96, "maps": ("basecolor", "roughness", "normal", "ao", "metallic")}
-BEAUTY = {"pose": (0, 0, 25), "focus": (0.85, 0.0, 0.7)}
+BEAUTY = {"pose": (0, 0, 25), "focus": (0.0, 0.0, 0.92)}
 REPORT = {"pivot": "foot of the downhill post on the path or nosing line; +X along the path, +Y to the drop",
           "bay_plan_m": 1.70, "rail_height_m": 0.95, "pitches_deg": [0, 26, 28, 30],
           "symmetric_across_xz": True}

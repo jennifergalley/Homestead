@@ -12,7 +12,7 @@ Real-object research (written before modeling):
 Pivot at the post's foot on the ground; the arm points along +X (Water sets the yaw), 1.70 m up; the
 lettering reads on both faces. The post is bedded 0.35 m below the pivot.
 Lettering: Blender's bundled default font (DejaVu Sans, Bitstream Vera licence: free to use, modify and
-embed), converted to mesh and set 1.5 mm into each face of the arm. Everything else is original
+embed), converted to mesh and standing 1.5 mm proud of each face of the arm, like thick paint in the cut letters. Everything else is original
 procedural geometry and materials.
 """
 import bpy
@@ -58,17 +58,18 @@ def lettering(kit, name, face, paint):
     bpy.ops.object.convert(target='MESH')
     obj = bpy.context.view_layer.objects.active
     mesh = obj.data
-    # Text lies in XY facing +Z: stand it up on the arm's face. The FBX export mirrors Y (docs/blender-assets.md),
-    # which would print it backwards in the game, so it is laid mirror-image here and reads true after import.
+    # Text lies in XY facing +Z: stand it up on the arm's face, reading left to right as seen from that face. The
+    # export converts Blender's right-handed frame to Unreal's without mirroring the object (the knapsack check,
+    # 09-30), so text that reads true here reads true in the game.
     centre_x = POST * 0.5 + (ARM_LEN - POST * 0.5) * 0.45
     for v in mesh.vertices:
         x, y, z = v.co
         if face > 0:
-            v.co = Vector((centre_x + x, face * (ARM_T * 0.5 - 0.0015) + z * face, ARM_Z + y))
+            v.co = Vector((centre_x - x, face * (ARM_T * 0.5 + 0.0005) + z * face, ARM_Z + y))
         else:
-            v.co = Vector((centre_x - x, face * (ARM_T * 0.5 - 0.0015) + z * face, ARM_Z + y))
+            v.co = Vector((centre_x + x, face * (ARM_T * 0.5 + 0.0005) + z * face, ARM_Z + y))
     mesh.update()
-    kit.recalc_normals(obj)     # the mirror-image layout turns the faces inside out
+    kit.recalc_normals(obj)
     mesh.materials.clear()
     mesh.materials.append(paint)
     kit.tag_coords(mesh)

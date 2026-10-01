@@ -36,7 +36,7 @@ DESCRIPTION = ("Cut granite treads (3 variants), a 1.2 m landing, 0.6 and 0.75 m
                "wedge for the cove route (original). Pivots on the top face at the front nosing / downhill edge "
                "centre, +X up the flight.")
 COLLISION = "convex"
-TRIANGLE_BUDGET = 24000
+TRIANGLE_BUDGET = 25000
 PROVENANCE = "Original project-authored procedural geometry and materials; no third-party asset or texture."
 BAKE = {"size": 2048, "samples": 96, "maps": ("basecolor", "roughness", "normal", "ao")}
 BEAUTY = {"pose": (0, 0, 35), "focus": (0.15, 0.0, 0.0)}
@@ -56,7 +56,7 @@ WEDGE_LEN = 1.50
 
 
 def granite(kit, name, seed):
-    return kit.mats.granite(name, grain=0.004, patina=0.65, lichen=0.35, moss=0.15, iron=0.2, streaks=0.2,
+    return kit.mats.granite(name, grain=0.004, patina=0.75, lichen=0.12, moss=0.2, iron=0.2, streaks=0.2,
                             soil=0.0, relief=0.7, north=(0.0, 1.0, 0.0), seed=seed)
 
 

@@ -23,7 +23,7 @@ NAME = "CoveKerb"
 DESCRIPTION = ("Split granite edge kerbs: 1 m straight, 1 m 15-degree curve, 0.5 m end (original). Pivot on the "
                "path-side top edge, +X along the path, +Y to the drop.")
 COLLISION = "box"
-TRIANGLE_BUDGET = 9000
+TRIANGLE_BUDGET = 13000
 PROVENANCE = "Original project-authored procedural geometry and materials; no third-party asset or texture."
 BAKE = {"size": 2048, "samples": 96, "maps": ("basecolor", "roughness", "normal", "ao")}
 BEAUTY = {"pose": (0, 0, 30), "focus": (0.0, 0.07, -0.1)}
@@ -74,7 +74,6 @@ def build_straight(kit, mat):
 
 def build_curve(kit, mat):
     stone = kerb_stone(kit, "KerbCurve", 1.0, mat, 2)
-    kit.subdivide(stone, levels=1, smooth=False)
     radius = 1.0 / math.radians(15.0)
 
     def bend(co):
