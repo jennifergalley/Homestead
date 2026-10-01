@@ -3899,7 +3899,12 @@ void SleepOptionPolicy()
     CHECK(!BedSleepOption(12.0, 99.6));
     CHECK(BedSleepOption(21.0, 99.6)->choice == SleepChoice::UntilMorning);
     CHECK(!BedSleepOption(6.0, 100.0));
-    CHECK(!BedSleepOption(5.875, 100.0));
+    const auto shortMorning = BedSleepOption(5.875, 100.0);
+    CHECK(shortMorning && shortMorning->choice == SleepChoice::UntilMorning
+        && Close(shortMorning->hours, 0.125) && Close(shortMorning->wakeHour, 6.0));
+    const auto shortRest = BedSleepOption(5.875, 50.0);
+    CHECK(shortRest && shortRest->choice == SleepChoice::UntilRested
+        && Close(shortRest->hours, 0.125) && Close(shortRest->wakeHour, 6.0));
     CHECK(Close(BedSleepOption(12.0, 0.0)->hours, Exertion::MaxRestHours));
     CHECK(Close(BedSleepOption(18.0, 50.0)->hours, 5.0));
     CHECK(Close(BedSleepOption(18.0, 100.0)->hours, 12.0));
@@ -3916,6 +3921,11 @@ void SleepOptionPolicy()
         std::cerr << "Bed policy at sunrise: hour=" << sleeper.GetState().hour
             << " energy=" << sleeper.GetState().energy << '\n';
     CHECK(Close(sleeper.GetState().hour, 30.0) && Close(sleeper.GetState().energy, 100.0));
+    Edit(sleeper, [](State& state) { state.hour = 29.875; state.energy = 50.0; });
+    UnchangedFailure(sleeper, [&] { return sleeper.Sleep(0.125, Home, {1, 0}); });
+    OK(sleeper.Sleep(shortRest->hours, Home, {1, 0}, true));
+    CHECK(Close(sleeper.GetState().hour, 30.0) && Close(sleeper.GetState().energy, 51.25));
+    UnchangedFailure(sleeper, [&] { return sleeper.Sleep(0.125, Home, {1, 0}, true); });
     // One rain schedule for the rules, the lighting and the wet ground: two days in ten, 09:00-15:00. Day 0 is
     // dry and day 1 rains (as before); every ten-day block rains on one of offsets 1-2 and one of 6-7, so
     // exactly 20% of days with rains 4-6 days apart, and all four combinations occur.

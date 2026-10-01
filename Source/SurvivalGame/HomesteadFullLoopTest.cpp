@@ -540,7 +540,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             Controller->Sim.SkipToHourOfDay(12.0);
             if (!Controller->Sim.SetEnergy(40.0)) { Finish(false, TEXT("Could not prepare midday rest.")); return; }
             Teleport(Home);
-            Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
+            Controller->GetPawn()->SetActorRotation(FRotator(0, -20, 0));
             *BedPolicyHour = Controller->State().hour;
         },
         [this]()
@@ -562,7 +562,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         {
             Controller->Sim.SkipToHourOfDay(21.0);
             Teleport(Home);
-            Controller->GetPawn()->SetActorRotation(FRotator::ZeroRotator);
+            Controller->GetPawn()->SetActorRotation(FRotator(0, -20, 0));
             *BedPolicyHour = Controller->State().hour;
         },
         [this]()
@@ -577,6 +577,26 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             return !Controller->IsBookOpen() && !Controller->IsFailed()
                 && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 9.0, 0.02)
                 && Controller->State().energy >= Homestead::Food::FullEnergyAt;
+        });
+    Add(TEXT("At 05:52, the bed still offers a short sleep to 06:00"),
+        [this, Home, BedPolicyHour]()
+        {
+            Controller->Sim.SkipToHourOfDay(5.875);
+            Teleport(Home);
+            Controller->GetPawn()->SetActorRotation(FRotator(0, -20, 0));
+            *BedPolicyHour = Controller->State().hour;
+        },
+        [this]()
+        {
+            return Controller->FocusActions() == TEXT("[A] Sleep until morning")
+                && FMath::IsNearlyEqual(Controller->BedSleepHours(), 0.125, 0.001);
+        }, 0.65f);
+    Add(TEXT("A short final sleep stops precisely at 06:00"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, BedPolicyHour]()
+        {
+            return !Controller->IsBookOpen() && !Controller->IsFailed()
+                && FMath::IsNearlyEqual(Controller->State().hour, *BedPolicyHour + 0.125, 0.02);
         });
     Add(TEXT("Restore the pre-rest garden and clock"),
         [this, BeforeBedPolicy, BeforeBedRoute, BeforeBedAutoIndex, BeforeBedSavedAt, BeforeBedSaveLabel]()
@@ -915,6 +935,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                 Controller->Sim.SkipToHourOfDay(22.75);
                 if (!Controller->Sim.SetEnergy(100)) { Finish(false, TEXT("Could not prepare night rest.")); return; }
                 Teleport(Home);
+                Controller->GetPawn()->SetActorRotation(FRotator(0, -20, 0));
             },
             [this]()
             {
@@ -1114,6 +1135,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         {
             if (!Controller->Sim.SetEnergy(20)) { Finish(false, TEXT("Could not prepare berry-regrowth rest.")); return; }
             Teleport(Home);
+            Controller->GetPawn()->SetActorRotation(FRotator(0, -20, 0));
         },
         [this]()
         {

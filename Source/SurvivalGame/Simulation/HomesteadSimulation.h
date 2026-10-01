@@ -424,6 +424,7 @@ constexpr double SleepPerHour = 10.0;
 constexpr double DozeHours = 6.0;
 constexpr double DozePerHour = 6.0;
 constexpr double MinRestHours = 0.25;
+constexpr double MinDawnSleepHours = 1e-6; // Tiny positive intervals prevent a zero-time "sleep" just before 06:00.
 constexpr double MaxRestHours = 10.0;
 constexpr double GatherEnergy = 0.5;
 constexpr double ClearEnergy = 1.0;
@@ -499,7 +500,8 @@ struct SleepOption
 };
 constexpr double MorningWakeHour = 6.0;
 // Night runs 18:00-06:00. Rest stops at 06:00 if it would pass dawn; daytime with full
-// Energy has no bed action. The minimum sleep interval is a quarter hour.
+// Energy has no bed action. Ordinary rest is at least a quarter hour; the last minutes to
+// dawn may be shorter.
 std::optional<SleepOption> BedSleepOption(double hour, double energy);
 
 struct PreparedWorldRegion
@@ -684,7 +686,7 @@ public:
     Result DropWearable(int wearableId, Point position, Point player,
         std::uint64_t expectedRevision);
     Result PickUpDrop(int dropId, Point player);
-    Result Sleep(double hours, Point player, Point facing);
+    Result Sleep(double hours, Point player, Point facing, bool dawnLimited = false);
     // How many times she has dozed off from exhaustion in this session (never saved); the game
     // compares it to tell her when she wakes.
     int DozeCount() const { return dozes_; }

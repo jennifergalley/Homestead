@@ -488,7 +488,8 @@ Homestead::Result AHomesteadController::SleepInBed(Homestead::Point Position)
         Homestead::ResultCode::Unavailable, Sim.GetRevision()};
     const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ZeroVector;
     const Homestead::Point Facing{Forward.X, Forward.Y};
-    Homestead::Result Slept = Sim.Sleep(Offer->hours, Position, Facing);
+    Homestead::Result Slept = Sim.Sleep(Offer->hours, Position, Facing,
+        Offer->hours < Homestead::Exertion::MinRestHours);
     if (!Slept) return Slept;
     const FString Message = State().energy >= 99.0
         ? TEXT("You wake rested at ") + SleepClockText(State().hour) + TEXT(".")

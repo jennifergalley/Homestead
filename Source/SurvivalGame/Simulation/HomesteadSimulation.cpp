@@ -1132,14 +1132,14 @@ std::optional<SleepOption> BedSleepOption(double hour, double energy)
     const bool night = current >= 18.0 || current < MorningWakeHour;
     const double toMorning = night ? std::fmod(MorningWakeHour - current + 48.0, 24.0) : 0.0;
     if (energy >= Food::FullEnergyAt)
-        return night && toMorning >= Exertion::MinRestHours
+        return night && toMorning >= Exertion::MinDawnSleepHours
             ? std::optional<SleepOption>{{SleepChoice::UntilMorning, toMorning, MorningWakeHour}}
             : std::nullopt;
     const double deficit = 100.0 - energy;
     const double rest = Clamp(std::ceil(deficit / Exertion::SleepPerHour * 4.0 - 1e-9) / 4.0,
         Exertion::MinRestHours, Exertion::MaxRestHours);
     const double hours = night ? std::min(rest, toMorning) : rest;
-    if (hours < Exertion::MinRestHours) return std::nullopt;
+    if (hours < Exertion::MinDawnSleepHours) return std::nullopt;
     return SleepOption{SleepChoice::UntilRested, hours, std::fmod(current + hours, 24.0)};
 }
 
@@ -3081,10 +3081,19 @@ Result Simulation::PassDaysForPlaytest(double days, bool tend, Point player)
     const int whole = static_cast<int>(std::lround(days));
     return Good(std::to_string(whole) + (whole == 1 ? " day passes" : " days pass") + (tend ? "; the garden was tended." : "."));
 }
-Result Simulation::Sleep(double hours, Point player, Point facing)
+Result Simulation::Sleep(double hours, Point player, Point facing, bool dawnLimited)
 {
     if (state_.failed) return Failed();
-    if (!FiniteRange(hours, 0.25, 12.0)) return Bad("Choose between a quarter hour and twelve hours of sleep.");
+    if (!FiniteRange(hours, Exertion::MinRestHours, 12.0))
+    {
+        const double current = std::fmod(state_.hour, 24.0);
+        const double wake = std::fmod(state_.hour + hours, 24.0);
+        const bool shortDawn = dawnLimited && FiniteRange(hours, Exertion::MinDawnSleepHours, Exertion::MinRestHours)
+            && (current >= 18.0 || current < MorningWakeHour)
+            && std::abs(wake - MorningWakeHour) < 1e-6;
+        if (!shortDawn) return Bad(dawnLimited ? "A short sleep must end at 06:00."
+            : "Choose between a quarter hour and twelve hours of sleep.");
+    }
     if (ReachableBed(state_, player, facing) == -1) return Bad("Place a bed and move beside it before sleeping.");
     if (state_.hour + hours > MaxHour) return Bad("The calendar has reached its supported limit.");
     while (hours > 1e-12 && !state_.failed)
