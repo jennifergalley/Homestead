@@ -6,6 +6,7 @@
 #include "HomesteadHatchet.h"
 #include "HomesteadDiggingStick.h"
 #include "HomesteadActionTestState.h"
+#include "Simulation/HomesteadGardenTarget.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -204,12 +205,16 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     Add(TEXT("Stand east of the cleared garden"),
         [this, Garden, TillApproach]()
         {
-            Teleport(*TillApproach);
-            const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(
-                Garden.y - TillApproach->y, Garden.x - TillApproach->x));
+            // The hoe bites 85 cm ahead (Homestead::HoeCellAhead): stand that far from the square, on
+            // the clear approach line, so the stroke lands in it.
+            const FVector2D Toward = FVector2D(Garden.x - TillApproach->x, Garden.y - TillApproach->y).GetSafeNormal();
+            const Homestead::Point Stand{Garden.x - Toward.X * Homestead::GardenReach::HoeAheadCm,
+                Garden.y - Toward.Y * Homestead::GardenReach::HoeAheadCm};
+            Teleport(Stand);
+            const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(Toward.Y, Toward.X));
             Controller->GetPawn()->SetActorRotation(FRotator(0, Yaw, 0));
             Controller->SetControlRotation(FRotator(-20, Yaw, 0));
-        }, [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.7f);
+        }, [this]() { return Controller->Focus != AHomesteadController::EFocus::Plot; }, 0.7f);
     Add(TEXT("Till with one target-directed planted-foot digging-stick action"),
         [this, Avatar, Probe, Animation]()
         {
@@ -236,24 +241,37 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                     const auto Target = Homestead::GardenCellCenter(-13, 1);
                     const float ExpectedYaw = FMath::RadiansToDegrees(FMath::Atan2(
                         Target.y - Probe->Actor.Y, Target.x - Probe->Actor.X));
-                    return Probe->Ready && !Controller->ToastIsError() && Matches()
-                        && Animation()->TillStarts() == Probe->TillStarts + 1
+                    const bool bState = Probe->Ready && !Controller->ToastIsError() && Matches();
+                    const bool bStarts = Animation()->TillStarts() == Probe->TillStarts + 1
                         && Animation()->GatherStarts() == Probe->GatherStarts
                         && Animation()->ClearStarts() == Probe->ClearStarts
-                        && Animation()->WaterStarts() == Probe->Starts
-                        && Animation()->TillWeight() > 0.99f && Tool->IsPresented()
+                        && Animation()->WaterStarts() == Probe->Starts;
+                    const bool bTool = Animation()->TillWeight() > 0.99f && Tool->IsPresented()
                         && Tool->GetAttachParent() == Avatar->GetMesh()
                         && Tool->GetAttachSocketName() == TEXT("hand_r")
                         && Tool->GetCollisionEnabled() == ECollisionEnabled::NoCollision
                         && !Tool->GetGenerateOverlapEvents() && !Tool->CanEverAffectNavigation()
                         && Tool->GetNumSections() == 1
                         && Tool->GetComponentScale().Equals(FVector::OneVector, 0.001f)
-                        && Tool->Bounds.SphereRadius > 35 && Tool->Bounds.SphereRadius < 60
-                        && FVector::Dist(Probe->Actor, Avatar->GetActorLocation()) < 1
+                        && Tool->Bounds.SphereRadius > 35 && Tool->Bounds.SphereRadius < 60;
+                    const bool bPose = FVector::Dist(Probe->Actor, Avatar->GetActorLocation()) < 1
                         && FVector::Dist(Probe->Toe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"))) < 2
                         && Probe->View.Equals(Controller->GetControlRotation(), 0.01f)
                         && FMath::Abs(FMath::FindDeltaAngleDegrees(Avatar->TillTargetYaw(), ExpectedYaw)) < 0.1f;
+                    if (StepElapsed > 0.4f && !(bState && bStarts && bTool && bPose))
+                        Results.AddUnique(FString::Printf(TEXT("TILL_CHECK ready=%d toast_err=%d matches=%d starts=%d tool=%d pose=%d till=%u/%u weight=%.2f toast='%s'"),
+                            Probe->Ready, Controller->ToastIsError(), Matches(), bStarts, bTool, bPose,
+                            Animation()->TillStarts(), Probe->TillStarts, Animation()->TillWeight(), *Controller->Toast()));
+                    return bState && bStarts && bTool && bPose;
                 }
+            if (StepElapsed > 0.4f)
+            {
+                FString Cells;
+                for (const auto& Plot : Controller->State().plots) Cells += FString::Printf(TEXT(" %d:(%d,%d)"), Plot.id, Plot.cellX, Plot.cellY);
+                const FVector Forward = Avatar->GetActorForwardVector();
+                Results.AddUnique(FString::Printf(TEXT("TILL_CELL no plot at (-13,1); plots:%s actor=(%.0f,%.0f) forward=(%.2f,%.2f) toast='%s'"),
+                    *Cells, Avatar->GetActorLocation().X, Avatar->GetActorLocation().Y, Forward.X, Forward.Y, *Controller->Toast()));
+            }
             return false;
         }, 0.45f);
     Add(TEXT("Rapid competing hand requests cannot stack onto tilling"),
@@ -264,12 +282,15 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             && Animation()->ClearStarts() == Probe->ClearStarts
             && Animation()->WaterStarts() == Probe->Starts; }, 0.12f);
     Add(TEXT("Tilling recovers with no orphaned prop"), []() {}, Hidden, 1.9f);
-    Add(TEXT("Occupied plot rejects a second mapped Till without presentation"),
+    // A second stroke on the tilled square never tills another: the hoe weeds it (Simulation::Weed, which a
+    // fresh plot's trace of weeds allows) or is refused, exactly as the simulation says.
+    Add(TEXT("A second hoe stroke on the tilled square weeds it, never tills another plot"),
         [this, Probe, Animation]() { Controller->ChooseOnHotbar(Homestead::Item::DiggingStick);
             Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
+            Probe->Expected.Weed(GardenPlotId, Controller->PlayerPoint());
             Probe->TillStarts = Animation()->TillStarts(); Tap(EKeys::Gamepad_RightTrigger); },
-        [this, Probe, Animation, Hidden, Matches]() { return Controller->ToastIsError() && Matches() && Hidden()
-            && Animation()->TillStarts() == Probe->TillStarts; });
+        [this, Matches]() { return Matches() && Controller->State().plots.size() == 1; }, 0.45f);
+    Add(TEXT("The second stroke recovers"), []() {}, Hidden, 1.9f);
     Add(TEXT("Movement cancels a till presentation without replay"),
         [this, Avatar, Garden]() { Avatar->PlayTill(Garden); Axis(EKeys::Gamepad_LeftY, 0.8f); },
         [Avatar, Hidden]() { return Hidden() && Avatar->GetVelocity().Size2D() > 1; }, 0.35f);

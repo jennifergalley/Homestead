@@ -303,7 +303,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
         {
             // The disclosed fixture splits everything to single units; add one real stack of five.
             if (!Controller->MenuRows().ContainsByPredicate([](const FHomesteadRow& Row)
-                { return Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.Quantity > 2; }))
+                { return Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.HotbarCell < 0 && Row.Quantity > 2; }))
             {
                 if (!Controller->Sim.GrantItems(Homestead::Item::Stone, 5)) { Finish(false, TEXT("Could not grant the drag fixture stack.")); return; }
                 // A new stack takes the first empty hotbar cell; this fixture wants it in the grid.
@@ -315,7 +315,7 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
             // single-unit splits after it), so Right below still has a neighbour to move to.
             int32 Best = 0, Most = 0;
             for (const auto& Row : Controller->MenuRows())
-                if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.Quantity > Most)
+                if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.ContainerId == 0 && Row.HotbarCell < 0 && Row.Quantity > Most)
                 { Best = Row.SubjectId; Most = Row.Quantity; }
             if (Best) Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Best, 0);
             const auto Rows = Controller->MenuRows();
