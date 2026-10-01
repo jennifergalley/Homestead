@@ -12,7 +12,7 @@ namespace Homestead
 {
 namespace Food
 {
-bool EnergyFull(const State& state) { return state.energy >= 100.0 - 1e-9; }
+bool EnergyFull(const State& state) { return state.energy >= FullEnergyAt; }
 
 bool IsWellFed(const State& state) { return state.hour < state.wellFedUntilHour; }
 

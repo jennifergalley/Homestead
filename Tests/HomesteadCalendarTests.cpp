@@ -283,6 +283,14 @@ void EatingForEnergy()
     const Result snack = sim.Eat(Item::Bread);
     CHECK(!snack.ok && snack.message == "You're full of energy. Save it for later.");
     CHECK(sim.Serialize() == full && sim.Count(Item::Bread) == 2);
+    // Full means the bar reads 100: awake she drains 0.6 an hour, so 99.99 is still full (PIE, 09-30).
+    OK(sim.SetEnergy(99.6));
+    CHECK(!sim.Eat(Item::Bread).ok && sim.Count(Item::Bread) == 2);
+    OK(sim.SetEnergy(99.4));
+    const Result topped = sim.Eat(Item::Bread);
+    CHECK(topped.ok && topped.message == "+1 Energy" && sim.GetState().energy == 100.0 && sim.Count(Item::Bread) == 1);
+    OK(sim.GrantItems(Item::Bread, 1));
+    OK(sim.SetEnergy(100.0));
     // The pack's own stack (the hotbar's quick-eat) follows the same rules.
     int breadGroup = -1;
     for (const auto& entry : sim.GetState().inventoryLayout) if (entry.item == Item::Bread) breadGroup = entry.groupId;
