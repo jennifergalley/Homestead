@@ -1561,14 +1561,13 @@ not claim early Energy is fully solved.
   The independent wall plate is lowered to 279 cm. Native merged baseline remains 18/18; these
   Unreal-only routing/interior changes still require UBT and runtime verification.
 
-  **Cove fingerpost placement blocker (Integration PIE):** runtime logged `Cove route: not placing
-  Fingerpost (missing SM_Fingerpost_ToTheCove)` while the remaining 476 cove-kit pieces placed.
-  Props imported the valid `StaticMesh`
-  `/Game/SurvivalGame/Environment/Props/RoadSign/SM_RoadSign`, but
-  `HomesteadWorldCoveRoute.cpp` still requests the obsolete
-  `/Fingerpost/SM_Fingerpost_ToTheCove` path. Integration is correcting that kit-mesh mapping and
-  will rerun UBT and PIE. Treat the mapping as an in-progress placement repair until those checks
-  verify it; do not claim the cove complete or package-ready.
+  **Cove fingerpost parked (known 7:30 limitation):** PIE logs the absent
+  `SM_Fingerpost_ToTheCove`, but no mapping repair is approved. Its lettering is mirrored; Props'
+  `/Game/SurvivalGame/Environment/Props/RoadSign/SM_RoadSign` is a different blank board with the
+  wrong pivot. Integration reverted the uncommitted substitution and did not rebuild. The accepted
+  cove-kit scope for this build is 476 steps, kerbs and rails plus 84 rail blockers; the fingerpost
+  group is deliberately absent. Track a correct sign asset/orientation separately rather than
+  treating this as a verified complete cove or package acceptance.
 
   **7:30 AM build hold — Menu chest tiles:** the invisible 720p chest-stack regression is from
   Menu's unmerged `62f7c645` (a dropped `AddSlot`), **not** `3bc08d9a` or current batch
