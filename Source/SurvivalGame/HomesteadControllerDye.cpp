@@ -16,17 +16,26 @@ bool AHomesteadController::MenuPreviewDye(int32 WearableId, int32 Dye)
     if (!Item) return false;
     // She tries it on: a garment in her pack or the open chest is put on in the copy first, since the
     // wardrobe only dresses her in what she wears.
-    if (Item->owner == Homestead::WearableOwner::Chest
-        && !Candidate.MoveWearable(WearableId, 0, PlayerPoint(), Candidate.GetRevision())) return false;
-    if (Candidate.GetWearable(WearableId)->owner == Homestead::WearableOwner::Carried
-        && !Candidate.EquipWearable(WearableId, Candidate.GetRevision())) return false;
+    const auto Refuse = [WearableId, Dye](const FString& Why)
+    {
+        UE_LOG(LogHomesteadDye, Warning, TEXT("Dye preview %d on wearable %d refused: %s"), Dye, WearableId, *Why);
+        return false;
+    };
+    if (Item->owner == Homestead::WearableOwner::Chest)
+        if (const auto Moved = Candidate.MoveWearable(WearableId, 0, PlayerPoint(), Candidate.GetRevision()); !Moved)
+            return Refuse(UTF8_TO_TCHAR(Moved.message.c_str()));
+    if (Candidate.GetWearable(WearableId)->owner == Homestead::WearableOwner::Carried)
+        if (const auto Worn = Candidate.EquipWearable(WearableId, Candidate.GetRevision()); !Worn)
+            return Refuse(UTF8_TO_TCHAR(Worn.message.c_str()));
     Item = Candidate.GetWearable(WearableId);
-    if (!Item || Item->owner != Homestead::WearableOwner::Equipped) return false;
-    if (Item->dye != Dye && !Candidate.RecolorWearable(WearableId, Dye, PlayerPoint(), Candidate.GetRevision())) return false;
+    if (!Item || Item->owner != Homestead::WearableOwner::Equipped) return Refuse(TEXT("not worn after equipping"));
+    if (Item->dye != Dye)
+        if (const auto Dyed = Candidate.RecolorWearable(WearableId, Dye, PlayerPoint(), Candidate.GetRevision()); !Dyed)
+            return Refuse(UTF8_TO_TCHAR(Dyed.message.c_str()));
     FString Error;
     if (Avatar->PrepareEquipment(Candidate.GetState(), Appearance, Error) && Avatar->ApplyPreparedEquipment(Error)) return true;
     Avatar->ClearPreparedEquipment();
-    return false;
+    return Refuse(Error);
 }
 
 void AHomesteadController::MenuEndDyePreview()
