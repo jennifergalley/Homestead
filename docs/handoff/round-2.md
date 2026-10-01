@@ -819,6 +819,19 @@ receipt.**
   has no verb. There is no context dialog, Cancel or nap-hours picker. Integration is implementing
   this replacement; prior `15227420` confirmation tests do not accept it. UE, PIE, packaged and
   delivery evidence remain pending.
+
+  **Canonical next-batch source `9c981907` (not on `main`):** native Release 18/18 passes. Estate
+  Energy 0 is nonfatal with no doze; old failed Estate saves reopen unfailed at hunger 100 / Energy
+  0. Below 25% sprint is unavailable; below 10% walking is 75% speed and tool work says
+  `Too tired`; food and bed sleep recover Energy. Bed behavior now uses one E/A press until rested
+  (capped at 06:00 overnight), then until morning when already rested at night; it includes
+  chest-offset/facing/footprint-ray and focus-hysteresis fixes.
+
+  `UHomesteadSave::SavedRevision` is an optional SaveGame field (old saves default 0) used after
+  `SavedAtUtc` as the newest-valid tie-breaker. `LoadLatest(true)` scans Manual, Auto 0–2, Recovery
+  and backups without short-circuiting to an older Recovery. Native comparator/Estate-72-hour tests
+  and an isolated `SaveRoutingTest` write/read/corrupt-fallback fixture cover it. Menu HUD `d246`
+  still awaits its UE `[ready]`; controller/UI, PIE, packaged and Shipping acceptance are pending.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
