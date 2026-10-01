@@ -124,18 +124,36 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     Capture(TEXT("feedback-pack-success"));
     Add(TEXT("Controller opens crafting recipes"), [this]() { Tap(EKeys::Gamepad_RightShoulder); },
         [this]() { return Controller->BookPage() == 1 && Controller->UsesGamepad(); });
+    // The native book: A on a recipe she can't make yet shows the reason in its notice card ("Gather
+    // ... first."), keeps the same recipe focused and changes nothing. (The legacy footer's "A: craft"
+    // is gone: no recipe row carries a footer action any more.)
+    const auto RecipeFocus = MakeShared<int32>(INDEX_NONE);
     Add(TEXT("Real unaffordable craft replaces success with error without simulation changes"),
-        [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this, Before]() { return Controller->ToastIsError() && !Controller->Toast().IsEmpty()
-            && Controller->Toast() != TEXT("Your homestead is saved.") && Controller->Simulation().Serialize() == *Before
-            && Controller->SelectedRow() == 0 && Controller->BookFooter().Contains(TEXT("A: craft")); });
+        [this, Before, RecipeFocus]()
+        {
+            *Before = Controller->Simulation().Serialize();
+            *RecipeFocus = Controller->NativeMenu.IsValid() ? Controller->NativeMenu->GetSelectedContentIndex() : INDEX_NONE;
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+        },
+        [this, Before, RecipeFocus]()
+        {
+            const bool bOk = Controller->ToastIsError() && Controller->Toast().StartsWith(TEXT("Gather "))
+                && Controller->Simulation().Serialize() == *Before && Controller->NativeMenu.IsValid()
+                && Controller->NativeMenu->GetSelectedContentIndex() == *RecipeFocus
+                && Controller->NativeMenu->GetNoticeText() == Controller->Toast();
+            if (!bOk) Results.Add(FString::Printf(TEXT("CRAFT_REFUSAL toast='%s' error=%d focus=%d/%d notice='%s'"), *Controller->Toast(),
+                Controller->ToastIsError(), Controller->NativeMenu.IsValid() ? Controller->NativeMenu->GetSelectedContentIndex() : -2,
+                *RecipeFocus, Controller->NativeMenu.IsValid() ? *Controller->NativeMenu->GetNoticeText() : TEXT("")));
+            return bOk;
+        });
     Capture(TEXT("feedback-craft-error"));
     if (Baseline) return;
 
     Add(TEXT("Repeated keyboard rejection retains row and produces keyboard action hint"),
         [this]() { Tap(EKeys::Enter); },
-        [this, Before]() { return Controller->ToastIsError() && Controller->Simulation().Serialize() == *Before
-            && Controller->SelectedRow() == 0 && Controller->BookFooter().Contains(TEXT("Enter: craft")); });
+        [this, Before, RecipeFocus]() { return Controller->ToastIsError() && Controller->Simulation().Serialize() == *Before
+            && !Controller->UsesGamepad() && Controller->NativeMenu.IsValid()
+            && Controller->NativeMenu->GetSelectedContentIndex() == *RecipeFocus; });
     Capture(TEXT("feedback-craft-keyboard"));
     Add(TEXT("Record protected geometry while toast is present"),
         [this, Geometry]() { *Geometry = Controller->GetHUD<AHomesteadHUD>()->FeedbackCriticalGeometry(); },
