@@ -623,6 +623,9 @@ public:
     // Side-effect-free: would Till, Water or Weed succeed now? The same refusal, or ok (the world's garden
     // outline shows it before she acts). Till/Water/Weed call these first.
     Result CheckTill(int cellX, int cellY, Point player) const;
+    // CheckTill's checks on the ground alone (in reach, free of buildings, resources, spoiling overgrowth and
+    // plots, under the plot limit), without the hoe or her energy: whether the square could be tilled.
+    Result CheckTillGround(int cellX, int cellY, Point player) const;
     Result CheckWater(int plotId, Point player) const;
     Result CheckWeed(int plotId, Point player) const;
     // Whether Plant(plotId, player, kind) would sow now, with its refusal, changing nothing.

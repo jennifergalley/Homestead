@@ -27,5 +27,5 @@
 
 ## 5. Seed Outline and Plant Cue (Jenny's playtest)
 
-- [x] 5.1 Add side-effect-free `Simulation::CheckSow` (`Plant` calls it first), `GardenTool::Seed` in `PreviewGarden` on the focused plot the A/E sow uses (red `Till this square before sowing.` on untilled ground ahead), and `DescribeSow` for the bare-plot focus line (`Plant <seed>` keyed; refusal or `Select <seed> (<key>) to plant` unkeyed); native `SeedSowPreview` covers the valid/invalid matrix, cue text, no mutation and preview-plot == sown plot
+- [x] 5.1 Add side-effect-free `Simulation::CheckSow` (`Plant` calls it first), `GardenTool::Seed` in `PreviewGarden` on the focused plot the A/E sow uses (red `Till this square before sowing.` on the hoe's next square where `CheckTillGround` passes), and `DescribeSow` for the bare-plot focus line (`Plant <seed>` keyed; refusal or `Select <seed> (<key>) to plant` unkeyed); native `SeedSowPreview` covers the valid/invalid matrix, cue text, no mutation and preview-plot == sown plot
 - [ ] 5.2 Build SurvivalGameEditor and run the Hotbar suite's seed steps (`garden-outline-seed-{valid,invalid}.png`) in the next Unreal slot; inspect the green/red outline and the Plant/Select cues on keyboard and gamepad
