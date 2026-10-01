@@ -15,6 +15,21 @@ agent keeps both current.
 - The current round: [round-2.md](round-2.md) (the farming year and period crafting). Round 1, "Walk
   your estate", is recorded in [round-1.md](round-1.md).
 
+## Product copy and UI principle
+
+Jenny's standing direction (2026-09-30): assume the player is familiar with farming sims and avoid
+explaining mechanics on every screen. Do not toast obvious outcomes. Focus cards contain the name
+and keyed verbs only; detail panes/tooltips contain stats, requirements and price, not rules
+explanations; Settings contain a label and value; refusal reasons stay about 4–6 words. Review all
+new player-facing copy against this rule before it ships. The approved parchment/EB Garamond theme
+does not change this content rule. The forthcoming `realistic-animation` skill and Animation
+Inspector must carry the same concise review standard once they land.
+
+**Control rule (Jenny, 2026-09-30):** E/the interact button only interacts—harvest, plant, pick
+up, open, talk, eat or sleep. Tools act only through click/the gamepad tool button. Never cross
+these paths: E on an unripe crop must not water it. Hold-to-repeat belongs only to tool input.
+Menu's control audit and Props' repeat bindings verify this before delivery.
+
 ## Model, reasoning and implementer slots
 
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
@@ -238,6 +253,12 @@ Jenny's standing preference (2026-09-30): three packaged Estate builds every day
 At either freeze, only work that is already **UE-verified and code-reviewed** enters the build;
 everything else waits for the next slot. The first evening build under this policy is October 1,
 2026 (the 9 PM window on September 30 had already passed).
+
+**Before every Shipping build, reclaim dated release space safely:** retain the current
+Estate-shortcut Shipping release, at most its immediately previous Shipping rollback, and a named
+Development reference only while it is needed. Before pruning older dated releases,
+`Playtest-09xx` folders or stale `Build\Windows` staging, verify no process path or shortcut target
+uses them. Do not delete the current shortcut target, live save data, or the one retained rollback.
 
 1. The orchestrator notifies lanes at the freeze; lanes close their editors
    (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.

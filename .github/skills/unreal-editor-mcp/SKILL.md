@@ -436,6 +436,10 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 
 ### Interacting with the world
 
+- **Input contract:** E/the interact button only interacts (harvest, plant, pick up, open, talk,
+  eat or sleep). Tools act only through click/the gamepad tool button. Never make E on an unripe
+  crop water it; hold-to-repeat is tool-input-only. Verify this split with mouse/keyboard and
+  gamepad whenever interaction or tool routing changes.
 - **Focus is the nearest interactable within 2.8 m, regardless of facing** (`UpdateFocus`). To target
   a node, get closer to it than to anything else: `walk_to` with `stop_distance_cm` about 45, then
   confirm `nearbyResources[].focused` on your target before pressing the action.
@@ -1020,7 +1024,29 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **Packaged smoke and route tests (integration session only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
-  the MetaHuman heroine yourself (field notes).
+  the MetaHuman heroine yourself (field notes). **Any input-policy change** (hotbar selection, sow/eat/
+  weed bindings, sprint input or controller priority) runs packaged **both** `-Hotbar` and `-FullLoop`;
+  otherwise stale assertions can pass silently until the package route breaks.
+- **Audio cue loudness (pending standard):** source-only branch `jennifergalley-loudness` `95f4ea14`
+  establishes Jenny's rule: measure every new or changed cue against the forest ambience bed before
+  shipping it. Add a row to `Simulation/HomesteadAudioLevels.h` with use, source, category, bus and
+  gain; use a named `Gain` constant at every new `PlayEffect` call, never a literal. Run
+  `Scripts\Fetch-Assets.ps1`, install `soundfile`/`pyloudnorm`, then run
+  `python Scripts/Audio/Measure-Loudness.py` to regenerate
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; run
+  `Scripts\Test-Native.ps1` so `HomesteadAudioLevelTests` rejects out-of-band cues or audio files
+  with no registry row. The generated header must remain `HomesteadAudioMeasurements.h`, **not**
+  `*.generated.h`, which collides with UHT naming. Do not rely on this gate until the branch lands.
+- **Audio cue loudness (pending standard):** source-only branch `jennifergalley-loudness` `95f4ea14`
+  establishes Jenny's rule: measure every new or changed cue against the forest ambience bed before
+  shipping it. Add a row to `Simulation/HomesteadAudioLevels.h` with use, source, category, bus and
+  gain; use a named `Gain` constant at every new `PlayEffect` call, never a literal. Run
+  `Scripts\Fetch-Assets.ps1`, install `soundfile`/`pyloudnorm`, then run
+  `python Scripts/Audio/Measure-Loudness.py` to regenerate
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; run
+  `Scripts\Test-Native.ps1` so `HomesteadAudioLevelTests` rejects out-of-band cues or audio files
+  with no registry row. The generated header must remain `HomesteadAudioMeasurements.h`, **not**
+  `*.generated.h`, which collides with UHT naming. Do not rely on this gate until the branch lands.
 - **Blender props into Unreal:** import them in your running editor with `py` (see Props in the
   field notes), not with the headless `Import-Props.ps1`, which drops LODs and collision.
 - **C++ conventions that bite** (unity-build names, C2487/C4458/C4459, forward-declared enums, `UPROPERTY`
@@ -1040,6 +1066,11 @@ states. Each state begins from an isolated 10:00 fixture—known pack, 1,000 coi
 notices/pickups and no surface open—then shows exactly one book page, settings tab, dialog, shop,
 sign confirmation/refusal, notice, focus hint/outline or HUD state. The coverage check fails if any
 book tab, settings tab or notice style lacks an entry; add one whenever a surface is added.
+
+**Copy review rule:** assume the player knows farming sims. Do not add toasts for obvious outcomes.
+Focus cards show only a name and keyed verbs; details/tooltips show stats, requirements and price
+without rules explanations; Settings show label plus value; refusals are about 4–6 words. Check every
+new player-facing string against this rule before its gallery entry is accepted.
 
 - **Multi-resolution capture:** after integration, run
   `pwsh -File Scripts\Capture-UiGallery.ps1 [-Ids a,b] [-Res 720p,1080p,1440p,4K] [-Input KBM,Pad]`.

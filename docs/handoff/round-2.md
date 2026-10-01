@@ -385,7 +385,8 @@ current-cost compatibility semantics, not a save migration.
 - Bramble `550200` at 283 cm focuses over weed at 125 cm and one worn clear removes three canes for
   1.2 Energy; Sapling `570143` clears on one click for 4 Branch +1 Kindling /1.5 Energy; Iron thicket
   has no animation/sound; F5/F9 cleared state passes.
-- Sprint: run/walk changes about 0.03 Energy over 6 s, auto-off/refusal at <=10 and no resume at 50.
+- Historical sprint receipt: run/walk changed about 0.03 Energy over 6 s, auto-off/refusal at <=10
+  and no resume at 50. Jenny's 2026-09-30 25% sprint / 10% exhausted policy supersedes this.
 - Hoe hint is dropped from this local batch and remains chest-native-only. Bed UI reads 4 Branch +4
   Hay; old canes-bed deconstruct refunding four Hay is native-only intentional current-cost
   compatibility behavior. Forage-ID freeze remains source-only.
@@ -695,6 +696,15 @@ emptied carried pail. Current world focus misleadingly offers `[A] Fill carried 
 carried pail (the starter pail remains in its chest), then errors `Carry your pail`; a full pail, low
 Energy or being >1.2 m off bank are other possibilities.
 
+**Lake shallows / swimming backlog (`f34c0a4f`, Water branch only):** Jenny asked to wade into the
+lake and fill the pail **in** the water. Source-only `f34c0a4f` changes successful fills more than
+30 cm inside the fresh-water line to use `InWaterDipPoint`: the pail reaches ahead if that is water,
+otherwise turns toward deepest water and never steps back onto the bank. It still needs PIE
+reproduction of the actual waterline blocker, collision/wade-wall/slope diagnosis, in-water kneel
+proof and normal integration/package validation. `add-swimming` is created as a separate **backlog,
+not scheduled** OpenSpec: fresh-water wade/deep-wade/swim movement and animation, Energy cost,
+tool/pail restrictions and lake-crossing acceptance. Do not broaden the lake fix into swimming.
+
 Water and Integration reproduce the same flow only against a scratch copy, never Jenny's live save.
 The unique copied-save packaged run records pail/water/Energy/focus/edge distance/actor tag plus A/E/RT
 input and toast output, then becomes a core-loop acceptance test. Its copied-save **PIE** precursor
@@ -800,6 +810,35 @@ receipt.**
   kept classic as the temporary default during review; Jenny has now approved the
   `homestead.UITheme` parchment/EB Garamond style for the 7:30 AM build. The default flip still
   needs integration/package evidence; every future surface must have a UI-gallery entry.
+
+  **Bed interaction `15227420`:** source-only in the same next batch. Simulation and focus share a
+  90 cm footprint-edge / 30° half-cone admission so the bed loses to every existing focus target.
+  Jenny superseded its confirm/picker at 22:46: E/A immediately sleeps until Energy is full, capped
+  at 06:00 when overnight; if already rested at night it sleeps until 06:00; a rested daytime bed
+  has no verb. There is no context dialog, Cancel or nap-hours picker. Integration is implementing
+  this replacement; prior `15227420` confirmation tests do not accept it. UE, PIE, packaged and
+  delivery evidence remain pending.
+
+  **Canonical next-batch source `9c981907` (not on `main`):** native Release 18/18 passes. Estate
+  Energy 0 is nonfatal with no doze; old failed Estate saves reopen unfailed at hunger 100 / Energy
+  0. Below 25% sprint is unavailable; below 10% walking is 75% speed and tool work says
+  `Too tired`; food and bed sleep recover Energy. Bed behavior now uses one E/A press until rested
+  (capped at 06:00 overnight), then until morning when already rested at night; it includes
+  chest-offset/facing/footprint-ray and focus-hysteresis fixes.
+
+  `UHomesteadSave::SavedRevision` is an optional SaveGame field (old saves default 0) used after
+  `SavedAtUtc` as the newest-valid tie-breaker. `LoadLatest(true)` scans Manual, Auto 0–2, Recovery
+  and backups without short-circuiting to an older Recovery **on the Estate**. Woodland recovery
+  instead must prefer a valid sheltered Recovery with hunger/Energy >=20 before the newest eligible
+  candidate; the required correction is queued. Native comparator/Estate-72-hour tests
+  and an isolated `SaveRoutingTest` write/read/corrupt-fallback fixture cover it. Menu HUD `d246`
+  still awaits its UE `[ready]`; controller/UI, PIE, packaged and Shipping acceptance are pending.
+
+  **Dawn edge `192e0d52` / branch head `b1a6abda`:** ordinary `Sim.Sleep` keeps its original
+  0.25–12 hour interval and refusal. Only a dawn-limited bed rest may be shorter than 0.25 hours,
+  with a positive interval ending exactly at 06:00; `BedSleepOption` presents it at 05:52 and
+  `Sleep(..., dawnLimited=true)` validates it. Native 18/18 and FullLoop cover single A at
+  05:52 → 06:00. UE/PIE/package proof remains pending.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
@@ -1056,6 +1095,25 @@ requirement.
   Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
   two-swing clearing animation and awards/clears once, without a second click or double reward.
   Architecture traces tool tier, input and reward paths before native/PIE proof.
+- **Animation anatomy and inspection** — **Props source-only `ded05f62`, not on `main`.** It adds
+  `.github/skills/realistic-animation/` with MetaHuman per-joint comfortable/extreme ROM tables,
+  coupling, joint speeds, tool grips, posture/failure rules, review checklist and sources.
+  `rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` now runs
+  `joint_limits.py` after every bake and logs advisory `[anatomy AN_...]` lines; errors never block
+  a bake. `anim_audit.run()` writes a whole-cast report to
+  `E:\CopilotScratch\anim-audit\<stamp>\audit.md`. It also contains
+  `add-realistic-animation-skill` and cross-links from `homestead-animation-layer` / `blender-assets`
+  on the branch.
+
+  Rig facts for future inspection: twist/corrective upperarm/lowerarm/thigh/calf bones are RigLogic
+  followers in `ABP_Body_PostProcess`, not keyable/limited joints; fingers have
+  `*_metacarpal_*` bones between hand and `*_01`; the reference A-pose is not anatomical shoulder
+  zero; judge angles in UE component space (+Y forward, +X her left, +Z up), never Blender armature
+  axes. The planned Animation Inspector remains the animation counterpart to the UI Gallery:
+  deterministic frame-by-frame multi-view captures with ROM, contact and centre-of-mass overlays,
+  via `Scripts\Inspect-Animation.ps1` and `editor_mcp animinspect`. Cross-link it from canonical
+  `blender-assets` only after this branch lands and validates; none of this is animation acceptance
+  evidence yet.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
@@ -1072,6 +1130,15 @@ requirement.
   never fall back to CC0 `GrassStepA` footstep audio. PIE still needs cue count at 30/60/120 fps,
   miss/cancel, rain/music mix/headroom and cooked asset proof. Add provenance to `docs/asset-credits`
   only when shipped.
+
+  **Audio loudness standard `95f4ea14` (Water branch only):** every new or changed cue is measured
+  against the forest ambience bed before shipping. `HomesteadAudioLevels.h` owns cue use/source/
+  category/bus/gain rows and named gain constants; `Measure-Loudness.py` (after
+  `Fetch-Assets.ps1` and `soundfile`/`pyloudnorm`) regenerates
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; native
+  `HomesteadAudioLevelTests` rejects out-of-band or unregistered audio. The generated header must
+  not use `*.generated.h` because that collides with UHT. This pipeline is unmerged and is not yet
+  an acceptance gate.
 - **Bilateral ground-pull and sapling action count** — **Props, pending and not shipped.** By-hand
   Resource Weeds/Nettles already resolve in one `Sim.Harvest`; replace right-knee-only
   `KneelGather(Pouch)` with a dedicated bilateral kneel: two hand grabs, left/right toss behind,
@@ -1141,21 +1208,23 @@ requirement.
   side patches at some camera angles. Pending; not shipped.
 - **Sprint toggle** — **Menu `af7831b1` shipped in the 4 PM playable build.** Commit
   `8e0516a0` toggles sprint with L3 or a released Shift tap: Shift+Q/click does not toggle, work/book/
-  shop pause speed while preserving intent, and load/new/retry/teleport reset it. At <=10 Energy it
-  gives a notice; exhaustion disables sprint. Native 8/8 plus economy 12 / scenario 521 checks and
+  shop pause speed while preserving intent, and load/new/retry/teleport reset it. Historical
+  behavior at <=10 Energy gave a notice and disabled sprint; Jenny's 25% sprint / 10% exhausted
+  policy supersedes that threshold. Native 8/8 plus economy 12 / scenario 521 checks and
   Editor and Game builds/static-init pass. Integration's PIE verified Shift tap 480 cm/s, second tap
   210 cm/s and the corrected hint text. The hint lacks a standalone 4K capture; packaged NativeMenu
   and Hotbar suites passed.
 - **Sprint Energy cost** — **final product direction, pending and not shipped.** Sprint has **zero**
 sprint-specific Energy cost; this supersedes both current 0.35/real-second behavior and the tentative
 0.05/s/regen proposal. Baseline awake time drain remains -0.6/game-hour and ordinary work costs remain.
-Refuse the sprint toggle at Energy <=10 and turn it off if other work/time reaches that threshold; do
-not auto-resume after recovery.
+Refuse/turn off sprint below about 25% Energy; below about 10% walking slows and tool work says
+`Too tired`. Do not auto-resume after recovery.
 
 **Props partial `7475b435`:** native 9/9 on `jennifergalley-sprint-zero`, based on `4b8d6edd` and
 cleanly merging `main` `4463086d`, not built/PIE/packaged or shipped. It removes the 0.35/s charge,
 uses `Sim.CanSprint(Energy > 10)`, toggles off at <=10 with no auto-resume, and leaves speed/awake
-drain unchanged. Native coverage spans 30/60/120 FPS and day lengths, floor/refeeding/work/reload, plus
+drain unchanged. This historical partial is superseded by Jenny's 25% sprint / 10% exhausted
+policy. Native coverage spans 30/60/120 FPS and day lengths, floor/refeeding/work/reload, plus
 Hotbar/Creek/Visual routes. Integration's UAT lock on `a2607437` remains ahead of UE validation.
 
 The bramble-on-food `42a63b8f` conflict is separate from sprint; Props rebases it only after the
@@ -1274,6 +1343,24 @@ not claim early Energy is fully solved.
   hover text; retain tile quantity and controls. **Menu** owns the UI after active dye/Appearance work;
   source values from `ItemInfo` so future Energy-only lane-F values flow through automatically.
   Require native coverage and PIE checks at 1080p and 4K.
+- **Estate Energy safety (Jenny, 2026-09-30):** no death, fainting or failure state on the Estate.
+  Below about 25% Energy sprint is unavailable; below about 10% she walks more slowly and tool work
+  refuses with `Too tired`. The Energy bar shifts colour and pulses with `Getting tired` and
+  `Exhausted` warnings. Food and one-press bed sleep recover Energy. Integration owns simulation
+  and Menu owns HUD for the 7:30 AM batch; this remains source/package pending. Recovery/checkpoint
+  loads must choose the newest valid save by timestamp and revision, never an older Recovery file
+  over a newer autosave **on the Estate**. Legacy woodland still has lethal hunger and outdoor
+  autosaves: recovery prefers a valid sheltered Recovery with hunger/Energy >=20, otherwise the
+  newest eligible file. The high-priority source correction is recorded below; UE, package and
+  delivery acceptance remain pending.
+
+  **Recovery/chest correction `fdf69690` (not on `main`):** native Release 18/18 now confirms
+  Woodland recovery prefers a valid **same-world** sheltered Recovery with hunger/Energy >=20,
+  then falls back to the newest eligible candidate; Estate stays newest-valid by
+  timestamp/`SavedRevision`. FullLoop again expects the protected Woodland checkpoint. Chest focus,
+  `OpenChestStorage`, transfer, `ContainerAccess` and `FindNearestStructure` now all measure the
+  placed footprint centre; native coverage includes an on-foundation chest and an isolated two-mode
+  runtime-routing fixture. UE/PIE/package/Shipping evidence remains pending.
 - **Whole-number currency** — **agreed design, pending and not 4 PM content.** Preserve the current
   `int64` raw values and save bytes: semantically relabel the smallest stored unit as one whole
   `coin`, with **no numeric x100 migration**. Thus raw 1000 (formerly $10) becomes 1,000 coins and
@@ -1428,6 +1515,25 @@ not claim early Energy is fully solved.
   landing through ground-material wear, then verify it visually and on foot. Water's separate
   `1d5b90a9` trail PNG/bin is committed but requires `build_ground.py`, importing `T_EstateGround` /
   `T_EstateCanopy`, `ImportEstateMap`, and a visual check before any delivery claim.
+- **Water selective source merge `4324515d` (next batch only):** includes Water `d1fe4850`'s
+  concise pail-fill change (no success toast; refusals remain visible) and native Release 18/18
+  source evidence. The rejected global indoor `r.HairStrands.SkyLighting` toggle and black-hair
+  image are omitted. Water's `00fd` follow-up is not UE-verified; no Water visual or package
+  acceptance claim follows from this merge.
+
+  **Review follow-up `855a91cc` (not on `main`):** partial pails stay water-focusable until
+  `PailPortions` capacity; `NotifyResourceAction` clears stale refusal copy while retaining
+  refusal feedback; watering playtest asserts the named capacity. The isolated routing fixture
+  explicitly toggles `bEstateMap` for policy cases on the Woodland test actor and restores it.
+  The independent wall plate is lowered to 279 cm. Native merged baseline remains 18/18; these
+  Unreal-only routing/interior changes still require UBT and runtime verification.
+
+  **7:30 AM build hold — Menu chest tiles:** the invisible 720p chest-stack regression is from
+  Menu's unmerged `62f7c645` (a dropped `AddSlot`), **not** `3bc08d9a` or current batch
+  `855a91cc`. Native 18/18 does not catch this UI failure. Menu fixes it in `cc001d62`; the hold
+  remains until its 01:45 slot confirms chest view and directional navigation, followed by
+  Integration batch UI testing. No rollback is planned. One-line pail compile fix `c0a9e97a` is
+  source-only and does not clear this UI gate.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
@@ -1481,6 +1587,13 @@ not claim early Energy is fully solved.
   establishes an integrated delivery; package/RT-on acceptance remains required. **Jenny's review
   method (2026-09-30):** Water provides a side-by-side screenshot sheet; her Shipping build has
   no console, so no player-side CVar trial is assumed.
+
+  **Interior review exclusion:** Water's `ea6acb99` tries to disable
+  `r.HairStrands.SkyLighting` indoors by day. It makes the heroine's hair black and is **not
+  approved** for integration. The independent wall-top timber plate in
+  `HomesteadWorldStructures.cpp` is separable; Integration may take approved Water work minus the
+  global hair-sky toggle, or use Water's follow-up fix reference. No interior/hair delivery claim
+  follows from this review.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of

@@ -67,9 +67,9 @@ The HUD retains authoritative numeric values, fill ratios, colors, low-value thr
 
 Sprint speed will be 300 cm/s versus the retained 180 cm/s walk. Sprint itself does not mutate Energy:
 baseline awake time drain and ordinary work costs remain the only Energy costs. Sprint is admitted only
-above 10 Energy and turns off if those other costs reach the threshold, so sprint cannot create the
-`energy == 0` failed-state invariant. Walking and sleep remain available; existing saves keep their
-Energy unchanged by sprint alone.
+at or above about 25% Energy and turns off below that threshold. Below about 10%, walking slows and
+tool work says `Too tired`; Energy never creates an Estate failed/fainting state. Walking, eating
+and bed sleep remain available; existing saves keep their Energy unchanged by sprint alone.
 
 The character owns toggle-input and physical sprint state; Simulation owns threshold admission/auto-off.
 Sprint never auto-resumes after Energy recovers. No sprint state persists or resumes through stationary,
@@ -94,7 +94,8 @@ The HUD/simulation lane owns Simulation harvest/energy APIs, HUD context/toast p
 - **[Icon-only meters become ambiguous]** -> Use three visibly distinct silhouettes, stable order/color, retained numeric values, semantic measurement IDs, and ordinary first-look acceptance at 720p/4K.
 - **[Shorter errors disappear before they are read]** -> Reduce only ordinary action rejection from eight to six seconds; keep critical failures at eight and verify maximum real copy length.
 - **[Branch gather bypasses an atomic capacity check]** -> Apply cleared state only to the candidate after the existing full-yield capacity validation and commit once.
-- **[Low Energy admits sprint accidentally]** -> Use one bounded threshold API, turn sprint off at <=10 Energy, and test every relevant time/work path without persisting or auto-resuming sprint.
+- **[Low Energy admits sprint accidentally]** -> Use one bounded 25% threshold API, turn sprint
+  off below it, and test every relevant time/work path without persisting or auto-resuming sprint.
 - **[Sprint animation slides or looks like a fast walk]** -> Author against 300 cm/s travel cadence, inspect side/three-quarter/gameplay views, and reject simple walk-speedup as completion.
 - **[Shift conflicts with menu quantity modifiers]** -> Sprint input is ignored while menus are open; existing native-menu Shift handling remains local to the menu.
 - **[L3 click conflicts with future controls]** -> Left-stick click is currently unused; retain right-stick click for camera distance and cover both bindings in prompt/input tests.

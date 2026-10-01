@@ -48,6 +48,24 @@ Menus and construction planning pause simulation. No online gameplay services.
 - Preserve progress reliably.
 - Keep repeated tool work immediate through a visible ten-slot carried-tool hotbar, with
   mouse/keyboard and controller parity.
+- **Keep interaction and tools distinct.** E/the interact button only interacts—harvest, plant,
+  pick up, open, talk, eat or sleep. Tools act only through click/the gamepad tool button. No
+  crossover: E on an unripe crop never waters it. Hold-to-repeat binds only to tool input.
+- **Bed sleep is one press.** Within its tight bed focus, E/A immediately sleeps until Energy is
+  full, capped at 06:00 when sleeping overnight. If she is already rested at night it sleeps until
+  06:00; a rested daytime bed has no sleep verb. There is no confirm dialog or nap-hours picker.
+- **Estate Energy is never fatal.** Below roughly 25% Energy she cannot sprint; below roughly 10%
+  she walks more slowly and tool work says `Too tired`. The Energy bar changes colour and pulses,
+  with `Getting tired` and `Exhausted` warnings. Eating or sleeping restores her; she never faints,
+  dies, fails, or loses progress from low Energy. Estate recovery/checkpoint load chooses the newest
+  valid save by timestamp and revision. Legacy lethal-hunger woodland recovery instead prefers a
+  valid sheltered Recovery checkpoint with hunger and Energy at least 20, then uses the newest
+  eligible save.
+- **Respect farming-sim fluency.** Assume the player knows the genre: UI is concise rather than
+  instructional. No toasts for obvious outcomes; focus cards show only a name and keyed verbs;
+  details/tooltips show stats, requirements and price rather than rules explanations; settings show
+  a label and value; refusals are short (about 4–6 words). Review new copy against this principle
+  before it ships.
 - Ship small playable increments. Don't build the entire roadmap at once.
 
 ## Evidence and constraints
