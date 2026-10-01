@@ -621,7 +621,11 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
     Add(TEXT("Unavailable quick presses are atomic and expose structured requirements"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Enter); Tap(EKeys::Enter); },
         [this, Before]() { const FString Details = Controller->NativeMenu->GetDisplayedDetails();
-            return !Controller->ToastIsError() && Controller->Simulation().Serialize() == *Before
+            // The press explains itself in the book's notice, with the recipe's own reason, and
+            // nothing changes.
+            return Controller->ToastIsError() && Controller->Toast().StartsWith(TEXT("Gather "))
+                && Controller->NativeMenu->GetNoticeText() == Controller->Toast()
+                && Controller->Simulation().Serialize() == *Before
                 && Details.Contains(TEXT("Branch: Have")) && Details.Contains(TEXT("/ Need 2"))
                 && Details.Contains(TEXT("Rusted axe head: Have"))
                 && Details.Contains(TEXT("Salvage piles around the manor")); });

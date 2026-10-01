@@ -117,9 +117,14 @@ bool SHomesteadMenu::StartCraftHold(ECraftInput Input)
         || Region != ERegion::Content || !Entries.IsValidIndex(ContentSelection))
         return false;
     const auto& Row = Entries[ContentSelection];
-    if (Row.Subject != EHomesteadMenuSubject::Recipe || !Row.HasRecipeState
-        || !Row.RecipeState.craftable)
+    if (Row.Subject != EHomesteadMenuSubject::Recipe || !Row.HasRecipeState) return false;
+    // A press on a recipe she can't make yet says why, in the book's notice ("Gather 2 Branch first."),
+    // and changes nothing (MenuCraftRecipe refuses atomically with the assessment's own reason).
+    if (!Row.RecipeState.craftable)
+    {
+        Controller->MenuCraftRecipe(static_cast<Homestead::Recipe>(Row.SubjectId));
         return false;
+    }
     CraftHoldRecipe = Row.SubjectId;
     CraftHoldElapsed = 0;
     CraftBeat = 0;
