@@ -731,6 +731,9 @@ private:
     void PreviousRow();
     void NextRow();
     void RotatePlacement();
+    // R / LT: the hotbar steps to the next row of her pack (Homestead::Simulation::RotatePackRow); while
+    // placing a piece, R still turns it.
+    void RotateHotbarRow();
     void RotatePlacementBy(int32 Direction);
     void ToggleDeconstruct();
     void UpdateDeconstruct(bool bForce);

@@ -294,6 +294,15 @@ void AHomesteadController::SelectHotbarSlot(int32 Index)
     PlayEffect(UIClick, 0.05f);
 }
 
+void AHomesteadController::RotateHotbarRow()
+{
+    if (bPlanning) { RotatePlacement(); return; }
+    if (bBookOpen || IsFailed() || !bWorldReady || !ShouldShowHotbar()) return;
+    // The world hotbar now shows the pack's next row (it reads the row); refusals say why.
+    const auto Result = Sim.RotatePackRow(Sim.GetRevision());
+    NotifyResourceAction(Result, Result.ok ? UIClick.Get() : nullptr);
+}
+
 void AHomesteadController::CycleHotbar(int32 Direction)
 {
     if (!ShouldShowHotbar() || Direction == 0) return;

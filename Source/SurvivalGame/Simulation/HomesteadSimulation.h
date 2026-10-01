@@ -666,6 +666,10 @@ public:
     // Moves what is in `cell` below the row: onto that stack (or garment) there, merging with the
     // same item or else swapping; with no target (0, 0) to the end of her pack.
     Result MoveFromPackRow(int cell, int targetGroupId, int targetWearableId, std::uint64_t expectedRevision);
+    // The hotbar steps on to the next row of her pack, as in Coral Island: the first ten stacks below
+    // the row become the row, in order, and the row's stacks go to the end of her pack in cell order,
+    // so pressing again carries each row of her pack through the hotbar in turn.
+    Result RotatePackRow(std::uint64_t expectedRevision);
     // Takes `amount` of a chest stack straight into `cell` in one step: onto the same item it
     // merges, otherwise it becomes that cell's stack and whatever was there moves below the row.
     Result TransferGroupToPackRow(int chestId, int groupId, int amount, int cell, Point player,

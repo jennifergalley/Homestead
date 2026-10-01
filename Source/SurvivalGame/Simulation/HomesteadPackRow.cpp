@@ -189,6 +189,30 @@ Result Simulation::MoveFromPackRow(int cell, int targetGroupId, int targetWearab
     return CommitInventory(std::move(candidate), ("Swapped with " + SlotName(cell) + ".").c_str());
 }
 
+Result Simulation::RotatePackRow(std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    State candidate = state_;
+    auto& layout = candidate.inventoryLayout;
+    auto& row = candidate.packRow;
+    const std::vector<int> below = PackRowRules::BelowRow(row, layout);
+    if (below.empty()) return RowBad("Nothing else in your pack.");
+    PackRow next{};
+    for (int cell = 0; cell < PackRowSize && cell < static_cast<int>(below.size()); ++cell)
+        next[cell] = PackRowRules::CellFor(layout[below[cell]]);
+    // The row's stacks leave for the end of her pack, in cell order; the rest keep their order.
+    InventoryLayout reordered;
+    reordered.reserve(layout.size());
+    for (const auto& entry : layout)
+        if (PackRowRules::CellOf(row, entry) < 0) reordered.push_back(entry);
+    for (int cell = 0; cell < PackRowSize; ++cell)
+        if (const int index = PackRowRules::FindEntry(layout, row[cell]); index >= 0) reordered.push_back(layout[index]);
+    layout = std::move(reordered);
+    row = next;
+    return CommitInventory(std::move(candidate), "");
+}
+
 Result Simulation::ArrangePackRow(const std::array<int, PackRowSize>& items)
 {
     State candidate = state_;

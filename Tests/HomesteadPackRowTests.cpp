@@ -511,6 +511,48 @@ void Run(const char* name, void (*test)())
 }
 }
 
+// The hotbar rotates through her pack's rows (Coral Island): the first ten stacks below the row come up
+// into it in order, the row's stacks go to the end of her pack in cell order, nothing is gained or
+// lost, and with nothing below it is refused unchanged.
+void RotatingTheRowCarriesEachRowThrough()
+{
+    Simulation sim = Estate();
+    ClearRow(sim);
+    sim.SetPackRowAutoFill(false);
+    const Item stock[] = {Item::Stone, Item::Branch, Item::Fiber, Item::Seeds, Item::Berries, Item::Roots, Item::Timber,
+        Item::Pasty, Item::Bread, Item::TurnipSeed, Item::Cheese, Item::Kindling};
+    for (const Item item : stock) OK(sim.GrantItems(item, 1));
+    sim.SetPackRowAutoFill(true);
+    std::array<int, ItemCount> counts{};
+    for (int item = 0; item < ItemCount; ++item) counts[item] = sim.Count(static_cast<Item>(item));
+    const auto below = Below(sim);
+    CHECK(below.size() > static_cast<size_t>(PackRowSize));
+    OK(sim.RotatePackRow(sim.GetRevision()));
+    for (int cell = 0; cell < PackRowSize; ++cell)
+        CHECK(below[cell] > 0 ? V(CellItem(sim, cell)) == below[cell] : !sim.GetState().packRow[cell].Empty());
+    CHECK(Below(sim) == std::vector<int>(below.begin() + PackRowSize, below.end()));
+    CHECK(PackRowRules::Valid(sim.GetState().packRow, sim.GetState().inventoryLayout));
+    // Again: that row goes to the end in cell order, and the rest comes up.
+    std::vector<int> row;
+    for (int cell = 0; cell < PackRowSize; ++cell) row.push_back(below[cell]);
+    OK(sim.RotatePackRow(sim.GetRevision()));
+    const auto after = Below(sim);
+    CHECK(after.size() >= row.size() && std::vector<int>(after.end() - row.size(), after.end()) == row);
+    for (int item = 0; item < ItemCount; ++item) CHECK(sim.Count(static_cast<Item>(item)) == counts[item]);
+    CHECK(PackRowRules::Valid(sim.GetState().packRow, sim.GetState().inventoryLayout));
+    // A stale revision, or nothing below the row, is refused and changes nothing.
+    const std::string saved = sim.Serialize();
+    CHECK(!sim.RotatePackRow(sim.GetRevision() + 1));
+    Simulation alone = Estate();
+    ClearRow(alone);
+    if (Below(alone).size() <= static_cast<size_t>(PackRowSize))
+    {
+        OK(alone.RotatePackRow(alone.GetRevision()));
+        CHECK(!alone.RotatePackRow(alone.GetRevision()));
+    }
+    CHECK(sim.Serialize() == saved);
+}
+
 int main(int argc, char** argv)
 {
     if (argc > 1) filter = argv[1];
@@ -524,6 +566,7 @@ int main(int argc, char** argv)
     Run("the row is saved", TheRowIsSaved);
     Run("old pinned hotbars migrate once", OldPinnedHotbarsMigrateOnce);
     Run("saved pin lists sanitize", SavedLayoutsSanitize);
+    Run("rotating the row carries each row through", RotatingTheRowCarriesEachRowThrough);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }
