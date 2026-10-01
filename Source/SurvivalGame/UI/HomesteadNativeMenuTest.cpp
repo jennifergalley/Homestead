@@ -606,7 +606,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             const FString Pasty = UTF8_TO_TCHAR(Homestead::Food::EffectLabel(Controller->State(), Homestead::Item::Pasty).c_str());
             const FString Price = UTF8_TO_TCHAR(Homestead::FormatMoney(Homestead::BuyPrice(Homestead::Item::Pasty)).c_str());
             Results.Add(FString::Printf(TEXT("SHOP_LABELS purse=%s pasty=%s price=%s"), *Purse, *Pasty, *Price));
-            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && Pasty.StartsWith(UTF8_TO_TCHAR("+40 Energy \xC2\xB7 Well fed until "))
+            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && (Controller->State().fixedEstate ? Pasty.StartsWith(UTF8_TO_TCHAR("+40 Energy \xC2\xB7 Well fed until ")) : Pasty == TEXT("+40 Energy"))
                 && Price == TEXT("100 coins");
         }, 0.8f);
     Add(TEXT("Capture the shop's Buy page"), [this]() { Screenshot(TEXT("native-shop-buy")); },
