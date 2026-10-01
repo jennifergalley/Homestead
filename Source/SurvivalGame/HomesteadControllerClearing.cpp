@@ -8,6 +8,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Sound/SoundBase.h"
 
 using HomesteadControllerText::Text;
 
@@ -17,12 +18,15 @@ namespace HomesteadStrikeSound
 {
 // Effect gains (PlayEffect, times the Effects volume). The pickaxe's ping plays at the level the breaking
 // strike always had (Notify's default 0.12: the one Jenny likes), the final a touch louder (+2 dB); the cane
-// cuts are mastered like the chops (loudest 100 ms at -18 dBFS RMS) and play at the chops' gain.
+// cuts are mastered like the chops (loudest 100 ms at -18 dBFS RMS) and play 1.6 dB over the chops' gain
+// (Jenny: the billhook was almost too quiet).
 constexpr float PingGain = 0.12f;
 constexpr float FinalPingGain = 0.15f;
-constexpr float CaneCutGain = 0.75f;
+constexpr float CaneCutGain = 0.9f;
 constexpr float ChopGain = 0.75f;
 constexpr float WoodTapGain = 0.6f;
+// Jenny (2026-09-30): the swish was about twice as loud as it needed to be, well over the birds; -6 dB.
+constexpr float ScytheSwishGain = 0.4f;
 constexpr float FinalTapGain = 0.12f;
 }
 
@@ -324,7 +328,7 @@ void AHomesteadController::LandOvergrowthSwing()
         Notify(Summary + TEXT("."));
         // One airy swish at blade contact for the whole sweep; nothing on a miss or a cancel. With the
         // cue missing she mows in silence (InitializeAudio logged it) rather than with a footstep.
-        if (ScytheSwish) PlayEffect(ScytheSwish, 0.8f);
+        if (ScytheSwish) PlayEffect(ScytheSwish, HomesteadStrikeSound::ScytheSwishGain);
         return;
     }
     if (SwingNode == INDEX_NONE) return;
