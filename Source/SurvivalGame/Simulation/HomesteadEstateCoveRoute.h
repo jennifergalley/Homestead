@@ -76,6 +76,9 @@ struct CoveRouteGround
     double leftZ = 0.0;
     double centreZ = 0.0;
     double rightZ = 0.0;
+    // Further out, where the generator probes for a drop beside the path (kerbs, rails): its +Y and -Y sides.
+    double plusYOutZ = 0.0;
+    double minusYOutZ = 0.0;
 };
 
 // The graded ground just beyond a flight's foot and head (cove_route.py's END_SAMPLE_M along its axis, on the
@@ -84,6 +87,16 @@ struct CoveRouteFlightEnds
 {
     double foot[3] = {0.0, 0.0, 0.0};
     double head[3] = {0.0, 0.0, 0.0};
+};
+
+// Where two stair legs meet at a corner landing: the turning point on the landing's top, the landing's leg's
+// up direction (the landing runs CoveRouteCornerHalfCm past the point along it) and the other leg's.
+struct CoveRouteCorner
+{
+    Point position;
+    double z = 0.0;
+    double landingYaw = 0.0;
+    double otherYaw = 0.0;
 };
 
 // "To the Cove": pivot at the post's foot; the arm points along yaw.
@@ -101,7 +114,12 @@ struct CoveRoute
     std::vector<CoveRouteFlight> flights;
     std::vector<CoveRouteFlightEnds> flightEnds;   // one per flight, in step
     std::vector<CoveRouteLanding> landings;
+    std::vector<CoveRouteCorner> corners;
     std::vector<CoveRouteKerb> kerbs;
+    // Designed kerbs left out because they'd reach into the clear width (never placed; the tests check each).
+    std::vector<CoveRouteKerb> droppedKerbs;
+    // How many kerbs the design laid: kerbs + droppedKerbs, so none goes missing unaccounted for.
+    int designKerbCount = 0;
     std::vector<CoveRouteRail> rails;
     std::vector<CoveRouteFingerpost> fingerposts;
 
@@ -127,6 +145,7 @@ constexpr int CoveRouteMaxRisers = 12;
 constexpr double CoveRouteMinLandingCm = 120.0;
 constexpr double CoveRouteClearWidthCm = 140.0;
 constexpr double CoveRouteTreadWidthCm = 150.0;
+constexpr double CoveRouteCornerHalfCm = 75.0;   // cove_route.py CORNER_HALF_M
 constexpr double CoveRouteGroundSampleCm = 75.0;
 // The route's own limit: steeper than this is on steps.
 constexpr double CoveRouteMaxPathGrade = 1.0 / 7.0;

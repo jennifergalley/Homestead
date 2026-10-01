@@ -564,12 +564,32 @@ def edges(stations, flights, landings, runs, ground_fn):
         for side_name in (leg[0]["railSides"] if leg else ["right"]):
             landing_rail(lnd, leg, 1.0 if side_name == "left" else -1.0)
 
-    # Nothing stands in the path's clear width anywhere (a kerb on the inside of a sharp corner would land on
-    # the next stretch).
-    tree = cKDTree(xy)
-    kerbs = [k for k in kerbs if tree.query((k["x"], k["y"]))[0] >= CLEAR_HALF_M - 0.02]
-    rails = [r for r in rails if r["pitch"] > 0 or tree.query((r["x"], r["y"]))[0] >= CLEAR_HALF_M - 0.02]
+    # clear_of_path() runs on the stored design in main(), which keeps the designed kerbs.
     return kerbs, rails, s
+
+
+KERB_LENGTH_M = 1.0              # SM_CoveKerb_Straight, centred on its pivot
+CLEAR_MARGIN_M = 0.05            # a piece may reach this far inside the clear half-width: a joint kerb on a
+                                 # gentle curve turns ~1 degree and its ends dip 1-2 cm in (review, 2026-09-30)
+CLEAR_SAMPLES = 11
+
+
+def clear_of_path(xy, kerbs, rails):
+    """Drop kerbs and level rail bays (whose pawn blockers have collision) that reach into the clear width of
+    any stretch of the route anywhere along them, not just at their pivots (review, 2026-09-30: at the bench
+    steps' hairpin a kerb's end stood 25 cm from the centreline, in front of the bottom tread)."""
+    tree = cKDTree(np.asarray(xy, np.float64))
+    limit = CLEAR_HALF_M - CLEAR_MARGIN_M
+
+    def clear(x, y, yaw, start, end):
+        a = math.radians(yaw)
+        u = np.array([math.cos(a), math.sin(a)])
+        pts = np.array([x, y]) + np.outer(np.linspace(start, end, CLEAR_SAMPLES), u)
+        return tree.query(pts)[0].min() >= limit
+
+    kerbs = [k for k in kerbs if clear(k["x"], k["y"], k["yaw"], -KERB_LENGTH_M / 2, KERB_LENGTH_M / 2)]
+    rails = [r for r in rails if r["pitch"] > 0 or clear(r["x"], r["y"], r["yaw"], 0.0, r["length"])]
+    return kerbs, rails
 
 
 def estate_placements():
@@ -819,12 +839,15 @@ def write_inc(route):
     c = np.asarray(stations, np.float64)
     pick = list(range(0, len(c), step)) + ([len(c) - 1] if (len(c) - 1) % step else [])
     hd = np.radians(headings(c[:, :2]))
-    L.append(f"// ground(metres along, z {GROUND_SAMPLE_M:g} m to the left, z on the centreline, z {GROUND_SAMPLE_M:g} m to the right):")
-    L.append("// the graded heightfield (cm), left and right looking along the route")
+    L.append(f"// ground(metres along, z {GROUND_SAMPLE_M:g} m to the left, z on the centreline, z {GROUND_SAMPLE_M:g} m to the right,")
+    L.append(f"// z {CLEAR_HALF_M + SIDE_PROBE_M:g} m out on the route's +Y, z as far out on its -Y): the graded heightfield (cm),")
+    L.append("// left and right looking along the route; the last two are where edges() probes for a drop (kerbs, rails)")
     for k in pick:
         nrm = np.array([-np.sin(hd[k]), np.cos(hd[k])])            # the route's +Y: her right going down
         zl, zc, zr = (float(bilinear(zg, *(c[k, :2] + nrm * off))) for off in (-GROUND_SAMPLE_M, 0.0, GROUND_SAMPLE_M))
-        L.append(f"ground({c[k, 4]:.2f}, {zl * 100:.1f}, {zc * 100:.1f}, {zr * 100:.1f});")
+        out = CLEAR_HALF_M + SIDE_PROBE_M
+        zp, zm = (float(bilinear(zg, *(c[k, :2] + nrm * off))) for off in (out, -out))
+        L.append(f"ground({c[k, 4]:.2f}, {zl * 100:.1f}, {zc * 100:.1f}, {zr * 100:.1f}, {zp * 100:.1f}, {zm * 100:.1f});")
     L.append("// flight(x, y, z, yaw, rise, going, treads, rail pitch deg): tread i's pivot (top, front nosing centre)")
     L.append("// is (x, y, z) + i * (going along yaw, rise); +X runs up the flight")
     for f in route["flights"]:
@@ -841,6 +864,26 @@ def write_inc(route):
         head = start + up * (f["treads"] * f["going"] + END_SAMPLE_M)
         vals = [float(bilinear(zg, *(p + side * o))) * 100 for p in (foot, head) for o in (-END_SIDE_M, 0.0, END_SIDE_M)]
         L.append("flightEnds(" + ", ".join(f"{v:.1f}" for v in vals) + ");")
+    L.append("// corner(x, y, z, landing yaw, other yaw): where two stair legs meet at a corner landing: the turning point")
+    L.append("// on the landing's top, the landing's leg's up direction (the landing runs CORNER_HALF past the point along it)")
+    L.append("// and the other leg's up direction from the point")
+    legs = route["legs"]
+    ends = [(g["x"], g["y"]) for g in legs[1:]] + [tuple(route["control"][-1])]
+    for j in range(1, len(legs)):
+        if legs[j - 1]["kind"] != "stairs" or legs[j]["kind"] != "stairs":
+            continue
+        p = np.array([legs[j]["x"], legs[j]["y"]])
+        before = np.array([legs[j - 1]["x"], legs[j - 1]["y"]])
+        after = np.array(ends[j])
+        z = legs[j]["fromZ"]
+        # The landing belongs to the leg whose higher end is the point; the other leg climbs away from it.
+        if legs[j]["fromZ"] >= legs[j]["toZ"]:
+            u, u1 = p - after, before - p        # route descending: leg j's head, leg j-1 rises back up
+        else:
+            u, u1 = p - before, after - p
+        yaw = math.degrees(math.atan2(u[1], u[0]))
+        yaw1 = math.degrees(math.atan2(u1[1], u1[0]))
+        L.append(f"corner({p[0] * 100:.1f}, {p[1] * 100:.1f}, {z * 100:.1f}, {yaw:.2f}, {yaw1:.2f});")
     L.append("// landing(x, y, z, yaw, length): pivot at its front (downhill) edge's centre, top; +X up the steps")
     for lnd in route["landings"]:
         L.append(f"landing({lnd['x'] * 100:.1f}, {lnd['y'] * 100:.1f}, {lnd['z'] * 100:.1f}, {lnd['yaw']:.2f}, "
@@ -848,6 +891,14 @@ def write_inc(route):
     L.append("// kerb(x, y, z, yaw): a 1 m piece; pivot on its path-side top edge, +X along the path, +Y to the drop")
     for k in route["kerbs"]:
         L.append(f"kerb({k['x'] * 100:.1f}, {k['y'] * 100:.1f}, {k['z'] * 100:.1f}, {k['yaw']:.2f});")
+    L.append("// droppedKerb(x, y, z, yaw): a designed kerb clear_of_path dropped because it reaches into the clear width")
+    L.append("// (the tests check each really does; none is placed)")
+    L.append("// designKerbs(n): how many kerbs the design laid; every one is a kerb() or a droppedKerb() above and below")
+    L.append(f"designKerbs({len(route.get('designKerbs', route['kerbs']))});")
+    kept = {tuple(sorted(k.items())) for k in route["kerbs"]}
+    for k in route.get("designKerbs", []):
+        if tuple(sorted(k.items())) not in kept:
+            L.append(f"droppedKerb({k['x'] * 100:.1f}, {k['y'] * 100:.1f}, {k['z'] * 100:.1f}, {k['yaw']:.2f});")
     L.append("// rail(x, y, z, yaw, pitch deg, length cm along plan, mirrored): a bay; pivot at its downhill post's")
     L.append("// foot on the path (or the nosing line), +X along the path (uphill when raked), +Y to the drop;")
     L.append("// mirrored bays have the drop on -Y (scale Y by -1: a raked bay can't be turned round)")
@@ -1092,6 +1143,11 @@ def main():
             np.save(npy_path, zn)
             print(f"cove route: work npy brought into step at {int(stale.sum())} cells ({npy_path})")
 
+    # Re-applied to the stored design too, so a graded route re-emits without pieces in the way. The designed
+    # kerbs are kept ("designKerbs"), so each one dropped is emitted and the tests can check it had to go.
+    xy_all = [(c[0], c[1]) for c in route["centreline"]]
+    route.setdefault("designKerbs", route["kerbs"])
+    route["kerbs"], route["rails"] = clear_of_path(xy_all, route["designKerbs"], route["rails"])
     write_data(route)
     route = json.load(open(DATA))           # everything below reads what's committed, first run or re-run
     layout["coveRoute"] = {k: route[k] for k in ("graded", "control", "kinds", "length", "clearWidth", "maxPathGrade",

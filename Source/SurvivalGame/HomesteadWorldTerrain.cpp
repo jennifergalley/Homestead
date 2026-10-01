@@ -192,6 +192,7 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
         bTerrainReady = true;
         const bool bScenery = BuildEstateScenery();
         BuildRoadBridge();
+        BuildCoveRoute();
         return bScenery;
     }
     if (bFixedEstate)

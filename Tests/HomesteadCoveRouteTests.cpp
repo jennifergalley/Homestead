@@ -3,6 +3,7 @@
 // path grade and Props' step kit, protected wherever it's steep, and clear of the river, trees and forage.
 #include "../Source/SurvivalGame/Simulation/HomesteadEstate.h"
 #include "../Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.h"
+#include "../Source/SurvivalGame/Simulation/HomesteadCoveRouteKit.h"
 #include "../Source/SurvivalGame/Simulation/HomesteadSimulation.h"
 
 #include <algorithm>
@@ -246,7 +247,105 @@ int main()
         }
     }
 
-    // Kerbs and rails stand outside the 1.4 m clear width, on the path.
+    // Kerbs and rails stand outside the 1.4 m clear width, on the path, along their whole length (review,
+    // 2026-09-30: a kerb's pivot can be clear while its end reaches into the next stretch at a hairpin).
+    std::vector<Point> centreline;
+    for (const CoveRouteStation& s : route.stations) centreline.push_back(s.position);
+    auto clearAlong = [&](Point from, double yaw, double start, double end) {
+        double least = 1e300;
+        for (int i = 0; i <= 10; ++i) least = std::min(least, PolylineDistance(centreline, Along(from, yaw, start + (end - start) * i / 10.0)));
+        return least;
+    };
+    // cove_route.py CLEAR_MARGIN_M: a joint kerb on a gentle curve dips 1-2 cm inside; nothing reaches 5 cm in.
+    constexpr double ClearMarginCm = 5.0;
+    for (const CoveRouteKerb& k : route.kerbs)
+        Check(clearAlong(k.position, k.yaw, -50.0, 50.0) >= 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
+              "a kerb clear of the path along its length", clearAlong(k.position, k.yaw, -50.0, 50.0));
+    // Every kerb the design laid (cove_route.py keeps "designKerbs") is either placed or emitted as dropped,
+    // and each dropped one really reaches into the clear width. This is the guard for a kerb missing anywhere,
+    // a line's end or two together included, which the hole and coverage checks below can't see (review,
+    // 2026-09-30). At this design: 152 laid, the three at the bench steps' hairpin dropped.
+    Check(route.designKerbCount > 0
+              && route.kerbs.size() + route.droppedKerbs.size() == static_cast<size_t>(route.designKerbCount),
+          "every designed kerb placed or dropped", static_cast<double>(route.kerbs.size() + route.droppedKerbs.size()));
+    for (const CoveRouteKerb& k : route.droppedKerbs)
+        Check(clearAlong(k.position, k.yaw, -50.0, 50.0) < 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
+              "a dropped kerb reaches into the clear width", clearAlong(k.position, k.yaw, -50.0, 50.0));
+    Check(route.droppedKerbs.size() == 3, "the hairpin's three kerbs dropped", static_cast<double>(route.droppedKerbs.size()));
+    for (const CoveRouteRail& r : route.rails)
+        if (r.pitch == 0.0)
+            Check(clearAlong(r.position, r.yaw, 0.0, r.length) >= 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
+                  "a level rail bay clear of the path", clearAlong(r.position, r.yaw, 0.0, r.length));
+    // A kerb line has no short holes: along each side of the path, kerbs follow at about 1 m, and a gap
+    // under 3 m (which the generator bridges) never appears (review: dropped joint kerbs left 1 m holes).
+    {
+        struct Placed { double metres; int side; };
+        std::vector<Placed> placed;
+        // Each kerb's chainage by projection onto the nearest centreline segment (stations are 1 m apart and
+        // kerbs sit between them, so snapping to a station would invent 2 m gaps).
+        for (const CoveRouteKerb& k : route.kerbs)
+        {
+            double best = 1e300, metres = 0.0;
+            int side = 1;
+            for (size_t i = 0; i + 1 < route.stations.size(); ++i)
+            {
+                const Point a = route.stations[i].position, b = route.stations[i + 1].position;
+                const double dx = b.x - a.x, dy = b.y - a.y, len2 = dx * dx + dy * dy;
+                const double u = len2 > 0.0 ? std::clamp(((k.position.x - a.x) * dx + (k.position.y - a.y) * dy) / len2, 0.0, 1.0) : 0.0;
+                const double d = Distance(k.position, {a.x + u * dx, a.y + u * dy});
+                if (d < best)
+                {
+                    best = d;
+                    metres = route.stations[i].metres + u * (route.stations[i + 1].metres - route.stations[i].metres);
+                    side = dx * (k.position.y - a.y) - dy * (k.position.x - a.x) > 0.0 ? 1 : -1;
+                }
+            }
+            placed.push_back({metres, side});
+        }
+        for (const int side : {1, -1})
+        {
+            std::vector<double> along;
+            for (const Placed& p : placed) if (p.side == side) along.push_back(p.metres);
+            std::sort(along.begin(), along.end());
+            for (size_t i = 1; i < along.size(); ++i)
+            {
+                const double gap = along[i] - along[i - 1];
+                Check(gap < 1.6 || gap >= 3.0, "no short hole in a kerb line", along[i - 1]);
+            }
+        }
+        // A kerb within a metre wherever the graded ground clearly falls away beside a path for a metre either
+        // side (cove_route.py edges() probes CLEAR_HALF_M + SIDE_PROBE_M out for KERB_DROP_M 0.45 m), unless one
+        // there would reach into the clear width. It catches kerbs missing inside a run of falling ground, not at
+        // a line's end, where grading has flattened the shoulder and the next kerb in is within the metre; the
+        // design-count check above covers line ends.
+        if (route.ground.size() == route.stations.size())
+        {
+            constexpr double ClearDropCm = 50.0;   // KERB_DROP_M plus room for the grading since design
+            constexpr size_t Around = 1;           // the drop holds a metre either side, inside a run (MIN_RUN_M 3 m)
+            int required = 0;
+            for (size_t i = Around; i + Around < route.stations.size(); ++i)
+                for (const int side : {1, -1})
+                {
+                    bool falls = true;
+                    for (size_t j = i - Around; j <= i + Around && falls; ++j)
+                        falls = !route.stations[j].onSteps && route.stations[j].walkZ
+                            - (side > 0 ? route.ground[j].plusYOutZ : route.ground[j].minusYOutZ) > ClearDropCm;
+                    if (!falls) continue;
+                    const CoveRouteStation& s = route.stations[i];
+                    const Point a = route.stations[i - 1].position, b = route.stations[i + 1].position;
+                    const double heading = std::atan2(b.y - a.y, b.x - a.x);
+                    const double offset = side * 0.5 * CoveRouteClearWidthCm;
+                    const Point would{s.position.x - std::sin(heading) * offset, s.position.y + std::cos(heading) * offset};
+                    const double yaw = heading * 180.0 / 3.14159265358979323846 + (side > 0 ? 0.0 : 180.0);
+                    if (clearAlong(would, yaw, -50.0, 50.0) < 0.5 * CoveRouteClearWidthCm - ClearMarginCm) continue;
+                    ++required;
+                    const bool kerbed = std::any_of(placed.begin(), placed.end(), [&](const Placed& p)
+                        { return p.side == side && std::fabs(p.metres - s.metres) <= 1.0; });
+                    Check(kerbed, "a kerb where the ground falls away beside the path", s.metres);
+                }
+            Check(required >= 60, "kerb coverage checked along the falling stretches", required);
+        }
+    }
     for (const CoveRouteKerb& k : route.kerbs)
     {
         const CoveRoute::Nearest n = route.NearestTo(k.position);
@@ -300,6 +399,116 @@ int main()
     for (const CoveRouteFlight& f : route.flights)
         if (Distance(f.TreadPivot(f.treads), route.stations[head].position) < 150.0) pointsDown = YawDifference(cliff.yaw, f.yaw + 180.0) < 5.0;
     Check(pointsDown, "its arm points down the steps", cliff.yaw);
+
+    // Props' kit on the route (HomesteadCoveRouteKit): one block per tread, the landings covered end to end by
+    // whole slabs, every kerb, rail bay and fingerpost, and a pawn blocker along every rail bay.
+    {
+        const CoveKitLayout& kit = EstateCoveRouteKit();
+        const int treads = kit.Count(CoveKitPiece::StepA) + kit.Count(CoveKitPiece::StepB) + kit.Count(CoveKitPiece::StepC);
+        Check(treads == route.Steps(), "a block per tread", treads);
+        Check(kit.Count(CoveKitPiece::StepA) > 0 && kit.Count(CoveKitPiece::StepB) > 0 && kit.Count(CoveKitPiece::StepC) > 0,
+              "all three tread variants used");
+        Check(kit.Count(CoveKitPiece::Kerb) == static_cast<int>(route.kerbs.size()), "a piece per kerb");
+        const int rails = kit.Count(CoveKitPiece::RailLevel) + kit.Count(CoveKitPiece::Rail26) + kit.Count(CoveKitPiece::Rail28)
+            + kit.Count(CoveKitPiece::Rail30);
+        Check(rails == static_cast<int>(route.rails.size()), "a piece per rail bay", rails);
+        Check(kit.blockers.size() == route.rails.size(), "a blocker per rail bay", static_cast<double>(kit.blockers.size()));
+        Check(kit.Count(CoveKitPiece::Fingerpost) == 2, "two fingerposts");
+        // An end post closes every rail run, and none stands where a bay continues.
+        const int endPosts = kit.Count(CoveKitPiece::RailEndPost);
+        Check(endPosts >= 4 && endPosts <= 30, "an end post per free rail end", endPosts);
+        std::vector<const CoveKitPlacement*> posts;
+        for (const CoveKitPlacement& p : kit.pieces)
+            if (p.piece == CoveKitPiece::RailEndPost)
+            {
+                for (const CoveRouteRail& r : route.rails)
+                    Check(Distance(p.position, r.position) >= CoveKitRailJoinCm || std::fabs(p.z - r.z) >= CoveKitRailJoinZCm,
+                          "no end post beside a bay's own post", p.position.x);
+                for (const CoveKitPlacement* q : posts)
+                    Check(Distance(p.position, q->position) >= CoveKitRailJoinCm || std::fabs(p.z - q->z) >= CoveKitRailJoinZCm,
+                          "no two end posts together", p.position.x);
+                posts.push_back(&p);
+            }
+        // Every bay's far end has a post: another bay's, or an end post.
+        for (const CoveRouteRail& r : route.rails)
+        {
+            const Point end = Along(r.position, r.yaw, r.length);
+            const double endZ = r.z + r.length * std::tan(r.pitch * Pi / 180.0);
+            bool posted = false;
+            for (const CoveRouteRail& o : route.rails)
+                posted = posted || (&o != &r && Distance(o.position, end) < CoveKitRailJoinCm && std::fabs(o.z - endZ) < CoveKitRailJoinZCm);
+            for (const CoveKitPlacement* q : posts)
+                posted = posted || (Distance(q->position, end) < CoveKitRailJoinCm && std::fabs(q->z - endZ) < CoveKitRailJoinZCm);
+            Check(posted, "a post at every bay's far end", end.x);
+        }
+        double covered = 0.0, total = 0.0, worst = 1.0;
+        for (const CoveRouteLanding& l : route.landings) total += l.length;
+        for (const CoveKitPlacement& p : kit.pieces)
+        {
+            if (p.piece == CoveKitPiece::LandingSlab || p.piece == CoveKitPiece::LandingSlab75)
+            {
+                covered += p.scaleX * (p.piece == CoveKitPiece::LandingSlab75 ? CoveKitLandingSlab75Cm : CoveKitLandingSlabCm);
+                worst = std::max(worst, std::max(p.scaleX, 1.0 / p.scaleX));
+            }
+            const bool rail = p.piece == CoveKitPiece::RailLevel || p.piece == CoveKitPiece::Rail26 || p.piece == CoveKitPiece::Rail28
+                || p.piece == CoveKitPiece::Rail30;
+            if (rail)
+            {
+                Check(std::fabs(p.scaleX - p.scaleZ) < 1e-9, "a rail bay scales X and Z together", p.scaleX);
+                Check(p.scaleX > 0.3 && p.scaleX < 1.9, "rail bay scale", p.scaleX);
+                Check(std::fabs(std::fabs(p.scaleY) - 1.0) < 1e-9, "rail bays mirrored, never stretched across", p.scaleY);
+            }
+            else if (p.piece != CoveKitPiece::LandingWedge)
+                Check(p.scaleY == 1.0 && p.scaleZ == 1.0, "only rails and wedges mirror or scale across", p.scaleY);
+        }
+        Check(std::fabs(covered - total) < 0.5, "the slabs cover every landing end to end", covered - total);
+        Check(worst <= 1.1, "no slab stretched or squeezed more than 10% (Props' limit)", worst);
+        // A wedge at each corner landing: at the landing's top, its apex within the landing's end, opening toward
+        // the other leg, scaled to the turn.
+        Check(route.corners.size() == 2 && kit.Count(CoveKitPiece::LandingWedge) == static_cast<int>(route.corners.size()),
+              "a wedge per corner", static_cast<double>(route.corners.size()));
+        for (const CoveKitPlacement& p : kit.pieces)
+        {
+            if (p.piece != CoveKitPiece::LandingWedge) continue;
+            const CoveRouteCorner* c = nullptr;
+            for (const CoveRouteCorner& k : route.corners)
+                if (!c || Distance(k.position, p.position) < Distance(c->position, p.position)) c = &k;
+            Check(c && std::fabs(p.z - c->z) < 0.5, "a wedge on its landing's top", p.z);
+            Check(c && Distance(p.position, c->position) < 120.0, "a wedge's apex at its corner", c ? Distance(p.position, c->position) : 0.0);
+            Check(std::fabs(p.scaleY) > 0.8 && std::fabs(p.scaleY) < 1.05, "a wedge scaled to an 18-21 degree turn", p.scaleY);
+            const double yr = p.yaw * Pi / 180.0, a = c ? c->landingYaw * Pi / 180.0 : 0.0;
+            // +X along the landing's end edge (across its leg); +Y (after any mirroring) toward its up direction.
+            Check(std::fabs(std::cos(yr) * std::cos(a) + std::sin(yr) * std::sin(a)) < 0.02, "a wedge along the landing's end edge", p.yaw);
+            const double opens = (p.scaleY < 0.0 ? -1.0 : 1.0) * (-std::sin(yr) * std::cos(a) + std::cos(yr) * std::sin(a));
+            Check(opens > 0.99, "a wedge opening toward the other leg", opens);
+        }
+        int mirrored = 0;
+        for (const CoveRouteRail& r : route.rails) mirrored += r.mirrored ? 1 : 0;
+        int mirroredPieces = 0;
+        for (const CoveKitPlacement& p : kit.pieces) mirroredPieces += p.scaleY < 0.0 ? 1 : 0;
+        Check(mirroredPieces == mirrored, "the flagged bays mirrored", mirroredPieces);
+        for (size_t i = 0; i < kit.blockers.size() && i < route.rails.size(); ++i)
+        {
+            const CoveKitBlocker& b = kit.blockers[i];
+            const CoveRouteRail& r = route.rails[i];
+            const double rise = r.length * std::tan(r.pitch * Pi / 180.0);
+            Check(b.z + b.halfHeight >= r.z + rise + 95.0, "the blocker stands above the top rail at its high end", b.z + b.halfHeight);
+            Check(b.z - b.halfHeight <= r.z, "the blocker reaches down to the path", b.z - b.halfHeight);
+            Check(std::fabs(b.halfLength * 2.0 - r.length) < 0.01, "the blocker runs the bay's length", b.halfLength);
+            const CoveRoute::Nearest n = route.NearestTo(b.centre);
+            Check(n.distanceCm >= 0.5 * CoveRouteClearWidthCm, "no blocker in the clear width", n.distanceCm);
+            // Along its length too, for blockers beside a path (a flight's blockers sit over its own treads' edge).
+            if (r.pitch == 0.0)
+            {
+                double least = 1e300;
+                for (int k = 0; k <= 10; ++k)
+                    least = std::min(least, PolylineDistance(centreline, Along(b.centre, b.yaw, -b.halfLength + 2.0 * b.halfLength * k / 10.0)));
+                Check(least >= 0.5 * CoveRouteClearWidthCm - 2.0, "a path blocker clear of the path along its length", least);
+            }
+        }
+        std::printf("cove kit: %d treads, %d landing slabs (worst stretch %.2f), %d kerbs, %d rail bays (%d mirrored), %d end posts, %zu blockers\n",
+                    treads, kit.Count(CoveKitPiece::LandingSlab), worst, kit.Count(CoveKitPiece::Kerb), rails, mirrored, endPosts, kit.blockers.size());
+    }
 
     std::printf("HomesteadCoveRouteTests: %zu stations, %.0f m, %zu flights, %d steps, %zu landings, %zu kerbs, "
                 "%zu rail bays; %d failures\n", route.stations.size(), route.Length(), route.flights.size(), route.Steps(),
