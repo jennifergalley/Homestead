@@ -1177,6 +1177,15 @@ requirement.
   miss/cancel, rain/music mix/headroom and cooked asset proof. Add provenance to `docs/asset-credits`
   only when shipped.
 
+  **Bare-footstep packaging trap (Integration, repair pending):** tracked
+  `Assets/Audio/Footsteps/BareStepWalk_00..05` and `BareStepRun_00..03` WAVs require
+  `bootstrap_unreal.py` to generate and save their corresponding `Content` SoundWave assets.
+  Source merge alone left those ten `.uasset`s untracked; `Build-Game.ps1 -PackageOnly` cooked
+  successfully but an RT-on copied-save launch logged every cue missing while EstateSmoke passed.
+  Integration is importing, committing, cooking and verifying the ten assets. For every new
+  generated audio source, bootstrap and commit the SoundWave before `-PackageOnly`, then audit a
+  normal-play packaged launch; automated cook/smoke success is insufficient asset proof.
+
   **Audio loudness standard `95f4ea14` (Water branch only):** every new or changed cue is measured
   against the forest ambience bed before shipping. `HomesteadAudioLevels.h` owns cue use/source/
   category/bus/gain rows and named gain constants; `Measure-Loudness.py` (after

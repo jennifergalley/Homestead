@@ -989,7 +989,11 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **Package (integration session only during multi-lane rounds):** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
   (`bootstrap_unreal.py` and the character/locomotion imports run as `UnrealEditor-Cmd`
   commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
-  this worktree's generated content is already current. UAT is single-instance machine-wide; the
+  this worktree's generated content is already current. **A newly tracked generated audio source is
+  not current merely because its WAV exists:** run the bootstrap first, commit its generated
+  `Content` SoundWave asset, then use `-PackageOnly`. Audit it in a normal-play packaged launch as
+  well as automated suites; cooking can succeed while a missing SoundWave logs only at playback.
+  UAT is single-instance machine-wide; the
   script builds the game target with `-WaitMutex`, waits for UAT (`-WaitForUATMutex`) behind other worktrees, and cooks without the shared Zen store (`-SkipZenStore`). Each Unreal step counts
   toward the 2-process limit, and the cook starts more. It writes `Build\Logs\bootstrap.log` and
   `Build\Logs\package-<time>.log` in your worktree; the UAT log under `%APPDATA%` is shared and
