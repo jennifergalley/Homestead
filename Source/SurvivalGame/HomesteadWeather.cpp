@@ -135,7 +135,8 @@ bool UHomesteadWeather::IsInRoom(const FVector& Point) const
         const FVector4f& Cell = RoomCells[Index];
         if (Point.Z >= Shelters[Index].W) continue;
         const FVector2D Local = FVector2D(Point.X - Cell.X, Point.Y - Cell.Y).GetRotated(-Cell.W);
-        if (FMath::Abs(Local.X) < Cell.Z && FMath::Abs(Local.Y) < Cell.Z) return true;
+        // A centimetre of overlap, so a point on the line between two cells of one room is in both.
+        if (FMath::Abs(Local.X) <= Cell.Z + 1.0f && FMath::Abs(Local.Y) <= Cell.Z + 1.0f) return true;
     }
     return false;
 }
