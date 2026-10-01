@@ -29,15 +29,21 @@ constexpr float EntrySeconds = 75.0f;
 constexpr float CaptureSeconds = 0.8f;
 
 // Every file under the normal (non-sandbox) Estate save folder, with its size and time: the run proves
-// nothing there changed.
+// nothing there changed. The run's -UserDir moves ProjectSavedDir() into the sandbox, so the normal
+// folder is taken from the project itself (or -HomesteadRealSaveDir=<folder>, which Test-Game passes).
 TMap<FString, FString> SnapshotRealEstateSaves()
 {
     TMap<FString, FString> Files;
-    FHomesteadSaveRoute Route;
-    FString Error;
-    if (!ResolveHomesteadSaveRoute(TEXT(""), FPaths::ProjectSavedDir(), FPlatformProcess::UserSettingsDir(),
-        HomesteadTestOutputDirectory(), Route, Error)) return Files;
-    const FString Folder = FPaths::Combine(Route.Directory, TEXT("Estate"));
+    FString Folder;
+    if (!FParse::Value(FCommandLine::Get(), TEXT("HomesteadRealSaveDir="), Folder) || Folder.IsEmpty())
+    {
+        FHomesteadSaveRoute Route;
+        FString Error;
+        if (!ResolveHomesteadSaveRoute(TEXT(""), FPaths::Combine(FPaths::ProjectDir(), TEXT("Saved")),
+            FPlatformProcess::UserSettingsDir(), HomesteadTestOutputDirectory(), Route, Error)) return Files;
+        Folder = FPaths::Combine(Route.Directory, TEXT("Estate"));
+    }
+    Folder = FPaths::ConvertRelativePathToFull(Folder);
     TArray<FString> Found;
     IFileManager::Get().FindFilesRecursive(Found, *Folder, TEXT("*"), true, false);
     for (const FString& File : Found)

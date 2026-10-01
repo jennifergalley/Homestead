@@ -483,10 +483,11 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         {
             // Shown even where agents skip it (-HomesteadSkipNewGameSetup): the gallery is for looking at it.
             IConsoleVariable* Skip = IConsoleManager::Get().FindConsoleVariable(TEXT("homestead.SkipNewGameSetup"));
+            // At console priority, so it holds even after `homestead.SkipNewGameSetup 1` was typed.
             const int32 Was = Skip ? Skip->GetInt() : -1;
-            if (Skip) Skip->Set(0, ECVF_SetByCode);
+            if (Skip) Skip->Set(0, ECVF_SetByConsole);
             PC.BeginNewGameSetup();
-            if (Skip) Skip->Set(Was, ECVF_SetByCode);
+            if (Skip) Skip->Set(Was, ECVF_SetByConsole);
         }, 1.5f);
     return List;
 }

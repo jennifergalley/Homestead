@@ -263,7 +263,11 @@ if ($Hotbar) { $loopArguments = '-HomesteadHotbarTest -HomesteadMetaHuman -Homes
 if ($Crafting) { $loopArguments = '-HomesteadCraftingTest -HomesteadRequireLit' }
 # The Estate route plays the MetaHuman heroine Jenny plays, and skips the Names step.
 if ($EstateSmoke) { $loopArguments = '-HomesteadEstateSmoke -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRequireLit' }
-if ($UIGallery) { $loopArguments = "-HomesteadUIGallery=$UIGalleryIds -HomesteadUIGalleryInput=$UIGalleryInput -HomesteadMetaHuman -HomesteadSkipNewGameSetup" }
+if ($UIGallery) {
+    # The normal Estate saves the run proves it never touched (-UserDir moves Saved\ into the sandbox).
+    $realSaves = Join-Path $root 'Saved\SaveGames\Estate'
+    $loopArguments = "-HomesteadUIGallery=$UIGalleryIds -HomesteadUIGalleryInput=$UIGalleryInput -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRealSaveDir=`"$realSaves`""
+}
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $execCommands = @()
 if (-not $ShippingQA -and $RenderScale -gt 0) { $execCommands += "r.ScreenPercentage $RenderScale" }
@@ -284,12 +288,12 @@ if ($ShippingQA) {
         Stop-Process -Id $process.Id
         throw "Started $image instead of $executable; stopped it."
     }
-    if (-not ('HomesteadKillOnCloseJob' -as [type])) {
+    if (-not ('HomesteadGameJob' -as [type])) {
         Add-Type -TypeDefinition @"
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-public static class HomesteadKillOnCloseJob
+public static class HomesteadGameJob
 {
     [StructLayout(LayoutKind.Sequential)] struct Basic { public long PerProcessUserTimeLimit, PerJobUserTimeLimit; public uint LimitFlags; public UIntPtr MinimumWorkingSetSize, MaximumWorkingSetSize; public uint ActiveProcessLimit; public UIntPtr Affinity; public uint PriorityClass, SchedulingClass; }
     [StructLayout(LayoutKind.Sequential)] struct Counters { public ulong ReadOperations, WriteOperations, OtherOperations, ReadBytes, WriteBytes, OtherBytes; }
@@ -297,6 +301,9 @@ public static class HomesteadKillOnCloseJob
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern IntPtr CreateJobObject(IntPtr attributes, string name);
     [DllImport("kernel32.dll", SetLastError = true)] static extern bool SetInformationJobObject(IntPtr job, int infoClass, ref Extended info, uint length);
     [DllImport("kernel32.dll", SetLastError = true)] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+    [DllImport("kernel32.dll", SetLastError = true)] static extern bool CloseHandle(IntPtr handle);
+    // Closing the job ends everything still in it.
+    public static void Close(IntPtr job) { if (job != IntPtr.Zero) CloseHandle(job); }
     const uint KillOnJobClose = 0x2000;
     const int ExtendedLimitInformation = 9;
     // The job handle stays open for this PowerShell process's life; closing it kills everything in it.
@@ -313,11 +320,15 @@ public static class HomesteadKillOnCloseJob
 }
 "@
     }
-    $script:gameJob = [HomesteadKillOnCloseJob]::Adopt($process.Handle)
+    $script:gameJob = [HomesteadGameJob]::Adopt($process.Handle)
     Write-Host "Engine smoke-test PID: $($process.Id) (kill-on-close job). Log: $log"
 }
 Write-Host "Requested output: ${Width}x${Height}; 3D resolution policy: $(if($ShippingQA){'unchanged Shipping defaults'}elseif($RenderScale -eq 0){'player default'}else{$RenderScale})."
-if (-not $ShippingQA -and -not $process.WaitForExit($TimeoutSeconds * 1000)) {
+# Ctrl+C or a failure while waiting closes the job, which ends the game with it.
+$exited = $true
+try { if (-not $ShippingQA) { $exited = $process.WaitForExit($TimeoutSeconds * 1000) } }
+finally { if ($script:gameJob -and -not $process.HasExited -and $exited) { [HomesteadGameJob]::Close($script:gameJob); $script:gameJob = $null } }
+if (-not $exited) {
     Stop-Process -Id $process.Id
     throw "Engine smoke test exceeded $TimeoutSeconds seconds. Stopped only its process $($process.Id)."
 }
