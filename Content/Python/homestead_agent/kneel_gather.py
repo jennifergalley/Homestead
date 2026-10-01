@@ -12,6 +12,7 @@ hides the stick props at those moments (see STICK_EVENTS).
 
 Component space: forward +Y, her left +X, up +Z, floor z = 0.
 """
+import math
 import unreal
 from homestead_agent import rig_authoring as ra
 
@@ -48,6 +49,10 @@ BEND_SIGN = 1
 # torso, and the right hand lays each stick on top.
 CRADLE_WRIST_L = (4.0, 28.0, 120.0)
 CRADLE_ELBOW_POLE_L = (75.0, 10.0, 110.0)
+# The cradling left hand's palm, turned this far (deg) about its fingers from straight up. The sticks ride
+# on her forearm (the game lays them from the elbow and wrist), so the hand is free to turn: palm toward her
+# chest, hugging the bundle, keeps the forearm in range (palm up turned it over 180 degrees, joint_limits).
+CRADLE_PALM_ROLL = -100.0
 LAY_FROM_CRADLE_R = (-6.0, 8.0, 6.0)
 HUG_FROM_CRADLE_L = (0.0, 0.0, 12.0)
 # While kneeling the cradling wrist stays at least this high: the forward thigh's top is ~58 cm.
@@ -82,6 +87,45 @@ def key_knee_fingers(s, frame, weight=1.0):
     for finger, degrees in KNEE_CURL_L.items():
         for joint, deg in zip(('01', '02', '03'), degrees):
             s.key_rotation(frame, f'{finger}_{joint}_l_ctrl', yaw=deg * weight)
+
+
+# How high (cm) a stepping foot clears the ground at the middle of a step.
+STEP_LIFT = 6.0
+# A step's shape: (fraction of the step's time, fraction of its travel, fraction of STEP_LIFT). The foot
+# peels up and sets down nearly vertically, so it isn't moving along the ground while still on it.
+STEP_ARC = ((0.25, 0.1, 0.6), (0.5, 0.5, 1.0), (0.75, 0.9, 0.6))
+
+
+def key_step(s, control, start, end, a, b, roll_a=0.0, roll_b=0.0, lift=STEP_LIFT):
+    """
+Key a foot lifted along STEP_ARC between its keys at `start` (at `a`) and `end` (at `b`), rolling
+    from `roll_a` to `roll_b` (deg, the toes' tuck) with its travel; the end keys are the caller's."""
+    for time, travel, height in STEP_ARC:
+        frame = int(round(start + (end - start) * time))
+        if start < frame < end:
+            at = [p + (q - p) * travel for p, q in zip(a, b)]
+            s.key_world(frame, control, (at[0], at[1], at[2] + lift * height),
+                        unreal.Rotator(roll=roll_a + (roll_b - roll_a) * travel, pitch=0, yaw=0))
+
+
+def key_step_back(s, start, end, toes):
+    """
+The right foot steps back onto its toes behind her (`start` standing, `end` kneeling) instead of
+    dragging the ball of the foot 30 cm along the ground (the anatomy audit's kneel slides). The left foot has
+    already planted forward by then."""
+    key_step(s, 'foot_r_ik_ctrl', start, end, FOOT_R, FOOT_R_KNEEL, 0.0, toes.roll)
+
+
+def key_rise_steps(s, hold, rise, toes):
+    """
+Rising out of the kneel one foot at a time, so neither is dragged: the right foot comes off its toes and
+    steps up beside her (from `hold`, landing at `rise` - 2) while the left stays planted forward, then
+    the left steps back beside it (landing at `rise` + 6). The caller keys the right foot at `hold`."""
+    s.key_world(rise - 2, 'foot_r_ik_ctrl', FOOT_R)
+    key_step(s, 'foot_r_ik_ctrl', hold, rise - 2, FOOT_R_KNEEL, FOOT_R, toes.roll, 0.0)
+    s.key_world(rise - 2, 'foot_l_ik_ctrl', FOOT_L_FORWARD)
+    key_step(s, 'foot_l_ik_ctrl', rise - 2, rise + 6, FOOT_L_FORWARD, FOOT_L)
+    s.key_world(rise + 6, 'foot_l_ik_ctrl', FOOT_L)
 
 
 def _add(a, b):
@@ -140,21 +184,20 @@ def _author(chest_anim):
     s.key_world(F['rise'], 'body_ctrl', (0.0, 3.0, 101.0), tilt(F['rise']))
     s.key_world(F['end'], 'body_ctrl', BODY_STAND, tilt(F['end']))
 
-    # Feet: left steps forward and plants; right slides back onto tucked toes as the knee drops.
+    # Feet: left steps forward and plants; right steps back onto tucked toes as the knee drops.
     s.key_world(F['stand'], 'foot_l_ik_ctrl', FOOT_L)
     s.key_world(4, 'foot_l_ik_ctrl', _add(FOOT_L, (0, 8, 10)))
     s.key_world(F['step'] + 2, 'foot_l_ik_ctrl', FOOT_L_FORWARD)
     s.key_world(F['place2'] + 6, 'foot_l_ik_ctrl', FOOT_L_FORWARD)
-    s.key_world(F['rise'] - 4, 'foot_l_ik_ctrl', _add(FOOT_L, (0, 12, 9)))
-    s.key_world(F['rise'], 'foot_l_ik_ctrl', FOOT_L)
     s.key_world(F['end'], 'foot_l_ik_ctrl', FOOT_L)
     toes = unreal.Rotator(roll=45, pitch=0, yaw=0)
     s.key_world(F['stand'], 'foot_r_ik_ctrl', FOOT_R)
     s.key_world(F['step'], 'foot_r_ik_ctrl', FOOT_R)
     s.key_world(F['kneel'], 'foot_r_ik_ctrl', FOOT_R_KNEEL, toes)
+    key_step_back(s, F['step'], F['kneel'], toes)
     s.key_world(F['place2'] + 4, 'foot_r_ik_ctrl', FOOT_R_KNEEL, toes)
-    s.key_world(F['rise'] - 2, 'foot_r_ik_ctrl', FOOT_R)
     s.key_world(F['end'], 'foot_r_ik_ctrl', FOOT_R)
+    key_rise_steps(s, F['place2'] + 4, F['rise'], toes)
     # Knees point forward (pole vectors ahead of the knees).
     s.key_world(F['kneel'], 'leg_r_pv_ik_ctrl', (-18.0, 60.0, 20.0))
     s.key_world(F['kneel'], 'leg_l_pv_ik_ctrl', (20.0, 90.0, 60.0))
@@ -257,7 +300,10 @@ def _author(chest_anim):
     # Left hand: side -> brace on the forward knee while kneeling -> cradle the bundle -> side.
     side_l = (24.0, 5.0, 86.0)
     hang_l = s.hand_turn('l', down, (-1, 0, 0))
-    cradle_l = s.hand_turn('l', (-1, 0.2, 0), (0, 0, 1))
+    roll = math.radians(CRADLE_PALM_ROLL)
+    cradle_fingers = unreal.Vector(-1, 0.2, 0).normal()
+    cradle_palm = unreal.Vector(0, 0, 1) * math.cos(roll) + cradle_fingers.cross(unreal.Vector(0, 0, 1)) * math.sin(roll)
+    cradle_l = s.hand_turn('l', (-1, 0.2, 0), (cradle_palm.x, cradle_palm.y, cradle_palm.z))
     knee_l = knee_turn(s)
     s.key_world(F['stand'], 'hand_l_ik_ctrl', side_l, hang_l)
     s.key_world(F['kneel'], 'hand_l_ik_ctrl', KNEE_WRIST_L, knee_l)
