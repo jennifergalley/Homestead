@@ -41,9 +41,11 @@ constexpr float MaxRoll = 0.35f;
 constexpr float RollRate = 8.0f;
 // How far above and below the blade to look for the ground (cm).
 constexpr float TraceReach = 150.0f;
-// The most the scythe tips up about the lower nib to keep its point out of the ground (radians, ~35 degrees),
-// and how fast that eases back down once clear (per second).
-constexpr float MaxTipUp = 0.6f;
+// The most the scythe tips up about the lower nib to keep its point out of the ground (radians, ~11 degrees),
+// and how fast that eases back down once clear (per second). Enough for a 13-degree uphill swath: the baked mow
+// (scythe_mow.py, c7e22276) keeps the blade 4 cm above level ground on every frame it's laid from her fists,
+// and a larger tip pulled the upper nib off her left fist.
+constexpr float MaxTipUp = 0.2f;
 constexpr float TipDownRate = 6.0f;
 // A hit this far above a blade sample is foliage or a branch overhead, not the ground under it (cm): the trace
 // carries on below it. Deeper than the worst cut into the ground the clip ever made (38 cm).
