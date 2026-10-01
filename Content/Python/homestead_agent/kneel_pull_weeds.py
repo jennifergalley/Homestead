@@ -45,10 +45,13 @@ ANIM = 'AN_HeroineMH_KneelPullWeeds'
 
 FRAMES = {
     'stand': 0, 'step': 8, 'knee_r': 16, 'knee_l': 24, 'settle': 30,
-    'reach1': 38, 'grab1': 44, 'tug1': 49, 'pulled1': 54, 'swing1': 61, 'toss1': 65, 'back1': 72,
-    'reach2': 82, 'grab2': 88, 'tug2': 93, 'pulled2': 98, 'swing2': 105, 'toss2': 109, 'back2': 116,
-    'half': 124, 'rise': 134, 'end': 144,
+    'reach1': 38, 'grab1': 44, 'tug1': 49, 'pulled1': 54, 'swing1': 62, 'toss1': 66, 'back1': 74,
+    'reach2': 86, 'grab2': 92, 'tug2': 97, 'pulled2': 102, 'swing2': 110, 'toss2': 114, 'back2': 122,
+    'half': 130, 'rise': 140, 'end': 150,
 }
+# The toss keeps the two-fisted clip's timing exactly (Jenny: "10/10, keep it"): the swing 8 frames
+# after the root comes free, the release 4 after that, back 8 after the release. Only the dig is
+# one-handed and quicker.
 # Which hand pulls (and tosses) each weed; the other braces.
 PULL_HAND = {1: 'l', 2: 'r'}
 # Seconds of the gameplay beats: fists close, each root comes free, each weed leaves her hand.

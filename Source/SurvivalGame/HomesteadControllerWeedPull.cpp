@@ -1,7 +1,6 @@
-
-
-// over each shoulder (homestead_agent.kneel_pull_weeds). The pull is one transaction, a weed node's
-// Harvest or a garden square's Weed, and it lands when the second root comes out
+// Weeding by hand (Jenny's playtest): she kneels on both knees and pulls two fistfuls one hand at a
+// time, each tossed back over that hand's shoulder (homestead_agent.kneel_pull_weeds). The pull is one
+// transaction, a weed node's Harvest or a garden square's Weed, and it lands when the second root comes out
 // (AHomesteadCharacter::PullWeedsCommit). Interrupted before then, nothing changes: no weeds in the
 // pack, no Energy spent, the weed still standing. Without the clip the caller uses the pouch kneel.
 #include "HomesteadController.h"

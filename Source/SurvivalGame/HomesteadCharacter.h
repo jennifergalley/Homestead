@@ -192,7 +192,7 @@ public:
     // EVENTS['pulled2']: the second root comes out of the ground, the pull's one commit.
     static constexpr float PullWeedsForward = 39.0f;
     static constexpr float PullWeedsRight = 0.0f;
-    static constexpr float PullWeedsCommit = 98.0f / 30.0f;
+    static constexpr float PullWeedsCommit = 102.0f / 30.0f;
     // EVENTS['pulled1']: the first fistful comes out, and the clump shows it (AHomesteadWorld::ThinResource).
     static constexpr float PullWeedsFirstPull = 54.0f / 30.0f;
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
