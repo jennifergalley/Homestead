@@ -451,19 +451,26 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
         if (!Cue.Verb.IsEmpty() || !Cue.Key.IsEmpty()) Cues.Add(Cue);
     }
     if (Cues.IsEmpty()) return 0;
+    // The words are the notices' EB Garamond (as the toast and the book's card); the key and pad
+    // glyphs stay in the crisp sans on their pine stamps.
     constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 8, Space = 9;
+    const auto KeyWidth = [this](const FString& Key) { bNoticeText = false; return TextWidth(Key, KeySize); };
+    const auto WordsWidth = [this](const FString& Words, float WordsSize) { bNoticeText = true; const float W = TextWidth(Words, WordsSize); bNoticeText = false; return W; };
     float Width = 0;
     for (int32 Index = 0; Index < Cues.Num(); ++Index)
     {
         if (Index) Width += Gap;
-        if (!Cues[Index].Key.IsEmpty()) Width += FMath::Max(BadgeH, TextWidth(Cues[Index].Key, KeySize) + KeyPad * 2) + Space;
-        Width += TextWidth(Cues[Index].Verb, Size);
+        if (!Cues[Index].Key.IsEmpty()) Width += FMath::Max(BadgeH, KeyWidth(Cues[Index].Key) + KeyPad * 2) + Space;
+        Width += WordsWidth(Cues[Index].Verb, Size);
     }
     FString Title = PC.FocusTitle();
-    const float TitleSize = 16;
-    const float TitleWidth = FMath::Min(TextWidth(Title, TitleSize), 520.0f);
+    const float TitleSize = 17;
+    const float TitleWidth = FMath::Min(WordsWidth(Title, TitleSize), 520.0f);
+    // The serif's line heights (they carry their own leading).
+    const float VerbLine = FMath::Max(Size, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), Size).Y));
+    const float TitleLine = FMath::Max(TitleSize, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), TitleSize).Y));
     const float BoxWidth = FMath::Max(Width, TitleWidth) + 44;
-    const float BoxHeight = Title.IsEmpty() ? BadgeH + 20 : BadgeH + 44;
+    const float BoxHeight = Title.IsEmpty() ? BadgeH + 20 : BadgeH + 22 + TitleLine;
     // A parchment slip at the top centre, under the compass: the same notice the toast uses.
     float CenterX = FMath::Clamp(ViewWidth * 0.5f, BoxWidth * 0.5f + 12, ViewWidth - BoxWidth * 0.5f - 12);
     const float Top = HudNoticeLayout::Top;
@@ -480,8 +487,10 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     float Y = Top + 10;
     if (!Title.IsEmpty())
     {
+        bNoticeText = true;
         Write(Title, CenterX - TitleWidth * 0.5f, Y, TitleSize, HomesteadNoticeStyle::InkBrown.CopyWithNewOpacity(0.72f));
-        Y += 24;
+        bNoticeText = false;
+        Y += TitleLine + 2;
     }
     float X = CenterX - Width * 0.5f;
     for (int32 Index = 0; Index < Cues.Num(); ++Index)
@@ -490,14 +499,16 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
         const FCue& Cue = Cues[Index];
         if (!Cue.Key.IsEmpty())
         {
-            const float BadgeW = FMath::Max(BadgeH, TextWidth(Cue.Key, KeySize) + KeyPad * 2);
+            const float BadgeW = FMath::Max(BadgeH, KeyWidth(Cue.Key) + KeyPad * 2);
             // The key or pad glyph as a pine stamp with brass lettering.
             Panel(X, Y, BadgeW, BadgeH, Pine);
-            Write(Cue.Key, X + (BadgeW - TextWidth(Cue.Key, KeySize)) * 0.5f, Y + (BadgeH - KeySize) * 0.5f - 1, KeySize, HudGold);
+            Write(Cue.Key, X + (BadgeW - KeyWidth(Cue.Key)) * 0.5f, Y + (BadgeH - KeySize) * 0.5f - 1, KeySize, HudGold);
             X += BadgeW + Space;
         }
-        Write(Cue.Verb, X, Y + (BadgeH - Size) * 0.5f - 1, Size, HomesteadNoticeStyle::InkBrown);
-        X += TextWidth(Cue.Verb, Size);
+        bNoticeText = true;
+        Write(Cue.Verb, X, Y + (BadgeH - VerbLine) * 0.5f, Size, HomesteadNoticeStyle::InkBrown);
+        bNoticeText = false;
+        X += WordsWidth(Cue.Verb, Size);
     }
     return Top + BoxHeight;
 }
