@@ -79,7 +79,7 @@ def lettering(kit, name, face, paint):
 def build(kit):
     oak = kit.mats.wood("M_FingerpostOak", light=(0.30, 0.28, 0.25), dark=(0.10, 0.095, 0.085), grain=1.1,
                         roughness=0.8, weathering=0.8, grime=0.3, seed=71.0, relief=1.2)
-    paint = kit.material("M_FingerpostPaint", (0.62, 0.61, 0.57), roughness=0.85)
+    paint = kit.material("M_FingerpostPaint", (0.80, 0.79, 0.74), roughness=0.85)
     height = HEIGHT + BURY
     parts = [kit.box("Post", (POST, POST, height), location=(0.0, 0.0, HEIGHT - height * 0.5), material=oak,
                      bevel=0.01, bevel_segments=2)]
