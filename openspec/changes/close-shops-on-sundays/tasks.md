@@ -4,7 +4,7 @@
 
 - [x] 1.1 `ShopClosedDay` (Sunday), `IsShopDay`, and `IsShopOpen` closed all of the calendar day. `NextShopOpening`/`HoursUntilOpen` skip it. `ClosedMessage(shop, hour)` and `ClosedSignText` name the day it reopens.
 - [x] 1.2 `CanWaitForShop` allows only the ordinary night's closure, so `WaitForShop` refuses through Sunday with "The general store is closed on Sundays. It opens Monday at 8 AM." and passes no time.
-- [x] 1.3 The travel summary warns when she'd arrive on a Sunday (`storeClosedAllDay`) and names Monday after a Saturday evening.
+- [x] 1.3 The travel summary warns when she'd arrive on a Sunday during what would be the store's hours (`storeClosedAllDay`), and names Monday after a Saturday evening. Arriving before or after those hours reads as an ordinary night's closure, so it agrees with the clock-based "the next day" (review: leaving Sunday 22:00 and arriving Monday 05:00 had said both).
 - [x] 1.4 Native `ShopsCloseOnSundays` covers:
   - Sunday closed at every quarter hour from 06:00 to 06:00;
   - Saturday 17:59 open and 18:00 shut;

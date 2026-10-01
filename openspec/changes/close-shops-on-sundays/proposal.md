@@ -13,7 +13,7 @@ Jenny, on 2026-09-30: "Shops on Sundays - I think they should be closed." In 185
   - "Closed - opens at 8 AM" on other nights, as before.
 - The board on the shut door says "CLOSED / on Sundays", "CLOSED / opens Mon 8 AM" or "CLOSED / opens at 8 AM". It's updated whenever the words change.
 - She can wait at the door only through an ordinary night's closure (closing to opening, 14 h), never through Sunday. In that case the door offers no wait key, and E says "The general store is closed on Sundays. It opens Monday at 8 AM."
-- The walk-to-town summary warns when she'd arrive on a Sunday: "You'd arrive on a Sunday, when the general store is closed all day (it opens Monday at 8 AM)." When she'd arrive after Saturday's closing, it names Monday as the day it opens.
+- The walk-to-town summary warns when she'd arrive on a Sunday, during what would be the store's hours: "You'd arrive on a Sunday, when the general store is closed all day (it opens Monday at 8 AM)." When she'd arrive after Saturday's closing, it names Monday as the day it opens.
 - Nothing is saved: the rule comes from the clock alone, so old saves load unchanged.
 
 ## Impact

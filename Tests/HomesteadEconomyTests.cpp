@@ -547,8 +547,16 @@ void ShopsCloseOnSundays()
     CHECK(late.ok && late.storeClosedOnArrival && late.storeClosedAllDay);
     CHECK(late.summary.find("You'd arrive on a Sunday, when the general store is closed all day (it opens Monday at 8 AM).")
         != std::string::npos);
-    walker.SkipToHourOfDay(12.0);  // Sunday noon: she'd arrive Sunday evening, still closed all day
-    CHECK(PlanTravel(walker.GetState(), manor->position, TravelDestination::Town).storeClosedAllDay);
+    walker.SkipToHourOfDay(12.0);  // Sunday noon: she'd arrive Sunday evening, after its hours: shut for the night
+    const TravelPlan sundayEvening = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
+    CHECK(sundayEvening.storeClosedOnArrival && !sundayEvening.storeClosedAllDay && !sundayEvening.nextDay
+        && sundayEvening.summary.find("(it opens at 8 AM)") != std::string::npos);
+    walker.SkipToHourOfDay(22.0);  // Sunday 10 PM: she'd arrive about 5 AM, the next day by the clock; no "on a Sunday"
+    const TravelPlan overnight = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
+    CHECK(overnight.nextDay && overnight.storeClosedOnArrival && !overnight.storeClosedAllDay);
+    CHECK(overnight.summary.find("Sunday") == std::string::npos
+        && overnight.summary.find(" the next day.") != std::string::npos
+        && overnight.summary.find("(it opens at 8 AM)") != std::string::npos);
     walker.SkipToHourOfDay(6.5);   // Monday morning: open when she gets there
     const TravelPlan monday9 = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
     CHECK(monday9.ok && !monday9.storeClosedOnArrival && !monday9.storeClosedAllDay);

@@ -24,7 +24,7 @@ Waiting by a shop's door SHALL pass only an ordinary night's closure, from closi
 - **AND** no time passes
 
 ### Requirement: The walk to town warns of a Sunday
-The walk-to-town summary SHALL say when she'd arrive on a Sunday, and that the general store is closed all day.
+The walk-to-town summary SHALL say when she'd arrive on a Sunday during what would be the general store's hours, and that it is closed all day.
 
 #### Scenario: Set out late on Saturday
 - **WHEN** she plans the walk to town at 1 AM, arriving about 8 AM on a Sunday

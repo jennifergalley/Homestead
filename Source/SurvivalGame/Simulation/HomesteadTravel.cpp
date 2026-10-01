@@ -103,7 +103,10 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
                 plan.storeOpenHour = shop.openHour;
                 const double opens = NextShopOpening(shop, plan.arrivalHour);
                 const Calendar::Date arrives = Calendar::DateAt(plan.arrivalHour), reopens = Calendar::DateAt(opens);
-                plan.storeClosedAllDay = !IsShopDay(plan.arrivalHour);
+                // "Closed all day" only when she'd arrive in what would be its hours on a closed day: before
+                // or after them it's just shut for the night, as the clock-based "the next day" says (review).
+                const double ofDay = std::fmod(std::fmod(plan.arrivalHour, 24.0) + 24.0, 24.0);
+                plan.storeClosedAllDay = !IsShopDay(plan.arrivalHour) && ofDay >= shop.openHour && ofDay < shop.closeHour;
                 if (plan.storeClosedAllDay)
                     summary += std::string("\nYou'd arrive on a ") + Calendar::WeekdayName(arrives.weekday)
                         + ", when the general store is closed all day (it opens " + Calendar::WeekdayName(reopens.weekday)
