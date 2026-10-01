@@ -27,6 +27,8 @@ constexpr float StreamInSeconds = 20.0f;
 constexpr float EntrySeconds = 75.0f;
 // Time for the requested screenshot to be written before the next entry changes the screen.
 constexpr float CaptureSeconds = 0.8f;
+// Time for auto-exposure to settle on the backdrop (plain or world) before the capture.
+constexpr float BackdropSeconds = 1.5f;
 
 // Every file under the normal (non-sandbox) Estate save folder, with its size and time: the run proves
 // nothing there changed. The run's -UserDir moves ProjectSavedDir() into the sandbox, so the normal
@@ -63,6 +65,11 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
     FParse::Value(FCommandLine::Get(), TEXT("HomesteadUIGallery="), Spec, false);
     FParse::Value(FCommandLine::Get(), TEXT("HomesteadUIGalleryInput="), Input);
     const bool bPad = Input.Equals(TEXT("Pad"), ESearchCase::IgnoreCase);
+    // Plain (the default) hides the world behind the UI; World keeps the game scene.
+    FString Backdrop;
+    FParse::Value(FCommandLine::Get(), TEXT("HomesteadUIGalleryBackdrop="), Backdrop);
+    const bool bPlain = !Backdrop.Equals(TEXT("World"), ESearchCase::IgnoreCase);
+    const bool bHeroine = !FParse::Param(FCommandLine::Get(), TEXT("HomesteadUIGalleryNoHeroine"));
     FString Error;
     const TArray<FString> Ids = FHomesteadUIGallery::Resolve(Spec, Error);
     if (!Error.IsEmpty() || Ids.IsEmpty())
@@ -74,7 +81,8 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
     const FString Index = FPaths::Combine(Output, TEXT("gallery-index.tsv"));
     IFileManager::Get().Delete(*Index, false, true, true);
     FHomesteadUIGallery::ResetFixture();
-    Results.Add(FString::Printf(TEXT("UI_GALLERY ids=%d input=%s"), Ids.Num(), bPad ? TEXT("Pad") : TEXT("KBM")));
+    Results.Add(FString::Printf(TEXT("UI_GALLERY ids=%d input=%s backdrop=%s heroine=%d"), Ids.Num(), bPad ? TEXT("Pad") : TEXT("KBM"),
+        bPlain ? TEXT("plain") : TEXT("world"), bHeroine));
 
     // It never runs on a real save: the sandbox route, and nothing written to the normal Estate saves.
     const auto RealSaves = MakeShared<TMap<FString, FString>>(UIGalleryRun::SnapshotRealEstateSaves());
@@ -125,11 +133,25 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
         };
         Show.Wait = UIGalleryRun::EntrySeconds;
         Show.bCompleteWhenReady = true;
+        // The backdrop goes up first and the exposure settles on it before the capture.
+        const auto ApplyBackdrop = [this, Id, bPlain, bHeroine]()
+        {
+            const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
+            FHomesteadUIGallery::SetBackdrop(*Controller, bPlain && !(Entry && Entry->bKeepWorld), bHeroine);
+        };
+        FStep& Backdrop = Steps.AddDefaulted_GetRef();
+        Backdrop.Name = TEXT("Backdrop for ") + Id;
+        Backdrop.Skip = [Status]() { return *Status <= 0; };
+        Backdrop.Action = ApplyBackdrop;
+        Backdrop.Check = []() { return true; };
+        Backdrop.Wait = UIGalleryRun::BackdropSeconds;
         FStep& Capture = Steps.AddDefaulted_GetRef();
         Capture.Name = TEXT("Capture ") + Id;
         Capture.Skip = [Status]() { return *Status <= 0; };
-        Capture.Action = [this, Id, Output, Index]()
+        Capture.Action = [this, Id, Output, Index, ApplyBackdrop]()
         {
+            // Again, for anything that streamed in meanwhile.
+            ApplyBackdrop();
             const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
             // The window as she sees it: the 3D view, the Canvas HUD and every Slate widget.
             FScreenshotRequest::RequestScreenshot(FPaths::Combine(Output, Id + TEXT(".png")), true, false);

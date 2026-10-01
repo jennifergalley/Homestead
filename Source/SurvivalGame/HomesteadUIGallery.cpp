@@ -10,7 +10,14 @@
 #include "UI/SHomesteadShop.h"
 
 #include "Containers/Ticker.h"
+#include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
+#include "ShowFlags.h"
+#include "EngineUtils.h"
+#include "Engine/StaticMeshActor.h"
+#include "Engine/StaticMesh.h"
+#include "Components/StaticMeshComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "GameFramework/Pawn.h"
 #include "HAL/IConsoleManager.h"
 #include "InputKeyEventArgs.h"
@@ -26,6 +33,8 @@ TOptional<Homestead::Simulation> Base;
 TWeakObjectPtr<UWorld> BaseWorld;
 FTSTicker::FDelegateHandle Pending;
 int32 Cursor = INDEX_NONE;
+// The live console's backdrop (homestead.UIGallery backdrop plain|world), reapplied after each entry.
+bool bLivePlain = false;
 // Open ground west of the manor with nothing in reach (Estate PIE, 2026-09-30), facing east.
 constexpr double StageX = -1500.0, StageY = -2600.0;
 // Tillable meadow by the manor garden (a plot was tilled here in Estate PIE, 2026-09-30).
@@ -48,6 +57,85 @@ Homestead::Point Ahead(Homestead::Point From, double YawDegrees, double Cm)
 }
 }
 
+namespace HomesteadUIGalleryBackdrop
+{
+// Sky, fog and effects off on the plain backdrop (FEngineShowFlags names; any missing are skipped).
+const TCHAR* const HiddenFlags[] = {
+    TEXT("Atmosphere"), TEXT("Cloud"), TEXT("Fog"), TEXT("VolumetricFog"), TEXT("Particles"), TEXT("Decals"),
+    TEXT("Landscape"), TEXT("InstancedGrass"), TEXT("InstancedFoliage")};
+// A calm warm grey (linear), unlit, so edges and contrast read alike on every screen.
+const FLinearColor Neutral(0.20f, 0.19f, 0.17f, 1.0f);
+// The plane stands this far beyond the camera, wide enough to fill any view.
+constexpr float DistanceCm = 6000.0f;
+constexpr float ScaleOfBasicPlane = 400.0f; // the basic plane is 100 cm across
+const TCHAR* const PlaneMesh = TEXT("/Engine/BasicShapes/Plane.Plane");
+const TCHAR* const UnlitMaterial = TEXT("/Engine/EngineMaterials/EmissiveMeshMaterial.EmissiveMeshMaterial");
+TWeakObjectPtr<AStaticMeshActor> Plane;
+TWeakObjectPtr<UWorld> PlaneWorld;
+}
+
+void FHomesteadUIGallery::SetBackdrop(AHomesteadController& PC, bool bPlain, bool bHeroine)
+{
+    using namespace HomesteadUIGalleryBackdrop;
+    UWorld* World = PC.GetWorld();
+    UGameViewportClient* Viewport = World ? World->GetGameViewport() : nullptr;
+    if (!World || !Viewport) return;
+    for (const TCHAR* Name : HiddenFlags)
+    {
+        const int32 Index = FEngineShowFlags::FindIndexByName(Name);
+        if (Index != INDEX_NONE) Viewport->EngineShowFlags.SetSingleFlag(static_cast<uint32>(Index), !bPlain);
+    }
+    APawn* Heroine = PC.GetPawn();
+    if (Heroine) Heroine->SetActorHiddenInGame(bPlain && !bHeroine);
+    PC.HiddenActors.Reset();
+    if (PlaneWorld.Get() != World) { Plane.Reset(); PlaneWorld = World; }
+    if (!bPlain)
+    {
+        if (Plane.IsValid()) Plane->SetActorHiddenInGame(true);
+        return;
+    }
+    if (!Plane.IsValid())
+    {
+        UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, PlaneMesh);
+        UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, UnlitMaterial);
+        FActorSpawnParameters Spawn;
+        Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        AStaticMeshActor* Actor = World->SpawnActor<AStaticMeshActor>(Spawn);
+        if (!Actor || !Mesh) return;
+        UStaticMeshComponent* Component = Actor->GetStaticMeshComponent();
+        Component->SetMobility(EComponentMobility::Movable);
+        Component->SetStaticMesh(Mesh);
+        Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Component->SetCastShadow(false);
+        if (Material)
+        {
+            UMaterialInstanceDynamic* Colour = UMaterialInstanceDynamic::Create(Material, Actor);
+            Colour->SetVectorParameterValue(TEXT("Color"), Neutral);
+            Component->SetMaterial(0, Colour);
+        }
+        Plane = Actor;
+    }
+    // Square to the camera, beyond the heroine.
+    FVector Eye;
+    FRotator View;
+    PC.GetPlayerViewPoint(Eye, View);
+    const FVector Forward = View.Vector();
+    Plane->SetActorHiddenInGame(false);
+    Plane->SetActorLocationAndRotation(Eye + Forward * DistanceCm, FRotationMatrix::MakeFromZ(-Forward).Rotator());
+    Plane->SetActorScale3D(FVector(ScaleOfBasicPlane, ScaleOfBasicPlane, 1.0f));
+    // Everything else in the world is hidden from her view: the heroine, what she carries and the
+    // plane stay (the controller, HUD and camera draw nothing themselves).
+    for (TActorIterator<AActor> It(World); It; ++It)
+    {
+        AActor* Actor = *It;
+        if (Actor == Plane.Get() || Actor == Heroine || Actor == &PC) continue;
+        bool bHers = false;
+        for (AActor* Parent = Actor->GetAttachParentActor(); Parent && !bHers; Parent = Parent->GetAttachParentActor())
+            bHers = Parent == Heroine;
+        if (Heroine && Actor->GetOwner() == Heroine) bHers = true;
+        if (!bHers) PC.HiddenActors.Add(Actor);
+    }
+}
 void FHomesteadUIGallery::ResetFixture()
 {
     HomesteadUIGalleryFixture::Base.Reset();
@@ -489,6 +577,11 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             PC.BeginNewGameSetup();
             if (Skip) Skip->Set(Was, ECVF_SetByConsole);
         }, 1.5f);
+    // The garden outlines are world geometry, and night and rain are about the world's look: these keep
+    // the world on the plain backdrop.
+    for (FEntry& Entry : List)
+        Entry.bKeepWorld = Entry.Id.StartsWith(TEXT("garden-")) || Entry.Id == TEXT("focus-plant")
+            || Entry.Id.EndsWith(TEXT("-night")) || Entry.Id.EndsWith(TEXT("-rain"));
     return List;
 }
 
@@ -604,6 +697,14 @@ void Run(const TArray<FString>& Args, UWorld* World)
     auto* PC = World ? Cast<AHomesteadController>(World->GetFirstPlayerController()) : nullptr;
     const FString Verb = Args.IsEmpty() ? FString(TEXT("list")) : Args[0];
     const auto& Entries = FHomesteadUIGallery::Entries();
+    if (Verb.Equals(TEXT("backdrop"), ESearchCase::IgnoreCase))
+    {
+        const bool bPlain = Args.Num() < 2 || !Args[1].Equals(TEXT("world"), ESearchCase::IgnoreCase);
+        bLivePlain = bPlain;
+        if (PC) FHomesteadUIGallery::SetBackdrop(*PC, bPlain, true);
+        UE_LOG(LogHomesteadUIGallery, Display, TEXT("UI gallery backdrop: %s"), bPlain ? TEXT("plain") : TEXT("world"));
+        return;
+    }
     if (Verb.Equals(TEXT("list"), ESearchCase::IgnoreCase))
     {
         for (const auto& Entry : Entries) UE_LOG(LogHomesteadUIGallery, Display, TEXT("%-24s %s"), *Entry.Id, *Entry.Description);
@@ -616,10 +717,14 @@ void Run(const TArray<FString>& Args, UWorld* World)
         return;
     }
     const bool bPad = Args.Num() > 1 ? Args[1].Equals(TEXT("Pad"), ESearchCase::IgnoreCase) : PC->UsesGamepad();
-    const auto Report = [](const FString& Id)
+    TWeakObjectPtr<AHomesteadController> WeakPC(PC);
+    const auto Report = [WeakPC](const FString& Id)
     {
-        return [Id](bool bOk, const FString& Why)
+        return [Id, WeakPC](bool bOk, const FString& Why)
         {
+            const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
+            if (bOk && WeakPC.IsValid())
+                FHomesteadUIGallery::SetBackdrop(*WeakPC.Get(), bLivePlain && !(Entry && Entry->bKeepWorld), true);
             if (bOk) UE_LOG(LogHomesteadUIGallery, Display, TEXT("UI_GALLERY_READY %s"), *Id);
             else UE_LOG(LogHomesteadUIGallery, Warning, TEXT("UI_GALLERY_SKIPPED %s: %s"), *Id, *Why);
         };
@@ -655,7 +760,7 @@ void Run(const TArray<FString>& Args, UWorld* World)
 }
 
 FAutoConsoleCommandWithWorldAndArgs Command(TEXT("homestead.UIGallery"),
-    TEXT("UI gallery (Development): list | <id> | next | prev | all, then optional Pad or KBM. Puts one UI surface on screen from an isolated fixture."),
+    TEXT("UI gallery (Development): list | <id> | next | prev | all, then optional Pad or KBM; backdrop plain|world. Puts one UI surface on screen from an isolated fixture."),
     FConsoleCommandWithWorldAndArgsDelegate::CreateStatic(&Run));
 }
 #endif

@@ -9,7 +9,7 @@
 //   - Capture run: -HomesteadSmokeTest -HomesteadUIGallery[=<id>,<id>|all] [-HomesteadUIGalleryInput=Pad]
 //     on the Estate map, through Scripts\Capture-UiGallery.ps1 / Test-Game.ps1 -UIGallery. The
 //     smoke route keeps saves in its sandbox; a gallery run never touches a real save.
-//   - Live PIE: homestead.UIGallery list | <id> | next | prev | all [Pad|KBM] (editor_mcp.py gallery),
+//   - Live PIE: homestead.UIGallery list | <id> | next | prev | all [Pad|KBM], backdrop plain|world (editor_mcp.py gallery),
 //     in an editor started with -HomesteadPreviewProfile=<id> (Start-EditorMcp.ps1 -PreviewProfile gallery).
 // It runs only on an isolated save route (RefusalFor): never on a real save. Add an entry for every
 // new surface; the run fails when a book tab (SHomesteadMenu::TabPages), settings tab
@@ -47,6 +47,8 @@ struct FHomesteadUIGallery
         // Set while the entry shows another lane's work not yet on this line (what it needs); the run
         // still captures it and reports it as pending.
         FString Pending;
+        // Shown over the world even on the plain backdrop (the garden outlines are world geometry).
+        bool bKeepWorld = false;
     };
 
     static const TArray<FEntry>& Entries();
@@ -63,6 +65,12 @@ struct FHomesteadUIGallery
         TFunction<void(bool, const FString&)> OnReady);
     // Forgets the fixture taken from the current game (the next Show takes a fresh one).
     static void ResetFixture();
+    // Plain backdrop (Jenny, 2026-09-30): the UI in its real screen positions with the game out of the
+    // way. Every world actor is hidden from her camera and the sky, fog and particles are off; a flat
+    // warm-grey unlit plane fills the view behind the heroine, who stays (bHeroine) so the hints and
+    // outlines still read against her. Entries with bKeepWorld (garden outlines) keep the world.
+    // Call before each capture (the camera and streamed actors change); bPlain false restores it.
+    static void SetBackdrop(AHomesteadController& Controller, bool bPlain, bool bHeroine);
 
 private:
     static void Prepare(AHomesteadController& Controller, bool bPad);

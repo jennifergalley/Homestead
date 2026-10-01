@@ -16,7 +16,10 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     [switch]$EstateSmoke, [ValidateRange(0,1000)][int]$MaxLogErrors = 0,
     # The UI gallery (Development): each listed state captured with Slate (Source/SurvivalGame/HomesteadUIGallery.h).
     # Scripts\Capture-UiGallery.ps1 drives this per resolution and input.
-    [switch]$UIGallery, [string]$UIGalleryIds = 'all', [ValidateSet('KBM','Pad')][string]$UIGalleryInput = 'KBM')
+    [switch]$UIGallery, [string]$UIGalleryIds = 'all', [ValidateSet('KBM','Pad')][string]$UIGalleryInput = 'KBM',
+    # Plain: the UI over a flat warm-grey backdrop with the world hidden (the heroine stays unless
+    # -UIGalleryNoHeroine); World: over the game.
+    [ValidateSet('Plain','World')][string]$UIGalleryBackdrop = 'Plain', [switch]$UIGalleryNoHeroine)
 $ErrorActionPreference = 'Stop'
 if ($UIGallery -and $Packaged) { throw 'The UI gallery runs the Development editor binary (-game), not a packaged build.' }
 if ($EstateSmoke -and ($FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or $Creek -or $Crafting -or
@@ -266,7 +269,8 @@ if ($EstateSmoke) { $loopArguments = '-HomesteadEstateSmoke -HomesteadMetaHuman 
 if ($UIGallery) {
     # The normal Estate saves the run proves it never touched (-UserDir moves Saved\ into the sandbox).
     $realSaves = Join-Path $root 'Saved\SaveGames\Estate'
-    $loopArguments = "-HomesteadUIGallery=$UIGalleryIds -HomesteadUIGalleryInput=$UIGalleryInput -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRealSaveDir=`"$realSaves`""
+    $loopArguments = "-HomesteadUIGallery=$UIGalleryIds -HomesteadUIGalleryInput=$UIGalleryInput -HomesteadMetaHuman -HomesteadSkipNewGameSetup -HomesteadRealSaveDir=`"$realSaves`" -HomesteadUIGalleryBackdrop=$UIGalleryBackdrop"
+    if ($UIGalleryNoHeroine) { $loopArguments += ' -HomesteadUIGalleryNoHeroine' }
 }
 if ($RequireLit) { $loopArguments += ' -HomesteadRequireLit' }
 $execCommands = @()
