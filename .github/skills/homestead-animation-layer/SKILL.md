@@ -44,6 +44,16 @@ about 16° toward the fingers. Square it against wrist → `middle_01` before us
 line. If a gripping wrist folds, search the fist's free roll about that haft first, re-solving the
 forearm-to-knuckle angle at each key, before changing the arm pose.
 
+**Do not derive a held tool's working direction from knuckles.** That pins the hand to one roll.
+Each recipe supplies a fixed component-space swing-plane normal; derive the edge as
+`normal × haft`, then allow both fists to roll freely per key. Treat the reference hand's forearm
+twist as anatomical—not arbitrary rig—space: neutral palms face the thighs with thumbs forward, so
+a 180° palm-up-across-chest reading is genuine over-rotation.
+
+For kneeling foot changes, key a travel arc rather than dragging the foot along the ground: lift at
+about 10% of travel to 60% height, peak at 50%/100%, then descend at 90%/60%. Move one foot at a
+time on the rise, and give a 39 cm lifted step more than eight frames.
+
 **Treat a hand-bone-laid prop and finger direction as one constraint.** If gameplay lays a prop
 along the fingers, do not author fingers directly up its axis: that can fold the wrist even if the
 prop appears aligned. Define a constant finger lead over the prop axis in the recipe and apply the

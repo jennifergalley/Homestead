@@ -1172,7 +1172,8 @@ requirement.
   two-swing clearing animation and awards/clears once, without a second click or double reward.
   Architecture traces tool tier, input and reward paths before native/PIE proof.
 - **Animation anatomy and inspection** — **Props source-only `ded05f62`, not on `main`; current
-follow-up branches `props-0930b` `46b70ba3` and `realistic-animation` `8e40f725`.** It adds
+follow-up branches `props-0930b` `46b70ba3`, `realistic-animation` `8e40f725`, and
+`jennifergalley-props-anatomy-1001`.** It adds
 `.github/skills/realistic-animation/` with MetaHuman per-joint comfortable/extreme ROM tables,
 coupling, joint speeds, tool grips, posture/failure rules, review checklist and sources.
 `rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` now runs
@@ -1219,6 +1220,23 @@ coupling, joint speeds, tool grips, posture/failure rules, review checklist and 
   `joint_limits` across wrist flex/side/forearm twist; elbow-pole changes also trade those against
   shoulder internal rotation, so include shoulder in the score. The Inspector lab clip end time
   varies by about ±0.2 s between runs and is not a valid clip-length source.
+
+  **Latest anatomy-slot findings awaiting branch landing:** do not use a fist's knuckles as a held
+  tool's working direction—that locks the hand roll. `UpdateFellingHatchet` instead uses each
+  recipe's fixed component-space swing-plane normal, deriving `edge = normal × haft`, so both fists
+  can roll per key. The proposed optimizer makes 12 uniform roll bakes, scores each key/side for
+  wrist/forearm excess beyond comfortable limits (triple the penalty beyond extreme), selects the
+  best roll per key, then repeats pole-offset sweeps with elbow and shoulder in the score.
+  `E:\CopilotScratch\ce241dd6-2c0b-47ea-a402-ec9fe5dc3572\slot\rollopt.py` is the candidate
+  `homestead_agent` helper. `joint_limits` measures forearm twist from anatomical neutral—palms
+  toward thighs, thumbs forward—so palm-up across the chest at 180° is a true over-rotation.
+
+  For kneel steps, `kneel_gather.key_step` lifts a foot through a 10%/60%, 50%/100% and 90%/60%
+  travel arc; otherwise it drags across ground. Rise one foot at a time, and allow more than eight
+  frames for a 39 cm lifted step. The Inspector may transiently crash at startup with D3D device
+  removed; retry once before debugging an animation. In PowerShell, do not name helper functions
+  `r` or `n` (aliases are case-insensitive; `R` is `Invoke-History`), and do not embed a Python
+  `\"\"\"` docstring in a double-quoted PowerShell string—use the edit tool or `[char]34`.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
