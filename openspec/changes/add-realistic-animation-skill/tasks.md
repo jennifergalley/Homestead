@@ -32,6 +32,8 @@
       - AxeFell: knob roll 90 shared with the strike, left elbow pole 15 cm forward and up: left wrist flexion 99 -> 77, no wrist errors left.
       - HoeTill: left hand rolled (ulnar 65 -> 9); the right hand takes a working grip (the game turns the hoe 45 degrees in her fist as the clip blends in, the clip solved for that grip on every key): ulnar 74 -> 23, ROM errors 364 -> 211.
       - Remaining: forearm supination around 95-112 on the fell, strike and hoe (the swings' geometry); WaterRefined itself is untouched as it never plays with the MetaHuman.
+    - 2026-10-01 third slot (jennifergalley-props-anatomy-1001): the game lays the axe/pick edge from the recipe's swing plane, so both fists roll per key (chosen against joint_limits); AxeFell and HoeTill have no wrist or forearm errors left, GroundStrike's forearm 115 -> 103; the scythe's left fist rolls on its nib (left-arm cost 1539 -> 80, blade unchanged); the kneels step instead of dragging the right foot (slides 126-306 -> 51-104 cm/s; the pouch's 8-frame rise unchanged) and the sticks cradle turns palm-in (supination 180 -> 86).
+      - Remaining: GroundStrike's 1-2 frame elbow fold at the top of each downswing (needs a mid-swing hand key); KneelPullWeeds' toss (Jenny asked to keep it as is); the scythe's right wrist on the carry-to-address transition; ankle dorsiflexion and head extension on the kneels.
 
 ## 4. Animation Inspector
 
