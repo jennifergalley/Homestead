@@ -18,6 +18,7 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     # Scripts\Capture-UiGallery.ps1 drives this per resolution and input.
     [switch]$UIGallery, [string]$UIGalleryIds = 'all', [ValidateSet('KBM','Pad')][string]$UIGalleryInput = 'KBM')
 $ErrorActionPreference = 'Stop'
+if ($UIGallery -and $Packaged) { throw 'The UI gallery runs the Development editor binary (-game), not a packaged build.' }
 if ($EstateSmoke -and ($FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or $Creek -or $Crafting -or
     $Weeding -or $Clearing -or $GeneratedWoodland -or $Prompts -or $BookClarity -or $Hotbar -or $NativeMenu -or $WithAudio -or $FixtureSave)) {
     throw 'The Estate smoke route runs on its own.'
@@ -275,7 +276,45 @@ if ($ShippingQA) {
     $process = & (Join-Path $PSScriptRoot 'Invoke-ShippingQA.ps1') -PackageDirectory $packageRoot -OutputDirectory $output -Arguments $arguments -CompletionDriven:($GeneratedWoodland -or $FullLoop -or $NativeMenu)
 } else {
     $process = Start-Process -FilePath $executable -ArgumentList $arguments -PassThru
-    Write-Host "Engine smoke-test PID: $($process.Id). Log: $log"
+    # Only the process this script started, matched by its image: never Jenny's Build\Windows or
+    # Releases game. It runs in a kill-on-close job, so an aborted or timed-out run takes it (and the
+    # shader workers it starts) down when this script's process ends.
+    $image = try { $process.MainModule.FileName } catch { $process.Path }
+    if ($image -and -not [string]::Equals([IO.Path]::GetFullPath($image), [IO.Path]::GetFullPath($executable), [StringComparison]::OrdinalIgnoreCase)) {
+        Stop-Process -Id $process.Id
+        throw "Started $image instead of $executable; stopped it."
+    }
+    if (-not ('HomesteadKillOnCloseJob' -as [type])) {
+        Add-Type -TypeDefinition @"
+using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
+public static class HomesteadKillOnCloseJob
+{
+    [StructLayout(LayoutKind.Sequential)] struct Basic { public long PerProcessUserTimeLimit, PerJobUserTimeLimit; public uint LimitFlags; public UIntPtr MinimumWorkingSetSize, MaximumWorkingSetSize; public uint ActiveProcessLimit; public UIntPtr Affinity; public uint PriorityClass, SchedulingClass; }
+    [StructLayout(LayoutKind.Sequential)] struct Counters { public ulong ReadOperations, WriteOperations, OtherOperations, ReadBytes, WriteBytes, OtherBytes; }
+    [StructLayout(LayoutKind.Sequential)] struct Extended { public Basic BasicLimits; public Counters Io; public UIntPtr ProcessMemoryLimit, JobMemoryLimit, PeakProcessMemoryUsed, PeakJobMemoryUsed; }
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)] static extern IntPtr CreateJobObject(IntPtr attributes, string name);
+    [DllImport("kernel32.dll", SetLastError = true)] static extern bool SetInformationJobObject(IntPtr job, int infoClass, ref Extended info, uint length);
+    [DllImport("kernel32.dll", SetLastError = true)] static extern bool AssignProcessToJobObject(IntPtr job, IntPtr process);
+    const uint KillOnJobClose = 0x2000;
+    const int ExtendedLimitInformation = 9;
+    // The job handle stays open for this PowerShell process's life; closing it kills everything in it.
+    public static IntPtr Adopt(IntPtr process)
+    {
+        IntPtr job = CreateJobObject(IntPtr.Zero, null);
+        if (job == IntPtr.Zero) throw new Win32Exception();
+        Extended info = new Extended();
+        info.BasicLimits.LimitFlags = KillOnJobClose;
+        if (!SetInformationJobObject(job, ExtendedLimitInformation, ref info, (uint)Marshal.SizeOf(typeof(Extended)))) throw new Win32Exception();
+        if (!AssignProcessToJobObject(job, process)) throw new Win32Exception();
+        return job;
+    }
+}
+"@
+    }
+    $script:gameJob = [HomesteadKillOnCloseJob]::Adopt($process.Handle)
+    Write-Host "Engine smoke-test PID: $($process.Id) (kill-on-close job). Log: $log"
 }
 Write-Host "Requested output: ${Width}x${Height}; 3D resolution policy: $(if($ShippingQA){'unchanged Shipping defaults'}elseif($RenderScale -eq 0){'player default'}else{$RenderScale})."
 if (-not $ShippingQA -and -not $process.WaitForExit($TimeoutSeconds * 1000)) {

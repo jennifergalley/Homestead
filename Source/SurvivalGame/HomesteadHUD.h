@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
+#include "UI/HomesteadNoticeStyle.h"
 #include "HomesteadHUD.generated.h"
 
 class AHomesteadController;
@@ -66,7 +67,7 @@ private:
     // units), or 0 when nothing is focused, so the toast can stack under it.
     float DrawInteractCue(const AHomesteadController& PC);
     // The parchment notice card (UI/HomesteadNoticeStyle.h) in HUD units; a rust frame for errors.
-    void NoticeCard(float X, float Y, float Width, float Height, bool bError);
+    void NoticeCard(float X, float Y, float Width, float Height, HomesteadNoticeStyle::ESurface Surface);
     float TextWidth(const FString& Text, float Size) const;
     void DrawAppearanceBook(const AHomesteadController& PC);
 };

@@ -9,13 +9,16 @@
 //   - Capture run: -HomesteadSmokeTest -HomesteadUIGallery[=<id>,<id>|all] [-HomesteadUIGalleryInput=Pad]
 //     on the Estate map, through Scripts\Capture-UiGallery.ps1 / Test-Game.ps1 -UIGallery. The
 //     smoke route keeps saves in its sandbox; a gallery run never touches a real save.
-//   - Live PIE: homestead.UIGallery list | <id> | next | prev | all [Pad|KBM] (editor_mcp.py gallery).
-// Add an entry for every new surface; the run fails when a book tab, settings tab or notice style
-// has none (MissingCoverage).
+//   - Live PIE: homestead.UIGallery list | <id> | next | prev | all [Pad|KBM] (editor_mcp.py gallery),
+//     in an editor started with -HomesteadPreviewProfile=<id> (Start-EditorMcp.ps1 -PreviewProfile gallery).
+// It runs only on an isolated save route (RefusalFor): never on a real save. Add an entry for every
+// new surface; the run fails when a book tab (SHomesteadMenu::TabPages), settings tab
+// (SHomesteadMenu::SettingsTabCount) or notice surface (HomesteadNoticeStyle::ESurface) has none.
 #include "CoreMinimal.h"
 
 #if !UE_BUILD_SHIPPING
 #include "Simulation/HomesteadSimulation.h"
+#include "UI/HomesteadNoticeStyle.h"
 
 class AHomesteadController;
 
@@ -23,12 +26,8 @@ struct FHomesteadUIGallery
 {
     // What an entry stands for in the coverage check.
     enum class ECover : uint8 { BookPage, SettingsTab, Notice, Focus, Hud, Dialog, Shop, Setup };
-    // Every notice style on screen; each needs an entry.
-    enum class ENotice : uint8
-    {
-        WorldToast, WorldToastError, WorldToastLong, BookNotice, BookNoticeError, FocusCard, Pickup,
-        ControlsStrip, ShopStatus, Count
-    };
+    // Every notice surface the game draws (UI/HomesteadNoticeStyle.h); each needs an entry.
+    using ENotice = HomesteadNoticeStyle::ESurface;
     // Where she stands for an entry (world hints need something in front of her).
     struct FStage
     {
@@ -56,6 +55,9 @@ struct FHomesteadUIGallery
     static TArray<FString> Resolve(const FString& Spec, FString& Error);
     // Book tabs, settings tabs and notice styles with no entry ("book-page-3", "notice-5").
     static TArray<FString> MissingCoverage(const AHomesteadController& Controller);
+    // Only on an isolated save route (the smoke sandbox, or a -HomesteadPreviewProfile editor): the
+    // gallery changes the game it runs in (clock, stock, plots, names). Empty when allowed, else why not.
+    static FString RefusalFor(const AHomesteadController& Controller);
     // Puts `Id` on screen in this game; OnReady(true) once it has settled, or (false, why).
     static void Show(AHomesteadController& Controller, const FString& Id, bool bPad,
         TFunction<void(bool, const FString&)> OnReady);

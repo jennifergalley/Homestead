@@ -212,7 +212,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             return true;
         };
     };
-    const auto SignIndex = [](const TCHAR* Name)
+    const auto SignIndex = [](const TCHAR* Name) -> int32
     {
         const auto& Signs = Homestead::EstatePublicRoad().signs;
         for (int32 Index = 0; Index < static_cast<int32>(Signs.size()); ++Index)
@@ -247,9 +247,8 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         Entry.Apply = MoveTemp(Apply);
         Entry.Settle = Settle;
     };
-    const int32 Toast = static_cast<int32>(ENotice::WorldToast);
-    const int32 ToastError = static_cast<int32>(ENotice::WorldToastError);
-    const int32 ToastLong = static_cast<int32>(ENotice::WorldToastLong);
+    const int32 Toast = static_cast<int32>(ENotice::WorldNotice);
+    const int32 ToastError = static_cast<int32>(ENotice::WorldNoticeError);
 
     // The field book.
     Add(TEXT("book-pack"), TEXT("Field book, Inventory tab: the hotbar row over the pack grid, her portrait and equipped slots."),
@@ -366,7 +365,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Notice, Toast, nullptr, Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false));
     Add(TEXT("toast-error"), TEXT("World error notice: the rust-edged slip."),
         ECover::Notice, ToastError, nullptr, Notify(TEXT("Walk closer to a plant, resource, or work area."), true));
-    Add(TEXT("toast-long"), TEXT("A long world notice wrapping to two or three lines."), ECover::Notice, ToastLong, nullptr,
+    Add(TEXT("toast-long"), TEXT("A long world notice wrapping to two or three lines."), ECover::Hud, 11, nullptr,
         Notify(TEXT("Mowed 6 tufts: +4 Hay, +3 Weeds, +1 Seeds. The old orchard meadow is opening up; come back with the scythe tomorrow for the rest."), false));
     Add(TEXT("toast-error-long"), TEXT("A long error notice wrapping to more than one line."), ECover::Hud, 0, nullptr,
         Notify(TEXT("Could not save vertical sync. Your previous preference was restored. Check that the settings file isn't read-only, then try again."), true));
@@ -389,7 +388,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("hud-hotbar-tool"), TEXT("The hotbar with the hoe selected and empty cells."), ECover::Hud, 6, nullptr,
         [](AHomesteadController& PC) { PC.ChooseOnHotbar(Item::DiggingStick); });
     Add(TEXT("hud-pickups"), TEXT("Pickup lines beside her: +3 Berries, +2 Branch, +1 Stone."),
-        ECover::Notice, static_cast<int32>(ENotice::Pickup), nullptr, [](AHomesteadController& PC)
+        ECover::Notice, static_cast<int32>(ENotice::PickupLine), nullptr, [](AHomesteadController& PC)
         {
             PC.bPickupsPrimed = true;
             PC.Pickups = {{Item::Berries, 3, 0.0f}, {Item::Branch, 2, 0.0f}, {Item::Stone, 1, 0.0f}};
@@ -440,32 +439,32 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     // Simulation::CheckSow, PreviewGarden(Seed), DescribeSow). Until it is on this line these show the
     // older cue and no seed outline, and the run reports them as pending.
     const TCHAR* const SeedOutline = TEXT("Water's seed outline (jennifergalley-seed-outline @6408cdd7)");
-    const auto TurnipSeed = [](AHomesteadController& PC, bool bSelect)
+    const auto SowSeed = [](AHomesteadController& PC, bool bSelect)
     {
-        if (PC.Sim.Count(Item::TurnipSeed) < 4) PC.Sim.GrantItems(Item::TurnipSeed, 4 - PC.Sim.Count(Item::TurnipSeed));
-        PC.ChooseOnHotbar(Item::TurnipSeed);
+        if (PC.Sim.Count(Item::CarrotSeed) < 4) PC.Sim.GrantItems(Item::CarrotSeed, 4 - PC.Sim.Count(Item::CarrotSeed));
+        PC.ChooseOnHotbar(Item::CarrotSeed);
         if (!bSelect)
         {
             const int32 Empty = PC.FirstEmptyHotbarCell();
             if (Empty != INDEX_NONE) PC.SelectHotbarSlot(Empty);
         }
     };
-    Add(TEXT("garden-seed-plant"), TEXT("Turnip seed chosen over a tilled square: the green outline and '[E] Plant Turnip seed'."),
-        ECover::Focus, 11, Garden, [TillAhead, TurnipSeed](AHomesteadController& PC) { TillAhead(PC); TurnipSeed(PC, true); });
+    Add(TEXT("garden-seed-plant"), TEXT("Carrot seed chosen over a tilled square: the green outline and '[E] Plant Carrot seed'."),
+        ECover::Focus, 11, Garden, [TillAhead, SowSeed](AHomesteadController& PC) { TillAhead(PC); SowSeed(PC, true); });
     List.Last().Pending = SeedOutline;
-    Add(TEXT("garden-seed-occupied"), TEXT("Turnip seed over a square already sown: the red outline and 'A crop is already growing here.'"),
-        ECover::Focus, 12, Garden, [TillAhead, TurnipSeed](AHomesteadController& PC)
+    Add(TEXT("garden-seed-occupied"), TEXT("Carrot seed over a square already sown: the red outline and 'A crop is already growing here.'"),
+        ECover::Focus, 12, Garden, [TillAhead, SowSeed](AHomesteadController& PC)
         {
             const int32 Plot = TillAhead(PC);
-            TurnipSeed(PC, true);
-            if (Plot >= 0) PC.Sim.Plant(Plot, PC.PlayerPoint(), Homestead::CropKind::Turnips);
+            SowSeed(PC, true);
+            if (Plot >= 0) PC.Sim.Plant(Plot, PC.PlayerPoint(), Homestead::CropKind::Carrots);
         });
     List.Last().Pending = SeedOutline;
-    Add(TEXT("garden-seed-select"), TEXT("A tilled square with turnip seed in the hotbar but not chosen: 'Select Turnip seed (4) to plant'."),
-        ECover::Focus, 13, Garden, [TillAhead, TurnipSeed](AHomesteadController& PC) { TillAhead(PC); TurnipSeed(PC, false); });
+    Add(TEXT("garden-seed-select"), TEXT("A tilled square with carrot seed in the hotbar but not chosen: 'Select Carrot seed (4) to plant'."),
+        ECover::Focus, 13, Garden, [TillAhead, SowSeed](AHomesteadController& PC) { TillAhead(PC); SowSeed(PC, false); });
     List.Last().Pending = SeedOutline;
-    Add(TEXT("garden-seed-untilled"), TEXT("Turnip seed chosen over untilled meadow: the red outline and 'Till this square before sowing.'"),
-        ECover::Focus, 14, Garden, [TurnipSeed](AHomesteadController& PC) { TurnipSeed(PC, true); });
+    Add(TEXT("garden-seed-untilled"), TEXT("Carrot seed chosen over untilled meadow: the red outline and 'Till this square before sowing.'"),
+        ECover::Focus, 14, Garden, [SowSeed](AHomesteadController& PC) { SowSeed(PC, true); });
     List.Last().Pending = SeedOutline;
 
     // Night and rain: the same HUD and notices under the night sky and in the rain.
@@ -480,7 +479,15 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("setup-names"), TEXT("New-game Names step: her name, family and estate fields with the suggestions."), ECover::Setup, 1, nullptr,
         [](AHomesteadController& PC) { PC.bNewGameSetup = true; PC.ShowNames(); }, 1.2f);
     Add(TEXT("setup-new-game"), TEXT("New-game setup from the start (last in a run): the Appearance step before Names."), ECover::Setup, 0, nullptr,
-        [](AHomesteadController& PC) { PC.BeginNewGameSetup(); }, 1.5f);
+        [](AHomesteadController& PC)
+        {
+            // Shown even where agents skip it (-HomesteadSkipNewGameSetup): the gallery is for looking at it.
+            IConsoleVariable* Skip = IConsoleManager::Get().FindConsoleVariable(TEXT("homestead.SkipNewGameSetup"));
+            const int32 Was = Skip ? Skip->GetInt() : -1;
+            if (Skip) Skip->Set(0, ECVF_SetByCode);
+            PC.BeginNewGameSetup();
+            if (Skip) Skip->Set(Was, ECVF_SetByCode);
+        }, 1.5f);
     return List;
 }
 
@@ -508,7 +515,7 @@ TArray<FString> FHomesteadUIGallery::Resolve(const FString& Spec, FString& Error
     return Ids;
 }
 
-TArray<FString> FHomesteadUIGallery::MissingCoverage(const AHomesteadController& PC)
+TArray<FString> FHomesteadUIGallery::MissingCoverage(const AHomesteadController&)
 {
     TSet<int32> Pages, Tabs, Notices;
     for (const FEntry& Entry : Entries())
@@ -517,28 +524,35 @@ TArray<FString> FHomesteadUIGallery::MissingCoverage(const AHomesteadController&
         else if (Entry.Cover == ECover::SettingsTab) Tabs.Add(Entry.Key);
         else if (Entry.Cover == ECover::Notice) Notices.Add(Entry.Key);
     }
-    // Settings and Credits open without a tab; every page the book shows a tab for counts too.
-    TArray<int32> Needed = {4, 5};
-    if (PC.NativeMenu.IsValid())
-    {
-        for (int32 Page = 0; Page < 10; ++Page)
-            if (PC.NativeMenu->HasTabForPage(Page)) Needed.AddUnique(Page);
-    }
-    else for (const int32 Page : {0, 1, 2, 6, 7}) Needed.AddUnique(Page);
+    // Every page the tab bar cycles through, and the two the book opens without a tab: Settings
+    // (Start / Esc) and Credits (from Settings).
+    constexpr int32 SettingsPage = 4, CreditsPage = 5;
+    TArray<int32> Needed(HomesteadMenus::SHomesteadMenu::TabPages());
+    Needed.AddUnique(SettingsPage);
+    Needed.AddUnique(CreditsPage);
     TArray<FString> Missing;
     for (const int32 Page : Needed)
         if (!Pages.Contains(Page)) Missing.Add(FString::Printf(TEXT("book-page-%d"), Page));
-    for (int32 Tab = 0; Tab < 3; ++Tab)
+    for (int32 Tab = 0; Tab < HomesteadMenus::SHomesteadMenu::SettingsTabCount; ++Tab)
         if (!Tabs.Contains(Tab)) Missing.Add(FString::Printf(TEXT("settings-tab-%d"), Tab));
     for (int32 Style = 0; Style < static_cast<int32>(ENotice::Count); ++Style)
         if (!Notices.Contains(Style)) Missing.Add(FString::Printf(TEXT("notice-%d"), Style));
     return Missing;
 }
 
+FString FHomesteadUIGallery::RefusalFor(const AHomesteadController& PC)
+{
+    if (PC.SaveRoute.Mode == TEXT("test-sandbox") || PC.SaveRoute.Mode == TEXT("preview")) return FString();
+    return FString::Printf(TEXT("The UI gallery changes the game it runs in, and this game saves to %s (%s). Run it with ")
+        TEXT("-HomesteadSmokeTest (Capture-UiGallery.ps1), or start the editor with -HomesteadPreviewProfile=<id> ")
+        TEXT("(Start-EditorMcp.ps1 -PreviewProfile gallery)."), *PC.SaveRoute.Directory, *PC.SaveRoute.Mode);
+}
+
 void FHomesteadUIGallery::Show(AHomesteadController& PC, const FString& Id, bool bPad,
     TFunction<void(bool, const FString&)> OnReady)
 {
     using namespace HomesteadUIGalleryFixture;
+    if (const FString Refusal = RefusalFor(PC); !Refusal.IsEmpty()) { OnReady(false, Refusal); return; }
     const FEntry* Entry = Find(Id);
     if (!Entry) { OnReady(false, TEXT("No gallery entry ") + Id); return; }
     if (Pending.IsValid()) { FTSTicker::GetCoreTicker().RemoveTicker(Pending); Pending.Reset(); }
@@ -595,6 +609,11 @@ void Run(const TArray<FString>& Args, UWorld* World)
         return;
     }
     if (!PC) { UE_LOG(LogHomesteadUIGallery, Warning, TEXT("UI gallery: start the game (PIE) first.")); return; }
+    if (const FString Refusal = FHomesteadUIGallery::RefusalFor(*PC); !Refusal.IsEmpty())
+    {
+        UE_LOG(LogHomesteadUIGallery, Warning, TEXT("UI_GALLERY_REFUSED %s"), *Refusal);
+        return;
+    }
     const bool bPad = Args.Num() > 1 ? Args[1].Equals(TEXT("Pad"), ESearchCase::IgnoreCase) : PC->UsesGamepad();
     const auto Report = [](const FString& Id)
     {

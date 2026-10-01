@@ -48,9 +48,10 @@ FVector2D Measure(const FString& Text, float Size)
 }
 }
 
-void AHomesteadHUD::NoticeCard(float X, float Y, float Width, float Height, bool bError)
+void AHomesteadHUD::NoticeCard(float X, float Y, float Width, float Height, HomesteadNoticeStyle::ESurface Surface)
 {
     using namespace HomesteadNoticeStyle;
+    const bool bError = IsError(Surface);
     Panel(X + 1, Y + 4, Width, Height, Shadow);
     Panel(X, Y, Width, Height, bError ? RustInk : Frame);
     Panel(X + FrameWidth, Y + FrameWidth, Width - FrameWidth * 2, Height - FrameWidth * 2, FLinearColor(Paper.R, Paper.G, Paper.B, 1));
@@ -403,7 +404,7 @@ void AHomesteadHUD::DrawHUD()
             ToastSource = Toast;
             ToastBounds = FBox2D(FVector2D(X, Y) * UiScale, FVector2D(X + Width, Y + Height) * UiScale);
         }
-        NoticeCard(X, Y, Width, Height, PC->ToastIsError());
+        NoticeCard(X, Y, Width, Height, PC->ToastIsError() ? HomesteadNoticeStyle::ESurface::WorldNoticeError : HomesteadNoticeStyle::ESurface::WorldNotice);
         const FLinearColor TextInk = PC->ToastIsError() ? HomesteadNoticeStyle::RustInk : HomesteadNoticeStyle::InkBrown;
         for (int32 Index = 0; Index < Lines.Num(); ++Index)
             Write(Lines[Index], X + PadX, Y + PadTop + Index * Step, TextSize, TextInk);
@@ -482,7 +483,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
         if (Top < Vitals.Max.Y + Margin && CenterX + BoxWidth * 0.5f + Margin > Vitals.Min.X)
             CenterX = FMath::Max(BoxWidth * 0.5f + 12, Vitals.Min.X - Margin - BoxWidth * 0.5f);
     }
-    NoticeCard(CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight, false);
+    NoticeCard(CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight, HomesteadNoticeStyle::ESurface::FocusCard);
     ProtectFeedback(TEXT("interact-cue"), CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight);
     float Y = Top + 10;
     if (!Title.IsEmpty())

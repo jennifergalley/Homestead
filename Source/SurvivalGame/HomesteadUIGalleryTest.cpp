@@ -5,6 +5,7 @@
 // Scripts\Capture-UiGallery.ps1 runs this at each resolution and builds the contact sheet.
 #include "HomesteadSmokeTest.h"
 #include "HomesteadController.h"
+#include "HomesteadSaveRouting.h"
 #include "HomesteadTestPaths.h"
 #include "HomesteadUIGallery.h"
 
@@ -15,6 +16,7 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Parse.h"
 #include "Misc/Paths.h"
+#include "HAL/PlatformProcess.h"
 #include "UnrealClient.h"
 
 namespace UIGalleryRun
@@ -25,6 +27,25 @@ constexpr float StreamInSeconds = 20.0f;
 constexpr float EntrySeconds = 75.0f;
 // Time for the requested screenshot to be written before the next entry changes the screen.
 constexpr float CaptureSeconds = 0.8f;
+
+// Every file under the normal (non-sandbox) Estate save folder, with its size and time: the run proves
+// nothing there changed.
+TMap<FString, FString> SnapshotRealEstateSaves()
+{
+    TMap<FString, FString> Files;
+    FHomesteadSaveRoute Route;
+    FString Error;
+    if (!ResolveHomesteadSaveRoute(TEXT(""), FPaths::ProjectSavedDir(), FPlatformProcess::UserSettingsDir(),
+        HomesteadTestOutputDirectory(), Route, Error)) return Files;
+    const FString Folder = FPaths::Combine(Route.Directory, TEXT("Estate"));
+    TArray<FString> Found;
+    IFileManager::Get().FindFilesRecursive(Found, *Folder, TEXT("*"), true, false);
+    for (const FString& File : Found)
+        Files.Add(File, FString::Printf(TEXT("%lld %s"), IFileManager::Get().FileSize(*File),
+            *IFileManager::Get().GetTimeStamp(*File).ToString()));
+    Files.Add(TEXT("<folder>"), Folder);
+    return Files;
+}
 }
 
 void AHomesteadSmokeTest::PrepareUIGalleryChecks()
@@ -49,6 +70,15 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
     FHomesteadUIGallery::ResetFixture();
     Results.Add(FString::Printf(TEXT("UI_GALLERY ids=%d input=%s"), Ids.Num(), bPad ? TEXT("Pad") : TEXT("KBM")));
 
+    // It never runs on a real save: the sandbox route, and nothing written to the normal Estate saves.
+    const auto RealSaves = MakeShared<TMap<FString, FString>>(UIGalleryRun::SnapshotRealEstateSaves());
+    Add(TEXT("The gallery runs on the sandboxed save route"), []() {},
+        [this]()
+        {
+            const FString Refusal = FHomesteadUIGallery::RefusalFor(*Controller);
+            if (!Refusal.IsEmpty()) { Finish(false, Refusal); return false; }
+            return Controller->SaveRoute.Mode == TEXT("test-sandbox");
+        });
     Add(TEXT("Every book tab, settings tab and notice style has a gallery entry"), []() {},
         [this]()
         {
@@ -111,5 +141,14 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
         Capture.Check = []() { return true; };
         Capture.Wait = UIGalleryRun::CaptureSeconds;
     }
+    Add(TEXT("Nothing under the normal Estate saves was written during the gallery"), []() {},
+        [this, RealSaves]()
+        {
+            const TMap<FString, FString> Now = UIGalleryRun::SnapshotRealEstateSaves();
+            const bool bSame = Now.OrderIndependentCompareEqual(*RealSaves);
+            Results.Add(FString::Printf(TEXT("UI_GALLERY_REAL_SAVES files=%d unchanged=%d folder=%s"),
+                FMath::Max(0, Now.Num() - 1), bSame, *Now.FindRef(TEXT("<folder>"))));
+            return bSame;
+        });
 #endif
 }

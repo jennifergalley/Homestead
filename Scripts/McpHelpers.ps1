@@ -112,7 +112,7 @@ function pie() {
 
 # UI gallery in the running PIE (homestead.UIGallery): gallery <id> [Pad|KBM] [waitSeconds], then
 # the editor capture path. 'gallery list' logs the ids. Every state at several resolutions:
-# Scripts\Capture-UiGallery.ps1.
+# Scripts\Capture-UiGallery.ps1. Only on an isolated save route: Start-EditorMcp.ps1 -PreviewProfile gallery.
 function gallery([string]$id = 'list', [string]$inputMode = 'KBM', [double]$wait = 6) {
     if ($id -eq 'list') { $null = con 'homestead.UIGallery list'; return 'Listed in the Output Log (LogHomesteadUIGallery).' }
     $null = con "homestead.UIGallery $id $inputMode"

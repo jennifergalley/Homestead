@@ -13,7 +13,9 @@ Examples:
 
 `gallery <id>` puts one UI gallery state on screen in the running in-viewport PIE
 (homestead.UIGallery, Source/SurvivalGame/HomesteadUIGallery.h) and captures the editor window,
-Slate included. For every state at several resolutions use Scripts/Capture-UiGallery.ps1.
+Slate included. It runs only on an isolated save route: start the editor with
+Start-EditorMcp.ps1 -PreviewProfile gallery. For every state at several resolutions use
+Scripts/Capture-UiGallery.ps1.
 """
 from __future__ import annotations
 

@@ -190,7 +190,7 @@ int32 SHomesteadMenu::SettingsTabOf(int32 SettingId)
 
 void SHomesteadMenu::SetSettingsTab(int32 Tab)
 {
-    Tab = FMath::Clamp(Tab, 0, 2);
+    Tab = FMath::Clamp(Tab, 0, SettingsTabCount - 1);
     if (Tab == SettingsTab || Dialog != EDialog::None) return;
     SettingsTab = Tab;
     if (Scroll) Scroll->ScrollToStart();

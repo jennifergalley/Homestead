@@ -78,6 +78,9 @@ public:
     FString GetFocusedRegionName() const;
     // The field book's tabs (automation): how many there are, and whether one opens `Page`.
     int32 GetTabPageCount() const;
+    // The pages the tab bar cycles through (MenuDetail::FieldBookPages), and how many tabs Settings has.
+    static TConstArrayView<int32> TabPages();
+    static constexpr int32 SettingsTabCount = 3;
     bool HasTabForPage(int32 Page) const;
     bool HasSynchronizedFocus() const;
     bool IsFocusedControlVisible() const;

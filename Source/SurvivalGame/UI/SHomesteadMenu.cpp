@@ -298,6 +298,7 @@ void SHomesteadMenu::Refresh()
 }
 
 int32 SHomesteadMenu::GetTabPageCount() const { return UE_ARRAY_COUNT(FieldBookPages); }
+TConstArrayView<int32> SHomesteadMenu::TabPages() { return MakeArrayView(FieldBookPages); }
 bool SHomesteadMenu::HasTabForPage(int32 Page) const
 {
     for (const int32 Tab : FieldBookPages) if (Tab == Page) return true;
