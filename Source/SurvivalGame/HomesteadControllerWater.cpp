@@ -54,7 +54,9 @@ Homestead::Point AHomesteadController::FreshWaterDipPoint(Homestead::Point Posit
 void AHomesteadController::FillPailAtStream(Homestead::Point Position)
 {
     const auto Result = Sim.FillWater(Position);
-    Notify(Result);
+    // Jenny's concise rule: the gauge and the dip show a full pail, so only a refusal toasts.
+    if (!Result.ok) Notify(Result);
+    else RefreshRemaining = 0;
     // She kneels at the bank and dips the pail into the nearest authored fresh-water ribbon; standing in
     // the shallows, she dips where she stands instead (Jenny, 2026-09-30: fill in the water, not from the bank).
     if (Result.ok)
