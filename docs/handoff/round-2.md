@@ -543,13 +543,15 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 | 581000-581099 | **reserved exclusively** for Water roadside forage (approval 2026-09-29; `Scripts\Terrain\forage.py` → `HomesteadEstateRoadsidePlacements.inc`) |
 | 582000-582099 | clearable manor ruin rubble (Props; `HomesteadEstateRuinRubblePlacements` in `HomesteadEstate.cpp`) |
 | 582100-582299 | extra pickable forage in Estate woods and fields (Water; `Scripts\Terrain\forage.py` → `Simulation\HomesteadEstateForagePlacements.inc`) |
-| *next free: 582300+* | *claim here* |
+| 582300-582399 | **reserved exclusively** for Water lake-trail forage (approval 2026-10-01; `Scripts\Terrain\lake_path_plants.py` → `Simulation\HomesteadEstateLakePathPlacements.inc`; appended last after tool rack 520006) |
+| *next free: 582400+* | *claim here* |
 
 | Scenery kinds (`EstateSceneryKinds`; `scatter.py` kind bytes must match) | Owner |
 | --- | --- |
 | 13-18 | trees (oak, beech, sycamore, hawthorn, holly, hazel coppice) |
 | 19-41 | MVP woodland biome |
-| *next free: 42+* | *claim here* |
+| 42-48 | **reserved exclusively** for Water lake-trail wildflowers (`lake_path_plants.py`): bluebell, primrose, wild garlic, wood anemone, red campion, foxglove and cow parsley |
+| *next free: 49+* | *claim here* |
 
 ## Shared interfaces this round
 
@@ -690,6 +692,14 @@ approval; the generated-placement safety block remains until a verified merge.
 with 2.4 m cleared verges. Its terrain import requires `bake_ground.py` and then
 `build_ground.py` from the **same checkout**, because `Saved\Ground` PNGs are per-worktree. It
 remains unintegrated and needs the terrain/import verification described on Water's branch.
+
+**Lake-trail forage `bbea5da8` (unmerged):** claimed ids `582300–582399` are appended last through
+`lake_path_plants.py`; the generator emits live BerryBush/Roots to
+`HomesteadEstateLakePathPlacements.inc` and decorative wildflowers using scenery kinds 42–48.
+Once its forage include exists, rows are read back as save identity and never replanned; `--replan`
+is permitted only before shipment. `scatter.py` reruns `lake_path_plants.bake()` after
+`lake_features` so a fresh scatter preserves the flower clearing/records. This remains branch-only
+until save-stability, native, editor and package evidence admits it.
 
 **Packaged lake pail regression:** the diagnosis is inconclusive; do not make a speculative shore-range
 change. The shipped probe accepts lake shore <=120 cm, and PIE filled at landing (-79, -744) using an
