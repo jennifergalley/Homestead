@@ -210,7 +210,7 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return Controller->Toast() == TEXT("Could not save vertical sync. Your previous preference was restored.")
             && Controller->ToastIsError() && !GEngine->GetGameUserSettings()->IsVSyncEnabled()
-            && Controller->Simulation().Serialize() == *Before && Controller->SelectedRow() == 11; });
+            && Controller->Simulation().Serialize() == *Before && (Controller->Rows().IsValidIndex(Controller->SelectedRow()) && Controller->Rows()[Controller->SelectedRow()].Id == 11); });
     Capture(TEXT("feedback-settings-error"));
     Add(TEXT("Restore synthetic graphics file write permission"),
         [Config]() { FPlatformFileManager::Get().GetPlatformFile().SetReadOnly(*Config, false); },
@@ -218,7 +218,7 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     Add(TEXT("Controller success replaces error on same Settings row"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return !Controller->ToastIsError() && GEngine->GetGameUserSettings()->IsVSyncEnabled()
-            && Controller->SelectedRow() == 11 && Controller->Simulation().Serialize() == *Before; });
+            && (Controller->Rows().IsValidIndex(Controller->SelectedRow()) && Controller->Rows()[Controller->SelectedRow()].Id == 11) && Controller->Simulation().Serialize() == *Before; });
     Capture(TEXT("feedback-settings-success"));
     Add(TEXT("Keyboard restores Off in synthetic config with correct input hint"),
         [this]() { Tap(EKeys::Enter); },
