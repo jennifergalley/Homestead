@@ -55,22 +55,27 @@ void AHomesteadWorld::BuildCoveRoute()
     const Homestead::CoveKitLayout& Kit = Homestead::EstateCoveRouteKit();
     if (Kit.pieces.empty()) return;
 
-    // The kit must be complete: half a flight of steps is worse than the graded path alone.
+    // Each of Props' groups (steps, kerbs, rails, fingerposts) goes down whole or not at all, independently of
+    // the others (Homestead::CoveKitPlaceableGroups): the steps don't wait on a parked fingerpost.
     UStaticMesh* Meshes[UE_ARRAY_COUNT(KitMeshes)] = {};
+    Homestead::CoveKitMeshesLoaded Loaded{};
     TArray<FString> Missing;
     for (int32 Index = 0; Index < UE_ARRAY_COUNT(KitMeshes); ++Index)
     {
         const FString Path = FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s/%s.%s"),
             KitMeshes[Index].Folder, KitMeshes[Index].Name, KitMeshes[Index].Name);
         Meshes[Index] = LoadObject<UStaticMesh>(nullptr, *Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
+        Loaded[Index] = Meshes[Index] != nullptr;
         if (!Meshes[Index]) Missing.Add(KitMeshes[Index].Name);
     }
-    if (!Missing.IsEmpty())
-    {
-        UE_LOG(LogHomesteadWorld, Log, TEXT("Cove route: the step kit isn't imported (%s); the route is the graded path only."),
-            *FString::Join(Missing, TEXT(", ")));
-        return;
-    }
+    const Homestead::CoveKitGroupsPlaced Groups = Homestead::CoveKitPlaceableGroups(Loaded);
+    TArray<FString> Skipped;
+    for (int32 Group = 0; Group < static_cast<int32>(Homestead::CoveKitGroup::Count); ++Group)
+        if (!Groups[Group]) Skipped.Add(UTF8_TO_TCHAR(Homestead::CoveKitGroupName(static_cast<Homestead::CoveKitGroup>(Group))));
+    if (!Skipped.IsEmpty())
+        UE_LOG(LogHomesteadWorld, Log, TEXT("Cove route: not placing %s (missing %s)."),
+            *FString::Join(Skipped, TEXT(", ")), *FString::Join(Missing, TEXT(", ")));
+    if (Skipped.Num() == static_cast<int32>(Homestead::CoveKitGroup::Count)) return;
 
     auto Transform = [](const Homestead::CoveKitPlacement& Piece)
     {
@@ -80,10 +85,14 @@ void AHomesteadWorld::BuildCoveRoute()
     };
     TMap<int32, TObjectPtr<UInstancedStaticMeshComponent>> Batches;
     int32 Placed = 0;
+    int32 PlacedOf[static_cast<int32>(Homestead::CoveKitPiece::Count)] = {};
+    int32 Blockers = 0;
     for (const Homestead::CoveKitPlacement& Piece : Kit.pieces)
     {
         const int32 Index = static_cast<int32>(Piece.piece);
         UStaticMesh* Mesh = Meshes[Index];
+        if (!Groups[static_cast<int32>(Homestead::CoveKitGroupOf(Piece.piece))]) continue;
+        ++PlacedOf[Index];
         // A mirrored wedge (a left-hand turn) has negative Y scale too.
         if (IsRail(Piece.piece) || Piece.piece == Homestead::CoveKitPiece::Fingerpost || Piece.piece == Homestead::CoveKitPiece::RailEndPost
             || Piece.piece == Homestead::CoveKitPiece::LandingWedge)
@@ -138,6 +147,8 @@ void AHomesteadWorld::BuildCoveRoute()
     }
     for (const Homestead::CoveKitBlocker& Edge : Kit.blockers)
     {
+        // The pawn blockers stand behind the rails: with no rails, no invisible walls.
+        if (!Groups[static_cast<int32>(Homestead::CoveKitGroup::Rails)]) break;
         UBoxComponent* Blocker = NewObject<UBoxComponent>(this, NAME_None, RF_Transient);
         Blocker->SetupAttachment(GetRootComponent());
         Blocker->SetMobility(EComponentMobility::Movable);
@@ -154,8 +165,13 @@ void AHomesteadWorld::BuildCoveRoute()
         Blocker->SetHiddenInGame(true);
         Blocker->RegisterComponent();
         CoveRouteVisual.Components.Add(Blocker);
+        ++Blockers;
     }
-    UE_LOG(LogHomesteadWorld, Log, TEXT("Cove route: %d kit pieces (%d treads, %d landing slabs, %d kerbs), %d rail blockers."),
-        Placed, Kit.Count(Homestead::CoveKitPiece::StepA) + Kit.Count(Homestead::CoveKitPiece::StepB) + Kit.Count(Homestead::CoveKitPiece::StepC),
-        Kit.Count(Homestead::CoveKitPiece::LandingSlab), Kit.Count(Homestead::CoveKitPiece::Kerb), static_cast<int32>(Kit.blockers.size()));
+    // What actually went down (a group left out counts nothing).
+    const auto Of = [&PlacedOf](Homestead::CoveKitPiece Piece) { return PlacedOf[static_cast<int32>(Piece)]; };
+    UE_LOG(LogHomesteadWorld, Log, TEXT("Cove route: %d kit pieces (%d treads, %d landing slabs, %d kerbs, %d rail bays), %d rail blockers."),
+        Placed, Of(Homestead::CoveKitPiece::StepA) + Of(Homestead::CoveKitPiece::StepB) + Of(Homestead::CoveKitPiece::StepC),
+        Of(Homestead::CoveKitPiece::LandingSlab) + Of(Homestead::CoveKitPiece::LandingSlab75), Of(Homestead::CoveKitPiece::Kerb),
+        Of(Homestead::CoveKitPiece::RailLevel) + Of(Homestead::CoveKitPiece::Rail26) + Of(Homestead::CoveKitPiece::Rail28)
+            + Of(Homestead::CoveKitPiece::Rail30), Blockers);
 }
