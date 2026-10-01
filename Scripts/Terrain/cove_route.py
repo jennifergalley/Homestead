@@ -893,6 +893,8 @@ def write_inc(route):
         L.append(f"kerb({k['x'] * 100:.1f}, {k['y'] * 100:.1f}, {k['z'] * 100:.1f}, {k['yaw']:.2f});")
     L.append("// droppedKerb(x, y, z, yaw): a designed kerb clear_of_path dropped because it reaches into the clear width")
     L.append("// (the tests check each really does; none is placed)")
+    L.append("// designKerbs(n): how many kerbs the design laid; every one is a kerb() or a droppedKerb() above and below")
+    L.append(f"designKerbs({len(route.get('designKerbs', route['kerbs']))});")
     kept = {tuple(sorted(k.items())) for k in route["kerbs"]}
     for k in route.get("designKerbs", []):
         if tuple(sorted(k.items())) not in kept:

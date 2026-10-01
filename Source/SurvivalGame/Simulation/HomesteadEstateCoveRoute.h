@@ -118,6 +118,8 @@ struct CoveRoute
     std::vector<CoveRouteKerb> kerbs;
     // Designed kerbs left out because they'd reach into the clear width (never placed; the tests check each).
     std::vector<CoveRouteKerb> droppedKerbs;
+    // How many kerbs the design laid: kerbs + droppedKerbs, so none goes missing unaccounted for.
+    int designKerbCount = 0;
     std::vector<CoveRouteRail> rails;
     std::vector<CoveRouteFingerpost> fingerposts;
 

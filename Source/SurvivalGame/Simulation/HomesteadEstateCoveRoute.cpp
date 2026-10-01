@@ -70,6 +70,7 @@ const CoveRoute& EstateCoveRoute()
             route.landings.push_back({{x, y}, z, yaw, length});
         };
         auto kerb = [&](double x, double y, double z, double yaw) { route.kerbs.push_back({{x, y}, z, yaw}); };
+        auto designKerbs = [&](int count) { route.designKerbCount = count; };
         auto droppedKerb = [&](double x, double y, double z, double yaw) { route.droppedKerbs.push_back({{x, y}, z, yaw}); };
         auto rail = [&](double x, double y, double z, double yaw, double pitch, double length, int mirrored) {
             route.rails.push_back({{x, y}, z, yaw, pitch, length, mirrored != 0});

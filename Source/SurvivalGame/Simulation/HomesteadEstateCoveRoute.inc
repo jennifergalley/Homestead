@@ -1240,6 +1240,8 @@ kerb(-54577.2, -49647.2, 643.9, 65.85);
 kerb(-54617.8, -49737.8, 630.1, 65.85);
 // droppedKerb(x, y, z, yaw): a designed kerb clear_of_path dropped because it reaches into the clear width
 // (the tests check each really does; none is placed)
+// designKerbs(n): how many kerbs the design laid; every one is a kerb() or a droppedKerb() above and below
+designKerbs(152);
 droppedKerb(-52148.4, -47925.4, 1202.2, 157.75);
 droppedKerb(-52240.2, -47887.8, 1185.5, 157.75);
 droppedKerb(-52267.6, -47879.8, 1171.7, 210.47);

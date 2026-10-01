@@ -261,9 +261,13 @@ int main()
     for (const CoveRouteKerb& k : route.kerbs)
         Check(clearAlong(k.position, k.yaw, -50.0, 50.0) >= 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
               "a kerb clear of the path along its length", clearAlong(k.position, k.yaw, -50.0, 50.0));
-    // Each designed kerb left out (cove_route.py keeps "designKerbs") really reaches into the clear width, so a
-    // kerb dropped wrongly from a line's end, or two together, fails here though no short hole shows (review,
-    // 2026-09-30). At this design: the three at the bench steps' hairpin.
+    // Every kerb the design laid (cove_route.py keeps "designKerbs") is either placed or emitted as dropped,
+    // and each dropped one really reaches into the clear width. This is the guard for a kerb missing anywhere,
+    // a line's end or two together included, which the hole and coverage checks below can't see (review,
+    // 2026-09-30). At this design: 152 laid, the three at the bench steps' hairpin dropped.
+    Check(route.designKerbCount > 0
+              && route.kerbs.size() + route.droppedKerbs.size() == static_cast<size_t>(route.designKerbCount),
+          "every designed kerb placed or dropped", static_cast<double>(route.kerbs.size() + route.droppedKerbs.size()));
     for (const CoveRouteKerb& k : route.droppedKerbs)
         Check(clearAlong(k.position, k.yaw, -50.0, 50.0) < 0.5 * CoveRouteClearWidthCm - ClearMarginCm,
               "a dropped kerb reaches into the clear width", clearAlong(k.position, k.yaw, -50.0, 50.0));
@@ -309,10 +313,11 @@ int main()
                 Check(gap < 1.6 || gap >= 3.0, "no short hole in a kerb line", along[i - 1]);
             }
         }
-        // A kerb wherever the graded ground clearly falls away beside a path (cove_route.py edges() probes
-        // CLEAR_HALF_M + SIDE_PROBE_M out for KERB_DROP_M 0.45 m), unless one there would reach into the clear
-        // width (the hairpin's dropped ones). The hole check above can't see a kerb dropped from a line's end
-        // or two dropped together (review, 2026-09-30).
+        // A kerb within a metre wherever the graded ground clearly falls away beside a path for a metre either
+        // side (cove_route.py edges() probes CLEAR_HALF_M + SIDE_PROBE_M out for KERB_DROP_M 0.45 m), unless one
+        // there would reach into the clear width. It catches kerbs missing inside a run of falling ground, not at
+        // a line's end, where grading has flattened the shoulder and the next kerb in is within the metre; the
+        // design-count check above covers line ends.
         if (route.ground.size() == route.stations.size())
         {
             constexpr double ClearDropCm = 50.0;   // KERB_DROP_M plus room for the grading since design
