@@ -1,4 +1,5 @@
-// Weeding by hand (Jenny's playtest): she kneels on both knees, pulls two fistfuls and tosses them back
+
+
 // over each shoulder (homestead_agent.kneel_pull_weeds). The pull is one transaction, a weed node's
 // Harvest or a garden square's Weed, and it lands when the second root comes out
 // (AHomesteadCharacter::PullWeedsCommit). Interrupted before then, nothing changes: no weeds in the

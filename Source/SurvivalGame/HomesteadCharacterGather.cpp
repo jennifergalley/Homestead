@@ -33,11 +33,16 @@ constexpr float Grab = 38.0f / 30.0f, Cut = 72.0f / 30.0f;
 }
 
 // Moments in AN_HeroineMH_KneelPullWeeds (seconds; homestead_agent.kneel_pull_weeds EVENTS): each
-// root comes out of the ground, then leaves her hand behind her shoulder.
+// root comes out of the ground, then leaves her hand behind her shoulder. Index 0 is the first weed,
 namespace PullWeedsTiming
 {
-constexpr float Pulled[2] = {56.0f / 30.0f, 102.0f / 30.0f};
-constexpr float Toss[2] = {68.0f / 30.0f, 114.0f / 30.0f};
+constexpr float Pulled[2] = {54.0f / 30.0f, 98.0f / 30.0f};
+constexpr float Toss[2] = {65.0f / 30.0f, 109.0f / 30.0f};
+// One hand at a time: the left's fistful has left her hand before the right's comes out, and the
+// controller's beats are these same frames.
+static_assert(Pulled[0] < Toss[0] && Toss[0] < Pulled[1] && Pulled[1] < Toss[1], "Weed pulls must be staggered.");
+static_assert(Pulled[0] == AHomesteadCharacter::PullWeedsFirstPull && Pulled[1] == AHomesteadCharacter::PullWeedsCommit,
+    "PullWeedsFirstPull/PullWeedsCommit must match kneel_pull_weeds EVENTS pulled1/pulled2.");
 // A fistful's largest dimension in her hand (cm), whatever the clump's mesh.
 constexpr float HandfulSizeCm = 24.0f;
 // Let go behind the shoulder (actor frame: X forward, Y right): back, out to that side and up.

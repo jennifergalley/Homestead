@@ -4477,7 +4477,7 @@ void WeedPullCommitsOnlyOnItsOwnClip()
     // at the second root, while its clip still plays) committed at once, because the first clip's phase
     // was already past the commit beat. A pull only owns the phase once its own kneel has begun.
     using namespace WeedPull;
-    const float first = 56.0f / 30.0f, commit = 102.0f / 30.0f, end = 150.0f / 30.0f;
+    const float first = 54.0f / 30.0f, commit = 98.0f / 30.0f, end = 144.0f / 30.0f;
     const double timeout = 4.5;
     // Weed A: queued, starts (count 0 -> 1), thins at the first root, commits once at the second.
     Pending a{0, 0.0, false};
