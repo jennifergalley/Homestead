@@ -1,4 +1,5 @@
 // Portable tests for the item catalogue, money and shops.
+#include "HomesteadBackpack.h"
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
 #include "HomesteadHoldings.h"
@@ -12,6 +13,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <locale>
 #include <set>
 #include <sstream>
@@ -45,7 +47,7 @@ void CatalogueCoversEveryItem()
         CHECK(info.item == item);
         CHECK(std::strlen(info.name) > 0 && std::strlen(info.description) > 0 && std::strlen(info.icon) > 0);
         CHECK(keys.insert(info.key).second);
-        CHECK(info.basePriceCents >= 0);
+        CHECK(info.basePriceCoins >= 0);
         CHECK(IsEdible(item) == (info.hunger > 0.0));
     }
     CHECK(std::string(ItemName(Item::Count)) == "Unknown item");
@@ -61,7 +63,7 @@ void CatalogueMatchesLegacyMetadata()
     CHECK(std::string(ItemIcon(Item::Fur)) == "fur");
     CHECK(IsEdible(Item::Berries) && IsEdible(Item::RoastedRoots) && IsEdible(Item::HerbedRoots));
     CHECK(!IsEdible(Item::Roots) && !IsEdible(Item::Seeds));
-    CHECK(GetItemInfo(Item::HerbedRoots).hunger == 38.0 && GetItemInfo(Item::HerbedRoots).energy == 18.0);
+    CHECK(GetItemInfo(Item::HerbedRoots).hunger == 38.0 && GetItemInfo(Item::HerbedRoots).energy == 40.0);
     for (Item tool : {Item::Knife, Item::Hatchet, Item::DiggingStick, Item::WateringCan, Item::Machete})
         CHECK(IsTool(tool) && ItemSortRank(tool) == 0);
     CHECK(ItemSortRank(Item::Fur) == 1 && ItemSortRank(Item::Flowers) == 2 && ItemSortRank(Item::Water) == 3);
@@ -129,7 +131,7 @@ void MoneyFormatting()
     CHECK(FormatMoney(INT64_MAX) == "9,223,372,036,854,775,807 coins");
     CHECK(FormatMoneyDelta(200) == "+200 coins" && FormatMoneyDelta(-40) == "-40 coins" && FormatMoneyDelta(0) == "+0 coins"
         && FormatMoneyDelta(1) == "+1 coin" && FormatMoneyDelta(-1) == "-1 coin");
-    for (const Cents raw : {Cents(0), Cents(1), Cents(80), Cents(1000), MaxMoney, Cents(INT64_MIN)})
+    for (const Coins raw : {Coins(0), Coins(1), Coins(80), Coins(1000), MaxMoney, Coins(INT64_MIN)})
         CHECK(FormatMoney(raw).find('$') == std::string::npos && FormatMoney(raw).find('.') == std::string::npos);
     CHECK(BuyPrice(Item::Pasty) == 100 && SellPrice(Item::Stone) == 5 && BuyBackPrice(Item::Stone) == 5);
     CHECK(SellDownAmount(0) == 0 && SellDownAmount(1) == 1 && SellDownAmount(10) == 4 && SellDownAmount(3) == 2);
@@ -177,7 +179,7 @@ void SellAStack()
     Store store = OpenStore();
     auto& sim = store.sim;
     OK(sim.GrantItems(Item::Stone, 20));
-    const Cents before = sim.GetState().money;
+    const Coins before = sim.GetState().money;
     const auto revision = sim.GetRevision();
     const auto sold = sim.Sell(store.shop, Item::Stone, 12, store.customer);
     OK(sold);
@@ -238,11 +240,12 @@ void BuyAndEatAPasty()
     OK(bought);
     CHECK(bought.message == "Bought 1 Cornish pasty for 100 coins.");
     CHECK(sim.GetState().money == StartingMoney - 100 && sim.Count(Item::Pasty) == 1);
-    const double hunger = sim.GetState().hunger, energy = sim.GetState().energy;
+    const double energy = sim.GetState().energy;
     OK(sim.Eat(Item::Pasty));
-    CHECK(sim.GetState().hunger > hunger && sim.GetState().energy > energy);
+    // A Meal: +40 Energy and Well fed; the estate has no hunger.
+    CHECK(std::abs(sim.GetState().energy - (energy + 40.0)) < 1e-9 && sim.IsWellFed() && sim.GetState().hunger == 100.0);
     CHECK(sim.Count(Item::Pasty) == 0);
-    // Three loaves at 50 cents.
+    // Three loaves at 50 coins.
     const auto loaves = sim.Buy(store.shop, Item::Bread, 3, false, store.customer);
     OK(loaves);
     CHECK(loaves.message == "Bought 3 loaves of bread for 150 coins.");
@@ -260,7 +263,7 @@ void BuyBackAndCapacity()
     auto& sim = store.sim;
     OK(sim.GrantItems(Item::Stone, 10));
     OK(sim.Sell(store.shop, Item::Stone, 10, store.customer));
-    const Cents afterSale = sim.GetState().money;
+    const Coins afterSale = sim.GetState().money;
     OK(sim.Buy(store.shop, Item::Stone, 4, true, store.customer));
     CHECK(sim.GetState().money == afterSale - 4 * SellPrice(Item::Stone));
     CHECK(sim.FindShop(store.shop)->heroineStock[static_cast<int>(Item::Stone)] == 6 && sim.Count(Item::Stone) == 4);
@@ -270,6 +273,87 @@ void BuyBackAndCapacity()
     CHECK(sim.UsedCapacity() == InventoryCapacity);
     const auto full = sim.Buy(store.shop, Item::Bread, 1, false, store.customer);
     CHECK(!full.ok && full.code == ResultCode::Capacity);
+}
+
+void LeatherBackpackUpgrade()
+{
+    Store store = OpenStore();
+    auto& sim = store.sim;
+    CHECK(sim.PackCapacity() == InventoryCapacity && !sim.GetState().leatherBackpack);
+    CHECK(Backpack::Offered(sim.GetState(), ShopKind::GeneralStore) && Backpack::Price == 1500);
+    const std::string before = sim.Serialize();
+    // No section until she owns one, so a new game saves exactly as before.
+    CHECK(before.find(std::string("\n") + Backpack::SaveTag + " ") == std::string::npos);
+    // 1,000 coins isn't enough; nothing changes.
+    const std::uint64_t revision = sim.GetRevision();
+    const auto poor = sim.BuyBackpack(store.shop, store.customer);
+    CHECK(!poor.ok && poor.message == "That costs 1,500 coins; you have 1,000 coins." && sim.GetRevision() == revision);
+    CHECK(!sim.SetBackpackShown(false).ok && sim.Serialize() == before);
+    // Too far from the counter is refused too.
+    OK(sim.GrantMoney(1000));
+    CHECK(!sim.BuyBackpack(store.shop, {store.counter.x + 5000.0, store.counter.y}).ok);
+    // Bought once: 2,000 - 1,500 leaves 500, and her pack doubles.
+    const auto bought = sim.BuyBackpack(store.shop, store.customer);
+    OK(bought);
+    CHECK(bought.message == "Bought the leather backpack for 1,500 coins. You can carry 240 now.");
+    CHECK(sim.GetState().money == 500 && sim.GetState().leatherBackpack && sim.GetState().backpackShown);
+    CHECK(sim.PackCapacity() == 240 && !Backpack::Offered(sim.GetState(), ShopKind::GeneralStore));
+    const auto again = sim.BuyBackpack(store.shop, store.customer);
+    CHECK(!again.ok && sim.GetState().money == 500);
+    // She can carry 240, but not 241.
+    OK(sim.GrantItems(Item::Branch, 240 - sim.UsedCapacity()));
+    CHECK(sim.UsedCapacity() == 240);
+    CHECK(!sim.GrantItems(Item::Stone, 1).ok);
+    const auto full = sim.Buy(store.shop, Item::Bread, 1, false, store.customer);
+    CHECK(!full.ok && full.code == ResultCode::Capacity);
+    // With the backpack a ground stack may hold 240 (two drops merge up to it), and she picks it up whole.
+    const auto branchGroup = [&sim]()
+    {
+        for (const auto& entry : sim.GetState().inventoryLayout)
+            if (entry.wearableId == 0 && entry.item == Item::Branch) return entry;
+        return LayoutEntry{};
+    };
+    const int branches = sim.Count(Item::Branch);
+    CHECK(branches > InventoryCapacity + 60);
+    OK(sim.DropGroup(branchGroup().groupId, branches - 60, store.customer, store.customer, sim.GetRevision()));
+    OK(sim.DropGroup(branchGroup().groupId, 60, store.customer, store.customer, sim.GetRevision()));
+    CHECK(sim.GetState().worldDrops.size() == 1 && sim.GetState().worldDrops.front().quantity == branches);
+    OK(sim.PickUpDrop(sim.GetState().worldDrops.front().id, store.customer));
+    CHECK(sim.UsedCapacity() == 240 && sim.GetState().worldDrops.empty());
+    // Hiding it is a look only: capacity stays.
+    OK(sim.SetBackpackShown(false));
+    CHECK(!sim.GetState().backpackShown && sim.PackCapacity() == 240);
+    // Saved and loaded with a full 240 pack and the backpack hidden.
+    const std::string saved = sim.Serialize();
+    CHECK(saved.find(std::string("\n") + Backpack::SaveTag + " 1 0\n") != std::string::npos);
+    Simulation loaded;
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.GetState().leatherBackpack && !loaded.GetState().backpackShown && loaded.PackCapacity() == 240);
+    CHECK(loaded.UsedCapacity() == 240 && loaded.Serialize() == saved);
+    // An older save (no section) loads with the plain pack.
+    Simulation older;
+    older.SetPlacements(ProvisionalEstatePlacements());
+    OK(older.Deserialize(before));
+    CHECK(!older.GetState().leatherBackpack && older.GetState().backpackShown && older.PackCapacity() == InventoryCapacity);
+    // A 240-item pack without the backpack is refused as corrupt, not truncated.
+    std::string stripped = saved;
+    const std::string payload = saved.substr(saved.find('\n') + 1);
+    const std::string line = std::string(Backpack::SaveTag) + " 1 0\n";
+    const auto at = payload.find(line);
+    CHECK(at != std::string::npos);
+    {
+        const std::string trimmed = payload.substr(0, at) + payload.substr(at + line.size());
+        std::uint64_t hash = UINT64_C(14695981039346656037);
+        for (unsigned char c : trimmed) { hash ^= c; hash *= UINT64_C(1099511628211); }
+        std::istringstream header(saved.substr(0, saved.find('\n')));
+        std::string magic, version;
+        header >> magic >> version;
+        stripped = magic + " " + version + " " + std::to_string(trimmed.size()) + " " + std::to_string(hash) + "\n" + trimmed;
+    }
+    Simulation truncated;
+    truncated.SetPlacements(ProvisionalEstatePlacements());
+    CHECK(!truncated.Deserialize(stripped).ok);
 }
 
 void StockSellsDownEachMorning()
@@ -346,6 +430,41 @@ void PlaytestShopPlacement()
     CHECK(loaded.FindShop(ShopKind::GeneralStore)->counterYaw == 45.0);
 }
 
+void WholeCoinPurseGuards()
+{
+    // Whole-number currency: the stored unit is one coin, so raw values and saves are unchanged. A
+    // playtest grant can't push the purse past its cap or below zero from any int64 amount, including
+    // the extremes that used to overflow the check, and a refused grant changes nothing.
+    Simulation sim;
+    OK(sim.PlaceShop(ShopKind::GeneralStore, {100.0, 200.0}));
+    OK(sim.GrantMoney(0));
+    OK(sim.GrantMoney(1));
+    CHECK(sim.GetState().money == 1);
+    for (Coins wild : {std::numeric_limits<Coins>::max(), std::numeric_limits<Coins>::min(), MaxMoney, Coins{-2}})
+    {
+        const std::string before = sim.Serialize();
+        const auto revision = sim.GetRevision();
+        CHECK(!sim.GrantMoney(wild).ok);
+        CHECK(sim.Serialize() == before && sim.GetRevision() == revision && sim.GetState().money == 1);
+    }
+    OK(sim.GrantMoney(MaxMoney - 1));
+    CHECK(sim.GetState().money == MaxMoney);
+    CHECK(!sim.GrantMoney(1).ok && sim.GetState().money == MaxMoney);
+    OK(sim.GrantMoney(-MaxMoney));
+    CHECK(sim.GetState().money == 0);
+    // Save bytes: the purse is still one raw integer on the economy line, 2234 stays 2234.
+    OK(sim.GrantMoney(2234));
+    const std::string saved = sim.Serialize();
+    CHECK(saved.find("\neconomy 2234 ") != std::string::npos);
+    Simulation loaded;
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.GetState().money == 2234 && loaded.Serialize() == saved);
+    // The reference prices keep their raw values: a pasty 80 base / 100 in the shop, bread 40 / 50.
+    CHECK(SellPrice(Item::Pasty) == 80 && BuyPrice(Item::Pasty) == 100);
+    CHECK(SellPrice(Item::Bread) == 40 && BuyPrice(Item::Bread) == 50);
+    CHECK(StartingMoney == 1000);
+}
+
 void WaitForTheStoreToOpen()
 {
     Store store = OpenStore();
@@ -363,27 +482,138 @@ void WaitForTheStoreToOpen()
     const std::string evening = sim.Serialize();
     CHECK(!sim.WaitForShop(store.shop, {door.x, door.y - 5000.0}).ok && sim.Serialize() == evening);
     CHECK(!sim.WaitForShop(store.shop + 999, door).ok && sim.Serialize() == evening);
-    // Too hungry to last the night: refused before any time passes.
+    // Hunger never fails her on the estate, so an empty belly doesn't stop the wait (tried on a copy).
     Edit(sim, 5.0, 100.0);
-    const std::string hungry = sim.Serialize();
-    const auto refused = sim.WaitForShop(store.shop, door);
-    CHECK(!refused.ok && refused.message.find("too hungry") != std::string::npos);
-    CHECK(sim.Serialize() == hungry);
-    // Too tired to last the night (she'd doze off in the street): refused before any time passes.
+    Simulation hungry = sim;
+    OK(hungry.WaitForShop(store.shop, door));
+    // Exhaustion does not strand her outside the estate shop or force a doze.
     Edit(sim, 100.0, 3.0);
-    const std::string tired = sim.Serialize();
-    const auto sleepy = sim.WaitForShop(store.shop, door);
-    CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos);
-    CHECK(sim.Serialize() == tired);
+    const int dozes = sim.DozeCount();
+    const double tiredHour = sim.GetState().hour;
+    OK(sim.WaitForShop(store.shop, door));
+    CHECK(!sim.GetState().failed && sim.GetState().energy == 0.0
+        && sim.DozeCount() == dozes && std::abs(sim.GetState().hour - tiredHour - 13.0) < 0.01);
     // Fed: she waits the night through, across midnight and the 6 AM rollover, and it's open.
+    sim.SkipToHourOfDay(19.0);
     Edit(sim, 100.0, 100.0);
     const double before = sim.GetState().hour;
     OK(sim.WaitForShop(store.shop, door));
     const double after = sim.GetState().hour;
     CHECK(std::abs((after - before) - 13.0) < 0.01);
     CHECK(IsShopOpen(*sim.FindShop(store.shop), after));
-    CHECK(sim.GetState().hunger < 100.0);
+    CHECK(sim.GetState().hunger == 100.0); // No hunger on the estate.
     OK(sim.CheckShopAccess(store.shop, store.customer));
+}
+
+// Every shop is closed all day Sunday (Jenny, 2026-09-30): at every hour, with the reopening day in each refusal,
+// the door sign and the walk-to-town warning, and no waiting at the door across it. Nothing is saved for it.
+void ShopsCloseOnSundays()
+{
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    const Shop& shop = *sim.FindShop(store.shop);
+    const Point door{store.counter.x, store.counter.y - 700.0};
+    // Day 0 (Monday, Spring 1, 1851) at 9 AM; the calendar day runs 06:00 to 06:00.
+    const double monday = 0.0, saturday = 5 * 24.0, sunday = 6 * 24.0, nextMonday = 7 * 24.0;
+    CHECK(Calendar::DateAt(sunday + 6.0).weekday == Weekday::Sunday && Calendar::DateAt(saturday + 6.0).weekday == Weekday::Saturday);
+    CHECK(Calendar::DateAt(nextMonday + 6.0).weekday == Weekday::Monday);
+    for (double hour = 6.0; hour < 30.0; hour += 0.25)
+        CHECK(!IsShopOpen(shop, sunday + hour) && !IsShopDay(sunday + hour));
+    // Saturday keeps its hours to the minute; Monday opens on the stroke of 8.
+    CHECK(IsShopOpen(shop, saturday + 8.0) && IsShopOpen(shop, saturday + 17.0 + 59.0 / 60.0) && !IsShopOpen(shop, saturday + 18.0));
+    CHECK(!IsShopOpen(shop, nextMonday + 7.99) && IsShopOpen(shop, nextMonday + 8.0) && IsShopOpen(shop, monday + 8.0));
+    for (const double weekday : {0.0, 1.0, 2.0, 3.0, 4.0, 5.0})
+        CHECK(IsShopOpen(shop, weekday * 24.0 + 12.0));
+    // When it next opens, past Sunday.
+    CHECK(NextShopOpening(shop, sunday + 12.0) == nextMonday + 8.0 && NextShopOpening(shop, saturday + 19.0) == nextMonday + 8.0);
+    CHECK(NextShopOpening(shop, nextMonday + 3.0) == nextMonday + 8.0 && NextShopOpening(shop, monday + 19.0) == 24.0 + 8.0);
+    CHECK(std::abs(HoursUntilOpen(shop, saturday + 19.0) - 37.0) < 1e-9);
+    // The words: the closed day, a Saturday evening, an ordinary night.
+    CHECK(ClosedMessage(shop, sunday + 12.0) == "Closed today (Sunday) - opens Monday at 8 AM");
+    CHECK(ClosedMessage(shop, nextMonday + 3.0) == "Closed today (Sunday) - opens Monday at 8 AM");  // still Sunday's day
+    CHECK(ClosedMessage(shop, saturday + 19.0) == "Closed - opens Monday at 8 AM");
+    CHECK(ClosedMessage(shop, monday + 19.0) == "Closed - opens at 8 AM" && ClosedMessage(shop, saturday + 7.0) == "Closed - opens at 8 AM");
+    CHECK(ClosedSignText(shop, sunday + 12.0) == "CLOSED\non Sundays");
+    CHECK(ClosedSignText(shop, saturday + 19.0) == "CLOSED\nopens Mon 8 AM");
+    CHECK(ClosedSignText(shop, monday + 19.0) == "CLOSED\nopens at 8 AM");
+    // Waiting at the door: the night's closure only (at most 14 h), never through a closed day's hours.
+    CHECK(CanWaitForShop(shop, monday + 19.0) && CanWaitForShop(shop, saturday + 7.0) && CanWaitForShop(shop, nextMonday + 3.0));
+    CHECK(CanWaitForShop(shop, 4 * 24.0 + 18.0));  // Friday at closing: the full 14 h night
+    CHECK(CanWaitForShop(shop, sunday + 19.0));    // Sunday evening: just the night to Monday's opening
+    CHECK(!CanWaitForShop(shop, sunday + 7.0) && !CanWaitForShop(shop, sunday + 12.0) && !CanWaitForShop(shop, saturday + 19.0));
+    CHECK(!CanWaitForShop(shop, saturday + 12.0));  // open: nothing to wait for
+
+    // Through the Simulation on Sunday at noon: no trade, no wait, nothing changes.
+    for (int day = 0; day < 6; ++day) sim.SkipToHourOfDay(9.0);
+    sim.SkipToHourOfDay(12.0);
+    CHECK(sim.Today().weekday == Weekday::Sunday);
+    Edit(sim, 100.0, 100.0);
+    const std::string sundayNoon = sim.Serialize();
+    const auto access = sim.CheckShopAccess(store.shop, store.customer);
+    CHECK(!access.ok && access.code == ResultCode::Unavailable && access.message == "Closed today (Sunday) - opens Monday at 8 AM");
+    CHECK(!sim.Sell(store.shop, Item::Stone, 1, store.customer).ok && !sim.Buy(store.shop, Item::Pasty, 1, false, store.customer).ok);
+    const auto wait = sim.WaitForShop(store.shop, door);
+    CHECK(!wait.ok && wait.code == ResultCode::Unavailable
+        && wait.message == "The general store is closed on Sundays. It opens Monday at 8 AM.");
+    CHECK(sim.Serialize() == sundayNoon);
+    // Old saves (no weekday anywhere in them) load and keep the rule: it comes from the clock alone.
+    Simulation loaded;
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(sundayNoon));
+    CHECK(loaded.Serialize() == sundayNoon && !loaded.CheckShopAccess(store.shop, store.customer).ok);
+    // Monday 8 AM: open again.
+    sim.SkipToHourOfDay(8.0);
+    CHECK(sim.Today().weekday == Weekday::Monday);
+    OK(sim.CheckShopAccess(store.shop, store.customer));
+
+    // The walk to town warns when she'd arrive on a Sunday (about 7 game hours on the road).
+    const PublicRoadStop* manor = EstatePublicRoad().FindStop("Manor");
+    CHECK(manor != nullptr);
+    // Forward to `hourOfDay` on the next calendar day that's `day` (02:00 belongs to the day before).
+    const auto Seek = [](Simulation& at, Weekday day, double hourOfDay)
+    {
+        for (int step = 0; step < 9; ++step)
+        {
+            at.SkipToHourOfDay(hourOfDay);
+            if (Calendar::DateAt(at.GetState().hour).weekday == day) return;
+        }
+        CHECK(false);
+    };
+    Simulation walker = sim;
+    Seek(walker, Weekday::Saturday, 1.0);  // 1 AM, still Saturday's day: she'd arrive about 8 AM on Sunday
+    const TravelPlan late = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
+    CHECK(late.ok && late.storeClosedOnArrival && late.storeClosedAllDay);
+    CHECK(late.summary.find("You'd arrive on a Sunday, when the general store is closed all day (it opens Monday at 8 AM).")
+        != std::string::npos);
+    walker.SkipToHourOfDay(12.0);  // Sunday noon: she'd arrive Sunday evening, after its hours: shut for the night
+    const TravelPlan sundayEvening = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
+    CHECK(sundayEvening.storeClosedOnArrival && !sundayEvening.storeClosedAllDay && !sundayEvening.nextDay
+        && sundayEvening.summary.find("(it opens at 8 AM)") != std::string::npos);
+    walker.SkipToHourOfDay(22.0);  // Sunday 10 PM: she'd arrive about 5 AM, the next day by the clock; no "on a Sunday"
+    const TravelPlan overnight = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
+    CHECK(overnight.nextDay && overnight.storeClosedOnArrival && !overnight.storeClosedAllDay);
+    CHECK(overnight.summary.find("Sunday") == std::string::npos
+        && overnight.summary.find(" the next day.") != std::string::npos
+        && overnight.summary.find("(it opens at 8 AM)") != std::string::npos);
+    walker.SkipToHourOfDay(6.5);   // Monday morning: open when she gets there
+    const TravelPlan monday9 = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
+    CHECK(monday9.ok && !monday9.storeClosedOnArrival && !monday9.storeClosedAllDay);
+    Simulation saturdayNoon = sim;
+    Seek(saturdayNoon, Weekday::Saturday, 12.0);  // Saturday noon: she'd arrive after closing, and it opens Monday
+    // Early on Sunday, before what would be opening time (review): it opens Monday, not "at 8 AM".
+    {
+        Simulation early = saturdayNoon;
+        const double walk = PlanTravel(early.GetState(), manor->position, TravelDestination::Town).gameHours;
+        early.SkipToHourOfDay(7.5 - walk);  // just after midnight: she'd arrive about 07:30 on Sunday
+        const TravelPlan dawn = PlanTravel(early.GetState(), manor->position, TravelDestination::Town);
+        CHECK(Calendar::DateAt(dawn.arrivalHour).weekday == Weekday::Sunday
+            && std::abs(std::fmod(dawn.arrivalHour, 24.0) - 7.5) < 1e-6);
+        CHECK(dawn.storeClosedOnArrival && !dawn.storeClosedAllDay
+            && dawn.summary.find("(it opens Monday at 8 AM)") != std::string::npos);
+    }
+    const TravelPlan evening = PlanTravel(saturdayNoon.GetState(), manor->position, TravelDestination::Town);
+    CHECK(evening.storeClosedOnArrival && !evening.storeClosedAllDay
+        && evening.summary.find("(it opens Monday at 8 AM)") != std::string::npos);
 }
 
 void NoWalkToTownFromTown()
@@ -420,6 +650,38 @@ void NoWalkToTownFromTown()
     const std::string before = sim.Serialize();
     const auto refused = sim.WalkRoad(TravelDestination::Town, counter);
     CHECK(!refused.ok && refused.message == "You're already at the general store." && sim.Serialize() == before);
+}
+
+void RoadSignsOfferTheWalk()
+{
+    const PublicRoad& road = EstatePublicRoad();
+    CHECK(road.signs.size() == 3);
+    CHECK(RoadSignDestinations("ManorRoadSign") == std::vector<TravelDestination>{TravelDestination::Town});
+    CHECK(RoadSignDestinations("TownRoadSign") == std::vector<TravelDestination>{TravelDestination::Manor});
+    CHECK(RoadSignDestinations("GatewayRoadSign").size() == 2 && RoadSignDestinations("Milestone").empty());
+    CHECK(RoadSignLabel("ManorRoadSign") == "To town" && RoadSignLabel("TownRoadSign") == "To the manor"
+        && RoadSignLabel("GatewayRoadSign") == "Town / Manor");
+    Store store = OpenStore();
+    Simulation& sim = store.sim;
+    sim.SkipToHourOfDay(9.0);
+    for (const PublicRoadSign& sign : road.signs)
+    {
+        // She reads the sign she stands beside, and only within reach.
+        CHECK(RoadSignNear(sign.position) == &sign);
+        CHECK(RoadSignNear({sign.position.x + RoadSignReachCm + 50.0, sign.position.y}) == nullptr);
+        // Every walk it offers plans from the verge where it stands.
+        for (const TravelDestination destination : RoadSignDestinations(sign.name))
+        {
+            const TravelPlan plan = PlanTravel(sim.GetState(), sign.position, destination);
+            CHECK(plan.ok && plan.gameHours > 0.0 && plan.connectorMetres < 30.0);
+        }
+    }
+    // The walk from the manor's sign is the Map tab's walk: one transaction, time passes, she's in town.
+    const PublicRoadSign* manorSign = road.FindSign("ManorRoadSign");
+    const double before = sim.GetState().hour;
+    const TravelPlan plan = PlanTravel(sim.GetState(), manorSign->position, TravelDestination::Town);
+    OK(sim.WalkRoad(TravelDestination::Town, manorSign->position));
+    CHECK(std::abs(sim.GetState().hour - (before + plan.gameHours)) < 1e-6);
 }
 
 void WalkTheRoad()
@@ -473,35 +735,37 @@ void WalkTheRoad()
     CHECK(!PlanTravel(sim.GetState(), town->position, TravelDestination::Town).ok);
     Simulation woodland;
     CHECK(!PlanTravel(woodland.GetState(), manor->position, TravelDestination::Town).ok);
-    // Refusals pass no time at all.
+    // Hunger and exhaustion never strand her on the estate road.
     sim.SkipToHourOfDay(12.0);
     Edit(sim, 5.0, 100.0);
-    const std::string hungry = sim.Serialize();
-    const auto starving = sim.WalkRoad(TravelDestination::Town, manor->position);
-    CHECK(!starving.ok && starving.message.find("too hungry") != std::string::npos && sim.Serialize() == hungry);
+    Simulation hungry = sim;
+    OK(hungry.WalkRoad(TravelDestination::Town, manor->position));
     Edit(sim, 100.0, 3.0);
-    const std::string tired = sim.Serialize();
-    const auto sleepy = sim.WalkRoad(TravelDestination::Town, manor->position);
-    CHECK(!sleepy.ok && sleepy.message.find("too tired") != std::string::npos && sim.Serialize() == tired);
+    const double tiredHour = sim.GetState().hour;
+    const int dozes = sim.DozeCount();
+    const TravelPlan tiredWalk = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
+    OK(sim.WalkRoad(TravelDestination::Town, manor->position));
+    CHECK(!sim.GetState().failed && sim.DozeCount() == dozes
+        && std::abs(sim.GetState().hour - tiredHour - tiredWalk.gameHours) < 1e-6);
     const std::string there = sim.Serialize();
     CHECK(!sim.WalkRoad(TravelDestination::Town, town->position).ok && sim.Serialize() == there);
-    // Fed and rested: the clock runs for the whole walk, and she's hungrier and a little more tired.
+    // Rested: the clock runs for the whole walk, and she's a little more tired (the estate has no hunger).
     Edit(sim, 100.0, 100.0);
     const double before = sim.GetState().hour;
     const std::uint64_t revision = sim.GetRevision();
     const TravelPlan plan = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
     OK(sim.WalkRoad(TravelDestination::Town, manor->position));
     CHECK(std::abs(sim.GetState().hour - before - plan.gameHours) < 1e-6);
-    CHECK(sim.GetRevision() > revision && sim.GetState().hunger < 100.0 && sim.GetState().energy < 100.0);
+    CHECK(sim.GetRevision() > revision && sim.GetState().hunger == 100.0 && sim.GetState().energy < 100.0);
     CHECK(sim.DozeCount() == 0);
 }
 
 // Shops and the pack show the canonical nominal Energy one food restores, from its catalogue row.
 void FoodEnergyLabels()
 {
-    CHECK(FoodEnergyLabel(Item::Pasty) == "+25 Energy");
-    CHECK(FoodEnergyLabel(Item::Bread) == "+8 Energy");
-    CHECK(FoodEnergyLabel(Item::Cheese) == "+12 Energy");
+    CHECK(FoodEnergyLabel(Item::Pasty) == "+40 Energy");
+    CHECK(FoodEnergyLabel(Item::Bread) == "+12 Energy");
+    CHECK(FoodEnergyLabel(Item::Cheese) == "+15 Energy");
     for (int i = 0; i < ItemCount; ++i)
     {
         const auto item = static_cast<Item>(i);
@@ -513,6 +777,36 @@ void FoodEnergyLabels()
     // Not food: tools, materials and raw produce that needs cooking show nothing.
     CHECK(FoodEnergyLabel(Item::Hatchet).empty() && FoodEnergyLabel(Item::Stone).empty() && FoodEnergyLabel(Item::Potato).empty());
     CHECK(FoodEnergyLabel(Item::Count).empty() && FoodEnergyLabel(static_cast<Item>(-1)).empty());
+}
+
+// Filling the pail standing in the water (Jenny, 2026-09-30): the pail goes in ahead of her when that's water,
+// otherwise toward deeper water, never back onto the bank, from anywhere in the water. A round pond 10 m across.
+void PailDipsWhereSheStands()
+{
+    const auto edge = [](Point p) { return std::hypot(p.x, p.y) - 1000.0; };   // negative inside
+    constexpr double forward = 59.0, right = 12.0, inside = 25.0;
+    // The reach itself: 59 cm ahead, 12 cm to her right, turned by her heading (as UE's FRotator turns it).
+    const Point east = InWaterDipPoint(Point{0.0, 0.0}, 0.0, forward, right, inside, edge);
+    CHECK(std::abs(east.x - 59.0) < 1e-9 && std::abs(east.y - 12.0) < 1e-9);
+    const Point north = InWaterDipPoint(Point{0.0, 0.0}, 90.0, forward, right, inside, edge);
+    CHECK(std::abs(north.x + 12.0) < 1e-9 && std::abs(north.y - 59.0) < 1e-9);
+    // From 1 cm to 2 m in, facing every way: the pail always lands in the water, as deep as where she stands or
+    // deeper, and straight ahead whenever ahead is well in (review: 0-30 cm in used to turn her back to the bank).
+    for (const double in : {1.0, 10.0, 24.0, 30.0, 60.0, 200.0})
+        for (int facing = 0; facing < 16; ++facing)
+        {
+            const Point her{1000.0 - in, 0.0};
+            const double yaw = facing * 22.5;
+            const Point dip = InWaterDipPoint(her, yaw, forward, right, inside, edge);
+            CHECK(edge(dip) < 0.0);
+            CHECK(edge(dip) <= edge(her) + 1e-9 || edge(dip) <= -inside);
+            const double r = yaw * 3.14159265358979323846 / 180.0;
+            const Point ahead{her.x + forward * std::cos(r) - right * std::sin(r), her.y + forward * std::sin(r) + right * std::cos(r)};
+            if (edge(ahead) <= -inside) CHECK(std::abs(dip.x - ahead.x) < 1e-9 && std::abs(dip.y - ahead.y) < 1e-9);
+        }
+    // Facing the bank from 10 cm in: the pail goes in behind her, toward open water.
+    const Point turned = InWaterDipPoint(Point{990.0, 0.0}, 0.0, forward, right, inside, edge);
+    CHECK(turned.x < 990.0 && edge(turned) < -40.0);
 }
 
 void PailWaterPresentation()
@@ -527,13 +821,13 @@ void PailWaterPresentation()
         return PresentPail(state);
     };
     // One carried pail: its water is a gauge and the pack's Water tile folds into it.
-    for (int water : {0, 1, 6})
+    for (int water : {0, 1, 6, PailCapacity})
     {
         const auto pail = With(1, water);
         CHECK(pail.gauge && pail.charge == water && pail.hidePackWater);
     }
     // More than one pail holds (an older save), or 1200: the gauge is full and the tile shows every portion.
-    for (int water : {7, 1200})
+    for (int water : {PailCapacity + 1, 1200})
     {
         const auto pail = With(1, water);
         CHECK(pail.gauge && pail.charge == PailCapacity && !pail.hidePackWater);
@@ -545,16 +839,16 @@ void PailWaterPresentation()
     CHECK(With(2, 4).gauge && With(2, 4).charge == 4 && !With(2, 4).hidePackWater);
     // Presentation only: the stock itself round-trips through a save untouched.
     OK(sim.GrantItems(Item::WateringCan, 1));
-    OK(sim.GrantItems(Item::Water, 9));
+    OK(sim.GrantItems(Item::Water, PailCapacity + 3));
     Simulation reloaded;
     reloaded.SetPlacements(ProvisionalEstatePlacements());
     OK(reloaded.Deserialize(sim.Serialize()));
-    CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= 9);
+    CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= PailCapacity + 3);
     const auto loaded = PresentPail(reloaded.GetState());
     CHECK(loaded.gauge && loaded.charge == PailCapacity && !loaded.hidePackWater);
     // The pack's footer names the charge (a controller has no hover for the tooltip).
-    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 6" && PailChargeLabel(With(1, 0)) == "Water 0 / 6");
-    CHECK(PailChargeLabel(With(1, 1200)) == "Water 6 / 6" && PailChargeLabel(With(0, 4)).empty());
+    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 15" && PailChargeLabel(With(1, 0)) == "Water 0 / 15");
+    CHECK(PailChargeLabel(With(1, 1200)) == "Water 15 / 15" && PailChargeLabel(With(0, 4)).empty());
 }
 
 // The "+3 Berries" line counts only real gains: gathering, buying, crafting and grants, never a chest
@@ -710,15 +1004,20 @@ int main(int argc, char** argv)
     Run("rejected trades change nothing", RejectedTradesChangeNothing);
     Run("buy and eat a pasty", BuyAndEatAPasty);
     Run("buy back and pack capacity", BuyBackAndCapacity);
+    Run("the leather backpack upgrade", LeatherBackpackUpgrade);
     Run("her goods sell down each morning", StockSellsDownEachMorning);
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
     Run("no walk to town from town", NoWalkToTownFromTown);
     Run("playtest shop placement", PlaytestShopPlacement);
+    Run("whole-coin purse guards and unchanged save bytes", WholeCoinPurseGuards);
     Run("wait for the store to open", WaitForTheStoreToOpen);
+    Run("shops close on Sundays", ShopsCloseOnSundays);
     Run("walk the road to town and back", WalkTheRoad);
+    Run("the road signs offer the same walk", RoadSignsOfferTheWalk);
     Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);
     Run("pickup lines follow her actual stacks", PickupGainsFollowActualStacks);
     Run("pail water shows on the pail", PailWaterPresentation);
+    Run("the pail dips where she stands in the water", PailDipsWhereSheStands);
     Run("food shows its Energy", FoodEnergyLabels);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;

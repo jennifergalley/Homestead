@@ -165,7 +165,9 @@ def main():
     mine_z = pad(z, MINE, (12.0, 12.0), 16.0)
     town_z = pad(z, TOWN_SQUARE, (85.0, 70.0), 60.0, mode="plane")
 
-    # 4. The road: a gradient-limited profile graded into a 5 m bed with soft verges.
+    # 4. The road: a gradient-limited profile graded into a 5 m bed with soft verges. road_grade.py has
+    #    since replaced this profile with one that follows the ground (1 in 5 max, a bridge deck over the
+    #    river): after a fresh reshape, run it (and river_channel.py) before anything else reads the road.
     road = resample_polyline(densify(ROAD, 1.0), 1.0)[0]
     prof = gaussian_filter1d(sample(gaussian_filter(z, 3), road), 22, mode="nearest")
     for _ in range(3):

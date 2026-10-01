@@ -57,12 +57,30 @@ constexpr WearableDefinition StarterWardrobe[] = {
 bool StockStarterChest(State& state);
 // The heritage building's id, or 0 when there is none.
 int HeritageBuildingId(const State& state);
-// Whether building over `area` is refused because it lies on the ruined manor's footprint.
+// The roofless hall she may build in (Jenny's playtest: the estate is hers, but nothing could go inside
+// the ruin). In the manor's own frame (cm; U east from the footprint's west end, V north from its south
+// front, as AHomesteadManorRuin draws it): east of the cross wall (U 1800), inside the east gable and
+// the rear wall, and north of the strip in front of the standing room's doorway, so her way out to the
+// cross-wall openings and the west rooms stays open. Each edge keeps the wall's half thickness (28 cm)
+// plus her capsule (45 cm) clear of the masonry.
+constexpr double SafeHallMinU = 1873.0, SafeHallMaxU = 2899.0;
+constexpr double SafeHallMinV = 700.0, SafeHallMaxV = 1699.0;
+// Where the ruin draws its fallen roof timbers in the hall, and their reach plus her capsule: kept clear
+// while they are still ruin scenery (once they are clearable debris, the placement rules keep off them).
+constexpr double HallTimbersU = 2450.0, HallTimbersV = 1300.0, HallTimbersClearance = 290.0;
+// Whether a world point lies in the safe hall.
+bool InSafeHall(const EstateLayout& layout, Point point);
+// Whether building over `area` is refused because it lies on the ruined manor's footprint. Inside the
+// footprint only three things are allowed: furnishing the heritage standing room's own floor; a new
+// foundation (of her own, or the standing room's grid extended into the hall); and a fire, bed or chest.
+// The last two need the whole footprint in the safe hall. Walls, doorways and roofs never go up inside the
+// ruin. Anything wholly outside the footprint, including the standing room's grid extended south or east,
+// isn't the manor's concern.
 bool BlockedByManor(const State& state, const EstateLayout& layout, const PlacementTarget& target,
     const Footprint& area);
 
-// "Eleanor Cavendish — Trevennor, Spring 1" (an empty string for unnamed woodland games).
-std::string SaveLabel(const State& state, const char* season, int day);
+// "Eleanor Cavendish — Trevennor, Spring 1, 1851" (an empty string for unnamed woodland games).
+std::string SaveLabel(const State& state);
 
 // Journal entries: the arrival note is written when she first comes home.
 constexpr const char* ArrivalEntry = "arrival";

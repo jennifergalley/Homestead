@@ -1,9 +1,53 @@
 #include "HomesteadLampLook.h"
+#include "Simulation/HomesteadLampLight.h"
 
+#include "Camera/PlayerCameraManager.h"
 #include "Components/PointLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInterface.h"
+#include "HAL/IConsoleManager.h"
+#include "Kismet/GameplayStatics.h"
+
+namespace HomesteadLampLookTuning
+{
+TAutoConsoleVariable<float> CVarLampIntensity(TEXT("homestead.LampIntensity"),
+    static_cast<float>(Homestead::OilLampLight.intensity),
+    TEXT("Oil lamp light: unitless intensity (about lux at the flame) with the gentle falloff."));
+TAutoConsoleVariable<float> CVarLampRadius(TEXT("homestead.LampRadius"),
+    static_cast<float>(Homestead::OilLampLight.radiusCm / 100.0),
+    TEXT("Oil lamp light: attenuation radius in metres."));
+TAutoConsoleVariable<float> CVarLampFalloff(TEXT("homestead.LampFalloff"),
+    static_cast<float>(Homestead::OilLampLight.falloffExponent),
+    TEXT("Oil lamp light: falloff exponent, (1 - (d/R)^2)^exponent."));
+TAutoConsoleVariable<int32> CVarLampLegacy(TEXT("homestead.LampLegacy"), 0,
+    TEXT("1: the first lamp's inverse-square light (1400, 10 m), for A/B against the tuned one."));
+TAutoConsoleVariable<float> CVarPlacedLampShadowDistance(TEXT("homestead.PlacedLampShadowDistance"),
+    static_cast<float>(Homestead::PlacedLampShadowDistanceCm / 100.0),
+    TEXT("A lamp set down casts shadows only while the camera is within this many metres (0: always)."));
+
+Homestead::LampLightProfile CurrentProfile()
+{
+    if (CVarLampLegacy.GetValueOnGameThread() != 0) return Homestead::LegacyOilLampLight;
+    Homestead::LampLightProfile Profile = Homestead::OilLampLight;
+    Profile.intensity = FMath::Max(0.0f, CVarLampIntensity.GetValueOnGameThread());
+    Profile.radiusCm = FMath::Max(100.0f, CVarLampRadius.GetValueOnGameThread() * 100.0f);
+    Profile.falloffExponent = FMath::Max(0.1f, CVarLampFalloff.GetValueOnGameThread());
+    return Profile;
+}
+
+// The profile on a light, the intensity scaled by the flame's shiver; the shape only when it changed.
+void ApplyProfile(UPointLightComponent* Light, float Shiver)
+{
+    const Homestead::LampLightProfile Profile = CurrentProfile();
+    const float Radius = static_cast<float>(Profile.radiusCm);
+    const float Exponent = static_cast<float>(Profile.falloffExponent);
+    if (Light->bUseInverseSquaredFalloff != Profile.inverseSquared) Light->SetUseInverseSquaredFalloff(Profile.inverseSquared);
+    if (!FMath::IsNearlyEqual(Light->AttenuationRadius, Radius)) Light->SetAttenuationRadius(Radius);
+    if (!FMath::IsNearlyEqual(Light->LightFalloffExponent, Exponent)) Light->SetLightFalloffExponent(Exponent);
+    Light->SetIntensity(static_cast<float>(Profile.intensity) * Shiver);
+}
+}
 
 namespace HomesteadLampLook
 {
@@ -71,8 +115,7 @@ UPointLightComponent* AddLight(UObject* Outer, USceneComponent* Parent, const FV
     Light->SetupAttachment(Parent);
     Light->SetRelativeLocation(Offset + FVector(0, 0, FlameHeight));
     Light->SetLightColor(LightColor);
-    Light->SetIntensity(LightIntensity);
-    Light->SetAttenuationRadius(LightRadius);
+    HomesteadLampLookTuning::ApplyProfile(Light, 1.0f);
     Light->SetSourceRadius(1.5f);
     Light->SetSoftSourceRadius(3.0f);
     Light->SetCastShadows(true);
@@ -94,7 +137,18 @@ void SetLit(UStaticMeshComponent* Flame, UPointLightComponent* Light, bool bLit,
     if (Light)
     {
         if (Light->IsVisible() != bLit) Light->SetVisibility(bLit);
-        if (bLit) Light->SetIntensity(LightIntensity * Shiver);
+        if (bLit) HomesteadLampLookTuning::ApplyProfile(Light, Shiver);
     }
+}
+
+void UpdatePlacedShadows(UPointLightComponent* Light, const UObject* WorldContext)
+{
+    if (!Light || !Light->IsVisible()) return;
+    const APlayerCameraManager* Camera = UGameplayStatics::GetPlayerCameraManager(WorldContext, 0);
+    if (!Camera) return;
+    const double Distance = FVector::Dist(Camera->GetCameraLocation(), Light->GetComponentLocation());
+    const bool bWant = Homestead::PlacedLampCastsShadows(Distance,
+        HomesteadLampLookTuning::CVarPlacedLampShadowDistance.GetValueOnGameThread() * 100.0);
+    if (Light->CastShadows != bWant) Light->SetCastShadows(bWant);
 }
 }

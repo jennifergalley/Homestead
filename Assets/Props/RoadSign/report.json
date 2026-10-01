@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "RoadSign",
+  "description": "Silvered oak road sign: a blank painted board tenoned onto a square post with two knee braces (original). Pivot = post foot; the board faces +X and -X, 1.10 x 0.30 m, top at 1.90 m.",
+  "collision": "none",
+  "triangle_budget": 8000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/road_sign.py",
+  "source_sha256": "06e2cc0972e7cabed2b6495aba65af66e357f2e277cf1bb745fcf1934020a08d",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_RoadSign": {
+      "vertices": 700,
+      "triangles": 1368,
+      "size_cm": [
+        13.7,
+        113.0,
+        227.2
+      ],
+      "materials": [
+        {
+          "name": "M_RoadSign",
+          "textures": {
+            "basecolor": "T_RoadSign_basecolor.png",
+            "roughness": "T_RoadSign_roughness.png",
+            "normal": "T_RoadSign_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RoadSign_basecolor.png",
+          "roughness": "T_RoadSign_roughness.png",
+          "normal": "T_RoadSign_normal.png",
+          "ao": "T_RoadSign_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -65
+        ],
+        "focus": [
+          0.0,
+          0.3,
+          1.75
+        ]
+      },
+      "fbx": "SM_RoadSign.fbx",
+      "sha256": "51d3a4f87167c72beaa9d14bf1eca16b20a8964d1ed5033ab2673e8f56f6f359",
+      "preview": "preview_SM_RoadSign.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RoadSign_hero.png",
+          "detail": "beauty_SM_RoadSign_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -65
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "pivot": "foot of the post on the ground; the board faces +X and -X",
+  "board_cm": {
+    "width": 110.00000000000001,
+    "height": 30.0,
+    "top": 190.0,
+    "centre_z": 175.0,
+    "face_x": 2.0,
+    "bead_proud": 0.6
+  },
+  "painted_field_cm": {
+    "width": 98.0,
+    "height": 20.0
+  },
+  "text_standoff_cm": 2.3,
+  "note": "Blank board: AHomesteadRoadSign paints the words with TextRender on both faces.",
+  "textures": {
+    "T_RoadSign_basecolor.png": "0c47b8eada66d049e9f0fb190c9900dcd8124bedac8c5438decd94288c0059ec",
+    "T_RoadSign_roughness.png": "8092463b270871ff6e36f90bfc2e11b94424a66b4cfb1a12301997c011a7df10",
+    "T_RoadSign_normal.png": "1d2f38f2f41a01e6d37e68b69597c7aa99366b1507892ce8b31768a3c932d089"
+  }
+}

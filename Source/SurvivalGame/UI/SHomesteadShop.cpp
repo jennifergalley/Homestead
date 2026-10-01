@@ -1,9 +1,12 @@
 #include "SHomesteadShop.h"
+#include "HomesteadUITheme.h"
 
 #include "SHomesteadIcon.h"
 #include "SHomesteadHudScale.h"
 #include "../HomesteadController.h"
 #include "../HomesteadShopkeeper.h"
+#include "../Simulation/HomesteadBackpack.h"
+#include "../Simulation/HomesteadFood.h"
 #include "../Simulation/HomesteadItems.h"
 #include "Brushes/SlateColorBrush.h"
 #include "Framework/Application/SlateApplication.h"
@@ -22,14 +25,14 @@ namespace HomesteadMenus
 {
 namespace
 {
-const FLinearColor ShopInk(0.93f, 0.93f, 0.84f);
-const FLinearColor ShopMuted(0.71f, 0.77f, 0.69f);
-const FLinearColor ShopGold(0.92f, 0.74f, 0.43f);
-const FLinearColor ShopWarning(1.0f, 0.67f, 0.48f);
-const FLinearColor ShopPanel(0.025f, 0.05f, 0.038f, 0.93f);
-const FLinearColor ShopRow(0.05f, 0.085f, 0.065f, 0.85f);
-const FLinearColor ShopSelected(0.13f, 0.20f, 0.15f, 0.95f);
-const FLinearColor ShopPineInk(0.025f, 0.05f, 0.038f, 1.0f);
+HomesteadUITheme::FThemeColor ShopInk(0.93f, 0.93f, 0.84f);
+HomesteadUITheme::FThemeColor ShopMuted(0.71f, 0.77f, 0.69f);
+HomesteadUITheme::FThemeColor ShopGold(0.92f, 0.74f, 0.43f);
+HomesteadUITheme::FThemeColor ShopWarning(1.0f, 0.67f, 0.48f);
+HomesteadUITheme::FThemeColor ShopPanel(0.025f, 0.05f, 0.038f, 0.93f);
+HomesteadUITheme::FThemeColor ShopRow(0.05f, 0.085f, 0.065f, 0.85f);
+HomesteadUITheme::FThemeColor ShopSelected(0.13f, 0.20f, 0.15f, 0.95f);
+HomesteadUITheme::FThemeColor ShopPineInk(0.025f, 0.05f, 0.038f, 1.0f);
 
 const FButtonStyle& ShopButtonStyle()
 {
@@ -42,7 +45,7 @@ const FButtonStyle& ShopButtonStyle()
     return Style;
 }
 FString Utf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
-FString Money(int64 Cents) { return Utf8(Homestead::FormatMoney(Cents).c_str()); }
+FString Money(int64 Amount) { return Utf8(Homestead::FormatMoney(Amount).c_str()); }
 }
 
 void SHomesteadShop::Construct(const FArguments& Args)
@@ -69,7 +72,7 @@ void SHomesteadShop::Construct(const FArguments& Args)
 TSharedRef<SWidget> SHomesteadShop::Label(const FString& Value, int32 Size, const FLinearColor& Color, bool bWrap) const
 {
     return SNew(STextBlock).Text(FText::FromString(Value)).ColorAndOpacity(Color)
-        .Font(FCoreStyle::GetDefaultFontStyle("Regular", Size)).AutoWrapText(bWrap);
+        .Font(HomesteadUITheme::Font("Regular", Size)).AutoWrapText(bWrap);
 }
 
 TSharedRef<SWidget> SHomesteadShop::Button(const FString& Text, TFunction<void()> Action, bool bPrimary, float MinWidth)
@@ -78,10 +81,10 @@ TSharedRef<SWidget> SHomesteadShop::Button(const FString& Text, TFunction<void()
     [
         SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(14, 8))
         .HAlign(HAlign_Center)
-        .ButtonColorAndOpacity(bPrimary ? ShopGold : FLinearColor(0.10f, 0.16f, 0.12f, 1))
+        .ButtonColorAndOpacity(bPrimary ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
         .OnClicked_Lambda([Action]() { Action(); return FReply::Handled(); })
         [
-            SNew(STextBlock).Text(FText::FromString(Text)).Font(FCoreStyle::GetDefaultFontStyle("Regular", 15))
+            SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 15))
             .ColorAndOpacity(bPrimary ? ShopPineInk : ShopInk)
         ]
     ];
@@ -118,6 +121,18 @@ void SHomesteadShop::BuildRows()
         }
         return;
     }
+    // The leather backpack heads the Buy list until she owns it: one only, not a repeating good.
+    if (Homestead::Backpack::Offered(Sim.GetState(), Shop->kind))
+    {
+        FRow Upgrades;
+        Upgrades.Header = TEXT("Upgrades");
+        Rows.Add(Upgrades);
+        FRow Backpack;
+        Backpack.bUpgrade = true;
+        Backpack.Available = 1;
+        Backpack.Unit = Homestead::Backpack::Price;
+        Rows.Add(Backpack);
+    }
     FRow Goods;
     Goods.Header = TEXT("Shop goods");
     Rows.Add(Goods);
@@ -146,7 +161,7 @@ void SHomesteadShop::BuildRows()
     if (Rows.Num() == HeaderIndex + 1)
     {
         FRow Empty;
-        Empty.Header = TEXT("Nothing yet. Goods you sell here are set out for townsfolk, and you can buy them back.");
+        Empty.Header = TEXT("Nothing yet.");
         Empty.Available = -2;
         Rows.Add(Empty);
     }
@@ -169,9 +184,10 @@ int32 SHomesteadShop::Limit(const FRow& Row) const
     if (!Controller.IsValid()) return 0;
     const auto& Sim = Controller->Simulation();
     if (Tab == 0) return Row.Available;
-    const int64 Affordable = Row.Unit > 0 ? Sim.GetState().money / Row.Unit : Homestead::InventoryCapacity;
-    int32 Room = Homestead::InventoryCapacity - Sim.UsedCapacity();
-    Room = FMath::Min(Room, Homestead::InventoryCapacity - Sim.Count(Row.Item));
+    if (Row.bUpgrade) return Sim.GetState().money >= Row.Unit ? 1 : 0;
+    const int64 Affordable = Row.Unit > 0 ? Sim.GetState().money / Row.Unit : Sim.PackCapacity();
+    int32 Room = Sim.PackCapacity() - Sim.UsedCapacity();
+    Room = FMath::Min(Room, Sim.PackCapacity() - Sim.Count(Row.Item));
     int64 Most = FMath::Min<int64>(Affordable, Room);
     if (Row.bHeroine) Most = FMath::Min<int64>(Most, Row.Available);
     return static_cast<int32>(FMath::Max<int64>(0, Most));
@@ -182,7 +198,12 @@ FString SHomesteadShop::RowLabel(int32 Index) const
     if (!Rows.IsValidIndex(Index)) return FString();
     const FRow& Row = Rows[Index];
     if (!Row.Header.IsEmpty()) return Row.Header;
-    return Utf8(Homestead::ItemName(Row.Item));
+    return RowName(Row);
+}
+
+FString SHomesteadShop::RowName(const FRow& Row) const
+{
+    return Utf8(Row.bUpgrade ? Homestead::Backpack::Name : Homestead::ItemName(Row.Item));
 }
 
 void SHomesteadShop::Refresh()
@@ -276,6 +297,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
     const bool bSelected = Index == Selection;
     FString Stock;
     if (Tab == 0) Stock = FString::Printf(TEXT("%d carried"), Row.Available);
+    else if (Row.bUpgrade) Stock = FString::Printf(TEXT("Carry %d"), Homestead::MaxPackCapacity);
     else if (Row.bHeroine) Stock = FString::Printf(TEXT("%d on the shelf"), Row.Available);
     else Stock = TEXT("In stock");
     auto Widget = SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(10, 5))
@@ -287,7 +309,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             [
                 SNew(SBox).WidthOverride(38).HeightOverride(38)
                 [
-                    SNew(SHomesteadIcon).Kind(FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Row.Item))))
+                    SNew(SHomesteadIcon).Kind(Row.bUpgrade ? FName(TEXT("pack")) : FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Row.Item))))
                 ]
             ]
             + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
@@ -295,14 +317,17 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
                 SNew(SVerticalBox)
                 + SVerticalBox::Slot().AutoHeight()
                 [
-                    // Food shows the Energy one restores before she buys it (Homestead::FoodEnergyLabel).
+                    // Food shows what eating one now would do before she buys it: its Energy, and for a
+                    // Meal on the estate until when she'd be Well fed (Homestead::Food::EffectLabel; the
+                    // clock is paused while the shop is open).
                     SNew(SHorizontalBox)
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
-                    [ Label(Utf8(Homestead::ItemName(Row.Item)), 17, bSelected ? ShopGold : ShopInk, false) ]
+                    [ Label(RowName(Row), 17, bSelected ? ShopGold : ShopInk, false) ]
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(10, 0, 0, 1)
-                    [ Label(Utf8(Homestead::FoodEnergyLabel(Row.Item).c_str()), 14, ShopGold, false) ]
+                    [ Label(Row.bUpgrade || !Controller.IsValid() ? FString() : Utf8(Homestead::Food::EffectLabel(Controller->Simulation().GetState(), Row.Item).c_str()), 14, ShopGold, false) ]
                 ]
-                + SVerticalBox::Slot().AutoHeight()[Label(Utf8(Homestead::ItemDescription(Row.Item)), 12, ShopMuted)]
+                + SVerticalBox::Slot().AutoHeight()
+                [ Label(Utf8(Row.bUpgrade ? Homestead::Backpack::Description : Homestead::ItemDescription(Row.Item)), 12, ShopMuted) ]
             ]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(16, 0)
             [
@@ -311,7 +336,8 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
             [
                 // Wide enough for "1,000 coins each" on one line.
-                SNew(SBox).WidthOverride(170).HAlign(HAlign_Right)[Label(Money(Row.Unit) + TEXT(" each"), 16, ShopInk, false)]
+                SNew(SBox).WidthOverride(170).HAlign(HAlign_Right)
+                [ Label(Money(Row.Unit) + (Row.bUpgrade ? TEXT("") : TEXT(" each")), 16, ShopInk, false) ]
             ]
         ];
     RowWidgets[Index] = Widget;
@@ -336,7 +362,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildFooter()
             SNew(SHorizontalBox)
             + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
             [
-                Label(FString::Printf(TEXT("%s %s"), *Verb, UTF8_TO_TCHAR(Homestead::ItemName(Row->Item))), 18, ShopGold)
+                Label(FString::Printf(TEXT("%s %s"), *Verb, *RowName(*Row)), 18, ShopGold)
             ]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[Button(TEXT("-"), [this]() { AdjustQuantity(-1); }, false, 44)]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0)
@@ -388,10 +414,10 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
         return SNew(SBox).MinDesiredWidth(150)
         [
             SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(16, 7)).HAlign(HAlign_Center)
-            .ButtonColorAndOpacity(Tab == Index ? ShopGold : FLinearColor(0.10f, 0.16f, 0.12f, 1))
+            .ButtonColorAndOpacity(Tab == Index ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
             .OnClicked_Lambda([this, Index]() { SetTab(Index); return FReply::Handled(); })
             [
-                SNew(STextBlock).Text(FText::FromString(Text)).Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
+                SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 17))
                 .ColorAndOpacity(Tab == Index ? ShopPineInk : ShopInk)
             ]
         ];
@@ -449,7 +475,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 12, 0, 0)
                 [
                     SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                    .BorderBackgroundColor(FLinearColor(0.04f, 0.07f, 0.055f, 0.95f)).Padding(FMargin(14, 10))
+                    .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.04f, 0.07f, 0.055f, 0.95f))).Padding(FMargin(14, 10))
                     [
                         BuildFooter()
                     ]
@@ -507,7 +533,8 @@ void SHomesteadShop::Choose(int32 Index)
         bStatusError = true;
         const auto& Sim = Controller->Simulation();
         Status = Tab == 0 ? TEXT("You have none to sell.")
-            : Sim.GetState().money < Rows[Index].Unit ? FString::Printf(TEXT("That's %s each; you have %s."), *Money(Rows[Index].Unit), *Wallet())
+            : Sim.GetState().money < Rows[Index].Unit ? FString::Printf(TEXT("That's %s%s; you have %s."), *Money(Rows[Index].Unit),
+                Rows[Index].bUpgrade ? TEXT("") : TEXT(" each"), *Wallet())
             : TEXT("Your pack is full.");
         Refresh();
         return;
@@ -542,7 +569,8 @@ void SHomesteadShop::Confirm()
 {
     const FRow* Row = Chosen();
     if (!bQuantity || !Row || !Controller.IsValid()) return;
-    const auto Result = Controller->ShopTrade(ShopId, Row->Item, Quantity, Tab == 0, Row->bHeroine);
+    const auto Result = Row->bUpgrade ? Controller->ShopBuyBackpack(ShopId)
+        : Controller->ShopTrade(ShopId, Row->Item, Quantity, Tab == 0, Row->bHeroine);
     Status = UTF8_TO_TCHAR(Result.message.c_str());
     bStatusError = !Result.ok;
     if (Result.ok) bQuantity = false;

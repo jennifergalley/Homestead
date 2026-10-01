@@ -4,6 +4,7 @@
 // cell back down into her pack or the chest: onto an empty place it moves, onto the same item it
 // merges, onto anything else the two swap (HomesteadControllerHotbarEditor.cpp).
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 #include "../Simulation/HomesteadHotbarLayout.h"
 #include "../Simulation/HomesteadPackRow.h"
 
@@ -11,8 +12,15 @@ namespace HomesteadMenus
 {
 namespace MenuHotbarStyle
 {
-// Slightly smaller than a pack tile so ten fit under the pack grid.
+// Beside an open chest: slightly smaller than a pack tile so ten fit over the pack column.
 constexpr float SlotSize = 58;
+// As a pack grid row: the grid's slot padding and its cell height (a pack tile is 80 tall with a
+// 2-unit inset, SHomesteadMenuPages.cpp EmptyCell), and a pack tile's icon size.
+constexpr float GridSlotPadding = 4;
+constexpr float GridCellHeight = 80;
+constexpr float GridCellInset = 2;
+constexpr float GridIconSize = 48;
+constexpr float StripIconSize = 40;
 }
 const FHomesteadRow* SHomesteadMenu::HotbarCandidateRow() const
 {
@@ -41,10 +49,10 @@ FLinearColor SHomesteadMenu::HotbarCellColor(int32 Slot) const
         // Gold where it will go; a rust wash for something worn, which has to come off first.
         const FHomesteadRow* Row = HeldHotbarSlot == INDEX_NONE ? HotbarCandidateRow() : nullptr;
         const bool Refused = Row && Row->ContainerId < 0;
-        return Refused ? FLinearColor(0.42f, 0.16f, 0.08f, 0.9f) : MenuGold;
+        return Refused ? HomesteadUITheme::Themed(FLinearColor(0.42f, 0.16f, 0.08f, 0.9f)) : FLinearColor(MenuGold);
     }
-    if (Slot == HeldHotbarSlot) return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
-    return Region == ERegion::Hotbar && Slot == HotbarSelection ? Selected : FLinearColor(0.055f, 0.09f, 0.075f, 0.5f);
+    if (Slot == HeldHotbarSlot) return HomesteadUITheme::Themed(FLinearColor(0.045f, 0.055f, 0.05f, 0.72f));
+    return Region == ERegion::Hotbar && Slot == HotbarSelection ? Selected : HomesteadUITheme::Themed(FLinearColor(0.055f, 0.09f, 0.075f, 0.5f));
 }
 FHomesteadHotbarSlot SHomesteadMenu::BookHotbarSlot(int32 Slot) const
 {
@@ -55,11 +63,14 @@ FHomesteadHotbarSlot SHomesteadMenu::BookHotbarSlot(int32 Slot) const
     }
     return HotbarSnapshotCache.IsValidIndex(Slot) ? HotbarSnapshotCache[Slot] : FHomesteadHotbarSlot();
 }
-TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
+TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar(bool bGridRow)
 {
     // The same ten numbered cells as the world hotbar: the first row of her pack, holding the very
-    // stacks the world hotbar shows. A stack used up leaves its cell empty.
+    // stacks the world hotbar shows. A stack used up leaves its cell empty. On the Pack page it is
+    // laid out as one of the pack grid's rows (Jenny 2026-09-30, "like Coral Island"): the same
+    // columns, spacing and cell height as the rows below it.
     TSharedRef<SHorizontalBox> Strip = SNew(SHorizontalBox);
+    TSharedRef<SUniformGridPanel> GridRow = SNew(SUniformGridPanel).SlotPadding(FMargin(MenuHotbarStyle::GridSlotPadding));
     HotbarCells.Reset();
     for (int32 Slot = 0; Slot < Homestead::HotbarSize; ++Slot)
     {
@@ -86,10 +97,24 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                 bHotbarPointerDragging = false;
             })
             .OnReleased_Lambda([this]() { if (bHotbarPointerDown) EndHotbarPointerDrag(); })
-            .OnClicked_Lambda([this, Slot]()
+            .OnClicked_Lambda([this, Slot, SlotInfo]()
             {
                 if (!PointerAction() || Dialog != EDialog::None) return FReply::Handled();
                 if (bSuppressHotbarClick) { bSuppressHotbarClick = false; return FReply::Handled(); }
+                // Shift+click, as on any pack stack: straight into the open chest, or else down into the
+                // rest of her pack (Jenny 2026-09-30: the row acts like any other row).
+                if (SlotInfo().Assigned && !HeldHotbarRow.IsSet()
+                    && (bShift || FSlateApplication::Get().GetModifierKeys().IsShiftDown()))
+                {
+                    if (Controller->ActiveStorageChest().IsSet())
+                    {
+                        FHomesteadRow Chest;
+                        Chest.ContainerId = Controller->ActiveStorageChest().GetValue();
+                        Controller->MenuMoveHotbarToPack(Slot, &Chest);
+                    }
+                    else Controller->MenuMoveHotbarToPack(Slot, nullptr);
+                    return FReply::Handled();
+                }
                 Region = ERegion::Hotbar;
                 HotbarSelection = Slot;
                 // Holding a stack ("Move to a hotbar slot"): a click places it.
@@ -99,7 +124,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
             });
         Button->RightClick = [this, Slot]() { if (PointerAction() && Dialog == EDialog::None) OpenHotbarSlotMenu(Slot, true); };
         Button->SetContent(
-            SNew(SBox).WidthOverride(MenuHotbarStyle::SlotSize).HeightOverride(MenuHotbarStyle::SlotSize)
+            SNew(SBox)
+            .WidthOverride(bGridRow ? FOptionalSize() : FOptionalSize(MenuHotbarStyle::SlotSize))
+            .HeightOverride(bGridRow ? FOptionalSize() : FOptionalSize(MenuHotbarStyle::SlotSize))
             [
                 SNew(SOverlay)
                 + SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)
@@ -114,7 +141,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                         {
                             const bool Lit = IsHotbarDropTarget(Slot) || Slot == HeldHotbarSlot
                                 || (Region == ERegion::Hotbar && Slot == HotbarSelection);
-                            return Lit ? FLinearColor::Transparent : FLinearColor(0.2f, 0.3f, 0.24f, 0.25f);
+                            return Lit ? FLinearColor::Transparent : HomesteadUITheme::Themed(FLinearColor(0.2f, 0.3f, 0.24f, 0.25f));
                         })
                     ]
                 ]
@@ -130,12 +157,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                 ]
                 + SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
                 [
-                    SNew(SBox).WidthOverride(40).HeightOverride(40)
+                    SNew(SBox)
+                    .WidthOverride(bGridRow ? MenuHotbarStyle::GridIconSize : MenuHotbarStyle::StripIconSize)
+                    .HeightOverride(bGridRow ? MenuHotbarStyle::GridIconSize : MenuHotbarStyle::StripIconSize)
                     .Visibility_Lambda([SlotInfo]() { return SlotInfo().Assigned ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
                     [
                         SNew(SHomesteadIcon)
                         .Kind_Lambda([SlotInfo]() { return SlotInfo().Icon; })
-                        .Tint_Lambda([this, Slot, SlotInfo]()
+                        .Tint_Lambda([this, Slot, SlotInfo]() -> FLinearColor
                         {
                             // Pine on the gold of her selected cell, as on the world hotbar.
                             if (IsHotbarDropTarget(Slot) || (Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot)) return PineInk;
@@ -146,14 +175,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                 + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(5, 3, 0, 0)
                 [
                     SNew(STextBlock).Text(FText::FromString(UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str())))
-                    .Font(FCoreStyle::GetDefaultFontStyle("Bold", 13))
+                    .Font(HomesteadUITheme::KeyFont("Bold", 13))
                     .ColorAndOpacity_Lambda([this, Slot]() { return FSlateColor(IsHotbarDropTarget(Slot) || (Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot) ? PineInk : Ink); })
                     .Visibility(EVisibility::HitTestInvisible)
                 ]
                 + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(0, 0, 5, 2)
                 [
                     // The stack's count (tools and garments are single).
-                    SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Bold", 13))
+                    SNew(STextBlock).Font(HomesteadUITheme::Font("Bold", 13))
                     .Text_Lambda([SlotInfo]()
                     {
                         const auto Info = SlotInfo();
@@ -168,8 +197,16 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                 ]
             ]);
         HotbarCells.Add(Button);
-        Strip->AddSlot().AutoWidth().Padding(3, 0)[ RegisterButton(Button, ERegion::Hotbar, Slot) ];
+        if (bGridRow)
+            GridRow->AddSlot(Slot, 0)
+            [
+                SNew(SBox).HeightOverride(MenuHotbarStyle::GridCellHeight).Padding(MenuHotbarStyle::GridCellInset)
+                [ RegisterButton(Button, ERegion::Hotbar, Slot) ]
+            ];
+        else Strip->AddSlot().AutoWidth().Padding(3, 0)[ RegisterButton(Button, ERegion::Hotbar, Slot) ];
     }
+    bHotbarInScroll = bGridRow;
+    if (bGridRow) return GridRow;
     return Strip;
 }
 void SHomesteadMenu::OpenHotbarSlotMenu(int32 Slot, bool bPointer)

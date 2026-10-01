@@ -55,7 +55,7 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
     Add(TEXT("Close initial Notes"), [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this]() { return !Controller->IsBookOpen(); });
     QueueGrant(Homestead::Item::Billhook, 1);
-    Add(TEXT("Open actual carried inventory with controller"), [this]() { Tap(EKeys::Gamepad_Special_Right); },
+    Add(TEXT("Open actual carried inventory with controller"), [this]() { Tap(EKeys::Gamepad_Special_Left); },
         [this]()
         {
             return PackCountsMatch(*Controller) && Controller->Simulation().Count(Homestead::Item::Billhook) == 1
@@ -96,24 +96,35 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
             const auto Rows = Controller->Rows();
             // Every buildable piece in enum order; the hearth belongs to the old house.
             if (Controller->BookPage() != 2 || Rows.Num() != static_cast<int32>(Homestead::Piece::Hearth)
-                || Controller->BookTitle() != TEXT("Building plans") || !Controller->BookFooter().Contains(TEXT("A: Choose a spot to build"))) return false;
+                || Controller->BookTitle() != TEXT("Building plans") || !Controller->BookFooter().Contains(TEXT("A: Build"))) return false;
             for (int32 Id = 0; Id < Rows.Num(); ++Id)
             {
                 const auto Piece = static_cast<Homestead::Piece>(Id);
                 if (Rows[Id].Id != Id || Rows[Id].Label != UTF8_TO_TCHAR(Homestead::PieceName(Piece))
-                    || !Rows[Id].Detail.StartsWith(FString(TEXT("Needs: ")) + UTF8_TO_TCHAR(Homestead::PieceRequirements(Piece)))) return false;
+                    || !Rows[Id].HasRecipeState) return false;
             }
             return true;
         });
     QueueBookCapture(TEXT("book-plans"));
-    Add(TEXT("Planning selects a preview, not a possession or material purchase"),
+    // A plan she can't afford yet is refused in the book, as a recipe is (Jenny 2026-09-30): the
+    // short notice, still on the plans, not placing, nothing changed.
+    Add(TEXT("A on a plan she can't afford says what's short and doesn't start placing"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, Before]()
+        {
+            return Controller->IsBookOpen() && Controller->BookPage() == 2 && !Controller->IsPlanning()
+                && Controller->ToastIsError() && Controller->Toast().StartsWith(TEXT("Gather "))
+                && Controller->Toast().EndsWith(TEXT(" first.")) && Controller->Simulation().Serialize() == *Before;
+        });
+    Steps.Last().Skip = [this]() { return Controller->Simulation().CheckBuildCost(Homestead::Piece::Foundation).ok; };
+    Add(TEXT("Planning selects a preview, not a possession or material purchase"),
+        [this, Before]() { AffordPlan(); *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return Controller->IsPlanning() && Controller->Simulation().Serialize() == *Before; });
     Add(TEXT("Cancel planning"), [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsPlanning(); });
     Add(TEXT("Keyboard reopens the same building plan page"), [this]() { Tap(EKeys::B); },
         [this]() { return Controller->BookPage() == 2 && Controller->SelectedRow() == 0
-            && Controller->BookFooter().Contains(TEXT("Enter: Choose a spot to build")); });
+            && Controller->BookFooter().Contains(TEXT("Enter: Build")); });
     QueueBookCapture(TEXT("book-plans-keyboard"));
     Add(TEXT("Menus pause the simulation and preserve the camera"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); CameraStart = Controller->GetControlRotation().Yaw; },

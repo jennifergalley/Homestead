@@ -1,4 +1,6 @@
 #include "HomesteadSimulation.h"
+#include "../Source/SurvivalGame/HomesteadSavePreference.h"
+#include "HomesteadBed.h"
 #include "HomesteadCrops.h"
 #include "HomesteadShops.h"
 #include "HomesteadEstate.h"
@@ -9,6 +11,8 @@
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadRuinDebris.h"
+#include "HomesteadSwingTiming.h"
+#include "HomesteadToolRepeat.h"
 
 #include <algorithm>
 #include <cmath>
@@ -149,12 +153,19 @@ std::string Encode(const State& s, int version = SimulationSaveVersion, int widt
         out << "tools " << ToolKindCount;
         for (const ToolTier tier : s.toolTiers) out << ' ' << static_cast<int>(tier);
         out << '\n';
-        std::vector<int> picked;
+        std::vector<int> picked, withered;
         for (const auto& p : s.plots) if (p.planted && p.picked) picked.push_back(p.id);
+        for (const auto& p : s.plots) if (p.planted && p.withered) withered.push_back(p.id);
         if (!picked.empty())
         {
             out << "picked " << picked.size();
             for (int id : picked) out << ' ' << id;
+            out << '\n';
+        }
+        if (!withered.empty())
+        {
+            out << "withered " << withered.size();
+            for (int id : withered) out << ' ' << id;
             out << '\n';
         }
     }
@@ -397,6 +408,12 @@ void BedrollTakesHay()
     CHECK(PieceRequirements(Piece::Bed) == cost);
     CHECK(std::string(PieceRequirements(Piece::Wall)).find(ItemName(Item::BrambleCanes)) != std::string::npos);
     CHECK(std::string(PieceRequirements(Piece::Chest)).find(ItemName(Item::BrambleCanes)) != std::string::npos);
+    // The Build tab lists the same cost as rows (PieceCost) and the foundation as a condition.
+    CHECK(PieceCost(Piece::Bed)[static_cast<int>(Item::Branch)] == 4 && PieceCost(Piece::Bed)[static_cast<int>(Item::Hay)] == 4);
+    CHECK(PieceCost(Piece::Wall)[static_cast<int>(Item::BrambleCanes)] > 0);
+    CHECK(PieceNeedsFoundation(Piece::Wall) && PieceNeedsFoundation(Piece::Doorway) && PieceNeedsFoundation(Piece::Roof));
+    CHECK(!PieceNeedsFoundation(Piece::Bed) && !PieceNeedsFoundation(Piece::Chest) && !PieceNeedsFoundation(Piece::Foundation));
+    CHECK(PieceCost(Piece::Count) == Inventory{});
 
     // Canes alone, or too little hay, are refused and spend nothing.
     Simulation canes;
@@ -568,7 +585,7 @@ void GardenTargetPreview()
         Simulation tired = sim;
         Edit(tired, [](State& state) { state.energy = 0.5; });
         const GardenTarget exhausted = PreviewGarden(tired, GardenTool::Hoe, {stand.x - 300.0, stand.y}, 1.0, 0.0);
-        CHECK(exhausted.shown && !exhausted.valid && exhausted.reason.find("exhausted") != std::string::npos);
+        CHECK(exhausted.shown && !exhausted.valid && exhausted.reason.find("Too tired") != std::string::npos);
     }
 
     // The pail: nothing without a focused plot; no pail, then empty, then fillable, then fully watered.
@@ -587,6 +604,210 @@ void GardenTargetPreview()
     pail = PreviewGarden(sim, GardenTool::Pail, garden, 1.0, 0.0, plotId);
     CHECK(!pail.valid && pail.reason == "This soil is already fully watered.");
     CHECK(!PreviewGarden(sim, GardenTool::None, garden, 1.0, 0.0, plotId).shown);
+
+    // A withered crop: the hoe's outline is the plot it hoes out (the focused one first, else the one
+    // ahead), judged by ClearWithered, even when it has no weeds to pull.
+    {
+        Simulation dead = sim;
+        Edit(dead, [plotId](State& state)
+        {
+            for (auto& plot : state.plots)
+                if (plot.id == plotId) { plot.planted = true; plot.withered = true; plot.weeds = 0.0; plot.growth = 0.5; }
+        });
+        const Point beside{GardenCellCenter(gx, gy).x - 60.0, GardenCellCenter(gx, gy).y};
+        const GardenTarget focused = PreviewGarden(dead, GardenTool::Hoe, beside, 0.0, 1.0, plotId);
+        CHECK(focused.shown && focused.plotId == plotId && focused.valid && focused.reason.empty());
+        CHECK(focused.valid == dead.CheckClearWithered(plotId, beside).ok);
+        const GardenTarget ahead = PreviewGarden(dead, GardenTool::Hoe, stand, 1.0, 0.0);
+        CHECK(ahead.shown && ahead.plotId == plotId && ahead.valid);
+        const std::string untouched = dead.Serialize();
+        CHECK(dead.CheckClearWithered(plotId, beside).ok && dead.Serialize() == untouched);
+        OK(dead.ClearWithered(plotId, beside));
+        CHECK(!dead.CheckClearWithered(plotId, beside).ok
+            && dead.CheckClearWithered(plotId, beside).message == "Nothing withered grows here.");
+    }
+}
+
+// Seeds on the hotbar: the outline previews exactly the plot the [A]/[E] sow acts on (the focused plot), with
+// Plant's own refusals (Simulation::CheckSow), and the focus line's cue (Homestead::DescribeSow). Previewing
+// never sows or spends seed. (Main has no crop seasons or withering yet, so neither refuses.)
+void SeedSowPreview()
+{
+    Simulation sim;
+    Edit(sim, [](State&) {});
+    OK(sim.GrantItems(Item::RustedHoeBlade, 1));
+    GatherUntil(sim, Item::Branch, ResourceKind::Branches, 5);
+    OK(sim.Craft(Recipe::HaftHoe, Home));
+    const int gx = CellToGarden(-2), gy = CellToGarden(-1);
+    const Point stand{GardenCellCenter(gx, gy).x - 85.0, GardenCellCenter(gx, gy).y};
+    OK(sim.Till(gx, gy, stand));
+    const int plotId = sim.FindNearestPlot(GardenCellCenter(gx, gy), 1);
+    CHECK(plotId != -1);
+    OK(sim.GrantItems(Item::CarrotSeed, 2));
+    const Point beside = GardenCellCenter(gx, gy);
+
+    // Valid: green on the focused plot, "Plant Carrot seed" keyed, and nothing changes however often it's asked.
+    const std::string before = sim.Serialize();
+    GardenTarget seed = PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::CarrotSeed);
+    CHECK(seed.shown && seed.valid && seed.reason.empty() && seed.plotId == plotId && seed.cellX == gx && seed.cellY == gy);
+    std::vector<Item> row(PackRowSize, Item::Count);
+    row[3] = Item::CarrotSeed;
+    SowCue cue = DescribeSow(sim, plotId, beside, Item::CarrotSeed, row);
+    CHECK(cue.keyed && cue.text == "Plant Carrot seed");
+    for (int repeat = 0; repeat < 50; ++repeat)
+    {
+        PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::CarrotSeed);
+        DescribeSow(sim, plotId, beside, Item::CarrotSeed, row);
+        (void)sim.CheckSow(plotId, beside, CropKind::Carrots);
+    }
+    CHECK(sim.Serialize() == before);
+
+    // Invalid cases give Plant's own refusal, unkeyed; each agrees with what Plant would do on a copy.
+    const auto Refused = [&](const Simulation& at, Point player, int plot, Item item, const std::string& want)
+    {
+        const GardenTarget target = PreviewGarden(at, GardenTool::Seed, player, 1.0, 0.0, plot, item);
+        const SowCue refusal = DescribeSow(at, plot, player, item, row);
+        Simulation copy = at;
+        const Result planted = copy.Plant(plot, player, CropForSeed(item)->kind);
+        CHECK(target.shown && !target.valid && target.reason == want);
+        CHECK(!refusal.keyed && refusal.text == want);
+        CHECK(!planted.ok && planted.message == want);
+    };
+    Refused(sim, beside, plotId, Item::BroadBeanSeed, "You have no Broad bean seed to sow.");
+    // Out of its seasons (Spring 1, 1851): Plant's own season refusal, seed in hand or not.
+    {
+        Simulation turnips = sim;
+        OK(turnips.GrantItems(Item::TurnipSeed, 1));
+        Refused(turnips, beside, plotId, Item::TurnipSeed, OutOfSeasonText(CropKind::Turnips));
+        CHECK(OutOfSeasonText(CropKind::Turnips) == "Turnips grow in Autumn and Winter.");
+    }
+    // A withered plant: hoe it out first (red, with the reason).
+    {
+        Simulation dead = sim;
+        Edit(dead, [plotId](State& state)
+        {
+            for (Plot& plot : state.plots)
+                if (plot.id == plotId) { plot.planted = true; plot.withered = true; plot.kind = CropKind::Potatoes; }
+        });
+        Refused(dead, beside, plotId, Item::CarrotSeed, "Hoe out the withered plant before planting.");
+    }
+    Refused(sim, {beside.x + 2000.0, beside.y}, plotId, Item::CarrotSeed, "Move beside a tilled plot to plant.");
+    {
+        Simulation tired = sim;
+        Edit(tired, [](State& state) { state.energy = 0.5; });
+        const GardenTarget exhausted = PreviewGarden(tired, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::CarrotSeed);
+        CHECK(exhausted.shown && !exhausted.valid && exhausted.reason.find("Too tired") != std::string::npos);
+        CHECK(exhausted.reason == tired.CheckSow(plotId, beside, CropKind::Carrots).message);
+    }
+    if (sim.Count(Item::Berries) == 0) Refused(sim, beside, plotId, Item::Berries, "Gather a berry to plant the seeds from its fruit.");
+    if (sim.Count(Item::Seeds) == 0) Refused(sim, beside, plotId, Item::Seeds, "Gather seeds from wild roots before planting.");
+
+    // Nothing to show without a seed, for a non-seed, or for a plot that isn't there.
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::Count).shown);
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::Stone).shown);
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, 987654, Item::CarrotSeed).shown);
+    CHECK(!sim.CheckSow(987654, beside, CropKind::Carrots).ok);
+
+    // Untilled: with no plot in focus, the square the hoe would till next is red until it's tilled; a berry,
+    // held more often to eat, outlines nothing there.
+    const Point edge{GardenCellCenter(gx, gy).x + GardenCellSize * 0.5 - 10.0, GardenCellCenter(gx, gy).y};
+    const GardenTarget untilled = PreviewGarden(sim, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::CarrotSeed);
+    CHECK(untilled.shown && !untilled.valid && untilled.reason == UntilledSowText && untilled.plotId == -1);
+    CHECK(untilled.cellX == gx + 1 && untilled.cellY == gy);
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::Berries).shown);
+    // An out-of-season seed (turnips in Spring) doesn't ask her to till first only to be refused (review).
+    {
+        Simulation turnips = sim;
+        OK(turnips.GrantItems(Item::TurnipSeed, 1));
+        CHECK(!PreviewGarden(turnips, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::TurnipSeed).shown);
+    }
+    // Facing back onto her own plot without it in focus shows nothing: it's tilled.
+    CHECK(!PreviewGarden(sim, GardenTool::Seed, edge, -1.0, 0.0, -1, Item::CarrotSeed).shown);
+    // The same square the hoe tills, wherever she stands in hers (review: the pail's 60 cm pointed at her own
+    // square from 15-40 cm in, while the hoe's 85 cm tills the next one).
+    for (const double into : {15.0, 25.0, 40.0, 60.0, 90.0})
+    {
+        const Point at{GardenCellCenter(gx + 1, gy).x - GardenCellSize * 0.5 + into, GardenCellCenter(gx + 1, gy).y};
+        int hoeX = 0, hoeY = 0;
+        HoeCellAhead(at, 1.0, 0.0, hoeX, hoeY);
+        const GardenTarget ahead = PreviewGarden(sim, GardenTool::Seed, at, 1.0, 0.0, -1, Item::CarrotSeed);
+        const GardenTarget hoe = PreviewGarden(sim, GardenTool::Hoe, at, 1.0, 0.0);
+        CHECK(ahead.cellX == hoeX && ahead.cellY == hoeY && hoe.cellX == hoeX && hoe.cellY == hoeY);
+        CHECK(ahead.shown == sim.CheckTillGround(hoeX, hoeY, at).ok);
+    }
+    // Tillable but for the hoe or her energy: still "till this square first".
+    {
+        Simulation unready = sim;
+        Edit(unready, [](State& state)
+        {
+            state.energy = 0.5;
+            state.inventory[static_cast<int>(Item::DiggingStick)] = 0;
+            state.inventoryLayout.erase(std::remove_if(state.inventoryLayout.begin(), state.inventoryLayout.end(),
+                [](const LayoutEntry& entry) { return entry.item == Item::DiggingStick; }), state.inventoryLayout.end());
+        });
+        CHECK(!unready.CheckTill(gx + 1, gy, edge).ok);
+        CHECK(PreviewGarden(unready, GardenTool::Seed, edge, 1.0, 0.0, -1, Item::CarrotSeed).reason == UntilledSowText);
+    }
+    // Ground that can't be tilled (a building, a resource, spoiling overgrowth) shows nothing.
+    Simulation built = sim;
+    BuildingStock(built);
+    OK(built.Place(Piece::Fire, -3, -1, 0, CellCenter(-3, -1)));
+    int refused = 0;
+    bool building = false;
+    for (int y = gy - 30; y <= gy + 30; ++y)
+        for (int x = gx - 30; x <= gx + 30; ++x)
+        {
+            const Point from{GardenCellCenter(x, y).x - 85.0, GardenCellCenter(x, y).y};
+            const Result ground = built.CheckTillGround(x, y, from);
+            if (ground.ok || ground.message == "Move closer to a valid garden square." || ground.message == "This cell is already tilled.") continue;
+            ++refused;
+            building = building || ground.message == "Choose soil away from buildings.";
+            CHECK(!PreviewGarden(built, GardenTool::Seed, from, 1.0, 0.0, -1, Item::CarrotSeed).shown);
+        }
+    CHECK(refused > 0 && building);
+    CHECK(sim.Serialize() == before);
+
+    // No seed selected: name a seed in the hotbar row and its number key; a berry only when no seed is there.
+    std::vector<Item> none(PackRowSize, Item::Count);
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, none).text == "Choose seeds on the hotbar to sow");
+    CHECK(!DescribeSow(sim, plotId, beside, Item::Count, row).keyed);
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, row).text == "Select Carrot seed (4) to plant");
+    CHECK(DescribeSow(sim, plotId, beside, Item::Hatchet, row).text == "Select Carrot seed (4) to plant");
+    std::vector<Item> last(PackRowSize, Item::Count);
+    last[PackRowSize - 1] = Item::CarrotSeed;
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, last).text == "Select Carrot seed (0) to plant");
+    std::vector<Item> spent(PackRowSize, Item::Count);
+    spent[2] = Item::BroadBeanSeed;  // none in the pack: not offered
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, spent).text == "Choose seeds on the hotbar to sow");
+    {
+        Simulation turnips = sim;
+        OK(turnips.GrantItems(Item::TurnipSeed, 3));
+        std::vector<Item> autumn(PackRowSize, Item::Count);
+        autumn[0] = Item::TurnipSeed;   // out of season in Spring: skipped
+        autumn[5] = Item::CarrotSeed;
+        CHECK(DescribeSow(turnips, plotId, beside, Item::Count, autumn).text == "Select Carrot seed (6) to plant");
+        autumn[5] = Item::Count;
+        CHECK(DescribeSow(turnips, plotId, beside, Item::Count, autumn).text == "Choose seeds on the hotbar to sow");
+    }
+    {
+        Simulation berried = sim;
+        OK(berried.GrantItems(Item::Berries, 1));
+        std::vector<Item> fruit(PackRowSize, Item::Count);
+        fruit[1] = Item::Berries;
+        CHECK(DescribeSow(berried, plotId, beside, Item::Count, fruit).text == "Select Berries (2) to plant their seeds");
+        fruit[6] = Item::CarrotSeed;
+        CHECK(DescribeSow(berried, plotId, beside, Item::Count, fruit).text == "Select Carrot seed (7) to plant");
+        const SowCue berry = DescribeSow(berried, plotId, beside, Item::Berries, fruit);
+        CHECK(berry.keyed && berry.text == "Plant berry seeds");
+    }
+
+    // The action sows exactly the previewed plot, spending one seed; then the plot is occupied.
+    const int seedsBefore = sim.Count(Item::CarrotSeed);
+    OK(sim.Plant(seed.plotId, beside, CropForSeed(Item::CarrotSeed)->kind));
+    CHECK(sim.Count(Item::CarrotSeed) == seedsBefore - 1);
+    for (const Plot& plot : sim.GetState().plots)
+        if (plot.id == seed.plotId) CHECK(plot.planted && plot.kind == CropKind::Carrots);
+    Refused(sim, beside, plotId, Item::CarrotSeed, "A crop is already growing here.");
 }
 
 void GameplayWalkthrough()
@@ -616,8 +837,9 @@ void GameplayWalkthrough()
     CHECK(plotId != -1);
     OK(sim.Plant(plotId, garden));
     OK(sim.FillWater(WaterSource));
-    CHECK(sim.Count(Item::Water) == 6);
+    CHECK(sim.Count(Item::Water) == PailPortions);
     OK(sim.Water(plotId, garden));
+    CHECK(sim.Count(Item::Water) == PailPortions - 1);   // each watering spends one
     GatherUntil(sim, Item::Branch, ResourceKind::Branches, 40);
     GatherUntil(sim, Item::Stone, ResourceKind::Stones, 8);
     OK(sim.GrantItems(Item::BrambleCanes, 15));
@@ -658,7 +880,7 @@ void GameplayWalkthrough()
     // A cooked meal restores some energy as well as food.
     CHECK(sim.GetState().energy > energyBeforeMeal || sim.GetState().energy == 100);
     const double beforeSleep = sim.GetState().hour;
-    OK(sim.Sleep(8, Home));
+    OK(sim.Sleep(8, Home, {1, 0}));
     CHECK(Close(sim.GetState().hour, beforeSleep + 8));
     CHECK(sim.GetState().energy == 100);
     CHECK(!sim.IsNearFire(firePosition));
@@ -670,7 +892,7 @@ void GameplayWalkthrough()
         if (sim.Count(Item::Berries) < 3) GatherUntil(sim, Item::Berries, ResourceKind::BerryBush, 10);
         while (sim.GetState().hunger < 85) OK(sim.Eat(Item::Berries));
         sim.AdvanceGameHours(4, Home);
-        OK(sim.Sleep(8, Home));
+        OK(sim.Sleep(8, Home, {1, 0}));
     }
     CHECK(sim.GetState().plots[0].growth == 1);
     const int roots = sim.Count(Item::Roots);
@@ -712,12 +934,12 @@ void AtomicTransactions()
     Stock(sim, {{Item::WateringCan, 1}, {Item::Water, 1}, {Item::Stone, 117}});
     CHECK(sim.FillWater({WaterSource.x + 90000, WaterSource.y}).message == "Walk to the river or the lake to fill your pail.");
     OK(sim.FillWater(WaterSource));
-    CHECK(sim.UsedCapacity() == 118);
-    CHECK(sim.Count(Item::Water) == 6);
+    CHECK(sim.UsedCapacity() == 118);   // water takes no pack space
+    CHECK(sim.Count(Item::Water) == 15);
     Stock(sim, {{Item::Knife, 1}, {Item::WateringCan, 1}, {Item::Branch, 112}});
     OK(sim.FillWater(WaterSource));
     CHECK(sim.UsedCapacity() == 114);
-    CHECK(sim.Count(Item::Water) == 6);
+    CHECK(sim.Count(Item::Water) == 15);   // Jenny, 2026-09-30: a pail holds 15, up from 6
     UnchangedFailure(sim, [&] { return sim.FillWater(WaterSource); });
     CHECK(sim.FillWater(WaterSource).message == "Your pail is already full.");
     CHECK(sim.Count(Item::Water) == PailPortions);
@@ -726,7 +948,14 @@ void AtomicTransactions()
     CHECK(sim.Count(Item::WateringCan) == 1);
     UnchangedFailure(sim, [&] { return sim.EmptyPail(); });
     OK(sim.FillWater(WaterSource));
-    CHECK(sim.Count(Item::Water) == 6);
+    CHECK(sim.Count(Item::Water) == 15);
+    // An old save's six-portion pail, part used, loads with its four portions; the next fill tops it to 15.
+    Stock(sim, {{Item::Knife, 1}, {Item::WateringCan, 1}, {Item::Water, 4}});
+    Simulation reloaded;
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(reloaded.Count(Item::Water) == 4);
+    OK(reloaded.FillWater(WaterSource));
+    CHECK(reloaded.Count(Item::Water) == 15);
     Stock(sim, {{Item::Knife, 1}, {Item::Roots, 2}});
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::RoastedRoots, Home); });
     UnchangedFailure(sim, [&] { return sim.Craft(Recipe::HerbedRoots, Home); });
@@ -1260,7 +1489,7 @@ void GrowBerryBush(Simulation& sim, int plotId, Point garden)
                 GatherUntil(sim, Item::Berries, ResourceKind::BerryBush, 5);
             OK(sim.Eat(Item::Berries));
         }
-        OK(sim.Sleep(8, Home));
+        OK(sim.Sleep(8, Home, {1, 0}));
         CHECK(!sim.GetState().failed);
         CHECK(sim.GetState().plots[0].kind == CropKind::Berries);
         CHECK(sim.GetState().plots[0].planted);
@@ -1473,23 +1702,23 @@ void CropTableAndStatus()
     CHECK(harvested.message == "Harvested 4 roots and 2 seeds. This plot is ready to replant.");
     CHECK(!sim.GetState().plots[0].planted);
 
-    // Sow bought turnip seed and broad beans: turnips clear the plot, beans keep cropping.
-    Stock(sim, {{Item::DiggingStick, 1}, {Item::WateringCan, 1}, {Item::TurnipSeed, 1}, {Item::BroadBeanSeed, 1}});
+    // Sow bought carrot seed and broad beans (both spring crops): carrots clear the plot, beans keep cropping.
+    Stock(sim, {{Item::DiggingStick, 1}, {Item::WateringCan, 1}, {Item::CarrotSeed, 1}, {Item::BroadBeanSeed, 1}});
     const Point beans = CellCenter(-3, -1);
     OK(sim.Till(CellToGarden(-3), CellToGarden(-1), beans));
     const int beanId = sim.FindNearestPlot(beans, 1);
-    const Result sown = sim.Plant(rootId, roots, CropKind::Turnips);
+    const Result sown = sim.Plant(rootId, roots, CropKind::Carrots);
     OK(sown);
-    CHECK(sown.message == "Planted turnips. Ready in about 4 days if watered.");
-    CHECK(sim.Count(Item::TurnipSeed) == 0);
-    UnchangedFailure(sim, [&] { return sim.Plant(beanId, beans, CropKind::Carrots); });
+    CHECK(sown.message == "Planted carrots. Ready in about 5 days if watered.");
+    CHECK(sim.Count(Item::CarrotSeed) == 0);
+    UnchangedFailure(sim, [&] { return sim.Plant(beanId, beans, CropKind::Potatoes); });
     OK(sim.Plant(beanId, beans, CropKind::BroadBeans));
     Edit(sim, [](State& state) { for (auto& plot : state.plots) plot.growth = 1.0; });
-    const int turnipsBefore = sim.Count(Item::Turnip);
+    const int carrotsBefore = sim.Count(Item::Carrot);
     const Result pulled = sim.HarvestCrop(rootId, roots);
     OK(pulled);
-    CHECK(pulled.message == "Harvested 2 turnips. This plot is ready to replant.");
-    CHECK(sim.Count(Item::Turnip) == turnipsBefore + 2);
+    CHECK(pulled.message == "Harvested 3 carrots. This plot is ready to replant.");
+    CHECK(sim.Count(Item::Carrot) == carrotsBefore + 3);
     for (const auto& each : sim.GetState().plots)
         if (each.id == rootId) CHECK(!each.planted && each.kind == CropKind::Roots);
     const Result picked = sim.HarvestCrop(beanId, beans);
@@ -1528,20 +1757,20 @@ void CropTableAndStatus()
     }
 
     // Playtest aid: passing tended days grows a crop on schedule; untended ones dry out and lag.
-    Stock(sim, {{Item::TurnipSeed, 2}});
-    OK(sim.Plant(rootId, roots, CropKind::Turnips));
+    Stock(sim, {{Item::CarrotSeed, 2}});
+    OK(sim.Plant(rootId, roots, CropKind::Carrots));
     Simulation untended;
     OK(untended.Deserialize(sim.Serialize()));
     const double hourBefore = sim.GetState().hour;
-    OK(sim.PassDaysForPlaytest(3.9, true, roots));
+    OK(sim.PassDaysForPlaytest(4.9, true, roots));
     for (const auto& each : sim.GetState().plots)
         if (each.id == rootId) CHECK(each.planted && !IsRipe(each) && each.growth > 0.95);
     OK(sim.PassDaysForPlaytest(0.2, true, roots));
     for (const auto& each : sim.GetState().plots)
         if (each.id == rootId) CHECK(IsRipe(each));
-    CHECK(Close(sim.GetState().hour - hourBefore, 4.1 * 24.0) && !sim.GetState().failed);
+    CHECK(Close(sim.GetState().hour - hourBefore, 5.1 * 24.0) && !sim.GetState().failed);
     CHECK(sim.GetState().hunger == 100.0);
-    OK(untended.PassDaysForPlaytest(4.1, false, roots));
+    OK(untended.PassDaysForPlaytest(5.1, false, roots));
     for (const auto& each : untended.GetState().plots)
         if (each.id == rootId) CHECK(!IsRipe(each) && each.growth > 0.1);
     UnchangedFailure(sim, [&] { return sim.PassDaysForPlaytest(0.0, true, roots); });
@@ -1831,6 +2060,7 @@ void ClockPauseAndBatching()
     const auto initial = sim.Serialize();
     sim.Advance(3600, Home, true);
     CHECK(sim.Serialize() == initial);
+    // New games run 60-minute days: 150 real seconds are one game hour.
     sim.Advance(150, Home);
     CHECK(Close(sim.GetState().hour, 7));
     OK(sim.SetDayMinutes(30));
@@ -1858,14 +2088,18 @@ void ClockPauseAndBatching()
     CHECK(Close(large.GetState().plots[0].moisture, small.GetState().plots[0].moisture, 0.001));
     CHECK(Close(large.GetState().plots[0].weeds, small.GetState().plots[0].weeds, 0.001));
     CHECK(Close(large.GetState().structures.back().fuelHours, small.GetState().structures.back().fuelHours));
-    Edit(sim, [](State& state) { state.hour = 14 * 24; });
+    // 28-day seasons from the 06:00 rollover (the calendar's own tests are in HomesteadCalendarTests).
+    Edit(sim, [](State& state) { state.hour = 14 * 24 + 6; });
     CHECK(sim.DayNumber() == 15);
+    CHECK(std::string(sim.SeasonName()) == "Spring");
+    Edit(sim, [](State& state) { state.hour = 28 * 24 + 6; });
+    CHECK(sim.DayNumber() == 1);
     CHECK(std::string(sim.SeasonName()) == "Summer");
-    Edit(sim, [](State& state) { state.hour = 28 * 24; });
+    Edit(sim, [](State& state) { state.hour = 56 * 24 + 6; });
     CHECK(std::string(sim.SeasonName()) == "Autumn");
-    Edit(sim, [](State& state) { state.hour = 42 * 24; });
+    Edit(sim, [](State& state) { state.hour = 84 * 24 + 6; });
     CHECK(std::string(sim.SeasonName()) == "Winter");
-    Edit(sim, [](State& state) { state.hour = 56 * 24; });
+    Edit(sim, [](State& state) { state.hour = 112 * 24 + 6; });
     CHECK(std::string(sim.SeasonName()) == "Spring");
 }
 
@@ -1918,8 +2152,8 @@ void CosmeticClothingAndRetiredFur()
 
     // A winter night costs the dressed and the bare exactly the same: there is no cold.
     Simulation bare;
-    Edit(bare, [](State& state) { state.hour = 42 * 24 + 20; state.energy = 100; state.hunger = 80; });
-    Edit(sim, [](State& state) { state.hour = 42 * 24 + 20; state.energy = 100; state.hunger = 80; });
+    Edit(bare, [](State& state) { state.hour = 84 * 24 + 20; state.energy = 100; state.hunger = 80; });
+    Edit(sim, [](State& state) { state.hour = 84 * 24 + 20; state.energy = 100; state.hunger = 80; });
     CHECK(std::string(bare.SeasonName()) == "Winter");
     bare.AdvanceGameHours(2, Home);
     sim.AdvanceGameHours(2, Home);
@@ -1947,16 +2181,16 @@ void SleepAndFailure()
     CHECK(Close(energies[0] - bare.GetState().energy, 3 * Exertion::AwakePerHour));
     CHECK(Close(energies[1] - indoor.GetState().energy, 3 * Exertion::AwakePerHour));
     CHECK(Close(energies[2] - fire.GetState().energy, 3 * Exertion::AwakePerHour));
-    UnchangedFailure(bare, [&] { return bare.Sleep(8, Home); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(8, Home, {1, 0}); });
     BuildingStock(bare);
     OK(bare.Place(Piece::Bed, -3, 0, 0, Home));
-    UnchangedFailure(bare, [&] { return bare.Sleep(13, Home); });
-    UnchangedFailure(bare, [&] { return bare.Sleep(-1, Home); });
-    UnchangedFailure(bare, [&] { return bare.Sleep(std::numeric_limits<double>::quiet_NaN(), Home); });
-    UnchangedFailure(bare, [&] { return bare.Sleep(8, {3900, 3900}); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(13, Home, {1, 0}); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(-1, Home, {1, 0}); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(std::numeric_limits<double>::quiet_NaN(), Home, {1, 0}); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(8, {3900, 3900}, {1, 0}); });
     Edit(bare, [](State& state) { state.hour = 19; state.hunger = 0.65; state.energy = 10; });
     const auto checkpoint = bare.Serialize();
-    CHECK(!bare.Sleep(8, Home).ok);
+    CHECK(!bare.Sleep(8, Home, {1, 0}).ok);
     CHECK(bare.GetState().failed);
     CHECK(Close(bare.GetState().hour, 19.5));
     CHECK(Close(bare.GetState().energy, 15));
@@ -1966,7 +2200,7 @@ void SleepAndFailure()
     CHECK(failed == bare.Serialize());
     UnchangedFailure(bare, [&] { return bare.Eat(Item::Berries); });
     UnchangedFailure(bare, [&] { return bare.SetDayMinutes(30); });
-    UnchangedFailure(bare, [&] { return bare.Sleep(1, Home); });
+    UnchangedFailure(bare, [&] { return bare.Sleep(1, Home, {1, 0}); });
     UnchangedFailure(bare, [&] { return bare.Craft(Recipe::HaftAxe, Home); });
     Simulation savedFailure;
     OK(savedFailure.Deserialize(failed));
@@ -1974,8 +2208,8 @@ void SleepAndFailure()
     OK(bare.Deserialize(checkpoint));
     CHECK(!bare.GetState().failed);
     // A cold night in bed is simply rest now.
-    Edit(bare, [](State& state) { state.hour = 42 * 24 + 20; state.hunger = 80; state.energy = 60; });
-    OK(bare.Sleep(8, Home));
+    Edit(bare, [](State& state) { state.hour = 84 * 24 + 20; state.hunger = 80; state.energy = 60; });
+    OK(bare.Sleep(8, Home, {1, 0}));
     CHECK(!bare.GetState().failed && bare.GetState().energy == 100);
     // Time awake drains Energy slowly (1.2 points last two hours). Running out doesn't fail her: she
     // dozes off where she stands for DozeHours at the slower rate, then carries on awake.
@@ -2008,8 +2242,8 @@ void SleepAndFiniteBoundaries()
     Edit(once, [](State& state) { state.hour = 31; state.energy = 15; });
     Simulation split;
     OK(split.Deserialize(once.Serialize()));
-    OK(once.Sleep(8, Home));
-    for (int i = 0; i < 16; ++i) OK(split.Sleep(0.5, Home));
+    OK(once.Sleep(8, Home, {1, 0}));
+    for (int i = 0; i < 16; ++i) OK(split.Sleep(0.5, Home, {1, 0}));
     CHECK(Close(once.GetState().hour, split.GetState().hour, 1e-7));
     CHECK(Close(once.GetState().hunger, split.GetState().hunger, 1e-7));
     CHECK(Close(once.GetState().energy, split.GetState().energy, 1e-7));
@@ -2022,12 +2256,67 @@ void SleepAndFiniteBoundaries()
     const std::string before = once.Serialize();
     once.AdvanceGameHours(1, Home);
     CHECK(once.Serialize() == before);
-    UnchangedFailure(once, [&] { return once.Sleep(1, Home); });
+    UnchangedFailure(once, [&] { return once.Sleep(1, Home, {1, 0}); });
     Edit(once, [](State& state) { state.nextId = TransientResourceIdBase - 1; });
     UnchangedFailure(once, [&] { return once.Till(CellToGarden(-1), CellToGarden(-1), CellCenter(-1, -1)); });
     UnchangedFailure(once, [&] { return once.Place(Piece::Foundation, -1, -1, 0, CellCenter(-1, -1)); });
     Simulation restored;
     OK(restored.Deserialize(once.Serialize()));
+}
+
+void BedSleepReachAndPriority()
+{
+    Simulation sim;
+    BuildingStock(sim);
+    BuildRoom(sim);
+    OK(sim.Place(Piece::Bed, -3, 0, 0, Home));
+    const auto& state = sim.GetState();
+    const Structure* bed = nullptr;
+    for (const auto& structure : state.structures)
+        if (structure.kind == Piece::Bed) bed = &structure;
+    CHECK(bed != nullptr);
+    const int bedId = bed->id;
+    const Footprint box = StructureFootprint(state, *bed);
+    const auto approach = [&](double outside)
+    {
+        const Point offset = RotateYaw({box.half.x + outside, 0}, box.yaw);
+        return Point{box.center.x + offset.x, box.center.y + offset.y};
+    };
+    const Point near = approach(89);
+    const Point toward = RotateYaw({-1, 0}, box.yaw);
+    const Point away = RotateYaw({1, 0}, box.yaw);
+    CHECK(ReachableBed(state, near, toward) == bedId);
+    CHECK(ReachableBed(state, approach(91), toward) == -1);
+    CHECK(ReachableBed(state, near, away) == -1);
+    CHECK(ReachableBed(state, near, RotateYaw({-0.87, 0.49}, box.yaw)) == bedId);
+    CHECK(ReachableBed(state, near, RotateYaw({-0.85, 0.53}, box.yaw)) == bedId);
+    CHECK(ReachableBed(state, near, RotateYaw({-0.25, 0.97}, box.yaw)) == -1);
+    const Point headOffset = RotateYaw({box.half.x + 85, box.half.y + 20}, box.yaw);
+    const Point nearHead{box.center.x + headOffset.x, box.center.y + headOffset.y};
+    CHECK(ReachableBed(state, nearHead,
+        RotateYaw({-2 * box.half.x - 85, -2 * box.half.y - 20}, box.yaw)) == bedId);
+    CHECK(ReachableBed(state, approach(94), toward) == -1);
+    CHECK(BedFocusCandidate(state, approach(94), toward, false, true) == bedId);
+    CHECK(BedFocusCandidate(state, approach(94), toward, false, false) == -1);
+    UnchangedFailure(sim, [&] { return sim.Sleep(1, approach(91), toward); });
+    UnchangedFailure(sim, [&] { return sim.Sleep(1, near, away); });
+
+    OK(sim.Place(Piece::Foundation, -2, 0, 0, CellCenter(-2, 0)));
+    OK(sim.Place(Piece::Chest, -2, 0, 0, CellCenter(-2, 0)));
+    CHECK(sim.FindNearestStructure(near, Piece::Chest, 280) != -1);
+    const Structure* chest = nullptr;
+    for (const auto& structure : sim.GetState().structures)
+        if (structure.kind == Piece::Chest) chest = &structure;
+    CHECK(chest != nullptr);
+    const Point chestCenter = StructureFootprint(sim.GetState(), *chest).center;
+    CHECK(chestCenter.x != StructureCenter(sim.GetState(), *chest).x
+        && chestCenter.y != StructureCenter(sim.GetState(), *chest).y);
+    const Point chestDirection{chestCenter.x - near.x, chestCenter.y - near.y};
+    CHECK(toward.x * chestDirection.x + toward.y * chestDirection.y
+        < BedFacingCosine * std::hypot(chestDirection.x, chestDirection.y));
+    CHECK(BedFocusCandidate(sim.GetState(), near, toward, true) == -1);
+    CHECK(BedFocusCandidate(sim.GetState(), near, toward, false) == bedId);
+    OK(sim.Sleep(1, near, toward));
 }
 
 void PersistenceRejection()
@@ -2499,7 +2788,8 @@ void PersistentWorldDropTransactions()
     malformed.worldDrops.push_back({malformed.nextId++, {MaxWorldCoordinate + 1, 0}, Item::Branch, 1, 0});
     UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
     malformed = clothing.GetState();
-    malformed.worldDrops.push_back({malformed.nextId, Home, Item::Branch, 121, 0});
+    // A world drop stack holds at most what the largest pack (the leather backpack) can.
+    malformed.worldDrops.push_back({malformed.nextId, Home, Item::Branch, MaxPackCapacity + 1, 0});
     ++malformed.nextId;
     UnchangedFailure(rejected, [&] { return rejected.Deserialize(Encode(malformed)); });
     malformed = clothing.GetState();
@@ -3259,11 +3549,11 @@ void SparseEditScaleAndPayloadBounds()
 }
 
 // Sprint is free (Jenny, round 2): no Energy of its own at any frame rate or day length. She may
-// start or keep sprinting only above 10 Energy; the awake drain and work are what bring her there.
+// start or keep sprinting from 25 Energy; the awake drain and work are what bring her there.
 void SprintEnergyContract()
 {
     Simulation sim;
-    CHECK(Exertion::SprintFloor == 10.0);
+    CHECK(Exertion::SprintFloor == 25.0);
     const std::string before = sim.Serialize();
     const auto revision = sim.GetRevision();
     OK(sim.CanSprint());
@@ -3291,13 +3581,13 @@ void SprintEnergyContract()
             CHECK(Close(running.GetState().energy, 100.0 - hours * Exertion::AwakePerHour, 1e-6));
         }
 
-    // The floor: above 10 she may run, at or below it she can't, and a failed run can't either.
-    OK(sim.SetEnergy(10.01));
+    // The floor: from 25 she may run, below it she can't, and a failed run can't either.
+    OK(sim.SetEnergy(25.0));
     OK(sim.CanSprint());
-    OK(sim.SetEnergy(10.0));
+    OK(sim.SetEnergy(24.99));
     const auto tired = sim.CanSprint();
-    CHECK(!tired.ok && tired.message == "Too tired to run. Eat something or rest.");
-    OK(sim.SetEnergy(4.0));
+    CHECK(!tired.ok && tired.message == "Too tired to sprint.");
+    OK(sim.SetEnergy(20.0));
     CHECK(!sim.CanSprint());
     // Eating brings her back over the floor; nothing turns the toggle back on here (that's the pawn's
     // job, and it never does it by itself), but she may ask again.
@@ -3306,10 +3596,10 @@ void SprintEnergyContract()
     OK(sim.Eat(Item::Berries));
     OK(sim.CanSprint());
     // Work that wears her down to the floor stops her sprinting.
-    OK(sim.SetEnergy(10.4));
+    OK(sim.SetEnergy(25.4));
     const auto branch = Node(sim, ResourceKind::Branches);
     OK(sim.Harvest(branch.id, branch.position));
-    CHECK(sim.GetState().energy <= 10.0 && !sim.CanSprint());
+    CHECK(sim.GetState().energy < 25.0 && !sim.CanSprint());
     // Energy survives a save exactly; the toggle itself is never saved.
     Simulation loaded;
     OK(loaded.Deserialize(sim.Serialize()));
@@ -3339,9 +3629,11 @@ void ActionEnergyContract()
     UnchangedFailure(sim, [&] { return sim.Till(CellToGarden(-3), CellToGarden(-1), CellCenter(-3, -1)); });
     Simulation probe;
     OK(probe.Deserialize(sim.Serialize()));
-    CHECK(probe.Till(CellToGarden(-3), CellToGarden(-1), CellCenter(-3, -1)).message.find("exhausted") != std::string::npos);
-    // Light work is still possible at the same Energy, and exertion never drops her below the reserve.
+    CHECK(probe.Till(CellToGarden(-3), CellToGarden(-1), CellCenter(-3, -1)).message.find("Too tired") != std::string::npos);
+    // Even light work waits until she is back above the exhausted band.
     const int plot = sim.GetState().plots[0].id;
+    UnchangedFailure(sim, [&] { return sim.Plant(plot, CellCenter(-2, -1)); });
+    OK(sim.SetEnergy(10.5));
     OK(sim.Plant(plot, CellCenter(-2, -1)));
     CHECK(sim.GetState().energy >= Exertion::Reserve);
     CHECK(!sim.GetState().failed);
@@ -3532,11 +3824,57 @@ void DeconstructChestContentsAndOverflow()
     OK(overflow.Transfer(fullChest, Item::Branch, 60, chestSite));
     OK(overflow.GrantItems(Item::Stone, 80));
     CHECK(overflow.UsedCapacity() == InventoryCapacity);
-    OK(overflow.Deconstruct(fullChest, chestSite));
+    const auto tookDown = overflow.Deconstruct(fullChest, chestSite);
+    OK(tookDown);
+    // What didn't fit is worth a short notice (ResultCode::PackOverflow), not the full story.
+    CHECK(tookDown.code == ResultCode::PackOverflow && tookDown.message.rfind("Pack full: ", 0) == 0);
     CHECK(overflow.UsedCapacity() == InventoryCapacity);
     int dropped = 0;
     for (const auto& drop : overflow.GetState().worldDrops) dropped += drop.quantity;
     CHECK(dropped == 67);
+}
+
+// Ground stacks never outgrow her pack (120 without the leather backpack), since PickUpDrop takes a
+// stack whole: drops in one spot and a chest's spill both split at her capacity.
+void GroundStacksStayPickable()
+{
+    Simulation sim;
+    Stock(sim, {{Item::Branch, 100}});
+    OK(sim.DropGroup(Group(sim, Item::Branch), 100, Home, Home, sim.GetRevision()));
+    OK(sim.GrantItems(Item::Branch, 100));
+    OK(sim.DropGroup(Group(sim, Item::Branch), 100, Home, Home, sim.GetRevision()));
+    CHECK(sim.GetState().worldDrops.size() == 2);
+    for (const auto& drop : sim.GetState().worldDrops) CHECK(drop.quantity == 100);
+    OK(sim.PickUpDrop(sim.GetState().worldDrops.front().id, Home));
+    CHECK(sim.Count(Item::Branch) == 100);
+    // A small drop still joins a stack when it fits.
+    OK(sim.DropGroup(Group(sim, Item::Branch), 20, Home, Home, sim.GetRevision()));
+    CHECK(sim.GetState().worldDrops.size() == 1 && sim.GetState().worldDrops.front().quantity == 120);
+
+    // A chest of 300 stone taken down with a full pack spills 120 / 120 / 60.
+    Simulation spill;
+    Stock(spill, {{Item::Branch, 105}, {Item::BrambleCanes, 2}});
+    const Point chestSite = CellCenter(2, 0);
+    OK(spill.Place(Piece::Chest, 2, 0, 0, chestSite));
+    const int chest = StructureIdAt(spill, Piece::Chest, 2, 0);
+    OK(spill.Transfer(chest, Item::Branch, spill.Count(Item::Branch), chestSite));
+    for (int put = 0; put < 300; put += 100)
+    {
+        OK(spill.GrantItems(Item::Stone, 100));
+        OK(spill.Transfer(chest, Item::Stone, 100, chestSite));
+    }
+    OK(spill.GrantItems(Item::Fiber, InventoryCapacity - spill.UsedCapacity()));
+    CHECK(spill.UsedCapacity() == InventoryCapacity);
+    OK(spill.Deconstruct(chest, chestSite));
+    std::vector<int> stones;
+    for (const auto& drop : spill.GetState().worldDrops)
+    {
+        CHECK(drop.quantity <= InventoryCapacity);
+        if (drop.wearableId == 0 && drop.item == Item::Stone) stones.push_back(drop.quantity);
+    }
+    std::sort(stones.begin(), stones.end());
+    CHECK((stones == std::vector<int>{60, 120, 120}));
+    InventoryRoundTrip(spill);
 }
 
 void HeritageManorPiecesCannotBeDeconstructed()
@@ -3578,32 +3916,56 @@ void ChestCapacityAndWaterSpace()
     OK(waterSim.GrantItems(Item::Branch, InventoryCapacity - 1));
     CHECK(waterSim.UsedCapacity() == InventoryCapacity);
     OK(waterSim.FillWater(WaterSource));
-    CHECK(waterSim.Count(Item::Water) == 6);
+    CHECK(waterSim.Count(Item::Water) == PailPortions);
     CHECK(waterSim.UsedCapacity() == InventoryCapacity);
 }
 
 void SleepOptionPolicy()
 {
-    // 21:00 with part of her energy left: "until morning" leads and wakes her at 06:45; "until
-    // rested" (40 short, 4 h) and a nap follow.
-    const auto night = SleepOptions(21.0, 60.0);
-    CHECK(night.size() == 3);
-    CHECK(night[0].choice == SleepChoice::UntilMorning && Close(night[0].hours, 9.75) && Close(night[0].wakeHour, 6.75));
-    CHECK(night[1].choice == SleepChoice::UntilRested && Close(night[1].hours, 4.0) && Close(night[1].wakeHour, 1.0));
-    CHECK(night[2].choice == SleepChoice::Nap && Close(night[2].hours, 1.0) && Close(night[2].wakeHour, 22.0));
-    // A night owl going to bed at 05:00 nearly spent sleeps through into the afternoon.
-    const auto owl = SleepOptions(5.0, 5.0);
-    CHECK(owl[0].choice == SleepChoice::UntilRested && Close(owl[0].hours, 9.5) && Close(owl[0].wakeHour, 14.5));
-    // Rested at noon: one short rest, no separate nap.
-    const auto noon = SleepOptions(12.0, 100.0);
-    CHECK(noon.size() == 1 && noon[0].choice == SleepChoice::UntilRested && Close(noon[0].hours, 1.0));
-    // "Until rested" that would wake her near morning is folded into "until morning".
-    const auto late = SleepOptions(22.75, 20.0);
-    CHECK(late.size() == 2 && late[0].choice == SleepChoice::UntilMorning && late[1].choice == SleepChoice::Nap);
-    // Bounds: at most ten hours to rest, an early night from 18:00 runs to morning.
-    CHECK(Close(SleepOptions(12.0, 0.0)[0].hours, Exertion::MaxRestHours));
-    CHECK(Close(SleepOptions(18.0, 50.0)[0].hours, 12.75));
-    CHECK(Close(SleepOptions(12.0, 97.0)[0].hours, Exertion::MinRestHours));
+    const auto tiredNight = BedSleepOption(21.0, 60.0);
+    CHECK(tiredNight && tiredNight->choice == SleepChoice::UntilRested
+        && Close(tiredNight->hours, 4.0) && Close(tiredNight->wakeHour, 1.0));
+    const auto restedNight = BedSleepOption(25.0, 100.0);
+    CHECK(restedNight && restedNight->choice == SleepChoice::UntilMorning
+        && Close(restedNight->hours, 5.0) && Close(restedNight->wakeHour, 6.0));
+    const auto late = BedSleepOption(22.75, 20.0);
+    CHECK(late && late->choice == SleepChoice::UntilRested
+        && Close(late->hours, 7.25) && Close(late->wakeHour, 6.0));
+    const auto owl = BedSleepOption(5.0, 5.0);
+    CHECK(owl && owl->choice == SleepChoice::UntilRested && Close(owl->hours, 1.0) && Close(owl->wakeHour, 6.0));
+    const auto midday = BedSleepOption(12.0, 97.0);
+    CHECK(midday && midday->choice == SleepChoice::UntilRested && Close(midday->hours, 0.5));
+    CHECK(!BedSleepOption(12.0, 100.0));
+    CHECK(!BedSleepOption(12.0, 99.6));
+    CHECK(BedSleepOption(21.0, 99.6)->choice == SleepChoice::UntilMorning);
+    CHECK(!BedSleepOption(6.0, 100.0));
+    const auto shortMorning = BedSleepOption(5.875, 100.0);
+    CHECK(shortMorning && shortMorning->choice == SleepChoice::UntilMorning
+        && Close(shortMorning->hours, 0.125) && Close(shortMorning->wakeHour, 6.0));
+    const auto shortRest = BedSleepOption(5.875, 50.0);
+    CHECK(shortRest && shortRest->choice == SleepChoice::UntilRested
+        && Close(shortRest->hours, 0.125) && Close(shortRest->wakeHour, 6.0));
+    CHECK(Close(BedSleepOption(12.0, 0.0)->hours, Exertion::MaxRestHours));
+    CHECK(Close(BedSleepOption(18.0, 50.0)->hours, 5.0));
+    CHECK(Close(BedSleepOption(18.0, 100.0)->hours, 12.0));
+    CHECK(!BedSleepOption(std::numeric_limits<double>::quiet_NaN(), 50.0));
+    CHECK(!BedSleepOption(12.0, std::numeric_limits<double>::quiet_NaN()));
+    Simulation sleeper;
+    BuildingStock(sleeper);
+    OK(sleeper.Place(Piece::Bed, -3, 0, 0, Home));
+    Edit(sleeper, [](State& state) { state.hour = 21.0; state.energy = 60.0; });
+    OK(sleeper.Sleep(BedSleepOption(sleeper.GetState().hour, sleeper.GetState().energy)->hours, Home, {1, 0}));
+    CHECK(Close(sleeper.GetState().hour, 25.0) && sleeper.GetState().energy == 100.0);
+    OK(sleeper.Sleep(BedSleepOption(sleeper.GetState().hour, sleeper.GetState().energy)->hours, Home, {1, 0}));
+    if (!Close(sleeper.GetState().hour, 30.0) || !Close(sleeper.GetState().energy, 100.0))
+        std::cerr << "Bed policy at sunrise: hour=" << sleeper.GetState().hour
+            << " energy=" << sleeper.GetState().energy << '\n';
+    CHECK(Close(sleeper.GetState().hour, 30.0) && Close(sleeper.GetState().energy, 100.0));
+    Edit(sleeper, [](State& state) { state.hour = 29.875; state.energy = 50.0; });
+    UnchangedFailure(sleeper, [&] { return sleeper.Sleep(0.125, Home, {1, 0}); });
+    OK(sleeper.Sleep(shortRest->hours, Home, {1, 0}, true));
+    CHECK(Close(sleeper.GetState().hour, 30.0) && Close(sleeper.GetState().energy, 51.25));
+    UnchangedFailure(sleeper, [&] { return sleeper.Sleep(0.125, Home, {1, 0}, true); });
     // One rain schedule for the rules, the lighting and the wet ground: two days in ten, 09:00-15:00. Day 0 is
     // dry and day 1 rains (as before); every ten-day block rains on one of offsets 1-2 and one of 6-7, so
     // exactly 20% of days with rains 4-6 days apart, and all four combinations occur.
@@ -3624,6 +3986,7 @@ void SleepOptionPolicy()
                 shortestGap = std::min(shortestGap, day - lastRain);
                 longestGap = std::max(longestGap, day - lastRain);
             }
+
             lastRain = day;
         }
         for (long long block = 0; block < 1000; ++block)
@@ -3676,14 +4039,96 @@ void SleepOptionPolicy()
         CHECK(Close(RainAudioGain(1.0, 0.7, 0.0), 0.315) && Close(RainAudioGain(1.0, 0.7, 1.0), 0.1225));
         CHECK(RainAudioGain(0.0, 0.7, 0.0) == 0.0 && !RainAudible(0.0, 0.7, 0.0));
         CHECK(RainAudioGain(1.0, 0.0, 0.0) == 0.0 && !RainAudible(1.0, 0.0, 1.0));   // Ambience muted
-    }    // Recovery follows hours slept, not the clock: a daytime sleep until rested fills her up.
+    }
+    // At 05:00, rest stops at 06:00 even when she still needs more sleep; daytime can finish it.
     Simulation owlSim;
     BuildingStock(owlSim);
     OK(owlSim.Place(Piece::Bed, -3, 0, 0, Home));
     Edit(owlSim, [](State& state) { state.hour = 29.0; state.energy = 5.0; state.hunger = 90.0; });
-    OK(owlSim.Sleep(SleepOptions(owlSim.GetState().hour, owlSim.GetState().energy)[0].hours, Home));
-    CHECK(Close(owlSim.GetState().hour, 38.5));
-    CHECK(Close(owlSim.GetState().energy, 100.0) && !owlSim.GetState().failed);
+    const auto owlRest = BedSleepOption(owlSim.GetState().hour, owlSim.GetState().energy);
+    CHECK(owlRest && Close(owlRest->hours, 1.0));
+    OK(owlSim.Sleep(owlRest->hours, Home, {1, 0}));
+    CHECK(Close(owlSim.GetState().hour, 30.0));
+    CHECK(Close(owlSim.GetState().energy, 15.0) && !owlSim.GetState().failed);
+    const auto afterDawn = BedSleepOption(owlSim.GetState().hour, owlSim.GetState().energy);
+    if (!afterDawn || !Close(afterDawn->hours, 8.5))
+        std::cerr << "After dawn: hour=" << owlSim.GetState().hour
+            << " energy=" << owlSim.GetState().energy
+            << " offer=" << (afterDawn ? afterDawn->hours : -1) << '\n';
+    CHECK(afterDawn && Close(afterDawn->hours, 8.5));
+    OK(owlSim.Sleep(afterDawn->hours, Home, {1, 0}));
+    CHECK(Close(owlSim.GetState().hour, 38.5) && Close(owlSim.GetState().energy, 100.0));
+}
+
+void EstateExhaustionIsNonlethal()
+{
+    const auto makeEstate = []()
+    {
+        Simulation estate;
+        OK(estate.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+        return estate;
+    };
+    Simulation sim = makeEstate();
+    OK(sim.SetEnergy(0.0));
+    const double started = sim.GetState().hour;
+    const int dozes = sim.DozeCount();
+    CHECK(Exertion::SprintFloor == 25.0 && Exertion::SlowWalkFloor == 10.0);
+    CHECK(Close(Exertion::WalkSpeedFactor(0), 0.75));
+    CHECK(Close(Exertion::WalkSpeedFactor(9.99), 0.75));
+    CHECK(Close(Exertion::WalkSpeedFactor(10), 1.0));
+    CHECK(!sim.CanSprint() && sim.CheckExertion(0.5).message == "Too tired.");
+    sim.AdvanceGameHours(72.0, ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {}));
+    CHECK(Close(sim.GetState().hour, started + 72.0) && !sim.GetState().failed
+        && sim.GetState().hunger == 100.0 && sim.GetState().energy == 0.0 && sim.DozeCount() == dozes);
+    Simulation loaded = makeEstate();
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(!loaded.GetState().failed && loaded.GetState().energy == 0);
+    OK(sim.GrantItems(Item::Berries, 2));
+    OK(sim.Eat(Item::Berries));
+    CHECK(sim.GetState().energy > 0 && !sim.GetState().failed);
+    OK(sim.SetEnergy(9.99));
+    CHECK(!sim.CanSprint() && sim.CheckExertion(0.5).message == "Too tired.");
+    OK(sim.SetEnergy(10.0));
+    CHECK(Close(Exertion::WalkSpeedFactor(sim.GetState().energy), 1.0) && !sim.CanSprint());
+    OK(sim.SetEnergy(24.99));
+    CHECK(!sim.CanSprint());
+    OK(sim.SetEnergy(25.0));
+    OK(sim.CanSprint());
+    OK(sim.CheckExertion(0.5));
+
+    std::string payload = sim.Serialize();
+    payload.erase(0, payload.find('\n') + 1);
+    const State& state = sim.GetState();
+    payload.replace(0, payload.find('\n'), std::to_string(state.hour) + " " + std::to_string(state.dayMinutes)
+        + " 0 0 1 " + std::to_string(state.nextId));
+    Simulation recovered = makeEstate();
+    OK(recovered.Deserialize(Envelope(payload)));
+    CHECK(!recovered.GetState().failed && recovered.GetState().hunger == 100
+        && recovered.GetState().energy == 0);
+}
+
+void NewestValidRecoveryPreference()
+{
+    const FHomesteadSavePreference oldRecovery{100, 18, 8};
+    const FHomesteadSavePreference newerAuto{200, 10, 2};
+    CHECK(IsNewerHomesteadSave(newerAuto, oldRecovery));
+    CHECK(!IsNewerHomesteadSave(oldRecovery, newerAuto));
+    CHECK(IsNewerHomesteadSave({200, 11, 8}, newerAuto));
+    CHECK(!IsNewerHomesteadSave({200, 9, 0}, newerAuto));
+    CHECK(IsNewerHomesteadSave({200, 10, 0}, newerAuto));
+
+    const std::pair<FHomesteadSavePreference, bool> files[] = {
+        {{300, 19, 0}, false}, // corrupt newest file
+        {oldRecovery, true},
+        {newerAuto, true},
+        {{150, 2, 4}, true}
+    };
+    const FHomesteadSavePreference* best = nullptr;
+    for (const auto& file : files)
+        if (file.second && (!best || IsNewerHomesteadSave(file.first, *best)))
+            best = &file.first;
+    CHECK(best && best->SavedAtUtc == newerAuto.SavedAtUtc
+        && best->SavedRevision == newerAuto.SavedRevision);
 }
 
 void OvergrowthTableAndPrompts()
@@ -3909,6 +4354,157 @@ void ScytheSweepMowsEachTuftOnce()
     CHECK(PlacedNode(sim, behind).cleared && !PlacedNode(sim, bramble).cleared);
 }
 
+// Hold-to-repeat (Homestead::ToolRepeat): plays a held press the way AHomesteadController does. Each blow
+// is counted, the last one clears (ClearOvergrowth), and AfterBlow decides whether another follows.
+// heldFor: how many blows the button stays down through (-1: never released); between(blows) runs
+// after each blow so a test can drain energy or turn her away.
+struct HeldRun
+{
+    int blows = 0;
+    Result cleared;
+    Result refusal{true, "", ResultCode::None, 0};
+};
+
+HeldRun HoldTool(Simulation& sim, int target, Item tool, Point at, Point facing, int heldFor,
+    const std::function<void(int)>& between = {})
+{
+    HeldRun run;
+    int landed = 0;
+    for (;;)
+    {
+        ++run.blows;
+        if (++landed >= sim.OvergrowthSwings(target))
+        {
+            run.cleared = sim.ClearOvergrowth(target, tool, at);
+            landed = 0;
+        }
+        if (between) between(run.blows);
+        ToolRepeat::Held now;
+        now.held = heldFor < 0 || run.blows < heldFor;
+        now.sameTool = sim.Count(tool) > 0;
+        now.aimed = sim.FindAimedOvergrowth(at, facing, tool);
+        const auto decision = ToolRepeat::AfterBlow(sim, target, tool, at, now);
+        if (!decision.more || run.blows > 50)
+        {
+            run.refusal = decision.refusal;
+            return run;
+        }
+    }
+}
+
+void HeldToolRepeatsUntilClear()
+{
+    const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
+    const Point ahead{1, 0};
+    EstatePlacements table;
+    table.bakeVersion = 7;
+    int next = EstatePlacementIdBase + 20500;
+    const auto add = [&](ResourceKind kind, double dx, double dy)
+    {
+        table.placements.push_back({next++, kind, {at.x + dx, at.y + dy}, 0, 0, 1, 0});
+        return table.placements.back().id;
+    };
+    const int stump = add(ResourceKind::StumpMedium, 70, 0);
+    const int beside = add(ResourceKind::StumpMedium, 110, 25);
+    const int rubble = add(ResourceKind::Rubble, 0, -90);
+    const auto fresh = [&](Simulation& sim)
+    {
+        OK(sim.NewEstateGame(ProvisionalEstateLayout(), table));
+        OK(sim.GrantItems(Item::Hatchet, 1));
+        OK(sim.GrantItems(Item::Pickaxe, 1));
+        OK(sim.SetEnergy(100.0));
+    };
+
+    // Only the overgrowth tools repeat; the hoe, can, lamp and food never do.
+    CHECK(ToolRepeat::Repeats(Item::Hatchet) && ToolRepeat::Repeats(Item::Billhook)
+        && ToolRepeat::Repeats(Item::Pickaxe) && ToolRepeat::Repeats(Item::Scythe));
+    CHECK(!ToolRepeat::Repeats(Item::DiggingStick) && !ToolRepeat::Repeats(Item::WateringCan)
+        && !ToolRepeat::Repeats(Item::OilLamp) && !ToolRepeat::Repeats(Item::Berries));
+
+    // Held: blow after blow on the stump she aimed at, exactly as many as it needs, cleared once, then stop.
+    {
+        Simulation sim;
+        fresh(sim);
+        CHECK(sim.FindAimedOvergrowth(at, ahead, Item::Hatchet) == stump);
+        const int needed = sim.OvergrowthSwings(stump);
+        CHECK(needed == 5);
+        const int wood = sim.Count(Item::Firewood) + sim.Count(Item::Branch) + sim.Count(Item::Kindling);
+        const auto run = HoldTool(sim, stump, Item::Hatchet, at, ahead, -1);
+        CHECK(run.blows == needed && run.cleared.ok && run.refusal.ok);
+        CHECK(PlacedNode(sim, stump).cleared);
+        CHECK(sim.Count(Item::Firewood) + sim.Count(Item::Branch) + sim.Count(Item::Kindling) > wood);
+        // Never on to the next stump, even though it's now the one ahead of her and still held.
+        CHECK(!PlacedNode(sim, beside).cleared);
+        CHECK(sim.FindAimedOvergrowth(at, ahead, Item::Hatchet) == beside);
+        ToolRepeat::Held still;
+        still.held = still.sameTool = true;
+        still.aimed = beside;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, still).more);
+    }
+    // A click is exactly one blow, and letting go mid-swing finishes only that blow: nothing clears,
+    // nothing is spent, and she stops quietly (the controller then says how many swings are left).
+    for (const int heldFor : {0, 1, 3})
+    {
+        Simulation sim;
+        fresh(sim);
+        const double energy = sim.GetState().energy;
+        const auto run = HoldTool(sim, stump, Item::Hatchet, at, ahead, heldFor);
+        CHECK(run.blows == std::max(1, heldFor) && run.refusal.ok && !PlacedNode(sim, stump).cleared);
+        CHECK(sim.GetState().energy == energy);
+    }
+    // Below the 10% energy floor the next blow is refused with Integration's "Too tired." and she stops.
+    {
+        Simulation sim;
+        fresh(sim);
+        const auto run = HoldTool(sim, stump, Item::Hatchet, at, ahead, -1,
+            [&](int blows) { if (blows == 2) OK(sim.SetEnergy(9.5)); });
+        CHECK(run.blows == 2 && !run.refusal.ok && run.refusal.message == "Too tired.");
+        CHECK(!PlacedNode(sim, stump).cleared);
+    }
+    // Turning away, putting the tool down or opening the book ends the run.
+    {
+        Simulation sim;
+        fresh(sim);
+        ToolRepeat::Held now;
+        now.held = now.sameTool = true;
+        now.aimed = stump;
+        CHECK(ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, now).more);
+        now.aimed = -1;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, now).more);
+        now.aimed = stump;
+        now.sameTool = false;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, now).more);
+        now.sameTool = true;
+        now.menuOpen = true;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::Hatchet, at, now).more);
+        // The hoe doesn't repeat even if held on something.
+        now.menuOpen = false;
+        CHECK(!ToolRepeat::AfterBlow(sim, stump, Item::DiggingStick, at, now).more);
+    }
+    // The pickaxe on rubble: two blows held, one reward.
+    {
+        Simulation sim;
+        fresh(sim);
+        const Point down{0, -1};
+        CHECK(sim.FindAimedOvergrowth(at, down, Item::Pickaxe) == rubble);
+        const int stone = sim.Count(Item::Stone);
+        const auto run = HoldTool(sim, rubble, Item::Pickaxe, at, down, -1);
+        CHECK(run.blows == sim.OvergrowthSwings(rubble) && run.blows == 2 && run.cleared.ok);
+        CHECK(PlacedNode(sim, rubble).cleared && sim.Count(Item::Stone) > stone);
+    }
+
+    // The strike clips loop one stroke cycle (axe_fell.FRAMES: loop 44-80, contacts at 34 and 70). A held
+    // blow can join only before the clip leaves its last cycle for the recovery.
+    const float loopStart = 44.0f / 30.0f, loop = 36.0f / 30.0f, margin = 2.0f / 30.0f;
+    CHECK(ToolRepeat::CanAddStroke(34.0f / 30.0f, 1, loopStart, loop, margin));
+    CHECK(ToolRepeat::CanAddStroke(41.0f / 30.0f, 1, loopStart, loop, margin));
+    CHECK(!ToolRepeat::CanAddStroke(42.0f / 30.0f, 1, loopStart, loop, margin));
+    CHECK(!ToolRepeat::CanAddStroke(50.0f / 30.0f, 1, loopStart, loop, margin));
+    CHECK(ToolRepeat::CanAddStroke(70.0f / 30.0f, 2, loopStart, loop, margin));
+    CHECK(!ToolRepeat::CanAddStroke(79.0f / 30.0f, 2, loopStart, loop, margin));
+    CHECK(Close(ToolRepeat::JoinDeadline(3, loopStart, loop, 0.0f), 116.0 / 30.0, 1e-5));
+}
+
 void MultiSwingTiersAndCapacity()
 {
     const Point at = ProvisionalEstateLayout().PointOr(Anchor::StandingRoomSpawn, {});
@@ -3942,17 +4538,14 @@ void MultiSwingTiersAndCapacity()
     // An iron axe takes a large stump in four swings.
     OK(sim.SetToolTier(ToolKind::Axe, ToolTier::Iron));
     CHECK(sim.OvergrowthSwings(large) == 4);
-    // Too tired: refused before the reserve, unchanged.
+    // Below 10 Energy, even a tier-qualified swing is refused without a state change.
     Simulation tired;
     OK(tired.NewEstateGame(ProvisionalEstateLayout(), placements));
     OK(tired.GrantItems(Item::Hatchet, 1));
     OK(tired.SetToolTier(ToolKind::Axe, ToolTier::Iron));
-    OK(tired.SetEnergy(10.0));
-    // 10 Energy is above a large stump's reserve line, so let the hours wear her down.
-    while (tired.GetState().energy - tired.OvergrowthCost(large) >= Exertion::Reserve)
-        tired.AdvanceGameHours(0.5, at);
+    OK(tired.SetEnergy(9.9));
     UnchangedFailure(tired, [&] { return tired.ClearOvergrowth(large, Item::Hatchet, at); });
-    CHECK(tired.CheckOvergrowth(large, Item::Hatchet, at).message.find("exhausted") != std::string::npos);
+    CHECK(tired.CheckOvergrowth(large, Item::Hatchet, at).message == "Too tired.");
 
     // A full pack still clears; what doesn't fit lies on the ground as one pickable drop.
     Simulation full;
@@ -4087,6 +4680,7 @@ void WeedCreepNearOvergrowth()
     for (const auto& node : loaded.GetState().resources)
         if (!node.cleared && node.kind == ResourceKind::TallGrass) { regrownId = node.id; break; }
     CHECK(regrownId != -1);
+    OK(loaded.SetEnergy(30.0));
     OK(loaded.ClearOvergrowth(regrownId, Item::Scythe, PlacedNode(loaded, regrownId).position));
 }
 
@@ -4231,6 +4825,32 @@ void EveryHandGatherHasItsOwnPose()
         CHECK(HandGatherPose(kind) == GatherPose::Pouch);
     CHECK(HandGatherPose(ResourceKind::Reeds) == GatherPose::Reeds);
     CHECK(HandGatherPose(ResourceKind::TallGrass) == GatherPose::None && HandGatherPose(ResourceKind::Sapling) == GatherPose::None);
+}
+
+void BillhookBlowLandsOnlyOnItsOwnHack()
+{
+    // Code review 0930: a click during the last hack's follow-through (its clip already past the
+    // contact) must not land on the new target. Only a hack started after the press counts, at its own
+    // contact; walking up keeps it waiting; a hack that never starts, or stops early, is dropped.
+    using namespace SwingTiming;
+    const float contact = 1.25f;
+    const double grace = 0.4;
+    // The old hack (start 4) is at 1.4 s when she clicks (starts recorded as 4): it never lands.
+    for (float phase : {1.3f, 1.5f, 1.8f})
+        CHECK(Advance(4, 4, true, phase, contact, false, 0.1, grace) == Step::Wait);
+    // It ends; her new request was refused while it played, so no new hack: dropped, no blow.
+    CHECK(Advance(4, 4, false, -1.0f, contact, false, 0.5, grace) == Step::Drop);
+    // The same click, but walking up first: waits through the approach, then its own hack lands.
+    CHECK(Advance(4, 4, true, 1.6f, contact, true, 0.0, grace) == Step::Wait);
+    CHECK(Advance(4, 4, false, -1.0f, contact, true, 0.0, grace) == Step::Wait);
+    CHECK(Advance(4, 5, true, 0.2f, contact, false, 0.1, grace) == Step::Wait);
+    CHECK(Advance(4, 5, true, 1.25f, contact, false, 1.2, grace) == Step::Land);
+    // A fresh press from rest: waits for the clip, lands at contact.
+    CHECK(Advance(9, 9, false, -1.0f, contact, false, 0.1, grace) == Step::Wait);
+    CHECK(Advance(9, 10, true, 1.0f, contact, false, 1.0, grace) == Step::Wait);
+    CHECK(Advance(9, 10, true, 1.3f, contact, false, 1.3, grace) == Step::Land);
+    // Its own hack cancelled before the contact (she moved): dropped.
+    CHECK(Advance(9, 10, false, -1.0f, contact, false, 0.9, grace) == Step::Drop);
 }
 
 void RuinDebrisIsClearable()
@@ -4477,7 +5097,7 @@ void WeedPullCommitsOnlyOnItsOwnClip()
     // at the second root, while its clip still plays) committed at once, because the first clip's phase
     // was already past the commit beat. A pull only owns the phase once its own kneel has begun.
     using namespace WeedPull;
-    const float first = 56.0f / 30.0f, commit = 102.0f / 30.0f, end = 150.0f / 30.0f;
+    const float first = 54.0f / 30.0f, commit = 102.0f / 30.0f, end = 150.0f / 30.0f;
     const double timeout = 4.5;
     // Weed A: queued, starts (count 0 -> 1), thins at the first root, commits once at the second.
     Pending a{0, 0.0, false};
@@ -4535,7 +5155,7 @@ void ClearoutKindsAndSpoiledGround()
     for (int id : {crate, barrel, heap, planks, nettles, weeds}) CHECK(sim.CanHarvest(id));
     const auto cleared = sim.Harvest(crate, at);
     OK(cleared);
-    CHECK(cleared.message.find("Cleared the broken crate") == 0);
+    CHECK(cleared.message.find("Cleared the broken crate") == 0 && cleared.code != ResultCode::PackOverflow);
     CHECK(sim.Count(Item::Kindling) >= 2 && sim.Count(Item::Kindling) <= 3);
     UnchangedFailure(sim, [&] { return sim.Harvest(crate, at); });
     OK(sim.Harvest(barrel, at));
@@ -4672,11 +5292,11 @@ void SnackOnFullStomachRestoresEnergy()
     const auto fed = sim.Eat(Item::Berries);
     OK(fed);
     CHECK(fed.message == "Ate Berries: Food +12." && sim.GetState().hunger == 62.0);
-    // Full and tired with a cooked dish: Energy only.
+    // Full and tired with a cooked dish: Energy only (the §3a table's +40 applies in the woodland too).
     Edit(sim, [](State& state) { state.hunger = 100.0; state.energy = 20.0; });
     const auto dish = sim.Eat(Item::HerbedRoots);
     OK(dish);
-    CHECK(dish.message == "Ate Herbed roots: Energy +18." && Close(sim.GetState().energy, 38.0));
+    CHECK(dish.message == "Ate Herbed roots: Energy +40." && Close(sim.GetState().energy, 60.0));
     Simulation loaded;
     OK(loaded.Deserialize(sim.Serialize()));
     CHECK(loaded.Serialize() == sim.Serialize());
@@ -4968,6 +5588,7 @@ int main()
     Run("a worn billhook fells a sapling in one press", OneSwingWornSapling);
     Run("multi-swing clears, energy reserve and full-pack yields", MultiSwingTiersAndCapacity);
     Run("one scythe sweep mows each tuft once", ScytheSweepMowsEachTuftOnce);
+    Run("a held tool strikes its target until it clears, then stops", HeldToolRepeatsUntilClear);
     Run("salvage head order and the scythe's forward arc", SalvageOrderAndScytheArc);
     Run("daily weed creep near remaining overgrowth only", WeedCreepNearOvergrowth);
     Run("manor clear-out field placement", ManorClearoutField);
@@ -4976,6 +5597,7 @@ int main()
     Run("every hand gather has its own pose", EveryHandGatherHasItsOwnPose);
     Run("a wrong or under-tier tool is non-actionable", WrongOrUnderTierToolIsNonActionable);
     Run("the ruin's fallen roof timbers are chopped with the axe", RuinTimbersAreChoppedWithTheAxe);
+    Run("a billhook blow lands only on its own hack", BillhookBlowLandsOnlyOnItsOwnHack);
     Run("clear-out rubbish, nettles, stumps and spoiled ground", ClearoutKindsAndSpoiledGround);
     Run("pre-pivot vitals line without warmth", LegacyVitalsLine);
     Run("playtest skip to morning", SkipToMorning);
@@ -5004,9 +5626,12 @@ int main()
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);
     Run("item stocks carry their width; version 12 saves migrate", ItemStockWidthCompatibility);
     Run("clock, pause and batching consistency", ClockPauseAndBatching);
-    Run("sprint is free and needs more than 10 Energy", SprintEnergyContract);
+    Run("sprint is free and needs at least 25 Energy", SprintEnergyContract);
     Run("work spends Energy and time drains it slowly", ActionEnergyContract);
     Run("sleep and failure recovery without cold", SleepAndFailure);
+    Run("estate exhaustion never fails or faints, including old saves", EstateExhaustionIsNonlethal);
+    Run("newest valid autosave beats older recovery and corrupt newest", NewestValidRecoveryPreference);
+    Run("bed reach, facing and focus priority", BedSleepReachAndPriority);
     Run("retired fur and reeds, and cosmetic clothing", CosmeticClothingAndRetiredFur);
     Run("sleep integration and finite boundaries", SleepAndFiniteBoundaries);
     Run("strict atomic persistence", PersistenceRejection);
@@ -5019,6 +5644,7 @@ int main()
     Run("persistent atomic world drop transactions", PersistentWorldDropTransactions);
     Run("selected carried food groups and atomic eating", SelectedFoodGroupTransactions);
     Run("strict wardrobe ownership and current-schema save rejection", WardrobeSaveRejection);
+    Run("ground stacks stay small enough to pick up whole", GroundStacksStayPickable);
     Run("seeded resource identity and bounded region activation", GeneratedWorldIdentityAndActivation);
     Run("permanent generated felling and persistent renewable timers", GeneratedFellingAndPersistentTimers);
     Run("cross-cell trunk footprint, chosen building sites and reload", GeneratedBuildingFootprintAndReload);
@@ -5028,6 +5654,7 @@ int main()
     Run("sparse edit scale, payload bounds and atomic rejection", SparseEditScaleAndPayloadBounds);
     Run("MVP woodland placements", MvpWoodlandPlacements);
     Run("garden outline preview matches the hoe and pail", GardenTargetPreview);
+    Run("seed outline and plant cue match the sow action", SeedSowPreview);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

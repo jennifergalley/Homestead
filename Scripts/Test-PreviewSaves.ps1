@@ -27,8 +27,9 @@ if($Packaged) {
 }
 function Invoke-RoutingProcess([string]$Name,[string]$Flags,[int]$ExpectedExit=0) {
     $log=Join-Path $output "$Name.log"
-    $arguments=$prefix+"$Flags -HomesteadTestOutput=`"$output`" $graphicsArguments -nullrhi -nosound -unattended -abslog=`"$log`""
-    $process=Start-Process -FilePath $executable -WorkingDirectory $working -ArgumentList $arguments -PassThru
+    # The Woodland mesh admission checks cooked render LODs; NullRHI strips that data.
+    $arguments=$prefix+"$Flags -HomesteadTestOutput=`"$output`" $graphicsArguments -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720 -nosound -unattended -abslog=`"$log`""
+    $process=Start-Process -FilePath $executable -WorkingDirectory $working -ArgumentList $arguments -WindowStyle Hidden -PassThru
     try {
         if(-not $process.WaitForExit($TimeoutSeconds*1000)){throw "Routing validation timed out: $Name (PID $($process.Id))."}
         if($process.ExitCode -ne $ExpectedExit){throw "Routing process $Name exited $($process.ExitCode), expected $ExpectedExit. See $log"}
@@ -70,7 +71,7 @@ if(Test-Path -LiteralPath (Join-Path $previewRoot "profile-$probe")){
 }
 $probeLog=Join-Path $output 'normal-preview.log'
 $arguments=$prefix+"-HomesteadPreviewProfile=$probe $graphicsArguments -RenderOffscreen -windowed -ForceRes -ResX=1280 -ResY=720 -nosound -abslog=`"$probeLog`""
-$process=Start-Process -FilePath $executable -WorkingDirectory $working -ArgumentList $arguments -PassThru
+$process=Start-Process -FilePath $executable -WorkingDirectory $working -ArgumentList $arguments -WindowStyle Hidden -PassThru
 try {
     $ready=$false
     $limit=[DateTimeOffset]::UtcNow.AddSeconds($TimeoutSeconds)

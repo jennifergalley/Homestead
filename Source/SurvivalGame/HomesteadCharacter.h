@@ -29,6 +29,13 @@ namespace Homestead { struct Point; enum class Item : int; }
 
 enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds, Plant, Harvest, PullWeeds };
 
+// SM_Scythe is always shown with this local scale: the Unreal import negates Y, and the mowing clip
+// (scythe_mow.py) and both scythe poses are authored in scythe.py's own coordinates.
+namespace HomesteadScythe
+{
+inline const FVector Mirror(1.0f, -1.0f, 1.0f);
+}
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
 {
@@ -71,6 +78,13 @@ public:
     float WalkClipSpeed() const { return bMetaHumanActive ? 209.9f : 120.0f; }
     float SprintClipSpeed() const { return bMetaHumanActive ? 524.8f : 300.0f; }
     void SetAppearancePreview(bool Enabled);
+    // Shows the leather backpack on her back (the controller mirrors Simulation state each tick).
+    void SetBackpackShown(bool bShown);
+    // Whether Props' backpack mesh is imported (the upgrade and its toggle work without it).
+    bool HasBackpackMesh() const { return Backpack != nullptr; }
+    // The Appearance page's own camera controls: orbit her (degrees) and zoom (+ closer, in wheel steps).
+    void OrbitAppearance(float Yaw, float Pitch);
+    void ZoomAppearance(float Steps);
     // The view the appearance preview returns to (a spawn placed while it was open).
     void SetRestingViewRotation(const FRotator& Rotation) { SavedViewRotation = Rotation; }
     // While previewing appearance, bring the camera in close on her face (eye choices).
@@ -87,8 +101,8 @@ public:
     bool IsSprinting() const { return bSprintActive; }
     // Sprint is a toggle (Shift / L3): on until pressed again, a load or new game, or she tires.
     bool IsSprintOn() const { return bSprintOn; }
-    // Sprint itself costs nothing; at or below this Energy (Simulation::CanSprint) she can't sprint.
-    static constexpr double SprintEnergyFloor = 10.0;
+    // Sprint itself costs nothing; below this Energy (Simulation::CanSprint) she can't sprint.
+    static constexpr double SprintEnergyFloor = 25.0;
     // L3 (on press) and a tap of Shift (on release; AHomesteadController::TrackSprintShift) flip it.
     void RequestSprintToggle();
     // Drops out of sprint speed for now (work, menus, falling) but leaves the toggle on.
@@ -168,7 +182,8 @@ public:
     // mesh shown in her hand (pivot at the grip). Like the other kneels, IsStickPileOnGround stays
     // true until the crop leaves the ground. False when no kneeling clip can play.
     bool PlayHarvest(Homestead::Point Target, bool bPick, UStaticMesh* Produce);
-    // Weeds pulled by hand on both knees, two fistfuls tossed back over each shoulder, no tool
+    // Weeds pulled by hand on both knees, one hand at a time: each hand digs out a fistful and tosses
+    // it back over its own shoulder, no tool
     // (AN_HeroineMH_KneelPullWeeds, homestead_agent.kneel_pull_weeds). False, and nothing plays,
     // when the clip isn't loaded; the caller then uses the pouch kneel. Handful is the mesh of the
     // clump she pulls (null: the garden's nettle tuft); each fistful shows in her hand from its pull to
@@ -186,7 +201,7 @@ public:
     static constexpr float PullWeedsRight = 0.0f;
     static constexpr float PullWeedsCommit = 102.0f / 30.0f;
     // EVENTS['pulled1']: the first fistful comes out, and the clump shows it (AHomesteadWorld::ThinResource).
-    static constexpr float PullWeedsFirstPull = 56.0f / 30.0f;
+    static constexpr float PullWeedsFirstPull = 54.0f / 30.0f;
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
     // world keeps the gathered pile visible until then.
     bool IsStickPileOnGround() const { return PendingKneel.IsSet() || bStickPileOnGround; }
@@ -213,9 +228,18 @@ public:
     // The billhook (and the scythe, if its mowing clip is missing) reuses the hack with its own
     // held prop; false when that prop is missing.
     bool PlayMacheteHack(Homestead::Point Target);
-    bool PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool);
+    // Radius (cm, the target's reach in front of its centre) walks or steps her into the stance where
+    // the blade crosses the stems (HackCut*) on the target's near side; below 0 she only turns to it.
+    bool PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool, float Radius = -1.0f);
     // Seconds into the hack when the second cut lands and the plant is cleared.
     static constexpr float MacheteClearSeconds = 1.25f;
+    // Where the blade's middle crosses the stems as the second cut lands (machete_hack.py HAND_R
+    // 'strike2' wrist (-13, 38, 86) plus about 28 cm down the blade along its (-0.5, 0.6, -0.6)
+    // direction): cm to her left and forward of her root. Estimated from the keys; check in PIE.
+    static constexpr float HackCutLeft = -27.0f;
+    static constexpr float HackCutForward = 55.0f;
+    // How much of the target's radius the cut reaches into before the blade meets stems.
+    static constexpr float HackBite = 0.4f;
     UAnimSequence* GetMacheteAnimation() const { return MacheteAnimation; }
     // Two-handed felling with the hatchet (MetaHuman only): Strokes cuts, then she recovers to the
     // carry. False when the clip or the held hatchet is unavailable, so the caller uses PlayClear.
@@ -380,6 +404,10 @@ private:
     UPROPERTY() TObjectPtr<UStaticMesh> HarvestProduceMesh;
     // The forage pouch on her right hip (shown on the MetaHuman heroine).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> ForagePouch;
+    // The leather backpack on her back when she owns it and shows it (SetBackpackShown); null until
+    // Props' mesh exists.
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Backpack;
+    bool bBackpackShown = false;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CordBelt;
     // The pouch hangs from the belt and lies on the outside of her right thigh, so it swings with
     // the thigh (forward and back about the belt, out and in about the hip) once her pose is final.
@@ -451,8 +479,13 @@ private:
     bool bStrikeHatchet = false;
     bool BeginTwoHanded(Homestead::Point Target, int32 Strokes, float Radius, float BitLeft, float BitForward,
         float CutLeft, float CutForward);
-    // The mowing scythe, laid from both fists on its nibs.
+    // The mowing scythe, laid from both fists on its nibs, then rolled about the line through both nib
+    // grips so its blade follows the ground under the swath (both fists stay on their nibs).
     void UpdateMowingScythe(UStaticMeshComponent& Prop, float Weight);
+    // That roll (radians), eased from tick to tick so the blade doesn't chatter over bumps.
+    float MowGroundRoll = 0.0f;
+    // What that roll can't reach (radians; up at once, eased down): the scythe tipped up about the lower nib.
+    float MowTipUp = 0.0f;
     // Eases her into a work stance (felling, hacking) instead of snapping: a snapped turn flings
     // the simulated hair.
     FVector FellStepFrom = FVector::ZeroVector, FellStepTo = FVector::ZeroVector;
@@ -472,6 +505,8 @@ private:
     FVector2D FellApproachTo = FVector2D::ZeroVector;
     float FellApproachYaw = 0, FellApproachTime = 0;
     int32 FellApproachStrokes = 0;
+    // The approach ends in the hack (the billhook) rather than a felling-timed swing.
+    bool bApproachHack = false;
     void UpdateFellApproach(float DeltaSeconds);
     // The Blender machete, held in the right hand's closed grip (pivot at the grip centre).
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> HeldMachete;
@@ -519,6 +554,10 @@ private:
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<USkeletalMeshComponent>> MetaHumanGarments;
     // Wearable definition per MetaHuman garment slot (-1 when nothing is worn there).
     TArray<int32> MetaHumanWorn, PendingMetaHumanWorn;
+    // The equipped linen tunic's dye (INDEX_NONE when none): on the MetaHuman the tunic is the
+    // homespun tank top and shorts, tinted to match.
+    int32 MetaHumanTunicDye = INDEX_NONE, PendingMetaHumanTunicDye = INDEX_NONE;
+    void ApplyMetaHumanTunicDye();
     // How far soled footwear lifts her off the ground, in cm.
     float FootwearLift = 0;
     void ApplyMetaHumanGarments();
@@ -533,6 +572,16 @@ private:
     bool bHeroineAssetsValid = false;
     bool bAppearancePreview = false;
     bool bAppearanceFaceFocus = false;
+    // The preview's full-length arm (ZoomAppearance), and the chase arm's collision setting to give back.
+    float AppearanceArm = 280.0f;
+    bool bSavedArmCollision = true;
+    // Appearance camera limits (cm, degrees): full length at the default, her face at the closest.
+    static constexpr float AppearanceArmDefault = 280.0f;
+    static constexpr float AppearanceArmMin = 90.0f;
+    static constexpr float AppearanceArmMax = 340.0f;
+    static constexpr float AppearanceZoomStep = 30.0f;
+    static constexpr float AppearancePitchMin = -40.0f;
+    static constexpr float AppearancePitchMax = 25.0f;
     float FaceFocusBlend = 0.0f;
     float FaceFocusBodyArm = 280.0f;
     TOptional<float> SavedNearClip;

@@ -1,8 +1,14 @@
 #include "HomesteadHUD.h"
+#include "UI/HomesteadUITheme.h"
 #include "HomesteadController.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadMapComponent.h"
+#include "UI/HomesteadNoticeStyle.h"
 #include "UI/SHomesteadVitals.h"
+#include "UI/SHomesteadArrival.h"
+#include "Fonts/FontMeasure.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Rendering/SlateRenderer.h"
 #include "Engine/Canvas.h"
 #include "CanvasItem.h"
 #include "GlobalRenderResources.h"
@@ -13,15 +19,77 @@
 
 namespace
 {
-const FLinearColor Ink(0.93f, 0.93f, 0.84f, 1);
-const FLinearColor Muted(0.71f, 0.77f, 0.69f, 1);
-const FLinearColor HudGold(0.92f, 0.74f, 0.43f, 1);
-const FLinearColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
-const FLinearColor HudWarning(1.0f, 0.67f, 0.48f, 1);
+HomesteadUITheme::FThemeColor Ink(0.93f, 0.93f, 0.84f, 1);
+HomesteadUITheme::FThemeColor Muted(0.71f, 0.77f, 0.69f, 1);
+HomesteadUITheme::FThemeColor HudGold(0.92f, 0.74f, 0.43f, 1);
+HomesteadUITheme::FThemeColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
+HomesteadUITheme::FThemeColor HudWarning(1.0f, 0.67f, 0.48f, 1);
+}
+
+// The world notices at the top centre (HUD units): the focus actions card sits just under the
+// compass band (UHomesteadMapComponent::CompassBox ends at 96), and the toast stacks under it.
+namespace HudNoticeLayout
+{
+constexpr float Top = 110, Gap = 10;
+constexpr float TextSize = 23, LineStep = 30, PadX = 22, PadTop = 13, PadBottom = 13, MinWidth = 240, MaxWidth = 900;
+}
+
+namespace HudNoticeFont
+{
+// The toast's words are the field book notice card's EB Garamond (HomesteadMenus::DisplayFont), so a
+// notice reads the same in the world as in the book. Slate points per HUD Size unit: TextSize 23 sets
+// at about 18 pt, a line about 31 units tall.
+constexpr float PointsPerUnit = 0.78f;
+// The smallest the serif is ever drawn on screen (font size units, about pixels): 720p scales the HUD to
+// two thirds, which left the focus title near 9 and the toast near 12 (Orchestrator review, 2026-09-30).
+// Text above it keeps its proportion at 1080p and 4K.
+constexpr float MinScreenSize = 15.0f;
+// The font as drawn on a HUD at UiScale.
+FSlateFontInfo At(float Size, float UiScale)
+{
+    return HomesteadMenus::DisplayFont(FMath::Max(Size * PointsPerUnit * UiScale, MinScreenSize));
+}
+// In HUD logical units: the drawn extent divided by UiScale, so cards grow to fit the floored text.
+FVector2D Measure(const FString& Text, float Size, float UiScale)
+{
+    if (!FSlateApplication::IsInitialized() || UiScale <= 0.0f) return FVector2D::ZeroVector;
+    return FVector2D(FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Text, At(Size, UiScale))) / UiScale;
+}
+}
+
+void AHomesteadHUD::NoticeCard(float X, float Y, float Width, float Height, HomesteadNoticeStyle::ESurface Surface)
+{
+    using namespace HomesteadNoticeStyle;
+    const bool bError = IsError(Surface);
+    Panel(X + 1, Y + 4, Width, Height, Shadow);
+    Panel(X, Y, Width, Height, bError ? RustInk : Frame);
+    Panel(X + FrameWidth, Y + FrameWidth, Width - FrameWidth * 2, Height - FrameWidth * 2, FLinearColor(Paper.R, Paper.G, Paper.B, 1));
+    const FLinearColor Rule = InkBrown.CopyWithNewOpacity(RuleOpacity);
+    Panel(X + RuleInset, Y + RuleInset, Width - RuleInset * 2, RuleWidth, Rule);
+    Panel(X + RuleInset, Y + Height - RuleInset - RuleWidth, Width - RuleInset * 2, RuleWidth, Rule);
+    Panel(X + RuleInset, Y + RuleInset, RuleWidth, Height - RuleInset * 2, Rule);
+    Panel(X + Width - RuleInset - RuleWidth, Y + RuleInset, RuleWidth, Height - RuleInset * 2, Rule);
 }
 
 void AHomesteadHUD::Write(const FString& Text, float X, float Y, float Size, FLinearColor Color)
 {
+    // The Canvas draws a Slate font only through a runtime-cached UFont (FCanvasSimpleTextItem needs one).
+    UFont* Engine = GEngine ? GEngine->GetMediumFont() : nullptr;
+    if (bNoticeText && Canvas && FSlateApplication::IsInitialized() && Engine && Engine->FontCacheType == EFontCacheType::Runtime)
+    {
+        if (bMeasureFeedback)
+        {
+            const FVector2D Extent = HudNoticeFont::Measure(Text, Size, UiScale);
+            const FBox2D Bounds(FVector2D(X, Y) * UiScale, (FVector2D(X, Y) + Extent) * UiScale);
+            if (bDrawingToast) { ToastLines.Add(Text); ToastTextBounds.Add(Bounds); ToastColor = Color; }
+            else if (!Text.IsEmpty()) FeedbackProtected.Emplace(Text, Bounds);
+        }
+        FCanvasTextItem Item(FVector2D(X, Y) * UiScale, FText::FromString(Text), HudNoticeFont::At(Size, UiScale), Color);
+        Item.Font = Engine;
+        Item.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Item);
+        return;
+    }
     UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
     if (!Font) return;
     const float Height = FMath::Max(1.0f, static_cast<float>(Font->GetMaxCharHeight()));
@@ -174,17 +242,21 @@ void AHomesteadHUD::DrawCalendar(const AHomesteadController& PC, float X, float 
     Stroke(CX - R - 16, CY, CX + R + 16, CY, 2.5f, Muted);
 
     const float TextX = X + 140;
-    Write(FString::Printf(TEXT("%s  /  Day %d"), UTF8_TO_TCHAR(Sim.SeasonName()), Sim.DayNumber()), TextX, Y + 10, 24, Ink);
+    // "Mon, Spring 12", with the days left in the season's last three days (lane A calendar).
+    const Homestead::Calendar::Date Today = Sim.Today();
+    Write(UTF8_TO_TCHAR(Homestead::Calendar::ShortDate(Today).c_str()), TextX, Y + 10, 24, Ink);
     if (PC.IsPlanning() || PC.IsBookOpen() || PC.IsShopScreenOpen())
     {
         const FString Paused = TEXT("time paused");
         Write(Paused, X + Width - 16 - TextWidth(Paused, 16), Y + 16, 16, Muted);
     }
-    const int32 H = FMath::FloorToInt(Hour);
-    const int32 M = FMath::FloorToInt((Hour - H) * 60);
-    const FString Clock = FString::Printf(TEXT("%d:%02d"), H % 12 == 0 ? 12 : H % 12, M);
-    Write(Clock, TextX, Y + 42, 42, Ink);
-    Write(H < 12 ? TEXT("AM") : TEXT("PM"), TextX + TextWidth(Clock, 42) + 8, Y + 58, 24, HudGold);
+    else if (const std::string Warning = Homestead::Calendar::SeasonWarning(Today); !Warning.empty())
+    {
+        const FString Left = UTF8_TO_TCHAR(Warning.c_str());
+        Write(Left, X + Width - 16 - TextWidth(Left, 16), Y + 16, 16, HudGold);
+    }
+    // The time itself ("7:40 PM") is native Slate text laid over this spot (UI/SHomesteadClock),
+    // so it stays crisp where the Canvas font blurred at 42 units.
 
     // Weather: sun, rain cloud, or a clear night's moon.
     const float IconX = X + 350, IconY = Y + 68;
@@ -202,13 +274,10 @@ TArray<FString> AHomesteadHUD::WrappedLines(const FString& Text, float Width, fl
     TArray<FString> Words;
     Text.ParseIntoArrayWS(Words);
     FString Line;
-    const float FontScale = Size / FMath::Max(1.0f, static_cast<float>(Font->GetMaxCharHeight()));
     for (const FString& Word : Words)
     {
         FString Candidate = Line.IsEmpty() ? Word : Line + TEXT(" ") + Word;
-        float W = 0, H = 0;
-        Canvas->StrLen(Font, Candidate, W, H);
-        if (!Line.IsEmpty() && W * FontScale > Width)
+        if (!Line.IsEmpty() && TextWidth(Candidate, Size) > Width)
         {
             Lines.Add(Line);
             Line = Word;
@@ -234,6 +303,9 @@ void AHomesteadHUD::DrawHUD()
     if (!PC) return;
     if (PC->HasNativeMenu()) return;
     UiScale = FMath::Clamp(Canvas->ClipY / 1080.0f, 0.4f, 1.5f);
+    // The theme trial: in parchment every Canvas word is the book's serif (key glyphs excepted).
+    bThemeSerif = HomesteadUITheme::IsParchment();
+    bNoticeText = bThemeSerif;
     ViewWidth = Canvas->ClipX / UiScale;
     ViewHeight = Canvas->ClipY / UiScale;
     static const bool MeasureFeedback = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"))
@@ -249,6 +321,8 @@ void AHomesteadHUD::DrawHUD()
     // (SHomesteadVitals::Top = CalendarTop + CalendarHeight + 8).
     const float CalendarX = FMath::Max(30.0f, ViewWidth - 30 - 460);
     DrawCalendar(*PC, CalendarX, HomesteadHudLayout::CalendarTop);
+    // The bottom of the focus actions card, when one is showing; the toast stacks under it.
+    float NoticeBottom = 0;
 
     if (PC->IsFailed())
     {
@@ -267,8 +341,8 @@ void AHomesteadHUD::DrawHUD()
     else
     {
         if (PC->IsShopScreenOpen()) return;
-        // Food, energy and the purse are the Slate vitals stack (UI/SHomesteadVitals) under the calendar.
-        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth);
+        // Energy (and the woodland's food), the purse and Well fed are the Slate vitals stack (UI/SHomesteadVitals) under the calendar.
+        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth, *PC);
         ProtectFeedback(TEXT("vitals"), Vitals.Min.X, Vitals.Min.Y, Vitals.GetSize().X, Vitals.GetSize().Y);
         const float Width = FMath::Min(880.0f, ViewWidth - 80);
         const float X = (ViewWidth - Width) * 0.5f;
@@ -285,56 +359,77 @@ void AHomesteadHUD::DrawHUD()
                 Write(PC->UsesGamepad() ? TEXT("Sticks: walk and aim   LB / RB: rotate   A: place   Y / X: take down   B: done")
                     : TEXT("WASD + mouse: walk and aim   R / wheel: rotate   E / click: place   X: take down   Esc: done"), X + 22, ViewHeight - 157, 20, HudGold);
         }
-        else DrawInteractCue(*PC);
+        else NoticeBottom = DrawInteractCue(*PC);
         if (const UHomesteadMapComponent* Map = PC->MapPresenter(); Map && Map->IsMinimapVisible())
         {
             const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth, ViewHeight);
             ProtectFeedback(TEXT("minimap"), Minimap.Min.X, Minimap.Min.Y, Minimap.GetSize().X, Minimap.GetSize().Y);
         }
+        if (const UHomesteadMapComponent* Map = PC->MapPresenter(); Map && Map->IsCompassVisible())
+        {
+            const FBox2D Compass = UHomesteadMapComponent::CompassBox(ViewWidth, ViewHeight);
+            if (Compass.bIsValid)
+                ProtectFeedback(TEXT("compass"), Compass.Min.X, Compass.Min.Y, Compass.GetSize().X, Compass.GetSize().Y);
+        }
+        // The controls strip is a first-minute reminder (AHomesteadController::ShowsControlsHint).
         // The wheel picks the hotbar tool; Ctrl+wheel zooms the camera (AHomesteadController::InputKey).
         // Sprint is a toggle, so the hint says which way it's set.
-        const auto* Heroine = Cast<AHomesteadCharacter>(PC->GetPawn());
-        const TCHAR* Sprint = Heroine && Heroine->IsSprintOn() ? TEXT("Sprint: on") : TEXT("Sprint: off");
-        const FString Hints = PC->UsesGamepad()
-            ? FString::Printf(TEXT("[Menu] Field book   [L3] %s   [R3] Camera distance"), Sprint)
-            : FString::Printf(TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] %s   Wheel: tool   Ctrl+wheel: zoom"), Sprint);
-        const float HintsWidth = FMath::Max(120.0f, FMath::Min(TextWidth(Hints, 19) + 26, CalendarX - 16 - 30));
-        Panel(30, 26, HintsWidth, 46, Pine);
-        Write(Hints, 42, 38, 19, Ink);
+        if (PC->ShowsControlsHint())
+        {
+            const auto* Heroine = Cast<AHomesteadCharacter>(PC->GetPawn());
+            const TCHAR* Sprint = Heroine && Heroine->IsSprintOn() ? TEXT("Sprint: on") : TEXT("Sprint: off");
+            const FString Hints = PC->UsesGamepad()
+                ? FString::Printf(TEXT("[Menu] Field book   [L3] %s   [R3] Camera distance"), Sprint)
+                : FString::Printf(TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] %s   Wheel: tool   Ctrl+wheel: zoom"), Sprint);
+            const float HintsWidth = FMath::Max(120.0f, FMath::Min(TextWidth(Hints, 19) + 26, CalendarX - 16 - 30));
+            Panel(30, 26, HintsWidth, 46, Pine);
+            Write(Hints, 42, 38, 19, Ink);
+        }
     }
     const FString Toast = PC->Toast();
     if (!Toast.IsEmpty())
     {
+        using namespace HudNoticeLayout;
         const bool InBook = PC->IsBookOpen();
-        float Width = FMath::Min(900.0f, FMath::Max(80.0f, ViewWidth - (InBook ? 540 : 80)));
-        // Outside the book the toast is centred, but never runs under the vitals stack at the
+        float Width = FMath::Min(MaxWidth, FMath::Max(80.0f, ViewWidth - (InBook ? 540 : 80)));
+        // Outside the book the toast is a parchment slip at the top centre (under the focus actions
+        // when they're showing), sized to its text. It never runs under the vitals stack at the
         // top-right (narrow windows): it gives up width, then slides left.
-        const float VitalsLeft = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth).Min.X - 16;
+        const float VitalsLeft = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth, *PC).Min.X - 16;
+        if (!InBook) Width = FMath::Min(Width, FMath::Max(300.0f, VitalsLeft - 30));
+        bNoticeText = true;
+        const auto Lines = WrappedLines(Toast, Width - PadX * 2, TextSize);
+        float Longest = 0;
+        for (const FString& Line : Lines) Longest = FMath::Max(Longest, TextWidth(Line, TextSize));
+        Width = FMath::Clamp(Longest + PadX * 2 + 2, FMath::Min(MinWidth, Width), Width);
         float X = InBook ? 30 : (ViewWidth - Width) * 0.5f;
-        if (!InBook && X + Width > VitalsLeft)
-        {
-            Width = FMath::Clamp(VitalsLeft - 30, 300.0f, Width);
-            X = FMath::Max(30.0f, FMath::Min((ViewWidth - Width) * 0.5f, VitalsLeft - Width));
-        }
-        const auto Lines = WrappedLines(Toast, Width - 44, 23);
-        const float Height = FMath::Max(92.0f, 53.0f + (Lines.Num() - 1) * 30);
+        if (!InBook && X + Width > VitalsLeft) X = FMath::Max(30.0f, VitalsLeft - Width);
+        // The serif's own line height (it carries its leading), in place of the bare text size.
+        const float LineHeight = FMath::Max(TextSize, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), TextSize, UiScale).Y));
+        const float Step = FMath::Max(LineStep, LineHeight);
+        const float Height = PadTop + PadBottom + LineHeight + (Lines.Num() - 1) * Step;
         // In the book the toast takes the top-left, clear of the calendar at the top-right.
-        const float Y = InBook ? 26 : 113;
+        const float Y = InBook ? 26 : NoticeBottom > 0 ? NoticeBottom + Gap : Top;
         bDrawingToast = true;
         if (bMeasureFeedback)
         {
             ToastSource = Toast;
             ToastBounds = FBox2D(FVector2D(X, Y) * UiScale, FVector2D(X + Width, Y + Height) * UiScale);
         }
-        Panel(X, Y, Width, Height, Pine);
+        NoticeCard(X, Y, Width, Height, PC->ToastIsError() ? HomesteadNoticeStyle::ESurface::WorldNoticeError : HomesteadNoticeStyle::ESurface::WorldNotice);
+        const FLinearColor TextInk = PC->ToastIsError() ? HomesteadNoticeStyle::RustInk : HomesteadNoticeStyle::InkBrown;
         for (int32 Index = 0; Index < Lines.Num(); ++Index)
-            Write(Lines[Index], X + 22, Y + 15 + Index * 30, 23, PC->ToastIsError() ? HudWarning : Ink);
+            Write(Lines[Index], X + PadX, Y + PadTop + Index * Step, TextSize, TextInk);
         bDrawingToast = false;
+        bNoticeText = bThemeSerif;
     }
 }
 
 float AHomesteadHUD::TextWidth(const FString& Text, float Size) const
 {
+    if (bNoticeText && FSlateApplication::IsInitialized() && GEngine && GEngine->GetMediumFont()
+        && GEngine->GetMediumFont()->FontCacheType == EFontCacheType::Runtime)
+        return static_cast<float>(HudNoticeFont::Measure(Text, Size, UiScale).X);
     UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
     if (!Font || !Canvas) return 0;
     float W = 0, H = 0;
@@ -342,14 +437,12 @@ float AHomesteadHUD::TextWidth(const FString& Text, float Size) const
     return W * Size / FMath::Max(1.0f, static_cast<float>(Font->GetMaxCharHeight()));
 }
 
-void AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
+float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
 {
     const APawn* Pawn = PC.GetPawn();
     const FString Actions = PC.FocusActions();
-    // Nothing to do here: the open woodland's "[I] Field book" hint already sits in the top bar.
-    if (!Pawn || Actions.IsEmpty() || Actions.Contains(TEXT("Field book"))) return;
-    const FVector Screen = Project(Pawn->GetActorLocation() + FVector(0, 0, 112), false);
-    if (Screen.Z <= 0) return;
+    // Nothing to do here: the open woodland's "[I] Field book" hint belongs to the controls strip.
+    if (!Pawn || Actions.IsEmpty() || Actions.Contains(TEXT("Field book"))) return 0;
     // "[E] Gather   [LMB] Clear with Knife" -> (key, verb) pairs; unkeyed hints stay plain text.
     TArray<FString> Parts;
     Actions.ParseIntoArray(Parts, TEXT("   "));
@@ -366,49 +459,60 @@ void AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
             Cue.Verb = Part.Mid(Close + 1).TrimStart();
         }
         else Cue.Verb = Part;
-        // A keyed hint retires once she's done that action a few times; guidance text stays.
-        if (!Cue.Key.IsEmpty() && PC.IsHintRetired(Cue.Verb)) continue;
         if (!Cue.Verb.IsEmpty() || !Cue.Key.IsEmpty()) Cues.Add(Cue);
     }
-    if (Cues.IsEmpty()) return;
-    constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 8, Space = 9;
+    // A lone keyed hint retires once she's done that action a few times. Where the target offers more
+    // than one action they all stay, so the choice is always on the card (Jenny 2026-09-30: a ripe,
+    // weedy plot shows "[F] Pull weeds" and "[E] Harvest", never only one of them).
+    int32 Keyed = 0;
+    for (const FCue& Cue : Cues) Keyed += Cue.Key.IsEmpty() ? 0 : 1;
+    if (Keyed == 1)
+        Cues.RemoveAll([&PC](const FCue& Cue) { return !Cue.Key.IsEmpty() && PC.IsHintRetired(Cue.Verb); });
+    if (Cues.IsEmpty()) return 0;
+    // The words are the notices' EB Garamond (as the toast and the book's card); the key and pad
+    // glyphs stay in the crisp sans on their pine stamps.
+    constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 11, Space = 9;
+    const auto KeyWidth = [this](const FString& Key) { bNoticeText = false; const float W = TextWidth(Key, KeySize); bNoticeText = bThemeSerif; return W; };
+    const auto WordsWidth = [this](const FString& Words, float WordsSize) { bNoticeText = true; const float W = TextWidth(Words, WordsSize); bNoticeText = bThemeSerif; return W; };
+    // Key and pad glyphs: a pine stamp with brass lettering in either theme, in the crisp sans.
+    const FLinearColor KeyStamp(0.055f, 0.09f, 0.075f, 0.96f), KeyLetter(0.92f, 0.74f, 0.43f, 1.0f);
     float Width = 0;
     for (int32 Index = 0; Index < Cues.Num(); ++Index)
     {
         if (Index) Width += Gap;
-        if (!Cues[Index].Key.IsEmpty()) Width += FMath::Max(BadgeH, TextWidth(Cues[Index].Key, KeySize) + KeyPad * 2) + Space;
-        Width += TextWidth(Cues[Index].Verb, Size);
+        if (!Cues[Index].Key.IsEmpty()) Width += FMath::Max(BadgeH, KeyWidth(Cues[Index].Key) + KeyPad * 2) + Space;
+        Width += WordsWidth(Cues[Index].Verb, Size);
     }
     FString Title = PC.FocusTitle();
-    const float TitleSize = 16;
-    const float TitleWidth = FMath::Min(TextWidth(Title, TitleSize), 520.0f);
-    const float BoxWidth = FMath::Max(Width, TitleWidth) + 30;
-    const float BoxHeight = Title.IsEmpty() ? BadgeH + 16 : BadgeH + 40;
-    float CenterX = FMath::Clamp(static_cast<float>(Screen.X) / UiScale, BoxWidth * 0.5f + 12, ViewWidth - BoxWidth * 0.5f - 12);
-    const float Top = FMath::Clamp(static_cast<float>(Screen.Y) / UiScale - BoxHeight, 110.0f, ViewHeight - 260.0f);
-    if (const UHomesteadMapComponent* Map = PC.MapPresenter(); Map && Map->IsMinimapVisible())
-    {
-        // Keep clear of the bottom-right minimap, including its bezel and the N marker on the rim.
-        constexpr float RimClearance = 16, Margin = 10;
-        const FBox2D Minimap = UHomesteadMapComponent::MinimapBox(ViewWidth, ViewHeight).ExpandBy(RimClearance);
-        if (Top + BoxHeight + Margin > Minimap.Min.Y && CenterX + BoxWidth * 0.5f + Margin > Minimap.Min.X)
-            CenterX = FMath::Max(BoxWidth * 0.5f + 12, Minimap.Min.X - Margin - BoxWidth * 0.5f);
-    }
+    const float TitleSize = 17;
+    const float TitleWidth = FMath::Min(WordsWidth(Title, TitleSize), 520.0f);
+    // The serif's line heights (they carry their own leading).
+    const float VerbLine = FMath::Max(Size, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), Size, UiScale).Y));
+    const float TitleLine = FMath::Max(TitleSize, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), TitleSize, UiScale).Y));
+    const float BoxWidth = FMath::Max(Width, TitleWidth) + 44;
+    // The action row is as tall as its key stamp or its words, whichever is taller (720p floors the words).
+    const float RowHeight = FMath::Max(BadgeH, VerbLine);
+    const float BoxHeight = Title.IsEmpty() ? RowHeight + 20 : RowHeight + 22 + TitleLine;
+    // A parchment slip at the top centre, under the compass: the same notice the toast uses.
+    float CenterX = FMath::Clamp(ViewWidth * 0.5f, BoxWidth * 0.5f + 12, ViewWidth - BoxWidth * 0.5f - 12);
+    const float Top = HudNoticeLayout::Top;
     if (!PC.IsShopScreenOpen())
     {
         // And clear of the vitals stack under the calendar at the top-right.
         constexpr float Margin = 10;
-        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth);
+        const FBox2D Vitals = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth, PC);
         if (Top < Vitals.Max.Y + Margin && CenterX + BoxWidth * 0.5f + Margin > Vitals.Min.X)
             CenterX = FMath::Max(BoxWidth * 0.5f + 12, Vitals.Min.X - Margin - BoxWidth * 0.5f);
     }
-    Panel(CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight, FLinearColor(0.02f, 0.035f, 0.028f, 0.58f));
+    NoticeCard(CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight, HomesteadNoticeStyle::ESurface::FocusCard);
     ProtectFeedback(TEXT("interact-cue"), CenterX - BoxWidth * 0.5f, Top, BoxWidth, BoxHeight);
-    float Y = Top + 8;
+    float Y = Top + 10;
     if (!Title.IsEmpty())
     {
-        Write(Title, CenterX - TitleWidth * 0.5f, Y, TitleSize, Muted);
-        Y += 24;
+        bNoticeText = true;
+        Write(Title, CenterX - TitleWidth * 0.5f, Y, TitleSize, HomesteadNoticeStyle::InkBrown.CopyWithNewOpacity(0.72f));
+        bNoticeText = bThemeSerif;
+        Y += TitleLine + 2;
     }
     float X = CenterX - Width * 0.5f;
     for (int32 Index = 0; Index < Cues.Num(); ++Index)
@@ -417,15 +521,20 @@ void AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
         const FCue& Cue = Cues[Index];
         if (!Cue.Key.IsEmpty())
         {
-            const float BadgeW = FMath::Max(BadgeH, TextWidth(Cue.Key, KeySize) + KeyPad * 2);
-            Panel(X, Y, BadgeW, BadgeH, HudGold);
-            Write(Cue.Key, X + (BadgeW - TextWidth(Cue.Key, KeySize)) * 0.5f, Y + (BadgeH - KeySize) * 0.5f - 1, KeySize, Pine);
+            const float BadgeW = FMath::Max(BadgeH, KeyWidth(Cue.Key) + KeyPad * 2);
+            // The key or pad glyph as a pine stamp with brass lettering.
+            Panel(X, Y + (RowHeight - BadgeH) * 0.5f, BadgeW, BadgeH, KeyStamp);
+            bNoticeText = false;
+            Write(Cue.Key, X + (BadgeW - KeyWidth(Cue.Key)) * 0.5f, Y + (RowHeight - KeySize) * 0.5f - 1, KeySize, KeyLetter);
+            bNoticeText = bThemeSerif;
             X += BadgeW + Space;
         }
-        Write(Cue.Verb, X + 1, Y + (BadgeH - Size) * 0.5f, Size, FLinearColor(0, 0, 0, 0.7f));
-        Write(Cue.Verb, X, Y + (BadgeH - Size) * 0.5f - 1, Size, Ink);
-        X += TextWidth(Cue.Verb, Size);
+        bNoticeText = true;
+        Write(Cue.Verb, X, Y + (RowHeight - VerbLine) * 0.5f, Size, HomesteadNoticeStyle::InkBrown);
+        bNoticeText = bThemeSerif;
+        X += WordsWidth(Cue.Verb, Size);
     }
+    return Top + BoxHeight;
 }
 
 void AHomesteadHUD::MeasureBookLine(const FString& Text, float Width, float Size, const TCHAR* TextRole)
@@ -462,7 +571,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     Panel(X, Y, Width, Height, Pine);
     ProtectFeedback(TEXT("book-panel"), X, Y, Width, Height);
     Write(PC.BookTitle(), X + 34, Y + 24, 38, Ink);
-    const FString Capacity = FString::Printf(TEXT("Carried %d / %d  |  World paused"), PC.Simulation().UsedCapacity(), Homestead::InventoryCapacity);
+    const FString Capacity = FString::Printf(TEXT("Carried %d / %d  |  World paused"), PC.Simulation().UsedCapacity(), PC.Simulation().PackCapacity());
     MeasureBookLine(Capacity, 331, 19, TEXT("capacity"));
     Write(Capacity,
         X + Width - 365, Y + 37, 19, Muted);

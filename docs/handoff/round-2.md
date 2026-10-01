@@ -542,13 +542,15 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 | 581000-581099 | **reserved exclusively** for Water roadside forage (approval 2026-09-29; `Scripts\Terrain\forage.py` → `HomesteadEstateRoadsidePlacements.inc`) |
 | 582000-582099 | clearable manor ruin rubble (Props; `HomesteadEstateRuinRubblePlacements` in `HomesteadEstate.cpp`) |
 | 582100-582299 | extra pickable forage in Estate woods and fields (Water; `Scripts\Terrain\forage.py` → `Simulation\HomesteadEstateForagePlacements.inc`) |
-| *next free: 582300+* | *claim here* |
+| 582300-582399 | **reserved exclusively** for Water lake-trail forage (approval 2026-10-01; `Scripts\Terrain\lake_path_plants.py` → `Simulation\HomesteadEstateLakePathPlacements.inc`; appended last after tool rack 520006) |
+| *next free: 582400+* | *claim here* |
 
 | Scenery kinds (`EstateSceneryKinds`; `scatter.py` kind bytes must match) | Owner |
 | --- | --- |
 | 13-18 | trees (oak, beech, sycamore, hawthorn, holly, hazel coppice) |
 | 19-41 | MVP woodland biome |
-| *next free: 42+* | *claim here* |
+| 42-48 | **reserved exclusively** for Water lake-trail wildflowers (`lake_path_plants.py`): bluebell, primrose, wild garlic, wood anemone, red campion, foxglove and cow parsley |
+| *next free: 49+* | *claim here* |
 
 ## Shared interfaces this round
 
@@ -689,6 +691,14 @@ approval; the generated-placement safety block remains until a verified merge.
 with 2.4 m cleared verges. Its terrain import requires `bake_ground.py` and then
 `build_ground.py` from the **same checkout**, because `Saved\Ground` PNGs are per-worktree. It
 remains unintegrated and needs the terrain/import verification described on Water's branch.
+
+**Lake-trail forage `bbea5da8` (unmerged):** claimed ids `582300–582399` are appended last through
+`lake_path_plants.py`; the generator emits live BerryBush/Roots to
+`HomesteadEstateLakePathPlacements.inc` and decorative wildflowers using scenery kinds 42–48.
+Once its forage include exists, rows are read back as save identity and never replanned; `--replan`
+is permitted only before shipment. `scatter.py` reruns `lake_path_plants.bake()` after
+`lake_features` so a fresh scatter preserves the flower clearing/records. This remains branch-only
+until save-stability, native, editor and package evidence admits it.
 
 **Packaged lake pail regression:** the diagnosis is inconclusive; do not make a speculative shore-range
 change. The shipped probe accepts lake shore <=120 cm, and PIE filled at landing (-79, -744) using an
@@ -839,6 +849,13 @@ receipt.**
   with a positive interval ending exactly at 06:00; `BedSleepOption` presents it at 05:52 and
   `Sleep(..., dawnLimited=true)` validates it. Native 18/18 and FullLoop cover single A at
   05:52 → 06:00. UE/PIE/package proof remains pending.
+
+  **Accepted source heads `645d55a7` (not on `main`):** Integration separately merged Props
+  hold-to-repeat `2d1a4fed`, baked scythe `5ec5df04`, imported cove-kit assets `b5b55fb8`, Water
+  cove placement `c11458c9`, and canonical audio-loudness docs `4eb5a6b7`; all are ancestors of the
+  clean batch and native Release 18/18 passes. The rejected global hair-sky toggle remains
+  excluded. Unreal compile, PIE, package and Shipping acceptance await the exclusive integration
+  slot; there is no playable-delivery claim.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 

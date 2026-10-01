@@ -101,7 +101,27 @@ TravelPlan PlanTravel(const State& state, Point from, TravelDestination destinat
             {
                 plan.storeClosedOnArrival = true;
                 plan.storeOpenHour = shop.openHour;
-                summary += "\nThe general store will be closed then (it opens at " + FormatHour(shop.openHour) + ").";
+                const double opens = NextShopOpening(shop, plan.arrivalHour);
+                const Calendar::Date arrives = Calendar::DateAt(plan.arrivalHour), reopens = Calendar::DateAt(opens);
+                // "Closed all day" only when she'd arrive in what would be its hours on a closed day: before
+                // or after them it's just shut for the night, as the clock-based "the next day" says (review).
+                const double ofDay = std::fmod(std::fmod(plan.arrivalHour, 24.0) + 24.0, 24.0);
+                plan.storeClosedAllDay = !IsShopDay(plan.arrivalHour) && ofDay >= shop.openHour && ofDay < shop.closeHour;
+                if (plan.storeClosedAllDay)
+                    summary += std::string("\nYou'd arrive on a ") + Calendar::WeekdayName(arrives.weekday)
+                        + ", when the general store is closed all day (it opens " + Calendar::WeekdayName(reopens.weekday)
+                        + " at " + FormatHour(opens) + ").";
+                else
+                {
+                    // "(it opens at 8 AM)" means the next 8 AM on the clock; anything later names its day (review:
+                    // a Sunday 07:30 arrival waits 25 h, for Monday).
+                    const double nextOnClock = std::floor(plan.arrivalHour / 24.0) * 24.0
+                        + (ofDay < shop.openHour ? 0.0 : 24.0) + shop.openHour;
+                    summary += std::fabs(opens - nextOnClock) < 1e-6
+                        ? "\nThe general store will be closed then (it opens at " + FormatHour(opens) + ")."
+                        : std::string("\nThe general store will be closed then (it opens ") + Calendar::WeekdayName(reopens.weekday)
+                            + " at " + FormatHour(opens) + ").";
+                }
             }
     plan.summary = summary;
     plan.ok = true;
@@ -127,5 +147,33 @@ Result Simulation::WalkRoad(TravelDestination destination, Point from)
     AdvanceGameHours(plan.gameHours, plan.arrival);
     ++revision_;
     return TravelGood("You walk to " + where + ". It's " + FormatHour(state_.hour) + ".", revision_);
+}
+
+std::vector<TravelDestination> RoadSignDestinations(const std::string& signName)
+{
+    if (signName == "ManorRoadSign") return {TravelDestination::Town};
+    if (signName == "TownRoadSign") return {TravelDestination::Manor};
+    if (signName == "GatewayRoadSign") return {TravelDestination::Town, TravelDestination::Manor};
+    return {};
+}
+
+const PublicRoadSign* RoadSignNear(Point at, double reachCm)
+{
+    const PublicRoadSign* nearest = nullptr;
+    double best = reachCm;
+    for (const PublicRoadSign& sign : EstatePublicRoad().signs)
+    {
+        const double distance = std::hypot(at.x - sign.position.x, at.y - sign.position.y);
+        if (distance <= best && !RoadSignDestinations(sign.name).empty()) { best = distance; nearest = &sign; }
+    }
+    return nearest;
+}
+
+std::string RoadSignLabel(const std::string& signName)
+{
+    const auto destinations = RoadSignDestinations(signName);
+    if (destinations.size() == 2) return "Town / Manor";
+    if (destinations.size() == 1) return destinations[0] == TravelDestination::Town ? "To town" : "To the manor";
+    return {};
 }
 }

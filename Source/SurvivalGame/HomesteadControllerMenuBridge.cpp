@@ -78,6 +78,7 @@ void AHomesteadController::MenuSelect(int32 Row)
 
 void AHomesteadController::MenuActivate()
 {
+    if (RejectPendingGroundSnapAction()) return;
     if (bMenuSaveInProgress || !bBookOpen) return;
     if (bTestResetRequired && (Page != 4 || !Rows().IsValidIndex(Selection)
         || (Rows()[Selection].Id != 1 && Rows()[Selection].Id != 8 && Rows()[Selection].Id != 9)))
@@ -91,6 +92,7 @@ void AHomesteadController::MenuActivate()
 
 bool AHomesteadController::MenuCraftRecipe(Homestead::Recipe Recipe)
 {
+    if (RejectPendingGroundSnapAction()) return false;
     if (bMenuSaveInProgress || !bBookOpen || Page != 1 || IsFailed() || bTestResetRequired)
         return false;
     const auto Assessment = Sim.AssessRecipe(Recipe, PlayerPoint());
@@ -143,9 +145,9 @@ void AHomesteadController::MenuCraftBeat(int32 Beat)
     PlayEffect(Strike, 0.16f);
 }
 
-void AHomesteadController::MenuStore() { if (!bMenuSaveInProgress) Secondary(); }
+void AHomesteadController::MenuStore() { if (!RejectPendingGroundSnapAction() && !bMenuSaveInProgress) Secondary(); }
 
-void AHomesteadController::MenuTake() { if (!bMenuSaveInProgress) Withdraw(); }
+void AHomesteadController::MenuTake() { if (!RejectPendingGroundSnapAction() && !bMenuSaveInProgress) Withdraw(); }
 
 void AHomesteadController::MenuBack()
 {

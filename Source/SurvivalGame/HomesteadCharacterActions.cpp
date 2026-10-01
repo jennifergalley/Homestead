@@ -97,6 +97,7 @@ void AHomesteadCharacter::CancelAction(bool Immediate)
     ClearYaw.Reset();
     TillYaw.Reset();
     bFellApproach = false;
+    bApproachHack = false;
     WaterYaw.Reset();
 }
 
@@ -217,7 +218,7 @@ bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target)
     return PlayMacheteHack(Target, Homestead::Item::Machete);
 }
 
-bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool)
+bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target, Homestead::Item Tool, float Radius)
 {
     if (!bMetaHumanActive || !MacheteAnimation || !GetHeldProp(Tool)) return false;
     HackTool = Tool;
@@ -225,11 +226,34 @@ bool AHomesteadCharacter::PlayMacheteHack(Homestead::Point Target, Homestead::It
     if (!Animation) return false;
     CancelSprint();
     GetCharacterMovement()->StopMovementImmediately();
+    bFellApproach = false;
+    bApproachHack = false;
     const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
     if (FMath::IsFinite(Delta.X) && FMath::IsFinite(Delta.Y) && Delta.SizeSquared() >= 1)
     {
-        ClearYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
-        BeginStanceStep(GetActorLocation(), *ClearYaw);
+        const float TargetYaw = FMath::RadiansToDegrees(FMath::Atan2(Delta.Y, Delta.X));
+        ClearYaw = TargetYaw;
+        if (Radius >= 0)
+        {
+            // Jenny (09-29): the billhook must visibly meet what it cuts. Stand where the blade's cut
+            // lands on the target's near side, facing a little left of it (the cut falls to her right).
+            const float Left = HackCutLeft, Forward = HackCutForward + Radius * (1.0f - HackBite);
+            const float Standoff = FMath::Sqrt(Left * Left + Forward * Forward);
+            ClearYaw = TargetYaw + FMath::RadiansToDegrees(FMath::Atan2(Left, Forward));
+            const FVector2D To = FVector2D(Target.x, Target.y) - Delta.GetSafeNormal() * Standoff;
+            if (FVector2D::Distance(To, FVector2D(GetActorLocation())) > 35.0f && Delta.Size() > Standoff)
+            {
+                // Too far for a stance step: walk up to it, then settle and hack (UpdateFellApproach).
+                bFellApproach = true;
+                bApproachHack = true;
+                FellApproachTo = To;
+                FellApproachYaw = *ClearYaw;
+                FellApproachTime = 0;
+                return true;
+            }
+            BeginStanceStep(FVector(To.X, To.Y, GetActorLocation().Z), *ClearYaw);
+        }
+        else BeginStanceStep(GetActorLocation(), *ClearYaw);
     }
     else ClearYaw.Reset();
     Animation->RequestMacheteHack();
@@ -309,6 +333,7 @@ bool AHomesteadCharacter::BeginTwoHanded(Homestead::Point Target, int32 Strokes,
     if (!Animation) return false;
     CancelSprint();
     GetCharacterMovement()->StopMovementImmediately();
+    bApproachHack = false;
     const FVector2D Delta(Target.x - GetActorLocation().X, Target.y - GetActorLocation().Y);
     if (FMath::IsFinite(Delta.X) && FMath::IsFinite(Delta.Y) && Delta.SizeSquared() >= 1)
     {
@@ -359,6 +384,16 @@ void AHomesteadCharacter::UpdateFellApproach(float DeltaSeconds)
     bFellApproach = false;
     UE_LOG(LogTemp, Verbose, TEXT("Fell: approach ended at (%.0f, %.0f) after %.2fs, %.0f cm short"), GetActorLocation().X, GetActorLocation().Y, FellApproachTime, Distance);
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
+    if (bApproachHack)
+    {
+        bApproachHack = false;
+        if (!Animation || !MacheteAnimation || !GetHeldProp(HackTool)) return;
+        GetCharacterMovement()->StopMovementImmediately();
+        ClearYaw = FellApproachYaw;
+        BeginStanceStep(FVector(FellApproachTo.X, FellApproachTo.Y, GetActorLocation().Z), FellApproachYaw);
+        Animation->RequestMacheteHack();
+        return;
+    }
     if (!Animation || !(FellTool == Homestead::Item::Hatchet && !bStrikeHatchet ? CanFell() : CanStrike(FellTool))) return;
     GetCharacterMovement()->StopMovementImmediately();
     ClearYaw = FellApproachYaw;

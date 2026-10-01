@@ -247,8 +247,43 @@ def ground_fields(h, w, layout):
         wear = np.maximum(wear, np.maximum(tread, np.where(s_lake < 0, 1.0, 0.0)))
         density *= 1.0 - 0.95 * tread
         height *= 1.0 - 0.8 * tread
+    # The cove route (cove_route.py): a trodden path about 1.4 m wide from the manor's front door down to the
+    # cove, bare where its steps and landings stand (the heightfield is cut a few cm under them) and through
+    # the leaf litter where it passes under trees.
+    cove = layout.get("coveRoute")
+    if cove:
+        line = next(p["points"] for p in layout.get("footpaths", []) if p.get("name") == "Cove")
+        d_cove = line_distance(line, h.shape)
+        tread = 0.85 * smoothstep(1.5, 0.5, d_cove) * (0.75 + 0.25 * clump)
+        d_steps = np.full(h.shape, np.inf, np.float32)
+        control = cove["control"]
+        for (a, b), kind in zip(zip(control[:-1], control[1:]), cove["kinds"]):
+            if kind == "stairs":
+                d_steps = np.minimum(d_steps, line_distance([a, b], h.shape))
+        steps = smoothstep(2.6, 1.6, d_steps)
+        wear = np.maximum(wear, np.maximum(tread, 0.7 * steps))
+        density *= (1.0 - 0.95 * smoothstep(1.9, 0.7, d_cove)) * (1.0 - steps)
+        height *= 1.0 - 0.8 * tread
+        trail = np.maximum(trail, smoothstep(2.0, 0.8, d_cove).astype(np.float32))
     tx, ty = lm["TownSquare"][:2]
     density *= smoothstep(100.0, 140.0, np.hypot(X - tx, Y - ty))
+    # The town's street and square (town_layout.py): trodden soil, worn most down the middle of the street.
+    town = layout.get("town")
+    if town:
+        d_street = line_distance(town["street"], h.shape)
+        hw = town["streetHalfWidth"]
+        wear = np.maximum(wear, 0.8 * smoothstep(hw + 0.8, hw - 0.8, d_street) * (0.7 + 0.3 * clump))
+        (cx, cy), hx, hy = town["square"]["centre"], town["square"]["halfX"], town["square"]["halfY"]
+        out = np.maximum(np.abs(X - cx) - hx, np.abs(Y - cy) - hy)
+        wear = np.maximum(wear, 0.55 * smoothstep(1.5, -1.0, out) * (0.6 + 0.4 * clump))
+    # No blades up through the road bridge's planks (public_road.py records the deck).
+    bridge = layout.get("roadBridge")
+    if bridge:
+        bx, by = bridge["centre"]
+        yaw = np.radians(bridge["yaw"])
+        along = (X - bx) * np.cos(yaw) + (Y - by) * np.sin(yaw)
+        across = -(X - bx) * np.sin(yaw) + (Y - by) * np.cos(yaw)
+        density *= 1.0 - ((np.abs(along) < bridge["halfLength"] + 1.0) & (np.abs(across) < bridge["halfWidth"] + 1.4))
 
     # The derelict farm (manor lane): overgrown inside, but keep the fence line clear.
     fx0, fx1, fy0, fy1 = FARM
@@ -258,8 +293,9 @@ def ground_fields(h, w, layout):
 
     # Under the trees: leaf litter and moss, a thin shaded grass.
     canopy = canopy_mask(h.shape)
-    # The lake trail cuts through the tree belt north of the farm: its trodden soil shows through the
-    # leaf litter (the landscape material lays litter over wear wherever the canopy mask is up).
+    # The lake trail cuts through the tree belt north of the farm, and the cove route through the valley's
+    # trees: their trodden soil shows through the leaf litter (the landscape material lays litter over wear
+    # wherever the canopy mask is up).
     canopy = canopy * (1.0 - 0.9 * trail)
     density *= 1.0 - 0.8 * canopy
     height *= 1.0 - 0.3 * canopy

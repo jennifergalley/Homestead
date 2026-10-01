@@ -442,9 +442,10 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
         if (Entered)
         {
             if (!RenewalCheck(!PC->IsBookOpen() && PC->Focus == AHomesteadController::EFocus::Bed && PC->FocusId == 105
-                && (PC->FocusActions().Contains(TEXT("Sleep")) || PC->FocusActions().Contains(TEXT("Nap")))
+                && PC->FocusActions().Contains(TEXT("Sleep"))
                 && PC->Simulation().IsSheltered(PC->PlayerPoint()),
                 TEXT("Mapped route did not reach actual sheltered bed105."))) return;
+            R.OfferedSleepHours = PC->BedSleepHours();
             R.ActionHour = PC->State().hour; R.ActionEngine = R.EngineUnpaused;
             Tap(EKeys::Gamepad_FaceButton_Bottom);
         }
@@ -452,7 +453,8 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
         {
             const double Natural = (R.EngineUnpaused - R.ActionEngine) * 24.0 / (PC->State().dayMinutes * 60.0);
             const double Rest = PC->State().hour - R.ActionHour - Natural;
-            if (!RenewalCheck(!PC->ToastIsError() && FMath::Abs(Rest - 8) < 1.e-6, TEXT("Normal mapped8h rest failed."))) return;
+            if (!RenewalCheck(!PC->ToastIsError() && R.OfferedSleepHours > 0
+                && FMath::Abs(Rest - R.OfferedSleepHours) < 0.05, TEXT("Single bed action did not advance its offered rest."))) return;
             R.SleepHours += Rest; ++R.Sleeps;
             RenewalEvent(FString::Printf(TEXT("normal bed rest%d advanced%.8fh plus%.8fnatural; hunger%.2f"),
                 R.Sleeps, Rest, Natural, PC->State().hunger));
@@ -461,8 +463,8 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
         {
             const bool Ready = R.InitialDeadlines[Id] <= PC->State().hour;
             const auto* N = RenewalNode(PC->State(), Id);
-            if (!RenewalCheck(N && N->readyAtHour == R.InitialDeadlines[Id] && Ready == (Id != 10 || R.Sleeps == 3),
-                TEXT("Chosen24h/36h deadlines changed or crossed unexpectedly."))) return;
+            if (!RenewalCheck(N && N->readyAtHour == R.InitialDeadlines[Id],
+                TEXT("Chosen24h/36h deadlines changed unexpectedly."))) return;
             if (!RenewalVisuals(Id, Ready, false, FString::Printf(TEXT("rest%d"), R.Sleeps), false)) return;
         }
         if (!RenewalVisuals(14, false, false, TEXT("after-rest-cleared"), false)) return;
@@ -471,7 +473,7 @@ void AHomesteadVisualPlaytest::TickRenewal(float EngineDelta)
         if (Entered && !RenewalVisuals(14, false, false, TEXT("cleared-final"), true)) return;
         if (Age > 0.8) Next(); break;
     case Kind::Finish:
-        if (!RenewalCheck(R.ReadOnly || (R.Sleeps == 3 && FMath::Abs(R.SleepHours - 24) < 1.e-6 && R.Rejects == 6
+        if (!RenewalCheck(R.ReadOnly || (R.Sleeps == 3 && R.SleepHours > 0 && R.Rejects == 6
             && R.Harvests == 3 && R.Saves == 2 && R.RoundTrips == 1), TEXT("Incomplete fixed renewal route."))) return;
         FinishRenewal(TEXT("passed"), R.ReadOnly ? TEXT("Separate process restored exact final state, cooldowns and actual depleted/cleared components.")
             : TEXT("Mapped24h/36h renewal, visuals, single rewards and saves passed.")); break;

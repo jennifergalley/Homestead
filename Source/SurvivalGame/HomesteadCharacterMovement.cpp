@@ -148,7 +148,9 @@ void AHomesteadCharacter::LabShiftSprint(const FInputActionValue&)
 void AHomesteadCharacter::CancelSprint()
 {
     bSprintActive = false;
-    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed();
+    const auto* PC = Cast<AHomesteadController>(Controller);
+    const float WalkFactor = PC ? static_cast<float>(Homestead::Exertion::WalkSpeedFactor(PC->State().energy)) : 1.0f;
+    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed() * WalkFactor;
 }
 
 void AHomesteadCharacter::ResetSprint()

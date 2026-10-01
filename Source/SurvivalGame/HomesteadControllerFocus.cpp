@@ -3,6 +3,7 @@
 #include "HomesteadControllerHelpers.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadWorld.h"
+#include "Simulation/HomesteadBed.h"
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadGardenTarget.h"
 #include "Simulation/HomesteadItems.h"
@@ -21,14 +22,23 @@ using HomesteadControllerText::Text;
 
 void AHomesteadController::UpdateFocus()
 {
+    const bool bHeldBed = Focus == EFocus::Bed;
     Focus = EFocus::None;
     FocusId = -1;
+    bBedFocusActionable = false;
     const auto Position = PlayerPoint();
     double Best = 280.0;
+    constexpr double FurnitureBroadphaseCm = 425.0; // 280 cm focus plus the largest furniture offset.
+    Homestead::Point FocusTarget{};
+    bool bHasFocusTarget = false;
     auto Consider = [&](EFocus Kind, int Id, Homestead::Point Target)
     {
         const double Distance = FMath::Sqrt(FMath::Square(Target.x - Position.x) + FMath::Square(Target.y - Position.y));
-        if (Distance < Best) { Best = Distance; Focus = Kind; FocusId = Id; }
+        if (Distance < Best)
+        {
+            Best = Distance; Focus = Kind; FocusId = Id;
+            FocusTarget = Target; bHasFocusTarget = true;
+        }
     };
     for (const auto& Node : State().resources)
         if (!Node.cleared) Consider(EFocus::Resource, Node.id, Node.position);
@@ -50,6 +60,8 @@ void AHomesteadController::UpdateFocus()
                     + FMath::Square(Homestead::PlotCenter(Plot).y - Position.y)));
                 Focus = EFocus::Plot;
                 FocusId = Plot.id;
+                FocusTarget = Homestead::PlotCenter(Plot);
+                bHasFocusTarget = true;
                 break;
             }
     }
@@ -58,12 +70,21 @@ void AHomesteadController::UpdateFocus()
         EFocus Kind = EFocus::None;
         if (Structure.kind == Homestead::Piece::Fire) Kind = EFocus::Fire;
         if (Structure.kind == Homestead::Piece::Hearth) Kind = EFocus::Hearth;
-        if (Structure.kind == Homestead::Piece::Bed) Kind = EFocus::Bed;
         if (Structure.kind == Homestead::Piece::Chest) Kind = EFocus::Chest;
-        if (Kind != EFocus::None) Consider(Kind, Structure.id, Homestead::StructureCenter(State(), Structure));
+        if (Kind != EFocus::None)
+        {
+            // The furthest furniture offset is 142 cm; avoid footprint/foundation scans far from her.
+            const auto Cell = Homestead::StructureCenter(State(), Structure);
+            if (FMath::Square(Cell.x - Position.x) + FMath::Square(Cell.y - Position.y) < FMath::Square(FurnitureBroadphaseCm))
+                Consider(Kind, Structure.id, Homestead::StructureFootprint(State(), Structure).center);
+        }
     }
     ConsiderStoreFocus(Consider);
+    ConsiderRoadSignFocus(Consider);
+    const EFocus BeforeHeldTool = Focus;
+    const int BeforeHeldId = FocusId;
     FocusHeldToolTarget(Position);
+    if (Focus != BeforeHeldTool || FocusId != BeforeHeldId) bHasFocusTarget = false;
     if (Sim.NearWater(Position))
     {
         // With the watering can out and not full, the stream wins over a crop on the bank when she
@@ -72,10 +93,11 @@ void AHomesteadController::UpdateFocus()
             && Sim.Count(Homestead::Item::WateringCan) > 0;
         const int32 Water = Sim.Count(Homestead::Item::Water);
         const double Edge = FMath::Max(0.0, WaterEdgeDistance(Position, false));
-        if (Focus == EFocus::None || (bCan && Water < 6 && (Water == 0 || Edge <= Best)))
+        if (Focus == EFocus::None || (bCan && Water < Homestead::PailPortions && (Water == 0 || Edge <= Best)))
         {
             Focus = EFocus::Water;
             FocusId = -1;
+            bHasFocusTarget = false;
         }
     }
     // With the machete out, the nearest bush or bramble within arm's reach takes the focus.
@@ -91,6 +113,22 @@ void AHomesteadController::UpdateFocus()
         FocusBrushSpecies = Brush.Species;
         FocusBrushPosition = Brush.Position;
         bFocusBrushWoody = Brush.bWoody;
+        bHasFocusTarget = false;
+    }
+    const FVector Forward = GetPawn() ? GetPawn()->GetActorForwardVector() : FVector::ZeroVector;
+    bool bOtherFacing = Focus != EFocus::None;
+    if (bOtherFacing && bHasFocusTarget)
+    {
+        const double X = FocusTarget.x - Position.x, Y = FocusTarget.y - Position.y;
+        const double Distance = FMath::Sqrt(X * X + Y * Y);
+        bOtherFacing = Distance < 1e-6
+            || (Forward.X * X + Forward.Y * Y) >= Homestead::BedFacingCosine * Distance;
+    }
+    const int Bed = Homestead::BedFocusCandidate(State(), Position, {Forward.X, Forward.Y}, bOtherFacing, bHeldBed);
+    if (Bed != -1)
+    {
+        Focus = EFocus::Bed; FocusId = Bed;
+        bBedFocusActionable = Homestead::ReachableBed(State(), Position, {Forward.X, Forward.Y}) == Bed;
     }
 }
 
@@ -122,8 +160,8 @@ FString AHomesteadController::FocusTitle() const
         for (const auto& Plot : State().plots)
         {
             if (Plot.id != FocusId) continue;
-            if (!Plot.planted) return TEXT("A little patch of earth");
-            return Text(Homestead::PlotStatus(Plot).c_str());
+            if (!Plot.planted) return TEXT("Tilled soil");
+            return Text(Homestead::PlotStatus(Plot, State().hour).c_str());
         }
         break;
     case EFocus::Drop:
@@ -144,12 +182,13 @@ FString AHomesteadController::FocusTitle() const
         break;
     case EFocus::Fire: return TEXT("Cookfire");
     case EFocus::Hearth: return TEXT("Hearth");
-    case EFocus::Bed: return TEXT("Bedroll");
-    case EFocus::Chest: return TEXT("Storage chest");
+    case EFocus::Bed: return TEXT("Bed");
+    case EFocus::Chest: return ChestDisplayName(FocusId);
     case EFocus::Water: return TEXT("Fresh stream water");
     case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusTitle();
+    case EFocus::RoadSign: return RoadSignTitle();
     default: break;
     }
     if (Focus == EFocus::None && SelectedCarriedTool() == Homestead::Item::OilLamp)
@@ -178,9 +217,9 @@ FString AHomesteadController::FocusActions() const
             if (Node.id == FocusId)
             {
                 if (Node.readyAtHour > State().hour) return FString();
+                // Trees are felled with the axe on the tool button; nothing else is offered on them.
                 if (Node.kind == Homestead::ResourceKind::ForestTree)
-                    return ToolAvailable && SelectedTool == Homestead::Item::Hatchet
-                        ? Use + TEXT(" Fell with Axe") : ToolPrompt(Sim, Homestead::Item::Hatchet, TEXT("axe"), TEXT(" to fell"));
+                    return ToolAvailable && SelectedTool == Homestead::Item::Hatchet ? Use + TEXT(" Fell") : FString();
                 if (Node.kind == Homestead::ResourceKind::DeerRemains || Node.kind == Homestead::ResourceKind::Reeds)
                     return FString();
                 if (const auto* Overgrowth = Homestead::FindOvergrowth(Node.kind))
@@ -192,22 +231,14 @@ FString AHomesteadController::FocusActions() const
                     // Weeds and nettles are pulled, rubbish is cleared away, a fallen bough gathered.
                     const FString Hand = A + (Node.kind == Homestead::ResourceKind::Weeds || Node.kind == Homestead::ResourceKind::Nettles
                         ? TEXT(" Pull") : Homestead::IsRubbish(Node.kind) ? TEXT(" Clear away") : TEXT(" Gather"));
-                    if (Handles)
-                    {
-                        // Out of tier: say which upgrade it needs rather than offering a swing that glances off.
-                        const Homestead::ToolTier Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
-                        if (Sim.GetToolTier(Overgrowth->tool) < Needed)
-                            return UTF8_TO_TCHAR(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str());
-                        return Use + TEXT(" ") + SwingVerb(SelectedTool)
-                            + (Overgrowth->byHand ? TEXT("   ") + Hand : FString());
-                    }
+                    // Too worn for it: say which upgrade it needs rather than offering a swing that glances off.
+                    const Homestead::ToolTier Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
+                    const bool bTooWorn = Overgrowth->tool != Homestead::ToolKind::Count && Sim.GetToolTier(Overgrowth->tool) < Needed;
+                    if (Handles && !bTooWorn)
+                        return (Overgrowth->byHand ? Hand + TEXT("   ") : FString()) + Use + TEXT(" ") + SwingVerb(SelectedTool);
                     if (Overgrowth->byHand) return Hand;
-                    // Too worn for it: name the upgrade whichever tool is in hand, rather than
-                    // suggesting she select a tool that would only be refused (Jenny, 09-29).
-                    if (const Homestead::ToolTier Needed = FMath::Max(Overgrowth->minTier, Node.minTier);
-                        Sim.GetToolTier(Overgrowth->tool) < Needed)
-                        return UTF8_TO_TCHAR(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str());
-                    return ToolPrompt(Sim, Homestead::ToolItem(Overgrowth->tool), UTF8_TO_TCHAR(Homestead::ToolName(Overgrowth->tool)));
+                    if (Handles && bTooWorn) return UTF8_TO_TCHAR(Homestead::NeedsToolMessage(Overgrowth->tool, Needed).c_str());
+                    return FString();
                 }
                 // Loose stones are small enough to pick up by hand, unlike the rocks the pickaxe breaks.
                 if (Node.kind == Homestead::ResourceKind::Stones) return A + TEXT(" Pick up");
@@ -218,81 +249,50 @@ FString AHomesteadController::FocusActions() const
         for (const auto& Plot : State().plots)
             if (Plot.id == FocusId)
             {
-                // [F]/[X] pulls weeds by hand whatever is selected (the hoe's [LMB] works the square
-                // ahead instead), so the prompt says so on any square where weeds show: bare, growing
-                // or ripe. It never sows.
-                const FString Pull = Homestead::HasVisibleWeeds(Plot) ? X + TEXT(" Pull weeds") : FString();
-                const FString AndPull = Pull.IsEmpty() ? FString() : TEXT("   ") + Pull;
-                if (!Plot.planted)
-                {
-                    // [A]/[E] sows the seed stack chosen on the hotbar (a berry sows berry seed; wild
-                    // roots are chosen as Seeds).
-                    if (HotbarItem(SelectedHotbarSlot) != Homestead::Item::Count)
-                        if (const auto* Seed = Homestead::CropForSeed(HotbarItem(SelectedHotbarSlot)))
-                        {
-                            const auto Chosen = HotbarItem(SelectedHotbarSlot);
-                            const FString What = Seed->kind == Homestead::CropKind::Berries ? FString(TEXT("berry seeds"))
-                                : Seed->kind == Homestead::CropKind::Roots ? FString(TEXT("roots")) : Text(Seed->lower);
-                            if (Sim.Count(Chosen) <= 0)
-                                return TEXT("No ") + FString(UTF8_TO_TCHAR(Homestead::ItemName(Chosen))).ToLower()
-                                    + TEXT(" left") + AndPull + SeedPouchHint();
-                            return A + TEXT(" Sow ") + What
-                                + (Chosen == Homestead::Item::Berries ? TEXT("   ") + Use + TEXT(" Eat") : FString()) + AndPull + SeedPouchHint();
-                        }
-                    return (Pull.IsEmpty() ? FString() : Pull + TEXT("   ")) + TEXT("Choose seeds on the hotbar to sow") + SeedPouchHint();
-                }
-                if (Homestead::IsRipe(Plot)) return A + TEXT(" Harvest") + AndPull;
-                FString Actions;
-                if (Homestead::NeedsWater(Plot))
-                {
-                    // The pail in her pack waters on [E]/[A]; otherwise say where it is.
-                    const int32 Pail = ToolWhereabouts(Sim, Homestead::Item::WateringCan);
-                    Actions = Pail == 2 && Sim.Count(Homestead::Item::Water) <= 0 ? FString(UTF8_TO_TCHAR(Homestead::EmptyPailText))
-                        : Pail == 2 ? (ToolAvailable && SelectedTool == Homestead::Item::WateringCan ? Use : A) + TEXT(" Water")
-                        : ToolPrompt(Sim, Homestead::Item::WateringCan, TEXT("pail"), TEXT(" to water"));
-                }
-                if (!Pull.IsEmpty()) Actions += (Actions.IsEmpty() ? TEXT("") : TEXT("   ")) + Pull;
-                return Actions;
+                // Every action that would work now, interactions first ([E] plant or harvest, [F] pull
+                // weeds), then the tool in hand (the pail waters, the hoe hoes out a withered crop). E
+                // never waters or hoes (Jenny 2026-09-30).
+                TArray<FString> Actions;
+                const Homestead::Item Chosen = HotbarItem(SelectedHotbarSlot);
+                if (!Plot.planted && Chosen != Homestead::Item::Count)
+                    if (Homestead::CropForSeed(Chosen))
+                        Actions.Add(Sim.Count(Chosen) <= 0
+                            ? TEXT("No ") + Text(Homestead::ItemName(Chosen)).ToLower() + TEXT(" left")
+                            : A + TEXT(" Plant ") + Text(Homestead::ItemName(Chosen)));
+                if (Homestead::IsRipe(Plot)) Actions.Add(A + TEXT(" Harvest"));
+                if (Homestead::HasVisibleWeeds(Plot)) Actions.Add(X + TEXT(" Pull weeds"));
+                if (Plot.planted && Plot.withered && ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
+                    Actions.Add(Use + TEXT(" Hoe out"));
+                if (Plot.planted && !Plot.withered && !Homestead::IsRipe(Plot) && Homestead::NeedsWater(Plot)
+                    && ToolAvailable && SelectedTool == Homestead::Item::WateringCan)
+                    Actions.Add(Sim.Count(Homestead::Item::Water) <= 0 ? FString(TEXT("Pail empty")) : Use + TEXT(" Water"));
+                return FString::Join(Actions, TEXT("   ")) + (Plot.planted ? FString() : SeedPouchHint());
             }
         break;
-    case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add firewood / branch");
+    case EFocus::Fire: return A + TEXT(" Cook   ") + X + TEXT(" Add fuel");
     case EFocus::Hearth: return A + TEXT(" Cook");
     case EFocus::Drop: return A + TEXT(" Pick up");
     case EFocus::Bed:
-    {
-        const auto Options = BedSleepOptions();
-        const int32 Index = BedSleepIndex();
-        if (!Options.size()) return FString();
-        FString Line = A + TEXT(" ") + SleepOptionLabel(Options[Index]);
-        if (Options.size() > 1)
-        {
-            TArray<FString> Others;
-            for (int32 Other = 0; Other < static_cast<int32>(Options.size()); ++Other)
-                if (Other != Index)
-                    Others.Add(Options[Other].choice == Homestead::SleepChoice::UntilMorning ? TEXT("until morning")
-                        : Options[Other].choice == Homestead::SleepChoice::UntilRested ? TEXT("until rested") : TEXT("nap"));
-            Line += FString(TEXT("   ")) + (bGamepad ? TEXT("[D-pad]") : TEXT("[Up/Down]")) + TEXT(" ") + FString::Join(Others, TEXT(" / "));
-        }
-        return Line;
-    }
-    case EFocus::Chest: return A + TEXT(" Open pack / storage");
+        if (!bBedFocusActionable) return FString();
+        if (const auto Offer = BedSleepOffer())
+            return A + (Offer->choice == Homestead::SleepChoice::UntilMorning
+                ? TEXT(" Sleep until morning") : TEXT(" Sleep until rested"));
+        return FString();
+    case EFocus::Chest: return A + TEXT(" Open");
     case EFocus::Water:
-        // Offer the fill only when it can happen: say where the pail is, or that it's already full.
-        switch (ToolWhereabouts(Sim, Homestead::Item::WateringCan))
-        {
-        case 2:
-            if (Sim.Count(Homestead::Item::Water) >= Homestead::PailPortions) return TEXT("Your pail is full");
-            return ToolAvailable && SelectedTool == Homestead::Item::WateringCan
-                ? Use + TEXT(" Fill Pail") : A + TEXT(" Fill carried Pail");
-        case 1: return TEXT("Take your pail from the chest to fill it");
-        default: return TEXT("Requires a pail");
-        }
+        // The pail is filled with the tool button; only offered with it in hand.
+        if (!ToolAvailable || SelectedTool != Homestead::Item::WateringCan) return FString();
+        return Sim.Count(Homestead::Item::Water) >= Homestead::PailPortions ? FString(TEXT("Pail full")) : Use + TEXT(" Fill pail");
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
+    case EFocus::RoadSign: return RoadSignActions();
     default:
         if (ToolAvailable && SelectedTool == Homestead::Item::OilLamp)
             return Use + TEXT(" Set lamp down   ") + X + TEXT(" Fill lamp");
+        // With seed out over untilled ground, the red outline says to till it first (UpdateGardenOutline).
+        if (Homestead::CropForSeed(HotbarItem(SelectedHotbarSlot)) && !GardenOutlineReason.IsEmpty())
+            return GardenOutlineReason + SeedPouchHint();
         if (!SeedPouchHint().IsEmpty())
             return (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book")) + SeedPouchHint();
         // Food on the hotbar is eaten with A / E (or X / F) when there's nothing else to use them on.
@@ -302,7 +302,7 @@ FString AHomesteadController::FocusActions() const
         if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick && !GardenOutlineReason.IsEmpty())
             return GardenOutlineReason;
         return ToolAvailable && SelectedTool == Homestead::Item::DiggingStick
-        ? Use + TEXT(" Till ground") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
+        ? Use + TEXT(" Till") : (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book"));
     }
     return FString();
 }
@@ -386,7 +386,15 @@ void AHomesteadController::ResetActionHints()
         if (Branch && PersistIntProperty(Branch->IniPath, ActionHintSection, *Pair.Key, 0))
             GConfig->SetInt(ActionHintSection, *Pair.Key, 0, GGameUserSettingsIni);
     HintUses.Reset();
+    ControlsHint.Restart();
     Notify(TEXT("Action hints will show again for your next few tries."));
+}
+
+bool AHomesteadController::IsControlsHintOnScreen() const
+{
+    // Where AHomesteadHUD::DrawHUD draws the strip: the open world, not a book, shop, setup or failure.
+    return bWorldReady && ControlsHint.Showing() && !HasNativeMenu() && !bBookOpen && !ShopScreen.IsValid()
+        && !IsFailed() && !IsNewGameSetup() && !IsNamingSetup();
 }
 
 void AHomesteadController::Notify(const Homestead::Result& Result, USoundBase* SuccessCue)
@@ -398,9 +406,10 @@ void AHomesteadController::Notify(const Homestead::Result& Result, USoundBase* S
 
 void AHomesteadController::NotifyResourceAction(const Homestead::Result& Result, USoundBase* SuccessCue)
 {
-    if (!Result.ok)
+    // Refusals, and a full pack leaving things on the ground, are worth a notice; plain success isn't.
+    if (!Result.ok || Result.code == Homestead::ResultCode::PackOverflow)
     {
-        Notify(Result);
+        Notify(Result, SuccessCue);
         return;
     }
     ToastText.Reset();

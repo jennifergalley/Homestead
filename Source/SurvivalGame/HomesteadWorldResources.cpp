@@ -144,6 +144,7 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             bVisualBuildFailed = true;
             return;
         }
+        TagSwayingShrub(*Component);
         Component->SetRelativeTransform(FTransform(Rotation, Ground - Rotation.RotateVector(Anchor * Scale), FVector(Scale)));
         Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Component->SetCollisionResponseToAllChannels(ECR_Ignore);

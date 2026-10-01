@@ -45,4 +45,15 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Homestead Estate")
     static FString ApplyEstateHeightfield(const FString& HeightfieldR16, int32 MinX, int32 MinY, int32 MaxX,
         int32 MaxY, int32 TileSize = 63, bool bDryRun = true, const FString& ReportCsv = TEXT(""));
+
+    /**
+     * Brings the Landscape's paint layers on its base edit layer in line with 8-bit 4033x4033 weightmaps
+     * (WeightmapFolder/<Layer>.png from Scripts/Terrain/weightmaps.py, row = +Y, column = +X) within the
+     * vertex rectangle, the outermost row and column excepted, as ApplyEstateHeightfield does for heights.
+     * Writes each layer's weights as they are (the maps sum to 255 at every vertex), tile by tile, only
+     * where they differ. With bDryRun it only reports. Save the dirty proxies afterwards.
+     */
+    UFUNCTION(BlueprintCallable, Category = "Homestead Estate")
+    static FString ApplyEstateWeightmaps(const FString& WeightmapFolder, const TArray<FName>& LayerNames, int32 MinX,
+        int32 MinY, int32 MaxX, int32 MaxY, int32 TileSize = 63, bool bDryRun = true);
 };

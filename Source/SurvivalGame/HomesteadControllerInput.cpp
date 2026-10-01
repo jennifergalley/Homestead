@@ -58,6 +58,14 @@ bool AHomesteadController::InputKey(const FInputKeyEventArgs& Params)
         }
         return true;
     }
+    if (Params.Event == IE_Released && (Params.Key == EKeys::E || Params.Key == EKeys::Enter
+        || Params.Key == EKeys::Gamepad_FaceButton_Bottom)) bBedSleepHeld = false;
+    if (bPendingGroundSnap)
+    {
+        if (Params.Event == IE_Pressed && Params.Key == EKeys::F9) QuickLoad();
+        else if (Params.Event == IE_Pressed) RejectPendingGroundSnapAction();
+        return true;
+    }
     FInputAxisProperties AxisProperties;
     const bool HasAxisProperties = Params.Key.IsGamepadKey() && Params.Key.IsAnalog() && PlayerInput
         && PlayerInput->GetAxisProperties(Params.Key, AxisProperties);
@@ -193,6 +201,8 @@ void AHomesteadController::HideNativeMenu()
     if (MenuPointerInput.IsValid() && FSlateApplication::IsInitialized())
         FSlateApplication::Get().UnregisterInputPreProcessor(MenuPointerInput);
     MenuPointerInput.Reset();
+    // Closing the book keeps a sound level she stepped with the d-pad (saved once, here).
+    if (NativeMenu.IsValid()) NativeMenu->CommitAudioStep();
     if (NativeMenu.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(NativeMenu.ToSharedRef());
     NativeMenu.Reset();
@@ -237,7 +247,8 @@ void AHomesteadController::SetupInputComponent()
     InputComponent->BindKey(EKeys::Gamepad_DPad_Down, IE_Pressed, this, &AHomesteadController::NextRow);
     InputComponent->BindKey(EKeys::Gamepad_DPad_Left, IE_Pressed, this, &AHomesteadController::PreviousPage);
     InputComponent->BindKey(EKeys::Gamepad_DPad_Right, IE_Pressed, this, &AHomesteadController::NextPage);
-    InputComponent->BindKey(EKeys::R, IE_Pressed, this, &AHomesteadController::RotatePlacement);
+    InputComponent->BindKey(EKeys::R, IE_Pressed, this, &AHomesteadController::RotateHotbarRow);
+    InputComponent->BindKey(EKeys::Gamepad_LeftTrigger, IE_Pressed, this, &AHomesteadController::RotateHotbarRow);
     InputComponent->BindKey(EKeys::Q, IE_Pressed, this, &AHomesteadController::NextSeed);
     InputComponent->BindKey(EKeys::Gamepad_RightThumbstick, IE_Pressed, this, &AHomesteadController::CycleZoom);
     InputComponent->BindKey(EKeys::F5, IE_Pressed, this, &AHomesteadController::QuickSave);

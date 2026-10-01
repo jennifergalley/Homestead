@@ -123,16 +123,16 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     if (Blocked) CancelSprint();
     const bool Moving = Movement->GetCurrentAcceleration().SizeSquared2D() > 1.0f
         && GetVelocity().SizeSquared2D() > 144.0f;
-    // Too tired to go on (work and the hours awake wore her down; running itself is free): the
-    // toggle goes off with one gentle notice, and she walks. It never turns itself back on.
+    // The Energy HUD announces the threshold; don't add a second notice when sprint turns off.
     if (bSprintOn && !Lab && PC && !PC->Simulation().CanSprint())
     {
         ResetSprint();
-        PC->SprintTooTired();
     }
     bSprintActive = bSprintOn && !Blocked && Moving
         && (Lab || PC->Simulation().CanSprint()) && SprintAnimation != nullptr;
-    Movement->MaxWalkSpeed = bSprintActive ? SprintSpeed() : WalkSpeed();
+    const float WalkFactor = !Lab && PC
+        ? static_cast<float>(Homestead::Exertion::WalkSpeedFactor(PC->State().energy)) : 1.0f;
+    Movement->MaxWalkSpeed = bSprintActive ? SprintSpeed() : WalkSpeed() * WalkFactor;
     if (bAppearancePreview) UpdateAppearanceFraming();
     UpdatePendingKneel();
     UpdateCarriedSticks();

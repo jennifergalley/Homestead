@@ -86,6 +86,10 @@ public:
     static FString EstateName(const AHomesteadController& Controller);
     // Where the minimap sits, in the HUD's 1080-line logical units for a view of that logical size.
     static FBox2D MinimapBox(float ViewWidth, float ViewHeight);
+    // The compass trial at the top centre (its band and the landmark tokens hanging under it), in the
+    // same units; invalid when the view is too narrow to fit it beside the calendar.
+    static FBox2D CompassBox(float ViewWidth, float ViewHeight);
+    bool IsCompassVisible() const;
     // Crossings shown so far (for tests), and the text of the last one.
     int32 CrossingCount() const { return Crossings; }
     const FString& LastCrossing() const { return LastCrossingText; }
@@ -106,6 +110,7 @@ private:
     FString ModelKey;
     FHomesteadMapFrame CurrentFrame;
     TSharedPtr<SWidget> Minimap;
+    TSharedPtr<SWidget> Compass;
     FHomesteadMapViewState ViewState;
     bool bRotateWithCamera = false;
     // Boundary crossing: the settled side, and where she was last frame (a long jump is a load or

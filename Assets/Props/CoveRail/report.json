@@ -1,0 +1,476 @@
+{
+  "schema": 1,
+  "name": "CoveRail",
+  "description": "Silvered oak post-and-rail handrail: level bay, raked bays at 26/28/30 degrees, end and corner posts, all symmetric across the rail line for Y-mirroring (original). Pivot = downhill post's foot.",
+  "collision": "none",
+  "triangle_budget": 16000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/cove_handrail.py",
+  "source_sha256": "3e8749866e098a5350360027e3e37dbc24879cfa11ff47714cf6d5b46ccfd4ff",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_CoveRail_Level": {
+      "vertices": 640,
+      "triangles": 1240,
+      "size_cm": [
+        176.11,
+        13.3,
+        128.45
+      ],
+      "materials": [
+        {
+          "name": "M_CoveRail_Level",
+          "textures": {
+            "basecolor": "T_CoveRail_Level_basecolor.png",
+            "roughness": "T_CoveRail_Level_roughness.png",
+            "metallic": "T_CoveRail_Level_metallic.png",
+            "normal": "T_CoveRail_Level_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveRail_Level_basecolor.png",
+          "roughness": "T_CoveRail_Level_roughness.png",
+          "normal": "T_CoveRail_Level_normal.png",
+          "ao": "T_CoveRail_Level_ao.png",
+          "metallic": "T_CoveRail_Level_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "focus": [
+          0.85,
+          0.0,
+          0.7
+        ]
+      },
+      "fbx": "SM_CoveRail_Level.fbx",
+      "sha256": "4d275bc4d682eb1d492f3a13b6394e5999e039ae5925ecbab9ca11f15ed059ba",
+      "preview": "preview_SM_CoveRail_Level.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveRail_Level_hero.png",
+          "detail": "beauty_SM_CoveRail_Level_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveRail_Rake26": {
+      "vertices": 640,
+      "triangles": 1240,
+      "size_cm": [
+        177.49,
+        13.3,
+        199.55
+      ],
+      "materials": [
+        {
+          "name": "M_CoveRail_Rake26",
+          "textures": {
+            "basecolor": "T_CoveRail_Rake26_basecolor.png",
+            "roughness": "T_CoveRail_Rake26_roughness.png",
+            "metallic": "T_CoveRail_Rake26_metallic.png",
+            "normal": "T_CoveRail_Rake26_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveRail_Rake26_basecolor.png",
+          "roughness": "T_CoveRail_Rake26_roughness.png",
+          "normal": "T_CoveRail_Rake26_normal.png",
+          "ao": "T_CoveRail_Rake26_ao.png",
+          "metallic": "T_CoveRail_Rake26_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "focus": [
+          0.85,
+          0.0,
+          0.7
+        ]
+      },
+      "fbx": "SM_CoveRail_Rake26.fbx",
+      "sha256": "e857486804727b8ded49af817a0de54b8e32c49275877928df91e37c209040a3",
+      "preview": "preview_SM_CoveRail_Rake26.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveRail_Rake26_hero.png",
+          "detail": "beauty_SM_CoveRail_Rake26_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveRail_Rake28": {
+      "vertices": 640,
+      "triangles": 1240,
+      "size_cm": [
+        177.59,
+        13.3,
+        206.97
+      ],
+      "materials": [
+        {
+          "name": "M_CoveRail_Rake28",
+          "textures": {
+            "basecolor": "T_CoveRail_Rake28_basecolor.png",
+            "roughness": "T_CoveRail_Rake28_roughness.png",
+            "metallic": "T_CoveRail_Rake28_metallic.png",
+            "normal": "T_CoveRail_Rake28_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveRail_Rake28_basecolor.png",
+          "roughness": "T_CoveRail_Rake28_roughness.png",
+          "normal": "T_CoveRail_Rake28_normal.png",
+          "ao": "T_CoveRail_Rake28_ao.png",
+          "metallic": "T_CoveRail_Rake28_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "focus": [
+          0.85,
+          0.0,
+          0.7
+        ]
+      },
+      "fbx": "SM_CoveRail_Rake28.fbx",
+      "sha256": "5e13e576ff282733cc96bd0be199b01ea26b47fabcbe23166d0d1c6bf4e5fc98",
+      "preview": "preview_SM_CoveRail_Rake28.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveRail_Rake28_hero.png",
+          "detail": "beauty_SM_CoveRail_Rake28_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveRail_Rake30": {
+      "vertices": 640,
+      "triangles": 1240,
+      "size_cm": [
+        177.69,
+        13.3,
+        214.68
+      ],
+      "materials": [
+        {
+          "name": "M_CoveRail_Rake30",
+          "textures": {
+            "basecolor": "T_CoveRail_Rake30_basecolor.png",
+            "roughness": "T_CoveRail_Rake30_roughness.png",
+            "metallic": "T_CoveRail_Rake30_metallic.png",
+            "normal": "T_CoveRail_Rake30_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveRail_Rake30_basecolor.png",
+          "roughness": "T_CoveRail_Rake30_roughness.png",
+          "normal": "T_CoveRail_Rake30_normal.png",
+          "ao": "T_CoveRail_Rake30_ao.png",
+          "metallic": "T_CoveRail_Rake30_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "focus": [
+          0.85,
+          0.0,
+          0.7
+        ]
+      },
+      "fbx": "SM_CoveRail_Rake30.fbx",
+      "sha256": "765e8bfc11b250af4af60cf65e49b68679a961cda45c0dd39358c546fb463b55",
+      "preview": "preview_SM_CoveRail_Rake30.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveRail_Rake30_hero.png",
+          "detail": "beauty_SM_CoveRail_Rake30_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveRail_EndPost": {
+      "vertices": 240,
+      "triangles": 448,
+      "size_cm": [
+        12.22,
+        13.3,
+        128.45
+      ],
+      "materials": [
+        {
+          "name": "M_CoveRail_EndPost",
+          "textures": {
+            "basecolor": "T_CoveRail_EndPost_basecolor.png",
+            "roughness": "T_CoveRail_EndPost_roughness.png",
+            "metallic": "T_CoveRail_EndPost_metallic.png",
+            "normal": "T_CoveRail_EndPost_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveRail_EndPost_basecolor.png",
+          "roughness": "T_CoveRail_EndPost_roughness.png",
+          "normal": "T_CoveRail_EndPost_normal.png",
+          "ao": "T_CoveRail_EndPost_ao.png",
+          "metallic": "T_CoveRail_EndPost_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "focus": [
+          0.85,
+          0.0,
+          0.7
+        ]
+      },
+      "fbx": "SM_CoveRail_EndPost.fbx",
+      "sha256": "fd43d52d54e670e0c226f6feae1f123fe43fafec5d35125e32fa30e96ced9fe5",
+      "preview": "preview_SM_CoveRail_EndPost.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveRail_EndPost_hero.png",
+          "detail": "beauty_SM_CoveRail_EndPost_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveRail_CornerPost": {
+      "vertices": 240,
+      "triangles": 448,
+      "size_cm": [
+        14.66,
+        14.66,
+        128.45
+      ],
+      "materials": [
+        {
+          "name": "M_CoveRail_CornerPost",
+          "textures": {
+            "basecolor": "T_CoveRail_CornerPost_basecolor.png",
+            "roughness": "T_CoveRail_CornerPost_roughness.png",
+            "metallic": "T_CoveRail_CornerPost_metallic.png",
+            "normal": "T_CoveRail_CornerPost_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveRail_CornerPost_basecolor.png",
+          "roughness": "T_CoveRail_CornerPost_roughness.png",
+          "normal": "T_CoveRail_CornerPost_normal.png",
+          "ao": "T_CoveRail_CornerPost_ao.png",
+          "metallic": "T_CoveRail_CornerPost_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "focus": [
+          0.85,
+          0.0,
+          0.7
+        ]
+      },
+      "fbx": "SM_CoveRail_CornerPost.fbx",
+      "sha256": "19064d3b6f33dc04fe50dd81d8cba25117271021f787f28bed5de306fdc89def",
+      "preview": "preview_SM_CoveRail_CornerPost.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveRail_CornerPost_hero.png",
+          "detail": "beauty_SM_CoveRail_CornerPost_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          25
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "pivot": "foot of the downhill post on the path or nosing line; +X along the path, +Y to the drop",
+  "bay_plan_m": 1.7,
+  "rail_height_m": 0.95,
+  "pitches_deg": [
+    0,
+    26,
+    28,
+    30
+  ],
+  "symmetric_across_xz": true,
+  "textures": {
+    "T_CoveRail_Level_basecolor.png": "22b4953c1fc13be9ad8d433ae25fb1ffeedcb6150b170d6d532577894510e959",
+    "T_CoveRail_Level_roughness.png": "7296ebfaea19ab67ed35d432ab921da23a7598a8eb70a24e22403cdc21aab204",
+    "T_CoveRail_Level_metallic.png": "6e05118a8e1d402e57eb112c37bfdefe45ea754dafb280818bd375ba9ab21c9d",
+    "T_CoveRail_Level_normal.png": "bc6beb4e918e5bad37a65fc4cf0112af8ba3534b682526ac8c83fb3b6cf2f1a9",
+    "T_CoveRail_Rake26_basecolor.png": "dd1fdde665fc3c506c507a35024315e7d4a9557c78789fcb37a50dcf5024cb57",
+    "T_CoveRail_Rake26_roughness.png": "d04328dee5a45818d2fe7d23a7d217eb5a4bd508364f001d04c69a9080d826ba",
+    "T_CoveRail_Rake26_metallic.png": "1d5239175b49b63a5ca5cd9273aa00f34249a661dbaf7b5308749b057647c6b4",
+    "T_CoveRail_Rake26_normal.png": "3b763baa4f10f66c22c70f1bfd6671b40baf0a992e7dfce5b6298ef8f284558d",
+    "T_CoveRail_Rake28_basecolor.png": "ed631b4f69f440d1388568887d6c5eab8ba3676cf31dd43041210f678824e04f",
+    "T_CoveRail_Rake28_roughness.png": "b73d3849bf64f57737f673ee9197109444c69c4756cfa30833d9361aa43d4696",
+    "T_CoveRail_Rake28_metallic.png": "3bd4bc53e16caabe9ef742be0f4168d582bcab2f4c09df730df85bee6aece5d0",
+    "T_CoveRail_Rake28_normal.png": "8ba1fc03f23ab032b71db87caf27202af7c6617bbf069aa79cee87e676b82b15",
+    "T_CoveRail_Rake30_basecolor.png": "e10095d66ac289f44544983f5a0c2079a43948c3d74b3795ca8de79958b281a6",
+    "T_CoveRail_Rake30_roughness.png": "9a7390d643b6b88f277b9229130061986bc840ad512721379f52436042c8c85b",
+    "T_CoveRail_Rake30_metallic.png": "dd3bf7a6d2e597260c610bd80fffef7e2214b6261aeca985a94800f171e55a45",
+    "T_CoveRail_Rake30_normal.png": "a996b675dc4d4eba74392a56b411be81f2ef2ab14bf45e776c8db2fd0afe1ae8",
+    "T_CoveRail_EndPost_basecolor.png": "11a16bcfbf580f45675a954e01dda525d396628a882a05e338555db8278a7fda",
+    "T_CoveRail_EndPost_roughness.png": "d86131ec7c991b9da943d177bb7ccfaefa5f31258a8fa855f3dd5c659b7a07e4",
+    "T_CoveRail_EndPost_metallic.png": "bf1d442a7a8a0424cf0cb2654b4a4771cf71cafaa43f280b9aadce9d0f8a66f0",
+    "T_CoveRail_EndPost_normal.png": "a692aefaa6bf250f1e5fe4a6397105bf2eb744d9029f1cd56a4f9bd90e2641d5",
+    "T_CoveRail_CornerPost_basecolor.png": "539501f8ee40ee17ce35ad94833dd98a28a3f0a2f5af88ffb97f436beeb97ae9",
+    "T_CoveRail_CornerPost_roughness.png": "0f766620f5549542b75142ab215c73ca4e39f018ead923ec04384b8a4b62a00a",
+    "T_CoveRail_CornerPost_metallic.png": "5cedac7363f60ccdad4c072c4c5101522cb429355e69bdb1221b636708a017e7",
+    "T_CoveRail_CornerPost_normal.png": "74012d93ba5d18bb7f6087a02dcf93dd73ba3fc556bf8509bdd13dd0ed3a759d"
+  }
+}

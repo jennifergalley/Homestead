@@ -1,6 +1,6 @@
-// Weeding by hand (Jenny's playtest): she kneels on both knees, pulls two fistfuls and tosses them back
-// over each shoulder (homestead_agent.kneel_pull_weeds). The pull is one transaction, a weed node's
-// Harvest or a garden square's Weed, and it lands when the second root comes out
+// Weeding by hand (Jenny's playtest): she kneels on both knees and pulls two fistfuls one hand at a
+// time, each tossed back over that hand's shoulder (homestead_agent.kneel_pull_weeds). The pull is one
+// transaction, a weed node's Harvest or a garden square's Weed, and it lands when the second root comes out
 // (AHomesteadCharacter::PullWeedsCommit). Interrupted before then, nothing changes: no weeds in the
 // pack, no Energy spent, the weed still standing. Without the clip the caller uses the pouch kneel.
 #include "HomesteadController.h"
@@ -83,5 +83,5 @@ void AHomesteadController::UpdatePendingWeedPull()
     // Pulled: the refresh removes the clump, so leave it thinned rather than pop it back for a frame.
     if (Result.ok && Landscape) Landscape->ForgetThinnedResource();
     Drop();
-    Notify(Result, Node != INDEX_NONE ? WoodTapA.Get() : GrassStepA.Get());
+    NotifyResourceAction(Result, Node != INDEX_NONE ? WoodTapA.Get() : GrassStepA.Get());
 }

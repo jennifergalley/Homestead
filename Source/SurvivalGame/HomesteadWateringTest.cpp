@@ -6,6 +6,8 @@
 #include "HomesteadHatchet.h"
 #include "HomesteadDiggingStick.h"
 #include "HomesteadActionTestState.h"
+#include "Simulation/HomesteadCrops.h"
+#include "Simulation/HomesteadGardenTarget.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
@@ -78,8 +80,8 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         },
             [this, Hidden]() { return Controller->FocusTitle() == TEXT("Fresh stream water") && Hidden(); }, 0.7f);
         Add(TEXT("Refill changes water stock but does not start a watering pose"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
-            [this, Hidden]() { return Controller->Simulation().Count(Homestead::Item::Water) == 6 && Hidden(); });
+            [this]() { if (!Controller->ChooseOnHotbar(Homestead::Item::WateringCan)) { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; } Tap(EKeys::Gamepad_RightTrigger); },
+            [this, Hidden]() { return Controller->Simulation().Count(Homestead::Item::Water) == Homestead::PailPortions && Hidden(); });
         Approach();
     };
     auto Water = [this, Avatar, Probe, Animation, Matches](FKey Key, bool DoubleTap = false)
@@ -87,6 +89,10 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         Add(TEXT("One correct watering transaction with attached tool: ") + Key.ToString(),
             [this, Avatar, Probe, Animation, Key, DoubleTap]()
             {
+                // Watering is the pail on the tool button (LMB / RT); E / A never waters (Jenny 2026-09-30).
+                // Chosen first: putting it in the hotbar row is a change of its own, before the snapshot.
+                if (!Controller->ChooseOnHotbar(Homestead::Item::WateringCan))
+                { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; }
                 Probe->Expected = Controller->Simulation();
                 Probe->Hour = Controller->State().hour;
                 Probe->Ready = Probe->Expected.Water(GardenPlotId, Controller->PlayerPoint()).ok;
@@ -97,8 +103,9 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 Probe->Hand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"));
                 Probe->Toe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
                 Probe->View = Controller->GetControlRotation();
-                Tap(Key);
-                if (DoubleTap) Tap(Key);
+                const FKey Use = Key == EKeys::E ? EKeys::LeftMouseButton : Key == EKeys::Gamepad_FaceButton_Bottom ? EKeys::Gamepad_RightTrigger : Key;
+                Tap(Use);
+                if (DoubleTap) Tap(Use);
             },
             [this, Avatar, Probe, Animation, Matches, DoubleTap]()
             {
@@ -106,35 +113,63 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 const auto Target = Homestead::GardenCellCenter(-13, 1);
                 const float ExpectedYaw = FMath::RadiansToDegrees(FMath::Atan2(
                     Target.y - Probe->Actor.Y, Target.x - Probe->Actor.X));
-                return Probe->Ready && Matches() && Controller->ToastIsError() == DoubleTap
-                    && Animation()->WaterStarts() == Probe->Starts + 1 && Animation()->GatherStarts() == Probe->GatherStarts
+                const bool bState = Probe->Ready && Matches() && Controller->ToastIsError() == DoubleTap;
+                const bool bStarts = Animation()->WaterStarts() == Probe->Starts + 1 && Animation()->GatherStarts() == Probe->GatherStarts
                     && Animation()->ClearStarts() == Probe->ClearStarts && !Avatar->GetHatchet()->IsPresented()
-                    && Animation()->WaterWeight() > 0.99f && Animation()->GatherWeight() < 0.001f && Tool->IsPresented()
+                    && Animation()->WaterWeight() > 0.99f && Animation()->GatherWeight() < 0.001f;
+                const bool bTool = Tool->IsPresented()
                     && Tool->GetAttachParent() == Avatar->GetMesh() && Tool->GetAttachSocketName() == TEXT("hand_r")
                     && Tool->GetCollisionEnabled() == ECollisionEnabled::NoCollision && Tool->GetNumSections() == 2
                     && Tool->GetComponentScale().Equals(FVector::OneVector, 0.001f)
                     && Tool->Bounds.SphereRadius > 10 && Tool->Bounds.SphereRadius < 60
-                    && FVector::Dist(Tool->GripPosition(), Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))) < 10
-                    && FVector::Dist(Probe->Hand, Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))) > 20
+                    && FVector::Dist(Tool->GripPosition(), Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))) < 10;
+                const bool bPose = FVector::Dist(Probe->Hand, Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))) > 20
                     && FVector::Dist(Probe->Actor, Avatar->GetActorLocation()) < 1
                     && FVector::Dist(Probe->Toe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"))) < 2
                     && Probe->View.Equals(Controller->GetControlRotation(), 0.01f)
                     && FMath::Abs(FMath::FindDeltaAngleDegrees(
                         Avatar->WaterTargetYaw(), ExpectedYaw)) < 0.1f
                     && Controller->State().hour - Probe->Hour < 0.02;
+                if (StepElapsed > 0.5f && !(bState && bStarts && bTool && bPose))
+                    Results.AddUnique(FString::Printf(TEXT("POUR_CHECK ready=%d matches=%d toast_err=%d starts=%d tool=%d pose=%d water=%u/%u weight=%.2f hand_moved=%.1f actor_moved=%.2f toe_moved=%.2f view_same=%d yaw_err=%.2f hours=%.4f toast='%s'"),
+                        Probe->Ready, Matches(), Controller->ToastIsError(), bStarts, bTool, bPose,
+                        Animation()->WaterStarts(), Probe->Starts, Animation()->WaterWeight(),
+                        FVector::Dist(Probe->Hand, Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"))), FVector::Dist(Probe->Actor, Avatar->GetActorLocation()),
+                        FVector::Dist(Probe->Toe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"))), Probe->View.Equals(Controller->GetControlRotation(), 0.01f),
+                        FMath::Abs(FMath::FindDeltaAngleDegrees(Avatar->WaterTargetYaw(), ExpectedYaw)), Controller->State().hour - Probe->Hour, *Controller->Toast()));
+                return bState && bStarts && bTool && bPose;
             }, 0.55f);
     };
-    auto Rejected = [this, Probe, Animation, Hidden, Matches](const FString& Reason)
+    // A refused watering on the tool button: with the pail chosen, the simulation's own refusal (worked
+    // out on a copy); with no pail, an empty hotbar cell chosen, so the press has no tool at all.
+    auto Rejected = [this, Probe, Animation, Hidden, Matches](const FString& Reason, bool bHasPail)
     {
-        Add(Reason, [this, Probe, Animation]()
+        const auto ExpectedToast = MakeShared<FString>();
+        Add(Reason, [this, Probe, Animation, bHasPail, ExpectedToast]()
             {
+                if (bHasPail && !Controller->ChooseOnHotbar(Homestead::Item::WateringCan))
+                { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; }
                 Probe->Expected = Controller->Simulation();
                 Probe->Hour = Controller->State().hour;
                 Probe->Starts = Animation()->WaterStarts();
-                Tap(EKeys::E);
-            }, [this, Probe, Animation, Hidden, Matches]()
+                if (bHasPail)
+                {
+                    Homestead::Simulation Copy = Controller->Simulation();
+                    *ExpectedToast = UTF8_TO_TCHAR(Copy.Water(GardenPlotId, Controller->PlayerPoint()).message.c_str());
+                }
+                else
+                {
+                    const int32 Empty = Controller->FirstEmptyHotbarCell();
+                    if (Controller->Simulation().Count(Homestead::Item::WateringCan) > 0 || Empty == INDEX_NONE)
+                    { Finish(false, TEXT("The no-pail fixture has a pail or no empty hotbar cell.")); return; }
+                    Controller->SelectHotbarSlot(Empty);
+                    *ExpectedToast = TEXT("Choose a carried tool first.");
+                }
+                Tap(EKeys::LeftMouseButton);
+            }, [this, Probe, Animation, Hidden, Matches, ExpectedToast]()
             {
-                return Controller->ToastIsError() && Matches() && Hidden() && Animation()->WaterStarts() == Probe->Starts;
+                return Controller->ToastIsError() && Controller->Toast() == *ExpectedToast && !ExpectedToast->IsEmpty()
+                    && Matches() && Hidden() && Animation()->WaterStarts() == Probe->Starts;
             });
     };
 
@@ -170,25 +205,31 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             Controller->GetPawn()->SetActorRotation(FRotator(0, Yaw, 0));
             Controller->SetControlRotation(FRotator(-20, Yaw, 0));
         }, [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.7f);
-    Add(TEXT("Missing digging stick rejects tilling without presentation"),
+    Add(TEXT("X / F never tills: no change and no presentation without the hoe on the tool button"),
         [this, Probe, Animation]() { Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
             Probe->TillStarts = Animation()->TillStarts(); Tap(EKeys::Gamepad_FaceButton_Left); },
-        [this, Probe, Animation, Hidden, Matches]() { return Controller->ToastIsError() && Matches() && Hidden()
+        [this, Probe, Animation, Hidden, Matches]() { return Matches() && Hidden()
             && Animation()->TillStarts() == Probe->TillStarts; });
     QueueGrant(Homestead::Item::RustedHoeBlade, 1);
     QueueCraft(Homestead::Recipe::HaftHoe);
     Add(TEXT("Stand east of the cleared garden"),
         [this, Garden, TillApproach]()
         {
-            Teleport(*TillApproach);
-            const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(
-                Garden.y - TillApproach->y, Garden.x - TillApproach->x));
+            // The hoe bites 85 cm ahead (Homestead::HoeCellAhead): stand that far from the square, on
+            // the clear approach line, so the stroke lands in it.
+            const FVector2D Toward = FVector2D(Garden.x - TillApproach->x, Garden.y - TillApproach->y).GetSafeNormal();
+            const Homestead::Point Stand{Garden.x - Toward.X * Homestead::GardenReach::HoeAheadCm,
+                Garden.y - Toward.Y * Homestead::GardenReach::HoeAheadCm};
+            Teleport(Stand);
+            const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(Toward.Y, Toward.X));
             Controller->GetPawn()->SetActorRotation(FRotator(0, Yaw, 0));
             Controller->SetControlRotation(FRotator(-20, Yaw, 0));
-        }, [this]() { return Controller->FocusTitle() == TEXT("Woodland"); }, 0.7f);
+        }, [this]() { return Controller->Focus != AHomesteadController::EFocus::Plot; }, 0.7f);
     Add(TEXT("Till with one target-directed planted-foot digging-stick action"),
         [this, Avatar, Probe, Animation]()
         {
+            if (!Controller->ChooseOnHotbar(Homestead::Item::DiggingStick))
+            { Finish(false, TEXT("The digging stick could not be chosen on the hotbar.")); return; }
             Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
             Probe->Ready = Probe->Expected.Till(-13, 1, Controller->PlayerPoint()).ok;
             Probe->TillStarts = Animation()->TillStarts();
@@ -198,7 +239,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             Probe->Actor = Avatar->GetActorLocation();
             Probe->Toe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
             Probe->View = Controller->GetControlRotation();
-            Tap(EKeys::Gamepad_FaceButton_Left);
+            Tap(EKeys::Gamepad_RightTrigger);
         },
         [this, Avatar, Probe, Animation, Matches]()
         {
@@ -210,24 +251,37 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                     const auto Target = Homestead::GardenCellCenter(-13, 1);
                     const float ExpectedYaw = FMath::RadiansToDegrees(FMath::Atan2(
                         Target.y - Probe->Actor.Y, Target.x - Probe->Actor.X));
-                    return Probe->Ready && !Controller->ToastIsError() && Matches()
-                        && Animation()->TillStarts() == Probe->TillStarts + 1
+                    const bool bState = Probe->Ready && !Controller->ToastIsError() && Matches();
+                    const bool bStarts = Animation()->TillStarts() == Probe->TillStarts + 1
                         && Animation()->GatherStarts() == Probe->GatherStarts
                         && Animation()->ClearStarts() == Probe->ClearStarts
-                        && Animation()->WaterStarts() == Probe->Starts
-                        && Animation()->TillWeight() > 0.99f && Tool->IsPresented()
+                        && Animation()->WaterStarts() == Probe->Starts;
+                    const bool bTool = Animation()->TillWeight() > 0.99f && Tool->IsPresented()
                         && Tool->GetAttachParent() == Avatar->GetMesh()
                         && Tool->GetAttachSocketName() == TEXT("hand_r")
                         && Tool->GetCollisionEnabled() == ECollisionEnabled::NoCollision
                         && !Tool->GetGenerateOverlapEvents() && !Tool->CanEverAffectNavigation()
                         && Tool->GetNumSections() == 1
                         && Tool->GetComponentScale().Equals(FVector::OneVector, 0.001f)
-                        && Tool->Bounds.SphereRadius > 35 && Tool->Bounds.SphereRadius < 60
-                        && FVector::Dist(Probe->Actor, Avatar->GetActorLocation()) < 1
+                        && Tool->Bounds.SphereRadius > 35 && Tool->Bounds.SphereRadius < 60;
+                    const bool bPose = FVector::Dist(Probe->Actor, Avatar->GetActorLocation()) < 1
                         && FVector::Dist(Probe->Toe, Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"))) < 2
                         && Probe->View.Equals(Controller->GetControlRotation(), 0.01f)
                         && FMath::Abs(FMath::FindDeltaAngleDegrees(Avatar->TillTargetYaw(), ExpectedYaw)) < 0.1f;
+                    if (StepElapsed > 0.4f && !(bState && bStarts && bTool && bPose))
+                        Results.AddUnique(FString::Printf(TEXT("TILL_CHECK ready=%d toast_err=%d matches=%d starts=%d tool=%d pose=%d till=%u/%u weight=%.2f toast='%s'"),
+                            Probe->Ready, Controller->ToastIsError(), Matches(), bStarts, bTool, bPose,
+                            Animation()->TillStarts(), Probe->TillStarts, Animation()->TillWeight(), *Controller->Toast()));
+                    return bState && bStarts && bTool && bPose;
                 }
+            if (StepElapsed > 0.4f)
+            {
+                FString Cells;
+                for (const auto& Plot : Controller->State().plots) Cells += FString::Printf(TEXT(" %d:(%d,%d)"), Plot.id, Plot.cellX, Plot.cellY);
+                const FVector Forward = Avatar->GetActorForwardVector();
+                Results.AddUnique(FString::Printf(TEXT("TILL_CELL no plot at (-13,1); plots:%s actor=(%.0f,%.0f) forward=(%.2f,%.2f) toast='%s'"),
+                    *Cells, Avatar->GetActorLocation().X, Avatar->GetActorLocation().Y, Forward.X, Forward.Y, *Controller->Toast()));
+            }
             return false;
         }, 0.45f);
     Add(TEXT("Rapid competing hand requests cannot stack onto tilling"),
@@ -238,11 +292,15 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             && Animation()->ClearStarts() == Probe->ClearStarts
             && Animation()->WaterStarts() == Probe->Starts; }, 0.12f);
     Add(TEXT("Tilling recovers with no orphaned prop"), []() {}, Hidden, 1.9f);
-    Add(TEXT("Occupied plot rejects a second mapped Till without presentation"),
-        [this, Probe, Animation]() { Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
-            Probe->TillStarts = Animation()->TillStarts(); Tap(EKeys::Gamepad_FaceButton_Left); },
-        [this, Probe, Animation, Hidden, Matches]() { return Controller->ToastIsError() && Matches() && Hidden()
-            && Animation()->TillStarts() == Probe->TillStarts; });
+    // A second stroke on the tilled square never tills another: the hoe weeds it (Simulation::Weed, which a
+    // fresh plot's trace of weeds allows) or is refused, exactly as the simulation says.
+    Add(TEXT("A second hoe stroke on the tilled square weeds it, never tills another plot"),
+        [this, Probe, Animation]() { Controller->ChooseOnHotbar(Homestead::Item::DiggingStick);
+            Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
+            Probe->Expected.Weed(GardenPlotId, Controller->PlayerPoint());
+            Probe->TillStarts = Animation()->TillStarts(); Tap(EKeys::Gamepad_RightTrigger); },
+        [this, Matches]() { return Matches() && Controller->State().plots.size() == 1; }, 0.45f);
+    Add(TEXT("The second stroke recovers"), []() {}, Hidden, 1.9f);
     Add(TEXT("Movement cancels a till presentation without replay"),
         [this, Avatar, Garden]() { Avatar->PlayTill(Garden); Axis(EKeys::Gamepad_LeftY, 0.8f); },
         [Avatar, Hidden]() { return Hidden() && Avatar->GetVelocity().Size2D() > 1; }, 0.35f);
@@ -257,13 +315,13 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         [this, Avatar, Garden]() { Avatar->PlayTill(Garden); Tap(EKeys::F9); },
         [this, Hidden]() { return !Controller->ToastIsError() && Hidden(); }, 0.8f);
     Add(TEXT("Approach and plant actual wild-root seeds"), [this, Garden]() { Teleport(Garden); },
-        [this]() { return Controller->FocusTitle() == TEXT("A little patch of earth"); }, 0.7f);
+        [this]() { return Controller->FocusTitle() == TEXT("Tilled soil"); }, 0.7f);
     Add(TEXT("Plant with gamepad A (Seeds chosen on the hotbar); no watering prop"),
         [this]() { Controller->ChooseOnHotbar(Homestead::Item::Seeds); Tap(EKeys::Gamepad_FaceButton_Bottom); },
-        [this, Hidden]() { return !Controller->ToastIsError() && Hidden() && Controller->FocusActions().Contains(TEXT("Water")); });
-    Rejected(TEXT("No-can rejection neither debits water nor presents a free tool"));
+        [this, Hidden]() { return !Controller->ToastIsError() && Hidden() && Controller->FocusTitle() != TEXT("Tilled soil"); });
+    Rejected(TEXT("No pail: the tool button on an empty cell neither debits water nor presents a free tool"), false);
     QueueGrant(Homestead::Item::WateringCan, 1);
-    Rejected(TEXT("Empty-can rejection has no pose, prop or moisture reward"));
+    Rejected(TEXT("Empty-pail rejection has no pose, prop or moisture reward"), true);
     Refill();
     Water(EKeys::Gamepad_FaceButton_Bottom, true);
     Add(TEXT("Capture watering with the real hand-held tool"), [this]() { Screenshot(TEXT("watering-pour")); },
@@ -346,13 +404,14 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         Add(TEXT("Each allowed repeat consumes exactly one real water portion"),
             [this, Probe]()
             {
+                Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
                 Probe->Expected = Controller->Simulation();
                 Probe->Hour = Controller->State().hour;
                 Probe->Ready = Probe->Expected.Water(GardenPlotId, Controller->PlayerPoint()).ok;
-                Tap(EKeys::E);
+                Tap(EKeys::LeftMouseButton);
             }, [this, Probe, Matches]() { return Probe->Ready && !Controller->ToastIsError() && Matches(); }, 0.12f);
     Add(TEXT("Wait for repeated watering to recover"), []() {}, Hidden, 2.3f);
-    Rejected(TEXT("Exhausted water follows the existing refill rejection without a pose"));
+    Rejected(TEXT("Exhausted water follows the existing refill rejection without a pose"), true);
     Add(TEXT("Move to a valid empty context beyond all plot/resource focus"),
         [this, Garden]()
         {
@@ -377,7 +436,7 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 }
         },
         [this, Hidden]() { return Controller->FocusTitle() == TEXT("Woodland") && Hidden(); }, 0.7f);
-    Add(TEXT("Out-of-range interaction has no water debit or presentation"),
+    Add(TEXT("E with nothing in front of her does nothing: no water debit or presentation"),
         [this, Probe]() { Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour; Tap(EKeys::E); },
-        [this, Hidden, Matches]() { return Controller->Toast().Contains(TEXT("Walk closer")) && Hidden() && Matches(); });
+        [Hidden, Matches]() { return Hidden() && Matches(); });
 }

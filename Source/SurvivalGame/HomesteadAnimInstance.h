@@ -48,6 +48,10 @@ public:
     float LampKneelPhase() const;
     // Two-handed axe felling: Strokes cuts into the trunk (the clip's stroke cycle repeats).
     void RequestFell(int32 Strokes);
+    // A held tool button asks the running strike for more strokes (Homestead::ToolRepeat). True if the
+    // clip took them: it loops its stroke cycle again instead of recovering. False once it has left
+    // its last cycle, or when no strike is playing.
+    bool ExtendFell(int32 Strokes);
     // Curl the right hand's fingers around a held tool handle (0 open, 1 closed grip). At rest the
     // wrist deviates CarryDegrees toward the pinky so the tool's head hangs down and forward.
     void SetRightHandGrip(float Alpha, float CarryDegrees = 46.0f);

@@ -1,17 +1,18 @@
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 #include "../Simulation/HomesteadHotbarLayout.h"
 
 namespace HomesteadMenus
 {
 TSharedRef<SButton> SHomesteadMenu::MakeButton(const FString& Label, TFunction<void()> Action,
-    TAttribute<FSlateColor> Color, const FString& AccessibleLabel, FMargin Padding)
+    TAttribute<FSlateColor> Color, const FString& AccessibleLabel, FMargin Padding, float FontSize)
 {
     return SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(Padding)
         .ButtonColorAndOpacity(Color).ToolTipText(FText::FromString(AccessibleLabel.IsEmpty() ? Label : AccessibleLabel))
         .OnClicked_Lambda([this, Action]() { if (PointerAction()) Action(); return FReply::Handled(); })
         [
             SNew(STextBlock).Text(FText::FromString(Label)).AutoWrapText(true)
-            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
+            .Font(HomesteadUITheme::Font("Regular", FontSize))
             .ColorAndOpacity_Lambda([Color]() { return Color.Get().GetSpecifiedColor() == MenuGold ? FSlateColor(PineInk) : FSlateColor(Ink); })
         ];
 }
@@ -127,6 +128,9 @@ void SHomesteadMenu::SynchronizeFocus()
     FSlateApplication::Get().SetKeyboardFocus(Target, EFocusCause::Navigation);
     bFocusPending = FSlateApplication::Get().GetKeyboardFocusedWidget() != Target;
     if (Dialog != EDialog::None && DialogScroll) DialogScroll->ScrollDescendantIntoView(Target, false);
+    // On the Pack page the hotbar row is the grid's first row, inside the scrolling pack.
+    if (Dialog == EDialog::None && Region == ERegion::Hotbar && Scroll && bHotbarInScroll)
+        Scroll->ScrollDescendantIntoView(Target, false, EDescendantScrollDestination::IntoView);
     ScrollActionIntoView();
 }
 
@@ -150,8 +154,11 @@ bool SHomesteadMenu::IsFocusedControlVisible() const
 {
     const auto Target = FocusWidget();
     if (!Target) return false;
+    // Settings' Save / Load / Quit row sits above the scrolling list (SettingsTopCount), so it is
+    // measured against the book, not the list's scroll box.
+    const bool bSettingsTopRow = SeenPage == 4 && Region == ERegion::Content && ContentSelection < SettingsTopCount();
     const auto Container = Dialog != EDialog::None ? StaticCastSharedPtr<SWidget>(DialogScroll)
-        : Region == ERegion::Content ? StaticCastSharedPtr<SWidget>(Scroll)
+        : Region == ERegion::Content && !bSettingsTopRow ? StaticCastSharedPtr<SWidget>(Scroll)
         : Region == ERegion::Actions ? StaticCastSharedPtr<SWidget>(DetailsScroll) : TSharedPtr<SWidget>();
     const FGeometry Bounds = Container ? Container->GetCachedGeometry() : GetCachedGeometry();
     const auto Geometry = Target->GetCachedGeometry();
@@ -187,7 +194,7 @@ int32 SHomesteadMenu::SettingsTabOf(int32 SettingId)
 
 void SHomesteadMenu::SetSettingsTab(int32 Tab)
 {
-    Tab = FMath::Clamp(Tab, 0, 2);
+    Tab = FMath::Clamp(Tab, 0, SettingsTabCount - 1);
     if (Tab == SettingsTab || Dialog != EDialog::None) return;
     SettingsTab = Tab;
     if (Scroll) Scroll->ScrollToStart();
@@ -355,7 +362,8 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
             }
             if (Direction.x)
             {
-                Controller->MenuAdjustSetting(Entries[ContentSelection].Id, Direction.x);
+                if (IsAudioSetting(Entries[ContentSelection].Id)) StepAudio(Entries[ContentSelection].Id, Direction.x);
+                else Controller->MenuAdjustSetting(Entries[ContentSelection].Id, Direction.x);
                 Refresh();
                 return;
             }
@@ -398,8 +406,9 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
             }
             if (Direction.y && Local >= 0)
             {
+                const int32 Width = CurrentContainer == 0 ? StoragePackColumns() : StorageColumns();
                 const auto LocalMove = HomesteadMenuNavigation::Move(
-                    Local, CurrentGrid.Num(), StorageColumns(), Direction, Local % StorageColumns());
+                    Local, CurrentGrid.Num(), Width, Direction, Local % Width);
                 if (!LocalMove.boundary && LocalMove.index >= 0)
                 {
                     Select(CurrentGrid[LocalMove.index], true);
@@ -535,5 +544,40 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
         SynchronizeFocus();
     }
     else NavigateSpatial(Direction);
+}
+
+void SHomesteadMenu::StepAudio(int32 Id, int32 Direction)
+{
+    if (!Controller.IsValid()) return;
+    if (AudioEditId != Id || !bAudioStepEdit)
+    {
+        CommitAudioStep();
+        AudioEditId = Id;
+        AudioEditStart = Controller->MenuAudioVolume(Id);
+        bAudioStepEdit = true;
+    }
+    // One step is a twentieth of the slider, the same as before; she hears it as it changes.
+    Controller->MenuPreviewAudioVolume(Id, Controller->MenuAudioVolume(Id) + Direction * 0.05f);
+}
+
+void SHomesteadMenu::CommitAudioStep()
+{
+    if (!bAudioStepEdit) return;
+    bAudioStepEdit = false;
+    const int32 Id = AudioEditId;
+    AudioEditId = -1;
+    if (!Controller.IsValid()) return;
+    const float Current = Controller->MenuAudioVolume(Id);
+    if (!FMath::IsNearlyEqual(Current, AudioEditStart)) Controller->MenuCommitAudioVolume(Id, Current, AudioEditStart);
+}
+
+bool SHomesteadMenu::CancelAudioStep()
+{
+    if (!bAudioStepEdit) return false;
+    bAudioStepEdit = false;
+    if (Controller.IsValid()) Controller->MenuPreviewAudioVolume(AudioEditId, AudioEditStart);
+    AudioEditId = -1;
+    Refresh();
+    return true;
 }
 }

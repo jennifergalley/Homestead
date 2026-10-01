@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "LeatherBackpack",
+  "description": "1850s leather knapsack of dubbined harness leather: flap with two iron roller-buckle straps, top handle, shoulder straps fitted over her shoulders (original). Pivot = her back between the shoulder blades in the reference pose; attach to spine_05.",
+  "collision": "none",
+  "triangle_budget": 18000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/leather_backpack.py",
+  "source_sha256": "0de9680be3cf5f6ded08488490e3c77238249b8753e14186501d08c54fd3992d",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_LeatherBackpack": {
+      "vertices": 8890,
+      "triangles": 17100,
+      "size_cm": [
+        34.9,
+        37.95,
+        49.08
+      ],
+      "materials": [
+        {
+          "name": "M_LeatherBackpack",
+          "textures": {
+            "basecolor": "T_LeatherBackpack_basecolor.png",
+            "roughness": "T_LeatherBackpack_roughness.png",
+            "metallic": "T_LeatherBackpack_metallic.png",
+            "normal": "T_LeatherBackpack_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_LeatherBackpack_basecolor.png",
+          "roughness": "T_LeatherBackpack_roughness.png",
+          "normal": "T_LeatherBackpack_normal.png",
+          "ao": "T_LeatherBackpack_ao.png",
+          "metallic": "T_LeatherBackpack_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "focus": [
+          0.085,
+          0.14,
+          -0.18
+        ]
+      },
+      "fbx": "SM_LeatherBackpack.fbx",
+      "sha256": "86797393720b49d9477bc502249eac60d9ae864130cb9c2e0967a092d44d6bbf",
+      "preview": "preview_SM_LeatherBackpack.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_LeatherBackpack_hero.png",
+          "detail": "beauty_SM_LeatherBackpack_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          180
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "dimensions_m": {
+    "width": 0.32,
+    "height": 0.36,
+    "depth": 0.13
+  },
+  "front": "the flap faces +Y (away from her back); her forward is -Y",
+  "attach": {
+    "bone": "spine_05",
+    "pivot_reference_pose_cm": [
+      0.0,
+      -11.01,
+      126.0
+    ],
+    "fitted": true
+  },
+  "textures": {
+    "T_LeatherBackpack_basecolor.png": "11a9eba4bcaad1ad39b9ec9d106cdf3bf916f7fdde56577f77c048aada112e19",
+    "T_LeatherBackpack_roughness.png": "9e3f33169ea0fa657aa14d15cb9c8654f3c39907f46f5db3a6b75d7a5afab0e3",
+    "T_LeatherBackpack_metallic.png": "82f847d49e06268022d4c4405b4456d21350a4cd0a484aaeb4211b61bc38e20f",
+    "T_LeatherBackpack_normal.png": "95a7a8915c15a0b8f47be3c0b614ed91b618ae6413d2e301c80acba890222a56"
+  }
+}

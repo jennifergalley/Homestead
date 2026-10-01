@@ -192,9 +192,19 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FCString::Strifind(FCommandLine::Get(), TEXT("-HomesteadUIGallery")))
+    {
+        PrepareUIGalleryChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadEstateSmoke")))
     {
         PrepareEstateSmokeChecks();
+        return;
+    }
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadToolRepeatTest")))
+    {
+        PrepareToolRepeatChecks();
         return;
     }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadGeneratedWoodland")))
@@ -634,8 +644,8 @@ void AHomesteadSmokeTest::Prepare()
                 *CurrentId = Current.id;
             },
             [this, CurrentId]() { return Controller->IsResourceFocused(*CurrentId); }, 0.65f);
-        Add(TEXT("Clear the generated building-site tree through gamepad X"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
+        Add(TEXT("Fell the generated building-site tree with the axe on RT"),
+            [this]() { Controller->ChooseOnHotbar(Homestead::Item::Hatchet); Tap(EKeys::Gamepad_RightTrigger); },
             [this, Key]()
             {
                 Homestead::ResourceNode Current;
@@ -769,7 +779,23 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         const int32 Cell = Native && Controller->BookPage() == 0
             && Step.NavigateToId < Homestead::ItemCount
             ? Controller->HotbarCellOf(static_cast<Homestead::Item>(Step.NavigateToId)) : INDEX_NONE;
-        if (Cell != INDEX_NONE)
+        if (Native && Controller->BookPage() == 4)
+        {
+            // Settings rows sit on their tabs (Game / Sound / Video), with Resume and the tabs above them:
+            // focus the row as a player would pick its tab and then the row.
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            NavigationComplete = Controller->IsBookOpen() && Subject && Subject->Id == Step.NavigateToId;
+            if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
+            {
+                if (!Controller->IsBookOpen() || !Controller->NativeMenu->FocusLegacySubject(Step.NavigateToId))
+                {
+                    Finish(false, Step.Name + TEXT(" | That Settings row is unavailable."));
+                    return;
+                }
+                LastNavigationAt = StepElapsed;
+            }
+        }
+        else if (Cell != INDEX_NONE)
         {
             const FString Region = Controller->NativeMenu->GetFocusedRegionName();
             const int32 FocusedCell = Controller->NativeMenu->GetFocusedHotbarSlot();
@@ -835,8 +861,10 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         return;
     }
     // The legacy skin/eye material contract doesn't apply to routes that run the MetaHuman heroine.
+    // Nor while the dye chooser dresses her in an unsaved preview (checked after Apply or Cancel).
     const bool MaterialsValid = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
         || FParse::Param(FCommandLine::Get(), TEXT("HomesteadMetaHuman"))
+        || (Controller->NativeMenu.IsValid() && Controller->NativeMenu->IsDyeChooserOpen())
         || (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
             ? VerifyNativeMenuPresentation() : VerifyPresentationMaterials());
     if (!MaterialsValid)
@@ -904,6 +932,7 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadEstateSmoke"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadToolRepeatTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));

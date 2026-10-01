@@ -10,8 +10,8 @@ namespace HomesteadIcons
 {
 namespace
 {
-    constexpr FLinearColor Cream = HomesteadPalette::Cream;
-    constexpr FLinearColor Pine = HomesteadPalette::Pine;
+    const FLinearColor& Cream = HomesteadPalette::Cream;
+    const FLinearColor& Pine = HomesteadPalette::Pine;
     const FLinearColor Charcoal(0.045f, 0.035f, 0.025f);
     const FLinearColor Wood(0.49f, 0.29f, 0.13f);
     const FLinearColor LeafGreen(0.32f, 0.52f, 0.19f);

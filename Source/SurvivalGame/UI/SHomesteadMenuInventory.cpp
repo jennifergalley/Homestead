@@ -1,4 +1,5 @@
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 
 namespace HomesteadMenus
 {
@@ -51,15 +52,15 @@ void SHomesteadMenu::FocusEquipment(int32 Index, bool bPointer)
 FLinearColor SHomesteadMenu::CellColor(int32 Index) const
 {
     if (bVirtualDraggingItem && Index == VirtualDragSource)
-        return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
+        return HomesteadUITheme::Themed(FLinearColor(0.045f, 0.055f, 0.05f, 0.72f));
     if (bVirtualDraggingItem && Index == ContentSelection)
         return MenuGold;
     if (bPointerDraggingItem && Index == PointerDragSource)
-        return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
+        return HomesteadUITheme::Themed(FLinearColor(0.045f, 0.055f, 0.05f, 0.72f));
     if (bPointerDraggingItem && Index == PointerDragTarget)
         return MenuGold;
     return Index == ContentSelection ? Selected
-        : Index == Hover ? Selected : FLinearColor(0.055f, 0.09f, 0.075f, 0.5f);
+        : Index == Hover ? Selected : HomesteadUITheme::Themed(FLinearColor(0.055f, 0.09f, 0.075f, 0.5f));
 }
 
 void SHomesteadMenu::Select(int32 Index, bool KeepDesiredColumn)
@@ -71,7 +72,13 @@ void SHomesteadMenu::Select(int32 Index, bool KeepDesiredColumn)
         RememberedKeys[SeenPage] = RowKey(Entries[ContentSelection]);
         if (RowIndices[ContentSelection] != INDEX_NONE) Controller->MenuSelect(RowIndices[ContentSelection]);
         if (Scroll && Cells.IsValidIndex(ContentSelection))
-            Scroll->ScrollDescendantIntoView(Cells[ContentSelection], false, EDescendantScrollDestination::IntoView);
+        {
+            // A tile built this frame has no layout yet; scrolling to it now would leave the scroll offset
+            // NaN. Its scroll waits for the first layout (Tick).
+            if (Cells[ContentSelection]->GetCachedGeometry().GetLocalSize().X > 0)
+                Scroll->ScrollDescendantIntoView(Cells[ContentSelection], false, EDescendantScrollDestination::IntoView);
+            else bScrollSelectionPending = true;
+        }
         if (DetailsHost) DetailsHost->SetContent(BuildDetails());
         else ComputeActions();
         ScrollActionIntoView();
@@ -109,11 +116,52 @@ FVector2D SHomesteadMenu::PopupAnchorFor(const TSharedPtr<SWidget>& Widget, bool
     return FVector2D(Geometry.GetAbsolutePosition()) + FVector2D(Geometry.GetAbsoluteSize()) * 0.6f;
 }
 
+void SHomesteadMenu::OpenDyeChooser(int32 Choice)
+{
+    if (!Controller.IsValid()) return;
+    DyeChoice = FMath::Clamp(Choice, 0, MenuDyeStyle::Count - 1);
+    PopupOptions.Reset();
+    PopupTitle = FString::Printf(TEXT("Dye the %s"), *FString(UTF8_TO_TCHAR(Homestead::GetWearableDefinition(
+        static_cast<Homestead::WearableDefinition>(DyeRow.Id))->name)).ToLower());
+    for (int32 Dye = 0; Dye < MenuDyeStyle::Count; ++Dye)
+        PopupOptions.Add({[this, Dye]()
+            {
+                return FString(UTF8_TO_TCHAR(Homestead::DyeName(Dye)))
+                    + (Dye == DyeOriginal ? TEXT("  (as it is)") : Dye == DyeChoice ? TEXT("  (chosen)") : TEXT(""));
+            },
+            [this, Dye]() { OpenDyeChooser(Dye); }, nullptr, {}, MenuDyeStyle::Swatch(Dye)});
+    // Nothing is spent and nothing changes until Apply.
+    PopupOptions.Add({[this]() { return FString::Printf(TEXT("Apply %s"), UTF8_TO_TCHAR(Homestead::DyeName(DyeChoice))); },
+        [this]()
+        {
+            bDyeChooser = false;
+            DyePreviewed = INDEX_NONE;
+            if (!Controller->MenuItemAction(DyeRow, EHomesteadItemAction::Dye, DyeChoice + 1, DyeRevision))
+                Controller->MenuEndDyePreview();
+        },
+        [this]() { return DyeChoice != DyeOriginal; }});
+    PopupOptions.Add({[]() { return FString(TEXT("Cancel")); }, nullptr, nullptr});
+    bDyeChooser = true;
+    SetDialog(EDialog::Context);
+    // After choosing a dye the next press applies it; otherwise start on her current dye.
+    DialogSelection = DyeChoice != DyeOriginal ? MenuDyeStyle::Count : DyeChoice;
+    bFocusPending = true;
+}
+
+void SHomesteadMenu::EndDyePreview()
+{
+    bDyeChooser = false;
+    if (DyePreviewed == INDEX_NONE) return;
+    DyePreviewed = INDEX_NONE;
+    if (Controller.IsValid()) Controller->MenuEndDyePreview();
+}
+
 bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
 {
     if (!Controller.IsValid()) return false;
     if (Row.Subject != EHomesteadMenuSubject::ItemGroup && Row.Subject != EHomesteadMenuSubject::Wearable) return false;
     PopupOptions.Reset();
+    bDyeChooser = false;
     const auto Add = [this](const FString& Label, TFunction<void()> Run, TOptional<EHomesteadItemAction> Action = {})
     {
         PopupOptions.Add({[Label]() { return Label; }, MoveTemp(Run), nullptr, Action});
@@ -193,10 +241,24 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
         }
         else Add(TEXT("Take to pack"), Move, EHomesteadItemAction::Transfer);
         const auto* Info = Homestead::GetWearableDefinition(static_cast<Homestead::WearableDefinition>(Row.Id));
-        if (Info && Info->dyeable) Add(TEXT("Change dye"), Act(EHomesteadItemAction::Dye, 1), EHomesteadItemAction::Dye);
+        if (Info && Info->dyeable)
+            Add(TEXT("Change dye..."), [this, Row]()
+            {
+                const auto* Owned = Controller->Simulation().GetWearable(Row.SubjectId);
+                if (!Owned) return;
+                DyeRow = Row;
+                DyeRevision = Controller->Simulation().GetRevision();
+                DyeOriginal = Owned->dye;
+                OpenDyeChooser(Owned->dye);
+            }, EHomesteadItemAction::Dye);
     }
     if (SeenPage == 0 && Row.ContainerId >= 0)
         Add(TEXT("Sort pack"), [this]() { Controller->MenuSortPack(); });
+    if (SeenPage == 0 && Controller->ActiveStorageChest().IsSet())
+    {
+        Add(TEXT("Store matching stacks (T)"), [this]() { Controller->MenuStoreMatching(); });
+        Add(TEXT("Name this chest..."), [this]() { OpenRenameChest(); });
+    }
     Add(TEXT("Cancel"), nullptr);
     return true;
 }

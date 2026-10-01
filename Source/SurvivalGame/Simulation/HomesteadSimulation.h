@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HomesteadCalendar.h"
 #include "HomesteadItems.h"
 #include "HomesteadShops.h"
 #include "HomesteadWorldGeneration.h"
@@ -9,6 +10,7 @@
 #include <functional>
 #include <iosfwd>
 #include <memory>
+#include <optional>
 #include <set>
 #include <string>
 #include <vector>
@@ -60,7 +62,13 @@ constexpr int GardenCellsPerCell = 3;
 constexpr double GardenCellSize = CellSize / GardenCellsPerCell;
 constexpr int InventoryCapacity = 120;
 constexpr int ChestCapacity = 1200;
-constexpr int ContainerCapacity(int containerId) { return containerId > 0 ? ChestCapacity : InventoryCapacity; }
+// Her pack holds InventoryCapacity until she buys the leather backpack (HomesteadBackpack.h), then
+// MaxPackCapacity. Load-time validation that doesn't know her state yet (drops, saved stock) uses the
+// maximum; stacks set on the ground are never larger than her own PackCapacity, so she can pick them up.
+constexpr int MaxPackCapacity = 240;
+struct State;
+int PackCapacity(const State& state);
+int ContainerCapacity(const State& state, int containerId);
 // 12 is the estate pivot: no warmth in the vitals, estate items, tool tiers, parcels, money and the manor.
 // 13 writes each item stock (and the equipment slots) with its width first, so appending an Item or a
 // slot no longer changes the save format. Enums that name data stay append-only.
@@ -106,7 +114,8 @@ enum class WearableOwner : int { Carried, Chest, Equipped, World };
 // UnsupportedVersion: a save from an older build this one can't read. NewerBuild: a save written by a
 // newer build (a later version, wider item stocks or a section this build doesn't know); the game
 // must leave it untouched so that build can still open it.
-enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable, ToolTier, NewerBuild };
+// PackOverflow: it worked, but what didn't fit in her pack was left on the ground (worth a notice).
+enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable, ToolTier, NewerBuild, PackOverflow };
 constexpr int EquipmentSlotCount = static_cast<int>(EquipmentSlot::Count);
 
 struct WearableDefinitionInfo
@@ -240,6 +249,8 @@ struct Structure
     StructureSkin skin = StructureSkin::Timber;
     // Part of the old manor (the standing room): not removable until the round-5 rebuild.
     bool heritage = false;
+    // A chest's name as she gave it (trimmed UTF-8), empty for the default (HomesteadChests.h).
+    std::string customName;
 };
 
 // A turned rectangle on the ground: centre, half extents along its own axes, Unreal yaw in degrees.
@@ -279,6 +290,10 @@ struct Plot
     // regrowth days ("ripening again, day 1 of 3") instead of the first growth. Saved in the optional
     // "picked" section; older saves default to false.
     bool picked = false;
+    // Still planted when its crop's seasons ended (Crops::WitherOutOfSeason): it keeps its kind for
+    // the dead plant's look, yields nothing and grows no further until the hoe clears it. Saved in
+    // the optional "withered" section.
+    bool withered = false;
 };
 
 struct WorldDrop
@@ -303,6 +318,8 @@ struct Parcel
 struct State
 {
     double hour = 6.0;
+    // Real minutes per game day. New games start at 60 ("Balanced"), long enough to walk to town
+    // and back while the shops are open; Settings offers 30, 60 and 120, and saves keep their own.
     double dayMinutes = 60.0;
     double hunger = 85.0;
     double energy = 100.0;
@@ -320,6 +337,10 @@ struct State
     std::array<int, EquipmentSlotCount> equipment{};
     InventoryLayout inventoryLayout;
     PackRow packRow{};
+    // Rows of her pack rotated out of the hotbar (R / LT, RotatePackRow), each kept as it was, gaps and
+    // all, so its stacks come back to the same number keys. Cells may name stacks since used up or
+    // moved; RotatePackRow drops those as the row comes back. Saved in the optional "packrowsparked" section.
+    std::vector<PackRow> parkedRows;
     Generation::WorldDescriptor world{};
     Generation::ChunkCoord activeChunk{};
     std::vector<ResourceEdit> resourceEdits;
@@ -329,7 +350,7 @@ struct State
     bool fixedEstate = false;
     int placementBakeVersion = 0;
     std::vector<Parcel> parcels; // Fixed estate only; empty in the seeded woodland.
-    Cents money = 0; // HomesteadShops.h; changes only through Sell, Buy and playtest grants.
+    Coins money = 0; // HomesteadShops.h; changes only through Sell, Buy and playtest grants.
     std::vector<Shop> shops;
     // Every tool starts worn; the blacksmith (round 3) raises them.
     std::array<ToolTier, ToolKindCount> toolTiers{};
@@ -343,6 +364,13 @@ struct State
     // lamp kit (new estate games start with it; older saves get it once on load).
     double lampOilHours = 0.0;
     bool lampKitGranted = false;
+    // The leather backpack (HomesteadBackpack.h): bought once, doubling her pack; and whether it
+    // shows on her back (a look only: it never changes capacity).
+    bool leatherBackpack = false;
+    bool backpackShown = true;
+    // Estate only (HomesteadFood.h): the game hour her Well fed runs out; she is Well fed while hour is
+    // below it. Saved in the optional "wellfed" section only while active.
+    double wellFedUntilHour = 0.0;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -356,6 +384,9 @@ const char* PieceName(Piece piece);
 const char* CropName(CropKind kind);
 const char* RecipeRequirements(Recipe recipe);
 const char* PieceRequirements(Piece piece);
+// What a piece costs to build, and whether it stands on a foundation (walls, doorways and roofs).
+Inventory PieceCost(Piece piece);
+bool PieceNeedsFoundation(Piece piece);
 // Whether the Build page offers the piece (the hearth belongs to the old house).
 bool IsBuildable(Piece piece);
 // Beds, chests, cookfires and the hearth: one per building cell, set inside it.
@@ -389,9 +420,8 @@ Point FurnitureOffset(Piece kind);
 Footprint PieceFootprint(const Building& building, Piece kind, int cellX, int cellY, int rotation, bool onFoundation);
 Footprint StructureFootprint(const State& state, const Structure& structure);
 bool FootprintsOverlap(const Footprint& a, const Footprint& b);
-// Energy: time awake drains it slowly; work spends it. Work is refused when it would leave her
-// below Reserve. Nothing enforces a bedtime: sleep restores SleepPerHour for each hour slept at any
-// hour, and only running Energy out forces rest, when she dozes off where she stands.
+// Energy: time awake drains it slowly; work spends it. On the estate she keeps walking at zero
+// Energy rather than fainting, and food or bed rest restores it.
 namespace Exertion
 {
 constexpr double AwakePerHour = 0.6;
@@ -401,8 +431,8 @@ constexpr double SleepPerHour = 10.0;
 // and only part rested.
 constexpr double DozeHours = 6.0;
 constexpr double DozePerHour = 6.0;
-constexpr double NapHours = 1.0;
-constexpr double MinRestHours = 1.0;
+constexpr double MinRestHours = 0.25;
+constexpr double MinDawnSleepHours = 1e-6; // Tiny positive intervals prevent a zero-time "sleep" just before 06:00.
 constexpr double MaxRestHours = 10.0;
 constexpr double GatherEnergy = 0.5;
 constexpr double ClearEnergy = 1.0;
@@ -415,8 +445,11 @@ constexpr double CookEnergy = 0.3;
 constexpr double SplitFirewoodEnergy = 1.5;
 constexpr double BuildEnergy = 1.5;
 constexpr double GarmentEnergy = 0.8;
-// Sprinting costs no Energy of its own (Jenny, round 2); she can only start or keep sprinting above this.
-constexpr double SprintFloor = 10.0;
+// Sprinting costs no Energy of its own; below 25 she walks, below 10 she walks at 75% speed.
+constexpr double SprintFloor = 25.0;
+constexpr double SlowWalkFloor = 10.0;
+constexpr double SlowWalkFactor = 0.75;
+inline double WalkSpeedFactor(double energy) { return energy < SlowWalkFloor ? SlowWalkFactor : 1.0; }
 constexpr double TillEnergy = 2.0;
 constexpr double PlantEnergy = 0.4;
 constexpr double WaterEnergy = 0.4;
@@ -425,6 +458,15 @@ constexpr double HarvestCropEnergy = 0.6;
 constexpr double FillWaterEnergy = 0.3;
 constexpr double FuelEnergy = 0.2;
 constexpr double DeconstructEnergy = 1.0;
+}
+
+// Hunger belongs to the seeded woodland only: there it drains at these rates and at 0 fails her (she
+// retries a checkpoint). The estate has no hunger (HomesteadFood.h): `State::hunger` stays at 100 and
+// is still saved, until the next planned save-version bump drops it.
+namespace Hunger
+{
+constexpr double AwakePerHour = 2.0;
+constexpr double AsleepPerHour = 1.3;
 }
 
 // The spring weather: it rains on two days in every ten, RainStartHour to RainEndHour (Jenny, 2026-09-29:
@@ -456,20 +498,19 @@ double RainAudioGain(double rain, double ambience, double indoors);
 // Whether the loop plays at all: judged before RainLoudness, so it starts and stops at the same moments.
 bool RainAudible(double rain, double ambience, double indoors);
 
-// What the bed offers (flexible-sleep): each choice with its length and the hour of day she'd wake.
-enum class SleepChoice { UntilMorning, UntilRested, Nap };
+// One bed action at a time: restore Energy, or pass the night when she is already rested.
+enum class SleepChoice { UntilMorning, UntilRested };
 struct SleepOption
 {
     SleepChoice choice = SleepChoice::UntilRested;
     double hours = 0.0;
     double wakeHour = 0.0; // Hour of day, 0-24.
 };
-constexpr double MorningWakeHour = 6.75;
-// The choices at `hour` with `energy`, the default first: "until morning" (06:45) in the evening and
-// at night (18:00-05:00), "until rested" (her Energy deficit at SleepPerHour, a quarter hour up,
-// MinRestHours to MaxRestHours; left out when it would wake her within 45 minutes of morning) and a
-// NapHours nap (left out when "until rested" is already that short).
-std::vector<SleepOption> SleepOptions(double hour, double energy);
+constexpr double MorningWakeHour = 6.0;
+// Night runs 18:00-06:00. Rest stops at 06:00 if it would pass dawn; daytime with full
+// Energy has no bed action. Ordinary rest is at least a quarter hour; the last minutes to
+// dawn may be shorter.
+std::optional<SleepOption> BedSleepOption(double hour, double energy);
 
 struct PreparedWorldRegion
 {
@@ -510,14 +551,33 @@ public:
     Result ResolveGeneratedResource(const Generation::GeneratedEntityKey& key, ResourceNode& out) const;
     int Count(Item item) const;
     int UsedCapacity() const;
+    // What her pack holds now: InventoryCapacity, or MaxPackCapacity with the leather backpack.
+    int PackCapacity() const;
     int ChestUsedCapacity(int chestId) const;
     std::uint64_t GetRevision() const { return revision_; }
     const WearableInstance* GetWearable(int id) const;
     const InventoryLayout* GetLayout(int containerId) const;
     bool IsRaining() const;
     bool IsNight() const;
+    // The calendar date now (HomesteadCalendar.h): "Mon, Spring 12".
+    Calendar::Date Today() const { return Calendar::DateAt(state_.hour); }
+    // Day of the season, 1-28.
     int DayNumber() const;
     const char* SeasonName() const;
+    // What the last season change did, for the game's toast. Step fills it at each season rollover;
+    // SeasonChanges() counts them this session (never saved), so the game compares the count.
+    struct SeasonChange
+    {
+        Season from = Season::Spring;
+        Season to = Season::Spring;
+        int witheredPlots = 0;
+    };
+    int SeasonChanges() const { return seasonChanges_; }
+    const SeasonChange& LastSeasonChange() const { return lastSeasonChange_; }
+    // Well fed after a Meal on the estate (HomesteadFood.h), and what work costing `base` costs her
+    // now: base x Food::WellFedWorkFactor while Well fed, otherwise base.
+    bool IsWellFed() const;
+    double WorkCost(double base) const;
     bool IsSheltered(Point position) const;
     bool IsNearFire(Point position) const;
     RecipeAssessment AssessRecipe(Recipe recipe, Point player) const;
@@ -573,11 +633,20 @@ public:
     // Side-effect-free: would Till, Water or Weed succeed now? The same refusal, or ok (the world's garden
     // outline shows it before she acts). Till/Water/Weed call these first.
     Result CheckTill(int cellX, int cellY, Point player) const;
+    // CheckTill's checks on the ground alone (in reach, free of buildings, resources, spoiling overgrowth and
+    // plots, under the plot limit), without the hoe or her energy: whether the square could be tilled.
+    Result CheckTillGround(int cellX, int cellY, Point player) const;
     Result CheckWater(int plotId, Point player) const;
     Result CheckWeed(int plotId, Point player) const;
+    // Whether Plant(plotId, player, kind) would sow now, with its refusal, changing nothing.
+    Result CheckSow(int plotId, Point player, CropKind kind) const;
     Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
     Result Water(int plotId, Point player);
     Result Weed(int plotId, Point player);
+    // Hoes a withered plant out, back to tilled soil (needs the hoe).
+    Result ClearWithered(int plotId, Point player);
+    // Whether ClearWithered would succeed now, changing nothing.
+    Result CheckClearWithered(int plotId, Point player) const;
     Result HarvestCrop(int plotId, Point player);
     Result FillWater(Point player);
     // Tip the water out of the pail (it stays in her pack, empty).
@@ -591,6 +660,12 @@ public:
     Result RecolorWearable(int id, int dye, Point player, std::uint64_t expectedRevision);
     Result TransferGroup(int chestId, int groupId, int amount, bool toChest, Point player,
         std::uint64_t expectedRevision);
+    // Auto-store: in one step, moves her carried goods onto stacks of the same item already in this
+    // chest (HomesteadChests.h AutoStores: never tools, the lamp, water or garments). Stacks below the
+    // hotbar row go first, then row cells, as far as the chest has room; the rest stays with her.
+    Result StoreMatching(int chestId, Point player, std::uint64_t expectedRevision);
+    // Names a chest (trimmed; empty puts back the default name). Nothing else changes.
+    Result RenameChest(int chestId, const std::string& name, Point player, std::uint64_t expectedRevision);
     Result SplitGroup(int containerId, int groupId, int amount, Point player, std::uint64_t expectedRevision);
     Result MergeGroups(int containerId, int sourceGroupId, int targetGroupId, Point player,
         std::uint64_t expectedRevision);
@@ -605,6 +680,10 @@ public:
     // Moves what is in `cell` below the row: onto that stack (or garment) there, merging with the
     // same item or else swapping; with no target (0, 0) to the end of her pack.
     Result MoveFromPackRow(int cell, int targetGroupId, int targetWearableId, std::uint64_t expectedRevision);
+    // The hotbar steps on to the next row of her pack, as in Coral Island: the first ten stacks below
+    // the row become the row, in order, and the row's stacks go to the end of her pack in cell order,
+    // so pressing again carries each row of her pack through the hotbar in turn.
+    Result RotatePackRow(std::uint64_t expectedRevision);
     // Takes `amount` of a chest stack straight into `cell` in one step: onto the same item it
     // merges, otherwise it becomes that cell's stack and whatever was there moves below the row.
     Result TransferGroupToPackRow(int chestId, int groupId, int amount, int cell, Point player,
@@ -621,7 +700,7 @@ public:
     Result DropWearable(int wearableId, Point position, Point player,
         std::uint64_t expectedRevision);
     Result PickUpDrop(int dropId, Point player);
-    Result Sleep(double hours, Point player);
+    Result Sleep(double hours, Point player, Point facing, bool dawnLimited = false);
     // How many times she has dozed off from exhaustion in this session (never saved); the game
     // compares it to tell her when she wakes.
     int DozeCount() const { return dozes_; }
@@ -677,7 +756,7 @@ public:
     Result PassDaysForPlaytest(double days, bool tend, Point player);
     // Playtest aid for screenshots: set every planted plot's growth (0-1) directly.
     Result SetCropGrowthForPlaytest(double growth);
-    // Whether she may sprint now: not failed and Energy above Exertion::SprintFloor. Running costs
+    // Whether she may sprint now: not failed and Energy at least Exertion::SprintFloor. Running costs
     // nothing extra; the ordinary awake drain and work costs are what bring her down to the floor.
     Result CanSprint() const;
     // Whether she has the Energy for work costing `cost` (see Exertion); ok when she does.
@@ -694,6 +773,10 @@ public:
     Result Sell(int shopId, Item item, int quantity, Point player);
     // Buys the shop's own goods, or with `fromHeroineStock` her own sold goods back.
     Result Buy(int shopId, Item item, int quantity, bool fromHeroineStock, Point player);
+    // The leather backpack: a one-time upgrade at an open General Store (HomesteadBackpack.h).
+    Result BuyBackpack(int shopId, Point player);
+    // Shows or hides the backpack on her back; capacity is unchanged either way.
+    Result SetBackpackShown(bool shown);
     // Counts a shopkeeper greeting (a friendship stub).
     Result GreetShopkeeper(int shopId);
     // Waits by a closed shop until it opens: the ordinary passage of time (crops, weather, vitals,
@@ -704,7 +787,9 @@ public:
     // doze off on the way. The caller stands her at PlanTravel's arrival point.
     Result WalkRoad(TravelDestination destination, Point from);
     // Playtest aids: adjust the purse; open (or move) a shop with its counter at `counter`.
-    Result GrantMoney(Cents cents);
+    // Playtest grant (or take, when negative). Refused, changing nothing, if the purse would go below
+    // zero or past MaxMoney; overflow-safe for any int64 amount.
+    Result GrantMoney(Coins coins);
     Result PlaceShop(ShopKind kind, Point counter, double yaw = 0.0);
     // Oil lamp (HomesteadLamp.cpp). One lamp, one reservoir of oil wherever the lamp is.
     double LampOil() const { return state_.lampOilHours; }
@@ -734,6 +819,8 @@ private:
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
     int dozes_ = 0;
+    int seasonChanges_ = 0;
+    SeasonChange lastSeasonChange_;
     bool TryAdjust(const Inventory& change);
     Result CheckRevision(std::uint64_t expectedRevision) const;
     // CheckPlacement without the reach and exertion rules (the starter kit places from afar).
@@ -754,6 +841,11 @@ private:
     static bool ReadEconomy(std::istream& input, State& candidate, std::set<int>& ids);
     // Once a day at the 6 AM rollover: cleared grass and weeds near remaining overgrowth may regrow.
     void CreepWeeds(int day);
+    // Calendar hooks (HomesteadCalendarHooks.cpp). Step calls OnNewDay once for every 06:00 rollover
+    // it crosses, and OnNewDay calls OnNewSeason first when that day begins a season. Features that
+    // change with the day or the season add their call there rather than in Step.
+    void OnNewDay(const Calendar::Date& today);
+    void OnNewSeason(const Calendar::Date& today, Season from);
     // Oil lamp (HomesteadLamp.cpp).
     bool lampInHand_ = false;
     void BurnLamp(double hours, bool sleeping);

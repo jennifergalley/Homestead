@@ -801,7 +801,7 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
         {
             Homestead::Simulation Supplied = Controller->Simulation();
             auto& State = const_cast<Homestead::State&>(Supplied.GetState());
-            for (const auto Pair : {TPair<Item, int32>(Item::Seeds, 1),
+            for (const auto Pair : {TPair<Item, int32>(Item::Seeds, 2),
                 TPair<Item, int32>(Item::Water, 6)})
             {
                 State.inventory[static_cast<int32>(Pair.Key)] += Pair.Value;
@@ -812,8 +812,25 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             if (!Result) { Finish(false, UTF8_TO_TCHAR(Result.message.c_str())); return; }
             Teleport(Homestead::GardenCellCenter(*TillX, *TillY));
         },
-        [this]() { return Controller->Simulation().Count(Item::Seeds) >= 1
+        [this]() { return Controller->Simulation().Count(Item::Seeds) >= 2
             && Controller->Simulation().Count(Item::Water) >= 6; }, 0.7f);
+    // Seeds chosen on the hotbar outline the plot [E] would sow (the focused one) without sowing it.
+    const auto SeedsBefore = MakeShared<int32>(0);
+    Add(TEXT("Seeds chosen on the hotbar outline the focused tilled plot green with the Plant cue"),
+        [this, SeedsBefore]() { *SeedsBefore = Controller->Simulation().Count(Item::Seeds); Controller->ChooseOnHotbar(Item::Seeds); },
+        [this, TillX, TillY, OutlineIs, SeedsBefore]()
+        {
+            const bool Bare = std::any_of(Controller->State().plots.begin(), Controller->State().plots.end(),
+                [TillX, TillY](const auto& Plot) { return Plot.cellX == *TillX && Plot.cellY == *TillY && !Plot.planted; });
+            const FString Plant = FString(Controller->bGamepad ? TEXT("[A]") : TEXT("[E]")) + TEXT(" Plant Seeds");
+            if (!Controller->FocusActions().Contains(Plant))
+                Results.Add(FString::Printf(TEXT("GARDEN_OUTLINE_SEED_DIAG focus='%s'"), *Controller->FocusActions()));
+            return Controller->Focus == AHomesteadController::EFocus::Plot && OutlineIs(*TillX, *TillY, true) && Bare
+                && Controller->FocusActions().Contains(Plant) && Controller->Simulation().Count(Item::Seeds) == *SeedsBefore;
+        }, 0.7f);
+    Add(TEXT("Capture the seed's green garden outline"),
+        [this]() { Screenshot(TEXT("garden-outline-seed-valid")); },
+        [this, TillX, TillY, OutlineIs]() { return OutlineIs(*TillX, *TillY, true); }, 0.5f);
     Add(TEXT("E remains independent and plants the focused plot (Seeds chosen on the hotbar)"),
         [this]() { Controller->ChooseOnHotbar(Item::Seeds); Tap(EKeys::E); },
         [this, TillX, TillY]() { return std::any_of(
@@ -821,6 +838,16 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 [TillX, TillY](const auto& Plot)
                 { return Plot.cellX == *TillX && Plot.cellY == *TillY && Plot.planted; }); }, 4.0f);
     Steps.Last().bCompleteWhenReady = true;
+    Add(TEXT("The sown plot's seed outline turns red with the occupied refusal"),
+        [this]() {},
+        [this, TillX, TillY, OutlineIs]() { return Controller->Simulation().Count(Item::Seeds) > 0
+            && OutlineIs(*TillX, *TillY, false)
+            && Controller->GardenOutlineReason == TEXT("A crop is already growing here.")
+            // The red outline retains the refusal, but the concise focus card no longer repeats it.
+            && !Controller->FocusActions().Contains(Controller->GardenOutlineReason); }, 4.0f);
+    Add(TEXT("Capture the seed's red garden outline"),
+        [this]() { Screenshot(TEXT("garden-outline-seed-invalid")); },
+        [this, TillX, TillY, OutlineIs]() { return OutlineIs(*TillX, *TillY, false); }, 0.5f);
     Add(TEXT("Number six selects the Watering Can; the focused dry plot is outlined green"),
         [this]() { Tap(EKeys::Six); },
         [this, TillX, TillY, OutlineIs]() { return Controller->SelectedHotbarIndex() == 5
@@ -920,11 +947,11 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
                 && Avatar->GetCharacterMovement()->IsMovingOnGround()
                 && !Controller->bPendingSpawn;
         }, 0.8f);
-    Add(TEXT("CONTROLLED Simulation Energy set to exactly the 10-Energy sprint floor"),
+    Add(TEXT("CONTROLLED Simulation Energy set below the 10-Energy slow-walk floor"),
         [this, ReserveEnergy]()
         {
             // Sprint costs nothing, so the fixture sets Energy directly instead of running it down.
-            const auto Result = Controller->Sim.SetEnergy(10.0);
+            const auto Result = Controller->Sim.SetEnergy(9.0);
             if (!Result)
             {
                 Finish(false, UTF8_TO_TCHAR(Result.message.c_str()));
@@ -932,9 +959,9 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             }
             *ReserveEnergy = Controller->State().energy;
         },
-        [this, ReserveEnergy]() { return FMath::IsNearlyEqual(*ReserveEnergy, 10.0, 0.001)
-            && Controller->State().energy <= 10.0 && Controller->State().energy > 9.9; });
-    Add(TEXT("A Shift tap below the Energy reserve is refused and she walks"),
+        [this, ReserveEnergy]() { return FMath::IsNearlyEqual(*ReserveEnergy, 9.0, 0.001)
+            && Controller->State().energy <= 9.0 && Controller->State().energy > 8.9; });
+    Add(TEXT("A Shift tap below the Energy reserve is refused and she walks slowly"),
         [this, ReserveEnergy]()
         {
             *ReserveEnergy = Controller->State().energy;
@@ -947,7 +974,8 @@ void AHomesteadSmokeTest::PrepareHotbarChecks()
             const auto* Avatar = Cast<AHomesteadCharacter>(Controller->GetPawn());
             return Avatar && Avatar->GetVelocity().Size2D() > 60
                 && !Avatar->IsSprinting()
-                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed, Avatar->WalkSpeed())
+                && FMath::IsNearlyEqual(Avatar->GetCharacterMovement()->MaxWalkSpeed,
+                    Avatar->WalkSpeed() * Homestead::Exertion::SlowWalkFactor)
                 && Controller->State().energy <= *ReserveEnergy
                 && Controller->State().energy > *ReserveEnergy - 0.1;
         }, 0.9f);
