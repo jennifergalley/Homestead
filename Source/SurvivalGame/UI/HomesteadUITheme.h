@@ -1,10 +1,11 @@
 #pragma once
 
-// The UI theme trial (Jenny, 2026-09-30 18:57): the parchment notice card and the field book's EB
-// Garamond as the look of every menu and HUD surface, against the classic pine-and-cream look.
-// `homestead.UITheme parchment|classic` (or -HomesteadUITheme=classic on the command line) picks it;
-// parchment is this branch's default until Jenny approves it. Widgets read the theme when they are
-// built, so reopen a menu (or restart) after switching.
+// The game's UI theme: the parchment notice card and the field book's EB Garamond on every menu and
+// HUD surface (trialled 2026-09-30 18:57, approved by Jenny 21:54). Parchment is the default; every new
+// UI surface uses it (colours via FThemeColor/Themed, text via Font(), key glyphs via KeyFont()) and gets
+// a UI gallery entry. `homestead.UITheme classic` (or -HomesteadUITheme=classic) keeps the old pine-and-
+// cream look for comparison only. Widgets read the theme when they are built, so reopen a menu (or
+// restart) after switching.
 //
 // Colours keep their classic value in code (FThemeColor) and turn into the parchment equivalent on use:
 // dark panels become paper (deeper panels lighter, selections darker), light text becomes iron-gall
