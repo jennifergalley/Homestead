@@ -41,8 +41,14 @@ constexpr float MaxRoll = 0.35f;
 constexpr float RollRate = 8.0f;
 // How far above and below the blade to look for the ground (cm).
 constexpr float TraceReach = 150.0f;
-// The most the scythe is tipped up about the lower nib to keep its blade out of the ground (radians, ~40 degrees).
-constexpr float MaxTipUp = 0.7f;
+// The extra roll about the grip line that keeps the blade out of the ground wherever the eased ground roll can't
+// (radians, ~35 degrees; the clip's opening and closing swings), and how fast it eases in and back out (per second).
+constexpr float MaxClearRoll = 0.6f;
+constexpr float ClearRollUpRate = 20.0f;
+constexpr float ClearRollDownRate = 6.0f;
+// A hit this far above a blade sample is foliage or a branch overhead, not the ground under it (cm): the trace
+// carries on below it. Deeper than the worst cut into the ground the clip ever made (38 cm).
+constexpr float MaxGroundAbove = 60.0f;
 }
 
 namespace
@@ -273,7 +279,7 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     const float Weight = Animation->FellWeight();
     if (Weight <= 0.01f)
     {
-        MowGroundRoll = 0.0f;
+        MowGroundRoll = MowClearRoll = 0.0f;
         return;
     }
     if (FellTool == Homestead::Item::Scythe)
@@ -347,11 +353,22 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
     FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadMowGround), false, this);
     const auto GroundUnder = [World, &Query](const FVector& At, float& Height)
     {
-        FHitResult Hit;
-        if (!World || !World->LineTraceSingleByChannel(Hit, At + FVector(0, 0, MowGround::TraceReach),
-            At - FVector(0, 0, MowGround::TraceReach), ECC_Visibility, Query)) return false;
-        Height = static_cast<float>(Hit.ImpactPoint.Z);
-        return true;
+        if (!World) return false;
+        FVector Start = At + FVector(0, 0, MowGround::TraceReach);
+        const FVector End = At - FVector(0, 0, MowGround::TraceReach);
+        // A bush or bough overhead isn't the ground: look again from just under it (a few times at most).
+        for (int32 Try = 0; Try < 3; ++Try)
+        {
+            FHitResult Hit;
+            if (!World->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Query)) return false;
+            if (Hit.ImpactPoint.Z - At.Z <= MowGround::MaxGroundAbove)
+            {
+                Height = static_cast<float>(Hit.ImpactPoint.Z);
+                return true;
+            }
+            Start = Hit.ImpactPoint - FVector(0, 0, 2.0);
+        }
+        return false;
     };
     if (World && !NibLine.IsNearlyZero())
     {
@@ -387,31 +404,38 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
     TwoHanded.SetRotation(FQuat(NibLine, MowGroundRoll) * TwoHanded.GetRotation());
     FTransform Blended;
     Blended.Blend(Prop.GetComponentTransform(), TwoHanded, FMath::SmoothStep(0.0f, 1.0f, Weight));
-    // The roll can't catch everything: as the clip opens and closes, her hands swing the blade through a wide
-    // arc and its point swept up to 38 cm into the ground (PIE, 09-30). Wherever a blade sample is still
-    // below MinClearance, tip the whole scythe up about the lower nib (her right fist stays on it) until it
-    // clears; twice, as the roll solve does.
-    for (int32 Pass = 0; Pass < 2; ++Pass)
-    {
-        const FTransform Laid(Blended.GetRotation(), Blended.GetLocation(), Scale);
-        float Lowest = TNumericLimits<float>::Max();
-        FVector LowestAt = FVector::ZeroVector;
-        for (const FVector& Sample : MowGround::BladeSamples)
+    // The eased roll can't catch everything: as the clip opens and closes, her hands swing the blade through a
+    // wide arc and its point went up to 38 cm into the ground (PIE, 09-30). Wherever a blade sample is still
+    // below MinClearance, roll further about the same grip line (both fists stay on their nibs), solved twice
+    // like the ground roll and eased in quickly and out slowly, so a switch of lowest sample doesn't pop.
+    float WantClear = 0.0f;
+    if (!NibLine.IsNearlyZero())
+        for (int32 Pass = 0; Pass < 2; ++Pass)
         {
-            const FVector At = Laid.TransformPosition(Sample);
-            float Height = 0.0f;
-            if (GroundUnder(At, Height) && At.Z - Height < Lowest)
+            const FQuat Extra(NibLine, WantClear);
+            const FTransform Laid(Extra * Blended.GetRotation(), Lower + Extra.RotateVector(Blended.GetLocation() - Lower), Scale);
+            float Lowest = TNumericLimits<float>::Max(), LiftPerRadian = 0.0f;
+            for (const FVector& Sample : MowGround::BladeSamples)
             {
-                Lowest = static_cast<float>(At.Z - Height);
-                LowestAt = At;
+                const FVector At = Laid.TransformPosition(Sample);
+                float Height = 0.0f;
+                if (GroundUnder(At, Height) && At.Z - Height < Lowest)
+                {
+                    Lowest = static_cast<float>(At.Z - Height);
+                    LiftPerRadian = static_cast<float>(FVector::CrossProduct(NibLine, At - Lower).Z);
+                }
             }
+            if (Lowest >= MowGround::MinClearance || FMath::Abs(LiftPerRadian) < 1.0f) break;
+            WantClear = FMath::Clamp(WantClear + (MowGround::MinClearance - Lowest) / LiftPerRadian,
+                -MowGround::MaxClearRoll, MowGround::MaxClearRoll);
         }
-        const FVector Out = FVector(LowestAt.X - Lower.X, LowestAt.Y - Lower.Y, 0.0);
-        if (Lowest >= MowGround::MinClearance || Out.Size() < 10.0) break;
-        const float Angle = FMath::Asin(FMath::Min(1.0f, (MowGround::MinClearance - Lowest) / static_cast<float>(Out.Size())));
-        const FQuat Tip(FVector::CrossProduct(Out, FVector::UpVector).GetSafeNormal(), FMath::Min(Angle, MowGround::MaxTipUp));
-        Blended.SetLocation(Lower + Tip.RotateVector(Blended.GetLocation() - Lower));
-        Blended.SetRotation(Tip * Blended.GetRotation());
+    const float ClearRate = FMath::Abs(WantClear) > FMath::Abs(MowClearRoll) ? MowGround::ClearRollUpRate : MowGround::ClearRollDownRate;
+    MowClearRoll = FMath::FInterpTo(MowClearRoll, WantClear, Dt, ClearRate);
+    if (!NibLine.IsNearlyZero() && MowClearRoll != 0.0f)
+    {
+        const FQuat Extra(NibLine, MowClearRoll);
+        Blended.SetLocation(Lower + Extra.RotateVector(Blended.GetLocation() - Lower));
+        Blended.SetRotation(Extra * Blended.GetRotation());
     }
     Prop.SetWorldTransform(Blended);
 }
