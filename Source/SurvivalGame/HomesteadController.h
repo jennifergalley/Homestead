@@ -46,7 +46,7 @@ struct FHomesteadRow
     int32 Quantity = 0;
     FString Name;
     FString Location;
-    // A short state shown after the selected item's name in the pack's footer ("Water 5 / 6").
+    // A short state shown after the selected item's name in the pack's footer ("Water 5 / 15").
     FString Status;
     // The hotbar cell (0-9) holding this pack row, the first row of her pack; INDEX_NONE below it.
     int32 HotbarCell = INDEX_NONE;
