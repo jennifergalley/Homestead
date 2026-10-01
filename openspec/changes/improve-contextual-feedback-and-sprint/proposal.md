@@ -14,7 +14,10 @@ The gameplay HUD currently displays interaction and menu guidance even when noth
 - Remove renewal commentary from gather success messages. Renewable forage still renews silently.
 - Make fallen-branch patches one-time pickups: successful gathering removes the patch permanently, persists the edit, and never schedules regrowth.
 - Add toggle-to-sprint on keyboard Shift and controller left-stick click, with faster grounded movement and a distinct authored sprint animation at zero sprint-specific Energy cost.
-- Refuse sprint at Energy <=10 and turn it off if other work or time reaches that threshold; stop it when movement, ground contact, menu, planning, failure, or action-presentation conditions no longer permit it. Sprint never auto-resumes after recovery.
+- Refuse sprint below about 25% Energy and turn it off if other work or time reaches that threshold;
+  below about 10% slow walking and `Too tired` tool refusal apply. Stop sprint when movement, ground
+  contact, menu, planning, failure, or action-presentation conditions no longer permit it. Sprint
+  never auto-resumes after recovery.
 - Reuse the current focus detector, Canvas HUD, transient toast lifecycle, Simulation inventory authority, Energy/save state, Enhanced Input mapping, movement component, retained heroine skeleton, analytical Blender authoring helpers, and animation proxy. No external asset or dependency is required.
 
 The smallest useful in-game result removes the always-on `Woodland`/till/menu panels, stacks icon-led survival meters in the lower left, and replaces one successful gather with an exact `Added to pack` toast. The first playable demonstration additionally confirms a missing-hatchet rejection clears after six seconds, gathers a fallen-branch patch twice across save/reload to prove it remains gone, then toggles Shift to enter a visibly distinct faster gait that safely returns to walking at the low-Energy threshold. Full-round acceptance covers keyboard/controller parity, all representative forage yields, rejection-message classes, HUD layout at 720p/4K, sprint cancellation, Energy non-mutation, animation quality, and immutable Shipping replay.

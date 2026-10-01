@@ -1,11 +1,16 @@
 # Tasks
 
-- [x] 1.1 `SleepOptions` (until morning / until rested / nap) with wake times; recovery by hours slept.
-- [x] 1.2 Energy no longer fails her; out of Energy she dozes off in place (6 h at 6/h) with a toast.
-- [x] 1.3 The bed prompt shows the choice and wake time; Up/Down (D-pad) cycles; A confirms.
-- [x] 1.4 Native tests (`SleepOptionPolicy`, doze and doze-into-starvation) and FullLoop's outdoor sleeps.
-- [x] 1.5 Verify in PIE: bed at 21:00 part-tired, "until morning", wakes 06:45; up to 05:00, "until
-  rested", wakes in the afternoon full; a 1 h nap; draining Energy to empty dozes her off. _Verified with HomesteadSleep / HomesteadBedChoice: 21:00 e55 → 06:45 e100; 05:00 e5 → 14:47 e100; nap 20:00 → 21:03; e0.2 at 14:00 → doze toast, 20:20, e36._
-- [ ] 1.6 Packaged suites: FullLoop and Hotbar sleep steps pass; the ForageRenewal route (expects fixed
-  8 h rests) needs its expectation changed if it's still run.
-- [ ] 1.7 Jenny playtests: a night-owl day and an early night.
+- [x] 1.1 Historical flexible-sleep options with wake times; recovery by hours slept. Superseded at
+  the bed by Jenny's 2026-09-30 one-press policy.
+- [x] 1.2 Historical forced-doze behavior. Superseded by Jenny's nonfatal Estate Energy policy.
+- [x] 1.3 Historical bed choice/picker behavior. Superseded by one-press E/A sleep.
+- [x] 1.4 Historical doze-based test coverage. Superseded by low-Energy/no-failure acceptance.
+- [x] 1.5 Historical picker verification. Superseded at the bed by Jenny's one-press policy.
+- [ ] 1.6 One-press sleep: native/FullLoop/Hotbar cover 90 cm edge + facing admission, first E/A
+  sleep, tired daytime and night outcomes, rested-night 06:00, rested-day no verb, and no
+  confirmation/picker/nap path. Recheck the ForageRenewal route if it assumes fixed 8 h rests.
+- [ ] 1.7 Packaged and Jenny playtest: a night-owl day, tired early night and rested nighttime
+  sleep, with mouse/keyboard and controller parity.
+- [ ] 1.8 Nonfatal Energy: native/UE/package tests cover <25% sprint cutoff, <10% slow walk and
+  `Too tired` tool refusal, bar colour/pulse plus `Getting tired`/`Exhausted` warnings, no
+  forced-doze/failure, eating/bed recovery, and newest-valid timestamp/revision recovery selection.
