@@ -828,7 +828,9 @@ receipt.**
 
   `UHomesteadSave::SavedRevision` is an optional SaveGame field (old saves default 0) used after
   `SavedAtUtc` as the newest-valid tie-breaker. `LoadLatest(true)` scans Manual, Auto 0–2, Recovery
-  and backups without short-circuiting to an older Recovery. Native comparator/Estate-72-hour tests
+  and backups without short-circuiting to an older Recovery **on the Estate**. Woodland recovery
+  instead must prefer a valid sheltered Recovery with hunger/Energy >=20 before the newest eligible
+  candidate; the required correction is queued. Native comparator/Estate-72-hour tests
   and an isolated `SaveRoutingTest` write/read/corrupt-fallback fixture cover it. Menu HUD `d246`
   still awaits its UE `[ready]`; controller/UI, PIE, packaged and Shipping acceptance are pending.
 
@@ -1327,7 +1329,10 @@ not claim early Energy is fully solved.
   `Exhausted` warnings. Food and one-press bed sleep recover Energy. Integration owns simulation
   and Menu owns HUD for the 7:30 AM batch; this remains source/package pending. Recovery/checkpoint
   loads must choose the newest valid save by timestamp and revision, never an older Recovery file
-  over a newer autosave.
+  over a newer autosave **on the Estate**. Legacy woodland still has lethal hunger and outdoor
+  autosaves: recovery prefers a valid sheltered Recovery with hunger/Energy >=20, otherwise the
+  newest eligible file. The high-priority source correction is queued; no code acceptance claim
+  exists until its SHA and verification arrive.
 - **Whole-number currency** — **agreed design, pending and not 4 PM content.** Preserve the current
   `int64` raw values and save bytes: semantically relabel the smallest stored unit as one whole
   `coin`, with **no numeric x100 migration**. Thus raw 1000 (formerly $10) becomes 1,000 coins and
