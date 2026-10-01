@@ -2254,7 +2254,7 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 if (Controller->HotbarItem(Cell) == Homestead::Item::Pasty) return Cell;
             return static_cast<int32>(INDEX_NONE);
         };
-        Add(TEXT("Chest view shows the hotbar row as the pack's first row: inside the book, heading the pack column above the grids"),
+        Add(TEXT("Chest view shows the hotbar row as the pack's first row: heading the pack column, a grid row in one line"),
             [this, SavedSelected, PreStrip]() { *SavedSelected = Controller->SelectedHotbarIndex(); *PreStrip = Controller->Simulation().Serialize(); },
             [this]()
             {
@@ -2277,8 +2277,9 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 Results.Add(FString::Printf(TEXT("GEOMETRY chest-row viewport=%.0fx%.0f row=(%.0f,%.0f)-(%.0f,%.0f) cell=%.0f grids_top=%.0f pack_left=%.0f"),
                     Book.GetAbsoluteSize().X, Book.GetAbsoluteSize().Y, First.GetAbsolutePosition().X, First.GetAbsolutePosition().Y,
                     RowRight, RowBottom, First.GetAbsoluteSize().X, Menu->GetContentScrollTop(), Menu->GetPackColumnLeft()));
-                // The first row: above both grids, over the pack column (not the chest's), in one line.
-                return RowBottom <= Menu->GetContentScrollTop() + 1.0f
+                // The first row of the pack column, inside the scrolling grids (not over the chest's), in one line.
+                return RowBottom <= Menu->GetContentScrollBottom() + 1.0f
+                    && First.GetAbsolutePosition().Y >= Menu->GetContentScrollTop() - 1.0f
                     && First.GetAbsolutePosition().X >= Menu->GetPackColumnLeft() - 12.0f
                     && FMath::IsNearlyEqual(First.GetAbsolutePosition().Y, Last.GetAbsolutePosition().Y, 1.0f)
                     && First.GetAbsoluteSize().X >= 30.0f * Book.GetAbsoluteSize().Y / 720.0f;
@@ -2427,6 +2428,40 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
                 if (!Controller->Sim.Deserialize(Controller->Sim.Serialize())) Finish(false, TEXT("The edited row did not reload."));
             },
             [this, Bindings, StripBindings]() { return Bindings() == *StripBindings; });
+        // The hotbar row acts like any pack row (Jenny 2026-09-30): Shift+click on a cell stores its stack.
+        const auto ShiftCell = MakeShared<int32>(INDEX_NONE);
+        const auto ShiftItem = MakeShared<Homestead::Item>(Homestead::Item::Count);
+        const auto ShiftCarried = MakeShared<int32>(0);
+        const auto ShiftChestUsed = MakeShared<int32>(0);
+        Add(TEXT("Shift+click on a hotbar cell stores its stack in the open chest"),
+            [this, Chest, ShiftCell, ShiftItem, ShiftCarried, ShiftChestUsed]()
+            {
+                *ShiftCell = INDEX_NONE;
+                for (int32 Cell = 0; Cell < Homestead::PackRowSize && *ShiftCell == INDEX_NONE; ++Cell)
+                    if (Controller->HotbarItem(Cell) != Homestead::Item::Count) *ShiftCell = Cell;
+                const auto Widget = *ShiftCell != INDEX_NONE ? Controller->NativeMenu->GetBookHotbarSlot(*ShiftCell) : nullptr;
+                if (!Widget) { Finish(false, TEXT("No stocked hotbar cell to Shift+click.")); return; }
+                *ShiftItem = Controller->HotbarItem(*ShiftCell);
+                *ShiftCarried = Controller->Simulation().Count(*ShiftItem);
+                *ShiftChestUsed = Controller->Simulation().ChestUsedCapacity(*Chest);
+                const FVector2D Position = Widget->GetCachedGeometry().GetAbsolutePositionAtCoordinates(FVector2D(0.5f, 0.5f));
+                auto& Slate = FSlateApplication::Get();
+                Slate.SetCursorPos(Position);
+                Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+                TSet<FKey> Pressed; Pressed.Add(EKeys::LeftMouseButton);
+                Slate.ProcessMouseButtonDownEvent(nullptr, FPointerEvent(0, Position, Position, Pressed,
+                    EKeys::LeftMouseButton, 0, FModifierKeysState()));
+                Slate.ProcessMouseButtonUpEvent(FPointerEvent(0, Position, Position, TSet<FKey>(),
+                    EKeys::LeftMouseButton, 0, FModifierKeysState()));
+                Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
+            },
+            [this, Chest, ShiftCell, ShiftItem, ShiftCarried, ShiftChestUsed]()
+            {
+                return Controller->HotbarItem(*ShiftCell) == Homestead::Item::Count
+                    && Controller->Simulation().Count(*ShiftItem) < *ShiftCarried
+                    && Controller->Simulation().ChestUsedCapacity(*Chest) > *ShiftChestUsed
+                    && !Controller->NativeMenu->HasActiveDialog();
+            }, 0.4f);
         Add(TEXT("Restore the fixture's stock and the row as it was"),
             [this, SavedSelected, PreStrip]()
             {

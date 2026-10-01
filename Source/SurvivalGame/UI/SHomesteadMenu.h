@@ -265,6 +265,7 @@ private:
     void QuickMove(int32 Index);
     void ComputeActions();
     int32 StorageColumns() const;
+    int32 StoragePackColumns() const;
     int32 SettingsTopCount() const;
     FString PackHint() const;
     int32 AudioEditId = -1;

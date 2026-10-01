@@ -460,6 +460,13 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         }, 1.3f);
     Add(TEXT("book-chest"), TEXT("A storage chest open beside her pack, with its name and Store matching."), ECover::Dialog, 5, Chest,
         [ChestId](AHomesteadController& PC) { PC.OpenChestStorage(ChestId(PC)); });
+    Add(TEXT("chest-hotbar-store"), TEXT("A chest open: the hotbar row heads the pack column as one of its rows, the same cells as the pack grid, ready to Shift+click or drag into the chest."),
+        ECover::Dialog, 10, Chest,
+        [ChestId](AHomesteadController& PC)
+        {
+            PC.OpenChestStorage(ChestId(PC));
+            if (PC.NativeMenu.IsValid()) PC.NativeMenu->ActivateHotbarSlot(0);
+        });
     Add(TEXT("book-chest-rename"), TEXT("Naming the chest: the name being typed and the suggestions."), ECover::Dialog, 6, Chest,
         [ChestId](AHomesteadController& PC)
         {
