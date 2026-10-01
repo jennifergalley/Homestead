@@ -325,6 +325,14 @@ if ($EstateSmoke) {
 if ($RequireLit -and $result -notmatch '(?m)^LIT_GUARD samples=[1-9]\d* final_mode=3 shader_complexity=0 ') {
     throw 'The requested sustained Lit guard did not produce successful runtime evidence.'
 }
+# Suites selected only through -ExtraArguments have their own capture rules, not the full loop's:
+# the Hotkey safety fixture takes none (Test-HotkeySafety.ps1 expects 0 screenshots), and the
+# Feedback fixture takes one screenshot per measured notice (Test-FeedbackLayout.ps1).
+if ($ExtraArguments -match '(^|\s)-HomesteadHotkeyTest(\s|$)') { $captures = @() }
+elseif ($ExtraArguments -match '(^|\s)-HomesteadFeedbackTest(\s|$)') {
+    $captures = @(Get-ChildItem -LiteralPath $output -Filter '*.layout.json' | ForEach-Object { $_.Name -replace '\.layout\.json$', '.png' })
+    if ($captures.Count -lt 2) { throw 'The Feedback fixture measured fewer than two active notices.' }
+}
 foreach ($name in $captures) {
     $image = Join-Path $output $name
     if (-not (Test-Path -LiteralPath $image) -or (Get-Item -LiteralPath $image).Length -eq 0) {
