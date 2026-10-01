@@ -1,4 +1,5 @@
 #include "SHomesteadPickups.h"
+#include "HomesteadUITheme.h"
 
 #include "HomesteadPalette.h"
 #include "../HomesteadController.h"
@@ -14,7 +15,7 @@ namespace PickupStyle
 {
 // Outline in HUD units, and its ink: dark enough to read over sky, grass or snow without a panel.
 constexpr float Outline = 2.0f;
-inline constexpr FLinearColor OutlineInk(0.025f, 0.05f, 0.038f, 0.9f);
+HomesteadUITheme::FThemeColor OutlineInk(0.025f, 0.05f, 0.038f, 0.9f);
 }
 
 void SHomesteadPickups::Construct(const FArguments& Args)
@@ -35,7 +36,7 @@ int32 SHomesteadPickups::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
     // One HUD unit, whatever the viewport's DPI scale: 1/1080 of its height.
     const float Unit = Local.Y / 1080.0f;
     const FVector2D Anchor = Pixel * (Local / ViewportPixels);
-    FSlateFontInfo Font = FCoreStyle::GetDefaultFontStyle("Bold", TextSize * Unit);
+    FSlateFontInfo Font = HomesteadUITheme::Font("Bold", TextSize * Unit);
     Font.OutlineSettings.OutlineSize = FMath::Max(1, FMath::RoundToInt(PickupStyle::Outline * Unit));
     const TSharedRef<FSlateFontMeasure> Measure = FSlateApplication::Get().GetRenderer()->GetFontMeasureService();
     // Newest nearest her, older lines stacked above.

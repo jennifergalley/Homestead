@@ -6,8 +6,9 @@ The stamp folder holds one folder per resolution and input (720p, 4K-pad, ...), 
 <id>.png captures and gallery-index.tsv (id <tab> description). For each folder it writes:
   view/<id>.jpg   - a copy at most VIEW_WIDTH wide, small enough for an agent's image viewer
   contact.jpg     - every capture as a labelled thumbnail grid
-and in the stamp folder index.md (id, description, the capture at each resolution). Generated
-files; do not edit by hand.
+and in the stamp folder index.md (id, description, the capture at each resolution), plus, where a
+<res>-classic and a <res>-parchment folder both exist, side-by-side-<res>-NN.jpg pages: each screen's
+classic capture beside its parchment one, for the theme decision. Generated files; do not edit by hand.
 """
 from __future__ import annotations
 
@@ -78,6 +79,45 @@ def build_folder(folder: pathlib.Path, rows: list[tuple[str, str]]) -> list[str]
     return present
 
 
+PAIR_WIDTH = 900
+PAIRS_PER_PAGE = 8
+
+
+def build_side_by_side(stamp: pathlib.Path, order: list[str], descriptions: dict[str, str]) -> list[pathlib.Path]:
+    pages = []
+    for classic in sorted(path for path in stamp.glob("*-classic*") if path.is_dir()):
+        parchment = stamp / classic.name.replace("-classic", "-parchment")
+        if not parchment.is_dir():
+            continue
+        both = [i for i in order if (classic / f"{i}.png").exists() and (parchment / f"{i}.png").exists()]
+        label_font = font(22)
+        for page in range(0, len(both), PAIRS_PER_PAGE):
+            chunk = both[page:page + PAIRS_PER_PAGE]
+            rows = []
+            for identifier in chunk:
+                images = []
+                for folder in (classic, parchment):
+                    with Image.open(folder / f"{identifier}.png") as image:
+                        image = image.convert("RGB")
+                        images.append(image.resize((PAIR_WIDTH, round(image.height * PAIR_WIDTH / image.width)), Image.LANCZOS))
+                rows.append((identifier, images))
+            row_height = max(images[0].height for _, images in rows) + LABEL_HEIGHT + 8
+            sheet = Image.new("RGB", (PAIR_WIDTH * 2 + 12, 40 + row_height * len(rows)), BACKGROUND)
+            draw = ImageDraw.Draw(sheet)
+            draw.text((8, 8), "classic", fill=LABEL_COLOUR, font=label_font)
+            draw.text((PAIR_WIDTH + 20, 8), "parchment", fill=LABEL_COLOUR, font=label_font)
+            for number, (identifier, images) in enumerate(rows):
+                y = 40 + number * row_height
+                draw.text((8, y + 2), f"{identifier}: {descriptions.get(identifier, '')}"[:160], fill=LABEL_COLOUR, font=font(16))
+                sheet.paste(images[0], (0, y + LABEL_HEIGHT))
+                sheet.paste(images[1], (PAIR_WIDTH + 12, y + LABEL_HEIGHT))
+            resolution = classic.name.replace("-classic", "")
+            out = stamp / f"side-by-side-{resolution}-{page // PAIRS_PER_PAGE + 1:02d}.jpg"
+            sheet.save(out, quality=SHEET_QUALITY)
+            pages.append(out)
+    return pages
+
+
 def main() -> int:
     if len(sys.argv) != 2:
         print(__doc__)
@@ -102,6 +142,9 @@ def main() -> int:
         cells = [f"[view]({name}/view/{identifier}.jpg)" if identifier in present else "skipped"
                  for name, present in captured.items()]
         lines.append(f"| `{identifier}` | {descriptions[identifier]} | " + " | ".join(cells) + " |")
+    sides = build_side_by_side(stamp, order, descriptions)
+    if sides:
+        lines += ["", "## Classic | parchment", ""] + [f"- [{path.name}]({path.name})" for path in sides]
     (stamp / "index.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print(stamp / "index.md")
     return 0

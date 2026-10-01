@@ -4,6 +4,7 @@
 // cell back down into her pack or the chest: onto an empty place it moves, onto the same item it
 // merges, onto anything else the two swap (HomesteadControllerHotbarEditor.cpp).
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 #include "../Simulation/HomesteadHotbarLayout.h"
 #include "../Simulation/HomesteadPackRow.h"
 
@@ -41,10 +42,10 @@ FLinearColor SHomesteadMenu::HotbarCellColor(int32 Slot) const
         // Gold where it will go; a rust wash for something worn, which has to come off first.
         const FHomesteadRow* Row = HeldHotbarSlot == INDEX_NONE ? HotbarCandidateRow() : nullptr;
         const bool Refused = Row && Row->ContainerId < 0;
-        return Refused ? FLinearColor(0.42f, 0.16f, 0.08f, 0.9f) : MenuGold;
+        return Refused ? HomesteadUITheme::Themed(FLinearColor(0.42f, 0.16f, 0.08f, 0.9f)) : FLinearColor(MenuGold);
     }
-    if (Slot == HeldHotbarSlot) return FLinearColor(0.045f, 0.055f, 0.05f, 0.72f);
-    return Region == ERegion::Hotbar && Slot == HotbarSelection ? Selected : FLinearColor(0.055f, 0.09f, 0.075f, 0.5f);
+    if (Slot == HeldHotbarSlot) return HomesteadUITheme::Themed(FLinearColor(0.045f, 0.055f, 0.05f, 0.72f));
+    return Region == ERegion::Hotbar && Slot == HotbarSelection ? Selected : HomesteadUITheme::Themed(FLinearColor(0.055f, 0.09f, 0.075f, 0.5f));
 }
 FHomesteadHotbarSlot SHomesteadMenu::BookHotbarSlot(int32 Slot) const
 {
@@ -114,7 +115,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                         {
                             const bool Lit = IsHotbarDropTarget(Slot) || Slot == HeldHotbarSlot
                                 || (Region == ERegion::Hotbar && Slot == HotbarSelection);
-                            return Lit ? FLinearColor::Transparent : FLinearColor(0.2f, 0.3f, 0.24f, 0.25f);
+                            return Lit ? FLinearColor::Transparent : HomesteadUITheme::Themed(FLinearColor(0.2f, 0.3f, 0.24f, 0.25f));
                         })
                     ]
                 ]
@@ -135,7 +136,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                     [
                         SNew(SHomesteadIcon)
                         .Kind_Lambda([SlotInfo]() { return SlotInfo().Icon; })
-                        .Tint_Lambda([this, Slot, SlotInfo]()
+                        .Tint_Lambda([this, Slot, SlotInfo]() -> FLinearColor
                         {
                             // Pine on the gold of her selected cell, as on the world hotbar.
                             if (IsHotbarDropTarget(Slot) || (Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot)) return PineInk;
@@ -146,14 +147,14 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar()
                 + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(5, 3, 0, 0)
                 [
                     SNew(STextBlock).Text(FText::FromString(UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str())))
-                    .Font(FCoreStyle::GetDefaultFontStyle("Bold", 13))
+                    .Font(HomesteadUITheme::KeyFont("Bold", 13))
                     .ColorAndOpacity_Lambda([this, Slot]() { return FSlateColor(IsHotbarDropTarget(Slot) || (Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot) ? PineInk : Ink); })
                     .Visibility(EVisibility::HitTestInvisible)
                 ]
                 + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(0, 0, 5, 2)
                 [
                     // The stack's count (tools and garments are single).
-                    SNew(STextBlock).Font(FCoreStyle::GetDefaultFontStyle("Bold", 13))
+                    SNew(STextBlock).Font(HomesteadUITheme::Font("Bold", 13))
                     .Text_Lambda([SlotInfo]()
                     {
                         const auto Info = SlotInfo();

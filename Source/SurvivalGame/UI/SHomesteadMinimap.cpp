@@ -1,4 +1,5 @@
 #include "SHomesteadMinimap.h"
+#include "HomesteadUITheme.h"
 
 #include "../HomesteadMapComponent.h"
 #include "HomesteadMapPainter.h"
@@ -9,7 +10,7 @@ namespace
 {
 constexpr float MmLogicalRadius = 110.0f;
 constexpr int32 MmRimSegments = 72;
-const FLinearColor MmBezel(0.035f, 0.055f, 0.046f, 0.96f);
+HomesteadUITheme::FThemeColor MmBezel(0.035f, 0.055f, 0.046f, 0.96f);
 FVector2D MmToLocal(HomesteadMap::Vec Value) { return FVector2D(Value.x, Value.y); }
 HomesteadMap::Vec MmToVec(FVector2D Value) { return {Value.X, Value.Y}; }
 }

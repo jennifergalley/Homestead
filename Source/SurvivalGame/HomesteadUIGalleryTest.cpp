@@ -18,6 +18,7 @@
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
 #include "UnrealClient.h"
+#include "Engine/Engine.h"
 
 namespace UIGalleryRun
 {
@@ -81,6 +82,8 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
     const FString Index = FPaths::Combine(Output, TEXT("gallery-index.tsv"));
     IFileManager::Get().Delete(*Index, false, true, true);
     FHomesteadUIGallery::ResetFixture();
+    // The engine's own on-screen notes ("Preparing Shaders (19)") aren't part of her UI.
+    if (GEngine) GEngine->Exec(GetWorld(), TEXT("DisableAllScreenMessages"));
     Results.Add(FString::Printf(TEXT("UI_GALLERY ids=%d input=%s backdrop=%s heroine=%d"), Ids.Num(), bPad ? TEXT("Pad") : TEXT("KBM"),
         bPlain ? TEXT("plain") : TEXT("world"), bHeroine));
 
@@ -139,12 +142,12 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
             const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
             FHomesteadUIGallery::SetBackdrop(*Controller, bPlain && !(Entry && Entry->bKeepWorld), bHeroine);
         };
-        FStep& Backdrop = Steps.AddDefaulted_GetRef();
-        Backdrop.Name = TEXT("Backdrop for ") + Id;
-        Backdrop.Skip = [Status]() { return *Status <= 0; };
-        Backdrop.Action = ApplyBackdrop;
-        Backdrop.Check = []() { return true; };
-        Backdrop.Wait = UIGalleryRun::BackdropSeconds;
+        FStep& Settle = Steps.AddDefaulted_GetRef();
+        Settle.Name = TEXT("Backdrop for ") + Id;
+        Settle.Skip = [Status]() { return *Status <= 0; };
+        Settle.Action = ApplyBackdrop;
+        Settle.Check = []() { return true; };
+        Settle.Wait = UIGalleryRun::BackdropSeconds;
         FStep& Capture = Steps.AddDefaulted_GetRef();
         Capture.Name = TEXT("Capture ") + Id;
         Capture.Skip = [Status]() { return *Status <= 0; };

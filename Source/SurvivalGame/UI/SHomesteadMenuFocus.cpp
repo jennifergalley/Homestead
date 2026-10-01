@@ -1,4 +1,5 @@
 #include "SHomesteadMenuPrivate.h"
+#include "HomesteadUITheme.h"
 #include "../Simulation/HomesteadHotbarLayout.h"
 
 namespace HomesteadMenus
@@ -11,7 +12,7 @@ TSharedRef<SButton> SHomesteadMenu::MakeButton(const FString& Label, TFunction<v
         .OnClicked_Lambda([this, Action]() { if (PointerAction()) Action(); return FReply::Handled(); })
         [
             SNew(STextBlock).Text(FText::FromString(Label)).AutoWrapText(true)
-            .Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
+            .Font(HomesteadUITheme::Font("Regular", 17))
             .ColorAndOpacity_Lambda([Color]() { return Color.Get().GetSpecifiedColor() == MenuGold ? FSlateColor(PineInk) : FSlateColor(Ink); })
         ];
 }

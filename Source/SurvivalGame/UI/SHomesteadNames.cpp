@@ -1,4 +1,5 @@
 #include "SHomesteadNames.h"
+#include "HomesteadUITheme.h"
 #include "HomesteadPalette.h"
 
 #include "SHomesteadArrival.h"
@@ -18,13 +19,13 @@ namespace HomesteadMenus
 {
 namespace
 {
-constexpr FLinearColor NameInk = HomesteadPalette::Cream;
-constexpr FLinearColor NameMuted = HomesteadPalette::Sage;
-constexpr FLinearColor NameGold = HomesteadPalette::Brass;
-const FLinearColor NameWarning(0.95f, 0.55f, 0.42f);
-const FLinearColor NamePanel = HomesteadPalette::DeepPine.CopyWithNewOpacity(0.9f);
-const FLinearColor NameField(0.06f, 0.1f, 0.075f, 0.95f);
-const FLinearColor NameFieldSelected(0.13f, 0.19f, 0.14f, 1.0f);
+const FLinearColor& NameInk = HomesteadPalette::Cream;
+const FLinearColor& NameMuted = HomesteadPalette::Sage;
+const FLinearColor& NameGold = HomesteadPalette::Brass;
+HomesteadUITheme::FThemeColor NameWarning(0.95f, 0.55f, 0.42f);
+HomesteadUITheme::FThemeColor NamePanel(0.025f, 0.05f, 0.038f, 0.9f);
+HomesteadUITheme::FThemeColor NameField(0.06f, 0.1f, 0.075f, 0.95f);
+HomesteadUITheme::FThemeColor NameFieldSelected(0.13f, 0.19f, 0.14f, 1.0f);
 
 std::string ToUtf8(const FString& Text) { return std::string(TCHAR_TO_UTF8(*Text)); }
 }
@@ -69,7 +70,7 @@ void SHomesteadNames::Construct(const FArguments& Args)
                 [
                     SNew(STextBlock)
                     .Text(FText::FromString(TEXT("Name her, her family and the estate. You can keep these or type your own.")))
-                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 15)).ColorAndOpacity(NameMuted).AutoWrapText(true)
+                    .Font(HomesteadUITheme::Font("Regular", 15)).ColorAndOpacity(NameMuted).AutoWrapText(true)
                 ]
                 + SVerticalBox::Slot().AutoHeight()[Fields]
                 + SVerticalBox::Slot().AutoHeight()
@@ -83,7 +84,7 @@ void SHomesteadNames::Construct(const FArguments& Args)
                     SNew(STextBlock)
                     .Text_Lambda([this]() { return FText::FromString(Warning); })
                     .Visibility_Lambda([this]() { return Warning.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible; })
-                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 15)).ColorAndOpacity(NameWarning)
+                    .Font(HomesteadUITheme::Font("Regular", 15)).ColorAndOpacity(NameWarning)
                 ]
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 18, 0, 0)
                 [
@@ -95,7 +96,7 @@ void SHomesteadNames::Construct(const FArguments& Args)
                         .OnClicked_Lambda([this]() { Row = BackRow; OnBack.ExecuteIfBound(); return FReply::Handled(); })
                         [
                             SNew(STextBlock).Text(FText::FromString(TEXT("\u2039 Appearance")))
-                            .Font(FCoreStyle::GetDefaultFontStyle("Bold", 17)).ColorAndOpacity(ButtonColor(BackRow))
+                            .Font(HomesteadUITheme::Font("Bold", 17)).ColorAndOpacity(ButtonColor(BackRow))
                         ]
                     ]
                     + SHorizontalBox::Slot().FillWidth(1)
@@ -106,7 +107,7 @@ void SHomesteadNames::Construct(const FArguments& Args)
                         .OnClicked_Lambda([this]() { Row = BeginRow; TryBegin(); return FReply::Handled(); })
                         [
                             SNew(STextBlock).Text(FText::FromString(TEXT("Begin \u203A")))
-                            .Font(FCoreStyle::GetDefaultFontStyle("Bold", 20)).ColorAndOpacity(ButtonColor(BeginRow))
+                            .Font(HomesteadUITheme::Font("Bold", 20)).ColorAndOpacity(ButtonColor(BeginRow))
                         ]
                     ]
                 ]
@@ -114,7 +115,7 @@ void SHomesteadNames::Construct(const FArguments& Args)
                 [
                     SNew(STextBlock)
                     .Text(FText::FromString(TEXT("Controller: A edit with letters, Start begin, B back\nKeyboard: type, Tab or Enter for the next field, Esc back")))
-                    .Font(FCoreStyle::GetDefaultFontStyle("Regular", 14)).ColorAndOpacity(NameMuted).AutoWrapText(true)
+                    .Font(HomesteadUITheme::Font("Regular", 14)).ColorAndOpacity(NameMuted).AutoWrapText(true)
                 ]
             ]
         ]
@@ -131,7 +132,7 @@ TSharedRef<SWidget> SHomesteadNames::FieldWidget(int32 Field, const FText& Label
             SNew(SVerticalBox)
             + SVerticalBox::Slot().AutoHeight().Padding(2, 0, 0, 4)
             [
-                SNew(STextBlock).Text(Label).Font(FCoreStyle::GetDefaultFontStyle("Bold", 14))
+                SNew(STextBlock).Text(Label).Font(HomesteadUITheme::Font("Bold", 14))
                 .ColorAndOpacity_Lambda([this, Field]() { return FSlateColor(Row == Field ? NameGold : NameMuted); })
             ]
             + SVerticalBox::Slot().AutoHeight()
@@ -161,7 +162,7 @@ TSharedRef<SWidget> SHomesteadNames::FieldWidget(int32 Field, const FText& Label
                         SNew(STextBlock)
                         .Text_Lambda([this, Field]()
                         { return FText::FromString(FString::Printf(TEXT("%d/%d"), Values[Field].Len(), Homestead::Manor::MaxNameLength)); })
-                        .Font(FCoreStyle::GetDefaultFontStyle("Regular", 12)).ColorAndOpacity(NameMuted)
+                        .Font(HomesteadUITheme::Font("Regular", 12)).ColorAndOpacity(NameMuted)
                     ]
                 ]
             ]
@@ -203,7 +204,7 @@ TSharedRef<SWidget> SHomesteadNames::GridWidget()
                     [
                         SNew(STextBlock)
                         .Text_Lambda([this, X, Y]() { return FText::FromString(GridCell(X, Y)); })
-                        .Font(FCoreStyle::GetDefaultFontStyle("Bold", 16))
+                        .Font(HomesteadUITheme::Font("Bold", 16))
                         .ColorAndOpacity_Lambda([this, X, Y]() { return FSlateColor(GridX == X && GridY == Y ? FLinearColor::White : NameInk); })
                     ]
                 ]

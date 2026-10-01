@@ -114,6 +114,9 @@ bool SHomesteadMenu::HandleKey(FKey Key, EInputEvent Event, float InputAmount)
     }
     if (Key == EKeys::Gamepad_LeftShoulder) { ChangePage(ShiftFieldBookPage(SeenPage, -1)); return true; }
     if (Key == EKeys::Gamepad_RightShoulder) { ChangePage(ShiftFieldBookPage(SeenPage, 1)); return true; }
+    // The world's book shortcuts work inside it too, as the controls strip says: C crafting, B building.
+    if (Key == EKeys::C && !bControl) { ChangePage(1); return true; }
+    if (Key == EKeys::B && !bControl) { ChangePage(2); return true; }
     if (Key == EKeys::Tab)
     {
         if (bControl) ChangePage(ShiftFieldBookPage(SeenPage, bShift ? -1 : 1));

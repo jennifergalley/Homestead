@@ -3,6 +3,7 @@
 #if !UE_BUILD_SHIPPING
 #include "HomesteadCharacter.h"
 #include "HomesteadController.h"
+#include "Simulation/HomesteadBackpack.h"
 #include "Simulation/HomesteadEstatePublicRoad.h"
 #include "Simulation/HomesteadShops.h"
 #include "Simulation/HomesteadTravel.h"
@@ -59,17 +60,18 @@ Homestead::Point Ahead(Homestead::Point From, double YawDegrees, double Cm)
 
 namespace HomesteadUIGalleryBackdrop
 {
-// Sky, fog and effects off on the plain backdrop (FEngineShowFlags names; any missing are skipped).
+// Fog and effects off on the plain backdrop (FEngineShowFlags names; any missing are skipped). The sky
+// stays on so its light and the exposure stay as in the game (with it off, auto-exposure blew her out).
 const TCHAR* const HiddenFlags[] = {
-    TEXT("Atmosphere"), TEXT("Cloud"), TEXT("Fog"), TEXT("VolumetricFog"), TEXT("Particles"), TEXT("Decals"),
+    TEXT("Fog"), TEXT("VolumetricFog"), TEXT("Particles"), TEXT("Decals"),
     TEXT("Landscape"), TEXT("InstancedGrass"), TEXT("InstancedFoliage")};
-// A calm warm grey (linear), unlit, so edges and contrast read alike on every screen.
-const FLinearColor Neutral(0.20f, 0.19f, 0.17f, 1.0f);
+// A calm warm grey, lit like any surface in the scene, so the exposure matches the game.
+const FLinearColor Neutral(0.30f, 0.28f, 0.25f, 1.0f);
 // The plane stands this far beyond the camera, wide enough to fill any view.
 constexpr float DistanceCm = 6000.0f;
 constexpr float ScaleOfBasicPlane = 400.0f; // the basic plane is 100 cm across
 const TCHAR* const PlaneMesh = TEXT("/Engine/BasicShapes/Plane.Plane");
-const TCHAR* const UnlitMaterial = TEXT("/Engine/EngineMaterials/EmissiveMeshMaterial.EmissiveMeshMaterial");
+const TCHAR* const UnlitMaterial = TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial");
 TWeakObjectPtr<AStaticMeshActor> Plane;
 TWeakObjectPtr<UWorld> PlaneWorld;
 }
@@ -157,6 +159,8 @@ void FHomesteadUIGallery::Prepare(AHomesteadController& PC, bool bPad)
     {
         Homestead::Simulation& Sim = PC.Sim;
         Sim.SkipToHourOfDay(10.0);
+        // A trading day: the shops close on Sundays (Water's close-shops-on-sundays).
+        if (Sim.Today().weekday == Homestead::Weekday::Sunday) Sim.SkipToHourOfDay(10.0);
         const TPair<Homestead::Item, int32> Kit[] = {
             {Homestead::Item::Pasty, 3}, {Homestead::Item::Bread, 2}, {Homestead::Item::Berries, 5},
             {Homestead::Item::Branch, 6}, {Homestead::Item::Stone, 4}, {Homestead::Item::Fiber, 3},
@@ -205,6 +209,13 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         PC.InputKey(FInputKeyEventArgs::CreateSimulated(Key, IE_Released, 0));
     };
     const auto Accept = [Press](AHomesteadController& PC) { Press(PC, PC.UsesGamepad() ? EKeys::Gamepad_FaceButton_Bottom : EKeys::Enter); };
+    // After the book has built its rows (it builds on the frame after it opens).
+    const auto Later = [](AHomesteadController& PC, TFunction<void(AHomesteadController&)> Then)
+    {
+        TWeakObjectPtr<AHomesteadController> Weak(&PC);
+        FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([Weak, Then](float)
+            { if (Weak.IsValid()) Then(*Weak.Get()); return false; }), 0.3f);
+    };
     const auto Notify = [](const TCHAR* Text, bool bError)
     { return [Text, bError](AHomesteadController& PC) { PC.Notify(Text, bError); }; };
     const auto Book = [](int32 Page) { return [Page](AHomesteadController& PC) { PC.OpenBook(Page); }; };
@@ -389,22 +400,28 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Notice, static_cast<int32>(ENotice::BookNoticeError), nullptr,
         [](AHomesteadController& PC) { PC.OpenBook(0); PC.Notify(TEXT("You can't carry any more. Store something in a chest first."), true); });
     Add(TEXT("book-item-menu"), TEXT("Pack, a Cornish pasty's item menu: Eat, Move, Drop and the like."), ECover::Dialog, 3, nullptr,
-        [](AHomesteadController& PC)
+        [Later](AHomesteadController& Opened)
         {
-            PC.OpenBook(0);
+            Opened.OpenBook(0);
+            Later(Opened, [](AHomesteadController& PC)
+            {
             const auto Rows = PC.MenuRows();
             for (int32 Index = 0; Index < Rows.Num(); ++Index)
                 if (Rows[Index].Subject == EHomesteadMenuSubject::ItemGroup && Rows[Index].Id == static_cast<int32>(Item::Pasty))
                 { if (PC.NativeMenu.IsValid()) PC.NativeMenu->OpenItemContextMenu(Index, !PC.UsesGamepad()); return; }
-        });
+            });
+        }, 1.3f);
     Add(TEXT("book-quantity"), TEXT("Pack, the how-many popover for a stack of branches."), ECover::Dialog, 4, nullptr,
-        [](AHomesteadController& PC)
+        [Later](AHomesteadController& Opened)
         {
-            PC.OpenBook(0);
-            for (const auto& Row : PC.MenuRows())
-                if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Id == static_cast<int32>(Item::Branch))
-                { if (PC.NativeMenu.IsValid()) PC.NativeMenu->OpenQuantityPrompt(Row); return; }
-        });
+            Opened.OpenBook(0);
+            Later(Opened, [](AHomesteadController& PC)
+            {
+                for (const auto& Row : PC.MenuRows())
+                    if (Row.Subject == EHomesteadMenuSubject::ItemGroup && Row.Id == static_cast<int32>(Item::Branch))
+                    { if (PC.NativeMenu.IsValid()) PC.NativeMenu->OpenQuantityPrompt(Row); return; }
+            });
+        }, 1.3f);
     Add(TEXT("book-chest"), TEXT("A storage chest open beside her pack, with its name and Store matching."), ECover::Dialog, 5, Chest,
         [ChestId](AHomesteadController& PC) { PC.OpenChestStorage(ChestId(PC)); });
     Add(TEXT("book-chest-rename"), TEXT("Naming the chest: the name being typed and the suggestions."), ECover::Dialog, 6, Chest,
@@ -423,6 +440,30 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Notice, static_cast<int32>(ENotice::ShopStatus), Counter, Shop(1, 30, TEXT("pasty")));
     Add(TEXT("shop-backpack"), TEXT("Buy tab with 1,500 coins, choosing the leather backpack: its confirm."), ECover::Shop, 2, Counter,
         Shop(1, 1500, TEXT("upgrade")));
+    // The leather knapsack on her back (Props' SM_LeatherBackpack), bought through the store's own rule
+    // (from the counter: the gallery passes the counter's spot), seen in the open from several sides so
+    // the attach can be judged: the pack behind her back, the straps over her shoulders, nothing through
+    // her torso. The camera's yaw is relative to her facing (0 = behind her).
+    const auto Knapsack = [](float CameraYaw)
+    {
+        return [CameraYaw](AHomesteadController& PC)
+        {
+            if (PC.State().shops.empty()) return;
+            const auto& Shop = PC.State().shops.front();
+            PC.Sim.GrantMoney(Homestead::Backpack::Price - PC.State().money);
+            PC.Sim.BuyBackpack(Shop.id, Ahead({Shop.counterX, Shop.counterY}, Shop.counterYaw, 120.0));
+            if (const APawn* Pawn = PC.GetPawn())
+                PC.SetControlRotation(FRotator(-8.0f, Pawn->GetActorRotation().Yaw + CameraYaw, 0.0f));
+        };
+    };
+    Add(TEXT("hud-backpack"), TEXT("The leather knapsack on her back, from behind: the pack between her shoulder blades, her pack now 240."),
+        ECover::Shop, 4, nullptr, Knapsack(0.0f), 1.5f);
+    Add(TEXT("hud-backpack-side"), TEXT("The knapsack from her left side (90 degrees): the pack against her back, nothing through her torso."),
+        ECover::Hud, 12, nullptr, Knapsack(90.0f), 1.5f);
+    Add(TEXT("hud-backpack-three-quarter"), TEXT("The knapsack from behind her left shoulder (three-quarter): the straps over her shoulder."),
+        ECover::Hud, 13, nullptr, Knapsack(45.0f), 1.5f);
+    Add(TEXT("hud-backpack-front"), TEXT("The knapsack from the front three-quarter: the straps down her chest."),
+        ECover::Hud, 14, nullptr, Knapsack(150.0f), 1.5f);
     Add(TEXT("shop-quantity"), TEXT("Buy tab, choosing bread: the how-many dialog."), ECover::Shop, 3, Counter, Shop(1, -1, TEXT("Bread")));
 
     // Road signs.
@@ -433,21 +474,22 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             PC.FocusId = SignIndex(TEXT("GatewayRoadSign"));
             PC.InteractWithRoadSign();
         });
-    Add(TEXT("sign-refused"), TEXT("A one-way road sign she can't walk from here: only a rust-edged notice saying why, no book."),
-        ECover::Dialog, 8, nullptr, [](AHomesteadController& PC)
+    // At the manor's stop, the town sign's one way (to the manor) is refused: she's already there.
+    Add(TEXT("sign-refused"), TEXT("A one-way road sign she can't walk from here: only a rust-edged notice saying why ('You're already at the manor.'), no book."),
+        ECover::Dialog, 8, [](AHomesteadController&, FStage& Out, FString& Why)
         {
-            const auto& Signs = Homestead::EstatePublicRoad().signs;
-            for (int32 Index = 0; Index < static_cast<int32>(Signs.size()); ++Index)
-            {
-                const auto Ways = Homestead::RoadSignDestinations(Signs[Index].name);
-                if (Ways.size() != 1 || (PC.CanSetOut() && PC.MenuPlanTravel(Ways[0]).ok)) continue;
-                PC.Focus = AHomesteadController::EFocus::RoadSign;
-                PC.FocusId = Index;
-                PC.InteractWithRoadSign();
-                return;
-            }
+            const auto* Manor = Homestead::EstatePublicRoad().FindStop("Manor");
+            if (!Manor) { Why = TEXT("No manor stop on the public road."); return false; }
+            Out.bMove = true;
+            Out.Stand = Manor->position;
+            Out.Face = {Manor->position.x + 500.0, Manor->position.y};
+            return true;
+        }, [SignIndex](AHomesteadController& PC)
+        {
+            PC.Focus = AHomesteadController::EFocus::RoadSign;
+            PC.FocusId = SignIndex(TEXT("TownRoadSign"));
+            PC.InteractWithRoadSign();
         });
-
     // World notices.
     Add(TEXT("toast-success"), TEXT("World notice: a parchment slip at the top centre in the book's serif."),
         ECover::Notice, Toast, nullptr, Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false));
@@ -494,16 +536,32 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         [](AHomesteadController& PC) { PC.Sim.GrantItems(Item::Hatchet, 1); PC.ChooseOnHotbar(Item::Hatchet); });
     Add(TEXT("focus-plant"), TEXT("A tilled square ahead with seed chosen: the green outline and the keyed 'Sow' hint."),
         ECover::Focus, 2, Garden, [TillAhead](AHomesteadController& PC) { TillAhead(PC); PC.ChooseOnHotbar(Item::Seeds); });
-    Add(TEXT("focus-door"), TEXT("At the general store's door: the keyed door hint."), ECover::Focus, 3,
+    List.Last().Pending = TEXT("Water's seed outline and 'Plant <seed>' cue (jennifergalley-seed-outline @6408cdd7)");
+    // The door only offers a hint while the store is shut (open, it simply opens): after closing time.
+    Add(TEXT("focus-door"), TEXT("At the general store's door after closing (7 PM): 'General store | Closed' and the wait hint."), ECover::Focus, 3,
         [](AHomesteadController& PC, FStage& Out, FString& Why)
         {
             const auto* Door = PC.Sim.Layout().FindLandmark(Homestead::Anchor::GeneralStoreDoor);
             if (!Door) { Why = TEXT("No general store door."); return false; }
+            PC.Sim.SkipToHourOfDay(19.0);
             Out.bMove = true;
             Out.Stand = Ahead(Door->position, Door->yaw, -60.0);
             Out.Face = Ahead(Door->position, Door->yaw, 300.0);
             return true;
         }, nullptr);
+    Add(TEXT("focus-door-sunday"), TEXT("The general store's door at 10:00 on a Sunday: 'Closed today (Sunday) - opens Monday at 8 AM', no wait key, the CLOSED board, no shopkeeper."),
+        ECover::Focus, 15, [](AHomesteadController& PC, FStage& Out, FString& Why)
+        {
+            const auto* Door = PC.Sim.Layout().FindLandmark(Homestead::Anchor::GeneralStoreDoor);
+            if (!Door) { Why = TEXT("No general store door."); return false; }
+            for (int32 Step = 0; Step < 7 && PC.Sim.Today().weekday != Homestead::Weekday::Sunday; ++Step) PC.Sim.SkipToHourOfDay(10.0);
+            Out.bMove = true;
+            Out.Stand = Ahead(Door->position, Door->yaw, -60.0);
+            Out.Face = Ahead(Door->position, Door->yaw, 300.0);
+            return true;
+        }, nullptr);
+    List.Last().Pending = TEXT("Water's Sunday closing (jennifergalley-sunday-closing @077a7a3c / water-slot-1001)");
+    List.Last().bKeepWorld = true;
     Add(TEXT("focus-shopkeeper"), TEXT("At the counter facing the shopkeeper: her name and the keyed talk/trade hint."),
         ECover::Focus, 4, Counter, nullptr);
     Add(TEXT("focus-sign"), TEXT("Facing the Gateway road sign: 'Road sign | Town / Manor' and the keyed 'Choose a way'."),
@@ -580,7 +638,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     // The garden outlines are world geometry, and night and rain are about the world's look: these keep
     // the world on the plain backdrop.
     for (FEntry& Entry : List)
-        Entry.bKeepWorld = Entry.Id.StartsWith(TEXT("garden-")) || Entry.Id == TEXT("focus-plant")
+        Entry.bKeepWorld = Entry.bKeepWorld || Entry.Id.StartsWith(TEXT("garden-")) || Entry.Id == TEXT("focus-plant")
             || Entry.Id.EndsWith(TEXT("-night")) || Entry.Id.EndsWith(TEXT("-rain"));
     return List;
 }
@@ -725,8 +783,8 @@ void Run(const TArray<FString>& Args, UWorld* World)
             const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
             if (bOk && WeakPC.IsValid())
                 FHomesteadUIGallery::SetBackdrop(*WeakPC.Get(), bLivePlain && !(Entry && Entry->bKeepWorld), true);
-            if (bOk) UE_LOG(LogHomesteadUIGallery, Display, TEXT("UI_GALLERY_READY %s"), *Id);
-            else UE_LOG(LogHomesteadUIGallery, Warning, TEXT("UI_GALLERY_SKIPPED %s: %s"), *Id, *Why);
+            if (bOk) { UE_LOG(LogHomesteadUIGallery, Display, TEXT("UI_GALLERY_READY %s"), *Id); }
+            else { UE_LOG(LogHomesteadUIGallery, Warning, TEXT("UI_GALLERY_SKIPPED %s: %s"), *Id, *Why); }
         };
     };
     if (Verb.Equals(TEXT("all"), ESearchCase::IgnoreCase))

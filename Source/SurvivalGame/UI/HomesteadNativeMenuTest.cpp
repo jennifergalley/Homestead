@@ -1340,8 +1340,25 @@ void AHomesteadSmokeTest::PrepareNativeWardrobeChecks()
         [this]() { return Controller->NativeMenu->IsDyeChooserOpen(); });
     Add(TEXT("Moving to the next dye previews it on her without changing the save"),
         [this]() { Tap(EKeys::Gamepad_DPad_Down); },
-        [this, DyeTarget, DyeBefore]() { return Controller->NativeMenu->GetDyePreview() == *DyeTarget
-            && FString(UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str())) == *DyeBefore; });
+        [this, DyeTarget, DyeBefore]()
+        {
+            const FString Now = UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str());
+            const bool bPreview = Controller->NativeMenu->GetDyePreview() == *DyeTarget;
+            const bool bSame = Now == *DyeBefore;
+            if (!bPreview || !bSame)
+            {
+                // Which half failed, and where the save differs, for the next run.
+                TArray<FString> A, B;
+                DyeBefore->ParseIntoArrayLines(A);
+                Now.ParseIntoArrayLines(B);
+                int32 Line = 0;
+                while (Line < A.Num() && Line < B.Num() && A[Line] == B[Line]) ++Line;
+                Results.Add(FString::Printf(TEXT("DYE_PREVIEW preview=%d target=%d open=%d same=%d first_diff_line=%d before='%s' now='%s'"),
+                    Controller->NativeMenu->GetDyePreview(), *DyeTarget, Controller->NativeMenu->IsDyeChooserOpen(), bSame, Line,
+                    A.IsValidIndex(Line) ? *A[Line].Left(160) : TEXT(""), B.IsValidIndex(Line) ? *B[Line].Left(160) : TEXT("")));
+            }
+            return bPreview && bSame;
+        });
     Add(TEXT("Capture the dye chooser previewing the next dye"),
         [this]() { Screenshot(TEXT("native-dye-chooser")); },
         [this]() { return Controller->NativeMenu->IsDyeChooserOpen(); }, 0.8f);

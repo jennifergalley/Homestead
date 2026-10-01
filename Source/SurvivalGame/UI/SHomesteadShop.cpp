@@ -1,4 +1,5 @@
 #include "SHomesteadShop.h"
+#include "HomesteadUITheme.h"
 
 #include "SHomesteadIcon.h"
 #include "SHomesteadHudScale.h"
@@ -24,14 +25,14 @@ namespace HomesteadMenus
 {
 namespace
 {
-const FLinearColor ShopInk(0.93f, 0.93f, 0.84f);
-const FLinearColor ShopMuted(0.71f, 0.77f, 0.69f);
-const FLinearColor ShopGold(0.92f, 0.74f, 0.43f);
-const FLinearColor ShopWarning(1.0f, 0.67f, 0.48f);
-const FLinearColor ShopPanel(0.025f, 0.05f, 0.038f, 0.93f);
-const FLinearColor ShopRow(0.05f, 0.085f, 0.065f, 0.85f);
-const FLinearColor ShopSelected(0.13f, 0.20f, 0.15f, 0.95f);
-const FLinearColor ShopPineInk(0.025f, 0.05f, 0.038f, 1.0f);
+HomesteadUITheme::FThemeColor ShopInk(0.93f, 0.93f, 0.84f);
+HomesteadUITheme::FThemeColor ShopMuted(0.71f, 0.77f, 0.69f);
+HomesteadUITheme::FThemeColor ShopGold(0.92f, 0.74f, 0.43f);
+HomesteadUITheme::FThemeColor ShopWarning(1.0f, 0.67f, 0.48f);
+HomesteadUITheme::FThemeColor ShopPanel(0.025f, 0.05f, 0.038f, 0.93f);
+HomesteadUITheme::FThemeColor ShopRow(0.05f, 0.085f, 0.065f, 0.85f);
+HomesteadUITheme::FThemeColor ShopSelected(0.13f, 0.20f, 0.15f, 0.95f);
+HomesteadUITheme::FThemeColor ShopPineInk(0.025f, 0.05f, 0.038f, 1.0f);
 
 const FButtonStyle& ShopButtonStyle()
 {
@@ -71,7 +72,7 @@ void SHomesteadShop::Construct(const FArguments& Args)
 TSharedRef<SWidget> SHomesteadShop::Label(const FString& Value, int32 Size, const FLinearColor& Color, bool bWrap) const
 {
     return SNew(STextBlock).Text(FText::FromString(Value)).ColorAndOpacity(Color)
-        .Font(FCoreStyle::GetDefaultFontStyle("Regular", Size)).AutoWrapText(bWrap);
+        .Font(HomesteadUITheme::Font("Regular", Size)).AutoWrapText(bWrap);
 }
 
 TSharedRef<SWidget> SHomesteadShop::Button(const FString& Text, TFunction<void()> Action, bool bPrimary, float MinWidth)
@@ -80,10 +81,10 @@ TSharedRef<SWidget> SHomesteadShop::Button(const FString& Text, TFunction<void()
     [
         SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(14, 8))
         .HAlign(HAlign_Center)
-        .ButtonColorAndOpacity(bPrimary ? ShopGold : FLinearColor(0.10f, 0.16f, 0.12f, 1))
+        .ButtonColorAndOpacity(bPrimary ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
         .OnClicked_Lambda([Action]() { Action(); return FReply::Handled(); })
         [
-            SNew(STextBlock).Text(FText::FromString(Text)).Font(FCoreStyle::GetDefaultFontStyle("Regular", 15))
+            SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 15))
             .ColorAndOpacity(bPrimary ? ShopPineInk : ShopInk)
         ]
     ];
@@ -413,10 +414,10 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
         return SNew(SBox).MinDesiredWidth(150)
         [
             SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(16, 7)).HAlign(HAlign_Center)
-            .ButtonColorAndOpacity(Tab == Index ? ShopGold : FLinearColor(0.10f, 0.16f, 0.12f, 1))
+            .ButtonColorAndOpacity(Tab == Index ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
             .OnClicked_Lambda([this, Index]() { SetTab(Index); return FReply::Handled(); })
             [
-                SNew(STextBlock).Text(FText::FromString(Text)).Font(FCoreStyle::GetDefaultFontStyle("Regular", 17))
+                SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 17))
                 .ColorAndOpacity(Tab == Index ? ShopPineInk : ShopInk)
             ]
         ];
@@ -474,7 +475,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
                 + SVerticalBox::Slot().AutoHeight().Padding(0, 12, 0, 0)
                 [
                     SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                    .BorderBackgroundColor(FLinearColor(0.04f, 0.07f, 0.055f, 0.95f)).Padding(FMargin(14, 10))
+                    .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.04f, 0.07f, 0.055f, 0.95f))).Padding(FMargin(14, 10))
                     [
                         BuildFooter()
                     ]
