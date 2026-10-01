@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "WoodAnemone",
+  "description": "A clump of wood anemones in flower, 15 cm tall and 35 cm across: slender stems, a whorl of three cut leaves each, and white six-tepalled flowers with yellow centres. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 9000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/wood_anemone.py",
+  "source_sha256": "678b5152d7724311c32cc466be9c0160978c4b71795dd3cc905db7559245de90",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_WoodAnemoneClump": {
+      "vertices": 841,
+      "triangles": 1036,
+      "size_cm": [
+        32.65,
+        24.05,
+        15.53
+      ],
+      "materials": [
+        {
+          "name": "M_WoodAnemone",
+          "textures": {
+            "basecolor": "T_WoodAnemone_basecolor.png",
+            "normal": "T_WoodAnemone_normal.png",
+            "roughness": "T_WoodAnemone_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.011361494660377502,
+          0.0026298873126506805,
+          0.08
+        ]
+      },
+      "fbx": "SM_WoodAnemoneClump.fbx",
+      "sha256": "9c497f3ca5ff6bf60e8b2f95ba4ece9b9f1c187e4b86a50c5ab94da15ca541d2",
+      "preview": "preview_SM_WoodAnemoneClump.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WoodAnemoneClump_hero.png",
+          "detail": "beauty_SM_WoodAnemoneClump_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_WoodAnemoneClump_LOD1": {
+      "vertices": 298,
+      "triangles": 284,
+      "size_cm": [
+        24.9,
+        20.09,
+        15.53
+      ],
+      "materials": [
+        {
+          "name": "M_WoodAnemone",
+          "textures": {
+            "basecolor": "T_WoodAnemone_basecolor.png",
+            "normal": "T_WoodAnemone_normal.png",
+            "roughness": "T_WoodAnemone_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.011361494660377502,
+          0.0026298873126506805,
+          0.08
+        ]
+      },
+      "fbx": "SM_WoodAnemoneClump_LOD1.fbx",
+      "sha256": "c3d5dab5ed7ea852f76bf6c646def129800a457dacc060ce1c87baf441ab5a75",
+      "preview": "preview_SM_WoodAnemoneClump_LOD1.png"
+    },
+    "SM_WoodAnemoneClump_LOD2": {
+      "vertices": 217,
+      "triangles": 176,
+      "size_cm": [
+        24.83,
+        20.04,
+        15.53
+      ],
+      "materials": [
+        {
+          "name": "M_WoodAnemone",
+          "textures": {
+            "basecolor": "T_WoodAnemone_basecolor.png",
+            "normal": "T_WoodAnemone_normal.png",
+            "roughness": "T_WoodAnemone_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.011361494660377502,
+          0.0026298873126506805,
+          0.08
+        ]
+      },
+      "fbx": "SM_WoodAnemoneClump_LOD2.fbx",
+      "sha256": "fb6f593020af2b24595ffc437ba450ffb333eac6c332d7c193fca90cb4bd4fd2",
+      "preview": "preview_SM_WoodAnemoneClump_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_WoodAnemone: T_WoodAnemone_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_WoodAnemone_basecolor.png": "b7bc05c09d6bcc514a4af339d98e519492e329d0aeace3d66f963932760c7b66",
+    "T_WoodAnemone_normal.png": "e834382adee7d780a81a8db3be853ff864a6e0f243aade80c3ea4de2b116a38c",
+    "T_WoodAnemone_roughness.png": "4a4f7aa98b9b0033edf3417ca55ef8923e50ebb597b972b1f680723c0f4ce3f0"
+  }
+}

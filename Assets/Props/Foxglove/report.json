@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Foxglove",
+  "description": "A foxglove in flower, 90 cm tall: a rosette of large wrinkled grey-green leaves and a single one-sided spike of drooping purple bells, spotted inside, tapering to buds. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 14000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/foxglove.py",
+  "source_sha256": "f2933fdc2f6d1d8c5639d05c2538967a9205e666554978361a5f0485c7cfd029",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_Foxglove": {
+      "vertices": 1949,
+      "triangles": 2988,
+      "size_cm": [
+        45.66,
+        46.03,
+        95.94
+      ],
+      "materials": [
+        {
+          "name": "M_Foxglove",
+          "textures": {
+            "basecolor": "T_Foxglove_basecolor.png",
+            "normal": "T_Foxglove_normal.png",
+            "roughness": "T_Foxglove_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.008714661002159119,
+          -0.009680099785327911,
+          0.5
+        ]
+      },
+      "fbx": "SM_Foxglove.fbx",
+      "sha256": "7e4e552bb34ad96d9dc61a2182f6c2060a3c211a05b8638b935603a82ed3a87a",
+      "preview": "preview_SM_Foxglove.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Foxglove_hero.png",
+          "detail": "beauty_SM_Foxglove_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_Foxglove_LOD1": {
+      "vertices": 514,
+      "triangles": 676,
+      "size_cm": [
+        43.63,
+        39.35,
+        95.58
+      ],
+      "materials": [
+        {
+          "name": "M_Foxglove",
+          "textures": {
+            "basecolor": "T_Foxglove_basecolor.png",
+            "normal": "T_Foxglove_normal.png",
+            "roughness": "T_Foxglove_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.008714661002159119,
+          -0.009680099785327911,
+          0.5
+        ]
+      },
+      "fbx": "SM_Foxglove_LOD1.fbx",
+      "sha256": "a16e5a6c13f46bd7fbb6f93cd09caf2dd5947a1552aeb517b13bdff8a542b730",
+      "preview": "preview_SM_Foxglove_LOD1.png"
+    },
+    "SM_Foxglove_LOD2": {
+      "vertices": 235,
+      "triangles": 302,
+      "size_cm": [
+        38.28,
+        32.45,
+        103.48
+      ],
+      "materials": [
+        {
+          "name": "M_Foxglove",
+          "textures": {
+            "basecolor": "T_Foxglove_basecolor.png",
+            "normal": "T_Foxglove_normal.png",
+            "roughness": "T_Foxglove_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.008714661002159119,
+          -0.009680099785327911,
+          0.5
+        ]
+      },
+      "fbx": "SM_Foxglove_LOD2.fbx",
+      "sha256": "3ee1cc252d0807246d08ae65d4811e1a14fa9392a6504fe33468d975104b0839",
+      "preview": "preview_SM_Foxglove_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_Foxglove: T_Foxglove_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_Foxglove_basecolor.png": "08e862f164edd952a2be56c9cb06a8ae20acee1e9053d2bc3d5a5c9ea7079645",
+    "T_Foxglove_normal.png": "a538fff398be1cfb8735624f54fe11fad75bf93a4cf3cb6d2a2abbc4dae2d0cf",
+    "T_Foxglove_roughness.png": "4950ada19e50724159dc11334374069cd3e0b698616ab70f170944d6e8602b39"
+  }
+}

@@ -114,11 +114,11 @@ def describe(rng):
                             keep=rng.random(), curl=rng.uniform(0.1, 0.3)))
     side = rng.uniform(0, math.tau)
     bells = []
-    count = 24
+    count = 36
     for k in range(count):
         t = k / (count - 1)
-        bells.append(dict(t=0.46 + 0.42 * t, az=side + rng.uniform(-1.1, 1.1),
-                          length=(0.050 - 0.016 * t) * rng.uniform(0.92, 1.08), bud=t > 0.72, phase=rng.random()))
+        bells.append(dict(t=0.42 + 0.55 * t, az=side + rng.uniform(-1.1, 1.1),
+                          length=(0.048 - 0.014 * t) * rng.uniform(0.92, 1.08), bud=t > 0.66, phase=rng.random()))
     return dict(rosette=rosette, stem=dict(lean=rng.uniform(0, math.tau), tilt=rng.uniform(0.03, 0.08)),
                 bells=bells, side=side, stem_leaves=[dict(t=0.1 + 0.08 * k, az=k * 2.39996 + side,
                                                          length=0.14 - 0.022 * k) for k in range(5)])
@@ -168,18 +168,19 @@ def emit(desc, atlas, lod, height):
             b.tube([node, ped_end], [0.0012, 0.0010], 3, atlas.uv("stem"), v_length=0.1, phase=bl["phase"], flutter=0.5)
         if bl["bud"]:
             down = (out * 0.6 - Vector((0, 0, 0.5))).normalized()
-            b.sphere(ped_end + down * 0.006, 0.006 * (1.6 - bl["t"]), atlas.uv("bud"), segs=(5, 4, 3)[lod], rings=3,
-                     stretch=1.5, axis=down, phase=bl["phase"])
+            size = 0.0045 + 0.007 * (0.97 - bl["t"]) / 0.32
+            b.sphere(ped_end + down * size, size, atlas.uv("bud"), segs=(6, 4, 3)[lod], rings=4 if lod == 0 else 3,
+                     stretch=1.7, axis=down, phase=bl["phase"])
             continue
         # The bell hangs out and down from its pedicel, the mouth flaring and the lower lip jutting.
         down = (out * 0.75 - Vector((0, 0, 0.66))).normalized()
         L = bl["length"]
         along = [0.0, 0.15, 0.45, 0.75, 0.95, 1.0]
-        radii = [L * r for r in (0.10, 0.20, 0.27, 0.31, 0.36, 0.40)]
+        radii = [L * r for r in (0.07, 0.14, 0.20, 0.23, 0.26, 0.29)]
         ring = [ped_end + down * L * a for a in along]
         # The lower lip juts beyond the upper.
         ring[-1] = ring[-1] - Vector((0, 0, L * 0.06))
-        sides = (7, 5, 4)[lod]
+        sides = (8, 6, 4)[lod]
         roll = math.atan2(out.y, out.x)
         idx = (range(6) if lod == 0 else (0, 2, 5))
         b.tube([ring[i] for i in idx], [radii[i] for i in idx], sides, atlas.uv("bell"), v_length=L,
