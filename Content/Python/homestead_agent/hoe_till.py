@@ -14,8 +14,11 @@ back up into the carry. The game shows the square's turned soil from EVENTS['cho
 The keys name where the blade's tip is and the direction the haft points toward the blade; the
 right wrist follows from the hoe's carried placement in her hand (``HELD``, read from the running
 game's ``Held_SM_StoneHoe`` component relative to ``hand_r`` with ``homestead.CarryHoe`` at its
-default). SM_StoneHoe (Assets/Props/StoneHoe/report.json "attach"): pivot at the old working grip,
-haft along +Z toward its top end, blade tip at (0, -EDGE_OUT, EDGE_ALONG).
+default). SM_StoneHoe and SM_DrawHoe (Assets/Props/*/report.json): pivot at the working grip,
+haft along +Z toward its top end. Blender authors the blade on -Y, but the FBX export mirrors Y, so
+the imported tip is at (0, +EDGE_OUT, EDGE_ALONG). Authoring for -Y left her right hand folded
+about 150 degrees back on the forearm while the game spun the hoe half a turn in her fist to fix the
+blade (the anatomy audit's HoeTill wrist break); the hand is now solved for the hoe as it is.
 
 Component space: forward +Y, her left +X, up +Z, floor z = 0.
 """
@@ -83,10 +86,10 @@ def _frame(key):
 
 
 def prop_transform(key):
-    """Component-space transform of the hoe: +Z toward the top end (-h), -Y along the blade (b)."""
+    """Component-space transform of the imported hoe: +Z toward the top end (-h), +Y along the blade (b)."""
     tip, h, b = _frame(key)
     origin = tip - h * (-EDGE_ALONG) - b * EDGE_OUT
-    rot = unreal.MathLibrary.make_rot_from_zy(h * -1.0, b * -1.0)
+    rot = unreal.MathLibrary.make_rot_from_zy(h * -1.0, b)
     return unreal.Transform(origin, rot, unreal.Vector(1, 1, 1))
 
 
@@ -149,7 +152,7 @@ def build():
 def report(anim):
     """Baked blade tip (through the carried hoe in the baked right hand) vs keyed, and hand spacing."""
     bones = ['hand_r', 'hand_l']
-    tip_local = unreal.Vector(0, -EDGE_OUT, EDGE_ALONG)
+    tip_local = unreal.Vector(0, EDGE_OUT, EDGE_ALONG)
     lines = []
     for name, frame in FRAMES.items():
         b = ra.bone_positions(anim, bones, frame / 30)
