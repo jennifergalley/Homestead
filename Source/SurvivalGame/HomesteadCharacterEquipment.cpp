@@ -157,7 +157,24 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         const FTransform HeldPose = StoneHoe
             ? FTransform(FQuat(FVector::XAxisVector, FMath::DegreesToRadians(Lean))) * Spec.Rest
             : Tilt(Spec.Rest, Lean);
-        if (!Spec.bHangs) Prop->SetRelativeTransform(Turn * HeldPose);
+        FTransform Placed = Turn * HeldPose;
+        if (StoneHoe && Hoeing)
+        {
+            // Setting the hoe to till, she turns it in her fist about the palm's normal so the haft
+            // crosses her palm on a working grip's diagonal; carried straight, her wrist bent 74
+            // degrees toward the little finger (hoe_till.py WORK_TURN and the hand_r-space palm).
+            // The clip holds the work grip from its first frame to its last (its stand and end keys
+            // put the hoe where the carry has it), so the turn eases in and out with the blend.
+            constexpr float HoeWorkTurnDegrees = -45.0f;
+            const FVector PalmNormal = FVector(-0.036f, 0.984f, 0.175f).GetSafeNormal();
+            const FVector PalmCentre = FVector(-0.998f, -0.043f, 0.036f) * 6.0f + PalmNormal * 2.6f;
+            const float Work = FMath::SmoothStep(0.0f, 1.0f, Animation->TillWeight());
+            const FVector Haft = Placed.GetRotation().GetAxisZ();
+            const FVector HaftGrip = Placed.GetLocation() + Haft * FVector::DotProduct(PalmCentre - Placed.GetLocation(), Haft);
+            Placed = Placed * (FTransform(-HaftGrip)
+                * FTransform(FQuat(PalmNormal, FMath::DegreesToRadians(HoeWorkTurnDegrees * Work))) * FTransform(HaftGrip));
+        }
+        if (!Spec.bHangs) Prop->SetRelativeTransform(Placed);
         if (Spec.bHangs)
         {
             // Hanging from the fist unless the pour lays it in both hands (UpdateWaterPail).

@@ -22,6 +22,7 @@ blade (the anatomy audit's HoeTill wrist break); the hand is now solved for the 
 
 Component space: forward +Y, her left +X, up +Z, floor z = 0.
 """
+import math
 import unreal
 from homestead_agent import rig_authoring as ra
 from homestead_agent import kneel_gather as kg
@@ -40,6 +41,16 @@ EDGE_OUT = 19.31
 # The hoe's transform relative to hand_r while carried (AHomesteadCharacter::UpdateHeldTools):
 # location (cm) and rotation (x, y, z, w).
 HELD = ((-10.8226, -1.6719, 26.0197), (-0.709149, 0.694266, 0.003177, 0.122849))
+# While she tills, the hoe turns this far (deg) in her right fist about the palm's normal, so the haft lies
+# across her palm on the diagonal of a working grip instead of the carry's; carried straight, her right
+# wrist bent 74 degrees toward the little finger (joint_limits). The game turns it the same way as she sets
+# the hoe (HoeWorkTurnDegrees in HomesteadCharacterEquipment.cpp). The hand_r-space palm normal, finger
+# direction and the palm's centre (cm along the fingers and off the palm) are measured on her rig.
+WORK_TURN = -45.0
+PALM_NORMAL_R = (-0.036, 0.984, 0.175)
+PALM_ALONG_R = (-0.998, -0.043, 0.036)
+PALM_REACH_R = 6.0
+PALM_DEPTH_R = 2.6
 # Where her left hand closes on the haft, from the prop pivot toward the blade (cm).
 LEFT_ALONG = -4.0
 # The left hand's roll on the haft (deg about the haft toward the blade) away from knuckles down the blade's
@@ -99,9 +110,20 @@ def prop_transform(key):
     return unreal.Transform(origin, rot, unreal.Vector(1, 1, 1))
 
 
-def _held():
+def _held(work=True):
+    """The hoe in her right hand: carried (``HELD``) or, while she tills, turned ``WORK_TURN`` degrees in her
+    fist about the palm's normal through the point of the haft nearest her palm (the grip's centre)."""
     loc, q = HELD
-    return unreal.Transform(_v(loc), unreal.Quat(*q).rotator(), unreal.Vector(1, 1, 1))
+    loc, rot = _v(loc), unreal.Quat(*q)
+    if work and WORK_TURN:
+        n = _v(PALM_NORMAL_R).normal()
+        palm = _v(PALM_ALONG_R) * PALM_REACH_R + n * PALM_DEPTH_R
+        haft = rot.rotate_vector(unreal.Vector(0, 0, 1))
+        grip = loc + haft * (palm - loc).dot(haft)
+        half = math.radians(WORK_TURN) * 0.5
+        turn = unreal.Quat(n.x * math.sin(half), n.y * math.sin(half), n.z * math.sin(half), math.cos(half))
+        loc, rot = grip + turn.rotate_vector(loc - grip), turn * rot
+    return unreal.Transform(loc, rot.rotator(), unreal.Vector(1, 1, 1))
 
 
 def right_hand(s, key):
@@ -131,7 +153,17 @@ def build():
         if name in ('stand', 'end'):
             position, blade, edge = af.WRIST_R_STAND
             b, e = af._norm(blade), af._norm(edge)
-            s.key_world(frame, 'hand_r_ik_ctrl', position, right.turn(b, (e - b * e.dot(b)).normal()))
+            turn = right.turn(b, (e - b * e.dot(b)).normal())
+            if WORK_TURN:
+                # The carry's hoe exactly where it rides, her fist already on the work grip: the game turns
+                # the hoe in her hand as the clip blends in and out, so she regrips without moving it.
+                rest = s.bone('hand_r').rotation
+                hand = unreal.Transform(_v(position), (turn.quaternion() * rest).rotator(), unreal.Vector(1, 1, 1))
+                carried = unreal.MathLibrary.compose_transforms(_held(False), hand)
+                work = unreal.MathLibrary.compose_transforms(unreal.MathLibrary.invert_transform(_held()), carried)
+                position = (work.translation.x, work.translation.y, work.translation.z)
+                turn = (work.rotation * rest.inversed()).rotator()
+            s.key_world(frame, 'hand_r_ik_ctrl', position, turn)
             s.key_world(frame, 'hand_l_ik_ctrl', af.WRIST_L_STAND, s.hand_turn('l', (0, 0.2, -1), (-1, 0, 0)))
             continue
         position, turn = right_hand(s, name)
