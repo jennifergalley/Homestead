@@ -82,7 +82,7 @@ AHomesteadAnimInspector::AHomesteadAnimInspector()
     bExit = FParse::Param(Command, TEXT("HomesteadAnimInspectorExit"));
     if (OutDir.IsEmpty()) OutDir = FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("AnimInspector"), Action);
     FString ViewList = TEXT("front,left,right,top,threequarter");
-    FParse::Value(Command, TEXT("HomesteadAnimInspectorViews="), ViewList);
+    FParse::Value(Command, TEXT("HomesteadAnimInspectorViews="), ViewList, /*bShouldStopOnSeparator=*/false);
     TArray<FString> Names;
     ViewList.ParseIntoArray(Names, TEXT(","));
     for (const FString& Name : Names)
