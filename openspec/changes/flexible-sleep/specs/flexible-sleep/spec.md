@@ -52,10 +52,18 @@ work SHALL refuse with `Too tired`. The Energy bar SHALL change colour and pulse
 
 ### Requirement: Recovery loads the newest valid save
 
-Any recovery or checkpoint load SHALL choose the newest valid candidate by timestamp and simulation
-revision, rather than selecting an older Recovery save over a newer autosave.
+Estate recovery or checkpoint load SHALL choose the newest valid candidate by timestamp and
+simulation revision, rather than selecting an older Recovery save over a newer autosave. Legacy
+woodland recovery SHALL instead prefer a valid sheltered Recovery checkpoint with hunger and Energy
+at least 20, then choose the newest eligible candidate.
 
 #### Scenario: Newer autosave beats recovery
 
 - **WHEN** a valid autosave is newer than a valid Recovery save
 - **THEN** recovery loads the autosave
+
+#### Scenario: Woodland sheltered recovery wins
+
+- **WHEN** the woodland has a valid sheltered Recovery save with hunger and Energy at least 20 and
+  a newer nearly starved outdoor autosave
+- **THEN** recovery loads the sheltered Recovery save

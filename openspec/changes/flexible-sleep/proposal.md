@@ -45,6 +45,6 @@ None.
 - `HomesteadController.*`: the bed prompt, one-press admission and wake messages, low-Energy movement/
   tool gates, and newest-valid recovery/checkpoint selection.
 - HUD/menu: Energy colour/pulse plus concise threshold warnings.
-- Tests: native low-Energy/no-failure, sprint/tool/walk thresholds, newest-valid recovery by
-  timestamp/revision, ordinary short-sleep refusal, dawn-limited short sleep, and FullLoop
-  sleep/input routes. No save version bump.
+- Tests: native low-Energy/no-failure, sprint/tool/walk thresholds, newest-valid Estate recovery by
+  timestamp/revision, woodland sheltered-recovery preference, ordinary short-sleep refusal,
+  dawn-limited short sleep, and FullLoop sleep/input routes. No save version bump.

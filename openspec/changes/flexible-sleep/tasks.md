@@ -15,4 +15,5 @@
   sleep, with mouse/keyboard and controller parity.
 - [ ] 1.8 Nonfatal Energy: native/UE/package tests cover <25% sprint cutoff, <10% slow walk and
   `Too tired` tool refusal, bar colour/pulse plus `Getting tired`/`Exhausted` warnings, no
-  forced-doze/failure, eating/bed recovery, and newest-valid timestamp/revision recovery selection.
+  forced-doze/failure, eating/bed recovery, newest-valid Estate timestamp/revision selection, and
+  lethal-hunger woodland sheltered Recovery preference.

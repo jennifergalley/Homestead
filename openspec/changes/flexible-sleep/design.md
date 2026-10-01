@@ -14,7 +14,9 @@
    low. Below about 25% the sprint admission turns off; below about 10% walking slows and tools
    refuse with `Too tired`. The HUD owns the colour/pulse plus `Getting tired` / `Exhausted`
    warnings. Food and bed sleep are the only recovery actions.
-5. **Newest valid recovery.** Any recovery/checkpoint load evaluates valid candidate saves by
+5. **Mode-specific recovery.** Estate recovery/checkpoint load evaluates valid candidate saves by
    timestamp then simulation revision, selecting the newest rather than privileging an older
-   `Recovery` slot over newer autosaves.
+   `Recovery` slot over newer autosaves. Legacy woodland retains lethal hunger: recovery first
+   prefers a valid sheltered `Recovery` checkpoint with hunger and Energy at least 20, then selects
+   the newest eligible candidate to avoid loading a nearly starved outdoor autosave.
 6. **Sleep over 12 hours** runs as halves if needed because `Simulation::Sleep` accepts at most 12.
