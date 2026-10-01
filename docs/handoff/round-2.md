@@ -504,9 +504,10 @@ The design's "Lanes and ownership" table is authoritative. In short:
 - **`SimulationSaveVersion` is bumped once, at final integration** (design §10: `Plot::withered`, the new
   enum values, gate state, the second shop, `dayMinutes`). Lanes never bump it; tell the orchestrator
   before your `[ready]` if you add to the save format.
-- **Playtest builds** on the "Homestead Estate" shortcut twice daily: 7:30 AM (freeze 4:30 AM;
-  Integration slot 5:00 AM) and 9:00 PM (freeze 6:00 PM; Integration slot 6:30 PM). At freeze,
-  only UE-verified, code-reviewed work enters; the rest waits for the next slot
+- **Playtest builds** on the "Homestead Estate" shortcut three times daily: 7:30 AM (freeze 4:30
+  AM; Integration slot 5:00 AM), 4:00 PM (freeze 1:00 PM; Integration slot 1:30 PM) and 9:00 PM
+  (freeze 6:00 PM; Integration slot 6:30 PM). At freeze, only UE-verified, code-reviewed work
+  enters; the rest waits for the next slot
   (`docs\handoff\README.md`, "Playtest builds"). `main` must stay playable. The first evening
   build is October 1, 2026.
 - **Jenny's playtest feedback takes priority** over round-2 lane work.
@@ -615,9 +616,10 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
   length for it.
 - **Sunday closing:** resolved 2026-09-30 — both shops close all day Sunday. Water implements this
   on `jennifergalley-sunday-closing`; it remains unmerged and unshipped.
-- **UI theme:** resolved direction, pending screenshot approval — parchment cards plus EB Garamond
-  become the consistent menu/HUD theme if Jenny approves Menu's `homestead.UITheme` screenshot
-  trial.
+- **UI theme:** approved 2026-09-30 — parchment cards plus EB Garamond are the standing menu/HUD
+  theme and are scheduled for the 7:30 AM Estate build. The `homestead.UITheme` implementation
+  still needs its Integration/package receipt before it is called shipped; every future UI surface
+  needs a gallery entry.
 - **Night review:** Water supplies a side-by-side screenshot sheet; Jenny's Shipping build has no
   console, so do not request CVar trials from her.
 - **Names:** Tregear's and its keeper are placeholders.
@@ -654,9 +656,9 @@ after the north-west lake; town-entry/store acceptance, coordinate bridge, roads
 signs wait for the final road route. If the terrain or water work needs placement ids, the Water Agent
 claims them through this page before using them (the registry starts at 581000+).
 
-**Night tuning remains pending:** Water's unmerged `fix-night-brightness` defaults are
-`NightMoonLux=0.2`, `NightSky=0.3` and `NightMinExposure=-1`. Do not update the editor skill or
-claim a brightness fix until Integration has packaged RT-on sign-off.
+**Night tuning values are final:** Jenny approved Water's Set A:
+`NightMoonLux=0.2`, `NightSky=0.3` and `NightMinExposure=-1`. Its source/integration and packaged
+RT-on receipt remain pending; Water's side-by-side screenshot sheet is the player-review method.
 
 ### Forage placement ID freeze blocker
 
@@ -795,9 +797,10 @@ receipt.**
   October `190eb04c` (including Sunday closure) and cove kit `d3826435` onto the current
   chest/tools/teleport/Water base. Native Release 18/18 passes. Combined native compilation exposed
   stale backpack `constexpr Cents Price` and fixes it as whole-coin `Coins` in `6df4e916`.
-  Controller/UI, Editor/Game, PIE, package and delivery evidence are still absent. The parchment
-  theme is deliberately **classic by default** in `32ecce62`; explicit `homestead.UITheme`
-  parchment remains available only for Jenny's screenshot approval.
+  Controller/UI, Editor/Game, PIE, package and delivery evidence are still absent. `32ecce62`
+  kept classic as the temporary default during review; Jenny has now approved the
+  `homestead.UITheme` parchment/EB Garamond style for the 7:30 AM build. The default flip still
+  needs integration/package evidence; every future surface must have a UI-gallery entry.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
@@ -858,10 +861,10 @@ requirement.
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
 
-  **UI theme decision (Jenny, 2026-09-30):** parchment cards plus EB Garamond become the consistent
-  menu and HUD theme if she approves Menu's screenshot trial. Menu is evaluating the
-  `homestead.UITheme` switch; do not roll it out or call it shipped before that visual approval and
-  the normal resolution/input checks.
+  **UI theme decision (Jenny approved 2026-09-30):** parchment cards plus EB Garamond are the
+  consistent menu/HUD theme for the 7:30 AM build. Menu's `homestead.UITheme` switch remains
+  package-pending; retain normal resolution/input checks and require a gallery entry for every new
+  surface before calling it shipped.
 - **Pickup gain popup** — **Menu acceptance `04959978` is main-integrated in `23aba36a`, but excluded
   from the next aim/rain/Shipping package and not shipped.** Based on common Simulation revision gains
   across pack, owned chests and drops, it suppresses moves/reloads and Water, then presents a
@@ -1464,7 +1467,8 @@ not claim early Energy is fully solved.
   intensity is 0.6 (day 1), and night auto-exposure has a -2 EV100 floor (day 0). The combined
   moon/sky/adaptation cause is plausible, not visually proven.
 
-  **Water wired partial `71cffeaa` is unshipped and outside the 4 PM build.** It wires
+  **Water wired partial `71cffeaa` is unshipped.** Jenny's final night Set A is
+  `NightMoonLux=0.2`, `NightSky=0.3` and `NightMinExposure=-1`; it wires
   `HomesteadNightLight` into `UpdateLighting`; CVar defaults `NightMoonLux=0.2`, `NightSky=0.3` and
   `NightMinExposure=-1` match `NightLightTuning`. The schedule holds 0.2 lux moonlit ground after
   dusk (altitude compensation capped at 1 lux low), uses night sky 0.3 rather than 0.6 and leaves noon
@@ -1475,9 +1479,9 @@ not claim early Energy is fully solved.
   It still needs PIE after the Menu/Props editor turns, then Integration's fixed-camera packaged RT-on
   Lumen hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to
   calibrate smooth dusk and lamp/hearth readability. Neither the trace nor the wired schedule
-  establishes a visual fix; do not update the editor skill's default row before this sign-off.
-  **Jenny's review method (2026-09-30):** Water provides a side-by-side screenshot sheet; her
-  Shipping build has no console, so no player-side CVar trial is assumed.
+  establishes an integrated delivery; package/RT-on acceptance remains required. **Jenny's review
+  method (2026-09-30):** Water provides a side-by-side screenshot sheet; her Shipping build has
+  no console, so no player-side CVar trial is assumed.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of

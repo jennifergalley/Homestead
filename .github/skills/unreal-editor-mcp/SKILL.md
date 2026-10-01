@@ -222,7 +222,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | After `build_ground.py` or `build_landscape_material.py` in the editor, `M_EstateGrass`/`MI_EstateGrass`, `SM_GrassPatch_LOD0-2`, `T_GrassWind`, `T_Ground_Stony`/`Trodden_*` and `M_EstateLandscape` show as modified | The bake re-saves them byte-different with identical content | Close the editor, then `git checkout -- Content` unless you actually changed the bake's inputs. |
 | `scatter.py` leaves a diff in the placement `.inc` that is only line endings | It writes LF, and the checkout uses `core.autocrlf` | Harmless. Check with `git diff --ignore-cr-at-eol` (or `-w`) and don't commit a line-ending-only change. |
 | PIE woodland forest floor near-black at noon; terrain half streamed | Agent editors run with ray tracing off; the game's lighting is tuned for RT | Don't judge brightness, night lighting or shadows in PIE. Use the packaged build (RT on), or `-RayTracing` when process limits allow. |
-| Estate nights look like a bright moonlit day | `homestead.NightMinExposure` (default -2, `HomesteadWorld.cpp`) lets auto-exposure brighten the night | At `homestead.NightMinExposure 1`, point lights (lamp, hearth) read as night lighting. Judge night lighting in the packaged build (RT on), and tell the orchestrator before changing the default. |
+| Estate nights look like a bright moonlit day | Current main still has the pre-review exposure path; Jenny's final pending Set A is `NightMoonLux=0.2`, `NightSky=0.3`, `NightMinExposure=-1` | Do not judge night/lamp balance in agent PIE (RT off). Water supplies a side-by-side screenshot sheet; Integration must verify the approved set in packaged RT-on before its 7:30 AM delivery receipt. Jenny's Shipping build has no console, so do not ask her to trial CVars. |
+| PIE says `pie:true` but has no `worldReady`/location/control yaw, the viewport is black, and `shot` says `Failed to capture any editor windows` | The editor main window is minimized (`IsIconic`), so PIE never brings up the world despite the session starting | Restore the editor window, then restart PIE: use `ShowWindow((Get-Process -Id <editor-pid>).MainWindowHandle, 4)`, then `unpie; pie`. Verify `worldReady` and pawn spawn before testing. |
 | A red on-screen warning in Development builds: "Cached lighting in Lumen ... going to be clipped ... r.EyeAdaptation.CachedLightingPreExposure", in full sun (about EV 13.5) | The cached-lighting pre-exposure range didn't cover bright sun | `DefaultEngine.ini` `[SystemSettings]` sets `r.EyeAdaptation.CachedLightingPreExposure=8` (about EV -4 to 16). If it returns, adjust that value, not the exposure. |
 | `'HomesteadLabController' object has no attribute 'get_pawn'` | Not exposed to Python | `unreal.GameplayStatics.get_player_pawn(world, 0)`. |
 | `NameError: name '__file__' is not defined` in `run_python` | `run_python` executes a code string, not a file | `pyfile <path>` (McpHelpers), or `exec(compile(open(p).read(), p, 'exec'), {'__file__': p, '__name__': '__main__'})`. |
@@ -1033,8 +1034,10 @@ Extend it there when play needs a capability; prefer real input over state edits
 
 ### Seeing every UI (pending UI gallery)
 
-**Source-only at `jennifergalley-menu-gallery-0930` `d34a03f9`; do not claim gallery coverage until
-it compiles and runs.** `FHomesteadUIGallery` is a Development-only list of named, deterministic UI
+**Jenny approved the parchment/EB Garamond UI theme on 2026-09-30 for the 7:30 AM build.** The
+gallery implementation remains source-only at `jennifergalley-menu-gallery-0930` `fdbd50ac`; do
+not claim gallery coverage until it compiles and runs. Every new UI surface must use the approved
+theme and add a gallery entry. `FHomesteadUIGallery` is a Development-only list of named, deterministic UI
 states. Each state begins from an isolated 10:00 fixture—known pack, 1,000 coins, Energy 80, no
 notices/pickups and no surface open—then shows exactly one book page, settings tab, dialog, shop,
 sign confirmation/refusal, notice, focus hint/outline or HUD state. The coverage check fails if any
