@@ -36,8 +36,7 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `docs\handoff\round-<n>.md`). Lanes implement, verify in the editor, run native tests, compile-check
   with `Scripts\Invoke-UnrealBuild.ps1`, commit and push, then send `[ready]` to the
   orchestrator ("Delivering lane work" in `docs\handoff\README.md`). The orchestrator only
-  coordinates and never builds. The separate `mvp-survival` line packages its own deliverables to
-  `E:\Repos\HomesteadMVP\Windows`, after telling the orchestrator.
+  coordinates and never builds.
 - **At most 2 Unreal processes on the machine** (Jenny, 2026-09-28; it was 3), counting editors,
   packaged games and commandlets (`UnrealEditor-Cmd` imports and bootstraps too). Each editor commits
   15-17 GB of memory: with three open, the 32 GB machine ran out of RAM and the pagefile on C: grew to
@@ -108,10 +107,17 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `t.FPSChart.OpenFolderOnDump 0` first (`ChartCreation.cpp`).
 - **Scratch and helper files** go in the worktree's `Saved\` (git-ignored) or
   `E:\CopilotScratch\<session-id>\`, never `%TEMP%` (on C:, and shared between sessions) or a shared
-  fixed filename. See the disk rules in `~\.copilot\copilot-instructions.md`.
-- **Jenny's playable builds.** Never retarget or overwrite `Desktop\Homestead.lnk` or anything
-  under `E:\Repos\HomesteadMVP\`. The estate build gets its own "Homestead Estate" shortcut. Never
-  merge the `mvp-survival` branch with `main`, in either direction.
+  fixed filename. Long-running sessions must periodically check
+  `~\.copilot\session-state\<session-id>\files` size: transcript images and other bulky artifacts
+  can silently fill C:. Move only the identified bulky subfolder to
+  `E:\CopilotScratch\<session-id>\` with
+  `robocopy "<source>" "<destination>" /E /MOVE`—never bulk-delete the session folder. See the
+  disk rules in `~\.copilot\copilot-instructions.md`.
+- **Jenny's playable build.** `Homestead Estate.lnk` is the only active game shortcut; Integration
+  retargets it only after save-safety and package checks. Jenny retired the survival MVP at
+  `archive/mvp-survival-20260930` (`93612cdf`); its old package, saves and retired shortcut backup
+  were deleted with her approval, leaving the Git tag as the only MVP archive reference. Do not confuse the active
+  `jennifergalley-mvp-woodland-biome` Estate Seasons handoff (`b19a0ad0`) with the retired line.
 - **Saves.** Lanes never change `SimulationSaveVersion`; the orchestrator bumps it once per
   integration. It's **13** (stocks carry their width; v12 saves migrate; version 11 is refused with a reset notice;
   7-10 still migrate). If your branch adds anything to the save format, tell the orchestrator
@@ -170,6 +176,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Editor startup hangs with no log output after `Waiting for ZenServer to be ready`; a native "Wait for ZenServer?" Yes/No dialog is up | The log shows `Found existing instance running on port 8558 with different data directory, will attempt shutdown`: this worktree's `DerivedDataCache\Zen` differs from the running zenserver, so the editor restarts zenserver on its own data dir. That can also pull Zen out from under another worktree's editor | `Start-EditorMcp.ps1` now answers Yes automatically while it waits (it sends the dialog's `IDC_YES` command). By hand: find the window titled "Wait for ZenServer?" for the editor PID with `EnumWindows` and post `WM_COMMAND` 1003 to it (UIA Invoke isn't available). Warn other lanes if you see the shutdown line. |
 | Every MCP call hangs after a reimport or bake | A hidden modal ("Overwrite Existing Object") behind PIE | Stop PIE before reimports and Sequencer bakes. To recover, find the modal with user32 `EnumWindows` on the editor PID and click it, or kill and restart the editor. |
 | `CaptureEditorImage`: `Failed to capture any editor windows` | Floating or minimised PIE window, or a different monitor | `hshot` (`HighResShot` through `execute_console_command` with the player controller) writes `Saved\Screenshots\WindowsEditor\*.png`, but without Slate UI. For UI, bring PIE in-viewport and retry `shot`, or capture a standalone `-game` window. |
+| PIE says `pie:true` but has no `worldReady`/location/control yaw, the viewport is black, and `shot` says `Failed to capture any editor windows` | The editor main window is minimized (`IsIconic`), so PIE never brings up the world despite the session starting | Restore the editor window, then restart PIE: use `ShowWindow((Get-Process -Id <editor-pid>).MainWindowHandle, 4)`, then `unpie; pie`. Verify `worldReady` and pawn spawn before testing. |
 | The hotbar, vitals or field book are missing from a screenshot | `HighResShot` (`hshot`) renders the scene and Canvas HUD only; Slate viewport widgets aren't drawn into it | Use `shot` (`CaptureEditorImage`) or `[GameWin]::Capture` of a standalone `-game` window. |
 | `hshot` / `HighResShot` captures come out black | The editor window is minimised | Keep it restored (it can be behind other windows). |
 | On the first PIE after launch, a floating "Message Log" window (Asset Check, Map Check, Localization Service) covers PIE in `shot` captures | The editor reports load-time checks | Close it: post `WM_CLOSE` to the editor-PID window titled "Message Log", or `click` its X (scale capture coordinates; see the helper table). `hshot` (HighResShot) isn't affected. |
@@ -377,9 +384,11 @@ hk release_all; mcp $E StopPIE
   about 87-95 m, Z ≈ 8700-9500) and views; see table 0.1.
 - **Time and weather for tests:** `HomesteadMorning <h>` (console, with the player controller) jumps the
   clock without simulating the skipped hours. With `h` earlier than the current hour it goes to the next
-  day, which is the quick way to reach rain: `IsRainDay` chooses two stable hashed days per ten-day
-  block (offsets 1–2 and 6–7; day 0 is dry and block 0's first rain is day 1), from 09:00 to 15:00.
-  Use `Homestead::IsRainDay`/the active test route rather than assuming days 2, 5, 8. Time skips
+  day, which is the quick way to reach rain. The current main schedule chooses two stable hashed
+  days per ten-day block (offsets 1–2 and 6–7; day 0 is dry and block 0's first rain is day 1),
+  from 09:00 to 15:00. **Jenny's 2026-09-30 full-cycle seasonal, reload-stable rain direction is
+  pending Water implementation**; do not write new routes that assume the daytime window. Use the
+  active `IsRainDay`/rain test route rather than hard-coded days or hours. Time skips
   don't grow crops or run day-rollover logic; only Advance or Sleep does. For deterministic crop tests,
   use `HomesteadGrowCrops <days> [tend=1]` to advance crop days, or
   `HomesteadCropGrowth <0-1>` to set the growth fraction directly.
@@ -1019,6 +1028,31 @@ Extend it there when play needs a capability; prefer real input over state edits
   vertex colours (`ToFColor(true)`), and `FGeometry::GetLocalSize()` returns `FVector2f`. Font assets: a
   `FontFace` needs `loading_policy` INLINE, and an `FTypefaceEntry` is built with `Emplace_GetRef(name)`
   then `.Font = FFontData(Face)`.
+
+### Seeing every UI (pending UI gallery)
+
+**Source-only at `jennifergalley-menu-gallery-0930` `d34a03f9`; do not claim gallery coverage until
+it compiles and runs.** `FHomesteadUIGallery` is a Development-only list of named, deterministic UI
+states. Each state begins from an isolated 10:00 fixture—known pack, 1,000 coins, Energy 80, no
+notices/pickups and no surface open—then shows exactly one book page, settings tab, dialog, shop,
+sign confirmation/refusal, notice, focus hint/outline or HUD state. The coverage check fails if any
+book tab, settings tab or notice style lacks an entry; add one whenever a surface is added.
+
+- **Multi-resolution capture:** after integration, run
+  `pwsh -File Scripts\Capture-UiGallery.ps1 [-Ids a,b] [-Res 720p,1080p,1440p,4K] [-Input KBM,Pad]`.
+  Output is `E:\CopilotScratch\<session>\ui-gallery\<stamp>\<res>[-pad]\<id>.png`, plus
+  viewable `view\<id>.jpg`, per-resolution `contact.jpg` and a stamp-level `index.md`. It starts
+  one hidden Development game per resolution/input (about 10 minutes each), refuses to start with
+  two Unreal processes or under 6 GB free, and keeps saves sandboxed through
+  `-HomesteadSmokeTest`. `setup-new-game` owns the screen, so it must run last in `all`.
+- **One hidden route:** `Scripts\Test-Game.ps1 -UIGallery -UIGalleryIds all -UIGalleryInput KBM
+  -Width <n> -Height <n> -OutputDirectory <dir>`. It captures the game window through
+  `FScreenshotRequest` with Slate UI, not the desktop. Never omit `-HomesteadSmokeTest`: without
+  it the run is not save-isolated.
+- **Live PIE:** use `homestead.UIGallery list | <id> | next | prev | all [Pad|KBM]`,
+  `python Scripts\editor_mcp.py gallery <id> [--input Pad] [--wait 6]`, or the McpHelpers
+  `gallery <id> [Pad] [wait]` helper. This mutates the running PIE fixture, so never point it at a
+  real save. Use `shot`; `hshot`/HighResShot omit Slate.
 
 ## 9. Field notes
 

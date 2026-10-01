@@ -19,7 +19,7 @@ page current; report changes to it rather than editing lane rows yourself.
 | Ruined manor and arrival | `f8b77021-941d-47e8-8bbd-1e93a632e5e8` | `jennifergalley-ruined-manor-and-arrival` | `jennifergalley-studious-doodle` | 8768 | `add-ruined-manor-and-arrival` |
 | Estate boundary and minimap | `6e131c6a-a333-4f65-a10b-a634a2f04117` | `jennifergalley-estate-boundary-and-minimap` | `jennifergalley-automatic-spork` | 8766 | `add-estate-boundary-map-and-minimap` |
 | Estate ocean and water | `89914e30-d8b6-4605-8635-5735406c97a2` | `jennifergalley-estate-ocean-and-water` | `jennifergalley-silver-guide` | 8771 | `author-fixed-cornish-estate-map` (task 2.3: ocean, river, pail refill) |
-| MVP survival polish (separate product line; never merge with `main`) | `d587d011-6481-4e8d-a465-ecbe80e96bbc` | `mvp-survival` (session branch `jennifergalley-mvp-survival-polish`) | `jennifergalley-probable-barnacle` | 8770 | none |
+| MVP survival polish (**retired 2026-09-30; historical lane**) | `d587d011-6481-4e8d-a465-ecbe80e96bbc` | archived as `archive/mvp-survival-20260930` (`93612cdf`) | `jennifergalley-probable-barnacle` | 8770 | none |
 | Planning (idle) | `57cf6ea4-e358-4d63-b34d-c140448d7ad6` | `jennifergalley-cozy-estate-pivot-plan` | | | `pivot-to-cozy-estate-life-sim` |
 | Blender assets (idle) | `65a2408b-f87d-42c7-afdf-c48370465344` | `jennifergalley-blender-asset-pipeline` | | | |
 
@@ -209,8 +209,9 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   assume.
 - Shared-doc findings go through the docs agent (`docs\handoff\README.md`).
 - Packaging is centralized (Jenny, 2026-09-27): only one session runs UAT and packaged tests;
-  lanes implement, push and notify. `mvp-survival` packages its own deliverables to
-  `E:\Repos\HomesteadMVP\Windows` after telling the orchestrator.
+  lanes implement, push and notify. The then-separate MVP survival line was retired on 2026-09-30
+  as `archive/mvp-survival-20260930` (`93612cdf`); this historical note is not an active package
+  instruction.
 - **The orchestrator only coordinates** (Jenny, 2026-09-28). Hands-on integration moved to a dedicated
   session, `e251051b` ("Integration Agent", worktree `jennifergalley-literate-eureka`): it merges
   forwarded `[ready]`s, builds, runs native, packaged, PIE and perf checks, packages, and reports
@@ -220,7 +221,8 @@ packaged build (she starts facing the lit doorway); there's no `controlYaw` asse
   (`jennifergalley-literate-eureka\Build\Windows`). At the end of the round, when the orchestrator
   says so, it retargets the "Homestead Estate" shortcut to that build's `JennysHomesteadGame.exe`, keeping
   the Homestead icon. Until then the shortcut stays on `jennifergalley-cautious-pancake`, and
-  `Homestead.lnk` is never touched.
+  At the time, `Homestead.lnk` was left untouched; it was removed during the 2026-09-30 MVP
+  retirement, leaving `Homestead Estate.lnk` as the only active game shortcut.
 - Overgrown clearing lane: removes the knife, machete, warmth and fibre paths. Its "Estate tool route"
   is now in skill section 4; the manor lane added the on-foot routes to all five salvage piles.
 

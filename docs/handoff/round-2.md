@@ -89,7 +89,9 @@ and ShellLink-read-back verified to
 `-ReuseCooked` staging output contains only `SurvivalGame-Win64-Shipping.exe`, so Integration made a
 candidate-local hard-link `JennysHomesteadGame.exe` alias and verified the same SHA before shortcut
 promotion. Estate-map arguments, candidate-local `-UserDir`, working directory and icon are retained;
-the prior link is backed up on `E:` and `Homestead.lnk` remains MVP-untouched.
+the prior Estate link is backed up on `E:`. MVP survival was retired on 2026-09-30 as
+`archive/mvp-survival-20260930` (`93612cdf`); `Homestead.lnk` was removed and
+`Homestead Estate.lnk` is the only active game shortcut.
 
 Phoenix Development passed all six packaged suites. Shipping reuses five hash-identical cooked
 containers; copied-save F5/F9 passed; 175 owned-PID endpoint samples observed zero sockets. All 19
@@ -283,7 +285,8 @@ Jenny game process, fresh staged data and no new blocker. ShellLink read-back re
 `Build\Releases\20260929-split-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
 with SHA `2A1834BC5B667740F184AB949A147A3A14A7E00E0B8F8A8E1384554AF1CC3FA4`. Estate-map arguments,
 candidate-local `-UserDir`, icon and working directory are retained. The prior Shipping link is
-backed up on `E:`, Development remains a rollback path and `Homestead.lnk` remains MVP-untouched.
+backed up on `E:` and Development remains a rollback path. Historical receipt: `Homestead.lnk` was
+then left untouched; it was removed during the 2026-09-30 MVP retirement.
 
 The Shipping package reuses five byte-identical cooked containers. Its copied-Estate-save startup
 probe reports `shipping=true`, `traceCompiled=false`, Lit 634 ticks, F5/F9 MD5 equality and zero
@@ -397,7 +400,8 @@ Menu pickup `b2a49e36` + `cb3f40c7`, weed clip and scythe remain excluded.
 FullLoop berry-regrowth assertion correction). After Jenny quit and asked, Integration retargeted only
 `Homestead Estate.lnk` to
 `jennifergalley-literate-eureka\Build\Playtest-0929pm\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`;
-`Homestead.lnk` and the morning `Playtest-0929` build remain untouched. The latest Estate save
+Historical receipt: `Homestead.lnk` and the morning `Playtest-0929` build then remained untouched.
+The latest Estate save
 (`Manual`, 2:01 PM) carried over and is scratch-backed.
 
 All packaged 1080p suites passed: Smoke 57.9 fps, Clearing 52.1, Hotbar 53.5, NativeMenu 56.6 and
@@ -405,15 +409,17 @@ FullLoop 54.5. `EstateSmoke` passed with zero material compile/errors, all six l
 rendering, and the pond default material/usage checks; manor measured 59.2 fps (p99 20.2 ms) and woods
 60 fps (p99 16.7 ms). The build includes the north-west lake and map-label removal, rain gain fix,
 Gait run, Menu toast/berry A-X Energy/Ctrl+wheel/wait changes, manor rubble and sprint, plus earlier
-crop, river, performance and save work. Rain remains audibly unproven; listen outdoors on day 2 from
-about 11:00 to 15:30.
+crop, river, performance and save work. Historical daytime rain audio remains audibly unproven; do
+not use its day-2 11:00–15:30 window as a current test recipe. After Water's full-cycle schedule
+lands, listen outdoors during a scheduled rain event instead.
 
 ## Evening playtest build
 
 **[playtest] ready:** `Build\Playtest-0929eve` packages `main` `ca141b1f` / game code `a2607437`
 plus test-only `6556c1fe`, and is on `Homestead Estate.lnk` with a copied 3:46 PM Manual save.
 Integration retargeted only that shortcut with its existing icon/arguments; it never touched
-`Homestead.lnk` or Jenny's live save. Native passed 9/9; six packaged suites passed: Smoke 56.9 fps,
+Jenny's live save. Historical receipt: `Homestead.lnk` was then retained and was later removed in
+the 2026-09-30 MVP retirement. Native passed 9/9; six packaged suites passed: Smoke 56.9 fps,
 Clearing 53.1, NativeMenu 55.2 and EstateSmoke woods 58.6 among them.
 
 The fresh-game packaged FullLoop exercises the core loop, so it is now **deliverable**. Food PIE also
@@ -601,7 +607,15 @@ or removing them needs `table.bakeVersion` raised. Details are in round 1's regi
 - **Day length:** resolved 2026-09-29 — new Estate games default to **60-minute days**. Settings
   continue to offer 30 and 120 minutes, and existing saves retain their stored value. The source
   OpenSpec is updated only after Props implements and verifies the corrective commit held below.
-- **Sunday closing:** should shops close on Sundays? (A per-shop data flag, so easy to turn off.)
+- **Sunset/day length:** resolved 2026-09-30 — an 18:00 sunset is accepted; do not change day
+  length for it.
+- **Sunday closing:** resolved 2026-09-30 — both shops close all day Sunday. Water implements this
+  on `jennifergalley-sunday-closing`; it remains unmerged and unshipped.
+- **UI theme:** resolved direction, pending screenshot approval — parchment cards plus EB Garamond
+  become the consistent menu/HUD theme if Jenny approves Menu's `homestead.UITheme` screenshot
+  trial.
+- **Night review:** Water supplies a side-by-side screenshot sheet; Jenny's Shipping build has no
+  console, so do not request CVar trials from her.
 - **Names:** Tregear's and its keeper are placeholders.
 
 ## Lane status
@@ -831,6 +845,11 @@ requirement.
   `ResetActionHints`, freezing that timer in a paused book/shop. Preserve retirement after three
   successes in `GameUserSettings::ActionHints`. Cover Feedback/Prompt/NativeMenu, 720p/4K, controller,
   pause timing and focus behavior.
+
+  **UI theme decision (Jenny, 2026-09-30):** parchment cards plus EB Garamond become the consistent
+  menu and HUD theme if she approves Menu's screenshot trial. Menu is evaluating the
+  `homestead.UITheme` switch; do not roll it out or call it shipped before that visual approval and
+  the normal resolution/input checks.
 - **Pickup gain popup** — **Menu acceptance `04959978` is main-integrated in `23aba36a`, but excluded
   from the next aim/rain/Shipping package and not shipped.** Based on common Simulation revision gains
   across pack, owned chests and drops, it suppresses moves/reloads and Water, then presents a
@@ -944,7 +963,8 @@ requirement.
   `Build\Releases\20260930-coral-hotbar-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
   with SHA `7C65AAF0305556A74177B4C62D7C87FDFD5708ACAA95B388B432A54434B281EB`. Estate-map arguments,
   candidate-local `-UserDir`, working directory and icon are preserved; the prior link is backed up
-  on `E:` and `Homestead.lnk` remains MVP-untouched. The candidate reuses five hash-identical cooked
+  on `E:`; historical receipt: `Homestead.lnk` was then retained and was later removed in the
+  2026-09-30 MVP retirement. The candidate reuses five hash-identical cooked
   containers. All 19 source SaveGames plus GameUserSettings/Input match their pre-promotion hashes;
   Manual `F816C870...5EB8` remains unchanged.
 
@@ -1252,22 +1272,16 @@ not claim early Energy is fully solved.
   cap-overflow guard after an explicit slot; **Menu** owns the coordinated shop/HUD/toast/UI formatter
   slice. Avoid a half release. Validate Economy, Lamp, legacy v12/v13 saves, raw 0/1/`INT64_MIN` and
   cap behavior; package a 720p/4K purchase such as 1,000 → 900 coins for a pasty.
-- **Weather recurrence** — **Water Agent** (retained lane; supersedes the broader Calendar proposal):
-  rain every third day is too frequent. The smallest traced change is a stable hash selecting offsets
-  **1 or 2** and **6 or 7** in every 10-day block: exactly 20% rain, 4–6-day gaps and day 0 dry. Keep
-  the current 09:00–15:00 rain window, overcast, moisture and audio behavior; no seed or new save
-  section. Old saves' forecast can change, while accrued plot moisture persists; document that at
-  implementation. Tests cover count, gaps and save/reload. **Pending; not shipped.** Calendar retires
-  after its lane-A work.
+- **Full-cycle rain** — **Water Agent** (Jenny decision, 2026-09-30): rain falls at random times
+  through the entire day/night cycle, with seasonal weighting, reload-stable scheduling and
+  coherent night-rain lighting. No day-length change follows. Water implements it; it is **pending
+  and unshipped**. Acceptance includes save/reload stability, roof shelter, ground/audio response,
+  daylight and real night-rain events, plus packaged RT-on night evidence.
 
-  **Delivered recurrence (`69827d75`, included in Phoenix `main` `e5877da8`):** `IsRainDay` now uses SplitMix64 per
-  ten-day block with one offset 1–2 and one 6–7 (day 0 dry; block 0's first rain remains day 1).
-  Native coverage spans 10,000 days, spacing, all offset pairs, whole days, negative hours and
-  save/reload. The first Development FullLoop failed only because its crop-wetting fixture skipped
-  until `day % 3 == 1`; it now advances until `Homestead::IsRainDay(State.hour)` and retains the
-  assertion that both plots become wet. Phoenix Development v2 subsequently passed all six packaged
-  suites. This is a **test-fixture correction, not a rain rollback**; the 20% schedule is delivered
-  in Phoenix.
+  **Historical recurrence (`69827d75`, Phoenix):** the delivered SplitMix64 two-days-in-ten
+  schedule and its 09:00–15:00 window are superseded by this decision. Its native count/gap/save
+  checks and semantic FullLoop rain-day fixture remain useful regression evidence, but daytime
+  window captures do not accept the replacement schedule.
 
   A separate hidden copied-Estate-save QA run physically F5-saved (scratch hash changed), then
   key-7/F9 restored slot 1 and the prior game time; the source save remained untouched. Its later
@@ -1450,6 +1464,8 @@ not claim early Energy is fully solved.
   Lumen hardware-ray-tracing plus VSM clear/rain captures at 18:00, 19:00, 21:00 and midnight to
   calibrate smooth dusk and lamp/hearth readability. Neither the trace nor the wired schedule
   establishes a visual fix; do not update the editor skill's default row before this sign-off.
+  **Jenny's review method (2026-09-30):** Water provides a side-by-side screenshot sheet; her
+  Shipping build has no console, so no player-side CVar trial is assumed.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
@@ -1524,8 +1540,9 @@ not claim early Energy is fully solved.
   `UHomesteadWeather`. Water's headless trace found the cause: `FadeIn(2, Gain)` followed by
   `SetVolumeMultiplier(Gain)` applies rain gain twice, leaving roughly 0.40 for a default shower and
   0.07 for drizzle, while source RMS is a healthy -24 dBFS. Its narrow branch correction uses
-  `FadeIn(2, 1)` and leaves gain solely to the multiplier. Rain is intentionally silent on dry
-  days/times (currently only day 2/3, 09:00–15:00).
+  `FadeIn(2, 1)` and leaves gain solely to the multiplier. Historical Phoenix behavior is silent
+  outside its day-2/3 daytime windows; Water's pending full-cycle schedule must keep audio silent
+  whenever no rain event is scheduled.
 
   **The isolated code fix shipped** as `65726628` → `545e057b` on `main` `76b316a3` and is included
   in the 4 PM package. Editor and game builds, native tests (8/8), and the static-init check pass.
@@ -1535,9 +1552,9 @@ not claim early Energy is fully solved.
   excluded.
 
   **Audible resolution remains unproven.** Low RAM and the Menu editor prevented Water's ears-on
-  capture, and packaged `AudioProof` covers only legacy audio. Jenny can listen outdoors during rain
-  on day 2, roughly 11:00–15:30, in the 4 PM package. Do not describe the subjective rain sound as
-  conclusively fixed without ears-on or recorded Estate-rain evidence.
+  capture, and packaged `AudioProof` covers only legacy audio. After the full-cycle schedule lands,
+  Jenny can listen outdoors during any scheduled rain event. Do not describe the subjective rain
+  sound as conclusively fixed without ears-on or recorded Estate-rain evidence.
 
   The heritage-stone west doorway is a 130 × 220 cm gap with no leaf. **Props** queues an original
   oak-plank mesh and frame after the cove stairs. The later audio/door implementer makes the leaf
@@ -1575,6 +1592,10 @@ not claim early Energy is fully solved.
   tilled-square controls: A/E sows the hotbar-selected seed; no seed selected says `Choose seeds on
   the hotbar to sow`; selected Wild Roots sow roots; F/X weeds only; selected zero stock gives the
   seed-specific refusal. The Menu README changes with the commit already describe the behavior.
+- Seed-outline planting cues (`aa18d0e5`, not on `main`): after it lands, replace any historical
+  `[A] Sow turnips` copy with `[E]/[A] Plant Turnip seed`; with no selection, use
+  `Select Turnip seed (4) to plant`. Keep this pending until the branch's simulation/controller/UI
+  behavior and new `CheckSow` / `PreviewGarden(Seed)` tests are integrated.
 
 ## Tooling requests (unassigned)
 

@@ -92,9 +92,10 @@ Woodland-only code: chunk generation and regional descriptors (all of `Simulatio
 `HomesteadRegional*`), the terrain, regional, woodland and tree-batch methods in
 `HomesteadWorld{Terrain,Regional,Woodland,Trees}.cpp`, the controller's chunk-edge preparation,
 and most in-game test
-routes (they still load the woodland map and its knife/reeds content). The MVP survival line
-(`mvp-survival`) and the MVP woodland biome (placement ids 560000+) depend on it. **Ask the
-orchestrator before removing any of it.**
+routes (they still load the woodland map and its knife/reeds content). The survival MVP was retired
+at `archive/mvp-survival-20260930` (`93612cdf`), but Estate Seasons' retained historical branch
+`jennifergalley-mvp-woodland-biome` (`b19a0ad0`) and Estate placement ids 560000+ still use this
+code. **Ask the orchestrator before removing any of it.**
 
 ## 4. Simulation core
 

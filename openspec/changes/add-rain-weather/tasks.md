@@ -11,7 +11,17 @@
 - [ ] 1.8 GPU cost at 4K with rain on and off in a perf window.
 - [ ] 1.9 Optional: a wet sheen on her hair, clothes and props.
 
-## 3. Recurrence
+## 3. Historical daytime recurrence
 
 - [x] 3.1 Rain on two days in ten instead of every third day (Jenny, 2026-09-29: too often). A stable SplitMix64 hash of each ten-day block picks offsets 1 or 2 and 6 or 7: exactly 20% of days, rains 4-6 days apart, day 0 dry, and day 1 still the first rain. The 09:00-15:00 window, overcast, moisture and audio are unchanged, and there's no seed or save section. Old saves keep their plots' moisture, but their forecast from the current day on follows the new schedule. Native: counts over 10,000 days, gaps, all four offset pairs, whole days, save/reload.
-- [ ] 3.2 PIE/package: day 1 rains, days 3-5 stay dry, and the rain returns on day 6 or 7.
+- [ ] 3.2 Historical PIE/package evidence for the former daytime schedule. Do not use this as
+  acceptance for the superseding full-cycle design.
+
+## 4. Full-cycle recurrence (Jenny, 2026-09-30)
+
+- [ ] 4.1 Replace the daytime-only window with a seasonally weighted, reload-stable schedule that
+  selects rain at random times through the full day/night cycle.
+- [ ] 4.2 Drive coherent night-rain lighting, overcast, wet ground and ambience without turning
+  night into day.
+- [ ] 4.3 Verify save/reload stability, daytime and night events, roof shelter, wet ground/audio
+  behavior and packaged RT-on night evidence.
