@@ -1826,57 +1826,7 @@ bool Simulation::IsNight() const
     const double hour = std::fmod(state_.hour, 24.0);
     return hour < 6.0 || hour >= 19.0;
 }
-namespace
-{
-// SplitMix64 of the block; the salt is fixed so block 0 rains on day 1 (as the old schedule did).
-constexpr std::uint64_t RainBlockSalt = 0x52A12026ull;
-std::uint64_t RainBlockHash(long long block)
-{
-    std::uint64_t z = (static_cast<std::uint64_t>(block) ^ RainBlockSalt) + 0x9E3779B97F4A7C15ull;
-    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ull;
-    z = (z ^ (z >> 27)) * 0x94D049BB133111EBull;
-    return z ^ (z >> 31);
-}
-}
-int RainDayOffset(long long block, int which)
-{
-    const std::uint64_t hash = RainBlockHash(block);
-    return which == 0 ? 1 + static_cast<int>(hash & 1u) : 6 + static_cast<int>((hash >> 1) & 1u);
-}
-bool IsRainDay(double hour)
-{
-    const long long day = static_cast<long long>(std::floor(hour / 24.0));
-    const long long block = day >= 0 ? day / RainBlockDays : -((-day + RainBlockDays - 1) / RainBlockDays);
-    const int offset = static_cast<int>(day - block * RainBlockDays);
-    return offset == RainDayOffset(block, 0) || offset == RainDayOffset(block, 1);
-}
-bool IsRainingAt(double hour)
-{
-    const double ofDay = std::fmod(hour, 24.0);
-    return IsRainDay(hour) && ofDay >= RainStartHour && ofDay < RainEndHour;
-}
 bool Simulation::IsRaining() const { return IsRainingAt(state_.hour); }
-double RainAmount(double hour)
-{
-    if (!IsRainingAt(hour)) return 0.0;
-    const double ofDay = std::fmod(hour, 24.0);
-    const double day = std::floor(hour / 24.0);
-    const auto ease = [](double t) { t = Clamp(t, 0.0, 1.0); return t * t * (3.0 - 2.0 * t); };
-    const double envelope = ease((ofDay - RainStartHour) / 0.25) * ease((RainEndHour - ofDay) / (1.0 / 6.0));
-    const double wave = 0.5 + 0.5 * std::sin((ofDay - RainStartHour) * 6.2831853 / 1.6 + day * 1.7)
-        * (0.8 + 0.2 * std::sin((ofDay - RainStartHour) * 6.2831853 / 0.55 + day * 0.9));
-    const double shower = ease((wave - 0.35) / 0.5);
-    return envelope * (0.3 + 0.7 * shower);
-}
-double Overcast(double hour)
-{
-    // The rain window sits mid-morning, so the cloud's half-hour lead never crosses midnight.
-    if (!IsRainDay(hour)) return 0.0;
-    const double ofDay = std::fmod(hour, 24.0);
-    const auto ease = [](double t) { t = Clamp(t, 0.0, 1.0); return t * t * (3.0 - 2.0 * t); };
-    return ease((ofDay - (RainStartHour - OvercastLeadHours)) / OvercastLeadHours)
-        * ease((RainEndHour + OvercastLeadHours - ofDay) / OvercastLeadHours);
-}
 namespace
 {
 double RainAudioLevel(double rain, double ambience, double indoors)
@@ -2938,6 +2888,8 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
     const double energyRate = sleeping ? recoveryPerHour : -Exertion::AwakePerHour;
     // Stop at the first failed vital, rather than consuming hours beyond the checkpoint boundary.
     double elapsed = hours;
+    // And where rain starts or stops (spells begin at any minute): the rain this step reads holds throughout.
+    if (const double change = NextRainChange(state_.hour); change - state_.hour > 1e-9) elapsed = std::min(elapsed, change - state_.hour);
     if (hungerFails) elapsed = std::min(elapsed, state_.hunger / -hungerRate);
     if (energyRate < 0 && !state_.fixedEstate) elapsed = std::min(elapsed, state_.energy / -energyRate);
     state_.hunger = Clamp(state_.hunger + hungerRate * elapsed, 0.0, 100.0);

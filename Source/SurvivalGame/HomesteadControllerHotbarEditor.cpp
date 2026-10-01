@@ -3,6 +3,7 @@
 // her pack; onto an empty cell it moves, onto the same item it merges, onto anything else the two
 // swap. Stock only ever moves, all in one simulation transaction; this says why when it can't.
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 
 #include "Simulation/HomesteadPackRow.h"
 
@@ -32,7 +33,7 @@ bool AHomesteadController::MenuPlaceInHotbar(const FHomesteadRow& Row, int32 Cel
     }
     else Result = {false, "Take that garment off before putting it on the hotbar."};
     if (!Result) { Notify(Result); return false; }
-    PlayEffect(UIClick, 0.05f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
     return true;
 }
 
@@ -45,7 +46,7 @@ bool AHomesteadController::MenuMoveHotbarSlot(int32 From, int32 To)
     if (From == To) return true;
     const auto Result = Sim.MoveToPackRow(Entry->wearableId ? 0 : Entry->groupId, Entry->wearableId, To, Sim.GetRevision());
     if (!Result) { Notify(Result); return false; }
-    PlayEffect(UIClick, 0.05f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
     return true;
 }
 
@@ -69,6 +70,6 @@ bool AHomesteadController::MenuMoveHotbarToPack(int32 Cell, const FHomesteadRow*
         Result = Sim.MoveFromPackRow(Cell, Stack ? Target->SubjectId : 0, Garment ? Target->SubjectId : 0, Sim.GetRevision());
     }
     if (!Result) { Notify(Result); return false; }
-    PlayEffect(UIClick, 0.05f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
     return true;
 }

@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 #include "HomesteadControllerPreferences.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadEstateGround.h"
@@ -160,24 +161,22 @@ void AHomesteadController::InitializeAudio()
     // integrated, LUFS) measured from each source file; every track is matched to the same level,
     // which sits about 14 dB under the old harp-only mix at the default 65% setting, so music stays
     // under the woodland ambience and footsteps instead of dominating them.
-    struct FTrack { const TCHAR* Name; float Loudness; };
-    static constexpr FTrack Tracks[] = {
-        {TEXT("EveningHarp"), -21.0f}, {TEXT("WhispersOfTheGlen"), -14.7f}, {TEXT("MedievalTheme"), -15.7f},
-        {TEXT("ANewTown"), -15.6f}};
-    constexpr float TargetLoudnessAtFullVolume = -35.0f;
+    // The track list and loudness live in the loudness standard (Simulation/HomesteadAudioLevels.h).
+    const float TargetLoudnessAtFullVolume = static_cast<float>(Homestead::AudioLevels::MusicTargetLufs);
     MusicTracks.Reset();
     MusicTrackGains.Reset();
     MusicTrackNames.Reset();
-    for (const FTrack& Track : Tracks)
+    for (const Homestead::AudioLevels::MusicTrack& Track : Homestead::AudioLevels::MusicTracks)
     {
+        const FString Name = UTF8_TO_TCHAR(Track.name);
         if (USoundBase* Score = LoadObject<USoundBase>(nullptr,
-                *FString::Printf(TEXT("/Game/SurvivalGame/Audio/Music/%s.%s"), Track.Name, Track.Name)))
+                *FString::Printf(TEXT("/Game/SurvivalGame/Audio/Music/%s.%s"), *Name, *Name)))
         {
             MusicTracks.Add(Score);
-            MusicTrackNames.Add(Track.Name);
-            MusicTrackGains.Add(FMath::Pow(10.0f, (TargetLoudnessAtFullVolume - Track.Loudness) / 20.0f));
+            MusicTrackNames.Add(Name);
+            MusicTrackGains.Add(FMath::Pow(10.0f, (TargetLoudnessAtFullVolume - static_cast<float>(Track.loudnessLufs)) / 20.0f));
         }
-        else UE_LOG(LogTemp, Warning, TEXT("Music track %s is not imported and is skipped. Run Scripts/bootstrap_unreal.py."), Track.Name);
+        else UE_LOG(LogTemp, Warning, TEXT("Music track %s is not imported and is skipped. Run Scripts/bootstrap_unreal.py."), *Name);
     }
     // A fresh launch avoids opening with the track the previous launch last started (a user
     // preference, independent of homestead saves). Order comes from process entropy.
@@ -243,7 +242,7 @@ void AHomesteadController::PlayFootstep(bool bLeftFoot, bool bRun)
         bRun ? TEXT("run") : TEXT("walk"), Now);
     // Bare feet on soft soil are quiet: about 10 dB under the old shod grass step while walking,
     // a little firmer when running, with a small level variation so repeats don't stand out.
-    const float Gain = (bRun ? 0.07f : 0.04f) * FMath::FRandRange(0.85f, 1.15f);
+    const float Gain = (bRun ? Homestead::AudioLevels::Gain::FootstepRun : Homestead::AudioLevels::Gain::FootstepWalk) * FMath::FRandRange(0.85f, 1.15f);
     // On the estate's turf, moor and leaf litter the step is softer still: a few dB down, with a
     // low-pass taking the grit off the top, as bare feet on grass sound. Other ground is unchanged.
     const FVector Feet = Avatar->GetActorLocation();

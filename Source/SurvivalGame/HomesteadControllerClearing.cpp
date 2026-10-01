@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
@@ -18,18 +19,15 @@ DEFINE_LOG_CATEGORY_STATIC(LogHomesteadStrikeSound, Log, All);
 
 namespace HomesteadStrikeSound
 {
-// Effect gains (PlayEffect, times the Effects volume). The pickaxe's ping plays at the level the breaking
-// strike always had (Notify's default 0.12: the one Jenny likes), the final a touch louder (+2 dB); the cane
-// cuts are mastered like the chops (loudest 100 ms at -18 dBFS RMS) and play 1.6 dB over the chops' gain
-// (Jenny: the billhook was almost too quiet).
-constexpr float PingGain = 0.12f;
-constexpr float FinalPingGain = 0.15f;
-constexpr float CaneCutGain = 0.9f;
-constexpr float ChopGain = 0.75f;
-constexpr float WoodTapGain = 0.6f;
-// Jenny (2026-09-30): the swish was about twice as loud as it needed to be, well over the birds; -6 dB.
-constexpr float ScytheSwishGain = 0.4f;
-constexpr float FinalTapGain = 0.12f;
+// Strike gains come from the loudness standard (Simulation/HomesteadAudioLevels.h): the pickaxe's ping at
+// the level Jenny liked on the breaking strike, its final +2 dB; the cane cut over the chops' gain (Jenny:
+// the billhook was almost too quiet at 0.75).
+constexpr float PingGain = Homestead::AudioLevels::Gain::Ping;
+constexpr float FinalPingGain = Homestead::AudioLevels::Gain::FinalPing;
+constexpr float CaneCutGain = Homestead::AudioLevels::Gain::CaneCut;
+constexpr float ChopGain = Homestead::AudioLevels::Gain::Chop;
+constexpr float WoodTapGain = Homestead::AudioLevels::Gain::WoodTap;
+constexpr float FinalTapGain = Homestead::AudioLevels::Gain::FinalTap;
 }
 
 void AHomesteadController::StartMacheteHack()
@@ -96,8 +94,8 @@ void AHomesteadController::UpdatePendingFell()
     FVector Landing;
     if (Landscape && Landscape->TakeFelledTreeLanding(Landing))
     {
-        if (TreeFallThud) PlayEffect(TreeFallThud, 0.7f);
-        else PlayEffect(WoodTapA, 0.6f);
+        if (TreeFallThud) PlayEffect(TreeFallThud, Homestead::AudioLevels::Gain::TreeFall);
+        else PlayEffect(WoodTapA, Homestead::AudioLevels::Gain::WoodTap);
     }
     if (FellResource == INDEX_NONE) return;
     const auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
@@ -118,9 +116,9 @@ void AHomesteadController::UpdatePendingFell()
         if (!ChopStrokes.IsEmpty())
         {
             const int32 Pick = FellStrokesHeard % ChopStrokes.Num();
-            PlayEffect(ChopStrokes[Pick].Get(), Pick == 2 ? 0.65f : 0.8f);
+            PlayEffect(ChopStrokes[Pick].Get(), Pick == 2 ? Homestead::AudioLevels::Gain::FellChopHeavy : Homestead::AudioLevels::Gain::FellChop);
         }
-        else PlayEffect(FellStrokesHeard % 2 ? WoodTapA.Get() : WoodTapB.Get(), 0.55f);
+        else PlayEffect(FellStrokesHeard % 2 ? WoodTapA.Get() : WoodTapB.Get(), Homestead::AudioLevels::Gain::FellTap);
         ++FellStrokesHeard;
     }
     // The last stroke through the notch, or she stopped: the tree goes over.
@@ -421,7 +419,7 @@ void AHomesteadController::LandOvergrowthSwing(bool bMoreComing)
         Notify(Summary + TEXT("."));
         // One airy swish at blade contact for the whole sweep; nothing on a miss or a cancel. With the
         // cue missing she mows in silence (InitializeAudio logged it) rather than with a footstep.
-        if (ScytheSwish) PlayEffect(ScytheSwish, HomesteadStrikeSound::ScytheSwishGain);
+        if (ScytheSwish) PlayEffect(ScytheSwish, Homestead::AudioLevels::Gain::ScytheSwish);
         return;
     }
     if (SwingNode == INDEX_NONE) return;

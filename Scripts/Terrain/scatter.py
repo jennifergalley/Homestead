@@ -348,6 +348,9 @@ def main():
     if L.get("lake"):
         import lake_features
         lake_features.apply_to_scenery_file(os.path.join(runtime, "EstateScenery.bin"), L["lake"])
+        # The lake trail's wildflowers (kinds 42-48), around its committed forage rows.
+        import lake_path_plants
+        lake_path_plants.bake(os.path.join(runtime, "EstateScenery.bin"))
     # The cove route (cove_route.py): clear the scatter off it.
     if L.get("coveRoute"):
         import cove_route

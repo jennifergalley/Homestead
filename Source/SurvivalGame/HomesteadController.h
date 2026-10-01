@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Simulation/HomesteadAudioLevels.h"
 #include "GameFramework/PlayerController.h"
 #include "Simulation/HomesteadSimulation.h"
 #include "Simulation/HomesteadHoldings.h"
@@ -446,7 +447,7 @@ private:
     // The creek's burble: a looping, attenuated source kept at the point of the stream nearest
     // the listener, so it swells as she walks up to the water and fades into the woods.
     UPROPERTY() TObjectPtr<UAudioComponent> Creek;
-    static constexpr float CreekGain = 0.35f;
+    static constexpr float CreekGain = static_cast<float>(Homestead::AudioLevels::CreekGain);
     void UpdateCreekAudio();
     UPROPERTY() TObjectPtr<USoundBase> GrassStepA;
     UPROPERTY() TObjectPtr<USoundBase> GrassStepB;
@@ -821,6 +822,6 @@ private:
     UHomesteadSave* ReadSave(const FString& Filename) const;
     bool ApplySave(const UHomesteadSave& Save);
     void InitializeAudio();
-    void PlayEffect(USoundBase* Cue, float Gain = 0.12f);
+    void PlayEffect(USoundBase* Cue, float Gain = Homestead::AudioLevels::Gain::Default);
     UFUNCTION() void MusicFinished();
 };

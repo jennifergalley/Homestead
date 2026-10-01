@@ -2,6 +2,7 @@
 
 #include "HomesteadCalendar.h"
 #include "HomesteadItems.h"
+#include "HomesteadRain.h"
 #include "HomesteadShops.h"
 #include "HomesteadWorldGeneration.h"
 
@@ -469,25 +470,7 @@ constexpr double AwakePerHour = 2.0;
 constexpr double AsleepPerHour = 1.3;
 }
 
-// The spring weather: it rains on two days in every ten, RainStartHour to RainEndHour (Jenny, 2026-09-29:
-// every third day was too often). A stable hash of each ten-day block picks one day from offsets 1-2
-// and one from 6-7, so it rains exactly 20% of days, the rains 4-6 days apart, day 0 is dry and the
-// first rain comes on day 1 as before. It depends on the hour alone: no seed, nothing saved.
-constexpr double RainStartHour = 9.0;
-constexpr double RainEndHour = 15.0;
-constexpr int RainBlockDays = 10;
-bool IsRainDay(double hour);
-// The two rainy day offsets (0-9) of the ten-day block starting on day block * RainBlockDays.
-int RainDayOffset(long long block, int which);
-bool IsRainingAt(double hour);
-// How hard it's raining at `hour`, 0-1 (add-rain-weather): nothing outside the rain window; inside
-// it a drizzle (0.3) that swells into passing showers (up to 1) every hour and a half or so, easing
-// in over the first quarter hour and out over the last ten minutes.
-double RainAmount(double hour);
-// Cloud cover at `hour`, 0-1: builds over the half hour before the rain and clears over the half
-// hour after it, so the sky greys before a drop falls.
-double Overcast(double hour);
-constexpr double OvercastLeadHours = 0.5;
+// The weather lives in Simulation/HomesteadRain.h (included above): rain spells at any hour, from the clock alone.
 // The rain loop's volume multiplier (UHomesteadWeather applies it once, after a fade-in to full): rain
 // strength^0.7 times the Ambience setting, 0.9 outdoors and 0.35 indoors (0 outdoors .. 1 indoors),
 // times RainLoudness. Jenny, 2026-09-29: the rain was too loud, so RainLoudness halves it (-6 dB).
