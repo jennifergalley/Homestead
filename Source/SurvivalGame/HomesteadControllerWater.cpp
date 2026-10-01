@@ -54,10 +54,35 @@ void AHomesteadController::FillPailAtStream(Homestead::Point Position)
 {
     const auto Result = Sim.FillWater(Position);
     Notify(Result);
-    // She kneels at the bank and dips the pail into the nearest authored fresh-water ribbon.
+    // She kneels at the bank and dips the pail into the nearest authored fresh-water ribbon; standing in
+    // the shallows, she dips where she stands instead (Jenny, 2026-09-30: fill in the water, not from the bank).
     if (Result.ok)
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
-            Avatar->PlayFillPail(FreshWaterDipPoint(Position));
+            Avatar->PlayFillPail(WaterEdgeDistance(Position, false) <= -PailInWaterCm
+                ? InWaterDipPoint(Position, Avatar->GetActorRotation().Yaw) : FreshWaterDipPoint(Position));
+}
+
+Homestead::Point AHomesteadController::InWaterDipPoint(Homestead::Point Position, double Yaw) const
+{
+    // The pail's reach from where she stands (AHomesteadCharacter::FillForward/FillRight), turned to the
+    // heading that puts it in the deepest water: ahead of her when that's water, else toward open water,
+    // never back onto the bank.
+    const auto ReachAt = [Position](double Heading)
+    {
+        const FVector Reach = FRotator(0.0, Heading, 0.0).RotateVector(
+            FVector(AHomesteadCharacter::FillForward, AHomesteadCharacter::FillRight, 0.0));
+        return Homestead::Point{Position.x + Reach.X, Position.y + Reach.Y};
+    };
+    Homestead::Point Best = ReachAt(Yaw);
+    double BestEdge = WaterEdgeDistance(Best, false);
+    if (BestEdge <= -PailDipInsideCm) return Best;
+    for (int32 Step = 1; Step < 8; ++Step)
+    {
+        const Homestead::Point Candidate = ReachAt(Yaw + Step * 45.0);
+        const double Edge = WaterEdgeDistance(Candidate, false);
+        if (Edge < BestEdge) { Best = Candidate; BestEdge = Edge; }
+    }
+    return Best;
 }
 
 double AHomesteadController::WaterEdgeDistance(Homestead::Point Position, bool bIncludeSea) const
