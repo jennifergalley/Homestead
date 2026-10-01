@@ -29,6 +29,13 @@ namespace Homestead { struct Point; enum class Item : int; }
 
 enum class EHomesteadKneelGather : uint8 { Sticks, Stones, Pouch, Reeds, Plant, Harvest, PullWeeds };
 
+// SM_Scythe is always shown with this local scale: the Unreal import negates Y, and the mowing clip
+// (scythe_mow.py) and both scythe poses are authored in scythe.py's own coordinates.
+namespace HomesteadScythe
+{
+inline const FVector Mirror(1.0f, -1.0f, 1.0f);
+}
+
 UCLASS()
 class SURVIVALGAME_API AHomesteadCharacter : public ACharacter
 {
@@ -175,7 +182,8 @@ public:
     // mesh shown in her hand (pivot at the grip). Like the other kneels, IsStickPileOnGround stays
     // true until the crop leaves the ground. False when no kneeling clip can play.
     bool PlayHarvest(Homestead::Point Target, bool bPick, UStaticMesh* Produce);
-    // Weeds pulled by hand on both knees, two fistfuls tossed back over each shoulder, no tool
+    // Weeds pulled by hand on both knees, one hand at a time: each hand digs out a fistful and tosses
+    // it back over its own shoulder, no tool
     // (AN_HeroineMH_KneelPullWeeds, homestead_agent.kneel_pull_weeds). False, and nothing plays,
     // when the clip isn't loaded; the caller then uses the pouch kneel. Handful is the mesh of the
     // clump she pulls (null: the garden's nettle tuft); each fistful shows in her hand from its pull to
@@ -193,7 +201,7 @@ public:
     static constexpr float PullWeedsRight = 0.0f;
     static constexpr float PullWeedsCommit = 102.0f / 30.0f;
     // EVENTS['pulled1']: the first fistful comes out, and the clump shows it (AHomesteadWorld::ThinResource).
-    static constexpr float PullWeedsFirstPull = 56.0f / 30.0f;
+    static constexpr float PullWeedsFirstPull = 54.0f / 30.0f;
     // True from a kneeling stick gather's start until she lifts the last stick off the ground, so the
     // world keeps the gathered pile visible until then.
     bool IsStickPileOnGround() const { return PendingKneel.IsSet() || bStickPileOnGround; }
@@ -471,8 +479,13 @@ private:
     bool bStrikeHatchet = false;
     bool BeginTwoHanded(Homestead::Point Target, int32 Strokes, float Radius, float BitLeft, float BitForward,
         float CutLeft, float CutForward);
-    // The mowing scythe, laid from both fists on its nibs.
+    // The mowing scythe, laid from both fists on its nibs, then rolled about the line through both nib
+    // grips so its blade follows the ground under the swath (both fists stay on their nibs).
     void UpdateMowingScythe(UStaticMeshComponent& Prop, float Weight);
+    // That roll (radians), eased from tick to tick so the blade doesn't chatter over bumps.
+    float MowGroundRoll = 0.0f;
+    // What that roll can't reach (radians; up at once, eased down): the scythe tipped up about the lower nib.
+    float MowTipUp = 0.0f;
     // Eases her into a work stance (felling, hacking) instead of snapping: a snapped turn flings
     // the simulated hair.
     FVector FellStepFrom = FVector::ZeroVector, FellStepTo = FVector::ZeroVector;

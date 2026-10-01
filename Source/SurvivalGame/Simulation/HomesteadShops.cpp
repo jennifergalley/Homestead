@@ -19,7 +19,7 @@ Result ShopBad(const std::string& text, std::uint64_t revision, ResultCode code 
     return {false, text, code, revision};
 }
 bool ValidShopItem(Item item) { return static_cast<int>(item) >= 0 && static_cast<int>(item) < ItemCount; }
-Cents RoundedMarkup(Cents base) { return (base * ShopMarkupPercent + 50) / 100; }
+Coins RoundedMarkup(Coins base) { return (base * ShopMarkupPercent + 50) / 100; }
 bool NearCounter(const Shop& shop, Point player)
 {
     if (!std::isfinite(player.x) || !std::isfinite(player.y)) return false;
@@ -34,19 +34,19 @@ std::string ToLowerAscii(std::string text)
 }
 }
 
-std::string FormatMoney(Cents cents)
+std::string FormatMoney(Coins amount)
 {
-    const bool negative = cents < 0;
+    const bool negative = amount < 0;
     // Magnitude as unsigned so the most negative value still formats.
-    const std::uint64_t magnitude = negative ? static_cast<std::uint64_t>(-(cents + 1)) + 1 : static_cast<std::uint64_t>(cents);
-    std::string coins = std::to_string(magnitude);
-    for (int i = static_cast<int>(coins.size()) - 3; i > 0; i -= 3) coins.insert(static_cast<std::size_t>(i), ",");
-    return std::string(negative ? "-" : "") + coins + (magnitude == 1 ? " coin" : " coins");
+    const std::uint64_t magnitude = negative ? static_cast<std::uint64_t>(-(amount + 1)) + 1 : static_cast<std::uint64_t>(amount);
+    std::string digits = std::to_string(magnitude);
+    for (int i = static_cast<int>(digits.size()) - 3; i > 0; i -= 3) digits.insert(static_cast<std::size_t>(i), ",");
+    return std::string(negative ? "-" : "") + digits + (magnitude == 1 ? " coin" : " coins");
 }
 
-std::string FormatMoneyDelta(Cents cents)
+std::string FormatMoneyDelta(Coins amount)
 {
-    return cents < 0 ? FormatMoney(cents) : "+" + FormatMoney(cents);
+    return amount < 0 ? FormatMoney(amount) : "+" + FormatMoney(amount);
 }
 
 const std::vector<Item>& ShopGoods(ShopKind kind)
@@ -94,9 +94,9 @@ std::string ClosedMessage(const Shop& shop)
     return "Closed - opens at " + FormatHour(shop.openHour);
 }
 
-Cents SellPrice(Item item) { return BasePrice(item); }
-Cents BuyPrice(Item item) { return RoundedMarkup(BasePrice(item)); }
-Cents BuyBackPrice(Item item) { return SellPrice(item); }
+Coins SellPrice(Item item) { return BasePrice(item); }
+Coins BuyPrice(Item item) { return RoundedMarkup(BasePrice(item)); }
+Coins BuyBackPrice(Item item) { return SellPrice(item); }
 
 int SellDownAmount(int quantity)
 {
@@ -137,7 +137,7 @@ Result Simulation::Sell(int shopId, Item item, int quantity, Point player)
     if (!ShopBuys(shop->kind, item))
         return ShopBad(std::string(ShopDisplayName(shop->kind)) + " doesn't buy " + ItemName(item) + ".", revision_);
     if (Count(item) < quantity) return ShopBad("You're only carrying " + Plural(Count(item), item) + ".", revision_);
-    const Cents earned = SellPrice(item) * quantity;
+    const Coins earned = SellPrice(item) * quantity;
     if (state_.money + earned > MaxMoney) return ShopBad("Your purse can't hold any more.", revision_, ResultCode::Capacity);
     State candidate = state_;
     Shop* target = nullptr;
@@ -167,7 +167,7 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     }
     else if (std::find(goods.begin(), goods.end(), item) == goods.end())
         return ShopBad(std::string(ShopDisplayName(shop->kind)) + " doesn't sell " + ItemName(item) + ".", revision_);
-    const Cents cost = (fromHeroineStock ? BuyBackPrice(item) : BuyPrice(item)) * quantity;
+    const Coins cost = (fromHeroineStock ? BuyBackPrice(item) : BuyPrice(item)) * quantity;
     if (cost > state_.money)
         return ShopBad("That costs " + FormatMoney(cost) + "; you have " + FormatMoney(state_.money) + ".", revision_);
     if (UsedCapacity() + quantity > PackCapacity() || Count(item) + quantity > PackCapacity())
@@ -254,11 +254,14 @@ Result Simulation::GreetShopkeeper(int shopId)
     return ShopBad("There is no such shop.", revision_);
 }
 
-Result Simulation::GrantMoney(Cents cents)
+Result Simulation::GrantMoney(Coins coins)
 {
-    if (cents < -state_.money || state_.money + cents > MaxMoney) return ShopBad("That would leave the purse out of range.", revision_);
-    state_.money += cents;
-    return ShopGood(FormatMoneyDelta(cents), ++revision_);
+    // The purse always holds 0..MaxMoney, so neither bound can overflow: a huge grant is compared with
+    // the room left rather than added first (INT64_MAX used to wrap past the cap).
+    const bool outOfRange = coins < 0 ? coins < -state_.money : coins > MaxMoney - state_.money;
+    if (outOfRange) return ShopBad("That would leave the purse out of range.", revision_);
+    state_.money += coins;
+    return ShopGood(FormatMoneyDelta(coins), ++revision_);
 }
 
 Result Simulation::PlaceShop(ShopKind kind, Point counter, double yaw)

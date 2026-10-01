@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <locale>
 #include <set>
 #include <sstream>
@@ -46,7 +47,7 @@ void CatalogueCoversEveryItem()
         CHECK(info.item == item);
         CHECK(std::strlen(info.name) > 0 && std::strlen(info.description) > 0 && std::strlen(info.icon) > 0);
         CHECK(keys.insert(info.key).second);
-        CHECK(info.basePriceCents >= 0);
+        CHECK(info.basePriceCoins >= 0);
         CHECK(IsEdible(item) == (info.hunger > 0.0));
     }
     CHECK(std::string(ItemName(Item::Count)) == "Unknown item");
@@ -130,7 +131,7 @@ void MoneyFormatting()
     CHECK(FormatMoney(INT64_MAX) == "9,223,372,036,854,775,807 coins");
     CHECK(FormatMoneyDelta(200) == "+200 coins" && FormatMoneyDelta(-40) == "-40 coins" && FormatMoneyDelta(0) == "+0 coins"
         && FormatMoneyDelta(1) == "+1 coin" && FormatMoneyDelta(-1) == "-1 coin");
-    for (const Cents raw : {Cents(0), Cents(1), Cents(80), Cents(1000), MaxMoney, Cents(INT64_MIN)})
+    for (const Coins raw : {Coins(0), Coins(1), Coins(80), Coins(1000), MaxMoney, Coins(INT64_MIN)})
         CHECK(FormatMoney(raw).find('$') == std::string::npos && FormatMoney(raw).find('.') == std::string::npos);
     CHECK(BuyPrice(Item::Pasty) == 100 && SellPrice(Item::Stone) == 5 && BuyBackPrice(Item::Stone) == 5);
     CHECK(SellDownAmount(0) == 0 && SellDownAmount(1) == 1 && SellDownAmount(10) == 4 && SellDownAmount(3) == 2);
@@ -178,7 +179,7 @@ void SellAStack()
     Store store = OpenStore();
     auto& sim = store.sim;
     OK(sim.GrantItems(Item::Stone, 20));
-    const Cents before = sim.GetState().money;
+    const Coins before = sim.GetState().money;
     const auto revision = sim.GetRevision();
     const auto sold = sim.Sell(store.shop, Item::Stone, 12, store.customer);
     OK(sold);
@@ -244,7 +245,7 @@ void BuyAndEatAPasty()
     // A Meal: +40 Energy and Well fed; the estate has no hunger.
     CHECK(std::abs(sim.GetState().energy - (energy + 40.0)) < 1e-9 && sim.IsWellFed() && sim.GetState().hunger == 100.0);
     CHECK(sim.Count(Item::Pasty) == 0);
-    // Three loaves at 50 cents.
+    // Three loaves at 50 coins.
     const auto loaves = sim.Buy(store.shop, Item::Bread, 3, false, store.customer);
     OK(loaves);
     CHECK(loaves.message == "Bought 3 loaves of bread for 150 coins.");
@@ -262,7 +263,7 @@ void BuyBackAndCapacity()
     auto& sim = store.sim;
     OK(sim.GrantItems(Item::Stone, 10));
     OK(sim.Sell(store.shop, Item::Stone, 10, store.customer));
-    const Cents afterSale = sim.GetState().money;
+    const Coins afterSale = sim.GetState().money;
     OK(sim.Buy(store.shop, Item::Stone, 4, true, store.customer));
     CHECK(sim.GetState().money == afterSale - 4 * SellPrice(Item::Stone));
     CHECK(sim.FindShop(store.shop)->heroineStock[static_cast<int>(Item::Stone)] == 6 && sim.Count(Item::Stone) == 4);
@@ -427,6 +428,41 @@ void PlaytestShopPlacement()
     OK(loaded.Deserialize(sim.Serialize()));
     CHECK(loaded.GetState().money == 250 && loaded.FindShop(ShopKind::GeneralStore)->counterX == 300.0);
     CHECK(loaded.FindShop(ShopKind::GeneralStore)->counterYaw == 45.0);
+}
+
+void WholeCoinPurseGuards()
+{
+    // Whole-number currency: the stored unit is one coin, so raw values and saves are unchanged. A
+    // playtest grant can't push the purse past its cap or below zero from any int64 amount, including
+    // the extremes that used to overflow the check, and a refused grant changes nothing.
+    Simulation sim;
+    OK(sim.PlaceShop(ShopKind::GeneralStore, {100.0, 200.0}));
+    OK(sim.GrantMoney(0));
+    OK(sim.GrantMoney(1));
+    CHECK(sim.GetState().money == 1);
+    for (Coins wild : {std::numeric_limits<Coins>::max(), std::numeric_limits<Coins>::min(), MaxMoney, Coins{-2}})
+    {
+        const std::string before = sim.Serialize();
+        const auto revision = sim.GetRevision();
+        CHECK(!sim.GrantMoney(wild).ok);
+        CHECK(sim.Serialize() == before && sim.GetRevision() == revision && sim.GetState().money == 1);
+    }
+    OK(sim.GrantMoney(MaxMoney - 1));
+    CHECK(sim.GetState().money == MaxMoney);
+    CHECK(!sim.GrantMoney(1).ok && sim.GetState().money == MaxMoney);
+    OK(sim.GrantMoney(-MaxMoney));
+    CHECK(sim.GetState().money == 0);
+    // Save bytes: the purse is still one raw integer on the economy line, 2234 stays 2234.
+    OK(sim.GrantMoney(2234));
+    const std::string saved = sim.Serialize();
+    CHECK(saved.find("\neconomy 2234 ") != std::string::npos);
+    Simulation loaded;
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.GetState().money == 2234 && loaded.Serialize() == saved);
+    // The reference prices keep their raw values: a pasty 80 base / 100 in the shop, bread 40 / 50.
+    CHECK(SellPrice(Item::Pasty) == 80 && BuyPrice(Item::Pasty) == 100);
+    CHECK(SellPrice(Item::Bread) == 40 && BuyPrice(Item::Bread) == 50);
+    CHECK(StartingMoney == 1000);
 }
 
 void WaitForTheStoreToOpen()
@@ -827,6 +863,7 @@ int main(int argc, char** argv)
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
     Run("no walk to town from town", NoWalkToTownFromTown);
     Run("playtest shop placement", PlaytestShopPlacement);
+    Run("whole-coin purse guards and unchanged save bytes", WholeCoinPurseGuards);
     Run("wait for the store to open", WaitForTheStoreToOpen);
     Run("walk the road to town and back", WalkTheRoad);
     Run("the road signs offer the same walk", RoadSignsOfferTheWalk);

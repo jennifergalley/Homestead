@@ -296,11 +296,11 @@ void AHomesteadController::HomesteadOpenStore()
         *ShopText(Homestead::FormatMoney(State().money))) : ShopText(Result.message), !Result.ok);
 }
 
-void AHomesteadController::HomesteadMoney(int32 Cents)
+void AHomesteadController::HomesteadMoney(int32 Coins)
 {
     if (RejectPendingGroundSnapAction()) return;
     const int64 Before = State().money;
-    const auto Result = Sim.GrantMoney(Cents);
+    const auto Result = Sim.GrantMoney(Coins);
     if (Result.ok) { LastWalletDelta = State().money - Before; WalletDeltaRemaining = 3.0f; }
     Notify(Result.ok ? FString::Printf(TEXT("Purse: %s"), *ShopText(Homestead::FormatMoney(State().money))) : ShopText(Result.message),
         !Result.ok);

@@ -47,7 +47,7 @@ struct ItemInfo
     const char* description;
     ItemCategory category;
     const char* icon;        // SHomesteadIcon glyph key.
-    std::int64_t basePriceCents;
+    std::int64_t basePriceCoins;
     ShopMask buyers;         // Shops that buy it from her.
     double hunger = 0.0;     // Woodland only (the estate has no hunger); above zero exactly for food.
     double energy = 0.0;     // Energy one restores.
