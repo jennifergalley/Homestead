@@ -786,6 +786,14 @@ receipt.**
   sliders; backpack in progress); Props 0930b (coins/`GrantMoney`, safe manor hall and
   scythe grip/ground mow); Water road-grade/bridge/night/town-square/river-mouth stack, with
   foliage motion separate.
+- **Integration next-batch source `68c6f883` (not on `main`):** merges accepted Menu
+  gallery/theme/signs/Energy `3d993f81`, Props 0930b `65385ba3`, Energy fix `1a3f3261`, Water
+  October `190eb04c` (including Sunday closure) and cove kit `d3826435` onto the current
+  chest/tools/teleport/Water base. Native Release 18/18 passes. Combined native compilation exposed
+  stale backpack `constexpr Cents Price` and fixes it as whole-coin `Coins` in `6df4e916`.
+  Controller/UI, Editor/Game, PIE, package and delivery evidence are still absent. The parchment
+  theme is deliberately **classic by default** in `32ecce62`; explicit `homestead.UITheme`
+  parchment remains available only for Jenny's screenshot approval.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
