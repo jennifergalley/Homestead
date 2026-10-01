@@ -25,12 +25,19 @@ TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.6f,
     TEXT("Sky light intensity at full night."));
 TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -2.0f,
     TEXT("Auto exposure min brightness at full night."));
+TAutoConsoleVariable<float> CVarIndoorDaySky(TEXT("homestead.IndoorDaySky"), 0.3f,
+    TEXT("Sky light scale indoors by day (times the indoor mix and daylight). Groom sky lighting sees the "
+         "open sky capture through a roof, so a full sky light blew her hair out white under one."));
+TAutoConsoleVariable<int32> CVarIndoorHairSkyOff(TEXT("homestead.IndoorHairSkyOff"), 0,
+    TEXT("1 = also switch groom sky lighting off indoors by day (hair then renders near-black)."));
 }
 
 using HomesteadWorldLighting::CVarRayTracedSun;
 using HomesteadWorldLighting::CVarNightMoonLux;
 using HomesteadWorldLighting::CVarNightSky;
 using HomesteadWorldLighting::CVarNightMinExposure;
+using HomesteadWorldLighting::CVarIndoorDaySky;
+using HomesteadWorldLighting::CVarIndoorHairSkyOff;
 
 void AHomesteadWorld::BuildLighting()
 {
@@ -165,7 +172,9 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float NightSkyIntensity = CVarNightSky.GetValueOnGameThread();
     const float NightMinExposure = CVarNightMinExposure.GetValueOnGameThread();
     Moon->SetIntensity(NightMoonLux * (1.0f - Daylight));
-    Sky->SetIntensity(FMath::Lerp(NightSkyIntensity, 1.0f, Daylight) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud));
+    const float IndoorDay = GetIndoorMix() * Daylight;
+    Sky->SetIntensity(FMath::Lerp(NightSkyIntensity, 1.0f, Daylight) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud)
+        * FMath::Lerp(1.0f, CVarIndoorDaySky.GetValueOnGameThread(), IndoorDay));
     // The real-time sky capture still sees the clear blue atmosphere under the cloud layer, so warm it
     // back towards a neutral grey overcast.
     Sky->SetLightColor(FMath::Lerp(FLinearColor::White, FLinearColor(1.0f, 0.93f, 0.84f), Cloud));
@@ -173,8 +182,9 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
     Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud
         + IndoorDayExposureBias * GetIndoorMix() * Daylight;
-    const float IndoorDay = GetIndoorMix() * Daylight;
-    if (bHairSkyLightingOff ? IndoorDay < 0.35f : IndoorDay > 0.65f)
+    const bool bWantHairSkyOff = CVarIndoorHairSkyOff.GetValueOnGameThread() != 0
+        && (bHairSkyLightingOff ? IndoorDay >= 0.35f : IndoorDay > 0.65f);
+    if (bWantHairSkyOff != bHairSkyLightingOff)
         if (IConsoleVariable* HairSky = IConsoleManager::Get().FindConsoleVariable(TEXT("r.HairStrands.SkyLighting")))
         {
             bHairSkyLightingOff = !bHairSkyLightingOff;

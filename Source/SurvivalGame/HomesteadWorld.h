@@ -307,8 +307,9 @@ private:
     static constexpr float HearthIntensity = 2600.0f;
     static constexpr float HearthRadiusCm = 800.0f;
     // Groom sky lighting samples the sky capture with only the hair's own occlusion, so under a roof
-    // by day her hair glowed white. Switch it off indoors by day (with hysteresis on the indoor mix
-    // times daylight); the hair then takes direct and hearth light only, like the room around her.
+    // by day her hair glowed white. The sky light is scaled down indoors by day (homestead.IndoorDaySky);
+    // homestead.IndoorHairSkyOff 1 also switches the groom's sky term off there (with hysteresis), which
+    // leaves the hair near-black, so it is off by default.
     bool bHairSkyLightingOff = false;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
