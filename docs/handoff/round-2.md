@@ -101,6 +101,15 @@ door/forage acceptance or a proven Shipping bug. Visible human startup, manual p
 the hair rod/fan cure remain unobserved/inconclusive; the stale modular-equipment wrapper assertion
 is still not a full wrapper pass. Earlier Development/Shipping receipts remain rollback history.
 
+**Shipping map-gate correction (UE 5.8):** an Estate-default Shipping client always loads
+`GameDefaultMap` and ignores `Test-Game.ps1`'s old Woodland positional map: `GameInstance.cpp`
+642–645 clears it while `UE_ALLOW_MAP_OVERRIDE_IN_SHIPPING` is off, and `ConfigCacheIni.h:57`
+also disables `-ini` override. Shipping Hotbar, NativeMenu and FullLoop consequently report
+`fixedEstate=1` then fail on Woodland data; their prior Development Woodland receipts remain valid,
+but they are not Shipping acceptance gates until adapted to Estate. Do not enable map override just
+for QA. For Estate-default Shipping, use Estate-targeted guarded zero-network routes such as
+EstateSmoke and ToolRepeat; those currently pass.
+
 **Shared-memory warning (2026-09-29 20:19):** Jenny later launched the Shipping Estate while Menu
 editor PID 52420 remained open; Available MBytes fell to 143. Integration touched no process and used
 urgent mailbox to ask Menu to close only its own editor. The durable response is now

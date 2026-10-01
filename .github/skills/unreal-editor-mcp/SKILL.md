@@ -83,6 +83,14 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `/Game/SurvivalGame/Maps/Estate` since `b07d4a82`), and that startup is clean, so don't pass `-Map`.
   (An explicit `-Map /Game/SurvivalGame/Maps/Estate` once hung startup for 20 minutes.) For the old
   woodland, `load_level('/Game/SurvivalGame/Maps/Homestead')` after MCP answers.
+- **Shipping cannot select the old Woodland positional map:** UE 5.8's Shipping client clears the
+  positional map when `UE_ALLOW_MAP_OVERRIDE_IN_SHIPPING` is off (`GameInstance.cpp` 642–645), and
+  Shipping also ignores `-ini` map overrides (`ConfigCacheIni.h` 57). A package whose
+  `GameDefaultMap` is Estate will therefore report `fixedEstate=1` and load Estate despite
+  `Test-Game.ps1` requesting `/Game/SurvivalGame/Maps/Homestead`. Do not enable engine map override
+  just for QA. Woodland Hotbar, NativeMenu and FullLoop routes remain valid **Development** coverage,
+  but are not valid Shipping gates until adapted to Estate; use Estate-targeted Shipping routes
+  such as EstateSmoke and ToolRepeat instead.
 - **Never stop shared processes.** `zenserver.exe` (the DDC/Zen server on port 8558),
   `UnrealTraceServer.exe`, `ShaderCompileWorker.exe` and other worktrees' `UnrealEditor*`/UBT/UAT
   processes may be serving another session's build or cook. Stop only processes you started, by PID.
@@ -1038,8 +1046,10 @@ Extend it there when play needs a capability; prefer real input over state edits
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
   the MetaHuman heroine yourself (field notes). **Any input-policy change** (hotbar selection, sow/eat/
-  weed bindings, sprint input or controller priority) runs packaged **both** `-Hotbar` and `-FullLoop`;
-  otherwise stale assertions can pass silently until the package route breaks.
+  weed bindings, sprint input or controller priority) runs packaged **both** `-Hotbar` and `-FullLoop`
+  in Development. In Shipping, they are Woodland positional-map routes and therefore invalid for an
+  Estate-default package; run adapted Estate routes instead, otherwise stale assertions can pass
+  silently until the package route breaks.
 - **Audio cue loudness (pending standard):** source-only branch `jennifergalley-loudness` `95f4ea14`
   establishes Jenny's rule: measure every new or changed cue against the forest ambience bed before
   shipping it. Add a row to `Simulation/HomesteadAudioLevels.h` with use, source, category, bus and
