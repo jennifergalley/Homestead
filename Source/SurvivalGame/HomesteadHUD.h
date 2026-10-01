@@ -33,6 +33,8 @@ private:
     FString BookTextOverflow;
     FString BookMeasurements;
     bool bMeasureFeedback = false, bDrawingToast = false;
+    // While set, Write / TextWidth / WrappedLines set words in the field book's display serif (the toast).
+    bool bNoticeText = false;
     FString ToastSource;
     TArray<FString> ToastLines;
     TArray<FBox2D> ToastTextBounds;

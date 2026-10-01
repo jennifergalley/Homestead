@@ -4,6 +4,10 @@
 #include "HomesteadMapComponent.h"
 #include "UI/HomesteadNoticeStyle.h"
 #include "UI/SHomesteadVitals.h"
+#include "UI/SHomesteadArrival.h"
+#include "Fonts/FontMeasure.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Rendering/SlateRenderer.h"
 #include "Engine/Canvas.h"
 #include "CanvasItem.h"
 #include "GlobalRenderResources.h"
@@ -29,6 +33,21 @@ constexpr float Top = 110, Gap = 10;
 constexpr float TextSize = 23, LineStep = 30, PadX = 22, PadTop = 13, PadBottom = 13, MinWidth = 240, MaxWidth = 900;
 }
 
+namespace HudNoticeFont
+{
+// The toast's words are the field book notice card's EB Garamond (HomesteadMenus::DisplayFont), so a
+// notice reads the same in the world as in the book. Slate points per HUD Size unit: TextSize 23 sets
+// at about 18 pt, a line about 31 units tall.
+constexpr float PointsPerUnit = 0.78f;
+FSlateFontInfo At(float Size) { return HomesteadMenus::DisplayFont(Size * PointsPerUnit); }
+// In HUD logical units (Slate units at scale 1).
+FVector2D Measure(const FString& Text, float Size)
+{
+    if (!FSlateApplication::IsInitialized()) return FVector2D::ZeroVector;
+    return FVector2D(FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Text, At(Size)));
+}
+}
+
 void AHomesteadHUD::NoticeCard(float X, float Y, float Width, float Height, bool bError)
 {
     using namespace HomesteadNoticeStyle;
@@ -44,6 +63,23 @@ void AHomesteadHUD::NoticeCard(float X, float Y, float Width, float Height, bool
 
 void AHomesteadHUD::Write(const FString& Text, float X, float Y, float Size, FLinearColor Color)
 {
+    // The Canvas draws a Slate font only through a runtime-cached UFont (FCanvasSimpleTextItem needs one).
+    UFont* Engine = GEngine ? GEngine->GetMediumFont() : nullptr;
+    if (bNoticeText && Canvas && FSlateApplication::IsInitialized() && Engine && Engine->FontCacheType == EFontCacheType::Runtime)
+    {
+        if (bMeasureFeedback)
+        {
+            const FVector2D Extent = HudNoticeFont::Measure(Text, Size);
+            const FBox2D Bounds(FVector2D(X, Y) * UiScale, (FVector2D(X, Y) + Extent) * UiScale);
+            if (bDrawingToast) { ToastLines.Add(Text); ToastTextBounds.Add(Bounds); ToastColor = Color; }
+            else if (!Text.IsEmpty()) FeedbackProtected.Emplace(Text, Bounds);
+        }
+        FCanvasTextItem Item(FVector2D(X, Y) * UiScale, FText::FromString(Text), HudNoticeFont::At(Size * UiScale), Color);
+        Item.Font = Engine;
+        Item.BlendMode = SE_BLEND_Translucent;
+        Canvas->DrawItem(Item);
+        return;
+    }
     UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
     if (!Font) return;
     const float Height = FMath::Max(1.0f, static_cast<float>(Font->GetMaxCharHeight()));
@@ -221,13 +257,10 @@ TArray<FString> AHomesteadHUD::WrappedLines(const FString& Text, float Width, fl
     TArray<FString> Words;
     Text.ParseIntoArrayWS(Words);
     FString Line;
-    const float FontScale = Size / FMath::Max(1.0f, static_cast<float>(Font->GetMaxCharHeight()));
     for (const FString& Word : Words)
     {
         FString Candidate = Line.IsEmpty() ? Word : Line + TEXT(" ") + Word;
-        float W = 0, H = 0;
-        Canvas->StrLen(Font, Candidate, W, H);
-        if (!Line.IsEmpty() && W * FontScale > Width)
+        if (!Line.IsEmpty() && TextWidth(Candidate, Size) > Width)
         {
             Lines.Add(Line);
             Line = Word;
@@ -344,13 +377,17 @@ void AHomesteadHUD::DrawHUD()
         // top-right (narrow windows): it gives up width, then slides left.
         const float VitalsLeft = HomesteadMenus::SHomesteadVitals::LogicalBox(ViewWidth).Min.X - 16;
         if (!InBook) Width = FMath::Min(Width, FMath::Max(300.0f, VitalsLeft - 30));
+        bNoticeText = true;
         const auto Lines = WrappedLines(Toast, Width - PadX * 2, TextSize);
         float Longest = 0;
         for (const FString& Line : Lines) Longest = FMath::Max(Longest, TextWidth(Line, TextSize));
         Width = FMath::Clamp(Longest + PadX * 2 + 2, FMath::Min(MinWidth, Width), Width);
         float X = InBook ? 30 : (ViewWidth - Width) * 0.5f;
         if (!InBook && X + Width > VitalsLeft) X = FMath::Max(30.0f, VitalsLeft - Width);
-        const float Height = PadTop + PadBottom + TextSize + (Lines.Num() - 1) * LineStep + 4;
+        // The serif's own line height (it carries its leading), in place of the bare text size.
+        const float LineHeight = FMath::Max(TextSize, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), TextSize).Y));
+        const float Step = FMath::Max(LineStep, LineHeight);
+        const float Height = PadTop + PadBottom + LineHeight + (Lines.Num() - 1) * Step;
         // In the book the toast takes the top-left, clear of the calendar at the top-right.
         const float Y = InBook ? 26 : NoticeBottom > 0 ? NoticeBottom + Gap : Top;
         bDrawingToast = true;
@@ -362,13 +399,17 @@ void AHomesteadHUD::DrawHUD()
         NoticeCard(X, Y, Width, Height, PC->ToastIsError());
         const FLinearColor TextInk = PC->ToastIsError() ? HomesteadNoticeStyle::RustInk : HomesteadNoticeStyle::InkBrown;
         for (int32 Index = 0; Index < Lines.Num(); ++Index)
-            Write(Lines[Index], X + PadX, Y + PadTop + Index * LineStep, TextSize, TextInk);
+            Write(Lines[Index], X + PadX, Y + PadTop + Index * Step, TextSize, TextInk);
         bDrawingToast = false;
+        bNoticeText = false;
     }
 }
 
 float AHomesteadHUD::TextWidth(const FString& Text, float Size) const
 {
+    if (bNoticeText && FSlateApplication::IsInitialized() && GEngine && GEngine->GetMediumFont()
+        && GEngine->GetMediumFont()->FontCacheType == EFontCacheType::Runtime)
+        return static_cast<float>(HudNoticeFont::Measure(Text, Size).X);
     UFont* Font = GEngine ? GEngine->GetMediumFont() : nullptr;
     if (!Font || !Canvas) return 0;
     float W = 0, H = 0;
