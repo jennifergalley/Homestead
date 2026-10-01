@@ -1511,6 +1511,13 @@ not claim early Energy is fully solved.
   source evidence. The rejected global indoor `r.HairStrands.SkyLighting` toggle and black-hair
   image are omitted. Water's `00fd` follow-up is not UE-verified; no Water visual or package
   acceptance claim follows from this merge.
+
+  **Review follow-up `855a91cc` (not on `main`):** partial pails stay water-focusable until
+  `PailPortions` capacity; `NotifyResourceAction` clears stale refusal copy while retaining
+  refusal feedback; watering playtest asserts the named capacity. The isolated routing fixture
+  explicitly toggles `bEstateMap` for policy cases on the Woodland test actor and restores it.
+  The independent wall plate is lowered to 279 cm. Native merged baseline remains 18/18; these
+  Unreal-only routing/interior changes still require UBT and runtime verification.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
