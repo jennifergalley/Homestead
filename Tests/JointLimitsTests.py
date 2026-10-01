@@ -238,9 +238,14 @@ class MotionAndContact(unittest.TestCase):
     def test_ground_penetration_and_slide(self):
         sunk = pose(shift={"root": (0.0, 0.0, -6.0)})
         self.assertTrue(keys(issues([sunk]), "ground"))
-        slid = pose(shift={"root": (0.0, 2.0, 0.0)})
-        found = issues([NEUTRAL, slid])
-        self.assertIn("foot_l", keys(found, "slide"))
+        # Planted for six frames while the root drifts 2 cm a frame: a slide.
+        drift = [pose(shift={"root": (0.0, 2.0 * i, 0.0)}) for i in range(6)]
+        self.assertIn("foot_l", keys(issues(drift), "slide"))
+        # A step that only skims the floor for two frames between lifts isn't read as planted.
+        lifted = {"root": (0.0, 0.0, 10.0)}
+        skim = [pose(shift=lifted), pose(shift={"root": (0.0, 0.0, 0.0)}), pose(shift={"root": (0.0, 3.0, 0.0)}),
+                pose(shift={"root": (0.0, 6.0, 10.0)})]
+        self.assertNotIn("foot_l", keys(issues(skim), "slide"))
 
     def test_balance_outside_support(self):
         lean = pose(shift={"spine_01": (0.0, 40.0, 0.0)})

@@ -42,6 +42,8 @@ CONTACT_CM = 3.0
 PENETRATION_CM = 1.5
 # A planted contact moving faster than this along the floor slides (cm/s): 0.5 cm a frame at 30 fps.
 SLIDE_CM_PER_S = 15.0
+# A contact is planted only through a run of this many frames near the floor (a skimming step isn't).
+PLANT_MIN_FRAMES = 4
 # The centre of mass should stay this far inside the support polygon in a held pose (cm).
 COM_MARGIN_CM = 2.0
 # A limb's elevation is only split into flexion and abduction when its projection on that plane is at
@@ -547,8 +549,7 @@ def check_frames(frames, neutral, fps=FPS, events=None, contacts=None, floor_z=0
                     issues.append(dict(frame=i, kind="speed", severity=severity, joint=key, value=speed,
                                        text=f"{key} {speed:.0f} deg/s ({warn} warns, {error} pops)"))
         issues.extend(_ground(pose, i, floor_z))
-        if i:
-            issues.extend(_slides(frames[i - 1], pose, i, fps, floor_z))
+    issues.extend(_slides(frames, fps, floor_z))
     issues.extend(_balance(frames, events or {}, floor_z, fps))
     return {"issues": issues, "angles": history}
 
@@ -570,18 +571,26 @@ def _ground(pose, i, floor_z):
     return out
 
 
-def _slides(prev, pose, i, fps, floor_z):
+def _slides(frames, fps, floor_z):
+    """Planted contacts that slide. A contact counts as planted only through a run of at least
+    PLANT_MIN_FRAMES frames near the floor, so a step skimming the ground isn't read as a slide."""
     out = []
     for bone in ("ball_l", "ball_r", "foot_l", "foot_r", "calf_l", "calf_r"):
-        if bone not in pose or bone not in prev:
-            continue
-        a, b = prev[bone][0], pose[bone][0]
         skin = CONTACT_BONES[bone]
-        planted = a[2] - skin - floor_z < CONTACT_CM and b[2] - skin - floor_z < CONTACT_CM
-        speed = math.hypot(b[0] - a[0], b[1] - a[1]) * fps
-        if planted and speed > SLIDE_CM_PER_S:
-            out.append(dict(frame=i, kind="slide", severity="error" if speed > 3 * SLIDE_CM_PER_S else "warn",
-                            joint=bone, value=speed, text=f"{bone} slides {speed:.0f} cm/s while planted"))
+        near = [bone in p and p[bone][0][2] - skin - floor_z < CONTACT_CM for p in frames]
+        start = None
+        for i in range(len(frames) + 1):
+            if i < len(frames) and near[i]:
+                start = i if start is None else start
+                continue
+            if start is not None and i - start >= PLANT_MIN_FRAMES:
+                for k in range(start + 1, i):
+                    a, b = frames[k - 1][bone][0], frames[k][bone][0]
+                    speed = math.hypot(b[0] - a[0], b[1] - a[1]) * fps
+                    if speed > SLIDE_CM_PER_S:
+                        out.append(dict(frame=k, kind="slide", severity="error" if speed > 3 * SLIDE_CM_PER_S else "warn",
+                                        joint=bone, value=speed, text=f"{bone} slides {speed:.0f} cm/s while planted"))
+            start = None
     return out
 
 
