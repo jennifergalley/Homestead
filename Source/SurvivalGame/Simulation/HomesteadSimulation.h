@@ -113,7 +113,8 @@ enum class WearableOwner : int { Carried, Chest, Equipped, World };
 // UnsupportedVersion: a save from an older build this one can't read. NewerBuild: a save written by a
 // newer build (a later version, wider item stocks or a section this build doesn't know); the game
 // must leave it untouched so that build can still open it.
-enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable, ToolTier, NewerBuild };
+// PackOverflow: it worked, but what didn't fit in her pack was left on the ground (worth a notice).
+enum class ResultCode : int { None, Invalid, StaleRevision, UnsupportedVersion, CorruptSave, Capacity, Unavailable, ToolTier, NewerBuild, PackOverflow };
 constexpr int EquipmentSlotCount = static_cast<int>(EquipmentSlot::Count);
 
 struct WearableDefinitionInfo
@@ -335,6 +336,10 @@ struct State
     std::array<int, EquipmentSlotCount> equipment{};
     InventoryLayout inventoryLayout;
     PackRow packRow{};
+    // Rows of her pack rotated out of the hotbar (R / LT, RotatePackRow), each kept as it was, gaps and
+    // all, so its stacks come back to the same number keys. Cells may name stacks since used up or
+    // moved; RotatePackRow drops those as the row comes back. Saved in the optional "packrowsparked" section.
+    std::vector<PackRow> parkedRows;
     Generation::WorldDescriptor world{};
     Generation::ChunkCoord activeChunk{};
     std::vector<ResourceEdit> resourceEdits;
@@ -633,6 +638,8 @@ public:
     Result Weed(int plotId, Point player);
     // Hoes a withered plant out, back to tilled soil (needs the hoe).
     Result ClearWithered(int plotId, Point player);
+    // Whether ClearWithered would succeed now, changing nothing.
+    Result CheckClearWithered(int plotId, Point player) const;
     Result HarvestCrop(int plotId, Point player);
     Result FillWater(Point player);
     // Tip the water out of the pail (it stays in her pack, empty).

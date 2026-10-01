@@ -219,6 +219,26 @@ void AHomesteadSmokeTest::QueueGrant(Homestead::Item Item, int32 Count)
         [this, Item, Count, Before]() { return Controller->Simulation().Count(Item) == *Before + Count; });
 }
 
+void AHomesteadSmokeTest::AffordPlan(Homestead::Piece Kind)
+{
+    AffordPlanBefore = UTF8_TO_TCHAR(Controller->Simulation().Serialize().c_str());
+    const Homestead::Inventory Cost = Homestead::PieceCost(Kind);
+    for (int32 Material = 0; Material < Homestead::ItemCount; ++Material)
+    {
+        const auto Item = static_cast<Homestead::Item>(Material);
+        const int32 Short = Cost[Material] - Controller->Simulation().Count(Item);
+        if (Short > 0 && !Controller->Sim.GrantItems(Item, Short))
+        { Finish(false, TEXT("The plan's materials did not fit in the pack.")); return; }
+    }
+}
+
+void AHomesteadSmokeTest::UndoAffordPlan()
+{
+    if (AffordPlanBefore.IsEmpty()) return;
+    if (!Controller->Sim.Deserialize(TCHAR_TO_UTF8(*AffordPlanBefore))) Finish(false, TEXT("Could not put back the plan's materials."));
+    AffordPlanBefore.Reset();
+}
+
 void AHomesteadSmokeTest::QueueCraft(Homestead::Recipe Recipe)
 {
     const auto Item = CraftedItem(Recipe);

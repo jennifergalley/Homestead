@@ -511,10 +511,11 @@ void Run(const char* name, void (*test)())
 }
 }
 
-// The hotbar rotates through her pack's rows (Coral Island): the first ten stacks below the row come up
-// into it in order, the row's stacks go to the end of her pack in cell order, nothing is gained or
-// lost, and with nothing below it is refused unchanged.
-void RotatingTheRowCarriesEachRowThrough()
+// The hotbar rotates through her pack's rows (Coral Island, R / LT). Stacks below that no row holds come
+// up first, ten at a time in pack order; then the rows rotated out come back in turn exactly as they
+// were, gaps and all, so every stack keeps its number key. Her pack's order and stock never change,
+// the rows rotated out are saved, and with nothing else to bring up it is refused unchanged.
+void RotatingTheRowKeepsEachStacksKey()
 {
     Simulation sim = Estate();
     ClearRow(sim);
@@ -523,36 +524,52 @@ void RotatingTheRowCarriesEachRowThrough()
         Item::Pasty, Item::Bread, Item::TurnipSeed, Item::Cheese, Item::Kindling};
     for (const Item item : stock) OK(sim.GrantItems(item, 1));
     sim.SetPackRowAutoFill(true);
+    // A row with gaps: cheese on key 1 and kindling on key 8, nothing between.
+    OK(sim.MoveToPackRow(Group(sim, Item::Cheese), 0, 0, sim.GetRevision()));
+    OK(sim.MoveToPackRow(Group(sim, Item::Kindling), 0, 7, sim.GetRevision()));
     std::array<int, ItemCount> counts{};
     for (int item = 0; item < ItemCount; ++item) counts[item] = sim.Count(static_cast<Item>(item));
+    const auto layoutOf = [](const Simulation& s)
+    {
+        std::vector<int> order;
+        for (const auto& entry : s.GetState().inventoryLayout) order.push_back(entry.wearableId ? -entry.wearableId : V(entry.item));
+        return order;
+    };
+    const auto packOrder = layoutOf(sim);
     const auto below = Below(sim);
-    CHECK(below.size() > static_cast<size_t>(PackRowSize));
+    CHECK(!below.empty());
     OK(sim.RotatePackRow(sim.GetRevision()));
+    // The stacks below come up, in pack order from key 1.
     for (int cell = 0; cell < PackRowSize; ++cell)
-        CHECK(below[cell] > 0 ? V(CellItem(sim, cell)) == below[cell] : !sim.GetState().packRow[cell].Empty());
-    CHECK(Below(sim) == std::vector<int>(below.begin() + PackRowSize, below.end()));
+        CHECK(cell < static_cast<int>(below.size()) ? V(CellItem(sim, cell)) == below[cell] : sim.GetState().packRow[cell].Empty());
+    CHECK(sim.GetState().parkedRows.size() == 1);
     CHECK(PackRowRules::Valid(sim.GetState().packRow, sim.GetState().inventoryLayout));
-    // Again: that row goes to the end in cell order, and the rest comes up.
-    std::vector<int> row;
-    for (int cell = 0; cell < PackRowSize; ++cell) row.push_back(below[cell]);
-    OK(sim.RotatePackRow(sim.GetRevision()));
-    const auto after = Below(sim);
-    CHECK(after.size() >= row.size() && std::vector<int>(after.end() - row.size(), after.end()) == row);
-    for (int item = 0; item < ItemCount; ++item) CHECK(sim.Count(static_cast<Item>(item)) == counts[item]);
-    CHECK(PackRowRules::Valid(sim.GetState().packRow, sim.GetState().inventoryLayout));
-    // A stale revision, or nothing below the row, is refused and changes nothing.
+    // Saved and loaded, the rows rotated out come back the same.
+    Simulation loaded = Estate();
+    OK(loaded.Deserialize(sim.Serialize()));
+    CHECK(loaded.GetState().parkedRows.size() == 1 && loaded.Serialize() == sim.Serialize());
+    // Round again until the first row comes back (every other stack has had its turn): with its gaps,
+    // cheese on key 1 and kindling on key 8.
+    for (Simulation* each : {&sim, &loaded})
+    {
+        int presses = 0;
+        do { OK(each->RotatePackRow(each->GetRevision())); ++presses; }
+        while (CellItem(*each, 0) != Item::Cheese && presses < 40);
+        CHECK(presses > 1 && presses < 40);
+        CHECK(CellItem(*each, 0) == Item::Cheese && CellItem(*each, 7) == Item::Kindling);
+        for (int cell = 1; cell < PackRowSize; ++cell) if (cell != 7) CHECK(each->GetState().packRow[cell].Empty());
+        CHECK(layoutOf(*each) == packOrder);
+        for (int item = 0; item < ItemCount; ++item) CHECK(each->Count(static_cast<Item>(item)) == counts[item]);
+        CHECK(PackRowRules::Valid(each->GetState().packRow, each->GetState().inventoryLayout));
+    }
+    // A stale revision is refused unchanged.
     const std::string saved = sim.Serialize();
     CHECK(!sim.RotatePackRow(sim.GetRevision() + 1));
-    Simulation alone = Estate();
-    ClearRow(alone);
-    if (Below(alone).size() <= static_cast<size_t>(PackRowSize))
-    {
-        OK(alone.RotatePackRow(alone.GetRevision()));
-        CHECK(!alone.RotatePackRow(alone.GetRevision()));
-    }
     CHECK(sim.Serialize() == saved);
+    // Saves from before parking have no section and load with no rows rotated out.
+    Simulation fresh = Estate();
+    CHECK(fresh.Serialize().find(PackRowRules::ParkedSaveTag) == std::string::npos && fresh.GetState().parkedRows.empty());
 }
-
 int main(int argc, char** argv)
 {
     if (argc > 1) filter = argv[1];
@@ -566,7 +583,7 @@ int main(int argc, char** argv)
     Run("the row is saved", TheRowIsSaved);
     Run("old pinned hotbars migrate once", OldPinnedHotbarsMigrateOnce);
     Run("saved pin lists sanitize", SavedLayoutsSanitize);
-    Run("rotating the row carries each row through", RotatingTheRowCarriesEachRowThrough);
+    Run("rotating the row keeps each stack's key", RotatingTheRowKeepsEachStacksKey);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

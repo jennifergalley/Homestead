@@ -36,8 +36,8 @@ struct GardenTarget
 // The square the hoe acts on from `player` facing (forwardX, forwardY) (unit vector).
 void HoeCellAhead(Point player, double forwardX, double forwardY, int& cellX, int& cellY);
 
-// Hoe: the square ahead, a till when it's untilled and a weeding when it's a plot.
-// Pail: the plot `focusPlotId` (the controller's focus), or nothing when there is none.
+// Hoe: a focused withered crop (`focusPlotId`), else the square ahead: hoeing out a withered crop there,
+// weeding a plot, tilling open ground. Pail: the plot `focusPlotId` (the controller's focus), or nothing.
 GardenTarget PreviewGarden(const Simulation& sim, GardenTool tool, Point player, double forwardX, double forwardY,
     int focusPlotId = -1);
 }

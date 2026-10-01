@@ -255,10 +255,10 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     Add(TEXT("Real save feedback on building-plan page"), [this]() { Tap(EKeys::F5); },
         [this]() { return Controller->Toast() == TEXT("Your homestead is saved."); });
     Capture(TEXT("feedback-plans-success"));
-    Add(TEXT("Select actual plan with controller"), [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+    Add(TEXT("Select actual plan with controller"), [this]() { AffordPlan(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this]() { return Controller->IsPlanning() && !Controller->IsBookOpen(); });
     Add(TEXT("Real rejected placement leaves simulation and planning controls intact"),
-        [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, Before]() { UndoAffordPlan(); *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return Controller->IsPlanning() && Controller->ToastIsError()
             && Controller->Simulation().Serialize() == *Before && !Controller->Toast().IsEmpty(); });
     Capture(TEXT("feedback-planning-error"));

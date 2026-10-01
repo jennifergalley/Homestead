@@ -188,7 +188,7 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
     Add(TEXT("Return from Look"), [this]() { Tap(EKeys::Gamepad_FaceButton_Right); }, Hidden);
     Weed(EKeys::F);
     Add(TEXT("Planning cancels weeding; X rotates rather than weeds"),
-        [this]() { Tap(EKeys::B); Tap(EKeys::Gamepad_FaceButton_Bottom); Tap(EKeys::Gamepad_FaceButton_Left); },
+        [this]() { AffordPlan(); Tap(EKeys::B); Tap(EKeys::Gamepad_FaceButton_Bottom); Tap(EKeys::Gamepad_FaceButton_Left); },
         [this, Hidden]() { return Controller->IsPlanning() && Hidden(); });
     Add(TEXT("Leave planning without a queued pose"), [this]() { Tap(EKeys::Gamepad_FaceButton_Right); }, Hidden);
     Weed(EKeys::F);

@@ -377,9 +377,10 @@ void AHomesteadController::Notify(const Homestead::Result& Result, USoundBase* S
 
 void AHomesteadController::NotifyResourceAction(const Homestead::Result& Result, USoundBase* SuccessCue)
 {
-    if (!Result.ok)
+    // Refusals, and a full pack leaving things on the ground, are worth a notice; plain success isn't.
+    if (!Result.ok || Result.code == Homestead::ResultCode::PackOverflow)
     {
-        Notify(Result);
+        Notify(Result, SuccessCue);
         return;
     }
     ToastText.Reset();

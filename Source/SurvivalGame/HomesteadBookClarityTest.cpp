@@ -106,8 +106,19 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
             return true;
         });
     QueueBookCapture(TEXT("book-plans"));
-    Add(TEXT("Planning selects a preview, not a possession or material purchase"),
+    // A plan she can't afford yet is refused in the book, as a recipe is (Jenny 2026-09-30): the
+    // short notice, still on the plans, not placing, nothing changed.
+    Add(TEXT("A on a plan she can't afford says what's short and doesn't start placing"),
         [this, Before]() { *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, Before]()
+        {
+            return Controller->IsBookOpen() && Controller->BookPage() == 2 && !Controller->IsPlanning()
+                && Controller->ToastIsError() && Controller->Toast().StartsWith(TEXT("Gather "))
+                && Controller->Toast().EndsWith(TEXT(" first.")) && Controller->Simulation().Serialize() == *Before;
+        });
+    Steps.Last().Skip = [this]() { return Controller->Simulation().CheckBuildCost(Homestead::Piece::Foundation).ok; };
+    Add(TEXT("Planning selects a preview, not a possession or material purchase"),
+        [this, Before]() { AffordPlan(); *Before = Controller->Simulation().Serialize(); Tap(EKeys::Gamepad_FaceButton_Bottom); },
         [this, Before]() { return Controller->IsPlanning() && Controller->Simulation().Serialize() == *Before; });
     Add(TEXT("Cancel planning"), [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsPlanning(); });
