@@ -58,6 +58,9 @@ void FHomesteadUIGallery::Prepare(AHomesteadController& PC, bool bPad)
 {
     using namespace HomesteadUIGalleryFixture;
     if (PC.IsShopScreenOpen()) PC.CloseShopScreen();
+    // Out of the new-game setup (its Names step, or its Appearance step in the book).
+    if (PC.NamesWidget.IsValid()) PC.HideNames();
+    PC.bNewGameSetup = false;
     if (PC.NativeMenu.IsValid() && PC.NativeMenu->HasActiveDialog()) PC.NativeMenu->Back();
     if (PC.IsBookOpen()) PC.CloseBook();
     if (auto* Avatar = Cast<AHomesteadCharacter>(PC.GetPawn())) Avatar->CancelAction(true);
@@ -224,6 +227,13 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             if (PC.ChooseOnHotbar(Item::Pasty)) PC.EatFromHotbar(Item::Pasty);
         };
     };
+    // The same hour on a rainy day (rain falls RainStartHour-RainEndHour on two days in ten), or tonight.
+    const auto Rain = [](AHomesteadController& PC)
+    {
+        for (int32 Day = 0; Day < Homestead::RainBlockDays && !Homestead::IsRainingAt(PC.State().hour); ++Day)
+            PC.Sim.SkipToHourOfDay(12.0);
+    };
+    const auto Night = [](AHomesteadController& PC) { PC.Sim.SkipToHourOfDay(22.5); };
     const auto Add = [](const TCHAR* Id, const TCHAR* Description, ECover Cover, int32 Key,
         TFunction<bool(AHomesteadController&, FStage&, FString&)> StageAt, TFunction<void(AHomesteadController&)> Apply,
         float Settle = 0.9f)
@@ -426,8 +436,50 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             PC.ChooseOnHotbar(Item::WateringCan);
         });
 
-    // Last: the new-game setup takes over the screen until it is finished.
-    Add(TEXT("setup-new-game"), TEXT("New-game setup (ends a run): the Appearance step before the Names step."), ECover::Setup, 0, nullptr,
+    // Seed outlines and the sowing cue (Water's seed-outline, jennifergalley-seed-outline @6408cdd7:
+    // Simulation::CheckSow, PreviewGarden(Seed), DescribeSow). Until it is on this line these show the
+    // older cue and no seed outline, and the run reports them as pending.
+    const TCHAR* const SeedOutline = TEXT("Water's seed outline (jennifergalley-seed-outline @6408cdd7)");
+    const auto TurnipSeed = [](AHomesteadController& PC, bool bSelect)
+    {
+        if (PC.Sim.Count(Item::TurnipSeed) < 4) PC.Sim.GrantItems(Item::TurnipSeed, 4 - PC.Sim.Count(Item::TurnipSeed));
+        PC.ChooseOnHotbar(Item::TurnipSeed);
+        if (!bSelect)
+        {
+            const int32 Empty = PC.FirstEmptyHotbarCell();
+            if (Empty != INDEX_NONE) PC.SelectHotbarSlot(Empty);
+        }
+    };
+    Add(TEXT("garden-seed-plant"), TEXT("Turnip seed chosen over a tilled square: the green outline and '[E] Plant Turnip seed'."),
+        ECover::Focus, 11, Garden, [TillAhead, TurnipSeed](AHomesteadController& PC) { TillAhead(PC); TurnipSeed(PC, true); });
+    List.Last().Pending = SeedOutline;
+    Add(TEXT("garden-seed-occupied"), TEXT("Turnip seed over a square already sown: the red outline and 'A crop is already growing here.'"),
+        ECover::Focus, 12, Garden, [TillAhead, TurnipSeed](AHomesteadController& PC)
+        {
+            const int32 Plot = TillAhead(PC);
+            TurnipSeed(PC, true);
+            if (Plot >= 0) PC.Sim.Plant(Plot, PC.PlayerPoint(), Homestead::CropKind::Turnips);
+        });
+    List.Last().Pending = SeedOutline;
+    Add(TEXT("garden-seed-select"), TEXT("A tilled square with turnip seed in the hotbar but not chosen: 'Select Turnip seed (4) to plant'."),
+        ECover::Focus, 13, Garden, [TillAhead, TurnipSeed](AHomesteadController& PC) { TillAhead(PC); TurnipSeed(PC, false); });
+    List.Last().Pending = SeedOutline;
+    Add(TEXT("garden-seed-untilled"), TEXT("Turnip seed chosen over untilled meadow: the red outline and 'Till this square before sowing.'"),
+        ECover::Focus, 14, Garden, [TurnipSeed](AHomesteadController& PC) { TurnipSeed(PC, true); });
+    List.Last().Pending = SeedOutline;
+
+    // Night and rain: the same HUD and notices under the night sky and in the rain.
+    Add(TEXT("hud-night"), TEXT("The world HUD at 10:30 PM: the moon in the calendar, the night-lit world."), ECover::Hud, 7, nullptr, Night, 1.5f);
+    Add(TEXT("hud-rain"), TEXT("The world HUD in the rain: the rain cloud in the calendar, rain falling."), ECover::Hud, 8, nullptr, Rain, 1.5f);
+    Add(TEXT("toast-night"), TEXT("A world notice at night: the parchment slip over the dark scene."), ECover::Hud, 9, nullptr,
+        [Night](AHomesteadController& PC) { Night(PC); PC.Notify(TEXT("Planted roots. Ready in about 2 days if watered."), false); }, 1.5f);
+    Add(TEXT("toast-rain"), TEXT("A world error notice in the rain."), ECover::Hud, 10, nullptr,
+        [Rain](AHomesteadController& PC) { Rain(PC); PC.Notify(TEXT("Walk closer to a plant, resource, or work area."), true); }, 1.5f);
+
+    // The new-game setup: the Names step on its own, then the whole flow (it takes over the screen).
+    Add(TEXT("setup-names"), TEXT("New-game Names step: her name, family and estate fields with the suggestions."), ECover::Setup, 1, nullptr,
+        [](AHomesteadController& PC) { PC.bNewGameSetup = true; PC.ShowNames(); }, 1.2f);
+    Add(TEXT("setup-new-game"), TEXT("New-game setup from the start (last in a run): the Appearance step before Names."), ECover::Setup, 0, nullptr,
         [](AHomesteadController& PC) { PC.BeginNewGameSetup(); }, 1.5f);
     return List;
 }

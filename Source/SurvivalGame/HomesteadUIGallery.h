@@ -45,6 +45,9 @@ struct FHomesteadUIGallery
         TFunction<bool(AHomesteadController&, FStage&, FString&)> Stage;
         TFunction<void(AHomesteadController&)> Apply;
         float Settle = 0.9f; // Seconds on screen before it counts as shown.
+        // Set while the entry shows another lane's work not yet on this line (what it needs); the run
+        // still captures it and reports it as pending.
+        FString Pending;
     };
 
     static const TArray<FEntry>& Entries();

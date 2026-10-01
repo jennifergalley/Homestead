@@ -97,7 +97,13 @@ void AHomesteadSmokeTest::PrepareUIGalleryChecks()
             const FHomesteadUIGallery::FEntry* Entry = FHomesteadUIGallery::Find(Id);
             // The window as she sees it: the 3D view, the Canvas HUD and every Slate widget.
             FScreenshotRequest::RequestScreenshot(FPaths::Combine(Output, Id + TEXT(".png")), true, false);
-            const FString Line = Id + TEXT("\t") + (Entry ? Entry->Description.Replace(TEXT("\t"), TEXT(" ")) : FString()) + TEXT("\n");
+            FString Description = Entry ? Entry->Description.Replace(TEXT("\t"), TEXT(" ")) : FString();
+            if (Entry && !Entry->Pending.IsEmpty())
+            {
+                Description += TEXT(" (pending: ") + Entry->Pending + TEXT(")");
+                Results.Add(FString::Printf(TEXT("UI_GALLERY_PENDING %s: %s"), *Id, *Entry->Pending));
+            }
+            const FString Line = Id + TEXT("\t") + Description + TEXT("\n");
             FFileHelper::SaveStringToFile(Line, *Index, FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM,
                 &IFileManager::Get(), FILEWRITE_Append);
             Results.Add(TEXT("UI_GALLERY_CAPTURED ") + Id);

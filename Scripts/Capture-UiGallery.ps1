@@ -58,7 +58,7 @@ foreach ($resolution in $Res) {
         }
         $result = Join-Path $folder 'smoke-result.txt'
         if (Test-Path -LiteralPath $result) {
-            Select-String -LiteralPath $result -Pattern '^UI_GALLERY_(SKIPPED|MISSING)' | ForEach-Object { Write-Warning $_.Line }
+            Select-String -LiteralPath $result -Pattern '^UI_GALLERY_(SKIPPED|MISSING|PENDING)' | ForEach-Object { Write-Warning $_.Line }
         }
     }
 }
