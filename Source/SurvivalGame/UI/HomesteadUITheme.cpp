@@ -27,7 +27,7 @@ constexpr float SerifScale = 1.12f;
 
 TAutoConsoleVariable<FString> CVarTheme(TEXT("homestead.UITheme"), TEXT(""),
     TEXT("UI theme trial: parchment (the parchment card and EB Garamond everywhere) or classic (pine and cream). ")
-    TEXT("Empty: -HomesteadUITheme=<name> from the command line, else classic. Reopen menus after changing."),
+    TEXT("Empty: -HomesteadUITheme=<name> from the command line, else parchment. Reopen menus after changing."),
     FConsoleVariableDelegate::CreateLambda([](IConsoleVariable*) { HomesteadUITheme::Apply(); }));
 
 float Luminance(const FLinearColor& Colour) { return 0.2126f * Colour.R + 0.7152f * Colour.G + 0.0722f * Colour.B; }
@@ -39,7 +39,7 @@ ETheme Current()
 {
     FString Value = HomesteadUIThemeTuning::CVarTheme.GetValueOnGameThread();
     if (Value.IsEmpty()) FParse::Value(FCommandLine::Get(), TEXT("HomesteadUITheme="), Value);
-    return Value.Equals(TEXT("parchment"), ESearchCase::IgnoreCase) ? ETheme::Parchment : ETheme::Classic;
+    return Value.Equals(TEXT("classic"), ESearchCase::IgnoreCase) ? ETheme::Classic : ETheme::Parchment;
 }
 
 void Set(ETheme Theme)
