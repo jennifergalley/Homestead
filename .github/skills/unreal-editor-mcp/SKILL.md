@@ -1024,7 +1024,29 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **Packaged smoke and route tests (integration session only, like packaging):** `Scripts\Test-Game.ps1` with hashtable splats (table 0.1);
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
-  the MetaHuman heroine yourself (field notes).
+  the MetaHuman heroine yourself (field notes). **Any input-policy change** (hotbar selection, sow/eat/
+  weed bindings, sprint input or controller priority) runs packaged **both** `-Hotbar` and `-FullLoop`;
+  otherwise stale assertions can pass silently until the package route breaks.
+- **Audio cue loudness (pending standard):** source-only branch `jennifergalley-loudness` `95f4ea14`
+  establishes Jenny's rule: measure every new or changed cue against the forest ambience bed before
+  shipping it. Add a row to `Simulation/HomesteadAudioLevels.h` with use, source, category, bus and
+  gain; use a named `Gain` constant at every new `PlayEffect` call, never a literal. Run
+  `Scripts\Fetch-Assets.ps1`, install `soundfile`/`pyloudnorm`, then run
+  `python Scripts/Audio/Measure-Loudness.py` to regenerate
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; run
+  `Scripts\Test-Native.ps1` so `HomesteadAudioLevelTests` rejects out-of-band cues or audio files
+  with no registry row. The generated header must remain `HomesteadAudioMeasurements.h`, **not**
+  `*.generated.h`, which collides with UHT naming. Do not rely on this gate until the branch lands.
+- **Audio cue loudness (pending standard):** source-only branch `jennifergalley-loudness` `95f4ea14`
+  establishes Jenny's rule: measure every new or changed cue against the forest ambience bed before
+  shipping it. Add a row to `Simulation/HomesteadAudioLevels.h` with use, source, category, bus and
+  gain; use a named `Gain` constant at every new `PlayEffect` call, never a literal. Run
+  `Scripts\Fetch-Assets.ps1`, install `soundfile`/`pyloudnorm`, then run
+  `python Scripts/Audio/Measure-Loudness.py` to regenerate
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; run
+  `Scripts\Test-Native.ps1` so `HomesteadAudioLevelTests` rejects out-of-band cues or audio files
+  with no registry row. The generated header must remain `HomesteadAudioMeasurements.h`, **not**
+  `*.generated.h`, which collides with UHT naming. Do not rely on this gate until the branch lands.
 - **Blender props into Unreal:** import them in your running editor with `py` (see Props in the
   field notes), not with the headless `Import-Props.ps1`, which drops LODs and collision.
 - **C++ conventions that bite** (unity-build names, C2487/C4458/C4459, forward-declared enums, `UPROPERTY`

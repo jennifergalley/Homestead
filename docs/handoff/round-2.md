@@ -1095,14 +1095,25 @@ requirement.
   Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
   two-swing clearing animation and awards/clears once, without a second click or double reward.
   Architecture traces tool tier, input and reward paths before native/PIE proof.
-- **Animation anatomy and inspection** — **Props overnight research, pending and unshipped.** Jenny
-  directed a `realistic-animation` repo skill with a MetaHuman per-joint anatomy/range-of-motion
-  table, review checklist, ROM checks in `report()` and an audit of heroine clips. Its planned
-  Animation Inspector is the animation counterpart to the UI Gallery: deterministic frame-by-frame
-  multi-view captures with ROM, contact and centre-of-mass overlays, exposed through
-  `Scripts\Inspect-Animation.ps1` and `editor_mcp animinspect`. Cross-link the resulting
-  `realistic-animation` and Animation Inspector from `blender-assets` only after they land; until
-  then this is a research/tooling direction, not an animation acceptance claim.
+- **Animation anatomy and inspection** — **Props source-only `ded05f62`, not on `main`.** It adds
+  `.github/skills/realistic-animation/` with MetaHuman per-joint comfortable/extreme ROM tables,
+  coupling, joint speeds, tool grips, posture/failure rules, review checklist and sources.
+  `rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` now runs
+  `joint_limits.py` after every bake and logs advisory `[anatomy AN_...]` lines; errors never block
+  a bake. `anim_audit.run()` writes a whole-cast report to
+  `E:\CopilotScratch\anim-audit\<stamp>\audit.md`. It also contains
+  `add-realistic-animation-skill` and cross-links from `homestead-animation-layer` / `blender-assets`
+  on the branch.
+
+  Rig facts for future inspection: twist/corrective upperarm/lowerarm/thigh/calf bones are RigLogic
+  followers in `ABP_Body_PostProcess`, not keyable/limited joints; fingers have
+  `*_metacarpal_*` bones between hand and `*_01`; the reference A-pose is not anatomical shoulder
+  zero; judge angles in UE component space (+Y forward, +X her left, +Z up), never Blender armature
+  axes. The planned Animation Inspector remains the animation counterpart to the UI Gallery:
+  deterministic frame-by-frame multi-view captures with ROM, contact and centre-of-mass overlays,
+  via `Scripts\Inspect-Animation.ps1` and `editor_mcp animinspect`. Cross-link it from canonical
+  `blender-assets` only after this branch lands and validates; none of this is animation acceptance
+  evidence yet.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
@@ -1119,6 +1130,15 @@ requirement.
   never fall back to CC0 `GrassStepA` footstep audio. PIE still needs cue count at 30/60/120 fps,
   miss/cancel, rain/music mix/headroom and cooked asset proof. Add provenance to `docs/asset-credits`
   only when shipped.
+
+  **Audio loudness standard `95f4ea14` (Water branch only):** every new or changed cue is measured
+  against the forest ambience bed before shipping. `HomesteadAudioLevels.h` owns cue use/source/
+  category/bus/gain rows and named gain constants; `Measure-Loudness.py` (after
+  `Fetch-Assets.ps1` and `soundfile`/`pyloudnorm`) regenerates
+  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; native
+  `HomesteadAudioLevelTests` rejects out-of-band or unregistered audio. The generated header must
+  not use `*.generated.h` because that collides with UHT. This pipeline is unmerged and is not yet
+  an acceptance gate.
 - **Bilateral ground-pull and sapling action count** — **Props, pending and not shipped.** By-hand
   Resource Weeds/Nettles already resolve in one `Sim.Harvest`; replace right-knee-only
   `KneelGather(Pouch)` with a dedicated bilateral kneel: two hand grabs, left/right toss behind,
@@ -1495,6 +1515,25 @@ not claim early Energy is fully solved.
   landing through ground-material wear, then verify it visually and on foot. Water's separate
   `1d5b90a9` trail PNG/bin is committed but requires `build_ground.py`, importing `T_EstateGround` /
   `T_EstateCanopy`, `ImportEstateMap`, and a visual check before any delivery claim.
+- **Water selective source merge `4324515d` (next batch only):** includes Water `d1fe4850`'s
+  concise pail-fill change (no success toast; refusals remain visible) and native Release 18/18
+  source evidence. The rejected global indoor `r.HairStrands.SkyLighting` toggle and black-hair
+  image are omitted. Water's `00fd` follow-up is not UE-verified; no Water visual or package
+  acceptance claim follows from this merge.
+
+  **Review follow-up `855a91cc` (not on `main`):** partial pails stay water-focusable until
+  `PailPortions` capacity; `NotifyResourceAction` clears stale refusal copy while retaining
+  refusal feedback; watering playtest asserts the named capacity. The isolated routing fixture
+  explicitly toggles `bEstateMap` for policy cases on the Woodland test actor and restores it.
+  The independent wall plate is lowered to 279 cm. Native merged baseline remains 18/18; these
+  Unreal-only routing/interior changes still require UBT and runtime verification.
+
+  **7:30 AM build hold — Menu chest tiles:** the invisible 720p chest-stack regression is from
+  Menu's unmerged `62f7c645` (a dropped `AddSlot`), **not** `3bc08d9a` or current batch
+  `855a91cc`. Native 18/18 does not catch this UI failure. Menu fixes it in `cc001d62`; the hold
+  remains until its 01:45 slot confirms chest view and directional navigation, followed by
+  Integration batch UI testing. No rollback is planned. One-line pail compile fix `c0a9e97a` is
+  source-only and does not clear this UI gate.
 - **River road bridge** — **Water Agent** (`89914e30`), after the lake slice; a safe, walkable
   period wooden bridge where the road crosses the river. A Props mesh may be needed. Pending; not
   shipped.
