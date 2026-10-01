@@ -27,8 +27,10 @@ int32 SHomesteadMenu::StorageColumns() const { return LogicalBookWidth() >= 1800
 
 int32 SHomesteadMenu::Columns() const
 {
+    // The Pack page's grid is as wide as the hotbar row heading it (Homestead::PackRowSize), so the row
+    // reads as the grid's first row.
     const bool Expanded = LogicalBookWidth() >= 1800;
-    return SeenPage == 0 ? (Expanded ? 12 : 9)
+    return SeenPage == 0 ? Homestead::PackRowSize
         : SeenPage <= 2 ? (Expanded ? 10 : 6) : 1;
 }
 
@@ -379,14 +381,6 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 12)[ Text(Summary, 17) ];
     PackDropArea.Reset();
     ChestDropArea.Reset();
-    if (SeenPage == 0 && !Storage)
-    {
-        // The hotbar is the pack's first row (Simulation/HomesteadPackRow.h): its ten keyed cells
-        // head the pack, and the grid below holds the rest.
-        InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 4)
-        [ Text(TEXT("Hotbar  -  the first row of your pack (keys 1-0)"), 16) ];
-        InventoryColumn->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 10)[ BuildBookHotbar() ];
-    }
     if (Storage)
     {
         TSharedPtr<SVerticalBox> ChestColumn;
@@ -466,7 +460,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     ]
                 ]
                 + SVerticalBox::Slot().AutoHeight().Padding(4, 0, 4, 4)
-                [ Text(TEXT("Hotbar  -  the first row of your pack (keys 1-0)"), 15) ]
+                [ Text(TEXT("Hotbar"), 15) ]
                 + SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Left).Padding(0, 0, 0, 8)
                 [
                     SNew(SScaleBox).Stretch(EStretch::ScaleToFitX).StretchDirection(EStretchDirection::DownOnly)
@@ -505,6 +499,36 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
             + SScrollBox::Slot().HAlign(HAlign_Fill)[ SAssignNew(AppearanceList, SVerticalBox) ]
         ];
+    }
+    else if (SeenPage == 0)
+    {
+        // The hotbar is the pack's first row (Simulation/HomesteadPackRow.h): one of the grid's rows,
+        // the same width and height as the rest, set apart only by a small label and a rule beneath it.
+        InventoryColumn->AddSlot().FillHeight(1)
+        [
+            SAssignNew(Scroll, SScrollBox).Clipping(EWidgetClipping::ClipToBounds)
+            + SScrollBox::Slot().HAlign(HAlign_Fill)
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot().AutoHeight().Padding(6, 0, 6, 0)
+                [
+                    SNew(STextBlock).Text(FText::FromString(TEXT("Hotbar"))).ColorAndOpacity(Muted)
+                    .Font(HomesteadUITheme::Font("Regular", 13))
+                ]
+                + SVerticalBox::Slot().AutoHeight()[ BuildBookHotbar(true) ]
+                + SVerticalBox::Slot().AutoHeight().Padding(6, 2, 6, 6)
+                [
+                    SNew(SBox).HeightOverride(1.5f)
+                    [
+                        SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                        .BorderBackgroundColor(FLinearColor(Ink.R, Ink.G, Ink.B, 0.35f))
+                    ]
+                ]
+                + SVerticalBox::Slot().AutoHeight()
+                [ SAssignNew(Grid, SUniformGridPanel).SlotPadding(FMargin(4)) ]
+            ]
+        ];
+        PackDropArea = Scroll;
     }
     else
     {

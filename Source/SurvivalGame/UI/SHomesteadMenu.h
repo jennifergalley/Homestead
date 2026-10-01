@@ -297,7 +297,10 @@ private:
     bool bHotbarPointerDragging = false;
     bool bSuppressHotbarClick = false;
     TOptional<FHomesteadRow> HeldHotbarRow;
-    TSharedRef<SWidget> BuildBookHotbar();
+    // The row as one of the pack grid's rows (Pack page: cells as wide as the grid's, inside its scroll),
+    // or as a strip of fixed cells (heading the pack column beside an open chest).
+    TSharedRef<SWidget> BuildBookHotbar(bool bGridRow = false);
+    bool bHotbarInScroll = false;
     // One hotbar snapshot per frame for the strip's many per-paint attributes.
     FHomesteadHotbarSlot BookHotbarSlot(int32 Slot) const;
     mutable TArray<FHomesteadHotbarSlot> HotbarSnapshotCache;
@@ -312,6 +315,11 @@ private:
     void OpenHotbarSlotMenu(int32 Slot, bool bPointer);
     void CancelHotbarHolds();
     FString HotbarHint() const;
+    // The drag ghost (SHomesteadMenuDragGhost.cpp): what she holds, drawn over the book under the cursor
+    // or, on the pad, on the focused cell's corner, so she can't forget what she's carrying.
+    struct FDragGhost { FName Icon; int32 Count = 0; FVector2D Position = FVector2D::ZeroVector; bool bOnCell = false; };
+    TOptional<FDragGhost> CurrentDragGhost() const;
+    TSharedRef<SWidget> BuildDragGhost();
     enum class ECraftInput { None, Pointer, Keyboard, Controller };
     static constexpr float CraftCycleSeconds = 1.2f;
     int32 CraftHoldRecipe = INDEX_NONE;

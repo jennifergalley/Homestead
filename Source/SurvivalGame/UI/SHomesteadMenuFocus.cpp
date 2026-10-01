@@ -128,6 +128,9 @@ void SHomesteadMenu::SynchronizeFocus()
     FSlateApplication::Get().SetKeyboardFocus(Target, EFocusCause::Navigation);
     bFocusPending = FSlateApplication::Get().GetKeyboardFocusedWidget() != Target;
     if (Dialog != EDialog::None && DialogScroll) DialogScroll->ScrollDescendantIntoView(Target, false);
+    // On the Pack page the hotbar row is the grid's first row, inside the scrolling pack.
+    if (Dialog == EDialog::None && Region == ERegion::Hotbar && Scroll && bHotbarInScroll)
+        Scroll->ScrollDescendantIntoView(Target, false, EDescendantScrollDestination::IntoView);
     ScrollActionIntoView();
 }
 
