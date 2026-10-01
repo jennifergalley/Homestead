@@ -10,5 +10,7 @@
 
 ## 2. Verification
 
-- [ ] 2.1 PIE: weed a plot in the evening, sleep, see tufts at dawn; weed again, play until evening, none
+- [x] 2.1 PIE (2026-10-01, awake path): a fresh plot tilled at 14:40 shows no weeds after 12 awake hours (02:41),
+      then [F] Pull weeds at 07:31 after crossing 06:00; pulled at 07:40, none by 19:42. The sleep and doze paths
+      are native-tested (DailyWeedPass); the PIE world had no bed to sleep in.
 - [ ] 2.2 HomesteadFullLoop still passes (it sleeps to 06:45 and expects weeds after)
