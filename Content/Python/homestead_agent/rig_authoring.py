@@ -139,8 +139,10 @@ class Session:
     def key_float(self, frame, control, value):
         self._add(control, frame, float(value))
 
-    def bake(self, anim_name, folder=OUTPUT):
-        """Bake the sequence onto a new AnimSequence for the heroine skeleton; returns it."""
+    def bake(self, anim_name, folder=OUTPUT, events=None, contacts=None):
+        """Bake the sequence onto a new AnimSequence for the heroine skeleton; returns it. The baked clip is
+        then checked against human joint limits (joint_limits, realistic-animation skill) and the summary
+        logged: ``events`` is the recipe's FRAMES dict, ``contacts`` its strike or impact frames."""
         path = f'{folder}/{anim_name}'
         if unreal.EditorAssetLibrary.does_asset_exist(path):
             unreal.EditorAssetLibrary.delete_asset(path)
@@ -155,6 +157,12 @@ class Session:
                                  unreal.load_asset('/Engine/Animation/DefaultAnimCurveCompressionSettings'))
         unreal.EditorAssetLibrary.save_loaded_asset(anim, False)
         unreal.EditorAssetLibrary.save_loaded_asset(self.sequence, False)
+        try:
+            from homestead_agent import joint_limits
+            for line in joint_limits.report(anim, events=events, contacts=contacts):
+                unreal.log(f'[anatomy {anim_name}] {line}')
+        except Exception as error:  # the check never blocks a bake
+            unreal.log_warning(f'[anatomy {anim_name}] check skipped: {error}')
         return anim
 
 

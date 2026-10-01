@@ -23,6 +23,10 @@ Idle/Walk/Sprint blends ─► ActionBlend (B = the one full-body action evaluat
 
 ## 1. Author the clip (Python, editor, not PIE)
 
+Design the poses with the `realistic-animation` skill first: per-joint ranges for the MetaHuman bones,
+coupling (scapula with a raised arm, wrist extension in a power grip, weight shift before the action),
+grips per tool and the review checklist.
+
 Follow "Author an animation with the MetaHuman Control Rig" in the `unreal-editor-mcp` skill.
 Copy the closest module in `Content/Python/homestead_agent/` (`hoe_till.py` for a two-handed tool,
 `machete_hack.py` for one hand, `kneel_gather.py` for kneeling, `eat_berry.py`/`craft_hands.py`
@@ -33,7 +37,10 @@ for layers). Keep in the module, as constants:
 - the held prop's transform in the hand (`HELD`), read from the running game;
 - a `report()` that prints the contact point against its target at each key.
 
-It bakes `/Game/Characters/Heroine_MH/Animations/AN_HeroineMH_<Name>`. Save the asset, clean up the
+It bakes `/Game/Characters/Heroine_MH/Animations/AN_HeroineMH_<Name>`. Pass the module's `FRAMES` and
+its strike or impact keys to `s.bake(ANIM, events=FRAMES, contacts=[...])`: the bake runs the anatomical
+joint-limit checker (`joint_limits.py`) and logs `[anatomy AN_...]` lines. Fix every error, and every
+warning that isn't a deliberate brief extreme, before committing. Save the asset, clean up the
 authoring actor and sequence, and commit the `.uasset` with the `.py`.
 
 ## 2. Load it on the character
@@ -72,6 +79,8 @@ happens in the simulation.
 
 ## 5. Check it
 
+- Anatomy: the bake's `[anatomy]` lines, or `anim_audit.run(['AN_HeroineMH_<Name>'])` for a report, then
+  the `realistic-animation` review checklist (front, side and top at the key frames).
 - Character lab: `-HomesteadCharacterLab` or `homestead.CharacterLab 1`, then `LabAction <Name>`
   if you add a lab hook (`HomesteadLab.cpp`); capture a burst and look for limbs through the body
   (`kneel_gather.clearance`) and sharp wrists.

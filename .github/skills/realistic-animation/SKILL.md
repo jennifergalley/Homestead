@@ -303,22 +303,36 @@ dict (contact beats, extremes, transitions) plus the first and last frame:
 
 ## 8. Automated checks
 
-- **Status:**
-  - `Content/Python/homestead_agent/joint_limits.py` is work in progress on branch
-    `jennifergalley-realistic-animation`.
-  - The Animation Inspector (multi-view frame captures with overlays) is planned under the same
-    OpenSpec change, `add-realistic-animation-skill`.
-- **Checker:**
-  - Pure Python. It reads component-space bone positions per frame (from
-    `rig_authoring.bone_positions` on a baked clip, or from PIE socket transforms) and measures
-    anatomical angles from positions: limb vectors in pelvis and chest frames, elbow plane, hand
-    long and across vectors.
-  - It doesn't read raw local Euler channels, because MetaHuman local axes differ per side and per
-    bone.
-  - It flags frames outside the comfortable and extreme bands in section 2, joint speeds over the
-    hard-pop table, ground penetration, foot slides, and the CoM outside the support hull (de Leva
-    female segment fractions).
-  - The recipe's `report()` prints a grouped summary.
+- **Status:** the checker (`Content/Python/homestead_agent/joint_limits.py`, tests in
+  `Tests/JointLimitsTests.py`) and the clip audit (`anim_audit.py`) are on branch
+  `jennifergalley-realistic-animation`. The in-engine calibration (twist signs on the real skeleton) and
+  the first full audit happen in an Unreal slot. The Animation Inspector (multi-view frame captures with
+  overlays) is planned under the same OpenSpec change, `add-realistic-animation-skill`.
+- **Every bake is checked.** `rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` runs the
+  checker on the new clip and logs `[anatomy AN_...]` lines: a count by kind and severity, then the worst
+  issue per joint with its frame and `FRAMES` key. Pass the recipe's `FRAMES` and its strike or impact
+  keys so the report names beats and fast contact frames only warn. A recipe's `report()` can add the
+  same lines with `joint_limits.report(anim, events=FRAMES, contacts=[...])`.
+- **Whole-cast audit:** `from homestead_agent import anim_audit; anim_audit.run()` checks every heroine
+  clip and writes `audit.md` under `E:\CopilotScratch\anim-audit\<stamp>\`.
+- **How it measures** (pure Python, so it runs anywhere on `{bone: (location, quaternion)}` component-space
+  poses):
+  - Absolute, from positions in body frames: shoulder and hip flexion and abduction (chest and pelvis
+    frames) and elbow and knee flexion. These read 0 at anatomical neutral whatever the bind pose is.
+  - Relative to the skeleton's reference pose (`neutral_pose()`): the spine, neck and head per bone,
+    the clavicle, wrist, fingers, thumb, ankle and toes as swing along anatomical directions (toward the
+    front, the palm, up), and the rotations as twist about the segment: shoulder and hip rotation,
+    forearm pronation, tibial rotation and subtalar inversion. Forearm roll is read as the hand's twist
+    relative to the upper arm, wherever the rig keys it.
+  - Regional totals: lumbar twist, spine flexion, side bend and twist, and neck turn and flexion.
+  - Coupling: arm overhead on a still clavicle, a fist on a flexed wrist, wrist deviation off neutral
+    flexion, an isolated DIP, a spread fist, hip flexion with a straight knee, tibial rotation near
+    extension, dorsiflexion with a straight knee, head turned with the torso still, and a deep bend with
+    straight hips.
+  - Motion and contact: per-joint speed against the section 2 table (warnings only within two frames
+    of a listed contact), ground penetration, planted foot or knee slides (over 0.5 cm a frame) and the
+    centre of mass outside the support in held frames (de Leva female segment fractions).
+  - It never reads raw local Euler channels, because MetaHuman's local axes differ per bone and side.
 - **Seeing every frame:** the Animation Inspector (planned) plays a clip at a fixed 1/30 s step in
   the Character Lab with props. It captures front, side, top and three-quarter views, with:
   - the skeleton coloured by ROM status;

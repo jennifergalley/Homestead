@@ -1,30 +1,31 @@
 """Anatomical joint-limit checker for the MetaHuman heroine's clips (realistic-animation skill).
 
     from homestead_agent import joint_limits as jl
-    print(jl.report(anim))                     # in the editor: a baked AnimSequence, every frame
-    issues = jl.check_frames(frames, bind)     # anywhere: poses as {bone: (location, quaternion)}
+    print('\\n'.join(jl.report(anim, events=FRAMES)))   # editor: a baked AnimSequence, every frame
+    result = jl.check_frames(frames, neutral)          # anywhere: poses as {bone: (location, quaternion)}
 
-Every joint angle is measured from the bones' component-space transforms against the skeleton's own
-bind (reference) pose. No assumption is made about Unreal's per-bone local axes:
-- the child bone's rotation relative to its parent, minus the bind relation, is split into a swing
-  (where the segment points) and a twist (roll about the segment);
-- the swing is read along anatomical directions fixed in the parent at bind time: flexion toward the
-  body's front, the palm, the back of the knee and so on, from the component frame (forward +Y,
-  her left +X, up +Z) and the hand's own knuckle and palm directions;
-- so a joint reads 0 in the bind pose, and its signs and names follow anatomy (flexion,
-  extension, abduction, ulnar deviation, pronation...).
+Poses are component space (rig_authoring's frame: forward +Y, her left +X, up +Z); locations in cm,
+quaternions (x, y, z, w). Joint angles are measured two ways, never from raw local Euler channels
+(MetaHuman's local axes differ per bone and per side):
+- absolute, from positions in body frames: shoulder and hip elevation (flexion/extension and
+  abduction/adduction in the chest and pelvis frames) and elbow and knee flexion. These read 0 at
+  anatomical neutral whatever the bind pose is (MetaHuman binds in an A-pose, arms lowered about 45
+  degrees);
+- relative to a neutral pose (the skeleton's reference pose in the editor): the child bone's rotation
+  relative to its parent, minus the neutral relation, split into swing along anatomical directions
+  (flexion toward the front, the palm, upward...) and twist about the segment. That covers the spine,
+  neck, head, clavicle, wrist, fingers, thumb, ankle, toes and the rotations (shoulder and hip
+  internal/external rotation, forearm pronation/supination, tibial rotation, subtalar inversion).
 
-The limits come from clinical range-of-motion norms (AAOS, AMA Guides, the CDC normative ROM study
-Soucie et al. 2011, Norkin & White, Kapandji/Neumann). The sources and per-joint citations are in
-.github/skills/realistic-animation/SKILL.md. Each axis has a comfortable band (functional, everyday
-work) and an extreme band (normal active end-range). Outside the extreme band is a hard error; between
-the bands is a warning that the pose reads strained. MetaHuman's bind pose isn't anatomical zero
-everywhere (the arms are lowered about 45 degrees and the fingers slightly curled), so BIND_OFFSET adds
-each joint's bind angle back before the bands are applied.
+Bands (comfortable, extreme) come from clinical range-of-motion norms for adult women; the sources and
+the reasoning are in .github/skills/realistic-animation/SKILL.md. Between the bands is a warning (the
+pose reads strained); beyond the extreme band is an error. Coupling checks catch combinations that are
+each legal but not together (an arm overhead on a still clavicle, a fist on a flexed wrist, a DIP bent
+with its PIP straight...). Speeds are checked against per-joint pop ceilings at 30 fps, and contacts,
+foot slides and the centre of mass over the support as before.
 
-The pure-Python core (vectors, quaternions, decomposition, checks) imports nothing from unreal, so
-Tests/JointLimitsTests.py exercises it with synthetic poses. The editor adapter at the bottom
-(pose_at, bind_pose, report) imports unreal lazily.
+The core imports nothing from unreal, so Tests/JointLimitsTests.py checks it with synthetic poses. The
+editor adapter at the bottom (pose_at, neutral_pose, report) imports unreal lazily.
 """
 import math
 
@@ -32,15 +33,22 @@ import math
 
 FPS = 30.0
 FORWARD = (0.0, 1.0, 0.0)
+BACK = (0.0, -1.0, 0.0)
 LEFT = (1.0, 0.0, 0.0)
 UP = (0.0, 0.0, 1.0)
+DOWN = (0.0, 0.0, -1.0)
 # A bone this close to or below the floor plane (cm) counts as touching / penetrating it.
 CONTACT_CM = 3.0
 PENETRATION_CM = 1.5
-# A planted contact moving faster than this along the floor slides (cm/s).
-SLIDE_CM_PER_S = 8.0
-# The centre of mass may sit this far outside the support polygon (cm) before a static frame is flagged.
+# A planted contact moving faster than this along the floor slides (cm/s): 0.5 cm a frame at 30 fps.
+SLIDE_CM_PER_S = 15.0
+# The centre of mass should stay this far inside the support polygon in a held pose (cm).
 COM_MARGIN_CM = 2.0
+# A limb's elevation is only split into flexion and abduction when its projection on that plane is at
+# least this long (unit vector), so an arm straight out to the side has no flexion reading.
+PLANE_MIN = 0.35
+# Speed issues within this many frames of a listed contact (a strike's bite) are only warnings.
+CONTACT_GRACE_FRAMES = 2
 
 
 # ------------------------------------------------------------------------------------------- vector math
@@ -79,6 +87,21 @@ def reject(a, axis):
     return sub(a, scale(axis, dot(a, axis)))
 
 
+def angle_between(a, b):
+    return math.degrees(math.acos(max(-1.0, min(1.0, dot(norm(a), norm(b))))))
+
+
+def signed_angle(a, b, axis):
+    """Angle (degrees) from ``a`` to ``b`` about ``axis``, both projected on the plane normal to it."""
+    ax = norm(axis)
+    pa, pb = norm(reject(a, ax)), norm(reject(b, ax))
+    return math.degrees(math.atan2(dot(ax, cross(pa, pb)), dot(pa, pb)))
+
+
+def wrap(degrees):
+    return (degrees + 180.0) % 360.0 - 180.0
+
+
 # Quaternions are (x, y, z, w), the same order as unreal.Quat, and rotate vectors as q * v * q^-1.
 
 def q_mul(a, b):
@@ -113,209 +136,163 @@ def q_axis_angle(axis, degrees):
     return (a[0] * s, a[1] * s, a[2] * s, math.cos(h))
 
 
+IDENTITY = (0.0, 0.0, 0.0, 1.0)
+
+
 def twist_angle(q, axis):
     """Signed twist (degrees) of ``q`` about the unit ``axis`` (swing-twist decomposition)."""
     x, y, z, w = q
     p = dot((x, y, z), axis)
     if abs(p) < 1e-12 and abs(w) < 1e-12:
         return 180.0
-    angle = 2.0 * math.degrees(math.atan2(p, w))
-    return (angle + 180.0) % 360.0 - 180.0
+    return wrap(2.0 * math.degrees(math.atan2(p, w)))
 
 
-# ------------------------------------------------------------------------------------------ joint table
+# ------------------------------------------------------------------------------------------ joint tables
 
 def _band(comfortable, extreme):
     return {"comfortable": comfortable, "extreme": extreme}
 
 
-# Each joint: the proximal (parent) and distal (child) bones; the bone whose position gives the distal
-# segment's direction (None: the child's own direction from the parent, for end bones); and three
-# anatomical axes:
-#   flex  - swing toward `flex_toward` (positive) and away (negative: extension / hyperextension);
-#   side  - swing toward `side_toward` (positive) and away;
-#   twist - roll about the segment, positive toward `twist_positive` (named; sign mirrored on the left).
-# Directions: 'forward', 'back', 'up', 'down', 'lateral' (away from her midline on that side),
-# 'medial', 'palm' (out of the palm), 'thumb' (toward the thumb side), 'left'.
-# Bands are degrees from anatomical zero; see the skill for the sources. 'provisional' marks values still
-# to be confirmed against the research findings.
-JOINTS = [
-    # --- spine: per-segment shares of the regional ranges (thoracolumbar spread over five bones).
-    dict(name="spine_01", parent="pelvis", child="spine_01", end="spine_02", flex_toward="forward",
-         side_toward="left", axes=dict(
-             flex=_band((-10, 20), (-20, 30)), side=_band((-8, 8), (-12, 12)), twist=_band((-3, 3), (-6, 6)))),
-    dict(name="spine_02", parent="spine_01", child="spine_02", end="spine_03", flex_toward="forward",
-         side_toward="left", axes=dict(
-             flex=_band((-8, 15), (-15, 25)), side=_band((-8, 8), (-12, 12)), twist=_band((-5, 5), (-8, 8)))),
-    dict(name="spine_03", parent="spine_02", child="spine_03", end="spine_04", flex_toward="forward",
-         side_toward="left", axes=dict(
-             flex=_band((-6, 12), (-10, 18)), side=_band((-6, 6), (-10, 10)), twist=_band((-8, 8), (-12, 12)))),
-    dict(name="spine_04", parent="spine_03", child="spine_04", end="spine_05", flex_toward="forward",
-         side_toward="left", axes=dict(
-             flex=_band((-5, 10), (-8, 15)), side=_band((-6, 6), (-9, 9)), twist=_band((-8, 8), (-12, 12)))),
-    dict(name="spine_05", parent="spine_04", child="spine_05", end="neck_01", flex_toward="forward",
-         side_toward="left", axes=dict(
-             flex=_band((-5, 8), (-8, 12)), side=_band((-5, 5), (-8, 8)), twist=_band((-8, 8), (-12, 12)))),
-    # --- neck and head: the cervical range split over neck_01, neck_02 and head (C1-C2 does most rotation).
-    dict(name="neck_01", parent="spine_05", child="neck_01", end="neck_02", flex_toward="forward",
-         side_toward="left", axes=dict(
-             flex=_band((-15, 15), (-25, 22)), side=_band((-10, 10), (-15, 15)), twist=_band((-10, 10), (-15, 15)))),
-    dict(name="neck_02", parent="neck_01", child="neck_02", end="head", flex_toward="forward",
-         side_toward="left", axes=dict(
-             flex=_band((-15, 15), (-25, 20)), side=_band((-10, 10), (-15, 15)), twist=_band((-15, 15), (-25, 25)))),
-    dict(name="head", parent="neck_02", child="head", end=None, flex_toward="forward",
-         side_toward="left", axes=dict(
-             flex=_band((-12, 12), (-20, 18)), side=_band((-8, 8), (-12, 12)), twist=_band((-25, 25), (-40, 40)))),
-    # --- shoulder girdle: the clavicle elevates/depresses and protracts/retracts.
-    dict(name="clavicle", sides="lr", parent="spine_05", child="clavicle", end="upperarm", flex_toward="up",
-         side_toward="forward", axes=dict(
-             flex=_band((-5, 20), (-10, 35)), side=_band((-15, 15), (-25, 25)), twist=_band((-20, 20), (-40, 40)))),
-    # --- glenohumeral: the upper arm relative to the clavicle (scapula), so elevation the girdle takes
-    # is not counted twice. Flexion forward, abduction outward, internal rotation positive.
-    dict(name="shoulder", sides="lr", parent="clavicle", child="upperarm", end="lowerarm", flex_toward="forward",
-         side_toward="lateral", twist_positive="internal", axes=dict(
-             flex=_band((-30, 120), (-50, 160)), side=_band((-20, 120), (-30, 150)), twist=_band((-60, 60), (-90, 70)))),
-    # --- elbow: a hinge; side and twist should stay near zero (the carrying angle is in the bind pose).
-    dict(name="elbow", sides="lr", parent="upperarm", child="lowerarm", end="hand", flex_toward="forward",
-         side_toward="lateral", axes=dict(
-             flex=_band((0, 140), (-8, 150)), side=_band((-5, 5), (-10, 10)), twist=_band((-10, 10), (-20, 20)))),
-    # --- wrist: hand relative to the forearm. Twist here is forearm roll (pronation positive): it
-    # belongs to the radioulnar joints, and on the rig to the forearm twist bones.
-    dict(name="wrist", sides="lr", parent="lowerarm", child="hand", end="middle_01", flex_toward="palm",
-         side_toward="thumb", twist_positive="pronation", axes=dict(
-             flex=_band((-40, 40), (-70, 75)), side=_band((-25, 10), (-35, 20)), twist=_band((-60, 60), (-85, 75)))),
-    # --- fingers: MCP (proximal phalanx on the hand), PIP and DIP. Flexion into the palm; small
-    # hyperextension only. Abduction (side) at the MCP only.
-    *[dict(name=f"{f}_mcp", sides="lr", parent="hand", child=f"{f}_01", end=f"{f}_02", flex_toward="palm",
-           side_toward="thumb", axes=dict(
-               flex=_band((-10, 80), (-30, 95)), side=_band((-15, 15), (-25, 25)), twist=_band((-10, 10), (-20, 20))))
-      for f in ("index", "middle", "ring", "pinky")],
-    *[dict(name=f"{f}_pip", sides="lr", parent=f"{f}_01", child=f"{f}_02", end=f"{f}_03", flex_toward="palm",
-           side_toward="thumb", axes=dict(
-               flex=_band((0, 95), (-5, 110)), side=_band((-5, 5), (-10, 10)), twist=_band((-5, 5), (-10, 10))))
-      for f in ("index", "middle", "ring", "pinky")],
-    *[dict(name=f"{f}_dip", sides="lr", parent=f"{f}_02", child=f"{f}_03", end=None, flex_toward="palm",
-           side_toward="thumb", axes=dict(
-               flex=_band((0, 70), (-15, 90)), side=_band((-5, 5), (-10, 10)), twist=_band((-5, 5), (-10, 10))))
-      for f in ("index", "middle", "ring", "pinky")],
-    dict(name="thumb_mcp", sides="lr", parent="thumb_01", child="thumb_02", end="thumb_03", flex_toward="palm",
-         side_toward="thumb", axes=dict(
-             flex=_band((-5, 45), (-10, 60)), side=_band((-10, 10), (-15, 15)), twist=_band((-10, 10), (-20, 20)))),
-    dict(name="thumb_ip", sides="lr", parent="thumb_02", child="thumb_03", end=None, flex_toward="palm",
-         side_toward="thumb", axes=dict(
-             flex=_band((-10, 70), (-25, 80)), side=_band((-5, 5), (-10, 10)), twist=_band((-5, 5), (-10, 10)))),
-    # --- hip: thigh relative to the pelvis. Flexion forward, abduction outward, internal rotation positive.
-    dict(name="hip", sides="lr", parent="pelvis", child="thigh", end="calf", flex_toward="forward",
-         side_toward="lateral", twist_positive="internal", axes=dict(
-             flex=_band((-15, 110), (-25, 125)), side=_band((-15, 35), (-25, 45)), twist=_band((-35, 30), (-45, 40)))),
-    # --- knee: a hinge with flexion-coupled tibial rotation; flexion moves the shin back.
-    dict(name="knee", sides="lr", parent="thigh", child="calf", end="foot", flex_toward="back",
-         side_toward="lateral", twist_positive="internal", axes=dict(
-             flex=_band((0, 135), (-5, 155)), side=_band((-5, 5), (-8, 8)), twist=_band((-15, 15), (-30, 30)))),
-    # --- ankle: dorsiflexion lifts the foot (positive); the twist about the foot's long axis is the
-    # subtalar inversion (positive) / eversion.
-    dict(name="ankle", sides="lr", parent="calf", child="foot", end="ball", flex_toward="up",
-         side_toward="lateral", twist_positive="inversion", axes=dict(
-             flex=_band((-35, 15), (-50, 25)), side=_band((-10, 10), (-20, 20)), twist=_band((-10, 20), (-15, 30)))),
-    # --- toes (the MTP joints as one ball bone): extension lifts the toes (positive here).
-    dict(name="toes", sides="lr", parent="foot", child="ball", end=None, flex_toward="up",
-         side_toward="lateral", axes=dict(
-             flex=_band((-20, 60), (-35, 90)), side=_band((-10, 10), (-15, 15)), twist=_band((-10, 10), (-15, 15)))),
+# Joints measured relative to the neutral pose. Each: the parent and child bones; the segment whose
+# direction the child's rotation swings (from, to) at neutral; the anatomical direction flexion swings
+# toward and the side direction; and bands per axis (None: not measured here). Directions: 'forward',
+# 'up', 'left', 'lateral' (away from her midline on that side), 'palm' (out of the palm, into a grip),
+# 'thumb' (toward the thumb side). Twist is positive toward internal rotation / pronation / turning to her
+# right / inversion; twist_left_sign fixes the left side's sign where the anatomical name isn't mirrored
+# the default way. Names ending in _l/_r get the side; 'pelvis', 'head', spine_* and neck_* don't.
+FINGERS = ("index", "middle", "ring", "pinky")
+RIG_JOINTS = [
+    # --- spine: the thoracolumbar range spread over five bones; lumbar twist is tiny.
+    dict(name="spine_01", parent="pelvis", child="spine_01", seg=("spine_01", "spine_02"), flex="forward", side="left",
+         bands=dict(flex=_band((-10, 14), (-15, 20)), side=_band((-6, 6), (-12, 12)), twist=_band((-2, 2), (-5, 5)))),
+    dict(name="spine_02", parent="spine_01", child="spine_02", seg=("spine_02", "spine_03"), flex="forward", side="left",
+         bands=dict(flex=_band((-10, 14), (-15, 20)), side=_band((-7, 7), (-12, 12)), twist=_band((-3, 3), (-5, 5)))),
+    dict(name="spine_03", parent="spine_02", child="spine_03", seg=("spine_03", "spine_04"), flex="forward", side="left",
+         bands=dict(flex=_band((-8, 12), (-15, 20)), side=_band((-7, 7), (-12, 12)), twist=_band((-8, 8), (-15, 15)))),
+    dict(name="spine_04", parent="spine_03", child="spine_04", seg=("spine_04", "spine_05"), flex="forward", side="left",
+         bands=dict(flex=_band((-8, 10), (-15, 20)), side=_band((-7, 7), (-12, 12)), twist=_band((-10, 10), (-15, 15)))),
+    dict(name="spine_05", parent="spine_04", child="spine_05", seg=("spine_05", "neck_01"), flex="forward", side="left",
+         bands=dict(flex=_band((-8, 8), (-15, 20)), side=_band((-6, 6), (-12, 12)), twist=_band((-12, 12), (-15, 15)))),
+    # --- neck and head: the cervical range over three bones; no one bone turns more than 35-40 degrees.
+    dict(name="neck_01", parent="spine_05", child="neck_01", seg=("neck_01", "neck_02"), flex="forward", side="left",
+         bands=dict(flex=_band((-25, 20), (-30, 30)), side=_band((-18, 18), (-22, 22)), twist=_band((-20, 20), (-35, 35)))),
+    dict(name="neck_02", parent="neck_01", child="neck_02", seg=("neck_02", "head"), flex="forward", side="left",
+         bands=dict(flex=_band((-20, 15), (-25, 25)), side=_band((-15, 15), (-20, 20)), twist=_band((-35, 35), (-40, 40)))),
+    dict(name="head", parent="neck_02", child="head", seg=("neck_02", "head"), flex="forward", side="left",
+         bands=dict(flex=_band((-8, 10), (-12, 20)), side=_band((-7, 7), (-12, 12)), twist=_band((-20, 20), (-35, 35)))),
+    # --- shoulder girdle: elevation (up) and protraction (forward) of the clavicle.
+    dict(name="clavicle", sides="lr", parent="spine_05", child="clavicle", seg=("clavicle", "upperarm"), flex="up",
+         side="forward", bands=dict(flex=_band((-5, 20), (-10, 40)), side=_band((-15, 15), (-30, 35)), twist=None)),
+    # --- rotations of the long bones about themselves.
+    dict(name="shoulder", sides="lr", parent="clavicle", child="upperarm", seg=("upperarm", "lowerarm"),
+         bands=dict(flex=None, side=None, twist=_band((-90, 70), (-110, 100)))),
+    # Forearm roll: the hand's twist about the forearm relative to the upper arm, wherever the rig keys it.
+    dict(name="forearm", sides="lr", parent="upperarm", child="hand", seg=("lowerarm", "hand"),
+         bands=dict(flex=None, side=None, twist=_band((-80, 80), (-90, 85)))),
+    dict(name="wrist", sides="lr", parent="lowerarm", child="hand", seg=("hand", "middle_01"), flex="palm", side="thumb",
+         bands=dict(flex=_band((-40, 40), (-80, 85)), side=_band((-25, 15), (-40, 25)), twist=None)),
+    *[dict(name=f"{f}_mcp", sides="lr", parent=f"{f}_metacarpal", child=f"{f}_01", seg=(f"{f}_01", f"{f}_02"),
+           flex="palm", side="thumb",
+           bands=dict(flex=_band((-15, 75), (-30, 100)), side=_band((-15, 15), (-25, 30)), twist=None)) for f in FINGERS],
+    *[dict(name=f"{f}_pip", sides="lr", parent=f"{f}_01", child=f"{f}_02", seg=(f"{f}_02", f"{f}_03"),
+           flex="palm", side="thumb", bands=dict(flex=_band((-5, 90), (-10, 115)), side=None, twist=None)) for f in FINGERS],
+    *[dict(name=f"{f}_dip", sides="lr", parent=f"{f}_02", child=f"{f}_03", seg=(f"{f}_02", f"{f}_03"),
+           flex="palm", side="thumb", bands=dict(flex=_band((-5, 55), (-10, 90)), side=None, twist=None)) for f in FINGERS],
+    dict(name="thumb_mcp", sides="lr", parent="thumb_01", child="thumb_02", seg=("thumb_02", "thumb_03"), flex="palm",
+         side="thumb", bands=dict(flex=_band((-10, 35), (-15, 55)), side=None, twist=None)),
+    dict(name="thumb_ip", sides="lr", parent="thumb_02", child="thumb_03", seg=("thumb_02", "thumb_03"), flex="palm",
+         side="thumb", bands=dict(flex=_band((-10, 60), (-15, 90)), side=None, twist=None)),
+    dict(name="hip", sides="lr", parent="pelvis", child="thigh", seg=("thigh", "calf"),
+         bands=dict(flex=None, side=None, twist=_band((-60, 40), (-75, 55)))),
+    dict(name="knee", sides="lr", parent="thigh", child="calf", seg=("calf", "foot"),
+         bands=dict(flex=None, side=None, twist=_band((-35, 25), (-40, 30)))),
+    # Dorsiflexion lifts the foot (positive); the twist about the foot is subtalar inversion.
+    dict(name="ankle", sides="lr", parent="calf", child="foot", seg=("foot", "ball"), flex="up", side=None,
+         twist_left_sign=1.0, bands=dict(flex=_band((-50, 20), (-60, 30)), side=None, twist=_band((-8, 15), (-15, 25)))),
+    # The MTP joints as one ball bone: extension lifts the toes (positive).
+    dict(name="toes", sides="lr", parent="foot", child="ball", seg=("foot", "ball"), flex="up", side=None,
+         bands=dict(flex=_band((-30, 70), (-45, 90)), side=None, twist=None)),
 ]
 
-# Names of the positive and negative directions of each axis, for readable reports.
+# Absolute measures: (key, family, band). Computed in absolute_angles().
+ABSOLUTE = {
+    "shoulder.flex": _band((-45, 150), (-60, 180)),
+    "shoulder.abd": _band((-40, 150), (-75, 180)),
+    "elbow.flex": _band((-5, 130), (-10, 152)),
+    "hip.flex": _band((-15, 120), (-25, 135)),
+    "hip.abd": _band((-25, 40), (-35, 55)),
+    "knee.flex": _band((-5, 140), (-10, 156)),
+}
+
+# Regional totals of the per-bone readings.
+TOTALS = {
+    "lumbar.twist": (("spine_01", "spine_02"), "twist", _band((-5, 5), (-12, 12))),
+    "spine.flex": (("spine_01", "spine_02", "spine_03", "spine_04", "spine_05"), "flex", _band((-25, 55), (-30, 70))),
+    "spine.side": (("spine_01", "spine_02", "spine_03", "spine_04", "spine_05"), "side", _band((-30, 30), (-35, 35))),
+    "spine.twist": (("spine_01", "spine_02", "spine_03", "spine_04", "spine_05"), "twist", _band((-35, 35), (-60, 60))),
+    "neck.twist": (("neck_01", "neck_02", "head"), "twist", _band((-75, 75), (-85, 85))),
+    "neck.flex": (("neck_01", "neck_02", "head"), "flex", _band((-55, 45), (-70, 60))),
+}
+
+# Readable names for each axis's positive and negative direction.
 AXIS_NAMES = {
-    "spine": {"flex": ("flexion", "extension"), "side": ("left bend", "right bend"), "twist": ("twist", "twist")},
-    "clavicle": {"flex": ("elevation", "depression"), "side": ("protraction", "retraction"), "twist": ("roll", "roll")},
-    "shoulder": {"flex": ("flexion", "extension"), "side": ("abduction", "adduction"),
+    "spine": {"flex": ("flexion", "extension"), "side": ("left bend", "right bend"), "twist": ("turn right", "turn left")},
+    "clavicle": {"flex": ("elevation", "depression"), "side": ("protraction", "retraction")},
+    "shoulder": {"flex": ("flexion", "extension"), "abd": ("abduction", "adduction"),
                  "twist": ("internal rotation", "external rotation")},
-    "elbow": {"flex": ("flexion", "hyperextension"), "side": ("valgus", "varus"), "twist": ("twist", "twist")},
-    "wrist": {"flex": ("flexion", "extension"), "side": ("radial deviation", "ulnar deviation"),
-              "twist": ("pronation", "supination")},
-    "finger": {"flex": ("flexion", "hyperextension"), "side": ("abduction", "adduction"), "twist": ("roll", "roll")},
-    "hip": {"flex": ("flexion", "extension"), "side": ("abduction", "adduction"),
+    "forearm": {"twist": ("pronation", "supination")},
+    "elbow": {"flex": ("flexion", "hyperextension")},
+    "wrist": {"flex": ("flexion", "extension"), "side": ("radial deviation", "ulnar deviation")},
+    "finger": {"flex": ("flexion", "hyperextension"), "side": ("spread", "spread")},
+    "hip": {"flex": ("flexion", "extension"), "abd": ("abduction", "adduction"),
             "twist": ("internal rotation", "external rotation")},
-    "knee": {"flex": ("flexion", "hyperextension"), "side": ("varus", "valgus"),
-             "twist": ("internal rotation", "external rotation")},
-    "ankle": {"flex": ("dorsiflexion", "plantarflexion"), "side": ("abduction", "adduction"),
-              "twist": ("inversion", "eversion")},
-    "toes": {"flex": ("extension", "flexion"), "side": ("abduction", "adduction"), "twist": ("roll", "roll")},
+    "knee": {"flex": ("flexion", "hyperextension"), "twist": ("internal rotation", "external rotation")},
+    "ankle": {"flex": ("dorsiflexion", "plantarflexion"), "twist": ("inversion", "eversion")},
+    "toes": {"flex": ("extension", "flexion")},
 }
 
-# Angular-speed ceilings (deg/s) per joint family for hand-keyed work clips. Above `warn` a frame-to-frame
-# change reads as a snap unless it's the strike of a swing; above `error` it is a pop at any time.
+# Angular-speed ceilings (deg/s) per family: (warning, error). Warnings at a tool swing's fast end,
+# errors at the hard pop (degrees a frame at 30 fps x 30); realistic-animation skill, joint speed.
 SPEED = {
-    "spine": (250, 500), "neck": (300, 600), "head": (350, 700), "clavicle": (300, 600),
-    "shoulder": (600, 1200), "elbow": (700, 1400), "wrist": (700, 1400), "finger": (900, 1800),
-    "hip": (500, 1000), "knee": (700, 1400), "ankle": (600, 1200), "toes": (600, 1200),
+    "head": (180, 240), "spine": (300, 360), "clavicle": (600, 1200), "shoulder": (900, 1200),
+    "elbow": (1000, 1500), "forearm": (1200, 1800), "wrist": (1200, 1800), "finger": (1200, 2400),
+    "hip": (700, 1000), "knee": (900, 1300), "ankle": (900, 1200), "toes": (900, 1200),
 }
 
-# Per-joint bind-pose angles (degrees, anatomical zero = 0) added to the measured delta. MetaHuman binds
-# with the arms lowered ~45 deg from horizontal, i.e. shoulder abduction ~45 deg from the trunk's
-# side... measured in-engine with bind_offsets() and pasted here. Missing joints read 0.
-BIND_OFFSET = {}
 
-
-def family(name):
-    if name.startswith("spine"):
+def family(key):
+    """'wrist_l.flex' -> 'wrist'; spine and neck bones -> 'spine' / 'head'; finger joints -> 'finger'."""
+    joint = key.split(".")[0]
+    if joint.endswith(("_l", "_r")):
+        joint = joint[:-2]
+    if joint.startswith("spine") or joint == "lumbar":
         return "spine"
-    if name in ("neck_01", "neck_02"):
-        return "neck"
-    if name.endswith(("_mcp", "_pip", "_dip", "_ip")):
+    if joint.startswith("neck") or joint == "head":
+        return "head"
+    if joint.endswith(("_mcp", "_pip", "_dip", "_ip")):
         return "finger"
-    return name
+    return joint
 
 
-def axis_names(name):
-    f = family(name)
-    if f in ("neck", "head"):
-        f = "spine"
-    return AXIS_NAMES.get(f, AXIS_NAMES["spine"])
+def describe(key, value):
+    axis = key.split(".")[1]
+    f = family(key)
+    names = AXIS_NAMES.get("spine" if f == "head" else f, {}).get(axis)
+    if not names:
+        return f"{value:+.0f}"
+    return f"{names[0] if value >= 0 else names[1]} {abs(value):.0f}"
 
 
-def joint_list():
-    """Every joint instance: (instance name, side or '', joint dict)."""
-    out = []
-    for j in JOINTS:
-        for side in (j.get("sides") or ""):
-            out.append((f"{j['name']}_{side}", side, j))
-        if not j.get("sides"):
-            out.append((j["name"], "", j))
-    return out
-
-
-def _bone(name, side):
-    return f"{name}_{side}" if side else name
-
-
-# -------------------------------------------------------------------------------------- the measurement
-
-def _direction(word, side, hand_frame):
-    lat = (-1.0, 0.0, 0.0) if side == "r" else (1.0, 0.0, 0.0)
-    if word == "forward":
-        return FORWARD
-    if word == "back":
-        return scale(FORWARD, -1.0)
-    if word == "up":
-        return UP
-    if word == "down":
-        return scale(UP, -1.0)
-    if word == "left":
-        return LEFT
-    if word == "lateral":
-        return lat
-    if word == "medial":
-        return scale(lat, -1.0)
-    if word == "palm":
-        return hand_frame["palm"]
-    if word == "thumb":
-        return hand_frame["thumb"]
-    raise ValueError(word)
+def _side_bone(name, side):
+    if not side or name in ("pelvis", "head") or name.startswith(("spine_", "neck_")):
+        return name
+    return f"{name}_{side}"
 
 
 def hand_frame(pose, side):
     """The hand's knuckle direction, thumb-side direction and palm normal (out of the palm, into a grip)
-    in component space, from bone positions (works on any pose)."""
+    in component space, from bone positions."""
     hand = pose[f"hand_{side}"][0]
     along = norm(sub(pose[f"middle_01_{side}"][0], hand))
     across = sub(pose[f"index_01_{side}"][0], pose[f"pinky_01_{side}"][0])
@@ -324,68 +301,145 @@ def hand_frame(pose, side):
     return {"along": along, "thumb": thumb, "palm": palm}
 
 
-def _segment(pose, joint, side):
-    child = _bone(joint["child"], side)
-    if joint.get("end"):
-        end = _bone(joint["end"], side) if joint["end"] not in ("head", "neck_01", "neck_02", "spine_02",
-                                                               "spine_03", "spine_04", "spine_05") else joint["end"]
-        if end in pose:
-            return norm(sub(pose[end][0], pose[child][0]))
-    parent = _bone(joint["parent"], side) if joint["parent"] not in ("pelvis", "spine_01", "spine_02", "spine_03",
-                                                                      "spine_04", "spine_05", "neck_01", "neck_02") \
-        else joint["parent"]
-    return norm(sub(pose[child][0], pose[parent][0]))
+def _direction(word, side, hf):
+    lateral = (-1.0, 0.0, 0.0) if side == "r" else (1.0, 0.0, 0.0)
+    return {"forward": FORWARD, "up": UP, "left": LEFT, "lateral": lateral,
+            "palm": hf["palm"] if hf else FORWARD, "thumb": hf["thumb"] if hf else FORWARD}[word]
 
 
-def _bones(joint, side):
-    def resolve(b):
-        return b if b in ("pelvis", "head") or b.startswith(("spine_", "neck_")) else _bone(b, side)
-    return resolve(joint["parent"]), resolve(joint["child"])
+# ----------------------------------------------------------------------------------------- calibration
 
+class Calibration:
+    """What the measurements need from the neutral pose, computed once: per relative joint the segment
+    and anatomical directions in the parent's frame and the neutral relation; the body frames; the
+    elbow and knee hinge axes in the upper arm and thigh."""
 
-class Rig:
-    """Bind-pose geometry for every joint, computed once: the distal segment direction and the
-    anatomical flex and side directions, all expressed in the parent bone's local frame."""
-
-    def __init__(self, bind):
-        self.bind = bind
+    def __init__(self, neutral):
+        self.neutral = neutral
         self.joints = {}
-        frames = {s: hand_frame(bind, s) for s in "lr" if f"hand_{s}" in bind and f"index_01_{s}" in bind}
-        for name, side, j in joint_list():
-            parent, child = _bones(j, side)
-            if parent not in bind or child not in bind:
-                continue
-            hf = frames.get(side) or {"palm": FORWARD, "thumb": FORWARD, "along": FORWARD}
-            d = _segment(bind, j, side)
-            flex = norm(reject(_direction(j["flex_toward"], side, hf), d))
-            side_dir = reject(_direction(j["side_toward"], side, hf), d)
-            side_dir = norm(reject(side_dir, flex))
-            if length(side_dir) < 0.5:
-                side_dir = norm(cross(d, flex))
-            qp = bind[parent][1]
-            to_local = q_inv(qp)
-            self.joints[name] = dict(
-                joint=j, side=side, parent=parent, child=child,
-                rel0=q_mul(q_inv(qp), bind[child][1]),
-                d=q_rotate(to_local, d), e_flex=q_rotate(to_local, flex), e_side=q_rotate(to_local, side_dir),
-                mirror=-1.0 if side == "l" else 1.0)
+        frames = {s: hand_frame(neutral, s) for s in "lr"
+                  if all(f"{b}_{s}" in neutral for b in ("hand", "middle_01", "index_01", "pinky_01"))}
+        for j in RIG_JOINTS:
+            for side in (j.get("sides") or [""]):
+                name = _side_bone(j["name"], side) if side else j["name"]
+                parent, child = _side_bone(j["parent"], side), _side_bone(j["child"], side)
+                if parent not in neutral and j["parent"].endswith("_metacarpal"):
+                    parent = _side_bone("hand", side)
+                a, b = (_side_bone(x, side) for x in j["seg"])
+                if parent not in neutral or child not in neutral or a not in neutral or b not in neutral:
+                    continue
+                d = norm(sub(neutral[b][0], neutral[a][0]))
+                if length(d) < 0.5:
+                    continue
+                hf = frames.get(side)
+                to_local = q_inv(neutral[parent][1])
+                g = dict(def_=j, side=side, parent=parent, child=child,
+                         rel0=q_mul(q_inv(neutral[parent][1]), neutral[child][1]), d=q_rotate(to_local, d))
+                if j.get("flex"):
+                    flex = norm(reject(_direction(j["flex"], side, hf), d))
+                    g["e_flex"] = q_rotate(to_local, flex)
+                    if j.get("side"):
+                        sd = norm(reject(reject(_direction(j["side"], side, hf), d), flex))
+                        if length(sd) < 0.5:
+                            sd = norm(cross(d, flex))
+                        g["e_side"] = q_rotate(to_local, sd)
+                left_sign = j.get("twist_left_sign", -1.0)
+                g["mirror"] = left_sign if side == "l" else -left_sign if side == "r" else 1.0
+                self.joints[name] = g
+        # Hinge axes: elbow flexion carries the forearm forward, knee flexion the shank back.
+        self.hinges = {}
+        for side in "lr":
+            for key, parent, mid, flex_dir in (("elbow", "upperarm", "lowerarm", FORWARD), ("knee", "thigh", "calf", BACK)):
+                p, m = f"{parent}_{side}", f"{mid}_{side}"
+                if p in neutral and m in neutral:
+                    seg = norm(sub(neutral[m][0], neutral[p][0]))
+                    axis = norm(cross(seg, flex_dir))
+                    if length(axis) < 0.5:
+                        axis = LEFT
+                    self.hinges[f"{key}_{side}"] = (p, q_rotate(q_inv(neutral[p][1]), axis))
+        self.frame_bones = {"chest": "spine_05", "pelvis": "pelvis"}
 
-    def angles(self, pose, name):
-        """(flex, side, twist) degrees for one joint instance in ``pose``, or None if bones are missing."""
+    def body_frame(self, pose, which):
+        """(forward, left, up) of the chest or pelvis: the neutral component axes carried by that bone."""
+        bone = self.frame_bones[which]
+        if bone not in pose or bone not in self.neutral:
+            return None
+        delta = q_mul(pose[bone][1], q_inv(self.neutral[bone][1]))
+        return tuple(q_rotate(delta, v) for v in (FORWARD, LEFT, UP))
+
+    def relative(self, pose, name):
+        """{'flex', 'side', 'twist'} degrees for one relative joint (only its measured axes), or None."""
         g = self.joints.get(name)
         if g is None or g["parent"] not in pose or g["child"] not in pose:
             return None
         rel = q_mul(q_inv(pose[g["parent"]][1]), pose[g["child"]][1])
         delta = q_norm(q_mul(rel, q_inv(g["rel0"])))
         d = q_rotate(delta, g["d"])
-        flex = math.degrees(math.atan2(dot(d, g["e_flex"]), dot(d, g["d"])))
-        side = math.degrees(math.atan2(dot(d, g["e_side"]), math.hypot(dot(d, g["d"]), dot(d, g["e_flex"]))))
-        twist = twist_angle(delta, g["d"]) * g["mirror"]
-        off = BIND_OFFSET.get(name.rsplit("_", 1)[0] if g["side"] else name, (0.0, 0.0, 0.0))
-        return (flex + off[0], side + off[1], twist + off[2])
+        bands = g["def_"]["bands"]
+        out = {}
+        if bands.get("flex") and "e_flex" in g:
+            out["flex"] = math.degrees(math.atan2(dot(d, g["e_flex"]), dot(d, g["d"])))
+        if bands.get("side") and "e_side" in g:
+            out["side"] = math.degrees(math.atan2(dot(d, g["e_side"]), math.hypot(dot(d, g["d"]), dot(d, g.get("e_flex", d)))))
+        if bands.get("twist"):
+            out["twist"] = twist_angle(delta, g["d"]) * g["mirror"]
+        return out
 
 
-# ------------------------------------------------------------------------------------------- the checks
+def absolute_angles(cal, pose):
+    """Shoulder and hip elevation in the chest and pelvis frames, and elbow and knee flexion."""
+    out = {}
+    for side, sign in (("l", 1.0), ("r", -1.0)):
+        for limb, frame, a, b in (("shoulder", "chest", "upperarm", "lowerarm"), ("hip", "pelvis", "thigh", "calf")):
+            fr = cal.body_frame(pose, frame)
+            if fr is None or f"{a}_{side}" not in pose or f"{b}_{side}" not in pose:
+                continue
+            f, l, u = fr
+            d = norm(sub(pose[f"{b}_{side}"][0], pose[f"{a}_{side}"][0]))
+            df, dl, du = dot(d, f), dot(d, l) * sign, dot(d, u)
+            if math.hypot(df, du) >= PLANE_MIN:
+                out[f"{limb}_{side}.flex"] = math.degrees(math.atan2(df, -du))
+            if math.hypot(dl, du) >= PLANE_MIN:
+                out[f"{limb}_{side}.abd"] = math.degrees(math.atan2(dl, -du))
+            out[f"{limb}_{side}.elevation"] = angle_between(d, scale(u, -1.0))
+        for key, (top, mid, end) in (("elbow", ("upperarm", "lowerarm", "hand")), ("knee", ("thigh", "calf", "foot"))):
+            name = f"{key}_{side}"
+            bones = [f"{x}_{side}" for x in (top, mid, end)]
+            if name not in cal.hinges or any(x not in pose for x in bones):
+                continue
+            parent, axis_local = cal.hinges[name]
+            axis = q_rotate(pose[parent][1], axis_local)
+            upper = sub(pose[bones[1]][0], pose[bones[0]][0])
+            lower = sub(pose[bones[2]][0], pose[bones[1]][0])
+            out[f"{name}.flex"] = signed_angle(upper, lower, axis)
+    return out
+
+
+def measure(cal, pose):
+    """Every angle for one pose: {'wrist_l.flex': degrees, ...} (absent when it can't be measured)."""
+    out = absolute_angles(cal, pose)
+    for name in cal.joints:
+        for axis, value in (cal.relative(pose, name) or {}).items():
+            out[f"{name}.{axis}"] = value
+    for key, (bones, axis, _) in TOTALS.items():
+        values = [out.get(f"{b}.{axis}") for b in bones]
+        if all(v is not None for v in values):
+            out[key] = sum(values)
+    return out
+
+
+def band_for(key):
+    if key in TOTALS:
+        return TOTALS[key][2]
+    joint, axis = key.split(".")
+    base = joint[:-2] if joint.endswith(("_l", "_r")) else joint
+    if f"{base}.{axis}" in ABSOLUTE:
+        return ABSOLUTE[f"{base}.{axis}"]
+    for j in RIG_JOINTS:
+        if j["name"] == base:
+            return j["bands"].get(axis)
+    return None
+
 
 def classify(value, band):
     lo, hi = band["comfortable"]
@@ -395,60 +449,100 @@ def classify(value, band):
     return "beyond"
 
 
-def check_pose(rig, pose):
-    """Joint-angle status for one pose: {joint: {axis: (degrees, status)}}."""
-    out = {}
-    for name, side, j in joint_list():
-        a = rig.angles(pose, name)
-        if a is None:
-            continue
-        out[name] = {axis: (value, classify(value, j["axes"][axis])) for axis, value in zip(("flex", "side", "twist"), a)}
+# --------------------------------------------------------------------------------------------- coupling
+
+def coupling(values):
+    """Combinations that are each legal but not together: [(key, severity, value, text)]."""
+    out = []
+    v = values.get
+    for s in "lr":
+        elevation, clav = v(f"shoulder_{s}.elevation"), v(f"clavicle_{s}.flex")
+        if elevation is not None and clav is not None and elevation > 100 and clav < 5:
+            out.append((f"shoulder_{s}.rhythm", "warn", elevation,
+                        f"arm raised {elevation:.0f} with the clavicle still ({clav:+.0f}): add scapular upward rotation"))
+        wflex = v(f"wrist_{s}.flex")
+        pips = [v(f"{f}_pip_{s}.flex") for f in FINGERS]
+        pips = [p for p in pips if p is not None]
+        if wflex is not None and pips and wflex > 20 and sum(pips) / len(pips) > 70:
+            out.append((f"wrist_{s}.tenodesis", "warn", wflex,
+                        f"fist on a flexed wrist ({wflex:.0f}): a power grip wants 15-35 extension"))
+        wdev = v(f"wrist_{s}.side")
+        if wflex is not None and wdev is not None and abs(wflex) > 45 and (wdev > 15 or wdev < -20):
+            out.append((f"wrist_{s}.deviation", "warn", wdev,
+                        f"wrist deviation {describe(f'wrist_{s}.side', wdev)} at flexion {wflex:+.0f}: deviation shrinks off neutral"))
+        for f in FINGERS:
+            pip, dip = v(f"{f}_pip_{s}.flex"), v(f"{f}_dip_{s}.flex")
+            if pip is not None and dip is not None and dip > 30 and pip < 20:
+                out.append((f"{f}_dip_{s}.coupling", "warn", dip, f"{f} DIP {dip:.0f} with its PIP straight ({pip:.0f})"))
+            if pip is not None and dip is not None and pip > 95 and dip < -5:
+                out.append((f"{f}_dip_{s}.coupling", "warn", dip, f"{f} DIP extended with its PIP at {pip:.0f}"))
+            mcp, spread = v(f"{f}_mcp_{s}.flex"), v(f"{f}_mcp_{s}.side")
+            if mcp is not None and spread is not None and mcp > 45 and abs(spread) > 15:
+                out.append((f"{f}_mcp_{s}.coupling", "warn", spread, f"{f} spread {abs(spread):.0f} in a fist (MCP {mcp:.0f})"))
+        knee, hip = v(f"knee_{s}.flex"), v(f"hip_{s}.flex")
+        if knee is not None and hip is not None and knee < 20 and hip > 90:
+            out.append((f"hip_{s}.hamstring", "error" if hip > 110 else "warn", hip,
+                        f"hip flexed {hip:.0f} with the knee straight ({knee:.0f}): hamstring-limited"))
+        rot = v(f"knee_{s}.twist")
+        if knee is not None and rot is not None and knee < 30 and abs(rot) > 10:
+            out.append((f"knee_{s}.screwhome", "error" if abs(rot) > 15 else "warn", rot,
+                        f"tibial rotation {rot:+.0f} at knee flexion {knee:.0f}: locked near extension"))
+        ankle = v(f"ankle_{s}.flex")
+        if knee is not None and ankle is not None and knee < 15 and ankle > 15:
+            out.append((f"ankle_{s}.gastrocnemius", "warn", ankle,
+                        f"dorsiflexion {ankle:.0f} with a straight knee: lift the heel or shift the pelvis"))
+    neck, torso = v("neck.twist"), v("spine.twist")
+    if neck is not None and torso is not None and abs(neck) > 75 and abs(torso) < 15:
+        out.append(("neck.trunk", "warn", neck, f"head turned {neck:+.0f} with the torso still ({torso:+.0f})"))
+    bend = v("spine.flex")
+    hips = [h for h in (v("hip_l.flex"), v("hip_r.flex")) if h is not None]
+    if bend is not None and hips and bend > 45 and max(hips) < 30:
+        out.append(("spine.lumbopelvic", "warn", bend, f"spine bent {bend:.0f} with the hips nearly straight"))
     return out
 
 
-def describe(name, axis, value):
-    pos, neg = axis_names(name.rsplit("_", 1)[0] if name.endswith(("_l", "_r")) else name)[axis]
-    return f"{pos if value >= 0 else neg} {abs(value):.0f}"
+# --------------------------------------------------------------------------------------------- checking
 
-
-def check_frames(frames, bind, fps=FPS, events=None, floor_z=0.0):
-    """Check a clip: ``frames`` is a list of poses ({bone: (location, quaternion)}), component space.
-    Returns {'issues': [...], 'angles': [per-frame check_pose]} where each issue is a dict with frame,
-    kind ('rom', 'speed', 'ground', 'slide', 'balance'), severity ('warn' or 'error'), joint, text."""
-    rig = Rig(bind)
+def check_frames(frames, neutral, fps=FPS, events=None, contacts=None, floor_z=0.0):
+    """Check a clip. ``frames``: poses ({bone: (location, quaternion)}, component space); ``neutral``: the
+    neutral (reference) pose; ``events``: {name: frame} key frames (balance is checked at them);
+    ``contacts``: frames of strikes or impacts, where a fast joint is only a warning.
+    Returns {'issues': [...], 'angles': [per-frame measure()]}. Each issue: frame, kind ('rom', 'coupling',
+    'speed', 'ground', 'slide', 'balance'), severity ('warn' or 'error'), joint, value, text."""
+    cal = Calibration(neutral)
     issues, history = [], []
-    events = events or {}
+    contacts = list(contacts or [])
     for i, pose in enumerate(frames):
-        state = check_pose(rig, pose)
-        history.append(state)
-        for name, axes in state.items():
-            j = rig.joints[name]["joint"]
-            for axis, (value, status) in axes.items():
-                if status == "ok":
-                    continue
-                band = j["axes"][axis]
+        values = measure(cal, pose)
+        history.append(values)
+        for key, value in values.items():
+            band = band_for(key)
+            if band is None:
+                continue
+            status = classify(value, band)
+            if status != "ok":
                 issues.append(dict(frame=i, kind="rom", severity="error" if status == "beyond" else "warn",
-                                   joint=name, axis=axis, value=value,
-                                   text=f"{name} {describe(name, axis, value)} deg "
-                                        f"(comfortable {band['comfortable']}, extreme {band['extreme']})"))
+                                   joint=key, value=value,
+                                   text=f"{key} {describe(key, value)} deg (comfortable {band['comfortable']}, "
+                                        f"extreme {band['extreme']})"))
+        for key, severity, value, text in coupling(values):
+            issues.append(dict(frame=i, kind="coupling", severity=severity, joint=key, value=value, text=text))
         if i:
             prev = history[i - 1]
-            for name, axes in state.items():
-                if name not in prev:
+            near_contact = any(abs(i - c) <= CONTACT_GRACE_FRAMES for c in contacts)
+            for key, value in values.items():
+                if key not in prev or key.endswith(".elevation"):
                     continue
-                warn, error = SPEED.get(family(name), (700, 1400))
-                for axis in axes:
-                    speed = abs(axes[axis][0] - prev[name][axis][0]) * fps
-                    if axis == "twist" and abs(axes[axis][0] - prev[name][axis][0]) > 180:
-                        continue
-                    if speed > warn:
-                        issues.append(dict(frame=i, kind="speed", severity="error" if speed > error else "warn",
-                                           joint=name, axis=axis, value=speed,
-                                           text=f"{name} {axis} {speed:.0f} deg/s (snap above {warn}, pop above {error})"))
+                warn, error = SPEED.get(family(key), (900, 1800))
+                speed = abs(wrap(value - prev[key])) * fps
+                if speed > warn:
+                    severity = "error" if speed > error and not near_contact else "warn"
+                    issues.append(dict(frame=i, kind="speed", severity=severity, joint=key, value=speed,
+                                       text=f"{key} {speed:.0f} deg/s ({warn} warns, {error} pops)"))
         issues.extend(_ground(pose, i, floor_z))
         if i:
             issues.extend(_slides(frames[i - 1], pose, i, fps, floor_z))
-    issues.extend(_balance(frames, events, floor_z))
+    issues.extend(_balance(frames, events or {}, floor_z, fps))
     return {"issues": issues, "angles": history}
 
 
@@ -471,11 +565,12 @@ def _ground(pose, i, floor_z):
 
 def _slides(prev, pose, i, fps, floor_z):
     out = []
-    for bone in ("ball_l", "ball_r", "foot_l", "foot_r"):
+    for bone in ("ball_l", "ball_r", "foot_l", "foot_r", "calf_l", "calf_r"):
         if bone not in pose or bone not in prev:
             continue
         a, b = prev[bone][0], pose[bone][0]
-        planted = a[2] - CONTACT_BONES[bone] - floor_z < CONTACT_CM and b[2] - CONTACT_BONES[bone] - floor_z < CONTACT_CM
+        skin = CONTACT_BONES[bone]
+        planted = a[2] - skin - floor_z < CONTACT_CM and b[2] - skin - floor_z < CONTACT_CM
         speed = math.hypot(b[0] - a[0], b[1] - a[1]) * fps
         if planted and speed > SLIDE_CM_PER_S:
             out.append(dict(frame=i, kind="slide", severity="error" if speed > 3 * SLIDE_CM_PER_S else "warn",
@@ -483,17 +578,17 @@ def _slides(prev, pose, i, fps, floor_z):
     return out
 
 
-# Segment mass fractions for women (de Leva 1996, after Zatsiorsky-Seluyanov) and where each segment's
-# centre of mass sits along it (fraction from the proximal end). Provisional until checked against findings.
+# Segment mass fractions for women and each segment's centre of mass from its first bone (de Leva 1996;
+# realistic-animation skill). The trunk and head spans are rig landmarks, so their centres are approximate.
 SEGMENTS = [
     ("head", "neck_02", "head", 0.0668, 0.5),
-    ("trunk", "pelvis", "neck_01", 0.4257, 0.5),
-    ("upperarm_l", "upperarm_l", "lowerarm_l", 0.0255, 0.575), ("upperarm_r", "upperarm_r", "lowerarm_r", 0.0255, 0.575),
-    ("forearm_l", "lowerarm_l", "hand_l", 0.0138, 0.456), ("forearm_r", "lowerarm_r", "hand_r", 0.0138, 0.456),
-    ("hand_l", "hand_l", "middle_01_l", 0.0056, 0.75), ("hand_r", "hand_r", "middle_01_r", 0.0056, 0.75),
-    ("thigh_l", "thigh_l", "calf_l", 0.1478, 0.39), ("thigh_r", "thigh_r", "calf_r", 0.1478, 0.39),
-    ("shank_l", "calf_l", "foot_l", 0.0481, 0.44), ("shank_r", "calf_r", "foot_r", 0.0481, 0.44),
-    ("foot_l", "foot_l", "ball_l", 0.0129, 0.5), ("foot_r", "foot_r", "ball_r", 0.0129, 0.5),
+    ("trunk", "pelvis", "neck_01", 0.4258, 0.5),
+    ("upperarm_l", "upperarm_l", "lowerarm_l", 0.0255, 0.5754), ("upperarm_r", "upperarm_r", "lowerarm_r", 0.0255, 0.5754),
+    ("forearm_l", "lowerarm_l", "hand_l", 0.0138, 0.4559), ("forearm_r", "lowerarm_r", "hand_r", 0.0138, 0.4559),
+    ("hand_l", "hand_l", "middle_01_l", 0.0056, 0.7474), ("hand_r", "hand_r", "middle_01_r", 0.0056, 0.7474),
+    ("thigh_l", "thigh_l", "calf_l", 0.1478, 0.3612), ("thigh_r", "thigh_r", "calf_r", 0.1478, 0.3612),
+    ("shank_l", "calf_l", "foot_l", 0.0481, 0.4352), ("shank_r", "calf_r", "foot_r", 0.0481, 0.4352),
+    ("foot_l", "foot_l", "ball_l", 0.0129, 0.4014), ("foot_r", "foot_r", "ball_r", 0.0129, 0.4014),
 ]
 
 
@@ -509,11 +604,8 @@ def centre_of_mass(pose):
 
 def support_points(pose, floor_z=0.0):
     """Floor-contact points (x, y) of the bones within CONTACT_CM of the floor."""
-    pts = []
-    for bone, skin in CONTACT_BONES.items():
-        if bone in pose and pose[bone][0][2] - skin - floor_z < CONTACT_CM:
-            pts.append((pose[bone][0][0], pose[bone][0][1]))
-    return pts
+    return [(pose[b][0][0], pose[b][0][1]) for b, skin in CONTACT_BONES.items()
+            if b in pose and pose[b][0][2] - skin - floor_z < CONTACT_CM]
 
 
 def convex_hull(points):
@@ -536,8 +628,8 @@ def convex_hull(points):
 
 
 def distance_outside(point, hull):
-    """How far (cm) ``point`` lies outside the convex ``hull`` polygon; 0 inside. Degenerate hulls
-    (one or two contacts) measure to the point or segment."""
+    """How far (cm) ``point`` lies outside the convex ``hull``; 0 inside. One or two contacts measure to
+    the point or segment."""
     if not hull:
         return float("inf")
     if len(hull) == 1:
@@ -556,51 +648,73 @@ def distance_outside(point, hull):
     return min(seg_dist(point, a, b) for a, b in zip(hull, hull[1:] + hull[:1]))
 
 
-def _balance(frames, events, floor_z):
-    """Static balance at held frames: where the pose barely moves (a hold or an authored key), the
-    centre of mass must project inside the support polygon."""
+def _balance(frames, events, floor_z, fps=FPS):
+    """Static balance where the pose holds (the centre of mass barely moves) or at a key frame: its
+    ground projection must sit inside the support polygon."""
     out = []
+    keys = set(events.values())
     for i in range(1, len(frames) - 1):
         com = centre_of_mass(frames[i])
         prev, nxt = centre_of_mass(frames[i - 1]), centre_of_mass(frames[i + 1])
         if com is None or prev is None or nxt is None:
             continue
-        still = length(sub(nxt, prev)) * FPS * 0.5 < 5.0
-        if not still and i not in events.values():
+        still = length(sub(nxt, prev)) * fps * 0.5 < 5.0
+        if not still and i not in keys:
             continue
         hull = convex_hull(support_points(frames[i], floor_z))
+        if not hull:
+            continue
         outside = distance_outside((com[0], com[1]), hull)
-        if outside > COM_MARGIN_CM:
+        if outside > 0.0:
             out.append(dict(frame=i, kind="balance", severity="error" if outside > 8 else "warn", joint="com",
                             value=outside, text=f"centre of mass {outside:.1f} cm outside the support polygon"))
     return out
 
 
 def summarize(result, keys=None, limit=40):
-    """Report lines: counts by kind and severity, then the worst issues grouped by joint and axis."""
+    """Report lines: counts by kind and severity, then the worst issue of each joint and kind."""
     issues = result["issues"]
-    lines = []
     counts = {}
     for it in issues:
         counts[(it["kind"], it["severity"])] = counts.get((it["kind"], it["severity"]), 0) + 1
-    lines.append("joint check: " + (", ".join(f"{k[0]} {k[1]} {v}" for k, v in sorted(counts.items())) or "clean"))
+    lines = ["joint check: " + (", ".join(f"{k[0]} {k[1]} {v}" for k, v in sorted(counts.items())) or "clean")]
     groups = {}
     for it in issues:
-        key = (it["kind"], it["joint"], it.get("axis", ""))
-        g = groups.setdefault(key, {"first": it["frame"], "last": it["frame"], "worst": it, "n": 0})
+        g = groups.setdefault((it["kind"], it["joint"]), {"first": it["frame"], "last": it["frame"], "worst": it, "n": 0})
         g["n"] += 1
         g["last"] = it["frame"]
-        if abs(it["value"]) > abs(g["worst"]["value"]) or it["severity"] == "error" and g["worst"]["severity"] != "error":
+        worse = (it["severity"] == "error" and g["worst"]["severity"] != "error") or (
+            it["severity"] == g["worst"]["severity"] and abs(it["value"]) > abs(g["worst"]["value"]))
+        if worse:
             g["worst"] = it
-    order = sorted(groups.items(), key=lambda kv: (kv[1]["worst"]["severity"] != "error", -abs(kv[1]["worst"]["value"])))
-    for (kind, joint, axis), g in order[:limit]:
+    order = sorted(groups.values(), key=lambda g: (g["worst"]["severity"] != "error", -abs(g["worst"]["value"])))
+    for g in order[:limit]:
         w = g["worst"]
         key = f" [{keys[w['frame']]}]" if keys and w["frame"] in keys else ""
-        lines.append(f"  {w['severity']:5s} frames {g['first']}-{g['last']} ({g['n']}): worst at {w['frame']}{key}: {w['text']}")
+        lines.append(f"  {w['severity']:5s} {w['kind']:8s} frames {g['first']}-{g['last']} ({g['n']}): "
+                     f"worst at {w['frame']}{key}: {w['text']}")
+    if len(order) > limit:
+        lines.append(f"  ... and {len(order) - limit} more")
     return lines
 
 
 # ------------------------------------------------------------------------------- editor adapter (unreal)
+
+def bones_needed():
+    names = {"root", "pelvis", "head"} | set(CONTACT_BONES)
+    for _, a, b, _, _ in SEGMENTS:
+        names.update([a, b])
+    for j in RIG_JOINTS:
+        for side in (j.get("sides") or [""]):
+            names.update(_side_bone(x, side) for x in (j["parent"], j["child"], *j["seg"]))
+            if j["parent"].endswith("_metacarpal"):
+                names.add(_side_bone("hand", side))
+    for side in "lr":
+        names.update(f"{b}_{side}" for b in ("upperarm", "lowerarm", "hand", "thigh", "calf", "foot", "ball",
+                                             "middle_01", "index_01", "pinky_01"))
+    names.update(["spine_05", "neck_01"])
+    return sorted(names)
+
 
 def _pose_from_transforms(transforms):
     out = {}
@@ -610,70 +724,59 @@ def _pose_from_transforms(transforms):
     return out
 
 
-def bones_needed():
-    names = set(["pelvis", "head"] + [b for _, a, b, _, _ in SEGMENTS] + [a for _, a, _, _, _ in SEGMENTS])
-    for name, side, j in joint_list():
-        p, c = _bones(j, side)
-        names.update([p, c])
-        if j.get("end"):
-            e = j["end"]
-            names.add(e if e in ("head",) or e.startswith(("spine_", "neck_")) else _bone(e, side))
-    for side in "lr":
-        names.update([f"hand_{side}", f"middle_01_{side}", f"index_01_{side}", f"pinky_01_{side}"])
-    names.update(CONTACT_BONES)
-    return sorted(names)
-
-
-def pose_at(anim, time):
-    """Component-space pose of a baked clip at ``time`` seconds (editor Python)."""
-    from homestead_agent import rig_authoring as ra
-    return _pose_from_transforms(ra.bone_positions(anim, bones_needed(), time))
-
-
-def bind_pose():
-    """The heroine skeleton's reference pose in component space (editor Python)."""
+def pose_at(anim, time, bones=None):
+    """Component-space pose of a baked clip at ``time`` seconds (editor Python). Each bone's local pose
+    is read once per call and composed down its path from the root."""
     import unreal
-    from homestead_agent import rig_authoring as ra
-    skeleton = unreal.load_asset(ra.BODY).skeleton
-    out = {}
-    for name in bones_needed():
+    lib = unreal.AnimationLibrary
+    local, out = {}, {}
+    for bone in bones or bones_needed():
         try:
-            t = unreal.AnimationLibrary.get_bone_pose_for_frame  # noqa: F841 (presence check only)
-        except AttributeError:
-            pass
-        t = _ref_component(skeleton, name)
-        if t is not None:
-            out[name] = t
-    return out
-
-
-def _ref_component(skeleton, bone):
-    import unreal
-    # Accumulate the reference local transforms up to the root.
-    chain = []
-    name = bone
-    ref = unreal.AnimationLibrary
-    while name and str(name) != "None":
-        try:
-            local = skeleton.get_reference_pose().get_ref_bone_pose(name, unreal.AnimPoseSpaces.LOCAL)
+            path = list(lib.find_bone_path_to_root(anim, bone))
         except Exception:
-            return None
-        chain.append(local)
-        name = skeleton.get_reference_pose().get_parent_bone_name(name) if hasattr(
-            skeleton.get_reference_pose(), "get_parent_bone_name") else None
-    t = unreal.Transform()
-    for local in reversed(chain):
-        t = local * t
-    loc, q = t.translation, t.rotation
-    return ((loc.x, loc.y, loc.z), (q.x, q.y, q.z, q.w))
+            continue
+        if not path:
+            continue
+        t = unreal.Transform()
+        for name in path:
+            key = str(name)
+            if key not in local:
+                local[key] = lib.get_bone_pose_for_time(anim, name, time, False)
+            t = unreal.MathLibrary.compose_transforms(t, local[key])
+        out[bone] = t
+    return _pose_from_transforms(out)
 
 
-def report(anim, events=None, every=1, bind=None):
-    """Joint check of a baked clip, every ``every`` frames: report lines for a recipe's report()."""
+def neutral_pose(bones=None):
+    """The heroine skeleton's reference pose in component space (editor Python): the zero for every
+    angle measured relative to neutral."""
+    import unreal
+    from homestead_agent import rig_authoring as ra
+    mesh = unreal.load_asset(ra.BODY)
+    skeleton = mesh.get_editor_property("skeleton")
+    pose = unreal.AnimPoseExtensions.get_reference_pose(skeleton)
+    out = {}
+    for bone in bones or bones_needed():
+        try:
+            out[bone] = unreal.AnimPoseExtensions.get_bone_pose(pose, bone, unreal.AnimPoseSpaces.WORLD)
+        except Exception:
+            continue
+    return _pose_from_transforms(out)
+
+
+def report(anim, events=None, contacts=None, every=1, neutral=None, limit=40):
+    """Joint check of a baked clip every ``every`` frames: report lines for a recipe's report().
+    ``events``: the recipe's FRAMES dict (named in the report and balance-checked); ``contacts``: frames
+    of strikes or impacts (named FRAMES keys or numbers)."""
     frames_n = int(round(anim.get_play_length() * FPS))
-    times = [i / FPS for i in range(0, frames_n + 1, every)]
-    frames = [pose_at(anim, t) for t in times]
-    bind = bind or bind_pose()
-    result = check_frames(frames, bind, fps=FPS / every)
-    keys = {i // every: name for name, i in (events or {}).items()}
-    return summarize(result, keys)
+    indices = list(range(0, frames_n + 1, every))
+    frames = [pose_at(anim, i / FPS) for i in indices]
+    neutral = neutral or neutral_pose()
+    events = {k: v // every for k, v in (events or {}).items()}
+    contacts = [(events.get(c) if isinstance(c, str) else c // every) for c in (contacts or [])]
+    result = check_frames(frames, neutral, fps=FPS / every, events=events,
+                          contacts=[c for c in contacts if c is not None])
+    keys = {}
+    for name, i in events.items():
+        keys.setdefault(i, name)
+    return summarize(result, keys, limit)
