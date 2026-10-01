@@ -47,7 +47,7 @@ void AHomesteadWorld::UpdateHearthFlicker(float DeltaSeconds)
         // Layered slow breathing and quick licks, like a settled wood fire.
         const float Flicker = 0.82f + 0.1f * FMath::PerlinNoise1D(T * 1.3f) + 0.08f * FMath::PerlinNoise1D(T * 7.1f)
             + 0.05f * FMath::PerlinNoise1D(T * 17.0f);
-        HearthLights[Index]->SetIntensity(5200.0f * Flicker);
+        HearthLights[Index]->SetIntensity(HearthIntensity * Flicker);
     }
 }
 
@@ -159,6 +159,15 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         const float HeightScale = bWallPiece ? 1.085f : 1.0f;
         if (Kit && KitPart(Kit, HeightScale))
         {
+            // The kit's deck boards have hairline seams and the tilted slates lap open at an angle, so
+            // the noon sun drew bright lines across the ceiling. A felt underlay between the deck
+            // (top 281.5 cm) and the slates seals it, inset under the eaves and verges so it never shows.
+            if (Structure.kind == Homestead::Piece::Roof && !bPreview && !bDeconstruct)
+                Part(Cube, FVector(0, 4, 283), FVector(312, 316, 2.4f), HomesteadWorldLook::RoofUnderlay);
+            // Between the joists the coping left a sky-bright slot along every wall top: a timber wall
+            // plate inside the wall's thickness (faces at Y 130 and 158) fills it without showing on either face.
+            if (bWallPiece && !bPreview && !bDeconstruct)
+                Part(Cube, FVector(0, 144, 270), FVector(300, 24, 24), HomesteadWorldLook::RoofUnderlay);
             if (!bPreview && !bDeconstruct && Homestead::Door::HasLeaf(Structure))
                 AddDoorLeaf(Visual, Structure.id, Base, Rotation, HeightScale);
             return;
@@ -192,12 +201,13 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         UPointLightComponent* Light = NewObject<UPointLightComponent>(this);
         Light->SetupAttachment(GetRootComponent());
         Light->SetMobility(EComponentMobility::Movable);
-        // Just in front of the opening, so the room (not the firebox) takes the light.
-        Light->SetRelativeLocation(Base + Rotation.RotateVector(FVector(0, 55, 55)));
+        // Low, just in front of the opening, so the room (not the firebox) takes the light and the
+        // floor and her lower half catch it first, like a fire seen from the settle.
+        Light->SetRelativeLocation(Base + Rotation.RotateVector(FVector(0, 50, 38)));
         Light->SetLightColor(FLinearColor(1.0f, 0.45f, 0.16f));
-        Light->SetIntensity(5200.0f);
-        Light->SetAttenuationRadius(900.0f);
-        Light->SetSourceRadius(30.0f);
+        Light->SetIntensity(HearthIntensity);
+        Light->SetAttenuationRadius(HearthRadiusCm);
+        Light->SetSourceRadius(20.0f);
         Light->SetCastShadows(true);
         Light->RegisterComponent();
         Visual.Components.Add(Light);

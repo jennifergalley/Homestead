@@ -297,6 +297,14 @@ private:
     static constexpr float OvercastSunSourceAngle = 12.0f;
     static constexpr float OvercastExposureBias = -0.8f;
     static constexpr float OvercastSaturation = 0.72f;
+    // Under a roof by day, eye adaptation would lift a shaded room back to outdoor brightness. Hold it
+    // down (EV, scaled by the indoor mix and daylight) so the room reads as dim, with daylight at the
+    // door and the hearth as the key; at night the lamp and hearth already set the level.
+    static constexpr float IndoorDayExposureBias = -0.7f;
+    // The hearth as a settled low fire: a warm key low in front of the opening, oil-lamp strength
+    // (HomesteadLampLook's lamp is 1400 / 1000 cm), rather than a floodlight filling the room.
+    static constexpr float HearthIntensity = 2600.0f;
+    static constexpr float HearthRadiusCm = 800.0f;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
     // The standing room's door (HomesteadWorldDoors.cpp, Simulation/HomesteadDoor): an oak leaf on a hinge

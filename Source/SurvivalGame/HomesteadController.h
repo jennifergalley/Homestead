@@ -51,7 +51,7 @@ struct FHomesteadRow
     int32 Quantity = 0;
     FString Name;
     FString Location;
-    // A short state shown after the selected item's name in the pack's footer ("Water 5 / 6").
+    // A short state shown after the selected item's name in the pack's footer ("Water 5 / 15").
     FString Status;
     // The hotbar cell (0-9) holding this pack row, the first row of her pack; INDEX_NONE below it.
     int32 HotbarCell = INDEX_NONE;
@@ -460,6 +460,8 @@ private:
     UPROPERTY() TObjectPtr<USoundBase> WoodTapB;
     // Hatchet biting a standing trunk, one per stroke in turn.
     UPROPERTY() TArray<TObjectPtr<USoundBase>> ChopStrokes;
+    // The billhook's cane cuts (Scripts/generate_billhook_sound.py: CaneCutA/B/C), one per landed swing.
+    UPROPERTY() TArray<TObjectPtr<USoundBase>> CaneCuts;
     UPROPERTY() TObjectPtr<USoundBase> TreeFallThud;
     // The scythe's one swish per sweep that cuts something (Scripts/generate_scythe_sound.py); never a footstep in its place.
     UPROPERTY() TObjectPtr<USoundBase> ScytheSwish;
@@ -594,6 +596,9 @@ private:
     void UpdatePendingSwing();
     // bMoreComing: another blow of the same press follows, so no 'N more swings' notice in between.
     void LandOvergrowthSwing(bool bMoreComing = false);
+    // The sound of a landed swing at its contact (HomesteadControllerClearing.cpp): the pickaxe's stone
+    // ping, the billhook's cane cut, other tools' chop; `Swing` counts from 1, `bFinal` is the clearing one.
+    void PlayStrikeCue(Homestead::Item Tool, int32 Swing, bool bFinal);
     void ResetOvergrowthSwing();
     // HomesteadControllerWeedPull.cpp: weeds pulled by hand on both knees (a weed node, or a garden
     // square's weeds), committed once at the second root (AHomesteadCharacter::PullWeedsCommit). A
@@ -779,6 +784,8 @@ private:
     // Fill the watering pail at the nearest fresh water edge, with her kneeling fill when it succeeds.
     void FillPailAtStream(Homestead::Point Position);
     Homestead::Point FreshWaterDipPoint(Homestead::Point Position) const;
+    // In the water at all she fills the pail where she stands (Homestead::InWaterDipPoint, HomesteadPail.h).
+    Homestead::Point InWaterDipPoint(Homestead::Point Position, double Yaw) const;
     // The pail goes in this far inside the waterline, so it visibly dips into the water.
     static constexpr double PailDipInsideCm = 25.0;
     void EndPlacement();

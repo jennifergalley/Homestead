@@ -779,6 +779,36 @@ void FoodEnergyLabels()
     CHECK(FoodEnergyLabel(Item::Count).empty() && FoodEnergyLabel(static_cast<Item>(-1)).empty());
 }
 
+// Filling the pail standing in the water (Jenny, 2026-09-30): the pail goes in ahead of her when that's water,
+// otherwise toward deeper water, never back onto the bank, from anywhere in the water. A round pond 10 m across.
+void PailDipsWhereSheStands()
+{
+    const auto edge = [](Point p) { return std::hypot(p.x, p.y) - 1000.0; };   // negative inside
+    constexpr double forward = 59.0, right = 12.0, inside = 25.0;
+    // The reach itself: 59 cm ahead, 12 cm to her right, turned by her heading (as UE's FRotator turns it).
+    const Point east = InWaterDipPoint(Point{0.0, 0.0}, 0.0, forward, right, inside, edge);
+    CHECK(std::abs(east.x - 59.0) < 1e-9 && std::abs(east.y - 12.0) < 1e-9);
+    const Point north = InWaterDipPoint(Point{0.0, 0.0}, 90.0, forward, right, inside, edge);
+    CHECK(std::abs(north.x + 12.0) < 1e-9 && std::abs(north.y - 59.0) < 1e-9);
+    // From 1 cm to 2 m in, facing every way: the pail always lands in the water, as deep as where she stands or
+    // deeper, and straight ahead whenever ahead is well in (review: 0-30 cm in used to turn her back to the bank).
+    for (const double in : {1.0, 10.0, 24.0, 30.0, 60.0, 200.0})
+        for (int facing = 0; facing < 16; ++facing)
+        {
+            const Point her{1000.0 - in, 0.0};
+            const double yaw = facing * 22.5;
+            const Point dip = InWaterDipPoint(her, yaw, forward, right, inside, edge);
+            CHECK(edge(dip) < 0.0);
+            CHECK(edge(dip) <= edge(her) + 1e-9 || edge(dip) <= -inside);
+            const double r = yaw * 3.14159265358979323846 / 180.0;
+            const Point ahead{her.x + forward * std::cos(r) - right * std::sin(r), her.y + forward * std::sin(r) + right * std::cos(r)};
+            if (edge(ahead) <= -inside) CHECK(std::abs(dip.x - ahead.x) < 1e-9 && std::abs(dip.y - ahead.y) < 1e-9);
+        }
+    // Facing the bank from 10 cm in: the pail goes in behind her, toward open water.
+    const Point turned = InWaterDipPoint(Point{990.0, 0.0}, 0.0, forward, right, inside, edge);
+    CHECK(turned.x < 990.0 && edge(turned) < -40.0);
+}
+
 void PailWaterPresentation()
 {
     Simulation sim;
@@ -791,13 +821,13 @@ void PailWaterPresentation()
         return PresentPail(state);
     };
     // One carried pail: its water is a gauge and the pack's Water tile folds into it.
-    for (int water : {0, 1, 6})
+    for (int water : {0, 1, 6, PailCapacity})
     {
         const auto pail = With(1, water);
         CHECK(pail.gauge && pail.charge == water && pail.hidePackWater);
     }
     // More than one pail holds (an older save), or 1200: the gauge is full and the tile shows every portion.
-    for (int water : {7, 1200})
+    for (int water : {PailCapacity + 1, 1200})
     {
         const auto pail = With(1, water);
         CHECK(pail.gauge && pail.charge == PailCapacity && !pail.hidePackWater);
@@ -809,16 +839,16 @@ void PailWaterPresentation()
     CHECK(With(2, 4).gauge && With(2, 4).charge == 4 && !With(2, 4).hidePackWater);
     // Presentation only: the stock itself round-trips through a save untouched.
     OK(sim.GrantItems(Item::WateringCan, 1));
-    OK(sim.GrantItems(Item::Water, 9));
+    OK(sim.GrantItems(Item::Water, PailCapacity + 3));
     Simulation reloaded;
     reloaded.SetPlacements(ProvisionalEstatePlacements());
     OK(reloaded.Deserialize(sim.Serialize()));
-    CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= 9);
+    CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= PailCapacity + 3);
     const auto loaded = PresentPail(reloaded.GetState());
     CHECK(loaded.gauge && loaded.charge == PailCapacity && !loaded.hidePackWater);
     // The pack's footer names the charge (a controller has no hover for the tooltip).
-    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 6" && PailChargeLabel(With(1, 0)) == "Water 0 / 6");
-    CHECK(PailChargeLabel(With(1, 1200)) == "Water 6 / 6" && PailChargeLabel(With(0, 4)).empty());
+    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 15" && PailChargeLabel(With(1, 0)) == "Water 0 / 15");
+    CHECK(PailChargeLabel(With(1, 1200)) == "Water 15 / 15" && PailChargeLabel(With(0, 4)).empty());
 }
 
 // The "+3 Berries" line counts only real gains: gathering, buying, crafting and grants, never a chest
@@ -987,6 +1017,7 @@ int main(int argc, char** argv)
     Run("pickup lines count only new things", PickupGainsCountOnlyNewThings);
     Run("pickup lines follow her actual stacks", PickupGainsFollowActualStacks);
     Run("pail water shows on the pail", PailWaterPresentation);
+    Run("the pail dips where she stands in the water", PailDipsWhereSheStands);
     Run("food shows its Energy", FoodEnergyLabels);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;

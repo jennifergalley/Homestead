@@ -2860,8 +2860,8 @@ Result Simulation::FillWater(Point player)
     if (Count(Item::Water) >= PailPortions) return Bad("Your pail is already full.");
     const Inventory change = Items({{Item::Water, PailPortions - Count(Item::Water)}});
     if (auto ready = CheckExertion(Exertion::FillWaterEnergy); !ready) return ready;
-    if (!TryAdjust(change)) return Bad("Make enough room in your pack for six water portions.");
-    return Exert(Exertion::FillWaterEnergy, Good("Pail filled with six water portions."));
+    if (!TryAdjust(change)) return Bad("Make enough room in your pack for the water.");
+    return Exert(Exertion::FillWaterEnergy, Good("Pail filled."));
 }
 Result Simulation::EmptyPail()
 {
