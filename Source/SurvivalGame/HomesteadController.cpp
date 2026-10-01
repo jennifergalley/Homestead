@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 #include "HomesteadControllerText.h"
 #include "UI/HomesteadUITheme.h"
 #include "HomesteadControllerPreferences.h"
@@ -465,7 +466,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
             if (StepDistance >= 70)
             {
                 StepDistance = FMath::Fmod(StepDistance, 70.0f);
-                PlayEffect(bAlternateStep ? GrassStepA.Get() : GrassStepB.Get(), 0.12f);
+                PlayEffect(bAlternateStep ? GrassStepA.Get() : GrassStepB.Get(), Homestead::AudioLevels::Gain::ShodStep);
                 bAlternateStep = !bAlternateStep;
             }
         }

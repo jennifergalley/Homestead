@@ -1,4 +1,5 @@
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
@@ -66,7 +67,7 @@ void AHomesteadController::OpenBook(int32 TargetPage)
     Page = TargetPage == RetiredGuidebookPage ? 0 : FMath::Clamp(TargetPage, 0, 7);
     Selection = 0;
     bConfirmRestart = false;
-    PlayEffect(UIClick, 0.08f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
         Avatar->CancelAction(true);
@@ -94,7 +95,7 @@ void AHomesteadController::Withdraw()
 
 void AHomesteadController::CloseBook()
 {
-    if (bBookOpen) PlayEffect(UIClick, 0.08f);
+    if (bBookOpen) PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
     bBookOpen = false;
     ActiveChestId.Reset();
     MenuInventoryViewIndex = 0;
@@ -121,7 +122,7 @@ void AHomesteadController::Back()
     if (IsFailed()) { RetryCheckpoint(); return; }
     if (bBookOpen) CloseBook();
     else if (bPlanning) EndPlacement();
-    else if (CancelShopWait()) PlayEffect(UIClick, 0.05f);
+    else if (CancelShopWait()) PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
     else OpenBook(4);
 }
 
@@ -130,7 +131,7 @@ void AHomesteadController::PreviousPage()
     if (bPlanning) { RotatePlacementBy(-1); return; }
     if (!bBookOpen) { CycleHotbar(-1); return; }
     Page = ShiftFieldBookPage(Page, -1); Selection = 0; bConfirmRestart = false;
-    PlayEffect(UIClick, 0.08f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(Page == 6);
 }
 
@@ -139,7 +140,7 @@ void AHomesteadController::NextPage()
     if (bPlanning) { RotatePlacement(); return; }
     if (!bBookOpen) { CycleHotbar(1); return; }
     Page = ShiftFieldBookPage(Page, 1); Selection = 0; bConfirmRestart = false;
-    PlayEffect(UIClick, 0.08f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn())) Avatar->SetAppearancePreview(Page == 6);
 }
 
@@ -148,7 +149,7 @@ void AHomesteadController::PreviousRow()
     if (!bBookOpen) { CycleSeedPouch(-1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + Count - 1) % Count;
-    PlayEffect(UIClick, 0.06f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickSoft);
     bConfirmRestart = false;
 }
 
@@ -157,7 +158,7 @@ void AHomesteadController::NextRow()
     if (!bBookOpen) { CycleSeedPouch(1); return; }
     const int Count = Rows().Num();
     if (Count) Selection = (Selection + 1) % Count;
-    PlayEffect(UIClick, 0.06f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickSoft);
     bConfirmRestart = false;
 }
 
@@ -429,7 +430,7 @@ void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
         // Saved with the game (Simulation/HomesteadBackpack.h); the character picks it up each tick.
         const auto Result = Sim.SetBackpackShown(Value == 0);
         if (!Result) Notify(Result);
-        else PlayEffect(UIClick, 0.08f);
+        else PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
         return;
     }
     FHomesteadAppearance Next = Appearance;
@@ -454,7 +455,7 @@ void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
         return;
     }
     Appearance = Next;
-    PlayEffect(UIClick, 0.08f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
 }
 
 std::optional<Homestead::SleepOption> AHomesteadController::BedSleepOffer() const

@@ -301,6 +301,16 @@ const EstatePlacements& ProvisionalEstatePlacements()
         // unsearched in every older save and gives whichever rusted head she is still missing. It goes
         // last, so no earlier section's proximity skips or sequential ids can shift because of it.
         salvage(520006, 230.0, 1010.0);
+        // Brambles and wild roots in the woods along the lake trail (582300-582399, Scripts/Terrain/
+        // lake_path_plants.py; Jenny, 2026-09-30), last of all with the same 3 m rule, so nothing earlier moves.
+        auto lakeForage = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateLakePathPlacements.inc"
         // Town lane (530000+).
         return table;
     }();

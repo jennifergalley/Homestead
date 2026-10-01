@@ -338,11 +338,13 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             if (PC.ChooseOnHotbar(Item::Pasty)) PC.EatFromHotbar(Item::Pasty);
         };
     };
-    // The same hour on a rainy day (rain falls RainStartHour-RainEndHour on two days in ten), or tonight.
+    // The next spell of rain (Simulation/HomesteadRain.h: any hour, day or night), half an hour in; or tonight.
     const auto Rain = [](AHomesteadController& PC)
     {
-        for (int32 Day = 0; Day < Homestead::RainBlockDays && !Homestead::IsRainingAt(PC.State().hour); ++Day)
-            PC.Sim.SkipToHourOfDay(12.0);
+        Homestead::RainSpell Spell;
+        if (!Homestead::NextRainSpell(PC.State().hour, Spell) || Homestead::IsRainingAt(PC.State().hour)) return;
+        const double At = Spell.start + FMath::Min(0.5, (Spell.end - Spell.start) * 0.5);
+        for (int32 Day = 0; Day < 40 && PC.State().hour < At - 1e-6; ++Day) PC.Sim.SkipToHourOfDay(FMath::Fmod(At, 24.0));
     };
     const auto Night = [](AHomesteadController& PC) { PC.Sim.SkipToHourOfDay(22.5); };
     const auto Add = [](const TCHAR* Id, const TCHAR* Description, ECover Cover, int32 Key,

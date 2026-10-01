@@ -3,6 +3,7 @@
 // away however full the hotbar is. Sowing still takes the seed shown in the selected slot, and only
 // while she has some (the crops lane's rule, AHomesteadController::Interact on a bare plot).
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 
 #include "HomesteadCharacter.h"
 #include "Simulation/HomesteadCrops.h"
@@ -70,7 +71,7 @@ bool AHomesteadController::CycleSeedPouch(int32 Direction)
         Sim.Count(Chosen), Next + 1, Count);
     bToastError = false;
     ToastRemaining = 1.4f;
-    PlayEffect(UIClick, 0.05f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
     return true;
 }
 

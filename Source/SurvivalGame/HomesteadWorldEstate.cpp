@@ -34,7 +34,7 @@ struct FEstateSceneryKind
     bool bShadow = false;
 };
 // Index = the kind byte written by Scripts/Terrain/scatter.py (19+: mvp_woodland.py). Keep them in step.
-const FEstateSceneryKind EstateSceneryKinds[] = {
+constexpr FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_TreeSmall02_Woodland.SM_TreeSmall02_Woodland"), true, 0, true, 3, 41},
     {TEXT("/Game/Trials/MatureFir_20260922_02/Meshes/SM_MatureFir.SM_MatureFir"), true, 0, true, 30, 76},
     {TEXT("/Game/SurvivalGame/Environment/Props/Hazel/SM_Hazel.SM_Hazel"), false, 14000, false, 0, 0},
@@ -86,7 +86,38 @@ const FEstateSceneryKind EstateSceneryKinds[] = {
     {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBoulderLow/SM_GraniteBoulderLow.SM_GraniteBoulderLow"), true, 24000, false, 0, 72},
     {TEXT("/Game/SurvivalGame/Environment/Props/GraniteBoulderJointed/SM_GraniteBoulderJointed.SM_GraniteBoulderJointed"), true, 60000, false, 0, 160},
     {TEXT("/Game/SurvivalGame/Environment/Props/GraniteSplitBoulder/SM_GraniteSplitBoulder.SM_GraniteSplitBoulder"), true, 0, false, 0, 400},
+    // 42-48: the lake trail's wildflowers (Scripts/Terrain/lake_path_plants.py; Jenny, 2026-09-30), decorative only: no
+    // collision or shadow, culled within a short walk. Bluebells, primroses and wild garlic reuse the forage
+    // clumps' meshes; anemone, campion, foxglove and cow parsley come from Props' recipes (a missing mesh logs
+    // once and its records are skipped until it's imported).
+    {TEXT("/Game/SurvivalGame/Environment/Props/Bluebell/SM_BluebellClump.SM_BluebellClump"), false, 4500, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/Primrose/SM_PrimroseClump.SM_PrimroseClump"), false, 4500, false, 1, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/WildGarlic/SM_WildGarlic.SM_WildGarlic"), false, 4500, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/WoodAnemone/SM_WoodAnemoneClump.SM_WoodAnemoneClump"), false, 4500, false, 1, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/RedCampion/SM_RedCampionClump.SM_RedCampionClump"), false, 5500, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/Foxglove/SM_Foxglove.SM_Foxglove"), false, 6500, false, 2, 0},
+    {TEXT("/Game/SurvivalGame/Environment/Props/CowParsley/SM_CowParsley.SM_CowParsley"), false, 6000, false, 2, 0},
 };
+// The kind byte indexes this table directly, so kinds are append-only: a row inserted mid-table re-meshes every
+// later kind across the estate. Sentinels pin a few indices to their assets (scatter.py, mvp_woodland.py,
+// lake_path_plants.py write these bytes).
+constexpr bool EstateKindIs(int32 Kind, const TCHAR* Name)
+{
+    const TCHAR* Path = EstateSceneryKinds[Kind].Path;
+    int32 PathLength = 0, NameLength = 0;
+    while (Path[PathLength]) ++PathLength;
+    while (Name[NameLength]) ++NameLength;
+    if (NameLength > PathLength) return false;
+    for (int32 Index = 0; Index < NameLength; ++Index)
+        if (Path[PathLength - NameLength + Index] != Name[Index]) return false;
+    return true;
+}
+static_assert(UE_ARRAY_COUNT(EstateSceneryKinds) == 49, "EstateSceneryKinds is append-only: claim the next kind on the round page");
+static_assert(EstateKindIs(5, TEXT("SM_GraniteBlockTalus")) && EstateKindIs(13, TEXT("SM_Oak"))
+    && EstateKindIs(19, TEXT("SM_Jacaranda")) && EstateKindIs(30, TEXT("SM_Fern02_c")) && EstateKindIs(31, TEXT("SM_Fern02_d"))
+    && EstateKindIs(33, TEXT("SM_GrassMedium01_tiny_a")) && EstateKindIs(41, TEXT("SM_GraniteSplitBoulder"))
+    && EstateKindIs(42, TEXT("SM_BluebellClump")) && EstateKindIs(48, TEXT("SM_CowParsley")),
+    "EstateSceneryKinds moved: a kind's index no longer matches the bytes in EstateScenery.bin");
 
 #pragma pack(push, 1)
 struct FEstateSceneryRecord

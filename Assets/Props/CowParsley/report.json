@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "CowParsley",
+  "description": "Cow parsley in flower, 80 cm tall and 55 cm across: a mound of fresh fern-like leaves and branching hollow stems topped with lacy white umbels. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 14000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/cow_parsley.py",
+  "source_sha256": "0017ea0fc0fa92b1d99bf753c1de2b9dc741edc7c6d4e1e470d6ac1544a060d0",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_CowParsley": {
+      "vertices": 2557,
+      "triangles": 2956,
+      "size_cm": [
+        57.27,
+        48.92,
+        87.59
+      ],
+      "materials": [
+        {
+          "name": "M_CowParsley",
+          "textures": {
+            "basecolor": "T_CowParsley_basecolor.png",
+            "normal": "T_CowParsley_normal.png",
+            "roughness": "T_CowParsley_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.00975024700164795,
+          -0.002329602837562561,
+          0.72
+        ]
+      },
+      "fbx": "SM_CowParsley.fbx",
+      "sha256": "7ecaa3b1551e5ef21d1103a0d0fc942046a6e264ff5c0b56e1cac5a555a98340",
+      "preview": "preview_SM_CowParsley.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CowParsley_hero.png",
+          "detail": "beauty_SM_CowParsley_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CowParsley_LOD1": {
+      "vertices": 1387,
+      "triangles": 1584,
+      "size_cm": [
+        56.2,
+        48.67,
+        88.87
+      ],
+      "materials": [
+        {
+          "name": "M_CowParsley",
+          "textures": {
+            "basecolor": "T_CowParsley_basecolor.png",
+            "normal": "T_CowParsley_normal.png",
+            "roughness": "T_CowParsley_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.00975024700164795,
+          -0.002329602837562561,
+          0.72
+        ]
+      },
+      "fbx": "SM_CowParsley_LOD1.fbx",
+      "sha256": "78751860f96c22ade4637d53efbb2205e464d8092aee44d4376c3fa73b2af9d8",
+      "preview": "preview_SM_CowParsley_LOD1.png"
+    },
+    "SM_CowParsley_LOD2": {
+      "vertices": 425,
+      "triangles": 346,
+      "size_cm": [
+        56.24,
+        47.99,
+        89.02
+      ],
+      "materials": [
+        {
+          "name": "M_CowParsley",
+          "textures": {
+            "basecolor": "T_CowParsley_basecolor.png",
+            "normal": "T_CowParsley_normal.png",
+            "roughness": "T_CowParsley_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.00975024700164795,
+          -0.002329602837562561,
+          0.72
+        ]
+      },
+      "fbx": "SM_CowParsley_LOD2.fbx",
+      "sha256": "900d59113152f01160cd12e8edb1bbc863f55a4298ce5648ad531fe7ed545fc1",
+      "preview": "preview_SM_CowParsley_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_CowParsley: T_CowParsley_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_CowParsley_basecolor.png": "c153bf6222678c565b0fd4e2707253d4224f9f73ee1ec7a80278cd6319f127cc",
+    "T_CowParsley_normal.png": "2a373587b4301b2732b9c93313cf824e8d692728273a84b64f0af9d44e916cee",
+    "T_CowParsley_roughness.png": "6c389c5a4b22d12b481d17e417d9197d61d61c4d56d2689622b7234bbc61b192"
+  }
+}

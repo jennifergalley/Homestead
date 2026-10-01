@@ -308,6 +308,10 @@ private:
     // (HomesteadLampLook's lamp is 1400 / 1000 cm), rather than a floodlight filling the room.
     static constexpr float HearthIntensity = 2600.0f;
     static constexpr float HearthRadiusCm = 800.0f;
+    // At night (Jenny, 2026-09-30: rain at any hour) full cloud hides most of the moon, but the night sky
+    // light keeps its floor and the exposure isn't pushed below the night's own floor, so a rainy night is
+    // darker than a clear one without going black; the lamp and the hearth carry it.
+    static constexpr float OvercastMoonScale = 0.35f;
     TArray<FHearthSound> HearthSounds;
     void UpdateHearthSound(float DeltaSeconds);
     // The standing room's door (HomesteadWorldDoors.cpp, Simulation/HomesteadDoor): an oak leaf on a hinge
