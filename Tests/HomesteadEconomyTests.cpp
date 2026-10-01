@@ -557,13 +557,13 @@ void PailWaterPresentation()
         return PresentPail(state);
     };
     // One carried pail: its water is a gauge and the pack's Water tile folds into it.
-    for (int water : {0, 1, 6})
+    for (int water : {0, 1, 6, PailCapacity})
     {
         const auto pail = With(1, water);
         CHECK(pail.gauge && pail.charge == water && pail.hidePackWater);
     }
     // More than one pail holds (an older save), or 1200: the gauge is full and the tile shows every portion.
-    for (int water : {7, 1200})
+    for (int water : {PailCapacity + 1, 1200})
     {
         const auto pail = With(1, water);
         CHECK(pail.gauge && pail.charge == PailCapacity && !pail.hidePackWater);
@@ -575,16 +575,16 @@ void PailWaterPresentation()
     CHECK(With(2, 4).gauge && With(2, 4).charge == 4 && !With(2, 4).hidePackWater);
     // Presentation only: the stock itself round-trips through a save untouched.
     OK(sim.GrantItems(Item::WateringCan, 1));
-    OK(sim.GrantItems(Item::Water, 9));
+    OK(sim.GrantItems(Item::Water, PailCapacity + 3));
     Simulation reloaded;
     reloaded.SetPlacements(ProvisionalEstatePlacements());
     OK(reloaded.Deserialize(sim.Serialize()));
-    CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= 9);
+    CHECK(reloaded.Count(Item::Water) == sim.Count(Item::Water) && reloaded.Count(Item::Water) >= PailCapacity + 3);
     const auto loaded = PresentPail(reloaded.GetState());
     CHECK(loaded.gauge && loaded.charge == PailCapacity && !loaded.hidePackWater);
     // The pack's footer names the charge (a controller has no hover for the tooltip).
-    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 6" && PailChargeLabel(With(1, 0)) == "Water 0 / 6");
-    CHECK(PailChargeLabel(With(1, 1200)) == "Water 6 / 6" && PailChargeLabel(With(0, 4)).empty());
+    CHECK(PailChargeLabel(With(1, 5)) == "Water 5 / 15" && PailChargeLabel(With(1, 0)) == "Water 0 / 15");
+    CHECK(PailChargeLabel(With(1, 1200)) == "Water 15 / 15" && PailChargeLabel(With(0, 4)).empty());
 }
 
 // The "+3 Berries" line counts only real gains: gathering, buying, crafting and grants, never a chest

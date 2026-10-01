@@ -436,6 +436,10 @@ hotbar slots `One`..`Nine`/`Zero`. Keyboard equivalents are in `README.md` Contr
 
 ### Interacting with the world
 
+- **Input contract:** E/the interact button only interacts (harvest, plant, pick up, open, talk,
+  eat or sleep). Tools act only through click/the gamepad tool button. Never make E on an unripe
+  crop water it; hold-to-repeat is tool-input-only. Verify this split with mouse/keyboard and
+  gamepad whenever interaction or tool routing changes.
 - **Focus is the nearest interactable within 2.8 m, regardless of facing** (`UpdateFocus`). To target
   a node, get closer to it than to anything else: `walk_to` with `stop_distance_cm` about 45, then
   confirm `nearbyResources[].focused` on your target before pressing the action.
@@ -1040,6 +1044,11 @@ states. Each state begins from an isolated 10:00 fixture—known pack, 1,000 coi
 notices/pickups and no surface open—then shows exactly one book page, settings tab, dialog, shop,
 sign confirmation/refusal, notice, focus hint/outline or HUD state. The coverage check fails if any
 book tab, settings tab or notice style lacks an entry; add one whenever a surface is added.
+
+**Copy review rule:** assume the player knows farming sims. Do not add toasts for obvious outcomes.
+Focus cards show only a name and keyed verbs; details/tooltips show stats, requirements and price
+without rules explanations; Settings show label plus value; refusals are about 4–6 words. Check every
+new player-facing string against this rule before its gallery entry is accepted.
 
 - **Multi-resolution capture:** after integration, run
   `pwsh -File Scripts\Capture-UiGallery.ps1 [-Ids a,b] [-Res 720p,1080p,1440p,4K] [-Input KBM,Pad]`.
