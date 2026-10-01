@@ -87,6 +87,10 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         Add(TEXT("One correct watering transaction with attached tool: ") + Key.ToString(),
             [this, Avatar, Probe, Animation, Key, DoubleTap]()
             {
+                // Watering is the pail on the tool button (LMB / RT); E / A never waters (Jenny 2026-09-30).
+                // Chosen first: putting it in the hotbar row is a change of its own, before the snapshot.
+                if (!Controller->ChooseOnHotbar(Homestead::Item::WateringCan))
+                { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; }
                 Probe->Expected = Controller->Simulation();
                 Probe->Hour = Controller->State().hour;
                 Probe->Ready = Probe->Expected.Water(GardenPlotId, Controller->PlayerPoint()).ok;
@@ -97,9 +101,6 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
                 Probe->Hand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"));
                 Probe->Toe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
                 Probe->View = Controller->GetControlRotation();
-                // Watering is the pail on the tool button (LMB / RT); E / A never waters (Jenny 2026-09-30).
-                if (!Controller->ChooseOnHotbar(Homestead::Item::WateringCan))
-                { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; }
                 const FKey Use = Key == EKeys::E ? EKeys::LeftMouseButton : Key == EKeys::Gamepad_FaceButton_Bottom ? EKeys::Gamepad_RightTrigger : Key;
                 Tap(Use);
                 if (DoubleTap) Tap(Use);
@@ -135,13 +136,13 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         const auto ExpectedToast = MakeShared<FString>();
         Add(Reason, [this, Probe, Animation, bHasPail, ExpectedToast]()
             {
+                if (bHasPail && !Controller->ChooseOnHotbar(Homestead::Item::WateringCan))
+                { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; }
                 Probe->Expected = Controller->Simulation();
                 Probe->Hour = Controller->State().hour;
                 Probe->Starts = Animation()->WaterStarts();
                 if (bHasPail)
                 {
-                    if (!Controller->ChooseOnHotbar(Homestead::Item::WateringCan))
-                    { Finish(false, TEXT("The pail could not be chosen on the hotbar.")); return; }
                     Homestead::Simulation Copy = Controller->Simulation();
                     *ExpectedToast = UTF8_TO_TCHAR(Copy.Water(GardenPlotId, Controller->PlayerPoint()).message.c_str());
                 }
@@ -212,6 +213,8 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
     Add(TEXT("Till with one target-directed planted-foot digging-stick action"),
         [this, Avatar, Probe, Animation]()
         {
+            if (!Controller->ChooseOnHotbar(Homestead::Item::DiggingStick))
+            { Finish(false, TEXT("The digging stick could not be chosen on the hotbar.")); return; }
             Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
             Probe->Ready = Probe->Expected.Till(-13, 1, Controller->PlayerPoint()).ok;
             Probe->TillStarts = Animation()->TillStarts();
@@ -221,7 +224,6 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             Probe->Actor = Avatar->GetActorLocation();
             Probe->Toe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
             Probe->View = Controller->GetControlRotation();
-            Controller->ChooseOnHotbar(Homestead::Item::DiggingStick);
             Tap(EKeys::Gamepad_RightTrigger);
         },
         [this, Avatar, Probe, Animation, Matches]()
@@ -263,8 +265,9 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
             && Animation()->WaterStarts() == Probe->Starts; }, 0.12f);
     Add(TEXT("Tilling recovers with no orphaned prop"), []() {}, Hidden, 1.9f);
     Add(TEXT("Occupied plot rejects a second mapped Till without presentation"),
-        [this, Probe, Animation]() { Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
-            Probe->TillStarts = Animation()->TillStarts(); Controller->ChooseOnHotbar(Homestead::Item::DiggingStick); Tap(EKeys::Gamepad_RightTrigger); },
+        [this, Probe, Animation]() { Controller->ChooseOnHotbar(Homestead::Item::DiggingStick);
+            Probe->Expected = Controller->Simulation(); Probe->Hour = Controller->State().hour;
+            Probe->TillStarts = Animation()->TillStarts(); Tap(EKeys::Gamepad_RightTrigger); },
         [this, Probe, Animation, Hidden, Matches]() { return Controller->ToastIsError() && Matches() && Hidden()
             && Animation()->TillStarts() == Probe->TillStarts; });
     Add(TEXT("Movement cancels a till presentation without replay"),
@@ -370,10 +373,10 @@ void AHomesteadSmokeTest::PrepareWateringChecks()
         Add(TEXT("Each allowed repeat consumes exactly one real water portion"),
             [this, Probe]()
             {
+                Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
                 Probe->Expected = Controller->Simulation();
                 Probe->Hour = Controller->State().hour;
                 Probe->Ready = Probe->Expected.Water(GardenPlotId, Controller->PlayerPoint()).ok;
-                Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
                 Tap(EKeys::LeftMouseButton);
             }, [this, Probe, Matches]() { return Probe->Ready && !Controller->ToastIsError() && Matches(); }, 0.12f);
     Add(TEXT("Wait for repeated watering to recover"), []() {}, Hidden, 2.3f);

@@ -163,12 +163,12 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
         Add(TEXT("One authoritative tree clear with scale-one held hatchet: ") + Key.ToString(),
             [this, Avatar, Probe, Snapshot, Node, Key]()
             {
+                // Felling is the axe on the tool button (LMB / RT); F / X and E never fell (Jenny 2026-09-30).
+                Controller->ChooseOnHotbar(Homestead::Item::Hatchet);
                 Snapshot(); Probe->Ready = Probe->Expected.Clear(Node->id, Controller->PlayerPoint()).ok;
                 Probe->Actor = Avatar->GetActorLocation(); Probe->Hand = Avatar->GetMesh()->GetBoneLocation(TEXT("hand_r"));
                 Probe->LeftToe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_l")); Probe->RightToe = Avatar->GetMesh()->GetBoneLocation(TEXT("ball_r"));
                 Probe->View = Controller->GetControlRotation();
-                // Felling is the axe on the tool button (LMB / RT); F / X and E never fell (Jenny 2026-09-30).
-                Controller->ChooseOnHotbar(Homestead::Item::Hatchet);
                 Tap(Key == EKeys::F ? EKeys::LeftMouseButton : Key == EKeys::Gamepad_FaceButton_Left ? EKeys::Gamepad_RightTrigger : Key);
             }, [this, Avatar, Probe, Animation, Matches, Node]()
             {
@@ -631,7 +631,7 @@ void AHomesteadSmokeTest::PrepareClearingChecks()
     Approach(Reserved);
     Add(TEXT("Ready tree capacity rejection has no clear, yield, energy debit or swing"),
         [this, Probe, Snapshot, Reserved]()
-        { Snapshot(); Probe->Ready = !Probe->Expected.Clear(Reserved->id, Controller->PlayerPoint()).ok; Controller->ChooseOnHotbar(Homestead::Item::Hatchet); Tap(EKeys::LeftMouseButton); },
+        { Controller->ChooseOnHotbar(Homestead::Item::Hatchet); Snapshot(); Probe->Ready = !Probe->Expected.Clear(Reserved->id, Controller->PlayerPoint()).ok; Tap(EKeys::LeftMouseButton); },
         [this, Probe, Animation, Hidden, Matches]()
         { return Probe->Ready && Controller->ToastIsError() && Hidden() && Matches() && Animation()->ClearStarts() == Probe->Starts; });
 }

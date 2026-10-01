@@ -90,6 +90,10 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
                 if (!Controller->Sim.Harvest(Node.id, Node.position))
                 { Finish(false, TEXT("Navigation fixture could not gather its real branch stock.")); return; }
         }
+        // Not enough branches lying about for a ten-column pack's six rows: top up by authority.
+        if (const int32 Short = Groups + 3 - Controller->Sim.UsedCapacity(); Short > 0)
+            if (!Controller->Sim.GrantItems(Homestead::Item::Branch, Short))
+            { Finish(false, TEXT("Navigation fixture could not top up its branch stock.")); return; }
         while (static_cast<int32>(Controller->Sim.GetLayout(0)->size()) < Groups)
         {
             int32 Group = 0;

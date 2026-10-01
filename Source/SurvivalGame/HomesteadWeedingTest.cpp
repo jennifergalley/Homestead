@@ -138,11 +138,11 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
     Add(TEXT("Real water then weed while picking: both valid deltas, one pose, no can"),
         [this, Probe, Snapshot]()
         {
+            // Watering is the pail on the tool button (E never waters, Jenny 2026-09-30).
+            Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
             Snapshot();
             Probe->Ready = Probe->Expected.Water(GardenPlotId, Controller->PlayerPoint()).ok
                 && Probe->Expected.Weed(GardenPlotId, Controller->PlayerPoint()).ok;
-            // Watering is the pail on the tool button (E never waters, Jenny 2026-09-30).
-            Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
             Tap(EKeys::LeftMouseButton); Tap(EKeys::F);
         }, [this, Avatar, Probe, Animation, Matches]()
         {
@@ -155,9 +155,9 @@ void AHomesteadSmokeTest::PrepareWeedingChecks()
     Add(TEXT("Start real watering before reverse alternation"),
         [this, Probe, Snapshot]()
         {
+            Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
             Snapshot();
             Probe->Ready = Probe->Expected.Water(GardenPlotId, Controller->PlayerPoint()).ok;
-            Controller->ChooseOnHotbar(Homestead::Item::WateringCan);
             Tap(EKeys::LeftMouseButton);
         }, [Avatar, Probe, Animation, Matches]()
         {

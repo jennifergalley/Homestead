@@ -55,7 +55,7 @@ void AHomesteadSmokeTest::PrepareBookClarityChecks()
     Add(TEXT("Close initial Notes"), [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this]() { return !Controller->IsBookOpen(); });
     QueueGrant(Homestead::Item::Billhook, 1);
-    Add(TEXT("Open actual carried inventory with controller"), [this]() { Tap(EKeys::Gamepad_Special_Right); },
+    Add(TEXT("Open actual carried inventory with controller"), [this]() { Tap(EKeys::Gamepad_Special_Left); },
         [this]()
         {
             return PackCountsMatch(*Controller) && Controller->Simulation().Count(Homestead::Item::Billhook) == 1

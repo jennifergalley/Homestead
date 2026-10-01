@@ -24,6 +24,8 @@ const FMargin ResumePadding(14, 6);
 }
 
 int32 SHomesteadMenu::StorageColumns() const { return LogicalBookWidth() >= 1800 ? 8 : 6; }
+// Beside a chest the pack grid is as wide as the hotbar row heading it.
+int32 SHomesteadMenu::StoragePackColumns() const { return Homestead::PackRowSize; }
 
 int32 SHomesteadMenu::Columns() const
 {
