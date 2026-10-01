@@ -138,8 +138,11 @@ void AHomesteadSmokeTest::PreparePromptChecks()
     Add(TEXT("Mapped controller camera selects controller Look"),
         [this]() { CameraStart = Controller->GetControlRotation().Yaw; Axis(EKeys::Gamepad_RightX, 0.8f); },
         [this]() { return Controller->UsesGamepad() && FMath::Abs(FMath::FindDeltaAngleDegrees(CameraStart, Controller->GetControlRotation().Yaw)) > 0.1f; });
+    // A middle click: a deliberate mouse press that activates nothing. A left click here is the book's
+    // accept key on the focused Appearance choice, and applying it hitched one frame ~0.3 s, past the
+    // click's 0.2 s priority window before the next stick poll (Prompts run 2026-09-30).
     Add(TEXT("Click gets visible priority over continuously held camera stick"),
-        [this]() { Tap(EKeys::LeftMouseButton); },
+        [this]() { Tap(EKeys::MiddleMouseButton); },
         [this]() { return !Controller->UsesGamepad(); }, 0.08f);
     Steps.Last().Repeat = [this]() { Axis(EKeys::Gamepad_RightX, 0.8f); };
     Add(TEXT("Ongoing real controller camera takes over after200ms"),
