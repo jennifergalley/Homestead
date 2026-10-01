@@ -41,6 +41,8 @@ constexpr float MaxRoll = 0.35f;
 constexpr float RollRate = 8.0f;
 // How far above and below the blade to look for the ground (cm).
 constexpr float TraceReach = 150.0f;
+// The most the scythe is tipped up about the lower nib to keep its blade out of the ground (radians, ~40 degrees).
+constexpr float MaxTipUp = 0.7f;
 }
 
 namespace
@@ -342,17 +344,17 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
     const FVector NibLine = (Upper - Lower).GetSafeNormal();
     UWorld* World = GetWorld();
     float WantRoll = 0.0f;
+    FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadMowGround), false, this);
+    const auto GroundUnder = [World, &Query](const FVector& At, float& Height)
+    {
+        FHitResult Hit;
+        if (!World || !World->LineTraceSingleByChannel(Hit, At + FVector(0, 0, MowGround::TraceReach),
+            At - FVector(0, 0, MowGround::TraceReach), ECC_Visibility, Query)) return false;
+        Height = static_cast<float>(Hit.ImpactPoint.Z);
+        return true;
+    };
     if (World && !NibLine.IsNearlyZero())
     {
-        FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadMowGround), false, this);
-        const auto GroundUnder = [World, &Query](const FVector& At, float& Height)
-        {
-            FHitResult Hit;
-            if (!World->LineTraceSingleByChannel(Hit, At + FVector(0, 0, MowGround::TraceReach),
-                At - FVector(0, 0, MowGround::TraceReach), ECC_Visibility, Query)) return false;
-            Height = static_cast<float>(Hit.ImpactPoint.Z);
-            return true;
-        };
         // Solve on the unrolled lay, twice (the second pass corrects the first's small-angle guess).
         for (int32 Pass = 0; Pass < 2; ++Pass)
         {
@@ -385,6 +387,32 @@ void AHomesteadCharacter::UpdateMowingScythe(UStaticMeshComponent& Prop, float W
     TwoHanded.SetRotation(FQuat(NibLine, MowGroundRoll) * TwoHanded.GetRotation());
     FTransform Blended;
     Blended.Blend(Prop.GetComponentTransform(), TwoHanded, FMath::SmoothStep(0.0f, 1.0f, Weight));
+    // The roll can't catch everything: as the clip opens and closes, her hands swing the blade through a wide
+    // arc and its point swept up to 38 cm into the ground (PIE, 09-30). Wherever a blade sample is still
+    // below MinClearance, tip the whole scythe up about the lower nib (her right fist stays on it) until it
+    // clears; twice, as the roll solve does.
+    for (int32 Pass = 0; Pass < 2; ++Pass)
+    {
+        const FTransform Laid(Blended.GetRotation(), Blended.GetLocation(), Scale);
+        float Lowest = TNumericLimits<float>::Max();
+        FVector LowestAt = FVector::ZeroVector;
+        for (const FVector& Sample : MowGround::BladeSamples)
+        {
+            const FVector At = Laid.TransformPosition(Sample);
+            float Height = 0.0f;
+            if (GroundUnder(At, Height) && At.Z - Height < Lowest)
+            {
+                Lowest = static_cast<float>(At.Z - Height);
+                LowestAt = At;
+            }
+        }
+        const FVector Out = FVector(LowestAt.X - Lower.X, LowestAt.Y - Lower.Y, 0.0);
+        if (Lowest >= MowGround::MinClearance || Out.Size() < 10.0) break;
+        const float Angle = FMath::Asin(FMath::Min(1.0f, (MowGround::MinClearance - Lowest) / static_cast<float>(Out.Size())));
+        const FQuat Tip(FVector::CrossProduct(Out, FVector::UpVector).GetSafeNormal(), FMath::Min(Angle, MowGround::MaxTipUp));
+        Blended.SetLocation(Lower + Tip.RotateVector(Blended.GetLocation() - Lower));
+        Blended.SetRotation(Tip * Blended.GetRotation());
+    }
     Prop.SetWorldTransform(Blended);
 }
 
