@@ -72,7 +72,7 @@ void AHomesteadController::UpdateFocus()
             && Sim.Count(Homestead::Item::WateringCan) > 0;
         const int32 Water = Sim.Count(Homestead::Item::Water);
         const double Edge = FMath::Max(0.0, WaterEdgeDistance(Position, false));
-        if (Focus == EFocus::None || (bCan && Water < 6 && (Water == 0 || Edge <= Best)))
+        if (Focus == EFocus::None || (bCan && Water < Homestead::PailPortions && (Water == 0 || Edge <= Best)))
         {
             Focus = EFocus::Water;
             FocusId = -1;
