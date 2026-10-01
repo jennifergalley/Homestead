@@ -104,6 +104,7 @@ void UHomesteadWeather::Update(const Homestead::State& State, float InDaylight)
     Overcast = static_cast<float>(Homestead::Overcast(State.hour));
     Daylight = InDaylight;
     Shelters.Reset();
+    RoomCells.Reset();
     for (const auto& Structure : State.structures)
     {
         if (Structure.kind != Homestead::Piece::Roof) continue;
@@ -113,6 +114,8 @@ void UHomesteadWeather::Update(const Homestead::State& State, float InDaylight)
         Shelters.Add(FVector4f(Box.center.x, Box.center.y,
             FMath::Max(ShelterRadiusCm, static_cast<float>(FMath::Sqrt(Box.half.x * Box.half.x + Box.half.y * Box.half.y))),
             (FMath::IsFinite(Ground) ? Ground : 0.0f) + ShelterTopCm));
+        RoomCells.Add(FVector4f(Box.center.x, Box.center.y, static_cast<float>(FMath::Min(Box.half.x, Box.half.y)),
+            static_cast<float>(Box.yaw)));
     }
     ShelterFrom = FVector(FLT_MAX); // re-pick the nearest roofs on the next tick
 }
@@ -122,6 +125,18 @@ bool UHomesteadWeather::IsUnderShelter(const FVector& Point) const
     for (const FVector4f& Roof : Shelters)
         if (Point.Z < Roof.W && FVector2D::DistSquared(FVector2D(Point), FVector2D(Roof.X, Roof.Y)) < Roof.Z * Roof.Z)
             return true;
+    return false;
+}
+
+bool UHomesteadWeather::IsInRoom(const FVector& Point) const
+{
+    for (int32 Index = 0; Index < RoomCells.Num(); ++Index)
+    {
+        const FVector4f& Cell = RoomCells[Index];
+        if (Point.Z >= Shelters[Index].W) continue;
+        const FVector2D Local = FVector2D(Point.X - Cell.X, Point.Y - Cell.Y).GetRotated(-Cell.W);
+        if (FMath::Abs(Local.X) < Cell.Z && FMath::Abs(Local.Y) < Cell.Z) return true;
+    }
     return false;
 }
 
@@ -148,6 +163,9 @@ void UHomesteadWeather::TickWeather(float DeltaSeconds)
     }
     const bool bIndoors = bInShelter || bOverhead;
     Indoors = FMath::FInterpConstantTo(Indoors, bIndoors ? 1.0f : 0.0f, DeltaSeconds, 2.0f);
+    const APawn* Heroine = Viewer->GetPawn();
+    const bool bRoomed = Heroine && IsInRoom(Heroine->GetActorLocation());
+    Roomed = FMath::FInterpConstantTo(Roomed, bRoomed ? 1.0f : 0.0f, DeltaSeconds, 1.0f);
     StreakFade = FMath::FInterpConstantTo(StreakFade, bOverhead && !bInShelter ? 0.0f : 1.0f, DeltaSeconds, 3.0f);
 
     const bool bRaining = Rain > 0.001f && StreakFade > 0.001f;

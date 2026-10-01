@@ -26,7 +26,7 @@ TAutoConsoleVariable<float> CVarNightSky(TEXT("homestead.NightSky"), 0.6f,
 TAutoConsoleVariable<float> CVarNightMinExposure(TEXT("homestead.NightMinExposure"), -2.0f,
     TEXT("Auto exposure min brightness at full night."));
 TAutoConsoleVariable<float> CVarIndoorDaySky(TEXT("homestead.IndoorDaySky"), 0.3f,
-    TEXT("Sky light scale indoors by day (times the indoor mix and daylight). Groom sky lighting sees the "
+    TEXT("Sky light scale while she is inside a roofed room by day (times the room mix and daylight). Groom sky lighting sees the "
          "open sky capture through a roof, so a full sky light blew her hair out white under one."));
 TAutoConsoleVariable<int32> CVarIndoorHairSkyOff(TEXT("homestead.IndoorHairSkyOff"), 0,
     TEXT("1 = also switch groom sky lighting off indoors by day (hair then renders near-black)."));
@@ -172,7 +172,9 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     const float NightSkyIntensity = CVarNightSky.GetValueOnGameThread();
     const float NightMinExposure = CVarNightMinExposure.GetValueOnGameThread();
     Moon->SetIntensity(NightMoonLux * (1.0f - Daylight));
-    const float IndoorDay = GetIndoorMix() * Daylight;
+    // Only while she is inside a roofed room (her position, eased), so the outdoors keeps its sky fill when
+    // the camera passes a doorway or an overhang.
+    const float IndoorDay = GetRoomMix() * Daylight;
     Sky->SetIntensity(FMath::Lerp(NightSkyIntensity, 1.0f, Daylight) * FMath::Lerp(1.0f, OvercastSkyScale, Cloud)
         * FMath::Lerp(1.0f, CVarIndoorDaySky.GetValueOnGameThread(), IndoorDay));
     // The real-time sky capture still sees the clear blue atmosphere under the cloud layer, so warm it
@@ -181,7 +183,7 @@ void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
     Exposure->Settings.AutoExposureMinBrightness = FMath::Lerp(NightMinExposure, 0.0f, Daylight);
     // Auto-exposure would brighten a dull day back to a sunny one; hold it down and take the colour out.
     Exposure->Settings.AutoExposureBias = -0.15f + OvercastExposureBias * Cloud
-        + IndoorDayExposureBias * GetIndoorMix() * Daylight;
+        + IndoorDayExposureBias * IndoorDay;
     const bool bWantHairSkyOff = CVarIndoorHairSkyOff.GetValueOnGameThread() != 0
         && (bHairSkyLightingOff ? IndoorDay >= 0.35f : IndoorDay > 0.65f);
     if (bWantHairSkyOff != bHairSkyLightingOff)
