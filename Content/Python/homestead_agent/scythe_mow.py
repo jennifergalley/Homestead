@@ -92,10 +92,15 @@ POLE_R = {
     'rock': (-10.0, 30.0, 60.0), 'recover': (-55.0, 0.0, 80.0), 'end': (-60.0, -10.0, 90.0),
 }
 POLE_L = {
-    'stand': (60.0, -10.0, 90.0), 'address': (60.0, 10.0, 100.0), 'lift': (45.0, 10.0, 100.0),
-    'back': (30.0, 10.0, 100.0), 'strike': (60.0, 5.0, 100.0), 'bite': (65.0, 0.0, 100.0),
+    'stand': (60.0, -10.0, 90.0), 'address': (60.0, 10.0, 100.0), 'lift': (45.0, 40.0, 100.0),
+    'back': (30.0, 40.0, 100.0), 'strike': (60.0, 5.0, 100.0), 'bite': (65.0, 0.0, 100.0),
     'rock': (65.0, -5.0, 100.0), 'recover': (55.0, 0.0, 95.0), 'end': (60.0, -10.0, 90.0),
 }
+# The left fist's roll on its nib per key (deg, as axe_fell.ROLL_L). The game takes only the left grip's
+# centre (the snath's line), which a roll doesn't move; the right fist's pinky-to-index axis sets the
+# blade, so it isn't rolled. Unrolled, the left wrist bent back up to 118 degrees over the nib; these keep it
+# and the forearm inside their comfortable ranges (joint_limits).
+ROLL_L = {'address': 90.0, 'lift': 60.0, 'back': 90.0, 'strike': 90.0, 'bite': 90.0, 'rock': 90.0, 'recover': 60.0}
 WRIST_R_STAND = af.WRIST_R_STAND
 WRIST_L_STAND = af.WRIST_L_STAND
 # A wide, staggered stance: left foot forward toward the swath, right foot back.
@@ -204,6 +209,7 @@ def _author(lifts):
             continue
         (rc, rn, rk), (lc, ln, lk) = grips(name)
         s.key_world(frame, 'hand_r_ik_ctrl', right.wrist(rc, rn, rk), right.turn(rn, rk))
+        lk = af.rolled(lk, ln, ROLL_L[part])
         s.key_world(frame, 'hand_l_ik_ctrl', left.wrist(lc, ln, lk), left.turn(ln, lk))
     s.key_world(F['stand'], 'foot_l_ik_ctrl', kg.FOOT_L)
     s.key_world(5, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (2, 6, 6)))
