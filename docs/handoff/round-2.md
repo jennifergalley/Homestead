@@ -1540,6 +1540,13 @@ not claim early Energy is fully solved.
   establishes an integrated delivery; package/RT-on acceptance remains required. **Jenny's review
   method (2026-09-30):** Water provides a side-by-side screenshot sheet; her Shipping build has
   no console, so no player-side CVar trial is assumed.
+
+  **Interior review exclusion:** Water's `ea6acb99` tries to disable
+  `r.HairStrands.SkyLighting` indoors by day. It makes the heroine's hair black and is **not
+  approved** for integration. The independent wall-top timber plate in
+  `HomesteadWorldStructures.cpp` is separable; Integration may take approved Water work minus the
+  global hair-sky toggle, or use Water's follow-up fix reference. No interior/hair delivery claim
+  follows from this review.
 - **Town-road layout** — **Water Agent**, after the north-west lake and final road route: the 12
   blocking `town_massing.py` blockouts occupy a 40 × 34.5 m four-sided square with adjacent building
   gaps of only 0.2–0.35 m (about 0.9 m beside the General Store); the main road ends ~72 m short of
