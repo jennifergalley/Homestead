@@ -303,6 +303,16 @@ void AHomesteadWorld::BuildStructure(FHomesteadWorldVisual& Visual, const Homest
         Part(Cube, FVector(95, -28, 14), FVector(68, 106, 8), FLinearColor(0.23f, 0.31f, 0.21f));
         break;
     case Homestead::Piece::Chest:
+        // The Victorian trunk (victorian_trunk.py: 70 x 57 x 59 cm, pivot bottom centre, hasp on +Y like the
+        // blockout's lock), on the blockout chest's own footprint so placements, collision and saves are unchanged.
+        if (UStaticMesh* Trunk = ManorMesh(TEXT("VictorianTrunk")))
+        {
+            UStaticMeshComponent* Placed = Part(Trunk, FVector(-100, -100, 0), FVector(100.0f), FLinearColor::White, true);
+            if (Placed && !bPreview)
+                for (int32 Slot = 0; Slot < Trunk->GetStaticMaterials().Num(); ++Slot)
+                    Placed->SetMaterial(Slot, Trunk->GetMaterial(Slot));
+            break;
+        }
         Part(Cube, FVector(-100, -100, 27), FVector(70, 55, 54), Wood, true);
         Part(Cube, FVector(-100, -100, 55), FVector(74, 59, 6), Bark);
         Part(Cube, FVector(-100, -71, 35), FVector(12, 4, 12), Stone);

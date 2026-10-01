@@ -29,11 +29,13 @@
 #include "RenderCore.h"
 #include "Misc/PackageName.h"
 
-// The worn leather backpack's mesh: an original asset Props authors (not yet made).
+// The worn leather backpack's mesh: an original asset Props authors (Scripts/Blender/Recipes/leather_backpack.py).
 namespace HeroineBackpackStyle
 {
 constexpr const TCHAR* PackagePath = TEXT("/Game/SurvivalGame/Environment/Props/LeatherBackpack/SM_LeatherBackpack");
 constexpr const TCHAR* ObjectPath = TEXT("/Game/SurvivalGame/Environment/Props/LeatherBackpack/SM_LeatherBackpack.SM_LeatherBackpack");
+// Its pivot in the reference pose (component cm): report.json attach.pivot_reference_pose_cm.
+const FVector PivotRefPose(0.0f, -11.01f, 126.0f);
 }
 
 namespace
@@ -523,8 +525,15 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         if (UStaticMesh* Pack = LoadObject<UStaticMesh>(nullptr, HeroineBackpackStyle::ObjectPath))
         {
             Backpack = MakeProp(TEXT("Backpack"), Pack);
-            // Props adds the reference-pose pivot (report.json attach.pivot_reference_pose_cm) with the import, as for CordBelt.
+            // leather_backpack.py's pivot is her back between the shoulder blades in the reference pose
+            // (report.json attach.pivot_reference_pose_cm, already in Unreal's frame). The mesh itself keeps
+            // the recipe's Blender Y (her forward -Y), so it is mirrored in Y here; unmirrored, its body sat
+            // in her chest (mesh-local Y -12.7..+25.2, the pack on +Y).
             Backpack->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("spine_05"));
+            const FReferenceSkeleton& Skeleton = MetaHumanBody->GetRefSkeleton();
+            const int32 Spine = Skeleton.FindBoneIndex(TEXT("spine_05"));
+            const FTransform PackPivot(FQuat::Identity, HeroineBackpackStyle::PivotRefPose, FVector(1.0f, -1.0f, 1.0f));
+            if (Spine != INDEX_NONE) Backpack->SetRelativeTransform(PackPivot.GetRelativeTransform(RefComponentTransform(Skeleton, Spine)));
             Backpack->SetVisibility(bBackpackShown);
         }
     // The rawhide cord belt the pouch hangs from, tied on the shorts' waistband with the knot in
