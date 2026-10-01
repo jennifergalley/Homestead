@@ -29,6 +29,17 @@ public:
     static FBox2D LogicalBox(float ViewWidth, const AHomesteadController& Controller);
     static bool ShowsFoodRow(const AHomesteadController& Controller);
     static bool ShowsWellFed(const AHomesteadController& Controller);
+    // Low-meter warnings (Jenny 2026-09-30: she starved "with zero warning"). A meter is low below
+    // LowAt and critical below CriticalAt: its bar turns amber, then a muted red, and pulses gently, and
+    // a short notice marks each crossing ("Getting tired", "Exhausted"; "Getting hungry", "Starving" for
+    // the woodland's Food). The band only drops back once the meter is RearmMargin above the line, so a
+    // value hovering at 25 doesn't repeat itself.
+    static constexpr double LowAt = 25, CriticalAt = 10, RearmMargin = 5;
+    // A meter that moves this much in one tick was loaded, slept or eaten up, not worn down: re-arm quietly.
+    static constexpr double JumpLimit = 20;
+    // 0 fine, 1 low, 2 critical, given the band it showed last.
+    static int32 WarningBand(double Value, int32 Previous);
+    static const TCHAR* WarningText(int32 Meter, int32 Band);
     // Top = the calendar's top (26) + height (100) + an 8-unit gap (HomesteadHudLayout in HomesteadHUD.h).
     static constexpr float Right = 30, Top = 134, RowHeight = 54, RowGap = 6, Width = 460, ChipHeight = 38;
 
@@ -45,6 +56,12 @@ private:
     bool bMealPrimed = false;
     double Displayed(int32 Meter, double Actual) const;
     float PopupAlpha(int32 Meter) const;
+    // The band each meter (0 food, 1 energy) showed last and its value, primed on the first tick so a
+    // rebuilt HUD or a freshly loaded game says nothing.
+    int32 WarnBand[2] = {0, 0};
+    double WarnLast[2] = {0, 0};
+    bool bWarnPrimed = false;
+    void UpdateLowWarnings();
     TWeakObjectPtr<AHomesteadController> Controller;
 };
 }

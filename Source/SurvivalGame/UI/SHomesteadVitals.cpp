@@ -35,6 +35,12 @@ HomesteadUITheme::FThemeColor Gain(0.72f, 0.90f, 0.56f, 1);
 // The bars' fills: in parchment an olive ink for Energy and an ochre for the woodland's Food.
 HomesteadUITheme::FThemeColor EnergyFill(FLinearColor(0.66f, 0.76f, 0.52f, 1), FLinearColor(0.16f, 0.23f, 0.07f, 1));
 HomesteadUITheme::FThemeColor FoodFill(FLinearColor(0.77f, 0.66f, 0.37f, 1), FLinearColor(0.42f, 0.25f, 0.05f, 1));
+// Low and critical fills: amber, then a muted red (deep enough on parchment to read as a warning).
+HomesteadUITheme::FThemeColor LowFill(FLinearColor(1.0f, 0.70f, 0.30f, 1), FLinearColor(0.64f, 0.38f, 0.04f, 1));
+HomesteadUITheme::FThemeColor CriticalFill(FLinearColor(0.88f, 0.40f, 0.34f, 1), FLinearColor(0.56f, 0.14f, 0.09f, 1));
+// The gentle pulse of a low bar: its opacity eases between these over one period (seconds).
+constexpr float PulseMinOpacity = 0.6f;
+constexpr double PulsePeriod = 1.8;
 // The Well fed chip: a smaller pasty than the bars' icons, in the purse's warm gold.
 constexpr float ChipIconSize = 30, ChipTextSize = 17;
 
@@ -97,6 +103,7 @@ void SHomesteadVitals::Tick(const FGeometry& Geometry, double Time, float Delta)
 {
     SCompoundWidget::Tick(Geometry, Time, Delta);
     if (!Controller.IsValid()) return;
+    UpdateLowWarnings();
     const auto& Meal = Controller->LastMealGain();
     // Meals eaten before this stack was built (it's rebuilt with the hotbar) don't replay.
     if (!bMealPrimed) { bMealPrimed = true; MealSerialSeen = Meal.Serial; return; }
@@ -117,6 +124,39 @@ void SHomesteadVitals::Tick(const FGeometry& Geometry, double Time, float Delta)
         Meals[Meter].Gain = (bShowing ? Meals[Meter].Gain : 0.0) + Gains[Meter];
         Meals[Meter].StartedAt = Now;
     }
+}
+
+int32 SHomesteadVitals::WarningBand(double Value, int32 Previous)
+{
+    // Down at the lines, back up only a little above them.
+    const double Low = Previous >= 1 ? LowAt + RearmMargin : LowAt;
+    const double Critical = Previous >= 2 ? CriticalAt + RearmMargin : CriticalAt;
+    return Value < Critical ? 2 : Value < Low ? 1 : 0;
+}
+
+const TCHAR* SHomesteadVitals::WarningText(int32 Meter, int32 Band)
+{
+    if (Band <= 0) return TEXT("");
+    return Meter == 0 ? (Band >= 2 ? TEXT("Starving") : TEXT("Getting hungry"))
+        : (Band >= 2 ? TEXT("Exhausted") : TEXT("Getting tired"));
+}
+
+void SHomesteadVitals::UpdateLowWarnings()
+{
+    const double Values[2] = {Controller->State().hunger, Controller->State().energy};
+    const bool Shown[2] = {ShowsFoodRow(*Controller), true};
+    for (int32 Meter = 0; Meter < 2; ++Meter)
+    {
+        const int32 Band = WarningBand(Values[Meter], WarnBand[Meter]);
+        // Only a meter worn down across a line speaks, once: not the first look at a loaded game, not a
+        // jump from loading or sleeping, not while she's failed or a menu has the screen.
+        const bool bWornDown = bWarnPrimed && FMath::Abs(Values[Meter] - WarnLast[Meter]) < JumpLimit;
+        if (bWornDown && Shown[Meter] && Band > WarnBand[Meter] && !Controller->IsFailed())
+            Controller->Notify(WarningText(Meter, Band), Band >= 2);
+        WarnBand[Meter] = Band;
+        WarnLast[Meter] = Values[Meter];
+    }
+    bWarnPrimed = true;
 }
 
 double SHomesteadVitals::Displayed(int32 Meter, double Actual) const
@@ -165,8 +205,17 @@ TSharedRef<SWidget> SHomesteadVitals::MeterRow(FName Icon, TFunction<double()> V
                         .WidthOverride_Lambda([this, Value, Meter]()
                         { return VitalsStyle::BarWidth * FMath::Clamp(static_cast<float>(Displayed(Meter, Value()) / 100.0), 0.0f, 1.0f); })
                         [
+                            // Amber when low, a muted red when critical, pulsing gently while either.
                             SNew(SImage).Image(VitalsStyle::White())
-                            .ColorAndOpacity_Lambda([Value, Fill]() { return FSlateColor(Value() < 25 ? VitalsStyle::Warning : Fill); })
+                            .ColorAndOpacity_Lambda([Value, Fill]()
+                            {
+                                const double Now = Value();
+                                if (Now >= LowAt) return FSlateColor(Fill);
+                                const FLinearColor Warn = Now < CriticalAt ? VitalsStyle::CriticalFill : VitalsStyle::LowFill;
+                                const double Phase = FSlateApplication::Get().GetCurrentTime() / VitalsStyle::PulsePeriod;
+                                const float Ease = 0.5f + 0.5f * FMath::Cos(static_cast<float>(2.0 * PI * Phase));
+                                return FSlateColor(Warn.CopyWithNewOpacity(FMath::Lerp(VitalsStyle::PulseMinOpacity, 1.0f, Ease)));
+                            })
                         ]
                     ]
                 ]

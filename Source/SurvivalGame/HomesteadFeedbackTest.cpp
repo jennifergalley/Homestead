@@ -114,6 +114,28 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     };
     Add(TEXT("Close initial Notes with existing toggle"), [this]() { Tap(EKeys::I); },
         [this]() { return !Controller->IsBookOpen(); });
+    // Low Energy warns once per crossing (Jenny 2026-09-30: she starved "with zero warning"): a short
+    // notice as it falls past 25 and past 10, never again while it hovers, never for a loaded/slept jump.
+    // A marker notice in between proves nothing new was said.
+    const auto Marker = TEXT("energy-warning-marker");
+    const auto EnergyStep = [this, Marker](const TCHAR* Name, double Energy, bool bMark, const TCHAR* Expected, bool bError)
+    {
+        Add(Name, [this, Marker, Energy, bMark]()
+            {
+                if (bMark) Controller->Notify(Marker, false);
+                Controller->Sim.SetEnergy(Energy);
+            },
+            [this, Expected, bError]() { return Controller->Toast() == Expected && Controller->ToastIsError() == bError; }, 0.3f);
+    };
+    EnergyStep(TEXT("A jump down to 40 (as from a load) says nothing"), 40.0, true, Marker, false);
+    EnergyStep(TEXT("Wearing down to 30 says nothing"), 30.0, true, Marker, false);
+    EnergyStep(TEXT("Crossing 25 says 'Getting tired' once"), 23.0, true, TEXT("Getting tired"), false);
+    EnergyStep(TEXT("Hovering below 25 says nothing more"), 22.0, true, Marker, false);
+    EnergyStep(TEXT("Back to 27 (inside the re-arm margin) and down to 24 again says nothing"), 27.0, true, Marker, false);
+    EnergyStep(TEXT("Down again to 24 still says nothing"), 24.0, true, Marker, false);
+    EnergyStep(TEXT("Crossing 10 says 'Exhausted' as a warning"), 9.0, true, TEXT("Exhausted"), true);
+    EnergyStep(TEXT("Hovering below 10 says nothing more"), 8.0, true, Marker, false);
+    EnergyStep(TEXT("Restoring her Energy in one jump says nothing"), 100.0, true, Marker, false);
     Add(TEXT("Open pack with mapped keyboard I"), [this]() { Tap(EKeys::I); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Save success comes from actual sandbox F5"),

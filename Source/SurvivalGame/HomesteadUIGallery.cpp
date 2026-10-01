@@ -540,8 +540,12 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
 
     // The HUD.
     Add(TEXT("hud-overview"), TEXT("World HUD: calendar and clock, Energy bar, purse, compass, minimap and the hotbar."), ECover::Hud, 2, nullptr, nullptr);
-    Add(TEXT("hud-energy-low"), TEXT("Energy low: the bar short and warm-coloured."), ECover::Hud, 3, nullptr,
-        [](AHomesteadController& PC) { PC.Sim.SetEnergy(14.0); });
+    Add(TEXT("hud-energy-low"), TEXT("Energy below 25: the bar amber and pulsing gently, and the 'Getting tired' notice it gave on crossing."),
+        ECover::Hud, 3, nullptr,
+        [](AHomesteadController& PC) { PC.Sim.SetEnergy(18.0); PC.Notify(TEXT("Getting tired"), false); });
+    Add(TEXT("hud-energy-exhausted"), TEXT("Energy below 10: the bar a muted red and pulsing, and the 'Exhausted' notice."),
+        ECover::Hud, 15, nullptr,
+        [](AHomesteadController& PC) { PC.Sim.SetEnergy(6.0); PC.Notify(TEXT("Exhausted"), true); });
     Add(TEXT("hud-wellfed"), TEXT("Well fed: the pasty chip 'Well fed until …' under the purse, no toast."), ECover::Hud, 4, nullptr,
         [](AHomesteadController& PC)
         {
