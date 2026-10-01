@@ -72,7 +72,8 @@ public:
     virtual void PlayerTick(float DeltaTime) override;
 
     // Console commands (also reachable through the editor MCP console helpers).
-    // Play a work animation in place: Gather, Sticks, Water, Chop, Knife or Till. Sticks and
+    // Play a work animation in place (the full list is in LabAction's warning): the gathers, Water, Chop,
+    // Knife, Till, Fell and the estate tools (Weeds, Mow, Pickaxe, AxeStrike, Billhook). Sticks and
     // Gather use the placed prop like the game does (Sticks places a stick pile if there is none).
     UFUNCTION(Exec) void LabAction(const FString& Name);
     // Put a resource on the floor 45 cm in front of her (where she stops to gather in the woodland):
