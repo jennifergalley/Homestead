@@ -50,6 +50,12 @@ and short player-facing changelist; the planner reads it directly.
 - SHA: pending
 - Status: planned
 - Ships:
+- Menu panels line up edge to edge, with one clear selection outline.
+- Dragging an item drops it in exactly the square you choose.
+- Crafting recipes fill the page width.
+- Map labels are crisp, with no text shadow.
+- The wardrobe preview just shows her standing.
+- A lighter accent keeps selected text readable.
 - Sprint toggles on and off with keyboard and controller, and respects tired Energy.
 - Signposts lead between the manor, the coast, and town without losing the path.
 - Lake-trail forage stays picked after a reload.
