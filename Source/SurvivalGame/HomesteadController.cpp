@@ -125,6 +125,8 @@ void AHomesteadController::BeginPlay()
     Super::BeginPlay();
     // The UI theme trial (UI/HomesteadUITheme.h): every themed colour set before any widget is built.
     HomesteadUITheme::Apply();
+    // A palette change (Settings › Book colours, or homestead.UITheme) rebuilds the widgets built in the old one.
+    ThemeChangedHandle = HomesteadUITheme::OnChanged().AddUObject(this, &AHomesteadController::HandleThemeChanged);
     const bool SmokeTest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadSmokeTest"));
     const bool VisualPlaytest = FParse::Param(FCommandLine::Get(), TEXT("HomesteadVisualPlaytest"));
 #if UE_BUILD_SHIPPING
@@ -285,6 +287,7 @@ bool ShoreContains(const USplineComponent& Spline, const FVector2D& Point)
 
 void AHomesteadController::EndPlay(const EEndPlayReason::Type Reason)
 {
+    HomesteadUITheme::OnChanged().Remove(ThemeChangedHandle);
     EndGroundSnap();
     HideNames();
     if (ArrivalCard.IsValid() && GEngine && GEngine->GameViewport)

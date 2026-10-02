@@ -52,6 +52,8 @@ public:
     void RequestTestResetPrompt() { bResetPromptShown = false; }
     void Back();
     void Refresh();
+    // Rebuilds every panel in the current palette, keeping the page, tab, focus and scroll.
+    void RebuildForTheme();
     bool PrepareQuickAction();
     bool HasActiveDialog() const { return Dialog != EDialog::None; }
     bool IsExitPrompt() const { return Dialog == EDialog::Exit; }
@@ -385,6 +387,8 @@ private:
     FString EquipmentLabel(int32 Index) const;
     void CycleRegion(int32 Direction);
     void SetDialog(EDialog Value);
+    // The book's frame: backdrop, tab band, page host, modal host and notice card.
+    void BuildFrame();
     void BuildDialog();
     void DialogAction(int32 Index);
     int32 DialogCount() const;

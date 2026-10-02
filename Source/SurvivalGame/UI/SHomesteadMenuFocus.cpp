@@ -187,7 +187,7 @@ int32 SHomesteadMenu::SettingsTabOf(int32 SettingId)
     {
     case 0: case 1: case 9: return -1;
     case 5: case 6: case 7: case 16: return 1;
-    case 10: case 11: return 2;
+    case 10: case 11: case 18: return 2;
     default: return 0;
     }
 }

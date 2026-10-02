@@ -232,6 +232,10 @@ public:
     void MenuSetAutosaveEnabled(bool Enabled);
     // Settings › Book colours: the dark (candlelit) or light parchment book, remembered for next time.
     void MenuSetDarkBook(bool bDark);
+    // Rebuilds the book (in place) and the HUD's Slate widgets in the new palette, on the next tick.
+    void HandleThemeChanged();
+    FDelegateHandle ThemeChangedHandle;
+    bool bThemeRebuildPending = false;
     void MenuSetAutosaveInterval(int32 Minutes);
     const FSlateBrush* MenuPortraitBrush() const { return MenuPortrait ? &PortraitBrush : nullptr; }
     void RefreshMenuPortrait();

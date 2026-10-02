@@ -5,6 +5,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadMapComponent.h"
 #include "UI/HomesteadUITheme.h"
+#include "UI/SHomesteadMenu.h"
 #include "TimerManager.h"
 
 #include "AudioDevice.h"
@@ -199,15 +200,23 @@ void AHomesteadController::MenuSetDarkBook(bool bDark)
 {
     if (HomesteadUITheme::IsDark() == bDark) return;
     HomesteadUITheme::Set(bDark ? HomesteadUITheme::ETheme::Dark : HomesteadUITheme::ETheme::Parchment);
-    // The book builds its panels from the palette, so it reopens on this page in the new colours (next
-    // tick: this may be the book's own button click).
-    if (IsBookOpen())
-        GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this, Open = BookPage()]()
+}
+
+void AHomesteadController::HandleThemeChanged()
+{
+    // Next tick: the change may come from the book's own button click.
+    if (bThemeRebuildPending || !GetWorld()) return;
+    bThemeRebuildPending = true;
+    GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]()
+    {
+        bThemeRebuildPending = false;
+        if (NativeMenu.IsValid()) NativeMenu->RebuildForTheme();
+        if (HotbarRoot.IsValid())
         {
-            if (!IsBookOpen()) return;
-            CloseBook();
-            OpenBook(Open);
-        }));
+            HideHotbar();
+            ShowHotbar();
+        }
+    }));
 }
 
 void AHomesteadController::MenuSetGameSpeed(double DayMinutes)

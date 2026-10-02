@@ -169,6 +169,16 @@ void Apply()
 {
     const ETheme Theme = Current();
     for (FThemeColor* Colour = Registry(); Colour; Colour = Colour->Next) Colour->Apply(Theme);
+    static TOptional<ETheme> Applied;
+    const bool bChanged = Applied.IsSet() && Applied.GetValue() != Theme;
+    Applied = Theme;
+    if (bChanged) OnChanged().Broadcast();
+}
+
+FSimpleMulticastDelegate& OnChanged()
+{
+    static FSimpleMulticastDelegate Changed;
+    return Changed;
 }
 
 FSlateFontInfo Font(FName Typeface, float Size)
