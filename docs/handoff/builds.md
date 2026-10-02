@@ -14,7 +14,7 @@ and short player-facing changelist; the planner reads it directly.
 - Hold to chop or clear; E interacts while click uses tools.
 - Seed tiles show an outline and `[E] Plant`; one hint card lists the available actions.
 - Dragging shows a ghost; the full-size hotbar row supports `R` rotation.
-- Chest storage opens from the hotbar, with Shift-click transfer.
+- Hotbar items can be stored in a chest, including with Shift-click.
 - The Build tab shows a clear `Requires` list.
 - Parchment UI, concise copy, and compact Settings are the new default.
 - Night brightness Set A is in; both shops close on Sundays.
