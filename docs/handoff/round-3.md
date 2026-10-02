@@ -22,14 +22,17 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
-| Orchestrator Agent | the new orchestrator fills in its ID | its own | coordinates only (GPT-6 Sol, medium) |
+| Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only (GPT-6 Sol, medium) |
 | Disk Cleanup Agent | `9fc4e210-68e7-4bc1-acca-d52366894506` | `jennifergalley-congenial-engine` | **retained**; its own schedule is cleared, and the orchestrator asks it for one sweep a day |
 | Old Integration Agent | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-literate-eureka` | retired, **do not archive**: its worktree holds the 9 PM Shipping release the shortcut targets |
 | Old UI Menus, Props Animations, Terrain Weather, Documentation, Architecture | `5cf73757`, `ce241dd6`, `89914e30`, `a9f10974`, `a1648ae7` | various | retired; don't message them. Spawn fresh sessions instead |
 | Old orchestrator | `92eac339` | `jennifergalley-cautious-pancake` | retired; hosts the old planner canvas instance |
 
-**Never archive** an Integration session whose worktree holds the shortcut's current Shipping target or
-its one rollback; Cleanup checks this before deleting releases.
+**Do not archive any old agents**: old Orchestrator, UI Menus, Props Animations, Terrain Weather,
+Documentation, Architecture, Integration, or Cleanup. Jenny will archive them herself once the new
+system works. "Archive when done" applies only to sessions this orchestrator spawns. In particular,
+the old Integration worktree holds the shortcut's current Shipping release; Cleanup checks that target
+and its one rollback before deleting releases.
 
 ## Spawning lanes
 
