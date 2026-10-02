@@ -20,7 +20,13 @@ for testing. Light parchment stays the default until Jenny approves.
 `HomesteadUITheme::DarkOf` maps every classic colour onto these tokens, the same way `ParchmentOf`
 maps it for the light book. Coloured meanings keep their own colours: the Energy and Food bars keep
 their classic fills, and the Requires rows are olive (met) or oxblood (missing). Notice cards
-(toasts, the focus card) stay paper in both palettes.
+(toasts, the hint/focus card and the book's notice) are umber with cream ink, a dim-gilt frame
+(#9C7A45) and terracotta errors (`HomesteadNoticeStyle::Card*()`, paper #3A2C21); key glyphs sit on
+a gilt stamp in umber ink. In the light book they stay paper (apply-dark-theme-everywhere).
+
+Every Slate HUD widget (hotbar, meters, coins, clock, pickups) and the open book are rebuilt when
+the palette changes; theme-dependent Slate brushes (notice card, naming screen, sliders) are cached
+per theme.
 
 ## Contrast (WCAG, composited over the dimmed world or the map)
 
@@ -38,6 +44,18 @@ their classic fills, and the Requires rows are olive (met) or oxblood (missing).
 | Popup text on popup | #30291F / #D6CAAF | 8.9:1 | #EFE2C6 / #30251C | 11.7:1 |
 | Map label on its chip | #30291F / #D8CCB0 | 9.0:1 | #EFE2C6 / #3B3127 | 9.9:1 |
 | Selected map label on its chip | #6F3519 / #D8CCB0 | 6.0:1 | #D4AA62 / #3B3127 | 5.9:1 |
+| Clock and calendar text on calendar panel | #30291F / #D0C4A7 | 8.3:1 | #EFE2C6 / #3E3328 | 9.5:1 |
+| Clock PM (accent) on calendar panel | #6F3519 / #D0C4A7 | 5.5:1 | #D4AA62 / #3E3328 | 5.7:1 |
+| Coins and meter label (accent) on vitals panel | #6F3519 / #D0C4A7 | 5.5:1 | #D4AA62 / #3E3328 | 5.7:1 |
+| Warning delta on vitals panel | #813021 / #D0C4A7 | 5.1:1 | #E8906F / #3E3328 | 5.0:1 |
+| Gain (+N, +coins) on vitals panel | #305019 / #D0C4A7 | 5.3:1 | #DDF3C5 / #3E3328 | 10.3:1 |
+| Notice and hint card text | #30291F / #CEC2A6 | 8.1:1 | #EFE2C6 / #3A2C21 | 10.5:1 |
+| Hint card title (secondary) | #594B38 / #CEC2A6 | 4.8:1 | #C8B696 / #3A2C21 | 6.8:1 |
+| Error notice text | #813021 / #CEC2A6 | 5.0:1 | #E8906F / #3A2C21 | 5.5:1 |
+| Key glyph on its stamp | #F6DFAF / #42554D | 6.1:1 | #24190F / #D4AA62 | 8.0:1 |
+| Requires [+] on met row | #304510 / #BCBC95 | 5.4:1 | #D4AA62 / #3C3C20 | 5.2:1 |
+| Requires [-] on missing row | #6F190D / #D4AA95 | 5.4:1 | #E8906F / #522219 | 5.4:1 |
+| Requires text on met or missing row | #30291F / #D4AA95 | 6.8:1 | #EFE2C6 / #522219 | 10.2:1 |
 
 Every pair is 4.5:1 or better in both palettes. Text on the accent fill always uses the accent's own
 ink (`PineInk`: paper on the light book's rust, umber on the dark book's gilt), which fixes the

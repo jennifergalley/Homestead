@@ -25,7 +25,7 @@ constexpr float FadeStart = 0.72f;
 // A landmark she's standing at has no useful bearing (cm).
 constexpr double NearbyCm = 1500.0;
 HomesteadUITheme::FThemeColor Band(0.035f, 0.055f, 0.046f, 0.9f);
-HomesteadUITheme::FThemeColor Shadow(FLinearColor(0.02f, 0.03f, 0.025f, 0.55f), FLinearColor(0.0f, 0.0f, 0.0f, 0.35f));
+HomesteadUITheme::FThemeColor Shadow(FLinearColor(0.02f, 0.03f, 0.025f, 0.55f), FLinearColor(0.0f, 0.0f, 0.0f, 0.35f), FLinearColor(0.0f, 0.0f, 0.0f, 0.45f));
 HomesteadUITheme::FThemeColor Cream(0.95f, 0.91f, 0.78f, 1.0f);
 HomesteadUITheme::FThemeColor Ordinal(0.74f, 0.72f, 0.60f, 1.0f);
 HomesteadUITheme::FThemeColor North(0.93f, 0.44f, 0.30f, 1.0f);

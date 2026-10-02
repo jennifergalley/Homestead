@@ -73,7 +73,9 @@ namespace HomesteadUITheme
 ETheme Current()
 {
     FString Value = HomesteadUIThemeTuning::CVarTheme.GetValueOnGameThread();
-    if (Value.IsEmpty()) FParse::Value(FCommandLine::Get(), TEXT("HomesteadUITheme="), Value);
+    // Read once, on first use (read every frame by the HUD's cards).
+    static const FString CommandLine = []() { FString Found; FParse::Value(FCommandLine::Get(), TEXT("HomesteadUITheme="), Found); return Found; }();
+    if (Value.IsEmpty()) Value = CommandLine;
     if (Value.IsEmpty()) Value = HomesteadUIThemeTuning::SavedTheme();
     return HomesteadUIThemeTuning::Parse(Value);
 }

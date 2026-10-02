@@ -26,6 +26,16 @@ HomesteadUITheme::FThemeColor NameWarning(0.95f, 0.55f, 0.42f);
 HomesteadUITheme::FThemeColor NamePanel(0.025f, 0.05f, 0.038f, 0.9f);
 HomesteadUITheme::FThemeColor NameField(0.06f, 0.1f, 0.075f, 0.95f);
 HomesteadUITheme::FThemeColor NameFieldSelected(0.13f, 0.19f, 0.14f, 1.0f);
+HomesteadUITheme::FThemeColor NameFieldEdge(0.2f, 0.26f, 0.21f, 1.0f);
+// Letters on the accent (the chosen key): the accent's own ink, as in the book.
+HomesteadUITheme::FThemeColor NameOnAccent(0.025f, 0.05f, 0.038f, 1.0f);
+// Brushes are kept per theme, so the screen follows a palette change.
+template <typename FMake> const FSlateBrush* ThemedBrush(TOptional<FSlateRoundedBoxBrush> (&Cache)[3], FMake Make)
+{
+    auto& Brush = Cache[static_cast<int32>(HomesteadUITheme::Current())];
+    if (!Brush) Brush.Emplace(Make());
+    return &*Brush;
+}
 
 std::string ToUtf8(const FString& Text) { return std::string(TCHAR_TO_UTF8(*Text)); }
 }
@@ -57,7 +67,11 @@ void SHomesteadNames::Construct(const FArguments& Args)
         .WidthOverride(720)
         [
             SNew(SBorder)
-            .BorderImage_Lambda([]() -> const FSlateBrush* { static const FSlateRoundedBoxBrush Panel(NamePanel, 10.0f); return &Panel; })
+            .BorderImage_Lambda([]() -> const FSlateBrush*
+            {
+                static TOptional<FSlateRoundedBoxBrush> Panel[3];
+                return ThemedBrush(Panel, []() { return FSlateRoundedBoxBrush(NamePanel, 10.0f); });
+            })
             .Padding(FMargin(44, 32))
             [
                 SNew(SVerticalBox)
@@ -140,9 +154,9 @@ TSharedRef<SWidget> SHomesteadNames::FieldWidget(int32 Field, const FText& Label
                 SNew(SBorder)
                 .BorderImage_Lambda([this, Field]() -> const FSlateBrush*
                 {
-                    static const FSlateRoundedBoxBrush Plain(NameField, 6.0f, FLinearColor(0.2f, 0.26f, 0.21f), 1.0f);
-                    static const FSlateRoundedBoxBrush Chosen(NameFieldSelected, 6.0f, NameGold, 2.0f);
-                    return Row == Field ? &Chosen : &Plain;
+                    static TOptional<FSlateRoundedBoxBrush> Plain[3], Chosen[3];
+                    return Row == Field ? ThemedBrush(Chosen, []() { return FSlateRoundedBoxBrush(NameFieldSelected, 6.0f, NameGold, 2.0f); })
+                        : ThemedBrush(Plain, []() { return FSlateRoundedBoxBrush(NameField, 6.0f, NameFieldEdge, 1.0f); });
                 })
                 .Padding(FMargin(14, 8))
                 [
@@ -197,7 +211,7 @@ TSharedRef<SWidget> SHomesteadNames::GridWidget()
             [
                 SNew(SButton).IsFocusable(false)
                 .ButtonColorAndOpacity_Lambda([this, X, Y]()
-                { return FLinearColor(GridX == X && GridY == Y ? NameGold * 0.55f : NameField); })
+                { return FLinearColor(GridX == X && GridY == Y ? NameGold : NameField); })
                 .OnClicked_Lambda([this, X, Y]() { GridX = X; GridY = Y; PressGridCell(); return FReply::Handled(); })
                 [
                     SNew(SBox).WidthOverride(Y < GridHeight - 1 ? 44.0f : 116.0f).HeightOverride(40).HAlign(HAlign_Center).VAlign(VAlign_Center)
@@ -205,7 +219,7 @@ TSharedRef<SWidget> SHomesteadNames::GridWidget()
                         SNew(STextBlock)
                         .Text_Lambda([this, X, Y]() { return FText::FromString(GridCell(X, Y)); })
                         .Font(HomesteadUITheme::Font("Bold", 16))
-                        .ColorAndOpacity_Lambda([this, X, Y]() { return FSlateColor(GridX == X && GridY == Y ? FLinearColor::White : NameInk); })
+                        .ColorAndOpacity_Lambda([this, X, Y]() { return FSlateColor(GridX == X && GridY == Y ? NameOnAccent : NameInk); })
                     ]
                 ]
             ];

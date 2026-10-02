@@ -9,8 +9,8 @@ namespace MenuDetailStyle
 // and a rose-tinted paper with dark marks, so the ink text keeps its contrast.
 HomesteadUITheme::FThemeColor MetRow(FLinearColor(0.075f, 0.16f, 0.10f, 0.75f), FLinearColor(0.50f, 0.50f, 0.30f, 0.98f), FLinearColor(0.0452f, 0.0452f, 0.0144f, 0.98f));
 HomesteadUITheme::FThemeColor MissingRow(FLinearColor(0.24f, 0.075f, 0.055f, 0.8f), FLinearColor(0.66f, 0.40f, 0.30f, 0.98f), FLinearColor(0.0844f, 0.0160f, 0.0097f, 0.98f));
-HomesteadUITheme::FThemeColor MetMark(FLinearColor(0.92f, 0.74f, 0.43f, 1.0f), FLinearColor(0.12f, 0.18f, 0.04f, 1.0f));
-HomesteadUITheme::FThemeColor MissingMark(FLinearColor(1.0f, 0.66f, 0.52f, 1.0f), FLinearColor(0.30f, 0.03f, 0.01f, 1.0f));
+HomesteadUITheme::FThemeColor MetMark(FLinearColor(0.92f, 0.74f, 0.43f, 1.0f), FLinearColor(0.03f, 0.06f, 0.005f, 1.0f));
+HomesteadUITheme::FThemeColor MissingMark(FLinearColor(1.0f, 0.66f, 0.52f, 1.0f), FLinearColor(0.16f, 0.01f, 0.004f, 1.0f));
 }
 TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
 {

@@ -180,27 +180,31 @@ constexpr double ErrorSeconds = 3.8;
 constexpr double FadeInSeconds = 0.14;
 constexpr double FadeOutSeconds = 0.35;
 constexpr float RiseDistance = 8.0f;
-// Aged paper, iron-gall brown ink, and a rust ink for things that went wrong (shared with the HUD's
-// world notices through HomesteadNoticeStyle).
-constexpr FLinearColor Paper = HomesteadNoticeStyle::Paper;
-constexpr FLinearColor InkBrown = HomesteadNoticeStyle::InkBrown;
-constexpr FLinearColor RustInk = HomesteadNoticeStyle::RustInk;
+// Aged paper, iron-gall brown ink, and a rust ink for things that went wrong, or their candlelit
+// counterparts in the dark book (shared with the HUD's world notices through HomesteadNoticeStyle).
+// The brushes are kept per theme, so the card follows a palette change.
+inline int32 ThemeSlot() { return static_cast<int32>(HomesteadUITheme::Current()); }
 inline const FSlateBrush& CardBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, HomesteadNoticeStyle::Frame, HomesteadNoticeStyle::FrameWidth);
-    return Brush;
+    static TOptional<FSlateRoundedBoxBrush> Brushes[3];
+    auto& Brush = Brushes[ThemeSlot()];
+    if (!Brush) Brush.Emplace(HomesteadNoticeStyle::CardPaper(), 6.0f, HomesteadNoticeStyle::CardFrame(), HomesteadNoticeStyle::FrameWidth);
+    return *Brush;
 }
 inline const FSlateBrush& ErrorCardBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(Paper, 6.0f, RustInk, HomesteadNoticeStyle::FrameWidth);
-    return Brush;
+    static TOptional<FSlateRoundedBoxBrush> Brushes[3];
+    auto& Brush = Brushes[ThemeSlot()];
+    if (!Brush) Brush.Emplace(HomesteadNoticeStyle::CardPaper(), 6.0f, HomesteadNoticeStyle::CardRust(), HomesteadNoticeStyle::FrameWidth);
+    return *Brush;
 }
 // The inner rule of the double frame.
 inline const FSlateBrush& RuleBrush()
 {
-    static const FSlateRoundedBoxBrush Brush(FLinearColor::Transparent, 3.0f,
-        InkBrown.CopyWithNewOpacity(HomesteadNoticeStyle::RuleOpacity), HomesteadNoticeStyle::RuleWidth);
-    return Brush;
+    static TOptional<FSlateRoundedBoxBrush> Brushes[3];
+    auto& Brush = Brushes[ThemeSlot()];
+    if (!Brush) Brush.Emplace(FLinearColor::Transparent, 3.0f, HomesteadNoticeStyle::CardRule(), HomesteadNoticeStyle::RuleWidth);
+    return *Brush;
 }
 inline const FSlateBrush& ShadowBrush()
 {
@@ -233,15 +237,18 @@ inline const FButtonStyle& MenuButtonStyle()
 // A pale track with a large, easy-to-grab round handle.
 inline const FSliderStyle& MenuSliderStyle()
 {
-    static const FSliderStyle Style = FSliderStyle()
+    // Kept per theme: the thumb is the accent, ringed in the accent's ink.
+    static TOptional<FSliderStyle> Styles[3];
+    auto& Style = Styles[static_cast<int32>(HomesteadUITheme::Current())];
+    if (!Style) Style = FSliderStyle()
         .SetNormalBarImage(FSlateRoundedBoxBrush(FLinearColor(0.93f, 0.93f, 0.88f, 1), 5.0f))
         .SetHoveredBarImage(FSlateRoundedBoxBrush(FLinearColor::White, 5.0f))
         .SetDisabledBarImage(FSlateRoundedBoxBrush(FLinearColor(0.6f, 0.6f, 0.58f, 0.6f), 5.0f))
         .SetNormalThumbImage(FSlateRoundedBoxBrush(MenuGold, 17.0f, PineInk, 2.0f, FVector2f(34, 34)))
-        .SetHoveredThumbImage(FSlateRoundedBoxBrush(FLinearColor(1.0f, 0.84f, 0.55f), 17.0f, PineInk, 2.0f, FVector2f(38, 38)))
+        .SetHoveredThumbImage(FSlateRoundedBoxBrush(MenuGold, 17.0f, PineInk, 2.0f, FVector2f(38, 38)))
         .SetDisabledThumbImage(FSlateRoundedBoxBrush(Muted, 17.0f, PineInk, 2.0f, FVector2f(34, 34)))
         .SetBarThickness(10.0f);
-    return Style;
+    return *Style;
 }
 inline bool IsAudioSetting(int32 Id) { return (Id >= 5 && Id <= 7) || Id == 16; }
 inline int32 AudioSliderSlot(int32 Id) { return Id == 16 ? 3 : Id - 5; }

@@ -115,7 +115,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             .Font(HomesteadUITheme::Font(TEXT("Bold"), 13))
                             .ColorAndOpacity(HotbarStyle::Cream)
                             .ShadowOffset(FVector2D(1, 1))
-                            .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
+                            .ShadowColorAndOpacity(HomesteadUITheme::Themed(FLinearColor(0, 0, 0, 0.85f)))
                             .Visibility(EVisibility::HitTestInvisible)
                         ]
                         + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top)
@@ -132,10 +132,10 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             })
                             [
                                 SNew(SHomesteadIcon).Kind(FName(TEXT("pouch-arrows")))
-                                .Tint_Lambda([Weak = Controller, Index]()
+                                .Tint_Lambda([]()
                                 {
-                                    // Dark on the selected slot's brass face, brass on the others.
-                                    return Weak.IsValid() && Weak->SelectedHotbarIndex() == Index ? HotbarStyle::Pine : HotbarStyle::Gold;
+                                    // Brass on the slot's face, selected or not (the selection is the frame round it).
+                                    return FLinearColor(HotbarStyle::Gold);
                                 })
                             ]
                         ]
@@ -185,7 +185,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             .Font(HomesteadUITheme::KeyFont(TEXT("Bold"), 13))
                             .ColorAndOpacity(HotbarStyle::Cream)
                             .ShadowOffset(FVector2D(1, 1))
-                            .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
+                            .ShadowColorAndOpacity(HomesteadUITheme::Themed(FLinearColor(0, 0, 0, 0.85f)))
                         ]
                     ]
                 ]

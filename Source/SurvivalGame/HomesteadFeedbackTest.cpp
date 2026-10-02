@@ -106,7 +106,7 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
                 const auto* HUD = Controller->GetHUD<AHomesteadHUD>();
                 const bool ExpectedOverlap = Baseline && Controller->IsBookOpen() && Controller->BookPage() != 6;
                 const FLinearColor ExpectedColor = Controller->ToastIsError()
-                    ? HomesteadNoticeStyle::RustInk : HomesteadNoticeStyle::InkBrown;
+                    ? HomesteadNoticeStyle::CardRust() : HomesteadNoticeStyle::CardInk();
                 return HUD && !Controller->Toast().IsEmpty() && HUD->FeedbackSource() == Controller->Toast()
                     && HUD->FeedbackFullText() && HUD->FeedbackInsideViewport()
                     && HUD->FeedbackOverlaps() == ExpectedOverlap && HUD->FeedbackColor().Equals(ExpectedColor);

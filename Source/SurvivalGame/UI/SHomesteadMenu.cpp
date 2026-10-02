@@ -79,7 +79,7 @@ void SHomesteadMenu::BuildFrame()
                                             .WrappingPolicy(ETextWrappingPolicy::AllowPerCharacterWrapping)
                                             .Justification(ETextJustify::Center)
                                             .Font(DisplayFont(MenuNoticeStyle::FontSize))
-                                            .ColorAndOpacity_Lambda([this]() { return FSlateColor(bNoticeError ? MenuNoticeStyle::RustInk : MenuNoticeStyle::InkBrown); })
+                                            .ColorAndOpacity_Lambda([this]() { return FSlateColor(bNoticeError ? HomesteadNoticeStyle::CardRust() : HomesteadNoticeStyle::CardInk()); })
                                             .Text_Lambda([this]() { return FText::FromString(NoticeText); })
                                         ]
                                     ]

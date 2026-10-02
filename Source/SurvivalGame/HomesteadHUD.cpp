@@ -62,9 +62,10 @@ void AHomesteadHUD::NoticeCard(float X, float Y, float Width, float Height, Home
     using namespace HomesteadNoticeStyle;
     const bool bError = IsError(Surface);
     Panel(X + 1, Y + 4, Width, Height, Shadow);
-    Panel(X, Y, Width, Height, bError ? RustInk : Frame);
-    Panel(X + FrameWidth, Y + FrameWidth, Width - FrameWidth * 2, Height - FrameWidth * 2, FLinearColor(Paper.R, Paper.G, Paper.B, 1));
-    const FLinearColor Rule = InkBrown.CopyWithNewOpacity(RuleOpacity);
+    Panel(X, Y, Width, Height, bError ? CardRust() : CardFrame());
+    const FLinearColor CardPaperNow = CardPaper();
+    Panel(X + FrameWidth, Y + FrameWidth, Width - FrameWidth * 2, Height - FrameWidth * 2, FLinearColor(CardPaperNow.R, CardPaperNow.G, CardPaperNow.B, 1));
+    const FLinearColor Rule = CardRule();
     Panel(X + RuleInset, Y + RuleInset, Width - RuleInset * 2, RuleWidth, Rule);
     Panel(X + RuleInset, Y + Height - RuleInset - RuleWidth, Width - RuleInset * 2, RuleWidth, Rule);
     Panel(X + RuleInset, Y + RuleInset, RuleWidth, Height - RuleInset * 2, Rule);
@@ -332,7 +333,7 @@ void AHomesteadHUD::DrawHUD()
 
     if (PC->IsFailed())
     {
-        Panel(0, 0, ViewWidth, ViewHeight, FLinearColor(0.025f, 0.04f, 0.035f, 0.85f));
+        Panel(0, 0, ViewWidth, ViewHeight, HomesteadUITheme::Themed(FLinearColor(0.025f, 0.04f, 0.035f, 0.85f)));
         const float X = (ViewWidth - 760) * 0.5f;
         Write(TEXT("Time to try again"), X, ViewHeight * 0.39f, 43, Ink);
         Wrap(TEXT("You ran out of food or energy. Return to a recovery checkpoint and try a different preparation."),
@@ -423,9 +424,11 @@ void AHomesteadHUD::DrawHUD()
             ToastBounds = FBox2D(FVector2D(X, Y) * UiScale, FVector2D(X + Width, Y + Height) * UiScale);
         }
         NoticeCard(X, Y, Width, Height, PC->ToastIsError() ? HomesteadNoticeStyle::ESurface::WorldNoticeError : HomesteadNoticeStyle::ESurface::WorldNotice);
-        const FLinearColor TextInk = PC->ToastIsError() ? HomesteadNoticeStyle::RustInk : HomesteadNoticeStyle::InkBrown;
+        const FLinearColor TextInk = PC->ToastIsError() ? HomesteadNoticeStyle::CardRust() : HomesteadNoticeStyle::CardInk();
+        // Each line sits centred on its slip (a short "Not ready yet" on a minimum-width card was left-hugging).
         for (int32 Index = 0; Index < Lines.Num(); ++Index)
-            Write(Lines[Index], X + PadX, Y + PadTop + Index * Step, TextSize, TextInk);
+            Write(Lines[Index], X + FMath::Max(PadX, (Width - TextWidth(Lines[Index], TextSize)) * 0.5f),
+                Y + PadTop + Index * Step, TextSize, TextInk);
         bDrawingToast = false;
         bNoticeText = bThemeSerif;
     }
@@ -480,8 +483,8 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 11, Space = 9;
     const auto KeyWidth = [this](const FString& Key) { bNoticeText = false; const float W = TextWidth(Key, KeySize); bNoticeText = bThemeSerif; return W; };
     const auto WordsWidth = [this](const FString& Words, float WordsSize) { bNoticeText = true; const float W = TextWidth(Words, WordsSize); bNoticeText = bThemeSerif; return W; };
-    // Key and pad glyphs: a pine stamp with brass lettering in either theme, in the crisp sans.
-    const FLinearColor KeyStamp(0.055f, 0.09f, 0.075f, 0.96f), KeyLetter(0.92f, 0.74f, 0.43f, 1.0f);
+    // Key and pad glyphs: a stamp in the crisp sans (pine and brass on the light card, gilt and umber on the dark).
+    const FLinearColor KeyStamp = HomesteadNoticeStyle::KeyStamp(), KeyLetter = HomesteadNoticeStyle::KeyLetter();
     float Width = 0;
     for (int32 Index = 0; Index < Cues.Num(); ++Index)
     {
@@ -516,7 +519,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     if (!Title.IsEmpty())
     {
         bNoticeText = true;
-        Write(Title, CenterX - TitleWidth * 0.5f, Y, TitleSize, HomesteadNoticeStyle::InkBrown.CopyWithNewOpacity(0.72f));
+        Write(Title, CenterX - TitleWidth * 0.5f, Y, TitleSize, HomesteadNoticeStyle::CardMutedInk());
         bNoticeText = bThemeSerif;
         Y += TitleLine + 2;
     }
@@ -536,7 +539,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
             X += BadgeW + Space;
         }
         bNoticeText = true;
-        Write(Cue.Verb, X, Y + (RowHeight - VerbLine) * 0.5f, Size, HomesteadNoticeStyle::InkBrown);
+        Write(Cue.Verb, X, Y + (RowHeight - VerbLine) * 0.5f, Size, HomesteadNoticeStyle::CardInk());
         bNoticeText = bThemeSerif;
         X += WordsWidth(Cue.Verb, Size);
     }
@@ -618,7 +621,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
         if (RowY + 54 > Y + Height - 91) BookTextOverflow += TEXT("Row overlaps footer area; ");
         if (Selected)
         {
-            Panel(X + 23, RowY - 5, Width - 46, RowHeight - 5, FLinearColor(0.09f, 0.14f, 0.105f, 1));
+            Panel(X + 23, RowY - 5, Width - 46, RowHeight - 5, HomesteadUITheme::Themed(FLinearColor(0.09f, 0.14f, 0.105f, 1)));
             ProtectFeedback(TEXT("selected-row"), X + 23, RowY - 5, Width - 46, RowHeight - 5);
         }
         Write(Rows[Index].Label, X + 40, RowY + 3, 24, Selected ? HudGold : Ink);
@@ -626,7 +629,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     }
     if (Rows.Num() > Visible)
         Write(FString::Printf(TEXT("%d / %d"), PC.SelectedRow() + 1, Rows.Num()), X + Width - 108, Y + Height - 91, 18, Muted);
-    Panel(X + 30, Y + Height - 64, Width - 60, 1, FLinearColor(0.28f, 0.35f, 0.29f, 1));
+    Panel(X + 30, Y + Height - 64, Width - 60, 1, HomesteadUITheme::Themed(FLinearColor(0.28f, 0.35f, 0.29f, 1)));
     MeasureBookLine(PC.BookFooter(), Width - 72, 19, TEXT("footer"));
     Write(PC.BookFooter(),
         X + 36, Y + Height - 43, 19, Muted);
@@ -652,7 +655,7 @@ void AHomesteadHUD::DrawAppearanceBook(const AHomesteadController& PC)
         const float RowY = Y + 122 + (Index - First) * RowHeight;
         if (Index == PC.SelectedRow())
         {
-            Panel(X + 15, RowY - 7, Width - 30, RowHeight - 6, FLinearColor(0.09f, 0.14f, 0.105f, 1));
+            Panel(X + 15, RowY - 7, Width - 30, RowHeight - 6, HomesteadUITheme::Themed(FLinearColor(0.09f, 0.14f, 0.105f, 1)));
             ProtectFeedback(TEXT("selected-look-row"), X + 15, RowY - 7, Width - 30, RowHeight - 6);
         }
         Write(Options[Index].Label, X + 28, RowY, 22, Index == PC.SelectedRow() ? HudGold : Ink);
@@ -660,7 +663,7 @@ void AHomesteadHUD::DrawAppearanceBook(const AHomesteadController& PC)
     }
     if (Options.Num() > Visible)
         Write(FString::Printf(TEXT("%d / %d"), PC.SelectedRow() + 1, Options.Num()), X + Width - 86, Y + 77, 17, Muted);
-    Panel(X + 25, Y + Height - 109, Width - 50, 1, FLinearColor(0.28f, 0.35f, 0.29f, 1));
+    Panel(X + 25, Y + Height - 109, Width - 50, 1, HomesteadUITheme::Themed(FLinearColor(0.28f, 0.35f, 0.29f, 1)));
     Wrap(PC.UsesGamepad() ? TEXT("D-pad: select   A: change   LB/RB: pages   B: close")
         : TEXT("Arrows: select/pages   Enter: change   Esc: close"),
         X + 28, Y + Height - 91, Width - 56, 17, Muted, 2);

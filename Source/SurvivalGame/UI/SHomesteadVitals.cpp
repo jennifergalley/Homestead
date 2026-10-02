@@ -31,7 +31,10 @@ constexpr double MealPopupSeconds = 2.0;
 constexpr double MealPopupFadeIn = 0.15;
 constexpr double MealPopupFadeOut = 0.6;
 constexpr float MealPopupRise = 6.0f;
-HomesteadUITheme::FThemeColor Gain(0.72f, 0.90f, 0.56f, 1);
+// Gains ("+12", "+$3.00"): a leaf green, deep enough on the light card to read at 4.5:1.
+HomesteadUITheme::FThemeColor Gain(FLinearColor(0.72f, 0.90f, 0.56f, 1), FLinearColor(0.03f, 0.08f, 0.01f, 1), FLinearColor(0.72f, 0.90f, 0.56f, 1));
+// The halo round a floating "+N": the panel's own colour, so it reads on the bar in any theme.
+HomesteadUITheme::FThemeColor PopupHalo(0.01f, 0.02f, 0.015f, 0.9f);
 // The bars' fills: in parchment an olive ink for Energy and an ochre for the woodland's Food; the dark book keeps the classic fills.
 HomesteadUITheme::FThemeColor EnergyFill(FLinearColor(0.66f, 0.76f, 0.52f, 1), FLinearColor(0.16f, 0.23f, 0.07f, 1), FLinearColor(0.66f, 0.76f, 0.52f, 1));
 HomesteadUITheme::FThemeColor FoodFill(FLinearColor(0.77f, 0.66f, 0.37f, 1), FLinearColor(0.42f, 0.25f, 0.05f, 1), FLinearColor(0.77f, 0.66f, 0.37f, 1));
@@ -181,7 +184,7 @@ TSharedRef<SWidget> SHomesteadVitals::MeterRow(FName Icon, TFunction<double()> V
     const FString Name(Label);
     FSlateFontInfo PopupFont = HomesteadUITheme::Font(TEXT("Bold"), 17);
     PopupFont.OutlineSettings.OutlineSize = 2;
-    PopupFont.OutlineSettings.OutlineColor = FLinearColor(0.01f, 0.02f, 0.015f, 0.9f);
+    PopupFont.OutlineSettings.OutlineColor = VitalsStyle::PopupHalo;
     return SNew(SBox).WidthOverride(Width).HeightOverride(RowHeight)
     [
         SNew(SOverlay)
@@ -274,7 +277,7 @@ TSharedRef<SWidget> SHomesteadVitals::PurseRow()
                 {
                     const float Alpha = Controller.IsValid() ? Controller->WalletDeltaAlpha() : 0.0f;
                     const bool bGain = Controller.IsValid() && Controller->WalletDelta() > 0;
-                    const FLinearColor Color = bGain ? FLinearColor(0.72f, 0.90f, 0.56f, 1) : VitalsStyle::Warning;
+                    const FLinearColor Color = bGain ? FLinearColor(VitalsStyle::Gain) : FLinearColor(VitalsStyle::Warning);
                     return FSlateColor(FLinearColor(Color.R, Color.G, Color.B, Alpha));
                 })
                 .Text_Lambda([this]()
