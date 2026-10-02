@@ -75,3 +75,25 @@ Harvesting SHALL play a kneel-and-pull animation for root crops and cabbage, and
 #### Scenario: Pulling a turnip
 - **WHEN** she harvests a ripe turnip plot
 - **THEN** she kneels, pulls the turnip up, holds it briefly, and her hand is empty afterwards
+
+### Requirement: Weeds come up once a day, on some plots
+Plot weeds SHALL grow only in one daily pass: at 6 AM when she is awake, or when she wakes from a sleep
+or doze that crossed 6 AM. In each pass, each cultivated plot SHALL sprout weeds with a fixed chance
+(35%), decided deterministically from the plot and the day so a reload never rerolls it. Weeds SHALL
+NOT grow between passes.
+
+#### Scenario: A night's sleep
+- **WHEN** she sleeps from 22:00 until 06:00
+- **THEN** one pass has run when she wakes: some plots have new weeds and others don't
+
+#### Scenario: A nap
+- **WHEN** she naps for two hours in the afternoon
+- **THEN** no weeds appear
+
+#### Scenario: Several days pass
+- **WHEN** she stays awake or sleeps through several mornings
+- **THEN** each morning runs exactly one pass, and the same plots sprout as if each day had passed separately
+
+#### Scenario: Reload
+- **WHEN** she saves and loads either side of 6 AM
+- **THEN** which plots sprout, and the timing of the next pass, are unchanged
