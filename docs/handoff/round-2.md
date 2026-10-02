@@ -131,6 +131,14 @@ guard could hide it. The guard stopped only its owned PID; no live saves were to
 do not use hidden-window physical-key F5/F9 or capture evidence. Use `-RenderOffscreen` for
 old-save load auditing and packaged FullLoop for F5/F9 instead.
 
+**Evening package memory failure (2026-10-01, retry pending):** after UBT/native passed with
+8.23 GB free, `Build-Game.ps1 -PackageOnly -SkipAssets` reached roughly 38/48 skinned assets in
+the UnrealEditor-Cmd cook and repeatedly reported `AssetCompile memory estimate ... 4608 MiB,
+MemoryLimit 1934-2843 MiB`. Free physical memory fell to 1,196 MB. The agreed watchdog stopped
+only Integration's commandlet PID 18712 and UAT dotnet PID 43408; UAT failed `-1` and no release
+or shortcut changed. Integration is investigating a lower-memory retry. Do not infer or document a
+remedy until that retry is verified.
+
 **Shared-memory warning (2026-09-29 20:19):** Jenny later launched the Shipping Estate while Menu
 editor PID 52420 remained open; Available MBytes fell to 143. Integration touched no process and used
 urgent mailbox to ask Menu to close only its own editor. The durable response is now
