@@ -8,8 +8,8 @@ Integration-session-only during multi-lane rounds: lanes and the orchestrator do
                       locomotion imports (about 25 minutes). Use it only when generated content is already
                       current in this worktree; the editor module build still runs (a no-op when current).
 -SkipAssets           skips Fetch-Assets.ps1.
--LowMemoryCook        caps asset compilation at one task and leaves most CPU threads free during
-                      the Development cook; use when other sessions leave little available RAM.
+-LowMemoryCook        caps Development cook asset compilation at one task and leaves most CPU
+                      threads free; also limits the Shipping code build to four actions.
 UAT is single-instance machine-wide; this script waits for another worktree's package to finish
 (-WaitForUATMutex). It builds the game target itself with -WaitMutex (UAT's build step can't wait for
 other worktrees' UBT) and cooks with -SkipZenStore, so the machine-shared Zen server isn't involved.
@@ -64,7 +64,10 @@ if ($ReuseCooked) {
         $containerHashes = @($paks | ForEach-Object { [ordered]@{ name=$_.Name; sha256=(Get-FileHash $_.FullName).Hash } })
     }
     $build = Join-Path $engine 'Engine\Build\BatchFiles\Build.bat'
-    & $build SurvivalGame Win64 Shipping "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild
+    $buildArgs = @('SurvivalGame', 'Win64', 'Shipping', "-Project=$project",
+        '-WaitMutex', '-NoHotReloadFromIDE', '-NoUBA', '-NoXGE', '-NoFASTBuild')
+    if ($LowMemoryCook) { $buildArgs += '-MaxParallelActions=4' }
+    & $build @buildArgs
     if ($LASTEXITCODE -ne 0) { throw "Shipping build failed ($LASTEXITCODE)." }
     if (-not $Package) { Write-Host 'Shipping code built; no editor, cooker, packager or game launched.'; return }
     $stage = Join-Path $archive 'Staging'
