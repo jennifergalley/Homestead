@@ -260,6 +260,7 @@ export function renderPlannerHtml() {
         card.append(el("strong", "", value), el("span", "muted", label));
         stats.append(card);
       }
+    }
 
       function renderBuildCard(build, current = false) {
         const card = el("article", "build-card" + (current ? " current" : ""));
@@ -301,7 +302,6 @@ export function renderPlannerHtml() {
           buildsNode.append(later);
         }
       }
-    }
 
     function featureMatches(feature) {
       if (state.filter !== "all" && feature.status !== state.filter) return false;
