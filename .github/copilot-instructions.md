@@ -37,9 +37,9 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
   the next build. Integration merges, runs UBT/suites, makes the Shipping acceptance check and
   retargets the shortcut while preserving its icon. Lanes close editors during the build. If
   verification fails, the last good build stays on the shortcut. **`main` must stay playable:**
-  push only verified work. Once every Jenny-flagged item for the build is done and time remains,
-  lanes tell the orchestrator and take the next lane-fitting item in
-  `docs/handoff/priority.json`; Jenny owns that order.
+  push only verified work. Lanes implement only what Jenny has prioritized for their specific
+  build, then go idle; they do not autonomously take unflagged `priority.json` work. If little or
+  nothing is prioritized, the orchestrator asks Jenny to schedule it.
 - **When Jenny pauses development to play,** every session stops launching editors and builds until
   she says to resume. Finish or park your current step, close your editor, and wait by ending your
   turn (see "Waiting means ending your turn" below).

@@ -153,10 +153,10 @@ Template:
    Affects other lanes? yes/no
 ```
 
-**Planner canvas:** `openspec-task-planner` reads `builds.md`, `backlog.md`, and the authoritative
-`priority.json`. Dragging reorders priority; **Top** promotes an item, **Next build** assigns it to
-the current build, and **Quote** exposes its player ask. **Remove** archives that OpenSpec change,
-so use it only for shipped, retired, or clearly stale work.
+**Planner canvas:** `openspec-task-planner` reads `builds.md`, `backlog.md`, and `priority.json` for
+Jenny's scheduling. Dragging reorders priority; **Top** promotes an item, **Next build** assigns it
+to a build, and **Quote** exposes its player ask. **Remove** archives that OpenSpec change, so use
+it only for shipped, retired, or clearly stale work.
 
 **Blockers:** if something blocks you for more than about 15 minutes, or affects other worktrees
 (shared ports, GPU/VRAM, Live Coding, locks, a broken `main`), report it immediately with
@@ -203,9 +203,9 @@ A lane delivers an increment like this:
    active primary worktree or another session's worktree. Reuse one secondary worktree per lane
    rather than creating one per task; abandoned `props-*`, `water-*` and `*-0930-*` worktrees cost
    14–25 GB each, with about 5 GB each of DDC and Intermediate after a build.
-6. **When Jenny's explicitly flagged items for the current build are done and time remains,** tell
-   the orchestrator, then take the next lane-fitting item in `docs\handoff\priority.json`. Jenny
-   owns that order; do not substitute a locally preferred task.
+6. **When Jenny's explicitly flagged items for the current build are done,** end the turn and go
+   idle. Do not autonomously take an unflagged queue item. If little or nothing is prioritized, the
+   orchestrator asks Jenny to schedule work.
 7. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
 
    ```text
@@ -275,11 +275,9 @@ addressed, Integration ships the verified build immediately rather than waiting 
 wake-up automations until Jenny supplies new feedback or the orchestrator starts new work. The
 scheduled slots remain the fallback cadence while feedback or verified work is still pending.
 
-**Priority pickup after flagged work (Jenny, 2026-10-01):** when every item Jenny explicitly
-flagged for the current build is done and time remains, a lane takes the next item in
-[`docs\handoff\priority.json`](priority.json) that fits its ownership. Jenny owns that order; treat
-it as correct. Tell the orchestrator before beginning the picked item so it can prevent two lanes
-from claiming it.
+**Slot-only work (Jenny, 2026-10-01):** lanes implement only what Jenny has explicitly prioritized
+for a specific build, then go idle. They do not pick up unflagged queue work. If a build has little
+or no prioritized work, the orchestrator asks Jenny to schedule it.
 
 **Before every Shipping build, reclaim dated release space safely:** retain the current
 Estate-shortcut Shipping release and at most its immediately previous Shipping rollback. A named
