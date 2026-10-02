@@ -1,7 +1,6 @@
 {
   "order": [
     "polish-parchment-ui",
-    "daily-weed-pass",
     "place-items-in-exact-slots",
     "fix-tool-grip-contact",
     "pitch-dark-parchment-theme",
@@ -10,14 +9,14 @@
     "widen-estate-beach",
     "unify-hud-notices",
     "speed-up-pickup-animation",
+    "add-shore-and-river-fishing",
     "space-out-town-square",
+    "add-swimming",
     "restore-mine-pumping-and-deep-levels",
     "rebuild-manor-and-decorate",
     "open-estate-mine-shallow-level",
     "fix-estate-river-source",
     "add-watermill-and-artisan-goods",
-    "add-swimming",
-    "add-shore-and-river-fishing",
     "add-ranching-and-livestock",
     "add-horse-and-wagon",
     "add-hired-workers-and-estate-upkeep",
@@ -32,12 +31,14 @@
     "daily-weed-pass": "2026-10-01 21:00",
     "fix-tool-grip-contact": "2026-10-02 07:30",
     "place-items-in-exact-slots": "2026-10-02 07:30",
-    "pitch-dark-parchment-theme": "2026-10-01 21:00"
+    "pitch-dark-parchment-theme": "2026-10-01 21:00",
+    "reduce-foliage-shadow-motion": "2026-10-02 07:30",
+    "refine-playable-heroine-hairstyles": "2026-10-02 07:30"
   },
   "removed": [
     "replace-heroine-with-metahuman",
     "prioritize-heroine-quality-and-tool-clarity",
     "expand-randomized-music-playlist"
   ],
-  "updated": "2026-10-02T01:48:02.727Z"
+  "updated": "2026-10-02T01:54:16.275Z"
 }
