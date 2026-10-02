@@ -253,12 +253,18 @@ async function loadFeature(projectRoot, tasksPath, activeChange) {
 export async function loadPlanner(projectRoot, now = Date.now()) {
     const taskFiles = await findTaskFiles(join(projectRoot, "openspec", "changes"));
     const activeChange = await readActiveChange(projectRoot, now);
-    const [features, builds, priority] = await Promise.all([
+    const [features, builds, priority, backlogEntries] = await Promise.all([
         Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange))),
         loadBuilds(projectRoot),
         readFile(join(projectRoot, "docs", "handoff", "priority.json"), "utf8")
             .then((text) => JSON.parse(text)).catch(() => ({})),
+        loadBacklogInbox(projectRoot),
     ]);
+    // Jenny's backlog-form entries aren't OpenSpec changes, but they belong on
+    // the same reorderable/removable board — synthesize a pseudo-feature for
+    // each one so the board, priority.json, and quote/remove/assign wiring
+    // all treat them like any other item.
+    for (const entry of backlogEntries) features.push(backlogFeatureFromEntry(entry));
     const order = new Map((Array.isArray(priority.order) ? priority.order : []).map((id, index) => [id, index]));
     const removed = new Set(Array.isArray(priority.removed) ? priority.removed : []);
     for (let i = features.length - 1; i >= 0; i--) if (removed.has(features[i].id)) features.splice(i, 1);
@@ -268,8 +274,8 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
         build.time = buildTime(build);
     }
     features.sort((a, b) => {
-        const ao = order.has(a.id) ? order.get(a.id) : Infinity;
-        const bo = order.has(b.id) ? order.get(b.id) : Infinity;
+        const ao = order.has(a.id) ? order.get(a.id) : defaultFeatureRank(a);
+        const bo = order.has(b.id) ? order.get(b.id) : defaultFeatureRank(b);
         if (ao !== bo) return ao - bo;
         if (a.status !== b.status) return statusOrder[a.status] - statusOrder[b.status];
         return b.modifiedAt.localeCompare(a.modifiedAt);
@@ -393,20 +399,17 @@ function formatBacklogInboxEntry(entry) {
     return `- **${entry.title}** — Jenny, ${date} (added from the planner canvas): ${description}${image}`;
 }
 
+// These entries now also show up directly on the planner board (see
+// backlogFeatureFromEntry below), so the markdown copy is just plain bullets
+// under the existing "## Later" heading — no separate "not yet triaged"
+// heading or explanatory paragraph needed.
 export function renderBacklogInboxBlock(entries) {
     if (!entries.length) return "";
     const lines = [...entries].reverse().map(formatBacklogInboxEntry);
-    return [
-        backlogMarkerStart,
-        "## New from Jenny (not yet triaged)",
-        "",
-        "Added from the planner canvas without spending chat tokens. Fold each into the list above (or Later),",
-        "then delete its line here.",
-        "",
-        ...lines,
-        backlogMarkerEnd,
-    ].join("\n");
+    return [backlogMarkerStart, ...lines, backlogMarkerEnd].join("\n");
 }
+
+const laterHeadingPattern = /^##\s+Later\s*$/im;
 
 // Exported so tests can exercise the marker insertion/update/removal logic
 // directly against small markdown fixtures.
@@ -423,10 +426,15 @@ export function upsertMarkedBlock(markdown, block) {
     if (hasBlock) {
         return markdown.slice(0, startIndex) + block + markdown.slice(endIndex + backlogMarkerEnd.length);
     }
-    const headingMatch = markdown.match(/\n(##\s+)/);
-    if (!headingMatch) return markdown.replace(/\n*$/, "\n\n" + block + "\n");
-    const insertAt = headingMatch.index + 1;
-    return markdown.slice(0, insertAt) + block + "\n\n" + markdown.slice(insertAt);
+    // New submissions land as plain bullets directly under the existing
+    // "## Later" heading rather than a separate triage section.
+    const headingMatch = laterHeadingPattern.exec(markdown);
+    if (headingMatch) {
+        const insertAt = headingMatch.index + headingMatch[0].length;
+        return markdown.slice(0, insertAt) + "\n\n" + block + markdown.slice(insertAt);
+    }
+    // No "## Later" section yet — create one at the end of the file.
+    return markdown.replace(/\n*$/, "\n\n## Later\n\n" + block + "\n");
 }
 
 export async function syncBacklogMarkdown(projectRoot, entries) {
@@ -450,6 +458,44 @@ export function toBacklogClientEntry(entry) {
         createdUtc: entry.createdUtc,
         imageUrl: entry.imageFile ? `/api/backlog-image/${encodeURIComponent(entry.id)}` : null,
     };
+}
+
+const backlogFeaturePrefix = "backlog:";
+
+// Exported so the HTTP routes and tests can recognize/build the same id a
+// backlog entry gets once it's represented on the planner board.
+export function backlogFeatureId(entryId) {
+    return `${backlogFeaturePrefix}${entryId}`;
+}
+
+// Turns a persisted backlog-inbox entry into a pseudo-feature so it can sit
+// on the same reorderable/removable board as real OpenSpec changes, using
+// the existing priority/quote/remove machinery unchanged.
+function backlogFeatureFromEntry(entry) {
+    return {
+        id: backlogFeatureId(entry.id),
+        name: entry.id,
+        title: entry.title,
+        path: null,
+        modifiedAt: entry.createdUtc,
+        completed: 0,
+        total: 0,
+        status: "proposed",
+        sections: [],
+        fromBacklog: true,
+        description: entry.description ?? "",
+        imageUrl: entry.imageFile ? `/api/backlog-image/${encodeURIComponent(entry.id)}` : null,
+    };
+}
+
+// Unordered backlog-form entries should default to the top of the board
+// (newest first) rather than the bottom, since Jenny expects to see what she
+// just typed immediately. Real OpenSpec features with no explicit order
+// still fall back to the end of the list.
+function defaultFeatureRank(feature) {
+    if (!feature.fromBacklog) return Infinity;
+    const time = Date.parse(feature.modifiedAt);
+    return Number.isFinite(time) ? -time : Infinity;
 }
 
 export async function addBacklogEntry(projectRoot, { title, description, image } = {}, now = Date.now()) {

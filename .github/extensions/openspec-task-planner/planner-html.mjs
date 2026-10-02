@@ -315,18 +315,8 @@ export function renderPlannerHtml() {
     }
     .field input[type="file"] { color: var(--text-color-default, #e6edf3); }
     .backlog-form-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
-    .backlog-recent { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
-    .backlog-recent-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid var(--border-color-default, #30363d);
-      border-radius: 8px;
-      padding: 6px 10px;
-      max-width: 260px;
-    }
-    .backlog-recent-item img { width: 32px; height: 32px; object-fit: cover; border-radius: 4px; }
-    .backlog-recent-item .backlog-recent-title { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .backlog-origin { font-style: italic; }
+    .backlog-thumb { width: 28px; height: 28px; object-fit: cover; border-radius: 4px; margin-top: 4px; display: block; }
     .error-text { color: var(--true-color-red, #f85149); }
   </style>
 </head>
@@ -362,7 +352,6 @@ export function renderPlannerHtml() {
           <span id="backlog-form-status" class="muted" role="status" aria-live="polite"></span>
         </div>
       </form>
-      <div id="backlog-recent" class="backlog-recent"></div>
     </section>
     <section id="builds" class="builds" aria-label="Build changelist"></section>
     <div class="builds-head backlog-head">
@@ -470,10 +459,20 @@ export function renderPlannerHtml() {
         const row = el("div", "check-row" + (feature.slot ? " next" : ""));
         row.dataset.id = feature.id;
         row.draggable = true;
-        row.title = feature.path;
+        row.title = feature.path ?? feature.description ?? feature.title;
         const text = el("div");
         text.append(el("div", "check-title", feature.title));
         if (feature.carriedFrom) text.append(el("div", "carried-note", "Carried over from " + feature.carriedFrom));
+        if (feature.fromBacklog) {
+          text.append(el("div", "check-text backlog-origin", "From Jenny's backlog form" + (feature.description ? " — " + feature.description : "")));
+          if (feature.imageUrl) {
+            const thumb = document.createElement("img");
+            thumb.className = "backlog-thumb";
+            thumb.src = feature.imageUrl;
+            thumb.alt = "";
+            text.append(thumb);
+          }
+        }
         for (const task of open.slice(0, 3)) text.append(el("div", "check-text", task.text));
         const button = el("select", "slot-select" + (feature.slot ? " on" : ""));
         button.title = "Schedule for a release";
@@ -572,34 +571,6 @@ export function renderPlannerHtml() {
       });
     }
 
-    function renderBacklogRecent(entries) {
-      const host = document.getElementById("backlog-recent");
-      host.replaceChildren();
-      for (const entry of entries.slice(-6).reverse()) {
-        const item = el("div", "backlog-recent-item");
-        if (entry.imageUrl) {
-          const img = document.createElement("img");
-          img.src = entry.imageUrl;
-          img.alt = "";
-          item.append(img);
-        }
-        item.append(el("span", "backlog-recent-title", entry.title));
-        item.title = entry.title + (entry.description ? " — " + entry.description : "");
-        host.append(item);
-      }
-    }
-
-    async function loadBacklogRecent() {
-      try {
-        const response = await fetch("/api/backlog", { cache: "no-store" });
-        if (!response.ok) return;
-        const data = await response.json();
-        renderBacklogRecent(Array.isArray(data.entries) ? data.entries : []);
-      } catch {
-        // Non-fatal: the recent-submissions strip is a convenience, not required reading.
-      }
-    }
-
     const backlogForm = document.getElementById("backlog-form");
     const backlogTitle = document.getElementById("backlog-title");
     const backlogDescription = document.getElementById("backlog-description");
@@ -659,8 +630,8 @@ export function renderPlannerHtml() {
         if (!response.ok) throw new Error(data.error ?? "Couldn't add to the backlog");
         backlogForm.reset();
         backlogStatus.className = "muted";
-        backlogStatus.textContent = "Added “" + title + "” to docs/handoff/backlog.md.";
-        await loadBacklogRecent();
+        backlogStatus.textContent = "Added “" + title + "” to the top of Planned improvements and docs/handoff/backlog.md.";
+        await load(true, true);
       } catch (error) {
         backlogStatus.className = "error-text";
         backlogStatus.textContent = error.message;
@@ -698,8 +669,7 @@ export function renderPlannerHtml() {
 
     refresh.addEventListener("click", () => load(false));
     load(false);
-    loadBacklogRecent();
-    setInterval(() => { load(true); loadBacklogRecent(); }, 10000);
+    setInterval(() => load(true), 10000);
   </script>
 </body>
 </html>`;

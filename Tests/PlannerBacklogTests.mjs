@@ -11,6 +11,7 @@ import {
     decodeBacklogImage,
     addBacklogEntry,
     loadBacklogInbox,
+    loadPlanner,
     toBacklogClientEntry,
     backlogMdPath,
     backlogAttachmentsDir,
@@ -61,8 +62,8 @@ test("decodeBacklogImage accepts a valid PNG data URL and rejects bad input", ()
     assert.match(decodeBacklogImage({ dataUrl: `data:image/png;base64,${oversized}` }).error, /too large/);
 });
 
-test("upsertMarkedBlock inserts after the first heading, replaces idempotently, and removes cleanly", () => {
-    const markdown = "# Title\n\nIntro.\n\n## Next two builds\n\n1. Item.\n";
+test("upsertMarkedBlock inserts under the existing ## Later heading, replaces idempotently, and removes cleanly", () => {
+    const markdown = "# Title\n\nIntro.\n\n## Next two builds\n\n1. Item.\n\n## Later\n\n- Older later item.\n";
     const block = renderBacklogInboxBlock([
         { id: "a", title: "First", description: "desc", imageFile: null, createdUtc: "2026-10-01T00:00:00.000Z" },
     ]);
@@ -70,7 +71,11 @@ test("upsertMarkedBlock inserts after the first heading, replaces idempotently, 
     const inserted = upsertMarkedBlock(markdown, block);
     assert.ok(inserted.includes("<!-- jenny-inbox:start -->"));
     assert.ok(inserted.includes("First"));
-    assert.ok(inserted.indexOf("<!-- jenny-inbox:start -->") < inserted.indexOf("## Next two builds"));
+    // Lands right under "## Later", ahead of the pre-existing bullets, and
+    // after "## Next two builds" (not before the first heading in the file).
+    assert.ok(inserted.indexOf("## Next two builds") < inserted.indexOf("<!-- jenny-inbox:start -->"));
+    assert.ok(inserted.indexOf("## Later") < inserted.indexOf("<!-- jenny-inbox:start -->"));
+    assert.ok(inserted.indexOf("<!-- jenny-inbox:start -->") < inserted.indexOf("Older later item."));
 
     const block2 = renderBacklogInboxBlock([
         { id: "a", title: "First", description: "desc", imageFile: null, createdUtc: "2026-10-01T00:00:00.000Z" },
@@ -83,10 +88,22 @@ test("upsertMarkedBlock inserts after the first heading, replaces idempotently, 
     const removed = upsertMarkedBlock(replaced, "");
     assert.ok(!removed.includes("jenny-inbox"));
     assert.ok(!removed.includes("Second"));
-    assert.ok(removed.includes("## Next two builds"));
+    assert.ok(removed.includes("## Later"));
+    assert.ok(removed.includes("Older later item."));
 });
 
-test("addBacklogEntry persists inbox JSON, attachment bytes, and syncs backlog.md", async (t) => {
+test("upsertMarkedBlock creates a ## Later section when the file doesn't have one", () => {
+    const markdown = "# Title\n\nIntro.\n\n## Next two builds\n\n1. Item.\n";
+    const block = renderBacklogInboxBlock([
+        { id: "a", title: "First", description: "", imageFile: null, createdUtc: "2026-10-01T00:00:00.000Z" },
+    ]);
+    const inserted = upsertMarkedBlock(markdown, block);
+    assert.ok(inserted.includes("## Later"));
+    assert.ok(inserted.indexOf("## Later") < inserted.indexOf("<!-- jenny-inbox:start -->"));
+    assert.ok(inserted.includes("First"));
+});
+
+test("addBacklogEntry persists inbox JSON, attachment bytes, and syncs backlog.md under ## Later", async (t) => {
     const root = await fixture(t);
     const result = await addBacklogEntry(root, {
         title: "  Sell crops at the General Store  ",
@@ -108,7 +125,9 @@ test("addBacklogEntry persists inbox JSON, attachment bytes, and syncs backlog.m
 
     const markdown = await readFile(backlogMdPath(root), "utf8");
     assert.ok(markdown.includes("Sell crops at the General Store"));
-    assert.ok(markdown.includes("## New from Jenny (not yet triaged)"));
+    assert.ok(!markdown.includes("## New from Jenny"));
+    assert.ok(markdown.indexOf("## Later") < markdown.indexOf("Sell crops at the General Store"));
+    assert.ok(markdown.indexOf("Sell crops at the General Store") < markdown.indexOf("Later item."));
 
     const client = toBacklogClientEntry(entry);
     assert.equal(client.imageUrl, `/api/backlog-image/${entry.id}`);
@@ -120,4 +139,25 @@ test("addBacklogEntry rejects an invalid title without writing any files", async
     const result = await addBacklogEntry(root, { title: "   " });
     assert.equal(result.error, "Title is required.");
     assert.deepEqual(await loadBacklogInbox(root), []);
+});
+
+test("loadPlanner surfaces backlog entries as unscheduled pseudo-features, newest first", async (t) => {
+    const root = await fixture(t);
+    await mkdir(join(root, "openspec", "changes", "existing-feature"), { recursive: true });
+    await writeFile(join(root, "openspec", "changes", "existing-feature", "tasks.md"), "## Work\n- [ ] 1.1 Step\n");
+
+    const older = await addBacklogEntry(root, { title: "Older backlog item" }, Date.parse("2026-10-01T10:00:00Z"));
+    const newer = await addBacklogEntry(root, { title: "Newer backlog item" }, Date.parse("2026-10-01T12:00:00Z"));
+    assert.ok(older.value && newer.value);
+
+    const planner = await loadPlanner(root, Date.parse("2026-10-01T23:00:00Z"));
+    const titles = planner.features.map((feature) => feature.title);
+    assert.equal(titles[0], "Newer backlog item");
+    assert.equal(titles[1], "Older backlog item");
+
+    const newerFeature = planner.features.find((feature) => feature.title === "Newer backlog item");
+    assert.equal(newerFeature.fromBacklog, true);
+    assert.equal(newerFeature.status, "proposed");
+    assert.equal(newerFeature.slot, null);
+    assert.ok(newerFeature.id.startsWith("backlog:"));
 });
