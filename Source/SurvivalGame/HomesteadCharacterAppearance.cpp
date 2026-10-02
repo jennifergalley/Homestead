@@ -781,16 +781,17 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         MetaHumanLODSync->ComponentsToSync.Add(FComponentSync(Garment->GetFName(), ESyncOption::Passive));
     for (UGroomComponent* Groom : MetaHumanGrooms)
     {
+        // Her scalp hair always draws as strands at its finest LOD (ApplyMetaHumanHairLOD), so it isn't
+        // in the sync: the stock grooms' lower LODs are decimated strands, cards and helmet meshes, which
+        // showed as rods, fans and LOD pops on the Bob and updo as the camera moved (Jenny, 09-29 and 10-01).
+        if (Groom == MetaHumanHair) continue;
         MetaHumanLODSync->ComponentsToSync.Add(FComponentSync(Groom->GetFName(), ESyncOption::Passive));
         FLODMappingData GroomMapping;
-        // Scalp hair stops at groom LOD 4 (cards) instead of the stock 5 and 7. Those are Legacy01 helmet
-        // meshes bound by transfer, and Pixie declares them with no mesh at all. Jenny saw rods and fans in
-        // far and rear views (09-29). This is an unconfirmed fix: it didn't reproduce in the lab.
         // Brows, lashes and fuzz keep the stock mapping.
-        const bool bScalp = Groom == MetaHumanHair;
-        GroomMapping.Mapping = bScalp ? TArray<int32>{1, 3, 4, 4} : TArray<int32>{1, 3, 5, 7};
+        GroomMapping.Mapping = TArray<int32>{1, 3, 5, 7};
         MetaHumanLODSync->CustomLODMapping.Add(Groom->GetFName(), GroomMapping);
     }
+    ApplyMetaHumanHairLOD();
     MetaHumanLODSync->RegisterComponent();
     bMetaHumanAssetsValid = true;
     return true;
@@ -885,6 +886,17 @@ void AHomesteadCharacter::ApplyMetaHumanTunicDye()
     }
 }
 
+void AHomesteadCharacter::ApplyMetaHumanHairLOD()
+{
+    // LOD 0 is each groom's full strands; the camera never gets far enough from her for strands to cost
+    // much, and every lower LOD of the stock grooms showed rods, fans or pops (see LoadMetaHumanStack).
+    if (!MetaHumanHair) return;
+    MetaHumanHair->SetForcedLOD(0);
+    UE_LOG(LogHomesteadHair, Log, TEXT("Heroine hair %s held at LOD %d of %d (full strands)."),
+        MetaHumanHair->GroomAsset ? *MetaHumanHair->GroomAsset->GetName() : TEXT("none"),
+        MetaHumanHair->GetForcedLOD(), MetaHumanHair->GetNumLODs());
+}
+
 void AHomesteadCharacter::ApplyMetaHumanLook()
 {
     if (!MetaHumanHair || !MetaHumanLook.IsValid()) return;
@@ -904,6 +916,7 @@ void AHomesteadCharacter::ApplyMetaHumanLook()
             return;
         }
         MetaHumanHair->SetGroomAsset(Asset, Binding);
+        ApplyMetaHumanHairLOD();
         // The component's physics overrides (bend stiffness 0.15, collision radius 5 cm, air drag 1...)
         // were tuned for the long assembled groom and replace every group's authored values. On the stock
         // bobs, updos and ponytail they are 3-20x stiffer, 2-50x wider and 10x draggier than authored, so a

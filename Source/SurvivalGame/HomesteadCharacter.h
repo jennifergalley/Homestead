@@ -450,6 +450,8 @@ private:
     FHomesteadAppearance MetaHumanLook, PendingMetaHumanLook;
     int32 AppliedMetaHair = 0;
     void ApplyMetaHumanLook();
+    // Keeps her scalp groom on its full-strand LOD whatever the camera distance.
+    void ApplyMetaHumanHairLOD();
     void ApplyMetaHumanSkinAndEyes();
     float HairSprintBlend = 0;
     FTransform HairLastHead;
