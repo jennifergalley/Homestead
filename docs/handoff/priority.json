@@ -18,6 +18,7 @@
     "improve-contextual-feedback-and-sprint",
     "flexible-sleep",
     "fix-night-brightness",
+    "add-hud-compass-trial",
     "fix-live-sound-sliders",
     "fix-estate-river-source",
     "enrich-estate-ground-and-meadow",
@@ -39,7 +40,6 @@
     "add-pickup-gain-lines",
     "add-leather-backpack",
     "add-lake-trail-forage",
-    "add-hud-compass-trial",
     "add-hotbar-eat-and-meal-gains",
     "add-horse-and-wagon",
     "add-hired-workers-and-estate-upkeep",
@@ -61,5 +61,5 @@
   "removed": [
     "replace-heroine-with-metahuman"
   ],
-  "updated": "2026-10-02T01:05:07.140Z"
+  "updated": "2026-10-02T01:06:10.577Z"
 }
