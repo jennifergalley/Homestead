@@ -1,5 +1,9 @@
 {
   "order": [
+    "add-estate-lake",
+    "add-cove-route",
+    "add-chest-names",
+    "add-chest-auto-store",
     "reduce-foliage-shadow-motion",
     "refine-playable-heroine-hairstyles",
     "expand-randomized-music-playlist",
@@ -47,19 +51,15 @@
     "add-handcart-hauling-and-dynamic-prices",
     "add-field-book-notice-card",
     "add-family-reputation-and-land-purchase",
-    "add-estate-lake",
     "add-dye-chooser",
     "add-dollars-and-general-store",
-    "add-cove-route",
     "add-cove-route-kit",
     "add-courtship-and-family",
-    "add-chest-names",
-    "add-chest-auto-store",
     "add-boat-fishing"
   ],
   "nextBuild": [],
   "removed": [
     "replace-heroine-with-metahuman"
   ],
-  "updated": "2026-10-02T01:06:42.734Z"
+  "updated": "2026-10-02T01:07:37.076Z"
 }
