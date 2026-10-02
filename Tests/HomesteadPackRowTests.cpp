@@ -5,6 +5,7 @@
 #include "HomesteadPackRow.h"
 #include "HomesteadSimulation.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -580,6 +581,114 @@ void RotatingTheRowKeepsEachStacksKey()
     Simulation fresh = Estate();
     CHECK(fresh.Serialize().find(PackRowRules::ParkedSaveTag) == std::string::npos && fresh.GetState().parkedRows.empty());
 }
+
+// What each square of her pack's grid holds (item ids; -1 for a gap).
+std::vector<int> Squares(const Simulation& sim)
+{
+    std::vector<int> result;
+    const auto& state = sim.GetState();
+    for (const int index : PackRowRules::Grid(state))
+        result.push_back(index < 0 ? -1 : V(state.inventoryLayout[index].item));
+    return result;
+}
+
+int SquareOf(const std::vector<int>& squares, Item item)
+{
+    const auto found = std::find(squares.begin(), squares.end(), V(item));
+    return found == squares.end() ? -1 : static_cast<int>(found - squares.begin());
+}
+
+void ItemsKeepTheirSquares()
+{
+    Simulation sim = Estate();
+    ClearRow(sim);
+    for (const Item item : {Item::Stone, Item::Branch, Item::Fiber}) OK(sim.GrantItems(item, 2));
+    ClearRow(sim);
+    // Until she places something the grid is packed, in layout order.
+    CHECK(sim.GetState().packSlots.empty());
+    OK(sim.MoveToPackRow(Group(sim, Item::Stone), 0, 2, sim.GetRevision()));
+    const auto packed = Squares(sim);
+    CHECK(std::find(packed.begin(), packed.end(), -1) == packed.end() && packed.size() < 20);
+    // From the hotbar onto the 40th square: it lands there, and the squares before it are unchanged.
+    OK(sim.MoveToPackSlot(Group(sim, Item::Stone), 0, 39, sim.GetRevision()));
+    auto squares = Squares(sim);
+    CHECK(squares.size() == 40 && squares[39] == V(Item::Stone) && sim.GetState().packRow[2].Empty());
+    for (std::size_t i = 0; i < packed.size(); ++i) CHECK(squares[i] == packed[i]);
+    for (std::size_t i = packed.size(); i < 39; ++i) CHECK(squares[i] == -1);
+    // Saved and loaded, every square is where it was.
+    const std::string saved = sim.Serialize();
+    CHECK(saved.find("\npackslots 40 ") != std::string::npos);
+    Simulation loaded = Estate();
+    OK(loaded.Deserialize(saved));
+    CHECK(Squares(loaded) == squares && loaded.Serialize() == saved);
+    // Onto a stack the two swap; onto an empty square it moves; trailing gaps go.
+    const int branch = SquareOf(squares, Item::Branch);
+    OK(sim.MoveToPackSlot(Group(sim, Item::Stone), 0, branch, sim.GetRevision()));
+    squares = Squares(sim);
+    CHECK(squares[branch] == V(Item::Stone) && squares[39] == V(Item::Branch));
+    OK(sim.MoveToPackSlot(Group(sim, Item::Branch), 0, 20, sim.GetRevision()));
+    squares = Squares(sim);
+    CHECK(squares.size() == 21 && squares[20] == V(Item::Branch) && squares[branch] == V(Item::Stone));
+    // Leaving a square leaves a gap there; nothing closes up.
+    OK(sim.MoveToPackSlot(Group(sim, Item::Stone), 0, 30, sim.GetRevision()));
+    const auto gapped = Squares(sim);
+    CHECK(gapped[branch] == -1 && gapped[30] == V(Item::Stone) && gapped[20] == V(Item::Branch));
+    // The layout lists the row, then the grid in order (what tests and the book read).
+    const auto& layout = sim.GetState().inventoryLayout;
+    const auto below = PackRowRules::BelowRow(sim.GetState().packRow, layout);
+    std::vector<int> listed;
+    for (const int index : below) listed.push_back(V(layout[index].item));
+    std::vector<int> shown;
+    for (const int value : gapped) if (value >= 0) shown.push_back(value);
+    CHECK(std::equal(shown.begin(), shown.end(), listed.begin()));
+    // Out of the hotbar with no square chosen, a stack takes the first gap.
+    const int firstGap = static_cast<int>(std::find(gapped.begin(), gapped.end(), -1) - gapped.begin());
+    OK(sim.MoveToPackRow(Group(sim, Item::Fiber), 0, 4, sim.GetRevision()));
+    OK(sim.MoveFromPackRow(4, 0, 0, sim.GetRevision()));
+    CHECK(Squares(sim)[std::min(firstGap, SquareOf(gapped, Item::Fiber))] == V(Item::Fiber));
+    // From the hotbar onto a stack below: they swap, the stack below going up into her cell.
+    OK(sim.MoveToPackRow(Group(sim, Item::Fiber), 0, 4, sim.GetRevision()));
+    OK(sim.MoveToPackSlot(Group(sim, Item::Fiber), 0, 20, sim.GetRevision()));
+    CHECK(Squares(sim)[20] == V(Item::Fiber) && CellItem(sim, 4) == Item::Branch);
+    // Onto the same item they merge, and nothing is lost or made.
+    OK(sim.GrantItems(Item::Stone, 2));
+    const int stones = sim.Count(Item::Stone);
+    OK(sim.SplitGroup(0, Group(sim, Item::Stone), 1, {}, sim.GetRevision()));
+    int split = 0;
+    for (const auto& entry : sim.GetState().inventoryLayout)
+        if (entry.wearableId == 0 && entry.item == Item::Stone && entry.quantity == 1) split = entry.groupId;
+    CHECK(split != 0);
+    if (PackRowRules::RowCellOf(sim.GetState(), split, 0) < 0)
+        OK(sim.MoveToPackRow(split, 0, 7, sim.GetRevision()));
+    OK(sim.MoveToPackSlot(split, 0, 30, sim.GetRevision()));
+    CHECK(sim.Count(Item::Stone) == stones && Group(sim, Item::Stone) != 0 && Squares(sim)[30] == V(Item::Stone));
+    // Refusals change nothing.
+    const std::string before = sim.Serialize();
+    const auto revision = sim.GetRevision();
+    CHECK(!sim.MoveToPackSlot(Group(sim, Item::Fiber), 0, -1, revision));
+    CHECK(!sim.MoveToPackSlot(Group(sim, Item::Fiber), 0, PackRowRules::MaxPackSlots, revision));
+    CHECK(!sim.MoveToPackSlot(999999, 0, 3, revision));
+    CHECK(sim.MoveToPackSlot(Group(sim, Item::Fiber), 0, 3, revision + 1).code == ResultCode::StaleRevision);
+    OK(sim.MoveToPackSlot(Group(sim, Item::Fiber), 0, 20, revision));
+    CHECK(sim.Serialize() == before && sim.GetRevision() == revision);
+    // Saves from before squares load packed; a damaged section is refused, leaving the game as it was.
+    std::string payload = saved.substr(saved.find('\n') + 1);
+    const auto start = payload.find("\npackslots ");
+    const std::string old = Reseal(saved, payload.substr(0, start + 1) + payload.substr(payload.find('\n', start + 1) + 1));
+    Simulation older = Estate();
+    OK(older.Deserialize(old));
+    CHECK(older.GetState().packSlots.empty() && older.Serialize().find("packslots") == std::string::npos);
+    const std::string damaged = Reseal(saved, payload.substr(0, start + 1) + "packslots 1 5 7"
+        + payload.substr(payload.find('\n', start + 1)));
+    const std::string kept = older.Serialize();
+    const auto refused = older.Deserialize(damaged);
+    CHECK(!refused && refused.code == ResultCode::CorruptSave && older.Serialize() == kept);
+    // Sorting packs the grid again.
+    OK(sim.SortPack(sim.GetRevision()));
+    const auto sorted = Squares(sim);
+    CHECK(sim.GetState().packSlots.empty() && std::find(sorted.begin(), sorted.end(), -1) == sorted.end());
+}
+
 int main(int argc, char** argv)
 {
     if (argc > 1) filter = argv[1];
@@ -594,6 +703,7 @@ int main(int argc, char** argv)
     Run("old pinned hotbars migrate once", OldPinnedHotbarsMigrateOnce);
     Run("saved pin lists sanitize", SavedLayoutsSanitize);
     Run("rotating the row keeps each stack's key", RotatingTheRowKeepsEachStacksKey);
+    Run("items keep their squares", ItemsKeepTheirSquares);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

@@ -60,7 +60,10 @@ FLinearColor SHomesteadMenu::CellColor(int32 Index) const
     if (bPointerDraggingItem && Index == PointerDragTarget)
         return MenuGold;
     return Index == ContentSelection ? Selected
-        : Index == Hover ? Selected : HomesteadUITheme::Themed(FLinearColor(0.055f, 0.09f, 0.075f, 0.5f));
+        : Index == Hover ? Selected
+        : Entries.IsValidIndex(Index) && Entries[Index].Subject == EHomesteadMenuSubject::EmptySlot
+            ? HomesteadUITheme::Themed(FLinearColor(0.2f, 0.3f, 0.24f, 0.25f))
+        : HomesteadUITheme::Themed(FLinearColor(0.055f, 0.09f, 0.075f, 0.5f));
 }
 
 void SHomesteadMenu::Select(int32 Index, bool KeepDesiredColumn)
@@ -98,6 +101,7 @@ void SHomesteadMenu::QuickMove(int32 Index)
 {
     if (!Controller.IsValid() || Dialog != EDialog::None || !Entries.IsValidIndex(Index)) return;
     const FHomesteadRow Row = Entries[Index];
+    if (Row.Subject == EHomesteadMenuSubject::EmptySlot) return;
     bool Changed = false;
     if (Controller->ActiveStorageChest().IsSet() || Row.ContainerId != 0)
         Changed = Controller->MenuMoveWhole(Row);
@@ -343,6 +347,8 @@ void SHomesteadMenu::EndPointerItemDrag()
     const int32 HotbarTarget = PointerHotbarTarget;
     int32 Target = INDEX_NONE;
     bool bOverSource = false;
+    FHomesteadRow PadTarget;
+    bool bOverPad = false;
     if (WasDragging && FSlateApplication::IsInitialized())
     {
         const FVector2D Position = FSlateApplication::Get().GetCursorPos();
@@ -351,18 +357,23 @@ void SHomesteadMenu::EndPointerItemDrag()
                 && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position))
             { Target = Index; break; }
         bOverSource = Cells.IsValidIndex(Source) && Cells[Source] && Cells[Source]->GetCachedGeometry().IsUnderLocation(Position);
+        bOverPad = Target == INDEX_NONE && !bOverSource && PackPadAt(Position, PadTarget);
     }
     bPointerItemDown = false;
     bPointerDraggingItem = false;
     PointerDragSource = INDEX_NONE;
     PointerDragTarget = INDEX_NONE;
     PointerHotbarTarget = INDEX_NONE;
+    PointerPadSlot = INDEX_NONE;
     // Only a release back over the tile she picked up clicks it; swallow that one click. Released
     // anywhere else, no click follows, so the next real click mustn't be eaten.
     bSuppressItemClick = WasDragging && bOverSource;
     if (WasDragging && Entries.IsValidIndex(Source) && Entries.IsValidIndex(Target)
         && Source != Target)
         Controller->MenuDrop(Entries[Source], Entries[Target], PointerDragRevision);
+    // Onto an empty square past her last stack: exactly there.
+    else if (WasDragging && Entries.IsValidIndex(Source) && bOverPad)
+        Controller->MenuDrop(Entries[Source], PadTarget, PointerDragRevision);
     // Dropped on a hotbar cell: the stack itself moves into her pack's first row (from a chest in
     // one step), merging or swapping with what is there. Anywhere else, nothing.
     else if (WasDragging && Entries.IsValidIndex(Source) && Target == INDEX_NONE && HotbarCells.IsValidIndex(HotbarTarget))
@@ -376,7 +387,25 @@ void SHomesteadMenu::CancelPointerItemDrag()
     PointerDragSource = INDEX_NONE;
     PointerDragTarget = INDEX_NONE;
     PointerHotbarTarget = INDEX_NONE;
+    PointerPadSlot = INDEX_NONE;
     bSuppressItemClick = false;
+}
+
+bool SHomesteadMenu::PackPadAt(FVector2D Position, FHomesteadRow& Out) const
+{
+    for (const auto& Pad : PackPadCells)
+        if (const auto Widget = Pad.Value.Pin(); Widget && Widget->GetCachedGeometry().IsUnderLocation(Position))
+        {
+            Out = FHomesteadRow();
+            Out.Subject = EHomesteadMenuSubject::EmptySlot;
+            Out.Id = -1;
+            Out.SubjectId = Pad.Key;
+            Out.ContainerId = 0;
+            Out.DestinationId = -1;
+            Out.PackSlot = Pad.Key;
+            return true;
+        }
+    return false;
 }
 
 void SHomesteadMenu::BeginOrCommitVirtualItemDrag()
@@ -421,6 +450,8 @@ void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
         {
             const int32 Over = HotbarCellAt(Position);
             PointerHotbarTarget = Over != HeldHotbarSlot ? Over : INDEX_NONE;
+            FHomesteadRow Pad;
+            PointerPadSlot = Over == INDEX_NONE && PackPadAt(Position, Pad) ? Pad.PackSlot : INDEX_NONE;
         }
         return;
     }
@@ -438,6 +469,8 @@ void SHomesteadMenu::PointerItemDragMove(FVector2D Position)
                 { PointerDragTarget = Index; break; }
             // Off the grid, a pack stack can go onto one of the book's hotbar slots.
             PointerHotbarTarget = PointerDragTarget == INDEX_NONE && HotbarCandidateRow() ? HotbarCellAt(Position) : INDEX_NONE;
+            FHomesteadRow Pad;
+            PointerPadSlot = PointerDragTarget == INDEX_NONE && PackPadAt(Position, Pad) ? Pad.PackSlot : INDEX_NONE;
             if (Scroll && PointerHotbarTarget == INDEX_NONE)
             {
                 const auto Bounds = Scroll->GetCachedGeometry();

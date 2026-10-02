@@ -277,6 +277,11 @@ private:
     float AudioEditStart = 0;
     int32 PointerDragSource = INDEX_NONE;
     int32 PointerDragTarget = INDEX_NONE;
+    // The empty squares padding her pack's grid (after its last stack), each a drop target; the one
+    // under a drag lights (PointerPadSlot).
+    TArray<TPair<int32, TWeakPtr<SWidget>>> PackPadCells;
+    int32 PointerPadSlot = INDEX_NONE;
+    bool PackPadAt(FVector2D Position, FHomesteadRow& Out) const;
     FVector2D PointerDragStart = FVector2D::ZeroVector;
     uint64 PointerDragRevision = 0;
     bool bPointerItemDown = false;

@@ -602,18 +602,26 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 ]
             ]
         ];
-    // Empty slots draw as pale outlines on the page, so the pack and chests read as grids of room.
-    auto EmptyCell = []() -> TSharedRef<SWidget>
+    // Empty slots draw as pale outlines on the page, so the pack and chests read as grids of room. In
+    // her pack each is a square she can drop onto (PackPadAt); it lights while something is held over it.
+    PackPadCells.Reset();
+    auto EmptyCell = [this](int32 PackSlot = INDEX_NONE) -> TSharedRef<SWidget>
     {
-        return SNew(SBox).WidthOverride(ItemCellWidth + 4).HeightOverride(80).Padding(2)
+        TSharedRef<SWidget> Cell = SNew(SBox).WidthOverride(ItemCellWidth + 4).HeightOverride(80).Padding(2)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(1.5f)
                 .BorderBackgroundColor(FLinearColor(Ink.R, Ink.G, Ink.B, 0.2f))
                 [
                     SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                    .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.2f, 0.3f, 0.24f, 0.25f)))
+                    .BorderBackgroundColor_Lambda([this, PackSlot]()
+                    {
+                        return PackSlot != INDEX_NONE && PackSlot == PointerPadSlot ? FLinearColor(MenuGold)
+                            : HomesteadUITheme::Themed(FLinearColor(0.2f, 0.3f, 0.24f, 0.25f));
+                    })
                 ]
             ];
+        if (PackSlot != INDEX_NONE) PackPadCells.Add({PackSlot, Cell});
+        return Cell;
     };
     const bool bPackGrid = SeenPage == 0 && !(Controller->InventoryView() == 2);
     if (Entries.IsEmpty() && Grid && bPackGrid)
@@ -636,7 +644,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         TSharedPtr<SVerticalBox> Contents;
         auto Button = RegisterButton(SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(7)
             .ButtonColorAndOpacity_Lambda([this, Index]() { return CellColor(Index); })
-            .ToolTipText(FText::FromString(Name + TEXT("\n") + Row.Detail))
+            .ToolTipText(FText::FromString(Row.Subject == EHomesteadMenuSubject::EmptySlot ? FString() : Name + TEXT("\n") + Row.Detail))
             .OnHovered_Lambda([this, Index]() { if (Controller.IsValid() && !Controller->UsesGamepad()) Hover = Index; })
             .OnUnhovered_Lambda([this, Index]() { if (Hover == Index) Hover = INDEX_NONE; })
             .OnPressed_Lambda([this, Index]()
@@ -691,7 +699,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             {
                 if (PointerAction() && Dialog == EDialog::None) OpenItemContextMenu(Index);
             };
-        if (SeenPage == 0)
+        if (SeenPage == 0 && Row.Subject == EHomesteadMenuSubject::EmptySlot) {}
+        else if (SeenPage == 0)
         {
             Contents->AddSlot().AutoHeight().HAlign(HAlign_Center)
             [
@@ -701,15 +710,12 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     + SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
                     [ SNew(SBox).WidthOverride(48).HeightOverride(48)
                         [ SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(Row.IconTint) ] ]
+                    // The count sits on the tile itself, as on the hotbar's cells (no box of its own).
                     + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom)
                     [
-                        SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                        .BorderBackgroundColor(MenuPine).Padding(FMargin(4, 1))
-                        [
-                            SNew(STextBlock).Text(FText::AsNumber(FMath::Max(1, Row.Quantity)))
-                            .ColorAndOpacity(Ink)
-                            .Font(HomesteadUITheme::Font("Bold", 15))
-                        ]
+                        SNew(STextBlock).Text(FText::AsNumber(FMath::Max(1, Row.Quantity)))
+                        .ColorAndOpacity(Ink)
+                        .Font(HomesteadUITheme::Font("Bold", 15))
                     ]
                 ]
             ];
@@ -821,19 +827,19 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         else Grid->AddSlot(Index % Columns(), Index / Columns())[ Cell.ToSharedRef() ];
     }
     // Pad the grids with empty slots to at least four full rows, and always complete the last row.
-    const auto Pad = [&EmptyCell](const TSharedPtr<SUniformGridPanel>& Target, int32 Used, int32 Width)
+    const auto Pad = [&EmptyCell](const TSharedPtr<SUniformGridPanel>& Target, int32 Used, int32 Width, bool bPackSquares)
     {
         if (!Target || Width <= 0) return;
         const int32 Total = FMath::Max(Width * 4, (Used + Width - 1) / Width * Width);
         for (int32 Cell = FMath::Max(Used, 0); Cell < Total; ++Cell)
-            Target->AddSlot(Cell % Width, Cell / Width)[ EmptyCell() ];
+            Target->AddSlot(Cell % Width, Cell / Width)[ EmptyCell(bPackSquares ? Cell : INDEX_NONE) ];
     };
     if (Storage)
     {
-        Pad(ChestGrid, ChestCell, StorageColumns());
-        Pad(PackGrid, PackCell, StoragePackColumns());
+        Pad(ChestGrid, ChestCell, StorageColumns(), false);
+        Pad(PackGrid, PackCell, StoragePackColumns(), true);
     }
-    else if (bPackGrid) Pad(Grid, FMath::Max(Entries.Num(), 1), Columns());
+    else if (bPackGrid) Pad(Grid, FMath::Max(Entries.Num(), 1), Columns(), Controller->InventoryView() == 0);
     return Result;
 }
 }

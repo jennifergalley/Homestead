@@ -342,6 +342,11 @@ struct State
     // all, so its stacks come back to the same number keys. Cells may name stacks since used up or
     // moved; RotatePackRow drops those as the row comes back. Saved in the optional "packrowsparked" section.
     std::vector<PackRow> parkedRows;
+    // Where each stack below the hotbar sits in her pack's grid (place-items-in-exact-slots): slot i
+    // names a carried entry, or is an empty gap. Empty until she first drops something on a slot
+    // (MoveToPackSlot); until then the grid is the layout's order, packed. Cells naming stacks since used
+    // up or moved stay gaps; new stacks take the first gap. Saved in the optional "packslots" section.
+    std::vector<PackRowCell> packSlots;
     Generation::WorldDescriptor world{};
     Generation::ChunkCoord activeChunk{};
     std::vector<ResourceEdit> resourceEdits;
@@ -663,6 +668,10 @@ public:
     // Moves what is in `cell` below the row: onto that stack (or garment) there, merging with the
     // same item or else swapping; with no target (0, 0) to the end of her pack.
     Result MoveFromPackRow(int cell, int targetGroupId, int targetWearableId, std::uint64_t expectedRevision);
+    // Puts one of her carried stacks (or garment `wearableId`), from the hotbar row or below it, in
+    // `slot` of her pack's grid below the row (HomesteadPackRow.h): onto an empty slot it moves, onto
+    // the same item it merges, onto anything else the two swap places. Gaps stay where they are.
+    Result MoveToPackSlot(int groupId, int wearableId, int slot, std::uint64_t expectedRevision);
     // The hotbar steps on to the next row of her pack, as in Coral Island: the first ten stacks below
     // the row become the row, in order, and the row's stacks go to the end of her pack in cell order,
     // so pressing again carries each row of her pack through the hotbar in turn.

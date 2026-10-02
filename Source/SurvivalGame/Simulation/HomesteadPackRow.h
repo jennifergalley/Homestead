@@ -15,7 +15,9 @@
 //   the stacks below in order.
 // - A stack used up leaves its cell empty; nothing is held for it.
 // - Moving onto an empty cell moves, onto the same item merges, onto anything else swaps.
-// - Sort Pack sorts only below the row.
+// - Below the row her pack is a grid of squares (State::packSlots): once she drops something on a
+//   square, every stack keeps its square, gaps included, through saves; new stacks take the first gap.
+// - Sort Pack sorts only below the row, and packs the grid again.
 namespace Homestead
 {
 namespace PackRowRules
@@ -30,6 +32,24 @@ bool ReadSaveSection(std::istream& input, State& state);
 constexpr const char* ParkedSaveTag = "packrowsparked";
 void WriteParkedSection(std::ostream& output, const State& state);
 bool ReadParkedSection(std::istream& input, State& state);
+// Optional trailing section (tag "packslots") for where each stack sits in the grid below the row
+// (State::packSlots); written only once she has placed something, so older saves load packed.
+constexpr const char* SlotsSaveTag = "packslots";
+void WriteSlotsSection(std::ostream& output, const State& state);
+bool ReadSlotsSection(std::istream& input, State& state);
+// The most squares her pack's grid may span.
+constexpr int MaxPackSlots = 1024;
+
+// Her pack's grid below the row, square by square: the layout index in each, or -1 for a gap (never
+// a trailing one). Placed stacks keep their squares; the rest fill the first gaps, then follow in
+// layout order. The pail's water, while it shows on the pail (HomesteadPail.h), takes no square.
+std::vector<int> Grid(const State& state);
+// Grid() as cells: what State::packSlots holds once she places something.
+std::vector<PackRowCell> GridCells(const State& state);
+// Renames a placed square (a stack swapped in for another), when she has placed any.
+void ReplaceSlot(State& state, const PackRowCell& from, const PackRowCell& to);
+// Puts the layout in the order she sees: the row's entries, then the grid's, then anything hidden.
+void OrderLayoutByGrid(State& state);
 
 // The cell naming `entry`.
 PackRowCell CellFor(const LayoutEntry& entry);

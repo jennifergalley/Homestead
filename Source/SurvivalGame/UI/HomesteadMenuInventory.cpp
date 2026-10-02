@@ -95,10 +95,30 @@ TArray<FHomesteadRow> AHomesteadController::MenuRows() const
         if (CurrentContainer < 0) return;
         const auto* Layout = Sim.GetLayout(CurrentContainer);
         if (!Layout) return;
+        if (CurrentContainer == 0)
+        {
+            // Her pack below the hotbar row (shown as its own ten cells, MenuHotbarRow), square by square:
+            // gaps between stacks are empty squares she can drop onto (place-items-in-exact-slots).
+            const auto Grid = Homestead::PackRowRules::Grid(State());
+            for (int32 Slot = 0; Slot < static_cast<int32>(Grid.size()); ++Slot)
+            {
+                FHomesteadRow Row;
+                if (Grid[Slot] < 0 || !MenuEntryRow((*Layout)[Grid[Slot]], 0, Row))
+                {
+                    Row = FHomesteadRow();
+                    Row.Subject = EHomesteadMenuSubject::EmptySlot;
+                    Row.Id = -1;
+                    Row.SubjectId = Slot;
+                    Row.ContainerId = 0;
+                    Row.DestinationId = -1;
+                }
+                Row.PackSlot = Slot;
+                Result.Add(MoveTemp(Row));
+            }
+            return;
+        }
         for (const auto& Entry : *Layout)
         {
-            // Her pack's first row is the hotbar, shown as its own ten cells (MenuHotbarRow).
-            if (CurrentContainer == 0 && Homestead::PackRowRules::CellOf(State().packRow, Entry) >= 0) continue;
             FHomesteadRow Row;
             if (MenuEntryRow(Entry, CurrentContainer, Row)) Result.Add(MoveTemp(Row));
         }
@@ -170,6 +190,8 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
     int32 Amount, uint64 ExpectedRevision)
 {
     if (RejectPendingGroundSnapAction()) return false;
+    // An empty square of her pack holds nothing to act on.
+    if (Row.Subject == EHomesteadMenuSubject::EmptySlot) return false;
     if (bMenuSaveInProgress || IsFailed() || bTestResetRequired)
     { Notify(TEXT("This action is unavailable until you return to a playable world."), true); return false; }
     if (ExpectedRevision != Sim.GetRevision())
@@ -325,6 +347,7 @@ bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomestea
     uint64 ExpectedRevision)
 {
     if (RejectPendingGroundSnapAction()) return false;
+    if (Source.Subject == EHomesteadMenuSubject::EmptySlot) return false;
     if (ExpectedRevision != Sim.GetRevision())
     { Notify(TEXT("Your inventory changed. Pick up the item again."), true); return false; }
     // The hotbar is the first row of her pack: into, within and out of it (HomesteadPackRow.h).
@@ -357,6 +380,16 @@ bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomestea
         Notify(Result);
         return Result.ok;
     }
+    // In her pack, the exact square: onto an empty one it moves, onto a stack the two swap.
+    if (Source.ContainerId == 0 && Target.PackSlot != INDEX_NONE)
+    {
+        const bool Garment = Source.Subject == EHomesteadMenuSubject::Wearable;
+        const auto Result = Sim.MoveToPackSlot(Garment ? 0 : Source.SubjectId, Garment ? Source.SubjectId : 0,
+            Target.PackSlot, ExpectedRevision);
+        NotifyResourceAction(Result, nullptr);
+        return Result.ok;
+    }
+    if (Target.Subject == EHomesteadMenuSubject::EmptySlot) return false;
     const auto* Layout = Sim.GetLayout(Source.ContainerId);
     if (!Layout) return false;
     const auto FindIndex = [Layout](const FHomesteadRow& Row)

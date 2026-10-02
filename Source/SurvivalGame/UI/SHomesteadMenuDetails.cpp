@@ -342,7 +342,8 @@ FString SHomesteadMenu::PackHint() const
     if (bHotbarLine && !HotbarCells.IsEmpty()) return HotbarHint();
     const int32 Index = DetailIndex();
     FString Subject;
-    if (Entries.IsValidIndex(Index) && Entries[Index].Subject != EHomesteadMenuSubject::Legacy)
+    if (Entries.IsValidIndex(Index) && Entries[Index].Subject != EHomesteadMenuSubject::Legacy
+        && Entries[Index].Subject != EHomesteadMenuSubject::EmptySlot)
     {
         const auto& Row = Entries[Index];
         Subject = EntryName(Row) + (Row.Quantity > 1 ? FString::Printf(TEXT(" x%d"), Row.Quantity) : FString())

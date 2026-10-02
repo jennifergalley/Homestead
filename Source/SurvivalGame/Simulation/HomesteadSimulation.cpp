@@ -1380,6 +1380,9 @@ Result Simulation::CommitInventory(State&& candidate, const char* message)
     for (const auto& piece : candidate.structures)
         if (piece.kind == Piece::Chest && !ReconcileLayout(candidate, piece.id))
             return {false, "Storage group identities are exhausted.", ResultCode::Unavailable, revision_};
+    // Once she has placed something, every stack keeps the square it shows in (new ones take the first
+    // gaps), and a stack that left her pack's grid gives its square up (HomesteadPackRow.h).
+    if (!candidate.packSlots.empty()) candidate.packSlots = PackRowRules::GridCells(candidate);
     auto result = ValidateInventory(candidate);
     if (!result) { result.revision = revision_; return result; }
     state_ = std::move(candidate);
@@ -1713,10 +1716,13 @@ Result Simulation::SortPack(std::uint64_t expectedRevision)
         }
         return true;
     };
-    if (sameLayout())
+    const auto grid = PackRowRules::Grid(state_);
+    if (sameLayout() && std::find(grid.begin(), grid.end(), -1) == grid.end())
         return {true, "Pack is already sorted.", ResultCode::None, revision_};
     candidate.inventoryLayout = std::move(row);
     candidate.inventoryLayout.insert(candidate.inventoryLayout.end(), layout.begin(), layout.end());
+    // Sorting packs the grid again: the squares she chose give way to the sorted order.
+    candidate.packSlots.clear();
     return CommitInventory(std::move(candidate), "Pack sorted.");
 }
 Result Simulation::DropGroup(int groupId, int amount, Point position, Point player,
@@ -3147,6 +3153,7 @@ std::string Simulation::Serialize() const
     Crops::WriteWitheredSection(body, state_);
     PackRowRules::WriteSaveSection(body, state_);
     PackRowRules::WriteParkedSection(body, state_);
+    PackRowRules::WriteSlotsSection(body, state_);
     if (Chests::HasSaveSection(state_)) Chests::WriteSaveSection(body, state_);
     if (Backpack::HasSaveSection(state_)) Backpack::WriteSaveSection(body, state_);
     Food::WriteSaveSection(body, state_);
@@ -3422,6 +3429,7 @@ Result Simulation::Deserialize(const std::string& data)
     input >> std::ws;
     // Optional tagged trailing sections, each introduced by its tag word.
     bool parkedRowsSeen = false;
+    bool packSlotsSeen = false;
     while (!input.eof())
     {
         std::string tag;
@@ -3446,6 +3454,11 @@ Result Simulation::Deserialize(const std::string& data)
         {
             if (parkedRowsSeen || !PackRowRules::ReadParkedSection(input, candidate)) return invalid();
             parkedRowsSeen = true;
+        }
+        else if (tag == PackRowRules::SlotsSaveTag)
+        {
+            if (packSlotsSeen || !PackRowRules::ReadSlotsSection(input, candidate)) return invalid();
+            packSlotsSeen = true;
         }
         else if (tag == Chests::SaveTag) { if (!Chests::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Backpack::SaveTag) { if (!Backpack::ReadSaveSection(input, candidate)) return invalid(); }
