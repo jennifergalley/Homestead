@@ -36,11 +36,14 @@ and short player-facing changelist; the planner reads it directly.
 
 ## 2026-10-01 — early evening
 
-- SHA: pending
-- Status: building
+- SHA: `c2a589452bc05faec0f72f08758d84f5e5f92c7d`
+- Status: delivered
 - Ships:
-- More natural forearm and fist-roll tool contact.
-- Sequential kneels, a corrected stick cradle, and animation-inspector hardening.
+- Two-handed swings and the scythe's left fist follow a more natural working plane.
+- The hoe now holds its working grip with a more natural elbow and wrist.
+- Her feet step into and out of kneels one at a time, with a corrected stick cradle.
+- The animation inspector is harder to break in Development and the character lab; it is not a player feature.
+- Verification: Native 19, Inspector 22, nine Development routes, and guarded Shipping EstateSmoke/ToolRepeat passed; the promoted Shipping SHA-256 is `6E2EC11A5CF44AA7945AC88559C7020D6371D7A8A071DDFB53DCE4D82344D27C` with 18 saves preserved.
 
 ## Later
 
