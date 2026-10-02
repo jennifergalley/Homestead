@@ -124,6 +124,9 @@ before each pass.
 
 ## Rules
 
+- Props held or used by the heroine (tools, pails, lamps) must fit a plausible grip: check the handle
+  against the grips and wrist ranges in the `realistic-animation` skill (a power grip wants the handle
+  diagonal across the palm, the wrist slightly extended).
 - A live recipe build **clears the current scene**. If the window contains
   unsaved hand work, ask before rebuilding (or save a copy first).
 - Use original geometry or verified-license sources only. Scans come from CC0 Poly Haven via

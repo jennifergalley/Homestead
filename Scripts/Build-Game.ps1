@@ -8,6 +8,8 @@ Integration-session-only during multi-lane rounds: lanes and the orchestrator do
                       locomotion imports (about 25 minutes). Use it only when generated content is already
                       current in this worktree; the editor module build still runs (a no-op when current).
 -SkipAssets           skips Fetch-Assets.ps1.
+-LowMemoryCook        caps Development cook asset compilation at one task and leaves most CPU
+                      threads free; also limits the Shipping code build to four actions.
 UAT is single-instance machine-wide; this script waits for another worktree's package to finish
 (-WaitForUATMutex). It builds the game target itself with -WaitMutex (UAT's build step can't wait for
 other worktrees' UBT) and cooks with -SkipZenStore, so the machine-shared Zen server isn't involved.
@@ -19,7 +21,7 @@ to change. Shared-machine rules: .github\skills\unreal-editor-mcp\SKILL.md, sect
 param([string]$EngineRoot, [switch]$Package, [switch]$PackageOnly, [switch]$SkipAssets,
     [string]$ArchiveDirectory = 'Build\Windows',
     [ValidateSet('Development','Shipping')][string]$Configuration = 'Development',
-    [switch]$ReuseCooked, [string]$ReusePakDirectory)
+    [switch]$ReuseCooked, [string]$ReusePakDirectory, [switch]$LowMemoryCook)
 $ErrorActionPreference = 'Stop'
 if ($PackageOnly) { $Package = [switch]$true }
 $root = Split-Path $PSScriptRoot -Parent
@@ -62,7 +64,10 @@ if ($ReuseCooked) {
         $containerHashes = @($paks | ForEach-Object { [ordered]@{ name=$_.Name; sha256=(Get-FileHash $_.FullName).Hash } })
     }
     $build = Join-Path $engine 'Engine\Build\BatchFiles\Build.bat'
-    & $build SurvivalGame Win64 Shipping "-Project=$project" -WaitMutex -NoHotReloadFromIDE -NoUBA -NoXGE -NoFASTBuild
+    $buildArgs = @('SurvivalGame', 'Win64', 'Shipping', "-Project=$project",
+        '-WaitMutex', '-NoHotReloadFromIDE', '-NoUBA', '-NoXGE', '-NoFASTBuild')
+    if ($LowMemoryCook) { $buildArgs += '-MaxParallelActions=4' }
+    & $build @buildArgs
     if ($LASTEXITCODE -ne 0) { throw "Shipping build failed ($LASTEXITCODE)." }
     if (-not $Package) { Write-Host 'Shipping code built; no editor, cooker, packager or game launched.'; return }
     $stage = Join-Path $archive 'Staging'
@@ -132,7 +137,14 @@ if ($Package) {
     # the Zen store whenever ue.projectstore exists, so remove a stale marker first.
     Remove-Item -LiteralPath (Join-Path $root 'Saved\Cooked\Windows\ue.projectstore') -Force -ErrorAction SilentlyContinue
     Write-Host "Packaging; full output: $packageLog"
-    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -skipbuild -cook -stage -pak -archive "-archivedirectory=$archive" '-AdditionalCookerOptions=-SkipZenStore' -prereqs -unattended -utf8output -WaitForUATMutex *>&1 |
+    $cookOptions = '-SkipZenStore'
+    if ($LowMemoryCook) {
+        # A memory-constrained machine can overcommit several 4.5 GB skinned-asset builds at once.
+        $cookOptions += ' -asyncassetcompilationmaxconcurrency=1 -asyncskinnedassetcompilationmaxconcurrency=1'
+        $cookOptions += ' -asyncstaticmeshcompilationmaxconcurrency=1 -asynctexturecompilationmaxconcurrency=1'
+        $cookOptions += ' -ini:Engine:[DevOptions.Shaders]:PercentageUnusedShaderCompilingThreads=88'
+    }
+    & $uat BuildCookRun "-project=$project" -noP4 -platform=Win64 -clientconfig=Development -skipbuild -cook -stage -pak -archive "-archivedirectory=$archive" "-AdditionalCookerOptions=$cookOptions" -prereqs -unattended -utf8output -WaitForUATMutex *>&1 |
         Tee-Object -LiteralPath $packageLog
     if ($LASTEXITCODE -ne 0) { throw "Game packaging failed ($LASTEXITCODE). See $packageLog and Saved\Logs\UnrealPak.log." }
     $packageRoot = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $archive

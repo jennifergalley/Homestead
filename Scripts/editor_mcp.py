@@ -16,6 +16,7 @@ Examples:
 Slate included. It runs only on an isolated save route: start the editor with
 Start-EditorMcp.ps1 -PreviewProfile gallery. For every state at several resolutions use
 Scripts/Capture-UiGallery.ps1.
+    python Scripts/editor_mcp.py animinspect Weeds --recipe kneel_pull_weeds
 """
 from __future__ import annotations
 
@@ -139,7 +140,28 @@ def main() -> int:
     gallery.add_argument("--input", choices=["KBM", "Pad"], default="KBM")
     gallery.add_argument("--wait", type=float, default=6.0,
                          help="seconds to let it settle (teleports across the estate can take 20+)")
+    inspect = sub.add_parser("animinspect", help="record a heroine action frame by frame (Scripts/Inspect-Animation.ps1)")
+    inspect.add_argument("clip", help="a Character Lab LabAction name, e.g. Weeds, Mow, Sticks")
+    inspect.add_argument("--recipe", help="homestead_agent recipe whose FRAMES name the beats")
+    inspect.add_argument("--contacts", default="", help="comma-separated FRAMES keys of strikes or impacts")
+    inspect.add_argument("--every", type=int, default=2)
+    inspect.add_argument("--views", default="front,left,right,top,threequarter")
+    inspect.add_argument("--hold", help="a LabHold tool to carry first")
     args = parser.parse_args()
+
+    if args.command == "animinspect":
+        # Runs its own hidden game process (not this editor), so no MCP connection is needed.
+        import subprocess
+        script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Inspect-Animation.ps1")
+        command = ["pwsh", "-NoProfile", "-File", script, "-Clip", args.clip, "-Every", str(args.every),
+                   "-Views", args.views]
+        if args.recipe:
+            command += ["-Recipe", args.recipe]
+        if args.contacts:
+            command += ["-Contacts", args.contacts]
+        if args.hold:
+            command += ["-Hold", args.hold]
+        return subprocess.call(command)
 
     client = McpClient(args.url, args.timeout)
     try:

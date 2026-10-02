@@ -84,7 +84,9 @@ BODY = {
     'draw2': ((0, 1, -15), 40), 'recover': ((0, 1, -6), 14), 'end': ((0, 0, 0), 0),
 }
 POLE_R = (-60.0, -25.0, 95.0)
-POLE_L = (55.0, 10.0, 70.0)
+# The left elbow points out and back behind the haft, as when drawing a hoe toward you; further forward
+# it turned her forearm over past its range (supination 111 degrees, joint_limits).
+POLE_L = (55.0, -35.0, 70.0)
 FOOT_L_FORWARD = (14.0, 18.0, 8.6)
 FOOT_R_BACK = (-15.0, -12.0, 8.6)
 
