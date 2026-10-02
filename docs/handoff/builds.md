@@ -42,6 +42,19 @@ and short player-facing changelist; the planner reads it directly.
 - More natural forearm and fist-roll tool contact.
 - Sequential kneels, a corrected stick cradle, and animation-inspector hardening.
 
+## 2026-10-01 — 9 PM
+
+- SHA: pending
+- Status: planned
+- Ships:
+- Sprint toggles on and off with keyboard and controller, and respects tired Energy.
+- Signposts lead between the manor, the coast, and town without losing the path.
+- Lake-trail forage stays picked after a reload.
+- The farm-to-lake walk and landing feel finished.
+- The full cove route from the Estate walks cleanly.
+- Chests can be renamed, and the name sticks.
+- One button stores matching items in an open chest.
+
 ## Later
 
 - The player-driven deferred queue is in [backlog.md](backlog.md): river/ocean, map and town feedback, fishing, hauling, mine work, manor rebuilding, artisan goods, and later estate systems.

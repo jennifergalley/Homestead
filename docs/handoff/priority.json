@@ -1,5 +1,7 @@
 {
   "order": [
+    "add-sprint-toggle",
+    "add-road-sign-travel",
     "add-lake-trail-forage",
     "add-estate-lake",
     "add-cove-route",
@@ -37,9 +39,7 @@
     "add-terrain-following-road-and-bridge",
     "add-swimming",
     "add-standing-room-door-and-room-audio",
-    "add-sprint-toggle",
     "add-shore-and-river-fishing",
-    "add-road-sign-travel",
     "add-ranching-and-livestock",
     "add-rain-weather",
     "add-pickup-gain-lines",
@@ -57,9 +57,17 @@
     "add-courtship-and-family",
     "add-boat-fishing"
   ],
-  "nextBuild": [],
+  "nextBuild": [
+    "add-sprint-toggle",
+    "add-road-sign-travel",
+    "add-lake-trail-forage",
+    "add-estate-lake",
+    "add-cove-route",
+    "add-chest-names",
+    "add-chest-auto-store"
+  ],
   "removed": [
     "replace-heroine-with-metahuman"
   ],
-  "updated": "2026-10-02T01:07:49.399Z"
+  "updated": "2026-10-02T01:08:41.168Z"
 }
