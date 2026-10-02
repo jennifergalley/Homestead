@@ -31,6 +31,17 @@ async function findTaskFiles(directory) {
     return found;
 }
 
+const hashToken = /\b(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,64}\b/gi;
+
+function stripHashes(text) {
+    return text
+        .replace(/\s*\([^()]*\b(?=[0-9a-f]*\d)(?=[0-9a-f]*[a-f])[0-9a-f]{7,64}\b[^()]*\)/gi, "")
+        .replace(/`?\b(?:SHA(?:-?256)?)\b`?:?\s*/g, "")
+        .replace(hashToken, "")
+        .replace(/\s{2,}/g, " ")
+        .trim();
+}
+
 function parseTasks(markdown) {
     const sections = [];
     let section = { title: "Tasks", tasks: [] };
@@ -47,14 +58,14 @@ function parseTasks(markdown) {
         if (task) {
             currentTask = {
                 id: task[2],
-                text: task[3],
+                text: stripHashes(task[3]),
                 done: task[1].toLowerCase() === "x",
             };
             section.tasks.push(currentTask);
             continue;
         }
         if (currentTask && /^\s{2,}\S/.test(line)) {
-            currentTask.text += ` ${line.trim()}`;
+            currentTask.text += ` ${stripHashes(line.trim())}`;
         } else if (line.trim()) {
             currentTask = null;
         }
@@ -88,10 +99,13 @@ function parseBuilds(markdown) {
         const bullet = line.match(/^\s*-\s+(.+?)\s*$/);
         if (!bullet) continue;
         const text = bullet[1].replace(/`/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+        const hash = /\b(?=[0-9a-f]*\d)[0-9a-f]{7,64}\b|\bSHA(?:-?256)?\b/i;
+        const clean = text.split(/;\s*/).filter((part) => !hash.test(part)).join("; ").trim();
+        if (!clean) continue;
         if (inLater) {
-            later.push(text);
-        } else if (current && text !== "Ships:") {
-            current.ships.push(text);
+            later.push(clean);
+        } else if (current && clean !== "Ships:") {
+            current.ships.push(clean);
         }
     }
     return { entries, later };

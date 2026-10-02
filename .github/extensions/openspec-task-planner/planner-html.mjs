@@ -332,7 +332,6 @@ export function renderPlannerHtml() {
       title.append(el("strong", "", build.label ?? [build.date, build.slot].filter(Boolean).join(" — ")),
         el("span", "badge " + (build.status === "delivered" ? "complete" : "active"), build.status));
       card.append(title);
-      if (build.sha && build.sha !== "pending") card.append(el("div", "build-meta", build.sha));
       if (build.ships?.length) {
         const list = el("ul");
         for (const item of build.ships) list.append(el("li", "", item));
