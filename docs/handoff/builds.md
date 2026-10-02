@@ -4,8 +4,8 @@ Integration updates this file for every delivery. Each entry uses a date/slot he
 and short player-facing changelist; the planner reads it directly.
 
 Timing (Jenny, 2026-10-01): start each build about an hour before its slot (7:30 AM, 4 PM, 9 PM).
-When every item Jenny explicitly marked for a build is done and time remains, lanes take the next
-item from the planner's priority order (`priority.json`) that fits their lane.
+Lanes implement only what Jenny has prioritized for a specific build, then go idle. They don't pick up
+unflagged queue items. If little or nothing is prioritized, the orchestrator tells Jenny to schedule work.
 
 ## 2026-10-01 — 7:30 AM
 
