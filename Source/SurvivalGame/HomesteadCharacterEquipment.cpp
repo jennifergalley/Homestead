@@ -332,8 +332,8 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     // (edge_for: the plane's normal crossed with the haft); these are those normals in component
     // space, forward +Y, her left +X.
     const FVector SwingNormal = FellTool == Homestead::Item::Hatchet && !bStrikeHatchet
-        ? FVector(-0.438846f, -0.585515f, -0.681605f)    // axe_fell.swing_normal(), signed by edge_for
-        : FVector(-0.941768f, -0.21651f, -0.257287f);    // ground_strike.swing_normal(), signed by edge_for
+        ? FVector(-0.666149f, -0.372853f, -0.64593f)    // axe_fell.swing_normal(), signed by edge_for
+        : FVector(-0.975181f, -0.103031f, -0.195974f);    // ground_strike.swing_normal(), signed by edge_for
     // Both fists stay together at the base of the haft (axe_fell.py), so their spacing can't set
     // the line; each closed fist's pinky-to-index axis runs along the haft. That axis slants
     // about 16 degrees toward the fingers, so with the fists rolled differently each is squared

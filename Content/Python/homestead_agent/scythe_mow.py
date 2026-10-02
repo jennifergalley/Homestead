@@ -65,7 +65,10 @@ LOOP = af.LOOP
 # The snath leans back toward her by LEAN (degrees) and the scythe turns about her by the sweep
 # yaw (+ to her right). NIB_LOWER is the lower nib grip (the prop pivot) at zero sweep.
 LEAN = 45.0
-NIB_LOWER = (-10.0, 56.0, 72.0)
+# 28 cm further out than first authored (Jenny, 10-01: one hand clipped her chest; move the tool in front of her
+# so her arms have room): her left fist on the upper nib now clears her chest and belly through the whole stroke,
+# and the right arm reaches near straight to the lower nib, as on a real scythe.
+NIB_LOWER = (-10.0, 84.0, 72.0)
 # The upper nib grip in the prop's frame (scythe.py: 42 cm up the snath).
 NIB_UPPER = (1.7, -4.4, 42.0)
 HEEL = (2.8, 9.6, -98.0)
@@ -100,7 +103,7 @@ POLE_L = {
 # centre (the snath's line), which a roll doesn't move; the right fist's pinky-to-index axis sets the
 # blade, so it isn't rolled. Unrolled, the left wrist bent back up to 118 degrees over the nib; these keep it
 # and the forearm inside their comfortable ranges (joint_limits).
-ROLL_L = {'address': 90.0, 'lift': 60.0, 'back': 90.0, 'strike': 90.0, 'bite': 90.0, 'rock': 90.0, 'recover': 60.0}
+ROLL_L = {'address': 60.0, 'lift': 30.0, 'back': 30.0, 'strike': 60.0, 'bite': 60.0, 'rock': 60.0, 'recover': 30.0}
 WRIST_R_STAND = af.WRIST_R_STAND
 WRIST_L_STAND = af.WRIST_L_STAND
 # A wide, staggered stance: left foot forward toward the swath, right foot back.

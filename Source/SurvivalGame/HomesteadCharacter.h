@@ -257,18 +257,18 @@ public:
     // The tool the felling-timed clip is swinging (the hatchet unless a strike or mow is playing).
     Homestead::Item FellingTool() const { return FellTool; }
     // At impact in AN_HeroineMH_GroundStrike (ground_strike.bits()): cm to her left and forward.
-    static constexpr float StrikePickLeft = 3.3f;
-    static constexpr float StrikePickForward = 75.1f;
-    static constexpr float StrikeAxeLeft = 0.8f;
-    static constexpr float StrikeAxeForward = 58.6f;
+    static constexpr float StrikePickLeft = 1.0f;
+    static constexpr float StrikePickForward = 74.8f;
+    static constexpr float StrikeAxeLeft = -0.4f;
+    static constexpr float StrikeAxeForward = 53.0f;
     // She is still walking up to the felling stance; the swing has not been requested yet.
     bool IsApproachingFell() const { return bFellApproach; }
     // At impact in AN_HeroineMH_AxeFell (axe_fell.bit_at_strike): the bit's centre relative to her
     // root (cm to her left, cm forward) and its horizontal travel into the trunk (left, forward).
-    static constexpr float FellBitLeft = -27.7f;
-    static constexpr float FellBitForward = 66.2f;
-    static constexpr float FellCutLeft = 0.863f;
-    static constexpr float FellCutForward = 0.505f;
+    static constexpr float FellBitLeft = -28.3f;
+    static constexpr float FellBitForward = 65.9f;
+    static constexpr float FellCutLeft = 0.809f;
+    static constexpr float FellCutForward = 0.588f;
     UAnimSequence* GetFellAnimation() const;
     // A berry (or piece of root) from the hip pouch to her mouth (MetaHuman only; false otherwise).
     bool PlayEat(bool bBerry);

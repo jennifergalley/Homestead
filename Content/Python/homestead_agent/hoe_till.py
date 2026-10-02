@@ -51,30 +51,32 @@ PALM_NORMAL_R = (-0.036, 0.984, 0.175)
 PALM_ALONG_R = (-0.998, -0.043, 0.036)
 PALM_REACH_R = 6.0
 PALM_DEPTH_R = 2.6
-# Where her left hand closes on the haft, from the prop pivot toward the blade (cm).
-LEFT_ALONG = -4.0
+# Where her left hand closes on the haft, from the prop pivot toward the blade (cm): well down the haft, as a hoe
+# is held, so her left forearm stays out in front of her belly through the draw (Jenny, 10-01: an arm clipped
+# through her torso; 4 cm from the right hand it lay 12 cm into her belly).
+LEFT_ALONG = 20.0
 # The left hand's roll on the haft (deg about the haft toward the blade) away from knuckles down the blade's
 # hang, per key; the game doesn't read the left hand, so it can roll freely. Rolled on the raises, its
 # 65-degree ulnar deviation there clears (joint_limits); elsewhere a roll trades its forearm twist for
 # wrist flexion one for one, so it stays near the grip.
-LEFT_ROLL = {'set': 30.0, 'raise1': 60.0, 'chop1': 30.0, 'bite1': 30.0, 'draw1': 30.0, 'raise2': 60.0, 'chop2': 30.0,
-             'bite2': 30.0, 'draw2': 30.0, 'recover': 30.0}
+LEFT_ROLL = {key: 30.0 for key in ('set', 'raise1', 'chop1', 'bite1', 'draw1', 'raise2', 'chop2', 'bite2', 'draw2', 'recover')}
 
 # Blade tip (cm) and the haft's direction toward the blade at each key. The strokes stay low:
 # the blade lifts under half a metre, chops into the square and drags back along the soil with
-# the haft at a steady slope, so the hoe moves smoothly over the ground.
+# the haft at a steady slope, so the hoe moves smoothly over the ground. The strokes land 12 cm further out than first
+# authored, giving her arms room in front of her body.
 CHOP = (0.14, 0.70, -0.70)
 KEYS = {
-    'set': ((-4.0, 76.0, 3.0), (0.14, 0.78, -0.61)),
-    'raise1': ((-4.0, 84.0, 44.0), (0.14, 0.94, -0.30)),
-    'chop1': ((-4.0, 72.0, 0.5), CHOP),
-    'bite1': ((-4.0, 71.0, -1.5), CHOP),
-    'draw1': ((-4.0, 60.0, 0.5), CHOP),
-    'raise2': ((-10.0, 84.0, 44.0), (0.08, 0.94, -0.30)),
-    'chop2': ((-10.0, 72.0, 0.5), (0.08, 0.70, -0.70)),
-    'bite2': ((-10.0, 71.0, -1.5), (0.08, 0.70, -0.70)),
-    'draw2': ((-10.0, 60.0, 0.5), (0.08, 0.70, -0.70)),
-    'recover': ((-7.0, 80.0, 24.0), (0.14, 0.86, -0.50)),
+    'set': ((-4.0, 88.0, 3.0), (0.14, 0.78, -0.61)),
+    'raise1': ((-4.0, 96.0, 44.0), (0.14, 0.94, -0.30)),
+    'chop1': ((-4.0, 84.0, 0.5), CHOP),
+    'bite1': ((-4.0, 83.0, -1.5), CHOP),
+    'draw1': ((-4.0, 72.0, 0.5), CHOP),
+    'raise2': ((-10.0, 96.0, 44.0), (0.08, 0.94, -0.30)),
+    'chop2': ((-10.0, 84.0, 0.5), (0.08, 0.70, -0.70)),
+    'bite2': ((-10.0, 83.0, -1.5), (0.08, 0.70, -0.70)),
+    'draw2': ((-10.0, 72.0, 0.5), (0.08, 0.70, -0.70)),
+    'recover': ((-7.0, 92.0, 24.0), (0.14, 0.86, -0.50)),
 }
 # Pelvis drop/forward (cm) and forward bend (deg).
 BODY = {
@@ -83,6 +85,8 @@ BODY = {
     'raise2': ((0, 1, -10), 26), 'chop2': ((0, 4, -16), 42), 'bite2': ((0, 4, -17), 44),
     'draw2': ((0, 1, -15), 40), 'recover': ((0, 1, -6), 14), 'end': ((0, 0, 0), 0),
 }
+# Her left wrist halfway from the haft back to her side (component cm).
+LEFT_RELEASE = (26.0, 26.0, 84.0)
 POLE_R = (-60.0, -25.0, 95.0)
 # The left elbow points out and back behind the haft, as when drawing a hoe toward you; further forward
 # it turned her forearm over past its range (supination 111 degrees, joint_limits).
@@ -175,6 +179,9 @@ def build():
         # Left hand overhand on the haft: index toward the blade, knuckles down its hang.
         b_l = af.rolled(b, h, LEFT_ROLL.get(name, 0.0))
         s.key_world(frame, 'hand_l_ik_ctrl', left.wrist((grip.x, grip.y, grip.z), h, b_l), left.turn(h, b_l))
+    # Reaching for the haft and letting go of it, her left hand passes out in front of her, not across her belly.
+    s.key_world(F['set'] // 2, 'hand_l_ik_ctrl', LEFT_RELEASE, s.hand_turn('l', (0, 0.6, -0.8), (-1, 0, 0)))
+    s.key_world((F['recover'] + F['end']) // 2, 'hand_l_ik_ctrl', LEFT_RELEASE, s.hand_turn('l', (0, 0.6, -0.8), (-1, 0, 0)))
     s.key_world(F['stand'], 'foot_l_ik_ctrl', kg.FOOT_L)
     s.key_world(5, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (0, 9, 6)))
     s.key_world(F['set'], 'foot_l_ik_ctrl', FOOT_L_FORWARD)

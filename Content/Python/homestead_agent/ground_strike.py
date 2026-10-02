@@ -42,12 +42,20 @@ STROKE = {
     'lift': ((-6.0, 22.0, 118.0), (-0.1, 0.25, 0.96), 30.0),
     # Top of the lift: fists above her right shoulder, the head behind her head.
     'back': ((-7.0, 10.0, 146.0), (-0.12, -0.5, 0.86), 36.0),
-    # Impact: fists low in front at the end of the haft, the head down on the ground ahead.
-    'strike': ((-3.0, 32.0, 86.0), (-0.02, 0.8, -0.6), 11.0),
-    'bite': ((-3.0, 33.0, 83.0), (-0.02, 0.78, -0.63), 11.0),
+    # Impact: fists low in front at the end of the haft, the head down on the ground ahead. The haft lands 15 degrees
+    # flatter than first authored, the point on the same spot, so her front wrist isn't cocked sharply at the blow
+    # (Jenny, 10-01; joint_limits: right wrist flexion 67 -> 43 degrees).
+    'strike': ((-2.4, 18.1, 72.9), (-0.023, 0.928, -0.372), 11.0),
+    'bite': ((-2.8, 18.4, 70.4), (-0.023, 0.914, -0.405), 11.0),
     # Prising the head free: the fists rise a little and draw back.
-    'rock': ((-4.0, 28.0, 93.0), (-0.03, 0.86, -0.5), 14.0),
+    'rock': ((-3.6, 15.5, 78.4), (-0.034, 0.965, -0.261), 14.0),
 }
+# Halfway down each blow (between 'back' and 'strike'): the fists swing out in front of her face and chest. Left to
+# interpolate, they cut straight from above her head to low in front, through her head and chest, and her right
+# elbow folded to 158 degrees (now 90).
+DOWN = ((-5.0, 35.0, 105.0), (-0.15, 0.55, 0.82), 18.0)
+DOWN_ROLL = (60.0, -30.0)
+DOWN_POLE = ((45.0, 15.0, 110.0), (-60.0, 15.0, 110.0))
 GRIP = {
     'address': ((-4.0, 30.0, 90.0), (-0.02, 0.82, -0.57), 24.0),
     'recover': ((-10.0, 24.0, 94.0), (-0.2, 0.8, -0.55), 12.0),
@@ -80,10 +88,8 @@ TWIST_SIGN = af.TWIST_SIGN
 # degrees back on the forearms; these keep each wrist and forearm nearest their comfortable ranges
 # (joint_limits). The game reads the point's direction from the swing plane (UpdateFellingHatchet's
 # SwingNormal is swing_normal()), not her knuckles.
-ROLL_L = {'address': 60.0, 'lift': 60.0, 'back': 90.0, 'strike': 90.0, 'bite': 90.0, 'rock': 90.0,
-          'recover': 60.0}
-ROLL_R = {'address': 0.0, 'lift': -60.0, 'back': -30.0, 'strike': -30.0, 'bite': -30.0, 'rock': -30.0,
-          'recover': 0.0}
+ROLL_L = {'address': 45.0, 'lift': 60.0, 'back': 90.0, 'strike': 45.0, 'bite': 45.0, 'rock': 45.0, 'recover': 60.0}
+ROLL_R = {'address': 0.0, 'lift': -45.0, 'back': -30.0, 'strike': -15.0, 'bite': -15.0, 'rock': -30.0, 'recover': -15.0}
 FOOT_L_FORWARD = (15.0, 12.0, 8.6)
 FOOT_R_BACK = (-15.0, -6.0, 8.6)
 
@@ -141,6 +147,18 @@ def build():
         s.key_world(frame, 'hand_l_ik_ctrl', left.wrist(centre, h, e_l), left.turn(h, e_l))
         top = af._vec(centre) + h * slide
         s.key_world(frame, 'hand_r_ik_ctrl', right.wrist((top.x, top.y, top.z), h, e_r), right.turn(h, e_r))
+    if DOWN is not None:
+        for n in (1, 2):
+            f = (F[f'back{n}'] + F[f'strike{n}']) // 2
+            centre, haft, slide = DOWN
+            h = af._norm(haft)
+            e = edge_for(h)
+            e_l, e_r = af.rolled(e, h, DOWN_ROLL[0]), af.rolled(e, h, DOWN_ROLL[1])
+            s.key_world(f, 'hand_l_ik_ctrl', left.wrist(centre, h, e_l), left.turn(h, e_l))
+            top = af._vec(centre) + h * slide
+            s.key_world(f, 'hand_r_ik_ctrl', right.wrist((top.x, top.y, top.z), h, e_r), right.turn(h, e_r))
+            s.key_world(f, 'arm_l_pv_ik_ctrl', DOWN_POLE[0])
+            s.key_world(f, 'arm_r_pv_ik_ctrl', DOWN_POLE[1])
     s.key_world(F['stand'], 'foot_l_ik_ctrl', kg.FOOT_L)
     s.key_world(5, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (1, 7, 6)))
     s.key_world(F['address'], 'foot_l_ik_ctrl', FOOT_L_FORWARD)

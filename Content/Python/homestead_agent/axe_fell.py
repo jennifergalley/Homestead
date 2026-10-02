@@ -54,9 +54,12 @@ STROKE = {
     # crosses in front of her chest rather than through it) while the right fist, just above it,
     # draws back and up beside her right shoulder with the head behind that shoulder.
     'back': ((-14.0, 16.0, 138.0), (-0.4, -0.55, 0.73), HANDS),
-    'strike': ((-8.0, 30.0, 102.0), (-0.65, 0.72, -0.2), HANDS),
-    'bite': ((-7.0, 31.0, 99.0), (-0.63, 0.72, -0.28), HANDS),
-    'rock': ((-10.0, 25.0, 104.0), (-0.62, 0.76, -0.1), HANDS),
+    # The blow: the haft near level and aimed a little left of where it was first authored, with the bit on the
+    # same spot (Jenny, 10-01: the front wrist bent far too sharply). Both wrists stay within 45 degrees of
+    # straight through the bite (joint_limits); the knob hand was bent 65 degrees.
+    'strike': ((-12.8, 24.2, 91.0), (-0.530, 0.846, 0.058), HANDS),
+    'bite': ((-11.3, 24.1, 88.0), (-0.518, 0.855, -0.023), HANDS),
+    'rock': ((-15.7, 20.1, 92.7), (-0.482, 0.862, 0.160), HANDS),
 }
 GRIP = {
     'address': ((-8.0, 27.0, 100.0), (-0.63, 0.75, -0.15), HANDS),
@@ -84,8 +87,8 @@ POLE_R = {
 # trunk, nearer her body through the blow and higher on the backswing and recovery, so its wrist and
 # forearm stay near their comfortable ranges without turning the shoulder in past them (joint_limits).
 POLE_L = {
-    'stand': (60.0, -10.0, 90.0), 'address': (65.0, 30.0, 90.0), 'lift': (30.0, 45.0, 115.0),
-    'back': (20.0, 55.0, 120.0), 'strike': (20.0, 35.0, 87.0), 'bite': (20.0, 35.0, 85.0),
+    'stand': (60.0, -10.0, 90.0), 'address': (65.0, 50.0, 90.0), 'lift': (30.0, 45.0, 115.0),
+    'back': (20.0, 55.0, 145.0), 'strike': (20.0, 35.0, 87.0), 'bite': (20.0, 35.0, 85.0),
     'rock': (25.0, 30.0, 91.0), 'recover': (60.0, -15.0, 125.0), 'end': (60.0, -10.0, 90.0),
 }
 # Pelvis offset (cm), torso twist (deg, + turns her chest to her right) and forward lean (deg).
@@ -103,10 +106,8 @@ TWIST_SIGN = 1
 # a real fist, so the hand turns on it to stay in line with the forearm. Each key's roll keeps that
 # wrist and forearm nearest their comfortable ranges (joint_limits). The game reads the edge from the
 # swing plane, not her knuckles (UpdateFellingHatchet's SwingNormal is swing_normal()).
-ROLL_L = {'address': 90.0, 'lift': 60.0, 'back': 60.0, 'strike': 120.0, 'bite': 120.0, 'rock': 120.0,
-          'recover': 90.0}
-ROLL_R = {'address': 0.0, 'lift': -90.0, 'back': -90.0, 'strike': -30.0, 'bite': 0.0, 'rock': 0.0,
-          'recover': 30.0}
+ROLL_L = {'address': 75.0, 'lift': 75.0, 'back': 75.0, 'strike': 90.0, 'bite': 90.0, 'rock': 90.0, 'recover': 75.0}
+ROLL_R = {'address': -15.0, 'lift': -75.0, 'back': -75.0, 'strike': -15.0, 'bite': 0.0, 'rock': -15.0, 'recover': 15.0}
 # Left foot leads (toward the trunk), right foot back, as for a right-shoulder swing.
 FOOT_L_FORWARD = (14.0, 17.0, 8.6)
 FOOT_R_BACK = (-16.0, -8.0, 8.6)
