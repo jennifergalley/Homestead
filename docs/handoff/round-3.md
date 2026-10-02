@@ -105,3 +105,9 @@ can drop new work items straight into `docs/handoff/backlog.md` without spending
 agent. Submissions land in a `## New from Jenny (not yet triaged)` block at the top of the file (screenshots
 under `docs/handoff/attachments/backlog/`); fold each into the list above (or Later) and delete its line
 the next time you touch `backlog.md`.
+
+**Jenny's direct instructions stand** (2026-10-01): she chose to keep scheduling notifications off and gave
+that instruction directly to the implementing session. The orchestrator must not reverse a choice Jenny made
+directly with a lane, even on its own judgment about round-3 coordination needs, without her explicit
+approval first. Jenny may direct any lane herself; lanes follow her direct instruction over a conflicting
+orchestrator request.
