@@ -14,8 +14,6 @@
     "pitch-dark-parchment-theme",
     "reduce-foliage-shadow-motion",
     "refine-playable-heroine-hairstyles",
-    "expand-randomized-music-playlist",
-    "prioritize-heroine-quality-and-tool-clarity",
     "widen-estate-beach",
     "unify-hud-notices",
     "tune-tool-strike-sounds",
@@ -62,10 +60,6 @@
     "add-boat-fishing"
   ],
   "nextBuild": [],
-  "removed": [
-    "replace-heroine-with-metahuman"
-  ],
-  "updated": "2026-10-02T01:08:41.168Z",
   "slots": {
     "polish-parchment-ui": "2026-10-01 21:00",
     "add-sprint-toggle": "2026-10-01 21:00",
@@ -79,5 +73,11 @@
     "fix-tool-grip-contact": "2026-10-02 07:30",
     "place-items-in-exact-slots": "2026-10-02 07:30",
     "pitch-dark-parchment-theme": "2026-10-01 21:00"
-  }
+  },
+  "removed": [
+    "replace-heroine-with-metahuman",
+    "prioritize-heroine-quality-and-tool-clarity",
+    "expand-randomized-music-playlist"
+  ],
+  "updated": "2026-10-02T01:48:02.727Z"
 }
