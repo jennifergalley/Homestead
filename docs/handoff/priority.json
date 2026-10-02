@@ -2,6 +2,9 @@
   "order": [
     "pitch-dark-parchment-theme",
     "apply-dark-theme-everywhere",
+    "fix-map-click-travel",
+    "move-town-signpost",
+    "fit-rucksack-straps",
     "place-items-in-exact-slots",
     "fix-tool-grip-contact",
     "reduce-foliage-shadow-motion",
@@ -39,5 +42,5 @@
     "prioritize-heroine-quality-and-tool-clarity",
     "expand-randomized-music-playlist"
   ],
-  "updated": "2026-10-02T05:04:32.4280877Z"
+  "updated": "2026-10-02T05:23:04.1744008Z"
 }
