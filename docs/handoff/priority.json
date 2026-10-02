@@ -2,6 +2,7 @@
   "order": [
     "reduce-foliage-shadow-motion",
     "refine-playable-heroine-hairstyles",
+    "expand-randomized-music-playlist",
     "prioritize-heroine-quality-and-tool-clarity",
     "widen-estate-beach",
     "unify-hud-notices",
@@ -19,7 +20,6 @@
     "fix-night-brightness",
     "fix-live-sound-sliders",
     "fix-estate-river-source",
-    "expand-randomized-music-playlist",
     "enrich-estate-ground-and-meadow",
     "daily-weed-pass",
     "close-shops-on-sundays",
@@ -61,5 +61,5 @@
   "removed": [
     "replace-heroine-with-metahuman"
   ],
-  "updated": "2026-10-02T01:04:12.992Z"
+  "updated": "2026-10-02T01:05:07.140Z"
 }
