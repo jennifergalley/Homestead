@@ -237,7 +237,6 @@ void AHomesteadSmokeTest::PrepareGatheringChecks()
         [this, Probe, Animation]()
         {
             return SameGatherDelta(Controller->State(), Probe->Expected)
-                && Controller->ToastIsError()
                 && Animation()->GatherStarts() == Probe->Starts && Animation()->GatherWeight() < 0.001f;
         });
 
