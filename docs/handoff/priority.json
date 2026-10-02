@@ -1,5 +1,6 @@
 {
   "order": [
+    "add-lake-trail-forage",
     "add-estate-lake",
     "add-cove-route",
     "add-chest-names",
@@ -44,7 +45,6 @@
     "add-pickup-gain-lines",
     "add-leather-backpack",
     "add-appearance-camera-controls",
-    "add-lake-trail-forage",
     "add-hotbar-eat-and-meal-gains",
     "add-horse-and-wagon",
     "add-hired-workers-and-estate-upkeep",
@@ -61,5 +61,5 @@
   "removed": [
     "replace-heroine-with-metahuman"
   ],
-  "updated": "2026-10-02T01:07:37.076Z"
+  "updated": "2026-10-02T01:07:49.399Z"
 }
