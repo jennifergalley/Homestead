@@ -39,6 +39,7 @@
     "add-rain-weather",
     "add-pickup-gain-lines",
     "add-leather-backpack",
+    "add-appearance-camera-controls",
     "add-lake-trail-forage",
     "add-hotbar-eat-and-meal-gains",
     "add-horse-and-wagon",
@@ -54,12 +55,11 @@
     "add-courtship-and-family",
     "add-chest-names",
     "add-chest-auto-store",
-    "add-boat-fishing",
-    "add-appearance-camera-controls"
+    "add-boat-fishing"
   ],
   "nextBuild": [],
   "removed": [
     "replace-heroine-with-metahuman"
   ],
-  "updated": "2026-10-02T01:06:10.577Z"
+  "updated": "2026-10-02T01:06:42.734Z"
 }

@@ -265,6 +265,7 @@ export function renderPlannerHtml() {
       white-space: nowrap;
       font-size: 12px;
     }
+    .icon-button:disabled { opacity: .35; cursor: default; }
     .icon-button:hover { border-color: var(--true-color-blue, #58a6ff); color: var(--text-color-default, #e6edf3); }
     .icon-button.danger:hover, .icon-button.armed { border-color: var(--true-color-red, #f85149); color: var(--true-color-red, #f85149); }
   </style>
@@ -405,7 +406,18 @@ export function renderPlannerHtml() {
           try { await savePriority({ remove: feature.id }); await load(true, true); note.textContent = "Removed “" + feature.title + "”"; }
           catch (error) { note.textContent = error.message; remove.disabled = false; }
         });
-        actions.append(button, quote, remove);
+        const top = el("button", "icon-button", "⤒ Top");
+        top.type = "button";
+        top.title = "Move to top";
+        top.disabled = index === 0;
+        top.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          top.disabled = true;
+          const order = [feature.id, ...currentOrder().filter((id) => id !== feature.id)];
+          try { await savePriority({ order }); await load(true, true); note.textContent = "Moved “" + feature.title + "” to the top"; }
+          catch (error) { note.textContent = error.message; top.disabled = false; }
+        });
+        actions.append(top, button, quote, remove);
         row.append(el("div", "rank", String(index + 1)), el("div", "drag", "⋮⋮"), text, actions);
         row.addEventListener("dragstart", (event) => {
           state.dragging = row;
