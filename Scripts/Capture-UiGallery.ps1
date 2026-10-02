@@ -29,7 +29,7 @@ param(
     [ValidateSet('Plain', 'World')][string[]]$Backdrop = @('Plain'),
     [switch]$NoHeroine,
     # The UI theme trial: parchment (the branch default) and/or classic.
-    [ValidateSet('parchment', 'classic')][string[]]$Theme = @('parchment'),
+    [ValidateSet('parchment', 'dark', 'classic')][string[]]$Theme = @('parchment'),
     # Where the stamp folders go; defaults to E:\CopilotScratch\<SessionId>\ui-gallery.
     [string]$OutputRoot,
     [string]$SessionId = $(if ($env:COPILOT_SESSION_ID) { $env:COPILOT_SESSION_ID } else { 'ui-gallery' }),

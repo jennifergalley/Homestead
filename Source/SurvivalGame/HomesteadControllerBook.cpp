@@ -10,6 +10,7 @@
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadFood.h"
 #include "UI/SHomesteadMenu.h"
+#include "UI/HomesteadUITheme.h"
 #include "UI/SHomesteadShop.h"
 
 #include "Engine/Engine.h"
@@ -282,6 +283,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         if (Map)
             Result.Add({17, FString::Printf(TEXT("Minimap: %s"), Map->RotatesWithCamera() ? TEXT("turns with your view") : TEXT("north up")),
                 FString()});
+        Result.Add({18, FString::Printf(TEXT("Book colours: %s"), HomesteadUITheme::IsDark() ? TEXT("Dark") : TEXT("Light")), FString()});
         Result.Add({15, TEXT("Show action hints again"),
             FString()});
         if (!PreviewLabel().IsEmpty())
@@ -579,6 +581,7 @@ void AHomesteadController::ActivateRow()
         case 13: MenuSetAutosaveInterval(AutosaveMinutes == 5 ? 10 : AutosaveMinutes == 10 ? 20 : AutosaveMinutes == 20 ? 30 : 5); break;
         case 15: ResetActionHints(); break;
         case 17: if (Map) Map->SetRotatesWithCamera(!Map->RotatesWithCamera()); break;
+        case 18: MenuSetDarkBook(!HomesteadUITheme::IsDark()); break;
         default: break;
         }
     }

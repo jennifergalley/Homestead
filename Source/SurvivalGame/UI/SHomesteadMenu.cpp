@@ -33,7 +33,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                     + SOverlay::Slot().Padding(24, 16)
                     [
                         SAssignNew(Root, SVerticalBox)
-                        + SVerticalBox::Slot().AutoHeight()
+                        + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, BookGutter)
                         [
                             SAssignNew(TabBar, SHorizontalBox)
                         ]
@@ -88,9 +88,10 @@ void SHomesteadMenu::Construct(const FArguments& Args)
     ];
     for (const int32 Page : FieldBookPages)
     {
-        TabBar->AddSlot().FillWidth(1).Padding(3, 0)
+        // Gutters only between panels: the band's outer edges are the page's edges.
+        TabBar->AddSlot().FillWidth(1).Padding(0, 0, BookGutter, 0)
         [
-            RegisterButton(SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(4, 7))
+            RegisterButton(SNew(SMenuButton).ButtonStyle(&MenuButtonStyle()).IsFocusable(true).ContentPadding(FMargin(0, 7, 0, 0))
             .ButtonColorAndOpacity_Lambda([this, Page]() { return SeenPage == Page ? Selected
                 : Region == ERegion::Tabs && FocusedTab == Page ? Selected : MenuPine; })
             .ToolTipText(FText::FromString(Tabs[Page]))
@@ -105,7 +106,8 @@ void SHomesteadMenu::Construct(const FArguments& Args)
                     .Font(HomesteadUITheme::Font("Bold", 16))
                     .ColorAndOpacity_Lambda([this, Page]() { return SeenPage == Page ? FSlateColor(MenuGold) : FSlateColor(Ink); })
                 ]
-                + SVerticalBox::Slot().AutoHeight().Padding(8, 4, 8, 0)
+                // The accent rule runs the full width of the tab, flush with its panel's edges.
+                + SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 0)
                 [
                     SNew(SBox).HeightOverride(3)
                     [ SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(0)
@@ -117,7 +119,7 @@ void SHomesteadMenu::Construct(const FArguments& Args)
     }
     // The date closes the row on a panel of its own, so the tabs and it make one band as wide as the
     // page beneath (Jenny, 2026-09-30: no offset).
-    TabBar->AddSlot().AutoWidth().Padding(3, 0)
+    TabBar->AddSlot().AutoWidth()
     [
         SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(MenuPine)
         .Padding(FMargin(12, 4)).VAlign(VAlign_Center)

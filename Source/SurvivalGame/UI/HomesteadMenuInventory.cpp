@@ -61,7 +61,8 @@ FString AHomesteadController::MenuInventorySummary() const
             *ChestDisplayName(ActiveChestId.GetValue()), Sim.ChestUsedCapacity(ActiveChestId.GetValue()), Homestead::ChestCapacity,
             Sim.UsedCapacity(), Sim.PackCapacity());
     if (MenuInventoryViewIndex == 2) return TEXT("Equipped clothing");
-    return FString::Printf(TEXT("Your pack  |  %d / %d units"), Sim.UsedCapacity(), Sim.PackCapacity());
+    // The page's title already says "Your pack": the line under it is just how full it is.
+    return FString::Printf(TEXT("%d / %d units"), Sim.UsedCapacity(), Sim.PackCapacity());
 }
 
 TArray<FHomesteadRow> AHomesteadController::MenuRows() const

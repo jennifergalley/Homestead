@@ -21,6 +21,7 @@
 #include "Rendering/DrawElements.h"
 #include "Styling/CoreStyle.h"
 #include "Styling/SlateTypes.h"
+#include "Styling/StyleDefaults.h"
 #include "Types/NavigationMetaData.h"
 #include "Widgets/Images/SImage.h"
 #include "Widgets/Input/SButton.h"
@@ -57,6 +58,8 @@ public:
         if (RightClick && Event.GetEffectingButton() == EKeys::RightMouseButton) { RightClick(); return FReply::Handled(); }
         return SButton::OnMouseButtonUp(Geometry, Event);
     }
+    // One selection treatment: the book draws its own accent frame and fill, never Slate's blue focus ring.
+    virtual const FSlateBrush* GetFocusBrush() const override { return FStyleDefaults::GetNoBrush(); }
 };
 class SMenuFocusAnchor : public SCompoundWidget
 {
@@ -72,11 +75,12 @@ public:
         [
             SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
             .BorderBackgroundColor_Lambda([this]() { return HasKeyboardFocus()
-                ? FLinearColor(0.92f, 0.74f, 0.43f, 1) : FLinearColor::Transparent; })
+                ? HomesteadUITheme::Themed(FLinearColor(0.92f, 0.74f, 0.43f, 1)) : FLinearColor::Transparent; })
             [Args._Content.Widget]
         ];
     }
 
+    virtual const FSlateBrush* GetFocusBrush() const override { return FStyleDefaults::GetNoBrush(); }
     virtual bool SupportsKeyboardFocus() const override { return true; }
     virtual FReply OnFocusReceived(const FGeometry&, const FFocusEvent&) override
     { Focused.ExecuteIfBound(); return FReply::Handled(); }
@@ -261,6 +265,9 @@ inline FLinearColor AppearanceSwatchColor(int32 Id, int32 Value)
 }
 inline const TCHAR* Tabs[] = {TEXT("Inventory"), TEXT("Craft"), TEXT("Build"), TEXT("Guidebook"),
     TEXT("Settings"), TEXT("Credits"), TEXT("Appearance"), TEXT("Map")};
+// The one gap between the book's panels: tab to tab, and column to column on every page, so the tab
+// band's edges sit square over the page beneath (polish-parchment-ui).
+constexpr float BookGutter = 8.0f;
 inline const TCHAR* TabIcons[] = {TEXT("pack"), TEXT("craft"), TEXT("build"), TEXT("guide"),
     TEXT("settings"), TEXT("credits"), TEXT("appearance"), TEXT("map")};
 inline FName RequirementIcon(Homestead::Item Item)
@@ -323,6 +330,7 @@ using MenuDetail::IsAudioSetting;
 using MenuDetail::AudioSliderSlot;
 using MenuDetail::AppearanceSwatchColor;
 using MenuDetail::Tabs;
+using MenuDetail::BookGutter;
 using MenuDetail::TabIcons;
 using MenuDetail::RequirementIcon;
 using MenuDetail::RecipeIcons;

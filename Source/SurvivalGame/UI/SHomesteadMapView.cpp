@@ -403,7 +403,7 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
         const FVector2D Extent = HomesteadMapPaint::FPainter::MeasureText(Name, LabelSize) + FVector2D(8, 2);
         const FVector2D& Corner = Label.Value;
         Paint.Fill({Corner, Corner + FVector2D(Extent.X, 0), Corner + Extent, Corner + FVector2D(0, Extent.Y)}, MvPlate);
-        Paint.Text(Name, Corner + FVector2D(4, 1), LabelSize, bSelected ? MvGold : MvCream);
+        Paint.Text(Name, Corner + FVector2D(4, 1), LabelSize, bSelected ? MvGold : MvCream, true, false);
     }
 
     // For-sale names where they don't cover a place.
@@ -426,8 +426,10 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
         for (const FBox2D& Other : Taken) bClear &= !Box.Intersect(Other);
         for (const FBox2D& Other : Badges) bClear &= !Box.Intersect(Other);
         if (!bClear) continue;
-        Paint.Text(TEXT("FOR SALE"), At - FVector2D(Title.X * 0.5f, Title.Y), LabelSize, MvCream);
-        Paint.Text(Parcel.Label, At - FVector2D(Name.X * 0.5f, 0), LabelSize * 0.9f, MvCream, false);
+        const FBox2D Plate = Box.ExpandBy(FVector2D(4, 1));
+        Paint.Fill({Plate.Min, FVector2D(Plate.Max.X, Plate.Min.Y), Plate.Max, FVector2D(Plate.Min.X, Plate.Max.Y)}, MvPlate);
+        Paint.Text(TEXT("FOR SALE"), At - FVector2D(Title.X * 0.5f, Title.Y), LabelSize, MvCream, true, false);
+        Paint.Text(Parcel.Label, At - FVector2D(Name.X * 0.5f, 0), LabelSize * 0.9f, MvCream, false, false);
     }
 
     // You are here: a slow pulse under her arrow.
@@ -437,7 +439,10 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
     {
         const float LabelSize = 12.0f * Scale;
         const FVector2D Extent = HomesteadMapPaint::FPainter::MeasureText(TEXT("You are here"), LabelSize);
-        Paint.Text(TEXT("You are here"), Here + FVector2D(-Extent.X * 0.5f, 15 * Scale), LabelSize, MvCream);
+        const FVector2D HereAt = Here + FVector2D(-Extent.X * 0.5f, 15 * Scale);
+        Paint.Fill({HereAt - FVector2D(4, 1), HereAt + FVector2D(Extent.X + 4, -1), HereAt + Extent + FVector2D(4, 1),
+            HereAt + FVector2D(-4, Extent.Y + 1)}, MvPlate);
+        Paint.Text(TEXT("You are here"), HereAt, LabelSize, MvCream, true, false);
     }
 
     // North and a scale bar, like a surveyor's sheet.
@@ -458,7 +463,7 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
         Paint.Segment(Left, Left + FVector2D(0, -7 * Scale), MvCream, 2.0f * Scale);
         Paint.Segment(Left + FVector2D(Pixels, 0), Left + FVector2D(Pixels, -7 * Scale), MvCream, 2.0f * Scale);
         const FString Label = Length >= 1000 ? FString::Printf(TEXT("%.0f km"), Length / 1000) : FString::Printf(TEXT("%.0f m"), Length);
-        Paint.Text(Label, Left + FVector2D(Pixels + 8 * Scale, -15 * Scale), 11 * Scale, MvCream);
+        Paint.Text(Label, Left + FVector2D(Pixels + 8 * Scale, -15 * Scale), 11 * Scale, MvCream, true, false);
     }
 
     // The focused place, and how to drive the map.
@@ -476,12 +481,12 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
     const float CardWidth = FMath::Max3(TitleSize.X, DetailSize.X, ActionSize.X) + 24 * Scale;
     const float CardHeight = TitleSize.Y + DetailSize.Y + ActionSize.Y + 20 * Scale;
     Paint.Fill({CardAt, CardAt + FVector2D(CardWidth, 0), CardAt + FVector2D(CardWidth, CardHeight), CardAt + FVector2D(0, CardHeight)}, MvPlate);
-    Paint.Text(Title, CardAt + FVector2D(12, 8) * Scale, CardSize, MvGold);
-    Paint.Text(Detail, CardAt + FVector2D(12 * Scale, 10 * Scale + TitleSize.Y), CardSize * 0.8f, MvCream, false);
+    Paint.Text(Title, CardAt + FVector2D(12, 8) * Scale, CardSize, MvGold, true, false);
+    Paint.Text(Detail, CardAt + FVector2D(12 * Scale, 10 * Scale + TitleSize.Y), CardSize * 0.8f, MvCream, false, false);
     if (!Action.IsEmpty())
     {
         const FVector2D ActionAt = CardAt + FVector2D(12 * Scale, 16 * Scale + TitleSize.Y + DetailSize.Y);
-        Paint.Text(Action, ActionAt, CardSize * 0.8f, MvGold);
+        Paint.Text(Action, ActionAt, CardSize * 0.8f, MvGold, true, false);
         ActionBox = FBox2D(ActionAt - FVector2D(6, 4) * Scale, ActionAt + ActionSize + FVector2D(6, 0) * Scale);
     }
     else ActionBox.Init();

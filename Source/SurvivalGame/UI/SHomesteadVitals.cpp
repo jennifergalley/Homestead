@@ -32,12 +32,12 @@ constexpr double MealPopupFadeIn = 0.15;
 constexpr double MealPopupFadeOut = 0.6;
 constexpr float MealPopupRise = 6.0f;
 HomesteadUITheme::FThemeColor Gain(0.72f, 0.90f, 0.56f, 1);
-// The bars' fills: in parchment an olive ink for Energy and an ochre for the woodland's Food.
-HomesteadUITheme::FThemeColor EnergyFill(FLinearColor(0.66f, 0.76f, 0.52f, 1), FLinearColor(0.16f, 0.23f, 0.07f, 1));
-HomesteadUITheme::FThemeColor FoodFill(FLinearColor(0.77f, 0.66f, 0.37f, 1), FLinearColor(0.42f, 0.25f, 0.05f, 1));
+// The bars' fills: in parchment an olive ink for Energy and an ochre for the woodland's Food; the dark book keeps the classic fills.
+HomesteadUITheme::FThemeColor EnergyFill(FLinearColor(0.66f, 0.76f, 0.52f, 1), FLinearColor(0.16f, 0.23f, 0.07f, 1), FLinearColor(0.66f, 0.76f, 0.52f, 1));
+HomesteadUITheme::FThemeColor FoodFill(FLinearColor(0.77f, 0.66f, 0.37f, 1), FLinearColor(0.42f, 0.25f, 0.05f, 1), FLinearColor(0.77f, 0.66f, 0.37f, 1));
 // Low and critical fills: amber, then a muted red (deep enough on parchment to read as a warning).
-HomesteadUITheme::FThemeColor LowFill(FLinearColor(1.0f, 0.70f, 0.30f, 1), FLinearColor(0.64f, 0.38f, 0.04f, 1));
-HomesteadUITheme::FThemeColor CriticalFill(FLinearColor(0.88f, 0.40f, 0.34f, 1), FLinearColor(0.56f, 0.14f, 0.09f, 1));
+HomesteadUITheme::FThemeColor LowFill(FLinearColor(1.0f, 0.70f, 0.30f, 1), FLinearColor(0.64f, 0.38f, 0.04f, 1), FLinearColor(1.0f, 0.70f, 0.30f, 1));
+HomesteadUITheme::FThemeColor CriticalFill(FLinearColor(0.88f, 0.40f, 0.34f, 1), FLinearColor(0.56f, 0.14f, 0.09f, 1), FLinearColor(0.88f, 0.40f, 0.34f, 1));
 // The gentle pulse of a low bar: its opacity eases between these over one period (seconds).
 constexpr float PulseMinOpacity = 0.6f;
 constexpr double PulsePeriod = 1.8;

@@ -22,8 +22,8 @@ param([string]$EngineRoot, [switch]$Packaged, [switch]$WithAudio, [switch]$FullL
     # Plain: the UI over a flat warm-grey backdrop with the world hidden (the heroine stays unless
     # -UIGalleryNoHeroine); World: over the game.
     [ValidateSet('Plain','World')][string]$UIGalleryBackdrop = 'Plain', [switch]$UIGalleryNoHeroine,
-    # The UI theme trial (UI/HomesteadUITheme.h): parchment or classic.
-    [ValidateSet('','parchment','classic')][string]$UITheme = '')
+    # The UI theme (UI/HomesteadUITheme.h): parchment (light), dark or classic.
+    [ValidateSet('','parchment','dark','classic')][string]$UITheme = '')
 $ErrorActionPreference = 'Stop'
 if ($UIGallery -and $Packaged) { throw 'The UI gallery runs the Development editor binary (-game), not a packaged build.' }
 if ($EstateSmoke -and ($FullLoop -or $Presentation -or $HairLength -or $Gathering -or $Watering -or $Creek -or $Crafting -or

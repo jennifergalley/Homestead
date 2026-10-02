@@ -18,17 +18,23 @@
 
 namespace HomesteadUITheme
 {
-enum class ETheme : uint8 { Classic, Parchment };
+// Parchment is the light book; Dark is the same book by candlelight (umber vellum, cream ink, gilt), the
+// pitched dark option (pitch-dark-parchment-theme). Both use EB Garamond; Classic is the old pine look.
+enum class ETheme : uint8 { Classic, Parchment, Dark };
 ETheme Current();
-inline bool IsParchment() { return Current() == ETheme::Parchment; }
+// The serif book family (parchment or dark): fonts and shapes; colours come from the palette.
+inline bool IsParchment() { return Current() != ETheme::Classic; }
+inline bool IsDark() { return Current() == ETheme::Dark; }
+// Sets the theme for this session and remembers it (GameUserSettings) for the next.
 void Set(ETheme Theme);
 const TCHAR* Name(ETheme Theme);
 
-// The parchment counterpart of a classic UI colour (see above).
+// The parchment and dark counterparts of a classic UI colour (see above).
 FLinearColor ParchmentOf(const FLinearColor& Classic);
+FLinearColor DarkOf(const FLinearColor& Classic);
 
 // A UI colour that follows the theme: it IS the FLinearColor in use (so code reads .R, returns and
-// mixes it like any colour), holding its classic and parchment values. Every one registers itself and
+// mixes it like any colour), holding its classic, parchment and dark values. Every one registers itself and
 // Apply() rewrites them all in place when the theme is chosen (the controller's BeginPlay, and on
 // `homestead.UITheme`). Static initialisation only links the list; nothing reads the theme until Apply.
 // Declare them at namespace scope (`inline` in headers), never as locals.
@@ -37,23 +43,29 @@ struct FThemeColor : public FLinearColor
     FThemeColor(float R, float G, float B, float A = 1.0f) : FThemeColor(FLinearColor(R, G, B, A)) {}
     explicit FThemeColor(const FLinearColor& InClassic);
     FThemeColor(const FLinearColor& InClassic, const FLinearColor& InParchment);
+    FThemeColor(const FLinearColor& InClassic, const FLinearColor& InParchment, const FLinearColor& InDark);
     // A copy (a lambda returning one, say) is a plain snapshot of the current colour: it isn't
     // registered, so it never changes afterwards.
-    FThemeColor(const FThemeColor& Other) : FLinearColor(Other), Classic(Other.Classic), Parchment(Other.Parchment) {}
+    FThemeColor(const FThemeColor& Other) : FLinearColor(Other), Classic(Other.Classic), Parchment(Other.Parchment), Dark(Other.Dark) {}
     FThemeColor& operator=(const FThemeColor&) = delete;
     ~FThemeColor();
-    void Apply(bool bParchment);
+    void Apply(ETheme Theme);
 private:
     friend void Apply();
     FLinearColor Classic;
     FLinearColor Parchment;
+    FLinearColor Dark;
     FThemeColor* Next = nullptr;
 };
 // Sets every FThemeColor to the current theme. Widgets built afterwards use it.
 void Apply();
 
 // A colour written inline (not a named FThemeColor), for lambdas and widgets built after Apply.
-inline FLinearColor Themed(const FLinearColor& Classic) { return IsParchment() ? ParchmentOf(Classic) : Classic; }
+inline FLinearColor Themed(const FLinearColor& Classic)
+{
+    const ETheme Theme = Current();
+    return Theme == ETheme::Dark ? DarkOf(Classic) : Theme == ETheme::Parchment ? ParchmentOf(Classic) : Classic;
+}
 
 // The book's Slate fonts: EB Garamond in parchment, FCoreStyle's default (Typeface) in classic.
 FSlateFontInfo Font(FName Typeface, float Size);

@@ -278,7 +278,6 @@ void SHomesteadMenu::CycleRegion(int32 Direction)
         SynchronizeFocus();
         return;
     }
-    if (Controller->MenuPortraitBrush() && SeenPage == 0) Regions.Add(ERegion::Portrait);
     Regions.Add(ERegion::Content);
     if (SeenPage == 0 && !HotbarCells.IsEmpty()) Regions.Add(ERegion::Hotbar);
     if (SeenPage == 0) Regions.Add(ERegion::Equipment);
@@ -435,14 +434,8 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
             Region = ERegion::Hotbar;
             Moved = true;
         }
-        else if (SeenPage == 0 && Direction.x < 0 && Controller->MenuPortraitBrush() && !Controller->ActiveStorageChest().IsSet())
-        {
-            // The pack's left edge: her portrait beside it, whatever row she is on (spatial
-            // navigation can miss the tall image from rows it doesn't overlap).
-            Region = ERegion::Portrait;
-            PortraitSelection = -1;
-            Moved = true;
-        }
+        // The pack's left edge is the edge: her portrait beside it is only a picture.
+        else if (SeenPage == 0 && Direction.x < 0 && !Controller->ActiveStorageChest().IsSet()) return;
         break;
     }
     case ERegion::Tabs:

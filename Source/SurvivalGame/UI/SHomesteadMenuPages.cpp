@@ -30,10 +30,14 @@ int32 SHomesteadMenu::StoragePackColumns() const { return Homestead::PackRowSize
 int32 SHomesteadMenu::Columns() const
 {
     // The Pack page's grid is as wide as the hotbar row heading it (Homestead::PackRowSize), so the row
-    // reads as the grid's first row.
-    const bool Expanded = LogicalBookWidth() >= 1800;
-    return SeenPage == 0 ? Homestead::PackRowSize
-        : SeenPage <= 2 ? (Expanded ? 10 : 6) : 1;
+    // reads as the grid's first row. Recipes and plans fill their panel's width before wrapping
+    // (Jenny 2026-10-01): the book less its margins, the details column, the gutter and the panel's
+    // padding and scroll bar, in cells of ItemCellWidth plus the grid's 4 px slot padding each side.
+    if (SeenPage == 0) return Homestead::PackRowSize;
+    if (SeenPage > 2) return 1;
+    constexpr float BookMargins = 48.0f, PanelInsets = 36.0f, CellPitch = ItemCellWidth + 8.0f;
+    const float Available = LogicalBookWidth() - BookMargins - DetailsColumnWidth() - BookGutter - PanelInsets;
+    return FMath::Max(4, FMath::FloorToInt(Available / CellPitch));
 }
 
 TSharedRef<SWidget> SHomesteadMenu::BuildBody()
@@ -255,6 +259,15 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [OptionButton(TEXT("Turns with view"), Controller->MapPresenter()->RotatesWithCamera(),
                     [this]() { Controller->MapPresenter()->SetRotatesWithCamera(true); Refresh(); })];
             }
+            else if (Row.Id == 18)
+            {
+                TSharedPtr<SHorizontalBox> Choices;
+                RowContent->AddSlot().AutoHeight().Padding(0, 5, 0, 0)[SAssignNew(Choices, SHorizontalBox)];
+                Choices->AddSlot().AutoWidth().Padding(0, 0, 6, 0)
+                [OptionButton(TEXT("Light"), !HomesteadUITheme::IsDark(), [this]() { Controller->MenuSetDarkBook(false); })];
+                Choices->AddSlot().AutoWidth()
+                [OptionButton(TEXT("Dark"), HomesteadUITheme::IsDark(), [this]() { Controller->MenuSetDarkBook(true); })];
+            }
             else if (Row.Id == 13)
             {
                 TSharedPtr<SHorizontalBox> Choices;
@@ -301,44 +314,15 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     Body->AddSlot().FillHeight(1).HAlign(HAlign_Fill)[ SAssignNew(ColumnsBox, SHorizontalBox) ];
     if (SeenPage == 0 && !Storage && Controller->MenuPortraitBrush())
     {
-        ColumnsBox->AddSlot().AutoWidth().Padding(0, 0, 12, 0)
+        // Just her, standing (Jenny 2026-10-01: no turn, zoom or status controls on the preview).
+        ColumnsBox->AddSlot().AutoWidth().Padding(0, 0, BookGutter, 0)
         [
             SNew(SBox).WidthOverride(PortraitColumnWidth()).Clipping(EWidgetClipping::ClipToBounds)
             [
-                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2)
-                .BorderBackgroundColor_Lambda([this]() { return Region == ERegion::Portrait ? MenuGold : MenuPine; })
+                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2).BorderBackgroundColor(MenuPine)
                 [
-                    SNew(SVerticalBox)
-                    + SVerticalBox::Slot().FillHeight(1)
-                    [
-                        FocusAnchor(SNew(SScaleBox).Stretch(EStretch::ScaleToFit).HAlign(HAlign_Center).VAlign(VAlign_Center)
-                        [ SNew(SImage).Image_Lambda([this]() { return Controller.IsValid() ? Controller->MenuPortraitBrush() : nullptr; }) ], ERegion::Portrait, -1)
-                    ]
-                    + SVerticalBox::Slot().AutoHeight().Padding(8)
-                    [
-                        SNew(STextBlock).AutoWrapText(true).ColorAndOpacity(Ink)
-                        .Font(HomesteadUITheme::Font("Regular", 16))
-                        .Text_Lambda([this]() { return FText::FromString(Controller->MenuPortraitStatus()); })
-                    ]
-                    + SVerticalBox::Slot().AutoHeight().Padding(8, 0, 8, 8)
-                    [
-                        SNew(SBox).HeightOverride(44)
-                        [
-                            SNew(SHorizontalBox)
-                            + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 4, 0)
-                            [ RegisterButton(MakeButton(TEXT("<"), [this]() { Controller->OrbitMenuPortrait(-20); },
-                                TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Portrait && PortraitSelection == 0 ? MenuGold : MenuPine; }),
-                                TEXT("Turn character left"), FMargin(8)), ERegion::Portrait, 0) ]
-                            + SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 4, 0)
-                            [ RegisterButton(MakeButton(TEXT(">"), [this]() { Controller->OrbitMenuPortrait(20); },
-                                TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Portrait && PortraitSelection == 1 ? MenuGold : MenuPine; }),
-                                TEXT("Turn character right"), FMargin(8)), ERegion::Portrait, 1) ]
-                            + SHorizontalBox::Slot().FillWidth(1)
-                            [ RegisterButton(MakeButton(TEXT("Zoom"), [this]() { Controller->ZoomMenuPortrait(); },
-                                TAttribute<FSlateColor>::CreateLambda([this]() { return Region == ERegion::Portrait && PortraitSelection == 2 ? MenuGold : MenuPine; }),
-                                TEXT("Toggle close-up and full-body view"), FMargin(8)), ERegion::Portrait, 2) ]
-                        ]
-                    ]
+                    SNew(SScaleBox).Stretch(EStretch::ScaleToFit).HAlign(HAlign_Center).VAlign(VAlign_Center)
+                    [ SNew(SImage).Image_Lambda([this]() { return Controller.IsValid() ? Controller->MenuPortraitBrush() : nullptr; }) ]
                 ]
             ]
         ];
@@ -352,7 +336,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     if (PackOnly) ColumnsBox->AddSlot().FillWidth(1)[ InventoryPanel ];
     // Appearance is a narrow column at the left; she stands in the world to its right.
     else if (SeenPage == 6) ColumnsBox->AddSlot().AutoWidth()[ SNew(SBox).WidthOverride(AppearancePanelWidth)[ InventoryPanel ] ];
-    else ColumnsBox->AddSlot().FillWidth(1).Padding(0, 0, SeenPage == 0 ? 0 : 16, 0)[ InventoryPanel ];
+    else ColumnsBox->AddSlot().FillWidth(1).Padding(0, 0, SeenPage == 0 ? 0 : BookGutter, 0)[ InventoryPanel ];
     if (SeenPage == 0 && !Storage)
     {
         InventoryColumn->AddSlot().AutoHeight().Padding(4, 0, 4, 6)
@@ -572,9 +556,17 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     SNew(SHorizontalBox)
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 8, 0)
                     [ SNew(SBox).WidthOverride(36).HeightOverride(36)
-                        [ SNew(SHomesteadIcon).Kind(FName(EquipmentSlotIcons[Index])) ] ]
+                        [ SNew(SHomesteadIcon).Kind(FName(EquipmentSlotIcons[Index]))
+                            .Tint_Lambda([this, Index]() -> FLinearColor
+                                { return Region == ERegion::Equipment && EquipmentSelection == Index ? FLinearColor(PineInk) : FLinearColor(MenuGold); }) ] ]
                     + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
-                    [ Text(EquipmentLabel(Index), 15) ]
+                    [
+                        // Text on the accent is the accent's own ink (PineInk), in every theme.
+                        SNew(STextBlock).Text(FText::FromString(EquipmentLabel(Index))).AutoWrapText(true)
+                        .Font(HomesteadUITheme::Font("Regular", 15))
+                        .ColorAndOpacity_Lambda([this, Index]()
+                            { return Region == ERegion::Equipment && EquipmentSelection == Index ? FSlateColor(PineInk) : FSlateColor(Ink); })
+                    ]
                 ];
             SlotButton->RightClick = [this, Index]()
                 { if (PointerAction() && Dialog == EDialog::None) FocusEquipment(Index, true); };

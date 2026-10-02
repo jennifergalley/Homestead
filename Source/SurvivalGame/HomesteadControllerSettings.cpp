@@ -4,6 +4,8 @@
 #include "HomesteadControllerText.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadMapComponent.h"
+#include "UI/HomesteadUITheme.h"
+#include "TimerManager.h"
 
 #include "AudioDevice.h"
 #include "Components/AudioComponent.h"
@@ -193,6 +195,21 @@ void AHomesteadController::MenuSetAutosaveInterval(int32 Minutes)
     Notify(FString::Printf(TEXT("Autosave interval %d minutes."), AutosaveMinutes));
 }
 
+void AHomesteadController::MenuSetDarkBook(bool bDark)
+{
+    if (HomesteadUITheme::IsDark() == bDark) return;
+    HomesteadUITheme::Set(bDark ? HomesteadUITheme::ETheme::Dark : HomesteadUITheme::ETheme::Parchment);
+    // The book builds its panels from the palette, so it reopens on this page in the new colours (next
+    // tick: this may be the book's own button click).
+    if (IsBookOpen())
+        GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this, Open = BookPage()]()
+        {
+            if (!IsBookOpen()) return;
+            CloseBook();
+            OpenBook(Open);
+        }));
+}
+
 void AHomesteadController::MenuSetGameSpeed(double DayMinutes)
 {
     if (RejectPendingGroundSnapAction()) return;
@@ -218,6 +235,7 @@ void AHomesteadController::MenuAdjustSetting(int32 Id, int32 Direction)
     }
     else if (Id == 12) MenuSetAutosaveEnabled(Direction > 0);
     else if (Id == 17 && Map) Map->SetRotatesWithCamera(Direction > 0);
+    else if (Id == 18) MenuSetDarkBook(Direction > 0);
     else if (Id == 13 && bAutosaveEnabled)
     {
         const int32 Values[] = {5, 10, 20, 30};

@@ -230,6 +230,8 @@ public:
     bool IsAutosaveEnabled() const { return bAutosaveEnabled; }
     int32 AutosaveIntervalMinutes() const { return AutosaveMinutes; }
     void MenuSetAutosaveEnabled(bool Enabled);
+    // Settings › Book colours: the dark (candlelit) or light parchment book, remembered for next time.
+    void MenuSetDarkBook(bool bDark);
     void MenuSetAutosaveInterval(int32 Minutes);
     const FSlateBrush* MenuPortraitBrush() const { return MenuPortrait ? &PortraitBrush : nullptr; }
     void RefreshMenuPortrait();

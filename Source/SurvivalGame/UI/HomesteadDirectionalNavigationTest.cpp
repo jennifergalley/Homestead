@@ -227,24 +227,18 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
                     *Controller->GetPawn()->GetActorLocation().ToString(), *PortraitRotation->ToString(), *PortraitPose().ToString()));
             return Passed;
         }, 0.15f);
-    Add(TEXT("Left boundary reaches visible portrait without rotation"),
+    Add(TEXT("Left boundary stays in the pack (the portrait is only a picture)"),
         [this, ColumnCount]()
         {
-            // From wherever the last step left her in the first grid row, Left walks to its edge and on.
+            // From wherever the last step left her in the first grid row, Left walks to its edge and one more.
             const int32 Column = Controller->NativeMenu->GetSelectedContentIndex() % FMath::Max(1, *ColumnCount);
             for (int32 Step = 0; Step <= Column; ++Step) Tap(EKeys::Gamepad_DPad_Left);
         },
-        [Focused, PortraitRotation, PortraitPose]() { return Focused(TEXT("Portrait")) && PortraitPose().Equals(*PortraitRotation, 0.01); });
-    Add(TEXT("Right reverses from portrait into the carried content"),
-        [this]()
-        {
-            const auto Widget = FSlateApplication::Get().GetKeyboardFocusedWidget();
-            const auto Position = Widget->GetCachedGeometry().GetAbsolutePosition();
-            const auto Size = Widget->GetCachedGeometry().GetAbsoluteSize();
-            Results.Add(FString::Printf(TEXT("INPUT portrait-right before=%s widget=%s position=(%.2f,%.2f) size=(%.2f,%.2f)"),
-                *Controller->NativeMenu->GetFocusedRegionName(), *Widget->GetTypeAsString(), Position.X, Position.Y, Size.X, Size.Y));
-            Tap(EKeys::Gamepad_DPad_Right);
-        },
+        [this, Focused, ColumnCount, PortraitRotation, PortraitPose]() { return Focused(TEXT("Content"))
+            && Controller->NativeMenu->GetSelectedContentIndex() % FMath::Max(1, *ColumnCount) == 0
+            && PortraitPose().Equals(*PortraitRotation, 0.01); });
+    Add(TEXT("Right moves along the carried content"),
+        [this]() { Tap(EKeys::Gamepad_DPad_Right); },
         [Focused]() { return Focused(TEXT("Content")); });
     Add(TEXT("Right boundary stays in the pack now that item actions live in the item menu"),
         [this]() { Tap(EKeys::Right); },

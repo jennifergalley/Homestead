@@ -4,6 +4,7 @@
 #include "SHomesteadArrival.h"
 #include "HAL/IConsoleManager.h"
 #include "Misc/CommandLine.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Misc/Parse.h"
 #include "Styling/CoreStyle.h"
 
@@ -25,12 +26,46 @@ constexpr float MutedBelow = 0.86f;
 // The serif's x-height is small: the same point size reads about this much smaller than the sans.
 constexpr float SerifScale = 1.12f;
 
+// Dark (the candlelit book, pitch-dark-parchment-theme): umber vellum panels, cream ink, a muted gilt
+// accent and terracotta for warnings. Values are linear; the sRGB tokens and their contrast ratios
+// (all 4.5:1 or better on the panels they sit on) are in openspec/changes/pitch-dark-parchment-theme.
+const FLinearColor UmberDeep(0.0232f, 0.0137f, 0.0086f, 1.0f);   // #2A1F17 page and panels
+const FLinearColor UmberRaised(0.0685f, 0.0423f, 0.0252f, 1.0f); // #4A3A2C slots and selected rows
+const FLinearColor Gilt(0.6584f, 0.4020f, 0.1221f, 1.0f);        // #D4AA62 accent
+const FLinearColor Cream(0.8632f, 0.7605f, 0.5647f, 1.0f);       // #EFE2C6 body text
+const FLinearColor MutedCream(0.5776f, 0.4678f, 0.3050f, 1.0f);  // #C8B696 secondary text
+const FLinearColor Terracotta(0.8070f, 0.2789f, 0.1590f, 1.0f);  // #E8906F warnings
+const FLinearColor DarkOnAccent(0.0176f, 0.0097f, 0.0048f, 1.0f); // #24190F text on gilt
+
 TAutoConsoleVariable<FString> CVarTheme(TEXT("homestead.UITheme"), TEXT(""),
-    TEXT("UI theme: parchment (the game's look: parchment card and EB Garamond everywhere) or classic (old pine and cream, for comparison). ")
-    TEXT("Empty: -HomesteadUITheme=<name> from the command line, else parchment. Reopen menus after changing."),
+    TEXT("UI theme: parchment (the light book), dark (the candlelit book) or classic (old pine and cream, for comparison). ")
+    TEXT("Empty: -HomesteadUITheme=<name> from the command line, else Settings' choice, else parchment. Reopen menus after changing."),
     FConsoleVariableDelegate::CreateLambda([](IConsoleVariable*) { HomesteadUITheme::Apply(); }));
 
+constexpr const TCHAR* ThemeSection = TEXT("/Script/SurvivalGame.HomesteadUITheme");
+constexpr const TCHAR* ThemeKey = TEXT("Theme");
+
 float Luminance(const FLinearColor& Colour) { return 0.2126f * Colour.R + 0.7152f * Colour.G + 0.0722f * Colour.B; }
+
+HomesteadUITheme::ETheme Parse(const FString& Value)
+{
+    using HomesteadUITheme::ETheme;
+    if (Value.Equals(TEXT("classic"), ESearchCase::IgnoreCase)) return ETheme::Classic;
+    if (Value.Equals(TEXT("dark"), ESearchCase::IgnoreCase)) return ETheme::Dark;
+    return ETheme::Parchment;
+}
+
+// Settings' choice, read once on first use (never during static initialisation).
+FString& SavedTheme()
+{
+    static FString Saved = []()
+    {
+        FString Value;
+        if (GConfig) GConfig->GetString(ThemeSection, ThemeKey, Value, GGameUserSettingsIni);
+        return Value;
+    }();
+    return Saved;
+}
 }
 
 namespace HomesteadUITheme
@@ -39,16 +74,24 @@ ETheme Current()
 {
     FString Value = HomesteadUIThemeTuning::CVarTheme.GetValueOnGameThread();
     if (Value.IsEmpty()) FParse::Value(FCommandLine::Get(), TEXT("HomesteadUITheme="), Value);
-    return Value.Equals(TEXT("classic"), ESearchCase::IgnoreCase) ? ETheme::Classic : ETheme::Parchment;
+    if (Value.IsEmpty()) Value = HomesteadUIThemeTuning::SavedTheme();
+    return HomesteadUIThemeTuning::Parse(Value);
 }
 
 void Set(ETheme Theme)
 {
+    HomesteadUIThemeTuning::SavedTheme() = Name(Theme);
+    if (GConfig)
+    {
+        GConfig->SetString(HomesteadUIThemeTuning::ThemeSection, HomesteadUIThemeTuning::ThemeKey, Name(Theme), GGameUserSettingsIni);
+        GConfig->Flush(false, GGameUserSettingsIni);
+    }
     if (IConsoleVariable* Variable = IConsoleManager::Get().FindConsoleVariable(TEXT("homestead.UITheme")))
         Variable->Set(Name(Theme), ECVF_SetByConsole);
 }
 
-const TCHAR* Name(ETheme Theme) { return Theme == ETheme::Classic ? TEXT("classic") : TEXT("parchment"); }
+const TCHAR* Name(ETheme Theme)
+{ return Theme == ETheme::Classic ? TEXT("classic") : Theme == ETheme::Dark ? TEXT("dark") : TEXT("parchment"); }
 
 FLinearColor ParchmentOf(const FLinearColor& Classic)
 {
@@ -68,6 +111,28 @@ FLinearColor ParchmentOf(const FLinearColor& Classic)
     return (L < MutedBelow ? MutedInk : HomesteadNoticeStyle::InkBrown).CopyWithNewOpacity(Classic.A);
 }
 
+FLinearColor DarkOf(const FLinearColor& Classic)
+{
+    using namespace HomesteadUIThemeTuning;
+    const float L = Luminance(Classic);
+    const bool bWarm = Classic.R - Classic.B > 0.3f;
+    if (bWarm && Classic.R > 0.95f && Classic.G < 0.72f) return Terracotta.CopyWithNewOpacity(Classic.A);
+    if (L < SurfaceTop)
+    {
+        // The classic order is kept: deeper panels stay deepest, raised fills (selections, slots) lift.
+        // The darkest classic tone (pine ink on brass) is the text on the gilt accent.
+        if (L < 0.05f && Classic.A >= 0.99f) return DarkOnAccent;
+        const float T = FMath::Clamp((L - SurfaceDark) / SurfaceSpan, 0.0f, 1.0f);
+        FLinearColor Panel = FMath::Lerp(UmberDeep, UmberRaised, T);
+        Panel.A = Classic.A < FaintAlpha ? Classic.A : FMath::Max(Classic.A, PaperMinAlpha);
+        return Panel;
+    }
+    if (bWarm) return Gilt.CopyWithNewOpacity(Classic.A);
+    // Saturated colours (a green gain, say) keep their meaning.
+    if (FMath::Max3(Classic.R, Classic.G, Classic.B) - FMath::Min3(Classic.R, Classic.G, Classic.B) > 0.25f) return Classic;
+    return (L < MutedBelow ? MutedCream : Cream).CopyWithNewOpacity(Classic.A);
+}
+
 namespace
 {
 FThemeColor*& Registry()
@@ -77,10 +142,13 @@ FThemeColor*& Registry()
 }
 }
 
-FThemeColor::FThemeColor(const FLinearColor& InClassic) : FThemeColor(InClassic, ParchmentOf(InClassic)) {}
+FThemeColor::FThemeColor(const FLinearColor& InClassic) : FThemeColor(InClassic, ParchmentOf(InClassic), DarkOf(InClassic)) {}
 
 FThemeColor::FThemeColor(const FLinearColor& InClassic, const FLinearColor& InParchment)
-    : FLinearColor(InClassic), Classic(InClassic), Parchment(InParchment)
+    : FThemeColor(InClassic, InParchment, DarkOf(InClassic)) {}
+
+FThemeColor::FThemeColor(const FLinearColor& InClassic, const FLinearColor& InParchment, const FLinearColor& InDark)
+    : FLinearColor(InClassic), Classic(InClassic), Parchment(InParchment), Dark(InDark)
 {
     Next = Registry();
     Registry() = this;
@@ -92,15 +160,15 @@ FThemeColor::~FThemeColor()
         if (*Link == this) { *Link = Next; break; }
 }
 
-void FThemeColor::Apply(bool bParchment)
+void FThemeColor::Apply(ETheme Theme)
 {
-    static_cast<FLinearColor&>(*this) = bParchment ? Parchment : Classic;
+    static_cast<FLinearColor&>(*this) = Theme == ETheme::Dark ? Dark : Theme == ETheme::Parchment ? Parchment : Classic;
 }
 
 void Apply()
 {
-    const bool bParchment = IsParchment();
-    for (FThemeColor* Colour = Registry(); Colour; Colour = Colour->Next) Colour->Apply(bParchment);
+    const ETheme Theme = Current();
+    for (FThemeColor* Colour = Registry(); Colour; Colour = Colour->Next) Colour->Apply(Theme);
 }
 
 FSlateFontInfo Font(FName Typeface, float Size)
