@@ -305,7 +305,7 @@ void AHomesteadCharacter::UpdateFellingHatchet()
         return;
     }
     // The left fist holds the knob and the right closes just above it (axe_fell.py): the haft
-    // runs up from the left grip centre, the edge from the left knuckles.
+    // runs up from the left grip centre.
     USkeletalMeshComponent* Body = GetMesh();
     const auto GripCentre = [Body](const TCHAR* Side, FVector& Along)
     {
@@ -320,10 +320,14 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     };
     FVector AlongL;
     const FVector Knob = GripCentre(TEXT("l"), AlongL);
-    // The knob fist sits rolled on the haft so her wrist stays in line with the forearm, and the
-    // right fist rolls with the swing (axe_fell.py and ground_strike.py KNOB_ROLL, ROLL_R); turning
-    // the knob's knuckles back by its roll gives the edge (or the pick's point).
-    constexpr float KnobRollDegrees = 90.0f;
+    // Each fist rolls on the haft through the swing so her wrists stay in line with the forearms
+    // (axe_fell.py and ground_strike.py ROLL_L, ROLL_R), so the edge (or the pick's point) can't
+    // be read from her knuckles. The recipes lay it square to the haft in a fixed swing plane
+    // (edge_for: the plane's normal crossed with the haft); these are those normals in component
+    // space, forward +Y, her left +X.
+    const FVector SwingNormal = FellTool == Homestead::Item::Hatchet && !bStrikeHatchet
+        ? FVector(-0.438846f, -0.585515f, -0.681605f)    // axe_fell.swing_normal(), signed by edge_for
+        : FVector(-0.941768f, -0.21651f, -0.257287f);    // ground_strike.swing_normal(), signed by edge_for
     // Both fists stay together at the base of the haft (axe_fell.py), so their spacing can't set
     // the line; each closed fist's pinky-to-index axis runs along the haft. That axis slants
     // about 16 degrees toward the fingers, so with the fists rolled differently each is squared
@@ -339,8 +343,9 @@ void AHomesteadCharacter::UpdateFellingHatchet()
     const FVector AcrossL = Across(TEXT("l"));
     const FVector AcrossR = Across(TEXT("r"));
     const FVector Haft = (AcrossL + AcrossR).GetSafeNormal().IsNearlyZero() ? AcrossL : (AcrossL + AcrossR).GetSafeNormal();
-    const FVector Knuckles = AlongL.RotateAngleAxis(-KnobRollDegrees, Haft);
-    const FVector Edge = (Knuckles - Haft * FVector::DotProduct(Knuckles, Haft)).GetSafeNormal();
+    const FVector Normal = Body->GetComponentQuat().RotateVector(SwingNormal);
+    const FVector Lead = FVector::CrossProduct(Normal, Haft);
+    const FVector Edge = (Lead - Haft * FVector::DotProduct(Lead, Haft)).GetSafeNormal();
     if (Edge.IsNearlyZero()) return;
     // The imported hatchet's edge is on +Y (the Blender export mirrors Y; the report says -Y), so
     // +Y goes along the edge to face the tree.

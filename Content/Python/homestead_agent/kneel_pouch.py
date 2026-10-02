@@ -75,6 +75,8 @@ def _author(pelvis_anim):
     s.key_world(4, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (0, 8, 10)))
     s.key_world(F['step'] + 2, 'foot_l_ik_ctrl', kg.FOOT_L_FORWARD)
     s.key_world(F['out2'] + 2, 'foot_l_ik_ctrl', kg.FOOT_L_FORWARD)
+    # She rises in 8 frames, too quickly to step each foot in turn (kneel_gather.key_rise_steps), so both
+    # feet draw in together as she stands.
     s.key_world(F['rise'] - 4, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (0, 12, 9)))
     s.key_world(F['rise'], 'foot_l_ik_ctrl', kg.FOOT_L)
     s.key_world(F['end'], 'foot_l_ik_ctrl', kg.FOOT_L)
@@ -82,6 +84,7 @@ def _author(pelvis_anim):
     s.key_world(F['stand'], 'foot_r_ik_ctrl', kg.FOOT_R)
     s.key_world(F['step'], 'foot_r_ik_ctrl', kg.FOOT_R)
     s.key_world(F['kneel'], 'foot_r_ik_ctrl', kg.FOOT_R_KNEEL, toes)
+    kg.key_step_back(s, F['step'], F['kneel'], toes)
     s.key_world(F['out2'], 'foot_r_ik_ctrl', kg.FOOT_R_KNEEL, toes)
     s.key_world(F['rise'] - 2, 'foot_r_ik_ctrl', kg.FOOT_R)
     s.key_world(F['end'], 'foot_r_ik_ctrl', kg.FOOT_R)
