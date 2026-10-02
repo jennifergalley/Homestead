@@ -3,6 +3,10 @@
 Integration updates this file for every delivery. Each entry uses a date/slot heading, SHA, status,
 and short player-facing changelist; the planner reads it directly.
 
+Timing (Jenny, 2026-10-01): start each build about an hour before its slot (7:30 AM, 4 PM, 9 PM).
+When every item Jenny explicitly marked for a build is done and time remains, lanes take the next
+item from the planner's priority order (`priority.json`) that fits their lane.
+
 ## 2026-10-01 — 7:30 AM
 
 - SHA: `20ad66e9`
@@ -63,6 +67,15 @@ and short player-facing changelist; the planner reads it directly.
 - The full cove route from the Estate walks cleanly.
 - Chests can be renamed, and the name sticks.
 - One button stores matching items in an open chest.
+
+## 2026-10-02 — 7:30 AM
+
+- SHA: pending
+- Status: planned
+- Ships:
+- Her fingers wrap the idle-carried pickaxe instead of clipping through her fist.
+- Axe and pickaxe swings use a natural wrist angle on the forward hand.
+- The scythe sits further in front of her, so neither hand clips her chest.
 
 ## Later
 
