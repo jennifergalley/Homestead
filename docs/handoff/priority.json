@@ -8,6 +8,7 @@
     "add-cove-route",
     "add-chest-names",
     "add-chest-auto-store",
+    "daily-weed-pass",
     "fix-tool-grip-contact",
     "pitch-dark-parchment-theme",
     "reduce-foliage-shadow-motion",
@@ -32,7 +33,6 @@
     "fix-live-sound-sliders",
     "fix-estate-river-source",
     "enrich-estate-ground-and-meadow",
-    "daily-weed-pass",
     "close-shops-on-sundays",
     "author-fixed-cornish-estate-map",
     "audio-loudness-standard",
@@ -68,7 +68,8 @@
     "add-estate-lake",
     "add-cove-route",
     "add-chest-names",
-    "add-chest-auto-store"
+    "add-chest-auto-store",
+    "daily-weed-pass"
   ],
   "removed": [
     "replace-heroine-with-metahuman"

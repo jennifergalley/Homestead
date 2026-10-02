@@ -67,6 +67,7 @@ item from the planner's priority order (`priority.json`) that fits their lane.
 - The full cove route from the Estate walks cleanly.
 - Chests can be renamed, and the name sticks.
 - One button stores matching items in an open chest.
+- Weeds sprout in only some plots each day, at random.
 
 ## 2026-10-02 — 7:30 AM
 
