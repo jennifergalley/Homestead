@@ -29,3 +29,9 @@ the clear radius of any interactable, world drop, plot or building piece.
 
 The heroine's footsteps SHALL be quieter and duller on grass, moor and woodland floor than on other
 ground, and unchanged elsewhere.
+
+
+#### Scenario: Soft steps on grass
+
+- **WHEN** the heroine walks across grass, moor or woodland floor and then walks across another ground type
+- **THEN** her footsteps are quieter and duller on the grass, moor and woodland floor, and return to the unchanged sound elsewhere

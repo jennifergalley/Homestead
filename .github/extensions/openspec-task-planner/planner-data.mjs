@@ -20,7 +20,7 @@ async function findTaskFiles(directory) {
         throw error;
     }
     for (const entry of entries) {
-        if (entry.name.startsWith(".")) continue;
+        if (entry.name.startsWith(".") || entry.name === "archive") continue;
         const path = join(directory, entry.name);
         if (entry.isDirectory()) {
             found.push(...await findTaskFiles(path));
@@ -61,6 +61,48 @@ function parseTasks(markdown) {
     }
     if (section.tasks.length) sections.push(section);
     return sections;
+}
+
+function parseBuilds(markdown) {
+    const entries = [];
+    const later = [];
+    let current = null;
+    let inLater = false;
+    for (const line of markdown.split(/\r?\n/)) {
+        const heading = line.match(/^##\s+(.+?)\s*$/);
+        if (heading) {
+            inLater = heading[1].trim().toLowerCase() === "later";
+            current = null;
+            if (!inLater) {
+                const [date, slot] = heading[1].split(/\s+—\s+/, 2);
+                current = { date: date?.trim() ?? heading[1].trim(), slot: slot?.trim() ?? "", sha: "pending", status: "planned", ships: [] };
+                entries.push(current);
+            }
+            continue;
+        }
+        const property = line.match(/^\s*-\s+(SHA|Status):\s*(.+?)\s*$/i);
+        if (property && current) {
+            current[property[1].toLowerCase()] = property[2];
+            continue;
+        }
+        const bullet = line.match(/^\s*-\s+(.+?)\s*$/);
+        if (!bullet) continue;
+        if (inLater) {
+            later.push(bullet[1]);
+        } else if (current && bullet[1] !== "Ships:") {
+            current.ships.push(bullet[1]);
+        }
+    }
+    return { entries, later };
+}
+
+async function loadBuilds(projectRoot) {
+    try {
+        return parseBuilds(await readFile(join(projectRoot, "docs", "handoff", "builds.md"), "utf8"));
+    } catch (error) {
+        if (error?.code === "ENOENT") return { entries: [], later: [] };
+        throw error;
+    }
 }
 
 async function readActiveChange(projectRoot, now) {
@@ -108,7 +150,10 @@ async function loadFeature(projectRoot, tasksPath, activeChange) {
 export async function loadPlanner(projectRoot, now = Date.now()) {
     const taskFiles = await findTaskFiles(join(projectRoot, "openspec", "changes"));
     const activeChange = await readActiveChange(projectRoot, now);
-    const features = await Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange)));
+    const [features, builds] = await Promise.all([
+        Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange))),
+        loadBuilds(projectRoot),
+    ]);
     features.sort((a, b) => {
         if (a.status !== b.status) return statusOrder[a.status] - statusOrder[b.status];
         return b.modifiedAt.localeCompare(a.modifiedAt);
@@ -127,5 +172,6 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
             completedFeatures: features.filter((feature) => feature.status === "complete").length,
         },
         features,
+        builds,
     };
 }

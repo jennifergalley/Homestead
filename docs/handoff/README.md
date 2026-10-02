@@ -294,7 +294,8 @@ The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
    `Estate\` subfolder, and `Saved\Config`). Copy both from the old package into the new one, or she
    loses her game.
 3. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
-   orchestrator relays that to Jenny.
+   orchestrator relays that to Jenny. Integration also updates `docs\handoff\builds.md` with the
+   date/slot, SHA, status and player-facing changelist, moving unshipped work to its **Later** list.
 4. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
 
 Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.

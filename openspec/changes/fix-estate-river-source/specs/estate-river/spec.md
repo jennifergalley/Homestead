@@ -28,6 +28,11 @@ It SHALL NOT float over or tilt across grass.
 The river SHALL NOT be spatially loaded. It SHALL be visible from the manor and the drive, and the
 pail probe SHALL find it from anywhere on the estate.
 
+
+#### Scenario: The river remains available across the estate
+
+- **WHEN** she views the estate from the manor or drive, or uses the pail probe from any location on the estate
+- **THEN** the river is visible from the manor and drive, is not spatially unloaded, and the pail probe finds it without requiring travel into a loaded river area
 ### Requirement: The pail reaches the water
 
 When she fills the pail at the river, the pail SHALL dip into the water, not stop short of the edge.

@@ -55,6 +55,32 @@ export function renderPlannerHtml() {
     }
     .stat { padding: 15px; }
     .stat strong { display: block; font-size: 22px; line-height: 28px; }
+    .builds {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .builds-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .builds-head h2 { margin: 0; font-size: 17px; line-height: 24px; }
+    .build-card {
+      border: 1px solid var(--border-color-default, #30363d);
+      background: var(--background-color-muted, #161b22);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .build-card.current { border-color: var(--true-color-blue, #58a6ff); }
+    .build-title { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .build-title strong { font-size: 14px; }
+    .build-meta { color: var(--text-color-muted, #8b949e); font-family: var(--font-mono, Consolas, monospace); font-size: 12px; }
+    .build-card ul { margin: 8px 0 0; padding-left: 18px; }
+    .build-card li { margin: 2px 0; }
+    .build-card details { margin-top: 8px; }
+    .build-card summary { cursor: pointer; color: var(--text-color-muted, #8b949e); font-size: 12px; }
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -187,6 +213,7 @@ export function renderPlannerHtml() {
       </div>
       <button id="refresh" class="refresh" type="button">Refresh tasks</button>
     </header>
+    <section id="builds" class="builds" aria-label="Build changelist"></section>
     <section id="stats" class="stats" aria-label="Progress summary"></section>
     <section class="toolbar" aria-label="Planner controls">
       <input id="search" class="search" type="search" placeholder="Search features and tasks..." autocomplete="off">
@@ -206,6 +233,7 @@ export function renderPlannerHtml() {
       expanded: new Map(), completedExpanded: new Map(),
     };
     const stats = document.getElementById("stats");
+    const buildsNode = document.getElementById("builds");
     const board = document.getElementById("board");
     const search = document.getElementById("search");
     const refresh = document.getElementById("refresh");
@@ -231,6 +259,47 @@ export function renderPlannerHtml() {
         const card = el("div", "stat");
         card.append(el("strong", "", value), el("span", "muted", label));
         stats.append(card);
+      }
+
+      function renderBuildCard(build, current = false) {
+        const card = el("article", "build-card" + (current ? " current" : ""));
+        const title = el("div", "build-title");
+        title.append(el("strong", "", [build.date, build.slot].filter(Boolean).join(" — ")),
+          el("span", "badge " + (build.status === "delivered" ? "complete" : "active"), build.status));
+        card.append(title, el("div", "build-meta", build.sha));
+        if (build.ships.length) {
+          const list = el("ul");
+          for (const item of build.ships) list.append(el("li", "", item));
+          card.append(list);
+        }
+        return card;
+      }
+
+      function renderBuilds(builds) {
+        buildsNode.replaceChildren();
+        if (!builds?.entries?.length && !builds?.later?.length) return;
+        const head = el("div", "builds-head");
+        head.append(el("h2", "", "Builds"), el("span", "muted", "Current changelist and deferred work"));
+        buildsNode.append(head);
+        const current = builds.entries.find((build) => build.status === "building" || build.status === "planned")
+          ?? builds.entries.find((build) => build.status === "delivered");
+        if (current) buildsNode.append(renderBuildCard(current, true));
+        const delivered = builds.entries.filter((build) => build.status === "delivered" && build !== current);
+        for (const build of delivered.slice(0, 2)) buildsNode.append(renderBuildCard(build));
+        if (delivered.length > 2) {
+          const collapsed = el("details", "build-card");
+          collapsed.append(el("summary", "", "Older delivered builds (" + (delivered.length - 2) + ")"));
+          for (const build of delivered.slice(2)) collapsed.append(renderBuildCard(build));
+          buildsNode.append(collapsed);
+        }
+        if (builds.later?.length) {
+          const later = el("details", "build-card");
+          later.append(el("summary", "", "Later (" + builds.later.length + ")"));
+          const list = el("ul");
+          for (const item of builds.later) list.append(el("li", "", item));
+          later.append(list);
+          buildsNode.append(later);
+        }
       }
     }
 
@@ -304,6 +373,7 @@ export function renderPlannerHtml() {
     }
 
     function render() {
+      renderBuilds(state.planner.builds);
       renderStats(state.planner.summary);
       renderBoard();
     }
@@ -317,7 +387,7 @@ export function renderPlannerHtml() {
         const response = await fetch("/api/tasks", { cache: "no-store" });
         if (!response.ok) throw new Error("Planner request failed: " + response.status);
         const planner = await response.json();
-        const signature = JSON.stringify({ summary: planner.summary, features: planner.features });
+        const signature = JSON.stringify({ summary: planner.summary, features: planner.features, builds: planner.builds });
         if (!quiet || state.signature !== signature) {
           state.planner = planner;
           state.signature = signature;

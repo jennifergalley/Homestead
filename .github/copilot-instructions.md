@@ -144,6 +144,11 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   addressed, Integration ships the verified build immediately instead of waiting for the next
   scheduled slot. Then every lane clears wake-up automations and ends its turn until Jenny provides
   new feedback or the orchestrator assigns new work.
+- **Playtest-driven OpenSpec (Jenny, 2026-10-01):** create or retain a change only for Jenny's
+  explicit feedback or an estate goal she selects. Keep its proposal, design and tasks short, with
+  one or two player-checkable tasks; do not add a large speculative acceptance matrix. Close or
+  archive it when shipped. `docs\handoff\backlog.md` is the player-driven queue and
+  `docs\handoff\builds.md` is the current changelist and deferred-later ledger.
 - No worktrees, builds, renders, videos or big binaries on C:. See the user-level disk rules.
 - **Project storage hygiene (every lane):** delete your own scratch, render, recording and test-output
   artifacts when their task ends. Keep large transient artifacts under
