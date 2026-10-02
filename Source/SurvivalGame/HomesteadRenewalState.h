@@ -21,7 +21,8 @@ struct FHomesteadRenewalState
     FDateTime Deadline;
     double Started = 0, LastTick = 0, StepStarted = 0, NextControl = 0, NextReport = 0;
     double InitialHour = 0, SleepHours = 0, Unpaused = 0, Paused = 0, EngineUnpaused = 0;
-    double ActionHour = 0, ActionEngine = 0, BeforeDeadline = 0, ProgressAt = 0, ProgressDistance = 0, LastButton = 0;
+    double ActionHour = 0, ActionEngine = 0, OfferedSleepHours = 0, BeforeDeadline = 0;
+    double ProgressAt = 0, ProgressDistance = 0, LastButton = 0;
     double BeforeToastSeconds = 0;
     Homestead::Inventory BeforeInventory{};
     uint32 BeforeStarts = 0;

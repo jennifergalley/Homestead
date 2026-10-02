@@ -178,12 +178,14 @@ void AHomesteadSmokeTest::PrepareCreekChecks()
     const auto SprintStartEnergy = MakeShared<double>(0);
     if (HeroineSequence)
     {
-        Add(TEXT("Hold mapped L3 after ordinary walking"),
+        Add(TEXT("Press mapped L3 (sprint on) after ordinary walking"),
             [this, SprintStartEnergy]()
             {
                 *SprintStartEnergy = Controller->State().energy;
                 Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
                     EKeys::Gamepad_LeftThumbstick, IE_Pressed, 1));
+                Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+                    EKeys::Gamepad_LeftThumbstick, IE_Released, 0));
             }, []() { return true; });
     }
     Add(TEXT("Cross the former bank ribbons on colliding terrain"),
@@ -198,8 +200,13 @@ void AHomesteadSmokeTest::PrepareCreekChecks()
         {
             Axis(EKeys::Gamepad_LeftY, 0);
             if (HeroineSequence)
+            {
+                // Sprint is a toggle: a second L3 press turns it off.
+                Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
+                    EKeys::Gamepad_LeftThumbstick, IE_Pressed, 1));
                 Controller->InputKey(FInputKeyEventArgs::CreateSimulated(
                     EKeys::Gamepad_LeftThumbstick, IE_Released, 0));
+            }
         },
         [this, HeroineSequence, SprintStartEnergy]()
         {
@@ -209,8 +216,9 @@ void AHomesteadSmokeTest::PrepareCreekChecks()
                     Position.X, *SprintStartEnergy - Controller->State().energy));
             return Position.X >= 1720 && Controller->GetPawn()->GetVelocity().Size2D() < 5
                 && FMath::IsNearlyEqual(Position.Z, Controller->GroundHeight(Position.X, Position.Y), 100)
-                && (!HeroineSequence || (*SprintStartEnergy - Controller->State().energy > .15
-                    && *SprintStartEnergy - Controller->State().energy < 2.0));
+                // Sprint is free: only the slow awake drain (0.6 an hour) passes during the crossing.
+                && (!HeroineSequence || (*SprintStartEnergy - Controller->State().energy >= 0.0
+                    && *SprintStartEnergy - Controller->State().energy < .15));
         }, 0.5f);
     Add(TEXT("Capture completed creek crossing"),
         [this]() { Screenshot(TEXT("creek-crossed")); }, []() { return true; }, 0.8f);

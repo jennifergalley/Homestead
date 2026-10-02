@@ -1,4 +1,5 @@
 #include "SHomesteadHotbar.h"
+#include "HomesteadUITheme.h"
 #include "Widgets/Notifications/SProgressBar.h"
 
 #include "../HomesteadController.h"
@@ -17,10 +18,10 @@ namespace HomesteadMenus
 {
 namespace HotbarStyle
 {
-const FLinearColor Pine = HomesteadPalette::Pine.CopyWithNewOpacity(0.96f);
-const FLinearColor MutedPine(0.035f, 0.055f, 0.046f, 0.82f);
-constexpr FLinearColor Cream = HomesteadPalette::Cream;
-constexpr FLinearColor Gold = HomesteadPalette::Brass;
+HomesteadUITheme::FThemeColor Pine(0.055f, 0.09f, 0.075f, 0.96f);
+HomesteadUITheme::FThemeColor MutedPine(0.035f, 0.055f, 0.046f, 0.82f);
+const FLinearColor& Cream = HomesteadPalette::Cream;
+const FLinearColor& Gold = HomesteadPalette::Brass;
 constexpr float HotbarSlotSize = 64.0f;
 }
 
@@ -81,39 +82,37 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             {
                                 if (!Weak.IsValid()) return FName();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                // Pinned food keeps its (faded) icon when the pack runs out.
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Available || Snapshot[Index].Food)
-                                    ? Snapshot[Index].Icon : FName();
+                                // The cell's stack (the hotbar is the first row of her pack).
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available ? Snapshot[Index].Icon : FName();
                             })
                             .Tint_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return FLinearColor(1, 1, 1, 0);
                                 const auto Snapshot = Weak->HotbarSnapshot();
                                 if (!Snapshot.IsValidIndex(Index)) return FLinearColor(1, 1, 1, 0);
-                                return Snapshot[Index].Available ? HotbarStyle::Gold
-                                    : Snapshot[Index].Food ? FLinearColor(HotbarStyle::Gold.R, HotbarStyle::Gold.G, HotbarStyle::Gold.B, 0.3f) : FLinearColor(1, 1, 1, 0);
+                                return Snapshot[Index].Available ? HotbarStyle::Gold : FLinearColor(1, 1, 1, 0);
                             })
                             .Visibility_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return EVisibility::Collapsed;
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Available || Snapshot[Index].Food)
+                                return Snapshot.IsValidIndex(Index) && Snapshot[Index].Available
                                     ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
                             })
                         ]
                         + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom)
                         .Padding(0, 0, 5, 2)
                         [
-                            // How many of a pinned food are left in the pack.
+                            // The stack's count (tools and garments are single).
                             SNew(STextBlock)
                             .Text_Lambda([Weak = Controller, Index]()
                             {
                                 if (!Weak.IsValid()) return FText::GetEmpty();
                                 const auto Snapshot = Weak->HotbarSnapshot();
-                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || (Snapshot[Index].Seed && Snapshot[Index].Available))
+                                return Snapshot.IsValidIndex(Index) && (Snapshot[Index].Food || Snapshot[Index].Seed || Snapshot[Index].Material) && Snapshot[Index].Available
                                     ? FText::AsNumber(Snapshot[Index].Count) : FText::GetEmpty();
                             })
-                            .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
+                            .Font(HomesteadUITheme::Font(TEXT("Bold"), 13))
                             .ColorAndOpacity(HotbarStyle::Cream)
                             .ShadowOffset(FVector2D(1, 1))
                             .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))
@@ -154,7 +153,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             [
                                 SNew(SBorder)
                                 .BorderImage(FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
-                                .BorderBackgroundColor(FLinearColor(0.02f, 0.03f, 0.025f, 0.85f))
+                                .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.02f, 0.03f, 0.025f, 0.85f)))
                                 .Padding(0)
                                 [
                                     SNew(SProgressBar)
@@ -168,6 +167,8 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                                     {
                                         const auto Snapshot = Weak.IsValid() ? Weak->HotbarSnapshot() : TArray<FHomesteadHotbarSlot>();
                                         const bool bLow = Snapshot.IsValidIndex(Index) && Snapshot[Index].Fill < 1.0f / 6.0f;
+                                        const bool bWater = Snapshot.IsValidIndex(Index) && Snapshot[Index].Tool == Homestead::Item::WateringCan;
+                                        if (bWater) return FSlateColor(bLow ? FLinearColor(0.9f, 0.32f, 0.2f) : FLinearColor(0.36f, 0.66f, 0.92f));
                                         return FSlateColor(bLow ? FLinearColor(0.9f, 0.32f, 0.2f) : FLinearColor(0.98f, 0.68f, 0.28f));
                                     })
                                     .BackgroundImage(FCoreStyle::Get().GetBrush(TEXT("NoBrush")))
@@ -181,7 +182,7 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             SNew(STextBlock)
                             .Text(FText::FromString(Index == 9
                                 ? TEXT("0") : FString::FromInt(Index + 1)))
-                            .Font(FCoreStyle::GetDefaultFontStyle(TEXT("Bold"), 13))
+                            .Font(HomesteadUITheme::KeyFont(TEXT("Bold"), 13))
                             .ColorAndOpacity(HotbarStyle::Cream)
                             .ShadowOffset(FVector2D(1, 1))
                             .ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.85f))

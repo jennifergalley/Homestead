@@ -22,8 +22,8 @@
 
 namespace EstateSmokeRoute
 {
-// She arrives through the controller's ground settle, which holds her up to 180 s while World
-// Partition streams the collision in, so an arrival may take that long in a cold package.
+// Estate ground snap gives World Partition up to 90 real seconds for collision; allow a cold
+// packaged map some additional time for the surrounding materials and automation steps.
 constexpr float ArriveSeconds = 190.0f;
 // Frame timing: let streaming and shader work settle after she arrives, then sample.
 constexpr double TimingSettleSeconds = 6.0;
@@ -203,10 +203,16 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
     {
         FStep& Arrive = Steps.AddDefaulted_GetRef();
         Arrive.Name = TEXT("Arrive on the ground at ") + Label;
-        Arrive.Action = [this, Target]() { Controller->HomesteadTeleport(Target.x, Target.y); };
+        Arrive.Action = [this, Target]()
+        {
+            Controller->HomesteadTeleport(Target.x, Target.y);
+            if (Controller->IsEstateMap() && !Controller->GroundSnapStreamingActor)
+                Finish(false, TEXT("Teleport did not register a destination streaming source."));
+        };
         Arrive.Check = [this, OnGround, Target]()
         {
-            return !Controller->bPendingGroundSnap && !Controller->bPendingSpawn && OnGround()
+            return !Controller->bPendingGroundSnap && !Controller->GroundSnapStreamingActor
+                && !Controller->bPendingSpawn && OnGround()
                 && EstateSmokeRoute::Distance2D(Controller->PlayerPoint(), Target) < EstateSmokeRoute::ArrivedWithinCm;
         };
         Arrive.Wait = EstateSmokeRoute::ArriveSeconds;
@@ -263,8 +269,17 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         Step.Wait = EstateSmokeRoute::ArriveSeconds;
         Step.bCompleteWhenReady = true;
     }
-    Add(TEXT("Hands free for the first actions"), [this]() { Controller->SelectHotbarSlot(0); },
-        [this]() { return Controller->SelectedCarriedTool() == Homestead::Item::Count; });
+    const auto StockBeforeHandsFree = MakeShared<Homestead::Inventory>();
+    Add(TEXT("Hands free for the first actions"), [this, StockBeforeHandsFree]()
+        {
+            *StockBeforeHandsFree = Controller->State().inventory;
+            for (int32 Cell = 0; Cell < Homestead::PackRowSize; ++Cell)
+                if (!Controller->HotbarEntry(Cell)) { Controller->SelectHotbarSlot(Cell); return; }
+            Finish(false, TEXT("The starter pack has no empty hotbar cell for hand gathering."));
+        },
+        [this, StockBeforeHandsFree]() { return Controller->State().inventory == *StockBeforeHandsFree
+                && Controller->HotbarEntry(Controller->SelectedHotbarIndex()) == nullptr
+                && Controller->SelectedCarriedTool() == Homestead::Item::Count; });
     LandscapeRenders(TEXT("the manor"));
     Add(TEXT("Capture the standing room"), [this]() { Screenshot(TEXT("estate-manor")); }, []() { return true; }, 3.0f);
     Measure(TEXT("manor"));
@@ -326,10 +341,18 @@ void AHomesteadSmokeTest::PrepareEstateSmokeChecks()
         Visit(TEXT("the general store door"), Store->position, TEXT("estate-store"));
     else { Finish(false, TEXT("The general store door anchor is missing.")); return; }
 
-    // 5. The lamp at night: select it on the hotbar (key 8) and it lights in her hand.
+    // 5. The lamp at night: select its actual first-row cell and it lights in her hand.
     Add(TEXT("Night falls"), [this]() { Controller->HomesteadEnergy(100.0f); Controller->HomesteadMorning(EstateSmokeRoute::NightHour); },
         [this]() { return FMath::Fmod(Controller->State().hour, 24.0) >= EstateSmokeRoute::NightHour - 0.01; }, 1.0f);
-    Add(TEXT("Select the oil lamp with key 8"), [this]() { Tap(EKeys::Eight); },
+    Add(TEXT("Select the oil lamp using its numbered hotbar cell"), [this]()
+        {
+            const int32 Cell = Controller->HotbarCellOf(Homestead::Item::OilLamp);
+            if (Cell == INDEX_NONE)
+            { Finish(false, TEXT("The carried oil lamp is not in the first row of the pack.")); return; }
+            const FKey Keys[] = {EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five,
+                EKeys::Six, EKeys::Seven, EKeys::Eight, EKeys::Nine, EKeys::Zero};
+            Tap(Keys[Cell]);
+        },
         [this]()
         {
             return Controller->SelectedCarriedTool() == Homestead::Item::OilLamp

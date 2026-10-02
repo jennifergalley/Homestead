@@ -1,0 +1,524 @@
+{
+  "schema": 1,
+  "name": "CoveSteps",
+  "description": "Cut granite treads (3 variants), a 1.2 m landing, 0.6 and 0.75 m landing slabs and a 21-degree corner wedge for the cove route (original). Pivots on the top face at the front nosing / downhill edge centre, +X up the flight.",
+  "collision": "convex",
+  "triangle_budget": 25000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/cove_steps.py",
+  "source_sha256": "7a0ca4b6156201e8803cf96ea26abb3c1eabcad0165e69cc3b23505490f886d2",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_CoveStep_A": {
+      "vertices": 6145,
+      "triangles": 12288,
+      "size_cm": [
+        38.62,
+        150.2,
+        25.49
+      ],
+      "materials": [
+        {
+          "name": "M_CoveStep_A",
+          "textures": {
+            "basecolor": "T_CoveStep_A_basecolor.png",
+            "roughness": "T_CoveStep_A_roughness.png",
+            "normal": "T_CoveStep_A_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveStep_A_basecolor.png",
+          "roughness": "T_CoveStep_A_roughness.png",
+          "normal": "T_CoveStep_A_normal.png",
+          "ao": "T_CoveStep_A_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "focus": [
+          0.15,
+          0.0,
+          0.0
+        ]
+      },
+      "fbx": "SM_CoveStep_A.fbx",
+      "sha256": "0c2dc3b68d2664d94ebd96c6fe16c7b354e2df3a97c258e64560eb5126bdbbd9",
+      "preview": "preview_SM_CoveStep_A.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveStep_A_hero.png",
+          "detail": "beauty_SM_CoveStep_A_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveStep_B": {
+      "vertices": 6145,
+      "triangles": 12288,
+      "size_cm": [
+        37.52,
+        150.14,
+        25.42
+      ],
+      "materials": [
+        {
+          "name": "M_CoveStep_B",
+          "textures": {
+            "basecolor": "T_CoveStep_B_basecolor.png",
+            "roughness": "T_CoveStep_B_roughness.png",
+            "normal": "T_CoveStep_B_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveStep_B_basecolor.png",
+          "roughness": "T_CoveStep_B_roughness.png",
+          "normal": "T_CoveStep_B_normal.png",
+          "ao": "T_CoveStep_B_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "focus": [
+          0.15,
+          0.0,
+          0.0
+        ]
+      },
+      "fbx": "SM_CoveStep_B.fbx",
+      "sha256": "0683d779dbbacd842ecb4b2972debb8dad6ab09bc824835c94dfabfa0da7c71d",
+      "preview": "preview_SM_CoveStep_B.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveStep_B_hero.png",
+          "detail": "beauty_SM_CoveStep_B_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveStep_C": {
+      "vertices": 6144,
+      "triangles": 12284,
+      "size_cm": [
+        39.66,
+        150.16,
+        25.53
+      ],
+      "materials": [
+        {
+          "name": "M_CoveStep_C",
+          "textures": {
+            "basecolor": "T_CoveStep_C_basecolor.png",
+            "roughness": "T_CoveStep_C_roughness.png",
+            "normal": "T_CoveStep_C_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveStep_C_basecolor.png",
+          "roughness": "T_CoveStep_C_roughness.png",
+          "normal": "T_CoveStep_C_normal.png",
+          "ao": "T_CoveStep_C_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "focus": [
+          0.15,
+          0.0,
+          0.0
+        ]
+      },
+      "fbx": "SM_CoveStep_C.fbx",
+      "sha256": "f3543d576549b1deb02d5e23fb2ca8e31e6f8cb518c6468e169c3b6996090fde",
+      "preview": "preview_SM_CoveStep_C.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveStep_C_hero.png",
+          "detail": "beauty_SM_CoveStep_C_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveLanding": {
+      "vertices": 12285,
+      "triangles": 24570,
+      "size_cm": [
+        121.19,
+        150.19,
+        25.17
+      ],
+      "materials": [
+        {
+          "name": "M_CoveLanding",
+          "textures": {
+            "basecolor": "T_CoveLanding_basecolor.png",
+            "roughness": "T_CoveLanding_roughness.png",
+            "normal": "T_CoveLanding_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveLanding_basecolor.png",
+          "roughness": "T_CoveLanding_roughness.png",
+          "normal": "T_CoveLanding_normal.png",
+          "ao": "T_CoveLanding_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "focus": [
+          0.15,
+          0.0,
+          0.0
+        ]
+      },
+      "fbx": "SM_CoveLanding.fbx",
+      "sha256": "af2215f120016c8a3600108bc650fc2142743a29eeb8d4c4ba5215f5c0c96979",
+      "preview": "preview_SM_CoveLanding.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveLanding_hero.png",
+          "detail": "beauty_SM_CoveLanding_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveLandingSlab": {
+      "vertices": 6146,
+      "triangles": 12288,
+      "size_cm": [
+        61.15,
+        150.15,
+        25.18
+      ],
+      "materials": [
+        {
+          "name": "M_CoveLandingSlab",
+          "textures": {
+            "basecolor": "T_CoveLandingSlab_basecolor.png",
+            "roughness": "T_CoveLandingSlab_roughness.png",
+            "normal": "T_CoveLandingSlab_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveLandingSlab_basecolor.png",
+          "roughness": "T_CoveLandingSlab_roughness.png",
+          "normal": "T_CoveLandingSlab_normal.png",
+          "ao": "T_CoveLandingSlab_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "focus": [
+          0.15,
+          0.0,
+          0.0
+        ]
+      },
+      "fbx": "SM_CoveLandingSlab.fbx",
+      "sha256": "7787ea3a1102f598edc1eb870fd1457db0f6ae623d50f24e17bf1458460828c9",
+      "preview": "preview_SM_CoveLandingSlab.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveLandingSlab_hero.png",
+          "detail": "beauty_SM_CoveLandingSlab_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveLandingSlab75": {
+      "vertices": 6145,
+      "triangles": 12288,
+      "size_cm": [
+        76.17,
+        150.16,
+        25.17
+      ],
+      "materials": [
+        {
+          "name": "M_CoveLandingSlab75",
+          "textures": {
+            "basecolor": "T_CoveLandingSlab75_basecolor.png",
+            "roughness": "T_CoveLandingSlab75_roughness.png",
+            "normal": "T_CoveLandingSlab75_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveLandingSlab75_basecolor.png",
+          "roughness": "T_CoveLandingSlab75_roughness.png",
+          "normal": "T_CoveLandingSlab75_normal.png",
+          "ao": "T_CoveLandingSlab75_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "focus": [
+          0.15,
+          0.0,
+          0.0
+        ]
+      },
+      "fbx": "SM_CoveLandingSlab75.fbx",
+      "sha256": "e45c7c5192e7987272a946f76c12160aa0b85ea6b131e6c7234040a4c78df7ae",
+      "preview": "preview_SM_CoveLandingSlab75.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveLandingSlab75_hero.png",
+          "detail": "beauty_SM_CoveLandingSlab75_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CoveLandingWedge": {
+      "vertices": 266,
+      "triangles": 528,
+      "size_cm": [
+        138.35,
+        53.81,
+        25.14
+      ],
+      "materials": [
+        {
+          "name": "M_CoveLandingWedge",
+          "textures": {
+            "basecolor": "T_CoveLandingWedge_basecolor.png",
+            "roughness": "T_CoveLandingWedge_roughness.png",
+            "normal": "T_CoveLandingWedge_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CoveLandingWedge_basecolor.png",
+          "roughness": "T_CoveLandingWedge_roughness.png",
+          "normal": "T_CoveLandingWedge_normal.png",
+          "ao": "T_CoveLandingWedge_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "focus": [
+          0.15,
+          0.0,
+          0.0
+        ]
+      },
+      "fbx": "SM_CoveLandingWedge.fbx",
+      "sha256": "978dd582e0b0dd89238ec937ce182a3d2010c1235e2a48fd108c4e13d90ca644",
+      "preview": "preview_SM_CoveLandingWedge.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CoveLandingWedge_hero.png",
+          "detail": "beauty_SM_CoveLandingWedge_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          35
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "pivot": "top face, centre of the front nosing (treads) or downhill edge (landings); +X up the flight",
+  "tread_width_m": 1.5,
+  "block_depth_m": 0.25,
+  "skirt_m": 0.05,
+  "textures": {
+    "T_CoveStep_A_basecolor.png": "27382cd74dcc3f5b69ba887f55c0ca6612cc1c4db319ea58269466fa6811ee31",
+    "T_CoveStep_A_roughness.png": "f79c851c8949cbf579ecacb4d5f9ba396ce1ed7daf661ec1ac98ec7ed220aa67",
+    "T_CoveStep_A_normal.png": "4fb9dc1616c0e32beffc30cd4d62fb25040b5d2ce03a41c2e4280e0ace80d5e1",
+    "T_CoveStep_B_basecolor.png": "b463cf8491c9a6817bc9e96c7e79e684c943794203b5ae4a2e518cdc55d68509",
+    "T_CoveStep_B_roughness.png": "eaa46b0b2d8e7bd42fc9b81eb3c9bcde0edd3cb961958cd8d273a7a60483f84e",
+    "T_CoveStep_B_normal.png": "2537997ae668edf62ad70128f90913120b45eb63d61d632779f41e9c0be624e9",
+    "T_CoveStep_C_basecolor.png": "7ce033b2d3d47ecb3d44afcdbd9319f91805275f03a85f47618b3dae749c5833",
+    "T_CoveStep_C_roughness.png": "2cb39b8ba2ea91e08dc89b5db478e9c422cc5046ffb3e95f5c119dd1f423345f",
+    "T_CoveStep_C_normal.png": "3caf7caa6012c21add5884c612863e9c2f3ee593a8724614f486dfc6aa324a7c",
+    "T_CoveLanding_basecolor.png": "be5524b8bb152229748f028357ddd51256161197826fd1bc0a80272b32da8d17",
+    "T_CoveLanding_roughness.png": "fdfc5732ebfc751ea8bb0c4ff4f9387f1390e9b1ed9fca6a0b5605ed2e4954f5",
+    "T_CoveLanding_normal.png": "7e21b3ed691f54347f8c63728df52d107d2ac2b22a674b3b0b43933af0d2829d",
+    "T_CoveLandingSlab_basecolor.png": "f98c4e003146613125a83fabe335386e333bdc9c7a6b227e1f57dfff991149b1",
+    "T_CoveLandingSlab_roughness.png": "28fce82dbafcf54e1288b08403cf6f34358e5d459a5d6e6ee207d5a0be6e27d5",
+    "T_CoveLandingSlab_normal.png": "f166fb4352a41b1d6ff8ec79f61f41789b6b58f09c0bf4da342f82f86c5fbbe2",
+    "T_CoveLandingSlab75_basecolor.png": "ab526e17d312bccdec2b364ee4c06714d3ca9d514c3db10f39000a167d966296",
+    "T_CoveLandingSlab75_roughness.png": "36276be04b1de23d2b4e78aeb6bf58ee5e293924b4cdf52178d0aa41a90e74d3",
+    "T_CoveLandingSlab75_normal.png": "3043d8fd6012ecfff8b8ff40513d06177db74c275acdafbb0c3302866bf0d86d",
+    "T_CoveLandingWedge_basecolor.png": "c239b0d11dc28945aaedd8e0b423d26d0679504ae0e1e1124d60bc58e4be2bcb",
+    "T_CoveLandingWedge_roughness.png": "9f052fc0574d8cbc6c9a61258517b3c9dd5d78ef713c931dcdce75b2f30fc489",
+    "T_CoveLandingWedge_normal.png": "4275a1b33fefba7545a63af94adb2ee529ec8745dd8da7d969f45926ee9896cc"
+  }
+}

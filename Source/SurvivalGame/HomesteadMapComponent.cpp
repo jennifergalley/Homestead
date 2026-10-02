@@ -9,6 +9,7 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Simulation/HomesteadEstate.h"
 #include "Simulation/HomesteadParcels.h"
+#include "UI/SHomesteadCompass.h"
 #include "UI/SHomesteadMinimap.h"
 
 namespace
@@ -54,6 +55,25 @@ FBox2D UHomesteadMapComponent::MinimapBox(float ViewWidth, float ViewHeight)
     return FBox2D(FVector2D(ViewWidth - Right - Size, ViewHeight - Bottom - Size), FVector2D(ViewWidth - Right, ViewHeight - Bottom));
 }
 
+FBox2D UHomesteadMapComponent::CompassBox(float ViewWidth, float ViewHeight)
+{
+    // Centred on the top row, level with the calendar (HomesteadHudLayout::CalendarTop), and never
+    // closer than Gap to the calendar panel at the top-right (AHomesteadHUD::DrawHUD's CalendarX).
+    // The band is 40 units tall; the landmark tokens hang up to 30 below it.
+    constexpr float Top = 26, Height = 70, MaxWidth = 460, MinWidth = 280, Gap = 16, CalendarWidth = 460, Margin = 30;
+    const float CalendarLeft = FMath::Max(Margin, ViewWidth - Margin - CalendarWidth);
+    const float Half = FMath::Min(MaxWidth * 0.5f, FMath::Min(ViewWidth * 0.5f - Margin, CalendarLeft - Gap - ViewWidth * 0.5f));
+    if (Half * 2 < MinWidth || ViewHeight < Top + Height) return FBox2D(ForceInit);
+    return FBox2D(FVector2D(ViewWidth * 0.5f - Half, Top), FVector2D(ViewWidth * 0.5f + Half, Top + Height));
+}
+
+bool UHomesteadMapComponent::IsCompassVisible() const
+{
+    // It shares the top row with the first-minute controls strip, so it waits for that to retire.
+    const AHomesteadController* Controller = Owner();
+    return IsMinimapVisible() && Controller && !Controller->IsControlsHintOnScreen();
+}
+
 void UHomesteadMapComponent::BeginPlay()
 {
     Super::BeginPlay();
@@ -72,6 +92,8 @@ void UHomesteadMapComponent::BeginPlay()
     {
         Minimap = SNew(HomesteadMenus::SHomesteadMinimap).Map(this);
         GEngine->GameViewport->AddViewportWidgetContent(Minimap.ToSharedRef(), 45);
+        Compass = SNew(HomesteadMenus::SHomesteadCompass).Map(this);
+        GEngine->GameViewport->AddViewportWidgetContent(Compass.ToSharedRef(), 45);
     }
 }
 
@@ -79,7 +101,10 @@ void UHomesteadMapComponent::EndPlay(const EEndPlayReason::Type Reason)
 {
     if (Minimap.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(Minimap.ToSharedRef());
+    if (Compass.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(Compass.ToSharedRef());
     Minimap.Reset();
+    Compass.Reset();
     Super::EndPlay(Reason);
 }
 
@@ -158,11 +183,7 @@ void UHomesteadMapComponent::RefreshModel()
     for (const FLandmarkInfo& Place : Places)
         if (const Homestead::Landmark* Found = Layout.FindLandmark(Place.Anchor))
             Next->Landmarks.Add({Place.Name, Place.Description, Place.Glyph, ToVec(Found->position)});
-    const Homestead::Landmark* RoadStart = Layout.FindLandmark(Homestead::Anchor::RoadEstateEnd);
-    const Homestead::Landmark* RoadEnd = Layout.FindLandmark(Homestead::Anchor::RoadTownEnd);
-    if (RoadStart && RoadEnd)
-        Next->Landmarks.Add({TEXT("Dirt road"), TEXT("About a mile of rutted road from the gateway to town."), EHomesteadMapGlyph::Road,
-            {(RoadStart->position.x + RoadEnd->position.x) * 0.5, (RoadStart->position.y + RoadEnd->position.y) * 0.5}});
+    // The road itself is drawn on the map; it has no label (Jenny, 2026-09-29).
     Model = Next;
 }
 

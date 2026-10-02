@@ -1,4 +1,5 @@
 #include "HomesteadEstate.h"
+#include "HomesteadRuinDebris.h"
 
 #include <algorithm>
 #include <cmath>
@@ -42,15 +43,15 @@ const EstateLayout& ProvisionalEstateLayout()
             // corner; she wakes in line with its doorway on the west side, facing it.
             {Anchor::StandingRoomOrigin, {-25600.0, -63800.0}, 8652.6, 0.0},
             {Anchor::StandingRoomSpawn, {-25750.0, -63800.0}, 8652.6, -90.0},
-            {Anchor::EstateGateway, {-5500.0, 9000.0}, 4916.0, 60.0},
+            {Anchor::EstateGateway, {-5500.0, 9000.0}, 5632.0, 60.0},
             {Anchor::CoveBeach, {-65000.0, -51500.0}, 178.0, 215.0},
             {Anchor::MineEntrance, {-40500.0, -100000.0}, 7224.0, 0.0},
             {Anchor::MillSite, {-11800.0, -9200.0}, 3113.1, 0.0},
-            {Anchor::RoadEstateEnd, {-5500.0, 9000.0}, 4916.0, 60.0},
+            {Anchor::RoadEstateEnd, {-5500.0, 9000.0}, 5632.0, 60.0},
             {Anchor::RoadTownEnd, {-50000.0, 109000.0}, 9241.0, 45.0},
             {Anchor::TownSquare, {-54000.0, 115000.0}, 9109.0, 0.0},
-            {Anchor::GeneralStoreDoor, {-54000.0, 117000.0}, 9153.0, 90.0},
-            {Anchor::GeneralStoreCounter, {-54000.0, 117600.0}, 9166.0, -90.0},
+            {Anchor::GeneralStoreDoor, {-54000.0, 117950.0}, 9175.0, 90.0},
+            {Anchor::GeneralStoreCounter, {-54000.0, 118550.0}, 9188.0, -90.0},
             // The derelict farm's broken gate, on its south fence facing the ruin's rear-wall gap.
             {Anchor::DerelictFarmGate, {-22200.0, -65700.0}, 8720.6, 180.0},
         };
@@ -253,6 +254,63 @@ const EstatePlacements& ProvisionalEstatePlacements()
             table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateClearoutPlacements.inc"
+        // Forage on the verges of the public road to town (581000-581099, Scripts/Terrain/forage.py), off
+        // the estate by the narrow IsPublicRoadsidePlacement exception. Same 3 m rule as the brambles.
+        auto roadside = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateRoadsidePlacements.inc"
+        // Clearable manor ruin debris (582000-582099, HomesteadRuinDebris.h): the slate and loose
+        // granite heaps the ruin used to draw as scenery, at the same spots in its frame. A heap an
+        // earlier section has since grown into steps 1.5 m aside (never onto another placement).
+        auto debris = [&](const RuinDebris::Spot& spot)
+        {
+            const Point steps[] = {{0, 0}, {150, 0}, {-150, 0}, {0, 150}, {0, -150}};
+            Point at{manorX + spot.v, manorY + spot.u};
+            for (const Point& step : steps)
+            {
+                const Point candidate{manorX + spot.v + step.x, manorY + spot.u + step.y};
+                const bool crowded = std::any_of(table.placements.begin(), table.placements.end(), [&](const EstatePlacement& other)
+                    { return std::hypot(other.position.x - candidate.x, other.position.y - candidate.y) <= 120.0; });
+                if (!crowded) { at = candidate; break; }
+            }
+            table.placements.push_back({spot.id, spot.kind, at, 0.0, spot.yaw, spot.scale, 0});
+        };
+        for (const RuinDebris::Spot& spot : RuinDebris::Spots)
+            if (spot.kind != ResourceKind::RuinTimbers) debris(spot);
+        // More brambles in the estate's woods and field hedges (582100-582299, Scripts/Terrain/forage.py),
+        // after everything else; a row within 3 m of an earlier placement is skipped.
+        auto forage = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateForagePlacements.inc"
+        // The ruin's fallen roof timbers (582012-582013) joined the clearable debris after the forage was
+        // placed: they come after it, so no forage row's 3 m skip can change because of them.
+        for (const RuinDebris::Spot& spot : RuinDebris::Spots)
+            if (spot.kind == ResourceKind::RuinTimbers) debris(spot);
+        // Father's tool rack, where the arrival journal says his garden tools hung: by the chimney in
+        // the west rooms. Added after the first playtests (Jenny couldn't find a hoe), so it waits
+        // unsearched in every older save and gives whichever rusted head she is still missing. It goes
+        // last, so no earlier section's proximity skips or sequential ids can shift because of it.
+        salvage(520006, 230.0, 1010.0);
+        // Brambles and wild roots in the woods along the lake trail (582300-582399, Scripts/Terrain/
+        // lake_path_plants.py; Jenny, 2026-09-30), last of all with the same 3 m rule, so nothing earlier moves.
+        auto lakeForage = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateLakePathPlacements.inc"
         // Town lane (530000+).
         return table;
     }();

@@ -125,7 +125,7 @@ def textured_material(name, source_folder, prefix):
     return material
 
 
-def creek_water_material(rebuild=False, name="M_CreekWater"):
+def creek_water_material(rebuild=False, name="M_CreekWater", flow=1.0):
     """Flowing creek water on the Single Layer Water shading model, from the generated ripple and foam maps.
 
     Single Layer Water renders in the opaque pass, so the surface receives the woodland's shadows and
@@ -135,7 +135,8 @@ def creek_water_material(rebuild=False, name="M_CreekWater"):
     colour carries the depth over the rendered bed: R reaches 1 at 35 cm deep, G at 8 cm, which
     thins the foam and softens the shoreline highlight. B adds white water (M_EstateRiver, built from
     this graph by Scripts/Terrain/place_water.py, for the estate river's riffles and spring; 0 on the
-    woodland creek). Pass rebuild=True to re-author in place.
+    woodland creek). flow scales every drift speed (M_EstatePond, the estate lake, uses a small fraction).
+    Pass rebuild=True to re-author in place.
     """
     creek = ROOT / "Assets" / "Environment" / "Creek"
     ripples = import_asset("T_CreekRipples_N.png", "Textures", "T_CreekRipples_N", source_root=creek)
@@ -167,7 +168,8 @@ def creek_water_material(rebuild=False, name="M_CreekWater"):
 
     def sample(texture, tiling, speed, x, y, normal=False):
         coords = node(unreal.MaterialExpressionTextureCoordinate, x - 600, y, utiling=tiling, vtiling=tiling)
-        pan = node(unreal.MaterialExpressionPanner, x - 400, y, speed_x=speed[0], speed_y=speed[1])
+        # flow scales the drift: 1 for running water, a small fraction for still water stirred by the wind.
+        pan = node(unreal.MaterialExpressionPanner, x - 400, y, speed_x=speed[0] * flow, speed_y=speed[1] * flow)
         link(coords, "", pan, "Coordinate")
         tex = node(unreal.MaterialExpressionTextureSample, x - 200, y, texture=texture,
                    sampler_type=unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL if normal
@@ -276,8 +278,9 @@ def main():
         raise RuntimeError("Could not save the imported rock material assignments.")
 
     import_asset("evening-harp/EveningHarp.mp3", "Audio/Music", "EveningHarp")
-    for pack, name in (("ascending-the-vale", "AscendingTheVale"), ("teller-of-the-tales", "TellerOfTheTales"),
-                       ("meditation-impromptu-02", "MeditationImpromptu02"), ("at-rest", "AtRest")):
+    # Public-domain (CC0) pieces, licence pages verified 2026-09-30 (docs/asset-credits.md).
+    for pack, name in (("whispers-of-the-glen", "WhispersOfTheGlen"), ("medieval-theme", "MedievalTheme"),
+                       ("a-new-town", "ANewTown")):
         import_asset(f"{pack}/{name}.mp3", "Audio/Music", name)
     ambience = import_asset("forest-ambience/ForestAmbience.mp3", "Audio/Ambience", "ForestAmbience")
     ambience.set_editor_property("looping", True)
@@ -313,6 +316,18 @@ def main():
             raise RuntimeError(f"Could not save one-shot sound {name}.")
     # Hatchet-on-trunk chops and the trunk landing, cut from CC0 recordings by Scripts/generate_chop_sounds.py.
     for name in ("ChopA", "ChopB", "ChopC", "TreeFall"):
+        cue = import_asset(f"{name}.wav", "Audio/Effects", name, source_root=ROOT / "Assets" / "Audio" / "Effects")
+        cue.set_editor_property("looping", False)
+        if not LIB.save_loaded_asset(cue, only_if_is_dirty=False):
+            raise RuntimeError(f"Could not save one-shot sound {name}.")
+
+    # The scythe's mowing swish, original: synthesized by Scripts/generate_scythe_sound.py.
+    cue = import_asset("ScytheSwish.wav", "Audio/Effects", "ScytheSwish", source_root=ROOT / "Assets" / "Audio" / "Effects")
+    cue.set_editor_property("looping", False)
+    if not LIB.save_loaded_asset(cue, only_if_is_dirty=False):
+        raise RuntimeError("Could not save one-shot sound ScytheSwish.")
+    # The billhook's cane cuts, original: synthesized by Scripts/generate_billhook_sound.py.
+    for name in ("CaneCutA", "CaneCutB", "CaneCutC"):
         cue = import_asset(f"{name}.wav", "Audio/Effects", name, source_root=ROOT / "Assets" / "Audio" / "Effects")
         cue.set_editor_property("looping", False)
         if not LIB.save_loaded_asset(cue, only_if_is_dirty=False):

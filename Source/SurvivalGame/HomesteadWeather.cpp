@@ -104,6 +104,7 @@ void UHomesteadWeather::Update(const Homestead::State& State, float InDaylight)
     Overcast = static_cast<float>(Homestead::Overcast(State.hour));
     Daylight = InDaylight;
     Shelters.Reset();
+    RoomCells.Reset();
     for (const auto& Structure : State.structures)
     {
         if (Structure.kind != Homestead::Piece::Roof) continue;
@@ -113,6 +114,8 @@ void UHomesteadWeather::Update(const Homestead::State& State, float InDaylight)
         Shelters.Add(FVector4f(Box.center.x, Box.center.y,
             FMath::Max(ShelterRadiusCm, static_cast<float>(FMath::Sqrt(Box.half.x * Box.half.x + Box.half.y * Box.half.y))),
             (FMath::IsFinite(Ground) ? Ground : 0.0f) + ShelterTopCm));
+        RoomCells.Add(FVector4f(Box.center.x, Box.center.y, static_cast<float>(FMath::Min(Box.half.x, Box.half.y)),
+            static_cast<float>(Box.yaw)));
     }
     ShelterFrom = FVector(FLT_MAX); // re-pick the nearest roofs on the next tick
 }
@@ -122,6 +125,19 @@ bool UHomesteadWeather::IsUnderShelter(const FVector& Point) const
     for (const FVector4f& Roof : Shelters)
         if (Point.Z < Roof.W && FVector2D::DistSquared(FVector2D(Point), FVector2D(Roof.X, Roof.Y)) < Roof.Z * Roof.Z)
             return true;
+    return false;
+}
+
+bool UHomesteadWeather::IsInRoom(const FVector& Point) const
+{
+    for (int32 Index = 0; Index < RoomCells.Num(); ++Index)
+    {
+        const FVector4f& Cell = RoomCells[Index];
+        if (Point.Z >= Shelters[Index].W) continue;
+        const FVector2D Local = FVector2D(Point.X - Cell.X, Point.Y - Cell.Y).GetRotated(-Cell.W);
+        // A centimetre of overlap, so a point on the line between two cells of one room is in both.
+        if (FMath::Abs(Local.X) <= Cell.Z + 1.0f && FMath::Abs(Local.Y) <= Cell.Z + 1.0f) return true;
+    }
     return false;
 }
 
@@ -135,18 +151,22 @@ void UHomesteadWeather::TickWeather(float DeltaSeconds)
     if (Camera.ContainsNaN()) return;
 
     // Under a building piece's roof the material hides the streaks overhead and the rain outside
-    // stays in view; under any other roof (the store, a doorway) the camera sees none at all.
+    // stays in view; under any other roof (the store, a doorway) the camera sees none at all. The check
+    // runs in sun too: the woodland ambience and a roofed hearth mix by it as well as the rain.
     bInShelter = IsUnderShelter(Camera);
     OverheadCheckIn -= DeltaSeconds;
-    if (OverheadCheckIn <= 0.0f && (Rain > 0.0f || Overcast > 0.0f))
+    if (OverheadCheckIn <= 0.0f)
     {
-        OverheadCheckIn = 0.25f;
+        OverheadCheckIn = OverheadCheckSeconds;
         FCollisionQueryParams Query(SCENE_QUERY_STAT(HomesteadWeatherOverhead), false);
         if (APawn* Pawn = Viewer->GetPawn()) Query.AddIgnoredActor(Pawn);
         bOverhead = World->LineTraceTestByChannel(Camera, Camera + FVector(0, 0, OverheadCheckCm), ECC_Visibility, Query);
     }
     const bool bIndoors = bInShelter || bOverhead;
     Indoors = FMath::FInterpConstantTo(Indoors, bIndoors ? 1.0f : 0.0f, DeltaSeconds, 2.0f);
+    const APawn* Heroine = Viewer->GetPawn();
+    const bool bRoomed = Heroine && IsInRoom(Heroine->GetActorLocation());
+    Roomed = FMath::FInterpConstantTo(Roomed, bRoomed ? 1.0f : 0.0f, DeltaSeconds, 1.0f);
     StreakFade = FMath::FInterpConstantTo(StreakFade, bOverhead && !bInShelter ? 0.0f : 1.0f, DeltaSeconds, 3.0f);
 
     const bool bRaining = Rain > 0.001f && StreakFade > 0.001f;
@@ -183,10 +203,13 @@ void UHomesteadWeather::TickWeather(float DeltaSeconds)
     {
         const auto* Game = Cast<AHomesteadController>(Viewer);
         const float Setting = Game ? Game->AmbienceVolume : 0.7f;
-        const float Gain = FMath::Pow(Rain, 0.7f) * Setting * FMath::Lerp(OutdoorGain, IndoorGain, Indoors);
-        if (Gain > 0.001f)
+        // One gain, applied once: the loop fades in to full and this multiplier carries the rest.
+        const float Gain = static_cast<float>(Homestead::RainAudioGain(Rain, Setting, Indoors));
+        if (Homestead::RainAudible(Rain, Setting, Indoors))
         {
-            if (!Sound->IsPlaying()) Sound->FadeIn(2.0f, Gain, FMath::FRandRange(0.0f, 30.0f));
+            // Fade to full and let the volume multiplier carry the gain: FadeIn's level multiplies it, so
+            // fading to Gain as well played the rain at Gain squared (inaudible in drizzle).
+            if (!Sound->IsPlaying()) Sound->FadeIn(2.0f, 1.0f, FMath::FRandRange(0.0f, 30.0f));
             Sound->SetVolumeMultiplier(Gain);
             Sound->SetLowPassFilterFrequency(FMath::Lerp(20000.0f, IndoorCutoffHz, Indoors));
         }

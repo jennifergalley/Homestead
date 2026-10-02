@@ -57,6 +57,32 @@ def line_mask(points, size, width_px, oversample=2):
     return np.asarray(image.resize((size, size), Image.LANCZOS), dtype=np.float64) / 255.0
 
 
+def polygon_mask(points, size, oversample=2):
+    """An anti-aliased filled mask of a closed polygon of [x, y] metre points."""
+    big = size * oversample
+    image = Image.new("L", (big, big), 0)
+    ImageDraw.Draw(image).polygon([world_to_px(p[0], p[1], big) for p in points], fill=255)
+    return np.asarray(image.resize((size, size), Image.LANCZOS), dtype=np.float64) / 255.0
+
+
+def dashed_mask(points, size, width_px, dash_m=6.0, gap_m=4.0, oversample=2):
+    """A dashed polyline mask: dash_m drawn, gap_m left, along the path."""
+    p = np.asarray(points, np.float64)
+    seg = np.diff(p, axis=0)
+    s = np.r_[0.0, np.cumsum(np.hypot(*seg.T))]
+    t = np.arange(0.0, s[-1], 0.5)
+    dense = np.c_[np.interp(t, s, p[:, 0]), np.interp(t, s, p[:, 1])]
+    on = (t % (dash_m + gap_m)) < dash_m
+    big = size * oversample
+    image = Image.new("L", (big, big), 0)
+    draw = ImageDraw.Draw(image)
+    for a, b, keep in zip(dense[:-1], dense[1:], on[:-1]):
+        if keep:
+            draw.line([world_to_px(a[0], a[1], big), world_to_px(b[0], b[1], big)], fill=255,
+                      width=max(1, int(round(width_px * oversample))))
+    return np.asarray(image.resize((size, size), Image.LANCZOS), dtype=np.float64) / 255.0
+
+
 SCENERY_TREES = {0: 3.6, 1: 2.8, 13: 8.3, 14: 7.2, 15: 7.4, 16: 2.5, 19: 4.0, 20: 2.2}  # EstateSceneryKinds index -> canopy radius in metres at scale 1
 SCENERY_HAZEL = 2
 
@@ -193,11 +219,46 @@ def bake(heights, layout, size, capture=None, scenery=None, seed=7):
         rgb = blend(rgb, [0.20, 0.17, 0.12], line_mask(river, size, 4.0 / metres_per_px + 1.6) * 0.8)
         rgb = blend(rgb, [0.42, 0.58, 0.62], line_mask(river, size, 4.0 / metres_per_px) * 0.95)
 
+    # The estate lake: still water in the sea's shallow tint, an inked shore and one water-line ring.
+    lake = layout.get("lake")
+    if lake:
+        pool = polygon_mask(lake["shore"], size)
+        rgb = blend(rgb, [0.63, 0.72, 0.70], pool * 0.95)
+        rim = np.clip(ndimage.gaussian_filter(pool, 0.8) - ndimage.grey_erosion(pool, size=3), 0.0, 1.0)
+        rgb = blend(rgb, [0.20, 0.15, 0.11], np.clip(rim * 2.5, 0.0, 1.0) * 0.85)
+        inner = np.abs(ndimage.distance_transform_edt(pool > 0.5) * metres_per_px - 3.0) < metres_per_px * 0.6
+        rgb = blend(rgb, [0.30, 0.38, 0.40], inner * 0.3)
+
+    # Footpaths: dashed, like an estate plan's field paths (the lake path; the route to the cove).
+    paths = [lake["path"]] if lake else []
+    paths += [p["points"] for p in layout.get("footpaths", [])]
+    for points in paths:
+        rgb = blend(rgb, [0.33, 0.24, 0.15], dashed_mask(points, size, 2.2 / metres_per_px + 0.8) * 0.85)
+
     # Road: lightened with dark edges, like a surveyed carriage road.
     road = layout.get("road", [])
     if road:
         rgb = blend(rgb, [0.28, 0.20, 0.13], line_mask(road, size, 7.0 / metres_per_px + 2.0) * 0.75)
         rgb = blend(rgb, [0.97, 0.93, 0.81], line_mask(road, size, 7.0 / metres_per_px) * 0.95)
+
+    # The town (town_layout.py): its open square and street in the road's colours, the buildings as blocks.
+    town = layout.get("town")
+    if town:
+        sq = town["square"]
+        (cx, cy), hx, hy = sq["centre"], sq["halfX"], sq["halfY"]
+        square = polygon_mask([(cx - hx, cy - hy), (cx + hx, cy - hy), (cx + hx, cy + hy), (cx - hx, cy + hy)], size)
+        street = line_mask(town["street"], size, 2 * town["streetHalfWidth"] / metres_per_px)
+        rgb = blend(rgb, [0.28, 0.20, 0.13], np.clip(ndimage.grey_dilation(np.maximum(square, street), size=3) - np.maximum(square, street), 0, 1) * 0.6)
+        rgb = blend(rgb, [0.97, 0.93, 0.81], np.maximum(square, street) * 0.95)
+        blocks = [town["store"]["footprint"]]
+        for b in town["buildings"]:
+            t = np.radians(b["yaw"])
+            out, along = np.array([np.cos(t), np.sin(t)]), np.array([-np.sin(t), np.cos(t)])
+            front = np.array([b["x"], b["y"]])
+            blocks.append([front + along * a + out * d for a, d in ((-b["width"] / 2, 0), (b["width"] / 2, 0),
+                                                                  (b["width"] / 2, b["depth"]), (-b["width"] / 2, b["depth"]))])
+        for block in blocks:
+            rgb = blend(rgb, [0.36, 0.33, 0.30], polygon_mask(block, size) * 0.9)
 
     # Darken the far edges of the sheet slightly, like an old estate plan.
     yy, xx = np.mgrid[0:size, 0:size] / (size - 1.0) * 2.0 - 1.0

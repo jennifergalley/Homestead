@@ -18,10 +18,19 @@ two fists while she mows (``AHomesteadCharacter::UpdateFellingHatchet``). SM_Scy
 (Scripts/Blender/Recipes/scythe.py): pivot at the lower nib's grip, the snath up +Z, the nibs out
 along -Y, the blade along +X from the heel with its edge toward -Y, and the blade set on the snath
 at the working lean (``LEAN``) so it lies flat when she holds the snath leaning back toward her.
+Everything here is in scythe.py's own coordinates. The Unreal import negates Y, so the game shows
+the prop mirrored in its local Y (``HomesteadScythe::Mirror``) to match.
 
 The clip has the felling clip's structure (``axe_fell.FRAMES``): the 'strike' keys are the blade
 crossing in front of her, where the grass falls, and the cycle from one stroke's end to the next
 repeats for longer mowing, so the C++ felling timing applies unchanged.
+
+The game lays the scythe from her fists every frame (``blade_points``): between sparse keys the fists
+interpolate off the rigid scythe's path, and in PIE (09-30) its point dug up to 38 cm into the ground as
+each stroke opened and closed. ``build()`` therefore measures the blade that way on every two-handed frame
+and, wherever it is below BLADE_CLEARANCE, keys both hands raised together by the shortfall and bakes
+again. Raised together, the scythe rises without turning, so the fists stay on the nibs and the swing
+keeps its shape. ``report()`` prints the lowest point over the clip.
 
 Component space: forward +Y, her left +X, up +Z, floor z = 0.
 """
@@ -31,6 +40,21 @@ from homestead_agent import rig_authoring as ra
 from homestead_agent import kneel_gather as kg
 from homestead_agent import axe_fell as af
 
+# The blade, laid from her fists exactly as AHomesteadCharacter::UpdateMowingScythe lays it, must stay at
+# least BLADE_CLEARANCE (cm) above the floor (z = 0) on every frame; build() lifts both hands where it doesn't,
+# by the shortfall plus LIFT_MARGIN, re-baking up to LIFT_PASSES times. Back and edge along the blade and its
+# point, in scythe.py coordinates (HomesteadCharacterEquipment.cpp MowGround::BladeSamples).
+BLADE_CLEARANCE = 3.0
+LIFT_MARGIN = 1.0
+LIFT_PASSES = 3
+# The game lays the scythe from her fists whenever the action is blended in (UpdateMowingScythe blends by
+# FellWeight): fully from 0.12 s after the clip starts until 0.16 s before it ends (UHomesteadAnimInstance's
+# ActionBlend rates), so the getting-into and out-of-grip transitions must clear the ground too.
+BLEND_IN_FRAMES = 4
+BLEND_OUT_FRAMES = 5
+BLADE_SAMPLES = ((6.3, 11.0, -100.9), (6.3, 4.7, -94.5), (45.8, 9.2, -97.8), (45.8, 5.2, -93.8),
+                 (67.3, 5.5, -94.5), (67.3, 3.1, -92.2), (88.8, -0.3, -89.7))
+_GAME_BONES = [f'{b}_{side}' for side in 'lr' for b in ('hand', 'middle_01', 'index_01', 'pinky_01')]
 SEQUENCE = 'LS_ScytheMow'
 ANIM = 'AN_HeroineMH_ScytheMow'
 
@@ -130,6 +154,28 @@ def grips(name):
 
 
 def build():
+    """Bake, then lift both hands wherever the blade (laid from her fists as the game does) dips below
+    BLADE_CLEARANCE, and bake again; a few passes settle it. That covers the whole stretch the game lays the
+    scythe from her fists, the carry-to-address and recovery transitions included (PIE 10-01: they dug in
+    30-40 cm once MaxTipUp no longer tipped it out)."""
+    lifts = {}
+    anim = _author(lifts)
+    for _ in range(LIFT_PASSES):
+        low = {f: h for f, h in blade_heights(anim, *laid_frames()).items() if h < BLADE_CLEARANCE}
+        if not low:
+            break
+        for frame, height in low.items():
+            lifts[frame] = _lifted_hands(anim, frame, BLADE_CLEARANCE + LIFT_MARGIN - height)
+        anim = _author(lifts)
+    return anim
+
+
+def laid_frames():
+    """First and last frame the game lays the scythe wholly from her fists."""
+    return FRAMES['stand'] + BLEND_IN_FRAMES, FRAMES['end'] - BLEND_OUT_FRAMES
+
+
+def _author(lifts):
     s = ra.Session(SEQUENCE, frames=FRAMES['end'])
     right, left = af.Hand(s, 'r'), af.Hand(s, 'l')
     F = FRAMES
@@ -169,11 +215,56 @@ def build():
     s.key_world(F['address'], 'foot_r_ik_ctrl', FOOT_R_BACK)
     s.key_world(F['recover'], 'foot_r_ik_ctrl', FOOT_R_BACK)
     s.key_world(F['end'], 'foot_r_ik_ctrl', kg.FOOT_R)
+    # Frames where the blade would cut into the ground: both hands raised together (build()).
+    for frame, hands in lifts.items():
+        for side, (location, quat) in hands.items():
+            rest = s.bone(f'hand_{side}').rotation
+            s.key_world(frame, f'hand_{side}_ik_ctrl', location, (quat * rest.inversed()).rotator())
     return s.bake(ANIM)
+
+def _game_grip(b, side):
+    """AHomesteadCharacter::UpdateMowingScythe's GripCentre for one fist."""
+    hand = b[f'hand_{side}'].translation
+    knuckle = b[f'middle_01_{side}'].translation
+    across = b[f'index_01_{side}'].translation - b[f'pinky_01_{side}'].translation
+    along = (knuckle - hand).normal()
+    palm = (across.cross(along) if side == 'l' else along.cross(across)).normal()
+    return hand + (knuckle - hand) * 0.78 + palm * 2.6
+
+
+def blade_points(anim, frame):
+    """The blade samples (component cm) as the game lays the scythe from her fists at ``frame``: the lower
+    nib in the right fist, its nib along the right fist's pinky-to-index axis, the snath toward the left fist."""
+    b = ra.bone_positions(anim, _GAME_BONES, frame / 30)
+    lower, upper = _game_grip(b, 'r'), _game_grip(b, 'l')
+    nib = (b['index_01_r'].translation - b['pinky_01_r'].translation).normal()
+    snath = upper - lower
+    snath = (snath - nib * snath.dot(nib)).normal()
+    x = nib.cross(snath)
+    return [lower + x * p[0] + nib * p[1] + snath * p[2] for p in BLADE_SAMPLES]
+
+
+def blade_heights(anim, first=None, last=None):
+    """Lowest blade sample above the floor on each frame from `first` to `last` (default: the two-handed
+    stretch, address to recover)."""
+    first = FRAMES['address'] if first is None else first
+    last = FRAMES['recover'] if last is None else last
+    return {f: min(p.z for p in blade_points(anim, f)) for f in range(first, last + 1)}
+
+
+def _lifted_hands(anim, frame, lift):
+    """Both wrists as baked at ``frame``, raised by ``lift`` cm: the scythe rises with them unturned."""
+    b = ra.bone_positions(anim, ('hand_r', 'hand_l'), frame / 30)
+    out = {}
+    for side in 'rl':
+        t = b[f'hand_{side}']
+        out[side] = ((t.translation.x, t.translation.y, t.translation.z + lift), t.rotation)
+    return out
 
 
 def report(anim):
-    """Per key: each fist's grip centre against its nib target, and the blade heel's height."""
+    """Per key: each fist's grip centre against its nib target and the blade heel's height; then the blade's
+    lowest point over the whole two-handed stretch, laid from her fists as the game does (BLADE_CLEARANCE)."""
     bones = [f'{b}_{side}' for side in 'lr' for b in ('hand', 'middle_01', 'index_01', 'pinky_01')]
     lines = []
     for name, frame in FRAMES.items():
@@ -190,4 +281,14 @@ def report(anim):
         miss_l = (centre_l - af._vec(lc)).length()
         lines.append(f"{name:8s} right miss {miss_r:4.1f} left miss {miss_l:4.1f} nib dot {across_r.dot(rn):5.2f} "
                      f"heel ({heel[0]:6.1f},{heel[1]:6.1f},{heel[2]:5.1f})")
+    heights = blade_heights(anim, *laid_frames())
+    worst = min(heights, key=heights.get)
+    low = [f for f, h in heights.items() if h < BLADE_CLEARANCE]
+    first, last = laid_frames()
+    lines.append(f"blade lowest {heights[worst]:5.1f} cm at frame {worst} (frames {first}-{last}, transitions included); "
+                 f"frames below {BLADE_CLEARANCE:.0f} cm: {low or 'none'}")
+    for first, last in ((first, FRAMES['address'] - 1), (FRAMES['recover'] + 1, last)):
+        part = {f: heights[f] for f in range(first, last + 1)}
+        at = min(part, key=part.get)
+        lines.append(f"  transition {first}-{last}: lowest {part[at]:6.1f} cm at frame {at}")
     return '\n'.join(lines)

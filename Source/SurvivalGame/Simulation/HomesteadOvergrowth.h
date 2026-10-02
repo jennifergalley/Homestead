@@ -37,7 +37,7 @@ inline bool IsOvergrowth(ResourceKind kind) { return FindOvergrowth(kind) != nul
 const ResourceNode* OvergrowthSpoiling(const State& state, const Footprint& area);
 // "Clear the nettles here first."
 std::string SpoiledGroundMessage(const ResourceNode& node);
-// Hand-cleared rubbish (crates, barrels, heaps and planks).
+// Hand-cleared rubbish (crates, barrels, heaps, planks and fallen slates).
 bool IsRubbish(ResourceKind kind);
 // Lower-case, for prompts: "axe", "billhook".
 const char* ToolName(ToolKind tool);
@@ -48,15 +48,24 @@ Item ToolItem(ToolKind tool);
 ToolKind ToolForItem(Item item);
 // "Needs an iron axe".
 std::string NeedsToolMessage(ToolKind tool, ToolTier tier);
-// The rusted head a salvage pile gives next: the first of billhook, axe, scythe, pickaxe and hoe
+// The rusted head a salvage pile gives next: the first of billhook, hoe, axe, scythe and pickaxe
 // she owns neither as a head nor as a hafted tool; Item::Count once she has all five.
 Item NextSalvageHead(const State& state);
+// Where a manor salvage pile lies, for directions: "by the chimney in the west rooms".
+const char* SalvageWhereabouts(int pileId);
+// Why she can't till without a hoe, and where the nearest way to one is: her own rusted blade to
+// haft, else the nearest unsearched salvage pile to `player`.
+std::string NoHoeMessage(const State& state, Point player);
 // Energy multiplier for a tool tier (1 at worn).
 double TierEnergyFactor(ToolTier tier);
 
 namespace Overgrowth
 {
 constexpr double Reach = 300.0;
+// Anything this close to her centre counts as in front of her when she aims a tool.
+constexpr double AimAnyDirection = 60.0;
+// Further out, what she aims a tool at lies within this many degrees of straight ahead.
+constexpr double AimHalfAngleDegrees = 80.0;
 // Weed creep (design 7): a cleared grass or weed placement within this distance of any uncleared
 // overgrowth has this daily chance of growing back.
 constexpr double CreepNeighbourDistance = 600.0;

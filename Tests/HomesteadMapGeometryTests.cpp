@@ -119,6 +119,47 @@ void Triangulation()
     CHECK(std::abs(DistanceToRing({{0, 0}, {10, 0}, {10, 10}, {0, 10}}, {5, 3}) - 3.0) < 1e-9);
     CHECK(Contains({{0, 0}, {10, 0}, {10, 10}, {0, 10}}, {5, 5}) && !Contains({{0, 0}, {10, 0}, {10, 10}}, {9, 9.5}));
 }
+
+void Legibility()
+{
+    // 720p: 0.667 physical px per HUD unit, so an 8.5-unit badge is under 6 px until it's raised.
+    CHECK(std::abs(AtLeastPhysical(8.5, 0.667, 9.0) * 0.667 - 9.0) < 1e-9);
+    CHECK(AtLeastPhysical(11.0, 1.5, 9.0) == 11.0);
+    CHECK(AtLeastPhysical(4.0, 0.0, 9.0) == 4.0);
+    CHECK(std::abs(SnapToPixel(10.3, 1.5) * 1.5 - 15.0) < 1e-9);
+    CHECK(std::abs(SnapToPixel(-2.9, 2.0) * 2.0 - -6.0) < 1e-9);
+    CHECK(SnapToPixel(7.25, 0.0) == 7.25);
+    // Priority order wins: the second overlaps the first and waits; the third is clear.
+    const auto kept = SpacedCircles({{0, 0}, {15, 0}, {40, 0}}, {10, 10, 10}, 4);
+    CHECK(kept.size() == 2 && kept[0] == 0 && kept[1] == 2);
+    CHECK(SpacedCircles({{0, 0}, {24, 0}}, {10, 10}, 4).size() == 2);
+    CHECK(SpacedCircles({{0, 0}}, {}, 4).empty());
+}
+
+void Compass()
+{
+    // +X is north (0), +Y east (90), -X south (180), -Y west (270).
+    CHECK(std::abs(BearingDegrees({0, 0}, {10, 0}) - 0.0) < 1e-9);
+    CHECK(std::abs(BearingDegrees({0, 0}, {0, 10}) - 90.0) < 1e-9);
+    CHECK(std::abs(BearingDegrees({0, 0}, {-10, 0}) - 180.0) < 1e-9);
+    CHECK(std::abs(BearingDegrees({0, 0}, {0, -10}) - 270.0) < 1e-9);
+    CHECK(std::abs(BearingDegrees({5, 5}, {15, 15}) - 45.0) < 1e-9);
+    CHECK(BearingDegrees({3, 3}, {3, 3}) == 0.0);
+    CHECK(std::abs(RelativeDegrees(10, 350) - 20.0) < 1e-9);
+    CHECK(std::abs(RelativeDegrees(350, 10) - -20.0) < 1e-9);
+    CHECK(std::abs(RelativeDegrees(180, 0) - 180.0) < 1e-9);
+    CHECK(std::abs(RelativeDegrees(0, 180) - 180.0) < 1e-9);
+    CHECK(std::abs(RelativeDegrees(-90, 720) - -90.0) < 1e-9);
+    // Facing east, north is a quarter-field to the left and south a quarter to the right.
+    double offset = 0;
+    CHECK(CompassOffset(0, 90, 90, 200, offset) && std::abs(offset - -200.0) < 1e-9);
+    CHECK(CompassOffset(180, 90, 90, 200, offset) && std::abs(offset - 200.0) < 1e-9);
+    CHECK(CompassOffset(90, 90, 90, 200, offset) && std::abs(offset) < 1e-9);
+    CHECK(CompassOffset(135, 90, 90, 200, offset) && std::abs(offset - 100.0) < 1e-9);
+    // Behind her is off the strip.
+    CHECK(!CompassOffset(270, 90, 90, 200, offset));
+    CHECK(!CompassOffset(0, 0, 0, 200, offset));
+}
 }
 
 int main()
@@ -127,6 +168,8 @@ int main()
     Clipping();
     DashesAndHatching();
     Triangulation();
+    Legibility();
+    Compass();
     std::cout << "Map geometry: " << checks << " checks passed.\n";
     return 0;
 }

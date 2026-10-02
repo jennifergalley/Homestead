@@ -20,7 +20,7 @@ const TCHAR* HairStyleName(int32 Index)
 const TCHAR* MetaHairName(int32 Index)
 {
     static const TCHAR* Values[] = {TEXT("Long and straight"), TEXT("Straight bob"), TEXT("Low ponytail"),
-        TEXT("Braided updo"), TEXT("Twin buns"), TEXT("Long and tousled"), TEXT("Curly bob"),
+        TEXT("Braided updo"), TEXT("Twin buns"), TEXT("Long and tousled"), TEXT("Long bob"),
         TEXT("Long with a fringe"), TEXT("Pixie crop")};
     static_assert(UE_ARRAY_COUNT(Values) == MetaHairCount);
     return Choice(Values, Index);
@@ -121,5 +121,13 @@ FLinearColor TunicTint(int32 Index)
         FLinearColor::White, FLinearColor(1.1f, 0.17f, 0.56f),
         FLinearColor(0.5f, 0.6f, 2.4f), FLinearColor(2.75f, 1.78f, 2.61f)};
     return Choice(Values, Index);
+}
+FLinearColor HomespunDyeTint(int32 Dye)
+{
+    // Tuned by eye on the homespun albedo in PIE: plant dyes of the period, not bright aniline.
+    static const FLinearColor Values[] = {
+        FLinearColor::White, FLinearColor(0.78f, 0.36f, 0.40f),
+        FLinearColor(0.55f, 0.63f, 0.75f), FLinearColor(1.08f, 1.0f, 0.86f)};
+    return Choice(Values, Dye);
 }
 }

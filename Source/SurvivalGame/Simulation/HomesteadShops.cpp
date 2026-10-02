@@ -1,4 +1,5 @@
 #include "HomesteadShops.h"
+#include "HomesteadBackpack.h"
 #include "HomesteadEstate.h"
 #include "HomesteadSimulation.h"
 
@@ -18,7 +19,7 @@ Result ShopBad(const std::string& text, std::uint64_t revision, ResultCode code 
     return {false, text, code, revision};
 }
 bool ValidShopItem(Item item) { return static_cast<int>(item) >= 0 && static_cast<int>(item) < ItemCount; }
-Cents RoundedMarkup(Cents base) { return (base * ShopMarkupPercent + 50) / 100; }
+Coins RoundedMarkup(Coins base) { return (base * ShopMarkupPercent + 50) / 100; }
 bool NearCounter(const Shop& shop, Point player)
 {
     if (!std::isfinite(player.x) || !std::isfinite(player.y)) return false;
@@ -26,24 +27,26 @@ bool NearCounter(const Shop& shop, Point player)
     return dx * dx + dy * dy <= CounterReach * CounterReach;
 }
 std::string Plural(int quantity, Item item) { return CountedName(item, quantity); }
-}
-
-std::string FormatMoney(Cents cents)
+std::string ToLowerAscii(std::string text)
 {
-    const bool negative = cents < 0;
-    // Magnitude as unsigned so the most negative value still formats.
-    const std::uint64_t magnitude = negative ? static_cast<std::uint64_t>(-(cents + 1)) + 1 : static_cast<std::uint64_t>(cents);
-    std::string dollars = std::to_string(magnitude / 100);
-    for (int i = static_cast<int>(dollars.size()) - 3; i > 0; i -= 3) dollars.insert(static_cast<std::size_t>(i), ",");
-    const unsigned rest = static_cast<unsigned>(magnitude % 100);
-    std::string text = std::string(negative ? "-$" : "$") + dollars + "." + static_cast<char>('0' + rest / 10)
-        + static_cast<char>('0' + rest % 10);
+    for (char& c : text) if (c >= 'A' && c <= 'Z') c = static_cast<char>(c - 'A' + 'a');
     return text;
 }
+}
 
-std::string FormatMoneyDelta(Cents cents)
+std::string FormatMoney(Coins amount)
 {
-    return cents < 0 ? FormatMoney(cents) : "+" + FormatMoney(cents);
+    const bool negative = amount < 0;
+    // Magnitude as unsigned so the most negative value still formats.
+    const std::uint64_t magnitude = negative ? static_cast<std::uint64_t>(-(amount + 1)) + 1 : static_cast<std::uint64_t>(amount);
+    std::string digits = std::to_string(magnitude);
+    for (int i = static_cast<int>(digits.size()) - 3; i > 0; i -= 3) digits.insert(static_cast<std::size_t>(i), ",");
+    return std::string(negative ? "-" : "") + digits + (magnitude == 1 ? " coin" : " coins");
+}
+
+std::string FormatMoneyDelta(Coins amount)
+{
+    return amount < 0 ? FormatMoney(amount) : "+" + FormatMoney(amount);
 }
 
 const std::vector<Item>& ShopGoods(ShopKind kind)
@@ -59,31 +62,79 @@ const char* ShopDisplayName(ShopKind kind)
     return kind == ShopKind::GeneralStore ? "General store" : "Shop";
 }
 
+bool IsShopDay(double hour)
+{
+    return std::isfinite(hour) && Calendar::DateAt(hour).weekday != ShopClosedDay;
+}
+
 bool IsShopOpen(const Shop& shop, double hour)
 {
     if (!std::isfinite(hour)) return false;
     const double time = std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0);
-    return time >= shop.openHour && time < shop.closeHour;
+    return time >= shop.openHour && time < shop.closeHour && IsShopDay(hour);
+}
+
+double NextShopOpening(const Shop& shop, double hour)
+{
+    if (!std::isfinite(hour) || IsShopOpen(shop, hour)) return hour;
+    const double midnight = std::floor(hour / 24.0) * 24.0;
+    // Today's opening or a later one, past any closed day (a week covers every weekday).
+    for (int day = 0; day <= Calendar::DaysPerWeek + 1; ++day)
+    {
+        const double opening = midnight + day * 24.0 + shop.openHour;
+        if (opening > hour && IsShopOpen(shop, opening)) return opening;
+    }
+    return hour;
+}
+
+double HoursUntilOpen(const Shop& shop, double hour)
+{
+    return std::isfinite(hour) ? NextShopOpening(shop, hour) - hour : 0.0;
+}
+
+bool CanWaitForShop(const Shop& shop, double hour)
+{
+    if (!std::isfinite(hour) || IsShopOpen(shop, hour)) return false;
+    // Only the ordinary night's closure (closing to opening, 14 h): never through a closed day's hours.
+    return HoursUntilOpen(shop, hour) <= 24.0 - (shop.closeHour - shop.openHour) + 1e-6;
 }
 
 std::string FormatHour(double hour)
 {
-    const int whole = static_cast<int>(std::floor(std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0)));
-    const int minutes = static_cast<int>(std::lround((hour - std::floor(hour)) * 60.0)) % 60;
+    // Round to the minute first, so 7:59:50 reads 8 AM rather than 7 AM.
+    const long total = std::lround(std::fmod(std::fmod(hour, 24.0) + 24.0, 24.0) * 60.0) % (24 * 60);
+    const int whole = static_cast<int>(total / 60);
+    const int minutes = static_cast<int>(total % 60);
     const int twelve = whole % 12 == 0 ? 12 : whole % 12;
     std::string text = std::to_string(twelve);
     if (minutes) text += (minutes < 10 ? ":0" : ":") + std::to_string(minutes);
     return text + (whole < 12 ? " AM" : " PM");
 }
 
-std::string ClosedMessage(const Shop& shop)
+std::string ClosedMessage(const Shop& shop, double hour)
 {
-    return "Closed - opens at " + FormatHour(shop.openHour);
+    const double next = NextShopOpening(shop, hour);
+    const Calendar::Date today = Calendar::DateAt(hour), opens = Calendar::DateAt(next);
+    const std::string at = FormatHour(next);
+    if (!IsShopDay(hour))
+        return std::string("Closed today (") + Calendar::WeekdayName(today.weekday) + ") - opens "
+            + Calendar::WeekdayName(opens.weekday) + " at " + at;
+    if (opens.dayIndex > today.dayIndex + 1) return std::string("Closed - opens ") + Calendar::WeekdayName(opens.weekday) + " at " + at;
+    return "Closed - opens at " + at;
 }
 
-Cents SellPrice(Item item) { return BasePrice(item); }
-Cents BuyPrice(Item item) { return RoundedMarkup(BasePrice(item)); }
-Cents BuyBackPrice(Item item) { return SellPrice(item); }
+std::string ClosedSignText(const Shop& shop, double hour)
+{
+    const double next = NextShopOpening(shop, hour);
+    if (!IsShopDay(hour)) return std::string("CLOSED\non ") + Calendar::WeekdayName(ShopClosedDay) + "s";
+    if (Calendar::DateAt(next).dayIndex > Calendar::DateAt(hour).dayIndex + 1)
+        return std::string("CLOSED\nopens ") + Calendar::WeekdayShort(Calendar::DateAt(next).weekday) + " " + FormatHour(next);
+    return "CLOSED\nopens at " + FormatHour(next);
+}
+
+Coins SellPrice(Item item) { return BasePrice(item); }
+Coins BuyPrice(Item item) { return RoundedMarkup(BasePrice(item)); }
+Coins BuyBackPrice(Item item) { return SellPrice(item); }
 
 int SellDownAmount(int quantity)
 {
@@ -109,7 +160,7 @@ Result Simulation::CheckShopAccess(int shopId, Point player) const
     if (state_.failed) return ShopBad("You need to recover first.", revision_, ResultCode::Unavailable);
     const Shop* shop = FindShop(shopId);
     if (!shop) return ShopBad("There is no such shop.", revision_);
-    if (!IsShopOpen(*shop, state_.hour)) return ShopBad(ClosedMessage(*shop), revision_, ResultCode::Unavailable);
+    if (!IsShopOpen(*shop, state_.hour)) return ShopBad(ClosedMessage(*shop, state_.hour), revision_, ResultCode::Unavailable);
     if (!NearCounter(*shop, player)) return ShopBad("Step up to the counter to trade.", revision_);
     return ShopGood("", revision_);
 }
@@ -124,7 +175,7 @@ Result Simulation::Sell(int shopId, Item item, int quantity, Point player)
     if (!ShopBuys(shop->kind, item))
         return ShopBad(std::string(ShopDisplayName(shop->kind)) + " doesn't buy " + ItemName(item) + ".", revision_);
     if (Count(item) < quantity) return ShopBad("You're only carrying " + Plural(Count(item), item) + ".", revision_);
-    const Cents earned = SellPrice(item) * quantity;
+    const Coins earned = SellPrice(item) * quantity;
     if (state_.money + earned > MaxMoney) return ShopBad("Your purse can't hold any more.", revision_, ResultCode::Capacity);
     State candidate = state_;
     Shop* target = nullptr;
@@ -144,7 +195,7 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     const auto access = CheckShopAccess(shopId, player);
     if (!access) return access;
     const Shop* shop = FindShop(shopId);
-    if (!ValidShopItem(item) || quantity <= 0 || quantity > InventoryCapacity)
+    if (!ValidShopItem(item) || quantity <= 0 || quantity > MaxPackCapacity)
         return ShopBad("Choose something to buy and how many.", revision_);
     const auto& goods = ShopGoods(shop->kind);
     if (fromHeroineStock)
@@ -154,10 +205,10 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     }
     else if (std::find(goods.begin(), goods.end(), item) == goods.end())
         return ShopBad(std::string(ShopDisplayName(shop->kind)) + " doesn't sell " + ItemName(item) + ".", revision_);
-    const Cents cost = (fromHeroineStock ? BuyBackPrice(item) : BuyPrice(item)) * quantity;
+    const Coins cost = (fromHeroineStock ? BuyBackPrice(item) : BuyPrice(item)) * quantity;
     if (cost > state_.money)
         return ShopBad("That costs " + FormatMoney(cost) + "; you have " + FormatMoney(state_.money) + ".", revision_);
-    if (UsedCapacity() + quantity > InventoryCapacity || Count(item) + quantity > InventoryCapacity)
+    if (UsedCapacity() + quantity > PackCapacity() || Count(item) + quantity > PackCapacity())
         return ShopBad("Not enough pack space for " + Plural(quantity, item) + ".", revision_, ResultCode::Capacity);
     State candidate = state_;
     for (auto& value : candidate.shops)
@@ -166,6 +217,76 @@ Result Simulation::Buy(int shopId, Item item, int quantity, bool fromHeroineStoc
     candidate.money -= cost;
     const std::string message = "Bought " + Plural(quantity, item) + " for " + FormatMoney(cost) + ".";
     return CommitInventory(std::move(candidate), message.c_str());
+}
+
+Result Simulation::BuyBackpack(int shopId, Point player)
+{
+    const auto access = CheckShopAccess(shopId, player);
+    if (!access) return access;
+    const Shop* shop = FindShop(shopId);
+    if (state_.leatherBackpack) return ShopBad("You already have the leather backpack.", revision_);
+    if (!Backpack::Offered(state_, shop->kind))
+        return ShopBad(std::string(ShopDisplayName(shop->kind)) + " doesn't sell backpacks.", revision_);
+    if (Backpack::Price > state_.money)
+        return ShopBad("That costs " + FormatMoney(Backpack::Price) + "; you have " + FormatMoney(state_.money) + ".", revision_);
+    State candidate = state_;
+    candidate.leatherBackpack = true;
+    candidate.backpackShown = true;
+    candidate.money -= Backpack::Price;
+    const std::string message = "Bought the leather backpack for " + FormatMoney(Backpack::Price)
+        + ". You can carry " + std::to_string(MaxPackCapacity) + " now.";
+    return CommitInventory(std::move(candidate), message.c_str());
+}
+
+Result Simulation::SetBackpackShown(bool shown)
+{
+    if (!state_.leatherBackpack) return ShopBad("You don't have a backpack yet.", revision_);
+    if (state_.backpackShown == shown) return ShopBad(shown ? "Your backpack is already showing." : "Your backpack is already hidden.", revision_);
+    state_.backpackShown = shown;
+    return ShopGood(shown ? "Your backpack shows on your back." : "Your backpack is hidden. You can still carry as much.", ++revision_);
+}
+
+Result Simulation::WaitForShop(int shopId, Point player)
+{
+    if (state_.failed) return ShopBad("You need to recover first.", revision_, ResultCode::Unavailable);
+    const Shop* shop = FindShop(shopId);
+    if (!shop) return ShopBad("There is no such shop.", revision_);
+    const std::string name = ShopDisplayName(shop->kind);
+    if (IsShopOpen(*shop, state_.hour)) return ShopBad("The " + ToLowerAscii(name) + " is open now.", revision_);
+    // No waiting out a whole closed day in the street: only the ordinary night's closure.
+    if (!CanWaitForShop(*shop, state_.hour))
+    {
+        const double next = NextShopOpening(*shop, state_.hour);
+        return ShopBad("The " + ToLowerAscii(name) + " is closed on " + Calendar::WeekdayName(ShopClosedDay) + "s. It opens "
+            + Calendar::WeekdayName(Calendar::DateAt(next).weekday) + " at " + FormatHour(next) + ".", revision_,
+            ResultCode::Unavailable);
+    }
+    if (!std::isfinite(player.x) || !std::isfinite(player.y)
+        || std::hypot(player.x - shop->counterX, player.y - shop->counterY) > ShopWaitReach)
+        return ShopBad("Wait by the shop's door.", revision_);
+    const double openHour = shop->openHour;
+    // A hair past the hour, so the step boundaries can't leave the clock a rounding error short.
+    const double hours = HoursUntilOpen(*shop, state_.hour) + 1e-6;
+    // Try it on a copy first: if she'd collapse before it opens, she waits no time at all.
+    Simulation trial = *this;
+    trial.AdvanceGameHours(hours, player);
+    if (trial.state_.failed)
+        return ShopBad("You're too hungry to wait until " + FormatHour(openHour) + ". Eat something first.", revision_,
+            ResultCode::Unavailable);
+    // Worn out, she'd doze off in the street before it opens: that isn't the wait she agreed to.
+    if (trial.DozeCount() != DozeCount())
+        return ShopBad("You're too tired to wait until " + FormatHour(openHour) + ". Rest or eat first.", revision_,
+            ResultCode::Unavailable);
+    // AdvanceGameHours passes no time at all past the calendar's supported limit.
+    if (trial.state_.hour < state_.hour + hours - 1e-3)
+        return ShopBad("The calendar has reached its supported limit.", revision_);
+    // The ordinary passage of time: crops, weather, fires, vitals and the morning sell-down all run.
+    AdvanceGameHours(hours, player);
+    ++revision_;
+    const Shop* opened = FindShop(shopId);
+    if (!opened || !IsShopOpen(*opened, state_.hour))
+        return ShopBad("You waited, but the " + ToLowerAscii(name) + " is still closed.", revision_, ResultCode::Unavailable);
+    return ShopGood("You wait by the door until " + FormatHour(openHour) + ". The " + ToLowerAscii(name) + " is open.", revision_);
 }
 
 Result Simulation::GreetShopkeeper(int shopId)
@@ -179,11 +300,14 @@ Result Simulation::GreetShopkeeper(int shopId)
     return ShopBad("There is no such shop.", revision_);
 }
 
-Result Simulation::GrantMoney(Cents cents)
+Result Simulation::GrantMoney(Coins coins)
 {
-    if (cents < -state_.money || state_.money + cents > MaxMoney) return ShopBad("That would leave the purse out of range.", revision_);
-    state_.money += cents;
-    return ShopGood(FormatMoneyDelta(cents), ++revision_);
+    // The purse always holds 0..MaxMoney, so neither bound can overflow: a huge grant is compared with
+    // the room left rather than added first (INT64_MAX used to wrap past the cap).
+    const bool outOfRange = coins < 0 ? coins < -state_.money : coins > MaxMoney - state_.money;
+    if (outOfRange) return ShopBad("That would leave the purse out of range.", revision_);
+    state_.money += coins;
+    return ShopGood(FormatMoneyDelta(coins), ++revision_);
 }
 
 Result Simulation::PlaceShop(ShopKind kind, Point counter, double yaw)

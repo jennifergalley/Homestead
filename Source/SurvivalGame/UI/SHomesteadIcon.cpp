@@ -10,8 +10,8 @@ namespace HomesteadIcons
 {
 namespace
 {
-    constexpr FLinearColor Cream = HomesteadPalette::Cream;
-    constexpr FLinearColor Pine = HomesteadPalette::Pine;
+    const FLinearColor& Cream = HomesteadPalette::Cream;
+    const FLinearColor& Pine = HomesteadPalette::Pine;
     const FLinearColor Charcoal(0.045f, 0.035f, 0.025f);
     const FLinearColor Wood(0.49f, 0.29f, 0.13f);
     const FLinearColor LeafGreen(0.32f, 0.52f, 0.19f);
@@ -776,8 +776,8 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Disc(28, 28, 19, Wood);
         P.Disc(28, 28, 16, Gold);
         P.Disc(28, 28, 12, RootOrange);
-        P.Line({{32, 20}, {24, 20}, {23, 27}, {33, 29}, {32, 36}, {23, 36}}, Cream, 2.5f);
-        P.Line({{28, 16}, {28, 40}}, Cream, 1.5f);
+        // A small stamped crown: money is whole coins, with no currency sign.
+        P.Line({{21, 33}, {21, 24}, {25, 29}, {28, 21}, {31, 29}, {35, 24}, {35, 33}, {21, 33}}, Cream, 2.0f);
         break;
     case EKind::Shop:
         P.Shape({{6, 22}, {28, 8}, {50, 22}}, Gold);

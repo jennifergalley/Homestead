@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "RedCampion",
+  "description": "A clump of red campion in flower, 50 cm tall and 40 cm across: hairy upright stems with paired oval leaves and loose clusters of rose-pink flowers with deeply cleft petals. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 12000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/red_campion.py",
+  "source_sha256": "b8c9d7dc8891c790a8433be38e3157f064a4d20e9cff2c72454ad418a55a5007",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_RedCampionClump": {
+      "vertices": 2275,
+      "triangles": 2552,
+      "size_cm": [
+        45.67,
+        37.7,
+        56.7
+      ],
+      "materials": [
+        {
+          "name": "M_RedCampion",
+          "textures": {
+            "basecolor": "T_RedCampion_basecolor.png",
+            "normal": "T_RedCampion_normal.png",
+            "roughness": "T_RedCampion_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.05526435375213623,
+          0.04803835481405258,
+          0.44
+        ]
+      },
+      "fbx": "SM_RedCampionClump.fbx",
+      "sha256": "3da66cbaabfe35e716adc9fa9aa1aeed73342c7f6259e193e46f76a4a5e7ea2e",
+      "preview": "preview_SM_RedCampionClump.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RedCampionClump_hero.png",
+          "detail": "beauty_SM_RedCampionClump_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RedCampionClump_LOD1": {
+      "vertices": 999,
+      "triangles": 986,
+      "size_cm": [
+        37.57,
+        33.93,
+        56.42
+      ],
+      "materials": [
+        {
+          "name": "M_RedCampion",
+          "textures": {
+            "basecolor": "T_RedCampion_basecolor.png",
+            "normal": "T_RedCampion_normal.png",
+            "roughness": "T_RedCampion_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.05526435375213623,
+          0.04803835481405258,
+          0.44
+        ]
+      },
+      "fbx": "SM_RedCampionClump_LOD1.fbx",
+      "sha256": "bb60db7e88f99e431f9a3d648879cebebc392223d0cab0211c127e5ea3fc7bd0",
+      "preview": "preview_SM_RedCampionClump_LOD1.png"
+    },
+    "SM_RedCampionClump_LOD2": {
+      "vertices": 464,
+      "triangles": 408,
+      "size_cm": [
+        36.56,
+        33.88,
+        57.92
+      ],
+      "materials": [
+        {
+          "name": "M_RedCampion",
+          "textures": {
+            "basecolor": "T_RedCampion_basecolor.png",
+            "normal": "T_RedCampion_normal.png",
+            "roughness": "T_RedCampion_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.05526435375213623,
+          0.04803835481405258,
+          0.44
+        ]
+      },
+      "fbx": "SM_RedCampionClump_LOD2.fbx",
+      "sha256": "3d715aa82686e3c0d7df512571cdf24cf7c06d739641158dc05e5bd8a13f4075",
+      "preview": "preview_SM_RedCampionClump_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_RedCampion: T_RedCampion_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_RedCampion_basecolor.png": "6d65899385f4b71f45aea052adf156ff2c35c7dd4dac44fbee749ec9cc0d65c1",
+    "T_RedCampion_normal.png": "29181f7f31093ced4ba913129c0b8bddb1be34068e096873212580871a255b2c",
+    "T_RedCampion_roughness.png": "b4e68e766d03401132d6f9ce2b3c475a43dd296f47c96c5f3a2e4bf03b47168c"
+  }
+}

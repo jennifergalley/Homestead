@@ -53,6 +53,17 @@ HOLD = {
 # Where the stream lands, relative to her standing pose (the game steps her up so the square's
 # middle lands here): below the lip at the middle of the sweep.
 SPOT = (0.0, 43.0, 0.0)
+# Her fingers lead the pail's axis forward by this much (deg) on the side holds: with the pail upright
+# the palms press its sides with the fingers forward, like carrying a pot; fingers straight up its
+# axis folded both wrists about 146 degrees back. With the lead equal to the pour's tip her hands hardly
+# turn: the pail pivots between her palms as she tips it (between 'take' and 'tip', and back between
+# 'back' and 'level'). The lead eases out as she tips it to pour
+# (`AHomesteadCharacter::UpdateWaterPail` turns her fingers back by the same lead, PailFingerLead).
+LEAD = {'reach': 100.0, 'take': 100.0, 'tip': 0.0, 'sweep': 0.0, 'back': 0.0, 'level': 100.0, 'rebail': 100.0}
+# The right fist on the bail (knuckles forward, palm to her left) and the left hand ready to take
+# the pail: fingers forward as well as down or up, so the wrists stay near straight.
+BAIL_FINGERS = (0.0, 0.95, -0.3)
+READY_L_FINGERS = (0.0, 1.0, 0.0)
 LEAN = {'stand': 0, 'lift': 6, 'reach': 10, 'take': 14, 'tip': 18, 'sweep': 20, 'back': 20,
         'level': 14, 'rebail': 10, 'release': 8, 'lower': 4, 'end': 0}
 
@@ -64,14 +75,14 @@ def _axis(deg):
 
 def _side_wrist(side, name):
     centre, deg = HOLD[name]
-    f = _axis(deg)
+    f = _axis(deg + LEAD[name])
     sign = 1.0 if side == 'l' else -1.0
     out = GRIP_RADIUS + PALM_OFF
     return (centre[0] + sign * out - PALM_ALONG * f[0], centre[1] - PALM_ALONG * f[1],
             centre[2] - PALM_ALONG * f[2])
 
 
-def _bail_wrist(name, fingers=(0.0, 0.3, -1.0)):
+def _bail_wrist(name, fingers=BAIL_FINGERS):
     centre, deg = HOLD[name]
     pivot = (centre[0], centre[1], centre[2] + GRIP_DROP)
     n = math.sqrt(sum(c * c for c in fingers))
@@ -113,12 +124,12 @@ def build():
 
     right, left = targets()
     hang_r = s.hand_turn('r', (0, 0, -1), (1, 0, 0))
-    bail_r = s.hand_turn('r', (0.0, 0.3, -1.0), (1, 0, 0))
+    bail_r = s.hand_turn('r', BAIL_FINGERS, (1, 0, 0))
     hang_l = s.hand_turn('l', (0, 0, -1), (-1, 0, 0))
-    ready_l = s.hand_turn('l', (0.0, 0.3, 1.0), (-1, 0, 0))
+    ready_l = s.hand_turn('l', READY_L_FINGERS, (-1, 0, 0))
 
     def side(hand, name):
-        f = _axis(HOLD[name][1])
+        f = _axis(HOLD[name][1] + LEAD[name])
         return s.hand_turn(hand, f, (1, 0, 0) if hand == 'r' else (-1, 0, 0))
 
     turns_r = {'stand': hang_r, 'lift': bail_r, 'reach': bail_r, 'rebail': bail_r, 'release': bail_r,

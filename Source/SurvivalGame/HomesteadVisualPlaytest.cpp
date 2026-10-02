@@ -1158,6 +1158,7 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
             {
                 StationaryEnergy = PC->State().energy;
                 PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+                PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
             }
             if (Pass.Label == TEXT("sprint-keyboard"))
             {
@@ -1166,16 +1167,24 @@ void AHomesteadVisualPlaytest::Tick(float DeltaSeconds)
             }
             if (Pass.Label == TEXT("release-to-walk"))
             {
+                PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
                 PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
                 SprintEndEnergy = PC->State().energy;
             }
             if (Pass.Label == TEXT("sprint-controller")
                 || Pass.Label == TEXT("sprint-visual-sample"))
+            {
                 PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_LeftThumbstick, IE_Pressed, 1));
+                PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_LeftThumbstick, IE_Released, 0));
+            }
             if (Pass.Label == TEXT("open-book-while-sprinting"))
                 MenuEnergy = PC->State().energy;
+            // Sprint is a toggle: a second L3 press turns it off.
             if (Pass.Label == TEXT("controller-stop"))
+            {
+                PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_LeftThumbstick, IE_Pressed, 1));
                 PC->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::Gamepad_LeftThumbstick, IE_Released, 0));
+            }
             if (Pass.Label == TEXT("save-exertion"))
                 SavedSprintEnergy = PC->State().energy;
             if (Pass.Label == TEXT("open-pack"))
@@ -1390,7 +1399,8 @@ void AHomesteadVisualPlaytest::Finish()
         && bStationarySprintSafe && bSprintMenuCancelled && bSprintReloaded
         && bPortraitReady
         && WalkDistance > 30.0 && SprintDistance / 3.0 > WalkDistance / 2.0 * 1.3
-        && SprintStartEnergy - SprintEndEnergy > 0.5 && SprintStartEnergy - SprintEndEnergy < 2.0
+        // Sprint is free: only the slow awake drain passes while she runs.
+        && SprintStartEnergy - SprintEndEnergy >= 0.0 && SprintStartEnergy - SprintEndEnergy < 0.5
         : bGaitReview ? PassIndex >= Passes.Num() && CaptureIndex > 0
         : bPresentationDiagnostics ? PassIndex >= Passes.Num() && !Passes.IsEmpty() && CaptureIndex > 0
         : bClearRoute ? bCleared && bObservedClear && bObservedHatchet && bClearRecovered

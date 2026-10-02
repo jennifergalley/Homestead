@@ -184,7 +184,7 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
     }
     if (!FFileHelper::SaveStringToFile(Framing, *FPaths::Combine(Directory, Name + TEXT(".frame.txt"))))
         UE_LOG(LogTemp, Error, TEXT("Could not write screenshot framing evidence."));
-    const bool IncludeSlate = Controller->HasNativeMenu()
+    const bool IncludeSlate = Controller->HasNativeMenu() || Controller->GetShopScreen().IsValid()
         || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotbarTest"));
     FScreenshotRequest::RequestScreenshot(FPaths::Combine(Directory, Name + TEXT(".png")),
         IncludeSlate, false);
@@ -192,9 +192,19 @@ void AHomesteadSmokeTest::Screenshot(const FString& Name)
 
 void AHomesteadSmokeTest::Prepare()
 {
+    if (FCString::Strifind(FCommandLine::Get(), TEXT("-HomesteadUIGallery")))
+    {
+        PrepareUIGalleryChecks();
+        return;
+    }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadEstateSmoke")))
     {
         PrepareEstateSmokeChecks();
+        return;
+    }
+    if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadToolRepeatTest")))
+    {
+        PrepareToolRepeatChecks();
         return;
     }
     if (FParse::Param(FCommandLine::Get(), TEXT("HomesteadGeneratedWoodland")))
@@ -357,9 +367,9 @@ void AHomesteadSmokeTest::Prepare()
         });
     Add(TEXT("Baseline skin and eyes retain Default Lit shading and saved color controls"),
         []() {}, [this]() { return VerifyPresentationMaterials(); });
-    Add(TEXT("Initial notes page is open"),
+    Add(TEXT("The field book opens on the pack (the Guidebook is retired)"),
         []() {},
-        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3; });
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Automation ignores physical-source menu input"),
         [this]()
         {
@@ -371,7 +381,7 @@ void AHomesteadSmokeTest::Prepare()
                     IE_Released, 0, false, FPlatformTime::Cycles64()));
             }
         },
-        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 3; });
+        [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Gamepad closes the field book"),
         [this]() { Tap(EKeys::Gamepad_Special_Right); },
         [this]() { return !Controller->IsBookOpen(); });
@@ -399,13 +409,8 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Capture the settled clearing exposure"),
         [this]() { Screenshot(TEXT("clearing")); },
         []() { return true; }, 1.0f);
-    Add(TEXT("Gamepad Guidebook route reaches the pack through field-book tabs"),
-        [this]()
-        {
-            Tap(EKeys::Gamepad_Special_Left);
-            // Guidebook back to the pack: Map, Structures, Craft, Pack.
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
-        },
+    Add(TEXT("Gamepad View opens the field book at the pack"),
+        [this]() { Tap(EKeys::Gamepad_Special_Left); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Menu pauses simulation"),
         [this]() { PausedHour = Controller->State().hour; },
@@ -420,12 +425,7 @@ void AHomesteadSmokeTest::Prepare()
         [this]() { Tap(EKeys::Escape); },
         [this]() { return !Controller->IsBookOpen(); });
     Add(TEXT("Open the pack before appearance changes"),
-        [this]()
-        {
-            Tap(EKeys::Gamepad_Special_Left);
-            // Guidebook back to the pack: Map, Structures, Craft, Pack.
-            Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder); Tap(EKeys::Gamepad_LeftShoulder);
-        },
+        [this]() { Tap(EKeys::Gamepad_Special_Left); },
         [this]() { return Controller->IsBookOpen() && Controller->BookPage() == 0; });
     Add(TEXT("Open the appearance page with the controller"),
         [this]() { CameraStart = Controller->GetControlRotation().Yaw; Tap(EKeys::Gamepad_LeftShoulder); },
@@ -552,7 +552,10 @@ void AHomesteadSmokeTest::Prepare()
     Add(TEXT("Eat forage through the actual inventory control"),
         [this]()
         {
-            const auto* Row = Controller->NativeMenu->GetSelectedSubject();
+            FHomesteadRow HotbarRow;
+            const FHomesteadRow* Row = Controller->NativeMenu->GetFocusedRegionName() == TEXT("Hotbar")
+                && Controller->MenuHotbarRow(Controller->NativeMenu->GetFocusedHotbarSlot(), HotbarRow)
+                ? &HotbarRow : Controller->NativeMenu->GetSelectedSubject();
             if (!Row || !Controller->MenuItemAction(*Row, EHomesteadItemAction::Primary,
                 1, Controller->Simulation().GetRevision()))
                 Finish(false, TEXT("The harvested food action is unavailable."));
@@ -641,8 +644,8 @@ void AHomesteadSmokeTest::Prepare()
                 *CurrentId = Current.id;
             },
             [this, CurrentId]() { return Controller->IsResourceFocused(*CurrentId); }, 0.65f);
-        Add(TEXT("Clear the generated building-site tree through gamepad X"),
-            [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
+        Add(TEXT("Fell the generated building-site tree with the axe on RT"),
+            [this]() { Controller->ChooseOnHotbar(Homestead::Item::Hatchet); Tap(EKeys::Gamepad_RightTrigger); },
             [this, Key]()
             {
                 Homestead::ResourceNode Current;
@@ -773,30 +776,69 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         const int32 Current = Native ? Controller->NativeMenu->GetSelectedContentIndex() : Controller->SelectedRow();
         const int32 Target = Rows.IndexOfByPredicate([&Step](const FHomesteadRow& Row)
             { return Row.Id == Step.NavigateToId && Row.Subject != EHomesteadMenuSubject::GarmentRecipe; });
-        if (Native && (!Controller->IsBookOpen() || Target == INDEX_NONE || !Rows.IsValidIndex(Current)
-            || Controller->NativeMenu->GetFocusedRegionName() != TEXT("Content")))
+        const int32 Cell = Native && Controller->BookPage() == 0
+            && Step.NavigateToId < Homestead::ItemCount
+            ? Controller->HotbarCellOf(static_cast<Homestead::Item>(Step.NavigateToId)) : INDEX_NONE;
+        if (Native && Controller->BookPage() == 4)
         {
-            Finish(false, Step.Name + TEXT(" | Native content grid or requested subject is unavailable."));
-            return;
-        }
-        NavigationComplete = Current == Target && Target != INDEX_NONE;
-        if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
-        {
-            if (Native)
+            // Settings rows sit on their tabs (Game / Sound / Video), with Resume and the tabs above them:
+            // focus the row as a player would pick its tab and then the row.
+            const auto* Subject = Controller->NativeMenu->GetSelectedSubject();
+            NavigationComplete = Controller->IsBookOpen() && Subject && Subject->Id == Step.NavigateToId;
+            if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
             {
-                const int32 Columns = Controller->NativeMenu->GetContentColumnCount();
-                if (Columns <= 0)
+                if (!Controller->IsBookOpen() || !Controller->NativeMenu->FocusLegacySubject(Step.NavigateToId))
                 {
-                    Finish(false, Step.Name + TEXT(" | Native content grid has no columns."));
+                    Finish(false, Step.Name + TEXT(" | That Settings row is unavailable."));
                     return;
                 }
-                if (Target / Columns != Current / Columns)
-                    Tap(Target > Current ? EKeys::Gamepad_DPad_Down : EKeys::Gamepad_DPad_Up);
-                else
-                    Tap(Target > Current ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
+                LastNavigationAt = StepElapsed;
             }
-            else Tap(EKeys::Gamepad_DPad_Down);
-            LastNavigationAt = StepElapsed;
+        }
+        else if (Cell != INDEX_NONE)
+        {
+            const FString Region = Controller->NativeMenu->GetFocusedRegionName();
+            const int32 FocusedCell = Controller->NativeMenu->GetFocusedHotbarSlot();
+            if (!Controller->IsBookOpen() || (Region != TEXT("Content") && Region != TEXT("Hotbar")))
+            {
+                Finish(false, Step.Name + TEXT(" | Native pack focus cannot reach the hotbar row."));
+                return;
+            }
+            NavigationComplete = Region == TEXT("Hotbar") && FocusedCell == Cell;
+            if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
+            {
+                Tap(Region == TEXT("Content") ? EKeys::Gamepad_DPad_Up
+                    : FocusedCell < Cell ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
+                LastNavigationAt = StepElapsed;
+            }
+        }
+        else
+        {
+            if (Native && (!Controller->IsBookOpen() || Target == INDEX_NONE || !Rows.IsValidIndex(Current)
+                || Controller->NativeMenu->GetFocusedRegionName() != TEXT("Content")))
+            {
+                Finish(false, Step.Name + TEXT(" | Native content grid or requested subject is unavailable."));
+                return;
+            }
+            NavigationComplete = Current == Target && Target != INDEX_NONE;
+            if (!NavigationComplete && StepElapsed - LastNavigationAt >= 0.18f)
+            {
+                if (Native)
+                {
+                    const int32 Columns = Controller->NativeMenu->GetContentColumnCount();
+                    if (Columns <= 0)
+                    {
+                        Finish(false, Step.Name + TEXT(" | Native content grid has no columns."));
+                        return;
+                    }
+                    if (Target / Columns != Current / Columns)
+                        Tap(Target > Current ? EKeys::Gamepad_DPad_Down : EKeys::Gamepad_DPad_Up);
+                    else
+                        Tap(Target > Current ? EKeys::Gamepad_DPad_Right : EKeys::Gamepad_DPad_Left);
+                }
+                else Tap(EKeys::Gamepad_DPad_Down);
+                LastNavigationAt = StepElapsed;
+            }
         }
     }
     const bool CompletedEarly = Step.bCompleteWhenReady && Step.Check();
@@ -819,8 +861,10 @@ void AHomesteadSmokeTest::Tick(float DeltaSeconds)
         return;
     }
     // The legacy skin/eye material contract doesn't apply to routes that run the MetaHuman heroine.
+    // Nor while the dye chooser dresses her in an unsaved preview (checked after Apply or Cancel).
     const bool MaterialsValid = FParse::Param(FCommandLine::Get(), TEXT("HomesteadPresentationTest"))
         || FParse::Param(FCommandLine::Get(), TEXT("HomesteadMetaHuman"))
+        || (Controller->NativeMenu.IsValid() && Controller->NativeMenu->IsDyeChooserOpen())
         || (FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
             ? VerifyNativeMenuPresentation() : VerifyPresentationMaterials());
     if (!MaterialsValid)
@@ -888,6 +932,7 @@ void AHomesteadSmokeTest::Finish(bool Success, const FString& Reason)
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadFeedbackTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadNativeMenuTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadEstateSmoke"))
+            || FParse::Param(FCommandLine::Get(), TEXT("HomesteadToolRepeatTest"))
             || FParse::Param(FCommandLine::Get(), TEXT("HomesteadHotkeyTest")) ? 0 : 4;
         Results.Add(FString::Printf(TEXT("INPUT_ISOLATION ignored_external_events=%u (includes %d deliberate rejection probes)"),
             Controller->IgnoredExternalInputCount(), Probes));

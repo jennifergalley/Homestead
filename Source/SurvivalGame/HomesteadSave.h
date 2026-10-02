@@ -17,6 +17,8 @@ public:
     UPROPERTY() FVector PlayerLocation = FVector(-1000, 0, 150);
     UPROPERTY() FRotator ViewRotation = FRotator(-15, 0, 0);
     UPROPERTY() int64 SavedAtUtc = 0;
+    // Same-second tie-breaker; old saves without this field read as zero.
+    UPROPERTY() int64 SavedRevision = 0;
     // For the save list: "Eleanor Cavendish — Trevennor, Spring 1" (empty for unnamed woodland games).
     UPROPERTY() FString SaveLabel;
     UPROPERTY() float CameraSensitivity = 1.0f;
@@ -38,6 +40,8 @@ public:
     // 0: saved before food could be pinned; 1: pinned food and the machete migration applied;
     // 2: the estate's hafted tools (scythe, billhook, pickaxe) join the hotbar.
     // 3: the oil lamp joins older hotbars (add-oil-lamp).
-    static constexpr int32 CurrentHotbarLayout = 3;
+    // 4: the hotbar is the first row of her pack, saved with the simulation ("packrow"); HotbarSlots
+    //    is then only a reference copy. Older saves' pins move into the row once on load.
+    static constexpr int32 CurrentHotbarLayout = 4;
     UPROPERTY() int32 HotbarLayout = 0;
 };

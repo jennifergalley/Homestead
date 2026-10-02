@@ -7,7 +7,7 @@
 #include "HomesteadEstateTerrain.h"
 #include "Materials/MaterialInterface.h"
 
-DEFINE_LOG_CATEGORY_STATIC(LogHomesteadGround, Log, All);
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadGrassField, Log, All);
 
 namespace
 {
@@ -55,7 +55,7 @@ bool UHomesteadGrassField::LoadAssets()
         UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, *Path);
         if (!Mesh)
         {
-            UE_LOG(LogHomesteadGround, Warning, TEXT("Estate grass mesh missing: %s. Run Scripts/Terrain/build_ground.py."), *Path);
+            UE_LOG(LogHomesteadGrassField, Warning, TEXT("Estate grass mesh missing: %s. Run Scripts/Terrain/build_ground.py."), *Path);
             return false;
         }
         Meshes.Add(Mesh);
@@ -63,7 +63,7 @@ bool UHomesteadGrassField::LoadAssets()
     Material = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/SurvivalGame/Estate/Ground/MI_EstateGrass.MI_EstateGrass"));
     if (!Material)
     {
-        UE_LOG(LogHomesteadGround, Warning, TEXT("MI_EstateGrass is missing. Run Scripts/Terrain/build_ground.py."));
+        UE_LOG(LogHomesteadGrassField, Warning, TEXT("MI_EstateGrass is missing. Run Scripts/Terrain/build_ground.py."));
         return false;
     }
     bAssetsReady = true;

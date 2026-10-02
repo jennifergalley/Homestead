@@ -1,6 +1,7 @@
 // The general store in the game: its building and shopkeeper actors, the interaction focus, the
 // shop screen and the wallet readout. Trading itself is Simulation::Sell / Simulation::Buy.
 #include "HomesteadController.h"
+#include "Simulation/HomesteadAudioLevels.h"
 
 #include "HomesteadCharacter.h"
 #include "HomesteadGeneralStore.h"
@@ -10,6 +11,8 @@
 #include "Engine/GameViewportClient.h"
 #include "Framework/Application/SlateApplication.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadShop, Log, All);
 
 namespace
 {
@@ -41,7 +44,7 @@ void AHomesteadController::OpenShopScreen(int32 ShopId, bool bGreet)
     if (!Shop || !GEngine || !GEngine->GameViewport) return;
     if (!Homestead::IsShopOpen(*Shop, State().hour))
     {
-        Notify(ShopText(Homestead::ClosedMessage(*Shop)), true);
+        Notify(ShopText(Homestead::ClosedMessage(*Shop, State().hour)), true);
         return;
     }
     if (bBookOpen) CloseBook();
@@ -64,7 +67,7 @@ void AHomesteadController::OpenShopScreen(int32 ShopId, bool bGreet)
     Mode.SetHideCursorDuringCapture(false);
     Mode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
     SetInputMode(Mode);
-    PlayEffect(UIClick, 0.08f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
     UE_LOG(LogTemp, Display, TEXT("SHOP_OPEN shop=%d greeted=%d purse=%lld"), ShopId, bGreet ? 1 : 0,
         static_cast<long long>(State().money));
 }
@@ -77,12 +80,14 @@ void AHomesteadController::CloseShopScreen()
     FlushPressedKeys();
     bShowMouseCursor = false;
     SetInputMode(FInputModeGameOnly());
-    PlayEffect(UIClick, 0.08f);
+    PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
 }
 
 Homestead::Result AHomesteadController::ShopTrade(int32 ShopId, Homestead::Item Item, int32 Quantity, bool bSell,
     bool bHeroineStock)
 {
+    if (RejectPendingGroundSnapAction())
+        return {false, "Still finding your footing. Wait a moment.", Homestead::ResultCode::Unavailable, Sim.GetRevision()};
     const int64 Before = State().money;
     const auto Result = bSell ? Sim.Sell(ShopId, Item, Quantity, PlayerPoint())
         : Sim.Buy(ShopId, Item, Quantity, bHeroineStock, PlayerPoint());
@@ -93,13 +98,30 @@ Homestead::Result AHomesteadController::ShopTrade(int32 ShopId, Homestead::Item 
     {
         LastWalletDelta = State().money - Before;
         WalletDeltaRemaining = 3.0f;
-        PlayEffect(bSell ? WoodTapA : WoodTapB, 0.35f);
-        if (!bSell) PinNewSeed(Item);
+        PlayEffect(bSell ? WoodTapA : WoodTapB, Homestead::AudioLevels::Gain::ShopSale);
+        // Bought goods land in the first empty hotbar cell, else below it (HomesteadPackRow.h).
     }
     return Result;
 }
 
-void AHomesteadController::ShopClick() { PlayEffect(UIClick, 0.05f); }
+Homestead::Result AHomesteadController::ShopBuyBackpack(int32 ShopId)
+{
+    if (RejectPendingGroundSnapAction())
+        return {false, "Still finding your footing. Wait a moment.", Homestead::ResultCode::Unavailable, Sim.GetRevision()};
+    const int64 Before = State().money;
+    const auto Result = Sim.BuyBackpack(ShopId, PlayerPoint());
+    UE_LOG(LogTemp, Display, TEXT("SHOP_TRADE upgrade item=leather-backpack ok=%d purse=%lld capacity=%d message=\"%s\""),
+        Result.ok ? 1 : 0, static_cast<long long>(State().money), Sim.PackCapacity(), *ShopText(Result.message));
+    if (Result.ok)
+    {
+        LastWalletDelta = State().money - Before;
+        WalletDeltaRemaining = 3.0f;
+        PlayEffect(WoodTapB, Homestead::AudioLevels::Gain::ShopSale);
+    }
+    return Result;
+}
+
+void AHomesteadController::ShopClick() { PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint); }
 
 void AHomesteadController::NoteShopDevice(bool bPad)
 {
@@ -131,7 +153,7 @@ void AHomesteadController::SyncStores()
         auto* Store = GetWorld()->SpawnActor<AHomesteadGeneralStore>(Parameters);
         if (!Store) continue;
         Store->Build(Shop.id, FVector2D(Shop.counterX, Shop.counterY), static_cast<float>(Shop.counterYaw),
-            [this](float X, float Y) { return GroundHeight(X, Y); }, TEXT("CLOSED\nopens at ") + ShopText(Homestead::FormatHour(Shop.openHour)));
+            [this](float X, float Y) { return GroundHeight(X, Y); }, ShopText(Homestead::ClosedSignText(Shop, State().hour)));
         Stores.Add(Store);
         UE_LOG(LogTemp, Display, TEXT("STORE_BUILT shop=%d counter=(%.0f, %.0f) yaw=%.0f"), Shop.id, Shop.counterX, Shop.counterY,
             Shop.counterYaw);
@@ -151,7 +173,12 @@ void AHomesteadController::TickStores(float DeltaSeconds)
     const FVector Heroine = GetPawn() ? GetPawn()->GetActorLocation() : FVector(1e9);
     for (const auto& Store : Stores)
         if (const Homestead::Shop* Shop = Store ? Sim.FindShop(Store->GetShopId()) : nullptr)
-            Store->SetOpen(Homestead::IsShopOpen(*Shop, State().hour), Heroine);
+        {
+            const bool bOpen = Homestead::IsShopOpen(*Shop, State().hour);
+            Store->SetOpen(bOpen, Heroine);
+            // The board names the day it reopens (a Sunday, or a Saturday evening); SetText only on a change.
+            if (!bOpen) Store->SetClosedText(ShopText(Homestead::ClosedSignText(*Shop, State().hour)));
+        }
 }
 
 void AHomesteadController::ConsiderStoreFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const
@@ -182,12 +209,56 @@ FString AHomesteadController::StoreFocusTitle() const
     return FString(AHomesteadShopkeeper::DisplayName()) + TEXT("  |  General store");
 }
 
+namespace ShopWait
+{
+// How long the "Wait until ...?" question stays up, and how soon a second press may answer it (so a
+// bounced or doubled press can't confirm by accident), in real seconds.
+constexpr double AskSeconds = 8.0;
+constexpr double MinAnswerSeconds = 0.35;
+// "13 h", "1 h 30 min", "45 min".
+FString Duration(double Hours)
+{
+    const int32 Minutes = FMath::Max(1, FMath::RoundToInt(Hours * 60.0));
+    if (Minutes < 60) return FString::Printf(TEXT("%d min"), Minutes);
+    const int32 Whole = Minutes / 60, Rest = Minutes % 60;
+    return Rest ? FString::Printf(TEXT("%d h %d min"), Whole, Rest) : FString::Printf(TEXT("%d h"), Whole);
+}
+}
+
+bool AHomesteadController::IsShopWaitArmed() const
+{
+    return WaitShopId != INDEX_NONE && Focus == EFocus::StoreDoor && FocusId == WaitShopId
+        && FPlatformTime::Seconds() - WaitAskedAt < ShopWait::AskSeconds;
+}
+
+bool AHomesteadController::CancelShopWait()
+{
+    const bool bArmed = IsShopWaitArmed();
+    WaitShopId = INDEX_NONE;
+    return bArmed;
+}
+
 FString AHomesteadController::StoreFocusActions() const
 {
     const Homestead::Shop* Shop = Sim.FindShop(FocusId);
     if (!Shop) return FString();
-    if (Focus == EFocus::StoreDoor) return ShopText(Homestead::ClosedMessage(*Shop));
-    return (bGamepad ? TEXT("[A]") : TEXT("[E]")) + FString(TEXT(" Talk to ")) + AHomesteadShopkeeper::DisplayName();
+    const FString A = bGamepad ? TEXT("[A]") : TEXT("[E]");
+    if (Focus == EFocus::StoreDoor)
+    {
+        // Across a closed day there's no waiting at the door: just when it opens.
+        if (!Homestead::CanWaitForShop(*Shop, State().hour)) return ShopText(Homestead::ClosedMessage(*Shop, State().hour));
+        const FString Opens = ShopText(Homestead::FormatHour(Shop->openHour));
+        const double Wait = Homestead::HoursUntilOpen(*Shop, State().hour);
+        // Past midnight is a night out in the street; say so before she agrees.
+        const bool bOvernight = FMath::Fmod(State().hour, 24.0) + Wait >= 24.0;
+        const FString Hours = ShopWait::Duration(Wait) + (bOvernight ? TEXT(", overnight,") : TEXT(""));
+        if (IsShopWaitArmed())
+            return FString::Printf(TEXT("Wait %s until %s?   %s Wait   %s Cancel"), *Hours, *Opens, *A,
+                bGamepad ? TEXT("[B]") : TEXT("[Esc]"));
+        return ShopText(Homestead::ClosedMessage(*Shop, State().hour)) + TEXT("   ") + A + TEXT(" Wait until ") + Opens
+            + TEXT(" (") + ShopWait::Duration(Wait) + TEXT(")");
+    }
+    return A + FString(TEXT(" Talk to ")) + AHomesteadShopkeeper::DisplayName();
 }
 
 void AHomesteadController::InteractWithStore()
@@ -196,7 +267,28 @@ void AHomesteadController::InteractWithStore()
     if (!Shop) return;
     if (Focus == EFocus::StoreDoor || !Homestead::IsShopOpen(*Shop, State().hour))
     {
-        Notify(ShopText(Homestead::ClosedMessage(*Shop)), true);
+        if (Focus != EFocus::StoreDoor) { Notify(ShopText(Homestead::ClosedMessage(*Shop, State().hour)), true); return; }
+        // Nothing to wait for across a closed day: E says when it opens (WaitForShop's refusal).
+        if (!Homestead::CanWaitForShop(*Shop, State().hour))
+        {
+            WaitShopId = INDEX_NONE;
+            Notify(ShopText(Sim.WaitForShop(FocusId, PlayerPoint()).message), true);
+            return;
+        }
+        if (!IsShopWaitArmed())
+        {
+            // First press asks; the prompt shows the question and how to answer it.
+            WaitShopId = FocusId;
+            WaitAskedAt = FPlatformTime::Seconds();
+            PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
+            return;
+        }
+        if (FPlatformTime::Seconds() - WaitAskedAt < ShopWait::MinAnswerSeconds) return;
+        const int32 ShopId = WaitShopId;
+        WaitShopId = INDEX_NONE;
+        const auto Result = Sim.WaitForShop(ShopId, PlayerPoint());
+        Notify(ShopText(Result.message), !Result.ok);
+        if (Result.ok) UE_LOG(LogHomesteadShop, Log, TEXT("Waited for shop %d; now hour %.2f."), ShopId, State().hour);
         return;
     }
     OpenShopScreen(Shop->id);
@@ -204,6 +296,7 @@ void AHomesteadController::InteractWithStore()
 
 void AHomesteadController::HomesteadOpenStore()
 {
+    if (RejectPendingGroundSnapAction()) return;
     const APawn* Heroine = GetPawn();
     if (!Heroine) return;
     const float Yaw = Heroine->GetActorRotation().Yaw;
@@ -218,10 +311,11 @@ void AHomesteadController::HomesteadOpenStore()
         *ShopText(Homestead::FormatMoney(State().money))) : ShopText(Result.message), !Result.ok);
 }
 
-void AHomesteadController::HomesteadMoney(int32 Cents)
+void AHomesteadController::HomesteadMoney(int32 Coins)
 {
+    if (RejectPendingGroundSnapAction()) return;
     const int64 Before = State().money;
-    const auto Result = Sim.GrantMoney(Cents);
+    const auto Result = Sim.GrantMoney(Coins);
     if (Result.ok) { LastWalletDelta = State().money - Before; WalletDeltaRemaining = 3.0f; }
     Notify(Result.ok ? FString::Printf(TEXT("Purse: %s"), *ShopText(Homestead::FormatMoney(State().money))) : ShopText(Result.message),
         !Result.ok);

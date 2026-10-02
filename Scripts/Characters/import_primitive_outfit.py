@@ -6,8 +6,13 @@ Run in the editor (MCP run_python):
 
 Imports SKM_PrimitiveOutfit.fbx (tank top + shorts, two material slots) as a skeletal mesh on
 metahuman_base_skel, its 4K textures (OpenGL normals flipped to Unreal's convention) and one
-M_PropTextured instance per garment, into /Game/Characters/Heroine_MH/Assembled/Heroine/PrimitiveOutfit.
+M_HomespunDyeable instance per garment, into /Game/Characters/Heroine_MH/Assembled/Heroine/PrimitiveOutfit.
+M_HomespunDyeable is M_PropTextured with a "Tint" vector (default white) multiplying the base colour,
+which AHomesteadCharacter::ApplyMetaHumanTunicDye sets for the dyed linen tunic.
 AHomesteadCharacter wears it over the un-culled body (BodyFull) when it exists.
+
+To re-parent the existing instances without reimporting the mesh or textures, set
+REPARENT_ONLY = True before exec.
 """
 import importlib.util
 import json
@@ -23,6 +28,7 @@ LIB = unreal.EditorAssetLibrary
 TOOLS = unreal.AssetToolsHelpers.get_asset_tools()
 EDIT = unreal.MaterialEditingLibrary
 GARMENTS = {"M_PrimitiveTankTop": "T_PrimitiveTankTop", "M_PrimitiveShorts": "T_PrimitiveShorts"}
+DYEABLE_PARENT = f"{DEST}/M_HomespunDyeable"
 
 
 def _props():
@@ -65,9 +71,43 @@ def _import_mesh():
     return mesh
 
 
+def dyeable_parent(props):
+    """M_PropTextured with BaseColorTexture multiplied by a "Tint" vector parameter (white = undyed)."""
+    if LIB.does_asset_exist(DYEABLE_PARENT):
+        return LIB.load_asset(DYEABLE_PARENT)
+    source = props.textured_parent()
+    material = LIB.duplicate_asset(source.get_path_name(), DYEABLE_PARENT)
+    if not isinstance(material, unreal.Material):
+        raise RuntimeError("Could not create " + DYEABLE_PARENT)
+    albedo = EDIT.get_material_property_input_node(material, unreal.MaterialProperty.MP_BASE_COLOR)
+    if not albedo:
+        raise RuntimeError(DYEABLE_PARENT + " has no base colour input to tint")
+    tint = EDIT.create_material_expression(material, unreal.MaterialExpressionVectorParameter, -500, -760)
+    tint.set_editor_property("parameter_name", "Tint")
+    tint.set_editor_property("default_value", unreal.LinearColor(1, 1, 1, 1))
+    multiply = EDIT.create_material_expression(material, unreal.MaterialExpressionMultiply, -220, -500)
+    if not (EDIT.connect_material_expressions(albedo, "RGB", multiply, "A")
+            and EDIT.connect_material_expressions(tint, "", multiply, "B")
+            and EDIT.connect_material_property(multiply, "", unreal.MaterialProperty.MP_BASE_COLOR)):
+        raise RuntimeError("Could not wire the Tint in " + DYEABLE_PARENT)
+    EDIT.recompile_material(material)
+    props.save(material)
+    return material
+
+
+def reparent_instances(props):
+    parent = dyeable_parent(props)
+    for name in GARMENTS:
+        instance = LIB.load_asset(f"{DEST}/MI_{name[2:]}")
+        EDIT.set_material_instance_parent(instance, parent)
+        EDIT.update_material_instance(instance)
+        props.save(instance)
+    print(json.dumps({"parent": parent.get_path_name(), "instances": [f"MI_{n[2:]}" for n in GARMENTS]}))
+
+
 def run():
     props = _props()
-    parent = props.textured_parent()
+    parent = dyeable_parent(props)
     mesh = _import_mesh()
     materials = mesh.materials
     for index, slot in enumerate(materials):
@@ -97,4 +137,7 @@ def run():
     return result
 
 
-run()
+if globals().get("REPARENT_ONLY"):
+    reparent_instances(_props())
+else:
+    run()

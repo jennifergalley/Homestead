@@ -79,10 +79,13 @@ POLE_R = {
     'back': (-75.0, -15.0, 135.0), 'strike': (-45.0, 15.0, 72.0), 'bite': (-45.0, 15.0, 70.0),
     'rock': (-50.0, 10.0, 76.0), 'recover': (-55.0, -5.0, 85.0), 'end': (-60.0, -10.0, 90.0),
 }
+# The knob hand's elbow rides 15 cm further forward and up than the swing's geometry alone suggests: with
+# KNOB_ROLL that balances its wrist flexion (99 degrees before, 77 now) against the forearm's supination and
+# the shoulder's internal rotation, which go past their limits if the elbow rides any higher (joint_limits).
 POLE_L = {
-    'stand': (60.0, -10.0, 90.0), 'address': (45.0, 15.0, 75.0), 'lift': (30.0, 30.0, 100.0),
-    'back': (20.0, 40.0, 105.0), 'strike': (40.0, 20.0, 72.0), 'bite': (40.0, 20.0, 70.0),
-    'rock': (45.0, 15.0, 76.0), 'recover': (60.0, -5.0, 85.0), 'end': (60.0, -10.0, 90.0),
+    'stand': (60.0, -10.0, 90.0), 'address': (45.0, 30.0, 90.0), 'lift': (30.0, 45.0, 115.0),
+    'back': (20.0, 55.0, 120.0), 'strike': (40.0, 35.0, 87.0), 'bite': (40.0, 35.0, 85.0),
+    'rock': (45.0, 30.0, 91.0), 'recover': (60.0, 10.0, 100.0), 'end': (60.0, -10.0, 90.0),
 }
 # Pelvis offset (cm), torso twist (deg, + turns her chest to her right) and forward lean (deg).
 # The backswing winds the chest and hips to her right over the back (right) foot; the strike drives
@@ -93,6 +96,15 @@ BODY = {
     'rock': ((2, 5, -12), -16, 20), 'recover': ((0, 3, -7), -6, 8), 'end': ((0, 0, 0), 0, 0),
 }
 TWIST_SIGN = 1
+# Each fist's roll about the haft (deg, right-handed about the haft toward the head) away from
+# knuckles-along-the-edge. Keeping the knuckles on the edge folded her wrists 115-155 degrees
+# back on the forearm (the anatomy audit's AxeFell wrist breaks): the haft lies diagonally across
+# a real fist, so the hand turns on it to stay in line with the forearm. The knob hand keeps one
+# roll throughout because the game reads the edge from its knuckles (KnobRollDegrees in
+# HomesteadCharacterEquipment.cpp undoes it); the right fist rolls further on the backswing.
+KNOB_ROLL = 90.0
+ROLL_R = {'address': -30.0, 'lift': -90.0, 'back': -90.0, 'strike': -30.0, 'bite': -30.0,
+          'rock': -30.0, 'recover': 0.0}
 # Left foot leads (toward the trunk), right foot back, as for a right-shoulder swing.
 FOOT_L_FORWARD = (14.0, 17.0, 8.6)
 FOOT_R_BACK = (-16.0, -8.0, 8.6)
@@ -125,6 +137,13 @@ def edge_for(haft):
         n = n * -1.0
     e = n.cross(h)
     return (e - h * e.dot(h)).normal()
+
+
+def rolled(edge, haft, degrees):
+    """``edge`` turned ``degrees`` about ``haft`` (Rodrigues; ``haft`` is a unit vector)."""
+    t = math.radians(degrees)
+    return (edge * math.cos(t) + haft.cross(edge) * math.sin(t)
+            + haft * (haft.dot(edge) * (1.0 - math.cos(t)))).normal()
 
 
 class Hand:
@@ -182,9 +201,10 @@ def build():
         centre, haft, slide = GRIP[name]
         h = _norm(haft)
         e = edge_for(h)
-        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist(centre, h, e), left.turn(h, e))
+        e_l, e_r = rolled(e, h, KNOB_ROLL), rolled(e, h, ROLL_R[part])
+        s.key_world(frame, 'hand_l_ik_ctrl', left.wrist(centre, h, e_l), left.turn(h, e_l))
         top = _vec(centre) + h * slide
-        s.key_world(frame, 'hand_r_ik_ctrl', right.wrist((top.x, top.y, top.z), h, e), right.turn(h, e))
+        s.key_world(frame, 'hand_r_ik_ctrl', right.wrist((top.x, top.y, top.z), h, e_r), right.turn(h, e_r))
     # Stance: step the left foot toward the trunk and set the right back, then return.
     s.key_world(F['stand'], 'foot_l_ik_ctrl', kg.FOOT_L)
     s.key_world(5, 'foot_l_ik_ctrl', kg._add(kg.FOOT_L, (1, 9, 6)))

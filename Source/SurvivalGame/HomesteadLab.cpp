@@ -1,4 +1,5 @@
 #include "HomesteadLab.h"
+#include "Simulation/HomesteadAudioLevels.h"
 
 #include "Animation/AnimSequence.h"
 #include "Components/DirectionalLightComponent.h"
@@ -564,7 +565,7 @@ void AHomesteadLabController::PlayFootstep(bool bLeftFoot, bool bRun)
     if (Pool.Num() > 1 && Pick == LastStep) Pick = (Pick + 1) % Pool.Num();
     LastStep = Pick;
     // Same levels as the game at its default 80% effects volume.
-    UGameplayStatics::PlaySound2D(this, Pool[Pick].Get(), 0.8f * (bRun ? 0.07f : 0.04f) * FMath::FRandRange(0.85f, 1.15f),
+    UGameplayStatics::PlaySound2D(this, Pool[Pick].Get(), 0.8f * (bRun ? Homestead::AudioLevels::Gain::FootstepRun : Homestead::AudioLevels::Gain::FootstepWalk) * FMath::FRandRange(0.85f, 1.15f),
         FMath::FRandRange(0.96f, 1.04f));
 }
 
@@ -583,15 +584,16 @@ void AHomesteadLabHUD::DrawHUD()
     if (Avatar)
     {
         const FVector P = Avatar->GetActorLocation();
-        Lines.Add(FString::Printf(TEXT("Speed %.0f cm/s   Sprint %s   Pos %.0f, %.0f, %.0f"),
-            Avatar->GetVelocity().Size2D(), Avatar->IsSprinting() ? TEXT("on") : TEXT("off"), P.X, P.Y, P.Z));
+        Lines.Add(FString::Printf(TEXT("Speed %.0f cm/s   Sprint %s (%s)   Pos %.0f, %.0f, %.0f"),
+            Avatar->GetVelocity().Size2D(), Avatar->IsSprintOn() ? TEXT("on") : TEXT("off"),
+            Avatar->IsSprinting() ? TEXT("running") : TEXT("not running"), P.X, P.Y, P.Z));
     }
     if (Anim)
         Lines.Add(FString::Printf(TEXT("Walk %.2f  Sprint %.2f  Action %.2f   Foot placement %s"),
             Anim->WalkWeight(), Anim->SprintWeight(), Anim->ActionWeight(),
             Feet && Feet->GetInt() ? TEXT("on") : TEXT("off")));
     Lines.Add(FString::Printf(TEXT("Frame %.1f ms   Sun %.1f h"), SmoothedFrameMs, Lab && Lab->LabWorld() ? Lab->LabWorld()->SunHour() : 0.0f));
-    Lines.Add(TEXT("Move WASD / left stick   Sprint Shift / L3   Look mouse / right stick   Zoom wheel"));
+    Lines.Add(TEXT("Move WASD / left stick   Sprint toggle Shift / L3   Look mouse / right stick   Zoom wheel"));
     Lines.Add(TEXT("Console: LabAction Gather|Sticks|Stones|Roots|Berries|Reeds|Eat|Craft|Water|Fill|Chop|Knife|Till|Machete|Fell   LabHold <tool>|None   LabLoop <action>|Off   LabProp Sticks|Stones|Roots|Berries|Reeds|None   LabSun <hour>   LabCourse   LabTeleport <x> <y>   slomo <rate>"));
     float Y = 24.0f * Scale;
     for (const FString& Line : Lines)

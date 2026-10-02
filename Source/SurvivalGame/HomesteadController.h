@@ -1,17 +1,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Simulation/HomesteadAudioLevels.h"
 #include "GameFramework/PlayerController.h"
 #include "Simulation/HomesteadSimulation.h"
+#include "Simulation/HomesteadHoldings.h"
+#include "Simulation/HomesteadTravel.h"
 #include "HomesteadAppearance.h"
 #include "HomesteadSaveRouting.h"
 #include "HomesteadPromptIntent.h"
 #include "HomesteadMusicPlaylist.h"
+#include "UI/HomesteadHudTiming.h"
 #include "Styling/SlateBrush.h"
+#include "Templates/UniquePtr.h"
 #include "HomesteadController.generated.h"
 
 class AHomesteadWorld;
+class AActor;
 class UHomesteadSave;
+class UWorldPartitionStreamingSourceComponent;
 class UAudioComponent;
 class USoundBase;
 namespace HomesteadMenus { class SHomesteadMenu; }
@@ -20,6 +27,7 @@ namespace HomesteadMenus { class SHomesteadHotbar; }
 using SHomesteadHotbar = HomesteadMenus::SHomesteadHotbar;
 namespace HomesteadMenus { class SHomesteadShop; }
 class AHomesteadGeneralStore;
+class AHomesteadRoadSign;
 namespace HomesteadMenus { class SHomesteadNames; class SHomesteadArrival; }
 class IInputProcessor;
 class AHomesteadMenuPortrait;
@@ -44,10 +52,16 @@ struct FHomesteadRow
     int32 Quantity = 0;
     FString Name;
     FString Location;
+    // A short state shown after the selected item's name in the pack's footer ("Water 5 / 15").
+    FString Status;
+    // The hotbar cell (0-9) holding this pack row, the first row of her pack; INDEX_NONE below it.
+    int32 HotbarCell = INDEX_NONE;
     FName Icon;
     FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
     Homestead::RecipeAssessment RecipeState;
     bool HasRecipeState = false;
+    // A build plan's conditions beyond its materials ("Foundation required"), listed under them.
+    TArray<FString> Conditions;
 };
 
 struct FHomesteadHotbarSlot
@@ -57,9 +71,13 @@ struct FHomesteadHotbarSlot
     bool Assigned = false;
     bool Available = false;
     bool Selected = false;
-    // Food pinned to the hotbar: left-click eats one. Count is how many are in the pack.
+    // Food in the cell: left-click eats one. Count is the cell's stack.
     bool Food = false;
     int32 Count = 0;
+    // A material (or anything else that isn't a tool, food or seed): shows its count, does nothing.
+    bool Material = false;
+    // A garment carried in the cell (Tool stays Item::Count).
+    bool Garment = false;
     FName Icon;
     // A level shown as a thin bar along the slot's foot (the lamp's oil), 0-1; negative for none.
     float Fill = -1.0f;
@@ -93,7 +111,6 @@ public:
     const FHomesteadAppearance& GetAppearance() const { return Appearance; }
     bool HasHeroine() const;
     const Homestead::State& State() const { return Sim.GetState(); }
-    Homestead::Result SpendSprintEnergy(double RealSeconds);
     const Homestead::Simulation& Simulation() const { return Sim; }
     int32 BookPage() const { return Page; }
     int32 SelectedRow() const { return Selection; }
@@ -102,12 +119,30 @@ public:
     void MenuInventoryView(int32 View);
     int32 InventoryView() const { return MenuInventoryViewIndex; }
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
+    // Walking the public road to the manor or town (HomesteadControllerTravel.cpp): the preview from
+    // where she stands, and the walk itself (the clock runs for its length; she's stood at the end).
+    Homestead::TravelPlan MenuPlanTravel(Homestead::TravelDestination Destination) const;
+    bool MenuTravel(Homestead::TravelDestination Destination, uint64 ExpectedRevision);
+    // Whether she's in a state to set out at all (her body is there and settled on the ground).
+    bool CanSetOut() const;
+    // The dye chooser's live preview: shows her wearing the garment in `Dye` through the real wardrobe
+    // path without changing anything saved; MenuEndDyePreview puts her own clothes back.
+    bool MenuPreviewDye(int32 WearableId, int32 Dye);
+    void MenuEndDyePreview();
+    // The Appearance page's camera (orbit in degrees, zoom in wheel steps); nothing outside it.
+    void MenuOrbitAppearance(float Yaw, float Pitch);
+    void MenuZoomAppearance(float Steps);
     bool MenuSplitHalf(const FHomesteadRow& Row);
     // Moves a whole stack or garment between the pack and the open chest (as much as fits).
     bool MenuMoveWhole(const FHomesteadRow& Row);
     // The menu row for one owned garment wherever it is (worn, carried or stored).
     bool MenuWearableRow(int32 WearableId, FHomesteadRow& Out) const;
     bool MenuSortPack();
+    // The open chest (HomesteadControllerChests.cpp): its name ("Storage chest" until she names it),
+    // auto-store onto its matching stacks, and naming it (empty puts the default back).
+    FString ChestDisplayName(int32 ChestId) const;
+    bool MenuStoreMatching();
+    bool MenuRenameChest(const FString& Name);
     bool MenuDrop(const FHomesteadRow& Source, const FHomesteadRow& Target, uint64 ExpectedRevision);
     bool OpenChestStorage(int32 ChestId);
     TOptional<int32> ActiveStorageChest() const { return ActiveChestId; }
@@ -127,20 +162,25 @@ public:
     bool IsHintRetired(const FString& Verb) const;
     int32 HintUseCount(const FString& Verb) const;
     void ResetActionHints();
+    // The top-left controls strip shows for its first minute on screen (UI/HomesteadHudTiming.h).
+    bool ShowsControlsHint() const { return ControlsHint.Showing(); }
+    double ControlsHintSecondsLeft() const { return ControlsHint.Remaining(); }
+    bool IsControlsHintOnScreen() const;
     bool IsResourceFocused(int32 Id) const { return Focus == EFocus::Resource && FocusId == Id; }
     FString Toast() const { return ToastRemaining > 0 ? ToastText : FString(); }
+    // Seconds the current toast has left, and a count of Notify calls (tells a repeated message apart).
+    float ToastSecondsLeft() const { return ToastRemaining; }
+    uint32 NoticeCount() const { return NoticeSerial; }
     FString PlacementLabel() const;
     // Whether the preview snaps, stands free, or why it can't be built there.
     FString PlacementStatus() const;
-    // The bed's choices (Homestead::SleepOptions) for her Energy now, and the one the prompt shows:
-    // the default first, or what she picked with the D-pad (Up/Down) while at this bed.
-    std::vector<Homestead::SleepOption> BedSleepOptions() const;
-    int32 BedSleepIndex() const;
+    // The single bed action for her current Energy and time of day.
+    std::optional<Homestead::SleepOption> BedSleepOffer() const;
     double BedSleepHours() const;
-    // "Sleep until morning (wake 06:45)", "Sleep until rested (wake ~14:30)", "Nap 1 h (wake 23:15)".
-    static FString SleepOptionLabel(const Homestead::SleepOption& Option);
     FString PreviewLabel() const;
     bool ToastIsError() const { return bToastError; }
+    // A short HUD notice from outside the controller (the vitals stack's low-Energy warnings).
+    void PostHudNotice(const FString& Text, bool bWarning) { Notify(Text, bWarning); }
     Homestead::Point PlayerPoint() const;
     float GroundHeight(float X, float Y) const;
     bool PrepareWorldAt(Homestead::Point Position);
@@ -171,7 +211,7 @@ public:
     bool MenuPhysicalInput(FKey Key, EInputEvent Event, float Amount = 1);
     bool MenuPointerButtonIntent(FKey Key);
     bool MenuPointerIntent(float X, float Y);
-    bool MenuAcceptsPhysicalInput() const { return !bAutomatedInputOnly || bSimulatedMenuEvent; }
+    bool MenuAcceptsPhysicalInput() const { return !bPendingGroundSnap && (!bAutomatedInputOnly || bSimulatedMenuEvent); }
     FString MenuSaveStatus() const;
     FString MenuLastError() const { return ToastText; }
     bool MenuNeedsTestReset() const { return bTestResetRequired; }
@@ -200,12 +240,29 @@ public:
     int32 SelectedHotbarIndex() const { return SelectedHotbarSlot; }
     void SelectHotbarSlot(int32 Index);
     void CycleHotbar(int32 Direction);
-    // Tools and food can be pinned to the hotbar from the pack.
-    static bool CanPinToHotbar(Homestead::Item Item);
-    bool IsPinnedToHotbar(Homestead::Item Item) const;
-    bool TogglePinnedToHotbar(Homestead::Item Item);
-    // Pins newly bought or given crop seed to a free hotbar slot (no-op if pinned or full).
-    void PinNewSeed(Homestead::Item Item);
+    // The hotbar is the first row of her pack, as in Coral Island (Simulation/HomesteadPackRow.h):
+    // ten cells holding her real carried stacks, no pins. The item in a cell (Item::Count when empty
+    // or holding a garment), the carried entry itself, and the first cell holding an item.
+    Homestead::Item HotbarItem(int32 Cell) const;
+    const Homestead::LayoutEntry* HotbarEntry(int32 Cell) const;
+    int32 HotbarCellOf(Homestead::Item Item) const;
+    int32 FirstEmptyHotbarCell() const;
+    // The field book's hotbar (HomesteadControllerHotbarEditor.cpp): put a pack or chest row in a
+    // cell (onto an empty cell it moves, onto the same item it merges, else the two swap), move one
+    // cell onto another, or move a cell's stack below the row (onto a stack there, or to the end
+    // with no target). Stock is only ever moved, and the selected cell index stays where it is.
+    // False (with an explanatory notice) when refused.
+    bool MenuPlaceInHotbar(const FHomesteadRow& Row, int32 Cell);
+    bool MenuMoveHotbarSlot(int32 From, int32 To);
+    bool MenuMoveHotbarToPack(int32 Cell, const FHomesteadRow* Target);
+    // The menu row for what `Cell` holds; false when it is empty.
+    bool MenuHotbarRow(int32 Cell, FHomesteadRow& Out) const;
+    // The menu row for one layout entry of `Container` (0 = her pack); false for the pail's hidden water.
+    bool MenuEntryRow(const Homestead::LayoutEntry& Entry, int32 Container, FHomesteadRow& Row) const;
+    // Moves her first stack of `Item` into the first empty cell if it isn't in the row (with the row full,
+    // onto the selected cell, swapping), and selects its cell, as a player would (tests, the UI gallery).
+    // False when she has none in her pack.
+    bool ChooseOnHotbar(Homestead::Item Item);
     // Seed pouch: a hotbar slot holding sowing seed steps through every seed type in her pack
     // (D-pad up/down, or Q / Shift+Q), so one slot carries them all. Returns false when the selected
     // slot isn't seed, so the D-pad can do its other jobs.
@@ -268,6 +325,8 @@ public:
     void CloseShopScreen();
     // One Sell or Buy at the shop's counter; shows the wallet delta on success.
     Homestead::Result ShopTrade(int32 ShopId, Homestead::Item Item, int32 Quantity, bool bSell, bool bHeroineStock);
+    // The one-time leather backpack (Simulation/HomesteadBackpack.h).
+    Homestead::Result ShopBuyBackpack(int32 ShopId);
     void ShopClick();
     void NoteShopDevice(bool bPad);
     // The name she gave the estate ("the estate" in woodland games), for "From {Estate}" and toasts.
@@ -275,18 +334,36 @@ public:
     // The signed change of the last trade and how visible its readout still is (1 fresh, 0 gone).
     int64 WalletDelta() const { return LastWalletDelta; }
     float WalletDeltaAlpha() const { return FMath::Clamp(WalletDeltaRemaining / 1.0f, 0.0f, 1.0f); }
+    // What the last meal from the hotbar actually added to food and energy (after caps), for the
+    // vitals' "+N" popups; Serial counts meals so a repeat of the same gain still shows.
+    struct FMealGain { double Food = 0, Energy = 0; uint32 Serial = 0; };
+    const FMealGain& LastMealGain() const { return MealGain; }
+    // Items she has just gained (gathered, harvested, crafted, bought; not moved out of a chest or
+    // picked back up), for the "+3 Berries" popup beside her (HomesteadControllerPickups.cpp,
+    // UI/SHomesteadPickups). Shown is how long each has been on screen, in real seconds.
+    struct FPickup { Homestead::Item Item = Homestead::Item::Count; int32 Amount = 0; float Shown = 0.0f; };
+    const TArray<FPickup>& RecentPickups() const { return Pickups; }
+    bool PickupsVisible() const;
+    // Where the popup hangs from: her upper body projected to the viewport, in pixels.
+    bool PickupAnchor(FVector2D& Pixel, FVector2D& ViewportPixels) const;
+    // Sprint was asked for (or ran out) with too little Energy: a gentle notice, not a failure.
+    void SprintTooTired();
+    // Keyboard sprint: a tap of Shift toggles it on release, unless Shift was a modifier (Shift+Q,
+    // Shift+click) meanwhile. Movement keys don't count, so Shift+W still toggles.
+    void TrackSprintShift(const FInputKeyEventArgs& Params);
+    // The selected hotbar slot's food, even when she has none left (Item::Count if it isn't food).
+    Homestead::Item SelectedHotbarFood() const;
     // Console playtest aid: open the general store on the ground ahead of her (moving it if it exists).
     UFUNCTION(Exec) void HomesteadOpenStore();
-    // Console playtest aid: add (or with a negative amount remove) cents from her purse.
-    UFUNCTION(Exec) void HomesteadMoney(int32 Cents = 1000);
+    // Console playtest aid: add (or with a negative amount remove) coins from her purse.
+    UFUNCTION(Exec) void HomesteadMoney(int32 Coins = 1000);
     // Playtest aid: set her Energy (0-100), e.g. to try dozing off or the bed's "until rested".
     UFUNCTION(Exec) void HomesteadEnergy(float Energy = 100.0f);
     // Playtest aid: tip the water out of her pail, e.g. to try filling it at the river again.
     UFUNCTION(Exec) void HomesteadEmptyPail();
     // Playtest aids for the bed (stand beside one): sleep with choice N as listed in the prompt (-1 =
     // the one shown), or step the shown choice by Delta, as Up/Down (D-pad) do.
-    UFUNCTION(Exec) void HomesteadSleep(int32 Option = -1);
-    UFUNCTION(Exec) void HomesteadBedChoice(int32 Delta = 1);
+    UFUNCTION(Exec) void HomesteadSleep();
     // Console playtest aid: move her to world X,Y and stand her on the ground there (waiting for the
     // ground's collision to stream in). Give Z to land on the first surface at or below Z instead
     // (an upper floor, say); omit it for the terrain.
@@ -319,19 +396,47 @@ private:
         std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
     friend class AHomesteadVisualPlaytest;
     friend class AHomesteadSmokeTest;
+    friend class AHomesteadGardenProbe;
+    // The UI gallery (Development builds) sets up isolated states for each UI surface.
+    friend struct FHomesteadUIGallery;
     friend class UHomesteadMapComponent;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth, RoadSign };
     // General store (HomesteadShopFlow.cpp).
     TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
+    // The fingerposts on the public road (HomesteadControllerRoadSigns.cpp); FocusId indexes the road's signs.
+    UPROPERTY() TArray<TObjectPtr<AHomesteadRoadSign>> RoadSigns;
+    void TickRoadSigns();
+    void ConsiderRoadSignFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;
+    FString RoadSignTitle() const;
+    FString RoadSignActions() const;
+    void InteractWithRoadSign();
     int64 LastWalletDelta = 0;
     float WalletDeltaRemaining = 0.0f;
+    FMealGain MealGain;
+    TArray<FPickup> Pickups;
+    // The pack and everything she owns (pack, chests, dropped) at PickupRevision: a gain raises both,
+    // a move between them raises only the pack.
+    Homestead::Holdings PickupHoldings;
+    uint64 PickupRevision = 0;
+    bool bPickupsPrimed = false;
+    void UpdatePickups(float DeltaSeconds);
+    TSharedPtr<SWidget> PickupsRoot;
+    bool bSprintShiftDown = false;
+    bool bSprintShiftModifier = false;
+    // A/X with food selected and nothing to interact with: eat one (or say none is left).
+    bool EatSelectedFoodInstead();
     void SyncStores();
     void TickStores(float DeltaSeconds);
     void ConsiderStoreFocus(TFunctionRef<void(EFocus, int32, Homestead::Point)> Consider) const;
     FString StoreFocusTitle() const;
     FString StoreFocusActions() const;
     void InteractWithStore();
+    // Waiting at a closed shop's door: A asks, a second A (or B to cancel) answers.
+    int32 WaitShopId = INDEX_NONE;
+    double WaitAskedAt = 0.0;
+    bool IsShopWaitArmed() const;
+    bool CancelShopWait();
     FString GreetingFor(const Homestead::Shop& Shop) const;
     Homestead::Simulation Sim;
     FHomesteadAppearance Appearance;
@@ -342,7 +447,7 @@ private:
     // The creek's burble: a looping, attenuated source kept at the point of the stream nearest
     // the listener, so it swells as she walks up to the water and fades into the woods.
     UPROPERTY() TObjectPtr<UAudioComponent> Creek;
-    static constexpr float CreekGain = 0.35f;
+    static constexpr float CreekGain = static_cast<float>(Homestead::AudioLevels::CreekGain);
     void UpdateCreekAudio();
     UPROPERTY() TObjectPtr<USoundBase> GrassStepA;
     UPROPERTY() TObjectPtr<USoundBase> GrassStepB;
@@ -360,7 +465,11 @@ private:
     UPROPERTY() TObjectPtr<USoundBase> WoodTapB;
     // Hatchet biting a standing trunk, one per stroke in turn.
     UPROPERTY() TArray<TObjectPtr<USoundBase>> ChopStrokes;
+    // The billhook's cane cuts (Scripts/generate_billhook_sound.py: CaneCutA/B/C), one per landed swing.
+    UPROPERTY() TArray<TObjectPtr<USoundBase>> CaneCuts;
     UPROPERTY() TObjectPtr<USoundBase> TreeFallThud;
+    // The scythe's one swish per sweep that cuts something (Scripts/generate_scythe_sound.py); never a footstep in its place.
+    UPROPERTY() TObjectPtr<USoundBase> ScytheSwish;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeA;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeB;
     UPROPERTY() TObjectPtr<USoundBase> CraftStrikeC;
@@ -394,6 +503,21 @@ private:
     bool bPendingGroundSnap = false;
     FVector GroundSnapTarget = FVector::ZeroVector;
     float GroundSnapWait = 0;
+    FVector GroundSnapSafePosition = FVector::ZeroVector;
+    FRotator GroundSnapSafeRotation = FRotator::ZeroRotator;
+    FRotator GroundSnapSafeActorRotation = FRotator::ZeroRotator;
+    double GroundSnapStartedAt = 0;
+    double GroundSnapLastReportAt = 0;
+    double GroundSnapLastInputNoticeAt = -1000.0;
+    TUniquePtr<Homestead::Simulation> GroundSnapTravelBefore;
+    UPROPERTY(Transient)
+    TObjectPtr<AActor> GroundSnapStreamingActor;
+    UPROPERTY(Transient)
+    TObjectPtr<UWorldPartitionStreamingSourceComponent> GroundSnapStreamingSource;
+    void BeginGroundSnap(FVector Target);
+    void EndGroundSnap();
+    void AbortGroundSnap();
+    bool RejectPendingGroundSnapAction();
     // Oil lamp: the kneel to set it down at LampSpot, or take up the set-down lamp LampDropId,
     // commits when her hand reaches the ground (AHomesteadCharacter::ConsumeLampContact).
     enum class ELampHandoff : uint8 { None, SetDown, PickUp };
@@ -421,7 +545,7 @@ private:
     bool bConfirmRestart = false;
     bool bMusicFading = false;
     bool bWasFailed = false;
-    int32 Page = 3;
+    int32 Page = 0;
     int32 Selection = 0;
     int32 AutoSaveIndex = 0;
     // Quarter turns for pieces snapped onto a building; free-standing pieces turn by BuildYawOffset.
@@ -435,6 +559,7 @@ private:
     Homestead::Piece BuildKind = Homestead::Piece::Foundation;
     EFocus Focus = EFocus::None;
     int32 FocusId = -1;
+    bool bBedFocusActionable = false;
     // The underbrush plant in focus while the machete is selected (EFocus::Underbrush).
     FIntPoint FocusBrushChunk = FIntPoint::ZeroValue;
     int32 FocusBrushIndex = INDEX_NONE;
@@ -462,12 +587,48 @@ private:
     bool bSwingFellTimed = false;
     double SwingSince = 0;
     uint32 SwingFellStartsBefore = 0;
+    // The hack clip's start counter at the press: only a hack started after it lands this swing.
+    uint32 SwingHackStartsBefore = 0;
+    // Blows this swing plays in one go and how many have landed so far; each counts at its own
+    // contact, and the target clears on the last. A press starts with one; holding the tool button
+    // adds one at a time to the running strike (HomesteadControllerToolRepeat.cpp).
+    int32 SwingStrokes = 1;
+    int32 SwingStrokesLanded = 0;
     // The scythe's sweep: every grass and weed tuft in the forward arc when it began.
     TArray<int32> ScytheTargets;
     void SwingAtOvergrowth(Homestead::Item Tool);
     void UpdatePendingSwing();
-    void LandOvergrowthSwing();
+    // bMoreComing: another blow of the same press follows, so no 'N more swings' notice in between.
+    void LandOvergrowthSwing(bool bMoreComing = false);
+    // The sound of a landed swing at its contact (HomesteadControllerClearing.cpp): the pickaxe's stone
+    // ping, the billhook's cane cut, other tools' chop; `Swing` counts from 1, `bFinal` is the clearing one.
+    void PlayStrikeCue(Homestead::Item Tool, int32 Swing, bool bFinal);
     void ResetOvergrowthSwing();
+    // Hold-to-repeat (HomesteadControllerToolRepeat.cpp, rule in Simulation/HomesteadToolRepeat.h):
+    // while the left mouse button or right trigger stays down, each landed blow is followed by another
+    // on the same target until it clears. Strike clips loop on (ExtendFell); the billhook's hack
+    // starts again once its clip has finished (HeldRepeatNode, UpdateHeldRepeat).
+    bool IsToolButtonHeld() const;
+    // Whether another blow follows the one that just landed on Node. Shows the refusal (Too tired.) or
+    // the swings still needed when it stops.
+    bool ContinueHeldStrike(int32 Node, Homestead::Item Tool);
+    void UpdateHeldRepeat();
+    // A held strike's next blow, waiting for the end of this blow's follow-through to join the clip.
+    int32 HeldStrokeNode = INDEX_NONE;
+    int32 HeldRepeatNode = INDEX_NONE;
+    Homestead::Item HeldRepeatTool = Homestead::Item::Count;
+    // Every overgrowth blow landed this session (the tool-repeat route counts a held run's blows).
+    uint32 OvergrowthBlowsLanded = 0;
+    // HomesteadControllerWeedPull.cpp: weeds pulled by hand on both knees (a weed node, or a garden
+    // square's weeds), committed once at the second root (AHomesteadCharacter::PullWeedsCommit). A
+    // cancel before then changes nothing. False when the clip can't play, so the caller uses the pouch kneel.
+    bool StartWeedPull(int32 NodeId, int32 PlotId, Homestead::Point Target);
+    void UpdatePendingWeedPull();
+    int32 PendingWeedNode = INDEX_NONE;
+    int32 PendingWeedPlot = INDEX_NONE;
+    double PendingWeedSince = 0;
+    bool bPendingWeedStarted = false;
+    uint32 PendingWeedStartsBefore = 0;
     // Felling in progress: the tree is already cleared; its standing copy topples after the last
     // stroke (or at once if she stops), with a chop sound per stroke.
     int32 FellResource = INDEX_NONE;
@@ -480,6 +641,7 @@ private:
     void UpdatePendingFell();
     float RefreshRemaining = 0;
     float ToastRemaining = 0;
+    HomesteadHud::ControlsHintWindow ControlsHint;
     float AutosaveRemaining = 240;
     bool bAutosaveEnabled = true;
     int32 AutosaveMinutes = 5;
@@ -518,6 +680,7 @@ private:
     TSharedPtr<SWidget> HotbarRoot;
     // Food, energy and the purse (UI/SHomesteadVitals), shown and removed with the hotbar.
     TSharedPtr<SWidget> VitalsRoot;
+    TSharedPtr<SWidget> ClockRoot;
     // add-ruined-manor-and-arrival: the Names step and the arrival title card.
     bool bNewGameSetup = false;
     TSharedPtr<HomesteadMenus::SHomesteadNames> NamesWidget;
@@ -540,6 +703,8 @@ private:
     bool PersistCameraSensitivity(float Requested);
     bool PersistCameraInversion(bool Requested);
     bool PersistAudioVolume(int32 Id, float Requested, float Previous);
+    // Successful sound-level writes to GameUserSettings (for the menu automation).
+    int32 AudioPersistWrites = 0;
     bool PersistAutosaveEnabled(bool Requested);
     bool PersistAutosaveInterval(int32 Requested);
     bool PersistResolutionScale(float Requested);
@@ -547,14 +712,22 @@ private:
     void HideNativeMenu();
     void ShowHotbar();
     void HideHotbar();
+    // A new game's row: the lamp in cell 8 (key 8) if she carries it, the rest empty for the tools
+    // she hafts; selects cell 1.
     void ResetHotbar();
-    // Layout is the save's HotbarLayout: older hotbars gain the machete and berries once.
+    // Applies a save's hotbar. Saves from before the row (HotbarLayout 3 or older) kept a pinned
+    // list: her first carried stack of each pinned item moves into that cell once; pins she has
+    // none of become ordinary empty cells.
     void SanitizeHotbar(const TArray<int32>& Slots, int32 Selected, int32 Layout);
     void EatFromHotbar(Homestead::Item Food);
     // The garden square the hoe lands on, just ahead of her.
     void TillSquareAhead(int32& X, int32& Y) const;
     // Till the square ahead with the hoe, or hoe out its weeds if it is already tilled.
     void HoeSquareAhead();
+    // The garden outline for the selected hoe or pail (HomesteadControllerGarden.cpp), every tick.
+    void UpdateGardenOutline();
+    // Why the outlined square is red (the check's refusal), for the focus line; empty when it's green.
+    FString GardenOutlineReason;
     // Plant the focused bare plot with Crop; she kneels to press in the seed.
     void PlantFocusedPlot(Homestead::CropKind Crop);
     // After HarvestCrop succeeds: she pulls or picks the crop, which stays in the ground until lifted.
@@ -562,11 +735,15 @@ private:
     // Jenny's playtest kit (tools, bed, two chests; seeds on new games). Skipped in automation.
     void GrantPlaytestKit(bool bNewGame);
     void UseSelectedTool();
-    // Pins a newly hafted tool to the hotbar (if needed) and selects it.
+    // Selects a newly hafted tool's hotbar cell (it arrives in the first empty one).
     void SlotHaftedTool(Homestead::Recipe Recipe);
     void NotifyResourceAction(const Homestead::Result& Result, USoundBase* SuccessCue);
-    TArray<int32> HotbarSlots;
     int32 SelectedHotbarSlot = 0;
+    TArray<FHomesteadHotbarSlot> BuildHotbarSnapshot() const;
+    mutable TArray<FHomesteadHotbarSlot> HotbarSnapshotCache;
+    mutable uint64 HotbarSnapshotFrame = MAX_uint64;
+    mutable uint64 HotbarSnapshotRevision = 0;
+    mutable int32 HotbarSnapshotSelected = INDEX_NONE;
     int32 HoveredHotbarSlot = INDEX_NONE;
     FHomesteadSaveRoute SaveRoute;
     bool bSaveRoutingReady = false;
@@ -591,13 +768,15 @@ private:
     void OpenSettings();
     void OpenCraft();
     void OpenBuild();
-    void OpenJournal();
     void OpenMap();
     void PreviousPage();
     void NextPage();
     void PreviousRow();
     void NextRow();
     void RotatePlacement();
+    // R / LT: the hotbar steps to the next row of her pack (Homestead::Simulation::RotatePackRow); while
+    // placing a piece, R still turns it.
+    void RotateHotbarRow();
     void RotatePlacementBy(int32 Direction);
     void ToggleDeconstruct();
     void UpdateDeconstruct(bool bForce);
@@ -605,13 +784,14 @@ private:
     // second unless forced).
     void UpdatePlacement(bool bForce);
     Homestead::Result SleepInBed(Homestead::Point Position);
-    // Sleeps with the chosen option and makes the usual autosave and recovery checkpoint.
+    // Sleeps with the single offered action and makes the usual autosave and recovery checkpoint.
     void SleepAtBed(Homestead::Point Position);
-    // At the bed, Up/Down (D-pad) steps through the sleep choices. False when not at a bed.
-    bool CycleBedChoice(int32 Delta);
-    Homestead::SleepChoice BedChoice = Homestead::SleepChoice::UntilMorning;
-    int32 BedChoiceBed = INDEX_NONE;
+    bool bBedSleepHeld = false;
     int32 SeenDozes = 0;
+    // Calendar toasts (HomesteadControllerCalendar.cpp): once per season change, compared against the
+    // simulation after each Advance.
+    int32 SeenSeasonChanges = 0;
+    void TickCalendarNotices();
     void CycleZoom();
     void QuickSave();
     void QuickLoad();
@@ -620,10 +800,14 @@ private:
     void OpenBook(int32 TargetPage);
     void CloseBook();
     void UpdateFocus();
+    // HomesteadControllerToolFocus.cpp: the held tool's aimed overgrowth, and the 280-300 cm band.
+    void FocusHeldToolTarget(Homestead::Point Position);
     void BeginPlacement(Homestead::Piece Kind);
     // Fill the watering pail at the nearest fresh water edge, with her kneeling fill when it succeeds.
     void FillPailAtStream(Homestead::Point Position);
     Homestead::Point FreshWaterDipPoint(Homestead::Point Position) const;
+    // In the water at all she fills the pail where she stands (Homestead::InWaterDipPoint, HomesteadPail.h).
+    Homestead::Point InWaterDipPoint(Homestead::Point Position, double Yaw) const;
     // The pail goes in this far inside the waterline, so it visibly dips into the water.
     static constexpr double PailDipInsideCm = 25.0;
     void EndPlacement();
@@ -638,6 +822,6 @@ private:
     UHomesteadSave* ReadSave(const FString& Filename) const;
     bool ApplySave(const UHomesteadSave& Save);
     void InitializeAudio();
-    void PlayEffect(USoundBase* Cue, float Gain = 0.12f);
+    void PlayEffect(USoundBase* Cue, float Gain = Homestead::AudioLevels::Gain::Default);
     UFUNCTION() void MusicFinished();
 };

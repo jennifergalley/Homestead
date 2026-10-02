@@ -21,6 +21,7 @@
 #include "HomesteadLab.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Simulation/HomesteadToolRepeat.h"
 
 namespace
 {
@@ -1092,6 +1093,24 @@ void UHomesteadAnimInstance::RequestFell(int32 Strokes)
     auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
     Proxy.Requested = EHandAction::Fell;
     Proxy.RequestedStrokes = FMath::Clamp(Strokes, 1, 8);
+}
+
+bool UHomesteadAnimInstance::ExtendFell(int32 Strokes)
+{
+    // Two frames at 30 fps: the controller checks after this frame's update, and the next one must
+    // still land inside the last cycle.
+    constexpr float JoinMarginSeconds = 2.0f / 30.0f;
+    // Only bounds a stuck button: no overgrowth needs this many blows at any tier.
+    constexpr int32 MaxHeldStrokes = 64;
+    auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    if (Proxy.Active != EHandAction::Fell || !Proxy.bGathering || Proxy.bCancelled
+        || Proxy.Requested != EHandAction::None || Strokes <= Proxy.FellStrokes || Strokes > MaxHeldStrokes)
+        return false;
+    if (!Homestead::ToolRepeat::CanAddStroke(Proxy.GatherTime, Proxy.FellStrokes,
+            AHomesteadCharacter::FellLoopStart, AHomesteadCharacter::FellLoop, JoinMarginSeconds))
+        return false;
+    Proxy.FellStrokes = Strokes;
+    return true;
 }
 
 float UHomesteadAnimInstance::FellWeight() const

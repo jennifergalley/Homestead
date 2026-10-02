@@ -6,6 +6,7 @@
 
 class UHomesteadMapComponent;
 struct FHomesteadMapViewState;
+enum class EHomesteadMapGlyph : uint8;
 
 namespace HomesteadMenus
 {
@@ -18,6 +19,10 @@ public:
     SLATE_BEGIN_ARGS(SHomesteadMapView) {}
         SLATE_ARGUMENT(TWeakObjectPtr<UHomesteadMapComponent>, Map)
         SLATE_ATTRIBUTE(bool, UsesGamepad)
+        // A line under the focused place's description (the walk there, on Town and the manor).
+        SLATE_ATTRIBUTE(FString, PlaceAction)
+        // Clicking that line.
+        SLATE_EVENT(FSimpleDelegate, OnPlaceAction)
     SLATE_END_ARGS()
 
     void Construct(const FArguments& Args);
@@ -30,6 +35,8 @@ public:
     void ZoomBy(double Factor, FVector2D AnchorLocal);
     void PanPixels(FVector2D Delta);
     FString SelectedName() const;
+    // The focused landmark's glyph (Town, Manor...), unset with nothing focused.
+    TOptional<EHomesteadMapGlyph> SelectedGlyph() const;
     double PixelsPerCm() const;
     HomesteadMap::Vec Center() const;
     double FitPixelsPerCm() const;
@@ -51,6 +58,10 @@ protected:
 private:
     TWeakObjectPtr<UHomesteadMapComponent> Map;
     TAttribute<bool> UsesGamepad;
+    TAttribute<FString> PlaceAction;
+    FSimpleDelegate OnPlaceAction;
+    // Where the action line was last painted (local space), for the click.
+    mutable FBox2D ActionBox = FBox2D(ForceInit);
     // The painted size; the pan and zoom limits follow it.
     mutable FVector2D Size = FVector2D(480, 320);
     bool bDragging = false;

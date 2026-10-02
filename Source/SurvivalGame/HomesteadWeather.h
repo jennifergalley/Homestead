@@ -33,12 +33,12 @@ public:
     // A roof piece's reach round its centre (a 3 m cell's half diagonal) and the height its rain stops.
     static constexpr float ShelterRadiusCm = 215.0f;
     static constexpr float ShelterTopCm = 520.0f;
-    // How far overhead a roof shelters the camera (and muffles the rain) when it isn't a building piece.
+    // How far overhead a roof shelters the camera (and muffles the rain and ambience) when it isn't a
+    // building piece. Checked every OverheadCheckSeconds in any weather.
     static constexpr float OverheadCheckCm = 2500.0f;
-    // Rain ambience at full strength outdoors, before the Ambience volume setting; indoors it drops to
-    // IndoorGain behind a low-pass at IndoorCutoffHz, like rain heard on a roof.
-    static constexpr float OutdoorGain = 0.9f;
-    static constexpr float IndoorGain = 0.35f;
+    static constexpr float OverheadCheckSeconds = 0.25f;
+    // Rain ambience volume: Homestead::RainAudioGain (the simulation, native-tested). Indoors it's also
+    // muffled behind a low-pass at IndoorCutoffHz, like rain heard on a roof.
     static constexpr float IndoorCutoffHz = 900.0f;
 
     UHomesteadWeather();
@@ -48,21 +48,32 @@ public:
     void TickWeather(float DeltaSeconds);
     float GetOvercast() const { return Overcast; }
     float GetRain() const { return Rain; }
+    /** 0 outdoors .. 1 indoors at the camera, eased (under a roof piece or anything else overhead). The
+     *  rain, the woodland ambience, the creek and a roofed hearth all mix by it (HomesteadRoomAudio). */
+    float GetIndoorMix() const { return Indoors; }
+    /** Whether a point is under one of the building pieces' roofs. */
+    bool IsUnderShelter(const FVector& Point) const;
+    /** 0 .. 1, eased over about a second: her own position (not the camera's) inside a roofed building cell,
+     *  within its walls (the cell squares tile a room, so walking between cells doesn't dip), so porches
+     *  and overhangs don't count and the camera crossing a threshold doesn't flip it. The interior daylight (sky fill, exposure) follows this. */
+    float GetRoomMix() const { return Roomed; }
 
 private:
     bool LoadAssets();
-    bool IsUnderShelter(const FVector& Point) const;
 
     UPROPERTY() TObjectPtr<UStaticMeshComponent> Streaks;
     UPROPERTY() TObjectPtr<UStaticMeshComponent> Clouds;
     UPROPERTY() TObjectPtr<UAudioComponent> Sound;
     UPROPERTY() TObjectPtr<UMaterialParameterCollection> Parameters;
     TArray<FVector4f> Shelters; // x, y, radius, top z (cm) of each roof piece.
+    TArray<FVector4f> RoomCells; // per roof piece: centre x, y, half size (cm, square to its yaw), yaw (degrees).
+    bool IsInRoom(const FVector& Point) const;
     FVector ShelterFrom = FVector(FLT_MAX);
     float Rain = 0.0f;
     float Overcast = 0.0f;
     float Daylight = 1.0f;
     float Indoors = 0.0f;       // 0 outdoors .. 1 indoors, eased.
+    float Roomed = 0.0f;        // GetRoomMix.
     float StreakFade = 1.0f;    // 0 under a roof that isn't a building piece.
     float OverheadCheckIn = 0.0f;
     bool bOverhead = false;

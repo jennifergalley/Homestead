@@ -1,15 +1,21 @@
 #include "HomesteadSimulation.h"
+#include "HomesteadBed.h"
+#include "HomesteadBackpack.h"
+#include "HomesteadChests.h"
 #include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
+#include "HomesteadFood.h"
 #include "HomesteadParcels.h"
 #include "HomesteadManor.h"
 #include "HomesteadLamp.h"
 #include "HomesteadOvergrowth.h"
+#include "HomesteadPackRow.h"
 #include "HomesteadSimulationDetail.h"
 
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <cstdint>
 #include <cstdint>
 #include <iomanip>
 #include <limits>
@@ -64,6 +70,12 @@ double Clamp(double value, double low, double high) { return std::max(low, std::
 Result Good(const std::string& text) { return {true, text}; }
 Result Bad(const std::string& text) { return {false, text, ResultCode::Invalid}; }
 Result Failed() { return Bad("You need to recover. Load your recent checkpoint to continue."); }
+std::string NoSeedMessage(CropKind kind)
+{
+    return kind == CropKind::Berries ? "Gather a berry to plant the seeds from its fruit."
+        : kind == CropKind::Roots ? "Gather seeds from wild roots before planting."
+        : std::string("You have no ") + ItemName(GetCropInfo(kind).seed) + " to sow.";
+}
 double FoodNutrition(Item item) { return GetItemInfo(item).hunger; }
 // Stamina from a meal: a handful of berries is a quick pick-me-up, cooked roots a real rest.
 double FoodEnergy(Item item) { return GetItemInfo(item).energy; }
@@ -74,17 +86,32 @@ std::string ApplyMeal(State& state, Item item)
     const double energy = std::min(100.0, state.energy + FoodEnergy(item)) - state.energy;
     state.hunger += food;
     state.energy += energy;
-    std::string message = std::string("Ate ") + ItemName(item) + ": Food +" + std::to_string(static_cast<int>(std::lround(food)));
-    if (energy >= 0.5) message += ", Energy +" + std::to_string(static_cast<int>(std::lround(energy)));
+    std::string message = std::string("Ate ") + ItemName(item) + ":";
+    const bool showFood = food >= 0.5 || energy < 0.5;
+    if (showFood) message += " Food +" + std::to_string(static_cast<int>(std::lround(food)));
+    if (energy >= 0.5) message += std::string(showFood ? "," : "") + " Energy +" + std::to_string(static_cast<int>(std::lround(energy)));
     return message + ".";
 }
 Result CanEat(const State& state, Item item)
 {
     if (state.failed) return Failed();
+    if (state.fixedEstate)
+    {
+        const std::string refusal = Food::EstateRefusal(state, item);
+        return refusal.empty() ? Good("") : Bad(refusal);
+    }
     if (FoodNutrition(item) == 0.0) return Bad(item == Item::Roots ? std::string("Raw roots need cooking first.")
         : std::string(ItemName(item)) + " isn't something to eat.");
-    if (state.hunger >= 100.0) return Bad("You are already full. Save this food for later.");
+    // A snack is still worth eating on a full stomach when it restores energy she's short of.
+    const bool feeds = state.hunger < 100.0;
+    const bool restores = state.energy < 100.0 && FoodEnergy(item) > 0.0;
+    if (!feeds && !restores) return Bad("You are already full. Save this food for later.");
     return Good("");
+}
+// Eats one (after CanEat): Energy only and Well fed on the estate, hunger and energy in the woodland.
+std::string Consume(State& state, Item item)
+{
+    return state.fixedEstate ? Food::EatOnEstate(state, item) : ApplyMeal(state, item);
 }
 Inventory Items(std::initializer_list<std::pair<Item, int>> values)
 {
@@ -143,7 +170,8 @@ Inventory Yield(ResourceKind kind)
 {
     switch (kind)
     {
-    case ResourceKind::Branches: return Items({{Item::Branch, 5}});
+    // Fallen branches come with a handful of dry twigs, so she can always light a cook without a billhook.
+    case ResourceKind::Branches: return Items({{Item::Branch, 5}, {Item::Kindling, 1}});
     case ResourceKind::Stones: return Items({{Item::Stone, 4}});
     case ResourceKind::BerryBush: return Items({{Item::Berries, 5}});
     case ResourceKind::Roots: return Items({{Item::Roots, 2}, {Item::Seeds, 2}});
@@ -169,7 +197,8 @@ Inventory BuildCost(Piece kind)
     case Piece::Doorway: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -1}});
     case Piece::Roof: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -3}});
     case Piece::Fire: return Items({{Item::Branch, -3}, {Item::Stone, -4}});
-    case Piece::Bed: return Items({{Item::Branch, -4}, {Item::BrambleCanes, -4}});
+    // A bedroll: a branch frame with a tick stuffed with hay (Jenny's playtest), not woven canes.
+    case Piece::Bed: return Items({{Item::Branch, -4}, {Item::Hay, -4}});
     case Piece::Chest: return Items({{Item::Branch, -5}, {Item::BrambleCanes, -2}});
     default: return {};
     }
@@ -183,13 +212,16 @@ Inventory CraftChange(Recipe recipe)
     case Recipe::HaftScythe: return Items({{Item::RustedScytheBlade, -1}, {Item::Branch, -2}, {Item::Scythe, 1}});
     case Recipe::HaftBillhook: return Items({{Item::RustedBillhookHead, -1}, {Item::Branch, -2}, {Item::Billhook, 1}});
     case Recipe::HaftPickaxe: return Items({{Item::RustedPickHead, -1}, {Item::Branch, -2}, {Item::Pickaxe, 1}});
-    case Recipe::RoastedRoots: return Items({{Item::Roots, -2}, {Item::RoastedRoots, 1}});
-    case Recipe::HerbedRoots: return Items({{Item::Roots, -2}, {Item::Flowers, -1}, {Item::HerbedRoots, 1}});
+    // Every cooked batch burns one kindling to get the pan going, even at the always-lit hearth.
+    case Recipe::RoastedRoots: return Items({{Item::Roots, -2}, {Item::Kindling, -1}, {Item::RoastedRoots, 1}});
+    case Recipe::HerbedRoots: return Items({{Item::Roots, -2}, {Item::Flowers, -1}, {Item::Kindling, -1}, {Item::HerbedRoots, 1}});
     case Recipe::SplitFirewood: return Items({{Item::Timber, -1}, {Item::Firewood, 4}});
     default: return {};
     }
 }
 bool Hafting(Recipe recipe) { return recipe >= Recipe::HaftAxe && recipe <= Recipe::HaftPickaxe; }
+// The one place that says which recipes cook: they need a lit fire or the hearth.
+bool Cooking(Recipe recipe) { return recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots; }
 std::string DescribeCost(const Inventory& change)
 {
     std::string result;
@@ -600,31 +632,43 @@ Result ContainerAccess(const State& state, int container, Point player)
     if (container == 0) return Good("");
     const auto* chest = Find(state.structures, container);
     if (!chest || chest->kind != Piece::Chest) return Bad("Choose an existing storage chest.");
-    if (!Near(player, Homestead::StructureCenter(state, *chest), ChestReach))
+    if (!Near(player, Homestead::StructureFootprint(state, *chest).center, ChestReach))
         return Bad("Move within 280 cm of this chest.");
     return Good("");
 }
 bool CanAllocate(int next) { return next > 0 && next < std::numeric_limits<int>::max() - 1; }
 int InventoryCategory(Item item) { return ItemSortRank(item); }
 
-bool ReconcileLayout(State& state, int container)
+bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
 {
     auto* layout = ContainerLayout(state, container);
     const auto* stock = ContainerStock(state, container);
     if (!layout || !stock) return false;
+    // Her pack's first row is the hotbar (HomesteadPackRow.h): gains and uses visit its cells first,
+    // and new stacks and garments take its first empty cell.
+    const bool pack = container == 0;
     layout->erase(std::remove_if(layout->begin(), layout->end(), [&](const LayoutEntry& entry) {
         if (entry.wearableId == 0) return false;
         const auto* item = Find(state.wearables, entry.wearableId);
         return !item || !InContainer(*item, container);
     }), layout->end());
+    std::vector<int> order;
+    if (pack) order = PackRowRules::FillOrder(state.packRow, *layout);
+    else
+    {
+        order.resize(layout->size());
+        for (int index = 0; index < static_cast<int>(order.size()); ++index) order[index] = index;
+    }
+    std::vector<LayoutEntry> arrivals;
     for (int i = 0; i < ItemCount; ++i)
     {
         int displayed = 0;
         for (const auto& entry : *layout)
             if (entry.wearableId == 0 && static_cast<int>(entry.item) == i) displayed += entry.quantity;
         int difference = (*stock)[i] - displayed;
-        for (auto& entry : *layout)
+        for (const int index : order)
         {
+            auto& entry = (*layout)[index];
             if (entry.wearableId != 0 || static_cast<int>(entry.item) != i) continue;
             if (difference > 0) { entry.quantity += difference; difference = 0; }
             else if (difference < 0)
@@ -638,6 +682,8 @@ bool ReconcileLayout(State& state, int container)
         {
             if (!CanAllocate(state.nextGroupId)) return false;
             layout->push_back({state.nextGroupId++, static_cast<Item>(i), difference, 0});
+            // The pail's water shows on the pail (HomesteadPail.h), never in a hotbar cell.
+            if (pack && static_cast<Item>(i) != Item::Water) arrivals.push_back(layout->back());
         }
     }
     layout->erase(std::remove_if(layout->begin(), layout->end(), [](const LayoutEntry& entry) {
@@ -648,7 +694,17 @@ bool ReconcileLayout(State& state, int container)
         if (!InContainer(item, container)) continue;
         const auto found = std::find_if(layout->begin(), layout->end(),
             [&](const LayoutEntry& entry) { return entry.wearableId == item.id; });
-        if (found == layout->end()) layout->push_back({0, Item::Knife, 0, item.id});
+        if (found != layout->end()) continue;
+        layout->push_back({0, Item::Knife, 0, item.id});
+        if (pack) arrivals.push_back(layout->back());
+    }
+    if (pack)
+    {
+        // A stack used up leaves its cell empty; arrivals then fill the first empty cells.
+        PackRowRules::Prune(state.packRow, *layout);
+        if (fillPackRow)
+            for (const auto& entry : arrivals)
+                if (!PackRowRules::TakeFirstEmpty(state.packRow, entry)) break;
     }
     return true;
 }
@@ -695,7 +751,7 @@ Result ValidateInventory(const State& state)
     const auto validateContainer = [&](int container) -> Result {
         const auto* stock = ContainerStock(state, container);
         const auto* layout = ContainerLayout(state, container);
-        const int capacity = ContainerCapacity(container);
+        const int capacity = ContainerCapacity(state, container);
         if (!stock || !layout || !StockValid(*stock, capacity) || ContainerUsed(state, container) > capacity)
             return {false, container == 0 ? "Not enough pack space." : "The chest does not have enough space.", ResultCode::Capacity};
         if (layout->size() > static_cast<std::size_t>(capacity)) return Bad("Inventory layout has too many entries.");
@@ -722,6 +778,8 @@ Result ValidateInventory(const State& state)
     };
     auto result = validateContainer(0);
     if (!result) return result;
+    if (!PackRowRules::Valid(state.packRow, state.inventoryLayout))
+        return Bad("The hotbar row names a missing or repeated stack.");
     for (const auto& piece : state.structures)
     {
         if (piece.kind == Piece::Chest)
@@ -743,7 +801,7 @@ Result ValidateInventory(const State& state)
         if (drop.wearableId == 0)
         {
             if (!ValidEnum(drop.item, Item::Count) || drop.quantity <= 0
-                || drop.quantity > InventoryCapacity)
+                || drop.quantity > MaxPackCapacity)
                 return Bad("A world item drop has an invalid payload.");
         }
         else
@@ -810,15 +868,22 @@ void EraseResourceEdit(State& candidate, const Generation::GeneratedEntityKey& k
 int PackUsed(const State& state) { return ContainerUsed(state, 0); }
 bool AddWorldDrop(State& candidate, Point position, Item item, int quantity)
 {
+    // A stack on the ground never holds more than she can pick up in one go (PickUpDrop is whole-stack).
+    const int stack = Homestead::PackCapacity(candidate);
     for (auto& drop : candidate.worldDrops)
-        if (drop.wearableId == 0 && drop.item == item && drop.quantity <= InventoryCapacity - quantity
+        if (drop.wearableId == 0 && drop.item == item && drop.quantity <= stack - quantity
             && DistanceSquared(position, drop.position) <= DropMergeReach * DropMergeReach)
         {
             drop.quantity += quantity;
             return true;
         }
-    if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1) return false;
-    candidate.worldDrops.push_back({candidate.nextId++, position, item, quantity, 0});
+    while (quantity > 0)
+    {
+        if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1) return false;
+        const int part = std::min(quantity, stack);
+        candidate.worldDrops.push_back({candidate.nextId++, position, item, part, 0});
+        quantity -= part;
+    }
     return true;
 }
 }
@@ -878,7 +943,8 @@ const char* ResourceName(ResourceKind kind)
         "Tall grass", "Weeds", "Thin bramble", "Bramble thicket", "Bramble bank", "Fallen bough",
         "Small stump", "Large stump", "Ancient stump", "Fallen log", "Giant log", "Rubble", "Small rock", "Boulder",
         "Salvage pile", "Primroses", "Bluebells", "Wild daffodils", "Wild garlic",
-        "Nettles", "Stump", "Broken crate", "Broken barrel", "Rubbish heap", "Rotten planks"};
+        "Nettles", "Stump", "Broken crate", "Broken barrel", "Rubbish heap", "Rotten planks",
+        "Fallen slates", "Fallen roof timbers"};
     static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(ResourceKind::Count), "Every resource needs a name.");
     return ValidEnum(kind, ResourceKind::Count) ? names[static_cast<int>(kind)] : "Unknown resource";
 }
@@ -907,7 +973,7 @@ const char* RecipeRequirements(Recipe recipe)
         {
             const auto kind = static_cast<Recipe>(i);
             result[i] = DescribeCost(CraftChange(kind));
-            if (kind == Recipe::RoastedRoots || kind == Recipe::HerbedRoots)
+            if (Cooking(kind))
                 result[i] += "; nearby fueled fire (no pot needed)";
             else if (kind == Recipe::SplitFirewood)
                 result[i] += "; axe required";
@@ -935,6 +1001,16 @@ const char* PieceRequirements(Piece piece)
     return ValidEnum(piece, Piece::Count) ? descriptions[static_cast<int>(piece)].c_str() : "Unknown structure";
 }
 bool IsBuildable(Piece piece) { return ValidEnum(piece, Piece::Count) && piece != Piece::Hearth; }
+Inventory PieceCost(Piece piece)
+{
+    // BuildCost is the change to her stock (negative); the cost is what it takes.
+    Inventory cost{};
+    if (!ValidEnum(piece, Piece::Count)) return cost;
+    const Inventory change = BuildCost(piece);
+    for (int i = 0; i < ItemCount; ++i) cost[i] = change[i] < 0 ? -change[i] : 0;
+    return cost;
+}
+bool PieceNeedsFoundation(Piece piece) { return EdgePiece(piece) || piece == Piece::Roof; }
 bool IsFurniture(Piece piece)
 {
     return piece == Piece::Fire || piece == Piece::Bed || piece == Piece::Chest || piece == Piece::Hearth;
@@ -1057,25 +1133,24 @@ bool FootprintsOverlap(const Footprint& a, const Footprint& b)
         if (std::abs(delta.x * axis.x + delta.y * axis.y) >= radius(a, axis) + radius(b, axis)) return false;
     return true;
 }
-std::vector<SleepOption> SleepOptions(double hour, double energy)
+std::optional<SleepOption> BedSleepOption(double hour, double energy)
 {
+    if (!std::isfinite(hour) || !std::isfinite(energy) || hour < 0.0 || energy < 0.0 || energy > 100.0)
+        return std::nullopt;
     double current = std::fmod(hour, 24.0);
-    if (current < 0.0) current += 24.0;
-    const auto wake = [current](double hours) { return std::fmod(current + hours, 24.0); };
-    std::vector<SleepOption> options;
-    const bool evening = current >= 18.0 || current < 5.0;
-    const double toMorning = std::fmod(MorningWakeHour - current + 48.0, 24.0);
-    if (evening && toMorning >= Exertion::NapHours)
-        options.push_back({SleepChoice::UntilMorning, toMorning, MorningWakeHour});
-    const double deficit = Clamp(100.0 - (std::isfinite(energy) ? energy : 0.0), 0.0, 100.0);
-    const double rested = Clamp(std::ceil(deficit / Exertion::SleepPerHour * 4.0 - 1e-9) / 4.0,
+    if (std::abs(current - MorningWakeHour) < 1e-6) current = MorningWakeHour;
+    const bool night = current >= 18.0 || current < MorningWakeHour;
+    const double toMorning = night ? std::fmod(MorningWakeHour - current + 48.0, 24.0) : 0.0;
+    if (energy >= Food::FullEnergyAt)
+        return night && toMorning >= Exertion::MinDawnSleepHours
+            ? std::optional<SleepOption>{{SleepChoice::UntilMorning, toMorning, MorningWakeHour}}
+            : std::nullopt;
+    const double deficit = 100.0 - energy;
+    const double rest = Clamp(std::ceil(deficit / Exertion::SleepPerHour * 4.0 - 1e-9) / 4.0,
         Exertion::MinRestHours, Exertion::MaxRestHours);
-    if (options.empty() || std::abs(rested - options.front().hours) > 0.75)
-        options.push_back({SleepChoice::UntilRested, rested, wake(rested)});
-    bool shortOffered = false;
-    for (const auto& option : options) shortOffered |= option.hours <= Exertion::NapHours + 0.01;
-    if (!shortOffered) options.push_back({SleepChoice::Nap, Exertion::NapHours, wake(Exertion::NapHours)});
-    return options;
+    const double hours = night ? std::min(rest, toMorning) : rest;
+    if (hours < Exertion::MinDawnSleepHours) return std::nullopt;
+    return SleepOption{SleepChoice::UntilRested, hours, std::fmod(current + hours, 24.0)};
 }
 
 Simulation::Simulation() { NewGame(); }
@@ -1127,6 +1202,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
 {
     State candidate;
     candidate.fixedEstate = true;
+    candidate.hunger = 100.0; // The estate has no hunger (HomesteadFood.h).
     candidate.placementBakeVersion = placements.bakeVersion;
     // She arrives in her tunic; clothing is cosmetic on the estate.
     candidate.wearables = {{1, WearableDefinition::LinenTunic, 0, WearableOwner::Equipped, 0}};
@@ -1149,6 +1225,8 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
         candidate.inventory[static_cast<int>(Item::WateringCan)] = 1;
         candidate.inventoryLayout.push_back({candidate.nextGroupId++, Item::WateringCan, 1, 0});
     }
+    // A few days' food and a change of clothes wait in the chest too.
+    else Manor::StockStarterChest(candidate);
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return inventory;
     layout_ = std::make_shared<const EstateLayout>(layout);
@@ -1257,6 +1335,10 @@ int Simulation::UsedCapacity() const
 {
     return ContainerUsed(state_, 0);
 }
+int Simulation::PackCapacity() const
+{
+    return Homestead::PackCapacity(state_);
+}
 int Simulation::ChestUsedCapacity(int chestId) const
 {
     return chestId > 0 ? ContainerUsed(state_, chestId) : -1;
@@ -1269,16 +1351,17 @@ bool Simulation::TryAdjust(const Inventory& change)
     for (int i = 0; i < ItemCount; ++i)
     {
         const long long value = static_cast<long long>(state_.inventory[i]) + change[i];
-        if (value < 0 || value > InventoryCapacity) return false;
+        if (value < 0 || value > Homestead::PackCapacity(state_)) return false;
         updated[i] = static_cast<int>(value);
     }
-    if (!StockValid(updated)) return false;
+    if (!StockValid(updated, Homestead::PackCapacity(state_))) return false;
     State candidate = state_;
     candidate.inventory = updated;
-    if (!ReconcileLayout(candidate, 0) || !ValidateInventory(candidate)) return false;
+    if (!ReconcileLayout(candidate, 0, fillPackRow_) || !ValidateInventory(candidate)) return false;
     // Existing callers retain resource/plot/structure pointers across this helper.
     state_.inventory = candidate.inventory;
     state_.inventoryLayout = std::move(candidate.inventoryLayout);
+    state_.packRow = candidate.packRow;
     state_.nextGroupId = candidate.nextGroupId;
     ++revision_;
     return true;
@@ -1292,7 +1375,7 @@ Result Simulation::CheckRevision(std::uint64_t expectedRevision) const
 }
 Result Simulation::CommitInventory(State&& candidate, const char* message)
 {
-    if (!ReconcileLayout(candidate, 0))
+    if (!ReconcileLayout(candidate, 0, fillPackRow_))
         return {false, "Inventory group identities are exhausted.", ResultCode::Unavailable, revision_};
     for (const auto& piece : candidate.structures)
         if (piece.kind == Piece::Chest && !ReconcileLayout(candidate, piece.id))
@@ -1426,6 +1509,95 @@ Result Simulation::TransferGroup(int chestId, int groupId, int amount, bool toCh
     (*ContainerStock(candidate, destination))[item] += amount;
     return CommitInventory(std::move(candidate), toChest ? "Selected quantity stored." : "Selected quantity taken.");
 }
+Result Simulation::StoreMatching(int chestId, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (chestId <= 0) return Bad("Choose a storage chest.");
+    const auto access = ContainerAccess(state_, chestId, player);
+    if (!access) return access;
+    State candidate = state_;
+    const Inventory& held = *ContainerStock(state_, chestId);
+    Inventory* chest = ContainerStock(candidate, chestId);
+    auto& pack = candidate.inventoryLayout;
+    // Below the row first, in pack order, then the row's cells left to right, so the hotbar gives
+    // up its stacks last.
+    std::vector<int> order;
+    for (int index = 0; index < static_cast<int>(pack.size()); ++index)
+        if (PackRowRules::CellOf(candidate.packRow, pack[index]) < 0) order.push_back(index);
+    for (const auto& cell : candidate.packRow)
+        if (const int index = PackRowRules::FindEntry(pack, cell); index >= 0) order.push_back(index);
+    int room = ChestCapacity - ContainerUsed(candidate, chestId);
+    int matched = 0, stored = 0;
+    for (const int index : order)
+    {
+        auto& entry = pack[index];
+        const int item = static_cast<int>(entry.item);
+        if (entry.wearableId != 0 || entry.quantity <= 0 || held[item] <= 0 || !Chests::AutoStores(entry.item)) continue;
+        matched += entry.quantity;
+        const int moved = std::min(entry.quantity, std::max(0, room));
+        if (moved <= 0) continue;
+        entry.quantity -= moved;
+        candidate.inventory[item] -= moved;
+        (*chest)[item] += moved;
+        room -= moved;
+        stored += moved;
+    }
+    if (matched == 0) return Bad("Nothing in your pack matches what's already in this chest.");
+    if (stored == 0) return {false, "The chest is full.", ResultCode::Capacity, revision_};
+    const std::string message = stored == matched
+        ? "Stored " + std::to_string(stored) + (stored == 1 ? " item" : " items") + " onto matching stacks."
+        : "Stored " + std::to_string(stored) + " of " + std::to_string(matched) + " matching items; the chest is full.";
+    return CommitInventory(std::move(candidate), message.c_str());
+}
+Result Simulation::RenameChest(int chestId, const std::string& name, Point player, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (chestId <= 0) return Bad("Choose a storage chest.");
+    const auto access = ContainerAccess(state_, chestId, player);
+    if (!access) return access;
+    const std::string trimmed = Manor::TrimName(name);
+    if (const std::string problem = Chests::NameProblem(trimmed); !problem.empty()) return Bad(problem.c_str());
+    auto* found = Find(state_.structures, chestId);
+    if (found->customName == trimmed) return Bad(trimmed.empty() ? "The chest has no name to clear." : "The chest already has that name.");
+    found->customName = trimmed;
+    ++revision_;
+    return {true, trimmed.empty() ? std::string("The chest is a ") + Chests::DefaultName + " again."
+        : "The chest is now called " + trimmed + ".", ResultCode::None, revision_};
+}
+Result Simulation::TransferGroupToPackRow(int chestId, int groupId, int amount, int cell, Point player,
+    std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (chestId <= 0) return Bad("Choose a storage chest.");
+    if (cell < 0 || cell >= PackRowSize) return Bad("Choose one of the ten hotbar slots.");
+    const auto access = ContainerAccess(state_, chestId, player);
+    if (!access) return access;
+    State candidate = state_;
+    auto* chest = ContainerLayout(candidate, chestId);
+    auto entry = std::find_if(chest->begin(), chest->end(),
+        [&](const LayoutEntry& value) { return value.groupId == groupId && value.wearableId == 0; });
+    if (entry == chest->end() || amount <= 0 || amount > entry->quantity)
+        return Bad("Choose an available quantity from the selected group.");
+    const Item item = entry->item;
+    entry->quantity -= amount;
+    (*ContainerStock(candidate, chestId))[static_cast<int>(item)] -= amount;
+    candidate.inventory[static_cast<int>(item)] += amount;
+    auto& pack = candidate.inventoryLayout;
+    const int held = PackRowRules::FindEntry(pack, candidate.packRow[cell]);
+    if (held >= 0 && pack[held].wearableId == 0 && pack[held].item == item) pack[held].quantity += amount;
+    else
+    {
+        // Whatever was in the cell stays in her pack, below the row.
+        if (!CanAllocate(candidate.nextGroupId)) return Bad("Inventory group identities are exhausted.");
+        pack.push_back({candidate.nextGroupId++, item, amount, 0});
+        candidate.packRow[cell] = {pack.back().groupId, 0};
+    }
+    return CommitInventory(std::move(candidate), ("Taken onto hotbar slot " +
+        std::to_string(PackRowRules::KeyNumber(cell)) + ".").c_str());
+}
 Result Simulation::SplitGroup(int containerId, int groupId, int amount, Point player, std::uint64_t expectedRevision)
 {
     const auto ready = CheckRevision(expectedRevision);
@@ -1498,7 +1670,11 @@ Result Simulation::SortPack(std::uint64_t expectedRevision)
     const auto ready = CheckRevision(expectedRevision);
     if (!ready) return ready;
     State candidate = state_;
-    auto& layout = candidate.inventoryLayout;
+    // Only what lies below the hotbar row is sorted (HomesteadPackRow.h); the row keeps its order.
+    InventoryLayout row, layout;
+    for (const auto& entry : state_.inventoryLayout)
+        (PackRowRules::CellOf(state_.packRow, entry) >= 0 ? row : layout).push_back(entry);
+    const InventoryLayout before = layout;
     for (auto first = layout.begin(); first != layout.end(); ++first)
     {
         if (first->wearableId != 0) continue;
@@ -1526,11 +1702,11 @@ Result Simulation::SortPack(std::uint64_t expectedRevision)
         [&](const LayoutEntry& left, const LayoutEntry& right) { return key(left) < key(right); });
     const auto sameLayout = [&]()
     {
-        if (layout.size() != state_.inventoryLayout.size()) return false;
+        if (layout.size() != before.size()) return false;
         for (std::size_t index = 0; index < layout.size(); ++index)
         {
             const auto& left = layout[index];
-            const auto& right = state_.inventoryLayout[index];
+            const auto& right = before[index];
             if (left.groupId != right.groupId || left.item != right.item
                 || left.quantity != right.quantity || left.wearableId != right.wearableId)
                 return false;
@@ -1539,6 +1715,8 @@ Result Simulation::SortPack(std::uint64_t expectedRevision)
     };
     if (sameLayout())
         return {true, "Pack is already sorted.", ResultCode::None, revision_};
+    candidate.inventoryLayout = std::move(row);
+    candidate.inventoryLayout.insert(candidate.inventoryLayout.end(), layout.begin(), layout.end());
     return CommitInventory(std::move(candidate), "Pack sorted.");
 }
 Result Simulation::DropGroup(int groupId, int amount, Point position, Point player,
@@ -1565,8 +1743,9 @@ Result Simulation::DropGroup(int groupId, int amount, Point position, Point play
     double nearest = DropMergeReach * DropMergeReach;
     for (auto& drop : candidate.worldDrops)
     {
+        // Merged stacks stay small enough for her to pick up whole.
         if (drop.wearableId != 0 || drop.item != entry->item
-            || drop.quantity > InventoryCapacity - amount) continue;
+            || drop.quantity > Homestead::PackCapacity(candidate) - amount) continue;
         const double distance = DistanceSquared(position, drop.position);
         if (distance <= nearest && (!merge || distance < nearest || drop.id < merge->id))
         { merge = &drop; nearest = distance; }
@@ -1626,13 +1805,13 @@ Result Simulation::PickUpDrop(int dropId, Point player)
         [dropId](const WorldDrop& value) { return value.id == dropId; });
     if (drop->wearableId == 0)
     {
-        if (TakesSpace(drop->item) && ContainerUsed(candidate, 0) > InventoryCapacity - drop->quantity)
+        if (TakesSpace(drop->item) && ContainerUsed(candidate, 0) > Homestead::PackCapacity(candidate) - drop->quantity)
             return {false, "Not enough pack space to pick up the complete stack.", ResultCode::Capacity, revision_};
         candidate.inventory[static_cast<int>(drop->item)] += drop->quantity;
     }
     else
     {
-        if (ContainerUsed(candidate, 0) >= InventoryCapacity)
+        if (ContainerUsed(candidate, 0) >= Homestead::PackCapacity(candidate))
             return {false, "Not enough pack space to pick up this garment.", ResultCode::Capacity, revision_};
         auto* wearable = Find(candidate.wearables, drop->wearableId);
         if (!wearable || wearable->owner != WearableOwner::World)
@@ -1647,40 +1826,26 @@ bool Simulation::IsNight() const
     const double hour = std::fmod(state_.hour, 24.0);
     return hour < 6.0 || hour >= 19.0;
 }
-bool IsRainDay(double hour) { return static_cast<long long>(std::floor(hour / 24.0)) % 3 == 1; }
-bool IsRainingAt(double hour)
-{
-    const double ofDay = std::fmod(hour, 24.0);
-    return IsRainDay(hour) && ofDay >= RainStartHour && ofDay < RainEndHour;
-}
 bool Simulation::IsRaining() const { return IsRainingAt(state_.hour); }
-double RainAmount(double hour)
+namespace
 {
-    if (!IsRainingAt(hour)) return 0.0;
-    const double ofDay = std::fmod(hour, 24.0);
-    const double day = std::floor(hour / 24.0);
-    const auto ease = [](double t) { t = Clamp(t, 0.0, 1.0); return t * t * (3.0 - 2.0 * t); };
-    const double envelope = ease((ofDay - RainStartHour) / 0.25) * ease((RainEndHour - ofDay) / (1.0 / 6.0));
-    const double wave = 0.5 + 0.5 * std::sin((ofDay - RainStartHour) * 6.2831853 / 1.6 + day * 1.7)
-        * (0.8 + 0.2 * std::sin((ofDay - RainStartHour) * 6.2831853 / 0.55 + day * 0.9));
-    const double shower = ease((wave - 0.35) / 0.5);
-    return envelope * (0.3 + 0.7 * shower);
-}
-double Overcast(double hour)
+double RainAudioLevel(double rain, double ambience, double indoors)
 {
-    // The rain window sits mid-morning, so the cloud's half-hour lead never crosses midnight.
-    if (!IsRainDay(hour)) return 0.0;
-    const double ofDay = std::fmod(hour, 24.0);
-    const auto ease = [](double t) { t = Clamp(t, 0.0, 1.0); return t * t * (3.0 - 2.0 * t); };
-    return ease((ofDay - (RainStartHour - OvercastLeadHours)) / OvercastLeadHours)
-        * ease((RainEndHour + OvercastLeadHours - ofDay) / OvercastLeadHours);
+    if (!(rain > 0.0)) return 0.0;
+    const double inside = Clamp(indoors, 0.0, 1.0);
+    return std::pow(Clamp(rain, 0.0, 1.0), 0.7) * ambience * (RainOutdoorGain + (RainIndoorGain - RainOutdoorGain) * inside);
 }
-int Simulation::DayNumber() const { return static_cast<int>(state_.hour / 24.0) + 1; }
-const char* Simulation::SeasonName() const
+}
+double RainAudioGain(double rain, double ambience, double indoors)
 {
-    static const char* names[] = {"Spring", "Summer", "Autumn", "Winter"};
-    return names[((DayNumber() - 1) / 14) % 4];
+    return RainAudioLevel(rain, ambience, indoors) * RainLoudness;
 }
+bool RainAudible(double rain, double ambience, double indoors)
+{
+    return RainAudioLevel(rain, ambience, indoors) > 0.001;
+}
+int Simulation::DayNumber() const { return Today().dayOfSeason; }
+const char* Simulation::SeasonName() const { return Calendar::SeasonName(Today().season); }
 bool Simulation::IsSheltered(Point position) const
 {
     if (!ValidPoint(position)) return false;
@@ -1792,8 +1957,11 @@ int Simulation::FindNearestStructure(Point position, Piece kind, double maxDista
     double distance = maxDistance * maxDistance;
     for (const auto& piece : state_.structures)
     {
-        const double current = DistanceSquared(position, Homestead::StructureCenter(state_, piece));
-        if (piece.kind == kind && current <= distance && !(current == distance && nearest != -1))
+        if (piece.kind != kind) continue;
+        const Point target = kind == Piece::Chest ? Homestead::StructureFootprint(state_, piece).center
+            : Homestead::StructureCenter(state_, piece);
+        const double current = DistanceSquared(position, target);
+        if (current <= distance && !(current == distance && nearest != -1))
         { nearest = piece.id; distance = current; }
     }
     return nearest;
@@ -1869,7 +2037,7 @@ Result Simulation::ClearUnderbrush(Generation::ChunkCoord chunk, int index, bool
         std::lower_bound(candidate.clearedUnderbrush.begin(), candidate.clearedUnderbrush.end(), key), key);
     // A full pack still clears; the cuttings are just left on the ground.
     ++candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
-    if (ContainerUsed(candidate, 0) > InventoryCapacity) --candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
+    if (ContainerUsed(candidate, 0) > Homestead::PackCapacity(candidate)) --candidate.inventory[static_cast<int>(woody ? Item::Branch : Item::Fiber)];
     return Exert(cost, CommitInventory(std::move(candidate), "Undergrowth cleared."));
 }
 Result Simulation::Eat(Item item)
@@ -1877,7 +2045,7 @@ Result Simulation::Eat(Item item)
     const auto allowed = CanEat(state_, item);
     if (!allowed) return allowed;
     if (!TryAdjust(Items({{item, -1}}))) return Bad(std::string("Gather or cook some ") + ItemName(item) + " first.");
-    return Good(ApplyMeal(state_, item));
+    return Good(Consume(state_, item));
 }
 Result Simulation::EatGroup(int groupId, std::uint64_t expectedRevision)
 {
@@ -1893,7 +2061,7 @@ Result Simulation::EatGroup(int groupId, std::uint64_t expectedRevision)
     const Item item = entry->item;
     --entry->quantity;
     --candidate.inventory[static_cast<int>(item)];
-    const std::string message = ApplyMeal(candidate, item);
+    const std::string message = Consume(candidate, item);
     return CommitInventory(std::move(candidate), message.c_str());
 }
 Result Simulation::Craft(Recipe recipe, Point player)
@@ -1901,7 +2069,7 @@ Result Simulation::Craft(Recipe recipe, Point player)
     if (state_.failed) return Failed();
     if (!ValidEnum(recipe, Recipe::Count) || !ValidPoint(player)) return Bad("Choose a valid recipe and location.");
     const Inventory change = CraftChange(recipe);
-    const bool cooking = recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots;
+    const bool cooking = Cooking(recipe);
     if (cooking && !IsNearFire(player)) return Bad("Move beside a lit cookfire or the hearth to cook roots; no pot is needed.");
     if (recipe == Recipe::SplitFirewood && Count(Item::Hatchet) == 0)
         return Bad("Take your axe from storage to split firewood.");
@@ -1948,8 +2116,7 @@ RecipeAssessment Simulation::AssessRecipe(Recipe recipe, Point player) const
         }
     }
 
-    const bool cooking = recipe == Recipe::RoastedRoots
-        || recipe == Recipe::HerbedRoots;
+    const bool cooking = Cooking(recipe);
     assessment.stationRequired = cooking;
     assessment.stationMet = !cooking || IsNearFire(player);
     if (recipe == Recipe::SplitFirewood)
@@ -2269,25 +2436,27 @@ Result Simulation::Deconstruct(int structureId, Point player)
     const Point spot = ClearDropSpot(candidate, player);
     const Result crowded = Bad("Too many possessions are already resting in the world. Pick some up before taking this down.");
     int setDown = 0;
+    // Spilled stacks are no bigger than she can pick up whole (her pack, 120 or 240).
+    const int stack = Homestead::PackCapacity(candidate);
     const auto dropItems = [&](Item item, int quantity)
     {
         while (quantity > 0)
         {
             WorldDrop* merge = nullptr;
             for (auto& drop : candidate.worldDrops)
-                if (drop.wearableId == 0 && drop.item == item && drop.quantity < InventoryCapacity
+                if (drop.wearableId == 0 && drop.item == item && drop.quantity < stack
                     && Near(spot, drop.position, DropMergeReach)) { merge = &drop; break; }
             int moved = 0;
             if (merge)
             {
-                moved = std::min(quantity, InventoryCapacity - merge->quantity);
+                moved = std::min(quantity, stack - merge->quantity);
                 merge->quantity += moved;
             }
             else
             {
                 if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1)
                     return false;
-                moved = std::min(quantity, InventoryCapacity);
+                moved = std::min(quantity, stack);
                 candidate.worldDrops.push_back({candidate.nextId++, spot, item, moved, 0});
             }
             quantity -= moved;
@@ -2301,8 +2470,8 @@ Result Simulation::Deconstruct(int structureId, Point player)
             const int back = contents ? (chest ? piece.storage[i] : 0) : -cost[i];
             if (back <= 0) continue;
             const Item item = static_cast<Item>(i);
-            const int kept = TakesSpace(item) ? std::min(back, std::max(0, InventoryCapacity - ContainerUsed(candidate, 0)))
-                : std::min(back, InventoryCapacity - candidate.inventory[i]);
+            const int kept = TakesSpace(item) ? std::min(back, std::max(0, Homestead::PackCapacity(candidate) - ContainerUsed(candidate, 0)))
+                : std::min(back, Homestead::PackCapacity(candidate) - candidate.inventory[i]);
             candidate.inventory[i] += kept;
             if (!dropItems(item, back - kept)) return crowded;
         }
@@ -2310,7 +2479,7 @@ Result Simulation::Deconstruct(int structureId, Point player)
     {
         if (wearable.owner != WearableOwner::Chest || wearable.chestId != piece.id) continue;
         wearable.chestId = 0;
-        if (ContainerUsed(candidate, 0) < InventoryCapacity)
+        if (ContainerUsed(candidate, 0) < Homestead::PackCapacity(candidate))
         {
             wearable.owner = WearableOwner::Carried;
             continue;
@@ -2325,9 +2494,10 @@ Result Simulation::Deconstruct(int structureId, Point player)
     if (chest) message += ", and its contents";
     message += ".";
     if (setDown > 0)
-        message += " Your pack is full, so " + std::to_string(setDown) + (setDown == 1 ? " thing is" : " things are")
-            + " set down beside you.";
-    return Exert(Exertion::DeconstructEnergy, CommitInventory(std::move(candidate), message.c_str()));
+        message = "Pack full: " + std::to_string(setDown) + (setDown == 1 ? " thing" : " things") + " set down beside you.";
+    auto done = Exert(Exertion::DeconstructEnergy, CommitInventory(std::move(candidate), message.c_str()));
+    if (done.ok && setDown > 0) done.code = ResultCode::PackOverflow;
+    return done;
 }
 Result Simulation::GrantStarterKit(Point anchor, Point facing, bool includeSeeds)
 {
@@ -2480,13 +2650,22 @@ Result Simulation::GrantItems(Item item, int count)
     ++revision_;
     return Good(std::string("Added ") + std::to_string(count) + " " + ItemName(item) + ".");
 }
-Result Simulation::Till(int cellX, int cellY, Point player)
+Result Simulation::CheckTill(int cellX, int cellY, Point player) const
+{
+    if (state_.failed) return Failed();
+    if (!ValidCell(GardenToCell(cellX), GardenToCell(cellY)) || !Near(player, GardenCellCenter(cellX, cellY)))
+        return Bad("Move closer to a valid garden square.");
+    if (Count(Item::DiggingStick) == 0)
+        return Bad(NoHoeMessage(state_, player));
+    if (auto ground = CheckTillGround(cellX, cellY, player); !ground) return ground;
+    return CheckExertion(Exertion::TillEnergy);
+}
+Result Simulation::CheckTillGround(int cellX, int cellY, Point player) const
 {
     if (state_.failed) return Failed();
     const int buildingX = GardenToCell(cellX), buildingY = GardenToCell(cellY);
     if (!ValidCell(buildingX, buildingY) || !Near(player, GardenCellCenter(cellX, cellY)))
         return Bad("Move closer to a valid garden square.");
-    if (Count(Item::DiggingStick) == 0) return Bad("Craft a hoe before tilling soil.");
     if (state_.plots.size() >= MaxObjects || state_.nextId >= TransientResourceIdBase - 1)
         return Bad("The garden has reached its plot limit.");
     const auto space = CheckGardenResources(state_, cellX, cellY);
@@ -2498,57 +2677,114 @@ Result Simulation::Till(int cellX, int cellY, Point player)
             return Bad("Choose soil away from buildings.");
     for (const auto& plot : state_.plots)
         if (plot.cellX == cellX && plot.cellY == cellY) return Bad("This cell is already tilled.");
-    if (auto ready = CheckExertion(Exertion::TillEnergy); !ready) return ready;
+    return Good("");
+}
+Result Simulation::Till(int cellX, int cellY, Point player)
+{
+    if (auto ready = CheckTill(cellX, cellY, player); !ready) return ready;
     state_.plots.push_back({state_.nextId++, cellX, cellY, false, 0.0, 0.35, 0.0});
     return Exert(Exertion::TillEnergy, Good("Soil tilled. Choose seeds or a berry on your hotbar to plant here."));
 }
-Result Simulation::Plant(int plotId, Point player, CropKind kind)
+Result Simulation::CheckSow(int plotId, Point player, CropKind kind) const
 {
     if (state_.failed) return Failed();
     if (!ValidEnum(kind, CropKind::Count)) return Bad("Choose seeds to plant.");
-    auto* plot = Find(state_.plots, plotId);
+    const auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a tilled plot to plant.");
-    if (plot->planted) return Bad("A crop is already growing here.");
+    if (plot->planted) return Bad(plot->withered ? "Hoe out the withered plant before planting." : "A crop is already growing here.");
     const auto& crop = GetCropInfo(kind);
+    if (!GrowsIn(kind, Today().season)) return Bad(OutOfSeasonText(kind));
     if (auto ready = CheckExertion(Exertion::PlantEnergy); !ready) return ready;
-    if (!TryAdjust(Items({{crop.seed, -1}})))
-        return Bad(kind == CropKind::Berries ? "Gather a berry to plant the seeds from its fruit."
-            : kind == CropKind::Roots ? "Gather seeds from wild roots before planting."
-            : std::string("You have no ") + ItemName(crop.seed) + " to sow.");
+    if (Count(crop.seed) <= 0) return Bad(NoSeedMessage(kind));
+    return Good("");
+}
+Result Simulation::Plant(int plotId, Point player, CropKind kind)
+{
+    if (auto ready = CheckSow(plotId, player, kind); !ready) return ready;
+    auto* plot = Find(state_.plots, plotId);
+    const auto& crop = GetCropInfo(kind);
+    if (!TryAdjust(Items({{crop.seed, -1}}))) return Bad(NoSeedMessage(kind));
     plot->kind = kind;
     plot->planted = true;
     plot->picked = false;
+    plot->withered = false;
     plot->growth = 0.0;
-    return Exert(Exertion::PlantEnergy, Good(std::string("Planted ") + crop.lower + ". " + ReadyInText(kind)));
+    // Planting too late in its seasons is allowed, with a warning.
+    const auto late = TooLateText(kind, crop.growHours, state_.hour);
+    return Exert(Exertion::PlantEnergy, Good(std::string("Planted ") + crop.lower + ". "
+        + (late.empty() ? ReadyInText(kind) : late)));
 }
-Result Simulation::Water(int plotId, Point player)
+Result Simulation::CheckWater(int plotId, Point player) const
 {
     if (state_.failed) return Failed();
-    auto* plot = Find(state_.plots, plotId);
+    const auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to water it.");
+    if (plot->withered) return Bad("Nothing living to water. Hoe out the withered plant.");
     if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to water crops.");
     if (plot->moisture >= 1.0) return Bad("This soil is already fully watered.");
     if (Count(Item::Water) <= 0) return Bad(EmptyPailText);
-    if (auto ready = CheckExertion(Exertion::WaterEnergy); !ready) return ready;
+    return CheckExertion(Exertion::WaterEnergy);
+}
+Result Simulation::Water(int plotId, Point player)
+{
+    if (auto ready = CheckWater(plotId, player); !ready) return ready;
+    auto* plot = Find(state_.plots, plotId);
     if (!TryAdjust(Items({{Item::Water, -1}}))) return Bad(EmptyPailText);
     plot->moisture = 1.0;
     return Exert(Exertion::WaterEnergy, Good("Soil watered."));
 }
-Result Simulation::Weed(int plotId, Point player)
+Result Simulation::CheckWeed(int plotId, Point player) const
 {
     if (state_.failed) return Failed();
-    auto* plot = Find(state_.plots, plotId);
+    const auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside a garden plot to weed it.");
+    if (plot->withered)
+    {
+        // Weeding a withered plot hoes the dead plant out (ClearWithered).
+        if (Count(Item::DiggingStick) == 0) return Bad("Carry your hoe to clear the withered plant.");
+        return CheckExertion(Exertion::TillEnergy);
+    }
     if (plot->weeds <= 0.0) return Bad("This plot is already free of weeds.");
-    if (auto ready = CheckExertion(Exertion::WeedEnergy); !ready) return ready;
+    return CheckExertion(Exertion::WeedEnergy);
+}
+Result Simulation::Weed(int plotId, Point player)
+{
+    if (auto ready = CheckWeed(plotId, player); !ready) return ready;
+    auto* plot = Find(state_.plots, plotId);
+    if (plot->withered) return ClearWithered(plotId, player);
     plot->weeds = 0.0;
-    return Exert(Exertion::WeedEnergy, Good("Weeds removed. The crop has more room to grow."));
+    return Exert(Exertion::WeedEnergy, Good(plot->planted ? "Weeds removed. The crop has more room to grow."
+        : "Weeds pulled. The square is clean for sowing."));
+}
+Result Simulation::CheckClearWithered(int plotId, Point player) const
+{
+    if (state_.failed) return Failed();
+    const auto* plot = Find(state_.plots, plotId);
+    if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside the plot to clear it.");
+    if (!plot->planted || !plot->withered) return Bad("Nothing withered grows here.");
+    if (Count(Item::DiggingStick) == 0) return Bad("Carry your hoe to clear the withered plant.");
+    return CheckExertion(Exertion::TillEnergy);
+}
+Result Simulation::ClearWithered(int plotId, Point player)
+{
+    if (auto ready = CheckClearWithered(plotId, player); !ready) return ready;
+    auto* plot = Find(state_.plots, plotId);
+    const std::string name = GetCropInfo(plot->kind).lower;
+    plot->planted = false;
+    plot->withered = false;
+    plot->picked = false;
+    plot->growth = 0.0;
+    plot->weeds = 0.0;
+    // A cleared plot keeps the neutral kind (saves require it for bare soil).
+    plot->kind = CropKind::Roots;
+    return Exert(Exertion::TillEnergy, Good("Hoed out the withered " + name + ". The soil is ready to plant."));
 }
 Result Simulation::HarvestCrop(int plotId, Point player)
 {
     if (state_.failed) return Failed();
     auto* plot = Find(state_.plots, plotId);
     if (!plot || !Near(player, PlotCenter(*plot))) return Bad("Move beside your crop to harvest.");
+    if (plot->planted && plot->withered) return Bad(PlotStatus(*plot) + ".");
     if (!plot->planted || plot->growth < 1.0)
         return Bad(plot->planted ? PlotStatus(*plot) + "." : std::string("Nothing is growing here yet."));
     const auto& crop = GetCropInfo(plot->kind);
@@ -2576,16 +2812,22 @@ Result Simulation::HarvestCrop(int plotId, Point player)
         : ". This plot is ready to replant.";
     return Exert(Exertion::HarvestCropEnergy, Good(message));
 }
+bool Simulation::PailStored() const
+{
+    for (const auto& structure : state_.structures)
+        if (structure.storage[static_cast<int>(Item::WateringCan)] > 0) return true;
+    return false;
+}
 Result Simulation::FillWater(Point player)
 {
     if (state_.failed) return Failed();
-    if (Count(Item::WateringCan) == 0) return Bad("Carry your pail to collect water.");
-    if (!NearWater(player)) return Bad("Walk to the stream to refill your pail.");
-    if (Count(Item::Water) >= 6) return Bad("Your pail is already full.");
-    const Inventory change = Items({{Item::Water, 6 - Count(Item::Water)}});
+    if (Count(Item::WateringCan) == 0) return Bad(PailStored() ? "Your pail is in the chest. Take it to fill it." : "You need a pail to carry water.");
+    if (!NearWater(player)) return Bad("Walk to the river or the lake to fill your pail.");
+    if (Count(Item::Water) >= PailPortions) return Bad("Your pail is already full.");
+    const Inventory change = Items({{Item::Water, PailPortions - Count(Item::Water)}});
     if (auto ready = CheckExertion(Exertion::FillWaterEnergy); !ready) return ready;
-    if (!TryAdjust(change)) return Bad("Make enough room in your pack for six water portions.");
-    return Exert(Exertion::FillWaterEnergy, Good("Pail filled with six water portions."));
+    if (!TryAdjust(change)) return Bad("Make enough room in your pack for the water.");
+    return Exert(Exertion::FillWaterEnergy, Good("Pail filled."));
 }
 Result Simulation::EmptyPail()
 {
@@ -2616,7 +2858,8 @@ Result Simulation::Transfer(int chestId, Item item, int amount, Point player)
     if (state_.failed) return Failed();
     auto* chest = Find(state_.structures, chestId);
     if (!chest || chest->kind != Piece::Chest) return Bad("Choose a storage chest.");
-    if (!Near(player, Homestead::StructureCenter(state_, *chest), ChestReach)) return Bad("Move within 280 cm of this chest.");
+    if (!Near(player, Homestead::StructureFootprint(state_, *chest).center, ChestReach))
+        return Bad("Move within 280 cm of this chest.");
     if (!ValidEnum(item, Item::Count) || amount == 0 || amount < -ChestCapacity || amount > ChestCapacity)
         return Bad("Choose an item and a transfer amount this pack or chest can hold.");
     const int index = static_cast<int>(item);
@@ -2638,42 +2881,47 @@ double Simulation::Step(double hours, Point player, bool sleeping, double recove
 {
     (void)player;
     const bool rain = IsRaining();
-    const double hungerRate = sleeping ? -1.3 : -2.0;
+    // The seeded woodland keeps its legacy rule: hunger drains and at 0 fails her. The estate has no
+    // hunger (HomesteadFood.h): it stays at 100.
+    const bool hungerFails = !state_.fixedEstate;
+    const double hungerRate = !hungerFails ? 0.0 : sleeping ? -Hunger::AsleepPerHour : -Hunger::AwakePerHour;
     const double energyRate = sleeping ? recoveryPerHour : -Exertion::AwakePerHour;
     // Stop at the first failed vital, rather than consuming hours beyond the checkpoint boundary.
     double elapsed = hours;
-    elapsed = std::min(elapsed, state_.hunger / -hungerRate);
-    if (energyRate < 0) elapsed = std::min(elapsed, state_.energy / -energyRate);
+    // And where rain starts or stops (spells begin at any minute): the rain this step reads holds throughout.
+    if (const double change = NextRainChange(state_.hour); change - state_.hour > 1e-9) elapsed = std::min(elapsed, change - state_.hour);
+    if (hungerFails) elapsed = std::min(elapsed, state_.hunger / -hungerRate);
+    if (energyRate < 0 && !state_.fixedEstate) elapsed = std::min(elapsed, state_.energy / -energyRate);
     state_.hunger = Clamp(state_.hunger + hungerRate * elapsed, 0.0, 100.0);
     state_.energy = Clamp(state_.energy + energyRate * elapsed, 0.0, 100.0);
+    constexpr double FullEnergyRoundoff = 1e-6;
+    if (sleeping && state_.energy >= 100.0 - FullEnergyRoundoff) state_.energy = 100.0;
     for (auto& piece : state_.structures)
         if (piece.kind == Piece::Fire) piece.fuelHours = std::max(0.0, piece.fuelHours - elapsed);
     BurnLamp(elapsed, sleeping);
     for (auto& plot : state_.plots)
     {
         plot.moisture = Clamp(plot.moisture + (rain ? 0.3 : -0.025) * elapsed, 0.0, 1.0);
-        plot.weeds = Clamp(plot.weeds + 0.009 * elapsed, 0.0, 1.0);
-        if (plot.planted)
+        if (plot.planted && !plot.withered)
         {
             const double growingHours = GetCropInfo(plot.kind).growHours;
             const double rate = MoistureGrowthFactor(plot.moisture) * WeedGrowthFactor(plot.weeds) / growingHours;
             plot.growth = Clamp(plot.growth + elapsed * rate, 0.0, 1.0);
         }
     }
-    const double before = state_.hour;
-    const int dayBefore = static_cast<int>(std::floor((before - DayRolloverHour) / 24.0));
+    const int dayBefore = Calendar::DayIndex(state_.hour);
     state_.hour += elapsed;
-    // Townsfolk buy down her goods in the shops each morning.
-    if (std::floor((state_.hour - DayRolloverHour) / 24.0) > std::floor((before - DayRolloverHour) / 24.0))
-        SellDownShops();
-    // Only hunger fails her. Energy running out makes her doze off (AdvanceGameHours).
+    // The 06:00 rollover: the shops sell down, weeds creep and the seasons turn (OnNewDay).
+    for (int day = dayBefore + 1; day <= Calendar::DayIndex(state_.hour); ++day) OnNewDay(Calendar::DateOfDay(day));
+    // Awake at 6 AM, the day's plot weeds come up now; asleep, they wait for her to wake (Sleep, DozeOff).
+    if (!sleeping) Crops::GrowDailyWeeds(state_, Calendar::DayIndex(state_.hour) - dayBefore);
+    // Energy running out makes her doze off (AdvanceGameHours); only in the woodland does hunger fail her.
     if (state_.energy <= 1e-10) state_.energy = 0.0;
     if (state_.hunger <= 1e-10)
     {
         state_.hunger = 0.0;
-        state_.failed = true;
+        if (hungerFails) state_.failed = true;
     }
-    if (const int day = static_cast<int>(std::floor((state_.hour - DayRolloverHour) / 24.0)); day > dayBefore) CreepWeeds(day);
     return elapsed;
 }
 Result Simulation::SetEnergy(double energy)
@@ -2688,6 +2936,7 @@ double Simulation::DozeOff(Point player)
 {
     double left = std::min(Exertion::DozeHours, MaxHour - state_.hour);
     double slept = 0.0;
+    const int weedDay = Crops::WeedDay(state_.hour);
     while (left > 1e-12 && !state_.failed)
     {
         double step = std::min(left, TimeStep);
@@ -2698,6 +2947,7 @@ double Simulation::DozeOff(Point player)
         left -= done;
         slept += done;
     }
+    if (!state_.failed) Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
     ++dozes_;
     ++revision_;
     return slept;
@@ -2707,27 +2957,26 @@ void Simulation::Advance(double realSeconds, Point player, bool paused)
     if (paused || !FiniteRange(realSeconds, 0.0, 31536000.0)) return;
     AdvanceGameHours(realSeconds * 24.0 / (state_.dayMinutes * 60.0), player);
 }
-Result Simulation::SpendSprintEnergy(double realSeconds)
+Result Simulation::CanSprint() const
 {
     if (state_.failed) return Failed();
-    if (!FiniteRange(realSeconds, 0.0, 10.0) || realSeconds <= 0)
-        return Bad("Sprint requires a positive finite time step.");
-    if (state_.energy <= 10.0)
-        return Bad("Rest to regain enough energy to sprint.");
-    state_.energy = std::max(10.0, state_.energy - 0.35 * realSeconds);
+    if (state_.energy < Exertion::SprintFloor) return Bad("Too tired to sprint.");
     return {true, "", ResultCode::None, revision_};
 }
 Result Simulation::CheckExertion(double cost) const
 {
     if (state_.failed) return Failed();
-    if (state_.energy - cost < Exertion::Reserve) return Bad("You're too exhausted to keep working. Eat something or rest.");
+    if (state_.energy < Exertion::SlowWalkFloor) return Bad("Too tired.");
+    if (state_.energy - WorkCost(cost) < Exertion::Reserve) return Bad("Too tired.");
     return {true, "", ResultCode::None, revision_};
 }
 Result Simulation::Exert(double cost, Result done)
 {
-    if (done.ok) state_.energy = Clamp(state_.energy - cost, 0.0, 100.0);
+    if (done.ok) state_.energy = Clamp(state_.energy - WorkCost(cost), 0.0, 100.0);
     return done;
 }
+bool Simulation::IsWellFed() const { return Food::IsWellFed(state_); }
+double Simulation::WorkCost(double base) const { return IsWellFed() ? base * Food::WellFedWorkFactor : base; }
 double Simulation::HarvestCost(int nodeId) const
 {
     const auto* node = Find(state_.resources, nodeId);
@@ -2755,8 +3004,9 @@ void Simulation::AdvanceGameHours(double hours, Point player)
         for (const auto& piece : state_.structures)
             if (piece.kind == Piece::Fire && piece.fuelHours > 0) step = std::min(step, piece.fuelHours);
         hours -= Step(step, player, false);
-        // Worn out: she dozes off where she stands, and the rough sleep counts against the time asked.
-        if (!state_.failed && state_.energy <= 1e-10) hours = std::max(0.0, hours - DozeOff(player));
+        // Only the woodland forces a doze at zero Energy; estate time continues while she walks slowly.
+        if (!state_.fixedEstate && !state_.failed && state_.energy <= 1e-10)
+            hours = std::max(0.0, hours - DozeOff(player));
     }
 }
 void Simulation::SkipToHourOfDay(double hourOfDay)
@@ -2806,12 +3056,22 @@ Result Simulation::PassDaysForPlaytest(double days, bool tend, Point player)
     const int whole = static_cast<int>(std::lround(days));
     return Good(std::to_string(whole) + (whole == 1 ? " day passes" : " days pass") + (tend ? "; the garden was tended." : "."));
 }
-Result Simulation::Sleep(double hours, Point player)
+Result Simulation::Sleep(double hours, Point player, Point facing, bool dawnLimited)
 {
     if (state_.failed) return Failed();
-    if (!FiniteRange(hours, 0.25, 12.0)) return Bad("Choose between a quarter hour and twelve hours of sleep.");
-    if (FindNearestStructure(player, Piece::Bed, Reach) == -1) return Bad("Place a bed and move beside it before sleeping.");
+    if (!FiniteRange(hours, Exertion::MinRestHours, 12.0))
+    {
+        const double current = std::fmod(state_.hour, 24.0);
+        const double wake = std::fmod(state_.hour + hours, 24.0);
+        const bool shortDawn = dawnLimited && FiniteRange(hours, Exertion::MinDawnSleepHours, Exertion::MinRestHours)
+            && (current >= 18.0 || current < MorningWakeHour)
+            && std::abs(wake - MorningWakeHour) < 1e-6;
+        if (!shortDawn) return Bad(dawnLimited ? "A short sleep must end at 06:00."
+            : "Choose between a quarter hour and twelve hours of sleep.");
+    }
+    if (ReachableBed(state_, player, facing) == -1) return Bad("Place a bed and move beside it before sleeping.");
     if (state_.hour + hours > MaxHour) return Bad("The calendar has reached its supported limit.");
+    const int weedDay = Crops::WeedDay(state_.hour);
     while (hours > 1e-12 && !state_.failed)
     {
         double step = std::min(hours, TimeStep);
@@ -2822,6 +3082,8 @@ Result Simulation::Sleep(double hours, Point player)
         hours -= done;
     }
     if (state_.failed) return Bad("Your rest was interrupted by a critical need. Load your recent checkpoint.");
+    // Slept through 6 AM: the day's weeds are up when she wakes.
+    Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
     return Good("You wake rested. Your garden and fires continued through the night.");
 }
 
@@ -2882,6 +3144,12 @@ std::string Simulation::Serialize() const
     if (Manor::HasSaveSection(state_)) Manor::WriteSaveSection(body, state_);
     Lamp::WriteSaveSection(body, state_);
     Crops::WriteSaveSection(body, state_);
+    Crops::WriteWitheredSection(body, state_);
+    PackRowRules::WriteSaveSection(body, state_);
+    PackRowRules::WriteParkedSection(body, state_);
+    if (Chests::HasSaveSection(state_)) Chests::WriteSaveSection(body, state_);
+    if (Backpack::HasSaveSection(state_)) Backpack::WriteSaveSection(body, state_);
+    Food::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -2946,9 +3214,7 @@ Result Simulation::Deserialize(const std::string& data)
         !FiniteRange(candidate.hunger, 0.0, 100.0) || !FiniteRange(candidate.energy, 0.0, 100.0) ||
         !FiniteRange(legacyWarmth, 0.0, 100.0) || candidate.nextId < 1 ||
         candidate.nextId >= TransientResourceIdBase) return invalid();
-    const bool critical = candidate.hunger == 0 || candidate.energy == 0 || legacyWarmth == 0;
-    if (critical != candidate.failed) return invalid();
-    switch (ReadSavedStock(input, candidate.inventory, version, storedItems, InventoryCapacity))
+    switch (ReadSavedStock(input, candidate.inventory, version, storedItems, MaxPackCapacity))
     {
     case SavedStock::Ok: break;
     case SavedStock::Newer: return newer;
@@ -2960,6 +3226,11 @@ Result Simulation::Deserialize(const std::string& data)
     std::uint64_t generationVersion = 0;
     if (!ReadUnsigned(input, candidate.world.seed) || !ReadUnsigned(input, generationVersion)) return invalid();
     candidate.fixedEstate = generationVersion == EstateWorldMarker;
+    // Woodland saves retain the original failure invariant. Estate saves, even older ones that
+    // failed at zero hunger or Energy, reopen playable after all other save validation succeeds.
+    if (!candidate.fixedEstate
+        && ((candidate.energy == 0 || legacyWarmth == 0 || candidate.hunger == 0) != candidate.failed))
+        return invalid();
     if (candidate.fixedEstate)
     {
         if (!placements_ || candidate.world.seed != static_cast<std::uint64_t>(placements_->bakeVersion)) return {false,
@@ -3150,6 +3421,7 @@ Result Simulation::Deserialize(const std::string& data)
     RefreshShopCounters(candidate, Layout());
     input >> std::ws;
     // Optional tagged trailing sections, each introduced by its tag word.
+    bool parkedRowsSeen = false;
     while (!input.eof())
     {
         std::string tag;
@@ -3168,6 +3440,16 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Manor::SaveTag) { if (!Manor::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Lamp::SaveTag) { if (!Lamp::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Crops::SaveTag) { if (!Crops::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Crops::WitheredSaveTag) { if (!Crops::ReadWitheredSection(input, candidate)) return invalid(); }
+        else if (tag == PackRowRules::SaveTag) { if (!PackRowRules::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == PackRowRules::ParkedSaveTag)
+        {
+            if (parkedRowsSeen || !PackRowRules::ReadParkedSection(input, candidate)) return invalid();
+            parkedRowsSeen = true;
+        }
+        else if (tag == Chests::SaveTag) { if (!Chests::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Backpack::SaveTag) { if (!Backpack::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == Food::SaveTag) { if (!Food::ReadSaveSection(input, candidate)) return invalid(); }
         // A section this build doesn't know came from a newer build; it can't be skipped safely.
         else return newer;
         input >> std::ws;
@@ -3180,6 +3462,8 @@ Result Simulation::Deserialize(const std::string& data)
         candidate.world.generationVersion == state_.world.generationVersion;
     if (candidate.fixedEstate)
     {
+        candidate.failed = false;
+        candidate.hunger = 100.0; // The estate has no hunger (HomesteadFood.h); older saves drained it.
         const auto estate = MaterializeEstate(candidate, *placements_);
         if (!estate) return estate;
         // Overgrowth baked after this save was made (the manor clear-out) can land on her plots or

@@ -1,0 +1,116 @@
+# Audio checks
+
+Like the UI gallery, but for sound: one row per effect cue, giving what triggers it, what Jenny should hear, and how
+an agent checks it without ears. The check is a log line: the cue's name and the clip phase when it fired, against
+the clip's contact time (the "ear proxy"). Add a row whenever a cue is added or changed.
+
+Run: start PIE, do the action, and filter the output log for the tag.
+
+| Cue | Trigger | What she should hear | Check (log) |
+| --- | --- | --- | --- |
+| `CraftStrikeA`/`B`/`C`, the pickaxe ping | Every landed pickaxe strike on rubble or a rock (`PlayStrikeCue`). Earlier strikes rotate A, B, C at gain 0.12; the breaking strike plays A at 0.15. | A bright stone-on-steel ping on every strike, varied a little in pitch (+/-4%), with no wood chop. The last strike is a touch louder. | `STRIKE_CUE tool=Pickaxe swing=N final=0/1 cue=CraftStrike* phase=… contact=…`, with `phase` at or just past `contact` (`FellStrikeSeconds(0)`). |
+| `CaneCutA`/`B`/`C`, the billhook cane cut (`Scripts/generate_billhook_sound.py`) | Every landed billhook swing on brambles or a sapling, rotating A, B, C at gain 0.9 (over the chops' 0.75: Jenny found it almost too quiet). | A quick hooked slash, a woody fibrous snap, then leaves rustling as the cane falls. | `STRIKE_CUE tool=Billhook … cue=CaneCut*`, with `phase` at or just past `contact` (`MacheteClearSeconds`, 1.25 s). |
+| `ScytheSwish` | Each scythe sweep that mows something, at gain 0.25 (was 0.8: Jenny found it twice as loud as needed). | An airy swish through grass, with no thud, a little under the chops and well over the birds. | (no log yet) |
+
+## Loudness standard
+
+Every sound is balanced against the forest ambience bed before it ships (Jenny, 2026-09-30: "balance it
+against the ambience sounds from the get-go"). The rule: **measure a new or changed cue against the ambience
+before shipping it.**
+
+- **Where levels live.** `Source/SurvivalGame/Simulation/HomesteadAudioLevels.h` holds every cue's category,
+  its in-game gain (the playback code reads its gains from there) and the category bands. Add a row for
+  each new use of a sound, and a gain constant for each new call site; no literal gains in `PlayEffect`.
+- **How it's measured.** `python Scripts/Audio/Measure-Loudness.py` (needs `pip install soundfile pyloudnorm`
+  and the fetched sources, `Scripts/Fetch-Assets.ps1`). It measures each source file (EBU R128 K-weighting),
+  applies the cue gain and the default slider (Effects 0.8, Ambience 0.7, Music 0.65), and compares it with
+  the **reference: the forest bed's integrated loudness at its in-game gain (about -49 LUFS)**. Beds and music
+  are judged by integrated loudness; one-shots by their momentary max (400 ms), which is how a short hit sounds
+  against a steady bed. It rewrites `HomesteadAudioMeasurements.h` and the table below, and exits 1
+  when a cue is out of band or a file under `Assets/Audio` has no row. `--check` reports without writing.
+- **The gate.** The native test `HomesteadAudioLevelTests` (`Scripts\Test-Native.ps1`) fails when a cue is
+  out of its band, a cue has no measurement, a measured file has no cue (no category), or the music, rain,
+  hearth and creek gains drift from the gameplay constants.
+
+Category bands, in LU over the forest bed. These suit a cozy game: steps and clicks at or under the birds,
+pickups just over them, the creek, hearth and music around +10, tool hits clearly above, and the scythe's swish
+a few LU under the chops it works between. The numbers are bigger than you might expect because a one-shot's
+momentary max is compared with a steady bed's integrated loudness, and the forest recording itself is quiet.
+
+| Category | Band (LU) | Judged by |
+| --- | --- | --- |
+| AmbienceBed (forest, creek) | -3 to +12 | integrated |
+| Weather (rain) | +12 to +22 | integrated |
+| Hearth | +4 to +12 | integrated |
+| Music | +6 to +12 | integrated |
+| Footstep | -8 to +5 | momentary max |
+| Pickup (gather, sow, sale) | +2 to +10 | momentary max |
+| UI | -10 to 0 | momentary max |
+| Door (no cue yet) | +6 to +14 | momentary max |
+| ToolImpact (chops, ping, cane cut, craft beats, tree fall) | +11 to +25 | momentary max |
+| Swish (scythe) | +14 to +19 | momentary max |
+
+What the first pass moved (2026-10-01): the scythe swish 0.8 to 0.25 (+28.1 to +18.0 LU: Jenny's -6 dB put it
+at +22.1, still over the chops, so -4 dB more); the billhook cane cut 0.75 to 0.9 (by ear: by this measure it's
+already the loudest tool hit, but Jenny heard it as almost too quiet); the shop counter's sale tap 0.35 to 0.16
+(+16.3 to +9.5); Evening Harp's stated loudness -21.0 to its measured -19.4 LUFS, so it plays 1.6 dB quieter, level with
+the other tracks (it had played at +12.3 LU, over the Music band). Everything else already sat in its band and is unchanged.
+Music is judged at its measured loudness moved by the gain the game applies from the stated loudness, and the
+stated loudness must be within 0.5 LU of the measurement.
+
+Every cue at its in-game gain (generated by `Measure-Loudness.py`; don't edit by hand):
+
+<!-- loudness-table:start -->
+| Use | Source | Category | Gain | Level (LUFS) | Over the forest bed (LU) | Band (LU) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Forest bed (reference) | `ForestAmbience.mp3` | AmbienceBed | 1.0 | -49.4 | +0.0 | -3 to +12 |
+| Creek | `CreekLoop.wav` | AmbienceBed | 0.35 | -39.7 | +9.7 | -3 to +12 |
+| Rain, full | `RainLoop.wav` | Weather | 0.45 | -29.2 | +20.2 | +12 to +22 |
+| Hearth crackle | `HearthCrackle.wav` | Hearth | 0.32 | -39.3 | +10.2 | +4 to +12 |
+| Music: EveningHarp | `EveningHarp.mp3` | Music | 0.0 | -38.8 | +10.6 | +6 to +12 |
+| Music: WhispersOfTheGlen | `WhispersOfTheGlen.mp3` | Music | 0.0 | -38.8 | +10.6 | +6 to +12 |
+| Music: MedievalTheme | `MedievalTheme.mp3` | Music | 0.0 | -38.7 | +10.7 | +6 to +12 |
+| Music: ANewTown | `ANewTown.mp3` | Music | 0.0 | -38.8 | +10.6 | +6 to +12 |
+| Bare step, walk | `BareStepWalk_00.wav` | Footstep | 0.04 | -53.3 | -3.9 | -8 to +5 |
+| Bare step, walk | `BareStepWalk_01.wav` | Footstep | 0.04 | -53.2 | -3.8 | -8 to +5 |
+| Bare step, walk | `BareStepWalk_02.wav` | Footstep | 0.04 | -52.5 | -3.1 | -8 to +5 |
+| Bare step, walk | `BareStepWalk_03.wav` | Footstep | 0.04 | -52.8 | -3.4 | -8 to +5 |
+| Bare step, walk | `BareStepWalk_04.wav` | Footstep | 0.04 | -54.1 | -4.7 | -8 to +5 |
+| Bare step, walk | `BareStepWalk_05.wav` | Footstep | 0.04 | -53.5 | -4.1 | -8 to +5 |
+| Bare step, run | `BareStepRun_00.wav` | Footstep | 0.07 | -49.8 | -0.4 | -8 to +5 |
+| Bare step, run | `BareStepRun_01.wav` | Footstep | 0.07 | -47.3 | +2.1 | -8 to +5 |
+| Bare step, run | `BareStepRun_02.wav` | Footstep | 0.07 | -49.0 | +0.4 | -8 to +5 |
+| Bare step, run | `BareStepRun_03.wav` | Footstep | 0.07 | -48.3 | +1.1 | -8 to +5 |
+| Shod grass step | `GrassStepA.ogg` | Footstep | 0.12 | -46.1 | +3.3 | -8 to +5 |
+| Shod grass step | `GrassStepB.ogg` | Footstep | 0.12 | -45.3 | +4.1 | -8 to +5 |
+| Gather, sow, till | `GrassStepA.ogg` | Pickup | 0.12 | -46.1 | +3.3 | +2 to +10 |
+| Gather, sow, till | `GrassStepB.ogg` | Pickup | 0.12 | -45.3 | +4.1 | +2 to +10 |
+| Pick up, clear by hand | `WoodTapA.ogg` | Pickup | 0.12 | -42.4 | +7.0 | +2 to +10 |
+| Pick up, clear by hand | `WoodTapB.ogg` | Pickup | 0.12 | -44.5 | +4.9 | +2 to +10 |
+| Overgrowth cleared tap | `WoodTapB.ogg` | Pickup | 0.12 | -44.5 | +4.9 | +2 to +10 |
+| Shop sale | `WoodTapA.ogg` | Pickup | 0.16 | -39.9 | +9.5 | +2 to +10 |
+| Shop purchase | `WoodTapB.ogg` | Pickup | 0.16 | -42.0 | +7.4 | +2 to +10 |
+| UI click | `UIClick.ogg` | UI | 0.08 | -53.4 | -4.0 | -10 to +0 |
+| UI click, soft | `UIClick.ogg` | UI | 0.06 | -55.9 | -6.5 | -10 to +0 |
+| UI click, faint | `UIClick.ogg` | UI | 0.05 | -57.4 | -8.0 | -10 to +0 |
+| Pickaxe ping | `CraftStrikeA.ogg` | ToolImpact | 0.12 | -36.3 | +13.1 | +11 to +25 |
+| Pickaxe ping | `CraftStrikeB.ogg` | ToolImpact | 0.12 | -37.1 | +12.3 | +11 to +25 |
+| Pickaxe ping | `CraftStrikeC.ogg` | ToolImpact | 0.12 | -37.8 | +11.6 | +11 to +25 |
+| Pickaxe final ping | `CraftStrikeA.ogg` | ToolImpact | 0.15 | -34.3 | +15.1 | +11 to +25 |
+| Craft beat | `CraftStrikeA.ogg` | ToolImpact | 0.16 | -33.8 | +15.6 | +11 to +25 |
+| Craft beat | `CraftStrikeB.ogg` | ToolImpact | 0.16 | -34.6 | +14.8 | +11 to +25 |
+| Craft beat | `CraftStrikeC.ogg` | ToolImpact | 0.16 | -35.3 | +14.1 | +11 to +25 |
+| Billhook cane cut | `CaneCutA.wav` | ToolImpact | 0.9 | -25.5 | +23.9 | +11 to +25 |
+| Billhook cane cut | `CaneCutB.wav` | ToolImpact | 0.9 | -26.0 | +23.4 | +11 to +25 |
+| Billhook cane cut | `CaneCutC.wav` | ToolImpact | 0.9 | -25.1 | +24.3 | +11 to +25 |
+| Chop | `ChopA.wav` | ToolImpact | 0.75 | -29.7 | +19.7 | +11 to +25 |
+| Chop | `ChopB.wav` | ToolImpact | 0.75 | -30.0 | +19.4 | +11 to +25 |
+| Chop | `ChopC.wav` | ToolImpact | 0.75 | -27.5 | +21.9 | +11 to +25 |
+| Felling chop | `ChopA.wav` | ToolImpact | 0.8 | -29.2 | +20.2 | +11 to +25 |
+| Felling chop | `ChopB.wav` | ToolImpact | 0.8 | -29.4 | +20.0 | +11 to +25 |
+| Felling chop, heavy | `ChopC.wav` | ToolImpact | 0.65 | -28.7 | +20.7 | +11 to +25 |
+| Chop fallback tap | `WoodTapA.ogg` | ToolImpact | 0.6 | -28.4 | +21.0 | +11 to +25 |
+| Felling fallback tap | `WoodTapB.ogg` | ToolImpact | 0.55 | -31.3 | +18.1 | +11 to +25 |
+| Tree falls | `TreeFall.wav` | ToolImpact | 0.7 | -25.1 | +24.3 | +11 to +25 |
+| Scythe swish | `ScytheSwish.wav` | Swish | 0.25 | -31.4 | +18.0 | +14 to +19 |
+<!-- loudness-table:end -->
