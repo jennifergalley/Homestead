@@ -9,6 +9,7 @@
     "add-chest-names",
     "add-chest-auto-store",
     "daily-weed-pass",
+    "place-items-in-exact-slots",
     "fix-tool-grip-contact",
     "pitch-dark-parchment-theme",
     "reduce-foliage-shadow-motion",
@@ -60,19 +61,23 @@
     "add-courtship-and-family",
     "add-boat-fishing"
   ],
-  "nextBuild": [
-    "polish-parchment-ui",
-    "add-sprint-toggle",
-    "add-road-sign-travel",
-    "add-lake-trail-forage",
-    "add-estate-lake",
-    "add-cove-route",
-    "add-chest-names",
-    "add-chest-auto-store",
-    "daily-weed-pass"
-  ],
+  "nextBuild": [],
   "removed": [
     "replace-heroine-with-metahuman"
   ],
-  "updated": "2026-10-02T01:08:41.168Z"
+  "updated": "2026-10-02T01:08:41.168Z",
+  "slots": {
+    "polish-parchment-ui": "2026-10-01 21:00",
+    "add-sprint-toggle": "2026-10-01 21:00",
+    "add-road-sign-travel": "2026-10-01 21:00",
+    "add-lake-trail-forage": "2026-10-01 21:00",
+    "add-estate-lake": "2026-10-01 21:00",
+    "add-cove-route": "2026-10-01 21:00",
+    "add-chest-names": "2026-10-01 21:00",
+    "add-chest-auto-store": "2026-10-01 21:00",
+    "daily-weed-pass": "2026-10-01 21:00",
+    "fix-tool-grip-contact": "2026-10-02 07:30",
+    "place-items-in-exact-slots": "2026-10-02 07:30",
+    "pitch-dark-parchment-theme": "2026-10-01 21:00"
+  }
 }

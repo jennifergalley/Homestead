@@ -255,6 +255,32 @@ export function renderPlannerHtml() {
       color: var(--text-color-default, #e6edf3);
     }
     .row-actions { display: flex; gap: 6px; align-items: center; }
+    .slot-select {
+      border: 1px solid var(--border-color-default, #30363d);
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: var(--background-color-default, #0d1117);
+      color: var(--text-color-muted, #8b949e);
+      font: inherit;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .slot-select.on {
+      border-color: var(--true-color-blue, #58a6ff);
+      background: var(--true-color-blue-muted, #1f6feb33);
+      color: var(--text-color-default, #e6edf3);
+    }
+    .carried-note { color: var(--true-color-orange, #d29922); font-size: 12px; margin-top: 2px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .chip {
+      border: 1px solid var(--border-color-default, #30363d);
+      border-radius: 999px;
+      padding: 2px 9px;
+      font-size: 12px;
+      color: var(--text-color-default, #e6edf3);
+    }
+    .chip.carried { border-color: var(--true-color-orange, #d29922); }
+    .chip.carried::after { content: " ↻"; color: var(--true-color-orange, #d29922); }
     .icon-button {
       border: 1px solid var(--border-color-default, #30363d);
       border-radius: 999px;
@@ -275,7 +301,7 @@ export function renderPlannerHtml() {
     <header class="hero">
       <div>
         <h1>Homestead task planner</h1>
-        <div class="subtitle">What shipped, what's building, and what's next. Drag to set priority; flag items for the next build.</div>
+        <div class="subtitle">What shipped, what's building, and what's next. Drag to set priority; pick a release for each item.</div>
       </div>
       <button id="refresh" class="refresh" type="button">Refresh</button>
     </header>
@@ -300,30 +326,52 @@ export function renderPlannerHtml() {
       return node;
     };
 
-    function renderBuildCard(build, current = false) {
+    function renderBuildCard(build, current = false, assigned = []) {
       const card = el("article", "build-card" + (current ? " current" : ""));
       const title = el("div", "build-title");
-      title.append(el("strong", "", [build.date, build.slot].filter(Boolean).join(" — ")),
+      title.append(el("strong", "", build.label ?? [build.date, build.slot].filter(Boolean).join(" — ")),
         el("span", "badge " + (build.status === "delivered" ? "complete" : "active"), build.status));
-      card.append(title, el("div", "build-meta", build.sha));
-      if (build.ships.length) {
+      card.append(title);
+      if (build.sha && build.sha !== "pending") card.append(el("div", "build-meta", build.sha));
+      if (build.ships?.length) {
         const list = el("ul");
         for (const item of build.ships) list.append(el("li", "", item));
         card.append(list);
       }
+      if (assigned.length) {
+        const chips = el("div", "chips");
+        for (const feature of assigned) {
+          const chip = el("span", "chip" + (feature.carriedFrom ? " carried" : ""), feature.title);
+          if (feature.carriedFrom) chip.title = "Carried over from " + feature.carriedFrom;
+          chips.append(chip);
+        }
+        card.append(chips);
+      }
+      if (!build.ships?.length && !assigned.length) card.append(el("div", "build-meta", "Nothing scheduled yet"));
       return card;
     }
 
     function renderBuilds(builds) {
       buildsNode.replaceChildren();
-      if (!builds?.entries?.length && !builds?.later?.length) return;
+      const slots = state.planner.slots ?? [];
+      const features = state.planner.features;
       const head = el("div", "builds-head");
-      head.append(el("h2", "", "Builds"), el("span", "muted", "Current changelist and recent deliveries"));
+      head.append(el("h2", "", "Builds"), el("span", "muted", "Upcoming releases and recent deliveries"));
       buildsNode.append(head);
-      const current = builds.entries.find((build) => build.status === "building" || build.status === "planned")
-        ?? builds.entries.find((build) => build.status === "delivered");
-      if (current) buildsNode.append(renderBuildCard(current, true));
-      const delivered = builds.entries.filter((build) => build.status === "delivered" && build !== current);
+      const shown = new Set();
+      slots.forEach((slot, index) => {
+        const entry = builds?.entries?.find((build) => build.key === slot.key && build.status !== "delivered");
+        const assigned = features.filter((feature) => feature.slot === slot.key);
+        if (entry) shown.add(entry);
+        if (!entry && !assigned.length && index > 0) return;
+        buildsNode.append(renderBuildCard({ ...(entry ?? { status: "planned", ships: [] }), label: slot.label, status: entry?.status ?? "planned" }, index === 0, assigned));
+      });
+      const byTime = (a, b) => (Number.isFinite(a.time) ? a.time : 0) - (Number.isFinite(b.time) ? b.time : 0);
+      for (const build of [...(builds?.entries ?? [])].sort(byTime)) {
+        if (build.status === "delivered" || shown.has(build)) continue;
+        buildsNode.append(renderBuildCard(build));
+      }
+      const delivered = (builds?.entries ?? []).filter((build) => build.status === "delivered").sort((a, b) => byTime(b, a));
       for (const build of delivered.slice(0, 2)) buildsNode.append(renderBuildCard(build));
       if (delivered.length > 2) {
         const collapsed = el("details", "build-card");
@@ -348,8 +396,8 @@ export function renderPlannerHtml() {
     function renderBoard() {
       board.replaceChildren();
       const features = state.planner.features.filter((feature) => feature.status !== "complete");
-      const flagged = features.filter((feature) => feature.nextBuild).length;
-      note.textContent = features.length + " items" + (flagged ? " · " + flagged + " flagged for the next build" : "");
+      const flagged = features.filter((feature) => feature.slot).length;
+      note.textContent = features.length + " items" + (flagged ? " · " + flagged + " scheduled" : "");
       if (!features.length) {
         board.append(el("div", "empty", "Nothing planned. Playtest feedback will land here."));
         return;
@@ -357,20 +405,23 @@ export function renderPlannerHtml() {
       const list = el("div", "checklist");
       features.forEach((feature, index) => {
         const open = feature.sections.flatMap((section) => section.tasks).filter((task) => !task.done);
-        const row = el("div", "check-row" + (feature.nextBuild ? " next" : ""));
+        const row = el("div", "check-row" + (feature.slot ? " next" : ""));
         row.dataset.id = feature.id;
         row.draggable = true;
         row.title = feature.path;
         const text = el("div");
         text.append(el("div", "check-title", feature.title));
+        if (feature.carriedFrom) text.append(el("div", "carried-note", "Carried over from " + feature.carriedFrom));
         for (const task of open.slice(0, 3)) text.append(el("div", "check-text", task.text));
-        const button = el("button", "next-button" + (feature.nextBuild ? " on" : ""),
-          feature.nextBuild ? "★ Next build" : "☆ Next build");
-        button.type = "button";
-        button.addEventListener("click", async (event) => {
-          event.stopPropagation();
+        const button = el("select", "slot-select" + (feature.slot ? " on" : ""));
+        button.title = "Schedule for a release";
+        button.append(new Option("Unscheduled", ""));
+        for (const slot of state.planner.slots ?? []) button.append(new Option(slot.label, slot.key));
+        button.value = feature.slot ?? "";
+        for (const eventName of ["mousedown", "click", "dragstart"]) button.addEventListener(eventName, (event) => event.stopPropagation());
+        button.addEventListener("change", async () => {
           button.disabled = true;
-          try { await savePriority({ toggleNext: feature.id }); await load(true, true); }
+          try { await savePriority({ assign: { id: feature.id, slot: button.value || null } }); await load(true, true); }
           catch (error) { note.textContent = error.message; }
           finally { button.disabled = false; }
         });

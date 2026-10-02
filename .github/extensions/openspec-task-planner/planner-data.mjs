@@ -106,6 +106,94 @@ async function loadBuilds(projectRoot) {
     }
 }
 
+const slotMinutes = [7 * 60 + 30, 16 * 60, 21 * 60];
+const pad = (value) => String(value).padStart(2, "0");
+const dateKey = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
+function slotTimeText(minutes) {
+    const hour = Math.floor(minutes / 60), minute = minutes % 60;
+    return `${hour % 12 || 12}${minute ? ":" + pad(minute) : ""} ${hour < 12 ? "AM" : "PM"}`;
+}
+
+function parseSlotMinutes(text) {
+    const match = /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i.exec((text ?? "").trim());
+    if (!match) return null;
+    return (Number(match[1]) % 12 + (match[3].toUpperCase() === "PM" ? 12 : 0)) * 60 + Number(match[2] ?? 0);
+}
+
+export function buildKey(build) {
+    const minutes = parseSlotMinutes(build.slot);
+    return minutes === null || !/^\d{4}-\d{2}-\d{2}$/.test(build.date) ? null
+        : `${build.date} ${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
+}
+
+function keyTime(key) {
+    const match = /^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$/.exec(key ?? "");
+    return match ? new Date(+match[1], +match[2] - 1, +match[3], +match[4], +match[5]).getTime() : NaN;
+}
+
+const namedSlotMinutes = { morning: 9 * 60, midday: 12 * 60, noon: 12 * 60, afternoon: 15 * 60, "early evening": 18 * 60, evening: 20 * 60, night: 22 * 60, overnight: 23 * 60 };
+
+function buildTime(build) {
+    const exact = keyTime(buildKey(build));
+    if (Number.isFinite(exact)) return exact;
+    const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(build.date ?? "");
+    if (!day) return NaN;
+    const minutes = namedSlotMinutes[(build.slot ?? "").trim().toLowerCase()] ?? 12 * 60;
+    return new Date(+day[1], +day[2] - 1, +day[3], Math.floor(minutes / 60), minutes % 60).getTime();
+}
+
+function slotLabel(time, now) {
+    const date = new Date(time);
+    const today = new Date(now);
+    const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+    const minutes = date.getHours() * 60 + date.getMinutes();
+    const day = dateKey(date) === dateKey(today) ? (minutes >= 18 * 60 ? "Tonight" : "Today")
+        : dateKey(date) === dateKey(tomorrow) ? "Tomorrow"
+        : date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    return `${day} ${slotTimeText(minutes)}`;
+}
+
+export function upcomingSlots(builds, now = Date.now(), count = 3) {
+    const delivered = new Set(builds.entries.filter((build) => build.status === "delivered").map(buildKey).filter(Boolean));
+    const slots = [];
+    const start = new Date(now);
+    for (let day = 0; slots.length < count && day < 14; day++) {
+        for (const minutes of slotMinutes) {
+            const time = new Date(start.getFullYear(), start.getMonth(), start.getDate() + day, Math.floor(minutes / 60), minutes % 60).getTime();
+            const key = `${dateKey(new Date(time))} ${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
+            if (time <= now || delivered.has(key)) continue;
+            slots.push({ key, label: slotLabel(time, now), date: dateKey(new Date(time)), slot: slotTimeText(minutes) });
+            if (slots.length === count) break;
+        }
+    }
+    return slots;
+}
+
+export function scheduleFeatures(features, priority, builds, now = Date.now()) {
+    const slots = upcomingSlots(builds, now, 3);
+    const open = new Set(slots.map((slot) => slot.key));
+    const labels = new Map(slots.map((slot) => [slot.key, slot.label]));
+    const assigned = priority.slots && typeof priority.slots === "object" ? priority.slots : {};
+    const legacyNext = new Set(Array.isArray(priority.nextBuild) ? priority.nextBuild : []);
+    for (const feature of features) {
+        let key = typeof assigned[feature.id] === "string" ? assigned[feature.id]
+            : legacyNext.has(feature.id) && slots[0] ? slots[0].key : null;
+        feature.carriedFrom = null;
+        if (key && !open.has(key) && feature.status !== "complete") {
+            const time = keyTime(key);
+            feature.carriedFrom = Number.isFinite(time)
+                ? new Date(time).toLocaleDateString("en-US", { weekday: "short" }) + " " + slotTimeText(new Date(time).getHours() * 60 + new Date(time).getMinutes())
+                : key;
+            key = slots[0]?.key ?? null;
+        }
+        feature.slot = key;
+        feature.slotLabel = key ? labels.get(key) ?? key : null;
+        feature.nextBuild = !!key;
+    }
+    return slots;
+}
+
 async function readActiveChange(projectRoot, now) {
     let run;
     let status;
@@ -158,10 +246,13 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
             .then((text) => JSON.parse(text)).catch(() => ({})),
     ]);
     const order = new Map((Array.isArray(priority.order) ? priority.order : []).map((id, index) => [id, index]));
-    const nextBuild = new Set(Array.isArray(priority.nextBuild) ? priority.nextBuild : []);
     const removed = new Set(Array.isArray(priority.removed) ? priority.removed : []);
     for (let i = features.length - 1; i >= 0; i--) if (removed.has(features[i].id)) features.splice(i, 1);
-    for (const feature of features) feature.nextBuild = nextBuild.has(feature.id);
+    const slots = scheduleFeatures(features, priority, builds, now);
+    for (const build of builds.entries) {
+        build.key = buildKey(build);
+        build.time = buildTime(build);
+    }
     features.sort((a, b) => {
         const ao = order.has(a.id) ? order.get(a.id) : Infinity;
         const bo = order.has(b.id) ? order.get(b.id) : Infinity;
@@ -184,5 +275,6 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
         },
         features,
         builds,
+        slots,
     };
 }

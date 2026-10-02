@@ -55,7 +55,6 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Status: planned
 - Ships:
 - Menu panels line up edge to edge, with one clear selection outline.
-- Dragging an item drops it in exactly the square you choose.
 - Crafting recipes fill the page width.
 - Map labels are crisp, with no text shadow.
 - The wardrobe preview just shows her standing.
@@ -78,6 +77,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Axe and pickaxe swings use a natural wrist angle on the forward hand.
 - The scythe sits further in front of her, so neither hand clips her chest.
 - Hoeing keeps both arms clear of her torso.
+- Dragging an item drops it in exactly the square you choose, and it stays there (moved from 9 PM).
 
 ## Later
 

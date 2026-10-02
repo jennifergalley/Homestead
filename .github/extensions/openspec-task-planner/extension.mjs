@@ -16,10 +16,23 @@ let pendingNotes = [];
 async function readPriority() {
     try {
         const value = JSON.parse(await readFile(priorityPath, "utf8"));
-        return { order: Array.isArray(value.order) ? value.order : [], nextBuild: Array.isArray(value.nextBuild) ? value.nextBuild : [], removed: Array.isArray(value.removed) ? value.removed : [] };
+        return {
+            order: Array.isArray(value.order) ? value.order : [],
+            nextBuild: Array.isArray(value.nextBuild) ? value.nextBuild : [],
+            slots: value.slots && typeof value.slots === "object" ? value.slots : {},
+            removed: Array.isArray(value.removed) ? value.removed : [],
+        };
     } catch {
-        return { order: [], nextBuild: [], removed: [] };
+        return { order: [], nextBuild: [], slots: {}, removed: [] };
     }
+}
+
+async function migrateNextBuild(priority) {
+    if (!priority.nextBuild.length) return;
+    const planner = await loadPlanner(projectRoot);
+    const first = planner.slots[0]?.key;
+    for (const id of priority.nextBuild) if (first && !priority.slots[id]) priority.slots[id] = first;
+    priority.nextBuild = [];
 }
 
 async function writePriority(priority) {
@@ -46,14 +59,18 @@ function notifyOrchestrator(note) {
         const planner = await loadPlanner(projectRoot);
         const titles = new Map(planner.features.map((feature) => [feature.id, feature.title]));
         const priority = await readPriority();
-        const next = priority.nextBuild.map((id) => titles.get(id) ?? id);
+        const scheduled = planner.slots.map((slot) => {
+            const items = planner.features.filter((feature) => feature.slot === slot.key)
+                .map((feature) => feature.title + (feature.carriedFrom ? " (carried over from " + feature.carriedFrom + ")" : ""));
+            return slot.label + " [" + slot.key + "]: " + (items.length ? items.join(", ") : "nothing");
+        });
         const top = priority.order.slice(0, 8).map((id, index) => `${index + 1}. ${titles.get(id) ?? id}`);
         await session.send({
             prompt: [
-                "[Task planner] Jenny updated her backlog priorities in the canvas (" + notes.join("; ") + ").",
-                "Flagged for the next build: " + (next.length ? next.join(", ") : "none") + ".",
+                "[Task planner] Jenny updated her backlog in the canvas (" + notes.join("; ") + ").",
+                "Scheduled releases:\n" + scheduled.join("\n"),
                 "Priority order (top 8):\n" + top.join("\n"),
-                "docs/handoff/priority.json was updated in the Orchestrator worktree: commit and push it to main, assign the next-build items to their lanes, and add them to the next planned entry in docs/handoff/builds.md.",
+                "docs/handoff/priority.json was updated in the Orchestrator worktree: commit and push it to main, assign newly scheduled items to their lanes, and keep each slot's entry in docs/handoff/builds.md in sync.",
             ].join("\n"),
         });
     }, 15000);
@@ -98,16 +115,24 @@ async function startServer(instanceId) {
                     priority.order = body.order.filter((id) => typeof id === "string").slice(0, 500);
                     notifyOrchestrator("reordered");
                 }
-                if (typeof body.toggleNext === "string") {
-                    const id = body.toggleNext;
-                    const on = !priority.nextBuild.includes(id);
-                    priority.nextBuild = on ? [...priority.nextBuild, id] : priority.nextBuild.filter((value) => value !== id);
-                    notifyOrchestrator((on ? "flagged " : "unflagged ") + id);
+                if (body.assign && typeof body.assign.id === "string") {
+                    await migrateNextBuild(priority);
+                    const { id, slot } = body.assign;
+                    const planner = await loadPlanner(projectRoot);
+                    const target = planner.slots.find((value) => value.key === slot);
+                    if (slot && !target) {
+                        sendJson(res, { error: "That release is no longer open" }, 400);
+                        return;
+                    }
+                    if (target) priority.slots[id] = target.key;
+                    else delete priority.slots[id];
+                    notifyOrchestrator(target ? "scheduled " + id + " for " + target.label : "unscheduled " + id);
                 }
                 if (typeof body.remove === "string") {
                     const id = body.remove;
                     priority.removed = [...new Set([...(priority.removed ?? []), id])];
                     priority.nextBuild = priority.nextBuild.filter((value) => value !== id);
+                    delete priority.slots[id];
                     priority.order = priority.order.filter((value) => value !== id);
                     notifyOrchestrator("removed " + id + " (archive its OpenSpec change)");
                 }
@@ -130,7 +155,7 @@ async function startServer(instanceId) {
                     attachments: [{
                         type: "extension_context",
                         title: feature.title,
-                        payload: { kind: "planned-improvement", id: feature.id, path: feature.path, title: feature.title, tasks, nextBuild: !!feature.nextBuild },
+                        payload: { kind: "planned-improvement", id: feature.id, path: feature.path, title: feature.title, tasks, release: feature.slotLabel ?? "unscheduled" },
                     }],
                 });
                 sendJson(res, { ok: true });
