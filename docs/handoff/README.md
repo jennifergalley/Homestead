@@ -37,6 +37,8 @@ Jenny's standing team preference (2026-09-29). These are **required settings for
 launches**; documenting them does not change a live session's model or reasoning level.
 
 Updated 2026-10-01 for token efficiency (Jenny approved): pick the cheapest tier that keeps quality.
+Jenny prefers GPT-6 Sol over Sonnet 5 for sub-agents because they cost the same in GHCP; use
+GPT-6 Sol wherever Sonnet 5 would otherwise be selected for a new agent.
 
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
@@ -44,7 +46,7 @@ Updated 2026-10-01 for token efficiency (Jenny approved): pick the cheapest tier
 | Documentation Agent | GPT-5.6 Terra (`gpt-5.6-terra`) | medium | default |
 | Architecture Agent (spawn only for a real refactor or review) | GPT-6 Sol (`gpt-6-sol`) | high | default |
 | Implementer, hard work: animation, Blender, rendering, save format, complex gameplay | Claude Opus 5.5 (`claude-opus-5.5`) | high | long |
-| Implementer, small work: UI tweaks, copy, moving or placing objects, test fixes | Claude Sonnet 5 (`claude-sonnet-5`) | medium | default |
+| Implementer, small work: UI tweaks, copy, moving or placing objects, test fixes | GPT-6 Sol (`gpt-6-sol`) | medium | default |
 | Integration Agent (merge, package, run scripted tests) | GPT-5.4 mini (`gpt-5.4-mini`) | medium | default |
 | Code review sub-agent (only for save-format or gameplay-logic diffs) | GPT-5.4 mini (`gpt-5.4-mini`) | medium | default |
 | Disk Cleanup Agent | unchanged (existing session) | | |

@@ -42,7 +42,7 @@ Archive it once its work is pushed and Integration has packaged it.
 
 | Area | Typical work | Tier |
 | --- | --- | --- |
-| UI Menus | the book, HUD, map, hints, toasts, theme, controls | small (Sonnet) unless it touches saves |
+| UI Menus | the book, HUD, map, hints, toasts, theme, controls | small (GPT-6 Sol) unless it touches saves |
 | Props Animations | character, tools, animation, clothing, Blender assets | hard (Opus) |
 | Terrain Weather | terrain, water, foliage, weather, object placement on the map | small for placement, hard for rendering |
 | Integration | merge, Development-Run, package, scripted tests, shortcut | GPT-5.4 mini |
