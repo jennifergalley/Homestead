@@ -932,6 +932,8 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         const auto BeforeHour = MakeShared<double>(0);
         const auto BeforeGrowth = MakeShared<double>(0);
         const auto BeforeBerryGrowth = MakeShared<double>(0);
+        const auto BeforeRootWeeds = MakeShared<double>(0);
+        const auto BeforeBerryWeeds = MakeShared<double>(0);
         const auto BeforeFuel = MakeShared<double>(0);
         const auto ExpectedSleep = MakeShared<double>(8);
         if (Rest == 3)
@@ -968,33 +970,43 @@ void AHomesteadSmokeTest::PrepareFullLoop()
                     && Controller->Simulation().IsSheltered(Controller->PlayerPoint());
             }, 0.65f);
         Add(FString::Printf(TEXT("Sleep in the cabin until first light, rest %d"), Rest + 1),
-            [this, BeforeHour, BeforeGrowth, BeforeBerryGrowth, BeforeFuel, ExpectedSleep, BerryPlotId]()
+            [this, BeforeHour, BeforeGrowth, BeforeBerryGrowth, BeforeRootWeeds, BeforeBerryWeeds,
+                BeforeFuel, ExpectedSleep, BerryPlotId]()
             {
                 *BeforeHour = Controller->State().hour;
                 *ExpectedSleep = Controller->BedSleepHours();
                 const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
                 *BeforeGrowth = Plot ? Plot->growth : -1;
+                *BeforeRootWeeds = Plot ? Plot->weeds : -1;
                 const auto* BerryPlot = FindPlot(Controller->State(), *BerryPlotId);
                 *BeforeBerryGrowth = BerryPlot ? BerryPlot->growth : -1;
+                *BeforeBerryWeeds = BerryPlot ? BerryPlot->weeds : -1;
                 const auto* Piece = FindPiece(Controller->State(), Homestead::Piece::Fire, -3, -2);
                 *BeforeFuel = Piece ? Piece->fuelHours : -1;
                 Tap(EKeys::Gamepad_FaceButton_Bottom);
             },
-            [this, BeforeHour, BeforeGrowth, BeforeBerryGrowth, BeforeFuel, ExpectedSleep, BerryPlotId]()
+            [this, BeforeHour, BeforeGrowth, BeforeBerryGrowth, BeforeRootWeeds, BeforeBerryWeeds,
+                BeforeFuel, ExpectedSleep, BerryPlotId]()
             {
                 const auto& State = Controller->State();
                 const auto* Plot = FindPlot(State, GardenPlotId);
                 const auto* BerryPlot = FindPlot(State, *BerryPlotId);
                 const auto* Piece = FindPiece(State, Homestead::Piece::Fire, -3, -2);
+                const int32 WeedDay = Homestead::Crops::WeedDay(State.hour);
                 return !Controller->IsFailed() && !Controller->ToastIsError() && Plot && Piece && BerryPlot
                     && FMath::Abs(*ExpectedSleep - 7.25) < 0.02
                     && State.hour >= *BeforeHour + *ExpectedSleep - 0.01
                     && State.hour < *BeforeHour + *ExpectedSleep + 0.1
                     && FMath::Abs(FMath::Fmod(State.hour, 24.0) - 6.0) < 0.02
+                    && WeedDay == Homestead::Crops::WeedDay(*BeforeHour) + 1
                     && State.energy > 99 && State.hunger > 40
-                    && Plot->planted && Plot->growth >= *BeforeGrowth && Plot->weeds > 0.05
+                    && Plot->planted && Plot->growth >= *BeforeGrowth
+                    && FMath::IsNearlyEqual(Plot->weeds, FMath::Min(1.0,
+                        *BeforeRootWeeds + (Homestead::Crops::WeedsComeUp(Plot->id, WeedDay) ? Homestead::CropCare::DailyWeeds : 0.0)), 0.001)
                     && BerryPlot->planted && BerryPlot->kind == Homestead::CropKind::Berries
-                    && BerryPlot->growth >= *BeforeBerryGrowth && BerryPlot->weeds > 0.05
+                    && BerryPlot->growth >= *BeforeBerryGrowth
+                    && FMath::IsNearlyEqual(BerryPlot->weeds, FMath::Min(1.0,
+                        *BeforeBerryWeeds + (Homestead::Crops::WeedsComeUp(BerryPlot->id, WeedDay) ? Homestead::CropCare::DailyWeeds : 0.0)), 0.001)
                     && FMath::Abs(Piece->fuelHours - FMath::Max(0.0, *BeforeFuel - *ExpectedSleep)) < 0.05;
             }, 0.6f);
         if (Rest == 1)
@@ -1032,7 +1044,7 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             [this]()
             {
                 const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
-                return Plot && Plot->planted && Plot->growth > 0 && Plot->weeds > 0.05;
+                return Plot && Plot->planted && Plot->growth > 0;
             }, 0.65f);
         Add(FString::Printf(TEXT("Remove gradual weeds through gamepad X after rest %d"), Rest + 1),
             [this]() { Tap(EKeys::Gamepad_FaceButton_Left); },
@@ -1067,13 +1079,13 @@ void AHomesteadSmokeTest::PrepareFullLoop()
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
             return Plot && (Plot->growth >= 1 || Plot->moisture >= 1);
         };
-        Add(FString::Printf(TEXT("Inspect berry growth and gradual weeds after rest %d"), Rest + 1),
+        Add(FString::Printf(TEXT("Inspect berry growth and any weeds after rest %d"), Rest + 1),
             [this, BerryGarden]() { Teleport(BerryGarden); },
             [this, BerryPlotId]()
             {
                 const auto* Plot = FindPlot(Controller->State(), *BerryPlotId);
                 return Plot && Plot->planted && Plot->kind == Homestead::CropKind::Berries
-                    && Plot->growth > 0 && Plot->weeds > 0.05
+                    && Plot->growth > 0
                     && Controller->FocusTitle().StartsWith(TEXT("Berries"));
             }, 0.65f);
         Add(FString::Printf(TEXT("Gamepad X weeds the planted berry bush after rest %d"), Rest + 1),
