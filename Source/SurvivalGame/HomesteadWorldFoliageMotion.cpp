@@ -25,6 +25,13 @@ TAutoConsoleVariable<float> CVarShrubWind(TEXT("homestead.ShrubWind"), ShrubWind
     TEXT("wind (1 = as authored, 0 = still). The sway is tip-weighted (height squared)."));
 TAutoConsoleVariable<int32> CVarShrubShadows(TEXT("homestead.ShrubShadows"), 1,
     TEXT("1 = those shrubs cast shadows (default); 0 = they don't (A/B for shadow motion)."));
+// Jenny, 2026-10-01: under the woodland canopy the dappled shade swam, flickered and hitched as she walked. The
+// Nanite trees' ray-traced shadows followed their wind sway through a coarse proxy that the engine re-simulates
+// only for nearby instance buckets (so the pose jumped as she moved), and the virtual shadow maps redrew every
+// swaying canopy's pages each frame. Shadows from the rest pose cure both and cost less.
+TAutoConsoleVariable<int32> CVarFoliageShadowSway(TEXT("homestead.FoliageShadowSway"), 0,
+    TEXT("0 = foliage shadows come from the plants' rest pose while the leaves still sway (default); 1 = the ")
+    TEXT("shadows follow the wind sway, as before (A/B)."));
 TAutoConsoleVariable<int32> CVarFoliageDither(TEXT("homestead.FoliageDither"), 1,
     TEXT("1 = the camera-safe dither fades plants between the camera and her (default); 0 = off (A/B)."));
 // Names are made on use, not during static initialisation.
@@ -83,9 +90,45 @@ void AHomesteadWorld::TagSwayingShrub(UMeshComponent& Component)
     if (AppliedShrubWind == 0.0f) Static->SetEvaluateWorldPositionOffset(false);
 }
 
+void AHomesteadWorld::ApplyFoliageShadowSway(UPrimitiveComponent& Component, EShadowCacheInvalidationBehavior Authored, bool bSway)
+{
+    if (UStaticMeshComponent* Static = Cast<UStaticMeshComponent>(&Component))
+    {
+        if (Static->IsRegistered()) Static->SetEvaluateWorldPositionOffsetInRayTracing(bSway);
+        else Static->bEvaluateWorldPositionOffsetInRayTracing = bSway;
+    }
+    // Rigid: the cached virtual shadow pages ignore the sway (they still follow a moved or felled plant).
+    const EShadowCacheInvalidationBehavior Behaviour = bSway ? Authored : EShadowCacheInvalidationBehavior::Rigid;
+    if (Component.ShadowCacheInvalidationBehavior != Behaviour)
+    {
+        Component.ShadowCacheInvalidationBehavior = Behaviour;
+        if (Component.IsRegistered()) Component.MarkRenderStateDirty();
+    }
+}
+
+void AHomesteadWorld::CalmFoliageShadow(UMeshComponent& Component)
+{
+    using namespace HomesteadFoliageMotion;
+    const EShadowCacheInvalidationBehavior Authored = Component.ShadowCacheInvalidationBehavior;
+    ApplyFoliageShadowSway(Component, Authored, CVarFoliageShadowSway.GetValueOnGameThread() != 0);
+    CalmShadowFoliage.Emplace(&Component, Authored);
+}
+
 void AHomesteadWorld::UpdateFoliageMotion()
 {
     using namespace HomesteadFoliageMotion;
+    const int32 ShadowSway = CVarFoliageShadowSway.GetValueOnGameThread() != 0 ? 1 : 0;
+    if (ShadowSway != AppliedFoliageShadowSway)
+    {
+        CalmShadowFoliage.RemoveAll([](const TPair<TWeakObjectPtr<UPrimitiveComponent>, EShadowCacheInvalidationBehavior>& Entry)
+            { return !Entry.Key.IsValid(); });
+        if (AppliedFoliageShadowSway >= 0)
+        {
+            for (const auto& Entry : CalmShadowFoliage) ApplyFoliageShadowSway(*Entry.Key.Get(), Entry.Value, ShadowSway != 0);
+            UE_LOG(LogHomesteadWorld, Display, TEXT("Foliage shadows follow the sway: %d (%d components)"), ShadowSway, CalmShadowFoliage.Num());
+        }
+        AppliedFoliageShadowSway = ShadowSway;
+    }
     const float Wind = FMath::Max(0.0f, CVarShrubWind.GetValueOnGameThread());
     const int32 Shadows = CVarShrubShadows.GetValueOnGameThread() != 0 ? 1 : 0;
     const int32 Dither = CVarFoliageDither.GetValueOnGameThread() != 0 ? 1 : 0;

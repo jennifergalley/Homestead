@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Async/Future.h"
 #include "GameFramework/Actor.h"
+#include "SceneTypes.h"
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadRegionalDescriptorCache.h"
 #include "Simulation/HomesteadSimulation.h"
@@ -533,6 +534,14 @@ private:
     // camera-safe dither, each behind a console variable for A/B; re-applied only when one changes.
     void TagSwayingShrub(UMeshComponent& Component);
     void UpdateFoliageMotion();
+    // Foliage shadows from the rest pose (reduce-foliage-shadow-motion; homestead.FoliageShadowSway): the
+    // leaves still sway on screen, but their ray-traced and virtual shadows don't follow the sway, so the
+    // dappled shade under the canopy holds still as she walks. Called for every foliage component it's
+    // given (ApplyCameraSafeFoliageMaterials), and remembered so the console variable can A/B it live.
+    void CalmFoliageShadow(UMeshComponent& Component);
+    void ApplyFoliageShadowSway(UPrimitiveComponent& Component, EShadowCacheInvalidationBehavior Authored, bool bSway);
+    TArray<TPair<TWeakObjectPtr<UPrimitiveComponent>, EShadowCacheInvalidationBehavior>> CalmShadowFoliage;
+    int32 AppliedFoliageShadowSway = -1;
     UPROPERTY()
     TMap<TObjectPtr<UMaterialInterface>, TObjectPtr<UMaterialInstanceDynamic>> ShrubWindMaterials;
     TMap<TWeakObjectPtr<UMaterialInstanceDynamic>, FVector2f> ShrubWindBase;   // authored WindStrength, LeafFlutter

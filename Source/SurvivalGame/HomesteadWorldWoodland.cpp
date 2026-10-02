@@ -378,6 +378,7 @@ bool AHomesteadWorld::LoadCameraSafeFoliageMaterials()
 
 bool AHomesteadWorld::ApplyCameraSafeFoliageMaterials(UMeshComponent& Component)
 {
+    CalmFoliageShadow(Component);
     UStaticMesh* Mesh = Cast<UStaticMeshComponent>(&Component)
         ? CastChecked<UStaticMeshComponent>(&Component)->GetStaticMesh()
         : Cast<UHierarchicalInstancedStaticMeshComponent>(&Component)
