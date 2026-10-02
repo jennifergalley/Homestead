@@ -187,6 +187,36 @@ export function renderPlannerHtml() {
     }
     .completed-content .section { margin-top: 12px; }
     .meta { margin-top: 13px; font-size: 12px; color: var(--text-color-muted, #8b949e); }
+    .checklist {
+      border: 1px solid var(--border-color-default, #30363d);
+      background: var(--background-color-muted, #161b22);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .check-row {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 16px;
+      border-bottom: 1px solid color-mix(in srgb, var(--border-color-default, #30363d) 55%, transparent);
+    }
+    .check-row:last-child { border-bottom: 0; }
+    .check-box {
+      width: 16px; height: 16px; margin-top: 3px;
+      border: 1.5px solid var(--text-color-muted, #8b949e);
+      border-radius: 4px;
+      display: grid; place-items: center;
+      font-size: 12px; line-height: 1;
+    }
+    .check-row.done .check-box {
+      border-color: var(--true-color-green, #3fb950);
+      background: var(--true-color-green-muted, #23863633);
+      color: var(--true-color-green, #3fb950);
+    }
+    .check-title { font-weight: var(--font-weight-semibold, 600); }
+    .check-text { color: var(--text-color-muted, #8b949e); font-size: 13px; }
+    .check-row.done .check-title, .check-row.done .check-text { text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 55%, transparent); }
     .empty { padding: 48px 20px; text-align: center; color: var(--text-color-muted, #8b949e); }
     .error {
       border: 1px solid var(--true-color-red, #f85149);
@@ -321,7 +351,25 @@ export function renderPlannerHtml() {
         board.append(el("div", "empty", "No OpenSpec work matches this view."));
         return;
       }
-      for (const feature of features) {
+      const singles = features.filter((feature) => feature.total <= 1);
+      if (singles.length) {
+        const list = el("div", "checklist");
+        for (const feature of singles) {
+          const task = feature.sections.flatMap((section) => section.tasks)[0];
+          const done = feature.total > 0 && feature.completed >= feature.total;
+          const row = el("div", "check-row" + (done ? " done" : ""));
+          row.title = feature.path;
+          const text = el("div");
+          text.append(el("div", "check-title", feature.title));
+          if (task) text.append(el("div", "check-text", task.text));
+          const badge = feature.status === "active" || feature.status === "paused"
+            ? el("span", "badge " + feature.status, feature.status) : el("span");
+          row.append(el("div", "check-box", done ? "✓" : ""), text, badge);
+          list.append(row);
+        }
+        board.append(list);
+      }
+      for (const feature of features.filter((feature) => feature.total > 1)) {
         const details = el("details", "feature " + feature.status);
         details.open = state.expanded.get(feature.id)
           ?? (feature.status === "active" || feature.status === "paused");

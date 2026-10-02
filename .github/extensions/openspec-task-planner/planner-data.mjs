@@ -43,7 +43,7 @@ function parseTasks(markdown) {
             currentTask = null;
             continue;
         }
-        const task = line.match(/^- \[([ xX])\]\s+([0-9]+(?:\.[0-9]+)?)\s*(.+?)\s*$/);
+        const task = line.match(/^- \[([ xX])\]\s+([0-9]+(?:\.[0-9]+)?)\.?\s*(.+?)\s*$/);
         if (task) {
             currentTask = {
                 id: task[2],
@@ -82,15 +82,16 @@ function parseBuilds(markdown) {
         }
         const property = line.match(/^\s*-\s+(SHA|Status):\s*(.+?)\s*$/i);
         if (property && current) {
-            current[property[1].toLowerCase()] = property[2];
+            current[property[1].toLowerCase()] = property[2].replace(/`/g, "");
             continue;
         }
         const bullet = line.match(/^\s*-\s+(.+?)\s*$/);
         if (!bullet) continue;
+        const text = bullet[1].replace(/`/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
         if (inLater) {
-            later.push(bullet[1]);
-        } else if (current && bullet[1] !== "Ships:") {
-            current.ships.push(bullet[1]);
+            later.push(text);
+        } else if (current && text !== "Ships:") {
+            current.ships.push(text);
         }
     }
     return { entries, later };
