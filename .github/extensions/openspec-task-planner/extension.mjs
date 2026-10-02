@@ -3,15 +3,18 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createCanvas, joinSession } from "@github/copilot-sdk/extension";
-import { loadPlanner } from "./planner-data.mjs";
+import { loadPlanner, loadBacklogInbox, addBacklogEntry, toBacklogClientEntry, backlogAttachmentsDir, BACKLOG_IMAGE_TYPES } from "./planner-data.mjs";
 import { renderPlannerHtml } from "./planner-html.mjs";
 
 const projectRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const priorityPath = join(projectRoot, "docs", "handoff", "priority.json");
 const servers = new Map();
 let session = null;
-let notifyTimer = null;
-let pendingNotes = [];
+// Jenny's backlog-entry form, and reordering/scheduling in this canvas, are
+// deliberately agent-free: they write straight to disk (priority.json,
+// backlog-inbox.json, backlog.md) and the orchestrator picks up the change
+// next time it reads those files. Nothing here calls session.send().
+const BACKLOG_BODY_MAX_BYTES = 11 * 1024 * 1024; // ~8 MB image, base64-inflated, plus JSON overhead
 
 async function readPriority() {
     try {
@@ -40,40 +43,13 @@ async function writePriority(priority) {
     await writeFile(priorityPath, JSON.stringify({ ...priority, updated: new Date().toISOString() }, null, 2) + "\n", "utf8");
 }
 
-async function readBody(req) {
+async function readBody(req, maxBytes = 200000) {
     let body = "";
     for await (const chunk of req) {
         body += chunk;
-        if (body.length > 200000) throw new Error("Request too large");
+        if (body.length > maxBytes) throw new Error("Request too large");
     }
     return body ? JSON.parse(body) : {};
-}
-
-function notifyOrchestrator(note) {
-    pendingNotes.push(note);
-    clearTimeout(notifyTimer);
-    notifyTimer = setTimeout(async () => {
-        const notes = pendingNotes;
-        pendingNotes = [];
-        if (!session) return;
-        const planner = await loadPlanner(projectRoot);
-        const titles = new Map(planner.features.map((feature) => [feature.id, feature.title]));
-        const priority = await readPriority();
-        const scheduled = planner.slots.map((slot) => {
-            const items = planner.features.filter((feature) => feature.slot === slot.key)
-                .map((feature) => feature.title + (feature.carriedFrom ? " (carried over from " + feature.carriedFrom + ")" : ""));
-            return slot.label + " [" + slot.key + "]: " + (items.length ? items.join(", ") : "nothing");
-        });
-        const top = priority.order.slice(0, 8).map((id, index) => `${index + 1}. ${titles.get(id) ?? id}`);
-        await session.send({
-            prompt: [
-                "[Task planner] Jenny updated her backlog in the canvas (" + notes.join("; ") + ").",
-                "Scheduled releases:\n" + scheduled.join("\n"),
-                "Priority order (top 8):\n" + top.join("\n"),
-                "docs/handoff/priority.json was updated in the Orchestrator worktree: commit and push it to main, assign newly scheduled items to their lanes, and keep each slot's entry in docs/handoff/builds.md in sync.",
-            ].join("\n"),
-        });
-    }, 15000);
 }
 
 function sendJson(res, value, status = 200) {
@@ -113,7 +89,6 @@ async function startServer(instanceId) {
                 const priority = await readPriority();
                 if (Array.isArray(body.order)) {
                     priority.order = body.order.filter((id) => typeof id === "string").slice(0, 500);
-                    notifyOrchestrator("reordered");
                 }
                 if (body.assign && typeof body.assign.id === "string") {
                     await migrateNextBuild(priority);
@@ -126,7 +101,6 @@ async function startServer(instanceId) {
                     }
                     if (target) priority.slots[id] = target.key;
                     else delete priority.slots[id];
-                    notifyOrchestrator(target ? "scheduled " + id + " for " + target.label : "unscheduled " + id);
                 }
                 if (typeof body.remove === "string") {
                     const id = body.remove;
@@ -134,7 +108,6 @@ async function startServer(instanceId) {
                     priority.nextBuild = priority.nextBuild.filter((value) => value !== id);
                     delete priority.slots[id];
                     priority.order = priority.order.filter((value) => value !== id);
-                    notifyOrchestrator("removed " + id + " (archive its OpenSpec change)");
                 }
                 await writePriority(priority);
                 sendJson(res, priority);
@@ -159,6 +132,55 @@ async function startServer(instanceId) {
                     }],
                 });
                 sendJson(res, { ok: true });
+                return;
+            }
+            if (req.method === "GET" && url.pathname === "/api/backlog") {
+                const entries = await loadBacklogInbox(projectRoot);
+                sendJson(res, { entries: entries.map(toBacklogClientEntry) });
+                return;
+            }
+            if (req.method === "POST" && url.pathname === "/api/backlog") {
+                let body;
+                try {
+                    body = await readBody(req, BACKLOG_BODY_MAX_BYTES);
+                } catch {
+                    sendJson(res, { error: "Request too large" }, 413);
+                    return;
+                }
+                const result = await addBacklogEntry(projectRoot, {
+                    title: body.title,
+                    description: body.description,
+                    image: body.image,
+                });
+                if (result.error) {
+                    sendJson(res, { error: result.error }, 400);
+                    return;
+                }
+                sendJson(res, { entry: toBacklogClientEntry(result.value) }, 201);
+                return;
+            }
+            if (req.method === "GET" && url.pathname.startsWith("/api/backlog-image/")) {
+                const id = decodeURIComponent(url.pathname.slice("/api/backlog-image/".length));
+                const entries = await loadBacklogInbox(projectRoot);
+                const entry = entries.find((value) => value.id === id);
+                if (!entry || !entry.imageFile) {
+                    sendJson(res, { error: "Not found" }, 404);
+                    return;
+                }
+                let bytes;
+                try {
+                    bytes = await readFile(join(backlogAttachmentsDir(projectRoot), entry.imageFile));
+                } catch {
+                    sendJson(res, { error: "Not found" }, 404);
+                    return;
+                }
+                const mime = [...BACKLOG_IMAGE_TYPES.keys()].find((key) => key === entry.imageMime) ?? "application/octet-stream";
+                res.writeHead(200, {
+                    "Content-Type": mime,
+                    "Cache-Control": "no-store",
+                    "X-Content-Type-Options": "nosniff",
+                });
+                res.end(bytes);
                 return;
             }
             sendJson(res, { error: "Not found" }, 404);

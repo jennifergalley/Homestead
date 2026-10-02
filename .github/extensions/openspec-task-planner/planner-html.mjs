@@ -294,6 +294,40 @@ export function renderPlannerHtml() {
     .icon-button:disabled { opacity: .35; cursor: default; }
     .icon-button:hover { border-color: var(--true-color-blue, #58a6ff); color: var(--text-color-default, #e6edf3); }
     .icon-button.danger:hover, .icon-button.armed { border-color: var(--true-color-red, #f85149); color: var(--true-color-red, #f85149); }
+    .backlog-form {
+      border: 1px solid var(--border-color-default, #30363d);
+      background: var(--background-color-muted, #161b22);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .backlog-form h2 { margin: 0; font-size: 16px; }
+    .field { display: block; margin: 10px 0; }
+    .field > span { display: block; margin-bottom: 4px; color: var(--text-color-muted, #8b949e); font-size: 12px; }
+    .field input[type="text"], .field textarea {
+      width: 100%;
+      border: 1px solid var(--border-color-default, #30363d);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--background-color-default, #0d1117);
+      color: var(--text-color-default, #e6edf3);
+      resize: vertical;
+    }
+    .field input[type="file"] { color: var(--text-color-default, #e6edf3); }
+    .backlog-form-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+    .backlog-recent { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .backlog-recent-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border-color-default, #30363d);
+      border-radius: 8px;
+      padding: 6px 10px;
+      max-width: 260px;
+    }
+    .backlog-recent-item img { width: 32px; height: 32px; object-fit: cover; border-radius: 4px; }
+    .backlog-recent-item .backlog-recent-title { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .error-text { color: var(--true-color-red, #f85149); }
   </style>
 </head>
 <body>
@@ -305,6 +339,31 @@ export function renderPlannerHtml() {
       </div>
       <button id="refresh" class="refresh" type="button">Refresh</button>
     </header>
+    <section id="backlog-form-card" class="backlog-form" aria-label="Quick backlog entry">
+      <div class="builds-head">
+        <h2>Add to Jenny's backlog</h2>
+        <span id="backlog-form-note" class="muted">No chat tokens spent — this writes straight to docs/handoff/backlog.md.</span>
+      </div>
+      <form id="backlog-form" novalidate>
+        <label class="field">
+          <span>Title</span>
+          <input id="backlog-title" type="text" maxlength="200" required placeholder="e.g. Sell crops at the General Store">
+        </label>
+        <label class="field">
+          <span>Description (optional)</span>
+          <textarea id="backlog-description" maxlength="4000" rows="3" placeholder="What should it do? What did you see?"></textarea>
+        </label>
+        <label class="field">
+          <span>Screenshot (optional, PNG/JPEG/WebP/GIF, max 8 MB)</span>
+          <input id="backlog-image" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+        </label>
+        <div class="backlog-form-actions">
+          <button id="backlog-submit" class="refresh" type="submit">Add to backlog</button>
+          <span id="backlog-form-status" class="muted" role="status" aria-live="polite"></span>
+        </div>
+      </form>
+      <div id="backlog-recent" class="backlog-recent"></div>
+    </section>
     <section id="builds" class="builds" aria-label="Build changelist"></section>
     <div class="builds-head backlog-head">
       <h2>Planned improvements</h2>
@@ -318,6 +377,10 @@ export function renderPlannerHtml() {
     const board = document.getElementById("board");
     const refresh = document.getElementById("refresh");
     const note = document.getElementById("backlog-note");
+    const BACKLOG_MAX_TITLE_LENGTH = 200;
+    const BACKLOG_MAX_DESCRIPTION_LENGTH = 4000;
+    const BACKLOG_MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+    const BACKLOG_IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 
     const el = (tag, className, text) => {
       const node = document.createElement(tag);
@@ -500,6 +563,112 @@ export function renderPlannerHtml() {
       renderBoard();
     }
 
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("Couldn't read the screenshot file"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderBacklogRecent(entries) {
+      const host = document.getElementById("backlog-recent");
+      host.replaceChildren();
+      for (const entry of entries.slice(-6).reverse()) {
+        const item = el("div", "backlog-recent-item");
+        if (entry.imageUrl) {
+          const img = document.createElement("img");
+          img.src = entry.imageUrl;
+          img.alt = "";
+          item.append(img);
+        }
+        item.append(el("span", "backlog-recent-title", entry.title));
+        item.title = entry.title + (entry.description ? " — " + entry.description : "");
+        host.append(item);
+      }
+    }
+
+    async function loadBacklogRecent() {
+      try {
+        const response = await fetch("/api/backlog", { cache: "no-store" });
+        if (!response.ok) return;
+        const data = await response.json();
+        renderBacklogRecent(Array.isArray(data.entries) ? data.entries : []);
+      } catch {
+        // Non-fatal: the recent-submissions strip is a convenience, not required reading.
+      }
+    }
+
+    const backlogForm = document.getElementById("backlog-form");
+    const backlogTitle = document.getElementById("backlog-title");
+    const backlogDescription = document.getElementById("backlog-description");
+    const backlogImage = document.getElementById("backlog-image");
+    const backlogSubmit = document.getElementById("backlog-submit");
+    const backlogStatus = document.getElementById("backlog-form-status");
+
+    backlogForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      backlogStatus.className = "muted";
+      const title = backlogTitle.value.trim();
+      const description = backlogDescription.value.trim();
+      if (!title) {
+        backlogStatus.className = "error-text";
+        backlogStatus.textContent = "Title is required.";
+        backlogTitle.focus();
+        return;
+      }
+      if (title.length > BACKLOG_MAX_TITLE_LENGTH) {
+        backlogStatus.className = "error-text";
+        backlogStatus.textContent = "Title is too long (max " + BACKLOG_MAX_TITLE_LENGTH + " characters).";
+        return;
+      }
+      if (description.length > BACKLOG_MAX_DESCRIPTION_LENGTH) {
+        backlogStatus.className = "error-text";
+        backlogStatus.textContent = "Description is too long (max " + BACKLOG_MAX_DESCRIPTION_LENGTH + " characters).";
+        return;
+      }
+      const file = backlogImage.files?.[0] ?? null;
+      let image;
+      if (file) {
+        if (!BACKLOG_IMAGE_TYPES.has(file.type)) {
+          backlogStatus.className = "error-text";
+          backlogStatus.textContent = "Screenshot must be a PNG, JPEG, WebP, or GIF image.";
+          return;
+        }
+        if (file.size > BACKLOG_MAX_IMAGE_BYTES) {
+          backlogStatus.className = "error-text";
+          backlogStatus.textContent = "Screenshot is too large (max " + Math.floor(BACKLOG_MAX_IMAGE_BYTES / (1024 * 1024)) + " MB).";
+          return;
+        }
+        try {
+          image = { dataUrl: await fileToDataUrl(file) };
+        } catch (error) {
+          backlogStatus.className = "error-text";
+          backlogStatus.textContent = error.message;
+          return;
+        }
+      }
+      backlogSubmit.disabled = true;
+      backlogStatus.textContent = "Adding...";
+      try {
+        const response = await fetch("/api/backlog", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title, description, image }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error ?? "Couldn't add to the backlog");
+        backlogForm.reset();
+        backlogStatus.className = "muted";
+        backlogStatus.textContent = "Added “" + title + "” to docs/handoff/backlog.md.";
+        await loadBacklogRecent();
+      } catch (error) {
+        backlogStatus.className = "error-text";
+        backlogStatus.textContent = error.message;
+      } finally {
+        backlogSubmit.disabled = false;
+      }
+    });
+
     async function load(quiet = false, force = false) {
       if (!quiet) {
         refresh.disabled = true;
@@ -529,7 +698,8 @@ export function renderPlannerHtml() {
 
     refresh.addEventListener("click", () => load(false));
     load(false);
-    setInterval(() => load(true), 10000);
+    loadBacklogRecent();
+    setInterval(() => { load(true); loadBacklogRecent(); }, 10000);
   </script>
 </body>
 </html>`;

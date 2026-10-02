@@ -95,6 +95,13 @@ tell her the expected time. Then:
 
 ## Planner canvas
 
-Open it with `open_canvas` (canvas `openspec-task-planner`). Each time Jenny reorders or schedules work there,
-you get a notification: commit and push `docs/handoff/priority.json` to `main`, brief the lanes for any
-newly scheduled items, and keep each slot's entry in `docs/handoff/builds.md` in sync.
+Open it with `open_canvas` (canvas `openspec-task-planner`). Reordering, scheduling, quoting, and removing
+items there is agent-free by design: it writes straight to `docs/handoff/priority.json` (no chat message is
+sent). When you next read that file and see its `updated` timestamp has moved, commit and push it to `main`,
+brief the lanes for any newly scheduled items, and keep each slot's entry in `docs/handoff/builds.md` in sync.
+
+The canvas also has a quick backlog-entry form (title, optional description, optional screenshot) so Jenny
+can drop new work items straight into `docs/handoff/backlog.md` without spending chat tokens or waiting on an
+agent. Submissions land in a `## New from Jenny (not yet triaged)` block at the top of the file (screenshots
+under `docs/handoff/attachments/backlog/`); fold each into the list above (or Later) and delete its line
+the next time you touch `backlog.md`.

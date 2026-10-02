@@ -1,4 +1,4 @@
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readFile, readdir, stat, writeFile, mkdir } from "node:fs/promises";
 import { basename, dirname, join, relative } from "node:path";
 
 const activeWindowMs = 15 * 60 * 1000;
@@ -291,4 +291,196 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
         builds,
         slots,
     };
+}
+
+// --- Jenny's quick backlog inbox -----------------------------------------
+// A lightweight, agent-free capture path: the planner canvas form posts here,
+// the entry is persisted to disk immediately, and the orchestrator picks it
+// up the next time it reads docs/handoff/backlog.md — no chat message is
+// sent on submission.
+
+export const BACKLOG_IMAGE_TYPES = new Map([
+    ["image/png", "png"],
+    ["image/jpeg", "jpg"],
+    ["image/webp", "webp"],
+    ["image/gif", "gif"],
+]);
+export const BACKLOG_MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+export const BACKLOG_MAX_TITLE_LENGTH = 200;
+export const BACKLOG_MAX_DESCRIPTION_LENGTH = 4000;
+
+const backlogInboxSegments = ["docs", "handoff", "backlog-inbox.json"];
+const backlogAttachmentsSegments = ["docs", "handoff", "attachments", "backlog"];
+const backlogMdSegments = ["docs", "handoff", "backlog.md"];
+const backlogMarkerStart = "<!-- jenny-inbox:start -->";
+const backlogMarkerEnd = "<!-- jenny-inbox:end -->";
+
+export function backlogInboxPath(projectRoot) {
+    return join(projectRoot, ...backlogInboxSegments);
+}
+
+export function backlogAttachmentsDir(projectRoot) {
+    return join(projectRoot, ...backlogAttachmentsSegments);
+}
+
+export function backlogMdPath(projectRoot) {
+    return join(projectRoot, ...backlogMdSegments);
+}
+
+export async function loadBacklogInbox(projectRoot) {
+    try {
+        const value = JSON.parse(await readFile(backlogInboxPath(projectRoot), "utf8"));
+        return Array.isArray(value.entries) ? value.entries : [];
+    } catch (error) {
+        if (error?.code === "ENOENT") return [];
+        // A corrupt inbox file must not silently drop Jenny's submissions —
+        // surface the error rather than overwriting it with an empty list.
+        throw error;
+    }
+}
+
+export function sanitizeBacklogTitle(raw) {
+    const title = typeof raw === "string" ? raw.trim() : "";
+    if (!title) return { error: "Title is required." };
+    if (title.length > BACKLOG_MAX_TITLE_LENGTH) {
+        return { error: `Title is too long (max ${BACKLOG_MAX_TITLE_LENGTH} characters).` };
+    }
+    return { value: title };
+}
+
+export function sanitizeBacklogDescription(raw) {
+    const description = typeof raw === "string" ? raw.trim() : "";
+    if (description.length > BACKLOG_MAX_DESCRIPTION_LENGTH) {
+        return { error: `Description is too long (max ${BACKLOG_MAX_DESCRIPTION_LENGTH} characters).` };
+    }
+    return { value: description };
+}
+
+const dataUrlPattern = /^data:([a-z0-9.+-]+\/[a-z0-9.+-]+);base64,([a-zA-Z0-9+/]+=*)$/i;
+
+export function decodeBacklogImage(image) {
+    if (image == null) return { value: null };
+    if (typeof image !== "object" || typeof image.dataUrl !== "string") {
+        return { error: "Screenshot data is invalid." };
+    }
+    const match = dataUrlPattern.exec(image.dataUrl);
+    if (!match) return { error: "Screenshot must be a PNG, JPEG, WebP, or GIF image." };
+    const mime = match[1].toLowerCase();
+    const extension = BACKLOG_IMAGE_TYPES.get(mime);
+    if (!extension) return { error: "Screenshot must be a PNG, JPEG, WebP, or GIF image." };
+    let buffer;
+    try {
+        buffer = Buffer.from(match[2], "base64");
+    } catch {
+        return { error: "Screenshot data could not be decoded." };
+    }
+    if (!buffer.length) return { error: "Screenshot data could not be decoded." };
+    if (buffer.length > BACKLOG_MAX_IMAGE_BYTES) {
+        return { error: `Screenshot is too large (max ${Math.floor(BACKLOG_MAX_IMAGE_BYTES / (1024 * 1024))} MB).` };
+    }
+    return { value: { buffer, mime, extension } };
+}
+
+export function generateBacklogId(now = Date.now()) {
+    const random = Math.random().toString(36).slice(2, 8);
+    return `jenny-${now.toString(36)}-${random}`;
+}
+
+function formatBacklogInboxEntry(entry) {
+    const date = typeof entry.createdUtc === "string" ? entry.createdUtc.slice(0, 10) : "";
+    const description = entry.description && entry.description.trim() ? entry.description.trim() : "(no description)";
+    const image = entry.imageFile ? ` [Screenshot](attachments/backlog/${entry.imageFile})` : "";
+    return `- **${entry.title}** — Jenny, ${date} (added from the planner canvas): ${description}${image}`;
+}
+
+export function renderBacklogInboxBlock(entries) {
+    if (!entries.length) return "";
+    const lines = [...entries].reverse().map(formatBacklogInboxEntry);
+    return [
+        backlogMarkerStart,
+        "## New from Jenny (not yet triaged)",
+        "",
+        "Added from the planner canvas without spending chat tokens. Fold each into the list above (or Later),",
+        "then delete its line here.",
+        "",
+        ...lines,
+        backlogMarkerEnd,
+    ].join("\n");
+}
+
+// Exported so tests can exercise the marker insertion/update/removal logic
+// directly against small markdown fixtures.
+export function upsertMarkedBlock(markdown, block) {
+    const startIndex = markdown.indexOf(backlogMarkerStart);
+    const endIndex = markdown.indexOf(backlogMarkerEnd);
+    const hasBlock = startIndex !== -1 && endIndex !== -1 && endIndex > startIndex;
+    if (!block) {
+        if (!hasBlock) return markdown;
+        const before = markdown.slice(0, startIndex);
+        const after = markdown.slice(endIndex + backlogMarkerEnd.length);
+        return (before + after).replace(/\n{3,}/g, "\n\n");
+    }
+    if (hasBlock) {
+        return markdown.slice(0, startIndex) + block + markdown.slice(endIndex + backlogMarkerEnd.length);
+    }
+    const headingMatch = markdown.match(/\n(##\s+)/);
+    if (!headingMatch) return markdown.replace(/\n*$/, "\n\n" + block + "\n");
+    const insertAt = headingMatch.index + 1;
+    return markdown.slice(0, insertAt) + block + "\n\n" + markdown.slice(insertAt);
+}
+
+export async function syncBacklogMarkdown(projectRoot, entries) {
+    const path = backlogMdPath(projectRoot);
+    let markdown;
+    try {
+        markdown = await readFile(path, "utf8");
+    } catch (error) {
+        if (error?.code !== "ENOENT") throw error;
+        markdown = "";
+    }
+    const updated = upsertMarkedBlock(markdown, renderBacklogInboxBlock(entries));
+    if (updated !== markdown) await writeFile(path, updated, "utf8");
+}
+
+export function toBacklogClientEntry(entry) {
+    return {
+        id: entry.id,
+        title: entry.title,
+        description: entry.description,
+        createdUtc: entry.createdUtc,
+        imageUrl: entry.imageFile ? `/api/backlog-image/${encodeURIComponent(entry.id)}` : null,
+    };
+}
+
+export async function addBacklogEntry(projectRoot, { title, description, image } = {}, now = Date.now()) {
+    const titleResult = sanitizeBacklogTitle(title);
+    if (titleResult.error) return { error: titleResult.error };
+    const descriptionResult = sanitizeBacklogDescription(description);
+    if (descriptionResult.error) return { error: descriptionResult.error };
+    const imageResult = decodeBacklogImage(image);
+    if (imageResult.error) return { error: imageResult.error };
+
+    const id = generateBacklogId(now);
+    let imageFile = null;
+    let imageMime = null;
+    if (imageResult.value) {
+        imageFile = `${id}.${imageResult.value.extension}`;
+        imageMime = imageResult.value.mime;
+        await mkdir(backlogAttachmentsDir(projectRoot), { recursive: true });
+        await writeFile(join(backlogAttachmentsDir(projectRoot), imageFile), imageResult.value.buffer);
+    }
+    const entry = {
+        id,
+        title: titleResult.value,
+        description: descriptionResult.value,
+        imageFile,
+        imageMime,
+        createdUtc: new Date(now).toISOString(),
+    };
+    const entries = await loadBacklogInbox(projectRoot);
+    entries.push(entry);
+    await mkdir(dirname(backlogInboxPath(projectRoot)), { recursive: true });
+    await writeFile(backlogInboxPath(projectRoot), JSON.stringify({ entries }, null, 2) + "\n", "utf8");
+    await syncBacklogMarkdown(projectRoot, entries);
+    return { value: entry };
 }

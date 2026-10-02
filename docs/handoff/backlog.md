@@ -4,21 +4,21 @@ Only Jenny-directed work belongs here. Every line is one player-checkable slice,
 
 ## Next two builds
 
-1. **Refine playable heroine hairstyles** — Jenny, 2026-09-29: test Bob and updo while moving at near/far views; remove rod, fan, or LOD artifacts. **Lane:** Props. **Size:** M.
-2. **Replace heroine with MetaHuman** — Jenny, 2026-09-29: play tools, wardrobe, and movement; fix the next visible MetaHuman regression. **Lane:** Props. **Size:** M.
-3. **Speed up pickup animation** — Jenny, 2026-09-27: pick up branch, stone, herb, and clear-out resources with immediate visible feedback. **Lane:** Props. **Size:** S.
-4. **Flexible sleep** — Jenny, 2026-09-30: play tired/rested/dawn one-press bed sleep; retain only confusing behavior. **Lane:** Menu/Integration. **Size:** S.
-5. **Improve contextual feedback and sprint** — Jenny, 2026-09-30: play tired sprint, exhausted work refusal, and recovery; retain only unclear messages or controls. **Lane:** Menu. **Size:** S.
-6. **Add rain weather** — Jenny, 2026-09-30: play reload-stable seasonal rain across day/night, shelter, wet ground, audio, and lighting. **Lane:** Water. **Size:** M.
-7. **Fix estate river source** — Jenny, 2026-09-29: make the river visibly reach the ocean and verify it on foot. **Lane:** Water. **Size:** S.
-8. **Improve estate frame rate** — Jenny's smooth-play requirement: fix the next player-visible hitch or readability/performance regression. **Lane:** Performance. **Size:** M.
+1. **Add dollars and general store** — **Urgent (Jenny, 2026-10-01): she needs to sell crops now.** Land crop selling at the General Store first (fastest path to a working sell loop); separate specialty stores (e.g. a dedicated farm/produce stand) come later. Walk an Estate-to-town sell/buy loop and tune only flagged route, price, or greeting friction. **Lane:** Menu. **Size:** S.
+2. **Refine playable heroine hairstyles** — Jenny, 2026-09-29: test Bob and updo while moving at near/far views; remove rod, fan, or LOD artifacts. **Lane:** Props. **Size:** M.
+3. **Replace heroine with MetaHuman** — Jenny, 2026-09-29: play tools, wardrobe, and movement; fix the next visible MetaHuman regression. **Lane:** Props. **Size:** M.
+4. **Speed up pickup animation** — Jenny, 2026-09-27: pick up branch, stone, herb, and clear-out resources with immediate visible feedback. **Lane:** Props. **Size:** S.
+5. **Flexible sleep** — Jenny, 2026-09-30: play tired/rested/dawn one-press bed sleep; retain only confusing behavior. **Lane:** Menu/Integration. **Size:** S.
+6. **Improve contextual feedback and sprint** — Jenny, 2026-09-30: play tired sprint, exhausted work refusal, and recovery; retain only unclear messages or controls. **Lane:** Menu. **Size:** S.
+7. **Add rain weather** — Jenny, 2026-09-30: play reload-stable seasonal rain across day/night, shelter, wet ground, audio, and lighting. **Lane:** Water. **Size:** M.
+8. **Fix estate river source** — Jenny, 2026-09-29: make the river visibly reach the ocean and verify it on foot. **Lane:** Water. **Size:** S.
+9. **Improve estate frame rate** — Jenny's smooth-play requirement: fix the next player-visible hitch or readability/performance regression. **Lane:** Performance. **Size:** M.
 
 ## Later
 
 - **Prioritize heroine quality and tool clarity** — Jenny, 2026-09-29: play an ordinary tool/wardrobe loop; fix the next visible pose, contact, or hair issue. **Lane:** Props. **Size:** M.
 - **Rework farming calendar and period crafting** — Jenny, 2026-09-29: play a 60-minute day and Sunday shop loop; tune only flagged timing, closure, Energy, or Well fed behavior. **Lane:** Simulation. **Size:** M.
 - **Enrich estate ground and meadow** — Jenny, 2026-10-01: walk farm, manor, lake, and coast; address the next ground-presentation issue. **Lane:** Water. **Size:** M.
-- **Add dollars and general store** — Jenny, 2026-09-29: walk an Estate-to-town sell/buy loop and tune only flagged route, price, or greeting friction. **Lane:** Menu. **Size:** S.
 - **Add shore and river fishing** — Jenny's cozy-estate direction, 2026-09-27: catch and sell or cook one fish. **Lane:** Water. **Size:** L.
 - **Add handcart hauling and dynamic prices** — Jenny's cozy-estate direction, 2026-09-27: haul goods to town and see stock-sensitive pricing. **Lane:** Props/Menu. **Size:** L.
 - **Restore mine pumping and deep levels** — Jenny's cozy-estate direction, 2026-09-27: operate a pump, open a deeper level, and bring back ore. **Lane:** Water/Props. **Size:** L.
