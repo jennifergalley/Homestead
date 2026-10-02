@@ -1,7 +1,7 @@
 {
   "order": [
-    "polish-parchment-ui",
     "pitch-dark-parchment-theme",
+    "apply-dark-theme-everywhere",
     "place-items-in-exact-slots",
     "fix-tool-grip-contact",
     "reduce-foliage-shadow-motion",
@@ -27,18 +27,17 @@
   ],
   "nextBuild": [],
   "slots": {
-    "polish-parchment-ui": "2026-10-01 21:00",
-    "daily-weed-pass": "2026-10-01 21:00",
     "fix-tool-grip-contact": "2026-10-02 07:30",
     "place-items-in-exact-slots": "2026-10-02 07:30",
-    "pitch-dark-parchment-theme": "2026-10-01 21:00",
+    "pitch-dark-parchment-theme": "2026-10-02 07:30",
     "reduce-foliage-shadow-motion": "2026-10-02 07:30",
-    "refine-playable-heroine-hairstyles": "2026-10-02 07:30"
+    "refine-playable-heroine-hairstyles": "2026-10-02 07:30",
+    "apply-dark-theme-everywhere": "2026-10-02 07:30"
   },
   "removed": [
     "replace-heroine-with-metahuman",
     "prioritize-heroine-quality-and-tool-clarity",
     "expand-randomized-music-playlist"
   ],
-  "updated": "2026-10-02T01:54:58.475Z"
+  "updated": "2026-10-02T05:04:32.4280877Z"
 }
