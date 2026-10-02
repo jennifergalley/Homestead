@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <ostream>
 #include <istream>
 #include <vector>
@@ -192,11 +193,25 @@ int WeedDay(double hour)
     return Calendar::DayIndex(hour); // the calendar's own day, with its tolerance at 06:00
 }
 
+bool WeedsComeUp(int plotId, int day)
+{
+    // SplitMix64 of the plot and the day: a well-mixed, platform-independent value per pair.
+    std::uint64_t x = (static_cast<std::uint64_t>(static_cast<std::uint32_t>(plotId)) << 32)
+        ^ static_cast<std::uint32_t>(day);
+    x += 0x9E3779B97F4A7C15ull;
+    x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9ull;
+    x = (x ^ (x >> 27)) * 0x94D049BB133111EBull;
+    x ^= x >> 31;
+    return static_cast<double>(x >> 11) / 9007199254740992.0 < CropCare::DailyWeedChance; // 2^53
+}
+
 void GrowDailyWeeds(State& state, int days)
 {
     if (days <= 0) return;
+    const int lastDay = WeedDay(state.hour);
     for (auto& plot : state.plots)
-        plot.weeds = std::min(1.0, plot.weeds + CropCare::DailyWeeds * days);
+        for (int day = lastDay - days + 1; day <= lastDay; ++day)
+            if (WeedsComeUp(plot.id, day)) plot.weeds = std::min(1.0, plot.weeds + CropCare::DailyWeeds);
 }
 
 void WriteSaveSection(std::ostream& output, const State& state)

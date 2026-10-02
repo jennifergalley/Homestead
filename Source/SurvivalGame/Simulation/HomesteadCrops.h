@@ -59,8 +59,11 @@ constexpr double WeedPenalty = 0.7;
 // [F]/[X] Pull weeds prompt appears exactly when she can see something to pull.
 constexpr double VisibleWeeds = 0.125;
 // Weeds come up once a day, never in between (Jenny, 2026-09-30: something to clear each morning, not
-// twice a day): each pass adds this much to every plot, a little under the old 0.009 an hour (0.216 a day).
+// twice a day): each pass adds this much to a plot, a little under the old 0.009 an hour (0.216 a day).
 constexpr double DailyWeeds = 0.2;
+// ...but only on some plots each day (Jenny, 2026-10-01: weeds shouldn't grow in every plot every day):
+// each plot gets its own chance each day (Crops::WeedsComeUp).
+constexpr double DailyWeedChance = 0.35;
 }
 double MoistureGrowthFactor(double moisture);
 double WeedGrowthFactor(double weeds);
@@ -105,7 +108,11 @@ namespace Crops
 {
 // The calendar day the weeds keep, rolling over at the 6 AM day boundary (DayRolloverHour).
 int WeedDay(double hour);
-// The daily weed pass, `days` times over: DailyWeeds more on every plot, capped at fully weedy.
+// Whether weeds come up on plot `plotId` at the 6 AM pass of calendar day `day` (WeedDay): a fixed hash of
+// the two against DailyWeedChance, not a live random number, so a reload or a long sleep never rerolls a day.
+bool WeedsComeUp(int plotId, int day);
+// The daily weed pass for the `days` calendar days that just began (the last of them is WeedDay(state.hour)):
+// DailyWeeds more on each plot whose weeds come up that day (WeedsComeUp), capped at fully weedy.
 // Simulation::Step runs it when she is awake at 6 AM; Sleep and DozeOff run it on waking when the
 // sleep crossed 6 AM. Each calendar day gets exactly one pass whichever way it comes, and nothing
 // grows between passes, so a reload needs no record of when the last one ran.

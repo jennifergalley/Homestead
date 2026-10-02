@@ -1437,32 +1437,47 @@ void DailyWeedPass()
     OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
     OK(sim.Plant(sim.FindNearestPlot(garden, 1), garden));
     const auto weeds = [](const Simulation& s) { return s.GetState().plots[0].weeds; };
-    // Day 0 = 06:00 on the first morning; hour 30 is the next 6 AM. Fed and rested, plot clean.
-    const auto set = [](Simulation& s, double hour, double plotWeeds = 0.0, double energy = 100.0) {
+    // Weeds come up on some plots each day (Crops::WeedsComeUp). The timing checks below run from the
+    // morning before the first day this plot's weeds come up: day 0 = 06:00 on that morning, hour 30
+    // (plus the shift) the 6 AM pass that brings them.
+    const int plotId = sim.GetState().plots[0].id;
+    int firstDay = 1;
+    while (!Crops::WeedsComeUp(plotId, firstDay)) ++firstDay;
+    const double shift = 24.0 * (firstDay - 1);
+    // DailyWeeds for each day from rom to 	o that this plot's weeds come up, capped at fully weedy.
+    const auto expected = [plotId](int from, int to, double start = 0.0) {
+        double w = start;
+        for (int day = from; day <= to; ++day)
+            if (Crops::WeedsComeUp(plotId, day)) w = std::min(1.0, w + CropCare::DailyWeeds);
+        return w;
+    };
+    // Fed and rested, plot clean.
+    const auto set = [shift](Simulation& s, double hour, double plotWeeds = 0.0, double energy = 100.0) {
         Edit(s, [=](State& state) {
-            state.hour = hour;
+            state.hour = hour + shift;
             state.hunger = 100.0;
             state.energy = energy;
             state.plots[0].weeds = plotWeeds;
         });
     };
     CHECK(Crops::WeedDay(6.0) == 0 && Crops::WeedDay(29.99) == 0 && Crops::WeedDay(30.0) == 1);
+    CHECK(firstDay < 20 && Crops::WeedDay(30.0 + shift) == firstDay);
 
     // 18 awake hours from noon: nothing until 6 AM, then one pass.
     Simulation awake = sim;
     set(awake, 12.0);
     awake.AdvanceGameHours(17.9, Home);
-    CHECK(weeds(awake) == 0.0 && awake.GetState().hour < 30.0);
+    CHECK(weeds(awake) == 0.0 && awake.GetState().hour < 30.0 + shift);
     awake.AdvanceGameHours(0.2, Home);
     CHECK(Close(weeds(awake), CropCare::DailyWeeds));
     awake.AdvanceGameHours(20.0, Home);
-    CHECK(Close(weeds(awake), CropCare::DailyWeeds));
+    CHECK(Close(weeds(awake), expected(firstDay, Crops::WeedDay(awake.GetState().hour))));
 
     // A night's sleep (22:00 to 06:00): exactly one pass, on waking.
     Simulation night = sim;
     set(night, 22.0);
     OK(night.Sleep(8.0, Home, {1, 0}));
-    CHECK(Close(night.GetState().hour, 30.0) && Close(weeds(night), CropCare::DailyWeeds));
+    CHECK(Close(night.GetState().hour, 30.0 + shift) && Close(weeds(night), CropCare::DailyWeeds));
     // Awake for the rest of that day: no second pass.
     night.AdvanceGameHours(10.0, Home);
     CHECK(Close(weeds(night), CropCare::DailyWeeds));
@@ -1476,7 +1491,7 @@ void DailyWeedPass()
     OK(across.Sleep(6.0, Home, {1, 0}));
     CHECK(Close(weeds(across), CropCare::DailyWeeds));
     across.AdvanceGameHours(20.0, Home);
-    CHECK(Close(weeds(across), CropCare::DailyWeeds) && across.GetState().hour < 54.0);
+    CHECK(Close(weeds(across), CropCare::DailyWeeds) && across.GetState().hour < 54.0 + shift);
     // Woken before 6 AM (22:00 to 05:00): no pass on waking; it comes at 6 AM with her up.
     Simulation early = sim;
     set(early, 22.0);
@@ -1495,19 +1510,18 @@ void DailyWeedPass()
     Simulation doze = sim;
     set(doze, 29.0, 0.0, 0.3);
     doze.AdvanceGameHours(0.6, Home);
-    CHECK(doze.GetState().hour > 30.0 && Close(weeds(doze), CropCare::DailyWeeds));
+    CHECK(doze.GetState().hour > 30.0 + shift && Close(weeds(doze), CropCare::DailyWeeds));
 
-    // Three days without sleep: three passes, one each 6 AM.
+    // Three days without sleep: one pass each 6 AM, bringing weeds on the days they come up.
     Simulation days = sim;
     set(days, 7.0);
     for (int chunk = 0; chunk < 12; ++chunk)
     {
         Edit(days, [](State& state) { state.hunger = 100.0; state.energy = 100.0; });
         days.AdvanceGameHours(6.0, Home);
-        const int passes = Crops::WeedDay(days.GetState().hour);
-        CHECK(Close(weeds(days), std::min(1.0, CropCare::DailyWeeds * passes)));
+        CHECK(Close(weeds(days), expected(firstDay, Crops::WeedDay(days.GetState().hour))));
     }
-    CHECK(Close(days.GetState().hour, 79.0) && Close(weeds(days), CropCare::DailyWeeds * 3));
+    CHECK(Close(days.GetState().hour, 79.0 + shift) && Close(weeds(days), expected(firstDay, firstDay + 2)));
     // Capped at fully weedy.
     set(days, 29.5, 0.9);
     days.AdvanceGameHours(1.0, Home);
@@ -1528,6 +1542,97 @@ void DailyWeedPass()
     afterPass.AdvanceGameHours(5.0, Home);
     saved.AdvanceGameHours(5.0, Home);
     CHECK(weeds(afterPass) == weeds(saved) && Close(weeds(afterPass), 0.37 + CropCare::DailyWeeds));
+}
+
+// Weeds come up on some plots each day, not all (Jenny, 2026-10-01), from a fixed hash of the plot and the day,
+// so a multi-day pass matches passing the days one at a time and a reload never rerolls.
+void SporadicDailyWeeds()
+{
+    const auto plots = [](int count) {
+        State state;
+        state.plots.clear();
+        for (int i = 0; i < count; ++i)
+        {
+            Plot plot;
+            plot.id = 100 + i;
+            plot.cellX = i;
+            state.plots.push_back(plot);
+        }
+        return state;
+    };
+    // 16 plots over 40 days, cleared each morning: each day some plots and not others.
+    State state = plots(16);
+    int ups = 0, mixedDays = 0;
+    std::vector<int> perPlot(state.plots.size(), 0);
+    for (int day = 1; day <= 40; ++day)
+    {
+        state.hour = 6.0 + 24.0 * day;
+        CHECK(Crops::WeedDay(state.hour) == day);
+        for (auto& plot : state.plots) plot.weeds = 0.0;
+        Crops::GrowDailyWeeds(state, 1);
+        int up = 0;
+        for (size_t i = 0; i < state.plots.size(); ++i)
+        {
+            const auto& plot = state.plots[i];
+            CHECK(Crops::WeedsComeUp(plot.id, day) == (plot.weeds > 0.0));
+            if (plot.weeds > 0.0)
+            {
+                CHECK(Close(plot.weeds, CropCare::DailyWeeds));
+                ++up;
+                ++perPlot[i];
+            }
+        }
+        ups += up;
+        if (up > 0 && up < static_cast<int>(state.plots.size())) ++mixedDays;
+    }
+    const double share = ups / (16.0 * 40.0);
+    CHECK(share > CropCare::DailyWeedChance - 0.1 && share < CropCare::DailyWeedChance + 0.1);
+    CHECK(mixedDays >= 30);
+    for (int count : perPlot) CHECK(count > 0 && count < 40);
+
+    // One pass covering 10 days (a long sleep) matches the 10 daily passes.
+    State together = plots(16), apart = plots(16);
+    together.hour = 6.0 + 24.0 * 10;
+    Crops::GrowDailyWeeds(together, 10);
+    for (int day = 1; day <= 10; ++day)
+    {
+        apart.hour = 6.0 + 24.0 * day;
+        Crops::GrowDailyWeeds(apart, 1);
+    }
+    for (size_t i = 0; i < together.plots.size(); ++i) CHECK(together.plots[i].weeds == apart.plots[i].weeds);
+
+    // In the game: tilled squares over four days, saved and reloaded halfway, end up exactly the same.
+    Simulation sim;
+    Stock(sim, {{Item::DiggingStick, 1}});
+    const Point garden = CellCenter(-2, -1);
+    for (int x = 0; x < 4; ++x) OK(sim.Till(CellToGarden(-2) + x, CellToGarden(-1), garden));
+    CHECK(sim.GetState().plots.size() == 4);
+    const auto day = [](Simulation& s) {
+        for (int chunk = 0; chunk < 4; ++chunk)
+        {
+            Edit(s, [](State& st) { st.hunger = 100.0; st.energy = 100.0; });
+            s.AdvanceGameHours(6.0, Home);
+        }
+    };
+    Edit(sim, [](State& st) { st.hour = 7.0; for (auto& plot : st.plots) plot.weeds = 0.0; });
+    day(sim);
+    day(sim);
+    Simulation reloaded;
+    OK(reloaded.Deserialize(sim.Serialize()));
+    day(sim);
+    day(sim);
+    day(reloaded);
+    day(reloaded);
+    CHECK(reloaded.Serialize() == sim.Serialize());
+    const int lastDay = Crops::WeedDay(sim.GetState().hour);
+    CHECK(lastDay == 4);
+    for (const auto& plot : sim.GetState().plots)
+    {
+        double want = 0.0;
+        for (int d = 1; d <= lastDay; ++d)
+            if (Crops::WeedsComeUp(plot.id, d)) want = std::min(1.0, want + CropCare::DailyWeeds);
+        CHECK(Close(plot.weeds, want));
+    }
 }
 
 void FarmingAndRain()
@@ -5781,6 +5886,7 @@ int main()
     Run("fallen branches give renewable kindling", BranchesYieldRenewableKindling);
     Run("default gameplay walkthrough", GameplayWalkthrough);
     Run("weeds come up once a day, on waking or at 6 AM", DailyWeedPass);
+    Run("sporadic daily weeds, stable over reloads", SporadicDailyWeeds);
     Run("atomic inventory transactions", AtomicTransactions);
     Run("regrowth and persistent clearing", RegrowthAndClearing);
     Run("placement and enclosure", PlacementAndShelter);
