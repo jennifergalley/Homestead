@@ -514,6 +514,10 @@ The design's "Lanes and ownership" table is authoritative. In short:
 
 ## Rules this round (carried over)
 
+- **Feedback-complete fast path (Jenny, 2026-10-01):** when all current playtest feedback is
+  addressed, Integration ships the verified build immediately instead of waiting for the next
+  scheduled build slot. Lanes then clear wake-up automations and end their turns until new feedback
+  arrives or the orchestrator assigns fresh work.
 - **Two Unreal processes** machine-wide, **one reserved for the Integration Agent**; every other lane
   shares the second, one at a time (`Start-EditorMcp.ps1` enforces both). Close your editor as soon as a
   verification pass is done (`Scripts\Stop-MyEditor.ps1`).

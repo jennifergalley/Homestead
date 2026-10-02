@@ -261,6 +261,12 @@ At either freeze, only work that is already **UE-verified and code-reviewed** en
 everything else waits for the next slot. The first evening build under this policy is October 1,
 2026 (the 9 PM window on September 30 had already passed).
 
+**Feedback-complete fast path (Jenny, 2026-10-01):** when all current playtest feedback is
+addressed, Integration ships the verified build immediately rather than waiting for the next
+7:30 AM/4:00 PM/9:00 PM slot. After that early delivery, lanes end their turns and clear their
+wake-up automations until Jenny supplies new feedback or the orchestrator starts new work. The
+scheduled slots remain the fallback cadence while feedback or verified work is still pending.
+
 **Before every Shipping build, reclaim dated release space safely:** retain the current
 Estate-shortcut Shipping release and at most its immediately previous Shipping rollback. A named
 Development reference is only temporary during active QA and is deleted after the Shipping cut.

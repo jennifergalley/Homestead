@@ -140,6 +140,10 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   the only MVP archive reference. The
   `jennifergalley-mvp-woodland-biome` branch is **not** the retired line: it is Water's active
   Estate Seasons handoff (`b19a0ad0`).
+- **Feedback-complete fast path (Jenny, 2026-10-01):** when all current playtest feedback is
+  addressed, Integration ships the verified build immediately instead of waiting for the next
+  scheduled slot. Then every lane clears wake-up automations and ends its turn until Jenny provides
+  new feedback or the orchestrator assigns new work.
 - No worktrees, builds, renders, videos or big binaries on C:. See the user-level disk rules.
 - **Project storage hygiene (every lane):** delete your own scratch, render, recording and test-output
   artifacts when their task ends. Keep large transient artifacts under
