@@ -59,13 +59,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Map labels are crisp, with no text shadow.
 - The wardrobe preview just shows her standing.
 - A lighter accent keeps selected text readable.
-- Sprint toggles on and off with keyboard and controller, and respects tired Energy.
-- Signposts lead between the manor, the coast, and town without losing the path.
-- Lake-trail forage stays picked after a reload.
-- The farm-to-lake walk and landing feel finished.
-- The full cove route from the Estate walks cleanly.
-- Chests can be renamed, and the name sticks.
-- One button stores matching items in an open chest.
+- A dark parchment palette is available in Settings › Book colours.
 - Weeds sprout in only some plots each day, at random.
 
 ## 2026-10-02 — 7:30 AM

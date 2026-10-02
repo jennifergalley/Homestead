@@ -1,4 +1,4 @@
 # Tasks
 
 ## Playtest queue
-- [ ] 1. Compare side-by-side screenshots of the dark parchment palette and approve or adjust it.
+- [ ] 1. Choose Dark in Settings > Book colours; the menus switch to a readable dark parchment palette.
