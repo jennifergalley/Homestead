@@ -15,3 +15,7 @@ Each sign on the public road SHALL, when she is within reach, offer the walks it
 
 ### Requirement: A clearly labelled stand-in until the sign mesh exists
 Until the original sign mesh is imported, each sign SHALL be shown as a labelled stand-in post and board with its painted words.
+
+#### Scenario: A player can read the temporary sign
+- **WHEN** she approaches a road sign before its original mesh is imported
+- **THEN** its post, board, and painted destination remain visible and legible

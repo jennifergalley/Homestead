@@ -58,6 +58,7 @@ a slot by sleeping or polling.
 | **Integration session** | Does all hands-on integration: merges the lane work the orchestrator forwards, resolves conflicts, builds, runs native and packaged tests, PIE and perf checks, and **is the only session that packages** (the only one running UAT). Reports `[integrated] <what> @ <sha>` to the orchestrator | The round page's registry ("Integration Agent") |
 | **Docs agent** | Standing session for the whole round. It receives findings and blockers from every session and records each once in the canonical doc. It keeps this folder, the skills and the setup docs current, and relays cross-lane blockers to the orchestrator | The round page's registry ("Documentation Agent") |
 | **Architecture agent** (code steward) | Long-lived. Owns how the code is written: `docs\architecture.md`, the "Code practices" section of `.github\copilot-instructions.md`, and the code-convention skills under `.github\skills`. Makes small, safe refactors in files no lane is editing, proposes larger ones as OpenSpec changes for between rounds, and reviews each integrated batch. The docs agent owns process docs (this folder, the editor/Blender skills' shared-machine and failure sections, setup); the two keep each other's docs consistent | The round page's registry ("Architecture agent") |
+| **Disk Cleanup Agent** | Daily 10:00 AM project-storage steward. Removes unnecessary project-owned scratch, renders, test output, stale build staging and excess releases from `C:`/`E:`; Jenny's current save game is the protected boundary. It verifies process paths and shortcut targets before deleting a release, and preserves the current shortcut Shipping target plus one rollback. | The round page's registry ("Disk Cleanup Agent") |
 | **Lanes** | One worktree and one OpenSpec change each. They own the files named in their design's "Lanes and ownership" | The round page's registry |
 
 **Session names:** every session keeps its app name as "<one or two words> Agent", describing its
@@ -191,7 +192,13 @@ A lane delivers an increment like this:
 4. Commit only your files. Push to `main` when you're rebased and tested; otherwise commit to your
    lane branch. All worktrees share one local repository, so the integration session can read
    unpushed lane branches directly.
-5. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
+5. **Retire secondary worktrees in the same turn:** after a per-task worktree's slice lands or is
+   parked, push its branch if it must survive remotely, then run
+   `git worktree remove <secondary-worktree-path>` and `git worktree prune`. Never remove a lane's
+   active primary worktree or another session's worktree. Reuse one secondary worktree per lane
+   rather than creating one per task; abandoned `props-*`, `water-*` and `*-0930-*` worktrees cost
+   14–25 GB each, with about 5 GB each of DDC and Intermediate after a build.
+6. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
 
    ```text
    [ready] <lane> — branch <branch> @ <sha> (pushed to main: yes/no)
@@ -254,11 +261,27 @@ At either freeze, only work that is already **UE-verified and code-reviewed** en
 everything else waits for the next slot. The first evening build under this policy is October 1,
 2026 (the 9 PM window on September 30 had already passed).
 
+**Feedback-complete fast path (Jenny, 2026-10-01):** when all current playtest feedback is
+addressed, Integration ships the verified build immediately rather than waiting for the next
+7:30 AM/4:00 PM/9:00 PM slot. After that early delivery, lanes end their turns and clear their
+wake-up automations until Jenny supplies new feedback or the orchestrator starts new work. The
+scheduled slots remain the fallback cadence while feedback or verified work is still pending.
+
 **Before every Shipping build, reclaim dated release space safely:** retain the current
-Estate-shortcut Shipping release, at most its immediately previous Shipping rollback, and a named
-Development reference only while it is needed. Before pruning older dated releases,
+Estate-shortcut Shipping release and at most its immediately previous Shipping rollback. A named
+Development reference is only temporary during active QA and is deleted after the Shipping cut.
+Before pruning older dated releases,
 `Playtest-09xx` folders or stale `Build\Windows` staging, verify no process path or shortcut target
 uses them. Do not delete the current shortcut target, live save data, or the one retained rollback.
+
+**Project disk stewardship (every lane):** delete your own project scratch, renders, recordings and
+test output when the task that needed them ends. Keep no large binary in
+`C:\Users\Jenny\.copilot\session-state\...\files`; use `E:\CopilotScratch\<session-id>` while it is
+needed, then clean only the paths you own. Keep only the current shortcut Shipping release and its
+immediately previous rollback; delete Development releases and `Saved\Automation` test sandboxes
+after the Shipping cut unless they are actively needed. When in doubt, delete unnecessary
+project-owned artifacts—but never Jenny's current save game.
+The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
 
 1. The orchestrator notifies lanes at the freeze; lanes close their editors
    (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.
@@ -271,7 +294,8 @@ uses them. Do not delete the current shortcut target, live save data, or the one
    `Estate\` subfolder, and `Saved\Config`). Copy both from the old package into the new one, or she
    loses her game.
 3. It reports `[playtest] ready @ <sha>` to the orchestrator with what's new and what to try, and the
-   orchestrator relays that to Jenny.
+   orchestrator relays that to Jenny. Integration also updates `docs\handoff\builds.md` with the
+   date/slot, SHA, status and player-facing changelist, moving unshipped work to its **Later** list.
 4. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
 
 Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.

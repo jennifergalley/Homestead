@@ -16,6 +16,7 @@ session's **mailbox address**; session IDs are for `send_session_message`.
 | Integration Agent | `e251051b` | `jennifergalley-literate-eureka` (MCP 8775) | merges batches, builds, tests, packages; the reserved Unreal slot |
 | Documentation Agent | `a9f10974` (project session `d99bb15c`) | `jennifergalley-stunning-dollop` | process docs, this page, findings from every lane |
 | Architecture Agent | `a1648ae7` | `jennifergalley-cuddly-invention` | code steward: `docs\architecture.md`, code conventions, safe refactors, batch reviews |
+| Disk Cleanup Agent | `9fc4e210` | `jennifergalley-congenial-engine` | daily 10:00 AM project-storage cleanup; Jenny's current save game is protected |
 | **A. Calendar Agent** | `f8b77021` | `jennifergalley-studious-doodle` | `Homestead::Calendar`, gentle hunger, crop seasons and withering; **lands first** |
 | **B. Harvest Agent / temporary Gait Agent** | `65a2408b` | `jennifergalley-vigilant-fishstick` | peas, wheat, barley, leeks, winter broccoli; withered silhouettes; temporarily lowers the running foot swing apex |
 | **C. Seedsman Agent** | `5cf73757` | `jennifergalley-fluffy-broccoli` | Tregear's shop, the watering can, Sunday closing |
@@ -35,7 +36,7 @@ three-hands-on-implementer cap (including Integration) and the two-Unreal-proces
 
 | Current session / role | Planned disposition | Handoff condition |
 | --- | --- | --- |
-| Documentation Agent, Integration Agent, Architecture Agent | **Retain** | Long-lived team roles |
+| Documentation Agent, Integration Agent, Architecture Agent, Disk Cleanup Agent | **Retain** | Long-lived team roles; Disk Cleanup runs daily at 10:00 AM |
 | UI Agent / temporary Menu Agent (`5cf73757`) | **Retain** | Menu/UI feature owner |
 | Weather Agent / Water (`89914e30`) | **Retain** | Water and terrain owner |
 | Props Agent | **Retain role; session TBD** | Receives props and character asset recipes |
@@ -62,6 +63,15 @@ recipe. Canonical measurements and the non-adopted UBA cache decision remain in
 `SurvivalGamePCH.h` only when common across the runtime module, never UnrealEd. The UBT mutex is per
 engine installation; compile throughput hinges on physical free memory and UBA's 85% commit threshold.
 
+**Disk Cleanup finding (2026-10-01):** 29 abandoned secondary task worktrees consumed about 480 GB
+(roughly 14–25 GB each, plus about 5 GB each of DDC and Intermediate after builds). A lane removes
+its own per-task secondary worktree in the same turn its slice lands or is parked, after pushing any
+branch it needs to retain; reuse one secondary worktree per lane rather than one per task. Integration
+also removes Development releases and `Saved\Automation` test sandboxes after the Shipping cut,
+retaining only the shortcut target and one Shipping rollback. Jenny's current save game remains the
+protected boundary; the Cleanup Agent's daily 10:00 AM sweep is enforcement, not a substitute for
+lane cleanup.
+
 ## Model, reasoning and implementer slots
 
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
@@ -82,24 +92,56 @@ Time-critical integration gets a slot by pausing a lane. The orchestrator grants
 waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
 a slot by sleeping or polling.
 
-**Current Shipping delivery (Phoenix, `main` `e5877da8`):** `Homestead Estate.lnk` is retargeted
-and ShellLink-read-back verified to
-`Build\Releases\20260930-phoenix-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
-(SHA `8B0410A4DBD9C801B9FFDBB33BBB872960C0853BBEFD38D55F84068DD102021F`). The
-`-ReuseCooked` staging output contains only `SurvivalGame-Win64-Shipping.exe`, so Integration made a
-candidate-local hard-link `JennysHomesteadGame.exe` alias and verified the same SHA before shortcut
-promotion. Estate-map arguments, candidate-local `-UserDir`, working directory and icon are retained;
-the prior Estate link is backed up on `E:`. MVP survival was retired on 2026-09-30 as
-`archive/mvp-survival-20260930` (`93612cdf`); `Homestead.lnk` was removed and
-`Homestead Estate.lnk` is the only active game shortcut.
+**Current Shipping delivery (morning 2026-10-01, `main` `20ad66e9`):** `Homestead Estate.lnk` was
+ShellLink-read-back promoted to
+`Build\Releases\20261001-morning-shipping\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`
+(SHA `F713BEB99F5907CC2FDCEBE9480C3001A7789E1FC72F69E5EDAA0692B4EFF564`). The shortcut retains its
+approved icon and has a candidate-local `-UserDir`; `estate-shortcut-before-oct01.lnk` preserves the
+Phoenix target as rollback. The delivery receipt at
+`E:\CopilotScratch\e251051b-8674-4ef0-a3ed-03830407f8b6\delivery\oct01-shortcut-receipt.json`
+records promotion and SHA evidence. It copied and hash-recorded all 18 current save/backup files
+before promotion, including Estate Recovery; `Homestead.lnk` remains retired and `Homestead Estate.lnk`
+is the only active game shortcut.
 
-Phoenix Development passed all six packaged suites. Shipping reuses five hash-identical cooked
-containers; copied-save F5/F9 passed; 175 owned-PID endpoint samples observed zero sockets. All 19
-saves plus GameUserSettings/Input match pre-promotion originals, including Manual
-`F816C870...5EB8`. The old Phoenix copied-save teleport ground-hold is a QA limitation, not visual
-door/forage acceptance or a proven Shipping bug. Visible human startup, manual physical gamepad and
-the hair rod/fan cure remain unobserved/inconclusive; the stale modular-equipment wrapper assertion
-is still not a full wrapper pass. Earlier Development/Shipping receipts remain rollback history.
+Known non-gates for this delivery: Watering failure is test-side; UE 5.8 Shipping cannot route the
+Estate-default package to Woodland; the cove fingerpost is deliberately parked; and indoor daytime
+hair remains visually unresolved. These do not invalidate the stated delivery, but none is a claim
+of acceptance for its separate behavior. Earlier Phoenix Development/Shipping receipts remain
+rollback history.
+
+**Shipping map-gate correction (UE 5.8):** an Estate-default Shipping client always loads
+`GameDefaultMap` and ignores `Test-Game.ps1`'s old Woodland positional map: `GameInstance.cpp`
+642–645 clears it while `UE_ALLOW_MAP_OVERRIDE_IN_SHIPPING` is off, and `ConfigCacheIni.h:57`
+also disables `-ini` override. Shipping Hotbar, NativeMenu and FullLoop consequently report
+`fixedEstate=1` then fail on Woodland data; their prior Development Woodland receipts remain valid,
+but they are not Shipping acceptance gates until adapted to Estate. Do not enable map override just
+for QA. For Estate-default Shipping, use Estate-targeted guarded zero-network routes such as
+EstateSmoke and ToolRepeat; those currently pass.
+
+**Feedback test correction:** `Scripts\Test-FeedbackLayout.ps1` omitted its Woodland positional map,
+so its Energy/VSync fixture launched the default Estate and failed from 30 to 23. The corrected
+wrapper passes `/Game/SurvivalGame/Maps/Homestead`, rejects Shipping, and now passes packaged
+Feedback with 63 checks and 13 captures. The prior Feedback failure was harness-only, not a
+delivery non-gate.
+
+**Hidden-window safety correction:** a Development copied-Estate run launched with
+`-WindowStyle Hidden -unattended -windowed` still briefly foregrounded before the `EnumWindows`
+guard could hide it. The guard stopped only its owned PID; no live saves were touched. Until a
+`CreateProcess`-suspended launcher installs per-PID window-hide and foreground guards before resume,
+do not use hidden-window physical-key F5/F9 or capture evidence. Use `-RenderOffscreen` for
+old-save load auditing and packaged FullLoop for F5/F9 instead.
+
+**Evening package memory pressure (2026-10-01, fixed):** after UBT/native passed with
+8.23 GB free, `Build-Game.ps1 -PackageOnly -SkipAssets` reached roughly 38/48 skinned assets in
+the UnrealEditor-Cmd cook and repeatedly reported `AssetCompile memory estimate ... 4608 MiB,
+MemoryLimit 1934-2843 MiB`. Free physical memory fell to 1,196 MB. The agreed watchdog stopped
+only Integration's commandlet PID 18712 and UAT dotnet PID 43408; UAT failed `-1` and no release
+or shortcut changed. The verified warmed-DDC retry used
+`Build-Game.ps1 -PackageOnly -SkipAssets -LowMemoryCook`: the switch forwards all four
+asset-compilation concurrency CVars at `1` plus
+`-ini:Engine:[DevOptions.Shaders]:PercentageUnusedShaderCompilingThreads=88` to UAT's actual
+UnrealEditor-Cmd cook. Development cooked/staged in 8m02s, free RAM recovered to 13.1 GB and the
+watchdog never tripped. Use the opt-in only for observed cook-memory pressure.
 
 **Shared-memory warning (2026-09-29 20:19):** Jenny later launched the Shipping Estate while Menu
 editor PID 52420 remained open; Available MBytes fell to 143. Integration touched no process and used
@@ -433,6 +475,7 @@ inside-store Map card still offers a false `23 min` walk.
 Input-policy changes must run packaged **both Hotbar and FullLoop** suites, which caught the silent
 stale assertions here. The playtest does not blanket-complete the separate partial bramble/sprint/bed/
 Hoe-hint, Water prompt/generator, or Menu pickup/pail/store-card work.
+
 ## Core-loop priority after 4 PM
 
 Jenny's next priority is a packaged, end-to-end first core loop, in this order: hoe/tool assembly;
@@ -483,6 +526,10 @@ The design's "Lanes and ownership" table is authoritative. In short:
 
 ## Rules this round (carried over)
 
+- **Feedback-complete fast path (Jenny, 2026-10-01):** when all current playtest feedback is
+  addressed, Integration ships the verified build immediately instead of waiting for the next
+  scheduled build slot. Lanes then clear wake-up automations and end their turns until new feedback
+  arrives or the orchestrator assigns fresh work.
 - **Two Unreal processes** machine-wide, **one reserved for the Integration Agent**; every other lane
   shares the second, one at a time (`Start-EditorMcp.ps1` enforces both). Close your editor as soon as a
   verification pass is done (`Scripts\Stop-MyEditor.ps1`).
@@ -856,6 +903,34 @@ receipt.**
   clean batch and native Release 18/18 passes. The rejected global hair-sky toggle remains
   excluded. Unreal compile, PIE, package and Shipping acceptance await the exclusive integration
   slot; there is no playable-delivery claim.
+
+  **Menu integration source `2f76fc14` (not on `main`):** Integration resolved eight conflicts
+  while merging approved Menu `91fefd64` plus docs `5a12e461`; the branch is clean and native
+  Release is 18/18. `PackRow` now has 11 scenarios / 560 checks, covering absent optional
+  `packrowsparked` in old saves, rotated-save reload, and duplicate/malformed-section rejection.
+  The E/click tool split, 15-portion pail, direct bed action and audio cues remain present.
+  Feedback VSync and Watering-facing failures are known test-side failures, not product acceptance.
+  Unreal compile, PIE, package and Shipping evidence remain pending in Integration's exclusive
+  slot; this does not clear the chest-view/UI hold or establish a playable delivery.
+
+  **Post-build source-comment cleanup:** `Source\SurvivalGame\HomesteadController.h:363` still
+  describes `HomesteadSleep` as accepting choice `N` and `HomesteadBedChoice` as Up/Down picker
+  navigation. That comment is stale: the implemented contract is zero-argument direct bed sleep
+  with no picker. Do not edit the header during the active UBT/editor acceptance slot; correct it
+  in a docs-only source cleanup after today's build evidence is complete.
+
+  **Integration acceptance diagnostics (pending final tests and commit):** `SaveRoutingTest` under
+  packaged `-nullrhi` rejects valid Woodland grass meshes because
+  `UStaticMesh::GetRenderData()` has no LODs even though the mesh and material load. Do not weaken
+  production mesh admission for that headless rendering absence: the hidden offscreen rendered-RHI
+  route passes runtime routing with 196 writes and 148 cross-process reads. After close and
+  immediate reopen, DirNav can select pack index 54 while its offscreen `SMenuButton` has cached
+  `(0,0)` geometry; one layout wait is insufficient. The pending `SHomesteadMenu::Tick` fix seeds
+  `ScrollOffset` from the selected uniform-grid row fraction until tile geometry exists, then calls
+  `ScrollDescendantIntoView`; packaged 720 DirNav has passed that route provisionally. The FullLoop
+  midday fixture must use `SetEnergy(39)`, not 40: awake Energy drain plus quarter-hour sleep
+  rounding advances the first tick from 6.0 to 6.25 hours. Promote these to the editor skill only
+  after Integration posts its final acceptance tests and commit.
 - **Source in progress:** leather backpack (Menu plus Props asset), Victorian trunk, cove route and
   stair kit, billhook swing, pickaxe idle/contacts, wider beach and four-times lamp reach.
 
@@ -1112,10 +1187,12 @@ requirement.
   Correct the pickaxe's upside-down idle grip; one tap or hold on a rock triggers the complete
   two-swing clearing animation and awards/clears once, without a second click or double reward.
   Architecture traces tool tier, input and reward paths before native/PIE proof.
-- **Animation anatomy and inspection** — **Props source-only `ded05f62`, not on `main`.** It adds
-  `.github/skills/realistic-animation/` with MetaHuman per-joint comfortable/extreme ROM tables,
-  coupling, joint speeds, tool grips, posture/failure rules, review checklist and sources.
-  `rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` now runs
+- **Animation anatomy and inspection** — **Props source-only `ded05f62`, not on `main`; current
+follow-up branches `props-0930b` `46b70ba3`, `realistic-animation` `8e40f725`, and
+`jennifergalley-props-anatomy-1001`.** It adds
+`.github/skills/realistic-animation/` with MetaHuman per-joint comfortable/extreme ROM tables,
+coupling, joint speeds, tool grips, posture/failure rules, review checklist and sources.
+`rig_authoring.Session.bake(anim, events=FRAMES, contacts=[...])` now runs
   `joint_limits.py` after every bake and logs advisory `[anatomy AN_...]` lines; errors never block
   a bake. `anim_audit.run()` writes a whole-cast report to
   `E:\CopilotScratch\anim-audit\<stamp>\audit.md`. It also contains
@@ -1131,6 +1208,51 @@ requirement.
   via `Scripts\Inspect-Animation.ps1` and `editor_mcp animinspect`. Cross-link it from canonical
   `blender-assets` only after this branch lands and validates; none of this is animation acceptance
   evidence yet.
+
+  **Animation-slot findings awaiting branch landing:** Blender FBX import mirrors Y, so a
+  report's blade-at-`-Y` is engine `+Y`; author clips for imported axes rather than repairing them
+  with a runtime half-turn, which can leave a roughly 150° folded wrist (`hoe_till.py` did this).
+  `rig_authoring.key_euler` on the branch winds raw roll/pitch/yaw keys to the nearest Euler
+  solution of their neighbour, preventing ±180° long sweeps, 100–150° tool flips and
+  2,500–4,500°/s pops on re-bake. `index_01` → `pinky_01` slants about 16° toward the fingers:
+  square it against wrist → `middle_01` before using a fist line as a haft axis. A gripping fist
+  can freely roll around that axis, so solve per-key roll first when a wrist folds, using the
+  forearm-to-knuckle angle as the check.
+
+  Inspector contract on the branch: `frames.json` prop transforms are actor-space while bone poses
+  are component-space, with `mesh` mapping between them; `-Views` comma lists require
+  `FParse::Value(..., bShouldStopOnSeparator=false)`. The Inspector needs at least 6 GB free, so
+  close the editor before running it. Promote these source-bound implementation details to the
+  canonical realism/inspector skills only after the branch lands and validates.
+
+  **Additional animation-slot findings awaiting branch landing:** a hand-bone-laid prop couples
+  finger direction to prop orientation. `UpdateWaterPail` lays the pail along left fingers, so
+  fingers authored up the pail axis fold the wrist about 146°; keep a constant authoring lead
+  (`pail_pour.LEAD`) over the prop axis and apply its equal/opposite runtime rotation on the same
+  beats. The hoe's `UpdateHeldTools` work-grip turn is about the palm normal (hand-r measurement
+  `(-0.036, 0.984, 0.175)`), pivoting at the haft point nearest the palm. Ease carry-to-work
+  placement with the action blend weight, not clip phase: phase lags pose evaluation by a frame and
+  previously dipped the blade 15 cm into ground. For free haft roll, score each candidate with
+  `joint_limits` across wrist flex/side/forearm twist; elbow-pole changes also trade those against
+  shoulder internal rotation, so include shoulder in the score. The Inspector lab clip end time
+  varies by about ±0.2 s between runs and is not a valid clip-length source.
+
+  **Latest anatomy-slot findings awaiting branch landing:** do not use a fist's knuckles as a held
+  tool's working direction—that locks the hand roll. `UpdateFellingHatchet` instead uses each
+  recipe's fixed component-space swing-plane normal, deriving `edge = normal × haft`, so both fists
+  can roll per key. The proposed optimizer makes 12 uniform roll bakes, scores each key/side for
+  wrist/forearm excess beyond comfortable limits (triple the penalty beyond extreme), selects the
+  best roll per key, then repeats pole-offset sweeps with elbow and shoulder in the score.
+  `E:\CopilotScratch\ce241dd6-2c0b-47ea-a402-ec9fe5dc3572\slot\rollopt.py` is the candidate
+  `homestead_agent` helper. `joint_limits` measures forearm twist from anatomical neutral—palms
+  toward thighs, thumbs forward—so palm-up across the chest at 180° is a true over-rotation.
+
+  For kneel steps, `kneel_gather.key_step` lifts a foot through a 10%/60%, 50%/100% and 90%/60%
+  travel arc; otherwise it drags across ground. Rise one foot at a time, and allow more than eight
+  frames for a 39 cm lifted step. The Inspector may transiently crash at startup with D3D device
+  removed; retry once before debugging an animation. In PowerShell, do not name helper functions
+  `r` or `n` (aliases are case-insensitive; `R` is `Invoke-History`), and do not embed a Python
+  `"""` docstring in a double-quoted PowerShell string—use the edit tool or `[char]34`.
 - **Gather and scythe feedback** — **Props, pending and not shipped.** Remove generic slight-knee-bend
   gather routing: solid pickup uses the existing Stones kneel; bush/plant pickup uses the existing
   Berries/Roots hip-pouch animation; preserve specialized reeds/tree behavior and held-prop contact.
@@ -1147,6 +1269,15 @@ requirement.
   never fall back to CC0 `GrassStepA` footstep audio. PIE still needs cue count at 30/60/120 fps,
   miss/cancel, rain/music mix/headroom and cooked asset proof. Add provenance to `docs/asset-credits`
   only when shipped.
+
+  **Bare-footstep packaging trap (Integration, repair pending):** tracked
+  `Assets/Audio/Footsteps/BareStepWalk_00..05` and `BareStepRun_00..03` WAVs require
+  `bootstrap_unreal.py` to generate and save their corresponding `Content` SoundWave assets.
+  Source merge alone left those ten `.uasset`s untracked; `Build-Game.ps1 -PackageOnly` cooked
+  successfully but an RT-on copied-save launch logged every cue missing while EstateSmoke passed.
+  Integration is importing, committing, cooking and verifying the ten assets. For every new
+  generated audio source, bootstrap and commit the SoundWave before `-PackageOnly`, then audit a
+  normal-play packaged launch; automated cook/smoke success is insufficient asset proof.
 
   **Audio loudness standard `95f4ea14` (Water branch only):** every new or changed cue is measured
   against the forest ambience bed before shipping. `HomesteadAudioLevels.h` owns cue use/source/
@@ -1545,6 +1676,14 @@ not claim early Energy is fully solved.
   The independent wall plate is lowered to 279 cm. Native merged baseline remains 18/18; these
   Unreal-only routing/interior changes still require UBT and runtime verification.
 
+  **Cove fingerpost parked (known 7:30 limitation):** PIE logs the absent
+  `SM_Fingerpost_ToTheCove`, but no mapping repair is approved. Its lettering is mirrored; Props'
+  `/Game/SurvivalGame/Environment/Props/RoadSign/SM_RoadSign` is a different blank board with the
+  wrong pivot. Integration reverted the uncommitted substitution and did not rebuild. The accepted
+  cove-kit scope for this build is 476 steps, kerbs and rails plus 84 rail blockers; the fingerpost
+  group is deliberately absent. Track a correct sign asset/orientation separately rather than
+  treating this as a verified complete cove or package acceptance.
+
   **7:30 AM build hold — Menu chest tiles:** the invisible 720p chest-stack regression is from
   Menu's unmerged `62f7c645` (a dropped `AddSlot`), **not** `3bc08d9a` or current batch
   `855a91cc`. Native 18/18 does not catch this UI failure. Menu fixes it in `cc001d62`; the hold
@@ -1708,6 +1847,8 @@ not claim early Energy is fully solved.
 
 ## Decisions during the round
 
+- **4 PM round:** starts from delivered `main` `20ad66e9`; lanes rebase onto that baseline before
+  resuming their independently owned work.
 - **4 PM playtest package:** only independently verified `[ready]` slices are eligible. Pending
   feedback above is not included merely because it has an owner.
 - **Calendar A package hold:** raw `a3c7e04d` is excluded. Its 60-minute-default correction must be

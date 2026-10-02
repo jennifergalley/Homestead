@@ -20,7 +20,7 @@ async function findTaskFiles(directory) {
         throw error;
     }
     for (const entry of entries) {
-        if (entry.name.startsWith(".")) continue;
+        if (entry.name.startsWith(".") || entry.name === "archive") continue;
         const path = join(directory, entry.name);
         if (entry.isDirectory()) {
             found.push(...await findTaskFiles(path));
@@ -43,7 +43,7 @@ function parseTasks(markdown) {
             currentTask = null;
             continue;
         }
-        const task = line.match(/^- \[([ xX])\]\s+([0-9]+(?:\.[0-9]+)?)\s*(.+?)\s*$/);
+        const task = line.match(/^- \[([ xX])\]\s+([0-9]+(?:\.[0-9]+)?)\.?\s*(.+?)\s*$/);
         if (task) {
             currentTask = {
                 id: task[2],
@@ -61,6 +61,49 @@ function parseTasks(markdown) {
     }
     if (section.tasks.length) sections.push(section);
     return sections;
+}
+
+function parseBuilds(markdown) {
+    const entries = [];
+    const later = [];
+    let current = null;
+    let inLater = false;
+    for (const line of markdown.split(/\r?\n/)) {
+        const heading = line.match(/^##\s+(.+?)\s*$/);
+        if (heading) {
+            inLater = heading[1].trim().toLowerCase() === "later";
+            current = null;
+            if (!inLater) {
+                const [date, slot] = heading[1].split(/\s+—\s+/, 2);
+                current = { date: date?.trim() ?? heading[1].trim(), slot: slot?.trim() ?? "", sha: "pending", status: "planned", ships: [] };
+                entries.push(current);
+            }
+            continue;
+        }
+        const property = line.match(/^\s*-\s+(SHA|Status):\s*(.+?)\s*$/i);
+        if (property && current) {
+            current[property[1].toLowerCase()] = property[2].replace(/`/g, "");
+            continue;
+        }
+        const bullet = line.match(/^\s*-\s+(.+?)\s*$/);
+        if (!bullet) continue;
+        const text = bullet[1].replace(/`/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+        if (inLater) {
+            later.push(text);
+        } else if (current && text !== "Ships:") {
+            current.ships.push(text);
+        }
+    }
+    return { entries, later };
+}
+
+async function loadBuilds(projectRoot) {
+    try {
+        return parseBuilds(await readFile(join(projectRoot, "docs", "handoff", "builds.md"), "utf8"));
+    } catch (error) {
+        if (error?.code === "ENOENT") return { entries: [], later: [] };
+        throw error;
+    }
 }
 
 async function readActiveChange(projectRoot, now) {
@@ -108,8 +151,21 @@ async function loadFeature(projectRoot, tasksPath, activeChange) {
 export async function loadPlanner(projectRoot, now = Date.now()) {
     const taskFiles = await findTaskFiles(join(projectRoot, "openspec", "changes"));
     const activeChange = await readActiveChange(projectRoot, now);
-    const features = await Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange)));
+    const [features, builds, priority] = await Promise.all([
+        Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange))),
+        loadBuilds(projectRoot),
+        readFile(join(projectRoot, "docs", "handoff", "priority.json"), "utf8")
+            .then((text) => JSON.parse(text)).catch(() => ({})),
+    ]);
+    const order = new Map((Array.isArray(priority.order) ? priority.order : []).map((id, index) => [id, index]));
+    const nextBuild = new Set(Array.isArray(priority.nextBuild) ? priority.nextBuild : []);
+    const removed = new Set(Array.isArray(priority.removed) ? priority.removed : []);
+    for (let i = features.length - 1; i >= 0; i--) if (removed.has(features[i].id)) features.splice(i, 1);
+    for (const feature of features) feature.nextBuild = nextBuild.has(feature.id);
     features.sort((a, b) => {
+        const ao = order.has(a.id) ? order.get(a.id) : Infinity;
+        const bo = order.has(b.id) ? order.get(b.id) : Infinity;
+        if (ao !== bo) return ao - bo;
         if (a.status !== b.status) return statusOrder[a.status] - statusOrder[b.status];
         return b.modifiedAt.localeCompare(a.modifiedAt);
     });
@@ -127,5 +183,6 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
             completedFeatures: features.filter((feature) => feature.status === "complete").length,
         },
         features,
+        builds,
     };
 }

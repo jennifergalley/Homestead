@@ -83,6 +83,14 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   `/Game/SurvivalGame/Maps/Estate` since `b07d4a82`), and that startup is clean, so don't pass `-Map`.
   (An explicit `-Map /Game/SurvivalGame/Maps/Estate` once hung startup for 20 minutes.) For the old
   woodland, `load_level('/Game/SurvivalGame/Maps/Homestead')` after MCP answers.
+- **Shipping cannot select the old Woodland positional map:** UE 5.8's Shipping client clears the
+  positional map when `UE_ALLOW_MAP_OVERRIDE_IN_SHIPPING` is off (`GameInstance.cpp` 642–645), and
+  Shipping also ignores `-ini` map overrides (`ConfigCacheIni.h` 57). A package whose
+  `GameDefaultMap` is Estate will therefore report `fixedEstate=1` and load Estate despite
+  `Test-Game.ps1` requesting `/Game/SurvivalGame/Maps/Homestead`. Do not enable engine map override
+  just for QA. Woodland Hotbar, NativeMenu and FullLoop routes remain valid **Development** coverage,
+  but are not valid Shipping gates until adapted to Estate; use Estate-targeted Shipping routes
+  such as EstateSmoke and ToolRepeat instead.
 - **Never stop shared processes.** `zenserver.exe` (the DDC/Zen server on port 8558),
   `UnrealTraceServer.exe`, `ShaderCompileWorker.exe` and other worktrees' `UnrealEditor*`/UBT/UAT
   processes may be serving another session's build or cook. Stop only processes you started, by PID.
@@ -207,6 +215,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `error C2027: use of undefined type 'X'` (or C2065) in a file that used to compile | `SurvivalGame` now has a private PCH (`SurvivalGamePCH.h`) instead of the UnrealEd shared one, so headers it used to pull in aren't there | Include the engine header for X in that file. See section 8, "Private PCH". |
 | The packaged game exits at once with code **777006** and writes no log | `CrashDuringStaticInit` (`GenericPlatformCrashContext.h`): code ran during static initialisation that needs the engine. The case on 2026-09-28: a namespace-scope `TAutoConsoleVariable` whose default called `FParse::Param(FCommandLine::Get(), ...)`. That works in the editor, where the module DLL loads late, but is fatal in the monolithic game, and every package from `a725ff1d` to `7c5fdc28` crashed at launch | See the `homestead-code-conventions` skill, "Unreal C++" ("Nothing at namespace scope may read runtime state"). To find such a crash, `python Scripts\Examples\dbgrun.py "<exe and args>"` runs the game under a minimal debugger and prints debug output, exceptions and a symbolised stack. |
 | `Build-Game.ps1 -Package -SkipAssets` fails: `Missing licensed source asset ... forest-ground\GroundColor.jpg` | `-SkipAssets` only skips the asset fetch; the content bootstrap still runs and needs `Assets\Source`, which new worktrees don't have | When generated content is committed and current, use `-PackageOnly`. |
+| `Build-Game.ps1 -PackageOnly -SkipAssets` stalls in the skinned-asset cook with repeated `AssetCompile memory estimate ... 4608 MiB, MemoryLimit ...`, or free RAM approaches the 1.5 GB watchdog limit | Default asynchronous asset compilation overcommits available memory during the UnrealEditor-Cmd cook | Retry the same command with `-LowMemoryCook`. It forwards all four asset-compilation concurrency CVars at `1` plus `PercentageUnusedShaderCompilingThreads=88` to UAT's actual cook command. The verified warmed-DDC Development retry completed in 8m02s without the watchdog firing; use this opt-in only when the normal cook shows the pressure. |
 | New lane's worktree is incomplete: `SurvivalGame.uproject` missing, thousands of staged deletions in `git status` | The app's `create_session` worktree step hit `git command timed out after 300 seconds` (a full checkout with LFS is slow under load), but the session started anyway | `git -C <worktree> reset --hard HEAD` (about 3 min), then confirm `git status` is clean and `SurvivalGame.uproject` exists before building. |
 | Estate "Save failed... check disk space and permissions" (misleading text) / saves rejected on load | `ReadSave` in `HomesteadController.cpp` rejected `abs(PlayerLocation.Z) > 5000`; estate ground is Z ≈ 8700-9500 | Fixed on `main` in `f2e504c5` (bound by `MaxWorldCoordinate`). Rebase if you still see it. |
 | Spawn yaw ignored on Estate | `ChooseStartingView` (fresh terrain) and `SetAppearancePreview(false)` restoring a `SavedViewRotation` captured before spawn both overwrote it | The manor lane's fix is in `f2e504c5`; if it recurs, check `controlYaw` and a capture after the book closes. |
@@ -989,13 +998,21 @@ Extend it there when play needs a capability; prefer real input over state edits
 - **Package (integration session only during multi-lane rounds):** `Scripts\Build-Game.ps1 -Package` builds the editor module, regenerates content
   (`bootstrap_unreal.py` and the character/locomotion imports run as `UnrealEditor-Cmd`
   commandlets, one at a time, about 25 min) and runs UAT. `-PackageOnly` skips the content steps when
-  this worktree's generated content is already current. UAT is single-instance machine-wide; the
+  this worktree's generated content is already current. **A newly tracked generated audio source is
+  not current merely because its WAV exists:** run the bootstrap first, commit its generated
+  `Content` SoundWave asset, then use `-PackageOnly`. Audit it in a normal-play packaged launch as
+  well as automated suites; cooking can succeed while a missing SoundWave logs only at playback.
+  UAT is single-instance machine-wide; the
   script builds the game target with `-WaitMutex`, waits for UAT (`-WaitForUATMutex`) behind other worktrees, and cooks without the shared Zen store (`-SkipZenStore`). Each Unreal step counts
   toward the 2-process limit, and the cook starts more. It writes `Build\Logs\bootstrap.log` and
   `Build\Logs\package-<time>.log` in your worktree; the UAT log under `%APPDATA%` is shared and
   unreliable. The bootstrap re-saves tracked `.uasset`s, so check `git status` afterwards. The
   script refuses to package over a running player; close `SurvivalGame`/`JennysHomesteadGame`
   processes from that folder first (for Jenny's builds, see sections 0 and 7).
+  If the skinned-asset cook logs 4+ GB `AssetCompile memory estimate` warnings or approaches the
+  watchdog threshold, retry with `-LowMemoryCook`; it serializes async asset compilation and leaves
+  88% of shader-compiling threads unused for that cook. Confirm those switches appear on UAT's
+  actual UnrealEditor-Cmd command before relying on the result.
 - **Packaged walk drivers: `Walk` after every `BugItGo`.** `BugItGo` switches on Ghost (flying, no
   collision), so a driver that then holds W flies her level and under rising ground, and the
   terrain-recovery toast repeats. It looks like missing landscape collision; three map-lane runs were
@@ -1012,6 +1029,16 @@ Extend it there when play needs a capability; prefer real input over state edits
   **every** top-level window belonging to the child PID—not only an `UnrealWindow` class—and sample
   the foreground PID from launch to prove it never stole focus. `-nosound` suppresses
   `ActiveSound` logs, so never use audio logs as an acceptance gate in a run that passes it.
+- **Copied-save F5/F9 and RT-on night evidence:** `-RenderOffscreen -WindowStyle Hidden` can load an
+  isolated copy of an Estate save and emit `SAVE_LOAD_AUDIT`, but it has no top-level HWND. It cannot
+  receive physical-source F5/F9 input or provide a normal window capture. **Do not claim hidden
+  physical-key proof from `-windowed -WindowStyle Hidden`: it can briefly foreground before an
+  `EnumWindows` hide guard runs.** Use `-RenderOffscreen` only for copied-save load auditing and
+  existing packaged FullLoop routes for F5/F9. A hidden owned HWND may be used for physical keys or
+  RT-on captures only after a `CreateProcess`-suspended launch has installed the per-PID hide and
+  foreground guard *before resume*, alongside the job object. Verify matching before/after
+  `SAVE_LOAD_AUDIT` hashes and unchanged hashes for every original backup before calling copied-save
+  preservation proven.
 - **UI at real resolutions and DPI (standalone window, not PIE):** launch
   `UnrealEditor.exe "<worktree>\SurvivalGame.uproject" /Game/SurvivalGame/Maps/Estate -game -windowed
   -ResX=3840 -ResY=2160 -log=ui-4k.log` (and 1280x720; for 4K use `-fullscreen` instead of
@@ -1025,18 +1052,15 @@ Extend it there when play needs a capability; prefer real input over state edits
   point it at a non-default package with `-PackageDirectory <dir>` (and `-OutputDirectory`).
   They run a plain `-game` process with `-HomesteadSmokeTest`, which uses the legacy heroine; check
   the MetaHuman heroine yourself (field notes). **Any input-policy change** (hotbar selection, sow/eat/
-  weed bindings, sprint input or controller priority) runs packaged **both** `-Hotbar` and `-FullLoop`;
-  otherwise stale assertions can pass silently until the package route breaks.
-- **Audio cue loudness (pending standard):** source-only branch `jennifergalley-loudness` `95f4ea14`
-  establishes Jenny's rule: measure every new or changed cue against the forest ambience bed before
-  shipping it. Add a row to `Simulation/HomesteadAudioLevels.h` with use, source, category, bus and
-  gain; use a named `Gain` constant at every new `PlayEffect` call, never a literal. Run
-  `Scripts\Fetch-Assets.ps1`, install `soundfile`/`pyloudnorm`, then run
-  `python Scripts/Audio/Measure-Loudness.py` to regenerate
-  `HomesteadAudioMeasurements.h` and `docs/audio-checks.md`; run
-  `Scripts\Test-Native.ps1` so `HomesteadAudioLevelTests` rejects out-of-band cues or audio files
-  with no registry row. The generated header must remain `HomesteadAudioMeasurements.h`, **not**
-  `*.generated.h`, which collides with UHT naming. Do not rely on this gate until the branch lands.
+  weed bindings, sprint input or controller priority) runs packaged **both** `-Hotbar` and `-FullLoop`
+  in Development. In Shipping, they are Woodland positional-map routes and therefore invalid for an
+  Estate-default package; run adapted Estate routes instead, otherwise stale assertions can pass
+  silently until the package route breaks.
+- **Feedback layout route:** `Scripts\Test-FeedbackLayout.ps1` is Woodland-specific. Pass
+  `/Game/SurvivalGame/Maps/Homestead` positionally and reject Shipping, where UE 5.8 enforces the
+  Estate default map. Without the explicit Development map, the wrapper silently launches Estate
+  and its Energy/VSync fixture fails against the wrong state (30 → 23). The corrected packaged
+  route passes 63 checks and captures 13 images.
 - **Audio cue loudness (pending standard):** source-only branch `jennifergalley-loudness` `95f4ea14`
   establishes Jenny's rule: measure every new or changed cue against the forest ambience bed before
   shipping it. Add a row to `Simulation/HomesteadAudioLevels.h` with use, source, category, bus and

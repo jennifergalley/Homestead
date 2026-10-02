@@ -55,6 +55,32 @@ export function renderPlannerHtml() {
     }
     .stat { padding: 15px; }
     .stat strong { display: block; font-size: 22px; line-height: 28px; }
+    .builds {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .builds-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .builds-head h2 { margin: 0; font-size: 17px; line-height: 24px; }
+    .build-card {
+      border: 1px solid var(--border-color-default, #30363d);
+      background: var(--background-color-muted, #161b22);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .build-card.current { border-color: var(--true-color-blue, #58a6ff); }
+    .build-title { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .build-title strong { font-size: 14px; }
+    .build-meta { color: var(--text-color-muted, #8b949e); font-family: var(--font-mono, Consolas, monospace); font-size: 12px; }
+    .build-card ul { margin: 8px 0 0; padding-left: 18px; }
+    .build-card li { margin: 2px 0; }
+    .build-card details { margin-top: 8px; }
+    .build-card summary { cursor: pointer; color: var(--text-color-muted, #8b949e); font-size: 12px; }
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -161,6 +187,36 @@ export function renderPlannerHtml() {
     }
     .completed-content .section { margin-top: 12px; }
     .meta { margin-top: 13px; font-size: 12px; color: var(--text-color-muted, #8b949e); }
+    .checklist {
+      border: 1px solid var(--border-color-default, #30363d);
+      background: var(--background-color-muted, #161b22);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .check-row {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      padding: 10px 16px;
+      border-bottom: 1px solid color-mix(in srgb, var(--border-color-default, #30363d) 55%, transparent);
+    }
+    .check-row:last-child { border-bottom: 0; }
+    .check-box {
+      width: 16px; height: 16px; margin-top: 3px;
+      border: 1.5px solid var(--text-color-muted, #8b949e);
+      border-radius: 4px;
+      display: grid; place-items: center;
+      font-size: 12px; line-height: 1;
+    }
+    .check-row.done .check-box {
+      border-color: var(--true-color-green, #3fb950);
+      background: var(--true-color-green-muted, #23863633);
+      color: var(--true-color-green, #3fb950);
+    }
+    .check-title { font-weight: var(--font-weight-semibold, 600); }
+    .check-text { color: var(--text-color-muted, #8b949e); font-size: 13px; }
+    .check-row.done .check-title, .check-row.done .check-text { text-decoration: line-through; text-decoration-color: color-mix(in srgb, currentColor 55%, transparent); }
     .empty { padding: 48px 20px; text-align: center; color: var(--text-color-muted, #8b949e); }
     .error {
       border: 1px solid var(--true-color-red, #f85149);
@@ -176,6 +232,41 @@ export function renderPlannerHtml() {
       .stats { grid-template-columns: repeat(2, 1fr); }
       .feature-head { grid-template-columns: 1fr; gap: 7px; }
     }
+    .backlog-head { margin: 4px 0 10px; }
+    .check-row { grid-template-columns: 26px 18px minmax(0, 1fr) auto; cursor: grab; }
+    .check-row.dragging { opacity: .45; }
+    .check-row.next { background: color-mix(in srgb, var(--true-color-blue, #58a6ff) 9%, transparent); }
+    .rank { color: var(--text-color-muted, #8b949e); font-variant-numeric: tabular-nums; text-align: right; padding-top: 1px; }
+    .drag { color: var(--text-color-muted, #8b949e); letter-spacing: -3px; padding-top: 1px; user-select: none; }
+    .next-button {
+      border: 1px solid var(--border-color-default, #30363d);
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: transparent;
+      color: var(--text-color-muted, #8b949e);
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+    .next-button:hover { border-color: var(--true-color-blue, #58a6ff); color: var(--text-color-default, #e6edf3); }
+    .next-button.on {
+      border-color: var(--true-color-blue, #58a6ff);
+      background: var(--true-color-blue-muted, #1f6feb33);
+      color: var(--text-color-default, #e6edf3);
+    }
+    .row-actions { display: flex; gap: 6px; align-items: center; }
+    .icon-button {
+      border: 1px solid var(--border-color-default, #30363d);
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: transparent;
+      color: var(--text-color-muted, #8b949e);
+      cursor: pointer;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+    .icon-button:hover { border-color: var(--true-color-blue, #58a6ff); color: var(--text-color-default, #e6edf3); }
+    .icon-button.danger:hover, .icon-button.armed { border-color: var(--true-color-red, #f85149); color: var(--true-color-red, #f85149); }
   </style>
 </head>
 <body>
@@ -183,32 +274,23 @@ export function renderPlannerHtml() {
     <header class="hero">
       <div>
         <h1>Homestead task planner</h1>
-        <div class="subtitle">Active work, paused work, and plans at a glance. Completed tasks stay tucked away.</div>
+        <div class="subtitle">What shipped, what's building, and what's next. Drag to set priority; flag items for the next build.</div>
       </div>
-      <button id="refresh" class="refresh" type="button">Refresh tasks</button>
+      <button id="refresh" class="refresh" type="button">Refresh</button>
     </header>
-    <section id="stats" class="stats" aria-label="Progress summary"></section>
-    <section class="toolbar" aria-label="Planner controls">
-      <input id="search" class="search" type="search" placeholder="Search features and tasks..." autocomplete="off">
-      <div class="filters" role="group" aria-label="Status filter">
-        <button class="filter active" data-filter="all" type="button">All</button>
-        <button class="filter" data-filter="active" type="button">Active</button>
-        <button class="filter" data-filter="paused" type="button">Paused</button>
-        <button class="filter" data-filter="proposed" type="button">Proposed</button>
-        <button class="filter" data-filter="complete" type="button">Complete</button>
-      </div>
-    </section>
+    <section id="builds" class="builds" aria-label="Build changelist"></section>
+    <div class="builds-head backlog-head">
+      <h2>Planned improvements</h2>
+      <span id="backlog-note" class="muted"></span>
+    </div>
     <section id="board" class="board" aria-live="polite"></section>
   </main>
   <script>
-    const state = {
-      planner: null, signature: null, filter: "all", query: "",
-      expanded: new Map(), completedExpanded: new Map(),
-    };
-    const stats = document.getElementById("stats");
+    const state = { planner: null, signature: null, dragging: null };
+    const buildsNode = document.getElementById("builds");
     const board = document.getElementById("board");
-    const search = document.getElementById("search");
     const refresh = document.getElementById("refresh");
+    const note = document.getElementById("backlog-note");
 
     const el = (tag, className, text) => {
       const node = document.createElement(tag);
@@ -217,98 +299,146 @@ export function renderPlannerHtml() {
       return node;
     };
 
-    function renderStats(summary) {
-      stats.replaceChildren();
-      const values = [
-        ["Tasks complete", summary.completedTasks + " / " + summary.totalTasks],
-        ["Overall progress", summary.totalTasks ? Math.round(summary.completedTasks * 100 / summary.totalTasks) + "%" : "0%"],
-        ["Active features", String(summary.activeFeatures)],
-        ["Paused features", String(summary.pausedFeatures)],
-        ["Proposed features", String(summary.proposedFeatures)],
-        ["Completed features", String(summary.completedFeatures)],
-      ];
-      for (const [label, value] of values) {
-        const card = el("div", "stat");
-        card.append(el("strong", "", value), el("span", "muted", label));
-        stats.append(card);
+    function renderBuildCard(build, current = false) {
+      const card = el("article", "build-card" + (current ? " current" : ""));
+      const title = el("div", "build-title");
+      title.append(el("strong", "", [build.date, build.slot].filter(Boolean).join(" — ")),
+        el("span", "badge " + (build.status === "delivered" ? "complete" : "active"), build.status));
+      card.append(title, el("div", "build-meta", build.sha));
+      if (build.ships.length) {
+        const list = el("ul");
+        for (const item of build.ships) list.append(el("li", "", item));
+        card.append(list);
+      }
+      return card;
+    }
+
+    function renderBuilds(builds) {
+      buildsNode.replaceChildren();
+      if (!builds?.entries?.length && !builds?.later?.length) return;
+      const head = el("div", "builds-head");
+      head.append(el("h2", "", "Builds"), el("span", "muted", "Current changelist and recent deliveries"));
+      buildsNode.append(head);
+      const current = builds.entries.find((build) => build.status === "building" || build.status === "planned")
+        ?? builds.entries.find((build) => build.status === "delivered");
+      if (current) buildsNode.append(renderBuildCard(current, true));
+      const delivered = builds.entries.filter((build) => build.status === "delivered" && build !== current);
+      for (const build of delivered.slice(0, 2)) buildsNode.append(renderBuildCard(build));
+      if (delivered.length > 2) {
+        const collapsed = el("details", "build-card");
+        collapsed.append(el("summary", "", "Older delivered builds (" + (delivered.length - 2) + ")"));
+        for (const build of delivered.slice(2)) collapsed.append(renderBuildCard(build));
+        buildsNode.append(collapsed);
       }
     }
 
-    function featureMatches(feature) {
-      if (state.filter !== "all" && feature.status !== state.filter) return false;
-      if (!state.query) return true;
-      const haystack = [
-        feature.title,
-        feature.name,
-        ...feature.sections.flatMap((section) => [section.title, ...section.tasks.map((task) => task.text)]),
-      ].join(" ").toLowerCase();
-      return haystack.includes(state.query);
+    async function savePriority(payload) {
+      const response = await fetch("/api/priority", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error("Couldn't save priority: " + response.status);
+      return response.json();
+    }
+
+    function currentOrder() {
+      return [...board.querySelectorAll(".check-row")].map((row) => row.dataset.id);
     }
 
     function renderBoard() {
       board.replaceChildren();
-      const features = state.planner.features.filter(featureMatches);
+      const features = state.planner.features.filter((feature) => feature.status !== "complete");
+      const flagged = features.filter((feature) => feature.nextBuild).length;
+      note.textContent = features.length + " items" + (flagged ? " · " + flagged + " flagged for the next build" : "");
       if (!features.length) {
-        board.append(el("div", "empty", "No OpenSpec work matches this view."));
+        board.append(el("div", "empty", "Nothing planned. Playtest feedback will land here."));
         return;
       }
-      for (const feature of features) {
-        const details = el("details", "feature " + feature.status);
-        details.open = state.expanded.get(feature.id)
-          ?? (feature.status === "active" || feature.status === "paused");
-        details.addEventListener("toggle", () => state.expanded.set(feature.id, details.open));
-        const summary = el("summary");
-        const head = el("div", "feature-head");
-        const title = el("div", "feature-title");
-        title.append(el("h2", "", feature.title), el("span", "badge " + feature.status, feature.status));
-        head.append(title, el("div", "count", feature.completed + " / " + feature.total));
-        const bar = el("div", "bar");
-        const fill = el("span");
-        fill.style.width = (feature.total ? feature.completed * 100 / feature.total : 0) + "%";
-        bar.append(fill);
-        summary.append(head, bar);
-        details.append(summary);
-
-        const body = el("div", "feature-body");
-        const appendSections = (parent, sections, done) => {
-          for (const section of sections) {
-            const tasks = section.tasks.filter((task) => task.done === done);
-            if (!tasks.length) continue;
-            const sectionNode = el("section", "section");
-            sectionNode.append(el("h3", "", section.title));
-            for (const task of tasks) {
-              const taskNode = el("div", "task" + (task.done ? " done" : ""));
-              taskNode.append(el("div", "task-id", task.id), el("div", "task-text", task.text));
-              sectionNode.append(taskNode);
-            }
-            parent.append(sectionNode);
+      const list = el("div", "checklist");
+      features.forEach((feature, index) => {
+        const open = feature.sections.flatMap((section) => section.tasks).filter((task) => !task.done);
+        const row = el("div", "check-row" + (feature.nextBuild ? " next" : ""));
+        row.dataset.id = feature.id;
+        row.draggable = true;
+        row.title = feature.path;
+        const text = el("div");
+        text.append(el("div", "check-title", feature.title));
+        for (const task of open.slice(0, 3)) text.append(el("div", "check-text", task.text));
+        const button = el("button", "next-button" + (feature.nextBuild ? " on" : ""),
+          feature.nextBuild ? "★ Next build" : "☆ Next build");
+        button.type = "button";
+        button.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          button.disabled = true;
+          try { await savePriority({ toggleNext: feature.id }); await load(true, true); }
+          catch (error) { note.textContent = error.message; }
+          finally { button.disabled = false; }
+        });
+        const actions = el("div", "row-actions");
+        const quote = el("button", "icon-button", "❝ Quote");
+        quote.type = "button";
+        quote.title = "Attach this item to the chat";
+        quote.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          quote.disabled = true;
+          try {
+            const response = await fetch("/api/quote", {
+              method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: feature.id }),
+            });
+            if (!response.ok) throw new Error((await response.json()).error ?? "Couldn't attach");
+            note.textContent = "Attached “" + feature.title + "” to the chat";
+          } catch (error) { note.textContent = error.message; }
+          finally { quote.disabled = false; }
+        });
+        const remove = el("button", "icon-button danger", "✕");
+        remove.type = "button";
+        remove.title = "Remove from the list";
+        remove.addEventListener("click", async (event) => {
+          event.stopPropagation();
+          if (remove.dataset.armed !== "1") {
+            remove.dataset.armed = "1";
+            remove.textContent = "Remove?";
+            remove.classList.add("armed");
+            setTimeout(() => { remove.dataset.armed = ""; remove.textContent = "✕"; remove.classList.remove("armed"); }, 3000);
+            return;
           }
-        };
-        appendSections(body, feature.sections, false);
-
-        if (feature.completed > 0) {
-          const completed = el("details", "completed-group");
-          completed.open = state.completedExpanded.get(feature.id) ?? false;
-          completed.addEventListener("toggle", () =>
-            state.completedExpanded.set(feature.id, completed.open));
-          completed.append(el("summary", "", "Completed (" + feature.completed + ")"));
-          const completedContent = el("div", "completed-content");
-          appendSections(completedContent, feature.sections, true);
-          completed.append(completedContent);
-          body.append(completed);
-        }
-        body.append(el("div", "meta", feature.path + " | Updated " + new Date(feature.modifiedAt).toLocaleString()));
-        details.append(body);
-        board.append(details);
-      }
+          remove.disabled = true;
+          try { await savePriority({ remove: feature.id }); await load(true, true); note.textContent = "Removed “" + feature.title + "”"; }
+          catch (error) { note.textContent = error.message; remove.disabled = false; }
+        });
+        actions.append(button, quote, remove);
+        row.append(el("div", "rank", String(index + 1)), el("div", "drag", "⋮⋮"), text, actions);
+        row.addEventListener("dragstart", (event) => {
+          state.dragging = row;
+          row.classList.add("dragging");
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", feature.id);
+        });
+        row.addEventListener("dragend", async () => {
+          row.classList.remove("dragging");
+          state.dragging = null;
+          [...list.querySelectorAll(".rank")].forEach((rank, i) => { rank.textContent = String(i + 1); });
+          try { await savePriority({ order: currentOrder() }); note.textContent = "Order saved"; }
+          catch (error) { note.textContent = error.message; }
+        });
+        row.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          const dragging = state.dragging;
+          if (!dragging || dragging === row) return;
+          const box = row.getBoundingClientRect();
+          const after = event.clientY > box.top + box.height / 2;
+          list.insertBefore(dragging, after ? row.nextSibling : row);
+        });
+        list.append(row);
+      });
+      board.append(list);
     }
 
     function render() {
-      renderStats(state.planner.summary);
+      renderBuilds(state.planner.builds);
       renderBoard();
     }
 
-    async function load(quiet = false) {
+    async function load(quiet = false, force = false) {
       if (!quiet) {
         refresh.disabled = true;
         refresh.textContent = "Refreshing...";
@@ -317,8 +447,9 @@ export function renderPlannerHtml() {
         const response = await fetch("/api/tasks", { cache: "no-store" });
         if (!response.ok) throw new Error("Planner request failed: " + response.status);
         const planner = await response.json();
-        const signature = JSON.stringify({ summary: planner.summary, features: planner.features });
-        if (!quiet || state.signature !== signature) {
+        const signature = JSON.stringify({ features: planner.features, builds: planner.builds });
+        if (state.dragging) return;
+        if (force || !quiet || state.signature !== signature) {
           state.planner = planner;
           state.signature = signature;
           render();
@@ -329,25 +460,14 @@ export function renderPlannerHtml() {
       } finally {
         if (!quiet) {
           refresh.disabled = false;
-          refresh.textContent = "Refresh tasks";
+          refresh.textContent = "Refresh";
         }
       }
     }
 
-    search.addEventListener("input", () => {
-      state.query = search.value.trim().toLowerCase();
-      if (state.planner) renderBoard();
-    });
-    for (const button of document.querySelectorAll(".filter")) {
-      button.addEventListener("click", () => {
-        state.filter = button.dataset.filter;
-        document.querySelectorAll(".filter").forEach((item) => item.classList.toggle("active", item === button));
-        if (state.planner) renderBoard();
-      });
-    }
-    refresh.addEventListener("click", () => load());
-    load();
-    setInterval(() => load(true), 60_000);
+    refresh.addEventListener("click", () => load(false));
+    load(false);
+    setInterval(() => load(true), 10000);
   </script>
 </body>
 </html>`;
