@@ -12,8 +12,9 @@ agent keeps both current.
   from real LIDAR), with no procedural world, cold, death or predators.
 - The authoritative design and round order: `openspec\changes\pivot-to-cozy-estate-life-sim\design.md`.
 - The working policy (playable increments, reuse first, OpenSpec before each round): `docs\game-plan.md`.
-- The current round: [round-2.md](round-2.md) (the farming year and period crafting). Round 1, "Walk
-  your estate", is recorded in [round-1.md](round-1.md).
+- The current round: [round-3.md](round-3.md) (scheduled builds with a lean, token-efficient team).
+  Earlier rounds are history only; don't read them unless you need a specific detail:
+  [round-2.md](round-2.md) and [round-1.md](round-1.md).
 
 ## Product copy and UI principle
 
@@ -35,12 +36,42 @@ Menu's control audit and Props' repeat bindings verify this before delivery.
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
 launches**; documenting them does not change a live session's model or reasoning level.
 
+Updated 2026-10-01 for token efficiency (Jenny approved): pick the cheapest tier that keeps quality.
+
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
-| Documentation Agent | GPT-5.6 Terra (`gpt-5.6-terra`) | **high** | **long** |
-| Architecture Agent | GPT-6 Sol (`gpt-6-sol`) | high | long |
-| Orchestrator Agent | GPT-6 Sol (`gpt-6-sol`) | **medium** | **long** |
-| Implementer (Blender, Unreal or code work) | Claude Opus 5.5 | high | long |
+| Orchestrator Agent | GPT-6 Sol (`gpt-6-sol`) | medium | default |
+| Documentation Agent | GPT-5.6 Terra (`gpt-5.6-terra`) | medium | default |
+| Architecture Agent (spawn only for a real refactor or review) | GPT-6 Sol (`gpt-6-sol`) | high | default |
+| Implementer, hard work: animation, Blender, rendering, save format, complex gameplay | Claude Opus 5.5 (`claude-opus-5.5`) | high | long |
+| Implementer, small work: UI tweaks, copy, moving or placing objects, test fixes | Claude Sonnet 5 (`claude-sonnet-5`) | medium | default |
+| Integration Agent (merge, package, run scripted tests) | GPT-5.4 mini (`gpt-5.4-mini`) | medium | default |
+| Code review sub-agent (only for save-format or gameplay-logic diffs) | GPT-5.4 mini (`gpt-5.4-mini`) | medium | default |
+| Disk Cleanup Agent | unchanged (existing session) | | |
+
+Integration escalates a failure it can't explain in one attempt to the orchestrator, which assigns it to
+the owning lane rather than having Integration debug gameplay.
+
+## Token budget (Jenny, 2026-10-01)
+
+Tokens are the scarce resource. Every session follows these rules:
+
+- **Fresh sessions, short histories.** The orchestrator spawns implementers per build slot (or per
+  day) and archives them once their work is on `main` and pushed. Long-lived sessions re-read their
+  whole history every turn. A replacement orchestrator starts from this page and the current round page.
+- **Short reports.** Lanes report in two lines at most: `[ready] <change> @ <sha>` plus what Jenny should
+  try. No narration, recap or progress updates.
+- **No acknowledgements.** Don't reply to idle notices, status updates or thanks. Message only when the
+  recipient must act.
+- **Batch per lane per build.** The orchestrator sends each lane one briefing per build slot with all
+  of its scheduled items, not a stream of separate requests.
+- **No standing check-ins.** The orchestrator wakes only for build slots (about an hour before each)
+  and for incoming messages; no 30-minute polling.
+- **Review only risky diffs** (save format, gameplay logic) with the cheap reviewer above.
+- **Docs reports only for real findings**: something broke, a doc was wrong, or a recipe other lanes
+  need. No running commentary.
+- **Jenny verifies in-game.** Lanes don't open the editor for screenshots or self-QA unless the task
+  can't be checked any other way (animation and art usually need it; UI and logic usually don't).
 
 **At most three concurrent hands-on implementers** do Blender, Unreal or code work. This is a cap
 across active work, not a role-label exemption, and is separate from the 2-Unreal-process machine cap.
@@ -83,8 +114,8 @@ a blocking wait keeps its turn open, so queued `send_session_message`s never arr
 Waiting on a build or command the session itself started is fine through the tool's own completion
 notification (async shells / `initial_wait`); a sleep loop isn't. For an editor slot, check
 `Get-Process UnrealEditor*` once: one slot is reserved for the integration session, so if another
-lane's Unreal process is already running, schedule a wake-up about 5 minutes out and end the turn. The orchestrator uses the same pattern: it checks in every 30 minutes
-through its own session automation.
+lane's Unreal process is already running, schedule a wake-up about 5 minutes out and end the turn. The orchestrator wakes only
+for build slots and incoming messages (see "Token budget").
 
 ## Jenny's packaged game memory safety
 
