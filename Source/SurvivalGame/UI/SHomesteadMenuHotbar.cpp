@@ -228,6 +228,8 @@ void SHomesteadMenu::EndHotbarPointerDrag()
     int32 To = INDEX_NONE;
     int32 Onto = INDEX_NONE;
     bool bOverSource = false, bOverPack = false, bOverChest = false;
+    FHomesteadRow PadTarget;
+    bool bOverPad = false;
     if (WasDragging && FSlateApplication::IsInitialized())
     {
         const FVector2D Position = FSlateApplication::Get().GetCursorPos();
@@ -237,6 +239,7 @@ void SHomesteadMenu::EndHotbarPointerDrag()
         {
             for (int32 Index = 0; Index < Cells.Num() && Onto == INDEX_NONE; ++Index)
                 if (Cells[Index] && Entries.IsValidIndex(Index) && Cells[Index]->GetCachedGeometry().IsUnderLocation(Position)) Onto = Index;
+            bOverPad = Onto == INDEX_NONE && PackPadAt(Position, PadTarget);
             bOverPack = PackDropArea && PackDropArea->GetCachedGeometry().IsUnderLocation(Position);
             bOverChest = ChestDropArea && ChestDropArea->GetCachedGeometry().IsUnderLocation(Position);
         }
@@ -244,11 +247,13 @@ void SHomesteadMenu::EndHotbarPointerDrag()
     bHotbarPointerDown = false;
     bHotbarPointerDragging = false;
     PointerHotbarTarget = INDEX_NONE;
+    PointerPadSlot = INDEX_NONE;
     HeldHotbarSlot = INDEX_NONE;
     bSuppressHotbarClick = WasDragging && bOverSource;
     if (!WasDragging || !Controller.IsValid()) return;
-    // Onto another cell it moves, merges or swaps; onto a stack below it merges or swaps; onto the
-    // rest of her pack it goes to its end; onto the chest it is stored. Anywhere else, nothing.
+    // Onto another cell it moves, merges or swaps; onto a square of her pack it goes exactly there
+    // (merging or swapping with a stack in it); onto the rest of her pack, the first empty square;
+    // onto the chest it is stored. Anywhere else, nothing.
     if (To != INDEX_NONE && To != From)
     {
         Controller->MenuMoveHotbarSlot(From, To);
@@ -257,6 +262,7 @@ void SHomesteadMenu::EndHotbarPointerDrag()
         bFocusPending = true;
     }
     else if (Onto != INDEX_NONE) Controller->MenuMoveHotbarToPack(From, &Entries[Onto]);
+    else if (bOverPad) Controller->MenuMoveHotbarToPack(From, &PadTarget);
     else if (bOverChest && Controller->ActiveStorageChest().IsSet())
     {
         FHomesteadRow Chest;
@@ -272,6 +278,7 @@ void SHomesteadMenu::CancelHotbarHolds()
     bHotbarPointerDown = false;
     bHotbarPointerDragging = false;
     PointerHotbarTarget = INDEX_NONE;
+    PointerPadSlot = INDEX_NONE;
     bSuppressHotbarClick = false;
 }
 void SHomesteadMenu::BeginPlacingOnHotbar(const FHomesteadRow& Row)

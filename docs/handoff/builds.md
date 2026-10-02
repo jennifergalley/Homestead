@@ -72,6 +72,8 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - The scythe sits further in front of her, so neither hand clips her chest.
 - Hoeing keeps both arms clear of her torso.
 - Dragging an item drops it in exactly the square you choose, and it stays there (moved from 9 PM).
+- Switching Book colours keeps you on the same Settings tab and row, without the double click or focus jump.
+- After switching Book colours, the hotbar and the Energy/Food meters change to the new palette straight away.
 - Woodland foliage shadows no longer swim or flicker as she walks under the canopy.
 - Bob and updo hairstyles stay clean while moving, with no rods, fans or LOD pops at any distance.
 

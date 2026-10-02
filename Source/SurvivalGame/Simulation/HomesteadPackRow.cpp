@@ -1,4 +1,5 @@
 #include "HomesteadPackRow.h"
+#include "HomesteadPail.h"
 
 #include <algorithm>
 #include <istream>
@@ -49,6 +50,84 @@ bool ReadParkedSection(std::istream& input, State& state)
             if (!(input >> cell.groupId >> cell.wearableId) || cell.groupId < 0 || cell.wearableId < 0) return false;
     // Stale cells (stacks since used up or moved) are dropped as a row comes back (RotatePackRow).
     return true;
+}
+
+void WriteSlotsSection(std::ostream& output, const State& state)
+{
+    if (state.packSlots.empty()) return;
+    output << SlotsSaveTag << ' ' << state.packSlots.size();
+    for (const auto& cell : state.packSlots) output << ' ' << cell.groupId << ' ' << cell.wearableId;
+    output << '\n';
+}
+
+bool ReadSlotsSection(std::istream& input, State& state)
+{
+    int count = 0;
+    if (!(input >> count) || count < 0 || count > MaxPackSlots) return false;
+    state.packSlots.assign(static_cast<size_t>(count), PackRowCell{});
+    for (auto& cell : state.packSlots)
+        if (!(input >> cell.groupId >> cell.wearableId) || cell.groupId < 0 || cell.wearableId < 0
+            || (cell.groupId != 0 && cell.wearableId != 0))
+            return false;
+    // Stale squares (stacks since used up or moved) read as gaps (Grid).
+    return true;
+}
+
+std::vector<int> Grid(const State& state)
+{
+    const auto& layout = state.inventoryLayout;
+    const bool hideWater = PresentPail(state).hidePackWater;
+    std::vector<int> below;
+    for (const int index : BelowRow(state.packRow, layout))
+        if (!(hideWater && layout[index].wearableId == 0 && layout[index].item == Item::Water)) below.push_back(index);
+    std::vector<bool> placed(layout.size(), false);
+    std::vector<int> grid;
+    grid.reserve(std::max(state.packSlots.size(), below.size()));
+    for (const auto& cell : state.packSlots)
+    {
+        int found = -1;
+        if (!cell.Empty())
+            for (const int index : below)
+                if (!placed[index] && CellFor(layout[index]) == cell) { found = index; break; }
+        if (found >= 0) placed[found] = true;
+        grid.push_back(found);
+    }
+    for (const int index : below)
+    {
+        if (placed[index]) continue;
+        const auto gap = std::find(grid.begin(), grid.end(), -1);
+        if (gap != grid.end()) *gap = index;
+        else grid.push_back(index);
+    }
+    while (!grid.empty() && grid.back() < 0) grid.pop_back();
+    return grid;
+}
+
+std::vector<PackRowCell> GridCells(const State& state)
+{
+    std::vector<PackRowCell> cells;
+    for (const int index : Grid(state)) cells.push_back(index < 0 ? PackRowCell{} : CellFor(state.inventoryLayout[index]));
+    return cells;
+}
+
+void ReplaceSlot(State& state, const PackRowCell& from, const PackRowCell& to)
+{
+    for (auto& cell : state.packSlots)
+        if (!from.Empty() && cell == from) { cell = to; return; }
+}
+
+void OrderLayoutByGrid(State& state)
+{
+    const auto& layout = state.inventoryLayout;
+    InventoryLayout ordered;
+    ordered.reserve(layout.size());
+    std::vector<bool> taken(layout.size(), false);
+    const auto take = [&](int index) { if (!taken[index]) { ordered.push_back(layout[index]); taken[index] = true; } };
+    for (int index = 0; index < static_cast<int>(layout.size()); ++index)
+        if (CellOf(state.packRow, layout[index]) >= 0) take(index);
+    for (const int index : Grid(state)) if (index >= 0) take(index);
+    for (int index = 0; index < static_cast<int>(layout.size()); ++index) take(index);
+    state.inventoryLayout = std::move(ordered);
 }
 
 PackRowCell CellFor(const LayoutEntry& entry)
@@ -175,7 +254,11 @@ Result Simulation::MoveToPackRow(int groupId, int wearableId, int cell, std::uin
     // Within the row the two cells trade places; from below, whatever was in the cell takes her
     // stack's old place in the pack.
     if (from >= 0) row[from] = held >= 0 ? occupant : PackRowCell{};
-    else if (held >= 0) std::swap(layout[source], layout[held]);
+    else if (held >= 0)
+    {
+        PackRowRules::ReplaceSlot(candidate, row[cell], occupant);
+        std::swap(layout[source], layout[held]);
+    }
     return CommitInventory(std::move(candidate),
         ((held >= 0 ? "Swapped into " : "Moved to ") + SlotName(cell) + ".").c_str());
 }
@@ -208,9 +291,52 @@ Result Simulation::MoveFromPackRow(int cell, int targetGroupId, int targetWearab
         row[cell] = {};
         return CommitInventory(std::move(candidate), "Added to the stack in your pack.");
     }
+    const PackRowCell moving = row[cell];
     row[cell] = PackRowRules::CellFor(layout[target]);
+    PackRowRules::ReplaceSlot(candidate, row[cell], moving);
     std::swap(layout[source], layout[target]);
     return CommitInventory(std::move(candidate), ("Swapped with " + SlotName(cell) + ".").c_str());
+}
+
+Result Simulation::MoveToPackSlot(int groupId, int wearableId, int slot, std::uint64_t expectedRevision)
+{
+    const auto ready = CheckRevision(expectedRevision);
+    if (!ready) return ready;
+    if (slot < 0 || slot >= PackRowRules::MaxPackSlots) return RowBad("Choose a square in your pack.");
+    State candidate = state_;
+    auto& layout = candidate.inventoryLayout;
+    auto& row = candidate.packRow;
+    const int source = FindCarried(layout, groupId, wearableId);
+    if (source < 0) return RowBad("Choose something in your pack. Take stored things into your pack first.");
+    const PackRowCell key = PackRowRules::CellFor(layout[source]);
+    // From here on every stack keeps its square (State::packSlots).
+    auto slots = PackRowRules::GridCells(candidate);
+    if (static_cast<int>(slots.size()) <= slot) slots.resize(static_cast<size_t>(slot) + 1);
+    const int fromCell = PackRowRules::CellOf(row, layout[source]);
+    const auto found = std::find(slots.begin(), slots.end(), key);
+    const int fromSlot = found == slots.end() ? -1 : static_cast<int>(found - slots.begin());
+    if (fromCell < 0 && fromSlot < 0) return RowBad("That can't go in a square of your pack.");
+    if (fromSlot == slot) return {true, "", ResultCode::None, revision_};
+    const PackRowCell occupant = slots[slot];
+    const int held = PackRowRules::FindEntry(layout, occupant);
+    if (held >= 0 && Stackable(layout[held], layout[source]))
+    {
+        layout[held].quantity += layout[source].quantity;
+        layout.erase(layout.begin() + source);
+        if (fromCell >= 0) row[fromCell] = {};
+        else slots[fromSlot] = {};
+    }
+    else
+    {
+        // Onto a stack the two swap: from the hotbar, that stack goes up into her cell.
+        slots[slot] = key;
+        if (fromCell >= 0) row[fromCell] = held >= 0 ? occupant : PackRowCell{};
+        else slots[fromSlot] = held >= 0 ? occupant : PackRowCell{};
+    }
+    while (!slots.empty() && slots.back().Empty()) slots.pop_back();
+    candidate.packSlots = std::move(slots);
+    PackRowRules::OrderLayoutByGrid(candidate);
+    return CommitInventory(std::move(candidate), "");
 }
 
 Result Simulation::RotatePackRow(std::uint64_t expectedRevision)
@@ -232,8 +358,9 @@ Result Simulation::RotatePackRow(std::uint64_t expectedRevision)
     PackRow incoming{};
     bool found = false;
     int cell = 0;
-    for (const int index : PackRowRules::BelowRow(row, layout))
+    for (const int index : PackRowRules::Grid(candidate))
     {
+        if (index < 0) continue;
         const PackRowCell key = PackRowRules::CellFor(layout[index]);
         bool isParked = false;
         for (const auto& other : parked) isParked = isParked || inRow(other, key);

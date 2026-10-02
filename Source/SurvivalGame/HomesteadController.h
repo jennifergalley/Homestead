@@ -34,7 +34,8 @@ class AHomesteadMenuPortrait;
 class UHomesteadMapComponent;
 class SWidget;
 
-enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe, Recipe };
+// EmptySlot: an empty square of her pack's grid (place-items-in-exact-slots), a place to drop things.
+enum class EHomesteadMenuSubject : uint8 { Legacy, ItemGroup, Wearable, GarmentRecipe, Recipe, EmptySlot };
 enum class EHomesteadItemAction : uint8 { Primary, Transfer, Split, Merge, MoveEarlier, MoveLater, Equip, Unequip, Dye, Drop, Pin };
 
 struct FHomesteadRow
@@ -56,6 +57,8 @@ struct FHomesteadRow
     FString Status;
     // The hotbar cell (0-9) holding this pack row, the first row of her pack; INDEX_NONE below it.
     int32 HotbarCell = INDEX_NONE;
+    // Its square in her pack's grid below the hotbar (Homestead::PackRowRules::Grid); INDEX_NONE elsewhere.
+    int32 PackSlot = INDEX_NONE;
     FName Icon;
     FLinearColor IconTint = FLinearColor(0.92f, 0.74f, 0.43f);
     Homestead::RecipeAssessment RecipeState;
@@ -232,6 +235,10 @@ public:
     void MenuSetAutosaveEnabled(bool Enabled);
     // Settings › Book colours: the dark (candlelit) or light parchment book, remembered for next time.
     void MenuSetDarkBook(bool bDark);
+    // Rebuilds the book (in place) and the HUD's Slate widgets in the new palette, on the next tick.
+    void HandleThemeChanged();
+    FDelegateHandle ThemeChangedHandle;
+    bool bThemeRebuildPending = false;
     void MenuSetAutosaveInterval(int32 Minutes);
     const FSlateBrush* MenuPortraitBrush() const { return MenuPortrait ? &PortraitBrush : nullptr; }
     void RefreshMenuPortrait();

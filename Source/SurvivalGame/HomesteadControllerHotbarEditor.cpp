@@ -16,6 +16,7 @@ bool AHomesteadController::MenuPlaceInHotbar(const FHomesteadRow& Row, int32 Cel
         return false;
     }
     if (Row.HotbarCell == Cell) return true;
+    if (Row.Subject == EHomesteadMenuSubject::EmptySlot) return false;
     Homestead::Result Result{false, "That can't go on the hotbar."};
     const bool Garment = Row.Subject == EHomesteadMenuSubject::Wearable;
     if (Row.Subject != EHomesteadMenuSubject::ItemGroup && !Garment)
@@ -62,6 +63,12 @@ bool AHomesteadController::MenuMoveHotbarToPack(int32 Cell, const FHomesteadRow*
         Result = Entry->wearableId
             ? Sim.MoveWearable(Entry->wearableId, Target->ContainerId, PlayerPoint(), Sim.GetRevision())
             : Sim.TransferGroup(Target->ContainerId, Entry->groupId, Entry->quantity, true, PlayerPoint(), Sim.GetRevision());
+    }
+    else if (Target && Target->ContainerId == 0 && Target->PackSlot != INDEX_NONE)
+    {
+        // Onto a square of her pack: exactly there, merging with the same item or swapping.
+        const auto* Entry = HotbarEntry(Cell);
+        Result = Sim.MoveToPackSlot(Entry->wearableId ? 0 : Entry->groupId, Entry->wearableId, Target->PackSlot, Sim.GetRevision());
     }
     else
     {

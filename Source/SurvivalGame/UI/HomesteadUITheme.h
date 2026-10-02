@@ -59,6 +59,9 @@ private:
 };
 // Sets every FThemeColor to the current theme. Widgets built afterwards use it.
 void Apply();
+// Broadcast by Apply when the theme actually changes, so widgets built in the old palette (the book,
+// the hotbar, the vitals) can rebuild. Listeners may be mid-click: defer the rebuild a tick.
+FSimpleMulticastDelegate& OnChanged();
 
 // A colour written inline (not a named FThemeColor), for lambdas and widgets built after Apply.
 inline FLinearColor Themed(const FLinearColor& Classic)

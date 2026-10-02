@@ -52,6 +52,8 @@ public:
     void RequestTestResetPrompt() { bResetPromptShown = false; }
     void Back();
     void Refresh();
+    // Rebuilds every panel in the current palette, keeping the page, tab, focus and scroll.
+    void RebuildForTheme();
     bool PrepareQuickAction();
     bool HasActiveDialog() const { return Dialog != EDialog::None; }
     bool IsExitPrompt() const { return Dialog == EDialog::Exit; }
@@ -275,6 +277,11 @@ private:
     float AudioEditStart = 0;
     int32 PointerDragSource = INDEX_NONE;
     int32 PointerDragTarget = INDEX_NONE;
+    // The empty squares padding her pack's grid (after its last stack), each a drop target; the one
+    // under a drag lights (PointerPadSlot).
+    TArray<TPair<int32, TWeakPtr<SWidget>>> PackPadCells;
+    int32 PointerPadSlot = INDEX_NONE;
+    bool PackPadAt(FVector2D Position, FHomesteadRow& Out) const;
     FVector2D PointerDragStart = FVector2D::ZeroVector;
     uint64 PointerDragRevision = 0;
     bool bPointerItemDown = false;
@@ -385,6 +392,8 @@ private:
     FString EquipmentLabel(int32 Index) const;
     void CycleRegion(int32 Direction);
     void SetDialog(EDialog Value);
+    // The book's frame: backdrop, tab band, page host, modal host and notice card.
+    void BuildFrame();
     void BuildDialog();
     void DialogAction(int32 Index);
     int32 DialogCount() const;

@@ -14,6 +14,13 @@ TSharedRef<SWidget> SHomesteadMenu::Text(const FString& Value, int32 Size) const
 void SHomesteadMenu::Construct(const FArguments& Args)
 {
     Controller = Args._Controller;
+    BuildFrame();
+    Refresh();
+}
+
+void SHomesteadMenu::BuildFrame()
+{
+    FocusTargets.Reset();
     ChildSlot
     [
         SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
@@ -140,7 +147,17 @@ void SHomesteadMenu::Construct(const FArguments& Args)
         ]
         ]
     ];
+}
+
+void SHomesteadMenu::RebuildForTheme()
+{
+    // The palette changed (Settings › Book colours): rebuild every panel in place, keeping the page,
+    // settings tab, focused row and scroll (the page is unchanged, so Refresh keeps them).
+    if (Dialog != EDialog::None) SetDialog(EDialog::None);
+    const float Offset = Scroll ? Scroll->GetScrollOffset() : 0.0f;
+    BuildFrame();
     Refresh();
+    if (Scroll) Scroll->SetScrollOffset(Offset);
 }
 
 void SHomesteadMenu::Tick(const FGeometry& Geometry, double Time, float Delta)
@@ -285,7 +302,7 @@ void SHomesteadMenu::Refresh()
     if (SeenPage == 4)
     {
         // Session rows first, then only the rows of the chosen Game / Sound / Video tab.
-        static const int32 Order[] = {0, 1, 9, 2, 3, 4, 17, 12, 13, 15, 8, 14, 16, 5, 6, 7, 10, 11};
+        static const int32 Order[] = {0, 1, 9, 2, 3, 4, 17, 12, 13, 15, 8, 14, 16, 5, 6, 7, 10, 11, 18};
         TArray<FHomesteadRow> Sorted;
         TArray<int32> SortedIndices;
         const auto Take = [&](int32 Found)
