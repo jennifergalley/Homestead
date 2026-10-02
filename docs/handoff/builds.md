@@ -51,8 +51,8 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 
 ## 2026-10-01 — 9 PM
 
-- SHA: pending
-- Status: planned
+- SHA: `3aa62ab0e8f7a03c4c0ab52f9dde764e710999be`
+- Status: delivered
 - Ships:
 - Menu panels line up edge to edge, with one clear selection outline.
 - Crafting recipes fill the page width.
@@ -61,6 +61,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - A lighter accent keeps selected text readable.
 - A dark parchment palette is available in Settings › Book colours.
 - Weeds sprout in only some plots each day, at random.
+- Verification: Native 19, eight Development smoke/FullLoop routes, and guarded Shipping EstateSmoke/ToolRepeat passed with 392 zero-network samples; Shipping SHA-256 `DB6B6D8BB4E7928E3CA5695EB77B3B2A3CE38E58BA2107AE863F9681E53FFA87`, with 18 current saves copied unchanged.
 
 ## 2026-10-02 — 7:30 AM
 
