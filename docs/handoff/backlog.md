@@ -1,6 +1,6 @@
 # Playtest backlog
 
-Only Jenny-directed work belongs here. Every line is one player-checkable slice, not a speculative implementation plan. Lanes create or revise an OpenSpec change only after Jenny gives feedback or explicitly selects a later item.
+Only Jenny-directed work belongs here. Every line is one player-checkable slice, not a speculative implementation plan. Lanes create or revise an OpenSpec change only after Jenny gives feedback or explicitly selects a later item. `priority.json` is Jenny's authoritative order: after completing every explicitly flagged item for the current build, a lane tells the orchestrator and takes the next lane-fitting priority item if time remains. The planner canvas can drag-reorder that list; **Top**, **Next build**, **Quote**, and **Remove** act on it, with **Remove** archiving the change.
 
 ## Next two builds
 

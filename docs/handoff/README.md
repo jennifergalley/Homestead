@@ -153,6 +153,11 @@ Template:
    Affects other lanes? yes/no
 ```
 
+**Planner canvas:** `openspec-task-planner` reads `builds.md`, `backlog.md`, and the authoritative
+`priority.json`. Dragging reorders priority; **Top** promotes an item, **Next build** assigns it to
+the current build, and **Quote** exposes its player ask. **Remove** archives that OpenSpec change,
+so use it only for shipped, retired, or clearly stale work.
+
 **Blockers:** if something blocks you for more than about 15 minutes, or affects other worktrees
 (shared ports, GPU/VRAM, Live Coding, locks, a broken `main`), report it immediately with
 `mailbox_send` to the docs agent's and orchestrator's worktrees (see the mailbox section above),
@@ -198,7 +203,10 @@ A lane delivers an increment like this:
    active primary worktree or another session's worktree. Reuse one secondary worktree per lane
    rather than creating one per task; abandoned `props-*`, `water-*` and `*-0930-*` worktrees cost
    14–25 GB each, with about 5 GB each of DDC and Intermediate after a build.
-6. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
+6. **When Jenny's explicitly flagged items for the current build are done and time remains,** tell
+   the orchestrator, then take the next lane-fitting item in `docs\handoff\priority.json`. Jenny
+   owns that order; do not substitute a locally preferred task.
+7. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
 
    ```text
    [ready] <lane> — branch <branch> @ <sha> (pushed to main: yes/no)
@@ -251,21 +259,27 @@ only retained MVP archive reference. The retained
 
 Jenny's standing preference (2026-09-30): three packaged Estate builds every day.
 
-| Slot | Freeze | Integration exclusive slot | Shortcut ready |
-| --- | --- | --- | --- |
-| Morning | 4:30 AM | 5:00 AM | 7:30 AM |
-| Afternoon | 1:00 PM | 1:30 PM | 4:00 PM |
-| Evening | 6:00 PM | 6:30 PM | 9:00 PM |
+| Slot | Build starts | Shortcut ready |
+| --- | --- | --- |
+| Morning | about 6:30 AM | 7:30 AM |
+| Afternoon | about 3:00 PM | 4:00 PM |
+| Evening | about 8:00 PM | 9:00 PM |
 
-At either freeze, only work that is already **UE-verified and code-reviewed** enters the build;
-everything else waits for the next slot. The first evening build under this policy is October 1,
-2026 (the 9 PM window on September 30 had already passed).
+Start each build about an hour before its slot. Only work already **UE-verified and code-reviewed**
+enters; everything else waits for the next slot. The first evening build under this policy is
+October 1, 2026 (the 9 PM window on September 30 had already passed).
 
 **Feedback-complete fast path (Jenny, 2026-10-01):** when all current playtest feedback is
 addressed, Integration ships the verified build immediately rather than waiting for the next
 7:30 AM/4:00 PM/9:00 PM slot. After that early delivery, lanes end their turns and clear their
 wake-up automations until Jenny supplies new feedback or the orchestrator starts new work. The
 scheduled slots remain the fallback cadence while feedback or verified work is still pending.
+
+**Priority pickup after flagged work (Jenny, 2026-10-01):** when every item Jenny explicitly
+flagged for the current build is done and time remains, a lane takes the next item in
+[`docs\handoff\priority.json`](priority.json) that fits its ownership. Jenny owns that order; treat
+it as correct. Tell the orchestrator before beginning the picked item so it can prevent two lanes
+from claiming it.
 
 **Before every Shipping build, reclaim dated release space safely:** retain the current
 Estate-shortcut Shipping release and at most its immediately previous Shipping rollback. A named
