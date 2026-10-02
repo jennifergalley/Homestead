@@ -627,7 +627,7 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         Prop->SetUsingAbsoluteRotation(Asset.bHangs);
         Prop->SetCastShadow(true);
         HeldProps.Add(Prop);
-        HeldToolSpecs.Add({Asset.Tool, Asset.CarryDegrees, Asset.bHangs, Asset.Offset * Grip});
+        HeldToolSpecs.Add({Asset.Tool, Asset.CarryDegrees, Asset.bHangs, Asset.Offset * Grip, Asset.Offset});
     }
     // The oil lamp hangs from her fist by its bail (oil_lamp.py): a hanger at the grip that the
     // pendulum turns, with the bail's top at the hanger.

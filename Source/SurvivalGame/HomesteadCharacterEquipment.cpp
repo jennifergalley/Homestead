@@ -92,10 +92,16 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     // the tool's angle themselves, so the tilt eases out while one plays.
     const float TiltTarget = HandsFree && !Hacking && !Felling && !CuttingReeds && !Hoeing ? 1.0f : 0.0f;
     HeldToolTilt = FMath::FInterpConstantTo(HeldToolTilt, TiltTarget, DeltaSeconds, 1.0f / 0.15f);
-    const auto Tilt = [this](const FTransform& Rest, float Degrees)
+    const auto Tilt = [this](const FTransform& Rest, float Degrees, const FTransform& Offset = FTransform::Identity)
     {
         // Grip-local X is the palm normal; a positive turn about it tips the head toward the fingertips.
-        return FTransform(FQuat(FVector::XAxisVector, FMath::DegreesToRadians(Degrees * HeldToolTilt))) * Rest;
+        // The turn pivots at her grip, not the prop's pivot: the pick is carried 34 cm up its haft, and
+        // turning it about its pivot swung the haft 4-5 cm off her palm into her fingers (Jenny, 10-01).
+        const float Radians = FMath::DegreesToRadians(Degrees * HeldToolTilt);
+        // No turn, no change (the scythe's offset is mirrored, which a round trip through its inverse
+        // needn't preserve exactly).
+        if (FMath::IsNearlyZero(Radians)) return Rest;
+        return Offset * FTransform(FQuat(FVector::XAxisVector, Radians)) * Offset.Inverse() * Rest;
     };
     if (HeldMachete)
     {
@@ -156,7 +162,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         const float Lean = CarryDegrees - (StoneHoe ? FMath::Min(CarryDegrees, RestWristDegrees) : Carry);
         const FTransform HeldPose = StoneHoe
             ? FTransform(FQuat(FVector::XAxisVector, FMath::DegreesToRadians(Lean))) * Spec.Rest
-            : Tilt(Spec.Rest, Lean);
+            : Tilt(Spec.Rest, Lean, Spec.Offset);
         FTransform Placed = Turn * HeldPose;
         if (StoneHoe && Hoeing)
         {

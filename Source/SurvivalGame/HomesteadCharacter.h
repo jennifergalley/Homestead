@@ -521,6 +521,9 @@ private:
         bool bHangs;
         // Attachment to hand_r with the handle square across the fingers (as the actions use it).
         FTransform Rest;
+        // The prop's pivot relative to the grip (FHeldToolAsset::Offset): identity when the tool is held
+        // at its pivot; the pick, for one, is carried 34 cm up its haft.
+        FTransform Offset;
     };
     FTransform MacheteGrip;
     // The tool swinging the hack clip.
