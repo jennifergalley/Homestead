@@ -76,6 +76,7 @@ item from the planner's priority order (`priority.json`) that fits their lane.
 - Her fingers wrap the idle-carried pickaxe instead of clipping through her fist.
 - Axe and pickaxe swings use a natural wrist angle on the forward hand.
 - The scythe sits further in front of her, so neither hand clips her chest.
+- Hoeing keeps both arms clear of her torso.
 
 ## Later
 

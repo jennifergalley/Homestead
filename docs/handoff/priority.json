@@ -1,5 +1,6 @@
 {
   "order": [
+    "polish-parchment-ui",
     "add-sprint-toggle",
     "add-road-sign-travel",
     "add-lake-trail-forage",
@@ -7,6 +8,8 @@
     "add-cove-route",
     "add-chest-names",
     "add-chest-auto-store",
+    "fix-tool-grip-contact",
+    "pitch-dark-parchment-theme",
     "reduce-foliage-shadow-motion",
     "refine-playable-heroine-hairstyles",
     "expand-randomized-music-playlist",
@@ -58,6 +61,7 @@
     "add-boat-fishing"
   ],
   "nextBuild": [
+    "polish-parchment-ui",
     "add-sprint-toggle",
     "add-road-sign-travel",
     "add-lake-trail-forage",
