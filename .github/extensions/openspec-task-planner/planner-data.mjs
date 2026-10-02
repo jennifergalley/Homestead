@@ -151,11 +151,21 @@ async function loadFeature(projectRoot, tasksPath, activeChange) {
 export async function loadPlanner(projectRoot, now = Date.now()) {
     const taskFiles = await findTaskFiles(join(projectRoot, "openspec", "changes"));
     const activeChange = await readActiveChange(projectRoot, now);
-    const [features, builds] = await Promise.all([
+    const [features, builds, priority] = await Promise.all([
         Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange))),
         loadBuilds(projectRoot),
+        readFile(join(projectRoot, "docs", "handoff", "priority.json"), "utf8")
+            .then((text) => JSON.parse(text)).catch(() => ({})),
     ]);
+    const order = new Map((Array.isArray(priority.order) ? priority.order : []).map((id, index) => [id, index]));
+    const nextBuild = new Set(Array.isArray(priority.nextBuild) ? priority.nextBuild : []);
+    const removed = new Set(Array.isArray(priority.removed) ? priority.removed : []);
+    for (let i = features.length - 1; i >= 0; i--) if (removed.has(features[i].id)) features.splice(i, 1);
+    for (const feature of features) feature.nextBuild = nextBuild.has(feature.id);
     features.sort((a, b) => {
+        const ao = order.has(a.id) ? order.get(a.id) : Infinity;
+        const bo = order.has(b.id) ? order.get(b.id) : Infinity;
+        if (ao !== bo) return ao - bo;
         if (a.status !== b.status) return statusOrder[a.status] - statusOrder[b.status];
         return b.modifiedAt.localeCompare(a.modifiedAt);
     });
