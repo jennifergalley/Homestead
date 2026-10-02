@@ -17,7 +17,7 @@ bool IsMovementKey(const FKey& Key)
 
 void AHomesteadController::SprintTooTired()
 {
-    Notify(TEXT("Too tired to sprint."), true);
+    Notify(TEXT("Too tired to sprint"), true);
 }
 
 void AHomesteadController::TrackSprintShift(const FInputKeyEventArgs& Params)

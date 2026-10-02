@@ -256,7 +256,7 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
         Add(TEXT("Sort pack"), [this]() { Controller->MenuSortPack(); });
     if (SeenPage == 0 && Controller->ActiveStorageChest().IsSet())
     {
-        Add(TEXT("Store matching stacks (T)"), [this]() { Controller->MenuStoreMatching(); });
+        Add(Controller->UsesGamepad() ? TEXT("Store matching") : TEXT("Store matching (T)"), [this]() { Controller->MenuStoreMatching(); });
         Add(TEXT("Name this chest..."), [this]() { OpenRenameChest(); });
     }
     Add(TEXT("Cancel"), nullptr);

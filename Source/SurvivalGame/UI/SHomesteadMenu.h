@@ -62,6 +62,7 @@ public:
     bool IsItemContextMenu() const { return Dialog == EDialog::Context; }
     bool IsQuantityPrompt() const { return Dialog == EDialog::Quantity; }
     int32 DialogCountForTest() const { return DialogCount(); }
+    int32 DialogSelectionForTest() const { return DialogSelection; }
     FString GetPopupOptionLabel(int32 Index) const
     { return PopupOptions.IsValidIndex(Index) && PopupOptions[Index].Label ? PopupOptions[Index].Label() : FString(); }
     TSharedPtr<SWidget> GetDialogButton(int32 Index) const

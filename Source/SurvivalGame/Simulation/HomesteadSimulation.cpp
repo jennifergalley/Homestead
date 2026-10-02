@@ -1543,11 +1543,11 @@ Result Simulation::StoreMatching(int chestId, Point player, std::uint64_t expect
         room -= moved;
         stored += moved;
     }
-    if (matched == 0) return Bad("Nothing in your pack matches what's already in this chest.");
-    if (stored == 0) return {false, "The chest is full.", ResultCode::Capacity, revision_};
+    if (matched == 0) return Bad("Nothing here to match");
+    if (stored == 0) return {false, "Chest full", ResultCode::Capacity, revision_};
     const std::string message = stored == matched
-        ? "Stored " + std::to_string(stored) + (stored == 1 ? " item" : " items") + " onto matching stacks."
-        : "Stored " + std::to_string(stored) + " of " + std::to_string(matched) + " matching items; the chest is full.";
+        ? "Stored " + std::to_string(stored)
+        : "Stored " + std::to_string(stored) + " of " + std::to_string(matched) + "; chest full";
     return CommitInventory(std::move(candidate), message.c_str());
 }
 Result Simulation::RenameChest(int chestId, const std::string& name, Point player, std::uint64_t expectedRevision)

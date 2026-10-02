@@ -155,7 +155,7 @@ void StoresOnlyMatchingGoods()
     const std::uint64_t revision = sim.GetRevision();
     const Result stored = Store(estate);
     OK(stored);
-    CHECK(stored.message == "Stored 5 items onto matching stacks.");
+    CHECK(stored.message == "Stored 5");
     CHECK(sim.GetRevision() == revision + 1);
     CHECK(ChestCount(estate, Item::Branch) == branchesBefore + 5 && sim.Count(Item::Branch) == 0);
     // Unmatched goods, tools and clothes stay with her; the stone keeps its hotbar cell.
@@ -183,7 +183,7 @@ void NothingToStoreChangesNothing()
     const std::string before = sim.Serialize();
     const std::uint64_t revision = sim.GetRevision();
     const Result none = Store(estate);
-    CHECK(!none.ok && none.message == "Nothing in your pack matches what's already in this chest.");
+    CHECK(!none.ok && none.message == "Nothing here to match");
     CHECK(sim.Serialize() == before && sim.GetRevision() == revision);
     // Stale, too far and not-a-chest are refused too.
     CHECK(sim.StoreMatching(estate.chest, estate.at, revision + 7).code == ResultCode::StaleRevision);
@@ -215,7 +215,7 @@ void PartialWhenFullAndRowLast()
     CHECK(belowGroup > 0 && !InRow(sim, belowGroup));
     const Result partial = Store(estate);
     OK(partial);
-    CHECK(partial.message == "Stored 3 of 6 matching items; the chest is full.");
+    CHECK(partial.message == "Stored 3 of 6; chest full");
     CHECK(sim.ChestUsedCapacity(estate.chest) == ChestCapacity && sim.Count(Item::Branch) == 3);
     // The stack below the row gave first; the row's stack is untouched.
     for (const auto& entry : sim.GetState().inventoryLayout)
@@ -227,7 +227,7 @@ void PartialWhenFullAndRowLast()
     // Full: refused as a capacity problem, and nothing is lost.
     const std::string before = sim.Serialize();
     const Result full = Store(estate);
-    CHECK(!full.ok && full.code == ResultCode::Capacity && full.message == "The chest is full.");
+    CHECK(!full.ok && full.code == ResultCode::Capacity && full.message == "Chest full");
     CHECK(sim.Serialize() == before && sim.Count(Item::Branch) == 3);
 }
 

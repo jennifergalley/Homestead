@@ -168,4 +168,43 @@ void AHomesteadSmokeTest::PreparePromptChecks()
     Add(TEXT("Controller back exits planning and restores controller context"),
         [this]() { Tap(EKeys::Gamepad_FaceButton_Right); },
         [this]() { return !Controller->IsPlanning() && Controller->UsesGamepad(); });
+
+    // Sprint is a toggle on both devices (add-sprint-toggle): a tap of Shift or a click of L3 turns it on
+    // and the next turns it off; too tired, it refuses briefly, and running low turns it off.
+    const auto Heroine = [this]() { return Cast<AHomesteadCharacter>(Controller->GetPawn()); };
+    const auto Sprinting = [Heroine]() { const auto* Avatar = Heroine(); return Avatar && Avatar->IsSprintOn(); };
+    Add(TEXT("Rested for the sprint checks"),
+        [this]() { Controller->Sim.SetEnergy(80.0); },
+        [this, Sprinting]() { return !Sprinting() && Controller->Simulation().CanSprint().ok; });
+    Add(TEXT("A tap of Shift turns sprint on"), [this]() { Tap(EKeys::LeftShift); }, Sprinting);
+    Add(TEXT("Another tap of Shift turns it off"), [this]() { Tap(EKeys::LeftShift); },
+        [Sprinting]() { return !Sprinting(); });
+    Add(TEXT("L3 turns sprint on"), [this]() { Tap(EKeys::Gamepad_LeftThumbstick); }, Sprinting);
+    Add(TEXT("L3 again turns it off"), [this]() { Tap(EKeys::Gamepad_LeftThumbstick); },
+        [Sprinting]() { return !Sprinting(); });
+    Add(TEXT("Shift used as a modifier (Shift+Q) doesn't toggle sprint"),
+        [this]()
+        {
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Pressed, 1));
+            Tap(EKeys::Q);
+            Controller->InputKey(FInputKeyEventArgs::CreateSimulated(EKeys::LeftShift, IE_Released, 0));
+        },
+        [Sprinting]() { return !Sprinting(); });
+    Add(TEXT("On, then worn below the sprint floor, it turns itself off"),
+        [this]() { Tap(EKeys::LeftShift); },
+        [Sprinting]() { return Sprinting(); });
+    Add(TEXT("Below the floor sprint is off"),
+        [this]() { Controller->Sim.SetEnergy(Homestead::Exertion::SprintFloor - 5.0); },
+        [Sprinting]() { return !Sprinting(); });
+    Add(TEXT("Too tired: a tap is refused briefly, both devices, and sprint stays off"),
+        [this]() { Controller->ToastText.Reset(); Tap(EKeys::LeftShift); },
+        [this, Sprinting]() { return !Sprinting() && Controller->ToastIsError() && Controller->Toast() == TEXT("Too tired to sprint"); });
+    Add(TEXT("Too tired on the pad too"),
+        [this]() { Controller->ToastText.Reset(); Tap(EKeys::Gamepad_LeftThumbstick); },
+        [this, Sprinting]() { return !Sprinting() && Controller->Toast() == TEXT("Too tired to sprint"); });
+    Add(TEXT("Rested again, sprint toggles"),
+        [this]() { Controller->Sim.SetEnergy(80.0); Tap(EKeys::LeftShift); },
+        Sprinting);
+    Add(TEXT("And off, for the next checks"), [this]() { Tap(EKeys::LeftShift); },
+        [Sprinting]() { return !Sprinting(); });
 }

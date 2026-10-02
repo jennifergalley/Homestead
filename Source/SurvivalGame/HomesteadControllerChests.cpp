@@ -26,6 +26,7 @@ bool AHomesteadController::MenuRenameChest(const FString& Name)
     if (RejectPendingGroundSnapAction()) return false;
     if (!ActiveChestId.IsSet()) return false;
     const auto Result = Sim.RenameChest(ActiveChestId.GetValue(), TCHAR_TO_UTF8(*Name), PlayerPoint(), Sim.GetRevision());
-    Notify(Result);
+    // The chest's title shows the new name; only a refusal needs saying.
+    NotifyResourceAction(Result, nullptr);
     return Result.ok;
 }

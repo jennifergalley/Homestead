@@ -1658,6 +1658,22 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, Chest]() { return !Controller->NativeMenu->IsRenamingChest() && !Controller->ToastIsError()
             && Controller->ChestDisplayName(*Chest) == TEXT("Linen press")
             && Controller->MenuInventorySummary().StartsWith(TEXT("Linen press:")); });
+    // The name sticks (add-chest-names): closed and reopened, then saved and loaded.
+    Add(TEXT("Closed and reopened, the chest keeps its name"),
+        [this, Chest]() { Controller->CloseBook(); Controller->OpenChestStorage(*Chest); },
+        [this, Chest]() { return Controller->IsBookOpen() && Controller->ActiveStorageChest().IsSet()
+            && Controller->ChestDisplayName(*Chest) == TEXT("Linen press")
+            && Controller->MenuInventorySummary().StartsWith(TEXT("Linen press:")); });
+    Add(TEXT("Saved with its name"), [this]() { Tap(EKeys::F5); },
+        [this]() { return !Controller->ToastIsError() && Controller->Toast() == TEXT("Your homestead is saved."); });
+    Add(TEXT("Loaded, the chest still has its name"),
+        [this]() { Tap(EKeys::F9); },
+        [this, Chest]() { return !Controller->ToastIsError() && !Controller->IsBookOpen()
+            && Controller->ChestDisplayName(*Chest) == TEXT("Linen press"); }, 0.8f);
+    Add(TEXT("Reopened after the load, the name titles storage"),
+        [this, Chest]() { Controller->OpenChestStorage(*Chest); },
+        [this, Chest]() { return Controller->IsBookOpen() && Controller->ActiveStorageChest().IsSet()
+            && Controller->MenuInventorySummary().StartsWith(TEXT("Linen press:")); });
     const auto StoreExpected = MakeShared<Homestead::Simulation>();
     const auto BeforeStore = MakeShared<Homestead::Simulation>();
     Add(TEXT("T stores carried Stone onto the chest's Stone stack and nothing else"),
@@ -1686,6 +1702,46 @@ void AHomesteadSmokeTest::PrepareNativeInventoryTransactionChecks()
         [this, StoreExpected]() { Tap(EKeys::T); },
         [this, StoreExpected]() { return Controller->ToastIsError()
             && Controller->Simulation().Serialize() == StoreExpected->Serialize(); });
+    // On the pad the same store is the stack's own menu (Y): "Store matching".
+    const auto PadStoreOption = MakeShared<int32>(INDEX_NONE);
+    const auto PadStoreBefore = MakeShared<int32>(0);
+    Add(TEXT("Y on a carried stack offers Store matching on the pad"),
+        [this, Chest, PadStoreOption, PadStoreBefore]()
+        {
+            auto& Sim = Controller->Sim;
+            if (!Sim.GrantItems(Homestead::Item::Stone, 2).ok) { Finish(false, TEXT("Could not grant the pad Stone fixture.")); return; }
+            // Below the hotbar row, so it's a pack tile to focus.
+            if (const int32 Cell = Controller->HotbarCellOf(Homestead::Item::Stone); Cell != INDEX_NONE)
+                Sim.MoveFromPackRow(Cell, 0, 0, Sim.GetRevision());
+            *PadStoreBefore = Sim.ChestUsedCapacity(*Chest);
+            Controller->NativeMenu->Refresh();
+            int32 Stone = 0;
+            for (const auto& Entry : *Sim.GetLayout(0))
+                if (!Entry.wearableId && Entry.item == Homestead::Item::Stone) { Stone = Entry.groupId; break; }
+            if (!Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, Stone, 0))
+            { Finish(false, TEXT("The pack Stone stack is not focusable.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Top);
+        },
+        [this, PadStoreOption]()
+        {
+            if (!Controller->NativeMenu->IsItemContextMenu()) return false;
+            for (int32 Index = 0; Index < Controller->NativeMenu->DialogCountForTest(); ++Index)
+                if (Controller->NativeMenu->GetPopupOptionLabel(Index) == TEXT("Store matching")) *PadStoreOption = Index;
+            return *PadStoreOption != INDEX_NONE;
+        });
+    Add(TEXT("D-pad to Store matching"),
+        []() {},
+        [this, PadStoreOption]() { return Controller->NativeMenu->DialogSelectionForTest() == *PadStoreOption; });
+    Steps.Last().Repeat = [this, PadStoreOption]()
+    {
+        if (Controller->NativeMenu->DialogSelectionForTest() != *PadStoreOption && StepElapsed - LastNavigationAt > 0.15f)
+        { Tap(EKeys::Gamepad_DPad_Down); LastNavigationAt = StepElapsed; }
+    };
+    Add(TEXT("A stores the stone onto the chest's stack; nothing lost or duplicated"),
+        [this]() { Tap(EKeys::Gamepad_FaceButton_Bottom); },
+        [this, Chest, PadStoreBefore]() { return !Controller->NativeMenu->HasActiveDialog() && !Controller->ToastIsError()
+            && Controller->Simulation().Count(Homestead::Item::Stone) == 0
+            && Controller->Simulation().ChestUsedCapacity(*Chest) == *PadStoreBefore + 2; });
     Add(TEXT("Put the chest back as it was before the auto-store checks (keeping its name)"),
         [this, BeforeStore]() { Controller->Sim = *BeforeStore; Controller->NativeMenu->Refresh(); },
         [this, Chest]() { return Controller->Simulation().ChestUsedCapacity(*Chest) == 0
