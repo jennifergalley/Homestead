@@ -1,0 +1,115 @@
+{
+  "buildId": "20261002-measured-01",
+  "authorizedAt": "2026-10-03T04:32:10.763Z",
+  "allocationPolicy": "Each local per-call record counted once. UI task boundaries use lane-reported cursors; Town uses lane-reported UTC boundaries (sampled cursors are not exact). All tooling, startup, shared verification and coordination belongs to explicit overhead. Feature-specific tests stay with their feature. Helpers inherit task membership, not their parent's context tier. No lifetime or inclusive parent totals are added.",
+  "legacy": {
+    "status": "unattributed",
+    "recordedNanoAiu": null,
+    "description": "Inherited implementation on main through 6390d37f predates this measurement. Its cost is not zero and is excluded from the new-work subtotal until attributable evidence is supplied."
+  },
+  "limits": [
+    "Interim capture only: contributors are still working; final responses, later review/integration/retries require another export before archival.",
+    "Integration/review session membership is pending coordinator assignment.",
+    "Context tiers for fresh lanes are launcher-confirmed; coordinator context remains unknown.",
+    "Failed attempts and startup overhead are included in captured calls, but retry costs are not separated without explicit event-range classification.",
+    "Town's final shared-verification boundary is pending; later calls currently remain with the signpost segment until reclassified.",
+    "Historical implementation and billing reconciliation remain unattributed."
+  ],
+  "segments": [
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "projectSessionId": "3c4e743c-3c27-4732-adce-e651536c7e75",
+      "task": "orchestration-overhead",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 68682,
+      "contextTier": null
+    },
+    {
+      "sessionId": "02a5caf8-3fdf-4c96-be5c-192448d6fcdf",
+      "projectSessionId": "a03bb295-c2b9-48dc-9b78-3144b3690e66",
+      "task": "accounting-tooling",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Coordinator's explicit launch configuration; call model/effort come from usage records"
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "task": "ui-startup-overhead",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "throughEventId": 68737,
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "task": "apply-dark-theme-everywhere",
+      "category": "implementation",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 68737,
+      "throughEventId": 68756,
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "task": "fix-map-click-travel",
+      "category": "implementation",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 68756,
+      "throughEventId": 68761,
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "task": "place-items-in-exact-slots",
+      "category": "implementation",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 68761,
+      "throughEventId": 68789,
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "task": "ui-shared-verification",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 68789,
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "UI lane reported task cursors 68737, 68756, 68761 and shared verification after 68789; runtime context unknown"
+    },
+    {
+      "sessionId": "d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2",
+      "task": "town-startup-overhead",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "until": "2026-10-03T04:38:28.000Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2",
+      "task": "add-dollars-and-general-store",
+      "category": "implementation",
+      "since": "2026-10-03T04:38:28.000Z",
+      "until": "2026-10-03T04:45:26.975Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2",
+      "task": "move-town-signpost",
+      "category": "implementation",
+      "since": "2026-10-03T04:45:26.975Z",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Town lane reported UTC research/start and crop-to-sign boundary; runtime context unknown"
+    }
+  ]
+}
