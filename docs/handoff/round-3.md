@@ -146,9 +146,11 @@ orchestrator request.
   and handoffs, and stopped-lane usage capture. Use fresh task-scoped sessions for new scheduled work.
   No old agent was archived. Integration has no automation and cannot be archived while its release
   is referenced.
-- Accounting closure: 439 calls through `69130`, `1743479960000` nano-AIU (1,743.47996 AIU).
-  This is **not a billing-reconciled credit total**: parent/Integration post-capture tails, actual
-  runtime context, inherited implementation costs and billing reconciliation remain incomplete.
+- Final bounded accounting: 454 calls through `69152`, `1797874160000` nano-AIU (1,797.87416 AIU).
+  Parent ends at `69151`, Integration at `69152`; all windows are closed so future work cannot
+  accrue to build 01. The export observed `69159` and excludes eight pre-/post-cutoff records.
+  This is **not a billing-reconciled credit total**: actual runtime context, inherited implementation
+  costs and billing reconciliation remain incomplete; later closing activity is intentionally outside scope.
   Task/model/effort breakdown and coverage are on the agent-free planner; detailed disjoint ranges
   are in accounting/measured-01-allocation.json. No per-message refresh/polling.
 - Bootstrap recovery is documented in integration-measured-01.md: Jenny approved backing up

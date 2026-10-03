@@ -57,13 +57,7 @@
       "readySha": "440d4de5bea60cddcb5fd5cb751e05dc1c8ca0e5",
       "handoff": "docs/handoff/ui-measured-01.md",
       "status": "reviewed and shipped; task session archived after closure capture; player checks pending; mapped A/Enter regression compiled but not run",
-      "reportedUsageSnapshot": {
-        "throughEventId": 68851,
-        "calls": 45,
-        "recordedNanoAiu": 157423420000,
-        "final": false
-      },
-      "telemetryStatus": "Runtime identity verified; event 68772 effort unknown, other captured calls high; actual context unknown; delivery tail requires capture"
+      "telemetryStatus": "Runtime identity and per-call model/effort captured; missing effort stays unknown; actual context unknown; bounded closure captured"
     },
     {
       "sessionId": "d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2",
@@ -83,7 +77,7 @@
       "readySha": "6e9c3a9aaac7e3c1ceb9a5ec0e07f8ef01895b38",
       "handoff": "docs/handoff/town-measured-01.md",
       "status": "reviewed and shipped; task session archived after closure capture; player checks pending",
-      "telemetryStatus": "Accounting verified runtime identity and call model/effort; actual context unknown; delivery tail requires capture"
+      "telemetryStatus": "Runtime identity and call configuration captured through bounded closure; actual context unknown"
     },
     {
       "sessionId": "02a5caf8-3fdf-4c96-be5c-192448d6fcdf",
@@ -120,7 +114,16 @@
       "telemetryStatus": "Local usage confirms GPT-5.6 Terra / medium; launch context default, actual context unknown. Accounting merge/validation and refreshed capture are separately allocated."
     }
   ],
-  "accountingStatus": "closure captured through 69130; parent/Integration closing tails, runtime contexts, legacy costs and billing reconciliation remain incomplete",
+  "accountingStatus": "all allocation windows closed; runtime contexts, legacy costs and billing reconciliation remain incomplete",
+  "accountingClosure": {
+    "parentThroughEventId": 69151,
+    "integrationThroughEventId": 69152,
+    "calls": 454,
+    "recordedNanoAiu": "1797874160000",
+    "exportObservedThroughEventId": 69159,
+    "excludedCalls": 8,
+    "postCutoffActivity": "intentionally outside measured build 01"
+  },
   "historicalImplementationCost": "inherited main work requires separate attribution; not included as zero",
   "notes": [
     "No overnight work or automations.",
