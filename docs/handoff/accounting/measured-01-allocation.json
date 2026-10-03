@@ -92,9 +92,71 @@
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
       "afterEventId": 68824,
+      "throughEventId": 68859,
       "contextTier": null,
       "launchContextTier": "default",
       "contextEvidence": "UI terminal handoff reports delivery after 68824; its snapshot through 68833 is non-final. Telemetry runtime is 8ee8d5f3; app session is 762c7ab7. Event 68772 has no recorded reasoning effort."
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "projectSessionId": "762c7ab7-c8ec-454f-9eb1-3669c01ffdbd",
+      "task": "ui-packslots-review-rework",
+      "category": "rework",
+      "retryClassification": "review-driven-fix",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 68941,
+      "throughEventId": 68965,
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Review-driven fixes for pack-slot legacy-save migration and A/Enter EmptySlot commit; local usage confirms GPT-6.1 Sol / high, actual context unknown."
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "projectSessionId": "762c7ab7-c8ec-454f-9eb1-3669c01ffdbd",
+      "task": "ui-rework-validation",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 68965,
+      "throughEventId": 68974,
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "UI reported native and editor validation after rework; mapped A/Enter regression compiled but not executed."
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "projectSessionId": "762c7ab7-c8ec-454f-9eb1-3669c01ffdbd",
+      "task": "ui-rework-delivery-overhead",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 68974,
+      "throughEventId": 69050,
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Replacement UI delivery tail before the invalid-Shipping diagnosis; actual context unknown."
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "projectSessionId": "762c7ab7-c8ec-454f-9eb1-3669c01ffdbd",
+      "task": "ui-invalid-shipping-gate-diagnosis",
+      "category": "overhead",
+      "retryClassification": "shared-failed-gate-diagnosis",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 69050,
+      "throughEventId": 69068,
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "UI source diagnosis confirmed the Shipping FullLoop field-book assertion is a stale Woodland route, not implementation work; local usage confirms GPT-6.1 Sol / high, actual context unknown."
+    },
+    {
+      "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "projectSessionId": "762c7ab7-c8ec-454f-9eb1-3669c01ffdbd",
+      "task": "ui-final-delivery-overhead",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 69068,
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Terminal UI handoff tail remains open; actual context unknown."
     },
     {
       "sessionId": "d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2",
@@ -164,10 +226,37 @@
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
       "afterEventId": 68853,
+      "throughEventId": 69014,
       "agentId": "main",
       "contextTier": null,
       "launchContextTier": "default",
-      "contextEvidence": "Refreshed accounting capture and reporting; actual runtime context is unknown."
+      "contextEvidence": "Accounting capture, reviewed-lane admission, and package preflight through the first recovery event; actual runtime context is unknown."
+    },
+    {
+      "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
+      "projectSessionId": "d8027b79-2a9e-40fe-9e97-82f0d33d3ad8",
+      "task": "integration-package-recovery-rework",
+      "category": "rework",
+      "retryClassification": "bootstrap-asset-recovery-and-valid-gate-classification",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 69014,
+      "throughEventId": 69069,
+      "agentId": "main",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Includes hash-verified backup of 900 bootstrap-written assets, scoped restore, clean PackageOnly recook, Shipping staging, guarded Estate route QA, and classification of the invalid Shipping FullLoop gate; actual runtime context is unknown."
+    },
+    {
+      "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
+      "projectSessionId": "d8027b79-2a9e-40fe-9e97-82f0d33d3ad8",
+      "task": "integration-final-valid-route-validation",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 69069,
+      "agentId": "main",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Development FullLoop on the current integrated source and release-delivery work; actual runtime context is unknown."
     },
     {
       "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
@@ -186,6 +275,22 @@
       "contextTier": null,
       "launchContextTier": "default",
       "contextEvidence": "Read-only independent reviewer telemetry confirms GPT-6.1 Sol / high; actual runtime context is unknown."
+    },
+    {
+      "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
+      "projectSessionId": "d8027b79-2a9e-40fe-9e97-82f0d33d3ad8",
+      "agentId": "be475939-47b6-4de1-85a4-220ba579d0b4",
+      "task": "independent-packslots-rereview",
+      "tasks": [
+        "place-items-in-exact-slots"
+      ],
+      "category": "review",
+      "since": "2026-10-03T05:07:56.676Z",
+      "afterEventId": 68939,
+      "throughEventId": 68992,
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Read-only re-review telemetry confirms GPT-6.1 Sol / high; actual runtime context is unknown."
     }
   ]
 }

@@ -32,8 +32,54 @@ is unknown.
   arrival, resources, save format and bake version are unchanged.
 - UI promotion is blocked pending fixes for a legacy crafted-away pack-slot save rejected before
   reconciliation and keyboard/controller commit onto an empty pack square.
+- UI fix `440d4de5bea60cddcb5fd5cb751e05dc1c8ca0e5` passed independent re-review. Its legacy
+  migration preserves structural/duplicate refusal before retiring only valid issued-and-absent
+  references; its input guard permits `EmptySlot` only for an existing drag. Native and editor
+  compile evidence passed; the mapped A/Enter regression compiled but was not executed.
+
+## Build and validation checkpoint
+
+- Integrated Town at merge `07ec7235` and the cleared UI replacement at merge `6c206a73`
+  (`440d4de5bea60cddcb5fd5cb751e05dc1c8ca0e5`); the replacement's independent re-review passed.
+- Combined Release native validation passed all 19 suites. The Development `SurvivalGame` target
+  compiled successfully.
+- The first package bootstrap re-saved 900 tracked Content assets. Their actual bytes were backed
+  up with matching hashes under
+  `E:\CopilotScratch\3554b767-ebd7-436c-a691-13795fecad77\package-bootstrap-evidence`, then only
+  that enumerated list was restored. A clean `-PackageOnly` recook completed with Content clean.
+- Current Shipping candidate is
+  `Build\Releases\20261002-measured-01\shipping-candidate`; it was staged from unchanged clean
+  cooked containers, without editor/bootstrap/cooker/UnrealPak. Guarded Shipping EstateSmoke and
+  ToolRepeat passed.
+- Shipping FullLoop is explicitly excluded: it requests the Woodland map, while Shipping forces
+  Estate and FullLoop has no Estate adaptation. Its Pack-start assertion failure is invalid
+  Shipping coverage, not a UI regression; no source change was made.
+- Isolated Development FullLoop passed on the current integrated source/package. It passed every
+  engine assertion, including Pack startup, exact chest-grid transfer and save reload; its
+  performance sample recorded mean 43.49 FPS, p95 29.10 ms and p99 30.14 ms over 11,052 samples.
 
 ## Next action
 
-Merge Town after confirming a clean integration; wait for the UI owner’s targeted fix SHA and
-validation. No editor, UBT, game build or package has been started by this session.
+Retain the promoted candidate and the old rollback package; do not archive this release-holding
+worktree before Jenny's manual acceptance.
+
+## Delivery
+
+- Promoted the Shipping candidate to `Homestead Estate.lnk` after the valid gates. The shortcut
+  now targets
+  `Build\Releases\20261002-measured-01\shipping-candidate\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`;
+  its executable SHA-256 is
+  `272613AA2892C6B6A4A618A5277747A81ECA0AA72A997C14DCBB3CB5538E93D8`.
+- Copied and hash-verified all 20 package-local SaveGames/Config files before retargeting. The
+  old `20261001-9pm-shipping` package remains the single rollback, and the shortcut retained
+  `Homestead.ico`. Promotion evidence is under
+  `E:\CopilotScratch\3554b767-ebd7-436c-a691-13795fecad77\promotion-evidence`.
+- The source/package receipt is `d2155333`; the candidate receipt records Shipping staging at
+  `2026-10-03T06:34:05.7513339+00:00` from the clean reused cook and container hashes.
+- Refreshed measured accounting captured 419 calls and `1675964350000` nano-AIU through event
+  `69106`. It remains incomplete: delivery responses after that cutoff, actual context tiers,
+  legacy historical costs, and external billing reconciliation are unavailable.
+- Seven Jenny playtests remain manual acceptance only: dark book/HUD consistency, map-click fast
+  travel, pack-square persistence after reload, crop sales, and the signpost's road placement/
+  direction are not represented as completed visual or player acceptance. Development FullLoop
+  FPS is route telemetry, not Estate visual/performance acceptance.

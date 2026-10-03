@@ -81,8 +81,8 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 
 ## 2026-10-02 — next measured build
 
-- SHA: pending
-- Status: in progress; first task-scoped-team and AI-credit-accounted delivery
+- SHA: `d2155333` (source/package checkpoint; delivery accounting handoff follows)
+- Status: delivered to `Homestead Estate.lnk`; manual Jenny acceptance remains pending
 - Build ID: `20261002-measured-01`
 - Ships:
 - Dark theme applies consistently across the book and HUD.
@@ -97,6 +97,13 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
   the backlog. Existing main changes are not reverted merely because further fixes are deferred.
 - Timing: work begins on Jenny's request at 21:32 local. No overnight automation; park at her
   sign-off. A delivery time is not established until implementation and integration readiness are known.
+- Verification: reviewed Town crop/sign transaction work and reviewed/re-reviewed pack-slot
+  migration/input work; Native 19, current-source Development FullLoop, and guarded Shipping
+  EstateSmoke/ToolRepeat passed. Shipping FullLoop is intentionally excluded because it is an
+  unadapted Woodland route while Shipping forces Estate. The promoted Shipping executable SHA-256
+  is `272613AA2892C6B6A4A618A5277747A81ECA0AA72A997C14DCBB3CB5538E93D8`; 20 package-local
+  save/config files were hash-verified on copy, and the prior 20261001 9 PM Shipping release is
+  retained as rollback.
 
 ## Later
 
