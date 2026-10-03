@@ -43,9 +43,9 @@
         "reasoningEffort": "high",
         "contextTier": "default"
       },
-      "readySha": "f881c28c9c112c78e199678ebf425671c3f8ff24",
+      "readySha": "440d4de5bea60cddcb5fd5cb751e05dc1c8ca0e5",
       "handoff": "docs/handoff/ui-measured-01.md",
-      "status": "review-blocked; UI fixing legacy save reconciliation and keyboard/controller empty-slot drops; replacement SHA required",
+      "status": "replacement fixes delivered; parked; independent re-review and player checks pending; mapped A/Enter regression compiled but not run",
       "reportedUsageSnapshot": {
         "throughEventId": 68851,
         "calls": 45,

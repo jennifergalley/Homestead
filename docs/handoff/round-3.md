@@ -23,7 +23,7 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
 | Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |
-| UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | `jennifergalley-turbo-carnival` | candidate `f881c28c` review-blocked; resumed for two inventory fixes with slot granted; ui-measured-01.md handoff |
+| UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | `jennifergalley-turbo-carnival` | replacement `440d4de5` ready for re-review; parked, slot released; ui-measured-01.md handoff |
 | Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | `jennifergalley-vigilant-broccoli` | `6e9c3a9a` reviewed/integrated at `9d7c117e`; parked, slot released; player checks pending; town-measured-01.md handoff |
 | Accounting Agent | `02a5caf8-3fdf-4c96-be5c-192448d6fcdf` | `jennifergalley-laughing-lamp` | integrated on main at `08878e51`; parked, slot released; GPT-6.1 Sol/medium/default; accounting-measured-01.md handoff |
 | Integration Agent | `3554b767-ebd7-436c-a691-13795fecad77` | `jennifergalley-redesigned-couscous` | measured build 01: merge accounting first, selected gameplay after ready/review; GPT-5.6 Terra/medium/default; integration-measured-01.md handoff |
@@ -126,20 +126,21 @@ directly with a lane, even on its own judgment about round-3 coordination needs,
 approval first. Jenny may direct any lane herself; lanes follow her direct instruction over a conflicting
 orchestrator request.
 
-## Latest coordination handoff (2026-10-02, 21:58)
+## Latest coordination handoff (2026-10-02, 22:07)
 
 - Active build: `20261002-measured-01`, authorized at 21:32 local. Scope and deferrals are committed
   in builds.md, backlog.md and priority.json; kickoff SHA `6390d37f`. No delivery ETA yet and no
   overnight work/automations. User-approved right-sized delegation is now in agent-lifecycle.md.
-- UI has a hands-on slot for review-driven repair; Integration counts while merging/building.
-  Town and Accounting are parked. UI owns theme/map/inventory; Town owns shop/trade/signpost files; Integration
+- UI, Town and Accounting are parked; Integration counts while merging/building.
+  UI owns theme/map/inventory; Town owns shop/trade/signpost files; Integration
   owns merging/testing/packaging and the next accounting captures.
   Lanes push feature branches and report exact ready SHAs, not unverified changes to main.
 - UI's original ready SHA is now blocked by independent review: legacy crafted-away pack-slot
   saves reject before reconciliation (high), and keyboard/controller cannot drop onto EmptySlot
-  (medium). The same High owner is authorized to fix both with regressions and one compile.
-  Preserve save format/version and corrupt-save rejection. Replacement SHA and independent
-  re-review are required before UI promotion or packaging; seven Jenny checks remain pending.
+  (medium). The same High owner delivered replacement `440d4de5` with both fixes, native 2/2
+  and one editor compile passed, unchanged save format/version and retained corrupt-save rejection.
+  Actual mapped A/Enter regression was authored/compiled but not run. Independent re-review is
+  required before UI promotion or packaging; seven Jenny checks remain pending.
 - Town ready SHA is in the registry and manifest: crop/sign native suites and editor compile passed.
   Production shop source path is checked, not in-game clicks. Crop-selling/sign visual checks remain
   Jenny's; no save/bake change. Town passed independent review and is integrated at `9d7c117e`.
@@ -158,6 +159,9 @@ orchestrator request.
   not final. Event `68772` has unknown effort; actual runtime context remains unknown.
 - Town task splits use UTC evidence in town-measured-01.md, not sampled cursors. Its receipt
   through `68896` is 59 calls and `182170580000` nano-AIU; later handoff/messages are delivery overhead.
+- UI review rework is `[68941,68965]`, validation `(68965,68974]`, then delivery after `68974`.
+  Initial delivery ends `68859`; do not overlap these with the old open-ended delivery segment.
+  Capture the final reply tail at the next integration gate, not after every message.
 - Local session usage records expose per-call model, reasoning effort, token details and nano-AI
   units. Capture actual context configuration separately. GitHub's AI export aggregates by user/model/day,
   so it can reconcile totals but cannot by itself supply task attribution. See the accounting contract.
