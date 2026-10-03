@@ -29,6 +29,7 @@
   "contributors": [
     {
       "sessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
+      "projectSessionId": "762c7ab7-c8ec-454f-9eb1-3669c01ffdbd",
       "runtimeSessionId": "8ee8d5f3-2054-46d2-95df-1615bf4939d6",
       "role": "UI",
       "worktree": "jennifergalley-turbo-carnival",
@@ -42,7 +43,16 @@
         "reasoningEffort": "high",
         "contextTier": "default"
       },
-      "telemetryStatus": "Accounting verified runtime identity and call model/effort; actual context unknown"
+      "readySha": "f881c28c9c112c78e199678ebf425671c3f8ff24",
+      "handoff": "docs/handoff/ui-measured-01.md",
+      "status": "parked; independent review, integration and player checks pending",
+      "reportedUsageSnapshot": {
+        "throughEventId": 68851,
+        "calls": 45,
+        "recordedNanoAiu": 157423420000,
+        "final": false
+      },
+      "telemetryStatus": "Runtime identity verified; event 68772 effort unknown, other captured calls high; actual context unknown; delivery tail requires capture"
     },
     {
       "sessionId": "d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2",
