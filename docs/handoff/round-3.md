@@ -126,7 +126,7 @@ directly with a lane, even on its own judgment about round-3 coordination needs,
 approval first. Jenny may direct any lane herself; lanes follow her direct instruction over a conflicting
 orchestrator request.
 
-## Latest coordination handoff (2026-10-02, 22:43)
+## Latest coordination handoff (2026-10-02, 23:39)
 
 - Active build: `20261002-measured-01`, authorized at 21:32 local. Scope and deferrals are committed
   in builds.md, backlog.md and priority.json; kickoff SHA `6390d37f`. No delivery ETA yet and no
@@ -135,7 +135,7 @@ orchestrator request.
   UI owns theme/map/inventory; Town owns shop/trade/signpost files; Integration
   owns merging/testing/packaging and the next accounting captures.
   Lanes push feature branches and report exact ready SHAs, not unverified changes to main.
-- Integration's first Shipping package succeeded but is **not admitted**: content bootstrap
+- Integration's first Shipping package succeeded but was **not admitted**: content bootstrap
   re-saved tracked assets. Pre-package assets were clean and the selected UI/Town changes need
   no generated Content changes. Initial report counted 902 paths; evidence inventory counts 900,
   so reconcile the exact set before restoration. Evidence is under
@@ -145,7 +145,24 @@ orchestrator request.
   Pointer/OID diffs alone are not backups. No broad Content restore/reset, asset commit, save
   changes or shortcut promotion. Invalidate only owned relevant cook/stage outputs so the first
   package's regenerated content cannot leak into the retry. Preserve recovery/rebuild costs as rework.
-  All independent review, save-safety and Shipping checks still gate delivery; revised ETA pending.
+  All independent review, save-safety and Shipping checks still gate delivery.
+- Recovery is complete: 900 actual assets backed up with verified hashes, only those paths restored;
+  clean `-PackageOnly` succeeded with Content clean. Guarded Shipping EstateSmoke and ToolRepeat
+  passed. Shipping FullLoop failed the field-book Pack assertion despite process exit 0; the harness
+  failure was subsequently classified as invalid coverage, not a gameplay regression.
+- Integration and UI independently confirmed the documented mismatch: FullLoop requests Woodland,
+  Shipping ignores that map override and loads Estate, and no Estate adaptation exists. Estate's
+  Appearance startup is legitimate. No gameplay edit/compile is needed; UI is parked, slot released.
+  Complete planned Development FullLoop coverage on its correct map/current source alongside valid
+  Estate Shipping routes before promotion. If another long Development build/cook is needed, report
+  an ETA first so Jenny can decide whether to park tonight. Never weaken assertions or claim
+  invalid-route coverage.
+  Failure evidence: `E:\CopilotScratch\3554b767-ebd7-436c-a691-13795fecad77\shipping-qa\full-loop-shipping`.
+  Current shortcut/save remain unchanged; delivery ETA is not confirmed, and no overnight automation.
+- Integration confirmed a current Development package/cook at UI merge `6c206a73` under its
+  `Build\Windows` and is running isolated Development FullLoop; no further long build is needed.
+- UI's late diagnosis `[69050,69068]` is shared failed-gate diagnosis overhead, not UI implementation.
+  Split it from open delivery allocations and capture the terminal tail at the next meaningful gate.
 - UI's original ready SHA is now blocked by independent review: legacy crafted-away pack-slot
   saves reject before reconciliation (high), and keyboard/controller cannot drop onto EmptySlot
   (medium). The same High owner delivered replacement `440d4de5` with both fixes, native 2/2
