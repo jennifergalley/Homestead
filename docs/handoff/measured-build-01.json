@@ -43,9 +43,9 @@
         "reasoningEffort": "high",
         "contextTier": "default"
       },
-      "readySha": "f881c28c9c112c78e199678ebf425671c3f8ff24",
+      "readySha": "440d4de5bea60cddcb5fd5cb751e05dc1c8ca0e5",
       "handoff": "docs/handoff/ui-measured-01.md",
-      "status": "parked; independent review, integration and player checks pending",
+      "status": "replacement fixes delivered; parked; independent re-review and player checks pending; mapped A/Enter regression compiled but not run",
       "reportedUsageSnapshot": {
         "throughEventId": 68851,
         "calls": 45,
@@ -71,7 +71,7 @@
       },
       "readySha": "6e9c3a9aaac7e3c1ceb9a5ec0e07f8ef01895b38",
       "handoff": "docs/handoff/town-measured-01.md",
-      "status": "parked; independent review, integration and player checks pending",
+      "status": "reviewed and integrated on main at 9d7c117e; parked; player checks pending",
       "telemetryStatus": "Accounting verified runtime identity and call model/effort; actual context unknown; delivery tail requires capture"
     },
     {
