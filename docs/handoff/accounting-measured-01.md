@@ -5,6 +5,8 @@ Accounting Agent: app `a03bb295-c2b9-48dc-9b78-3144b3690e66`, runtime
 `02a5caf8-3fdf-4c96-be5c-192448d6fcdf`, branch `jennifergalley-accounting-agent`,
 worktree `jennifergalley-laughing-lamp`. Actual call model/effort: GPT-6.1 Sol / medium,
 verified in local usage. Launch context default; actual runtime context unknown.
+Implementation checkpoint `9d8807a8` is pushed to the feature branch; subsequent branch-tip
+handoff/capture updates preserve its interfaces. Integration has not merged or packaged it.
 
 ## Interface and capture
 
@@ -80,5 +82,10 @@ and HTTP report/backlog/screenshot/quote/reorder/schedule/remove behavior with f
 The first capture's rates reconcile exactly to recorded nano-AIU. UI detector returned no findings.
 Sixteen Node cases and two Python cases pass. Tests caught and fixed a Windows SQLite handle
 cleanup issue and a browser-renderer scope error; no unrelated planner tests were changed.
+The reloaded SDK canvas opens and its refresh action/live HTTP endpoint return the real report.
+Ready-time evidence includes `128` calls through cursor `68810`, `447853020000` recorded nano-AIU
+and zero recorded-minus-rated residual; later captures supersede that interim snapshot.
+Accounting's recorded subtotal there is `103550090000` nano-AIU. This is new-work evidence, not a
+complete build invoice. Recapture after this handoff/terminal response and later integration.
 No owned editor, live test server, automation, save or release dependency. Scratch test directories
 are removed by the tests; the small committed snapshots/report are the durable accounting evidence.
