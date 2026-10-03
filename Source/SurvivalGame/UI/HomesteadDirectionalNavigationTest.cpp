@@ -2,6 +2,7 @@
 #include "../HomesteadController.h"
 #include "SHomesteadMenu.h"
 #include "HomesteadMenuPortrait.h"
+#include "../Simulation/HomesteadPackRow.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Input/Events.h"
@@ -462,6 +463,72 @@ void AHomesteadSmokeTest::PrepareDirectionalNavigationChecks()
     Add(TEXT("Restore the pack the row steps changed"),
         [this, PreRow]() { Controller->Sim.Deserialize(*PreRow); if (Controller->NativeMenu) Controller->NativeMenu->Refresh(); },
         [this, PreRow]() { return Controller->Sim.Serialize() == *PreRow; });
+    const auto GapFixture = MakeShared<std::string>();
+    const auto GapStack = MakeShared<int32>(0);
+    const auto GapStock = MakeShared<Homestead::Inventory>();
+    const auto GapBase = MakeShared<int32>(0);
+    Add(TEXT("Arrange an exact-square input fixture with an internal gap"),
+        [this, GapFixture, GapStack, GapStock, GapBase]()
+        {
+            *GapFixture = Controller->Sim.Serialize();
+            *GapStock = Controller->State().inventory;
+            *GapBase = static_cast<int32>(Homestead::PackRowRules::GridCells(Controller->State()).size());
+            int32 Other = 0;
+            for (const auto& Entry : Controller->State().inventoryLayout)
+                if (Entry.wearableId == 0 && Entry.item != Homestead::Item::Water)
+                {
+                    if (!*GapStack) *GapStack = Entry.groupId;
+                    else { Other = Entry.groupId; break; }
+                }
+            if (!*GapStack || !Other || *GapBase + 3 >= Homestead::PackRowRules::MaxPackSlots
+                || !Controller->Sim.MoveToPackSlot(*GapStack, 0, *GapBase, Controller->Sim.GetRevision())
+                || !Controller->Sim.MoveToPackSlot(Other, 0, *GapBase + 3, Controller->Sim.GetRevision()))
+            { Finish(false, TEXT("Could not arrange the exact-square input fixture.")); return; }
+            Controller->NativeMenu->Refresh();
+        },
+        [this, GapBase]() { return Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::EmptySlot, *GapBase + 1, 0); });
+    for (const FKey Key : {EKeys::Gamepad_FaceButton_Bottom, EKeys::Enter})
+    {
+        const int32 Offset = Key == EKeys::Enter ? 2 : 1;
+        Add(Key == EKeys::Enter ? TEXT("Enter commits a carried stack onto an empty square")
+            : TEXT("Controller A commits a carried stack onto an empty square"),
+            [this, GapStack, GapBase, Key, Offset]()
+            {
+                const int32 Target = *GapBase + Offset;
+                if (!Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::ItemGroup, *GapStack, 0))
+                { Finish(false, TEXT("Could not focus the exact-square source.")); return; }
+                Tap(Key);
+                if (!Controller->NativeMenu->IsVirtualDraggingItem()
+                    || !Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::EmptySlot, Target, 0))
+                { Finish(false, TEXT("Could not pick up or focus the exact-square target.")); return; }
+                Tap(Key);
+            },
+            [this, GapStack, GapStock, GapBase, Offset]()
+            {
+                const int32 Target = *GapBase + Offset;
+                const auto Slots = Homestead::PackRowRules::GridCells(Controller->State());
+                return !Controller->NativeMenu->IsVirtualDraggingItem()
+                    && Slots.size() > static_cast<size_t>(Target) && Slots[Target].groupId == *GapStack
+                    && Controller->State().inventory == *GapStock;
+            });
+    }
+    Add(TEXT("An empty square cannot begin an A or Enter drag"),
+        [this, GapBase]()
+        {
+            if (!Controller->NativeMenu->FocusSubject(EHomesteadMenuSubject::EmptySlot, *GapBase, 0))
+            { Finish(false, TEXT("Could not focus the empty drag-start square.")); return; }
+            Tap(EKeys::Gamepad_FaceButton_Bottom);
+            Tap(EKeys::Enter);
+        },
+        [this]() { return !Controller->NativeMenu->IsVirtualDraggingItem(); });
+    Add(TEXT("Restore the pack after empty-square input checks"),
+        [this, GapFixture]()
+        {
+            if (!Controller->Sim.Deserialize(*GapFixture))
+            { Finish(false, TEXT("Could not restore the exact-square input fixture.")); return; }
+            Controller->NativeMenu->Refresh();
+        },
+        [this, GapFixture]() { return Controller->Sim.Serialize() == *GapFixture; });
     Add(TEXT("Settings still begins on safe Resume control"),
         [this]() { Controller->CloseBook(); Tap(EKeys::Escape); },
         [Focused]() { return Focused(TEXT("Session")); });

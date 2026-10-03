@@ -21,7 +21,7 @@ public:
         SLATE_ATTRIBUTE(bool, UsesGamepad)
         // A line under the focused place's description (the walk there, on Town and the manor).
         SLATE_ATTRIBUTE(FString, PlaceAction)
-        // Clicking that line.
+        // Clicking that line or a destination landmark.
         SLATE_EVENT(FSimpleDelegate, OnPlaceAction)
     SLATE_END_ARGS()
 

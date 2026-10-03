@@ -1,5 +1,10 @@
 # Tasks
 
+## Implementation status
+Existing HUD/book palette rebuilding and focus restoration retained; naming
+text now follows live palette changes. Editor compile passed; visual acceptance
+below remains Jenny's playtest. Town owns the shop palette work.
+
 ## Playtest queue
 - [ ] 1. In Dark, walk around the estate: the clock, date, meters, coins, hotbar, compass and hint card are all dark, and every word reads clearly.
 - [ ] 2. Trigger a toast ("Not ready yet") and a hint card; the text sits centred on its card in both Light and Dark.

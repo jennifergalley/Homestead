@@ -14,6 +14,10 @@ struct MoveResult
     int index = -1;
     bool boundary = false;
 };
+constexpr bool CanConfirmInventoryDrag(bool dragging, bool movableSubject, bool emptySlot)
+{
+    return movableSubject || (dragging && emptySlot);
+}
 constexpr int Step(int index, int count, int columns, int dx, int dy)
 {
     if (count <= 0 || columns <= 0) return -1;

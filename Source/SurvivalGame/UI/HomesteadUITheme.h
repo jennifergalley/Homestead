@@ -5,7 +5,7 @@
 // UI surface uses it (colours via FThemeColor/Themed, text via Font(), key glyphs via KeyFont()) and gets
 // a UI gallery entry. `homestead.UITheme classic` (or -HomesteadUITheme=classic) keeps the old pine-and-
 // cream look for comparison only. Widgets read the theme when they are built, so reopen a menu (or
-// restart) after switching.
+// restart) after switching to the classic comparison font. Palette changes update immediately.
 //
 // Colours keep their classic value in code (FThemeColor) and turn into the parchment equivalent on use:
 // dark panels become paper (deeper panels lighter, selections darker), light text becomes iron-gall

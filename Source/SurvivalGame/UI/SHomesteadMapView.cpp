@@ -250,6 +250,7 @@ FReply SHomesteadMapView::OnMouseButtonUp(const FGeometry& Geometry, const FPoin
             if (Distance < Nearest) { Nearest = Distance; Hit = Index; }
         }
         State().Selected = Hit;
+        if (Hit != INDEX_NONE) OnPlaceAction.ExecuteIfBound();
     }
     return FReply::Handled().ReleaseMouseCapture();
 }

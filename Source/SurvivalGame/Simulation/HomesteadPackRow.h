@@ -14,9 +14,10 @@
 // - Gains top up an existing stack, and uses draw from one, row cells first (left to right), then
 //   the stacks below in order.
 // - A stack used up leaves its cell empty; nothing is held for it.
-// - Moving onto an empty cell moves, onto the same item merges, onto anything else swaps.
+// - Moving onto an empty hotbar cell moves, onto the same item merges, onto anything else swaps.
 // - Below the row her pack is a grid of squares (State::packSlots): once she drops something on a
 //   square, every stack keeps its square, gaps included, through saves; new stacks take the first gap.
+//   Dropping onto an occupied square swaps the two entries, even for matching items.
 // - Sort Pack sorts only below the row, and packs the grid again.
 namespace Homestead
 {
@@ -37,6 +38,9 @@ bool ReadParkedSection(std::istream& input, State& state);
 constexpr const char* SlotsSaveTag = "packslots";
 void WriteSlotsSection(std::ostream& output, const State& state);
 bool ReadSlotsSection(std::istream& input, State& state);
+bool ValidSlots(const State& state);
+// After reading all sections: retire old consumed-stack references without relaxing corrupt-save checks.
+bool RestoreSlots(State& state);
 // The most squares her pack's grid may span.
 constexpr int MaxPackSlots = 1024;
 

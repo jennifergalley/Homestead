@@ -1,5 +1,6 @@
 #include "SHomesteadMenuPrivate.h"
 #include "HomesteadUITheme.h"
+#include "../Simulation/HomesteadPackRow.h"
 
 namespace HomesteadMenus
 {
@@ -625,7 +626,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     };
     const bool bPackGrid = SeenPage == 0 && !(Controller->InventoryView() == 2);
     if (Entries.IsEmpty() && Grid && bPackGrid)
-        Grid->AddSlot(0, 0)[ FocusAnchor(EmptyCell(), ERegion::Content, -1) ];
+        Grid->AddSlot(0, 0)[ FocusAnchor(EmptyCell(Controller->InventoryView() == 0 ? 0 : INDEX_NONE), ERegion::Content, -1) ];
     else if (Entries.IsEmpty() && Grid)
         Grid->AddSlot(0, 0)[ FocusAnchor(SNew(SBox).WidthOverride_Lambda([this]()
             { return FMath::Max(ItemCellWidth, Scroll->GetCachedGeometry().GetLocalSize().X > 0
@@ -830,7 +831,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     const auto Pad = [&EmptyCell](const TSharedPtr<SUniformGridPanel>& Target, int32 Used, int32 Width, bool bPackSquares)
     {
         if (!Target || Width <= 0) return;
-        const int32 Total = FMath::Max(Width * 4, (Used + Width - 1) / Width * Width);
+        const int32 Padded = FMath::Max(Width * 4, (Used + Width - 1) / Width * Width);
+        const int32 Total = bPackSquares ? FMath::Min(Padded, Homestead::PackRowRules::MaxPackSlots) : Padded;
         for (int32 Cell = FMath::Max(Used, 0); Cell < Total; ++Cell)
             Target->AddSlot(Cell % Width, Cell / Width)[ EmptyCell(bPackSquares ? Cell : INDEX_NONE) ];
     };

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <istream>
 #include <ostream>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -65,11 +66,54 @@ bool ReadSlotsSection(std::istream& input, State& state)
     int count = 0;
     if (!(input >> count) || count < 0 || count > MaxPackSlots) return false;
     state.packSlots.assign(static_cast<size_t>(count), PackRowCell{});
+    std::set<int> groups, garments;
     for (auto& cell : state.packSlots)
+    {
         if (!(input >> cell.groupId >> cell.wearableId) || cell.groupId < 0 || cell.wearableId < 0
             || (cell.groupId != 0 && cell.wearableId != 0))
             return false;
-    // Stale squares (stacks since used up or moved) read as gaps (Grid).
+        if (!cell.Empty()
+            && (cell.groupId != 0 ? !groups.insert(cell.groupId).second : !garments.insert(cell.wearableId).second))
+            return false;
+    }
+    // References are validated after all save sections have been read.
+    return true;
+}
+
+bool ValidSlots(const State& state)
+{
+    if (state.packSlots.size() > MaxPackSlots) return false;
+    std::set<int> groups, garments;
+    const bool hideWater = PresentPail(state).hidePackWater;
+    for (const auto& cell : state.packSlots)
+    {
+        if (cell.Empty()) continue;
+        if (cell.groupId < 0 || cell.wearableId < 0 || (cell.groupId != 0) == (cell.wearableId != 0))
+            return false;
+        const int index = FindEntry(state.inventoryLayout, cell);
+        if (index < 0 || CellOf(state.packRow, state.inventoryLayout[index]) >= 0) return false;
+        const auto& entry = state.inventoryLayout[index];
+        if (hideWater && entry.wearableId == 0 && entry.item == Item::Water) return false;
+        if (cell.groupId != 0 ? !groups.insert(cell.groupId).second : !garments.insert(cell.wearableId).second)
+            return false;
+    }
+    return true;
+}
+
+bool RestoreSlots(State& state)
+{
+    for (auto& cell : state.packSlots)
+    {
+        if (cell.Empty() || FindEntry(state.inventoryLayout, cell) >= 0) continue;
+        // Old TryAdjust saves retained squares after crafting/eating retired their stack identities.
+        // An issued, absent stack is a gap; a live stored stack or an unissued identity is corrupt.
+        if (cell.groupId <= 0 || cell.groupId >= state.nextGroupId) return false;
+        for (const auto& piece : state.structures)
+            if (FindEntry(piece.layout, cell) >= 0) return false;
+        cell = {};
+    }
+    if (!ValidSlots(state)) return false;
+    if (!state.packSlots.empty()) state.packSlots = GridCells(state);
     return true;
 }
 
@@ -319,20 +363,9 @@ Result Simulation::MoveToPackSlot(int groupId, int wearableId, int slot, std::ui
     if (fromSlot == slot) return {true, "", ResultCode::None, revision_};
     const PackRowCell occupant = slots[slot];
     const int held = PackRowRules::FindEntry(layout, occupant);
-    if (held >= 0 && Stackable(layout[held], layout[source]))
-    {
-        layout[held].quantity += layout[source].quantity;
-        layout.erase(layout.begin() + source);
-        if (fromCell >= 0) row[fromCell] = {};
-        else slots[fromSlot] = {};
-    }
-    else
-    {
-        // Onto a stack the two swap: from the hotbar, that stack goes up into her cell.
-        slots[slot] = key;
-        if (fromCell >= 0) row[fromCell] = held >= 0 ? occupant : PackRowCell{};
-        else slots[fromSlot] = held >= 0 ? occupant : PackRowCell{};
-    }
+    slots[slot] = key;
+    if (fromCell >= 0) row[fromCell] = held >= 0 ? occupant : PackRowCell{};
+    else slots[fromSlot] = held >= 0 ? occupant : PackRowCell{};
     while (!slots.empty() && slots.back().Empty()) slots.pop_back();
     candidate.packSlots = std::move(slots);
     PackRowRules::OrderLayoutByGrid(candidate);
