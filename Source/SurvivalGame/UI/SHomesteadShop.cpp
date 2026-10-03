@@ -1,5 +1,6 @@
 #include "SHomesteadShop.h"
 #include "HomesteadUITheme.h"
+#include "HomesteadPalette.h"
 
 #include "SHomesteadIcon.h"
 #include "SHomesteadHudScale.h"
@@ -25,14 +26,14 @@ namespace HomesteadMenus
 {
 namespace
 {
-HomesteadUITheme::FThemeColor ShopInk(0.93f, 0.93f, 0.84f);
-HomesteadUITheme::FThemeColor ShopMuted(0.71f, 0.77f, 0.69f);
-HomesteadUITheme::FThemeColor ShopGold(0.92f, 0.74f, 0.43f);
-HomesteadUITheme::FThemeColor ShopWarning(1.0f, 0.67f, 0.48f);
+const HomesteadUITheme::FThemeColor& ShopInk = HomesteadPalette::Cream;
+const HomesteadUITheme::FThemeColor& ShopMuted = HomesteadPalette::Sage;
+const HomesteadUITheme::FThemeColor& ShopGold = HomesteadPalette::Brass;
+const HomesteadUITheme::FThemeColor& ShopWarning = HomesteadPalette::Warning;
 HomesteadUITheme::FThemeColor ShopPanel(0.025f, 0.05f, 0.038f, 0.93f);
 HomesteadUITheme::FThemeColor ShopRow(0.05f, 0.085f, 0.065f, 0.85f);
 HomesteadUITheme::FThemeColor ShopSelected(0.13f, 0.20f, 0.15f, 0.95f);
-HomesteadUITheme::FThemeColor ShopPineInk(0.025f, 0.05f, 0.038f, 1.0f);
+const HomesteadUITheme::FThemeColor& ShopPineInk = HomesteadPalette::DeepPine;
 
 const FButtonStyle& ShopButtonStyle()
 {
@@ -109,10 +110,8 @@ void SHomesteadShop::BuildRows()
     if (!Shop) return;
     if (Tab == 0)
     {
-        for (int32 Index = 0; Index < Homestead::ItemCount; ++Index)
+        for (const Homestead::Item Item : Homestead::ShopSellableItems(Sim, Shop->kind))
         {
-            const auto Item = static_cast<Homestead::Item>(Index);
-            if (Sim.Count(Item) <= 0 || !Homestead::ShopBuys(Shop->kind, Item)) continue;
             FRow Row;
             Row.Item = Item;
             Row.Available = Sim.Count(Item);
@@ -397,8 +396,6 @@ TSharedRef<SWidget> SHomesteadShop::BuildFooter()
     }
     FString Hint = bPad ? TEXT("[A] Choose   [LB / RB] Sell / Buy   [B] Leave")
         : TEXT("Click or [Enter] to choose   [Tab] Sell / Buy   [Esc] Leave");
-    if (Tab == 0 && Rows.IsEmpty())
-        Hint = TEXT("Nothing you're carrying sells here. The store buys hay, scrap, firewood, stone, kindling and spring flowers. ") + Hint;
     Footer->AddSlot().AutoHeight()[Label(Hint, 14, ShopMuted)];
     return Footer;
 }

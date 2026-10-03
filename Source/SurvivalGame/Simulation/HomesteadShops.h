@@ -12,6 +12,7 @@
 // (Simulation::Sell / Simulation::Buy, in HomesteadShops.cpp) so every coin moves with the goods.
 namespace Homestead
 {
+class Simulation;
 // Money is a whole number of coins: the smallest stored unit is one coin (the raw values and save
 // bytes are unchanged from when it read as cents, so buying power is too).
 using Coins = std::int64_t;
@@ -49,6 +50,8 @@ struct Shop
 
 // The shop's own goods, restocked without limit in round 1.
 const std::vector<Item>& ShopGoods(ShopKind kind);
+// Carried goods accepted by this shop, in catalogue order; shared by the Sell pane and native tests.
+std::vector<Item> ShopSellableItems(const Simulation& simulation, ShopKind kind);
 const char* ShopDisplayName(ShopKind kind);
 // Every shop keeps the Sabbath (Jenny, 2026-09-30): closed all day Sunday (the calendar day, 06:00 to 06:00).
 constexpr Weekday ShopClosedDay = Weekday::Sunday;
