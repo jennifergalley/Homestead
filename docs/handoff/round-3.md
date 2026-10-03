@@ -24,8 +24,8 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 | --- | --- | --- | --- |
 | Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |
 | UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | `jennifergalley-turbo-carnival` | ready `f881c28c9c112c78e199678ebf425671c3f8ff24`; parked, slot released; independent review/player checks pending; ui-measured-01.md handoff |
-| Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | `jennifergalley-vigilant-broccoli` | measured build 01: crop sales and town signpost; GPT-6.1 Sol/high/default; owns town-measured-01.md handoff |
-| Accounting Agent | `02a5caf8-3fdf-4c96-be5c-192448d6fcdf` | `jennifergalley-laughing-lamp` | ready on feature branch `848e4b4841b5e306fdedf6fbc94336f409a7d65d`; slot released; GPT-6.1 Sol/medium/default; accounting-measured-01.md handoff |
+| Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | `jennifergalley-vigilant-broccoli` | ready `6e9c3a9aaac7e3c1ceb9a5ec0e07f8ef01895b38`; parked, slot released; independent review/player checks pending; town-measured-01.md handoff |
+| Accounting Agent | `02a5caf8-3fdf-4c96-be5c-192448d6fcdf` | `jennifergalley-laughing-lamp` | integrated on main at `08878e51`; parked, slot released; GPT-6.1 Sol/medium/default; accounting-measured-01.md handoff |
 | Integration Agent | `3554b767-ebd7-436c-a691-13795fecad77` | `jennifergalley-redesigned-couscous` | measured build 01: merge accounting first, selected gameplay after ready/review; GPT-5.6 Terra/medium/default; integration-measured-01.md handoff |
 | Disk Cleanup Agent | `9fc4e210-68e7-4bc1-acca-d52366894506` | `jennifergalley-congenial-engine` | **retained**; its own schedule is cleared, and the orchestrator asks it for one sweep a day |
 | Old Integration Agent | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-literate-eureka` | retired, **do not archive**: its worktree holds the 9 PM Shipping release the shortcut targets |
@@ -126,30 +126,34 @@ directly with a lane, even on its own judgment about round-3 coordination needs,
 approval first. Jenny may direct any lane herself; lanes follow her direct instruction over a conflicting
 orchestrator request.
 
-## Latest coordination handoff (2026-10-02, 21:51)
+## Latest coordination handoff (2026-10-02, 21:54)
 
 - Active build: `20261002-measured-01`, authorized at 21:32 local. Scope and deferrals are committed
   in builds.md, backlog.md and priority.json; kickoff SHA `6390d37f`. No delivery ETA yet and no
   overnight work/automations. User-approved right-sized delegation is now in agent-lifecycle.md.
-- Town and new Integration hold hands-on slots; UI and Accounting finished their slices and
+- Integration holds a hands-on slot; UI, Town and Accounting finished their slices and
   released theirs. UI owns theme/map/inventory; Town owns shop/trade/signpost files; Integration
   owns merging/testing/packaging and the next accounting captures.
   Lanes push feature branches and report exact ready SHAs, not unverified changes to main.
 - UI ready SHA is in the registry and manifest: native checks and editor compile passed; no PIE or
-  visual acceptance claimed. Seven Jenny checks remain pending. Town is authorized to compile
-  after confirming the now-parked UI's UBT/editor release through the normal guards.
-- Fresh Integration is running on Terra/medium. Its first action is merging/testing Accounting's
-  exact ready SHA, then pushing verified tooling to main for the parent's planner reload. Town
-  is not ready yet. Obtain independent focused high-tier review of the
-  optional packslots save diff (`80ec5928`) and new risky gameplay changes before promotion.
-- Accounting collector/report/planner implementation is ready, **not yet integrated**. Its real interim
-  export through event `68818` records 136 calls and `467308390000` nano-AIU; this is not a final
-  build invoice. Capture all later responses and Integration/review calls before eligible archival.
+  visual acceptance claimed. Seven Jenny checks remain pending.
+- Town ready SHA is in the registry and manifest: crop/sign native suites and editor compile passed.
+  Production shop source path is checked, not in-game clicks. Crop-selling/sign visual checks remain
+  Jenny's; no save/bake change. Both gameplay lanes are parked without processes or automations.
+- Fresh Integration runs on Terra/medium. Accounting tooling is integrated; the parent safely
+  fast-forwarded and reopened the planner. Independent GPT-6.1 Sol/high UI/packslots review is
+  running; Town's crop transactions must also receive review before promotion and packaging.
+- Accounting collector/report/planner is **integrated**. The report at `09d542ec` captures 221 calls
+  through `68903` and `741350550000` nano-AIU; this is not a final build invoice. Capture later
+  responses and Integration/review calls before eligible archival, at meaningful build gates rather
+  than after every forwarded usage note.
   Contributor identities/configuration and the coordinator's pre-kickoff usage cursor are recorded
   in measured-build-01.json. Include helpers, startup/retries, review, integration and overhead.
 - UI verification allocation is `(68789,68824]`; delivery overhead is after `68824`, without
   overlap. Accounting reports UI snapshot through `68851`: 45 calls, `157423420000` nano-AIU,
   not final. Event `68772` has unknown effort; actual runtime context remains unknown.
+- Town task splits use UTC evidence in town-measured-01.md, not sampled cursors. Its receipt
+  through `68896` is 59 calls and `182170580000` nano-AIU; later handoff/messages are delivery overhead.
 - Local session usage records expose per-call model, reasoning effort, token details and nano-AI
   units. Capture actual context configuration separately. GitHub's AI export aggregates by user/model/day,
   so it can reconcile totals but cannot by itself supply task attribution. See the accounting contract.
