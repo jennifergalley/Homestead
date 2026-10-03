@@ -1,7 +1,18 @@
 {
   "buildId": "20261002-measured-01",
-  "status": "in-progress",
+  "status": "delivered-awaiting-player-acceptance",
   "authorizedAt": "2026-10-03T04:32:10.763Z",
+  "deliveredAt": "2026-10-03T06:46:31Z",
+  "delivery": {
+    "sourcePackageCheckpoint": "d2155333",
+    "shippingExecutableSha256": "272613AA2892C6B6A4A618A5277747A81ECA0AA72A997C14DCBB3CB5538E93D8",
+    "releaseHoldingSessionId": "3554b767-ebd7-436c-a691-13795fecad77",
+    "releaseWorktree": "jennifergalley-redesigned-couscous",
+    "releaseDirectory": "Build\\Releases\\20261002-measured-01\\shipping-candidate\\Windows",
+    "rollbackWorktree": "jennifergalley-literate-eureka",
+    "rollbackDirectory": "Build\\Releases\\20261001-9pm-shipping\\Windows",
+    "playerAcceptance": "pending"
+  },
   "coordinator": {
     "projectSessionId": "3c4e743c-3c27-4732-adce-e651536c7e75",
     "runtimeSessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
@@ -45,7 +56,7 @@
       },
       "readySha": "440d4de5bea60cddcb5fd5cb751e05dc1c8ca0e5",
       "handoff": "docs/handoff/ui-measured-01.md",
-      "status": "replacement fixes delivered; parked; independent re-review and player checks pending; mapped A/Enter regression compiled but not run",
+      "status": "reviewed and shipped; task session archived after closure capture; player checks pending; mapped A/Enter regression compiled but not run",
       "reportedUsageSnapshot": {
         "throughEventId": 68851,
         "calls": 45,
@@ -71,7 +82,7 @@
       },
       "readySha": "6e9c3a9aaac7e3c1ceb9a5ec0e07f8ef01895b38",
       "handoff": "docs/handoff/town-measured-01.md",
-      "status": "reviewed and integrated on main at 9d7c117e; parked; player checks pending",
+      "status": "reviewed and shipped; task session archived after closure capture; player checks pending",
       "telemetryStatus": "Accounting verified runtime identity and call model/effort; actual context unknown; delivery tail requires capture"
     },
     {
@@ -88,7 +99,8 @@
         "contextTier": "default"
       },
       "readySha": "848e4b4841b5e306fdedf6fbc94336f409a7d65d",
-      "telemetryStatus": "real interim export captured; terminal and integration costs require recapture; actual context unknown"
+      "status": "integrated; task session archived after closure capture",
+      "telemetryStatus": "stopped-lane closure captured; actual context unknown"
     },
     {
       "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
@@ -104,10 +116,11 @@
         "reasoningEffort": "medium",
         "contextTier": "default"
       },
+      "status": "release-holding; non-archivable while shortcut or rollback depends on this worktree",
       "telemetryStatus": "Local usage confirms GPT-5.6 Terra / medium; launch context default, actual context unknown. Accounting merge/validation and refreshed capture are separately allocated."
     }
   ],
-  "accountingStatus": "collector/report integrated on main; final captures and billing reconciliation pending",
+  "accountingStatus": "closure captured through 69130; parent/Integration closing tails, runtime contexts, legacy costs and billing reconciliation remain incomplete",
   "historicalImplementationCost": "inherited main work requires separate attribution; not included as zero",
   "notes": [
     "No overnight work or automations.",
