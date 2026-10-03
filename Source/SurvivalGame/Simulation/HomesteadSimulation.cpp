@@ -3469,6 +3469,7 @@ Result Simulation::Deserialize(const std::string& data)
         input >> std::ws;
     }
     if (!input.eof()) return invalid();
+    if (!PackRowRules::RestoreSlots(candidate)) return invalid();
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return {false, inventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};
     int nextHandle = nextResourceHandle_;

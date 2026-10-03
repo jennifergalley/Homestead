@@ -66,10 +66,16 @@ bool ReadSlotsSection(std::istream& input, State& state)
     int count = 0;
     if (!(input >> count) || count < 0 || count > MaxPackSlots) return false;
     state.packSlots.assign(static_cast<size_t>(count), PackRowCell{});
+    std::set<int> groups, garments;
     for (auto& cell : state.packSlots)
+    {
         if (!(input >> cell.groupId >> cell.wearableId) || cell.groupId < 0 || cell.wearableId < 0
             || (cell.groupId != 0 && cell.wearableId != 0))
             return false;
+        if (!cell.Empty()
+            && (cell.groupId != 0 ? !groups.insert(cell.groupId).second : !garments.insert(cell.wearableId).second))
+            return false;
+    }
     // References are validated after all save sections have been read.
     return true;
 }
@@ -91,6 +97,23 @@ bool ValidSlots(const State& state)
         if (cell.groupId != 0 ? !groups.insert(cell.groupId).second : !garments.insert(cell.wearableId).second)
             return false;
     }
+    return true;
+}
+
+bool RestoreSlots(State& state)
+{
+    for (auto& cell : state.packSlots)
+    {
+        if (cell.Empty() || FindEntry(state.inventoryLayout, cell) >= 0) continue;
+        // Old TryAdjust saves retained squares after crafting/eating retired their stack identities.
+        // An issued, absent stack is a gap; a live stored stack or an unissued identity is corrupt.
+        if (cell.groupId <= 0 || cell.groupId >= state.nextGroupId) return false;
+        for (const auto& piece : state.structures)
+            if (FindEntry(piece.layout, cell) >= 0) return false;
+        cell = {};
+    }
+    if (!ValidSlots(state)) return false;
+    if (!state.packSlots.empty()) state.packSlots = GridCells(state);
     return true;
 }
 

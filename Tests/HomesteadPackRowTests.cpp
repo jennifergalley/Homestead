@@ -4,6 +4,7 @@
 #include "HomesteadHotbarLayout.h"
 #include "HomesteadPackRow.h"
 #include "HomesteadSimulation.h"
+#include "../Source/SurvivalGame/UI/HomesteadMenuNavigation.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -748,13 +749,15 @@ void SavedPackSquaresAreStrict()
     const int chestId = chest->id;
     const auto at = sim.StructureCenter(*chest);
     OK(sim.TransferGroup(chestId, branch, 2, true, at, sim.GetRevision()));
+    const int storedBranch = ChestGroup(sim, chestId, Item::Branch);
+    CHECK(storedBranch != 0);
     const auto stored = sim.Serialize();
     const auto storedPayload = stored.substr(stored.find('\n') + 1);
     const auto storedStart = storedPayload.find("\npackslots ");
     const auto storedEnd = storedPayload.find('\n', storedStart + 1);
     CHECK(storedStart != std::string::npos);
     CHECK(!sim.Deserialize(Reseal(stored, storedPayload.substr(0, storedStart + 1)
-        + "packslots 1 " + std::to_string(branch) + " 0\n" + storedPayload.substr(storedEnd + 1))));
+        + "packslots 1 " + std::to_string(storedBranch) + " 0\n" + storedPayload.substr(storedEnd + 1))));
     CHECK(sim.Serialize() == stored);
 }
 
@@ -778,6 +781,72 @@ void PackSquaresSurviveInventoryAdjustments()
         [berries](const PackRowCell& cell) { return cell.groupId == berries; }));
 }
 
+void OldCraftedAwaySquaresLoadAsGaps()
+{
+    Simulation sim = Estate();
+    OK(sim.GrantItems(Item::RustedAxeHead, 1));
+    OK(sim.GrantItems(Item::Branch, 2));
+    OK(sim.GrantItems(Item::Stone, 1));
+    ClearRow(sim);
+    const int head = Group(sim, Item::RustedAxeHead);
+    const int branch = Group(sim, Item::Branch);
+    const int stone = Group(sim, Item::Stone);
+    OK(sim.MoveToPackSlot(head, 0, 17, sim.GetRevision()));
+    OK(sim.MoveToPackSlot(branch, 0, 19, sim.GetRevision()));
+    OK(sim.MoveToPackSlot(stone, 0, 23, sim.GetRevision()));
+    const auto beforeCraft = sim.Serialize();
+    const auto oldStart = beforeCraft.find("\npackslots ");
+    const auto oldEnd = beforeCraft.find('\n', oldStart + 1);
+    CHECK(oldStart != std::string::npos);
+    const auto oldSlots = beforeCraft.substr(oldStart + 1, oldEnd - oldStart);
+    OK(sim.Craft(Recipe::HaftAxe, {}));
+    CHECK(sim.Count(Item::RustedAxeHead) == 0 && sim.Count(Item::Branch) == 0);
+    const auto current = sim.Serialize();
+    const auto payload = current.substr(current.find('\n') + 1);
+    const auto start = payload.find("\npackslots ");
+    const auto end = payload.find('\n', start + 1);
+    CHECK(start != std::string::npos);
+    const auto prefix = payload.substr(0, start + 1), suffix = payload.substr(end + 1);
+    // Reproduce old main: post-craft inventory with the exact pre-craft slot section.
+    const auto oldMainSave = Reseal(current, prefix + oldSlots + suffix);
+    Simulation loaded = Estate();
+    OK(loaded.Deserialize(oldMainSave));
+    CHECK(loaded.Serialize() == current);
+    CHECK(loaded.GetState().inventory == sim.GetState().inventory);
+    const auto grid = PackRowRules::GridCells(loaded.GetState());
+    CHECK(grid[17].Empty() && grid[19].Empty() && grid[23].groupId == stone);
+    const auto revision = loaded.GetRevision();
+    for (const auto& line : std::vector<std::string>{
+        "packslots 2 " + std::to_string(head) + " 0 " + std::to_string(head) + " 0\n",
+        "packslots 1 " + std::to_string(sim.GetState().nextGroupId) + " 0\n",
+        "packslots 1 0 " + std::to_string(sim.GetState().nextWearableId) + "\n"})
+    {
+        CHECK(!loaded.Deserialize(Reseal(current, prefix + line + suffix)));
+        CHECK(loaded.Serialize() == current && loaded.GetRevision() == revision);
+    }
+}
+
+void VirtualDragAcceptsOnlyEmptyCommitTargets()
+{
+    using HomesteadMenuNavigation::CanConfirmInventoryDrag;
+    CHECK(CanConfirmInventoryDrag(false, true, false));
+    CHECK(CanConfirmInventoryDrag(true, true, false));
+    CHECK(!CanConfirmInventoryDrag(false, false, true));
+    CHECK(CanConfirmInventoryDrag(true, false, true));
+    CHECK(!CanConfirmInventoryDrag(false, false, false));
+    CHECK(!CanConfirmInventoryDrag(true, false, false));
+    Simulation sim = Estate();
+    OK(sim.GrantItems(Item::Stone, 2));
+    const int stone = Group(sim, Item::Stone);
+    OK(sim.MoveToPackSlot(stone, 0, 17, sim.GetRevision()));
+    const auto stock = sim.GetState().inventory;
+    // This is the shared eligibility rule used by A/Enter, followed by their MenuDrop command.
+    CHECK(CanConfirmInventoryDrag(true, false, true));
+    OK(sim.MoveToPackSlot(stone, 0, 18, sim.GetRevision()));
+    CHECK(PackRowRules::GridCells(sim.GetState())[18].groupId == stone);
+    CHECK(sim.GetState().inventory == stock);
+}
+
 int main(int argc, char** argv)
 {
     if (argc > 1) filter = argv[1];
@@ -795,6 +864,8 @@ int main(int argc, char** argv)
     Run("items keep their squares", ItemsKeepTheirSquares);
     Run("saved pack squares are strict", SavedPackSquaresAreStrict);
     Run("pack squares survive inventory adjustments", PackSquaresSurviveInventoryAdjustments);
+    Run("old crafted-away squares load as gaps", OldCraftedAwaySquaresLoadAsGaps);
+    Run("virtual drag accepts only empty commit targets", VirtualDragAcceptsOnlyEmptyCommitTargets);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

@@ -39,6 +39,8 @@ constexpr const char* SlotsSaveTag = "packslots";
 void WriteSlotsSection(std::ostream& output, const State& state);
 bool ReadSlotsSection(std::istream& input, State& state);
 bool ValidSlots(const State& state);
+// After reading all sections: retire old consumed-stack references without relaxing corrupt-save checks.
+bool RestoreSlots(State& state);
 // The most squares her pack's grid may span.
 constexpr int MaxPackSlots = 1024;
 

@@ -414,8 +414,10 @@ void SHomesteadMenu::BeginOrCommitVirtualItemDrag()
         || Region != ERegion::Content || !Entries.IsValidIndex(ContentSelection))
         return;
     const auto& Row = Entries[ContentSelection];
-    if (Row.Subject != EHomesteadMenuSubject::ItemGroup
-        && Row.Subject != EHomesteadMenuSubject::Wearable)
+    const bool MovableSubject = Row.Subject == EHomesteadMenuSubject::ItemGroup
+        || Row.Subject == EHomesteadMenuSubject::Wearable;
+    if (!HomesteadMenuNavigation::CanConfirmInventoryDrag(bVirtualDraggingItem, MovableSubject,
+        Row.Subject == EHomesteadMenuSubject::EmptySlot))
         return;
     if (!bVirtualDraggingItem)
     {

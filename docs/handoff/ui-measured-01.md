@@ -7,7 +7,8 @@
   worktree `E:\Repos\copilot-worktrees\SurvivalGame\jennifergalley-turbo-carnival`.
 - Actual model/effort confirmed by Accounting: `gpt-6.1-sol` / `high`;
   launch context `default`, actual runtime context unknown. No helper sessions.
-- Base SHA `6390d37f`; delivery SHA is the commit containing this handoff (obtain
+- Base SHA `6390d37f`; initial delivery `f881c28c`; review-fix SHA is the commit
+  containing this handoff (obtain
   with `git log -1 -- docs\handoff\ui-measured-01.md`). Startup clean: 0 status
   entries, 7864 tracked files; bootstrap STOP lifted without reset.
 - Done: required policy/context reads; OpenSpec status/apply; concise missing
@@ -17,10 +18,13 @@
 - Map destination clicks now select then dispatch the same travel prompt as T;
   A/Enter confirm opens it too, retaining zoom for non-travel landmarks.
 - Pack: occupied squares swap matching stacks too; empty square zero is a real
-  target. Reconciliation now covers TryAdjust and saves reject missing, duplicate
-  or hotbar slot references atomically. Save version and optional format unchanged;
+  target. Reconciliation now covers TryAdjust. Old-main retired references load as
+  gaps; unissued, duplicate, hotbar/chest/equipped references refuse atomically.
+  A/Enter commits onto empty squares without permitting empty drag starts.
+  Save version and optional format unchanged;
   serialization no longer emits stale references after consuming the last stack.
-- Next owner: Integration merges/packages only after its admission checks.
+- Next owner: Integration re-reviews the two blocker fixes, then merges/packages
+  only after its admission checks.
   Jenny verifies theme contrast/focus, map click/A and drag/reload.
 - Player-checkable task checkboxes stay pending until Jenny's playtest.
 - Ownership: HUD/book/map/inventory and matching simulation/tests; no shop,
@@ -36,7 +40,10 @@
 | fix-map-click-travel | 2026-10-03T04:41:09.801Z | 2026-10-03T04:41:44.967Z | (68756, 68761] |
 | place-items-in-exact-slots | 2026-10-03T04:41:44.967Z | 2026-10-03T04:44:15.394Z | (68761, 68789] |
 | Shared native/editor verification and review | 2026-10-03T04:44:15.394Z | 2026-10-03T04:48:05.368Z | (68789, 68824] |
-| Handoff/commit/push/storage cleanup | 2026-10-03T04:48:05.368Z | pending | after 68824 |
+| Initial handoff/commit/push/storage cleanup | 2026-10-03T04:48:05.368Z | 2026-10-03T04:51:46.572Z | (68824, 68859] |
+| Exact-slots independent-review fixes | 2026-10-03T04:57:27.788Z | 2026-10-03T05:01:35.383Z | [68941, 68965] |
+| Review-fix native/editor verification | 2026-10-03T05:01:35.383Z | 2026-10-03T05:05:48.213Z | (68965, 68974] |
+| Review-fix delivery/cleanup | 2026-10-03T05:05:48.213Z | pending | after 68974 |
 
 Accounting should allocate shared planning/compile overhead explicitly and attribute
 inherited implementation separately, not as zero-cost work in this build.
@@ -47,6 +54,9 @@ Startup 48.75596, theme 30.05783, map 9.35890, exact slots 36.17409,
 verification/review 12.01238, delivery so far 9.93782 AIU. One exact-slot event
 (68772) omits reasoning effort; others report high. Accounting must append the
 post-68833 delivery tail rather than call this snapshot the final total.
+Resumed review-fix snapshot through 68974: 16 events, 78.65539 AIU
+(implementation 63.69912, verification 14.95627), all gpt-6.1-sol/high,
+no helpers or unknown usage amounts. Append the final delivery tail separately.
 
 ## Verification
 Read-only git status/log and OpenSpec commands succeeded. All three changes use
@@ -67,14 +77,35 @@ first test run then caught default Simulation vs Estate load-fixture mismatch
 - PASS one Development editor compile: 32 actions, 125 seconds, no editor launch.
   Command: `Scripts\Invoke-UnrealBuild.ps1 -Target SurvivalGameEditor -Configuration Development`.
 - PASS `openspec validate <assigned-change> --strict` for all three changes.
-- Focused direct review completed for the complete owned code diff and inherited
-  packslots reader/reconciliation/drag routing. No unresolved code findings.
+- Owner direct review completed; Integration's independent review caught the two
+  blockers below. The follow-up is ready for its re-review, not self-approved.
 - No save version/tag changes, placement changes, UAT, package test or visual
   acceptance claim. All seven player-checkable tasks remain unchecked.
 
 Reproduce native checks with Visual Studio CMake:
 `cmake --build <E:-scratch-native-dir> --config Release --target HomesteadPackRowTests HomesteadChestTests HomesteadMapGeometryTests`
 then `ctest --test-dir <E:-scratch-native-dir> -C Release -R '^(HomesteadPackRowTests|HomesteadChestTests|HomesteadMapGeometryTests)$' --output-on-failure`.
+
+## Independent-review follow-up
+Integration blocked f881c28c on old-main crafted-away slot references and the
+virtual-drag subject guard rejecting EmptySlot before MenuDrop. Both are fixed:
+the reader rejects duplicate keys before retiring missing issued stack references
+after all sections load, and the shared input predicate distinguishes pickup from
+commit. Save version/format stays unchanged.
+
+- PASS Release: pack-row and chest suites, 2/2. Pack-row: 16 scenarios,
+  792 checks. A crafted-save fixture combines post-craft inventory with the exact
+  pre-craft slot section; it migrates without stock loss or moving live squares.
+  Duplicate retired ids, unissued ids, invalid garments and live chest references
+  still refuse atomically. Native input eligibility covers empty commit/start.
+- The first follow-up run exposed a fixture assumption: TransferGroup creates a
+  destination group rather than retaining the source id. The corrupt-chest test
+  now references the actual live chest group, not the legitimately retired source.
+- PASS one follow-up Development editor compile: 28 actions, 129 seconds.
+  HomesteadDirectionalNavigationTest now exercises real mapped A and Enter
+  commits, empty drag-start refusal and fixture restoration. That route compiled
+  but was not run here; no live editor/PIE or packaged test was authorized.
+- No theme/map/Town scope changes. Seven player playtests remain pending.
 
 ## Owned files
 Theme: UI/SHomesteadNames.cpp and UI/HomesteadUITheme.h. Map:
@@ -83,6 +114,8 @@ Simulation/HomesteadPackRow.cpp/.h, Simulation/HomesteadSimulation.cpp,
 UI/HomesteadMenuInventory.cpp, UI/SHomesteadMenuPages.cpp,
 HomesteadControllerHotbarEditor.cpp and Tests/HomesteadPackRowTests.cpp.
 Planning/status: each assigned change's design.md/tasks.md and this handoff.
+Review-fix additions: UI/HomesteadMenuNavigation.h,
+UI/SHomesteadMenuInventory.cpp and UI/HomesteadDirectionalNavigationTest.cpp.
 
 ## Parking / storage
 No editor/game/process or automation remains after verification. Native scratch,
