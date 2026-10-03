@@ -1,7 +1,7 @@
 # Town measured build 01
 
 - Build: `20261002-measured-01`; app `44e7062d-49af-4d90-bc81-c3ad396086c6`; runtime `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2`; branch `jennifergalley-town-agent`; worktree `jennifergalley-vigilant-broccoli`.
-- Model/config: observed `gpt-6.1-sol` / high throughout; requested default context, actual context unobserved. No model changes or helpers/helper IDs. Base `6390d37f`; implementation SHA pending first commit; delivery HEAD will be reported with `[ready]`. No main push.
+- Model/config: observed `gpt-6.1-sol` / high throughout; requested default context, actual context unobserved. No model changes or helpers/helper IDs. Base `6390d37f`; verified implementation SHA `964aecb37c6b387f2d194cf9938ee0aee8cdcf69`; delivery HEAD includes this handoff receipt and is reported with `[ready]`. No main push.
 - State/next: both changes implemented and directly reviewed; targeted native suites and one editor compile passed. Integration can merge/package; Jenny's integrated shop/sign visual acceptance remains unchecked. Park after feature-branch delivery, no further scope.
 - Files: `HomesteadItems.cpp`, `HomesteadShops.{h,cpp}`, `UI\SHomesteadShop.cpp`, `Tests\HomesteadEconomyTests.cpp`; road generator/public-road include/header and `Tests\HomesteadPublicRoadTests.cpp`; the two OpenSpec changes. No UI-owned theme/map/inventory files changed.
 - Crops: roots/berries now use the existing General Store buyer mask at unchanged 4/6 coins. Six period prices remain 20/16/14/90/8/13. Wild roots/berries use identical Items with no provenance and are therefore also accepted, as Jenny authorized; no other forage/economy scope.
@@ -14,7 +14,7 @@
 
 ## Task and usage boundaries
 
-Times below are local (-07:00); cursors are sampled local `assistant_usage_events` IDs, not exact billing partitions. Early practical research covered both scopes; combined CTest is included at the tail of sign work.
+Times below are on 2026-10-02, local (-07:00); cursors are sampled local `assistant_usage_events` IDs, not exact billing partitions. Early practical research covered both scopes; combined CTest is included at the tail of sign work.
 
 | Segment | Start/end | Usage cursor boundary |
 | --- | --- | --- |
@@ -22,8 +22,10 @@ Times below are local (-07:00); cursors are sampled local `assistant_usage_event
 | Crops research / implementation / first native pass | 21:38:28 to 21:45:26.9758702 | start sampled 68725; transition sampled 68803 |
 | Sign implementation / geometry / combined native suites | after crop pass to 21:48:07.9746405 | 68803 to shared-validation sample 68826 |
 | Shared review / editor compile | queue clear 21:48:29; compile complete 21:50:48.3151346 | 68826 to sample 68845 |
-| Delivery / handoff / cleanup | after compile; final receipt follows | 68845 onward |
+| Delivery / handoff / cleanup | after compile; receipt sampled 21:53:35 | 68845 through sample 68896; final messages follow |
 
 Local recorded usage through cursor 68865: startup 32,293,110,000; crop 106,401,450,000; sign/CTest 18,655,560,000; shared editor/review 4,211,300,000; delivery-so-far 9,220,180,000 nano-AIU (55 recorded calls, none missing in that sample). Total 170,781,600,000 nano-AIU at that cursor only, not a final bill. Accounting owns final export, conversion and post-handoff usage; no unobserved cost is treated as zero.
+
+Delivery receipt through cursor 68896 (`2026-10-03T04:53:35.038Z`): 59 recorded calls, 182,170,580,000 nano-AIU, zero missing usage records in the sample. Handoff commit/push/messages after this receipt belong to delivery overhead and require Accounting's final export.
 
 No helpers, wakeups/automations, live processes or live editor were created. Named scratch is cleaned before delivery; ignored build caches and the worktree-local UBT verification log remain reproducible evidence. Jenny owns actual-game acceptance; Integration owns the measured Shipping build. Stop promptly on sign-off.
