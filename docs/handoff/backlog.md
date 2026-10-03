@@ -3,18 +3,13 @@
 Only Jenny-directed work belongs here. Every line is one player-checkable slice, not a speculative implementation plan. Lanes create or revise an OpenSpec change only after Jenny gives feedback or explicitly selects a later item. `priority.json` is Jenny's scheduling order, not an autonomous pickup queue: lanes implement only the items she prioritized for their build, then go idle. The planner canvas can drag-reorder the list; **Top**, **Next build**, **Quote**, and **Remove** act on it, with **Remove** archiving the change.
 
 <!-- jenny-inbox:start -->
+- **Wait at the General Store on Sunday until it opens** — Jenny, 2026-10-03 (added from the planner canvas): When I get to the General Store on Sunday, I should have the option to wait until they open on Monday morning so I can enter.
 - **test** — Jenny, 2026-10-02 (added from the planner canvas): just testing backlog feature
 <!-- jenny-inbox:end -->
 
-## Next measured build
+## Current delivered build
 
-Jenny selected this scope on 2026-10-02. No additional work is scheduled.
-
-1. **Apply dark theme everywhere** — finish the chosen palette across the HUD and book, with readable text and correct focus after switching. **Lane:** UI.
-2. **Fix map click travel** — click a known map destination to fast travel, retaining T and controller confirmation. **Lane:** UI.
-3. **Move town signpost** — beside the road past the derelict farm, pointing toward town rather than outside the manor. **Lane:** Town.
-4. **Place items in exact slots** — items remain in the square selected, including gaps and after save/reload. **Lane:** UI.
-5. **Add dollars and general store** — **Urgent:** the General Store buys Jenny's grown crops; separate specialty stores come later. Preserve the existing buy loop. **Lane:** Town.
+The five items Jenny selected on 2026-10-02 shipped in `20261002-measured-01` and are no longer planned improvements. The changelist is in [builds.md](builds.md). Player acceptance remains pending; no next build work is scheduled.
 
 ## Next candidates (deferred, not scheduled)
 

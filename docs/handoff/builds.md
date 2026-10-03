@@ -63,26 +63,11 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Weeds sprout in only some plots each day, at random.
 - Verification: Native 19, eight Development smoke/FullLoop routes, and guarded Shipping EstateSmoke/ToolRepeat passed with 392 zero-network samples; Shipping SHA-256 `DB6B6D8BB4E7928E3CA5695EB77B3B2A3CE38E58BA2107AE863F9681E53FFA87`, with 18 current saves copied unchanged.
 
-## 2026-10-02 — 7:30 AM
-
-- SHA: pending
-- Status: superseded by Jenny's 2026-10-02 next measured build selection
-- Ships:
-- Her fingers wrap the idle-carried pickaxe instead of clipping through her fist.
-- Axe and pickaxe swings use a natural wrist angle on the forward hand.
-- The scythe sits further in front of her, so neither hand clips her chest.
-- Hoeing keeps both arms clear of her torso.
-- Dragging an item drops it in exactly the square you choose, and it stays there (moved from 9 PM).
-- Switching Book colours keeps you on the same Settings tab and row, without the double click or focus jump.
-- After switching Book colours, the hotbar and the Energy/Food meters change to the new palette straight away.
-- In Dark, the whole HUD is dark too (clock, meters, coins, hint card and toasts), every word reads clearly, and toast text is centred on its card.
-- Woodland foliage shadows no longer swim or flicker as she walks under the canopy.
-- Bob and updo hairstyles stay clean while moving, with no rods, fans or LOD pops at any distance.
-
-## 2026-10-02 — next measured build
+## 2026-10-02 — 11:46 PM
 
 - SHA: `d2155333` (source/package checkpoint; delivery accounting handoff follows)
-- Status: delivered to `Homestead Estate.lnk`; manual Jenny acceptance remains pending
+- Status: delivered
+- Player acceptance: pending; delivered to `Homestead Estate.lnk`.
 - Build ID: `20261002-measured-01`
 - Ships:
 - Dark theme applies consistently across the book and HUD.
@@ -95,8 +80,8 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
   inherited work; historical costs must be separately attributed or explicitly marked unavailable.
 - Deferred: animation/tool carrying, rucksack fit, foliage flicker and hair corrections remain in
   the backlog. Existing main changes are not reverted merely because further fixes are deferred.
-- Timing: work begins on Jenny's request at 21:32 local. No overnight automation; park at her
-  sign-off. A delivery time is not established until implementation and integration readiness are known.
+- Timing: Jenny authorized work at 21:32 local; the shortcut was promoted at 23:46:31 after the
+  valid delivery gates. No overnight automation.
 - Verification: reviewed Town crop/sign transaction work and reviewed/re-reviewed pack-slot
   migration/input work; Native 19, current-source Development FullLoop, and guarded Shipping
   EstateSmoke/ToolRepeat passed. Shipping FullLoop is intentionally excluded because it is an

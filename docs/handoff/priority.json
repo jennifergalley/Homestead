@@ -1,10 +1,5 @@
 {
   "order": [
-    "apply-dark-theme-everywhere",
-    "fix-map-click-travel",
-    "move-town-signpost",
-    "place-items-in-exact-slots",
-    "add-dollars-and-general-store",
     "pitch-dark-parchment-theme",
     "fit-rucksack-straps",
     "fix-tool-grip-contact",
@@ -29,19 +24,18 @@
     "add-courtship-and-family",
     "add-boat-fishing"
   ],
-  "nextBuild": [
+  "nextBuild": [],
+  "slots": {},
+  "removed": [
+    "replace-heroine-with-metahuman",
+    "prioritize-heroine-quality-and-tool-clarity",
+    "expand-randomized-music-playlist",
+    "backlog:jenny-muqkk7lh-gjmgxk",
     "apply-dark-theme-everywhere",
     "fix-map-click-travel",
     "move-town-signpost",
     "place-items-in-exact-slots",
     "add-dollars-and-general-store"
   ],
-  "slots": {},
-  "removed": [
-    "replace-heroine-with-metahuman",
-    "prioritize-heroine-quality-and-tool-clarity",
-    "expand-randomized-music-playlist",
-    "backlog:jenny-muqkk7lh-gjmgxk"
-  ],
-  "updated": "2026-10-03T04:32:10.763Z"
+  "updated": "2026-10-03T07:00:12.755Z"
 }
