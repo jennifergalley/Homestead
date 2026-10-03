@@ -62,6 +62,17 @@ const char* ShopDisplayName(ShopKind kind)
     return kind == ShopKind::GeneralStore ? "General store" : "Shop";
 }
 
+std::vector<Item> ShopSellableItems(const Simulation& simulation, ShopKind kind)
+{
+    std::vector<Item> items;
+    for (int index = 0; index < ItemCount; ++index)
+    {
+        const Item item = static_cast<Item>(index);
+        if (simulation.Count(item) > 0 && ShopBuys(kind, item)) items.push_back(item);
+    }
+    return items;
+}
+
 bool IsShopDay(double hour)
 {
     return std::isfinite(hour) && Calendar::DateAt(hour).weekday != ShopClosedDay;

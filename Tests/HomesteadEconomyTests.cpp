@@ -1,5 +1,6 @@
 // Portable tests for the item catalogue, money and shops.
 #include "HomesteadBackpack.h"
+#include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
 #include "HomesteadHoldings.h"
@@ -8,11 +9,13 @@
 #include "HomesteadSimulation.h"
 #include "HomesteadTravel.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
 #include <limits>
 #include <locale>
 #include <set>
@@ -146,10 +149,12 @@ struct Store
     Point customer{};
 };
 
-Store OpenStore()
+Store OpenStore(bool emptyEstate = false)
 {
     Store store;
-    OK(store.sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    EstatePlacements empty;
+    empty.bakeVersion = ProvisionalEstatePlacements().bakeVersion;
+    OK(store.sim.NewEstateGame(ProvisionalEstateLayout(), emptyEstate ? empty : ProvisionalEstatePlacements()));
     const Shop* shop = store.sim.FindShop(ShopKind::GeneralStore);
     CHECK(shop != nullptr);
     store.shop = shop->id;
@@ -673,22 +678,19 @@ void RoadSignsOfferTheWalk()
         for (const TravelDestination destination : RoadSignDestinations(sign.name))
         {
             const TravelPlan plan = PlanTravel(sim.GetState(), sign.position, destination);
-            CHECK(plan.ok && plan.gameHours > 0.0 && plan.connectorMetres < (sign.name == "ManorRoadSign" ? 60.0 : 30.0));
+            CHECK(plan.ok && plan.gameHours > 0.0 && plan.connectorMetres < 30.0);
         }
     }
-    // Jenny, 2026-10-01: the "To town" sign stands by the manor ruins, within 20 m of the ruin's front door and
-    // of her standing room, with the walk home landing on the path beside it. She can't walk "to the manor" from
-    // there, and the sign and her arrival spot are 2 m clear of every placement (the clear-out field crowds the door).
+    // The relocated sign does not move the walk-home arrival, which still lands beside the manor front door.
     const PublicRoadSign* manorSign = road.FindSign("ManorRoadSign");
     const EstateLayout& layout = ProvisionalEstateLayout();
     const Point frontDoor = EstateManorFrontDoor(layout);
-    const Point standingRoom = layout.PointOr(Anchor::StandingRoomOrigin, {});
-    CHECK(manorSign && std::hypot(manorSign->position.x - frontDoor.x, manorSign->position.y - frontDoor.y) < 2000.0);
-    CHECK(std::hypot(manorSign->position.x - standingRoom.x, manorSign->position.y - standingRoom.y) < 2000.0);
+    CHECK(manorSign && std::hypot(manorSign->position.x - frontDoor.x, manorSign->position.y - frontDoor.y) > 5000.0);
     const PublicRoadStop* manorStop = road.FindStop("Manor");
     CHECK(manorStop && manorStop->hasArrival
-        && std::hypot(manorStop->arrival.x - manorSign->position.x, manorStop->arrival.y - manorSign->position.y) < 500.0);
-    CHECK(!PlanTravel(sim.GetState(), manorSign->position, TravelDestination::Manor).ok);
+        && std::hypot(manorStop->arrival.x - frontDoor.x, manorStop->arrival.y - frontDoor.y) < 1000.0);
+    CHECK(manorStop->arrival.x == -26340.0 && manorStop->arrival.y == -64920.0);
+    CHECK(PlanTravel(sim.GetState(), manorSign->position, TravelDestination::Manor).ok);
     for (const EstatePlacement& placement : ProvisionalEstatePlacements().placements)
     {
         CHECK(std::hypot(placement.position.x - manorStop->arrival.x, placement.position.y - manorStop->arrival.y) > 200.0);
@@ -939,6 +941,95 @@ int PackStock(const Simulation& sim, Item item)
     return total;
 }
 
+// Ripen a planted fixture through the ordinary save reader, without spending several seasons growing it.
+void RipenSaleCrop(Simulation& sim)
+{
+    CHECK(sim.GetState().plots.size() == 1);
+    const Plot& plot = sim.GetState().plots.front();
+    const auto line = [&](double growth)
+    {
+        std::ostringstream out;
+        out.imbue(std::locale::classic());
+        out << std::setprecision(std::numeric_limits<double>::max_digits10);
+        out << '\n' << plot.id << ' ' << plot.cellX << ' ' << plot.cellY << ' ' << plot.planted << ' '
+            << growth << ' ' << plot.moisture << ' ' << plot.weeds << ' ' << static_cast<int>(plot.kind) << '\n';
+        return out.str();
+    };
+    const std::string saved = sim.Serialize(), old = line(plot.growth);
+    std::string body = saved.substr(saved.find('\n') + 1);
+    const auto at = body.find(old);
+    CHECK(at != std::string::npos);
+    body.replace(at, old.size(), line(1.0));
+    OK(sim.Deserialize(Reseal(saved, body)));
+    CHECK(IsRipe(sim.GetState().plots.front()));
+}
+
+void EveryHarvestAppearsInTheSellList()
+{
+    const Coins prices[] = {4, 6, 20, 16, 14, 90, 8, 13};
+    static_assert(sizeof(prices) / sizeof(prices[0]) == static_cast<int>(CropKind::Count));
+    for (int index = 0; index < static_cast<int>(CropKind::Count); ++index)
+    {
+        Store store = OpenStore(true);
+        Simulation& sim = store.sim;
+        const CropKind kind = static_cast<CropKind>(index);
+        const CropInfo& crop = GetCropInfo(kind);
+        for (int day = 0; !GrowsIn(kind, sim.Today().season) && day < Calendar::DaysPerYear; ++day)
+            sim.SkipToHourOfDay(9.0);
+        CHECK(GrowsIn(kind, sim.Today().season));
+        OK(sim.GrantItems(Item::DiggingStick, 1));
+        OK(sim.GrantItems(crop.seed, 1));
+        const Point garden = GardenCellCenter(-190, -675);
+        OK(sim.Till(-190, -675, garden));
+        const int plotId = sim.GetState().plots.front().id;
+        OK(sim.Plant(plotId, garden, kind));
+        RipenSaleCrop(sim);
+        const int before = sim.Count(crop.produce);
+        OK(sim.HarvestCrop(plotId, garden));
+        CHECK(sim.Count(crop.produce) == before + crop.produceCount);
+        CHECK(SellPrice(crop.produce) == prices[index]);
+        const auto listed = ShopSellableItems(sim, ShopKind::GeneralStore);
+        CHECK(std::count(listed.begin(), listed.end(), crop.produce) == 1);
+        CHECK(std::find(listed.begin(), listed.end(), Item::DiggingStick) == listed.end());
+
+        sim.SkipToHourOfDay(9.0);
+        if (!IsShopDay(sim.GetState().hour)) sim.SkipToHourOfDay(9.0);
+        const Coins purse = sim.GetState().money;
+        const int quantity = sim.Count(crop.produce);
+        const auto revision = sim.GetRevision();
+        OK(sim.Sell(store.shop, crop.produce, 1, store.customer));
+        CHECK(sim.GetRevision() > revision && sim.GetState().money == purse + prices[index]);
+        CHECK(sim.Count(crop.produce) == quantity - 1 && PackStock(sim, crop.produce) == quantity - 1);
+        CHECK(sim.FindShop(store.shop)->heroineStock[static_cast<int>(crop.produce)] == 1);
+        const std::string partial = sim.Serialize();
+        Simulation loaded;
+        EstatePlacements empty;
+        empty.bakeVersion = ProvisionalEstatePlacements().bakeVersion;
+        loaded.SetPlacements(empty);
+        OK(loaded.Deserialize(partial));
+        CHECK(loaded.Serialize() == partial);
+        CHECK(loaded.GetState().money == purse + prices[index] && loaded.Count(crop.produce) == quantity - 1);
+        const auto refused = sim.Sell(store.shop, crop.produce, quantity, store.customer);
+        CHECK(!refused.ok && sim.Serialize() == partial);
+        if (quantity > 1) OK(sim.Sell(store.shop, crop.produce, quantity - 1, store.customer));
+        CHECK(sim.GetState().money == purse + quantity * prices[index]);
+        CHECK(sim.Count(crop.produce) == 0 && PackStock(sim, crop.produce) == 0);
+        const auto depleted = ShopSellableItems(sim, ShopKind::GeneralStore);
+        CHECK(std::find(depleted.begin(), depleted.end(), crop.produce) == depleted.end());
+        const std::string sold = sim.Serialize();
+        CHECK(!sim.Sell(store.shop, crop.produce, 1, store.customer).ok && sim.Serialize() == sold);
+        OK(loaded.Deserialize(sold));
+        CHECK(loaded.Serialize() == sold && loaded.FindShop(store.shop)->heroineStock[static_cast<int>(crop.produce)] == quantity);
+        OK(loaded.Buy(store.shop, crop.produce, 1, true, store.customer));
+        CHECK(loaded.Count(crop.produce) == 1 && loaded.GetState().money == purse + (quantity - 1) * prices[index]);
+        CHECK(loaded.FindShop(store.shop)->heroineStock[static_cast<int>(crop.produce)] == quantity - 1);
+        loaded.SkipToHourOfDay(19.0);
+        const std::string closed = loaded.Serialize();
+        CHECK(!loaded.Sell(store.shop, crop.produce, 1, store.customer).ok);
+        CHECK(!loaded.Buy(store.shop, crop.produce, 1, true, store.customer).ok && loaded.Serialize() == closed);
+    }
+}
+
 // Stock truth on the actual-stack hotbar: a "+N" is exactly what her stacks gained, and arranging
 // those stacks (hotbar row, split, sort, back below the row), eating, garments and the lamp never
 // add a line or a second one for the same thing.
@@ -1021,6 +1112,7 @@ int main(int argc, char** argv)
     Run("money formatting and prices", MoneyFormatting);
     Run("a new estate starts with money and a store", NewEstateStartsWithMoneyAndAStore);
     Run("sell a stack at the counter", SellAStack);
+    Run("every harvested crop appears in the Sell list and trades safely", EveryHarvestAppearsInTheSellList);
     Run("rejected trades change nothing", RejectedTradesChangeNothing);
     Run("buy and eat a pasty", BuyAndEatAPasty);
     Run("buy back and pack capacity", BuyBackAndCapacity);

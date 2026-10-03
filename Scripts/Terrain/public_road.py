@@ -37,11 +37,11 @@ BRIDGE_CLEAR_HALF_WIDTH_M = 1.8
 # The signs: (name, chainage m or None for the gateway, side (+1 = right of travel toward town), facing).
 # "toTown" signs face walkers coming from the manor; "toManor" faces those leaving town.
 GATEWAY = (-55.0, 90.0)
-# Jenny, 2026-10-01: the "To town" sign belongs by the manor ruins, not 40 m away at the road's end. It stands
-# just outside the ruin's front door (EstateManorFrontDoor, (-259, -654.5)), on the east side of the cove path
-# its face turned to the door; the walk home from town lands her on the path beside it, facing the door.
-MANOR_SIGN_M = (-264.5, -650.25)        # 7 m from the door, 2.5 m off the cove path, 2.4 m clear of the clear-out
-MANOR_ARRIVAL_M = (-263.4, -649.2)      # 1.5 m from the sign, 2.3 m clear of the clear-out
+# Jenny, 2026-10-02: keep the same sign identity, but put it beyond the derelict farm toward town.
+# Farm corners mirror Anchor::DerelictFarm in HomesteadEstate.cpp; native road tests guard the match.
+FARM_CORNERS_M = ((-222.0, -705.0), (-222.0, -645.0), (-162.0, -645.0), (-162.0, -705.0))
+FARM_SIGN_BEYOND_M = 26.0       # past the farm, between existing verge trees without moving their saved ids
+MANOR_ARRIVAL_M = (-263.4, -649.2)      # unchanged walk-home landing, clear of the manor's clear-out
 MANOR_FRONT_DOOR_M = (-259.0, -654.5)
 
 
@@ -130,8 +130,16 @@ def main():
     deck = bridge_deck(layout, road, chain, z, frame)
     gate_ch = float(chain[int(np.argmin(np.hypot(*(road - np.array(GATEWAY)).T)))])
 
+    def nearest_chainage(point):
+        directions = np.diff(road, axis=0)
+        t = np.clip(((point - road[:-1]) * directions).sum(axis=1) / seg**2, 0.0, 1.0)
+        projected = road[:-1] + directions * t[:, None]
+        nearest = int(np.argmin(((projected - point)**2).sum(axis=1)))
+        return float(chain[nearest] + seg[nearest] * t[nearest])
+
+    farm_sign_ch = max(nearest_chainage(np.array(corner)) for corner in FARM_CORNERS_M) + FARM_SIGN_BEYOND_M
     signs = []
-    for name, ch, side, toward in (("ManorRoadSign", 12.0, -1, "town"),
+    for name, ch, side, toward in (("ManorRoadSign", farm_sign_ch, -1, "town"),
                                    ("GatewayRoadSign", gate_ch + 14.0, -1, "town"),
                                    ("TownRoadSign", float(chain[-1]) - 14.0, 1, "manor")):
         p, d = frame(ch)
@@ -140,9 +148,8 @@ def main():
         heading = math.degrees(math.atan2(d[1], d[0]))
         yaw = heading if toward == "town" else heading + 180.0
         if name == "ManorRoadSign":
-            q = np.array(MANOR_SIGN_M)
-            ch = 0.0
-            yaw = math.degrees(math.atan2(MANOR_FRONT_DOOR_M[1] - q[1], MANOR_FRONT_DOOR_M[0] - q[0]))
+            # road_sign.py's board runs along local +Y, not the face's local +X.
+            yaw = heading - 90.0
         signs.append((name, ch, q, ground(*q), (yaw + 360.0) % 360.0))
 
     lines = [

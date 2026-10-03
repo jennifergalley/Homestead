@@ -258,16 +258,29 @@ int main()
             2.0 * halfY / 100.0, 2.0 * halfX / 100.0, static_cast<double>(street.size()));
     }
 
-    // The road's signs stand on the verge, not the bed, and none in the bridge keep-out. The manor's stands by
-    // the ruin's front door instead (Jenny, 2026-10-01), off the road and within a short walk of it.
+    // Every sign stands on the verge; the existing town-bound sign is past the derelict farm, not the manor.
     Check(road.signs.size() == 3, "three signs", static_cast<double>(road.signs.size()));
     for (const PublicRoadSign& sign : road.signs)
     {
         const double off = road.NearestTo(sign.position).distanceCm;
-        if (sign.name == "ManorRoadSign") Check(off > 600.0 && off < 6000.0, "manor sign by the ruin, a short walk from the road", off);
-        else Check(off > 320.0 && off < 600.0, "sign on the verge", off);
+        Check(off > 320.0 && off < 600.0, "sign on the verge", off);
         Check(!road.InBridgeKeepOut(sign.position), "sign clear of the bridge");
         Check(sign.yaw >= 0.0 && sign.yaw < 360.0, "sign yaw normalised", sign.yaw);
+    }
+    const PublicRoadSign* farmSign = road.FindSign("ManorRoadSign");
+    const LandmarkPolygon* farm = ProvisionalEstateLayout().FindPolygon(Anchor::DerelictFarm);
+    Check(farmSign && farm, "original sign and derelict farm identities retained");
+    if (farmSign && farm)
+    {
+        double farmEnd = 0.0;
+        for (Point corner : farm->points) farmEnd = std::max(farmEnd, road.NearestTo(corner).chainage);
+        Check(farmSign->chainage > farmEnd + 10.0 && farmSign->chainage < farmEnd + 30.0, "sign beyond the farm toward town", farmSign->chainage - farmEnd);
+        Check(!PointInPolygon(farm->points, farmSign->position), "sign outside the farm");
+        const Point beforeSign = road.At(farmSign->chainage - 1.0), afterSign = road.At(farmSign->chainage + 1.0);
+        const double heading = std::atan2(afterSign.y - beforeSign.y, afterSign.x - beforeSign.x) * 180.0 / 3.14159265358979323846;
+        Check(std::abs(std::remainder(farmSign->yaw + 90.0 - heading, 360.0)) < 1.0, "local +Y sign arm points along road toward town");
+        for (const PublicRoadSign& sign : road.signs)
+            Check(Distance(sign.position, EstateManorFrontDoor()) > 5000.0, "no sign outside the manor", Distance(sign.position, EstateManorFrontDoor()));
     }
 
     // The bridge keep-out covers the crossing and its ramps and nothing far off it.
