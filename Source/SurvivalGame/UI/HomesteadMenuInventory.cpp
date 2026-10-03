@@ -371,6 +371,14 @@ bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomestea
     }
     if (Source.ContainerId < 0)
     { Notify(TEXT("Choose a valid destination in this container."), true); return false; }
+    if (Source.ContainerId == 0 && Target.PackSlot != INDEX_NONE)
+    {
+        const bool Garment = Source.Subject == EHomesteadMenuSubject::Wearable;
+        const auto Result = Sim.MoveToPackSlot(Garment ? 0 : Source.SubjectId, Garment ? Source.SubjectId : 0,
+            Target.PackSlot, ExpectedRevision);
+        NotifyResourceAction(Result, nullptr);
+        return Result.ok;
+    }
     if (Source.Subject == EHomesteadMenuSubject::ItemGroup
         && Target.Subject == EHomesteadMenuSubject::ItemGroup
         && Source.Id == Target.Id && Source.SubjectId != Target.SubjectId)
@@ -378,15 +386,6 @@ bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomestea
         const auto Result = Sim.MergeGroups(Source.ContainerId, Source.SubjectId,
             Target.SubjectId, PlayerPoint(), ExpectedRevision);
         Notify(Result);
-        return Result.ok;
-    }
-    // In her pack, the exact square: onto an empty one it moves, onto a stack the two swap.
-    if (Source.ContainerId == 0 && Target.PackSlot != INDEX_NONE)
-    {
-        const bool Garment = Source.Subject == EHomesteadMenuSubject::Wearable;
-        const auto Result = Sim.MoveToPackSlot(Garment ? 0 : Source.SubjectId, Garment ? Source.SubjectId : 0,
-            Target.PackSlot, ExpectedRevision);
-        NotifyResourceAction(Result, nullptr);
         return Result.ok;
     }
     if (Target.Subject == EHomesteadMenuSubject::EmptySlot) return false;

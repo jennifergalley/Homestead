@@ -650,18 +650,27 @@ void ItemsKeepTheirSquares()
     OK(sim.MoveToPackRow(Group(sim, Item::Fiber), 0, 4, sim.GetRevision()));
     OK(sim.MoveToPackSlot(Group(sim, Item::Fiber), 0, 20, sim.GetRevision()));
     CHECK(Squares(sim)[20] == V(Item::Fiber) && CellItem(sim, 4) == Item::Branch);
-    // Onto the same item they merge, and nothing is lost or made.
+    // Matching items swap identities and quantities; neither stack is lost or made.
     OK(sim.GrantItems(Item::Stone, 2));
     const int stones = sim.Count(Item::Stone);
-    OK(sim.SplitGroup(0, Group(sim, Item::Stone), 1, {}, sim.GetRevision()));
+    const int mainStone = Group(sim, Item::Stone);
+    OK(sim.SplitGroup(0, mainStone, 1, {}, sim.GetRevision()));
     int split = 0;
     for (const auto& entry : sim.GetState().inventoryLayout)
         if (entry.wearableId == 0 && entry.item == Item::Stone && entry.quantity == 1) split = entry.groupId;
     CHECK(split != 0);
     if (PackRowRules::RowCellOf(sim.GetState(), split, 0) < 0)
         OK(sim.MoveToPackRow(split, 0, 7, sim.GetRevision()));
+    const int splitCell = PackRowRules::RowCellOf(sim.GetState(), split, 0);
     OK(sim.MoveToPackSlot(split, 0, 30, sim.GetRevision()));
-    CHECK(sim.Count(Item::Stone) == stones && Group(sim, Item::Stone) != 0 && Squares(sim)[30] == V(Item::Stone));
+    CHECK(sim.Count(Item::Stone) == stones && Squares(sim)[30] == V(Item::Stone));
+    CHECK(sim.GetState().packRow[splitCell].groupId == mainStone);
+    CHECK(sim.GetLayout(0)->at(PackRowRules::Grid(sim.GetState())[30]).groupId == split);
+    CHECK(sim.GetLayout(0)->at(PackRowRules::Grid(sim.GetState())[30]).quantity == 1);
+    CHECK(CellQuantity(sim, splitCell) == stones - 1);
+    OK(sim.MoveToPackSlot(mainStone, 0, 30, sim.GetRevision()));
+    CHECK(sim.GetState().packRow[splitCell].groupId == split);
+    CHECK(sim.GetLayout(0)->at(PackRowRules::Grid(sim.GetState())[30]).groupId == mainStone);
     // Refusals change nothing.
     const std::string before = sim.Serialize();
     const auto revision = sim.GetRevision();
@@ -689,6 +698,86 @@ void ItemsKeepTheirSquares()
     CHECK(sim.GetState().packSlots.empty() && std::find(sorted.begin(), sorted.end(), -1) == sorted.end());
 }
 
+void SavedPackSquaresAreStrict()
+{
+    Simulation sim = Estate();
+    OK(sim.GrantItems(Item::Stone, 2));
+    OK(sim.GrantItems(Item::Branch, 2));
+    const int stone = Group(sim, Item::Stone);
+    const int branch = Group(sim, Item::Branch);
+    OK(sim.MoveToPackRow(branch, 0, 0, sim.GetRevision()));
+    OK(sim.MoveToPackSlot(stone, 0, 17, sim.GetRevision()));
+    const auto saved = sim.Serialize();
+    const auto payload = saved.substr(saved.find('\n') + 1);
+    const auto start = payload.find("\npackslots ");
+    CHECK(start != std::string::npos);
+    const auto end = payload.find('\n', start + 1);
+    const auto withoutSlots = payload.substr(0, start + 1) + payload.substr(end + 1);
+    Simulation loaded = sim;
+    const auto unchanged = loaded.Serialize();
+    const auto revision = loaded.GetRevision();
+    for (const auto& section : std::vector<std::string>{
+        "packslots -1\n", "packslots 1025\n", "packslots 1\n",
+        "packslots 1 -1 0\n", "packslots 1 999999 0\n",
+        "packslots 1 " + std::to_string(stone) + " 1\n",
+        "packslots 1 " + std::to_string(branch) + " 0\n",
+        "packslots 2 " + std::to_string(stone) + " 0 " + std::to_string(stone) + " 0\n",
+        "packslots 0\npackslots 0\n"})
+    {
+        const auto result = loaded.Deserialize(Reseal(saved, withoutSlots + section));
+        CHECK(!result && result.code == ResultCode::CorruptSave);
+        CHECK(loaded.Serialize() == unchanged);
+        CHECK(loaded.GetRevision() == revision);
+    }
+    for (const auto& garment : sim.GetState().wearables)
+        if (garment.owner == WearableOwner::Equipped)
+        {
+            CHECK(!loaded.Deserialize(Reseal(saved, withoutSlots + "packslots 1 0 "
+                + std::to_string(garment.id) + "\n")));
+            CHECK(loaded.Serialize() == unchanged);
+            break;
+        }
+    const auto rowAt = withoutSlots.find("\npackrow ");
+    CHECK(rowAt != std::string::npos);
+    const auto slotLine = payload.substr(start + 1, end - start);
+    OK(loaded.Deserialize(Reseal(saved, withoutSlots.substr(0, rowAt + 1)
+        + slotLine + withoutSlots.substr(rowAt + 1))));
+    CHECK(loaded.Serialize() == saved);
+    const auto* chest = StarterChest(sim);
+    CHECK(chest != nullptr);
+    const int chestId = chest->id;
+    const auto at = sim.StructureCenter(*chest);
+    OK(sim.TransferGroup(chestId, branch, 2, true, at, sim.GetRevision()));
+    const auto stored = sim.Serialize();
+    const auto storedPayload = stored.substr(stored.find('\n') + 1);
+    const auto storedStart = storedPayload.find("\npackslots ");
+    const auto storedEnd = storedPayload.find('\n', storedStart + 1);
+    CHECK(storedStart != std::string::npos);
+    CHECK(!sim.Deserialize(Reseal(stored, storedPayload.substr(0, storedStart + 1)
+        + "packslots 1 " + std::to_string(branch) + " 0\n" + storedPayload.substr(storedEnd + 1))));
+    CHECK(sim.Serialize() == stored);
+}
+
+void PackSquaresSurviveInventoryAdjustments()
+{
+    Simulation sim = Estate();
+    OK(sim.GrantItems(Item::Berries, 1));
+    const int berries = Group(sim, Item::Berries);
+    OK(sim.MoveToPackSlot(berries, 0, 17, sim.GetRevision()));
+    const int quantity = sim.Count(Item::Berries);
+    for (int consumed = 0; consumed < quantity; ++consumed)
+    {
+        OK(sim.SetEnergy(50.0));
+        OK(sim.Eat(Item::Berries));
+        CHECK(PackRowRules::ValidSlots(sim.GetState()));
+        Simulation loaded = Estate();
+        OK(loaded.Deserialize(sim.Serialize()));
+        CHECK(loaded.Serialize() == sim.Serialize());
+    }
+    CHECK(std::none_of(sim.GetState().packSlots.begin(), sim.GetState().packSlots.end(),
+        [berries](const PackRowCell& cell) { return cell.groupId == berries; }));
+}
+
 int main(int argc, char** argv)
 {
     if (argc > 1) filter = argv[1];
@@ -704,6 +793,8 @@ int main(int argc, char** argv)
     Run("saved pin lists sanitize", SavedLayoutsSanitize);
     Run("rotating the row keeps each stack's key", RotatingTheRowKeepsEachStacksKey);
     Run("items keep their squares", ItemsKeepTheirSquares);
+    Run("saved pack squares are strict", SavedPackSquaresAreStrict);
+    Run("pack squares survive inventory adjustments", PackSquaresSurviveInventoryAdjustments);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;
 }

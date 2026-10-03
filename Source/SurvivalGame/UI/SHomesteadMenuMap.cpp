@@ -32,7 +32,7 @@ FString SHomesteadMenu::MapTravelLine() const
     if (!Destination || !Controller.IsValid()) return {};
     const Homestead::TravelPlan Plan = Controller->MenuPlanTravel(*Destination);
     if (!Plan.ok) return UTF8_TO_TCHAR(Plan.error.c_str());
-    return FString::Printf(TEXT("%s: walk there, about %s"), Controller->UsesGamepad() ? TEXT("X") : TEXT("T or click here"),
+    return FString::Printf(TEXT("%s: walk there, about %s"), Controller->UsesGamepad() ? TEXT("A / X") : TEXT("T or click here"),
         UTF8_TO_TCHAR(Homestead::FormatWalkDuration(Plan.gameHours).c_str()));
 }
 
@@ -149,7 +149,11 @@ bool SHomesteadMenu::HandleMapKey(FKey Key, EInputEvent Event, float InputAmount
         return true;
     }
     if (Key == EKeys::Enter || Key == EKeys::SpaceBar || Key == EKeys::E || Key == EKeys::Gamepad_FaceButton_Bottom)
-    { MapView->ToggleZoomOnSelected(); return true; }
+    {
+        if (const auto Destination = MapTravelDestination()) OpenTravelPrompt(*Destination);
+        else MapView->ToggleZoomOnSelected();
+        return true;
+    }
     if (Key == EKeys::Equals || Key == EKeys::Add) { MapView->ZoomBy(1.5, MapView->GetCachedGeometry().GetLocalSize() * 0.5f); return true; }
     if (Key == EKeys::Hyphen || Key == EKeys::Subtract) { MapView->ZoomBy(1 / 1.5, MapView->GetCachedGeometry().GetLocalSize() * 0.5f); return true; }
     // Pointer clicks belong to the map itself (drag, choose a place).

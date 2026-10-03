@@ -66,7 +66,7 @@ bool AHomesteadController::MenuMoveHotbarToPack(int32 Cell, const FHomesteadRow*
     }
     else if (Target && Target->ContainerId == 0 && Target->PackSlot != INDEX_NONE)
     {
-        // Onto a square of her pack: exactly there, merging with the same item or swapping.
+        // Onto a square of her pack: exactly there, swapping with any occupant.
         const auto* Entry = HotbarEntry(Cell);
         Result = Sim.MoveToPackSlot(Entry->wearableId ? 0 : Entry->groupId, Entry->wearableId, Target->PackSlot, Sim.GetRevision());
     }

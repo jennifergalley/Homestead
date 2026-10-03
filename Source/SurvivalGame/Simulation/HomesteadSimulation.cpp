@@ -705,6 +705,7 @@ bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
         if (fillPackRow)
             for (const auto& entry : arrivals)
                 if (!PackRowRules::TakeFirstEmpty(state.packRow, entry)) break;
+        if (!state.packSlots.empty()) state.packSlots = PackRowRules::GridCells(state);
     }
     return true;
 }
@@ -780,6 +781,8 @@ Result ValidateInventory(const State& state)
     if (!result) return result;
     if (!PackRowRules::Valid(state.packRow, state.inventoryLayout))
         return Bad("The hotbar row names a missing or repeated stack.");
+    if (!PackRowRules::ValidSlots(state))
+        return Bad("The pack squares name a missing or repeated stack.");
     for (const auto& piece : state.structures)
     {
         if (piece.kind == Piece::Chest)
@@ -1362,6 +1365,7 @@ bool Simulation::TryAdjust(const Inventory& change)
     state_.inventory = candidate.inventory;
     state_.inventoryLayout = std::move(candidate.inventoryLayout);
     state_.packRow = candidate.packRow;
+    state_.packSlots = std::move(candidate.packSlots);
     state_.nextGroupId = candidate.nextGroupId;
     ++revision_;
     return true;
@@ -1380,9 +1384,6 @@ Result Simulation::CommitInventory(State&& candidate, const char* message)
     for (const auto& piece : candidate.structures)
         if (piece.kind == Piece::Chest && !ReconcileLayout(candidate, piece.id))
             return {false, "Storage group identities are exhausted.", ResultCode::Unavailable, revision_};
-    // Once she has placed something, every stack keeps the square it shows in (new ones take the first
-    // gaps), and a stack that left her pack's grid gives its square up (HomesteadPackRow.h).
-    if (!candidate.packSlots.empty()) candidate.packSlots = PackRowRules::GridCells(candidate);
     auto result = ValidateInventory(candidate);
     if (!result) { result.revision = revision_; return result; }
     state_ = std::move(candidate);
