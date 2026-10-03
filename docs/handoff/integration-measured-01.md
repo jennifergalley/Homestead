@@ -18,8 +18,22 @@ is unknown.
   `68862`; it remains incomplete pending lane terminals, review, later integration and billing
   reconciliation.
 
+## Admission review
+
+- Independent read-only review ran as nested agent
+  `be475939-47b6-4de1-85a4-220ba579d0b4` in this Integration runtime. Telemetry confirms
+  GPT-6.1 Sol / high; its actual context is unknown. Review calls are separately allocated through
+  event `68939`.
+- Reviewed `80ec592828329b7b0d5171b4890cd934f47a8be0`, UI candidate
+  `f881c28c9c112c78e199678ebf425671c3f8ff24`, Town implementation
+  `964aecb37c6b387f2d194cf9938ee0aee8cdcf69`, and Town delivery
+  `6e9c3a9aaac7e3c1ceb9a5ec0e07f8ef01895b38`.
+- Town passed review: crop sales preserve atomic wallet/inventory/shop updates and sign identities,
+  arrival, resources, save format and bake version are unchanged.
+- UI promotion is blocked pending fixes for a legacy crafted-away pack-slot save rejected before
+  reconciliation and keyboard/controller commit onto an empty pack square.
+
 ## Next action
 
-Wait for Town's exact ready SHA. Before any promotion, request the required independent high-tier
-review of `80ec5928`, UI's slot reconciliation, and Town's crop transaction/save-sensitive diff.
-No editor, UBT, game build or package has been started by this session.
+Merge Town after confirming a clean integration; wait for the UI owner’s targeted fix SHA and
+validation. No editor, UBT, game build or package has been started by this session.

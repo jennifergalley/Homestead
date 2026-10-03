@@ -152,6 +152,7 @@
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
       "throughEventId": 68853,
+      "agentId": "main",
       "contextTier": null,
       "launchContextTier": "default",
       "contextEvidence": "Local usage records 68831-68853 confirm GPT-5.6 Terra / medium; actual runtime context is unknown."
@@ -163,9 +164,28 @@
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
       "afterEventId": 68853,
+      "agentId": "main",
       "contextTier": null,
       "launchContextTier": "default",
       "contextEvidence": "Refreshed accounting capture and reporting; actual runtime context is unknown."
+    },
+    {
+      "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
+      "projectSessionId": "d8027b79-2a9e-40fe-9e97-82f0d33d3ad8",
+      "agentId": "be475939-47b6-4de1-85a4-220ba579d0b4",
+      "task": "independent-packslots-and-town-review",
+      "tasks": [
+        "place-items-in-exact-slots",
+        "add-dollars-and-general-store",
+        "move-town-signpost"
+      ],
+      "category": "review",
+      "since": "2026-10-03T04:53:15.789Z",
+      "afterEventId": 68885,
+      "throughEventId": 68939,
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Read-only independent reviewer telemetry confirms GPT-6.1 Sol / high; actual runtime context is unknown."
     }
   ]
 }
