@@ -75,7 +75,9 @@ worktree before Jenny's manual acceptance.
   `Homestead.ico`. Promotion evidence is under
   `E:\CopilotScratch\3554b767-ebd7-436c-a691-13795fecad77\promotion-evidence`.
 - The source/package receipt is `d2155333`; the candidate receipt records Shipping staging at
-  `2026-10-03T06:34:05.7513339+00:00` from the clean reused cook and container hashes.
+  `2026-10-03T06:34:05.7513339+00:00` from the clean reused cook and container hashes. This is
+  not promotion time: the retained promotion receipt proves the shortcut was retargeted at
+  `2026-10-03T06:46:31Z`, after the Development FullLoop pass.
 - Refreshed measured accounting captured 419 calls and `1675964350000` nano-AIU through event
   `69106`. It remains incomplete: delivery responses after that cutoff, actual context tiers,
   legacy historical costs, and external billing reconciliation are unavailable.
@@ -83,3 +85,13 @@ worktree before Jenny's manual acceptance.
   travel, pack-square persistence after reload, crop sales, and the signpost's road placement/
   direction are not represented as completed visual or player acceptance. Development FullLoop
   FPS is route telemetry, not Estate visual/performance acceptance.
+- Closure capture closed the stopped lane tails at Accounting `69075`, UI `69076`, and Town
+  `68910`; coordinator/integration events after `69117`/`69120` remain explicitly open delivery
+  tails. Actual context tiers, legacy historical costs, and external billing reconciliation remain
+  unavailable.
+- The final pre-park export supersedes the earlier checkpoint: it captured 439 calls and
+  `1743479960000` nano-AIU through event `69130`, with no missing configured session and one
+  excluded pre-baseline record. Post-capture coordinator/integration delivery tails remain open.
+- `JennysHomesteadGame.exe` began from the promoted candidate at `2026-10-03T06:48:32Z`. It is
+  Jenny's live playtest process and was not touched; this worktree is release-holding and must not
+  be archived while the shortcut or process depends on it.

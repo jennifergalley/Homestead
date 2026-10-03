@@ -8,11 +8,11 @@
     "description": "Inherited implementation on main through 6390d37f predates this measurement. Its cost is not zero and is excluded from the new-work subtotal until attributable evidence is supplied."
   },
   "limits": [
-    "Interim capture only: contributors are still working; final responses, later review/integration/retries require another export before archival.",
-    "Integration/review session membership is pending coordinator assignment.",
+    "Closure capture includes stopped Accounting, UI and Town lanes; coordinator and Integration post-capture delivery tails require another export before archival.",
+    "Integration and reviewer membership is explicitly allocated; actual runtime context tiers remain unavailable.",
     "Context tiers for fresh lanes are launcher-confirmed; coordinator context remains unknown.",
     "Failed attempts and startup overhead are included in captured calls, but retry costs are not separated without explicit event-range classification.",
-    "Town's final shared-verification boundary is pending; later calls currently remain with the signpost segment until reclassified.",
+    "Town delivery is closed through event 68910; its implementation splits retain lane-reported UTC boundaries.",
     "Historical implementation and billing reconciliation remain unattributed."
   ],
   "segments": [
@@ -23,7 +23,18 @@
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
       "afterEventId": 68682,
+      "throughEventId": 69117,
       "contextTier": null
+    },
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "projectSessionId": "3c4e743c-3c27-4732-adce-e651536c7e75",
+      "task": "orchestration-delivery-tail",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 69117,
+      "contextTier": null,
+      "contextEvidence": "Post-closure coordinator delivery/archival tail is intentionally open; actual context remains unknown."
     },
     {
       "sessionId": "02a5caf8-3fdf-4c96-be5c-192448d6fcdf",
@@ -31,6 +42,7 @@
       "task": "accounting-tooling",
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
+      "throughEventId": 69075,
       "contextTier": null,
       "launchContextTier": "default",
       "contextEvidence": "Coordinator's explicit launch configuration; call model/effort come from usage records"
@@ -154,6 +166,7 @@
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
       "afterEventId": 69068,
+      "throughEventId": 69076,
       "contextTier": null,
       "launchContextTier": "default",
       "contextEvidence": "Terminal UI handoff tail remains open; actual context unknown."
@@ -203,6 +216,7 @@
       "task": "town-delivery-overhead",
       "category": "overhead",
       "since": "2026-10-03T04:50:48.3151346Z",
+      "throughEventId": 68910,
       "contextTier": null,
       "launchContextTier": "default",
       "contextEvidence": "Town delivery/handoff tail begins after editor compile; terminal boundary remains pending. No helpers; actual runtime context unknown."
@@ -253,10 +267,23 @@
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
       "afterEventId": 69069,
+      "throughEventId": 69120,
       "agentId": "main",
       "contextTier": null,
       "launchContextTier": "default",
       "contextEvidence": "Development FullLoop on the current integrated source and release-delivery work; actual runtime context is unknown."
+    },
+    {
+      "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
+      "projectSessionId": "d8027b79-2a9e-40fe-9e97-82f0d33d3ad8",
+      "task": "integration-post-capture-delivery-tail",
+      "category": "overhead",
+      "since": "2026-10-03T04:32:10.763Z",
+      "afterEventId": 69120,
+      "agentId": "main",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Release-holding parking and post-closure communication after the terminal capture are intentionally open; actual runtime context is unknown."
     },
     {
       "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
