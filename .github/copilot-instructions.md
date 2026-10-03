@@ -2,15 +2,20 @@
 
 ## Model, reasoning and implementer slots
 
-Jenny's standing team preference (2026-09-29). These are **required settings for future session
+Jenny's standing team preference (updated 2026-10-02). These are **required settings for future session
 launches**; documenting them does not change a live session's model or reasoning level.
 
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
-| Documentation Agent | GPT-5.6 Terra (`gpt-5.6-terra`) | **high** | **long** |
-| Architecture Agent | GPT-6 Sol (`gpt-6-sol`) | high | long |
-| Orchestrator Agent | GPT-6 Sol (`gpt-6-sol`) | **medium** | **long** |
-| Implementer (Blender, Unreal or code work) | Claude Opus 5.5 | high | long |
+| Orchestrator Agent | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
+| Blender / Unreal work; gameplay, visual or performance implementation and risky review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
+| Documentation, integration / building, scripted tests and accounting | GPT-6 Luna (`gpt-6-luna`), GPT-5.6 Terra (`gpt-5.6-terra`), or GPT-6.1 Sol (`gpt-6.1-sol`) | low / medium as appropriate | default |
+
+Bias toward fresh task-scoped sessions, retaining an existing session for tightly related follow-ups
+when its working context remains useful. Every session, including the orchestrator, maintains a compact
+repo handoff and records task/build attribution, actual model/configuration and AI credit usage before
+replacement or eligible archival. Model changes within a session are separate accounting segments.
+See `docs\handoff\agent-lifecycle.md`; preserve the existing old-agent and live-release archival protections.
 
 **At most three concurrent hands-on implementers** do Blender, Unreal or code work. This is a cap
 across active work, not a role-label exemption, and is separate from the 2-Unreal-process machine cap.

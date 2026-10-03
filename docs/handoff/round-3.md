@@ -22,7 +22,7 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
-| Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only (GPT-6 Sol, medium) |
+| Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |
 | Disk Cleanup Agent | `9fc4e210-68e7-4bc1-acca-d52366894506` | `jennifergalley-congenial-engine` | **retained**; its own schedule is cleared, and the orchestrator asks it for one sweep a day |
 | Old Integration Agent | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-literate-eureka` | retired, **do not archive**: its worktree holds the 9 PM Shipping release the shortcut targets |
 | Old UI Menus, Props Animations, Terrain Weather, Documentation, Architecture | `5cf73757`, `ce241dd6`, `89914e30`, `a9f10974`, `a1648ae7` | various | retired; don't message them. Spawn fresh sessions instead |
@@ -42,10 +42,16 @@ Archive it once its work is pushed and Integration has packaged it.
 
 | Area | Typical work | Tier |
 | --- | --- | --- |
-| UI Menus | the book, HUD, map, hints, toasts, theme, controls | small (GPT-6 Sol) unless it touches saves |
-| Props Animations | character, tools, animation, clothing, Blender assets | hard (Opus) |
-| Terrain Weather | terrain, water, foliage, weather, object placement on the map | small for placement, hard for rendering |
-| Integration | merge, Development-Run, package, scripted tests, shortcut | GPT-5.4 mini |
+| UI Menus | the book, HUD, map, hints, toasts, theme, controls | GPT-6.1 Sol, high |
+| Props Animations | character, tools, animation, clothing, Blender assets | GPT-6.1 Sol, high |
+| Terrain Weather | terrain, water, foliage, weather, object placement on the map | GPT-6.1 Sol, high |
+| Integration | merge, Development-Run, package, scripted tests, shortcut | routine low/medium tier from README.md; escalate implementation bugs |
+
+**2026-10-02 model and lifecycle update:** the earlier tiers in this round are superseded by
+README.md's current model table. Use GPT-6.1 Sol / high for the orchestrator and all Blender, Unreal,
+gameplay, visual and performance implementation; use cheaper models or lower effort for routine docs,
+integration and test execution. Keep task-scoped handoffs and build-credit attribution per
+[agent-lifecycle.md](agent-lifecycle.md). Do not infer a live session's settings from this registry.
 
 Parked work (don't resume unless scheduled): `origin/park-sprint-chests` (`f0cc4527`, sprint and chest
 edits) and Terrain's water-slot-walk.
@@ -67,7 +73,7 @@ tell her the expected time. Then:
 
 0. Rename yourself "Orchestrator Agent", add your session ID to the registry above, and open the planner canvas.
 
-1. Spawn a fresh Integration Agent (GPT-5.4 mini).
+1. Spawn a fresh Integration Agent using README.md's current routine-work model tier.
 2. Start a Development-Run with your own session ID as coordinator, then assign the Integration worker:
    ```
    Scripts\Development-Run.ps1 -Action Start -Hours 6 -CompletionPolicy until-complete -CoordinatorSessionId <your id> -StateDirectory <Integration worktree>\Automation
@@ -111,3 +117,18 @@ that instruction directly to the implementing session. The orchestrator must not
 directly with a lane, even on its own judgment about round-3 coordination needs, without her explicit
 approval first. Jenny may direct any lane herself; lanes follow her direct instruction over a conflicting
 orchestrator request.
+
+## Latest coordination handoff (2026-10-02)
+
+- Jenny requested build-level AI credit accounting and a planner breakdown by task, session, model,
+  reasoning effort and context. The policy is documented; collection/export and canvas display are
+  **not implemented**. Discussed lifecycle guidance is to bias toward fresh task-scoped sessions while
+  retaining tightly related follow-ups when beneficial.
+- Local session usage records expose per-call model, reasoning effort, token details and nano-AI
+  units. Capture actual context configuration separately. GitHub's AI export aggregates by user/model/day,
+  so it can reconcile totals but cannot by itself supply task attribution. See the accounting contract.
+- At the status check, all other listed Homestead agents were stopped; no lanes, builds or automations
+  were started for this discussion. The 2026-10-02 morning build is still marked planned in builds.md;
+  do not claim it shipped without a verified delivery update.
+- This worktree contains Jenny's uncommitted planner changes in backlog.md, priority.json and
+  backlog-inbox.json. Preserve them; do not reset or overwrite them while updating policy.

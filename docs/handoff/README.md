@@ -36,19 +36,18 @@ Menu's control audit and Props' repeat bindings verify this before delivery.
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
 launches**; documenting them does not change a live session's model or reasoning level.
 
-Updated 2026-10-01 for token efficiency (Jenny approved): pick the cheapest tier that keeps quality.
-Jenny prefers GPT-6 Sol over Sonnet 5 for sub-agents because they cost the same in GHCP; use
-GPT-6 Sol wherever Sonnet 5 would otherwise be selected for a new agent.
+Updated 2026-10-02 (Jenny): protect visual quality, gameplay and performance while measuring AI
+credits per build. This policy supersedes the earlier Opus/Sonnet/GPT-6 Sol role tiers. See
+[agent-lifecycle.md](agent-lifecycle.md) for handoffs, session reuse and accounting requirements.
+Use default context unless the task needs long context; record both configured tier and actual usage.
 
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
-| Orchestrator Agent | GPT-6 Sol (`gpt-6-sol`) | medium | default |
-| Documentation Agent | GPT-5.6 Terra (`gpt-5.6-terra`) | medium | default |
-| Architecture Agent (spawn only for a real refactor or review) | GPT-6 Sol (`gpt-6-sol`) | high | default |
-| Implementer, hard work: animation, Blender, rendering, save format, complex gameplay | Claude Opus 5.5 (`claude-opus-5.5`) | high | long |
-| Implementer, small work: UI tweaks, copy, moving or placing objects, test fixes | GPT-6 Sol (`gpt-6-sol`) | medium | default |
-| Integration Agent (merge, package, run scripted tests) | GPT-5.4 mini (`gpt-5.4-mini`) | medium | default |
-| Code review sub-agent (only for save-format or gameplay-logic diffs) | GPT-5.4 mini (`gpt-5.4-mini`) | medium | default |
+| Orchestrator Agent | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
+| Blender / Unreal work and gameplay, visuals or performance implementation | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
+| Architecture / gameplay or save-format review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
+| Documentation / straightforward status and accounting | GPT-6 Luna (`gpt-6-luna`) or GPT-5.6 Terra (`gpt-5.6-terra`) | low / medium as needed | default |
+| Integration / building / scripted test execution | GPT-5.6 Terra (`gpt-5.6-terra`), GPT-6 Luna (`gpt-6-luna`), or GPT-6.1 Sol (`gpt-6.1-sol`) | low / medium as needed | default |
 | Disk Cleanup Agent | unchanged (existing session) | | |
 
 Integration escalates a failure it can't explain in one attempt to the orchestrator, which assigns it to
@@ -58,9 +57,11 @@ the owning lane rather than having Integration debug gameplay.
 
 Tokens are the scarce resource. Every session follows these rules:
 
-- **Fresh sessions, short histories.** The orchestrator spawns implementers per build slot (or per
-  day) and archives them once their work is on `main` and pushed. Long-lived sessions re-read their
-  whole history every turn. A replacement orchestrator starts from this page and the current round page.
+- **Fresh sessions, focused histories.** Bias toward a new session for a new task or unrelated work.
+  Reuse a session for a tightly related follow-up when its working context is still useful. Before
+  replacement or eligible archival, persist a compact handoff and its usage attribution. Cached history
+  still costs credits, but restarting also costs context reconstruction; measure rather than assume.
+  A replacement orchestrator starts from this page, the current round page and the linked task handoffs.
 - **Short reports.** Lanes report in two lines at most: `[ready] <change> @ <sha>` plus what Jenny should
   try. No narration, recap or progress updates.
 - **No acknowledgements.** Don't reply to idle notices, status updates or thanks. Message only when the
@@ -69,7 +70,7 @@ Tokens are the scarce resource. Every session follows these rules:
   of its scheduled items, not a stream of separate requests.
 - **No standing check-ins.** The orchestrator wakes only for build slots (about an hour before each)
   and for incoming messages; no 30-minute polling.
-- **Review only risky diffs** (save format, gameplay logic) with the cheap reviewer above.
+- **Review only risky diffs** (save format, gameplay logic) with the quality tier above.
 - **Docs reports only for real findings**: something broke, a doc was wrong, or a recipe other lanes
   need. No running commentary.
 - **Jenny verifies in-game.** Lanes don't open the editor for screenshots or self-QA unless the task
@@ -89,8 +90,8 @@ a slot by sleeping or polling.
 | --- | --- | --- |
 | **Orchestrator** | **Coordinates only** (Jenny's standing preference): plans the round, spawns lane, docs and integration sessions, owns shared interfaces and decisions (such as the save-version bump), forwards lanes' `[ready]`s to the integration session, relays results to Jenny, assigns follow-ups, and reconciles doc conflicts. It **never builds, merges, packages or verifies**: while its turn is busy with hands-on work, queued messages from lanes can't reach it. It ends its turns promptly | The round page's registry; `get_sessions_status` ("Orchestrator Agent") |
 | **Integration session** | Does all hands-on integration: merges the lane work the orchestrator forwards, resolves conflicts, builds, runs native and packaged tests, PIE and perf checks, and **is the only session that packages** (the only one running UAT). Reports `[integrated] <what> @ <sha>` to the orchestrator | The round page's registry ("Integration Agent") |
-| **Docs agent** | Standing session for the whole round. It receives findings and blockers from every session and records each once in the canonical doc. It keeps this folder, the skills and the setup docs current, and relays cross-lane blockers to the orchestrator | The round page's registry ("Documentation Agent") |
-| **Architecture agent** (code steward) | Long-lived. Owns how the code is written: `docs\architecture.md`, the "Code practices" section of `.github\copilot-instructions.md`, and the code-convention skills under `.github\skills`. Makes small, safe refactors in files no lane is editing, proposes larger ones as OpenSpec changes for between rounds, and reviews each integrated batch. The docs agent owns process docs (this folder, the editor/Blender skills' shared-machine and failure sections, setup); the two keep each other's docs consistent | The round page's registry ("Architecture agent") |
+| **Docs agent** | Task-scoped session when needed. It receives actionable findings and records each once in the canonical doc, keeps shared skills and setup docs current, and leaves a handoff before replacement | The round page's registry ("Documentation Agent") |
+| **Architecture agent** (code steward) | Task-scoped session for a real refactor or risky review. Owns the assigned architecture or convention change, avoids files another lane is editing, and persists findings and a handoff before replacement. Docs owns process documentation; both keep their assigned changes consistent | The round page's registry ("Architecture agent") |
 | **Disk Cleanup Agent** | Daily 10:00 AM project-storage steward. Removes unnecessary project-owned scratch, renders, test output, stale build staging and excess releases from `C:`/`E:`; Jenny's current save game is the protected boundary. It verifies process paths and shortcut targets before deleting a release, and preserves the current shortcut Shipping target plus one rollback. | The round page's registry ("Disk Cleanup Agent") |
 | **Lanes** | One worktree and one OpenSpec change each. They own the files named in their design's "Lanes and ownership" | The round page's registry |
 
