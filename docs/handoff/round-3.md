@@ -126,7 +126,7 @@ directly with a lane, even on its own judgment about round-3 coordination needs,
 approval first. Jenny may direct any lane herself; lanes follow her direct instruction over a conflicting
 orchestrator request.
 
-## Latest coordination handoff (2026-10-02, 22:07)
+## Latest coordination handoff (2026-10-02, 22:43)
 
 - Active build: `20261002-measured-01`, authorized at 21:32 local. Scope and deferrals are committed
   in builds.md, backlog.md and priority.json; kickoff SHA `6390d37f`. No delivery ETA yet and no
@@ -135,6 +135,17 @@ orchestrator request.
   UI owns theme/map/inventory; Town owns shop/trade/signpost files; Integration
   owns merging/testing/packaging and the next accounting captures.
   Lanes push feature branches and report exact ready SHAs, not unverified changes to main.
+- Integration's first Shipping package succeeded but is **not admitted**: content bootstrap
+  re-saved tracked assets. Pre-package assets were clean and the selected UI/Town changes need
+  no generated Content changes. Initial report counted 902 paths; evidence inventory counts 900,
+  so reconcile the exact set before restoration. Evidence is under
+  `E:\CopilotScratch\3554b767-ebd7-436c-a691-13795fecad77\package-bootstrap-evidence`.
+- Jenny explicitly approved backing up the actual confirmed bootstrap-written asset bytes on E:,
+  restoring only that enumerated set to committed versions, and clean-recooking with `-PackageOnly`.
+  Pointer/OID diffs alone are not backups. No broad Content restore/reset, asset commit, save
+  changes or shortcut promotion. Invalidate only owned relevant cook/stage outputs so the first
+  package's regenerated content cannot leak into the retry. Preserve recovery/rebuild costs as rework.
+  All independent review, save-safety and Shipping checks still gate delivery; revised ETA pending.
 - UI's original ready SHA is now blocked by independent review: legacy crafted-away pack-slot
   saves reject before reconciliation (high), and keyboard/controller cannot drop onto EmptySlot
   (medium). The same High owner delivered replacement `440d4de5` with both fixes, native 2/2
