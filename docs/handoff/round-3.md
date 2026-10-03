@@ -23,6 +23,9 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
 | Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |
+| UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | `jennifergalley-turbo-carnival` | measured build 01: theme, map click travel, exact pack slots; GPT-6.1 Sol/high/default; owns ui-measured-01.md handoff |
+| Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | `jennifergalley-vigilant-broccoli` | measured build 01: crop sales and town signpost; GPT-6.1 Sol/high/default; owns town-measured-01.md handoff |
+| Accounting Agent | `02a5caf8-3fdf-4c96-be5c-192448d6fcdf` | `jennifergalley-laughing-lamp` | measured build 01: collector/export and agent-free planner cost report; GPT-6.1 Sol/medium/default; owns accounting-measured-01.md handoff |
 | Disk Cleanup Agent | `9fc4e210-68e7-4bc1-acca-d52366894506` | `jennifergalley-congenial-engine` | **retained**; its own schedule is cleared, and the orchestrator asks it for one sweep a day |
 | Old Integration Agent | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-literate-eureka` | retired, **do not archive**: its worktree holds the 9 PM Shipping release the shortcut targets |
 | Old UI Menus, Props Animations, Terrain Weather, Documentation, Architecture | `5cf73757`, `ce241dd6`, `89914e30`, `a9f10974`, `a1648ae7` | various | retired; don't message them. Spawn fresh sessions instead |
@@ -57,6 +60,10 @@ Parked work (don't resume unless scheduled): `origin/park-sprint-chests` (`f0cc4
 edits) and Terrain's water-slot-walk.
 
 ## Next build: 7:30 AM, 2026-10-02
+
+**Superseded at 21:32 on 2026-10-02:** Jenny selected the next measured build scope in builds.md and
+priority.json. Do not package the old list below as the new requested scope. Animation/tool carrying,
+rucksack, foliage flicker and hair fixes are deferred without reverting existing main work.
 
 Everything scheduled is on `main` (at or before `caa06e5d`):
 
@@ -118,17 +125,28 @@ directly with a lane, even on its own judgment about round-3 coordination needs,
 approval first. Jenny may direct any lane herself; lanes follow her direct instruction over a conflicting
 orchestrator request.
 
-## Latest coordination handoff (2026-10-02)
+## Latest coordination handoff (2026-10-02, 21:39)
 
-- Jenny requested build-level AI credit accounting and a planner breakdown by task, session, model,
-  reasoning effort and context. The policy is documented; collection/export and canvas display are
-  **not implemented**. Discussed lifecycle guidance is to bias toward fresh task-scoped sessions while
-  retaining tightly related follow-ups when beneficial.
+- Active build: `20261002-measured-01`, authorized at 21:32 local. Scope and deferrals are committed
+  in builds.md, backlog.md and priority.json; kickoff SHA `6390d37f`. No delivery ETA yet and no
+  overnight work/automations. User-approved right-sized delegation is now in agent-lifecycle.md.
+- Three fresh lanes in the registry are running, consuming all three hands-on slots. UI owns
+  theme/map/inventory; Town owns shop/trade/signpost files; Accounting owns planner/accounting tooling.
+  Lanes push feature branches and report exact ready SHAs, not unverified changes to main.
+- After a lane completes and frees a slot, spawn fresh Integration on a routine-work tier to merge
+  selected ready SHAs, run the package gates and deliver. Obtain focused high-tier review of the
+  optional packslots save diff (`80ec5928`) and new risky gameplay changes before promotion.
+- Accounting is implementing credit export and planner breakdown; the feature is **not shipped**.
+  Contributor identities/configuration and the coordinator's pre-kickoff usage cursor are recorded
+  in measured-build-01.json. Include helpers, startup/retries, review, integration and overhead.
 - Local session usage records expose per-call model, reasoning effort, token details and nano-AI
   units. Capture actual context configuration separately. GitHub's AI export aggregates by user/model/day,
   so it can reconcile totals but cannot by itself supply task attribution. See the accounting contract.
-- At the status check, all other listed Homestead agents were stopped; no lanes, builds or automations
-  were started for this discussion. The 2026-10-02 morning build is still marked planned in builds.md;
-  do not claim it shipped without a verified delivery update.
-- This worktree contains Jenny's uncommitted planner changes in backlog.md, priority.json and
-  backlog-inbox.json. Preserve them; do not reset or overwrite them while updating policy.
+- Fresh worktrees initially appeared incomplete immediately after create_session; all three agents'
+  startup rechecks then confirmed clean indexes and required project files at kickoff SHA. STOP was
+  lifted, and no reset was needed. Jenny authorized repair only for still-incomplete fresh checkouts
+  with no real edits; do not treat this as blanket reset permission.
+- All old agents remain stopped/protected. No new Integration has launched yet. Preserve the old
+  Integration worktree and Jenny's current shortcut/save. The next build is not delivered.
+- This worktree still contains Jenny's untracked backlog-inbox.json; its test entry is preserved
+  in backlog.md and its removal flag in priority.json. Do not discard it during pulls or cleanup.
