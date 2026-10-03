@@ -327,6 +327,24 @@ export function renderPlannerHtml() {
     .backlog-origin { font-style: italic; }
     .backlog-thumb { width: 28px; height: 28px; object-fit: cover; border-radius: 4px; margin-top: 4px; display: block; }
     .error-text { color: var(--true-color-red, #f85149); }
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border-color-default, #30363d); margin-bottom: 18px; }
+    .tab-button {
+      border: 1px solid transparent;
+      border-bottom: none;
+      border-radius: 8px 8px 0 0;
+      padding: 8px 16px;
+      background: transparent;
+      color: var(--text-color-muted, #8b949e);
+      cursor: pointer;
+      font-weight: var(--font-weight-semibold, 600);
+    }
+    .tab-button:hover { color: var(--text-color-default, #e6edf3); }
+    .tab-button.active {
+      color: var(--text-color-default, #e6edf3);
+      border-color: var(--border-color-default, #30363d);
+      background: var(--background-color-muted, #161b22);
+    }
+    .tab-panel.hidden { display: none; }
   </style>
 </head>
 <body>
@@ -338,37 +356,45 @@ export function renderPlannerHtml() {
       </div>
       <button id="refresh" class="refresh" type="button">Refresh</button>
     </header>
-    <section id="backlog-form-card" class="backlog-form" aria-label="Quick backlog entry">
-      <div class="builds-head">
-        <h2>Add to Jenny's backlog</h2>
-        <span id="backlog-form-note" class="muted">No chat tokens spent — this writes straight to docs/handoff/backlog.md.</span>
-      </div>
-      <form id="backlog-form" novalidate>
-        <label class="field">
-          <span>Title</span>
-          <input id="backlog-title" type="text" maxlength="200" required placeholder="e.g. Sell crops at the General Store">
-        </label>
-        <label class="field">
-          <span>Description (optional)</span>
-          <textarea id="backlog-description" maxlength="4000" rows="3" placeholder="What should it do? What did you see?"></textarea>
-        </label>
-        <label class="field">
-          <span>Screenshot (optional, PNG/JPEG/WebP/GIF, max 8 MB)</span>
-          <input id="backlog-image" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
-        </label>
-        <div class="backlog-form-actions">
-          <button id="backlog-submit" class="refresh" type="submit">Add to backlog</button>
-          <span id="backlog-form-status" class="muted" role="status" aria-live="polite"></span>
+    <nav class="tabs" role="tablist" aria-label="Planner sections">
+      <button id="tab-planning-btn" class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="tab-planning">Planning</button>
+      <button id="tab-cost-btn" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="tab-cost">Measured build cost</button>
+    </nav>
+    <div id="tab-planning" class="tab-panel" role="tabpanel" aria-labelledby="tab-planning-btn">
+      <section id="backlog-form-card" class="backlog-form" aria-label="Quick backlog entry">
+        <div class="builds-head">
+          <h2>Add to Jenny's backlog</h2>
+          <span id="backlog-form-note" class="muted">No chat tokens spent — this writes straight to docs/handoff/backlog.md.</span>
         </div>
-      </form>
-    </section>
-    <section id="builds" class="builds" aria-label="Build changelist"></section>
-    <section id="accounting" class="accounting" aria-label="Measured build costs"></section>
-    <div class="builds-head backlog-head">
-      <h2>Planned improvements</h2>
-      <span id="backlog-note" class="muted"></span>
+        <form id="backlog-form" novalidate>
+          <label class="field">
+            <span>Title</span>
+            <input id="backlog-title" type="text" maxlength="200" required placeholder="e.g. Sell crops at the General Store">
+          </label>
+          <label class="field">
+            <span>Description (optional)</span>
+            <textarea id="backlog-description" maxlength="4000" rows="3" placeholder="What should it do? What did you see?"></textarea>
+          </label>
+          <label class="field">
+            <span>Screenshot (optional, PNG/JPEG/WebP/GIF, max 8 MB)</span>
+            <input id="backlog-image" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
+          </label>
+          <div class="backlog-form-actions">
+            <button id="backlog-submit" class="refresh" type="submit">Add to backlog</button>
+            <span id="backlog-form-status" class="muted" role="status" aria-live="polite"></span>
+          </div>
+        </form>
+      </section>
+      <section id="builds" class="builds" aria-label="Build changelist"></section>
+      <div class="builds-head backlog-head">
+        <h2>Planned improvements</h2>
+        <span id="backlog-note" class="muted"></span>
+      </div>
+      <section id="board" class="board" aria-live="polite"></section>
     </div>
-    <section id="board" class="board" aria-live="polite"></section>
+    <div id="tab-cost" class="tab-panel hidden" role="tabpanel" aria-labelledby="tab-cost-btn">
+      <section id="accounting" class="accounting" aria-label="Measured build costs"></section>
+    </div>
   </main>
   <script>
     const state = { planner: null, signature: null, dragging: null };
@@ -731,6 +757,23 @@ export function renderPlannerHtml() {
     }
 
     refresh.addEventListener("click", () => load(false));
+
+    const tabPlanningBtn = document.getElementById("tab-planning-btn");
+    const tabCostBtn = document.getElementById("tab-cost-btn");
+    const tabPlanning = document.getElementById("tab-planning");
+    const tabCost = document.getElementById("tab-cost");
+    function showTab(name) {
+      const planning = name === "planning";
+      tabPlanning.classList.toggle("hidden", !planning);
+      tabCost.classList.toggle("hidden", planning);
+      tabPlanningBtn.classList.toggle("active", planning);
+      tabCostBtn.classList.toggle("active", !planning);
+      tabPlanningBtn.setAttribute("aria-selected", String(planning));
+      tabCostBtn.setAttribute("aria-selected", String(!planning));
+    }
+    tabPlanningBtn.addEventListener("click", () => showTab("planning"));
+    tabCostBtn.addEventListener("click", () => showTab("cost"));
+
     load(false);
     setInterval(() => load(true), 10000);
   </script>
