@@ -78,7 +78,7 @@
     },
     {
       "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
-      "runtimeSessionId": null,
+      "runtimeSessionId": "3554b767-ebd7-436c-a691-13795fecad77",
       "role": "Integration",
       "worktree": "jennifergalley-redesigned-couscous",
       "tasks": [
@@ -89,7 +89,7 @@
         "reasoningEffort": "medium",
         "contextTier": "default"
       },
-      "telemetryStatus": "pending runtime identity, actual configuration and usage capture"
+      "telemetryStatus": "Local usage confirms GPT-5.6 Terra / medium; launch context default, actual context unknown. Accounting merge/validation and refreshed capture are separately allocated."
     }
   ],
   "accountingStatus": "collector/report ready on feature branch; integration and later captures pending",
