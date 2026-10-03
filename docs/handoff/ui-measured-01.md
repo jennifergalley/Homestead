@@ -1,5 +1,9 @@
 # UI measured build 01
 
+Player acceptance: Jenny considers all shipped checks complete as of 2026-10-03.
+The verification and attribution records below describe the lane's earlier runs;
+the mapped A/Enter automation was compiled but not executed.
+
 - Build: `20261002-measured-01`; changes: apply-dark-theme-everywhere,
   fix-map-click-travel, place-items-in-exact-slots.
 - App session: `762c7ab7-c8ec-454f-9eb1-3669c01ffdbd`; runtime:
@@ -26,7 +30,7 @@
 - Next owner: Integration re-reviews the two blocker fixes, then merges/packages
   only after its admission checks.
   Jenny verifies theme contrast/focus, map click/A and drag/reload.
-- Player-checkable task checkboxes stay pending until Jenny's playtest.
+- Player-checkable task checkboxes are complete per Jenny's 2026-10-03 instruction.
 - Ownership: HUD/book/map/inventory and matching simulation/tests; no shop,
   trade, signpost, animation, rucksack, foliage or hair edits.
 - No editor, automation, shortcut/release or save dependencies.
@@ -80,7 +84,7 @@ first test run then caught default Simulation vs Estate load-fixture mismatch
 - Owner direct review completed; Integration's independent review caught the two
   blockers below. The follow-up is ready for its re-review, not self-approved.
 - No save version/tag changes, placement changes, UAT, package test or visual
-  acceptance claim. All seven player-checkable tasks remain unchecked.
+  acceptance claim at lane verification time. Jenny subsequently accepted the player checks.
 
 Reproduce native checks with Visual Studio CMake:
 `cmake --build <E:-scratch-native-dir> --config Release --target HomesteadPackRowTests HomesteadChestTests HomesteadMapGeometryTests`
@@ -105,7 +109,7 @@ commit. Save version/format stays unchanged.
   HomesteadDirectionalNavigationTest now exercises real mapped A and Enter
   commits, empty drag-start refusal and fixture restoration. That route compiled
   but was not run here; no live editor/PIE or packaged test was authorized.
-- No theme/map/Town scope changes. Seven player playtests remain pending.
+- No theme/map/Town scope changes. Jenny subsequently accepted the player checks.
 
 ## Owned files
 Theme: UI/SHomesteadNames.cpp and UI/HomesteadUITheme.h. Map:

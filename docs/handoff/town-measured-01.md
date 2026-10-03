@@ -1,8 +1,12 @@
 # Town measured build 01
 
+Player acceptance: Jenny considers the shipped shop/sign checks complete as of
+2026-10-03. The lane evidence below describes earlier native/source checks, not
+additional automated or live-game execution.
+
 - Build: `20261002-measured-01`; app `44e7062d-49af-4d90-bc81-c3ad396086c6`; runtime `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2`; branch `jennifergalley-town-agent`; worktree `jennifergalley-vigilant-broccoli`.
 - Model/config: observed `gpt-6.1-sol` / high throughout; requested default context, actual context unobserved. No model changes or helpers/helper IDs. Base `6390d37f`; verified implementation SHA `964aecb37c6b387f2d194cf9938ee0aee8cdcf69`; delivery HEAD includes this handoff receipt and is reported with `[ready]`. No main push.
-- State/next: both changes implemented and directly reviewed; targeted native suites and one editor compile passed. Integration can merge/package; Jenny's integrated shop/sign visual acceptance remains unchecked. Park after feature-branch delivery, no further scope.
+- State/next: both changes implemented, reviewed and shipped; native suites and editor compile passed. Jenny considers the shop/sign checks complete as of 2026-10-03; the task session is archived, no further scope.
 - Files: `HomesteadItems.cpp`, `HomesteadShops.{h,cpp}`, `UI\SHomesteadShop.cpp`, `Tests\HomesteadEconomyTests.cpp`; road generator/public-road include/header and `Tests\HomesteadPublicRoadTests.cpp`; the two OpenSpec changes. No UI-owned theme/map/inventory files changed.
 - Crops: roots/berries now use the existing General Store buyer mask at unchanged 4/6 coins. Six period prices remain 20/16/14/90/8/13. Wild roots/berries use identical Items with no provenance and are therefore also accepted, as Jenny authorized; no other forage/economy scope.
 - Production path: `SHomesteadShop::BuildRows` uses tested `ShopSellableItems`, carried quantity and `SellPrice`; `Limit`/Max cap to carried quantity; `Confirm` passes selected Item/quantity with Sell tab true to `AHomesteadController::ShopTrade`, which calls `Sim.Sell` and updates wallet only on success; `Refresh` rebuilds rows after each result. This is source-path verification plus production row-source/native transactions, not an in-game UI click test.

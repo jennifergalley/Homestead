@@ -67,7 +67,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 
 - SHA: `d2155333` (source/package checkpoint; delivery accounting handoff follows)
 - Status: delivered
-- Player acceptance: pending; delivered to `Homestead Estate.lnk`.
+- Player acceptance: complete per Jenny, 2026-10-03; delivered to `Homestead Estate.lnk`.
 - Build ID: `20261002-measured-01`
 - Ships:
 - Dark theme applies consistently across the book and HUD.

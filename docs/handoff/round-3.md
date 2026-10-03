@@ -23,8 +23,8 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
 | Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |
-| UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | archived | `440d4de5` reviewed/shipped; closure captured; player checks pending; ui-measured-01.md handoff |
-| Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | archived | `6e9c3a9a` reviewed/shipped; closure captured; player checks pending; town-measured-01.md handoff |
+| UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | archived | `440d4de5` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; ui-measured-01.md handoff |
+| Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | archived | `6e9c3a9a` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; town-measured-01.md handoff |
 | Accounting Agent | `02a5caf8-3fdf-4c96-be5c-192448d6fcdf` | archived | tooling integrated; closure captured; GPT-6.1 Sol/medium/default; accounting-measured-01.md handoff |
 | Integration Agent | `3554b767-ebd7-436c-a691-13795fecad77` | `jennifergalley-redesigned-couscous` | **release-holding, do not archive**; shortcut targets measured build 01; GPT-5.6 Terra/medium/default; integration-measured-01.md handoff |
 | Disk Cleanup Agent | `9fc4e210-68e7-4bc1-acca-d52366894506` | `jennifergalley-congenial-engine` | **retained**; its own schedule is cleared, and the orchestrator asks it for one sweep a day |
@@ -102,7 +102,7 @@ tell her the expected time. Then:
 
 ## Player-feedback queue
 
-- `fix-map-click-travel` and `move-town-signpost` shipped in measured build 01; Jenny's checks remain pending.
+- `fix-map-click-travel` and `move-town-signpost` shipped in measured build 01; Jenny considers their checks complete.
 - `fit-rucksack-straps`: the rucksack straps sink inside her shoulders and chest (Props, hard).
 
 ## Planner canvas
@@ -126,7 +126,7 @@ orchestrator request.
 
 ## Latest coordination handoff (2026-10-02 delivery)
 
-- `20261002-measured-01` is **delivered**, awaiting Jenny's player acceptance. Authorized 21:32
+- `20261002-measured-01` is **delivered and accepted by Jenny** as of 2026-10-03. Authorized 21:32
   local; shortcut promoted 23:46:31 after valid gates. Source/package checkpoint `d2155333`;
   closure checkpoint `e657e70d`. Exact release/hash/rollback are in measured-build-01.json and
   integration-measured-01.md. The 23:34:05 candidate receipt is staging, not promotion.
@@ -137,7 +137,7 @@ orchestrator request.
   Development FullLoop, and guarded Shipping EstateSmoke/ToolRepeat passed. Shipping FullLoop
   is invalid unadapted Woodland coverage, not a gameplay failure. Route FPS is not Estate visual
   or performance acceptance; actual mapped A/Enter regression compiled but was not run.
-  Keep OpenSpec player-check tasks pending until Jenny verifies them.
+  Jenny considers all shipped player-check tasks complete; their OpenSpec checkboxes are closed.
 - Both Integration worktrees are protected: new `jennifergalley-redesigned-couscous` holds the
   shortcut release; old `jennifergalley-literate-eureka` holds the single 9 PM rollback. All 20
   SaveGames/Config files were copied/hash-verified and the shortcut icon preserved. Jenny's game

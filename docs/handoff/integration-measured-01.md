@@ -61,7 +61,7 @@ is unknown.
 ## Next action
 
 Retain the promoted candidate and the old rollback package; do not archive this release-holding
-worktree before Jenny's manual acceptance.
+worktree while the shortcut, running game or retained release depends on it, even after acceptance.
 
 ## Delivery
 
@@ -81,10 +81,10 @@ worktree before Jenny's manual acceptance.
 - Refreshed measured accounting captured 419 calls and `1675964350000` nano-AIU through event
   `69106`. It remains incomplete: delivery responses after that cutoff, actual context tiers,
   legacy historical costs, and external billing reconciliation are unavailable.
-- Seven Jenny playtests remain manual acceptance only: dark book/HUD consistency, map-click fast
-  travel, pack-square persistence after reload, crop sales, and the signpost's road placement/
-  direction are not represented as completed visual or player acceptance. Development FullLoop
-  FPS is route telemetry, not Estate visual/performance acceptance.
+- Jenny considers all shipped player checks complete as of 2026-10-03: dark book/HUD consistency,
+  map-click fast travel, pack-square persistence after reload, crop sales, and the signpost's road
+  placement/direction. This records her acceptance, not additional automated execution.
+  Development FullLoop FPS remains route telemetry, not an Estate performance benchmark.
 - Closure capture closed the stopped lane tails at Accounting `69075`, UI `69076`, and Town
   `68910`; final coordinator/integration delivery overhead is closed through `69151`/`69152`.
   Later activity is intentionally outside build01. Actual context tiers, legacy historical costs,
