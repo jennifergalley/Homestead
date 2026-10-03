@@ -1,14 +1,12 @@
 {
   "order": [
-    "pitch-dark-parchment-theme",
+    "backlog:jenny-mus1sztj-sinh3q",
+    "backlog:jenny-mus1kfmm-ayz6jx",
     "fit-rucksack-straps",
-    "fix-tool-grip-contact",
+    "add-shore-and-river-fishing",
     "reduce-foliage-shadow-motion",
-    "refine-playable-heroine-hairstyles",
     "widen-estate-beach",
     "unify-hud-notices",
-    "speed-up-pickup-animation",
-    "add-shore-and-river-fishing",
     "space-out-town-square",
     "add-swimming",
     "restore-mine-pumping-and-deep-levels",
@@ -35,7 +33,9 @@
     "fix-map-click-travel",
     "move-town-signpost",
     "place-items-in-exact-slots",
-    "add-dollars-and-general-store"
+    "add-dollars-and-general-store",
+    "pitch-dark-parchment-theme",
+    "speed-up-pickup-animation"
   ],
-  "updated": "2026-10-03T07:00:12.755Z"
+  "updated": "2026-10-03T07:10:05.368Z"
 }

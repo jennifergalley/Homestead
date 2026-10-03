@@ -3,6 +3,8 @@
 Only Jenny-directed work belongs here. Every line is one player-checkable slice, not a speculative implementation plan. Lanes create or revise an OpenSpec change only after Jenny gives feedback or explicitly selects a later item. `priority.json` is Jenny's scheduling order, not an autonomous pickup queue: lanes implement only the items she prioritized for their build, then go idle. The planner canvas can drag-reorder the list; **Top**, **Next build**, **Quote**, and **Remove** act on it, with **Remove** archiving the change.
 
 <!-- jenny-inbox:start -->
+- **Improve tool carry holds** — Jenny, 2026-10-03 (added from the planner canvas): Further tool-carry polish deferred from measured build 01, separate from the shipped grip/contact fixes. Refine idle and moving holds so grips look natural and tools do not clip through her hands or body.
+- **Improve work animations** — Jenny, 2026-10-03 (added from the planner canvas): Further heroine action/work animation improvements deferred from measured build 01, separate from already shipped fixes. Polish natural movement, tool contact and transitions when Jenny schedules this work.
 - **Teleporting back to the manor should deposit me at the new sign location beside the farm and road** — Jenny, 2026-10-03 (added from the planner canvas): (no description)
 - **Wait at the General Store on Sunday until it opens** — Jenny, 2026-10-03 (added from the planner canvas): When I get to the General Store on Sunday, I should have the option to wait until they open on Monday morning so I can enter.
 - **test** — Jenny, 2026-10-02 (added from the planner canvas): just testing backlog feature
@@ -14,7 +16,8 @@ The five items Jenny selected on 2026-10-02 shipped in `20261002-measured-01` an
 
 ## Next candidates (deferred, not scheduled)
 
-- **Fix tool grip contact** — tool carrying/contact and animation corrections remain in the backlog; no further work in this build.
+- **Improve work animations** — further action/work animation polish is a separate Planned improvements card; deferred and not scheduled.
+- **Improve tool carry holds** — further idle/moving tool holds are a separate Planned improvements card; earlier grip/contact fixes remain shipped.
 - **Fit rucksack straps** — shoulder/chest fit remains deferred with the character work.
 - **Refine playable heroine hairstyles** — Bob/updo motion and near/far artifacts remain deferred.
 - **Reduce foliage shadow motion** — foliage flicker/shadow corrections remain deferred.

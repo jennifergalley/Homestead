@@ -1,0 +1,44 @@
+{
+  "entries": [
+    {
+      "id": "jenny-muqkk7lh-gjmgxk",
+      "title": "test",
+      "description": "just testing backlog feature",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-02T06:15:36.053Z"
+    },
+    {
+      "id": "jenny-mus1kfmm-ayz6jx",
+      "title": "Wait at the General Store on Sunday until it opens",
+      "description": "When I get to the General Store on Sunday, I should have the option to wait until they open on Monday morning so I can enter.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-03T06:59:26.110Z"
+    },
+    {
+      "id": "jenny-mus1sztj-sinh3q",
+      "title": "Teleporting back to the manor should deposit me at the new sign location beside the farm and road",
+      "description": "",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-03T07:06:05.527Z"
+    },
+    {
+      "id": "jenny-mus200pa-iiju4e",
+      "title": "Improve work animations",
+      "description": "Further heroine action/work animation improvements deferred from measured build 01, separate from already shipped fixes. Polish natural movement, tool contact and transitions when Jenny schedules this work.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-03T07:11:33.262Z"
+    },
+    {
+      "id": "jenny-mus200q1-469jig",
+      "title": "Improve tool carry holds",
+      "description": "Further tool-carry polish deferred from measured build 01, separate from the shipped grip/contact fixes. Refine idle and moving holds so grips look natural and tools do not clip through her hands or body.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-03T07:11:33.289Z"
+    }
+  ]
+}
