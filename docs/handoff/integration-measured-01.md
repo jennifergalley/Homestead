@@ -86,12 +86,13 @@ worktree before Jenny's manual acceptance.
   direction are not represented as completed visual or player acceptance. Development FullLoop
   FPS is route telemetry, not Estate visual/performance acceptance.
 - Closure capture closed the stopped lane tails at Accounting `69075`, UI `69076`, and Town
-  `68910`; coordinator/integration events after `69117`/`69120` remain explicitly open delivery
-  tails. Actual context tiers, legacy historical costs, and external billing reconciliation remain
-  unavailable.
-- The final pre-park export supersedes the earlier checkpoint: it captured 439 calls and
-  `1743479960000` nano-AIU through event `69130`, with no missing configured session and one
-  excluded pre-baseline record. Post-capture coordinator/integration delivery tails remain open.
+  `68910`; final coordinator/integration delivery overhead is closed through `69151`/`69152`.
+  Later activity is intentionally outside build01. Actual context tiers, legacy historical costs,
+  and external billing reconciliation remain unavailable.
+- The final pre-park export supersedes the earlier checkpoint: it allocates 454 calls and
+  `1797874160000` nano-AIU through the final build01 cutoff at event `69152`, with no missing
+  configured session. The exporter observed records through `69159`; eight pre-/post-cutoff
+  records are excluded so later work is not charged to build01.
 - `JennysHomesteadGame.exe` began from the promoted candidate at `2026-10-03T06:48:32Z`. It is
   Jenny's live playtest process and was not touched; this worktree is release-holding and must not
   be archived while the shortcut or process depends on it.

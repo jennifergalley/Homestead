@@ -8,7 +8,7 @@
     "description": "Inherited implementation on main through 6390d37f predates this measurement. Its cost is not zero and is excluded from the new-work subtotal until attributable evidence is supplied."
   },
   "limits": [
-    "Closure capture includes stopped Accounting, UI and Town lanes; coordinator and Integration post-capture delivery tails require another export before archival.",
+    "Final capture closes every measured-build segment; activity after the final cutoff is intentionally outside build01.",
     "Integration and reviewer membership is explicitly allocated; actual runtime context tiers remain unavailable.",
     "Context tiers for fresh lanes are launcher-confirmed; coordinator context remains unknown.",
     "Failed attempts and startup overhead are included in captured calls, but retry costs are not separated without explicit event-range classification.",
@@ -33,8 +33,9 @@
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
       "afterEventId": 69117,
+      "throughEventId": 69151,
       "contextTier": null,
-      "contextEvidence": "Post-closure coordinator delivery/archival tail is intentionally open; actual context remains unknown."
+      "contextEvidence": "Final coordinator delivery/archival overhead through the explicit build01 cutoff; actual context remains unknown."
     },
     {
       "sessionId": "02a5caf8-3fdf-4c96-be5c-192448d6fcdf",
@@ -280,10 +281,11 @@
       "category": "overhead",
       "since": "2026-10-03T04:32:10.763Z",
       "afterEventId": 69120,
+      "throughEventId": 69152,
       "agentId": "main",
       "contextTier": null,
       "launchContextTier": "default",
-      "contextEvidence": "Release-holding parking and post-closure communication after the terminal capture are intentionally open; actual runtime context is unknown."
+      "contextEvidence": "Final release-holding parking and post-closure communication through the explicit build01 cutoff; actual runtime context is unknown."
     },
     {
       "sessionId": "3554b767-ebd7-436c-a691-13795fecad77",
