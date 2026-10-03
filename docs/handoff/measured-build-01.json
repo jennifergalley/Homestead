@@ -1,0 +1,37 @@
+{
+  "buildId": "20261002-measured-01",
+  "status": "in-progress",
+  "authorizedAt": "2026-10-03T04:32:10.763Z",
+  "coordinator": {
+    "projectSessionId": "3c4e743c-3c27-4732-adce-e651536c7e75",
+    "runtimeSessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+    "model": "gpt-6.1-sol",
+    "reasoningEffort": "high",
+    "contextTier": null,
+    "preKickoffUsageEventCursor": 68682,
+    "preKickoffRecordedNanoAiu": 172910230000,
+    "task": "orchestration-overhead"
+  },
+  "tasks": [
+    "apply-dark-theme-everywhere",
+    "fix-map-click-travel",
+    "move-town-signpost",
+    "place-items-in-exact-slots",
+    "add-dollars-and-general-store"
+  ],
+  "deferred": [
+    "fix-tool-grip-contact",
+    "fit-rucksack-straps",
+    "reduce-foliage-shadow-motion",
+    "refine-playable-heroine-hairstyles",
+    "speed-up-pickup-animation"
+  ],
+  "contributors": [],
+  "accountingStatus": "collector-pending",
+  "historicalImplementationCost": "inherited main work requires separate attribution; not included as zero",
+  "notes": [
+    "No overnight work or automations.",
+    "Three concurrent hands-on implementers maximum, counting nested helpers.",
+    "Preserve Jenny's direct instructions and agent-free planner scheduling."
+  ]
+}

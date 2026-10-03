@@ -38,6 +38,21 @@ and verify no ongoing work, attached automation, live shortcut release or other 
 Jenny's old agents remain protected until she chooses to archive them. An orchestrator cannot archive
 itself; it leaves a replacement handoff. No work or automations run overnight.
 
+## Right-sized delegation
+
+Agents may delegate bounded support work to cheaper, task-scoped sub-agents when expected savings
+exceed startup, briefing and review costs. The owning agent remains accountable for correctness.
+Prefer direct execution for tiny tasks; use a separate project session only when isolation or an
+independent workstream warrants it. Supply an objective, relevant files or excerpts, constraints,
+expected output and acceptance criteria, not the entire parent conversation.
+
+Keep delegation one level deep by default. The three-hands-on-implementer cap applies across the
+whole tree, including helpers while they edit, build or use Blender/Unreal. Request a slot before
+starting a hands-on helper if all slots are occupied. All descendant usage belongs in task/build costs.
+Cheap helpers can document verified facts or execute existing tests. The high-effort owning agent
+defines gameplay test behavior and edge cases and reviews helper-written cases; substantive gameplay,
+animation or rendering diagnosis remains GPT-6.1 Sol / high. Jenny's direct instructions still win.
+
 ## Accounting contract for future builds
 
 This is the requested reporting contract, not an implemented collector or planner feature.

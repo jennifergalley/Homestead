@@ -2,20 +2,36 @@
 
 Only Jenny-directed work belongs here. Every line is one player-checkable slice, not a speculative implementation plan. Lanes create or revise an OpenSpec change only after Jenny gives feedback or explicitly selects a later item. `priority.json` is Jenny's scheduling order, not an autonomous pickup queue: lanes implement only the items she prioritized for their build, then go idle. The planner canvas can drag-reorder the list; **Top**, **Next build**, **Quote**, and **Remove** act on it, with **Remove** archiving the change.
 
-## Next two builds
+<!-- jenny-inbox:start -->
+- **test** — Jenny, 2026-10-02 (added from the planner canvas): just testing backlog feature
+<!-- jenny-inbox:end -->
 
-1. **Add dollars and general store** — **Urgent (Jenny, 2026-10-01): she needs to sell crops now.** Land crop selling at the General Store first (fastest path to a working sell loop); separate specialty stores (e.g. a dedicated farm/produce stand) come later. Walk an Estate-to-town sell/buy loop and tune only flagged route, price, or greeting friction. **Lane:** Menu. **Size:** S.
-2. **Refine playable heroine hairstyles** — Jenny, 2026-09-29: test Bob and updo while moving at near/far views; remove rod, fan, or LOD artifacts. **Lane:** Props. **Size:** M.
-3. **Replace heroine with MetaHuman** — Jenny, 2026-09-29: play tools, wardrobe, and movement; fix the next visible MetaHuman regression. **Lane:** Props. **Size:** M.
-4. **Speed up pickup animation** — Jenny, 2026-09-27: pick up branch, stone, herb, and clear-out resources with immediate visible feedback. **Lane:** Props. **Size:** S.
-5. **Flexible sleep** — Jenny, 2026-09-30: play tired/rested/dawn one-press bed sleep; retain only confusing behavior. **Lane:** Menu/Integration. **Size:** S.
-6. **Improve contextual feedback and sprint** — Jenny, 2026-09-30: play tired sprint, exhausted work refusal, and recovery; retain only unclear messages or controls. **Lane:** Menu. **Size:** S.
-7. **Add rain weather** — Jenny, 2026-09-30: play reload-stable seasonal rain across day/night, shelter, wet ground, audio, and lighting. **Lane:** Water. **Size:** M.
-8. **Fix estate river source** — Jenny, 2026-09-29: make the river visibly reach the ocean and verify it on foot. **Lane:** Water. **Size:** S.
-9. **Improve estate frame rate** — Jenny's smooth-play requirement: fix the next player-visible hitch or readability/performance regression. **Lane:** Performance. **Size:** M.
+## Next measured build
+
+Jenny selected this scope on 2026-10-02. No additional work is scheduled.
+
+1. **Apply dark theme everywhere** — finish the chosen palette across the HUD and book, with readable text and correct focus after switching. **Lane:** UI.
+2. **Fix map click travel** — click a known map destination to fast travel, retaining T and controller confirmation. **Lane:** UI.
+3. **Move town signpost** — beside the road past the derelict farm, pointing toward town rather than outside the manor. **Lane:** Town.
+4. **Place items in exact slots** — items remain in the square selected, including gaps and after save/reload. **Lane:** UI.
+5. **Add dollars and general store** — **Urgent:** the General Store buys Jenny's grown crops; separate specialty stores come later. Preserve the existing buy loop. **Lane:** Town.
+
+## Next candidates (deferred, not scheduled)
+
+- **Fix tool grip contact** — tool carrying/contact and animation corrections remain in the backlog; no further work in this build.
+- **Fit rucksack straps** — shoulder/chest fit remains deferred with the character work.
+- **Refine playable heroine hairstyles** — Bob/updo motion and near/far artifacts remain deferred.
+- **Reduce foliage shadow motion** — foliage flicker/shadow corrections remain deferred.
+- **Speed up pickup animation** — pickup animation improvements remain deferred.
 
 ## Later
 
+- **Replace heroine with MetaHuman** — retain the next player-reported character regression for a later selection.
+- **Flexible sleep** — retain Jenny's one-press tired/rested/dawn bed-sleep feedback.
+- **Improve contextual feedback and sprint** — retain flagged tired-sprint/refusal/recovery controls and copy.
+- **Add rain weather** — retain flagged seasonal rain, shelter, wet ground, audio and lighting issues.
+- **Fix estate river source** — retain the river-to-ocean on-foot check.
+- **Improve estate frame rate** — retain the next player-visible hitch/performance regression.
 - **Prioritize heroine quality and tool clarity** — Jenny, 2026-09-29: play an ordinary tool/wardrobe loop; fix the next visible pose, contact, or hair issue. **Lane:** Props. **Size:** M.
 - **Rework farming calendar and period crafting** — Jenny, 2026-09-29: play a 60-minute day and Sunday shop loop; tune only flagged timing, closure, Energy, or Well fed behavior. **Lane:** Simulation. **Size:** M.
 - **Enrich estate ground and meadow** — Jenny, 2026-10-01: walk farm, manor, lake, and coast; address the next ground-presentation issue. **Lane:** Water. **Size:** M.

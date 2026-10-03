@@ -66,7 +66,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 ## 2026-10-02 — 7:30 AM
 
 - SHA: pending
-- Status: planned
+- Status: superseded by Jenny's 2026-10-02 next measured build selection
 - Ships:
 - Her fingers wrap the idle-carried pickaxe instead of clipping through her fist.
 - Axe and pickaxe swings use a natural wrist angle on the forward hand.
@@ -78,6 +78,25 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - In Dark, the whole HUD is dark too (clock, meters, coins, hint card and toasts), every word reads clearly, and toast text is centred on its card.
 - Woodland foliage shadows no longer swim or flicker as she walks under the canopy.
 - Bob and updo hairstyles stay clean while moving, with no rods, fans or LOD pops at any distance.
+
+## 2026-10-02 — next measured build
+
+- SHA: pending
+- Status: in progress; first task-scoped-team and AI-credit-accounted delivery
+- Build ID: `20261002-measured-01`
+- Ships:
+- Dark theme applies consistently across the book and HUD.
+- Clicking a known map destination fast travels, with T and controller confirmation retained.
+- The town signpost stands beside the road past the derelict farm and points toward town.
+- Pack items stay in the exact selected squares and preserve their layout after reload.
+- The General Store purchases grown crops while preserving its existing buy loop.
+- Accounting: include new lanes, helpers, orchestration, review and integration from the kickoff;
+  show model/effort/context and coverage in the planner. Earlier implementation already on main is
+  inherited work; historical costs must be separately attributed or explicitly marked unavailable.
+- Deferred: animation/tool carrying, rucksack fit, foliage flicker and hair corrections remain in
+  the backlog. Existing main changes are not reverted merely because further fixes are deferred.
+- Timing: work begins on Jenny's request at 21:32 local. No overnight automation; park at her
+  sign-off. A delivery time is not established until implementation and integration readiness are known.
 
 ## Later
 
