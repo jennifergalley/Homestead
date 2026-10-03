@@ -81,6 +81,15 @@ export function renderPlannerHtml() {
     .build-card li { margin: 2px 0; }
     .build-card details { margin-top: 8px; }
     .build-card summary { cursor: pointer; color: var(--text-color-muted, #8b949e); font-size: 12px; }
+    .accounting { margin-bottom: 22px; }
+    .accounting h2 { font-size: 17px; margin: 0 0 10px; }
+    .accounting details { padding: 12px 0; border-bottom: 1px solid var(--border-color-default, #30363d); }
+    .accounting summary { cursor: pointer; font-weight: var(--font-weight-semibold, 600); }
+    .cost-scroll { overflow-x: auto; margin: 12px 0; }
+    .cost-table { border-collapse: collapse; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; }
+    .cost-table th, .cost-table td { padding: 8px; text-align: right; border-bottom: 1px solid var(--border-color-default, #30363d); }
+    .cost-table th:first-child, .cost-table td:first-child { text-align: left; min-width: 220px; }
+    .cost-table caption { text-align: left; margin-bottom: 6px; }
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -354,6 +363,7 @@ export function renderPlannerHtml() {
       </form>
     </section>
     <section id="builds" class="builds" aria-label="Build changelist"></section>
+    <section id="accounting" class="accounting" aria-label="Measured build costs"></section>
     <div class="builds-head backlog-head">
       <h2>Planned improvements</h2>
       <span id="backlog-note" class="muted"></span>
@@ -429,6 +439,58 @@ export function renderPlannerHtml() {
         collapsed.append(el("summary", "", "Older delivered builds (" + (delivered.length - 2) + ")"));
         for (const build of delivered.slice(2)) collapsed.append(renderBuildCard(build));
         buildsNode.append(collapsed);
+      }
+    }
+    function aiu(value) {
+      if (value == null) return "unknown";
+      const nano = BigInt(value);
+      return (Number(nano) / 1e9).toLocaleString("en-US", { maximumFractionDigits: 3 });
+    }
+
+    function renderAccounting(reports) {
+      const node = document.getElementById("accounting");
+      node.replaceChildren(el("h2", "", "Measured build costs"));
+      if (!reports?.length) {
+        node.append(el("p", "muted", "No usage export yet. Missing costs are unknown, not zero."));
+        return;
+      }
+      for (const report of [...reports].reverse()) {
+        const details = el("details");
+        details.open = report === reports[reports.length - 1];
+        details.append(el("summary", "", report.buildId + " · " + (report.totals.recordedCalls ? aiu(report.totals.recordedNanoAiu) : "unknown") + " recorded AIU · " + report.status));
+        details.append(el("p", "muted", "Captured " + new Date(report.generatedAt).toLocaleString() + ". " + report.totals.recordedCalls + "/" + report.totals.calls + " calls have recorded costs. AIU = nano-AIU / 1 billion; not billing-reconciled AI credits."));
+        const scroll = el("div", "cost-scroll");
+        const table = el("table", "cost-table");
+        table.append(el("caption", "", "Costs in AIU. Token classes use supplied billing rates, not aggregate input tokens."));
+        const head = el("tr");
+        for (const label of ["Task / session / configuration", "Calls", "Recorded", "Input", "Cache read", "Cache write", "Output", "Estimated"]) {
+          const th = el("th", "", label); th.scope = "col"; head.append(th);
+        }
+        const thead = el("thead"); thead.append(head); table.append(thead);
+        const tbody = el("tbody");
+        for (const segment of [...report.segments, { ...report.totals, task: "New-work subtotal" }]) {
+          const row = el("tr");
+          const label = el("td", "", segment.task + (segment.category === "overhead" ? " (overhead)" : ""));
+          if (segment.sessionId) {
+            label.append(el("div", "muted", segment.sessionId + " / " + segment.agentId),
+              el("div", "muted", [segment.model ?? "unknown model", segment.reasoningEffort ?? "unknown effort", segment.contextTier ?? "unknown runtime context"].join(" · ")));
+            if (segment.launchContextTier) label.append(el("div", "muted", "Launch context: " + segment.launchContextTier));
+            if (segment.tasks?.length > 1) label.append(el("div", "muted", segment.tasks.join(", ")));
+            label.title = [segment.contextEvidence ?? "Context configuration unknown", "Retry classification: " + segment.retryClassification,
+              "Events " + segment.firstEventId + "-" + segment.lastEventId, "Max prompt " + segment.maxPromptTokens + " tokens"].join("; ");
+          }
+          row.append(label, el("td", "", segment.calls), el("td", "", segment.recordedCalls ? aiu(segment.recordedNanoAiu) : "unknown"));
+          for (const key of ["input", "cache_read", "cache_write", "output"]) {
+            row.append(el("td", "", segment.ratedCalls ? aiu(segment.tokenCostsNanoAiu[key]) + (segment.ratedCalls < segment.calls ? " (partial)" : "") : "unknown"));
+          }
+          row.append(el("td", "", segment.unknownCostCalls ? (segment.estimatedCalls ? aiu(segment.estimatedNanoAiu) + " (partial)" : "unknown") : aiu(segment.estimatedNanoAiu))); tbody.append(row);
+        }
+        table.append(tbody); scroll.append(table); details.append(scroll);
+        details.append(el("p", "muted", "Inherited implementation: " + report.legacy.status + " (excluded; not zero). " + (report.legacy.description ?? "Historical usage attribution is not supplied.")));
+        details.append(el("p", "muted", report.allocationPolicy));
+        const limits = el("ul");
+        for (const limit of report.coverage.limits) limits.append(el("li", "", limit));
+        details.append(limits); node.append(details);
       }
     }
 
@@ -559,6 +621,7 @@ export function renderPlannerHtml() {
 
     function render() {
       renderBuilds(state.planner.builds);
+      renderAccounting(state.planner.accounting);
       renderBoard();
     }
 
@@ -649,7 +712,7 @@ export function renderPlannerHtml() {
         const response = await fetch("/api/tasks", { cache: "no-store" });
         if (!response.ok) throw new Error("Planner request failed: " + response.status);
         const planner = await response.json();
-        const signature = JSON.stringify({ features: planner.features, builds: planner.builds });
+        const signature = JSON.stringify({ features: planner.features, builds: planner.builds, accounting: planner.accounting });
         if (state.dragging) return;
         if (force || !quiet || state.signature !== signature) {
           state.planner = planner;

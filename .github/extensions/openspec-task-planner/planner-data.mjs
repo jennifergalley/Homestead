@@ -1,5 +1,6 @@
 import { readFile, readdir, stat, writeFile, mkdir } from "node:fs/promises";
 import { basename, dirname, join, relative } from "node:path";
+import { loadUsageReports } from "./accounting-data.mjs";
 
 const activeWindowMs = 15 * 60 * 1000;
 const statusOrder = { active: 0, paused: 1, proposed: 2, complete: 3 };
@@ -253,12 +254,13 @@ async function loadFeature(projectRoot, tasksPath, activeChange) {
 export async function loadPlanner(projectRoot, now = Date.now()) {
     const taskFiles = await findTaskFiles(join(projectRoot, "openspec", "changes"));
     const activeChange = await readActiveChange(projectRoot, now);
-    const [features, builds, priority, backlogEntries] = await Promise.all([
+    const [features, builds, priority, backlogEntries, accounting] = await Promise.all([
         Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange))),
         loadBuilds(projectRoot),
         readFile(join(projectRoot, "docs", "handoff", "priority.json"), "utf8")
             .then((text) => JSON.parse(text)).catch(() => ({})),
         loadBacklogInbox(projectRoot),
+        loadUsageReports(projectRoot),
     ]);
     // Jenny's backlog-form entries aren't OpenSpec changes, but they belong on
     // the same reorderable/removable board — synthesize a pseudo-feature for
@@ -296,6 +298,7 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
         features,
         builds,
         slots,
+        accounting,
     };
 }
 
