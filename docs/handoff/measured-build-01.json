@@ -45,7 +45,7 @@
       },
       "readySha": "f881c28c9c112c78e199678ebf425671c3f8ff24",
       "handoff": "docs/handoff/ui-measured-01.md",
-      "status": "parked; independent review, integration and player checks pending",
+      "status": "review-blocked; UI fixing legacy save reconciliation and keyboard/controller empty-slot drops; replacement SHA required",
       "reportedUsageSnapshot": {
         "throughEventId": 68851,
         "calls": 45,
@@ -71,7 +71,7 @@
       },
       "readySha": "6e9c3a9aaac7e3c1ceb9a5ec0e07f8ef01895b38",
       "handoff": "docs/handoff/town-measured-01.md",
-      "status": "parked; independent review, integration and player checks pending",
+      "status": "reviewed and integrated on main at 9d7c117e; parked; player checks pending",
       "telemetryStatus": "Accounting verified runtime identity and call model/effort; actual context unknown; delivery tail requires capture"
     },
     {
