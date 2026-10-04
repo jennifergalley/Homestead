@@ -43,7 +43,9 @@
     "backlog:jenny-mut592z8-2od0d5": "2026-10-03 21:00",
     "backlog:jenny-mut5legr-oba2rd": "2026-10-03 21:00",
     "add-shore-and-river-fishing": "2026-10-03 21:00",
-    "backlog:jenny-mus1kfmm-ayz6jx": "2026-10-03 21:00"
+    "backlog:jenny-mus1kfmm-ayz6jx": "2026-10-03 21:00",
+    "backlog:jenny-mut6p856-a7gysc": "2026-10-03 21:00",
+    "unify-hud-notices": "2026-10-03 21:00"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -58,5 +60,5 @@
     "pitch-dark-parchment-theme",
     "speed-up-pickup-animation"
   ],
-  "updated": "2026-10-04T01:55:06.090Z"
+  "updated": "2026-10-04T02:11:13.969Z"
 }
