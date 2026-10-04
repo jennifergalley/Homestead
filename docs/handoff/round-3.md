@@ -12,9 +12,9 @@ fresh implementers spawned only for planner-assigned work, and the rules in "Tok
   editor only when the work can't be checked otherwise (animation and art).
 - Slots are work-driven: Next build delivers as soon as its admitted work is verified, then Build after next becomes Next build.
 - Unfinished items stay in their assigned planner slot until Jenny reprioritizes them.
-- The three-concurrent-hands-on cap applies only to game development: gameplay code, Blender,
-  Unreal, and game assets. Planner, backlog, and build-cost canvas-extension work is outside that
-  cap and needs no slot.
+- There is no cap on concurrent implementers. Machine limits still apply: at most two Unreal
+  processes, one reserved for Integration; no heavy editor or cook work while Jenny plays; never
+  use `-Force`; and Integration alone runs UAT packaging.
 - **No overnight or workday work** (Jenny, 2026-10-04). Work, automation, packaging, and promotion occur only while Jenny is around.
 - Her packaged Development game is often running. Never touch it, and never start a third Unreal process.
 
@@ -40,7 +40,7 @@ work/automations, no unselected animation/carry, meals, strap, normal-map, mine,
 | Orchestrator | `146ed534-2f78-48ba-b0fc-98436c1f3223` | Coordinates only. |
 | Integration | `64540925-e1b6-4766-ac1f-f2dc42f8aa36` | Integrates, verifies, packages, and promotes releases. |
 | Docs | Task-scoped | Maintains canonical shared documentation and handoffs. |
-| Balance | `81a547cd-0a72-4415-a617-460b5ade5f3c` | Reviews balance and cohesiveness; no game-code edits or implementer slot. |
+| Balance | `81a547cd-0a72-4415-a617-460b5ade5f3c` | Reviews balance and cohesiveness; no game-code edits. |
 | Cleanup | `9fc4e210-68e7-4bc1-acca-d52366894506` | Performs the daily project-storage sweep. |
 
 **Future-launch model clarification (2026-10-04):** launch new sessions and sub-agents with Claude
@@ -51,16 +51,16 @@ Haiku 4.5/medium for docs, accounting, and simple status. Existing GPT sessions 
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
 | Orchestrator Agent | runtime `146ed534-2f78-48ba-b0fc-98436c1f3223`; app `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; afternoon-03; GPT-6.1 Sol/high/default |
-| Fishing Art Agent | `ac7339b4-84f7-49c0-8ec2-3d51d2b86730` | `jennifergalley-bookish-pancake` | afternoon-03; hands-on slot 1; Claude Opus 5.5/high/default; fishing asset making/integration only |
-| Gameplay UI Agent | runtime `986d7db6-7ae4-4cee-a980-054664106056`; app `3d3426ed-7f12-4245-ab69-dc66e8698418` | `jennifergalley-miniature-invention` | afternoon-03; hands-on slot 2; GPT-6.1 Sol/high/default |
-| Environment Agent | `ff61de39-9742-45a8-8c6d-03512cd76224` | `jennifergalley-probable-engine` | afternoon-03; hands-on slot 3; GPT-6.1 Sol/high/default |
-| Integration Agent (afternoon-03) | `64540925-e1b6-4766-ac1f-f2dc42f8aa36` | `jennifergalley-integration-agent-8ba` | docs/accounting/preflight only until explicit slot grant; GPT-5.6 Terra/medium/default |
-| Balance Agent | `81a547cd-0a72-4415-a617-460b5ade5f3c` | review-only session | Claude Opus 5.5/high/default; reviews energy, coins, yields, timers, pacing, design, flavor, and UI; no game-code edits or implementer slot |
+| Fishing Art Agent | `ac7339b4-84f7-49c0-8ec2-3d51d2b86730` | `jennifergalley-bookish-pancake` | afternoon-03; Claude Opus 5.5/high/default; fishing asset making/integration only |
+| Gameplay UI Agent | runtime `986d7db6-7ae4-4cee-a980-054664106056`; app `3d3426ed-7f12-4245-ab69-dc66e8698418` | `jennifergalley-miniature-invention` | afternoon-03; GPT-6.1 Sol/high/default |
+| Environment Agent | `ff61de39-9742-45a8-8c6d-03512cd76224` | `jennifergalley-probable-engine` | afternoon-03; GPT-6.1 Sol/high/default |
+| Integration Agent (afternoon-03) | `64540925-e1b6-4766-ac1f-f2dc42f8aa36` | `jennifergalley-integration-agent-8ba` | docs/accounting/preflight until explicit integration grant; GPT-5.6 Terra/medium/default |
+| Balance Agent | `81a547cd-0a72-4415-a617-460b5ade5f3c` | review-only session | Claude Opus 5.5/high/default; reviews energy, coins, yields, timers, pacing, design, flavor, and UI; no game-code edits |
 | Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |
-| Farming Fishing Agent | `5be207bc-49b1-4a1b-811e-088ae565dc1b` | `jennifergalley-cautious-robot` | measured-02; hands-on slot 1; GPT-6.1 Sol/high/default launch |
-| Travel Rest Agent | `1b0e10a4-09b5-458e-b9de-098cce831b07` | `jennifergalley-miniature-fishstick` | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch |
-| Planner Editing Agent | `ac593377-587f-4319-a033-b17f309be13e` | `jennifergalley-cuddly-eureka` | measured-02; hands-on slot 3; GPT-6.1 Sol/high/default launch |
-| HUD Agent | `2424d5bc-bc5a-4eec-a37f-a2f82cb995d0` | pending lane handoff | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch; selected 2026-10-04 02:19:32Z |
+| Farming Fishing Agent | `5be207bc-49b1-4a1b-811e-088ae565dc1b` | `jennifergalley-cautious-robot` | measured-02; GPT-6.1 Sol/high/default launch |
+| Travel Rest Agent | `1b0e10a4-09b5-458e-b9de-098cce831b07` | `jennifergalley-miniature-fishstick` | measured-02; GPT-6.1 Sol/high/default launch |
+| Planner Editing Agent | `ac593377-587f-4319-a033-b17f309be13e` | `jennifergalley-cuddly-eureka` | measured-02; GPT-6.1 Sol/high/default launch |
+| HUD Agent | `2424d5bc-bc5a-4eec-a37f-a2f82cb995d0` | pending lane handoff | measured-02; GPT-6.1 Sol/high/default launch; selected 2026-10-04 02:19:32Z |
 | Integration Agent (build 02) | `e528fd4a-5aed-4c95-9463-a37941afc00b` | archived `jennifergalley-studious-goggles` | archived at 12:32 Oct 4; archival deleted measured02's Shipping output and package-local save. Do not contact; the 4 PM build is recovery. |
 | UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | archived | `440d4de5` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; ui-measured-01.md handoff |
 | Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | archived | `6e9c3a9a` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; town-measured-01.md handoff |

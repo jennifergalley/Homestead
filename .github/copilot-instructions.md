@@ -9,7 +9,7 @@ role, model or standing session changes. Model settings are **required for futur
 
 | Role | What it does | Model |
 | --- | --- | --- |
-| **Orchestrator Agent** | Coordinates only: plans, spawns, assigns slots, relays; never builds or merges. Reports to Jenny. | Claude Opus 5.5 / high / long |
+| **Orchestrator Agent** | Coordinates only: plans, spawns, schedules the shared editor, relays; never builds or merges. Reports to Jenny. | Claude Opus 5.5 / high / long |
 | **Integration Agent** | Only session that merges, packages and promotes builds; installs each release into the main checkout (`E:\Repos\SurvivalGame\Build\Windows`), the only place Jenny's shortcut may point. Also the current docs/accounting liaison. | Claude Sonnet 5 / medium |
 | **Docs Agent** | Records verified findings in canonical docs (skills, `docs/setup.md`, `docs/handoff/`). Spawned when needed; Integration covers it otherwise. | Claude Haiku 4.5 / medium |
 | **Balance Agent** | Reviews game balance (energy, coins, yields, timers, pacing) and cohesiveness (design, flavor, icons, menu/HUD look). Consulted at planning and before `[ready]`; doesn't edit game code. | Claude Opus 5.5 / high |
@@ -36,7 +36,7 @@ routine docs and status, Sonnet for code, integration and building, Opus 5 for r
 Opus 5.5 only for the Orchestrator, Blender/Unreal asset work and Balance. Sessions already running
 on GPT models keep running until they're replaced. The Balance Agent reviews energy, coins, yields, timers, pacing, design,
 flavor, and UI against cozy casual fun without grinding, then beauty (including flowers everywhere),
-then real-world verisimilitude. It does not edit game code and holds no implementer slot.
+then real-world verisimilitude. It does not edit game code.
 
 ## Balance consultation and delivery
 
@@ -73,14 +73,14 @@ repo handoff and records task/build attribution, actual model/configuration and 
 replacement or eligible archival. Model changes within a session are separate accounting segments.
 See `docs\handoff\agent-lifecycle.md`; preserve the existing old-agent and live-release archival protections.
 
-**At most three concurrent hands-on game-development implementers** do gameplay code, Blender,
-Unreal, or game-asset work. This is a cap across active game-development work, not a role-label
-exemption, and is separate from the 2-Unreal-process machine cap. The Integration Agent counts while
-merging, compiling, PIE testing or packaging, but not while only coordinating; Architecture counts
-while editing or building game code. Planner, backlog, and build-cost canvas-extension work is outside
-this cap and needs no slot. Time-critical integration gets a slot by pausing a lane. The orchestrator
-grants the next slot before a waiting lane resumes. An idle or waiting session schedules a wake-up and
-ends its turn; it doesn't hold a slot by sleeping or polling.
+**No cap on concurrent implementers** (Jenny, 2026-10-04: the old three-implementer cap is dropped).
+Run as many lanes as the assigned work needs. The **machine limits still apply**: at most 2 Unreal
+processes (editors, packaged games, commandlets), one of them reserved for Integration, so lanes share
+one editor turn through the orchestrator. Watch RAM and pagefile: an editor plus Jenny's running game
+has exhausted memory and crashed both. When Jenny is playing, lanes avoid heavy editor or cook work
+and never use `-Force`. Keep builds and compiles bounded (`-WaitMutex`; one UAT package at a time,
+Integration only). An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
+the editor by sleeping or polling.
 
 ## Loops
 

@@ -31,7 +31,7 @@ up, open, talk, eat or sleep. Tools act only through click/the gamepad tool butt
 these paths: E on an unripe crop must not water it. Hold-to-repeat belongs only to tool input.
 Menu's control audit and Props' repeat bindings verify this before delivery.
 
-## Model, reasoning and implementer slots
+## Model and reasoning
 
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
 launches**; documenting them does not change a live session's model or reasoning level.
@@ -70,28 +70,20 @@ Tokens are the scarce resource. Every session follows these rules:
   try. No narration, recap or progress updates.
 - **No acknowledgements.** Don't reply to idle notices, status updates or thanks. Message only when the
   recipient must act.
-- **Batch per lane per build.** The orchestrator sends each lane one briefing per build slot with all
+- **Batch per lane per build.** The orchestrator sends each lane one briefing with all
   of its scheduled items, not a stream of separate requests.
-- **No standing check-ins.** The orchestrator wakes only for build slots (about an hour before each)
-  and for incoming messages; no 30-minute polling.
-- **Scheduled coordinator wake.** At each build-slot wake, read the current
-  `docs/handoff/priority.json` and `docs/handoff/backlog-inbox.json` before assigning the *next*
-  scheduled build. Assign only newly selected, unscheduled work; do not duplicate active lane
-  ownership or turn notifications back on.
+- **No standing check-ins.** The orchestrator wakes for assigned work and incoming messages; no
+  30-minute polling.
 - **Review only risky diffs** (save format, gameplay logic) with the quality tier above.
 - **Docs reports only for real findings**: something broke, a doc was wrong, or a recipe other lanes
   need. No running commentary.
 - **Jenny verifies in-game.** Lanes don't open the editor for screenshots or self-QA unless the task
   can't be checked any other way (animation and art usually need it; UI and logic usually don't).
 
-**At most three concurrent hands-on game-development implementers** do gameplay code, Blender,
-Unreal, or game-asset work. This is a cap across active game-development work, not a role-label
-exemption, and is separate from the 2-Unreal-process machine cap. The Integration Agent counts while
-merging, compiling, PIE testing or packaging, but not while only coordinating; Architecture counts
-while editing or building game code. Planner, backlog, and build-cost canvas-extension work is outside
-this cap and needs no slot. Time-critical integration gets a slot by pausing a lane. The orchestrator
-grants the next slot before a waiting lane resumes. An idle or waiting session schedules a wake-up and
-ends its turn; it doesn't hold a slot by sleeping or polling.
+There is no cap on concurrent implementers. The machine limits remain: at most two Unreal processes
+total, one reserved for Integration; no heavy editor or cook work while Jenny plays; never use
+`-Force`; and Integration alone runs one UAT package at a time. An idle or waiting session schedules
+a wake-up and ends its turn rather than sleeping or polling.
 
 ## Roles
 
@@ -100,7 +92,7 @@ ends its turn; it doesn't hold a slot by sleeping or polling.
 | **Orchestrator** | **Coordinates only** (Jenny's standing preference): plans the round, spawns lane, docs and integration sessions, owns shared interfaces and decisions (such as the save-version bump), forwards lanes' `[ready]`s to the integration session, relays results to Jenny, assigns follow-ups, and reconciles doc conflicts. It **never builds, merges, packages or verifies**: while its turn is busy with hands-on work, queued messages from lanes can't reach it. It ends its turns promptly | The round page's registry; `get_sessions_status` ("Orchestrator Agent") |
 | **Integration session** | Does all hands-on integration: merges the lane work the orchestrator forwards, resolves conflicts, builds, runs native and packaged tests, PIE and perf checks, and **is the only session that packages** (the only one running UAT). Reports `[integrated] <what> @ <sha>` to the orchestrator | The round page's registry ("Integration Agent") |
 | **Docs agent** | Task-scoped session when needed. It receives actionable findings and records each once in the canonical doc, keeps shared skills and setup docs current, and leaves a handoff before replacement | The round page's registry ("Documentation Agent") |
-| **Balance Agent** | Reviews game balance (energy, coins, yields, timers, pacing) and cohesiveness (design, flavor, UI). Its pillar order is cozy casual fun without grinding, then beauty—especially flowers everywhere—then real-world verisimilitude. It does not edit game code and holds no implementer slot. | The round page's registry ("Balance Agent") |
+| **Balance Agent** | Reviews game balance (energy, coins, yields, timers, pacing) and cohesiveness (design, flavor, UI). Its pillar order is cozy casual fun without grinding, then beauty—especially flowers everywhere—then real-world verisimilitude. It does not edit game code. | The round page's registry ("Balance Agent") |
 | **Architecture agent** (code steward) | Task-scoped session for a real refactor or risky review. Owns the assigned architecture or convention change, avoids files another lane is editing, and persists findings and a handoff before replacement. Docs owns process documentation; both keep their assigned changes consistent | The round page's registry ("Architecture agent") |
 | **Disk Cleanup Agent** | Daily 10:00 AM project-storage steward. Removes unnecessary project-owned scratch, renders, test output, stale build staging and excess releases from `C:`/`E:`; Jenny's current save game is the protected boundary. It verifies process paths and shortcut targets before deleting a release, and preserves the current shortcut Shipping target plus one rollback. | The round page's registry ("Disk Cleanup Agent") |
 | **Lanes** | One worktree and one OpenSpec change each. They own the files named in their design's "Lanes and ownership" | The round page's registry |

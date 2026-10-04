@@ -50,11 +50,10 @@ Prefer direct execution for tiny tasks; use a separate project session only when
 independent workstream warrants it. Supply an objective, relevant files or excerpts, constraints,
 expected output and acceptance criteria, not the entire parent conversation.
 
-Keep delegation one level deep by default. The three-hands-on-implementer cap applies across the
-whole tree only for gameplay code, Blender, Unreal, and game-asset work, including helpers while
-they edit, build, or use Blender/Unreal. Request a slot before starting a game-development helper if
-all slots are occupied. Planner, backlog, and build-cost canvas-extension work is outside the cap and
-needs no slot. All descendant usage belongs in task/build costs. Cheap helpers can document verified
+Keep delegation one level deep by default. There is no implementer cap, but the machine limits still
+govern work: at most two Unreal processes with one reserved for Integration, no heavy editor or cook
+work while Jenny plays, never `-Force`, and one UAT package at a time run by Integration. All
+descendant usage belongs in task/build costs. Cheap helpers can document verified
 facts or execute existing tests. The high-effort owning agent defines gameplay test behavior and edge
 cases and reviews helper-written cases; substantive gameplay, animation or rendering diagnosis
 remains GPT-6.1 Sol / high. Jenny's direct instructions still win.
