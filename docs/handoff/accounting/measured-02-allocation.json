@@ -10,7 +10,8 @@
   "limits": [
     "Active build; final usage boundaries are not yet closed.",
     "Actual runtime context tiers and external billing reconciliation remain unknown.",
-    "Contributor identities and task boundaries will be recorded as lanes start and hand off."
+    "Contributor identities and task boundaries will be recorded as lanes start and hand off.",
+    "Integration's preflight segment is metadata and docs liaison only; it has no hands-on merge, build, package, test, helper, review, or failure allocation before an explicit coordinator slot grant."
   ],
   "segments": [
     {
@@ -19,6 +20,19 @@
       "category": "overhead",
       "since": "2026-10-04T01:55:51.513Z",
       "contextTier": null
+    },
+    {
+      "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+      "projectSessionId": "52572922-09fd-4287-85c5-840ceec6d895",
+      "task": "integration-admission-and-docs-liaison",
+      "category": "overhead",
+      "since": "2026-10-04T01:55:51.513Z",
+      "model": "gpt-5.6-terra",
+      "reasoningEffort": null,
+      "contextTier": null,
+      "launchContextTier": null,
+      "contextEvidence": "Runtime model observed in this session. Reasoning effort and actual/configured context tiers are not exposed; no value is inferred.",
+      "boundaryEvidence": "Preflight owns measured02 manifest/allocation metadata and shared-doc liaison only. No helpers, reviews, failures, merge, build, package, or test work is included until the coordinator grants an Integration hands-on slot."
     }
   ]
 }
