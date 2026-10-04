@@ -1,24 +1,21 @@
-# Round 3: scheduled builds with a lean team
+# Round 3: work-driven builds with a lean team
 
 Started 2026-10-01, 22:30. Jenny asked for a token-efficient team: a fresh orchestrator on GPT-6 Sol,
-fresh implementers spawned only for scheduled work, and the rules in "Token budget" in
+fresh implementers spawned only for planner-assigned work, and the rules in "Token budget" in
 [README.md](README.md). Read README.md first, then this page. Older round pages are history only.
 
 ## Jenny's standing rules
 
-- Lanes implement **only** what she schedules for a build slot in the planner canvas, then go idle.
+- Lanes implement **only** what she assigns to the planner's Next build or Build after next slot, then go idle.
   No autonomous pickup.
 - She does all playtesting and verification. Lanes run native tests and a compile; they open the
   editor only when the work can't be checked otherwise (animation and art).
-- Build slots: **7:30 AM, 4 PM, 9 PM**. Each build starts about an hour before its slot.
-- Unfinished items roll to the next release; tell her when that happens.
-- When a slot has nothing scheduled, tell her to schedule work.
+- Slots are work-driven: Next build delivers as soon as its admitted work is verified, then Build after next becomes Next build.
+- Unfinished items stay in their assigned planner slot until Jenny reprioritizes them.
 - The three-concurrent-hands-on cap applies only to game development: gameplay code, Blender,
   Unreal, and game assets. Planner, backlog, and build-cost canvas-extension work is outside that
   cap and needs no slot.
-- **No overnight work** (Jenny, 2026-10-01). She turns the computer off at night. No session schedules
-  automations or runs work between her evening sign-off and her first message in the morning. Work
-  starts when she turns the computer on and messages the orchestrator.
+- **No overnight or workday work** (Jenny, 2026-10-04). Work, automation, packaging, and promotion occur only while Jenny is around.
 - Her packaged game is often running. Never touch it, and never start a third Unreal process.
 
 ## Registry

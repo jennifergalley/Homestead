@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "buildId": "20261004-evening-03",
+  "authorizedAt": "2026-10-04T21:05:10Z",
+  "allocationPolicy": "Observed local per-call usage only. Includes Fishing Art, Gameplay's evening work, Balance/coordinator review, and Fishing integration after the afternoon03 cutoff. Earlier mixed/shared work remains unallocated; unknown effort and post-capture tails are retained as limitations rather than estimated.",
+  "segments": [
+    {
+      "task": "fishing-art",
+      "category": "asset-implementation",
+      "sessionId": "ac7339b4-84f7-49c0-8ec2-3d51d2b86730",
+      "agentId": "main",
+      "since": "2026-10-04T21:05:10Z",
+      "actualModel": "claude-opus-5.5",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "task": "fishing-gameplay",
+      "category": "implementation",
+      "sessionId": "986d7db6-7ae4-4cee-a980-054664106056",
+      "agentId": "main",
+      "since": "2026-10-04T21:05:10Z",
+      "actualModel": "gpt-6.1-sol",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "task": "fishing-balance-review",
+      "category": "review",
+      "sessionId": "81a547cd-0a72-4415-a617-460b5ade5f3c",
+      "agentId": "main",
+      "since": "2026-10-04T21:05:10Z",
+      "actualModel": "claude-opus-5.5",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "task": "fishing-coordination-review",
+      "category": "review",
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "agentId": "main",
+      "since": "2026-10-04T21:05:10Z",
+      "actualModel": "gpt-6.1-sol",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "task": "fishing-integration",
+      "category": "integration",
+      "sessionId": "64540925-e1b6-4766-ac1f-f2dc42f8aa36",
+      "agentId": "main",
+      "since": "2026-10-04T21:05:10Z",
+      "actualModel": "gpt-5.6-terra",
+      "actualReasoningEffort": "medium",
+      "contextTier": null,
+      "launchContextTier": "default"
+    }
+  ],
+  "finalCapture": true,
+  "limits": [
+    "Observed runtime AIU only; not billing-reconciled.",
+    "Actual runtime context tier is unverified.",
+    "Post-capture tails and mixed/shared work before the evening boundary remain unknown or unallocated."
+  ],
+  "deliveryClosureAt": "2026-10-04T22:13:39.8047906Z"
+}

@@ -15,7 +15,7 @@ role, model or standing session changes. Model settings are **required for futur
 | **Balance Agent** | Reviews game balance (energy, coins, yields, timers, pacing) and cohesiveness (design, flavor, icons, menu/HUD look). Consulted at planning and before `[ready]`; doesn't edit game code. | Claude Opus 5.5 / high |
 | **Cleanup Agent** | One bounded disk sweep per day after a delivery. | existing session |
 
-Feature lanes (Gameplay/UI, Environment, Art and so on) are spawned fresh per scheduled build and
+Feature lanes (Gameplay/UI, Environment, Art and so on) are spawned fresh per build and
 archived when their work ships. Never archive a session whose worktree holds something still needed.
 
 ### Models
@@ -71,18 +71,23 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
   deliver one small end-to-end improvement she can playtest (for example, one new animation). When an
   improvement is done and verified, commit it with a descriptive message and push it to `main` (a lane
   sends `[ready]` instead; see "Delivering lane work" in `docs/handoff/README.md`), then report what
-  to try. Don't batch several improvements into one delivery. Packaging now follows the playtest
-  schedule below rather than every improvement.
-- **Playtest builds on a schedule** (Jenny, 2026-09-30). Three Estate builds are cut every day:
-  **morning** is on the "Homestead Estate" shortcut by **7:30 AM** (start about 6:30 AM),
-  **afternoon** by **4:00 PM** (start about 3:00 PM), and **evening** by **9:00 PM** (start about
-  8:00 PM). Only work already UE-verified and code-reviewed is admitted; everything else waits for
-  the next build. Integration merges, runs UBT/suites, makes the Shipping acceptance check and
-  retargets the shortcut while preserving its icon. Lanes close editors during the build. If
-  verification fails, the last good build stays on the shortcut. **`main` must stay playable:**
-  push only verified work. Lanes implement only what Jenny has prioritized for their specific
-  build, then go idle; they do not autonomously take unflagged `priority.json` work. If little or
-  nothing is prioritized, the orchestrator asks Jenny to schedule it.
+  to try. Don't batch several improvements into one delivery. Packaging follows the build plan
+  below rather than every improvement.
+- **Builds ship when their work is done** (Jenny, 2026-10-04; replaces the fixed 7:30 AM / 4 PM /
+  9 PM schedule). The planner has two build slots: **Next build** and **Build after next**. Jenny
+  assigns backlog items to them. As soon as every item assigned to Next build is UE-verified,
+  code-reviewed and balance-OK, Integration packages and delivers it; there's no clock time.
+  If an item is blocked, the orchestrator asks Jenny whether to ship without it. After a delivery,
+  shipped items leave the backlog, unfinished Next items stay in Next, and Build after next items move
+  up to Next. Only verified work is admitted. Integration merges, runs UBT/suites, makes the Shipping
+  acceptance check, installs into the main checkout and retargets the shortcut while preserving its
+  icon. Lanes close editors during the build. If verification fails, the last good build stays on
+  the shortcut. **`main` must stay playable:** push only verified work. Lanes implement only what
+  Jenny assigned to the next two builds, then go idle; they never take unassigned work. If nothing is
+  assigned, the orchestrator asks Jenny.
+- **Work only while Jenny is around** (2026-10-04): no work overnight or during her workday. When she
+  signs off or turns the computer off, lanes park, automations are cleared, and work resumes from
+  where it stopped when she next asks.
 - **When Jenny pauses development to play,** every session stops launching editors and builds until
   she says to resume. Finish or park your current step, close your editor, and wait by ending your
   turn (see "Waiting means ending your turn" below).
@@ -184,8 +189,8 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
   `jennifergalley-mvp-woodland-biome` branch is **not** the retired line: it is Water's active
   Estate Seasons handoff (`b19a0ad0`).
 - **Feedback-complete fast path (Jenny, 2026-10-01):** when all current playtest feedback is
-  addressed, Integration ships the verified build immediately instead of waiting for the next
-  scheduled slot. Then every lane clears wake-up automations and ends its turn until Jenny provides
+  addressed, Integration ships the verified build immediately. Then every lane clears wake-up
+  automations and ends its turn until Jenny provides
   new feedback or the orchestrator assigns new work.
 - **Playtest-driven OpenSpec (Jenny, 2026-10-01):** create or retain a change only for Jenny's
   explicit feedback or an estate goal she selects. Keep its proposal, design and tasks short, with

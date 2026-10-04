@@ -325,29 +325,17 @@ package is staging only, never the promoted release. The first recovery moves th
 package to `Build\Windows-20260919-old` rather than deleting it; later promotions use the same
 main-checkout `Build\Windows` location.
 
-## Playtest builds (schedule)
+## Playtest builds (work-driven)
 
-Jenny's standing preference (2026-09-30): three packaged Estate builds every day.
+Jenny's standing preference (2026-10-04): the planner has two ordered release slots, **Next build**
+and **Build after next**. Lanes work only on Jenny-assigned items in those slots. Once all admitted
+work for a slot is UE-verified and code-reviewed, Integration packages, verifies, promotes, and
+reports it immediately; it does not wait for a clock time. The next slot is promoted only after the
+preceding delivery is closed.
 
-| Slot | Build starts | Shortcut ready |
-| --- | --- | --- |
-| Morning | about 6:30 AM | 7:30 AM |
-| Afternoon | about 3:00 PM | 4:00 PM |
-| Evening | about 8:00 PM | 9:00 PM |
-
-Start each build about an hour before its slot. Only work already **UE-verified and code-reviewed**
-enters; everything else waits for the next slot. The first evening build under this policy is
-October 1, 2026 (the 9 PM window on September 30 had already passed).
-
-**Feedback-complete fast path (Jenny, 2026-10-01):** when all current playtest feedback is
-addressed, Integration ships the verified build immediately rather than waiting for the next
-7:30 AM/4:00 PM/9:00 PM slot. After that early delivery, lanes end their turns and clear their
-wake-up automations until Jenny supplies new feedback or the orchestrator starts new work. The
-scheduled slots remain the fallback cadence while feedback or verified work is still pending.
-
-**Slot-only work (Jenny, 2026-10-01):** lanes implement only what Jenny has explicitly prioritized
-for a specific build, then go idle. They do not pick up unflagged queue work. If a build has little
-or no prioritized work, the orchestrator asks Jenny to schedule it.
+Work runs only while Jenny is around. There is no overnight or unattended workday scheduling,
+automation, packaging, or promotion. Lanes end their turns when assigned work is complete or Jenny
+is away; the orchestrator starts the next assigned slot when she is available.
 
 **Before every Shipping build, reclaim dated release space safely:** retain the current
 Estate-shortcut Shipping release and at most its immediately previous Shipping rollback. A named

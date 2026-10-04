@@ -24,6 +24,9 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Promotion: 3:13:39 PM local to `Homestead Estate.lnk`, preserving its icon and package-local
   `-UserDir`; `Windows-20261004-afternoon-03` remains the rollback. Player acceptance remains
   pending Jenny's playtest.
+- Accounting: `accounting/reports/20261004-evening-03.json` records 611 observed calls /
+  4,266.46243 AIU through the delivery closure; it is not billing-reconciled and retains unknown
+  tails and earlier mixed/shared work as explicit limitations.
 
 ## 2026-10-04 — 2:05 PM
 
