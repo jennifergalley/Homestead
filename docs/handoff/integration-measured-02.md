@@ -33,6 +33,10 @@ actual/configured context tiers are unknown.
   Shipping EstateSmoke/ToolRepeat. Once the handoff exists, the initial lean-path estimate is
   90–150 minutes excluding compile, runtime, save-containment, or cook failures; no safe delivery
   estimate exists before it.
+- Pre-handoff baseline: `Scripts\Test-Native.ps1 -Configuration Release` passed all 21 tests in
+  200.90 seconds after the hands-on grant. It validates the already integrated gameplay source only;
+  it does not validate the pending asset/export/eating-wiring checkpoint and must be rerun where
+  affected after that checkpoint lands.
 - Authorized at `2026-10-04T01:55:51.513Z` for the Oct 3 9 PM slot. The original 9 PM scope is
   retained historically, but the complete delivery was deferred at 20:49 local; Oct 4 7:30 AM is a
   target rather than a promise, with no overnight/signoff work. Checkout was clean at preflight
