@@ -11,7 +11,8 @@
     "Active build; final usage boundaries are not yet closed.",
     "Actual runtime context tiers and external billing reconciliation remain unknown.",
     "Contributor identities and task boundaries will be recorded as lanes start and hand off.",
-    "Integration's preflight segment is metadata and docs liaison only; it has no hands-on merge, build, package, test, helper, review, or failure allocation before an explicit coordinator slot grant."
+    "Integration's preflight segment is metadata and docs liaison only; it has no hands-on merge, build, package, test, helper, review, or failure allocation before an explicit coordinator slot grant.",
+    "Travel Rest and Planner Editing final handoff/parking metadata tails remain measured02 overhead; user holds and completion parking do not create new acceptance work."
   ],
   "segments": [
     {

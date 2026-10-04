@@ -109,7 +109,10 @@ Jenny's standing rule for every session. A session that's waiting (for an editor
 another lane's `[ready]`, an `[integrated]`, or a perf window) must never sleep, poll or loop in a shell:
 a blocking wait keeps its turn open, so queued `send_session_message`s never arrive. Instead:
 
-1. Schedule a wake-up with `save_session_automation`: `interval: "once"` with a `run_at` a few
+   An explicitly user-blocked or completed lane parks in interactive mode with no automation. Generic
+   completion reminders never override an explicit user hold.
+
+   1. Schedule a wake-up with `save_session_automation`: `interval: "once"` with a `run_at` a few
    minutes ahead, or `interval: "minutes"` with `every_minutes`. Its prompt says what to check.
 2. End the turn, so the session goes idle and messages can reach it.
 3. Clear the automation (`clear: true`) when it's no longer needed.
