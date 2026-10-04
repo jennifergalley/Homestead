@@ -17,10 +17,12 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   and pole price approved; blocking copy fixes adopted by Gameplay UI along with a 0.7 s strike
   window.
 
+- 2026-10-04: fishing final balance OK (numbers, copy, visuals) on `9958a359` / Art `abead265`.
+  Non-blocking polish sent: one catch toast "Caught a lake carp.", cue panel off the heroine,
+  larger fish glyphs, shorter refusal/escape lines.
+
 ## Open
 
-- Fishing final "balance OK": waiting on the Gameplay UI SHA and the Art ring-cue screenshot (warm
-  brass, not saturated green).
 - Follow-ups proposed to the Orchestrator for Jenny (not scheduled): halve crop growth, daily
   fishing catch, sleep 15/h, better-value snacks, cooked meals grant Well fed, UI audit items.
 
