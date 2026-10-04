@@ -77,6 +77,8 @@
       "bakedPotatoesSourceStatus": "Held synthetic source-only serving/portion with valid copied geometry/closed/scale/UV/hash fixtures, but cached live food-module graph means its material hash does not prove current skin/flesh nodes. NormalCaptureDiagnostics preserves OBJECT 3.062, EMIT 3.060, and unmatched-bump-control correction. Recipe must explicitly reload food and add source/noise-scale fixtures before fresh review. Not art/import-ready; no save/gameplay change.",
       "bakedPotatoesReloadedProofCheckpoint": "1cc2911f",
       "bakedPotatoesReloadedProofStatus": "Held art/import WIP: stale graph reproduced; recipe-owned reload, executed-source tags, and actual node-scale checks pass, with separately copied source and four fresh viewed 4K frames. Old 245 proof remains the cache audit; no fish/shared-helper/budget/gameplay/save edit.",
+      "roastedTurnipSourceCheckpoint": "e6715c2e",
+      "roastedTurnipSourceStatus": "Held WIP: original six-wedge Turnip1 serving, new earthenware, separate portion, four viewed 4K frames, and passing closed-component/current-shader/copied-hash fixtures. Molded, not art/import-ready; recipe-local closed-bevel winding only, no fish/shared-helper/save/gameplay change. Fourteen dishes plus realism/baking/imagery/wiring remain.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",

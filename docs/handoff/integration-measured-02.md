@@ -280,6 +280,13 @@ edits are included.
 The verified reload evidence replaces `24500d2a`'s invalid current-graph proof, not art acceptance:
 uniform flesh and procedural wood remain. Original dish source work continues independently with no
 fish budget/shared-helper, gameplay/save, or Integration hands-on change.
+Held checkpoint `e6715c2e` preserves the original six-wedge Turnip1 serving, a new earthenware dish,
+and separate portion, with four viewed 4K frames and passing closed-component, current-shader, and
+copied-hash fixtures. It remains too molded and **not** art/import-ready. The closed-bevel winding fix
+is recipe-local and does not alter open fish or any shared helper; Potato function ASTs are unchanged
+from `1cc2911f`. Potato and turnip source work is preserved, but 14 dishes plus realism, baking,
+imagery, and wiring remain. Farming continues authorized slot 2 with an uncertain forecast; no fish
+helper/budget, gameplay/save, or Integration hands-on action changes.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
