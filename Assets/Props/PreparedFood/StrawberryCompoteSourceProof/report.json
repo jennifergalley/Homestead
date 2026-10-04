@@ -1,0 +1,395 @@
+{
+  "schema": 1,
+  "name": "StrawberryCompoteSource",
+  "description": "Held original unsweetened strawberry reduction and eating spoon.",
+  "collision": "none",
+  "triangle_budget": 60000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/strawberry_compote.py",
+  "source_sha256": "dd69ef2e1503b4071c1957c9d58211a7cba839d14311b4c6deead3a2c4291a07",
+  "provenance": "Original closed cooked strawberry halves/pitted skin/intrinsic achenes, juice volume and generated dish/utensil; procedural PBR.",
+  "meshes": {
+    "SM_StrawberryCompote": {
+      "vertices": 26707,
+      "triangles": 52734,
+      "size_cm": [
+        13.2,
+        13.2,
+        3.66
+      ],
+      "materials": [
+        {
+          "name": "M_StrawberryReductionGlazedDish",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReducedJuice",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionHalf0",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionHalf0Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.29
+        },
+        {
+          "name": "M_StrawberryCompoteAchene0",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.47
+        },
+        {
+          "name": "M_StrawberryReductionHalf1",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionHalf1Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.29
+        },
+        {
+          "name": "M_StrawberryCompoteAchene1",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.47
+        },
+        {
+          "name": "M_StrawberryReductionHalf2",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionHalf2Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.29
+        },
+        {
+          "name": "M_StrawberryCompoteAchene2",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.47
+        },
+        {
+          "name": "M_StrawberryReductionHalf3",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionHalf3Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.29
+        },
+        {
+          "name": "M_StrawberryCompoteAchene3",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.47
+        },
+        {
+          "name": "M_StrawberryReductionHalf4",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionHalf4Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.29
+        },
+        {
+          "name": "M_StrawberryCompoteAchene4",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.47
+        },
+        {
+          "name": "M_StrawberryReductionHalf5",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionHalf5Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.29
+        },
+        {
+          "name": "M_StrawberryCompoteAchene5",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.47
+        },
+        {
+          "name": "M_StrawberryReductionHalf6",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionHalf6Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.29
+        },
+        {
+          "name": "M_StrawberryCompoteAchene6",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.47
+        },
+        {
+          "name": "M_StrawberryReductionHalf7",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionHalf7Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.29
+        },
+        {
+          "name": "M_StrawberryCompoteAchene7",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.47
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "focus": [
+          0.0,
+          -0.015,
+          0.020008859507739545
+        ],
+        "detail_distance": 0.29,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_StrawberryCompote.fbx",
+      "sha256": "1ed4f7ef9774c42d484ae67f30755cd5d2e18153662e7728ebe15f70f39b17e8",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StrawberryCompote_hero.png",
+          "detail": "beauty_SM_StrawberryCompote_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_StrawberryCompotePortion": {
+      "vertices": 6170,
+      "triangles": 12252,
+      "size_cm": [
+        2.34,
+        15.2,
+        1.14
+      ],
+      "materials": [
+        {
+          "name": "M_StrawberryReductionMapleSpoon",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionSpoonHalf",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_StrawberryReductionSpoonHalfFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.29
+        },
+        {
+          "name": "M_StrawberryCompoteAchene10",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.47
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "focus": [
+          0.0,
+          -0.04030769211053848,
+          0.00774505477398634
+        ],
+        "detail_distance": 0.25,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_StrawberryCompotePortion.fbx",
+      "sha256": "98037305f0fdb6ffb7729541771aacb71b447a205cf4e9530f26019f96547874",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_StrawberryCompotePortion_hero.png",
+          "detail": "beauty_SM_StrawberryCompotePortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "StrawberryCompote",
+  "ingredients": {
+    "Strawberries": 2,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "d891ba738802c02d5aee2244e9b4538dbefd691c635640e12a9c99d71ef5fb44",
+  "food_material_source_sha256": "50ff20f49d4859dfbda88ade176818a636bba4d81cf51d61a60deb9dd3404633"
+}

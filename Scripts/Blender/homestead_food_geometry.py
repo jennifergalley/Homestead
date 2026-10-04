@@ -5,11 +5,13 @@ Recipes reload this dependency explicitly in live Blender.
 """
 import hashlib
 import math
+import random
 from pathlib import Path
 
 import bmesh
-from mathutils import Vector
+from mathutils import Vector, noise
 from mathutils.bvhtree import BVHTree
+from mathutils.geometry import delaunay_2d_cdt
 
 SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
@@ -105,6 +107,42 @@ def carved_spoon(kit, name: str, material, length_m: float = .182):
     obj = kit.mesh(name, vertices, faces, material)
     closed_normals(obj)
     return obj
+
+
+def cut_food_patch(vertices: list, boundary: list, seed: int, normal_axis: int = 2) -> list:
+    """Seal a ragged food section with constrained, nonradial tissue triangles."""
+    axes = [axis for axis in range(3) if axis != normal_axis]
+    outline = [Vector((vertices[index][axes[0]], vertices[index][axes[1]])) for index in boundary]
+    points = list(outline)
+    xs, ys = [point.x for point in outline], [point.y for point in outline]
+    rng = random.Random(seed)
+    for row in range(1, 11):
+        for column in range(1, 11):
+            x = min(xs) + (max(xs) - min(xs)) * (column + rng.uniform(-.15, .15)) / 11
+            y = min(ys) + (max(ys) - min(ys)) * (row + rng.uniform(-.15, .15)) / 11
+            inside = False
+            for a, b in zip(outline, outline[1:] + outline[:1]):
+                if (a.y > y) != (b.y > y) and x < (b.x - a.x) * (y - a.y) / (b.y - a.y) + a.x:
+                    inside = not inside
+            if inside:
+                points.append(Vector((x, y)))
+    count = len(boundary)
+    cap_points, _, cap_faces, origins, _, _ = delaunay_2d_cdt(
+        points, [(i, (i + 1) % count) for i in range(count)],
+        [tuple(range(count))], 1, 1e-8)
+    height = sum(vertices[index][normal_axis] for index in boundary) / count
+    indices = []
+    for point, source in zip(cap_points, origins):
+        existing = next((i for i in source if i < count), None)
+        if existing is not None:
+            indices.append(boundary[existing])
+        else:
+            indices.append(len(vertices))
+            relief = .00014 * noise.noise(Vector((point.x * 2600, point.y * 2600, seed)))
+            vertex = Vector()
+            vertex[axes[0]], vertex[axes[1]], vertex[normal_axis] = point.x, point.y, height + relief
+            vertices.append(vertex)
+    return [tuple(indices[i] for i in face) for face in cap_faces]
 
 
 def seat_on_surfaces(obj, x: float, y: float, supports: list, maximum_radius: float) -> None:

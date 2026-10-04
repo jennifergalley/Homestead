@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "StrawberryCompote",
+  "recipe_sha256": "dd69ef2e1503b4071c1957c9d58211a7cba839d14311b4c6deead3a2c4291a07",
+  "food_material_source_sha256": "50ff20f49d4859dfbda88ade176818a636bba4d81cf51d61a60deb9dd3404633",
+  "copied_files_sha256": {
+    "SM_StrawberryCompote.fbx": "1ed4f7ef9774c42d484ae67f30755cd5d2e18153662e7728ebe15f70f39b17e8",
+    "beauty_SM_StrawberryCompote_hero.png": "3a0f486ba8038c1b0fac897d8a5588068e2f92a87fb0810f170293bd6196985b",
+    "beauty_SM_StrawberryCompote_detail.png": "67592c36c0e7875abb747eb4f1078f6ac9a5adf4ff84f41782a16f351c4fb07b",
+    "SM_StrawberryCompotePortion.fbx": "98037305f0fdb6ffb7729541771aacb71b447a205cf4e9530f26019f96547874",
+    "beauty_SM_StrawberryCompotePortion_hero.png": "1d59dda8c03ea82a930fb0d41487a8c3602b3c6c3abd36b2093eb6de35568a0d",
+    "beauty_SM_StrawberryCompotePortion_detail.png": "48118a7a74dd7d36ec3f56a0c35c8d6689f12a9c0e71fee1dff67ab32f7acf7a",
+    "StrawberryCompoteSource.blend": "c49cdabb5502e7a3c0e1621399f8280f4742acb7ba8076769ffe061645a8057f"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

@@ -16,10 +16,10 @@ editor/game compile and 21/21 native suites passed; original-art and
 release-save-isolation admission gates remain.
 
 Current source checkpoint: original potatoes, roasted turnips, stewed carrots,
-herbed broad beans, cabbage/potato stew and berry compote have separate
-serving/edible-portion WIP, NOT art/import acceptance. Ten dishes, all meal
+herbed broad beans, cabbage/potato stew, berry compote and strawberry compote have separate
+serving/edible-portion WIP, NOT art/import acceptance. Nine dishes, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original berry compote/spoon WIP; recipe/source receipts below are frozen,
+visible review is original strawberry compote/spoon WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -917,6 +917,52 @@ UAT changes. Preserved separated/framed EEVEE Material scene:
 Berry-compote-source-held-visible.blend on E:. Build02-only provisional snapshot:
 726 calls through event71003, 4,336,968,510,000 recorded nano-AIU; later calls/
 terminal response still need recapture.
+
+### Original unsweetened strawberry compote source milestone
+
+New strawberry_compote.py authors eight stemless softened halves, shoulder-to-tip
+lofts with skin pits and 160 separate intrinsic achenes, closed nonradial flesh
+sections, cooking juice, a new 13.2cm glazed dish and a generated 15.2cm carved
+maple eating spoon with a near-full half-fruit bite. Exact Strawberries2/Kindling1;
+no sugar, cream, spice, leaves or invented garnish. Strawberry/compote references
+inform receptacle/achene anatomy; dimensions/count are authored presentation,
+not an inventory-to-weight conversion. No existing crop/game mesh/photo reused.
+
+Intermediate fruit assemblies use centre pivots before rotation; bottom pivots
+had swung them through the dish wall. A supported mean-height constraint exposes
+partially immersed fruit above the juice without treating liquid as a hard
+support. A larger actual spoon bite satisfies the original height fixture; no
+bounds were weakened. Softer 0.35mm cut-edge rounding produced one fully collapsed
+bevel face; a local 10nm degenerate-edge dissolve removes it before closed-volume
+validation. Reduced, varied pink axial flesh field replaces the stark white stripe.
+
+Current serving/portion: 52,734/12,252 triangles,
+[13.2,13.2,3.66]/[2.34,15.2,1.14]cm; 170/22 closed islands. Finite/positive volume,
+noncollapsed coordinates, UV/bottom pivot/unit transforms/current executed-shader,
+dimension/budget and sampled dish/spoon clearance fixtures pass. Sampled spoon
+hollow 2.472mm exceeds the original scaled 2.088mm threshold; this is not hand,
+finger, wrist, mouth, contact, stability or full face-intersection proof.
+
+Four final 3840x2160/192-sample OPTIX frames viewed; original source, two FBX,
+report, four frames and reopened copied-source verification are frozen in
+StrawberryCompoteSourceProof. Still raw/molded/candy-like; flesh/juice lack convincing
+cooked tissue/viscosity, wood/glaze remain procedural. HELD, not art/import ready.
+Seven meal prototypes, nine unstarted, zero art approvals. Estimate >12 further
+hands-on source/refinement hours; fish/bake/imagery/eating/UE gates remain unbounded.
+Not a morning-build candidate or release ETA.
+
+The new cut_food_patch helper accepts an arbitrary cut normal axis; berry's older
+cap implementation remains in its recipe, not retroactively extracted or replaced.
+All fourteen previous shader and five previous geometry definitions are
+AST-identical to 50f155b9. Older frozen receipts retain their original source/hash;
+none overwritten or promoted. Separate framed EEVEE Material review preserved
+on E: as Strawberry-compote-source-held-visible.blend.
+
+Actual gpt-6.1-sol/high, launch default/actual context unknown. No helper,
+automation, fish probe, bake/budget/render-helper, gameplay/save/enum/version/
+placement, UE/UBT/UAT or shortcut changes. Build02-only provisional snapshot:
+759 calls through event71051, 4,492,791,490,000 recorded nano-AIU; subsequent calls
+and terminal response still need recapture. Not reconciled billing credits.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

@@ -303,3 +303,40 @@ def fruit_bowl_glaze(name: str) -> bpy.types.Material:
     pores = graph.noise(point, scale=2100, detail=2).outputs["Fac"]
     graph.set("Normal", graph.bump(pores, strength=.12, distance=.000018))
     return graph.mat
+
+
+def stewed_strawberry(name: str, seed: float, flesh: bool = False) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.vmath("ADD", graph.coord(), (seed * .017, seed * .043, seed * .031))
+    pigment = graph.noise(point, scale=450, detail=3).outputs["Fac"]
+    colour = graph.ramp(pigment, [
+        (.16, (.085, .006, .004)), (.5, (.19, .017, .009)),
+        (.84, (.29, .045, .020)),
+    ])
+    if flesh:
+        x, _, z = graph.separate(graph.coord())
+        axis = graph.math("ADD", x, graph.math("MULTIPLY", graph.math("SUBTRACT", pigment, .5), .0012))
+        core = graph.remap(graph.math("ABSOLUTE", axis), .0005, .0018, .6, 0)
+        core = graph.math("MULTIPLY", core, graph.remap(z, -.012, -.008))
+        core = graph.math("MULTIPLY", core, graph.remap(pigment, .2, .8, .85, .55))
+        colour = graph.mix(colour, (.25, .075, .045), core)
+    graph.set("Base Color", colour)
+    graph.set("Roughness", .29 if flesh else graph.remap(pigment, .2, .8, .26, .37))
+    graph.set("Subsurface Weight", .12)
+    graph.set("Subsurface Radius", (.0024, .001, .0006))
+    graph.set("Subsurface Scale", .05)
+    pulp = graph.noise(point, scale=2200, detail=2).outputs["Fac"]
+    graph.set("Normal", graph.bump(pulp, strength=.16, distance=.00006))
+    return graph.mat
+
+
+def strawberry_achene(name: str) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    variation = graph.noise(graph.coord(), scale=1700, detail=2).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(variation, [
+        (.2, (.077, .038, .009)), (.8, (.17, .10, .026)),
+    ]))
+    graph.set("Roughness", .47)
+    return graph.mat
