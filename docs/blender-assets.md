@@ -309,6 +309,9 @@ def build(kit):
 - **Portable Blender textures:** `bpy.ops.file.make_paths_relative(relative_remap=True)` can retain
   absolute image paths. Repoint images explicitly to `//Textures/<file>` and reopen the `.blend`
   before treating the asset as portable.
+- **Live render destination:** `build_prop(..., copy=True)` can leave `bpy.data.filepath` pointing
+  to the prior proof `.blend`, so `render_beauty` writes its images there. Explicitly open the newly
+  exported `.blend` before rendering; do not rely on the builder to update the active filepath.
 
 ## Rocks (Sierra Nevada granite)
 

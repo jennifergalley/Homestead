@@ -238,6 +238,11 @@ dispatch and nine offline contracts, but these are neither UE compile nor appear
 import or admit it. The canonical portability lesson is recorded: `relative_remap=True` can retain
 absolute image paths, so explicitly repoint to `//Textures` paths and reopen the blend. Farming
 continues anatomy refinement.
+Farming also verified a live-render destination pitfall: `build_prop(copy=True)` can retain
+`bpy.data.filepath` for the previous proof, causing `render_beauty` to write there. It restored only
+its three overwritten frozen `411fbd34` files from preservation copies and confirmed that proof
+folder clean; current carp renders now write to E: scratch. The canonical rule is to explicitly open
+the newly exported blend before rendering.
 
 At 22:07 local, Jenny additionally authorized the coordinator—not Farming—to schedule a single-use
 30-minute fallback check, rearming it only after processing while work remains active. She also
