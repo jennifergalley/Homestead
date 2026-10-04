@@ -143,7 +143,7 @@
       "contextTier": null,
       "launchContextTier": null,
       "contextEvidence": "One combined current-source SurvivalGameEditor and SurvivalGame Development build completed successfully in 176 seconds after a zero Unreal/game-process check. Actual runtime context and billing reconciliation remain unknown.",
-      "boundaryEvidence": "Candidate 9fe8b263 only. Full integrated Release native coverage then passed 21/21 in 199.74 seconds, with only known C4456 warnings in Manor/PublicRoad tests. This is source integration evidence, not game/UI/player/release acceptance; no editor, package, protected release, or real-save action is included."
+      "boundaryEvidence": "Candidate 9fe8b263 only. Full integrated Release native coverage then passed 21/21 in 199.74 seconds, with only known C4456 warnings in Manor/PublicRoad tests. One owned preview-profile editor session reached Estate PIE worldReady and HUD focus-chest gallery readiness, then closed for Farming's Blender window. The release guard's 15 disposable fixtures reran clean. This is limited source/HUD-route evidence, not full game/UI/player/release acceptance; no package, protected release, or real-save action is included."
     }
   ]
 }

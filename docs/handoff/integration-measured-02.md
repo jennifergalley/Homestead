@@ -155,6 +155,18 @@ The local pre-Fishing boundary `5e40dc30` isolates Travel and HUD source, but it
 verified 9 PM delivery: Travel/HUD still lack runtime, gallery, Jenny acceptance, and the mandatory
 real promotion containment proof. Fishing/Food also lacks the required original assets. Defer rather
 than package or promote a placeholder-art or incompletely verified slice.
+
+## Bounded current-source runtime evidence
+
+- With Farming's Blender window paused, Integration launched one owned editor at port 8768 with the
+  `measured02-runtime` preview profile. Estate PIE reached `worldReady` with no map errors.
+- `homestead.UIGallery focus-chest` reported `UI_GALLERY_READY focus-chest`; its capture shows the
+  wrapped `Wide Winter Wool Storage` chest title and action within the HUD. This is one HUD gallery
+  state, not full gallery or player acceptance. The editor was then closed before Farming resumed
+  Cycles work.
+- The merged candidate reran `ReleaseSaveIsolationTests.ps1`: 15 disposable E:-scratch checks passed.
+  This remains pre-launch fixture evidence only. Travel runtime and real candidate/rollback
+  route/hash/write-containment evidence are pending.
 - Its counted-stock serialization widens to 23 Items without a save version, bake, or tagged-section
   change. Older readers can therefore reject these saves even with zero new quantities; Farming
   inherits the Travel separate-save/write-protection rollback gate. Fishing casts are ephemeral.
