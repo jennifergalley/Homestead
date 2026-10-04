@@ -157,7 +157,9 @@ tip +Z; no borrowed mesh and no new motion. Geometry currently has 42,488 triang
 It is built/exported under `Assets/Props/FishingPole`, with 4096px basecolor,
 roughness, OpenGL normal, AO and metallic maps. Final 3840x2160 hero/detail
 renders (192 samples, RTX5080 OPTIX) and the basecolor atlas were viewed.
-It is an import-ready ART checkpoint, NOT imported/UE-verified or gameplay-ready.
+Art checkpoint `befe70b52fc593247d55a90de42383293f80dfa3` is pushed. Integration
+reports import/current-source held-path fixture at `0d05fa4c`; this is not full
+fishing gameplay acceptance.
 The recipe reserves four straight shaft UV islands and uses a new linen-cord
 material helper. Float follows its leader's curve so it is attached rather than
 floating off the line. Clamp the taper input at Blender's float32 endpoints.
@@ -191,13 +193,67 @@ digging-stick fallback is removed; missing original pole explicitly logs an erro
 No native rules, serialization, Item/Recipe widths or versions changed in this
 art checkpoint.
 
-All six fish and sixteen dishes remain to be authored. Species research has
-begun, but no fish/dish mesh or render is claimed. Plan distinct silhouettes,
-fins and markings for brown trout, Atlantic salmon, European perch, common carp,
-Atlantic mackerel and sea bass. New item images and eating portions must replace
-generic fish/food glyphs and existing root/berry eating-prop reuse. This is
-several hours of remaining work, not a credible full-set 9 PM delivery; no
-overnight automation or continued work after Jenny signs off.
+Jenny explicitly accepted the tip-line design at ~20:40 local; a reel may be
+a later upgrade, not this batch. The supplied 1280-wide Integration side capture
+was viewed: pole projects forward, without obvious idle leg/torso collision.
+It is too small to establish palm seating/finger wrap/butt-to-forearm clearance;
+close palm and front/three-quarter views were requested for the next owned
+Integration pass, not an extra editor launch. No speculative axis correction.
+
+Coordinator renewed slot2 for the six-fish family, then sixteen dishes. The new
+`caught_fish.py` matches the six catalogue ids to brown trout, Atlantic salmon,
+European perch, common carp, Atlantic mackerel and European sea bass. Text
+references and representative (not gameplay) dimensions are recorded in the
+recipe. Independently lofted bodies/heads/tails, integrated gill creases, lenticular eyes,
+ray-supported fins, salmonid adipose fins, four carp barbels and paired mackerel
+finlet rows distinguish anatomy, not merely recolouring a shared mesh.
+First baked counts were 37,304/41,922/38,673/41,124/42,233/40,488 triangles,
+lengths 34/62/30/42/36/46cm. Shared new material helpers author countershading,
+species spots/bars/waves, scale relief, membranes and striated eyes.
+
+Integration closed its rod viewport window and released GPU before the first
+4096 PBR / 4K 192-sample fish-family bake/render began. The viewed first trout
+hero/detail and atlas FAILED the art bar: floating rectangular gill patch,
+polka-dot scale pattern, flat pennant fins and button-like eye/front lip.
+Remaining owned headless renders were stopped; this is not accepted catch art.
+Subsequent passes integrate gills into the body, replace circular scale rims with
+staggered shingle seams, add fin striation/bow and unrayed adipose material,
+round the muzzle and conform the eyes to the actual curved head surface.
+Trout red spots are sparse and region-confined rather than uniform halo dots;
+scale spacing uses circumference rather than a stretched sine coordinate.
+Ray tubes now follow the membrane bow; a scene-preserving regression verifies
+seven rays at eight stations within 2 microns, alongside all six mesh checks.
+The final review roll is +78 degrees so the dorsal side appears above the flank;
+the earlier negative roll made the belly fins look like dorsals.
+
+Six original catch meshes, one source blend, six FBX files, 24 4096px PBR maps
+and twelve viewed 3840x2160/192-sample OPTIX renders are persisted in
+`Assets/Props/CaughtFish`. Recipe/FBX hashes, map/render dimensions, render
+configuration and warning-free asset receipts pass; all six geometry checks
+pass (dimensions, pivots, finite geometry/UVs, species, unique geometry, <=65k).
+Final triangles, in catalogue order: 42,058 / 46,584 / 43,273 / 45,726 /
+46,825 / 45,076. No native rules, save widths/versions, placements or Unreal
+assets changed in this family.
+
+This is a WIP preservation checkpoint, NOT accepted art or [ready]. Viewed
+close-ups still look too smooth/graphic: mouths read as drawn smile lines,
+heads lack convincing bony/skin detail, and perch/mackerel markings are too
+regular. Do not import/admit these as final fishing art or promote them merely
+because geometry/receipt checks pass. Next refinement should work on one
+species' head, mouth and material realism before another whole-family render.
+No dish geometry yet. Remaining art/presentation is at least several further
+hours (roughly 4-6+, not a completion promise), before Integration/Jenny gates.
+
+Owned visible Blender remains open with an EEVEE material-preview grid saved
+at `E:\CopilotScratch\5be207bc-49b1-4a1b-811e-088ae565dc1b\CaughtFish-live-review.blend`.
+Grid transforms are display-only; never export that scene as production.
+Owned obsolete geometry snapshot and exact blend backups were removed.
+Viewport failure/fix: builder previews leave BLENDER_WORKBENCH, where MATERIAL
+is not a valid shading enum. Switch scene engine to BLENDER_EEVEE first.
+New item images and eating portions must still replace generic fish/food glyphs
+and existing root/berry eating-prop reuse. This is several hours of remaining
+work, not a credible full-set 9 PM delivery; no overnight automation or
+continued work after Jenny signs off.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.
@@ -216,6 +272,8 @@ Original-art checkpoint snapshot: 140 calls through event 70004, recorded
 737049830000 nano-AIU, status incomplete/provisional. Original-art attribution
 starts at Jenny's correction `2026-10-04T03:04:19.556Z`; subsequent calls and
 terminal response still need recapture. No helpers or model/configuration change.
-All usage belongs to build 02, never the closed build 01 allocation. No actual-context
+Fish WIP usage has been refreshed in the adjacent metadata-only snapshot/report;
+later calls and the terminal response require recapture. All usage belongs to
+build 02, never the closed build 01 allocation. No actual-context
 or reconciled-credit claim. TEMP/TMP for heavy tools must use
 `E:\CopilotScratch\5be207bc-49b1-4a1b-811e-088ae565dc1b\tmp`.
