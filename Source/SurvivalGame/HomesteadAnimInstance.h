@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
+#include "HomesteadFishingPresentation.h"
 #include "HomesteadAnimInstance.generated.h"
 
 UCLASS(Transient)
@@ -41,6 +42,23 @@ public:
     // The oil lamp held up ahead of her (AN_HeroineMH_LampRaised), over the right arm and head.
     void SetLampRaised(bool bRaised);
     float LampRaisedWeight() const;
+    // Fishing (AN_HeroineMH_Fishing; segments and beats in HomesteadFishingPresentation.h). The
+    // controller sets the pose for the simulation's phase every tick; the counters advance only when
+    // the loaded clip crosses its authored contact beat, never on a timer.
+    void SetFishingPose(EHomesteadFishingPose Pose);
+    // The quick hook-set, played once over the current pose (presentation only).
+    void PlayFishingStrike();
+    // The float lands on the water: commit the cast and start the bite clock.
+    uint32 FishCastSplashes() const;
+    // The fish clears the water: grant the catch.
+    uint32 FishCatchLifts() const;
+    EHomesteadFishingPose FishingPose() const;
+    // Seconds on the fishing clip's own timeline while a segment plays, else -1.
+    float FishingClipTime() const;
+    bool IsFishingStrike() const;
+    float FishingWeight() const;
+    // False when the fishing clip failed to load: no contact beats will ever arrive.
+    bool HasFishingClip() const;
     // Kneeling to set the lamp down or take it up (AN_HeroineMH_LampSetDown).
     void RequestLampKneel();
     bool IsLampKneeling() const;
