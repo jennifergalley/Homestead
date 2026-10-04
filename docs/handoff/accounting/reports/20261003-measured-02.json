@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "buildId": "20261003-measured-02",
   "authorizedAt": "2026-10-04T01:55:51.513Z",
-  "generatedAt": "2026-10-04T18:45:01.716Z",
+  "generatedAt": "2026-10-04T18:50:27.341Z",
   "status": "incomplete",
   "unit": "nano-AIU",
   "displayUnit": "AIU",
@@ -18,7 +18,7 @@
     "limits": [
       "Capture ends at the delivery-closure snapshot; any post-capture tail is unknown.",
       "Actual runtime context tiers and external billing reconciliation are unknown.",
-      "The report includes allocated but unshipped HUD, Travel Rest, and deferred-art work; it is not a cost-only total for released assets.",
+      "The report includes HUD, Travel Rest, farming/fishing, Integration, orchestration, and review work delivered in the combined package; package delivery does not substitute for pending player acceptance.",
       "The five deferred preparations and final-realism work remain carried forward, not accepted or charged to a different release.",
       "Some configured context tiers are unknown."
     ],

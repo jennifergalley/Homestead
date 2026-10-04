@@ -245,6 +245,8 @@ export function renderPlannerHtml() {
     .check-row { grid-template-columns: 26px 18px minmax(0, 1fr) auto; cursor: grab; }
     .check-row.dragging { opacity: .45; }
     .check-row.next { background: color-mix(in srgb, var(--true-color-blue, #58a6ff) 9%, transparent); }
+    .check-row.shipped { background: color-mix(in srgb, var(--true-color-green, #3fb950) 9%, transparent); }
+    .delivery-note { color: var(--true-color-green, #3fb950); font-size: 12px; margin-top: 2px; }
     .rank { color: var(--text-color-muted, #8b949e); font-variant-numeric: tabular-nums; text-align: right; padding-top: 1px; }
     .drag { color: var(--text-color-muted, #8b949e); letter-spacing: -3px; padding-top: 1px; user-select: none; }
     .next-button {
@@ -475,7 +477,7 @@ export function renderPlannerHtml() {
       });
       const byTime = (a, b) => (Number.isFinite(a.time) ? a.time : 0) - (Number.isFinite(b.time) ? b.time : 0);
       for (const build of [...(builds?.entries ?? [])].sort(byTime)) {
-        if (build.status === "delivered" || shown.has(build)) continue;
+        if (build.status === "delivered" || build.status === "historical" || shown.has(build)) continue;
         buildsNode.append(renderBuildCard(build));
       }
       const delivered = (builds?.entries ?? []).filter((build) => build.status === "delivered").sort((a, b) => byTime(b, a));
@@ -564,12 +566,15 @@ export function renderPlannerHtml() {
       const list = el("div", "checklist");
       features.forEach((feature, index) => {
         const open = feature.sections.flatMap((section) => section.tasks).filter((task) => !task.done);
-        const row = el("div", "check-row" + (feature.slot ? " next" : ""));
+        const row = el("div", "check-row" + (feature.slot ? " next" : "") + (feature.deliveryStatus === "shipped" ? " shipped" : ""));
         row.dataset.id = feature.id;
         row.draggable = true;
         row.title = feature.path ?? feature.description ?? feature.title;
         const text = el("div");
         text.append(el("div", "check-title", feature.title));
+        if (feature.deliveryStatus === "shipped") {
+          text.append(el("div", "delivery-note", "Shipped in " + feature.deliveryBuildId + " · Player acceptance pending"));
+        }
         if (feature.carriedFrom) text.append(el("div", "carried-note", "Carried over from " + feature.carriedFrom));
         if (feature.fromBacklog) {
           text.append(el("div", "check-text backlog-origin", "From Jenny's backlog form" + (feature.description ? " — " + feature.description : "")));
@@ -584,8 +589,14 @@ export function renderPlannerHtml() {
         for (const task of open.slice(0, 3)) text.append(el("div", "check-text", task.text));
         const button = el("select", "slot-select" + (feature.slot ? " on" : ""));
         button.title = "Schedule for a release";
-        button.append(new Option("Unscheduled", ""));
-        for (const slot of state.planner.slots ?? []) button.append(new Option(slot.label, slot.key));
+        if (feature.deliveryStatus === "shipped") {
+          button.append(new Option("Shipped", ""));
+          button.title = "Delivered; player acceptance remains pending.";
+          button.disabled = true;
+        } else {
+          button.append(new Option("Unscheduled", ""));
+          for (const slot of state.planner.slots ?? []) button.append(new Option(slot.label, slot.key));
+        }
         button.value = feature.slot ?? "";
         for (const eventName of ["mousedown", "click", "dragstart"]) button.addEventListener(eventName, (event) => event.stopPropagation());
         button.addEventListener("change", async () => {

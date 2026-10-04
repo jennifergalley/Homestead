@@ -158,12 +158,42 @@ test("loadPlanner surfaces backlog entries as unscheduled pseudo-features, newes
     const titles = planner.features.map((feature) => feature.title);
     assert.equal(titles[0], "Newer backlog item");
     assert.equal(titles[1], "Older backlog item");
-
     const newerFeature = planner.features.find((feature) => feature.title === "Newer backlog item");
     assert.equal(newerFeature.fromBacklog, true);
     assert.equal(newerFeature.status, "proposed");
     assert.equal(newerFeature.slot, null);
     assert.ok(newerFeature.id.startsWith("backlog:"));
+});
+
+test("delivery registry marks shipped feedback without closing player acceptance or rewriting priority", async (t) => {
+    const root = await fixture(t);
+    const entry = (await addBacklogEntry(root, { title: "Delivered feedback" })).value;
+    const priorityPath = join(root, "docs", "handoff", "priority.json");
+    const priority = {
+        order: [`backlog:${entry.id}`],
+        slots: { [`backlog:${entry.id}`]: "2026-10-04 07:30" },
+    };
+    await writeFile(priorityPath, JSON.stringify(priority, null, 2) + "\n");
+    const priorityBefore = await readFile(priorityPath, "utf8");
+    await writeFile(join(root, "docs", "handoff", "measured-build-02.json"), JSON.stringify({
+        plannerDelivery: {
+            buildId: "20261003-measured-02",
+            status: "shipped",
+            playerAcceptance: "pending",
+            selectedIds: [`backlog:${entry.id}`],
+        },
+    }, null, 2) + "\n");
+
+    const planner = await loadPlanner(root, Date.parse("2026-10-04T12:00:00Z"));
+    const feature = planner.features.find((value) => value.id === `backlog:${entry.id}`);
+    assert.equal(feature.status, "proposed");
+    assert.equal(feature.deliveryStatus, "shipped");
+    assert.equal(feature.deliveryBuildId, "20261003-measured-02");
+    assert.equal(feature.playerAcceptance, "pending");
+    assert.equal(feature.slot, null);
+    assert.equal(feature.carriedFrom, null);
+    assert.equal(feature.nextBuild, false);
+    assert.equal(await readFile(priorityPath, "utf8"), priorityBefore);
 });
 
 test("editing preserves identity, screenshot, other entries, document metadata and priority bytes", async (t) => {

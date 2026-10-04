@@ -5,6 +5,7 @@ import { loadUsageReports } from "./accounting-data.mjs";
 
 const activeWindowMs = 15 * 60 * 1000;
 const statusOrder = { active: 0, paused: 1, proposed: 2, complete: 3 };
+const measuredBuildManifestSegments = ["docs", "handoff", "measured-build-02.json"];
 
 function titleCase(value) {
     return value
@@ -122,6 +123,27 @@ async function loadBuilds(projectRoot) {
     }
 }
 
+async function loadDeliveryRegistry(projectRoot) {
+    let manifest;
+    try {
+        manifest = JSON.parse(await readFile(join(projectRoot, ...measuredBuildManifestSegments), "utf8"));
+    } catch (error) {
+        if (error?.code === "ENOENT") return new Map();
+        throw error;
+    }
+    const delivery = manifest.plannerDelivery;
+    if (!delivery) return new Map();
+    if (delivery.status !== "shipped" || delivery.playerAcceptance !== "pending"
+        || typeof delivery.buildId !== "string" || !Array.isArray(delivery.selectedIds)
+        || delivery.selectedIds.some((id) => typeof id !== "string" || !id)) {
+        throw new Error("Invalid measured build planner delivery registry.");
+    }
+    return new Map(delivery.selectedIds.map((id) => [id, {
+        buildId: delivery.buildId,
+        playerAcceptance: delivery.playerAcceptance,
+    }]));
+}
+
 const slotMinutes = [7 * 60 + 30, 16 * 60, 21 * 60];
 const pad = (value) => String(value).padStart(2, "0");
 const dateKey = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
@@ -193,6 +215,13 @@ export function scheduleFeatures(features, priority, builds, now = Date.now()) {
     const assigned = priority.slots && typeof priority.slots === "object" ? priority.slots : {};
     const legacyNext = new Set(Array.isArray(priority.nextBuild) ? priority.nextBuild : []);
     for (const feature of features) {
+        if (feature.deliveryStatus === "shipped") {
+            feature.carriedFrom = null;
+            feature.slot = null;
+            feature.slotLabel = null;
+            feature.nextBuild = false;
+            continue;
+        }
         let key = typeof assigned[feature.id] === "string" ? assigned[feature.id]
             : legacyNext.has(feature.id) && slots[0] ? slots[0].key : null;
         feature.carriedFrom = null;
@@ -252,22 +281,34 @@ async function loadFeature(projectRoot, tasksPath, activeChange) {
     };
 }
 
+function applyDeliveryRegistry(features, registry) {
+    for (const feature of features) {
+        const delivery = registry.get(feature.id);
+        if (!delivery) continue;
+        feature.deliveryStatus = "shipped";
+        feature.deliveryBuildId = delivery.buildId;
+        feature.playerAcceptance = delivery.playerAcceptance;
+    }
+}
+
 export async function loadPlanner(projectRoot, now = Date.now()) {
     const taskFiles = await findTaskFiles(join(projectRoot, "openspec", "changes"));
     const activeChange = await readActiveChange(projectRoot, now);
-    const [features, builds, priority, backlogEntries, accounting] = await Promise.all([
+    const [features, builds, priority, backlogEntries, accounting, deliveryRegistry] = await Promise.all([
         Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange))),
         loadBuilds(projectRoot),
         readFile(join(projectRoot, "docs", "handoff", "priority.json"), "utf8")
             .then((text) => JSON.parse(text)).catch(() => ({})),
         loadBacklogInbox(projectRoot),
         loadUsageReports(projectRoot),
+        loadDeliveryRegistry(projectRoot),
     ]);
     // Jenny's backlog-form entries aren't OpenSpec changes, but they belong on
     // the same reorderable/removable board — synthesize a pseudo-feature for
     // each one so the board, priority.json, and quote/remove/assign wiring
     // all treat them like any other item.
     for (const entry of backlogEntries) features.push(backlogFeatureFromEntry(entry));
+    applyDeliveryRegistry(features, deliveryRegistry);
     const order = new Map((Array.isArray(priority.order) ? priority.order : []).map((id, index) => [id, index]));
     const removed = new Set(Array.isArray(priority.removed) ? priority.removed : []);
     for (let i = features.length - 1; i >= 0; i--) if (removed.has(features[i].id)) features.splice(i, 1);

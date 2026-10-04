@@ -118,8 +118,9 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 ## 2026-10-04 — gameplay-first Shipping admission
 
 - SHA: `cc2697ef` admits the frozen eleven-meal Unreal content.
-- Status: source/runtime gates are green; Shipping remains blocked pending a current cooked-container
-  source or an authorized fresh Shipping cook/staging route.
+- Status: historical
+- This admission record was superseded by the delivered fresh-cook Shipping release below; it is not
+  a currently blocked planned build.
 - Ships: the existing original pole and six fish, plus exactly eleven original meals frozen at
   `843324c17b85b5432785fc7a6b9e333702dc26ec`: Baked Potatoes, Roasted Turnips, Stewed Carrots,
   Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root Vegetable

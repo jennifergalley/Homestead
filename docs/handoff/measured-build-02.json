@@ -207,6 +207,33 @@
       "promotion": "Homestead Estate.lnk targets this candidate with its canonical package-local UserDir and preserved icon; active measured01 and protected rollback remain retained."
     }
   },
+  "plannerDelivery": {
+    "buildId": "20261003-measured-02",
+    "status": "shipped",
+    "playerAcceptance": "pending",
+    "selectedIds": [
+      "backlog:jenny-mut6p856-a7gysc",
+      "backlog:jenny-mut56ggp-uijcta",
+      "backlog:jenny-mut5v5yo-9f8fpx",
+      "backlog:jenny-mut57myz-9tfjci",
+      "backlog:jenny-mut5gsd4-oebvov",
+      "backlog:jenny-mut5c51h-orhi39",
+      "backlog:jenny-mut592z8-2od0d5",
+      "backlog:jenny-mut5legr-oba2rd",
+      "add-shore-and-river-fishing",
+      "backlog:jenny-mus1kfmm-ayz6jx",
+      "unify-hud-notices"
+    ],
+    "deferred": [
+      "GrilledMackerel",
+      "FishSoup",
+      "FishAndPotatoes",
+      "HerbedCarp",
+      "MackerelChowder",
+      "Final realism"
+    ],
+    "note": "This is a display-only delivery overlay. It does not alter priority.json, feedback entries, OpenSpec task completion, or Jenny's pending playtest acceptance."
+  },
   "deliveryRules": [
     "Only verified and reviewed work is admitted; unfinished items move to the fallback slot.",
     "No overnight work or automations after Jenny signs off; morning resumes on her first message.",
