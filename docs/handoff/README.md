@@ -43,7 +43,7 @@ Use default context unless the task needs long context; record both configured t
 
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
-| Orchestrator Agent | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
+| Orchestrator Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | long (Jenny requested 1.1M; actual runtime context remains separately observed) |
 | Blender / Unreal **asset making and asset integration only** | Claude Opus 5.5 (`claude-opus-5.5`) | high | default; long only when necessary |
 | Gameplay/UI/environment code, general Unreal work, visuals or performance implementation | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
 | Architecture / gameplay or save-format review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
@@ -54,8 +54,10 @@ Use default context unless the task needs long context; record both configured t
 Integration escalates a failure it can't explain in one attempt to the orchestrator, which assigns it to
 the owning lane rather than having Integration debug gameplay.
 
-Claude Opus 5.5 is not the general implementation tier: only asset creation and asset integration
-use it. These are future-launch settings, not a retune of an existing session.
+Claude Opus 5.5 is not the general implementation tier: only orchestrator launches and Blender/Unreal
+asset creation and asset integration use it. Jenny requested a 1.1M orchestrator context; record that
+request separately from the configured `long` tier and any unknown actual runtime context. These are
+future-launch settings, not a retune of an existing session.
 
 ## Token budget (Jenny, 2026-10-01)
 

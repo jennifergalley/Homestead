@@ -73,11 +73,14 @@ gameplay, visual and performance implementation; use cheaper models or lower eff
 integration and test execution. Keep task-scoped handoffs and build-credit attribution per
 [agent-lifecycle.md](agent-lifecycle.md). Do not infer a live session's settings from this registry.
 
-**2026-10-04 model clarification:** Claude Opus 5.5 / high / default is only for Blender/Unreal
-asset making and asset integration (long context only when necessary). It is not used for other work.
-GPT-6.1 Sol / high remains the future-launch configuration for coordinator and general
-gameplay/UI/environment code or risky review; routine docs, builds, tests and accounting stay on a
-cheaper low/medium tier. This policy does not retune a running session.
+**2026-10-04 model clarification:** Claude Opus 5.5 / high / long is the future-launch setting for
+the Orchestrator Agent (Jenny requested 1.1M context) and remains the only tier for Blender/Unreal
+asset making and asset integration (long only when necessary there). It is not used for general
+gameplay/UI/environment code, reviews, docs, accounting, or packaging. GPT-6.1 Sol / high remains
+the future-launch configuration for general gameplay/UI/environment code and risky review; routine
+docs, builds, tests and accounting stay on a cheaper low/medium tier. Record the requested 1.1M,
+configured `long`, and actual runtime context separately. This policy does not retune a running
+session: the current afternoon-03 coordinator remains a GPT-6.1 Sol / high / default segment.
 
 **Coordinator wake checklist (2026-10-04):** every scheduled coordinator wake reads fresh
 `priority.json` and `backlog-inbox.json` before assigning the next scheduled build. It assigns only
