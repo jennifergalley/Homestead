@@ -139,6 +139,12 @@ doze; Sunday wait preserves authoritative energy drain and adds no rest grant.
 - Editor compile, visual/player acceptance, and the mandatory release-isolation proof remain
   required. No heavy launch or real saves were touched. Preserve HUD pickup/name-toast removals and
   `QuietActionSerial`, along with Travel save hunks, during any later integration.
+- The local combined candidate `9fe8b263` compiled `SurvivalGameEditor` and `SurvivalGame`
+  Development successfully in 176 seconds after a game-closed process check. This validates source
+  integration only; it does not substitute for visual, player, or release proof.
+- Jenny now requires original art for the pole, six caught fish, and sixteen new dishes. The reused
+  pole/meal visuals in this source checkpoint block Fishing/Food promotion until original assets are
+  authored, imported, and wired. Do not use a stale or current editor pass as art acceptance.
 - Its counted-stock serialization widens to 23 Items without a save version, bake, or tagged-section
   change. Older readers can therefore reject these saves even with zero new quantities; Farming
   inherits the Travel separate-save/write-protection rollback gate. Fishing casts are ephemeral.

@@ -29,10 +29,11 @@
       "checkpoint": "ff3c9de86c58efce4901b9d89de174003a85d0d4",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
-        "compile",
+        "original pole, fish, and dish assets authored/imported/wired",
         "visual/player acceptance",
         "release save-isolation proof"
-      ]
+      ],
+      "compileEvidence": "Integrated candidate 9fe8b263 compiled SurvivalGameEditor and SurvivalGame Development successfully."
     },
     {
       "role": "Travel Rest",
