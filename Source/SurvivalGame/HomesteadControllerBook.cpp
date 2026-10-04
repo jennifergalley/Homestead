@@ -9,6 +9,7 @@
 #include "Simulation/HomesteadOvergrowth.h"
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadFood.h"
+#include "Simulation/HomesteadRecipes.h"
 #include "UI/SHomesteadMenu.h"
 #include "UI/HomesteadUITheme.h"
 #include "UI/SHomesteadShop.h"
@@ -36,7 +37,7 @@ int32 ShiftFieldBookPage(int32 Page, int32 Direction)
 }
 
 bool Edible(Homestead::Item Item) { return Homestead::IsEdible(Item); }
-const TCHAR* RecipeDescription(Homestead::Recipe Recipe)
+FString RecipeDescription(Homestead::Recipe Recipe)
 {
     switch (Recipe)
     {
@@ -48,7 +49,12 @@ const TCHAR* RecipeDescription(Homestead::Recipe Recipe)
     case Homestead::Recipe::RoastedRoots: return TEXT("Wild roots softened and warmed over a fueled cookfire.");
     case Homestead::Recipe::HerbedRoots: return TEXT("Roasted roots brightened with meadow herbs.");
     case Homestead::Recipe::SplitFirewood: return TEXT("Prepared fuel split from timber with a carried axe.");
-    default: return TEXT("");
+    default:
+        if (const auto* Meal = Homestead::FindCropMeal(Recipe))
+            return Text(Homestead::ItemDescription(Meal->output));
+        if (const auto* Meal = Homestead::FindFishMeal(Recipe))
+            return Text(Homestead::ItemDescription(Meal->output));
+        return TEXT("");
     }
 }
 }
@@ -61,6 +67,7 @@ using HomesteadControllerBookDetail::RetiredGuidebookPage;
 void AHomesteadController::OpenBook(int32 TargetPage)
 {
     if (RejectPendingGroundSnapAction()) return;
+    if (IsFishing()) Notify(Sim.CancelFishing());
     EndPlacement();
     HoveredHotbarSlot = INDEX_NONE;
     bBookOpen = true;
@@ -121,6 +128,7 @@ void AHomesteadController::OpenMap() { if (!IsFailed()) OpenBook(7); }
 void AHomesteadController::Back()
 {
     if (IsFailed()) { RetryCheckpoint(); return; }
+    if (IsFishing()) { Notify(Sim.CancelFishing()); return; }
     if (bBookOpen) CloseBook();
     else if (bPlanning) EndPlacement();
     else if (CancelShopWait()) PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
@@ -201,6 +209,9 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
             Row.Name = Row.Label = Text(Homestead::RecipeName(Recipe));
             Row.Location = FString::Printf(TEXT("Makes %d %s"), Assessment.outputCount,
                 *Text(Homestead::ItemName(Assessment.output)));
+            const auto Energy = Homestead::FoodEnergyLabel(Assessment.output);
+            if (!Energy.empty()) Row.Location += TEXT("   ") + Text(Energy.c_str());
+            Row.Icon = FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Assessment.output)));
             Row.Detail = RecipeDescription(Recipe);
             Row.IconTint = Assessment.craftable
                 ? FLinearColor(0.92f, 0.74f, 0.43f)

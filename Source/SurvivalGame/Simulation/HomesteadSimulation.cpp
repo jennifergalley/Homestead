@@ -3,6 +3,7 @@
 #include "HomesteadBackpack.h"
 #include "HomesteadChests.h"
 #include "HomesteadCrops.h"
+#include "HomesteadRecipes.h"
 #include "HomesteadEstate.h"
 #include "HomesteadFood.h"
 #include "HomesteadParcels.h"
@@ -217,12 +218,17 @@ Inventory CraftChange(Recipe recipe)
     case Recipe::RoastedRoots: return Items({{Item::Roots, -2}, {Item::Kindling, -1}, {Item::RoastedRoots, 1}});
     case Recipe::HerbedRoots: return Items({{Item::Roots, -2}, {Item::Flowers, -1}, {Item::Kindling, -1}, {Item::HerbedRoots, 1}});
     case Recipe::SplitFirewood: return Items({{Item::Timber, -1}, {Item::Firewood, 4}});
-    default: return {};
+    default: return FindCropMeal(recipe) ? CropMealChange(recipe) : FishMealChange(recipe);
     }
 }
 bool Hafting(Recipe recipe) { return recipe >= Recipe::HaftAxe && recipe <= Recipe::HaftPickaxe; }
 // The one place that says which recipes cook: they need a lit fire or the hearth.
-bool Cooking(Recipe recipe) { return recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots; }
+bool Cooking(Recipe recipe)
+{
+    const auto* fishMeal = FindFishMeal(recipe);
+    return recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots || FindCropMeal(recipe) != nullptr
+        || (fishMeal && fishMeal->cooking);
+}
 std::string DescribeCost(const Inventory& change)
 {
     std::string result;
@@ -954,10 +960,12 @@ const char* ResourceName(ResourceKind kind)
 }
 const char* RecipeName(Recipe recipe)
 {
+    if (const auto* meal = FindCropMeal(recipe)) return ItemName(meal->output);
+    if (const auto* meal = FindFishMeal(recipe)) return ItemName(meal->output);
     static const char* names[] = {"Craft an axe", "Craft a hoe", "Craft a scythe", "Craft a billhook", "Craft a pickaxe",
         "Roasted roots", "Herbed roots", "Split firewood"};
-    static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(Recipe::Count), "Every recipe needs a name.");
-    return ValidEnum(recipe, Recipe::Count) ? names[static_cast<int>(recipe)] : "Unknown recipe";
+    static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(Recipe::RoastedTurnips), "Legacy recipe names stay in order.");
+    return ValidEnum(recipe, Recipe::RoastedTurnips) ? names[static_cast<int>(recipe)] : "Unknown recipe";
 }
 const char* PieceName(Piece piece)
 {
@@ -1216,6 +1224,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     layout_ = std::make_shared<const EstateLayout>(layout);
     placements_ = std::make_shared<const EstatePlacements>(placements);
     state_ = std::move(candidate);
+    fishing_ = {};
     GrantLampKit();
     return {true, "You arrive home to " + state_.estateName + ".", ResultCode::None, ++revision_};
 }
@@ -1273,6 +1282,7 @@ Result Simulation::NewGame(std::uint64_t seed)
     const auto populated = Materialize(candidate, nullptr, nextHandle);
     if (!populated) return populated;
     state_ = std::move(candidate);
+    fishing_ = {};
     nextResourceHandle_ = nextHandle;
     return {true, "A new seeded woodland is ready.", ResultCode::None, ++revision_};
 }
@@ -2058,7 +2068,7 @@ Result Simulation::Craft(Recipe recipe, Point player)
     if (!ValidEnum(recipe, Recipe::Count) || !ValidPoint(player)) return Bad("Choose a valid recipe and location.");
     const Inventory change = CraftChange(recipe);
     const bool cooking = Cooking(recipe);
-    if (cooking && !IsNearFire(player)) return Bad("Move beside a lit cookfire or the hearth to cook roots; no pot is needed.");
+    if (cooking && !IsNearFire(player)) return Bad("Move beside a lit cookfire or the hearth to cook; no pot is needed.");
     if (recipe == Recipe::SplitFirewood && Count(Item::Hatchet) == 0)
         return Bad("Take your axe from storage to split firewood.");
     const double cost = cooking ? Exertion::CookEnergy
@@ -2776,9 +2786,10 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     if (!plot->planted || plot->growth < 1.0)
         return Bad(plot->planted ? PlotStatus(*plot) + "." : std::string("Nothing is growing here yet."));
     const auto& crop = GetCropInfo(plot->kind);
+    const int bonusCount = HarvestBonusCount(plot->kind, plotId, state_.hour);
     Inventory yield{};
     yield[static_cast<int>(crop.produce)] += crop.produceCount;
-    if (crop.bonus != Item::Count && crop.bonusCount > 0) yield[static_cast<int>(crop.bonus)] += crop.bonusCount;
+    if (crop.bonus != Item::Count && bonusCount > 0) yield[static_cast<int>(crop.bonus)] += bonusCount;
     if (auto ready = CheckExertion(Exertion::HarvestCropEnergy); !ready) return ready;
     if (!TryAdjust(yield)) return Bad(MissingMessage(yield, state_.inventory));
     const bool regrows = crop.regrowHours > 0.0;
@@ -2794,7 +2805,9 @@ Result Simulation::HarvestCrop(int plotId, Point player)
         return text;
     };
     std::string message = "Harvested " + counted(crop.produce, crop.produceCount);
-    if (crop.bonus != Item::Count && crop.bonusCount > 0) message += " and " + counted(crop.bonus, crop.bonusCount);
+    if (crop.bonus != Item::Count && bonusCount > 0)
+        message += " and " + (crop.bonus == Item::Seeds && bonusCount == 1 ? std::string("1 seed")
+            : counted(crop.bonus, bonusCount));
     message += regrows ? ". More will ripen in about " + std::to_string(CropRegrowDays(plot->kind))
             + (CropRegrowDays(plot->kind) == 1 ? " day." : " days.")
         : ". This plot is ready to replant.";
@@ -3488,6 +3501,7 @@ Result Simulation::Deserialize(const std::string& data)
     state_ = std::move(candidate);
     nextResourceHandle_ = nextHandle;
     // Saves from before the lamp get its kit once.
+    fishing_ = {};
     GrantLampKit();
     return {true, "Homestead restored. No time passed while you were away.", ResultCode::None, ++revision_};
 }

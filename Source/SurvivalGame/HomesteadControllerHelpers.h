@@ -12,7 +12,8 @@ namespace HomesteadControllerHelpers
 // The estate's tools. The retired knife and machete no longer ride on the hotbar.
 inline bool IsHotbarTool(Homestead::Item Item)
 {
-    return Homestead::ToolForItem(Item) != Homestead::ToolKind::Count || Item == Homestead::Item::OilLamp;
+    return Homestead::ToolForItem(Item) != Homestead::ToolKind::Count || Item == Homestead::Item::OilLamp
+        || Item == Homestead::Item::FishingPole;
 }
 
 template <typename FPredicate>

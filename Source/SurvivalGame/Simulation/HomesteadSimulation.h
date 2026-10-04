@@ -3,6 +3,7 @@
 #include "HomesteadCalendar.h"
 #include "HomesteadDaylight.h"
 #include "HomesteadItems.h"
+#include "HomesteadFishing.h"
 #include "HomesteadRain.h"
 #include "HomesteadShops.h"
 #include "HomesteadWorldGeneration.h"
@@ -39,7 +40,16 @@ enum class ResourceKind : int
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
-enum class Recipe : int { HaftAxe, HaftHoe, HaftScythe, HaftBillhook, HaftPickaxe, RoastedRoots, HerbedRoots, SplitFirewood, Count };
+enum class Recipe : int
+{
+    HaftAxe, HaftHoe, HaftScythe, HaftBillhook, HaftPickaxe, RoastedRoots, HerbedRoots, SplitFirewood,
+    // add-basic-crop-cookfire-recipes.
+    RoastedTurnips, StewedCarrots, BakedPotatoes, HerbedBroadBeans,
+    CabbagePotatoStew, BerryCompote, StrawberryCompote, RootVegetableHotpot,
+    RawFishSlices, GrilledTrout, GrilledPerch, GrilledMackerel,
+    FishSoup, FishAndPotatoes, HerbedCarp, MackerelChowder,
+    Count
+};
 // One of each tool; its tier belongs to the tool type (State::toolTiers).
 enum class ToolKind : int { Axe, Hoe, Pail, Scythe, Billhook, Pickaxe, Count };
 enum class ToolTier : int { Worn, Iron, Steel, Master, Count };
@@ -535,6 +545,14 @@ public:
     // the game supplies the probe. Generated worlds keep the procedural stream test.
     void SetWaterProbe(std::function<bool(Point)> probe) { waterProbe_ = std::move(probe); }
     bool NearWater(Point position) const;
+    void SetFishingWaterProbe(std::function<FishingWater(Point)> probe) { fishingWaterProbe_ = std::move(probe); }
+    FishingWater FishingWaterAt(Point player) const;
+    const FishingSession& FishingCast() const { return fishing_; }
+    Result CheckFishing(Point player) const;
+    Result BeginFishing(Point player);
+    Result AdvanceFishing(double seconds, Point player);
+    Result FishingPress(Point player);
+    Result CancelFishing();
     // True when a pail waits in a chest or other storage (and so can be fetched to fill).
     bool PailStored() const;
     Result SetActiveWorldRegion(Point player,
@@ -811,6 +829,8 @@ private:
     std::shared_ptr<const EstateLayout> layout_;
     std::shared_ptr<const EstatePlacements> placements_;
     std::function<bool(Point)> waterProbe_;
+    std::function<FishingWater(Point)> fishingWaterProbe_;
+    FishingSession fishing_;
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
     int dozes_ = 0;

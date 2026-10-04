@@ -16,6 +16,7 @@
 #include "UI/SHomesteadHotbar.h"
 #include "UI/SHomesteadHudScale.h"
 #include "UI/SHomesteadVitals.h"
+#include "UI/SHomesteadFishing.h"
 
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
@@ -76,11 +77,23 @@ void AHomesteadController::ShowHotbar()
             SNew(HomesteadMenus::SHomesteadClock).Controller(this)
         ];
     GEngine->GameViewport->AddViewportWidgetContent(ClockRoot.ToSharedRef(), 50);
+    FishingRoot = SNew(SBox)
+        .Visibility_Lambda([this]()
+        {
+            return IsFishing() && ShouldShowHotbar() && !HasNativeMenu() && !IsNewGameSetup() && !IsNamingSetup()
+                ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
+        })
+        [ SNew(HomesteadMenus::SHomesteadFishing).Controller(this) ];
+    GEngine->GameViewport->AddViewportWidgetContent(FishingRoot.ToSharedRef(), 50);
 }
 
 void AHomesteadController::HideHotbar()
 {
     HoveredHotbarSlot = INDEX_NONE;
+    if (IsFishing()) Sim.CancelFishing();
+    if (FishingRoot.IsValid() && GEngine && GEngine->GameViewport)
+        GEngine->GameViewport->RemoveViewportWidgetContent(FishingRoot.ToSharedRef());
+    FishingRoot.Reset();
     if (HotbarRoot.IsValid() && GEngine && GEngine->GameViewport)
         GEngine->GameViewport->RemoveViewportWidgetContent(HotbarRoot.ToSharedRef());
     if (VitalsRoot.IsValid() && GEngine && GEngine->GameViewport)
@@ -258,6 +271,7 @@ bool AHomesteadController::KnifePreviewRequested() const
 Homestead::Item AHomesteadController::PresentedTool() const
 {
     if (!ShouldShowHotbar()) return Homestead::Item::Count;
+    if (IsFishing()) return SelectedCarriedTool();
     const int32 Slot = HoveredHotbarSlot != INDEX_NONE ? HoveredHotbarSlot : SelectedHotbarSlot;
     const auto Tool = HotbarItem(Slot);
     return Tool != Homestead::Item::Count && IsHotbarTool(Tool) ? Tool : Homestead::Item::Count;
@@ -300,6 +314,7 @@ void AHomesteadController::UseSelectedTool()
     if (bPlanning && !bBookOpen) { Interact(); return; }
     if (!ShouldShowHotbar() || SelectedHotbarSlot < 0 || SelectedHotbarSlot >= Homestead::PackRowSize) return;
     const auto Selected = HotbarItem(SelectedHotbarSlot);
+    if (Selected == Homestead::Item::FishingPole) { FishingInput(); return; }
     const int32 ToolValue = Selected == Homestead::Item::Count ? -1 : static_cast<int32>(Selected);
     // Seeds on bare tilled soil: plant them there. A selected berry is always eaten (X / F sows
     // berry seed into a bare plot), so she can snack beside her own garden.

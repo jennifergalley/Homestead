@@ -192,6 +192,9 @@ public:
     bool IsEstateMap() const { return bEstateMap; }
     // Distance (cm) from a point to the nearest drawable water's edge; <= 0 is in the water.
     double WaterEdgeDistance(Homestead::Point Position, bool bIncludeSea = true) const;
+    Homestead::FishingWater ProbeFishingWater(Homestead::Point Position) const;
+    bool IsFishing() const;
+    FString FishingPrompt() const;
     bool IsWorldReady() const { return bWorldReady; }
     uint32 WorldRecoveryCount() const { return WorldRecoveries; }
     // Where the construction preview currently resolves (snapped or free-standing).
@@ -689,6 +692,12 @@ private:
     // Food, energy and the purse (UI/SHomesteadVitals), shown and removed with the hotbar.
     TSharedPtr<SWidget> VitalsRoot;
     TSharedPtr<SWidget> ClockRoot;
+    TSharedPtr<SWidget> FishingRoot;
+    void FishingInput();
+    void TickFishing(float DeltaSeconds);
+    Homestead::FishingWater FocusedFishingWater = Homestead::FishingWater::None;
+    FString FishingFocusText;
+    bool UpdateFishingFocus(Homestead::Point Position);
     // add-ruined-manor-and-arrival: the Names step and the arrival title card.
     bool bNewGameSetup = false;
     TSharedPtr<HomesteadMenus::SHomesteadNames> NamesWidget;

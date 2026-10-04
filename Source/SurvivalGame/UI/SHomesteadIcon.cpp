@@ -288,7 +288,9 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("wild-garlic")), EKind::WildGarlic},
         {FName(TEXT("oil-lamp")), EKind::OilLamp},
         {FName(TEXT("oil-flask")), EKind::OilFlask},
-        {FName(TEXT("pouch-arrows")), EKind::PouchArrows}
+        {FName(TEXT("pouch-arrows")), EKind::PouchArrows},
+        {FName(TEXT("fishing-pole")), EKind::FishingPole},
+        {FName(TEXT("fish")), EKind::Fish}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -321,6 +323,18 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
     const FLinearColor Gold = P.Accent;
     switch (IconKind)
     {
+    case EKind::FishingPole:
+        P.Line({{12, 47}, {33, 10}, {39, 8}}, Wood, 4);
+        P.Line({{39, 8}, {44, 17}, {44, 35}, {39, 41}, {35, 39}, {35, 35}}, Cream, 1.5f);
+        P.Line({{11, 47}, {17, 36}}, Gold, 6);
+        break;
+    case EKind::Fish:
+        P.Shape({{11, 28}, {19, 18}, {34, 17}, {44, 27}, {35, 38}, {20, 38}}, WaterBlue);
+        P.Shape({{11, 28}, {5, 18}, {5, 38}}, Gold);
+        P.Shape({{23, 19}, {29, 10}, {35, 19}}, Cream);
+        P.Line({{19, 28}, {32, 30}}, Cream, 1.5f);
+        P.Disc(37, 25, 2, Pine);
+        break;
     case EKind::Pack:
         P.Line({{21, 14}, {21, 8}, {34, 8}, {34, 14}}, Cream, 3);
         P.Shape({{16, 15}, {39, 15}, {44, 23}, {43, 47}, {12, 47}, {11, 23}}, Wood);

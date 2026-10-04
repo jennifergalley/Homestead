@@ -1,5 +1,6 @@
 #include "HomesteadController.h"
 #include "HomesteadControllerConfig.h"
+#include "HomesteadActionHints.h"
 #include "HomesteadControllerHelpers.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadWorld.h"
@@ -100,6 +101,12 @@ void AHomesteadController::UpdateFocus()
             bHasFocusTarget = false;
         }
     }
+    if (UpdateFishingFocus(Position))
+    {
+        Focus = EFocus::Water;
+        FocusId = -1;
+        bHasFocusTarget = false;
+    }
     // With the machete out, the nearest bush or bramble within arm's reach takes the focus.
     const bool bMachete = HotbarItem(SelectedHotbarSlot) == Homestead::Item::Machete
         && Sim.Count(Homestead::Item::Machete) > 0;
@@ -184,7 +191,10 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Hearth: return TEXT("Hearth");
     case EFocus::Bed: return TEXT("Bed");
     case EFocus::Chest: return ChestDisplayName(FocusId);
-    case EFocus::Water: return TEXT("Fresh stream water");
+    case EFocus::Water:
+        if (SelectedCarriedTool() == Homestead::Item::FishingPole)
+            return FString(UTF8_TO_TCHAR(Homestead::Fishing::WaterName(FocusedFishingWater))) + TEXT(" fishing");
+        return TEXT("Fresh stream water");
     case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusTitle();
@@ -256,9 +266,10 @@ FString AHomesteadController::FocusActions() const
                 const Homestead::Item Chosen = HotbarItem(SelectedHotbarSlot);
                 if (!Plot.planted && Chosen != Homestead::Item::Count)
                     if (Homestead::CropForSeed(Chosen))
-                        Actions.Add(Sim.Count(Chosen) <= 0
-                            ? TEXT("No ") + Text(Homestead::ItemName(Chosen)).ToLower() + TEXT(" left")
-                            : A + TEXT(" Plant ") + Text(Homestead::ItemName(Chosen)));
+                    {
+                        const auto Cue = Homestead::DescribeSow(Sim, Plot.id, PlayerPoint(), Chosen, {});
+                        Actions.Add((Cue.keyed ? A + TEXT(" ") : FString()) + Text(Cue.text.c_str()));
+                    }
                 if (Homestead::IsRipe(Plot)) Actions.Add(A + TEXT(" Harvest"));
                 if (Homestead::HasVisibleWeeds(Plot)) Actions.Add(X + TEXT(" Pull weeds"));
                 if (Plot.planted && Plot.withered && ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
@@ -280,6 +291,11 @@ FString AHomesteadController::FocusActions() const
         return FString();
     case EFocus::Chest: return A + TEXT(" Open");
     case EFocus::Water:
+        if (ToolAvailable && SelectedTool == Homestead::Item::FishingPole)
+        {
+            if (IsFishing()) return FString();
+            return FishingFocusText;
+        }
         // The pail is filled with the tool button; only offered with it in hand.
         if (!ToolAvailable || SelectedTool != Homestead::Item::WateringCan) return FString();
         return Sim.Count(Homestead::Item::Water) >= Homestead::PailPortions ? FString(TEXT("Pail full")) : Use + TEXT(" Fill pail");
@@ -332,7 +348,7 @@ int32 AHomesteadController::HintUseCount(const FString& Verb) const
 
 bool AHomesteadController::IsHintRetired(const FString& Verb) const
 {
-    return HintUseCount(Verb) >= HintRetireUses;
+    return HomesteadActionHints::ShouldRetire(TCHAR_TO_UTF8(*Verb), HintUseCount(Verb), HintRetireUses);
 }
 
 AHomesteadController::FHintUse AHomesteadController::BeginHintUse(const FString& Button) const

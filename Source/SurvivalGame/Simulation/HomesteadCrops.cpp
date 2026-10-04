@@ -28,7 +28,7 @@ constexpr SeasonMask CropSeasonsSpringToAutumn = CropSeasonsSpringSummer | Seaso
 // crops follow Coral Island / Stardew pacing (a handful of days), not real gardening time.
 const CropInfo CropTable[] = {
     // Legacy crops from the woodland prototype, kept with their original timings and yields.
-    {CropKind::Roots, "Roots", "roots", Item::Seeds, Item::Roots, 4, Item::Seeds, 2, 30.0, 0.0,
+    {CropKind::Roots, "Roots", "roots", Item::Seeds, Item::Roots, 4, Item::Seeds, 1, 30.0, 0.0,
         HarvestStyle::Pull, "CropCarrot", CropSeasonsSpringToAutumn},
     {CropKind::Berries, "Berries", "berries", Item::Berries, Item::Berries, 6, Item::Count, 0, 42.0, 24.0,
         HarvestStyle::Pick, "CropStrawberry", CropSeasonsSpringToAutumn},
@@ -59,6 +59,17 @@ bool CropTableInOrder()
 const CropInfo UnknownCropInfo{CropKind::Count, "Unknown crop", "unknown crop"};
 
 int CropDaysFor(double hours) { return hours <= 0.0 ? 0 : std::max(1, static_cast<int>(std::ceil(hours / 24.0 - 1e-9))); }
+
+double CropDailyRoll(int plotId, int day, std::uint64_t salt)
+{
+    std::uint64_t roll = (static_cast<std::uint64_t>(static_cast<std::uint32_t>(plotId)) << 32)
+        ^ static_cast<std::uint32_t>(day);
+    roll += salt;
+    roll = (roll ^ (roll >> 30)) * 0xBF58476D1CE4E5B9ull;
+    roll = (roll ^ (roll >> 27)) * 0x94D049BB133111EBull;
+    roll ^= roll >> 31;
+    return static_cast<double>(roll >> 11) / 9007199254740992.0;
+}
 }
 
 const CropInfo& GetCropInfo(CropKind kind)
@@ -77,6 +88,15 @@ const CropInfo* CropForSeed(Item seed)
 
 int CropDays(CropKind kind) { return CropDaysFor(GetCropInfo(kind).growHours); }
 int CropRegrowDays(CropKind kind) { return CropDaysFor(GetCropInfo(kind).regrowHours); }
+
+int HarvestBonusCount(CropKind kind, int plotId, double hour)
+{
+    const auto& crop = GetCropInfo(kind);
+    if (crop.bonus == Item::Count || crop.bonusCount <= 0) return 0;
+    if (!CropForSeed(crop.bonus)) return crop.bonusCount;
+    constexpr double HarvestSeedChance = 0.25;
+    return CropDailyRoll(plotId, Calendar::DayIndex(hour), 0xD1B54A32D192ED03ull) < HarvestSeedChance ? 1 : 0;
+}
 
 double MoistureGrowthFactor(double moisture)
 {
@@ -195,14 +215,7 @@ int WeedDay(double hour)
 
 bool WeedsComeUp(int plotId, int day)
 {
-    // SplitMix64 of the plot and the day: a well-mixed, platform-independent value per pair.
-    std::uint64_t x = (static_cast<std::uint64_t>(static_cast<std::uint32_t>(plotId)) << 32)
-        ^ static_cast<std::uint32_t>(day);
-    x += 0x9E3779B97F4A7C15ull;
-    x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9ull;
-    x = (x ^ (x >> 27)) * 0x94D049BB133111EBull;
-    x ^= x >> 31;
-    return static_cast<double>(x >> 11) / 9007199254740992.0 < CropCare::DailyWeedChance; // 2^53
+    return CropDailyRoll(plotId, day, 0x9E3779B97F4A7C15ull) < CropCare::DailyWeedChance;
 }
 
 void GrowDailyWeeds(State& state, int days)

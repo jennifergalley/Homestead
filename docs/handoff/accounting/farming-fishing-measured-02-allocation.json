@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "buildId": "20261003-measured-02",
+  "authorizedAt": "2026-10-04T01:55:51.513Z",
+  "segments": [
+    {
+      "sessionId": "5be207bc-49b1-4a1b-811e-088ae565dc1b",
+      "task": "farming-fishing-startup-and-planning",
+      "tasks": [
+        "fix-seed-planting-hint-and-harvest-balance",
+        "add-basic-crop-cookfire-recipes",
+        "add-shore-and-river-fishing"
+      ],
+      "category": "overhead",
+      "since": "2026-10-04T01:55:51.513Z",
+      "until": "2026-10-04T02:04:27.787Z",
+      "launchContextTier": "default",
+      "contextTier": null
+    },
+    {
+      "sessionId": "5be207bc-49b1-4a1b-811e-088ae565dc1b",
+      "task": "seed-hints-balance-and-crop-meals",
+      "tasks": [
+        "fix-seed-planting-hint-and-harvest-balance",
+        "add-basic-crop-cookfire-recipes"
+      ],
+      "category": "implementation",
+      "since": "2026-10-04T02:04:27.787Z",
+      "until": "2026-10-04T02:17:28.345Z",
+      "launchContextTier": "default",
+      "contextTier": null
+    },
+    {
+      "sessionId": "5be207bc-49b1-4a1b-811e-088ae565dc1b",
+      "task": "active-fishing-pole-and-fish-preparations",
+      "tasks": ["add-shore-and-river-fishing"],
+      "category": "implementation",
+      "since": "2026-10-04T02:17:28.345Z",
+      "launchContextTier": "default",
+      "contextTier": null
+    }
+  ]
+}

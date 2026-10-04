@@ -25,6 +25,12 @@ enum class Item : int
     // improve-crops-and-harvest: period crop seed (sold at the general store) and the produce.
     TurnipSeed, CarrotSeed, SeedPotato, CabbageSeed, BroadBeanSeed, StrawberryRunner,
     Turnip, Carrot, Potato, Cabbage, BroadBeans, Strawberries,
+    // add-basic-crop-cookfire-recipes.
+    RoastedTurnips, StewedCarrots, BakedPotatoes, HerbedBroadBeans,
+    CabbagePotatoStew, BerryCompote, StrawberryCompote, RootVegetableHotpot,
+    FishingPole, RiverTrout, RiverSalmon, LakePerch, LakeCarp, SeaMackerel, SeaBass,
+    RawFishSlices, GrilledTrout, GrilledPerch, GrilledMackerel,
+    FishSoup, FishAndPotatoes, HerbedCarp, MackerelChowder,
     Count
 };
 constexpr int ItemCount = static_cast<int>(Item::Count);

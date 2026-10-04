@@ -27,7 +27,7 @@ struct CropInfo
     Item produce = Item::Count;
     int produceCount = 0;
     Item bonus = Item::Count;  // an extra yield, e.g. seed saved from wild roots
-    int bonusCount = 0;
+    int bonusCount = 0;        // maximum; cultivated seed bonuses use HarvestBonusCount
     // Hours of steady growth from sowing to ripe when the soil is kept watered and weeded.
     double growHours = 0.0;
     // Hours for a picked plant to ripen again; 0 when harvesting clears the plot.
@@ -46,6 +46,8 @@ const CropInfo* CropForSeed(Item seed);
 // Whole days to ripen when watered (growHours rounded up to days).
 int CropDays(CropKind kind);
 int CropRegrowDays(CropKind kind);
+// Seed bonuses are occasional, deterministic per plot/day; other bonus items retain their quantity.
+int HarvestBonusCount(CropKind kind, int plotId, double hour);
 
 // Growth-rate modifiers. Soil watered within the last day grows at full speed; drier soil and a
 // plot more than half weedy grow slowly, never kill the crop.

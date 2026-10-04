@@ -52,7 +52,8 @@ std::string FormatMoneyDelta(Coins amount)
 const std::vector<Item>& ShopGoods(ShopKind kind)
 {
     static const std::vector<Item> generalStore = {Item::Pasty, Item::Bread, Item::Cheese, Item::Twine, Item::OilFlask,
-        Item::TurnipSeed, Item::CarrotSeed, Item::SeedPotato, Item::CabbageSeed, Item::BroadBeanSeed, Item::StrawberryRunner};
+        Item::TurnipSeed, Item::CarrotSeed, Item::SeedPotato, Item::CabbageSeed, Item::BroadBeanSeed, Item::StrawberryRunner,
+        Item::FishingPole};
     static const std::vector<Item> none;
     return kind == ShopKind::GeneralStore ? generalStore : none;
 }
@@ -146,7 +147,7 @@ std::string ClosedSignText(const Shop& shop, double hour)
 }
 
 Coins SellPrice(Item item) { return BasePrice(item); }
-Coins BuyPrice(Item item) { return RoundedMarkup(BasePrice(item)); }
+Coins BuyPrice(Item item) { return item == Item::FishingPole ? Fishing::PolePriceCoins : RoundedMarkup(BasePrice(item)); }
 Coins BuyBackPrice(Item item) { return SellPrice(item); }
 
 int SellDownAmount(int quantity)
