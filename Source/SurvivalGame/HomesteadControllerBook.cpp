@@ -201,6 +201,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
         for (int Index = 0; Index < static_cast<int>(Homestead::Recipe::Count); ++Index)
         {
             const auto Recipe = static_cast<Homestead::Recipe>(Index);
+            if (!Homestead::IsRecipeAvailable(Recipe)) continue;
             const auto Assessment = Sim.AssessRecipe(Recipe, PlayerPoint());
             FHomesteadRow Row;
             Row.Id = Index;

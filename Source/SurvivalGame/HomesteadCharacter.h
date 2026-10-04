@@ -272,6 +272,7 @@ public:
     UAnimSequence* GetFellAnimation() const;
     // A berry (or piece of root) from the hip pouch to her mouth (MetaHuman only; false otherwise).
     bool PlayEat(bool bBerry);
+    bool PlayEat(Homestead::Item Food);
     UAnimSequence* GetEatAnimation() const { return EatAnimation; }
     // AN_HeroineMH_CraftHands (homestead_agent.craft_hands): one loop is one craft cycle
     // (the same length as SHomesteadMenu::CraftCycleSeconds).
@@ -400,6 +401,8 @@ private:
     void UpdateEating();
     UPROPERTY() TObjectPtr<UStaticMesh> ForageBerryMesh;
     UPROPERTY() TObjectPtr<UStaticMesh> ForageRootMesh;
+    UPROPERTY() TMap<int32, TObjectPtr<UStaticMesh>> OriginalFoodMeshes;
+    UPROPERTY() TObjectPtr<UStaticMesh> EatingOriginalMesh;
     // A harvested crop's produce, shown in her hand instead of the wild forage prop (pivot at the grip).
     UPROPERTY() TObjectPtr<UStaticMesh> HarvestProduceMesh;
     // The forage pouch on her right hip (shown on the MetaHuman heroine).

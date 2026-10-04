@@ -5,6 +5,8 @@
 #include "Widgets/DeclarativeSyntaxSupport.h"
 #include "Widgets/SLeafWidget.h"
 
+struct FSlateDynamicImageBrush;
+
 namespace HomesteadIcons
 {
 class SURVIVALGAME_API SHomesteadIcon : public SLeafWidget
@@ -47,6 +49,10 @@ private:
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{HomesteadPalette::Brass};
     TAttribute<float> Desaturation{0.0f};
+    mutable FName ImageKind;
+    mutable bool bImageResolved = false;
+    mutable bool bOriginalImageExpected = false;
+    mutable TSharedPtr<FSlateDynamicImageBrush> OriginalImage;
 };
 }
 using SHomesteadIcon = HomesteadIcons::SHomesteadIcon;

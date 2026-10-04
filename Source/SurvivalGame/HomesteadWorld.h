@@ -588,6 +588,8 @@ private:
         bool bDeconstruct = false);
     void BuildPlot(FHomesteadWorldVisual& Visual, const Homestead::Plot& Plot);
     void BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop);
+    void BuildOriginalItemDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop);
+    UPROPERTY() TMap<int32, TObjectPtr<UStaticMesh>> OriginalDropMeshes;
     // A set-down oil lamp: the lamp on whatever is underfoot, lit while it has oil (false when the
     // lamp mesh isn't imported, so the generic bundle shows instead).
     bool BuildLampDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop);

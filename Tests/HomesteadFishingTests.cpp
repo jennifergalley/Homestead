@@ -3,6 +3,7 @@
 #include "HomesteadFood.h"
 #include "HomesteadRecipes.h"
 #include "HomesteadSimulation.h"
+#include "../Source/SurvivalGame/HomesteadOriginalItemArt.h"
 
 #include <algorithm>
 #include <cmath>
@@ -234,6 +235,7 @@ void Preparations()
         if (structure.kind == Piece::Hearth) { fire = base.StructureCenter(structure); found = true; break; }
     CHECK(found);
     std::set<Item> usedFish;
+    int available = 0, deferred = 0;
     for (int index = static_cast<int>(Recipe::RawFishSlices); index <= static_cast<int>(Recipe::MackerelChowder); ++index)
     {
         const auto recipe = static_cast<Recipe>(index);
@@ -256,6 +258,17 @@ void Preparations()
         CHECK(FoodClassOf(meal->output) == FoodClass::Meal && energy <= 100.0);
         CHECK(FishMealChange(recipe)[static_cast<int>(Item::Kindling)] == (meal->cooking ? -1 : 0));
         const auto inspection = sim.AssessRecipe(recipe, fire);
+        if (!IsRecipeAvailable(recipe))
+        {
+            ++deferred;
+            const auto before = sim.Serialize();
+            const auto revision = sim.GetRevision();
+            CHECK(!inspection.craftable && inspection.output == Item::Count);
+            CHECK(inspection.blocker == "This preparation is deferred from this playtest.");
+            CHECK(!sim.Craft(recipe, fire) && sim.Serialize() == before && sim.GetRevision() == revision);
+            continue;
+        }
+        ++available;
         CHECK(inspection.craftable && inspection.stationRequired == meal->cooking);
         CHECK(inspection.output == meal->output && inspection.outputCount == 1);
         if (meal->cooking)
@@ -280,8 +293,48 @@ void Preparations()
         CHECK(sim.GetState().energy == std::min(100.0, beforeEnergy + energy));
     }
     CHECK(usedFish.size() == 6);
+    CHECK(available == 3 && deferred == 5);
+    CHECK(IsRecipeAvailable(Recipe::RootVegetableHotpot) && IsRecipeAvailable(Recipe::GrilledPerch));
+    CHECK(!IsRecipeAvailable(Recipe::Count)
+        && !IsRecipeAvailable(static_cast<Recipe>(std::numeric_limits<int>::min())));
     CHECK(!FindFishMeal(Recipe::RoastedRoots) && !FindFishMeal(Recipe::Count));
     CHECK(!FindFishMeal(static_cast<Recipe>(std::numeric_limits<int>::min())));
+}
+
+void OriginalArtMappings()
+{
+    using namespace Homestead;
+    std::set<Item> items;
+    std::set<std::string> icons;
+    int meals = 0, fish = 0;
+    for (const auto& art : HomesteadOriginalItemArt::Entries)
+    {
+        CHECK(items.insert(art.item).second);
+        CHECK(icons.insert(art.icon).second);
+        CHECK(std::string(ItemIcon(art.item)) == art.icon);
+        CHECK(art.serving && *art.serving);
+        if (art.portion)
+        {
+            ++meals;
+            CHECK(FoodClassOf(art.item) == FoodClass::Meal);
+            CHECK(std::string(art.folder) == "PreparedFood");
+        }
+        if (art.fish)
+        {
+            ++fish;
+            CHECK(!art.portion && art.item >= Item::RiverTrout && art.item <= Item::SeaBass);
+            CHECK(std::string(art.folder) == "CaughtFish");
+        }
+    }
+    CHECK(meals == 11 && fish == 6 && items.size() == 18);
+    for (int index = static_cast<int>(Item::GrilledMackerel); index <= static_cast<int>(Item::MackerelChowder); ++index)
+    {
+        const Item item = static_cast<Item>(index);
+        CHECK(!HomesteadOriginalItemArt::Find(item));
+        CHECK(std::string(ItemIcon(item)) == "deferred-meal");
+    }
+    CHECK(!HomesteadOriginalItemArt::Find(Item::Count));
+    CHECK(!HomesteadOriginalItemArt::FindIcon("fish"));
 }
 }
 
@@ -291,6 +344,7 @@ int main()
     FishingTests::HabitatsAndReplay();
     FishingTests::TimingAndCancellation();
     FishingTests::Preparations();
+    FishingTests::OriginalArtMappings();
     std::cout << "Fishing price, habitats, timing, cancellation, food and persistence: "
         << FishingTests::Checks << " checks passed.\n";
 }

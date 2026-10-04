@@ -378,6 +378,12 @@ void RequirementsMatchTransactions()
         const auto before = sim.GetState().inventory;
         const double hour = sim.GetState().hour;
         const char* description = RecipeRequirements(recipe);
+        if (!IsRecipeAvailable(recipe))
+        {
+            UnchangedFailure(sim, [&] { return sim.Craft(recipe, Home); });
+            CHECK(description == RecipeRequirements(recipe));
+            continue;
+        }
         OK(sim.Craft(recipe, Home));
         CHECK(sim.GetState().hour == hour);
         const std::string spent = SpentDescription(before, sim.GetState().inventory);
@@ -532,6 +538,14 @@ void StructuredRecipeAssessment()
         const auto before = complete.Serialize();
         const auto revision = complete.GetRevision();
         const auto assessment = complete.AssessRecipe(recipe, position);
+        if (!IsRecipeAvailable(recipe))
+        {
+            CHECK(!assessment.craftable && assessment.output == Item::Count);
+            CHECK(assessment.blocker == "This preparation is deferred from this playtest.");
+            CHECK(!complete.Craft(recipe, position));
+            CHECK(complete.Serialize() == before && complete.GetRevision() == revision);
+            continue;
+        }
         CHECK(assessment.craftable && assessment.output == Outputs[index]);
         CHECK(assessment.outputCount == OutputCounts[index] && assessment.capacityMet);
         for (const auto& ingredient : assessment.ingredients)

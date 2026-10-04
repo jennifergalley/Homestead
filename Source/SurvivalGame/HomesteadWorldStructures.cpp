@@ -3,6 +3,7 @@
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldLook.h"
 #include "HomesteadLampLook.h"
+#include "HomesteadOriginalItemArt.h"
 #include "Simulation/HomesteadDoor.h"
 #include "Simulation/HomesteadRoomAudio.h"
 #include "Simulation/HomesteadEstatePublicRoad.h"
@@ -393,6 +394,11 @@ bool AHomesteadWorld::BuildLampDrop(FHomesteadWorldVisual& Visual, const Homeste
 void AHomesteadWorld::BuildDrop(FHomesteadWorldVisual& Visual, const Homestead::WorldDrop& Drop)
 {
     if (Drop.wearableId == 0 && Drop.item == Homestead::Item::OilLamp && BuildLampDrop(Visual, Drop)) return;
+    if (Drop.wearableId == 0 && HomesteadOriginalItemArt::Find(Drop.item))
+    {
+        BuildOriginalItemDrop(Visual, Drop);
+        return;
+    }
     FLinearColor Tint(0.56f, 0.43f, 0.22f);
     if (Drop.wearableId != 0) Tint = FLinearColor(0.64f, 0.42f, 0.52f);
     else

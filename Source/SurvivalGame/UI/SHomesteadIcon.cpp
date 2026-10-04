@@ -1,6 +1,9 @@
 #include "SHomesteadIcon.h"
 #include "HomesteadPalette.h"
+#include "HomesteadOriginalIcons.h"
+#include "../HomesteadOriginalItemArt.h"
 
+#include "Brushes/SlateDynamicImageBrush.h"
 #include "Rendering/DrawElements.h"
 #include "Styling/CoreStyle.h"
 
@@ -294,6 +297,28 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
     };
 
     const FName CurrentKind = Kind.Get();
+    if (!bImageResolved || ImageKind != CurrentKind)
+    {
+        ImageKind = CurrentKind;
+        bOriginalImageExpected = HomesteadOriginalItemArt::FindIcon(TCHAR_TO_UTF8(*CurrentKind.ToString())) != nullptr;
+        OriginalImage = HomesteadOriginalIcons::Load(CurrentKind);
+        bImageResolved = true;
+    }
+    if (OriginalImage)
+    {
+        const FVector2D Size = AllottedGeometry.GetLocalSize();
+        const double Side = FMath::Min(Size.X, Size.Y);
+        FLinearColor ImageTint = InWidgetStyle.GetColorAndOpacityTint();
+        ImageTint.A *= Tint.Get().A;
+        const ESlateDrawEffect ImageEffects = ShouldBeEnabled(bParentEnabled) && Desaturation.Get() <= 0.0f
+            ? ESlateDrawEffect::None : ESlateDrawEffect::DisabledEffect;
+        FSlateDrawElement::MakeBox(OutDrawElements, LayerId,
+            AllottedGeometry.ToPaintGeometry(FVector2D(Side, Side), FSlateLayoutTransform((Size - FVector2D(Side, Side)) * 0.5)),
+            OriginalImage.Get(), ImageEffects, ImageTint);
+        return LayerId;
+    }
+    if (CurrentKind == FName(TEXT("deferred-meal")) || bOriginalImageExpected)
+        return LayerId;
     EKind IconKind = EKind::Unknown;
     for (const auto& Entry : Kinds)
     {

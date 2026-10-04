@@ -1,0 +1,1258 @@
+{
+  "schema": 1,
+  "name": "PreparedFood",
+  "collision": "none",
+  "source_freeze_commit": "843324c17b85b5432785fc7a6b9e333702dc26ec",
+  "provisional_appearance": true,
+  "final_realism_accepted": false,
+  "blender": "5.2.1 LTS",
+  "provenance": "Frozen original Homestead geometry/procedural art; no reused older game assets.",
+  "meshes": {
+    "SM_BakedPotatoes": {
+      "vertices": 26536,
+      "triangles": 53056,
+      "size_cm": [
+        23.2,
+        23.2,
+        6.87
+      ],
+      "materials": [
+        {
+          "name": "M_BakedPotatoes",
+          "textures": {
+            "basecolor": "T_BakedPotatoes_basecolor.png",
+            "roughness": "T_BakedPotatoes_roughness.png",
+            "normal": "T_BakedPotatoes_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BakedPotatoes_basecolor.png",
+          "roughness": "T_BakedPotatoes_roughness.png",
+          "normal": "T_BakedPotatoes_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          0.0001810230314731598,
+          -0.01512502446770668,
+          0.04399999995250255
+        ],
+        "detail_distance": 0.4
+      },
+      "fbx": "SM_BakedPotatoes.fbx",
+      "frozen_geometry_uv_sha256": "f8a6486f163aab93c5dcd03e54b0904097812e7e32a82a3e12db558f21538940",
+      "sha256": "32a4e749775c27f6ff90c25dd8dc293c9d28ddae7fac76b74c03dc5254d7d423"
+    },
+    "SM_BakedPotatoesPortion": {
+      "vertices": 9090,
+      "triangles": 18176,
+      "size_cm": [
+        5.4,
+        7.8,
+        2.71
+      ],
+      "materials": [
+        {
+          "name": "M_BakedPotatoesPortion",
+          "textures": {
+            "basecolor": "T_BakedPotatoesPortion_basecolor.png",
+            "roughness": "T_BakedPotatoesPortion_roughness.png",
+            "normal": "T_BakedPotatoesPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BakedPotatoesPortion_basecolor.png",
+          "roughness": "T_BakedPotatoesPortion_roughness.png",
+          "normal": "T_BakedPotatoesPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          -0.0006849076598882675,
+          0.0,
+          0.04054928089678288
+        ],
+        "detail_distance": 0.27
+      },
+      "fbx": "SM_BakedPotatoesPortion.fbx",
+      "frozen_geometry_uv_sha256": "36b8c55d962b702679362c71f889b9aa8928bf6430287464069449faad350084",
+      "sha256": "a2afecc5aede1a381d95a23b4361ffb43c8a268cf5d31ca898f6153a70469d08"
+    },
+    "SM_RoastedTurnips": {
+      "vertices": 21277,
+      "triangles": 42526,
+      "size_cm": [
+        20.0,
+        20.0,
+        4.69
+      ],
+      "materials": [
+        {
+          "name": "M_RoastedTurnips",
+          "textures": {
+            "basecolor": "T_RoastedTurnips_basecolor.png",
+            "roughness": "T_RoastedTurnips_roughness.png",
+            "normal": "T_RoastedTurnips_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RoastedTurnips_basecolor.png",
+          "roughness": "T_RoastedTurnips_roughness.png",
+          "normal": "T_RoastedTurnips_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          8
+        ],
+        "focus": [
+          0.0,
+          -0.025,
+          0.0360233255084604
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_RoastedTurnips.fbx",
+      "frozen_geometry_uv_sha256": "cac12a1abe4211621f039b4154a1b8da107efdda4414e8de67115d34ea983f15",
+      "sha256": "884d4aae762f63b2a5d444bb8ce8befa0984e95cd2c064d6f4e4c90100028742"
+    },
+    "SM_RoastedTurnipsPortion": {
+      "vertices": 3321,
+      "triangles": 6638,
+      "size_cm": [
+        4.01,
+        7.6,
+        3.3
+      ],
+      "materials": [
+        {
+          "name": "M_RoastedTurnipsPortion",
+          "textures": {
+            "basecolor": "T_RoastedTurnipsPortion_basecolor.png",
+            "roughness": "T_RoastedTurnipsPortion_roughness.png",
+            "normal": "T_RoastedTurnipsPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RoastedTurnipsPortion_basecolor.png",
+          "roughness": "T_RoastedTurnipsPortion_roughness.png",
+          "normal": "T_RoastedTurnipsPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          8
+        ],
+        "focus": [
+          -0.0005678171291947365,
+          -1.564621925354004e-07,
+          0.020094724353402853
+        ],
+        "detail_distance": 0.27
+      },
+      "fbx": "SM_RoastedTurnipsPortion.fbx",
+      "frozen_geometry_uv_sha256": "e9188f01448085fbdf086d31526e9ebe605984987168fada5fc815e51aeccfae",
+      "sha256": "9b704b632df0da94b3fe788cdfab99dc18b9c02395479d6fd0ea3fad966061b5"
+    },
+    "SM_StewedCarrots": {
+      "vertices": 26924,
+      "triangles": 53792,
+      "size_cm": [
+        18.4,
+        18.4,
+        5.41
+      ],
+      "materials": [
+        {
+          "name": "M_StewedCarrots",
+          "textures": {
+            "basecolor": "T_StewedCarrots_basecolor.png",
+            "roughness": "T_StewedCarrots_roughness.png",
+            "normal": "T_StewedCarrots_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StewedCarrots_basecolor.png",
+          "roughness": "T_StewedCarrots_roughness.png",
+          "normal": "T_StewedCarrots_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          0.0,
+          -0.02,
+          0.04100447961408645
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_StewedCarrots.fbx",
+      "frozen_geometry_uv_sha256": "bb1f4c1ee9be43071cfd6ac9641d7d99d9c64e49b235a595a1a1c2ad631b7e31",
+      "sha256": "f96b8f31499c1e664a0e71414c345dff2b2a494cb3b87325d6d50fa815c245df"
+    },
+    "SM_StewedCarrotsPortion": {
+      "vertices": 1990,
+      "triangles": 3976,
+      "size_cm": [
+        2.51,
+        4.6,
+        1.26
+      ],
+      "materials": [
+        {
+          "name": "M_StewedCarrotsPortion",
+          "textures": {
+            "basecolor": "T_StewedCarrotsPortion_basecolor.png",
+            "roughness": "T_StewedCarrotsPortion_roughness.png",
+            "normal": "T_StewedCarrotsPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StewedCarrotsPortion_basecolor.png",
+          "roughness": "T_StewedCarrotsPortion_roughness.png",
+          "normal": "T_StewedCarrotsPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          -0.0008715852163732052,
+          0.0,
+          0.020500925920903683
+        ],
+        "detail_distance": 0.23
+      },
+      "fbx": "SM_StewedCarrotsPortion.fbx",
+      "frozen_geometry_uv_sha256": "64c789b004655f3c7ea4ea68f5841e0a8129e2c73fbb3e1242d660257b535433",
+      "sha256": "93610d22e9f60a0e8a63a71211609c4bba9953478e04bb5e8bc34312b6984d8f"
+    },
+    "SM_HerbedBroadBeans": {
+      "vertices": 31586,
+      "triangles": 62928,
+      "size_cm": [
+        13.44,
+        13.44,
+        3.93
+      ],
+      "materials": [
+        {
+          "name": "M_HerbedBroadBeans",
+          "textures": {
+            "basecolor": "T_HerbedBroadBeans_basecolor.png",
+            "roughness": "T_HerbedBroadBeans_roughness.png",
+            "normal": "T_HerbedBroadBeans_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_HerbedBroadBeans_basecolor.png",
+          "roughness": "T_HerbedBroadBeans_roughness.png",
+          "normal": "T_HerbedBroadBeans_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          0.0,
+          -0.013,
+          0.025206309381406753
+        ],
+        "detail_distance": 0.26,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_HerbedBroadBeans.fbx",
+      "frozen_geometry_uv_sha256": "aa4b1940a62412e53b20c3ec6caa81cefbc2be04428f3fb5af0be0cafdf1bb23",
+      "sha256": "d1f32ab5b63b31015f5de7308b00b1f57f25e7b79e10320301e4bb17ba60b65a"
+    },
+    "SM_HerbedBroadBeansPortion": {
+      "vertices": 1218,
+      "triangles": 2432,
+      "size_cm": [
+        1.36,
+        2.47,
+        0.8
+      ],
+      "materials": [
+        {
+          "name": "M_HerbedBroadBeansPortion",
+          "textures": {
+            "basecolor": "T_HerbedBroadBeansPortion_basecolor.png",
+            "roughness": "T_HerbedBroadBeansPortion_roughness.png",
+            "normal": "T_HerbedBroadBeansPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_HerbedBroadBeansPortion_basecolor.png",
+          "roughness": "T_HerbedBroadBeansPortion_roughness.png",
+          "normal": "T_HerbedBroadBeansPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          -0.0006639198400080204,
+          -0.004078764744102955,
+          0.009977033775299788
+        ],
+        "detail_distance": 0.15,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_HerbedBroadBeansPortion.fbx",
+      "frozen_geometry_uv_sha256": "20743ca3870c13abc83543bbf5d354b87b7863487a1d1b666ba8d4c55cbddbd5",
+      "sha256": "593388e1d36de2c00422866c4bd10950fda45a0fd6ca1a8d8862df1fb1ee6578"
+    },
+    "SM_CabbagePotatoStew": {
+      "vertices": 22864,
+      "triangles": 45576,
+      "size_cm": [
+        17.6,
+        17.6,
+        6.01
+      ],
+      "materials": [
+        {
+          "name": "M_CabbagePotatoStew",
+          "textures": {
+            "basecolor": "T_CabbagePotatoStew_basecolor.png",
+            "roughness": "T_CabbagePotatoStew_roughness.png",
+            "normal": "T_CabbagePotatoStew_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CabbagePotatoStew_basecolor.png",
+          "roughness": "T_CabbagePotatoStew_roughness.png",
+          "normal": "T_CabbagePotatoStew_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          0.0,
+          -0.017,
+          0.03900695332325995
+        ],
+        "detail_distance": 0.33,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_CabbagePotatoStew.fbx",
+      "frozen_geometry_uv_sha256": "faf69e29013757acbcccdc79417145f04ab412697409f91f30e9cf2aebe37f46",
+      "sha256": "d3b0676e1bc97acc2e73801360cd20cf9cb3375831684785b01bca41779f852f"
+    },
+    "SM_CabbagePotatoStewPortion": {
+      "vertices": 2082,
+      "triangles": 4156,
+      "size_cm": [
+        1.14,
+        1.57,
+        1.2
+      ],
+      "materials": [
+        {
+          "name": "M_CabbagePotatoStewPortion",
+          "textures": {
+            "basecolor": "T_CabbagePotatoStewPortion_basecolor.png",
+            "roughness": "T_CabbagePotatoStewPortion_roughness.png",
+            "normal": "T_CabbagePotatoStewPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CabbagePotatoStewPortion_basecolor.png",
+          "roughness": "T_CabbagePotatoStewPortion_roughness.png",
+          "normal": "T_CabbagePotatoStewPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          0.0,
+          -0.05100000143051148,
+          0.007299999929964543
+        ],
+        "detail_distance": 0.28,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_CabbagePotatoStewPortion.fbx",
+      "frozen_geometry_uv_sha256": "e249d704a680c746421c0049a7a40e12127e74b809cafa498b3205c56ba2cdeb",
+      "export_geometry_uv_sha256": "cf3edd734b835fcfc90f701525faceeb36b940c28244819ead85d9d90c0c590f",
+      "derivative": {
+        "kind": "frozen-edible-components-only",
+        "excluded_material": "M_CabbageStewMapleSpoon",
+        "original_geometry_added": false,
+        "pivot_translation_m": [
+          9.15583223104477e-06,
+          -0.06400000303983688,
+          0.002521177753806114
+        ]
+      },
+      "sha256": "9b59c4e466c8736d8adb952751a680171cb5ac5e0e16f6ac8486ef3c835cdc71"
+    },
+    "SM_BerryCompote": {
+      "vertices": 29514,
+      "triangles": 58972,
+      "size_cm": [
+        11.8,
+        11.8,
+        3.26
+      ],
+      "materials": [
+        {
+          "name": "M_BerryCompote",
+          "textures": {
+            "basecolor": "T_BerryCompote_basecolor.png",
+            "roughness": "T_BerryCompote_roughness.png",
+            "normal": "T_BerryCompote_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BerryCompote_basecolor.png",
+          "roughness": "T_BerryCompote_roughness.png",
+          "normal": "T_BerryCompote_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          9
+        ],
+        "focus": [
+          0.0,
+          -0.009,
+          0.021007509439252316
+        ],
+        "detail_distance": 0.26,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_BerryCompote.fbx",
+      "frozen_geometry_uv_sha256": "c0d4a7e52d2628cf2bbcc3b636cbd70111c32ad5abac322bb1267bacf8bb2e1e",
+      "sha256": "a73bb47d2752b6a8ccb7fd82a85031b123c5729cd9bb61fb6a7cb1a027b5becc"
+    },
+    "SM_BerryCompotePortion": {
+      "vertices": 2132,
+      "triangles": 4260,
+      "size_cm": [
+        1.49,
+        1.48,
+        0.99
+      ],
+      "materials": [
+        {
+          "name": "M_BerryCompotePortion",
+          "textures": {
+            "basecolor": "T_BerryCompotePortion_basecolor.png",
+            "roughness": "T_BerryCompotePortion_roughness.png",
+            "normal": "T_BerryCompotePortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BerryCompotePortion_basecolor.png",
+          "roughness": "T_BerryCompotePortion_roughness.png",
+          "normal": "T_BerryCompotePortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          9
+        ],
+        "focus": [
+          0.0,
+          -0.036769233226776124,
+          0.007834065929055214
+        ],
+        "detail_distance": 0.23,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_BerryCompotePortion.fbx",
+      "frozen_geometry_uv_sha256": "da00f676b8c2deb9f5d31424a44bcb2ad0467cef3788bb24e279073206c057a0",
+      "export_geometry_uv_sha256": "bf5dff0841ec5ec26bb519eba433944245e145526c065f6b65df84c58dbc8593",
+      "derivative": {
+        "kind": "frozen-edible-components-only",
+        "excluded_material": "M_BerryReductionMapleSpoon",
+        "original_geometry_added": false,
+        "pivot_translation_m": [
+          -2.892245538532734e-05,
+          -0.050940051674842834,
+          0.0013882899656891823
+        ]
+      },
+      "sha256": "a3fff3ea7b4bc3e4298dea2a5582cb84678c20e3c364a227e4f5342cbc2ced06"
+    },
+    "SM_StrawberryCompote": {
+      "vertices": 26707,
+      "triangles": 52734,
+      "size_cm": [
+        13.2,
+        13.2,
+        3.66
+      ],
+      "materials": [
+        {
+          "name": "M_StrawberryCompote",
+          "textures": {
+            "basecolor": "T_StrawberryCompote_basecolor.png",
+            "roughness": "T_StrawberryCompote_roughness.png",
+            "normal": "T_StrawberryCompote_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StrawberryCompote_basecolor.png",
+          "roughness": "T_StrawberryCompote_roughness.png",
+          "normal": "T_StrawberryCompote_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "focus": [
+          0.0,
+          -0.015,
+          0.020008859507739545
+        ],
+        "detail_distance": 0.29,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_StrawberryCompote.fbx",
+      "frozen_geometry_uv_sha256": "11979644d1d6872c0002a1d0f74e1bc819d4faa6d49abf7ada9f5cbab652dc57",
+      "sha256": "632a7337bd1267d1563543d16fe47faefd74c96f7c6ee001e0096ead7999f51e"
+    },
+    "SM_StrawberryCompotePortion": {
+      "vertices": 3034,
+      "triangles": 5984,
+      "size_cm": [
+        1.86,
+        2.44,
+        1.0
+      ],
+      "materials": [
+        {
+          "name": "M_StrawberryCompotePortion",
+          "textures": {
+            "basecolor": "T_StrawberryCompotePortion_basecolor.png",
+            "roughness": "T_StrawberryCompotePortion_roughness.png",
+            "normal": "T_StrawberryCompotePortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_StrawberryCompotePortion_basecolor.png",
+          "roughness": "T_StrawberryCompotePortion_roughness.png",
+          "normal": "T_StrawberryCompotePortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "focus": [
+          0.0,
+          -0.04030769211053848,
+          0.00774505477398634
+        ],
+        "detail_distance": 0.25,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_StrawberryCompotePortion.fbx",
+      "frozen_geometry_uv_sha256": "78674d2bf136aab77cafa588a4f0026ef4f82010dfaba857bb737f70029d8116",
+      "export_geometry_uv_sha256": "8ef8a0c0833cf9dcc761546434fe364db441cf6e978653dbaea60f3824ce674d",
+      "derivative": {
+        "kind": "frozen-edible-components-only",
+        "excluded_material": "M_StrawberryReductionMapleSpoon",
+        "original_geometry_added": false,
+        "pivot_translation_m": [
+          0.0,
+          -0.05403052270412445,
+          0.0014094207435846329
+        ]
+      },
+      "sha256": "820e9958ce098f1c564eecec2152332d2106127f9e84fc295514d99c0b79dab1"
+    },
+    "SM_RootVegetableHotpot": {
+      "vertices": 27288,
+      "triangles": 54400,
+      "size_cm": [
+        19.36,
+        16.6,
+        5.71
+      ],
+      "materials": [
+        {
+          "name": "M_RootVegetableHotpot",
+          "textures": {
+            "basecolor": "T_RootVegetableHotpot_basecolor.png",
+            "roughness": "T_RootVegetableHotpot_roughness.png",
+            "normal": "T_RootVegetableHotpot_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RootVegetableHotpot_basecolor.png",
+          "roughness": "T_RootVegetableHotpot_roughness.png",
+          "normal": "T_RootVegetableHotpot_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.02,
+          0.03500597136002034
+        ],
+        "detail_distance": 0.34,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_RootVegetableHotpot.fbx",
+      "frozen_geometry_uv_sha256": "dd8f4b4d6a64f71fc6ab98cdc7e4777d049e371825077f5e99960e50fae803e8",
+      "sha256": "f052dc58cdcdd812606cc59004256d5995cfb05967934e20846a34868f63c82b"
+    },
+    "SM_RootVegetableHotpotPortion": {
+      "vertices": 2927,
+      "triangles": 5838,
+      "size_cm": [
+        2.32,
+        1.45,
+        1.14
+      ],
+      "materials": [
+        {
+          "name": "M_RootVegetableHotpotPortion",
+          "textures": {
+            "basecolor": "T_RootVegetableHotpotPortion_basecolor.png",
+            "roughness": "T_RootVegetableHotpotPortion_roughness.png",
+            "normal": "T_RootVegetableHotpotPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RootVegetableHotpotPortion_basecolor.png",
+          "roughness": "T_RootVegetableHotpotPortion_roughness.png",
+          "normal": "T_RootVegetableHotpotPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.05092307993769646,
+          0.008478022007271647
+        ],
+        "detail_distance": 0.27,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_RootVegetableHotpotPortion.fbx",
+      "frozen_geometry_uv_sha256": "2290cf576c5911e87b6ea994479139b2a8b3e82ac7067fcb6b4fc80bf3b35f15",
+      "export_geometry_uv_sha256": "896599cc2919621f89c9c5f48f9d316089fdb9a9e60224eee4935fb733b8faf1",
+      "derivative": {
+        "kind": "frozen-edible-components-only",
+        "excluded_material": "M_RootHotpotMapleSpoon",
+        "original_geometry_added": false,
+        "pivot_translation_m": [
+          -0.00023557618260383606,
+          -0.059304192662239075,
+          0.0028195499908179045
+        ]
+      },
+      "sha256": "e67603636155917c8e8fb0a977d0b088018f9b6b8a55b6e14c5d4ff7c8031da2"
+    },
+    "SM_RawFishSlices": {
+      "vertices": 23274,
+      "triangles": 46520,
+      "size_cm": [
+        22.0,
+        16.4,
+        1.5
+      ],
+      "materials": [
+        {
+          "name": "M_RawFishSlices",
+          "textures": {
+            "basecolor": "T_RawFishSlices_basecolor.png",
+            "roughness": "T_RawFishSlices_roughness.png",
+            "normal": "T_RawFishSlices_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RawFishSlices_basecolor.png",
+          "roughness": "T_RawFishSlices_roughness.png",
+          "normal": "T_RawFishSlices_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "focus": [
+          0.0,
+          -0.016,
+          0.01301640834286809
+        ],
+        "detail_distance": 0.33,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_RawFishSlices.fbx",
+      "frozen_geometry_uv_sha256": "15960fee28a03bacc019798eb375231af6e9a38c2076b70faaf8ef25aef4c26d",
+      "sha256": "f442a04a372976bd4e5097b6e163bbd761d3fd83257badbf9725c711aeb5213e"
+    },
+    "SM_RawFishSlicesPortion": {
+      "vertices": 3694,
+      "triangles": 7384,
+      "size_cm": [
+        3.23,
+        1.62,
+        0.64
+      ],
+      "materials": [
+        {
+          "name": "M_RawFishSlicesPortion",
+          "textures": {
+            "basecolor": "T_RawFishSlicesPortion_basecolor.png",
+            "roughness": "T_RawFishSlicesPortion_roughness.png",
+            "normal": "T_RawFishSlicesPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RawFishSlicesPortion_basecolor.png",
+          "roughness": "T_RawFishSlicesPortion_roughness.png",
+          "normal": "T_RawFishSlicesPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "focus": [
+          -0.00012343283742666245,
+          4.214979708194733e-05,
+          0.0072636027317494155
+        ],
+        "detail_distance": 0.24,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_RawFishSlicesPortion.fbx",
+      "frozen_geometry_uv_sha256": "1d1be5c28bf3c989fe654c10938470f9b382d2cb5e8027fa3553de32e5fd5bda",
+      "sha256": "919e3190c2cd70d2a5793fe80c0f922b725cde05c2901008155d82548576ee3d"
+    },
+    "SM_GrilledTrout": {
+      "vertices": 24770,
+      "triangles": 49520,
+      "size_cm": [
+        22.0,
+        15.6,
+        1.76
+      ],
+      "materials": [
+        {
+          "name": "M_GrilledTrout",
+          "textures": {
+            "basecolor": "T_GrilledTrout_basecolor.png",
+            "roughness": "T_GrilledTrout_roughness.png",
+            "normal": "T_GrilledTrout_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GrilledTrout_basecolor.png",
+          "roughness": "T_GrilledTrout_roughness.png",
+          "normal": "T_GrilledTrout_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -9
+        ],
+        "focus": [
+          0.0,
+          -0.01,
+          0.017012709711678325
+        ],
+        "detail_distance": 0.33,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_GrilledTrout.fbx",
+      "frozen_geometry_uv_sha256": "fd0b56ab0a9364c3877282984a21359ae487003585e0810693d7e633f606e331",
+      "sha256": "fc141bfeb0e065558594def01a8ddad28596e6fb01fe5934b806f761c502e58f"
+    },
+    "SM_GrilledTroutPortion": {
+      "vertices": 4825,
+      "triangles": 9646,
+      "size_cm": [
+        2.5,
+        3.76,
+        0.92
+      ],
+      "materials": [
+        {
+          "name": "M_GrilledTroutPortion",
+          "textures": {
+            "basecolor": "T_GrilledTroutPortion_basecolor.png",
+            "roughness": "T_GrilledTroutPortion_roughness.png",
+            "normal": "T_GrilledTroutPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GrilledTroutPortion_basecolor.png",
+          "roughness": "T_GrilledTroutPortion_roughness.png",
+          "normal": "T_GrilledTroutPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          -9
+        ],
+        "focus": [
+          -4.572328180074692e-06,
+          0.002108076587319374,
+          0.009720363903790712
+        ],
+        "detail_distance": 0.24,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_GrilledTroutPortion.fbx",
+      "frozen_geometry_uv_sha256": "e9b1536e3ecfe0b4682f636737e167579b3604e35646424407271f357bb9fb12",
+      "sha256": "92e6ab2d568f37c369a09747d5c0bb58c0b013dee01cf2877b8ea8fccd74834e"
+    },
+    "SM_GrilledPerch": {
+      "vertices": 22766,
+      "triangles": 45520,
+      "size_cm": [
+        19.8,
+        14.4,
+        1.44
+      ],
+      "materials": [
+        {
+          "name": "M_GrilledPerch",
+          "textures": {
+            "basecolor": "T_GrilledPerch_basecolor.png",
+            "roughness": "T_GrilledPerch_roughness.png",
+            "normal": "T_GrilledPerch_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GrilledPerch_basecolor.png",
+          "roughness": "T_GrilledPerch_roughness.png",
+          "normal": "T_GrilledPerch_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          9
+        ],
+        "focus": [
+          0.0,
+          -0.014,
+          0.01501215615682304
+        ],
+        "detail_distance": 0.3,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_GrilledPerch.fbx",
+      "frozen_geometry_uv_sha256": "722720aa7044c00b7a680a373332a77ebf3cd4309047d1ef39aa11cac1b20f93",
+      "sha256": "8915a412ecba0a51f8b811499ec7427d589450977a3cc6236cdbfa64665c95cd"
+    },
+    "SM_GrilledPerchPortion": {
+      "vertices": 4605,
+      "triangles": 9206,
+      "size_cm": [
+        2.21,
+        3.38,
+        0.77
+      ],
+      "materials": [
+        {
+          "name": "M_GrilledPerchPortion",
+          "textures": {
+            "basecolor": "T_GrilledPerchPortion_basecolor.png",
+            "roughness": "T_GrilledPerchPortion_roughness.png",
+            "normal": "T_GrilledPerchPortion_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 16,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_GrilledPerchPortion_basecolor.png",
+          "roughness": "T_GrilledPerchPortion_roughness.png",
+          "normal": "T_GrilledPerchPortion_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          9
+        ],
+        "focus": [
+          -3.363378345966339e-05,
+          0.0018837167881429195,
+          0.007371390117332339
+        ],
+        "detail_distance": 0.24,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_GrilledPerchPortion.fbx",
+      "frozen_geometry_uv_sha256": "1e5513dc16409b0ec80ca09dd320389ce2fca24ddadc50f89084a1b4d46299d8",
+      "sha256": "06b3c765398c037a339eefa20bd5924d08c71abbd9055bfe9a332e0ca4357948"
+    }
+  },
+  "sources": {
+    "BakedPotatoes": {
+      "blend": "Assets/Props/PreparedFood/PotatoesReloadedSourceProof/PreparedPotatoesSource.blend",
+      "sha256": "7bca2e888d058c94252ce262efe950a818edb81111ab0a7152646f7dab1e745c",
+      "ingredients": {
+        "Potato": 2,
+        "Kindling": 1
+      }
+    },
+    "RoastedTurnips": {
+      "blend": "Assets/Props/PreparedFood/RoastedTurnipsSourceProof/RoastedTurnipsSource.blend",
+      "sha256": "96ca65151ed72d7e2005afd742c3511bec4f73db5f0161bf7df5df451d438da7",
+      "ingredients": {
+        "Turnip": 1,
+        "Kindling": 1
+      }
+    },
+    "StewedCarrots": {
+      "blend": "Assets/Props/PreparedFood/StewedCarrotsSourceProof/StewedCarrotsSource.blend",
+      "sha256": "e6d02f65eb38150847a939f8e8677bf604dc8a7f90a952c2c3ef940ad85d1b46",
+      "ingredients": {
+        "Carrot": 2,
+        "Kindling": 1
+      }
+    },
+    "HerbedBroadBeans": {
+      "blend": "Assets/Props/PreparedFood/HerbedBroadBeansSourceProof/HerbedBroadBeansSource.blend",
+      "sha256": "2f1ca9cf8f5b38bbc950e8da9d24320f82f53b3fda749577b06efee93f324f5e",
+      "ingredients": {
+        "BroadBeans": 3,
+        "Flowers": 1,
+        "Kindling": 1
+      }
+    },
+    "CabbagePotatoStew": {
+      "blend": "Assets/Props/PreparedFood/CabbagePotatoStewSourceProof/CabbagePotatoStewSource.blend",
+      "sha256": "d43a4a57844199db788116309004828b0737977fced4a18684e0498c8c37abf9",
+      "ingredients": {
+        "Cabbage": 1,
+        "Potato": 1,
+        "Flowers": 1,
+        "Kindling": 1
+      }
+    },
+    "BerryCompote": {
+      "blend": "Assets/Props/PreparedFood/BerryCompoteSourceProof/BerryCompoteSource.blend",
+      "sha256": "223219260c9526666b4ec8d6efb57c681aa906141ab41aaaace91ce277d06fc3",
+      "ingredients": {
+        "Berries": 3,
+        "Kindling": 1
+      }
+    },
+    "StrawberryCompote": {
+      "blend": "Assets/Props/PreparedFood/StrawberryCompoteSourceProof/StrawberryCompoteSource.blend",
+      "sha256": "c49cdabb5502e7a3c0e1621399f8280f4742acb7ba8076769ffe061645a8057f",
+      "ingredients": {
+        "Strawberries": 2,
+        "Kindling": 1
+      }
+    },
+    "RootVegetableHotpot": {
+      "blend": "Assets/Props/PreparedFood/RootVegetableHotpotSourceProof/RootVegetableHotpotSource.blend",
+      "sha256": "7a160a33ab8dc5da98755214d1579e5e6698b15248c40976ea79f723b8c952c5",
+      "ingredients": {
+        "Roots": 2,
+        "Turnip": 1,
+        "Flowers": 1,
+        "Kindling": 1
+      }
+    },
+    "RawFishSlices": {
+      "blend": "Assets/Props/PreparedFood/RawFishSlicesSourceProof/RawFishSlicesSource.blend",
+      "sha256": "d9e4c0c72f424aa51440323db93afce069ea5cacda3b10c943fc88f106320b25",
+      "ingredients": {
+        "SeaMackerel": 1
+      }
+    },
+    "GrilledTrout": {
+      "blend": "Assets/Props/PreparedFood/GrilledTroutSourceProof/GrilledTroutSource.blend",
+      "sha256": "4f9d54a7aadc5590f7dfeae8f830dc2478540b916a30a48f5554e74edb2e3ba5",
+      "ingredients": {
+        "RiverTrout": 1,
+        "Kindling": 1
+      }
+    },
+    "GrilledPerch": {
+      "blend": "Assets/Props/PreparedFood/GrilledPerchSourceProof/GrilledPerchSource.blend",
+      "sha256": "a428ee31a3ff865a2e519151ac323abf89bf8b129734e9f6241bdd51bf79c1f1",
+      "ingredients": {
+        "LakePerch": 1,
+        "Kindling": 1
+      }
+    }
+  },
+  "warnings": [
+    "Provisional appearance: known baked relief patching is not resolved.",
+    "Unreal imports, material compilation and eating alignment require Integration verification."
+  ],
+  "triangle_budget": 80000,
+  "deferred_items": [
+    "GrilledMackerel",
+    "FishSoup",
+    "FishAndPotatoes",
+    "HerbedCarp",
+    "MackerelChowder"
+  ],
+  "item_meshes": {
+    "BakedPotatoes": {
+      "serving": "SM_BakedPotatoes",
+      "portion": "SM_BakedPotatoesPortion"
+    },
+    "RoastedTurnips": {
+      "serving": "SM_RoastedTurnips",
+      "portion": "SM_RoastedTurnipsPortion"
+    },
+    "StewedCarrots": {
+      "serving": "SM_StewedCarrots",
+      "portion": "SM_StewedCarrotsPortion"
+    },
+    "HerbedBroadBeans": {
+      "serving": "SM_HerbedBroadBeans",
+      "portion": "SM_HerbedBroadBeansPortion"
+    },
+    "CabbagePotatoStew": {
+      "serving": "SM_CabbagePotatoStew",
+      "portion": "SM_CabbagePotatoStewPortion"
+    },
+    "BerryCompote": {
+      "serving": "SM_BerryCompote",
+      "portion": "SM_BerryCompotePortion"
+    },
+    "StrawberryCompote": {
+      "serving": "SM_StrawberryCompote",
+      "portion": "SM_StrawberryCompotePortion"
+    },
+    "RootVegetableHotpot": {
+      "serving": "SM_RootVegetableHotpot",
+      "portion": "SM_RootVegetableHotpotPortion"
+    },
+    "RawFishSlices": {
+      "serving": "SM_RawFishSlices",
+      "portion": "SM_RawFishSlicesPortion"
+    },
+    "GrilledTrout": {
+      "serving": "SM_GrilledTrout",
+      "portion": "SM_GrilledTroutPortion"
+    },
+    "GrilledPerch": {
+      "serving": "SM_GrilledPerch",
+      "portion": "SM_GrilledPerchPortion"
+    }
+  }
+}

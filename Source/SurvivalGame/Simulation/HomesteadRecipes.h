@@ -22,6 +22,7 @@ struct MealRecipeInfo
 
 const MealRecipeInfo* FindCropMeal(Recipe recipe);
 const MealRecipeInfo* FindFishMeal(Recipe recipe);
+bool IsRecipeAvailable(Recipe recipe);
 Inventory CropMealChange(Recipe recipe);
 Inventory FishMealChange(Recipe recipe);
 // Nominal Energy, balanced against ingredient sale opportunity including fuel and seasoning.

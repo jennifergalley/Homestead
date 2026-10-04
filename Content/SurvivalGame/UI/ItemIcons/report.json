@@ -1,0 +1,116 @@
+{
+  "source_freeze_commit": "843324c17b85b5432785fc7a6b9e333702dc26ec",
+  "provisional_appearance": true,
+  "source": "Original existing hero images; no reused game artwork or new render.",
+  "size_px": 256,
+  "images": {
+    "baked-potatoes": {
+      "item": "BakedPotatoes",
+      "source": "Assets/Props/PreparedFood/PotatoesReloadedSourceProof/beauty_SM_BakedPotatoes_hero.png",
+      "source_sha256": "b3793db57ef704c47e00126cc2a42e7b0d54b33c110f0151edc514695a7d503d",
+      "sha256": "ec50d5fa4bb79341f11d31d1358d5331214a36afe2d29557ea08c4ceba21055a"
+    },
+    "roasted-turnips": {
+      "item": "RoastedTurnips",
+      "source": "Assets/Props/PreparedFood/RoastedTurnipsSourceProof/beauty_SM_RoastedTurnips_hero.png",
+      "source_sha256": "a57ecf23bf8f28c16fdc60bc4752a6ed338a28daf20347c4257eeca938e11ce6",
+      "sha256": "f419232494077b15a0469414eacc3d21d302f731037cda065e3e36ac1ec9658c"
+    },
+    "stewed-carrots": {
+      "item": "StewedCarrots",
+      "source": "Assets/Props/PreparedFood/StewedCarrotsSourceProof/beauty_SM_StewedCarrots_hero.png",
+      "source_sha256": "c0abcb9afa5e8b9f2fa23168e9085622df9d3d1c00f4ba5b67659bb2463756e0",
+      "sha256": "8882036aff28ed03cdbe45a1c579ea9da804e18b3ba0f86aab80820e4cb699fb"
+    },
+    "herbed-broad-beans": {
+      "item": "HerbedBroadBeans",
+      "source": "Assets/Props/PreparedFood/HerbedBroadBeansSourceProof/beauty_SM_HerbedBroadBeans_hero.png",
+      "source_sha256": "5d0d520cbadc97c8a7f2dd9f76f73be9127bf1755901ddd349160550c31472cb",
+      "sha256": "2571524685298ba6a164fcb412d422cb07f303491c16d090a26f5490d4e73b15"
+    },
+    "cabbage-potato-stew": {
+      "item": "CabbagePotatoStew",
+      "source": "Assets/Props/PreparedFood/CabbagePotatoStewSourceProof/beauty_SM_CabbagePotatoStew_hero.png",
+      "source_sha256": "f29d72b4c9dfd4bfb55d99cff24cb62bb27490f8d4d2c67e14ba5947d907daed",
+      "sha256": "236722854067bcbcef96ae1605d2f0e59780b085ea2a48c640cfdaaf3ce439c2"
+    },
+    "berry-compote": {
+      "item": "BerryCompote",
+      "source": "Assets/Props/PreparedFood/BerryCompoteSourceProof/beauty_SM_BerryCompote_hero.png",
+      "source_sha256": "aa9b01dbd0ece4fcf131a9cc9a6ad7964ffe7fd15e2065b3395feda9f4b149db",
+      "sha256": "043b8ef857be644957a43628f37f7dfab92d1cb06965f88f9bc96caeb0f91a7d"
+    },
+    "strawberry-compote": {
+      "item": "StrawberryCompote",
+      "source": "Assets/Props/PreparedFood/StrawberryCompoteSourceProof/beauty_SM_StrawberryCompote_hero.png",
+      "source_sha256": "3a0f486ba8038c1b0fac897d8a5588068e2f92a87fb0810f170293bd6196985b",
+      "sha256": "43696f4a32c0f578fe3f4f91699da75dd534a361d105ddaea6e28b3cf9b47ee1"
+    },
+    "root-vegetable-hotpot": {
+      "item": "RootVegetableHotpot",
+      "source": "Assets/Props/PreparedFood/RootVegetableHotpotSourceProof/beauty_SM_RootVegetableHotpot_hero.png",
+      "source_sha256": "d268ddb872d1203bb7e0d110a263b1a2df87bbd056c352e691e853ec6b66acbd",
+      "sha256": "be3f0576e9f30b62349b743949487d73ea1d7d04d4d32dd5a926e09663ca530a"
+    },
+    "raw-fish-slices": {
+      "item": "RawFishSlices",
+      "source": "Assets/Props/PreparedFood/RawFishSlicesSourceProof/beauty_SM_RawFishSlices_hero.png",
+      "source_sha256": "ad3cc875a42b340fb568c1f3f8eae0da036691cfdaa5dd23e027f10a3d26601c",
+      "sha256": "845588260486d3fd9b843685a75ae4076d77fb531ae31df13e6863a8a7df9410"
+    },
+    "grilled-trout": {
+      "item": "GrilledTrout",
+      "source": "Assets/Props/PreparedFood/GrilledTroutSourceProof/beauty_SM_GrilledTrout_hero.png",
+      "source_sha256": "2887bbd4ce8f3494ffbd88d9eab7d92a2bf0effedca43c50aa956ff71006227c",
+      "sha256": "1e793b502857e60fbfc9185a0a33d074ee9788ae656384b5a6949692c166009c"
+    },
+    "grilled-perch": {
+      "item": "GrilledPerch",
+      "source": "Assets/Props/PreparedFood/GrilledPerchSourceProof/beauty_SM_GrilledPerch_hero.png",
+      "source_sha256": "298b2cd3036fd9b488c397993c2905602901ffdc1c65a4b7249726bb0f93115a",
+      "sha256": "c89639b90afb9859e578b08b3fa5c0c14489f1dd7f377a6541e8428b63493a64"
+    },
+    "river-trout": {
+      "item": "RiverTrout",
+      "source": "Assets/Props/CaughtFish/beauty_SM_RiverTrout_hero.png",
+      "source_sha256": "8870711ad59bddd1098e6cf856371a2625bb4a05ee072a10c58fe29b8e0ea80f",
+      "sha256": "9bf12261d4d1f7a8c76347b74fd8931c2095855467575645be392abf7c6f485d"
+    },
+    "river-salmon": {
+      "item": "RiverSalmon",
+      "source": "Assets/Props/CaughtFish/beauty_SM_RiverSalmon_hero.png",
+      "source_sha256": "75103f09e801bbbac9fd041b6f114667fdee7c56aed6ecc861513563fed430f6",
+      "sha256": "411ecccfc8ab9252509515968b1ef7c10b6b6a996b004548105f44deac5ef9c1"
+    },
+    "lake-perch": {
+      "item": "LakePerch",
+      "source": "Assets/Props/CaughtFish/beauty_SM_LakePerch_hero.png",
+      "source_sha256": "1110e8e62418155ec3a16b22c536ef575a3f9b1803425cbe44e258b2cf26eaf5",
+      "sha256": "4b6a0a087dce824328fde043de5afa41276d4d2ab6afc830fc63b9c2491de060"
+    },
+    "lake-carp": {
+      "item": "LakeCarp",
+      "source": "Assets/Props/CaughtFish/beauty_SM_LakeCarp_hero.png",
+      "source_sha256": "ff74dbc7ab24ac35660460be32da7966e2bfa357f64f1bc763724183f03b3e60",
+      "sha256": "3401bc2cd401690b199b5612e236462fb96c5f4fd7c512eb81f4514838e88de0"
+    },
+    "sea-mackerel": {
+      "item": "SeaMackerel",
+      "source": "Assets/Props/CaughtFish/beauty_SM_SeaMackerel_hero.png",
+      "source_sha256": "e331c30155ed28485effb641451910b0ad45b6813f8b4769786e7973f017060a",
+      "sha256": "1ccccb9680084f19b4d1dbf77fca6f028a81eb46391940b59d2ec774ac78da04"
+    },
+    "sea-bass": {
+      "item": "SeaBass",
+      "source": "Assets/Props/CaughtFish/beauty_SM_SeaBass_hero.png",
+      "source_sha256": "bb40bf0250f6db3d783978b78ab3f3c8d9dbde2f14eaa8f3ae6b8204197c0f99",
+      "sha256": "1401544a07124b836b145b4b026d1c53a45c7a1afcfea91a4f340abae79abdb5"
+    },
+    "fishing-pole": {
+      "item": "FishingPole",
+      "source": "Assets/Props/FishingPole/beauty_SM_FishingPole_hero.png",
+      "source_sha256": "78141b28bf8a41b78098da964ec131d87b693c139b1759cf47eb1418371d3f6e",
+      "sha256": "7127dd191fa4c62c77d26c5f230f4efd86be4ae507db400bca50afa5c7331156"
+    }
+  }
+}
