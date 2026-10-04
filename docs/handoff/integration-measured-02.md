@@ -234,6 +234,12 @@ Base, and Coat; `<=1.7` plus local improvement distinguishes tangent from the ro
 procedural branch. It is not a production object-space UE map or art acceptance. Preserve budgets,
 shaders, and parents; no shared-helper defect is established. Farming continues independent original
 meal source work without waiting.
+Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
+(`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
+evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
+coordinator directs only the one 4096 OBJECT-space diagnostic plus independent original sixteen-dish
+source modeling; production budgets and shaders remain unchanged. Live carp WIP is saved on E:;
+Farming's build02 accounting reports 521 calls provisionally.
 Checkpoint `cf30e41d` supplies that single-trout structural proof under
 `Assets\Props\CaughtFish\StructuralProof`: source, clay, and five-map 4K renders with hashes. It is
 still WIP-only; its frozen `4148` views are unchanged and the full six-family root remains stale and
