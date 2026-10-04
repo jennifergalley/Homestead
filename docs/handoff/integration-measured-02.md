@@ -205,6 +205,11 @@ operculum, pectoral, and scale corrections are advisory to Farming's newer struc
 full fish family, require one trout source-versus-baked 4K proof: the reviewed `BAKE=None` wrapper
 proves the source shader only, not five-map translation. Preserve the opt-in wet film, jaw winding,
 and eye-contact improvements. This is not final art or UE admission.
+The same reviewer has one bounded same-task follow-up on the newest frozen `c0` proof/source: inspect
+two to four views and choose one remaining causal correction among anatomy, shader, or bake. This is
+read-only, uses no new helper or GPU/editor/implementation slot, and is not a waiting gate for
+Farming's autonomous slot 2. The residual molded/procedural appearance remains, the art/wiring estimate
+has grown to an uncertain 11–18+ hours, and the sixteen dishes are untouched.
 Checkpoint `cf30e41d` supplies that single-trout structural proof under
 `Assets\Props\CaughtFish\StructuralProof`: source, clay, and five-map 4K renders with hashes. It is
 still WIP-only; its frozen `4148` views are unchanged and the full six-family root remains stale and
