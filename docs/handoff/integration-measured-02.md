@@ -211,6 +211,12 @@ still WIP-only; its frozen `4148` views are unchanged and the full six-family ro
 inadmissible. Its recipe-local ground re-seat compensates for thin-fin welding shifting the minimum Z
 by 35 micrometres. Wet film remains `.65/.06`; there are no generic-parent changes or UE/API compile
 claims. Farming continues anatomy work, and no import is requested.
+Checkpoint `15000b47` is the later held WIP family proof: `CaughtFish\HingedProof` and
+`CaughtFish\FamilyReview` preserve six anatomy fixtures, 30 maps, twelve viewed 4K frames, portable
+textures, and four passing offline import contracts, with no save changes. It is **not**
+import/admission-ready: molded heads, checker-like scales, and opaque fins remain visible failures;
+sixteen dishes and their wiring are still pending. Farming estimates at least another 8–12 hours,
+followed by engine gates. It continues the authorized refinement with no UE or build launch.
 
 ### Narrow overnight exception
 

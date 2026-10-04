@@ -64,6 +64,8 @@
       "originalPoleEvidence": "Integrated locally at 60da4466; authored FishingPole assets imported and its selected held mesh validated in a measured02-rod preview-profile fixture. Fish/dish art remains incomplete.",
       "fishStructuralProofCheckpoint": "cf30e41d",
       "fishStructuralProofStatus": "WIP-only one-trout source/clay/five-map 4K proof under CaughtFish/StructuralProof; the frozen 4148 views and six-family root remain inadmissible.",
+      "fishFamilyProofCheckpoint": "15000b47",
+      "fishFamilyProofStatus": "Held WIP: HingedProof/FamilyReview includes six anatomy fixtures, 30 maps, twelve viewed 4K frames, portable textures, and four passing offline contracts. Molded heads, checker-like scales, opaque fins, sixteen dishes/wiring, and engine gates remain outstanding.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
