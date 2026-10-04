@@ -82,14 +82,41 @@ export function renderPlannerHtml() {
     .build-card details { margin-top: 8px; }
     .build-card summary { cursor: pointer; color: var(--text-color-muted, #8b949e); font-size: 12px; }
     .accounting { margin-bottom: 22px; }
-    .accounting h2 { font-size: 17px; margin: 0 0 10px; }
-    .accounting details { padding: 12px 0; border-bottom: 1px solid var(--border-color-default, #30363d); }
+    .accounting h2 { font-size: 17px; margin: 0 0 8px; }
+    .accounting h3 { font-size: 15px; margin: 0; }
+    .accounting p { margin: 8px 0; max-width: 75ch; }
     .accounting summary { cursor: pointer; font-weight: var(--font-weight-semibold, 600); }
-    .cost-scroll { overflow-x: auto; margin: 12px 0; }
-    .cost-table { border-collapse: collapse; width: 100%; font-size: 12px; font-variant-numeric: tabular-nums; }
-    .cost-table th, .cost-table td { padding: 8px; text-align: right; border-bottom: 1px solid var(--border-color-default, #30363d); }
-    .cost-table th:first-child, .cost-table td:first-child { text-align: left; min-width: 220px; }
-    .cost-table caption { text-align: left; margin-bottom: 6px; }
+    .cost-period { margin: 0 0 32px; }
+    .cost-period figcaption { margin-bottom: 12px; }
+    .cost-period-line, .cost-build-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px 20px; }
+    .cost-chart-scroll { overflow-x: auto; padding: 4px 4px 8px; }
+    .cost-chart { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(28px, 1fr); min-width: 930px; gap: 4px; }
+    .cost-day { display: flex; flex-direction: column; padding: 4px 0; border: 0; border-radius: 4px; background: none; color: inherit; cursor: pointer; font-variant-numeric: tabular-nums; font-size: 11px; }
+    .cost-day:hover, .cost-day:focus-visible { background: var(--background-color-muted, #161b22); }
+    .cost-day:focus-visible { outline: 2px solid var(--color-focus-outline, #58a6ff); outline-offset: 1px; }
+    .cost-day.future { color: var(--text-color-muted, #8b949e); }
+    .cost-bar-area { height: 190px; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; border-bottom: 1px solid var(--border-color-default, #30363d); }
+    .cost-bar { display: block; width: 70%; max-width: 28px; min-height: 2px; background: var(--true-color-blue, #58a6ff); border-radius: 3px 3px 0 0; }
+    .cost-day.zero .cost-bar { background: var(--border-color-default, #30363d); }
+    .cost-day.unknown .cost-bar { background: repeating-linear-gradient(135deg, var(--text-color-muted, #8b949e) 0 2px, transparent 2px 5px); border: 1px solid var(--text-color-muted, #8b949e); }
+    .cost-day-label { display: block; padding-top: 8px; }
+    .cost-day-value { display: block; margin-bottom: 4px; }
+    .cost-chart-readout { min-height: 20px; font-variant-numeric: tabular-nums; }
+    .cost-build { padding: 24px 0; border-top: 1px solid var(--border-color-default, #30363d); }
+    .cost-build-total { font-weight: var(--font-weight-semibold, 600); font-variant-numeric: tabular-nums; }
+    .cost-build-content { display: grid; grid-template-columns: minmax(0, 2fr) minmax(240px, 1fr); gap: 20px 40px; margin-top: 12px; }
+    .cost-features { margin: 0; padding-left: 20px; max-width: 75ch; }
+    .cost-features li { margin-bottom: 6px; }
+    .cost-groups { margin: 0; }
+    .cost-group { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 8px; }
+    .cost-group dt { color: var(--text-color-muted, #8b949e); }
+    .cost-group dd { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .cost-older { margin-top: 16px; }
+    .cost-error { color: var(--true-color-red, #ff7b72); }
+    @media (max-width: 700px) {
+      .cost-build-content { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+      .cost-period-line { flex-direction: column; }
+    }
     .toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -375,7 +402,7 @@ export function renderPlannerHtml() {
     </header>
     <nav class="tabs" role="tablist" aria-label="Planner sections">
       <button id="tab-planning-btn" class="tab-button active" type="button" role="tab" aria-selected="true" aria-controls="tab-planning">Planning</button>
-      <button id="tab-cost-btn" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="tab-cost">Measured build cost</button>
+      <button id="tab-cost-btn" class="tab-button" type="button" role="tab" aria-selected="false" aria-controls="tab-cost">Build cost</button>
     </nav>
     <div id="tab-planning" class="tab-panel" role="tabpanel" aria-labelledby="tab-planning-btn">
       <section id="backlog-form-card" class="backlog-form" aria-label="Quick backlog entry">
@@ -442,6 +469,7 @@ export function renderPlannerHtml() {
       title.append(el("strong", "", build.label ?? [build.date, build.slot].filter(Boolean).join(" — ")),
         el("span", "badge " + (build.status === "delivered" ? "complete" : "active"), build.status));
       card.append(title);
+      if (build.dataError) card.append(el("p", "cost-error", build.dataError));
       if (build.ships?.length) {
         const list = el("ul");
         for (const item of build.ships) list.append(el("li", "", item));
@@ -495,50 +523,97 @@ export function renderPlannerHtml() {
       return (Number(nano) / 1e9).toLocaleString("en-US", { maximumFractionDigits: 3 });
     }
 
-    function renderAccounting(reports) {
+    function renderAccounting(view) {
       const node = document.getElementById("accounting");
-      node.replaceChildren(el("h2", "", "Measured build costs"));
-      if (!reports?.length) {
-        node.append(el("p", "muted", "No usage export yet. Missing costs are unknown, not zero."));
+      node.replaceChildren();
+      if (!view) {
+        node.append(el("p", "muted", "No shipment cost view yet. Missing costs are unknown, not zero."));
         return;
       }
-      for (const report of [...reports].reverse()) {
-        const details = el("details");
-        details.open = report === reports[reports.length - 1];
-        details.append(el("summary", "", report.buildId + " · " + (report.totals.recordedCalls ? aiu(report.totals.recordedNanoAiu) : "unknown") + " recorded AIU · " + report.status));
-        details.append(el("p", "muted", "Captured " + new Date(report.generatedAt).toLocaleString() + ". " + report.totals.recordedCalls + "/" + report.totals.calls + " calls have recorded costs. AIU = nano-AIU / 1 billion; not billing-reconciled AI credits."));
-        const scroll = el("div", "cost-scroll");
-        const table = el("table", "cost-table");
-        table.append(el("caption", "", "Costs in AIU. Token classes use supplied billing rates, not aggregate input tokens."));
-        const head = el("tr");
-        for (const label of ["Task / session / configuration", "Calls", "Recorded", "Input", "Cache read", "Cache write", "Output", "Estimated"]) {
-          const th = el("th", "", label); th.scope = "col"; head.append(th);
+      const period = view.period;
+      const figure = el("figure", "cost-period");
+      const caption = el("figcaption");
+      caption.append(el("h2", "", "Daily shipped-build cost"));
+      if (period.status === "current") {
+        const line = el("div", "cost-period-line");
+        line.append(el("span", "muted", period.start + " – " + period.end + " · Resets " + period.reset),
+          el("span", "", aiu(period.recordedNanoAiu) + " recorded AIU" + (period.unknown ? " + unknown costs" : "")));
+        caption.append(line);
+        figure.append(caption);
+        const scroll = el("div", "cost-chart-scroll");
+        const chart = el("div", "cost-chart");
+        chart.setAttribute("role", "group");
+        chart.setAttribute("aria-label", "Daily shipped-build cost for the current billing period");
+        const readout = el("p", "cost-chart-readout muted", "Select a day for its cost and shipment count. Zero means no shipment; ? means missing cost.");
+        readout.setAttribute("aria-live", "polite");
+        const max = Math.max(1, ...period.days.map((day) => Number(BigInt(day.recordedNanoAiu)) / 1e9));
+        period.days.forEach((day, index) => {
+          const value = Number(BigInt(day.recordedNanoAiu)) / 1e9;
+          const amount = day.unknown && !value ? "Unknown cost" : aiu(day.recordedNanoAiu) + " recorded AIU" + (day.unknown ? " + unknown costs" : "");
+          const description = day.date + " · " + amount + " · " + day.shipments + " shipped build" + (day.shipments === 1 ? "" : "s") + (day.future ? " · Upcoming day" : "");
+          const button = el("button", "cost-day" + (day.unknown ? " unknown" : !value ? " zero" : "") + (day.future ? " future" : ""));
+          button.type = "button";
+          button.dataset.date = day.date;
+          button.setAttribute("aria-label", description);
+          button.title = description;
+          const area = el("span", "cost-bar-area");
+          const shortValue = day.unknown && !value ? "?" : value >= 1000 ? (value / 1000).toFixed(1) + "k" : value ? value.toFixed(1) : "0";
+          area.append(el("span", "cost-day-value", shortValue));
+          const bar = el("span", "cost-bar");
+          bar.style.height = Math.max(day.unknown && !value ? 12 : 2, value / max * 160) + "px";
+          area.append(bar);
+          button.append(area, el("span", "cost-day-label", index === 0 || day.date.endsWith("-01") ? day.date.slice(5).replace("-", "/") : day.date.slice(8)));
+          button.addEventListener("focus", () => { readout.textContent = description; });
+          button.addEventListener("click", () => { readout.textContent = description; });
+          button.addEventListener("keydown", (event) => {
+            const target = event.key === "ArrowRight" ? index + 1 : event.key === "ArrowLeft" ? index - 1 : null;
+            if (target !== null && chart.children[target]) { event.preventDefault(); chart.children[target].focus(); }
+          });
+          chart.append(button);
+        });
+        scroll.append(chart); figure.append(scroll, readout);
+      } else {
+        figure.append(caption, el("p", "cost-error", period.message));
+      }
+      figure.append(el("p", "muted", "Observed AIU, not billing-reconciled AI credits. Homestead shipped-build costs are assigned to shipment day, not the day calls ran."));
+      node.append(figure, el("h2", "", "Shipped builds"));
+      const older = el("details", "cost-older");
+      older.append(el("summary", "", "Earlier shipped builds (" + Math.max(0, view.shipped.length - 2) + ")"));
+      view.shipped.forEach((build, index) => {
+        const article = el("article", "cost-build");
+        const head = el("div", "cost-build-head");
+        head.append(el("h3", "", build.label),
+          el("span", "cost-build-total", build.recordedNanoAiu == null ? "Cost unknown" : aiu(build.recordedNanoAiu) + " recorded AIU"));
+        article.append(head);
+        if (build.dataError) article.append(el("p", "cost-error", build.dataError));
+        const content = el("div", "cost-build-content");
+        const list = el("ul", "cost-features");
+        for (const feature of build.features) list.append(el("li", "", feature));
+        if (!build.features.length) list.append(el("li", "muted", "Shipped features not recorded."));
+        content.append(list);
+        const groups = el("dl", "cost-groups");
+        for (const group of build.groups) {
+          const row = el("div", "cost-group");
+          row.append(el("dt", "", group.label), el("dd", "", aiu(group.recordedNanoAiu)));
+          groups.append(row);
         }
-        const thead = el("thead"); thead.append(head); table.append(thead);
-        const tbody = el("tbody");
-        for (const segment of [...report.segments, { ...report.totals, task: "New-work subtotal" }]) {
-          const row = el("tr");
-          const label = el("td", "", segment.task + (segment.category === "overhead" ? " (overhead)" : ""));
-          if (segment.sessionId) {
-            label.append(el("div", "muted", segment.sessionId + " / " + segment.agentId),
-              el("div", "muted", [segment.model ?? "unknown model", segment.reasoningEffort ?? "unknown effort", segment.contextTier ?? "unknown runtime context"].join(" · ")));
-            if (segment.launchContextTier) label.append(el("div", "muted", "Launch context: " + segment.launchContextTier));
-            if (segment.tasks?.length > 1) label.append(el("div", "muted", segment.tasks.join(", ")));
-            label.title = [segment.contextEvidence ?? "Context configuration unknown", "Retry classification: " + segment.retryClassification,
-              "Events " + segment.firstEventId + "-" + segment.lastEventId, "Max prompt " + segment.maxPromptTokens + " tokens"].join("; ");
-          }
-          row.append(label, el("td", "", segment.calls), el("td", "", segment.recordedCalls ? aiu(segment.recordedNanoAiu) : "unknown"));
-          for (const key of ["input", "cache_read", "cache_write", "output"]) {
-            row.append(el("td", "", segment.ratedCalls ? aiu(segment.tokenCostsNanoAiu[key]) + (segment.ratedCalls < segment.calls ? " (partial)" : "") : "unknown"));
-          }
-          row.append(el("td", "", segment.unknownCostCalls ? (segment.estimatedCalls ? aiu(segment.estimatedNanoAiu) + " (partial)" : "unknown") : aiu(segment.estimatedNanoAiu))); tbody.append(row);
+        if (build.groups.length) content.append(groups);
+        article.append(content);
+        if (build.partial) article.append(el("p", "muted", build.recordedNanoAiu == null
+          ? "No cost export for this shipment. Missing costs are unknown, not zero."
+          : "Recorded subtotal; billing reconciliation" + (build.inheritedUnknown ? " and inherited costs" : "") + " remain incomplete."));
+        if (build.estimatedNanoAiu !== "0") article.append(el("p", "muted", aiu(build.estimatedNanoAiu) + " estimated AIU, separate from the recorded subtotal."));
+        if (build.reportPath) {
+          const evidence = el("details");
+          evidence.append(el("summary", "muted", "Source report"), el("p", "muted", build.reportPath));
+          article.append(evidence);
         }
-        table.append(tbody); scroll.append(table); details.append(scroll);
-        details.append(el("p", "muted", "Inherited implementation: " + report.legacy.status + " (excluded; not zero). " + (report.legacy.description ?? "Historical usage attribution is not supplied.")));
-        details.append(el("p", "muted", report.allocationPolicy));
-        const limits = el("ul");
-        for (const limit of report.coverage.limits) limits.append(el("li", "", limit));
-        details.append(limits); node.append(details);
+        (index < 2 ? node : older).append(article);
+      });
+      if (view.shipped.length > 2) node.append(older);
+      if (!view.shipped.length) node.append(el("p", "muted", "No shipped builds recorded yet."));
+      if (view.unshippedReports) {
+        node.append(el("p", "muted", view.unshippedReports + " unshipped cost report(s) excluded from shipment totals."));
       }
     }
 
@@ -691,7 +766,7 @@ export function renderPlannerHtml() {
 
     function render() {
       renderBuilds(state.planner.builds);
-      renderAccounting(state.planner.accounting);
+      renderAccounting(state.planner.costView);
       renderBoard();
     }
 
@@ -900,7 +975,7 @@ export function renderPlannerHtml() {
         const response = await fetch("/api/tasks", { cache: "no-store" });
         if (!response.ok) throw new Error("Planner request failed: " + response.status);
         const planner = await response.json();
-        const signature = JSON.stringify({ features: planner.features, builds: planner.builds, accounting: planner.accounting });
+        const signature = JSON.stringify({ features: planner.features, builds: planner.builds, accounting: planner.accounting, costView: planner.costView });
         if (state.dragging) return;
         if (force || !quiet || state.signature !== signature) {
           state.planner = planner;
