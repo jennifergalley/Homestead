@@ -1,0 +1,24 @@
+{
+  "buildId": "20261003-measured-02",
+  "authorizedAt": "2026-10-04T01:55:51.513Z",
+  "allocationPolicy": "Count each usage event once from this authorization boundary. Add fresh lane, integration and helper runtime identities before exporting. Preserve build01's closed windows. Split feature work and shared overhead using lane-reported boundaries; unknown context and billing coverage stay unknown.",
+  "legacy": {
+    "status": "unattributed",
+    "recordedNanoAiu": null,
+    "description": "Inherited source and prior deferred-feature implementation are excluded from new-work totals until attributable evidence is available, not treated as zero."
+  },
+  "limits": [
+    "Active build; final usage boundaries are not yet closed.",
+    "Actual runtime context tiers and external billing reconciliation remain unknown.",
+    "Contributor identities and task boundaries will be recorded as lanes start and hand off."
+  ],
+  "segments": [
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "task": "orchestration-overhead",
+      "category": "overhead",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null
+    }
+  ]
+}

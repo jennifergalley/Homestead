@@ -20,6 +20,11 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 
 ## Registry
 
+Active round: `20261003-measured-02`, authorized 2026-10-03 18:55 local for the
+9 PM slot, with 2026-10-04 7:30 AM fallback. Scope and ownership are in
+[measured-build-02.json](measured-build-02.json); fresh lane identities follow at launch.
+No overnight work/automations, no unselected animation/carry or manor-arrival work.
+
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
 | Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |

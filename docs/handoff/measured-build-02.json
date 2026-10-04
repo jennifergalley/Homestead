@@ -1,0 +1,57 @@
+{
+  "buildId": "20261003-measured-02",
+  "status": "authorized",
+  "authorizedAt": "2026-10-04T01:55:51.513Z",
+  "targetSlot": "2026-10-03 21:00",
+  "fallbackSlot": "2026-10-04 07:30",
+  "coordinator": {
+    "runtimeSessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+    "model": "gpt-6.1-sol",
+    "reasoningEffort": "high",
+    "contextTier": null
+  },
+  "lanes": [
+    {
+      "role": "Farming Fishing",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "selectedIds": [
+        "backlog:jenny-mut56ggp-uijcta",
+        "backlog:jenny-mut57myz-9tfjci",
+        "backlog:jenny-mut5gsd4-oebvov",
+        "backlog:jenny-mut592z8-2od0d5",
+        "backlog:jenny-mut5legr-oba2rd",
+        "add-shore-and-river-fishing"
+      ]
+    },
+    {
+      "role": "Travel Rest",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "selectedIds": [
+        "backlog:jenny-mut5v5yo-9f8fpx",
+        "backlog:jenny-mut5c51h-orhi39",
+        "backlog:jenny-mus1kfmm-ayz6jx"
+      ]
+    },
+    {
+      "role": "Planner Editing",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "selectedIds": [
+        "backlog:jenny-mut5x32c-7715t2"
+      ]
+    }
+  ],
+  "deliveryRules": [
+    "Only verified and reviewed work is admitted; unfinished items move to the fallback slot.",
+    "No overnight work or automations after Jenny signs off; morning resumes on her first message.",
+    "Integration alone merges, builds, packages and retargets the Estate shortcut.",
+    "Preserve the current measured-01 release, rollback, save files and all old agents.",
+    "Further animation/carry holds, manor arrival relocation and other unselected work remain deferred.",
+    "Build01 accounting windows remain closed; this round uses a separate allocation."
+  ]
+}

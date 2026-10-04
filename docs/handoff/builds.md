@@ -90,6 +90,24 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
   save/config files were hash-verified on copy, and the prior 20261001 9 PM Shipping release is
   retained as rollback.
 
+## 2026-10-03 — 9:00 PM
+
+- SHA: pending
+- Status: planned
+- Build ID: `20261003-measured-02`
+- Plant Seeds hint appears when selected seeds target tilled ground.
+- Crop harvests yield fewer seeds so buying seeds remains useful.
+- Add 5-10 basic crop/forage cookfire recipes, with kindling and some herb seasoning.
+- Sell a hotbar fishing pole at the General Store for 1500 coins.
+- Catch location-specific river, lake and ocean fish; cook or sell them.
+- Unlock marked fast-travel destinations by visiting, including Town before signpost/map travel.
+- Evening sleep lasts until the earlier of dawn or 6 AM.
+- Sunday General Store waiting advances to Monday opening.
+- Edit feedback titles, descriptions and screenshots directly in the planner.
+- Scope: the fishing feature and its two feedback cards are one implementation, not duplicate work.
+- Timing: authorized 18:55 local; unfinished work may slip to 2026-10-04 7:30 AM.
+- Safety: verified work only; no overnight work/automation after Jenny signs off.
+
 ## Later
 
 - The player-driven deferred queue is in [backlog.md](backlog.md): river/ocean, map and town feedback, fishing, hauling, mine work, manor rebuilding, artisan goods, and later estate systems.
