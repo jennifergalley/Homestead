@@ -17,10 +17,10 @@ release-save-isolation admission gates remain.
 
 Current source checkpoint: original potatoes, roasted turnips, stewed carrots,
 herbed broad beans, cabbage/potato stew, berry compote, strawberry compote and
-root vegetable hotpot have separate serving/edible-portion WIP, NOT art/import acceptance.
-Eight fish preparations, all meal
+root vegetable hotpot and raw mackerel slices have separate serving/edible-portion WIP,
+NOT art/import acceptance. Seven fish preparations, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original root hotpot/spoon WIP; recipe/source receipts below are frozen,
+visible review is original raw mackerel slices/portion WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -1008,6 +1008,48 @@ default/actual context unknown; no agents/automation/fish probe/bake/budget/
 render-helper/gameplay/save/enum/version/placement/UE/UBT/UAT/shortcut changes.
 Build02-only provisional snapshot: 775 calls through event71078,
 4,549,225,690,000 recorded nano-AIU; later calls/terminal response need recapture.
+No reconciled billing-credit claim.
+
+### Original raw mackerel meal source milestone
+
+New raw_fish_slices.py authors six independent boneless skin-on fillet cuts, a
+new 22x16.4cm oval ceramic dish and a separate 3.23cm edible slice. Exact
+SeaMackerel1; no fire/fuel/rice/vinegar/soy/citrus/herbs/garnish. Myomere and mackerel
+food references informed pale pink-white muscle, lateral dark muscle, myoseptal
+partitions and skin markings; authored dimensions/count are presentation, not
+stock-weight or real food-safety instructions. No caught-fish/crop/game mesh reused.
+
+New closed asymmetric fillet lofts have oblique knife ends, tapered thickness,
+shallow real myoseptal relief and finer soft fascia fields. Correct interior cap
+coordinates back onto their oblique knife planes without altering boundaries.
+First bars-of-soap silhouettes, stark muscle stripe and blue racing-stripe skin
+were rejected in viewed 4K passes; taper, narrower varied dark muscle and thin
+irregular dark skin marks improve them. Two slices are skin-up; edible slice
+remains flesh-up. New prepared-food shaders do not call/modify caught-fish shaders.
+
+Current serving/portion: 46,520/7,384 triangles,
+[22.0,16.4,1.5]/[3.23,1.62,0.64]cm; 7/1 closed islands. Closed positive volume,
+finite/noncollapsed coordinates, UV/bottom pivot/unit transforms, dimension/budget,
+executed shader/source graph and sampled dish-clearance fixtures pass with no
+bound relaxation. Four final 3840x2160/192-sample OPTIX frames viewed; original
+source/two FBX/report/four frames/reopened copied receipt frozen in
+RawFishSlicesSourceProof. No full self-intersection/contact/stability, eating
+grip/hand/mouth or engine material/animation acceptance.
+
+Still too smooth/molded/slab-like, muscle/skin markings too graphic and ceramic
+too procedural: HELD, not art/import ready. Nine source prototypes, seven
+preparations unstarted, zero art approvals. More than twelve hands-on hours still
+estimated for unstarted sources/refinement, plus unknown fish/bake/imagery/eating/
+UE gates; not a release ETA. Prior seventeen shader/six geometry definitions are
+AST-identical to 1bc234e1; held catch recipe is byte-identical after newline
+normalization. Older frozen proofs remain at their original SHA, not recaptured.
+
+Separate framed EEVEE Material scene preserved on E: as
+Raw-mackerel-source-held-visible.blend. Actual gpt-6.1-sol/high, launch default/
+actual context unknown; no agents/automation/caught-fish probe/bake/budget/
+render-helper/gameplay/save/enum/version/placement/UE/UBT/UAT/shortcut changes.
+Build02-only provisional snapshot: 792 calls through event71109,
+4,616,358,250,000 recorded nano-AIU; later calls/terminal response need recapture.
 No reconciled billing-credit claim.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec

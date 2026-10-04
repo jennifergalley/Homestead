@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "name": "RawFishSlicesSource",
+  "description": "Held original boneless mackerel slices and separate edible portion.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/raw_fish_slices.py",
+  "source_sha256": "5799a8c572aa73fa2822519ee338abd2d072b673f82dd1f4edeb51419d386d3a",
+  "provenance": "Original closed fillet-cut lofts with real shallow myoseptal relief, independent oval dish and procedural food PBR; no catch mesh reused.",
+  "meshes": {
+    "SM_RawFishSlices": {
+      "vertices": 23274,
+      "triangles": 46520,
+      "size_cm": [
+        22.0,
+        16.4,
+        1.5
+      ],
+      "materials": [
+        {
+          "name": "M_RawMackerelOvalPlate",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.35
+        },
+        {
+          "name": "M_RawMackerelSlice0Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RawMackerelSlice0Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.31
+        },
+        {
+          "name": "M_RawMackerelSlice1Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RawMackerelSlice1Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.31
+        },
+        {
+          "name": "M_RawMackerelSlice2Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RawMackerelSlice2Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.31
+        },
+        {
+          "name": "M_RawMackerelSlice3Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RawMackerelSlice3Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.31
+        },
+        {
+          "name": "M_RawMackerelSlice4Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RawMackerelSlice4Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.31
+        },
+        {
+          "name": "M_RawMackerelSlice5Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RawMackerelSlice5Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.31
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "focus": [
+          0.0,
+          -0.016,
+          0.01301640834286809
+        ],
+        "detail_distance": 0.33,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_RawFishSlices.fbx",
+      "sha256": "ad7d5e7bdd6ba1e8e52ae6ce77a998c52d711195c073883fdc65125ffab6f084",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RawFishSlices_hero.png",
+          "detail": "beauty_SM_RawFishSlices_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RawFishSlicesPortion": {
+      "vertices": 3694,
+      "triangles": 7384,
+      "size_cm": [
+        3.23,
+        1.62,
+        0.64
+      ],
+      "materials": [
+        {
+          "name": "M_RawMackerelEdibleSliceFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RawMackerelEdibleSliceSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.31
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "focus": [
+          -0.00012343283742666245,
+          4.214979708194733e-05,
+          0.0072636027317494155
+        ],
+        "detail_distance": 0.24,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_RawFishSlicesPortion.fbx",
+      "sha256": "ca7ffd0f56934c536e5b7806f9362af1f26ba1d6f94836ee14d19b0d049469ae",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RawFishSlicesPortion_hero.png",
+          "detail": "beauty_SM_RawFishSlicesPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          11
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "RawFishSlices",
+  "ingredients": {
+    "SeaMackerel": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "d891ba738802c02d5aee2244e9b4538dbefd691c635640e12a9c99d71ef5fb44",
+  "food_material_source_sha256": "4b288073d1c9767a354c9fce05d340f72a440a0219fd3349f628b2ccde42b72b"
+}

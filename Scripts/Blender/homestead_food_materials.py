@@ -14,6 +14,10 @@ SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 SKIN_NOISE_SCALES = (170, 65, 1600, 850)
 FLESH_NOISE_SCALES = (230, 1300)
 CARROT_FIBRE_RELIEF_M = .00015
+RAW_MYOMERE_SPACING_M = .0054
+RAW_MYOMERE_SLOPE = .45
+RAW_MYOMERE_CURVE_M = .0008
+RAW_FASCIA_WIDTH_M = .00016
 
 
 def potato_skin(name: str, seed: float) -> bpy.types.Material:
@@ -365,4 +369,72 @@ def stewed_root(name: str, seed: float, flesh: bool, turnip: bool = False) -> bp
     graph.set("Subsurface Radius", (.0014, .0010, .0005))
     graph.set("Subsurface Scale", .05)
     graph.set("Normal", graph.bump(fibres, strength=.23, distance=.000065))
+    return graph.mat
+
+
+def raw_mackerel_flesh(name: str, seed: int) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    x, y, _ = graph.separate(point)
+    shifted = graph.vmath("ADD", point, (seed * .021, seed * .039, seed * .053))
+    tissue = graph.noise(shifted, scale=220, detail=3).outputs["Fac"]
+    colour = graph.ramp(tissue, [
+        (.18, (.30, .235, .20)), (.5, (.36, .29, .25)), (.82, (.405, .335, .29)),
+    ], "EASE")
+    phase = graph.math("ADD", y, graph.math("MULTIPLY", graph.math("ABSOLUTE", x), RAW_MYOMERE_SLOPE))
+    phase = graph.math("ADD", phase, graph.math("MULTIPLY",
+                        graph.math("SINE", graph.math("MULTIPLY", x, 260)), RAW_MYOMERE_CURVE_M))
+    phase = graph.math("ADD", phase, .001 * (seed % 5))
+    phase = graph.math("DIVIDE", phase, RAW_MYOMERE_SPACING_M)
+    fraction = graph.math("PINGPONG", phase, .5)
+    fascia = graph.remap(fraction, 0, RAW_FASCIA_WIDTH_M / RAW_MYOMERE_SPACING_M, .30, 0)
+    colour = graph.mix(colour, (.53, .46, .39), fascia)
+    blood_axis = graph.math("ADD", x, graph.math("ADD", .005, graph.math("MULTIPLY",
+                           graph.math("SINE", graph.math("ADD", graph.math("MULTIPLY", y, 740), seed)), .0007)))
+    bloodline = graph.remap(graph.math("ABSOLUTE", blood_axis), .0004, .0017, .65, 0)
+    colour = graph.mix(colour, (.085, .023, .016), bloodline)
+    fibres = graph.noise(graph.scale(shifted, (1, .12, 1)),
+                        scale=2200, detail=3).outputs["Fac"]
+    graph.set("Base Color", colour)
+    graph.set("Roughness", graph.remap(tissue, .2, .8, .34, .23))
+    graph.set("Subsurface Weight", .16)
+    graph.set("Subsurface Radius", (.002, .0013, .0009))
+    graph.set("Subsurface Scale", .05)
+    graph.set("Normal", graph.bump(fibres, strength=.18, distance=.000035))
+    return graph.mat
+
+
+def prepared_mackerel_skin(name: str) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    x, y, _ = graph.separate(point)
+    variation = graph.noise(point, scale=190, detail=3).outputs["Fac"]
+    stripe = graph.math("SINE", graph.math("ADD",
+                        graph.math("ADD", graph.math("MULTIPLY", y, 620), graph.math("MULTIPLY", x, 180)),
+                        graph.math("MULTIPLY", variation, 2)))
+    silver = graph.mix((.25, .30, .28), (.045, .070, .070),
+                       graph.remap(stripe, .55, .96, 0, .72))
+    fines = graph.noise(point, scale=3100, detail=2).outputs["Fac"]
+    graph.set("Base Color", silver)
+    graph.set("Metallic", .13)
+    graph.set("Roughness", .31)
+    graph.set("Coat Weight", .20)
+    graph.set("Coat Roughness", .18)
+    graph.set("Normal", graph.bump(fines, strength=.10, distance=.000018))
+    return graph.mat
+
+
+def raw_fish_plate(name: str) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    firing = graph.noise(point, scale=60, detail=2).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(firing, [
+        (.2, (.11, .14, .15)), (.8, (.145, .18, .188)),
+    ], "EASE"))
+    grit = graph.noise(point, scale=1400, detail=2).outputs["Fac"]
+    graph.set("Roughness", .35)
+    graph.set("Normal", graph.bump(grit, strength=.12, distance=.000035))
     return graph.mat
