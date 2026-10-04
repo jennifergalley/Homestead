@@ -92,8 +92,8 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 
 ## 2026-10-03 — 9:00 PM
 
-- SHA: pending
-- Status: planned
+- SHA: not built
+- Status: deferred
 - Build ID: `20261003-measured-02`
 - Plant Seeds hint appears when selected seeds target tilled ground.
 - Crop harvests yield fewer seeds so buying seeds remains useful.
@@ -104,9 +104,32 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Evening sleep lasts until the earlier of dawn or 6 AM.
 - Sunday General Store waiting advances to Monday opening.
 - Edit feedback titles, descriptions and screenshots directly in the planner.
+- Larger chest names and concise, non-overlapping HUD notices.
 - Scope: the fishing feature and its two feedback cards are one implementation, not duplicate work.
-- Timing: authorized 18:55 local; unfinished work may slip to 2026-10-04 7:30 AM.
-- Safety: verified work only; no overnight work/automation after Jenny signs off.
+- Timing: deferred at 20:49 local; this entry preserves the original selected scope.
+- Safety: no placeholder or unverified subset package; no overnight work after Jenny signs off.
+
+## 2026-10-03 — 7:14 PM
+
+- SHA: `3846476d`
+- Status: delivered
+- Planner tooling only: feedback cards can edit title, description and screenshots while preserving IDs and schedules.
+- The existing canvas was refreshed. Player acceptance remains Jenny's; its OpenSpec checkbox is not marked complete.
+- The delivered editing card is hidden and unscheduled by `5ec7c7a8`; no game package or shortcut change.
+
+## 2026-10-04 — 7:30 AM
+
+- SHA: pending
+- Status: planned
+- Build ID: `20261003-measured-02`
+- Timing: target, not a promise; morning work resumes only on Jenny's first message.
+- Pending scope: the eleven selected game cards moved from the deferred 9 PM slot by `5ec7c7a8`.
+- Plant Seeds hint, fewer harvest seeds, crop cookfire recipes, the 1500-coin pole and location-specific fishing/cooking/sales.
+- First-visit travel unlocks, evening-to-dawn sleep, Sunday shop waiting, larger chest names and unified HUD notices.
+- Art gate: all-new original pole, six fish and sixteen dishes, imported, wired and visually checked. Jenny approved the tip-line pole; no reel in this batch.
+- Release gate: remaining runtime and canonical release-local save-containment checks; no reused art or unverified subset.
+- Player checks are post-delivery acceptance, not completed agent-run observations.
+- No overnight work or automation after signoff.
 
 ## Later
 

@@ -1,9 +1,17 @@
 {
   "buildId": "20261003-measured-02",
-  "status": "authorized",
+  "status": "deferred",
   "authorizedAt": "2026-10-04T01:55:51.513Z",
   "targetSlot": "2026-10-03 21:00",
   "fallbackSlot": "2026-10-04 07:30",
+  "fallbackStatus": "target-not-promise",
+  "deliveryDecision": "Full game delivery deferred at 20:49 local on Oct 3. Original fish/meal art and runtime/release-isolation gates remain incomplete; do not package placeholders or an unverified subset. Eleven selected game cards moved to the morning target. No overnight/signoff work.",
+  "toolingDelivery": {
+    "sourceSha": "3846476d",
+    "status": "delivered",
+    "plannerStateSha": "5ec7c7a8",
+    "playerAcceptance": "pending"
+  },
   "coordinator": {
     "runtimeSessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
     "model": "gpt-6.1-sol",
