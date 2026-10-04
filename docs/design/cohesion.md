@@ -12,17 +12,18 @@ conflict, the cozier, more fun or more beautiful option wins.
 - **Where and when:** the Trevennor estate, a neglected manor on the Cornish coast, spring 1851 on.
   The heroine, Eleanor Cavendish, has inherited it and is bringing it back to life. The world is
   coves, river valleys, hedge banks, granite, slate, engine-house ruins far off, a market town with
-  Pascoe's general store (Mrs. Martha Pascoe).
+  Trethewey's general store (Mr. Josiah Trethewey, a shopkeeper in his fifties; renamed from
+  Pascoe, a Poldark surname, on 2026-10-04).
 - **Mood:** warm, unhurried, hopeful. Work is satisfying, never punishing; she doesn't starve,
   faint or die on the estate. Setbacks are gentle (a doze in the field, a missed fish).
 - **Period feel without pastiche:** coins, posies, pasties, lamp oil, hemp twine, a field book.
   Prefer things a Cornish household of 1851 would know. Avoid modern words (sushi, upgrade,
   inventory in player copy, XP, quest) unless no period word reads clearly; clarity wins over
   period accuracy (pillar 1 beats pillar 3).
-- **Names:** Cornish surnames and places (Pascoe, Trevennor, Penhallow, Tregarthen, Polwhele…) and
-  plain Victorian given names. **Never reference *Poldark***: no Ross, Demelza, Nampara, Trenwith,
-  Wheal Leisure/Grace, Warleggan, Jud, Prudie, Verity or close variants. If a name sounds like the
-  show, pick another.
+- **Names:** Cornish surnames and places (Trethewey, Trevennor, Penhallow, Tregarthen, Polwhele…)
+  and plain Victorian given names. **Never reference *Poldark***: no Ross, Demelza, Nampara,
+  Trenwith, Wheal Leisure/Grace, Warleggan, Pascoe, Hoskin(g), Jud, Prudie, Verity or close
+  variants. If a name sounds like the show, pick another.
 
 ## 2. Copy conventions
 
@@ -36,7 +37,7 @@ conflict, the cozier, more fun or more beautiful option wins.
 | Numbers | Thousands commas; "coins", not "c" or "$". | "1,500 coins" |
 | Ranges | En dash, no spaces for numbers; spaced en dash for clauses. | "Open 8 AM–6 PM" · "Hotbar – the first row" |
 | Dates | `Mon, Spring 1, 1851` style everywhere. Weather words match the HUD. | |
-| Store name | Full: **Pascoe's general store**; short: **the general store**. Sentence case unless it's a title heading. | |
+| Store name | Full: **Trethewey's general store**; short: **the general store**. Sentence case unless it's a title heading. | |
 
 Assume the player knows farming games: don't toast obvious outcomes (picked up 1 hay) and don't
 explain standard verbs.

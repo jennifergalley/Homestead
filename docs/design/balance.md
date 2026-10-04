@@ -60,10 +60,10 @@ generous and cozy.
 | --- | --- | --- |
 | Maximum | 100 | |
 | Awake drain | 0.6 an hour, about 12 a day | ✅ Barely noticeable. |
-| Sleeping in bed | 10 an hour; from 0.25 h up to 10 h | 🟡 See below. |
+| Sleeping in bed | Always ends at 100 (Jenny, 2026-10-04; 9 PM build). The time it takes is still the deficit ÷ 10 an hour, from 0.25 h up to 10 h. | ✅ Supersedes the 15-an-hour proposal. |
 | Dozing off (passing out at 02:00) | 6 h at 6 an hour, so 36 | ✅ A mild penalty, which is right. |
 | Sprint floor / slow-walk floor | 25 / 10, where walking drops to 75% speed | ✅ She never faints on the estate. |
-| Well fed | 3 h of work at × 0.85 cost | ✅ |
+| Well fed | 3 h of work at × 0.85 cost, from every Meal (pasty, roots, crop and fish dishes); snacks give none | ✅ |
 
 ### Action costs
 
@@ -89,9 +89,8 @@ generous and cozy.
 ✅ A full bar is a long, varied morning's work, and food tops it up. Energy is a gentle pacing cue,
 not a wall.
 
-🟡 **A late night leaves her short.** Bed at 22:00 restores 80, midnight 60 and 02:00 just 40. A
-player who plays to the end of the day, the natural cozy rhythm, starts the next morning at 50–70.
-Suggest SleepPerHour 10 → **15**, so a midnight bedtime gives 90 and 22:00 gives a full bar.
+✅ **Resolved:** a late night used to leave her short (bed at 02:00 restored only 40). From the
+9 PM build, any bed sleep refills her to 100.
 
 ## 4. Crops
 
@@ -145,9 +144,9 @@ would have sold for. Cooking also costs one kindling (3 coins) and 0.3 energy.
 
 ✅ The biggest dish, the stew, gives the most energy per meal.
 
-🟡 Cooking never beats selling in coins; it only turns coins into energy. That's fine while energy
-is gentle, but a cooked meal should feel special. Suggest Well fed on every cooked Meal, not only
-the pasty, or +10% energy for dishes with several ingredients.
+✅ Cooking never beats selling in coins; it turns coins into energy. Every Meal already grants Well
+fed (3 h at × 0.85), which makes a cooked meal feel special. A native test covers it from the 9 PM
+build.
 
 ## 6. Foraging and clearing
 
@@ -264,9 +263,9 @@ These are proposals for the Orchestrator to offer Jenny. None is scheduled.
    the 3rd real hour, and profit per real hour doubles. The alternative, a 30-minute default day,
    halves everything else too: shop hours, lamp oil and sleep.
 2. 🔴 **A daily fishing catch:** 5 per water type per day (§8).
-3. 🟡 **Sleep:** 15 energy an hour (§3).
+3. ✅ **Sleep:** superseded by Jenny's rule that any bed sleep refills to 100 (9 PM build).
 4. 🟡 **Better-value snacks:** bread 20 energy, cheese 28 (§2).
-5. 🟡 **Cooked meals grant Well fed** (§5).
+5. ✅ **Cooked meals grant Well fed:** already true for every Meal (§5).
 
 ## Changelog
 
@@ -274,3 +273,7 @@ These are proposals for the Orchestrator to offer Jenny. None is scheduled.
   UI lane.
 - 2026-10-04: travel-time targets for the map resize (§9), sent to the Map planning agent. Restated
   in sprint seconds the same day at Jenny's direction.
+- 2026-10-04 (9 PM planning, Gameplay agent): bed sleep always refills to 100; Well fed confirmed on
+  every Meal; tree felling on the map at 4 energy, with forest trees regrowing after 3 days beyond
+  60 m of the manor and farm (a stump, then a sapling at day 1), and trees lining the roads and the
+  town square left unchoppable. The shopkeeper is renamed Mr. Josiah Trethewey.
