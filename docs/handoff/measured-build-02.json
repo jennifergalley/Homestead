@@ -20,6 +20,23 @@
       "The Oct 4 07:30 slot remains a target, not a promise."
     ]
   },
+  "userDirectedCoordinationExceptions": [
+    {
+      "authorizedAt": "2026-10-03T22:07:00-07:00",
+      "scope": "Coordinator only",
+      "instruction": "A scheduled coordinator check may use one single-use 30-minute fallback and may be rearmed only after it processes while the work remains active. Farming has no automation."
+    },
+    {
+      "authorizedAt": "2026-10-03T22:07:00-07:00",
+      "scope": "Fishing Blender/Unreal work",
+      "instruction": "Do not apply a blanket playtime pause. Jenny prefers to stop playing if a genuine resource conflict requires it; report the exact conflict first.",
+      "constraints": [
+        "Preserve the two-Unreal-process cap.",
+        "Preserve assigned import ownership.",
+        "Integration remains parked for overnight hands-on, build, and package work until separately assigned."
+      ]
+    }
+  ],
   "coordinator": {
     "runtimeSessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
     "model": "gpt-6.1-sol",

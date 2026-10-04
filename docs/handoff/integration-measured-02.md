@@ -195,6 +195,14 @@ It creates no automation and does not authorize WIP import/admission, Integratio
 work, or any change to the original-art, route-isolation, and release gates. Oct 4 7:30 AM remains a
 target rather than a promise.
 
+At 22:07 local, Jenny additionally authorized the coordinator—not Farming—to schedule a single-use
+30-minute fallback check, rearming it only after processing while work remains active. She also
+directed that Fishing Blender/Unreal work may continue while she plays: do not apply a blanket
+playtime pause. If a real resource conflict arises, report its exact editor/GPU/process constraint so
+she can choose to stop playing. The two-Unreal-process cap and assigned import ownership remain
+mandatory. Integration's overnight hands-on, build, and package hold is unchanged until separately
+assigned.
+
 ## Bounded current-source runtime evidence
 
 - With Farming's Blender window paused, Integration launched one owned editor at port 8768 with the
