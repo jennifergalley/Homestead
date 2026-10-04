@@ -944,9 +944,13 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         {
             if (bFishStriking)
             {
+                // Carry the strike's overshoot into the next segment so a frame hitch doesn't push
+                // the catch's lift beat later than the simulation's contact timeout allows.
+                const float Overshoot = FishTime - End;
                 bFishStriking = false;
                 StartFishSegment(FishPose == EHomesteadFishingPose::None ? EHomesteadFishingPose::Fight : FishPose, false);
                 FishSegmentRange(FishSegment, false, Start, End, bLoop);
+                FishTime = FMath::Min(Start + Overshoot, End - FishClipFrame);
             }
             else if (bLoop) FishTime = Start + FMath::Fmod(FishTime - Start, End - Start - FishClipFrame);
             else if (FishSegment == EHomesteadFishingPose::Cast && FishPose == EHomesteadFishingPose::Wait)
