@@ -22,6 +22,9 @@ actual/configured context tiers are unknown.
   the sole protected rollback remains
   `jennifergalley-literate-eureka\Build\Releases\20261001-9pm-shipping\Windows`. Do not reopen
   build01 windows, touch Jenny's live game, remove saves, or archive either worktree.
+- Jenny paused build work at 19:09 local on Oct 3 while she plays. Until an explicit resume, do not
+  start Unreal Editor, UBT, UAT, packages, or tests involving Unreal; preserve the active game,
+  saves, shortcut, and protected releases. No automation is scheduled.
 - Baseline planner coverage is not a clean full suite: `PlannerStatusTests.mjs` has a pre-existing
   final renderer assertion for removed `statusFilters`/`completedExpanded` controls. The lane reports
   its first four data tests pass; do not label the stale renderer assertion a measured02 regression.
