@@ -74,7 +74,7 @@ export function groupBuildCosts(report) {
         estimatedNanoAiu: String(estimated) }));
 }
 
-export function buildCostView({ reports = [], builds = [], manifests = [], features = [], cycle = null,
+export function buildCostView({ reports = [], builds = [], manifests = [], cycle = null,
     now = Date.now() }) {
     const timeZone = cycle?.timeZone ?? "America/Los_Angeles";
     const today = localDate(now, timeZone);
@@ -85,11 +85,11 @@ export function buildCostView({ reports = [], builds = [], manifests = [], featu
     }
     const metadata = new Map();
     for (const manifest of manifests) {
-        if (!manifest.buildId) throw new Error("Missing delivery manifest build ID.");
-        if (metadata.has(manifest.buildId)) throw new Error(`Duplicate delivery manifest: ${manifest.buildId}`);
-        metadata.set(manifest.buildId, manifest);
+        const id = manifest.buildId ?? manifest.plannerDelivery?.buildId;
+        if (!id) throw new Error("Missing delivery manifest build ID.");
+        if (metadata.has(id)) throw new Error(`Duplicate delivery manifest: ${id}`);
+        metadata.set(id, manifest);
     }
-    const titles = new Map(features.map((feature) => [feature.id, feature.title]));
     const used = new Set();
     const shipped = builds.filter((build) => build.status === "delivered").map((build) => {
         if (build.buildId && used.has(build.buildId)) throw new Error(`Duplicate shipment: ${build.buildId}`);
@@ -99,10 +99,7 @@ export function buildCostView({ reports = [], builds = [], manifests = [], featu
         const deliveredAt = manifest?.deliveredAt ?? null;
         const timing = shipmentTiming(build, deliveredAt, timeZone);
         const date = timing.date;
-        const selected = manifest?.plannerDelivery?.status === "shipped" ? manifest.plannerDelivery.selectedIds ?? [] : [];
-        const selectedTitles = selected.map((id) => titles.get(id));
-        const shippedFeatures = selected.length && selectedTitles.every(Boolean)
-            ? selectedTitles : build.shippedFeatures ?? build.ships ?? [];
+        const shippedFeatures = build.shippedFeatures ?? build.ships ?? [];
         return {
             buildId: build.buildId ?? null, date, deliveredAt,
             label: timing.label, time: timing.time, dataError: timing.dataError,
@@ -111,7 +108,8 @@ export function buildCostView({ reports = [], builds = [], manifests = [], featu
             estimatedNanoAiu: report ? String(nano(report.totals.estimatedNanoAiu)) : "0",
             groups: report ? groupBuildCosts(report) : [],
             partial: !report || report.status !== "reconciled" || report.totals.recordedCalls !== report.totals.calls,
-            missingCosts: !report || report.totals.recordedCalls !== report.totals.calls,
+            missingCosts: !report || report.totals.recordedCalls !== report.totals.calls
+                || report.legacy?.recordedNanoAiu == null || !!report.coverage?.missingSessions?.length,
             inheritedUnknown: report?.legacy?.recordedNanoAiu == null,
             reportPath: report ? `docs/handoff/accounting/reports/${report.buildId}.json` : null,
         };
@@ -137,7 +135,7 @@ export function buildCostView({ reports = [], builds = [], manifests = [], featu
     return { period, shipped, unshippedReports: reports.filter((report) => !used.has(report.buildId)).length };
 }
 
-export async function loadBuildCostView(projectRoot, reports, builds, features, now = Date.now()) {
+export async function loadBuildCostView(projectRoot, reports, builds, now = Date.now()) {
     const handoff = join(projectRoot, "docs", "handoff");
     let files;
     try { files = await readdir(handoff); }
@@ -147,5 +145,5 @@ export async function loadBuildCostView(projectRoot, reports, builds, features, 
         Promise.all(files.filter((file) => /^measured-build-[\w-]+\.json$/.test(file))
             .map(async (file) => JSON.parse(await readFile(join(handoff, file), "utf8")))),
     ]);
-    return buildCostView({ reports, builds: builds.entries, manifests, features, cycle, now });
+    return buildCostView({ reports, builds: builds.entries, manifests, cycle, now });
 }

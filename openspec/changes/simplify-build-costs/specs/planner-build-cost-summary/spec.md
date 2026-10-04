@@ -8,7 +8,7 @@ Help Jenny understand shipped Homestead improvements and their observed AI cost 
 
 ### Requirement: Concise shipped build summaries
 
-The Build cost tab SHALL list shipped features, actual shipment date, recorded cost and a coarse feature/category breakdown, without session/token tables. It MUST preserve detailed evidence, keep missing costs unknown and distinguish observed AIU from billing-reconciled credits. Reading it MUST NOT notify or invoke agents.
+The Build cost tab SHALL list shipped features, actual shipment date/time, recorded cost and a coarse feature/category breakdown, without session/token tables. Both planner tabs MUST label shipments `YYYY-MM-DD — h:mm AM/PM`, order them by parsed shipment date/time newest first and visibly flag invalid shipment headings rather than guessing. Deferred/historical/unshipped records MUST NOT appear as delivered cards or stale upcoming releases. It MUST preserve detailed evidence, keep missing costs unknown and distinguish observed AIU from billing-reconciled credits. Reading it MUST NOT notify or invoke agents.
 
 #### Scenario: Measured build shipment
 

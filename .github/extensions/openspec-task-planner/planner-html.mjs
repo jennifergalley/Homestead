@@ -465,14 +465,15 @@ export function renderPlannerHtml() {
 
     function renderBuildCard(build, current = false, assigned = []) {
       const card = el("article", "build-card" + (current ? " current" : ""));
+      const items = build.status === "delivered" ? build.shippedFeatures ?? build.ships : build.ships;
       const title = el("div", "build-title");
       title.append(el("strong", "", build.label ?? [build.date, build.slot].filter(Boolean).join(" — ")),
         el("span", "badge " + (build.status === "delivered" ? "complete" : "active"), build.status));
       card.append(title);
       if (build.dataError) card.append(el("p", "cost-error", build.dataError));
-      if (build.ships?.length) {
+      if (items?.length) {
         const list = el("ul");
-        for (const item of build.ships) list.append(el("li", "", item));
+        for (const item of items) list.append(el("li", "", item));
         card.append(list);
       }
       if (assigned.length) {
@@ -484,7 +485,7 @@ export function renderPlannerHtml() {
         }
         card.append(chips);
       }
-      if (!build.ships?.length && !assigned.length) card.append(el("div", "build-meta", "Nothing scheduled yet"));
+      if (!items?.length && !assigned.length) card.append(el("div", "build-meta", build.status === "delivered" ? "Shipped features not recorded" : "Nothing scheduled yet"));
       return card;
     }
 
@@ -495,19 +496,13 @@ export function renderPlannerHtml() {
       const head = el("div", "builds-head");
       head.append(el("h2", "", "Builds"), el("span", "muted", "Upcoming releases and recent deliveries"));
       buildsNode.append(head);
-      const shown = new Set();
       slots.forEach((slot, index) => {
-        const entry = builds?.entries?.find((build) => build.key === slot.key && build.status !== "delivered");
+        const entry = builds?.entries?.find((build) => build.key === slot.key && build.status === "planned");
         const assigned = features.filter((feature) => feature.slot === slot.key);
-        if (entry) shown.add(entry);
         if (!entry && !assigned.length && index > 0) return;
         buildsNode.append(renderBuildCard({ ...(entry ?? { status: "planned", ships: [] }), label: slot.label, status: entry?.status ?? "planned" }, index === 0, assigned));
       });
       const byTime = (a, b) => (Number.isFinite(a.time) ? a.time : 0) - (Number.isFinite(b.time) ? b.time : 0);
-      for (const build of [...(builds?.entries ?? [])].sort(byTime)) {
-        if (build.status === "delivered" || build.status === "historical" || shown.has(build)) continue;
-        buildsNode.append(renderBuildCard(build));
-      }
       const delivered = (builds?.entries ?? []).filter((build) => build.status === "delivered").sort((a, b) => byTime(b, a));
       for (const build of delivered.slice(0, 2)) buildsNode.append(renderBuildCard(build));
       if (delivered.length > 2) {
@@ -551,13 +546,13 @@ export function renderPlannerHtml() {
           const value = Number(BigInt(day.recordedNanoAiu)) / 1e9;
           const amount = day.unknown && !value ? "Unknown cost" : aiu(day.recordedNanoAiu) + " recorded AIU" + (day.unknown ? " + unknown costs" : "");
           const description = day.date + " · " + amount + " · " + day.shipments + " shipped build" + (day.shipments === 1 ? "" : "s") + (day.future ? " · Upcoming day" : "");
-          const button = el("button", "cost-day" + (day.unknown ? " unknown" : !value ? " zero" : "") + (day.future ? " future" : ""));
+          const button = el("button", "cost-day" + (day.unknown && !value ? " unknown" : !value ? " zero" : "") + (day.future ? " future" : ""));
           button.type = "button";
           button.dataset.date = day.date;
           button.setAttribute("aria-label", description);
           button.title = description;
           const area = el("span", "cost-bar-area");
-          const shortValue = day.unknown && !value ? "?" : value >= 1000 ? (value / 1000).toFixed(1) + "k" : value ? value.toFixed(1) : "0";
+          const shortValue = day.unknown && !value ? "?" : (value >= 1000 ? (value / 1000).toFixed(1) + "k" : value ? value.toFixed(1) : "0") + (day.unknown ? "+" : "");
           area.append(el("span", "cost-day-value", shortValue));
           const bar = el("span", "cost-bar");
           bar.style.height = Math.max(day.unknown && !value ? 12 : 2, value / max * 160) + "px";

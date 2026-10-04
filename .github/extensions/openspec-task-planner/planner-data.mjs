@@ -100,7 +100,10 @@ function parseBuilds(markdown) {
         }
         const property = line.match(/^\s*-\s+(SHA|Status):\s*(.+?)\s*$/i);
         if (property && current) {
+            if (property[1].toLowerCase() === "status" && current.status === "historical"
+                && property[2] === "delivered") current.shippedFeatures = [];
             current[property[1].toLowerCase()] = property[2].replace(/`/g, "");
+            inShips = false;
             continue;
         }
         if (inShips && current?.shippedFeatures.length && /^\s{2,}\S/.test(line) && !/^\s*-/.test(line)) {
@@ -320,7 +323,7 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
     // each one so the board, priority.json, and quote/remove/assign wiring
     // all treat them like any other item.
     for (const entry of backlogEntries) features.push(backlogFeatureFromEntry(entry));
-    const costView = await loadBuildCostView(projectRoot, accounting, builds, features, now);
+    const costView = await loadBuildCostView(projectRoot, accounting, builds, now);
     applyDeliveryRegistry(features, deliveryRegistry);
     const order = new Map((Array.isArray(priority.order) ? priority.order : []).map((id, index) => [id, index]));
     const removed = new Set(Array.isArray(priority.removed) ? priority.removed : []);
@@ -329,8 +332,14 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
     for (const build of builds.entries) {
         build.key = buildKey(build);
         build.time = buildTime(build);
-        if (build.status === "delivered") Object.assign(build, shipmentTiming(build));
+        if (build.status === "delivered") {
+            const shipment = costView.shipped.find((value) => value.buildId && value.buildId === build.buildId);
+            Object.assign(build, shipment ? { label: shipment.label, time: shipment.time, dataError: shipment.dataError }
+                : shipmentTiming(build));
+        }
     }
+    builds.entries.sort((a, b) => (Number.isFinite(b.time) ? b.time : -Infinity)
+        - (Number.isFinite(a.time) ? a.time : -Infinity));
     features.sort((a, b) => {
         const ao = order.has(a.id) ? order.get(a.id) : defaultFeatureRank(a);
         const bo = order.has(b.id) ? order.get(b.id) : defaultFeatureRank(b);

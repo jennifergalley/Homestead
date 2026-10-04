@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { buildUsageReport, persistUsageReport, loadUsageReports } from "../.github/extensions/openspec-task-planner/accounting-data.mjs";
 import { startPlannerServer } from "../.github/extensions/openspec-task-planner/planner-server.mjs";
 import { renderPlannerHtml } from "../.github/extensions/openspec-task-planner/planner-html.mjs";
+import { buildCostView } from "../.github/extensions/openspec-task-planner/cost-view.mjs";
 
 const since = "2026-10-03T04:32:10.763Z";
 const allocation = {
@@ -120,8 +121,8 @@ test("HTTP report reads, backlog/screenshots, schedule/reorder/remove and quote 
     await post("api/priority", { remove: id });
     assert.equal((await (await fetch(url + "api/tasks")).json()).features.length, 0);
     const html = await (await fetch(url)).text();
-    assert.match(html, /unknown runtime context/);
-    assert.match(html, /Inherited implementation/);
+    assert.match(html, /Observed AIU, not billing-reconciled AI credits/);
+    assert.doesNotMatch(html, /cost-table/);
     assert.match(html, /accounting: planner.accounting/);
 });
 
@@ -133,9 +134,13 @@ test("rendered browser script parses without executing it", () => {
 test("browser accounting renderer is in page scope and renders actual costs and unknown coverage", () => {
     class Element {
         children = [];
+        style = {};
+        dataset = {};
         append(...children) { this.children.push(...children); }
+        prepend(...children) { this.children.unshift(...children); }
         replaceChildren(...children) { this.children = children; }
         addEventListener() {}
+        setAttribute() {}
     }
     const nodes = new Map();
     const document = {
@@ -148,13 +153,15 @@ test("browser accounting renderer is in page scope and renders actual costs and 
     const script = renderPlannerHtml().match(/<script>([\s\S]*?)<\/script>/)[1];
     const beforeStartup = script.slice(0, script.indexOf('    refresh.addEventListener'));
     const renderAccounting = new Function("document", beforeStartup + "\nreturn renderAccounting;")(document);
-    renderAccounting([]);
+    renderAccounting(null);
     const text = (node) => [node.textContent ?? "", ...node.children.map(text)].join(" ");
     assert.match(text(nodes.get("accounting")), /unknown, not zero/);
     const report = buildUsageReport(allocation, [snapshot([event(11)])]);
-    renderAccounting([report]);
+    renderAccounting(buildCostView({ reports: [report], builds: [{ buildId: report.buildId,
+        status: "delivered", date: "2026-10-03", slot: "9 PM", shippedFeatures: ["A shipped feature"] }] }));
     assert.match(text(nodes.get("accounting")), /3.744 recorded AIU/);
-    assert.match(text(nodes.get("accounting")), /unknown runtime context/);
-    assert.match(text(nodes.get("accounting")), /Inherited implementation: unattributed/);
-    assert.equal(nodes.get("accounting").children[1].open, true);
+    assert.match(text(nodes.get("accounting")), /A shipped feature/);
+    assert.match(text(nodes.get("accounting")), /2026-10-03 — 9:00 PM/);
+    assert.match(text(nodes.get("accounting")), /inherited costs.*incomplete/);
+    assert.doesNotMatch(text(nodes.get("accounting")), /unknown runtime context|gpt-6.1-sol|cache read/);
 });

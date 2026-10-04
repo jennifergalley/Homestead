@@ -12,7 +12,8 @@ See proposal.md. Existing reports already retain disjoint per-call allocations. 
 
 ## Decisions
 
-- Keep detailed reports and their API representation; add a compact view joining delivered changelist entries, explicit build IDs/report references, delivery manifests and feature titles. Exclude planned/historical/deferred entries.
+- Keep detailed reports and their API representation; add a compact view joining delivered changelist entries, explicit build IDs/report references and delivery manifests. Use immutable shipped-feature text, not editable feedback titles. Exclude planned/historical/deferred entries.
+- Jenny's added direction: enforce `YYYY-MM-DD — h:mm AM/PM` shipment labels and numeric newest-first ordering in both tabs. Invalid shipment headings show an explicit data error rather than an invented time/free-text label. Historical/deferred cards are not upcoming releases.
 - Sum integer nano-AIU before display. Combine model/session segments into feature bundles and broad overhead/integration/review categories; do not divide shared work arbitrarily between features.
 - Persist Jenny's confirmed cycle as extension configuration. Do not assume later cycles: once it expires, request updated dates rather than display the old cycle as current.
 - Chart costs on the shipment's local date in America/Los_Angeles. Zero means no shipment; shipments without cost evidence show unknown. A concise qualifier explains observed AIU and missing historical costs.
