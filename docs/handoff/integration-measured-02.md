@@ -145,6 +145,16 @@ doze; Sunday wait preserves authoritative energy drain and adds no rest grant.
 - Jenny now requires original art for the pole, six caught fish, and sixteen new dishes. The reused
   pole/meal visuals in this source checkpoint block Fishing/Food promotion until original assets are
   authored, imported, and wired. Do not use a stale or current editor pass as art acceptance.
+- Full integrated Release native coverage passed 21/21 in 199.74 seconds. The only warnings were
+  pre-existing C4456 shadowed locals in `HomesteadManorTests.cpp` and
+  `HomesteadPublicRoadTests.cpp`.
+
+## Delivery decision
+
+The local pre-Fishing boundary `5e40dc30` isolates Travel and HUD source, but it is not a clean
+verified 9 PM delivery: Travel/HUD still lack runtime, gallery, Jenny acceptance, and the mandatory
+real promotion containment proof. Fishing/Food also lacks the required original assets. Defer rather
+than package or promote a placeholder-art or incompletely verified slice.
 - Its counted-stock serialization widens to 23 Items without a save version, bake, or tagged-section
   change. Older readers can therefore reject these saves even with zero new quantities; Farming
   inherits the Travel separate-save/write-protection rollback gate. Fishing casts are ephemeral.
