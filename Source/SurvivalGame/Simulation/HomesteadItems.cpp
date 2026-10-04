@@ -245,7 +245,8 @@ bool IsSeedPacket(Item item)
     default: return false;
     }
 }
-bool CanStackItem(Item item) { return ValidItem(item) && !IsSeedPacket(item); }
+// Packets of one crop stack; a different crop is a different Item and never merges with it.
+bool CanStackItem(Item item) { return ValidItem(item); }
 int ItemSortRank(Item item)
 {
     if (!ValidItem(item)) return 5;

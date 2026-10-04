@@ -3098,10 +3098,10 @@ void DirectSplitAndDeterministicSort()
     OK(sim.ArrangePackRow(noRow));
     OK(sim.SortPack(sim.GetRevision()));
     CHECK(sim.UsedCapacity() == used && sim.GetState().inventory == totals);
-    CHECK(sim.GetLayout(0)->size() == 8);
+    CHECK(sim.GetLayout(0)->size() == 7);
     const Item expected[] = {Item::Knife, Item::Hatchet, Item::Stone,
-        Item::Fiber, Item::Berries, Item::Seeds, Item::Seeds};
-    for (int index = 0; index < 7; ++index)
+        Item::Fiber, Item::Berries, Item::Seeds};
+    for (int index = 0; index < 6; ++index)
         CHECK(sim.GetLayout(0)->at(index).item == expected[index]);
     CHECK(sim.GetLayout(0)->back().wearableId == tunic.id);
     CHECK(sim.GetWearable(tunic.id)->definition == tunic.definition
@@ -3133,23 +3133,9 @@ void PersistentWorldDropTransactions()
         const int firstDrop = category.GetState().worldDrops.front().id;
         OK(category.PickUpDrop(firstDrop, Home));
         CHECK(category.Count(item) == 3 && category.GetState().worldDrops.empty());
-        if (IsSeedPacket(item))
-        {
-            for (int packet = 0; packet < 3; ++packet)
-                OK(category.DropGroup(Group(category, item), 1, Home, Home, category.GetRevision()));
-            CHECK(category.Count(item) == 0 && category.GetState().worldDrops.size() == 3);
-            while (!category.GetState().worldDrops.empty())
-            {
-                CHECK(category.GetState().worldDrops.front().quantity == 1);
-                OK(category.PickUpDrop(category.GetState().worldDrops.front().id, Home));
-            }
-        }
-        else
-        {
-            OK(category.DropGroup(Group(category, item), 3, Home, Home, category.GetRevision()));
-            CHECK(category.Count(item) == 0 && category.GetState().worldDrops.front().quantity == 3);
-            OK(category.PickUpDrop(category.GetState().worldDrops.front().id, Home));
-        }
+        OK(category.DropGroup(Group(category, item), 3, Home, Home, category.GetRevision()));
+        CHECK(category.Count(item) == 0 && category.GetState().worldDrops.front().quantity == 3);
+        OK(category.PickUpDrop(category.GetState().worldDrops.front().id, Home));
         CHECK(category.Count(item) == 3);
     }
 

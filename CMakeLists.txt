@@ -24,7 +24,6 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadFlowerCover.cpp
     Source/SurvivalGame/Simulation/HomesteadParcels.cpp
     Source/SurvivalGame/Simulation/HomesteadItems.cpp
-    Source/SurvivalGame/Simulation/HomesteadSeedPackets.cpp
     Source/SurvivalGame/Simulation/HomesteadShops.cpp
     Source/SurvivalGame/Simulation/HomesteadRain.cpp
     Source/SurvivalGame/Simulation/HomesteadManor.cpp

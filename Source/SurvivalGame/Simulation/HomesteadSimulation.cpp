@@ -1,5 +1,4 @@
 #include "HomesteadSimulation.h"
-#include "HomesteadSeedPackets.h"
 #include "HomesteadBed.h"
 #include "HomesteadBackpack.h"
 #include "HomesteadChests.h"
@@ -658,7 +657,6 @@ bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
     // Her pack's first row is the hotbar (HomesteadPackRow.h): gains and uses visit its cells first,
     // and new stacks and garments take its first empty cell.
     const bool pack = container == 0;
-    if (!SeedPackets::SplitGroups(state, *layout)) return false;
     layout->erase(std::remove_if(layout->begin(), layout->end(), [&](const LayoutEntry& entry) {
         if (entry.wearableId == 0) return false;
         const auto* item = Find(state.wearables, entry.wearableId);
@@ -693,9 +691,8 @@ bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
         while (difference > 0)
         {
             if (!CanAllocate(state.nextGroupId)) return false;
-            const int quantity = IsSeedPacket(static_cast<Item>(i)) ? 1 : difference;
-            layout->push_back({state.nextGroupId++, static_cast<Item>(i), quantity, 0});
-            difference -= quantity;
+            layout->push_back({state.nextGroupId++, static_cast<Item>(i), difference, 0});
+            difference = 0;
             // The pail's water shows on the pail (HomesteadPail.h), never in a hotbar cell.
             if (pack && static_cast<Item>(i) != Item::Water) arrivals.push_back(layout->back());
         }
@@ -723,12 +720,12 @@ bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
     }
     return true;
 }
-Result ValidateInventory(const State& state, bool allowLegacySeedGroups = false)
+Result ValidateInventory(const State& state)
 {
     if (!CanAllocate(state.nextWearableId) || !CanAllocate(state.nextGroupId) || state.wearables.size() > MaxObjects)
         return Bad("The wardrobe identity allocator is invalid or exhausted.");
     std::set<int> ids, groupIds, displayed;
-    std::size_t packetGroups = 0, stackedGroups = 0;
+    std::size_t groupCount = 0;
     std::array<int, EquipmentSlotCount> equipment{};
     for (const auto& item : state.wearables)
     {
@@ -785,12 +782,10 @@ Result ValidateInventory(const State& state, bool allowLegacySeedGroups = false)
             else
             {
                 if (entry.groupId <= 0 || entry.groupId >= state.nextGroupId || !groupIds.insert(entry.groupId).second ||
-                    !ValidEnum(entry.item, Item::Count) || entry.quantity <= 0 || entry.quantity > capacity
-                    || (!allowLegacySeedGroups && IsSeedPacket(entry.item) && entry.quantity != 1))
+                    !ValidEnum(entry.item, Item::Count) || entry.quantity <= 0 || entry.quantity > capacity)
                     return Bad("A fungible group has invalid identity, item or quantity.");
                 total[static_cast<int>(entry.item)] += entry.quantity;
-                if (IsSeedPacket(entry.item) && entry.quantity == 1) ++packetGroups;
-                else ++stackedGroups;
+                ++groupCount;
             }
         }
         if (total != *stock) return Bad("Inventory layout does not partition the stored quantities.");
@@ -811,7 +806,7 @@ Result ValidateInventory(const State& state, bool allowLegacySeedGroups = false)
         }
         else if (!piece.layout.empty()) return Bad("Only chests may contain inventory layout.");
     }
-    if (stackedGroups > MaxObjects || (!allowLegacySeedGroups && packetGroups > SeedPackets::MaxPacketGroups))
+    if (groupCount > MaxObjects)
         return Bad("The homestead has reached its inventory group limit.");
     std::set<int> dropIds, droppedWearables;
     if (state.worldDrops.size() > MaxWorldDrops) return Bad("The world drop limit is exceeded.");
@@ -903,7 +898,7 @@ bool AddWorldDrop(State& candidate, Point position, Item item, int quantity)
     while (quantity > 0)
     {
         if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1) return false;
-        const int part = IsSeedPacket(item) ? 1 : std::min(quantity, stack);
+        const int part = std::min(quantity, stack);
         candidate.worldDrops.push_back({candidate.nextId++, position, item, part, 0});
         quantity -= part;
     }
@@ -1640,7 +1635,6 @@ Result Simulation::MergeGroups(int containerId, int sourceGroupId, int targetGro
         [&](const LayoutEntry& value) { return value.groupId == targetGroupId && value.wearableId == 0; });
     if (source == layout->end() || target == layout->end() || source == target || source->item != target->item)
         return Bad("Choose two different groups of the same item in this container.");
-    if (!CanStackItem(source->item)) return Bad("Seed packets cannot be stacked.");
     target->quantity += source->quantity;
     layout->erase(source);
     return CommitInventory(std::move(candidate), "Groups merged; capacity is unchanged.");
@@ -2475,7 +2469,7 @@ Result Simulation::Deconstruct(int structureId, Point player)
             {
                 if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1)
                     return false;
-                moved = IsSeedPacket(item) ? 1 : std::min(quantity, stack);
+                moved = std::min(quantity, stack);
                 candidate.worldDrops.push_back({candidate.nextId++, spot, item, moved, 0});
             }
             quantity -= moved;
@@ -3509,15 +3503,8 @@ Result Simulation::Deserialize(const std::string& data)
     }
     if (!input.eof()) return invalid();
     if (!PackRowRules::RestoreSlots(candidate)) return invalid();
-    const auto inventory = ValidateInventory(candidate, true);
+    const auto inventory = ValidateInventory(candidate);
     if (!inventory) return {false, inventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};
-    if (SeedPackets::CountPackets(candidate) > SeedPackets::MaxPacketGroups)
-        return {false, "This test save has more seed packets than this build supports. Your current game and save were not changed.",
-            ResultCode::Capacity, revision_};
-    if (!SeedPackets::NormalizeSavedGroups(candidate)) return invalid();
-    const auto normalizedInventory = ValidateInventory(candidate);
-    if (!normalizedInventory)
-        return {false, normalizedInventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};
     int nextHandle = nextResourceHandle_;
     const bool sameWorld = candidate.world.seed == state_.world.seed &&
         candidate.world.generationVersion == state_.world.generationVersion;
