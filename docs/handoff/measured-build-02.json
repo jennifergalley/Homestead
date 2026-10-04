@@ -83,6 +83,8 @@
       "stewedCarrotsSourceStatus": "Held WIP: original source/proof (53,792/3,976 triangles), four viewed 4K frames, and passing closed-island/current-shader/copied-source fixtures. Bowl penetration fixed; 8.45 cm heap rejected with largest-first bounded vertex seating, but full contact/intersection remains unproven. Three source meals remain below realism bar and 13 unstarted; no fish/helper/bake, UE, gameplay/save/version change.",
       "herbedBeansSourceCheckpoint": "ae434be5",
       "herbedBeansSourceStatus": "Held WIP: original 24-seed/36-flake Herbed Beans, new 13.44 cm bowl/portion, 62,928/2,432 triangles, four viewed 4K frames, and passing source/coordinate/island/applied-transform/sampled-bowl fixtures. f/64 detail remains waxy/molded/procedural; not art/import-ready. Four prototypes, 12 unstarted dishes, zero approvals; no fish/helper/budget/bake, UE, gameplay/save change.",
+      "herbedBeansCoordinateFollowUpCheckpoint": "2612dcaa",
+      "herbedBeansCoordinateFollowUpStatus": "Metadata-only negative result: translated Object coordinates match pcoord within 1.88e-8 m, but 4K/native comparison RMS 0.0284 full/0.0923 surface does not recover fine relief. No source-coordinate, fish/bake, or production change; ae434be5 hold unchanged.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",

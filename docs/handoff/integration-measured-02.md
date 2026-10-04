@@ -295,6 +295,13 @@ leaves f/64 detail failures—waxy/molded beans and procedural clay—so this is
 admission. There are now four source prototypes, 12 unstarted dishes, and zero approvals. Farming's
 664-call build02-only snapshot is provisional; no fish/helper/budget/bake, UE, gameplay, or save
 change is included. The visible EEVEE state is preserved after the completed GPU render.
+Metadata-only follow-up `2612dcaa` checked one bean: translated Object coordinates match retained
+`pcoord` within `1.88e-8` m, yet viewed 4K/native-pixel comparison remains `0.0284` full and
+`0.0923` surface RMS and does not recover fine relief. There is no source-coordinate fix, fish/bake
+diagnosis, or production change. The `ae434be5` art hold is unchanged; diagnostic replay/evidence
+stays on owned E: scratch, its visible held bean scene was restored, and no render remains active.
+Farming's build02 snapshot is now provisionally 679 calls; four prototypes, 12 unstarted dishes, and
+zero approvals remain.
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
 prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four
