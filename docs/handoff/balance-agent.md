@@ -32,7 +32,9 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 Every suggestion I make (balance, cohesion/UI, polish) becomes a backlog card tagged with its
 source. End each review by sending the Orchestrator a "Backlog suggestions" list: one line per
 card with a title, a one-sentence description and the doc section it came from. The Orchestrator
-adds them through the planner; I never edit the backlog files myself.
+adds them through the planner; I never edit the backlog files myself. Before suggesting a card be
+retired, check its current text in `docs/handoff/backlog-inbox.json` / `priority.json`: Jenny may
+have rewritten it (she turned "sleep 15/h" into "Sleep always resets the energy bar entirely").
 
 ## How lanes reach me
 
