@@ -6,16 +6,16 @@
   "triangle_budget": 20000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/farm_fence.py",
-  "source_sha256": "47ca249b59a5fc8837b83613635dfa7601ba730240b8549f3b0d84ecd3090734",
+  "source_sha256": "18774b35440f8f27887a7e0b3c0f2ea70496e0e2115c8dbd131920727a4bd877",
   "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture.",
   "meshes": {
     "SM_FarmFencePost": {
-      "vertices": 687,
-      "triangles": 1170,
+      "vertices": 1978,
+      "triangles": 3790,
       "size_cm": [
-        14.89,
-        13.47,
-        131.24
+        16.62,
+        14.49,
+        131.46
       ],
       "materials": [
         {
@@ -49,9 +49,9 @@
           0
         ],
         "focus": [
-          0.0014588907361030579,
-          -0.022441605776548385,
-          0.6906102679669857
+          -0.007154140621423721,
+          -0.027540201991796492,
+          0.7032581030391156
         ],
         "views": [
           "hero",
@@ -60,31 +60,8 @@
         ]
       },
       "fbx": "SM_FarmFencePost.fbx",
-      "sha256": "ced1dd354030541ace3155fad53510eb5f968cd58effd47166a9cf872ce8f8a6",
-      "preview": "preview_SM_FarmFencePost.png",
-      "beauty": {
-        "views": {
-          "hero": "beauty_SM_FarmFencePost_hero.png",
-          "detail": "beauty_SM_FarmFencePost_detail.png",
-          "eye": "beauty_SM_FarmFencePost_eye.png"
-        },
-        "device": "OPTIX",
-        "gpus": [
-          "NVIDIA GeForce RTX 5080"
-        ],
-        "samples": 256,
-        "resolution": [
-          3840,
-          2160
-        ],
-        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
-        "pose": [
-          0,
-          0,
-          0
-        ],
-        "ground": "lowest"
-      }
+      "sha256": "302745f2e10fab3cc385095d063c1f93bd5208025f2acc32e7e9dbe575767523",
+      "preview": "preview_SM_FarmFencePost.png"
     },
     "SM_FarmFencePostSnapped": {
       "vertices": 1226,
@@ -408,10 +385,10 @@
   "rail_axis": "Fence rails and post mortises run along local X.",
   "gateway": "Hanging post is at local origin; shutting post is at +310 cm X. Gate leaf spans about +18 to +303 cm X before yaw, is swung 25 degrees toward Blender -Y (Unreal +Y) from the hanging post, and the latch/head end is dropped until the stile foot rests on z=0.",
   "textures": {
-    "T_FarmFencePost_basecolor.png": "8e963e3930153a614a4f3b3604d91cbd195fe05f338c511bdad55eb37b8f3e4b",
-    "T_FarmFencePost_roughness.png": "33b24f0577f3dbd70d5825d3aa11581e3de7c557c64a1f315052f772eb000f1c",
+    "T_FarmFencePost_basecolor.png": "8643ae92a787c70c798f72a21c29f988fe2ed25d8f8ed1b99637603821ad123d",
+    "T_FarmFencePost_roughness.png": "8b343af2805cdf954eeed7403483e8552e3bb75aa712771bc03ecb80dac2803d",
     "T_FarmFencePost_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
-    "T_FarmFencePost_normal.png": "b583cd334b6be5eafbd460697d9a756586ca92c9c643adf3d9e1b2aae0da4ec8",
+    "T_FarmFencePost_normal.png": "ca3ef449df9eab8a94dcd41d74d6077ae1c5b0951b738154ad1ee3e5e413bb10",
     "T_FarmFencePostSnapped_basecolor.png": "be79301c709764056b50b236cb416d6caf81cf452e8a1a5bdf43119897215e81",
     "T_FarmFencePostSnapped_roughness.png": "af0935bd22245fcb34c6b84e6dd94bc6b8183e3317aa23a496d4379b58d6ad38",
     "T_FarmFencePostSnapped_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
