@@ -339,6 +339,7 @@ AHomesteadController::FHintUse AHomesteadController::BeginHintUse(const FString&
 {
     FHintUse Use;
     Use.Serial = NoticeSerial;
+    Use.QuietSerial = QuietActionSerial;
     Use.bHackPending = bHackPending;
     TArray<FString> Parts;
     FocusActions().ParseIntoArray(Parts, TEXT("   "));
@@ -355,7 +356,8 @@ AHomesteadController::FHintUse AHomesteadController::BeginHintUse(const FString&
 void AHomesteadController::EndHintUse(const FHintUse& Use)
 {
     if (Use.Id.IsEmpty()) return;
-    const bool Succeeded = (NoticeSerial != Use.Serial && !bToastError) || (!Use.bHackPending && bHackPending);
+    const bool Succeeded = QuietActionSerial != Use.QuietSerial
+        || (NoticeSerial != Use.Serial && !bToastError) || (!Use.bHackPending && bHackPending);
     if (!Succeeded) return;
     int32& Uses = HintUses.FindOrAdd(Use.Id);
     if (Uses >= HintRetireUses) return;
@@ -412,10 +414,8 @@ void AHomesteadController::NotifyResourceAction(const Homestead::Result& Result,
         Notify(Result, SuccessCue);
         return;
     }
-    ToastText.Reset();
-    ToastRemaining = 0;
-    bToastError = false;
-    ++NoticeSerial;
+    // Quiet success must not erase a still-live refusal, save or first-visit unlock notice.
+    ++QuietActionSerial;
     if (SuccessCue) PlayEffect(SuccessCue);
     RefreshRemaining = 0;
 }

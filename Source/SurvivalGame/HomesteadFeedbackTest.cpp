@@ -114,6 +114,40 @@ void AHomesteadSmokeTest::PrepareFeedbackChecks()
     };
     Add(TEXT("Close initial Notes with existing toggle"), [this]() { Tap(EKeys::I); },
         [this]() { return !Controller->IsBookOpen(); });
+    // Synthetic presentation regression: a quiet action must not clear/restart an explicit notice
+    // or prevent hint learning just because the retained notice is a refusal.
+    for (const bool bError : {false, true})
+    {
+        const FString Message = bError ? TEXT("Too tired") : TEXT("Fast Travel Destination Unlocked: Lake");
+        const auto NoticeSerial = MakeShared<uint32>(0);
+        const auto HintCount = MakeShared<int32>(0);
+        const FString Hint = bError ? TEXT("HudQuietErrorFixture") : TEXT("HudQuietSuccessFixture");
+        Add(TEXT("Quiet resource success and hotbar selection preserve notice text, priority, clock and hint learning"),
+            [this, Message, bError, NoticeSerial, HintCount, Hint]()
+            {
+                Controller->Notify(Message, bError);
+                *NoticeSerial = Controller->NoticeCount();
+                *HintCount = Controller->HintUses.FindRef(Hint);
+                AHomesteadController::FHintUse Use;
+                Use.Id = Hint;
+                Use.Serial = *NoticeSerial;
+                Use.QuietSerial = Controller->QuietActionSerial;
+                Use.bHackPending = Controller->bHackPending;
+                Controller->NotifyResourceAction({true, "", Homestead::ResultCode::None, Controller->Sim.GetRevision()}, nullptr);
+                Controller->EndHintUse(Use);
+                const int32 Cell = Controller->SelectedHotbarIndex();
+                Controller->SelectHotbarSlot((Cell + 1) % 10);
+                Controller->SelectHotbarSlot(Cell);
+            },
+            [this, Message, bError, NoticeSerial, HintCount, Hint]()
+            {
+                const float Life = bError ? 8.0f : 5.0f;
+                return Controller->Toast() == Message && Controller->ToastIsError() == bError
+                    && Controller->NoticeCount() == *NoticeSerial
+                    && Controller->ToastSecondsLeft() <= Life && Controller->ToastSecondsLeft() > Life - 0.5f
+                    && Controller->HintUses.FindRef(Hint) == FMath::Min(*HintCount + 1, AHomesteadController::HintRetireUses);
+            }, 0.1f);
+    }
     // Low Energy warns once per crossing (Jenny 2026-09-30: she starved "with zero warning"): a short
     // notice as it falls past 25 and past 10, never again while it hovers, never for a loaded/slept jump.
     // A marker notice in between proves nothing new was said.

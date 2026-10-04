@@ -1,26 +1,15 @@
-// "+3 Berries": what she has just gained, floated beside her (UI/SHomesteadPickups). One path for
+// "+3 Berries": what she has just gained, in the common HUD notice stack. One path for
 // every way of getting things - gathering, clearing, harvest, crafting, the shop - by watching her
 // counts rather than each action (Simulation/HomesteadHoldings.h decides what counts as a gain, so
 // chest moves and picking her own drop back up never show). Loads and new games resync quietly.
 #include "HomesteadController.h"
 
-#include "UI/SHomesteadPickups.h"
+#include "UI/HomesteadPickupTiming.h"
 
 bool AHomesteadController::PickupsVisible() const
 {
     return bWorldReady && !bPendingSpawn && !bBookOpen && !IsFailed() && !ShopScreen.IsValid() && !HasNativeMenu()
         && !IsNewGameSetup() && !IsNamingSetup();
-}
-
-bool AHomesteadController::PickupAnchor(FVector2D& Pixel, FVector2D& ViewportPixels) const
-{
-    const APawn* Heroine = GetPawn();
-    int32 Width = 0, Height = 0;
-    GetViewportSize(Width, Height);
-    if (!Heroine || Width <= 0 || Height <= 0) return false;
-    ViewportPixels = FVector2D(Width, Height);
-    // Chest height, so the line sits beside her rather than over her head or feet.
-    return ProjectWorldLocationToScreen(Heroine->GetActorLocation() + FVector(0, 0, 30), Pixel, true);
 }
 
 void AHomesteadController::UpdatePickups(float DeltaSeconds)

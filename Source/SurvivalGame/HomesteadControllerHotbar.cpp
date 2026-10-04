@@ -15,7 +15,6 @@
 #include "UI/SHomesteadClock.h"
 #include "UI/SHomesteadHotbar.h"
 #include "UI/SHomesteadHudScale.h"
-#include "UI/SHomesteadPickups.h"
 #include "UI/SHomesteadVitals.h"
 
 #include "Engine/Engine.h"
@@ -66,16 +65,6 @@ void AHomesteadController::ShowHotbar()
             SNew(HomesteadMenus::SHomesteadVitals).Controller(this)
         ];
     GEngine->GameViewport->AddViewportWidgetContent(VitalsRoot.ToSharedRef(), 50);
-    // Painted over the world without layout or hit testing, so nothing shifts and clicks pass through.
-    PickupsRoot = SNew(SBox)
-        .Visibility_Lambda([this]()
-        {
-            return PickupsVisible() && !Pickups.IsEmpty() ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
-        })
-        [
-            SNew(HomesteadMenus::SHomesteadPickups).Controller(this)
-        ];
-    GEngine->GameViewport->AddViewportWidgetContent(PickupsRoot.ToSharedRef(), 50);
     // The calendar's time of day, as Slate text over the Canvas calendar panel (which the HUD
     // draws whenever the native book is closed; the failure screen covers it).
     ClockRoot = SNew(SBox)
@@ -100,9 +89,6 @@ void AHomesteadController::HideHotbar()
         GEngine->GameViewport->RemoveViewportWidgetContent(ClockRoot.ToSharedRef());
     ClockRoot.Reset();
     VitalsRoot.Reset();
-    if (PickupsRoot.IsValid() && GEngine && GEngine->GameViewport)
-        GEngine->GameViewport->RemoveViewportWidgetContent(PickupsRoot.ToSharedRef());
-    PickupsRoot.Reset();
     HotbarWidget.Reset();
     HotbarRoot.Reset();
 }
@@ -290,10 +276,6 @@ void AHomesteadController::SelectHotbarSlot(int32 Index)
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
             Avatar->CancelAction(true);
     SelectedHotbarSlot = Index;
-    FHomesteadRow Held;
-    ToastText = MenuHotbarRow(Index, Held) ? Held.Name : FString(TEXT("Empty slot"));
-    bToastError = false;
-    ToastRemaining = 1.0f;
     PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);
 }
 
