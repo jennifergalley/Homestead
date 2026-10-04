@@ -73,7 +73,7 @@ Result Simulation::CheckFishing(Point player) const
     if (fishing_.phase != FishingPhase::Idle)
         return {false, "Finish or cancel your current cast first.", ResultCode::Unavailable, revision_};
     if (Count(Item::FishingPole) == 0)
-        return {false, "Take a fishing pole in your pack; the General Store sells one for 1500 coins.", ResultCode::Unavailable, revision_};
+        return {false, "Needs a fishing pole.", ResultCode::Unavailable, revision_};
     if (FishingWaterAt(player) == FishingWater::None)
         return {false, "Stand beside a river, lake or the sea to cast.", ResultCode::Unavailable, revision_};
     if (UsedCapacity() >= PackCapacity())

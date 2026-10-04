@@ -33,7 +33,7 @@ constexpr double CastContactTimeoutSeconds = 2.5;
 // The authored 0.8-second strike/lift also needs room for hitches and game-thread counter latency.
 constexpr double CatchContactTimeoutSeconds = 2.0;
 constexpr double MinBiteSeconds = 2.0, BiteVariationSeconds = 2.0, HookWindowSeconds = 0.9;
-constexpr double MinStrikeSeconds = 0.65, StrikeVariationSeconds = 0.6, StrikeWindowSeconds = 0.5;
+constexpr double MinStrikeSeconds = 0.65, StrikeVariationSeconds = 0.6, StrikeWindowSeconds = 0.7;
 constexpr int LandingBeats = 2;
 const char* WaterName(FishingWater water);
 Item CatchFor(FishingWater water, std::uint64_t seed);

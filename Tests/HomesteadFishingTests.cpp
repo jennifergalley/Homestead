@@ -215,6 +215,10 @@ void TimingAndCancellation()
         CHECK(trial.Count(sim.FishingCast().catchItem) == 0);
     }
     Simulation late = sim;
+    Simulation gentle = sim;
+    LandingBeat(gentle, 0.65);
+    CHECK(gentle.FishingCast().phase == FishingPhase::Landing && gentle.FishingCast().landedBeats == 1);
+    CHECK(gentle.Count(sim.FishingCast().catchItem) == 0);
     OK(late.AdvanceFishing(firstStrike + Fishing::StrikeWindowSeconds + 0.001, {0, 0}));
     CHECK(late.FishingCast().phase == FishingPhase::Idle);
     OK(sim.AdvanceFishing(0.0, {101, 0}));

@@ -760,9 +760,9 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             if (Landing) PC.Sim.FishingPress(PC.PlayerPoint());
         };
     };
-    Add(TEXT("hud-fishing-bite"), TEXT("Staged fishing bite: the active hook prompt and timer."),
+    Add(TEXT("hud-fishing-bite"), TEXT("Staged fishing bite: the active hook prompt and closing ring."),
         ECover::Hud, 16, nullptr, FishingStage(false), 0.4f);
-    Add(TEXT("hud-fishing-landing"), TEXT("Staged fishing landing: two beats in the highlighted green band."),
+    Add(TEXT("hud-fishing-landing"), TEXT("Staged fishing landing: two strikes following the float's closing-ring cues."),
         ECover::Hud, 17, nullptr, FishingStage(true), 1.1f);
     Add(TEXT("hud-night"), TEXT("The world HUD at 10:30 PM: the moon in the calendar, the night-lit world."), ECover::Hud, 7, nullptr, Night, 1.5f);
     Add(TEXT("hud-rain"), TEXT("The world HUD in the rain: the rain cloud in the calendar, rain falling."), ECover::Hud, 8, nullptr, Rain, 1.5f);
