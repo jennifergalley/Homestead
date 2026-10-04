@@ -122,14 +122,6 @@
       "createdUtc": "2026-10-04T21:45:15.8Z"
     },
     {
-      "id": "jenny-muucngv5-50wj8m",
-      "title": "[Balance] Cooked meals grant Well fed",
-      "description": "Source: Balance Agent, docs/design/balance.md §9 (2026-10-04). Make cooking worth it vs selling raw crops by giving cooked meals the Well fed buff.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T21:45:15.809Z"
-    },
-    {
       "id": "jenny-muucngve-dfc8a4",
       "title": "[Balance UI] HUD almanac plate",
       "description": "Source: Balance Agent UI audit, docs/design/cohesion.md §5 (2026-10-04). Size M. Replace the flat clock, energy and coin rectangles with one framed plate: pocket-watch medallion for the clock, purse tag for coins.",
@@ -225,6 +217,22 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-04T22:21:51.191Z"
+    },
+    {
+      "id": "jenny-muue0he2-1xhiqg",
+      "title": "New spawn spawned me way outside the manor instead of in the room with the fireplace",
+      "description": "It also skipped the name / estate name form",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T22:23:22.634Z"
+    },
+    {
+      "id": "jenny-muue8oyh-kmm2zg",
+      "title": "[Balance UI] Call it \"the village\", not \"town\", in player copy",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §2 \"Settlement\" (2026-10-04). With town now ~200 m from the manor it reads as a village; change \"town\" to \"village\" in player-facing copy beyond map labels and the store greeting (fast-travel names, toasts, field book).",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T22:29:45.689Z"
     }
   ]
 }

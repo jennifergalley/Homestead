@@ -11,7 +11,8 @@ conflict, the cozier, more fun or more beautiful option wins.
 
 - **Where and when:** the Trevennor estate, a neglected manor on the Cornish coast, spring 1851 on.
   The heroine, Eleanor Cavendish, has inherited it and is bringing it back to life. The world is
-  coves, river valleys, hedge banks, granite, slate, engine-house ruins far off, a market town with
+  coves, river valleys, hedge banks, granite, slate, engine-house ruins far off, a village at the
+  foot of the drive (about 200 m from the manor, above the estuary) with
   Trethewey's general store (Mr. Josiah Trethewey, a shopkeeper in his fifties; renamed from
   Pascoe, a Poldark surname, on 2026-10-04).
 - **Mood:** warm, unhurried, hopeful. Work is satisfying, never punishing; she doesn't starve,
@@ -38,6 +39,7 @@ conflict, the cozier, more fun or more beautiful option wins.
 | Ranges | En dash, no spaces for numbers; spaced en dash for clauses. | "Open 8 AM–6 PM" · "Hotbar – the first row" |
 | Dates | `Mon, Spring 1, 1851` style everywhere. Weather words match the HUD. | |
 | Store name | Full: **Trethewey's general store**; short: **the general store**. Sentence case unless it's a title heading. | |
+| Settlement | **The village**, never "town", now that it sits at the foot of the drive. Map label: "The village at the foot of the drive, above the estuary". | "Word travels quick in a village." |
 
 Assume the player knows farming games: don't toast obvious outcomes (picked up 1 hay) and don't
 explain standard verbs.
