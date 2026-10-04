@@ -50,9 +50,9 @@
       "launchContextTier": "default",
       "observedUsageCheckpoint": {
         "firstEventId": 71819,
-        "lastEventId": 72275,
-        "calls": 111,
-        "recordedNanoAiu": "397485970000",
+        "lastEventId": 72376,
+        "calls": 126,
+        "recordedNanoAiu": "431607970000",
         "status": "open-tail",
         "source": "Gameplay/UI local usage checkpoint",
         "eventRangeUtc": "2026-10-04T19:07:23Z to 2026-10-04T19:34:52Z",
@@ -60,8 +60,8 @@
           {
             "model": "gpt-6.1-sol",
             "reasoningEffort": "high",
-            "calls": 109,
-            "recordedNanoAiu": "341115990000"
+            "calls": 124,
+            "recordedNanoAiu": "375237990000"
           },
           {
             "model": null,

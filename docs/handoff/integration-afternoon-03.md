@@ -65,6 +65,9 @@ Gameplay source checkpoint `74203f72c8647ba52f4da78e747908d5cb0f4dd0` is clean a
 It includes Art dependencies `256ce7e5`, `dab028ac`, and `e32d4d15`. Seed packet normalization
 preserves counts with unchanged version/fields and no placement/enum change, but is not admitted:
 the coordinator's focused risky review and all remaining delivery gates still apply.
+Gameplay's review checkpoint covers events `71819..72376`: 126 calls and `431607970000` nano-AIU,
+including 124 GPT-6.1 Sol/high calls (`375237990000` nano-AIU) and two telemetry-incomplete calls
+(`56369980000` nano-AIU). It remains afternoon03-only with a final tail pending.
 
 ## Release-loss incident and recovery procedure
 
