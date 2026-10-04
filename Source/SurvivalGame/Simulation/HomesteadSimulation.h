@@ -552,6 +552,8 @@ public:
     Result BeginFishing(Point player);
     Result AdvanceFishing(double seconds, Point player);
     Result FishingPress(Point player);
+    Result FishingAnimationContact(FishingContact contact, std::uint64_t token, Point player);
+    Result FishingAnimationInterrupted(std::uint64_t token);
     Result CancelFishing();
     // True when a pail waits in a chest or other storage (and so can be fetched to fill).
     bool PailStored() const;
@@ -649,7 +651,7 @@ public:
     Result CheckWeed(int plotId, Point player) const;
     // Whether Plant(plotId, player, kind) would sow now, with its refusal, changing nothing.
     Result CheckSow(int plotId, Point player, CropKind kind) const;
-    Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
+    Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots, int seedGroupId = 0);
     Result Water(int plotId, Point player);
     Result Weed(int plotId, Point player);
     // Hoes a withered plant out, back to tilled soil (needs the hoe).
@@ -831,6 +833,7 @@ private:
     std::function<bool(Point)> waterProbe_;
     std::function<FishingWater(Point)> fishingWaterProbe_;
     FishingSession fishing_;
+    std::uint64_t nextFishingToken_ = 1;
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
     int dozes_ = 0;

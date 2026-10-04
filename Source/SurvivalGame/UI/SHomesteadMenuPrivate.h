@@ -296,6 +296,8 @@ constexpr Homestead::EquipmentSlot VisibleEquipmentSlots[] = {
     Homestead::EquipmentSlot::Torso, Homestead::EquipmentSlot::Legs, Homestead::EquipmentSlot::Outer,
     Homestead::EquipmentSlot::Feet};
 constexpr int32 VisibleEquipmentSlotCount = UE_ARRAY_COUNT(VisibleEquipmentSlots);
+constexpr int32 BackEquipmentIndex = VisibleEquipmentSlotCount;
+constexpr int32 EquipmentChoiceCount = VisibleEquipmentSlotCount + 1;
 inline const TCHAR* EquipmentSlotNames[] = {TEXT("Top"), TEXT("Legs"), TEXT("Coat"), TEXT("Feet")};
 inline const TCHAR* EquipmentSlotIcons[] = {TEXT("slot-torso"), TEXT("trousers"), TEXT("fur-coat"), TEXT("slot-feet")};
 // The pages the tab bar, LB/RB and Ctrl+Tab cycle through. Page 3 (the old Guidebook) is retired but
@@ -344,6 +346,8 @@ using MenuDetail::RecipeIcons;
 using MenuDetail::PieceIcons;
 using MenuDetail::VisibleEquipmentSlots;
 using MenuDetail::VisibleEquipmentSlotCount;
+using MenuDetail::BackEquipmentIndex;
+using MenuDetail::EquipmentChoiceCount;
 using MenuDetail::EquipmentSlotNames;
 using MenuDetail::EquipmentSlotIcons;
 using MenuDetail::FieldBookPages;

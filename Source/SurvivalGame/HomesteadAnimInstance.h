@@ -53,6 +53,7 @@ public:
     uint32 FishCastSplashes() const;
     // The fish clears the water: grant the catch.
     uint32 FishCatchLifts() const;
+    uint32 FishInterruptions() const;
     // The segment playing: a landed Catch keeps playing to its end after SetFishingPose(None).
     EHomesteadFishingPose FishingPose() const;
     // Seconds on the fishing clip's own timeline while a segment plays, else -1.

@@ -263,7 +263,7 @@ namespace
 Result RowBad(const std::string& text) { return {false, text, ResultCode::Invalid}; }
 bool Stackable(const LayoutEntry& left, const LayoutEntry& right)
 {
-    return left.wearableId == 0 && right.wearableId == 0 && left.item == right.item;
+    return left.wearableId == 0 && right.wearableId == 0 && left.item == right.item && CanStackItem(left.item);
 }
 std::string SlotName(int cell) { return "hotbar slot " + std::to_string(PackRowRules::KeyNumber(cell)); }
 int FindCarried(const InventoryLayout& layout, int groupId, int wearableId)

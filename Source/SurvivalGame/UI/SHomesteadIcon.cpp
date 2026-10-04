@@ -318,7 +318,7 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("berries")), EKind::Berries},
         {FName(TEXT("roots")), EKind::Roots},
         {FName(TEXT("flowers")), EKind::Flowers},
-        {FName(TEXT("seeds")), EKind::Seeds},
+        {FName(TEXT("seeds")), EKind::SeedRoots},
         {FName(TEXT("hatchet")), EKind::Hatchet},
         {FName(TEXT("digging-stick")), EKind::DiggingStick},
         {FName(TEXT("watering-can")), EKind::WateringCan},
@@ -412,10 +412,8 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
             break;
         }
     }
-    // Seed packets are drawn glyphs in the tool and crop style (per-crop end product on the packet).
-    // The pole and catch glyphs below stay behind their measured02 renders until the evening fishing
-    // slice routes them (IconKind == EKind::FishingPole || IconKind >= EKind::RiverTrout).
-    const bool bGlyphFirst = IconKind >= EKind::SeedRoots;
+    const bool bGlyphFirst = IconKind >= EKind::SeedRoots || IconKind == EKind::FishingPole
+        || (IconKind >= EKind::RiverTrout && IconKind <= EKind::SeaBass);
     if (!bImageResolved || ImageKind != CurrentKind)
     {
         ImageKind = CurrentKind;

@@ -13,15 +13,34 @@ void SHomesteadMenu::ChangeInventoryView(int32 View)
     Refresh();
 }
 
+void SHomesteadMenu::OpenBackEquipment(bool bPointer)
+{
+    FocusEquipment(BackEquipmentIndex, bPointer);
+}
+
 void SHomesteadMenu::FocusEquipment(int32 Index, bool bPointer)
 {
-    if (!Controller.IsValid() || Dialog != EDialog::None || Index < 0 || Index >= VisibleEquipmentSlotCount) return;
-    const auto Slot = VisibleEquipmentSlots[Index];
-    const int32 Id = Controller->State().equipment[static_cast<int32>(Slot)];
+    if (!Controller.IsValid() || Dialog != EDialog::None || Index < 0 || Index >= EquipmentChoiceCount) return;
     EquipmentSelection = Index;
     TSharedPtr<SWidget> Anchor;
     for (const auto& Target : FocusTargets)
         if (Target.region == ERegion::Equipment && Target.index == Index) Anchor = Target.widget.Pin();
+    if (Index == BackEquipmentIndex)
+    {
+        PopupOptions.Reset();
+        PopupTitle = TEXT("Back");
+        PopupOptions.Add({[]() { return FString(TEXT("Leather Rucksack")); },
+            [this]() { Controller->MenuSetBackEquipment(true); },
+            [this]() { return Controller.IsValid() && Controller->State().leatherBackpack; }, {}});
+        PopupOptions.Add({[]() { return FString(TEXT("None")); },
+            [this]() { Controller->MenuSetBackEquipment(false); }, nullptr, {}});
+        PopupOptions.Add({[]() { return FString(TEXT("Cancel")); }, nullptr, nullptr, {}});
+        PopupAnchor = PopupAnchorFor(Anchor, bPointer);
+        SetDialog(EDialog::Context);
+        return;
+    }
+    const auto Slot = VisibleEquipmentSlots[Index];
+    const int32 Id = Controller->State().equipment[static_cast<int32>(Slot)];
     FHomesteadRow Worn;
     if (Id && Controller->MenuWearableRow(Id, Worn))
     {

@@ -283,6 +283,8 @@ void SHomesteadMenu::BuildDialog()
         Labels = {TEXT("Cancel"), TEXT("Start a new woodland")};
     }
     TSharedPtr<SVerticalBox> Choices;
+    const bool bCompactQuit = Dialog == EDialog::Exit || Dialog == EDialog::Unsaved
+        || Dialog == EDialog::SaveFailed || Dialog == EDialog::GraphicsFailed;
     DialogButtons.Reset();
     AmountControl.Reset();
     ModalHost->SetVisibility(EVisibility::Visible);
@@ -292,17 +294,18 @@ void SHomesteadMenu::BuildDialog()
         .BorderBackgroundColor(FLinearColor(0.0f, 0.0f, 0.0f, 0.45f)).Padding(0)
         .HAlign(HAlign_Center).VAlign(VAlign_Center)
         [
-            SNew(SBox).WidthOverride(Dialog == EDialog::Exit || Dialog == EDialog::Unsaved ? 620.0f : 760.0f)
+            SNew(SBox).WidthOverride(Dialog == EDialog::Exit || Dialog == EDialog::Unsaved ? 560.0f : 760.0f)
             .MaxDesiredHeight(820)
             [
                 SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.01f, 0.025f, 0.015f, 0.92f))).Padding(FMargin(44, 34))
+                .BorderBackgroundColor(HomesteadUITheme::Themed(FLinearColor(0.01f, 0.025f, 0.015f, 0.92f)))
+                .Padding(bCompactQuit ? FMargin(30, 24) : FMargin(44, 34))
                 [
                     SNew(SVerticalBox)
-                    + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ Text(Title, 30) ]
+                    + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ Text(Title, bCompactQuit ? 20 : 30) ]
                     + SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 18)
                     [ SNew(SBox).MaxDesiredHeight(360)
-                        [ SNew(SScrollBox) + SScrollBox::Slot()[ Text(Description, 20) ] ] ]
+                        [ SNew(SScrollBox) + SScrollBox::Slot()[ Text(Description, bCompactQuit ? 14 : 20) ] ] ]
                     + SVerticalBox::Slot().AutoHeight()
                     [
                         SNew(SBox).MaxDesiredHeight(230)
@@ -325,7 +328,8 @@ void SHomesteadMenu::BuildDialog()
     for (int32 Index = 0; Index < Labels.Num(); ++Index)
     {
         auto Button = MakeButton(Labels[Index], [this, Index]() { DialogAction(Index); },
-            TAttribute<FSlateColor>::CreateLambda([this, Index]() { return DialogSelection == Index ? MenuGold : Selected; }));
+            TAttribute<FSlateColor>::CreateLambda([this, Index]() { return DialogSelection == Index ? MenuGold : Selected; }),
+            FString(), bCompactQuit ? FMargin(12, 7) : FMargin(14, 10), bCompactQuit ? 14.0f : 17.0f);
         Button->SetOnFocusReceived(FSimpleDelegate::CreateLambda([this, Index]()
             { if (!bSynchronizingFocus) { DialogSelection = Index; bEditingAmount = false; } }));
         DialogButtons.Add(Button);

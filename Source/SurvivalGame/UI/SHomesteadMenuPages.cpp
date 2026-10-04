@@ -576,6 +576,20 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 RegisterButton(SlotButton, ERegion::Equipment, Index)
             ];
         }
+        InventoryColumn->AddSlot().AutoHeight().Padding(3, 6, 3, 0)
+        [
+            RegisterButton(MakeButton(EquipmentLabel(BackEquipmentIndex),
+                [this]() { OpenBackEquipment(true); },
+                TAttribute<FSlateColor>::CreateLambda([this]()
+                    { return Region == ERegion::Equipment && EquipmentSelection == BackEquipmentIndex ? MenuGold : Selected; }),
+                TEXT("Choose Leather Rucksack or None"), FMargin(12, 7), 15),
+                ERegion::Equipment, BackEquipmentIndex)
+        ];
+        InventoryColumn->AddSlot().AutoHeight().Padding(6, 3, 6, 0)
+        [
+            SNew(STextBlock).Text(FText::FromString(TEXT("Appearance only; your purchased inventory-space upgrade stays.")))
+            .Font(HomesteadUITheme::Font("Regular", 13)).ColorAndOpacity(Muted).AutoWrapText(true)
+        ];
     }
     if (SeenPage == 0)
     {

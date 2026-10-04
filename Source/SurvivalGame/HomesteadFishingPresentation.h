@@ -1,11 +1,11 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include <cstdint>
 
 // What the heroine's fishing presentation shows. The controller maps the simulation's fishing phase
 // to one of these on each phase or cast-token change (UHomesteadAnimInstance::SetFishingPose; every
 // Cast call restarts the swing); the art never decides a catch.
-enum class EHomesteadFishingPose : uint8
+enum class EHomesteadFishingPose : std::uint8_t
 {
     None,
     Cast,  // swing the line out; FishCastSplashes() ticks when the float lands

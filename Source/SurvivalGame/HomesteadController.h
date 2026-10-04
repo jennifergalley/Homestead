@@ -122,6 +122,7 @@ public:
     void MenuInventoryView(int32 View);
     int32 InventoryView() const { return MenuInventoryViewIndex; }
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
+    bool MenuSetBackEquipment(bool bShown);
     // Walking the public road to the manor or town (HomesteadControllerTravel.cpp): the preview from
     // where she stands, and the walk itself (the clock runs for its length; she's stood at the end).
     Homestead::TravelPlan MenuPlanTravel(Homestead::TravelDestination Destination) const;
@@ -695,6 +696,13 @@ private:
     TSharedPtr<SWidget> FishingRoot;
     void FishingInput();
     void TickFishing(float DeltaSeconds);
+    void PresentFishing();
+    Homestead::FishingPhase FishingPresentedPhase = Homestead::FishingPhase::Idle;
+    uint64 FishingPresentedToken = 0;
+    uint32 ObservedFishSplashes = 0;
+    uint32 ObservedFishLifts = 0;
+    uint32 ObservedFishInterruptions = 0;
+    bool bFishingLiftSucceeded = false;
     Homestead::FishingWater FocusedFishingWater = Homestead::FishingWater::None;
     FString FishingFocusText;
     bool UpdateFishingFocus(Homestead::Point Position);
