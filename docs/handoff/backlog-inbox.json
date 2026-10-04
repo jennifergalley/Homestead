@@ -33,14 +33,6 @@
       "createdUtc": "2026-10-03T07:11:33.289Z"
     },
     {
-      "id": "jenny-mut5x32c-7715t2",
-      "title": "Edit items in the planner backlog",
-      "description": "I should be able to edit items I've added to the backlog from my feedback form, where clicking a pencil icon somewhere on the card opens it back up in the form so I can edit the title, description, and remove or add new screenshots for it.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T01:49:00.996Z"
-    },
-    {
       "id": "jenny-mut6t8g6-mcldh5",
       "title": "Path to the Mine from the Manor",
       "description": "There should be a dedicated path through the woods to the mine from the manor, just as there is to the lake through the trees",

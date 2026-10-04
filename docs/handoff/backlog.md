@@ -15,7 +15,6 @@ Only Jenny-directed work belongs here. Every line is one player-checkable slice,
 - **Differentiate seeds by plant type in the inventory** — Jenny, 2026-10-04 (added from the planner canvas): instead of just saying Seeds, it should say Roots seeds, Carrot seeds, Turnip seeds, etc., they should take up individual inventory slots and not be stackable, and they should all have distinct icons with a picture of their end product on the seed packet. There shouldn't be any generic "Seeds" that doesn't tell me what I'm growing
 - **Build an asset for the Mine - a large stone building I can enter, with a trapdoor in the floor that leads into the Mine** — Jenny, 2026-10-04 (added from the planner canvas): Even if the trapdoor is just a placeholder for now, the building for the mine should exist in the world. I should be able to go inside the main room of the first floor, see rocks piled in a corner, a desk, an oil lamp on the desk that let's say burns infinitely but can't be picked up, and a trapdoor in the floor that will later on lead down into the mine.
 - **Path to the Mine from the Manor** — Jenny, 2026-10-04 (added from the planner canvas): There should be a dedicated path through the woods to the mine from the manor, just as there is to the lake through the trees
-- **Edit items in the planner backlog** — Jenny, 2026-10-04 (added from the planner canvas): I should be able to edit items I've added to the backlog from my feedback form, where clicking a pencil icon somewhere on the card opens it back up in the form so I can edit the title, description, and remove or add new screenshots for it.
 - **Improve tool carry holds** — Jenny, 2026-10-03 (added from the planner canvas): Further tool-carry polish deferred from measured build 01, separate from the shipped grip/contact fixes. Refine idle and moving holds so grips look natural and tools do not clip through her hands or body.
 - **Improve work animations** — Jenny, 2026-10-03 (added from the planner canvas): Further heroine action/work animation improvements deferred from measured build 01, separate from already shipped fixes. Polish natural movement, tool contact and transitions when Jenny schedules this work.
 - **Teleporting back to the manor should deposit me at the new sign location beside the farm and road** — Jenny, 2026-10-03 (added from the planner canvas): (no description)
@@ -24,7 +23,17 @@ Only Jenny-directed work belongs here. Every line is one player-checkable slice,
 
 ## Current delivered build
 
-The five items Jenny selected on 2026-10-02 shipped in `20261002-measured-01` and are no longer planned improvements. The changelist is in [builds.md](builds.md). Jenny considers the player checks complete as of 2026-10-03; no next build work is scheduled.
+`20261003-measured-02` is delivered; its player acceptance remains pending Jenny's playtest.
+The shipped cards and receipt are retained in [backlog-archive.json](backlog-archive.json), while new
+feedback refinements are selected for the 4 PM `20261004-afternoon-03` build:
+
+- Fishing pole/fish icon refinement with cast, bite, catch, and randomized timing presentation.
+- Compact Quit dialog matching Settings.
+- Back-slot Leather Rucksack/None visibility without capacity loss.
+- Wider wildflowers outside farm, manor ruins, and tilled ground.
+- Visible broken fenceposts until the complete fence is dismantled.
+- Crop-specific non-stackable seed packets with end-product icons.
+- A ripe targeted crop always shows `[E] Harvest <crop>` unless weeding takes precedence.
 
 ## Next candidates (deferred, not scheduled)
 

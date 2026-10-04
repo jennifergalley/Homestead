@@ -29,6 +29,26 @@
         "unify-hud-notices"
       ],
       "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
+    },
+    {
+      "deliveryId": "planner-editing-feedback",
+      "status": "delivered-tooling-pending-player-acceptance",
+      "receipt": {
+        "commit": "3846476d",
+        "handoff": "planner-editing-measured-02.md",
+        "costAllocation": "Excluded from 20261003-measured-02's frozen eleven-item gameplay delivery and its observed usage report."
+      },
+      "inboxEntries": [
+        {
+          "id": "jenny-mut5x32c-7715t2",
+          "title": "Edit items in the planner backlog",
+          "description": "I should be able to edit items I've added to the backlog from my feedback form, where clicking a pencil icon somewhere on the card opens it back up in the form so I can edit the title, description, and remove or add new screenshots for it.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T01:49:00.996Z"
+        }
+      ],
+      "acceptance": "This separately delivered planner tool remains pending Jenny's player check. Its archival preserves source history without adding it to the measured02 frozen eleven, observed cost, or active backlog."
     }
   ]
 }
