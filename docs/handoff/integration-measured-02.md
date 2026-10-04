@@ -217,6 +217,14 @@ SpeciesProof SourceFamily carp hero/detail, SourceTrout+BakedTrout trout detail,
 The baked trout shows local cheek-reflection patches absent from source and possible normal-map
 blockiness, but the precise cause is unproven and global frame scores do not prove local fidelity.
 Retain the prior anatomy, fin, and film fixes. This creates no waiting, admission, or UE claim.
+At 03:57 local, the fish bake/normal reconstruction became a genuine blocker. Technical reviewer
+`fc56f594-b380-45f1-9633-428ca29e5089` (GPT-6.1 Sol, high, default launch; actual context unknown)
+has one read-only shader-to-bake-to-normal causal probe/fix. Same-mesh source-normal hybrid improved
+`3.105` to `1.318`; 16-bit, bump, triangulation, and coat variants failed; 8K/head UV was about
+`2.44`; an untouched repeat was `.007`. No root cause, admission, or budget increase is proven.
+The reviewer performs no process, render, implementation, generic bake rewrite, family bake, or UE
+work. Farming preserves/checkpoints carp/probe WIP and continues already-authorized sixteen original
+dish source/geometry work in slot 2 without waiting or new scope.
 Checkpoint `cf30e41d` supplies that single-trout structural proof under
 `Assets\Props\CaughtFish\StructuralProof`: source, clay, and five-map 4K renders with hashes. It is
 still WIP-only; its frozen `4148` views are unchanged and the full six-family root remains stale and

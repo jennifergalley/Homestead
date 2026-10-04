@@ -167,6 +167,17 @@
       "launchContextTier": "default",
       "contextEvidence": "Completed in three read-only turns diagnosing 4148 fish images/recipe and the newest frozen c0 proof/source. Actual runtime context and billing reconciliation remain unknown.",
       "boundaryEvidence": "Initial review viewed 4148 refinement trout/perch hero and detail images plus the earlier trout detail. Primary failure is anatomical construction; uniform scales and marks are secondary, not missing gloss. Sent jaw, operculum, pectoral, and scale corrections to Farming as advisory for newer structural work. One trout source-versus-baked 4K proof is required before the family because BAKE=None is source-shader evidence, not five-map translation proof. Follow-up viewed SpeciesProof SourceFamily carp hero/detail, SourceTrout+BakedTrout trout detail, and BakedTrout normal. c0 materially improved; the one directed next correction is tangent-continuous carp cheek/lip rostral interpolation in body/carp_lip, verified in one head view, rather than more family/gloss sweeps. Baked trout shows local cheek-reflection patches absent from source and possible normal-map blockiness, but their precise cause is unproven; global frame scores do not prove local fidelity. Preserve prior anatomy, fin, and film fixes. No files, processes, GPU, Blender, Unreal Editor, implementation, export, cleanup, waiting gate, admission, or UE claim."
+    },
+    {
+      "sessionId": "fc56f594-b380-45f1-9633-428ca29e5089",
+      "task": "fish-bake-normal-reconstruction-diagnosis",
+      "category": "review",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "contextTier": "default",
+      "launchContextTier": "default",
+      "contextEvidence": "Read-only shader-to-bake-to-normal reconstruction diagnosis launched after the 03:57 genuine bake blocker. Actual runtime context and billing reconciliation remain unknown.",
+      "boundaryEvidence": "Bounded to one causal probe/fix; no process, render, implementation, generic bake rewrite, family bake, UE work, or budget increase. Same-mesh source-normal hybrid improved 3.105 to 1.318; 16-bit, bump, triangulation, and coat variants failed; 8K/head UV was about 2.44; untouched repeat was .007. No root cause or admission is proven. Farming checkpoints carp/probe WIP and continues its already-authorized 16 original dish source/geometry work in slot 2 without waiting."
     }
   ]
 }
