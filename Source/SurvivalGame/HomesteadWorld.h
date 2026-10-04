@@ -389,10 +389,11 @@ private:
     // pokes through a floor or wall; it comes back if the piece is taken down. Low cover and trees
     // are also cleared off every interactable (berry bush, herb, bramble, salvage), so each one stands
     // in the open where she can see and reach it.
-    void ClearEstateSceneryUnderPieces(const Homestead::State& State);
+    void ClearEstateSceneryUnderPieces(const Homestead::Simulation& Simulation, uint64 LayoutKey);
     TArray<TArray<FTransform>> EstateSceneryTransforms;
     TArray<float> EstateSceneryClearRadius; // 0 for trees and rocks, which are never hidden under pieces.
     TArray<float> EstateSceneryTrunkRadius; // Trees only: the trunk footprint kept clear of interactables.
+    TArray<float> EstateSceneryFlowerRadius; // Full unscaled XY bounds, including the pivot offset; 0 for other kinds.
     TArray<TBitArray<>> EstateSceneryHidden;
     // The near meadow round the camera on the fixed estate (HomesteadGrassField).
     UPROPERTY() TObjectPtr<class UHomesteadGrassField> EstateGrass;
@@ -403,6 +404,7 @@ private:
     float AppliedSunSourceAngle = -1.0f;
     bool bGroundParametersTried = false;
     uint64 EstateSceneryClearKey = 0;
+    uint64 EstateSceneryInputsKey = 0;
     bool bEstateSceneryClearKnown = false;
     UPROPERTY()
     TObjectPtr<USkyLightComponent> Sky;
