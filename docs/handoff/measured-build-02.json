@@ -62,6 +62,8 @@
       "checkpoint": "ff3c9de86c58efce4901b9d89de174003a85d0d4",
       "originalPoleCheckpoint": "befe70b52fc593247d55a90de42383293f80dfa3",
       "originalPoleEvidence": "Integrated locally at 60da4466; authored FishingPole assets imported and its selected held mesh validated in a measured02-rod preview-profile fixture. Fish/dish art remains incomplete.",
+      "fishStructuralProofCheckpoint": "cf30e41d",
+      "fishStructuralProofStatus": "WIP-only one-trout source/clay/five-map 4K proof under CaughtFish/StructuralProof; the frozen 4148 views and six-family root remain inadmissible.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
