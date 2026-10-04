@@ -81,13 +81,8 @@ public:
     UFUNCTION(Exec) void LabProp(const FString& Name);
     // Repeat a LabAction (with a fresh prop and from the same spot) until LabLoop Off.
     UFUNCTION(Exec) void LabLoop(const FString& Name);
-    // Carry a hotbar tool at rest in her hand: Knife, Hatchet, DiggingStick, Pail, Machete, Lamp, Scythe,
-    // Billhook, Pickaxe, FishingPole or None.
+    // Carry a hotbar tool at rest in her hand: Knife, Hatchet, DiggingStick, Pail, Machete, Lamp or None.
     UFUNCTION(Exec) void LabHold(const FString& Name);
-    // Fishing presentation with the pole in hand: Cast, Wait, Bite, Fight, Strike, Catch, Miss or None;
-    // Auto plays cast, bite, strike, fight and catch in turn (Trout, Perch... picks the fish first),
-    // logging the cast-splash and catch-lift beats as they arrive.
-    UFUNCTION(Exec) void LabFish(const FString& Pose);
     // Move the sun to a time of day (0-24); shadows and sky follow.
     UFUNCTION(Exec) void LabSun(float Hour);
     // Put the heroine at X/Y (cm) on the floor or course, facing +X.
@@ -117,11 +112,6 @@ private:
     double LoopNextStart = 0;
     double LoopPlayAt = 0;
     float LoopPeriod = 0;
-    // LabFish Auto: the scripted step, when the next one starts, and the beats seen so far.
-    int32 FishStep = 0;
-    double FishNextStep = 0;
-    uint32 FishSplashes = 0, FishLifts = 0;
-    void TickLabFish();
 };
 
 UCLASS()

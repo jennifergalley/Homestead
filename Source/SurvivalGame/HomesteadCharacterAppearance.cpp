@@ -494,10 +494,6 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     LampSetDownAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_LampSetDown"));
     if (LampSetDownAnimation && LampSetDownAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
         LampSetDownAnimation = nullptr;
-    // Optional: authored with homestead_agent.fish_cast (segments in HomesteadFishingPresentation.h).
-    FishingAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Fishing"));
-    if (FishingAnimation && FishingAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
-        FishingAnimation = nullptr;
     // The branch she works while crafting, upright through her left fist.
     if (UStaticMesh* Piece = LoadObject<UStaticMesh>(nullptr,
             TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b")))
@@ -679,7 +675,6 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
             TEXT("/Game/SurvivalGame/Environment/Props/WaterPail/M_PourStream.M_PourStream"), nullptr, LOAD_NoWarn | LOAD_Quiet))
             PourStream->SetMaterial(0, Water);
     }
-    CreateFishingTackle();
 
     USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
     UClass* FaceAnimClass = LoadObject<UClass>(nullptr,

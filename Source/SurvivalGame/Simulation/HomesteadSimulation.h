@@ -552,7 +552,6 @@ public:
     Result BeginFishing(Point player);
     Result AdvanceFishing(double seconds, Point player);
     Result FishingPress(Point player);
-    Result FishingAnimationContact(FishingContact contact, std::uint64_t token, Point player);
     Result CancelFishing();
     // True when a pail waits in a chest or other storage (and so can be fetched to fill).
     bool PailStored() const;
@@ -832,7 +831,6 @@ private:
     std::function<bool(Point)> waterProbe_;
     std::function<FishingWater(Point)> fishingWaterProbe_;
     FishingSession fishing_;
-    std::uint64_t nextFishingToken_ = 1;
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;
     int dozes_ = 0;

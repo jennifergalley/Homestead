@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -174,6 +175,87 @@ void LegacyFullPack()
         CHECK(!roundtrip.Deserialize(Reseal(legacy, payload)));
         CHECK(roundtrip.Serialize() == normalized);
     }
+}
+
+void LegacyFullChests(int chestCount, bool accepted)
+{
+    using namespace Homestead;
+    Simulation sim;
+    OK(sim.GrantItems(Item::Branch, 5 * chestCount));
+    OK(sim.GrantItems(Item::BrambleCanes, 2 * chestCount));
+    int made = 0;
+    for (int y = -8; y <= 8 && made < chestCount; ++y)
+        for (int x = -8; x <= 8 && made < chestCount; ++x)
+            if (sim.Place(Piece::Chest, x, y, 0, CellCenter(x, y))) ++made;
+    CHECK(made == chestCount);
+    const auto structureText = [](const Structure& piece)
+    {
+        std::ostringstream out;
+        out << std::setprecision(std::numeric_limits<double>::max_digits10);
+        out << piece.id << ' ' << static_cast<int>(piece.kind) << ' ' << piece.buildingId << ' '
+            << piece.cellX << ' ' << piece.cellY << ' ' << piece.rotation << ' ' << piece.fuelHours;
+        out << ' ' << ItemCount;
+        for (int quantity : piece.storage) out << ' ' << quantity;
+        out << '\n' << LayoutText(piece.layout);
+        return out.str();
+    };
+    const auto saved = sim.Serialize();
+    auto payload = saved.substr(saved.find('\n') + 1);
+    int nextGroup = sim.GetState().nextGroupId;
+    std::vector<int> chests, originalGroups;
+    for (const auto& piece : sim.GetState().structures)
+    {
+        if (piece.kind != Piece::Chest || chests.size() == static_cast<std::size_t>(chestCount)) continue;
+        Structure legacy = piece;
+        legacy.storage.fill(0);
+        legacy.storage[static_cast<int>(Item::Seeds)] = ChestCapacity;
+        legacy.layout = {{nextGroup++, Item::Seeds, ChestCapacity, 0}};
+        originalGroups.push_back(legacy.layout.front().groupId);
+        if (chests.empty())
+        {
+            legacy.storage[static_cast<int>(Item::Water)] = 1;
+            legacy.layout.push_back({nextGroup++, Item::Water, 1, 0});
+        }
+        const auto current = structureText(piece);
+        const auto at = payload.find(current);
+        CHECK(at != std::string::npos);
+        payload.replace(at, current.size(), structureText(legacy));
+        chests.push_back(piece.id);
+    }
+    const auto allocator = "\n" + std::to_string(sim.GetState().nextWearableId) + " "
+        + std::to_string(sim.GetState().nextGroupId) + "\n" + std::to_string(sim.GetState().wearables.size()) + "\n";
+    const auto at = payload.find(allocator);
+    CHECK(at != std::string::npos);
+    const auto expandedAllocator = "\n" + std::to_string(sim.GetState().nextWearableId) + " "
+        + std::to_string(nextGroup) + "\n" + std::to_string(sim.GetState().wearables.size()) + "\n";
+    payload.replace(at, allocator.size(), expandedAllocator);
+    const auto before = sim.Serialize();
+    const auto loaded = sim.Deserialize(Reseal(saved, payload));
+    if (!accepted)
+    {
+        CHECK(!loaded && loaded.code == ResultCode::Capacity && sim.Serialize() == before);
+        return;
+    }
+    OK(loaded);
+    std::size_t packets = 0;
+    for (std::size_t index = 0; index < chests.size(); ++index)
+    {
+        const auto groups = Groups(*sim.GetLayout(chests[index]), Item::Seeds);
+        CHECK(groups.size() == ChestCapacity && groups.front() == originalGroups[index]);
+        CHECK(sim.ChestUsedCapacity(chests[index]) == ChestCapacity);
+        packets += groups.size();
+    }
+    CHECK(packets == static_cast<std::size_t>(chestCount * ChestCapacity)
+        && sim.GetLayout(chests.front())->size() == ChestCapacity + 1);
+    const auto normalized = sim.Serialize();
+    Simulation roundtrip = sim;
+    const auto started = std::chrono::steady_clock::now();
+    OK(roundtrip.Deserialize(normalized));
+    const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
+    CHECK(seconds < 0.5);
+    std::cout << "Normalized " << packets << " packets: " << normalized.size() << " bytes, "
+        << seconds << " seconds to load.\n";
+    CHECK(roundtrip.Serialize() == normalized);
 }
 
 void ChestAndGround()
@@ -377,6 +459,8 @@ int main()
 {
     SeedPacketTests::IdentitiesAndMoves();
     SeedPacketTests::LegacyFullPack();
+    SeedPacketTests::LegacyFullChests(4, true);
+    SeedPacketTests::LegacyFullChests(9, false);
     SeedPacketTests::ChestAndGround();
     SeedPacketTests::BuyPackets();
     SeedPacketTests::HarvestWeedsFirst();

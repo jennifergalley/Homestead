@@ -491,82 +491,12 @@ void AHomesteadLabController::LabHold(const FString& Name)
     const TPair<const TCHAR*, Item> Tools[] = {{TEXT("Knife"), Item::Knife}, {TEXT("Hatchet"), Item::Hatchet},
         {TEXT("DiggingStick"), Item::DiggingStick}, {TEXT("Pail"), Item::WateringCan}, {TEXT("Machete"), Item::Machete},
         {TEXT("Lamp"), Item::OilLamp}, {TEXT("Scythe"), Item::Scythe}, {TEXT("Billhook"), Item::Billhook},
-        {TEXT("Pickaxe"), Item::Pickaxe}, {TEXT("FishingPole"), Item::FishingPole}};
+        {TEXT("Pickaxe"), Item::Pickaxe}};
     for (const auto& Tool : Tools)
         if (Name.Equals(Tool.Key, ESearchCase::IgnoreCase)) { Avatar->SetLabHeldTool(Tool.Value); return; }
     Avatar->SetLabHeldTool(Item::Count);
     if (!Name.Equals(TEXT("None"), ESearchCase::IgnoreCase))
-        UE_LOG(LogTemp, Warning, TEXT("LabHold takes Knife, Hatchet, DiggingStick, Pail, Machete, Lamp, Scythe, Billhook, Pickaxe, FishingPole or None."));
-}
-
-DEFINE_LOG_CATEGORY_STATIC(LogHomesteadLabFish, Log, All);
-
-void AHomesteadLabController::LabFish(const FString& Pose)
-{
-    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-    auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-    if (!Animation) return;
-    using Homestead::Item;
-    const TPair<const TCHAR*, Item> Fish[] = {{TEXT("Trout"), Item::RiverTrout}, {TEXT("Salmon"), Item::RiverSalmon},
-        {TEXT("Perch"), Item::LakePerch}, {TEXT("Carp"), Item::LakeCarp}, {TEXT("Mackerel"), Item::SeaMackerel},
-        {TEXT("Bass"), Item::SeaBass}};
-    for (const auto& Kind : Fish)
-        if (Pose.Equals(Kind.Key, ESearchCase::IgnoreCase)) { Avatar->SetFishingCatch(Kind.Value); return; }
-    const TPair<const TCHAR*, EHomesteadFishingPose> Poses[] = {{TEXT("None"), EHomesteadFishingPose::None},
-        {TEXT("Cast"), EHomesteadFishingPose::Cast}, {TEXT("Wait"), EHomesteadFishingPose::Wait},
-        {TEXT("Bite"), EHomesteadFishingPose::Bite}, {TEXT("Fight"), EHomesteadFishingPose::Fight},
-        {TEXT("Catch"), EHomesteadFishingPose::Catch}, {TEXT("Miss"), EHomesteadFishingPose::Miss}};
-    FishStep = 0;
-    if (!Pose.Equals(TEXT("None"), ESearchCase::IgnoreCase)) Avatar->SetLabHeldTool(Item::FishingPole);
-    FishSplashes = Animation->FishCastSplashes();
-    FishLifts = Animation->FishCatchLifts();
-    if (Pose.Equals(TEXT("Auto"), ESearchCase::IgnoreCase))
-    {
-        FishStep = 1;
-        FishNextStep = 0;
-        return;
-    }
-    if (Pose.Equals(TEXT("Strike"), ESearchCase::IgnoreCase))
-    {
-        Animation->SetFishingPose(EHomesteadFishingPose::Fight);
-        Animation->PlayFishingStrike();
-        return;
-    }
-    for (const auto& Entry : Poses)
-        if (Pose.Equals(Entry.Key, ESearchCase::IgnoreCase)) { Animation->SetFishingPose(Entry.Value); return; }
-    UE_LOG(LogHomesteadLabFish, Warning, TEXT("LabFish takes Cast, Wait, Bite, Fight, Strike, Catch, Miss, None, Auto or a fish (Trout, Salmon, Perch, Carp, Mackerel, Bass)."));
-}
-
-void AHomesteadLabController::TickLabFish()
-{
-    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-    auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
-    if (!Animation) return;
-    const double Now = GetWorld()->GetTimeSeconds();
-    if (Animation->FishCastSplashes() != FishSplashes)
-    {
-        FishSplashes = Animation->FishCastSplashes();
-        UE_LOG(LogHomesteadLabFish, Log, TEXT("LabFish: cast splash beat %u at clip %.2f s."), FishSplashes, Animation->FishingClipTime());
-        if (FishStep == 2) { FishStep = 3; FishNextStep = Now + 2.0; }
-    }
-    if (Animation->FishCatchLifts() != FishLifts)
-    {
-        FishLifts = Animation->FishCatchLifts();
-        UE_LOG(LogHomesteadLabFish, Log, TEXT("LabFish: catch lift beat %u at clip %.2f s."), FishLifts, Animation->FishingClipTime());
-        if (FishStep == 6) { FishStep = 7; FishNextStep = Now + 2.5; }
-    }
-    if (FishStep == 0 || Now < FishNextStep) return;
-    // The beats advance steps 2 and 6, as the simulation's cast and catch do; the rest are timed.
-    switch (FishStep)
-    {
-    case 1: Animation->SetFishingPose(EHomesteadFishingPose::Cast); FishStep = 2; FishNextStep = Now + 4.0; break;
-    case 2: UE_LOG(LogHomesteadLabFish, Warning, TEXT("LabFish: no cast splash beat arrived.")); FishStep = 0; break;
-    case 3: Animation->SetFishingPose(EHomesteadFishingPose::Bite); FishStep = 4; FishNextStep = Now + 1.8; break;
-    case 4: Animation->SetFishingPose(EHomesteadFishingPose::Fight); Animation->PlayFishingStrike(); FishStep = 5; FishNextStep = Now + 2.6; break;
-    case 5: Animation->SetFishingPose(EHomesteadFishingPose::Catch); FishStep = 6; FishNextStep = Now + 4.0; break;
-    case 6: UE_LOG(LogHomesteadLabFish, Warning, TEXT("LabFish: no catch lift beat arrived.")); FishStep = 0; break;
-    default: Animation->SetFishingPose(EHomesteadFishingPose::None); FishStep = 0; break;
-    }
+        UE_LOG(LogTemp, Warning, TEXT("LabHold takes Knife, Hatchet, DiggingStick, Pail, Machete, Lamp, Scythe, Billhook, Pickaxe or None."));
 }
 
 void AHomesteadLabController::LabLoop(const FString& Name)
@@ -592,7 +522,6 @@ void AHomesteadLabController::LabLoop(const FString& Name)
 void AHomesteadLabController::PlayerTick(float DeltaTime)
 {
     Super::PlayerTick(DeltaTime);
-    TickLabFish();
     if (LampKneel != 0)
         if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
         {

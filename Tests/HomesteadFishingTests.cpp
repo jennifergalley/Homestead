@@ -39,25 +39,16 @@ Homestead::Simulation Fisher(Homestead::FishingWater water)
 void Hook(Homestead::Simulation& sim)
 {
     OK(sim.BeginFishing({0, 0}));
-    CHECK(sim.FishingCast().phase == Homestead::FishingPhase::Casting);
-    OK(sim.AdvanceFishing(Homestead::Fishing::CastSplashSeconds, {0, 0}));
-    OK(sim.FishingAnimationContact(Homestead::FishingContact::CastSplash, sim.FishingCast().token, {0, 0}));
     OK(sim.AdvanceFishing(sim.FishingCast().biteAfter, {0, 0}));
     CHECK(sim.FishingCast().phase == Homestead::FishingPhase::Bite);
     OK(sim.FishingPress({0, 0}));
     CHECK(sim.FishingCast().phase == Homestead::FishingPhase::Landing);
 }
 
-void LandingBeat(Homestead::Simulation& sim, double cueOffset = Homestead::Fishing::StrikeWindowSeconds * 0.5)
+void LandingBeat(Homestead::Simulation& sim, double fraction = 0.7)
 {
-    OK(sim.AdvanceFishing(sim.FishingCast().strikeAfter + cueOffset, {0, 0}));
+    OK(sim.AdvanceFishing(Homestead::Fishing::LandingSeconds * fraction, {0, 0}));
     OK(sim.FishingPress({0, 0}));
-}
-
-Homestead::Result Lift(Homestead::Simulation& sim)
-{
-    OK(sim.AdvanceFishing(Homestead::Fishing::CatchLiftSeconds, {0, 0}));
-    return sim.FishingAnimationContact(Homestead::FishingContact::CatchLift, sim.FishingCast().token, {0, 0});
 }
 
 void PoleAndSales()
@@ -139,9 +130,6 @@ void HabitatsAndReplay()
         LandingBeat(sim);
         LandingBeat(replay);
         LandingBeat(replay);
-        CHECK(sim.FishingCast().phase == FishingPhase::Catching && sim.Count(caught) == 0);
-        OK(Lift(sim));
-        OK(Lift(replay));
         CHECK(sim.Count(caught) == 1 && sim.FishingCast().phase == FishingPhase::Idle);
         CHECK(sim.Serialize() == replay.Serialize());
         const auto saved = sim.Serialize();
@@ -166,12 +154,9 @@ void TimingAndCancellation()
     OK(sim.BeginFishing({0, 0}));
     const auto spent = sim.Serialize();
     const auto revision = sim.GetRevision();
-    const auto token = sim.FishingCast().token;
     const double delay = sim.FishingCast().biteAfter;
     CHECK(delay >= 2.0 && delay < 4.0);
-    CHECK(!sim.FishingAnimationContact(FishingContact::CastSplash, token, {0, 0}));
-    CHECK(!sim.FishingAnimationContact(FishingContact::CatchLift, token, {0, 0}));
-    OK(sim.AdvanceFishing(Fishing::CastSplashSeconds, {0, 0}));
+    OK(sim.AdvanceFishing(delay / 2.0, {0, 0}));
     CHECK(sim.GetRevision() == revision && sim.Serialize() == spent);
     const double elapsed = sim.FishingCast().elapsed;
     CHECK(!sim.AdvanceFishing(std::numeric_limits<double>::quiet_NaN(), {0, 0}));
@@ -182,38 +167,28 @@ void TimingAndCancellation()
     Simulation restored = sim;
     OK(restored.Deserialize(spent));
     CHECK(restored.FishingCast().phase == FishingPhase::Idle && restored.Serialize() == spent);
-    OK(sim.FishingAnimationContact(FishingContact::CastSplash, token, {0, 0}));
-    CHECK(!sim.FishingAnimationContact(FishingContact::CastSplash, token, {0, 0}));
     OK(sim.FishingPress({0, 0}));
     CHECK(sim.FishingCast().phase == FishingPhase::Idle && sim.Serialize() == spent);
     OK(sim.BeginFishing({0, 0}));
-    CHECK(sim.FishingCast().token != token && sim.FishingCast().biteAfter != delay);
-    CHECK(!sim.FishingAnimationContact(FishingContact::CastSplash, token, {0, 0}));
-    OK(sim.AdvanceFishing(Fishing::CastContactTimeoutSeconds + 0.001, {0, 0}));
+    OK(sim.AdvanceFishing(sim.FishingCast().biteAfter + Fishing::HookWindowSeconds + 0.001, {0, 0}));
     CHECK(sim.FishingCast().phase == FishingPhase::Idle);
     OK(sim.BeginFishing({0, 0}));
-    OK(sim.AdvanceFishing(Fishing::CastSplashSeconds, {0, 0}));
-    OK(sim.FishingAnimationContact(FishingContact::CastSplash, sim.FishingCast().token, {0, 0}));
-    Simulation noHook = sim;
-    OK(noHook.AdvanceFishing(noHook.FishingCast().biteAfter + Fishing::HookWindowSeconds + 0.001, {0, 0}));
-    CHECK(noHook.FishingCast().phase == FishingPhase::Idle);
     OK(sim.AdvanceFishing(sim.FishingCast().biteAfter + Fishing::HookWindowSeconds, {0, 0}));
     OK(sim.FishingPress({0, 0}));
     CHECK(sim.FishingCast().phase == FishingPhase::Landing);
     OK(sim.CancelFishing());
     Hook(sim);
-    const double firstStrike = sim.FishingCast().strikeAfter;
-    CHECK(firstStrike >= Fishing::MinStrikeSeconds && firstStrike < Fishing::MinStrikeSeconds + Fishing::StrikeVariationSeconds);
-    for (double offset : {0.0, Fishing::StrikeWindowSeconds, -0.001, Fishing::StrikeWindowSeconds + 0.001})
+    for (double fraction : {Fishing::LandingBandStart, Fishing::LandingBandEnd,
+        Fishing::LandingBandStart - 0.001, Fishing::LandingBandEnd + 0.001})
     {
         Simulation trial = sim;
-        LandingBeat(trial, offset);
-        const bool inBand = offset >= 0.0 && offset <= Fishing::StrikeWindowSeconds;
+        LandingBeat(trial, fraction);
+        const bool inBand = fraction >= Fishing::LandingBandStart && fraction <= Fishing::LandingBandEnd;
         CHECK((trial.FishingCast().phase == FishingPhase::Landing) == inBand);
         CHECK(trial.Count(sim.FishingCast().catchItem) == 0);
     }
     Simulation late = sim;
-    OK(late.AdvanceFishing(firstStrike + Fishing::StrikeWindowSeconds + 0.001, {0, 0}));
+    OK(late.AdvanceFishing(Fishing::LandingSeconds + 0.001, {0, 0}));
     CHECK(late.FishingCast().phase == FishingPhase::Idle);
     OK(sim.AdvanceFishing(0.0, {101, 0}));
     CHECK(sim.FishingCast().phase == FishingPhase::Idle);
@@ -237,32 +212,15 @@ void TimingAndCancellation()
     sim = Fisher(FishingWater::Ocean);
     Hook(sim);
     const Item catchItem = sim.FishingCast().catchItem;
-    LandingBeat(sim);
-    CHECK(sim.FishingCast().strikeAfter != firstStrike);
-    LandingBeat(sim);
-    const auto catchToken = sim.FishingCast().token;
-    CHECK(!sim.FishingAnimationContact(FishingContact::CatchLift, catchToken, {0, 0}));
-    Simulation noContact = sim;
-    OK(noContact.AdvanceFishing(Fishing::CatchContactTimeoutSeconds + 0.001, {0, 0}));
-    CHECK(noContact.FishingCast().phase == FishingPhase::Idle && noContact.Count(catchItem) == 0);
-    Simulation cancelled = sim;
-    OK(cancelled.CancelFishing());
-    CHECK(!cancelled.FishingAnimationContact(FishingContact::CatchLift, catchToken, {0, 0}));
-    Simulation success = sim;
-    OK(Lift(success));
-    const auto caughtSave = success.Serialize();
-    CHECK(success.Count(catchItem) == 1);
-    CHECK(!success.FishingAnimationContact(FishingContact::CatchLift, catchToken, {0, 0}));
-    CHECK(success.Serialize() == caughtSave);
     OK(sim.GrantItems(Item::Stone, sim.PackCapacity() - sim.UsedCapacity()));
-    CHECK(!Lift(sim));
+    LandingBeat(sim);
+    LandingBeat(sim);
     CHECK(sim.FishingCast().phase == FishingPhase::Idle && sim.Count(catchItem) == 0);
     sim = Fisher(FishingWater::River);
     Hook(sim);
-    LandingBeat(sim);
-    LandingBeat(sim);
     sim.SetFishingWaterProbe([](Point) { return FishingWater::Lake; });
-    OK(sim.AdvanceFishing(Fishing::CatchLiftSeconds, {0, 0}));
+    LandingBeat(sim);
+    LandingBeat(sim);
     CHECK(sim.FishingCast().phase == FishingPhase::Idle && sim.Count(Item::RiverTrout) == 0 && sim.Count(Item::RiverSalmon) == 0);
 }
 

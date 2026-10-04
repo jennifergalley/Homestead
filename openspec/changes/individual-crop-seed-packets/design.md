@@ -25,3 +25,5 @@ Old seed stacks referenced by hotbar/pack squares -> preserve the existing id fo
 ## Migration Plan
 
 Same save version and fields, more quantity-one layout groups. Load normalization does not write actual player save files; report the compatibility effect before ready. Focused native roundtrip/old-layout/merge/stock tests precede admission.
+
+The practical packet budget is eight full seed chests plus the upgraded pack (9,840), separate from the existing 4,096 stackable-group limit. Legacy totals over that budget are refused explicitly before expansion, leaving the game/save untouched; no packets are silently dropped. Keep the 8 MiB payload guard. Full seed chests may also carry free stored water, so the layout reader accommodates that extra group. Verify four full chests (4,800 packets) normalize and reload below 0.5 seconds; an oversized nine-chest fixture must refuse atomically.

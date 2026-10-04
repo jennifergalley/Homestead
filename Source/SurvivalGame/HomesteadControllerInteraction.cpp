@@ -26,7 +26,7 @@ void AHomesteadController::Interact()
     if (bBookOpen) { ActivateRow(); return; }
     const auto Position = PlayerPoint();
     if (!bWorldReady || !PrepareWorldAt(Position)) return;
-    if (IsFishing()) return;
+    if (IsFishing()) { FishingInput(); return; }
     if (bPlanning)
     {
         if (bDeconstructing)
@@ -52,6 +52,8 @@ void AHomesteadController::Interact()
         return;
     }
     UpdateFocus();
+    if (Focus == EFocus::Water && SelectedCarriedTool() == Homestead::Item::FishingPole)
+    { FishingInput(); return; }
     const FHintUse Hint = BeginHintUse(bGamepad ? TEXT("A") : TEXT("E"));
     ON_SCOPE_EXIT { EndHintUse(Hint); };
     switch (Focus)

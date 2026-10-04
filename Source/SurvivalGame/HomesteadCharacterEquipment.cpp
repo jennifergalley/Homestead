@@ -90,8 +90,7 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     // At rest a tool's handle crosses the palm diagonally (heel of the hand to the index knuckle),
     // which tips its head forward and down with the wrist nearly straight. Authored actions set
     // the tool's angle themselves, so the tilt eases out while one plays.
-    const bool Fishing = Animation->FishingWeight() > 0.01f;
-    const float TiltTarget = HandsFree && !Hacking && !Felling && !CuttingReeds && !Hoeing && !Fishing ? 1.0f : 0.0f;
+    const float TiltTarget = HandsFree && !Hacking && !Felling && !CuttingReeds && !Hoeing ? 1.0f : 0.0f;
     HeldToolTilt = FMath::FInterpConstantTo(HeldToolTilt, TiltTarget, DeltaSeconds, 1.0f / 0.15f);
     const auto Tilt = [this](const FTransform& Rest, float Degrees, const FTransform& Offset = FTransform::Identity)
     {
@@ -125,7 +124,6 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
             || Spec.Tool == Homestead::Item::DiggingStick && Hoeing
             || (Hacking && Spec.Tool == HackTool)
             || Spec.Tool == Homestead::Item::WateringCan && PailWork
-            || Spec.Tool == Homestead::Item::FishingPole && Fishing
             || (HandsFree && !Hacking && Presented == Spec.Tool);
         Prop->SetVisibility(Held);
         if (!Held) continue;
@@ -138,8 +136,6 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
         const float CarryDegrees = Tuned >= 0 ? Tuned : Spec.CarryDegrees;
         // The authored saw stroke drives the wrist; the resting carry deviation would skew the blade.
         Carry = CuttingReeds || Hoeing ? 0.0f : Hacking ? RestWristDegrees : FMath::Min(CarryDegrees, RestWristDegrees);
-        // fish_cast.py lays the pole with her wrist straight; the carry deviation eases out with the layer.
-        if (Spec.Tool == Homestead::Item::FishingPole) Carry = FMath::Lerp(Carry, 0.0f, Animation->FishingWeight());
         // Resting carries that differ from the working grip: the hatchet and knife hang edge-down and the
         // pickaxe point-down (Jenny, 09-29: it rode point-up), turned about the haft; the hoe is carried blade-low in front, turned end for end from
         // how she works it. The turn eases out with the tilt when an authored action takes over.
@@ -207,8 +203,6 @@ void AHomesteadCharacter::UpdateHeldTools(float DeltaSeconds)
     // both fists here, over the one-handed placement just set.
     UpdateFellingHatchet();
     UpdateCraftPiece(Animation->CraftWeight());
-    UStaticMeshComponent* Pole = GetHeldProp(Homestead::Item::FishingPole);
-    UpdateFishingTackle(*Animation, Pole && Pole->IsVisible() ? Pole : nullptr, DeltaSeconds);
 }
 
 bool AHomesteadCharacter::UpdateHeldLamp(UHomesteadAnimInstance& Animation, bool bHandsFree, Homestead::Item Presented, float DeltaSeconds)
