@@ -150,7 +150,7 @@ void ParcelsComeFromTheLayout()
     CHECK(InOwnedParcel(provisional, layout.PointOr(Anchor::StandingRoomSpawn, {})));
     CHECK(InOwnedParcel(provisional, layout.PointOr(Anchor::MillSite, {})));
     CHECK(!InOwnedParcel(provisional, layout.PointOr(Anchor::TownSquare, {})));
-    CHECK(!InOwnedParcel(provisional, layout.PointOr(Anchor::RoadTownEnd, {})));
+    // The town road meets the estate drive at its junction, inside the owned land; the square is outside it.
     // Turned footprints report their true corners.
     Point corners[4];
     FootprintCorners({{0, 0}, {10, 5}, 90.0}, corners);

@@ -1,21 +1,23 @@
-"""Lay out the town square (Jenny, 2026-09-29: "the town buildings are bunched too tightly").
+"""Lay out the town square (Jenny, 2026-09-29: "the town buildings are bunched too tightly") where
+shrink-estate-map stage 1 (2026-10-04) puts it: the village at the foot of the drive.
 
-The old massing was twelve blockouts packed round a 40 x 34.5 m square, 0.2-0.35 m apart, with the main
-road stopping 72 m short of it. This lays out an open square of SQUARE_ALONG_Y_M x SQUARE_ALONG_X_M round
-the TownSquare anchor, faced by irregular terraces and cottages with 3-6 m side lanes between the groups,
-the general store in the middle of its east side, and a separate curved `townStreet` (5.5 m wide) from the
-main road's end into the square. The main road, its 1.94 km chainage and its anchors don't move. The
-town already stands on reshape.py's plane pad, so the heightfield doesn't change.
+An open square of SQUARE_ALONG_Y_M x SQUARE_ALONG_X_M round the pad's centre (town_pad.py's "townPad"), faced
+by irregular terraces and cottages with 3-6 m side lanes between the groups, the general store on the east
+side by the street's mouth, and a curved `townStreet` (5.5 m wide) that leaves the main road at the junction
+(JUNCTION_CHAINAGE_M metres from the manor forecourt) and enters the square's east side heading west. The
+main road and its chainage don't move. town_pad.py levels the ground first.
 
+    python Scripts\\Terrain\\town_pad.py      # first, once
     python Scripts\\Terrain\\town_layout.py
 
 Writes (in step):
-    Scripts/Terrain/estate_layout.json   "town" (square, street, buildings, store) and the store anchors
+    Scripts/Terrain/estate_layout.json   "town" (square, street, buildings, store), the TownSquare, RoadTownEnd
+                                         and store anchors
     Tests/Data/HomesteadTownLayout.inc   footprints, square and street for the native tests (generated)
 It checks the layout first and refuses to write one that breaks a rule (lanes, clearances, the store
 room, the street's curve). Then: weightmaps.py, bake_ground.py and bake_estate_map.py; in the editor
 town_massing.py (it reads "town"), ApplyEstateWeightmaps and ImportEstateMap. HomesteadEstate.cpp's
-GeneralStoreDoor/Counter mirror the anchors printed here. Saves keep their shop: the game re-seats the
+TownSquare/RoadTownEnd/GeneralStoreDoor/Counter mirror the anchors printed here. Saves keep their shop: the game re-seats the
 general store's counter on the anchor when a save loads (Simulation::RefreshShopCounters).
 """
 import json
@@ -43,6 +45,9 @@ TERRACE_JOINT_M = 0.1            # between the houses of one terrace (they share
 STORE_DOOR_TO_COUNTER_M = 6.0
 STORE_FOOTPRINT_M = (9.6, 9.4)   # depth, width
 STORE_DOOR_OUT_M = 0.5           # the door anchor stands just outside the front
+JUNCTION_CHAINAGE_M = 140.0      # where the street leaves the main road: ~27 m from the manor door + this + the street
+SPUR_TURN_DEG = 55.0             # the street leaves the road turned this far to its left (toward the square)
+TOWN_ARRIVAL_FROM_DOOR_M = 4.0   # a walk to town lands her this far in front of the store door
 
 # Frontages of the square, its edges: (name, front line, along axis, yaw of the building's back).
 # A building's actor sits at the centre of its front wall and runs back along its local +X (yaw).
@@ -59,28 +64,29 @@ RUBBLE, ASHLAR, RENDER = "Rubble", "Ashlar", "Render"
 # wall tint, chimneys, door at, shopfront, sign colour, side windows. Groups of touching houses are
 # terraces; the gaps between groups are the side lanes. Names that the old massing used keep their actors.
 BUILDINGS = [
-    # North side (60 m, y 1120 -> 1180)
+    # North side (60 m, y from the square's west edge to its east edge)
     ("NorthCottage", "north", 3.0, 8.0, 6.5, 0.4, 1, 290, 50, RIDGE, RUBBLE, (0.95, 0.93, 0.9), 1, -0.4, False, (0.1, 0.07, 0.03), True),
     ("Baker", "north", 11.1, 9.0, 7.5, 0.0, 2, 280, 45, GABLE, RENDER, (0.98, 0.97, 0.93), -1, 0.55, True, (0.05, 0.08, 0.16), False),
     ("Draper", "north", 24.1, 10.0, 8.0, 0.2, 2, 290, 40, RIDGE, RUBBLE, (1, 1, 1), 2, 0.6, True, (0.16, 0.05, 0.08), False),
     ("CornerHouse", "north", 34.2, 9.0, 7.0, 0.6, 2, 300, 42, GABLE, RENDER, (1.0, 0.97, 0.9), -1, -0.5, False, (0.05, 0.05, 0.05), True),
     ("Chandler", "north", 48.2, 8.5, 7.0, 0.3, 2, 285, 44, RIDGE, RENDER, (0.97, 0.95, 1.0), 1, 0.4, True, (0.12, 0.09, 0.02), True),
-    # East side (45 m, x -562.5 -> -517.5): the general store in the middle, spawned by the game.
-    ("EastCottage", "east", 4.5, 9.0, 6.5, 0.3, 1, 285, 48, GABLE, RUBBLE, (1, 1, 1), 1, -0.5, False, (0.1, 0.07, 0.03), True),
-    ("EastHouse", "east", 31.3, 10.0, 8.0, 0.0, 2, 295, 40, RIDGE, RENDER, (1.0, 0.95, 0.80), 2, 0.3, False, (0.08, 0.04, 0.02), True),
-    # South side (60 m, y 1120 -> 1180)
+    # East side (45 m, south to north): the street comes in at the south end, then the general store (spawned
+    # by the game), a cottage and a house.
+    ("EastCottage", "east", 26.0, 7.5, 6.5, 0.3, 1, 285, 48, GABLE, RUBBLE, (1, 1, 1), 1, -0.5, False, (0.1, 0.07, 0.03), True),
+    ("EastHouse", "east", 36.5, 8.5, 8.0, 0.0, 2, 295, 40, RIDGE, RENDER, (1.0, 0.95, 0.80), 2, 0.3, False, (0.08, 0.04, 0.02), True),
+    # South side (60 m, west to east)
     ("Butcher", "south", 3.0, 9.0, 7.5, 0.2, 2, 290, 45, GABLE, RUBBLE, (0.92, 0.92, 0.9), -1, -0.55, True, (0.05, 0.12, 0.06), True),
     ("SouthHouse", "south", 12.1, 9.0, 7.0, 0.5, 2, 300, 38, RIDGE, RENDER, (0.92, 0.95, 1.0), 2, 0.0, False, (0.05, 0.05, 0.05), False),
     ("Chemist", "south", 25.6, 8.8, 7.5, 0.0, 2, 310, 35, RIDGE, ASHLAR, (1.05, 1.0, 0.92), 1, 0.55, True, (0.10, 0.06, 0.02), True),
     ("Ironmonger", "south", 34.5, 11.0, 8.0, 0.4, 2, 300, 38, RIDGE, RENDER, (1.0, 0.92, 0.85), 2, -0.5, True, (0.20, 0.04, 0.04), False),
     ("SouthCottage", "south", 50.0, 7.5, 6.5, 0.3, 1, 290, 48, GABLE, RUBBLE, (1.02, 1.0, 0.95), -1, 0.4, False, (0.1, 0.07, 0.03), True),
-    # West side (45 m, x -562.5 -> -517.5): the town street comes in at its north end.
+    # West side (45 m, south to north)
     ("WestCottage", "west", 3.0, 9.0, 6.5, 0.3, 1, 290, 45, GABLE, RUBBLE, (1.05, 1.02, 0.95), -1, 0.5, False, (0.1, 0.07, 0.03), True),
     ("Inn", "west", 12.1, 12.0, 8.5, 0.0, 3, 290, 32, RIDGE, ASHLAR, (1, 1, 1), 2, 0.0, False, (0.03, 0.05, 0.12), False),
-    ("LaneCottage", "west", 39.0, 6.0, 6.0, 0.3, 1, 280, 50, GABLE, RUBBLE, (1.0, 0.98, 0.94), 1, 0.3, False, (0.1, 0.07, 0.03), True),
+    ("LaneCottage", "west", 27.1, 6.0, 6.0, 0.3, 1, 280, 50, GABLE, RUBBLE, (1.0, 0.98, 0.94), 1, 0.3, False, (0.1, 0.07, 0.03), True),
 ]
-STORE = ("east", None)           # centred on its side
-STREET_ENTRY_S = 33.0            # where the street meets the west side (m along it)
+STORE = ("east", 13.5)           # side and s0: just north of the street's mouth, so the door is the first thing in view
+STREET_ENTRY = ("east", 6.75)    # where the street meets the square: side and metres along it (clear of the store)
 
 
 def frame(centre, side):
@@ -102,12 +108,13 @@ def footprint(centre, side, s0, width, depth, setback):
     return front, yaw, np.array(corners)
 
 
-def street_points(start, heading, end):
-    """A cubic Bezier from the road's end (leaving along its heading) into the square (arriving east), 1 m steps."""
+def street_points(start, heading, end, arrive):
+    """A cubic Bezier from the junction (leaving along heading) into the square (arriving along `arrive`, a unit
+    vector pointing into the square), 1 m steps."""
     p0, p3 = np.asarray(start, float), np.asarray(end, float)
     reach = np.linalg.norm(p3 - p0) * 0.45
     p1 = p0 + heading * reach
-    p2 = p3 - np.array([0.0, 1.0]) * reach
+    p2 = p3 - arrive * reach
     t = np.linspace(0, 1, 400)[:, None]
     curve = (1 - t) ** 3 * p0 + 3 * (1 - t) ** 2 * t * p1 + 3 * (1 - t) * t ** 2 * p2 + t ** 3 * p3
     seg = np.r_[0, np.cumsum(np.linalg.norm(np.diff(curve, axis=0), axis=1))]
@@ -132,7 +139,10 @@ def point_polygon_distance(p, poly):
 def main():
     layout = json.load(open(LAYOUT))
     lm = layout["landmarks"]
-    centre = np.array(lm["TownSquare"][:2], float)
+    pad = layout.get("townPad")
+    if not pad:
+        raise SystemExit("town_layout: run town_pad.py first (it records the village's centre)")
+    centre = np.array(pad["centre"], float)
     problems = []
 
     placed = []
@@ -140,11 +150,10 @@ def main():
         name, side, s0, width, depth, setback = row[:6]
         front, yaw, poly = footprint(centre, side, s0, width, depth, setback)
         placed.append((name, side, s0, width, depth, setback, front, yaw, poly, row[6:]))
-    # The store: centred on its side, the door just outside its front.
+    # The store: at its configured spot on its side, the door just outside its front.
     origin, along, out, store_yaw = frame(centre, STORE[0])
-    side_len = SQUARE_ALONG_X_M if STORE[0] in ("east", "west") else SQUARE_ALONG_Y_M
     store_depth, store_width = STORE_FOOTPRINT_M
-    store_s0 = side_len / 2 - store_width / 2
+    store_s0 = STORE[1]
     store_front, _, store_poly = footprint(centre, STORE[0], store_s0, store_width, store_depth, 0.0)
     door = store_front - out * STORE_DOOR_OUT_M
     counter = door + out * STORE_DOOR_TO_COUNTER_M
@@ -161,8 +170,6 @@ def main():
             if LANE_M[0] - 1e-6 <= gap <= LANE_M[1] + 1e-6:
                 lanes.append((side, a[0], b[0], round(gap, 2)))
                 continue
-            if side == "west" and a[2] + a[3] < STREET_ENTRY_S < b[2]:
-                continue
             problems.append(f"{side}: {a[0]} to {b[0]} is {gap:.2f} m (a terrace joint or a {LANE_M[0]}-{LANE_M[1]} m lane)")
         for p in row:
             if p[2] < 0 or p[2] + p[3] > (SQUARE_ALONG_X_M if side in ("east", "west") else SQUARE_ALONG_Y_M):
@@ -173,13 +180,18 @@ def main():
             if any(point_polygon_distance(q, b[8]) < -1e-6 for q in a[8]) or any(point_polygon_distance(q, a[8]) < -1e-6 for q in b[8]):
                 problems.append(f"{a[0]} overlaps {b[0]}")
 
-    # The street: from the main road's last point, along its heading, into the west side at STREET_ENTRY_S.
+    # The street: from the main road at the junction, turned SPUR_TURN_DEG toward the square, into its east side.
     road = np.asarray(layout["road"], float)
-    start = road[-1]
-    heading = (road[-1] - road[-3]) / np.linalg.norm(road[-1] - road[-3])
-    w_origin, w_along, w_out, _ = frame(centre, "west")
-    entry = w_origin + w_along * STREET_ENTRY_S - w_out * 1.0      # a metre into the square
-    street = street_points(start, heading, entry)
+    chain = np.r_[0.0, np.cumsum(np.hypot(*np.diff(road, axis=0).T))]
+    k = int(np.searchsorted(chain, JUNCTION_CHAINAGE_M))
+    start = road[k]
+    ahead = (road[k + 1] - road[k - 1]) / np.linalg.norm(road[k + 1] - road[k - 1])
+    turn = -math.radians(SPUR_TURN_DEG)        # x north, y east: this rotation is clockwise seen from above, so negate for left
+    heading = np.array([ahead[0] * math.cos(turn) - ahead[1] * math.sin(turn),
+                        ahead[0] * math.sin(turn) + ahead[1] * math.cos(turn)])
+    e_origin, e_along, e_out, _ = frame(centre, STREET_ENTRY[0])
+    entry = e_origin + e_along * STREET_ENTRY[1] - e_out * 1.0      # a metre into the square
+    street = street_points(start, heading, entry, -e_out)
     for p in street:
         for b in placed:
             clear = point_polygon_distance(p, b[8]) - STREET_HALF_WIDTH_M
@@ -207,6 +219,11 @@ def main():
     def ground(p):
         return round(float(z[int(round(p[1])) + H, int(round(p[0])) + H]), 2)
 
+    arrival = door - out * TOWN_ARRIVAL_FROM_DOOR_M
+    lm["RoadTownEnd"] = [round(float(start[0]), 2), round(float(start[1]), 2), ground(start), 45.0]
+    lm["TownSquare"] = [round(float(centre[0]), 2), round(float(centre[1]), 2), ground(centre), 0.0]
+    lm["TownArrival"] = [round(float(arrival[0]), 2), round(float(arrival[1]), 2), ground(arrival),
+                         round(math.degrees(math.atan2(out[1], out[0])) % 360.0, 1)]
     lm["GeneralStoreDoor"] = [round(float(door[0]), 2), round(float(door[1]), 2), ground(door), store_yaw]
     lm["GeneralStoreCounter"] = [round(float(counter[0]), 2), round(float(counter[1]), 2), ground(counter), store_yaw - 180.0]
     buildings = []
@@ -219,7 +236,7 @@ def main():
                           "roof": roof, "wall": wall, "tint": list(tint), "chimneys": chimneys, "doorAt": door_at,
                           "shopfront": shop, "sign": list(sign), "sideWindows": side_windows})
     layout["town"] = {"square": {"centre": centre.round(2).tolist(), "halfX": SQUARE_ALONG_X_M / 2, "halfY": SQUARE_ALONG_Y_M / 2},
-                      "street": np.round(street, 2).tolist(), "streetHalfWidth": STREET_HALF_WIDTH_M,
+                      "junctionChainage": JUNCTION_CHAINAGE_M, "street": np.round(street, 2).tolist(), "streetHalfWidth": STREET_HALF_WIDTH_M,
                       "store": {"footprint": np.round(store_poly, 2).tolist()}, "buildings": buildings}
     with open(LAYOUT, "w") as fh:
         json.dump(layout, fh, indent=1)
@@ -239,6 +256,7 @@ def main():
 
     print(f"town: square {SQUARE_ALONG_Y_M:.0f} x {SQUARE_ALONG_X_M:.0f} m, {len(buildings)} buildings + the store, "
           f"{len(lanes)} side lanes {sorted(set(l[3] for l in lanes))} m, street {street_len} m (tightest bend {radius:.0f} m)")
+    print(f"town: junction {lm['RoadTownEnd']}, TownSquare {lm['TownSquare']}, TownArrival {lm['TownArrival']}")
     print(f"town: GeneralStoreDoor {lm['GeneralStoreDoor']}, GeneralStoreCounter {lm['GeneralStoreCounter']} "
           f"(mirror in HomesteadEstate.cpp in cm)")
 

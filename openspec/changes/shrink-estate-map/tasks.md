@@ -1,6 +1,6 @@
 # Tasks
 
-Unscheduled planning only. Both checks below remain incomplete; no implementation, editor or build is authorized by this proposal.
+Stage 1 (task 1.1) is implemented in the Map Agent's 2026-10-04 build: a 214-point 852 m road, the town stop 128 m from the manor and a boundary pocket at the village. It stays unchecked until Jenny accepts it in play. Stage 2 (task 2.1) is not started and needs the Orchestrator's go-ahead.
 
 ## 1. Closer-town first delivery
 

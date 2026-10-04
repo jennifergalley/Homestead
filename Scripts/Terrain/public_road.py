@@ -26,6 +26,7 @@ SIZE, H = 4033, 2016
 SCENERY = os.path.join(REPO, "Content", "SurvivalGame", "Estate", "Runtime", "EstateScenery.bin")
 BRIDGE_CLEAR_MARGIN_M = 0.8      # scatter kept this far clear of the deck and its railings
 SIGN_OFFSET_M = 4.2            # a sign stands this far off the centreline, on the verge
+TOWN_SIGN_PAST_JUNCTION_M = 8.0  # the town sign stands just past the turn into the village
 BRIDGE_HALF_ALONG_M = 20.0     # the bridge keep-out: deck and ramps (chainage 664-704 about the crossing)
 BRIDGE_HALF_ACROSS_M = 6.0
 # The road bridge's deck (road_grade.py holds the road level over the river): it rests this far past the
@@ -137,11 +138,12 @@ def main():
         nearest = int(np.argmin(((projected - point)**2).sum(axis=1)))
         return float(chain[nearest] + seg[nearest] * t[nearest])
 
+    junction_ch = float(layout["town"]["junctionChainage"])
     farm_sign_ch = max(nearest_chainage(np.array(corner)) for corner in FARM_CORNERS_M) + FARM_SIGN_BEYOND_M
     signs = []
     for name, ch, side, toward in (("ManorRoadSign", farm_sign_ch, -1, "town"),
                                    ("GatewayRoadSign", gate_ch + 14.0, -1, "town"),
-                                   ("TownRoadSign", float(chain[-1]) - 14.0, 1, "manor")):
+                                   ("TownRoadSign", junction_ch + TOWN_SIGN_PAST_JUNCTION_M, 1, "manor")):
         p, d = frame(ch)
         right = np.array([-d[1], d[0]])       # x north, y east: right of the heading (Unreal is left-handed)
         q = p + right * side * SIGN_OFFSET_M
@@ -168,11 +170,13 @@ def main():
     lines.append("// stop(name, chainage m): travel endpoints on the walkable road bed")
     lines.append(f"stop(\"Manor\", {12.0:.2f});")
     lines.append(f"stop(\"Gateway\", {gate_ch:.2f});")
-    lines.append(f"stop(\"Town\", {float(chain[-1]) - 6.0:.2f});")
+    lines.append(f"stop(\"Town\", {junction_ch:.2f});")
     lines.append("// arrival(stop, x cm, y cm, ground z cm, yaw deg): where a walk to that stop leaves her, off the road")
     ax, ay = MANOR_ARRIVAL_M
     arrival_yaw = math.degrees(math.atan2(MANOR_FRONT_DOOR_M[1] - ay, MANOR_FRONT_DOOR_M[0] - ax))
     lines.append(f"arrival(\"Manor\", {ax * 100.0:.1f}, {ay * 100.0:.1f}, {ground(ax, ay) * 100.0:.1f}, {(arrival_yaw + 360.0) % 360.0:.1f});")
+    tx, ty, tz, tyaw = layout["landmarks"]["TownArrival"]
+    lines.append(f"arrival(\"Town\", {tx * 100.0:.1f}, {ty * 100.0:.1f}, {tz * 100.0:.1f}, {tyaw % 360.0:.1f});")
     lines.append("// sign(name, chainage m, x cm, y cm, ground z cm, yaw deg): the face points along yaw")
     for name, ch, q, gz, yaw in signs:
         lines.append(f"sign(\"{name}\", {ch:.2f}, {q[0] * 100.0:.1f}, {q[1] * 100.0:.1f}, {gz * 100.0:.1f}, {yaw:.1f});")

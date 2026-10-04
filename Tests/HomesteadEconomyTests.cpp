@@ -595,31 +595,32 @@ void ShopsCloseOnSundays()
         CHECK(false);
     };
     Simulation walker = sim;
-    Seek(walker, Weekday::Saturday, 1.0);  // 1 AM, still Saturday's day: she'd arrive about 8 AM on Sunday
+    const double walkHours = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town).gameHours;  // the short walk, under an hour
+    Seek(walker, Weekday::Sunday, 9.0);  // Sunday 9 AM: she'd arrive about 9:42 AM, in store hours on its closed day
     const TravelPlan late = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
     CHECK(late.ok && late.storeClosedOnArrival && late.storeClosedAllDay);
     CHECK(late.summary.find("You'd arrive on a Sunday, when the general store is closed all day (it opens Monday at 8 AM).")
         != std::string::npos);
-    walker.SkipToHourOfDay(12.0);  // Sunday noon: she'd arrive Sunday evening, after its hours: shut for the night
+    walker.SkipToHourOfDay(21.0);  // Sunday 9 PM: she'd arrive about 10 PM, after its hours: shut for the night
     const TravelPlan sundayEvening = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
     CHECK(sundayEvening.storeClosedOnArrival && !sundayEvening.storeClosedAllDay && !sundayEvening.nextDay
         && sundayEvening.summary.find("(it opens at 8 AM)") != std::string::npos);
-    walker.SkipToHourOfDay(22.0);  // Sunday 10 PM: she'd arrive about 5 AM, the next day by the clock; no "on a Sunday"
+    walker.SkipToHourOfDay(24.0 - 0.5 * walkHours);  // Sunday just before midnight: she'd arrive just after it, the next day by the clock; no "on a Sunday"
     const TravelPlan overnight = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
     CHECK(overnight.nextDay && overnight.storeClosedOnArrival && !overnight.storeClosedAllDay);
     CHECK(overnight.summary.find("Sunday") == std::string::npos
         && overnight.summary.find(" the next day.") != std::string::npos
         && overnight.summary.find("(it opens at 8 AM)") != std::string::npos);
-    walker.SkipToHourOfDay(6.5);   // Monday morning: open when she gets there
+    walker.SkipToHourOfDay(7.5);   // Monday morning: open when she gets there
     const TravelPlan monday9 = PlanTravel(walker.GetState(), manor->position, TravelDestination::Town);
     CHECK(monday9.ok && !monday9.storeClosedOnArrival && !monday9.storeClosedAllDay);
     Simulation saturdayNoon = sim;
-    Seek(saturdayNoon, Weekday::Saturday, 12.0);  // Saturday noon: she'd arrive after closing, and it opens Monday
+    Seek(saturdayNoon, Weekday::Saturday, 22.0);  // Saturday 10 PM: she'd arrive after closing, and it opens Monday
     // Early on Sunday, before what would be opening time (review): it opens Monday, not "at 8 AM".
     {
         Simulation early = saturdayNoon;
         const double walk = PlanTravel(early.GetState(), manor->position, TravelDestination::Town).gameHours;
-        early.SkipToHourOfDay(7.5 - walk);  // just after midnight: she'd arrive about 07:30 on Sunday
+        early.SkipToHourOfDay(7.5 - walk);  // she'd arrive about 07:30 on Sunday
         const TravelPlan dawn = PlanTravel(early.GetState(), manor->position, TravelDestination::Town);
         CHECK(Calendar::DateAt(dawn.arrivalHour).weekday == Weekday::Sunday
             && std::abs(std::fmod(dawn.arrivalHour, 24.0) - 7.5) < 1e-6);
@@ -723,16 +724,16 @@ void WalkTheRoad()
     CHECK(manor && town);
     Store store = OpenStore();
     Simulation& sim = store.sim;
-    // Noon at the manor, default 60-minute day: the whole road at the conservative pace, ~7 game hours.
+    // Noon at the manor, default 60-minute day: the short road to the village at the conservative pace, under an hour.
     sim.SkipToHourOfDay(12.0);
     const TravelPlan noon = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
     CHECK(noon.ok && noon.connectorMetres < 1.0);
     CHECK(std::abs(noon.roadMetres - (town->chainage - manor->chainage)) < 1.0);
     const double expected = noon.totalMetres * 100.0 / RoadWalkPaceCmPerSecond / 3600.0 * 24.0 * 60.0 / sim.GetState().dayMinutes;
-    CHECK(std::abs(noon.gameHours - expected) < 1e-9 && noon.gameHours > 6.8 && noon.gameHours < 7.4);
-    CHECK(noon.arrival.x == town->position.x && noon.arrival.y == town->position.y && noon.arrivalZ == town->z);
-    CHECK(noon.storeClosedOnArrival && noon.summary.find("closed") != std::string::npos && !noon.nextDay);
-    CHECK(noon.summary.find("1.9 km") != std::string::npos);
+    CHECK(std::abs(noon.gameHours - expected) < 1e-9 && noon.gameHours > 0.4 && noon.gameHours < 1.0);
+    CHECK(town->hasArrival && noon.arrival.x == town->arrival.x && noon.arrival.y == town->arrival.y && noon.arrivalZ == town->arrivalZ);
+    CHECK(!noon.storeClosedOnArrival && noon.summary.find("closed") == std::string::npos && !noon.nextDay);
+    CHECK(noon.summary.find(" m") != std::string::npos);
     // The saved day length scales it: a 30-minute day doubles the game hours, 120 halves them.
     OK(sim.SetDayMinutes(30.0));
     CHECK(std::abs(PlanTravel(sim.GetState(), manor->position, TravelDestination::Town).gameHours - noon.gameHours * 2.0) < 1e-9);
@@ -745,14 +746,14 @@ void WalkTheRoad()
     CHECK(std::abs(PlanTravel(reloaded.GetState(), manor->position, TravelDestination::Town).gameHours - noon.gameHours / 2.0) < 1e-9);
     OK(sim.SetDayMinutes(60.0));
     // Early enough, the store is open when she gets there.
-    sim.SkipToHourOfDay(6.5);
+    sim.SkipToHourOfDay(7.5);
     const TravelPlan morning = PlanTravel(sim.GetState(), manor->position, TravelDestination::Town);
     CHECK(morning.ok && !morning.storeClosedOnArrival && morning.summary.find("closed") == std::string::npos);
     // Late: past midnight on the way.
-    sim.SkipToHourOfDay(22.0);
+    sim.SkipToHourOfDay(23.7);
     CHECK(PlanTravel(sim.GetState(), manor->position, TravelDestination::Town).nextDay);
     // Partway along (the gateway), only the rest of the road counts; home to the manor never warns about the store.
-    const Point gateway = road.At(road.FindStop("Gateway")->chainage);
+    const Point gateway = road.At(manor->chainage + 76.0);
     const TravelPlan half = PlanTravel(sim.GetState(), gateway, TravelDestination::Town);
     CHECK(half.ok && half.gameHours < noon.gameHours * 0.7);
     const TravelPlan home = PlanTravel(sim.GetState(), town->position, TravelDestination::Manor);
@@ -761,7 +762,7 @@ void WalkTheRoad()
         && home.arrival.y == manor->arrival.y && home.arrivalZ == manor->arrivalZ);
     CHECK(home.totalMetres > road.WalkMetres(town->chainage, manor->chainage) + 30.0);
     // Off the road: the straight walk back to it counts too, and far off she has to find it herself.
-    const TravelPlan field = PlanTravel(sim.GetState(), {gateway.x + 20000.0, gateway.y}, TravelDestination::Town);
+    const TravelPlan field = PlanTravel(sim.GetState(), {gateway.x + 25000.0, gateway.y}, TravelDestination::Town);
     CHECK(field.ok && field.connectorMetres > 150.0 && field.totalMetres > half.totalMetres);
     CHECK(!PlanTravel(sim.GetState(), {gateway.x + 90000.0, gateway.y}, TravelDestination::Town).ok);
     CHECK(!PlanTravel(sim.GetState(), town->position, TravelDestination::Town).ok);
