@@ -37,9 +37,11 @@ Planner Editing admission additionally requires its new title, description, scre
 identifier-preservation coverage to pass. The pre-existing removed-controls renderer assertion is
 reported separately and does not justify restoring unrelated planner UI.
 
-Travel Rest may append a counted travel-destination-ID save section: Manor remains implicit, and
-legacy saves without the section leave every other destination locked. This does not bump the save
-or bake version. Admit it only after independent save review and non-destructive rejection coverage
-confirm old package readers reject the new tag. Before any promotion, preserve pre-upgrade save
-copies in both the current release and rollback so a downgrade never reads or writes an incompatible
-newer save.
+Travel Rest may append an optional `travel <count> <id>...` section of sorted, unique destination
+IDs 1..6; Manor (0) remains implicit. Missing legacy sections lock every non-Manor destination, and
+malformed or duplicate sections refuse transactionally. This does not bump the save or bake version.
+Admit it only after independent save review and non-destructive rejection coverage confirm old
+package readers reject the unknown tag without overwriting the file. Before promotion, preserve
+pre-upgrade save copies in both the current release and rollback so a downgrade never reads or writes
+an incompatible newer save. Estate `AdvanceGameHours` must not force a zero-energy doze; Sunday wait
+preserves authoritative energy drain and adds no rest grant.
