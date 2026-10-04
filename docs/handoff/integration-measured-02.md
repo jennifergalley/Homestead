@@ -54,6 +54,12 @@ reported separately and does not justify restoring unrelated planner UI.
   released.
 - This slot performed no Unreal, UBT, UAT, Live Coding, package, release, gameplay, or save work.
 
+## HUD selection
+
+HUD owns selected chest-name hint enlargement and concise, non-overlapping resource/refusal/save
+notices. Preserve Travel Rest's first-visit travel notice and Farming Fishing's Plant Seeds hint;
+mine path and building work remain unselected. The lane is held to the active no-compilation rule.
+
 ## Travel Rest checkpoint
 
 - Checkpoint `b37b0070` on `jennifergalley-travel-rest-agent` is pushed but **not admitted**:

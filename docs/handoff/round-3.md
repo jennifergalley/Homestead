@@ -31,6 +31,7 @@ No overnight work/automations, no unselected animation/carry or manor-arrival wo
 | Farming Fishing Agent | `5be207bc-49b1-4a1b-811e-088ae565dc1b` | `jennifergalley-cautious-robot` | measured-02; hands-on slot 1; GPT-6.1 Sol/high/default launch |
 | Travel Rest Agent | `1b0e10a4-09b5-458e-b9de-098cce831b07` | `jennifergalley-miniature-fishstick` | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch |
 | Planner Editing Agent | `ac593377-587f-4319-a033-b17f309be13e` | `jennifergalley-cuddly-eureka` | measured-02; hands-on slot 3; GPT-6.1 Sol/high/default launch |
+| HUD Agent | `2424d5bc-bc5a-4eec-a37f-a2f82cb995d0` | pending lane handoff | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch; selected 2026-10-04 02:19:32Z |
 | Integration Agent (build 02) | `e528fd4a-5aed-4c95-9463-a37941afc00b` | `jennifergalley-studious-goggles` | docs/accounting liaison and admission preflight only until granted hands-on slot; GPT-5.6 Terra/medium/default launch |
 | UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | archived | `440d4de5` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; ui-measured-01.md handoff |
 | Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | archived | `6e9c3a9a` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; town-measured-01.md handoff |

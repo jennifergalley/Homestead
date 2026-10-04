@@ -75,6 +75,18 @@
       "launchContextTier": "default",
       "contextEvidence": "Incomplete handoff snapshot: 44 high-effort calls / 154106870000 nano-AIU plus one missing-effort event 69443 / 7137160000 nano-AIU. Actual runtime context and billing reconciliation are unknown.",
       "boundaryEvidence": "Includes planning, implementation, native checks, one test-fixture failure/retry, and handoff across the three selected feedback items. No helpers or future editor compile/review allocation; later handoff/push calls remain uncaptured."
+    },
+    {
+      "sessionId": "2424d5bc-bc5a-4eec-a37f-a2f82cb995d0",
+      "task": "hud-feedback-bundle",
+      "category": "implementation",
+      "since": "2026-10-04T02:19:32.169Z",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Selection and launch configuration recorded by the coordinator; actual runtime context, app-session identity, helpers, and final usage boundary remain pending lane handoff.",
+      "boundaryEvidence": "Owns selected chest-name hint and HUD-notice unification only. Preserve first-visit travel and Plant Seeds hint behavior; mine path and building work are unselected."
     }
   ]
 }
