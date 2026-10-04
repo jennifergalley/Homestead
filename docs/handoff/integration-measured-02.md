@@ -36,3 +36,10 @@ grant. Shipping FullLoop remains invalid until Estate-adapted.
 Planner Editing admission additionally requires its new title, description, screenshot, and
 identifier-preservation coverage to pass. The pre-existing removed-controls renderer assertion is
 reported separately and does not justify restoring unrelated planner UI.
+
+Travel Rest may append a counted travel-destination-ID save section: Manor remains implicit, and
+legacy saves without the section leave every other destination locked. This does not bump the save
+or bake version. Admit it only after independent save review and non-destructive rejection coverage
+confirm old package readers reject the new tag. Before any promotion, preserve pre-upgrade save
+copies in both the current release and rollback so a downgrade never reads or writes an incompatible
+newer save.
