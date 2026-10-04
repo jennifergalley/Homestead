@@ -185,6 +185,10 @@ It preserves six original meshes, 24 PBR maps, 12 viewed 4K renders, and geometr
 but its head, mouth, and marking realism still needs correction; sixteen dishes and their portions
 remain outstanding. The canonical Blender guide records the live preview remedy: switch from
 `BLENDER_WORKBENCH` to `BLENDER_EEVEE` before requesting material viewport shading.
+Refinement also established that the plain one-lobe prop shader cannot represent the required wet-skin
+film. Farming will add an opt-in fish-only ClearCoat parent and import hook, without changing an
+existing parent; its source bake must preserve the same film. Keep fish import/admission held until
+that ready checkpoint arrives, then verify the new parent compiles during the owned Unreal import.
 
 ### Narrow overnight exception
 

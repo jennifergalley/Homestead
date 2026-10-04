@@ -65,6 +65,7 @@
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
+        "fish-only ClearCoat parent/import hook and compile verification",
         "automated visual acceptance",
         "release save-isolation proof"
       ],
