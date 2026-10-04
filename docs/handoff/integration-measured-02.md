@@ -287,6 +287,13 @@ is recipe-local and does not alter open fish or any shared helper; Potato functi
 from `1cc2911f`. Potato and turnip source work is preserved, but 14 dishes plus realism, baking,
 imagery, and wiring remain. Farming continues authorized slot 2 with an uncertain forecast; no fish
 helper/budget, gameplay/save, or Integration hands-on action changes.
+Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
+penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
+prove complete contact/intersection. Its `53,792/3,976` triangle source, four viewed 4K frames, and
+closed-island/current-shader/copied-source fixtures pass. It remains below the art/import realism bar:
+three source meals are still below that bar and 13 are unstarted. There are no fish
+budget/helper/bake, UE, gameplay, save, or version changes. Farming continues authorized independent
+meal source work.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
