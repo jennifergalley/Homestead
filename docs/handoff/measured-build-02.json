@@ -6,6 +6,20 @@
   "fallbackSlot": "2026-10-04 07:30",
   "fallbackStatus": "target-not-promise",
   "deliveryDecision": "Deferred at 20:49 local on Oct 3. The original 9 PM scope is preserved historically, but the Fishing/Food art set is incomplete and no independently complete Travel/HUD subset has its required runtime, gallery, player, and release-isolation evidence. Do not package a placeholder or unverified candidate tonight; do no overnight/signoff work.",
+  "userDirectedException": {
+    "authorizedAt": "2026-10-03T22:05:00-07:00",
+    "instruction": "Continue the Fishing lane overnight if needed.",
+    "scope": "Farming Fishing only: its existing six-fish refinement, then sixteen original dishes, portions, exports, and wiring.",
+    "grantedSlot": 2,
+    "mode": "autopilot",
+    "constraints": [
+      "No new automations.",
+      "Do not admit or import a WIP checkpoint.",
+      "Integration remains parked for Unreal, build, package, and promotion work.",
+      "Original-art, route-isolation, and release gates remain unchanged.",
+      "The Oct 4 07:30 slot remains a target, not a promise."
+    ]
+  },
   "coordinator": {
     "runtimeSessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
     "model": "gpt-6.1-sol",
@@ -92,7 +106,7 @@
     "model": "gpt-5.6-terra",
     "reasoningEffort": "medium",
     "launchContextTier": "default",
-    "status": "docs/accounting liaison; release-isolation guard and original-pole import evidence completed locally, with no gameplay admission or promotion"
+    "status": "parked for Unreal/build/package/promotion; release-isolation guard and original-pole import evidence completed locally, with no gameplay admission"
   },
   "deliveryRules": [
     "Only verified and reviewed work is admitted; unfinished items move to the fallback slot.",

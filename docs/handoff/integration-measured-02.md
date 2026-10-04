@@ -186,6 +186,15 @@ but its head, mouth, and marking realism still needs correction; sixteen dishes 
 remain outstanding. The canonical Blender guide records the live preview remedy: switch from
 `BLENDER_WORKBENCH` to `BLENDER_EEVEE` before requesting material viewport shading.
 
+### Narrow overnight exception
+
+At 22:05 local on Oct 3, Jenny directly authorized Farming Fishing to continue overnight if needed.
+This supersedes the prior no-overnight parking instruction **only** for that lane's existing scope:
+six-fish refinement, then sixteen original dishes, portions, export, and wiring, in autopilot slot 2.
+It creates no automation and does not authorize WIP import/admission, Integration Unreal/build/package
+work, or any change to the original-art, route-isolation, and release gates. Oct 4 7:30 AM remains a
+target rather than a promise.
+
 ## Bounded current-source runtime evidence
 
 - With Farming's Blender window paused, Integration launched one owned editor at port 8768 with the
