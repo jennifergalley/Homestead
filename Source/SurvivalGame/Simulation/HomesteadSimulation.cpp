@@ -14,6 +14,7 @@
 #include "HomesteadPackRow.h"
 #include "HomesteadSimulationDetail.h"
 #include "HomesteadTravel.h"
+#include "HomesteadTreeFelling.h"
 
 #include <algorithm>
 #include <cctype>
@@ -3183,6 +3184,7 @@ std::string Simulation::Serialize() const
     if (Backpack::HasSaveSection(state_)) Backpack::WriteSaveSection(body, state_);
     Food::WriteSaveSection(body, state_);
     TravelDiscovery::WriteSaveSection(body, state_);
+    TreeFelling::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3457,6 +3459,7 @@ Result Simulation::Deserialize(const std::string& data)
     bool parkedRowsSeen = false;
     bool packSlotsSeen = false;
     bool travelSeen = false;
+    bool felledSeen = false;
     while (!input.eof())
     {
         std::string tag;
@@ -3494,6 +3497,11 @@ Result Simulation::Deserialize(const std::string& data)
         {
             if (travelSeen || !TravelDiscovery::ReadSaveSection(input, candidate)) return invalid();
             travelSeen = true;
+        }
+        else if (tag == TreeFelling::SaveTag)
+        {
+            if (felledSeen || !TreeFelling::ReadSaveSection(input, candidate)) return invalid();
+            felledSeen = true;
         }
         // A section this build doesn't know came from a newer build; it can't be skipped safely.
         else return newer;

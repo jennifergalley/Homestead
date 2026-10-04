@@ -236,6 +236,16 @@ struct UnderbrushEdit
 };
 bool operator<(const UnderbrushEdit& a, const UnderbrushEdit& b);
 
+// A decorative (scenery) tree she has felled, keyed by its trunk position in whole centimetres
+// (HomesteadTreeFelling.h): the game hour it fell and whether it grows back.
+struct FelledTree
+{
+    int xCm = 0;
+    int yCm = 0;
+    double fellHour = 0.0;
+    bool regrows = false;
+};
+
 // A building's own grid, placed anywhere at any heading. Local cell (x, y) spans
 // [x, x + 1] x [y, y + 1] CellSize units from `origin`, turned `yaw` degrees (Unreal yaw: +X toward
 // +Y). Building 0 is the world-aligned grid (origin 0, yaw 0) that every structure used before
@@ -390,6 +400,9 @@ struct State
     double wellFedUntilHour = 0.0;
     // Sorted destination ids beyond the initially visited Manor, in the optional "travel" section.
     std::vector<int> discoveredTravel;
+    // Scenery trees felled with the axe and not yet regrown, sorted by (xCm, yCm), in the optional "felled"
+    // section (HomesteadTreeFelling.h).
+    std::vector<FelledTree> felledTrees;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -605,6 +618,11 @@ public:
     // yield a branch, soft growth yields fiber.
     Result ClearUnderbrush(Generation::ChunkCoord chunk, int index, bool woody, Point plant, Point player);
     bool IsUnderbrushCleared(Generation::ChunkCoord chunk, int index) const;
+    // Fells a decorative scenery tree whose trunk stands at `tree` (HomesteadTreeFelling.cpp); the Unreal
+    // world supplies the position, the rules live there.
+    Result FellSceneryTree(Point tree, Point player);
+    // Why she can't fell it now (no axe, too far, too tired, already down, protected), or ok. Spends nothing.
+    Result CheckFellSceneryTree(Point tree, Point player) const;
     Result Eat(Item item);
     Result EatGroup(int groupId, std::uint64_t expectedRevision);
     Result Craft(Recipe recipe, Point player);

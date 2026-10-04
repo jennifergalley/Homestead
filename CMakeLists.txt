@@ -38,6 +38,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadPackRow.cpp
     Source/SurvivalGame/Simulation/HomesteadEstatePublicRoad.cpp
     Source/SurvivalGame/Simulation/HomesteadTravel.cpp
+    Source/SurvivalGame/Simulation/HomesteadTreeFelling.cpp
     Source/SurvivalGame/Simulation/HomesteadGardenTarget.cpp
     Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.cpp
     Source/SurvivalGame/Simulation/HomesteadCoveRouteKit.cpp)
@@ -210,6 +211,15 @@ else()
     target_compile_options(HomesteadTravelRestTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
 endif()
 add_test(NAME HomesteadTravelRestTests COMMAND HomesteadTravelRestTests)
+
+add_executable(HomesteadTreeFellingTests Tests/HomesteadTreeFellingTests.cpp)
+target_link_libraries(HomesteadTreeFellingTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadTreeFellingTests PRIVATE /W4 /WX /EHs-c-)
+else()
+    target_compile_options(HomesteadTreeFellingTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
+endif()
+add_test(NAME HomesteadTreeFellingTests COMMAND HomesteadTreeFellingTests)
 
 add_executable(HomesteadCoveRouteTests Tests/HomesteadCoveRouteTests.cpp)
 target_link_libraries(HomesteadCoveRouteTests PRIVATE HomesteadSimulation)
