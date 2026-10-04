@@ -318,6 +318,14 @@ geometry, `pcoord`, and material-index fixtures remain identical/current; the pr
 geometry-function ASTs remain unchanged. There is no fish/bake/animation/gameplay/save change.
 Farming's build02 snapshot is provisionally 726 calls (event `71003`), with more than 12 remaining
 source hours plus unknown gates.
+Held source-only checkpoint `c82c482d` preserves original Strawberry Compote, dish, and `15.2` cm
+spoon with frozen copied fixtures and four viewed 4K frames. A local cooked-edge bevel collapsed one
+triangle; recipe-local dissolve of its 10 nm degenerate edge restores unchanged closed/clearance
+bounds. The meal remains molded/raw-looking and **not** art/import-ready. There are seven meal-source
+prototypes, nine unstarted dishes, and zero approvals; old library definitions remain unchanged.
+There is no fish/bake/gameplay/save/UE change. Farming's build02 snapshot is provisionally 759 calls
+(event `71051`); more than 12 source/refinement hours plus unknown gates is not a delivery ETA.
+Farming continues authorized hotpot source work with no Integration hands-on assignment.
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
 prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four
