@@ -45,6 +45,7 @@ Use default context unless the task needs long context; record both configured t
 | --- | --- | --- | --- |
 | Orchestrator Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | long (Jenny requested 1.1M; actual runtime context remains separately observed) |
 | Blender / Unreal **asset making and asset integration only** | Claude Opus 5.5 (`claude-opus-5.5`) | high | default; long only when necessary |
+| Balance Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | default |
 | Gameplay/UI/environment code, general Unreal work, visuals or performance implementation | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
 | Architecture / gameplay or save-format review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
 | Documentation / straightforward status and accounting | GPT-6 Luna (`gpt-6-luna`) or GPT-5.6 Terra (`gpt-5.6-terra`) | low / medium as needed | default |
@@ -54,10 +55,10 @@ Use default context unless the task needs long context; record both configured t
 Integration escalates a failure it can't explain in one attempt to the orchestrator, which assigns it to
 the owning lane rather than having Integration debug gameplay.
 
-Claude Opus 5.5 is not the general implementation tier: only orchestrator launches and Blender/Unreal
-asset creation and asset integration use it. Jenny requested a 1.1M orchestrator context; record that
-request separately from the configured `long` tier and any unknown actual runtime context. These are
-future-launch settings, not a retune of an existing session.
+Claude Opus 5.5 is not the general implementation tier: it is allowed only for the Orchestrator,
+Blender/Unreal asset creation and asset integration, and the Balance Agent. Jenny requested a 1.1M
+orchestrator context; record that request separately from the configured `long` tier and any unknown
+actual runtime context. These are future-launch settings, not a retune of an existing session.
 
 ## Token budget (Jenny, 2026-10-01)
 
@@ -102,6 +103,7 @@ ends its turn; it doesn't hold a slot by sleeping or polling.
 | **Orchestrator** | **Coordinates only** (Jenny's standing preference): plans the round, spawns lane, docs and integration sessions, owns shared interfaces and decisions (such as the save-version bump), forwards lanes' `[ready]`s to the integration session, relays results to Jenny, assigns follow-ups, and reconciles doc conflicts. It **never builds, merges, packages or verifies**: while its turn is busy with hands-on work, queued messages from lanes can't reach it. It ends its turns promptly | The round page's registry; `get_sessions_status` ("Orchestrator Agent") |
 | **Integration session** | Does all hands-on integration: merges the lane work the orchestrator forwards, resolves conflicts, builds, runs native and packaged tests, PIE and perf checks, and **is the only session that packages** (the only one running UAT). Reports `[integrated] <what> @ <sha>` to the orchestrator | The round page's registry ("Integration Agent") |
 | **Docs agent** | Task-scoped session when needed. It receives actionable findings and records each once in the canonical doc, keeps shared skills and setup docs current, and leaves a handoff before replacement | The round page's registry ("Documentation Agent") |
+| **Balance Agent** | Reviews game balance (energy, coins, yields, timers, pacing) and cohesiveness (design, flavor, UI). Its pillar order is cozy casual fun without grinding, then beauty—especially flowers everywhere—then real-world verisimilitude. It does not edit game code and holds no implementer slot. | The round page's registry ("Balance Agent") |
 | **Architecture agent** (code steward) | Task-scoped session for a real refactor or risky review. Owns the assigned architecture or convention change, avoids files another lane is editing, and persists findings and a handoff before replacement. Docs owns process documentation; both keep their assigned changes consistent | The round page's registry ("Architecture agent") |
 | **Disk Cleanup Agent** | Daily 10:00 AM project-storage steward. Removes unnecessary project-owned scratch, renders, test output, stale build staging and excess releases from `C:`/`E:`; Jenny's current save game is the protected boundary. It verifies process paths and shortcut targets before deleting a release, and preserves the current shortcut Shipping target plus one rollback. | The round page's registry ("Disk Cleanup Agent") |
 | **Lanes** | One worktree and one OpenSpec change each. They own the files named in their design's "Lanes and ownership" | The round page's registry |
@@ -229,7 +231,8 @@ UBT mutex (`Result: Failed (ConflictingInstance)`, UAT exit 10) and the shared Z
 
 A lane delivers an increment like this:
 
-1. Implement it, and verify it in your own editor (MCP/PIE).
+1. Consult Balance while planning every new feature for its proposal and numbers. Implement it, and
+   verify it in your own editor (MCP/PIE).
 2. Run the native tests: `Scripts\Test-Native.ps1 -Configuration Release`. Rebase onto `main` first
    and run them again after the rebase. Other lanes' changes can break your tests (a pail added to
    the pack broke a manor chest test). If the breakage comes from an interaction between lanes, say
@@ -257,7 +260,9 @@ A lane delivers an increment like this:
 6. **When Jenny's explicitly flagged items for the current build are done,** end the turn and go
    idle. Do not autonomously take an unflagged queue item. If little or nothing is prioritized, the
    orchestrator asks Jenny to schedule work.
-7. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
+7. Consult Balance again before `[ready]` for final numbers, player-facing copy, and a screenshot.
+   Record Balance's OK in the ready evidence.
+8. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
 
    ```text
    [ready] <lane> — branch <branch> @ <sha> (pushed to main: yes/no)
@@ -284,6 +289,8 @@ orchestrator asks for a playtest build.
 
 Integration merge notes:
 
+- Integration admits gameplay that changes balance or player-visible flavor only when the receipt
+  records Balance's OK.
 - All worktrees share one `.git`, so a lane's local branch can be merged without a push. Lanes
   sometimes rewrite history before pushing (for example ocean `e777db71` became `8a407908`), so
   always merge the exact SHA named in the latest `[ready]`, not the branch tip you saw earlier.

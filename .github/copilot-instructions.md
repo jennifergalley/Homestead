@@ -7,9 +7,23 @@ launches**; documenting them does not change a live session's model or reasoning
 
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
-| Orchestrator Agent | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
+| Orchestrator Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | long (Jenny requested 1.1M; actual runtime context is recorded separately) |
+| Blender / Unreal asset making and asset integration | Claude Opus 5.5 (`claude-opus-5.5`) | high | default; long only when necessary |
+| Balance Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | default |
 | Blender / Unreal work; gameplay, visual or performance implementation and risky review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
 | Documentation, integration / building, scripted tests and accounting | GPT-6 Luna (`gpt-6-luna`), GPT-5.6 Terra (`gpt-5.6-terra`), or GPT-6.1 Sol (`gpt-6.1-sol`) | low / medium as appropriate | default |
+
+Claude Opus 5.5 is allowed only for the Orchestrator, Blender/Unreal asset making and asset
+integration, and Balance. The Balance Agent reviews energy, coins, yields, timers, pacing, design,
+flavor, and UI against cozy casual fun without grinding, then beauty (including flowers everywhere),
+then real-world verisimilitude. It does not edit game code and holds no implementer slot.
+
+## Balance consultation and delivery
+
+Lanes consult Balance while planning every new feature for the proposal and numbers, then again
+before `[ready]` for final numbers, player-facing copy, and a screenshot; the ready evidence records
+Balance's OK. Integration admits gameplay that changes balance or player-visible flavor only when
+the delivery receipt records that OK.
 
 Bias toward fresh task-scoped sessions, retaining an existing session for tightly related follow-ups
 when its working context remains useful. Every session, including the orchestrator, maintains a compact

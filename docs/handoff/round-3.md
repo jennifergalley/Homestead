@@ -29,6 +29,16 @@ for the 4 PM slot. Scope and launch boundaries are in
 [`accounting/afternoon-03-allocation.json`](accounting/afternoon-03-allocation.json). No overnight
 work/automations, no unselected animation/carry, meals, strap, normal-map, mine, or tree work.
 
+### Standing team
+
+| Role | Session | Standing responsibility |
+| --- | --- | --- |
+| Orchestrator | `146ed534-2f78-48ba-b0fc-98436c1f3223` | Coordinates only. |
+| Integration | `64540925-e1b6-4766-ac1f-f2dc42f8aa36` | Integrates, verifies, packages, and promotes releases. |
+| Docs | Task-scoped | Maintains canonical shared documentation and handoffs. |
+| Balance | `81a547cd-0a72-4415-a617-460b5ade5f3c` | Reviews balance and cohesiveness; no game-code edits or implementer slot. |
+| Cleanup | `9fc4e210-68e7-4bc1-acca-d52366894506` | Performs the daily project-storage sweep. |
+
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
 | Orchestrator Agent | runtime `146ed534-2f78-48ba-b0fc-98436c1f3223`; app `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; afternoon-03; GPT-6.1 Sol/high/default |
@@ -36,6 +46,7 @@ work/automations, no unselected animation/carry, meals, strap, normal-map, mine,
 | Gameplay UI Agent | runtime `986d7db6-7ae4-4cee-a980-054664106056`; app `3d3426ed-7f12-4245-ab69-dc66e8698418` | `jennifergalley-miniature-invention` | afternoon-03; hands-on slot 2; GPT-6.1 Sol/high/default |
 | Environment Agent | `ff61de39-9742-45a8-8c6d-03512cd76224` | `jennifergalley-probable-engine` | afternoon-03; hands-on slot 3; GPT-6.1 Sol/high/default |
 | Integration Agent (afternoon-03) | `64540925-e1b6-4766-ac1f-f2dc42f8aa36` | `jennifergalley-integration-agent-8ba` | docs/accounting/preflight only until explicit slot grant; GPT-5.6 Terra/medium/default |
+| Balance Agent | `81a547cd-0a72-4415-a617-460b5ade5f3c` | review-only session | Claude Opus 5.5/high/default; reviews energy, coins, yields, timers, pacing, design, flavor, and UI; no game-code edits or implementer slot |
 | Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |
 | Farming Fishing Agent | `5be207bc-49b1-4a1b-811e-088ae565dc1b` | `jennifergalley-cautious-robot` | measured-02; hands-on slot 1; GPT-6.1 Sol/high/default launch |
 | Travel Rest Agent | `1b0e10a4-09b5-458e-b9de-098cce831b07` | `jennifergalley-miniature-fishstick` | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch |
@@ -82,9 +93,10 @@ integration and test execution. Keep task-scoped handoffs and build-credit attri
 [agent-lifecycle.md](agent-lifecycle.md). Do not infer a live session's settings from this registry.
 
 **2026-10-04 model clarification:** Claude Opus 5.5 / high / long is the future-launch setting for
-the Orchestrator Agent (Jenny requested 1.1M context) and remains the only tier for Blender/Unreal
-asset making and asset integration (long only when necessary there). It is not used for general
-gameplay/UI/environment code, reviews, docs, accounting, or packaging. GPT-6.1 Sol / high remains
+the Orchestrator Agent (Jenny requested 1.1M context). Claude Opus 5.5 / high / default is also
+allowed for Blender/Unreal asset making and asset integration (long only when necessary there) and
+the Balance Agent. It is not used for general gameplay/UI/environment code, reviews other than
+Balance, docs, accounting, or packaging. GPT-6.1 Sol / high remains
 the future-launch configuration for general gameplay/UI/environment code and risky review; routine
 docs, builds, tests and accounting stay on a cheaper low/medium tier. Record the requested 1.1M,
 configured `long`, and actual runtime context separately. This policy does not retune a running

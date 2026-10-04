@@ -4,9 +4,10 @@ Jenny's policy, 2026-10-02. Quality, especially visuals and performance, remains
 AI credits are an additional optimization metric, not permission to lower that gate.
 The role/model table in README.md is authoritative. This policy does not retune an existing session.
 For future launches, Claude Opus 5.5 / high / long is reserved for Orchestrator Agents (Jenny's
-requested context is 1.1M) and for Blender/Unreal asset making and asset integration (long only when
-necessary there). Record the 1.1M request, configured `long` tier, and observed actual runtime
-context as separate facts. Opus is not used for general gameplay/UI/environment code, risky review,
+requested context is 1.1M). Claude Opus 5.5 / high / default is also reserved for Blender/Unreal
+asset making and asset integration (long only when necessary there) and the Balance Agent. Record
+the 1.1M request, configured `long` tier, and observed actual runtime context as separate facts.
+Opus is not used for general gameplay/UI/environment code, risky review other than Balance,
 documentation, accounting, integration, builds, or scripted tests; those use the GPT-6.1 Sol / high
 or cheaper README tiers as appropriate.
 
