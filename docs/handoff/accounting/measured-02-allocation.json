@@ -244,7 +244,7 @@
       "contextTier": null,
       "launchContextTier": "default",
       "contextEvidence": "Current runtime model is observed; reasoning, actual context, and final billing reconciliation remain unknown.",
-      "boundaryEvidence": "One 11m25s fresh Development cook wrote 1,019 tracked assets and was stopped. Jenny-approved reconciliation restored 892 incidental paths and retained 127 admitted asset paths; a 2m31s recook staged Shipping candidate 0D33088B19607142D1A5EB3FC410A499024DE71A3209E8601993ED47ED9171FA. Candidate snapshot/route assertion, two bounded real candidate starts with unchanged candidate/rollback 18-file roots, and guarded EstateSmoke/ToolRepeat passed. Promotion is excluded pending approved persistence for the 127 retained resaves."
+      "boundaryEvidence": "One 11m25s fresh Development cook wrote 1,019 tracked assets and was stopped. Jenny-approved reconciliation restored 892 incidental paths and retained 127 admitted asset paths; a 2m31s recook staged Shipping candidate 0D33088B19607142D1A5EB3FC410A499024DE71A3209E8601993ED47ED9171FA. Candidate snapshot/route assertion and guarded EstateSmoke/ToolRepeat passed. The 127 exact paths were persisted at b073cebe. A normal candidate F5 write changed only candidate Estate/Homestead_Manual.sav, its .bak matched the pre-write payload, F9 reload stayed alive, and protected rollback hashes remained unchanged. The shortcut promotion is included; no protected source/release/rollback cleanup is allocated."
     }
   ]
 }

@@ -560,11 +560,18 @@ assigned.
 - Two bounded, normal candidate launches used its real package-local `-UserDir`. Shipping suppresses
   the requested save-audit log marker, so this is not a synthetic write claim; both processes stayed
   alive until owned shutdown, and post-launch hashes prove both the candidate and protected rollback
-  `SaveGames` trees remain unchanged at 18 files each. The Development-only routing fixture remains
-  the manual/autosave/backup replacement proof because the synthetic writer is compiled out of
-  Shipping.
-- **Promotion hold:** the 127 retained, manifest-approved asset resaves are still uncommitted. They
-  are entirely within the admitted CaughtFish, PreparedFood, FishingPole, and fish material paths,
-  but no shortcut or promotion action may occur until the coordinator/Jenny explicitly chooses their
-  persistent commit/reconciliation path. No protected release, rollback, player save, or shortcut
-  has been modified.
+  `SaveGames` trees remained unchanged at 18 files each.
+- The actual write/load gate then passed against the normal candidate: F5 replaced only
+  `Estate\Homestead_Manual.sav`; its `.bak` exactly matched the pre-write manual-save SHA-256; F9
+  reload stayed alive; the protected rollback root remained hash-identical. This uses the real
+  package-local candidate `-UserDir`, not synthetic Shipping test code.
+- The exact 127-path asset set was persisted at `b073cebe` after count and path verification
+  (30 CaughtFish, 89 PreparedFood, seven FishingPole, and `M_CaughtFishWet`; no incidental or
+  deferred asset). The manifest-bound source now matches the reconciled cook inputs.
+- **Promoted:** `Homestead Estate.lnk` now targets the current candidate executable with canonical
+  package-local `-UserDir`; its icon remains
+  `C:\Users\Jenny\AppData\Local\Homestead\Icons\Homestead.ico,0`. The launch target hash remains
+  `0D33088B19607142D1A5EB3FC410A499024DE71A3209E8601993ED47ED9171FA`.
+  Immediately before promotion, active save files and `GameUserSettings.ini` were copied and
+  hash-checked into the candidate; the active measured01 release and protected rollback remain
+  untouched. Durable promotion and hash receipts are in the Integration E: reconciliation scratch.
