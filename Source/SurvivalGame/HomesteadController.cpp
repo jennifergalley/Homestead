@@ -527,6 +527,7 @@ void AHomesteadController::Tick(float DeltaSeconds)
         bWorldReady = Landscape->Refresh(Sim);
         if (!bWorldReady) { Notify(TEXT("World refresh failed. Movement is disabled; existing saves are retained."), true); return; }
         UpdateFocus();
+        TickTravelDiscovery();
         RefreshRemaining = 0.25f;
     }
     if (bWorldReady && !bPendingSpawn && !IsFailed())

@@ -14,6 +14,31 @@ bool AHomesteadController::CanSetOut() const
     return Cast<AHomesteadCharacter>(GetPawn()) && bWorldReady && !bPendingSpawn && !bPendingGroundSnap;
 }
 
+void AHomesteadController::TickTravelDiscovery()
+{
+    if (!CanSetOut() || !State().fixedEstate || IsFailed() || bBookOpen || bPlanning
+        || HasNativeMenu() || IsNewGameSetup() || IsNamingSetup() || ShopScreen.IsValid()) return;
+    const Homestead::Point At = PlayerPoint();
+    for (int32 Index = 1; Index < Homestead::TravelDestinationCount; ++Index)
+    {
+        const auto Destination = static_cast<Homestead::TravelDestination>(Index);
+        if (Homestead::IsTravelUnlocked(State(), Destination) || !Homestead::TravelVisitNear(At, Destination, Sim.Layout())) continue;
+        const auto Result = Sim.DiscoverTravel(Destination, At);
+        if (!Result.ok) { Notify(Result); return; }
+        PendingTravelNotices.Add(Destination);
+        UE_LOG(LogHomesteadTravel, Log, TEXT("%s"), UTF8_TO_TCHAR(Result.message.c_str()));
+    }
+    // Town and its store may be discovered together. Keep both notices instead of replacing one.
+    while (ToastRemaining <= 0.0f && !PendingTravelNotices.IsEmpty())
+    {
+        const auto Destination = PendingTravelNotices[0];
+        PendingTravelNotices.RemoveAt(0);
+        if (Homestead::IsTravelUnlocked(State(), Destination))
+            Notify(FString::Printf(TEXT("Fast Travel Destination Unlocked: %s"),
+                UTF8_TO_TCHAR(Homestead::TravelDestinationLabel(Destination))), false);
+    }
+}
+
 Homestead::TravelPlan AHomesteadController::MenuPlanTravel(Homestead::TravelDestination Destination) const
 {
     return Homestead::PlanTravel(State(), PlayerPoint(), Destination, Sim.Layout());

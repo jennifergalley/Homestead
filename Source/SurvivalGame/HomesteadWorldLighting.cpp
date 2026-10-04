@@ -2,6 +2,7 @@
 #include "HomesteadWorldLog.h"
 #include "HomesteadWeather.h"
 #include "Simulation/HomesteadNightLight.h"
+#include "Simulation/HomesteadDaylight.h"
 
 #include "Camera/PlayerCameraManager.h"
 #include "Components/DirectionalLightComponent.h"
@@ -125,8 +126,7 @@ void AHomesteadWorld::BuildLighting()
 void AHomesteadWorld::UpdateLighting(const Homestead::State& State)
 {
     const float Hour = static_cast<float>(FMath::Fmod(State.hour, 24.0));
-    const float SolarAngle = (Hour - 6.0f) / 24.0f * 2.0f * PI;
-    const float Elevation = FMath::Sin(SolarAngle);
+    const float Elevation = static_cast<float>(Homestead::Daylight::SolarElevation(Hour));
     const float Daylight = FMath::SmoothStep(-0.1f, 0.25f, Elevation);
     // The simulation's rain spells (Simulation/HomesteadRain.h): cloud builds before each and clears after
     // it (Homestead::Overcast), the rain swells and eases (Homestead::RainAmount), at any hour.

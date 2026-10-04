@@ -106,8 +106,10 @@ double HoursUntilOpen(const Shop& shop, double hour)
 bool CanWaitForShop(const Shop& shop, double hour)
 {
     if (!std::isfinite(hour) || IsShopOpen(shop, hour)) return false;
-    // Only the ordinary night's closure (closing to opening, 14 h): never through a closed day's hours.
-    return HoursUntilOpen(shop, hour) <= 24.0 - (shop.closeHour - shop.openHour) + 1e-6;
+    const double wait = HoursUntilOpen(shop, hour);
+    if (wait <= 0.0) return false;
+    return (shop.kind == ShopKind::GeneralStore && !IsShopDay(hour))
+        || wait <= 24.0 - (shop.closeHour - shop.openHour) + 1e-6;
 }
 
 std::string FormatHour(double hour)
@@ -264,7 +266,6 @@ Result Simulation::WaitForShop(int shopId, Point player)
     if (!shop) return ShopBad("There is no such shop.", revision_);
     const std::string name = ShopDisplayName(shop->kind);
     if (IsShopOpen(*shop, state_.hour)) return ShopBad("The " + ToLowerAscii(name) + " is open now.", revision_);
-    // No waiting out a whole closed day in the street: only the ordinary night's closure.
     if (!CanWaitForShop(*shop, state_.hour))
     {
         const double next = NextShopOpening(*shop, state_.hour);
@@ -275,6 +276,7 @@ Result Simulation::WaitForShop(int shopId, Point player)
     if (!std::isfinite(player.x) || !std::isfinite(player.y)
         || std::hypot(player.x - shop->counterX, player.y - shop->counterY) > ShopWaitReach)
         return ShopBad("Wait by the shop's door.", revision_);
+    const double opening = NextShopOpening(*shop, state_.hour);
     const double openHour = shop->openHour;
     // A hair past the hour, so the step boundaries can't leave the clock a rounding error short.
     const double hours = HoursUntilOpen(*shop, state_.hour) + 1e-6;
@@ -292,12 +294,13 @@ Result Simulation::WaitForShop(int shopId, Point player)
     if (trial.state_.hour < state_.hour + hours - 1e-3)
         return ShopBad("The calendar has reached its supported limit.", revision_);
     // The ordinary passage of time: crops, weather, fires, vitals and the morning sell-down all run.
-    AdvanceGameHours(hours, player);
+    const Shop* opened = trial.FindShop(shopId);
+    if (!opened || !IsShopOpen(*opened, trial.state_.hour))
+        return ShopBad("The shop won't be open then.", revision_, ResultCode::Unavailable);
+    *this = std::move(trial);
     ++revision_;
-    const Shop* opened = FindShop(shopId);
-    if (!opened || !IsShopOpen(*opened, state_.hour))
-        return ShopBad("You waited, but the " + ToLowerAscii(name) + " is still closed.", revision_, ResultCode::Unavailable);
-    return ShopGood("You wait by the door until " + FormatHour(openHour) + ". The " + ToLowerAscii(name) + " is open.", revision_);
+    return ShopGood(std::string("It's ") + Calendar::WeekdayName(Calendar::DateAt(opening).weekday)
+        + " " + FormatHour(opening) + ". The " + ToLowerAscii(name) + " is open.", revision_);
 }
 
 Result Simulation::GreetShopkeeper(int shopId)

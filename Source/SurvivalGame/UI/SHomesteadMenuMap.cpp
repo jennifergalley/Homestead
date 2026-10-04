@@ -22,7 +22,12 @@ TOptional<Homestead::TravelDestination> SHomesteadMenu::MapTravelDestination() c
     const TOptional<EHomesteadMapGlyph> Glyph = MapView ? MapView->SelectedGlyph() : TOptional<EHomesteadMapGlyph>();
     if (!Glyph) return {};
     if (*Glyph == EHomesteadMapGlyph::Manor) return Homestead::TravelDestination::Manor;
-    if (*Glyph == EHomesteadMapGlyph::Town || *Glyph == EHomesteadMapGlyph::Store) return Homestead::TravelDestination::Town;
+    if (*Glyph == EHomesteadMapGlyph::Town) return Homestead::TravelDestination::Town;
+    if (*Glyph == EHomesteadMapGlyph::Mine) return Homestead::TravelDestination::Mine;
+    if (*Glyph == EHomesteadMapGlyph::Cove) return Homestead::TravelDestination::Cove;
+    if (*Glyph == EHomesteadMapGlyph::Mill) return Homestead::TravelDestination::Mill;
+    if (*Glyph == EHomesteadMapGlyph::Gateway) return Homestead::TravelDestination::Gateway;
+    if (*Glyph == EHomesteadMapGlyph::Store) return Homestead::TravelDestination::Store;
     return {};
 }
 
@@ -48,7 +53,7 @@ void SHomesteadMenu::OpenTravelPrompt(Homestead::TravelDestination Destination)
     }
     const uint64 Revision = Controller->Simulation().GetRevision();
     PopupOptions.Reset();
-    PopupTitle = Destination == Homestead::TravelDestination::Manor ? TEXT("Walk home to the manor?") : TEXT("Walk into town?");
+    PopupTitle = FString::Printf(TEXT("Walk to %s?"), UTF8_TO_TCHAR(Homestead::TravelDestinationName(Destination)));
     PopupBody = UTF8_TO_TCHAR(Plan.summary.c_str());
     PopupOptions.Add({[]() { return FString(TEXT("Set off")); },
         [this, Destination, Revision]() { Controller->MenuTravel(Destination, Revision); }, nullptr});
@@ -80,6 +85,7 @@ void SHomesteadMenu::OpenSignTravelPrompt(const FString& SignWords, const TArray
         const Homestead::TravelPlan Plan = Controller->MenuPlanTravel(Destination);
         const FString Where = UTF8_TO_TCHAR(Homestead::TravelDestinationName(Destination));
         if (Plan.ok) Lines.Add(UTF8_TO_TCHAR(Plan.summary.c_str()));
+        else Lines.Add(FString::Printf(TEXT("%s: %s"), *Where, UTF8_TO_TCHAR(Plan.error.c_str())));
         PopupOptions.Add({[Where, Plan]()
             {
                 return Plan.ok ? FString::Printf(TEXT("Walk to %s (%s)"), *Where, UTF8_TO_TCHAR(Homestead::FormatWalkDuration(Plan.gameHours).c_str()))

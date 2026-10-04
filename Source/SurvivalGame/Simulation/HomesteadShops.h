@@ -63,8 +63,7 @@ bool IsShopOpen(const Shop& shop, double hour);
 double NextShopOpening(const Shop& shop, double hour);
 // Hours from `hour` until the shop next opens; 0 while it's open.
 double HoursUntilOpen(const Shop& shop, double hour);
-// Whether she may wait by the door for it to open: only through the ordinary night's closure (closing to
-// opening), never through a closed day's hours (Simulation::WaitForShop refuses, naming the day it opens).
+// Ordinary overnight waiting, and a Sunday wait until Monday morning opening.
 bool CanWaitForShop(const Shop& shop, double hour);
 // How near the shop (its counter) she must be to wait for it to open, in cm: the door and the
 // street outside it.

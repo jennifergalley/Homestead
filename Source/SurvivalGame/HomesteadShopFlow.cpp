@@ -245,9 +245,11 @@ FString AHomesteadController::StoreFocusActions() const
     const FString A = bGamepad ? TEXT("[A]") : TEXT("[E]");
     if (Focus == EFocus::StoreDoor)
     {
-        // Across a closed day there's no waiting at the door: just when it opens.
         if (!Homestead::CanWaitForShop(*Shop, State().hour)) return ShopText(Homestead::ClosedMessage(*Shop, State().hour));
-        const FString Opens = ShopText(Homestead::FormatHour(Shop->openHour));
+        const double Opening = Homestead::NextShopOpening(*Shop, State().hour);
+        const FString Opens = (!Homestead::IsShopDay(State().hour)
+            ? ShopText(Homestead::Calendar::WeekdayName(Homestead::Calendar::DateAt(Opening).weekday)) + TEXT(" ")
+            : FString()) + ShopText(Homestead::FormatHour(Opening));
         const double Wait = Homestead::HoursUntilOpen(*Shop, State().hour);
         // Past midnight is a night out in the street; say so before she agrees.
         const bool bOvernight = FMath::Fmod(State().hour, 24.0) + Wait >= 24.0;
@@ -268,7 +270,6 @@ void AHomesteadController::InteractWithStore()
     if (Focus == EFocus::StoreDoor || !Homestead::IsShopOpen(*Shop, State().hour))
     {
         if (Focus != EFocus::StoreDoor) { Notify(ShopText(Homestead::ClosedMessage(*Shop, State().hour)), true); return; }
-        // Nothing to wait for across a closed day: E says when it opens (WaitForShop's refusal).
         if (!Homestead::CanWaitForShop(*Shop, State().hour))
         {
             WaitShopId = INDEX_NONE;
@@ -288,7 +289,12 @@ void AHomesteadController::InteractWithStore()
         WaitShopId = INDEX_NONE;
         const auto Result = Sim.WaitForShop(ShopId, PlayerPoint());
         Notify(ShopText(Result.message), !Result.ok);
-        if (Result.ok) UE_LOG(LogHomesteadShop, Log, TEXT("Waited for shop %d; now hour %.2f."), ShopId, State().hour);
+        if (Result.ok)
+        {
+            TickStores(0.0f);
+            UpdateFocus();
+            UE_LOG(LogHomesteadShop, Log, TEXT("Waited for shop %d; now hour %.2f."), ShopId, State().hour);
+        }
         return;
     }
     OpenShopScreen(Shop->id);

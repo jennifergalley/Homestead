@@ -1,10 +1,33 @@
 #include "HomesteadBed.h"
+#include "HomesteadFood.h"
 
 #include <algorithm>
 #include <cmath>
 
 namespace Homestead
 {
+std::optional<SleepOption> BedSleepOption(double hour, double energy, double sunrise, double sunset)
+{
+    if (!std::isfinite(hour) || !std::isfinite(energy) || hour < 0.0 || energy < 0.0 || energy > 100.0
+        || !std::isfinite(sunrise) || !std::isfinite(sunset) || sunrise <= 0.0 || sunset >= 24.0
+        || sunrise >= sunset)
+        return std::nullopt;
+    const double morning = std::min(Daylight::MorningSleepHour, sunrise);
+    const double evening = std::min(Daylight::EveningSleepHour, sunset);
+    double current = std::fmod(hour, 24.0);
+    if (std::abs(current - morning) < Exertion::MinDawnSleepHours) current = morning;
+    if (current >= evening || current < morning)
+    {
+        const double hours = std::fmod(morning - current + 48.0, 24.0);
+        if (hours < Exertion::MinDawnSleepHours) return std::nullopt;
+        return SleepOption{SleepChoice::UntilMorning, hours, morning};
+    }
+    if (energy >= Food::FullEnergyAt) return std::nullopt;
+    const double hours = std::clamp(std::ceil((100.0 - energy) / Exertion::SleepPerHour * 4.0 - 1e-9) / 4.0,
+        Exertion::MinRestHours, Exertion::MaxRestHours);
+    return SleepOption{SleepChoice::UntilRested, hours, std::fmod(current + hours, 24.0)};
+}
+
 namespace BedAim
 {
 constexpr double CoarseReachCm = 300.0; // The 90 cm edge reach plus the bed's offset and half extents.

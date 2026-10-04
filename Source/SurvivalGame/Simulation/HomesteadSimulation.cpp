@@ -11,6 +11,7 @@
 #include "HomesteadOvergrowth.h"
 #include "HomesteadPackRow.h"
 #include "HomesteadSimulationDetail.h"
+#include "HomesteadTravel.h"
 
 #include <algorithm>
 #include <cctype>
@@ -1136,26 +1137,6 @@ bool FootprintsOverlap(const Footprint& a, const Footprint& b)
         if (std::abs(delta.x * axis.x + delta.y * axis.y) >= radius(a, axis) + radius(b, axis)) return false;
     return true;
 }
-std::optional<SleepOption> BedSleepOption(double hour, double energy)
-{
-    if (!std::isfinite(hour) || !std::isfinite(energy) || hour < 0.0 || energy < 0.0 || energy > 100.0)
-        return std::nullopt;
-    double current = std::fmod(hour, 24.0);
-    if (std::abs(current - MorningWakeHour) < 1e-6) current = MorningWakeHour;
-    const bool night = current >= 18.0 || current < MorningWakeHour;
-    const double toMorning = night ? std::fmod(MorningWakeHour - current + 48.0, 24.0) : 0.0;
-    if (energy >= Food::FullEnergyAt)
-        return night && toMorning >= Exertion::MinDawnSleepHours
-            ? std::optional<SleepOption>{{SleepChoice::UntilMorning, toMorning, MorningWakeHour}}
-            : std::nullopt;
-    const double deficit = 100.0 - energy;
-    const double rest = Clamp(std::ceil(deficit / Exertion::SleepPerHour * 4.0 - 1e-9) / 4.0,
-        Exertion::MinRestHours, Exertion::MaxRestHours);
-    const double hours = night ? std::min(rest, toMorning) : rest;
-    if (hours < Exertion::MinDawnSleepHours) return std::nullopt;
-    return SleepOption{SleepChoice::UntilRested, hours, std::fmod(current + hours, 24.0)};
-}
-
 Simulation::Simulation() { NewGame(); }
 
 namespace
@@ -3068,12 +3049,10 @@ Result Simulation::Sleep(double hours, Point player, Point facing, bool dawnLimi
     if (state_.failed) return Failed();
     if (!FiniteRange(hours, Exertion::MinRestHours, 12.0))
     {
-        const double current = std::fmod(state_.hour, 24.0);
-        const double wake = std::fmod(state_.hour + hours, 24.0);
-        const bool shortDawn = dawnLimited && FiniteRange(hours, Exertion::MinDawnSleepHours, Exertion::MinRestHours)
-            && (current >= 18.0 || current < MorningWakeHour)
-            && std::abs(wake - MorningWakeHour) < 1e-6;
-        if (!shortDawn) return Bad(dawnLimited ? "A short sleep must end at 06:00."
+        const auto offer = BedSleepOption(state_.hour, state_.energy);
+        const bool untilDawn = dawnLimited && std::isfinite(hours) && offer
+            && offer->choice == SleepChoice::UntilMorning && std::abs(hours - offer->hours) < 1e-9;
+        if (!untilDawn) return Bad(dawnLimited ? "Sleep must end at dawn."
             : "Choose between a quarter hour and twelve hours of sleep.");
     }
     if (ReachableBed(state_, player, facing) == -1) return Bad("Place a bed and move beside it before sleeping.");
@@ -3158,6 +3137,7 @@ std::string Simulation::Serialize() const
     if (Chests::HasSaveSection(state_)) Chests::WriteSaveSection(body, state_);
     if (Backpack::HasSaveSection(state_)) Backpack::WriteSaveSection(body, state_);
     Food::WriteSaveSection(body, state_);
+    TravelDiscovery::WriteSaveSection(body, state_);
     const std::string payload = body.str();
     std::ostringstream output;
     output.imbue(std::locale::classic());
@@ -3431,6 +3411,7 @@ Result Simulation::Deserialize(const std::string& data)
     // Optional tagged trailing sections, each introduced by its tag word.
     bool parkedRowsSeen = false;
     bool packSlotsSeen = false;
+    bool travelSeen = false;
     while (!input.eof())
     {
         std::string tag;
@@ -3464,6 +3445,11 @@ Result Simulation::Deserialize(const std::string& data)
         else if (tag == Chests::SaveTag) { if (!Chests::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Backpack::SaveTag) { if (!Backpack::ReadSaveSection(input, candidate)) return invalid(); }
         else if (tag == Food::SaveTag) { if (!Food::ReadSaveSection(input, candidate)) return invalid(); }
+        else if (tag == TravelDiscovery::SaveTag)
+        {
+            if (travelSeen || !TravelDiscovery::ReadSaveSection(input, candidate)) return invalid();
+            travelSeen = true;
+        }
         // A section this build doesn't know came from a newer build; it can't be skipped safely.
         else return newer;
         input >> std::ws;
