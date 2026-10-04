@@ -16,7 +16,7 @@ public:
     void Construct(const FArguments& Args);
     static FBox2D LogicalBox(float ViewWidth);
     static constexpr float Width = 520.0f;
-    static constexpr float Height = 200.0f;
+    static constexpr float Height = 270.0f;
     static constexpr float Bottom = 180.0f;
 private:
     TWeakObjectPtr<AHomesteadController> Controller;
