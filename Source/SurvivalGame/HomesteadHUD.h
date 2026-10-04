@@ -54,6 +54,8 @@ private:
     TArray<FString> WrappedLines(const FString& Text, float Width, float Size);
     void Wrap(const FString& Text, float X, float Y, float Width, float Size, FLinearColor Color, int MaxLines = 3);
     void Panel(float X, float Y, float Width, float Height, FLinearColor Color);
+    // The shared ornate frame (UI/HomesteadFrameStyle.h) over a plate already drawn at this box.
+    void DrawFrame(float X, float Y, float Width, float Height);
     // The calendar: a sun/moon dial for the time of day, "Spring / Day 2", the 12-hour time and a weather icon.
     void DrawCalendar(const AHomesteadController& PC, float X, float Y);
     // Procedural icon primitives in HUD units (scaled by UiScale).

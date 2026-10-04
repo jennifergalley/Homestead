@@ -5,6 +5,8 @@
 #include "HomesteadMapComponent.h"
 #include "UI/HomesteadNoticeStyle.h"
 #include "UI/HomesteadHudNoticeLayout.h"
+#include "UI/HomesteadFrameStyle.h"
+#include "UI/HomesteadPalette.h"
 #include "UI/SHomesteadVitals.h"
 #include "UI/SHomesteadArrival.h"
 #include "Fonts/FontMeasure.h"
@@ -101,6 +103,13 @@ void AHomesteadHUD::Write(const FString& Text, float X, float Y, float Size, FLi
 void AHomesteadHUD::Panel(float X, float Y, float Width, float Height, FLinearColor Color)
 {
     DrawRect(Color, X * UiScale, Y * UiScale, Width * UiScale, Height * UiScale);
+}
+
+void AHomesteadHUD::DrawFrame(float X, float Y, float Width, float Height)
+{
+    HomesteadFrameStyle::ForEachRect(Width, Height,
+        [this, X, Y](HomesteadFrameStyle::EPart Part, float PartX, float PartY, float PartW, float PartH)
+        { Panel(X + PartX, Y + PartY, PartW, PartH, HomesteadFrameStyle::ColorOf(Part)); });
 }
 
 namespace
@@ -258,6 +267,7 @@ void AHomesteadHUD::DrawCalendar(const AHomesteadController& PC, float X, float 
     else if (bNight) MoonIcon(IconX, IconY, 11, MoonCream, Solid);
     else SunIcon(IconX, IconY, 9, HudGold);
     Write(bRain ? TEXT("Rain") : bNight ? TEXT("Clear") : TEXT("Sunny"), IconX + 28, Y + 56, 21, Muted);
+    DrawFrame(X, Y, Width, Height);
 }
 
 TArray<FString> AHomesteadHUD::WrappedLines(const FString& Text, float Width, float Size)
@@ -365,6 +375,7 @@ void AHomesteadHUD::DrawHUD()
         if (PC->IsPlanning())
         {
             Panel(X, ViewHeight - 262, Width, 132, Pine);
+            DrawFrame(X, ViewHeight - 262, Width, 132);
             ProtectFeedback(TEXT("planning-panel"), X, ViewHeight - 262, Width, 132);
             Wrap(PC->PlacementLabel(), X + 22, ViewHeight - 249, Width - 44, 24, Ink, 1);
             Wrap(PC->PlacementStatus(), X + 22, ViewHeight - 217, Width - 44, 21, PC->IsPlacementValid() ? Muted : HudWarning, 2);
@@ -399,6 +410,7 @@ void AHomesteadHUD::DrawHUD()
                 : FString::Printf(TEXT("[I] Field book   [C] Craft   [B] Build   [Shift] %s   Wheel: tool   Ctrl+wheel: zoom"), Sprint);
             const float HintsWidth = FMath::Max(120.0f, FMath::Min(TextWidth(Hints, 19) + 26, CalendarX - 16 - 30));
             Panel(30, 26, HintsWidth, 46, Pine);
+            DrawFrame(30, 26, HintsWidth, 46);
             Write(Hints, 42, 38, 19, Ink);
         }
     }
@@ -461,8 +473,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     constexpr float TitleGap = 6, RowGap = 10;
     const auto KeyWidth = [this](const FString& Key) { bNoticeText = false; const float W = TextWidth(Key, KeySize); bNoticeText = bThemeSerif; return W; };
     const auto WordsWidth = [this](const FString& Words, float WordsSize) { bNoticeText = true; const float W = TextWidth(Words, WordsSize); bNoticeText = bThemeSerif; return W; };
-    // Key and pad glyphs: a stamp in the crisp sans (pine and brass on the light card, gilt and umber on the dark).
-    const FLinearColor KeyStamp = HomesteadNoticeStyle::KeyStamp(), KeyLetter = HomesteadNoticeStyle::KeyLetter();
+    // Key and pad glyphs: an ink keycap in the crisp sans (HomesteadPalette::Keycap*).
     const float ContentWidth = NoticeMaxWidth(PC) - HudNoticeLayout::PadX * 2 - 2;
     const float VerbLine = FMath::Max(Size, static_cast<float>(HudNoticeFont::Measure(TEXT("Ag"), Size, UiScale).Y));
     const bool bChest = PC.IsChestFocused();
@@ -531,10 +542,14 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
             if (Cue.BadgeWidth > 0)
             {
                 const float LetterWidth = KeyWidth(Cue.Key);
-                Panel(X, Y + (Row.Height - BadgeH) * 0.5f, Cue.BadgeWidth, BadgeH, KeyStamp);
+                // An ink keycap: ink rim, a deeper lower edge for the bevel, then the paper face.
+                const float CapY = Y + (Row.Height - BadgeH) * 0.5f;
+                Panel(X, CapY, Cue.BadgeWidth, BadgeH, HomesteadPalette::KeycapInk);
+                Panel(X + 1, CapY + 1, Cue.BadgeWidth - 2, BadgeH - 2, HomesteadPalette::KeycapBevel);
+                Panel(X + 1, CapY + 1, Cue.BadgeWidth - 2, BadgeH - 4, HomesteadPalette::KeycapPaper);
                 bNoticeText = false;
                 Write(Cue.Key, X + (Cue.BadgeWidth - LetterWidth) * 0.5f,
-                    Y + (Row.Height - KeySize) * 0.5f - 1, KeySize, KeyLetter);
+                    Y + (Row.Height - KeySize) * 0.5f - 2, KeySize, HomesteadPalette::KeycapInk);
                 bNoticeText = bThemeSerif;
                 X += Cue.BadgeWidth + Space;
             }
@@ -582,6 +597,7 @@ void AHomesteadHUD::DrawBook(const AHomesteadController& PC)
     BookMeasurements.Reset();
     MeasureBookLine(PC.BookTitle(), Width - 423, 38, TEXT("title"));
     Panel(X, Y, Width, Height, Pine);
+    DrawFrame(X, Y, Width, Height);
     ProtectFeedback(TEXT("book-panel"), X, Y, Width, Height);
     Write(PC.BookTitle(), X + 34, Y + 24, 38, Ink);
     const FString Capacity = FString::Printf(TEXT("Carried %d / %d  |  World paused"), PC.Simulation().UsedCapacity(), PC.Simulation().PackCapacity());
@@ -646,6 +662,7 @@ void AHomesteadHUD::DrawAppearanceBook(const AHomesteadController& PC)
     const float Width = FMath::Min(500.0f, ViewWidth * 0.35f);
     const float Height = FMath::Min(790.0f, ViewHeight - Y - 35);
     Panel(X, Y, Width, Height, Pine);
+    DrawFrame(X, Y, Width, Height);
     ProtectFeedback(TEXT("look-panel"), X, Y, Width, Height);
     Write(TEXT("Your look"), X + 28, Y + 24, 35, Ink);
     Write(PC.HasHeroine() ? TEXT("An early, editable heroine") : TEXT("Character assets unavailable"),

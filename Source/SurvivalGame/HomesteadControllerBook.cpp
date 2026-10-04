@@ -188,7 +188,7 @@ TArray<FHomesteadRow> AHomesteadController::Rows() const
             const FString Action = InPack && Edible(Item) ? TEXT("eat 1")
                 : InChest ? TEXT("take 1") : TEXT("");
             const FString Detail = !InPack ? TEXT("Stored nearby, not carried. Take one into your pack.")
-                : Edible(Item) ? TEXT("Food - eat one from your pack.")
+                : Edible(Item) ? TEXT("Food \u2013 eat one from your pack.")
                 : TEXT("Used in the world or in recipes.");
             const FString Label = Chest
                 ? FString::Printf(TEXT("%s  |  Carried: %d  |  Chest: %d"), *Text(Homestead::ItemName(Item)), InPack, InChest)

@@ -1,5 +1,6 @@
 #include "SHomesteadMenuPrivate.h"
 #include "HomesteadUITheme.h"
+#include "SHomesteadMark.h"
 
 namespace HomesteadMenus
 {
@@ -116,9 +117,8 @@ TSharedRef<SWidget> SHomesteadMenu::BuildDetails()
                         [ SNew(STextBlock).Text(FText::FromString(Status)).ColorAndOpacity(Ink)
                             .Font(HomesteadUITheme::Font("Regular", 16)) ]
                         + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
-                        [ SNew(STextBlock).Text(FText::FromString(Met ? TEXT("[+]") : TEXT("[-]")))
-                            .ColorAndOpacity(Met ? FLinearColor(MenuDetailStyle::MetMark) : FLinearColor(MenuDetailStyle::MissingMark))
-                            .Font(HomesteadUITheme::Font("Bold", 16)) ]
+                        [ SNew(SHomesteadMark).Met(Met)
+                            .Color(Met ? FLinearColor(MenuDetailStyle::MetMark) : FLinearColor(MenuDetailStyle::MissingMark)) ]
                     ]
                     + SVerticalBox::Slot().AutoHeight()
                     [

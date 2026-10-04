@@ -68,8 +68,8 @@ bool CanWaitForShop(const Shop& shop, double hour);
 // How near the shop (its counter) she must be to wait for it to open, in cm: the door and the
 // street outside it.
 constexpr double ShopWaitReach = 1500.0;
-// "Closed - opens at 8 AM"; "Closed - opens Monday at 8 AM" past a closed day; on one,
-// "Closed today (Sunday) - opens Monday at 8 AM".
+// "Closed <en dash> opens at 8 AM"; "Closed <en dash> opens Monday at 8 AM" past a closed day; on one,
+// "Closed today (Sunday) <en dash> opens Monday at 8 AM".
 std::string ClosedMessage(const Shop& shop, double hour);
 // The board hung on the shut door: "CLOSED\nopens at 8 AM", "CLOSED\nopens Mon 8 AM", "CLOSED\non Sundays".
 std::string ClosedSignText(const Shop& shop, double hour);

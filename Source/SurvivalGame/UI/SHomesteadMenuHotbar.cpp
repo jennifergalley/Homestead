@@ -5,6 +5,7 @@
 // merges, onto anything else the two swap (HomesteadControllerHotbarEditor.cpp).
 #include "SHomesteadMenuPrivate.h"
 #include "HomesteadUITheme.h"
+#include "SHomesteadKeycap.h"
 #include "../Simulation/HomesteadHotbarLayout.h"
 #include "../Simulation/HomesteadPackRow.h"
 
@@ -172,12 +173,9 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar(bool bGridRow)
                         })
                     ]
                 ]
-                + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(5, 3, 0, 0)
+                + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(3, 2, 0, 0)
                 [
-                    SNew(STextBlock).Text(FText::FromString(UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str())))
-                    .Font(HomesteadUITheme::KeyFont("Bold", 13))
-                    .ColorAndOpacity_Lambda([this, Slot]() { return FSlateColor(IsHotbarDropTarget(Slot) || (Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot) ? PineInk : Ink); })
-                    .Visibility(EVisibility::HitTestInvisible)
+                    Keycap::Make(FText::FromString(UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(Slot).c_str())), 12)
                 ]
                 + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(0, 0, 5, 2)
                 [

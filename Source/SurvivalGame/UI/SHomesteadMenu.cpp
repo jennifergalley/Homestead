@@ -1,5 +1,7 @@
 #include "SHomesteadMenu.h"
 #include "HomesteadUITheme.h"
+#include "SHomesteadFrame.h"
+#include "../HomesteadController.h"
 #include "SHomesteadMenuPrivate.h"
 
 namespace HomesteadMenus
@@ -60,6 +62,12 @@ void SHomesteadMenu::BuildFrame()
                         ]
                     ]
                         + SOverlay::Slot()[ SAssignNew(ModalHost, SBox).Visibility(EVisibility::Collapsed) ]
+                        // The shared ornate frame around the page (the appearance book paints its own on the Canvas).
+                        + SOverlay::Slot().Padding(6)
+                        [
+                            SNew(SHomesteadFrame)
+                            .Visibility_Lambda([this]() { return SeenPage == 6 ? EVisibility::Collapsed : EVisibility::HitTestInvisible; })
+                        ]
                         // Notices: a small card over the page that never takes focus, clicks or layout space.
                         + SOverlay::Slot().Expose(NoticeSlot).HAlign(HAlign_Center).VAlign(VAlign_Bottom)
                             .Padding(0, 0, 0, MenuNoticeStyle::BottomInset)
@@ -139,10 +147,12 @@ void SHomesteadMenu::BuildFrame()
             {
                 if (!Controller.IsValid()) return FText();
                 const double Hour = FMath::Fmod(Controller->State().hour, 24.0);
-                return FText::FromString(FString::Printf(TEXT("%s / Day %d\n%02d:%02d  %s"),
-                    UTF8_TO_TCHAR(Controller->Simulation().SeasonName()), Controller->Simulation().DayNumber(),
+                // The HUD's date and weather words ("Mon, Spring 1", "Sunny" by day, "Clear" at night).
+                const bool bNight = Controller->Simulation().IsNight();
+                return FText::FromString(FString::Printf(TEXT("%s\n%02d:%02d  %s"),
+                    UTF8_TO_TCHAR(Homestead::Calendar::ShortDate(Controller->Simulation().Today()).c_str()),
                     FMath::FloorToInt(Hour), FMath::FloorToInt((Hour - FMath::FloorToInt(Hour)) * 60),
-                    Controller->Simulation().IsRaining() ? TEXT("Rain") : TEXT("Clear")));
+                    Controller->Simulation().IsRaining() ? TEXT("Rain") : bNight ? TEXT("Clear") : TEXT("Sunny")));
             })
         ]
         ]

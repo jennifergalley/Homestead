@@ -1,5 +1,6 @@
 #include "SHomesteadShop.h"
 #include "HomesteadUITheme.h"
+#include "SHomesteadFrame.h"
 #include "HomesteadPalette.h"
 
 #include "SHomesteadIcon.h"
@@ -245,6 +246,8 @@ TSharedRef<SWidget> SHomesteadShop::BuildGreeting()
     [
         SNew(SBox).WidthOverride(820)
         [
+            SNew(SHomesteadFrame)
+            [
             SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(ShopPanel)
             .Padding(FMargin(26, 18))
             [
@@ -277,6 +280,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildGreeting()
                         Button(bPad ? TEXT("Continue  [A]") : TEXT("Continue  [E]"), [this]() { Continue(); }, true, 160)
                     ]
                 ]
+            ]
             ]
         ]
     ];
@@ -403,7 +407,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildFooter()
 TSharedRef<SWidget> SHomesteadShop::BuildTrade()
 {
     const Homestead::Shop* Shop = Controller.IsValid() ? Controller->Simulation().FindShop(ShopId) : nullptr;
-    const FString Hours = Shop ? FString::Printf(TEXT("Open %s - %s"),
+    const FString Hours = Shop ? FString::Printf(TEXT("Open %s\u2013%s"),
         UTF8_TO_TCHAR(Homestead::FormatHour(Shop->openHour).c_str()), UTF8_TO_TCHAR(Homestead::FormatHour(Shop->closeHour).c_str()))
         : FString();
     const auto TabButton = [this](int32 Index, const FString& Text)
@@ -428,6 +432,8 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
     [
         SNew(SBox).WidthOverride(920).HeightOverride(600)
         [
+            SNew(SHomesteadFrame)
+            [
             SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(ShopPanel)
             .Padding(FMargin(26, 18))
             [
@@ -477,6 +483,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
                         BuildFooter()
                     ]
                 ]
+            ]
             ]
         ]
     ];

@@ -228,7 +228,7 @@ void RejectedTradesChangeNothing()
     sim.SkipToHourOfDay(19.0);
     const std::string evening = sim.Serialize();
     const auto closed = sim.Sell(store.shop, Item::Stone, 1, store.customer);
-    CHECK(!closed.ok && closed.message == "Closed - opens at 8 AM" && closed.code == ResultCode::Unavailable);
+    CHECK(!closed.ok && closed.message == "Closed \xE2\x80\x93 opens at 8 AM" && closed.code == ResultCode::Unavailable);
     CHECK(sim.Serialize() == evening);
     CHECK(!sim.CheckShopAccess(store.shop, store.customer).ok);
     sim.SkipToHourOfDay(8.0);
@@ -542,10 +542,10 @@ void ShopsCloseOnSundays()
     CHECK(NextShopOpening(shop, nextMonday + 3.0) == nextMonday + 8.0 && NextShopOpening(shop, monday + 19.0) == 24.0 + 8.0);
     CHECK(std::abs(HoursUntilOpen(shop, saturday + 19.0) - 37.0) < 1e-9);
     // The words: the closed day, a Saturday evening, an ordinary night.
-    CHECK(ClosedMessage(shop, sunday + 12.0) == "Closed today (Sunday) - opens Monday at 8 AM");
-    CHECK(ClosedMessage(shop, nextMonday + 3.0) == "Closed today (Sunday) - opens Monday at 8 AM");  // still Sunday's day
-    CHECK(ClosedMessage(shop, saturday + 19.0) == "Closed - opens Monday at 8 AM");
-    CHECK(ClosedMessage(shop, monday + 19.0) == "Closed - opens at 8 AM" && ClosedMessage(shop, saturday + 7.0) == "Closed - opens at 8 AM");
+    CHECK(ClosedMessage(shop, sunday + 12.0) == "Closed today (Sunday) \xE2\x80\x93 opens Monday at 8 AM");
+    CHECK(ClosedMessage(shop, nextMonday + 3.0) == "Closed today (Sunday) \xE2\x80\x93 opens Monday at 8 AM");  // still Sunday's day
+    CHECK(ClosedMessage(shop, saturday + 19.0) == "Closed \xE2\x80\x93 opens Monday at 8 AM");
+    CHECK(ClosedMessage(shop, monday + 19.0) == "Closed \xE2\x80\x93 opens at 8 AM" && ClosedMessage(shop, saturday + 7.0) == "Closed \xE2\x80\x93 opens at 8 AM");
     CHECK(ClosedSignText(shop, sunday + 12.0) == "CLOSED\non Sundays");
     CHECK(ClosedSignText(shop, saturday + 19.0) == "CLOSED\nopens Mon 8 AM");
     CHECK(ClosedSignText(shop, monday + 19.0) == "CLOSED\nopens at 8 AM");
@@ -563,7 +563,7 @@ void ShopsCloseOnSundays()
     Edit(sim, 100.0, 100.0);
     const std::string sundayNoon = sim.Serialize();
     const auto access = sim.CheckShopAccess(store.shop, store.customer);
-    CHECK(!access.ok && access.code == ResultCode::Unavailable && access.message == "Closed today (Sunday) - opens Monday at 8 AM");
+    CHECK(!access.ok && access.code == ResultCode::Unavailable && access.message == "Closed today (Sunday) \xE2\x80\x93 opens Monday at 8 AM");
     CHECK(!sim.Sell(store.shop, Item::Stone, 1, store.customer).ok && !sim.Buy(store.shop, Item::Pasty, 1, false, store.customer).ok);
     Simulation waiter = sim;
     const auto wait = waiter.WaitForShop(store.shop, door);

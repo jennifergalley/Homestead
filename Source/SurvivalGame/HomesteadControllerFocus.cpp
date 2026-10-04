@@ -204,7 +204,7 @@ FString AHomesteadController::FocusTitle() const
     if (Focus == EFocus::None && SelectedCarriedTool() == Homestead::Item::OilLamp)
     {
         const double Oil = Sim.LampOil();
-        return Oil <= 0.0 ? FString(TEXT("Oil lamp - out of oil"))
+        return Oil <= 0.0 ? FString(TEXT("Oil lamp \u2013 out of oil"))
             : FString::Printf(TEXT("Oil lamp - %s left"), Oil >= 1.5 ? *FString::Printf(TEXT("%.0f hours"), FMath::RoundToDouble(Oil))
                 : *FString::Printf(TEXT("%d minutes"), FMath::Max(1, FMath::RoundToInt(Oil * 60.0))));
     }
@@ -314,7 +314,12 @@ FString AHomesteadController::FocusActions() const
             return (bGamepad ? TEXT("[Menu] Field book") : TEXT("[I] Field book")) + SeedPouchHint();
         // Food on the hotbar is eaten with A / E (or X / F) when there's nothing else to use them on.
         if (const auto Food = SelectedHotbarFood(); Food != Homestead::Item::Count && Sim.Count(Food) > 0)
-            return A + TEXT(" Eat ") + Text(Homestead::ItemName(Food)).ToLower();
+        {
+            // Sentence case under the verb, keeping a proper adjective ("Eat Cornish pasty", "Eat baked potato").
+            FString Name = Text(Homestead::ItemName(Food));
+            if (!Name.StartsWith(TEXT("Cornish"))) Name = Name.ToLower();
+            return A + TEXT(" Eat ") + Name;
+        }
         // With the hoe out, a red outline says why the square ahead can't be tilled (UpdateGardenOutline).
         if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick && !GardenOutlineReason.IsEmpty())
             return GardenOutlineReason;

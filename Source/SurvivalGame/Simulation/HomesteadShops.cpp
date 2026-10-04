@@ -131,10 +131,10 @@ std::string ClosedMessage(const Shop& shop, double hour)
     const Calendar::Date today = Calendar::DateAt(hour), opens = Calendar::DateAt(next);
     const std::string at = FormatHour(next);
     if (!IsShopDay(hour))
-        return std::string("Closed today (") + Calendar::WeekdayName(today.weekday) + ") - opens "
+        return std::string("Closed today (") + Calendar::WeekdayName(today.weekday) + ") \xE2\x80\x93 opens "
             + Calendar::WeekdayName(opens.weekday) + " at " + at;
-    if (opens.dayIndex > today.dayIndex + 1) return std::string("Closed - opens ") + Calendar::WeekdayName(opens.weekday) + " at " + at;
-    return "Closed - opens at " + at;
+    if (opens.dayIndex > today.dayIndex + 1) return std::string("Closed \xE2\x80\x93 opens ") + Calendar::WeekdayName(opens.weekday) + " at " + at;
+    return "Closed \xE2\x80\x93 opens at " + at;
 }
 
 std::string ClosedSignText(const Shop& shop, double hour)

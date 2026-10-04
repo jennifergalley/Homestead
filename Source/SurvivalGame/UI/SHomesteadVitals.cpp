@@ -5,6 +5,7 @@
 #include "../Simulation/HomesteadFood.h"
 #include "../Simulation/HomesteadShops.h"
 #include "SHomesteadHudScale.h"
+#include "SHomesteadFrame.h"
 #include "SHomesteadIcon.h"
 #include "Styling/CoreStyle.h"
 #include "Framework/Application/SlateApplication.h"
@@ -190,6 +191,8 @@ TSharedRef<SWidget> SHomesteadVitals::MeterRow(FName Icon, TFunction<double()> V
         SNew(SOverlay)
         + SOverlay::Slot()
         [ SNew(SImage).Image(VitalsStyle::White()).ColorAndOpacity(VitalsStyle::Backing) ]
+        + SOverlay::Slot()
+        [ SNew(SHomesteadFrame).Visibility(EVisibility::HitTestInvisible) ]
         + SOverlay::Slot().Padding(VitalsStyle::SidePad, 0)
         [
             SNew(SHorizontalBox)
@@ -252,6 +255,8 @@ TSharedRef<SWidget> SHomesteadVitals::PurseRow()
         SNew(SOverlay)
         + SOverlay::Slot()
         [ SNew(SImage).Image(VitalsStyle::White()).ColorAndOpacity(VitalsStyle::Backing) ]
+        + SOverlay::Slot()
+        [ SNew(SHomesteadFrame).Visibility(EVisibility::HitTestInvisible) ]
         + SOverlay::Slot().Padding(VitalsStyle::SidePad, 0)
         [
             SNew(SHorizontalBox)
@@ -300,6 +305,8 @@ TSharedRef<SWidget> SHomesteadVitals::WellFedChip()
         SNew(SOverlay)
         + SOverlay::Slot()
         [ SNew(SImage).Image(VitalsStyle::White()).ColorAndOpacity(VitalsStyle::Backing) ]
+        + SOverlay::Slot()
+        [ SNew(SHomesteadFrame).Visibility(EVisibility::HitTestInvisible) ]
         + SOverlay::Slot().Padding(VitalsStyle::SidePad, 0)
         [
             SNew(SHorizontalBox)

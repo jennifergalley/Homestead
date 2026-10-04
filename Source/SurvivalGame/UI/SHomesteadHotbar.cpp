@@ -4,6 +4,9 @@
 
 #include "../HomesteadController.h"
 #include "HomesteadPalette.h"
+#include "HomesteadNoticeStyle.h"
+#include "SHomesteadFrame.h"
+#include "SHomesteadKeycap.h"
 #include "SHomesteadIcon.h"
 #include "Styling/CoreStyle.h"
 #include "Widgets/Images/SImage.h"
@@ -23,6 +26,8 @@ HomesteadUITheme::FThemeColor MutedPine(0.035f, 0.055f, 0.046f, 0.82f);
 const FLinearColor& Cream = HomesteadPalette::Cream;
 const FLinearColor& Gold = HomesteadPalette::Brass;
 constexpr float HotbarSlotSize = 64.0f;
+// How far the selected cell's shadow falls right and down (units): a slight lift.
+constexpr float LiftX = 1.0f, LiftY = 4.0f;
 }
 
 void SHomesteadHotbar::Construct(const FArguments& Args)
@@ -39,6 +44,20 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
         TSharedPtr<SButton> Button;
         Slots->AddSlot().AutoWidth().Padding(3, 0)
         [
+            // A lift shadow under the selected cell (the other cells keep the same footprint).
+            SNew(SOverlay)
+            + SOverlay::Slot().Padding(HotbarStyle::LiftX, HotbarStyle::LiftY, 0, 0)
+            [
+                SNew(SImage)
+                .Image(FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
+                .ColorAndOpacity_Lambda([Weak = Controller, Index]()
+                {
+                    return Weak.IsValid() && Weak->SelectedHotbarIndex() == Index
+                        ? FSlateColor(HomesteadNoticeStyle::Shadow) : FSlateColor(FLinearColor::Transparent);
+                })
+            ]
+            + SOverlay::Slot().Padding(0, 0, HotbarStyle::LiftX, HotbarStyle::LiftY)
+            [
             SNew(SBorder)
             .BorderImage(FCoreStyle::Get().GetBrush(TEXT("WhiteBrush")))
             .BorderBackgroundColor_Lambda([Weak = Controller, Index]()
@@ -177,18 +196,23 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                             ]
                         ]
                         + SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top)
-                        .Padding(5, 2, 0, 0)
+                        .Padding(3, 2, 0, 0)
                         [
-                            SNew(STextBlock)
-                            .Text(FText::FromString(Index == 9
-                                ? TEXT("0") : FString::FromInt(Index + 1)))
-                            .Font(HomesteadUITheme::KeyFont(TEXT("Bold"), 13))
-                            .ColorAndOpacity(HotbarStyle::Cream)
-                            .ShadowOffset(FVector2D(1, 1))
-                            .ShadowColorAndOpacity(HomesteadUITheme::Themed(FLinearColor(0, 0, 0, 0.85f)))
+                            // The slot's number as an ink keycap, a stamp on the cell's corner.
+                            Keycap::Make(FText::FromString(Index == 9 ? TEXT("0") : FString::FromInt(Index + 1)), 12)
+                        ]
+                        // The shared frame inside the selected cell, so the choice reads as framed, not just tinted.
+                        + SOverlay::Slot()
+                        [
+                            SNew(SHomesteadFrame)
+                            .Visibility_Lambda([Weak = Controller, Index]()
+                            {
+                                return Weak.IsValid() && Weak->SelectedHotbarIndex() == Index ? EVisibility::SelfHitTestInvisible : EVisibility::Collapsed;
+                            })
                         ]
                     ]
                 ]
+            ]
             ]
         ];
         SlotButtons.Add(Button);
