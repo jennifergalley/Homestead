@@ -10,7 +10,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 ## 2026-10-04 — 4:00 PM
 
 - Build ID: `20261004-afternoon-03`
-- Status: scheduled; metadata/preflight only until the coordinator grants Integration a hands-on slot.
+- Status: planned
 - Authorization: Jenny's 11:59:23 local message; target 4:00 PM local.
 - Selected scope: refine fishing pole/fish icons and cast/bite/catch presentation; compact Quit
   dialog; Back-slot rucksack visibility without capacity loss; wider wildflowers outside farm,

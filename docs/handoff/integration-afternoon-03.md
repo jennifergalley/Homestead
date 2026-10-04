@@ -14,6 +14,8 @@ GPT-5.6 Terra / medium / default; the actual context tier is not yet captured.
   `.github/copilot-instructions.md` change in the main checkout was not touched.
 - The three hands-on slots belong to Fishing Art, Gameplay UI, and Environment. Integration is
   metadata/accounting/preflight only until the coordinator explicitly grants a slot.
+- The 4 PM build card is planned. The coordinator subsequently granted Integration hands-on slot 3
+  for the main-checkout Shipping recovery; its package gates remain in progress.
 - `accounting/afternoon-03-allocation.json` starts every current lane at the new authorization
   boundary. It deliberately excludes measured02's closed 2,477-call / 11,439.97802 observed-AIU
   report and its unknown tail.
