@@ -249,6 +249,12 @@ explicitly take the final Bump normal `WORLD->OBJECT`, set type `NORMAL`, normal
 Base+Coat map. `<=1.7` with local improvement implicates NORMAL-pass extraction; roughly `3.062`
 implicates field evaluation/filtering. It is not a production fix, UE object-space map, budget change,
 admission, shared-helper claim, or meal pause.
+The further authorized explicit-normal EMIT capture also failed: cheek RMS `3.060` versus OBJECT
+`3.062`, with viewed patches persisting despite signed final Bump-socket transformation,
+normalization, `.5n+.5` encoding, 4096 NonColor, and Base+Coat OBJECT reconstruction. The exact
+UV-bake procedural evaluation/filtering cause remains unresolved; no production shader, map, helper,
+or import change follows. Frozen fish evidence is unchanged. Original potato serving/portion source
+work advances independently, but is not meal or art acceptance.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
