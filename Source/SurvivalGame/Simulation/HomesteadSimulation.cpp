@@ -217,14 +217,16 @@ Inventory CraftChange(Recipe recipe)
     case Recipe::RoastedRoots: return Items({{Item::Roots, -2}, {Item::Kindling, -1}, {Item::RoastedRoots, 1}});
     case Recipe::HerbedRoots: return Items({{Item::Roots, -2}, {Item::Flowers, -1}, {Item::Kindling, -1}, {Item::HerbedRoots, 1}});
     case Recipe::SplitFirewood: return Items({{Item::Timber, -1}, {Item::Firewood, 4}});
-    default: return CropMealChange(recipe);
+    default: return FindCropMeal(recipe) ? CropMealChange(recipe) : FishMealChange(recipe);
     }
 }
 bool Hafting(Recipe recipe) { return recipe >= Recipe::HaftAxe && recipe <= Recipe::HaftPickaxe; }
 // The one place that says which recipes cook: they need a lit fire or the hearth.
 bool Cooking(Recipe recipe)
 {
-    return recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots || FindCropMeal(recipe) != nullptr;
+    const auto* fishMeal = FindFishMeal(recipe);
+    return recipe == Recipe::RoastedRoots || recipe == Recipe::HerbedRoots || FindCropMeal(recipe) != nullptr
+        || (fishMeal && fishMeal->cooking);
 }
 std::string DescribeCost(const Inventory& change)
 {
@@ -958,6 +960,7 @@ const char* ResourceName(ResourceKind kind)
 const char* RecipeName(Recipe recipe)
 {
     if (const auto* meal = FindCropMeal(recipe)) return ItemName(meal->output);
+    if (const auto* meal = FindFishMeal(recipe)) return ItemName(meal->output);
     static const char* names[] = {"Craft an axe", "Craft a hoe", "Craft a scythe", "Craft a billhook", "Craft a pickaxe",
         "Roasted roots", "Herbed roots", "Split firewood"};
     static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(Recipe::RoastedTurnips), "Legacy recipe names stay in order.");
@@ -1240,6 +1243,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
     layout_ = std::make_shared<const EstateLayout>(layout);
     placements_ = std::make_shared<const EstatePlacements>(placements);
     state_ = std::move(candidate);
+    fishing_ = {};
     GrantLampKit();
     return {true, "You arrive home to " + state_.estateName + ".", ResultCode::None, ++revision_};
 }
@@ -1297,6 +1301,7 @@ Result Simulation::NewGame(std::uint64_t seed)
     const auto populated = Materialize(candidate, nullptr, nextHandle);
     if (!populated) return populated;
     state_ = std::move(candidate);
+    fishing_ = {};
     nextResourceHandle_ = nextHandle;
     return {true, "A new seeded woodland is ready.", ResultCode::None, ++revision_};
 }
@@ -3510,6 +3515,7 @@ Result Simulation::Deserialize(const std::string& data)
     state_ = std::move(candidate);
     nextResourceHandle_ = nextHandle;
     // Saves from before the lamp get its kit once.
+    fishing_ = {};
     GrantLampKit();
     return {true, "Homestead restored. No time passed while you were away.", ResultCode::None, ++revision_};
 }

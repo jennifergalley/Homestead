@@ -14,6 +14,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadBed.cpp
     Source/SurvivalGame/Simulation/HomesteadCrops.cpp
     Source/SurvivalGame/Simulation/HomesteadRecipes.cpp
+    Source/SurvivalGame/Simulation/HomesteadFishing.cpp
     Source/SurvivalGame/Simulation/HomesteadFood.cpp
     Source/SurvivalGame/Simulation/HomesteadCalendar.cpp
     Source/SurvivalGame/Simulation/HomesteadCalendarHooks.cpp
@@ -57,6 +58,15 @@ else()
     target_compile_options(HomesteadSimulationTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadSimulationTests COMMAND HomesteadSimulationTests)
+
+add_executable(HomesteadFishingTests Tests/HomesteadFishingTests.cpp)
+target_link_libraries(HomesteadFishingTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadFishingTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadFishingTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadFishingTests COMMAND HomesteadFishingTests)
 
 add_executable(HomesteadWorldGenerationTests Tests/HomesteadWorldGenerationTests.cpp)
 target_link_libraries(HomesteadWorldGenerationTests PRIVATE HomesteadSimulation)

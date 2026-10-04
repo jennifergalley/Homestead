@@ -507,6 +507,8 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Notice, static_cast<int32>(ENotice::ShopStatus), Counter, Shop(1, 30, TEXT("pasty")));
     Add(TEXT("shop-backpack"), TEXT("Buy tab with 1,500 coins, choosing the leather backpack: its confirm."), ECover::Shop, 2, Counter,
         Shop(1, 1500, TEXT("upgrade")));
+    Add(TEXT("shop-fishing-pole"), TEXT("Buy tab with 1,500 coins, choosing the fishing pole beside the backpack upgrade."),
+        ECover::Shop, 5, Counter, Shop(1, 1500, TEXT("Fishing pole")));
     // The leather knapsack on her back (Props' SM_LeatherBackpack), bought through the store's own rule
     // (from the counter: the gallery passes the counter's spot), seen in the open from several sides so
     // the attach can be judged: the pack behind her back, the straps over her shoulders, nothing through
@@ -705,6 +707,24 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     List.Last().Pending = SeedOutline;
 
     // Night and rain: the same HUD and notices under the night sky and in the rain.
+    const auto FishingStage = [](bool Landing)
+    {
+        return [Landing](AHomesteadController& PC)
+        {
+            PC.Sim.GrantItems(Item::FishingPole, 1);
+            PC.ChooseOnHotbar(Item::FishingPole);
+            PC.Sim.SetFishingWaterProbe([](Point) { return Homestead::FishingWater::River; });
+            const auto Cast = PC.Sim.BeginFishing(PC.PlayerPoint());
+            PC.PrepareEstateSimulation(PC.Sim);
+            if (!Cast) { PC.Notify(Cast); return; }
+            PC.Sim.AdvanceFishing(PC.Sim.FishingCast().biteAfter, PC.PlayerPoint());
+            if (Landing) PC.Sim.FishingPress(PC.PlayerPoint());
+        };
+    };
+    Add(TEXT("hud-fishing-bite"), TEXT("Staged fishing bite: the active hook prompt and timer."),
+        ECover::Hud, 16, nullptr, FishingStage(false), 0.4f);
+    Add(TEXT("hud-fishing-landing"), TEXT("Staged fishing landing: two beats in the highlighted green band."),
+        ECover::Hud, 17, nullptr, FishingStage(true), 1.1f);
     Add(TEXT("hud-night"), TEXT("The world HUD at 10:30 PM: the moon in the calendar, the night-lit world."), ECover::Hud, 7, nullptr, Night, 1.5f);
     Add(TEXT("hud-rain"), TEXT("The world HUD in the rain: the rain cloud in the calendar, rain falling."), ECover::Hud, 8, nullptr, Rain, 1.5f);
     Add(TEXT("toast-night"), TEXT("A world notice at night: the parchment slip over the dark scene."), ECover::Hud, 9, nullptr,

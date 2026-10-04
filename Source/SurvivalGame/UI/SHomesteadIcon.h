@@ -42,7 +42,7 @@ private:
         Pasty, Bread, Cheese, Twine, Coin, Shop,
         Scythe, Billhook, Pickaxe, RustedAxeHead, RustedHoeBlade, RustedScytheBlade, RustedBillhookHead,
         RustedPickHead, Hay, Weeds, BrambleCanes, Kindling, ScrapIron, ScrapLead,
-        Primroses, Bluebells, WildDaffodils, WildGarlic, OilLamp, OilFlask, PouchArrows
+        Primroses, Bluebells, WildDaffodils, WildGarlic, OilLamp, OilFlask, PouchArrows, FishingPole, Fish
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{HomesteadPalette::Brass};

@@ -367,12 +367,14 @@ void RequirementsMatchTransactions()
         BuildingStock(sim);
         OK(sim.Place(Piece::Fire, -3, -1, 0, CellCenter(-3, -1)));
         OK(sim.AddFuel(sim.GetState().structures.back().id, CellCenter(-3, -1)));
-        Stock(sim, {{Item::Hatchet, 1}, {Item::Branch, 40}, {Item::Stone, 20},
+        Stock(sim, {{Item::Hatchet, 1}, {Item::Branch, 36}, {Item::Stone, 20},
             {Item::RustedAxeHead, 1}, {Item::RustedHoeBlade, 1}, {Item::RustedScytheBlade, 1},
             {Item::RustedBillhookHead, 1}, {Item::RustedPickHead, 1},
             {Item::Roots, 10}, {Item::Flowers, 10}, {Item::Kindling, 10}, {Item::Timber, 1},
             {Item::Turnip, 2}, {Item::Carrot, 2}, {Item::Potato, 2}, {Item::Cabbage, 1},
-            {Item::BroadBeans, 3}, {Item::Berries, 3}, {Item::Strawberries, 2}});
+            {Item::BroadBeans, 3}, {Item::Berries, 3}, {Item::Strawberries, 2},
+            {Item::RiverTrout, 1}, {Item::RiverSalmon, 1}, {Item::LakePerch, 1}, {Item::LakeCarp, 1},
+            {Item::SeaMackerel, 1}, {Item::SeaBass, 1}});
         const auto before = sim.GetState().inventory;
         const double hour = sim.GetState().hour;
         const char* description = RecipeRequirements(recipe);
@@ -511,18 +513,22 @@ void StructuredRecipeAssessment()
         {Item::RustedBillhookHead, 1}, {Item::RustedPickHead, 1}, {Item::Roots, 10},
         {Item::Flowers, 10}, {Item::Kindling, 10}, {Item::Timber, 4},
         {Item::Turnip, 2}, {Item::Carrot, 2}, {Item::Potato, 2}, {Item::Cabbage, 1},
-        {Item::BroadBeans, 3}, {Item::Berries, 3}, {Item::Strawberries, 2}});
+        {Item::BroadBeans, 3}, {Item::Berries, 3}, {Item::Strawberries, 2},
+        {Item::RiverTrout, 1}, {Item::RiverSalmon, 1}, {Item::LakePerch, 1}, {Item::LakeCarp, 1},
+        {Item::SeaMackerel, 1}, {Item::SeaBass, 1}});
     const Item Outputs[] = {Item::Hatchet, Item::DiggingStick, Item::Scythe, Item::Billhook, Item::Pickaxe,
         Item::RoastedRoots, Item::HerbedRoots, Item::Firewood, Item::RoastedTurnips, Item::StewedCarrots,
         Item::BakedPotatoes, Item::HerbedBroadBeans, Item::CabbagePotatoStew, Item::BerryCompote,
-        Item::StrawberryCompote, Item::RootVegetableHotpot};
-    const int OutputCounts[] = {1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1};
+        Item::StrawberryCompote, Item::RootVegetableHotpot, Item::RawFishSlices, Item::GrilledTrout,
+        Item::GrilledPerch, Item::GrilledMackerel, Item::FishSoup, Item::FishAndPotatoes,
+        Item::HerbedCarp, Item::MackerelChowder};
+    const int OutputCounts[] = {1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     static_assert(sizeof(Outputs) / sizeof(Outputs[0]) == static_cast<int>(Recipe::Count), "Every recipe is assessed.");
     for (int index = 0; index < static_cast<int>(Recipe::Count); ++index)
     {
         const auto recipe = static_cast<Recipe>(index);
         const Point position = index == static_cast<int>(Recipe::RoastedRoots)
-            || index == static_cast<int>(Recipe::HerbedRoots) || FindCropMeal(recipe) ? completeFire : Home;
+            || index == static_cast<int>(Recipe::HerbedRoots) || FindCropMeal(recipe) || FindFishMeal(recipe) ? completeFire : Home;
         const auto before = complete.Serialize();
         const auto revision = complete.GetRevision();
         const auto assessment = complete.AssessRecipe(recipe, position);
@@ -984,7 +990,7 @@ void BasicCropMeals()
 {
     std::set<Item> covered;
     int meals = 0, seasoned = 0;
-    for (int index = static_cast<int>(Recipe::RoastedTurnips); index < static_cast<int>(Recipe::Count); ++index)
+    for (int index = static_cast<int>(Recipe::RoastedTurnips); index <= static_cast<int>(Recipe::RootVegetableHotpot); ++index)
     {
         const Recipe recipe = static_cast<Recipe>(index);
         const auto* meal = FindCropMeal(recipe);

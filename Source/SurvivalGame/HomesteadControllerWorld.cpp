@@ -64,6 +64,10 @@ void AHomesteadController::PrepareEstateSimulation(Homestead::Simulation& Target
         // Only fresh water counts for the pail; the sea is salt.
         return Self.IsValid() && Self->WaterEdgeDistance(Position, false) <= 120.0;
     });
+    Target.SetFishingWaterProbe([Self](Homestead::Point Position)
+    {
+        return Self.IsValid() ? Self->ProbeFishingWater(Position) : Homestead::FishingWater::None;
+    });
 }
 
 void AHomesteadController::SetEstateSpawn()

@@ -52,6 +52,8 @@ FString RecipeDescription(Homestead::Recipe Recipe)
     default:
         if (const auto* Meal = Homestead::FindCropMeal(Recipe))
             return Text(Homestead::ItemDescription(Meal->output));
+        if (const auto* Meal = Homestead::FindFishMeal(Recipe))
+            return Text(Homestead::ItemDescription(Meal->output));
         return TEXT("");
     }
 }
@@ -65,6 +67,7 @@ using HomesteadControllerBookDetail::RetiredGuidebookPage;
 void AHomesteadController::OpenBook(int32 TargetPage)
 {
     if (RejectPendingGroundSnapAction()) return;
+    if (IsFishing()) Notify(Sim.CancelFishing());
     EndPlacement();
     HoveredHotbarSlot = INDEX_NONE;
     bBookOpen = true;
@@ -125,6 +128,7 @@ void AHomesteadController::OpenMap() { if (!IsFailed()) OpenBook(7); }
 void AHomesteadController::Back()
 {
     if (IsFailed()) { RetryCheckpoint(); return; }
+    if (IsFishing()) { Notify(Sim.CancelFishing()); return; }
     if (bBookOpen) CloseBook();
     else if (bPlanning) EndPlacement();
     else if (CancelShopWait()) PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);

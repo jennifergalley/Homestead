@@ -101,6 +101,12 @@ void AHomesteadController::UpdateFocus()
             bHasFocusTarget = false;
         }
     }
+    if (UpdateFishingFocus(Position))
+    {
+        Focus = EFocus::Water;
+        FocusId = -1;
+        bHasFocusTarget = false;
+    }
     // With the machete out, the nearest bush or bramble within arm's reach takes the focus.
     const bool bMachete = HotbarItem(SelectedHotbarSlot) == Homestead::Item::Machete
         && Sim.Count(Homestead::Item::Machete) > 0;
@@ -185,7 +191,10 @@ FString AHomesteadController::FocusTitle() const
     case EFocus::Hearth: return TEXT("Hearth");
     case EFocus::Bed: return TEXT("Bed");
     case EFocus::Chest: return ChestDisplayName(FocusId);
-    case EFocus::Water: return TEXT("Fresh stream water");
+    case EFocus::Water:
+        if (SelectedCarriedTool() == Homestead::Item::FishingPole)
+            return FString(UTF8_TO_TCHAR(Homestead::Fishing::WaterName(FocusedFishingWater))) + TEXT(" fishing");
+        return TEXT("Fresh stream water");
     case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusTitle();
@@ -282,6 +291,11 @@ FString AHomesteadController::FocusActions() const
         return FString();
     case EFocus::Chest: return A + TEXT(" Open");
     case EFocus::Water:
+        if (ToolAvailable && SelectedTool == Homestead::Item::FishingPole)
+        {
+            if (IsFishing()) return FString();
+            return FishingFocusText;
+        }
         // The pail is filled with the tool button; only offered with it in hand.
         if (!ToolAvailable || SelectedTool != Homestead::Item::WateringCan) return FString();
         return Sim.Count(Homestead::Item::Water) >= Homestead::PailPortions ? FString(TEXT("Pail full")) : Use + TEXT(" Fill pail");

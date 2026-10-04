@@ -612,6 +612,8 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         // nib: the snath runs through her fist with its top end forward and up, and the blade trails
         // behind her at knee height, out to her right.
         {Homestead::Item::Scythe, TEXT("Scythe/SM_Scythe"), RestWristDegrees, false, ScytheTrail},
+        {Homestead::Item::FishingPole, TEXT("DiggingStick/SM_DiggingStick"), RestWristDegrees, false,
+            FTransform(FQuat(FVector::XAxisVector, PI), FVector(0, 0, -10), FVector(0.65f, 0.65f, 1.8f))},
     };
     for (const FHeldToolAsset& Asset : Assets)
     {
@@ -621,7 +623,9 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         if (!PropMesh) continue;
         // One prop per tool: the first authored mesh found wins.
         if (HeldToolSpecs.ContainsByPredicate([&Asset](const FHeldToolSpec& Spec) { return Spec.Tool == Asset.Tool; })) continue;
-        auto* Prop = MakeProp(*FString::Printf(TEXT("Held_%s"), *Name), PropMesh);
+        const FString HeldComponentName = Asset.Tool == Homestead::Item::FishingPole
+            ? TEXT("Held_FishingPole") : FString::Printf(TEXT("Held_%s"), *Name);
+        auto* Prop = MakeProp(*HeldComponentName, PropMesh);
         Prop->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("hand_r"));
         Prop->SetRelativeTransform(Asset.Offset * Grip);
         Prop->SetUsingAbsoluteRotation(Asset.bHangs);

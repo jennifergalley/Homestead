@@ -28,6 +28,9 @@ enum class Item : int
     // add-basic-crop-cookfire-recipes.
     RoastedTurnips, StewedCarrots, BakedPotatoes, HerbedBroadBeans,
     CabbagePotatoStew, BerryCompote, StrawberryCompote, RootVegetableHotpot,
+    FishingPole, RiverTrout, RiverSalmon, LakePerch, LakeCarp, SeaMackerel, SeaBass,
+    RawFishSlices, GrilledTrout, GrilledPerch, GrilledMackerel,
+    FishSoup, FishAndPotatoes, HerbedCarp, MackerelChowder,
     Count
 };
 constexpr int ItemCount = static_cast<int>(Item::Count);
