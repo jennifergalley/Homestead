@@ -6,4 +6,6 @@
 
 ## 2. Jenny's player checks
 
+Source and targeted native coverage complete, including real crop growth and seasonal withering; branch-delivery checkbox remains pending editor compile/review permission.
+
 - [ ] 2.1 At the Sunday General Store confirm Monday opening is offered, cancellation spends no time, and confirming reaches Monday opening with normal world consequences and permits entry.

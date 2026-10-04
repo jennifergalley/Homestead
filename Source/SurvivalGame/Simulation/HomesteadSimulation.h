@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HomesteadCalendar.h"
+#include "HomesteadDaylight.h"
 #include "HomesteadItems.h"
 #include "HomesteadRain.h"
 #include "HomesteadShops.h"
@@ -377,6 +378,8 @@ struct State
     // Estate only (HomesteadFood.h): the game hour her Well fed runs out; she is Well fed while hour is
     // below it. Saved in the optional "wellfed" section only while active.
     double wellFedUntilHour = 0.0;
+    // Sorted destination ids beyond the initially visited Manor, in the optional "travel" section.
+    std::vector<int> discoveredTravel;
 };
 
 const WearableDefinitionInfo* GetWearableDefinition(WearableDefinition definition);
@@ -486,7 +489,7 @@ double RainAudioGain(double rain, double ambience, double indoors);
 // Whether the loop plays at all: judged before RainLoudness, so it starts and stops at the same moments.
 bool RainAudible(double rain, double ambience, double indoors);
 
-// One bed action at a time: restore Energy, or pass the night when she is already rested.
+// One bed action at a time: pass the night, or restore Energy during the day.
 enum class SleepChoice { UntilMorning, UntilRested };
 struct SleepOption
 {
@@ -494,11 +497,10 @@ struct SleepOption
     double hours = 0.0;
     double wakeHour = 0.0; // Hour of day, 0-24.
 };
-constexpr double MorningWakeHour = 6.0;
-// Night runs 18:00-06:00. Rest stops at 06:00 if it would pass dawn; daytime with full
-// Energy has no bed action. Ordinary rest is at least a quarter hour; the last minutes to
-// dawn may be shorter.
-std::optional<SleepOption> BedSleepOption(double hour, double energy);
+constexpr double MorningWakeHour = Daylight::MorningSleepHour;
+// Evening starts at the earlier of 18:00 and sunset; wake at the earlier of 06:00 and sunrise.
+std::optional<SleepOption> BedSleepOption(double hour, double energy,
+    double sunrise = Daylight::SunriseHour, double sunset = Daylight::SunsetHour);
 
 struct PreparedWorldRegion
 {
@@ -524,6 +526,7 @@ public:
     void SetLayout(const EstateLayout& layout);
     // The heroine's, her family's and the estate's names (see HomesteadManor.h for the rules).
     Result SetNames(const std::string& heroine, const std::string& family, const std::string& estate);
+    Result DiscoverTravel(TravelDestination destination, Point player);
     // The estate's name for HUD and toasts ("Trevennor"); "the estate" before one is chosen.
     std::string EstateName() const;
     // The baked placements a fixed-estate save is loaded against; set before Deserialize.

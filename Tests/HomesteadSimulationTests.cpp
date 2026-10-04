@@ -4158,16 +4158,16 @@ void ChestCapacityAndWaterSpace()
 void SleepOptionPolicy()
 {
     const auto tiredNight = BedSleepOption(21.0, 60.0);
-    CHECK(tiredNight && tiredNight->choice == SleepChoice::UntilRested
-        && Close(tiredNight->hours, 4.0) && Close(tiredNight->wakeHour, 1.0));
+    CHECK(tiredNight && tiredNight->choice == SleepChoice::UntilMorning
+        && Close(tiredNight->hours, 9.0) && Close(tiredNight->wakeHour, 6.0));
     const auto restedNight = BedSleepOption(25.0, 100.0);
     CHECK(restedNight && restedNight->choice == SleepChoice::UntilMorning
         && Close(restedNight->hours, 5.0) && Close(restedNight->wakeHour, 6.0));
     const auto late = BedSleepOption(22.75, 20.0);
-    CHECK(late && late->choice == SleepChoice::UntilRested
+    CHECK(late && late->choice == SleepChoice::UntilMorning
         && Close(late->hours, 7.25) && Close(late->wakeHour, 6.0));
     const auto owl = BedSleepOption(5.0, 5.0);
-    CHECK(owl && owl->choice == SleepChoice::UntilRested && Close(owl->hours, 1.0) && Close(owl->wakeHour, 6.0));
+    CHECK(owl && owl->choice == SleepChoice::UntilMorning && Close(owl->hours, 1.0) && Close(owl->wakeHour, 6.0));
     const auto midday = BedSleepOption(12.0, 97.0);
     CHECK(midday && midday->choice == SleepChoice::UntilRested && Close(midday->hours, 0.5));
     CHECK(!BedSleepOption(12.0, 100.0));
@@ -4178,10 +4178,10 @@ void SleepOptionPolicy()
     CHECK(shortMorning && shortMorning->choice == SleepChoice::UntilMorning
         && Close(shortMorning->hours, 0.125) && Close(shortMorning->wakeHour, 6.0));
     const auto shortRest = BedSleepOption(5.875, 50.0);
-    CHECK(shortRest && shortRest->choice == SleepChoice::UntilRested
+    CHECK(shortRest && shortRest->choice == SleepChoice::UntilMorning
         && Close(shortRest->hours, 0.125) && Close(shortRest->wakeHour, 6.0));
     CHECK(Close(BedSleepOption(12.0, 0.0)->hours, Exertion::MaxRestHours));
-    CHECK(Close(BedSleepOption(18.0, 50.0)->hours, 5.0));
+    CHECK(Close(BedSleepOption(18.0, 50.0)->hours, 12.0));
     CHECK(Close(BedSleepOption(18.0, 100.0)->hours, 12.0));
     CHECK(!BedSleepOption(std::numeric_limits<double>::quiet_NaN(), 50.0));
     CHECK(!BedSleepOption(12.0, std::numeric_limits<double>::quiet_NaN()));
@@ -4190,7 +4190,8 @@ void SleepOptionPolicy()
     OK(sleeper.Place(Piece::Bed, -3, 0, 0, Home));
     Edit(sleeper, [](State& state) { state.hour = 21.0; state.energy = 60.0; });
     OK(sleeper.Sleep(BedSleepOption(sleeper.GetState().hour, sleeper.GetState().energy)->hours, Home, {1, 0}));
-    CHECK(Close(sleeper.GetState().hour, 25.0) && sleeper.GetState().energy == 100.0);
+    CHECK(Close(sleeper.GetState().hour, 30.0) && sleeper.GetState().energy == 100.0);
+    Edit(sleeper, [](State& state) { state.hour = 25.0; });
     OK(sleeper.Sleep(BedSleepOption(sleeper.GetState().hour, sleeper.GetState().energy)->hours, Home, {1, 0}));
     if (!Close(sleeper.GetState().hour, 30.0) || !Close(sleeper.GetState().energy, 100.0))
         std::cerr << "Bed policy at sunrise: hour=" << sleeper.GetState().hour

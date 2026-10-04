@@ -801,6 +801,8 @@ private:
     // simulation after each Advance.
     int32 SeenSeasonChanges = 0;
     void TickCalendarNotices();
+    void TickTravelDiscovery();
+    TArray<Homestead::TravelDestination> PendingTravelNotices;
     void CycleZoom();
     void QuickSave();
     void QuickLoad();

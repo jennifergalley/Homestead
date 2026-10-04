@@ -190,6 +190,7 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
         return false;
     }
     bTestResetRequired = false;
+    PendingTravelNotices.Reset();
     bWorldReady = true;
     bHasPlayableSession = true;
     LoadProblem.Reset();
@@ -355,6 +356,7 @@ void AHomesteadController::RetryCheckpoint()
     if (!Landscape->Refresh(Candidate)) { bWorldReady = false; Notify(TEXT("Checkpoint terrain could not be prepared."), true); return; }
     Sim = MoveTemp(Candidate);
     ActiveChestId.Reset();
+    PendingTravelNotices.Reset();
     bWorldReady = true;
     if (auto* Avatar = Cast<AHomesteadCharacter>(GetPawn()))
     {
@@ -392,6 +394,7 @@ void AHomesteadController::NewGame()
     if (!Landscape->Refresh(Candidate)) { bWorldReady = false; Notify(TEXT("The new woodland could not be prepared. Your current session is retained."), true); return; }
     Sim = MoveTemp(Candidate);
     ActiveChestId.Reset();
+    PendingTravelNotices.Reset();
     bWorldReady = true;
     bTestResetRequired = false;
     bHasPlayableSession = true;

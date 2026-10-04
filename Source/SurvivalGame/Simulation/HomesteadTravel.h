@@ -24,10 +24,20 @@ constexpr double TravelMaxConnectorCm = 60000.0;
 // store 26 m off it), cm; beside the store (ShopWaitReach of its counter) she's "at the store".
 constexpr double TravelTownReachCm = 4500.0;
 
-enum class TravelDestination : int { Manor, Town };
+enum class TravelDestination : int { Manor, Town, Mine, Cove, Mill, Gateway, Store, Count };
+constexpr int TravelDestinationCount = static_cast<int>(TravelDestination::Count);
 
 // "the manor" / "town", for sentences ("Walk to town").
 const char* TravelDestinationName(TravelDestination destination);
+const char* TravelDestinationLabel(TravelDestination destination);
+bool IsTravelUnlocked(const State& state, TravelDestination destination);
+bool TravelVisitNear(Point at, TravelDestination destination, const EstateLayout& layout);
+namespace TravelDiscovery
+{
+constexpr const char* SaveTag = "travel";
+void WriteSaveSection(std::ostream& output, const State& state);
+bool ReadSaveSection(std::istream& input, State& state);
+}
 
 struct TravelPlan
 {

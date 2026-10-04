@@ -162,6 +162,7 @@ Store OpenStore(bool emptyEstate = false)
     CHECK(shop->counterX == store.counter.x && shop->counterY == store.counter.y);
     CHECK(shop->counterYaw == ProvisionalEstateLayout().FindLandmark(Anchor::GeneralStoreCounter)->yaw);
     store.customer = {store.counter.x, store.counter.y - 150.0};
+    OK(store.sim.DiscoverTravel(TravelDestination::Town, store.counter));
     store.sim.SkipToHourOfDay(9.0);
     return store;
 }
@@ -511,7 +512,7 @@ void WaitForTheStoreToOpen()
 }
 
 // Every shop is closed all day Sunday (Jenny, 2026-09-30): at every hour, with the reopening day in each refusal,
-// the door sign and the walk-to-town warning, and no waiting at the door across it. Nothing is saved for it.
+// the door sign and the walk-to-town warning. Sunday waiting reaches Monday opening.
 void ShopsCloseOnSundays()
 {
     Store store = OpenStore();
@@ -541,14 +542,14 @@ void ShopsCloseOnSundays()
     CHECK(ClosedSignText(shop, sunday + 12.0) == "CLOSED\non Sundays");
     CHECK(ClosedSignText(shop, saturday + 19.0) == "CLOSED\nopens Mon 8 AM");
     CHECK(ClosedSignText(shop, monday + 19.0) == "CLOSED\nopens at 8 AM");
-    // Waiting at the door: the night's closure only (at most 14 h), never through a closed day's hours.
+    // Sunday waiting is allowed; Saturday evening is still outside the selected wait policy.
     CHECK(CanWaitForShop(shop, monday + 19.0) && CanWaitForShop(shop, saturday + 7.0) && CanWaitForShop(shop, nextMonday + 3.0));
     CHECK(CanWaitForShop(shop, 4 * 24.0 + 18.0));  // Friday at closing: the full 14 h night
     CHECK(CanWaitForShop(shop, sunday + 19.0));    // Sunday evening: just the night to Monday's opening
-    CHECK(!CanWaitForShop(shop, sunday + 7.0) && !CanWaitForShop(shop, sunday + 12.0) && !CanWaitForShop(shop, saturday + 19.0));
+    CHECK(CanWaitForShop(shop, sunday + 7.0) && CanWaitForShop(shop, sunday + 12.0) && !CanWaitForShop(shop, saturday + 19.0));
     CHECK(!CanWaitForShop(shop, saturday + 12.0));  // open: nothing to wait for
 
-    // Through the Simulation on Sunday at noon: no trade, no wait, nothing changes.
+    // Sunday at noon: no trade yet, but waiting opens the shop on Monday.
     for (int day = 0; day < 6; ++day) sim.SkipToHourOfDay(9.0);
     sim.SkipToHourOfDay(12.0);
     CHECK(sim.Today().weekday == Weekday::Sunday);
@@ -557,9 +558,11 @@ void ShopsCloseOnSundays()
     const auto access = sim.CheckShopAccess(store.shop, store.customer);
     CHECK(!access.ok && access.code == ResultCode::Unavailable && access.message == "Closed today (Sunday) - opens Monday at 8 AM");
     CHECK(!sim.Sell(store.shop, Item::Stone, 1, store.customer).ok && !sim.Buy(store.shop, Item::Pasty, 1, false, store.customer).ok);
-    const auto wait = sim.WaitForShop(store.shop, door);
-    CHECK(!wait.ok && wait.code == ResultCode::Unavailable
-        && wait.message == "The general store is closed on Sundays. It opens Monday at 8 AM.");
+    Simulation waiter = sim;
+    const auto wait = waiter.WaitForShop(store.shop, door);
+    CHECK(wait.ok && waiter.Today().weekday == Weekday::Monday
+        && std::abs(waiter.GetState().hour - (nextMonday + 8.0)) < 1e-5);
+    OK(waiter.CheckShopAccess(store.shop, store.customer));
     CHECK(sim.Serialize() == sundayNoon);
     // Old saves (no weekday anywhere in them) load and keep the rule: it comes from the clock alone.
     Simulation loaded;
