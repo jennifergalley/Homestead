@@ -272,6 +272,11 @@ nodes were older parameters and it remains inadmissible. Farming is adding recip
 `importlib.reload(food)`, shader source tags, and actual noise-scale fixtures before a fresh source
 review. The canonical lesson is that `build_prop` reloads kit/material modules only; custom recipe
 dependencies need explicit live reload.
+Held checkpoint `1cc2911f` verifies the cache correction: it reproduces the stale graph fixture, then
+passes recipe-owned reload, executed-source tags, and actual node-scale checks; copied source and four
+fresh viewed 4K frames were separately verified. `PotatoesReloadedSourceProof` remains art/import WIP,
+while old `24500d2a` retains the shader-cache audit. No fish, shared-helper, budget, gameplay, or save
+edits are included.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The

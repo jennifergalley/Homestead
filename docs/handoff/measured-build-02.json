@@ -75,6 +75,8 @@
       "fishCarpBakeProofStatus": "Held WIP: carp tangent/source proof (55,008 triangles, 42.11 cm), passing raw/copied fixtures, and twelve-case local bake evidence. One 4096 OBJECT-space diagnostic is directed; no production budget/shader, UE, gameplay, or save change.",
       "bakedPotatoesSourceCheckpoint": "24500d2a",
       "bakedPotatoesSourceStatus": "Held synthetic source-only serving/portion with valid copied geometry/closed/scale/UV/hash fixtures, but cached live food-module graph means its material hash does not prove current skin/flesh nodes. NormalCaptureDiagnostics preserves OBJECT 3.062, EMIT 3.060, and unmatched-bump-control correction. Recipe must explicitly reload food and add source/noise-scale fixtures before fresh review. Not art/import-ready; no save/gameplay change.",
+      "bakedPotatoesReloadedProofCheckpoint": "1cc2911f",
+      "bakedPotatoesReloadedProofStatus": "Held art/import WIP: stale graph reproduced; recipe-owned reload, executed-source tags, and actual node-scale checks pass, with separately copied source and four fresh viewed 4K frames. Old 245 proof remains the cache audit; no fish/shared-helper/budget/gameplay/save edit.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
