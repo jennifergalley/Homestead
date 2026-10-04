@@ -2,6 +2,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
 #include "HomesteadFishingPresentation.h"
+#include "HomesteadFishingPresentationRules.h"
 #include "HomesteadEstateTerrain.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SplineComponent.h"
@@ -133,6 +134,12 @@ void AHomesteadController::PresentFishing()
     auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     if (!Animation) return;
     const auto& Session = Sim.FishingCast();
+    if (Session.phase == Homestead::FishingPhase::Idle
+        && HomesteadFishingPresentationRules::FinishedMiss(
+            Animation->FishingPose() == EHomesteadFishingPose::Miss, Animation->HasFishingClip(),
+            Animation->FishingClipTime(), HomesteadFishingTiming::MissEnd, KINDA_SMALL_NUMBER))
+        Animation->SetFishingPose(EHomesteadFishingPose::None);
+    const bool bNewCast = HomesteadFishingPresentationRules::NewCast(Session, FishingPresentedToken);
     if (Session.token != FishingPresentedToken && Session.phase != Homestead::FishingPhase::Idle)
     {
         FishingPresentedToken = Session.token;
@@ -140,7 +147,7 @@ void AHomesteadController::PresentFishing()
         ObservedFishSplashes = Animation->FishCastSplashes();
         ObservedFishLifts = Animation->FishCatchLifts();
     }
-    if (Session.phase == FishingPresentedPhase) return;
+    if (Session.phase == FishingPresentedPhase && !bNewCast) return;
     EHomesteadFishingPose Pose = EHomesteadFishingPose::None;
     switch (Session.phase)
     {

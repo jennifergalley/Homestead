@@ -38,6 +38,8 @@ constexpr double MaxHour = 1000000.0;
 constexpr double TimeStep = 1.0 / 120.0;
 constexpr int MaxObjects = 4096;
 constexpr int MaxStock = ChestCapacity;
+// Stored water has no capacity cost but may have its own groups beside a full chest.
+constexpr int MaxContainerLayoutEntries = ChestCapacity + MaxStock;
 constexpr double DropReach = 220.0;
 constexpr double DropMergeReach = 120.0;
 constexpr double MaxFuel = 48.0;
@@ -725,6 +727,7 @@ Result ValidateInventory(const State& state, bool allowLegacySeedGroups = false)
     if (!CanAllocate(state.nextWearableId) || !CanAllocate(state.nextGroupId) || state.wearables.size() > MaxObjects)
         return Bad("The wardrobe identity allocator is invalid or exhausted.");
     std::set<int> ids, groupIds, displayed;
+    std::size_t packetGroups = 0, stackedGroups = 0;
     std::array<int, EquipmentSlotCount> equipment{};
     for (const auto& item : state.wearables)
     {
@@ -784,6 +787,8 @@ Result ValidateInventory(const State& state, bool allowLegacySeedGroups = false)
                     || (!allowLegacySeedGroups && IsSeedPacket(entry.item) && entry.quantity != 1))
                     return Bad("A fungible group has invalid identity, item or quantity.");
                 total[static_cast<int>(entry.item)] += entry.quantity;
+                if (IsSeedPacket(entry.item) && entry.quantity == 1) ++packetGroups;
+                else ++stackedGroups;
             }
         }
         if (total != *stock) return Bad("Inventory layout does not partition the stored quantities.");
@@ -804,7 +809,8 @@ Result ValidateInventory(const State& state, bool allowLegacySeedGroups = false)
         }
         else if (!piece.layout.empty()) return Bad("Only chests may contain inventory layout.");
     }
-    if (groupIds.size() > MaxObjects) return Bad("The homestead has reached its inventory group limit.");
+    if (stackedGroups > MaxObjects || (!allowLegacySeedGroups && packetGroups > SeedPackets::MaxPacketGroups))
+        return Bad("The homestead has reached its inventory group limit.");
     std::set<int> dropIds, droppedWearables;
     if (state.worldDrops.size() > MaxWorldDrops) return Bad("The world drop limit is exceeded.");
     for (const auto& drop : state.worldDrops)
@@ -857,7 +863,7 @@ void WriteLayout(std::ostream& output, const InventoryLayout& layout)
 bool ReadLayout(std::istream& input, InventoryLayout& layout)
 {
     int count = 0;
-    if (!(input >> count) || count < 0 || count > ChestCapacity) return false;
+    if (!(input >> count) || count < 0 || count > MaxContainerLayoutEntries) return false;
     for (int i = 0; i < count; ++i)
     {
         LayoutEntry entry;
@@ -3494,6 +3500,9 @@ Result Simulation::Deserialize(const std::string& data)
     if (!PackRowRules::RestoreSlots(candidate)) return invalid();
     const auto inventory = ValidateInventory(candidate, true);
     if (!inventory) return {false, inventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};
+    if (SeedPackets::CountPackets(candidate) > SeedPackets::MaxPacketGroups)
+        return {false, "This test save has more seed packets than this build supports. Your current game and save were not changed.",
+            ResultCode::Capacity, revision_};
     if (!SeedPackets::NormalizeSavedGroups(candidate)) return invalid();
     const auto normalizedInventory = ValidateInventory(candidate);
     if (!normalizedInventory)

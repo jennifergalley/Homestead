@@ -4,6 +4,7 @@
 #include "HomesteadRecipes.h"
 #include "HomesteadSimulation.h"
 #include "../Source/SurvivalGame/HomesteadOriginalItemArt.h"
+#include "../Source/SurvivalGame/HomesteadFishingPresentationRules.h"
 
 #include <algorithm>
 #include <cmath>
@@ -266,6 +267,34 @@ void TimingAndCancellation()
     CHECK(sim.FishingCast().phase == FishingPhase::Idle && sim.Count(Item::RiverTrout) == 0 && sim.Count(Item::RiverSalmon) == 0);
 }
 
+void PresentationCompletionAndRecast()
+{
+    using namespace Homestead;
+    using HomesteadFishingPresentationRules::FinishedMiss;
+    using HomesteadFishingPresentationRules::NewCast;
+    auto sim = Fisher(FishingWater::River);
+    OK(sim.BeginFishing({0, 0}));
+    const auto first = sim.FishingCast().token;
+    CHECK(NewCast(sim.FishingCast(), 0));
+    CHECK(!NewCast(sim.FishingCast(), first));
+    OK(sim.CancelFishing());
+    CHECK(!NewCast(sim.FishingCast(), first));
+    OK(sim.BeginFishing({0, 0}));
+    CHECK(sim.FishingCast().phase == FishingPhase::Casting && NewCast(sim.FishingCast(), first));
+    CHECK(sim.FishingCast().elapsed == 0.0);
+    CHECK(!sim.FishingAnimationContact(FishingContact::CastSplash, first, {0, 0}));
+    CHECK(!sim.FishingAnimationContact(FishingContact::CastSplash, sim.FishingCast().token, {0, 0}));
+    OK(sim.AdvanceFishing(Fishing::CastSplashSeconds, {0, 0}));
+    OK(sim.FishingAnimationContact(FishingContact::CastSplash, sim.FishingCast().token, {0, 0}));
+    CHECK(!NewCast(sim.FishingCast(), first));
+    CHECK(!FinishedMiss(true, true, 7.4, 8.0, 0.0001));
+    CHECK(!FinishedMiss(true, true, 7.99, 8.0, 0.0001));
+    CHECK(FinishedMiss(true, true, 8.0 - 0.0001, 8.0, 0.0001));
+    CHECK(FinishedMiss(true, true, 8.0, 8.0, 0.0001));
+    CHECK(FinishedMiss(true, false, -1.0, 8.0, 0.0001));
+    CHECK(!FinishedMiss(false, true, 8.0, 8.0, 0.0001));
+}
+
 void Preparations()
 {
     using namespace Homestead;
@@ -385,6 +414,7 @@ int main()
     FishingTests::PoleAndSales();
     FishingTests::HabitatsAndReplay();
     FishingTests::TimingAndCancellation();
+    FishingTests::PresentationCompletionAndRecast();
     FishingTests::Preparations();
     FishingTests::OriginalArtMappings();
     std::cout << "Fishing price, habitats, timing, cancellation, food and persistence: "

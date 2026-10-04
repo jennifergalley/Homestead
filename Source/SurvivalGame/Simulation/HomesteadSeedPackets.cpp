@@ -7,6 +7,21 @@ namespace Homestead
 {
 namespace SeedPackets
 {
+std::size_t CountPackets(const State& state)
+{
+    std::size_t total = 0;
+    const auto count = [&total](const InventoryLayout& layout)
+    {
+        for (const auto& entry : layout)
+            if (entry.wearableId == 0 && IsSeedPacket(entry.item) && entry.quantity > 0)
+                total += static_cast<std::size_t>(entry.quantity);
+    };
+    count(state.inventoryLayout);
+    for (const auto& piece : state.structures)
+        if (piece.kind == Piece::Chest) count(piece.layout);
+    return total;
+}
+
 bool SplitGroups(State& state, InventoryLayout& layout)
 {
     InventoryLayout packets;
@@ -26,6 +41,7 @@ bool SplitGroups(State& state, InventoryLayout& layout)
 
 bool NormalizeSavedGroups(State& state)
 {
+    if (CountPackets(state) > MaxPacketGroups) return false;
     if (!SplitGroups(state, state.inventoryLayout)) return false;
     for (auto& piece : state.structures)
         if (piece.kind == Piece::Chest && !SplitGroups(state, piece.layout)) return false;
