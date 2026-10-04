@@ -60,6 +60,20 @@
       "launchContextTier": "default",
       "contextEvidence": "Lane handoff identifies a 31-call, 121013240000 nano-AIU incomplete snapshot through event 69423; final delivery-tail capture remains pending. Actual runtime context is unknown.",
       "boundaryEvidence": "Planner-only feature work. Non-agent Node, loopback fixture, and optional isolated browser helpers have no LLM usage; no review, gameplay, save, or Unreal allocation is included."
+    },
+    {
+      "sessionId": "1b0e10a4-09b5-458e-b9de-098cce831b07",
+      "projectSessionId": "f84c58de-15cd-457f-bdc3-450ac4ecd859",
+      "task": "travel-rest-feedback-bundle",
+      "category": "implementation",
+      "since": "2026-10-04T01:58:37.147Z",
+      "throughEventId": 69498,
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Incomplete handoff snapshot: 44 high-effort calls / 154106870000 nano-AIU plus one missing-effort event 69443 / 7137160000 nano-AIU. Actual runtime context and billing reconciliation are unknown.",
+      "boundaryEvidence": "Includes planning, implementation, native checks, one test-fixture failure/retry, and handoff across the three selected feedback items. No helpers or future editor compile/review allocation; later handoff/push calls remain uncaptured."
     }
   ]
 }

@@ -54,6 +54,17 @@ reported separately and does not justify restoring unrelated planner UI.
   released.
 - This slot performed no Unreal, UBT, UAT, Live Coding, package, release, gameplay, or save work.
 
+## Travel Rest checkpoint
+
+- Checkpoint `b37b0070` on `jennifergalley-travel-rest-agent` is pushed but **not admitted**:
+  editor compile, independent review, and Jenny's player checks remain pending while game compilation
+  is held. Do not merge it yet.
+- Five regression suites and the new 286-check TravelRest suite passed after a test-fixture
+  Saturday/Sunday correction and isolated native retry. The approved optional travel record,
+  transactional malformed/duplicate refusal, and no-save/bake-bump boundary remain in force.
+- Estate time advancement does not force a low-energy doze. Sunday wait retains normal awake energy
+  drain and crop/season consequences, without granting rest.
+
 Travel Rest may append an optional `travel <count> <id>...` section of sorted, unique destination
 IDs 1..6; Manor (0) remains implicit. Missing legacy sections lock every non-Manor destination, and
 malformed or duplicate sections refuse transactionally. This does not bump the save or bake version.
