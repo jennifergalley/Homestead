@@ -310,6 +310,14 @@ and **not** import/admission-ready; broth source transmission is not a UE materi
 spoon grip is unverified. Runtime spoon seating and liquid material are future Integration gates.
 The existing eight shader ASTs are unchanged, and there are no fish/bake/animation/gameplay/save
 changes. Farming's build02 snapshot is provisionally 698 calls (event `70962`).
+Held WIP checkpoint `50f155b9` preserves `BerryCompoteSourceProof`: `58,972/10,528` triangles,
+serving/portion dimensions `[11.8,11.8,3.26]/[2.25,14.6,1.12]` cm, copied source, four viewed 4K
+frames, FBX, and passing fixtures. It remains molded/gel/procedural and **not** art/import-ready.
+There are six source prototypes, 10 unstarted dishes, and zero approvals. Cabbage-spoon extraction
+geometry, `pcoord`, and material-index fixtures remain identical/current; the prior 12 shader and four
+geometry-function ASTs remain unchanged. There is no fish/bake/animation/gameplay/save change.
+Farming's build02 snapshot is provisionally 726 calls (event `71003`), with more than 12 remaining
+source hours plus unknown gates.
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
 prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four
