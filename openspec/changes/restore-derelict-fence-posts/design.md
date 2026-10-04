@@ -4,6 +4,13 @@
 
 See proposal.md. Baseline `490b9d22` uses `AHomesteadDerelictFarm`, a no-tick scenery actor that rebuilds separate ISM batches on construction/BeginPlay. Post/rail placement is not linked to Simulation clearing. The authorized feedback screenshot retains dark mortise liners and small cracks, but not the outer post body.
 
+Confirmed root cause: the recipe's sequential EXACT boolean collapsed the hewn post body at
+the second mortise for this seed. Fishing Art repaired the joined mortise cutter with a guarded
+EXACT/FLOAT fallback, rebuilt and reimported only the original upright asset at `3e994653`.
+Environment cherry-picked that isolated commit as `80d6a496`; no fence C++ repair was needed.
+Owned fresh-editor PIE shows the post bodies and seated rails, with all six fence batches
+unchanged through actual bramble clearing, adjacent tilling, walking back and save/reload.
+
 ## Goals / Non-Goals
 
 **Goals:** Fix the actual rendering defect and preserve existing support ownership.
