@@ -442,7 +442,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
                     + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
                     [
                         SNew(SVerticalBox)
-                        + SVerticalBox::Slot().AutoHeight()[Label(TEXT("Pascoe's General Store"), 22, ShopInk)]
+                        + SVerticalBox::Slot().AutoHeight()[Label(TEXT("Trethewey's General Store"), 22, ShopInk)]
                         + SVerticalBox::Slot().AutoHeight()[Label(Hours, 13, ShopMuted)]
                     ]
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 8, 0)

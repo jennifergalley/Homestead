@@ -36,7 +36,7 @@ AHomesteadShopkeeper::AHomesteadShopkeeper()
     Label->SetVerticalAlignment(EVRTA_TextBottom);
     Label->SetWorldSize(9.0f);
     Label->SetTextRenderColor(FColor(236, 222, 190));
-    Label->SetText(FText::FromString(TEXT("Mrs. Martha Pascoe\n(stand-in body)")));
+    Label->SetText(FText::FromString(TEXT("Mr. Josiah Trethewey\n(stand-in body)")));
     Label->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     Label->SetCastShadow(false);
 }

@@ -2,7 +2,7 @@
 
 ## Why
 
-Jenny selected crop sales for measured build `20261002-measured-01`: harvest produce, take it to Pascoe's, and receive coins. The six period crops already have store buyers; legacy grown roots and berries do not.
+Jenny selected crop sales for measured build `20261002-measured-01`: harvest produce, take it to Trethewey's, and receive coins. The six period crops already have store buyers; legacy grown roots and berries do not.
 
 ## What Changes
 

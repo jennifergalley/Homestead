@@ -666,7 +666,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         }, nullptr);
     List.Last().Pending = TEXT("Water's Sunday closing (jennifergalley-sunday-closing @077a7a3c / water-slot-1001)");
     List.Last().bKeepWorld = true;
-    Add(TEXT("focus-shopkeeper"), TEXT("At the counter facing the shopkeeper: her name and the keyed talk/trade hint."),
+    Add(TEXT("focus-shopkeeper"), TEXT("At the counter facing the shopkeeper: his name and the keyed talk/trade hint."),
         ECover::Focus, 4, Counter, nullptr);
     Add(TEXT("focus-sign"), TEXT("Facing the Gateway road sign: 'Road sign | Town / Manor' and the keyed 'Choose a way'."),
         ECover::Focus, 5, Sign(TEXT("GatewayRoadSign"), 180.0), nullptr);

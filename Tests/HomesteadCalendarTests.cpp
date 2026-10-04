@@ -248,7 +248,7 @@ void NoHungerOnTheEstate()
     CHECK(!sim.GetState().failed && sim.GetState().hunger == 100.0);
     OK(sim.SetEnergy(20.0));
     OK(sim.Sleep(2.0, bedSide, {1, 0}));
-    CHECK(Close(sim.GetState().energy, 20.0 + 2.0 * Exertion::SleepPerHour));
+    CHECK(Close(sim.GetState().energy, 100.0));
     OK(sim.GrantItems(Item::DiggingStick, 1));
     const int gx = GardenCell(Spawn.x) - 20, gy = GardenCell(Spawn.y) - 20;
     OK(sim.SetEnergy(50.0));
@@ -561,6 +561,27 @@ void FoodLabelsAndWellFedBadge()
     CHECK(Food::EffectLabel(woodland, Item::Pasty) == "+40 Energy");
     CHECK(Food::PackUseText(woodland, Item::Pasty) == "Food: +40 Energy each. Eat one from your pack.");
 }
+
+// Every cooked or prepared Meal in the catalogue starts Well fed; Snacks and raw crops never do.
+void EveryMealGrantsWellFed()
+{
+    int meals = 0;
+    for (int index = 0; index < ItemCount; ++index)
+    {
+        const Item item = static_cast<Item>(index);
+        Simulation sim = Estate();
+        sim.SkipToHourOfDay(11.5);
+        OK(sim.GrantItems(item, 1));
+        OK(sim.SetEnergy(10.0));
+        const bool meal = FoodClassOf(item) == FoodClass::Meal;
+        const Result eaten = sim.Eat(item);
+        if (!IsEdible(item)) continue;
+        CHECK(eaten.ok && sim.IsWellFed() == meal);
+        CHECK(!meal || Close(sim.GetState().wellFedUntilHour, sim.GetState().hour + Food::WellFedHours));
+        meals += meal ? 1 : 0;
+    }
+    CHECK(meals >= 11);
+}
 }
 
 int main()
@@ -572,6 +593,7 @@ int main()
     Run("snacks and meals restore Energy; meals make her Well fed", EatingForEnergy);
     Run("Well fed runs across midnight and saves only while active", WellFedAcrossMidnightAndSaves);
     Run("food labels and the Well fed badge read what eating does now", FoodLabelsAndWellFedBadge);
+    Run("every cooked Meal grants Well fed", EveryMealGrantsWellFed);
     Run("crops grow in season and wither when it ends", CropSeasonsAndWithering);
     std::cout << cases << " scenarios, " << checks << " explicit checks passed.\n";
     return 0;

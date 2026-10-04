@@ -17,7 +17,7 @@ display-only conversion; the historic dollar-era receipts remain intact as evide
 1. Start a new estate game. The purse, a coin icon in the vitals stack under the calendar at the top right, reads **$10.00**.
 2. Walk to the town square, about 1.7 km east of the house along the road. The general store is on
    the north side, with a green **GENERAL STORE** board over the door.
-3. Climb the steps and go inside. At the counter the prompt reads **Talk to Mrs. Pascoe**. Press
+3. Climb the steps and go inside. At the counter the prompt reads **Talk to Mr. Trethewey**. Press
    E, A or click to see her greeting, then **Continue** to open the shop. The game pauses while it's
    open.
 4. **Sell** tab: pick an item, set the quantity (the Quantity dialog is the field book's), check
@@ -37,7 +37,7 @@ B or Escape backs out. The mouse works throughout.
 
 ## Placeholders
 
-- Mrs. Martha Pascoe, the $10.00 start and the estate name "Trevennor" are placeholders until
+- Mr. Josiah Trethewey, the $10.00 start and the estate name "Trevennor" are placeholders until
   Jenny renames them.
 - The shopkeeper is a **stand-in body**, the heroine mesh with an apron, labelled over her head.
   Her MetaHuman (task 3.2) waits for Jenny's Epic sign-in.

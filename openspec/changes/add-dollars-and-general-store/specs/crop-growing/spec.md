@@ -3,7 +3,7 @@
 ## MODIFIED Requirements
 
 ### Requirement: Period crops are sold as seed at the general store
-Pascoe's general store SHALL sell seed for turnips, carrots, potatoes, broad beans, strawberries and cabbage. Each crop SHALL yield its own produce, which she can eat or sell at the store. The legacy root and berry crops SHALL keep working, and the General Store SHALL also buy their produce at its existing listed price.
+Trethewey's general store SHALL sell seed for turnips, carrots, potatoes, broad beans, strawberries and cabbage. Each crop SHALL yield its own produce, which she can eat or sell at the store. The legacy root and berry crops SHALL keep working, and the General Store SHALL also buy their produce at its existing listed price.
 
 #### Scenario: Buying and sowing seed
 - **WHEN** she buys carrot seed at the store and sows it

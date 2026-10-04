@@ -4383,8 +4383,12 @@ void SleepOptionPolicy()
     Edit(sleeper, [](State& state) { state.hour = 29.875; state.energy = 50.0; });
     UnchangedFailure(sleeper, [&] { return sleeper.Sleep(0.125, Home, {1, 0}); });
     OK(sleeper.Sleep(shortRest->hours, Home, {1, 0}, true));
-    CHECK(Close(sleeper.GetState().hour, 30.0) && Close(sleeper.GetState().energy, 51.25));
+    CHECK(Close(sleeper.GetState().hour, 30.0) && Close(sleeper.GetState().energy, 100.0));
     UnchangedFailure(sleeper, [&] { return sleeper.Sleep(0.125, Home, {1, 0}, true); });
+    // Sleep always fully restores energy, however short the offer (Jenny, 2026-10-04).
+    Edit(sleeper, [](State& state) { state.hour = 14.0; state.energy = 3.0; });
+    OK(sleeper.Sleep(0.25, Home, {1, 0}));
+    CHECK(sleeper.GetState().energy == 100.0);
     // Rain at any hour (Jenny, 2026-09-30: "let it randomize throughout the day/night cycle"). Each calendar
     // day may draw one spell of 1-8 h starting at any hour, free to run past midnight and past 06:00, with
     // cloud building before it and clearing after; spells never merge; autumn and winter are wetter; the
@@ -4505,7 +4509,9 @@ void SleepOptionPolicy()
     CHECK(owlRest && Close(owlRest->hours, 1.0));
     OK(owlSim.Sleep(owlRest->hours, Home, {1, 0}));
     CHECK(Close(owlSim.GetState().hour, 30.0));
-    CHECK(Close(owlSim.GetState().energy, 15.0) && !owlSim.GetState().failed);
+    CHECK(Close(owlSim.GetState().energy, 100.0) && !owlSim.GetState().failed);
+    // Sleep fills the bar, so reset it to prove the daytime offer still sizes itself to the deficit.
+    Edit(owlSim, [](State& state) { state.energy = 15.0; });
     const auto afterDawn = BedSleepOption(owlSim.GetState().hour, owlSim.GetState().energy);
     if (!afterDawn || !Close(afterDawn->hours, 8.5))
         std::cerr << "After dawn: hour=" << owlSim.GetState().hour

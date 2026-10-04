@@ -23,7 +23,7 @@ FString AHomesteadController::GreetingFor(const Homestead::Shop& Shop) const
 {
     const FString Estate = EstateName();
     if (Shop.greetings == 0)
-        return FString::Printf(TEXT("Well now, you'll be the new lady up at %s! Martha Pascoe. Word travels quick in a town "
+        return FString::Printf(TEXT("Well now, you'll be the new lady up at %s! Josiah Trethewey. Word travels quick in a village "
             "this size. If it's sold in Cornwall I've likely a shelf of it, and anything you bring down from the estate, "
             "set it on the counter and I'll give you a fair price."), *Estate);
     const double Hour = FMath::Fmod(State().hour, 24.0);

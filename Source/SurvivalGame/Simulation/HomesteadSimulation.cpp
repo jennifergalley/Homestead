@@ -3111,6 +3111,8 @@ Result Simulation::Sleep(double hours, Point player, Point facing, bool dawnLimi
         hours -= done;
     }
     if (state_.failed) return Bad("Your rest was interrupted by a critical need. Load your recent checkpoint.");
+    // Sleep always fully restores energy, however long the bed offer ran (Jenny, 2026-10-04).
+    state_.energy = 100.0;
     // Slept through 6 AM: the day's weeds are up when she wakes.
     Crops::GrowDailyWeeds(state_, Crops::WeedDay(state_.hour) - weedDay);
     return Good("You wake rested. Your garden and fires continued through the night.");
