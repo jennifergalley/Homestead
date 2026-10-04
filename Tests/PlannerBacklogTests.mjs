@@ -191,7 +191,6 @@ test("delivery registry marks shipped feedback without closing player acceptance
     assert.equal(feature.deliveryBuildId, "20261003-measured-02");
     assert.equal(feature.playerAcceptance, "pending");
     assert.equal(feature.slot, null);
-    assert.equal(feature.carriedFrom, null);
     assert.equal(feature.nextBuild, false);
     assert.equal(await readFile(priorityPath, "utf8"), priorityBefore);
 });
@@ -251,7 +250,7 @@ test("editing preserves identity, screenshot, other entries, document metadata a
     assert.match(await readFile(backlogMdPath(root), "utf8"), /New description/);
     const planner = await loadPlanner(root, new Date(2026, 9, 3, 18).getTime());
     assert.equal(planner.features[0].id, `backlog:${first.id}`);
-    assert.equal(planner.features[0].slot, "2026-10-03 21:00");
+    assert.equal(planner.features[0].slot, "next");
     assert.equal(planner.features.length, 1);
 });
 

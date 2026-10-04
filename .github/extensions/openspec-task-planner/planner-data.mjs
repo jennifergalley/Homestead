@@ -4,6 +4,7 @@ import { basename, dirname, join, relative } from "node:path";
 import { loadUsageReports } from "./accounting-data.mjs";
 import { loadBuildCostView } from "./cost-view.mjs";
 import { parseSlotMinutes, shipmentTiming } from "./build-time.mjs";
+import { BUILD_SLOTS, isBuildSlotKey, migrateSlots, slotKeyForHeading, slotLabel } from "./build-slots.mjs";
 
 const activeWindowMs = 15 * 60 * 1000;
 const statusOrder = { active: 0, paused: 1, proposed: 2, complete: 3 };
@@ -93,7 +94,7 @@ function parseBuilds(markdown) {
             current = null;
             if (!inLater) {
                 const [date, slot] = heading[1].split(/\s+—\s+/, 2);
-                current = { date: date?.trim() ?? heading[1].trim(), slot: slot?.trim() ?? "", sha: "pending", status: "planned", ships: [], shippedFeatures: [] };
+                current = { heading: heading[1].trim(), date: date?.trim() ?? heading[1].trim(), slot: slot?.trim() ?? "", sha: "pending", status: "planned", ships: [], shippedFeatures: [] };
                 entries.push(current);
             }
             continue;
@@ -134,7 +135,7 @@ function parseBuilds(markdown) {
     return { entries, later };
 }
 
-async function loadBuilds(projectRoot) {
+export async function loadBuilds(projectRoot) {
     try {
         return parseBuilds(await readFile(join(projectRoot, "docs", "handoff", "builds.md"), "utf8"));
     } catch (error) {
@@ -164,15 +165,10 @@ async function loadDeliveryRegistry(projectRoot) {
     }]));
 }
 
-const slotMinutes = [7 * 60 + 30, 16 * 60, 21 * 60];
 const pad = (value) => String(value).padStart(2, "0");
-const dateKey = (date) => `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
-function slotTimeText(minutes) {
-    const hour = Math.floor(minutes / 60), minute = minutes % 60;
-    return `${hour % 12 || 12}${minute ? ":" + pad(minute) : ""} ${hour < 12 ? "AM" : "PM"}`;
-}
-
+// Shipped builds keep their exact "YYYY-MM-DD — h:mm AM/PM" headings; this key
+// ("YYYY-MM-DD HH:mm") is how old fixed-time slot assignments are matched to them.
 export function buildKey(build) {
     const minutes = parseSlotMinutes(build.slot);
     return minutes === null || !/^\d{4}-\d{2}-\d{2}$/.test(build.date) ? null
@@ -188,6 +184,7 @@ const namedSlotMinutes = { morning: 9 * 60, midday: 12 * 60, noon: 12 * 60, afte
 
 function buildTime(build) {
     if (build.status === "delivered") return shipmentTiming(build).time ?? NaN;
+    if (build.status === "planned") return NaN;
     const exact = keyTime(buildKey(build));
     if (Number.isFinite(exact)) return exact;
     const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(build.date ?? "");
@@ -196,64 +193,42 @@ function buildTime(build) {
     return new Date(+day[1], +day[2] - 1, +day[3], Math.floor(minutes / 60), minutes % 60).getTime();
 }
 
-function slotLabel(time, now) {
-    const date = new Date(time);
-    const today = new Date(now);
-    const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-    const minutes = date.getHours() * 60 + date.getMinutes();
-    const day = dateKey(date) === dateKey(today) ? (minutes >= 18 * 60 ? "Tonight" : "Today")
-        : dateKey(date) === dateKey(tomorrow) ? "Tomorrow"
-        : date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-    return `${day} ${slotTimeText(minutes)}`;
+export function deliveredBuildKeys(builds) {
+    return new Set(builds.entries.filter((build) => build.status === "delivered").map(buildKey).filter(Boolean));
 }
 
-export function upcomingSlots(builds, now = Date.now(), count = 3) {
-    const delivered = new Set(builds.entries.filter((build) => build.status === "delivered").map(buildKey).filter(Boolean));
-    const slots = [];
-    const start = new Date(now);
-    for (let day = 0; slots.length < count && day < 14; day++) {
-        for (const minutes of slotMinutes) {
-            const time = new Date(start.getFullYear(), start.getMonth(), start.getDate() + day, Math.floor(minutes / 60), minutes % 60).getTime();
-            const key = `${dateKey(new Date(time))} ${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
-            if (time <= now || delivered.has(key)) continue;
-            slots.push({ key, label: slotLabel(time, now), date: dateKey(new Date(time)), slot: slotTimeText(minutes) });
-            if (slots.length === count) break;
+export function priorityPath(projectRoot) {
+    return join(projectRoot, "docs", "handoff", "priority.json");
+}
+
+// Reads priority.json and migrates any fixed-time or legacy `nextBuild` entries
+// onto the two named slots; the file itself is only rewritten by the next save.
+// The board tolerates a bad file (empty state); `strict` callers that rewrite
+// the file must not, so a corrupt document throws instead of being replaced.
+export async function loadPriority(projectRoot, builds, { strict = false } = {}) {
+    let raw = {};
+    try {
+        raw = JSON.parse(await readFile(priorityPath(projectRoot), "utf8"));
+        if (strict && (raw === null || typeof raw !== "object" || Array.isArray(raw))) {
+            throw new Error("priority.json must be a JSON object.");
         }
+    } catch (error) {
+        if (strict && error?.code !== "ENOENT") throw error;
+        raw = {};
     }
-    return slots;
+    return migrateSlots(raw, deliveredBuildKeys(builds));
 }
 
-export function scheduleFeatures(features, priority, builds, now = Date.now()) {
-    const slots = upcomingSlots(builds, now, 3);
-    const open = new Set(slots.map((slot) => slot.key));
-    const labels = new Map(slots.map((slot) => [slot.key, slot.label]));
+export function scheduleFeatures(features, priority) {
     const assigned = priority.slots && typeof priority.slots === "object" ? priority.slots : {};
-    const legacyNext = new Set(Array.isArray(priority.nextBuild) ? priority.nextBuild : []);
     for (const feature of features) {
-        if (feature.deliveryStatus === "shipped") {
-            feature.carriedFrom = null;
-            feature.slot = null;
-            feature.slotLabel = null;
-            feature.nextBuild = false;
-            continue;
-        }
-        let key = typeof assigned[feature.id] === "string" ? assigned[feature.id]
-            : legacyNext.has(feature.id) && slots[0] ? slots[0].key : null;
-        feature.carriedFrom = null;
-        if (key && !open.has(key) && feature.status !== "complete") {
-            const time = keyTime(key);
-            feature.carriedFrom = Number.isFinite(time)
-                ? new Date(time).toLocaleDateString("en-US", { weekday: "short" }) + " " + slotTimeText(new Date(time).getHours() * 60 + new Date(time).getMinutes())
-                : key;
-            key = slots[0]?.key ?? null;
-        }
+        const key = feature.deliveryStatus !== "shipped" && isBuildSlotKey(assigned[feature.id]) ? assigned[feature.id] : null;
         feature.slot = key;
-        feature.slotLabel = key ? labels.get(key) ?? key : null;
+        feature.slotLabel = slotLabel(key);
         feature.nextBuild = !!key;
     }
-    return slots;
+    return BUILD_SLOTS.map((slot) => ({ ...slot }));
 }
-
 async function readActiveChange(projectRoot, now) {
     let run;
     let status;
@@ -309,11 +284,10 @@ function applyDeliveryRegistry(features, registry) {
 export async function loadPlanner(projectRoot, now = Date.now()) {
     const taskFiles = await findTaskFiles(join(projectRoot, "openspec", "changes"));
     const activeChange = await readActiveChange(projectRoot, now);
-    const [features, builds, priority, backlogEntries, accounting, deliveryRegistry] = await Promise.all([
+    const builds = await loadBuilds(projectRoot);
+    const [features, priority, backlogEntries, accounting, deliveryRegistry] = await Promise.all([
         Promise.all(taskFiles.map((path) => loadFeature(projectRoot, path, activeChange))),
-        loadBuilds(projectRoot),
-        readFile(join(projectRoot, "docs", "handoff", "priority.json"), "utf8")
-            .then((text) => JSON.parse(text)).catch(() => ({})),
+        loadPriority(projectRoot, builds),
         loadBacklogInbox(projectRoot),
         loadUsageReports(projectRoot),
         loadDeliveryRegistry(projectRoot),
@@ -325,21 +299,36 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
     for (const entry of backlogEntries) features.push(backlogFeatureFromEntry(entry));
     const costView = await loadBuildCostView(projectRoot, accounting, builds, now);
     applyDeliveryRegistry(features, deliveryRegistry);
-    const order = new Map((Array.isArray(priority.order) ? priority.order : []).map((id, index) => [id, index]));
-    const removed = new Set(Array.isArray(priority.removed) ? priority.removed : []);
+    const order = new Map(priority.order.map((id, index) => [id, index]));
+    const removed = new Set(priority.removed);
     for (let i = features.length - 1; i >= 0; i--) if (removed.has(features[i].id)) features.splice(i, 1);
-    const slots = scheduleFeatures(features, priority, builds, now);
+    const slots = scheduleFeatures(features, priority);
+    const plannedSeen = new Set();
     for (const build of builds.entries) {
         build.key = buildKey(build);
         build.time = buildTime(build);
-        if (build.status === "delivered") {
+        if (build.status === "planned") {
+            const key = slotKeyForHeading(build.heading);
+            build.key = null;
+            if (!key) {
+                build.dataError = `Planned builds must be headed "${BUILD_SLOTS.map((slot) => slot.label).join('" or "')}", not "${build.heading}". Correct the build changelist.`;
+            } else if (plannedSeen.has(key)) {
+                build.dataError = `More than one planned "${slotLabel(key)}" card. Keep one in the build changelist.`;
+            } else {
+                build.key = key;
+                build.label = slotLabel(key);
+                plannedSeen.add(key);
+            }
+        } else if (build.status === "delivered") {
             const shipment = costView.shipped.find((value) => value.buildId && value.buildId === build.buildId);
             Object.assign(build, shipment ? { label: shipment.label, time: shipment.time, dataError: shipment.dataError }
                 : shipmentTiming(build));
         }
     }
-    builds.entries.sort((a, b) => (Number.isFinite(b.time) ? b.time : -Infinity)
-        - (Number.isFinite(a.time) ? a.time : -Infinity));
+    // Planned cards first (Next build, Build after next, then malformed ones so the error shows), then shipped history newest-first.
+    const plannedRank = (build) => build.status !== "planned" ? 3 : build.key ? BUILD_SLOTS.findIndex((slot) => slot.key === build.key) : 2;
+    builds.entries.sort((a, b) => plannedRank(a) - plannedRank(b)
+        || (Number.isFinite(b.time) ? b.time : -Infinity) - (Number.isFinite(a.time) ? a.time : -Infinity));
     features.sort((a, b) => {
         const ao = order.has(a.id) ? order.get(a.id) : defaultFeatureRank(a);
         const bo = order.has(b.id) ? order.get(b.id) : defaultFeatureRank(b);
@@ -433,7 +422,7 @@ export function backlogEntryRevision(entry) {
     return createHash("sha256").update(JSON.stringify(entry)).digest("hex");
 }
 
-async function atomicBacklogWrite(path, content) {
+export async function atomicBacklogWrite(path, content) {
     await mkdir(dirname(path), { recursive: true });
     const temporary = `${path}.${randomUUID()}.tmp`;
     try {

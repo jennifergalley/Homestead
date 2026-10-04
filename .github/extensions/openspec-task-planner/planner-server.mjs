@@ -1,11 +1,12 @@
 import { createServer } from "node:http";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { loadPlanner, loadBacklogInbox, addBacklogEntry, updateBacklogEntry, toBacklogClientEntry, backlogAttachmentsDir, BACKLOG_IMAGE_TYPES } from "./planner-data.mjs";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { isBuildSlotKey } from "./build-slots.mjs";
+import { loadPlanner, loadBuilds, loadPriority, atomicBacklogWrite, priorityPath as priorityFile, loadBacklogInbox, addBacklogEntry, updateBacklogEntry, toBacklogClientEntry, backlogAttachmentsDir, BACKLOG_IMAGE_TYPES } from "./planner-data.mjs";
 import { renderPlannerHtml } from "./planner-html.mjs";
 
 export async function startPlannerServer(projectRoot, instanceId, session) {
-    const priorityPath = join(projectRoot, "docs", "handoff", "priority.json");
+    const priorityPath = priorityFile(projectRoot);
     // Jenny's backlog-entry form, and reordering/scheduling in this canvas, are
     // deliberately agent-free: they write straight to disk (priority.json,
     // backlog-inbox.json, backlog.md) and the orchestrator picks up the change
@@ -13,30 +14,11 @@ export async function startPlannerServer(projectRoot, instanceId, session) {
     const BACKLOG_BODY_MAX_BYTES = 11 * 1024 * 1024; // ~8 MB image, base64-inflated, plus JSON overhead
 
     async function readPriority() {
-        try {
-            const value = JSON.parse(await readFile(priorityPath, "utf8"));
-            return {
-                order: Array.isArray(value.order) ? value.order : [],
-                nextBuild: Array.isArray(value.nextBuild) ? value.nextBuild : [],
-                slots: value.slots && typeof value.slots === "object" ? value.slots : {},
-                removed: Array.isArray(value.removed) ? value.removed : [],
-            };
-        } catch {
-            return { order: [], nextBuild: [], slots: {}, removed: [] };
-        }
-    }
-
-    async function migrateNextBuild(priority) {
-        if (!priority.nextBuild.length) return;
-        const planner = await loadPlanner(projectRoot);
-        const first = planner.slots[0]?.key;
-        for (const id of priority.nextBuild) if (first && !priority.slots[id]) priority.slots[id] = first;
-        priority.nextBuild = [];
+        return loadPriority(projectRoot, await loadBuilds(projectRoot));
     }
 
     async function writePriority(priority) {
-        await mkdir(dirname(priorityPath), { recursive: true });
-        await writeFile(priorityPath, JSON.stringify({ ...priority, updated: new Date().toISOString() }, null, 2) + "\n", "utf8");
+        await atomicBacklogWrite(priorityPath, JSON.stringify({ ...priority, updated: new Date().toISOString() }, null, 2) + "\n");
     }
 
     async function readBody(req, maxBytes = 200000) {
@@ -89,21 +71,17 @@ export async function startPlannerServer(projectRoot, instanceId, session) {
                     priority.order = body.order.filter((id) => typeof id === "string").slice(0, 500);
                 }
                 if (body.assign && typeof body.assign.id === "string") {
-                    await migrateNextBuild(priority);
                     const { id, slot } = body.assign;
-                    const planner = await loadPlanner(projectRoot);
-                    const target = planner.slots.find((value) => value.key === slot);
-                    if (slot && !target) {
-                        sendJson(res, { error: "That release is no longer open" }, 400);
+                    if (slot && !isBuildSlotKey(slot)) {
+                        sendJson(res, { error: "Choose Next build or Build after next" }, 400);
                         return;
                     }
-                    if (target) priority.slots[id] = target.key;
+                    if (slot) priority.slots[id] = slot;
                     else delete priority.slots[id];
                 }
                 if (typeof body.remove === "string") {
                     const id = body.remove;
-                    priority.removed = [...new Set([...(priority.removed ?? []), id])];
-                    priority.nextBuild = priority.nextBuild.filter((value) => value !== id);
+                    priority.removed = [...new Set([...(priority.removed), id])];
                     delete priority.slots[id];
                     priority.order = priority.order.filter((value) => value !== id);
                 }

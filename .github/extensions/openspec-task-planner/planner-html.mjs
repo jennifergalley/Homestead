@@ -308,8 +308,7 @@ export function renderPlannerHtml() {
       background: var(--true-color-blue-muted, #1f6feb33);
       color: var(--text-color-default, #e6edf3);
     }
-    .carried-note { color: var(--true-color-orange, #d29922); font-size: 12px; margin-top: 2px; }
-    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+        .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
     .chip {
       border: 1px solid var(--border-color-default, #30363d);
       border-radius: 999px;
@@ -317,8 +316,6 @@ export function renderPlannerHtml() {
       font-size: 12px;
       color: var(--text-color-default, #e6edf3);
     }
-    .chip.carried { border-color: var(--true-color-orange, #d29922); }
-    .chip.carried::after { content: " ↻"; color: var(--true-color-orange, #d29922); }
     .icon-button {
       border: 1px solid var(--border-color-default, #30363d);
       border-radius: 999px;
@@ -396,7 +393,7 @@ export function renderPlannerHtml() {
     <header class="hero">
       <div>
         <h1>Homestead task planner</h1>
-        <div class="subtitle">What shipped, what's building, and what's next. Drag to set priority; pick a release for each item.</div>
+        <div class="subtitle">What shipped, what's building, and what's next. Drag to set priority; assign each item to the next build or the one after.</div>
       </div>
       <button id="refresh" class="refresh" type="button">Refresh</button>
     </header>
@@ -479,9 +476,7 @@ export function renderPlannerHtml() {
       if (assigned.length) {
         const chips = el("div", "chips");
         for (const feature of assigned) {
-          const chip = el("span", "chip" + (feature.carriedFrom ? " carried" : ""), feature.title);
-          if (feature.carriedFrom) chip.title = "Carried over from " + feature.carriedFrom;
-          chips.append(chip);
+          chips.append(el("span", "chip", feature.title));
         }
         card.append(chips);
       }
@@ -494,14 +489,16 @@ export function renderPlannerHtml() {
       const slots = state.planner.slots ?? [];
       const features = state.planner.features;
       const head = el("div", "builds-head");
-      head.append(el("h2", "", "Builds"), el("span", "muted", "Upcoming releases and recent deliveries"));
+      head.append(el("h2", "", "Builds"), el("span", "muted", "Next two builds and recent deliveries"));
       buildsNode.append(head);
       slots.forEach((slot, index) => {
         const entry = builds?.entries?.find((build) => build.key === slot.key && build.status === "planned");
         const assigned = features.filter((feature) => feature.slot === slot.key);
-        if (!entry && !assigned.length && index > 0) return;
-        buildsNode.append(renderBuildCard({ ...(entry ?? { status: "planned", ships: [] }), label: slot.label, status: entry?.status ?? "planned" }, index === 0, assigned));
+        buildsNode.append(renderBuildCard({ ...(entry ?? { status: "planned", ships: [] }), label: slot.label, status: "planned" }, index === 0, assigned));
       });
+      for (const build of (builds?.entries ?? []).filter((entry) => entry.status === "planned" && !entry.key)) {
+        buildsNode.append(renderBuildCard({ ...build, label: build.heading }));
+      }
       const byTime = (a, b) => (Number.isFinite(a.time) ? a.time : 0) - (Number.isFinite(b.time) ? b.time : 0);
       const delivered = (builds?.entries ?? []).filter((build) => build.status === "delivered").sort((a, b) => byTime(b, a));
       for (const build of delivered.slice(0, 2)) buildsNode.append(renderBuildCard(build));
@@ -645,7 +642,6 @@ export function renderPlannerHtml() {
         if (feature.deliveryStatus === "shipped") {
           text.append(el("div", "delivery-note", "Shipped in " + feature.deliveryBuildId + " · Player acceptance pending"));
         }
-        if (feature.carriedFrom) text.append(el("div", "carried-note", "Carried over from " + feature.carriedFrom));
         if (feature.fromBacklog) {
           text.append(el("div", "check-text backlog-origin", "From Jenny's backlog form" + (feature.description ? " — " + feature.description : "")));
           if (feature.imageUrl) {
@@ -658,7 +654,7 @@ export function renderPlannerHtml() {
         }
         for (const task of open.slice(0, 3)) text.append(el("div", "check-text", task.text));
         const button = el("select", "slot-select" + (feature.slot ? " on" : ""));
-        button.title = "Schedule for a release";
+        button.title = "Assign to a build";
         if (feature.deliveryStatus === "shipped") {
           button.append(new Option("Shipped", ""));
           button.title = "Delivered; player acceptance remains pending.";
