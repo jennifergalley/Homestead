@@ -494,6 +494,10 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
     LampSetDownAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_LampSetDown"));
     if (LampSetDownAnimation && LampSetDownAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
         LampSetDownAnimation = nullptr;
+    // Optional: authored with homestead_agent.fish_cast (segments in HomesteadFishingPresentation.h).
+    FishingAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_Fishing"));
+    if (FishingAnimation && FishingAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())
+        FishingAnimation = nullptr;
     // The branch she works while crafting, upright through her left fist.
     if (UStaticMesh* Piece = LoadObject<UStaticMesh>(nullptr,
             TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b")))
@@ -591,6 +595,8 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         * FRotationMatrix::MakeFromZX(SnathAlong, FVector(1, 0, 0)).ToQuat().Inverse();
     const FTransform ScytheTrail = FTransform(FQuat::Identity, FVector::ZeroVector, HomesteadScythe::Mirror)
         * FTransform(ScytheTurn, -ScytheTurn.RotateVector(SnathInFist));
+    // fish_cast.py ROD_TILT: the casting clip is keyed with the rod 40 degrees off the knuckle line.
+    constexpr float FishingRodTiltDegrees = 40.0f;
     const FHeldToolAsset Assets[] = {
         {Homestead::Item::Knife, TEXT("FlintKnife/SM_FlintKnife"), 30, false, FTransform::Identity},
         // The estate axe (estate_axe.py) and draw hoe (draw_hoe.py) are authored in the flint hatchet's
@@ -614,9 +620,11 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         // nib: the snath runs through her fist with its top end forward and up, and the blade trails
         // behind her at knee height, out to her right.
         {Homestead::Item::Scythe, TEXT("Scythe/SM_Scythe"), RestWristDegrees, false, ScytheTrail},
-        // fishing_pole.py: grip at the origin, working tip +Z; already authored at game scale.
+        // fishing_pole.py: grip at the origin, working tip +Z; already authored at game scale. A rod lies
+        // diagonally in the fist (fish_cast.py ROD_TILT): its tip leans from the knuckle line toward the fingers.
         {Homestead::Item::FishingPole, TEXT("FishingPole/SM_FishingPole"), RestWristDegrees, false,
-            FTransform::Identity},
+            FTransform(FRotationMatrix::MakeFromZX(FVector(0.0f, -FMath::Sin(FMath::DegreesToRadians(FishingRodTiltDegrees)),
+                FMath::Cos(FMath::DegreesToRadians(FishingRodTiltDegrees))), FVector(1, 0, 0)).ToQuat())},
     };
     for (const FHeldToolAsset& Asset : Assets)
     {
@@ -675,6 +683,7 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
             TEXT("/Game/SurvivalGame/Environment/Props/WaterPail/M_PourStream.M_PourStream"), nullptr, LOAD_NoWarn | LOAD_Quiet))
             PourStream->SetMaterial(0, Water);
     }
+    CreateFishingTackle();
 
     USkeletalMesh* FaceMesh = LoadMetaHumanAsset<USkeletalMesh>(TEXT("Assembled/Heroine/Face/SKM_MHC_Heroine_FaceMesh"));
     UClass* FaceAnimClass = LoadObject<UClass>(nullptr,
