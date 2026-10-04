@@ -15,6 +15,12 @@ live port 9878. No game/save/shortcut touched. Integration reports its combined
 editor/game compile and 21/21 native suites passed; original-art and
 release-save-isolation admission gates remain.
 
+Current source checkpoint: original potatoes and roasted turnips have separate
+serving/edible-portion WIP, NOT art/import acceptance. Fourteen dishes, all meal
+baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
+visible review is original turnip WIP; recipe/source receipts below are frozen,
+not automatically valid against a later edited material library.
+
 ## Boundaries and selected feedback
 Latest authorization: Jenny directly requested continuation even overnight at
 22:05 local Oct 3; coordinator explicitly restored hands-on slot2 after checking
@@ -685,6 +691,40 @@ import, engine verification, imagery/eating wiring, gameplay/save or fish
 material/helper/budget changes. Older proofs must not be rerendered in place.
 Build02-only provisional usage now 589 calls through event70794,
 3,473,105,220,000 recorded nano-AIU; later calls require recapture.
+
+### Original roasted turnip source milestone
+
+New roasted_turnips.py authors one trimmed 7.6cm purple-top root in six
+sector-loft wedges, original 20cm hand-thrown earthenware, and a separate edible
+wedge. Exact Turnip1/Kindling1; no butter/oil/herbs or reused crop/meal mesh.
+Text anatomy reference is cited in the recipe; no external texture. Independently
+modeled cut planes, subtle vascular relief, 0.55mm cooked-edge rounding and
+analytic dish-floor seating preserve closed components. The six source sectors
+represent one root, not six inventory units.
+
+First viewed pass was raw-looking with repeated grey spots. Later passes reduce
+that pattern to broader dry-heat browning and slightly irregular placement.
+The edge modifier exposed negative closed volume on the portion; owning-recipe
+normal repair now requires a closed shell and explicitly orients positive volume.
+Fixtures check all seven serving islands/one portion island individually, so
+the dish cannot mask an inverted wedge. This does NOT apply to open fish sheets
+or alter shared normal helpers.
+
+Current serving/portion: 42,526/6,638 triangles,
+[20.0,20.0,4.69]/[4.01,7.6,3.3]cm. All finite/closed/positive-component-volume/
+noncollapsed/UV/pivot/scale/current-shader fixtures pass. Four latest viewed
+3840x2160/192-sample OPTIX frames remain too smooth/molded with procedural clay;
+not art/import ready. RoastedTurnipsSourceProof preserves reopened source, two
+FBX, four frames, report and copied hash/executed-graph verification. New food
+functions leave potato_skin/potato_flesh ASTs unchanged from 1cc2911f.
+
+Owned visible turnip WIP is saved on E: as Turnips-source-held-visible.blend;
+display transforms never replace export-origin source. No food baking/import/
+engine/wiring/gameplay/save/fish-helper/budget changes. Fourteen original dishes
+still unstarted; potato/turnip art approval also remains. Continue independent
+source work under existing overnight slot2, no automation or approval wait.
+Build02-only provisional snapshot: 611 calls through event70829,
+3,637,828,390,000 recorded nano-AIU; later calls/terminal response need recapture.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

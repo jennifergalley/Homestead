@@ -60,3 +60,53 @@ def potato_flesh(name: str, seed: float) -> bpy.types.Material:
     fines = graph.noise(point, scale=FLESH_NOISE_SCALES[1], detail=2).outputs["Fac"]
     graph.set("Normal", graph.bump(fines, strength=.30, distance=.00016))
     return graph.mat
+
+
+def roasted_turnip(name: str, seed: float, skin: bool) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    _, shoulder, _ = graph.separate(point)
+    shifted = graph.vmath("ADD", point, (seed * .029, seed * .047, seed * .013))
+    cooking = graph.noise(shifted, scale=140, detail=3).outputs["Fac"]
+    colour = graph.ramp(cooking, [
+        (.15, (.40, .30, .14)), (.50, (.47, .37, .21)),
+        (.85, (.52, .43, .27)),
+    ], "EASE")
+    heat = graph.noise(shifted, scale=35, detail=2).outputs["Fac"]
+    sear = graph.remap(heat, .27, .69, .45, .95)
+    crust = graph.ramp(cooking, [
+        (.18, (.13, .052, .012)), (.50, (.27, .135, .034)),
+        (.82, (.35, .205, .075)),
+    ], "EASE")
+    colour = graph.mix(colour, crust, sear)
+    if skin:
+        crown = graph.remap(shoulder, .008, .027)
+        colour = graph.mix(colour, (.065, .022, .026), crown)
+        scorch = graph.remap(heat, .63, .79, 0, .70)
+    else:
+        scorch = graph.remap(heat, .67, .84, 0, .72)
+    graph.set("Base Color", graph.mix(colour, (.075, .023, .005), scorch))
+    fibres = graph.noise(graph.scale(shifted, (1, .24, 1)),
+                        scale=1400, detail=2).outputs["Fac"]
+    graph.set("Roughness", graph.remap(cooking, .25, .75, .65, .44) if not skin else .74)
+    graph.set("Subsurface Weight", .055)
+    graph.set("Subsurface Radius", (.002, .0014, .0007))
+    graph.set("Subsurface Scale", .05)
+    graph.set("Normal", graph.bump(fibres, strength=.16, distance=.000045))
+    return graph.mat
+
+
+def earthenware(name: str, seed: float) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.vmath("ADD", graph.coord(), (seed * .13, seed * .07, 0))
+    firing = graph.noise(point, scale=75, detail=3).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(firing, [
+        (.15, (.11, .029, .010)), (.45, (.23, .075, .031)),
+        (.80, (.31, .116, .050)),
+    ], "EASE"))
+    grit = graph.noise(point, scale=1800, detail=2).outputs["Fac"]
+    graph.set("Roughness", .79)
+    graph.set("Normal", graph.bump(grit, strength=.19, distance=.000065))
+    return graph.mat
