@@ -1,0 +1,375 @@
+{
+  "generated_by": "measure_fish_bake_diagnostics.py; do not edit measurements by hand",
+  "captured_at": "2026-10-04T11:00:18.003491+00:00",
+  "source_checkpoint": "c0ec4e0ceef29925326d34d26e924e49a98ddb75",
+  "source_recipe_sha256": "22b7f84088fcc597d5d510d29b5c74bac2167909871bcdaed5f4e42c1d402bb7",
+  "material_recipe_sha256": "a0bf6a16587109f53ea288482bd5df10e6e497668807f3f80697577bde758ad3",
+  "input_sha256": {
+    "SourceTrout\\CaughtFishTroutProof.blend": "f8e88d1778af56c100c93a530d83439883276eac46990d54f05d4001b9bc969e",
+    "SourceTrout\\report.json": "c234060cce80ec7722d952be05cca4f58594d3075109010b0a36e32401863e69",
+    "SourceTrout\\beauty_SM_RiverTrout_detail.png": "2c762deb291f33e8e0f9c9623f25e0a448441aa4680c250a9d2312ce67577c8a",
+    "BakedTrout\\CaughtFishTroutBake.blend": "866edd06256d36934a0d2128d5080d25f31a5c0fa5880c638a172d8c0e02a6f9",
+    "BakedTrout\\report.json": "a39c4ba61796bf719f8458df2e6247af6e19a3af2960a814f4ba714c69030b6b"
+  },
+  "not_production_or_acceptance": true,
+  "comparison": "Fixed detail framing, 3840x2160, 192 samples, OPTIX, absolute RGB8",
+  "crops_xyxy": {
+    "whole": [
+      0,
+      0,
+      3840,
+      2160
+    ],
+    "head": [
+      2100,
+      500,
+      3500,
+      1400
+    ],
+    "cheek": [
+      2050,
+      800,
+      2700,
+      1250
+    ],
+    "flank": [
+      300,
+      400,
+      1200,
+      1500
+    ]
+  },
+  "limits": [
+    "Hybrid source shaders on opaque slots isolate cheek inputs, not the complete production model.",
+    "8192 normal and changed UV allocation are diagnostics; production map budgets are unchanged.",
+    "Source-normal translation dominates the cheek difference; its exact defect is unresolved.",
+    "Inherited diagnostic reports are not fresh export or import receipts.",
+    "Local image differences do not certify anatomy, artistic quality, or Unreal appearance."
+  ],
+  "cases": [
+    {
+      "mode": "original4096",
+      "frame_sha256": "57edb80fd7f1efdaf0148005c23cf16de2a0e3e9d77823923df84675cdb27747",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.5989812612533569,
+          "rms_rgb8": 1.445764183998108,
+          "p99_absolute_rgb8": 6.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 1.3338298797607422,
+          "rms_rgb8": 2.357311487197876,
+          "p99_absolute_rgb8": 8.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 2.3886449337005615,
+          "rms_rgb8": 3.105088472366333,
+          "p99_absolute_rgb8": 8.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 0.9994935989379883,
+          "rms_rgb8": 1.5449659824371338,
+          "p99_absolute_rgb8": 5.0
+        }
+      },
+      "frame_location": "E:\\Repos\\copilot-worktrees\\SurvivalGame\\jennifergalley-cautious-robot\\Assets\\Props\\CaughtFish\\SpeciesProof\\BakedTrout\\beauty_SM_RiverTrout_detail.png"
+    },
+    {
+      "mode": "normal16bit",
+      "frame_sha256": "bbb98297b5f1176399c1a1e280c3e9a5d898c654b31f9e5c03aa155e6742a183",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.5239786505699158,
+          "rms_rgb8": 1.2725228071212769,
+          "p99_absolute_rgb8": 5.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 1.2764960527420044,
+          "rms_rgb8": 2.278629779815674,
+          "p99_absolute_rgb8": 8.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 2.3649275302886963,
+          "rms_rgb8": 3.066450357437134,
+          "p99_absolute_rgb8": 8.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 0.8992899060249329,
+          "rms_rgb8": 1.4648715257644653,
+          "p99_absolute_rgb8": 5.0
+        }
+      },
+      "frame_location": "E:\\CopilotScratch\\5be207bc-49b1-4a1b-811e-088ae565dc1b\\fish-normal-precision-probe\\beauty_SM_RiverTrout_detail.png"
+    },
+    {
+      "mode": "two_head_microbumps_removed",
+      "frame_sha256": "16598bfbac26a7db7b402528086bbf2493dc00929f8aaa748d0ca6cc5624aaff",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.6582025289535522,
+          "rms_rgb8": 1.6079957485198975,
+          "p99_absolute_rgb8": 7.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 1.6360515356063843,
+          "rms_rgb8": 2.9130146503448486,
+          "p99_absolute_rgb8": 10.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 2.938680410385132,
+          "rms_rgb8": 3.8319308757781982,
+          "p99_absolute_rgb8": 10.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 0.999467670917511,
+          "rms_rgb8": 1.5449508428573608,
+          "p99_absolute_rgb8": 5.0
+        }
+      },
+      "frame_location": "E:\\CopilotScratch\\5be207bc-49b1-4a1b-811e-088ae565dc1b\\fish-head-relief-probe\\beauty_SM_RiverTrout_detail.png"
+    },
+    {
+      "mode": "all_skin_bumps_removed",
+      "frame_sha256": "6f33f55c3a2396a531c9fd14a0eaaff444dc09eaf5b5a2baaa93663ecc7c9ee7",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.7262596487998962,
+          "rms_rgb8": 1.8578295707702637,
+          "p99_absolute_rgb8": 8.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 1.7404597997665405,
+          "rms_rgb8": 3.2171125411987305,
+          "p99_absolute_rgb8": 11.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 3.10634183883667,
+          "rms_rgb8": 4.1346001625061035,
+          "p99_absolute_rgb8": 11.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 1.0541969537734985,
+          "rms_rgb8": 1.6584175825119019,
+          "p99_absolute_rgb8": 6.0
+        }
+      },
+      "frame_location": "E:\\CopilotScratch\\5be207bc-49b1-4a1b-811e-088ae565dc1b\\fish-skin-normal-probe\\beauty_SM_RiverTrout_detail.png"
+    },
+    {
+      "mode": "matched_triangulation",
+      "frame_sha256": "da86ebdb418adaa961360b046cd0e8c177ff39943bbc7a060ae3488cd1e20ff7",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.6127703189849854,
+          "rms_rgb8": 1.5193676948547363,
+          "p99_absolute_rgb8": 6.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 1.3575280904769897,
+          "rms_rgb8": 2.4059159755706787,
+          "p99_absolute_rgb8": 8.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 2.412696361541748,
+          "rms_rgb8": 3.1388158798217773,
+          "p99_absolute_rgb8": 8.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 1.003541111946106,
+          "rms_rgb8": 1.5534658432006836,
+          "p99_absolute_rgb8": 5.0
+        }
+      },
+      "frame_location": "E:\\CopilotScratch\\5be207bc-49b1-4a1b-811e-088ae565dc1b\\fish-triangulated-normal-probe\\beauty_SM_RiverTrout_detail.png"
+    },
+    {
+      "mode": "coat_zero_during_normal_bake_only",
+      "frame_sha256": "f50e73db8d070ad17db42aca215c534d5adff54a174195a95919beec8bcf6668",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.5989845991134644,
+          "rms_rgb8": 1.4457786083221436,
+          "p99_absolute_rgb8": 6.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 1.3338290452957153,
+          "rms_rgb8": 2.3573098182678223,
+          "p99_absolute_rgb8": 8.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 2.38865065574646,
+          "rms_rgb8": 3.1050872802734375,
+          "p99_absolute_rgb8": 8.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 0.9994693398475647,
+          "rms_rgb8": 1.544945240020752,
+          "p99_absolute_rgb8": 5.0
+        }
+      },
+      "frame_location": "E:\\CopilotScratch\\5be207bc-49b1-4a1b-811e-088ae565dc1b\\fish-coat-normal-bake-probe\\beauty_SM_RiverTrout_detail.png"
+    },
+    {
+      "mode": "source_roughness_hybrid",
+      "frame_sha256": "6772a99682c989b660f0e583585129ff052ac99eaea53d44099127f0be46c6b9",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.4015059471130371,
+          "rms_rgb8": 1.116817593574524,
+          "p99_absolute_rgb8": 5.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 0.9377010464668274,
+          "rms_rgb8": 1.7718228101730347,
+          "p99_absolute_rgb8": 7.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 1.4371669292449951,
+          "rms_rgb8": 2.0675034523010254,
+          "p99_absolute_rgb8": 6.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 0.7150562405586243,
+          "rms_rgb8": 1.361594796180725,
+          "p99_absolute_rgb8": 5.0
+        }
+      },
+      "retained_frame": "source_roughness_detail.png"
+    },
+    {
+      "mode": "source_roughness_metallic_hybrid",
+      "frame_sha256": "1713b0f73d7fc911bf15c0d93b81e7cc1f307813f8650c11fc254150d4dcd13a",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.4293384552001953,
+          "rms_rgb8": 1.2257462739944458,
+          "p99_absolute_rgb8": 5.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 1.1194965839385986,
+          "rms_rgb8": 2.193744659423828,
+          "p99_absolute_rgb8": 9.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 1.5456045866012573,
+          "rms_rgb8": 2.253770112991333,
+          "p99_absolute_rgb8": 7.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 0.7143215537071228,
+          "rms_rgb8": 1.3613494634628296,
+          "p99_absolute_rgb8": 5.0
+        }
+      },
+      "frame_location": "E:\\CopilotScratch\\5be207bc-49b1-4a1b-811e-088ae565dc1b\\fish-hybrid-scalars-probe\\beauty_SM_RiverTrout_detail.png"
+    },
+    {
+      "mode": "source_normal_coat_normal_hybrid",
+      "frame_sha256": "42692f14ad6ff304e4929e5a06f6e883682f711e9fe37b2c1ccc2557b15aa4fd",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.3641018569469452,
+          "rms_rgb8": 0.9254835247993469,
+          "p99_absolute_rgb8": 4.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 0.4202965497970581,
+          "rms_rgb8": 0.8800172805786133,
+          "p99_absolute_rgb8": 4.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 0.7815338969230652,
+          "rms_rgb8": 1.317788004875183,
+          "p99_absolute_rgb8": 5.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 0.8957161903381348,
+          "rms_rgb8": 1.4615157842636108,
+          "p99_absolute_rgb8": 5.0
+        }
+      },
+      "retained_frame": "source_normal_detail.png"
+    },
+    {
+      "mode": "normal8192_other_maps4096",
+      "frame_sha256": "5caa94483c0d237583c90000a7baf4d5ad1b3de10166b4e3c9194cb59c042f4d",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.5330955386161804,
+          "rms_rgb8": 1.2744885683059692,
+          "p99_absolute_rgb8": 5.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 1.0716021060943604,
+          "rms_rgb8": 1.8882907629013062,
+          "p99_absolute_rgb8": 7.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 1.8676433563232422,
+          "rms_rgb8": 2.439105749130249,
+          "p99_absolute_rgb8": 7.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 0.9161720275878906,
+          "rms_rgb8": 1.3577755689620972,
+          "p99_absolute_rgb8": 4.0
+        }
+      },
+      "retained_frame": "normal8192_detail.png"
+    },
+    {
+      "mode": "head_uv3_five4096_maps",
+      "frame_sha256": "a287d8c7c13216e06100080c5144d189ea0413b0abd40f559b8d161bb13f8d0e",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 0.5536970496177673,
+          "rms_rgb8": 1.3352360725402832,
+          "p99_absolute_rgb8": 5.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 1.0297000408172607,
+          "rms_rgb8": 1.8179658651351929,
+          "p99_absolute_rgb8": 6.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 1.8806438446044922,
+          "rms_rgb8": 2.4316439628601074,
+          "p99_absolute_rgb8": 6.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 1.1544913053512573,
+          "rms_rgb8": 1.9543129205703735,
+          "p99_absolute_rgb8": 7.0
+        }
+      },
+      "retained_frame": "head_uv3_detail.png"
+    },
+    {
+      "mode": "untouched_source_repeat",
+      "frame_sha256": "dceea965f943a96088d82d1350ada886a89972c65844a7ad69ac4f5ba09d4fba",
+      "crop_measurements": {
+        "whole": {
+          "mean_absolute_rgb8": 4.838606037083082e-05,
+          "rms_rgb8": 0.006956008728593588,
+          "p99_absolute_rgb8": 0.0
+        },
+        "head": {
+          "mean_absolute_rgb8": 6.375661178026348e-05,
+          "rms_rgb8": 0.007984774187207222,
+          "p99_absolute_rgb8": 0.0
+        },
+        "cheek": {
+          "mean_absolute_rgb8": 7.521367660956457e-05,
+          "rms_rgb8": 0.008672581985592842,
+          "p99_absolute_rgb8": 0.0
+        },
+        "flank": {
+          "mean_absolute_rgb8": 5.95959609199781e-05,
+          "rms_rgb8": 0.007719842251390219,
+          "p99_absolute_rgb8": 0.0
+        }
+      },
+      "frame_location": "E:\\CopilotScratch\\5be207bc-49b1-4a1b-811e-088ae565dc1b\\fish-source-repeat-probe\\beauty_SM_RiverTrout_detail.png"
+    }
+  ]
+}

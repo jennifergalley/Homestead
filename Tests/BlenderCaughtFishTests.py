@@ -114,6 +114,28 @@ def check_jaw_openings() -> None:
                     assert upper[-1].z - lower[-1].z < .25 * middle_gap
                     assert len(obj["oral_cheek_faces"]) >= 4, "Carp has open predator cheeks"
                     assert all(data.polygons[index].material_index == 0 for index in obj["oral_cheek_faces"])
+                    rostrum = list(obj["oral_rostral_upper"])
+                    assert len(rostrum) == (recipe.CARP_ROSTRAL_BANDS + 1) * columns
+                    for side in range(columns):
+                        start = data.vertices[rostrum[side]].co
+                        first = data.vertices[rostrum[columns + side]].co
+                        posterior = data.vertices[columns + side].co
+                        assert (first - start).normalized().dot((start - posterior).normalized()) > .85, (
+                            "Carp rostrum breaks the cheek tangent at an angular shoulder")
+                    center = columns // 2
+                    start = data.vertices[rostrum[center]].co
+                    lip = data.vertices[rostrum[-columns + center]].co
+                    middle = data.vertices[rostrum[(recipe.CARP_ROSTRAL_BANDS // 2) * columns + center]].co
+                    assert (middle - start.lerp(lip, .5)).length > .0002, (
+                        "Carp rostrum retains a straight annulus panel")
+                    next_lining = obj["oral_lining_start"] + obj["oral_lining_columns"]
+                    for side in (0, center, columns - 1):
+                        lip = data.vertices[rostrum[-columns + side]].co
+                        previous = data.vertices[rostrum[-2 * columns + side]].co
+                        column = round(side * (obj["oral_lining_columns"] - 1) / (columns - 1))
+                        lining = data.vertices[next_lining + column].co
+                        assert (lip - previous).normalized().dot((lining - lip).normalized()) > .85, (
+                            "Carp lip breaks its tangent into the oral lining")
                 for ring in range(recipe.BODY_RINGS):
                     u = recipe.body_station(ring)
                     for side in range(2):

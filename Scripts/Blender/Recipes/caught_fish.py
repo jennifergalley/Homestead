@@ -46,6 +46,10 @@ BODY_RINGS = 201
 BODY_SIDES = 80
 ORAL_LINING_COLUMNS = 21
 ROSTRUM_ROUNDING = .004
+CARP_ROSTRAL_BANDS = 16
+CARP_ROSTRAL_OUTER_REACH = .36
+CARP_ROSTRAL_INNER_REACH = .26
+CARP_CHEEK_SEGMENTS = 6
 HEAD_BLEND_START = .18
 HEAD_BLEND_END = .38
 HEAD_CROSS_SECTION_FLATTENING = .18
@@ -268,6 +272,16 @@ def landmark_station(u: float, angle: float) -> float:
     return u + (posterior - .22) * blend
 
 
+def carp_rostrum(start: Vector, posterior: Vector, lip: Vector, lining: Vector,
+                 t: float) -> Vector:
+    """Continue the cheek tangent around the fleshy lip into the oral lining."""
+    span = (lip - start).length
+    outer = start + (start - posterior).normalized() * span * CARP_ROSTRAL_OUTER_REACH
+    inner = lip - (lining - lip).normalized() * span * CARP_ROSTRAL_INNER_REACH
+    return (start * (1 - t) ** 3 + outer * (3 * (1 - t) ** 2 * t)
+            + inner * (3 * (1 - t) * t * t) + lip * t ** 3)
+
+
 def body(kit, fish: dict, material, cavity_material):
     vertices, faces, coords = [], [], []
     columns = BODY_SIDES // 2 + 1
@@ -318,13 +332,21 @@ def body(kit, fish: dict, material, cavity_material):
         if fish["pattern"] == "carp":
             # A fleshy annulus surrounds the sucker opening, not a filled half-disk.
             rostral_bands[upper] = [previous]
-            for layer in range(1, 6):
-                t = layer / 5
+            next_right, next_left = (vertices[index] for index in rims[(upper, 1)])
+            inset = min(fish["length"] * .006, abs(next_right.x - next_left.x) * .225)
+            next_right = next_right - Vector((inset, 0, 0))
+            next_left = next_left + Vector((inset, 0, 0))
+            for layer in range(1, CARP_ROSTRAL_BANDS + 1):
+                t = layer / CARP_ROSTRAL_BANDS
                 current = []
                 for side in range(columns):
+                    across = side / (columns - 1)
+                    lining = (next_right.lerp(next_left, across) if upper
+                              else next_left.lerp(next_right, across))
+                    lining.z += oral_gap(fish, body_station(1)) * .20 * math.sin(math.pi * across) ** 2
                     current.append(len(vertices))
-                    point = vertices[offset + side].lerp(carp_lip(upper, side / (columns - 1)), t)
-                    point.y -= fish["length"] * fish["lip_radius"] * math.sin(math.pi * t)
+                    point = carp_rostrum(vertices[offset + side], vertices[offset + columns + side],
+                                         carp_lip(upper, across), lining, t)
                     vertices.append(point)
                     coords.append((0, 1 - 2 * side / (columns - 1), math.sin(oral_angle(fish, 0))))
                 for side in range(columns - 1):
@@ -374,13 +396,14 @@ def body(kit, fish: dict, material, cavity_material):
                 vertices[inner_top + 1] = vertices[front_rims[False][-1 if side == 0 else 0]].copy()
             coords.extend((coords[top], coords[bottom]))
             wall.append((top, bottom, inner_top, inner_top + 1))
-        for first, second in zip(wall, wall[1:]):
+        front_cheek_column = []
+        for segment, (first, second) in enumerate(zip(wall, wall[1:])):
             top, bottom, inside_top, inside_bottom = first
             next_top, next_bottom, next_inside_top, next_inside_bottom = second
             if front_rims:
                 first_column, next_column = [top], [next_top]
-                for step in range(1, 6):
-                    t = step / 6
+                for step in range(1, CARP_CHEEK_SEGMENTS):
+                    t = step / CARP_CHEEK_SEGMENTS
                     for column, a, b in ((first_column, top, bottom), (next_column, next_top, next_bottom)):
                         point = vertices[a].lerp(vertices[b], t)
                         cheek_u = coords[a][0] / body_station(head_rings[-1])
@@ -391,6 +414,8 @@ def body(kit, fish: dict, material, cavity_material):
                         coords.append((coords[a][0], coords[a][1], coords[a][2] * (1 - t) + coords[b][2] * t))
                 first_column.append(bottom)
                 next_column.append(next_bottom)
+                if segment == 0:
+                    front_cheek_column = first_column
                 for a, b, next_a, next_b in zip(first_column, first_column[1:], next_column, next_column[1:]):
                     cheek_faces.append(len(faces))
                     faces.append((a, next_a, next_b, b))
@@ -400,13 +425,32 @@ def body(kit, fish: dict, material, cavity_material):
         if wall:
             top, bottom, inside_top, inside_bottom = wall[0]
             if front_rims:
-                for band in range(5):
-                    a = rostral_bands[True][band][0 if side == 0 else -1]
-                    b = rostral_bands[True][band + 1][0 if side == 0 else -1]
-                    c = rostral_bands[False][band + 1][-1 if side == 0 else 0]
-                    d = rostral_bands[False][band][-1 if side == 0 else 0]
-                    cheek_faces.append(len(faces))
-                    faces.append((a, b, c, d))
+                next_top, next_bottom, next_inside_top, next_inside_bottom = wall[1]
+                previous = front_cheek_column
+                lip_top = vertices[front_rims[True][0 if side == 0 else -1]]
+                lip_bottom = vertices[front_rims[False][-1 if side == 0 else 0]]
+                for band in range(1, CARP_ROSTRAL_BANDS + 1):
+                    current = [rostral_bands[True][band][0 if side == 0 else -1]]
+                    for step in range(1, CARP_CHEEK_SEGMENTS):
+                        across = step / CARP_CHEEK_SEGMENTS
+                        posterior = vertices[next_top].lerp(vertices[next_bottom], across)
+                        cheek_u = coords[next_top][0] / body_station(head_rings[-1])
+                        posterior.x += ((1 if side == 0 else -1) * fish["length"] * .002
+                                        * math.sin(math.pi * across) * math.sin(math.pi * cheek_u))
+                        point = carp_rostrum(
+                            vertices[top].lerp(vertices[bottom], across), posterior,
+                            lip_top.lerp(lip_bottom, across),
+                            vertices[next_inside_top].lerp(vertices[next_inside_bottom], across),
+                            band / CARP_ROSTRAL_BANDS)
+                        current.append(len(vertices))
+                        vertices.append(point)
+                        coords.append((0, coords[top][1],
+                                       coords[top][2] * (1 - across) + coords[bottom][2] * across))
+                    current.append(rostral_bands[False][band][-1 if side == 0 else 0])
+                    for a, b, next_a, next_b in zip(previous, previous[1:], current, current[1:]):
+                        cheek_faces.append(len(faces))
+                        faces.append((a, next_a, next_b, b))
+                    previous = current
             else:
                 faces.append((top, inside_top, inside_bottom, bottom))
         if side == 0:
@@ -449,6 +493,7 @@ def body(kit, fish: dict, material, cavity_material):
         obj["oral_front_upper"] = front_rims[True]
         obj["oral_front_lower"] = list(reversed(front_rims[False]))
         obj["oral_cheek_faces"] = cheek_faces
+        obj["oral_rostral_upper"] = [index for band in rostral_bands[True] for index in band]
     girth = lambda u: math.sqrt((profile(fish["width"], u) ** 2
                                 + ((profile(fish["top"], u) + profile(fish["bottom"], u)) / 2) ** 2) / 2)
     maximum_girth = max(girth(t) for t in PROFILE_T)

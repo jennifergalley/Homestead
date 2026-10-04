@@ -532,6 +532,73 @@ Actual gpt-6.1-sol/high, launch context default, actual context tier unknown.
 Build02-only provisional usage: 463 calls through event70551,
 2,834,389,040,000 recorded nano-AIU; later calls require recapture.
 
+### Held carp continuity and one-specimen bake isolation after c0ec4e0c
+
+WIP only, NOT [ready], fish import/admission or a solved realism gate.
+The carp rostrum now follows sixteen cubic bands from the posterior cheek
+tangent around the lip into the oral lining; the lateral front cheek shares
+the same curved transition. Opening, lining, four barbels and other five
+species' geometry are preserved. The first .55/.45 control reaches exceeded
+the existing 2mm length tolerance (42.25cm); .36/.26 passes at 42.11cm without
+weakening that guard. All-six raw mouth/hinge/vestibule/tooth/barbel/pupil,
+twelve pectoral and seven-ray attachment fixtures pass, with new sampled
+outer/inner tangent and non-straight midpoint fixtures. These are not complete
+watertightness or self-intersection guarantees.
+
+Assets\Props\CaughtFish\CarpContinuityProof preserves the copied source blend,
+FBX, report, two viewed 3840x2160/192-sample OPTIX frames and verification.
+Carp is 55,008 triangles, [8.53,42.11,17.09]cm. Current source/adapter/material
+hashes, copied FBX, joined geometry/UV/pivot/budget and unchanged .65/.06
+film/source-relief linkage pass. The curved shoulder reads less angular in
+the viewed close-up, but the family still looks too molded/procedural.
+Source shader hash remains a0bf6a16; recipe hash is 444c5f44. Frozen
+SpeciesProof, MembraneProof and production root are unchanged.
+
+The bake investigation holds frozen c0 trout geometry/fields/framing constant.
+Assets\Props\CaughtFish\BakeDiagnostics retains four selected detail frames,
+input/frame hashes and generated fixed-crop measurements for twelve cases.
+The cheek rectangle is x2050-2700,y800-1250, in the 3840x2160 detail frame.
+Original RGB8 RMS 3.105 falls to 1.318 with source Normal/Coat Normal and to
+2.068 with source roughness. Sixteen-bit normal, two/all microbump removal,
+matched triangulation and zero coat only during normal baking do not fix it.
+An 8192 normal reaches 2.439; a head-focused UV allocation with all five maps
+still 4096 reaches 2.432, only partial improvements. All production budgets
+and shader fields remain unchanged. Source/baked corner normals and transforms
+match; sampled cheek UV overlap checks found none. Untouched-source re-render
+RMS .00696 detail (.00677 hero, max difference1) is far below the observed
+artifact. Normal translation dominates, roughness contributes, and the exact
+reconstruction defect remains unproven. Hybrids are local input-isolation
+diagnostics, not whole-model production materials or export receipts.
+
+Coordinator decision at 2026-10-04T11:02Z: preserve/checkpoint this bounded
+carp correction and probes, keep fish held, and proceed independently with
+already-authorized original sixteen-dish source geometry/materials. Read-only
+reviewer fc56f594-b380-45f1-9633-428ca29e5089 traces a causal one-specimen fix;
+do not park for that review or run another family/gloss sweep. No generic bake
+rewrites, family baking, new helper agents, UE/build/save/automation work.
+The previous no-dishes-until-fish sequencing is superseded by this explicit
+parallel source-modeling instruction; overnight/slot2 remains authorized.
+
+Owned visible Blender PID20420/port9878 is saved as
+E:\CopilotScratch\5be207bc-49b1-4a1b-811e-088ae565dc1b\Carp-continuity-held-visible.blend,
+labelled HELD WIP with EEVEE material preview. The earlier six-source grid is
+also preserved. Open exported proof blends explicitly before any rendering;
+the visible review copy is not an export receipt. Diagnostic input blends,
+normal maps and scripts remain in named E: probe folders for the reviewer.
+Blender lacks Pillow; copied-proof PNG dimensions were checked with its
+dependency-free signature/IHDR parser instead of installing packages. Offline
+Pillow/NumPy measurement decoded all twelve frames. No engine or art acceptance
+claim, gameplay/save/version/enum/placement changes, shortcuts or real saves.
+
+Actual gpt-6.1-sol/high, launch context default, actual tier unknown; no lane
+helpers. Build02-only provisional snapshot: 521 calls through event70642,
+3,182,641,350,000 recorded nano-AIU; terminal/later calls require recapture.
+The prior 11-18+ hour art/wiring estimate is no longer a reliable completion
+forecast after unresolved bake diagnosis; sixteen dishes/portions and image/
+eating wiring have not started at this checkpoint. First independent source
+slice is original Baked Potatoes serving and handheld portion, exactly potato
+and fuel as catalogued (no invented butter/oil/herb ingredient).
+
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.
 Notion identity and Ledger read in full; no technical-project Notion writes.

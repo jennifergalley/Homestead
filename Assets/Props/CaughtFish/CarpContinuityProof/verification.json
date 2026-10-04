@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_carp_continuity.py; do not edit measurements by hand",
+  "not_artistic_acceptance_or_import_authorization": true,
+  "draft_mode": "source_only",
+  "triangles": 55008,
+  "size_cm": [
+    8.53,
+    42.11,
+    17.09
+  ],
+  "checks": [
+    "all_six_raw_jaw_vestibule_tooth_barbel_pupil_fixtures",
+    "carp_sampled_outer_and_inner_rostral_tangents_and_curved_midpoint",
+    "seven_rays_eight_stations_attachment",
+    "twelve_broad_curved_pectoral_fans",
+    "joined_carp_scale_pivot_geometry_uv_and_budget",
+    "current_source_adapter_and_material_hashes",
+    "copied_fbx_hash_and_two_4k_192sample_optix_frames",
+    "unchanged_wet_film_and_linked_source_relief",
+    "procedural_materials_without_external_texture_dependencies"
+  ],
+  "artifact_sha256": {
+    "beauty_SM_LakeCarp_detail.png": "3a40011df176d2edfc47e5b5617b1cc9cbbe2f29c6ffe0de32c4bea1a91f8956",
+    "beauty_SM_LakeCarp_hero.png": "be86aa24341e774b8c04dc7d083a4c8844c4382ec478547e91ea7ee65b0802c1",
+    "CaughtFishCarpProof.blend": "bea8630cc4458f468213d992b9265cdd11a66be388e334b36769b27ed559853b",
+    "report.json": "8e7d50010c3e1d83c92e35236aedd078f980520b0e37b4ba2409620912aecd94",
+    "SM_LakeCarp.fbx": "fa6e17923e7491d502c75dd762eee95bac529924385615cce08aa33f936f85c1"
+  }
+}
