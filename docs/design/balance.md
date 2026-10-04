@@ -230,6 +230,31 @@ Rules of thumb:
 - **Something matures every session:** at least one harvest per real hour of play.
 - **Energy never ends a play session.** Food in the pack should always cover another hour's work.
 
+### Travel times (map resize, card `jenny-muucy9hz-jv5gx7`)
+
+Times are one-way at a **sprint** (Jenny, 2026-10-04), measured along the walkable route in real
+seconds. The MetaHuman sprints at 4.8 m/s. Sprinting costs no energy of its own; below 25 energy
+she walks at 2.1 m/s, about 2.3× slower, so walking is secondary context only. There's no
+movement-speed buff, and the map is scaled to fit these times.
+
+| Route | Comfortable | Upper bound (max route length) | Today (sprint) |
+| --- | --- | --- | --- |
+| Farm → manor | 5–10 s | 15 s (72 m) | 8–12 s ✅ |
+| Manor → lake | 20–35 s | 45 s (216 m) | 44 s (at the bound) |
+| Manor → town/store | 40–60 s | 75 s (360 m) | 426–432 s 🔴 |
+| Manor → coast/beach | 45–70 s | 90 s (432 m) | 110–129 s 🔴 |
+| Manor → mine site | 45–70 s | 90 s (432 m) | about 91 s (estimate, no authored path) 🟡 |
+
+- **Daily loop:** farm, then store, then one fishing spot, then home. That's at most about 3 minutes
+  of sprinting, or 6% of the ~50-minute waking day; 60 s real is about 24 game minutes. On a
+  low-energy walk the same loop is about 7 minutes, which is still acceptable.
+- **Distance order:** farm and manor are nearest, then the lake, then town. The coast and the mine
+  are trips she chooses to make.
+- **Town is the big one:** halving the map alone leaves it around 215 s, so it also has to move
+  close to the manor.
+- **Beauty:** no stretch longer than about 10 s of sprinting (about 50 m) without something to see
+  or gather, such as flowers, a stile, a view or a forageable.
+
 ### Proposed fixes to hit the targets
 
 These are proposals for the Orchestrator to offer Jenny. None is scheduled.
@@ -247,3 +272,5 @@ These are proposals for the Orchestrator to offer Jenny. None is scheduled.
 
 - 2026-10-04: first sheet (Balance Agent). Fishing strike window 0.5 → 0.7 s adopted by the Gameplay
   UI lane.
+- 2026-10-04: travel-time targets for the map resize (§9), sent to the Map planning agent. Restated
+  in sprint seconds the same day at Jenny's direction.

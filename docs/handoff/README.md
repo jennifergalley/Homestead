@@ -233,6 +233,9 @@ A lane delivers an increment like this:
 
 1. Consult Balance while planning every new feature for its proposal and numbers. Implement it, and
    verify it in your own editor (MCP/PIE).
+   Every Balance suggestion becomes a backlog card: prefix its title with `[Balance]` or `[Balance UI]`,
+   name the source document and section in its description, and have the Orchestrator add it through
+   the planner backlog form/API for Jenny to prioritize later.
 2. Run the native tests: `Scripts\Test-Native.ps1 -Configuration Release`. Rebase onto `main` first
    and run them again after the rebase. Other lanes' changes can break your tests (a pail added to
    the pack broke a manor chest test). If the breakage comes from an interaction between lanes, say

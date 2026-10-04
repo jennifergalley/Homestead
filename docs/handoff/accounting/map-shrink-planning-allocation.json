@@ -1,0 +1,27 @@
+{
+  "buildId": "unscheduled-shrink-estate-map-planning",
+  "authorizedAt": "2026-10-04T21:53:58.561Z",
+  "allocationPolicy": "Separate docs-only planning segment for backlog:jenny-muucy9hz-jv5gx7. Includes source measurements, Balance consultation, Jenny's sprint correction, OpenSpec creation, handoff and validation. Do not charge these events to afternoon03 environment implementation or a shipped build until explicitly scheduled.",
+  "limits": [
+    "First planning usage event is 73590; prior environment and parking usage is outside this segment.",
+    "Snapshot is incomplete: final commit, push and handoff tail require a later metadata export.",
+    "Recorded nano-AIU is not billing-reconciled AI credits.",
+    "Some calls have no recorded reasoning effort; preserve unknown in the export, not an inferred high value.",
+    "Balance consultation belongs to Balance's separate session; no helpers were launched here."
+  ],
+  "segments": [
+    {
+      "sessionId": "ff61de39-9742-45a8-8c6d-03512cd76224",
+      "projectSessionId": "ff61de39-9742-45a8-8c6d-03512cd76224",
+      "task": "shrink-estate-map",
+      "tasks": ["shrink-estate-map"],
+      "category": "planning",
+      "since": "2026-10-04T21:53:58.561Z",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "boundaryEvidence": "New planning request at authorizedAt; first matching runtime usage is event73590. Same live session, no model change, no implementation/editor/build."
+    }
+  ]
+}

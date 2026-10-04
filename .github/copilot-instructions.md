@@ -39,6 +39,9 @@ Lanes consult Balance while planning every new feature for the proposal and numb
 before `[ready]` for final numbers, player-facing copy, and a screenshot; the ready evidence records
 Balance's OK. Integration admits gameplay that changes balance or player-visible flavor only when
 the delivery receipt records that OK.
+Every Balance suggestion becomes a backlog card: prefix its title with `[Balance]` or `[Balance UI]`,
+name the source document and section in its description, and have the Orchestrator add it through the
+planner backlog form/API for Jenny to prioritize later.
 
 Bias toward fresh task-scoped sessions, retaining an existing session for tightly related follow-ups
 when its working context remains useful. Every session, including the orchestrator, maintains a compact
