@@ -98,8 +98,10 @@ Jenny works in two modes. When she hasn't said which, treat short requests as th
   code-reviewed and balance-OK, Integration packages and delivers it; there's no clock time.
   If an item is blocked, the orchestrator asks Jenny whether to ship without it. After a delivery,
   shipped items leave the backlog, unfinished Next items stay in Next, and Build after next items move
-  up to Next. Only verified work is admitted. Integration merges, runs UBT/suites, makes the Shipping
-  acceptance check, installs into the main checkout and retargets the shortcut while preserving its
+  up to Next. Only verified work is admitted. Integration merges, runs UBT/suites, packages a
+  **Development** build (Jenny, 2026-10-04: Development, not Shipping, so she has the developer console
+  and crashes leave reports in the package's `Saved\Crashes`), runs the acceptance checks on it,
+  installs into the main checkout and retargets the shortcut while preserving its
   icon. Lanes close editors during the build. If verification fails, the last good build stays on
   the shortcut. **`main` must stay playable:** push only verified work. Lanes implement only what
   Jenny assigned to the next two builds, then go idle; they never take unassigned work. If nothing is
@@ -220,7 +222,7 @@ The full list with fixes is in the editor skill, sections 0 and 0.1. In short:
 - **Project storage hygiene (every lane):** delete your own scratch, render, recording and test-output
   artifacts when their task ends. Keep large transient artifacts under
   `E:\CopilotScratch\<session-id>`, never session-state `files`; retain only the active shortcut
-  Shipping release and one rollback, deleting Development releases after the Shipping cut. Remove a
+  release and one rollback, deleting older releases. Remove a
   secondary per-task worktree as soon as its slice lands or is parked: push the branch if needed,
   then `git worktree remove <path>` and `git worktree prune`; reuse one secondary worktree per lane,
   and never remove another session's active worktree. Delete stale `Saved\Automation` sandboxes

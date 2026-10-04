@@ -16,7 +16,14 @@ fresh implementers spawned only for planner-assigned work, and the rules in "Tok
   Unreal, and game assets. Planner, backlog, and build-cost canvas-extension work is outside that
   cap and needs no slot.
 - **No overnight or workday work** (Jenny, 2026-10-04). Work, automation, packaging, and promotion occur only while Jenny is around.
-- Her packaged game is often running. Never touch it, and never start a third Unreal process.
+- Her packaged Development game is often running. Never touch it, and never start a third Unreal process.
+
+**Development delivery (Jenny, 2026-10-04):** the next and later deliveries package Development,
+not Shipping, so the developer console is available and crash reports remain under package
+`Saved\Crashes`. Integration runs EstateSmoke, ToolRepeat, and F5/F9 against the Development
+package before installing it to `E:\Repos\SurvivalGame\Build\Windows` and retargeting the shortcut
+to its Development executable with the preserved icon and package-local `-UserDir`. Development
+frame rate is not performance evidence; use Shipping or Test for performance measurements.
 
 ## Registry
 

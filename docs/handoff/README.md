@@ -317,7 +317,7 @@ only retained MVP archive reference. The retained
 `jennifergalley-mvp-woodland-biome` branch is Water's active Estate Seasons handoff
 (`b19a0ad0`), despite its historical name.
 
-**Main-checkout Shipping promotion (Jenny, 2026-10-04):** `Homestead Estate.lnk` may target only a
+**Main-checkout Development promotion (Jenny, 2026-10-04):** `Homestead Estate.lnk` may target only a
 build of `main` installed at `E:\Repos\SurvivalGame\Build\Windows`, never a session worktree or an
 external release root. Before installation, check the shared main checkout is clean, on `main`, and
 up to date; never overwrite its uncommitted work. Build and verify the candidate in Integration's
@@ -327,7 +327,11 @@ run `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof against the insta
 then retarget the shortcut and its exact package-local `-UserDir` there. The source worktree
 package is staging only, never the promoted release. The first recovery moves the former Sept. 19
 package to `Build\Windows-20260919-old` rather than deleting it; later promotions use the same
-main-checkout `Build\Windows` location.
+main-checkout `Build\Windows` location. Package with `Build-Game.ps1 -Configuration Development`;
+run EstateSmoke, ToolRepeat, and F5/F9 against that Development package, adapting routes that assume
+Shipping and reporting anything that works only in Shipping. Retarget the shortcut to the Development
+executable while preserving its icon and package-local `-UserDir`. Development frame rate is not
+performance evidence; use Shipping or Test configurations for performance measurement.
 
 ## Playtest builds (work-driven)
 
@@ -341,9 +345,8 @@ Work runs only while Jenny is around. There is no overnight or unattended workda
 automation, packaging, or promotion. Lanes end their turns when assigned work is complete or Jenny
 is away; the orchestrator starts the next assigned slot when she is available.
 
-**Before every Shipping build, reclaim dated release space safely:** retain the current
-Estate-shortcut Shipping release and at most its immediately previous Shipping rollback. A named
-Development reference is only temporary during active QA and is deleted after the Shipping cut.
+**Before every Development build, reclaim dated release space safely:** retain the current
+Estate-shortcut Development release and at most its immediately previous rollback.
 Before pruning older dated releases,
 `Playtest-09xx` folders or stale `Build\Windows` staging, verify no process path or shortcut target
 uses them. Do not delete the current shortcut target, live save data, or the one retained rollback.
@@ -351,22 +354,26 @@ uses them. Do not delete the current shortcut target, live save data, or the one
 **Project disk stewardship (every lane):** delete your own project scratch, renders, recordings and
 test output when the task that needed them ends. Keep no large binary in
 `C:\Users\Jenny\.copilot\session-state\...\files`; use `E:\CopilotScratch\<session-id>` while it is
-needed, then clean only the paths you own. Keep only the current shortcut Shipping release and its
-immediately previous rollback; delete Development releases and `Saved\Automation` test sandboxes
-after the Shipping cut unless they are actively needed. When in doubt, delete unnecessary
+needed, then clean only the paths you own. Keep only the current shortcut Development release and its
+immediately previous rollback; delete superseded Development releases and `Saved\Automation` test
+sandboxes unless they are actively needed. When in doubt, delete unnecessary
 project-owned artifacts—but never Jenny's current save game.
 The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
 
 1. The orchestrator notifies lanes at the freeze; lanes close their editors
    (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.
-2. The integration session merges admitted `main` work, runs UBT and packaged suites, makes the
-   Shipping acceptance check, and
+2. The integration session merges admitted `main` work, runs UBT and packaged suites, packages with
+   `Build-Game.ps1 -Configuration Development`, and runs EstateSmoke, ToolRepeat, and F5/F9 on that
+   Development package. It adapts Shipping-only routes or reports them as such; Development frame
+   rate is not representative, so performance measurements stay on Shipping or Test configurations.
+   It then
    packages under its own `Build\Releases`, then—only after confirming the shared main checkout is
    clean, current, and on `main`—installs the complete verified `Windows` package at
    `E:\Repos\SurvivalGame\Build\Windows`. It hashes every installed file against its source, runs
    `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof on that installed copy, and only then
    retargets the shortcut to
-   `E:\Repos\SurvivalGame\Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
+   the Development executable at
+   `E:\Repos\SurvivalGame\Build\Windows\SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Development.exe`,
    keeping the Homestead icon. `Homestead Estate.lnk` is the only active desktop game shortcut.
    **Before retargeting to a new package folder, copy Jenny's saves and settings across:** packaged
    Development builds keep them inside the package (`<package>\SurvivalGame\Saved\SaveGames`, with an
