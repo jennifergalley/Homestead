@@ -38,7 +38,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Hoe, axe, pickaxe, and watering wrists move more naturally; the scythe stays above ground.
 - Audio is balanced against the forest ambience, with short lamp messages.
 
-## 2026-10-01 — early evening
+## 2026-10-01 — 6:08 PM
 
 - SHA: `c2a589452bc05faec0f72f08758d84f5e5f92c7d`
 - Status: delivered
@@ -49,7 +49,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - The animation inspector is harder to break in Development and the character lab; it is not a player feature.
 - Verification: Native 19, Inspector 22, nine Development routes, and guarded Shipping EstateSmoke/ToolRepeat passed; the promoted Shipping SHA-256 is `6E2EC11A5CF44AA7945AC88559C7020D6371D7A8A071DDFB53DCE4D82344D27C` with 18 saves preserved.
 
-## 2026-10-01 — 9 PM
+## 2026-10-01 — 9:00 PM
 
 - SHA: `3aa62ab0e8f7a03c4c0ab52f9dde764e710999be`
 - Status: delivered
@@ -115,8 +115,10 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
   delivered tooling, hidden and unscheduled, with its OpenSpec player checkbox preserved.
 - Safety: verified work only; no placeholder or unverified subset package.
 
-## 2026-10-04 — gameplay-first Shipping admission
+## 2026-10-04 — 11:29 AM
 
+- Build ID: `20261003-measured-02`
+- Admission history before delivery:
 - SHA: `cc2697ef` admits the frozen eleven-meal Unreal content.
 - Status: historical
 - This admission record was superseded by the delivered fresh-cook Shipping release below; it is not
@@ -144,8 +146,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
   hash-identical reuse path. The Shipping script correctly refused an implicit cook; no stale
   container, protected release, player save, shortcut, or promotion action was taken.
 
-## 2026-10-04 — measured02 gameplay-first Shipping delivery
-
+- Delivered promotion:
 - SHA: `b073cebe` persists the exact manifest-approved 127-asset bootstrap resave set; `fa3265fd`
   records the fresh-cook/candidate evidence.
 - Status: delivered
@@ -188,3 +189,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 ## Later
 
 - The player-driven deferred queue is in [backlog.md](backlog.md): river/ocean, map and town feedback, fishing, hauling, mine work, manor rebuilding, artisan goods, and later estate systems.
+- Tooling deferred: extend `Scripts\Build-Game.ps1`'s Shipping `-ReuseCooked -Package` archive
+  validation so a future build can stage directly under `E:\HomesteadReleases\<build-id>`. Until a
+  tooling slot changes that script, package under the worktree's `Build\Releases`, then use the
+  durable-copy promotion procedure recorded in the delivery checklist.

@@ -38,21 +38,25 @@ work/automations, no unselected animation/carry, meals, strap, normal-map, mine,
 | Travel Rest Agent | `1b0e10a4-09b5-458e-b9de-098cce831b07` | `jennifergalley-miniature-fishstick` | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch |
 | Planner Editing Agent | `ac593377-587f-4319-a033-b17f309be13e` | `jennifergalley-cuddly-eureka` | measured-02; hands-on slot 3; GPT-6.1 Sol/high/default launch |
 | HUD Agent | `2424d5bc-bc5a-4eec-a37f-a2f82cb995d0` | pending lane handoff | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch; selected 2026-10-04 02:19:32Z |
-| Integration Agent (build 02) | `e528fd4a-5aed-4c95-9463-a37941afc00b` | `jennifergalley-studious-goggles` | docs/accounting liaison and admission preflight only until granted hands-on slot; GPT-5.6 Terra/medium/default launch |
+| Integration Agent (build 02) | `e528fd4a-5aed-4c95-9463-a37941afc00b` | archived `jennifergalley-studious-goggles` | archived at 12:32 Oct 4; archival deleted measured02's Shipping output and package-local save. Do not contact; the 4 PM build is recovery. |
 | UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | archived | `440d4de5` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; ui-measured-01.md handoff |
 | Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | archived | `6e9c3a9a` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; town-measured-01.md handoff |
 | Accounting Agent | `02a5caf8-3fdf-4c96-be5c-192448d6fcdf` | archived | tooling integrated; closure captured; GPT-6.1 Sol/medium/default; accounting-measured-01.md handoff |
-| Integration Agent | `3554b767-ebd7-436c-a691-13795fecad77` | `jennifergalley-redesigned-couscous` | **release-holding, do not archive**; shortcut targets measured build 01; GPT-5.6 Terra/medium/default; integration-measured-01.md handoff |
+| Integration Agent | `3554b767-ebd7-436c-a691-13795fecad77` | archived `jennifergalley-redesigned-couscous` | archived; its measured01 package is gone. Do not infer a rollback or retarget from it. |
 | Disk Cleanup Agent | `9fc4e210-68e7-4bc1-acca-d52366894506` | `jennifergalley-congenial-engine` | **retained**; its own schedule is cleared, and the orchestrator asks it for one sweep a day |
 | Old Integration Agent | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-literate-eureka` | retired, **do not archive**: its worktree holds the 9 PM Shipping release the shortcut targets |
 | Old UI Menus, Props Animations, Terrain Weather, Documentation, Architecture | `5cf73757`, `ce241dd6`, `89914e30`, `a9f10974`, `a1648ae7` | various | retired; don't message them. Spawn fresh sessions instead |
 | Old orchestrator | `92eac339` | `jennifergalley-cautious-pancake` | retired; hosts the old planner canvas instance |
 
-**Do not archive any old agents**: old Orchestrator, UI Menus, Props Animations, Terrain Weather,
-Documentation, Architecture, Integration, or Cleanup. Jenny will archive them herself once the new
-system works. "Archive when done" applies only to sessions this orchestrator spawns. In particular,
-the old Integration worktree holds the shortcut's current Shipping release; Cleanup checks that target
-and its one rollback before deleting releases.
+**Release-loss incident (2026-10-04, 12:32):** archiving a release-holding session deletes its
+worktree `Build` output. Archived measured02 `jennifergalley-studious-goggles` lost the active
+Shipping release and package-local save; archived measured01 `jennifergalley-redesigned-couscous`
+is also gone. Leave the broken shortcut untouched—do not rebuild measured02 or retarget the Oct 1
+rollback. `jennifergalley-literate-eureka` is the only remaining Oct 1 release root and is
+protected. The 4 PM afternoon-03 Shipping build is the recovery: package normally under the
+Integration worktree, then copy/hash-verify its complete `Windows` package to
+`E:\HomesteadReleases\20261004-afternoon-03\Windows`, run release isolation plus F5/F9 on the copy,
+and promote only that durable copy.
 
 ## Spawning lanes
 

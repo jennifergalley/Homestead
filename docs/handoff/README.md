@@ -305,6 +305,16 @@ only retained MVP archive reference. The retained
 `jennifergalley-mvp-woodland-biome` branch is Water's active Estate Seasons handoff
 (`b19a0ad0`), despite its historical name.
 
+**Durable Shipping release staging (Jenny, 2026-10-04):** archiving a session deletes its
+worktree `Build` output. Therefore build the verified Shipping candidate under the Integration
+worktree's `Build\Releases`, then copy its complete verified `Windows` package to
+`E:\HomesteadReleases\<build-id>\Windows`. Hash every copied file against the source, run
+`Assert-ReleaseSaveIsolation.ps1` against the copy, and run the F5/F9 save proof on the copy before
+retargeting `Homestead Estate.lnk` and its exact package-local `-UserDir` there. Preserve the
+package-local `Saved\SaveGames` and `Saved\Config`; do not use a reparse point. The source
+worktree package is staging only, never the promoted release. The future direct-external-root
+`Build-Game.ps1` improvement is deferred to a tooling slot.
+
 ## Playtest builds (schedule)
 
 Jenny's standing preference (2026-09-30): three packaged Estate builds every day.
@@ -349,7 +359,11 @@ The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
    (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.
 2. The integration session merges admitted `main` work, runs UBT and packaged suites, makes the
    Shipping acceptance check, and
-   retargets the shortcut to its `Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
+   packages under its own `Build\Releases`, then copies the complete verified `Windows` package to
+   `E:\HomesteadReleases\<build-id>\Windows`, hashes every destination file against its source,
+   runs `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof on that copy, and only then
+   retargets the shortcut to
+   `E:\HomesteadReleases\<build-id>\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
    keeping the Homestead icon. `Homestead Estate.lnk` is the only active desktop game shortcut.
    **Before retargeting to a new package folder, copy Jenny's saves and settings across:** packaged
    Development builds keep them inside the package (`<package>\SurvivalGame\Saved\SaveGames`, with an
@@ -368,7 +382,12 @@ The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
    arithmetic and deduplication; label AIU as observed rather than billing-reconciled credits, keep
    unknown context/post-capture tails visible, and never turn Jenny's unchecked playtest acceptance
    into completion.
-5. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
+5. **Build-card timestamps are mandatory:** every shipped entry in `docs\handoff\builds.md` is
+   headed exactly `## YYYY-MM-DD — h:mm AM/PM` using its actual local promotion time, ordered by
+   that time. Put build IDs, scope, admission evidence, and descriptions in the card body—not its
+   heading. An admission that did not ship belongs in the delivered build card body, not in its own
+   build heading.
+6. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
 
 Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.
 This replaces the old "package after every improvement" step of the Interactive Loop.

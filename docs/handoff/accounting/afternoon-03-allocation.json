@@ -50,11 +50,32 @@
       "launchContextTier": "default",
       "observedUsageCheckpoint": {
         "firstEventId": 71819,
-        "lastEventId": 71924,
-        "calls": 18,
-        "recordedNanoAiu": "75352570000",
+        "lastEventId": 72275,
+        "calls": 111,
+        "recordedNanoAiu": "397485970000",
         "status": "open-tail",
-        "source": "Gameplay/UI local usage checkpoint"
+        "source": "Gameplay/UI local usage checkpoint",
+        "eventRangeUtc": "2026-10-04T19:07:23Z to 2026-10-04T19:34:52Z",
+        "observedModels": [
+          {
+            "model": "gpt-6.1-sol",
+            "reasoningEffort": "high",
+            "calls": 109,
+            "recordedNanoAiu": "341115990000"
+          },
+          {
+            "model": null,
+            "reasoningEffort": null,
+            "calls": 2,
+            "recordedNanoAiu": "56369980000",
+            "limitation": "Telemetry lacks model and reasoning effort; do not infer a configuration change."
+          }
+        ],
+        "actualContextTier": null,
+        "limitations": [
+          "Configured context tier is default; actual runtime context is unverified.",
+          "This is an open-tail checkpoint, not the final delivery capture."
+        ]
       }
     },
     {

@@ -59,3 +59,19 @@ after Art's dependency handoff, with no perf lock. Retained Planner
 `ac593377-587f-4319-a033-b17f309be13e` holds slot 3 for Jenny-directed Build cost UI redesign and
 records its fresh tooling model/usage boundary separately from measured02's frozen delivery. No
 Integration hands-on slot is granted.
+
+## Release-loss incident and recovery procedure
+
+At 12:32 on Oct 4, archived measured02 worktree `jennifergalley-studious-goggles` lost its active
+Shipping package and package-local save; archived measured01 `jennifergalley-redesigned-couscous`
+is also absent. `Homestead Estate.lnk` remains broken and untouched: do not rebuild measured02 or
+retarget the Oct 1 9 PM rollback. Protect the remaining
+`jennifergalley-literate-eureka` Oct 1 release root. The 4 PM afternoon-03 Shipping build is the
+recovery path.
+
+For that promotion, package normally under this worktree's `Build\Releases`, then copy the complete
+verified `Windows` package to `E:\HomesteadReleases\20261004-afternoon-03\Windows`. Hash every
+destination file against the source; run `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof
+against the durable copy; then point the shortcut and its exact package-local `-UserDir` at the
+copy. Preserve its package-local `Saved\SaveGames` and `Saved\Config`. No script change is assigned
+today. `Build-Game.ps1` direct external-root support remains a later tooling item.
