@@ -22,9 +22,7 @@
     "add-boat-fishing"
   ],
   "nextBuild": [],
-  "slots": {
-    "backlog:jenny-muu6k1g1-qr5dx2": "2026-10-04 21:00"
-  },
+  "slots": {},
   "removed": [
     "replace-heroine-with-metahuman",
     "prioritize-heroine-quality-and-tool-clarity",
@@ -55,7 +53,8 @@
     "backlog:jenny-mutdnje8-0et783",
     "backlog:jenny-mutdjl7e-nzl7lh",
     "backlog:jenny-mutd9wre-js2x1r",
-    "backlog:jenny-muu6upvs-l7a0l6"
+    "backlog:jenny-muu6upvs-l7a0l6",
+    "backlog:jenny-muu6k1g1-qr5dx2"
   ],
-  "updated": "2026-10-04T21:07:31.626Z"
+  "updated": "2026-10-04T22:13:59.582Z"
 }

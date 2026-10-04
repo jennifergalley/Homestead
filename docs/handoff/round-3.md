@@ -39,6 +39,11 @@ work/automations, no unselected animation/carry, meals, strap, normal-map, mine,
 | Balance | `81a547cd-0a72-4415-a617-460b5ade5f3c` | Reviews balance and cohesiveness; no game-code edits or implementer slot. |
 | Cleanup | `9fc4e210-68e7-4bc1-acca-d52366894506` | Performs the daily project-storage sweep. |
 
+**Future-launch model clarification (2026-10-04):** launch new sessions and sub-agents with Claude
+models only: Opus 5.5/high for Orchestrator, assets, and Balance; Sonnet 5.5/high for gameplay and
+general Unreal; Opus 5/high for risky/code review; Sonnet 5/medium for Integration/build/test; and
+Haiku 4.5/medium for docs, accounting, and simple status. Existing GPT sessions continue unchanged.
+
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
 | Orchestrator Agent | runtime `146ed534-2f78-48ba-b0fc-98436c1f3223`; app `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; afternoon-03; GPT-6.1 Sol/high/default |

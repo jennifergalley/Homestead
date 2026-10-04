@@ -36,29 +36,26 @@ Menu's control audit and Props' repeat bindings verify this before delivery.
 Jenny's standing team preference (2026-09-29). These are **required settings for future session
 launches**; documenting them does not change a live session's model or reasoning level.
 
-Updated 2026-10-02 (Jenny): protect visual quality, gameplay and performance while measuring AI
-credits per build. This policy supersedes the earlier Opus/Sonnet/GPT-6 Sol role tiers. See
+Updated 2026-10-04 (Jenny): new sessions and sub-agents use Claude models only. Running GPT sessions
+continue until replacement; this policy does not retune them. See
 [agent-lifecycle.md](agent-lifecycle.md) for handoffs, session reuse and accounting requirements.
 Use default context unless the task needs long context; record both configured tier and actual usage.
 
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
-| Orchestrator Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | long (Jenny requested 1.1M; actual runtime context remains separately observed) |
-| Blender / Unreal **asset making and asset integration only** | Claude Opus 5.5 (`claude-opus-5.5`) | high | default; long only when necessary |
+| Orchestrator Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | default |
+| Blender / Unreal asset making and asset integration | Claude Opus 5.5 (`claude-opus-5.5`) | high | default |
 | Balance Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | default |
-| Gameplay/UI/environment code, general Unreal work, visuals or performance implementation | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
-| Architecture / gameplay or save-format review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
-| Documentation / straightforward status and accounting | GPT-6 Luna (`gpt-6-luna`) or GPT-5.6 Terra (`gpt-5.6-terra`) | low / medium as needed | default |
-| Integration / building / scripted test execution | GPT-5.6 Terra (`gpt-5.6-terra`), GPT-6 Luna (`gpt-6-luna`), or GPT-6.1 Sol (`gpt-6.1-sol`) | low / medium as needed | default |
+| Gameplay/UI/environment code and general Unreal work | Claude Sonnet 5.5 (`claude-sonnet-5.5`) | high | default |
+| Risky review and code-review sub-agents | Claude Opus 5 (`claude-opus-5`) | high | default |
+| Documentation, accounting, and straightforward status | Claude Haiku 4.5 (`claude-haiku-4.5`) | medium | default |
+| Integration, building, and scripted test execution | Claude Sonnet 5 (`claude-sonnet-5`) | medium | default |
 | Disk Cleanup Agent | unchanged (existing session) | | |
 
 Integration escalates a failure it can't explain in one attempt to the orchestrator, which assigns it to
 the owning lane rather than having Integration debug gameplay.
 
-Claude Opus 5.5 is not the general implementation tier: it is allowed only for the Orchestrator,
-Blender/Unreal asset creation and asset integration, and the Balance Agent. Jenny requested a 1.1M
-orchestrator context; record that request separately from the configured `long` tier and any unknown
-actual runtime context. These are future-launch settings, not a retune of an existing session.
+These are future-launch settings, not a retune of an existing session.
 
 ## Token budget (Jenny, 2026-10-01)
 

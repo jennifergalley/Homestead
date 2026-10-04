@@ -7,13 +7,23 @@ Timing (Jenny, 2026-10-01): start each build about an hour before its slot (7:30
 Lanes implement only what Jenny has prioritized for a specific build, then go idle. They don't pick up
 unflagged queue items. If little or nothing is prioritized, the orchestrator tells Jenny to schedule work.
 
-## 2026-10-04 — 9:00 PM
+## 2026-10-04 — 3:13 PM
 
-- Status: planned
-- Selected feedback: `backlog:jenny-muu6k1g1-qr5dx2` fishing pole/fish icons and original
-  cast/bite/catch presentation with randomized timing minigame.
-- This is the only fishing code or asset admission for the 9 PM slot; it is excluded from the 4 PM
-  build.
+- Build ID: `20261004-evening-03`
+- SHA: `4de52b4ff02a680ef7c25fc7cc76fcb2e877330b`
+- Status: delivered
+- Ships: fishing pole and six fish icons, authored cast/bite/catch presentation, and a randomized
+  bite/strike minigame.
+- Verification: Native 23/23; Development cook and Shipping reuse stage; package and package-local
+  Saved hashes; release-save isolation; guarded Shipping EstateSmoke and ToolRepeat all passed.
+  The StartupProbe recorded F5=1, F9=1, an error-free same-world state-MD5 roundtrip, normal Lit
+  1280x720 rendering, and MetaHuman readiness. Its final legacy `Base.Mesh` identity comparison
+  was waived because the active 2:05 PM release fails it identically while intentionally rendering
+  MetaHuman BodyFull. The promoted Shipping executable SHA-256 is
+  `4786A724D43E3DBB60D45AF3D7762D432946A21AEDAB934ABD2C4614C73EA24C`.
+- Promotion: 3:13:39 PM local to `Homestead Estate.lnk`, preserving its icon and package-local
+  `-UserDir`; `Windows-20261004-afternoon-03` remains the rollback. Player acceptance remains
+  pending Jenny's playtest.
 
 ## 2026-10-04 — 2:05 PM
 
@@ -158,6 +168,9 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Cove steps, kerbs, and rails are ready to walk.
 
 ## Later
+
+- Fix `HomesteadStartupProbe`'s legacy mesh-identity assertion to be MetaHuman-aware; the Fishing
+  promotion waiver covers only that pre-existing false invariant.
 
 - The player-driven deferred queue is in [backlog.md](backlog.md): river/ocean, map and town feedback, fishing, hauling, mine work, manor rebuilding, artisan goods, and later estate systems.
 - Tooling deferred: extend `Scripts\Build-Game.ps1`'s Shipping `-ReuseCooked -Package` archive

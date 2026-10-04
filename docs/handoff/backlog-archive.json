@@ -113,6 +113,28 @@
         }
       ],
       "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
+    },
+    {
+      "buildId": "20261004-evening-03",
+      "archivedAt": "2026-10-04T22:13:39.8047906Z",
+      "status": "shipped-pending-player-acceptance",
+      "receipt": {
+        "sourceCommit": "4de52b4ff02a680ef7c25fc7cc76fcb2e877330b",
+        "installedShippingExecutableSha256": "4786A724D43E3DBB60D45AF3D7762D432946A21AEDAB934ABD2C4614C73EA24C",
+        "verification": "Native 23/23; Development cook and Shipping reuse; package/save hashes; release isolation; guarded EstateSmoke and ToolRepeat; F5/F9 state roundtrip passed with a documented StartupProbe legacy-vs-MetaHuman mesh-identity waiver."
+      },
+      "inboxEntries": [
+        {
+          "id": "jenny-muu6k1g1-qr5dx2",
+          "title": "Fishing pole and fish icons need refinement",
+          "description": "The fishing pole and fish icons in the inventory / hotbar need refinement to match the quality and style of the other tools and finished crops. Fishing also needs an animation of her casting the line out, and the animations should drive the fishing / catching mechanics, not a text box with a progress bar that disappears too fast to read. Draw inspiration from how Coral Island does it. There should also be more randomness to the fishing animation, so it takes a random amount of time for a fish to bite, and the exact moment to click to catch the fish should involve randomness too so it becomes a minigame.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T18:54:38.161Z",
+          "updatedUtc": "2026-10-04T18:56:02.763Z"
+        }
+      ],
+      "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
     }
   ]
 }

@@ -10,8 +10,8 @@ role, model or standing session changes. Model settings are **required for futur
 | Role | What it does | Model |
 | --- | --- | --- |
 | **Orchestrator Agent** | Coordinates only: plans, spawns, assigns slots, relays; never builds or merges. Reports to Jenny. | Claude Opus 5.5 / high / long |
-| **Integration Agent** | Only session that merges, packages and promotes builds; installs each release into the main checkout (`E:\Repos\SurvivalGame\Build\Windows`), the only place Jenny's shortcut may point. Also the current docs/accounting liaison. | GPT-5.6 Terra or GPT-6 Luna / medium |
-| **Docs Agent** | Records verified findings in canonical docs (skills, `docs/setup.md`, `docs/handoff/`). Spawned when needed; Integration covers it otherwise. | GPT-6 Luna or GPT-5.6 Terra / low–medium |
+| **Integration Agent** | Only session that merges, packages and promotes builds; installs each release into the main checkout (`E:\Repos\SurvivalGame\Build\Windows`), the only place Jenny's shortcut may point. Also the current docs/accounting liaison. | Claude Sonnet 5 / medium |
+| **Docs Agent** | Records verified findings in canonical docs (skills, `docs/setup.md`, `docs/handoff/`). Spawned when needed; Integration covers it otherwise. | Claude Haiku 4.5 / medium |
 | **Balance Agent** | Reviews game balance (energy, coins, yields, timers, pacing) and cohesiveness (design, flavor, icons, menu/HUD look). Consulted at planning and before `[ready]`; doesn't edit game code. | Claude Opus 5.5 / high |
 | **Cleanup Agent** | One bounded disk sweep per day after a delivery. | existing session |
 
@@ -25,11 +25,16 @@ archived when their work ships. Never archive a session whose worktree holds som
 | Orchestrator Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | long (Jenny requested 1.1M; actual runtime context is recorded separately) |
 | Blender / Unreal asset making and asset integration | Claude Opus 5.5 (`claude-opus-5.5`) | high | default; long only when necessary |
 | Balance Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | default |
-| Gameplay/UI/environment code, general Unreal work, visuals or performance implementation, and risky review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
-| Documentation, integration / building, scripted tests and accounting | GPT-6 Luna (`gpt-6-luna`), GPT-5.6 Terra (`gpt-5.6-terra`), or GPT-6.1 Sol (`gpt-6.1-sol`) | low / medium as appropriate | default |
+| Gameplay/UI/environment code, general Unreal work, visuals or performance implementation | Claude Sonnet 5.5 (`claude-sonnet-5.5`) | high | default; long only if needed |
+| Risky review (save format, gameplay logic) and code-review sub-agents | Claude Opus 5 (`claude-opus-5`) | high | default |
+| Integration / building / scripted tests | Claude Sonnet 5 (`claude-sonnet-5`) | medium | default |
+| Documentation, accounting, simple status work | Claude Haiku 4.5 (`claude-haiku-4.5`) | medium | default |
 
-Claude Opus 5.5 is allowed only for the Orchestrator, Blender/Unreal asset making and asset
-integration, and Balance. The Balance Agent reviews energy, coins, yields, timers, pacing, design,
+**Claude models only (Jenny, 2026-10-04):** every new session and sub-agent uses a Claude model.
+No GPT models for new instances. Pick the cheapest Claude tier that keeps quality: Haiku for
+routine docs and status, Sonnet for code, integration and building, Opus 5 for risky review, and
+Opus 5.5 only for the Orchestrator, Blender/Unreal asset work and Balance. Sessions already running
+on GPT models keep running until they're replaced. The Balance Agent reviews energy, coins, yields, timers, pacing, design,
 flavor, and UI against cozy casual fun without grinding, then beauty (including flowers everywhere),
 then real-world verisimilitude. It does not edit game code and holds no implementer slot.
 

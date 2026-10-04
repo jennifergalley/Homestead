@@ -73,15 +73,6 @@
       "createdUtc": "2026-10-04T05:31:44.127Z"
     },
     {
-      "id": "jenny-muu6k1g1-qr5dx2",
-      "title": "Fishing pole and fish icons need refinement",
-      "description": "The fishing pole and fish icons in the inventory / hotbar need refinement to match the quality and style of the other tools and finished crops. Fishing also needs an animation of her casting the line out, and the animations should drive the fishing / catching mechanics, not a text box with a progress bar that disappears too fast to read. Draw inspiration from how Coral Island does it. There should also be more randomness to the fishing animation, so it takes a random amount of time for a fish to bite, and the exact moment to click to catch the fish should involve randomness too so it becomes a minigame.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T18:54:38.161Z",
-      "updatedUtc": "2026-10-04T18:56:02.763Z"
-    },
-    {
       "id": "jenny-muu7h2lt-0jye7b",
       "title": "Rename Pascoe to something else, non-Poldark-related",
       "description": "The names of the people and places should explicitly avoid directly referencing Poldark, the family names, business names, or estate names.",
