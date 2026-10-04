@@ -60,6 +60,12 @@ after Art's dependency handoff, with no perf lock. Retained Planner
 records its fresh tooling model/usage boundary separately from measured02's frozen delivery. No
 Integration hands-on slot is granted.
 
+Gameplay source checkpoint `74203f72c8647ba52f4da78e747908d5cb0f4dd0` is clean against
+`8fbea62d`; its six targeted native suites, combined Editor compile, and exact source stamp pass.
+It includes Art dependencies `256ce7e5`, `dab028ac`, and `e32d4d15`. Seed packet normalization
+preserves counts with unchanged version/fields and no placement/enum change, but is not admitted:
+the coordinator's focused risky review and all remaining delivery gates still apply.
+
 ## Release-loss incident and recovery procedure
 
 At 12:32 on Oct 4, archived measured02 worktree `jennifergalley-studious-goggles` lost its active
@@ -69,9 +75,19 @@ retarget the Oct 1 9 PM rollback. Protect the remaining
 `jennifergalley-literate-eureka` Oct 1 release root. The 4 PM afternoon-03 Shipping build is the
 recovery path.
 
-For that promotion, package normally under this worktree's `Build\Releases`, then copy the complete
-verified `Windows` package to `E:\HomesteadReleases\20261004-afternoon-03\Windows`. Hash every
-destination file against the source; run `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof
-against the durable copy; then point the shortcut and its exact package-local `-UserDir` at the
-copy. Preserve its package-local `Saved\SaveGames` and `Saved\Config`. No script change is assigned
-today. `Build-Game.ps1` direct external-root support remains a later tooling item.
+For that promotion, package normally under this worktree's `Build\Releases`, then install the
+complete verified `Windows` package at `E:\Repos\SurvivalGame\Build\Windows`. Before that copy,
+confirm the main checkout is clean, current, and on `main`; never overwrite its uncommitted work.
+For this recovery, move its Sept. 19 package to `Build\Windows-20260919-old` rather than deleting
+it. Hash every installed file against the source; run `Assert-ReleaseSaveIsolation.ps1` and the
+F5/F9 save proof against the installed copy; then point the shortcut and its exact package-local
+`-UserDir` at that main-checkout package. Preserve its package-local `Saved\SaveGames` and
+`Saved\Config`. Every later promotion uses the same main-checkout location. No script change is
+assigned today.
+
+The shared main checkout was switched cleanly to `main` at `628693f5`; its previous branch
+`autonomous/woodland-environment-assets-20260920` remains untouched. Its 19 referenced commits
+(newest first) are `10260ceb`, `c742f038`, `6e1ab1f4`, `dbb6e37d`, `65b89f55`, `acb8fe53`,
+`74982482`, `c2aa884a`, `c9998125`, `9107029b`, `c617b5f9`, `6d8e4bdb`, `74cec480`,
+`827e6bef`, `617f099a`, `7c7fe5ad`, `555a616c`, `1b061c32`, and `f26aec92`. They are already
+reachable from `main` (branch-only count zero); no push, reset, or deletion was performed.

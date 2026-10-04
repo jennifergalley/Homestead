@@ -305,15 +305,17 @@ only retained MVP archive reference. The retained
 `jennifergalley-mvp-woodland-biome` branch is Water's active Estate Seasons handoff
 (`b19a0ad0`), despite its historical name.
 
-**Durable Shipping release staging (Jenny, 2026-10-04):** archiving a session deletes its
-worktree `Build` output. Therefore build the verified Shipping candidate under the Integration
-worktree's `Build\Releases`, then copy its complete verified `Windows` package to
-`E:\HomesteadReleases\<build-id>\Windows`. Hash every copied file against the source, run
-`Assert-ReleaseSaveIsolation.ps1` against the copy, and run the F5/F9 save proof on the copy before
-retargeting `Homestead Estate.lnk` and its exact package-local `-UserDir` there. Preserve the
-package-local `Saved\SaveGames` and `Saved\Config`; do not use a reparse point. The source
-worktree package is staging only, never the promoted release. The future direct-external-root
-`Build-Game.ps1` improvement is deferred to a tooling slot.
+**Main-checkout Shipping promotion (Jenny, 2026-10-04):** `Homestead Estate.lnk` may target only a
+build of `main` installed at `E:\Repos\SurvivalGame\Build\Windows`, never a session worktree or an
+external release root. Before installation, check the shared main checkout is clean, on `main`, and
+up to date; never overwrite its uncommitted work. Build and verify the candidate in Integration's
+worktree, then copy its complete verified `Windows` package into the main checkout, preserving its
+package-local `Saved\SaveGames` and `Saved\Config`. Hash every installed file against the source,
+run `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof against the installed copy, and only
+then retarget the shortcut and its exact package-local `-UserDir` there. The source worktree
+package is staging only, never the promoted release. The first recovery moves the former Sept. 19
+package to `Build\Windows-20260919-old` rather than deleting it; later promotions use the same
+main-checkout `Build\Windows` location.
 
 ## Playtest builds (schedule)
 
@@ -359,11 +361,12 @@ The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
    (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.
 2. The integration session merges admitted `main` work, runs UBT and packaged suites, makes the
    Shipping acceptance check, and
-   packages under its own `Build\Releases`, then copies the complete verified `Windows` package to
-   `E:\HomesteadReleases\<build-id>\Windows`, hashes every destination file against its source,
-   runs `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof on that copy, and only then
+   packages under its own `Build\Releases`, then—only after confirming the shared main checkout is
+   clean, current, and on `main`—installs the complete verified `Windows` package at
+   `E:\Repos\SurvivalGame\Build\Windows`. It hashes every installed file against its source, runs
+   `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof on that installed copy, and only then
    retargets the shortcut to
-   `E:\HomesteadReleases\<build-id>\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
+   `E:\Repos\SurvivalGame\Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
    keeping the Homestead icon. `Homestead Estate.lnk` is the only active desktop game shortcut.
    **Before retargeting to a new package folder, copy Jenny's saves and settings across:** packaged
    Development builds keep them inside the package (`<package>\SurvivalGame\Saved\SaveGames`, with an

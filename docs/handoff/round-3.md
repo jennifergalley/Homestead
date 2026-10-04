@@ -54,9 +54,10 @@ Shipping release and package-local save; archived measured01 `jennifergalley-red
 is also gone. Leave the broken shortcut untouched—do not rebuild measured02 or retarget the Oct 1
 rollback. `jennifergalley-literate-eureka` is the only remaining Oct 1 release root and is
 protected. The 4 PM afternoon-03 Shipping build is the recovery: package normally under the
-Integration worktree, then copy/hash-verify its complete `Windows` package to
-`E:\HomesteadReleases\20261004-afternoon-03\Windows`, run release isolation plus F5/F9 on the copy,
-and promote only that durable copy.
+Integration worktree, then install/hash-verify its complete `Windows` package at
+`E:\Repos\SurvivalGame\Build\Windows`, run release isolation plus F5/F9 on that installed copy, and
+promote only the main-checkout build. The shortcut must never target a session worktree or an
+external release root.
 
 ## Spawning lanes
 
