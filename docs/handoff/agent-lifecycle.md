@@ -95,6 +95,12 @@ Optimize credits per accepted player-visible improvement alongside build totals,
 performance and visual acceptance. Compare similar task types rather than concluding that the more
 expensive build was inefficient merely because it contained harder work.
 
+### Billing-cycle presentation
+
+Jenny's confirmed billing cycle is September 30 through October 30 inclusive, resetting October 31.
+Planner cost charts report a build's shipment-day observed cost, not inferred account-day usage;
+keep those two time bases distinct and preserve event timestamps for billing reconciliation.
+
 ### Scheduled-build kickoff boundary
 
 Before work begins, create an allocation file for the build with its authorization timestamp, every
