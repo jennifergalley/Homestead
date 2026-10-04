@@ -13,6 +13,9 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 - Build slots: **7:30 AM, 4 PM, 9 PM**. Each build starts about an hour before its slot.
 - Unfinished items roll to the next release; tell her when that happens.
 - When a slot has nothing scheduled, tell her to schedule work.
+- The three-concurrent-hands-on cap applies only to game development: gameplay code, Blender,
+  Unreal, and game assets. Planner, backlog, and build-cost canvas-extension work is outside that
+  cap and needs no slot.
 - **No overnight work** (Jenny, 2026-10-01). She turns the computer off at night. No session schedules
   automations or runs work between her evening sign-off and her first message in the morning. Work
   starts when she turns the computer on and messages the orchestrator.

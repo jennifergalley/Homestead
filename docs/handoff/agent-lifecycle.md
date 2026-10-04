@@ -53,11 +53,13 @@ independent workstream warrants it. Supply an objective, relevant files or excer
 expected output and acceptance criteria, not the entire parent conversation.
 
 Keep delegation one level deep by default. The three-hands-on-implementer cap applies across the
-whole tree, including helpers while they edit, build or use Blender/Unreal. Request a slot before
-starting a hands-on helper if all slots are occupied. All descendant usage belongs in task/build costs.
-Cheap helpers can document verified facts or execute existing tests. The high-effort owning agent
-defines gameplay test behavior and edge cases and reviews helper-written cases; substantive gameplay,
-animation or rendering diagnosis remains GPT-6.1 Sol / high. Jenny's direct instructions still win.
+whole tree only for gameplay code, Blender, Unreal, and game-asset work, including helpers while
+they edit, build, or use Blender/Unreal. Request a slot before starting a game-development helper if
+all slots are occupied. Planner, backlog, and build-cost canvas-extension work is outside the cap and
+needs no slot. All descendant usage belongs in task/build costs. Cheap helpers can document verified
+facts or execute existing tests. The high-effort owning agent defines gameplay test behavior and edge
+cases and reviews helper-written cases; substantive gameplay, animation or rendering diagnosis
+remains GPT-6.1 Sol / high. Jenny's direct instructions still win.
 
 ## Accounting contract for future builds
 
