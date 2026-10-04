@@ -302,6 +302,14 @@ diagnosis, or production change. The `ae434be5` art hold is unchanged; diagnosti
 stays on owned E: scratch, its visible held bean scene was restored, and no render remains active.
 Farming's build02 snapshot is now provisionally 679 calls; four prototypes, 12 unstarted dishes, and
 zero approvals remain.
+Held WIP checkpoint `70f03669` preserves original Cabbage Potato Stew and a new hollow maple
+food-bearing eating spoon. Four viewed 4K, 192-sample frames and copied source/FBX/fixtures pass;
+the source is `45,576/10,424` triangles and the sampled spoon hollow is `2.959` mm. There are now
+five source prototypes, 11 unstarted dishes, and zero approvals. It remains stiff/molded/procedural
+and **not** import/admission-ready; broth source transmission is not a UE material contract and the
+spoon grip is unverified. Runtime spoon seating and liquid material are future Integration gates.
+The existing eight shader ASTs are unchanged, and there are no fish/bake/animation/gameplay/save
+changes. Farming's build02 snapshot is provisionally 698 calls (event `70962`).
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
 prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four

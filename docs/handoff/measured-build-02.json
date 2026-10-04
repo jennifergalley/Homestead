@@ -85,6 +85,8 @@
       "herbedBeansSourceStatus": "Held WIP: original 24-seed/36-flake Herbed Beans, new 13.44 cm bowl/portion, 62,928/2,432 triangles, four viewed 4K frames, and passing source/coordinate/island/applied-transform/sampled-bowl fixtures. f/64 detail remains waxy/molded/procedural; not art/import-ready. Four prototypes, 12 unstarted dishes, zero approvals; no fish/helper/budget/bake, UE, gameplay/save change.",
       "herbedBeansCoordinateFollowUpCheckpoint": "2612dcaa",
       "herbedBeansCoordinateFollowUpStatus": "Metadata-only negative result: translated Object coordinates match pcoord within 1.88e-8 m, but 4K/native comparison RMS 0.0284 full/0.0923 surface does not recover fine relief. No source-coordinate, fish/bake, or production change; ae434be5 hold unchanged.",
+      "cabbagePotatoStewSourceCheckpoint": "70f03669",
+      "cabbagePotatoStewSourceStatus": "Held WIP: original stew and hollow maple eating spoon; four viewed 4K/192-sample frames and copied source/FBX/fixtures pass; 45,576/10,424 triangles and 2.959 mm sampled hollow. Stiff/molded/procedural, not art/import-ready. Broth source transmission is not UE material proof and spoon grip is unverified; runtime seating/liquid material remain future Integration gates. Five prototypes, 11 unstarted, zero approvals; no fish/bake/animation/gameplay/save change.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
