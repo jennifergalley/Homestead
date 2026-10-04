@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "name": "PreparedPotatoesSource",
+  "description": "Held original coal-baked potato serving and edible portion.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/coal_baked_potatoes.py",
+  "source_sha256": "346ff8544ab888c1a7d885ccfbd26a1b58eca5061c5b8f9d3118411d3404db72",
+  "provenance": "Original custom tuber, eye-pit, split crumb and turned-platter geometry; procedural PBR. O'Dea CC BY-SA 4.0 photo observed only.",
+  "meshes": {
+    "SM_BakedPotatoes": {
+      "vertices": 26536,
+      "triangles": 53056,
+      "size_cm": [
+        23.2,
+        23.2,
+        6.87
+      ],
+      "materials": [
+        {
+          "name": "M_OriginalPotatoElmPlatter",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_WholeCoalPotatoSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SplitCoalPotatoLeftSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SplitCoalPotatoLeftFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.81
+        },
+        {
+          "name": "M_SplitCoalPotatoRightSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SplitCoalPotatoRightFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.81
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          0.0001810230314731598,
+          -0.01512502446770668,
+          0.04399999995250255
+        ],
+        "detail_distance": 0.4
+      },
+      "fbx": "SM_BakedPotatoes.fbx",
+      "sha256": "e4ad9e681730491df93b19f697800ac05105bc243b00925bc1a51ec31db043a4",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BakedPotatoes_hero.png",
+          "detail": "beauty_SM_BakedPotatoes_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_BakedPotatoesPortion": {
+      "vertices": 9090,
+      "triangles": 18176,
+      "size_cm": [
+        5.4,
+        7.8,
+        2.74
+      ],
+      "materials": [
+        {
+          "name": "M_HandheldCoalPotatoSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_HandheldCoalPotatoFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.81
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          -0.0006849076598882675,
+          0.0,
+          0.04054928089678288
+        ],
+        "detail_distance": 0.27
+      },
+      "fbx": "SM_BakedPotatoesPortion.fbx",
+      "sha256": "08bab61e70ab149a5e14ffb0783a6d45b9e4b77ebc6307c06eb4cd8c30db8927",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BakedPotatoesPortion_hero.png",
+          "detail": "beauty_SM_BakedPotatoesPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "BakedPotatoes",
+  "ingredients": {
+    "Potato": 2,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "serving_potato_units": 2,
+  "food_material_source_sha256": "6b2248b6846074f8141b89bdb810a12013cd762c1dc5cd9f46b71b04b120537a",
+  "not_import_or_art_acceptance": true
+}

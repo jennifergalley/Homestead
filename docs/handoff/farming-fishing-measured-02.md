@@ -559,8 +559,10 @@ Assets\Props\CaughtFish\BakeDiagnostics retains four selected detail frames,
 input/frame hashes and generated fixed-crop measurements for twelve cases.
 The cheek rectangle is x2050-2700,y800-1250, in the 3840x2160 detail frame.
 Original RGB8 RMS 3.105 falls to 1.318 with source Normal/Coat Normal and to
-2.068 with source roughness. Sixteen-bit normal, two/all microbump removal,
-matched triangulation and zero coat only during normal baking do not fix it.
+2.068 with source roughness. Sixteen-bit normal, matched triangulation and zero coat only during normal
+baking do not fix it. Correction: two/all microbump-removal variants were
+compared against the original bumped source, not matched bump-free source/bake
+pairs. They do NOT exclude Bump evaluation as a causal branch.
 An 8192 normal reaches 2.439; a head-focused UV allocation with all five maps
 still 4096 reaches 2.432, only partial improvements. All production budgets
 and shader fields remain unchanged. Source/baked corner normals and transforms
@@ -598,6 +600,64 @@ forecast after unresolved bake diagnosis; sixteen dishes/portions and image/
 eating wiring have not started at this checkpoint. First independent source
 slice is original Baked Potatoes serving and handheld portion, exactly potato
 and fuel as catalogued (no invented butter/oil/herb ingredient).
+
+### Two failed normal discriminators and first meal source milestone
+
+Both reviewer-directed one-specimen discriminators are complete and stopped.
+Frozen c0 trout topology/positions/matrices/corner normals/smooth/sharp/custom
+normal state, active/render UV and POINT fields were guarded. One 4096 OBJECT
+NORMAL round trip gives cheek RGB8 RMS 3.062 (original 3.105); one explicit
+final-source-normal EMIT capture gives 3.060. The latter captures the actual
+socket with WORLD->OBJECT, normalization and .5*n+.5 encoding; unlinked eye/
+oral slots use explicit shading-normal equivalents. Both miss the predeclared
+<=1.7 plus viewed-patch-reduction discriminator; patches persist. Neither
+tangent conversion alone nor NORMAL-pass extraction alone explains the issue.
+UV-bake procedural normal-field evaluation/filtering remains unproven. No
+shared-helper correction, shader/budget change or further family bake authorized.
+
+Assets\Props\CaughtFish\NormalCaptureDiagnostics preserves two viewed detail
+frames, measurements, diagnostic reports and copied-frame/hash verification.
+Reports retain inherited geometry/framing metadata: NOT fresh FBX/export/import
+receipts. Replay scripts, blends and normal images remain in the named E:
+fish-object-normal-probe and fish-emission-normal-probe folders. Earlier
+bump-removal controls were unmatched source pairs and do not exclude Bump
+evaluation. Integration recorded these results at 2f4e844e/f94a8399/166f8d2a.
+
+Original Baked Potatoes serving/edible-half source is now built, not accepted.
+New coal_baked_potatoes.py and isolated homestead_food_materials.py reuse only
+generic Graph/wood infrastructure, no existing meal/crop/root mesh or photo
+texture. The observed O'Dea CC BY-SA4.0 potato photograph stays on E: and is
+not shipped; no pictured kale/toppings or uncatalogued oil/butter/herbs were
+added. Exact ingredients: Potato2 and Kindling1. Original 23.2cm elm platter
+holds one whole potato and both halves of a second; separate edible half is
+7.8cm long, with no plate attached to the hand.
+
+Rejected radial crumb spokes and rim noise leaking across the entire flesh
+were replaced by a nonradial grid and perimeter-confined torn-rim noise.
+Upper/lower halves share the same authored tuber but are not duplicated lower
+halves. Serving/portion have 53,056/18,176 triangles and sizes
+[23.2,23.2,6.87]/[5.4,7.8,2.74]cm. Four 3840x2160/192-sample OPTIX frames were
+viewed; the current skin/wood remain procedurally mottled and flesh too uniform/
+synthetic. This is NOT a completed meal or one of sixteen art approvals.
+
+Assets\Props\PreparedFood\PotatoesSourceProof preserves the reopened copied
+source blend, two FBX, four frames, report and verification. Source/food hashes
+346ff854/6b2248b6 match; finite/closed/positive-volume/noncollapsed geometry,
+UV/bottom-pivot/scale/budget/role fixtures and copied FBX/frame receipts pass.
+Tests do not certify intersections, contact everywhere, grip or artistic/UE
+suitability. Source report material socket defaults are not evaluated albedo.
+No meal baking/import/wiring or gameplay/save/version/placement edits.
+
+Owned Blender PID20420/port9878 is preserved as labelled EEVEE material WIP:
+E:\CopilotScratch\5be207bc-49b1-4a1b-811e-088ae565dc1b\Potatoes-current-source-held-visible.blend.
+That replaces the stale second-pass visible potato copy, not frozen proofs.
+Continue independent meal source refinement, then fifteen remaining dishes/
+portions and original imagery/eating presentation; do not park waiting for fish
+review. Overnight slot2 authorization remains; Integration owns all engine gates.
+Actual gpt-6.1-sol/high, launch default/actual context unknown; no helpers or
+automation. Build02 provisional snapshot: 568 calls through event70757,
+3,418,866,540,000 recorded nano-AIU; later calls/terminal response need recapture.
+Prior hour estimates are obsolete; completion forecast remains uncertain.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.
