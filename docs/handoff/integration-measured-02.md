@@ -519,3 +519,17 @@ assigned.
   blocker. It reaffirmed the HUD `QuietActionSerial` and pickup/name-toast preservation plus
   Travel discovery/save-section constraints. This is source-risk evidence only, not compile, visual,
   player, or release approval.
+
+## Shipping package blocker
+
+- `cc2697ef` admits the Frozen-11 Unreal content: 22 meshes, 66 maps, and 110 generated assets.
+  The exact-boundary test, Release native suite (21/21), combined Development target build, and
+  isolated PIE import check pass. `ReleaseSaveIsolationTests.ps1` also passed all 15 disposable
+  parser fixtures.
+- Shipping staging is correctly held. This worktree has no file-based `Saved\Cooked\Windows`
+  container set, while the protected measured01 containers predate the imported meal assets.
+  `Build-Game.ps1 -Configuration Shipping -PackageOnly` therefore refused the unsupported implicit
+  cook, and the documented `-ReuseCooked -ReusePakDirectory` path would hash-preserve stale
+  containers. Do not bypass that integrity guard or use either protected release as a cook source.
+  An authorized fresh Shipping cook/staging route, or a verified current cooked container source, is
+  required before candidate save-containment, EstateSmoke/ToolRepeat, or promotion.

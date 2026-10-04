@@ -116,8 +116,9 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 
 ## 2026-10-04 — gameplay-first Shipping admission
 
-- SHA: pending Farming's frozen eleven-meal export/wiring handoff
-- Status: in progress; Jenny authorized this lean delivery at 09:44 local.
+- SHA: `cc2697ef` admits the frozen eleven-meal Unreal content.
+- Status: source/runtime gates are green; Shipping remains blocked pending a current cooked-container
+  source or an authorized fresh Shipping cook/staging route.
 - Ships: the existing original pole and six fish, plus exactly eleven original meals frozen at
   `843324c17b85b5432785fc7a6b9e333702dc26ec`: Baked Potatoes, Roasted Turnips, Stewed Carrots,
   Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root Vegetable
@@ -133,6 +134,13 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
   player saves, and the shortcut icon. Existing texture budgets are ceilings rather than mandatory
   4K rebakes; use a cheap coherent provisional original-asset material/import path and retain richer
   WIP. No functional or save gate is waived.
+- Evidence: exact boundary guard passed (11 meals, 22 meshes, 66 maps, 18 images, no deferred
+  assets); Release native suite passed 21/21; combined Development build and save-isolated PIE
+  import check passed; `ReleaseSaveIsolationTests.ps1` passed 15 disposable fixtures.
+- Blocker: this worktree has no reusable file-based `Saved\Cooked\Windows` set. The protected
+  measured01 Shipping containers predate Frozen-11 and cannot be staged under the documented
+  hash-identical reuse path. The Shipping script correctly refused an implicit cook; no stale
+  container, protected release, player save, shortcut, or promotion action was taken.
 
 ## Later
 
