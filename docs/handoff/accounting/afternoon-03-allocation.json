@@ -47,7 +47,15 @@
       "actualModel": "gpt-6.1-sol",
       "actualReasoningEffort": "high",
       "contextTier": null,
-      "launchContextTier": "default"
+      "launchContextTier": "default",
+      "observedUsageCheckpoint": {
+        "firstEventId": 71819,
+        "lastEventId": 71924,
+        "calls": 18,
+        "recordedNanoAiu": "75352570000",
+        "status": "open-tail",
+        "source": "Gameplay/UI local usage checkpoint"
+      }
     },
     {
       "sessionId": "ff61de39-9742-45a8-8c6d-03512cd76224",
