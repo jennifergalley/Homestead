@@ -55,7 +55,11 @@ explain standard verbs.
 - **Icons:** code-drawn vectors in `SHomesteadIcon.cpp` on a 56-unit grid, ink outline plus muted
   fill (see `docs/ui-icon-provenance.md`). One style for every icon on screen.
 - **Frames:** panels that float over the world (notices, focus card, HUD readouts) use the
-  double-rule frame with drop shadow; nothing is a bare flat rectangle.
+  double-rule frame with drop shadow; nothing is a bare flat rectangle. Inside the field book and
+  the shop, **every cell, tab and row** gets its own frame (Jenny, 2026-10-04): a 1.5 px brass or
+  iron-gall hairline, an inner rule and 7 px corner brackets (gated by size), brightening on hover.
+  There's no outer frame around the whole book. Rows can skip the brackets. The selected HUD
+  hotbar cell has no inner frame.
 - **Accent use:** rust/brass marks selection, focus and "act now" cues. Green/red are reserved for
   nothing; good/bad use sage and rust tints plus an icon, never colour alone.
 
