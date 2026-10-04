@@ -61,6 +61,14 @@
       "selectedIds": [
         "backlog:jenny-mut6p856-a7gysc",
         "unify-hud-notices"
+      ],
+      "checkpoint": "a9156572713ec42d8ebca529ef2f0d8807832554",
+      "checkpointStatus": "pushed-not-admitted",
+      "admissionBlockers": [
+        "compile",
+        "Unreal acceptance",
+        "UI gallery acceptance",
+        "Jenny player acceptance"
       ]
     }
   ],
@@ -70,7 +78,7 @@
     "model": "gpt-5.6-terra",
     "reasoningEffort": "medium",
     "launchContextTier": "default",
-    "status": "read-only preflight and docs/accounting liaison; no hands-on build slot yet"
+    "status": "docs/accounting liaison; source-only release-isolation guard completed, no gameplay admission or build slot"
   },
   "deliveryRules": [
     "Only verified and reviewed work is admitted; unfinished items move to the fallback slot.",

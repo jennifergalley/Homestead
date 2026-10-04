@@ -85,8 +85,8 @@
       "reasoningEffort": "high",
       "contextTier": null,
       "launchContextTier": "default",
-      "contextEvidence": "Selection and launch configuration recorded by the coordinator; actual runtime context, app-session identity, helpers, and final usage boundary remain pending lane handoff.",
-      "boundaryEvidence": "Owns selected chest-name hint and HUD-notice unification only. Preserve first-visit travel and Plant Seeds hint behavior; mine path and building work are unselected."
+      "contextEvidence": "Selection and launch configuration recorded by the coordinator; actual runtime context and final usage boundary remain pending the lane's accounting handoff. The lane reports no helpers.",
+      "boundaryEvidence": "Owns selected chest-name hint and HUD-notice unification only. Checkpoint a9156572713ec42d8ebca529ef2f0d8807832554 is pushed but not admitted: compile, Unreal/UI-gallery, and Jenny acceptance remain held. The lane reports no editor or build work. Preserve first-visit travel, the Farming three-use Plant Seeds hint retirement, and fishing mount behavior; mine path and building work are unselected."
     },
     {
       "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",

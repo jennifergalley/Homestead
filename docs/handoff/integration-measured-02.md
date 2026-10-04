@@ -60,6 +60,13 @@ HUD owns selected chest-name hint enlargement and concise, non-overlapping resou
 notices. Preserve Travel Rest's first-visit travel notice and Farming Fishing's Plant Seeds hint;
 mine path and building work remain unselected. The lane is held to the active no-compilation rule.
 
+- Source checkpoint `a9156572713ec42d8ebca529ef2f0d8807832554` on
+  `jennifergalley-hud-agent` is pushed but **not admitted**. Both selected source tasks are
+  implemented; compile, Unreal, UI gallery, and Jenny acceptance remain held. The lane used no
+  helpers, editor, or build work. Preserve Farming's three-use seed-hint retirement and the fishing
+  mount; meaningful notice clocks remain, while quiet success and hotbar selection no longer erase
+  notices.
+
 ## Travel Rest checkpoint
 
 - Checkpoint `b37b0070` on `jennifergalley-travel-rest-agent` is pushed but **not admitted**:
