@@ -30,3 +30,11 @@ Accept only exact forwarded `[ready]` SHAs after their review/verification evide
 perform one-shot risky review where needed, run the smallest affected native/UBT gates and isolated
 engine/Shipping/save checks, and package once. Do not disturb Jenny's game, package-local saves,
 protected measured01 release, protected measured02 worktree, or old rollback.
+
+## Seed-packet admission gate
+
+Gameplay reports that legacy grouped seeds will normalize to quantity-one packets while preserving
+stock, referenced IDs, unchanged fields, and the existing save version. That unchanged version is
+not a waiver: admit the seed packet slice only after a risky save-semantic review, Gameplay's targeted
+native overflow tests, scoped legacy/full-capacity/hotbar evidence, and candidate save/load evidence.
+No Integration build, editor, or package slot is granted by this gate alone.

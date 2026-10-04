@@ -77,6 +77,7 @@
   "deliveryRules": [
     "Accept only exact forwarded reviewed and verified ready commits after an explicit Integration slot grant.",
     "Do not merge, build, open an editor, package, or touch protected releases, saves, or Jenny's active game during metadata/preflight.",
+    "Seed-packet readiness additionally requires a risky save-semantic review plus scoped legacy/full-capacity/hotbar and candidate save/load evidence. An unchanged save version does not waive those gates; Gameplay owns the targeted native overflow tests.",
     "Final delivery first publishes an observed per-call accounting report and retains its limitations, then removes shipped active cards while retaining receipts and evidence."
   ]
 }
