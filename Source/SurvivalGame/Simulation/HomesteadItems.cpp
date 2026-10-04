@@ -126,6 +126,23 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Food, "wild-garlic", 8, StoreBuys, 5.0, 4.0, "Picked from broad bean plants", false, "broad bean pods", FoodClass::Snack},
     {Item::Strawberries, "strawberries", "Strawberries", "Sweet red strawberries, warm from the sun.",
         ItemCategory::Food, "berries", 13, StoreBuys, 8.0, 8.0, "Picked from strawberry plants", false, "strawberries", FoodClass::Snack},
+    // Energy: round(12 + 0.6 * consumed sale coins), including herbs and kindling.
+    {Item::RoastedTurnips, "roasted-turnips", "Roasted turnips", "Tender turnip pieces roasted over the cookfire.",
+        ItemCategory::Food, "roasted-roots", 23, NoBuyers, 26.0, 26.0, "Cookfire", false, nullptr, FoodClass::Meal},
+    {Item::StewedCarrots, "stewed-carrots", "Stewed carrots", "Sweet carrots gently stewed until tender.",
+        ItemCategory::Food, "roasted-roots", 35, NoBuyers, 33.0, 33.0, "Cookfire", false, nullptr, FoodClass::Meal},
+    {Item::BakedPotatoes, "baked-potatoes", "Baked potatoes", "Floury potatoes baked in the cookfire's embers.",
+        ItemCategory::Food, "roasted-roots", 31, NoBuyers, 31.0, 31.0, "Cookfire", false, nullptr, FoodClass::Meal},
+    {Item::HerbedBroadBeans, "herbed-broad-beans", "Herbed broad beans", "Tender broad beans seasoned with meadow herbs.",
+        ItemCategory::Food, "herbed-roots", 37, NoBuyers, 34.0, 34.0, "Cookfire", false, nullptr, FoodClass::Meal},
+    {Item::CabbagePotatoStew, "cabbage-potato-stew", "Cabbage and potato stew", "A hearty cabbage and potato stew with meadow herbs.",
+        ItemCategory::Food, "herbed-roots", 117, NoBuyers, 82.0, 82.0, "Cookfire", false, nullptr, FoodClass::Meal},
+    {Item::BerryCompote, "berry-compote", "Berry compote", "Wild berries simmered in their own juices.",
+        ItemCategory::Food, "berries", 21, NoBuyers, 25.0, 25.0, "Cookfire", false, nullptr, FoodClass::Meal},
+    {Item::StrawberryCompote, "strawberry-compote", "Strawberry compote", "Sweet strawberries gently simmered over the cookfire.",
+        ItemCategory::Food, "berries", 29, NoBuyers, 29.0, 29.0, "Cookfire", false, nullptr, FoodClass::Meal},
+    {Item::RootVegetableHotpot, "root-vegetable-hotpot", "Root vegetable hotpot", "Wild roots and turnip stewed with meadow herbs.",
+        ItemCategory::Food, "herbed-roots", 41, NoBuyers, 37.0, 37.0, "Cookfire", false, nullptr, FoodClass::Meal},
 };
 static_assert(sizeof(ItemCatalogue) / sizeof(ItemCatalogue[0]) == ItemCount, "Every item needs exactly one ItemCatalogue row.");
 

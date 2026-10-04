@@ -686,7 +686,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             if (Empty != INDEX_NONE) PC.SelectHotbarSlot(Empty);
         }
     };
-    Add(TEXT("garden-seed-plant"), TEXT("Carrot seed chosen over a tilled square: the green outline and '[E] Plant Carrot seed'."),
+    Add(TEXT("garden-seed-plant"), TEXT("Carrot seed chosen over a tilled square: the green outline and persistent '[E] Plant Seeds'."),
         ECover::Focus, 11, Garden, [TillAhead, SowSeed](AHomesteadController& PC) { TillAhead(PC); SowSeed(PC, true); });
     List.Last().Pending = SeedOutline;
     Add(TEXT("garden-seed-occupied"), TEXT("Carrot seed over a square already sown: the red outline and 'A crop is already growing here.'"),

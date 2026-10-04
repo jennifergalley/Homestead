@@ -38,7 +38,14 @@ enum class ResourceKind : int
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
-enum class Recipe : int { HaftAxe, HaftHoe, HaftScythe, HaftBillhook, HaftPickaxe, RoastedRoots, HerbedRoots, SplitFirewood, Count };
+enum class Recipe : int
+{
+    HaftAxe, HaftHoe, HaftScythe, HaftBillhook, HaftPickaxe, RoastedRoots, HerbedRoots, SplitFirewood,
+    // add-basic-crop-cookfire-recipes.
+    RoastedTurnips, StewedCarrots, BakedPotatoes, HerbedBroadBeans,
+    CabbagePotatoStew, BerryCompote, StrawberryCompote, RootVegetableHotpot,
+    Count
+};
 // One of each tool; its tier belongs to the tool type (State::toolTiers).
 enum class ToolKind : int { Axe, Hoe, Pail, Scythe, Billhook, Pickaxe, Count };
 enum class ToolTier : int { Worn, Iron, Steel, Master, Count };

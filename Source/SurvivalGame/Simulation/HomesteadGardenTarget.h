@@ -47,9 +47,8 @@ GardenTarget PreviewGarden(const Simulation& sim, GardenTool tool, Point player,
 constexpr const char* UntilledSowText = "Till this square before sowing.";
 
 // The sowing cue on a bare tilled plot's focus line (the [A]/[E] press, which sows only the seed selected
-// on the hotbar). `keyed` cues take the press's key glyph and retire after a few uses; plain ones are
-// guidance that always shows.
-// - A seed selected, and the press would sow: "Plant <seed>" (keyed).
+// on the hotbar). Plant Seeds never retires; plain refusals and guidance also remain visible.
+// - A seed selected, and the press would sow: "Plant Seeds" (keyed).
 // - A seed selected, and it wouldn't: CheckSow's refusal (plain).
 // - No seed selected, but one in the hotbar row she has and that's in season: "Select <seed> (<key>) to plant" (plain).
 // - Otherwise: "Choose seeds on the hotbar to sow" (plain).

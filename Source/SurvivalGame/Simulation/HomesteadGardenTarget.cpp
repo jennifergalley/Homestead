@@ -2,6 +2,7 @@
 
 #include "HomesteadCrops.h"
 #include "HomesteadPackRow.h"
+#include "../HomesteadActionHints.h"
 
 namespace Homestead
 {
@@ -97,7 +98,7 @@ SowCue DescribeSow(const Simulation& sim, int plotId, Point player, Item selecte
     if (const CropInfo* crop = selected == Item::Count ? nullptr : CropForSeed(selected))
     {
         const Result check = sim.CheckSow(plotId, player, crop->kind);
-        return check.ok ? SowCue{true, "Plant " + SeedLabel(selected)} : SowCue{false, check.message};
+        return check.ok ? SowCue{true, HomesteadActionHints::PlantSeeds} : SowCue{false, check.message};
     }
     // Nothing is sown unselected, so name the seed to select and its number key: a real seed first, else a
     // berry (whose seeds also sow).

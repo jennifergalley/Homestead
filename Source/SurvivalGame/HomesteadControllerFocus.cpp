@@ -1,5 +1,6 @@
 #include "HomesteadController.h"
 #include "HomesteadControllerConfig.h"
+#include "HomesteadActionHints.h"
 #include "HomesteadControllerHelpers.h"
 #include "HomesteadControllerText.h"
 #include "HomesteadWorld.h"
@@ -256,9 +257,10 @@ FString AHomesteadController::FocusActions() const
                 const Homestead::Item Chosen = HotbarItem(SelectedHotbarSlot);
                 if (!Plot.planted && Chosen != Homestead::Item::Count)
                     if (Homestead::CropForSeed(Chosen))
-                        Actions.Add(Sim.Count(Chosen) <= 0
-                            ? TEXT("No ") + Text(Homestead::ItemName(Chosen)).ToLower() + TEXT(" left")
-                            : A + TEXT(" Plant ") + Text(Homestead::ItemName(Chosen)));
+                    {
+                        const auto Cue = Homestead::DescribeSow(Sim, Plot.id, PlayerPoint(), Chosen, {});
+                        Actions.Add((Cue.keyed ? A + TEXT(" ") : FString()) + Text(Cue.text.c_str()));
+                    }
                 if (Homestead::IsRipe(Plot)) Actions.Add(A + TEXT(" Harvest"));
                 if (Homestead::HasVisibleWeeds(Plot)) Actions.Add(X + TEXT(" Pull weeds"));
                 if (Plot.planted && Plot.withered && ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
@@ -332,7 +334,7 @@ int32 AHomesteadController::HintUseCount(const FString& Verb) const
 
 bool AHomesteadController::IsHintRetired(const FString& Verb) const
 {
-    return HintUseCount(Verb) >= HintRetireUses;
+    return HomesteadActionHints::ShouldRetire(TCHAR_TO_UTF8(*Verb), HintUseCount(Verb), HintRetireUses);
 }
 
 AHomesteadController::FHintUse AHomesteadController::BeginHintUse(const FString& Button) const

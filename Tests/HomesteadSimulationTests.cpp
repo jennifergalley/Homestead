@@ -2,6 +2,8 @@
 #include "../Source/SurvivalGame/HomesteadSavePreference.h"
 #include "HomesteadBed.h"
 #include "HomesteadCrops.h"
+#include "HomesteadRecipes.h"
+#include "../Source/SurvivalGame/HomesteadActionHints.h"
 #include "HomesteadShops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
@@ -368,7 +370,9 @@ void RequirementsMatchTransactions()
         Stock(sim, {{Item::Hatchet, 1}, {Item::Branch, 40}, {Item::Stone, 20},
             {Item::RustedAxeHead, 1}, {Item::RustedHoeBlade, 1}, {Item::RustedScytheBlade, 1},
             {Item::RustedBillhookHead, 1}, {Item::RustedPickHead, 1},
-            {Item::Roots, 10}, {Item::Flowers, 10}, {Item::Kindling, 10}, {Item::Timber, 1}});
+            {Item::Roots, 10}, {Item::Flowers, 10}, {Item::Kindling, 10}, {Item::Timber, 1},
+            {Item::Turnip, 2}, {Item::Carrot, 2}, {Item::Potato, 2}, {Item::Cabbage, 1},
+            {Item::BroadBeans, 3}, {Item::Berries, 3}, {Item::Strawberries, 2}});
         const auto before = sim.GetState().inventory;
         const double hour = sim.GetState().hour;
         const char* description = RecipeRequirements(recipe);
@@ -505,16 +509,20 @@ void StructuredRecipeAssessment()
     Stock(complete, {{Item::Hatchet, 1}, {Item::Branch, 40},
         {Item::RustedAxeHead, 1}, {Item::RustedHoeBlade, 1}, {Item::RustedScytheBlade, 1},
         {Item::RustedBillhookHead, 1}, {Item::RustedPickHead, 1}, {Item::Roots, 10},
-        {Item::Flowers, 10}, {Item::Kindling, 10}, {Item::Timber, 4}});
+        {Item::Flowers, 10}, {Item::Kindling, 10}, {Item::Timber, 4},
+        {Item::Turnip, 2}, {Item::Carrot, 2}, {Item::Potato, 2}, {Item::Cabbage, 1},
+        {Item::BroadBeans, 3}, {Item::Berries, 3}, {Item::Strawberries, 2}});
     const Item Outputs[] = {Item::Hatchet, Item::DiggingStick, Item::Scythe, Item::Billhook, Item::Pickaxe,
-        Item::RoastedRoots, Item::HerbedRoots, Item::Firewood};
-    const int OutputCounts[] = {1, 1, 1, 1, 1, 1, 1, 4};
+        Item::RoastedRoots, Item::HerbedRoots, Item::Firewood, Item::RoastedTurnips, Item::StewedCarrots,
+        Item::BakedPotatoes, Item::HerbedBroadBeans, Item::CabbagePotatoStew, Item::BerryCompote,
+        Item::StrawberryCompote, Item::RootVegetableHotpot};
+    const int OutputCounts[] = {1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1};
     static_assert(sizeof(Outputs) / sizeof(Outputs[0]) == static_cast<int>(Recipe::Count), "Every recipe is assessed.");
     for (int index = 0; index < static_cast<int>(Recipe::Count); ++index)
     {
         const auto recipe = static_cast<Recipe>(index);
         const Point position = index == static_cast<int>(Recipe::RoastedRoots)
-            || index == static_cast<int>(Recipe::HerbedRoots) ? completeFire : Home;
+            || index == static_cast<int>(Recipe::HerbedRoots) || FindCropMeal(recipe) ? completeFire : Home;
         const auto before = complete.Serialize();
         const auto revision = complete.GetRevision();
         const auto assessment = complete.AssessRecipe(recipe, position);
@@ -646,14 +654,18 @@ void SeedSowPreview()
     OK(sim.GrantItems(Item::CarrotSeed, 2));
     const Point beside = GardenCellCenter(gx, gy);
 
-    // Valid: green on the focused plot, "Plant Carrot seed" keyed, and nothing changes however often it's asked.
+    // Valid: green on the focused plot, persistent Plant Seeds, and no mutation from inspection.
     const std::string before = sim.Serialize();
     GardenTarget seed = PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::CarrotSeed);
     CHECK(seed.shown && seed.valid && seed.reason.empty() && seed.plotId == plotId && seed.cellX == gx && seed.cellY == gy);
     std::vector<Item> row(PackRowSize, Item::Count);
     row[3] = Item::CarrotSeed;
     SowCue cue = DescribeSow(sim, plotId, beside, Item::CarrotSeed, row);
-    CHECK(cue.keyed && cue.text == "Plant Carrot seed");
+    CHECK(cue.keyed && cue.text == "Plant Seeds");
+    for (int uses : {0, 1, 3, 10, 100})
+        CHECK(!HomesteadActionHints::ShouldRetire(cue.text, uses, 3));
+    CHECK(!HomesteadActionHints::ShouldRetire("Gather", 2, 3));
+    CHECK(HomesteadActionHints::ShouldRetire("Gather", 3, 3));
     for (int repeat = 0; repeat < 50; ++repeat)
     {
         PreviewGarden(sim, GardenTool::Seed, beside, 1.0, 0.0, plotId, Item::CarrotSeed);
@@ -798,7 +810,7 @@ void SeedSowPreview()
         fruit[6] = Item::CarrotSeed;
         CHECK(DescribeSow(berried, plotId, beside, Item::Count, fruit).text == "Select Carrot seed (7) to plant");
         const SowCue berry = DescribeSow(berried, plotId, beside, Item::Berries, fruit);
-        CHECK(berry.keyed && berry.text == "Plant berry seeds");
+        CHECK(berry.keyed && berry.text == "Plant Seeds");
     }
 
     // The action sows exactly the previewed plot, spending one seed; then the plot is occupied.
@@ -899,9 +911,10 @@ void GameplayWalkthrough()
     CHECK(sim.GetState().plots[0].growth == 1);
     const int roots = sim.Count(Item::Roots);
     const int seeds = sim.Count(Item::Seeds);
+    const int seedBonus = HarvestBonusCount(CropKind::Roots, plotId, sim.GetState().hour);
     OK(sim.HarvestCrop(plotId, garden));
     CHECK(sim.Count(Item::Roots) == roots + 4);
-    CHECK(sim.Count(Item::Seeds) == seeds + 2);
+    CHECK(sim.Count(Item::Seeds) == seeds + seedBonus);
     CHECK(!sim.GetState().plots[0].planted);
     CHECK(sim.GetState().plots[0].growth == 0);
     OK(sim.Plant(plotId, garden));
@@ -916,6 +929,138 @@ void GameplayWalkthrough()
     CHECK(loaded.GetState().plots[0].planted);
     CHECK(loaded.IsNearFire(firePosition));
     CHECK(loaded.GetState().hour == sim.GetState().hour);
+}
+
+void ReducedCultivatedSeedReturns()
+{
+    int bonusTotal = 0;
+    constexpr int Samples = 1024;
+    for (int index = 0; index < Samples; ++index)
+    {
+        const int plotId = 2000 + index;
+        const double hour = 6.0 + (index % 28) * 24.0;
+        const int bonus = HarvestBonusCount(CropKind::Roots, plotId, hour);
+        CHECK(bonus == 0 || bonus == 1);
+        CHECK(bonus == HarvestBonusCount(CropKind::Roots, plotId, hour));
+        bonusTotal += bonus;
+        for (int kind = static_cast<int>(CropKind::Turnips); kind < static_cast<int>(CropKind::Count); ++kind)
+            CHECK(HarvestBonusCount(static_cast<CropKind>(kind), plotId, hour) == 0);
+    }
+    CHECK(bonusTotal >= Samples / 5 && bonusTotal <= Samples * 3 / 10);
+    CHECK(HarvestBonusCount(CropKind::Count, 1, 6.0) == 0);
+
+    // Exercise both bonus outcomes through the authoritative transaction and a pre-harvest reload.
+    for (int wanted : {0, 1})
+    {
+        Simulation sim;
+        Stock(sim, {{Item::DiggingStick, 1}, {Item::Seeds, 2}});
+        const Point garden = GardenCellCenter(CellToGarden(-2), CellToGarden(-1));
+        OK(sim.Till(CellToGarden(-2), CellToGarden(-1), garden));
+        const int id = sim.GetState().plots.back().id;
+        OK(sim.Plant(id, garden));
+        double hour = 6.0;
+        while (HarvestBonusCount(CropKind::Roots, id, hour) != wanted && hour < 1000.0) hour += 24.0;
+        CHECK(hour < 1000.0);
+        Edit(sim, [hour](State& state) { state.hour = hour; state.plots.back().growth = 1.0; });
+        const std::string before = sim.Serialize();
+        Simulation reload;
+        OK(reload.Deserialize(before));
+        const int seeds = sim.Count(Item::Seeds);
+        OK(sim.HarvestCrop(id, garden));
+        OK(reload.HarvestCrop(id, garden));
+        CHECK(sim.Count(Item::Seeds) == seeds + wanted && sim.Count(Item::Roots) == 4);
+        CHECK(sim.Serialize() == reload.Serialize());
+        UnchangedFailure(sim, [&] { return sim.HarvestCrop(id, garden); });
+    }
+
+    Simulation wild;
+    const auto roots = Node(wild, ResourceKind::Roots);
+    const int seeds = wild.Count(Item::Seeds);
+    OK(wild.Harvest(roots.id, roots.position));
+    CHECK(wild.Count(Item::Seeds) == seeds + 2);
+}
+
+void BasicCropMeals()
+{
+    std::set<Item> covered;
+    int meals = 0, seasoned = 0;
+    for (int index = static_cast<int>(Recipe::RoastedTurnips); index < static_cast<int>(Recipe::Count); ++index)
+    {
+        const Recipe recipe = static_cast<Recipe>(index);
+        const auto* meal = FindCropMeal(recipe);
+        CHECK(meal);
+        ++meals;
+        CHECK(std::string(RecipeName(recipe)) == ItemName(meal->output));
+        CHECK(IsEdible(meal->output) && FoodClassOf(meal->output) == FoodClass::Meal);
+        CHECK(ItemFromKey(ItemKey(meal->output)) == meal->output);
+        CHECK(!ShopBuys(ShopKind::GeneralStore, meal->output));
+        const auto change = CropMealChange(recipe);
+        CHECK(change[static_cast<int>(Item::Kindling)] == -1);
+        CHECK(change[static_cast<int>(meal->output)] == 1);
+        std::int64_t saleCoins = 0;
+        for (const auto& ingredient : meal->ingredients)
+            if (ingredient.item != Item::Count)
+            {
+                CHECK(ingredient.count > 0);
+                saleCoins += SellPrice(ingredient.item) * ingredient.count;
+                covered.insert(ingredient.item);
+            }
+        if (change[static_cast<int>(Item::Flowers)] < 0) ++seasoned;
+        const double energy = GetItemInfo(meal->output).energy;
+        CHECK(energy == CropMealEnergyForCost(saleCoins) && energy > 0.0 && energy <= 100.0);
+        CHECK(FoodEnergyLabel(meal->output) == "+" + std::to_string(static_cast<int>(energy)) + " Energy");
+
+        Simulation sim;
+        BuildingStock(sim);
+        const Point fire = CellCenter(-3, -1);
+        OK(sim.Place(Piece::Fire, -3, -1, 0, fire));
+        const int fireId = sim.GetState().structures.back().id;
+        Edit(sim, [meal](State& state)
+        {
+            state.inventory.fill(0);
+            state.inventory[static_cast<int>(Item::Branch)] = 1;
+            for (const auto& ingredient : meal->ingredients)
+                if (ingredient.item != Item::Count)
+                    state.inventory[static_cast<int>(ingredient.item)] = ingredient.count;
+        });
+        CHECK(!sim.AssessRecipe(recipe, fire).stationMet);
+        UnchangedFailure(sim, [&] { return sim.Craft(recipe, fire); });
+        OK(sim.AddFuel(fireId, fire));
+        auto ready = sim.AssessRecipe(recipe, fire);
+        CHECK(ready.craftable && ready.stationRequired && ready.stationMet);
+        CHECK(ready.output == meal->output && ready.outputCount == 1);
+        UnchangedFailure(sim, [&] { return sim.Craft(recipe, {50000, 50000}); });
+        Simulation missingFuel = sim;
+        Edit(missingFuel, [](State& state) { state.inventory[static_cast<int>(Item::Kindling)] = 0; });
+        UnchangedFailure(missingFuel, [&] { return missingFuel.Craft(recipe, fire); });
+        const auto before = sim.GetState().inventory;
+        OK(sim.Craft(recipe, fire));
+        for (int item = 0; item < ItemCount; ++item)
+            CHECK(sim.GetState().inventory[item] == before[item] + change[item]);
+        UnchangedFailure(sim, [&] { return sim.Craft(recipe, fire); });
+
+        Simulation saved;
+        OK(saved.Deserialize(sim.Serialize()));
+        CHECK(saved.Serialize() == sim.Serialize() && saved.Count(meal->output) == 1);
+        // Eating uses the same catalogue Energy shown by the cookbook, without meter clamping.
+        Edit(sim, [](State& state) { state.energy = 10.0; state.hunger = 10.0; });
+        OK(sim.Eat(meal->output));
+        CHECK(Close(sim.GetState().energy, 10.0 + energy));
+        CHECK(sim.Count(meal->output) == 0);
+    }
+    CHECK(meals == 8 && seasoned >= 2);
+    for (Item produce : {Item::Turnip, Item::Carrot, Item::Potato, Item::Cabbage,
+        Item::BroadBeans, Item::Strawberries, Item::Roots, Item::Berries})
+        CHECK(covered.count(produce) == 1);
+    CHECK(GetItemInfo(Item::RoastedRoots).energy == 25.0 && GetItemInfo(Item::HerbedRoots).energy == 40.0);
+    CHECK(!FindCropMeal(Recipe::HaftAxe) && !FindCropMeal(Recipe::Count));
+    CHECK(!FindCropMeal(static_cast<Recipe>(std::numeric_limits<int>::min())));
+
+    Simulation old;
+    Simulation widened;
+    OK(widened.Deserialize(Encode(old.GetState(), SimulationSaveVersion, static_cast<int>(Item::RoastedTurnips))));
+    for (int item = static_cast<int>(Item::RoastedTurnips); item < ItemCount; ++item)
+        CHECK(widened.Count(static_cast<Item>(item)) == 0);
 }
 
 void AtomicTransactions()
@@ -1280,7 +1425,7 @@ void TimberAndFirewoodTransactions()
     static_assert(ItemCount > static_cast<int>(Item::Fur), "Later items append after fur");
     static_assert(static_cast<int>(Recipe::HaftPickaxe) == 4, "Five hafting recipes replace the knife-crafted tools");
     static_assert(static_cast<int>(Recipe::SplitFirewood) == 7, "Split Firewood follows cooking");
-    static_assert(static_cast<int>(Recipe::Count) == 8, "Hafting, cooking and one processing recipe are present");
+    static_assert(static_cast<int>(Recipe::RoastedTurnips) == 8, "Legacy recipe ids are unchanged");
 
     Simulation sim;
     BuildingStock(sim);
@@ -1699,12 +1844,13 @@ void FarmingAndRain()
         CHECK(std::abs(edge.GetState().plots[0].moisture - 0.3 * 0.5) < 0.01);
     }
     Edit(dry, [](State& state) { state.plots[0].growth = 1; });
-    Stock(dry, {{Item::Stone, 115}});
+    Stock(dry, {{Item::Stone, 117}});
     UnchangedFailure(dry, [&] { return dry.HarvestCrop(id, garden); });
-    Stock(dry, {{Item::Stone, 114}});
+    const int seedBonus = HarvestBonusCount(CropKind::Roots, id, dry.GetState().hour);
+    Stock(dry, {{Item::Stone, dry.PackCapacity() - 5 - seedBonus}, {Item::Seeds, 1}});
     OK(dry.HarvestCrop(id, garden));
     CHECK(dry.UsedCapacity() == 120);
-    CHECK(dry.Count(Item::Roots) == 4 && dry.Count(Item::Seeds) == 2);
+    CHECK(dry.Count(Item::Roots) == 4 && dry.Count(Item::Seeds) == 1 + seedBonus);
     UnchangedFailure(dry, [&] { return dry.HarvestCrop(id, garden); });
     OK(dry.Plant(id, garden));
 }
@@ -1932,9 +2078,11 @@ void CropTableAndStatus()
         sim.AdvanceGameHours(15, Home);
     }
     CHECK(IsRipe(sim.GetState().plots[0]));
+    const int seedBonus = HarvestBonusCount(CropKind::Roots, rootId, sim.GetState().hour);
     const Result harvested = sim.HarvestCrop(rootId, roots);
     OK(harvested);
-    CHECK(harvested.message == "Harvested 4 roots and 2 seeds. This plot is ready to replant.");
+    CHECK(harvested.message == (seedBonus ? "Harvested 4 roots and 1 seed. This plot is ready to replant."
+        : "Harvested 4 roots. This plot is ready to replant."));
     CHECK(!sim.GetState().plots[0].planted);
 
     // Sow bought carrot seed and broad beans (both spring crops): carrots clear the plot, beans keep cropping.
@@ -2281,9 +2429,10 @@ void CropKindPersistenceAndVersionRejection()
     Edit(sim, [](State& state) { state.plots[0].growth = 1; });
     OK(restored.Deserialize(Encode(sim.GetState())));
     const int rootsBefore = restored.Count(Item::Roots), seedsBefore = restored.Count(Item::Seeds);
+    const int seedBonus = HarvestBonusCount(CropKind::Roots, id, restored.GetState().hour);
     OK(restored.HarvestCrop(id, garden));
     CHECK(restored.Count(Item::Roots) == rootsBefore + 4);
-    CHECK(restored.Count(Item::Seeds) == seedsBefore + 2);
+    CHECK(restored.Count(Item::Seeds) == seedsBefore + seedBonus);
     CHECK(!restored.GetState().plots[0].planted && restored.GetState().plots[0].kind == CropKind::Roots);
     OK(restored.Plant(id, garden));
     CHECK(restored.GetState().plots[0].kind == CropKind::Roots);
@@ -5881,6 +6030,7 @@ int main()
     Run("HUD requirements and zero-time action commits", RequirementsMatchTransactions);
     Run("the bedroll takes 4 Branch and 4 Hay", BedrollTakesHay);
     Run("pure structured recipe assessment", StructuredRecipeAssessment);
+    Run("eight crop meals, sale-cost Energy, station/fuel and save transactions", BasicCropMeals);
     Run("a snack on a full stomach restores Energy", SnackOnFullStomachRestoresEnergy);
     Run("each cooked batch burns exactly one kindling", CookingBurnsOneKindlingPerBatch);
     Run("fallen branches give renewable kindling", BranchesYieldRenewableKindling);
@@ -5902,6 +6052,7 @@ int main()
     Run("weeds in any square offer and take a pull", PullWeedsOnAnySquare);
     Run("berry planting, forgiving growth and recurring harvest", BerryCropCycle);
     Run("crop table, growing days, care modifiers, stages and status", CropTableAndStatus);
+    Run("cultivated seeds are occasional singles and replay across reloads", ReducedCultivatedSeedReturns);
     Run("crop-kind persistence and incompatible test-save rejection", CropKindPersistenceAndVersionRejection);
     Run("item stocks carry their width; version 12 saves migrate", ItemStockWidthCompatibility);
     Run("clock, pause and batching consistency", ClockPauseAndBatching);
