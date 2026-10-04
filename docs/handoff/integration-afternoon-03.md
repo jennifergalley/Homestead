@@ -39,6 +39,12 @@ not a waiver: admit the seed packet slice only after a risky save-semantic revie
 native overflow tests, scoped legacy/full-capacity/hotbar evidence, and candidate save/load evidence.
 No Integration build, editor, or package slot is granted by this gate alone.
 
+Gameplay checkpoint: legacy normalization preserves mixed 25+25+25 seeds in a full 120-slot pack,
+original roots/carrot hotbar IDs, and explicit/implicit grid references. Seed, fishing, Economy,
+Chest, and PackRow native suites pass. A Simulation fixture still expects stacked seeds and is being
+corrected. No player save, editor, or package was touched; no enum, placement, save-version, or
+field change is reported. This usage remains allocated to afternoon-03, not measured02.
+
 ## Environment readiness checkpoint
 
 Environment reports 5,835 supplemental flower clumps while retaining 374,850 original placement
