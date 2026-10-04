@@ -8,8 +8,45 @@ from pathlib import Path
 
 import bmesh
 import bpy
+from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 
 PIPELINE = Path(__file__).resolve().parents[1] / "Scripts" / "Blender"
+
+
+def sampled_container_clearance(obj: bpy.types.Object, prefix: str) -> None:
+    container_slots = {index for index, slot in enumerate(obj.material_slots)
+                       if slot.material.name.startswith(prefix)}
+    assert len(container_slots) == 1
+    faces = [tuple(face.vertices) for face in obj.data.polygons if face.material_index in container_slots]
+    surface = BVHTree.FromPolygons([vertex.co for vertex in obj.data.vertices], faces)
+    samples = {index for face in obj.data.polygons if face.material_index not in container_slots
+               for index in face.vertices}
+    for index in samples:
+        point = obj.data.vertices[index].co
+        hit, _, _, _ = surface.ray_cast(Vector((point.x, point.y, 1)), Vector((0, 0, -1)), 1)
+        assert hit is not None and point.z + .00002 >= hit.z, (obj.name, "sampled container penetration", index)
+
+
+def sampled_spoon_hollow(obj: bpy.types.Object, prefix: str, length_m: float) -> float:
+    wood_slots = {index for index, slot in enumerate(obj.material_slots)
+                  if slot.material.name.startswith(prefix)}
+    assert len(wood_slots) == 1
+    wood_vertices = {index for face in obj.data.polygons if face.material_index in wood_slots
+                     for index in face.vertices}
+    scale = length_m / .182
+    centre_y = min(obj.data.vertices[index].co.y for index in wood_vertices) + .0275 * scale
+    spoon_surface = BVHTree.FromPolygons(
+        [vertex.co for vertex in obj.data.vertices],
+        [tuple(face.vertices) for face in obj.data.polygons if face.material_index in wood_slots])
+    heights = []
+    for x in (0, -.011 * scale, .011 * scale):
+        hit, _, _, _ = spoon_surface.ray_cast(Vector((x, centre_y, 1)), Vector((0, 0, -1)), 1)
+        assert hit is not None
+        heights.append(hit.z)
+    depth = min(heights[1:]) - heights[0]
+    assert depth > .0025 * scale, "Original spoon head must remain hollow"
+    return depth
 
 
 def check_source_mesh(name: str, item: str, limits: tuple, components: int,

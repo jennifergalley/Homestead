@@ -264,3 +264,42 @@ def maple_eating_spoon(name: str) -> bpy.types.Material:
     graph.set("Roughness", graph.remap(grain, .2, .8, .57, .41))
     graph.set("Normal", graph.bump(fibres, strength=.15, distance=.000035))
     return graph.mat
+
+
+def reduced_blackberry(name: str, seed: float, juice: bool = False,
+                      pulp: bool = False) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.vmath("ADD", graph.coord(), (seed * .019, seed * .031, seed * .047))
+    pigment = graph.noise(point, scale=480, detail=3).outputs["Fac"]
+    colour = graph.ramp(pigment, [
+        (.16, (.008, .0015, .005)), (.50, (.025, .004, .017)),
+        (.84, (.048, .008, .028)),
+    ])
+    graph.set("Base Color", graph.mix(colour, (.058, .009, .029), .45) if pulp else colour)
+    graph.set("Roughness", .34 if pulp else
+              graph.remap(pigment, .2, .8, .20, .29) if not juice else .18)
+    graph.set("IOR", 1.38)
+    graph.set("Subsurface Weight", .10 if not juice else .05)
+    graph.set("Subsurface Radius", (.0012, .0006, .0008))
+    graph.set("Subsurface Scale", .05)
+    fines = graph.noise(point, scale=3200, detail=2).outputs["Fac"]
+    graph.set("Normal", graph.bump(fines, strength=.13, distance=.000025))
+    return graph.mat
+
+
+def fruit_bowl_glaze(name: str) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    firing = graph.noise(point, scale=170, detail=3).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(firing, [
+        (.15, (.095, .112, .097)), (.5, (.16, .18, .151)),
+        (.85, (.205, .224, .180)),
+    ]))
+    graph.set("Roughness", graph.remap(firing, .2, .8, .22, .31))
+    graph.set("Coat Weight", .2)
+    graph.set("Coat Roughness", .22)
+    pores = graph.noise(point, scale=2100, detail=2).outputs["Fac"]
+    graph.set("Normal", graph.bump(pores, strength=.12, distance=.000018))
+    return graph.mat

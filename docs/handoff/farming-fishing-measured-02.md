@@ -16,10 +16,10 @@ editor/game compile and 21/21 native suites passed; original-art and
 release-save-isolation admission gates remain.
 
 Current source checkpoint: original potatoes, roasted turnips, stewed carrots,
-herbed broad beans and cabbage/potato stew have separate serving/edible-portion
-WIP, NOT art/import acceptance. Eleven dishes, all meal
+herbed broad beans, cabbage/potato stew and berry compote have separate
+serving/edible-portion WIP, NOT art/import acceptance. Ten dishes, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original cabbage stew/spoon WIP; recipe/source receipts below are frozen,
+visible review is original berry compote/spoon WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -866,6 +866,57 @@ Actual gpt-6.1-sol/high, launch default/actual context unknown; no agent helpers
 automation/UE/UBT/UAT/gameplay/save/enum/version/placement changes. Build02-only
 provisional snapshot: 698 calls through event70962, 4,191,701,880,000 recorded
 nano-AIU; subsequent calls/terminal response still need recapture.
+
+### Original unsweetened berry compote source milestone
+
+New berry_compote.py authors twelve softened bramble fruits (eight complete,
+four ragged closed pulp exposures), original reduced-juice volume, new 11.8cm
+glazed shallow dish and a separately generated 14.6cm maple eating spoon with
+one exposed fruit bite. Exact Berries3/Kindling1, no sugar/cream/spices/leaves/
+invented garnish. References read: https://en.wikipedia.org/wiki/Compote and
+https://en.wikipedia.org/wiki/Blackberry; dimensions/design are authored, not
+an inventory-to-weight conversion. No reused game mesh or photographic texture.
+
+One closed fruit loft per fruit carries seeded angular drupelet relief, not
+intersecting spheres. Initial evenly spaced fresh-looking berries in a flat
+purple pool were viewed and rejected. Denser varied collapse/tilt, lower fluid,
+geometric pulp-height variation, four ragged exposures and constrained
+nonradial pulp triangulation replace that pass. A radial fan looked like a
+flower/cut-plastic cap in 4K and was replaced, not declared anatomical evidence.
+First liquid/wall sampling failure was corrected by authored radial clearance.
+The first half-fruit eating bite failed its original height fixture; increased
+the actual bite rather than weakening the bound. No fixture relaxation.
+
+Serving/portion: 58,972/10,528 triangles,
+[11.8,11.8,3.26]/[2.25,14.6,1.12]cm. All 14 serving/2 portion islands pass
+closed/positive/finite/noncollapsed coordinates, applied transforms, bottom
+pivot, UV/scale/budget/current executed-shader and sampled container clearance
+fixtures. Spoon hollow is 2.374mm below sampled side surfaces (>2.006mm scaled
+fixture); this is not a hand/finger/wrist/mouth-seating or contact/gravity proof.
+Four final 3840x2160/192-sample OPTIX frames viewed and copied with source/two FBX/
+report/reopened-source verification into BerryCompoteSourceProof.
+
+Still too molded/gel-like and regular, pulp/wood/glaze too procedural: HELD,
+not art/import admission. Six meal prototypes, zero approvals; ten unstarted.
+Estimate >12 further hands-on hours for unstarted sources/refinement alone;
+fish diagnosis, baking, imagery/eating wiring and UE gates add unbounded time.
+Not a morning-build candidate or a release ETA.
+
+Shared original spoon construction extracted to homestead_food_geometry;
+cabbage default output preserves identical vertex/topology/part-local coordinates.
+Container/hollow sampled fixtures extracted to BlenderPreparedFoodChecks with
+the same cabbage thresholds. New compote's smaller utensil is generated before
+coordinates/UVs, not a scaled reused static mesh. Twelve existing food shader
+functions and four existing food geometry functions remain AST-identical.
+Historical frozen proofs remain receipts at their original commit/library hash,
+NOT current-code recaptures; none were rerendered/overwritten or promoted.
+
+Actual gpt-6.1-sol/high, launch default/actual context unknown, no agents/
+automation/fish/bake/render-helper/gameplay/save/enum/version/placement/UE/UBT/
+UAT changes. Preserved separated/framed EEVEE Material scene:
+Berry-compote-source-held-visible.blend on E:. Build02-only provisional snapshot:
+726 calls through event71003, 4,336,968,510,000 recorded nano-AIU; later calls/
+terminal response still need recapture.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

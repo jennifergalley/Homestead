@@ -49,7 +49,6 @@ COOKED_LEAF_FOLD_M = .0014
 COOKED_LEAF_BEND_M = .0012
 POTATO_FACE_RELIEF_M = .00022
 POTATO_GRID = 9
-SPOON_SIDES = 64
 BROTH_SURFACE_M = .034
 BOWL_PROFILE = ((0, .001), (.047, .001), (.056, .005), (.066, .016),
                 (.077, .032), (.086, .049), (.088, .055), (.087, .060),
@@ -140,44 +139,8 @@ def potato_piece(kit, name: str, index: int, size: float = 1) -> bpy.types.Objec
 
 
 def spoon(kit) -> bpy.types.Object:
-    profile = []
-    for step in range(41):
-        y = -.105 + .055 * step / 40
-        relative = (y + .0775) / .0275
-        fullness = max(0, 1 - relative * relative)
-        width = .0006 + .0134 * math.sqrt(fullness) + .0039 * (step / 40) ** 8
-        if step / 40 > .72:
-            blend = (step / 40 - .72) / .28
-            blend = blend * blend * (3 - 2 * blend)
-            shoulder = .0006 + .0134 * math.sqrt(1 - .44 ** 2) + .0039 * .72 ** 8
-            width = shoulder * (1 - blend) + .0045 * blend
-        profile.append((y, width, .009, .0048 * fullness))
-    profile += [(-.047, .0047, .0095, 0), (-.042, .0046, .010, 0)]
-    profile += [(y, .0045 + .0003 * math.sin(y * 38), .010, 0)
-                for y in (.0, .02, .04, .06, .074, .077)]
-    vertices, rows, faces = [], [], []
-    for y, width, rim, hollow in profile:
-        row = []
-        for side in range(SPOON_SIDES):
-            theta = side * 2 * math.pi / SPOON_SIDES
-            if y <= -.05:
-                depth = (hollow * math.sin(theta) ** 2 if math.sin(theta) >= 0 else
-                         (hollow + .0015) * (-math.sin(theta)) ** .8)
-                z = rim - depth
-            else:
-                z = rim + .0018 * math.sin(theta)
-            row.append(len(vertices))
-            vertices.append(Vector((width * math.cos(theta), y, z)))
-        rows.append(row)
-    for first, second in zip(rows, rows[1:]):
-        for side in range(SPOON_SIDES):
-            following = (side + 1) % SPOON_SIDES
-            faces.append((first[side], second[side], second[following], first[following]))
-    faces.extend((tuple(reversed(rows[0])), tuple(rows[-1])))
-    obj = kit.mesh("OriginalCabbageStewMapleSpoon", vertices, faces,
-                   food.maple_eating_spoon("M_CabbageStewMapleSpoon"))
-    shapes.closed_normals(obj)
-    return obj
+    return shapes.carved_spoon(kit, "OriginalCabbageStewMapleSpoon",
+                               food.maple_eating_spoon("M_CabbageStewMapleSpoon"))
 
 
 def herb_fragment(kit, name: str, index: int, material) -> bpy.types.Object:
