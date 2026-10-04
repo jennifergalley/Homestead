@@ -16,11 +16,11 @@ editor/game compile and 21/21 native suites passed; original-art and
 release-save-isolation admission gates remain.
 
 Current source checkpoint: original potatoes, roasted turnips, stewed carrots,
-herbed broad beans, cabbage/potato stew, berry compote, strawberry compote and
-root vegetable hotpot and raw mackerel slices have separate serving/edible-portion WIP,
-NOT art/import acceptance. Seven fish preparations, all meal
+herbed broad beans, cabbage/potato stew, berry compote, strawberry compote,
+root vegetable hotpot, raw mackerel slices and grilled trout have separate
+serving/edible-portion WIP, NOT art/import acceptance. Six fish preparations, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original raw mackerel slices/portion WIP; recipe/source receipts below are frozen,
+visible review is original grilled trout/portion WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -1050,6 +1050,47 @@ actual context unknown; no agents/automation/caught-fish probe/bake/budget/
 render-helper/gameplay/save/enum/version/placement/UE/UBT/UAT/shortcut changes.
 Build02-only provisional snapshot: 792 calls through event71109,
 4,616,358,250,000 recorded nano-AIU; later calls/terminal response need recapture.
+No reconciled billing-credit claim.
+
+### Original grilled trout meal source milestone
+
+New grilled_trout.py authors one independent boneless 14cm cooked trout fillet,
+three loose muscle flakes, a new 22x15.6cm oval ceramic platter and a separate
+2.5x3.76cm edible broken piece. Exact RiverTrout1/Kindling1; no oil/butter/herbs/
+lemon/batter/garnish. Trout and fish-as-food references read; the earlier myomere
+study informs muscle folds. No catch/raw-food/crop mesh reused. New food-only
+flesh/skin/platter shaders do not call or modify the held catch library.
+
+First viewed 4K pass was a smooth white soap bar with detached-looking top flakes.
+Recipe-local adaptive rows now sample the narrow muscle troughs instead of missing
+them; closed curved end caps retain their original boundaries and account for
+their nonplanar fold. Loose flakes are seated beside the fillet rather than
+perched on its crown. Third pass adds seeded unequal muscle partitions/depths,
+rounded central folds, stronger head-to-tail taper, asymmetric thickness, more
+visible cooked skin and subdued uneven browning. A portion extent of 38.35mm
+failed the original 38mm fixture; actual axial length was reduced, not the bound.
+
+Final serving/portion: 49,520/9,646 triangles,
+[22.0,15.6,1.76]/[2.5,3.76,.92]cm; 5/1 closed positive-volume islands.
+Finite/noncollapsed coordinates, UV/bottom pivot/unit transforms, original
+dimension/budget/current-executed-shader graphs and sampled container clearance
+pass. Four final 3840x2160/192-sample OPTIX frames viewed. Copied source/two FBX/
+report/four frames/reopened receipt frozen in GrilledTroutSourceProof.
+Still molded/rubbery with conspicuous patterned muscle, smooth olive skin,
+insufficient broken-fibre/crisp surface and procedural ceramic: HELD, not
+art/import ready. No full intersection/contact/grip/eating/engine acceptance.
+
+Ten source prototypes/six unstarted preparations/zero art approvals. More than
+twelve additional hands-on hours remain estimated for source/refinement; fish/
+bake/imagery/eating/UE gates unknown, not a release ETA. Twenty prior shader and
+six geometry definitions are AST-identical to 7737497a; previous frozen proofs
+stay at their original commit, not recaptured against this new library.
+Separate framed EEVEE Material review saved on E: as
+Grilled-trout-source-held-visible.blend. Actual gpt-6.1-sol/high; launch default/
+actual context unknown, no agents/automation/catch probe/bake/budget/shared
+render-helper/gameplay/save/enum/version/placement/UE/UBT/UAT/shortcut change.
+Build02-only provisional snapshot: 818 calls through event71154,
+4,739,561,790,000 recorded nano-AIU; later calls/terminal response need recapture.
 No reconciled billing-credit claim.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec

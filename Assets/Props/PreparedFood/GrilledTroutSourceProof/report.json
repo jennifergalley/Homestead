@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "GrilledTroutSource",
+  "description": "Held original fire-browned trout fillet and edible piece.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/grilled_trout.py",
+  "source_sha256": "bc531963f6d6618a93958726c74d71057c0f9d47e112a9ff0e0c0ca5781935e1",
+  "provenance": "Original closed cooked-fillet loft, muscle relief, separate flakes, oval platter and food PBR; no caught-fish or meal mesh reused.",
+  "meshes": {
+    "SM_GrilledTrout": {
+      "vertices": 24770,
+      "triangles": 49520,
+      "size_cm": [
+        22.0,
+        15.6,
+        1.76
+      ],
+      "materials": [
+        {
+          "name": "M_GrilledTroutPlatter",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.43
+        },
+        {
+          "name": "M_CookedTroutFilletFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedTroutFilletSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedTroutFlake0Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedTroutFlake1Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedTroutFlake2Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -9
+        ],
+        "focus": [
+          0.0,
+          -0.01,
+          0.017012709711678325
+        ],
+        "detail_distance": 0.33,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_GrilledTrout.fbx",
+      "sha256": "0fab628e89cd188555643f3a3c10f78c848e6e25ca0f8b6a5bab2126478acf8d",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GrilledTrout_hero.png",
+          "detail": "beauty_SM_GrilledTrout_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -9
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_GrilledTroutPortion": {
+      "vertices": 4825,
+      "triangles": 9646,
+      "size_cm": [
+        2.5,
+        3.76,
+        0.92
+      ],
+      "materials": [
+        {
+          "name": "M_CookedTroutEdiblePieceFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedTroutEdiblePieceSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -9
+        ],
+        "focus": [
+          -4.572328180074692e-06,
+          0.002108076587319374,
+          0.009720363903790712
+        ],
+        "detail_distance": 0.24,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_GrilledTroutPortion.fbx",
+      "sha256": "b82fc18b1d2d0fdae99de83a27485023be0432e4ca04946112c80d8cf3e47cd4",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GrilledTroutPortion_hero.png",
+          "detail": "beauty_SM_GrilledTroutPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -9
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "GrilledTrout",
+  "ingredients": {
+    "RiverTrout": 1,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "d891ba738802c02d5aee2244e9b4538dbefd691c635640e12a9c99d71ef5fb44",
+  "food_material_source_sha256": "ce68b2ab722df58e91561900205953cd6fe04be9b91a958037ddc1767f4e58ee"
+}

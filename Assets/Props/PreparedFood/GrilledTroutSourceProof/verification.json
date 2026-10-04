@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "GrilledTrout",
+  "recipe_sha256": "bc531963f6d6618a93958726c74d71057c0f9d47e112a9ff0e0c0ca5781935e1",
+  "food_material_source_sha256": "ce68b2ab722df58e91561900205953cd6fe04be9b91a958037ddc1767f4e58ee",
+  "copied_files_sha256": {
+    "SM_GrilledTrout.fbx": "0fab628e89cd188555643f3a3c10f78c848e6e25ca0f8b6a5bab2126478acf8d",
+    "beauty_SM_GrilledTrout_hero.png": "2887bbd4ce8f3494ffbd88d9eab7d92a2bf0effedca43c50aa956ff71006227c",
+    "beauty_SM_GrilledTrout_detail.png": "5753086daffe4c1b6c78869c62d8df1b39c1b421cb004ba47429b95c1cebda92",
+    "SM_GrilledTroutPortion.fbx": "b82fc18b1d2d0fdae99de83a27485023be0432e4ca04946112c80d8cf3e47cd4",
+    "beauty_SM_GrilledTroutPortion_hero.png": "b798d301f84234af7a899080e0d2ce3e6df3747982a1af42167351841a901e92",
+    "beauty_SM_GrilledTroutPortion_detail.png": "f11b514b4e0a7d087c0a2ff9babed224c2c91d7c751b4752146d5160b5e3c4d7",
+    "GrilledTroutSource.blend": "4f9d54a7aadc5590f7dfeae8f830dc2478540b916a30a48f5554e74edb2e3ba5"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

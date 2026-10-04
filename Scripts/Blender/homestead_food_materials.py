@@ -438,3 +438,58 @@ def raw_fish_plate(name: str) -> bpy.types.Material:
     graph.set("Roughness", .35)
     graph.set("Normal", graph.bump(grit, strength=.12, distance=.000035))
     return graph.mat
+
+
+def grilled_trout_flesh(name: str, seed: int) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.vmath("ADD", graph.coord(), (seed * .017, seed * .037, seed * .051))
+    tissue = graph.noise(point, scale=160, detail=3).outputs["Fac"]
+    colour = graph.ramp(tissue, [
+        (.18, (.39, .295, .21)), (.50, (.48, .385, .29)),
+        (.82, (.55, .46, .355)),
+    ], "EASE")
+    heat = graph.noise(point, scale=45, detail=3).outputs["Fac"]
+    browning = graph.remap(heat, .25, .62, 0, .72)
+    colour = graph.mix(colour, (.14, .048, .012), browning)
+    fines = graph.noise(graph.scale(point, (1, .13, 1)),
+                        scale=2100, detail=3).outputs["Fac"]
+    graph.set("Base Color", colour)
+    graph.set("Roughness", graph.remap(tissue, .2, .8, .54, .38))
+    graph.set("Subsurface Weight", .07)
+    graph.set("Subsurface Radius", (.0015, .0010, .0006))
+    graph.set("Subsurface Scale", .05)
+    graph.set("Normal", graph.bump(fines, strength=.27, distance=.000065))
+    return graph.mat
+
+
+def grilled_trout_skin(name: str, seed: int) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.vmath("ADD", graph.coord(), (seed * .031, seed * .047, seed * .019))
+    heat = graph.noise(point, scale=75, detail=3).outputs["Fac"]
+    colour = graph.ramp(heat, [
+        (.18, (.039, .027, .012)), (.48, (.10, .070, .025)),
+        (.82, (.19, .132, .052)),
+    ], "EASE")
+    spots = graph.noise(point, scale=350, detail=2).outputs["Fac"]
+    colour = graph.mix(colour, (.009, .007, .004), graph.remap(spots, .64, .79, 0, .68))
+    scales = graph.noise(graph.scale(point, (1, .38, 1)),
+                         scale=1300, detail=2).outputs["Fac"]
+    graph.set("Base Color", colour)
+    graph.set("Roughness", graph.remap(heat, .2, .8, .60, .39))
+    graph.set("Normal", graph.bump(scales, strength=.22, distance=.000055))
+    return graph.mat
+
+
+def grilled_trout_platter(name: str) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    firing = graph.noise(graph.coord(), scale=55, detail=2).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(firing, [
+        (.2, (.15, .092, .047)), (.8, (.185, .121, .069)),
+    ], "EASE"))
+    grit = graph.noise(graph.coord(), scale=1600, detail=2).outputs["Fac"]
+    graph.set("Roughness", .43)
+    graph.set("Normal", graph.bump(grit, strength=.12, distance=.000035))
+    return graph.mat
