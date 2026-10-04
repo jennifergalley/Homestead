@@ -19,13 +19,17 @@ namespace FishingStyle
 {
 HomesteadUITheme::FThemeColor Paper(0.055f, 0.09f, 0.075f, 0.96f);
 HomesteadUITheme::FThemeColor Ink(0.92f, 0.86f, 0.7f);
-HomesteadUITheme::FThemeColor Water(0.16f, 0.3f, 0.32f);
-HomesteadUITheme::FThemeColor Ripple(0.55f, 0.72f, 0.7f);
-HomesteadUITheme::FThemeColor FloatRed(0.86f, 0.2f, 0.12f);
-HomesteadUITheme::FThemeColor FloatWhite(0.95f, 0.93f, 0.86f);
-HomesteadUITheme::FThemeColor Line(0.85f, 0.8f, 0.62f, 0.8f);
-HomesteadUITheme::FThemeColor Cue(1.0f, 0.82f, 0.25f);
-HomesteadUITheme::FThemeColor Pip(0.65f, 0.85f, 0.4f);
+// The bank scene is a picture of water, so it keeps the same colours in every theme (the theme would
+// otherwise turn the water to paper and the cue to ink). The cue and landed pips use the warm gilt accent,
+// which reads clearly against the water.
+HomesteadUITheme::FThemeColor Scene(const FLinearColor& Colour) { return {Colour, Colour, Colour}; }
+HomesteadUITheme::FThemeColor Water = Scene({0.16f, 0.3f, 0.32f});
+HomesteadUITheme::FThemeColor Ripple = Scene({0.55f, 0.72f, 0.7f});
+HomesteadUITheme::FThemeColor FloatRed = Scene({0.86f, 0.2f, 0.12f});
+HomesteadUITheme::FThemeColor FloatWhite = Scene({0.95f, 0.93f, 0.86f});
+HomesteadUITheme::FThemeColor Line = Scene({0.85f, 0.8f, 0.62f, 0.8f});
+HomesteadUITheme::FThemeColor Cue = Scene({1.0f, 0.8f, 0.42f});
+HomesteadUITheme::FThemeColor Pip = Scene({0.92f, 0.74f, 0.43f});
 
 // Bobber cue tuning (logical px / seconds): the ring closes from RingOuter to RingInner across the
 // simulation's own reaction window, so its timing always matches Homestead::Fishing::Marker.
