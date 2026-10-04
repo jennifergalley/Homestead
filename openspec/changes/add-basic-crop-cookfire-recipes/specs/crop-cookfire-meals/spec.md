@@ -20,3 +20,10 @@ New crop meals SHALL restore nominal Energy equal to the nearest whole number of
 - **WHEN** she compares new berry, potato and cabbage dishes
 - **THEN** the more valuable consumed ingredients buy proportionally more Energy according to the same rule
 - **AND** their values fit the Energy meter without requiring increased crop prices.
+
+### Requirement: Prepared crop dishes use original art
+The eight new dishes SHALL use newly authored Blender assets and distinct item presentation rather than reused food meshes. Original PBR art SHALL be reviewed at 4K before integrated acceptance.
+
+#### Scenario: Inspect a prepared dish
+- **WHEN** she inspects, cooks and eats a new crop dish
+- **THEN** the dish uses its original authored visual, not a generic old root or berry substitute

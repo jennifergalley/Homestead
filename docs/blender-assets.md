@@ -293,6 +293,10 @@ def build(kit):
   `pivot=None` so all LODs share one origin.
 - Textures used by the result are copied to `Assets\Props\<Name>\Textures` and the
   saved `.blend` is repointed to them.
+- **Saving an appended comparison scene:** `bpy.data.libraries.load(..., link=False)` can leave
+  library IDs after its owned comparison objects are deleted. Before saving a corrected copy, remove
+  only the exact snapshot library IDs created for that append, then rebuild; otherwise Blender can
+  fail with `Cannot overwrite used library`. Do not purge arbitrary libraries from Jenny's live scene.
 
 ## Rocks (Sierra Nevada granite)
 

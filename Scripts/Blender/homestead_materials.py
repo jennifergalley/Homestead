@@ -317,6 +317,26 @@ def rawhide(name, color=(0.42, 0.27, 0.12), strands=3, twist=90.0):
     return g.mat
 
 
+def linen_cord(name, color=(0.28, 0.24, 0.18), radius=0.0005, twist=180.0):
+    """Dry twisted flax; pcoord Z follows the cord, without leather subsurface."""
+    g = Graph(name)
+    x, y, z = g.separate(g.coord())
+    angle = g.math("ARCTAN2", y, x)
+    phase = g.math("ADD", g.math("MULTIPLY", angle, 3.0),
+                   g.math("MULTIPLY", z, twist * 6.283185))
+    strands = g.math("ABSOLUTE", g.math("SINE", phase))
+    fibres = g.noise(g.combine(angle, g.math("MULTIPLY", z, 40.0), 0.0),
+                     scale=35.0, detail=3.0).outputs["Fac"]
+    tone = g.math("MULTIPLY", g.remap(strands, 0.0, 1.0, 0.65, 1.0),
+                  g.remap(fibres, 0.2, 0.8, 0.8, 1.12))
+    g.set("Base Color", g.ramp(tone, [(0.3, tuple(c * 0.5 for c in color)),
+                                     (0.95, color)]))
+    g.set("Roughness", g.remap(fibres, 0.25, 0.8, 0.65, 0.85))
+    g.set("Subsurface Weight", 0.0)
+    g.set("Normal", g.bump(strands, strength=0.3, distance=radius * 0.25))
+    return g.mat
+
+
 def leaf(name, color=(0.07, 0.16, 0.03), vein=(0.18, 0.26, 0.07), tip=(0.11, 0.17, 0.04),
          roughness=0.45, translucency=0.3):
     """Leaf tissue for UV-mapped blades (U across the blade 0..1 with the midrib at

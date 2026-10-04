@@ -10,8 +10,10 @@ App session `d4518710-b508-4196-8598-1cf91d0edf7d`; runtime
 `jennifergalley-farming-fishing-agent`; worktree `jennifergalley-cautious-robot`.
 Actual model/effort `gpt-6.1-sol` / `high`, confirmed by local usage events
 69327-69329. Launch context default; actual runtime context tier unknown.
-No helpers, editor, owned live process or automation. No game/save/shortcut touched.
-Source still needs Integration's editor compile and release-save-isolation admission.
+No helpers, owned Unreal process or automation. Owned visible Blender PID 20420,
+live port 9878. No game/save/shortcut touched. Integration reports its combined
+editor/game compile and 21/21 native suites passed; original-art and
+release-save-isolation admission gates remain.
 
 ## Boundaries and selected feedback
 | Feedback | Change | State |
@@ -24,6 +26,13 @@ First delivery: seed hint/balance and eight crop meals. Then fishing pole at exa
 1500 coins beside backpack upgrade, inventory/hotbar, original active fishing,
 river/lake/ocean catches, General Store sale and fish preparations.
 No carry/grip/hair/foliage/rucksack/manor relocation or speculative scope.
+
+Jenny's Oct 3 20:04 correction requires all-new art, not reused pole/fish/meal
+assets: one original pole, six distinct catches and sixteen distinct new dishes.
+Existing shared code/material-building helpers are reusable, not existing meshes.
+She selected a visible Blender window. Coordinator granted slot2 and the shared
+Blender/GPU authoring window; Integration owns Unreal imports/save/builds.
+No placeholder promotion or entire 23-item-set promise for 9 PM.
 
 Travel Rest (`1b0e10a4-09b5-458e-b9de-098cce831b07`) owns bed/time/wait/discovery/travel.
 Its Simulation State/declarations and optional travel save hook must survive integration.
@@ -67,11 +76,12 @@ Focused new coverage exercises retirement, both seed outcomes/reload, a 1024-sam
 kindling/station refusal atomicity, Energy/eating and current/narrower stock saves.
 Both OpenSpec changes pass strict validation; risky source wiring reviewed directly.
 
-Jenny's newest decision (19:12 local, Oct 3) supersedes the earlier broad pause:
-Editor/Blender and scheduled fishing source work may proceed in slot1, but NO game
-compile/UBT/Live Coding/UAT/package while she plays. No editor needed or launched.
-This checkpoint is NOT compile-verified or release-ready until Integration's editor
-compile and Jenny's manual checks. No [ready] claim while that gate is blocked.
+Jenny's 20:00 local update says she is not playing and permits Blender/Unreal;
+the earlier 19:12 playtime compilation hold is superseded. Slot2 now covers original
+asset authoring rather than the prior conditional visual-QA assignment. This lane
+does not launch/compile its editor; Integration owns the combined current-source
+editor and eventual imports. No [ready] or art-acceptance claim before viewed
+4K renders, asset wiring and integrated verification.
 Never touch Jenny's game/saves/shortcut, no overnight automation.
 
 Native command: CMake Release targets HomesteadSimulationTests,
@@ -91,8 +101,9 @@ The commit containing this handoff follows pushed seed/crop checkpoint
 `249229b0d5c3f072d4fb6384e9ded0cb0f503d9c`. It adds the pole to ordinary General Store
 goods at exactly 1500 coins regardless of markup, before or after the backpack upgrade.
 Pack layout, hotbar selection, held-tool presentation and the generic cookbook are wired.
-The held pole reuses the original wooden digging-stick mesh/pose with a unique component;
-its attachment and UI presentation remain engine-unverified.
+That source checkpoint uses the original wooden digging-stick mesh/pose with a
+unique pole component. It is now explicitly rejected as final fishing art and
+will be replaced by the newly authored FishingPole, not retained as a fallback.
 
 Native fishing owns pole/Energy/space/water eligibility, the 1.5 Energy cast charge,
 2-4 second wait, 0.9 second hook window and two 1.8 second landing passes (55-85% band).
@@ -139,6 +150,55 @@ Player check: buy/select the pole for 1500, catch at each habitat using the timi
 sell a catch, prepare/eat raw slices and a kindling-fired dish. No packaging, main merge,
 shortcut retarget, live-game/save access, polling or overnight automation by this lane.
 
+## Original-art work in progress
+`Scripts/Blender/Recipes/fishing_pole.py` builds a new 1.95 m hazel blank,
+tip-fixed wound flax line, carved float and forged hook. Grip pivot at the origin,
+tip +Z; no borrowed mesh and no new motion. Geometry currently has 42,488 triangles.
+It is built/exported under `Assets/Props/FishingPole`, with 4096px basecolor,
+roughness, OpenGL normal, AO and metallic maps. Final 3840x2160 hero/detail
+renders (192 samples, RTX5080 OPTIX) and the basecolor atlas were viewed.
+It is an import-ready ART checkpoint, NOT imported/UE-verified or gameplay-ready.
+The recipe reserves four straight shaft UV islands and uses a new linen-cord
+material helper. Float follows its leader's curve so it is attached rather than
+floating off the line. Clamp the taper input at Blender's float32 endpoints.
+For manual geometry-only probes, `build_prop.py` normally supplies `kit.mats`;
+set that binding explicitly when calling a recipe without the builder.
+Review-only Kloofendal HDRI fetched with the standard MD5-verified CC0 pipeline;
+it is cached/ignored and is not a source of shipped geometry/material textures.
+
+First 4K critique found a diagonal material stripe across the float: the shared
+`assign_tube_uvs` helper mapped cap-centre vertices to the last body ring and its
+fan triangles overwrote body UVs. Corrected the helper to reserve independent
+cap disks; `Tests/BlenderTubeUVTests.py` passes capped/uncapped atlas bounds,
+nonzero cap area and cap/body separation in the live window without clearing it.
+Second viewed pass removes that stripe and widens the detail framing to show
+the full float, line and hook. Wood remains matte with longitudinal grain;
+thin line, modest natural bow and restrained wear are intentional. Remaining
+weaknesses: static secured travel tackle (not a deployed-line animation), no LOD,
+and unverified in-engine grip/body clearance. No existing assets were rebaked.
+
+The live preservation comparison appended only owned generated snapshots, but
+Blender retained their library records and refused to overwrite the source
+`.blend`. Saved a corrected scene copy, removed only those two owned snapshot
+library IDs, then rebuilt successfully. Do not remove unrelated library IDs.
+
+Integration's bounded Travel/HUD-only editor window finished and its editor
+exited before Cycles resumed. Final rod bake/render finished at ~20:31 local;
+Integration was offered a GPU-safe import/viewport gap. Its current-source
+compile result predates this checkpoint's new pole path, so it must compile that
+localized C++ change and import the asset before grip verification. The old
+digging-stick fallback is removed; missing original pole explicitly logs an error.
+No native rules, serialization, Item/Recipe widths or versions changed in this
+art checkpoint.
+
+All six fish and sixteen dishes remain to be authored. Species research has
+begun, but no fish/dish mesh or render is claimed. Plan distinct silhouettes,
+fins and markings for brown trout, Atlantic salmon, European perch, common carp,
+Atlantic mackerel and sea bass. New item images and eating portions must replace
+generic fish/food glyphs and existing root/berry eating-prop reuse. This is
+several hours of remaining work, not a credible full-set 9 PM delivery; no
+overnight automation or continued work after Jenny signs off.
+
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.
 Notion identity and Ledger read in full; no technical-project Notion writes.
@@ -152,6 +212,10 @@ Fishing implementation begins at 2026-10-04T02:17:28.345Z. Interim coverage incl
 source work; terminal response and later calls need recapture.
 The adjacent `farming-fishing-measured-02-report.json` is the provisional attributed
 aggregate; recorded nano-AIU is not a reconciled billing claim.
+Original-art checkpoint snapshot: 140 calls through event 70004, recorded
+737049830000 nano-AIU, status incomplete/provisional. Original-art attribution
+starts at Jenny's correction `2026-10-04T03:04:19.556Z`; subsequent calls and
+terminal response still need recapture. No helpers or model/configuration change.
 All usage belongs to build 02, never the closed build 01 allocation. No actual-context
 or reconciled-credit claim. TEMP/TMP for heavy tools must use
 `E:\CopilotScratch\5be207bc-49b1-4a1b-811e-088ae565dc1b\tmp`.

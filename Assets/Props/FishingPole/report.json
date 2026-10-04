@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "FishingPole",
+  "description": "Original tapered hazel pole, wound flax line, wooden float and forged hook.",
+  "collision": "none",
+  "triangle_budget": 50000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/fishing_pole.py",
+  "source_sha256": "0b8940791b6b3f5467dfe1bff5351e8042ba8ec3f38c0f63a1a38e84293708eb",
+  "provenance": "Original procedural geometry and PBR materials; no borrowed mesh or image.",
+  "meshes": {
+    "SM_FishingPole": {
+      "vertices": 21268,
+      "triangles": 42488,
+      "size_cm": [
+        7.3,
+        5.2,
+        195.05
+      ],
+      "materials": [
+        {
+          "name": "M_FishingPole",
+          "textures": {
+            "basecolor": "T_FishingPole_basecolor.png",
+            "roughness": "T_FishingPole_roughness.png",
+            "metallic": "T_FishingPole_metallic.png",
+            "normal": "T_FishingPole_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_FishingPole_basecolor.png",
+          "roughness": "T_FishingPole_roughness.png",
+          "normal": "T_FishingPole_normal.png",
+          "ao": "T_FishingPole_ao.png",
+          "metallic": "T_FishingPole_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          90,
+          24
+        ],
+        "focus": [
+          0.025,
+          -0.018,
+          0.24
+        ],
+        "detail_distance": 0.85
+      },
+      "fbx": "SM_FishingPole.fbx",
+      "sha256": "d534acee2b515b0e134531ec2688f33a5b5d8eaa3b8e1031f11dc2aad6f5b3fb",
+      "preview": "preview_SM_FishingPole.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FishingPole_hero.png",
+          "detail": "beauty_SM_FishingPole_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          90,
+          24
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "attach": {
+    "grip_cm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "butt_cm": [
+      0.0,
+      0.0,
+      -20.0
+    ],
+    "tip_cm": [
+      3.797871619462967,
+      -1.124660111963749,
+      175.0
+    ]
+  },
+  "presentation": "secured travel tackle; no deployed-line animation",
+  "textures": {
+    "T_FishingPole_basecolor.png": "db6ebd22b4a4fc1fc6e6bb7effb9ce38656990aafbc4b2de0e650e619ec97dfd",
+    "T_FishingPole_roughness.png": "282c8871e046324223c6e16674b9cdeaed269b71873df0009386721cac27ef29",
+    "T_FishingPole_metallic.png": "b19dd90349803a254aca608a8581ffe1c89a95347d5a244a2ed0ff526c565b28",
+    "T_FishingPole_normal.png": "56fa9c7559891ec3727ed939ecb68f901dc5b43935687db62cb1aa59802fb393"
+  }
+}

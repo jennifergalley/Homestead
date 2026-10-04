@@ -1,8 +1,8 @@
 # Tasks
 
-Source and focused Release native checks complete. Task 1.1 stays open for editor
-compile: Jenny currently permits source/editor work, but forbids UBT/build compilation.
+Source and focused native checks complete. Integration reports combined compile
+passed; tasks remain open for Jenny's newly required original art and acceptance.
 
 ## 1. Crop-food checkpoint
-- [ ] 1.1 Add eight append-only crop meals and cookbook support; verify ingredient/fuel/station transactions, sale-cost Energy, eating/hotbar metadata and counted-stock saves with focused native tests and coordinated editor compile.
-- [ ] 1.2 Jenny verifies the integrated build: inspect, cook and eat crop dishes at the cookfire, including a herb-seasoned dish; confirm visible ingredients/Energy and kindling use.
+- [ ] 1.1 Add eight crop meals, original dish assets and cookbook support; verify native rules, viewed 4K art and coordinated editor import/compile.
+- [ ] 1.2 Jenny verifies original dish art in the integrated cookbook/cook/eat path, including a herb-seasoned dish, visible ingredients/Energy and kindling use.
