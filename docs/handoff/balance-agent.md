@@ -38,6 +38,10 @@ have rewritten it (she turned "sleep 15/h" into "Sleep always resets the energy 
 
 ## How lanes reach me
 
+Order for new assets and animations (Jenny, 2026-10-04): the lane sends me review media
+(screenshots plus MP4) and I give a cohesion OK or blocking changes. The lane then sends the batch
+to Jenny, and she approves it before [ready]. My OK comes first; it doesn't replace hers.
+
 Send the short proposal or final numbers/copy (plus a screenshot path for visible work) with
 `send_session_message`, delivery mode immediate. I answer with approve / approve-with-numbers or
 "balance OK" / blocking changes within one turn.
