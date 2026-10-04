@@ -241,6 +241,14 @@ remains unresolved and creates no production/import acceptance. Correct the earl
 those probes used the original bumped source as reference rather than matched bump-free round trips,
 so they do not exclude Bump evaluation. Fish probes now stop; original sixteen-dish source work begins
 independently.
+The same reviewer completed a second and final read-only follow-up with no files or processes. The
+unchanged OBJECT result (`3.062`) confirms tangent conversion is insufficient and the cause remains
+unproven. After the meal-source milestone only, its one advisory scratch-4096 discriminator is to
+explicitly take the final Bump normal `WORLD->OBJECT`, set type `NORMAL`, normalize and encode
+`.5n+.5` through `EMIT` strength `1` into a data image, then substitute the existing OBJECT
+Base+Coat map. `<=1.7` with local improvement implicates NORMAL-pass extraction; roughly `3.062`
+implicates field evaluation/filtering. It is not a production fix, UE object-space map, budget change,
+admission, shared-helper claim, or meal pause.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
