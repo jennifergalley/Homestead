@@ -84,6 +84,25 @@ mine path and building work remain unselected. The lane is held to the active no
   launch, and leave the old root untouched for rollback. `-HomesteadPreviewProfile` is unsuitable:
   it uses shared `UserSettingsDir` profile roots.
 
+### Mandatory release-isolation gate
+
+The release-local `-UserDir` design is conditionally clean; it requires no source save-root
+migration, but neither gameplay checkpoint is ready until the following promotion/rollback evidence
+exists:
+
+1. Candidate and rollback launches each report the expected, canonical, physically distinct
+   `SaveGames` root; reject junctions, symlinks, aliases, shared routes, missing/wrong `-UserDir`,
+   and `-HomesteadPreviewProfile` before save access.
+2. Copy every loadable `.sav` and `.bak` from a stable, non-writing pre-upgrade source, hash-check
+   it into a fresh candidate root, and keep an immutable, old-reader-compatible rollback snapshot.
+   The candidate root contains no unrelated prior saves.
+3. In the authorized test window, load and save a synthetic candidate Travel save, then exercise
+   candidate manual/autosave/backup replacement and rollback auto/manual/recovery writes across all
+   slots and `.bak` files. Hashes in the *other* release root must remain unchanged.
+4. Rejection coverage uses disposable fixtures only; it never injects an upgraded save into the
+   protected rollback root. Any new `LoadLatest` guard is defense in depth, not a fix for deployed
+   old binaries.
+
 Travel Rest may append an optional `travel <count> <id>...` section of sorted, unique destination
 IDs 1..6; Manor (0) remains implicit. Missing legacy sections lock every non-Manor destination, and
 malformed or duplicate sections refuse transactionally. This does not bump the save or bake version.

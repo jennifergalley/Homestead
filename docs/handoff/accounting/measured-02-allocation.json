@@ -104,8 +104,8 @@
       "reasoningEffort": "high",
       "contextTier": null,
       "launchContextTier": "default",
-      "contextEvidence": "Independent source review in Integration slot 3. Actual runtime context and final usage-event boundary remain pending; record this helper once.",
-      "boundaryEvidence": "Travel review found old-reader .bak fallback can overwrite upgraded saves; Farming found no independent blocker but counted stock widening inherits rollback isolation. Neither checkpoint is admitted."
+      "contextEvidence": "Independent source and routing review in Integration slot 3. Actual runtime context and final usage-event boundary remain pending; record this helper once.",
+      "boundaryEvidence": "Travel review found old-reader .bak fallback can overwrite upgraded saves. It conditionally approved release-local UserDir isolation only with dual-root, snapshot, alias, and write-containment proof. Farming found no independent blocker but counted stock widening inherits that gate. Neither checkpoint is admitted."
     }
   ]
 }
