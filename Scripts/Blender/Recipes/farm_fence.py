@@ -21,6 +21,7 @@ import os
 import random
 from pathlib import Path
 
+import bmesh
 import bpy
 import numpy as np
 from mathutils import Vector
@@ -117,6 +118,72 @@ def _base_moss(kit, rng, radius_x, radius_y, max_z, mats, prefix):
     return parts
 
 
+def _volume(obj):
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    volume = bm.calc_volume(signed=True)
+    bm.free()
+    return volume
+
+
+def _outward(obj):
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    if bm.calc_volume(signed=True) < 0.0:
+        bmesh.ops.reverse_faces(bm, faces=bm.faces)
+    bm.to_mesh(obj.data)
+    bm.free()
+    obj.data.update()
+
+
+MORTISE_MAX_REMOVED_M3 = 0.0010  # One 7.6 x 4.6 cm through-mortise in a ~13 cm post removes ~0.00045 m3.
+
+
+def _mortise_cuts(body, heights, size, name):
+    """Boolean all through-mortises with one joined cutter and verify the post survived.
+
+    Cutting them one at a time let Blender's exact solver delete the whole lofted body at the
+    second cut, which shipped SM_FarmFencePost as floating mortise liners with no post (rails then
+    appeared to hover in the estate)."""
+    before = _volume(body)
+    cubes = []
+    for z in heights:
+        bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, z))
+        cube = bpy.context.object
+        cube.dimensions = size
+        cubes.append(cube)
+    bpy.ops.object.select_all(action="DESELECT")
+    for cube in cubes:
+        cube.select_set(True)
+    bpy.context.view_layer.objects.active = cubes[0]
+    bpy.ops.object.join()
+    cutter = bpy.context.object
+    cutter.name = name
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    bpy.ops.object.select_all(action="DESELECT")
+    bpy.context.view_layer.objects.active = body
+    backup = body.data.copy()
+    try:
+        # The exact solver collapses this seed's post; the float solver keeps it.
+        for solver in ("EXACT", "FLOAT"):
+            mod = body.modifiers.new(name, "BOOLEAN")
+            mod.operation = "DIFFERENCE"
+            mod.object = cutter
+            mod.solver = solver
+            bpy.ops.object.modifier_apply(modifier=mod.name)
+            removed = before - _volume(body)
+            if 0.0 < removed < MORTISE_MAX_REMOVED_M3 * len(heights):
+                return
+            print(f"HOMESTEAD_MORTISE_RETRY {name} solver={solver} removed={removed:.5f}")
+            broken = body.data
+            body.data = backup.copy()
+            bpy.data.meshes.remove(broken)
+    finally:
+        bpy.data.objects.remove(cutter, do_unlink=True)
+        bpy.data.meshes.remove(backup)
+    raise RuntimeError(f"{name}: every mortise boolean destroyed the {before:.5f} m3 post body")
+
 def _post_core(kit, name, height, width_x, depth_y, mats, seed, snapped=False):
     rng = random.Random(seed)
     points = []
@@ -132,8 +199,10 @@ def _post_core(kit, name, height, width_x, depth_y, mats, seed, snapped=False):
     body = common.beam(kit, f"{name}_HewnBody", points, width_x, depth_y, mats.get("post", mats["oak"]), seed,
                        spacing=0.060, section="rect", taper=taper, roll=math.radians(rng.uniform(-6, 6)))
     if not snapped:
-        for z in (0.35, 0.70, 1.05):
-            common.add_boolean_box_cut(body, (0, 0, z), (width_x + 0.05, 0.076, 0.046), f"{name}_MortiseCut_{z:.2f}")
+        # The vertical loft can come out inside-out; an inside-out body makes the exact boolean keep
+        # only the cutter slabs and drop the whole post (SM_FarmFencePost shipped that way).
+        _outward(body)
+        _mortise_cuts(body, (0.35, 0.70, 1.05), (width_x + 0.05, 0.076, 0.046), f"{name}_MortiseCuts")
         # Boolean mortise cuts can leave generated faces without the rest-coordinate attribute
         # that the oak shader needs; retag to keep the silvered grain from baking black.
         kit.tag_coords(body.data)
