@@ -97,6 +97,8 @@
       "rawMackerelSourceStatus": "Held WIP: independent original raw-mackerel cuts, oval dish, and edible slice with copied fixtures and four viewed 4K frames. Molded/graphic, not art/import-ready. Nine prototypes, seven unstarted, zero approvals; prior 17 food shaders, six geometry functions, and catch source unchanged. No caught-fish probe/bake/import/gameplay/save/UE change or release ETA.",
       "grilledTroutSourceCheckpoint": "f6464440",
       "grilledTroutSourceStatus": "Held WIP: original grilled trout, platter, and portion with copied fixtures and four final viewed 4K frames. Molded/rubbery patterned-muscle appearance, not art/import-ready. Portion trimmed from caught 38.35 mm to 37.55 mm rather than relaxing fixture; bounds unchanged. Ten prototypes, six unstarted, zero approvals; 20 shaders and six geometry definitions unchanged. No catch/bake/import/gameplay/save/UE change.",
+      "perchFilletSourceCheckpoint": "843324c1",
+      "perchFilletSourceStatus": "Held WIP: original perch fillet pair, platter, and portion with copied fixtures and four final viewed 4K frames. Smooth/molded painted skin, not art/import-ready. Eleven prototypes, five unstarted, zero approvals. Shared cooked-loft/trout delegation exact-replays frozen trout vertices/topology/pcoord/UV/material indices and rejects invalid input; 23 shaders and six geometry functions unchanged. No catch/bake/gameplay/save/UE change or release ETA.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
