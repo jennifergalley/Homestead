@@ -202,6 +202,49 @@
       "launchContextTier": "default",
       "contextEvidence": "Farming reports 869 build02 calls provisionally at event 71246; actual context and billing reconciliation remain unknown.",
       "boundaryEvidence": "Live carp WIP is saved on E:. This reported usage covers authorized overnight art refinement, including held source-only Baked Potatoes checkpoint 24500d2a, held Turnip1 checkpoint e6715c2e, held Stewed Carrots checkpoint bc4126c3, held Herbed Beans checkpoint ae434be5 and negative coordinate follow-up 2612dcaa, held Cabbage Potato Stew checkpoint 70f03669, held Berry Compote checkpoint 50f155b9, held Strawberry Compote checkpoint c82c482d, held Root/Turnip Hotpot checkpoint 1bc234e1, held Raw Mackerel checkpoint 7737497a, held Grilled Trout checkpoint f6464440, held Perch Fillet checkpoint 843324c1, held Grilled Mackerel checkpoint 0a1d1da8, and independent meal realism/source work. It does not establish art/import admission, gameplay/save/UE action, or production fish-proof/budget/shader changes."
+    },
+    {
+      "agentId": "bb415168-dbc2-4991-a8d5-4dfd7891e444",
+      "task": "frozen-eleven-runtime-risk-review",
+      "category": "review",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "usage": {
+        "apiCalls": 7,
+        "aiu": 22.91985
+      },
+      "contextEvidence": "Actual runtime context was not recorded. Counted once as the supplied independent review boundary; it is not included in coordinator totals.",
+      "boundaryEvidence": "Read-only review of the exact 25e0b2be runtime-risk delta found no significant high-confidence defect. It does not substitute for package, runtime, save, or Shipping acceptance."
+    },
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "task": "coordinator-observed-usage-cutoff",
+      "category": "overhead",
+      "through": "2026-10-04T18:14:52.958Z",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "contextTier": null,
+      "usage": {
+        "apiCalls": 405,
+        "aiu": 1240.72018,
+        "modelBreakdown": "403 gpt-6.1-sol high; 2 gpt-6.1-sol effort unknown"
+      },
+      "contextEvidence": "Provisional observed cutoff only; actual context and final billing reconciliation remain unknown.",
+      "boundaryEvidence": "Coordinator accounting boundary. Do not add child review usage to this segment."
+    },
+    {
+      "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+      "projectSessionId": "52572922-09fd-4287-85c5-840ceec6d895",
+      "task": "fresh-cook-reconciliation-and-shipping-candidate",
+      "category": "integration",
+      "model": "gpt-5.6-terra",
+      "reasoningEffort": null,
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Current runtime model is observed; reasoning, actual context, and final billing reconciliation remain unknown.",
+      "boundaryEvidence": "One 11m25s fresh Development cook wrote 1,019 tracked assets and was stopped. Jenny-approved reconciliation restored 892 incidental paths and retained 127 admitted asset paths; a 2m31s recook staged Shipping candidate 0D33088B19607142D1A5EB3FC410A499024DE71A3209E8601993ED47ED9171FA. Candidate snapshot/route assertion, two bounded real candidate starts with unchanged candidate/rollback 18-file roots, and guarded EstateSmoke/ToolRepeat passed. Promotion is excluded pending approved persistence for the 127 retained resaves."
     }
   ]
 }

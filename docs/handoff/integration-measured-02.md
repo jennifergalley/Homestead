@@ -533,3 +533,38 @@ assigned.
   containers. Do not bypass that integrity guard or use either protected release as a cook source.
   An authorized fresh Shipping cook/staging route, or a verified current cooked container source, is
   required before candidate save-containment, EstateSmoke/ToolRepeat, or promotion.
+
+## Fresh-cook reconciliation and Shipping candidate
+
+- The coordinator authorized a fresh cook/stage. `Build-Game.ps1 -Package -LowMemoryCook` produced
+  `Build\Releases\20261003-measured-02\fresh-cook-development` in 11m25s, but also wrote 1,019
+  tracked `.uasset` files (2,629,801,483 bytes). Integration stopped before using that output.
+- Jenny then authorized a manifest-bound surgical reconciliation. The durable E: manifest records
+  the full write set; 892 verified incidental bootstrap writes were restored from clean
+  `85614611`, while 127 intentionally admitted paths were retained: 30 CaughtFish, 89
+  PreparedFood, seven FishingPole, and `M_CaughtFishWet`. The pre-reconciliation candidate is
+  retained as `shipping-candidate-invalidated-pre-reconciliation`; it is provenance only.
+- `Build-Game.ps1 -PackageOnly -LowMemoryCook` recooked the reconciled source in 2m31s into
+  `reconciled-cook-development`. A fresh Shipping stage using only those containers succeeded at
+  `Build\Releases\20261003-measured-02\shipping-candidate\Windows`. Its executable SHA-256 is
+  `0D33088B19607142D1A5EB3FC410A499024DE71A3209E8601993ED47ED9171FA`.
+- Before test launch, Integration copied and hash-checked all 18 active-save files into the
+  candidate package-local `Saved\SaveGames` root. `Assert-ReleaseSaveIsolation.ps1` passed:
+  candidate and protected rollback roots are canonical, ordinary, physically distinct, and use
+  exactly their package-local `-UserDir` values.
+- The reconciled Shipping candidate passed guarded `EstateSmoke` and `ToolRepeat`. Estate smoke
+  covered the Estate traversal, landscape material, ground, Lit, and frame-timing path; tool repeat
+  covered axe, pickaxe, billhook, and scythe input/repeat behavior. Both routes reported successful
+  zero-network guard evidence. Shipping intentionally does not emit the Development material-log
+  checks.
+- Two bounded, normal candidate launches used its real package-local `-UserDir`. Shipping suppresses
+  the requested save-audit log marker, so this is not a synthetic write claim; both processes stayed
+  alive until owned shutdown, and post-launch hashes prove both the candidate and protected rollback
+  `SaveGames` trees remain unchanged at 18 files each. The Development-only routing fixture remains
+  the manual/autosave/backup replacement proof because the synthetic writer is compiled out of
+  Shipping.
+- **Promotion hold:** the 127 retained, manifest-approved asset resaves are still uncommitted. They
+  are entirely within the admitted CaughtFish, PreparedFood, FishingPole, and fish material paths,
+  but no shortcut or promotion action may occur until the coordinator/Jenny explicitly chooses their
+  persistent commit/reconciliation path. No protected release, rollback, player save, or shortcut
+  has been modified.

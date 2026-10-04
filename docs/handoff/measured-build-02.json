@@ -187,7 +187,18 @@
     "model": "gpt-5.6-terra",
     "reasoningEffort": "medium",
     "launchContextTier": "default",
-    "status": "hands-on slot 1 active: frozen eleven-meal content is imported and Development source gates are green; remaining gates are candidate/rollback save containment, package, guarded Shipping EstateSmoke/ToolRepeat, and promotion"
+    "status": "promotion held: reconciled fresh Shipping candidate passed save-route containment and guarded EstateSmoke/ToolRepeat; exact 127-path admitted bootstrap resaves need an approved persistent source reconciliation before shortcut promotion",
+    "shippingCandidate": {
+      "path": "Build/Releases/20261003-measured-02/shipping-candidate/Windows",
+      "executableSha256": "0D33088B19607142D1A5EB3FC410A499024DE71A3209E8601993ED47ED9171FA",
+      "freshCook": "reconciled-cook-development",
+      "shippingRoutes": [
+        "EstateSmoke passed",
+        "ToolRepeat passed"
+      ],
+      "saveContainment": "18 active saves copied/hash-checked into candidate; canonical candidate and rollback roots are distinct; two bounded normal candidate starts left both 18-file SaveGames trees unchanged.",
+      "sourceProvenanceHold": "892 incidental bootstrap writes restored; 127 explicitly admitted CaughtFish/PreparedFood/FishingPole/M_CaughtFishWet resaves retained but uncommitted pending explicit persistent-reconciliation approval."
+    }
   },
   "deliveryRules": [
     "Only verified and reviewed work is admitted; unfinished items move to the fallback slot.",

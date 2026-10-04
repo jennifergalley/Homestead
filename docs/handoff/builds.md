@@ -142,6 +142,23 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
   hash-identical reuse path. The Shipping script correctly refused an implicit cook; no stale
   container, protected release, player save, shortcut, or promotion action was taken.
 
+## 2026-10-04 — measured02 reconciled Shipping candidate
+
+- SHA: source remains `85614611` plus a held, manifest-approved 127-asset bootstrap resave set.
+- Status: **not promoted**. Fresh cook/staging and all required runtime/save gates pass; persistent
+  source provenance for the retained asset resaves awaits explicit coordinator/Jenny direction.
+- Fresh cook: the first Development cook wrote 1,019 tracked assets and was stopped. Jenny approved
+  surgical restoration of 892 verified incidental writes while retaining exactly the 127 admitted
+  CaughtFish/PreparedFood/FishingPole/`M_CaughtFishWet` paths. A 2m31s reconciled recook then
+  staged the current Shipping candidate without protected containers.
+- Verification: 18 active saves copied/hash-checked into the candidate; release-route assertion
+  passed; two bounded normal candidate starts left candidate and rollback SaveGames trees unchanged;
+  guarded Shipping EstateSmoke and ToolRepeat passed. Shipping executable SHA-256:
+  `0D33088B19607142D1A5EB3FC410A499024DE71A3209E8601993ED47ED9171FA`.
+- The active measured01 release, its sole rollback, shortcut icon, and all protected player saves
+  remain untouched. Do not promote until the retained 127-path set has an approved persistent
+  reconciliation.
+
 ## Later
 
 - The player-driven deferred queue is in [backlog.md](backlog.md): river/ocean, map and town feedback, fishing, hauling, mine work, manor rebuilding, artisan goods, and later estate systems.
