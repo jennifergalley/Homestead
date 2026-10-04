@@ -34,7 +34,7 @@
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
-        "visual/player acceptance",
+        "automated visual acceptance",
         "release save-isolation proof"
       ],
       "compileEvidence": "Integrated candidate 9fe8b263 compiled SurvivalGameEditor and SurvivalGame Development successfully."
@@ -79,8 +79,10 @@
       "admissionBlockers": [
         "compile",
         "Unreal acceptance",
-        "UI gallery acceptance",
-        "Jenny player acceptance"
+        "UI gallery acceptance"
+      ],
+      "postDeliveryChecks": [
+        "Jenny player check"
       ]
     }
   ],

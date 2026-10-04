@@ -67,18 +67,19 @@ mine path and building work remain unselected. The lane is held to the active no
 
 - Final source checkpoint `f184744c0c2fc9927375ec560411d20b9517ab82` on
   `jennifergalley-hud-agent` is pushed but **not admitted**. Both selected source tasks are
-  implemented; compile, Unreal, UI gallery, and Jenny acceptance remain held. The lane used no
+  implemented; compile, Unreal, and UI gallery acceptance remain held. Jenny's manual player check
+  is post-delivery. The lane used no
   helpers, editor, build, automation, main, shortcut, or save work. The hard-wrap completeness
   diagnostic is included. Preserve Farming's three-use seed-hint retirement and the fishing mount;
   meaningful notice clocks remain, while quiet success and hotbar selection no longer erase notices.
   The high-effort bounded review found no source-risk issue in notice serial/timer behavior,
-  hint-learning, or the hard-wrap diagnostic; this is not compile, gallery, or player acceptance.
+  hint-learning, or the hard-wrap diagnostic; this is not compile or gallery acceptance.
 
 ## Travel Rest checkpoint
 
 - Checkpoint `b37b0070` on `jennifergalley-travel-rest-agent` is pushed but **not admitted**:
-  editor compile, independent review, and Jenny's player checks remain pending while game compilation
-  is held. Do not merge it yet.
+  editor compile and independent review remain pending while game compilation is held. Jenny's
+  manual player check is post-delivery. Do not merge it yet.
 - Five regression suites and the new 286-check TravelRest suite passed after a test-fixture
   Saturday/Sunday correction and isolated native retry. The approved optional travel record,
   transactional malformed/duplicate refusal, and no-save/bake-bump boundary remain in force.
@@ -141,8 +142,8 @@ doze; Sunday wait preserves authoritative energy drain and adds no rest grant.
   prior seed/crop work plus pole 1500, timed river/lake/sea fishing, and eight fish preparations,
   cards, glyphs, and gallery work. The lane reports native Simulation/Economy/Manor 3/3 and 1,036
   focused fishing checks passing; its handoff is `docs\handoff\farming-fishing-measured-02.md`.
-- Editor compile, visual/player acceptance, and the mandatory release-isolation proof remain
-  required. No heavy launch or real saves were touched. Preserve HUD pickup/name-toast removals and
+- Editor compile, automated visual acceptance, and the mandatory release-isolation proof remain
+  required. Jenny's manual player check is post-delivery. No heavy launch or real saves were touched. Preserve HUD pickup/name-toast removals and
   `QuietActionSerial`, along with Travel save hunks, during any later integration.
 - The local combined candidate `9fe8b263` compiled `SurvivalGameEditor` and `SurvivalGame`
   Development successfully in 176 seconds after a game-closed process check. This validates source
@@ -163,12 +164,12 @@ doze; Sunday wait preserves authoritative energy drain and adds no rest grant.
   `/Game/SurvivalGame/Environment/Props/FishingPole/SM_FishingPole`, was visible at unit scale, and
   its side capture showed its hand-mounted clearance. The editor closed immediately afterward.
   This proves the original pole import and held presentation only—not fish/dish art, fishing gameplay,
-  full visual/player acceptance, package readiness, or promotion.
+  full automated visual acceptance, package readiness, or promotion.
 
 ## Delivery decision
 
 The local pre-Fishing boundary `5e40dc30` isolates Travel and HUD source, but it is not a clean
-verified 9 PM delivery: Travel/HUD still lack runtime, gallery, Jenny acceptance, and the mandatory
+verified 9 PM delivery: Travel/HUD still lack runtime, gallery, and the mandatory
 real promotion containment proof. Fishing/Food also lacks the required original assets. Defer rather
 than package or promote a placeholder-art or incompletely verified slice.
 
@@ -185,7 +186,7 @@ runtime, save-isolation, and package gates.
   `measured02-runtime` preview profile. Estate PIE reached `worldReady` with no map errors.
 - `homestead.UIGallery focus-chest` reported `UI_GALLERY_READY focus-chest`; its capture shows the
   wrapped `Wide Winter Wool Storage` chest title and action within the HUD. This is one HUD gallery
-  state, not full gallery or player acceptance. The editor was then closed before Farming resumed
+  state, not full gallery acceptance. Jenny's manual player check is post-delivery. The editor was then closed before Farming resumed
   Cycles work.
 - The merged candidate reran `ReleaseSaveIsolationTests.ps1`: 15 disposable E:-scratch checks passed.
   This remains pre-launch fixture evidence only. Travel runtime and real candidate/rollback
