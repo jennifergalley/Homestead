@@ -1,0 +1,12 @@
+# Gameplay UI afternoon03
+
+- Build: `20261004-afternoon-03`; app session `3d3426ed-7f12-4245-ab69-dc66e8698418`, runtime `986d7db6-7ae4-4cee-a980-054664106056`.
+- Branch: `jennifergalley-gameplay-ui-agent`; worktree `E:\Repos\copilot-worktrees\SurvivalGame\jennifergalley-miniature-invention`. Baseline `490b9d22`, clean checkout and project file verified.
+- Actual observed model/effort: `gpt-6.1-sol` / `high` (local usage); configured context `default`, actual runtime context unverified. Hands-on slot 2; no editor slot, editor launched or package.
+- Scope/plans: [quit and Back](../../openspec/changes/refine-quit-and-back-equipment/tasks.md), [seed packets and Harvest](../../openspec/changes/individual-crop-seed-packets/tasks.md), [fishing gameplay](../../openspec/changes/animation-led-fishing-gameplay/tasks.md). Each has proposal, design, delta specs and two tasks; all pass strict CLI validation. Implementation not started.
+- Next: explicitly apply these three prepared changes, implement selected code, native-check and compile, then request focused risky logic/save review through the coordinator.
+- Existing reuse: `SetBackpackShown` and `backpack` section already preserve capacity; character `SetBackpackShown` exists. All seven seed identities exist; `Item::Seeds` is roots only. `ReconcileLayout` currently stacks gains; native capacity already counts each unit. `HomesteadActionHints::ShouldRetire` currently retires Harvest through the HUD filter.
+- Art contract: `HomesteadFishingPresentation.h`, `EHomesteadFishingPose`, `SetFishingPose`, `PlayFishingStrike`, `FishCastSplashes`, `FishCatchLifts`; Gameplay controller owns phase mapping and counter forwarding. Missing clips must not synthesize contact counters. Agreed seed icon keys are recorded in seed design. Art owns character header/clip/widget/icon changes.
+- Save impacts planned: quantity-one seed layout normalization preserving original ids/counts, same version/fields; no placements. Notify coordinator before ready. Never touch actual player save files.
+- Usage checkpoint: local events `71819..71924`, 18 calls, `75352570000` nano-AIU (75.35257 observed AIU), one model segment; later calls not captured. Build03 only, not build02. Integration03 owns complete export/allocation. This is not billing-reconciled credits.
+- Processes/scratch: none started or created. No task automation. No changes to Jenny's game, saves or shortcut.
