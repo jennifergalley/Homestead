@@ -312,6 +312,9 @@ def build(kit):
 - **Live render destination:** `build_prop(..., copy=True)` can leave `bpy.data.filepath` pointing
   to the prior proof `.blend`, so `render_beauty` writes its images there. Explicitly open the newly
   exported `.blend` before rendering; do not rely on the builder to update the active filepath.
+- **Live recipe dependencies:** `build_prop` reloads the kit and material modules, not a recipe's
+  custom imports. Explicitly `importlib.reload()` each custom dependency in the recipe before a live
+  build; otherwise a file hash can describe newer source while Blender still renders a cached graph.
 
 ## Rocks (Sierra Nevada granite)
 

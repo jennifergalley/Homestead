@@ -266,6 +266,12 @@ synthetic and **not** art/import-ready, with no save or gameplay changes. Its
 the unmatched-bump-control correction. Farming continues authorized independent meal realism/source
 work in slot 2; fish proofs and budgets stay held, with no re-review, probe, or Integration hands-on
 action assigned.
+Correction: the isolated food module was cached in live Blender, so `24500d2a`'s on-disk material
+hash did **not** prove the current graph. Its geometry/hash fixtures remain valid, but its skin/flesh
+nodes were older parameters and it remains inadmissible. Farming is adding recipe-owned
+`importlib.reload(food)`, shader source tags, and actual noise-scale fixtures before a fresh source
+review. The canonical lesson is that `build_prop` reloads kit/material modules only; custom recipe
+dependencies need explicit live reload.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
