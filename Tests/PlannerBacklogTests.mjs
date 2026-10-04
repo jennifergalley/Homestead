@@ -196,6 +196,34 @@ test("delivery registry marks shipped feedback without closing player acceptance
     assert.equal(await readFile(priorityPath, "utf8"), priorityBefore);
 });
 
+test("shipped builds use strict date-time labels sorted newest first and visibly flag invalid headings", async (t) => {
+    const root = await fixture(t);
+    await writeFile(join(root, "docs", "handoff", "builds.md"), [
+        "# Builds", "",
+        "## 2026-10-04 — 7:30 AM", "- Status: delivered", "- Ships:", "- Morning feature",
+        "## 2026-10-04 — 11:29 AM", "- Status: delivered", "- Build ID: measured02", "- Ships:", "- Shipped fish",
+        "## 2026-10-03 — 9 PM", "- Status: delivered", "- Ships:", "- Evening feature",
+        "## 2026-10-04 — 4 PM", "- Status: delivered", "- Ships:", "- Afternoon feature",
+        "## 2026-10-01 — early evening", "- Status: delivered", "- Ships:", "- Missing time",
+        "## 2026-10-04 — measured02 gameplay-first Shipping delivery", "- Status: delivered",
+        "## 2026-10-04 — 25:90 AM", "- Status: delivered",
+        "## 2026-02-30 — 9 PM", "- Status: delivered",
+        "## 2026-10-03 — 9 PM", "- Status: deferred", "- Ships:", "- Never shipped",
+    ].join("\n"));
+    const planner = await loadPlanner(root, Date.parse("2026-10-04T19:00:00Z"));
+    const shipped = planner.builds.entries.filter((build) => build.status === "delivered");
+    assert.deepEqual(shipped.slice(0, 4).map((build) => build.label), [
+        "2026-10-04 — 4:00 PM", "2026-10-04 — 11:29 AM", "2026-10-04 — 7:30 AM", "2026-10-03 — 9:00 PM",
+    ]);
+    for (const build of shipped.slice(4)) {
+        assert.equal(build.label, "Invalid shipment date/time");
+        assert.match(build.dataError, /Correct the build changelist/);
+        assert.equal(build.time, null);
+    }
+    assert.deepEqual(planner.costView.shipped.map((build) => build.label), shipped.map((build) => build.label));
+    assert.ok(!planner.costView.shipped.some((build) => build.features.includes("Never shipped")));
+});
+
 test("editing preserves identity, screenshot, other entries, document metadata and priority bytes", async (t) => {
     const root = await fixture(t);
     const first = (await addBacklogEntry(root, { title: "First", image: { dataUrl: TINY_PNG_DATA_URL } })).value;

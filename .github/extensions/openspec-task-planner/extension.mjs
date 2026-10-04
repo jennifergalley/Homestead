@@ -18,7 +18,7 @@ session = await joinSession({
                 description: "Rescan OpenSpec tasks and return progress and recorded build costs.",
                 handler: async () => {
                     const planner = await loadPlanner(projectRoot);
-                    return { featureCount: planner.features.length, ...planner.summary, accounting: planner.accounting };
+                    return { featureCount: planner.features.length, ...planner.summary, accounting: planner.accounting, costView: planner.costView };
                 },
             }],
             open: async (ctx) => {
