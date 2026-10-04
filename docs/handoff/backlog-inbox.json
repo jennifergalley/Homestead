@@ -103,6 +103,30 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-04T01:49:00.996Z"
+    },
+    {
+      "id": "jenny-mut6p856-a7gysc",
+      "title": "Chest names should be displayed more prominently",
+      "description": "The font size for the chest name is quite small on the interaction hint. Please make it larger.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T02:10:53.946Z"
+    },
+    {
+      "id": "jenny-mut6t8g6-mcldh5",
+      "title": "Path to the Mine from the Manor",
+      "description": "There should be a dedicated path through the woods to the mine from the manor, just as there is to the lake through the trees",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T02:14:00.966Z"
+    },
+    {
+      "id": "jenny-mut6zr63-iu7hm9",
+      "title": "Build an asset for the Mine - a large stone building I can enter, with a trapdoor in the floor that leads into the Mine",
+      "description": "Even if the trapdoor is just a placeholder for now, the building for the mine should exist in the world. I should be able to go inside the main room of the first floor, see rocks piled in a corner, a desk, an oil lamp on the desk that let's say burns infinitely but can't be picked up, and a trapdoor in the floor that will later on lead down into the mine.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T02:19:05.163Z"
     }
   ]
 }
