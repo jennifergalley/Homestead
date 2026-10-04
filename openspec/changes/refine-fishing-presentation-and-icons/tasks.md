@@ -11,6 +11,7 @@
   - Fishing clip, tackle, bite cue and glyphs (task 1.1).
   - 4 PM seed-packet gate on Gameplay 4f8d8f9d: PASS. All 7 crops show distinct non-stacking packets in the hotbar and pack.
   - Fence post body restored (`3e994653`; the recipe's mortise boolean had collapsed it).
-- Next: PIE-gate Gameplay's 9 PM candidate once it contains `b6ee4ff3` and the lane editor slot is free. Check cast/bite/strike/catch/miss/cancel and the pole plus six fish glyphs, then send `[ready]`.
+  - Fish glyphs tilted 22° nose-up at 1.12x so they fill the slot like the tools and crops; salmon spots are dots (`69115cdc`, UBT clean). Gameplay candidate `e735bcb4` has everything through `6e2c6334`; asked it to merge `69115cdc`.
+- Next: PIE-gate Gameplay's 9 PM candidate once it contains `69115cdc` and the lane editor slot is free (after the 4 PM smoke). Check cast/bite/strike/catch/miss/cancel and the pole plus six fish glyphs, then send `[ready]`.
 - Re-author the clip with `Content/Python/homestead_agent/fish_cast.py` (MetaHuman Control Rig, 30 fps). The phase constants live in `HomesteadFishingPresentation.h`; change both together.
 - Evidence and scratch are in `E:\CopilotScratch\ac7339b4-...\` (gate4f8_*.png, fence_pie.png). No editor is running.
