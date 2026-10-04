@@ -5,9 +5,28 @@ Build `20261003-measured-02`; Integration runtime
 `52572922-09fd-4287-85c5-840ceec6d895`, branch
 `jennifergalley-integration-agent-68e`, worktree
 `jennifergalley-studious-goggles`. Runtime model is GPT-5.6 Terra; reasoning effort and
-actual/configured context tiers are unknown.
+actual context tier is unknown; launch configuration was medium effort/default context.
 
-## Admission checkpoint
+## Current coordination receipt (2026-10-03, 20:49 local)
+
+- Full game delivery is deferred. `5ec7c7a8` moves the eleven pending game cards to the
+  Oct 4 7:30 AM target, not a promise. No overnight/signoff work or automation.
+- Planner feedback editing is separately delivered at `3846476d`, refreshed in the live canvas
+  and hidden/unscheduled. Its original OpenSpec player check remains pending.
+- Candidate source, original pole import and evidence are retained on the Integration branch,
+  not admitted to main as a game delivery. Combined native 21/21 and editor/Development
+  compiles passed; six original fish and sixteen dishes remain incomplete.
+- Use the final reviewed release-route guard on the Integration branch, not the earlier main
+  checkpoint; its later FParse argument-boundary fixes and fifteen fixture checks are required.
+- The original pole is imported, but asset-owner grip/axes/clearance review and remaining
+  runtime/release-local save-containment proof are still required. Jenny approved tip-line
+  construction; a reel is outside this batch.
+- Jenny explicitly ended the playtime compilation hold at 20:00. The current Estate shortcut,
+  save files and both release-holding worktrees remain untouched/protected.
+- Subsequent source/art receipts are on the Integration branch; the following notes retain
+  their historical preflight/admission context. Player acceptance is post-delivery.
+
+## Historical preflight and admission notes
 
 - **Gameplay-first Shipping decision (09:44 local, Oct 4):** Jenny superseded the earlier
   all-art-perfect/sixteen-meal hold. Admit the existing original pole, six original fish, and

@@ -104,6 +104,7 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Evening sleep lasts until the earlier of dawn or 6 AM.
 - Sunday General Store waiting advances to Monday opening.
 - Edit feedback titles, descriptions and screenshots directly in the planner.
+- Larger chest names and concise, non-overlapping HUD notices.
 - Scope: the fishing feature and its two feedback cards are one implementation, not duplicate work.
 - Timing: authorized 18:55 local. The fallback is a **target** for 2026-10-04 7:30 AM, not a
   promise; no overnight work resumes after signoff without Jenny's next message.

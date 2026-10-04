@@ -222,17 +222,17 @@
       "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
       "task": "coordinator-observed-usage-cutoff",
       "category": "overhead",
-      "through": "2026-10-04T18:14:52.958Z",
+      "through": "2026-10-04T18:31:54.869Z",
       "model": "gpt-6.1-sol",
       "reasoningEffort": "high",
       "contextTier": null,
       "usage": {
-        "apiCalls": 405,
-        "aiu": 1240.72018,
-        "modelBreakdown": "403 gpt-6.1-sol high; 2 gpt-6.1-sol effort unknown"
+        "apiCalls": 424,
+        "aiu": 1302.36773,
+        "modelBreakdown": "422 gpt-6.1-sol high / 1233.26784 AIU; 2 gpt-6.1-sol effort unknown / 69.09989 AIU"
       },
-      "contextEvidence": "Provisional observed cutoff only; actual context and final billing reconciliation remain unknown.",
-      "boundaryEvidence": "Coordinator accounting boundary. Do not add child review usage to this segment."
+      "contextEvidence": "Provisional observed cutoff only; actual context and final billing reconciliation remain unknown. Post-cutoff tail is unknown and must not be fabricated.",
+      "boundaryEvidence": "Coordinator accounting boundary. Do not add child review usage to this segment; bb415168-dbc2-4991-a8d5-4dfd7891e444 remains a separate 7-call / 22.91985-AIU review segment."
     },
     {
       "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
