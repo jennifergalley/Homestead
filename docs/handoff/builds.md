@@ -15,25 +15,28 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - This is the only fishing code or asset admission for the 9 PM slot; it is excluded from the 4 PM
   build.
 
-## 2026-10-04 — 4:00 PM
+## 2026-10-04 — 2:05 PM
 
 - Build ID: `20261004-afternoon-03`
-- Status: planned
-- Authorization: Jenny's 11:59:23 local message; target 4:00 PM local.
-- Selected scope: compact Quit dialog; Back-slot rucksack visibility without capacity loss; wider
-  wildflowers outside farm, manor ruins, and tilled ground; visible broken fenceposts until the
-  complete fence is dismantled; crop-specific non-stackable seed packets/end-product icons; and a
-  persistent ripe-crop `[E] Harvest <crop>` hint unless weeding takes precedence. Fishing code and
-  assets are excluded.
-- Accounting: starts at `2026-10-04T18:59:23Z` in
-  `accounting/afternoon-03-allocation.json`. Measured02 remains closed at 2,477 calls /
-  11,439.97802 observed AIU; its unknown post-capture tail does not transfer to this build.
-- Runtime recovery: a fresh main-checkout Shipping package was installed at
-  `E:\Repos\SurvivalGame\Build\Windows` after Development UBT, a fresh cook, staged-package and
-  copied-save hash checks, release-save isolation, guarded EstateSmoke/ToolRepeat, and package-local
-  F5/F9 verification. `Homestead Estate.lnk` now targets that package with its existing icon. This
-  restores the lost active release only; it does not ship or remove any selected 4 PM feedback.
-- Player acceptance: no player checks are marked accepted by this scheduling record.
+- SHA: `c1d5351f23f69e9f12bc8f274fb1ac101fd45286`
+- Status: delivered
+- Ships:
+- Quit is compact and matches Settings.
+- The Back slot shows Leather Rucksack or None without changing capacity.
+- Crop-named one-slot seed packets have their own icons.
+- Ripe crops always show their named Harvest hint unless weeding comes first.
+- Wildflowers cover more field, wood, and water edges while excluding farm, manor, and tilled ground.
+- FarmFence posts remain visible until the complete fence is dismantled.
+- Fishing code and assets are excluded; fishing remains planned for 9 PM.
+- Verification: Development cook/reuse-stage Shipping package, 31 package hashes, 29 copied
+  package-local Saved hashes, release-save isolation, guarded Shipping EstateSmoke and ToolRepeat,
+  and normal package-local F5/F9 all passed. The promoted Shipping executable SHA-256 is
+  `98DD0BD5D90038F110F2442E64FE11292BA3C02C84533193DD8ADB965DE3E943`; the prior recovery package
+  remains at `E:\Repos\SurvivalGame\Build\Windows-20261004-recovery`.
+- Promotion: 2:05:09 PM local to `Homestead Estate.lnk`, preserving its icon and package-local
+  `-UserDir`. Player acceptance remains pending Jenny's playtest.
+- Accounting: `accounting/reports/20261004-afternoon-03.json` retains observed local runtime AIU
+  and its explicit mixed-work, context, tail, and billing limitations. Measured02 remains closed.
 
 ## 2026-10-04 — 11:29 AM
 

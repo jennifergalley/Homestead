@@ -49,36 +49,12 @@
       "createdUtc": "2026-10-04T02:19:05.163Z"
     },
     {
-      "id": "jenny-mutd9wre-js2x1r",
-      "title": "Differentiate seeds by plant type in the inventory",
-      "description": "instead of just saying Seeds, it should say Roots seeds, Carrot seeds, Turnip seeds, etc., they should take up individual inventory slots and not be stackable, and they should all have distinct icons with a picture of their end product on the seed packet. There shouldn't be any generic \"Seeds\" that doesn't tell me what I'm growing",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T05:14:56.666Z"
-    },
-    {
       "id": "jenny-mutde36c-gtsw0n",
       "title": "I should be able to Disassemble, Replace Fence around the Farm",
       "description": "I should be able to craft new wooden fence parts (sections of fence and gates) in the Build menu and place them around the farm, and I should be able to disassemble the broken down fence that currently exists around the farm first so I can replace it",
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-04T05:18:11.604Z"
-    },
-    {
-      "id": "jenny-mutdjl7e-nzl7lh",
-      "title": "Broken down fenceposts are invisible",
-      "description": "The broken down fence posts are invisible, leaving horizontal pieces of fence floating in midair. The fenceposts should be visible and not disappear unless I disassemble the whole thing",
-      "imageFile": "jenny-mutdjl7e-nzl7lh-c4147f18-37f2-4828-8a52-6b0ceb13f266.png",
-      "imageMime": "image/png",
-      "createdUtc": "2026-10-04T05:22:28.25Z"
-    },
-    {
-      "id": "jenny-mutdnje8-0et783",
-      "title": "Wildflowers everywhere",
-      "description": "I really enjoy the wildflowers along my walk to the lake, but I think we need them to be more widespread throughout the map. I'd like wildflowers to be essentially everywhere, along lakes and rivers, under the trees of the woods, and in open fields. The only place I really don't want them is in the farm (or anywhere I start tilling soil), or in the ruins of the broken down manor.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T05:25:32.528Z"
     },
     {
       "id": "jenny-mutdt417-zj976u",
@@ -97,22 +73,6 @@
       "createdUtc": "2026-10-04T05:31:44.127Z"
     },
     {
-      "id": "jenny-mutdzpsx-76dag4",
-      "title": "Toggle Backpack visibility",
-      "description": "I should be able to toggle the visibility of the backpack in my character's Equipped slots in my inventory. For a new \"Back\" slot under the \"Equipped Slots\", I should be able to select Leather Rucksack or None, with a hint making it clear that toggling off the pack's visibility doesn't remove the inventory space upgrade",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T05:35:00.705Z"
-    },
-    {
-      "id": "jenny-muteesvp-3bo5xf",
-      "title": "Quit Game menu text is too large",
-      "description": "Please make the size of the font and buttons of the Quit Game / Save and Quit / Quit without saving menu slightly smaller, to match the font size of the settings menu would be good, so it feels cohesive",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T05:46:44.533Z"
-    },
-    {
       "id": "jenny-muu6k1g1-qr5dx2",
       "title": "Fishing pole and fish icons need refinement",
       "description": "The fishing pole and fish icons in the inventory / hotbar need refinement to match the quality and style of the other tools and finished crops. Fishing also needs an animation of her casting the line out, and the animations should drive the fishing / catching mechanics, not a text box with a progress bar that disappears too fast to read. Draw inspiration from how Coral Island does it. There should also be more randomness to the fishing animation, so it takes a random amount of time for a fish to bite, and the exact moment to click to catch the fish should involve randomness too so it becomes a minigame.",
@@ -120,14 +80,6 @@
       "imageMime": null,
       "createdUtc": "2026-10-04T18:54:38.161Z",
       "updatedUtc": "2026-10-04T18:56:02.763Z"
-    },
-    {
-      "id": "jenny-muu6upvs-l7a0l6",
-      "title": "Pointing at a harvestable crop should always display \"[E] Harvest <crop>\"",
-      "description": "Unless I also need to weed the square, right now when I point at a harvestable crop, it does not give me an interaction hint that I can harvest. It should always show [E] Harvest <crop> when the crop is ready to harvest and I point at the square.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T19:02:56.392Z"
     }
   ]
 }

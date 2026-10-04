@@ -23,13 +23,7 @@
   ],
   "nextBuild": [],
   "slots": {
-    "backlog:jenny-muu6k1g1-qr5dx2": "2026-10-04 16:00",
-    "backlog:jenny-muteesvp-3bo5xf": "2026-10-04 16:00",
-    "backlog:jenny-mutdzpsx-76dag4": "2026-10-04 16:00",
-    "backlog:jenny-mutdnje8-0et783": "2026-10-04 16:00",
-    "backlog:jenny-mutdjl7e-nzl7lh": "2026-10-04 16:00",
-    "backlog:jenny-mutd9wre-js2x1r": "2026-10-04 16:00",
-    "backlog:jenny-muu6upvs-l7a0l6": "2026-10-04 16:00"
+    "backlog:jenny-muu6k1g1-qr5dx2": "2026-10-04 21:00"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -55,7 +49,13 @@
     "backlog:jenny-mut5legr-oba2rd",
     "add-shore-and-river-fishing",
     "backlog:jenny-mus1kfmm-ayz6jx",
-    "unify-hud-notices"
+    "unify-hud-notices",
+    "backlog:jenny-muteesvp-3bo5xf",
+    "backlog:jenny-mutdzpsx-76dag4",
+    "backlog:jenny-mutdnje8-0et783",
+    "backlog:jenny-mutdjl7e-nzl7lh",
+    "backlog:jenny-mutd9wre-js2x1r",
+    "backlog:jenny-muu6upvs-l7a0l6"
   ],
-  "updated": "2026-10-04T19:03:39.074Z"
+  "updated": "2026-10-04T21:07:31.626Z"
 }

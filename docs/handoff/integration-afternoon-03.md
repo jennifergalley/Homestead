@@ -136,3 +136,30 @@ reachable from `main` (branch-only count zero); no push, reset, or deletion was 
   and `911851260000` nano-AIU, with 216 observed GPT-5.6 Terra/medium calls and two
   reasoning-telemetry-incomplete calls. Its configured context is default; actual context and any
   later tail remain unknown.
+
+## Afternoon-03 delivery receipt
+
+- Exact admitted source is `c1d5351f23f69e9f12bc8f274fb1ac101fd45286`: Art's FarmFence-only
+  repair, the Gameplay final-tree delta, and Environment's non-duplicate final-tree delta. The
+  Fishing ancestry and files were excluded; Fishing remains the planned 9 PM admission.
+- A fresh low-memory Development cook/package completed in 2m30s. Its exact containers supplied
+  the editor-free Shipping reuse-stage at
+  `Build\Releases\20261004-afternoon-03\shipping-candidate-4pm\Windows`. The installed package at
+  `E:\Repos\SurvivalGame\Build\Windows` has executable SHA-256
+  `98DD0BD5D90038F110F2442E64FE11292BA3C02C84533193DD8ADB965DE3E943`; 31 package files and 29
+  package-local Saved files were hash-verified. The earlier verified recovery package remains at
+  `E:\Repos\SurvivalGame\Build\Windows-20261004-recovery`.
+- Release-save isolation, installed Shipping EstateSmoke, installed Shipping ToolRepeat, and normal
+  package-local F5/F9 passed. F5 replaced the candidate manual save from
+  `5770D2CD97F7E6B33E9A09C3DB64A9F23C7E62D47A9FD4796F18E40704C03A47` to
+  `90F770475F9948E3BD0A7691F0C7E2F989E9FEC7D2C20DF3C9E3C1165258B3ED`; its `.bak` preserved the
+  former payload, F9 stayed alive, and the rollback save tree was unchanged.
+- At 2:05:09 PM local, `Homestead Estate.lnk` was promoted to
+  `E:\Repos\SurvivalGame\Build\Windows\SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe`
+  with package-local `-UserDir="E:\Repos\SurvivalGame\Build\Windows\SurvivalGame"` and its existing
+  icon preserved. Jenny's player acceptance remains pending.
+- Six delivered feedback records are preserved under the `20261004-afternoon-03` receipt in
+  `backlog-archive.json` and removed from active priority, inbox, and Markdown surfaces. The
+  observed-usage report is deliberately partial: Art's fishing work belongs to evening, Gameplay
+  mixed fishing/shared work is unallocated, and actual context tiers, external billing, and
+  post-capture work remain unknown.

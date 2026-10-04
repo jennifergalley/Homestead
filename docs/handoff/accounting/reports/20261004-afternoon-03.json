@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "buildId": "20261004-afternoon-03",
+  "authorizedAt": "2026-10-04T18:59:23Z",
+  "generatedAt": "2026-10-04T21:05:09.2150612Z",
+  "status": "partial",
+  "unit": "nano-AIU",
+  "displayUnit": "AIU",
+  "nanoPerAiu": "1000000000",
+  "unitEvidence": "Local assistant_usage_events per-call values through delivery promotion; not reconciled to external billing.",
+  "allocationPolicy": "Includes only directly attributable orchestration, Environment, and Integration work. Art fishing work transfers to evening; Gameplay mixed fishing/shared work is intentionally unallocated rather than estimated.",
+  "legacy": {
+    "status": "unattributed",
+    "recordedNanoAiu": null,
+    "description": "Measured02 is closed separately and earlier implementation is excluded rather than counted as zero."
+  },
+  "coverage": {
+    "finalCapture": true,
+    "cutoff": "2026-10-04T21:05:09.2150612Z",
+    "missingSessions": [
+      "ac7339b4-84f7-49c0-8ec2-3d51d2b86730 (fishing-only, transferred to evening)",
+      "986d7db6-7ae4-4cee-a980-054664106056 (mixed fishing/shared work, unallocated)"
+    ],
+    "limits": [
+      "Actual runtime context tiers are unknown.",
+      "Post-promotion work and external billing are outside this capture.",
+      "This is a partial delivery allocation, not a fabricated split of mixed work."
+    ],
+    "billingReconciliation": "not supplied"
+  },
+  "totals": {
+    "calls": 657,
+    "recordedCalls": 657,
+    "estimatedCalls": 0,
+    "ratedCalls": 0,
+    "unknownCostCalls": 0,
+    "firstEventId": 71814,
+    "lastEventId": 73141,
+    "since": "2026-10-04T18:59:27.299Z",
+    "until": "2026-10-04T21:05:08.092Z",
+    "recordedNanoAiu": "3856520520000",
+    "estimatedNanoAiu": "0",
+    "tokenCostsNanoAiu": {
+      "input": "0",
+      "cache_read": "0",
+      "cache_write": "0",
+      "output": "0"
+    },
+    "otherTokenCostsNanoAiu": "0",
+    "recordedMinusRatedNanoAiu": null
+  },
+  "segments": [
+    {
+      "task": "afternoon-03-orchestration",
+      "category": "overhead",
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "calls": 248,
+      "recordedCalls": 248,
+      "recordedNanoAiu": "1953878960000",
+      "firstEventId": 71814,
+      "lastEventId": 73139,
+      "since": "2026-10-04T18:59:27.299Z",
+      "until": "2026-10-04T21:04:59.935Z",
+      "estimatedCalls": 0,
+      "ratedCalls": 0,
+      "unknownCostCalls": 0,
+      "estimatedNanoAiu": "0",
+      "tokenCostsNanoAiu": {
+        "input": "0",
+        "cache_read": "0",
+        "cache_write": "0",
+        "output": "0"
+      },
+      "otherTokenCostsNanoAiu": "0",
+      "recordedMinusRatedNanoAiu": null
+    },
+    {
+      "task": "environment-feedback-slices",
+      "category": "implementation",
+      "sessionId": "ff61de39-9742-45a8-8c6d-03512cd76224",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "calls": 114,
+      "recordedCalls": 114,
+      "recordedNanoAiu": "661022400000",
+      "firstEventId": 71820,
+      "lastEventId": 73067,
+      "since": "2026-10-04T19:07:25.740Z",
+      "until": "2026-10-04T20:53:29.630Z",
+      "estimatedCalls": 0,
+      "ratedCalls": 0,
+      "unknownCostCalls": 0,
+      "estimatedNanoAiu": "0",
+      "tokenCostsNanoAiu": {
+        "input": "0",
+        "cache_read": "0",
+        "cache_write": "0",
+        "output": "0"
+      },
+      "otherTokenCostsNanoAiu": "0",
+      "recordedMinusRatedNanoAiu": null
+    },
+    {
+      "task": "afternoon-03-integration",
+      "category": "overhead",
+      "sessionId": "64540925-e1b6-4766-ac1f-f2dc42f8aa36",
+      "model": "gpt-5.6-terra",
+      "reasoningEffort": "medium",
+      "calls": 295,
+      "recordedCalls": 295,
+      "recordedNanoAiu": "1241619160000",
+      "firstEventId": 71822,
+      "lastEventId": 73141,
+      "since": "2026-10-04T19:07:27.739Z",
+      "until": "2026-10-04T21:05:08.092Z",
+      "estimatedCalls": 0,
+      "ratedCalls": 0,
+      "unknownCostCalls": 0,
+      "estimatedNanoAiu": "0",
+      "tokenCostsNanoAiu": {
+        "input": "0",
+        "cache_read": "0",
+        "cache_write": "0",
+        "output": "0"
+      },
+      "otherTokenCostsNanoAiu": "0",
+      "recordedMinusRatedNanoAiu": null
+    }
+  ]
+}
