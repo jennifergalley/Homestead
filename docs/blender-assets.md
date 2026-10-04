@@ -301,6 +301,11 @@ def build(kit):
   `space.shading.type = 'MATERIAL'` is not a valid shading enum there (only `WIREFRAME`, `SOLID`,
   and `RENDERED`). Set `scene.render.engine = 'BLENDER_EEVEE'` first, then switch the viewport to
   material preview.
+- **Open jaw meshes:** a generated jaw volume can invert its skin normals during repair. Explicitly
+  wind the recipe's open-jaw surface, and conform eyes to `jaw_surface` rather than placing them
+  independently.
+- **Live `temp_override`:** use the active screen owned by a real Blender window; do not pass an
+  arbitrary member of `bpy.data.screens`, which may not belong to an owning window.
 
 ## Rocks (Sierra Nevada granite)
 

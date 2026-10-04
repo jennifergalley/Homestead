@@ -189,6 +189,12 @@ Refinement also established that the plain one-lobe prop shader cannot represent
 film. Farming will add an opt-in fish-only ClearCoat parent and import hook, without changing an
 existing parent; its source bake must preserve the same film. Keep fish import/admission held until
 that ready checkpoint arrives, then verify the new parent compiles during the owned Unreal import.
+Later source-only checkpoint `4148ab7c94026f70b577ada0488069c8a22fb8aa` preserves anatomy/film
+work and four viewed 4K drafts but is still WIP: coordinator art direction, full-family output, and
+import are held. It changes no UE, gameplay, or saves. Its fish-only ClearCoat import contracts pass
+offline; actual UE parent compile remains Integration's future gate. Reusable Blender fixes are
+documented: explicitly wind open-jaw repair volumes, conform eyes to `jaw_surface`, and use the
+active screen owned by a Blender window for `temp_override`.
 
 ### Narrow overnight exception
 
