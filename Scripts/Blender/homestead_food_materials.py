@@ -340,3 +340,29 @@ def strawberry_achene(name: str) -> bpy.types.Material:
     ]))
     graph.set("Roughness", .47)
     return graph.mat
+
+
+def stewed_root(name: str, seed: float, flesh: bool, turnip: bool = False) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    shifted = graph.vmath("ADD", point, (seed * .021, seed * .039, seed * .053))
+    tissue = graph.noise(shifted, scale=180, detail=3).outputs["Fac"]
+    if turnip:
+        colours = [(.18, (.39, .35, .24)), (.5, (.48, .44, .33)),
+                   (.82, (.54, .50, .39))]
+    elif flesh:
+        colours = [(.18, (.24, .18, .086)), (.5, (.32, .25, .13)),
+                   (.82, (.39, .32, .19))]
+    else:
+        colours = [(.18, (.045, .023, .009)), (.5, (.095, .055, .023)),
+                   (.82, (.14, .087, .040))]
+    graph.set("Base Color", graph.ramp(tissue, colours, "EASE"))
+    fibres = graph.noise(graph.scale(shifted, (1, .10, 1)),
+                        scale=1250, detail=3).outputs["Fac"]
+    graph.set("Roughness", graph.remap(tissue, .2, .8, .48, .32))
+    graph.set("Subsurface Weight", .065 if flesh or turnip else .02)
+    graph.set("Subsurface Radius", (.0014, .0010, .0005))
+    graph.set("Subsurface Scale", .05)
+    graph.set("Normal", graph.bump(fibres, strength=.23, distance=.000065))
+    return graph.mat

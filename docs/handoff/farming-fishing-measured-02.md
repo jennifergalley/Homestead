@@ -16,10 +16,11 @@ editor/game compile and 21/21 native suites passed; original-art and
 release-save-isolation admission gates remain.
 
 Current source checkpoint: original potatoes, roasted turnips, stewed carrots,
-herbed broad beans, cabbage/potato stew, berry compote and strawberry compote have separate
-serving/edible-portion WIP, NOT art/import acceptance. Nine dishes, all meal
+herbed broad beans, cabbage/potato stew, berry compote, strawberry compote and
+root vegetable hotpot have separate serving/edible-portion WIP, NOT art/import acceptance.
+Eight fish preparations, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original strawberry compote/spoon WIP; recipe/source receipts below are frozen,
+visible review is original root hotpot/spoon WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -963,6 +964,51 @@ automation, fish probe, bake/budget/render-helper, gameplay/save/enum/version/
 placement, UE/UBT/UAT or shortcut changes. Build02-only provisional snapshot:
 759 calls through event71051, 4,492,791,490,000 recorded nano-AIU; subsequent calls
 and terminal response still need recapture. Not reconciled billing credits.
+
+### Original root vegetable hotpot source milestone
+
+New root_vegetable_hotpot.py authors ten fibrous brown-skinned root segments,
+six curved white-turnip quarter sectors, twenty-four Meadow Herb flecks, cooking
+broth and a new 16.6cm two-lug earthenware crock. Exact Roots2/Turnip1/Flowers1/
+Kindling1; no potato/carrot/meat/oil/milk. Read root-vegetable and turnip reference
+pages; generic wild-root anatomy deliberately does not assign an uncatalogued
+species. Authored piece counts/size are presentation, not stock-to-weight rules.
+New 17cm generated maple spoon carries a separate root/turnip bite with seasoning.
+No prior crop/game/meal mesh or photographic texture reused.
+
+Root end sections use the nonradial cut helper; turnip cap boundaries retain the
+exact subdivided knife-cut vertices. Cooked 0.8mm edge rounding, shallow real
+longitudinal root ridges and curved turnip profiles replace sharp cylindrical
+forms. Partially immerse pieces in 32mm broth; solid supports remain the crock
+and other food, not liquid. Repositioning spoon bites prevents the turnip being
+forced onto the root, reducing its assembly height from 20mm to 14.2mm without
+weakening fixtures. The first herb fixture mistakenly expected unrelated noise
+scales; corrected it to the actual unchanged chopped-herb graph (650/2200).
+
+Current serving/portion: 54,400/12,106 triangles,
+[19.36,16.6,5.71]/[2.62,17.0,1.42]cm; 44/5 closed islands. Closed/positive-volume,
+finite/noncollapsed coordinates, UV/pivot/unit transforms, dimension/budget,
+current executed-shader and sampled crock/spoon clearance checks pass. Sampled
+spoon hollow is 2.764mm, above the original scaled 2.335mm threshold. This is not
+full face-intersection, gravity/contact/stability, hand/finger/wrist/mouth proof.
+Four final 3840x2160/192-sample OPTIX frames viewed; source/two FBX/report/four
+frames and reopened copied-source receipt frozen in RootVegetableHotpotSourceProof.
+
+Still regular stump/stone-like cuts, overly smooth tissue and flat/cloudy broth;
+clay/wood too procedural. HELD, not art/import ready. Eight meal source prototypes
+(all eight crop recipes), eight fish preparations unstarted, zero art approvals.
+Estimate >12 further hands-on source/refinement hours, plus unknown held fish,
+bake/imagery/eating/UE gates; not a morning candidate or release ETA.
+
+Sixteen prior shader and six geometry definitions remain AST-identical to
+c82c482d. Earlier frozen proofs remain tied to their original commit/library SHA,
+not recaptured or promoted. Separate framed EEVEE Material review preserved on
+E: as Root-hotpot-source-held-visible.blend. Actual gpt-6.1-sol/high, launch
+default/actual context unknown; no agents/automation/fish probe/bake/budget/
+render-helper/gameplay/save/enum/version/placement/UE/UBT/UAT/shortcut changes.
+Build02-only provisional snapshot: 775 calls through event71078,
+4,549,225,690,000 recorded nano-AIU; later calls/terminal response need recapture.
+No reconciled billing-credit claim.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

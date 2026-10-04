@@ -1,0 +1,433 @@
+{
+  "schema": 1,
+  "name": "RootVegetableHotpotSource",
+  "description": "Held original root-and-turnip hotpot and food-bearing maple spoon.",
+  "collision": "none",
+  "triangle_budget": 80000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/root_vegetable_hotpot.py",
+  "source_sha256": "38339b9bb006e4e473e74c1e182232cc33e176fd6f3b47e79ac3b1344df9ea1c",
+  "provenance": "Original root/quarter-sector turnip lofts, closed herb patches, generated crock/lugs/broth/spoon; procedural PBR.",
+  "meshes": {
+    "SM_RootVegetableHotpot": {
+      "vertices": 27288,
+      "triangles": 54400,
+      "size_cm": [
+        19.36,
+        16.6,
+        5.71
+      ],
+      "materials": [
+        {
+          "name": "M_RootHotpotCrock",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.79
+        },
+        {
+          "name": "M_RootHotpotBroth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.22
+        },
+        {
+          "name": "M_RootHotpotWildRoot0Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot0Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot1Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot1Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot2Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot2Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot3Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot3Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot4Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot4Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot5Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot5Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot6Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot6Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot7Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot7Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot8Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot8Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot9Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotWildRoot9Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotTurnip0",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotTurnip1",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotTurnip2",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotTurnip3",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotTurnip4",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotTurnip5",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotMeadowHerbs",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.58
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.02,
+          0.03500597136002034
+        ],
+        "detail_distance": 0.34,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_RootVegetableHotpot.fbx",
+      "sha256": "3b8175f26e8d29905df5f19c70d3a6597f5a82e2de0c15a7e3f797fbcee43019",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RootVegetableHotpot_hero.png",
+          "detail": "beauty_SM_RootVegetableHotpot_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RootVegetableHotpotPortion": {
+      "vertices": 6063,
+      "triangles": 12106,
+      "size_cm": [
+        2.62,
+        17.0,
+        1.42
+      ],
+      "materials": [
+        {
+          "name": "M_RootHotpotMapleSpoon",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotSpoonWildRootSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotSpoonWildRootFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotSpoonTurnip",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RootHotpotMeadowHerbs",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.58
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.05092307993769646,
+          0.008478022007271647
+        ],
+        "detail_distance": 0.27,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_RootVegetableHotpotPortion.fbx",
+      "sha256": "56ffe1d3b19d37e9ed59e7a1628bd7450483ec76cb88f7c6366d0d2f05e0982b",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RootVegetableHotpotPortion_hero.png",
+          "detail": "beauty_SM_RootVegetableHotpotPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "RootVegetableHotpot",
+  "ingredients": {
+    "Roots": 2,
+    "Turnip": 1,
+    "Flowers": 1,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "d891ba738802c02d5aee2244e9b4538dbefd691c635640e12a9c99d71ef5fb44",
+  "food_material_source_sha256": "cf9d066c015f855955f7ea2c80b5bb6622ec2449d98ffcc5f5a9a089b8772886"
+}

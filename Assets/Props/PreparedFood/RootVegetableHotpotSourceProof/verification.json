@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "RootVegetableHotpot",
+  "recipe_sha256": "38339b9bb006e4e473e74c1e182232cc33e176fd6f3b47e79ac3b1344df9ea1c",
+  "food_material_source_sha256": "cf9d066c015f855955f7ea2c80b5bb6622ec2449d98ffcc5f5a9a089b8772886",
+  "copied_files_sha256": {
+    "SM_RootVegetableHotpot.fbx": "3b8175f26e8d29905df5f19c70d3a6597f5a82e2de0c15a7e3f797fbcee43019",
+    "beauty_SM_RootVegetableHotpot_hero.png": "d268ddb872d1203bb7e0d110a263b1a2df87bbd056c352e691e853ec6b66acbd",
+    "beauty_SM_RootVegetableHotpot_detail.png": "a7747948eb527f7038729389ba008a541469f72e7a386e255fd3a1569572f180",
+    "SM_RootVegetableHotpotPortion.fbx": "56ffe1d3b19d37e9ed59e7a1628bd7450483ec76cb88f7c6366d0d2f05e0982b",
+    "beauty_SM_RootVegetableHotpotPortion_hero.png": "19a0d84143fd972c706192d26187984f4ea21e7951957283392b6e7ab91706c9",
+    "beauty_SM_RootVegetableHotpotPortion_detail.png": "74dad4cfa199a58296c55227d9044da1ec3ef0cb70538a21d64b3532ac2788de",
+    "RootVegetableHotpotSource.blend": "7a160a33ab8dc5da98755214d1579e5e6698b15248c40976ea79f723b8c952c5"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}
