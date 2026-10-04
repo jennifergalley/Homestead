@@ -306,6 +306,9 @@ def build(kit):
   independently.
 - **Live `temp_override`:** use the active screen owned by a real Blender window; do not pass an
   arbitrary member of `bpy.data.screens`, which may not belong to an owning window.
+- **Portable Blender textures:** `bpy.ops.file.make_paths_relative(relative_remap=True)` can retain
+  absolute image paths. Repoint images explicitly to `//Textures/<file>` and reopen the `.blend`
+  before treating the asset as portable.
 
 ## Rocks (Sierra Nevada granite)
 

@@ -231,6 +231,13 @@ engine gates, with sixteen dishes and wiring still pending. The full 07:30 deliv
 historically retained but at risk and no longer a realistic expectation. Do not invent a replacement
 slot or alter Jenny's planner selections. The current release remains unchanged; WIP import/admission
 is still forbidden while Farming's autonomous overnight slot 2 continues.
+Checkpoint `411fbd34` is held WIP only. Its `MembraneProof` preserves six current fish, twelve viewed
+4K frames, two material slots, 30 maps, and validated portable blend/receipts without gameplay, save,
+or version changes. It adds isolated `M_CaughtFishMembrane` TwoSidedFoliage with `.35` opacity
+dispatch and nine offline contracts, but these are neither UE compile nor appearance proof; do not
+import or admit it. The canonical portability lesson is recorded: `relative_remap=True` can retain
+absolute image paths, so explicitly repoint to `//Textures` paths and reopen the blend. Farming
+continues anatomy refinement.
 
 At 22:07 local, Jenny additionally authorized the coordinator—not Farming—to schedule a single-use
 30-minute fallback check, rearming it only after processing while work remains active. She also
