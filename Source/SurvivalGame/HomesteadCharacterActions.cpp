@@ -6,13 +6,17 @@
 #include "HomesteadHatchet.h"
 #include "HomesteadDiggingStick.h"
 #include "HomesteadKnife.h"
+#include "HomesteadOriginalItemArt.h"
 
 #include "Animation/AnimSequence.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/World.h"
+#include "Engine/StaticMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadEatingArt, Log, All);
 
 void AHomesteadCharacter::PlayWater()
 {
@@ -170,9 +174,39 @@ void AHomesteadCharacter::PlayLabCraft(int32 Cycles)
 
 bool AHomesteadCharacter::PlayEat(bool bBerry)
 {
+    return PlayEat(bBerry ? Homestead::Item::Berries : Homestead::Item::Roots);
+}
+
+bool AHomesteadCharacter::PlayEat(Homestead::Item Food)
+{
     auto* Animation = Cast<UHomesteadAnimInstance>(GetMesh()->GetAnimInstance());
     if (!bMetaHumanActive || !EatAnimation || !EatenFood || !Animation || Animation->IsEating()) return false;
-    bEatBerry = bBerry;
+    UStaticMesh* OriginalMesh = nullptr;
+    if (const auto* Art = HomesteadOriginalItemArt::Find(Food))
+    {
+        if (!Art->portion) return false;
+        const int32 ItemId = static_cast<int32>(Food);
+        if (const auto* Cached = OriginalFoodMeshes.Find(ItemId)) OriginalMesh = Cached->Get();
+        else
+        {
+            const FString Path = FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s/%s"),
+                UTF8_TO_TCHAR(Art->folder), UTF8_TO_TCHAR(Art->portion));
+            OriginalMesh = LoadObject<UStaticMesh>(nullptr, *Path);
+            if (!OriginalMesh)
+            {
+                UE_LOG(LogHomesteadEatingArt, Error, TEXT("Missing original edible portion: %s"), *Path);
+                return false;
+            }
+            OriginalFoodMeshes.Add(ItemId, OriginalMesh);
+        }
+    }
+    else if (Food >= Homestead::Item::GrilledMackerel && Food <= Homestead::Item::MackerelChowder)
+    {
+        UE_LOG(LogHomesteadEatingArt, Warning, TEXT("Deferred meal has no admitted eating art: %d"), static_cast<int32>(Food));
+        return false;
+    }
+    EatingOriginalMesh = OriginalMesh;
+    bEatBerry = Food == Homestead::Item::Berries;
     Animation->RequestEat();
     return true;
 }
@@ -195,11 +229,16 @@ void AHomesteadCharacter::UpdateEating()
     const FVector Hand = Body->GetSocketLocation(TEXT("hand_r"));
     const FVector Fingers = (Body->GetSocketLocation(TEXT("middle_01_r")) - Hand).GetSafeNormal();
     const FVector Across = (Body->GetSocketLocation(TEXT("index_01_r")) - Body->GetSocketLocation(TEXT("pinky_01_r"))).GetSafeNormal();
-    UStaticMesh* FoodMesh = bEatBerry ? ForageBerryMesh.Get() : ForageRootMesh.Get();
+    UStaticMesh* FoodMesh = EatingOriginalMesh ? EatingOriginalMesh.Get()
+        : (bEatBerry ? ForageBerryMesh.Get() : ForageRootMesh.Get());
     const bool bAuthored = FoodMesh != nullptr;
     if (bAuthored) EatenFood->SetStaticMesh(FoodMesh);
     // A small bite: a few berries off the cluster, or a short piece of root.
-    const FVector Scale = bAuthored ? FVector(bEatBerry ? 0.65f : 0.45f) : FVector(0.035f);
+    // The existing forage clip pinches a mouthful, not a whole potato or a long utensil.
+    constexpr double MouthfulLengthCm = 3.8;
+    const FVector Scale = EatingOriginalMesh
+        ? FVector(FMath::Min(1.0, MouthfulLengthCm / FMath::Max(0.01, FoodMesh->GetBounds().BoxExtent.GetMax() * 2.0)))
+        : (bAuthored ? FVector(bEatBerry ? 0.65f : 0.45f) : FVector(0.035f));
     const FRotator Rotation = bEatBerry ? FRotationMatrix::MakeFromZX(-Fingers, Across).Rotator()
         : FRotationMatrix::MakeFromZX(Fingers, Across).Rotator();
     // Between the pinched thumb and fingertips (the last knuckles plus a little toward the tips).
@@ -207,7 +246,9 @@ void AHomesteadCharacter::UpdateEating()
     const FVector Thumb = Body->GetSocketLocation(TEXT("thumb_03_r"));
     const FVector Pinch = (Index + Thumb) * 0.5f + ((Index - Hand).GetSafeNormal() + (Thumb - Hand).GetSafeNormal()).GetSafeNormal() * 1.2f;
     EatenFood->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-    EatenFood->SetWorldLocationAndRotation(Pinch, Rotation);
+    const FVector FoodCenter = EatingOriginalMesh
+        ? Rotation.RotateVector(FoodMesh->GetBounds().Origin * Scale) : FVector::ZeroVector;
+    EatenFood->SetWorldLocationAndRotation(Pinch - FoodCenter, Rotation);
     EatenFood->SetWorldScale3D(Scale);
     EatenFood->AttachToComponent(Body, FAttachmentTransformRules::KeepWorldTransform, TEXT("hand_r"));
     EatenFood->SetVisibility(true);

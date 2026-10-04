@@ -70,6 +70,13 @@ const MealRecipeInfo* FindFishMeal(Recipe recipe)
     return &FishMeals::Table[static_cast<int>(recipe) - static_cast<int>(Recipe::RawFishSlices)];
 }
 
+bool IsRecipeAvailable(Recipe recipe)
+{
+    // Jenny's Oct 4 playtest admits eleven original meals; retain the five deferred enum/save ids.
+    return recipe >= Recipe::HaftAxe && recipe < Recipe::Count
+        && !(recipe >= Recipe::GrilledMackerel && recipe <= Recipe::MackerelChowder);
+}
+
 namespace MealRecipes
 {
 Inventory Change(const MealRecipeInfo* meal)

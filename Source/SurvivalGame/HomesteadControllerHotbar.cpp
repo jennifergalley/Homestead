@@ -214,7 +214,7 @@ void AHomesteadController::EatFromHotbar(Homestead::Item Food)
     NotifyResourceAction(Result, nullptr);
     if (!Result.ok) return;
     if (State().fixedEstate && Homestead::FoodClassOf(Food) == Homestead::FoodClass::Meal) Notify(Result);
-    if (Avatar) Avatar->PlayEat(Food == Homestead::Item::Berries);
+    if (Avatar) Avatar->PlayEat(Food);
     MealGain.Food = State().hunger - FoodBefore;
     MealGain.Energy = State().energy - EnergyBefore;
     ++MealGain.Serial;

@@ -2085,6 +2085,7 @@ Result Simulation::Craft(Recipe recipe, Point player)
 {
     if (state_.failed) return Failed();
     if (!ValidEnum(recipe, Recipe::Count) || !ValidPoint(player)) return Bad("Choose a valid recipe and location.");
+    if (!IsRecipeAvailable(recipe)) return Bad("This preparation is deferred from this playtest.");
     const Inventory change = CraftChange(recipe);
     const bool cooking = Cooking(recipe);
     if (cooking && !IsNearFire(player)) return Bad("Move beside a lit cookfire or the hearth to cook; no pot is needed.");
@@ -2110,6 +2111,11 @@ RecipeAssessment Simulation::AssessRecipe(Recipe recipe, Point player) const
     if (!ValidEnum(recipe, Recipe::Count) || !ValidPoint(player))
     {
         assessment.blocker = "Choose a valid recipe and location.";
+        return assessment;
+    }
+    if (!IsRecipeAvailable(recipe))
+    {
+        assessment.blocker = "This preparation is deferred from this playtest.";
         return assessment;
     }
 
