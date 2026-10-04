@@ -368,6 +368,37 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::BookPage, 0, nullptr, Book(0));
     Add(TEXT("book-pack-rows"), TEXT("Pack page: the hotbar row as the grid's first row, its cells the same size and spacing as the rows beneath."),
         ECover::BookPage, 0, nullptr, Book(0));
+    Add(TEXT("book-back-equipment"), TEXT("Back equipment: Leather Rucksack or None, with the appearance-only capacity hint."),
+        ECover::Dialog, 10, nullptr, [Later](AHomesteadController& Opened)
+        {
+            const auto* Store = Opened.Sim.FindShop(Homestead::ShopKind::GeneralStore);
+            if (!Store) { Opened.Notify(TEXT("The gallery store is unavailable."), true); return; }
+            const int32 ShopId = Store->id;
+            const Homestead::Point Counter{Store->counterX, Store->counterY};
+            const auto Money = Opened.Sim.GrantMoney(Homestead::Backpack::Price - Opened.State().money);
+            if (!Money) { Opened.Notify(Money); return; }
+            const auto Bought = Opened.Sim.BuyBackpack(ShopId, Counter);
+            if (!Bought) { Opened.Notify(Bought); return; }
+            Opened.OpenBook(0);
+            Later(Opened, [](AHomesteadController& PC)
+            {
+                PC.MenuSetBackEquipment(true);
+                if (PC.NativeMenu.IsValid()) PC.NativeMenu->OpenBackEquipment();
+            });
+        });
+    Add(TEXT("book-seed-packets"), TEXT("Individual crop-specific seed packets: two of each crop, never stacked."),
+        ECover::BookPage, 0, nullptr, [](AHomesteadController& PC)
+        {
+            PC.Sim.SetPackRowAutoFill(false);
+            for (Item Seed : {Item::Seeds, Item::TurnipSeed, Item::CarrotSeed, Item::SeedPotato,
+                Item::CabbageSeed, Item::BroadBeanSeed, Item::StrawberryRunner})
+            {
+                const auto Granted = PC.Sim.GrantItems(Seed, 2);
+                if (!Granted) PC.Notify(Granted);
+            }
+            PC.Sim.SetPackRowAutoFill(true);
+            PC.OpenBook(0);
+        });
     Add(TEXT("book-pack-dragging"), TEXT("Pack page, holding a stack of branches over the hotbar row: its icon and count ride with the pointer (on the pad, on the focused cell's corner)."),
         ECover::Dialog, 9, nullptr,
         [Later, ToPack](AHomesteadController& Opened)

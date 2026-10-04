@@ -327,8 +327,15 @@ void LeatherBackpackUpgrade()
     OK(sim.PickUpDrop(sim.GetState().worldDrops.front().id, store.customer));
     CHECK(sim.UsedCapacity() == 240 && sim.GetState().worldDrops.empty());
     // Hiding it is a look only: capacity stays.
+    const auto carried = sim.GetState().inventory;
+    const auto groups = sim.GetState().inventoryLayout;
     OK(sim.SetBackpackShown(false));
     CHECK(!sim.GetState().backpackShown && sim.PackCapacity() == 240);
+    CHECK(sim.GetState().inventory == carried && sim.GetState().inventoryLayout.size() == groups.size());
+    OK(sim.SetBackpackShown(true));
+    CHECK(sim.GetState().backpackShown && sim.PackCapacity() == 240 && sim.UsedCapacity() == 240);
+    CHECK(sim.GetState().inventory == carried);
+    OK(sim.SetBackpackShown(false));
     // Saved and loaded with a full 240 pack and the backpack hidden.
     const std::string saved = sim.Serialize();
     CHECK(saved.find(std::string("\n") + Backpack::SaveTag + " 1 0\n") != std::string::npos);

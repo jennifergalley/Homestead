@@ -23,6 +23,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadEstateDisrepair.cpp
     Source/SurvivalGame/Simulation/HomesteadParcels.cpp
     Source/SurvivalGame/Simulation/HomesteadItems.cpp
+    Source/SurvivalGame/Simulation/HomesteadSeedPackets.cpp
     Source/SurvivalGame/Simulation/HomesteadShops.cpp
     Source/SurvivalGame/Simulation/HomesteadRain.cpp
     Source/SurvivalGame/Simulation/HomesteadManor.cpp
@@ -67,6 +68,15 @@ else()
     target_compile_options(HomesteadFishingTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
 endif()
 add_test(NAME HomesteadFishingTests COMMAND HomesteadFishingTests)
+
+add_executable(HomesteadSeedPacketTests Tests/HomesteadSeedPacketTests.cpp)
+target_link_libraries(HomesteadSeedPacketTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadSeedPacketTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadSeedPacketTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadSeedPacketTests COMMAND HomesteadSeedPacketTests)
 
 add_executable(HomesteadWorldGenerationTests Tests/HomesteadWorldGenerationTests.cpp)
 target_link_libraries(HomesteadWorldGenerationTests PRIVATE HomesteadSimulation)

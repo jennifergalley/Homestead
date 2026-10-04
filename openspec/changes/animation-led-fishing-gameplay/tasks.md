@@ -2,5 +2,5 @@
 
 ## 1. Animation-led fishing
 
-- [ ] 1.1 Implement native randomized timing/contact/reward/cancel/failure rules and tool-only controller policy against Art's agreed API; focused native tests prove no timer reward, exact successful-contact reward and bounded retries; compile combined interfaces.
+- [x] 1.1 Implement native randomized timing/contact/reward/cancel/failure rules and tool-only controller policy against Art's agreed API; focused native tests prove no timer reward, exact successful-contact reward and bounded retries; compile combined interfaces.
 - [ ] 1.2 Jenny checks the integrated Art/gameplay sequence at a bank: readable cast/bite/strike/catch cues, variable wait/strike timing, fish awarded on the successful lifted-fish beat, and no catch on miss/cancel.

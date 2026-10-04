@@ -1,4 +1,5 @@
 #include "HomesteadSimulation.h"
+#include "HomesteadSeedPackets.h"
 #include "HomesteadBed.h"
 #include "HomesteadBackpack.h"
 #include "HomesteadChests.h"
@@ -654,6 +655,7 @@ bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
     // Her pack's first row is the hotbar (HomesteadPackRow.h): gains and uses visit its cells first,
     // and new stacks and garments take its first empty cell.
     const bool pack = container == 0;
+    if (!SeedPackets::SplitGroups(state, *layout)) return false;
     layout->erase(std::remove_if(layout->begin(), layout->end(), [&](const LayoutEntry& entry) {
         if (entry.wearableId == 0) return false;
         const auto* item = Find(state.wearables, entry.wearableId);
@@ -677,7 +679,7 @@ bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
         {
             auto& entry = (*layout)[index];
             if (entry.wearableId != 0 || static_cast<int>(entry.item) != i) continue;
-            if (difference > 0) { entry.quantity += difference; difference = 0; }
+            if (difference > 0 && CanStackItem(entry.item)) { entry.quantity += difference; difference = 0; }
             else if (difference < 0)
             {
                 const int removed = std::min(entry.quantity, -difference);
@@ -685,10 +687,12 @@ bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
                 difference += removed;
             }
         }
-        if (difference > 0)
+        while (difference > 0)
         {
             if (!CanAllocate(state.nextGroupId)) return false;
-            layout->push_back({state.nextGroupId++, static_cast<Item>(i), difference, 0});
+            const int quantity = IsSeedPacket(static_cast<Item>(i)) ? 1 : difference;
+            layout->push_back({state.nextGroupId++, static_cast<Item>(i), quantity, 0});
+            difference -= quantity;
             // The pail's water shows on the pail (HomesteadPail.h), never in a hotbar cell.
             if (pack && static_cast<Item>(i) != Item::Water) arrivals.push_back(layout->back());
         }
@@ -716,7 +720,7 @@ bool ReconcileLayout(State& state, int container, bool fillPackRow = true)
     }
     return true;
 }
-Result ValidateInventory(const State& state)
+Result ValidateInventory(const State& state, bool allowLegacySeedGroups = false)
 {
     if (!CanAllocate(state.nextWearableId) || !CanAllocate(state.nextGroupId) || state.wearables.size() > MaxObjects)
         return Bad("The wardrobe identity allocator is invalid or exhausted.");
@@ -776,7 +780,8 @@ Result ValidateInventory(const State& state)
             else
             {
                 if (entry.groupId <= 0 || entry.groupId >= state.nextGroupId || !groupIds.insert(entry.groupId).second ||
-                    !ValidEnum(entry.item, Item::Count) || entry.quantity <= 0 || entry.quantity > capacity)
+                    !ValidEnum(entry.item, Item::Count) || entry.quantity <= 0 || entry.quantity > capacity
+                    || (!allowLegacySeedGroups && IsSeedPacket(entry.item) && entry.quantity != 1))
                     return Bad("A fungible group has invalid identity, item or quantity.");
                 total[static_cast<int>(entry.item)] += entry.quantity;
             }
@@ -881,7 +886,7 @@ bool AddWorldDrop(State& candidate, Point position, Item item, int quantity)
     // A stack on the ground never holds more than she can pick up in one go (PickUpDrop is whole-stack).
     const int stack = Homestead::PackCapacity(candidate);
     for (auto& drop : candidate.worldDrops)
-        if (drop.wearableId == 0 && drop.item == item && drop.quantity <= stack - quantity
+        if (CanStackItem(item) && drop.wearableId == 0 && drop.item == item && drop.quantity <= stack - quantity
             && DistanceSquared(position, drop.position) <= DropMergeReach * DropMergeReach)
         {
             drop.quantity += quantity;
@@ -890,7 +895,7 @@ bool AddWorldDrop(State& candidate, Point position, Item item, int quantity)
     while (quantity > 0)
     {
         if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1) return false;
-        const int part = std::min(quantity, stack);
+        const int part = IsSeedPacket(item) ? 1 : std::min(quantity, stack);
         candidate.worldDrops.push_back({candidate.nextId++, position, item, part, 0});
         quantity -= part;
     }
@@ -1582,7 +1587,8 @@ Result Simulation::TransferGroupToPackRow(int chestId, int groupId, int amount, 
     candidate.inventory[static_cast<int>(item)] += amount;
     auto& pack = candidate.inventoryLayout;
     const int held = PackRowRules::FindEntry(pack, candidate.packRow[cell]);
-    if (held >= 0 && pack[held].wearableId == 0 && pack[held].item == item) pack[held].quantity += amount;
+    if (held >= 0 && pack[held].wearableId == 0 && pack[held].item == item && CanStackItem(item))
+        pack[held].quantity += amount;
     else
     {
         // Whatever was in the cell stays in her pack, below the row.
@@ -1626,6 +1632,7 @@ Result Simulation::MergeGroups(int containerId, int sourceGroupId, int targetGro
         [&](const LayoutEntry& value) { return value.groupId == targetGroupId && value.wearableId == 0; });
     if (source == layout->end() || target == layout->end() || source == target || source->item != target->item)
         return Bad("Choose two different groups of the same item in this container.");
+    if (!CanStackItem(source->item)) return Bad("Seed packets cannot be stacked.");
     target->quantity += source->quantity;
     layout->erase(source);
     return CommitInventory(std::move(candidate), "Groups merged; capacity is unchanged.");
@@ -1672,7 +1679,7 @@ Result Simulation::SortPack(std::uint64_t expectedRevision)
     const InventoryLayout before = layout;
     for (auto first = layout.begin(); first != layout.end(); ++first)
     {
-        if (first->wearableId != 0) continue;
+        if (first->wearableId != 0 || !CanStackItem(first->item)) continue;
         for (auto duplicate = first + 1; duplicate != layout.end();)
         {
             if (duplicate->wearableId == 0 && duplicate->item == first->item)
@@ -1742,7 +1749,7 @@ Result Simulation::DropGroup(int groupId, int amount, Point position, Point play
     for (auto& drop : candidate.worldDrops)
     {
         // Merged stacks stay small enough for her to pick up whole.
-        if (drop.wearableId != 0 || drop.item != entry->item
+        if (!CanStackItem(entry->item) || drop.wearableId != 0 || drop.item != entry->item
             || drop.quantity > Homestead::PackCapacity(candidate) - amount) continue;
         const double distance = DistanceSquared(position, drop.position);
         if (distance <= nearest && (!merge || distance < nearest || drop.id < merge->id))
@@ -2448,7 +2455,7 @@ Result Simulation::Deconstruct(int structureId, Point player)
         {
             WorldDrop* merge = nullptr;
             for (auto& drop : candidate.worldDrops)
-                if (drop.wearableId == 0 && drop.item == item && drop.quantity < stack
+                if (CanStackItem(item) && drop.wearableId == 0 && drop.item == item && drop.quantity < stack
                     && Near(spot, drop.position, DropMergeReach)) { merge = &drop; break; }
             int moved = 0;
             if (merge)
@@ -2460,7 +2467,7 @@ Result Simulation::Deconstruct(int structureId, Point player)
             {
                 if (candidate.worldDrops.size() >= MaxWorldDrops || candidate.nextId >= TransientResourceIdBase - 1)
                     return false;
-                moved = std::min(quantity, stack);
+                moved = IsSeedPacket(item) ? 1 : std::min(quantity, stack);
                 candidate.worldDrops.push_back({candidate.nextId++, spot, item, moved, 0});
             }
             quantity -= moved;
@@ -2702,12 +2709,21 @@ Result Simulation::CheckSow(int plotId, Point player, CropKind kind) const
     if (Count(crop.seed) <= 0) return Bad(NoSeedMessage(kind));
     return Good("");
 }
-Result Simulation::Plant(int plotId, Point player, CropKind kind)
+Result Simulation::Plant(int plotId, Point player, CropKind kind, int seedGroupId)
 {
     if (auto ready = CheckSow(plotId, player, kind); !ready) return ready;
-    auto* plot = Find(state_.plots, plotId);
     const auto& crop = GetCropInfo(kind);
-    if (!TryAdjust(Items({{crop.seed, -1}}))) return Bad(NoSeedMessage(kind));
+    State candidate = state_;
+    if (seedGroupId != 0)
+    {
+        const auto packet = std::find_if(candidate.inventoryLayout.begin(), candidate.inventoryLayout.end(),
+            [seedGroupId](const LayoutEntry& entry) { return entry.groupId == seedGroupId && entry.wearableId == 0; });
+        if (packet == candidate.inventoryLayout.end() || packet->item != crop.seed || packet->quantity <= 0)
+            return Bad("Choose a carried packet for this crop.");
+        --packet->quantity;
+    }
+    --candidate.inventory[static_cast<int>(crop.seed)];
+    auto* plot = Find(candidate.plots, plotId);
     plot->kind = kind;
     plot->planted = true;
     plot->picked = false;
@@ -2715,8 +2731,8 @@ Result Simulation::Plant(int plotId, Point player, CropKind kind)
     plot->growth = 0.0;
     // Planting too late in its seasons is allowed, with a warning.
     const auto late = TooLateText(kind, crop.growHours, state_.hour);
-    return Exert(Exertion::PlantEnergy, Good(std::string("Planted ") + crop.lower + ". "
-        + (late.empty() ? ReadyInText(kind) : late)));
+    const auto message = std::string("Planted ") + crop.lower + ". " + (late.empty() ? ReadyInText(kind) : late);
+    return Exert(Exertion::PlantEnergy, CommitInventory(std::move(candidate), message.c_str()));
 }
 Result Simulation::CheckWater(int plotId, Point player) const
 {
@@ -2791,6 +2807,7 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     if (plot->planted && plot->withered) return Bad(PlotStatus(*plot) + ".");
     if (!plot->planted || plot->growth < 1.0)
         return Bad(plot->planted ? PlotStatus(*plot) + "." : std::string("Nothing is growing here yet."));
+    if (HasVisibleWeeds(*plot)) return Bad("Pull the weeds from this square before harvesting.");
     const auto& crop = GetCropInfo(plot->kind);
     const int bonusCount = HarvestBonusCount(plot->kind, plotId, state_.hour);
     Inventory yield{};
@@ -2798,6 +2815,7 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     if (crop.bonus != Item::Count && bonusCount > 0) yield[static_cast<int>(crop.bonus)] += bonusCount;
     if (auto ready = CheckExertion(Exertion::HarvestCropEnergy); !ready) return ready;
     if (!TryAdjust(yield)) return Bad(MissingMessage(yield, state_.inventory));
+    plot = Find(state_.plots, plotId);
     const bool regrows = crop.regrowHours > 0.0;
     plot->planted = regrows;
     plot->picked = regrows;
@@ -2812,8 +2830,7 @@ Result Simulation::HarvestCrop(int plotId, Point player)
     };
     std::string message = "Harvested " + counted(crop.produce, crop.produceCount);
     if (crop.bonus != Item::Count && bonusCount > 0)
-        message += " and " + (crop.bonus == Item::Seeds && bonusCount == 1 ? std::string("1 seed")
-            : counted(crop.bonus, bonusCount));
+        message += " and " + counted(crop.bonus, bonusCount);
     message += regrows ? ". More will ripen in about " + std::to_string(CropRegrowDays(plot->kind))
             + (CropRegrowDays(plot->kind) == 1 ? " day." : " days.")
         : ". This plot is ready to replant.";
@@ -3475,8 +3492,12 @@ Result Simulation::Deserialize(const std::string& data)
     }
     if (!input.eof()) return invalid();
     if (!PackRowRules::RestoreSlots(candidate)) return invalid();
-    const auto inventory = ValidateInventory(candidate);
+    const auto inventory = ValidateInventory(candidate, true);
     if (!inventory) return {false, inventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};
+    if (!SeedPackets::NormalizeSavedGroups(candidate)) return invalid();
+    const auto normalizedInventory = ValidateInventory(candidate);
+    if (!normalizedInventory)
+        return {false, normalizedInventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};
     int nextHandle = nextResourceHandle_;
     const bool sameWorld = candidate.world.seed == state_.world.seed &&
         candidate.world.generationVersion == state_.world.generationVersion;
