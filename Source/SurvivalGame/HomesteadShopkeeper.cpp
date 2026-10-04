@@ -1,21 +1,31 @@
 #include "HomesteadShopkeeper.h"
 
 #include "Animation/AnimSequence.h"
-#include "Camera/PlayerCameraManager.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/TextRenderComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
 
-namespace
+DEFINE_LOG_CATEGORY(LogHomesteadShopkeeper);
+
+namespace ShopkeeperStandIn
 {
-const TCHAR* StandInMesh = TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Ponytail_Apron.SK_Heroine_Ponytail_Apron");
-const TCHAR* StandInIdle = TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_RelaxedIdle.AN_Heroine_RelaxedIdle");
-// The legacy heroine meshes face +Y in their own space.
+const TCHAR* Mesh = TEXT("/Game/SurvivalGame/Characters/Heroine/SK_Heroine_Ponytail_Apron.SK_Heroine_Ponytail_Apron");
+const TCHAR* Idle = TEXT("/Game/SurvivalGame/Characters/Heroine/Animations/AN_Heroine_RelaxedIdle.AN_Heroine_RelaxedIdle");
+}
+
+namespace ShopkeeperTurn
+{
+// Both the legacy heroine meshes and the MetaHuman body face +Y in their own space.
 constexpr float MeshYaw = -90.0f;
 constexpr float LookRadius = 450.0f;
 constexpr float TurnDegreesPerSecond = 120.0f;
+// The stand-in stands free and turns as far as her shoulders allow.
+constexpr float StandInMaxTurn = 70.0f;
+// The clerk's hands rest on the counter about 38 cm in front of him (clerk_counter_idle.py), so a
+// small turn keeps them on the counter top instead of sliding off its back edge.
+constexpr float LeaningMaxTurn = 10.0f;
+constexpr float LeaningTurnDegreesPerSecond = 30.0f;
 }
 
 AHomesteadShopkeeper::AHomesteadShopkeeper()
@@ -24,36 +34,33 @@ AHomesteadShopkeeper::AHomesteadShopkeeper()
     PrimaryActorTick.TickInterval = 0.05f;
     Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
     SetRootComponent(Root);
-    Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("StandInBody"));
+    Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
     Body->SetupAttachment(Root);
-    Body->SetRelativeRotation(FRotator(0, MeshYaw, 0));
+    Body->SetRelativeRotation(FRotator(0, ShopkeeperTurn::MeshYaw, 0));
     Body->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+    Body->SetGenerateOverlapEvents(false);
     Body->SetCastShadow(true);
-    Label = CreateDefaultSubobject<UTextRenderComponent>(TEXT("StandInLabel"));
-    Label->SetupAttachment(Root);
-    Label->SetRelativeLocation(FVector(0, 0, 196));
-    Label->SetHorizontalAlignment(EHTA_Center);
-    Label->SetVerticalAlignment(EVRTA_TextBottom);
-    Label->SetWorldSize(9.0f);
-    Label->SetTextRenderColor(FColor(236, 222, 190));
-    Label->SetText(FText::FromString(TEXT("Mr. Josiah Trethewey\n(stand-in body)")));
-    Label->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    Label->SetCastShadow(false);
 }
 
 void AHomesteadShopkeeper::Place(const FVector& Location, float Yaw)
 {
     RestYaw = Yaw;
     SetActorLocationAndRotation(Location, FRotator(0, Yaw, 0));
-    if (!Body->GetSkeletalMeshAsset())
+    if (bBuilt) return;
+    bBuilt = true;
+    bMetaHuman = BuildMetaHuman();
+    if (!bMetaHuman) BuildStandIn();
+}
+
+void AHomesteadShopkeeper::BuildStandIn()
+{
+    UE_LOG(LogHomesteadShopkeeper, Warning, TEXT("Shopkeeper MetaHuman assets are missing; using the stand-in body."));
+    if (USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(nullptr, ShopkeeperStandIn::Mesh)) Body->SetSkeletalMeshAsset(Mesh);
+    else UE_LOG(LogHomesteadShopkeeper, Warning, TEXT("Shopkeeper stand-in mesh is missing: %s"), ShopkeeperStandIn::Mesh);
+    if (UAnimSequence* Idle = LoadObject<UAnimSequence>(nullptr, ShopkeeperStandIn::Idle))
     {
-        if (USkeletalMesh* Mesh = LoadObject<USkeletalMesh>(nullptr, StandInMesh)) Body->SetSkeletalMeshAsset(Mesh);
-        else UE_LOG(LogTemp, Warning, TEXT("Shopkeeper stand-in mesh is missing: %s"), StandInMesh);
-        if (UAnimSequence* Idle = LoadObject<UAnimSequence>(nullptr, StandInIdle))
-        {
-            Body->SetAnimationMode(EAnimationMode::AnimationSingleNode);
-            Body->PlayAnimation(Idle, true);
-        }
+        Body->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+        Body->PlayAnimation(Idle, true);
     }
 }
 
@@ -68,25 +75,20 @@ void AHomesteadShopkeeper::SetOnDuty(bool bOnDuty)
 void AHomesteadShopkeeper::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    const float MaxTurn = bMetaHuman ? ShopkeeperTurn::LeaningMaxTurn : ShopkeeperTurn::StandInMaxTurn;
+    const float TurnRate = bMetaHuman ? ShopkeeperTurn::LeaningTurnDegreesPerSecond : ShopkeeperTurn::TurnDegreesPerSecond;
     float TargetYaw = RestYaw;
     if (const APawn* Heroine = UGameplayStatics::GetPlayerPawn(this, 0))
     {
         const FVector ToHer = Heroine->GetActorLocation() - GetActorLocation();
-        if (ToHer.Size2D() < LookRadius)
+        if (ToHer.Size2D() < ShopkeeperTurn::LookRadius)
         {
-            // She turns toward the heroine, but not further than her shoulders would allow at the counter.
             const float Wanted = FMath::RadiansToDegrees(FMath::Atan2(ToHer.Y, ToHer.X));
-            TargetYaw = RestYaw + FMath::Clamp(FMath::FindDeltaAngleDegrees(RestYaw, Wanted), -70.0f, 70.0f);
+            TargetYaw = RestYaw + FMath::Clamp(FMath::FindDeltaAngleDegrees(RestYaw, Wanted), -MaxTurn, MaxTurn);
         }
     }
     const float Current = GetActorRotation().Yaw;
     const float Step = FMath::Clamp(FMath::FindDeltaAngleDegrees(Current, TargetYaw),
-        -TurnDegreesPerSecond * DeltaSeconds, TurnDegreesPerSecond * DeltaSeconds);
+        -TurnRate * DeltaSeconds, TurnRate * DeltaSeconds);
     SetActorRotation(FRotator(0, Current + Step, 0));
-    // The label always reads toward the camera.
-    if (const APlayerCameraManager* Camera = UGameplayStatics::GetPlayerCameraManager(this, 0))
-    {
-        const FVector ToCamera = Camera->GetCameraLocation() - Label->GetComponentLocation();
-        Label->SetWorldRotation(FRotator(0, FMath::RadiansToDegrees(FMath::Atan2(ToCamera.Y, ToCamera.X)), 0));
-    }
 }

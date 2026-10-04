@@ -1,0 +1,163 @@
+// AHomesteadShopkeeper's MetaHuman: Mr. Trethewey's body, face, grooms, Blender-fitted period
+// garments, the pencil behind his ear, and the LOD sync that keeps them together. Mirrors the
+// heroine's stack (HomesteadCharacterAppearance.cpp) at NPC cost: nothing animates off screen.
+#include "HomesteadShopkeeper.h"
+
+#include "Animation/AnimSequence.h"
+#include "Components/LODSyncComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Engine/StaticMesh.h"
+#include "GroomAsset.h"
+#include "GroomBindingAsset.h"
+#include "GroomComponent.h"
+#include "Materials/MaterialInterface.h"
+#include "Misc/Paths.h"
+
+namespace ShopkeeperMetaHuman
+{
+const TCHAR* const Root = TEXT("/Game/Characters/Clerk_MH");
+const TCHAR* const FaceAnimClass = TEXT("/Game/Characters/Clerk_MH/Common/Face/ABP_Face.ABP_Face_C");
+// His own counter-leaning idle (Content/Python/homestead_agent/clerk_counter_idle.py); the
+// heroine's standing idle plays through skeleton remapping if it is missing.
+const TCHAR* const Idles[] = {
+    TEXT("/Game/Characters/Clerk_MH/Animations/AN_ClerkMH_CounterIdle.AN_ClerkMH_CounterIdle"),
+    TEXT("/Game/Characters/Heroine_MH/Animations/AN_HeroineMH_ActiveIdle.AN_HeroineMH_ActiveIdle")};
+// Must match GARMENTS in Scripts/Characters/import_clerk_garments.py.
+const TCHAR* const GarmentNames[] = {
+    TEXT("SKM_ClerkTrousers"), TEXT("SKM_ClerkBoots"), TEXT("SKM_ClerkShirt"),
+    TEXT("SKM_ClerkWaistcoat"), TEXT("SKM_ClerkNeckerchief"), TEXT("SKM_ClerkApron")};
+const TCHAR* const PencilMesh = TEXT("Assembled/Clerk/Garments/SM_ClerkPencil");
+const FName PencilBone(TEXT("head"));
+
+struct FGroomSpec
+{
+    const TCHAR* Component;
+    const TCHAR* Groom;
+    TArray<const TCHAR*> Materials;
+};
+
+template <typename T>
+T* Load(const FString& RelativePath, bool bRequired = true)
+{
+    const FString Name = FPaths::GetBaseFilename(RelativePath);
+    const FString Path = FString::Printf(TEXT("%s/%s.%s"), Root, *RelativePath, *Name);
+    T* Asset = LoadObject<T>(nullptr, *Path, nullptr, bRequired ? LOAD_None : LOAD_NoWarn | LOAD_Quiet);
+    if (!Asset && bRequired) UE_LOG(LogHomesteadShopkeeper, Error, TEXT("Shopkeeper MetaHuman asset is missing: %s"), *Path);
+    return Asset;
+}
+}
+
+bool AHomesteadShopkeeper::BuildMetaHuman()
+{
+    using namespace ShopkeeperMetaHuman;
+    USkeletalMesh* BodyMesh = Load<USkeletalMesh>(TEXT("Assembled/Clerk/Body/SKM_MHC_Clerk_BodyMesh"));
+    USkeletalMesh* FaceMesh = Load<USkeletalMesh>(TEXT("Assembled/Clerk/Face/SKM_MHC_Clerk_FaceMesh"));
+    UClass* FaceAnim = LoadObject<UClass>(nullptr, FaceAnimClass);
+    if (!BodyMesh || !FaceMesh || !FaceAnim) return false;
+
+    Body->SetSkeletalMeshAsset(BodyMesh);
+    // An NPC: his pose only needs evaluating when someone can see him.
+    Body->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+    UAnimSequence* Idle = nullptr;
+    for (const TCHAR* Path : Idles)
+        if ((Idle = LoadObject<UAnimSequence>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet)) != nullptr) break;
+    if (Idle)
+    {
+        Body->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+        Body->PlayAnimation(Idle, true);
+    }
+    else UE_LOG(LogHomesteadShopkeeper, Warning, TEXT("Shopkeeper has no idle clip; he will hold the reference pose."));
+
+    auto MakeSkinned = [this](const TCHAR* Name, USkeletalMesh* Asset)
+    {
+        auto* Component = NewObject<USkeletalMeshComponent>(this, Name);
+        Component->SetupAttachment(Body);
+        Component->SetSkeletalMeshAsset(Asset);
+        Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Component->SetGenerateOverlapEvents(false);
+        Component->bUseAttachParentBound = true;
+        Component->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+        return Component;
+    };
+    // ABP_Face copies the body's pose, then runs RigLogic for the face rig.
+    Face = MakeSkinned(TEXT("Face"), FaceMesh);
+    Face->SetAnimInstanceClass(FaceAnim);
+    Face->AddTickPrerequisiteComponent(Body);
+    Face->RegisterComponent();
+
+    Garments.Reset();
+    for (const TCHAR* Name : GarmentNames)
+    {
+        USkeletalMesh* Mesh = Load<USkeletalMesh>(FString::Printf(TEXT("Assembled/Clerk/Garments/%s"), Name));
+        if (!Mesh) continue;
+        auto* Garment = MakeSkinned(Name, Mesh);
+        Garment->RegisterComponent();
+        Garment->SetLeaderPoseComponent(Body);
+        Garments.Add(Garment);
+    }
+
+    const FGroomSpec Specs[] = {
+        {TEXT("Hair"), TEXT("Hair_S_SlickBack"),
+            {TEXT("MI_WI_Hair_S_SlickBack_Hair"), TEXT("MI_WI_Hair_S_SlickBack_Hair_Cards"), TEXT("MI_WI_Hair_S_SlickBack_Hair_Helmet")}},
+        {TEXT("Beard"), TEXT("Beard_M_MuttonChops"),
+            {TEXT("MI_WI_Beard_M_MuttonChops_Hair"), TEXT("MI_WI_Beard_M_MuttonChops_Hair_Cards"), TEXT("MI_WI_Beard_M_MuttonChops_Hair_Helmet")}},
+        {TEXT("Eyebrows"), TEXT("Eyebrows_M_Dense"),
+            {TEXT("MI_WI_Eyebrows_M_Dense_Hair"), TEXT("MI_WI_Eyebrows_M_Dense_Facial_Hair")}},
+        {TEXT("Eyelashes"), TEXT("Eyelashes_S_Sparse"), {TEXT("MI_WI_Eyelashes_S_Sparse_Hair")}},
+    };
+    Grooms.Reset();
+    for (const FGroomSpec& Spec : Specs)
+    {
+        const FString Base = FString::Printf(TEXT("Assembled/Clerk/Grooms/%s"), Spec.Groom);
+        auto* Asset = Load<UGroomAsset>(Base);
+        auto* Binding = Load<UGroomBindingAsset>(Base + TEXT("_Binding"));
+        if (!Asset || !Binding) continue;
+        auto* Groom = NewObject<UGroomComponent>(this, Spec.Component);
+        Groom->SetupAttachment(Face);
+        Groom->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        // Short, oiled hair and whiskers: no strand simulation for a man standing at a counter.
+        Groom->SimulationSettings.bOverrideSettings = true;
+        Groom->SimulationSettings.SolverSettings.bEnableSimulation = false;
+        Groom->SetGroomAsset(Asset, Binding);
+        for (int32 Index = 0; Index < Spec.Materials.Num(); ++Index)
+            if (auto* Material = Load<UMaterialInterface>(FString::Printf(TEXT("Assembled/Clerk/Grooms/%s"), Spec.Materials[Index])))
+                Groom->SetMaterial(Index, Material);
+        Groom->RegisterComponent();
+        Grooms.Add(Groom);
+    }
+
+    if (UStaticMesh* PencilAsset = Load<UStaticMesh>(PencilMesh))
+    {
+        // Fitted in Blender against his head (Assets/Characters/ClerkClothing/clerk_pencil_fit.json).
+        Pencil = NewObject<UStaticMeshComponent>(this, TEXT("Pencil"));
+        Pencil->SetupAttachment(Body, PencilBone);
+        Pencil->SetStaticMesh(PencilAsset);
+        Pencil->SetRelativeTransform(FTransform::Identity);
+        Pencil->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+        Pencil->SetGenerateOverlapEvents(false);
+        Pencil->bUseAttachParentBound = true;
+        Pencil->RegisterComponent();
+    }
+
+    // Mirrors the assembled BP_Clerk LODSync: body and face drive, garments and grooms follow.
+    LODSync = NewObject<ULODSyncComponent>(this, TEXT("LODSync"));
+    LODSync->NumLODs = 4;
+    LODSync->ComponentsToSync = {
+        FComponentSync(Body->GetFName(), ESyncOption::Drive),
+        FComponentSync(Face->GetFName(), ESyncOption::Drive)};
+    for (USkeletalMeshComponent* Garment : Garments)
+        LODSync->ComponentsToSync.Add(FComponentSync(Garment->GetFName(), ESyncOption::Passive));
+    for (UGroomComponent* Groom : Grooms)
+    {
+        LODSync->ComponentsToSync.Add(FComponentSync(Groom->GetFName(), ESyncOption::Passive));
+        FLODMappingData GroomMapping;
+        GroomMapping.Mapping = TArray<int32>{1, 3, 5, 7};
+        LODSync->CustomLODMapping.Add(Groom->GetFName(), GroomMapping);
+    }
+    LODSync->RegisterComponent();
+    UE_LOG(LogHomesteadShopkeeper, Log, TEXT("Shopkeeper MetaHuman built: %d garments, %d grooms, idle %s."),
+        Garments.Num(), Grooms.Num(), Idle ? *Idle->GetName() : TEXT("none"));
+    return true;
+}
