@@ -87,6 +87,25 @@
       "launchContextTier": "default",
       "contextEvidence": "Selection and launch configuration recorded by the coordinator; actual runtime context, app-session identity, helpers, and final usage boundary remain pending lane handoff.",
       "boundaryEvidence": "Owns selected chest-name hint and HUD-notice unification only. Preserve first-visit travel and Plant Seeds hint behavior; mine path and building work are unselected."
+    },
+    {
+      "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+      "projectSessionId": "52572922-09fd-4287-85c5-840ceec6d895",
+      "agentId": "3865a688-1b7c-4b6e-b382-6419e666f0b1",
+      "task": "travel-rest-and-farming-risk-review",
+      "tasks": [
+        "sleep-evening-until-dawn",
+        "unlock-travel-by-visiting",
+        "wait-sunday-store-until-monday",
+        "farming-fishing-feedback-bundle"
+      ],
+      "category": "review",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Independent source review in Integration slot 3. Actual runtime context and final usage-event boundary remain pending; record this helper once.",
+      "boundaryEvidence": "Travel review found old-reader .bak fallback can overwrite upgraded saves; Farming found no independent blocker but counted stock widening inherits rollback isolation. Neither checkpoint is admitted."
     }
   ]
 }

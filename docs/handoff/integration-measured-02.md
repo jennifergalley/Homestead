@@ -70,12 +70,24 @@ mine path and building work remain unselected. The lane is held to the active no
   transactional malformed/duplicate refusal, and no-save/bake-bump boundary remain in force.
 - Estate time advancement does not force a low-energy doze. Sunday wait retains normal awake energy
   drain and crop/season consequences, without granting rest.
+- **Blocked by review:** `HomesteadControllerSaves.cpp:306–318` lets an old reader reject `travel`,
+  load a compatible pre-upgrade `.bak`, and continue saving. Those saves can overwrite the upgraded
+  slot and then its backup. A promoted Travel save requires separately routed, preserved pre-upgrade
+  saves, or shared-directory write protection plus rejection coverage; colocated `.bak` files are
+  insufficient.
 
 Travel Rest may append an optional `travel <count> <id>...` section of sorted, unique destination
 IDs 1..6; Manor (0) remains implicit. Missing legacy sections lock every non-Manor destination, and
 malformed or duplicate sections refuse transactionally. This does not bump the save or bake version.
-Admit it only after independent save review and non-destructive rejection coverage confirm old
-package readers reject the unknown tag without overwriting the file. Before promotion, preserve
-pre-upgrade save copies in both the current release and rollback so a downgrade never reads or writes
-an incompatible newer save. Estate `AdvanceGameHours` must not force a zero-energy doze; Sunday wait
-preserves authoritative energy drain and adds no rest grant.
+Admit it only after independent save review and non-destructive rejection coverage prove the
+separate-save or write-protection boundary. Estate `AdvanceGameHours` must not force a zero-energy
+doze; Sunday wait preserves authoritative energy drain and adds no rest grant.
+
+## Farming Fishing checkpoint
+
+- Checkpoint `249229b0d5c3f072d4fb6384e9ded0cb0f503d9c` is also **not admitted** until editor
+  compile and player acceptance. Independent review found no separate gameplay/economy source
+  blocker in its appended Items/Recipes, Plant Seeds hint, single-seed return, harvest, or meal flow.
+- Its existing counted-stock serialization widens when Items are appended, so older readers reject
+  the save even if every new meal count is zero. Farming promotion inherits the Travel separate-save
+  or write-protection rollback requirement.
