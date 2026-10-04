@@ -9,7 +9,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from BlenderFishBakeProofTests import MAPS, RENDER_SIZE, ROOT, digest
+from BlenderFishBakeProofTests import FISH_KEYS, MAPS, RENDER_SIZE, ROOT, check_wet_contract, digest
 
 
 def main() -> None:
@@ -23,9 +23,9 @@ def main() -> None:
     assert report["authored_source_sha256"] == digest(ROOT / "Scripts" / "Blender" / "Recipes" / "caught_fish.py")
     assert report["material_source_sha256"] == digest(ROOT / "Scripts" / "Blender" / "homestead_materials.py")
     assert report["source_sha256"] == digest(ROOT / report["source"])
-    assert report["wet_fish"] == {"coat_weight": .65, "coat_roughness": .06}
+    check_wet_contract(report)
     species = {entry["item"]: entry["scientific_name"] for entry in report["species"]}
-    assert len(species) == 6
+    assert set(species) == set(FISH_KEYS)
     assert set(report["meshes"]) == {"SM_" + key for key in species}
     textures = set()
     evidence = {"draft_only": True, "not_art_or_unreal_acceptance": True,
@@ -36,6 +36,9 @@ def main() -> None:
         assert digest(args.folder / mesh["fbx"]) == mesh["sha256"], name + " has a stale FBX"
         assert set(mesh["bake"]["maps"]) == MAPS
         assert mesh["bake"]["normal"] == "OpenGL"
+        key = name.removeprefix("SM_")
+        assert {material["name"] for material in mesh["materials"]} == {
+            "M_" + key, "M_" + key + "Membrane"}
         maps = {}
         for kind, filename in mesh["bake"]["maps"].items():
             assert filename not in textures, "Species share a baked map"

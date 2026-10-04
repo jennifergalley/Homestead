@@ -478,8 +478,8 @@ def textured_instance(spec, info, folder, dest, report=None):
     if report and "wet_fish" in report:
         if foliage or packed_foliage:
             raise ValueError("Wet-fish shading cannot use foliage textures")
-        from import_fish_material import wet_fish_parent
-        parent = wet_fish_parent(parent, report["wet_fish"])
+        from import_fish_material import fish_material_parent
+        parent = fish_material_parent(parent, report["wet_fish"], spec["name"])
     if not parent:
         raise RuntimeError("Missing parent material " + (FOLIAGE_PARENT if foliage else TEXTURED_PARENT))
     parameters = {"basecolor": "DiffuseTexture" if foliage else "BaseColorTexture", "normal": "NormalTexture",

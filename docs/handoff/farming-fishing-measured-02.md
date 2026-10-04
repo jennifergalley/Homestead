@@ -410,6 +410,60 @@ Build02-only provisional usage: 356 calls through event70403,
 Actual model/effort remains `gpt-6.1-sol`/high; launch context default,
 actual context tier unknown.
 
+### Held thin-fin and dentary checkpoint after 15000b47
+
+WIP only, NOT [ready], import authorization or art acceptance. Trout/salmon/
+mackerel skull stations are shortened smoothly without moving posterior fins.
+Slender anterior dentaries now blend into the deeper throat; the oral roof
+arches upward instead of depressing into the vestibule. Continuous clustered
+substrate variation replaces rectangular diffuse/roughness/metallic blocks;
+discrete scale variation is confined to exposed arches with a zero-start crown.
+The fixed wet film remains .65/.06.
+
+Thin ray-supported membranes now scatter light at source SSS .32 with effective
+200/100/50-micron radii. A face-domain role mask restores TWO baked materials:
+opaque anatomy at SSS0 and the exact M_<Item>Membrane slot at SSS .32, sharing
+the same four material images. AO remains a fifth exported map. This avoids
+the generic baker's maximum-source-SSS spreading through the head/body/eyes.
+The opt-in importer isolates M_CaughtFishMembrane from the common parent and
+uses TwoSidedFoliage/textured subsurface/.35 opacity as an engine approximation;
+it does not claim Blender/UE shading equivalence or actual shader compatibility.
+Nine offline dispatch/isolation/idempotence/error contracts pass; Integration
+still owns the real API/shader/import/appearance gate for both fish parents.
+
+Held evidence is Assets\Props\CaughtFish\MembraneProof\{Source,Baked,Family}.
+The paired trout source/bake has mean/RMS 8-bit differences .084/.583 hero
+and .529/1.558 detail; five 4096 maps and matching 4K views pass fidelity/
+current-source receipts. The family has six FBX, thirty 4096 maps and twelve
+viewed 3840x2160/192-sample OPTIX frames plus a viewed thirty-map overview.
+Copied receipts pass. Triangles: trout 51,539; salmon 57,510; perch 51,596;
+carp 53,610; mackerel 55,319; bass 54,655. Raw jaw/hinge/roof/station,
+160 tooth/four barbel roots, twelve pupils/pectoral fans, fin attachment,
+joined finite geometry/UV/pivot/normals and material-role fixtures pass.
+No gameplay, saves, versions, enum widths, placements or Unreal assets changed.
+
+Absolute Blender image paths survived save_as_mainfile(relative_remap=True)
+and failed two portability probes. Explicit //Textures-relative paths, saved
+without automatic remapping, then reopened, resolve all 24 family material
+references locally. This is a verified preservation fix, not a claim that the
+generic exporter already guarantees portability. Earlier held evidence is frozen.
+
+Viewed improvement: no rectangular substrate blocks, shorter selected skulls,
+thinner dentaries, more open palatal space and warmer light through the fins.
+The remaining art defect is concrete: carp still has a predatory wedge/gape,
+head ridges/opercular edges look carved and fins retain leaf-like regular ribs.
+Next correction targets species-specific muzzle/gape and jaw-relative bony
+landmarks before the sixteen dishes; no operational blocker or new approval
+wait. Another 8-12+ hours of art/wiring remains an estimate, not a release promise.
+
+Visible Blender PID20420/port9878 holds the current six baked meshes at their
+export origins, not the previous review grid. Named pre-pass/source/baked
+preservation copies remain on E:. No UE, UBT/UAT, new helpers, automation,
+shortcut or real-save access. Overnight/slot2 authorization remains in force.
+Build02-only provisional usage: 398 calls through event70463,
+2,445,055,050,000 recorded nano-AIU. Actual gpt-6.1-sol/high; launch context
+default, actual context tier unknown; later calls need recapture.
+
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.
 Notion identity and Ledger read in full; no technical-project Notion writes.

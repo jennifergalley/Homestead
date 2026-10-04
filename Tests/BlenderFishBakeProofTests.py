@@ -15,10 +15,17 @@ MAPS = {"basecolor", "roughness", "normal", "ao", "metallic"}
 RENDER_SIZE = (3840, 2160)
 MAX_MEAN_DIFFERENCE = 1.5
 MAX_RMS_DIFFERENCE = 3.0
+FISH_KEYS = ("RiverTrout", "RiverSalmon", "LakePerch", "LakeCarp", "SeaMackerel", "SeaBass")
 
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def check_wet_contract(report: dict) -> None:
+    assert report["wet_fish"] == {
+        "coat_weight": .65, "coat_roughness": .06, "membrane_opacity": .35,
+        "membrane_materials": ["M_" + key + "Membrane" for key in FISH_KEYS]}
 
 
 def main() -> None:
@@ -34,7 +41,7 @@ def main() -> None:
         assert report["authored_source_sha256"] == digest(ROOT / "Scripts" / "Blender" / "Recipes" / "caught_fish.py")
         assert report["material_source_sha256"] == digest(ROOT / "Scripts" / "Blender" / "homestead_materials.py")
         assert report["source_sha256"] == digest(ROOT / report["source"])
-        assert report["wet_fish"] == {"coat_weight": .65, "coat_roughness": .06}
+        check_wet_contract(report)
         assert set(report["meshes"]) == {"SM_RiverTrout"}, "Proof must contain only the one structural trout"
         assert not report["warnings"]
     assert source["draft_mode"] == "source" and baked["draft_mode"] == "baked"
@@ -44,6 +51,8 @@ def main() -> None:
     assert source_mesh["size_cm"] == baked_mesh["size_cm"]
     assert set(baked_mesh["bake"]["maps"]) == MAPS
     assert baked_mesh["bake"]["normal"] == "OpenGL"
+    assert {material["name"] for material in baked_mesh["materials"]} == {
+        "M_RiverTrout", "M_RiverTroutMembrane"}
     evidence = {"draft_only": True, "not_art_or_unreal_acceptance": True,
                 "authored_source_sha256": source["authored_source_sha256"],
                 "material_source_sha256": source["material_source_sha256"], "maps": {}, "views": {}}

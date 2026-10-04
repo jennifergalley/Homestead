@@ -12,6 +12,9 @@ import bpy
 
 FISH_COAT_WEIGHT = .65
 FISH_COAT_ROUGHNESS = .06
+FISH_MEMBRANE_SSS_WEIGHT = .32
+FISH_MEMBRANE_SSS_RADIUS = (.004, .002, .001)
+FISH_MEMBRANE_SSS_SCALE = .05
 
 
 class Graph:
@@ -270,8 +273,15 @@ def fish_skin(name: str, back: tuple, flank: tuple, belly: tuple,
     cells = g.combine(g.math("FLOOR", g.math("ADD", columns, offset)),
                       g.math("FLOOR", rows), 2.37)
     cell_tone = g.noise(cells, scale=1, detail=1).outputs["Fac"]
-    color = g.mix(color, g.ramp(cell_tone, [(0, (.73,.79,.75)), (1, (1.08,1.06,.96))]),
-                  g.math("MULTIPLY", scale_gate, .72), blend="MULTIPLY")
+    substrate = g.noise(g.combine(columns, rows, 5.41), scale=.22, detail=3).outputs["Fac"]
+    exposed = g.math("MULTIPLY", g.remap(sx, .03, .16),
+                     g.remap(g.math("SUBTRACT", sx, arch), -.030, .010, 1, 0))
+    exposed = g.math("MULTIPLY", exposed, g.remap(g.math("ABSOLUTE", sy), .30, .49, 1, 0))
+    scale_patch = g.math("MULTIPLY", exposed, scale_gate)
+    color = g.mix(color, g.ramp(substrate, [(0, (.86,.89,.86)), (1, (1.05,1.04,.99))]),
+                  g.math("MULTIPLY", scale_gate, .35), blend="MULTIPLY")
+    color = g.mix(color, g.ramp(cell_tone, [(0, (.88,.91,.89)), (1, (1.05,1.04,.99))]),
+                  g.math("MULTIPLY", scale_patch, .45), blend="MULTIPLY")
     color = g.mix(color, (.62, .67, .64),
                   g.math("MULTIPLY", g.math("MULTIPLY", rim, scale_gate), .08), blend="MULTIPLY")
     lateral_phase = g.math("MULTIPLY", g.remap(along, .22, .90), math.pi)
@@ -313,17 +323,20 @@ def fish_skin(name: str, back: tuple, flank: tuple, belly: tuple,
         nares = g.math("MAXIMUM", nares, g.remap(radius, .40, 1.1, 1, 0))
     color = g.mix(color, (.035,.039,.027), nares)
     g.set("Base Color", color)
-    rough = g.math("ADD", g.math("MULTIPLY", g.remap(cell_tone, .30, .70, .09, .34),
+    substrate_rough = g.math("ADD", g.remap(substrate, .30, .70, .15, .26),
+                           g.math("MULTIPLY", scale_patch, g.remap(cell_tone, 0, 1, -.018, .018)))
+    rough = g.math("ADD", g.math("MULTIPLY", substrate_rough,
                                 g.math("SUBTRACT", 1, head)),
                    g.math("MULTIPLY", g.remap(granules, .35, .65, .23, .09), head))
     g.set("Roughness", rough)
     silver = .40 if pattern in {"salmon", "mackerel", "bass"} else .24
-    reflectance = g.math("MULTIPLY", g.remap(cell_tone, .30, .70, .60, 1.20), silver)
+    reflectance = g.math("ADD", g.math("MULTIPLY", g.remap(substrate, .30, .70, .75, 1.05), silver),
+                        g.math("MULTIPLY", scale_patch, g.remap(cell_tone, 0, 1, -.015, .015)))
     g.set("Metallic", g.math("MAXIMUM", g.math("MULTIPLY", scale_gate, reflectance),
                             g.math("MULTIPLY", head, g.remap(granules, .35, .65, .20, .48))))
     g.set("Coat Weight", FISH_COAT_WEIGHT)
     g.set("Coat Roughness", FISH_COAT_ROUGHNESS)
-    crown = g.math("MULTIPLY", g.math("ADD", .20, g.math("MULTIPLY", sx, .80)),
+    crown = g.math("MULTIPLY", sx,
                    g.math("MAXIMUM", 0, g.math("SUBTRACT", 1, g.math("MULTIPLY", sy,
                                                                                   g.math("MULTIPLY", sy, 4)))))
     crown = g.math("MULTIPLY", crown, g.remap(g.math("SUBTRACT", sx, arch), -.018, .018, 1, 0))
@@ -340,7 +353,15 @@ def fish_skin(name: str, back: tuple, flank: tuple, belly: tuple,
     return g.mat
 
 
-def fish_fin(name: str, color: tuple, ray_detail: bool = True):
+def configure_fish_membrane(material: bpy.types.Material) -> None:
+    bsdf = next(node for node in material.node_tree.nodes if node.type == "BSDF_PRINCIPLED")
+    bsdf.inputs["Subsurface Weight"].default_value = FISH_MEMBRANE_SSS_WEIGHT
+    bsdf.inputs["Subsurface Radius"].default_value = FISH_MEMBRANE_SSS_RADIUS
+    bsdf.inputs["Subsurface Scale"].default_value = FISH_MEMBRANE_SSS_SCALE
+    material["fish_membrane"] = True
+
+
+def fish_fin(name: str, color: tuple, ray_detail: bool = True, membrane: bool = False):
     """Thin membrane with authored radial striation, not flat-coloured pennants."""
     g = Graph(name)
     p = g.coord()
@@ -361,6 +382,8 @@ def fish_fin(name: str, color: tuple, ray_detail: bool = True):
     normal = g.bump(grain, .16, .00009)
     g.set("Normal", g.bump(rib, .24, .00015, normal))
     g.mat.diffuse_color = (*color, 1.0)
+    if membrane:
+        configure_fish_membrane(g.mat)
     return g.mat
 
 

@@ -44,11 +44,15 @@ BODY_RINGS = 201
 BODY_SIDES = 80
 ORAL_LINING_COLUMNS = 11
 ROSTRUM_ROUNDING = .004
+HEAD_BLEND_START = .18
+HEAD_BLEND_END = .38
+HEAD_CROSS_SECTION_FLATTENING = .18
+MEMBRANE_OPACITY = .35
 BODY_STATION_SPANS = ((.06, 16), (.14, 32), (.21, 24), (.23, 24), (.30, 24),
                       (.50, 24), (.70, 24), (.85, 24), (.90, 8))
 PROFILE_T = (0, 0.035, 0.075, 0.12, 0.18, 0.25, 0.36, 0.50, 0.65, 0.76, 0.85, 0.90)
 FISH = (
-    dict(key="RiverTrout", species="Salmo trutta", length=0.34, pattern="trout",
+    dict(key="RiverTrout", species="Salmo trutta", length=0.34, pattern="trout", head_scale=.80, jaw_depth=.008,
          width=(.014, .024, .034, .043, .054, .058, .058, .051, .037, .022, .011, .009),
          top=(.017, .031, .049, .064, .080, .097, .103, .090, .065, .041, .021, .015),
          bottom=(.018, .030, .041, .053, .071, .088, .090, .079, .055, .030, .017, .014),
@@ -56,7 +60,7 @@ FISH = (
          fin=(.067, .074, .050), eye=(.33, .22, .065), eye_u=.095, eye_size=.014,
          dorsals=((.35, .52, .067, 14),), adipose=(.74, .80, .026),
          tail_height=.090, tail_fork=.988, mouth_end=.135, mouth_gap=.020, scales=140),
-    dict(key="RiverSalmon", species="Salmo salar", length=0.62, pattern="salmon",
+    dict(key="RiverSalmon", species="Salmo salar", length=0.62, pattern="salmon", head_scale=.78, jaw_depth=.008,
          width=(.009, .016, .026, .035, .045, .054, .055, .046, .033, .021, .012, .008),
          top=(.014, .024, .039, .054, .068, .084, .095, .083, .061, .037, .020, .015),
          bottom=(.018, .027, .037, .051, .066, .080, .086, .074, .053, .031, .018, .014),
@@ -64,7 +68,7 @@ FISH = (
          fin=(.091, .102, .073), eye=(.29, .27, .13), eye_u=.096, eye_size=.011,
          dorsals=((.36, .51, .10, 13),), adipose=(.75, .80, .025),
          tail_height=.12, tail_fork=.945, mouth_end=.151, mouth_gap=.013, scales=155),
-    dict(key="LakePerch", species="Perca fluviatilis", length=0.30, pattern="perch",
+    dict(key="LakePerch", species="Perca fluviatilis", length=0.30, pattern="perch", head_scale=1.0, jaw_depth=.010,
          width=(.012, .025, .039, .050, .060, .067, .065, .056, .042, .028, .014, .010),
          top=(.016, .039, .063, .078, .106, .151, .158, .141, .095, .054, .025, .016),
          bottom=(.028, .046, .059, .071, .087, .114, .123, .107, .079, .043, .021, .015),
@@ -72,7 +76,7 @@ FISH = (
          fin=(.27, .048, .016), eye=(.41, .27, .025), eye_u=.105, eye_size=.019,
          dorsals=((.29, .55, .123, 14), (.59, .76, .090, 13)), adipose=None,
          tail_height=.129, tail_fork=.947, mouth_end=.112, mouth_gap=.016, scales=78),
-    dict(key="LakeCarp", species="Cyprinus carpio", length=0.42, pattern="carp",
+    dict(key="LakeCarp", species="Cyprinus carpio", length=0.42, pattern="carp", head_scale=1.0, jaw_depth=.013,
          width=(.015, .029, .042, .054, .072, .090, .096, .087, .059, .038, .019, .012),
          top=(.023, .039, .060, .081, .118, .161, .183, .166, .122, .068, .031, .019),
          bottom=(.037, .052, .067, .081, .098, .124, .135, .122, .089, .053, .025, .018),
@@ -80,7 +84,7 @@ FISH = (
          fin=(.18, .105, .042), eye=(.32, .18, .040), eye_u=.10, eye_size=.012,
          dorsals=((.29, .74, .080, 20),), adipose=None,
          tail_height=.147, tail_fork=.923, mouth_end=.075, mouth_gap=.017, scales=46),
-    dict(key="SeaMackerel", species="Scomber scombrus", length=0.36, pattern="mackerel",
+    dict(key="SeaMackerel", species="Scomber scombrus", length=0.36, pattern="mackerel", head_scale=.82, jaw_depth=.008,
          width=(.006, .014, .024, .033, .048, .058, .061, .051, .033, .017, .008, .006),
          top=(.009, .023, .037, .050, .062, .071, .070, .060, .040, .024, .013, .010),
          bottom=(.013, .026, .040, .051, .063, .066, .064, .054, .037, .022, .012, .009),
@@ -88,7 +92,7 @@ FISH = (
          fin=(.12, .14, .11), eye=(.31, .28, .12), eye_u=.108, eye_size=.018,
          dorsals=((.31, .46, .087, 11), (.64, .73, .045, 10)), adipose=None,
          tail_height=.137, tail_fork=.918, mouth_end=.13, mouth_gap=.010, scales=130),
-    dict(key="SeaBass", species="Dicentrarchus labrax", length=0.46, pattern="bass",
+    dict(key="SeaBass", species="Dicentrarchus labrax", length=0.46, pattern="bass", head_scale=1.0, jaw_depth=.010,
          width=(.012, .029, .041, .049, .059, .068, .071, .061, .043, .028, .014, .011),
          top=(.018, .038, .056, .070, .087, .105, .118, .104, .077, .047, .024, .018),
          bottom=(.034, .046, .057, .066, .077, .089, .098, .087, .064, .037, .020, .016),
@@ -100,7 +104,9 @@ FISH = (
 REPORT = {"species": [{"item": f["key"], "scientific_name": f["species"],
                        "representative_length_cm": f["length"] * 100} for f in FISH],
           "wet_fish": {"coat_weight": materials.FISH_COAT_WEIGHT,
-                       "coat_roughness": materials.FISH_COAT_ROUGHNESS}}
+                       "coat_roughness": materials.FISH_COAT_ROUGHNESS,
+                       "membrane_materials": ["M_" + fish["key"] + "Membrane" for fish in FISH],
+                       "membrane_opacity": MEMBRANE_OPACITY}}
 
 
 def profile(values: tuple, t: float) -> float:
@@ -126,11 +132,27 @@ def profile(values: tuple, t: float) -> float:
             + (u**3 - u**2) * span * tangent(index + 1))
 
 
+def anatomy_station(fish: dict, u: float) -> float:
+    """Compress the smaller skulls without relocating posterior fins or the tail."""
+    blend = min(1, max(0, (u - HEAD_BLEND_START) / (HEAD_BLEND_END - HEAD_BLEND_START)))
+    blend = blend * blend * (3 - 2 * blend)
+    return u * (fish["head_scale"] + (1 - fish["head_scale"]) * blend)
+
+
+def ventral_profile(fish: dict, u: float) -> float:
+    """A slender dentary meets the deeper branchiostegal throat behind the mouth."""
+    t = min(1, u / fish["mouth_end"])
+    jaw = .003 + .014 * t ** 1.3 + fish["jaw_depth"] * (.65 + .35 * t)
+    blend = min(1, max(0, (u / fish["mouth_end"] - .65) / .60))
+    blend = blend * blend * (3 - 2 * blend)
+    return jaw * (1 - blend) + profile(fish["bottom"], u) * blend
+
+
 def surface(fish: dict, u: float, angle: float, lift: float = 0) -> Vector:
     length = fish["length"]
     s = math.sin(angle)
     muzzle = .55 + .45 * math.sqrt(max(0, 1 - (1 - min(1, u / .028)) ** 2))
-    z = profile(fish["top"] if s >= 0 else fish["bottom"], u) * s * muzzle
+    z = (profile(fish["top"], u) if s >= 0 else ventral_profile(fish, u)) * s * muzzle
     centre_x = .005 * math.sin(math.pi * u) ** 2
     posterior = .187 + .065 * math.exp(-((s - .20) / .50) ** 2)
     gate = min(1, max(0, (abs(math.cos(angle)) - .35) / .30))
@@ -143,7 +165,8 @@ def surface(fish: dict, u: float, angle: float, lift: float = 0) -> Vector:
         eye_angle = .35 if math.cos(angle) >= 0 else math.pi - .35
         delta = math.atan2(math.sin(angle - eye_angle), math.cos(angle - eye_angle))
         arc = max(profile(fish["top"], fish["eye_u"]), .035) * delta
-        orbit = math.hypot((u - fish["eye_u"]) / fish["eye_size"], arc / fish["eye_size"])
+        orbit = math.hypot((anatomy_station(fish, u) - anatomy_station(fish, fish["eye_u"]))
+                           / fish["eye_size"], arc / fish["eye_size"])
         preoperculum = .137 + .068 * math.exp(-((s + .10) / .48) ** 2)
         bone = (.0032 * math.exp(-((orbit - 1.12) / .23) ** 2)
                 + .0033 * math.exp(-((u - preoperculum) / .024) ** 2)
@@ -156,16 +179,17 @@ def surface(fish: dict, u: float, angle: float, lift: float = 0) -> Vector:
                 * math.exp(-((s + .62) / .10) ** 2)) * gate * length
     head_blend = max(0, min(1, (.285 - u) / .10))
     head_blend = head_blend * head_blend * (3 - 2 * head_blend)
-    lateral = math.copysign(abs(math.cos(angle)) ** (1 - .35 * head_blend), math.cos(angle))
+    lateral = math.copysign(abs(math.cos(angle)) ** (
+        1 - HEAD_CROSS_SECTION_FLATTENING * head_blend), math.cos(angle))
     return Vector((length * (centre_x + profile(fish["width"], u) * lateral * muzzle),
-                   length * (u - .5), length * z)) + Vector(
+                   length * (anatomy_station(fish, u) - .5), length * z)) + Vector(
                        (math.cos(angle), 0, math.sin(angle))) * (lift + operculum + bone)
 
 
 def oral_angle(fish: dict, u: float) -> float:
     t = min(1, u / fish["mouth_end"])
     z = -.003 - .014 * t ** 1.3
-    angle = math.asin(max(-.8, z / profile(fish["bottom"], min(u, fish["mouth_end"]))))
+    angle = math.asin(max(-.8, z / ventral_profile(fish, min(u, fish["mouth_end"]))))
     fade = min(1, max(0, (u - fish["mouth_end"]) / .045))
     return angle * (1 - fade * fade * (3 - 2 * fade))
 
@@ -188,8 +212,9 @@ def jaw_surface(fish: dict, u: float, angle: float, upper: bool) -> Vector:
     elif u < fish["mouth_end"]:
         hinge_u = fish["mouth_end"]
         hinge_z = surface(fish, hinge_u, oral_angle(fish, hinge_u)).z + fish["length"] * .008
-        hinge_y = fish["length"] * (hinge_u - .5)
-        opening = math.asin(min(.6, .88 * fish["mouth_gap"] / hinge_u))
+        hinge_station = anatomy_station(fish, hinge_u)
+        hinge_y = fish["length"] * (hinge_station - .5)
+        opening = math.asin(min(.6, .88 * fish["mouth_gap"] / hinge_station))
         opening *= min(1, max(0, (1 - u / hinge_u) / .25))
         dy, dz = point.y - hinge_y, point.z - hinge_z
         point.y = hinge_y + dy * math.cos(opening) - dz * math.sin(opening)
@@ -315,7 +340,7 @@ def body(kit, fish: dict, material, cavity_material):
                 t = column / (lining_columns - 1)
                 point = a.lerp(b, t)
                 fullness = oral_gap(fish, u) * .20 * math.sin(math.pi * t) ** 2
-                point.z += fullness * (-1 if upper else 1)
+                point.z += fullness
                 vertices.append(point)
                 coords.append((u, 1 - 2 * t, math.sin(oral_angle(fish, u))))
         for ring in range(len(head_rings) - 1):
@@ -541,11 +566,11 @@ def build_species(kit, fish: dict):
     skin = kit.mats.fish_skin("M_" + key + "Skin", fish["back"], fish["flank"],
                               fish["belly"], fish["pattern"], fish["scales"], scale_rings,
                               eye_u=fish["eye_u"])
-    fin = kit.mats.fish_fin("M_" + key + "Fin", fish["fin"])
+    fin = kit.mats.fish_fin("M_" + key + "Fin", fish["fin"], membrane=True)
     dorsal_color = (.18, .19, .13) if fish["pattern"] == "perch" else tuple(
         .60 * back + .40 * fin_color for back, fin_color in zip(fish["back"], fish["fin"]))
-    dorsal_fin = kit.mats.fish_fin("M_" + key + "Dorsal", dorsal_color)
-    pectoral_fin = kit.mats.fish_fin("M_" + key + "Pectoral", (.20, .16, .065)) if fish["pattern"] == "perch" else fin
+    dorsal_fin = kit.mats.fish_fin("M_" + key + "Dorsal", dorsal_color, membrane=True)
+    pectoral_fin = kit.mats.fish_fin("M_" + key + "Pectoral", (.20, .16, .065), membrane=True) if fish["pattern"] == "perch" else fin
     eye_mat = kit.mats.fish_eye("M_" + key + "Eye", fish["eye"])
     lip = kit.mats.fish_fin("M_" + key + "Lip", tuple(c*.65 for c in fish["flank"]))
     cavity = kit.mats.fish_fin("M_" + key + "Mouth", (.075, .044, .035), ray_detail=False)
@@ -586,6 +611,9 @@ def build_species(kit, fish: dict):
     obj["fish_item"] = key
     obj["fish_species"] = fish["species"]
     obj["fish_original"] = True
+    membrane_faces = obj.data.attributes.new("fish_membrane", "BOOLEAN", "FACE")
+    for face, entry in zip(obj.data.polygons, membrane_faces.data):
+        entry.value = bool(obj.data.materials[face.material_index].get("fish_membrane", False))
     return obj
 
 
@@ -594,10 +622,27 @@ def build(kit) -> list:
 
 
 def after_bake(kit, obj) -> None:
+    membrane_faces = obj.data.attributes.get("fish_membrane")
+    if membrane_faces is None or not any(entry.value for entry in membrane_faces.data):
+        raise RuntimeError("Caught fish lost its membrane face assignments: " + obj.name)
     material = obj.material_slots[0].material
     bsdf = next(node for node in material.node_tree.nodes if node.type == "BSDF_PRINCIPLED")
     bsdf.inputs["Coat Weight"].default_value = materials.FISH_COAT_WEIGHT
     bsdf.inputs["Coat Roughness"].default_value = materials.FISH_COAT_ROUGHNESS
+    # The generic baker carries the largest SSS weight; never spread fin scattering onto the skin.
+    bsdf.inputs["Subsurface Weight"].default_value = 0
+    name = "M_" + obj["fish_item"] + "Membrane"
+    previous = bpy.data.materials.get(name)
+    if previous is not None:
+        if previous.users:
+            raise RuntimeError("Caught fish membrane material is already in use: " + name)
+        bpy.data.materials.remove(previous)
+    membrane = material.copy()
+    membrane.name = name
+    materials.configure_fish_membrane(membrane)
+    obj.data.materials.append(membrane)
+    for face, entry in zip(obj.data.polygons, membrane_faces.data):
+        face.material_index = 1 if entry.value else 0
 
 
 for fish in FISH:

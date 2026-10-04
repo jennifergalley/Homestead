@@ -77,6 +77,13 @@ def check_jaw_openings() -> None:
             posterior = .187 + .065 * math.exp(-((math.sin(angle) - .20) / .50) ** 2)
             assert min(abs(u - posterior) for u in stations) < .000001, "Missing opercular landmark ring"
         for fish in recipe.FISH:
+            physical = [recipe.anatomy_station(fish, index / 1000) for index in range(1001)]
+            assert all(a < b for a, b in zip(physical, physical[1:])), fish["key"] + " folds its head stations"
+            assert abs(recipe.anatomy_station(fish, fish["eye_u"])
+                       - fish["eye_u"] * fish["head_scale"]) < .000001
+            assert recipe.anatomy_station(fish, .50) == .50, fish["key"] + " relocates posterior anatomy"
+            assert recipe.ventral_profile(fish, .035) < .65 * recipe.profile(fish["bottom"], .035), (
+                fish["key"] + " retains a body-thick anterior dentary")
             obj = recipe.body(kit, fish, skin, cavity)
             data = obj.data
             try:
@@ -84,7 +91,7 @@ def check_jaw_openings() -> None:
                 rest = recipe.surface(fish, chin_u, 1.5 * math.pi)
                 posed = recipe.jaw_surface(fish, chin_u, 1.5 * math.pi, False)
                 hinge_u = fish["mouth_end"]
-                hinge = Vector((rest.x, fish["length"] * (hinge_u - .5),
+                hinge = Vector((rest.x, fish["length"] * (recipe.anatomy_station(fish, hinge_u) - .5),
                                 recipe.surface(fish, hinge_u, recipe.oral_angle(fish, hinge_u)).z
                                 + fish["length"] * .008))
                 assert posed.y > rest.y and posed.z < rest.z, fish["key"] + " lacks mandibular retreat"
@@ -110,6 +117,12 @@ def check_jaw_openings() -> None:
                            for face in cavity_faces), fish["key"] + " has collapsed cavity faces"
                 lining_start = obj["oral_lining_start"]
                 lining_sheet = obj["oral_lining_columns"] * obj["oral_lining_rings"]
+                for ring in range(obj["oral_lining_rings"]):
+                    start = lining_start + ring * obj["oral_lining_columns"]
+                    middle = data.vertices[start + obj["oral_lining_columns"] // 2].co
+                    edges = (data.vertices[start].co
+                             + data.vertices[start + obj["oral_lining_columns"] - 1].co) * .5
+                    assert middle.z >= edges.z, fish["key"] + " has a depressed palatal vault"
                 roof_faces = [face for face in cavity_faces if all(
                     lining_start <= index < lining_start + lining_sheet for index in face.vertices)]
                 floor_faces = [face for face in cavity_faces if all(
@@ -225,7 +238,7 @@ def check_geometry(keys=EXPECTED) -> None:
         signature = hashlib.sha256(normalized).hexdigest()
         assert signature not in signatures, key + " reuses another catch's normalized geometry"
         signatures.add(signature)
-        assert len(obj.material_slots) in (1, 5, 6, 7, 8), key + " has missing anatomy materials"
+        assert len(obj.material_slots) in (1, 2, 5, 6, 7, 8), key + " has missing anatomy materials"
         print(f"ORIGINAL_FISH_PASS {key}: {species}, {triangles} tris, length/pivot/UV/unique geometry")
 
 
@@ -266,12 +279,33 @@ def check_baked_texture_dependencies(keys=EXPECTED) -> None:
     print("ORIGINAL_FISH_PORTABLE_TEXTURES_PASS", 4 * len(keys))
 
 
+def check_membrane_materials(keys=EXPECTED) -> None:
+    source = Path(__file__).resolve().parents[1] / "Scripts" / "Blender"
+    sys.path.insert(0, str(source))
+    import homestead_materials as materials
+    for key in keys:
+        obj = bpy.data.objects.get("SM_" + key)
+        assert obj is not None, "Missing membrane catch mesh: " + key
+        faces = obj.data.attributes.get("fish_membrane")
+        assert faces is not None and any(entry.value for entry in faces.data), key + " lacks fin assignments"
+        assert any(not entry.value for entry in faces.data), key + " marks its whole body as membrane"
+        for face, entry in zip(obj.data.polygons, faces.data):
+            material = obj.data.materials[face.material_index]
+            bsdf = next(node for node in material.node_tree.nodes if node.type == "BSDF_PRINCIPLED")
+            assert bool(material.get("fish_membrane", False)) == bool(entry.value), key + " changes fin assignments"
+            expected = materials.FISH_MEMBRANE_SSS_WEIGHT if entry.value else 0
+            assert abs(bsdf.inputs["Subsurface Weight"].default_value - expected) < .000001, (
+                key + " loses fin scattering or spreads it onto opaque anatomy")
+    print("ORIGINAL_FISH_MEMBRANE_MATERIALS_PASS", len(keys))
+
+
 def main() -> None:
     check_fin_ray_attachment()
     check_pectoral_fans()
     check_jaw_openings()
     check_wet_film()
     check_geometry()
+    check_membrane_materials()
     print("ORIGINAL_FISH_FAMILY_PASS 6")
 
 
