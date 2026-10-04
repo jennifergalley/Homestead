@@ -12,10 +12,10 @@ See proposal.md. Existing flower records use scenery kinds 42-48 and seven origi
 
 ## Decisions
 
-- Bake deterministic supplemental habitat drifts from existing terrain weights, water/path geometry and layout polygons rather than spawning individual flower actors or scattering each refresh. Preserve the lake-trail records and all non-flower records; make rebakes idempotent.
+- Bake deterministic supplemental habitat drifts from existing terrain weights, water/path geometry and layout polygons rather than spawning individual flower actors or scattering each refresh. Preserve the lake-trail records and all non-flower records; make rebakes idempotent. `estate_wildflowers.py` uses the ignored HSC1 padding (`WF3`) to identify only its own records; run it after any `lake_path_plants.py` rebake.
 - Keep existing kind indices, scale conventions, cell batches, material application and short cull distances. Use restrained densities and gaps, with explicit count summaries, rather than a uniform grid carpet.
 - Include farm/manor exclusions in the bake and runtime flower mask. Consume `State.plots`, `GardenCellCenter` and `GardenCellSize` rather than a second tilled-ground state or crop-dependent test. Mask the full flower footprint against the square.
-- Gate expensive mask work on Simulation revision and a relevant layout key including plot coordinates. Unchanged refreshes do not inspect instances; energy/time-only revisions do not trigger instance remasking.
+- Reuse Refresh's already-computed relevant layout key (including plot coordinates) before any mask-specific hashing. This actual-change gate is stronger than a revision-only gate: energy/time/inventory-only revisions do not rehash or inspect instances. A second footprint key ignores subordinate resource-cleared flags. The derived plot-cell index is rebuilt only for actual layout changes, never saved.
 - Environment owns supplemental terrain script/data and scenery mask/helpers/tests. Gameplay/UI retains controller/crop files and query semantics. Any actual mesh/material authoring goes to Fishing Art. Integration alone packages.
 
 ## Risks / Trade-offs

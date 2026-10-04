@@ -21,6 +21,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadOvergrowth.cpp
     Source/SurvivalGame/Simulation/HomesteadEstate.cpp
     Source/SurvivalGame/Simulation/HomesteadEstateDisrepair.cpp
+    Source/SurvivalGame/Simulation/HomesteadFlowerCover.cpp
     Source/SurvivalGame/Simulation/HomesteadParcels.cpp
     Source/SurvivalGame/Simulation/HomesteadItems.cpp
     Source/SurvivalGame/Simulation/HomesteadShops.cpp
@@ -50,6 +51,15 @@ else()
 endif()
 
 enable_testing()
+add_executable(HomesteadFlowerCoverTests Tests/HomesteadFlowerCoverTests.cpp)
+target_link_libraries(HomesteadFlowerCoverTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadFlowerCoverTests PRIVATE /W4 /EHs-c-)
+else()
+    target_compile_options(HomesteadFlowerCoverTests PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions)
+endif()
+add_test(NAME HomesteadFlowerCoverTests COMMAND HomesteadFlowerCoverTests)
+
 add_executable(HomesteadSimulationTests Tests/HomesteadSimulationTests.cpp)
 target_link_libraries(HomesteadSimulationTests PRIVATE HomesteadSimulation)
 if(MSVC)
