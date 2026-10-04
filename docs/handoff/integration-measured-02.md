@@ -195,6 +195,10 @@ import are held. It changes no UE, gameplay, or saves. Its fish-only ClearCoat i
 offline; actual UE parent compile remains Integration's future gate. Reusable Blender fixes are
 documented: explicitly wind open-jaw repair volumes, conform eyes to `jaw_surface`, and use the
 active screen owned by a Blender window for `temp_override`.
+Risky-art reviewer `991baa12-1d79-4171-bcd6-5c653ce1d09a` is a single build02 read-only helper
+(GPT-6.1 Sol, high, default launch) diagnosing the `4148` images and recipe. It uses no GPU, editor,
+or implementation slot. Jenny directly authorized Farming to continue autonomously on structural jaw,
+gill, and scale geometry, so this review does not pause that lane; export and UE admission remain held.
 
 ### Narrow overnight exception
 
