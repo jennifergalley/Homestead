@@ -147,8 +147,16 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 
 - SHA: `b073cebe` persists the exact manifest-approved 127-asset bootstrap resave set; `fa3265fd`
   records the fresh-cook/candidate evidence.
-- Status: **delivered**. `Homestead Estate.lnk` was retargeted after all gates passed, preserving its
-  icon and package-local `-UserDir`.
+- Status: delivered
+- `Homestead Estate.lnk` was retargeted after all gates passed, preserving its icon and
+  package-local `-UserDir`.
+- Ships: Plant Seeds/harvest-seed balance, crop cooking, the 1500-coin pole, the selected fishing loop with six original fish, and eleven provisional meals: Baked Potatoes, Roasted Turnips, Stewed Carrots, Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root Vegetable Hotpot, Raw Fish Slices, Grilled Trout, and Grilled Perch.
+- Player acceptance: **pending Jenny's playtest**. Delivery and guarded functional/save acceptance
+  do not close her unchecked planner checks.
+- Planner/accounting: `accounting/reports/20261003-measured-02.json` is the loader-compatible,
+  deduplicated observed-usage report. It covers all allocated lanes, Integration, orchestration, and
+  reviewers through the delivery-closure capture; `11,439.97802` recorded AIU is not
+  billing-reconciled credits, and any later tail/context remains unknown.
 - Fresh cook: the first Development cook wrote 1,019 tracked assets and was stopped. Jenny approved
   surgical restoration of 892 verified incidental writes while retaining exactly the 127 admitted
   CaughtFish/PreparedFood/FishingPole/`M_CaughtFishWet` paths. A 2m31s reconciled recook then

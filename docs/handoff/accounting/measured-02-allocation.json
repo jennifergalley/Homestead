@@ -1,6 +1,13 @@
 {
   "buildId": "20261003-measured-02",
   "authorizedAt": "2026-10-04T01:55:51.513Z",
+  "deliveryClosure": {
+    "allocation": "accounting/measured-02-final-allocation.json",
+    "usage": "accounting/measured-02-final-usage.json",
+    "report": "accounting/reports/20261003-measured-02.json",
+    "status": "published-incomplete-observed-usage",
+    "note": "The report is the planner input. It preserves exact per-call deduplication; AIU is not billing-reconciled credits, and post-capture context/billing remain unknown."
+  },
   "allocationPolicy": "Count each usage event once from this authorization boundary. Add fresh lane, integration and helper runtime identities before exporting. Preserve build01's closed windows. Split feature work and shared overhead using lane-reported boundaries; unknown context and billing coverage stay unknown.",
   "legacy": {
     "status": "unattributed",

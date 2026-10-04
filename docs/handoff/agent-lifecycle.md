@@ -57,6 +57,15 @@ animation or rendering diagnosis remains GPT-6.1 Sol / high. Jenny's direct inst
 
 This is the requested reporting contract, not an implemented collector or planner feature.
 
+### Mandatory delivery closure
+
+Before publishing a verified delivery, Integration exports every allocated local usage record and
+commits the corresponding `docs\handoff\accounting\reports\<build-id>.json` through
+`Scripts\Export-BuildUsage.py` and `Scripts\Report-BuildUsage.mjs`. The planner loads that report
+without agent work. The delivery ledger must distinguish shipped functionality from Jenny's pending
+playtest acceptance; it must carry deferred work forward and must not change planner IDs, schedules,
+edits, screenshots, or unchecked acceptance tasks.
+
 - Each accounting segment identifies the build, task/change, session/agent, actual model,
   reasoning effort, configured context tier, timestamps and usage-event range.
 - Export per-call token classes and recorded nano-AI units where available. Store integer units and

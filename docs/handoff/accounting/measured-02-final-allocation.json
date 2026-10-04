@@ -1,0 +1,138 @@
+{
+  "buildId": "20261003-measured-02",
+  "authorizedAt": "2026-10-04T01:55:51.513Z",
+  "finalCapture": false,
+  "allocationPolicy": "Count every captured local assistant_usage_events record exactly once from the measured02 authorization boundary through the delivery-closure capture. This is observed runtime AIU, not billing credits. The captured cutoff is final for this report only: later delivery-closure activity and external billing/context remain unknown.",
+  "legacy": {
+    "status": "unattributed",
+    "recordedNanoAiu": null,
+    "description": "Inherited source and earlier deferred-feature implementation are excluded rather than counted as zero."
+  },
+  "limits": [
+    "Capture ends at the delivery-closure snapshot; any post-capture tail is unknown.",
+    "Actual runtime context tiers and external billing reconciliation are unknown.",
+    "The report includes allocated but unshipped HUD, Travel Rest, and deferred-art work; it is not a cost-only total for released assets.",
+    "The five deferred preparations and final-realism work remain carried forward, not accepted or charged to a different release."
+  ],
+  "segments": [
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "agentId": "main",
+      "task": "orchestration-overhead",
+      "category": "overhead",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "agentId": "991baa12-1d79-4171-bcd6-5c653ce1d09a",
+      "task": "risky-fish-art-review",
+      "category": "review",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "agentId": "fc56f594-b380-45f1-9633-428ca29e5089",
+      "task": "fish-bake-normal-reconstruction-diagnosis",
+      "category": "review",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "agentId": "bb415168-dbc2-4991-a8d5-4dfd7891e444",
+      "task": "frozen-eleven-runtime-risk-review",
+      "category": "review",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "5be207bc-49b1-4a1b-811e-088ae565dc1b",
+      "agentId": "main",
+      "task": "farming-fishing-and-provisional-food",
+      "tasks": ["fix-seed-planting-hint-and-harvest-balance", "add-basic-crop-cookfire-recipes", "add-shore-and-river-fishing"],
+      "category": "implementation",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "1b0e10a4-09b5-458e-b9de-098cce831b07",
+      "agentId": "main",
+      "task": "travel-rest-feedback-bundle",
+      "category": "implementation",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "2424d5bc-bc5a-4eec-a37f-a2f82cb995d0",
+      "agentId": "main",
+      "task": "hud-feedback-bundle",
+      "category": "implementation",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "ac593377-587f-4319-a033-b17f309be13e",
+      "agentId": "main",
+      "task": "planner-feedback-editing",
+      "category": "implementation",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+      "agentId": "main",
+      "task": "integration-metadata-and-readiness",
+      "category": "overhead",
+      "since": "2026-10-04T01:55:51.513Z",
+      "until": "2026-10-04T09:44:00-07:00",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+      "agentId": "main",
+      "task": "gameplay-first-eleven-meal-delivery",
+      "category": "integration",
+      "since": "2026-10-04T09:44:00-07:00",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+      "agentId": "3865a688-1b7c-4b6e-b382-6419e666f0b1",
+      "task": "release-isolation-and-gameplay-risk-review",
+      "category": "review",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+      "agentId": "12dec5ba-3154-408f-92e3-10ddc75fcfb1",
+      "task": "fishing-risk-review",
+      "category": "review",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+      "agentId": "dd264dc9-3d9a-4aca-a792-20d08112cb99",
+      "task": "admission-boundary-review",
+      "category": "review",
+      "since": "2026-10-04T01:55:51.513Z",
+      "contextTier": null,
+      "launchContextTier": "default"
+    }
+  ]
+}

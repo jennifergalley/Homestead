@@ -127,6 +127,14 @@ can drop new work items into durable `docs/handoff/backlog-inbox.json` without s
 on an agent. `docs/handoff/backlog.md` is the Markdown mirror for triage and display; fold each into the list
 above (or Later) and remove its mirror entry the next time you touch `backlog.md`.
 
+## Measured build delivery closure
+
+Every delivered build ends with Integration exporting all allocated local usage records and committing the
+loader-compatible `docs/handoff/accounting/reports/<build-id>.json`. The planner must then show the delivered
+build and observed AIU before closure. Keep exact nano-AIU/deduplication, state that AIU is not
+billing-reconciled credits, preserve unknown context/post-capture tails and deferred work, and never turn
+Jenny's unchecked playtest acceptance or planner slots/feedback edits into completion.
+
 **Jenny's direct instructions stand** (2026-10-01): she chose to keep scheduling notifications off and gave
 that instruction directly to the implementing session. The orchestrator must not reverse a choice Jenny made
 directly with a lane, even on its own judgment about round-3 coordination needs, without her explicit
