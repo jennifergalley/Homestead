@@ -659,6 +659,33 @@ automation. Build02 provisional snapshot: 568 calls through event70757,
 3,418,866,540,000 recorded nano-AIU; later calls/terminal response need recapture.
 Prior hour estimates are obsolete; completion forecast remains uncertain.
 
+### Corrected live food dependency provenance
+
+24500d2a stays held. Audit found that build_prop reloads kit/mats but the new
+isolated food module remained cached between live requests. Its on-disk hash
+did NOT certify the executed shader graph; cached skin had eleven nodes with
+older ramp stops and flesh had only the 410-scale noise. Geometry/export hash
+fixtures remain valid; old four frames are not current-shader proof. Historical
+PotatoesSourceProof is unchanged except for explicit shader-cache-audit.json.
+Integration published this correction at f2ed9100, not a solved-cache claim.
+
+The owning recipe now explicitly reloads food before reading its report hash.
+Materials tag the executed module's loaded SOURCE_SHA256; fixtures independently
+check actual skin noise scales {170,65,1600,850} and flesh {230,1300}. The new
+fixture reproduced the prior scene's stale-source failure, then passed after
+fresh build/reopen. Two subsequent four-frame 4K/192-sample passes were viewed.
+Reduced camouflage, region-confined dry scorch, finer irregular starch relief
+and restrained natural moisture read less graphic, but flesh still looks too
+uniform and the elm grain remains procedural. No artistic acceptance.
+
+PotatoesReloadedSourceProof preserves a separate copied current blend/two FBX/
+four frames/report and fresh geometry/executed-shader/hash verification.
+Counts remain 53,056/18,176; portion now [5.4,7.8,2.71]cm. No food baking,
+import, engine verification, imagery/eating wiring, gameplay/save or fish
+material/helper/budget changes. Older proofs must not be rerendered in place.
+Build02-only provisional usage now 589 calls through event70794,
+3,473,105,220,000 recorded nano-AIU; later calls require recapture.
+
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.
 Notion identity and Ledger read in full; no technical-project Notion writes.

@@ -1,0 +1,28 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "recipe_sha256": "038f0e10038fcaaaca1e027a55f9ecc7b5f94d8e0fbaadd4808396a40e90f019",
+  "food_material_source_sha256": "0cfdb8fcd52f0741b0a10efb88f8d142752558b019a95112a9ec06770c754f83",
+  "copied_files_sha256": {
+    "SM_BakedPotatoes.fbx": "32493e0cee99fa2d993cadad6611cafce43519c640f549b5afa2fb9705e71ee2",
+    "beauty_SM_BakedPotatoes_hero.png": "b3793db57ef704c47e00126cc2a42e7b0d54b33c110f0151edc514695a7d503d",
+    "beauty_SM_BakedPotatoes_detail.png": "7745f64256292e7b01345c9011b471c71d963d1a7de0747494604aef0842c363",
+    "SM_BakedPotatoesPortion.fbx": "9405cc0701a4b1017c642525c3d2181ea4eee5b54b0bfa00d9f3095ed360fa24",
+    "beauty_SM_BakedPotatoesPortion_hero.png": "94d52dc0cf73cb148debb50e631918fb6a0a6ecbd56c2afcad055641c98a01d2",
+    "beauty_SM_BakedPotatoesPortion_detail.png": "adcf09752a9c70843f0744d31ba59054bb62cb13a8528b449e4cf7bf73b3ab10",
+    "PreparedPotatoesSource.blend": "7bca2e888d058c94252ce262efe950a818edb81111ab0a7152646f7dab1e745c"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual skin/flesh noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "skin/flesh/wood still require artistic refinement"
+  ]
+}

@@ -12,6 +12,7 @@ one whole and a second split into two halves, without oil/butter/garnish.
 Original 23.2cm turned elm platter; tubers 9.6-10.4cm, portion 7.8cm long.
 """
 import hashlib
+import importlib
 import math
 import random
 from pathlib import Path
@@ -20,6 +21,8 @@ import bmesh
 import homestead_food_materials as food
 import homestead_materials as materials
 from mathutils import Vector, noise
+
+food = importlib.reload(food)
 
 NAME = "PreparedPotatoesSource"
 DESCRIPTION = "Held original coal-baked potato serving and edible portion."
@@ -41,7 +44,8 @@ TUBER_RINGS = 72
 TUBER_SIDES = 96
 CRUMB_COLUMNS = 80
 CRUMB_CELL_SCALE_PER_M = 280
-CRUMB_FRACTURE_DEPTH_M = .0011
+CRUMB_FRACTURE_DEPTH_M = .0010
+CRUMB_CLUMP_RELIEF_M = .00065
 EYE_PIT_RADIUS_M = .0023
 EYE_PIT_DEPTH_M = .0009
 PLATTER_FLOOR_M = .009
@@ -120,12 +124,16 @@ def potato(kit, name: str, size: tuple, seed: int, split: bool, upper_half: bool
                 t = column / CRUMB_COLUMNS
                 point = vertices[left].lerp(vertices[right], t)
                 point.z *= (1 - math.sin(math.pi * t)) ** 2
-                grain = noise.noise(point * 640 + Vector((seed, seed * .31, 0)))
+                offset = Vector((seed, seed * .31, 0))
+                grain = noise.noise(point * 330 + offset)
                 distances = noise.voronoi(point * CRUMB_CELL_SCALE_PER_M
-                                          + Vector((seed, seed * .31, 0)))[0]
-                fracture = CRUMB_FRACTURE_DEPTH_M * math.exp(-((distances[1] - distances[0]) / .15) ** 2)
+                                          + offset)[0]
+                torn = max(0, min(1, .45 + 2 * noise.noise(point * 95 + offset)))
+                fracture = (CRUMB_FRACTURE_DEPTH_M * torn
+                            * math.exp(-((distances[1] - distances[0]) / .11) ** 2))
+                clump = CRUMB_CLUMP_RELIEF_M * noise.noise(point * 125 + offset)
                 fade = math.sin(math.pi * (ring + 1) / TUBER_RINGS) * math.sin(math.pi * t)
-                point.z += (.0042 + .0012 * grain - fracture) * fade
+                point.z += (.0042 + .00075 * grain + clump - fracture) * fade
                 row.append(len(vertices))
                 vertices.append(point)
             row.append(right)
