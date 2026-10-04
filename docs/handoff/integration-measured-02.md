@@ -75,6 +75,14 @@ mine path and building work remain unselected. The lane is held to the active no
   slot and then its backup. A promoted Travel save requires separately routed, preserved pre-upgrade
   saves, or shared-directory write protection plus rejection coverage; colocated `.bak` files are
   insufficient.
+- Read-only live routing proof: `Homestead Estate.lnk` targets the measured01 candidate with
+  `-UserDir="<candidate>\\Windows\\SurvivalGame"`. `ResolveHomesteadSaveRoute` defaults to
+  `ProjectSavedDir\\SaveGames`, yielding that candidate's
+  `Windows\\SurvivalGame\\Saved\\SaveGames`; the protected rollback has a separate package-local
+  root. The current release is therefore isolated, but every future promotion must preserve this
+  exact release-local override, copy/hash pre-upgrade saves into the new candidate before first
+  launch, and leave the old root untouched for rollback. `-HomesteadPreviewProfile` is unsuitable:
+  it uses shared `UserSettingsDir` profile roots.
 
 Travel Rest may append an optional `travel <count> <id>...` section of sorted, unique destination
 IDs 1..6; Manor (0) remains implicit. Missing legacy sections lock every non-Manor destination, and
