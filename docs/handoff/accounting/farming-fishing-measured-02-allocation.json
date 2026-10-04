@@ -36,6 +36,16 @@
       "tasks": ["add-shore-and-river-fishing"],
       "category": "implementation",
       "since": "2026-10-04T02:17:28.345Z",
+      "until": "2026-10-04T03:04:19.556Z",
+      "launchContextTier": "default",
+      "contextTier": null
+    },
+    {
+      "sessionId": "5be207bc-49b1-4a1b-811e-088ae565dc1b",
+      "task": "original-fishing-and-prepared-food-assets",
+      "tasks": ["add-shore-and-river-fishing", "add-basic-crop-cookfire-recipes"],
+      "category": "implementation",
+      "since": "2026-10-04T03:04:19.556Z",
       "launchContextTier": "default",
       "contextTier": null
     }

@@ -761,13 +761,27 @@ def assign_tube_uvs(obj, rect, sides, rings):
     u0, u1, v0, v1 = rect
     layer = obj.data.uv_layers["UVMap"].data
     body_faces = (rings - 1) * sides
+    capped = len(obj.data.polygons) > body_faces
+    cap_radius = min((u1 - u0) * 0.4, (v1 - v0) * 0.12) if capped else 0.0
+    gap = (v1 - v0) * 0.01 if capped else 0.0
+    body_v0, body_v1 = v0 + 2 * cap_radius + gap, v1 - 2 * cap_radius - gap
     for poly_index, poly in enumerate(obj.data.polygons):
         seam = poly_index < body_faces and poly_index % sides == sides - 1
         for loop_index, vertex_index in zip(poly.loop_indices, poly.vertices):
-            ring, side = divmod(min(vertex_index, rings * sides - 1), sides)
-            u = 1.0 if seam and side == 0 else side / sides
-            v = ring / max(1, rings - 1)
-            layer[loop_index].uv = (u0 + (u1 - u0) * u, v0 + (v1 - v0) * v)
+            if poly_index < body_faces:
+                ring, side = divmod(vertex_index, sides)
+                u = 1.0 if seam and side == 0 else side / sides
+                v = ring / max(1, rings - 1)
+                layer[loop_index].uv = (u0 + (u1 - u0) * u, body_v0 + (body_v1 - body_v0) * v)
+            else:
+                # A cap centre cannot share the last ring's UV: its fan would overwrite the body bake.
+                bottom = poly_index < body_faces + sides
+                centre = Vector(((u0 + u1) * 0.5, v0 + cap_radius if bottom else v1 - cap_radius))
+                if vertex_index >= rings * sides:
+                    layer[loop_index].uv = centre
+                else:
+                    angle = 2 * math.pi * (vertex_index % sides) / sides
+                    layer[loop_index].uv = centre + Vector((math.cos(angle), math.sin(angle))) * cap_radius
     return obj
 
 

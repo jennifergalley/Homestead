@@ -19,3 +19,10 @@ Catches SHALL store without spoilage and sell to the General Store. Preparations
 #### Scenario: Cook a catch
 - **WHEN** she inspects, prepares and eats a fish dish
 - **THEN** the displayed ingredients are spent once, her Energy rises by the catalogue amount subject to its cap, and she becomes Well fed
+
+### Requirement: Fishing items use original authored art
+The pole, six catch species and eight fish preparations SHALL use newly authored Blender assets, not reused tool or food meshes. Each species and dish SHALL have distinct item presentation. Original PBR assets SHALL be reviewed at 4K before integrated acceptance.
+
+#### Scenario: Inspect fishing item art
+- **WHEN** she selects the pole and inspects caught fish or prepared dishes
+- **THEN** she sees their original authored art, not the old digging stick or generic root/berry substitute

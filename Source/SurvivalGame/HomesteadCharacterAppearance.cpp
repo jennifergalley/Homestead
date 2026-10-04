@@ -29,6 +29,8 @@
 #include "RenderCore.h"
 #include "Misc/PackageName.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadFishingAssets, Log, All);
+
 // The worn leather backpack's mesh: an original asset Props authors (Scripts/Blender/Recipes/leather_backpack.py).
 namespace HeroineBackpackStyle
 {
@@ -612,15 +614,21 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         // nib: the snath runs through her fist with its top end forward and up, and the blade trails
         // behind her at knee height, out to her right.
         {Homestead::Item::Scythe, TEXT("Scythe/SM_Scythe"), RestWristDegrees, false, ScytheTrail},
-        {Homestead::Item::FishingPole, TEXT("DiggingStick/SM_DiggingStick"), RestWristDegrees, false,
-            FTransform(FQuat(FVector::XAxisVector, PI), FVector(0, 0, -10), FVector(0.65f, 0.65f, 1.8f))},
+        // fishing_pole.py: grip at the origin, working tip +Z; already authored at game scale.
+        {Homestead::Item::FishingPole, TEXT("FishingPole/SM_FishingPole"), RestWristDegrees, false,
+            FTransform::Identity},
     };
     for (const FHeldToolAsset& Asset : Assets)
     {
         const FString Name = FPaths::GetBaseFilename(Asset.Path);
         auto* PropMesh = LoadObject<UStaticMesh>(nullptr,
             *FString::Printf(TEXT("/Game/SurvivalGame/Environment/Props/%s.%s"), Asset.Path, *Name));
-        if (!PropMesh) continue;
+        if (!PropMesh)
+        {
+            if (Asset.Tool == Homestead::Item::FishingPole)
+                UE_LOG(LogHomesteadFishingAssets, Error, TEXT("Original FishingPole mesh is missing; import the authored asset before fishing acceptance."));
+            continue;
+        }
         // One prop per tool: the first authored mesh found wins.
         if (HeldToolSpecs.ContainsByPredicate([&Asset](const FHeldToolSpec& Spec) { return Spec.Tool == Asset.Tool; })) continue;
         const FString HeldComponentName = Asset.Tool == Homestead::Item::FishingPole
