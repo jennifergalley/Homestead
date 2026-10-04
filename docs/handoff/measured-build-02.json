@@ -4,7 +4,8 @@
   "authorizedAt": "2026-10-04T01:55:51.513Z",
   "targetSlot": "2026-10-03 21:00",
   "fallbackSlot": "2026-10-04 07:30",
-  "fallbackStatus": "target-not-promise",
+  "fallbackStatus": "historical-target-at-risk",
+  "fallbackRisk": "At 00:38 local, Farming estimated 8–12+ further hours for fish refinement, excluding engine gates; sixteen dishes/wiring are also pending. The full 07:30 delivery is no longer a realistic expectation.",
   "deliveryDecision": "Deferred at 20:49 local on Oct 3. The original 9 PM scope is preserved historically, but the Fishing/Food art set is incomplete and no independently complete Travel/HUD subset has its required runtime, gallery, player, and release-isolation evidence. Do not package a placeholder or unverified candidate tonight; do no overnight/signoff work.",
   "userDirectedException": {
     "authorizedAt": "2026-10-03T22:05:00-07:00",

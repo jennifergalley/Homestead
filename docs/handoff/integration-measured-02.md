@@ -226,6 +226,11 @@ six-fish refinement, then sixteen original dishes, portions, export, and wiring,
 It creates no automation and does not authorize WIP import/admission, Integration Unreal/build/package
 work, or any change to the original-art, route-isolation, and release gates. Oct 4 7:30 AM remains a
 target rather than a promise.
+At 00:38 local on Oct 4, Farming estimated another 8–12+ hours for fish refinement, excluding
+engine gates, with sixteen dishes and wiring still pending. The full 07:30 delivery is therefore
+historically retained but at risk and no longer a realistic expectation. Do not invent a replacement
+slot or alter Jenny's planner selections. The current release remains unchanged; WIP import/admission
+is still forbidden while Farming's autonomous overnight slot 2 continues.
 
 At 22:07 local, Jenny additionally authorized the coordinator—not Farming—to schedule a single-use
 30-minute fallback check, rearming it only after processing while work remains active. She also

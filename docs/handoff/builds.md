@@ -107,6 +107,9 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Scope: the fishing feature and its two feedback cards are one implementation, not duplicate work.
 - Timing: authorized 18:55 local. The fallback is a **target** for 2026-10-04 7:30 AM, not a
   promise; no overnight work resumes after signoff without Jenny's next message.
+- Timing update: at 00:38 local on Oct 4, the Fish lane estimated another 8–12+ hours before engine
+  gates, with sixteen dishes/wiring still pending. The full 7:30 AM target is historically retained
+  but at risk and no longer a realistic expectation; no replacement slot is promised.
 - Planner tooling receipt: the live feedback-editing delivery is `3846476d`; it is separately
   delivered tooling, hidden and unscheduled, with its OpenSpec player checkbox preserved.
 - Safety: verified work only; no placeholder or unverified subset package.
