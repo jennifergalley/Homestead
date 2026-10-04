@@ -18,7 +18,7 @@ function Assert-OrdinaryPath([string]$Path) {
     }
 }
 function Get-ReleaseSaveRoot([string]$Package, [string]$Arguments, [string]$Role) {
-    if ($Package -match '^(?:\\\\\?\\|\\\\\.\\)') {
+    if ($Package.Replace('/', '\') -match '^(?:\\\\\?\\|\\\\\.\\)') {
         throw "$Role package path cannot use an extended/device alias."
     }
     if ($Arguments -match '(?i)(?:^|\s)"?-HomesteadPreviewProfile(?:=|\s|$)') {
@@ -28,7 +28,7 @@ function Get-ReleaseSaveRoot([string]$Package, [string]$Arguments, [string]$Role
     if ($matches.Count -ne 1) { throw "$Role launch requires exactly one explicit -UserDir." }
     $value = if ($matches[0].Groups[1].Success) { $matches[0].Groups[1].Value } else { $matches[0].Groups[2].Value }
     if (-not [IO.Path]::IsPathFullyQualified($value)) { throw "$Role UserDir must be absolute." }
-    if ($value -match '^(?:\\\\\?\\|\\\\\.\\)') { throw "$Role UserDir cannot use an extended/device alias." }
+    if ($value.Replace('/', '\') -match '^(?:\\\\\?\\|\\\\\.\\)') { throw "$Role UserDir cannot use an extended/device alias." }
     $platform = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $Package
     $expected = [IO.Path]::GetFullPath((Join-Path $platform 'SurvivalGame'))
     $actual = [IO.Path]::GetFullPath($value)

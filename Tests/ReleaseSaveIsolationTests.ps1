@@ -35,7 +35,11 @@ try {
     Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage ("\\?\" + $candidate) `
         -CandidateArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
         -RollbackArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" }
-    Write-Output 'Release save isolation: 5 checks passed.'
+    $forwardAlias = ('//?/' + $candidate.Replace('\', '/'))
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $forwardAlias `
+        -CandidateArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" }
+    Write-Output 'Release save isolation: 6 checks passed.'
 } finally {
     if (Test-Path -LiteralPath $fixture) { Remove-Item -LiteralPath $fixture -Recurse -Force }
 }
