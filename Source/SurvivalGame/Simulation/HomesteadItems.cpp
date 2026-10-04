@@ -143,7 +143,7 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Food, "strawberry-compote", 29, NoBuyers, 29.0, 29.0, "Cookfire", false, nullptr, FoodClass::Meal},
     {Item::RootVegetableHotpot, "root-vegetable-hotpot", "Root vegetable hotpot", "Wild roots and turnip stewed with meadow herbs.",
         ItemCategory::Food, "root-vegetable-hotpot", 41, NoBuyers, 37.0, 37.0, "Cookfire", false, nullptr, FoodClass::Meal},
-    {Item::FishingPole, "fishing-pole", "Fishing pole", "Select this pole on the hotbar beside a river, lake or the sea. Cast, hook the bite, then land the fish in the green timing band.",
+    {Item::FishingPole, "fishing-pole", "Fishing pole", "Select this pole on the hotbar beside a river, lake or the sea. Cast, hook the bite, then follow the float's closing-ring cues to land the fish.",
         ItemCategory::Tool, "fishing-pole", 1200, NoBuyers, 0.0, 0.0, "General Store: 1500 coins", false, "fishing poles"},
     {Item::RiverTrout, "river-trout", "River trout", "A trout from running freshwater. Grill it or sell it at the General Store.",
         ItemCategory::Food, "river-trout", 40, StoreBuys, 0.0, 0.0, "River fishing", false, "river trout"},

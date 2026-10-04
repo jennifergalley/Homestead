@@ -322,6 +322,12 @@ public:
     static constexpr float LampSetDownContact = 30.0f / 30.0f;
     // Whether the held lamp shows lit (set by the controller from the simulation; the lab keeps it lit).
     void SetHeldLampLit(bool bLit) { bHeldLampLit = bLit; }
+    // Fishing (refine-fishing-art-and-casting): AN_HeroineMH_Fishing (homestead_agent.fish_cast),
+    // segmented per HomesteadFishingPresentation.h and played by UHomesteadAnimInstance::SetFishingPose.
+    UAnimSequence* GetFishingAnimation() const { return FishingAnimation; }
+    // The fish that comes up on the line at the catch (one of the six caught fish; anything else
+    // shows the river trout). The controller sets it before or during the Catch pose.
+    void SetFishingCatch(Homestead::Item Fish);
     float ClearTargetYaw() const { return ClearYaw.Get(GetActorRotation().Yaw); }
     float TillTargetYaw() const { return TillYaw.Get(GetActorRotation().Yaw); }
     float WaterTargetYaw() const { return WaterYaw.Get(GetActorRotation().Yaw); }
@@ -378,6 +384,20 @@ private:
     UPROPERTY() TObjectPtr<UAnimSequence> CraftAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> LampRaisedAnimation;
     UPROPERTY() TObjectPtr<UAnimSequence> LampSetDownAnimation;
+    UPROPERTY() TObjectPtr<UAnimSequence> FishingAnimation;
+    // Fishing tackle (HomesteadCharacterFishing.cpp): the flax line from the pole's tip to the float,
+    // the float on the water, and the caught fish hanging from the line after the lift.
+    UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> FishingLine;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> FishingFloat;
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> FishingCatch;
+    UPROPERTY() TArray<TObjectPtr<UStaticMesh>> CaughtFishMeshes;
+    Homestead::Item FishingCatchItem{};
+    FVector FishingFloatAt = FVector::ZeroVector;
+    FVector FishingFloatFrom = FVector::ZeroVector;
+    bool bFishingFloatOut = false;
+    float FishingBobTime = 0;
+    void CreateFishingTackle();
+    void UpdateFishingTackle(UHomesteadAnimInstance& Animation, UStaticMeshComponent* Pole, float DeltaSeconds);
     // The held lamp: a hanger at her grip (turned by the pendulum, like the pail), the lamp's parts
     // under it with the bail's top at the hanger, and the flame's light.
     UPROPERTY() TObjectPtr<USceneComponent> LampHanger;
