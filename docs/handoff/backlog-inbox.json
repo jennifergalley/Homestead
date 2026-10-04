@@ -112,6 +112,30 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-04T19:02:56.392Z"
+    },
+    {
+      "id": "jenny-mutde36c-gtsw0n",
+      "title": "I should be able to Disassemble, Replace Fence around the Farm",
+      "description": "I should be able to craft new wooden fence parts (sections of fence and gates) in the Build menu and place them around the farm, and I should be able to disassemble the broken down fence that currently exists around the farm first so I can replace it",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T05:18:11.604Z"
+    },
+    {
+      "id": "jenny-mutdt417-zj976u",
+      "title": "I'm not able to chop down trees",
+      "description": "It seems that in the shift from the survival MVP to the estate version of the game I lost the ability to chop down trees. We should still have the animation and sounds - please give me the ability to chop down any tree in the map, and depending on where it is (say, in a forest or far away from the manor or farm), it should have the capability to grow back (we can say it comes back as a fully formed tree for now and defer tree growth rates for later)",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T05:29:52.555Z"
+    },
+    {
+      "id": "jenny-mutdvi4f-5daxbq",
+      "title": "I should be able to go down into the mine and mine for rock, ore and gems",
+      "description": "The trapdoor in the Mine building asset should be usable, and I should be able to desend into dark tunnels, where I need to use my oil lamp for light, and my pickaxe to mine for ores, stone, and gems, as laid out in our plans. I should be able to sell these items in town and use them in crafting ingredients. Most important is the stone building recipes for rebuilding the manor to its former glory.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T05:31:44.127Z"
     }
   ]
 }
