@@ -5,6 +5,7 @@
 #include "HomesteadSimulation.h"
 #include "../Source/SurvivalGame/HomesteadOriginalItemArt.h"
 #include "../Source/SurvivalGame/HomesteadFishingPresentationRules.h"
+#include "../Source/SurvivalGame/HomesteadFishingPresentation.h"
 
 #include <algorithm>
 #include <cmath>
@@ -287,12 +288,17 @@ void PresentationCompletionAndRecast()
     OK(sim.AdvanceFishing(Fishing::CastSplashSeconds, {0, 0}));
     OK(sim.FishingAnimationContact(FishingContact::CastSplash, sim.FishingCast().token, {0, 0}));
     CHECK(!NewCast(sim.FishingCast(), first));
-    CHECK(!FinishedMiss(true, true, 7.4, 8.0, 0.0001));
-    CHECK(!FinishedMiss(true, true, 7.99, 8.0, 0.0001));
-    CHECK(FinishedMiss(true, true, 8.0 - 0.0001, 8.0, 0.0001));
-    CHECK(FinishedMiss(true, true, 8.0, 8.0, 0.0001));
-    CHECK(FinishedMiss(true, false, -1.0, 8.0, 0.0001));
-    CHECK(!FinishedMiss(false, true, 8.0, 8.0, 0.0001));
+    constexpr float lastSample = HomesteadFishingTiming::MissEnd - HomesteadFishingTiming::ClipFrameSeconds;
+    constexpr double endMargin = HomesteadFishingTiming::ClipFrameSeconds + 0.0001;
+    CHECK(!FinishedMiss(true, true, HomesteadFishingTiming::MissStart, HomesteadFishingTiming::MissEnd, endMargin));
+    CHECK(!FinishedMiss(true, true, lastSample - HomesteadFishingTiming::ClipFrameSeconds,
+        HomesteadFishingTiming::MissEnd, endMargin));
+    CHECK(FinishedMiss(true, true, lastSample, HomesteadFishingTiming::MissEnd, endMargin));
+    CHECK(FinishedMiss(true, true, HomesteadFishingTiming::MissEnd, HomesteadFishingTiming::MissEnd, endMargin));
+    CHECK(FinishedMiss(true, false, -1.0, HomesteadFishingTiming::MissEnd, endMargin));
+    CHECK(!FinishedMiss(false, true, lastSample, HomesteadFishingTiming::MissEnd, endMargin));
+    CHECK(std::abs(HomesteadFishingTiming::CastSplashSeconds - Fishing::CastSplashSeconds) < 0.0001);
+    CHECK(std::abs(HomesteadFishingTiming::CatchLiftSeconds - Fishing::CatchLiftSeconds) < 0.0001);
 }
 
 void Preparations()

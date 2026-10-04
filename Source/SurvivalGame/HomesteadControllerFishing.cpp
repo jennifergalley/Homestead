@@ -137,7 +137,8 @@ void AHomesteadController::PresentFishing()
     if (Session.phase == Homestead::FishingPhase::Idle
         && HomesteadFishingPresentationRules::FinishedMiss(
             Animation->FishingPose() == EHomesteadFishingPose::Miss, Animation->HasFishingClip(),
-            Animation->FishingClipTime(), HomesteadFishingTiming::MissEnd, KINDA_SMALL_NUMBER))
+            Animation->FishingClipTime(), HomesteadFishingTiming::MissEnd,
+            HomesteadFishingTiming::ClipFrameSeconds + KINDA_SMALL_NUMBER))
         Animation->SetFishingPose(EHomesteadFishingPose::None);
     const bool bNewCast = HomesteadFishingPresentationRules::NewCast(Session, FishingPresentedToken);
     if (Session.token != FishingPresentedToken && Session.phase != Homestead::FishingPhase::Idle)

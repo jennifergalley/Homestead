@@ -769,7 +769,8 @@ Result ValidateInventory(const State& state, bool allowLegacySeedGroups = false)
         const int capacity = ContainerCapacity(state, container);
         if (!stock || !layout || !StockValid(*stock, capacity) || ContainerUsed(state, container) > capacity)
             return {false, container == 0 ? "Not enough pack space." : "The chest does not have enough space.", ResultCode::Capacity};
-        if (layout->size() > static_cast<std::size_t>(capacity)) return Bad("Inventory layout has too many entries.");
+        const auto maxEntries = static_cast<std::size_t>(capacity + (*stock)[static_cast<int>(Item::Water)]);
+        if (layout->size() > maxEntries) return Bad("Inventory layout has too many entries.");
         Inventory total{};
         for (const auto& entry : *layout)
         {

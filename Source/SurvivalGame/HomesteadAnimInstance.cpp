@@ -497,6 +497,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     EHomesteadFishingPose FishSegment = EHomesteadFishingPose::None;
     bool bFishStriking = false;
     bool bFishStrikeRequested = false;
+    // Set by every SetFishingPose(Cast): a new cast restarts its swing even if Cast was already playing.
+    bool bFishCastRequested = false;
     bool bFishWasActive = false;
     float FishTime = 0;
     float FishAlpha = 0;
@@ -900,19 +902,26 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     // Plays the segment for the controller's pose on the clip's explicit timeline. Contact beats
     // count only when this real clip's time crosses them (no clip, no beats). A cast finishes its
     // swing before the wait hold takes over; the strike plays once and hands back to the pose.
+    // AN_HeroineMH_Fishing's frame seams (HomesteadFishingTiming::ClipFrameSeconds).
+    static constexpr float FishClipFrame = HomesteadFishingTiming::ClipFrameSeconds;
+
     void UpdateFishing(float DeltaSeconds)
     {
         using namespace HomesteadFishingTiming;
         const auto* Clip = FishA.GetSequence();
-        if (!Clip) { FishLayer.BlendWeights[0] = FishAlpha = 0; bFishStrikeRequested = false; return; }
+        if (!Clip) { FishLayer.BlendWeights[0] = FishAlpha = 0; bFishStrikeRequested = bFishCastRequested = false; return; }
         // A landed catch plays to its end (the fish in her hand) after the controller lets go, then fades.
         const bool bFinishingCatch = FishPose == EHomesteadFishingPose::None && bFishWasActive && !bFishStriking
-            && FishSegment == EHomesteadFishingPose::Catch && FishTime < CatchEnd - 0.02f;
+            && FishSegment == EHomesteadFishingPose::Catch && FishTime < CatchEnd - FishClipFrame * 1.5f;
         const bool bActive = FishPose != EHomesteadFishingPose::None || bFinishingCatch;
-        // A fresh cast always starts its segment over, even if the last one is still fading out.
-        if (bActive && !bFishWasActive)
+        // A fresh cast always starts its segment over, even if the last one is still fading out or a
+        // cancel and recast both landed before this tick. A recast drops any strike left from the old line.
+        const bool bRecast = bFishCastRequested && FishPose == EHomesteadFishingPose::Cast;
+        bFishCastRequested = false;
+        if (bActive && (!bFishWasActive || bRecast))
         {
             bFishStriking = false;
+            if (bRecast) bFishStrikeRequested = false;
             StartFishSegment(FishPose, false);
         }
         bFishWasActive = bActive;
@@ -929,7 +938,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         const float Before = FishTime;
         if (bActive || FishAlpha > 0.0f)
             FishTime = FishTime + DeltaSeconds;
-        if (FishTime >= End)
+        if (FishTime >= End - (bLoop || !bFishStriking && FishSegment != EHomesteadFishingPose::Cast ? FishClipFrame : 0.0f))
         {
             if (bFishStriking)
             {
@@ -937,10 +946,10 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
                 StartFishSegment(FishPose == EHomesteadFishingPose::None ? EHomesteadFishingPose::Fight : FishPose, false);
                 FishSegmentRange(FishSegment, false, Start, End, bLoop);
             }
-            else if (bLoop) FishTime = Start + FMath::Fmod(FishTime - Start, End - Start);
+            else if (bLoop) FishTime = Start + FMath::Fmod(FishTime - Start, End - Start - FishClipFrame);
             else if (FishSegment == EHomesteadFishingPose::Cast && FishPose == EHomesteadFishingPose::Wait)
                 StartFishSegment(EHomesteadFishingPose::Wait, false);
-            else FishTime = End - KINDA_SMALL_NUMBER;
+            else FishTime = End - FishClipFrame;
         }
         if (!bFishStriking && FishSegment == EHomesteadFishingPose::Cast
             && Before < CastStart + CastSplashSeconds && FishTime >= CastStart + CastSplashSeconds)
@@ -1105,6 +1114,13 @@ void UHomesteadAnimInstance::CancelAction(bool Immediate)
     auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
     Proxy.Requested = EHandAction::None;
     Proxy.bCancelled = true;
+    // Cancelling drops the fishing presentation too: no pose, no queued cast or strike, and a landed
+    // catch stops finishing (the layer fades out from wherever it was).
+    Proxy.FishPose = EHomesteadFishingPose::None;
+    Proxy.bFishCastRequested = false;
+    Proxy.bFishStrikeRequested = false;
+    Proxy.bFishStriking = false;
+    Proxy.bFishWasActive = false;
     if (Immediate)
     {
         Proxy.bGathering = false;
@@ -1177,7 +1193,9 @@ float UHomesteadAnimInstance::CraftWeight() const
 
 void UHomesteadAnimInstance::SetFishingPose(EHomesteadFishingPose Pose)
 {
-    GetProxyOnGameThread<FHomesteadAnimProxy>().FishPose = Pose;
+    auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    Proxy.FishPose = Pose;
+    if (Pose == EHomesteadFishingPose::Cast) Proxy.bFishCastRequested = true;
 }
 
 void UHomesteadAnimInstance::PlayFishingStrike()

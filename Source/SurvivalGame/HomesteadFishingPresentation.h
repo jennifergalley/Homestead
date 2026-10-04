@@ -1,10 +1,11 @@
 #pragma once
 
-#include "CoreMinimal.h"
+#include <cstdint>
 
 // What the heroine's fishing presentation shows. The controller maps the simulation's fishing phase
-// to one of these every tick (UHomesteadAnimInstance::SetFishingPose); the art never decides a catch.
-enum class EHomesteadFishingPose : uint8
+// to one of these on each phase or cast-token change (UHomesteadAnimInstance::SetFishingPose; every
+// Cast call restarts the swing); the art never decides a catch.
+enum class EHomesteadFishingPose : std::uint8_t
 {
     None,
     Cast,  // swing the line out; FishCastSplashes() ticks when the float lands
@@ -43,4 +44,7 @@ constexpr float CatchEnd = 7.4f;
 constexpr float CatchLiftSeconds = 0.4f;
 constexpr float MissStart = 7.4f;
 constexpr float MissEnd = 8.0f;
+// One frame of the 30 fps clip (fish_cast.py FPS). Where two segments meet, the earlier one's closing
+// key sits a frame early: loops wrap and one-shots hold at End - ClipFrameSeconds.
+constexpr float ClipFrameSeconds = 1.0f / 30.0f;
 }

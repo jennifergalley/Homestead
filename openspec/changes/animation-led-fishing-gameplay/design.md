@@ -22,6 +22,8 @@ Gameplay UI owns Simulation/HomesteadFishing.*, native tests and controller poli
 
 Agreed Art interface: HomesteadFishingPresentation.h defines EHomesteadFishingPose (None/Cast/Wait/Bite/Fight/Catch/Miss). UHomesteadAnimInstance exposes SetFishingPose, PlayFishingStrike and authored FishCastSplashes/FishCatchLifts counters. Controller snapshots counters per cast and forwards fresh contacts only. Missing clips must not synthesize contact counters from timers.
 
+Ship only at 9 PM, separate from the 4 PM seed/Back/quit/Harvest cut. Cast requests are keyed by the native cast token, including cancel/recast before an animation tick. Release Miss at the authored final sample (`MissEnd - ClipFrameSeconds`), then fade to None even when the native phase stays Idle. CancelAction clears pose, queued Cast/Strike and finishing-catch state. The portable presentation header lets native tests use the exact authored splash/lift/frame constants without engine types. Art's pole and six species glyphs activate only in this evening branch.
+
 ## Risks / Trade-offs
 
 Art not ready -> no timer-only success fallback; defer fishing integration explicitly. Late/missing/duplicate contact -> token and phase checks plus bounded expiry. Pack fills during animation -> refuse reward without partial mutation. Input held across phases -> one press edge per action.

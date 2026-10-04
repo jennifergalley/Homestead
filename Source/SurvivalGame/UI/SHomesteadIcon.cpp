@@ -193,6 +193,57 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
             return Desaturate(Color, Desaturation) * StyleTint;
         }
     };
+
+    // Side-on fish facing right, shared by the six catches so they read as one family like the crops.
+    struct FFishLook
+    {
+        float Depth;        // half body height at its deepest, canvas units
+        float TailSpread;   // half height of the tail fin tips
+        float TailNotch;    // x of the fork's inner point; nearer the body is a shallower fork
+        FLinearColor Back, Side, Belly, Fin;
+        bool bSpinyDorsal;
+    };
+
+    void PaintFish(FIconPainter& P, const FFishLook& L)
+    {
+        const float D = L.Depth;
+        const float Y = 28.0f;
+        P.Shape({{14, Y}, {5, Y - L.TailSpread}, {L.TailNotch, Y}, {5, Y + L.TailSpread}}, L.Fin);
+        if (L.bSpinyDorsal)
+        {
+            P.Shape({{20, Y - D * 0.8f}, {22, Y - D - 5}, {26, Y - D - 6}, {30, Y - D - 5}, {33, Y - D * 0.95f}}, L.Fin);
+            for (const float X : {22.0f, 25.5f, 29.0f})
+                P.Line({{X, Y - D * 0.85f}, {X + 0.5f, Y - D - 6.5f}}, L.Back, 1.0f);
+        }
+        else
+        {
+            P.Shape({{23, Y - D * 0.88f}, {28, Y - D - 5}, {34, Y - D - 3}, {37, Y - D * 0.98f}}, L.Fin);
+        }
+        P.Shape({{21, Y + D * 0.82f}, {24, Y + D + 4}, {29, Y + D * 0.9f}}, L.Fin);
+        P.Shape({{49, Y + 0.5f}, {45, Y - D * 0.72f}, {37, Y - D}, {25, Y - D * 0.92f}, {16, Y - D * 0.45f}, {12, Y},
+            {16, Y + D * 0.42f}, {25, Y + D * 0.88f}, {37, Y + D * 0.92f}, {45, Y + D * 0.62f}}, L.Side);
+        P.Shape({{47, Y - 1}, {45, Y - D * 0.72f}, {37, Y - D}, {25, Y - D * 0.92f}, {16, Y - D * 0.45f}, {13, Y - 0.5f},
+            {25, Y - D * 0.32f}, {38, Y - D * 0.38f}}, L.Back);
+        P.Shape({{46, Y + 2}, {45, Y + D * 0.62f}, {37, Y + D * 0.92f}, {25, Y + D * 0.88f}, {16, Y + D * 0.42f},
+            {14, Y + 0.8f}, {25, Y + D * 0.38f}, {38, Y + D * 0.42f}}, L.Belly);
+        P.Line({{40, Y - D * 0.68f}, {38, Y}, {40, Y + D * 0.58f}}, L.Back * 0.75f, 1.2f);
+        P.Shape({{38, Y + 1.5f}, {30, Y + 5}, {33, Y + 1.5f}}, L.Fin);
+        P.Line({{49, Y + 0.5f}, {46, Y + 1.5f}}, Charcoal, 1.0f);
+        P.Disc(44, Y - 2, 2.3f, Cream);
+        P.Disc(44.5f, Y - 2, 1.2f, Charcoal);
+    }
+
+    // A paper seed packet with a sky-blue picture window; the caller draws the grown crop in the window.
+    void PaintSeedPacket(FIconPainter& P, FLinearColor Band)
+    {
+        const FLinearColor Paper = Cream * 0.9f + HayGold * 0.1f;
+        P.Shape({{11, 7}, {45, 7}, {47, 51}, {9, 51}}, Paper);
+        P.Rect(11, 7, 34, 6, Band);
+        P.Line({{11, 13}, {45, 13}}, Wood, 1.0f);
+        P.Shape({{14, 16}, {42, 16}, {43, 43}, {13, 43}}, FLinearColor(0.62f, 0.78f, 0.84f));
+        P.Shape({{13.5f, 37}, {42.6f, 35}, {43, 43}, {13, 43}}, FLinearColor(0.47f, 0.33f, 0.19f));
+        P.Line({{16, 47}, {40, 47}}, Wood, 1.5f);
+    }
 }
 
 void SHomesteadIcon::Construct(const FArguments& InArgs)
@@ -233,7 +284,7 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("berries")), EKind::Berries},
         {FName(TEXT("roots")), EKind::Roots},
         {FName(TEXT("flowers")), EKind::Flowers},
-        {FName(TEXT("seeds")), EKind::Seeds},
+        {FName(TEXT("seeds")), EKind::SeedRoots},
         {FName(TEXT("hatchet")), EKind::Hatchet},
         {FName(TEXT("digging-stick")), EKind::DiggingStick},
         {FName(TEXT("watering-can")), EKind::WateringCan},
@@ -293,15 +344,48 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("oil-flask")), EKind::OilFlask},
         {FName(TEXT("pouch-arrows")), EKind::PouchArrows},
         {FName(TEXT("fishing-pole")), EKind::FishingPole},
-        {FName(TEXT("fish")), EKind::Fish}
+        {FName(TEXT("fish")), EKind::Fish},
+        {FName(TEXT("river-trout")), EKind::RiverTrout},
+        {FName(TEXT("river-salmon")), EKind::RiverSalmon},
+        {FName(TEXT("lake-perch")), EKind::LakePerch},
+        {FName(TEXT("lake-carp")), EKind::LakeCarp},
+        {FName(TEXT("sea-mackerel")), EKind::SeaMackerel},
+        {FName(TEXT("sea-bass")), EKind::SeaBass},
+        // Seed packets show the crop they grow. The -seeds keys are the per-crop packet icons;
+        // the item ids map too so a shop or pouch row naming the seed item still finds its packet.
+        {FName(TEXT("roots-seeds")), EKind::SeedRoots},
+        {FName(TEXT("turnip-seeds")), EKind::SeedTurnip},
+        {FName(TEXT("turnip-seed")), EKind::SeedTurnip},
+        {FName(TEXT("carrot-seeds")), EKind::SeedCarrot},
+        {FName(TEXT("carrot-seed")), EKind::SeedCarrot},
+        {FName(TEXT("potato-seeds")), EKind::SeedPotato},
+        {FName(TEXT("seed-potato")), EKind::SeedPotato},
+        {FName(TEXT("cabbage-seeds")), EKind::SeedCabbage},
+        {FName(TEXT("cabbage-seed")), EKind::SeedCabbage},
+        {FName(TEXT("broad-bean-seeds")), EKind::SeedBroadBean},
+        {FName(TEXT("broad-bean-seed")), EKind::SeedBroadBean},
+        {FName(TEXT("strawberry-seeds")), EKind::SeedStrawberry},
+        {FName(TEXT("strawberry-runner")), EKind::SeedStrawberry}
     };
 
     const FName CurrentKind = Kind.Get();
+    EKind IconKind = EKind::Unknown;
+    for (const auto& Entry : Kinds)
+    {
+        if (CurrentKind == Entry.Key)
+        {
+            IconKind = Entry.Value;
+            break;
+        }
+    }
+    const bool bGlyphFirst = IconKind >= EKind::SeedRoots || IconKind == EKind::FishingPole
+        || (IconKind >= EKind::RiverTrout && IconKind <= EKind::SeaBass);
     if (!bImageResolved || ImageKind != CurrentKind)
     {
         ImageKind = CurrentKind;
-        bOriginalImageExpected = HomesteadOriginalItemArt::FindIcon(TCHAR_TO_UTF8(*CurrentKind.ToString())) != nullptr;
-        OriginalImage = HomesteadOriginalIcons::Load(CurrentKind);
+        bOriginalImageExpected = !bGlyphFirst
+            && HomesteadOriginalItemArt::FindIcon(TCHAR_TO_UTF8(*CurrentKind.ToString())) != nullptr;
+        OriginalImage = bGlyphFirst ? nullptr : HomesteadOriginalIcons::Load(CurrentKind);
         bImageResolved = true;
     }
     if (OriginalImage)
@@ -319,15 +403,6 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
     }
     if (CurrentKind == FName(TEXT("deferred-meal")) || bOriginalImageExpected)
         return LayerId;
-    EKind IconKind = EKind::Unknown;
-    for (const auto& Entry : Kinds)
-    {
-        if (CurrentKind == Entry.Key)
-        {
-            IconKind = Entry.Value;
-            break;
-        }
-    }
     // Shop seed without a glyph of its own yet draws as a seed packet.
     if (IconKind == EKind::Unknown && !CurrentKind.IsNone())
     {
@@ -349,9 +424,155 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
     switch (IconKind)
     {
     case EKind::FishingPole:
-        P.Line({{12, 47}, {33, 10}, {39, 8}}, Wood, 4);
-        P.Line({{39, 8}, {44, 17}, {44, 35}, {39, 41}, {35, 39}, {35, 35}}, Cream, 1.5f);
-        P.Line({{11, 47}, {17, 36}}, Gold, 6);
+    {
+        // A cane rod with a cork grip and brass reel, the line dropping from the tip to a red float.
+        P.Line({{8, 52}, {26, 30}}, Wood, 4);
+        P.Line({{26, 30}, {44, 8}}, Wood * 1.12f, 2.5f);
+        P.Line({{44, 8}, {47, 4}}, Wood * 1.2f, 1.5f);
+        P.Line({{9, 50}, {18, 39}}, HayGold, 5.5f);
+        P.Line({{11, 47.5f}, {12.5f, 46}}, Wood, 1.0f);
+        P.Line({{15, 43.5f}, {16.5f, 42}}, Wood, 1.0f);
+        P.Line({{20, 37}, {24, 41}}, Iron, 2);
+        P.Disc(25, 42, 5, Gold);
+        P.Disc(25, 42, 2.2f, Iron);
+        P.Line({{25, 42}, {30, 46}}, Cream, 1.5f);
+        P.Disc(30.5f, 46.5f, 1.3f, Wood);
+        P.Disc(32, 23, 1.2f, Cream);
+        P.Disc(39, 14.5f, 1.1f, Cream);
+        P.Line({{47, 4}, {49, 14}, {50, 26}, {50, 37}}, Cream, 1.0f);
+        P.Line({{50, 34}, {50, 31}}, Berry, 1.5f);
+        P.Disc(50, 39, 3.2f, Berry);
+        P.Line({{47, 40}, {53, 40}}, Cream, 1.5f);
+        P.Line({{50, 42}, {50, 46}, {48, 47}}, StoneGray, 1.0f);
+        break;
+    }
+    case EKind::RiverTrout:
+        PaintFish(P, {8.0f, 7.0f, 8.0f, FLinearColor(0.34f, 0.38f, 0.20f), FLinearColor(0.70f, 0.66f, 0.44f),
+            FLinearColor(0.93f, 0.88f, 0.70f), FLinearColor(0.50f, 0.46f, 0.30f), false});
+        P.Line({{40, 28.5f}, {28, 29.2f}, {16, 28.4f}}, FLinearColor(0.88f, 0.46f, 0.48f), 2.5f);
+        for (const FVector2D& Spot : {FVector2D(20, 24), FVector2D(25, 22), FVector2D(30, 24), FVector2D(34, 21),
+                 FVector2D(36, 26), FVector2D(23, 32), FVector2D(31, 32), FVector2D(18, 29)})
+            P.Disc(Spot.X, Spot.Y, 0.9f, Charcoal);
+        break;
+    case EKind::RiverSalmon:
+        PaintFish(P, {7.5f, 8.0f, 9.0f, FLinearColor(0.28f, 0.38f, 0.48f), FLinearColor(0.76f, 0.80f, 0.82f),
+            FLinearColor(0.95f, 0.95f, 0.92f), FLinearColor(0.36f, 0.44f, 0.52f), false});
+        for (const FVector2D& Spot : {FVector2D(22, 23), FVector2D(28, 22), FVector2D(33, 23), FVector2D(37, 22)})
+        {
+            P.Line({Spot - FVector2D(1, 1), Spot + FVector2D(1, 1)}, Charcoal, 1.0f);
+            P.Line({Spot + FVector2D(-1, 1), Spot + FVector2D(1, -1)}, Charcoal, 1.0f);
+        }
+        P.Line({{42, 30}, {30, 30.5f}, {18, 29.5f}}, FLinearColor(0.90f, 0.62f, 0.60f), 1.2f);
+        break;
+    case EKind::LakePerch:
+        PaintFish(P, {9.5f, 7.0f, 8.0f, FLinearColor(0.24f, 0.36f, 0.16f), FLinearColor(0.64f, 0.68f, 0.28f),
+            FLinearColor(0.92f, 0.88f, 0.62f), FLinearColor(0.86f, 0.38f, 0.18f), true});
+        for (const float X : {20.0f, 26.0f, 32.0f, 37.0f})
+            P.Line({{X, 28 - 9.5f * 0.82f}, {X - 1.5f, 28 + 9.5f * 0.35f}}, FLinearColor(0.20f, 0.28f, 0.12f), 2.2f);
+        break;
+    case EKind::LakeCarp:
+        PaintFish(P, {10.5f, 8.0f, 7.0f, FLinearColor(0.42f, 0.30f, 0.12f), FLinearColor(0.80f, 0.60f, 0.24f),
+            FLinearColor(0.94f, 0.82f, 0.50f), FLinearColor(0.56f, 0.38f, 0.18f), false});
+        for (int32 Row = 0; Row < 3; ++Row)
+            for (int32 Col = 0; Col < 4; ++Col)
+            {
+                const float X = 19.0f + Col * 5.0f + (Row % 2) * 2.5f;
+                const float Y = 22.0f + Row * 5.0f;
+                P.Line({{X, Y - 2}, {X + 1.8f, Y}, {X, Y + 2}}, FLinearColor(0.52f, 0.36f, 0.14f), 1.0f);
+            }
+        P.Line({{47, 30}, {45, 34}}, Wood, 1.0f);
+        break;
+    case EKind::SeaMackerel:
+        PaintFish(P, {6.5f, 9.0f, 10.0f, FLinearColor(0.16f, 0.46f, 0.50f), FLinearColor(0.72f, 0.80f, 0.80f),
+            FLinearColor(0.95f, 0.95f, 0.90f), FLinearColor(0.28f, 0.42f, 0.44f), false});
+        for (const float X : {19.0f, 23.0f, 27.0f, 31.0f, 35.0f, 39.0f})
+            P.Line({{X, 28 - 6.5f * 0.88f}, {X + 1.5f, 25}, {X, 27}}, FLinearColor(0.06f, 0.14f, 0.16f), 1.2f);
+        for (const float X : {14.5f, 17.0f})
+        {
+            P.Shape({{X, 28 - 6.5f * 0.42f}, {X + 1, 28 - 6.5f * 0.42f - 2.5f}, {X + 2, 28 - 6.5f * 0.5f}}, FLinearColor(0.28f, 0.42f, 0.44f));
+            P.Shape({{X, 28 + 6.5f * 0.4f}, {X + 1, 28 + 6.5f * 0.4f + 2.5f}, {X + 2, 28 + 6.5f * 0.48f}}, FLinearColor(0.28f, 0.42f, 0.44f));
+        }
+        break;
+    case EKind::SeaBass:
+        PaintFish(P, {8.5f, 7.5f, 8.0f, FLinearColor(0.32f, 0.37f, 0.40f), FLinearColor(0.70f, 0.74f, 0.75f),
+            FLinearColor(0.92f, 0.92f, 0.88f), FLinearColor(0.42f, 0.46f, 0.48f), true});
+        P.Line({{42, 27.5f}, {28, 28.2f}, {16, 27.8f}}, FLinearColor(0.42f, 0.46f, 0.48f), 1.0f);
+        P.Disc(39.5f, 24.5f, 1.4f, FLinearColor(0.18f, 0.20f, 0.22f));
+        break;
+    case EKind::SeedRoots:
+        PaintSeedPacket(P, Wood);
+        P.Root(23, 23, RootOrange);
+        P.Root(33, 21, HayGold);
+        P.Leaf({23, 23}, {17, 16}, 2.5f);
+        P.Leaf({33, 21}, {38, 17}, 2.5f);
+        break;
+    case EKind::SeedTurnip:
+    {
+        PaintSeedPacket(P, FLinearColor(0.50f, 0.24f, 0.50f));
+        P.Leaf({28, 26}, {20, 17}, 3.0f);
+        P.Leaf({28, 26}, {36, 17}, 3.0f);
+        P.Leaf({28, 26}, {28, 17}, 2.5f);
+        P.Disc(28, 33, 8, FLinearColor(0.96f, 0.95f, 0.90f));
+        P.Shape({{20.5f, 31}, {23, 27}, {28, 25}, {33, 27}, {35.5f, 31}, {28, 29}}, FLinearColor(0.56f, 0.24f, 0.52f));
+        P.Line({{28, 41}, {28, 44}}, FLinearColor(0.96f, 0.95f, 0.90f), 1.2f);
+        break;
+    }
+    case EKind::SeedCarrot:
+        PaintSeedPacket(P, RootOrange);
+        P.Leaf({28, 24}, {21, 17}, 2.5f);
+        P.Leaf({28, 24}, {35, 17}, 2.5f);
+        P.Leaf({28, 24}, {28, 17}, 2.0f);
+        P.Shape({{23, 24}, {33, 24}, {30, 36}, {28, 44}, {26, 36}}, RootOrange);
+        P.Line({{25, 28}, {28, 28.5f}}, Rust, 1.0f);
+        P.Line({{29, 32}, {31, 31.5f}}, Rust, 1.0f);
+        P.Line({{26.5f, 36}, {28.5f, 36.5f}}, Rust, 1.0f);
+        break;
+    case EKind::SeedPotato:
+    {
+        const FLinearColor Skin(0.76f, 0.58f, 0.34f);
+        PaintSeedPacket(P, FLinearColor(0.58f, 0.42f, 0.24f));
+        P.Shape({{17, 31}, {20, 25}, {28, 22}, {36, 24}, {40, 30}, {37, 37}, {28, 40}, {20, 38}}, Skin);
+        P.Shape({{30, 34}, {36, 31}, {40, 34}, {38, 40}, {31, 41}}, Skin * 0.92f);
+        for (const FVector2D& Eye : {FVector2D(23, 28), FVector2D(30, 26), FVector2D(25, 34), FVector2D(35, 36)})
+            P.Disc(Eye.X, Eye.Y, 0.9f, Wood);
+        P.Line({{30, 26}, {31, 22}}, LeafGreen, 1.5f);
+        break;
+    }
+    case EKind::SeedCabbage:
+    {
+        const FLinearColor Heart(0.70f, 0.82f, 0.44f);
+        PaintSeedPacket(P, LeafGreen);
+        P.Leaf({28, 33}, {16, 38}, 5.0f);
+        P.Leaf({28, 33}, {40, 38}, 5.0f);
+        P.Disc(28, 31, 10, LeafGreen * 1.1f);
+        P.Disc(28, 30, 6.5f, Heart);
+        P.Line({{28, 30}, {24, 23}}, Cream, 1.0f);
+        P.Line({{28, 30}, {33, 24}}, Cream, 1.0f);
+        P.Line({{28, 30}, {21, 33}}, Cream, 1.0f);
+        P.Line({{28, 30}, {35, 34}}, Cream, 1.0f);
+        break;
+    }
+    case EKind::SeedBroadBean:
+    {
+        const FLinearColor Pod(0.40f, 0.62f, 0.24f);
+        const FLinearColor Bean(0.74f, 0.86f, 0.54f);
+        PaintSeedPacket(P, FLinearColor(0.24f, 0.44f, 0.20f));
+        P.Shape({{15, 39}, {20, 30}, {29, 23}, {39, 19}, {42, 21}, {36, 28}, {26, 35}, {17, 41}}, Pod);
+        for (const FVector2D& At : {FVector2D(21, 34), FVector2D(28, 28.5f), FVector2D(35, 23.5f)})
+            P.Disc(At.X, At.Y, 2.6f, Bean);
+        P.Line({{17, 40}, {37, 21}}, Pod * 0.75f, 1.0f);
+        P.Line({{41, 20}, {43, 17}}, Wood, 1.5f);
+        break;
+    }
+    case EKind::SeedStrawberry:
+        PaintSeedPacket(P, Berry);
+        P.Shape({{19, 27}, {28, 25}, {37, 27}, {36, 35}, {28, 43}, {20, 35}}, FLinearColor(0.82f, 0.14f, 0.18f));
+        for (const FVector2D& Pip : {FVector2D(23, 30), FVector2D(28, 29), FVector2D(33, 30), FVector2D(25, 35),
+                 FVector2D(31, 35), FVector2D(28, 39)})
+            P.Disc(Pip.X, Pip.Y, 0.8f, HayGold);
+        P.Leaf({28, 26}, {20, 21}, 2.5f);
+        P.Leaf({28, 26}, {36, 21}, 2.5f);
+        P.Leaf({28, 26}, {28, 19}, 2.0f);
         break;
     case EKind::Fish:
         P.Shape({{11, 28}, {19, 18}, {34, 17}, {44, 27}, {35, 38}, {20, 38}}, WaterBlue);

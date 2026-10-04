@@ -193,7 +193,7 @@ void LegacyFullChests(int chestCount, bool accepted)
         std::ostringstream out;
         out << std::setprecision(std::numeric_limits<double>::max_digits10);
         out << piece.id << ' ' << static_cast<int>(piece.kind) << ' ' << piece.buildingId << ' '
-            << piece.cellX << ' ' << piece.cellY << ' ' << piece.rotation << ' ' << piece.fuelHours << '\n';
+            << piece.cellX << ' ' << piece.cellY << ' ' << piece.rotation << ' ' << piece.fuelHours;
         out << ' ' << ItemCount;
         for (int quantity : piece.storage) out << ' ' << quantity;
         out << '\n' << LayoutText(piece.layout);

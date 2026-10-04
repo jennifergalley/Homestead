@@ -44,7 +44,9 @@ private:
         Pasty, Bread, Cheese, Twine, Coin, Shop,
         Scythe, Billhook, Pickaxe, RustedAxeHead, RustedHoeBlade, RustedScytheBlade, RustedBillhookHead,
         RustedPickHead, Hay, Weeds, BrambleCanes, Kindling, ScrapIron, ScrapLead,
-        Primroses, Bluebells, WildDaffodils, WildGarlic, OilLamp, OilFlask, PouchArrows, FishingPole, Fish
+        Primroses, Bluebells, WildDaffodils, WildGarlic, OilLamp, OilFlask, PouchArrows, FishingPole, Fish,
+        RiverTrout, RiverSalmon, LakePerch, LakeCarp, SeaMackerel, SeaBass,
+        SeedRoots, SeedTurnip, SeedCarrot, SeedPotato, SeedCabbage, SeedBroadBean, SeedStrawberry
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{HomesteadPalette::Brass};

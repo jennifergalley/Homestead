@@ -43,8 +43,9 @@ public:
     void SetLampRaised(bool bRaised);
     float LampRaisedWeight() const;
     // Fishing (AN_HeroineMH_Fishing; segments and beats in HomesteadFishingPresentation.h). The
-    // controller sets the pose for the simulation's phase every tick; the counters advance only when
-    // the loaded clip crosses its authored contact beat, never on a timer.
+    // controller sets the pose when the simulation's phase or cast token changes (not every tick:
+    // each Cast call restarts the swing); the counters advance only when the loaded clip crosses its
+    // authored contact beat, never on a timer.
     void SetFishingPose(EHomesteadFishingPose Pose);
     // The quick hook-set, played once over the current pose (presentation only).
     void PlayFishingStrike();
