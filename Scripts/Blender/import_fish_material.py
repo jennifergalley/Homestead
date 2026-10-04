@@ -9,8 +9,8 @@ import unreal
 PARENT = "/Game/SurvivalGame/Materials/M_CaughtFishWet"
 MEMBRANE_PARENT = "/Game/SurvivalGame/Materials/M_CaughtFishMembrane"
 PARAMETERS = (
-    ("coat_weight", "FishCoatWeight", unreal.MaterialProperty.MP_CUSTOM_DATA_0),
-    ("coat_roughness", "FishCoatRoughness", unreal.MaterialProperty.MP_CUSTOM_DATA_1),
+    ("coat_weight", "FishCoatWeight"),
+    ("coat_roughness", "FishCoatRoughness"),
 )
 
 
@@ -40,31 +40,36 @@ def _save_parent(material: unreal.Material, path: str, changed: bool) -> None:
 
 
 def wet_fish_parent(base_parent: unreal.Material, settings: dict) -> unreal.Material:
-    values = {key: _unit_setting(settings, key) for key, _, _ in PARAMETERS}
+    values = {key: _unit_setting(settings, key) for key, _ in PARAMETERS}
     material = _load_parent(base_parent, PARENT)
     edit = unreal.MaterialEditingLibrary
-    changed = material.get_editor_property("shading_model") != unreal.MaterialShadingModel.MSM_CLEAR_COAT
-    if changed:
-        material.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_CLEAR_COAT)
-    for index, (key, name, target) in enumerate(PARAMETERS):
-        node = edit.get_material_property_input_node(material, target)
-        if node is None:
-            changed = True
-            node = edit.create_material_expression(material, unreal.MaterialExpressionScalarParameter, -500, 850 + index * 180)
-            node.set_editor_property("parameter_name", name)
-            if not edit.connect_material_property(node, "", target):
-                raise RuntimeError("Could not connect fish wet-film parameter: " + name)
-        if not isinstance(node, unreal.MaterialExpressionScalarParameter) or str(node.get_editor_property("parameter_name")) != name:
-            raise RuntimeError("Unexpected fish wet-film parent input: " + name)
-        if abs(float(node.get_editor_property("default_value")) - values[key]) > 1e-6:
-            changed = True
-            node.set_editor_property("default_value", values[key])
+    roughness = edit.get_material_property_input_node(material, unreal.MaterialProperty.MP_ROUGHNESS)
+    if roughness is None:
+        raise RuntimeError("Fish wet-skin parent lacks its textured roughness")
+
+    # UE 5.8's Python MaterialProperty enum does not expose ClearCoat Custom Data inputs.
+    # Preserve a fish-local wet-film response by scaling the baked roughness instead of attempting
+    # unsupported pins, keeping the ordinary prop parent and all non-fish imports unchanged.
+    if isinstance(roughness, unreal.MaterialExpressionMultiply):
+        return material
+    scale = 1.0 - values["coat_weight"] * (1.0 - values["coat_roughness"])
+    multiply = edit.create_material_expression(material, unreal.MaterialExpressionMultiply, -250, 850)
+    scalar = edit.create_material_expression(material, unreal.MaterialExpressionScalarParameter, -500, 1025)
+    scalar.set_editor_property("parameter_name", "FishWetRoughnessScale")
+    scalar.set_editor_property("default_value", scale)
+    if not edit.connect_material_expressions(roughness, "R", multiply, "A"):
+        raise RuntimeError("Could not connect baked roughness to fish wet-film scale")
+    if not edit.connect_material_expressions(scalar, "", multiply, "B"):
+        raise RuntimeError("Could not connect fish wet-film scale")
+    if not edit.connect_material_property(multiply, "", unreal.MaterialProperty.MP_ROUGHNESS):
+        raise RuntimeError("Could not connect fish wet-film roughness")
+    changed = True
     _save_parent(material, PARENT, changed)
     return material
 
 
 def membrane_fish_parent(base_parent: unreal.Material, settings: dict) -> unreal.Material:
-    for key, _, _ in PARAMETERS:
+    for key, _ in PARAMETERS:
         _unit_setting(settings, key)
     opacity = _unit_setting(settings, "membrane_opacity")
     material = _load_parent(base_parent, MEMBRANE_PARENT)

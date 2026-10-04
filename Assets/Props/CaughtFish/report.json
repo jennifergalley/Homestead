@@ -8,6 +8,19 @@
   "source": "Scripts/Blender/Recipes/caught_fish.py",
   "source_sha256": "63990c47a85fb7ac78df74af39ee8f446b1c5c0f1614c22daf320098a6add255",
   "provenance": "Original parametric anatomy and procedural PBR; reference text only.",
+  "wet_fish": {
+    "coat_weight": 0.32,
+    "coat_roughness": 0.2,
+    "membrane_materials": [
+      "M_RiverTroutMembrane",
+      "M_RiverSalmonMembrane",
+      "M_LakePerchMembrane",
+      "M_LakeCarpMembrane",
+      "M_SeaMackerelMembrane",
+      "M_SeaBassMembrane"
+    ],
+    "membrane_opacity": 0.35
+  },
   "meshes": {
     "SM_RiverTrout": {
       "vertices": 21148,

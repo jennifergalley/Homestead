@@ -47,6 +47,13 @@ actual/configured context tiers are unknown.
   deferred meals are absent. It has no gameplay or save-code delta. Its sole implementation change
   adds the fish-only `wet_fish` report-metadata parent selection to `import_props.py`; ordinary
   props retain their existing parent selection.
+- Fish material correction: the frozen report omitted the recipe's `wet_fish` block, so the
+  initial import used `M_PropTextured` despite the fish-only importer path. Restored the authored
+  metadata, replaced UE 5.8-Python-inaccessible Clear Coat Custom Data wiring with a fish-local
+  baked-roughness scale, and reimported the same six authorized originals. All six `MI_*` instances
+  now resolve to `/Game/SurvivalGame/Materials/M_CaughtFishWet`; only the CaughtFish source report,
+  importer, fish assets, and that new material changed. No mesh source, texture source, gameplay,
+  enum, save, package, shortcut, or promotion data changed.
 - Fish import: in the owned editor at port 8768, `import_props.main(['CaughtFish'])` imported and
   saved all six authorized original fish to
   `/Game/SurvivalGame/Environment/Props/CaughtFish`. The saved folder has 36 assets, including
@@ -54,8 +61,8 @@ actual/configured context tiers are unknown.
   `SM_SeaMackerel`; all six mesh lookups succeeded. The imported mesh extents match the report:
   trout 7.72 × 34.05 × 10.79 cm, salmon 13.54 × 62.09 × 19.08 cm, perch 7.30 × 30.05 ×
   12.11 cm, carp 11.89 × 42.07 × 16.78 cm, mackerel 8.12 × 36.05 × 10.44 cm, and bass
-  11.23 × 46.07 × 15.13 cm. The editor then closed. This proves the asset import only, not
-  material runtime appearance, gameplay, meal import, package, save containment, or promotion.
+  11.23 × 46.07 × 15.13 cm. The editor then closed. This proves the source import and material
+  parent selection only, not gameplay, meal import, package, save containment, or promotion.
 - Authorized at `2026-10-04T01:55:51.513Z` for the Oct 3 9 PM slot. The original 9 PM scope is
   retained historically, but the complete delivery was deferred at 20:49 local; Oct 4 7:30 AM is a
   target rather than a promise, with no overnight/signoff work. Checkout was clean at preflight
