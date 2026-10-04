@@ -27,9 +27,15 @@ try {
         -CandidateArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`" -HomesteadPreviewProfile=shared" `
         -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
     Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
+        -CandidateArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`" `"-HomesteadPreviewProfile=shared`"" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
         -CandidateArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" `
         -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
-    Write-Output 'Release save isolation: 3 checks passed.'
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage ("\\?\" + $candidate) `
+        -CandidateArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" }
+    Write-Output 'Release save isolation: 5 checks passed.'
 } finally {
     if (Test-Path -LiteralPath $fixture) { Remove-Item -LiteralPath $fixture -Recurse -Force }
 }
