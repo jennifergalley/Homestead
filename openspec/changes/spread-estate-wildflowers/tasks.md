@@ -2,7 +2,7 @@
 
 ## 1. Wider flowers
 
-- [ ] 1.1 Implement deterministic Estate habitat drifts and farm/manor/tilled-square masking; verify repeatable bake counts and exclusions, focused native checks and one editor compile, then inspect flowers in the owned game when the lane editor slot is granted.
+- [x] 1.1 Implement deterministic Estate habitat drifts and farm/manor/tilled-square masking; verify repeatable bake counts and exclusions, focused native checks and one editor compile, then inspect flowers in the owned game when the lane editor slot is granted.
 
 ## 2. Player acceptance
 

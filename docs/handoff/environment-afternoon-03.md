@@ -7,16 +7,17 @@
 
 ## State and next action
 
-Both changes explicitly authorized for apply at 12:13 Oct 4. Flowers are implemented and
-native/compile-verified; owned visual/till proof and Art's fence-root-cause handoff remain.
-Both OpenSpec implementation checkboxes remain unchecked until their full evidence is obtained;
-Jenny's separate integrated acceptance is also unchecked. Strict validation passes for both.
+Both selected implementations are complete and branch-verified. Flower checkpoint:
+`8514b981189a9aaea6f668c16e73fd041101ea10`. Art's FarmFence-only `3e994653` was
+cherry-picked as `80d6a4967eab6bfaecb5433d61a8904f260bf6c3`; no fishing work was taken.
+The delivery commit carries this handoff, completed implementation tasks and the read-only
+PIE evidence helper. Jenny's integrated acceptance checkboxes remain unchecked.
 
-Hands-on slot 3 is granted. Fishing Art owns the shared lane editor first; do not launch a
-second lane editor. Orchestrator has queued Environment next, only after Art explicitly closes/releases.
-Integration03 is `64540925-e1b6-4766-ac1f-f2dc42f8aa36`; no packaging here.
-Orchestrator `146ed534-2f78-48ba-b0fc-98436c1f3223` explicitly authorized Art's narrow
-existing-fence asset audit/repair. No new disassembly Simulation feature.
+Slot3 and the lane editor were explicitly released to Environment at 13:32 Oct4, after the
+earlier instructed parked intervals. Owned editor PID26816, port8766, was closed after its
+bounded pass; no owned process or automation remains. Integration03
+`64540925-e1b6-4766-ac1f-f2dc42f8aa36` takes the pushed branch for afternoon03.
+No packaging, main merge, version bump or new disassembly feature here. Park after delivery.
 
 ## Relevant findings
 
@@ -33,14 +34,15 @@ existing-fence asset audit/repair. No new disassembly Simulation feature.
   subordinate clearing flags. No per-frame scatter, new actors, crops or forageables.
 - Read existing `State.plots`, `GardenCellCenter`, `GardenCellSize`, layout farm/manor polygons.
   Gameplay/UI (`986d7db6-7ae4-4cee-a980-054664106056`) retains crop/controller logic.
-- `AHomesteadDerelictFarm` is no-tick scenery. Fence posts have separate ISM batches, no
-  clear/disassembly state link, no explicit cull distance. The supplied screenshot has internal
-  mortise fragments without the upright body: body geometry/material failure is a lead, not
-  a confirmed cause. Art (`ac7339b4-84f7-49c0-8ec2-3d51d2b86730`) will audit after fishing.
+- Fence root cause is asset-only: sequential EXACT mortise booleans collapsed the hewn body
+  at the second cut. Fishing Art (`ac7339b4-84f7-49c0-8ec2-3d51d2b86730`) repaired a
+  joined cutter with a guarded EXACT/FLOAT fallback and reimported the original upright.
+  `AHomesteadDerelictFarm` remains unchanged, no-tick scenery with independent ISM supports;
+  no clearing/disassembly state link or cull distance was added.
 - Authorized feedback image:
   `E:\CopilotScratch\146ed534-2f78-48ba-b0fc-98436c1f3223\planner-publish-20261004-1600\fenceposts-feedback.png`.
 
-## Evidence and remaining work
+## Evidence and acceptance boundary
 
 - `python -m unittest discover -s Tests -p test_estate_wildflowers.py`: 3 passed.
 - Supplemental bake and `--verify`: repeatable bytes, all habitat/terrain/farm/manor exclusions pass.
@@ -49,20 +51,44 @@ existing-fence asset audit/repair. No new disassembly Simulation feature.
   passed (201.36 s). Native target build is warning-free.
 - `Scripts\Invoke-UnrealBuild.ps1`: SurvivalGameEditor succeeded, 44 actions, 173 s.
   Log: `Saved\Logs\UnrealBuildTool-SurvivalGameEditor-Development.log`.
-- Reviewed owned gating/footprint/scatter diff; `git diff --check` clean. No save schema,
-  placements, enum indices, bake version or mesh/material asset changes.
-- No owned Unreal process or in-game/performance claim. Waiting for Art's editor release
-  and fence asset handoff. Next: bounded habitat/till/fence PIE evidence, close editor,
-  complete implementation tracking only when proved, push and send exact `[ready]`.
+- Owned fresh-editor Estate PIE: field primroses, woodland anemones and bank wild garlic
+  inspected in ordinary gameplay. Supplemental bake has 81 clumps within18m of the lake and
+  248 within18m of river banks (categories can overlap); all original lake records remain.
+- One bounded read-only audit inspected 6,701 decorative flower instances, 6,649 shown at
+  that fixture state. Zero shown full footprints intersect the farm/manor polygons.
+  Actual LMB hoe at outside cell(-296,-642), centre(-29550,-64150), hid both intersecting
+  clumps and retained all10 non-intersecting neighbours. F5/F9 restored identical local flower
+  transforms/scales and the exact bare bed after moving away.
+- Fence views show repaired bodies and rails seated in mortises. Actual billhook cleared
+  bramble550003; actual hoe added a bed at(-22150,-65850). All6 fence batches, including
+  73 upright/leaning and36 snapped posts, retained identical transforms, visibility, materials
+  and zero cull distances through clear/till, a16m departure, input-driven walk return and F5/F9.
+- All7 flower base materials have instancing/Nanite usage; fence base material has both;
+  the two post meshes are non-Nanite. Fresh editor log has no material compile/default-usage
+  failure. Three startup HTTP socket-send errors are unrelated to rendering.
+- Reviewed runtime gating/footprints directly; helper executed in PIE and syntax-check passed;
+  both OpenSpec changes strict-valid, diff check clean. No save schema, interactive placements,
+  enum indices or bake version change. Only selected decorative scenery and Art's post assets.
+- No performance measurement or packaged/RT-on acceptance claim. Agent PIE has RT/VSM off;
+  Integration owns packaged verification and Jenny owns final visual acceptance.
 
-Owned scratch: only `E:\CopilotScratch\ff61de39-9742-45a8-8c6d-03512cd76224\tmp`;
-native/editor intermediates are ignored under this E: worktree. No automation.
+Evidence retained for Integration under
+`E:\CopilotScratch\ff61de39-9742-45a8-8c6d-03512cd76224\environment-proof`:
+`field-before.png`, `field-after.png`, `field-reload.png`, `woods.png`,
+`lake-bank.png`, `fence-before.png`, `fence-after-till.png`.
+Sibling JSON snapshots hold exact transforms/materials and the Estate-wide exclusion audit.
+Other captures and all three generated owned PIE saves were deleted after closing the editor;
+Jenny's game, windows and saves were never touched. Native/editor caches stay on this E: worktree.
+Keep only this bounded proof until Integration's acceptance, then clean it; no automation.
 
 ## Usage boundary
 
-All this fresh runtime's work belongs to afternoon03, not measured02. Local metadata snapshot
-through `2026-10-04T19:27:01.783Z`: 41 calls, events `71820` through `72137`,
-starting `2026-10-04T19:07:25.740Z`, 188445630000 recorded nano-AIU (188.44563 AIU).
-40 calls report Sol/high; one reports Sol with effort unknown (event 71948, 6.23094 AIU).
-This is incomplete, not billing-reconciled credits, and excludes this handoff/push and subsequent
-editor work. Integration must export the final runtime range after delivery/parking.
+All this fresh runtime's work belongs to afternoon03, not measured02. Committed metadata-only
+export: `accounting\environment-afternoon-03-usage.json`; allocation:
+`accounting\environment-afternoon-03-allocation.json`. Captured at
+`2026-10-04T20:49:42.465423Z`, events71820-73039,105 calls since
+`2026-10-04T19:07:25.740Z`,589482210000 recorded nano-AIU (589.48221 AIU).
+103 calls report Sol/high; two retain unknown effort. No helpers/model changes.
+Report CLI validated the export; it is incomplete, not billing-reconciled credits.
+Integration must capture the final handoff/push/parking tail once after delivery and deduplicate
+event IDs; Art's separate authoring cost is not charged again in this Environment runtime.
