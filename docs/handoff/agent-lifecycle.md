@@ -3,6 +3,10 @@
 Jenny's policy, 2026-10-02. Quality, especially visuals and performance, remains a shipping gate;
 AI credits are an additional optimization metric, not permission to lower that gate.
 The role/model table in README.md is authoritative. This policy does not retune an existing session.
+For future launches, Claude Opus 5.5 / high / default is reserved solely for Blender/Unreal asset
+making and asset integration; use long context only when necessary. All other gameplay/UI/environment
+code and risky review use GPT-6.1 Sol / high; routine documentation, integration, builds, scripted
+tests and accounting use the cheaper low/medium tiers in README.md.
 
 ## Compact, durable handoffs
 
@@ -88,6 +92,16 @@ edits, screenshots, or unchecked acceptance tasks.
 Optimize credits per accepted player-visible improvement alongside build totals, defects/rework,
 performance and visual acceptance. Compare similar task types rather than concluding that the more
 expensive build was inefficient merely because it contained harder work.
+
+### Scheduled-build kickoff boundary
+
+Before work begins, create an allocation file for the build with its authorization timestamp, every
+known runtime/app session identity, configured model/reasoning/context, and one segment starting at
+that timestamp for each allocated lane. Leave actual runtime model/effort/context unknown until
+observed; do not copy a previous build's usage window. At a scheduled coordinator wake, freshly read
+`priority.json` and `backlog-inbox.json` before assigning the next build, assigning only selected,
+unowned work and keeping notifications off. This prevents newly selected work from leaking into a
+closed build's measured range.
 
 ## Verified sources and telemetry limits
 

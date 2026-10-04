@@ -44,7 +44,8 @@ Use default context unless the task needs long context; record both configured t
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
 | Orchestrator Agent | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
-| Blender / Unreal work and gameplay, visuals or performance implementation | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
+| Blender / Unreal **asset making and asset integration only** | Claude Opus 5.5 (`claude-opus-5.5`) | high | default; long only when necessary |
+| Gameplay/UI/environment code, general Unreal work, visuals or performance implementation | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
 | Architecture / gameplay or save-format review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
 | Documentation / straightforward status and accounting | GPT-6 Luna (`gpt-6-luna`) or GPT-5.6 Terra (`gpt-5.6-terra`) | low / medium as needed | default |
 | Integration / building / scripted test execution | GPT-5.6 Terra (`gpt-5.6-terra`), GPT-6 Luna (`gpt-6-luna`), or GPT-6.1 Sol (`gpt-6.1-sol`) | low / medium as needed | default |
@@ -52,6 +53,9 @@ Use default context unless the task needs long context; record both configured t
 
 Integration escalates a failure it can't explain in one attempt to the orchestrator, which assigns it to
 the owning lane rather than having Integration debug gameplay.
+
+Claude Opus 5.5 is not the general implementation tier: only asset creation and asset integration
+use it. These are future-launch settings, not a retune of an existing session.
 
 ## Token budget (Jenny, 2026-10-01)
 
@@ -70,6 +74,10 @@ Tokens are the scarce resource. Every session follows these rules:
   of its scheduled items, not a stream of separate requests.
 - **No standing check-ins.** The orchestrator wakes only for build slots (about an hour before each)
   and for incoming messages; no 30-minute polling.
+- **Scheduled coordinator wake.** At each build-slot wake, read the current
+  `docs/handoff/priority.json` and `docs/handoff/backlog-inbox.json` before assigning the *next*
+  scheduled build. Assign only newly selected, unscheduled work; do not duplicate active lane
+  ownership or turn notifications back on.
 - **Review only risky diffs** (save format, gameplay logic) with the quality tier above.
 - **Docs reports only for real findings**: something broke, a doc was wrong, or a recipe other lanes
   need. No running commentary.
@@ -352,10 +360,12 @@ The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
    `Scripts\Export-BuildUsage.py`, then create
    `docs\handoff\accounting\reports\<build-id>.json` with `Scripts\Report-BuildUsage.mjs`. Commit
    the loader-compatible report with the delivery metadata so the planner shows the build and its
-   observed costs. Preserve exact integer nano-AIU arithmetic and deduplication; label AIU as
-   observed rather than billing-reconciled credits, keep unknown context/post-capture tails visible,
-   and do not mark Jenny's playtest checks accepted or mutate her priority IDs, schedules, edits, or
-   screenshots.
+   observed costs. Then remove shipped cards from the active planner/inbox/Markdown mirror, retain
+   their receipt and source evidence outside the active inbox, and refresh the delivered planner
+   data and Measured build cost tab before reporting to Jenny. Preserve exact integer nano-AIU
+   arithmetic and deduplication; label AIU as observed rather than billing-reconciled credits, keep
+   unknown context/post-capture tails visible, and never turn Jenny's unchecked playtest acceptance
+   into completion.
 5. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
 
 Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.

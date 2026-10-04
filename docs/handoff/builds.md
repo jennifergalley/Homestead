@@ -170,6 +170,21 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - The active measured01 release, its sole rollback, shortcut icon, and all protected player saves
   remain retained and untouched.
 
+## 2026-10-04 — 4:00 PM
+
+- Build ID: `20261004-afternoon-03`
+- Status: scheduled; metadata/preflight only until the coordinator grants Integration a hands-on slot.
+- Authorization: Jenny's 11:59:23 local message; target 4:00 PM local.
+- Selected scope: refine fishing pole/fish icons and cast/bite/catch presentation; compact Quit
+  dialog; Back-slot rucksack visibility without capacity loss; wider wildflowers outside farm,
+  manor ruins, and tilled ground; visible broken fenceposts until the complete fence is dismantled;
+  crop-specific non-stackable seed packets/end-product icons; and a persistent ripe-crop
+  `[E] Harvest <crop>` hint unless weeding takes precedence.
+- Accounting: starts at `2026-10-04T18:59:23Z` in
+  `accounting/afternoon-03-allocation.json`. Measured02 remains closed at 2,477 calls /
+  11,439.97802 observed AIU; its unknown post-capture tail does not transfer to this build.
+- Player acceptance: no player checks are marked accepted by this scheduling record.
+
 ## Later
 
 - The player-driven deferred queue is in [backlog.md](backlog.md): river/ocean, map and town feedback, fishing, hauling, mine work, manor rebuilding, artisan goods, and later estate systems.

@@ -1,0 +1,82 @@
+{
+  "buildId": "20261004-afternoon-03",
+  "status": "scheduled-preflight",
+  "authorizedAt": "2026-10-04T18:59:23Z",
+  "targetSlot": "2026-10-04T16:00:00-07:00",
+  "coordinator": {
+    "runtimeSessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+    "appSessionId": "3c4e743c-3c27-4732-adce-e651536c7e75",
+    "model": "gpt-6.1-sol",
+    "reasoningEffort": "high",
+    "launchContextTier": "default"
+  },
+  "lanes": [
+    {
+      "role": "Fishing Art",
+      "runtimeSessionId": "ac7339b4-84f7-49c0-8ec2-3d51d2b86730",
+      "appSessionId": null,
+      "worktree": "jennifergalley-bookish-pancake",
+      "model": "claude-opus-5.5",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "selectedIds": [
+        "backlog:jenny-muu6k1g1-qr5dx2"
+      ]
+    },
+    {
+      "role": "Gameplay UI",
+      "runtimeSessionId": "986d7db6-7ae4-4cee-a980-054664106056",
+      "appSessionId": "3d3426ed-7f12-4245-ab69-dc66e8698418",
+      "worktree": "jennifergalley-miniature-invention",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "selectedIds": [
+        "backlog:jenny-muteesvp-3bo5xf",
+        "backlog:jenny-mutdzpsx-76dag4",
+        "backlog:jenny-mutd9wre-js2x1r",
+        "backlog:jenny-muu6upvs-l7a0l6"
+      ]
+    },
+    {
+      "role": "Environment",
+      "runtimeSessionId": "ff61de39-9742-45a8-8c6d-03512cd76224",
+      "appSessionId": null,
+      "worktree": "jennifergalley-probable-engine",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "selectedIds": [
+        "backlog:jenny-mutdnje8-0et783",
+        "backlog:jenny-mutdjl7e-nzl7lh"
+      ]
+    }
+  ],
+  "integration": {
+    "runtimeSessionId": "64540925-e1b6-4766-ac1f-f2dc42f8aa36",
+    "appSessionId": "c5ee7d02-4a6f-488e-a317-8c4396836061",
+    "worktree": "jennifergalley-integration-agent-8ba",
+    "model": "gpt-5.6-terra",
+    "reasoningEffort": "medium",
+    "launchContextTier": "default",
+    "status": "metadata-preflight-only; hands-on integration requires an explicit coordinator slot grant"
+  },
+  "plannerDelivery": {
+    "status": "scheduled",
+    "playerAcceptance": "not-evaluated",
+    "selectedIds": [
+      "backlog:jenny-muu6k1g1-qr5dx2",
+      "backlog:jenny-muteesvp-3bo5xf",
+      "backlog:jenny-mutdzpsx-76dag4",
+      "backlog:jenny-mutdnje8-0et783",
+      "backlog:jenny-mutdjl7e-nzl7lh",
+      "backlog:jenny-mutd9wre-js2x1r",
+      "backlog:jenny-muu6upvs-l7a0l6"
+    ]
+  },
+  "deliveryRules": [
+    "Accept only exact forwarded reviewed and verified ready commits after an explicit Integration slot grant.",
+    "Do not merge, build, open an editor, package, or touch protected releases, saves, or Jenny's active game during metadata/preflight.",
+    "Final delivery first publishes an observed per-call accounting report and retains its limitations, then removes shipped active cards while retaining receipts and evidence."
+  ]
+}

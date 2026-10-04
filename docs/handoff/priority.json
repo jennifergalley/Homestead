@@ -1,14 +1,5 @@
 {
   "order": [
-    "backlog:jenny-mut56ggp-uijcta",
-    "backlog:jenny-mut5v5yo-9f8fpx",
-    "backlog:jenny-mut57myz-9tfjci",
-    "backlog:jenny-mut5gsd4-oebvov",
-    "backlog:jenny-mut5c51h-orhi39",
-    "backlog:jenny-mut592z8-2od0d5",
-    "backlog:jenny-mut5legr-oba2rd",
-    "add-shore-and-river-fishing",
-    "backlog:jenny-mus1kfmm-ayz6jx",
     "add-swimming",
     "widen-estate-beach",
     "rebuild-manor-and-decorate",
@@ -17,7 +8,6 @@
     "backlog:jenny-mus200pa-iiju4e",
     "fit-rucksack-straps",
     "reduce-foliage-shadow-motion",
-    "unify-hud-notices",
     "space-out-town-square",
     "restore-mine-pumping-and-deep-levels",
     "open-estate-mine-shallow-level",
@@ -33,17 +23,13 @@
   ],
   "nextBuild": [],
   "slots": {
-    "backlog:jenny-mut56ggp-uijcta": "2026-10-04 07:30",
-    "backlog:jenny-mut5v5yo-9f8fpx": "2026-10-04 07:30",
-    "backlog:jenny-mut57myz-9tfjci": "2026-10-04 07:30",
-    "backlog:jenny-mut5gsd4-oebvov": "2026-10-04 07:30",
-    "backlog:jenny-mut5c51h-orhi39": "2026-10-04 07:30",
-    "backlog:jenny-mut592z8-2od0d5": "2026-10-04 07:30",
-    "backlog:jenny-mut5legr-oba2rd": "2026-10-04 07:30",
-    "add-shore-and-river-fishing": "2026-10-04 07:30",
-    "backlog:jenny-mus1kfmm-ayz6jx": "2026-10-04 07:30",
-    "backlog:jenny-mut6p856-a7gysc": "2026-10-04 07:30",
-    "unify-hud-notices": "2026-10-04 07:30"
+    "backlog:jenny-muu6k1g1-qr5dx2": "2026-10-04 16:00",
+    "backlog:jenny-muteesvp-3bo5xf": "2026-10-04 16:00",
+    "backlog:jenny-mutdzpsx-76dag4": "2026-10-04 16:00",
+    "backlog:jenny-mutdnje8-0et783": "2026-10-04 16:00",
+    "backlog:jenny-mutdjl7e-nzl7lh": "2026-10-04 16:00",
+    "backlog:jenny-mutd9wre-js2x1r": "2026-10-04 16:00",
+    "backlog:jenny-muu6upvs-l7a0l6": "2026-10-04 16:00"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -58,7 +44,18 @@
     "pitch-dark-parchment-theme",
     "speed-up-pickup-animation",
     "backlog:jenny-mut5x32c-7715t2",
-    "edit-planner-feedback"
+    "edit-planner-feedback",
+    "backlog:jenny-mut6p856-a7gysc",
+    "backlog:jenny-mut56ggp-uijcta",
+    "backlog:jenny-mut5v5yo-9f8fpx",
+    "backlog:jenny-mut57myz-9tfjci",
+    "backlog:jenny-mut5gsd4-oebvov",
+    "backlog:jenny-mut5c51h-orhi39",
+    "backlog:jenny-mut592z8-2od0d5",
+    "backlog:jenny-mut5legr-oba2rd",
+    "add-shore-and-river-fishing",
+    "backlog:jenny-mus1kfmm-ayz6jx",
+    "unify-hud-notices"
   ],
-  "updated": "2026-10-04T03:49:52.690Z"
+  "updated": "2026-10-04T19:03:39.074Z"
 }

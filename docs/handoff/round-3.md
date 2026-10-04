@@ -20,13 +20,19 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 
 ## Registry
 
-Active round: `20261003-measured-02`, authorized 2026-10-03 18:55 local for the
-9 PM slot, with 2026-10-04 7:30 AM fallback. Scope and ownership are in
-[measured-build-02.json](measured-build-02.json); fresh lane identities are registered below.
-No overnight work/automations, no unselected animation/carry or manor-arrival work.
+Active round: `20261004-afternoon-03`, authorized by Jenny's 2026-10-04 11:59:23 local message
+for the 4 PM slot. Scope and launch boundaries are in
+[afternoon-build-03.json](afternoon-build-03.json) and
+[`accounting/afternoon-03-allocation.json`](accounting/afternoon-03-allocation.json). No overnight
+work/automations, no unselected animation/carry, meals, strap, normal-map, mine, or tree work.
 
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
+| Orchestrator Agent | runtime `146ed534-2f78-48ba-b0fc-98436c1f3223`; app `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; afternoon-03; GPT-6.1 Sol/high/default |
+| Fishing Art Agent | `ac7339b4-84f7-49c0-8ec2-3d51d2b86730` | `jennifergalley-bookish-pancake` | afternoon-03; hands-on slot 1; Claude Opus 5.5/high/default; fishing asset making/integration only |
+| Gameplay UI Agent | runtime `986d7db6-7ae4-4cee-a980-054664106056`; app `3d3426ed-7f12-4245-ab69-dc66e8698418` | `jennifergalley-miniature-invention` | afternoon-03; hands-on slot 2; GPT-6.1 Sol/high/default |
+| Environment Agent | `ff61de39-9742-45a8-8c6d-03512cd76224` | `jennifergalley-probable-engine` | afternoon-03; hands-on slot 3; GPT-6.1 Sol/high/default |
+| Integration Agent (afternoon-03) | `64540925-e1b6-4766-ac1f-f2dc42f8aa36` | `jennifergalley-integration-agent-8ba` | docs/accounting/preflight only until explicit slot grant; GPT-5.6 Terra/medium/default |
 | Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |
 | Farming Fishing Agent | `5be207bc-49b1-4a1b-811e-088ae565dc1b` | `jennifergalley-cautious-robot` | measured-02; hands-on slot 1; GPT-6.1 Sol/high/default launch |
 | Travel Rest Agent | `1b0e10a4-09b5-458e-b9de-098cce831b07` | `jennifergalley-miniature-fishstick` | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch |
@@ -66,6 +72,17 @@ README.md's current model table. Use GPT-6.1 Sol / high for the orchestrator and
 gameplay, visual and performance implementation; use cheaper models or lower effort for routine docs,
 integration and test execution. Keep task-scoped handoffs and build-credit attribution per
 [agent-lifecycle.md](agent-lifecycle.md). Do not infer a live session's settings from this registry.
+
+**2026-10-04 model clarification:** Claude Opus 5.5 / high / default is only for Blender/Unreal
+asset making and asset integration (long context only when necessary). It is not used for other work.
+GPT-6.1 Sol / high remains the future-launch configuration for coordinator and general
+gameplay/UI/environment code or risky review; routine docs, builds, tests and accounting stay on a
+cheaper low/medium tier. This policy does not retune a running session.
+
+**Coordinator wake checklist (2026-10-04):** every scheduled coordinator wake reads fresh
+`priority.json` and `backlog-inbox.json` before assigning the next scheduled build. It assigns only
+explicitly newly selected work, preserves existing owners, and leaves Jenny's scheduling
+notifications off.
 
 Parked work (don't resume unless scheduled): `origin/park-sprint-chests` (`f0cc4527`, sprint and chest
 edits) and Terrain's water-slot-walk.

@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "archives": [
+    {
+      "buildId": "20261003-measured-02",
+      "archivedAt": "2026-10-04T19:03:39.074Z",
+      "status": "shipped-pending-player-acceptance",
+      "receipt": {
+        "buildRecord": "measured-build-02.json",
+        "changelist": "builds.md",
+        "observedUsageReport": "accounting/reports/20261003-measured-02.json",
+        "recordedCalls": 2477,
+        "recordedAiu": "11439.97802",
+        "limitations": "Observed local runtime AIU only; external billing reconciliation, actual context tiers, and post-capture tails remain unknown."
+      },
+      "inboxEntries": [
+        "jenny-mut6p856-a7gysc",
+        "jenny-mut56ggp-uijcta",
+        "jenny-mut5v5yo-9f8fpx",
+        "jenny-mut57myz-9tfjci",
+        "jenny-mut5gsd4-oebvov",
+        "jenny-mut5c51h-orhi39",
+        "jenny-mut592z8-2od0d5",
+        "jenny-mut5legr-oba2rd",
+        "jenny-mus1kfmm-ayz6jx"
+      ],
+      "plannerOnlyItems": [
+        "add-shore-and-river-fishing",
+        "unify-hud-notices"
+      ],
+      "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
+    }
+  ]
+}

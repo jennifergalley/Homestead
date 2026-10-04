@@ -1,0 +1,76 @@
+{
+  "buildId": "20261004-afternoon-03",
+  "authorizedAt": "2026-10-04T18:59:23Z",
+  "finalCapture": false,
+  "allocationPolicy": "Count each captured local assistant_usage_events record at most once from this authorization boundary through the future delivery-closure capture. Do not reallocate any measured02 event. This is observed runtime AIU, not billing-reconciled credits.",
+  "legacy": {
+    "status": "unattributed",
+    "recordedNanoAiu": null,
+    "description": "Earlier implementation and measured02's closed 2,477-call / 11,439.97802-AIU report are excluded rather than counted as zero."
+  },
+  "limits": [
+    "Actual runtime model, effort, and context observations are unknown until captured; launch configuration is recorded separately.",
+    "External billing reconciliation and any post-capture tail remain unknown.",
+    "No current segment authorizes hands-on Integration work before an explicit coordinator slot grant."
+  ],
+  "segments": [
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "appSessionId": "3c4e743c-3c27-4732-adce-e651536c7e75",
+      "agentId": "main",
+      "task": "afternoon-03-orchestration",
+      "category": "overhead",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "gpt-6.1-sol",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "ac7339b4-84f7-49c0-8ec2-3d51d2b86730",
+      "agentId": "main",
+      "task": "fishing-presentation-assets",
+      "category": "implementation",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "claude-opus-5.5",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "986d7db6-7ae4-4cee-a980-054664106056",
+      "appSessionId": "3d3426ed-7f12-4245-ab69-dc66e8698418",
+      "agentId": "main",
+      "task": "gameplay-ui-feedback-slices",
+      "category": "implementation",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "gpt-6.1-sol",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "ff61de39-9742-45a8-8c6d-03512cd76224",
+      "agentId": "main",
+      "task": "environment-feedback-slices",
+      "category": "implementation",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "gpt-6.1-sol",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default"
+    },
+    {
+      "sessionId": "64540925-e1b6-4766-ac1f-f2dc42f8aa36",
+      "appSessionId": "c5ee7d02-4a6f-488e-a317-8c4396836061",
+      "agentId": "main",
+      "task": "integration-metadata-and-preflight",
+      "category": "overhead",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "gpt-5.6-terra",
+      "actualReasoningEffort": "medium",
+      "contextTier": null,
+      "launchContextTier": "default"
+    }
+  ]
+}
