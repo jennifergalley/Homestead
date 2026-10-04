@@ -15,10 +15,11 @@ live port 9878. No game/save/shortcut touched. Integration reports its combined
 editor/game compile and 21/21 native suites passed; original-art and
 release-save-isolation admission gates remain.
 
-Current source checkpoint: original potatoes, roasted turnips and stewed carrots
-have separate serving/edible-portion WIP, NOT art/import acceptance. Thirteen dishes, all meal
+Current source checkpoint: original potatoes, roasted turnips, stewed carrots and
+herbed broad beans have separate serving/edible-portion WIP, NOT art/import
+acceptance. Twelve dishes, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original carrot WIP; recipe/source receipts below are frozen,
+visible review is original broad bean WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -763,6 +764,46 @@ builds/gameplay/save/enum/version/placement/fish budget or shared bake changes.
 Actual gpt-6.1-sol/high, launch default/actual context unknown. Build02-only
 provisional snapshot: 632 calls through event70861, 3,838,758,080,000 recorded
 nano-AIU; subsequent calls/terminal response need recapture.
+
+### Original herbed broad bean source milestone
+
+New herbed_broad_beans.py authors 24 individual 1.9-2.5cm cooked seeds with
+asymmetric outlines, cotyledon groove, lateral hilum field/indentation, 36
+original thin chopped Meadow Herb flakes and new 13.44cm earthenware bowl.
+Separate single-bean edible portion has no bowl attached. Exact BroadBeans3/
+Flowers1/Kindling1; no oil, butter, salt or invented garnish. Three crop units
+are visually represented by the serving, not a new inventory conversion.
+No existing crop/fish/food mesh or photographic texture is reused.
+
+Viewed first pass was too sparse, smooth and polygonal; herbs read as cardboard
+rectangles. A tighter bowl/layout, denser bean silhouettes, stronger irregular
+hilum/fine-coat fields and thinner, curved six-sided herb fragments improve the
+source. Native-pixel crops still exposed uniform smoothness. Final detail views
+use recipe-owned f/64 (instead of f/22) and nearer portion focus so shallow focus
+cannot hide it; no shared renderer/helper or fish shader/budget change.
+All four final 3840x2160/192-sample OPTIX frames were viewed. Seeds still read too
+waxy/molded, hila insufficiently convincing and clay too procedural: NOT art/
+import acceptance. No completed-family or remaining-hours claim.
+
+Serving/portion: 62,928/2,432 triangles,
+[13.44,13.44,3.93]/[1.36,2.47,0.8]cm. Source fixtures pass all 61 serving islands/
+one portion, positive closed volume/noncollapsed geometry, original roles,
+finite part-local shader coordinates, applied transforms, bounded UVs/scale,
+executed shader hashes/noise scales and sampled food/bowl nonpenetration.
+These are not full face-intersection/contact/gravity/grip proof. Reopened
+HerbedBroadBeansSourceProof preserves source, two FBX, four frames, report and
+copied-source hash verification. All six existing food shader function ASTs
+remain unchanged from bc4126c3; earlier frozen source proofs are not overwritten
+or presented as current-code receipts after the new library functions.
+
+Owned Blender preserved as Beans-source-held-visible.blend on E:, separated
+and framed around the selected serving/portion in EEVEE Material view.
+Four meal source prototypes remain below artistic acceptance; twelve dishes
+unstarted. Baking, original imagery, eating wiring and Integration gates remain.
+No agent helpers/automation/UE/UBT/UAT/gameplay/save/version/enum/placement change.
+Actual gpt-6.1-sol/high; launch default/actual context unknown. Build02-only
+provisional snapshot: 664 calls through event70905, 4,024,406,690,000 recorded
+nano-AIU; subsequent calls/terminal response remain to capture.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

@@ -152,3 +152,45 @@ def cooking_liquid(name: str) -> bpy.types.Material:
     graph.set("IOR", 1.333)
     graph.set("Normal", graph.bump(variation, strength=.08, distance=.00002))
     return graph.mat
+
+
+def cooked_broad_bean(name: str, seed: float) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    shifted = graph.vmath("ADD", point, (seed * .037, seed * .019, seed * .061))
+    pigment = graph.noise(shifted, scale=180, detail=3).outputs["Fac"]
+    colour = graph.ramp(pigment, [
+        (.15, (.16, .21, .057)), (.48, (.29, .34, .13)),
+        (.85, (.39, .41, .22)),
+    ], "EASE")
+    colour = graph.mix(colour, (.17, .23, .065), (seed % 5) * .045)
+    scar_point = graph.scale(graph.vmath("SUBTRACT", point, (-.0061, .0006, .0016)),
+                             (850, 220, 550))
+    scar = graph.remap(graph.vmath("LENGTH", scar_point), .40, 1.2, .95, 0)
+    graph.set("Base Color", graph.mix(colour, (.42, .39, .24), scar))
+    wrinkles = graph.noise(graph.scale(shifted, (1, .35, 1)),
+                          scale=1100, detail=2).outputs["Fac"]
+    pores = graph.noise(shifted, scale=2600, detail=2).outputs["Fac"]
+    relief = graph.math("ADD", wrinkles, graph.math("MULTIPLY", pores, .16))
+    graph.set("Roughness", graph.remap(pigment, .2, .8, .54, .39))
+    graph.set("Subsurface Weight", .12)
+    graph.set("Subsurface Radius", (.002, .0017, .0007))
+    graph.set("Subsurface Scale", .05)
+    graph.set("Normal", graph.bump(relief, strength=.24, distance=.00010))
+    return graph.mat
+
+
+def chopped_meadow_herb(name: str) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    pigment = graph.noise(point, scale=650, detail=2).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(pigment, [
+        (.2, (.018, .038, .005)), (.8, (.055, .091, .018)),
+    ]))
+    veins = graph.noise(graph.scale(point, (1, .15, 1)),
+                       scale=2200, detail=2).outputs["Fac"]
+    graph.set("Roughness", .58)
+    graph.set("Normal", graph.bump(veins, strength=.10, distance=.00002))
+    return graph.mat
