@@ -23,6 +23,7 @@
     ],
     "constraints": [
       "Farming stops optional modeling, probes, and polish; it owns only the frozen eleven-meal exports, bakes, imagery, item-eating wiring, manifest handoff, and deferred-meal availability gating.",
+      "The ready imagery/eating delta must bind all six imported CaughtFish meshes as well as the eleven imported meal portions; current source references fish item identities only and would otherwise leave the imported originals unselected.",
       "Existing texture budgets are ceilings, not mandatory 4K rebakes: use the cheapest coherent provisional original-asset import/material path and preserve richer WIP for later.",
       "Integration owns Unreal import, combined build, runtime verification, package, Shipping checks, and promotion.",
       "Retain the existing UserDir release-isolation contract, enum/version compatibility, protected releases, rollback, saves, and shortcut icon.",

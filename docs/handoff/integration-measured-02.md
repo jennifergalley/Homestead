@@ -28,6 +28,10 @@ actual/configured context tiers are unknown.
   are ceilings, not mandatory 4K rebakes: use the cheapest coherent provisional original-asset
   import/material path and preserve richer WIP for later. The no-waiver functional, save, rollback,
   and protected-release gates remain in force.
+- Wiring gate: current source has fish item/recipe identities but no `CaughtFish` mesh-path
+  reference. Farming's assigned imagery/eating delta must bind the six imported original fish and
+  the eleven meal portions to actual gameplay presentation; otherwise the fish would be cooked
+  assets only. This requires no enum, save, or version change.
 - Initial critical path: Farming's ready eleven-meal handoff, then Integration import, merged
   Development/runtime checks, real candidate/rollback save containment evidence, package, and
   Shipping EstateSmoke/ToolRepeat. Once the handoff exists, the initial lean-path estimate is
