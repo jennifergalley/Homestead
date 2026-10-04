@@ -25,6 +25,13 @@
         "backlog:jenny-mut592z8-2od0d5",
         "backlog:jenny-mut5legr-oba2rd",
         "add-shore-and-river-fishing"
+      ],
+      "checkpoint": "ff3c9de86c58efce4901b9d89de174003a85d0d4",
+      "checkpointStatus": "pushed-not-admitted",
+      "admissionBlockers": [
+        "compile",
+        "visual/player acceptance",
+        "release save-isolation proof"
       ]
     },
     {

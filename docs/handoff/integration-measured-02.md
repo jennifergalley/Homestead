@@ -132,9 +132,13 @@ doze; Sunday wait preserves authoritative energy drain and adds no rest grant.
 
 ## Farming Fishing checkpoint
 
-- Checkpoint `249229b0d5c3f072d4fb6384e9ded0cb0f503d9c` is also **not admitted** until editor
-  compile and player acceptance. Independent review found no separate gameplay/economy source
-  blocker in its appended Items/Recipes, Plant Seeds hint, single-seed return, harvest, or meal flow.
-- Its existing counted-stock serialization widens when Items are appended, so older readers reject
-  the save even if every new meal count is zero. Farming promotion inherits the Travel separate-save
-  or write-protection rollback requirement.
+- Final checkpoint `ff3c9de86c58efce4901b9d89de174003a85d0d4` is **not admitted**. It contains the
+  prior seed/crop work plus pole 1500, timed river/lake/sea fishing, and eight fish preparations,
+  cards, glyphs, and gallery work. The lane reports native Simulation/Economy/Manor 3/3 and 1,036
+  focused fishing checks passing; its handoff is `docs\handoff\farming-fishing-measured-02.md`.
+- Editor compile, visual/player acceptance, and the mandatory release-isolation proof remain
+  required. No heavy launch or real saves were touched. Preserve HUD pickup/name-toast removals and
+  `QuietActionSerial`, along with Travel save hunks, during any later integration.
+- Its counted-stock serialization widens to 23 Items without a save version, bake, or tagged-section
+  change. Older readers can therefore reject these saves even with zero new quantities; Farming
+  inherits the Travel separate-save/write-protection rollback gate. Fishing casts are ephemeral.

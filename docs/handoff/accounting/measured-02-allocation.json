@@ -63,6 +63,17 @@
       "boundaryEvidence": "Planner-only feature work. Non-agent Node, loopback fixture, and optional isolated browser helpers have no LLM usage; no review, gameplay, save, or Unreal allocation is included."
     },
     {
+      "sessionId": "5be207bc-49b1-4a1b-811e-088ae565dc1b",
+      "task": "farming-fishing-feedback-bundle",
+      "category": "implementation",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Final lane usage boundary has not been supplied to Integration; actual runtime context and billing reconciliation remain unknown.",
+      "boundaryEvidence": "Final checkpoint ff3c9de86c58efce4901b9d89de174003a85d0d4 is pushed but not admitted. Includes the selected seed/crop, pole, fishing, and fish-preparation work; lane-reported native Simulation/Economy/Manor 3/3 and fishing 1036 checks are evidence only. Compile, visual/player, and release-isolation gates remain pending. The lane reports no heavy launch or real save mutation."
+    },
+    {
       "sessionId": "1b0e10a4-09b5-458e-b9de-098cce831b07",
       "projectSessionId": "f84c58de-15cd-457f-bdc3-450ac4ecd859",
       "task": "travel-rest-feedback-bundle",
