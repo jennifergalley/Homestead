@@ -48,16 +48,18 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::MineEntrance, {-40500.0, -100000.0}, 7224.0, 0.0},
             {Anchor::MillSite, {-11800.0, -9200.0}, 3113.1, 0.0},
             {Anchor::RoadEstateEnd, {-5500.0, 9000.0}, 5632.0, 60.0},
-            {Anchor::RoadTownEnd, {-50000.0, 109000.0}, 9241.0, 45.0},
-            {Anchor::TownSquare, {-54000.0, 115000.0}, 9109.0, 0.0},
-            {Anchor::GeneralStoreDoor, {-54000.0, 117950.0}, 9175.0, 90.0},
-            {Anchor::GeneralStoreCounter, {-54000.0, 118550.0}, 9188.0, -90.0},
+            {Anchor::RoadTownEnd, {-12428.0, -53292.0}, 8075.0, 45.0},
+            {Anchor::TownSquare, {-9600.0, -61800.0}, 8985.0, 0.0},
+            {Anchor::GeneralStoreDoor, {-10030.0, -58850.0}, 8800.0, 90.0},
+            {Anchor::GeneralStoreCounter, {-10030.0, -58250.0}, 8766.0, -90.0},
             // The derelict farm's broken gate, on its south fence facing the ruin's rear-wall gap.
             {Anchor::DerelictFarmGate, {-22200.0, -65700.0}, 8720.6, 180.0},
         };
         layout.polygons = {
             {Anchor::EstateBoundary,
-                {{16000.0, -115000.0}, {16000.0, -25000.0}, {6000.0, -3000.0}, {-4000.0, 11000.0},
+                {{16000.0, -115000.0}, {16000.0, -62400.0}, {-6200.0, -62400.0}, {-6200.0, -64600.0},
+                 {-13400.0, -64600.0}, {-13400.0, -57000.0}, {-6200.0, -57000.0}, {-6200.0, -61800.0},
+                 {16000.0, -61800.0}, {16000.0, -25000.0}, {6000.0, -3000.0}, {-4000.0, 11000.0},
                  {-20000.0, -5000.0}, {-35000.0, -21000.0}, {-52000.0, -32000.0}, {-76000.0, -43000.0},
                  {-76000.0, -115000.0}}},
             // The ruin is 18 x 30 m; the 6 x 6 m standing room is its carved-out south-east corner.
