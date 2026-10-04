@@ -338,6 +338,13 @@ art/import-ready. There are nine meal-source prototypes, seven unstarted dishes,
 The prior 17 food shaders and six geometry functions are unchanged, as is the catch recipe/source.
 This is not a caught-fish probe or bake and creates no import, gameplay, save, UE, Integration
 hands-on, or release-ETA change. Farming continues authorized cooked-food source work.
+Held source-only checkpoint `f6464440` preserves original Grilled Trout, platter, and portion with
+copied fixtures and four viewed final 4K frames. It remains molded/rubbery with patterned-muscle
+appearance and is **not** art/import-ready. An original portion-extent fixture caught `38.35` mm, so
+the actual piece was trimmed to `37.55` mm rather than relaxing the fixture; bounds remain unchanged.
+There are ten source prototypes, six unstarted dishes, and zero approvals. The prior 20 shaders and
+six geometry definitions are unchanged. Farming's build02 snapshot is provisionally 818 calls (event
+`71154`); no catch/bake/import/gameplay/save/UE change is included.
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
 prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four

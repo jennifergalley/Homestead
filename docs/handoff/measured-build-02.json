@@ -95,6 +95,8 @@
       "rootTurnipHotpotSourceStatus": "Held WIP: original root/turnip hotpot, crock, and 17 cm spoon with copied fixtures and four viewed 4K frames. Smooth/stump-like, not art/import-ready. Eight crop-meal source prototypes, eight fish preparations unstarted, zero approvals; 16 shader and six geometry-function ASTs unchanged. Raw-fish meal source continues independently of fish baking; no fish/bake/gameplay/save/UE change or release ETA.",
       "rawMackerelSourceCheckpoint": "7737497a",
       "rawMackerelSourceStatus": "Held WIP: independent original raw-mackerel cuts, oval dish, and edible slice with copied fixtures and four viewed 4K frames. Molded/graphic, not art/import-ready. Nine prototypes, seven unstarted, zero approvals; prior 17 food shaders, six geometry functions, and catch source unchanged. No caught-fish probe/bake/import/gameplay/save/UE change or release ETA.",
+      "grilledTroutSourceCheckpoint": "f6464440",
+      "grilledTroutSourceStatus": "Held WIP: original grilled trout, platter, and portion with copied fixtures and four final viewed 4K frames. Molded/rubbery patterned-muscle appearance, not art/import-ready. Portion trimmed from caught 38.35 mm to 37.55 mm rather than relaxing fixture; bounds unchanged. Ten prototypes, six unstarted, zero approvals; 20 shaders and six geometry definitions unchanged. No catch/bake/import/gameplay/save/UE change.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
