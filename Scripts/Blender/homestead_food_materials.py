@@ -13,6 +13,7 @@ from homestead_materials import Graph
 SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 SKIN_NOISE_SCALES = (170, 65, 1600, 850)
 FLESH_NOISE_SCALES = (230, 1300)
+CARROT_FIBRE_RELIEF_M = .00015
 
 
 def potato_skin(name: str, seed: float) -> bpy.types.Material:
@@ -109,4 +110,45 @@ def earthenware(name: str, seed: float) -> bpy.types.Material:
     grit = graph.noise(point, scale=1800, detail=2).outputs["Fac"]
     graph.set("Roughness", .79)
     graph.set("Normal", graph.bump(grit, strength=.19, distance=.000065))
+    return graph.mat
+
+
+def stewed_carrot(name: str, seed: float, skin: bool) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    x, _, z = graph.separate(point)
+    shifted = graph.vmath("ADD", point, (seed * .031, seed * .053, seed * .017))
+    pigment = graph.noise(shifted, scale=350, detail=3).outputs["Fac"]
+    colour = graph.ramp(pigment, [
+        (.18, (.24, .069, .008)), (.50, (.35, .115, .020)),
+        (.83, (.42, .170, .044)),
+    ], "EASE")
+    if not skin:
+        radial = graph.vmath("LENGTH", graph.combine(x, 0, z))
+        radial = graph.math("ADD", radial,
+                            graph.math("MULTIPLY", graph.math("SUBTRACT", pigment, .5), .0013))
+        core = graph.remap(radial, .004, .007, .68, 0)
+        colour = graph.mix(colour, (.42, .200, .068), core)
+    graph.set("Base Color", colour)
+    fibres = graph.noise(graph.scale(shifted, (1, .12, 1)),
+                        scale=1900, detail=2).outputs["Fac"]
+    graph.set("Roughness", graph.remap(pigment, .25, .75, .44, .29))
+    graph.set("Subsurface Weight", .10)
+    graph.set("Subsurface Radius", (.003, .0015, .0005))
+    graph.set("Subsurface Scale", .05)
+    graph.set("Normal", graph.bump(fibres, strength=.25, distance=CARROT_FIBRE_RELIEF_M))
+    return graph.mat
+
+
+def cooking_liquid(name: str) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    variation = graph.noise(graph.coord(), scale=90, detail=2).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(variation, [
+        (.20, (.058, .024, .005)), (.80, (.12, .052, .014)),
+    ]))
+    graph.set("Roughness", .19)
+    graph.set("IOR", 1.333)
+    graph.set("Normal", graph.bump(variation, strength=.08, distance=.00002))
     return graph.mat

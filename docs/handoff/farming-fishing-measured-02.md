@@ -15,10 +15,10 @@ live port 9878. No game/save/shortcut touched. Integration reports its combined
 editor/game compile and 21/21 native suites passed; original-art and
 release-save-isolation admission gates remain.
 
-Current source checkpoint: original potatoes and roasted turnips have separate
-serving/edible-portion WIP, NOT art/import acceptance. Fourteen dishes, all meal
+Current source checkpoint: original potatoes, roasted turnips and stewed carrots
+have separate serving/edible-portion WIP, NOT art/import acceptance. Thirteen dishes, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original turnip WIP; recipe/source receipts below are frozen,
+visible review is original carrot WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -725,6 +725,44 @@ still unstarted; potato/turnip art approval also remains. Continue independent
 source work under existing overnight slot2, no automation or approval wait.
 Build02-only provisional snapshot: 611 calls through event70829,
 3,637,828,390,000 recorded nano-AIU; later calls/terminal response need recapture.
+
+### Original stewed carrot source milestone
+
+New stewed_carrots.py authors two trimmed 13.8cm tapered roots, each cut into
+three lengths and split into halves (twelve pieces), original 18.4cm earthenware
+bowl, small cooking-water volume and an independent edible half segment.
+Exact Carrot2/Kindling1; no oil/butter/herbs/milk or reused mesh/photo texture.
+New food geometry tools require closed positive-volume components and reload
+explicitly; they do not touch open fish sheets or shared kit/bake helpers.
+Previous potato/turnip shader function ASTs remain unchanged from e6715c2e.
+
+First viewed source pass showed carrot/bowl penetration and overly sharp cuts.
+Own surface-BVH vertex seating now supports pieces against the actual bowl and
+earlier pieces, within the inner aperture, with 50-micron clearance. The first
+supported arrangement created an 8.45cm tower and failed its bound; heel-first
+two-layer placement removes the tower and retains the original 5.3-5.8cm height
+fixture. Cooked edges round by 0.35mm; a later pass strengthens fine vascular
+relief and gently varies the core boundary. No geometry is promoted on checks
+alone; sampled support is not a complete face-intersection/contact guarantee.
+
+Latest serving/portion: 53,792/3,976 triangles,
+[18.4,18.4,5.41]/[2.51,4.6,1.26]cm. All fourteen serving islands/one portion
+island are closed, finite, positive-volume and noncollapsed; UV/bottom-pivot/
+scale/current shader/geometry hashes pass. Four latest 3840x2160/192-sample
+OPTIX frames were viewed. Penetration/tower symptoms are gone, but the pieces
+remain too slab-like and clay too procedural; NOT art/import acceptance.
+StewedCarrotsSourceProof preserves the reopened copied source, two FBX, four
+frames, report and hash/executed-graph verification. Pixel crops inspected the
+earlier full-resolution smoothness rather than trusting downscaled previews.
+
+Owned Blender is preserved as Carrots-source-held-visible.blend on the same
+E: runtime scratch root, labelled EEVEE source WIP. Thirteen meals are unstarted;
+all three modeled meals still need artistic refinement, with baking/imagery/
+eating wiring and Integration gates untouched. No new agent helpers/automation/UE/
+builds/gameplay/save/enum/version/placement/fish budget or shared bake changes.
+Actual gpt-6.1-sol/high, launch default/actual context unknown. Build02-only
+provisional snapshot: 632 calls through event70861, 3,838,758,080,000 recorded
+nano-AIU; subsequent calls/terminal response need recapture.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.
