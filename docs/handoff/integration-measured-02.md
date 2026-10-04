@@ -259,6 +259,13 @@ The original **Baked Potatoes** serving/portion source milestone is built and vi
 nonradial crumb correction removes centre spokes; closed, UV, and scale fixtures pass at
 `43,968/13,632` triangles. This remains art WIP/source evidence only, not meal acceptance; Farming
 continues authorized meal refinement without waiting.
+Held source-only checkpoint `24500d2a` preserves the original Baked Potatoes serving/portion and
+four viewed 4K frames, with copied geometry, closed, scale, UV, and hash fixtures passing. It remains
+synthetic and **not** art/import-ready, with no save or gameplay changes. Its
+`NormalCaptureDiagnostics` retains the failed OBJECT (`3.062`) and explicit EMIT (`3.060`) cases plus
+the unmatched-bump-control correction. Farming continues authorized independent meal realism/source
+work in slot 2; fish proofs and budgets stay held, with no re-review, probe, or Integration hands-on
+action assigned.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
