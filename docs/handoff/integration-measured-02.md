@@ -332,6 +332,12 @@ art/import-ready. There are eight crop-meal source prototypes, eight fish prepar
 zero approvals. The prior 16 shader and six geometry-function ASTs are unchanged. Farming continues
 authorized raw-fish meal source work independently of unresolved fish baking; no fish/bake/gameplay/
 save/UE change, Integration hands-on assignment, or release ETA follows.
+Held source-only checkpoint `7737497a` preserves independent original raw-mackerel cuts, oval dish,
+and edible slice with copied fixtures and four viewed 4K frames. It remains molded/graphic and **not**
+art/import-ready. There are nine meal-source prototypes, seven unstarted dishes, and zero approvals.
+The prior 17 food shaders and six geometry functions are unchanged, as is the catch recipe/source.
+This is not a caught-fish probe or bake and creates no import, gameplay, save, UE, Integration
+hands-on, or release-ETA change. Farming continues authorized cooked-food source work.
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
 prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four
