@@ -255,6 +255,10 @@ normalization, `.5n+.5` encoding, 4096 NonColor, and Base+Coat OBJECT reconstruc
 UV-bake procedural evaluation/filtering cause remains unresolved; no production shader, map, helper,
 or import change follows. Frozen fish evidence is unchanged. Original potato serving/portion source
 work advances independently, but is not meal or art acceptance.
+The original **Baked Potatoes** serving/portion source milestone is built and viewed twice. Its
+nonradial crumb correction removes centre spokes; closed, UV, and scale fixtures pass at
+`43,968/13,632` triangles. This remains art WIP/source evidence only, not meal acceptance; Farming
+continues authorized meal refinement without waiting.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
