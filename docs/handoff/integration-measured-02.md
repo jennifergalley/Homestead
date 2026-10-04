@@ -37,6 +37,12 @@ actual/configured context tiers are unknown.
   200.90 seconds after the hands-on grant. It validates the already integrated gameplay source only;
   it does not validate the pending asset/export/eating-wiring checkpoint and must be rerun where
   affected after that checkpoint lands.
+- Frozen source admission: merged and published
+  `843324c17b85b5432785fc7a6b9e333702dc26ec` at `c2d8b080783faf425c59351460caeab5aa6907d6`.
+  The merge carries the authorized original fish and eleven meal source/provenance only; the five
+  deferred meals are absent. It has no gameplay or save-code delta. Its sole implementation change
+  adds the fish-only `wet_fish` report-metadata parent selection to `import_props.py`; ordinary
+  props retain their existing parent selection.
 - Authorized at `2026-10-04T01:55:51.513Z` for the Oct 3 9 PM slot. The original 9 PM scope is
   retained historically, but the complete delivery was deferred at 20:49 local; Oct 4 7:30 AM is a
   target rather than a promise, with no overnight/signoff work. Checkout was clean at preflight

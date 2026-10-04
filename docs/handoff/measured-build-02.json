@@ -9,6 +9,8 @@
   "deliveryDecision": "The complete sixteen-meal art scope was deferred at 20:49 local on Oct 3. At 09:44 local on Oct 4, Jenny superseded that all-art-perfect hold with a gameplay-first Shipping decision: admit only eleven existing original meal sources through 843324c1 despite their disclosed molded/baked appearance, then complete functional/save gates. Do not use reused old art, describe the originals as final realism, or silently promote further meals.",
   "gameplayFirstDelivery": {
     "authorizedAt": "2026-10-04T09:44:00-07:00",
+    "frozenSourceMerge": "c2d8b080783faf425c59351460caeab5aa6907d6",
+    "frozenSourceMergeStatus": "Published source admission of 843324c17b85b5432785fc7a6b9e333702dc26ec. It includes the authorized original fish and eleven meal source/provenance boundary, excludes all five deferred meals, and changes no gameplay or save code. The only implementation delta is the isolated wet_fish importer metadata path.",
     "scope": "Shipping delivery of the existing original pole, six original fish, and exactly eleven original meals frozen at 843324c17b85b5432785fc7a6b9e333702dc26ec: BakedPotatoes, RoastedTurnips, StewedCarrots, HerbedBroadBeans, CabbagePotatoStew, BerryCompote, StrawberryCompote, RootVegetableHotpot, RawFishSlices, GrilledTrout, and GrilledPerch.",
     "qualityDisclosure": "The admitted original meal and fish assets have known molded, baked, or procedural visual limitations. Jenny accepts them for mechanics playtesting, not as a final-realism claim.",
     "deferred": [
