@@ -194,3 +194,73 @@ def chopped_meadow_herb(name: str) -> bpy.types.Material:
     graph.set("Roughness", .58)
     graph.set("Normal", graph.bump(veins, strength=.10, distance=.00002))
     return graph.mat
+
+
+def stewed_cabbage(name: str, seed: float) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    x, _, _ = graph.separate(point)
+    shifted = graph.vmath("ADD", point, (seed * .019, seed * .037, seed * .041))
+    pigment = graph.noise(shifted, scale=240, detail=3).outputs["Fac"]
+    colour = graph.ramp(pigment, [
+        (.16, (.12, .16, .047)), (.5, (.20, .25, .096)),
+        (.84, (.31, .34, .17)),
+    ], "EASE")
+    midrib = graph.remap(graph.math("ABSOLUTE", x), .0005, .0022, .6, 0)
+    graph.set("Base Color", graph.mix(colour, (.40, .42, .25), midrib))
+    fines = graph.noise(graph.scale(shifted, (1, .23, 1)),
+                       scale=1700, detail=2).outputs["Fac"]
+    graph.set("Roughness", graph.remap(pigment, .2, .8, .49, .32))
+    graph.set("Subsurface Weight", .14)
+    graph.set("Subsurface Radius", (.0015, .0010, .0004))
+    graph.set("Subsurface Scale", .05)
+    graph.set("Normal", graph.bump(fines, strength=.15, distance=.000035))
+    return graph.mat
+
+
+def stewed_potato(name: str, seed: float) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.vmath("ADD", graph.coord(), (seed * .029, seed * .047, seed * .013))
+    crumb = graph.noise(point, scale=310, detail=3).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(crumb, [
+        (.15, (.39, .33, .21)), (.5, (.52, .47, .32)),
+        (.85, (.59, .55, .41)),
+    ], "EASE"))
+    pores = graph.noise(point, scale=1900, detail=2).outputs["Fac"]
+    graph.set("Roughness", graph.remap(crumb, .2, .8, .61, .44))
+    graph.set("Subsurface Weight", .12)
+    graph.set("Subsurface Radius", (.0027, .0016, .0007))
+    graph.set("Subsurface Scale", .05)
+    graph.set("Normal", graph.bump(pores, strength=.23, distance=.00010))
+    return graph.mat
+
+
+def vegetable_broth(name: str) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    variation = graph.noise(graph.coord(), scale=120, detail=2).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(variation, [
+        (.2, (.12, .115, .053)), (.8, (.22, .21, .12)),
+    ]))
+    graph.set("Roughness", .22)
+    graph.set("IOR", 1.333)
+    graph.set("Transmission Weight", .45)
+    graph.set("Normal", graph.bump(variation, strength=.08, distance=.000025))
+    return graph.mat
+
+
+def maple_eating_spoon(name: str) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.scale(graph.coord(), (1, .045, 1))
+    grain = graph.noise(point, scale=720, detail=3).outputs["Fac"]
+    graph.set("Base Color", graph.ramp(grain, [
+        (.18, (.12, .067, .025)), (.48, (.23, .15, .064)),
+        (.82, (.31, .22, .11)),
+    ], "EASE"))
+    fibres = graph.noise(point, scale=2300, detail=2).outputs["Fac"]
+    graph.set("Roughness", graph.remap(grain, .2, .8, .57, .41))
+    graph.set("Normal", graph.bump(fibres, strength=.15, distance=.000035))
+    return graph.mat

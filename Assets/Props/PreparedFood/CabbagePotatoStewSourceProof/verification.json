@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "CabbagePotatoStew",
+  "recipe_sha256": "3e3e61fc11d5dae08d5d75264593944b2fddc21d8dbdbfe389e1bb36188a9c11",
+  "food_material_source_sha256": "7e1271761bb8751b1a2d352975867e1d48435d8aabd564eb076d8a9db4e1235e",
+  "copied_files_sha256": {
+    "SM_CabbagePotatoStew.fbx": "e2c0e07d60d45cb4dee0956fb959c4c78a21dd5335d909343e7084c448e646ba",
+    "beauty_SM_CabbagePotatoStew_hero.png": "f29d72b4c9dfd4bfb55d99cff24cb62bb27490f8d4d2c67e14ba5947d907daed",
+    "beauty_SM_CabbagePotatoStew_detail.png": "d61c73d672dd94f377c60b4d5a234daf2285314e2ffe05bf1a5368e26c0e0f3e",
+    "SM_CabbagePotatoStewPortion.fbx": "13de2cb43b45873d2cd9dc2f03c3f3e9417a2d012da71f29113cbb9ff1fea442",
+    "beauty_SM_CabbagePotatoStewPortion_hero.png": "898fbba5ad62a525aa8b31628ebba0998c8dad16881abcba446e8e085af646fc",
+    "beauty_SM_CabbagePotatoStewPortion_detail.png": "3dcff3dca0a2698e485a96db92b8285102d7b75823f12222615dc1521b394bfd",
+    "CabbagePotatoStewSource.blend": "d43a4a57844199db788116309004828b0737977fced4a18684e0498c8c37abf9"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

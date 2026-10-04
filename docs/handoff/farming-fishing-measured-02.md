@@ -15,11 +15,11 @@ live port 9878. No game/save/shortcut touched. Integration reports its combined
 editor/game compile and 21/21 native suites passed; original-art and
 release-save-isolation admission gates remain.
 
-Current source checkpoint: original potatoes, roasted turnips, stewed carrots and
-herbed broad beans have separate serving/edible-portion WIP, NOT art/import
-acceptance. Twelve dishes, all meal
+Current source checkpoint: original potatoes, roasted turnips, stewed carrots,
+herbed broad beans and cabbage/potato stew have separate serving/edible-portion
+WIP, NOT art/import acceptance. Eleven dishes, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original broad bean WIP; recipe/source receipts below are frozen,
+visible review is original cabbage stew/spoon WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -817,6 +817,55 @@ ae434be5 source/proof and all production code/shaders/helpers remain unchanged.
 Updated build02-only provisional snapshot: 679 calls through event70935,
 4,068,096,370,000 recorded nano-AIU; later calls/terminal response still excluded.
 Visible held source restored after the diagnostic; no active render or shell.
+
+### Original cabbage/potato stew and eating-spoon source milestone
+
+New cabbage_potato_stew.py authors twelve closed cooked cabbage lamina/rib grids,
+six original softened potato cuts, eighteen Meadow Herb fragments, new 17.6cm
+earthenware bowl and bounded cooking-broth volume. Exact Cabbage1/Potato1/
+Flowers1/Kindling1; cooking water is presentation, with no new milk/oil/meat/
+garnish requirement. Observational reference: https://en.wikipedia.org/wiki/Cabbage;
+dimensions and serving/utensil design are authored, not inventory conversions.
+No prior crop/food/fish/utensil mesh or photographic texture is reused.
+
+The eating portion is a newly carved 18.2cm maple spoon, 2.8cm oval hollow head/
+9mm precision-grip handle, carrying one cooked potato bite and cabbage curl.
+It is not a bowl attached to the generic berry grip. Source -Y points to its
+tip and the FBX Y mirror remains explicit. Realistic-animation grip guidance
+was loaded; NO new action/carry/grip animation or runtime attachment was made.
+Item-specific seating, finger/wrist/mouth clearance and imported axes remain
+Integration gates; the bottom-centre export pivot is not an accepted grip anchor.
+
+Viewed first pass was too chip-like, potatoes too cubical and the spoon neck
+abrupt. Later passes reduce cooked-leaf cupping/bend, add branch/midrib thickness,
+finer face relief, rounded cuts and a cubic neck transition. A hard liquid
+support initially held every leaf above broth; liquid is now a presentation
+volume, with mean-height partial immersion constrained by solid supports.
+Two potato contacts keep the ingredient visible without lifting unsupported
+pieces. These are authored/sampled placements, not a gravity/contact solver.
+Broth transmission .45/IOR1.333 is Blender source only, NOT an Unreal material
+contract or a successful bake. No shared kit/renderer/fish/bake helper changes.
+
+Latest serving/portion: 45,576/10,424 triangles,
+[17.6,17.6,6.01]/[2.8,18.2,1.46]cm. All 38 serving islands/3 spoon-portion islands
+pass closed positive-volume/noncollapsed/finite geometry, retained part-local
+coordinates, applied transforms, UV/scale/budget/source-shader fixtures and
+sampled container clearance. Spoon-head centre is 2.959mm below sampled side
+surfaces (fixture requires >2.5mm), so a flat paddle cannot pass as a hollow spoon.
+No full face-intersection/contact/gravity/grip or artistic acceptance is implied.
+
+Four final 3840x2160/192-sample OPTIX frames were viewed. Cooked leaves still
+look too stiff, potato too molded/cubical and wood/clay/broth too procedural:
+NOT art/import acceptance. CabbagePotatoStewSourceProof preserves reopened source,
+two FBX, four frames, report and copied-source verification. Owned Blender is
+preserved as Cabbage-stew-source-held-visible.blend on E:, separated/framed EEVEE
+Material view. Five meal prototypes, zero approvals; eleven dishes unstarted.
+Original imagery, baking, item-specific eating and engine gates remain pending.
+
+Actual gpt-6.1-sol/high, launch default/actual context unknown; no agent helpers/
+automation/UE/UBT/UAT/gameplay/save/enum/version/placement changes. Build02-only
+provisional snapshot: 698 calls through event70962, 4,191,701,880,000 recorded
+nano-AIU; subsequent calls/terminal response still need recapture.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

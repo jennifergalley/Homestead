@@ -1,0 +1,343 @@
+{
+  "schema": 1,
+  "name": "CabbagePotatoStewSource",
+  "description": "Held original cabbage/potato stew and food-bearing maple spoon.",
+  "collision": "none",
+  "triangle_budget": 50000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/cabbage_potato_stew.py",
+  "source_sha256": "3e3e61fc11d5dae08d5d75264593944b2fddc21d8dbdbfe389e1bb36188a9c11",
+  "provenance": "Original closed cooked leaf grids, softened potato cuts, bowl, broth volume and hollow carved spoon; procedural PBR.",
+  "meshes": {
+    "SM_CabbagePotatoStew": {
+      "vertices": 22864,
+      "triangles": 45576,
+      "size_cm": [
+        17.6,
+        17.6,
+        6.01
+      ],
+      "materials": [
+        {
+          "name": "M_CabbageStewEarthenware",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.79
+        },
+        {
+          "name": "M_CabbageStewBroth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.22
+        },
+        {
+          "name": "M_CabbageStewPotato0",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewPotato1",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewPotato2",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewPotato3",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewPotato4",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewPotato5",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf0",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf1",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf2",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf3",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf4",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf5",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf6",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf7",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf8",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf9",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf10",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewLeaf11",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewMeadowHerbs",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.58
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          0.0,
+          -0.017,
+          0.03900695332325995
+        ],
+        "detail_distance": 0.33,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_CabbagePotatoStew.fbx",
+      "sha256": "e2c0e07d60d45cb4dee0956fb959c4c78a21dd5335d909343e7084c448e646ba",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CabbagePotatoStew_hero.png",
+          "detail": "beauty_SM_CabbagePotatoStew_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_CabbagePotatoStewPortion": {
+      "vertices": 5218,
+      "triangles": 10424,
+      "size_cm": [
+        2.8,
+        18.2,
+        1.46
+      ],
+      "materials": [
+        {
+          "name": "M_CabbageStewMapleSpoon",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewSpoonPotato",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CabbageStewSpoonLeaf",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          0.0,
+          -0.05100000143051148,
+          0.007299999929964543
+        ],
+        "detail_distance": 0.28,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_CabbagePotatoStewPortion.fbx",
+      "sha256": "13de2cb43b45873d2cd9dc2f03c3f3e9417a2d012da71f29113cbb9ff1fea442",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CabbagePotatoStewPortion_hero.png",
+          "detail": "beauty_SM_CabbagePotatoStewPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "CabbagePotatoStew",
+  "ingredients": {
+    "Cabbage": 1,
+    "Potato": 1,
+    "Flowers": 1,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "1dbc85bfbb449845a579613f1b2db856acca116a07381770107bf9eec3f9b08a",
+  "food_material_source_sha256": "7e1271761bb8751b1a2d352975867e1d48435d8aabd564eb076d8a9db4e1235e"
+}
