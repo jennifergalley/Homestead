@@ -253,6 +253,16 @@ She uses:
 retarget setup, content inventory and cooked folders. The prototype heroine below
 remains the rollback (`-HomesteadLegacyHeroine`).
 
+The General Store clerk, **Mr. Josiah Trethewey**, is a second MetaHuman under the same
+Unreal Engine EULA terms. He starts from Epic's stock preset with Epic's stock grooms (slicked
+hair, mutton chops, brows, lashes), Epic's cloud rig and 2K texture sources, and was edited by
+`Content\Python\homestead_agent\metahuman_clerk.py`. His shirt, waistcoat, trousers, apron,
+neckerchief, boots and pencil (`Assets\Characters\ClerkClothing`) are project-authored by
+`Scripts\Blender\Recipes\clerk_outfit.py` with numpy-synthesized textures, and his
+counter-leaning idle is keyed on his MetaHuman Control Rig by
+`Content\Python\homestead_agent\clerk_counter_idle.py`. No third-party mesh, texture or
+animation is used. `Assets\Characters\MetaHumanClerk\provenance.json` has the details.
+
 Her walk and sprint (run) loops come from Epic Games' **Game Animation Sample**
 project (free on Fab). It is Epic-published, UE-only content under the Unreal Engine
 EULA, so it may be used and modified in Unreal Engine products only. Five UEFN

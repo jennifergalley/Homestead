@@ -4,13 +4,18 @@
 #include "GameFramework/Actor.h"
 #include "HomesteadShopkeeper.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogHomesteadShopkeeper, Log, All);
+
+class UGroomComponent;
+class ULODSyncComponent;
 class USceneComponent;
 class USkeletalMeshComponent;
-class UTextRenderComponent;
+class UStaticMeshComponent;
 
-// The general-store shopkeeper. Until her MetaHuman is authored (add-dollars-and-general-store
-// task 3.2) she is a clearly labelled stand-in: the legacy aproned heroine body playing the
-// relaxed idle, turning to face the heroine when she comes within a few metres.
+// The general-store shopkeeper: a MetaHuman man in his fifties in shirt, waistcoat and apron
+// (metahuman-store-clerk), leaning on the counter in his idle and turning a little toward the
+// heroine when she comes near. If his MetaHuman assets are missing he falls back to the legacy
+// aproned heroine body (IsStandIn).
 UCLASS()
 class SURVIVALGAME_API AHomesteadShopkeeper : public AActor
 {
@@ -25,12 +30,22 @@ public:
     bool IsOnDuty() const { return bDuty; }
     static const TCHAR* DisplayName() { return TEXT("Mr. Trethewey"); }
     static const TCHAR* FullName() { return TEXT("Mr. Josiah Trethewey"); }
-    bool IsStandIn() const { return true; }
+    bool IsStandIn() const { return !bMetaHuman; }
 
 private:
+    // HomesteadShopkeeperMetaHuman.cpp: body, face, grooms, garments, pencil and LOD sync.
+    bool BuildMetaHuman();
+    void BuildStandIn();
+
     UPROPERTY() TObjectPtr<USceneComponent> Root;
     UPROPERTY() TObjectPtr<USkeletalMeshComponent> Body;
-    UPROPERTY() TObjectPtr<UTextRenderComponent> Label;
+    UPROPERTY() TObjectPtr<USkeletalMeshComponent> Face;
+    UPROPERTY() TArray<TObjectPtr<USkeletalMeshComponent>> Garments;
+    UPROPERTY() TArray<TObjectPtr<UGroomComponent>> Grooms;
+    UPROPERTY() TObjectPtr<UStaticMeshComponent> Pencil;
+    UPROPERTY() TObjectPtr<ULODSyncComponent> LODSync;
     float RestYaw = 0.0f;
     bool bDuty = true;
+    bool bBuilt = false;
+    bool bMetaHuman = false;
 };

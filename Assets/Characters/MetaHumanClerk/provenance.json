@@ -1,0 +1,34 @@
+{
+  "asset": "MetaHuman General Store clerk, Mr. Josiah Trethewey (metahuman-store-clerk)",
+  "recorded": "2026-10-04",
+  "tool": "MetaHuman Creator in Unreal Engine 5.8 (MetaHumanCharacter plugin), scripted through the editor MCP server",
+  "license": "Unreal Engine EULA (MetaHumans are covered by the Unreal Engine EULA from UE 5.6; no separate MetaHuman licence). See https://www.metahuman.com/license and https://www.unrealengine.com/eula",
+  "licenseNotes": [
+    "Free under the standard Unreal Engine terms; the Unreal Engine royalty applies above USD 1M gross revenue per product.",
+    "The EULA restricts using MetaHuman characters or animation data to train or feed generative AI. Do not do that with these assets."
+  ],
+  "source": {
+    "editableCharacter": "/Game/Characters/Clerk_MH/MHC_Clerk (editor-only source; not cooked)",
+    "startingPreset": "Epic MetaHuman Creator stock preset /MetaHumanCharacter/Optional/Presets/Walter, duplicated and edited by Content/Python/homestead_agent/metahuman_clerk.py",
+    "rig": "Epic MetaHuman cloud auto-rigging, requested from the editor with Jenny's Epic sign-in",
+    "textures": "Epic MetaHuman cloud texture sources at 2K (RES2K; one NPC seen at counter distance)",
+    "grooms": "Epic stock grooms: Hair_S_SlickBack, Beard_M_MuttonChops (greyer than the hair), eyebrows, eyelashes; no moustache, no peach fuzz",
+    "outfit": "Project-authored: Assets/Characters/ClerkClothing (shirt, waistcoat, trousers, apron, neckerchief, boots, pencil) from Scripts/Blender/Recipes/clerk_outfit.py with numpy-synthesized textures, skinned to metahuman_base_skel, imported by Scripts/Characters/import_clerk_garments.py. Walter's stock outfit is not used.",
+    "assembly": "build_meta_human, UE Optimized, output /Game/Characters/Clerk_MH/Assembled and /Common"
+  },
+  "animation": {
+    "clips": "/Game/Characters/Clerk_MH/Animations/AN_ClerkMH_CounterIdle",
+    "origin": "Project-authored: keyed on the clerk's own MetaHuman Control Rig by Content/Python/homestead_agent/clerk_counter_idle.py (rig_authoring library) and baked to his skeleton. No third-party animation data."
+  },
+  "contentInventory": {
+    "folders": {
+      "MHC_Clerk.uasset": {"MiB": 139.9, "cooked": false},
+      "Assembled/Clerk": {"files": 91, "MiB": 279.3, "cooked": true},
+      "Common": {"files": 170, "MiB": 159.6, "cooked": true},
+      "Animations": {"cooked": true}
+    }
+  },
+  "runtime": "AHomesteadShopkeeper (Source/SurvivalGame/HomesteadShopkeeperMetaHuman.cpp): body + face with ABP_Face, leader-posed garments, four grooms without simulation, LODSync over 4 LODs, OnlyTickPoseWhenRendered. Falls back to the stand-in heroine body if the clerk's body or face is missing.",
+  "cook": "Config/DefaultGame.ini DirectoriesToAlwaysCook: Clerk_MH/Assembled, /Common, /Animations",
+  "runtimePlugins": ["HairStrands", "RigLogic", "MetaHumanCoreTech", "MetaHumanCharacter"]
+}
