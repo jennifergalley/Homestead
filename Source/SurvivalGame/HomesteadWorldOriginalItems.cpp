@@ -26,21 +26,21 @@ void AHomesteadWorld::BuildOriginalItemDrop(FHomesteadWorldVisual& Visual, const
         }
         OriginalDropMeshes.Add(ItemId, OriginalMesh);
     }
-    FVector Ground = AtGround(Drop.position.x, Drop.position.y, 0);
+    FVector DropGround = AtGround(Drop.position.x, Drop.position.y, 0);
     if (bRoadBridgeBuilt && RoadBridgeVisual.Components.Num() > 0)
-        Ground.Z = Homestead::EstatePublicRoad().deck.RestZ(Drop.position, Ground.Z);
+        DropGround.Z = Homestead::EstatePublicRoad().deck.RestZ(Drop.position, DropGround.Z);
     // Fish length is Y; the original pole is 195cm along Z. Both must lie down, not stand upright.
     const bool bLayOnSide = Art->fish || Drop.item == Homestead::Item::FishingPole;
     const FRotator Rotation(bLayOnSide ? 90.0 : 0.0, Drop.id * 37 % 360, 0);
     const FBox Bounds = OriginalMesh->GetBoundingBox().TransformBy(FTransform(Rotation));
     constexpr double GroundClearanceCm = 0.5;
-    Ground.Z += GroundClearanceCm - Bounds.Min.Z;
+    DropGround.Z += GroundClearanceCm - Bounds.Min.Z;
     auto* Part = NewObject<UStaticMeshComponent>(this, MakeUniqueObjectName(this, UStaticMeshComponent::StaticClass(), TEXT("OriginalItemDrop")));
     Part->SetupAttachment(GetRootComponent());
     Part->SetMobility(EComponentMobility::Movable);
     Part->SetStaticMesh(OriginalMesh);
     Part->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-    Part->SetWorldLocationAndRotation(Ground, Rotation);
+    Part->SetWorldLocationAndRotation(DropGround, Rotation);
     Part->RegisterComponent();
     Visual.Components.Add(Part);
 }

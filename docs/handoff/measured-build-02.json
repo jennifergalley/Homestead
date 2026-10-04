@@ -12,6 +12,7 @@
     "frozenSourceMerge": "c2d8b080783faf425c59351460caeab5aa6907d6",
     "frozenSourceMergeStatus": "Published source admission of 843324c17b85b5432785fc7a6b9e333702dc26ec. It includes the authorized original fish and eleven meal source/provenance boundary, excludes all five deferred meals, and changes no gameplay or save code. The only implementation delta is the isolated wet_fish importer metadata path.",
     "fishImportStatus": "All six authorized original fish were imported and saved through the owned editor from Assets/Props/CaughtFish at the frozen source boundary. The frozen report omitted its authored wet_fish metadata, so Integration restored it and replaced unsupported UE 5.8 Python Clear Coat Custom Data pins with a fish-local baked-roughness scale; each MI now resolves to M_CaughtFishWet. CaughtFish has six static meshes and its material/texture assets; no meal asset, gameplay, save, package, shortcut, or promotion action is included.",
+    "preparedFoodImportStatus": "Farming ready checkpoint 25e0b2be8684d37882a143bc8f1e11fb8a23ddb5 was admitted at a7df1dfb. Integration imported only PreparedFood: 22 authorized serving/portion meshes, 66 maps, and 110 generated Unreal assets under /Game/SurvivalGame/Environment/Props/PreparedFood. A save-isolated owned PIE session reached Estate worldReady, accepted admitted meal and fish grants without presentation/material errors, and found no matching missing-art, material-compile, or default-material log entry. Asset-registry verification found all 22 meshes with one assigned material. This is provisional mechanics evidence only; package, candidate/rollback save containment, guarded Shipping tests, shortcut promotion, and any final-realism claim remain pending.",
     "scope": "Shipping delivery of the existing original pole, six original fish, and exactly eleven original meals frozen at 843324c17b85b5432785fc7a6b9e333702dc26ec: BakedPotatoes, RoastedTurnips, StewedCarrots, HerbedBroadBeans, CabbagePotatoStew, BerryCompote, StrawberryCompote, RootVegetableHotpot, RawFishSlices, GrilledTrout, and GrilledPerch.",
     "qualityDisclosure": "The admitted original meal and fish assets have known molded, baked, or procedural visual limitations. Jenny accepts them for mechanics playtesting, not as a final-realism claim.",
     "deferred": [
@@ -186,7 +187,7 @@
     "model": "gpt-5.6-terra",
     "reasoningEffort": "medium",
     "launchContextTier": "default",
-    "status": "hands-on slot 1 active: the six authorized original fish are imported/saved; awaiting Farming's lean eleven-meal export/bake/wiring/manifest checkpoint before meal import, combined build, runtime, package, and promotion"
+    "status": "hands-on slot 1 active: frozen eleven-meal content is imported and Development source gates are green; remaining gates are candidate/rollback save containment, package, guarded Shipping EstateSmoke/ToolRepeat, and promotion"
   },
   "deliveryRules": [
     "Only verified and reviewed work is admitted; unfinished items move to the fallback slot.",

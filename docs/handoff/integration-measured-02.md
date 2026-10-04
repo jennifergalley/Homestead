@@ -208,6 +208,24 @@ doze; Sunday wait preserves authoritative energy drain and adds no rest grant.
 - Full integrated Release native coverage passed 21/21 in 199.74 seconds. The only warnings were
   pre-existing C4456 shadowed locals in `HomesteadManorTests.cpp` and
   `HomesteadPublicRoadTests.cpp`.
+
+## Frozen eleven-meal admission evidence
+
+- Farming's ready checkpoint `25e0b2be8684d37882a143bc8f1e11fb8a23ddb5` was admitted at
+  `a7df1dfb`. `Tests\PreparedFoodPlaytestTests.py` passed the exact frozen boundary: eleven meals,
+  22 meshes, 66 maps, 18 images, and no deferred runtime assets.
+- Integration imported only `PreparedFood` through the owned editor. The Unreal registry contains
+  110 generated assets under `/Game/SurvivalGame/Environment/Props/PreparedFood`: all 22 authorized
+  serving/portion meshes have one assigned material. CaughtFish was not reimported.
+- `Scripts\Test-Native.ps1 -Configuration Release` passed all 21 suites (195.84 seconds). The
+  combined Development build initially caught C4458 in `HomesteadWorldOriginalItems.cpp`; renaming
+  the local `Ground` to `DropGround` resolved the warning-as-error, and
+  `SurvivalGameEditor,SurvivalGame` then built successfully (46 seconds).
+- A save-isolated Estate PIE session at port 8768 reached `worldReady`, accepted admitted
+  BakedPotatoes, GrilledTrout, GrilledPerch, BrookTrout, and SeaMackerel grants, and produced no
+  matching missing-art, material-compile, or default-material log entry. This is mechanics/import
+  evidence only, not a final-realism claim or release acceptance. Candidate/rollback save
+  containment, package, guarded Shipping EstateSmoke/ToolRepeat, and promotion remain required.
 - Original-pole checkpoint `befe70b52fc593247d55a90de42383293f80dfa3` is integrated locally at
   `60da4466`. It adds the authored `FishingPole` source package, capped-tube UV regression, held-mesh
   wiring, and the lane's authored 4K maps. The Blender pipeline guide now records the exact,
