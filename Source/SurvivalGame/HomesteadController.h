@@ -122,6 +122,7 @@ public:
     void MenuInventoryView(int32 View);
     int32 InventoryView() const { return MenuInventoryViewIndex; }
     bool MenuItemAction(const FHomesteadRow& Row, EHomesteadItemAction Action, int32 Amount, uint64 ExpectedRevision);
+    bool MenuSetBackEquipment(bool bShown);
     // Walking the public road to the manor or town (HomesteadControllerTravel.cpp): the preview from
     // where she stands, and the walk itself (the clock runs for its length; she's stood at the end).
     Homestead::TravelPlan MenuPlanTravel(Homestead::TravelDestination Destination) const;

@@ -328,7 +328,10 @@ TSharedPtr<SWidget> SHomesteadMenu::GetAudioSliderWidget(int32 AudioId) const
 
 FString SHomesteadMenu::EquipmentLabel(int32 Index) const
 {
-    if (!Controller.IsValid() || Index < 0 || Index >= VisibleEquipmentSlotCount) return {};
+    if (!Controller.IsValid() || Index < 0 || Index >= EquipmentChoiceCount) return {};
+    if (Index == BackEquipmentIndex)
+        return FString(TEXT("Back: ")) + (Controller->State().leatherBackpack && Controller->State().backpackShown
+            ? TEXT("Leather Rucksack") : TEXT("None"));
     const int32 Id = Controller->State().equipment[static_cast<int32>(VisibleEquipmentSlots[Index])];
     const auto* Item = Controller->Simulation().GetWearable(Id);
     return FString(EquipmentSlotNames[Index]) + TEXT("\n") + (Item

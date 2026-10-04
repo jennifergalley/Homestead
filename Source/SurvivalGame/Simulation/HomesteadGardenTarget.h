@@ -62,4 +62,5 @@ SowCue DescribeSow(const Simulation& sim, int plotId, Point player, Item selecte
 
 // "Turnip seed", "Seed potato", ...; a berry sows "berry seeds".
 std::string SeedLabel(Item seed);
+std::string DescribeHarvest(const Plot& plot);
 }

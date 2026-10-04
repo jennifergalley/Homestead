@@ -649,7 +649,7 @@ public:
     Result CheckWeed(int plotId, Point player) const;
     // Whether Plant(plotId, player, kind) would sow now, with its refusal, changing nothing.
     Result CheckSow(int plotId, Point player, CropKind kind) const;
-    Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots);
+    Result Plant(int plotId, Point player, CropKind kind = CropKind::Roots, int seedGroupId = 0);
     Result Water(int plotId, Point player);
     Result Weed(int plotId, Point player);
     // Hoes a withered plant out, back to tilled soil (needs the hoe).

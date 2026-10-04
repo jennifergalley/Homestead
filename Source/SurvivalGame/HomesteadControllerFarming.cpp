@@ -82,7 +82,8 @@ void AHomesteadController::PlantFocusedPlot(Homestead::CropKind Crop)
     const auto* Plot = FindPlotWhere(State().plots, [this](const Homestead::Plot& Candidate) { return Candidate.id == FocusId; });
     if (!Plot) return;
     const auto Target = Homestead::PlotCenter(*Plot);
-    const auto Result = Sim.Plant(FocusId, PlayerPoint(), Crop);
+    const auto* Packet = HotbarEntry(SelectedHotbarSlot);
+    const auto Result = Sim.Plant(FocusId, PlayerPoint(), Crop, Packet ? Packet->groupId : 0);
     NotifyResourceAction(Result, GrassStepB);
     if (!Result.ok) return;
     auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());

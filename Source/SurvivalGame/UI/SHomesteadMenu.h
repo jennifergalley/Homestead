@@ -47,6 +47,7 @@ public:
     bool FocusSubject(EHomesteadMenuSubject Subject, int32 SubjectId, int32 ContainerId);
     bool FocusItemAction(EHomesteadItemAction Action);
     void RequestExit();
+    void OpenBackEquipment(bool bPointer = false);
     void ShowSaveFailure(const FString& Error);
     void ShowGraphicsSaveFailure(const FString& Error);
     void RequestTestResetPrompt() { bResetPromptShown = false; }

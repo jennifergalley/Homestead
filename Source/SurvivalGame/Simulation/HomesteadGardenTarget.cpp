@@ -93,6 +93,12 @@ std::string SeedLabel(Item seed)
     return seed == Item::Berries ? std::string("berry seeds") : std::string(ItemName(seed));
 }
 
+std::string DescribeHarvest(const Plot& plot)
+{
+    if (!IsRipe(plot) || HasVisibleWeeds(plot)) return {};
+    return std::string(HomesteadActionHints::Harvest) + " " + GetCropInfo(plot.kind).name;
+}
+
 SowCue DescribeSow(const Simulation& sim, int plotId, Point player, Item selected, const std::vector<Item>& row)
 {
     if (const CropInfo* crop = selected == Item::Count ? nullptr : CropForSeed(selected))

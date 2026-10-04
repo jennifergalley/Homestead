@@ -82,6 +82,8 @@ bool IsEdible(Item item);
 // for anything that isn't food or restores no Energy. Shops and the pack show this before she eats.
 std::string FoodEnergyLabel(Item item);
 bool IsTool(Item item);
+bool IsSeedPacket(Item item);
+bool CanStackItem(Item item);
 // Pack sort order: tools, then materials and salvage, forage and food, then supplies.
 int ItemSortRank(Item item);
 std::int64_t BasePrice(Item item);

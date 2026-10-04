@@ -705,7 +705,7 @@ void SeedSowPreview()
         CHECK(!refusal.keyed && refusal.text == want);
         CHECK(!planted.ok && planted.message == want);
     };
-    Refused(sim, beside, plotId, Item::BroadBeanSeed, "You have no Broad bean seed to sow.");
+    Refused(sim, beside, plotId, Item::BroadBeanSeed, "You have no Broad bean seeds to sow.");
     // Out of its seasons (Spring 1, 1851): Plant's own season refusal, seed in hand or not.
     {
         Simulation turnips = sim;
@@ -803,11 +803,11 @@ void SeedSowPreview()
     std::vector<Item> none(PackRowSize, Item::Count);
     CHECK(DescribeSow(sim, plotId, beside, Item::Count, none).text == "Choose seeds on the hotbar to sow");
     CHECK(!DescribeSow(sim, plotId, beside, Item::Count, row).keyed);
-    CHECK(DescribeSow(sim, plotId, beside, Item::Count, row).text == "Select Carrot seed (4) to plant");
-    CHECK(DescribeSow(sim, plotId, beside, Item::Hatchet, row).text == "Select Carrot seed (4) to plant");
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, row).text == "Select Carrot seeds (4) to plant");
+    CHECK(DescribeSow(sim, plotId, beside, Item::Hatchet, row).text == "Select Carrot seeds (4) to plant");
     std::vector<Item> last(PackRowSize, Item::Count);
     last[PackRowSize - 1] = Item::CarrotSeed;
-    CHECK(DescribeSow(sim, plotId, beside, Item::Count, last).text == "Select Carrot seed (0) to plant");
+    CHECK(DescribeSow(sim, plotId, beside, Item::Count, last).text == "Select Carrot seeds (0) to plant");
     std::vector<Item> spent(PackRowSize, Item::Count);
     spent[2] = Item::BroadBeanSeed;  // none in the pack: not offered
     CHECK(DescribeSow(sim, plotId, beside, Item::Count, spent).text == "Choose seeds on the hotbar to sow");
@@ -817,7 +817,7 @@ void SeedSowPreview()
         std::vector<Item> autumn(PackRowSize, Item::Count);
         autumn[0] = Item::TurnipSeed;   // out of season in Spring: skipped
         autumn[5] = Item::CarrotSeed;
-        CHECK(DescribeSow(turnips, plotId, beside, Item::Count, autumn).text == "Select Carrot seed (6) to plant");
+        CHECK(DescribeSow(turnips, plotId, beside, Item::Count, autumn).text == "Select Carrot seeds (6) to plant");
         autumn[5] = Item::Count;
         CHECK(DescribeSow(turnips, plotId, beside, Item::Count, autumn).text == "Choose seeds on the hotbar to sow");
     }
@@ -828,7 +828,7 @@ void SeedSowPreview()
         fruit[1] = Item::Berries;
         CHECK(DescribeSow(berried, plotId, beside, Item::Count, fruit).text == "Select Berries (2) to plant their seeds");
         fruit[6] = Item::CarrotSeed;
-        CHECK(DescribeSow(berried, plotId, beside, Item::Count, fruit).text == "Select Carrot seed (7) to plant");
+        CHECK(DescribeSow(berried, plotId, beside, Item::Count, fruit).text == "Select Carrot seeds (7) to plant");
         const SowCue berry = DescribeSow(berried, plotId, beside, Item::Berries, fruit);
         CHECK(berry.keyed && berry.text == "Plant Seeds");
     }
@@ -3098,10 +3098,10 @@ void DirectSplitAndDeterministicSort()
     OK(sim.ArrangePackRow(noRow));
     OK(sim.SortPack(sim.GetRevision()));
     CHECK(sim.UsedCapacity() == used && sim.GetState().inventory == totals);
-    CHECK(sim.GetLayout(0)->size() == 7);
+    CHECK(sim.GetLayout(0)->size() == 8);
     const Item expected[] = {Item::Knife, Item::Hatchet, Item::Stone,
-        Item::Fiber, Item::Berries, Item::Seeds};
-    for (int index = 0; index < 6; ++index)
+        Item::Fiber, Item::Berries, Item::Seeds, Item::Seeds};
+    for (int index = 0; index < 7; ++index)
         CHECK(sim.GetLayout(0)->at(index).item == expected[index]);
     CHECK(sim.GetLayout(0)->back().wearableId == tunic.id);
     CHECK(sim.GetWearable(tunic.id)->definition == tunic.definition
@@ -3133,9 +3133,23 @@ void PersistentWorldDropTransactions()
         const int firstDrop = category.GetState().worldDrops.front().id;
         OK(category.PickUpDrop(firstDrop, Home));
         CHECK(category.Count(item) == 3 && category.GetState().worldDrops.empty());
-        OK(category.DropGroup(Group(category, item), 3, Home, Home, category.GetRevision()));
-        CHECK(category.Count(item) == 0 && category.GetState().worldDrops.front().quantity == 3);
-        OK(category.PickUpDrop(category.GetState().worldDrops.front().id, Home));
+        if (IsSeedPacket(item))
+        {
+            for (int packet = 0; packet < 3; ++packet)
+                OK(category.DropGroup(Group(category, item), 1, Home, Home, category.GetRevision()));
+            CHECK(category.Count(item) == 0 && category.GetState().worldDrops.size() == 3);
+            while (!category.GetState().worldDrops.empty())
+            {
+                CHECK(category.GetState().worldDrops.front().quantity == 1);
+                OK(category.PickUpDrop(category.GetState().worldDrops.front().id, Home));
+            }
+        }
+        else
+        {
+            OK(category.DropGroup(Group(category, item), 3, Home, Home, category.GetRevision()));
+            CHECK(category.Count(item) == 0 && category.GetState().worldDrops.front().quantity == 3);
+            OK(category.PickUpDrop(category.GetState().worldDrops.front().id, Home));
+        }
         CHECK(category.Count(item) == 3);
     }
 

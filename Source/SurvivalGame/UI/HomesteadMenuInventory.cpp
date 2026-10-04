@@ -381,7 +381,8 @@ bool AHomesteadController::MenuDrop(const FHomesteadRow& Source, const FHomestea
     }
     if (Source.Subject == EHomesteadMenuSubject::ItemGroup
         && Target.Subject == EHomesteadMenuSubject::ItemGroup
-        && Source.Id == Target.Id && Source.SubjectId != Target.SubjectId)
+        && Source.Id == Target.Id && Source.SubjectId != Target.SubjectId
+        && Homestead::CanStackItem(static_cast<Homestead::Item>(Source.Id)))
     {
         const auto Result = Sim.MergeGroups(Source.ContainerId, Source.SubjectId,
             Target.SubjectId, PlayerPoint(), ExpectedRevision);

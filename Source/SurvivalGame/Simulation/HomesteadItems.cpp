@@ -26,8 +26,8 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Forage, "roots", 4, StoreBuys, 0.0, 0.0, "Wild roots"},
     {Item::Flowers, "flowers", "Meadow herb", "A fragrant meadow herb for seasoning and posies.",
         ItemCategory::Forage, "flowers", 10, StoreBuys, 0.0, 0.0, "Meadow herb patches"},
-    {Item::Seeds, "seeds", "Seeds", "Root seeds for planting in tilled soil. Matures in about 2 days if watered.",
-        ItemCategory::Supply, "seeds", 2, NoBuyers},
+    {Item::Seeds, "seeds", "Roots seeds", "A packet of wild root seeds. Matures in about 2 days if watered.",
+        ItemCategory::Supply, "roots-seeds", 2, NoBuyers},
     // The axe, hoe and pail keep their original keys and enum names.
     {Item::Hatchet, "hatchet", "Axe", "A salvaged iron axe head on a new haft. Fells trees and clears stumps and fallen timber.",
         ItemCategory::Tool, "hatchet", 120, NoBuyers},
@@ -102,18 +102,18 @@ constexpr ItemInfo ItemCatalogue[] = {
         ItemCategory::Supply, "oil-flask", 12, NoBuyers, 0.0, 0.0, "The general store", false, "oil flasks"},
     // improve-crops-and-harvest. Seed prices are base; the store sells at 125%. Growing times match
     // HomesteadCrops.cpp (checked by the native tests).
-    {Item::TurnipSeed, "turnip-seed", "Turnip seed", "A paper of white-globe turnip seed. Matures in about 4 days if watered.",
-        ItemCategory::Supply, "seeds", 16, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "papers of turnip seed"},
-    {Item::CarrotSeed, "carrot-seed", "Carrot seed", "A paper of long orange carrot seed. Matures in about 5 days if watered.",
-        ItemCategory::Supply, "seeds", 20, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "papers of carrot seed"},
-    {Item::SeedPotato, "seed-potato", "Seed potato", "A chitted seed potato, sprouting from its eyes. Matures in about 6 days if watered.",
-        ItemCategory::Supply, "seeds", 24, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "seed potatoes"},
-    {Item::CabbageSeed, "cabbage-seed", "Cabbage seed", "A paper of drumhead cabbage seed. Matures in about 9 days if watered.",
-        ItemCategory::Supply, "seeds", 32, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "papers of cabbage seed"},
-    {Item::BroadBeanSeed, "broad-bean-seed", "Broad bean seed", "A twist of broad beans for sowing. Matures in about 7 days if watered, then crops every 3 days.",
-        ItemCategory::Supply, "seeds", 36, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "twists of broad bean seed"},
-    {Item::StrawberryRunner, "strawberry-runner", "Strawberry runner", "A rooted strawberry runner. Fruits in about 8 days if watered, then every 3 days.",
-        ItemCategory::Supply, "seeds", 48, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "strawberry runners"},
+    {Item::TurnipSeed, "turnip-seed", "Turnip seeds", "A packet of white-globe turnip seeds. Matures in about 4 days if watered.",
+        ItemCategory::Supply, "turnip-seeds", 16, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "packets of turnip seeds"},
+    {Item::CarrotSeed, "carrot-seed", "Carrot seeds", "A packet of long orange carrot seeds. Matures in about 5 days if watered.",
+        ItemCategory::Supply, "carrot-seeds", 20, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "packets of carrot seeds"},
+    {Item::SeedPotato, "seed-potato", "Potato seeds", "A packet of chitted seed potatoes. Matures in about 6 days if watered.",
+        ItemCategory::Supply, "potato-seeds", 24, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "packets of potato seeds"},
+    {Item::CabbageSeed, "cabbage-seed", "Cabbage seeds", "A packet of drumhead cabbage seeds. Matures in about 9 days if watered.",
+        ItemCategory::Supply, "cabbage-seeds", 32, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "packets of cabbage seeds"},
+    {Item::BroadBeanSeed, "broad-bean-seed", "Broad bean seeds", "A packet of broad beans for sowing. Matures in about 7 days if watered, then crops every 3 days.",
+        ItemCategory::Supply, "broad-bean-seeds", 36, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "packets of broad bean seeds"},
+    {Item::StrawberryRunner, "strawberry-runner", "Strawberry seeds", "A packet of strawberry planting stock. Fruits in about 8 days if watered, then every 3 days.",
+        ItemCategory::Supply, "strawberry-seeds", 48, NoBuyers, 0.0, 0.0, "Pascoe's general store", false, "packets of strawberry seeds"},
     {Item::Turnip, "turnip", "Turnip", "A white turnip with a purple shoulder. Crisp and peppery raw.",
         ItemCategory::Food, "roots", 20, StoreBuys, 8.0, 6.0, "Grown from turnip seed", false, "turnips", FoodClass::Snack},
     {Item::Carrot, "carrot", "Carrot", "A sweet orange carrot, earth still on it.",
@@ -236,6 +236,16 @@ std::string FoodEnergyLabel(Item item)
     return energy > 0 ? "+" + std::to_string(energy) + " Energy" : std::string();
 }
 bool IsTool(Item item) { return ValidItem(item) && GetItemInfo(item).category == ItemCategory::Tool; }
+bool IsSeedPacket(Item item)
+{
+    switch (item)
+    {
+    case Item::Seeds: case Item::TurnipSeed: case Item::CarrotSeed: case Item::SeedPotato:
+    case Item::CabbageSeed: case Item::BroadBeanSeed: case Item::StrawberryRunner: return true;
+    default: return false;
+    }
+}
+bool CanStackItem(Item item) { return ValidItem(item) && !IsSeedPacket(item); }
 int ItemSortRank(Item item)
 {
     if (!ValidItem(item)) return 5;

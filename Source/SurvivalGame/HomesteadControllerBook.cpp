@@ -441,10 +441,7 @@ void AHomesteadController::MenuSetAppearance(int32 Id, int32 Value)
     if (AppearanceChoice(Id) == Value) return;
     if (Id == 6)
     {
-        // Saved with the game (Simulation/HomesteadBackpack.h); the character picks it up each tick.
-        const auto Result = Sim.SetBackpackShown(Value == 0);
-        if (!Result) Notify(Result);
-        else PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClick);
+        MenuSetBackEquipment(Value == 0);
         return;
     }
     FHomesteadAppearance Next = Appearance;

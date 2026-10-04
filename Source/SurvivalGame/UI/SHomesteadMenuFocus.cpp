@@ -465,7 +465,14 @@ void SHomesteadMenu::NavigateDirection(HomesteadMenuNavigation::Direction Direct
         break;
     }
     case ERegion::Inventory: Moved = MoveWithin(InventorySelection, 3, 3, Direction); break;
-    case ERegion::Equipment: Moved = MoveWithin(EquipmentSelection, VisibleEquipmentSlotCount, VisibleEquipmentSlotCount, Direction); break;
+    case ERegion::Equipment:
+        if (EquipmentSelection < BackEquipmentIndex && Direction.y > 0)
+        { EquipmentSelection = BackEquipmentIndex; Moved = true; }
+        else if (EquipmentSelection == BackEquipmentIndex && Direction.y < 0)
+        { EquipmentSelection = 0; Moved = true; }
+        else if (EquipmentSelection < BackEquipmentIndex)
+            Moved = MoveWithin(EquipmentSelection, VisibleEquipmentSlotCount, VisibleEquipmentSlotCount, Direction);
+        break;
     case ERegion::Hotbar:
         if (Direction.x)
         {

@@ -270,7 +270,8 @@ FString AHomesteadController::FocusActions() const
                         const auto Cue = Homestead::DescribeSow(Sim, Plot.id, PlayerPoint(), Chosen, {});
                         Actions.Add((Cue.keyed ? A + TEXT(" ") : FString()) + Text(Cue.text.c_str()));
                     }
-                if (Homestead::IsRipe(Plot)) Actions.Add(A + TEXT(" Harvest"));
+                const auto HarvestCue = Homestead::DescribeHarvest(Plot);
+                if (!HarvestCue.empty()) Actions.Add(A + TEXT(" ") + Text(HarvestCue.c_str()));
                 if (Homestead::HasVisibleWeeds(Plot)) Actions.Add(X + TEXT(" Pull weeds"));
                 if (Plot.planted && Plot.withered && ToolAvailable && SelectedTool == Homestead::Item::DiggingStick)
                     Actions.Add(Use + TEXT(" Hoe out"));
