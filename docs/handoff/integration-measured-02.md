@@ -287,6 +287,13 @@ is recipe-local and does not alter open fish or any shared helper; Potato functi
 from `1cc2911f`. Potato and turnip source work is preserved, but 14 dishes plus realism, baking,
 imagery, and wiring remain. Farming continues authorized slot 2 with an uncertain forecast; no fish
 helper/budget, gameplay/save, or Integration hands-on action changes.
+Held WIP checkpoint `ae434be5` preserves original Herbed Beans: 24 seeds, 36 flakes, a new
+`13.44` cm bowl/portion, and `62,928/2,432` triangles. Four viewed 4K frames plus source,
+coordinate, island, applied-transform, and sampled-bowl fixtures pass. The completed OPTIX pass
+leaves f/64 detail failures—waxy/molded beans and procedural clay—so this is **not** art/import
+admission. There are now four source prototypes, 12 unstarted dishes, and zero approvals. Farming's
+664-call build02-only snapshot is provisional; no fish/helper/budget/bake, UE, gameplay, or save
+change is included.
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
 prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four
