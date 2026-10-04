@@ -262,7 +262,9 @@ A lane delivers an increment like this:
    orchestrator asks Jenny to schedule work.
 7. Consult Balance again before `[ready]` for final numbers, player-facing copy, and a screenshot.
    Record Balance's OK in the ready evidence.
-8. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
+8. For new player-visible assets or animations, capture actual-game/PIE review media, obtain Jenny's
+   approval, and record the approval in the ready evidence before sending `[ready]`.
+9. Message the orchestrator (`send_session_message`, `delivery_mode: "immediate"`; never enqueue):
 
    ```text
    [ready] <lane> — branch <branch> @ <sha> (pushed to main: yes/no)
@@ -291,6 +293,8 @@ Integration merge notes:
 
 - Integration admits gameplay that changes balance or player-visible flavor only when the receipt
   records Balance's OK.
+- Integration admits new player-visible assets or animations only when the ready evidence records
+  Jenny's approval of the review media.
 - All worktrees share one `.git`, so a lane's local branch can be merged without a push. Lanes
   sometimes rewrite history before pushing (for example ocean `e777db71` became `8a407908`), so
   always merge the exact SHA named in the latest `[ready]`, not the branch tip you saw earlier.

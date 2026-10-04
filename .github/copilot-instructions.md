@@ -48,6 +48,25 @@ Every Balance suggestion becomes a backlog card: prefix its title with `[Balance
 name the source document and section in its description, and have the Orchestrator add it through the
 planner backlog form/API for Jenny to prioritize later.
 
+## Jenny reviews new assets and animations before [ready]
+
+Jenny (2026-10-04) wants to see new art early, before playtest. Any lane that adds or changes a
+**player-visible asset** (tools, clothing, characters, props, item/meal/fish icons, UI art) or an
+**animation** (e.g. casting, chopping, idles) must:
+
+1. Capture review media from the actual game or PIE (not isolated renders): one or more screenshots
+   of each new asset at normal camera distance and in its UI slot, and a short video (MP4, a few
+   seconds per animation, with a frame-step or slow-motion pass if it helps). Store it under
+   `E:\CopilotScratch\<session-id>\review\<batch>\` and add a short `index.md` listing each item.
+2. **Stop and ask Jenny to approve the batch.** In interactive mode, use `ask_user`. In autopilot
+   (where `ask_user` can't reach her), message the Orchestrator with `[review]`, the folder path and
+   your session link; the Orchestrator asks Jenny to look. End your turn while you wait.
+3. Apply her feedback, re-capture what changed, and ask again. Only send `[ready]` after her approval,
+   and record it in the ready evidence. Integration won't admit new assets or animations without it.
+
+Batch items so she reviews a handful at once, not one message per icon. This comes on top of the
+Balance Agent's cohesion check, not instead of it.
+
 Bias toward fresh task-scoped sessions, retaining an existing session for tightly related follow-ups
 when its working context remains useful. Every session, including the orchestrator, maintains a compact
 repo handoff and records task/build attribution, actual model/configuration and AI credit usage before
