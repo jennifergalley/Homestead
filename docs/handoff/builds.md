@@ -28,6 +28,11 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Accounting: starts at `2026-10-04T18:59:23Z` in
   `accounting/afternoon-03-allocation.json`. Measured02 remains closed at 2,477 calls /
   11,439.97802 observed AIU; its unknown post-capture tail does not transfer to this build.
+- Runtime recovery: a fresh main-checkout Shipping package was installed at
+  `E:\Repos\SurvivalGame\Build\Windows` after Development UBT, a fresh cook, staged-package and
+  copied-save hash checks, release-save isolation, guarded EstateSmoke/ToolRepeat, and package-local
+  F5/F9 verification. `Homestead Estate.lnk` now targets that package with its existing icon. This
+  restores the lost active release only; it does not ship or remove any selected 4 PM feedback.
 - Player acceptance: no player checks are marked accepted by this scheduling record.
 
 ## 2026-10-04 — 11:29 AM

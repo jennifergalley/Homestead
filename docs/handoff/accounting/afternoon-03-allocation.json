@@ -2,7 +2,7 @@
   "buildId": "20261004-afternoon-03",
   "authorizedAt": "2026-10-04T18:59:23Z",
   "finalCapture": false,
-  "allocationPolicy": "Count each captured local assistant_usage_events record at most once from this authorization boundary through the future delivery-closure capture. Do not reallocate any measured02 event. This is observed runtime AIU, not billing-reconciled credits.",
+  "allocationPolicy": "Count each captured local assistant_usage_events record at most once from this authorization boundary through the future delivery-closure capture. Do not reallocate any measured02 event. Fishing-specific Art presentation and Gameplay rules/API/presentation work transfers to the planned evening build; mixed shared planning and verification stays explicitly unallocated rather than estimated. This is observed runtime AIU, not billing-reconciled credits.",
   "legacy": {
     "status": "unattributed",
     "recordedNanoAiu": null,
@@ -30,7 +30,7 @@
       "sessionId": "ac7339b4-84f7-49c0-8ec2-3d51d2b86730",
       "agentId": "main",
       "task": "fishing-presentation-assets",
-      "category": "implementation",
+      "category": "transferred-to-evening",
       "since": "2026-10-04T18:59:23Z",
       "actualModel": "claude-opus-5.5",
       "actualReasoningEffort": "high",
@@ -50,31 +50,32 @@
       "launchContextTier": "default",
       "observedUsageCheckpoint": {
         "firstEventId": 71819,
-        "lastEventId": 72376,
-        "calls": 126,
-        "recordedNanoAiu": "431607970000",
+        "lastEventId": 72693,
+        "calls": 175,
+        "recordedNanoAiu": "697971280000",
         "status": "open-tail",
         "source": "Gameplay/UI local usage checkpoint",
-        "eventRangeUtc": "2026-10-04T19:07:23Z to 2026-10-04T19:34:52Z",
+        "eventRangeUtc": "2026-10-04T19:07:23.010Z to 2026-10-04T20:15:46.328Z",
         "observedModels": [
           {
             "model": "gpt-6.1-sol",
             "reasoningEffort": "high",
-            "calls": 124,
-            "recordedNanoAiu": "375237990000"
+            "calls": 172,
+            "recordedNanoAiu": "587119260000"
           },
           {
             "model": null,
             "reasoningEffort": null,
-            "calls": 2,
-            "recordedNanoAiu": "56369980000",
+            "calls": 3,
+            "recordedNanoAiu": "110852020000",
             "limitation": "Telemetry lacks model and reasoning effort; do not infer a configuration change."
           }
         ],
         "actualContextTier": null,
         "limitations": [
           "Configured context tier is default; actual runtime context is unverified.",
-          "This is an open-tail checkpoint, not the final delivery capture."
+          "This checkpoint spans afternoon scope, deferred fishing, and shared work; it is not a final delivery capture.",
+          "Fishing-specific rules/API/presentation work transfers to the planned evening build; shared planning and verification are not split by task."
         ]
       }
     },
@@ -99,7 +100,34 @@
       "actualModel": "gpt-5.6-terra",
       "actualReasoningEffort": "medium",
       "contextTier": null,
-      "launchContextTier": "default"
+      "launchContextTier": "default",
+      "observedUsageCheckpoint": {
+        "firstEventId": 71822,
+        "lastEventId": 72713,
+        "calls": 218,
+        "recordedNanoAiu": "911851260000",
+        "status": "open-tail",
+        "source": "Integration local recovery-closure capture",
+        "eventRangeUtc": "2026-10-04T19:07:27.739Z to 2026-10-04T20:16:53.980Z",
+        "observedModels": [
+          {
+            "model": "gpt-5.6-terra",
+            "reasoningEffort": "medium",
+            "calls": 216
+          },
+          {
+            "model": "gpt-5.6-terra",
+            "reasoningEffort": null,
+            "calls": 2,
+            "limitation": "Telemetry lacks reasoning effort; do not infer a configuration change."
+          }
+        ],
+        "actualContextTier": null,
+        "limitations": [
+          "Configured context tier is default; actual runtime context is unverified.",
+          "This recovery-closure checkpoint has an open tail and is not billing-reconciled credits."
+        ]
+      }
     }
   ]
 }

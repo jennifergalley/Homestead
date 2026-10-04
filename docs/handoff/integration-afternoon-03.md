@@ -17,8 +17,9 @@ GPT-5.6 Terra / medium / default; the actual context tier is not yet captured.
   `.github/copilot-instructions.md` change in the main checkout was not touched.
 - The three hands-on slots belong to Fishing Art, Gameplay UI, and Environment. Integration is
   metadata/accounting/preflight only until the coordinator explicitly grants a slot.
-- The 4 PM build card is planned. The coordinator subsequently granted Integration hands-on slot 3
-  for the main-checkout Shipping recovery; its package gates remain in progress.
+- The 4 PM build card remains planned. The coordinator subsequently granted Integration hands-on
+  slot 3 for the main-checkout Shipping recovery; that recovery does not admit or mark the six
+  selected feature slices as delivered.
 - `accounting/afternoon-03-allocation.json` starts every current lane at the new authorization
   boundary. It deliberately excludes measured02's closed 2,477-call / 11,439.97802 observed-AIU
   report and its unknown tail.
@@ -66,14 +67,16 @@ after Art's dependency handoff, with no perf lock. Retained Planner
 records its fresh tooling model/usage boundary separately from measured02's frozen delivery. No
 Integration hands-on slot is granted.
 
-Gameplay source checkpoint `74203f72c8647ba52f4da78e747908d5cb0f4dd0` is clean against
-`8fbea62d`; its six targeted native suites, combined Editor compile, and exact source stamp pass.
+Gameplay source checkpoint `4f8d8f9d` is pushed against base `490b9d22`; its six targeted native
+suites, combined Editor compile, and exact source stamp pass. Coordinator recheck remains pending.
 It includes Art dependencies `256ce7e5`, `dab028ac`, and `e32d4d15`. Seed packet normalization
 preserves counts with unchanged version/fields and no placement/enum change, but is not admitted:
 the coordinator's focused risky review and all remaining delivery gates still apply.
-Gameplay's review checkpoint covers events `71819..72376`: 126 calls and `431607970000` nano-AIU,
-including 124 GPT-6.1 Sol/high calls (`375237990000` nano-AIU) and two telemetry-incomplete calls
-(`56369980000` nano-AIU). It remains afternoon03-only with a final tail pending.
+Gameplay's review checkpoint covers events `71819..72693`: 175 calls and `697971280000` nano-AIU,
+including 172 GPT-6.1 Sol/high calls (`587119260000` nano-AIU) and three telemetry-incomplete calls
+(`110852020000` nano-AIU). The configured context is default and actual runtime context remains
+unknown. It spans afternoon scope, deferred fishing, and shared work; fishing transfers to the
+evening slot and shared work stays unallocated rather than receiving an invented split.
 
 ## Release-loss incident and recovery procedure
 
@@ -100,3 +103,36 @@ The shared main checkout was switched cleanly to `main` at `628693f5`; its previ
 `74982482`, `c2aa884a`, `c9998125`, `9107029b`, `c617b5f9`, `6d8e4bdb`, `74cec480`,
 `827e6bef`, `617f099a`, `7c7fe5ad`, `555a616c`, `1b061c32`, and `f26aec92`. They are already
 reachable from `main` (branch-only count zero); no push, reset, or deletion was performed.
+
+## Recovery delivery receipt
+
+- Development UBT passed in 507 seconds. A fresh low-memory Development cook/package succeeded,
+  then the Shipping reuse-stage completed from those exact cooked containers. The staged source
+  package is `Build\Releases\20261004-afternoon-03\shipping-candidate\Windows`; its executable
+  SHA-256 is `58C149BD5E756A38E9AE614EB5C3AE7F6E4A828E2E22470378454F292E4CE94D`.
+- The former Sept. 19 package was preserved at
+  `E:\Repos\SurvivalGame\Build\Windows-20260919-old`. The verified Shipping package was copied to
+  `E:\Repos\SurvivalGame\Build\Windows`: all 31 package files matched the staged source hashes,
+  25 copied package-local `Saved` files matched their source hashes, and
+  `Assert-ReleaseSaveIsolation.ps1` passed with exact distinct candidate and rollback `-UserDir`
+  roots.
+- Installed-package `EstateSmoke` and `ToolRepeat` both passed under the bounded recovery run.
+  The normal package-local F5/F9 proof then replaced
+  `Saved\SaveGames\Estate\Homestead_Manual.sav`; the `.bak` SHA-256
+  `9D5E723D9C9D0DA7F50D505B45FC8F61493689F7A6F640EA60BD788590C677F8` matched the pre-write
+  payload, the new manual-save SHA-256 is
+  `5770D2CD97F7E6B33E9A09C3DB64A9F23C7E62D47A9FD4796F18E40704C03A47`, F9 remained alive, and
+  the protected rollback save tree was hash-identical.
+- At 1:15:49 PM local, `Homestead Estate.lnk` was restored to
+  `E:\Repos\SurvivalGame\Build\Windows\SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe`
+  with package-local `-UserDir="E:\Repos\SurvivalGame\Build\Windows\SurvivalGame"`. Its existing
+  `C:\Users\Jenny\AppData\Local\Homestead\Icons\Homestead.ico,0` icon was preserved. The bounded
+  recovery run was then stopped and its one-time wake automation cleared.
+- Jenny-directed accounting correction: all fishing rules/API/presentation work, including Fishing
+  Art's presentation lane, carries to the planned evening slot rather than this recovery or
+  measured02. Mixed shared planning and verification remain explicitly unallocated; no per-task
+  split is invented.
+- The Integration recovery-closure checkpoint covers local usage events `71822..72713`: 218 calls
+  and `911851260000` nano-AIU, with 216 observed GPT-5.6 Terra/medium calls and two
+  reasoning-telemetry-incomplete calls. Its configured context is default; actual context and any
+  later tail remain unknown.
