@@ -119,7 +119,7 @@
       "description": "Source: Balance Agent, docs/design/balance.md §9 (2026-10-04). Set bread to restore 20 energy and cheese 28.",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-04T21:45:15.800Z"
+      "createdUtc": "2026-10-04T21:45:15.8Z"
     },
     {
       "id": "jenny-muucngv5-50wj8m",
@@ -201,6 +201,30 @@
       "imageMime": null,
       "createdUtc": "2026-10-04T21:55:40.065Z",
       "updatedUtc": "2026-10-04T21:58:41.933Z"
+    },
+    {
+      "id": "jenny-muudyirr-dn5j2m",
+      "title": "[Balance] Trees grow back in stages",
+      "description": "Source: Balance Agent, docs/design/balance.md changelog (9 PM trees, 2026-10-04). A felled forest tree shows a stump, then a sapling on day 1, then a full tree on day 3.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T22:21:51.111Z"
+    },
+    {
+      "id": "jenny-muudyitk-ivvrch",
+      "title": "[Balance] Landmark trees stay standing",
+      "description": "Source: Balance Agent, docs/design/balance.md changelog (9 PM trees, 2026-10-04). Trees lining roads and the town square can't be chopped down.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T22:21:51.176Z"
+    },
+    {
+      "id": "jenny-muudyitz-cju6ta",
+      "title": "[Balance UI] Shopkeeper prop and whiskers",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §1 (2026-10-04). Give Mr. Trethewey one character prop (a pencil or spectacles) and greyer whiskers.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T22:21:51.191Z"
     }
   ]
 }
