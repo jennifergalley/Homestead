@@ -142,3 +142,7 @@ doze; Sunday wait preserves authoritative energy drain and adds no rest grant.
 - Its counted-stock serialization widens to 23 Items without a save version, bake, or tagged-section
   change. Older readers can therefore reject these saves even with zero new quantities; Farming
   inherits the Travel separate-save/write-protection rollback gate. Fishing casts are ephemeral.
+- A final high-effort review of `249229b0..ff3c9de` found no scoped fishing/item/economy/input/save
+  blocker. It reaffirmed the HUD `QuietActionSerial` and pickup/name-toast preservation plus
+  Travel discovery/save-section constraints. This is source-risk evidence only, not compile, visual,
+  player, or release approval.

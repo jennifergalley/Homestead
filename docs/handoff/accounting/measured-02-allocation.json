@@ -119,6 +119,19 @@
       "launchContextTier": "default",
       "contextEvidence": "Independent high-effort source/routing review in Integration slot 3. Actual runtime context and final usage-event boundary remain pending; record this helper once despite its follow-up review turns.",
       "boundaryEvidence": "Travel review found old-reader .bak fallback can overwrite upgraded saves. It conditionally approved release-local UserDir isolation only with dual-root, snapshot, alias, and write-containment proof. Farming found no independent blocker but counted stock widening inherits that gate. The reviewer also cleared the final FParse-compatible release-guard parser after 15 disposable fixtures and found no scoped HUD notice/hint/hard-wrap source blocker. No gameplay or HUD checkpoint is admitted."
+    },
+    {
+      "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+      "projectSessionId": "52572922-09fd-4287-85c5-840ceec6d895",
+      "agentId": "12dec5ba-3154-408f-92e3-10ddc75fcfb1",
+      "task": "fishing-risk-review",
+      "category": "review",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": null,
+      "contextEvidence": "Independent source-only review after final Fishing checkpoint. Actual runtime context and final usage-event boundary are unknown.",
+      "boundaryEvidence": "Reviewed only 249229b0..ff3c9de fishing/item/economy/input/save delta. No source-level blocker found; it reaffirmed HUD QuietActionSerial/pickup-toast and Travel discovery/save-section integration constraints. Compile, real habitat/player checks, and release-isolation proof remain pending."
     }
   ]
 }
