@@ -1,12 +1,28 @@
 {
   "buildId": "20261003-measured-02",
-  "status": "deferred",
+  "status": "gameplay-first-admission-in-progress",
   "authorizedAt": "2026-10-04T01:55:51.513Z",
   "targetSlot": "2026-10-03 21:00",
   "fallbackSlot": "2026-10-04 07:30",
   "fallbackStatus": "historical-target-at-risk",
   "fallbackRisk": "At 00:38 local, Farming estimated 8–12+ further hours for fish refinement, excluding engine gates; sixteen dishes/wiring are also pending. The full 07:30 delivery is no longer a realistic expectation.",
-  "deliveryDecision": "Deferred at 20:49 local on Oct 3. The original 9 PM scope is preserved historically, but the Fishing/Food art set is incomplete and no independently complete Travel/HUD subset has its required runtime, gallery, player, and release-isolation evidence. Do not package a placeholder or unverified candidate tonight; do no overnight/signoff work.",
+  "deliveryDecision": "The complete sixteen-meal art scope was deferred at 20:49 local on Oct 3. At 09:44 local on Oct 4, Jenny superseded that all-art-perfect hold with a gameplay-first Shipping decision: admit only eleven existing original meal sources through 843324c1 despite their disclosed molded/baked appearance, then complete functional/save gates. Do not use reused old art, describe the originals as final realism, or silently promote further meals.",
+  "gameplayFirstDelivery": {
+    "authorizedAt": "2026-10-04T09:44:00-07:00",
+    "scope": "Shipping delivery of the existing original pole, six original fish, and exactly eleven original meals: eight crop meals, raw mackerel, grilled trout, and perch.",
+    "qualityDisclosure": "The admitted original meal and fish assets have known molded, baked, or procedural visual limitations. Jenny accepts them for mechanics playtesting, not as a final-realism claim.",
+    "deferred": [
+      "grilled mackerel source checkpoint 0a1d1da8",
+      "four remaining unstarted meals"
+    ],
+    "constraints": [
+      "Farming stops optional modeling, probes, and polish; it owns only the frozen eleven-meal exports, bakes, imagery, item-eating wiring, and manifest handoff.",
+      "Existing texture budgets are ceilings, not mandatory 4K rebakes: use the cheapest coherent provisional original-asset import/material path and preserve richer WIP for later.",
+      "Integration owns Unreal import, combined build, runtime verification, package, Shipping checks, and promotion.",
+      "Retain the existing UserDir release-isolation contract, enum/version compatibility, protected releases, rollback, saves, and shortcut icon.",
+      "No functional, save, or promotion gate is waived."
+    ]
+  },
   "userDirectedException": {
     "authorizedAt": "2026-10-03T22:05:00-07:00",
     "instruction": "Continue the Fishing lane overnight if needed.",
@@ -163,7 +179,7 @@
     "model": "gpt-5.6-terra",
     "reasoningEffort": "medium",
     "launchContextTier": "default",
-    "status": "parked for Unreal/build/package/promotion; release-isolation guard and original-pole import evidence completed locally, with no gameplay admission"
+    "status": "hands-on slot 1 granted at 09:44 local for gameplay-first eleven-meal admission; awaiting Farming's lean export/bake/wiring/manifest checkpoint before Unreal import, build, runtime, package, and promotion"
   },
   "deliveryRules": [
     "Only verified and reviewed work is admitted; unfinished items move to the fallback slot.",

@@ -114,6 +114,24 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
   delivered tooling, hidden and unscheduled, with its OpenSpec player checkbox preserved.
 - Safety: verified work only; no placeholder or unverified subset package.
 
+## 2026-10-04 — gameplay-first Shipping admission
+
+- SHA: pending Farming's frozen eleven-meal export/wiring handoff
+- Status: in progress; Jenny authorized this lean delivery at 09:44 local.
+- Ships: the existing original pole and six fish, plus exactly eleven original meals through
+  `843324c1`: eight crop meals, raw mackerel, grilled trout, and perch. Jenny accepts their
+  disclosed molded/baked appearance for mechanics playtesting; it is not a final-realism claim.
+- Deferred: grilled mackerel checkpoint `0a1d1da8` and four unstarted meals remain preserved
+  deferred work. Do not list them as complete, prepare old-art fallbacks, or alter planner IDs or
+  schedules.
+- Gates: Farming supplies minimum exports, bakes/maps, representative imagery, item-eating wiring,
+  and manifest for the frozen eleven. Integration then imports, builds, validates runtime and real
+  candidate/rollback save containment, packages, and runs guarded Shipping EstateSmoke/ToolRepeat.
+  Preserve release-local `-UserDir`, enum/version compatibility, protected releases/rollback,
+  player saves, and the shortcut icon. Existing texture budgets are ceilings rather than mandatory
+  4K rebakes; use a cheap coherent provisional original-asset material/import path and retain richer
+  WIP. No functional or save gate is waived.
+
 ## Later
 
 - The player-driven deferred queue is in [backlog.md](backlog.md): river/ocean, map and town feedback, fishing, hauling, mine work, manor rebuilding, artisan goods, and later estate systems.
