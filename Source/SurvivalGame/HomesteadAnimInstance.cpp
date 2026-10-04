@@ -902,9 +902,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     // Plays the segment for the controller's pose on the clip's explicit timeline. Contact beats
     // count only when this real clip's time crosses them (no clip, no beats). A cast finishes its
     // swing before the wait hold takes over; the strike plays once and hands back to the pose.
-    // AN_HeroineMH_Fishing is 30 fps (fish_cast.py). Where two segments meet at one time the earlier one's
-    // closing key sits a frame early, so loops wrap and holds stop one frame before the segment end.
-    static constexpr float FishClipFrame = 1.0f / 30.0f;
+    // AN_HeroineMH_Fishing's frame seams (HomesteadFishingTiming::ClipFrameSeconds).
+    static constexpr float FishClipFrame = HomesteadFishingTiming::ClipFrameSeconds;
 
     void UpdateFishing(float DeltaSeconds)
     {
@@ -1115,6 +1114,13 @@ void UHomesteadAnimInstance::CancelAction(bool Immediate)
     auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
     Proxy.Requested = EHandAction::None;
     Proxy.bCancelled = true;
+    // Cancelling drops the fishing presentation too: no pose, no queued cast or strike, and a landed
+    // catch stops finishing (the layer fades out from wherever it was).
+    Proxy.FishPose = EHomesteadFishingPose::None;
+    Proxy.bFishCastRequested = false;
+    Proxy.bFishStrikeRequested = false;
+    Proxy.bFishStriking = false;
+    Proxy.bFishWasActive = false;
     if (Immediate)
     {
         Proxy.bGathering = false;
