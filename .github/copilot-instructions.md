@@ -1,16 +1,31 @@
 # Working with Jenny on Homestead
 
-## Model, reasoning and implementer slots
+## Agent Team Makeup
 
-Jenny's standing team preference (updated 2026-10-02). These are **required settings for future session
-launches**; documenting them does not change a live session's model or reasoning level.
+Jenny's standing team (updated 2026-10-04). The orchestrator keeps this section current whenever a
+role, model or standing session changes. Model settings are **required for future session launches**.
+
+### Standing roles
+
+| Role | What it does | Model |
+| --- | --- | --- |
+| **Orchestrator Agent** | Coordinates only: plans, spawns, assigns slots, relays; never builds or merges. Reports to Jenny. | Claude Opus 5.5 / high / long |
+| **Integration Agent** | Only session that merges, packages and promotes builds; installs each release into the main checkout (`E:\Repos\SurvivalGame\Build\Windows`), the only place Jenny's shortcut may point. Also the current docs/accounting liaison. | GPT-5.6 Terra or GPT-6 Luna / medium |
+| **Docs Agent** | Records verified findings in canonical docs (skills, `docs/setup.md`, `docs/handoff/`). Spawned when needed; Integration covers it otherwise. | GPT-6 Luna or GPT-5.6 Terra / low–medium |
+| **Balance Agent** | Reviews game balance (energy, coins, yields, timers, pacing) and cohesiveness (design, flavor, icons, menu/HUD look). Consulted at planning and before `[ready]`; doesn't edit game code. | Claude Opus 5.5 / high |
+| **Cleanup Agent** | One bounded disk sweep per day after a delivery. | existing session |
+
+Feature lanes (Gameplay/UI, Environment, Art and so on) are spawned fresh per scheduled build and
+archived when their work ships. Never archive a session whose worktree holds something still needed.
+
+### Models
 
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
 | Orchestrator Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | long (Jenny requested 1.1M; actual runtime context is recorded separately) |
 | Blender / Unreal asset making and asset integration | Claude Opus 5.5 (`claude-opus-5.5`) | high | default; long only when necessary |
 | Balance Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | default |
-| Blender / Unreal work; gameplay, visual or performance implementation and risky review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
+| Gameplay/UI/environment code, general Unreal work, visuals or performance implementation, and risky review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
 | Documentation, integration / building, scripted tests and accounting | GPT-6 Luna (`gpt-6-luna`), GPT-5.6 Terra (`gpt-5.6-terra`), or GPT-6.1 Sol (`gpt-6.1-sol`) | low / medium as appropriate | default |
 
 Claude Opus 5.5 is allowed only for the Orchestrator, Blender/Unreal asset making and asset
@@ -118,8 +133,7 @@ next five sessions.
 - **Urgent messages reach busy sessions through the mailbox.** `send_session_message` waits until
   the target's turn ends, which can be hours on autopilot. For blockers, rule changes and
   stop/rebase requests, also use `mailbox_send` (to a worktree folder name, a branch or `all`). The
-  target sees it after its next tool call. If you're a long-running session and `mailbox_send`
-  isn't among your tools, run `extensions_reload` once. When a mailbox message arrives, act on it
+  target sees it after its next tool call. When a mailbox message arrives, act on it
   before continuing. Details are in `docs/handoff/README.md`.
 - **Before debugging a tool or build failure,** check "Known failures → fixes" (section 0.1 of
   `.github/skills/unreal-editor-mcp/SKILL.md`).
