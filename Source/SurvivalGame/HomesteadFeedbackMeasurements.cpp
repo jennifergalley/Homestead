@@ -4,10 +4,11 @@
 
 namespace
 {
-FString FeedbackWords(const FString& Text)
+FString FeedbackCharacters(const FString& Text)
 {
     TArray<FString> Words; Text.ParseIntoArrayWS(Words);
-    return FString::Join(Words, TEXT(" "));
+    // Hard wrapping a long token adds a line break, not a missing source character.
+    return FString::Join(Words, TEXT(""));
 }
 bool IntersectsFeedback(const FBox2D& A, const FBox2D& B)
 {
@@ -30,7 +31,7 @@ void AHomesteadHUD::ProtectFeedback(const FString& RegionName, float X, float Y,
 bool AHomesteadHUD::FeedbackFullText() const
 {
     return bMeasureFeedback && !ToastSource.IsEmpty() && !ToastLines.IsEmpty()
-        && FeedbackWords(ToastSource) == FeedbackWords(FString::Join(ToastLines, TEXT(" ")));
+        && FeedbackCharacters(ToastSource) == FeedbackCharacters(FString::Join(ToastLines, TEXT(" ")));
 }
 bool AHomesteadHUD::FeedbackOverlaps() const
 {

@@ -157,6 +157,7 @@ public:
     FString BookFooter() const;
     FString FocusTitle() const;
     FString FocusActions() const;
+    bool IsChestFocused() const { return Focus == EFocus::Chest; }
     // The floating action hints retire once each action has been done this many times; the counts
     // live in the user settings file, so they outlast saves and new woodlands.
     static constexpr int32 HintRetireUses = 3;
@@ -348,13 +349,11 @@ public:
     struct FMealGain { double Food = 0, Energy = 0; uint32 Serial = 0; };
     const FMealGain& LastMealGain() const { return MealGain; }
     // Items she has just gained (gathered, harvested, crafted, bought; not moved out of a chest or
-    // picked back up), for the "+3 Berries" popup beside her (HomesteadControllerPickups.cpp,
-    // UI/SHomesteadPickups). Shown is how long each has been on screen, in real seconds.
+    // picked back up), for the HUD's "+3 Berries" notice (HomesteadControllerPickups.cpp).
+    // Shown is how long each has been on screen, in real seconds.
     struct FPickup { Homestead::Item Item = Homestead::Item::Count; int32 Amount = 0; float Shown = 0.0f; };
     const TArray<FPickup>& RecentPickups() const { return Pickups; }
     bool PickupsVisible() const;
-    // Where the popup hangs from: her upper body projected to the viewport, in pixels.
-    bool PickupAnchor(FVector2D& Pixel, FVector2D& ViewportPixels) const;
     // Sprint was asked for (or ran out) with too little Energy: a gentle notice, not a failure.
     void SprintTooTired();
     // Keyboard sprint: a tap of Shift toggles it on release, unless Shift was a modifier (Shift+Q,
@@ -392,14 +391,15 @@ public:
     void ApplyMasterVolume() const;
 
 private:
-    struct FHintUse { FString Id; uint32 Serial = 0; bool bHackPending = false; };
+    struct FHintUse { FString Id; uint32 Serial = 0; uint32 QuietSerial = 0; bool bHackPending = false; };
     // Before an action button is handled: which hint (if any) that button's cue shows now.
     FHintUse BeginHintUse(const FString& Button) const;
-    // After: count it when the action succeeded (a non-error notice, or a machete swing began).
+    // Count quiet resource success, a non-error notice, or a machete swing beginning.
     void EndHintUse(const FHintUse& Use);
     void LoadActionHints();
     TMap<FString, int32> HintUses;
     uint32 NoticeSerial = 0;
+    uint32 QuietActionSerial = 0;
     bool ResolveDropPoint(Homestead::Point& Result) const;
     bool CollectPreparedBaselines(Homestead::Generation::ChunkCoord Chunk,
         std::array<const Homestead::Generation::ChunkBaseline*, 9>& Prepared) const;
@@ -430,7 +430,6 @@ private:
     uint64 PickupRevision = 0;
     bool bPickupsPrimed = false;
     void UpdatePickups(float DeltaSeconds);
-    TSharedPtr<SWidget> PickupsRoot;
     bool bSprintShiftDown = false;
     bool bSprintShiftModifier = false;
     // A/X with food selected and nothing to interact with: eat one (or say none is left).

@@ -1,0 +1,27 @@
+{
+  "buildId": "20261003-measured-02",
+  "authorizedAt": "2026-10-04T02:19:32.169Z",
+  "allocationPolicy": "Allocate each event once to the selected HUD bundle; no invented per-feature split. No helpers were launched.",
+  "limits": [
+    "Checkpoint snapshot only: final handoff/push/parking tail and later authorized compilation remain uncaptured.",
+    "Actual context tier and external billing reconciliation are unknown.",
+    "Native/Unreal compilation, runtime checks, packaging and review costs are not included as performed work."
+  ],
+  "segments": [
+    {
+      "sessionId": "2424d5bc-bc5a-4eec-a37f-a2f82cb995d0",
+      "projectSessionId": "84aadda6-c29e-4852-b07f-e3cbacd4114d",
+      "task": "hud-measured-02-selected-bundle",
+      "tasks": ["emphasize-chest-hud-names", "unify-hud-notices"],
+      "category": "implementation",
+      "since": "2026-10-04T02:19:32.169Z",
+      "throughEventId": 69756,
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "contextEvidence": "Local runtime usage confirms GPT-6.1 Sol/high. Default is the coordinator's launch configuration, not proof of actual context tier.",
+      "boundaryEvidence": "Includes startup/context reading, short OpenSpec artifacts, HUD implementation, coupled hint-success regression, source checks and checkpoint accounting. No helpers, editor, game compilation, packaging, saves or user-game actions."
+    }
+  ]
+}

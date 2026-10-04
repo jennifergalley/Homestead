@@ -588,7 +588,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         [](AHomesteadController& PC) { for (int32 Day = 0; Day < 25; ++Day) PC.Sim.SkipToHourOfDay(10.0); });
     Add(TEXT("hud-hotbar-tool"), TEXT("The hotbar with the hoe selected and empty cells."), ECover::Hud, 6, nullptr,
         [](AHomesteadController& PC) { PC.ChooseOnHotbar(Item::DiggingStick); });
-    Add(TEXT("hud-pickups"), TEXT("Pickup lines beside her: +3 Berries, +2 Branch, +1 Stone."),
+    Add(TEXT("hud-pickups"), TEXT("Parchment pickup slip in the common HUD stack: +3 Berries, +2 Branch, +1 Stone."),
         ECover::Notice, static_cast<int32>(ENotice::PickupLine), nullptr, [](AHomesteadController& PC)
         {
             PC.bPickupsPrimed = true;
@@ -637,7 +637,15 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Focus, 4, Counter, nullptr);
     Add(TEXT("focus-sign"), TEXT("Facing the Gateway road sign: 'Road sign | Town / Manor' and the keyed 'Choose a way'."),
         ECover::Focus, 5, Sign(TEXT("GatewayRoadSign"), 180.0), nullptr);
-    Add(TEXT("focus-chest"), TEXT("Facing the storage chest: its name and the keyed open hint."), ECover::Focus, 6, Chest, nullptr);
+    Add(TEXT("focus-chest"), TEXT("A long chest name leads the parchment card; Open stays readable below, with refusal and gains stacked clear."),
+        ECover::Focus, 6, Chest, [ChestId](AHomesteadController& PC)
+        {
+            const auto Rename = PC.Sim.RenameChest(ChestId(PC), "Wide Winter Wool Storage", PC.PlayerPoint(), PC.Sim.GetRevision());
+            if (!Rename) { PC.Notify(Rename); return; }
+            PC.Notify(TEXT("Too tired"), true);
+            PC.bPickupsPrimed = true;
+            PC.Pickups = {{Item::Berries, 3, 0.0f}, {Item::Branch, 2, 0.0f}};
+        }, 0.5f);
     Add(TEXT("focus-eat"), TEXT("Food chosen on the hotbar with nothing in front of her: the keyed 'Eat' hint."), ECover::Focus, 7, nullptr,
         [](AHomesteadController& PC) { PC.Sim.SetEnergy(55.0); PC.ChooseOnHotbar(Item::Pasty); });
     Add(TEXT("garden-hoe"), TEXT("Hoe in hand over open meadow: the green till outline and the keyed 'Till' hint."),
