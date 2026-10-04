@@ -33,6 +33,19 @@
       "launchContextTier": null,
       "contextEvidence": "Runtime model observed in this session. Reasoning effort and actual/configured context tiers are not exposed; no value is inferred.",
       "boundaryEvidence": "Preflight owns measured02 manifest/allocation metadata and shared-doc liaison only. No helpers, reviews, failures, merge, build, package, or test work is included until the coordinator grants an Integration hands-on slot."
+    },
+    {
+      "sessionId": "ac593377-587f-4319-a033-b17f309be13e",
+      "projectSessionId": "356e2361-66fc-4678-89e7-9e884a2a3e69",
+      "task": "edit-planner-feedback",
+      "category": "implementation",
+      "since": "2026-10-04T01:58:36.783Z",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "contextEvidence": "Lane handoff identifies a 31-call, 121013240000 nano-AIU incomplete snapshot through event 69423; final delivery-tail capture remains pending. Actual runtime context is unknown.",
+      "boundaryEvidence": "Planner-only feature work. Non-agent Node, loopback fixture, and optional isolated browser helpers have no LLM usage; no review, gameplay, save, or Unreal allocation is included."
     }
   ]
 }
