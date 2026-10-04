@@ -118,12 +118,14 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 
 - SHA: pending Farming's frozen eleven-meal export/wiring handoff
 - Status: in progress; Jenny authorized this lean delivery at 09:44 local.
-- Ships: the existing original pole and six fish, plus exactly eleven original meals through
-  `843324c1`: eight crop meals, raw mackerel, grilled trout, and perch. Jenny accepts their
+- Ships: the existing original pole and six fish, plus exactly eleven original meals frozen at
+  `843324c17b85b5432785fc7a6b9e333702dc26ec`: Baked Potatoes, Roasted Turnips, Stewed Carrots,
+  Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root Vegetable
+  Hotpot, Raw Fish Slices, Grilled Trout, and Grilled Perch. Jenny accepts their
   disclosed molded/baked appearance for mechanics playtesting; it is not a final-realism claim.
-- Deferred: grilled mackerel checkpoint `0a1d1da8` and four unstarted meals remain preserved
-  deferred work. Do not list them as complete, prepare old-art fallbacks, or alter planner IDs or
-  schedules.
+- Deferred: Grilled Mackerel checkpoint `0a1d1da8`, Fish Soup, Fish and Potatoes, Herbed Carp,
+  and Mackerel Chowder remain preserved deferred work. Do not list them as complete, prepare
+  old-art fallbacks, or alter planner IDs or schedules.
 - Gates: Farming supplies minimum exports, bakes/maps, representative imagery, item-eating wiring,
   and manifest for the frozen eleven. Integration then imports, builds, validates runtime and real
   candidate/rollback save containment, packages, and runs guarded Shipping EstateSmoke/ToolRepeat.

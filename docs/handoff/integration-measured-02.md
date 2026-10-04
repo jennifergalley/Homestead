@@ -11,19 +11,23 @@ actual/configured context tiers are unknown.
 
 - **Gameplay-first Shipping decision (09:44 local, Oct 4):** Jenny superseded the earlier
   all-art-perfect/sixteen-meal hold. Admit the existing original pole, six original fish, and
-  exactly eleven existing original meals through Farming checkpoint `843324c1`: the eight crop
-  meals, raw mackerel, grilled trout, and perch. Their disclosed molded/baked/procedural
+  exactly eleven existing original meals through Farming checkpoint
+  `843324c17b85b5432785fc7a6b9e333702dc26ec`: `BakedPotatoes`, `RoastedTurnips`,
+  `StewedCarrots`, `HerbedBroadBeans`, `CabbagePotatoStew`, `BerryCompote`,
+  `StrawberryCompote`, `RootVegetableHotpot`, `RawFishSlices`, `GrilledTrout`, and
+  `GrilledPerch`. Their disclosed molded/baked/procedural
   appearance is accepted for mechanics playtesting only; do not claim final realism or substitute
-  reused old art. Grilled mackerel (`0a1d1da8`) and four unstarted meals are deferred and
-  preserved, not preparations represented as completed work.
+  reused old art. `GrilledMackerel` (`0a1d1da8`), `FishSoup`, `FishAndPotatoes`,
+  `HerbedCarp`, and `MackerelChowder` are deferred and preserved, not preparations represented
+  as completed work.
 - Integration owns hands-on slot 1 for the lean import, combined build, runtime, release-isolation,
   package, Shipping-check, and promotion path. Farming owns one ready checkpoint containing only
-  the frozen eleven meals' minimum exports, bakes/maps, representative imagery, item-eating
-  wiring, and manifest. It stops optional modeling, probes, and polish; it does not import Unreal
-  assets or alter catch/save/version contracts. Existing texture budgets are ceilings, not mandatory
-  4K rebakes: use the cheapest coherent provisional original-asset import/material path and preserve
-  richer WIP for later. The no-waiver functional, save, rollback, and protected-release gates remain
-  in force.
+  the frozen eleven meals' minimum exports, bakes/maps, representative imagery, item-eating wiring,
+  manifest, and deferred-meal availability gating. It stops optional modeling, probes, and polish;
+  it does not import Unreal assets or alter catch/save/version contracts. Existing texture budgets
+  are ceilings, not mandatory 4K rebakes: use the cheapest coherent provisional original-asset
+  import/material path and preserve richer WIP for later. The no-waiver functional, save, rollback,
+  and protected-release gates remain in force.
 - Initial critical path: Farming's ready eleven-meal handoff, then Integration import, merged
   Development/runtime checks, real candidate/rollback save containment evidence, package, and
   Shipping EstateSmoke/ToolRepeat. Once the handoff exists, the initial lean-path estimate is
