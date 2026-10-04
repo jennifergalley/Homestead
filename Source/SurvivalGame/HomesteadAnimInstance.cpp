@@ -1,6 +1,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadController.h"
+#include "HomesteadFishingPresentation.h"
 #include "Animation/AnimInstanceProxy.h"
 #include "Animation/AnimNode_SequencePlayer.h"
 #include "Animation/AnimSequence.h"
@@ -369,9 +370,20 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         CraftLayer.LayerSetup[0].BranchFilters.AddDefaulted_GetRef().BoneName = TEXT("spine_02");
         CraftLayer.BlendWeights[0] = 0;
         Craft.SetTeleportToExplicitTime(true);
+        // Fishing (AN_HeroineMH_Fishing) takes everything from spine_01 up; her legs keep the stance
+        // below. Two evaluators cross-fade so a jump between clip segments never pops.
+        FishBlend.A.SetLinkNode(&FishA);
+        FishBlend.B.SetLinkNode(&FishB);
+        FishLayer.BasePose.SetLinkNode(&CraftLayer);
+        FishLayer.AddPose();
+        FishLayer.BlendPoses[0].SetLinkNode(&FishBlend);
+        FishLayer.LayerSetup[0].BranchFilters.AddDefaulted_GetRef().BoneName = TEXT("spine_01");
+        FishLayer.BlendWeights[0] = 0;
+        FishA.SetTeleportToExplicitTime(true);
+        FishB.SetTeleportToExplicitTime(true);
         // The raised lamp (AN_HeroineMH_LampRaised): her right arm holds it up ahead of her and her
         // head peers past it, over walking and idling.
-        LampLayer.BasePose.SetLinkNode(&CraftLayer);
+        LampLayer.BasePose.SetLinkNode(&FishLayer);
         LampLayer.AddPose();
         LampLayer.BlendPoses[0].SetLinkNode(&LampPose);
         for (const TCHAR* Branch : {TEXT("clavicle_r"), TEXT("neck_01")})
@@ -476,6 +488,22 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     FAnimNode_LayeredBoneBlend LampLayer;
     float LampAlpha = 0;
     bool bLampRaised = false;
+    FAnimNode_SequenceEvaluator_Standalone FishA;
+    FAnimNode_SequenceEvaluator_Standalone FishB;
+    FLocomotionBlend FishBlend;
+    FAnimNode_LayeredBoneBlend FishLayer;
+    EHomesteadFishingPose FishPose = EHomesteadFishingPose::None;
+    // The segment playing (a pose, or the one-shot strike) and seconds into it on the clip timeline.
+    EHomesteadFishingPose FishSegment = EHomesteadFishingPose::None;
+    bool bFishStriking = false;
+    bool bFishStrikeRequested = false;
+    bool bFishWasActive = false;
+    float FishTime = 0;
+    float FishAlpha = 0;
+    // Which evaluator (0 = A, 1 = B) carries the current segment; the other holds the last one.
+    int32 FishSlot = 0;
+    uint32 FishSplashes = 0;
+    uint32 FishLifts = 0;
     float CraftAlpha = 0;
     float CraftTime = 0;
     float EatTime = 0;
@@ -570,6 +598,8 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
             Eat.SetSequence(Avatar->GetEatAnimation());
             Craft.SetSequence(Avatar->GetCraftAnimation());
             LampPose.SetSequence(Avatar->GetLampRaisedAnimation());
+            FishA.SetSequence(Avatar->GetFishingAnimation());
+            FishB.SetSequence(Avatar->GetFishingAnimation());
             bHoeTill = Avatar->UsesHoeTill();
         }
     }
@@ -834,6 +864,98 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         UpdateEating(DeltaSeconds);
         UpdateCrafting(Avatar, DeltaSeconds);
         UpdateLamp(DeltaSeconds);
+        UpdateFishing(DeltaSeconds);
+    }
+
+    static void FishSegmentRange(EHomesteadFishingPose Segment, bool bStrike, float& Start, float& End, bool& bLoop)
+    {
+        using namespace HomesteadFishingTiming;
+        bLoop = false;
+        if (bStrike) { Start = StrikeStart; End = StrikeEnd; return; }
+        switch (Segment)
+        {
+        case EHomesteadFishingPose::Cast: Start = CastStart; End = CastEnd; return;
+        case EHomesteadFishingPose::Wait: Start = WaitStart; End = WaitEnd; bLoop = true; return;
+        case EHomesteadFishingPose::Bite: Start = BiteStart; End = BiteEnd; bLoop = true; return;
+        case EHomesteadFishingPose::Fight: Start = FightStart; End = FightEnd; bLoop = true; return;
+        case EHomesteadFishingPose::Catch: Start = CatchStart; End = CatchEnd; return;
+        case EHomesteadFishingPose::Miss: Start = MissStart; End = MissEnd; return;
+        default: Start = End = WaitStart; return;
+        }
+    }
+
+    void StartFishSegment(EHomesteadFishingPose Segment, bool bStrike)
+    {
+        FishSegment = Segment;
+        bFishStriking = bStrike;
+        float Start, End;
+        bool bLoop;
+        FishSegmentRange(Segment, bStrike, Start, End, bLoop);
+        FishTime = Start;
+        // The outgoing evaluator freezes where it was while the new one fades in over it.
+        FishSlot = FishAlpha > 0.01f ? 1 - FishSlot : FishSlot;
+        if (FishAlpha <= 0.01f) FishBlend.Alpha = static_cast<float>(FishSlot);
+    }
+
+    // Plays the segment for the controller's pose on the clip's explicit timeline. Contact beats
+    // count only when this real clip's time crosses them (no clip, no beats). A cast finishes its
+    // swing before the wait hold takes over; the strike plays once and hands back to the pose.
+    void UpdateFishing(float DeltaSeconds)
+    {
+        using namespace HomesteadFishingTiming;
+        const auto* Clip = FishA.GetSequence();
+        if (!Clip) { FishLayer.BlendWeights[0] = FishAlpha = 0; bFishStrikeRequested = false; return; }
+        const bool bActive = FishPose != EHomesteadFishingPose::None;
+        // A fresh cast always starts its segment over, even if the last one is still fading out.
+        if (bActive && !bFishWasActive)
+        {
+            bFishStriking = false;
+            StartFishSegment(FishPose, false);
+        }
+        bFishWasActive = bActive;
+        if (bActive && bFishStrikeRequested && !bFishStriking)
+            StartFishSegment(FishPose, true);
+        bFishStrikeRequested = false;
+        const bool bCastSwinging = FishSegment == EHomesteadFishingPose::Cast && !bFishStriking && FishTime < CastEnd;
+        const bool bHoldCast = bCastSwinging && FishPose == EHomesteadFishingPose::Wait;
+        if (bActive && !bFishStriking && FishPose != FishSegment && !bHoldCast)
+            StartFishSegment(FishPose, false);
+        float Start, End;
+        bool bLoop;
+        FishSegmentRange(FishSegment, bFishStriking, Start, End, bLoop);
+        const float Before = FishTime;
+        if (bActive || FishAlpha > 0.0f)
+            FishTime = FishTime + DeltaSeconds;
+        if (FishTime >= End)
+        {
+            if (bFishStriking)
+            {
+                bFishStriking = false;
+                StartFishSegment(FishPose == EHomesteadFishingPose::None ? EHomesteadFishingPose::Fight : FishPose, false);
+                FishSegmentRange(FishSegment, false, Start, End, bLoop);
+            }
+            else if (bLoop) FishTime = Start + FMath::Fmod(FishTime - Start, End - Start);
+            else if (FishSegment == EHomesteadFishingPose::Cast && FishPose == EHomesteadFishingPose::Wait)
+                StartFishSegment(EHomesteadFishingPose::Wait, false);
+            else FishTime = End - KINDA_SMALL_NUMBER;
+        }
+        if (!bFishStriking && FishSegment == EHomesteadFishingPose::Cast
+            && Before < CastStart + CastSplashSeconds && FishTime >= CastStart + CastSplashSeconds)
+            ++FishSplashes;
+        if (!bFishStriking && FishSegment == EHomesteadFishingPose::Catch
+            && Before < CatchStart + CatchLiftSeconds && FishTime >= CatchStart + CatchLiftSeconds)
+            ++FishLifts;
+        auto& Current = FishSlot == 0 ? FishA : FishB;
+        Current.SetExplicitTime(FishTime);
+        FishBlend.Alpha = FMath::FInterpConstantTo(FishBlend.Alpha, static_cast<float>(FishSlot), DeltaSeconds, 1.0f / 0.15f);
+        const float Target = bActive ? 1.0f : 0.0f;
+        FishAlpha = FMath::FInterpConstantTo(FishAlpha, Target, DeltaSeconds, Target > FishAlpha ? 1.0f / 0.2f : 1.0f / 0.3f);
+        FishLayer.BlendWeights[0] = FishAlpha;
+        if (!bActive && FishAlpha <= 0.0f)
+        {
+            FishSegment = EHomesteadFishingPose::None;
+            bFishStriking = false;
+        }
     }
 
     // The raised hold eases in over 0.3 s and down over 0.25 s; a set-down or pick-up takes over.
@@ -1048,6 +1170,52 @@ float UHomesteadAnimInstance::LampKneelPhase() const
 float UHomesteadAnimInstance::CraftWeight() const
 {
     return GetProxyOnGameThread<FHomesteadAnimProxy>().CraftAlpha;
+}
+
+void UHomesteadAnimInstance::SetFishingPose(EHomesteadFishingPose Pose)
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().FishPose = Pose;
+}
+
+void UHomesteadAnimInstance::PlayFishingStrike()
+{
+    GetProxyOnGameThread<FHomesteadAnimProxy>().bFishStrikeRequested = true;
+}
+
+uint32 UHomesteadAnimInstance::FishCastSplashes() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().FishSplashes;
+}
+
+uint32 UHomesteadAnimInstance::FishCatchLifts() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().FishLifts;
+}
+
+EHomesteadFishingPose UHomesteadAnimInstance::FishingPose() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().FishPose;
+}
+
+float UHomesteadAnimInstance::FishingClipTime() const
+{
+    const auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
+    return Proxy.FishSegment != EHomesteadFishingPose::None && Proxy.FishA.GetSequence() ? Proxy.FishTime : -1.0f;
+}
+
+bool UHomesteadAnimInstance::IsFishingStrike() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().bFishStriking;
+}
+
+float UHomesteadAnimInstance::FishingWeight() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().FishAlpha;
+}
+
+bool UHomesteadAnimInstance::HasFishingClip() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().FishA.GetSequence() != nullptr;
 }
 
 float UHomesteadAnimInstance::EatWeight() const
