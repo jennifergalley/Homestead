@@ -167,6 +167,13 @@ verified 9 PM delivery: Travel/HUD still lack runtime, gallery, Jenny acceptance
 real promotion containment proof. Fishing/Food also lacks the required original assets. Defer rather
 than package or promote a placeholder-art or incompletely verified slice.
 
+At 20:49 local on Oct 3, the complete measured02 selected delivery is explicitly deferred: six fish
+and sixteen dish assets remain outstanding, and neither a Fishing/Food candidate nor an alternate
+Travel/HUD slice has all of its required evidence. Do not consume a speculative package cycle tonight.
+The next verification step is Farming's asset-owner review of the imported pole's real held pose,
+followed by original fish/dish delivery; only then may Integration schedule the remaining source,
+runtime, save-isolation, and package gates.
+
 ## Bounded current-source runtime evidence
 
 - With Farming's Blender window paused, Integration launched one owned editor at port 8768 with the
