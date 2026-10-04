@@ -3,27 +3,33 @@
 Only Jenny-directed work belongs here. Every line is one player-checkable slice, not a speculative implementation plan. Lanes create or revise an OpenSpec change only after Jenny gives feedback or explicitly selects a later item. `priority.json` is Jenny's scheduling order, not an autonomous pickup queue: lanes implement only the items she prioritized for their build, then go idle. The planner canvas can drag-reorder the list; **Top**, **Next build**, **Quote**, and **Remove** act on it, with **Remove** archiving the change.
 
 <!-- jenny-inbox:start -->
+- **MetaHuman model for the General Store clerk** — Jenny, 2026-10-04 (added from the planner canvas): Instead of the placeholder heroine asset, the General Store clerk should use a MetaHuman model with period-appropriate clothing, and it should be a man in his 50s or so
+- **Rename Pascoe to something else, non-Poldark-related** — Jenny, 2026-10-04 (added from the planner canvas): The names of the people and places should explicitly avoid directly referencing Poldark, the family names, business names, or estate names.
+- **Fishing pole and fish icons need refinement** — Jenny, 2026-10-04 (added from the planner canvas): The fishing pole and fish icons in the inventory / hotbar need refinement to match the quality and style of the other tools and finished crops. Fishing also needs an animation of her casting the line out, and the animations should drive the fishing / catching mechanics, not a text box with a progress bar that disappears too fast to read. Draw inspiration from how Coral Island does it. There should also be more randomness to the fishing animation, so it takes a random amount of time for a fish to bite, and the exact moment to click to catch the fish should involve randomness too so it becomes a minigame.
+- **I should be able to go down into the mine and mine for rock, ore and gems** — Jenny, 2026-10-04 (added from the planner canvas): The trapdoor in the Mine building asset should be usable, and I should be able to desend into dark tunnels, where I need to use my oil lamp for light, and my pickaxe to mine for ores, stone, and gems, as laid out in our plans. I should be able to sell these items in town and use them in crafting ingredients. Most important is the stone building recipes for rebuilding the manor to its former glory.
+- **I'm not able to chop down trees** — Jenny, 2026-10-04 (added from the planner canvas): It seems that in the shift from the survival MVP to the estate version of the game I lost the ability to chop down trees. We should still have the animation and sounds - please give me the ability to chop down any tree in the map, and depending on where it is (say, in a forest or far away from the manor or farm), it should have the capability to grow back (we can say it comes back as a fully formed tree for now and defer tree growth rates for later)
+- **I should be able to Disassemble, Replace Fence around the Farm** — Jenny, 2026-10-04 (added from the planner canvas): I should be able to craft new wooden fence parts (sections of fence and gates) in the Build menu and place them around the farm, and I should be able to disassemble the broken down fence that currently exists around the farm first so I can replace it
 - **Build an asset for the Mine - a large stone building I can enter, with a trapdoor in the floor that leads into the Mine** — Jenny, 2026-10-04 (added from the planner canvas): Even if the trapdoor is just a placeholder for now, the building for the mine should exist in the world. I should be able to go inside the main room of the first floor, see rocks piled in a corner, a desk, an oil lamp on the desk that let's say burns infinitely but can't be picked up, and a trapdoor in the floor that will later on lead down into the mine.
 - **Path to the Mine from the Manor** — Jenny, 2026-10-04 (added from the planner canvas): There should be a dedicated path through the woods to the mine from the manor, just as there is to the lake through the trees
-- **Chest names should be displayed more prominently** — Jenny, 2026-10-04 (added from the planner canvas): The font size for the chest name is quite small on the interaction hint. Please make it larger.
-- **Edit items in the planner backlog** — Jenny, 2026-10-04 (added from the planner canvas): I should be able to edit items I've added to the backlog from my feedback form, where clicking a pencil icon somewhere on the card opens it back up in the form so I can edit the title, description, and remove or add new screenshots for it.
-- **Sleeping in evening sleeps until dawn** — Jenny, 2026-10-04 (added from the planner canvas): Starting to sleep in the evening (post 6 PM or sunset, whichever is earlier) should have me sleep through the night and wake up at dawn (6 AM, or whenever the sun rises, whichever is earlier).
-- **Fishing with the pole at a river, lake, or ocean yields cookable / sellable fish** — Jenny, 2026-10-04 (added from the planner canvas): Fishing mechanics should work much the same way as Coral Island or Hades. I should catch different fish depending on where I fish, so river fish vs freshwater fish vs saltwater fish. I should be able to prepare the fish into edible dishes, from raw sushi to grilled fish, fish soup, fish n chips and a variety of seafood dishes. I should also be able to sell these fish to the General Store.
-- **Basic Recipes from Crops** — Jenny, 2026-10-04 (added from the planner canvas): I should be able to cook a selection of 5-10 additional basic recipes using the crops I can buy as seeds from the General Store and grow on my farm, as well as berries and roots. These require the cookfire and some kindling to prepare, and some should require Meadow Herbs for seasoning. The amount of energy they restore should be proportional to the opportunity cost of selling the crops for coins.
-- **Unlock fast travel via map by visiting a location once** — Jenny, 2026-10-04 (added from the planner canvas): When I visit a new location marked on the map or minimap for the first time, a notice should appear that says "Fast Travel Destination Unlocked: <Location>". From then on, I should be able to fast travel to that location from the map the same way I can the manor or the Town. This includes the Town - I should need to walk there once before I can fast travel there, either by signpost or by map.
-- **Buy a fishing pole at the General Store for 1500 coins** — Jenny, 2026-10-04 (added from the planner canvas): I should be able to buy a fishing pole at the General Store for 1500 coins at the same time as I can buy the backpack upgrade, which unlocks access to fishing. It should come into my inventory as an item I can place in my hotbar.
-- **Reduce the rate and quantity of receiving seeds from harvesting crops** — Jenny, 2026-10-04 (added from the planner canvas): As it stands, I might never need to buy seeds because I am getting so many when I harvest. We need to rebalance things so that the player is incentivized to buy seeds from the General Store.
-- **When I have seeds selected in my hotbar and am pointing at tilled ground, the [E] Plant Seeds interaction hint should always show** — Jenny, 2026-10-04 (added from the planner canvas): (no description)
 - **Improve tool carry holds** — Jenny, 2026-10-03 (added from the planner canvas): Further tool-carry polish deferred from measured build 01, separate from the shipped grip/contact fixes. Refine idle and moving holds so grips look natural and tools do not clip through her hands or body.
 - **Improve work animations** — Jenny, 2026-10-03 (added from the planner canvas): Further heroine action/work animation improvements deferred from measured build 01, separate from already shipped fixes. Polish natural movement, tool contact and transitions when Jenny schedules this work.
 - **Teleporting back to the manor should deposit me at the new sign location beside the farm and road** — Jenny, 2026-10-03 (added from the planner canvas): (no description)
-- **Wait at the General Store on Sunday until it opens** — Jenny, 2026-10-03 (added from the planner canvas): When I get to the General Store on Sunday, I should have the option to wait until they open on Monday morning so I can enter.
 - **test** — Jenny, 2026-10-02 (added from the planner canvas): just testing backlog feature
 <!-- jenny-inbox:end -->
 
 ## Current delivered build
 
-The five items Jenny selected on 2026-10-02 shipped in `20261002-measured-01` and are no longer planned improvements. The changelist is in [builds.md](builds.md). Jenny considers the player checks complete as of 2026-10-03; no next build work is scheduled.
+`20261003-measured-02` is delivered; its player acceptance remains pending Jenny's playtest.
+The shipped cards and receipt are retained in [backlog-archive.json](backlog-archive.json), while new
+feedback refinements are selected for the 4 PM `20261004-afternoon-03` build:
+
+- Fishing pole/fish icon refinement with cast, bite, catch, and randomized timing presentation.
+- Compact Quit dialog matching Settings.
+- Back-slot Leather Rucksack/None visibility without capacity loss.
+- Wider wildflowers outside farm, manor ruins, and tilled ground.
+- Visible broken fenceposts until the complete fence is dismantled.
+- Crop-specific non-stackable seed packets with end-product icons.
+- A ripe targeted crop always shows `[E] Harvest <crop>` unless weeding takes precedence.
 
 ## Next candidates (deferred, not scheduled)
 
@@ -45,7 +51,6 @@ The five items Jenny selected on 2026-10-02 shipped in `20261002-measured-01` an
 - **Prioritize heroine quality and tool clarity** — Jenny, 2026-09-29: play an ordinary tool/wardrobe loop; fix the next visible pose, contact, or hair issue. **Lane:** Props. **Size:** M.
 - **Rework farming calendar and period crafting** — Jenny, 2026-09-29: play a 60-minute day and Sunday shop loop; tune only flagged timing, closure, Energy, or Well fed behavior. **Lane:** Simulation. **Size:** M.
 - **Enrich estate ground and meadow** — Jenny, 2026-10-01: walk farm, manor, lake, and coast; address the next ground-presentation issue. **Lane:** Water. **Size:** M.
-- **Add shore and river fishing** — Jenny's cozy-estate direction, 2026-09-27: catch and sell or cook one fish. **Lane:** Water. **Size:** L.
 - **Add handcart hauling and dynamic prices** — Jenny's cozy-estate direction, 2026-09-27: haul goods to town and see stock-sensitive pricing. **Lane:** Props/Menu. **Size:** L.
 - **Restore mine pumping and deep levels** — Jenny's cozy-estate direction, 2026-09-27: operate a pump, open a deeper level, and bring back ore. **Lane:** Water/Props. **Size:** L.
 - **Author fixed Cornish estate map** — Jenny, 2026-10-01: fix the next player-reported Estate route, coast, town, or landmark issue. **Lane:** Water. **Size:** M.
@@ -88,7 +93,6 @@ The five items Jenny selected on 2026-10-02 shipped in `20261002-measured-01` an
 - **Reduce foliage shadow motion** — Jenny, 2026-09-30: walk under canopy without distracting or hitching shadow motion. **Lane:** Water/Performance. **Size:** M.
 - **Space out town square** — Jenny, 2026-09-30: walk comfortable gaps, side lanes, and a clear town route. **Lane:** Water. **Size:** M.
 - **Tune tool strike sounds** — Jenny, 2026-10-01: use each changed tool against a real target and keep its cue under ambience. **Lane:** Props/Audio. **Size:** S.
-- **Unify HUD notices** — Jenny, 2026-09-30: trigger resource, refusal, and save notices without overlap or verbosity. **Lane:** Menu. **Size:** S.
 - **Widen estate beach** — Jenny, 2026-09-30: walk 12–20 m of dry navigable shore below the cliffs. **Lane:** Water. **Size:** M.
 
 Build status lives in [builds.md](builds.md).

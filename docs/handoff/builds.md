@@ -7,61 +7,72 @@ Timing (Jenny, 2026-10-01): start each build about an hour before its slot (7:30
 Lanes implement only what Jenny has prioritized for a specific build, then go idle. They don't pick up
 unflagged queue items. If little or nothing is prioritized, the orchestrator tells Jenny to schedule work.
 
-## 2026-10-01 — 7:30 AM
+## 2026-10-04 — 9:00 PM
 
-- SHA: `20ad66e9`
+- Status: planned
+- Selected feedback: `backlog:jenny-muu6k1g1-qr5dx2` fishing pole/fish icons and original
+  cast/bite/catch presentation with randomized timing minigame.
+- This is the only fishing code or asset admission for the 9 PM slot; it is excluded from the 4 PM
+  build.
+
+## 2026-10-04 — 2:05 PM
+
+- Build ID: `20261004-afternoon-03`
+- SHA: `c1d5351f23f69e9f12bc8f274fb1ac101fd45286`
 - Status: delivered
 - Ships:
-- Zero Energy never kills her; low Energy warns, slows, and blocks exhausting tool work.
-- One press at bed time sleeps until rested or morning.
-- She can wade into the lake, fill a 15-portion pail in the water, and water from it.
-- Hold to chop or clear; E interacts while click uses tools.
-- Seed tiles show an outline and `[E] Plant`; one hint card lists the available actions.
-- Dragging shows a ghost; the full-size hotbar row supports `R` rotation.
-- Hotbar items can be stored in a chest, including with Shift-click.
-- The Build tab shows a clear `Requires` list.
-- Parchment UI, concise copy, and compact Settings are the new default.
-- Night brightness Set A is in; both shops close on Sundays.
-- New pickaxe and billhook sounds, a quieter scythe, and footsteps sit under the ambience.
-- Manor interior light leaks are fixed.
-- Cove steps, kerbs, and rails are ready to walk.
+- Quit is compact and matches Settings.
+- The Back slot shows Leather Rucksack or None without changing capacity.
+- Crop-named one-slot seed packets have their own icons.
+- Ripe crops always show their named Harvest hint unless weeding comes first.
+- Wildflowers cover more field, wood, and water edges while excluding farm, manor, and tilled ground.
+- FarmFence posts remain visible until the complete fence is dismantled.
+- Fishing code and assets are excluded; fishing remains planned for 9 PM.
+- Verification: Development cook/reuse-stage Shipping package, 31 package hashes, 29 copied
+  package-local Saved hashes, release-save isolation, guarded Shipping EstateSmoke and ToolRepeat,
+  and normal package-local F5/F9 all passed. The promoted Shipping executable SHA-256 is
+  `98DD0BD5D90038F110F2442E64FE11292BA3C02C84533193DD8ADB965DE3E943`; the prior recovery package
+  remains at `E:\Repos\SurvivalGame\Build\Windows-20261004-recovery`.
+- Promotion: 2:05:09 PM local to `Homestead Estate.lnk`, preserving its icon and package-local
+  `-UserDir`. Player acceptance remains pending Jenny's playtest.
+- Accounting: `accounting/reports/20261004-afternoon-03.json` retains observed local runtime AIU
+  and its explicit mixed-work, context, tail, and billing limitations. Measured02 remains closed.
 
-## 2026-10-01 — 4:00 PM
+## 2026-10-04 — 11:29 AM
 
-- SHA: `f8ec22dc`
+- Build ID: `20261003-measured-02`
+- SHA: `b073cebe` persists the exact manifest-approved 127-asset bootstrap resave set; `fa3265fd`
+  records the fresh-cook/candidate evidence.
 - Status: delivered
 - Ships:
-- The manor-ruin signpost points `To town`; cove fingerposts point the way down.
-- Lake-path wildflowers, berries, and root forage now line the walk.
-- Rain can arrive at any hour, including at night; weeds appear once per day.
-- Hair stays dark chestnut indoors by day.
-- Hoe, axe, pickaxe, and watering wrists move more naturally; the scythe stays above ground.
-- Audio is balanced against the forest ambience, with short lamp messages.
-
-## 2026-10-01 — early evening
-
-- SHA: `c2a589452bc05faec0f72f08758d84f5e5f92c7d`
-- Status: delivered
-- Ships:
-- Two-handed swings and the scythe's left fist follow a more natural working plane.
-- The hoe now holds its working grip with a more natural elbow and wrist.
-- Her feet step into and out of kneels one at a time, with a corrected stick cradle.
-- The animation inspector is harder to break in Development and the character lab; it is not a player feature.
-- Verification: Native 19, Inspector 22, nine Development routes, and guarded Shipping EstateSmoke/ToolRepeat passed; the promoted Shipping SHA-256 is `6E2EC11A5CF44AA7945AC88559C7020D6371D7A8A071DDFB53DCE4D82344D27C` with 18 saves preserved.
-
-## 2026-10-01 — 9 PM
-
-- SHA: `3aa62ab0e8f7a03c4c0ab52f9dde764e710999be`
-- Status: delivered
-- Ships:
-- Menu panels line up edge to edge, with one clear selection outline.
-- Crafting recipes fill the page width.
-- Map labels are crisp, with no text shadow.
-- The wardrobe preview just shows her standing.
-- A lighter accent keeps selected text readable.
-- A dark parchment palette is available in Settings › Book colours.
-- Weeds sprout in only some plots each day, at random.
-- Verification: Native 19, eight Development smoke/FullLoop routes, and guarded Shipping EstateSmoke/ToolRepeat passed with 392 zero-network samples; Shipping SHA-256 `DB6B6D8BB4E7928E3CA5695EB77B3B2A3CE38E58BA2107AE863F9681E53FFA87`, with 18 current saves copied unchanged.
+- Eleven crop meals shipped with provisional original art: Baked Potatoes, Roasted Turnips, Stewed
+  Carrots, Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root
+  Vegetable Hotpot, Raw Fish Slices, Grilled Trout, and Grilled Perch.
+- A 1,500-coin fishing pole catches location-specific fish that she can sell or cook.
+- Harvests yield fewer seeds, keeping seed purchases useful.
+- Tilled ground with selected seeds shows the Plant Seeds hint.
+- Evening sleep ends at dawn.
+- Fast travel unlocks by visiting marked destinations.
+- Sunday General Store waiting advances to Monday opening.
+- Chest names are larger.
+- HUD notices are unified, concise, and non-overlapping.
+- Player acceptance: **pending Jenny's playtest**. Delivery and guarded functional/save acceptance
+  do not close her unchecked planner checks.
+- Planner/accounting: `accounting/reports/20261003-measured-02.json` is the loader-compatible,
+  deduplicated observed-usage report. It covers all allocated lanes, Integration, orchestration, and
+  reviewers through the delivery-closure capture; `11,439.97802` recorded AIU is not
+  billing-reconciled credits, and any later tail/context remains unknown.
+- Fresh cook: the first Development cook wrote 1,019 tracked assets and was stopped. Jenny approved
+  surgical restoration of 892 verified incidental writes while retaining exactly the 127 admitted
+  CaughtFish/PreparedFood/FishingPole/`M_CaughtFishWet` paths. A 2m31s reconciled recook then
+  staged the current Shipping candidate without protected containers.
+- Verification: 18 active saves copied/hash-checked into the candidate; release-route assertion
+  passed; a real normal-candidate F5 manual write replaced only the candidate manual save, its
+  `.bak` matched the pre-write payload, F9 reload remained alive, and the protected rollback root
+  remained unchanged. Guarded Shipping EstateSmoke and ToolRepeat passed. Shipping executable SHA-256:
+  `0D33088B19607142D1A5EB3FC410A499024DE71A3209E8601993ED47ED9171FA`.
+- The active measured01 release, its sole rollback, shortcut icon, and all protected player saves
+  remain retained and untouched.
 
 ## 2026-10-02 — 11:46 PM
 
@@ -90,86 +101,66 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
   save/config files were hash-verified on copy, and the prior 20261001 9 PM Shipping release is
   retained as rollback.
 
-## 2026-10-03 — 9:00 PM
+## 2026-10-01 — 9:00 PM
 
-- SHA: not built
-- Status: deferred at 20:49 local; this 9 PM scope is retained as the historical selected card set.
-- Build ID: `20261003-measured-02`
-- Plant Seeds hint appears when selected seeds target tilled ground.
-- Crop harvests yield fewer seeds so buying seeds remains useful.
-- Add 5-10 basic crop/forage cookfire recipes, with kindling and some herb seasoning.
-- Sell a hotbar fishing pole at the General Store for 1500 coins.
-- Catch location-specific river, lake and ocean fish; cook or sell them.
-- Unlock marked fast-travel destinations by visiting, including Town before signpost/map travel.
-- Evening sleep lasts until the earlier of dawn or 6 AM.
-- Sunday General Store waiting advances to Monday opening.
-- Edit feedback titles, descriptions and screenshots directly in the planner.
-- Larger chest names and concise, non-overlapping HUD notices.
-- Scope: the fishing feature and its two feedback cards are one implementation, not duplicate work.
-- Timing: authorized 18:55 local. The fallback is a **target** for 2026-10-04 7:30 AM, not a
-  promise; no overnight work resumes after signoff without Jenny's next message.
-- Timing update: at 00:38 local on Oct 4, the Fish lane estimated another 8–12+ hours before engine
-  gates, with sixteen dishes/wiring still pending. The full 7:30 AM target is historically retained
-  but at risk and no longer a realistic expectation; no replacement slot is promised.
-- Planner tooling receipt: the live feedback-editing delivery is `3846476d`; it is separately
-  delivered tooling, hidden and unscheduled, with its OpenSpec player checkbox preserved.
-- Safety: verified work only; no placeholder or unverified subset package.
-
-## 2026-10-04 — gameplay-first Shipping admission
-
-- SHA: `cc2697ef` admits the frozen eleven-meal Unreal content.
-- Status: historical
-- This admission record was superseded by the delivered fresh-cook Shipping release below; it is not
-  a currently blocked planned build.
-- Ships: the existing original pole and six fish, plus exactly eleven original meals frozen at
-  `843324c17b85b5432785fc7a6b9e333702dc26ec`: Baked Potatoes, Roasted Turnips, Stewed Carrots,
-  Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root Vegetable
-  Hotpot, Raw Fish Slices, Grilled Trout, and Grilled Perch. Jenny accepts their
-  disclosed molded/baked appearance for mechanics playtesting; it is not a final-realism claim.
-- Deferred: Grilled Mackerel checkpoint `0a1d1da8`, Fish Soup, Fish and Potatoes, Herbed Carp,
-  and Mackerel Chowder remain preserved deferred work. Do not list them as complete, prepare
-  old-art fallbacks, or alter planner IDs or schedules.
-- Gates: Farming supplies minimum exports, bakes/maps, representative imagery, item-eating wiring,
-  and manifest for the frozen eleven. Integration then imports, builds, validates runtime and real
-  candidate/rollback save containment, packages, and runs guarded Shipping EstateSmoke/ToolRepeat.
-  Preserve release-local `-UserDir`, enum/version compatibility, protected releases/rollback,
-  player saves, and the shortcut icon. Existing texture budgets are ceilings rather than mandatory
-  4K rebakes; use a cheap coherent provisional original-asset material/import path and retain richer
-  WIP. No functional or save gate is waived.
-- Evidence: exact boundary guard passed (11 meals, 22 meshes, 66 maps, 18 images, no deferred
-  assets); Release native suite passed 21/21; combined Development build and save-isolated PIE
-  import check passed; `ReleaseSaveIsolationTests.ps1` passed 15 disposable fixtures.
-- Blocker: this worktree has no reusable file-based `Saved\Cooked\Windows` set. The protected
-  measured01 Shipping containers predate Frozen-11 and cannot be staged under the documented
-  hash-identical reuse path. The Shipping script correctly refused an implicit cook; no stale
-  container, protected release, player save, shortcut, or promotion action was taken.
-
-## 2026-10-04 — measured02 gameplay-first Shipping delivery
-
-- SHA: `b073cebe` persists the exact manifest-approved 127-asset bootstrap resave set; `fa3265fd`
-  records the fresh-cook/candidate evidence.
+- SHA: `3aa62ab0e8f7a03c4c0ab52f9dde764e710999be`
 - Status: delivered
-- `Homestead Estate.lnk` was retargeted after all gates passed, preserving its icon and
-  package-local `-UserDir`.
-- Ships: Plant Seeds/harvest-seed balance, crop cooking, the 1500-coin pole, the selected fishing loop with six original fish, and eleven provisional meals: Baked Potatoes, Roasted Turnips, Stewed Carrots, Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root Vegetable Hotpot, Raw Fish Slices, Grilled Trout, and Grilled Perch.
-- Player acceptance: **pending Jenny's playtest**. Delivery and guarded functional/save acceptance
-  do not close her unchecked planner checks.
-- Planner/accounting: `accounting/reports/20261003-measured-02.json` is the loader-compatible,
-  deduplicated observed-usage report. It covers all allocated lanes, Integration, orchestration, and
-  reviewers through the delivery-closure capture; `11,439.97802` recorded AIU is not
-  billing-reconciled credits, and any later tail/context remains unknown.
-- Fresh cook: the first Development cook wrote 1,019 tracked assets and was stopped. Jenny approved
-  surgical restoration of 892 verified incidental writes while retaining exactly the 127 admitted
-  CaughtFish/PreparedFood/FishingPole/`M_CaughtFishWet` paths. A 2m31s reconciled recook then
-  staged the current Shipping candidate without protected containers.
-- Verification: 18 active saves copied/hash-checked into the candidate; release-route assertion
-  passed; a real normal-candidate F5 manual write replaced only the candidate manual save, its
-  `.bak` matched the pre-write payload, F9 reload remained alive, and the protected rollback root
-  remained unchanged. Guarded Shipping EstateSmoke and ToolRepeat passed. Shipping executable SHA-256:
-  `0D33088B19607142D1A5EB3FC410A499024DE71A3209E8601993ED47ED9171FA`.
-- The active measured01 release, its sole rollback, shortcut icon, and all protected player saves
-  remain retained and untouched.
+- Ships:
+- Menu panels line up edge to edge, with one clear selection outline.
+- Crafting recipes fill the page width.
+- Map labels are crisp, with no text shadow.
+- The wardrobe preview just shows her standing.
+- A lighter accent keeps selected text readable.
+- A dark parchment palette is available in Settings › Book colours.
+- Weeds sprout in only some plots each day, at random.
+- Verification: Native 19, eight Development smoke/FullLoop routes, and guarded Shipping EstateSmoke/ToolRepeat passed with 392 zero-network samples; Shipping SHA-256 `DB6B6D8BB4E7928E3CA5695EB77B3B2A3CE38E58BA2107AE863F9681E53FFA87`, with 18 current saves copied unchanged.
+
+## 2026-10-01 — 6:08 PM
+
+- SHA: `c2a589452bc05faec0f72f08758d84f5e5f92c7d`
+- Status: delivered
+- Ships:
+- Two-handed swings and the scythe's left fist follow a more natural working plane.
+- The hoe now holds its working grip with a more natural elbow and wrist.
+- Her feet step into and out of kneels one at a time, with a corrected stick cradle.
+- The animation inspector is harder to break in Development and the character lab; it is not a player feature.
+- Verification: Native 19, Inspector 22, nine Development routes, and guarded Shipping EstateSmoke/ToolRepeat passed; the promoted Shipping SHA-256 is `6E2EC11A5CF44AA7945AC88559C7020D6371D7A8A071DDFB53DCE4D82344D27C` with 18 saves preserved.
+
+## 2026-10-01 — 4:00 PM
+
+- SHA: `f8ec22dc`
+- Status: delivered
+- Ships:
+- The manor-ruin signpost points `To town`; cove fingerposts point the way down.
+- Lake-path wildflowers, berries, and root forage now line the walk.
+- Rain can arrive at any hour, including at night; weeds appear once per day.
+- Hair stays dark chestnut indoors by day.
+- Hoe, axe, pickaxe, and watering wrists move more naturally; the scythe stays above ground.
+- Audio is balanced against the forest ambience, with short lamp messages.
+
+## 2026-10-01 — 7:30 AM
+
+- SHA: `20ad66e9`
+- Status: delivered
+- Ships:
+- Zero Energy never kills her; low Energy warns, slows, and blocks exhausting tool work.
+- One press at bed time sleeps until rested or morning.
+- She can wade into the lake, fill a 15-portion pail in the water, and water from it.
+- Hold to chop or clear; E interacts while click uses tools.
+- Seed tiles show an outline and `[E] Plant`; one hint card lists the available actions.
+- Dragging shows a ghost; the full-size hotbar row supports `R` rotation.
+- Hotbar items can be stored in a chest, including with Shift-click.
+- The Build tab shows a clear `Requires` list.
+- Parchment UI, concise copy, and compact Settings are the new default.
+- Night brightness Set A is in; both shops close on Sundays.
+- New pickaxe and billhook sounds, a quieter scythe, and footsteps sit under the ambience.
+- Manor interior light leaks are fixed.
+- Cove steps, kerbs, and rails are ready to walk.
 
 ## Later
 
 - The player-driven deferred queue is in [backlog.md](backlog.md): river/ocean, map and town feedback, fishing, hauling, mine work, manor rebuilding, artisan goods, and later estate systems.
+- Tooling deferred: extend `Scripts\Build-Game.ps1`'s Shipping `-ReuseCooked -Package` archive
+  validation so a future build can stage directly under `E:\HomesteadReleases\<build-id>`. Until a
+  tooling slot changes that script, package under the worktree's `Build\Releases`, then use the
+  durable-copy promotion procedure recorded in the delivery checklist.

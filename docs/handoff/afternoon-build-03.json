@@ -1,0 +1,99 @@
+{
+  "buildId": "20261004-afternoon-03",
+  "status": "delivered",
+  "authorizedAt": "2026-10-04T18:59:23Z",
+  "targetSlot": "2026-10-04T16:00:00-07:00",
+  "coordinator": {
+    "runtimeSessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+    "appSessionId": "3c4e743c-3c27-4732-adce-e651536c7e75",
+    "model": "gpt-6.1-sol",
+    "reasoningEffort": "high",
+    "launchContextTier": "default"
+  },
+  "lanes": [
+    {
+      "role": "Gameplay UI",
+      "runtimeSessionId": "986d7db6-7ae4-4cee-a980-054664106056",
+      "appSessionId": "3d3426ed-7f12-4245-ab69-dc66e8698418",
+      "worktree": "jennifergalley-miniature-invention",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "selectedIds": [
+        "backlog:jenny-muteesvp-3bo5xf",
+        "backlog:jenny-mutdzpsx-76dag4",
+        "backlog:jenny-mutd9wre-js2x1r",
+        "backlog:jenny-muu6upvs-l7a0l6"
+      ]
+    },
+    {
+      "role": "Environment",
+      "runtimeSessionId": "ff61de39-9742-45a8-8c6d-03512cd76224",
+      "appSessionId": null,
+      "worktree": "jennifergalley-probable-engine",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "selectedIds": [
+        "backlog:jenny-mutdnje8-0et783",
+        "backlog:jenny-mutdjl7e-nzl7lh"
+      ]
+    }
+  ],
+  "integration": {
+    "runtimeSessionId": "64540925-e1b6-4766-ac1f-f2dc42f8aa36",
+    "appSessionId": "c5ee7d02-4a6f-488e-a317-8c4396836061",
+    "worktree": "jennifergalley-integration-agent-8ba",
+    "model": "gpt-5.6-terra",
+    "reasoningEffort": "medium",
+    "launchContextTier": "default",
+    "status": "delivered",
+    "sourceCommit": "c1d5351f23f69e9f12bc8f274fb1ac101fd45286",
+    "promotedAt": "2026-10-04T14:05:09.2150612-07:00",
+    "package": {
+      "path": "E:\\Repos\\SurvivalGame\\Build\\Windows",
+      "executableSha256": "98DD0BD5D90038F110F2442E64FE11292BA3C02C84533193DD8ADB965DE3E943",
+      "rollbackPath": "E:\\Repos\\SurvivalGame\\Build\\Windows-20261004-recovery",
+      "stagedPath": "Build\\Releases\\20261004-afternoon-03\\shipping-candidate-4pm\\Windows",
+      "developmentCookSeconds": 150
+    },
+    "gates": {
+      "developmentCookAndShippingReuseStage": "passed",
+      "packageFileHashCount": 31,
+      "copiedSavedFileHashCount": 29,
+      "releaseSaveIsolation": "passed",
+      "estateSmoke": "passed",
+      "toolRepeat": "passed",
+      "normalPackageLocalF5F9": "passed",
+      "shortcut": {
+        "promotedAt": "2026-10-04T14:05:09.2150612-07:00",
+        "target": "E:\\Repos\\SurvivalGame\\Build\\Windows\\SurvivalGame\\Binaries\\Win64\\SurvivalGame-Win64-Shipping.exe",
+        "userDir": "E:\\Repos\\SurvivalGame\\Build\\Windows\\SurvivalGame",
+        "iconPreserved": true
+      }
+    }
+  },
+  "plannerDelivery": {
+    "status": "delivered",
+    "playerAcceptance": "pending-Jenny-playtest",
+    "selectedIds": [
+      "backlog:jenny-muteesvp-3bo5xf",
+      "backlog:jenny-mutdzpsx-76dag4",
+      "backlog:jenny-mutdnje8-0et783",
+      "backlog:jenny-mutdjl7e-nzl7lh",
+      "backlog:jenny-mutd9wre-js2x1r",
+      "backlog:jenny-muu6upvs-l7a0l6"
+    ],
+    "archivedReceipt": "backlog-archive.json#20261004-afternoon-03",
+    "excludedFromThisDelivery": [
+      "backlog:jenny-muu6k1g1-qr5dx2"
+    ]
+  },
+  "deliveryRules": [
+    "Accept only exact forwarded reviewed and verified ready commits after an explicit Integration slot grant.",
+    "Seed-packet readiness additionally requires a risky save-semantic review plus scoped legacy/full-capacity/hotbar and candidate save/load evidence. An unchanged save version does not waive those gates; Gameplay owns the targeted native overflow tests.",
+    "Final delivery first publishes an observed per-call accounting report and retains its limitations, then removes shipped active cards while retaining receipts and evidence.",
+    "Fishing code and assets are excluded from this delivered build and remain planned for the 9 PM fishing slot.",
+    "Player acceptance remains pending until Jenny records a new playtest result."
+  ]
+}

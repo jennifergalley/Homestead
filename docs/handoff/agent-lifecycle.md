@@ -3,6 +3,12 @@
 Jenny's policy, 2026-10-02. Quality, especially visuals and performance, remains a shipping gate;
 AI credits are an additional optimization metric, not permission to lower that gate.
 The role/model table in README.md is authoritative. This policy does not retune an existing session.
+For future launches, Claude Opus 5.5 / high / long is reserved for Orchestrator Agents (Jenny's
+requested context is 1.1M) and for Blender/Unreal asset making and asset integration (long only when
+necessary there). Record the 1.1M request, configured `long` tier, and observed actual runtime
+context as separate facts. Opus is not used for general gameplay/UI/environment code, risky review,
+documentation, accounting, integration, builds, or scripted tests; those use the GPT-6.1 Sol / high
+or cheaper README tiers as appropriate.
 
 ## Compact, durable handoffs
 
@@ -47,11 +53,13 @@ independent workstream warrants it. Supply an objective, relevant files or excer
 expected output and acceptance criteria, not the entire parent conversation.
 
 Keep delegation one level deep by default. The three-hands-on-implementer cap applies across the
-whole tree, including helpers while they edit, build or use Blender/Unreal. Request a slot before
-starting a hands-on helper if all slots are occupied. All descendant usage belongs in task/build costs.
-Cheap helpers can document verified facts or execute existing tests. The high-effort owning agent
-defines gameplay test behavior and edge cases and reviews helper-written cases; substantive gameplay,
-animation or rendering diagnosis remains GPT-6.1 Sol / high. Jenny's direct instructions still win.
+whole tree only for gameplay code, Blender, Unreal, and game-asset work, including helpers while
+they edit, build, or use Blender/Unreal. Request a slot before starting a game-development helper if
+all slots are occupied. Planner, backlog, and build-cost canvas-extension work is outside the cap and
+needs no slot. All descendant usage belongs in task/build costs. Cheap helpers can document verified
+facts or execute existing tests. The high-effort owning agent defines gameplay test behavior and edge
+cases and reviews helper-written cases; substantive gameplay, animation or rendering diagnosis
+remains GPT-6.1 Sol / high. Jenny's direct instructions still win.
 
 ## Accounting contract for future builds
 
@@ -88,6 +96,22 @@ edits, screenshots, or unchecked acceptance tasks.
 Optimize credits per accepted player-visible improvement alongside build totals, defects/rework,
 performance and visual acceptance. Compare similar task types rather than concluding that the more
 expensive build was inefficient merely because it contained harder work.
+
+### Billing-cycle presentation
+
+Jenny's confirmed billing cycle is September 30 through October 30 inclusive, resetting October 31.
+Planner cost charts report a build's shipment-day observed cost, not inferred account-day usage;
+keep those two time bases distinct and preserve event timestamps for billing reconciliation.
+
+### Scheduled-build kickoff boundary
+
+Before work begins, create an allocation file for the build with its authorization timestamp, every
+known runtime/app session identity, configured model/reasoning/context, and one segment starting at
+that timestamp for each allocated lane. Leave actual runtime model/effort/context unknown until
+observed; do not copy a previous build's usage window. At a scheduled coordinator wake, freshly read
+`priority.json` and `backlog-inbox.json` before assigning the next build, assigning only selected,
+unowned work and keeping notifications off. This prevents newly selected work from leaking into a
+closed build's measured range.
 
 ## Verified sources and telemetry limits
 

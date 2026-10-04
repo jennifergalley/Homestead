@@ -1,0 +1,27 @@
+{
+  "buildId": "20261004-afternoon-03",
+  "authorizedAt": "2026-10-04T19:07:25.740Z",
+  "allocationPolicy": "Each event belongs once to this selected environment bundle, including planning, implementation, native/editor verification, coordination, failed diagnostic attempts and pause/resume overhead. Do not invent per-feature splits. Fishing Art's asset-authoring runtime is separately owned by Art.",
+  "limits": [
+    "Checkpoint export only; final handoff, push and parking tail must be captured by Integration before build closure.",
+    "Configured context is default; actual context tier and billing reconciliation remain unknown.",
+    "Two runtime calls reported no reasoning effort; retain unknown rather than imputing high.",
+    "No helpers were launched; no Integration packaging or main merge is attributed here."
+  ],
+  "segments": [
+    {
+      "sessionId": "ff61de39-9742-45a8-8c6d-03512cd76224",
+      "projectSessionId": "5b9520f0-3085-4625-884b-93451ae970c6",
+      "task": "environment-afternoon-03-selected-bundle",
+      "tasks": ["spread-estate-wildflowers", "restore-derelict-fence-posts"],
+      "category": "implementation",
+      "since": "2026-10-04T19:07:25.740Z",
+      "model": "gpt-6.1-sol",
+      "reasoningEffort": "high",
+      "launchContextTier": "default",
+      "contextTier": null,
+      "contextEvidence": "Runtime records confirm Sol/high except two effort-unknown calls; no model change or helper. Default is the launch configuration, not observed runtime context size.",
+      "boundaryEvidence": "Fresh runtime belongs wholly to afternoon03, not measured02. Includes granted slot3 code/native work, explicit parked intervals, and the released shared-editor pass on Oct4."
+    }
+  ]
+}

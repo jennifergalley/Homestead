@@ -9,14 +9,6 @@
       "createdUtc": "2026-10-02T06:15:36.053Z"
     },
     {
-      "id": "jenny-mus1kfmm-ayz6jx",
-      "title": "Wait at the General Store on Sunday until it opens",
-      "description": "When I get to the General Store on Sunday, I should have the option to wait until they open on Monday morning so I can enter.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-03T06:59:26.110Z"
-    },
-    {
       "id": "jenny-mus1sztj-sinh3q",
       "title": "Teleporting back to the manor should deposit me at the new sign location beside the farm and road",
       "description": "",
@@ -41,78 +33,6 @@
       "createdUtc": "2026-10-03T07:11:33.289Z"
     },
     {
-      "id": "jenny-mut56ggp-uijcta",
-      "title": "When I have seeds selected in my hotbar and am pointing at tilled ground, the [E] Plant Seeds interaction hint should always show",
-      "description": "",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T01:28:18.649Z"
-    },
-    {
-      "id": "jenny-mut57myz-9tfjci",
-      "title": "Reduce the rate and quantity of receiving seeds from harvesting crops",
-      "description": "As it stands, I might never need to buy seeds because I am getting so many when I harvest. We need to rebalance things so that the player is incentivized to buy seeds from the General Store.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T01:29:13.739Z"
-    },
-    {
-      "id": "jenny-mut592z8-2od0d5",
-      "title": "Buy a fishing pole at the General Store for 1500 coins",
-      "description": "I should be able to buy a fishing pole at the General Store for 1500 coins at the same time as I can buy the backpack upgrade, which unlocks access to fishing. It should come into my inventory as an item I can place in my hotbar.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T01:30:21.140Z"
-    },
-    {
-      "id": "jenny-mut5c51h-orhi39",
-      "title": "Unlock fast travel via map by visiting a location once",
-      "description": "When I visit a new location marked on the map or minimap for the first time, a notice should appear that says \"Fast Travel Destination Unlocked: <Location>\". From then on, I should be able to fast travel to that location from the map the same way I can the manor or the Town. This includes the Town - I should need to walk there once before I can fast travel there, either by signpost or by map.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T01:32:43.781Z"
-    },
-    {
-      "id": "jenny-mut5gsd4-oebvov",
-      "title": "Basic Recipes from Crops",
-      "description": "I should be able to cook a selection of 5-10 additional basic recipes using the crops I can buy as seeds from the General Store and grow on my farm, as well as berries and roots. These require the cookfire and some kindling to prepare, and some should require Meadow Herbs for seasoning. The amount of energy they restore should be proportional to the opportunity cost of selling the crops for coins.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T01:36:20.632Z"
-    },
-    {
-      "id": "jenny-mut5legr-oba2rd",
-      "title": "Fishing with the pole at a river, lake, or ocean yields cookable / sellable fish",
-      "description": "Fishing mechanics should work much the same way as Coral Island or Hades. I should catch different fish depending on where I fish, so river fish vs freshwater fish vs saltwater fish. I should be able to prepare the fish into edible dishes, from raw sushi to grilled fish, fish soup, fish n chips and a variety of seafood dishes. I should also be able to sell these fish to the General Store.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T01:39:55.899Z"
-    },
-    {
-      "id": "jenny-mut5v5yo-9f8fpx",
-      "title": "Sleeping in evening sleeps until dawn",
-      "description": "Starting to sleep in the evening (post 6 PM or sunset, whichever is earlier) should have me sleep through the night and wake up at dawn (6 AM, or whenever the sun rises, whichever is earlier).",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T01:47:31.440Z"
-    },
-    {
-      "id": "jenny-mut5x32c-7715t2",
-      "title": "Edit items in the planner backlog",
-      "description": "I should be able to edit items I've added to the backlog from my feedback form, where clicking a pencil icon somewhere on the card opens it back up in the form so I can edit the title, description, and remove or add new screenshots for it.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T01:49:00.996Z"
-    },
-    {
-      "id": "jenny-mut6p856-a7gysc",
-      "title": "Chest names should be displayed more prominently",
-      "description": "The font size for the chest name is quite small on the interaction hint. Please make it larger.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T02:10:53.946Z"
-    },
-    {
       "id": "jenny-mut6t8g6-mcldh5",
       "title": "Path to the Mine from the Manor",
       "description": "There should be a dedicated path through the woods to the mine from the manor, just as there is to the lake through the trees",
@@ -127,6 +47,55 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-04T02:19:05.163Z"
+    },
+    {
+      "id": "jenny-mutde36c-gtsw0n",
+      "title": "I should be able to Disassemble, Replace Fence around the Farm",
+      "description": "I should be able to craft new wooden fence parts (sections of fence and gates) in the Build menu and place them around the farm, and I should be able to disassemble the broken down fence that currently exists around the farm first so I can replace it",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T05:18:11.604Z"
+    },
+    {
+      "id": "jenny-mutdt417-zj976u",
+      "title": "I'm not able to chop down trees",
+      "description": "It seems that in the shift from the survival MVP to the estate version of the game I lost the ability to chop down trees. We should still have the animation and sounds - please give me the ability to chop down any tree in the map, and depending on where it is (say, in a forest or far away from the manor or farm), it should have the capability to grow back (we can say it comes back as a fully formed tree for now and defer tree growth rates for later)",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T05:29:52.555Z"
+    },
+    {
+      "id": "jenny-mutdvi4f-5daxbq",
+      "title": "I should be able to go down into the mine and mine for rock, ore and gems",
+      "description": "The trapdoor in the Mine building asset should be usable, and I should be able to desend into dark tunnels, where I need to use my oil lamp for light, and my pickaxe to mine for ores, stone, and gems, as laid out in our plans. I should be able to sell these items in town and use them in crafting ingredients. Most important is the stone building recipes for rebuilding the manor to its former glory.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T05:31:44.127Z"
+    },
+    {
+      "id": "jenny-muu6k1g1-qr5dx2",
+      "title": "Fishing pole and fish icons need refinement",
+      "description": "The fishing pole and fish icons in the inventory / hotbar need refinement to match the quality and style of the other tools and finished crops. Fishing also needs an animation of her casting the line out, and the animations should drive the fishing / catching mechanics, not a text box with a progress bar that disappears too fast to read. Draw inspiration from how Coral Island does it. There should also be more randomness to the fishing animation, so it takes a random amount of time for a fish to bite, and the exact moment to click to catch the fish should involve randomness too so it becomes a minigame.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T18:54:38.161Z",
+      "updatedUtc": "2026-10-04T18:56:02.763Z"
+    },
+    {
+      "id": "jenny-muu7h2lt-0jye7b",
+      "title": "Rename Pascoe to something else, non-Poldark-related",
+      "description": "The names of the people and places should explicitly avoid directly referencing Poldark, the family names, business names, or estate names.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T19:20:19.313Z"
+    },
+    {
+      "id": "jenny-muu7idr3-mphjdv",
+      "title": "MetaHuman model for the General Store clerk",
+      "description": "Instead of the placeholder heroine asset, the General Store clerk should use a MetaHuman model with period-appropriate clothing, and it should be a man in his 50s or so",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T19:21:20.415Z"
     }
   ]
 }

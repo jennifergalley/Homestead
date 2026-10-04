@@ -17,13 +17,14 @@ repo handoff and records task/build attribution, actual model/configuration and 
 replacement or eligible archival. Model changes within a session are separate accounting segments.
 See `docs\handoff\agent-lifecycle.md`; preserve the existing old-agent and live-release archival protections.
 
-**At most three concurrent hands-on implementers** do Blender, Unreal or code work. This is a cap
-across active work, not a role-label exemption, and is separate from the 2-Unreal-process machine cap.
-The Integration Agent counts while merging, compiling, PIE testing or packaging, but not while only
-coordinating; Architecture counts while editing or building code; Docs counts while implementing tooling.
-Time-critical integration gets a slot by pausing a lane. The orchestrator grants the next slot before a
-waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
-a slot by sleeping or polling.
+**At most three concurrent hands-on game-development implementers** do gameplay code, Blender,
+Unreal, or game-asset work. This is a cap across active game-development work, not a role-label
+exemption, and is separate from the 2-Unreal-process machine cap. The Integration Agent counts while
+merging, compiling, PIE testing or packaging, but not while only coordinating; Architecture counts
+while editing or building game code. Planner, backlog, and build-cost canvas-extension work is outside
+this cap and needs no slot. Time-critical integration gets a slot by pausing a lane. The orchestrator
+grants the next slot before a waiting lane resumes. An idle or waiting session schedules a wake-up and
+ends its turn; it doesn't hold a slot by sleeping or polling.
 
 ## Loops
 

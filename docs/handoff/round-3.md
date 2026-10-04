@@ -13,6 +13,9 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 - Build slots: **7:30 AM, 4 PM, 9 PM**. Each build starts about an hour before its slot.
 - Unfinished items roll to the next release; tell her when that happens.
 - When a slot has nothing scheduled, tell her to schedule work.
+- The three-concurrent-hands-on cap applies only to game development: gameplay code, Blender,
+  Unreal, and game assets. Planner, backlog, and build-cost canvas-extension work is outside that
+  cap and needs no slot.
 - **No overnight work** (Jenny, 2026-10-01). She turns the computer off at night. No session schedules
   automations or runs work between her evening sign-off and her first message in the morning. Work
   starts when she turns the computer on and messages the orchestrator.
@@ -20,33 +23,44 @@ fresh implementers spawned only for scheduled work, and the rules in "Token budg
 
 ## Registry
 
-Active round: `20261003-measured-02`, authorized 2026-10-03 18:55 local for the
-9 PM slot, with 2026-10-04 7:30 AM fallback. Scope and ownership are in
-[measured-build-02.json](measured-build-02.json); fresh lane identities are registered below.
-No overnight work/automations, no unselected animation/carry or manor-arrival work.
+Active round: `20261004-afternoon-03`, authorized by Jenny's 2026-10-04 11:59:23 local message
+for the 4 PM slot. Scope and launch boundaries are in
+[afternoon-build-03.json](afternoon-build-03.json) and
+[`accounting/afternoon-03-allocation.json`](accounting/afternoon-03-allocation.json). No overnight
+work/automations, no unselected animation/carry, meals, strap, normal-map, mine, or tree work.
 
 | Name | Session | Worktree (`E:\Repos\copilot-worktrees\SurvivalGame\...`) | Status |
 | --- | --- | --- | --- |
+| Orchestrator Agent | runtime `146ed534-2f78-48ba-b0fc-98436c1f3223`; app `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; afternoon-03; GPT-6.1 Sol/high/default |
+| Fishing Art Agent | `ac7339b4-84f7-49c0-8ec2-3d51d2b86730` | `jennifergalley-bookish-pancake` | afternoon-03; hands-on slot 1; Claude Opus 5.5/high/default; fishing asset making/integration only |
+| Gameplay UI Agent | runtime `986d7db6-7ae4-4cee-a980-054664106056`; app `3d3426ed-7f12-4245-ab69-dc66e8698418` | `jennifergalley-miniature-invention` | afternoon-03; hands-on slot 2; GPT-6.1 Sol/high/default |
+| Environment Agent | `ff61de39-9742-45a8-8c6d-03512cd76224` | `jennifergalley-probable-engine` | afternoon-03; hands-on slot 3; GPT-6.1 Sol/high/default |
+| Integration Agent (afternoon-03) | `64540925-e1b6-4766-ac1f-f2dc42f8aa36` | `jennifergalley-integration-agent-8ba` | docs/accounting/preflight only until explicit slot grant; GPT-5.6 Terra/medium/default |
 | Orchestrator Agent | `3c4e743c-3c27-4732-adce-e651536c7e75` | `jennifergalley-expert-fiesta` | coordinates only; latest usage confirms GPT-6.1 Sol, high |
 | Farming Fishing Agent | `5be207bc-49b1-4a1b-811e-088ae565dc1b` | `jennifergalley-cautious-robot` | measured-02; hands-on slot 1; GPT-6.1 Sol/high/default launch |
 | Travel Rest Agent | `1b0e10a4-09b5-458e-b9de-098cce831b07` | `jennifergalley-miniature-fishstick` | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch |
 | Planner Editing Agent | `ac593377-587f-4319-a033-b17f309be13e` | `jennifergalley-cuddly-eureka` | measured-02; hands-on slot 3; GPT-6.1 Sol/high/default launch |
 | HUD Agent | `2424d5bc-bc5a-4eec-a37f-a2f82cb995d0` | pending lane handoff | measured-02; hands-on slot 2; GPT-6.1 Sol/high/default launch; selected 2026-10-04 02:19:32Z |
-| Integration Agent (build 02) | `e528fd4a-5aed-4c95-9463-a37941afc00b` | `jennifergalley-studious-goggles` | docs/accounting liaison and admission preflight only until granted hands-on slot; GPT-5.6 Terra/medium/default launch |
+| Integration Agent (build 02) | `e528fd4a-5aed-4c95-9463-a37941afc00b` | archived `jennifergalley-studious-goggles` | archived at 12:32 Oct 4; archival deleted measured02's Shipping output and package-local save. Do not contact; the 4 PM build is recovery. |
 | UI Agent | `8ee8d5f3-2054-46d2-95df-1615bf4939d6` | archived | `440d4de5` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; ui-measured-01.md handoff |
 | Town Agent | `d1334c5c-5b56-4cc8-90aa-dfe669b2b2e2` | archived | `6e9c3a9a` reviewed/shipped; closure captured; Jenny accepted checks 2026-10-03; town-measured-01.md handoff |
 | Accounting Agent | `02a5caf8-3fdf-4c96-be5c-192448d6fcdf` | archived | tooling integrated; closure captured; GPT-6.1 Sol/medium/default; accounting-measured-01.md handoff |
-| Integration Agent | `3554b767-ebd7-436c-a691-13795fecad77` | `jennifergalley-redesigned-couscous` | **release-holding, do not archive**; shortcut targets measured build 01; GPT-5.6 Terra/medium/default; integration-measured-01.md handoff |
+| Integration Agent | `3554b767-ebd7-436c-a691-13795fecad77` | archived `jennifergalley-redesigned-couscous` | archived; its measured01 package is gone. Do not infer a rollback or retarget from it. |
 | Disk Cleanup Agent | `9fc4e210-68e7-4bc1-acca-d52366894506` | `jennifergalley-congenial-engine` | **retained**; its own schedule is cleared, and the orchestrator asks it for one sweep a day |
 | Old Integration Agent | `e251051b-8674-4ef0-a3ed-03830407f8b6` | `jennifergalley-literate-eureka` | retired, **do not archive**: its worktree holds the 9 PM Shipping release the shortcut targets |
 | Old UI Menus, Props Animations, Terrain Weather, Documentation, Architecture | `5cf73757`, `ce241dd6`, `89914e30`, `a9f10974`, `a1648ae7` | various | retired; don't message them. Spawn fresh sessions instead |
 | Old orchestrator | `92eac339` | `jennifergalley-cautious-pancake` | retired; hosts the old planner canvas instance |
 
-**Do not archive any old agents**: old Orchestrator, UI Menus, Props Animations, Terrain Weather,
-Documentation, Architecture, Integration, or Cleanup. Jenny will archive them herself once the new
-system works. "Archive when done" applies only to sessions this orchestrator spawns. In particular,
-the old Integration worktree holds the shortcut's current Shipping release; Cleanup checks that target
-and its one rollback before deleting releases.
+**Release-loss incident (2026-10-04, 12:32):** archiving a release-holding session deletes its
+worktree `Build` output. Archived measured02 `jennifergalley-studious-goggles` lost the active
+Shipping release and package-local save; archived measured01 `jennifergalley-redesigned-couscous`
+is also gone. Leave the broken shortcut untouched—do not rebuild measured02 or retarget the Oct 1
+rollback. `jennifergalley-literate-eureka` is the only remaining Oct 1 release root and is
+protected. The 4 PM afternoon-03 Shipping build is the recovery: package normally under the
+Integration worktree, then install/hash-verify its complete `Windows` package at
+`E:\Repos\SurvivalGame\Build\Windows`, run release isolation plus F5/F9 on that installed copy, and
+promote only the main-checkout build. The shortcut must never target a session worktree or an
+external release root.
 
 ## Spawning lanes
 
@@ -66,6 +80,20 @@ README.md's current model table. Use GPT-6.1 Sol / high for the orchestrator and
 gameplay, visual and performance implementation; use cheaper models or lower effort for routine docs,
 integration and test execution. Keep task-scoped handoffs and build-credit attribution per
 [agent-lifecycle.md](agent-lifecycle.md). Do not infer a live session's settings from this registry.
+
+**2026-10-04 model clarification:** Claude Opus 5.5 / high / long is the future-launch setting for
+the Orchestrator Agent (Jenny requested 1.1M context) and remains the only tier for Blender/Unreal
+asset making and asset integration (long only when necessary there). It is not used for general
+gameplay/UI/environment code, reviews, docs, accounting, or packaging. GPT-6.1 Sol / high remains
+the future-launch configuration for general gameplay/UI/environment code and risky review; routine
+docs, builds, tests and accounting stay on a cheaper low/medium tier. Record the requested 1.1M,
+configured `long`, and actual runtime context separately. This policy does not retune a running
+session: the current afternoon-03 coordinator remains a GPT-6.1 Sol / high / default segment.
+
+**Coordinator wake checklist (2026-10-04):** every scheduled coordinator wake reads fresh
+`priority.json` and `backlog-inbox.json` before assigning the next scheduled build. It assigns only
+explicitly newly selected work, preserves existing owners, and leaves Jenny's scheduling
+notifications off.
 
 Parked work (don't resume unless scheduled): `origin/park-sprint-chests` (`f0cc4527`, sprint and chest
 edits) and Terrain's water-slot-walk.

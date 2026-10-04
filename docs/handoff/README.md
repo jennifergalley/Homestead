@@ -43,8 +43,9 @@ Use default context unless the task needs long context; record both configured t
 
 | Role | Model (exact ID) | Reasoning | Context |
 | --- | --- | --- | --- |
-| Orchestrator Agent | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
-| Blender / Unreal work and gameplay, visuals or performance implementation | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
+| Orchestrator Agent | Claude Opus 5.5 (`claude-opus-5.5`) | high | long (Jenny requested 1.1M; actual runtime context remains separately observed) |
+| Blender / Unreal **asset making and asset integration only** | Claude Opus 5.5 (`claude-opus-5.5`) | high | default; long only when necessary |
+| Gameplay/UI/environment code, general Unreal work, visuals or performance implementation | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default; long only if needed |
 | Architecture / gameplay or save-format review | GPT-6.1 Sol (`gpt-6.1-sol`) | high | default |
 | Documentation / straightforward status and accounting | GPT-6 Luna (`gpt-6-luna`) or GPT-5.6 Terra (`gpt-5.6-terra`) | low / medium as needed | default |
 | Integration / building / scripted test execution | GPT-5.6 Terra (`gpt-5.6-terra`), GPT-6 Luna (`gpt-6-luna`), or GPT-6.1 Sol (`gpt-6.1-sol`) | low / medium as needed | default |
@@ -52,6 +53,11 @@ Use default context unless the task needs long context; record both configured t
 
 Integration escalates a failure it can't explain in one attempt to the orchestrator, which assigns it to
 the owning lane rather than having Integration debug gameplay.
+
+Claude Opus 5.5 is not the general implementation tier: only orchestrator launches and Blender/Unreal
+asset creation and asset integration use it. Jenny requested a 1.1M orchestrator context; record that
+request separately from the configured `long` tier and any unknown actual runtime context. These are
+future-launch settings, not a retune of an existing session.
 
 ## Token budget (Jenny, 2026-10-01)
 
@@ -70,19 +76,24 @@ Tokens are the scarce resource. Every session follows these rules:
   of its scheduled items, not a stream of separate requests.
 - **No standing check-ins.** The orchestrator wakes only for build slots (about an hour before each)
   and for incoming messages; no 30-minute polling.
+- **Scheduled coordinator wake.** At each build-slot wake, read the current
+  `docs/handoff/priority.json` and `docs/handoff/backlog-inbox.json` before assigning the *next*
+  scheduled build. Assign only newly selected, unscheduled work; do not duplicate active lane
+  ownership or turn notifications back on.
 - **Review only risky diffs** (save format, gameplay logic) with the quality tier above.
 - **Docs reports only for real findings**: something broke, a doc was wrong, or a recipe other lanes
   need. No running commentary.
 - **Jenny verifies in-game.** Lanes don't open the editor for screenshots or self-QA unless the task
   can't be checked any other way (animation and art usually need it; UI and logic usually don't).
 
-**At most three concurrent hands-on implementers** do Blender, Unreal or code work. This is a cap
-across active work, not a role-label exemption, and is separate from the 2-Unreal-process machine cap.
-The Integration Agent counts while merging, compiling, PIE testing or packaging, but not while only
-coordinating; Architecture counts while editing or building code; Docs counts while implementing tooling.
-Time-critical integration gets a slot by pausing a lane. The orchestrator grants the next slot before a
-waiting lane resumes. An idle or waiting session schedules a wake-up and ends its turn; it doesn't hold
-a slot by sleeping or polling.
+**At most three concurrent hands-on game-development implementers** do gameplay code, Blender,
+Unreal, or game-asset work. This is a cap across active game-development work, not a role-label
+exemption, and is separate from the 2-Unreal-process machine cap. The Integration Agent counts while
+merging, compiling, PIE testing or packaging, but not while only coordinating; Architecture counts
+while editing or building game code. Planner, backlog, and build-cost canvas-extension work is outside
+this cap and needs no slot. Time-critical integration gets a slot by pausing a lane. The orchestrator
+grants the next slot before a waiting lane resumes. An idle or waiting session schedules a wake-up and
+ends its turn; it doesn't hold a slot by sleeping or polling.
 
 ## Roles
 
@@ -295,6 +306,18 @@ only retained MVP archive reference. The retained
 `jennifergalley-mvp-woodland-biome` branch is Water's active Estate Seasons handoff
 (`b19a0ad0`), despite its historical name.
 
+**Main-checkout Shipping promotion (Jenny, 2026-10-04):** `Homestead Estate.lnk` may target only a
+build of `main` installed at `E:\Repos\SurvivalGame\Build\Windows`, never a session worktree or an
+external release root. Before installation, check the shared main checkout is clean, on `main`, and
+up to date; never overwrite its uncommitted work. Build and verify the candidate in Integration's
+worktree, then copy its complete verified `Windows` package into the main checkout, preserving its
+package-local `Saved\SaveGames` and `Saved\Config`. Hash every installed file against the source,
+run `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof against the installed copy, and only
+then retarget the shortcut and its exact package-local `-UserDir` there. The source worktree
+package is staging only, never the promoted release. The first recovery moves the former Sept. 19
+package to `Build\Windows-20260919-old` rather than deleting it; later promotions use the same
+main-checkout `Build\Windows` location.
+
 ## Playtest builds (schedule)
 
 Jenny's standing preference (2026-09-30): three packaged Estate builds every day.
@@ -339,7 +362,12 @@ The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
    (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.
 2. The integration session merges admitted `main` work, runs UBT and packaged suites, makes the
    Shipping acceptance check, and
-   retargets the shortcut to its `Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
+   packages under its own `Build\Releases`, then—only after confirming the shared main checkout is
+   clean, current, and on `main`—installs the complete verified `Windows` package at
+   `E:\Repos\SurvivalGame\Build\Windows`. It hashes every installed file against its source, runs
+   `Assert-ReleaseSaveIsolation.ps1` and the F5/F9 save proof on that installed copy, and only then
+   retargets the shortcut to
+   `E:\Repos\SurvivalGame\Build\Windows\SurvivalGame\Binaries\Win64\JennysHomesteadGame.exe`,
    keeping the Homestead icon. `Homestead Estate.lnk` is the only active desktop game shortcut.
    **Before retargeting to a new package folder, copy Jenny's saves and settings across:** packaged
    Development builds keep them inside the package (`<package>\SurvivalGame\Saved\SaveGames`, with an
@@ -352,11 +380,18 @@ The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
    `Scripts\Export-BuildUsage.py`, then create
    `docs\handoff\accounting\reports\<build-id>.json` with `Scripts\Report-BuildUsage.mjs`. Commit
    the loader-compatible report with the delivery metadata so the planner shows the build and its
-   observed costs. Preserve exact integer nano-AIU arithmetic and deduplication; label AIU as
-   observed rather than billing-reconciled credits, keep unknown context/post-capture tails visible,
-   and do not mark Jenny's playtest checks accepted or mutate her priority IDs, schedules, edits, or
-   screenshots.
-5. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
+   observed costs. Then remove shipped cards from the active planner/inbox/Markdown mirror, retain
+   their receipt and source evidence outside the active inbox, and refresh the delivered planner
+   data and Measured build cost tab before reporting to Jenny. Preserve exact integer nano-AIU
+   arithmetic and deduplication; label AIU as observed rather than billing-reconciled credits, keep
+   unknown context/post-capture tails visible, and never turn Jenny's unchecked playtest acceptance
+   into completion.
+5. **Build-card timestamps are mandatory:** every shipped entry in `docs\handoff\builds.md` is
+   headed exactly `## YYYY-MM-DD — h:mm AM/PM` using its actual local promotion time, ordered by
+   that time. Put build IDs, scope, admission evidence, and descriptions in the card body—not its
+   heading. An admission that did not ship belongs in the delivered build card body, not in its own
+   build heading.
+6. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
 
 Because any scheduled build can pick up `main`, **`main` must stay playable**: push only verified work.
 This replaces the old "package after every improvement" step of the Interactive Loop.

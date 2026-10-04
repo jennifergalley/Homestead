@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "archives": [
+    {
+      "buildId": "20261003-measured-02",
+      "archivedAt": "2026-10-04T19:03:39.074Z",
+      "status": "shipped-pending-player-acceptance",
+      "receipt": {
+        "buildRecord": "measured-build-02.json",
+        "changelist": "builds.md",
+        "observedUsageReport": "accounting/reports/20261003-measured-02.json",
+        "recordedCalls": 2477,
+        "recordedAiu": "11439.97802",
+        "limitations": "Observed local runtime AIU only; external billing reconciliation, actual context tiers, and post-capture tails remain unknown."
+      },
+      "inboxEntries": [
+        "jenny-mut6p856-a7gysc",
+        "jenny-mut56ggp-uijcta",
+        "jenny-mut5v5yo-9f8fpx",
+        "jenny-mut57myz-9tfjci",
+        "jenny-mut5gsd4-oebvov",
+        "jenny-mut5c51h-orhi39",
+        "jenny-mut592z8-2od0d5",
+        "jenny-mut5legr-oba2rd",
+        "jenny-mus1kfmm-ayz6jx"
+      ],
+      "plannerOnlyItems": [
+        "add-shore-and-river-fishing",
+        "unify-hud-notices"
+      ],
+      "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
+    },
+    {
+      "deliveryId": "planner-editing-feedback",
+      "status": "delivered-tooling-pending-player-acceptance",
+      "receipt": {
+        "commit": "3846476d",
+        "handoff": "planner-editing-measured-02.md",
+        "costAllocation": "Excluded from 20261003-measured-02's frozen eleven-item gameplay delivery and its observed usage report."
+      },
+      "inboxEntries": [
+        {
+          "id": "jenny-mut5x32c-7715t2",
+          "title": "Edit items in the planner backlog",
+          "description": "I should be able to edit items I've added to the backlog from my feedback form, where clicking a pencil icon somewhere on the card opens it back up in the form so I can edit the title, description, and remove or add new screenshots for it.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T01:49:00.996Z"
+        }
+      ],
+      "acceptance": "This separately delivered planner tool remains pending Jenny's player check. Its archival preserves source history without adding it to the measured02 frozen eleven, observed cost, or active backlog."
+    },
+    {
+      "buildId": "20261004-afternoon-03",
+      "archivedAt": "2026-10-04T21:05:09.2150612Z",
+      "status": "shipped-pending-player-acceptance",
+      "receipt": {
+        "buildRecord": "afternoon-build-03.json",
+        "changelist": "builds.md",
+        "sourceCommit": "c1d5351f23f69e9f12bc8f274fb1ac101fd45286",
+        "installedShippingExecutableSha256": "98DD0BD5D90038F110F2442E64FE11292BA3C02C84533193DD8ADB965DE3E943",
+        "observedUsageReport": "accounting/reports/20261004-afternoon-03.json",
+        "limitations": "Observed local runtime AIU only; fishing-specific work is carried to the planned evening slot, mixed work remains unallocated, actual context tiers and post-capture tails remain unknown."
+      },
+      "inboxEntries": [
+        {
+          "id": "jenny-mutd9wre-js2x1r",
+          "title": "Differentiate seeds by plant type in the inventory",
+          "description": "instead of just saying Seeds, it should say Roots seeds, Carrot seeds, Turnip seeds, etc., they should take up individual inventory slots and not be stackable, and they should all have distinct icons with a picture of their end product on the seed packet. There shouldn't be any generic \"Seeds\" that doesn't tell me what I'm growing",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T05:14:56.666Z"
+        },
+        {
+          "id": "jenny-mutdjl7e-nzl7lh",
+          "title": "Broken down fenceposts are invisible",
+          "description": "The broken down fence posts are invisible, leaving horizontal pieces of fence floating in midair. The fenceposts should be visible and not disappear unless I disassemble the whole thing",
+          "imageFile": "jenny-mutdjl7e-nzl7lh-c4147f18-37f2-4828-8a52-6b0ceb13f266.png",
+          "imageMime": "image/png",
+          "createdUtc": "2026-10-04T05:22:28.25Z"
+        },
+        {
+          "id": "jenny-mutdnje8-0et783",
+          "title": "Wildflowers everywhere",
+          "description": "I really enjoy the wildflowers along my walk to the lake, but I think we need them to be more widespread throughout the map. I'd like wildflowers to be essentially everywhere, along lakes and rivers, under the trees of the woods, and in open fields. The only place I really don't want them is in the farm (or anywhere I start tilling soil), or in the ruins of the broken down manor.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T05:25:32.528Z"
+        },
+        {
+          "id": "jenny-mutdzpsx-76dag4",
+          "title": "Toggle Backpack visibility",
+          "description": "I should be able to toggle the visibility of the backpack in my character's Equipped slots in my inventory. For a new \"Back\" slot under the \"Equipped Slots\", I should be able to select Leather Rucksack or None, with a hint making it clear that toggling off the pack's visibility doesn't remove the inventory space upgrade",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T05:35:00.705Z"
+        },
+        {
+          "id": "jenny-muteesvp-3bo5xf",
+          "title": "Quit Game menu text is too large",
+          "description": "Please make the size of the font and buttons of the Quit Game / Save and Quit / Quit without saving menu slightly smaller, to match the font size of the settings menu would be good, so it feels cohesive",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T05:46:44.533Z"
+        },
+        {
+          "id": "jenny-muu6upvs-l7a0l6",
+          "title": "Pointing at a harvestable crop should always display \"[E] Harvest <crop>\"",
+          "description": "Unless I also need to weed the square, right now when I point at a harvestable crop, it does not give me an interaction hint that I can harvest. It should always show [E] Harvest <crop> when the crop is ready to harvest and I point at the square.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T19:02:56.392Z"
+        }
+      ],
+      "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
+    }
+  ]
+}

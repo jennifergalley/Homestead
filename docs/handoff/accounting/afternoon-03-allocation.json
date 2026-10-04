@@ -1,0 +1,148 @@
+{
+  "buildId": "20261004-afternoon-03",
+  "authorizedAt": "2026-10-04T18:59:23Z",
+  "finalCapture": true,
+  "allocationPolicy": "Count each captured local assistant_usage_events record at most once from this authorization boundary through the future delivery-closure capture. Do not reallocate any measured02 event. Fishing-specific Art presentation and Gameplay rules/API/presentation work transfers to the planned evening build; mixed shared planning and verification stays explicitly unallocated rather than estimated. This is observed runtime AIU, not billing-reconciled credits.",
+  "legacy": {
+    "status": "unattributed",
+    "recordedNanoAiu": null,
+    "description": "Earlier implementation and measured02's closed 2,477-call / 11,439.97802-AIU report are excluded rather than counted as zero."
+  },
+  "limits": [
+    "Actual runtime model, effort, and context observations are unknown until captured; launch configuration is recorded separately.",
+    "External billing reconciliation and any post-capture tail remain unknown.",
+    "Capture is bounded at the 2:05:09 PM local promotion; later work is outside this delivery report.",
+    "Fishing-specific Art work is transferred to evening and Gameplay mixed fishing/shared work is explicitly unallocated."
+  ],
+  "segments": [
+    {
+      "sessionId": "146ed534-2f78-48ba-b0fc-98436c1f3223",
+      "appSessionId": "3c4e743c-3c27-4732-adce-e651536c7e75",
+      "agentId": "main",
+      "task": "afternoon-03-orchestration",
+      "category": "overhead",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "gpt-6.1-sol",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "observedUsageCheckpoint": {
+        "firstEventId": 71814,
+        "lastEventId": 73139,
+        "calls": 248,
+        "recordedNanoAiu": "1953878960000",
+        "eventRangeUtc": "2026-10-04T18:59:27.299Z to 2026-10-04T21:04:59.935Z",
+        "status": "delivery-closure-capture",
+        "source": "local assistant_usage_events through delivery promotion",
+        "actualContextTier": null,
+        "limitations": [
+          "Observed runtime AIU only; not billing-reconciled.",
+          "Configured context tier is default; actual runtime context is unverified."
+        ]
+      }
+    },
+    {
+      "sessionId": "ac7339b4-84f7-49c0-8ec2-3d51d2b86730",
+      "agentId": "main",
+      "task": "fishing-presentation-assets",
+      "category": "transferred-to-evening",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "claude-opus-5.5",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "observedUsageCheckpoint": {
+        "firstEventId": 71821,
+        "lastEventId": 73135,
+        "calls": 380,
+        "recordedNanoAiu": "2480077760000",
+        "eventRangeUtc": "2026-10-04T19:07:26.514Z to 2026-10-04T21:04:51.180Z",
+        "status": "delivery-closure-capture",
+        "source": "local assistant_usage_events through delivery promotion",
+        "actualContextTier": null,
+        "limitations": [
+          "Observed runtime AIU only; not billing-reconciled.",
+          "Configured context tier is default; actual runtime context is unverified."
+        ]
+      }
+    },
+    {
+      "sessionId": "986d7db6-7ae4-4cee-a980-054664106056",
+      "appSessionId": "3d3426ed-7f12-4245-ab69-dc66e8698418",
+      "agentId": "main",
+      "task": "gameplay-ui-feedback-slices",
+      "category": "implementation",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "gpt-6.1-sol",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "observedUsageCheckpoint": {
+        "firstEventId": 71819,
+        "lastEventId": 73140,
+        "calls": 239,
+        "recordedNanoAiu": "1017318700000",
+        "eventRangeUtc": "2026-10-04T19:07:23.010Z to 2026-10-04T21:05:05.389Z",
+        "status": "delivery-closure-capture",
+        "source": "local assistant_usage_events through delivery promotion",
+        "actualContextTier": null,
+        "limitations": [
+          "Observed runtime AIU only; not billing-reconciled.",
+          "Configured context tier is default; actual runtime context is unverified."
+        ]
+      }
+    },
+    {
+      "sessionId": "ff61de39-9742-45a8-8c6d-03512cd76224",
+      "agentId": "main",
+      "task": "environment-feedback-slices",
+      "category": "implementation",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "gpt-6.1-sol",
+      "actualReasoningEffort": "high",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "observedUsageCheckpoint": {
+        "firstEventId": 71820,
+        "lastEventId": 73067,
+        "calls": 114,
+        "recordedNanoAiu": "661022400000",
+        "eventRangeUtc": "2026-10-04T19:07:25.740Z to 2026-10-04T20:53:29.630Z",
+        "status": "delivery-closure-capture",
+        "source": "local assistant_usage_events through delivery promotion",
+        "actualContextTier": null,
+        "limitations": [
+          "Observed runtime AIU only; not billing-reconciled.",
+          "Configured context tier is default; actual runtime context is unverified."
+        ]
+      }
+    },
+    {
+      "sessionId": "64540925-e1b6-4766-ac1f-f2dc42f8aa36",
+      "appSessionId": "c5ee7d02-4a6f-488e-a317-8c4396836061",
+      "agentId": "main",
+      "task": "integration-metadata-and-preflight",
+      "category": "overhead",
+      "since": "2026-10-04T18:59:23Z",
+      "actualModel": "gpt-5.6-terra",
+      "actualReasoningEffort": "medium",
+      "contextTier": null,
+      "launchContextTier": "default",
+      "observedUsageCheckpoint": {
+        "firstEventId": 71822,
+        "lastEventId": 73141,
+        "calls": 295,
+        "recordedNanoAiu": "1241619160000",
+        "eventRangeUtc": "2026-10-04T19:07:27.739Z to 2026-10-04T21:05:08.092Z",
+        "status": "delivery-closure-capture",
+        "source": "local assistant_usage_events through delivery promotion",
+        "actualContextTier": null,
+        "limitations": [
+          "Observed runtime AIU only; not billing-reconciled.",
+          "Configured context tier is default; actual runtime context is unverified."
+        ]
+      }
+    }
+  ],
+  "deliveryClosureAt": "2026-10-04T14:05:09.2150612-07:00"
+}

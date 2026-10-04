@@ -215,6 +215,10 @@ void TimingAndCancellation()
         CHECK(trial.Count(sim.FishingCast().catchItem) == 0);
     }
     Simulation late = sim;
+    Simulation gentle = sim;
+    LandingBeat(gentle, 0.65);
+    CHECK(gentle.FishingCast().phase == FishingPhase::Landing && gentle.FishingCast().landedBeats == 1);
+    CHECK(gentle.Count(sim.FishingCast().catchItem) == 0);
     OK(late.AdvanceFishing(firstStrike + Fishing::StrikeWindowSeconds + 0.001, {0, 0}));
     CHECK(late.FishingCast().phase == FishingPhase::Idle);
     OK(sim.AdvanceFishing(0.0, {101, 0}));
@@ -247,6 +251,15 @@ void TimingAndCancellation()
     Simulation noContact = sim;
     OK(noContact.AdvanceFishing(Fishing::CatchContactTimeoutSeconds + 0.001, {0, 0}));
     CHECK(noContact.FishingCast().phase == FishingPhase::Idle && noContact.Count(catchItem) == 0);
+    CHECK(!noContact.FishingAnimationContact(FishingContact::CatchLift, catchToken, {0, 0}));
+    Simulation hitched = sim;
+    constexpr double screenshotHitchSeconds = 0.27;
+    const double delayedLiftSeconds = HomesteadFishingTiming::StrikeEnd - HomesteadFishingTiming::StrikeStart
+        + HomesteadFishingTiming::CatchLiftSeconds + 2.0 * screenshotHitchSeconds;
+    OK(hitched.AdvanceFishing(delayedLiftSeconds, {0, 0}));
+    CHECK(hitched.FishingCast().phase == FishingPhase::Catching && hitched.Count(catchItem) == 0);
+    OK(hitched.FishingAnimationContact(FishingContact::CatchLift, catchToken, {0, 0}));
+    CHECK(hitched.FishingCast().phase == FishingPhase::Idle && hitched.Count(catchItem) == 1);
     Simulation cancelled = sim;
     OK(cancelled.CancelFishing());
     CHECK(!cancelled.FishingAnimationContact(FishingContact::CatchLift, catchToken, {0, 0}));

@@ -260,6 +260,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     {
         LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, static_cast<uint64>(Structure.buildingId));
         LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Pair(Structure.cellX, Structure.cellY));
+        LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, HomesteadWorldKeys::Pair(static_cast<int32>(Structure.kind), Structure.rotation));
     }
     LayoutKey = HomesteadWorldKeys::Mix(LayoutKey, 0x7ull + State.plots.size());
     for (const auto& Plot : State.plots)
@@ -277,7 +278,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         if (!State.fixedEstate && !BuildDecorations(Simulation)) return false;
         ResourceLayoutSignature = MoveTemp(Layout);
     }
-    if (State.fixedEstate) ClearEstateSceneryUnderPieces(State);
+    if (State.fixedEstate) ClearEstateSceneryUnderPieces(Simulation, LayoutKey);
     UpdateEstateGrass(State);
     FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
         static_cast<unsigned long long>(State.world.seed), State.world.generationVersion,

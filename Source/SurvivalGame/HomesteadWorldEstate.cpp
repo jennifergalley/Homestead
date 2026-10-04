@@ -4,6 +4,7 @@
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldLook.h"
 #include "HomesteadEstateTerrain.h"
+#include "Simulation/HomesteadFlowerCover.h"
 
 #include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -276,9 +277,13 @@ bool AHomesteadWorld::BuildEstateScenery()
         Batch->AddInstances(Transforms[BatchIndex], false, true);
         EstateScenery.Add(Batch);
         const FEstateSceneryKind& Info = EstateSceneryKinds[Kind];
-        const FVector Extent = Batch->GetStaticMesh()->GetBounds().BoxExtent;
+        const FBoxSphereBounds MeshBounds = Batch->GetStaticMesh()->GetBounds();
+        const FVector Extent = MeshBounds.BoxExtent;
         EstateSceneryClearRadius.Add(Info.bTree || Info.bCollision ? 0.0f : FMath::Max(Extent.X, Extent.Y) * 0.7f);
         EstateSceneryTrunkRadius.Add(Info.bTree ? Info.Footprint : 0.0f);
+        const FVector PivotReach = MeshBounds.Origin.GetAbs() + Extent;
+        EstateSceneryFlowerRadius.Add(Kind >= 42 && Kind <= 48
+            ? static_cast<float>(FMath::Sqrt(PivotReach.X * PivotReach.X + PivotReach.Y * PivotReach.Y)) : 0.0f);
         EstateSceneryHidden.Add(TBitArray<>(false, Transforms[BatchIndex].Num()));
         EstateSceneryTransforms.Add(MoveTemp(Transforms[BatchIndex]));
         Total += EstateSceneryTransforms.Last().Num();
@@ -290,8 +295,12 @@ bool AHomesteadWorld::BuildEstateScenery()
     return true;
 }
 
-void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& State)
+void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::Simulation& Simulation, uint64 LayoutKey)
 {
+    // Reuse Refresh's layout key: clock, crop growth and inventory-only refreshes never rehash the map here.
+    if (bEstateSceneryClearKnown && EstateSceneryInputsKey == LayoutKey) return;
+    EstateSceneryInputsKey = LayoutKey;
+    const Homestead::State& State = Simulation.GetState();
     // The pieces' footprints and the interactables' positions, to the centimetre (yaw to 0.1 degree).
     const auto Round = [](double Value) { return static_cast<uint64>(FMath::RoundToInt64(Value)); };
     uint64 Key = HomesteadWorldKeys::Seed;
@@ -311,9 +320,13 @@ void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& Stat
         Key = HomesteadWorldKeys::Mix(Key, Round(Node.position.x));
         Key = HomesteadWorldKeys::Mix(Key, Round(Node.position.y));
     }
+    Key = HomesteadWorldKeys::Mix(Key, State.plots.size());
+    for (const auto& Plot : State.plots)
+        Key = HomesteadWorldKeys::Mix(Key, HomesteadWorldKeys::Pair(Plot.cellX, Plot.cellY));
     if (bEstateSceneryClearKnown && Key == EstateSceneryClearKey) return;
     bEstateSceneryClearKnown = true;
     EstateSceneryClearKey = Key;
+    const Homestead::FlowerCoverMask Flowers(State, Simulation.Layout());
     TArray<Homestead::Footprint> Pieces;
     for (const auto& Structure : State.structures)
         Pieces.Add(Homestead::StructureFootprint(State, Structure));
@@ -329,6 +342,7 @@ void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& Stat
     // Clear ground round an interactable: enough to show a berry bush or herb tuft whole.
     constexpr float NodeCoverClear = 110.0f;
     constexpr float NodeTrunkClear = 170.0f;
+    constexpr float FlowerSwayMarginCm = 5.0f; // Keep the authored foliage wind clear of the tilled bed's edge.
     auto NearNode = [&Nodes, NodeCell](const FVector& Location, float Reach)
     {
         const FIntPoint Cell(FMath::FloorToInt32(Location.X / NodeCell), FMath::FloorToInt32(Location.Y / NodeCell));
@@ -343,6 +357,7 @@ void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& Stat
     {
         const float Radius = EstateSceneryClearRadius[Batch];
         const float Trunk = EstateSceneryTrunkRadius.IsValidIndex(Batch) ? EstateSceneryTrunkRadius[Batch] : 0.0f;
+        const float FlowerRadius = EstateSceneryFlowerRadius[Batch];
         if ((Radius <= 0 && Trunk <= 0) || !EstateScenery[Batch]) continue;
         const TArray<FTransform>& Transforms = EstateSceneryTransforms[Batch];
         TBitArray<>& Hidden = EstateSceneryHidden[Batch];
@@ -364,6 +379,8 @@ void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::State& Stat
             }
             const float Reach = Radius * Scale + Margin;
             bool bUnder = NearNode(Location, NodeCoverClear + Radius * Scale * 0.5f);
+            if (FlowerRadius > 0)
+                bUnder |= Flowers.Excludes({Location.X, Location.Y}, FlowerRadius * Scale + FlowerSwayMarginCm);
             for (const auto& Box : Pieces)
             {
                 const double Near = FMath::Max(Box.half.x, Box.half.y) + Reach;

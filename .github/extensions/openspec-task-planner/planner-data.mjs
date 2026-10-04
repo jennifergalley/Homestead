@@ -2,6 +2,8 @@ import { readFile, readdir, stat, writeFile, mkdir, rename, open, unlink } from 
 import { createHash, randomUUID } from "node:crypto";
 import { basename, dirname, join, relative } from "node:path";
 import { loadUsageReports } from "./accounting-data.mjs";
+import { loadBuildCostView } from "./cost-view.mjs";
+import { parseSlotMinutes, shipmentTiming } from "./build-time.mjs";
 
 const activeWindowMs = 15 * 60 * 1000;
 const statusOrder = { active: 0, paused: 1, proposed: 2, complete: 3 };
@@ -82,26 +84,44 @@ function parseBuilds(markdown) {
     const later = [];
     let current = null;
     let inLater = false;
+    let inShips = false;
     for (const line of markdown.split(/\r?\n/)) {
         const heading = line.match(/^##\s+(.+?)\s*$/);
         if (heading) {
             inLater = heading[1].trim().toLowerCase() === "later";
+            inShips = false;
             current = null;
             if (!inLater) {
                 const [date, slot] = heading[1].split(/\s+—\s+/, 2);
-                current = { date: date?.trim() ?? heading[1].trim(), slot: slot?.trim() ?? "", sha: "pending", status: "planned", ships: [] };
+                current = { date: date?.trim() ?? heading[1].trim(), slot: slot?.trim() ?? "", sha: "pending", status: "planned", ships: [], shippedFeatures: [] };
                 entries.push(current);
             }
             continue;
         }
         const property = line.match(/^\s*-\s+(SHA|Status):\s*(.+?)\s*$/i);
         if (property && current) {
+            if (property[1].toLowerCase() === "status" && current.status === "historical"
+                && property[2] === "delivered") current.shippedFeatures = [];
             current[property[1].toLowerCase()] = property[2].replace(/`/g, "");
+            inShips = false;
             continue;
+        }
+        if (inShips && current?.shippedFeatures.length && /^\s{2,}\S/.test(line) && !/^\s*-/.test(line)) {
+            current.shippedFeatures[current.shippedFeatures.length - 1] += " " + line.trim().replace(/`/g, "");
         }
         const bullet = line.match(/^\s*-\s+(.+?)\s*$/);
         if (!bullet) continue;
         const text = bullet[1].replace(/`/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1");
+        if (current) {
+            const id = text.match(/^Build ID:\s*([\w-]+)/i)
+                ?? text.match(/^Planner\/accounting:.*?reports\/([\w-]+)\.json/i);
+            if (id) current.buildId = id[1];
+            if (/^Ships:/.test(text)) {
+                inShips = true;
+                if (/^Ships:\s*\S/.test(text)) current.shippedFeatures.push(text.replace(/^Ships:\s*/, ""));
+            } else if (/^(?:[\w /-]+):/.test(text)) inShips = false;
+            else if (inShips) current.shippedFeatures.push(text);
+        }
         const hash = /\b(?=[0-9a-f]*\d)[0-9a-f]{7,64}\b|\bSHA(?:-?256)?\b/i;
         const clean = text.split(/;\s*/).filter((part) => !hash.test(part)).join("; ").trim();
         if (!clean) continue;
@@ -153,12 +173,6 @@ function slotTimeText(minutes) {
     return `${hour % 12 || 12}${minute ? ":" + pad(minute) : ""} ${hour < 12 ? "AM" : "PM"}`;
 }
 
-function parseSlotMinutes(text) {
-    const match = /^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i.exec((text ?? "").trim());
-    if (!match) return null;
-    return (Number(match[1]) % 12 + (match[3].toUpperCase() === "PM" ? 12 : 0)) * 60 + Number(match[2] ?? 0);
-}
-
 export function buildKey(build) {
     const minutes = parseSlotMinutes(build.slot);
     return minutes === null || !/^\d{4}-\d{2}-\d{2}$/.test(build.date) ? null
@@ -173,6 +187,7 @@ function keyTime(key) {
 const namedSlotMinutes = { morning: 9 * 60, midday: 12 * 60, noon: 12 * 60, afternoon: 15 * 60, "early evening": 18 * 60, evening: 20 * 60, night: 22 * 60, overnight: 23 * 60 };
 
 function buildTime(build) {
+    if (build.status === "delivered") return shipmentTiming(build).time ?? NaN;
     const exact = keyTime(buildKey(build));
     if (Number.isFinite(exact)) return exact;
     const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(build.date ?? "");
@@ -308,6 +323,7 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
     // each one so the board, priority.json, and quote/remove/assign wiring
     // all treat them like any other item.
     for (const entry of backlogEntries) features.push(backlogFeatureFromEntry(entry));
+    const costView = await loadBuildCostView(projectRoot, accounting, builds, now);
     applyDeliveryRegistry(features, deliveryRegistry);
     const order = new Map((Array.isArray(priority.order) ? priority.order : []).map((id, index) => [id, index]));
     const removed = new Set(Array.isArray(priority.removed) ? priority.removed : []);
@@ -316,7 +332,14 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
     for (const build of builds.entries) {
         build.key = buildKey(build);
         build.time = buildTime(build);
+        if (build.status === "delivered") {
+            const shipment = costView.shipped.find((value) => value.buildId && value.buildId === build.buildId);
+            Object.assign(build, shipment ? { label: shipment.label, time: shipment.time, dataError: shipment.dataError }
+                : shipmentTiming(build));
+        }
     }
+    builds.entries.sort((a, b) => (Number.isFinite(b.time) ? b.time : -Infinity)
+        - (Number.isFinite(a.time) ? a.time : -Infinity));
     features.sort((a, b) => {
         const ao = order.has(a.id) ? order.get(a.id) : defaultFeatureRank(a);
         const bo = order.has(b.id) ? order.get(b.id) : defaultFeatureRank(b);
@@ -341,6 +364,7 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
         builds,
         slots,
         accounting,
+        costView,
     };
 }
 

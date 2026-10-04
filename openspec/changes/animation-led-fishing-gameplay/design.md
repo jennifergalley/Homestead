@@ -12,6 +12,8 @@ Keep authoritative rules in plain C++17 and presentation in actors/widgets. No g
 
 Extend FishingSession with cast/catch presentation phases and bounded randomized strike cues. Deterministic hashes include cast identity/revision so repeated attempts vary without hidden RNG save state. Timers advance reaction windows but cannot issue rewards.
 
+The final cozy tuning uses a 2-4-second bite wait, 0.9-second hook window, and two strikes delayed 0.65-1.25 seconds with 0.7-second reaction windows. A 2.0-second catch-contact fail-safe tolerates frame hitches across the authored strike/lift; expiry or cancellation still yields nothing without the genuine lift contact. Player-facing names and instructions use fresh mackerel and closing-ring cues, not sushi or a retired green band.
+
 Expose explicit cast-release and successful-catch contact commands returning Result. Catch contact requires the authorized successful phase, matching cast token and the authored minimum beat; repeated or stale contacts fail without mutation. A missing contact times out without reward.
 
 Remove fishing dispatch from E/A interactions; tool input owns the sequence. Controller forwards Art's authored events to simulation and renders the phase/cue API without per-frame world scans.
