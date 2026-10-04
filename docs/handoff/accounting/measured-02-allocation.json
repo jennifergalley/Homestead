@@ -85,27 +85,29 @@
       "reasoningEffort": "high",
       "contextTier": null,
       "launchContextTier": "default",
-      "contextEvidence": "Selection and launch configuration recorded by the coordinator; actual runtime context and final usage boundary remain pending the lane's accounting handoff. The lane reports no helpers.",
-      "boundaryEvidence": "Owns selected chest-name hint and HUD-notice unification only. Checkpoint a9156572713ec42d8ebca529ef2f0d8807832554 is pushed but not admitted: compile, Unreal/UI-gallery, and Jenny acceptance remain held. The lane reports no editor or build work. Preserve first-visit travel, the Farming three-use Plant Seeds hint retirement, and fishing mount behavior; mine path and building work are unselected."
+      "contextEvidence": "Lane accounting records 49 high-effort calls / 180152410000 nano-AIU through event 69756; final push/message tail is excluded. Actual runtime context remains unknown. The lane reports no helpers.",
+      "boundaryEvidence": "Owns selected chest-name hint and HUD-notice unification only. Final checkpoint f184744c0c2fc9927375ec560411d20b9517ab82 is pushed but not admitted: compile, Unreal/UI-gallery, and Jenny acceptance remain held. The lane reports no editor, build, automation, main, shortcut, or save work. Preserve first-visit travel, the Farming three-use Plant Seeds hint retirement, and fishing mount behavior; mine path and building work are unselected."
     },
     {
       "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
       "projectSessionId": "52572922-09fd-4287-85c5-840ceec6d895",
       "agentId": "3865a688-1b7c-4b6e-b382-6419e666f0b1",
-      "task": "travel-rest-and-farming-risk-review",
+      "task": "release-isolation-and-gameplay-risk-review",
       "tasks": [
         "sleep-evening-until-dawn",
         "unlock-travel-by-visiting",
         "wait-sunday-store-until-monday",
-        "farming-fishing-feedback-bundle"
+        "farming-fishing-feedback-bundle",
+        "release-save-isolation-guard",
+        "hud-feedback-bundle"
       ],
       "category": "review",
       "model": "gpt-6.1-sol",
       "reasoningEffort": "high",
       "contextTier": null,
       "launchContextTier": "default",
-      "contextEvidence": "Independent source and routing review in Integration slot 3. Actual runtime context and final usage-event boundary remain pending; record this helper once.",
-      "boundaryEvidence": "Travel review found old-reader .bak fallback can overwrite upgraded saves. It conditionally approved release-local UserDir isolation only with dual-root, snapshot, alias, and write-containment proof. Farming found no independent blocker but counted stock widening inherits that gate. Neither checkpoint is admitted."
+      "contextEvidence": "Independent high-effort source/routing review in Integration slot 3. Actual runtime context and final usage-event boundary remain pending; record this helper once despite its follow-up review turns.",
+      "boundaryEvidence": "Travel review found old-reader .bak fallback can overwrite upgraded saves. It conditionally approved release-local UserDir isolation only with dual-root, snapshot, alias, and write-containment proof. Farming found no independent blocker but counted stock widening inherits that gate. The reviewer also cleared the final FParse-compatible release-guard parser after 15 disposable fixtures and found no scoped HUD notice/hint/hard-wrap source blocker. No gameplay or HUD checkpoint is admitted."
     }
   ]
 }

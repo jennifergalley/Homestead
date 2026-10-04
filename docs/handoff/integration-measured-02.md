@@ -60,12 +60,14 @@ HUD owns selected chest-name hint enlargement and concise, non-overlapping resou
 notices. Preserve Travel Rest's first-visit travel notice and Farming Fishing's Plant Seeds hint;
 mine path and building work remain unselected. The lane is held to the active no-compilation rule.
 
-- Source checkpoint `a9156572713ec42d8ebca529ef2f0d8807832554` on
+- Final source checkpoint `f184744c0c2fc9927375ec560411d20b9517ab82` on
   `jennifergalley-hud-agent` is pushed but **not admitted**. Both selected source tasks are
   implemented; compile, Unreal, UI gallery, and Jenny acceptance remain held. The lane used no
-  helpers, editor, or build work. Preserve Farming's three-use seed-hint retirement and the fishing
-  mount; meaningful notice clocks remain, while quiet success and hotbar selection no longer erase
-  notices.
+  helpers, editor, build, automation, main, shortcut, or save work. The hard-wrap completeness
+  diagnostic is included. Preserve Farming's three-use seed-hint retirement and the fishing mount;
+  meaningful notice clocks remain, while quiet success and hotbar selection no longer erase notices.
+  The high-effort bounded review found no source-risk issue in notice serial/timer behavior,
+  hint-learning, or the hard-wrap diagnostic; this is not compile, gallery, or player acceptance.
 
 ## Travel Rest checkpoint
 
@@ -109,6 +111,17 @@ exists:
 4. Rejection coverage uses disposable fixtures only; it never injects an upgraded save into the
    protected rollback root. Any new `LoadLatest` guard is defense in depth, not a fix for deployed
    old binaries.
+
+### Guard implementation and review
+
+- `Assert-ReleaseSaveIsolation.ps1` now parses `UserDir=` with Unreal `FParse`-compatible
+  boundaries, quote handling, ASCII whitespace, and unquoted delimiters before validating the
+  sole effective route. It rejects competing route forms rather than attempting to choose one.
+- `ReleaseSaveIsolationTests.ps1` passes 15 disposable E:-scratch fixtures, including conventional,
+  slash, bare, double-dash, whitespace, quoted-text, Unicode-boundary, comma, and device-alias
+  bypasses. A high-effort reviewer rechecked the final parser change with no significant issue.
+- This proves only the pre-launch guard's fixture behavior. The mandatory real candidate/rollback
+  route, snapshot/hash, and write-containment evidence above remains required before promotion.
 
 Travel Rest may append an optional `travel <count> <id>...` section of sorted, unique destination
 IDs 1..6; Manor (0) remains implicit. Missing legacy sections lock every non-Manor destination, and

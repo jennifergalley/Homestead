@@ -19,6 +19,8 @@ function Assert-Rejected([scriptblock]$Action) {
 try {
     $candidate = Make-Package 'candidate'
     $rollback = Make-Package 'rollback'
+    $commaCandidate = Make-Package 'release,candidate'
+    $commaRollback = Make-Package 'release,rollback'
     $ok = & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
         -CandidateArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
         -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`""
@@ -32,6 +34,33 @@ try {
     Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
         -CandidateArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" `
         -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
+        -CandidateArguments "/UserDir=E:\shared -UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
+        -CandidateArguments "UserDir=E:\shared -UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
+        -CandidateArguments "--UserDir=E:\shared -UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
+        -CandidateArguments "-UserDir= E:\shared -UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
+        -CandidateArguments "-Note=`"UserDir=$(Join-Path $candidate 'SurvivalGame') `" " `
+        -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
+        -CandidateArguments "$([char]0x00E9)UserDir=E:\shared -UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
+    Assert-Rejected { & $guard -CandidatePackage $commaCandidate -RollbackPackage $commaRollback `
+        -CandidateArguments "-UserDir=$(Join-Path $commaCandidate 'SurvivalGame')" `
+        -RollbackArguments "-UserDir=$(Join-Path $commaRollback 'SurvivalGame')" }
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
+        -CandidateArguments "-UserDir= `"$(Join-Path $candidate 'SurvivalGame')`"" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
+    Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $rollback `
+        -CandidateArguments "-UserDir=$([char]0x00A0)$(Join-Path $candidate 'SurvivalGame')" `
+        -RollbackArguments "-UserDir=`"$(Join-Path $rollback 'SurvivalGame')`"" }
     Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage ("\\?\" + $candidate) `
         -CandidateArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
         -RollbackArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" }
@@ -39,7 +68,7 @@ try {
     Assert-Rejected { & $guard -CandidatePackage $candidate -RollbackPackage $forwardAlias `
         -CandidateArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" `
         -RollbackArguments "-UserDir=`"$(Join-Path $candidate 'SurvivalGame')`"" }
-    Write-Output 'Release save isolation: 6 checks passed.'
+    Write-Output 'Release save isolation: 15 checks passed.'
 } finally {
     if (Test-Path -LiteralPath $fixture) { Remove-Item -LiteralPath $fixture -Recurse -Force }
 }
