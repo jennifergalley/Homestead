@@ -41,6 +41,16 @@ Planner Editing admission additionally requires its new title, description, scre
 identifier-preservation coverage to pass. The pre-existing removed-controls renderer assertion is
 reported separately and does not justify restoring unrelated planner UI.
 
+## Planner admission delivery
+
+- Merged the forwarded planner commit `108bbe621723c74d51ac0b896fa3ee2c73cd1fbb`, merged current
+  main registry metadata, and published the result at `fc83c40dd539f98f8cd877a47881efe740e7e693`.
+- Re-ran the isolated Node admission command after the merge: 19 checks passed; the one browser
+  proof skipped because `PLANNER_BROWSER_MODULE` was not configured to an E: `playwright-core`
+  module. `npx openspec validate edit-planner-feedback --strict` passed. The stale renderer
+  assertion remained intentionally excluded by its named skip pattern.
+- This slot performed no Unreal, UBT, UAT, Live Coding, package, release, gameplay, or save work.
+
 Travel Rest may append an optional `travel <count> <id>...` section of sorted, unique destination
 IDs 1..6; Manor (0) remains implicit. Missing legacy sections lock every non-Manor destination, and
 malformed or duplicate sections refuse transactionally. This does not bump the save or bake version.
