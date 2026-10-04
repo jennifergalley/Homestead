@@ -176,8 +176,8 @@
       "reasoningEffort": "high",
       "contextTier": "default",
       "launchContextTier": "default",
-      "contextEvidence": "Read-only shader-to-bake-to-normal reconstruction diagnosis launched after the 03:57 genuine bake blocker. Actual runtime context and billing reconciliation remain unknown.",
-      "boundaryEvidence": "Bounded to one causal probe/fix; no process, render, implementation, generic bake rewrite, family bake, UE work, or budget increase. Same-mesh source-normal hybrid improved 3.105 to 1.318; 16-bit, bump, triangulation, and coat variants failed; 8K/head UV was about 2.44; untouched repeat was .007. No root cause or admission is proven. Farming checkpoints carp/probe WIP and continues its already-authorized 16 original dish source/geometry work in slot 2 without waiting."
+      "contextEvidence": "Completed in one read-only turn diagnosing shader-to-bake-to-normal reconstruction after the 03:57 genuine bake blocker. Actual runtime context and billing reconciliation remain unknown.",
+      "boundaryEvidence": "No files or processes. Exact root remains unproven: SourceBump/POINT attribute sampling and differentials are strongest, with a tangent-path alternative; bump-removal tests lacked matched source controls, and source roughness hybrid 2.068 also contributes. One directed 4096 frozen-trout diagnostic normal roundtrip keeps topology, UVs, transforms, smooth state, Base, and Coat identical; threshold <=1.7 plus local improvement distinguishes tangent path from the roughly 3.1/2.4 procedural branch. It is not a production object-space UE map or art acceptance. Preserve budgets, shaders, and parents; no shared-helper defect is established. No render, implementation, generic bake rewrite, family bake, UE work, or budget increase. Farming continues independent original meal source work without waiting."
     }
   ]
 }

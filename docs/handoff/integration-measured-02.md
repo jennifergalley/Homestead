@@ -225,6 +225,15 @@ has one read-only shader-to-bake-to-normal causal probe/fix. Same-mesh source-no
 The reviewer performs no process, render, implementation, generic bake rewrite, family bake, or UE
 work. Farming preserves/checkpoints carp/probe WIP and continues already-authorized sixteen original
 dish source/geometry work in slot 2 without waiting or new scope.
+Reviewer `fc56f594-b380-45f1-9633-428ca29e5089` completed in one read-only turn with no files or
+processes. The root remains unproven: SourceBump/POINT sampling and differentials are strongest, with
+a tangent-path alternative; bump-removal tests lacked matched source controls, and source roughness
+hybrid `2.068` also contributes. Its one directed discriminating test is a 4096 frozen-trout
+OBJECT-space diagnostic normal roundtrip retaining the same topology/UVs/transforms/smooth state,
+Base, and Coat; `<=1.7` plus local improvement distinguishes tangent from the roughly `3.1/2.4`
+procedural branch. It is not a production object-space UE map or art acceptance. Preserve budgets,
+shaders, and parents; no shared-helper defect is established. Farming continues independent original
+meal source work without waiting.
 Checkpoint `cf30e41d` supplies that single-trout structural proof under
 `Assets\Props\CaughtFish\StructuralProof`: source, clay, and five-map 4K renders with hashes. It is
 still WIP-only; its frozen `4148` views are unchanged and the full six-family root remains stale and
