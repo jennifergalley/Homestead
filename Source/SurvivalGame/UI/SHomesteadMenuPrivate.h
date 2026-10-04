@@ -3,6 +3,7 @@
 #include "SHomesteadMenu.h"
 #include "HomesteadUITheme.h"
 #include "HomesteadNoticeStyle.h"
+#include "HomesteadFrameStyle.h"
 #include "../Simulation/HomesteadChests.h"
 #include "SHomesteadHudScale.h"
 #include "SHomesteadIcon.h"
@@ -48,6 +49,8 @@ public:
     { return FReply::Unhandled(); }
     // Item tiles open their context menu on a right click.
     TFunction<void()> RightClick;
+    // The selected hotbar cell is already a solid highlight, so it skips the shared cell border.
+    TFunction<bool()> SkipCellBorder;
     virtual FReply OnMouseButtonDown(const FGeometry& Geometry, const FPointerEvent& Event) override
     {
         if (RightClick && Event.GetEffectingButton() == EKeys::RightMouseButton) return FReply::Handled();
@@ -58,8 +61,52 @@ public:
         if (RightClick && Event.GetEffectingButton() == EKeys::RightMouseButton) { RightClick(); return FReply::Handled(); }
         return SButton::OnMouseButtonUp(Geometry, Event);
     }
-    // One selection treatment: the book draws its own accent frame and fill, never Slate's blue focus ring.
     virtual const FSlateBrush* GetFocusBrush() const override { return FStyleDefaults::GetNoBrush(); }
+    // Every book button is a bordered box of its own (see HomesteadFrameStyle::ForEachCellRect). A
+    // full-page scrim button is skipped by its height.
+    virtual int32 OnPaint(const FPaintArgs& Paint, const FGeometry& Geometry, const FSlateRect& CullingRect,
+        FSlateWindowElementList& Out, int32 LayerId, const FWidgetStyle& WidgetStyle, bool bParentEnabled) const override
+    {
+        const int32 ChildLayer = SButton::OnPaint(Paint, Geometry, CullingRect, Out, LayerId, WidgetStyle, bParentEnabled);
+        const FVector2f Size = FVector2f(Geometry.GetLocalSize());
+        if (Size.Y > MaxCellHeight || (SkipCellBorder && SkipCellBorder())) return ChildLayer;
+        const FSlateBrush* White = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush"));
+        const FLinearColor Tint = WidgetStyle.GetColorAndOpacityTint();
+        const bool bHot = IsHovered();
+        HomesteadFrameStyle::ForEachCellRect(Size.X, Size.Y,
+            [&](HomesteadFrameStyle::ECellPart Part, float X, float Y, float W, float H)
+            {
+                FSlateDrawElement::MakeBox(Out, ChildLayer, Geometry.ToPaintGeometry(FVector2f(W, H),
+                    FSlateLayoutTransform(FVector2f(X, Y))), White, ESlateDrawEffect::None,
+                    HomesteadFrameStyle::CellColorOf(Part, bHot) * Tint);
+            });
+        return ChildLayer + 1;
+    }
+    static constexpr float MaxCellHeight = 220.0f;
+};
+// The same cell border as an SMenuButton, for tiles that are not buttons (empty pack cells).
+class SMenuCellBorder : public SLeafWidget
+{
+public:
+    SLATE_BEGIN_ARGS(SMenuCellBorder) {}
+    SLATE_END_ARGS()
+    void Construct(const FArguments&) { SetVisibility(EVisibility::HitTestInvisible); }
+    virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D::ZeroVector; }
+    virtual int32 OnPaint(const FPaintArgs&, const FGeometry& Geometry, const FSlateRect&,
+        FSlateWindowElementList& Out, int32 LayerId, const FWidgetStyle& WidgetStyle, bool) const override
+    {
+        const FVector2f Size = FVector2f(Geometry.GetLocalSize());
+        const FSlateBrush* White = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush"));
+        const FLinearColor Tint = WidgetStyle.GetColorAndOpacityTint();
+        HomesteadFrameStyle::ForEachCellRect(Size.X, Size.Y,
+            [&](HomesteadFrameStyle::ECellPart Part, float X, float Y, float W, float H)
+            {
+                FSlateDrawElement::MakeBox(Out, LayerId, Geometry.ToPaintGeometry(FVector2f(W, H),
+                    FSlateLayoutTransform(FVector2f(X, Y))), White, ESlateDrawEffect::None,
+                    HomesteadFrameStyle::CellColorOf(Part, false) * Tint);
+            });
+        return LayerId + 1;
+    }
 };
 class SMenuFocusAnchor : public SCompoundWidget
 {
@@ -315,6 +362,7 @@ inline int32 ShiftFieldBookPage(int32 Page, int32 Direction)
 
 using MenuDetail::SMenuButton;
 using MenuDetail::SMenuFocusAnchor;
+using MenuDetail::SMenuCellBorder;
 using MenuDetail::SHomesteadCraftFill;
 using MenuDetail::Ink;
 using MenuDetail::Muted;

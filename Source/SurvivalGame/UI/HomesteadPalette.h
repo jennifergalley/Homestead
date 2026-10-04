@@ -33,6 +33,15 @@ inline HomesteadUITheme::FThemeColor FrameFlourish(FLinearColor(0.92f, 0.74f, 0.
 inline HomesteadUITheme::FThemeColor FrameGrain(FLinearColor(0.93f, 0.93f, 0.84f, 1.0f),
     FLinearColor(0.03f, 0.022f, 0.014f, 1.0f), FLinearColor(0.8632f, 0.7605f, 0.5647f, 1.0f));
 
+// The book's cell borders (HomesteadFrameStyle::ForEachCellRect): quieter than the frame, so a screen of
+// cells reads as inked boxes, with the corner brackets a shade stronger than the rule between them.
+inline HomesteadUITheme::FThemeColor CellRule(FLinearColor(0.92f, 0.74f, 0.43f, 0.35f),
+    FLinearColor(0.2f, 0.12f, 0.05f, 0.55f), FLinearColor(0.6584f, 0.4020f, 0.1221f, 0.4f));
+inline HomesteadUITheme::FThemeColor CellInner(FLinearColor(0.92f, 0.74f, 0.43f, 0.15f),
+    FLinearColor(0.2f, 0.12f, 0.05f, 0.22f), FLinearColor(0.6584f, 0.4020f, 0.1221f, 0.2f));
+inline HomesteadUITheme::FThemeColor CellBracket(FLinearColor(0.92f, 0.74f, 0.43f, 0.8f),
+    FLinearColor(0.2f, 0.12f, 0.05f, 0.9f), FLinearColor(0.6584f, 0.4020f, 0.1221f, 0.85f));
+
 // An ink keycap (SHomesteadKeycap): a paper cap with an ink rim, its lower edge a shade deeper for a
 // slight bevel, in every theme; the dark book's cap is umber vellum with cream ink.
 inline HomesteadUITheme::FThemeColor KeycapPaper(FLinearColor(0.62f, 0.54f, 0.38f, 1.0f),

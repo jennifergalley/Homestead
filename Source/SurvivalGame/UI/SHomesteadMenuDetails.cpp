@@ -341,23 +341,9 @@ FString SHomesteadMenu::EquipmentLabel(int32 Index) const
 FString SHomesteadMenu::PackHint() const
 {
     if (!Controller.IsValid()) return {};
-    const bool bHotbarLine = Region == ERegion::Hotbar || HeldHotbarRow.IsSet() || HeldHotbarSlot != INDEX_NONE;
-    if (bHotbarLine && !HotbarCells.IsEmpty()) return HotbarHint();
-    const int32 Index = DetailIndex();
-    FString Subject;
-    if (Entries.IsValidIndex(Index) && Entries[Index].Subject != EHomesteadMenuSubject::Legacy
-        && Entries[Index].Subject != EHomesteadMenuSubject::EmptySlot)
-    {
-        const auto& Row = Entries[Index];
-        Subject = EntryName(Row) + (Row.Quantity > 1 ? FString::Printf(TEXT(" x%d"), Row.Quantity) : FString())
-            + TEXT("  (") + Row.Location + TEXT(")") + (Row.Status.IsEmpty() ? FString() : TEXT("   ") + Row.Status)
-            + TEXT("\n");
-    }
-    const bool Chest = Controller->ActiveStorageChest().IsSet();
-    if (Controller->UsesGamepad())
-        return Subject + TEXT("A  pick up / place     Y  item actions     X  split in half     LB / RB  pages");
-    return Subject + (Chest
-        ? TEXT("Shift+click  move across     Right-click  actions     Ctrl+click  amount     Drag  move")
-        : TEXT("Right-click  actions     Shift+click  hotbar / wear     Ctrl+click  amount     Drag  rearrange"));
+    // The pack page carries no standing control hints or subject line; only the prompt that guides a
+    // hotbar move she has started.
+    const bool bHoldingForHotbar = HeldHotbarRow.IsSet() || HeldHotbarSlot != INDEX_NONE;
+    return bHoldingForHotbar && !HotbarCells.IsEmpty() ? HotbarHint() : FString();
 }
 }

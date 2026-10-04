@@ -124,6 +124,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBookHotbar(bool bGridRow)
                 return FReply::Handled();
             });
         Button->RightClick = [this, Slot]() { if (PointerAction() && Dialog == EDialog::None) OpenHotbarSlotMenu(Slot, true); };
+        Button->SkipCellBorder = [this, Slot]() { return Controller.IsValid() && Controller->SelectedHotbarIndex() == Slot; };
         Button->SetContent(
             SNew(SBox)
             .WidthOverride(bGridRow ? FOptionalSize() : FOptionalSize(MenuHotbarStyle::SlotSize))
@@ -349,9 +350,6 @@ FString SHomesteadMenu::HotbarHint() const
             UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(HeldHotbarSlot).c_str()),
             Pad ? TEXT("D-pad  choose slot     A  put it here (swaps)     B  cancel")
                 : TEXT("Enter  put it here (swaps)     Esc  cancel"));
-    const FString Subject = FString::Printf(TEXT("Slot %s: %s  (the first row of your pack)\n"),
-        UTF8_TO_TCHAR(Homestead::HotbarKeyLabel(HotbarSelection).c_str()), *Name(HotbarSelection));
-    return Subject + (Pad ? TEXT("A  pick up and move     Y  options     In the pack, Y  Move to a hotbar slot")
-        : TEXT("Drag stacks in, out and between slots     Right-click  options"));
+    return FString();
 }
 }

@@ -62,6 +62,43 @@ void ForEachRect(float W, float H, FnType&& Fn)
     }
 }
 
+// The field book's own rectangles (tabs, pack and hotbar cells, equipment slots, craft rows) carry a small
+// border of their own instead of one frame around the whole book: a hairline rule, a fainter inner rule
+// and a bracket at each corner with a dot tucked inside it. Fixed rectangle count per button.
+constexpr float CellRuleWidth = 1.5f;
+constexpr float CellInnerInset = 3.5f, CellInnerWidth = 1.0f;
+constexpr float CellBracketArm = 7.0f, CellBracketWidth = 2.5f, CellDot = 2.0f, CellDotInset = 5.0f;
+// Below these sizes a button only gets the hairline rule (a swatch, a round handle, a tiny icon button).
+constexpr float CellMinSize = 14.0f, CellInnerMinSize = 30.0f;
+
+enum class ECellPart : uint8 { Rule, Inner, Bracket };
+
+template <typename FnType>
+void ForEachCellRect(float W, float H, FnType&& Fn)
+{
+    if (W < CellMinSize || H < CellMinSize) return;
+    Fn(ECellPart::Rule, 0.0f, 0.0f, W, CellRuleWidth);
+    Fn(ECellPart::Rule, 0.0f, H - CellRuleWidth, W, CellRuleWidth);
+    Fn(ECellPart::Rule, 0.0f, CellRuleWidth, CellRuleWidth, H - 2 * CellRuleWidth);
+    Fn(ECellPart::Rule, W - CellRuleWidth, CellRuleWidth, CellRuleWidth, H - 2 * CellRuleWidth);
+    if (W < CellInnerMinSize || H < CellInnerMinSize) return;
+
+    const float L = CellInnerInset, T = CellInnerInset, R = W - CellInnerInset, B = H - CellInnerInset;
+    Fn(ECellPart::Inner, L, T, R - L, CellInnerWidth);
+    Fn(ECellPart::Inner, L, B - CellInnerWidth, R - L, CellInnerWidth);
+    Fn(ECellPart::Inner, L, T + CellInnerWidth, CellInnerWidth, B - T - 2 * CellInnerWidth);
+    Fn(ECellPart::Inner, R - CellInnerWidth, T + CellInnerWidth, CellInnerWidth, B - T - 2 * CellInnerWidth);
+    for (int32 Corner = 0; Corner < 4; ++Corner)
+    {
+        const bool bRight = Corner & 1, bBottom = Corner & 2;
+        const auto Span = [](bool bFar, float Extent, float Length) { return bFar ? Extent - Length : 0.0f; };
+        Fn(ECellPart::Bracket, Span(bRight, W, CellBracketArm), Span(bBottom, H, CellBracketWidth), CellBracketArm, CellBracketWidth);
+        Fn(ECellPart::Bracket, Span(bRight, W, CellBracketWidth), Span(bBottom, H, CellBracketArm), CellBracketWidth, CellBracketArm);
+        Fn(ECellPart::Bracket, Span(bRight, W, CellDotInset + CellDot) + (bRight ? 0.0f : CellDotInset),
+            Span(bBottom, H, CellDotInset + CellDot) + (bBottom ? 0.0f : CellDotInset), CellDot, CellDot);
+    }
+}
+
 // The colour of a part now (the theme may change while she plays).
 inline FLinearColor ColorOf(EPart Part)
 {
@@ -71,6 +108,16 @@ inline FLinearColor ColorOf(EPart Part)
     case EPart::Inner: return HomesteadPalette::FrameInner;
     case EPart::Flourish: return HomesteadPalette::FrameFlourish;
     default: return HomesteadPalette::FrameGrain.CopyWithNewOpacity(GrainOpacity);
+    }
+}
+
+inline FLinearColor CellColorOf(ECellPart Part, bool bHovered)
+{
+    switch (Part)
+    {
+    case ECellPart::Rule: return bHovered ? FLinearColor(HomesteadPalette::CellBracket) : FLinearColor(HomesteadPalette::CellRule);
+    case ECellPart::Inner: return HomesteadPalette::CellInner;
+    default: return HomesteadPalette::CellBracket;
     }
 }
 }

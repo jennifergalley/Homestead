@@ -595,6 +595,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
             SNew(STextBlock).ColorAndOpacity(Muted).Font(HomesteadUITheme::Font("Regular", 14))
             .WrapTextAt(Storage ? 0.0f : Columns() * (ItemCellWidth + 12.0f))
             .AutoWrapText(Storage)
+            .Visibility_Lambda([this]() { return PackHint().IsEmpty() ? EVisibility::Collapsed : EVisibility::HitTestInvisible; })
             .Text_Lambda([this]() { return FText::FromString(PackHint()); })
         ];
     }
@@ -619,16 +620,21 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
     {
         TSharedRef<SWidget> Cell = SNew(SBox).WidthOverride(ItemCellWidth + 4).HeightOverride(80).Padding(2)
             [
-                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(1.5f)
-                .BorderBackgroundColor(FLinearColor(Ink.R, Ink.G, Ink.B, 0.2f))
+                SNew(SOverlay)
+                + SOverlay::Slot()
                 [
-                    SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
-                    .BorderBackgroundColor_Lambda([this, PackSlot]()
-                    {
-                        return PackSlot != INDEX_NONE && PackSlot == PointerPadSlot ? FLinearColor(MenuGold)
-                            : HomesteadUITheme::Themed(FLinearColor(0.2f, 0.3f, 0.24f, 0.25f));
-                    })
+                    SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(1.5f)
+                    .BorderBackgroundColor(FLinearColor(Ink.R, Ink.G, Ink.B, 0.2f))
+                    [
+                        SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush"))
+                        .BorderBackgroundColor_Lambda([this, PackSlot]()
+                        {
+                            return PackSlot != INDEX_NONE && PackSlot == PointerPadSlot ? FLinearColor(MenuGold)
+                                : HomesteadUITheme::Themed(FLinearColor(0.2f, 0.3f, 0.24f, 0.25f));
+                        })
+                    ]
                 ]
+                + SOverlay::Slot()[ SNew(SMenuCellBorder) ]
             ];
         if (PackSlot != INDEX_NONE) PackPadCells.Add({PackSlot, Cell});
         return Cell;

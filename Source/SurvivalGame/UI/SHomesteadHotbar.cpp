@@ -5,7 +5,6 @@
 #include "../HomesteadController.h"
 #include "HomesteadPalette.h"
 #include "HomesteadNoticeStyle.h"
-#include "SHomesteadFrame.h"
 #include "SHomesteadKeycap.h"
 #include "SHomesteadIcon.h"
 #include "Styling/CoreStyle.h"
@@ -200,15 +199,6 @@ void SHomesteadHotbar::Construct(const FArguments& Args)
                         [
                             // The slot's number as an ink keycap, a stamp on the cell's corner.
                             Keycap::Make(FText::FromString(Index == 9 ? TEXT("0") : FString::FromInt(Index + 1)), 12)
-                        ]
-                        // The shared frame inside the selected cell, so the choice reads as framed, not just tinted.
-                        + SOverlay::Slot()
-                        [
-                            SNew(SHomesteadFrame)
-                            .Visibility_Lambda([Weak = Controller, Index]()
-                            {
-                                return Weak.IsValid() && Weak->SelectedHotbarIndex() == Index ? EVisibility::SelfHitTestInvisible : EVisibility::Collapsed;
-                            })
                         ]
                     ]
                 ]

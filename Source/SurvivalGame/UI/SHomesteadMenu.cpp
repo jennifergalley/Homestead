@@ -1,6 +1,5 @@
 #include "SHomesteadMenu.h"
 #include "HomesteadUITheme.h"
-#include "SHomesteadFrame.h"
 #include "../HomesteadController.h"
 #include "SHomesteadMenuPrivate.h"
 
@@ -62,12 +61,7 @@ void SHomesteadMenu::BuildFrame()
                         ]
                     ]
                         + SOverlay::Slot()[ SAssignNew(ModalHost, SBox).Visibility(EVisibility::Collapsed) ]
-                        // The shared ornate frame around the page (the appearance book paints its own on the Canvas).
-                        + SOverlay::Slot().Padding(6)
-                        [
-                            SNew(SHomesteadFrame)
-                            .Visibility_Lambda([this]() { return SeenPage == 6 ? EVisibility::Collapsed : EVisibility::HitTestInvisible; })
-                        ]
+                        // No frame around the page: each tab, cell and row carries its own border (SMenuButton).
                         // Notices: a small card over the page that never takes focus, clicks or layout space.
                         + SOverlay::Slot().Expose(NoticeSlot).HAlign(HAlign_Center).VAlign(VAlign_Bottom)
                             .Padding(0, 0, 0, MenuNoticeStyle::BottomInset)
