@@ -356,13 +356,59 @@ head halves, then repeat the one-trout proof before the full six-fish bake.
 The sixteen dishes/portions and image/eating wiring remain untouched and are
 still several hours of work. Integration's actual ClearCoat compile/import,
 held-pole close grip evidence and gameplay/release gates remain outstanding.
-Visible Blender preserves the one-trout baked scene; earlier full-family
+That checkpoint preserved the one-trout baked scene; earlier full-family
 and source scenes have named E: preservation copies.
 
 Current build02-only usage is 319 calls through event70353, 1,920,206,500,000
 recorded nano-AIU, incomplete/provisional. Actual model remains
 `gpt-6.1-sol`/high; launch context default, actual context tier unknown. No
 new helper/model segment or reconciled billing claim; later calls need recapture.
+
+### Current held hinge/landmark family checkpoint
+
+Still WIP, NOT [ready] or import/admission approval. The lower jaw now rotates
+about its posterior hinge and retreats instead of dropping vertically.
+Five predatory species have 160 seated curved teeth in total; carp retains
+four surface-seated barbels. Adaptive sampling keeps the 201 body-ring budget
+but follows the curved opercular landmark. Denser sampling exposed an inverted
+mackerel oral roof: the lining inset now clamps to 45% of local mouth half-width.
+Mirrored lateral-line scale coordinates, overlapping relief and granular
+head pigmentation are present; the wet film remains exactly .65/.06.
+
+Held evidence: `Assets\Props\CaughtFish\HingedProof\{Source,Baked}` has matching
+one-trout source/clay/baked views, five 4096 maps and `comparison.json`.
+Mean/RMS 8-bit differences are .084/.579 hero and .544/1.259 detail.
+`Assets\Props\CaughtFish\FamilyReview` has the current-source six-family blend,
+six FBX, thirty 4096 maps, twelve viewed 3840x2160/192-sample OPTIX views,
+atlas overview, report and `verification.json`. Earlier Refinement/StructuralProof
+evidence and the stale c70 production-root assets remain untouched.
+
+All six geometry, pivot, finite-UV/outward-skin, hinge/vestibule, pupil,
+tooth/barbel-root and pectoral fixtures pass. Triangle counts: trout 51,548;
+salmon 57,534; perch 51,674; carp 53,666; mackerel 55,364; bass 54,751.
+Both copied receipt validators pass against current source. The portable family
+blend was reopened and its 24 material-map dependencies checked; AO is exported
+and independently hashed, not a Blender material image node. A first dependency
+probe incorrectly parsed Blender's relative prefix as a Windows UNC path;
+the new explicit fixture strips that prefix before checking local Textures.
+Four offline import contracts and diff whitespace checks pass.
+
+The art bar is NOT met: viewed heads remain too molded/wedge-like, scale
+reflectance shows rectangular/checker-like regularity, and fins remain too
+opaque/graphic. Correct continuous substrate versus exposed-scale variation
+and species head proportions before another family bake; no placeholder
+promotion. Sixteen dishes/portions and image/eating wiring have not started.
+Budget another 8-12+ hours for remaining art/wiring, not a release promise;
+Integration's actual engine/material and playtest gates are additional.
+
+Visible Blender PID20420/port9878 now holds the portable baked six-family
+material-preview grid, with a named E: preservation copy. Grid transforms are
+review-only and do not affect the saved FBX/production blend. No Unreal launch,
+compile, import, gameplay/save/enum/version/placement change, helper or automation.
+Build02-only provisional usage: 356 calls through event70403,
+2,162,869,550,000 recorded nano-AIU; later calls require recapture.
+Actual model/effort remains `gpt-6.1-sol`/high; launch context default,
+actual context tier unknown.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

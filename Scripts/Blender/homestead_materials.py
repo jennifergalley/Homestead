@@ -255,7 +255,7 @@ def fish_skin(name: str, back: tuple, flank: tuple, belly: tuple,
     _, circumference, _ = g.separate(scale_p)
     rows = g.math("MULTIPLY", circumference, scale_rings / (2 * math.pi))
     columns = g.math("MULTIPLY", along, scale_rows)
-    scale_warp = g.noise(g.combine(columns, rows, 2.37), scale=.09, detail=2).outputs["Color"]
+    scale_warp = g.noise(g.combine(columns, rows, 2.37), scale=.75, detail=2).outputs["Color"]
     warp_x, warp_y, _ = g.separate(scale_warp)
     columns = g.math("ADD", columns, g.remap(warp_x, 0, 1, -.15, .15))
     rows = g.math("ADD", rows, g.remap(warp_y, 0, 1, -.12, .12))
@@ -274,6 +274,13 @@ def fish_skin(name: str, back: tuple, flank: tuple, belly: tuple,
                   g.math("MULTIPLY", scale_gate, .72), blend="MULTIPLY")
     color = g.mix(color, (.62, .67, .64),
                   g.math("MULTIPLY", g.math("MULTIPLY", rim, scale_gate), .08), blend="MULTIPLY")
+    lateral_phase = g.math("MULTIPLY", g.remap(along, .22, .90), math.pi)
+    lateral_up = g.math("ADD", .035, g.math("MULTIPLY", g.math("SINE", lateral_phase), .030))
+    lateral = g.remap(g.math("ABSOLUTE", g.math("SUBTRACT", up, lateral_up)), .006, .018, 1, 0)
+    lateral = g.math("MULTIPLY", lateral, scale_gate)
+    pore_line = g.math("MULTIPLY", lateral, g.remap(
+        g.math("COSINE", g.math("MULTIPLY", columns, 2 * math.pi)), .87, .995))
+    color = g.mix(color, (.72, .75, .68), g.math("MULTIPLY", lateral, .18), blend="MULTIPLY")
     gill_delta = g.math("DIVIDE", g.math("SUBTRACT", up, .20), .50)
     gill_u = g.math("ADD", .187, g.math("MULTIPLY", .065,
                    g.math("EXPONENT", g.math("MULTIPLY", g.math("MULTIPLY", gill_delta, gill_delta), -1))))
@@ -282,6 +289,7 @@ def fish_skin(name: str, back: tuple, flank: tuple, belly: tuple,
     color = g.mix(color, (.20, .23, .17), g.math("MULTIPLY", gill_line, .5), blend="MULTIPLY")
     head = g.math("MULTIPLY", g.remap(along, .02, .06), g.remap(along, .255, .19))
     pores = g.noise(g.scale(p, (390, 8, 110)), scale=1, detail=2).outputs["Fac"]
+    granules = g.noise(g.scale(p, (1250, 25, 380)), scale=1, detail=2).outputs["Fac"]
     mottling = g.noise(g.scale(p, (78, 6, 19)), scale=1, detail=3).outputs["Fac"]
     color = g.mix(color, g.ramp(mottling, [(0,(.72,.77,.60)), (1,(1.10,1.04,.87))]),
                   g.math("MULTIPLY", head, .45), blend="MULTIPLY")
@@ -293,6 +301,10 @@ def fish_skin(name: str, back: tuple, flank: tuple, belly: tuple,
     color = g.mix(color, (.55,.60,.44), g.math("MULTIPLY", plate_crease, .35), blend="MULTIPLY")
     color = g.mix(color, g.ramp(pores, [(0,(.65,.70,.66)), (1,(1.04,1.07,1.02))]),
                   g.math("MULTIPLY", head, .5), blend="MULTIPLY")
+    tint = (.86, .77, .48) if pattern in {"trout", "carp"} else (.86, .95, .78)
+    color = g.mix(color, tint, g.math("MULTIPLY", head, .45), blend="MULTIPLY")
+    color = g.mix(color, g.ramp(granules, [(0, (.38, .45, .40)), (1, (1.20, 1.16, .98))]),
+                  g.math("MULTIPLY", head, .70), blend="MULTIPLY")
     nares = 0
     for position, elevation in ((eye_u*.55,.43),(eye_u*.72,.48)):
         dx = g.math("DIVIDE", g.math("SUBTRACT", along, position), .0038)
@@ -303,20 +315,24 @@ def fish_skin(name: str, back: tuple, flank: tuple, belly: tuple,
     g.set("Base Color", color)
     rough = g.math("ADD", g.math("MULTIPLY", g.remap(cell_tone, .30, .70, .09, .34),
                                 g.math("SUBTRACT", 1, head)),
-                   g.math("MULTIPLY", g.remap(pores, 0, 1, .085, .19), head))
+                   g.math("MULTIPLY", g.remap(granules, .35, .65, .23, .09), head))
     g.set("Roughness", rough)
     silver = .40 if pattern in {"salmon", "mackerel", "bass"} else .24
     reflectance = g.math("MULTIPLY", g.remap(cell_tone, .30, .70, .60, 1.20), silver)
     g.set("Metallic", g.math("MAXIMUM", g.math("MULTIPLY", scale_gate, reflectance),
-                            g.math("MULTIPLY", head, .18)))
+                            g.math("MULTIPLY", head, g.remap(granules, .35, .65, .20, .48))))
     g.set("Coat Weight", FISH_COAT_WEIGHT)
     g.set("Coat Roughness", FISH_COAT_ROUGHNESS)
-    crown = g.math("MULTIPLY", g.math("SINE", g.math("MULTIPLY", sx, math.pi)),
+    crown = g.math("MULTIPLY", g.math("ADD", .20, g.math("MULTIPLY", sx, .80)),
                    g.math("MAXIMUM", 0, g.math("SUBTRACT", 1, g.math("MULTIPLY", sy,
                                                                                   g.math("MULTIPLY", sy, 4)))))
-    normal = g.bump(g.math("MULTIPLY", crown, scale_gate), .26, .00009)
-    normal = g.bump(g.math("MULTIPLY", rim, scale_gate), .24, .000065, normal)
+    crown = g.math("MULTIPLY", crown, g.remap(g.math("SUBTRACT", sx, arch), -.018, .018, 1, 0))
+    crown = g.math("MULTIPLY", crown, g.remap(cell_tone, 0, 1, .80, 1.20))
+    normal = g.bump(g.math("MULTIPLY", crown, scale_gate), .42, .00015)
+    normal = g.bump(g.math("MULTIPLY", g.math("MULTIPLY", rim, scale_gate), -1), .12, .000045, normal)
+    normal = g.bump(g.math("MULTIPLY", pore_line, -1), .16, .00005, normal)
     normal = g.bump(g.math("MULTIPLY", pores, head), .22, .000065, normal)
+    normal = g.bump(g.math("MULTIPLY", granules, head), .17, .000021, normal)
     normal = g.bump(g.math("MULTIPLY", plate_crease, -1), .25, .00018, normal)
     normal = g.bump(g.math("MULTIPLY", gill_line, -1), .35, .00035, normal)
     g.set("Normal", g.bump(g.math("MULTIPLY", nares, -1), .35, .0007, normal))

@@ -68,14 +68,32 @@ def check_jaw_openings() -> None:
     skin = bpy.data.materials.new("CaughtFishRegressionSkin")
     cavity = bpy.data.materials.new("CaughtFishRegressionCavity")
     try:
+        assert sum(count for _, count in recipe.BODY_STATION_SPANS) == recipe.BODY_RINGS - 1
+        for sample in range(81):
+            angle = 2 * math.pi * sample / 80
+            stations = [recipe.landmark_station(recipe.body_station(ring), angle)
+                        for ring in range(recipe.BODY_RINGS)]
+            assert all(a < b for a, b in zip(stations, stations[1:])), "Head rings cross"
+            posterior = .187 + .065 * math.exp(-((math.sin(angle) - .20) / .50) ** 2)
+            assert min(abs(u - posterior) for u in stations) < .000001, "Missing opercular landmark ring"
         for fish in recipe.FISH:
             obj = recipe.body(kit, fish, skin, cavity)
             data = obj.data
             try:
+                chin_u = .035
+                rest = recipe.surface(fish, chin_u, 1.5 * math.pi)
+                posed = recipe.jaw_surface(fish, chin_u, 1.5 * math.pi, False)
+                hinge_u = fish["mouth_end"]
+                hinge = Vector((rest.x, fish["length"] * (hinge_u - .5),
+                                recipe.surface(fish, hinge_u, recipe.oral_angle(fish, hinge_u)).z
+                                + fish["length"] * .008))
+                assert posed.y > rest.y and posed.z < rest.z, fish["key"] + " lacks mandibular retreat"
+                assert abs((posed - hinge).length - (rest - hinge).length) < .000001, (
+                    fish["key"] + " inflates its chin instead of hinging")
                 columns = recipe.BODY_SIDES // 2 + 1
                 lower_offset = recipe.BODY_RINGS * columns
                 for ring in range(recipe.BODY_RINGS):
-                    u = .90 * ring / (recipe.BODY_RINGS - 1)
+                    u = recipe.body_station(ring)
                     for side in range(2):
                         top = data.vertices[ring * columns + (0 if side == 0 else columns - 1)].co
                         bottom = data.vertices[lower_offset + ring * columns + (columns - 1 if side == 0 else 0)].co
@@ -105,6 +123,22 @@ def check_jaw_openings() -> None:
                         assert face.normal.dot(radial) > 0, fish["key"] + " has inverted skin normals"
                 head = BVHTree.FromPolygons([vertex.co for vertex in data.vertices],
                                            [face.vertices[:] for face in data.polygons])
+                mouth_parts = recipe.mouth(kit, fish, skin, cavity)
+                try:
+                    assert len(mouth_parts) == (4 if fish["pattern"] == "carp" else 32)
+                    for part in mouth_parts:
+                        assert all(math.isfinite(c) for vertex in part.data.vertices for c in vertex.co)
+                        sides = 12 if fish["pattern"] == "carp" else 8
+                        root = sum((vertex.co for vertex in part.data.vertices[:sides]), Vector()) / sides
+                        nearest, _, _, distance = head.find_nearest(root)
+                        assert nearest is not None and distance < .00015, (
+                            fish["key"] + " has a floating tooth/barbel root")
+                finally:
+                    for part in mouth_parts:
+                        mesh = part.data
+                        bpy.data.objects.remove(part, do_unlink=True)
+                        if mesh.users == 0:
+                            bpy.data.meshes.remove(mesh)
                 for side in (-1, 1):
                     eye = recipe.eye(kit, fish, skin, side)
                     eye_data = eye.data
@@ -123,7 +157,7 @@ def check_jaw_openings() -> None:
                 bpy.data.objects.remove(obj, do_unlink=True)
                 if data.users == 0:
                     bpy.data.meshes.remove(data)
-        print("ORIGINAL_FISH_JAW_PASS 6 rounded jaws/vestibules, inward oral linings, closed seams, 12 unclipped pupils")
+        print("ORIGINAL_FISH_JAW_PASS 6 hinged jaws/vestibules, 160 seated teeth/4 barbels, inward linings, closed seams, 12 unclipped pupils")
     finally:
         for material in (skin, cavity):
             if material.users == 0:
@@ -191,7 +225,7 @@ def check_geometry(keys=EXPECTED) -> None:
         signature = hashlib.sha256(normalized).hexdigest()
         assert signature not in signatures, key + " reuses another catch's normalized geometry"
         signatures.add(signature)
-        assert len(obj.material_slots) in (1, 5, 6, 7), key + " has missing anatomy materials"
+        assert len(obj.material_slots) in (1, 5, 6, 7, 8), key + " has missing anatomy materials"
         print(f"ORIGINAL_FISH_PASS {key}: {species}, {triangles} tris, length/pivot/UV/unique geometry")
 
 
@@ -207,6 +241,29 @@ def check_wet_film(keys=EXPECTED) -> None:
             assert abs(bsdf.inputs["Coat Weight"].default_value - materials.FISH_COAT_WEIGHT) < .000001
             assert abs(bsdf.inputs["Coat Roughness"].default_value - materials.FISH_COAT_ROUGHNESS) < .000001
     print("ORIGINAL_FISH_WET_FILM_PASS", len(keys))
+
+
+def check_baked_texture_dependencies(keys=EXPECTED) -> None:
+    for key in keys:
+        obj = bpy.data.objects.get("SM_" + key)
+        assert obj is not None, "Missing baked catch mesh: " + key
+        images = {node.image for slot in obj.material_slots
+                  for node in slot.material.node_tree.nodes
+                  if node.type == "TEX_IMAGE" and node.image is not None}
+        assert len(images) == 4, key + " lacks four baked material maps"
+        expected = {f"T_{key}_{kind}.png" for kind in ("basecolor", "roughness", "normal", "metallic")}
+        resolved = set()
+        for image in images:
+            assert image.source == "FILE", key + " retains an unsaved bake image"
+            # Strip Blender's relative prefix before Windows treats it as a UNC path.
+            assert image.filepath.startswith("//"), key + " retains an absolute scratch dependency"
+            relative = Path(image.filepath[2:])
+            assert relative.parts[0] == "Textures", key + " references textures outside its asset folder"
+            path = Path(bpy.path.abspath(image.filepath))
+            assert path.is_file(), key + " has a missing material map"
+            resolved.add(path.name)
+        assert resolved == expected, key + " references another catch's textures"
+    print("ORIGINAL_FISH_PORTABLE_TEXTURES_PASS", 4 * len(keys))
 
 
 def main() -> None:

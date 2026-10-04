@@ -1,0 +1,224 @@
+{
+  "draft_only": true,
+  "not_art_or_unreal_acceptance": true,
+  "authored_source_sha256": "c0bb2df366eab3c44ccf4e1d9d5bbc87386447c64567915a630654dbde96dcb9",
+  "material_source_sha256": "a83c05f5487fe7c2bb9b2f3f492e6a3bedaac6e35d46afc6f687b19f75a8f7b2",
+  "meshes": {
+    "SM_RiverTrout": {
+      "species": "Salmo trutta",
+      "triangles": 51548,
+      "maps": {
+        "basecolor": {
+          "file": "T_RiverTrout_basecolor.png",
+          "sha256": "d44e849f01d45b92a5d631c68e955506ad3182d0c7792a454801016038b9db5c"
+        },
+        "roughness": {
+          "file": "T_RiverTrout_roughness.png",
+          "sha256": "e6c0d92678e93137e561de2a61eca0036bd4e1d6d4d215e7c7aad273f27e4a63"
+        },
+        "normal": {
+          "file": "T_RiverTrout_normal.png",
+          "sha256": "48e6302984806e57074d855fe951ce08b0cf0426a7ea2e74412e4e661f53a125"
+        },
+        "ao": {
+          "file": "T_RiverTrout_ao.png",
+          "sha256": "4440a3bf93e0b173e7f054a2a8f5ba6134a1b1c8f244bacf46c326f35f5e32eb"
+        },
+        "metallic": {
+          "file": "T_RiverTrout_metallic.png",
+          "sha256": "8e70b4cd9143ccb2844d7d2f02d0d607f1294a60d40347976520373f981d46e8"
+        }
+      },
+      "views": {
+        "hero": {
+          "file": "beauty_SM_RiverTrout_hero.png",
+          "sha256": "a681249ed5498ba971da00516abca06c509b9ccc58f625447d616f85e07d0102"
+        },
+        "detail": {
+          "file": "beauty_SM_RiverTrout_detail.png",
+          "sha256": "7fe4096782fa21e70348eccf31066c04d8a54cd04c1055f43cfc285e36b10261"
+        }
+      }
+    },
+    "SM_RiverSalmon": {
+      "species": "Salmo salar",
+      "triangles": 57534,
+      "maps": {
+        "basecolor": {
+          "file": "T_RiverSalmon_basecolor.png",
+          "sha256": "0abe2ae7a579936c95b9bebb644b00fdba76fb0eeac8e0555281eff3880c0a1d"
+        },
+        "roughness": {
+          "file": "T_RiverSalmon_roughness.png",
+          "sha256": "68069138df85196b6af8a9052434c92f1e14456af2456ccc4ff07a1199bab92c"
+        },
+        "normal": {
+          "file": "T_RiverSalmon_normal.png",
+          "sha256": "88abdd5aa11ba3bf6b48cbcb4541146de79bea7219249746b542782f3c01a7b4"
+        },
+        "ao": {
+          "file": "T_RiverSalmon_ao.png",
+          "sha256": "32e25cd3ab4508ff0a282218925a7e6bf07a753bc89121d680b9efa592ed2735"
+        },
+        "metallic": {
+          "file": "T_RiverSalmon_metallic.png",
+          "sha256": "908ce581923960b9ce2d1e9bd1ba5415ea9083b5c30bfabfba9bc7ee7a3281da"
+        }
+      },
+      "views": {
+        "hero": {
+          "file": "beauty_SM_RiverSalmon_hero.png",
+          "sha256": "7ebb7b8f72146f3f14055ad2d55766b97dc81e375588e0a25602b7aac7ed2cf4"
+        },
+        "detail": {
+          "file": "beauty_SM_RiverSalmon_detail.png",
+          "sha256": "e5c79659c90664f781f8fb975ac268d969317cf274975a4f4ae90e8bf9783734"
+        }
+      }
+    },
+    "SM_LakePerch": {
+      "species": "Perca fluviatilis",
+      "triangles": 51674,
+      "maps": {
+        "basecolor": {
+          "file": "T_LakePerch_basecolor.png",
+          "sha256": "2bfacd6659a43f2a9793139b81781e38ef1220232fc4041148dd3fb102bd2643"
+        },
+        "roughness": {
+          "file": "T_LakePerch_roughness.png",
+          "sha256": "0d68fd4d1c89ec9e013f2a2a108e518bd74236068f0dddbfc06b1599751672a8"
+        },
+        "normal": {
+          "file": "T_LakePerch_normal.png",
+          "sha256": "555db8e9fe91e7971dbeff55ca5b3d469321328ac58c00ab4359d10ef1cf4baa"
+        },
+        "ao": {
+          "file": "T_LakePerch_ao.png",
+          "sha256": "9c265ea5f80e87fb9e30612db6aca89741efe2a23f1800ebc155ff60bcf0663b"
+        },
+        "metallic": {
+          "file": "T_LakePerch_metallic.png",
+          "sha256": "a4d44e9162f566da3fa9af48c4fb0b18a8f5a45d33b6192c7f472e28c0948872"
+        }
+      },
+      "views": {
+        "hero": {
+          "file": "beauty_SM_LakePerch_hero.png",
+          "sha256": "368696fe0b0a6fb2c0b20204c264e34c4bc9b5be96c33f6d81dbeb0622c09f7d"
+        },
+        "detail": {
+          "file": "beauty_SM_LakePerch_detail.png",
+          "sha256": "1c9db10251ce856cf211eecd41d816ee47eb4b90d2feed8cbdd6a84402f7e3ea"
+        }
+      }
+    },
+    "SM_LakeCarp": {
+      "species": "Cyprinus carpio",
+      "triangles": 53666,
+      "maps": {
+        "basecolor": {
+          "file": "T_LakeCarp_basecolor.png",
+          "sha256": "d18cdd6d5e41f204ccfaadcf4fb12174faa7d8d5a3704d6ae48f45c3c3f0f3ac"
+        },
+        "roughness": {
+          "file": "T_LakeCarp_roughness.png",
+          "sha256": "42efa87c0727868413729a5b5d1fd3f00ab31266bbe3af2d829f6d0ff82076a0"
+        },
+        "normal": {
+          "file": "T_LakeCarp_normal.png",
+          "sha256": "8b49910b19cf336dbb088ceee1d703084e4adfe5de2437a33d53666c45c5ad0b"
+        },
+        "ao": {
+          "file": "T_LakeCarp_ao.png",
+          "sha256": "0954bb55a420ebeaa06d7f20374156a6791f3639ba8597009badaec3079d0ac9"
+        },
+        "metallic": {
+          "file": "T_LakeCarp_metallic.png",
+          "sha256": "326ec31d61502de8561405fb5e24e162f8b70d32659e6bcb1386ff93837dfd8c"
+        }
+      },
+      "views": {
+        "hero": {
+          "file": "beauty_SM_LakeCarp_hero.png",
+          "sha256": "0e1357bee65a89c4f4a4120cee9c9c67a959df005097a9d5c63549e2c052457c"
+        },
+        "detail": {
+          "file": "beauty_SM_LakeCarp_detail.png",
+          "sha256": "657d845d64c238116f3a1a1e8b4eaf27831053685f45e61a361e230789668b8c"
+        }
+      }
+    },
+    "SM_SeaMackerel": {
+      "species": "Scomber scombrus",
+      "triangles": 55364,
+      "maps": {
+        "basecolor": {
+          "file": "T_SeaMackerel_basecolor.png",
+          "sha256": "db123bf8ff24007b3f4f954fd79cf4ec6670e178d4f10d996ce7830b32cd1d1b"
+        },
+        "roughness": {
+          "file": "T_SeaMackerel_roughness.png",
+          "sha256": "79142c6408a2561b7742f7f120266c3008a42e223310a5e70d493c50e0c7a3f8"
+        },
+        "normal": {
+          "file": "T_SeaMackerel_normal.png",
+          "sha256": "f307d4cd91a0d8bd81b4d3c4d0a043469c0a484023fd9de844b8bfd7e1067af4"
+        },
+        "ao": {
+          "file": "T_SeaMackerel_ao.png",
+          "sha256": "12d15070ee713c8537833d3b9868d46753f2676658f5d33e23337c804a2ac715"
+        },
+        "metallic": {
+          "file": "T_SeaMackerel_metallic.png",
+          "sha256": "3619cb0553543b46a79d90067b328721fec533975cc5736e1e2a2348a90c4e60"
+        }
+      },
+      "views": {
+        "hero": {
+          "file": "beauty_SM_SeaMackerel_hero.png",
+          "sha256": "b0a4a8e6bc59f29a669c4ffb7486aaeb4f632bcaa5029b6c45c5c16f4bff223a"
+        },
+        "detail": {
+          "file": "beauty_SM_SeaMackerel_detail.png",
+          "sha256": "8bca8ad8221a39f2f8eb82716a4d54eb03464558afe511234e89e02875ccc99d"
+        }
+      }
+    },
+    "SM_SeaBass": {
+      "species": "Dicentrarchus labrax",
+      "triangles": 54751,
+      "maps": {
+        "basecolor": {
+          "file": "T_SeaBass_basecolor.png",
+          "sha256": "5fb685dab53b9c2a0625e05954b820b6784e3d88365e38634c66ca92c0303450"
+        },
+        "roughness": {
+          "file": "T_SeaBass_roughness.png",
+          "sha256": "870c4df26bc3d30dfe9e79f5c755595970000ce204700429e543e32dbb5157e5"
+        },
+        "normal": {
+          "file": "T_SeaBass_normal.png",
+          "sha256": "9f3e1960264a70866ede0267f387df170375954c907ebf3c82de01cc639158dc"
+        },
+        "ao": {
+          "file": "T_SeaBass_ao.png",
+          "sha256": "654092d2f23d28d367524db3c404c30eb4fb64e7f04d41295bc6c82117bb9b7c"
+        },
+        "metallic": {
+          "file": "T_SeaBass_metallic.png",
+          "sha256": "72d6c6307ecf39ac2baaf8cc9d7f1371fcea45831707d4b27461b384bfacbb57"
+        }
+      },
+      "views": {
+        "hero": {
+          "file": "beauty_SM_SeaBass_hero.png",
+          "sha256": "e5a7b7d719b148d6f9f0c83979ca2357af6439118819dfd5a637e5d2f319330e"
+        },
+        "detail": {
+          "file": "beauty_SM_SeaBass_detail.png",
+          "sha256": "fae040261dea405b80b59ce298dd0555ce388fc261426e2d76c557187cae76cb"
+        }
+      }
+    }
+  }
+}
