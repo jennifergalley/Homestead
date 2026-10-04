@@ -52,3 +52,10 @@ records byte-for-byte. Deterministic bake/exclusions and focused Python tests pa
 authoritative plots, full scaled-mesh bounds, and the existing actual-layout key without
 clock/inventory-triggered scenery scans. This is not ready for admission: native persistence is still
 running, and editor compile plus owned Art proof are pending.
+
+Current coordination update: Environment checkpoint `8514b981` now has code/native/editor-compile
+evidence but is urgently paused until a regrant. Art owns the active UBT slot; Gameplay is queued
+after Art's dependency handoff, with no perf lock. Retained Planner
+`ac593377-587f-4319-a033-b17f309be13e` holds slot 3 for Jenny-directed Build cost UI redesign and
+records its fresh tooling model/usage boundary separately from measured02's frozen delivery. No
+Integration hands-on slot is granted.
