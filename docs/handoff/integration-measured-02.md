@@ -354,6 +354,14 @@ approvals. New shared cooked-loft/trout delegation has exact frozen-trout vertic
 geometry functions are unchanged. There is no catch/bake/gameplay/save/UE change. Farming's build02
 snapshot is provisionally 842 calls (event `71198`), not reconciled; no Integration hands-on
 assignment or release ETA follows.
+Held source-only checkpoint `0a1d1da8` preserves original Grilled Mackerel fillet, cut pieces, new
+platter, and edible piece with copied fixtures and four viewed final 4K frames. Cut relief is confined
+to interior caps after a viewed boundary crease; it remains smooth/rubbery with graphic skin and is
+**not** art/import-ready. There are 12 meal-source prototypes, four unstarted dishes, and zero
+approvals. The prior 26 shaders and eight geometry functions are unchanged. There is no catch
+probe/bake/gameplay/save/UE change. Farming's build02 snapshot is provisionally 869 calls (event
+`71246`), not reconciled; it continues the remaining four authorized meals with no Integration
+hands-on assignment or release ETA.
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
 prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four
