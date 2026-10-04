@@ -289,9 +289,10 @@ imagery, and wiring remain. Farming continues authorized slot 2 with an uncertai
 helper/budget, gameplay/save, or Integration hands-on action changes.
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
-prove complete contact/intersection. Its `53,792/3,976` triangle source, four viewed 4K frames, and
-closed-island/current-shader/copied-source fixtures pass. It remains below the art/import realism bar:
-three source meals are still below that bar and 13 are unstarted. There are no fish
+prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four
+fresh viewed 4K frames, and copied-source/executed-shader/island fixtures pass. It remains
+slab-like/procedural and below the art/import realism bar: there are three meal-source prototypes,
+13 unstarted dishes, and zero meal approvals. There are no fish
 budget/helper/bake, UE, gameplay, save, or version changes. Farming continues authorized independent
 meal source work.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
