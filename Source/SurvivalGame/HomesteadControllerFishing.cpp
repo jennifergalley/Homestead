@@ -94,6 +94,20 @@ void AHomesteadController::TickFishing(float DeltaSeconds)
         PresentFishing();
         return;
     }
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
+    if (Animation && Sim.FishingCast().token == FishingPresentedToken
+        && Animation->FishInterruptions() != ObservedFishInterruptions)
+    {
+        ObservedFishInterruptions = Animation->FishInterruptions();
+        const auto Interrupted = Sim.FishingAnimationInterrupted(FishingPresentedToken);
+        if (!Interrupted.ok)
+            UE_LOG(LogHomesteadFishingController, Warning, TEXT("Fishing interruption refused: %s"),
+                UTF8_TO_TCHAR(Interrupted.message.c_str()));
+        if (!Interrupted.message.empty()) Notify(Interrupted);
+        PresentFishing();
+        return;
+    }
     const auto Result = Sim.AdvanceFishing(DeltaSeconds, PlayerPoint());
     if (!Result.ok)
     {
@@ -101,8 +115,6 @@ void AHomesteadController::TickFishing(float DeltaSeconds)
         Sim.CancelFishing();
     }
     if (!Result.message.empty()) Notify(Result);
-    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
-    auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     if (Animation && IsFishing())
     {
         const uint32 Splashes = Animation->FishCastSplashes();
@@ -147,6 +159,7 @@ void AHomesteadController::PresentFishing()
         bFishingLiftSucceeded = false;
         ObservedFishSplashes = Animation->FishCastSplashes();
         ObservedFishLifts = Animation->FishCatchLifts();
+        ObservedFishInterruptions = Animation->FishInterruptions();
     }
     if (Session.phase == FishingPresentedPhase && !bNewCast) return;
     EHomesteadFishingPose Pose = EHomesteadFishingPose::None;

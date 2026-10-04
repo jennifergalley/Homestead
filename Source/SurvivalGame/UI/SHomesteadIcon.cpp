@@ -112,25 +112,47 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
                 Effects, Styled(Charcoal));
         }
 
+        // Rotates (counter-clockwise, degrees) and scales later Line/Shape/Disc/Leaf/Root points about
+        // Pivot, placing Pivot at Target. Rect stays axis-aligned and untransformed.
+        void SetPose(float Degrees, float Factor, FVector2D Pivot, FVector2D Target)
+        {
+            const float Radians = FMath::DegreesToRadians(Degrees);
+            PoseCos = FMath::Cos(Radians);
+            PoseSin = FMath::Sin(Radians);
+            PoseScale = Factor;
+            PosePivot = Pivot;
+            PoseTarget = Target;
+        }
+
         int32 GetLayer() const { return Layer; }
         float GetScale() const { return Scale; }
         FLinearColor Accent;
 
     private:
-        void Stroke(const TArray<FVector2D>& Points, FLinearColor Color, float Width)
+        FVector2D Posed(const FVector2D& Point) const
+        {
+            const FVector2D D = Point - PosePivot;
+            return PoseTarget + FVector2D(D.X * PoseCos + D.Y * PoseSin, -D.X * PoseSin + D.Y * PoseCos) * PoseScale;
+        }
+
+        void Stroke(const TArray<FVector2D>& Points, FLinearColor Color, float Width, bool bAlreadyPosed = false)
         {
             TArray<FVector2D> Scaled;
             Scaled.Reserve(Points.Num());
             for (const FVector2D& Point : Points)
             {
-                Scaled.Add(Origin + Point * Scale);
+                Scaled.Add(Origin + (bAlreadyPosed ? Point : Posed(Point)) * Scale);
             }
             FSlateDrawElement::MakeLines(Elements, ++Layer, Geometry.ToPaintGeometry(),
-                Scaled, Effects, Styled(Color), true, Width * Scale);
+                Scaled, Effects, Styled(Color), true, Width * PoseScale * Scale);
         }
 
         void Fill(TArray<FVector2D>& Path, FLinearColor Color)
         {
+            for (FVector2D& Point : Path)
+            {
+                Point = Posed(Point);
+            }
             // Local scan bands fill authored polygons using only Slate's standard box brush.
             // The antialiased contour covers the band edges; no engine custom-shape API is used.
             float MinY = 56.0f;
@@ -166,7 +188,7 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
             }
             const FVector2D FirstPoint = Path[0];
             Path.Add(FirstPoint);
-            Stroke(Path, Color, 1.5f);
+            Stroke(Path, Color, 1.5f, true);
         }
 
         const FGeometry& Geometry;
@@ -177,6 +199,11 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
         float Scale = 1.0f;
         FVector2D Origin;
         float Desaturation = 0.0f;
+        float PoseCos = 1.0f;
+        float PoseSin = 0.0f;
+        float PoseScale = 1.0f;
+        FVector2D PosePivot = FVector2D::ZeroVector;
+        FVector2D PoseTarget = FVector2D::ZeroVector;
 
         static FLinearColor Desaturate(const FLinearColor& Color, float Amount)
         {
@@ -204,8 +231,15 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
         bool bSpinyDorsal;
     };
 
+    // Nose-up diagonal at a slightly larger size, so a catch fills its slot like the tools and crops
+    // (tuned against the 64 px hotbar slot).
+    constexpr float FishIconTiltDegrees = 22.0f;
+    constexpr float FishIconScale = 1.12f;
+
+    // Leaves the pose set, so the caller's species markings follow the body.
     void PaintFish(FIconPainter& P, const FFishLook& L)
     {
+        P.SetPose(FishIconTiltDegrees, FishIconScale, FVector2D(27.0f, 28.0f), FVector2D(28.0f, 28.5f));
         const float D = L.Depth;
         const float Y = 28.0f;
         P.Shape({{14, Y}, {5, Y - L.TailSpread}, {L.TailNotch, Y}, {5, Y + L.TailSpread}}, L.Fin);
@@ -457,11 +491,9 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
     case EKind::RiverSalmon:
         PaintFish(P, {7.5f, 8.0f, 9.0f, FLinearColor(0.28f, 0.38f, 0.48f), FLinearColor(0.76f, 0.80f, 0.82f),
             FLinearColor(0.95f, 0.95f, 0.92f), FLinearColor(0.36f, 0.44f, 0.52f), false});
-        for (const FVector2D& Spot : {FVector2D(22, 23), FVector2D(28, 22), FVector2D(33, 23), FVector2D(37, 22)})
-        {
-            P.Line({Spot - FVector2D(1, 1), Spot + FVector2D(1, 1)}, Charcoal, 1.0f);
-            P.Line({Spot + FVector2D(-1, 1), Spot + FVector2D(1, -1)}, Charcoal, 1.0f);
-        }
+        for (const FVector2D& Spot : {FVector2D(21, 24), FVector2D(25, 22.5f), FVector2D(29, 23.5f),
+                 FVector2D(33, 22), FVector2D(36, 24), FVector2D(39, 23)})
+            P.Disc(Spot.X, Spot.Y, 0.75f, Charcoal);
         P.Line({{42, 30}, {30, 30.5f}, {18, 29.5f}}, FLinearColor(0.90f, 0.62f, 0.60f), 1.2f);
         break;
     case EKind::LakePerch:

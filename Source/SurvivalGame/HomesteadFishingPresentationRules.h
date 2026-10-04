@@ -13,4 +13,9 @@ inline bool FinishedMiss(bool playingMiss, bool hasClip, double clipTime, double
 {
     return playingMiss && (!hasClip || clipTime >= authoredEnd - endMargin);
 }
+
+inline bool CrossedContact(bool active, bool striking, double before, double after, double beat)
+{
+    return active && !striking && before < beat && after >= beat;
+}
 }

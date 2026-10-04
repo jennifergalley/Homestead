@@ -553,6 +553,7 @@ public:
     Result AdvanceFishing(double seconds, Point player);
     Result FishingPress(Point player);
     Result FishingAnimationContact(FishingContact contact, std::uint64_t token, Point player);
+    Result FishingAnimationInterrupted(std::uint64_t token);
     Result CancelFishing();
     // True when a pail waits in a chest or other storage (and so can be fetched to fill).
     bool PailStored() const;

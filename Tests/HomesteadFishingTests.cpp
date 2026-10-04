@@ -301,6 +301,37 @@ void PresentationCompletionAndRecast()
     CHECK(std::abs(HomesteadFishingTiming::CatchLiftSeconds - Fishing::CatchLiftSeconds) < 0.0001);
 }
 
+void InterruptedCatchOnSmallMove()
+{
+    using namespace Homestead;
+    auto sim = Fisher(FishingWater::River);
+    Hook(sim);
+    LandingBeat(sim);
+    LandingBeat(sim);
+    const auto token = sim.FishingCast().token;
+    const auto fish = sim.FishingCast().catchItem;
+    const Point smallMove{1.0, 0.0};
+    const double beforeLiftElapsed = HomesteadFishingTiming::StrikeEnd - HomesteadFishingTiming::StrikeStart
+        + HomesteadFishingTiming::CatchLiftSeconds - 0.1;
+    OK(sim.AdvanceFishing(beforeLiftElapsed, smallMove));
+    CHECK(sim.FishingCast().phase == FishingPhase::Catching && sim.Count(fish) == 0);
+    const float beat = HomesteadFishingTiming::CatchStart + HomesteadFishingTiming::CatchLiftSeconds;
+    const float before = beat - 0.1f;
+    const float after = beat + HomesteadFishingTiming::ClipFrameSeconds;
+    CHECK(HomesteadFishingPresentationRules::CrossedContact(true, false, before, after, beat));
+    CHECK(!HomesteadFishingPresentationRules::CrossedContact(false, false, before, after, beat));
+    CHECK(!sim.FishingAnimationInterrupted(token + 1));
+    CHECK(sim.FishingCast().phase == FishingPhase::Catching);
+    OK(sim.FishingAnimationInterrupted(token));
+    CHECK(sim.FishingCast().phase == FishingPhase::Idle && sim.Count(fish) == 0);
+    CHECK(!sim.FishingAnimationContact(FishingContact::CatchLift, token, smallMove));
+    CHECK(sim.Count(fish) == 0);
+    OK(sim.BeginFishing(smallMove));
+    const auto next = sim.FishingCast().token;
+    CHECK(next != token && !sim.FishingAnimationInterrupted(token));
+    CHECK(sim.FishingCast().phase == FishingPhase::Casting && sim.FishingCast().token == next);
+}
+
 void Preparations()
 {
     using namespace Homestead;
@@ -421,6 +452,7 @@ int main()
     FishingTests::HabitatsAndReplay();
     FishingTests::TimingAndCancellation();
     FishingTests::PresentationCompletionAndRecast();
+    FishingTests::InterruptedCatchOnSmallMove();
     FishingTests::Preparations();
     FishingTests::OriginalArtMappings();
     std::cout << "Fishing price, habitats, timing, cancellation, food and persistence: "

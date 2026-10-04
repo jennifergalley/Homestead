@@ -115,6 +115,13 @@ Result Simulation::CancelFishing()
     return {true, "Line reeled in. No fish caught.", ResultCode::None, revision_};
 }
 
+Result Simulation::FishingAnimationInterrupted(std::uint64_t token)
+{
+    if (token == 0 || token != fishing_.token || fishing_.phase == FishingPhase::Idle)
+        return {false, "That fishing cast is no longer active.", ResultCode::Unavailable, revision_};
+    return CancelFishing();
+}
+
 Result Simulation::AdvanceFishing(double seconds, Point player)
 {
     if (!std::isfinite(seconds) || seconds < 0.0 || seconds > 60.0

@@ -1,4 +1,5 @@
 #include "HomesteadAnimInstance.h"
+#include "HomesteadFishingPresentationRules.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadController.h"
 #include "HomesteadFishingPresentation.h"
@@ -506,6 +507,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
     int32 FishSlot = 0;
     uint32 FishSplashes = 0;
     uint32 FishLifts = 0;
+    uint32 FishInterruptions = 0;
     float CraftAlpha = 0;
     float CraftTime = 0;
     float EatTime = 0;
@@ -951,11 +953,13 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
                 StartFishSegment(EHomesteadFishingPose::Wait, false);
             else FishTime = End - FishClipFrame;
         }
-        if (!bFishStriking && FishSegment == EHomesteadFishingPose::Cast
-            && Before < CastStart + CastSplashSeconds && FishTime >= CastStart + CastSplashSeconds)
+        if (FishSegment == EHomesteadFishingPose::Cast
+            && HomesteadFishingPresentationRules::CrossedContact(
+                bActive, bFishStriking, Before, FishTime, CastStart + CastSplashSeconds))
             ++FishSplashes;
-        if (!bFishStriking && FishSegment == EHomesteadFishingPose::Catch
-            && Before < CatchStart + CatchLiftSeconds && FishTime >= CatchStart + CatchLiftSeconds)
+        if (FishSegment == EHomesteadFishingPose::Catch
+            && HomesteadFishingPresentationRules::CrossedContact(
+                bActive, bFishStriking, Before, FishTime, CatchStart + CatchLiftSeconds))
             ++FishLifts;
         auto& Current = FishSlot == 0 ? FishA : FishB;
         Current.SetExplicitTime(FishTime);
@@ -1114,6 +1118,9 @@ void UHomesteadAnimInstance::CancelAction(bool Immediate)
     auto& Proxy = GetProxyOnGameThread<FHomesteadAnimProxy>();
     Proxy.Requested = EHandAction::None;
     Proxy.bCancelled = true;
+    if (Proxy.FishPose != EHomesteadFishingPose::None || Proxy.bFishWasActive
+        || Proxy.bFishCastRequested || Proxy.bFishStrikeRequested)
+        ++Proxy.FishInterruptions;
     // Cancelling drops the fishing presentation too: no pose, no queued cast or strike, and a landed
     // catch stops finishing (the layer fades out from wherever it was).
     Proxy.FishPose = EHomesteadFishingPose::None;
@@ -1211,6 +1218,11 @@ uint32 UHomesteadAnimInstance::FishCastSplashes() const
 uint32 UHomesteadAnimInstance::FishCatchLifts() const
 {
     return GetProxyOnGameThread<FHomesteadAnimProxy>().FishLifts;
+}
+
+uint32 UHomesteadAnimInstance::FishInterruptions() const
+{
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().FishInterruptions;
 }
 
 EHomesteadFishingPose UHomesteadAnimInstance::FishingPose() const

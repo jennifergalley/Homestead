@@ -701,6 +701,7 @@ private:
     uint64 FishingPresentedToken = 0;
     uint32 ObservedFishSplashes = 0;
     uint32 ObservedFishLifts = 0;
+    uint32 ObservedFishInterruptions = 0;
     bool bFishingLiftSucceeded = false;
     Homestead::FishingWater FocusedFishingWater = Homestead::FishingWater::None;
     FString FishingFocusText;
