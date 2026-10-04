@@ -38,3 +38,11 @@ stock, referenced IDs, unchanged fields, and the existing save version. That unc
 not a waiver: admit the seed packet slice only after a risky save-semantic review, Gameplay's targeted
 native overflow tests, scoped legacy/full-capacity/hotbar evidence, and candidate save/load evidence.
 No Integration build, editor, or package slot is granted by this gate alone.
+
+## Environment readiness checkpoint
+
+Environment reports 5,835 supplemental flower clumps while retaining 374,850 original placement
+records byte-for-byte. Deterministic bake/exclusions and focused Python tests pass; the mask uses
+authoritative plots, full scaled-mesh bounds, and the existing actual-layout key without
+clock/inventory-triggered scenery scans. This is not ready for admission: native persistence is still
+running, and editor compile plus owned Art proof are pending.
