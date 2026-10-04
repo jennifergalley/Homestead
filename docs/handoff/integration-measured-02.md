@@ -22,6 +22,9 @@ actual/configured context tiers are unknown.
   the sole protected rollback remains
   `jennifergalley-literate-eureka\Build\Releases\20261001-9pm-shipping\Windows`. Do not reopen
   build01 windows, touch Jenny's live game, remove saves, or archive either worktree.
+- Baseline planner coverage is not a clean full suite: `PlannerStatusTests.mjs` has a pre-existing
+  final renderer assertion for removed `statusFilters`/`completedExpanded` controls. The lane reports
+  its first four data tests pass; do not label the stale renderer assertion a measured02 regression.
 
 ## Delivery gate
 
@@ -29,3 +32,7 @@ Admit only forwarded lane commits that are complete and independently reviewed w
 save risk warrants it. Integration alone may merge, run native and valid Development FullLoop,
 package via the documented clean-cook path, and run Shipping EstateSmoke/ToolRepeat after a slot
 grant. Shipping FullLoop remains invalid until Estate-adapted.
+
+Planner Editing admission additionally requires its new title, description, screenshot, and
+identifier-preservation coverage to pass. The pre-existing removed-controls renderer assertion is
+reported separately and does not justify restoring unrelated planner UI.

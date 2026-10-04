@@ -192,8 +192,8 @@ Jenny's scheduling. Dragging reorders priority; **Top** promotes an item, **Next
 to a build, and **Quote** exposes its player ask. **Remove** archives that OpenSpec change, so use
 it only for shipped, retired, or clearly stale work. All of this is agent-free: it writes straight to
 `priority.json` with no chat notification, so check its `updated` timestamp when you need to know if
-Jenny changed anything. The canvas also has a quick backlog-entry form (title/description/screenshot)
-that appends straight to `backlog.md`, also without spending chat tokens.
+Jenny changed anything. The quick backlog-entry form (title/description/screenshot) writes durable
+captures to `backlog-inbox.json`; `backlog.md` is its Markdown mirror for triage and display.
 
 **Blockers:** if something blocks you for more than about 15 minutes, or affects other worktrees
 (shared ports, GPU/VRAM, Live Coding, locks, a broken `main`), report it immediately with

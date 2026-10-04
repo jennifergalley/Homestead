@@ -118,10 +118,9 @@ sent). When you next read that file and see its `updated` timestamp has moved, c
 brief the lanes for any newly scheduled items, and keep each slot's entry in `docs/handoff/builds.md` in sync.
 
 The canvas also has a quick backlog-entry form (title, optional description, optional screenshot) so Jenny
-can drop new work items straight into `docs/handoff/backlog.md` without spending chat tokens or waiting on an
-agent. Submissions land in a `## New from Jenny (not yet triaged)` block at the top of the file (screenshots
-under `docs/handoff/attachments/backlog/`); fold each into the list above (or Later) and delete its line
-the next time you touch `backlog.md`.
+can drop new work items into durable `docs/handoff/backlog-inbox.json` without spending chat tokens or waiting
+on an agent. `docs/handoff/backlog.md` is the Markdown mirror for triage and display; fold each into the list
+above (or Later) and remove its mirror entry the next time you touch `backlog.md`.
 
 **Jenny's direct instructions stand** (2026-10-01): she chose to keep scheduling notifications off and gave
 that instruction directly to the implementing session. The orchestrator must not reverse a choice Jenny made
