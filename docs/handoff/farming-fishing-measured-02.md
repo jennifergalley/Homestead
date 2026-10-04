@@ -805,6 +805,19 @@ Actual gpt-6.1-sol/high; launch default/actual context unknown. Build02-only
 provisional snapshot: 664 calls through event70905, 4,024,406,690,000 recorded
 nano-AIU; subsequent calls/terminal response remain to capture.
 
+Bounded food-only coordinate check after this checkpoint: on the single bean
+portion, translated Object coordinates match pcoord at every vertex within
+1.88e-8m. One matched 4K/192-sample f/64 detail frame and native-pixel crops were
+viewed. RGB8 RMS is 0.0284 full-frame/0.0923 at [1650,1050,2400,1650]; the
+replacement does not recover viewed fine coat relief. No coordinate-source fix
+is justified by this check, and it establishes no fish or bake diagnosis.
+Replay script, diagnostic blend/report/frame, exact field check and pixel
+comparison remain in E: runtime scratch beans-coordinate-source. Frozen
+ae434be5 source/proof and all production code/shaders/helpers remain unchanged.
+Updated build02-only provisional snapshot: 679 calls through event70935,
+4,068,096,370,000 recorded nano-AIU; later calls/terminal response still excluded.
+Visible held source restored after the diagnostic; no active render or shell.
+
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.
 Notion identity and Ledger read in full; no technical-project Notion writes.
