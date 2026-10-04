@@ -180,6 +180,12 @@ The next verification step is Farming's asset-owner review of the imported pole'
 followed by original fish/dish delivery; only then may Integration schedule the remaining source,
 runtime, save-isolation, and package gates.
 
+Farming's later fish checkpoint `c70b603a` is explicitly WIP and must not be imported or admitted.
+It preserves six original meshes, 24 PBR maps, 12 viewed 4K renders, and geometry/receipt checks,
+but its head, mouth, and marking realism still needs correction; sixteen dishes and their portions
+remain outstanding. The canonical Blender guide records the live preview remedy: switch from
+`BLENDER_WORKBENCH` to `BLENDER_EEVEE` before requesting material viewport shading.
+
 ## Bounded current-source runtime evidence
 
 - With Farming's Blender window paused, Integration launched one owned editor at port 8768 with the

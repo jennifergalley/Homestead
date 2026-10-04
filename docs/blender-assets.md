@@ -297,6 +297,10 @@ def build(kit):
   library IDs after its owned comparison objects are deleted. Before saving a corrected copy, remove
   only the exact snapshot library IDs created for that append, then rebuild; otherwise Blender can
   fail with `Cannot overwrite used library`. Do not purge arbitrary libraries from Jenny's live scene.
+- **Live material preview:** a live builder can leave the viewport in `BLENDER_WORKBENCH`.
+  `space.shading.type = 'MATERIAL'` is not a valid shading enum there (only `WIREFRAME`, `SOLID`,
+  and `RENDERED`). Set `scene.render.engine = 'BLENDER_EEVEE'` first, then switch the viewport to
+  material preview.
 
 ## Rocks (Sierra Nevada granite)
 
