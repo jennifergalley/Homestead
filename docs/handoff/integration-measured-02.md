@@ -243,6 +243,12 @@ Farming also verified a live-render destination pitfall: `build_prop(copy=True)`
 its three overwritten frozen `411fbd34` files from preservation copies and confirmed that proof
 folder clean; current carp renders now write to E: scratch. The canonical rule is to explicitly open
 the newly exported blend before rendering.
+Checkpoint `c0ec4e0c` is another held WIP source checkpoint. It adds species mouths, cheeks, and
+fins plus shared base/coat relief; `SpeciesProof` preserves six source meshes, twelve viewed 4K
+frames, and one portable five-map trout pair with nine passing offline contracts. This is neither an
+engine nor an art gate: there is no baked six-fish family or dish delivery, and there are no UE,
+build, save, or version changes. Molded heads, procedural rays, and localized baked head blotching
+remain visible despite its whole-frame fidelity pass.
 
 At 22:07 local, Jenny additionally authorized the coordinator—not Farming—to schedule a single-use
 30-minute fallback check, rearming it only after processing while work remains active. She also

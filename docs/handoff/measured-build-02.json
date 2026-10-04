@@ -69,6 +69,8 @@
       "fishFamilyProofStatus": "Held WIP: HingedProof/FamilyReview includes six anatomy fixtures, 30 maps, twelve viewed 4K frames, portable textures, and four passing offline contracts. Molded heads, checker-like scales, opaque fins, sixteen dishes/wiring, and engine gates remain outstanding.",
       "fishMembraneProofCheckpoint": "411fbd34",
       "fishMembraneProofStatus": "Held WIP: MembraneProof includes six current fish, 12 viewed 4K frames, two slots, 30 maps, portable blend/receipts, and a new isolated TwoSidedFoliage .35-opacity material with nine offline contracts. UE compilation and appearance proof remain outstanding.",
+      "fishSpeciesProofCheckpoint": "c0ec4e0c",
+      "fishSpeciesProofStatus": "Held WIP: SpeciesProof has six source meshes, 12 viewed 4K frames, one portable five-map trout pair, and nine offline contracts. No baked six-fish family, dishes, engine/art gate, or UE/build/save/version change; molded heads, procedural rays, and localized baked head blotching remain.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
