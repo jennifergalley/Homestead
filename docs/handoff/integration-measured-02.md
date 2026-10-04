@@ -199,6 +199,12 @@ Risky-art reviewer `991baa12-1d79-4171-bcd6-5c653ce1d09a` is a single build02 re
 (GPT-6.1 Sol, high, default launch) diagnosing the `4148` images and recipe. It uses no GPU, editor,
 or implementation slot. Jenny directly authorized Farming to continue autonomously on structural jaw,
 gill, and scale geometry, so this review does not pause that lane; export and UE admission remain held.
+The reviewer completed in two read-only turns with no files, processes, or cleanup. It found anatomy
+construction—not missing gloss—as the primary failure, then uniform scales/marks; its concrete jaw,
+operculum, pectoral, and scale corrections are advisory to Farming's newer structural edits. Before a
+full fish family, require one trout source-versus-baked 4K proof: the reviewed `BAKE=None` wrapper
+proves the source shader only, not five-map translation. Preserve the opt-in wet film, jaw winding,
+and eye-contact improvements. This is not final art or UE admission.
 
 ### Narrow overnight exception
 
