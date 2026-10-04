@@ -67,6 +67,6 @@
     "Preserve the current measured-01 release, rollback, save files and all old agents.",
     "Further animation/carry holds, manor arrival relocation and other unselected work remain deferred.",
     "Build01 accounting windows remain closed; this round uses a separate allocation.",
-    "Jenny's current correction while she plays: hold UBT, UAT, Live Coding, game compilation, and packages. Editor/Blender source or asset work remains allowed with memory checks and at most two Unreal processes including her game; Farming Fishing has the sole lane editor permission and Travel Rest has none. Preserve the active game, saves, shortcut, and protected releases; no automation is scheduled."
+    "Jenny's current correction while she plays: hold UBT, UAT, Live Coding, game compilation, and packages. Editor/Blender source or asset work remains allowed with memory checks and at most two Unreal processes including her game; Farming Fishing has the sole lane editor permission and Travel Rest has none. Travel Rest alone has a narrow isolated tiny native-test rebuild permission of roughly seconds, not game/UBT/UAT compilation. Preserve the active game, saves, shortcut, and protected releases; no automation is scheduled."
   ]
 }
