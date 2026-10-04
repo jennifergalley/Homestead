@@ -493,3 +493,48 @@ def grilled_trout_platter(name: str) -> bpy.types.Material:
     graph.set("Roughness", .43)
     graph.set("Normal", graph.bump(grit, strength=.12, distance=.000035))
     return graph.mat
+
+
+def grilled_white_fish_flesh(name: str, seed: int) -> bpy.types.Material:
+    material = grilled_trout_flesh(name, seed)
+    ramps = [node for node in material.node_tree.nodes if node.type == "VALTORGB"]
+    if len(ramps) != 1 or len(ramps[0].color_ramp.elements) != 3:
+        raise ValueError("Cooked white-fish variant requires the authored three-stop tissue palette")
+    for element, colour in zip(ramps[0].color_ramp.elements,
+                               ((.41, .385, .31), (.51, .49, .415), (.57, .55, .48))):
+        element.color = (*colour, 1)
+    return material
+
+
+def grilled_perch_skin(name: str, seed: int) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.vmath("ADD", graph.coord(), (seed * .037, seed * .029, seed * .053))
+    _, y, _ = graph.separate(graph.coord())
+    heat = graph.noise(point, scale=85, detail=3).outputs["Fac"]
+    bands = graph.math("SINE", graph.math("ADD", graph.math("MULTIPLY", y, 235),
+                                         graph.math("MULTIPLY", heat, 1.5)))
+    colour = graph.ramp(heat, [
+        (.2, (.049, .033, .014)), (.5, (.125, .085, .031)),
+        (.8, (.18, .132, .056)),
+    ], "EASE")
+    colour = graph.mix(colour, (.012, .009, .005), graph.remap(bands, .10, .85, 0, .80))
+    blisters = graph.noise(point, scale=410, detail=2).outputs["Fac"]
+    fines = graph.noise(graph.scale(point, (1, .42, 1)),
+                        scale=1700, detail=2).outputs["Fac"]
+    graph.set("Base Color", colour)
+    graph.set("Roughness", graph.remap(heat, .2, .8, .78, .62))
+    relief = graph.math("ADD", fines, graph.math("MULTIPLY", blisters, .4))
+    graph.set("Normal", graph.bump(relief, strength=.25, distance=.00007))
+    return graph.mat
+
+
+def grilled_perch_platter(name: str) -> bpy.types.Material:
+    material = grilled_trout_platter(name)
+    ramps = [node for node in material.node_tree.nodes if node.type == "VALTORGB"]
+    if len(ramps) != 1 or len(ramps[0].color_ramp.elements) != 2:
+        raise ValueError("Perch platter variant requires the authored two-stop ceramic palette")
+    for element, colour in zip(ramps[0].color_ramp.elements,
+                               ((.115, .126, .115), (.15, .16, .144))):
+        element.color = (*colour, 1)
+    return material

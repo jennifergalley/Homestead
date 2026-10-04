@@ -17,10 +17,10 @@ release-save-isolation admission gates remain.
 
 Current source checkpoint: original potatoes, roasted turnips, stewed carrots,
 herbed broad beans, cabbage/potato stew, berry compote, strawberry compote,
-root vegetable hotpot, raw mackerel slices and grilled trout have separate
-serving/edible-portion WIP, NOT art/import acceptance. Six fish preparations, all meal
+root vegetable hotpot, raw mackerel slices, grilled trout and grilled perch have
+separate serving/edible-portion WIP, NOT art/import acceptance. Five fish preparations, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original grilled trout/portion WIP; recipe/source receipts below are frozen,
+visible review is original grilled perch/portion WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -1092,6 +1092,49 @@ render-helper/gameplay/save/enum/version/placement/UE/UBT/UAT/shortcut change.
 Build02-only provisional snapshot: 818 calls through event71154,
 4,739,561,790,000 recorded nano-AIU; later calls/terminal response need recapture.
 No reconciled billing-credit claim.
+
+### Original grilled perch meal source and cooked-loft reuse milestone
+
+New grilled_perch.py authors two independent 10.6-11cm boneless perch fillets,
+one skin-up/one flesh-up, on a new 19.8x14.4cm gray ceramic platter and a new
+2.21x3.38cm edible piece. Exact LakePerch1/Kindling1, no oil/butter/batter/herbs/
+lemon/garnish. European perch/fish-as-food references read; white cooked muscle
+and softened dark bars on cooked skin. Piece count/dimensions are presentation,
+not a stock-weight/yield rule. No caught-fish/raw/crop/exported meal mesh reused.
+
+Cooked muscle construction extracted into food geometry cooked_fillet/
+cooked_muscle_fold, with supplied materials/profile/seed and explicit errors for
+invalid finite dimensions/sampling. Grilled trout now delegates to it. Replay
+against frozen f6464440 requires identical vertices/topology/pcoord/UV/material
+indices and material-slot names for both trout meshes; current fixtures pass.
+Separate CookedFilletReuseProof records the two exact fingerprints. No source
+proof was overwritten or rerendered; old trout receipt remains at f6464440.
+Previous six geometry functions and twenty-three shader definitions AST-identical
+to f6464440. New white-flesh/gray-ceramic variants reuse their authored base
+graphs with explicit palette-shape guards; independent perch skin shader added.
+
+First viewed pass was smooth rubbery skin with deeply patterned muscle.
+Recipe-local skin/flesh relief, gentler 0.35mm muscle troughs, rougher cooked
+skin and subdued darkening improve silhouette/surface without changing the
+shared trout defaults. Source coordinates retagged after recipe-local relief.
+All original source bounds unchanged. Final serving/portion: 45,520/9,206
+triangles, [19.8,14.4,1.44]/[2.21,3.38,.77]cm; 3/1 closed positive-volume islands.
+Finite/noncollapsed coordinates, UV/bottom pivot/unit transforms, dimension/
+budget/current-executed-graph and sampled container-clearance fixtures pass.
+Four final 3840x2160/192-sample OPTIX frames viewed; copied source/two FBX/report/
+four frames/reopened receipt frozen in GrilledPerchSourceProof.
+
+Still smooth/molded with painted soft bars, weak crisp/broken-fibre detail and
+procedural glaze: HELD, not art/import ready. Eleven prototypes/five unstarted
+preparations/zero approvals. More than twelve further hands-on source/refinement
+hours estimated, plus unknown fish/bake/imagery/eating/UE gates; no release ETA.
+No full self-intersection/contact/grip/engine acceptance. Separate framed EEVEE
+Material review saved on E: Grilled-perch-source-held-visible.blend.
+Actual gpt-6.1-sol/high; launch default/actual context unknown; no agents/
+automation/caught-fish probe/bake/budget/shared render-helper/gameplay/save/enum/
+version/placement/UE/UBT/UAT/shortcut change. Build02-only provisional snapshot:
+842 calls through event71198, 4,904,497,700,000 recorded nano-AIU; later calls/
+terminal response need recapture. No reconciled billing-credit claim.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

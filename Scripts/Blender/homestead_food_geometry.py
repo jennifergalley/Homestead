@@ -9,6 +9,7 @@ import random
 from pathlib import Path
 
 import bmesh
+import bpy
 from mathutils import Vector, noise
 from mathutils.bvhtree import BVHTree
 from mathutils.geometry import delaunay_2d_cdt
@@ -163,3 +164,85 @@ def seat_on_surfaces(obj, x: float, y: float, supports: list, maximum_radius: fl
         if not supported:
             raise ValueError(obj.name + " has a vertex outside its authored support surfaces")
     obj.location = (x, y, required_height)
+
+
+def cooked_muscle_fold(x: float) -> float:
+    return .42 * (math.sqrt(x * x + .000003) - math.sqrt(.000003)) + .0008 * math.sin(x * 190)
+
+
+def cooked_fillet(kit, name: str, index: int, length: float, width: float,
+                  height: float, rows: int, flesh_material: bpy.types.Material,
+                  skin_material: bpy.types.Material | None,
+                  seed: int, whole_fillet: bool, sides: int = 80,
+                  spacing_m: float = .0095, depth_m: float = .00065) -> bpy.types.Object:
+    """Closed cooked muscle/skin loft; fresh material/profile per meal, no mesh reuse."""
+    if (any(not math.isfinite(value) or value <= 0 for value in (length, width, height, spacing_m))
+            or not math.isfinite(depth_m) or depth_m < 0 or rows < 4 or sides < 12):
+        raise ValueError("Cooked fish dimensions and sampling must support a finite closed loft")
+    vertices, rings, faces, skin_flags = [], [], [], []
+    rng = random.Random(seed + index)
+    partitions = []
+    for partition in range(-20, 21):
+        partitions.append((partition * spacing_m + rng.uniform(-.0012, .0012),
+                           rng.uniform(.60, 1.0)))
+    positions = {row / rows for row in range(rows + 1)}
+    for centre, _ in partitions:
+        for offset in (-.0013, -.00052, 0, .00052, .0013):
+            t = (centre + offset + length * .5) / length
+            if 0 < t < 1:
+                positions.add(t)
+    for t in sorted(positions):
+        ring = []
+        fullness = ((.27 + .73 * math.sin(.35 + t * math.pi * .81) ** .6) * (1 - .65 * t)
+                    if whole_fillet else .80 + .20 * math.sin(t * math.pi))
+        for side in range(sides):
+            theta = side * 2 * math.pi / sides
+            c, s = math.cos(theta), math.sin(theta)
+            x = width * .5 * fullness * c
+            x += .00065 * math.sin(t * 11 + index) * abs(s)
+            fold = cooked_muscle_fold(x)
+            y = length * (t - .5) - fold
+            top = max(0, s) ** .72
+            bottom = max(0, -s) ** .80
+            z = height * (.70 * top * (1 + .15 * c) - .30 * bottom) * (.7 + .3 * math.sin(t * math.pi))
+            point = Vector((x, y, z))
+            centre, depth = min(partitions, key=lambda entry: abs(y + fold - entry[0]))
+            distance = abs(y + fold - centre)
+            groove = depth * math.exp(-(distance / .00052) ** 2)
+            point.z -= top * min(depth_m, height * .12) * groove
+            point.z += top * .00018 * noise.noise(point * 930 + Vector((index, 4.9, 7.1)))
+            point.z += bottom * .00022 * noise.noise(point * 440 + Vector((index, 8.1, 3.9)))
+            ring.append(len(vertices))
+            vertices.append(point)
+        rings.append(ring)
+    for first, second in zip(rings, rings[1:]):
+        for side in range(sides):
+            following = (side + 1) % sides
+            faces.append((first[side], first[following], second[following], second[side]))
+            angle = (side + .5) * 2 * math.pi / sides
+            skin_flags.append(skin_material is not None and
+                              (math.sin(angle) < .06 or math.cos(angle) < -.76))
+    for cap, boundary in enumerate((rings[0], rings[-1])):
+        first_new = len(vertices)
+        faces += cut_food_patch(vertices, boundary, seed + index * 2 + cap, normal_axis=1)
+        mean_fold = sum(cooked_muscle_fold(vertices[i].x) for i in boundary) / len(boundary)
+        for point in vertices[first_new:]:
+            point.y += mean_fold - cooked_muscle_fold(point.x)
+    obj = kit.mesh(name, vertices, faces, flesh_material)
+    if skin_material is not None:
+        obj.data.materials.append(skin_material)
+        for face, is_skin in zip(obj.data.polygons, skin_flags):
+            face.material_index = int(is_skin)
+    closed_normals(obj)
+    bevel = obj.modifiers.new("CookedFishSoftCutEdges", "BEVEL")
+    bevel.width, bevel.segments, bevel.limit_method, bevel.angle_limit = .00035, 3, "ANGLE", .65
+    kit.apply_modifiers(obj)
+    mesh = bmesh.new()
+    try:
+        mesh.from_mesh(obj.data)
+        bmesh.ops.dissolve_degenerate(mesh, dist=1e-8, edges=list(mesh.edges))
+        mesh.to_mesh(obj.data)
+    finally:
+        mesh.free()
+    closed_normals(obj)
+    return obj

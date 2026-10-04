@@ -13,13 +13,10 @@ Dimensions/flake count are presentation, not a stock-weight gameplay rule.
 """
 import importlib
 import math
-import random
 
-import bmesh
 import bpy
 import homestead_food_geometry as shapes
 import homestead_food_materials as food
-from mathutils import Vector, noise
 
 shapes = importlib.reload(shapes)
 food = importlib.reload(food)
@@ -50,79 +47,14 @@ PLATTER_PROFILE = ((0, .001), (.047, .001), (.064, .003),
                    (.043, .005), (0, .005))
 
 
-def muscle_fold(x: float) -> float:
-    return .42 * (math.sqrt(x * x + .000003) - math.sqrt(.000003)) + .0008 * math.sin(x * 190)
-
-
 def cooked_fillet(kit, name: str, index: int, length: float, width: float,
                   height: float, rows: int, skin: bool = True) -> bpy.types.Object:
-    vertices, rings, faces, skin_flags = [], [], [], []
-    rng = random.Random(SEED + index)
-    partitions = []
-    for partition in range(-20, 21):
-        partitions.append((partition * MYOMERE_SPACING_M + rng.uniform(-.0012, .0012),
-                           rng.uniform(.60, 1.0)))
-    positions = {row / rows for row in range(rows + 1)}
-    # Add samples at muscle partitions; uniform rows alone miss their narrow troughs.
-    for centre, _ in partitions:
-        for offset in (-.0013, -.00052, 0, .00052, .0013):
-            t = (centre + offset + length * .5) / length
-            if 0 < t < 1:
-                positions.add(t)
-    for t in sorted(positions):
-        ring = []
-        fullness = ((.27 + .73 * math.sin(.35 + t * math.pi * .81) ** .6) * (1 - .65 * t)
-                    if index == 0 else .80 + .20 * math.sin(t * math.pi))
-        for side in range(FILLET_SIDES):
-            theta = side * 2 * math.pi / FILLET_SIDES
-            c, s = math.cos(theta), math.sin(theta)
-            x = width * .5 * fullness * c
-            x += .00065 * math.sin(t * 11 + index) * abs(s)
-            fold = muscle_fold(x)
-            y = length * (t - .5) - fold
-            top = max(0, s) ** .72
-            bottom = max(0, -s) ** .80
-            z = height * (.70 * top * (1 + .15 * c) - .30 * bottom) * (.7 + .3 * math.sin(t * math.pi))
-            point = Vector((x, y, z))
-            centre, depth = min(partitions, key=lambda entry: abs(y + fold - entry[0]))
-            distance = abs(y + fold - centre)
-            groove = depth * math.exp(-(distance / .00052) ** 2)
-            point.z -= top * min(MYOSEPTUM_DEPTH_M, height * .12) * groove
-            point.z += top * .00018 * noise.noise(point * 930 + Vector((index, 4.9, 7.1)))
-            point.z += bottom * .00022 * noise.noise(point * 440 + Vector((index, 8.1, 3.9)))
-            ring.append(len(vertices))
-            vertices.append(point)
-        rings.append(ring)
-    for first, second in zip(rings, rings[1:]):
-        for side in range(FILLET_SIDES):
-            following = (side + 1) % FILLET_SIDES
-            faces.append((first[side], first[following], second[following], second[side]))
-            angle = (side + .5) * 2 * math.pi / FILLET_SIDES
-            skin_flags.append(skin and (math.sin(angle) < .06 or math.cos(angle) < -.76))
-    for cap, boundary in enumerate((rings[0], rings[-1])):
-        first_new = len(vertices)
-        faces += shapes.cut_food_patch(vertices, boundary, SEED + index * 2 + cap, normal_axis=1)
-        mean_fold = sum(muscle_fold(vertices[i].x) for i in boundary) / len(boundary)
-        for point in vertices[first_new:]:
-            point.y += mean_fold - muscle_fold(point.x)
-    obj = kit.mesh(name, vertices, faces, food.grilled_trout_flesh("M_" + name + "Flesh", index))
-    if skin:
-        obj.data.materials.append(food.grilled_trout_skin("M_" + name + "Skin", index))
-        for face, is_skin in zip(obj.data.polygons, skin_flags):
-            face.material_index = int(is_skin)
-    shapes.closed_normals(obj)
-    bevel = obj.modifiers.new("GrilledTroutSoftCutEdges", "BEVEL")
-    bevel.width, bevel.segments, bevel.limit_method, bevel.angle_limit = .00035, 3, "ANGLE", .65
-    kit.apply_modifiers(obj)
-    mesh = bmesh.new()
-    try:
-        mesh.from_mesh(obj.data)
-        bmesh.ops.dissolve_degenerate(mesh, dist=1e-8, edges=list(mesh.edges))
-        mesh.to_mesh(obj.data)
-    finally:
-        mesh.free()
-    shapes.closed_normals(obj)
-    return obj
+    return shapes.cooked_fillet(
+        kit, name, index, length, width, height, rows,
+        food.grilled_trout_flesh("M_" + name + "Flesh", index),
+        food.grilled_trout_skin("M_" + name + "Skin", index) if skin else None,
+        SEED, index == 0, sides=FILLET_SIDES,
+        spacing_m=MYOMERE_SPACING_M, depth_m=MYOSEPTUM_DEPTH_M)
 
 
 def build(kit) -> list:
