@@ -80,6 +80,22 @@
       "imageMime": null,
       "createdUtc": "2026-10-04T18:54:38.161Z",
       "updatedUtc": "2026-10-04T18:56:02.763Z"
+    },
+    {
+      "id": "jenny-muu7h2lt-0jye7b",
+      "title": "Rename Pascoe to something else, non-Poldark-related",
+      "description": "The names of the people and places should explicitly avoid directly referencing Poldark, the family names, business names, or estate names.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T19:20:19.313Z"
+    },
+    {
+      "id": "jenny-muu7idr3-mphjdv",
+      "title": "MetaHuman model for the General Store clerk",
+      "description": "Instead of the placeholder heroine asset, the General Store clerk should use a MetaHuman model with period-appropriate clothing, and it should be a man in his 50s or so",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T19:21:20.415Z"
     }
   ]
 }
