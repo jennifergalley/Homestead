@@ -314,6 +314,56 @@ Current original-art work remains attributable only to build02; captured usage
 is 278 calls through event70276, 1,617,143,930,000 recorded nano-AIU, provisional
 and incomplete. No model/context change, helpers or reconciled billing claim.
 
+### Autonomous structural proof after the 23:08 continuation
+Jenny's direct continuation supersedes the brief art-direction pause. Slot2
+and the overnight exception remain active; no approval wait, automation,
+helper implementation or owned UE launch was added. Coordinator's one
+read-only review of frozen `4148ab7c` supported anatomy-first corrections;
+those four earlier views remain untouched in `Refinement`.
+
+New source has crescent opercular/preopercular fields, flatter-sided cheeks,
+localized maxillary/mandibular ridges, rounded snout caps, a full curved oral
+roof/floor behind rolled lips, fleshy adipose fins and broad bowed pectoral
+fans with narrower rooted attachments. Scale overlap now runs longitudinally
+and follows local girth, with locally warped cells; pigment size, density,
+cluster selection and halos vary. Film remains exactly .65/.06, without a
+blanket roughness sweep. Thin-fin welding moved the lowest vertex by 35
+microns after the shared kit set the pivot; this recipe now settles the
+finished welded mesh and accumulates that offset into review metadata.
+
+`StructuralProof/Source` and `StructuralProof/Baked` preserve ONE current-source
+trout, not a regenerated/admissible family. Both are explicitly draft-only.
+50,111 triangles; 4.85 x 34.0 x 9.52cm. Source hero/detail, neutral-pigment
+geometry hero/detail and five-map baked hero/detail were all viewed at
+3840x2160/192 samples/OPTIX with identical existing framing/lighting.
+All five 4096px atlases were inspected. The baked film fixture passes;
+current-source hashes, FBX/map hashes, sizes, warning-free receipts and
+paired frames pass `BlenderFishBakeProofTests.py`. Mean absolute source/baked
+differences are 0.071 hero and 0.421 detail in 8-bit levels; this measures
+bake fidelity, NOT realism or UE shader acceptance.
+
+All six raw jaw/cavity/outward-skin/eye fixtures and twelve projected-area
+pectoral fan fixtures pass; the one joined/baked trout passes pivot, UV,
+outward normals and budget checks. Four offline material-import contracts
+still pass. No gameplay, saves, enum widths, versions, placements or Unreal
+assets changed.
+
+This remains WIP, not [ready]: the viewed jaw is still too wedge-like and the
+front chin has an angular transition; the opercular margin and exposed scale
+finish remain too regular for the requested close-up realism. Next correction
+will use an anatomical lower-jaw hinge/retreat rather than simply inflating
+head halves, then repeat the one-trout proof before the full six-fish bake.
+The sixteen dishes/portions and image/eating wiring remain untouched and are
+still several hours of work. Integration's actual ClearCoat compile/import,
+held-pole close grip evidence and gameplay/release gates remain outstanding.
+Visible Blender preserves the one-trout baked scene; earlier full-family
+and source scenes have named E: preservation copies.
+
+Current build02-only usage is 319 calls through event70353, 1,920,206,500,000
+recorded nano-AIU, incomplete/provisional. Actual model remains
+`gpt-6.1-sol`/high; launch context default, actual context tier unknown. No
+new helper/model segment or reconciled billing claim; later calls need recapture.
+
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.
 Notion identity and Ledger read in full; no technical-project Notion writes.

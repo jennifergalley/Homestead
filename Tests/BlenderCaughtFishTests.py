@@ -80,7 +80,8 @@ def check_jaw_openings() -> None:
                         top = data.vertices[ring * columns + (0 if side == 0 else columns - 1)].co
                         bottom = data.vertices[lower_offset + ring * columns + (columns - 1 if side == 0 else 0)].co
                         if u == 0:
-                            assert abs((top.z - bottom.z) - fish["length"] * fish["mouth_gap"]) < .000002
+                            nominal_gap = fish["length"] * fish["mouth_gap"]
+                            assert .70 * nominal_gap <= top.z - bottom.z <= nominal_gap
                         elif u < fish["mouth_end"] * .5:
                             assert top.z > bottom.z, fish["key"] + " has a sealed mouth"
                         elif u >= fish["mouth_end"]:
@@ -89,6 +90,15 @@ def check_jaw_openings() -> None:
                 assert cavity_faces, fish["key"] + " lacks a modeled oral cavity"
                 assert all(face.area > 0 and all(math.isfinite(c) for c in face.normal)
                            for face in cavity_faces), fish["key"] + " has collapsed cavity faces"
+                lining_start = obj["oral_lining_start"]
+                lining_sheet = obj["oral_lining_columns"] * obj["oral_lining_rings"]
+                roof_faces = [face for face in cavity_faces if all(
+                    lining_start <= index < lining_start + lining_sheet for index in face.vertices)]
+                floor_faces = [face for face in cavity_faces if all(
+                    index >= lining_start + lining_sheet for index in face.vertices)]
+                assert roof_faces and floor_faces, fish["key"] + " lacks a full oral vestibule"
+                assert all(face.normal.z < 0 for face in roof_faces), fish["key"] + " has inverted oral roof"
+                assert all(face.normal.z > 0 for face in floor_faces), fish["key"] + " has inverted oral floor"
                 for face in data.polygons[:2 * (recipe.BODY_RINGS - 1) * (columns - 1)]:
                     if .30 * fish["length"] < face.center.y + .5 * fish["length"] < .80 * fish["length"]:
                         radial = Vector((face.center.x, 0, face.center.z))
@@ -113,11 +123,41 @@ def check_jaw_openings() -> None:
                 bpy.data.objects.remove(obj, do_unlink=True)
                 if data.users == 0:
                     bpy.data.meshes.remove(data)
-        print("ORIGINAL_FISH_JAW_PASS 6 open jaws, recessed cavity faces, closed seams, 12 unclipped pupils")
+        print("ORIGINAL_FISH_JAW_PASS 6 rounded jaws/vestibules, inward oral linings, closed seams, 12 unclipped pupils")
     finally:
         for material in (skin, cavity):
             if material.users == 0:
                 bpy.data.materials.remove(material)
+
+
+def check_pectoral_fans() -> None:
+    source = Path(__file__).resolve().parents[1] / "Scripts" / "Blender"
+    sys.path.insert(0, str(source))
+    import homestead_kit as kit
+
+    spec = importlib.util.spec_from_file_location("caught_fish_fan_regression", source / "Recipes" / "caught_fish.py")
+    recipe = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(recipe)
+    material = bpy.data.materials.new("CaughtFishRegressionFan")
+    try:
+        for fish in recipe.FISH:
+            for side in (-1, 1):
+                parts = recipe.paired_fin(kit, fish, material, side, False)
+                try:
+                    membrane = parts[0].data
+                    projected_area = sum(abs(face.normal.x) * face.area for face in membrane.polygons) / 2
+                    assert projected_area > .002 * fish["length"] ** 2, fish["key"] + " has an edge-on pectoral blade"
+                    assert all(math.isfinite(c) for vertex in membrane.vertices for c in vertex.co)
+                finally:
+                    for obj in parts:
+                        data = obj.data
+                        bpy.data.objects.remove(obj, do_unlink=True)
+                        if data.users == 0:
+                            bpy.data.meshes.remove(data)
+        print("ORIGINAL_FISH_PECTORAL_PASS 12 rooted broad curved membranes")
+    finally:
+        if material.users == 0:
+            bpy.data.materials.remove(material)
 
 
 def check_geometry(keys=EXPECTED) -> None:
@@ -171,6 +211,7 @@ def check_wet_film(keys=EXPECTED) -> None:
 
 def main() -> None:
     check_fin_ray_attachment()
+    check_pectoral_fans()
     check_jaw_openings()
     check_wet_film()
     check_geometry()

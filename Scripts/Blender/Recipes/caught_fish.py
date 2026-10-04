@@ -42,6 +42,8 @@ BAKE = {"size": 4096, "samples": 96, "maps": ("basecolor", "roughness", "normal"
 BEAUTY = {"pose": (0, 78, 28), "meshes": {}}
 BODY_RINGS = 201
 BODY_SIDES = 80
+ORAL_LINING_COLUMNS = 11
+ROSTRUM_ROUNDING = .004
 PROFILE_T = (0, 0.035, 0.075, 0.12, 0.18, 0.25, 0.36, 0.50, 0.65, 0.76, 0.85, 0.90)
 FISH = (
     dict(key="RiverTrout", species="Salmo trutta", length=0.34, pattern="trout",
@@ -128,24 +130,32 @@ def surface(fish: dict, u: float, angle: float, lift: float = 0) -> Vector:
     muzzle = .55 + .45 * math.sqrt(max(0, 1 - (1 - min(1, u / .028)) ** 2))
     z = profile(fish["top"] if s >= 0 else fish["bottom"], u) * s * muzzle
     centre_x = .005 * math.sin(math.pi * u) ** 2
-    posterior = .205 + .025 * abs(math.cos(angle))
+    posterior = .187 + .065 * math.exp(-((s - .20) / .50) ** 2)
     gate = min(1, max(0, (abs(math.cos(angle)) - .35) / .30))
-    operculum = (.0045 * math.exp(-((u - posterior + .020) / .030) ** 2)
-                 - .0025 * math.exp(-((u - posterior) / .006) ** 2)
-                 - .0013 * math.exp(-((u - posterior + .050) / .006) ** 2)) * gate * length
+    plate_edge = min(1, max(0, (posterior - u) / .009))
+    plate_front = min(1, max(0, (u - .13) / .040))
+    operculum = (.0038 * plate_front * plate_edge * plate_edge * (3 - 2 * plate_edge)
+                 - .0017 * math.exp(-((u - posterior) / .003) ** 2)) * gate * length
     bone = 0
     if u < .28:
         eye_angle = .35 if math.cos(angle) >= 0 else math.pi - .35
         delta = math.atan2(math.sin(angle - eye_angle), math.cos(angle - eye_angle))
         arc = max(profile(fish["top"], fish["eye_u"]), .035) * delta
         orbit = math.hypot((u - fish["eye_u"]) / fish["eye_size"], arc / fish["eye_size"])
-        preoperculum = .150 + .037 * (1 - s) * .5
+        preoperculum = .137 + .068 * math.exp(-((s + .10) / .48) ** 2)
         bone = (.0032 * math.exp(-((orbit - 1.12) / .23) ** 2)
-                + .0060 * math.exp(-((u - preoperculum) / .030) ** 2)
+                + .0033 * math.exp(-((u - preoperculum) / .024) ** 2)
                 * math.exp(-((s + .15) / .42) ** 2)
-                - .0017 * math.exp(-((u - preoperculum + .024) / .005) ** 2)
-                * math.exp(-((s + .05) / .48) ** 2)) * gate * length
-    return Vector((length * (centre_x + profile(fish["width"], u) * math.cos(angle) * muzzle),
+                - .0008 * math.exp(-((u - preoperculum + .024) / .005) ** 2)
+                * math.exp(-((s + .05) / .48) ** 2)
+                + .0035 * math.exp(-((u - .112) / .033) ** 2)
+                * math.exp(-((s + .17) / .08) ** 2)
+                + .0038 * math.exp(-((u - .095) / .055) ** 2)
+                * math.exp(-((s + .62) / .10) ** 2)) * gate * length
+    head_blend = max(0, min(1, (.285 - u) / .10))
+    head_blend = head_blend * head_blend * (3 - 2 * head_blend)
+    lateral = math.copysign(abs(math.cos(angle)) ** (1 - .35 * head_blend), math.cos(angle))
+    return Vector((length * (centre_x + profile(fish["width"], u) * lateral * muzzle),
                    length * (u - .5), length * z)) + Vector(
                        (math.cos(angle), 0, math.sin(angle))) * (lift + operculum + bone)
 
@@ -170,10 +180,14 @@ def jaw_surface(fish: dict, u: float, angle: float, upper: bool) -> Vector:
     distance = min(abs(math.atan2(math.sin(angle - cut), math.cos(angle - cut))),
                    abs(math.atan2(math.sin(angle - math.pi + cut), math.cos(angle - math.pi + cut))))
     rim = max(nose, math.exp(-(distance / .24) ** 2))
-    point.z += oral_gap(fish, u) * rim * (.5 if upper else -.5)
+    point.z += oral_gap(fish, u) * rim * (.12 if upper else -.88)
+    point.y += fish["length"] * ROSTRUM_ROUNDING * max(0, 1 - u / .028) ** 2
+    if upper:
+        point.y += fish["length"] * .005 * max(0, 1 - u / fish["mouth_end"]) ** 2
     lip = fish["length"] * .0028 * math.exp(-(distance / .075) ** 2)
     lip *= min(1, max(0, (fish["mouth_end"] - u) / .025))
-    point += Vector((math.cos(angle), 0, math.sin(angle))) * lip
+    lip = min(lip, oral_gap(fish, u) * .20)
+    point += Vector((math.cos(angle), -.28 * min(1, u / .015), -.55 if upper else .55)).normalized() * lip
     return point
 
 
@@ -213,14 +227,30 @@ def body(kit, fish: dict, material, cavity_material):
             a = offset + (BODY_RINGS - 1) * columns + side
             faces.append((centre, a + 1, a))
         right, left = rims[(upper, 0)]
+        centre_point = (vertices[right] + vertices[left]) * .5
+        previous = list(range(offset, offset + columns))
+        for layer in range(1, 5):
+            t = layer / 5
+            current = []
+            for side in range(columns):
+                point = centre_point.lerp(vertices[offset + side], 1 - t)
+                point.y -= fish["length"] * ROSTRUM_ROUNDING * math.sqrt(1 - (1 - t) ** 2)
+                current.append(len(vertices))
+                vertices.append(point)
+                coords.append((0, math.cos(oral_angle(fish, 0) + side * math.pi / (columns - 1)) * (1 - t),
+                               math.sin(oral_angle(fish, 0))))
+            for side in range(columns - 1):
+                faces.append((previous[side], previous[side + 1], current[side + 1], current[side]))
+            previous = current
         nose_center = len(vertices)
-        vertices.append((vertices[right] + vertices[left]) * .5)
+        vertices.append(centre_point - Vector((0, fish["length"] * ROSTRUM_ROUNDING, 0)))
         coords.append((0, 0, math.sin(oral_angle(fish, 0))))
         for side in range(columns - 1):
-            faces.append((nose_center, offset + side, offset + side + 1))
+            faces.append((nose_center, previous[side], previous[side + 1]))
     cavity_start = len(faces)
     head_rings = [ring for ring in range(BODY_RINGS)
                   if .90 * ring / (BODY_RINGS - 1) <= fish["mouth_end"]]
+    linings = []
     for side in range(2):
         side_start = len(faces)
         wall = []
@@ -242,11 +272,40 @@ def body(kit, fish: dict, material, cavity_material):
             faces.append((top, inside_top, inside_bottom, bottom))
         if side == 0:
             faces[side_start:] = [tuple(reversed(face)) for face in faces[side_start:]]
+        linings.append(wall)
+    lining_columns = ORAL_LINING_COLUMNS
+    lining_start = len(vertices)
+    for upper in (True, False):
+        offset = len(vertices)
+        for ring, (right, left) in enumerate(zip(*linings)):
+            a, b = vertices[right[2 if upper else 3]], vertices[left[2 if upper else 3]]
+            u = .90 * head_rings[ring] / (BODY_RINGS - 1)
+            for column in range(lining_columns):
+                t = column / (lining_columns - 1)
+                point = a.lerp(b, t)
+                fullness = oral_gap(fish, u) * .20 * math.sin(math.pi * t) ** 2
+                point.z += fullness * (-1 if upper else 1)
+                vertices.append(point)
+                coords.append((u, 1 - 2 * t, math.sin(oral_angle(fish, u))))
+        for ring in range(len(head_rings) - 1):
+            for column in range(lining_columns - 1):
+                a = offset + ring * lining_columns + column
+                quad = (a, a + 1, a + 1 + lining_columns, a + lining_columns)
+                faces.append(quad if upper else tuple(reversed(quad)))
     obj = kit.mesh("AnatomicalBody", vertices, faces, material)
     obj.data.materials.append(cavity_material)
     for polygon in obj.data.polygons[cavity_start:]:
         polygon.material_index = 1
     attribute(obj, "fishcoord", coords)
+    obj["oral_lining_start"] = lining_start
+    obj["oral_lining_columns"] = lining_columns
+    obj["oral_lining_rings"] = len(head_rings)
+    girth = lambda u: math.sqrt((profile(fish["width"], u) ** 2
+                                + ((profile(fish["top"], u) + profile(fish["bottom"], u)) / 2) ** 2) / 2)
+    maximum_girth = max(girth(t) for t in PROFILE_T)
+    girths = {u: girth(u) / maximum_girth for u, _, _ in coords}
+    attribute(obj, "fishscale", [(u, math.atan2(up, side) * girths[u], girths[u])
+                                 for u, side, up in coords])
     # The open oral sheets need explicit winding; volume-based repair can invert them.
     return obj
 
@@ -254,7 +313,8 @@ def body(kit, fish: dict, material, cavity_material):
 def membrane(kit, name: str, base, edge, rays: int, material, length: float,
              rib_material=None) -> list:
     columns, spans = rays * 3, 6
-    thickness = max(.00035, length * .0009)
+    adipose = name == "Adipose"
+    thickness = max(.00035, length * (.006 if adipose else .0009))
     vertices, faces, coords = [], [], []
 
     def normal_at(s):
@@ -272,7 +332,10 @@ def membrane(kit, name: str, base, edge, rays: int, material, length: float,
                 scallop = 1 - depth * math.sin(math.pi * s * rays) ** 2 * v
                 point = root.lerp(tip, v * scallop)
                 bow = length * .0025 * math.sin(math.pi * v) * math.sin(math.pi * s)
-                point += normal * (layer * thickness * .5 + bow)
+                local_thickness = thickness * (
+                    .10 + .90 * math.sin(math.pi * v) * math.sin(math.pi * s) if adipose
+                    else (.30 + .70 * (1 - v) ** .60) * (.75 + .25 * math.sin(math.pi * s)))
+                point += normal * (layer * local_thickness * .5 + bow)
                 vertices.append(point)
                 coords.append((s, v, rays))
     sheet = (columns + 1) * (spans + 1)
@@ -345,16 +408,18 @@ def tail(kit, fish: dict, material) -> list:
 
 def paired_fin(kit, fish: dict, material, side: int, pelvic: bool) -> list:
     length = fish["length"]
-    start, angle = (.49, -1.05) if pelvic else (.215, -.35)
-    if side < 0:
-        angle = math.pi - angle
-    base = lambda s: surface(fish, start + .035 * s, angle)
+    start, angle = (.49, -1.05) if pelvic else (.245, -.25)
+
+    def base(s):
+        polar = angle - (.12 if pelvic else .15) * s
+        return surface(fish, start + (.020 if pelvic else .008) * s,
+                       polar if side > 0 else math.pi - polar)
 
     def edge(s):
-        spread = max(.035, math.sin(math.pi * s) ** .65)
-        return base(s) + Vector((side * length * (.045 if pelvic else .059) * spread,
-                                 length * (.072 if pelvic else .105) * spread,
-                                 -length * (.035 if pelvic else .025) * spread))
+        spread = max(.035, math.sin(math.pi * s) ** .60)
+        return base(s) + Vector((side * length * (.026 if pelvic else .016) * spread,
+                                 length * (.078 if pelvic else .140) * (1 - .25 * s) * spread,
+                                 -length * ((.025 + .035 * s) if pelvic else (.015 + .085 * s)) * spread))
 
     return membrane(kit, "Pelvic" if pelvic else "Pectoral", base, edge,
                     10 if pelvic else 13, material, length, material)
@@ -432,7 +497,7 @@ def build_species(kit, fish: dict):
     pectoral_fin = kit.mats.fish_fin("M_" + key + "Pectoral", (.20, .16, .065)) if fish["pattern"] == "perch" else fin
     eye_mat = kit.mats.fish_eye("M_" + key + "Eye", fish["eye"])
     lip = kit.mats.fish_fin("M_" + key + "Lip", tuple(c*.65 for c in fish["flank"]))
-    cavity = kit.mats.fish_fin("M_" + key + "Mouth", (.045, .027, .020), ray_detail=False)
+    cavity = kit.mats.fish_fin("M_" + key + "Mouth", (.075, .044, .035), ray_detail=False)
     parts = [body(kit, fish, skin, cavity)]
     for index, spec in enumerate(fish["dorsals"]):
         parts.extend(dorsal(kit, fish, spec, dorsal_fin, index))
@@ -458,6 +523,14 @@ def build_species(kit, fish: dict):
             parts.extend(lower_fin(kit, fish, fin, start, start+.016, .016, 3))
     parts.extend(mouth(kit, fish, lip, cavity))
     obj = kit.join(parts, "SM_" + key, pivot="base", smooth_angle=65, unwrap=True)
+    # Welding the thin fin tips can move the lowest vertex after the kit sets its pivot.
+    settle = min(vertex.co.z for vertex in obj.data.vertices)
+    for vertex in obj.data.vertices:
+        vertex.co.z -= settle
+    shift = list(obj["homestead_shift"])
+    shift[2] += settle
+    obj["homestead_shift"] = shift
+    obj.data.update()
     obj["fish_item"] = key
     obj["fish_species"] = fish["species"]
     obj["fish_original"] = True
