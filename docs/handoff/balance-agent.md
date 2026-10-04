@@ -23,8 +23,16 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 
 ## Open
 
-- Follow-ups proposed to the Orchestrator for Jenny (not scheduled): halve crop growth, daily
-  fishing catch, sleep 15/h, better-value snacks, cooked meals grant Well fed, UI audit items.
+- My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
+  snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
+  "[Balance UI]" cards, added by the Orchestrator 2026-10-04.
+
+## Backlog suggestions rule (Jenny, 2026-10-04)
+
+Every suggestion I make (balance, cohesion/UI, polish) becomes a backlog card tagged with its
+source. End each review by sending the Orchestrator a "Backlog suggestions" list: one line per
+card with a title, a one-sentence description and the doc section it came from. The Orchestrator
+adds them through the planner; I never edit the backlog files myself.
 
 ## How lanes reach me
 
