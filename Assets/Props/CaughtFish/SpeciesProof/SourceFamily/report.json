@@ -1,0 +1,703 @@
+{
+  "schema": 1,
+  "name": "CaughtFishFamilySource",
+  "description": "Draft-only six-species head, oral chamber and fin-fan review.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/caught_fish_family_source.py",
+  "source_sha256": "894fd40ffb1684be99039b8038d0f918e30494c8c1b2daeabcb5d58b7e8ef0d1",
+  "provenance": "Original parametric anatomy and procedural PBR; cited text, PD-self trout/perch and CC BY-SA 3.0 carp photos for observation only.",
+  "meshes": {
+    "SM_RiverTrout": {
+      "vertices": 26660,
+      "triangles": 53242,
+      "size_cm": [
+        4.84,
+        34.0,
+        9.52
+      ],
+      "materials": [
+        {
+          "name": "M_RiverTroutSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutAdipose",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_RiverTroutTeeth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0008432557806372643,
+          -0.10540031292438508,
+          0.03931366625329247
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_RiverTrout.fbx",
+      "sha256": "bd70084b26692020cdf4315700474fa14435723c5eedd3e050ee044293914bbf",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RiverTrout_hero.png",
+          "detail": "beauty_SM_RiverTrout_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RiverSalmon": {
+      "vertices": 29608,
+      "triangles": 59414,
+      "size_cm": [
+        8.36,
+        62.01,
+        19.07
+      ],
+      "materials": [
+        {
+          "name": "M_RiverSalmonSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverSalmonMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverSalmonDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverSalmonAdipose",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverSalmonFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverSalmonEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_RiverSalmonTeeth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0015377029776573181,
+          -0.192133198094368,
+          0.07440000027418137
+        ],
+        "detail_distance": 0.62
+      },
+      "fbx": "SM_RiverSalmon.fbx",
+      "sha256": "82c1393b32bc952e4fb2668eafc84cc2e8813ab512aaea0a70c27a7a31136818",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RiverSalmon_hero.png",
+          "detail": "beauty_SM_RiverSalmon_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_LakePerch": {
+      "vertices": 26602,
+      "triangles": 53004,
+      "size_cm": [
+        4.79,
+        30.0,
+        12.46
+      ],
+      "materials": [
+        {
+          "name": "M_LakePerchSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakePerchMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakePerchDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakePerchFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakePerchEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_LakePerchPectoral",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakePerchTeeth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0007439767941832542,
+          -0.09299536573886871,
+          0.04223772883415222
+        ],
+        "detail_distance": 0.3
+      },
+      "fbx": "SM_LakePerch.fbx",
+      "sha256": "815bfc7500dbc99f0e5a0d44f976a6ea7f288b027b447110af628dbf2e802833",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_LakePerch_hero.png",
+          "detail": "beauty_SM_LakePerch_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_LakeCarp": {
+      "vertices": 26477,
+      "triangles": 52979,
+      "size_cm": [
+        8.53,
+        42.11,
+        17.09
+      ],
+      "materials": [
+        {
+          "name": "M_LakeCarpSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakeCarpMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakeCarpDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakeCarpFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakeCarpEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_LakeCarpLip",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0010415054857730865,
+          -0.12967263300418852,
+          0.06481246649855166
+        ],
+        "detail_distance": 0.42
+      },
+      "fbx": "SM_LakeCarp.fbx",
+      "sha256": "e948c412a1ee8459ff1eb7c858c1bee995966cbd92ac373e9f61c295aa141b06",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_LakeCarp_hero.png",
+          "detail": "beauty_SM_LakeCarp_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_SeaMackerel": {
+      "vertices": 28510,
+      "triangles": 56908,
+      "size_cm": [
+        5.12,
+        36.01,
+        10.44
+      ],
+      "materials": [
+        {
+          "name": "M_SeaMackerelSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SeaMackerelMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SeaMackerelDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SeaMackerelFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SeaMackerelEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_SeaMackerelTeeth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0008929958567023277,
+          -0.11155452910661696,
+          0.049320001155138016
+        ],
+        "detail_distance": 0.36
+      },
+      "fbx": "SM_SeaMackerel.fbx",
+      "sha256": "f1c40ec47976116d750aa1d1415d28212c47660cfae436c638fe7b39f81d03a9",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SeaMackerel_hero.png",
+          "detail": "beauty_SM_SeaMackerel_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_SeaBass": {
+      "vertices": 28305,
+      "triangles": 56586,
+      "size_cm": [
+        7.42,
+        46.0,
+        15.21
+      ],
+      "materials": [
+        {
+          "name": "M_SeaBassSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SeaBassMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SeaBassDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SeaBassFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_SeaBassEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_SeaBassTeeth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0011408012360334396,
+          -0.14260037252902985,
+          0.05650573676030035
+        ],
+        "detail_distance": 0.46
+      },
+      "fbx": "SM_SeaBass.fbx",
+      "sha256": "dc60d1bd0db2d0194668672cea77439ebb911527c1af7e44374d55943846a7e9",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SeaBass_hero.png",
+          "detail": "beauty_SM_SeaBass_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "species": [
+    {
+      "item": "RiverTrout",
+      "scientific_name": "Salmo trutta",
+      "representative_length_cm": 34.0
+    },
+    {
+      "item": "RiverSalmon",
+      "scientific_name": "Salmo salar",
+      "representative_length_cm": 62.0
+    },
+    {
+      "item": "LakePerch",
+      "scientific_name": "Perca fluviatilis",
+      "representative_length_cm": 30.0
+    },
+    {
+      "item": "LakeCarp",
+      "scientific_name": "Cyprinus carpio",
+      "representative_length_cm": 42.0
+    },
+    {
+      "item": "SeaMackerel",
+      "scientific_name": "Scomber scombrus",
+      "representative_length_cm": 36.0
+    },
+    {
+      "item": "SeaBass",
+      "scientific_name": "Dicentrarchus labrax",
+      "representative_length_cm": 46.0
+    }
+  ],
+  "wet_fish": {
+    "coat_weight": 0.65,
+    "coat_roughness": 0.06,
+    "membrane_materials": [
+      "M_RiverTroutMembrane",
+      "M_RiverSalmonMembrane",
+      "M_LakePerchMembrane",
+      "M_LakeCarpMembrane",
+      "M_SeaMackerelMembrane",
+      "M_SeaBassMembrane"
+    ],
+    "membrane_opacity": 0.35
+  },
+  "draft_only": true,
+  "draft_mode": "source",
+  "authored_source": "caught_fish.py",
+  "authored_source_sha256": "22b7f84088fcc597d5d510d29b5c74bac2167909871bcdaed5f4e42c1d402bb7",
+  "material_source_sha256": "a0bf6a16587109f53ea288482bd5df10e6e497668807f3f80697577bde758ad3"
+}

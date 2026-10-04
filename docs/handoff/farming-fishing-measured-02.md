@@ -25,9 +25,9 @@ access or shortcut changes; Integration retains imports and release gates.
 
 | Feedback | Change | State |
 | --- | --- | --- |
-| `jenny-mut56ggp-uijcta`, `jenny-mut57myz-9tfjci` | `fix-seed-planting-hint-and-harvest-balance` | source implemented; compile/acceptance pending |
-| `jenny-mut5gsd4-oebvov` | `add-basic-crop-cookfire-recipes` | source implemented; compile/acceptance pending |
-| `jenny-mut592z8-2od0d5`, `jenny-mut5legr-oba2rd` | existing `add-shore-and-river-fishing` | source/native verified; editor compile and acceptance pending |
+| `jenny-mut56ggp-uijcta`, `jenny-mut57myz-9tfjci` | `fix-seed-planting-hint-and-harvest-balance` | native/source implemented; Integration reports compilation passed; manual acceptance not claimed |
+| `jenny-mut5gsd4-oebvov` | `add-basic-crop-cookfire-recipes` | native/source implemented; Integration reports compilation passed; original meal art remains |
+| `jenny-mut592z8-2od0d5`, `jenny-mut5legr-oba2rd` | existing `add-shore-and-river-fishing` | native/source verified and Integration compilation reported; fish/meal art and integrated acceptance remain |
 
 First delivery: seed hint/balance and eight crop meals. Then fishing pole at exactly
 1500 coins beside backpack upgrade, inventory/hotbar, original active fishing,
@@ -463,6 +463,74 @@ shortcut or real-save access. Overnight/slot2 authorization remains in force.
 Build02-only provisional usage: 398 calls through event70463,
 2,445,055,050,000 recorded nano-AIU. Actual gpt-6.1-sol/high; launch context
 default, actual context tier unknown; later calls need recapture.
+
+### Held species-mouth and surface checkpoint after 411fbd34
+
+WIP only, NOT [ready] or fish import/admission authorization. The carp now has
+a broad short muzzle, a rounded terminal opening with fleshy annular lips,
+skin-covered lateral cheeks and a connected oral lining. Its smaller/forward
+eye, shorter gape/tail, four forward/downward barbels and larger bronze scales
+follow observation of George Chernilevsky's Cyprinus_carpio_2008_G1.jpg
+(verified CC BY-SA 3.0 on Wikimedia Commons). The photo is observation-only in
+E: scratch, not shipped or used as a texture. The long carp dorsal is no longer
+treated as an entirely spiny comb.
+
+All six share softer orbital/opercular/preopercular fields, jaw-relative
+maxillary/dentary bands, a smooth mandibular hinge blend, 21-column vestibules
+and a curved asymmetric pectoral fan rather than the earlier leaf/straight
+edge. Skin adds clustered pigment/scale variation, smaller non-carved crowns,
+silver/bronze reflectance and irregular salmon marking orientation. Fin shader
+rays gain finer distal branches/segmentation and less graphic contrast.
+Base Normal and Coat Normal now share the same authored/baked normal socket;
+the film remains .65/.06 and the opaque/membrane role separation is unchanged.
+
+Raw all-six stations/hinges/vestibules, 160 seated teeth/four barbels, twelve
+pupils/pectoral fans and seven-ray/eight-station attachment fixtures pass.
+The barbel clearance fixture casts against material-zero exterior skin only:
+nearest-face signed distance against the open inner cavity gave false failures.
+This checks sampled centre clearance, not general watertightness or a complete
+self-intersection proof. Joined geometry/UV/pivot/outward/unique-mesh fixtures
+pass, with trout 53,242; salmon 59,414; perch 53,004; carp 52,979; mackerel
+56,908; bass 56,586 triangles, all below the 65,000 budget.
+
+Held evidence is Assets\Props\CaughtFish\SpeciesProof:
+SourceFamily has the current six source-shader meshes and twelve viewed
+3840x2160/192-sample OPTIX frames. SourceTrout/BakedTrout retain a fresh paired
+five-map/4096 proof exercising both baked coat-normal sockets and the membrane
+role. Mean/RMS 8-bit differences are .099/.659 hero and .599/1.446 detail;
+copied fidelity receipts and four local texture dependencies pass after
+reopening. The basecolor and normal atlases were viewed. Nine offline fish
+import contracts still pass; there is no current baked six-fish set and no
+real Unreal API/shader/import/appearance proof for this source.
+
+Viewed weaknesses remain: heads still read too molded, the carp front lip
+has visible plane transitions, scale arches/rays retain procedural regularity,
+and the trout bake adds locally blotchy head reflections despite passing the
+whole-frame fidelity threshold. A sampled cheek crop had mean/RMS 2.39/3.11
+8-bit difference; full-frame numbers are not close-up art acceptance. Diagnose
+that actual bake/normal-detail loss and organic head/fin surfaces next, before
+starting sixteen dishes/edible portions and image/eating wiring. Estimated
+remaining art/wiring is 11-18+ hours (fish 3-6+, dishes/wiring 8-12+), uncertain
+and not a release ETA; Integration's engine and player gates remain additional.
+
+Live-builder copy=True does not update bpy.data.filepath. One initial carp
+render therefore read an older report and accidentally wrote into frozen
+MembraneProof/Family; only our three overwritten files were restored from
+preservation copies, and that subtree was verified clean. Every subsequent
+pass explicitly opened its exported blend before rendering. Integration
+published the canonical remedy at 43bcced5. Older held receipts stay frozen.
+
+Visible Blender PID20420/port9878 now holds six current source fish in an
+EEVEE material-preview grid, preserved at
+E:\CopilotScratch\5be207bc-49b1-4a1b-811e-088ae565dc1b\CaughtFish-species-source-visible-grid.blend.
+Review-only transforms do not alter saved export-origin meshes. Named E:
+preservation copies remain; superseded task scratch is being reduced after
+this checkpoint. No new helpers, automation, Unreal/UBT/UAT, production asset
+promotion, gameplay/save/enum/version/placement changes, shortcuts or real saves.
+Overnight/slot2 continuation remains authorized; no new approval wait.
+Actual gpt-6.1-sol/high, launch context default, actual context tier unknown.
+Build02-only provisional usage: 463 calls through event70551,
+2,834,389,040,000 recorded nano-AIU; later calls require recapture.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

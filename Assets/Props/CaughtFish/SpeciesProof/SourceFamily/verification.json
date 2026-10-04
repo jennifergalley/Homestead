@@ -1,0 +1,122 @@
+{
+  "draft_only": true,
+  "not_art_or_unreal_acceptance": true,
+  "authored_source_sha256": "22b7f84088fcc597d5d510d29b5c74bac2167909871bcdaed5f4e42c1d402bb7",
+  "material_source_sha256": "a0bf6a16587109f53ea288482bd5df10e6e497668807f3f80697577bde758ad3",
+  "meshes": {
+    "SM_RiverTrout": {
+      "triangles": 53242,
+      "size_cm": [
+        4.84,
+        34.0,
+        9.52
+      ],
+      "fbx_sha256": "bd70084b26692020cdf4315700474fa14435723c5eedd3e050ee044293914bbf",
+      "views": {
+        "hero": {
+          "file": "beauty_SM_RiverTrout_hero.png",
+          "sha256": "382ed40624195f19eb8f473a176205ef64e90a852a10eb4bf2f25725f7af6332"
+        },
+        "detail": {
+          "file": "beauty_SM_RiverTrout_detail.png",
+          "sha256": "94018714ab6001c356280ecb17e0894a0e91a06fb7968d42ea6c0730a5fc5f87"
+        }
+      }
+    },
+    "SM_RiverSalmon": {
+      "triangles": 59414,
+      "size_cm": [
+        8.36,
+        62.01,
+        19.07
+      ],
+      "fbx_sha256": "82c1393b32bc952e4fb2668eafc84cc2e8813ab512aaea0a70c27a7a31136818",
+      "views": {
+        "hero": {
+          "file": "beauty_SM_RiverSalmon_hero.png",
+          "sha256": "8614d6c7519e78e305755170f31f36538487780a192cbf77b004032a7aba6df7"
+        },
+        "detail": {
+          "file": "beauty_SM_RiverSalmon_detail.png",
+          "sha256": "6d08a5f0f9241ddb7e9a89123f153de6e50c37317aef7eebecc25d6700a32809"
+        }
+      }
+    },
+    "SM_LakePerch": {
+      "triangles": 53004,
+      "size_cm": [
+        4.79,
+        30.0,
+        12.46
+      ],
+      "fbx_sha256": "815bfc7500dbc99f0e5a0d44f976a6ea7f288b027b447110af628dbf2e802833",
+      "views": {
+        "hero": {
+          "file": "beauty_SM_LakePerch_hero.png",
+          "sha256": "6047d6537f0be12ecb0c92c37961c9a582e5b5b4fc50921842897e6b6148a922"
+        },
+        "detail": {
+          "file": "beauty_SM_LakePerch_detail.png",
+          "sha256": "65f2e3963555a3fe3368a55b46e91d44ea27676108f8f995b4803dd3621ec71d"
+        }
+      }
+    },
+    "SM_LakeCarp": {
+      "triangles": 52979,
+      "size_cm": [
+        8.53,
+        42.11,
+        17.09
+      ],
+      "fbx_sha256": "e948c412a1ee8459ff1eb7c858c1bee995966cbd92ac373e9f61c295aa141b06",
+      "views": {
+        "hero": {
+          "file": "beauty_SM_LakeCarp_hero.png",
+          "sha256": "ade852e6976718a66c8f67c4fcde73c462e2fd49962314f022fcf87f8ae98926"
+        },
+        "detail": {
+          "file": "beauty_SM_LakeCarp_detail.png",
+          "sha256": "387538ce9c93caf010cbcc265632e73759f034f1d1a767d545f862a2e32ceb80"
+        }
+      }
+    },
+    "SM_SeaMackerel": {
+      "triangles": 56908,
+      "size_cm": [
+        5.12,
+        36.01,
+        10.44
+      ],
+      "fbx_sha256": "f1c40ec47976116d750aa1d1415d28212c47660cfae436c638fe7b39f81d03a9",
+      "views": {
+        "hero": {
+          "file": "beauty_SM_SeaMackerel_hero.png",
+          "sha256": "81f380537dbfc46c437c3bbc463ad2bf3cecbc97aa9052ba31841532ae60fb81"
+        },
+        "detail": {
+          "file": "beauty_SM_SeaMackerel_detail.png",
+          "sha256": "04da02d27448fecc971dcc4e83d385dc8d9c2c48d504db7b93e511b61b8028bb"
+        }
+      }
+    },
+    "SM_SeaBass": {
+      "triangles": 56586,
+      "size_cm": [
+        7.42,
+        46.0,
+        15.21
+      ],
+      "fbx_sha256": "dc60d1bd0db2d0194668672cea77439ebb911527c1af7e44374d55943846a7e9",
+      "views": {
+        "hero": {
+          "file": "beauty_SM_SeaBass_hero.png",
+          "sha256": "0ad917efcdd394fc9427dc07712fef595ad6a4c17217cfc938acfc1898fd9563"
+        },
+        "detail": {
+          "file": "beauty_SM_SeaBass_detail.png",
+          "sha256": "e2f4eeb88f2eaf4c449446393f4bdd7440ea34439de9ad268c37b25e58a4b48c"
+        }
+      }
+    }
+  }
+}

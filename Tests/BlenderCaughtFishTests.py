@@ -77,6 +77,12 @@ def check_jaw_openings() -> None:
             posterior = .187 + .065 * math.exp(-((math.sin(angle) - .20) / .50) ** 2)
             assert min(abs(u - posterior) for u in stations) < .000001, "Missing opercular landmark ring"
         for fish in recipe.FISH:
+            if fish["pattern"] == "carp":
+                muzzle = recipe.surface(fish, 0, 0).x - recipe.surface(fish, 0, math.pi).x
+                head_width = recipe.surface(fish, .035, 0).x - recipe.surface(fish, .035, math.pi).x
+                assert muzzle > .65 * head_width, "Carp retains a pointed predator muzzle"
+                assert fish["mouth_end"] < .60 * fish["eye_u"], "Carp retains an elongated predator gape"
+                assert fish["lip_radius"] >= .004, "Carp lacks its fleshy lips"
             physical = [recipe.anatomy_station(fish, index / 1000) for index in range(1001)]
             assert all(a < b for a, b in zip(physical, physical[1:])), fish["key"] + " folds its head stations"
             assert abs(recipe.anatomy_station(fish, fish["eye_u"])
@@ -99,6 +105,15 @@ def check_jaw_openings() -> None:
                     fish["key"] + " inflates its chin instead of hinging")
                 columns = recipe.BODY_SIDES // 2 + 1
                 lower_offset = recipe.BODY_RINGS * columns
+                if fish["pattern"] == "carp":
+                    upper = [data.vertices[index].co for index in obj["oral_front_upper"]]
+                    lower = [data.vertices[index].co for index in obj["oral_front_lower"]]
+                    middle_gap = upper[len(upper)//2].z - lower[len(lower)//2].z
+                    assert middle_gap > 0
+                    assert upper[0].z - lower[0].z < .25 * middle_gap, "Carp has a rectangular terminal opening"
+                    assert upper[-1].z - lower[-1].z < .25 * middle_gap
+                    assert len(obj["oral_cheek_faces"]) >= 4, "Carp has open predator cheeks"
+                    assert all(data.polygons[index].material_index == 0 for index in obj["oral_cheek_faces"])
                 for ring in range(recipe.BODY_RINGS):
                     u = recipe.body_station(ring)
                     for side in range(2):
@@ -136,6 +151,9 @@ def check_jaw_openings() -> None:
                         assert face.normal.dot(radial) > 0, fish["key"] + " has inverted skin normals"
                 head = BVHTree.FromPolygons([vertex.co for vertex in data.vertices],
                                            [face.vertices[:] for face in data.polygons])
+                outer_skin = BVHTree.FromPolygons([vertex.co for vertex in data.vertices],
+                                                 [face.vertices[:] for face in data.polygons
+                                                  if face.material_index == 0])
                 mouth_parts = recipe.mouth(kit, fish, skin, cavity)
                 try:
                     assert len(mouth_parts) == (4 if fish["pattern"] == "carp" else 32)
@@ -146,6 +164,16 @@ def check_jaw_openings() -> None:
                         nearest, _, _, distance = head.find_nearest(root)
                         assert nearest is not None and distance < .00015, (
                             fish["key"] + " has a floating tooth/barbel root")
+                        if fish["pattern"] == "carp":
+                            for ring in range(2, 17):
+                                center = sum((vertex.co for vertex in part.data.vertices[
+                                    ring*sides:(ring+1)*sides]), Vector()) / sides
+                                side = 1 if center.x > 0 else -1
+                                hit = outer_skin.ray_cast(
+                                    center + Vector((side * fish["length"], 0, 0)), Vector((-side, 0, 0)),
+                                    fish["length"] - .00005)
+                                assert hit[0] is None, (
+                                    "Carp barbel runs through the cheek")
                 finally:
                     for part in mouth_parts:
                         mesh = part.data
@@ -253,6 +281,9 @@ def check_wet_film(keys=EXPECTED) -> None:
             bsdf = next(node for node in slot.material.node_tree.nodes if node.type == "BSDF_PRINCIPLED")
             assert abs(bsdf.inputs["Coat Weight"].default_value - materials.FISH_COAT_WEIGHT) < .000001
             assert abs(bsdf.inputs["Coat Roughness"].default_value - materials.FISH_COAT_ROUGHNESS) < .000001
+            assert bsdf.inputs["Normal"].is_linked and bsdf.inputs["Coat Normal"].is_linked
+            assert bsdf.inputs["Normal"].links[0].from_socket == bsdf.inputs["Coat Normal"].links[0].from_socket, (
+                key + " smooths its wet coat over the authored relief")
     print("ORIGINAL_FISH_WET_FILM_PASS", len(keys))
 
 
