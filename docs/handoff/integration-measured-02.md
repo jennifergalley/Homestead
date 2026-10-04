@@ -210,6 +210,13 @@ two to four views and choose one remaining causal correction among anatomy, shad
 read-only, uses no new helper or GPU/editor/implementation slot, and is not a waiting gate for
 Farming's autonomous slot 2. The residual molded/procedural appearance remains, the art/wiring estimate
 has grown to an uncertain 11–18+ hours, and the sixteen dishes are untouched.
+The reviewer completed that follow-up in its third and final read-only turn. `c0` materially improved;
+its one directed next action is tangent-continuous carp cheek/lip rostral interpolation in
+`body/carp_lip`, verified with one head view—not further family or gloss sweeps. It viewed the
+SpeciesProof SourceFamily carp hero/detail, SourceTrout+BakedTrout trout detail, and BakedTrout normal.
+The baked trout shows local cheek-reflection patches absent from source and possible normal-map
+blockiness, but the precise cause is unproven and global frame scores do not prove local fidelity.
+Retain the prior anatomy, fin, and film fixes. This creates no waiting, admission, or UE claim.
 Checkpoint `cf30e41d` supplies that single-trout structural proof under
 `Assets\Props\CaughtFish\StructuralProof`: source, clay, and five-map 4K renders with hashes. It is
 still WIP-only; its frozen `4148` views are unchanged and the full six-family root remains stale and
