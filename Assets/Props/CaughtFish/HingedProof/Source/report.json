@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "CaughtFishTroutProof",
+  "description": "Draft-only original trout jaw, operculum, fan and scale proof.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/caught_fish_trout_proof.py",
+  "source_sha256": "8d838e057db6cf68d609ddb7e51b40b2f97a859e49b2c3b4c802c5951d64cb35",
+  "provenance": "Original parametric anatomy and procedural PBR; cited text and PD-self photos for observation only.",
+  "meshes": {
+    "SM_RiverTrout": {
+      "vertices": 25811,
+      "triangles": 51548,
+      "size_cm": [
+        4.85,
+        34.0,
+        9.52
+      ],
+      "materials": [
+        {
+          "name": "M_RiverTroutSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutAdipose",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_RiverTroutTeeth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0008432911708950996,
+          -0.10540031292438508,
+          0.03931366625329247
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_RiverTrout.fbx",
+      "sha256": "1dffda51140dd059ae007804cdebb183c555de502d753f2732189d1f7dedc355",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RiverTrout_hero.png",
+          "detail": "beauty_SM_RiverTrout_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "authored_source": "caught_fish.py",
+  "authored_source_sha256": "c0bb2df366eab3c44ccf4e1d9d5bbc87386447c64567915a630654dbde96dcb9",
+  "material_source_sha256": "a83c05f5487fe7c2bb9b2f3f492e6a3bedaac6e35d46afc6f687b19f75a8f7b2",
+  "wet_fish": {
+    "coat_weight": 0.65,
+    "coat_roughness": 0.06
+  },
+  "structural_review": {
+    "SM_RiverTrout": {
+      "views": {
+        "hero": "anatomy_SM_RiverTrout_hero.png",
+        "detail": "anatomy_SM_RiverTrout_detail.png"
+      },
+      "device": "OPTIX",
+      "gpus": [
+        "NVIDIA GeForce RTX 5080"
+      ],
+      "samples": 192,
+      "resolution": [
+        3840,
+        2160
+      ],
+      "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+      "pose": [
+        0,
+        78,
+        28
+      ],
+      "ground": "lowest"
+    }
+  }
+}

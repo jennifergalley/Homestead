@@ -1,0 +1,14 @@
+{
+  "generated_by": "copied diagnostic PNG/hash/measurement verification",
+  "held_diagnostic_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "predeclared_cheek_rms_discriminator": 1.7,
+  "viewed_patch_reduction_also_required": true,
+  "result": "Both cases fail the discriminator; patching persists. Root cause unresolved.",
+  "files_sha256": {
+    "object4096_detail.png": "d1f9c3dc856e2ee63ee3a01e9c62960fade7e0a21f042565a521641a80ce8785",
+    "explicit4096_detail.png": "c260e3c93f1bdcb978d9f76f2ed65cbcc694a2db04e03e26606ca760567195c6"
+  },
+  "report_limits": "Diagnostic reports retain inherited framing/geometry metadata; not fresh FBX exports or import receipts.",
+  "unmatched_control_correction": "Earlier bump-removal variants use original bumped source reference, not matched bump-free pairs; Bump evaluation is not excluded."
+}

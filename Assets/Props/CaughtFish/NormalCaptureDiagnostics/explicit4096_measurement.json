@@ -1,0 +1,49 @@
+{
+  "generated_by": "one explicit source normal capture discriminator measurement; not acceptance",
+  "not_production_or_unreal_acceptance": true,
+  "source_frame_sha256": "2c762deb291f33e8e0f9c9623f25e0a448441aa4680c250a9d2312ce67577c8a",
+  "diagnostic_frame_sha256": "c260e3c93f1bdcb978d9f76f2ed65cbcc694a2db04e03e26606ca760567195c6",
+  "crops": {
+    "whole": {
+      "xyxy": [
+        0,
+        0,
+        3840,
+        2160
+      ],
+      "mean_absolute_rgb8": 0.5310758948326111,
+      "rms_rgb8": 1.3420233726501465
+    },
+    "head": {
+      "xyxy": [
+        2100,
+        500,
+        3500,
+        1400
+      ],
+      "mean_absolute_rgb8": 1.2798714637756348,
+      "rms_rgb8": 2.2780966758728027
+    },
+    "cheek": {
+      "xyxy": [
+        2050,
+        800,
+        2700,
+        1250
+      ],
+      "mean_absolute_rgb8": 2.362199544906616,
+      "rms_rgb8": 3.060312271118164
+    },
+    "flank": {
+      "xyxy": [
+        300,
+        400,
+        1200,
+        1500
+      ],
+      "mean_absolute_rgb8": 0.9071164727210999,
+      "rms_rgb8": 1.5073657035827637
+    }
+  },
+  "within_declared_numeric_discriminator": false
+}

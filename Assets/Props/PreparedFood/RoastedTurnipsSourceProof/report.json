@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "name": "RoastedTurnipsSource",
+  "description": "Held original dry-roasted turnip wedges and edible portion.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/roasted_turnips.py",
+  "source_sha256": "e1963dbd6c877a3bdfcc98d0591d36006887a76e3e35c575e0c7ab96e9607358",
+  "provenance": "Original sector-loft/cut-plane turnip and hand-thrown earthenware; procedural food PBR. Text anatomy reference only.",
+  "meshes": {
+    "SM_RoastedTurnips": {
+      "vertices": 21277,
+      "triangles": 42526,
+      "size_cm": [
+        20.0,
+        20.0,
+        4.69
+      ],
+      "materials": [
+        {
+          "name": "M_OriginalRoastTurnipEarthenware",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.79
+        },
+        {
+          "name": "M_RoastedTurnipWedge0Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.74
+        },
+        {
+          "name": "M_RoastedTurnipWedge0Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RoastedTurnipWedge1Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.74
+        },
+        {
+          "name": "M_RoastedTurnipWedge1Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RoastedTurnipWedge2Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.74
+        },
+        {
+          "name": "M_RoastedTurnipWedge2Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RoastedTurnipWedge3Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.74
+        },
+        {
+          "name": "M_RoastedTurnipWedge3Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RoastedTurnipWedge4Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.74
+        },
+        {
+          "name": "M_RoastedTurnipWedge4Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RoastedTurnipWedge5Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.74
+        },
+        {
+          "name": "M_RoastedTurnipWedge5Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          8
+        ],
+        "focus": [
+          0.0,
+          -0.025,
+          0.0360233255084604
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_RoastedTurnips.fbx",
+      "sha256": "e24ab0093c8da829f74a47d5949a76cb517dd687c7bb4d648c2068ad80891497",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RoastedTurnips_hero.png",
+          "detail": "beauty_SM_RoastedTurnips_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          8
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RoastedTurnipsPortion": {
+      "vertices": 3321,
+      "triangles": 6638,
+      "size_cm": [
+        4.01,
+        7.6,
+        3.3
+      ],
+      "materials": [
+        {
+          "name": "M_HandheldRoastedTurnipWedgeSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.74
+        },
+        {
+          "name": "M_HandheldRoastedTurnipWedgeFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          8
+        ],
+        "focus": [
+          -0.0005678171291947365,
+          -1.564621925354004e-07,
+          0.020094724353402853
+        ],
+        "detail_distance": 0.27
+      },
+      "fbx": "SM_RoastedTurnipsPortion.fbx",
+      "sha256": "2db896f491fd5c2b8f730e2d4008e5127c76bf8e54397f0e5778053b18625ccd",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RoastedTurnipsPortion_hero.png",
+          "detail": "beauty_SM_RoastedTurnipsPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          8
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "RoastedTurnips",
+  "ingredients": {
+    "Turnip": 1,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "serving_turnip_units": 1,
+  "not_import_or_art_acceptance": true,
+  "food_material_source_sha256": "dad417d8dccfbc91c670d73738802f7877fb47d9c8c8dfbe4c5888ffbeaaf3b6"
+}

@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "HerbedBroadBeans",
+  "recipe_sha256": "90ebbe7413a187255c3ea43a1c20c56c9bee3c092997d3a067f3e35a982fae1b",
+  "food_material_source_sha256": "21053b6072b22fbd635fadda5fead1bf78a6d02b517c0b9eb8d1b1a3a425c584",
+  "copied_files_sha256": {
+    "SM_HerbedBroadBeans.fbx": "2705342084c1dac7f0ef42dd0542ddb47254691f7d1b76ab0f09da520a352250",
+    "beauty_SM_HerbedBroadBeans_hero.png": "5d0d520cbadc97c8a7f2dd9f76f73be9127bf1755901ddd349160550c31472cb",
+    "beauty_SM_HerbedBroadBeans_detail.png": "c868fabe293b3e131002a9d790de6c7bb805c8dc41e637a10263d726029e7c5e",
+    "SM_HerbedBroadBeansPortion.fbx": "a912ab7b5ae4a26dc78c5ceb41475f604214c00f6f64b4f170605e6b56150eff",
+    "beauty_SM_HerbedBroadBeansPortion_hero.png": "0683340a36691a7e1212ffbf341e8ab86139e1f955a13a3b866aee58b29f03ee",
+    "beauty_SM_HerbedBroadBeansPortion_detail.png": "66e9739210ecf0708164944293b389b65e02978e874d43dc812fbc8cb8152e8d",
+    "HerbedBroadBeansSource.blend": "2f1ca9cf8f5b38bbc950e8da9d24320f82f53b3fda749577b06efee93f324f5e"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

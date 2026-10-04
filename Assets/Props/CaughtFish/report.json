@@ -1,0 +1,486 @@
+{
+  "schema": 1,
+  "name": "CaughtFish",
+  "description": "Six original anatomically distinct river, lake and coastal catches.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/caught_fish.py",
+  "source_sha256": "63990c47a85fb7ac78df74af39ee8f446b1c5c0f1614c22daf320098a6add255",
+  "provenance": "Original parametric anatomy and procedural PBR; reference text only.",
+  "meshes": {
+    "SM_RiverTrout": {
+      "vertices": 21148,
+      "triangles": 42058,
+      "size_cm": [
+        7.72,
+        34.05,
+        10.79
+      ],
+      "materials": [
+        {
+          "name": "M_RiverTrout",
+          "textures": {
+            "basecolor": "T_RiverTrout_basecolor.png",
+            "roughness": "T_RiverTrout_roughness.png",
+            "normal": "T_RiverTrout_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RiverTrout_basecolor.png",
+          "roughness": "T_RiverTrout_roughness.png",
+          "normal": "T_RiverTrout_normal.png",
+          "ao": "T_RiverTrout_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0007656197994947433,
+          -0.10512829222679139,
+          0.03909999877214432
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_RiverTrout.fbx",
+      "sha256": "12e42f16d40d2067648a4220d2a9f7a88577a579e5584d7f76feff36f0333b3d",
+      "preview": "preview_SM_RiverTrout.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RiverTrout_hero.png",
+          "detail": "beauty_SM_RiverTrout_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_RiverSalmon": {
+      "vertices": 23362,
+      "triangles": 46584,
+      "size_cm": [
+        13.54,
+        62.09,
+        19.08
+      ],
+      "materials": [
+        {
+          "name": "M_RiverSalmon",
+          "textures": {
+            "basecolor": "T_RiverSalmon_basecolor.png",
+            "roughness": "T_RiverSalmon_roughness.png",
+            "normal": "T_RiverSalmon_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RiverSalmon_basecolor.png",
+          "roughness": "T_RiverSalmon_roughness.png",
+          "normal": "T_RiverSalmon_normal.png",
+          "ao": "T_RiverSalmon_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.00139656662940979,
+          -0.19173566491603852,
+          0.07440000027418137
+        ],
+        "detail_distance": 0.62
+      },
+      "fbx": "SM_RiverSalmon.fbx",
+      "sha256": "d03c07c37fe487e6bb367be8089859d389d769defd21ced12ad3b2fac2df9983",
+      "preview": "preview_SM_RiverSalmon.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RiverSalmon_hero.png",
+          "detail": "beauty_SM_RiverSalmon_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_LakePerch": {
+      "vertices": 21761,
+      "triangles": 43273,
+      "size_cm": [
+        7.3,
+        30.05,
+        12.11
+      ],
+      "materials": [
+        {
+          "name": "M_LakePerch",
+          "textures": {
+            "basecolor": "T_LakePerch_basecolor.png",
+            "roughness": "T_LakePerch_roughness.png",
+            "normal": "T_LakePerch_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_LakePerch_basecolor.png",
+          "roughness": "T_LakePerch_roughness.png",
+          "normal": "T_LakePerch_normal.png",
+          "ao": "T_LakePerch_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0006753485649824142,
+          -0.09276249039173126,
+          0.03878825157880783
+        ],
+        "detail_distance": 0.3
+      },
+      "fbx": "SM_LakePerch.fbx",
+      "sha256": "3a20e39ef193f473a9d05d1e75e6768034171d05d662f1f8ba1cc2cee85ffde1",
+      "preview": "preview_SM_LakePerch.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_LakePerch_hero.png",
+          "detail": "beauty_SM_LakePerch_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_LakeCarp": {
+      "vertices": 22924,
+      "triangles": 45726,
+      "size_cm": [
+        11.89,
+        42.07,
+        16.78
+      ],
+      "materials": [
+        {
+          "name": "M_LakeCarp",
+          "textures": {
+            "basecolor": "T_LakeCarp_basecolor.png",
+            "roughness": "T_LakeCarp_roughness.png",
+            "normal": "T_LakeCarp_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_LakeCarp_basecolor.png",
+          "roughness": "T_LakeCarp_roughness.png",
+          "normal": "T_LakeCarp_normal.png",
+          "ao": "T_LakeCarp_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.000946681946516037,
+          -0.12984454025030134,
+          0.061739999800920486
+        ],
+        "detail_distance": 0.42
+      },
+      "fbx": "SM_LakeCarp.fbx",
+      "sha256": "d62968c5deac027ff750f09db1fdcaa47928339ed771b7a1ddddee7f373f7ffe",
+      "preview": "preview_SM_LakeCarp.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_LakeCarp_hero.png",
+          "detail": "beauty_SM_LakeCarp_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_SeaMackerel": {
+      "vertices": 23526,
+      "triangles": 46825,
+      "size_cm": [
+        8.12,
+        36.05,
+        10.44
+      ],
+      "materials": [
+        {
+          "name": "M_SeaMackerel",
+          "textures": {
+            "basecolor": "T_SeaMackerel_basecolor.png",
+            "roughness": "T_SeaMackerel_roughness.png",
+            "normal": "T_SeaMackerel_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SeaMackerel_basecolor.png",
+          "roughness": "T_SeaMackerel_roughness.png",
+          "normal": "T_SeaMackerel_normal.png",
+          "ao": "T_SeaMackerel_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0008114539086818695,
+          -0.11134256753921508,
+          0.049320001155138016
+        ],
+        "detail_distance": 0.36
+      },
+      "fbx": "SM_SeaMackerel.fbx",
+      "sha256": "6e9e04dcfb83af482c1e67aac90623197d4c01f29a622dee3332501502e7a152",
+      "preview": "preview_SM_SeaMackerel.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SeaMackerel_hero.png",
+          "detail": "beauty_SM_SeaMackerel_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_SeaBass": {
+      "vertices": 22611,
+      "triangles": 45076,
+      "size_cm": [
+        11.23,
+        46.07,
+        15.13
+      ],
+      "materials": [
+        {
+          "name": "M_SeaBass",
+          "textures": {
+            "basecolor": "T_SeaBass_basecolor.png",
+            "roughness": "T_SeaBass_roughness.png",
+            "normal": "T_SeaBass_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SeaBass_basecolor.png",
+          "roughness": "T_SeaBass_roughness.png",
+          "normal": "T_SeaBass_normal.png",
+          "ao": "T_SeaBass_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.001036267727613449,
+          -0.1422386542916298,
+          0.05565999820828438
+        ],
+        "detail_distance": 0.46
+      },
+      "fbx": "SM_SeaBass.fbx",
+      "sha256": "83551c692f3cf093a89572e021e5c584f871e2094590f7d1efe4f0280736e857",
+      "preview": "preview_SM_SeaBass.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SeaBass_hero.png",
+          "detail": "beauty_SM_SeaBass_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "species": [
+    {
+      "item": "RiverTrout",
+      "scientific_name": "Salmo trutta",
+      "representative_length_cm": 34.0
+    },
+    {
+      "item": "RiverSalmon",
+      "scientific_name": "Salmo salar",
+      "representative_length_cm": 62.0
+    },
+    {
+      "item": "LakePerch",
+      "scientific_name": "Perca fluviatilis",
+      "representative_length_cm": 30.0
+    },
+    {
+      "item": "LakeCarp",
+      "scientific_name": "Cyprinus carpio",
+      "representative_length_cm": 42.0
+    },
+    {
+      "item": "SeaMackerel",
+      "scientific_name": "Scomber scombrus",
+      "representative_length_cm": 36.0
+    },
+    {
+      "item": "SeaBass",
+      "scientific_name": "Dicentrarchus labrax",
+      "representative_length_cm": 46.0
+    }
+  ],
+  "textures": {
+    "T_RiverTrout_basecolor.png": "2a60b738048189e3facd3a38ce8fe0ae4545f931f481f04fa8d12f8f18653557",
+    "T_RiverTrout_roughness.png": "86f73138355835c813d010144285ad4981254d733f18899b5b8615227c2edc2d",
+    "T_RiverTrout_normal.png": "520f09f57d54ed80532cbe293af92d9be42a3cbd6fc6af713a27c09645f8fba3",
+    "T_RiverSalmon_basecolor.png": "2fe583fb3675414ee97dfd577dd0605c71bfceff20081e8d862dd995042138ad",
+    "T_RiverSalmon_roughness.png": "3698036cdf3690963a4ca32b1bde574418e57a65520c7797c163513db0062edb",
+    "T_RiverSalmon_normal.png": "e64409631c47ab464d338c2878134d0fb8774920c270d1cf96a4e0f70576b1b4",
+    "T_LakePerch_basecolor.png": "d32ce40a54e7f2f6c0896823a06c9bede75dc03b660916dd9c117bc8e9f6e41e",
+    "T_LakePerch_roughness.png": "086e3178f6b21675164425ee819256652c5c61543b272b781c19fa2e7d229a4b",
+    "T_LakePerch_normal.png": "9942406e6b1aaea24b0ab031ce3732796314e5a759c846ef8d51fdb1f80f0f85",
+    "T_LakeCarp_basecolor.png": "360e2649f22c5f5fce5329d4a667d3b629fc5ea0769f1751ed63dc877abe838d",
+    "T_LakeCarp_roughness.png": "b86263dbe7e7bb479061f2f24afa296c5c921cf24512a8a95b4e2ffbb0c91f57",
+    "T_LakeCarp_normal.png": "6b318992e3f0c79ebaade8f094cf21b89b824bb8244e45ca7cbfd461f6d6ea09",
+    "T_SeaMackerel_basecolor.png": "8b3af48c731688d0b86132917ca4546ab617afe1fea072b8a00e8e72c8c33d66",
+    "T_SeaMackerel_roughness.png": "4a885386d2cc7ae2a902dff62a4b75734606a03da0ab4b8980d1fb8d8e6ad387",
+    "T_SeaMackerel_normal.png": "4035fbbb873cb7677c615c01f25e2bdec07e6bd33f41c2c4cd18e5ebf856c382",
+    "T_SeaBass_basecolor.png": "aa2455795ba5d33e3316acc626c04530b6ba8a32d17b63fdf969571316ef014e",
+    "T_SeaBass_roughness.png": "ea89cae59b28fd878a7f8c73fa323fe5614c5146ec8850e396ba253b610cc89b",
+    "T_SeaBass_normal.png": "999b6336a0a3495c6117ad908881f8d07f912afe1277f5b3b32a95f86c9064a2"
+  }
+}

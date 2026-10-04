@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "RawFishSlices",
+  "recipe_sha256": "5799a8c572aa73fa2822519ee338abd2d072b673f82dd1f4edeb51419d386d3a",
+  "food_material_source_sha256": "4b288073d1c9767a354c9fce05d340f72a440a0219fd3349f628b2ccde42b72b",
+  "copied_files_sha256": {
+    "SM_RawFishSlices.fbx": "ad7d5e7bdd6ba1e8e52ae6ce77a998c52d711195c073883fdc65125ffab6f084",
+    "beauty_SM_RawFishSlices_hero.png": "ad3cc875a42b340fb568c1f3f8eae0da036691cfdaa5dd23e027f10a3d26601c",
+    "beauty_SM_RawFishSlices_detail.png": "50817ef499c02fc251933f23a60e5ddba97beffb15fb1c2de74d83e5b3182db6",
+    "SM_RawFishSlicesPortion.fbx": "ca7ffd0f56934c536e5b7806f9362af1f26ba1d6f94836ee14d19b0d049469ae",
+    "beauty_SM_RawFishSlicesPortion_hero.png": "1d9f58986a649eeea9ead6579ef0457d01b83a2ef48bd7e5af8606cd4df4a187",
+    "beauty_SM_RawFishSlicesPortion_detail.png": "4c078b9047e7720dfe3cca43252980ee09193eb2ac518a494eaf41dafe8a63fb",
+    "RawFishSlicesSource.blend": "d9e4c0c72f424aa51440323db93afce069ea5cacda3b10c943fc88f106320b25"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

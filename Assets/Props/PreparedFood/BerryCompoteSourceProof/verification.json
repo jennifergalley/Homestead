@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "BerryCompote",
+  "recipe_sha256": "b8ab34edba708c1d2181da8dc5831f736fa321fb6065c225cdb5a20bc0d06544",
+  "food_material_source_sha256": "10e483e32f6a8c86739fd31d5677cc89309ec8798114e668a3828b0cbb2aff94",
+  "copied_files_sha256": {
+    "SM_BerryCompote.fbx": "11a47a483fd56c103b71465ebc33796985596ab43d400db060edfab2d99c290c",
+    "beauty_SM_BerryCompote_hero.png": "aa9b01dbd0ece4fcf131a9cc9a6ad7964ffe7fd15e2065b3395feda9f4b149db",
+    "beauty_SM_BerryCompote_detail.png": "543f176194d9ae54d3a01bf54c9df7cd8f8d2d2b80ad7ec0f286e1bcbf389e79",
+    "SM_BerryCompotePortion.fbx": "9a0e776aa51c16bb25dde7ea6c268d03aca77629f99aa62b31817c7dd60c3df2",
+    "beauty_SM_BerryCompotePortion_hero.png": "c099fe18bba7c55afd8de87f1dad9bcd3b4210abd16bb32deaaf64942d6c08f2",
+    "beauty_SM_BerryCompotePortion_detail.png": "623c58a564c63ff55b15265c88ba1a199b38e2d842dcc23ba9b909bba494f06d",
+    "BerryCompoteSource.blend": "223219260c9526666b4ec8d6efb57c681aa906141ab41aaaace91ce277d06fc3"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "correction": "The isolated food module was cached in live Blender. The report hashes the on-disk module, not the code that built this scene's skin/flesh nodes.",
+  "source_geometry_receipts_remain_valid": true,
+  "executed_shader_source_hash_not_verified": true,
+  "four_frames_do_not_verify_current_shader_source": true,
+  "observed_cached_skin_graph": {
+    "node_count": 11,
+    "ramp_positions": [0.2, 0.32, 0.44, 0.57, 0.71, 0.83]
+  },
+  "observed_cached_flesh_noise_scales": [410],
+  "required_correction": "Recipe-owned explicit dependency reload, per-material executed-source tags and actual graph fixtures, then fresh build/reopen/render verification. Do not rewrite these historical proof frames."
+}

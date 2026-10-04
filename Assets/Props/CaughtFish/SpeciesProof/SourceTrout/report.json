@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "CaughtFishTroutProof",
+  "description": "Draft-only original trout jaw, operculum, fan and scale proof.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/caught_fish_trout_proof.py",
+  "source_sha256": "8d838e057db6cf68d609ddb7e51b40b2f97a859e49b2c3b4c802c5951d64cb35",
+  "provenance": "Original parametric anatomy and procedural PBR; cited text, PD-self trout/perch and CC BY-SA 3.0 carp photos for observation only.",
+  "meshes": {
+    "SM_RiverTrout": {
+      "vertices": 26660,
+      "triangles": 53242,
+      "size_cm": [
+        4.84,
+        34.0,
+        9.52
+      ],
+      "materials": [
+        {
+          "name": "M_RiverTroutSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutAdipose",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_RiverTroutTeeth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0008432557806372643,
+          -0.10540031292438508,
+          0.03931366625329247
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_RiverTrout.fbx",
+      "sha256": "e9d0d28e72a47e8eb8a2a168726025ddfc4604f0d12e1c06f9989c79d4046777",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RiverTrout_hero.png",
+          "detail": "beauty_SM_RiverTrout_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "authored_source": "caught_fish.py",
+  "authored_source_sha256": "22b7f84088fcc597d5d510d29b5c74bac2167909871bcdaed5f4e42c1d402bb7",
+  "material_source_sha256": "a0bf6a16587109f53ea288482bd5df10e6e497668807f3f80697577bde758ad3",
+  "wet_fish": {
+    "coat_weight": 0.65,
+    "coat_roughness": 0.06,
+    "membrane_materials": [
+      "M_RiverTroutMembrane",
+      "M_RiverSalmonMembrane",
+      "M_LakePerchMembrane",
+      "M_LakeCarpMembrane",
+      "M_SeaMackerelMembrane",
+      "M_SeaBassMembrane"
+    ],
+    "membrane_opacity": 0.35
+  }
+}

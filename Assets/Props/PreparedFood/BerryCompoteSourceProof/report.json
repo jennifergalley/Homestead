@@ -1,0 +1,314 @@
+{
+  "schema": 1,
+  "name": "BerryCompoteSource",
+  "description": "Held original unsweetened cooked bramble reduction and eating spoon.",
+  "collision": "none",
+  "triangle_budget": 60000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/berry_compote.py",
+  "source_sha256": "b8ab34edba708c1d2181da8dc5831f736fa321fb6065c225cdb5a20bc0d06544",
+  "provenance": "Original closed aggregate-fruit lofts, reduced-juice volume, glazed dish and generated maple utensil; procedural PBR.",
+  "meshes": {
+    "SM_BerryCompote": {
+      "vertices": 29514,
+      "triangles": 58972,
+      "size_cm": [
+        11.8,
+        11.8,
+        3.26
+      ],
+      "materials": [
+        {
+          "name": "M_BerryReductionGlazedDish",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReducedJuice",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.18
+        },
+        {
+          "name": "M_BrambleReductionFruit0",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit1",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit2",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit3",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit3Pulp",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.34
+        },
+        {
+          "name": "M_BrambleReductionFruit4",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit5",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit6",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit6Pulp",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.34
+        },
+        {
+          "name": "M_BrambleReductionFruit7",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit8",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit9",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit9Pulp",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.34
+        },
+        {
+          "name": "M_BrambleReductionFruit10",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit11",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionFruit11Pulp",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.34
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          9
+        ],
+        "focus": [
+          0.0,
+          -0.009,
+          0.021007509439252316
+        ],
+        "detail_distance": 0.26,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_BerryCompote.fbx",
+      "sha256": "11a47a483fd56c103b71465ebc33796985596ab43d400db060edfab2d99c290c",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BerryCompote_hero.png",
+          "detail": "beauty_SM_BerryCompote_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          9
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_BerryCompotePortion": {
+      "vertices": 5268,
+      "triangles": 10528,
+      "size_cm": [
+        2.25,
+        14.6,
+        1.12
+      ],
+      "materials": [
+        {
+          "name": "M_BerryReductionMapleSpoon",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionSpoonFruit",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_BrambleReductionSpoonFruitPulp",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.34
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          9
+        ],
+        "focus": [
+          0.0,
+          -0.036769233226776124,
+          0.007834065929055214
+        ],
+        "detail_distance": 0.23,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_BerryCompotePortion.fbx",
+      "sha256": "9a0e776aa51c16bb25dde7ea6c268d03aca77629f99aa62b31817c7dd60c3df2",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BerryCompotePortion_hero.png",
+          "detail": "beauty_SM_BerryCompotePortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          9
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "BerryCompote",
+  "ingredients": {
+    "Berries": 3,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "9e7e53e20ab51a711e3714b35770f929786e54e775a91d38cab4312340d7271d",
+  "food_material_source_sha256": "10e483e32f6a8c86739fd31d5677cc89309ec8798114e668a3828b0cbb2aff94"
+}

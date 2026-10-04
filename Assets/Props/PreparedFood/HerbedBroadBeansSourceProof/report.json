@@ -1,0 +1,367 @@
+{
+  "schema": 1,
+  "name": "HerbedBroadBeansSource",
+  "description": "Held original herbed broad bean serving and edible bean.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/herbed_broad_beans.py",
+  "source_sha256": "90ebbe7413a187255c3ea43a1c20c56c9bee3c092997d3a067f3e35a982fae1b",
+  "provenance": "Original seed coats/hila, chopped Meadow Herbs and hand-thrown bowl; procedural PBR.",
+  "meshes": {
+    "SM_HerbedBroadBeans": {
+      "vertices": 31586,
+      "triangles": 62928,
+      "size_cm": [
+        13.44,
+        13.44,
+        3.93
+      ],
+      "materials": [
+        {
+          "name": "M_OriginalBroadBeanEarthenware",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.79
+        },
+        {
+          "name": "M_OriginalCookedBroadBean0",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean1",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean2",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean3",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean4",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean5",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean6",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean7",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean8",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean9",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean10",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean11",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean12",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean13",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean14",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean15",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean16",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean17",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean18",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean19",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean20",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean21",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean22",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalCookedBroadBean23",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_OriginalBroadBeanMeadowHerbs",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.58
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          0.0,
+          -0.013,
+          0.025206309381406753
+        ],
+        "detail_distance": 0.26,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_HerbedBroadBeans.fbx",
+      "sha256": "2705342084c1dac7f0ef42dd0542ddb47254691f7d1b76ab0f09da520a352250",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_HerbedBroadBeans_hero.png",
+          "detail": "beauty_SM_HerbedBroadBeans_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_HerbedBroadBeansPortion": {
+      "vertices": 1218,
+      "triangles": 2432,
+      "size_cm": [
+        1.36,
+        2.47,
+        0.8
+      ],
+      "materials": [
+        {
+          "name": "M_EdibleHerbedBroadBean",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "focus": [
+          -0.0006639198400080204,
+          -0.004078764744102955,
+          0.009977033775299788
+        ],
+        "detail_distance": 0.15,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_HerbedBroadBeansPortion.fbx",
+      "sha256": "a912ab7b5ae4a26dc78c5ceb41475f604214c00f6f64b4f170605e6b56150eff",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_HerbedBroadBeansPortion_hero.png",
+          "detail": "beauty_SM_HerbedBroadBeansPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          12
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "HerbedBroadBeans",
+  "ingredients": {
+    "BroadBeans": 3,
+    "Flowers": 1,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "food_geometry_source_sha256": "1dbc85bfbb449845a579613f1b2db856acca116a07381770107bf9eec3f9b08a",
+  "food_material_source_sha256": "21053b6072b22fbd635fadda5fead1bf78a6d02b517c0b9eb8d1b1a3a425c584"
+}

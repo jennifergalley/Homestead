@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "RoastedTurnips",
+  "recipe_sha256": "e1963dbd6c877a3bdfcc98d0591d36006887a76e3e35c575e0c7ab96e9607358",
+  "food_material_source_sha256": "dad417d8dccfbc91c670d73738802f7877fb47d9c8c8dfbe4c5888ffbeaaf3b6",
+  "copied_files_sha256": {
+    "SM_RoastedTurnips.fbx": "e24ab0093c8da829f74a47d5949a76cb517dd687c7bb4d648c2068ad80891497",
+    "beauty_SM_RoastedTurnips_hero.png": "a57ecf23bf8f28c16fdc60bc4752a6ed338a28daf20347c4257eeca938e11ce6",
+    "beauty_SM_RoastedTurnips_detail.png": "551fd596f88867c6d9d1292b3ec7235045b700fba393fd64d45f80da95dab3ff",
+    "SM_RoastedTurnipsPortion.fbx": "2db896f491fd5c2b8f730e2d4008e5127c76bf8e54397f0e5778053b18625ccd",
+    "beauty_SM_RoastedTurnipsPortion_hero.png": "f9303f77ec822339a67c74860bb292e5b881a67c7e4030a732ebdd5c893d76db",
+    "beauty_SM_RoastedTurnipsPortion_detail.png": "996ee4989c408a3a7e652195ccc20b52267450e69b301d977436cadc922c4b8b",
+    "RoastedTurnipsSource.blend": "96ca65151ed72d7e2005afd742c3511bec4f73db5f0161bf7df5df451d438da7"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

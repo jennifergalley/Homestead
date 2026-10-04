@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "CaughtFishCarpProof",
+  "description": "Held original carp blunt muzzle, soft terminal mouth and cheek proof.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/caught_fish_carp_proof.py",
+  "source_sha256": "7118e4898c7ea14a00efed9e2899b9df6bc5b3cec52143d5e0bd6ae34c19270d",
+  "provenance": "Original parametric anatomy and procedural PBR; cited text, PD-self trout/perch and CC BY-SA 3.0 carp photos for observation only.",
+  "meshes": {
+    "SM_LakeCarp": {
+      "vertices": 27488,
+      "triangles": 55008,
+      "size_cm": [
+        8.53,
+        42.11,
+        17.09
+      ],
+      "materials": [
+        {
+          "name": "M_LakeCarpSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakeCarpMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakeCarpDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakeCarpFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakeCarpEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_LakeCarpLip",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0010415054857730865,
+          -0.12964614619016646,
+          0.06481246649855166
+        ],
+        "detail_distance": 0.42
+      },
+      "fbx": "SM_LakeCarp.fbx",
+      "sha256": "fa6e17923e7491d502c75dd762eee95bac529924385615cce08aa33f936f85c1",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_LakeCarp_hero.png",
+          "detail": "beauty_SM_LakeCarp_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "authored_source": "caught_fish.py",
+  "authored_source_sha256": "444c5f44b34dee5f81979d422b9da72a7e7e86c34f91426587db3e53da4cf47f",
+  "material_source_sha256": "a0bf6a16587109f53ea288482bd5df10e6e497668807f3f80697577bde758ad3",
+  "wet_fish": {
+    "coat_weight": 0.65,
+    "coat_roughness": 0.06,
+    "membrane_materials": [
+      "M_RiverTroutMembrane",
+      "M_RiverSalmonMembrane",
+      "M_LakePerchMembrane",
+      "M_LakeCarpMembrane",
+      "M_SeaMackerelMembrane",
+      "M_SeaBassMembrane"
+    ],
+    "membrane_opacity": 0.35
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "draft_only": true,
+  "not_art_or_unreal_acceptance": true,
+  "authored_source_sha256": "87bccffe11220d77baa3740509f3e971aca12699010fb8a6f8c5058331d39d0a",
+  "material_source_sha256": "33eea1b3fcf4341a10e0396d7dc9977b262369900e8a7dc9faa6614b84309b96",
+  "maps": {
+    "basecolor": {
+      "file": "T_RiverTrout_basecolor.png",
+      "sha256": "8d97b6832019ed61298ff9bf7a88c36388fa0f6d82cad246975740142faf542e"
+    },
+    "roughness": {
+      "file": "T_RiverTrout_roughness.png",
+      "sha256": "1ca3da03f324e7b1fda00b98f9b69e2494043302d732c8d64eadfce963853a86"
+    },
+    "normal": {
+      "file": "T_RiverTrout_normal.png",
+      "sha256": "056bd621980b7b5f98fb8dfd54ed22f9924659def8d430df7f218370bd8cc3fe"
+    },
+    "ao": {
+      "file": "T_RiverTrout_ao.png",
+      "sha256": "1888ee956e1a8b2dac903329e207caa3be45836615244b3b1900aab33767a3c6"
+    },
+    "metallic": {
+      "file": "T_RiverTrout_metallic.png",
+      "sha256": "6c04e9e163e454fcf14fc8482ab7586d94e54c953ca1e021b3b98353368d6199"
+    }
+  },
+  "views": {
+    "hero": {
+      "mean_absolute_8bit_difference": 0.08398622274398804,
+      "rms_8bit_difference": 0.5831591486930847,
+      "percentile_99_difference": 2.0
+    },
+    "detail": {
+      "mean_absolute_8bit_difference": 0.5294800400733948,
+      "rms_8bit_difference": 1.5582247972488403,
+      "percentile_99_difference": 5.0
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "generated_by": "one OBJECT normal discriminator measurement; not acceptance",
+  "not_production_or_unreal_acceptance": true,
+  "source_frame_sha256": "2c762deb291f33e8e0f9c9623f25e0a448441aa4680c250a9d2312ce67577c8a",
+  "diagnostic_frame_sha256": "d1f9c3dc856e2ee63ee3a01e9c62960fade7e0a21f042565a521641a80ce8785",
+  "crops": {
+    "whole": {
+      "xyxy": [
+        0,
+        0,
+        3840,
+        2160
+      ],
+      "mean_absolute_rgb8": 0.5312029123306274,
+      "rms_rgb8": 1.342258334159851
+    },
+    "head": {
+      "xyxy": [
+        2100,
+        500,
+        3500,
+        1400
+      ],
+      "mean_absolute_rgb8": 1.2800978422164917,
+      "rms_rgb8": 2.278778314590454
+    },
+    "cheek": {
+      "xyxy": [
+        2050,
+        800,
+        2700,
+        1250
+      ],
+      "mean_absolute_rgb8": 2.363126039505005,
+      "rms_rgb8": 3.062107801437378
+    },
+    "flank": {
+      "xyxy": [
+        300,
+        400,
+        1200,
+        1500
+      ],
+      "mean_absolute_rgb8": 0.9073222279548645,
+      "rms_rgb8": 1.506959319114685
+    }
+  },
+  "within_declared_numeric_discriminator": false
+}

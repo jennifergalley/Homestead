@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "GrilledPerch",
+  "recipe_sha256": "df7f6deff3457cc30fadd8d82c36795bed7df64b828c6bf05367d6f2dc50419d",
+  "food_material_source_sha256": "e4cf58e16e94e75354f3ed579c9cb408d457e8bedfda8c92a193ea074110ae93",
+  "copied_files_sha256": {
+    "SM_GrilledPerch.fbx": "cede80a58b20e3dd9014f2d3b710c9f1d09847823a796626f6ab065438d52f21",
+    "beauty_SM_GrilledPerch_hero.png": "298b2cd3036fd9b488c397993c2905602901ffdc1c65a4b7249726bb0f93115a",
+    "beauty_SM_GrilledPerch_detail.png": "3fdd419feb95d363c65aaff2dc7b8d098b0c109bee0548217afa5339200c4d42",
+    "SM_GrilledPerchPortion.fbx": "22cdb3abe28150c88f8a7427119fcddb73f9f255f48d01f5a275f46dd069b9fb",
+    "beauty_SM_GrilledPerchPortion_hero.png": "20b86699b9c2ce6562f01321a6fd571bced80f6e49b05ae6a0076586b0dd1505",
+    "beauty_SM_GrilledPerchPortion_detail.png": "0fb0bbdd80f56719f91333899a00ba23e2451136690b83c57c868fba2ebdf8fa",
+    "GrilledPerchSource.blend": "a428ee31a3ff865a2e519151ac323abf89bf8b129734e9f6241bdd51bf79c1f1"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

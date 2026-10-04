@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "CaughtFishTroutBake",
+  "description": "Draft-only original trout jaw, operculum, fan and scale proof.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/caught_fish_trout_bake.py",
+  "source_sha256": "066041e3f24cc54f14837d03668787383da11245ca9bfc53fc1b157771884d77",
+  "provenance": "Original parametric anatomy and procedural PBR; cited text and PD-self photos for observation only.",
+  "meshes": {
+    "SM_RiverTrout": {
+      "vertices": 25811,
+      "triangles": 51548,
+      "size_cm": [
+        4.85,
+        34.0,
+        9.52
+      ],
+      "materials": [
+        {
+          "name": "M_RiverTrout",
+          "textures": {
+            "basecolor": "T_RiverTrout_basecolor.png",
+            "roughness": "T_RiverTrout_roughness.png",
+            "metallic": "T_RiverTrout_metallic.png",
+            "normal": "T_RiverTrout_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_RiverTrout_basecolor.png",
+          "roughness": "T_RiverTrout_roughness.png",
+          "normal": "T_RiverTrout_normal.png",
+          "ao": "T_RiverTrout_ao.png",
+          "metallic": "T_RiverTrout_metallic.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0008432911708950996,
+          -0.10540031292438508,
+          0.03931366625329247
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_RiverTrout.fbx",
+      "sha256": "5996408c3c40ba1ae6a0a98bbad65611fa77f9716ea68ee0752c465fe3a0231f",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RiverTrout_hero.png",
+          "detail": "beauty_SM_RiverTrout_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "baked",
+  "authored_source": "caught_fish.py",
+  "authored_source_sha256": "c0bb2df366eab3c44ccf4e1d9d5bbc87386447c64567915a630654dbde96dcb9",
+  "material_source_sha256": "a83c05f5487fe7c2bb9b2f3f492e6a3bedaac6e35d46afc6f687b19f75a8f7b2",
+  "wet_fish": {
+    "coat_weight": 0.65,
+    "coat_roughness": 0.06
+  },
+  "textures": {
+    "T_RiverTrout_basecolor.png": "7e80975a453c98fc501b11bfa0082710fdebe96b7d45372a41f636debca949c3",
+    "T_RiverTrout_roughness.png": "4d12c43dfcae00099fbacf94ec0c8f1e46c331c35ef9d825f287bd32ca09fca2",
+    "T_RiverTrout_metallic.png": "f6ce26715068d2c93ba18c3eb31204b7b2f25c100357a3d460f7a522011e382b",
+    "T_RiverTrout_normal.png": "e8f056d2b4361ddd569bd5b49e4df8c85a367fd4199581ddfe6c0168c551b432"
+  }
+}

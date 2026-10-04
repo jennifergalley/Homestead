@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "StewedCarrots",
+  "recipe_sha256": "9f61f05bbe33a268188bc6056bed28e7cded8890d553879d85e2cc87e02730d4",
+  "food_material_source_sha256": "7ae2ee446a4dfd7da39525623fad269d4c06e1784a40c2c5392f7e43a248d452",
+  "copied_files_sha256": {
+    "SM_StewedCarrots.fbx": "e308d42e47d0051f64ebaaa797f295c059e4f8ca1ce85d554de9f11240c72093",
+    "beauty_SM_StewedCarrots_hero.png": "c0abcb9afa5e8b9f2fa23168e9085622df9d3d1c00f4ba5b67659bb2463756e0",
+    "beauty_SM_StewedCarrots_detail.png": "033225e37a1b16d5a6575d980ada30741440a1b7e985f92019858f72a3531d59",
+    "SM_StewedCarrotsPortion.fbx": "4f5d32b9f84cbc48e163cbd35756acfc1bbf8479745e1f0145a15acae8bae7d8",
+    "beauty_SM_StewedCarrotsPortion_hero.png": "08972712dd1a3e386749f9fae4411da43f0a27423ad15f9f61473fc92ae05938",
+    "beauty_SM_StewedCarrotsPortion_detail.png": "a4df737f5c4243e845c16693759d98b7f43d118e62d84bce37a67d3a3be0538e",
+    "StewedCarrotsSource.blend": "e6d02f65eb38150847a939f8e8677bf604dc8a7f90a952c2c3ef940ad85d1b46"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

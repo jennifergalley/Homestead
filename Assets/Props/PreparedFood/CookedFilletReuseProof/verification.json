@@ -1,0 +1,25 @@
+{
+  "held_source_only": true,
+  "before_commit": "f6464440",
+  "exact_geometry_pcoord_uv_material_indices": {
+    "SM_GrilledTrout": {
+      "mesh_pcoord_uv_material_indices_sha256": "d2205ecc20e7a333e7c5085970873fb15ab0ff3855e3832638bcbe78f9d8b5bb",
+      "materials": [
+        "M_GrilledTroutPlatter",
+        "M_CookedTroutFilletFlesh",
+        "M_CookedTroutFilletSkin",
+        "M_CookedTroutFlake0Flesh",
+        "M_CookedTroutFlake1Flesh",
+        "M_CookedTroutFlake2Flesh"
+      ]
+    },
+    "SM_GrilledTroutPortion": {
+      "mesh_pcoord_uv_material_indices_sha256": "81b17c2f5f7916ad6a5e66ef8e5caed36ea181fe19afc0b22afefa85726a081c",
+      "materials": [
+        "M_CookedTroutEdiblePieceFlesh",
+        "M_CookedTroutEdiblePieceSkin"
+      ]
+    }
+  },
+  "not_art_bake_or_engine_acceptance": true
+}
