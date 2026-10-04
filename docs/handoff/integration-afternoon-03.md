@@ -10,6 +10,9 @@ GPT-5.6 Terra / medium / default; the actual context tier is not yet captured.
 
 - Authorization is Jenny's 2026-10-04 11:59:23 local message, captured as
   `2026-10-04T18:59:23Z`; target is 4 PM local.
+- Jenny moved `backlog:jenny-muu6k1g1-qr5dx2` fishing to the planned 9 PM slot. The 4 PM build
+  admits only Quit, Back-slot, wildflower, fencepost, seed-packet, and persistent Harvest work;
+  it excludes all fishing code and assets.
 - This checkout is clean and complete at `490b9d22`. The unrelated
   `.github/copilot-instructions.md` change in the main checkout was not touched.
 - The three hands-on slots belong to Fishing Art, Gameplay UI, and Environment. Integration is
@@ -19,8 +22,9 @@ GPT-5.6 Terra / medium / default; the actual context tier is not yet captured.
 - `accounting/afternoon-03-allocation.json` starts every current lane at the new authorization
   boundary. It deliberately excludes measured02's closed 2,477-call / 11,439.97802 observed-AIU
   report and its unknown tail.
-- The live planner publication retains seven selected cards only. The eleven measured02 shipped IDs
-  were removed from active planner/inbox/Markdown surfaces and retained in
+- The 4 PM planner publication retains six selected cards. The fishing card is separately planned
+  for 9 PM. The eleven measured02 shipped IDs were removed from active planner/inbox/Markdown
+  surfaces and retained in
   `backlog-archive.json`; player acceptance remains pending.
 - The copied fencepost attachment is
   `attachments/backlog/jenny-mutdjl7e-nzl7lh-c4147f18-37f2-4828-8a52-6b0ceb13f266.png`,

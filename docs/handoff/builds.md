@@ -7,16 +7,24 @@ Timing (Jenny, 2026-10-01): start each build about an hour before its slot (7:30
 Lanes implement only what Jenny has prioritized for a specific build, then go idle. They don't pick up
 unflagged queue items. If little or nothing is prioritized, the orchestrator tells Jenny to schedule work.
 
+## 2026-10-04 — 9:00 PM
+
+- Status: planned
+- Selected feedback: `backlog:jenny-muu6k1g1-qr5dx2` fishing pole/fish icons and original
+  cast/bite/catch presentation with randomized timing minigame.
+- This is the only fishing code or asset admission for the 9 PM slot; it is excluded from the 4 PM
+  build.
+
 ## 2026-10-04 — 4:00 PM
 
 - Build ID: `20261004-afternoon-03`
 - Status: planned
 - Authorization: Jenny's 11:59:23 local message; target 4:00 PM local.
-- Selected scope: refine fishing pole/fish icons and cast/bite/catch presentation; compact Quit
-  dialog; Back-slot rucksack visibility without capacity loss; wider wildflowers outside farm,
-  manor ruins, and tilled ground; visible broken fenceposts until the complete fence is dismantled;
-  crop-specific non-stackable seed packets/end-product icons; and a persistent ripe-crop
-  `[E] Harvest <crop>` hint unless weeding takes precedence.
+- Selected scope: compact Quit dialog; Back-slot rucksack visibility without capacity loss; wider
+  wildflowers outside farm, manor ruins, and tilled ground; visible broken fenceposts until the
+  complete fence is dismantled; crop-specific non-stackable seed packets/end-product icons; and a
+  persistent ripe-crop `[E] Harvest <crop>` hint unless weeding takes precedence. Fishing code and
+  assets are excluded.
 - Accounting: starts at `2026-10-04T18:59:23Z` in
   `accounting/afternoon-03-allocation.json`. Measured02 remains closed at 2,477 calls /
   11,439.97802 observed AIU; its unknown post-capture tail does not transfer to this build.
