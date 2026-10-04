@@ -9,8 +9,10 @@ actual/configured context tiers are unknown.
 
 ## Admission checkpoint
 
-- Authorized at `2026-10-04T01:55:51.513Z` for the Oct 3 9 PM slot; verified unfinished work
-  falls back to Oct 4 7:30 AM. Checkout was clean at preflight (`8b67ebc0`).
+- Authorized at `2026-10-04T01:55:51.513Z` for the Oct 3 9 PM slot. The original 9 PM scope is
+  retained historically, but the complete delivery was deferred at 20:49 local; Oct 4 7:30 AM is a
+  target rather than a promise, with no overnight/signoff work. Checkout was clean at preflight
+  (`8b67ebc0`).
 - This session owns measured02 manifest/allocation metadata and shared-doc liaison. Its fresh
   accounting segment begins at authorization; there are no helpers, reviews, failures, builds,
   merges, packages, or tests allocated yet.
@@ -53,6 +55,9 @@ reported separately and does not justify restoring unrelated planner UI.
   `60849`; Jenny still owns the player edit check. Planner admission is complete and slot 3 is
   released.
 - This slot performed no Unreal, UBT, UAT, Live Coding, package, release, gameplay, or save work.
+- **Separate delivered tooling receipt:** `3846476d` delivered live planner feedback editing. The
+  planner fallback publication (`5ec7c7a8` on main) hides and unschedules that tooling delivery
+  while preserving the original OpenSpec player checkbox; it is not gameplay admission.
 
 ## HUD selection
 

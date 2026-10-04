@@ -92,8 +92,8 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 
 ## 2026-10-03 — 9:00 PM
 
-- SHA: pending
-- Status: planned
+- SHA: not built
+- Status: deferred at 20:49 local; this 9 PM scope is retained as the historical selected card set.
 - Build ID: `20261003-measured-02`
 - Plant Seeds hint appears when selected seeds target tilled ground.
 - Crop harvests yield fewer seeds so buying seeds remains useful.
@@ -105,8 +105,11 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 - Sunday General Store waiting advances to Monday opening.
 - Edit feedback titles, descriptions and screenshots directly in the planner.
 - Scope: the fishing feature and its two feedback cards are one implementation, not duplicate work.
-- Timing: authorized 18:55 local; unfinished work may slip to 2026-10-04 7:30 AM.
-- Safety: verified work only; no overnight work/automation after Jenny signs off.
+- Timing: authorized 18:55 local. The fallback is a **target** for 2026-10-04 7:30 AM, not a
+  promise; no overnight work resumes after signoff without Jenny's next message.
+- Planner tooling receipt: the live feedback-editing delivery is `3846476d`; it is separately
+  delivered tooling, hidden and unscheduled, with its OpenSpec player checkbox preserved.
+- Safety: verified work only; no placeholder or unverified subset package.
 
 ## Later
 
