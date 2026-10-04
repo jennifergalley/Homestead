@@ -13,6 +13,8 @@
   "lanes": [
     {
       "role": "Farming Fishing",
+      "sessionId": "5be207bc-49b1-4a1b-811e-088ae565dc1b",
+      "worktree": "jennifergalley-cautious-robot",
       "model": "gpt-6.1-sol",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -27,6 +29,8 @@
     },
     {
       "role": "Travel Rest",
+      "sessionId": "1b0e10a4-09b5-458e-b9de-098cce831b07",
+      "worktree": "jennifergalley-miniature-fishstick",
       "model": "gpt-6.1-sol",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -38,6 +42,8 @@
     },
     {
       "role": "Planner Editing",
+      "sessionId": "ac593377-587f-4319-a033-b17f309be13e",
+      "worktree": "jennifergalley-cuddly-eureka",
       "model": "gpt-6.1-sol",
       "reasoningEffort": "high",
       "launchContextTier": "default",
@@ -46,6 +52,14 @@
       ]
     }
   ],
+  "integration": {
+    "sessionId": "e528fd4a-5aed-4c95-9463-a37941afc00b",
+    "worktree": "jennifergalley-studious-goggles",
+    "model": "gpt-5.6-terra",
+    "reasoningEffort": "medium",
+    "launchContextTier": "default",
+    "status": "read-only preflight and docs/accounting liaison; no hands-on build slot yet"
+  },
   "deliveryRules": [
     "Only verified and reviewed work is admitted; unfinished items move to the fallback slot.",
     "No overnight work or automations after Jenny signs off; morning resumes on her first message.",
