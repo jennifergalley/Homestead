@@ -234,6 +234,13 @@ Base, and Coat; `<=1.7` plus local improvement distinguishes tangent from the ro
 procedural branch. It is not a production object-space UE map or art acceptance. Preserve budgets,
 shaders, and parents; no shared-helper defect is established. Farming continues independent original
 meal source work without waiting.
+The directed OBJECT4096 test did not clear the defect: guarded source/bake states and shared OBJECT
+Base+Coat NormalMap1/NonColor produced cheek RMS `3.062` versus original `3.105`, with viewed patches
+persisting. Tangent conversion alone is insufficient; the exact procedural-normal/filtering defect
+remains unresolved and creates no production/import acceptance. Correct the earlier bump-probe reading:
+those probes used the original bumped source as reference rather than matched bump-free round trips,
+so they do not exclude Bump evaluation. Fish probes now stop; original sixteen-dish source work begins
+independently.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
