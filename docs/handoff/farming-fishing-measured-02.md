@@ -17,10 +17,11 @@ release-save-isolation admission gates remain.
 
 Current source checkpoint: original potatoes, roasted turnips, stewed carrots,
 herbed broad beans, cabbage/potato stew, berry compote, strawberry compote,
-root vegetable hotpot, raw mackerel slices, grilled trout and grilled perch have
-separate serving/edible-portion WIP, NOT art/import acceptance. Five fish preparations, all meal
+root vegetable hotpot, raw mackerel slices, grilled trout, grilled perch and
+grilled mackerel have separate serving/edible-portion WIP, NOT art/import acceptance.
+Four fish preparations, all meal
 baking/imagery/eating wiring and the held fish realism/bake gate remain. Current
-visible review is original grilled perch/portion WIP; recipe/source receipts below are frozen,
+visible review is original grilled mackerel/portion WIP; recipe/source receipts below are frozen,
 not automatically valid against a later edited material library.
 
 ## Boundaries and selected feedback
@@ -1135,6 +1136,46 @@ automation/caught-fish probe/bake/budget/shared render-helper/gameplay/save/enum
 version/placement/UE/UBT/UAT/shortcut change. Build02-only provisional snapshot:
 842 calls through event71198, 4,904,497,700,000 recorded nano-AIU; later calls/
 terminal response need recapture. No reconciled billing-credit claim.
+
+### Original grilled mackerel meal source milestone
+
+New grilled_mackerel.py authors one independent 13.5cm boneless skin-up fillet,
+two smaller flesh-up pieces, a new 20.8x15.2cm ceramic platter and a new edible
+piece. Exact SeaMackerel1/Kindling1; no salt/oil/butter/herbs/lemon/batter/garnish.
+Mackerel-as-food reference reread; darker lateral muscle and narrow cooked-skin
+waves are intrinsic species details, not seasoning. Dimensions/piece count are
+presentation, not stock-weight/yield rules. No caught-fish/raw/exported meal mesh
+reused. Fresh lofts use the shared original cooked-food construction.
+
+First viewed pass resembled cold sushi/rubber with broad graphic skin/muscle
+stripes. Warmer browning, narrower weaker marks, organic nonmetallic skin,
+char variation and original-kit skin puckering improve it. Cut tissue now has
+recipe-local geometry relief. One viewed boundary crease prompted another pass:
+interior-cap orientation gating replaces whole-boundary displacement, retaining
+the softened edge rather than puffing it. Final four frames viewed; still smooth,
+rubbery with painted waves/line and inadequate crisp/broken muscle detail.
+HELD, not art/import ready. No caught-fish/shared bake/render-helper changed.
+
+Final serving/portion: 46,518/9,190 triangles,
+[20.8,15.2,1.59]/[2.2,3.35,.82]cm; 4/1 closed positive-volume islands.
+Finite/noncollapsed coordinates, UV/bottom pivot/unit transforms, unchanged
+dimension/budget/current-executed-graph and sampled container-clearance fixtures
+pass. Source coordinates retagged after recipe-local relief. Four final
+3840x2160/192-sample OPTIX frames, source/two FBX/report/reopened copied receipt
+frozen in GrilledMackerelSourceProof. No full self-intersection/contact/grip/
+eating/engine or food-safety acceptance.
+
+Twenty-six prior shader/eight geometry definitions AST-identical to 843324c1;
+previous proofs remain at their original SHA, not recaptured. Twelve prototypes/
+four preparations unstarted/zero approvals. More than twelve further hands-on
+source/refinement hours estimated, plus unknown fish/bake/imagery/eating/UE
+gates; not a release ETA. Separate framed EEVEE Material review saved on E:
+Grilled-mackerel-source-held-visible.blend. Actual gpt-6.1-sol/high; launch
+default/actual context unknown, no agents/automation/catch probe/bake/budget/
+gameplay/save/enum/version/placement/UE/UBT/UAT/shortcut changes.
+Build02-only provisional snapshot: 869 calls through event71246,
+5,176,984,720,000 recorded nano-AIU; later calls/terminal response need recapture.
+No reconciled billing-credit claim.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

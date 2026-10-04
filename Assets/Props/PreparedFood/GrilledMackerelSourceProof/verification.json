@@ -1,0 +1,29 @@
+{
+  "generated_by": "verify_potato_source_checkpoint.py",
+  "held_source_wip_only": true,
+  "not_art_import_or_gameplay_acceptance": true,
+  "food_item": "GrilledMackerel",
+  "recipe_sha256": "4f514a50539dc2fb45a5c04b887fbe0a8cccc7faaa6f624cfff6323e1822c33f",
+  "food_material_source_sha256": "212b84d39f38ecd913c5e7f65e6ba0acaf6ee815a3086ed1fbf82893ed1bac98",
+  "copied_files_sha256": {
+    "SM_GrilledMackerel.fbx": "f017adc2ce135a02673d8e03f5b7d72dafc91f70179f1c2506d4305182a05e5e",
+    "beauty_SM_GrilledMackerel_hero.png": "299800a85e2995f7e2d54cd077395128b9cf2fb6b5e7ef1fefeb5c21a290674a",
+    "beauty_SM_GrilledMackerel_detail.png": "d23f89ede34b72d42ba41969cb9b0691c0b13041b215fc0c4611e52407c53a46",
+    "SM_GrilledMackerelPortion.fbx": "b17b71b3a64ee2c991724f6f10d109d4bcec2495f53be8ebdf301f4394295a96",
+    "beauty_SM_GrilledMackerelPortion_hero.png": "208372382a73bc73dace3333e3793b88dcb50d54abfc066501ca66900befb651",
+    "beauty_SM_GrilledMackerelPortion_detail.png": "a74d0cfe116d7a4f09dc3086db4feb2337ed0452f4db65899cde500b43b37282",
+    "GrilledMackerelSource.blend": "6d213df8ca62b05424a7412b70f01ffa78ca37fb77c802f0c27a9dd1160a431f"
+  },
+  "checks": [
+    "finite/closed/positive-volume/noncollapsed",
+    "UV/bottom-pivot/scale/triangle-budget/original-source-roles",
+    "executed food shader source tags and actual noise-scale fixtures",
+    "recipe/material/FBX hashes and four 4K 192-sample receipts"
+  ],
+  "limits": [
+    "no self-intersection/contact/grip proof",
+    "procedural report material defaults are not evaluated albedo",
+    "no baked materials or Unreal verification",
+    "food/container surfaces still require artistic refinement"
+  ]
+}

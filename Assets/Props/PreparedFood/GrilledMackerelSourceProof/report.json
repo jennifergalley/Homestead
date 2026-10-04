@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "name": "GrilledMackerelSource",
+  "description": "Held original grilled mackerel fillet, broken pieces and edible portion.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/grilled_mackerel.py",
+  "source_sha256": "4f514a50539dc2fb45a5c04b887fbe0a8cccc7faaa6f624cfff6323e1822c33f",
+  "provenance": "Fresh original cooked-muscle lofts, custom ceramic profile and cooked-mackerel food PBR; no catch/raw/exported meal mesh reused.",
+  "meshes": {
+    "SM_GrilledMackerel": {
+      "vertices": 23267,
+      "triangles": 46518,
+      "size_cm": [
+        20.8,
+        15.2,
+        1.59
+      ],
+      "materials": [
+        {
+          "name": "M_GrilledMackerelPlatter",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.43
+        },
+        {
+          "name": "M_CookedMackerelFilletFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedMackerelFilletSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedMackerelBrokenPiece0Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedMackerelBrokenPiece0Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedMackerelBrokenPiece1Flesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedMackerelBrokenPiece1Skin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -7
+        ],
+        "focus": [
+          0.0,
+          -0.013,
+          0.016011644278652967
+        ],
+        "detail_distance": 0.32,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_GrilledMackerel.fbx",
+      "sha256": "f017adc2ce135a02673d8e03f5b7d72dafc91f70179f1c2506d4305182a05e5e",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GrilledMackerel_hero.png",
+          "detail": "beauty_SM_GrilledMackerel_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -7
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_GrilledMackerelPortion": {
+      "vertices": 4597,
+      "triangles": 9190,
+      "size_cm": [
+        2.2,
+        3.35,
+        0.82
+      ],
+      "materials": [
+        {
+          "name": "M_CookedMackerelEdiblePieceFlesh",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_CookedMackerelEdiblePieceSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          -7
+        ],
+        "focus": [
+          -1.6470439732074738e-05,
+          0.0018760277889668941,
+          0.007489479957148433
+        ],
+        "detail_distance": 0.24,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_GrilledMackerelPortion.fbx",
+      "sha256": "b17b71b3a64ee2c991724f6f10d109d4bcec2495f53be8ebdf301f4394295a96",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_GrilledMackerelPortion_hero.png",
+          "detail": "beauty_SM_GrilledMackerelPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          -7
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "GrilledMackerel",
+  "ingredients": {
+    "SeaMackerel": 1,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "cdd7e0a8e6a2b4aa4ae40d7469e3140f2cedaa30d249f6221fdb8524b0f26c53",
+  "food_material_source_sha256": "212b84d39f38ecd913c5e7f65e6ba0acaf6ee815a3086ed1fbf82893ed1bac98"
+}

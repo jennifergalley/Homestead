@@ -538,3 +538,66 @@ def grilled_perch_platter(name: str) -> bpy.types.Material:
                                ((.115, .126, .115), (.15, .16, .144))):
         element.color = (*colour, 1)
     return material
+
+
+def grilled_mackerel_flesh(name: str, seed: int) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    x, y, _ = graph.separate(point)
+    shifted = graph.vmath("ADD", point, (seed * .017, seed * .031, seed * .043))
+    muscle = graph.noise(shifted, scale=190, detail=3).outputs["Fac"]
+    colour = graph.ramp(muscle, [
+        (.2, (.37, .315, .24)), (.5, (.47, .415, .335)),
+        (.8, (.54, .49, .40)),
+    ], "EASE")
+    axis = graph.math("ADD", x, graph.math("ADD", .004, graph.math("MULTIPLY",
+                      graph.math("SINE", graph.math("MULTIPLY", y, 470)), .0006)))
+    dark_muscle = graph.remap(graph.math("ABSOLUTE", axis), .0002, .0013, .60, 0)
+    colour = graph.mix(colour, (.085, .038, .019), dark_muscle)
+    heat = graph.noise(shifted, scale=50, detail=3).outputs["Fac"]
+    colour = graph.mix(colour, (.17, .068, .022), graph.remap(heat, .38, .72, 0, .42))
+    fibres = graph.noise(graph.scale(shifted, (1, .14, 1)),
+                         scale=2200, detail=3).outputs["Fac"]
+    graph.set("Base Color", colour)
+    graph.set("Roughness", graph.remap(muscle, .2, .8, .53, .37))
+    graph.set("Subsurface Weight", .065)
+    graph.set("Subsurface Radius", (.0015, .0011, .0007))
+    graph.set("Subsurface Scale", .05)
+    graph.set("Normal", graph.bump(fibres, strength=.27, distance=.000065))
+    return graph.mat
+
+
+def grilled_mackerel_skin(name: str, seed: int) -> bpy.types.Material:
+    graph = Graph(name)
+    graph.mat["food_shader_source_sha256"] = SOURCE_SHA256
+    point = graph.coord()
+    x, y, _ = graph.separate(point)
+    heat = graph.noise(point, scale=110, detail=3).outputs["Fac"]
+    wave = graph.math("SINE", graph.math("ADD",
+                       graph.math("ADD", graph.math("MULTIPLY", y, 640),
+                                  graph.math("MULTIPLY", x, 180)),
+                       graph.math("MULTIPLY", heat, 2.3)))
+    colour = graph.mix((.16, .148, .118), (.040, .031, .019),
+                       graph.remap(wave, .64, .96, 0, .68))
+    scorch = graph.noise(graph.vmath("ADD", point, (seed * .037, seed * .019, seed * .041)),
+                         scale=60, detail=2).outputs["Fac"]
+    colour = graph.mix(colour, (.055, .029, .009), graph.remap(scorch, .28, .65, 0, .72))
+    colour = graph.mix(colour, (.006, .004, .002), graph.remap(scorch, .62, .78, 0, .80))
+    fines = graph.noise(point, scale=1800, detail=3).outputs["Fac"]
+    graph.set("Base Color", colour)
+    graph.set("Metallic", 0)
+    graph.set("Roughness", graph.remap(heat, .2, .8, .70, .49))
+    graph.set("Normal", graph.bump(fines, strength=.25, distance=.000065))
+    return graph.mat
+
+
+def grilled_mackerel_platter(name: str) -> bpy.types.Material:
+    material = grilled_trout_platter(name)
+    ramps = [node for node in material.node_tree.nodes if node.type == "VALTORGB"]
+    if len(ramps) != 1 or len(ramps[0].color_ramp.elements) != 2:
+        raise ValueError("Mackerel platter requires the authored two-stop ceramic palette")
+    for element, colour in zip(ramps[0].color_ramp.elements,
+                               ((.075, .11, .105), (.095, .14, .13))):
+        element.color = (*colour, 1)
+    return material
