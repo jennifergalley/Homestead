@@ -10,6 +10,7 @@
 #include "../Simulation/HomesteadBackpack.h"
 #include "../Simulation/HomesteadFood.h"
 #include "../Simulation/HomesteadItems.h"
+#include <algorithm>
 #include "Brushes/SlateColorBrush.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Styling/CoreStyle.h"
@@ -121,29 +122,40 @@ void SHomesteadShop::BuildRows()
         }
         return;
     }
-    // The leather backpack heads the Buy list until she owns it: one only, not a repeating good.
-    if (Homestead::Backpack::Offered(Sim.GetState(), Shop->kind))
+    // Upgrades head the Buy list: the leather backpack until she owns it (one only, not a repeating good), then the
+    // fishing pole, an ordinary purchase listed with them.
+    const auto GoodsRow = [](Homestead::Item Item)
+    {
+        FRow Row;
+        Row.Item = Item;
+        Row.Available = -1;
+        Row.Unit = Homestead::BuyPrice(Item);
+        return Row;
+    };
+    const auto IsUpgradeGood = [](Homestead::Item Item) { return Item == Homestead::Item::FishingPole; };
+    const bool bBackpack = Homestead::Backpack::Offered(Sim.GetState(), Shop->kind);
+    const auto& ShopItems = Homestead::ShopGoods(Shop->kind);
+    if (bBackpack || std::any_of(ShopItems.begin(), ShopItems.end(), IsUpgradeGood))
     {
         FRow Upgrades;
         Upgrades.Header = TEXT("Upgrades");
         Rows.Add(Upgrades);
+    }
+    if (bBackpack)
+    {
         FRow Backpack;
         Backpack.bUpgrade = true;
         Backpack.Available = 1;
         Backpack.Unit = Homestead::Backpack::Price;
         Rows.Add(Backpack);
     }
+    for (const Homestead::Item Item : ShopItems)
+        if (IsUpgradeGood(Item)) Rows.Add(GoodsRow(Item));
     FRow Goods;
     Goods.Header = TEXT("Shop goods");
     Rows.Add(Goods);
-    for (const Homestead::Item Item : Homestead::ShopGoods(Shop->kind))
-    {
-        FRow Row;
-        Row.Item = Item;
-        Row.Available = -1;
-        Row.Unit = Homestead::BuyPrice(Item);
-        Rows.Add(Row);
-    }
+    for (const Homestead::Item Item : ShopItems)
+        if (!IsUpgradeGood(Item)) Rows.Add(GoodsRow(Item));
     FRow Hers;
     Hers.Header = TEXT("From ") + EstateName();
     Rows.Add(Hers);

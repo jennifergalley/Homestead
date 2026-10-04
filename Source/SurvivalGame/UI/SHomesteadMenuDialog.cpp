@@ -12,7 +12,8 @@ void SHomesteadMenu::BuildPopup()
     const bool Quantity = Dialog == EDialog::Quantity;
     const bool Body = !PopupBody.IsEmpty();
     const float Width = Quantity ? 340.0f : Body ? 420.0f : 280.0f;
-    const float Height = 60.0f + PopupOptions.Num() * 48.0f + (Quantity ? 110.0f : 0.0f) + (Body ? 110.0f : 0.0f);
+    const float Height = 60.0f + PopupOptions.Num() * 48.0f + (Quantity ? 110.0f : 0.0f) + (Body ? 110.0f : 0.0f)
+        + (PopupOptions.ContainsByPredicate([](const FPopupOption& Option) { return !Option.Hint.IsEmpty(); }) ? 40.0f : 0.0f);
     // Open beside the pointer, kept inside the book.
     const FGeometry Frame = Root->GetCachedGeometry();
     const FVector2D Size = Frame.GetLocalSize();
@@ -110,6 +111,16 @@ void SHomesteadMenu::BuildPopup()
             { if (!bSynchronizingFocus) DialogSelection = Index; }));
         DialogButtons.Add(Button);
         List->AddSlot().AutoHeight().Padding(0, 3)[ Button ];
+    }
+    if (PopupOptions.ContainsByPredicate([](const FPopupOption& Option) { return !Option.Hint.IsEmpty(); }))
+    {
+        List->AddSlot().AutoHeight().Padding(4, 4, 4, 0)
+        [
+            SNew(STextBlock).ColorAndOpacity(Muted).Font(HomesteadUITheme::Font("Regular", 13)).AutoWrapText(true)
+            .Visibility_Lambda([this]() { return PopupOptions.IsValidIndex(DialogSelection) && !PopupOptions[DialogSelection].Hint.IsEmpty()
+                ? EVisibility::Visible : EVisibility::Collapsed; })
+            .Text_Lambda([this]() { return FText::FromString(PopupOptions.IsValidIndex(DialogSelection) ? PopupOptions[DialogSelection].Hint : FString()); })
+        ];
     }
     bFocusPending = true;
 }

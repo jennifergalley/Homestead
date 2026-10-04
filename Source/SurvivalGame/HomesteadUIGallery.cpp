@@ -368,7 +368,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::BookPage, 0, nullptr, Book(0));
     Add(TEXT("book-pack-rows"), TEXT("Pack page: the hotbar row as the grid's first row, its cells the same size and spacing as the rows beneath."),
         ECover::BookPage, 0, nullptr, Book(0));
-    Add(TEXT("book-back-equipment"), TEXT("Back equipment: Leather Rucksack or None, with the appearance-only capacity hint."),
+    Add(TEXT("book-back-equipment"), TEXT("Back equipment: Leather Rucksack or None; the appearance-only capacity hint shows only while None is highlighted."),
         ECover::Dialog, 10, nullptr, [Later](AHomesteadController& Opened)
         {
             const auto* Store = Opened.Sim.FindShop(Homestead::ShopKind::GeneralStore);
@@ -538,7 +538,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
         ECover::Notice, static_cast<int32>(ENotice::ShopStatus), Counter, Shop(1, 30, TEXT("pasty")));
     Add(TEXT("shop-backpack"), TEXT("Buy tab with 1,500 coins, choosing the leather backpack: its confirm."), ECover::Shop, 2, Counter,
         Shop(1, 1500, TEXT("upgrade")));
-    Add(TEXT("shop-fishing-pole"), TEXT("Buy tab with 1,500 coins, choosing the fishing pole beside the backpack upgrade."),
+    Add(TEXT("shop-fishing-pole"), TEXT("Buy tab with 1,500 coins, choosing the fishing pole under Upgrades beside the backpack."),
         ECover::Shop, 5, Counter, Shop(1, 1500, TEXT("Fishing pole")));
     // The leather knapsack on her back (Props' SM_LeatherBackpack), bought through the store's own rule
     // (from the counter: the gallery passes the counter's spot), seen in the open from several sides so

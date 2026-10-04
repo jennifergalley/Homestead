@@ -33,7 +33,8 @@ void SHomesteadMenu::FocusEquipment(int32 Index, bool bPointer)
             [this]() { Controller->MenuSetBackEquipment(true); },
             [this]() { return Controller.IsValid() && Controller->State().leatherBackpack; }, {}});
         PopupOptions.Add({[]() { return FString(TEXT("None")); },
-            [this]() { Controller->MenuSetBackEquipment(false); }, nullptr, {}});
+            [this]() { Controller->MenuSetBackEquipment(false); }, nullptr, {}, {},
+            TEXT("Appearance only; your purchased inventory-space upgrade stays.")});
         PopupOptions.Add({[]() { return FString(TEXT("Cancel")); }, nullptr, nullptr, {}});
         PopupAnchor = PopupAnchorFor(Anchor, bPointer);
         SetDialog(EDialog::Context);

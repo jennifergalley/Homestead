@@ -223,6 +223,8 @@ private:
         TOptional<EHomesteadItemAction> Action;
         // A colour chip shown before the label (the dye chooser's swatches).
         TOptional<FLinearColor> Swatch;
+        // A note shown under the list only while this option is the highlighted one (hovered or selected).
+        FString Hint;
     };
     TArray<FPopupOption> PopupOptions;
     FString PopupTitle;
