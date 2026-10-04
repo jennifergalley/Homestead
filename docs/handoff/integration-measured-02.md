@@ -277,6 +277,9 @@ passes recipe-owned reload, executed-source tags, and actual node-scale checks; 
 fresh viewed 4K frames were separately verified. `PotatoesReloadedSourceProof` remains art/import WIP,
 while old `24500d2a` retains the shader-cache audit. No fish, shared-helper, budget, gameplay, or save
 edits are included.
+The verified reload evidence replaces `24500d2a`'s invalid current-graph proof, not art acceptance:
+uniform flesh and procedural wood remain. Original dish source work continues independently with no
+fish budget/shared-helper, gameplay/save, or Integration hands-on change.
 Held WIP checkpoint `825fbe4b15cfb51ce583ab46f049afec954478c2` preserves carp tangent/source proof
 (`55,008` triangles, `42.11` cm), passing raw and copied fixtures, and twelve-case local bake
 evidence. It has no gameplay, save, or UE action and remains not import/admission-ready. The
