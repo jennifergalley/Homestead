@@ -326,6 +326,12 @@ prototypes, nine unstarted dishes, and zero approvals; old library definitions r
 There is no fish/bake/gameplay/save/UE change. Farming's build02 snapshot is provisionally 759 calls
 (event `71051`); more than 12 source/refinement hours plus unknown gates is not a delivery ETA.
 Farming continues authorized hotpot source work with no Integration hands-on assignment.
+Held source-only checkpoint `1bc234e1` preserves original Root/Turnip Hotpot, crock, and `17` cm
+spoon with copied fixtures and four viewed 4K frames. It remains smooth/stump-like and **not**
+art/import-ready. There are eight crop-meal source prototypes, eight fish preparations unstarted, and
+zero approvals. The prior 16 shader and six geometry-function ASTs are unchanged. Farming continues
+authorized raw-fish meal source work independently of unresolved fish baking; no fish/bake/gameplay/
+save/UE change, Integration hands-on assignment, or release ETA follows.
 Held WIP checkpoint `bc4126c3` adds original Stewed Carrots source/proof. It fixes the viewed bowl
 penetration and rejects an `8.45` cm heap through largest-first bounded vertex seating, but does not
 prove complete contact/intersection. Its 12-piece bowl/portion, `53,792/3,976` triangle source, four

@@ -91,6 +91,8 @@
       "berryCompoteSourceStatus": "Held WIP: original unsweetened bramble compote and 14.6 cm spoon, 58,972/10,528 triangles, reopened copied 4K/FBX/source fixtures. Molded/gel-like/procedural, not art/import-ready. Shared spoon extraction preserves cabbage geometry/pcoord/material indices; no fish/bake/animation/gameplay/save change. Six prototypes, 10 unstarted dishes, zero approvals; more than 12 source/refinement hours plus unbounded bake/wiring/UE gates remain.",
       "strawberryCompoteSourceCheckpoint": "c82c482d",
       "strawberryCompoteSourceStatus": "Held WIP: original strawberry compote, dish, and 15.2 cm spoon with frozen copied fixtures and four viewed 4K frames. Recipe-local 10 nm degenerate-edge dissolve fixes collapsed cooked-edge bevel triangle while preserving closed/clearance bounds. Molded/raw-looking, not art/import-ready; old library definitions unchanged. Seven prototypes, nine unstarted, zero approvals; no fish/bake/gameplay/save/UE change and no delivery ETA.",
+      "rootTurnipHotpotSourceCheckpoint": "1bc234e1",
+      "rootTurnipHotpotSourceStatus": "Held WIP: original root/turnip hotpot, crock, and 17 cm spoon with copied fixtures and four viewed 4K frames. Smooth/stump-like, not art/import-ready. Eight crop-meal source prototypes, eight fish preparations unstarted, zero approvals; 16 shader and six geometry-function ASTs unchanged. Raw-fish meal source continues independently of fish baking; no fish/bake/gameplay/save/UE change or release ETA.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
