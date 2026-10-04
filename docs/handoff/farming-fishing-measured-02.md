@@ -16,6 +16,13 @@ editor/game compile and 21/21 native suites passed; original-art and
 release-save-isolation admission gates remain.
 
 ## Boundaries and selected feedback
+Latest authorization: Jenny directly requested continuation even overnight at
+22:05 local Oct 3; coordinator explicitly restored hands-on slot2 after checking
+other lanes parked. This supersedes the prior parking/no-overnight hold for the
+existing fishing/food scope. Jenny subsequently permitted continued Blender work
+while she plays. No own Unreal launch, UBT/UAT, automation, helpers, real-save
+access or shortcut changes; Integration retains imports and release gates.
+
 | Feedback | Change | State |
 | --- | --- | --- |
 | `jenny-mut56ggp-uijcta`, `jenny-mut57myz-9tfjci` | `fix-seed-planting-hint-and-harvest-balance` | source implemented; compile/acceptance pending |
@@ -253,7 +260,59 @@ is not a valid shading enum. Switch scene engine to BLENDER_EEVEE first.
 New item images and eating portions must still replace generic fish/food glyphs
 and existing root/berry eating-prop reuse. This is several hours of remaining
 work, not a credible full-set 9 PM delivery; no overnight automation or
-continued work after Jenny signs off.
+continued work after a new explicit stop. The earlier parking instruction was
+superseded by the direct 22:05 overnight authorization above.
+
+Post-resume refinement is WIP, not a new art-admission claim. The full six-fish
+visible review scene was copied to E: scratch before rebuilding. New source
+replaces the external mouth-line tubes with separated upper/lower jaw skin and
+recessed oral walls, strengthens cheek/opercular/orbital forms, enlarges the dark
+pupil relative to its iris, and varies scale tones and perch/mackerel markings.
+Two explicitly PD-self reference photographs (trout/perch, cited in the recipe)
+were viewed for anatomy/material observation only; neither is shipped or used
+as a texture. `caught_fish_head_review.py` is a draft-only trout/perch subset,
+written to E: scratch, never a production import set.
+The new source requests a fifth metallic map; committed `CaughtFish` outputs
+at `c70b603a` are still the older four-map WIP and do not match these edits.
+Do not import them or infer new source/render verification from old receipts.
+
+Six bounded trout/perch passes were built and reviewed at 3840x2160 / 192
+samples (OPTIX), first with five baked maps and then directly from source
+shaders to avoid repeated draft baking. The latest `fish-head-review-wet`
+scratch set pins both anatomy and material source hashes. Source anatomy now
+has capped broad snouts, parted lip rims, two opercular/cheek creases, irregular
+perch bands, reduced trout dorsal/tail proportions and gold perch pectorals.
+Latest joined preview counts are 48,826 / 50,012 triangles. These remain drafts.
+Four other species have not received current-source full bake/render review;
+the sixteen dishes/portions and item-image/eating wiring remain pending.
+
+The new open-jaw topology exposed a real root defect: volume-based normal
+repair inverted the open skin sheets, and eye placement originally followed
+the pre-jaw surface. Explicit outer/cavity winding and eyes conformed to the
+actual jaw surface fix both. The scene-preserving regression verifies all six
+raw jaw models, outward upper/lower skin, recessed noncollapsed oral walls,
+closed posterior seams and all twelve pupil clearances against actual body
+triangles. Both joined preview meshes also pass exported outward-skin, UV,
+dimension/pivot, uniqueness and budget checks; fin-ray attachment still passes.
+
+The plain one-lobe prop shader does not represent wet-skin film independently
+of scale roughness. New fish source uses a .65-weight/.06-roughness coat;
+`after_bake` restores that film on the texture-backed material. The opt-in
+`wet_fish` report field routes only these meshes to a newly duplicated
+`M_CaughtFishWet` ClearCoat parent. It never changes the common parent; repeat
+fish imports do not recompile an unchanged fish parent. Four offline import
+contract tests pass (isolation, idempotence, invalid-data refusal and explicit
+conflict/save errors), plus syntax checks. They are NOT a UE shader compile:
+Integration recorded the held material gate at `d3ce243e` and owns that check.
+
+Viewed close-ups still read as procedural molded heads/regular scales and
+opaque fin sheets rather than the requested naturalistic close-up finish.
+Do not treat the wet-film change or passing geometry tests as art acceptance.
+Another full-family bake/import would be premature before resolving this
+visual-quality direction; the latest two-species review is the bounded evidence.
+Current original-art work remains attributable only to build02; captured usage
+is 278 calls through event70276, 1,617,143,930,000 recorded nano-AIU, provisional
+and incomplete. No model/context change, helpers or reconciled billing claim.
 
 Commands already run: git status/log (clean checkout), openspec list/context/spec
 inventory, full relevant crop/crafting specs, new change/status/instructions.

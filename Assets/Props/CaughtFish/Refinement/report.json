@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "name": "CaughtFishHeadReview",
+  "description": "Draft-only original trout/perch head, jaw and skin refinement.",
+  "collision": "none",
+  "triangle_budget": 65000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/caught_fish_head_review.py",
+  "source_sha256": "156040282f489cd5a9aad18fda938d3fc4dea4611b238a55286a4f272c10d29d",
+  "provenance": "Original parametric anatomy and procedural PBR; cited text and PD-self photos for observation only.",
+  "meshes": {
+    "SM_RiverTrout": {
+      "vertices": 24549,
+      "triangles": 48826,
+      "size_cm": [
+        7.76,
+        34.0,
+        9.28
+      ],
+      "materials": [
+        {
+          "name": "M_RiverTroutSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutAdipose",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_RiverTroutEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0007660519331693649,
+          -0.10540140070915223,
+          0.03687172755599022
+        ],
+        "detail_distance": 0.34
+      },
+      "fbx": "SM_RiverTrout.fbx",
+      "sha256": "79f6f1d99f01a9c16c426888b6091fc015c950dc967d9b8677c58299ef7eb0a3",
+      "preview": "preview_SM_RiverTrout.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_RiverTrout_hero.png",
+          "detail": "beauty_SM_RiverTrout_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_LakePerch": {
+      "vertices": 25155,
+      "triangles": 50012,
+      "size_cm": [
+        7.34,
+        30.0,
+        12.11
+      ],
+      "materials": [
+        {
+          "name": "M_LakePerchSkin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakePerchMouth",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakePerchDorsal",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakePerchFin",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_LakePerchEye",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.09
+        },
+        {
+          "name": "M_LakePerchPectoral",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "focus": [
+          -0.0006753988564014435,
+          -0.09300140070915222,
+          0.03878825157880783
+        ],
+        "detail_distance": 0.3
+      },
+      "fbx": "SM_LakePerch.fbx",
+      "sha256": "56c2fdc7a0d41d51bc3956dc465af34afa6bfe5d1d5a90aab9e495f811008e61",
+      "preview": "preview_SM_LakePerch.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_LakePerch_hero.png",
+          "detail": "beauty_SM_LakePerch_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          78,
+          28
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "authored_source": "caught_fish.py",
+  "authored_source_sha256": "bce338a2ece334808dfeb4ecd08e8c04f6a1a79bc9021db2f68e466ab345a4db",
+  "material_source_sha256": "20559b9879c0161420cd7fbae5f7f903e84fbe19e9db085b0bd1a205e34e3afd",
+  "wet_fish": {
+    "coat_weight": 0.65,
+    "coat_roughness": 0.06
+  }
+}

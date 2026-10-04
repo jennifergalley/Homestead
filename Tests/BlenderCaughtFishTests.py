@@ -11,6 +11,7 @@ from pathlib import Path
 
 import bpy
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 
 EXPECTED = {
     "RiverTrout": ("Salmo trutta", .34),
@@ -56,10 +57,73 @@ def check_fin_ray_attachment() -> None:
             bpy.data.materials.remove(material)
 
 
-def main() -> None:
-    check_fin_ray_attachment()
+def check_jaw_openings() -> None:
+    source = Path(__file__).resolve().parents[1] / "Scripts" / "Blender"
+    sys.path.insert(0, str(source))
+    import homestead_kit as kit
+
+    spec = importlib.util.spec_from_file_location("caught_fish_jaw_regression", source / "Recipes" / "caught_fish.py")
+    recipe = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(recipe)
+    skin = bpy.data.materials.new("CaughtFishRegressionSkin")
+    cavity = bpy.data.materials.new("CaughtFishRegressionCavity")
+    try:
+        for fish in recipe.FISH:
+            obj = recipe.body(kit, fish, skin, cavity)
+            data = obj.data
+            try:
+                columns = recipe.BODY_SIDES // 2 + 1
+                lower_offset = recipe.BODY_RINGS * columns
+                for ring in range(recipe.BODY_RINGS):
+                    u = .90 * ring / (recipe.BODY_RINGS - 1)
+                    for side in range(2):
+                        top = data.vertices[ring * columns + (0 if side == 0 else columns - 1)].co
+                        bottom = data.vertices[lower_offset + ring * columns + (columns - 1 if side == 0 else 0)].co
+                        if u == 0:
+                            assert abs((top.z - bottom.z) - fish["length"] * fish["mouth_gap"]) < .000002
+                        elif u < fish["mouth_end"] * .5:
+                            assert top.z > bottom.z, fish["key"] + " has a sealed mouth"
+                        elif u >= fish["mouth_end"]:
+                            assert (top - bottom).length < .000002, fish["key"] + " has a split cheek/body"
+                cavity_faces = [face for face in data.polygons if face.material_index == 1]
+                assert cavity_faces, fish["key"] + " lacks a modeled oral cavity"
+                assert all(face.area > 0 and all(math.isfinite(c) for c in face.normal)
+                           for face in cavity_faces), fish["key"] + " has collapsed cavity faces"
+                for face in data.polygons[:2 * (recipe.BODY_RINGS - 1) * (columns - 1)]:
+                    if .30 * fish["length"] < face.center.y + .5 * fish["length"] < .80 * fish["length"]:
+                        radial = Vector((face.center.x, 0, face.center.z))
+                        assert face.normal.dot(radial) > 0, fish["key"] + " has inverted skin normals"
+                head = BVHTree.FromPolygons([vertex.co for vertex in data.vertices],
+                                           [face.vertices[:] for face in data.polygons])
+                for side in (-1, 1):
+                    eye = recipe.eye(kit, fish, skin, side)
+                    eye_data = eye.data
+                    try:
+                        for vertex, coord in zip(eye_data.vertices, eye_data.attributes["eyecoord"].data):
+                            if math.hypot(coord.vector.y, coord.vector.z) > .75:
+                                continue
+                            nearest, normal, _, _ = head.find_nearest(vertex.co)
+                            assert nearest is not None
+                            assert (vertex.co - nearest).dot(normal) >= -.00006, fish["key"] + " clips its pupil into the jaw skin"
+                    finally:
+                        bpy.data.objects.remove(eye, do_unlink=True)
+                        if eye_data.users == 0:
+                            bpy.data.meshes.remove(eye_data)
+            finally:
+                bpy.data.objects.remove(obj, do_unlink=True)
+                if data.users == 0:
+                    bpy.data.meshes.remove(data)
+        print("ORIGINAL_FISH_JAW_PASS 6 open jaws, recessed cavity faces, closed seams, 12 unclipped pupils")
+    finally:
+        for material in (skin, cavity):
+            if material.users == 0:
+                bpy.data.materials.remove(material)
+
+
+def check_geometry(keys=EXPECTED) -> None:
     signatures = set()
-    for key, (species, length) in EXPECTED.items():
+    for key in keys:
+        species, length = EXPECTED[key]
         obj = bpy.data.objects.get("SM_" + key)
         assert obj is not None, "Missing catch mesh: " + key
         assert obj.get("fish_species") == species, "Species/catalogue mismatch: " + key
@@ -74,12 +138,42 @@ def main() -> None:
         assert 25000 <= triangles <= 65000, key + " is empty or exceeds the poly budget"
         assert data.uv_layers.get("UVMap") is not None, key + " has no bake UV"
         assert all(math.isfinite(c) for uv in data.uv_layers["UVMap"].data for c in uv.uv), key + " has invalid UVs"
+        skin_coords = data.attributes.get("fishcoord")
+        assert skin_coords is not None, key + " lost its authored anatomy coordinates"
+        outward_faces = 0
+        for face in data.polygons:
+            coord = sum((skin_coords.data[index].vector for index in face.vertices), Vector()) / len(face.vertices)
+            if .30 < coord.x < .80 and math.hypot(coord.y, coord.z) > .98:
+                assert face.normal.dot(Vector((coord.y, 0, coord.z))) > 0, key + " exports inward-facing skin"
+                outward_faces += 1
+        assert outward_faces > 1000, key + " lacks verifiable outer skin"
         normalized = b"".join(struct.pack("<3f", *(c / length for c in vertex.co)) for vertex in data.vertices)
         signature = hashlib.sha256(normalized).hexdigest()
         assert signature not in signatures, key + " reuses another catch's normalized geometry"
         signatures.add(signature)
-        assert len(obj.material_slots) in (1, 6, 7), key + " has missing anatomy materials"
+        assert len(obj.material_slots) in (1, 5, 6, 7), key + " has missing anatomy materials"
         print(f"ORIGINAL_FISH_PASS {key}: {species}, {triangles} tris, length/pivot/UV/unique geometry")
+
+
+def check_wet_film(keys=EXPECTED) -> None:
+    source = Path(__file__).resolve().parents[1] / "Scripts" / "Blender"
+    sys.path.insert(0, str(source))
+    import homestead_materials as materials
+    for key in keys:
+        obj = bpy.data.objects.get("SM_" + key)
+        assert obj is not None, "Missing wet-fish mesh: " + key
+        for slot in obj.material_slots:
+            bsdf = next(node for node in slot.material.node_tree.nodes if node.type == "BSDF_PRINCIPLED")
+            assert abs(bsdf.inputs["Coat Weight"].default_value - materials.FISH_COAT_WEIGHT) < .000001
+            assert abs(bsdf.inputs["Coat Roughness"].default_value - materials.FISH_COAT_ROUGHNESS) < .000001
+    print("ORIGINAL_FISH_WET_FILM_PASS", len(keys))
+
+
+def main() -> None:
+    check_fin_ray_attachment()
+    check_jaw_openings()
+    check_wet_film()
+    check_geometry()
     print("ORIGINAL_FISH_FAMILY_PASS 6")
 
 
