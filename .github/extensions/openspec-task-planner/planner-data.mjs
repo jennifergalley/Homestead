@@ -1,4 +1,5 @@
-import { readFile, readdir, stat, writeFile, mkdir } from "node:fs/promises";
+import { readFile, readdir, stat, writeFile, mkdir, rename, open, unlink } from "node:fs/promises";
+import { createHash, randomUUID } from "node:crypto";
 import { basename, dirname, join, relative } from "node:path";
 import { loadUsageReports } from "./accounting-data.mjs";
 
@@ -336,15 +337,68 @@ export function backlogMdPath(projectRoot) {
     return join(projectRoot, ...backlogMdSegments);
 }
 
-export async function loadBacklogInbox(projectRoot) {
+async function readBacklogDocument(projectRoot) {
     try {
         const value = JSON.parse(await readFile(backlogInboxPath(projectRoot), "utf8"));
-        return Array.isArray(value.entries) ? value.entries : [];
+        if (!value || !Array.isArray(value.entries)) throw new Error("Invalid feedback inbox: entries must be an array.");
+        const ids = new Set();
+        for (const entry of value.entries) {
+            if (!entry || typeof entry.id !== "string" || !entry.id || ids.has(entry.id)
+                || typeof entry.title !== "string"
+                || (entry.description != null && typeof entry.description !== "string")
+                || (entry.imageFile != null && (typeof entry.imageFile !== "string" || basename(entry.imageFile) !== entry.imageFile))) {
+                throw new Error("Invalid feedback inbox: check entry IDs, text and screenshot filenames.");
+            }
+            ids.add(entry.id);
+        }
+        return value;
     } catch (error) {
-        if (error?.code === "ENOENT") return [];
+        if (error?.code === "ENOENT") return { entries: [] };
         // A corrupt inbox file must not silently drop Jenny's submissions —
         // surface the error rather than overwriting it with an empty list.
         throw error;
+    }
+}
+
+export async function loadBacklogInbox(projectRoot) {
+    return (await readBacklogDocument(projectRoot)).entries;
+}
+
+export function backlogEntryRevision(entry) {
+    return createHash("sha256").update(JSON.stringify(entry)).digest("hex");
+}
+
+async function atomicBacklogWrite(path, content) {
+    await mkdir(dirname(path), { recursive: true });
+    const temporary = `${path}.${randomUUID()}.tmp`;
+    try {
+        await writeFile(temporary, content, { flag: "wx" });
+        await rename(temporary, path);
+    } finally {
+        await unlink(temporary).catch((error) => {
+            if (error.code !== "ENOENT") throw error;
+        });
+    }
+}
+
+async function withBacklogLock(projectRoot, action) {
+    const path = `${backlogInboxPath(projectRoot)}.lock`;
+    await mkdir(dirname(path), { recursive: true });
+    let lock;
+    try {
+        lock = await open(path, "wx");
+    } catch (error) {
+        if (error.code === "EEXIST") {
+            return { error: "Feedback is being saved elsewhere. Try again; if it persists, check " + path, status: 409 };
+        }
+        throw error;
+    }
+    try {
+        await lock.writeFile(JSON.stringify({ pid: process.pid, createdUtc: new Date().toISOString() }));
+        return await action();
+    } finally {
+        await lock.close();
+        await unlink(path);
     }
 }
 
@@ -387,6 +441,14 @@ export function decodeBacklogImage(image) {
     if (buffer.length > BACKLOG_MAX_IMAGE_BYTES) {
         return { error: `Screenshot is too large (max ${Math.floor(BACKLOG_MAX_IMAGE_BYTES / (1024 * 1024))} MB).` };
     }
+    if (buffer.toString("base64").replace(/=+$/, "") !== match[2].replace(/=+$/, "")) {
+        return { error: "Screenshot data could not be decoded." };
+    }
+    const headerMatches = mime === "image/png" ? buffer.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+        : mime === "image/jpeg" ? buffer[0] === 255 && buffer[1] === 216 && buffer[2] === 255
+        : mime === "image/webp" ? buffer.toString("ascii", 0, 4) === "RIFF" && buffer.toString("ascii", 8, 12) === "WEBP"
+        : ["GIF87a", "GIF89a"].includes(buffer.toString("ascii", 0, 6));
+    if (!headerMatches) return { error: "Screenshot content does not match its image type." };
     return { value: { buffer, mime, extension } };
 }
 
@@ -450,7 +512,7 @@ export async function syncBacklogMarkdown(projectRoot, entries) {
         markdown = "";
     }
     const updated = upsertMarkedBlock(markdown, renderBacklogInboxBlock(entries));
-    if (updated !== markdown) await writeFile(path, updated, "utf8");
+    if (updated !== markdown) await atomicBacklogWrite(path, updated);
 }
 
 export function toBacklogClientEntry(entry) {
@@ -459,6 +521,7 @@ export function toBacklogClientEntry(entry) {
         title: entry.title,
         description: entry.description,
         createdUtc: entry.createdUtc,
+        revision: backlogEntryRevision(entry),
         imageUrl: entry.imageFile ? `/api/backlog-image/${encodeURIComponent(entry.id)}` : null,
     };
 }
@@ -501,35 +564,77 @@ function defaultFeatureRank(feature) {
     return Number.isFinite(time) ? -time : Infinity;
 }
 
-export async function addBacklogEntry(projectRoot, { title, description, image } = {}, now = Date.now()) {
+async function saveBacklogDocument(projectRoot, document, entry) {
+    await atomicBacklogWrite(backlogInboxPath(projectRoot), JSON.stringify(document, null, 2) + "\n");
+    try {
+        await syncBacklogMarkdown(projectRoot, document.entries);
+    } catch (error) {
+        return { value: entry, warning: "Feedback saved, but backlog.md could not be updated: " + error.message };
+    }
+    return { value: entry };
+}
+
+async function storeBacklogImage(projectRoot, id, image) {
+    if (!image) return { imageFile: null, imageMime: null };
+    const imageFile = `${id}-${randomUUID()}.${image.extension}`;
+    await mkdir(backlogAttachmentsDir(projectRoot), { recursive: true });
+    await writeFile(join(backlogAttachmentsDir(projectRoot), imageFile), image.buffer, { flag: "wx" });
+    return { imageFile, imageMime: image.mime };
+}
+
+function validateBacklogContent({ title, description, image }) {
     const titleResult = sanitizeBacklogTitle(title);
     if (titleResult.error) return { error: titleResult.error };
+    if (description != null && typeof description !== "string") return { error: "Description must be text." };
     const descriptionResult = sanitizeBacklogDescription(description);
     if (descriptionResult.error) return { error: descriptionResult.error };
     const imageResult = decodeBacklogImage(image);
     if (imageResult.error) return { error: imageResult.error };
+    return { title: titleResult.value, description: descriptionResult.value, image: imageResult.value };
+}
 
-    const id = generateBacklogId(now);
-    let imageFile = null;
-    let imageMime = null;
-    if (imageResult.value) {
-        imageFile = `${id}.${imageResult.value.extension}`;
-        imageMime = imageResult.value.mime;
-        await mkdir(backlogAttachmentsDir(projectRoot), { recursive: true });
-        await writeFile(join(backlogAttachmentsDir(projectRoot), imageFile), imageResult.value.buffer);
+export async function addBacklogEntry(projectRoot, content = {}, now = Date.now()) {
+    const validated = validateBacklogContent(content);
+    if (validated.error) return validated;
+    return withBacklogLock(projectRoot, async () => {
+        const document = await readBacklogDocument(projectRoot);
+        const id = generateBacklogId(now);
+        if (document.entries.some((entry) => entry.id === id)) throw new Error("Feedback ID collision; try again.");
+        const entry = {
+            id,
+            title: validated.title,
+            description: validated.description,
+            ...await storeBacklogImage(projectRoot, id, validated.image),
+            createdUtc: new Date(now).toISOString(),
+        };
+        document.entries.push(entry);
+        return saveBacklogDocument(projectRoot, document, entry);
+    });
+}
+
+export async function updateBacklogEntry(projectRoot, id, content = {}, now = Date.now()) {
+    if (typeof id !== "string" || !/^[a-zA-Z0-9_-]{1,200}$/.test(id)) return { error: "Invalid feedback ID." };
+    const validated = validateBacklogContent(content);
+    if (validated.error) return validated;
+    if (typeof content.revision !== "string" || !/^[a-f0-9]{64}$/.test(content.revision)) {
+        return { error: "Reopen this feedback before saving." };
     }
-    const entry = {
-        id,
-        title: titleResult.value,
-        description: descriptionResult.value,
-        imageFile,
-        imageMime,
-        createdUtc: new Date(now).toISOString(),
-    };
-    const entries = await loadBacklogInbox(projectRoot);
-    entries.push(entry);
-    await mkdir(dirname(backlogInboxPath(projectRoot)), { recursive: true });
-    await writeFile(backlogInboxPath(projectRoot), JSON.stringify({ entries }, null, 2) + "\n", "utf8");
-    await syncBacklogMarkdown(projectRoot, entries);
-    return { value: entry };
+    return withBacklogLock(projectRoot, async () => {
+        const document = await readBacklogDocument(projectRoot);
+        const index = document.entries.findIndex((entry) => entry.id === id);
+        if (index === -1) return { error: "This feedback no longer exists. Cancel and refresh the planner.", status: 404 };
+        const current = document.entries[index];
+        if (backlogEntryRevision(current) !== content.revision) {
+            return { error: "This feedback changed elsewhere. Copy your draft, then cancel and reopen it.", status: 409 };
+        }
+        const entry = {
+            ...current,
+            title: validated.title,
+            description: validated.description,
+            updatedUtc: new Date(now).toISOString(),
+            ...(content.image !== undefined ? await storeBacklogImage(projectRoot, id, validated.image) : {}),
+        };
+        document.entries[index] = entry;
+        return saveBacklogDocument(projectRoot, document, entry);
+    });
 }

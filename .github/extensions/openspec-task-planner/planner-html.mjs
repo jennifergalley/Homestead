@@ -303,6 +303,16 @@ export function renderPlannerHtml() {
     .icon-button:disabled { opacity: .35; cursor: default; }
     .icon-button:hover { border-color: var(--true-color-blue, #58a6ff); color: var(--text-color-default, #e6edf3); }
     .icon-button.danger:hover, .icon-button.armed { border-color: var(--true-color-red, #f85149); color: var(--true-color-red, #f85149); }
+    button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 2px solid var(--color-focus-outline, #58a6ff);
+      outline-offset: 2px;
+    }
+    .check-row > div, .check-title, .check-text { min-width: 0; overflow-wrap: anywhere; }
+    .row-actions { flex-wrap: wrap; justify-content: flex-end; }
+    @media (max-width: 760px) {
+      .check-row { grid-template-columns: 26px 18px minmax(0, 1fr); }
+      .row-actions { grid-column: 3; justify-content: flex-start; }
+    }
     .backlog-form {
       border: 1px solid var(--border-color-default, #30363d);
       background: var(--background-color-muted, #161b22);
@@ -311,6 +321,7 @@ export function renderPlannerHtml() {
       margin-bottom: 18px;
     }
     .backlog-form h2 { margin: 0; font-size: 16px; }
+    .backlog-form .builds-head { flex-wrap: wrap; }
     .field { display: block; margin: 10px 0; }
     .field > span { display: block; margin-bottom: 4px; color: var(--text-color-muted, #8b949e); font-size: 12px; }
     .field input[type="text"], .field textarea {
@@ -324,6 +335,10 @@ export function renderPlannerHtml() {
     }
     .field input[type="file"] { color: var(--text-color-default, #e6edf3); }
     .backlog-form-actions { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+    .backlog-form-actions { flex-wrap: wrap; }
+    .screenshot-preview img { display: block; max-width: 100%; max-height: 180px; margin: 8px 0; object-fit: contain; }
+    .screenshot-preview p { margin: 8px 0; }
+    [hidden] { display: none !important; }
     .backlog-origin { font-style: italic; }
     .backlog-thumb { width: 28px; height: 28px; object-fit: cover; border-radius: 4px; margin-top: 4px; display: block; }
     .error-text { color: var(--true-color-red, #f85149); }
@@ -363,8 +378,8 @@ export function renderPlannerHtml() {
     <div id="tab-planning" class="tab-panel" role="tabpanel" aria-labelledby="tab-planning-btn">
       <section id="backlog-form-card" class="backlog-form" aria-label="Quick backlog entry">
         <div class="builds-head">
-          <h2>Add to Jenny's backlog</h2>
-          <span id="backlog-form-note" class="muted">No chat tokens spent — this writes straight to docs/handoff/backlog.md.</span>
+          <h2 id="backlog-form-heading">Add to Jenny's backlog</h2>
+          <span id="backlog-form-note" class="muted">Saved locally. No agent notifications.</span>
         </div>
         <form id="backlog-form" novalidate>
           <label class="field">
@@ -379,8 +394,13 @@ export function renderPlannerHtml() {
             <span>Screenshot (optional, PNG/JPEG/WebP/GIF, max 8 MB)</span>
             <input id="backlog-image" type="file" accept="image/png,image/jpeg,image/webp,image/gif">
           </label>
+          <div id="backlog-image-preview" class="screenshot-preview" hidden>
+            <p id="backlog-image-note" class="muted"></p>
+            <button id="backlog-image-remove" class="icon-button" type="button">Remove screenshot</button>
+          </div>
           <div class="backlog-form-actions">
             <button id="backlog-submit" class="refresh" type="submit">Add to backlog</button>
+            <button id="backlog-cancel" class="icon-button" type="button" hidden>Cancel</button>
             <span id="backlog-form-status" class="muted" role="status" aria-live="polite"></span>
           </div>
         </form>
@@ -617,6 +637,19 @@ export function renderPlannerHtml() {
           try { await savePriority({ order }); await load(true, true); note.textContent = "Moved “" + feature.title + "” to the top"; }
           catch (error) { note.textContent = error.message; top.disabled = false; }
         });
+        if (feature.fromBacklog) {
+          const edit = el("button", "icon-button feedback-edit", "✎");
+          edit.type = "button";
+          edit.title = "Edit feedback";
+          edit.setAttribute("aria-label", "Edit feedback: " + feature.title);
+          edit.disabled = feedbackState.busy || !!feedbackState.entry;
+          for (const eventName of ["mousedown", "dragstart"]) edit.addEventListener(eventName, (event) => event.stopPropagation());
+          edit.addEventListener("click", (event) => {
+            event.stopPropagation();
+            beginFeedbackEdit(feature.name);
+          });
+          actions.append(edit);
+        }
         actions.append(top, button, quote, remove);
         row.append(el("div", "rank", String(index + 1)), el("div", "drag", "⋮⋮"), text, actions);
         row.addEventListener("dragstart", (event) => {
@@ -666,10 +699,120 @@ export function renderPlannerHtml() {
     const backlogImage = document.getElementById("backlog-image");
     const backlogSubmit = document.getElementById("backlog-submit");
     const backlogStatus = document.getElementById("backlog-form-status");
+    const backlogHeading = document.getElementById("backlog-form-heading");
+    const backlogCancel = document.getElementById("backlog-cancel");
+    const backlogPreview = document.getElementById("backlog-image-preview");
+    const backlogCurrentImage = el("img");
+    backlogCurrentImage.id = "backlog-current-image";
+    backlogCurrentImage.alt = "Feedback screenshot";
+    backlogCurrentImage.hidden = true;
+    backlogPreview.prepend(backlogCurrentImage);
+    const backlogImageNote = document.getElementById("backlog-image-note");
+    const backlogImageRemove = document.getElementById("backlog-image-remove");
+    const feedbackState = { entry: null, busy: false, imageRemoved: false, previewUrl: null };
 
-    backlogForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      backlogStatus.className = "muted";
+    function feedbackStatus(message, error = false) {
+      backlogStatus.className = error ? "error-text" : "muted";
+      backlogStatus.textContent = message;
+    }
+
+    function hasFeedbackDraft() {
+      return !!(backlogTitle.value || backlogDescription.value || backlogImage.files?.length || feedbackState.entry);
+    }
+
+    function updateFeedbackControls() {
+      const editing = !!feedbackState.entry;
+      backlogHeading.textContent = editing ? "Edit Jenny's feedback" : "Add to Jenny's backlog";
+      backlogSubmit.textContent = feedbackState.busy ? (editing ? "Saving..." : "Working...") : (editing ? "Save changes" : "Add to backlog");
+      backlogCancel.hidden = !hasFeedbackDraft();
+      for (const control of [backlogTitle, backlogDescription, backlogImage, backlogSubmit, backlogCancel, backlogImageRemove]) {
+        control.disabled = feedbackState.busy;
+      }
+      for (const edit of board.querySelectorAll(".feedback-edit")) edit.disabled = feedbackState.busy || editing;
+    }
+
+    function updateFeedbackScreenshot() {
+      if (feedbackState.previewUrl) URL.revokeObjectURL(feedbackState.previewUrl);
+      feedbackState.previewUrl = null;
+      const file = backlogImage.files?.[0];
+      const existing = !feedbackState.imageRemoved && feedbackState.entry?.imageUrl;
+      if (file && BACKLOG_IMAGE_TYPES.has(file.type) && file.size <= BACKLOG_MAX_IMAGE_BYTES) {
+        feedbackState.previewUrl = URL.createObjectURL(file);
+      }
+      const source = feedbackState.previewUrl || (existing ? existing + "?revision=" + feedbackState.entry.revision : null);
+      backlogPreview.hidden = !source && !feedbackState.imageRemoved;
+      backlogCurrentImage.hidden = !source;
+      if (source) backlogCurrentImage.src = source;
+      else backlogCurrentImage.removeAttribute("src");
+      backlogImageRemove.hidden = !source;
+      backlogImageNote.textContent = file ? "New screenshot" : feedbackState.imageRemoved ? "Screenshot will be removed when you save." : "Current screenshot";
+    }
+
+    function resetFeedbackForm() {
+      backlogForm.reset();
+      feedbackState.entry = null;
+      feedbackState.imageRemoved = false;
+      updateFeedbackScreenshot();
+      updateFeedbackControls();
+    }
+
+    async function beginFeedbackEdit(id) {
+      if (feedbackState.busy || feedbackState.entry) return;
+      if (hasFeedbackDraft()) {
+        feedbackStatus("Save or cancel your current draft first.", true);
+        backlogTitle.focus();
+        return;
+      }
+      feedbackState.busy = true;
+      updateFeedbackControls();
+      feedbackStatus("Opening feedback...");
+      try {
+        const response = await fetch("/api/backlog", { cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error ?? "Couldn't open feedback. Try again.");
+        const entry = data.entries.find((value) => value.id === id);
+        if (!entry) throw new Error("This feedback no longer exists. Refresh the planner.");
+        feedbackState.entry = entry;
+        feedbackState.imageRemoved = false;
+        backlogTitle.value = entry.title;
+        backlogDescription.value = entry.description ?? "";
+        backlogImage.value = "";
+        updateFeedbackScreenshot();
+        feedbackStatus("");
+      } catch (error) {
+        feedbackStatus(error.message, true);
+      } finally {
+        feedbackState.busy = false;
+        updateFeedbackControls();
+      }
+      if (feedbackState.entry) {
+        document.getElementById("backlog-form-card").scrollIntoView({ block: "start" });
+        backlogTitle.focus();
+      }
+    }
+
+    backlogCancel.addEventListener("click", () => {
+      if (feedbackState.busy) return;
+      const id = feedbackState.entry?.id;
+      resetFeedbackForm();
+      feedbackStatus("Changes cancelled.");
+      const row = [...board.querySelectorAll(".check-row")].find((value) => value.dataset.id === "backlog:" + id);
+      (row?.querySelector(".feedback-edit") ?? backlogTitle).focus();
+    });
+    backlogImageRemove.addEventListener("click", () => {
+      backlogImage.value = "";
+      feedbackState.imageRemoved = !!feedbackState.entry?.imageUrl;
+      updateFeedbackScreenshot();
+      updateFeedbackControls();
+    });
+    backlogImage.addEventListener("change", () => {
+      if (backlogImage.files?.length) feedbackState.imageRemoved = false;
+      updateFeedbackScreenshot();
+      updateFeedbackControls();
+    });
+    for (const input of [backlogTitle, backlogDescription]) input.addEventListener("input", updateFeedbackControls);
+
+    async function submitFeedback() {
       const title = backlogTitle.value.trim();
       const description = backlogDescription.value.trim();
       if (!title) {
@@ -689,7 +832,7 @@ export function renderPlannerHtml() {
         return;
       }
       const file = backlogImage.files?.[0] ?? null;
-      let image;
+      let image = feedbackState.imageRemoved ? null : undefined;
       if (file) {
         if (!BACKLOG_IMAGE_TYPES.has(file.type)) {
           backlogStatus.className = "error-text";
@@ -709,23 +852,31 @@ export function renderPlannerHtml() {
           return;
         }
       }
-      backlogSubmit.disabled = true;
-      backlogStatus.textContent = "Adding...";
+      const entry = feedbackState.entry;
+      const response = await fetch(entry ? "/api/backlog/" + encodeURIComponent(entry.id) : "/api/backlog", {
+        method: entry ? "PATCH" : "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, description, image, revision: entry?.revision }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "Couldn't save feedback. Try again.");
+      resetFeedbackForm();
+      feedbackStatus(data.warning ?? (entry ? "Saved “" + title + "”." : "Added “" + title + "” to the backlog."), !!data.warning);
+      await load(true, true);
+    }
+
+    backlogForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (feedbackState.busy) return;
+      feedbackState.busy = true;
+      updateFeedbackControls();
+      feedbackStatus(feedbackState.entry ? "Saving..." : "Adding...");
       try {
-        const response = await fetch("/api/backlog", {
-          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ title, description, image }),
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.error ?? "Couldn't add to the backlog");
-        backlogForm.reset();
-        backlogStatus.className = "muted";
-        backlogStatus.textContent = "Added “" + title + "” to the top of Planned improvements and docs/handoff/backlog.md.";
-        await load(true, true);
+        await submitFeedback();
       } catch (error) {
-        backlogStatus.className = "error-text";
-        backlogStatus.textContent = error.message;
+        feedbackStatus(error.message, true);
       } finally {
-        backlogSubmit.disabled = false;
+        feedbackState.busy = false;
+        updateFeedbackControls();
       }
     });
 

@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { loadPlanner, loadBacklogInbox, addBacklogEntry, toBacklogClientEntry, backlogAttachmentsDir, BACKLOG_IMAGE_TYPES } from "./planner-data.mjs";
+import { loadPlanner, loadBacklogInbox, addBacklogEntry, updateBacklogEntry, toBacklogClientEntry, backlogAttachmentsDir, BACKLOG_IMAGE_TYPES } from "./planner-data.mjs";
 import { renderPlannerHtml } from "./planner-html.mjs";
 
 export async function startPlannerServer(projectRoot, instanceId, session) {
@@ -40,11 +40,14 @@ export async function startPlannerServer(projectRoot, instanceId, session) {
     }
 
     async function readBody(req, maxBytes = 200000) {
-        let body = "";
+        const chunks = [];
+        let bytes = 0;
         for await (const chunk of req) {
-            body += chunk;
-            if (body.length > maxBytes) throw new Error("Request too large");
+            bytes += chunk.length;
+            if (bytes > maxBytes) throw new Error("Request too large");
+            chunks.push(chunk);
         }
+        const body = Buffer.concat(chunks).toString("utf8");
         return body ? JSON.parse(body) : {};
     }
 
@@ -64,7 +67,7 @@ export async function startPlannerServer(projectRoot, instanceId, session) {
                 res.writeHead(200, {
                     "Content-Type": "text/html; charset=utf-8",
                     "Cache-Control": "no-store",
-                    "Content-Security-Policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:",
+                    "Content-Security-Policy": "default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data: blob:",
                     "X-Content-Type-Options": "nosniff",
                 });
                 res.end(renderPlannerHtml());
@@ -134,24 +137,29 @@ export async function startPlannerServer(projectRoot, instanceId, session) {
                 sendJson(res, { entries: entries.map(toBacklogClientEntry) });
                 return;
             }
-            if (req.method === "POST" && url.pathname === "/api/backlog") {
+            const editingBacklog = req.method === "PATCH" && url.pathname.startsWith("/api/backlog/");
+            if ((req.method === "POST" && url.pathname === "/api/backlog") || editingBacklog) {
                 let body;
                 try {
                     body = await readBody(req, BACKLOG_BODY_MAX_BYTES);
-                } catch {
-                    sendJson(res, { error: "Request too large" }, 413);
+                } catch (error) {
+                    sendJson(res, { error: error instanceof SyntaxError ? "Invalid feedback JSON." : error.message },
+                        error instanceof SyntaxError ? 400 : 413);
                     return;
                 }
-                const result = await addBacklogEntry(projectRoot, {
-                    title: body.title,
-                    description: body.description,
-                    image: body.image,
-                });
+                if (!body || typeof body !== "object" || Array.isArray(body)) {
+                    sendJson(res, { error: "Invalid feedback request." }, 400);
+                    return;
+                }
+                const content = { title: body.title, description: body.description, image: body.image, revision: body.revision };
+                const result = editingBacklog
+                    ? await updateBacklogEntry(projectRoot, decodeURIComponent(url.pathname.slice("/api/backlog/".length)), content)
+                    : await addBacklogEntry(projectRoot, content);
                 if (result.error) {
-                    sendJson(res, { error: result.error }, 400);
+                    sendJson(res, { error: result.error }, result.status ?? 400);
                     return;
                 }
-                sendJson(res, { entry: toBacklogClientEntry(result.value) }, 201);
+                sendJson(res, { entry: toBacklogClientEntry(result.value), warning: result.warning }, editingBacklog ? 200 : 201);
                 return;
             }
             if (req.method === "GET" && url.pathname.startsWith("/api/backlog-image/")) {
