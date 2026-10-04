@@ -905,7 +905,10 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         using namespace HomesteadFishingTiming;
         const auto* Clip = FishA.GetSequence();
         if (!Clip) { FishLayer.BlendWeights[0] = FishAlpha = 0; bFishStrikeRequested = false; return; }
-        const bool bActive = FishPose != EHomesteadFishingPose::None;
+        // A landed catch plays to its end (the fish in her hand) after the controller lets go, then fades.
+        const bool bFinishingCatch = FishPose == EHomesteadFishingPose::None && bFishWasActive && !bFishStriking
+            && FishSegment == EHomesteadFishingPose::Catch && FishTime < CatchEnd - 0.02f;
+        const bool bActive = FishPose != EHomesteadFishingPose::None || bFinishingCatch;
         // A fresh cast always starts its segment over, even if the last one is still fading out.
         if (bActive && !bFishWasActive)
         {
@@ -918,7 +921,7 @@ struct FHomesteadAnimProxy : FAnimInstanceProxy
         bFishStrikeRequested = false;
         const bool bCastSwinging = FishSegment == EHomesteadFishingPose::Cast && !bFishStriking && FishTime < CastEnd;
         const bool bHoldCast = bCastSwinging && FishPose == EHomesteadFishingPose::Wait;
-        if (bActive && !bFishStriking && FishPose != FishSegment && !bHoldCast)
+        if (bActive && !bFinishingCatch && !bFishStriking && FishPose != FishSegment && !bHoldCast)
             StartFishSegment(FishPose, false);
         float Start, End;
         bool bLoop;
@@ -1194,7 +1197,7 @@ uint32 UHomesteadAnimInstance::FishCatchLifts() const
 
 EHomesteadFishingPose UHomesteadAnimInstance::FishingPose() const
 {
-    return GetProxyOnGameThread<FHomesteadAnimProxy>().FishPose;
+    return GetProxyOnGameThread<FHomesteadAnimProxy>().FishSegment;
 }
 
 float UHomesteadAnimInstance::FishingClipTime() const
