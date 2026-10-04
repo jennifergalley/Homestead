@@ -33,41 +33,21 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 ## 2026-10-04 — 11:29 AM
 
 - Build ID: `20261003-measured-02`
-- Admission history before delivery:
-- SHA: `cc2697ef` admits the frozen eleven-meal Unreal content.
-- Status: historical
-- This admission record was superseded by the delivered fresh-cook Shipping release below; it is not
-  a currently blocked planned build.
-- Ships: the existing original pole and six fish, plus exactly eleven original meals frozen at
-  `843324c17b85b5432785fc7a6b9e333702dc26ec`: Baked Potatoes, Roasted Turnips, Stewed Carrots,
-  Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root Vegetable
-  Hotpot, Raw Fish Slices, Grilled Trout, and Grilled Perch. Jenny accepts their
-  disclosed molded/baked appearance for mechanics playtesting; it is not a final-realism claim.
-- Deferred: Grilled Mackerel checkpoint `0a1d1da8`, Fish Soup, Fish and Potatoes, Herbed Carp,
-  and Mackerel Chowder remain preserved deferred work. Do not list them as complete, prepare
-  old-art fallbacks, or alter planner IDs or schedules.
-- Gates: Farming supplies minimum exports, bakes/maps, representative imagery, item-eating wiring,
-  and manifest for the frozen eleven. Integration then imports, builds, validates runtime and real
-  candidate/rollback save containment, packages, and runs guarded Shipping EstateSmoke/ToolRepeat.
-  Preserve release-local `-UserDir`, enum/version compatibility, protected releases/rollback,
-  player saves, and the shortcut icon. Existing texture budgets are ceilings rather than mandatory
-  4K rebakes; use a cheap coherent provisional original-asset material/import path and retain richer
-  WIP. No functional or save gate is waived.
-- Evidence: exact boundary guard passed (11 meals, 22 meshes, 66 maps, 18 images, no deferred
-  assets); Release native suite passed 21/21; combined Development build and save-isolated PIE
-  import check passed; `ReleaseSaveIsolationTests.ps1` passed 15 disposable fixtures.
-- Blocker: this worktree has no reusable file-based `Saved\Cooked\Windows` set. The protected
-  measured01 Shipping containers predate Frozen-11 and cannot be staged under the documented
-  hash-identical reuse path. The Shipping script correctly refused an implicit cook; no stale
-  container, protected release, player save, shortcut, or promotion action was taken.
-
-- Delivered promotion:
 - SHA: `b073cebe` persists the exact manifest-approved 127-asset bootstrap resave set; `fa3265fd`
   records the fresh-cook/candidate evidence.
 - Status: delivered
-- `Homestead Estate.lnk` was retargeted after all gates passed, preserving its icon and
-  package-local `-UserDir`.
-- Ships: Plant Seeds/harvest-seed balance, crop cooking, the 1500-coin pole, the selected fishing loop with six original fish, and eleven provisional meals: Baked Potatoes, Roasted Turnips, Stewed Carrots, Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root Vegetable Hotpot, Raw Fish Slices, Grilled Trout, and Grilled Perch.
+- Ships:
+- Eleven crop meals shipped with provisional original art: Baked Potatoes, Roasted Turnips, Stewed
+  Carrots, Herbed Broad Beans, Cabbage Potato Stew, Berry Compote, Strawberry Compote, Root
+  Vegetable Hotpot, Raw Fish Slices, Grilled Trout, and Grilled Perch.
+- A 1,500-coin fishing pole catches location-specific fish that she can sell or cook.
+- Harvests yield fewer seeds, keeping seed purchases useful.
+- Tilled ground with selected seeds shows the Plant Seeds hint.
+- Evening sleep ends at dawn.
+- Fast travel unlocks by visiting marked destinations.
+- Sunday General Store waiting advances to Monday opening.
+- Chest names are larger.
+- HUD notices are unified, concise, and non-overlapping.
 - Player acceptance: **pending Jenny's playtest**. Delivery and guarded functional/save acceptance
   do not close her unchecked planner checks.
 - Planner/accounting: `accounting/reports/20261003-measured-02.json` is the loader-compatible,
