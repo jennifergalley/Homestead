@@ -148,6 +148,17 @@ doze; Sunday wait preserves authoritative energy drain and adds no rest grant.
 - Full integrated Release native coverage passed 21/21 in 199.74 seconds. The only warnings were
   pre-existing C4456 shadowed locals in `HomesteadManorTests.cpp` and
   `HomesteadPublicRoadTests.cpp`.
+- Original-pole checkpoint `befe70b52fc593247d55a90de42383293f80dfa3` is integrated locally at
+  `60da4466`. It adds the authored `FishingPole` source package, capped-tube UV regression, held-mesh
+  wiring, and the lane's authored 4K maps. The Blender pipeline guide now records the exact,
+  scope-limited cleanup for its appended-library save failure.
+- A fresh combined `SurvivalGameEditor` + `SurvivalGame` Development build passed in 62 seconds.
+  In a `measured02-rod` preview-profile PIE fixture, `hud-fishing-bite` reported
+  `UI_GALLERY_READY`; `Held_FishingPole` resolved to
+  `/Game/SurvivalGame/Environment/Props/FishingPole/SM_FishingPole`, was visible at unit scale, and
+  its side capture showed its hand-mounted clearance. The editor closed immediately afterward.
+  This proves the original pole import and held presentation only—not fish/dish art, fishing gameplay,
+  full visual/player acceptance, package readiness, or promotion.
 
 ## Delivery decision
 

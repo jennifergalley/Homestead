@@ -27,6 +27,8 @@
         "add-shore-and-river-fishing"
       ],
       "checkpoint": "ff3c9de86c58efce4901b9d89de174003a85d0d4",
+      "originalPoleCheckpoint": "befe70b52fc593247d55a90de42383293f80dfa3",
+      "originalPoleEvidence": "Integrated locally at 60da4466; authored FishingPole assets imported and its selected held mesh validated in a measured02-rod preview-profile fixture. Fish/dish art remains incomplete.",
       "checkpointStatus": "pushed-not-admitted",
       "admissionBlockers": [
         "original pole, fish, and dish assets authored/imported/wired",
@@ -86,7 +88,7 @@
     "model": "gpt-5.6-terra",
     "reasoningEffort": "medium",
     "launchContextTier": "default",
-    "status": "docs/accounting liaison; source-only release-isolation guard completed, no gameplay admission or build slot"
+    "status": "docs/accounting liaison; release-isolation guard and original-pole import evidence completed locally, with no gameplay admission or promotion"
   },
   "deliveryRules": [
     "Only verified and reviewed work is admitted; unfinished items move to the fallback slot.",
