@@ -59,7 +59,11 @@ explain standard verbs.
   the shop, **every cell, tab and row** gets its own frame (Jenny, 2026-10-04): a 1.5 px brass or
   iron-gall hairline, an inner rule and 7 px corner brackets (gated by size), brightening on hover.
   There's no outer frame around the whole book. Rows can skip the brackets. The selected HUD
-  hotbar cell has no inner frame.
+  hotbar cell has no inner frame. A heavier **grand** frame (3 px rule, gilt corner studs, 16 px
+  L-brackets, mid-edge bars) is used only on three showpiece panels: "Your pack", the portrait and
+  the HUD calendar. Everything else, including the book's date panel, stays standard.
+- **Selection:** a rust fill means the item is in hand (the equipped hotbar slot); a rust outline
+  means the cursor is on it. Don't use either one for anything else.
 - **Accent use:** rust/brass marks selection, focus and "act now" cues. Green/red are reserved for
   nothing; good/bad use sage and rust tints plus an icon, never colour alone.
 
