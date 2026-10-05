@@ -172,6 +172,8 @@ unflagged queue items. If little or nothing is prioritized, the orchestrator tel
 
 ## Later
 
+- Dedicated Development QA adapter for `Invoke-ShippingQA` parity.
+
 - Fix `HomesteadStartupProbe`'s legacy mesh-identity assertion to be MetaHuman-aware; the Fishing
   promotion waiver covers only that pre-existing false invariant.
 

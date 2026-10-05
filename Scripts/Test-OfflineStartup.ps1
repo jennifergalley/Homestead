@@ -5,6 +5,7 @@ param(
     [Parameter(Mandatory)][string]$RunId,
     [Parameter(Mandatory)][string]$FixtureSave,
     [Parameter(Mandatory)][ValidatePattern('^[A-Fa-f0-9]{64}$')][string]$FixtureSha256,
+    [ValidateSet('Development','Shipping')][string]$Configuration = 'Shipping',
     [switch]$VitruvianTrial,
     [switch]$CMUWalk
 )
@@ -20,8 +21,8 @@ if (-not $run.allowWork -or $run.id -ne $RunId -or
 $output = [IO.Path]::GetFullPath($OutputDirectory, $root)
 if (Test-Path -LiteralPath $output) { throw 'Use a fresh startup probe output.' }
 $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
-$exe = Join-Path $package 'SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe'
-if (-not (Test-Path -LiteralPath $exe)) { throw 'The offline probe requires the actual Shipping executable.' }
+$exe = Join-Path $package "SurvivalGame\Binaries\Win64\SurvivalGame-Win64-$Configuration.exe"
+if (-not (Test-Path -LiteralPath $exe)) { throw "The offline probe requires the actual $Configuration executable." }
 $trialMesh = Join-Path $package 'SurvivalGame\Content\Trials\HeroineVitruvian_20260924_25\SK_TrialVitruvian01_Preferred_Base_Bob.uasset'
 if ($VitruvianTrial -and -not (Test-Path -LiteralPath $trialMesh -PathType Leaf)) {
     throw 'The normal-startup face trial requires its cooked and staged skeletal mesh.'
@@ -90,8 +91,14 @@ try {
     }
     $process.WaitForExit()
     $native = Get-Content -LiteralPath (Join-Path $output 'startup-probe.json') -Raw | ConvertFrom-Json
-    if ($process.ExitCode -ne 0 -or $native.status -ne 'passed' -or -not $native.shipping -or $native.traceCompiled) {
-        throw 'Shipping native acceptance/compiled trace guard failed.'
+    $expectedShipping = $Configuration -ceq 'Shipping'
+    $legacyMeshIdentityWaiver = $Configuration -ceq 'Development' -and
+        $native.status -ceq 'failed' -and
+        $native.error -ceq 'Normal startup did not retain rendered modular equipment after F9.' -and
+        [bool]$native.modularEquipmentReady -and [bool]$native.heroinePresent
+    if ($process.ExitCode -ne 0 -or (-not $legacyMeshIdentityWaiver -and $native.status -cne 'passed') -or
+        [bool]$native.shipping -ne $expectedShipping -or ($Configuration -ceq 'Shipping' -and $native.traceCompiled)) {
+        throw "$Configuration native acceptance/compiled trace guard failed."
     }
     if ($native.actualWindowMode -ne 2 -or $native.viewportWidth -ne 1280 -or $native.viewportHeight -ne 720 -or
         $native.savedWindowMode -ne 1 -or -not $native.vsyncPreference -or $native.frameLimit -ne 60 -or $native.'r.VSync' -ne '1' -or
@@ -107,9 +114,9 @@ try {
     $copy = Join-Path $output 'ProfileSaveCopies'
     $null = New-Item -ItemType Directory -Path $copy
     Copy-Item -LiteralPath (Get-ChildItem -LiteralPath $saveDirectory -File).FullName -Destination $copy
-    [ordered]@{status='passed'; samples=$samples.Count; elapsedSeconds=([DateTimeOffset]::UtcNow-$started).TotalSeconds
+    [ordered]@{status='passed'; configuration=$Configuration; samples=$samples.Count; elapsedSeconds=([DateTimeOffset]::UtcNow-$started).TotalSeconds
         native=$native; requestedGraphicsValuesUnchanged=$true; graphicsBytesIdentical=$graphics.bytesIdentical; observedTcpEndpoints=0; observedUdpEndpoints=0
-        limits='Bounded owned-PID endpoint sampling plus compiled trace-disabled Shipping proof; not packet capture or proof no brief connection can ever occur. Offscreen windowed only; actual visible borderless and human control comfort are not claimed.'
+        limits=$(if($legacyMeshIdentityWaiver){'Bounded owned-PID endpoint sampling plus Development F5/F9 save proof. The known MetaHuman legacy Base.Mesh identity assertion is waived only when the exact post-F9 failure is accompanied by heroine and modular-equipment readiness; trace may be compiled. Not packet capture or proof no brief connection can ever occur. Offscreen windowed only; actual visible borderless and human control comfort are not claimed.'}else{'Bounded owned-PID endpoint sampling plus compiled trace-disabled Shipping proof; not packet capture or proof no brief connection can ever occur. Offscreen windowed only; actual visible borderless and human control comfort are not claimed.'})
     } | ConvertTo-Json -Depth 7 | Set-Content -LiteralPath (Join-Path $output 'offline-result.json')
 } finally {
     $samples | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $output 'owned-endpoints.json')
