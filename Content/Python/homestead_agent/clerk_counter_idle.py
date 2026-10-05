@@ -32,7 +32,7 @@ LENGTH = 240  # 8 s at 30 fps
 COUNTER_BACK_Y = 26.0
 COUNTER_TOP_Z = 98.9
 # Hand bone (wrist) above the counter with the palm flat on it; checked by report().
-WRIST_ABOVE_TOP = 3.2
+WRIST_ABOVE_TOP = 7.0
 HAND_X = 21.0
 HAND_Y = COUNTER_BACK_Y + 11.0
 FEET_HALF_WIDTH = 15.0
@@ -115,7 +115,13 @@ def build(anim=ANIM, wrist_above=WRIST_ABOVE_TOP, hand_y=HAND_Y, lean=1.0):
                     for joint, deg in zip(('01', '02', '03'), degrees):
                         pitch = SPREAD.get(finger, 0.0) if joint == '01' else 0.0
                         s.key_rotation(frame, f'{finger}_{joint}_{side}_ctrl', yaw=deg, pitch=pitch)
-        return s.bake(anim, folder=OUTPUT)
+        baked = s.bake(anim, folder=OUTPUT)
+    # The shared metahuman_base_skel's reference pose is the female base; without his own mesh as the
+    # retarget source, AnimationScaled bones (pelvis) stretch his whole pose ~7 cm up in game.
+    clip = unreal.load_asset(f'{OUTPUT}/{anim}')
+    clip.set_editor_property('retarget_source_asset', unreal.load_asset(BODY))
+    unreal.EditorAssetLibrary.save_loaded_asset(clip)
+    return baked
 
 
 def _angle(a, b, c):
