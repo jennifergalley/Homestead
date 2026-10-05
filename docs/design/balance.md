@@ -73,7 +73,7 @@ generous and cozy.
 | Clear by hand | 1.0 | 100 |
 | Soft underbrush | 0.8 | 125 |
 | Woody underbrush or sapling | 1.5 | 66 |
-| Fell a tree (hatchet, any unprotected estate tree; +6 timber, +4 branches) | 4.0 | 25 |
+| Fell a tree (axe, any unprotected estate tree; +6 timber, +4 branches) | 4.0 | 25 |
 | Till | 2.0 | 50 |
 | Plant, water (each) | 0.4 | 250 |
 | Weed | 0.8 | 125 |
