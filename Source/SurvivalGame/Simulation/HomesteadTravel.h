@@ -14,7 +14,7 @@ namespace Homestead
 {
 // A conservative ordinary walking pace, cm/s: the legacy heroine's walk speed, under the MetaHuman's
 // declared 210 cm/s top walk, because slopes, starts and stops slow a real walk (not measured in
-// PIE yet). The full 1.94 km road reads about 7.2 game hours at the default 60-minute day.
+// PIE yet). The full 852 m road reads about 3.2 game hours at the default 60-minute day.
 constexpr double RoadWalkPaceCmPerSecond = 180.0;
 // Closer than this to the destination, she is already there, cm.
 constexpr double TravelArrivedCm = 3000.0;
@@ -69,6 +69,9 @@ struct TravelPlan
 // or while she needs to recover.
 TravelPlan PlanTravel(const State& state, Point from, TravelDestination destination,
     const EstateLayout& layout = ProvisionalEstateLayout());
+// Whether `at` is close enough to the public road for a walk to start from it (TravelMaxConnectorCm). A save
+// made where the road no longer runs (the old town site) fails this, and the load puts her back at the manor.
+bool WithinTravelReachOfRoad(Point at);
 // "7 h 12 min", "45 min".
 std::string FormatWalkDuration(double gameHours);
 

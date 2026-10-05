@@ -634,10 +634,12 @@ int main()
         Simulation sim;
         Check(sim.NewEstateGame(estateLayout, ProvisionalEstatePlacements()).ok, "travel game");
         const PublicRoadStop* manorStop = road.FindStop("Manor");
+        Check(manorStop != nullptr, "the road has a Manor stop");
         Check(sim.DiscoverTravel(TravelDestination::Town, estateLayout.PointOr(Anchor::TownSquare, {})).ok, "town discovered");
         Check(sim.DiscoverTravel(TravelDestination::Store, estateLayout.PointOr(Anchor::GeneralStoreDoor, {})).ok, "store door discovered");
         for (const TravelDestination destination : {TravelDestination::Town, TravelDestination::Store})
         {
+            if (!manorStop) break;
             const TravelPlan plan = PlanTravel(sim.GetState(), manorStop->position, destination);
             Check(plan.ok && plan.totalMetres <= 360.0, "manor to the village is at most 360 m (75 s at a sprint)", plan.totalMetres);
             Check(plan.ok && plan.totalMetres >= 250.0, "manor to the village is a real walk, not a doorstep", plan.totalMetres);
@@ -649,6 +651,38 @@ int main()
                 if (placement.id == id) found = &placement;
             Check(found && IsPublicRoadsidePlacement(*found) && EstatePlacementAllowed(estateLayout, *found), "scenic roadside flowers are valid", id);
         }
+    }
+
+    // An old save that picked or cleared a placement the bake has since retired (the old roadside ids) loads
+    // quietly: its edit is dropped, the rest of the world is intact. And a save made at the old town site,
+    // beyond the trimmed road's reach, is recognised so the load can put her back at the manor.
+    {
+        const EstatePlacement* victim = nullptr;
+        for (const EstatePlacement& placement : ProvisionalEstatePlacements().placements)
+            if (placement.id >= PublicRoadsideFirstId && placement.id < PublicRoadsideEndId && placement.kind == ResourceKind::BerryBush)
+                victim = &placement;
+        Check(victim != nullptr, "a roadside bramble to retire");
+        if (victim)
+        {
+            Simulation sim;
+            Check(sim.NewEstateGame(estateLayout, ProvisionalEstatePlacements()).ok, "retirement game");
+            Check(sim.Harvest(victim->id, victim->position).ok, "picked the bramble that will be retired");
+            const std::string saved = sim.Serialize();
+            EstatePlacements trimmed = ProvisionalEstatePlacements();
+            const int retiredId = victim->id;
+            trimmed.placements.erase(std::remove_if(trimmed.placements.begin(), trimmed.placements.end(),
+                [retiredId](const EstatePlacement& placement) { return placement.id == retiredId; }), trimmed.placements.end());
+            Simulation loaded;
+            loaded.SetLayout(estateLayout);
+            loaded.SetPlacements(trimmed);
+            Check(loaded.Deserialize(saved).ok, "a save holding a retired placement id loads");
+            Check(!loaded.CanHarvest(retiredId), "the retired node is gone, not resurrected", retiredId);
+            Check(loaded.GetState().resources.size() == trimmed.placements.size(), "every other node is intact");
+        }
+        Check(WithinTravelReachOfRoad(estateLayout.PointOr(Anchor::StandingRoomSpawn, {})), "the manor is within reach of the road");
+        for (const char* anchor : {Anchor::TownSquare, Anchor::MineEntrance, Anchor::CoveBeach, Anchor::MillSite, Anchor::EstateGateway})
+            Check(WithinTravelReachOfRoad(estateLayout.PointOr(anchor, {})), anchor);
+        Check(!WithinTravelReachOfRoad({-54000.0, 115000.0}), "the old town site is out of the road's reach");
     }
     std::printf("forage: %d new estate brambles, %d roadside nodes (%d brambles, to %.0f m), %zu brambles in all\n",
         estateBrambles, roadsideNodes, roadsideBrambles, farthest, brambles.size());

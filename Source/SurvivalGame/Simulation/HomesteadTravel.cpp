@@ -118,6 +118,12 @@ std::string FormatWalkDuration(double gameHours)
     return std::to_string(hours) + " h" + (rest ? " " + std::to_string(rest) + " min" : std::string());
 }
 
+bool WithinTravelReachOfRoad(Point at)
+{
+    const PublicRoad& road = EstatePublicRoad();
+    return road.points.size() >= 2 && road.NearestTo(at).distanceCm <= TravelMaxConnectorCm;
+}
+
 TravelPlan PlanTravel(const State& state, Point from, TravelDestination destination, const EstateLayout& layout)
 {
     TravelPlan plan;
