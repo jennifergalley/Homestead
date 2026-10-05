@@ -1,0 +1,714 @@
+{
+ "recipe": "Scripts/Blender/Recipes/clerk_outfit.py",
+ "seed": 20261004,
+ "date": "2026-10-04",
+ "blender": "5.2.1 LTS",
+ "inputs": {
+  "SKM_MHC_Clerk_BodyMesh_Full.fbx": "103c45f3ca903f272d08f2710d9f4e63bc6db2dc004edc669ed47e67f84fb9da",
+  "SKM_MHC_Clerk_FaceMesh.fbx": "7765d878d803a6ca26ea3b3f54e219c116ed6f77a98188146131772459873fe7"
+ },
+ "garments": {
+  "SKM_ClerkBoots": {
+   "vertices": 6142,
+   "triangles": 12490,
+   "bones_weighted": 30,
+   "textures": {
+    "basecolor": "T_ClerkBoots_basecolor.png",
+    "normal": "T_ClerkBoots_normal.png",
+    "roughness": "T_ClerkBoots_roughness.png",
+    "ao": "T_ClerkBoots_ao.png"
+   }
+  },
+  "SKM_ClerkTrousers": {
+   "vertices": 15514,
+   "triangles": 31032,
+   "bones_weighted": 44,
+   "parts": 0,
+   "shell_vertices": 15514,
+   "texel_uv_per_m": 0.7302158856004513,
+   "textures": {
+    "basecolor": "T_ClerkTrousers_basecolor.png",
+    "normal": "T_ClerkTrousers_normal.png",
+    "roughness": "T_ClerkTrousers_roughness.png",
+    "ao": "T_ClerkTrousers_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.3021826446056366,
+    "albedo_mean": [
+     0.03248870372772217,
+     0.027128180488944054,
+     0.021322593092918396
+    ],
+    "rough_mean": 0.9228872656822205,
+    "px_per_cm": 14.954821337097242,
+    "resolution": 2048
+   },
+   "air_gap_mm_median": 9.84,
+   "air_gap_mm_min": 2.97
+  },
+  "SKM_ClerkShirt": {
+   "vertices": 16624,
+   "triangles": 33256,
+   "bones_weighted": 57,
+   "parts": 8,
+   "shell_vertices": 15088,
+   "texel_uv_per_m": 0.9011022113017187,
+   "textures": {
+    "basecolor": "T_ClerkShirt_basecolor.png",
+    "normal": "T_ClerkShirt_normal.png",
+    "roughness": "T_ClerkShirt_roughness.png",
+    "ao": "T_ClerkShirt_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.7400000095367432,
+    "albedo_mean": [
+     0.6273977160453796,
+     0.5731099247932434,
+     0.46029573678970337
+    ],
+    "rough_mean": 0.887939989566803,
+    "px_per_cm": 18.4545732874592,
+    "resolution": 2048
+   },
+   "air_gap_mm_median": 10.39,
+   "air_gap_mm_min": 2.92,
+   "rolled_sleeves": [
+    {
+     "side": "l",
+     "s_end": 0.33,
+     "elbow_s": 0.2804
+    },
+    {
+     "side": "r",
+     "s_end": 0.33,
+     "elbow_s": 0.2805
+    }
+   ]
+  },
+  "SKM_ClerkWaistcoat": {
+   "vertices": 9790,
+   "triangles": 19560,
+   "bones_weighted": 43,
+   "parts": 6,
+   "shell_vertices": 9562,
+   "texel_uv_per_m": 0.8525802275807808,
+   "textures": {
+    "basecolor": "T_ClerkWaistcoat_basecolor.png",
+    "normal": "T_ClerkWaistcoat_normal.png",
+    "roughness": "T_ClerkWaistcoat_roughness.png",
+    "ao": "T_ClerkWaistcoat_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.3021826446056366,
+    "albedo_mean": [
+     0.04086855798959732,
+     0.021536357700824738,
+     0.011373598128557205
+    ],
+    "rough_mean": 0.9217115640640259,
+    "px_per_cm": 17.46084306085439,
+    "resolution": 2048
+   },
+   "air_gap_mm_median": 13.89,
+   "air_gap_mm_min": 3.98
+  },
+  "SKM_ClerkNeckerchief": {
+   "vertices": 654,
+   "triangles": 1296,
+   "bones_weighted": 14,
+   "parts": 3,
+   "shell_vertices": 480,
+   "texel_uv_per_m": 2.7122815666668476,
+   "textures": {
+    "basecolor": "T_ClerkNeckerchief_basecolor.png",
+    "normal": "T_ClerkNeckerchief_normal.png",
+    "roughness": "T_ClerkNeckerchief_roughness.png",
+    "ao": "T_ClerkNeckerchief_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.2859915792942047,
+    "albedo_mean": [
+     0.23189301788806915,
+     0.040736064314842224,
+     0.025191308930516243
+    ],
+    "rough_mean": 0.8876664042472839,
+    "px_per_cm": 27.77376324266852,
+    "resolution": 1024
+   },
+   "air_gap_mm_median": 12.34,
+   "air_gap_mm_min": 5.79
+  },
+  "SKM_ClerkApron": {
+   "vertices": 6080,
+   "triangles": 12128,
+   "bones_weighted": 50,
+   "parts": 6,
+   "shell_vertices": 4898,
+   "texel_uv_per_m": 0.9037806159246538,
+   "textures": {
+    "basecolor": "T_ClerkApron_basecolor.png",
+    "normal": "T_ClerkApron_normal.png",
+    "roughness": "T_ClerkApron_roughness.png",
+    "ao": "T_ClerkApron_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.38756442070007324,
+    "albedo_mean": [
+     0.30480286478996277,
+     0.2526838779449463,
+     0.16156037151813507
+    ],
+    "rough_mean": 0.8882597088813782,
+    "px_per_cm": 18.509427014136907,
+    "resolution": 2048
+   },
+   "air_gap_mm_median": 72.39,
+   "air_gap_mm_min": 20.2
+  }
+ },
+ "total_garment_triangles": 109762,
+ "pencil": {
+  "vertices": 32,
+  "triangles": 60,
+  "fit": {
+   "attach_bone": "head",
+   "units": "cm / degrees",
+   "note": "Pencil (long axis +X, pivot at the middle, sharpened end +X) resting on top of his right ear between ear and skull, tip forward and tilted ~12 deg down. 'relative_to_head_bone' is in the Blender head bone's rest frame; verify the socket in the editor.",
+   "relative_to_head_bone": {
+    "location_cm": [
+     6.359,
+     1.606,
+     10.467
+    ],
+    "rotation_euler_xyz_deg": [
+     0.0,
+     0.0,
+     -102.0
+    ],
+    "rotation_quat_wxyz": [
+     0.62932,
+     0.0,
+     -0.0,
+     -0.77715
+    ]
+   },
+   "world_bind": {
+    "location_cm": [
+     -10.479,
+     0.374,
+     168.188
+    ],
+    "axis_x": [
+     0.0,
+     -0.9781,
+     -0.2079
+    ],
+    "axis_z": [
+     -1.0,
+     0.0,
+     0.0
+    ]
+   },
+   "unreal_component_space_guess": {
+    "location_cm": [
+     -10.479,
+     -0.374,
+     168.188
+    ],
+    "pencil_axis": [
+     0.0,
+     0.9781,
+     -0.2079
+    ],
+    "note": "Y negated for Unreal (verify in editor)"
+   },
+   "ear_top_cm": [
+    -9.48,
+    0.37,
+    168.59
+   ],
+   "min_clearance_mm": 6.0
+  },
+  "textures": {
+   "basecolor": "T_ClerkPencil_basecolor.png",
+   "normal": "T_ClerkPencil_normal.png",
+   "roughness": "T_ClerkPencil_roughness.png",
+   "ao": "T_ClerkPencil_ao.png"
+  }
+ },
+ "exports": {
+  "SKM_ClerkBoots": {
+   "path": "Assets/Characters/ClerkClothing/ClerkBoots/SKM_ClerkBoots.fbx",
+   "bones": 35
+  },
+  "SKM_ClerkTrousers": {
+   "path": "Assets/Characters/ClerkClothing/ClerkTrousers/SKM_ClerkTrousers.fbx",
+   "bones": 64
+  },
+  "SKM_ClerkShirt": {
+   "path": "Assets/Characters/ClerkClothing/ClerkShirt/SKM_ClerkShirt.fbx",
+   "bones": 76
+  },
+  "SKM_ClerkWaistcoat": {
+   "path": "Assets/Characters/ClerkClothing/ClerkWaistcoat/SKM_ClerkWaistcoat.fbx",
+   "bones": 58
+  },
+  "SKM_ClerkNeckerchief": {
+   "path": "Assets/Characters/ClerkClothing/ClerkNeckerchief/SKM_ClerkNeckerchief.fbx",
+   "bones": 25
+  },
+  "SKM_ClerkApron": {
+   "path": "Assets/Characters/ClerkClothing/ClerkApron/SKM_ClerkApron.fbx",
+   "bones": 67
+  }
+ },
+ "coverage_masks": {
+  "SKM_ClerkShirt": {
+   "path": "BodyCoverageMask_ClerkShirt.png",
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 10909,
+   "total_triangles": 60816,
+   "covered_vertices": 5887,
+   "per_garment_triangles": {
+    "SKM_ClerkShirt": 10909
+   },
+   "margin_m": 0.012
+  },
+  "SKM_ClerkWaistcoat": {
+   "path": "BodyCoverageMask_ClerkWaistcoat.png",
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 5403,
+   "total_triangles": 60816,
+   "covered_vertices": 3078,
+   "per_garment_triangles": {
+    "SKM_ClerkWaistcoat": 5403
+   },
+   "margin_m": 0.012
+  },
+  "SKM_ClerkTrousers": {
+   "path": "BodyCoverageMask_ClerkTrousers.png",
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 12174,
+   "total_triangles": 60816,
+   "covered_vertices": 6471,
+   "per_garment_triangles": {
+    "SKM_ClerkTrousers": 12174
+   },
+   "margin_m": 0.012
+  },
+  "SKM_ClerkApron": {
+   "path": "BodyCoverageMask_ClerkApron.png",
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 853,
+   "total_triangles": 60816,
+   "covered_vertices": 476,
+   "per_garment_triangles": {
+    "SKM_ClerkApron": 853
+   },
+   "margin_m": 0.012
+  },
+  "SKM_ClerkBoots": {
+   "path": "BodyCoverageMask_ClerkBoots.png",
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 11882,
+   "total_triangles": 60816,
+   "covered_vertices": 6666,
+   "per_garment_triangles": {
+    "SKM_ClerkBoots": 11882
+   },
+   "margin_m": 0.012
+  }
+ },
+ "counter_pose_hands": {
+  "l": [
+   0.162,
+   -0.389,
+   1.126
+  ],
+  "r": [
+   -0.162,
+   -0.389,
+   1.126
+  ]
+ },
+ "pose_metrics": {
+  "bind": {
+   "body": {
+    "SKM_ClerkBoots": {
+     "verts": 6142,
+     "inside": 15,
+     "inside_pct": 0.24422012373819602,
+     "inside_near_edge": 0,
+     "max_depth_mm": 3.1450492634920955,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkTrousers": {
+     "verts": 15514,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "inside_near_edge": 0,
+     "max_depth_mm": 0.0,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkShirt": {
+     "verts": 16624,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "inside_near_edge": 0,
+     "max_depth_mm": 0.0,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkWaistcoat": {
+     "verts": 9790,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "inside_near_edge": 0,
+     "max_depth_mm": 0.0,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkNeckerchief": {
+     "verts": 654,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "inside_near_edge": 0,
+     "max_depth_mm": 0.0,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkApron": {
+     "verts": 6080,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "inside_near_edge": 0,
+     "max_depth_mm": 0.0,
+     "p99_depth_mm": 0.0
+    }
+   },
+   "layers": {
+    "SKM_ClerkWaistcoat>SKM_ClerkShirt": {
+     "checked": 9790,
+     "inside": 3,
+     "inside_pct": 0.030643513789581203,
+     "max_depth_mm": 8.499781118116823
+    },
+    "SKM_ClerkApron>SKM_ClerkWaistcoat": {
+     "checked": 6080,
+     "inside": 92,
+     "inside_pct": 1.513157894736842,
+     "max_depth_mm": 4.424404068559962
+    },
+    "SKM_ClerkApron>SKM_ClerkTrousers": {
+     "checked": 6080,
+     "inside": 21,
+     "inside_pct": 0.34539473684210525,
+     "max_depth_mm": 17.69285058652376
+    },
+    "SKM_ClerkApron>SKM_ClerkShirt": {
+     "checked": 6080,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_ClerkShirt>SKM_ClerkTrousers": {
+     "checked": 16624,
+     "inside": 1376,
+     "inside_pct": 8.277189605389799,
+     "max_depth_mm": 220.66499697455893
+    },
+    "SKM_ClerkWaistcoat>SKM_ClerkTrousers": {
+     "checked": 9790,
+     "inside": 8,
+     "inside_pct": 0.08171603677221655,
+     "max_depth_mm": 7.794870022102683
+    },
+    "SKM_ClerkNeckerchief>SKM_ClerkShirt": {
+     "checked": 654,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_ClerkTrousers>SKM_ClerkBoots": {
+     "checked": 15514,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    }
+   }
+  },
+  "counter": {
+   "body": {
+    "SKM_ClerkBoots": {
+     "verts": 6142,
+     "inside": 15,
+     "inside_pct": 0.24422012373819602,
+     "inside_near_edge": 0,
+     "max_depth_mm": 3.1450492634920955,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkTrousers": {
+     "verts": 15514,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "inside_near_edge": 0,
+     "max_depth_mm": 0.25431630746846795,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkShirt": {
+     "verts": 16624,
+     "inside": 480,
+     "inside_pct": 2.8873917228103942,
+     "inside_near_edge": 0,
+     "max_depth_mm": 17.717345882960526,
+     "p99_depth_mm": 6.60235254994019
+    },
+    "SKM_ClerkWaistcoat": {
+     "verts": 9790,
+     "inside": 276,
+     "inside_pct": 2.8192032686414707,
+     "inside_near_edge": 59,
+     "max_depth_mm": 17.967952282500118,
+     "p99_depth_mm": 8.463553185858837
+    },
+    "SKM_ClerkNeckerchief": {
+     "verts": 654,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "inside_near_edge": 0,
+     "max_depth_mm": 0.0,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkApron": {
+     "verts": 6080,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "inside_near_edge": 0,
+     "max_depth_mm": 0.0,
+     "p99_depth_mm": 0.0
+    }
+   },
+   "layers": {
+    "SKM_ClerkWaistcoat>SKM_ClerkShirt": {
+     "checked": 9790,
+     "inside": 365,
+     "inside_pct": 3.7282941777323804,
+     "max_depth_mm": 20.139422537791813
+    },
+    "SKM_ClerkApron>SKM_ClerkWaistcoat": {
+     "checked": 6080,
+     "inside": 84,
+     "inside_pct": 1.381578947368421,
+     "max_depth_mm": 4.214331724267004
+    },
+    "SKM_ClerkApron>SKM_ClerkTrousers": {
+     "checked": 6080,
+     "inside": 240,
+     "inside_pct": 3.9473684210526314,
+     "max_depth_mm": 211.40166642009655
+    },
+    "SKM_ClerkApron>SKM_ClerkShirt": {
+     "checked": 6080,
+     "inside": 18,
+     "inside_pct": 0.2960526315789474,
+     "max_depth_mm": 5.095052818872518
+    },
+    "SKM_ClerkShirt>SKM_ClerkTrousers": {
+     "checked": 16624,
+     "inside": 1728,
+     "inside_pct": 10.39461020211742,
+     "max_depth_mm": 222.31186583277383
+    },
+    "SKM_ClerkWaistcoat>SKM_ClerkTrousers": {
+     "checked": 9790,
+     "inside": 536,
+     "inside_pct": 5.4749744637385085,
+     "max_depth_mm": 218.14543294344762
+    },
+    "SKM_ClerkNeckerchief>SKM_ClerkShirt": {
+     "checked": 654,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_ClerkTrousers>SKM_ClerkBoots": {
+     "checked": 15514,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    }
+   }
+  },
+  "walk": {
+   "body": {
+    "SKM_ClerkBoots": {
+     "verts": 6142,
+     "inside": 15,
+     "inside_pct": 0.24422012373819602,
+     "inside_near_edge": 0,
+     "max_depth_mm": 3.14504676300594,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkTrousers": {
+     "verts": 15514,
+     "inside": 2,
+     "inside_pct": 0.012891581797086502,
+     "inside_near_edge": 2,
+     "max_depth_mm": 2.061829090022098,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkShirt": {
+     "verts": 16624,
+     "inside": 498,
+     "inside_pct": 2.9956689124157845,
+     "inside_near_edge": 0,
+     "max_depth_mm": 16.69068267245023,
+     "p99_depth_mm": 6.807459265795923
+    },
+    "SKM_ClerkWaistcoat": {
+     "verts": 9790,
+     "inside": 286,
+     "inside_pct": 2.9213483146067416,
+     "inside_near_edge": 49,
+     "max_depth_mm": 16.40305070495265,
+     "p99_depth_mm": 8.5097292921206
+    },
+    "SKM_ClerkNeckerchief": {
+     "verts": 654,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "inside_near_edge": 0,
+     "max_depth_mm": 0.0,
+     "p99_depth_mm": 0.0
+    },
+    "SKM_ClerkApron": {
+     "verts": 6080,
+     "inside": 3,
+     "inside_pct": 0.049342105263157895,
+     "inside_near_edge": 3,
+     "max_depth_mm": 55.55909688797658,
+     "p99_depth_mm": 0.0
+    }
+   },
+   "layers": {
+    "SKM_ClerkWaistcoat>SKM_ClerkShirt": {
+     "checked": 9790,
+     "inside": 403,
+     "inside_pct": 4.116445352400409,
+     "max_depth_mm": 23.17947551836478
+    },
+    "SKM_ClerkApron>SKM_ClerkWaistcoat": {
+     "checked": 6080,
+     "inside": 90,
+     "inside_pct": 1.4802631578947367,
+     "max_depth_mm": 72.58072169962408
+    },
+    "SKM_ClerkApron>SKM_ClerkTrousers": {
+     "checked": 6080,
+     "inside": 78,
+     "inside_pct": 1.2828947368421053,
+     "max_depth_mm": 196.38871872217535
+    },
+    "SKM_ClerkApron>SKM_ClerkShirt": {
+     "checked": 6080,
+     "inside": 3,
+     "inside_pct": 0.049342105263157895,
+     "max_depth_mm": 65.69585735972298
+    },
+    "SKM_ClerkShirt>SKM_ClerkTrousers": {
+     "checked": 16624,
+     "inside": 145,
+     "inside_pct": 0.8722329162656399,
+     "max_depth_mm": 131.88101301683892
+    },
+    "SKM_ClerkWaistcoat>SKM_ClerkTrousers": {
+     "checked": 9790,
+     "inside": 3,
+     "inside_pct": 0.030643513789581203,
+     "max_depth_mm": 8.050460495896132
+    },
+    "SKM_ClerkNeckerchief>SKM_ClerkShirt": {
+     "checked": 654,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_ClerkTrousers>SKM_ClerkBoots": {
+     "checked": 15514,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    }
+   }
+  }
+ },
+ "previews": [
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\clerk_front.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\clerk_q34.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\clerk_side.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\clerk_back.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\clerk_torso_front.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\clerk_torso_q34.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\clerk_head_right.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\clerk_head_q34.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\counter_pose_front.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\counter_pose_q34.png",
+  "E:\\CopilotScratch\\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\\clerk_garments\\previews\\counter_pose_side.png"
+ ],
+ "files": {
+  "ClerkApron/BodyCoverageMask_ClerkApron.png": "2b99ad64fe15f4e2a8f18647ac6c6741605a1c69c5c68d1def17afab26b84820",
+  "ClerkApron/SKM_ClerkApron.fbx": "dce383065e957d8e5103cbf9f5fccdab42efeca81f330b23b4c09a4e646f966a",
+  "ClerkApron/Textures/T_ClerkApron_ao.png": "b4cf55150112572cae3162c77eb0f46013131a2131443e43d8803a546028f66e",
+  "ClerkApron/Textures/T_ClerkApron_basecolor.png": "7b9947a9e1352f37eecc35e9da428610b14b68e731b916cb0f3d6282b60267da",
+  "ClerkApron/Textures/T_ClerkApron_normal.png": "865edba1d22a214efa2455012811153682234ef8853b97fc11fdebeaa5190840",
+  "ClerkApron/Textures/T_ClerkApron_roughness.png": "1d5d037db19947d82934e24194990cdeb1171d320dfe954138744ac85d8a2040",
+  "ClerkBoots/BodyCoverageMask_ClerkBoots.png": "845ed58535a011f81d94d9aba1917d76e27faf386888a61338620301eb403d02",
+  "ClerkBoots/SKM_ClerkBoots.fbx": "35b5e45d46cb19fede99bcd25246c60ea4f92f9828210d14291da5c7702fd896",
+  "ClerkBoots/Textures/T_ClerkBoots_ao.png": "0d88fa0151fa13079e8f639ba874f72f4acd427422e42160707587cc1dfa6d17",
+  "ClerkBoots/Textures/T_ClerkBoots_basecolor.png": "010e42658bb35edbb08c7934838351e52fb43799ab4406f7f10d903f9032e038",
+  "ClerkBoots/Textures/T_ClerkBoots_normal.png": "c0f9a5d69ba5ebcdbb75b5baec13b1318d12a4f62bb44335a2a30d76dc876218",
+  "ClerkBoots/Textures/T_ClerkBoots_roughness.png": "5e79e7d2ca11df7184629ab54c5787a2fc3bfebf956d93f18930b9bc419f0019",
+  "ClerkNeckerchief/SKM_ClerkNeckerchief.fbx": "039e02acbc90c0acb579e77caa7c5ce1df06547601ada9bf5094a0f88d62b440",
+  "ClerkNeckerchief/Textures/T_ClerkNeckerchief_ao.png": "ce033c8903bd469cbda9aacac7912499155497e9d00559ec8eae2114c3fe89a9",
+  "ClerkNeckerchief/Textures/T_ClerkNeckerchief_basecolor.png": "db776c79e7e8f496513b547d42b3b6d48c758ef0ded180b0ced4e3c6c3c1e09f",
+  "ClerkNeckerchief/Textures/T_ClerkNeckerchief_normal.png": "81347531ad661b58ff52c296bdf0bc890a5144915043dfd539ba4a909bf22e56",
+  "ClerkNeckerchief/Textures/T_ClerkNeckerchief_roughness.png": "badbf21aef091de4054d437d1f4066cea29e10b21cf4a2ed89a2597e401a4f36",
+  "ClerkPencil/clerk_pencil_fit.json": "d9aafb963735d5d7911d9bb405643eaac74697598c0b2a30a7e156b3a67f086c",
+  "ClerkPencil/SM_ClerkPencil.fbx": "2bc5558d99d8aa63b1bf9928221356e903fa888eeaffed374ad470f5896faa4e",
+  "ClerkPencil/Textures/T_ClerkPencil_ao.png": "85a0969f7caaaa349e1d0fb080f2665d8b2f2735639ff292d875582cb56ac73b",
+  "ClerkPencil/Textures/T_ClerkPencil_basecolor.png": "5c4742f4e6d7ee90e6d9a2a17d215acdbdac3752decb881ea99ed652aa88a02e",
+  "ClerkPencil/Textures/T_ClerkPencil_normal.png": "2e30e2b33c852f5e050537fd5b98da7c7027c0e54a9caf9a3dee9afa897a3a3f",
+  "ClerkPencil/Textures/T_ClerkPencil_roughness.png": "49ca41012e401b806d1d2aa94d1b8611009da12746589926414bf810dd47b265",
+  "ClerkShirt/BodyCoverageMask_ClerkShirt.png": "55d9b13b3b2a20a2207fd6c7fbd39ad300e3705940cb67970eab14c5c487c827",
+  "ClerkShirt/SKM_ClerkShirt.fbx": "f4b2bb9207d78c42d22515dbf626484dd9dbbfb6b7623ab0399946fc35596553",
+  "ClerkShirt/Textures/T_ClerkShirt_ao.png": "40c86daa0d40f13208e19eb2b849c04d98c988602ce1c56883a28a22c4e3d556",
+  "ClerkShirt/Textures/T_ClerkShirt_basecolor.png": "3429802829ee0a4dbfdcc70dbe4d4618aff719f12a4d8141a7f2e6249dd18a1f",
+  "ClerkShirt/Textures/T_ClerkShirt_normal.png": "78d44b4f6f712f5649976854efbaa4683b82e69c61baacb40ebcccab0bf7ef18",
+  "ClerkShirt/Textures/T_ClerkShirt_roughness.png": "052ed544c80346f71fd51736385537859d56e1639939fc2c7c7df91f7a6dbb7c",
+  "ClerkTrousers/BodyCoverageMask_ClerkTrousers.png": "38368ea17060c2e703a88d9e43c736032512c3ab57246256d6ff7c019fe8fdf9",
+  "ClerkTrousers/SKM_ClerkTrousers.fbx": "49ab254f6c51f0d07ed4d4133297941bd4e59a4f24b187bb16a3ce6335f7ba1a",
+  "ClerkTrousers/Textures/T_ClerkTrousers_ao.png": "ffdd0ec9c48e80a562ace8d10ab95cc4e8d3385a8a3fc522bf9586b2157795fc",
+  "ClerkTrousers/Textures/T_ClerkTrousers_basecolor.png": "02b67516bf08df9e85a2395236ea6eb53c32ba5041a4a4144c0c9d2be6283db1",
+  "ClerkTrousers/Textures/T_ClerkTrousers_normal.png": "787be2b22eb2d374fbd02cf5ffb3ea2506df25c01113c7e1f233a4586c67cc84",
+  "ClerkTrousers/Textures/T_ClerkTrousers_roughness.png": "a70e1ff534b5972469bc7802b223cae3e02281eb206ae6aedf3b5251b2515b8a",
+  "ClerkWaistcoat/BodyCoverageMask_ClerkWaistcoat.png": "2102aacf2bcb4bf02694b351be0aba19a9127d06057b2b4484292fda79a3b828",
+  "ClerkWaistcoat/SKM_ClerkWaistcoat.fbx": "46fc6842a31c576d118fcfa141665a232da3d8cc9b326ac4295e9870b00ae9dd",
+  "ClerkWaistcoat/Textures/T_ClerkWaistcoat_ao.png": "2c718fc03b888379316689d267143fef59f51fb02513ad1380595ef09c5c4e54",
+  "ClerkWaistcoat/Textures/T_ClerkWaistcoat_basecolor.png": "4b2c1cf94de7d9378c3b640a51e3eb8ca1180d9e204d6ce699b6c3521c2b9fed",
+  "ClerkWaistcoat/Textures/T_ClerkWaistcoat_normal.png": "d44b959aee52cfec4abbdcdde257ff8b9b262f786f9d3ec5a66e73e59b8b7631",
+  "ClerkWaistcoat/Textures/T_ClerkWaistcoat_roughness.png": "b5c73bec3dad4734de31ecbb04946ce4a549c1ae0d203a45f6078c69c854331a"
+ }
+}

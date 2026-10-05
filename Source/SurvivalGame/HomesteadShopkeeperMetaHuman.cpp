@@ -30,6 +30,24 @@ const TCHAR* const GarmentNames[] = {
     TEXT("SKM_ClerkWaistcoat"), TEXT("SKM_ClerkNeckerchief"), TEXT("SKM_ClerkApron")};
 const TCHAR* const PencilMesh = TEXT("Assembled/Clerk/Garments/SM_ClerkPencil");
 const FName PencilBone(TEXT("head"));
+// Pencil resting on his right ear in his bind pose, in component space (cm; +Y forward, his left +X):
+// Assets/Characters/ClerkClothing/ClerkPencil/clerk_pencil_fit.json, Y negated from Blender. Its
+// long axis (mesh +X) points forward and ~15 degrees down.
+const FVector PencilBindLocation(-10.179, -0.674, 168.538);
+const FVector PencilBindAxisX(0.0, 0.9659, -0.2588);
+const FVector PencilBindAxisZ(-1.0, 0.0, 0.0);
+
+// The pencil's transform relative to the head bone, from its component-space bind transform and the
+// head bone's reference pose, so it follows his head through the idle.
+FTransform PencilRelativeToHead(const USkeletalMesh& Mesh)
+{
+    const FReferenceSkeleton& Skeleton = Mesh.GetRefSkeleton();
+    FTransform HeadBind = FTransform::Identity;
+    for (int32 Bone = Skeleton.FindBoneIndex(PencilBone); Bone != INDEX_NONE; Bone = Skeleton.GetParentIndex(Bone))
+        HeadBind = HeadBind * Skeleton.GetRefBonePose()[Bone];
+    const FTransform Bind(FRotationMatrix::MakeFromXZ(PencilBindAxisX, PencilBindAxisZ).ToQuat(), PencilBindLocation);
+    return Bind.GetRelativeTransform(HeadBind);
+}
 
 struct FGroomSpec
 {
@@ -130,11 +148,10 @@ bool AHomesteadShopkeeper::BuildMetaHuman()
 
     if (UStaticMesh* PencilAsset = Load<UStaticMesh>(PencilMesh))
     {
-        // Fitted in Blender against his head (Assets/Characters/ClerkClothing/clerk_pencil_fit.json).
         Pencil = NewObject<UStaticMeshComponent>(this, TEXT("Pencil"));
         Pencil->SetupAttachment(Body, PencilBone);
         Pencil->SetStaticMesh(PencilAsset);
-        Pencil->SetRelativeTransform(FTransform::Identity);
+        Pencil->SetRelativeTransform(PencilRelativeToHead(*BodyMesh));
         Pencil->SetCollisionEnabled(ECollisionEnabled::NoCollision);
         Pencil->SetGenerateOverlapEvents(false);
         Pencil->bUseAttachParentBound = true;

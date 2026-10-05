@@ -1,0 +1,59 @@
+{
+  "attach_bone": "head",
+  "units": "cm / degrees",
+  "note": "Pencil (long axis +X, pivot at the middle, sharpened end +X) resting on top of his right ear between ear and skull, tip forward and tilted ~12 deg down. 'relative_to_head_bone' is in the Blender head bone's rest frame; verify the socket in the editor.",
+  "relative_to_head_bone": {
+    "location_cm": [
+      6.359,
+      1.606,
+      10.467
+    ],
+    "rotation_euler_xyz_deg": [
+      0.0,
+      0.0,
+      -102.0
+    ],
+    "rotation_quat_wxyz": [
+      0.62932,
+      0.0,
+      -0.0,
+      -0.77715
+    ]
+  },
+  "world_bind": {
+    "location_cm": [
+      -10.479,
+      0.374,
+      168.188
+    ],
+    "axis_x": [
+      0.0,
+      -0.9781,
+      -0.2079
+    ],
+    "axis_z": [
+      -1.0,
+      0.0,
+      0.0
+    ]
+  },
+  "unreal_component_space_guess": {
+    "location_cm": [
+      -10.479,
+      -0.374,
+      168.188
+    ],
+    "pencil_axis": [
+      0.0,
+      0.9781,
+      -0.2079
+    ],
+    "note": "Y negated for Unreal (verify in editor)"
+  },
+  "ear_top_cm": [
+    -9.48,
+    0.37,
+    168.59
+  ],
+  "min_clearance_mm": 6.0
+}
