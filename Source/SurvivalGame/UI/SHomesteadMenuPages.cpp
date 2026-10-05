@@ -1,5 +1,6 @@
 #include "SHomesteadMenuPrivate.h"
 #include "SHomesteadCellBorder.h"
+#include "SHomesteadFrame.h"
 #include "HomesteadUITheme.h"
 #include "../Simulation/HomesteadPackRow.h"
 
@@ -321,20 +322,27 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
         [
             SNew(SBox).WidthOverride(PortraitColumnWidth()).Clipping(EWidgetClipping::ClipToBounds)
             [
-                SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(2).BorderBackgroundColor(MenuPine)
+                SNew(SHomesteadFrame).Grand(true)
                 [
-                    SNew(SScaleBox).Stretch(EStretch::ScaleToFit).HAlign(HAlign_Center).VAlign(VAlign_Center)
-                    [ SNew(SImage).Image_Lambda([this]() { return Controller.IsValid() ? Controller->MenuPortraitBrush() : nullptr; }) ]
+                    SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).Padding(10).BorderBackgroundColor(MenuPine)
+                    [
+                        SNew(SScaleBox).Stretch(EStretch::ScaleToFit).HAlign(HAlign_Center).VAlign(VAlign_Center)
+                        [ SNew(SImage).Image_Lambda([this]() { return Controller.IsValid() ? Controller->MenuPortraitBrush() : nullptr; }) ]
+                    ]
                 ]
             ]
         ];
     }
     TSharedPtr<SVerticalBox> InventoryColumn;
-    const auto InventoryPanel = SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(MenuPine).Padding(12)
-        .Clipping(EWidgetClipping::ClipToBounds)
+    const TSharedRef<SBorder> InventoryBorder = SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(MenuPine)
+        .Padding(SeenPage == 0 ? 18 : 12).Clipping(EWidgetClipping::ClipToBounds)
         [
             SAssignNew(InventoryColumn, SVerticalBox)
         ];
+    // The pack (and a chest's page) is a showpiece panel; the other pages keep their plain backing.
+    const TSharedRef<SWidget> InventoryPanel = SeenPage == 0
+        ? StaticCastSharedRef<SWidget>(SNew(SHomesteadFrame).Grand(true)[ InventoryBorder ])
+        : StaticCastSharedRef<SWidget>(InventoryBorder);
     if (PackOnly) ColumnsBox->AddSlot().FillWidth(1)[ InventoryPanel ];
     // Appearance is a narrow column at the left; she stands in the world to its right.
     else if (SeenPage == 6) ColumnsBox->AddSlot().AutoWidth()[ SNew(SBox).WidthOverride(AppearancePanelWidth)[ InventoryPanel ] ];

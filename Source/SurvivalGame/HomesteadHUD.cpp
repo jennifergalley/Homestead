@@ -105,11 +105,12 @@ void AHomesteadHUD::Panel(float X, float Y, float Width, float Height, FLinearCo
     DrawRect(Color, X * UiScale, Y * UiScale, Width * UiScale, Height * UiScale);
 }
 
-void AHomesteadHUD::DrawFrame(float X, float Y, float Width, float Height)
+void AHomesteadHUD::DrawFrame(float X, float Y, float Width, float Height, bool bGrand)
 {
-    HomesteadFrameStyle::ForEachRect(Width, Height,
-        [this, X, Y](HomesteadFrameStyle::EPart Part, float PartX, float PartY, float PartW, float PartH)
-        { Panel(X + PartX, Y + PartY, PartW, PartH, HomesteadFrameStyle::ColorOf(Part)); });
+    const auto Draw = [this, X, Y](HomesteadFrameStyle::EPart Part, float PartX, float PartY, float PartW, float PartH)
+    { Panel(X + PartX, Y + PartY, PartW, PartH, HomesteadFrameStyle::ColorOf(Part)); };
+    if (bGrand) HomesteadFrameStyle::ForEachGrandRect(Width, Height, Draw);
+    else HomesteadFrameStyle::ForEachRect(Width, Height, Draw);
 }
 
 namespace
@@ -267,7 +268,7 @@ void AHomesteadHUD::DrawCalendar(const AHomesteadController& PC, float X, float 
     else if (bNight) MoonIcon(IconX, IconY, 11, MoonCream, Solid);
     else SunIcon(IconX, IconY, 9, HudGold);
     Write(bRain ? TEXT("Rain") : bNight ? TEXT("Clear") : TEXT("Sunny"), IconX + 28, Y + 56, 21, Muted);
-    DrawFrame(X, Y, Width, Height);
+    DrawFrame(X, Y, Width, Height, true);
 }
 
 TArray<FString> AHomesteadHUD::WrappedLines(const FString& Text, float Width, float Size)

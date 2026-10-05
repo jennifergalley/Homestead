@@ -1,5 +1,6 @@
 #include "SHomesteadMenu.h"
 #include "HomesteadUITheme.h"
+#include "SHomesteadFrame.h"
 #include "../HomesteadController.h"
 #include "SHomesteadMenuPrivate.h"
 
@@ -130,8 +131,10 @@ void SHomesteadMenu::BuildFrame()
     // page beneath (Jenny, 2026-09-30: no offset).
     TabBar->AddSlot().AutoWidth()
     [
+        SNew(SHomesteadFrame)
+        [
         SNew(SBorder).BorderImage(FCoreStyle::Get().GetBrush("WhiteBrush")).BorderBackgroundColor(MenuPine)
-        .Padding(FMargin(12, 4)).VAlign(VAlign_Center)
+        .Padding(FMargin(12, 6)).VAlign(VAlign_Center)
         [
         SNew(SBox).WidthOverride(145)
         [
@@ -148,6 +151,7 @@ void SHomesteadMenu::BuildFrame()
                     FMath::FloorToInt(Hour), FMath::FloorToInt((Hour - FMath::FloorToInt(Hour)) * 60),
                     Controller->Simulation().IsRaining() ? TEXT("Rain") : bNight ? TEXT("Clear") : TEXT("Sunny")));
             })
+        ]
         ]
         ]
     ];

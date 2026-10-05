@@ -12,11 +12,16 @@ namespace HomesteadMenus
 class SHomesteadFrame : public SCompoundWidget
 {
 public:
-    SLATE_BEGIN_ARGS(SHomesteadFrame) {}
+    SLATE_BEGIN_ARGS(SHomesteadFrame) : _Grand(false) {}
+        SLATE_ARGUMENT(bool, Grand)
         SLATE_DEFAULT_SLOT(FArguments, Content)
     SLATE_END_ARGS()
     void Construct(const FArguments& Args);
     virtual int32 OnPaint(const FPaintArgs& Paint, const FGeometry& Geometry, const FSlateRect& CullingRect,
         FSlateWindowElementList& Out, int32 LayerId, const FWidgetStyle& Style, bool bParentEnabled) const override;
+
+private:
+    // The heavier frame for the pack, portrait and calendar panels (HomesteadFrameStyle::ForEachGrandRect).
+    bool bGrand = false;
 };
 }

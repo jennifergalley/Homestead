@@ -9,6 +9,7 @@ namespace HomesteadMenus
 void SHomesteadFrame::Construct(const FArguments& Args)
 {
     ChildSlot[ Args._Content.Widget ];
+    bGrand = Args._Grand;
 }
 
 int32 SHomesteadFrame::OnPaint(const FPaintArgs& Paint, const FGeometry& Geometry, const FSlateRect& CullingRect,
@@ -18,13 +19,14 @@ int32 SHomesteadFrame::OnPaint(const FPaintArgs& Paint, const FGeometry& Geometr
     const FSlateBrush* White = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush"));
     const FVector2f Size = FVector2f(Geometry.GetLocalSize());
     const FLinearColor Tint = Style.GetColorAndOpacityTint();
-    HomesteadFrameStyle::ForEachRect(Size.X, Size.Y,
-        [&](HomesteadFrameStyle::EPart Part, float X, float Y, float W, float H)
-        {
-            FSlateDrawElement::MakeBox(Out, ChildLayer, Geometry.ToPaintGeometry(FVector2f(W, H),
-                FSlateLayoutTransform(FVector2f(X, Y))), White, ESlateDrawEffect::None,
-                HomesteadFrameStyle::ColorOf(Part) * Tint);
-        });
+    const auto Draw = [&](HomesteadFrameStyle::EPart Part, float X, float Y, float W, float H)
+    {
+        FSlateDrawElement::MakeBox(Out, ChildLayer, Geometry.ToPaintGeometry(FVector2f(W, H),
+            FSlateLayoutTransform(FVector2f(X, Y))), White, ESlateDrawEffect::None,
+            HomesteadFrameStyle::ColorOf(Part) * Tint);
+    };
+    if (bGrand) HomesteadFrameStyle::ForEachGrandRect(Size.X, Size.Y, Draw);
+    else HomesteadFrameStyle::ForEachRect(Size.X, Size.Y, Draw);
     return ChildLayer + 1;
 }
 }
