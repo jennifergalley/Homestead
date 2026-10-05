@@ -5,7 +5,6 @@ import { startPlannerServer } from "./planner-server.mjs";
 
 const projectRoot = fileURLToPath(new URL("../../../", import.meta.url));
 const plannerOptions = { accountUsage: true };
-const plannerOptions = { accountUsage: true };
 const servers = new Map();
 let session;
 
