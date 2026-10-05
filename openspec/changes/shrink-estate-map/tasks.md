@@ -1,6 +1,6 @@
 # Tasks
 
-Stage 1 (task 1.1) is implemented in the Map Agent's 2026-10-04 build: a 214-point 852 m road, the town stop 128 m from the manor and a boundary pocket at the village. It stays unchecked until Jenny accepts it in play. Stage 2 (task 2.1) is not started and needs the Orchestrator's go-ahead.
+Stage 1 (task 1.1) is implemented in the Map Agent's 2026-10-04 9 PM build, re-sited at Jenny's direction: the village sits about 300 m (62 s sprint, straight line) from the manor forecourt, hidden in the woods to the north-east, with a 248 m walkable spur from a 852 m road and a boundary pocket at the village. Walked routes: 290 m to the store, 348 m to the square (cap 360 m = 75 s). It stays unchecked until Jenny accepts it in play. Stage 2 (task 2.1) is not started and needs the Orchestrator's go-ahead.
 
 ## 1. Closer-town first delivery
 

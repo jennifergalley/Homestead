@@ -1,10 +1,10 @@
 """Lay out the town square (Jenny, 2026-09-29: "the town buildings are bunched too tightly") where
-shrink-estate-map stage 1 (2026-10-04) puts it: the village at the foot of the drive.
+shrink-estate-map stage 1 (2026-10-04) puts it: the village hidden in the woods north-east of the manor, reached by a spur from the old road.
 
 An open square of SQUARE_ALONG_Y_M x SQUARE_ALONG_X_M round the pad's centre (town_pad.py's "townPad"), faced
 by irregular terraces and cottages with 3-6 m side lanes between the groups, the general store on the east
 side by the street's mouth, and a curved `townStreet` (5.5 m wide) that leaves the main road at the junction
-(JUNCTION_CHAINAGE_M metres from the manor forecourt) and enters the square's east side heading west. The
+(JUNCTION_CHAINAGE_M metres from the manor forecourt) and enters the square's street-mouth side. The
 main road and its chainage don't move. town_pad.py levels the ground first.
 
     python Scripts\\Terrain\\town_pad.py      # first, once
@@ -45,8 +45,9 @@ TERRACE_JOINT_M = 0.1            # between the houses of one terrace (they share
 STORE_DOOR_TO_COUNTER_M = 6.0
 STORE_FOOTPRINT_M = (9.6, 9.4)   # depth, width
 STORE_DOOR_OUT_M = 0.5           # the door anchor stands just outside the front
-JUNCTION_CHAINAGE_M = 140.0      # where the street leaves the main road: ~27 m from the manor door + this + the street
-SPUR_TURN_DEG = 55.0             # the street leaves the road turned this far to its left (toward the square)
+JUNCTION_CHAINAGE_M = 260.0      # where the street leaves the main road: metres along it from the manor forecourt
+SPUR_TURN_DEG = 55.0             # the street leaves the road turned this far to its right (toward the square)
+TOWN_ROTATION_DEG = 180.0        # the whole town turned about its centre: its street mouth and store face west, toward the drive
 TOWN_ARRIVAL_FROM_DOOR_M = 4.0   # a walk to town lands her this far in front of the store door
 
 # Frontages of the square, its edges: (name, front line, along axis, yaw of the building's back).
@@ -90,15 +91,22 @@ STREET_ENTRY = ("east", 6.75)    # where the street meets the square: side and m
 
 
 def frame(centre, side):
-    """(front-line origin, along unit, outward unit, yaw) of one side in world metres."""
+    """(front-line origin, along unit, outward unit, yaw) of one side in world metres, with the town turned
+    TOWN_ROTATION_DEG about its centre."""
     axis, sign, along, yaw = SIDES[side]
     cx, cy = centre
     half = {"x": SQUARE_ALONG_X_M / 2, "y": SQUARE_ALONG_Y_M / 2}
     if axis == "x":
         origin = np.array([cx + sign * half["x"], cy - half["y"]])
-        return origin, np.array([0.0, 1.0]), np.array([float(sign), 0.0]), yaw
-    origin = np.array([cx - half["x"], cy + sign * half["y"]])
-    return origin, np.array([1.0, 0.0]), np.array([0.0, float(sign)]), yaw
+        unit, out = np.array([0.0, 1.0]), np.array([float(sign), 0.0])
+    else:
+        origin = np.array([cx - half["x"], cy + sign * half["y"]])
+        unit, out = np.array([1.0, 0.0]), np.array([0.0, float(sign)])
+    a = math.radians(TOWN_ROTATION_DEG)
+    rot = np.array([[math.cos(a), -math.sin(a)], [math.sin(a), math.cos(a)]])
+    origin = np.asarray(centre, float) + rot @ (origin - np.asarray(centre, float))
+    yaw = (yaw + TOWN_ROTATION_DEG + 180.0) % 360.0 - 180.0
+    return origin, rot @ unit, rot @ out, yaw
 
 
 def footprint(centre, side, s0, width, depth, setback):
@@ -186,7 +194,7 @@ def main():
     k = int(np.searchsorted(chain, JUNCTION_CHAINAGE_M))
     start = road[k]
     ahead = (road[k + 1] - road[k - 1]) / np.linalg.norm(road[k + 1] - road[k - 1])
-    turn = -math.radians(SPUR_TURN_DEG)        # x north, y east: this rotation is clockwise seen from above, so negate for left
+    turn = math.radians(SPUR_TURN_DEG)         # x north, y east: this rotation is clockwise seen from above, a right turn
     heading = np.array([ahead[0] * math.cos(turn) - ahead[1] * math.sin(turn),
                         ahead[0] * math.sin(turn) + ahead[1] * math.cos(turn)])
     e_origin, e_along, e_out, _ = frame(centre, STREET_ENTRY[0])

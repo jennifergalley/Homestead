@@ -2,7 +2,7 @@
 
 Usage: python Scripts/Terrain/shrink_map.py [--dry]    (after town_pad.py and town_layout.py)
 
-1. Notches the EstateBoundary: a slit from its north edge (x = 160) down to a pocket round the square, so the new
+1. Notches the EstateBoundary: a 6 m slit from its north edge (x = 160, y -333..-327) down to a pocket round the square, so the new
    town stays public land even though the drive now reaches it from inside the estate.
 2. Drops the baked scatter inside the square and along the street (EstateScenery.bin), and thins the trees, shrubs
    and rocks round them.
@@ -25,9 +25,9 @@ LAYOUT = os.path.join(HERE, "estate_layout.json")
 SCENERY = os.path.join(ROOT, "Content", "SurvivalGame", "Estate", "Runtime", "EstateScenery.bin")
 FORAGE = os.path.join(ROOT, "Source", "SurvivalGame", "Simulation", "HomesteadEstateForagePlacements.inc")
 
-SLIT_Y_M = (-624.0, -618.0)          # a 6 m slit: no hedge, wall or placement can fit in it
-POCKET_X_M = (-134.0, -62.0)         # the pocket round the square, its street end and the store
-POCKET_Y_M = (-646.0, -570.0)
+SLIT_Y_M = (-333.0, -327.0)          # a 6 m slit: no hedge, wall or placement can fit in it
+POCKET_X_M = (-140.0, -60.0)         # the pocket round the square, its street end and the store
+POCKET_Y_M = (-380.0, -282.0)
 BOUNDARY_EDGE_X_M = 160.0
 
 CORE_PAD_M = 0.0                     # scatter inside the square's graded core is removed outright

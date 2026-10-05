@@ -6,4 +6,4 @@ roadside(581000, ResourceKind::BerryBush, -5515.1, 9784.9);
 roadside(581032, ResourceKind::Primroses, -7045.2, 10673.1);
 roadside(581033, ResourceKind::WildDaffodils, -6536.7, 11618.6);
 // The turn into the village: flowers on the verge opposite the lane to the square.
-roadside(581034, ResourceKind::Flowers, -12523.6, -52660.1);
+roadside(581034, ResourceKind::Flowers, -4933.0, -45304.0);

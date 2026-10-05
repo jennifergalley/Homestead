@@ -223,11 +223,11 @@ deck(-1233.0, -4117.5, 102.99, 3473.8, 550.0, 180.0, 3383.8, 3357.0);
 // stop(name, chainage m): travel endpoints on the walkable road bed
 stop("Manor", 12.00);
 stop("Gateway", 820.00);
-stop("Town", 140.00);
+stop("Town", 260.00);
 // arrival(stop, x cm, y cm, ground z cm, yaw deg): where a walk to that stop leaves her, off the road
 arrival("Manor", -26340.0, -64920.0, 8652.3, 309.7);
-arrival("Town", -10030.0, -59250.0, 8823.0, 90.0);
+arrival("Town", -9570.0, -35550.0, 6022.0, 270.0);
 // sign(name, chainage m, x cm, y cm, ground z cm, yaw deg): the face points along yaw
 sign("ManorRoadSign", 71.41, -17294.5, -58730.8, 8499.2, 310.5);
 sign("GatewayRoadSign", 834.00, -5764.7, 10313.7, 5818.8, 122.1);
-sign("TownRoadSign", 148.00, -12465.3, -52714.8, 8052.3, 227.4);
+sign("TownRoadSign", 268.00, -4859.8, -43525.5, 7384.4, 236.0);
