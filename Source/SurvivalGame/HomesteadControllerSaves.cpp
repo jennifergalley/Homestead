@@ -214,6 +214,9 @@ bool AHomesteadController::ApplySave(const UHomesteadSave& Save)
     PendingLocation = Save.PlayerLocation;
     PendingRotation = Save.ViewRotation;
     bFreshTerrainSpawn = false;
+    // A save from the old town site stands beyond the trimmed road's reach: wake her at the manor instead.
+    if (Sim.GetState().fixedEstate && !Homestead::WithinTravelReachOfRoad({PendingLocation.X, PendingLocation.Y}))
+        SetEstateSpawn();
     bPendingSpawn = true;
     bWasFailed = false;
     CaptureSessionCheckpoint(PendingLocation, PendingRotation);
