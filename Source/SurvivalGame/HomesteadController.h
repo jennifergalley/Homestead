@@ -7,6 +7,7 @@
 #include "Simulation/HomesteadHoldings.h"
 #include "Simulation/HomesteadTravel.h"
 #include "HomesteadAppearance.h"
+#include "HomesteadSaveGate.h"
 #include "HomesteadSaveRouting.h"
 #include "HomesteadPromptIntent.h"
 #include "HomesteadMusicPlaylist.h"
@@ -317,6 +318,11 @@ public:
     void BeginNewGameSetup();
     bool IsNamingSetup() const { return NamesWidget.IsValid(); }
     bool IsNewGameSetup() const { return bNewGameSetup; }
+    // Automation drives its own saves without placing or naming her.
+    EHomesteadSaveHold SaveHold() const
+    {
+        return bAutomatedInputOnly ? EHomesteadSaveHold::None : HomesteadSaveHold({bPendingSpawn, bNewGameSetup});
+    }
     TSharedPtr<HomesteadMenus::SHomesteadNames> NamesStep() const { return NamesWidget; }
     // The estate title card over the first view; it never blocks input.
     void ShowArrival();

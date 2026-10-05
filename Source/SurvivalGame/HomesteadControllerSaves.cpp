@@ -80,6 +80,15 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
     if (bPendingGroundSnap) { Notify(TEXT("Wait until she is safely on the ground before saving."), true); return false; }
     if (!bWorldReady) { Notify(TEXT("The world is not ready; no save files were changed."), true); return false; }
     if (!bSaveRoutingReady) { Notify(TEXT("Save routing is unavailable. No save files were accessed."), true); return false; }
+    if (const EHomesteadSaveHold Hold = SaveHold(); Hold != EHomesteadSaveHold::None)
+    {
+        const TCHAR* Reason = Hold == EHomesteadSaveHold::AwaitingSpawn
+            ? TEXT("She's still arriving. Wait until she has landed before saving.")
+            : TEXT("Finish naming her and the estate before saving.");
+        UE_LOG(LogTemp, Display, TEXT("Save to %s held: %s"), *Slot, Reason);
+        if (!Quiet) Notify(Reason, true);
+        return false;
+    }
     UHomesteadSave* Save = Cast<UHomesteadSave>(UGameplayStatics::CreateSaveGameObject(UHomesteadSave::StaticClass()));
     if (!Save) { Notify(TEXT("Could not create a save record."), true); return false; }
     Save->WorldId = WorldId;

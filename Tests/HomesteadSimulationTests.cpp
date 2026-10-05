@@ -1,5 +1,6 @@
 #include "HomesteadSimulation.h"
 #include "../Source/SurvivalGame/HomesteadSavePreference.h"
+#include "../Source/SurvivalGame/HomesteadSaveGate.h"
 #include "HomesteadBed.h"
 #include "HomesteadCrops.h"
 #include "HomesteadRecipes.h"
@@ -4579,6 +4580,14 @@ void NewestValidRecoveryPreference()
         && best->SavedRevision == newerAuto.SavedRevision);
 }
 
+void NewGameSaveIsHeldUntilSettled()
+{
+    CHECK(HomesteadSaveHold({false, false}) == EHomesteadSaveHold::None);
+    CHECK(HomesteadSaveHold({true, false}) == EHomesteadSaveHold::AwaitingSpawn);
+    CHECK(HomesteadSaveHold({true, true}) == EHomesteadSaveHold::AwaitingSpawn);
+    CHECK(HomesteadSaveHold({false, true}) == EHomesteadSaveHold::AwaitingNewGameSetup);
+}
+
 void OvergrowthTableAndPrompts()
 {
     for (auto kind : {ResourceKind::TallGrass, ResourceKind::Weeds}) CHECK(FindOvergrowth(kind)->tool == ToolKind::Scythe);
@@ -6088,6 +6097,7 @@ int main()
     Run("sleep and failure recovery without cold", SleepAndFailure);
     Run("estate exhaustion never fails or faints, including old saves", EstateExhaustionIsNonlethal);
     Run("newest valid autosave beats older recovery and corrupt newest", NewestValidRecoveryPreference);
+    Run("a new game cannot be saved before she lands and is named", NewGameSaveIsHeldUntilSettled);
     Run("bed reach, facing and focus priority", BedSleepReachAndPriority);
     Run("retired fur and reeds, and cosmetic clothing", CosmeticClothingAndRetiredFur);
     Run("sleep integration and finite boundaries", SleepAndFiniteBoundaries);
