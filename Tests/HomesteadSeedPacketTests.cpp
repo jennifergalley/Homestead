@@ -327,12 +327,42 @@ void LegacySinglePackets()
     OK(loaded.MergeGroups(0, Groups(loaded.GetState().inventoryLayout, Item::CarrotSeed)[1], stack, {0, 0}, loaded.GetRevision()));
     CHECK(loaded.Count(Item::CarrotSeed) == 5);
 }
+// A stack she split on purpose is not the old single-packet shape: it loads as saved.
+void SplitStackSurvivesLoad()
+{
+    using namespace Homestead;
+    Simulation sim;
+    sim.SetPackRowAutoFill(false);
+    OK(sim.GrantItems(Item::CarrotSeed, 5));
+    const auto stack = Groups(sim.GetState().inventoryLayout, Item::CarrotSeed)[0];
+    OK(sim.SplitGroup(0, stack, 2, {0, 0}, sim.GetRevision()));
+    const auto before = Groups(sim.GetState().inventoryLayout, Item::CarrotSeed);
+    CHECK(before.size() == 2);
+    const auto quantities = [](const InventoryLayout& layout)
+    {
+        std::vector<int> counts;
+        for (const auto& entry : layout)
+            if (entry.item == Item::CarrotSeed) counts.push_back(entry.quantity);
+        std::sort(counts.begin(), counts.end());
+        return counts;
+    };
+    const auto expected = quantities(sim.GetState().inventoryLayout);
+    CHECK(expected == std::vector<int>({2, 3}));
+    const auto saved = sim.Serialize();
+    Simulation loaded;
+    OK(loaded.Deserialize(saved));
+    CHECK(Groups(loaded.GetState().inventoryLayout, Item::CarrotSeed).size() == 2);
+    CHECK(quantities(loaded.GetState().inventoryLayout) == expected);
+    CHECK(loaded.Count(Item::CarrotSeed) == 5);
+    CHECK(loaded.Serialize() == saved);
+}
 }
 
 int main()
 {
     SeedPacketTests::IdentitiesAndStacking();
     SeedPacketTests::LegacySinglePackets();
+    SeedPacketTests::SplitStackSurvivesLoad();
     SeedPacketTests::ChestAndGround();
     SeedPacketTests::BuyPackets();
     SeedPacketTests::HarvestWeedsFirst();
