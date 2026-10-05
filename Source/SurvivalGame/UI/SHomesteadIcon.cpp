@@ -75,14 +75,25 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
 
         void Disc(float X, float Y, float Radius, FLinearColor Color)
         {
+            Ellipse(X, Y, Radius, Radius, Color);
+        }
+
+        void Ellipse(float X, float Y, float RadiusX, float RadiusY, FLinearColor Color)
+        {
+            const int32 Segments = RadiusX > 8.0f ? 28 : 16;
             TArray<FVector2D> Path;
-            Path.Reserve(17);
-            for (int32 Index = 0; Index < 16; ++Index)
+            Path.Reserve(Segments + 1);
+            for (int32 Index = 0; Index < Segments; ++Index)
             {
-                const float Angle = Index * (2.0f * PI / 16.0f);
-                Path.Add(FVector2D(X + FMath::Cos(Angle) * Radius, Y + FMath::Sin(Angle) * Radius));
+                const float Angle = Index * (2.0f * PI / Segments);
+                Path.Add(FVector2D(X + FMath::Cos(Angle) * RadiusX, Y + FMath::Sin(Angle) * RadiusY));
             }
             Fill(Path, Color);
+        }
+
+        void ClearPose()
+        {
+            SetPose(0.0f, 1.0f, FVector2D::ZeroVector, FVector2D::ZeroVector);
         }
 
         void Leaf(FVector2D Base, FVector2D Tip, float Width = 4.0f)
@@ -236,10 +247,9 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
     constexpr float FishIconTiltDegrees = 22.0f;
     constexpr float FishIconScale = 1.12f;
 
-    // Leaves the pose set, so the caller's species markings follow the body.
-    void PaintFish(FIconPainter& P, const FFishLook& L)
+    // Draws in the current pose (body laid out about 27,28), so a dish can place the fish itself.
+    void PaintFishBody(FIconPainter& P, const FFishLook& L)
     {
-        P.SetPose(FishIconTiltDegrees, FishIconScale, FVector2D(27.0f, 28.0f), FVector2D(28.0f, 28.5f));
         const float D = L.Depth;
         const float Y = 28.0f;
         P.Shape({{14, Y}, {5, Y - L.TailSpread}, {L.TailNotch, Y}, {5, Y + L.TailSpread}}, L.Fin);
@@ -267,6 +277,13 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
         P.Disc(44.5f, Y - 2, 1.2f, Charcoal);
     }
 
+    // Leaves the pose set, so the caller's species markings follow the body.
+    void PaintFish(FIconPainter& P, const FFishLook& L)
+    {
+        P.SetPose(FishIconTiltDegrees, FishIconScale, FVector2D(27.0f, 28.0f), FVector2D(28.0f, 28.5f));
+        PaintFishBody(P, L);
+    }
+
     // A paper seed packet with a sky-blue picture window; the caller draws the grown crop in the window.
     void PaintSeedPacket(FIconPainter& P, FLinearColor Band)
     {
@@ -277,6 +294,95 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
         P.Shape({{14, 16}, {42, 16}, {43, 43}, {13, 43}}, FLinearColor(0.62f, 0.78f, 0.84f));
         P.Shape({{13.5f, 37}, {42.6f, 35}, {43, 43}, {13, 43}}, FLinearColor(0.47f, 0.33f, 0.19f));
         P.Line({{16, 47}, {40, 47}}, Wood, 1.5f);
+    }
+
+    // Prepared meals share one vessel family so they read as a set: earthenware for stews, compotes and
+    // the hotpot, an iron skillet, a glazed plate or a plank for roasts and grills. Cream steam (two
+    // wisps at most) marks only the hot dishes.
+    const FLinearColor MealGlaze(0.92f, 0.90f, 0.78f);
+    const FLinearColor MealPotato(0.90f, 0.82f, 0.56f);
+    const FLinearColor MealPotatoSkin(0.30f, 0.17f, 0.07f);
+    const FLinearColor MealTurnipPurple(0.56f, 0.24f, 0.52f);
+    const FLinearColor MealStrawberry(0.82f, 0.14f, 0.18f);
+    const FLinearColor MealBean(0.74f, 0.86f, 0.54f);
+    constexpr float MealInkWidth = 1.2f; // the fish glyphs' accent-line weight
+
+    void PaintMealSteam(FIconPainter& P, float X, float Y)
+    {
+        P.Line({{X, Y}, {X - 2.5f, Y - 3.5f}, {X, Y - 7}, {X - 2, Y - 10.5f}}, Cream, 1.5f);
+        P.Line({{X + 8, Y + 1}, {X + 5.5f, Y - 2.5f}, {X + 8, Y - 6}, {X + 6, Y - 9.5f}}, Cream, 1.5f);
+    }
+
+    // A wide earthenware bowl; contents go between the two calls so the front lip covers their base.
+    void PaintMealBowlBack(FIconPainter& P, const FLinearColor& Broth)
+    {
+        P.Ellipse(28, 28, 21, 5, Rust * 1.15f);
+        P.Ellipse(28, 28.5f, 19, 3.8f, Broth);
+    }
+
+    void PaintMealBowlFront(FIconPainter& P)
+    {
+        P.Shape({{7, 28}, {12, 31.5f}, {20, 33}, {28, 33.4f}, {36, 33}, {44, 31.5f}, {49, 28}, {46.5f, 37},
+            {39, 45}, {17, 45}, {9.5f, 37}}, Rust);
+        P.Line({{9, 34}, {18, 37}, {28, 37.8f}, {38, 37}, {47, 34}}, MealGlaze, 1.5f);
+        P.Rect(20, 45, 16, 3, Rust * 0.7f);
+        P.Line({{9.5f, 37}, {17, 45}, {39, 45}, {46.5f, 37}}, Charcoal, MealInkWidth);
+    }
+
+    // A narrow-mouthed, round-bellied crock for the compotes, taller than the stew bowl.
+    void PaintMealCrockBack(FIconPainter& P, const FLinearColor& Fruit)
+    {
+        P.Ellipse(28, 25, 15, 3.8f, Rust * 1.15f);
+        P.Ellipse(28, 25.4f, 13, 2.8f, Fruit);
+    }
+
+    void PaintMealCrockFront(FIconPainter& P)
+    {
+        P.Shape({{13, 25}, {18, 28}, {28, 28.8f}, {38, 28}, {43, 25}, {46, 31}, {47, 41}, {42, 49}, {14, 49},
+            {9, 41}, {10, 31}}, Rust);
+        P.Line({{10, 35}, {28, 38}, {46, 35}}, MealGlaze, 2.0f);
+        P.Line({{9, 41}, {14, 49}, {42, 49}, {47, 41}}, Charcoal, MealInkWidth);
+    }
+
+    // An oval glazed plate centred at height Y.
+    void PaintMealPlate(FIconPainter& P, float Y)
+    {
+        P.Ellipse(28, Y, 24, 8.5f, MealGlaze);
+        P.Ellipse(28, Y - 0.5f, 18, 5.5f, MealGlaze * 0.9f);
+        P.Line({{4, Y}, {7.2f, Y + 4.3f}, {16, Y + 7.4f}, {28, Y + 8.5f}, {40, Y + 7.4f}, {48.8f, Y + 4.3f},
+            {52, Y}}, Charcoal, MealInkWidth);
+    }
+
+    // A serving plank laid out in fish-body coordinates; it follows the current pose.
+    void PaintMealPlank(FIconPainter& P)
+    {
+        // Darker than the cutting board so a browned fish still separates from the wood.
+        const FLinearColor Plank = Wood * 0.62f;
+        P.Shape({{5, 16}, {50, 16}, {52, 18.5f}, {52, 39.5f}, {50, 42}, {5, 42}, {3, 39.5f}, {3, 18.5f}}, Plank);
+        P.Line({{7, 21}, {24, 20.5f}}, Plank * 0.7f, 1.0f);
+        P.Line({{30, 37.5f}, {48, 38}}, Plank * 0.7f, 1.0f);
+        P.Line({{3, 39.5f}, {5, 42}, {50, 42}, {52, 39.5f}}, Charcoal, MealInkWidth);
+    }
+
+    void PaintMealTurnipWedge(FIconPainter& P, float X, float Y)
+    {
+        P.Shape({{X - 5, Y + 2}, {X - 3.5f, Y - 1.5f}, {X, Y - 3.2f}, {X + 3.5f, Y - 1.5f}, {X + 5, Y + 2}}, Cream * 0.95f);
+        P.Line({{X - 4.4f, Y}, {X - 3.5f, Y - 1.5f}, {X, Y - 3.2f}, {X + 3.5f, Y - 1.5f}, {X + 4.4f, Y}},
+            MealTurnipPurple, 1.8f);
+        P.Line({{X - 4, Y + 2}, {X + 4, Y + 2}}, HayGold * 0.85f, 1.2f);
+    }
+
+    // One raw mackerel slice (striped skin edge up), posed about its own centre.
+    void PaintMealFishSlice(FIconPainter& P, float X, float Y, float Degrees)
+    {
+        const FLinearColor Flesh(0.90f, 0.64f, 0.56f);
+        P.SetPose(Degrees, 1.25f, FVector2D::ZeroVector, FVector2D(X, Y));
+        P.Shape({{-8, -3}, {8, -3.5f}, {9, 3}, {-7, 3.5f}}, Flesh);
+        P.Line({{-8, -3.6f}, {8, -4.1f}}, FLinearColor(0.16f, 0.46f, 0.50f), 2.4f);
+        P.Line({{-7.5f, -2.2f}, {8.3f, -2.7f}}, MealGlaze, 0.8f);
+        P.Line({{-3, -1.8f}, {-1, 3}}, Flesh * 0.82f, 0.9f);
+        P.Line({{3, -2}, {5, 3}}, Flesh * 0.82f, 0.9f);
+        P.ClearPose();
     }
 }
 
@@ -399,7 +505,18 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("broad-bean-seeds")), EKind::SeedBroadBean},
         {FName(TEXT("broad-bean-seed")), EKind::SeedBroadBean},
         {FName(TEXT("strawberry-seeds")), EKind::SeedStrawberry},
-        {FName(TEXT("strawberry-runner")), EKind::SeedStrawberry}
+        {FName(TEXT("strawberry-runner")), EKind::SeedStrawberry},
+        {FName(TEXT("baked-potatoes")), EKind::BakedPotatoes},
+        {FName(TEXT("roasted-turnips")), EKind::RoastedTurnips},
+        {FName(TEXT("stewed-carrots")), EKind::StewedCarrots},
+        {FName(TEXT("herbed-broad-beans")), EKind::HerbedBroadBeans},
+        {FName(TEXT("cabbage-potato-stew")), EKind::CabbagePotatoStew},
+        {FName(TEXT("berry-compote")), EKind::BerryCompote},
+        {FName(TEXT("strawberry-compote")), EKind::StrawberryCompote},
+        {FName(TEXT("root-vegetable-hotpot")), EKind::RootVegetableHotpot},
+        {FName(TEXT("raw-fish-slices")), EKind::RawFishSlices},
+        {FName(TEXT("grilled-trout")), EKind::GrilledTrout},
+        {FName(TEXT("grilled-perch")), EKind::GrilledPerch}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -531,6 +648,192 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{42, 27.5f}, {28, 28.2f}, {16, 27.8f}}, FLinearColor(0.42f, 0.46f, 0.48f), 1.0f);
         P.Disc(39.5f, 24.5f, 1.4f, FLinearColor(0.18f, 0.20f, 0.22f));
         break;
+    case EKind::BakedPotatoes:
+        // Two oblong jacket potatoes, split open with a pat of butter, on a plate.
+        PaintMealPlate(P, 38);
+        P.SetPose(-10.0f, 1.0f, FVector2D(36.0f, 30.0f), FVector2D(37.0f, 30.0f));
+        P.Ellipse(36, 30, 12, 6.2f, MealPotatoSkin);
+        P.Shape({{29, 28.6f}, {33, 26.6f}, {39, 26.6f}, {43, 28.6f}, {39, 30.4f}, {33, 30.4f}}, MealPotato);
+        P.Disc(28, 32, 0.6f, MealPotatoSkin * 0.55f);
+        P.Disc(44, 32, 0.6f, MealPotatoSkin * 0.55f);
+        P.Line({{25, 32}, {30, 35.6f}, {36, 36.4f}, {42, 35.6f}, {47, 32}}, Charcoal, MealInkWidth);
+        P.SetPose(8.0f, 1.0f, FVector2D(19.0f, 33.0f), FVector2D(18.5f, 33.5f));
+        P.Ellipse(19, 33, 12.5f, 6.5f, MealPotatoSkin);
+        P.Shape({{11.5f, 31.5f}, {15.5f, 29.4f}, {22.5f, 29.4f}, {26.5f, 31.5f}, {22.5f, 33.4f}, {15.5f, 33.4f}}, MealPotato);
+        P.Disc(10, 35, 0.6f, MealPotatoSkin * 0.55f);
+        P.Disc(27, 35.5f, 0.6f, MealPotatoSkin * 0.55f);
+        P.Line({{7.5f, 35}, {12.5f, 38.6f}, {19, 39.5f}, {25.5f, 38.6f}, {30.5f, 35}}, Charcoal, MealInkWidth);
+        P.ClearPose();
+        P.Shape({{35.6f, 28.6f}, {38, 26.6f}, {40.4f, 28.6f}, {38, 30.4f}}, HayGold * 1.1f);
+        P.Shape({{16.6f, 31.6f}, {19, 29.6f}, {21.4f, 31.6f}, {19, 33.4f}}, HayGold * 1.1f);
+        P.Disc(14, 31, 0.8f, LeafGreen);
+        P.Disc(23.5f, 32.5f, 0.8f, LeafGreen);
+        P.Disc(33, 29, 0.8f, LeafGreen);
+        PaintMealSteam(P, 20, 24);
+        break;
+    case EKind::RoastedTurnips:
+        // Roasted in a small iron skillet, handle to the right.
+        P.Line({{41, 31}, {51, 24}}, Iron, 3.5f);
+        P.Disc(51.5f, 23.5f, 1.8f, Iron);
+        P.Ellipse(25, 34, 21, 9, Iron);
+        P.Ellipse(25, 33, 17.5f, 6.5f, Iron * 0.55f);
+        P.Line({{4, 34}, {6.8f, 38.5f}, {14.5f, 41.8f}, {25, 43}, {35.5f, 41.8f}, {43.2f, 38.5f}, {46, 34}},
+            Charcoal, MealInkWidth);
+        PaintMealTurnipWedge(P, 14, 31);
+        PaintMealTurnipWedge(P, 24.5f, 29);
+        PaintMealTurnipWedge(P, 35, 31);
+        PaintMealTurnipWedge(P, 19.5f, 35.5f);
+        PaintMealTurnipWedge(P, 30, 35.5f);
+        P.Leaf({38, 28}, {44, 23}, 1.8f);
+        PaintMealSteam(P, 18, 24);
+        break;
+    case EKind::StewedCarrots:
+        PaintMealBowlBack(P, RootOrange * 0.62f + Wood * 0.3f);
+        for (const FVector2D& Coin : {FVector2D(21, 22.5f), FVector2D(31, 21.5f), FVector2D(14.5f, 26),
+                 FVector2D(26, 25.5f), FVector2D(37, 25), FVector2D(43, 27.5f), FVector2D(20, 29), FVector2D(32, 29.2f)})
+        {
+            // Sliced coins, not whole fruit: flat discs with a pale core ring.
+            P.Ellipse(Coin.X, Coin.Y, 4.2f, 2.4f, RootOrange * 0.8f);
+            P.Ellipse(Coin.X, Coin.Y - 0.3f, 3.5f, 1.9f, RootOrange);
+            P.Ellipse(Coin.X, Coin.Y - 0.3f, 1.8f, 0.95f, HayGold * 1.1f);
+            P.Disc(Coin.X, Coin.Y - 0.3f, 0.5f, RootOrange * 0.9f);
+        }
+        // One carrot tip poking out of the stew.
+        P.Shape({{36, 22}, {40, 20}, {46, 12}, {38.5f, 18.5f}}, RootOrange);
+        P.Line({{39.5f, 19}, {41.5f, 17.5f}}, RootOrange * 0.7f, 1.0f);
+        P.Leaf({25, 21}, {29, 16.5f}, 1.6f);
+        PaintMealBowlFront(P);
+        PaintMealSteam(P, 21, 17);
+        break;
+    case EKind::HerbedBroadBeans:
+        // A cream-glazed bowl with a green band, heaped beans and herb sprigs.
+        P.Ellipse(28, 29, 21, 5, MealGlaze);
+        P.Ellipse(28, 29.5f, 19, 3.8f, LeafGreen * 0.65f);
+        for (const FVector2D& Bean : {FVector2D(20, 24), FVector2D(27, 22.5f), FVector2D(34, 23.5f),
+                 FVector2D(14, 27), FVector2D(40.5f, 26.5f), FVector2D(23.5f, 28), FVector2D(31, 27.5f), FVector2D(37, 29.5f)})
+        {
+            P.Ellipse(Bean.X, Bean.Y, 3.4f, 2.3f, MealBean);
+            P.Disc(Bean.X - 1.2f, Bean.Y - 0.8f, 0.7f, Cream);
+        }
+        P.Leaf({30, 22}, {38, 15}, 2.2f);
+        P.Leaf({30, 22}, {25, 14.5f}, 2.0f);
+        P.Shape({{7, 29}, {12, 32.5f}, {20, 34}, {28, 34.4f}, {36, 34}, {44, 32.5f}, {49, 29}, {45, 37}, {37, 41.5f},
+            {19, 41.5f}, {11, 37}}, MealGlaze * 0.92f);
+        P.Line({{10, 34}, {19, 36.5f}, {28, 37.2f}, {37, 36.5f}, {46, 34}}, LeafGreen, 1.5f);
+        P.Rect(21, 41.5f, 14, 3, MealGlaze * 0.72f);
+        P.Line({{11, 37}, {19, 41.5f}, {37, 41.5f}, {45, 37}}, Charcoal, MealInkWidth);
+        PaintMealSteam(P, 14, 19);
+        break;
+    case EKind::CabbagePotatoStew:
+        // Golden broth with cabbage leaves and potato cubes; a wooden spoon stands in it.
+        PaintMealBowlBack(P, HayGold * 0.6f + Wood * 0.3f);
+        P.Line({{36, 27}, {46, 8}}, Wood, 3.0f);
+        P.Shape({{11, 28}, {14, 23}, {20, 21.5f}, {24, 25}, {19, 29}}, LeafGreen * 1.15f);
+        P.Line({{13, 27}, {21, 23.5f}}, MealGlaze, 1.0f);
+        P.Shape({{28, 23}, {33, 19.5f}, {39, 21.5f}, {37, 26}, {30, 26.5f}}, LeafGreen);
+        P.Line({{30, 25}, {37, 21.5f}}, MealGlaze, 1.0f);
+        P.Shape({{21, 25}, {27, 24}, {28, 29}, {22, 30}}, MealPotato);
+        P.Shape({{38, 25.5f}, {44, 25}, {44.5f, 30}, {38.5f, 30.5f}}, MealPotato);
+        P.Shape({{14, 28.5f}, {19, 28}, {19.5f, 32}, {14.5f, 32.5f}}, MealPotato * 0.95f);
+        P.Shape({{29, 27}, {35, 26.5f}, {35.5f, 31}, {29.5f, 31.5f}}, LeafGreen * 1.25f);
+        PaintMealBowlFront(P);
+        PaintMealSteam(P, 17, 18);
+        break;
+    case EKind::BerryCompote:
+        PaintMealCrockBack(P, Berry * 0.55f);
+        for (const FVector2D& Fruit : {FVector2D(19, 23.5f), FVector2D(37, 23), FVector2D(24.5f, 20),
+                 FVector2D(31.5f, 19.5f), FVector2D(28, 15.5f), FVector2D(22, 26), FVector2D(28.5f, 24), FVector2D(34.5f, 26)})
+        {
+            P.Disc(Fruit.X, Fruit.Y, 3.4f, (static_cast<int32>(Fruit.X) % 2) ? Berry : Berry * 0.72f);
+            P.Disc(Fruit.X - 1.2f, Fruit.Y - 1.3f, 0.8f, Cream);
+        }
+        P.Leaf({33, 15}, {42, 9}, 2.4f);
+        PaintMealCrockFront(P);
+        break;
+    case EKind::StrawberryCompote:
+        PaintMealCrockBack(P, MealStrawberry * 0.6f);
+        P.Ellipse(18.5f, 25, 3.5f, 2.2f, MealStrawberry * 0.85f);
+        P.Ellipse(37.5f, 25, 3.5f, 2.2f, MealStrawberry * 0.85f);
+        P.Shape({{19, 12}, {28, 9.5f}, {37, 12}, {37.5f, 17}, {33, 23}, {28, 28}, {23, 23}, {18.5f, 17}}, MealStrawberry);
+        for (const FVector2D& Pip : {FVector2D(23, 14), FVector2D(28, 13), FVector2D(33, 14), FVector2D(22, 18.5f),
+                 FVector2D(27.5f, 18), FVector2D(33, 18.5f), FVector2D(25, 22.5f), FVector2D(30.5f, 22.5f)})
+            P.Disc(Pip.X, Pip.Y, 0.8f, HayGold);
+        P.Line({{21, 13.5f}, {20.5f, 16.5f}}, Cream, 1.0f);
+        P.Leaf({28, 11}, {19, 7.5f}, 2.4f);
+        P.Leaf({28, 11}, {37, 7.5f}, 2.4f);
+        P.Leaf({28, 11}, {28, 4.5f}, 2.0f);
+        PaintMealCrockFront(P);
+        break;
+    case EKind::RootVegetableHotpot:
+        // A lidded earthenware pot, the lid tipped up on its left rim over turnip slices and roots.
+        P.Line({{9, 31}, {5, 30}, {5, 36}, {9.5f, 36}}, Rust * 0.8f, 2.0f);
+        P.Line({{47, 31}, {51, 30}, {51, 36}, {46.5f, 36}}, Rust * 0.8f, 2.0f);
+        P.Ellipse(28, 27, 19, 4.5f, Rust * 1.15f);
+        P.Ellipse(28, 27.5f, 17, 3.4f, HayGold * 0.55f + Wood * 0.3f);
+        P.Shape({{34, 26}, {37, 22}, {42, 21.5f}, {44, 25}, {40, 28}}, RootOrange);
+        P.Ellipse(30, 25.5f, 4.5f, 2.6f, Cream * 0.95f);
+        P.Line({{25.6f, 25}, {28, 23.1f}, {32, 23.1f}, {34.4f, 25}}, MealTurnipPurple, 1.6f);
+        P.Ellipse(39, 27, 4.5f, 2.4f, Cream * 0.95f);
+        P.Line({{34.6f, 26.6f}, {37, 24.8f}, {41, 24.8f}, {43.4f, 26.6f}}, MealTurnipPurple, 1.6f);
+        P.Shape({{9, 27}, {14, 30.5f}, {28, 31.6f}, {42, 30.5f}, {47, 27}, {48, 37}, {44, 47}, {12, 47}, {8, 37}}, Rust);
+        P.Line({{8.5f, 36}, {28, 39}, {47.5f, 36}}, MealGlaze, 1.5f);
+        P.Line({{8, 37}, {12, 47}, {44, 47}, {48, 37}}, Charcoal, MealInkWidth);
+        P.SetPose(16.0f, 1.0f, FVector2D(9.0f, 27.0f), FVector2D(9.0f, 27.0f));
+        P.Shape({{8, 27}, {11, 22}, {20, 18.5f}, {28, 18}, {36, 18.5f}, {45, 22}, {48, 27}}, Rust * 1.1f);
+        P.Line({{8, 27}, {48, 27}}, Charcoal, MealInkWidth);
+        P.Disc(28, 16.5f, 2.4f, Wood);
+        P.ClearPose();
+        PaintMealSteam(P, 44, 16);
+        break;
+    case EKind::RawFishSlices:
+    {
+        // Raw, so no steam: mackerel slices shingled down a cutting board.
+        P.Shape({{11, 28}, {4, 28.5f}, {2, 32}, {4, 35.5f}, {11, 36}}, Wood);
+        P.Disc(5, 32, 1.3f, Pine);
+        P.Rect(12, 44, 39, 2.5f, Wood * 0.7f);
+        P.Shape({{13, 19}, {50, 19}, {53, 22}, {53, 42}, {50, 45}, {13, 45}, {10, 42}, {10, 22}}, Wood);
+        P.Line({{14, 24}, {30, 23.5f}}, Wood * 0.78f, 1.0f);
+        P.Line({{33, 41}, {49, 41.5f}}, Wood * 0.78f, 1.0f);
+        P.Line({{10, 42}, {13, 45}, {50, 45}, {53, 42}}, Charcoal, MealInkWidth);
+        PaintMealFishSlice(P, 22, 27, 15.0f);
+        PaintMealFishSlice(P, 30, 33, 15.0f);
+        PaintMealFishSlice(P, 38.5f, 39, 15.0f);
+        P.Leaf({43, 27}, {50, 23}, 2.2f);
+        P.Leaf({43, 27}, {47, 21.5f}, 1.8f);
+        break;
+    }
+    case EKind::GrilledTrout:
+    {
+        const FFishLook Look{8.0f, 7.0f, 8.0f, FLinearColor(0.34f, 0.36f, 0.20f), FLinearColor(0.80f, 0.72f, 0.54f),
+            FLinearColor(0.93f, 0.87f, 0.70f), FLinearColor(0.56f, 0.46f, 0.26f), false};
+        P.SetPose(12.0f, 0.92f, FVector2D(27.0f, 28.0f), FVector2D(27.0f, 30.0f));
+        PaintMealPlank(P);
+        PaintFishBody(P, Look);
+        P.Line({{40, 28.5f}, {28, 29.2f}, {16, 28.4f}}, FLinearColor(0.86f, 0.40f, 0.42f), 2.8f);
+        for (const FVector2D& Spot : {FVector2D(20, 24), FVector2D(25, 22), FVector2D(30, 24), FVector2D(34, 21),
+                 FVector2D(36, 26), FVector2D(23, 32), FVector2D(31, 32), FVector2D(18, 29)})
+            P.Disc(Spot.X, Spot.Y, 0.9f, Charcoal);
+        for (const float X : {23.0f, 30.0f, 37.0f})
+            P.Line({{X - 2.5f, 28 - 8 * 0.85f}, {X + 2.5f, 28 + 8 * 0.8f}}, Charcoal, 1.5f);
+        P.ClearPose();
+        PaintMealSteam(P, 9, 21);
+        break;
+    }
+    case EKind::GrilledPerch:
+    {
+        const FFishLook Look{9.5f, 7.0f, 8.0f, FLinearColor(0.34f, 0.30f, 0.13f), FLinearColor(0.70f, 0.58f, 0.28f),
+            FLinearColor(0.90f, 0.78f, 0.50f), FLinearColor(0.80f, 0.40f, 0.18f), true};
+        PaintMealPlate(P, 37);
+        P.SetPose(14.0f, 0.9f, FVector2D(27.0f, 28.0f), FVector2D(28.0f, 30.0f));
+        PaintFishBody(P, Look);
+        for (const float X : {20.0f, 26.0f, 32.0f, 37.0f})
+            P.Line({{X, 28 - 9.5f * 0.82f}, {X - 1.5f, 28 + 9.5f * 0.35f}}, FLinearColor(0.28f, 0.24f, 0.10f), 2.0f);
+        for (const float X : {23.0f, 30.0f, 37.0f})
+            P.Line({{X - 2.5f, 28 - 9.5f * 0.8f}, {X + 2.5f, 28 + 9.5f * 0.75f}}, Charcoal, 1.5f);
+        P.ClearPose();
+        PaintMealSteam(P, 8, 22);
+        break;
+    }
     case EKind::SeedRoots:
         PaintSeedPacket(P, Wood);
         P.Root(23, 23, RootOrange);
