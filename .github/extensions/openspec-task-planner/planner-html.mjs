@@ -113,7 +113,17 @@ export function renderPlannerHtml() {
     .cost-group dd { margin: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
     .cost-older { margin-top: 16px; }
     .cost-error { color: var(--true-color-red, #ff7b72); }
-    @media (max-width: 700px) {
+    .cost-share { margin: 0 0 32px; }
+    .cost-share-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 20px; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+    .cost-meter { height: 12px; border-radius: 6px; background: var(--border-color-default, #30363d); overflow: hidden; position: relative; }
+    .cost-meter-fill { display: block; height: 100%; background: var(--true-color-blue, #58a6ff); }
+    .cost-meter.over .cost-meter-fill { background: var(--true-color-red, #ff7b72); }
+    .cost-meter-pace { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--text-color-default, #e6edf3); }
+    .cost-share-sub { margin: 20px 0 8px; font-size: 14px; font-weight: var(--font-weight-semibold, 600); }
+    .cost-weeks { list-style: none; margin: 0; padding: 0; font-variant-numeric: tabular-nums; font-size: 13px; }
+    .cost-week { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 16px; padding: 6px 0; border-top: 1px solid var(--border-color-default, #30363d); }
+    .cost-week.current { font-weight: var(--font-weight-semibold, 600); }
+    .cost-week.upcoming { color: var(--text-color-muted, #8b949e); }    @media (max-width: 700px) {
       .cost-build-content { grid-template-columns: minmax(0, 1fr); gap: 16px; }
       .cost-period-line { flex-direction: column; }
     }
@@ -515,6 +525,59 @@ export function renderPlannerHtml() {
       return (Number(nano) / 1e9).toLocaleString("en-US", { maximumFractionDigits: 3 });
     }
 
+    function renderShare(share) {
+      const section = el("section", "cost-share");
+      section.setAttribute("aria-labelledby", "cost-share-title");
+      const title = el("h2", "", "Your share of this month's credits");
+      title.id = "cost-share-title";
+      const used = Number(BigInt(share.recordedNanoAiu)) / 1e9;
+      const total = share.shareCredits;
+      const meter = (value, allowed, pace) => {
+        const bar = el("div", "cost-meter" + (value > allowed ? " over" : ""));
+        bar.setAttribute("role", "progressbar");
+        bar.setAttribute("aria-valuemin", "0");
+        bar.setAttribute("aria-valuemax", String(Math.round(allowed)));
+        bar.setAttribute("aria-valuenow", String(Math.min(Math.round(value), Math.round(allowed))));
+        const fill = el("span", "cost-meter-fill");
+        fill.style.width = Math.min(100, allowed ? value / allowed * 100 : 0) + "%";
+        bar.append(fill);
+        if (pace != null) {
+          const mark = el("span", "cost-meter-pace");
+          mark.style.left = Math.min(100, pace / allowed * 100) + "%";
+          mark.title = "Even pace for today: " + aiu(String(Math.round(pace * 1e9))) + " AIU";
+          bar.append(mark);
+        }
+        return bar;
+      };
+      const head = el("div", "cost-share-head");
+      head.append(el("span", "", aiu(share.recordedNanoAiu) + " of " + total.toLocaleString("en-US") + " used (" + share.percentUsed + "%)" + (share.unknown ? " + unknown costs" : "")),
+        el("span", "muted", BigInt(share.overNanoAiu) > 0n ? aiu(share.overNanoAiu) + " over your share" : aiu(share.remainingNanoAiu) + " left"));
+      const paced = Number(BigInt(share.paceAllowedNanoAiu)) / 1e9;
+      section.append(title, head, meter(used, total, paced),
+        el("p", "muted", "Tick mark = even pace for today (" + paced.toLocaleString("en-US", { maximumFractionDigits: 0 }) + " AIU). " + (used > paced ? "Ahead of pace." : "On or under pace.")));
+      const week = share.weeks.find((entry) => entry.index === share.currentWeek);
+      if (week) {
+        const weekUsed = Number(BigInt(week.recordedNanoAiu)) / 1e9, weekAllowed = Number(BigInt(week.allotmentNanoAiu)) / 1e9;
+        section.append(el("p", "cost-share-sub", "This week (" + week.start + " – " + week.end + ")"));
+        const weekHead = el("div", "cost-share-head");
+        weekHead.append(el("span", "", aiu(week.recordedNanoAiu) + " of " + aiu(week.allotmentNanoAiu) + " used (" + (weekAllowed ? Math.round(weekUsed / weekAllowed * 100) : 0) + "%)" + (week.unknown ? " + unknown costs" : "")),
+          el("span", "muted", weekUsed > weekAllowed ? aiu(String(BigInt(week.recordedNanoAiu) - BigInt(week.allotmentNanoAiu))) + " over" : aiu(String(BigInt(week.allotmentNanoAiu) - BigInt(week.recordedNanoAiu))) + " left"));
+        section.append(weekHead, meter(weekUsed, weekAllowed, null));
+      }
+      section.append(el("p", "cost-share-sub", "Weekly allotment of your share"));
+      const weeks = el("ul", "cost-weeks");
+      for (const entry of share.weeks) {
+        const row = el("li", "cost-week " + entry.status);
+        if (entry.status === "current") row.setAttribute("aria-current", "true");
+        const dates = entry.start.slice(5) + " – " + entry.end.slice(5) + (entry.days < 7 ? " (" + entry.days + " days)" : "");
+        const usedText = entry.status === "upcoming" ? "" : aiu(entry.recordedNanoAiu) + (entry.unknown ? "+" : "") + " used";
+        row.append(el("span", "", "Week " + entry.index + " · " + dates), el("span", "num", entry.status === "upcoming" ? aiu(entry.allotmentNanoAiu) + " allotted" : usedText + " of " + aiu(entry.allotmentNanoAiu)));
+        weeks.append(row);
+      }
+      section.append(weeks);
+      return section;
+    }
+
     function renderAccounting(view) {
       const node = document.getElementById("accounting");
       node.replaceChildren();
@@ -568,7 +631,9 @@ export function renderPlannerHtml() {
         figure.append(caption, el("p", "cost-error", period.message));
       }
       figure.append(el("p", "muted", "Observed AIU, not billing-reconciled AI credits. Homestead shipped-build costs are assigned to shipment day, not the day calls ran."));
-      node.append(figure, el("h2", "", "Shipped builds"));
+      if (period.share) node.append(renderShare(period.share), figure);
+      else node.append(figure);
+      node.append(el("h2", "", "Shipped builds"));
       const older = el("details", "cost-older");
       older.append(el("summary", "", "Earlier shipped builds (" + Math.max(0, view.shipped.length - 2) + ")"));
       view.shipped.forEach((build, index) => {

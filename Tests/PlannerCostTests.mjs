@@ -63,6 +63,46 @@ test("multiple shipments aggregate exactly; missing costs are unknown, never zer
     assert.equal(view.period.unknown, true);
 });
 
+test("credit share tracks used, remaining and an exact weekly allotment of the 500k", () => {
+    const share = buildView().period.share;
+    assert.equal(share.shareCredits, 500000);
+    assert.equal(share.totalNanoAiu, "500000000000000");
+    assert.equal(share.recordedNanoAiu, measured.totals.recordedNanoAiu);
+    assert.equal(BigInt(share.recordedNanoAiu) + BigInt(share.remainingNanoAiu), 500000000000000n);
+    assert.equal(share.overNanoAiu, "0");
+    assert.equal(share.percentUsed, 0.29);
+    assert.equal(share.weeks.length, 5);
+    assert.deepEqual(share.weeks.map((week) => week.days), [7, 7, 7, 7, 3]);
+    assert.equal(share.weeks[0].start, "2026-09-30");
+    assert.equal(share.weeks.at(-1).end, "2026-10-30");
+    assert.equal(share.weeks.reduce((sum, week) => sum + BigInt(week.allotmentNanoAiu), 0n), 500000000000000n);
+    assert.equal(share.weeks[0].allotmentNanoAiu, String(500000000000000n * 7n / 31n));
+    assert.equal(share.weeks.reduce((sum, week) => sum + BigInt(week.recordedNanoAiu), 0n), BigInt(share.recordedNanoAiu));
+    assert.equal(share.currentWeek, 1);
+    assert.deepEqual(share.weeks.map((week) => week.status), ["current", "upcoming", "upcoming", "upcoming", "upcoming"]);
+    assert.equal(share.paceAllowedNanoAiu, String(500000000000000n * 5n / 31n));
+});
+
+test("credit share goes over cleanly, honours a configured share and skips non-current periods", () => {
+    const big = report("big", [segment("task", "implementation", "600000000000000")]);
+    const over = buildView({ reports: [big], builds: [{ ...shipment, buildId: "big" }] }).period.share;
+    assert.equal(over.remainingNanoAiu, "0");
+    assert.equal(over.overNanoAiu, "100000000000000");
+    assert.equal(over.percentUsed, 120);
+    const small = buildView({ cycle: { ...cycle, shareCredits: 1000 } }).period.share;
+    assert.equal(small.totalNanoAiu, "1000000000000");
+    assert.equal(small.weeks.reduce((sum, week) => sum + BigInt(week.allotmentNanoAiu), 0n), 1000000000000n);
+    assert.throws(() => buildView({ cycle: { ...cycle, shareCredits: 0 } }), /Invalid credit share/);
+    assert.equal(buildView({ cycle: { ...cycle, start: "2026-08-01", end: "2026-08-31", reset: "2026-09-01" } }).period.share, undefined);
+    assert.equal(buildView({ cycle: null }).period.share, undefined);
+});
+
+test("credit share marks weeks with unknown costs", () => {
+    const view = buildView({ builds: [shipment, { date: "2026-10-01", slot: "7:30 AM", status: "delivered", shippedFeatures: ["Older"] }] });
+    assert.equal(view.period.share.unknown, true);
+    assert.equal(view.period.share.weeks[0].unknown, true);
+});
+
 test("groups combine models/sessions/categories without losing integer cost or duplicating bundles", () => {
     const groups = groupBuildCosts(measured);
     assert.equal(groups.length, 3);

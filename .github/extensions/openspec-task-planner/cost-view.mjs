@@ -74,6 +74,44 @@ export function groupBuildCosts(report) {
         estimatedNanoAiu: String(estimated) }));
 }
 
+const defaultShareCredits = 500_000;
+const nanoPerAiu = 1_000_000_000n;
+const weekDays = 7;
+
+// Jenny's slice of the monthly credit pool, spread evenly across the billing period in
+// week blocks that start on the period's first day (the last block may be short).
+function creditShare(period, today, shareCredits) {
+    if (!Number.isInteger(shareCredits) || shareCredits <= 0) throw new Error("Invalid credit share.");
+    const total = BigInt(shareCredits) * nanoPerAiu;
+    const dayCount = BigInt(period.days.length);
+    const weeks = [];
+    let allocated = 0n;
+    for (let first = 0; first < period.days.length; first += weekDays) {
+        const days = period.days.slice(first, first + weekDays);
+        const last = first + weekDays >= period.days.length;
+        const allotment = last ? total - allocated : total * BigInt(days.length) / dayCount;
+        allocated += allotment;
+        const start = days[0].date, end = days.at(-1).date;
+        weeks.push({
+            index: weeks.length + 1, start, end, days: days.length,
+            allotmentNanoAiu: String(allotment),
+            recordedNanoAiu: String(days.reduce((sum, day) => sum + nano(day.recordedNanoAiu), 0n)),
+            unknown: days.some((day) => day.unknown),
+            status: today < start ? "upcoming" : today > end ? "past" : "current",
+        });
+    }
+    const used = nano(period.recordedNanoAiu);
+    const elapsed = BigInt(period.days.filter((day) => day.date <= today).length);
+    const paceAllowed = total * elapsed / dayCount;
+    return {
+        shareCredits, totalNanoAiu: String(total), recordedNanoAiu: String(used),
+        remainingNanoAiu: String(total > used ? total - used : 0n), overNanoAiu: String(used > total ? used - total : 0n),
+        percentUsed: Number(used * 10_000n / total) / 100,
+        paceAllowedNanoAiu: String(paceAllowed), unknown: period.unknown,
+        currentWeek: weeks.find((week) => week.status === "current")?.index ?? null, weeks,
+    };
+}
+
 export function buildCostView({ reports = [], builds = [], manifests = [], cycle = null,
     now = Date.now() }) {
     const timeZone = cycle?.timeZone ?? "America/Los_Angeles";
@@ -130,6 +168,7 @@ export function buildCostView({ reports = [], builds = [], manifests = [], cycle
             }
             period.recordedNanoAiu = String(period.days.reduce((sum, day) => sum + nano(day.recordedNanoAiu), 0n));
             period.unknown = period.days.some((day) => day.unknown);
+            period.share = creditShare(period, today, cycle.shareCredits ?? defaultShareCredits);
         } else period.message = "Billing dates need updating. The last confirmed period is not current.";
     }
     return { period, shipped, unshippedReports: reports.filter((report) => !used.has(report.buildId)).length };
