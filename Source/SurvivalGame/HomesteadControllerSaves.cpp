@@ -24,6 +24,8 @@
 #include "Misc/SecureHash.h"
 #include "Sound/SoundBase.h"
 
+DEFINE_LOG_CATEGORY_STATIC(LogHomesteadSaves, Log, All);
+
 using HomesteadControllerText::Text;
 
 UHomesteadSave* AHomesteadController::ReadSave(const FString& Filename) const
@@ -85,7 +87,7 @@ bool AHomesteadController::SaveSlot(const FString& Slot, bool Quiet)
         const TCHAR* Reason = Hold == EHomesteadSaveHold::AwaitingSpawn
             ? TEXT("She's still arriving. Wait until she has landed before saving.")
             : TEXT("Finish naming her and the estate before saving.");
-        UE_LOG(LogTemp, Display, TEXT("Save to %s held: %s"), *Slot, Reason);
+        UE_LOG(LogHomesteadSaves, Display, TEXT("Save to %s held: %s"), *Slot, Reason);
         if (!Quiet) Notify(Reason, true);
         return false;
     }
