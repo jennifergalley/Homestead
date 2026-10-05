@@ -57,10 +57,11 @@ for ($item = Get-Item -LiteralPath $fixture; $item -and $item.FullName.Length -g
 }
 $fixtureHash = $FixtureSha256.ToUpperInvariant()
 if ((Get-FileHash -LiteralPath $fixture).Hash -ne $fixtureHash) { throw 'Prepared test-world provenance differs.' }
-$null = New-Item -ItemType Directory -Path (Join-Path $output 'Graphics'), $saveDirectory
+$estateSaveDirectory = Join-Path $saveDirectory 'Estate'
+$null = New-Item -ItemType Directory -Path (Join-Path $output 'Graphics'), $estateSaveDirectory
 $config = Join-Path $output 'Graphics\GameUserSettings.ini'
 Copy-Item -LiteralPath (Join-Path $root 'Config\DefaultGameUserSettings.ini') -Destination $config
-Copy-Item -LiteralPath $fixture -Destination (Join-Path $saveDirectory 'Homestead_Manual.sav')
+Copy-Item -LiteralPath $fixture -Destination (Join-Path $estateSaveDirectory 'Homestead_Manual.sav')
 $configHash = (Get-FileHash -LiteralPath $config).Hash
 & (Join-Path $PSScriptRoot 'Set-EngineEnvironment.ps1')
 # Warm the read-only providers before startup; inspect only the owned probe PID afterward.
