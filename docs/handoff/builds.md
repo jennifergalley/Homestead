@@ -30,6 +30,8 @@ slot, then go idle; they do not pick up unflagged queue items.
 - Review: Clerk Balance OK (`81a547cd`); Jenny's asset-review gate was waived while AFK. Final clerk
   media: `E:\CopilotScratch\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\review\clerk-01\06-front-counter-clean-shaven.png`.
   Player acceptance remains pending Jenny's playtest.
+- Accounting: per-build report unavailable: `assistant_usage_events` is missing from the session DBs.
+  No estimated or zero-cost report was fabricated.
 
 ## 2026-10-04 — 3:13 PM
 
@@ -200,6 +202,9 @@ slot, then go idle; they do not pick up unflagged queue items.
 
 - Launch Development builds with trace control disabled or bound to localhost, if UE supports a flag
   (avoids a LAN-exposed 1985 listener and firewall prompts).
+
+- Rebuild `Export-BuildUsage` from `~/.copilot/session-store.db` (the source the planner's
+  account-usage tracker already reads) and backfill the 2026-10-04 evening build report.
 
 - Fix `HomesteadStartupProbe`'s legacy mesh-identity assertion to be MetaHuman-aware; the Fishing
   promotion waiver covers only that pre-existing false invariant.
