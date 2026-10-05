@@ -3,9 +3,9 @@
 Integration updates this file for every delivery. Each entry uses a date/slot heading, SHA, status,
 and short player-facing changelist; the planner reads it directly.
 
-Timing (Jenny, 2026-10-01): start each build about an hour before its slot (7:30 AM, 4 PM, 9 PM).
-Lanes implement only what Jenny has prioritized for a specific build, then go idle. They don't pick up
-unflagged queue items. If little or nothing is prioritized, the orchestrator tells Jenny to schedule work.
+Delivery is work-driven: the planner's Next build ships as soon as its admitted work is verified and
+reviewed, then Build after next moves up. Lanes implement only what Jenny has prioritized for a planner
+slot, then go idle; they do not pick up unflagged queue items.
 
 ## 2026-10-04 — 3:13 PM
 
