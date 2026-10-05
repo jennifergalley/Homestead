@@ -73,7 +73,7 @@ generous and cozy.
 | Clear by hand | 1.0 | 100 |
 | Soft underbrush | 0.8 | 125 |
 | Woody underbrush or sapling | 1.5 | 66 |
-| Fell a tree | 4.0 | 25 |
+| Fell a tree (hatchet, any unprotected estate tree; +6 timber, +4 branches) | 4.0 | 25 |
 | Till | 2.0 | 50 |
 | Plant, water (each) | 0.4 | 250 |
 | Weed | 0.8 | 125 |
@@ -277,3 +277,7 @@ These are proposals for the Orchestrator to offer Jenny. None is scheduled.
   every Meal; tree felling on the map at 4 energy, with forest trees regrowing after 3 days beyond
   60 m of the manor and farm (a stump, then a sapling at day 1), and trees lining the roads and the
   town square left unchoppable. The shopkeeper is renamed Mr. Josiah Trethewey.
+- 2026-10-04 (batch2, Gameplay agent): felling yields +6 timber, +4 branches (about 16 coins of
+  branches per 4 energy, so it's no coin farm); stump 24 h → sapling → full tree at 72 h, only for
+  trees 60 m or more from home; road-verge (9 m) and village-square (45 m) trees are protected;
+  reach 4.5 m.
