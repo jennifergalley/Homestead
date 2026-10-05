@@ -281,7 +281,7 @@ function applyDeliveryRegistry(features, registry) {
     }
 }
 
-export async function loadPlanner(projectRoot, now = Date.now()) {
+export async function loadPlanner(projectRoot, now = Date.now(), options = {}) {
     const taskFiles = await findTaskFiles(join(projectRoot, "openspec", "changes"));
     const activeChange = await readActiveChange(projectRoot, now);
     const builds = await loadBuilds(projectRoot);
@@ -297,7 +297,7 @@ export async function loadPlanner(projectRoot, now = Date.now()) {
     // each one so the board, priority.json, and quote/remove/assign wiring
     // all treat them like any other item.
     for (const entry of backlogEntries) features.push(backlogFeatureFromEntry(entry));
-    const costView = await loadBuildCostView(projectRoot, accounting, builds, now);
+    const costView = await loadBuildCostView(projectRoot, accounting, builds, now, options);
     applyDeliveryRegistry(features, deliveryRegistry);
     const order = new Map(priority.order.map((id, index) => [id, index]));
     const removed = new Set(priority.removed);

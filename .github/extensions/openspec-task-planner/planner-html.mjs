@@ -528,7 +528,8 @@ export function renderPlannerHtml() {
     function renderShare(share) {
       const section = el("section", "cost-share");
       section.setAttribute("aria-labelledby", "cost-share-title");
-      const title = el("h2", "", "Your share of this month's credits");
+      const allProjects = share.basis === "all-projects";
+      const title = el("h2", "", "Your share of this month's credits" + (allProjects ? " — all projects" : ""));
       title.id = "cost-share-title";
       const used = Number(BigInt(share.recordedNanoAiu)) / 1e9;
       const total = share.shareCredits;
@@ -555,6 +556,20 @@ export function renderPlannerHtml() {
       const paced = Number(BigInt(share.paceAllowedNanoAiu)) / 1e9;
       section.append(title, head, meter(used, total, paced),
         el("p", "muted", "Tick mark = even pace for today (" + paced.toLocaleString("en-US", { maximumFractionDigits: 0 }) + " AIU). " + (used > paced ? "Ahead of pace." : "On or under pace.")));
+      if (allProjects) {
+        section.append(el("p", "muted", "Every Copilot session on this PC, all projects (" + share.calls.toLocaleString("en-US") + " calls, " + share.sessions + " sessions). Alex's usage and other machines are not included."));
+        if (share.projects.length) {
+          const list = el("ul", "cost-weeks");
+          for (const project of share.projects) {
+            const row = el("li", "cost-week");
+            row.append(el("span", "", project.repository || "No repository (chats)"), el("span", "num", aiu(project.nanoAiu) + " · " + project.sessions + " sessions"));
+            list.append(row);
+          }
+          section.append(el("p", "cost-share-sub", "By project"), list);
+        }
+      } else {
+        section.append(el("p", "muted", "Account-wide usage is unavailable" + (share.usageMessage ? " (" + share.usageMessage + ")" : "") + "; showing shipped-build cost only."));
+      }
       const week = share.weeks.find((entry) => entry.index === share.currentWeek);
       if (week) {
         const weekUsed = Number(BigInt(week.recordedNanoAiu)) / 1e9, weekAllowed = Number(BigInt(week.allotmentNanoAiu)) / 1e9;

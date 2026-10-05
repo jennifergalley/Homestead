@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import test from "node:test";
 import { buildCostView, groupBuildCosts } from "../.github/extensions/openspec-task-planner/cost-view.mjs";
+import { loadAccountUsage, summarizeUsageRows } from "../.github/extensions/openspec-task-planner/account-usage.mjs";
 import { loadPlanner } from "../.github/extensions/openspec-task-planner/planner-data.mjs";
 import { persistUsageReport } from "../.github/extensions/openspec-task-planner/accounting-data.mjs";
 import { startPlannerServer } from "../.github/extensions/openspec-task-planner/planner-server.mjs";
@@ -101,6 +102,60 @@ test("credit share marks weeks with unknown costs", () => {
     const view = buildView({ builds: [shipment, { date: "2026-10-01", slot: "7:30 AM", status: "delivered", shippedFeatures: ["Older"] }] });
     assert.equal(view.period.share.unknown, true);
     assert.equal(view.period.share.weeks[0].unknown, true);
+});
+
+const octCycle = { start: "2026-10-01", end: "2026-10-31", reset: "2026-11-01", timeZone: "America/Los_Angeles" };
+
+test("account usage buckets by billing time zone, mixes timestamp formats and groups by project", () => {
+    const rows = [
+        { session_id: "a", created_at: "2026-10-01T06:59:59.000Z", nano: 9_000_000_000n, repository: "o/one" },
+        { session_id: "a", created_at: "2026-10-01T07:00:00.000Z", nano: 2_000_000_000n, repository: "o/one" },
+        { session_id: "b", created_at: "2026-10-02 12:00:00", nano: 3_000_000_000n, repository: null },
+        { session_id: "c", created_at: "2026-11-01T06:59:00Z", nano: 4_000_000_000n, repository: "o/two" },
+        { session_id: "c", created_at: "2026-11-01T07:00:00Z", nano: 5_000_000_000n, repository: "o/two" },
+    ];
+    const summary = summarizeUsageRows(rows, octCycle);
+    assert.deepEqual(summary.days, { "2026-10-01": "2000000000", "2026-10-02": "3000000000", "2026-10-31": "4000000000" });
+    assert.equal(summary.totalNanoAiu, "9000000000");
+    assert.equal(summary.calls, 3);
+    assert.equal(summary.sessions, 3);
+    assert.deepEqual(summary.projects.map((project) => project.repository), ["o/two", "No repository (chats)", "o/one"]);
+});
+
+test("credit share uses account-wide usage when available and falls back to shipped builds when not", () => {
+    const usage = { status: "ok", calls: 3, sessions: 2, projects: [{ repository: "o/one", nanoAiu: "1", calls: 1, sessions: 1 }],
+        days: { "2026-09-30": "50000000000000", "2026-10-04": "25000000000000", "2026-10-20": "1" } };
+    const share = buildView({ usage }).period.share;
+    assert.equal(share.basis, "all-projects");
+    assert.equal(share.recordedNanoAiu, "75000000000001");
+    assert.equal(share.percentUsed, 15);
+    assert.equal(share.weeks[0].recordedNanoAiu, "75000000000000");
+    assert.equal(share.weeks[2].recordedNanoAiu, "1");
+    assert.equal(share.unknown, false);
+    assert.equal(share.projects.length, 1);
+    const fallback = buildView({ usage: { status: "unavailable", message: "no store" } }).period.share;
+    assert.equal(fallback.basis, "shipped-builds");
+    assert.equal(fallback.usageMessage, "no store");
+    assert.equal(fallback.recordedNanoAiu, measured.totals.recordedNanoAiu);
+    assert.equal(buildView().period.share.basis, "shipped-builds");
+});
+
+test("loadAccountUsage reads a session store read-only and fails softly when it is missing", async (t) => {
+    const dir = await mkdtemp(join(tmpdir(), "planner-usage-"));
+    t.after(() => rm(dir, { recursive: true, force: true }));
+    const dbPath = join(dir, "store.db");
+    const { DatabaseSync } = await import("node:sqlite");
+    const db = new DatabaseSync(dbPath);
+    db.exec("CREATE TABLE sessions (id TEXT, repository TEXT); CREATE TABLE assistant_usage_events (session_id TEXT, created_at TEXT, total_nano_aiu INTEGER);");
+    db.exec("INSERT INTO sessions VALUES ('s1','o/one'); INSERT INTO assistant_usage_events VALUES ('s1','2026-10-03T20:00:00Z',1500000000), ('s1','2026-09-30T20:00:00Z',7), ('zz','2026-10-04T01:00:00Z',500000000);");
+    db.close();
+    const usage = await loadAccountUsage({ ...octCycle, dbPath });
+    assert.equal(usage.status, "ok");
+    assert.equal(usage.totalNanoAiu, "2000000000");
+    assert.deepEqual(usage.days, { "2026-10-03": "2000000000" });
+    assert.deepEqual(usage.projects.map((project) => project.repository), ["o/one", "No repository (chats)"]);
+    const missing = await loadAccountUsage({ ...octCycle, dbPath: join(dir, "nope.db") });
+    assert.equal(missing.status, "unavailable");
 });
 
 test("groups combine models/sessions/categories without losing integer cost or duplicating bundles", () => {

@@ -5,7 +5,7 @@ import { isBuildSlotKey } from "./build-slots.mjs";
 import { loadPlanner, loadBuilds, loadPriority, atomicBacklogWrite, priorityPath as priorityFile, loadBacklogInbox, addBacklogEntry, updateBacklogEntry, toBacklogClientEntry, backlogAttachmentsDir, BACKLOG_IMAGE_TYPES } from "./planner-data.mjs";
 import { renderPlannerHtml } from "./planner-html.mjs";
 
-export async function startPlannerServer(projectRoot, instanceId, session) {
+export async function startPlannerServer(projectRoot, instanceId, session, options = {}) {
     const priorityPath = priorityFile(projectRoot);
     // Jenny's backlog-entry form, and reordering/scheduling in this canvas, are
     // deliberately agent-free: they write straight to disk (priority.json,
@@ -57,7 +57,7 @@ export async function startPlannerServer(projectRoot, instanceId, session) {
             }
             if ((req.method === "GET" && url.pathname === "/api/tasks")
                 || (req.method === "POST" && url.pathname === "/refresh")) {
-                sendJson(res, await loadPlanner(projectRoot));
+                sendJson(res, await loadPlanner(projectRoot, Date.now(), options));
                 return;
             }
             if (req.method === "GET" && url.pathname === "/health") {
@@ -91,7 +91,7 @@ export async function startPlannerServer(projectRoot, instanceId, session) {
             }
             if (req.method === "POST" && url.pathname === "/api/quote") {
                 const body = await readBody(req);
-                const planner = await loadPlanner(projectRoot);
+                const planner = await loadPlanner(projectRoot, Date.now(), options);
                 const feature = planner.features.find((item) => item.id === body.id);
                 if (!feature) {
                     sendJson(res, { error: "Unknown item" }, 404);

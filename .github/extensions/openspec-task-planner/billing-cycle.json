@@ -1,8 +1,8 @@
 {
-  "start": "2026-09-30",
-  "end": "2026-10-30",
-  "reset": "2026-10-31",
+  "start": "2026-10-01",
+  "end": "2026-10-31",
+  "reset": "2026-11-01",
   "timeZone": "America/Los_Angeles",
   "shareCredits": 500000,
-  "evidence": "Jenny confirmed these dates on 2026-10-04 from the displayed 27-day reset countdown."
+  "evidence": "Jenny confirmed on 2026-10-04 that the cycle started Oct 1 and resets Nov 1."
 }

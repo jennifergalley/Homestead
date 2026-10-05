@@ -4,6 +4,8 @@ import { loadPlanner } from "./planner-data.mjs";
 import { startPlannerServer } from "./planner-server.mjs";
 
 const projectRoot = fileURLToPath(new URL("../../../", import.meta.url));
+const plannerOptions = { accountUsage: true };
+const plannerOptions = { accountUsage: true };
 const servers = new Map();
 let session;
 
@@ -17,17 +19,17 @@ session = await joinSession({
                 name: "refresh",
                 description: "Rescan OpenSpec tasks and return progress and recorded build costs.",
                 handler: async () => {
-                    const planner = await loadPlanner(projectRoot);
+                    const planner = await loadPlanner(projectRoot, Date.now(), plannerOptions);
                     return { featureCount: planner.features.length, ...planner.summary, accounting: planner.accounting, costView: planner.costView };
                 },
             }],
             open: async (ctx) => {
                 let entry = servers.get(ctx.instanceId);
                 if (!entry) {
-                    entry = await startPlannerServer(projectRoot, ctx.instanceId, session);
+                    entry = await startPlannerServer(projectRoot, ctx.instanceId, session, plannerOptions);
                     servers.set(ctx.instanceId, entry);
                 }
-                const planner = await loadPlanner(projectRoot);
+                const planner = await loadPlanner(projectRoot, Date.now(), plannerOptions);
                 return {
                     title: "Homestead OpenSpec tasks",
                     status: `${planner.summary.completedTasks}/${planner.summary.totalTasks} tasks complete`,

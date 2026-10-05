@@ -1,6 +1,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { shipmentTiming } from "./build-time.mjs";
+import { loadAccountUsage } from "./account-usage.mjs";
 
 const dayMs = 86_400_000;
 const featureLabels = {
@@ -80,7 +81,9 @@ const weekDays = 7;
 
 // Jenny's slice of the monthly credit pool, spread evenly across the billing period in
 // week blocks that start on the period's first day (the last block may be short).
-function creditShare(period, today, shareCredits) {
+function creditShare(period, today, shareCredits, usage) {
+    const account = usage?.status === "ok" ? usage : null;
+    const dayNano = (day) => account ? BigInt(account.days[day.date] ?? 0) : nano(day.recordedNanoAiu);
     if (!Number.isInteger(shareCredits) || shareCredits <= 0) throw new Error("Invalid credit share.");
     const total = BigInt(shareCredits) * nanoPerAiu;
     const dayCount = BigInt(period.days.length);
@@ -95,25 +98,29 @@ function creditShare(period, today, shareCredits) {
         weeks.push({
             index: weeks.length + 1, start, end, days: days.length,
             allotmentNanoAiu: String(allotment),
-            recordedNanoAiu: String(days.reduce((sum, day) => sum + nano(day.recordedNanoAiu), 0n)),
-            unknown: days.some((day) => day.unknown),
+            recordedNanoAiu: String(days.reduce((sum, day) => sum + dayNano(day), 0n)),
+            unknown: account ? false : days.some((day) => day.unknown),
             status: today < start ? "upcoming" : today > end ? "past" : "current",
         });
     }
-    const used = nano(period.recordedNanoAiu);
+    const used = period.days.reduce((sum, day) => sum + dayNano(day), 0n);
     const elapsed = BigInt(period.days.filter((day) => day.date <= today).length);
     const paceAllowed = total * elapsed / dayCount;
     return {
         shareCredits, totalNanoAiu: String(total), recordedNanoAiu: String(used),
         remainingNanoAiu: String(total > used ? total - used : 0n), overNanoAiu: String(used > total ? used - total : 0n),
         percentUsed: Number(used * 10_000n / total) / 100,
-        paceAllowedNanoAiu: String(paceAllowed), unknown: period.unknown,
+        paceAllowedNanoAiu: String(paceAllowed), unknown: account ? false : period.unknown,
+        basis: account ? "all-projects" : "shipped-builds",
+        usageMessage: !account && usage ? usage.message ?? null : null,
+        calls: account ? account.calls : null, sessions: account ? account.sessions : null,
+        projects: account ? account.projects : [],
         currentWeek: weeks.find((week) => week.status === "current")?.index ?? null, weeks,
     };
 }
 
 export function buildCostView({ reports = [], builds = [], manifests = [], cycle = null,
-    now = Date.now() }) {
+    now = Date.now(), usage = null }) {
     const timeZone = cycle?.timeZone ?? "America/Los_Angeles";
     const today = localDate(now, timeZone);
     const byId = new Map();
@@ -168,13 +175,13 @@ export function buildCostView({ reports = [], builds = [], manifests = [], cycle
             }
             period.recordedNanoAiu = String(period.days.reduce((sum, day) => sum + nano(day.recordedNanoAiu), 0n));
             period.unknown = period.days.some((day) => day.unknown);
-            period.share = creditShare(period, today, cycle.shareCredits ?? defaultShareCredits);
+            period.share = creditShare(period, today, cycle.shareCredits ?? defaultShareCredits, usage);
         } else period.message = "Billing dates need updating. The last confirmed period is not current.";
     }
     return { period, shipped, unshippedReports: reports.filter((report) => !used.has(report.buildId)).length };
 }
 
-export async function loadBuildCostView(projectRoot, reports, builds, now = Date.now()) {
+export async function loadBuildCostView(projectRoot, reports, builds, now = Date.now(), { accountUsage = false } = {}) {
     const handoff = join(projectRoot, "docs", "handoff");
     let files;
     try { files = await readdir(handoff); }
@@ -184,5 +191,7 @@ export async function loadBuildCostView(projectRoot, reports, builds, now = Date
         Promise.all(files.filter((file) => /^measured-build-[\w-]+\.json$/.test(file))
             .map(async (file) => JSON.parse(await readFile(join(handoff, file), "utf8")))),
     ]);
-    return buildCostView({ reports, builds: builds.entries, manifests, cycle, now });
+    const usage = accountUsage && cycle
+        ? await loadAccountUsage({ start: cycle.start, end: cycle.end, timeZone: cycle.timeZone ?? "America/Los_Angeles" }) : null;
+    return buildCostView({ reports, builds: builds.entries, manifests, cycle, now, usage });
 }
