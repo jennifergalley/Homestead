@@ -21,7 +21,13 @@ if (-not $run.allowWork -or $run.id -ne $RunId -or
 $output = [IO.Path]::GetFullPath($OutputDirectory, $root)
 if (Test-Path -LiteralPath $output) { throw 'Use a fresh startup probe output.' }
 $package = & (Join-Path $PSScriptRoot 'Resolve-PackageDirectory.ps1') -PackageDirectory $PackageDirectory
-$exe = Join-Path $package "SurvivalGame\Binaries\Win64\SurvivalGame-Win64-$Configuration.exe"
+$receipt = Get-Content -LiteralPath (Join-Path $package 'build-receipt.json') -Raw | ConvertFrom-Json
+if ($receipt.configuration -cne $Configuration) { throw "Package receipt configuration is not $Configuration." }
+$exe = if ($Configuration -ceq 'Shipping') {
+    Join-Path $package 'SurvivalGame\Binaries\Win64\SurvivalGame-Win64-Shipping.exe'
+} else {
+    Join-Path $package 'SurvivalGame\Binaries\Win64\SurvivalGame.exe'
+}
 if (-not (Test-Path -LiteralPath $exe)) { throw "The offline probe requires the actual $Configuration executable." }
 $trialMesh = Join-Path $package 'SurvivalGame\Content\Trials\HeroineVitruvian_20260924_25\SK_TrialVitruvian01_Preferred_Base_Bob.uasset'
 if ($VitruvianTrial -and -not (Test-Path -LiteralPath $trialMesh -PathType Leaf)) {
