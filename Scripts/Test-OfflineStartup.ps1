@@ -71,6 +71,7 @@ $arguments = "-HomesteadPreviewProfile=$profile -HomesteadStartupProbe=`"$output
 if ($VitruvianTrial) { $arguments += ' -HomesteadHeroineTrialVitruvian01' }
 if ($CMUWalk) { $arguments += ' -HomesteadTrialCMUWalk01' }
 $samples = [Collections.Generic.List[object]]::new()
+$developmentTraceControlEndpointSamples = 0
 $started = [DateTimeOffset]::UtcNow
 $process = Start-Process -FilePath $exe -WorkingDirectory $package -ArgumentList $arguments -PassThru
 [ordered]@{pid=$process.Id; startedUtc=$started.ToString('o'); arguments=$arguments; profile=$profile; saveDirectory=$saveDirectory
@@ -86,7 +87,13 @@ try {
         $udp = @(Get-CimInstance -Namespace 'root\StandardCimv2' -ClassName MSFT_NetUDPEndpoint -Filter "OwningProcess=$($process.Id)" |
             Select-Object LocalAddress,LocalPort)
         $samples.Add([ordered]@{utc=[DateTimeOffset]::UtcNow.ToString('o'); tcp=$tcp; udp=$udp})
-        if ($tcp.Count -or $udp.Count) { throw 'Unexpected owned network endpoint. Stop and report before any further launch.' }
+        $developmentTraceControlOnly = $Configuration -ceq 'Development' -and -not $udp.Count -and $tcp.Count -gt 0 -and
+            @($tcp | Where-Object { $_.LocalAddress -cne '0.0.0.0' -or $_.LocalPort -ne 1985 }).Count -eq 0
+        if ($developmentTraceControlOnly) {
+            $developmentTraceControlEndpointSamples++
+        } elseif ($tcp.Count -or $udp.Count) {
+            throw 'Unexpected owned network endpoint. Stop and report before any further launch.'
+        }
         $state = Get-Content -LiteralPath (Join-Path $root 'Automation\run.json') -Raw | ConvertFrom-Json
         if ($state.state -ne 'running' -or
             ($state.completionPolicy -ne 'until-complete' -and
@@ -121,10 +128,16 @@ try {
     if ($shots.Count) { throw 'F9 unexpectedly produced screenshot files.' }
     $copy = Join-Path $output 'ProfileSaveCopies'
     $null = New-Item -ItemType Directory -Path $copy
-    Copy-Item -LiteralPath (Get-ChildItem -LiteralPath $saveDirectory -File).FullName -Destination $copy
-    [ordered]@{status='passed'; configuration=$Configuration; legacyMeshIdentityWaiver=$legacyMeshIdentityWaiver; samples=$samples.Count; elapsedSeconds=([DateTimeOffset]::UtcNow-$started).TotalSeconds
-        native=$native; requestedGraphicsValuesUnchanged=$true; graphicsBytesIdentical=$graphics.bytesIdentical; observedTcpEndpoints=0; observedUdpEndpoints=0
-        limits=$(if($legacyMeshIdentityWaiver){'Bounded owned-PID endpoint sampling plus Development F5/F9 save proof. The known MetaHuman legacy Base.Mesh identity assertion is waived only when the exact post-F9 failure is accompanied by heroine and modular-equipment readiness; trace may be compiled. Not packet capture or proof no brief connection can ever occur. Offscreen windowed only; actual visible borderless and human control comfort are not claimed.'}else{'Bounded owned-PID endpoint sampling plus compiled trace-disabled Shipping proof; not packet capture or proof no brief connection can ever occur. Offscreen windowed only; actual visible borderless and human control comfort are not claimed.'})
+    $profileSaves = @(Get-ChildItem -LiteralPath $saveDirectory -File -Recurse)
+    foreach ($profileSave in $profileSaves) {
+        $relativePath = $profileSave.FullName.Substring($saveDirectory.Length).TrimStart('\')
+        $destination = Join-Path $copy $relativePath
+        $null = New-Item -ItemType Directory -Path (Split-Path $destination -Parent) -Force
+        Copy-Item -LiteralPath $profileSave.FullName -Destination $destination
+    }
+    [ordered]@{status='passed'; configuration=$Configuration; legacyMeshIdentityWaiver=$legacyMeshIdentityWaiver; developmentTraceControlEndpointSamples=$developmentTraceControlEndpointSamples; samples=$samples.Count; elapsedSeconds=([DateTimeOffset]::UtcNow-$started).TotalSeconds
+        native=$native; requestedGraphicsValuesUnchanged=$true; graphicsBytesIdentical=$graphics.bytesIdentical; observedTcpEndpoints=$developmentTraceControlEndpointSamples; observedUdpEndpoints=0
+        limits=$(if($Configuration -ceq 'Development'){'Bounded Development F5/F9 save proof. Only the known Development TraceControl TCP listener at 0.0.0.0:1985 is permitted; every other owned endpoint remains a failure. Trace may be compiled. The MetaHuman legacy Base.Mesh identity assertion is waived only when the exact post-F9 failure is accompanied by heroine and modular-equipment readiness. Not packet capture or proof no brief connection can ever occur. Offscreen windowed only; actual visible borderless and human control comfort are not claimed.'}else{'Bounded owned-PID endpoint sampling plus compiled trace-disabled Shipping proof; not packet capture or proof no brief connection can ever occur. Offscreen windowed only; actual visible borderless and human control comfort are not claimed.'})
     } | ConvertTo-Json -Depth 7 | Set-Content -LiteralPath (Join-Path $output 'offline-result.json')
 } finally {
     $samples | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath (Join-Path $output 'owned-endpoints.json')

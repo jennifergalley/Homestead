@@ -7,6 +7,30 @@ Delivery is work-driven: the planner's Next build ships as soon as its admitted 
 reviewed, then Build after next moves up. Lanes implement only what Jenny has prioritized for a planner
 slot, then go idle; they do not pick up unflagged queue items.
 
+## 2026-10-04 — Next build
+
+- Build ID: `20261004-next-01`
+- Package source SHA: `7bbab1c5175b23fd012c8ad1f5a134d81c93d487`
+- Status: delivered (Development)
+- Ships: the in-room new-game/naming save guard; closer village, beach, route flowers, and old-save
+  road recovery; legacy-only seed packet load merging; estate-tree felling/regrowth; flat meal ink
+  glyphs; Mr. Josiah Trethewey's clean-shaven MetaHuman clerk; and the reviewed sleep, rename, and
+  UI work already admitted on main.
+- Verification: Native 24/24; Development editor/game compile and cook/package; 53 installed package
+  hashes; 41 preserved package-local Saved/config hashes; release-save isolation; installed Development
+  EstateSmoke and ToolRepeat passed. Development acceptance uses ordinary `Test-Game` routes
+  (Shipping QA guard N/A). The F5/F9 probe recorded one save, one load, an identical saved/loaded
+  state MD5, Lit rendering, and profile isolation. Its intentional MetaHuman mesh assertion and the
+  Development-only TraceControl TCP `0.0.0.0:1985` listener were explicitly waived; all other owned
+  endpoints still fail the probe. The installed executable SHA-256 is
+  `6C4933A229423DC31DEE711ADF1C725FF8883C3B162B3E77A9C89F09BA0ACCD3`.
+- Promotion: `Homestead Estate.lnk` now targets the Development `SurvivalGame.exe` with the existing
+  Estate map argument, package-local `-UserDir`, and unchanged Homestead icon. The prior release
+  remains at `E:\Repos\SurvivalGame\Build\Windows-20261004-evening-03`.
+- Review: Clerk Balance OK (`81a547cd`); Jenny's asset-review gate was waived while AFK. Final clerk
+  media: `E:\CopilotScratch\fa19573e-88a5-4c54-ada3-3f9a07de5fc2\review\clerk-01\06-front-counter-clean-shaven.png`.
+  Player acceptance remains pending Jenny's playtest.
+
 ## 2026-10-04 — 3:13 PM
 
 - Build ID: `20261004-evening-03`
@@ -173,6 +197,9 @@ slot, then go idle; they do not pick up unflagged queue items.
 ## Later
 
 - Dedicated Development QA adapter for `Invoke-ShippingQA` parity.
+
+- Launch Development builds with trace control disabled or bound to localhost, if UE supports a flag
+  (avoids a LAN-exposed 1985 listener and firewall prompts).
 
 - Fix `HomesteadStartupProbe`'s legacy mesh-identity assertion to be MetaHuman-aware; the Fishing
   promotion waiver covers only that pre-existing false invariant.
