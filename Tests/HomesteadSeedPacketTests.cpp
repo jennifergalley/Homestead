@@ -241,11 +241,98 @@ void SowAndHarvestCue()
     ripe.withered = true;
     CHECK(DescribeHarvest(ripe).empty());
 }
+// Saves from the afternoon build keep each seed packet as a group of one; they load as stacks.
+void LegacySinglePackets()
+{
+    using namespace Homestead;
+    Simulation sim;
+    OK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));
+    sim.SetPackRowAutoFill(false);
+    OK(sim.GrantItems(Item::TurnipSeed, 3));
+    OK(sim.GrantItems(Item::Seeds, 1));
+    const auto splitAll = [&sim](int container, Item item, int count)
+    {
+        for (int i = 1; i < count; ++i)
+        {
+            const auto& layout = container == 0 ? sim.GetState().inventoryLayout : *sim.GetLayout(container);
+            const auto groups = Groups(layout, item);
+            OK(sim.SplitGroup(container, groups[0], 1, {0, 0}, sim.GetRevision()));
+        }
+    };
+    int chest = 0;
+    Point at{};
+    for (const auto& piece : sim.GetState().structures)
+        if (piece.kind == Piece::Chest) { chest = piece.id; at = StructureCenter(sim.GetState(), piece); break; }
+    CHECK(chest > 0);
+    OK(sim.GrantItems(Item::CarrotSeed, 8));
+    OK(sim.TransferGroup(chest, Groups(sim.GetState().inventoryLayout, Item::CarrotSeed)[0], 3, true, at, sim.GetRevision()));
+    CHECK(sim.Count(Item::CarrotSeed) == 5);
+    splitAll(0, Item::CarrotSeed, 5);
+    splitAll(0, Item::TurnipSeed, 3);
+    const auto stored = [&sim, chest]() -> const InventoryLayout&
+    {
+        for (const auto& piece : sim.GetState().structures)
+            if (piece.id == chest) return piece.layout;
+        static const InventoryLayout none;
+        return none;
+    };
+    for (int i = 1; i < 3; ++i)
+        OK(sim.SplitGroup(chest, Groups(stored(), Item::CarrotSeed)[0], 1, at, sim.GetRevision()));
+    CHECK(Groups(sim.GetState().inventoryLayout, Item::CarrotSeed).size() == 5);
+    CHECK(Groups(sim.GetState().inventoryLayout, Item::TurnipSeed).size() == 3);
+    CHECK(Groups(stored(), Item::CarrotSeed).size() == 3);
+
+    const auto carrots = Groups(sim.GetState().inventoryLayout, Item::CarrotSeed);
+    const auto turnips = Groups(sim.GetState().inventoryLayout, Item::TurnipSeed);
+    OK(sim.MoveToPackRow(carrots[3], 0, 2, sim.GetRevision()));
+    OK(sim.MoveToPackRow(carrots[1], 0, 5, sim.GetRevision()));
+    OK(sim.MoveToPackRow(turnips[2], 0, 7, sim.GetRevision()));
+    OK(sim.MoveToPackSlot(carrots[4], 0, 4, sim.GetRevision()));
+    const auto legacy = sim.Serialize();
+
+    Simulation loaded = sim;
+    OK(loaded.Deserialize(legacy));
+    const auto& state = loaded.GetState();
+    CHECK(loaded.Count(Item::CarrotSeed) == 5 && loaded.Count(Item::TurnipSeed) == 3 && loaded.Count(Item::Seeds) == 1);
+    CHECK(state.inventory == sim.GetState().inventory);
+    CHECK(Groups(state.inventoryLayout, Item::CarrotSeed).size() == 1);
+    CHECK(Groups(state.inventoryLayout, Item::TurnipSeed).size() == 1);
+    CHECK(Groups(state.inventoryLayout, Item::Seeds).size() == 1);
+    for (const auto& entry : state.inventoryLayout)
+        if (entry.item == Item::CarrotSeed) CHECK(entry.quantity == 5);
+        else if (entry.item == Item::TurnipSeed) CHECK(entry.quantity == 3);
+    // The stack the hotbar showed first keeps its cell; the other cell for the same crop empties.
+    CHECK(state.packRow[2].groupId == carrots[3]);
+    CHECK(state.packRow[5].Empty());
+    CHECK(state.packRow[7].groupId == turnips[2]);
+    CHECK(PackRowRules::Valid(state.packRow, state.inventoryLayout));
+    CHECK(PackRowRules::ValidSlots(state));
+    for (const auto& cell : state.packSlots)
+        if (!cell.Empty()) CHECK(PackRowRules::FindEntry(state.inventoryLayout, cell) >= 0);
+    for (const auto& piece : state.structures)
+        if (piece.id == chest)
+        {
+            const auto group = Groups(piece.layout, Item::CarrotSeed);
+            CHECK(group.size() == 1);
+            for (const auto& entry : piece.layout)
+                if (entry.item == Item::CarrotSeed) CHECK(entry.quantity == 3);
+            CHECK(piece.storage[static_cast<int>(Item::CarrotSeed)] == 3);
+        }
+    const auto normalized = loaded.Serialize();
+    Simulation roundtrip = loaded;
+    OK(roundtrip.Deserialize(normalized));
+    CHECK(roundtrip.Serialize() == normalized);
+    const auto stack = Groups(state.inventoryLayout, Item::CarrotSeed)[0];
+    OK(loaded.SplitGroup(0, stack, 2, {0, 0}, loaded.GetRevision()));
+    OK(loaded.MergeGroups(0, Groups(loaded.GetState().inventoryLayout, Item::CarrotSeed)[1], stack, {0, 0}, loaded.GetRevision()));
+    CHECK(loaded.Count(Item::CarrotSeed) == 5);
+}
 }
 
 int main()
 {
     SeedPacketTests::IdentitiesAndStacking();
+    SeedPacketTests::LegacySinglePackets();
     SeedPacketTests::ChestAndGround();
     SeedPacketTests::BuyPackets();
     SeedPacketTests::HarvestWeedsFirst();

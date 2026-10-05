@@ -205,7 +205,7 @@ FString AHomesteadController::FocusTitle() const
     {
         const double Oil = Sim.LampOil();
         return Oil <= 0.0 ? FString(TEXT("Oil lamp \u2013 out of oil"))
-            : FString::Printf(TEXT("Oil lamp - %s left"), Oil >= 1.5 ? *FString::Printf(TEXT("%.0f hours"), FMath::RoundToDouble(Oil))
+            : FString::Printf(TEXT("Oil lamp \u2013 %s left"), Oil >= 1.5 ? *FString::Printf(TEXT("%.0f hours"), FMath::RoundToDouble(Oil))
                 : *FString::Printf(TEXT("%d minutes"), FMath::Max(1, FMath::RoundToInt(Oil * 60.0))));
     }
     return TEXT("Woodland");

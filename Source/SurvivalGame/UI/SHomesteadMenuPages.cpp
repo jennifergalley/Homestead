@@ -1,4 +1,5 @@
 #include "SHomesteadMenuPrivate.h"
+#include "SHomesteadCellBorder.h"
 #include "HomesteadUITheme.h"
 #include "../Simulation/HomesteadPackRow.h"
 
@@ -634,7 +635,7 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                         })
                     ]
                 ]
-                + SOverlay::Slot()[ SNew(SMenuCellBorder) ]
+                + SOverlay::Slot()[ SNew(SHomesteadCellBorder) ]
             ];
         if (PackSlot != INDEX_NONE) PackPadCells.Add({PackSlot, Cell});
         return Cell;
@@ -726,13 +727,6 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                     + SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
                     [ SNew(SBox).WidthOverride(48).HeightOverride(48)
                         [ SNew(SHomesteadIcon).Kind(EntryIcon(Row)).Tint(Row.IconTint) ] ]
-                    // The count sits on the tile itself, as on the hotbar's cells (no box of its own).
-                    + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom)
-                    [
-                        SNew(STextBlock).Text(FText::AsNumber(FMath::Max(1, Row.Quantity)))
-                        .ColorAndOpacity(Ink)
-                        .Font(HomesteadUITheme::Font("Bold", 15))
-                    ]
                 ]
             ];
         }
@@ -816,6 +810,15 @@ TSharedRef<SWidget> SHomesteadMenu::BuildBody()
                 [
                     SNew(SOverlay)
                     + SOverlay::Slot()[ Button ]
+                    // A stack's count sits in the cell's bottom-right corner, as on the hotbar's cells.
+                    + SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Bottom).Padding(0, 0, 12, 8)
+                    [
+                        SNew(STextBlock).Text(FText::AsNumber(FMath::Max(1, Row.Quantity)))
+                        .Visibility(SeenPage == 0 && Row.Subject != EHomesteadMenuSubject::EmptySlot
+                            ? EVisibility::HitTestInvisible : EVisibility::Collapsed)
+                        .ColorAndOpacity(Ink)
+                        .Font(HomesteadUITheme::Font("Bold", 15))
+                    ]
                     // While she crafts this recipe its square fills with white from the bottom, then flashes.
                     + SOverlay::Slot()
                     [

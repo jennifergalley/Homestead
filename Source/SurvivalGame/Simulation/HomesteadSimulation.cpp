@@ -1,4 +1,5 @@
 #include "HomesteadSimulation.h"
+#include "HomesteadSeedStacks.h"
 #include "HomesteadBed.h"
 #include "HomesteadBackpack.h"
 #include "HomesteadChests.h"
@@ -3502,6 +3503,8 @@ Result Simulation::Deserialize(const std::string& data)
         input >> std::ws;
     }
     if (!input.eof()) return invalid();
+    // Afternoon-build saves hold seed packets one to a group; same-crop packets stack now.
+    if (!SeedStacks::MergeSavedPackets(candidate)) return invalid();
     if (!PackRowRules::RestoreSlots(candidate)) return invalid();
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return {false, inventory.message + " Your current game was not changed.", ResultCode::CorruptSave, revision_};

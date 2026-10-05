@@ -1,6 +1,7 @@
 #include "SHomesteadShop.h"
 #include "HomesteadUITheme.h"
 #include "SHomesteadFrame.h"
+#include "SHomesteadCellBorder.h"
 #include "HomesteadPalette.h"
 
 #include "SHomesteadIcon.h"
@@ -48,6 +49,11 @@ const FButtonStyle& ShopButtonStyle()
     return Style;
 }
 FString Utf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
+// The backpack and the fishing pole are one-off tools: a price, not "each".
+template <typename RowType> bool IsOneOff(const RowType& Row)
+{
+    return Row.bUpgrade || (!Row.bHeroine && Row.Item == Homestead::Item::FishingPole);
+}
 FString Money(int64 Amount) { return Utf8(Homestead::FormatMoney(Amount).c_str()); }
 }
 
@@ -82,14 +88,19 @@ TSharedRef<SWidget> SHomesteadShop::Button(const FString& Text, TFunction<void()
 {
     return SNew(SBox).MinDesiredWidth(MinWidth)
     [
-        SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(14, 8))
-        .HAlign(HAlign_Center)
-        .ButtonColorAndOpacity(bPrimary ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
-        .OnClicked_Lambda([Action]() { Action(); return FReply::Handled(); })
+        SNew(SOverlay)
+        + SOverlay::Slot()
         [
-            SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 15))
-            .ColorAndOpacity(bPrimary ? ShopPineInk : ShopInk)
+            SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(14, 8))
+            .HAlign(HAlign_Center)
+            .ButtonColorAndOpacity(bPrimary ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
+            .OnClicked_Lambda([Action]() { Action(); return FReply::Handled(); })
+            [
+                SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 15))
+                .ColorAndOpacity(bPrimary ? ShopPineInk : ShopInk)
+            ]
         ]
+        + SOverlay::Slot()[SNew(SHomesteadCellBorder)]
     ];
 }
 
@@ -352,11 +363,16 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             [
                 // Wide enough for "1,000 coins each" on one line.
                 SNew(SBox).WidthOverride(170).HAlign(HAlign_Right)
-                [ Label(Money(Row.Unit) + (Row.bUpgrade ? TEXT("") : TEXT(" each")), 16, ShopInk, false) ]
+                [ Label(Money(Row.Unit) + (IsOneOff(Row) ? TEXT("") : TEXT(" each")), 16, ShopInk, false) ]
             ]
         ];
     RowWidgets[Index] = Widget;
-    return SNew(SBox).Padding(FMargin(0, 2))[Widget];
+    return SNew(SBox).Padding(FMargin(0, 2))
+    [
+        SNew(SOverlay)
+        + SOverlay::Slot()[Widget]
+        + SOverlay::Slot()[SNew(SHomesteadCellBorder).Brackets(false)]
+    ];
 }
 
 TSharedRef<SWidget> SHomesteadShop::BuildFooter()
@@ -426,13 +442,18 @@ TSharedRef<SWidget> SHomesteadShop::BuildTrade()
     {
         return SNew(SBox).MinDesiredWidth(150)
         [
-            SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(16, 7)).HAlign(HAlign_Center)
-            .ButtonColorAndOpacity(Tab == Index ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
-            .OnClicked_Lambda([this, Index]() { SetTab(Index); return FReply::Handled(); })
+            SNew(SOverlay)
+            + SOverlay::Slot()
             [
-                SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 17))
-                .ColorAndOpacity(Tab == Index ? ShopPineInk : ShopInk)
+                SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(16, 7)).HAlign(HAlign_Center)
+                .ButtonColorAndOpacity(Tab == Index ? FLinearColor(ShopGold) : HomesteadUITheme::Themed(FLinearColor(0.10f, 0.16f, 0.12f, 1)))
+                .OnClicked_Lambda([this, Index]() { SetTab(Index); return FReply::Handled(); })
+                [
+                    SNew(STextBlock).Text(FText::FromString(Text)).Font(HomesteadUITheme::Font("Regular", 17))
+                    .ColorAndOpacity(Tab == Index ? ShopPineInk : ShopInk)
+                ]
             ]
+            + SOverlay::Slot()[SNew(SHomesteadCellBorder)]
         ];
     };
     RowWidgets.SetNum(Rows.Num());
@@ -550,7 +571,7 @@ void SHomesteadShop::Choose(int32 Index)
         const auto& Sim = Controller->Simulation();
         Status = Tab == 0 ? TEXT("You have none to sell.")
             : Sim.GetState().money < Rows[Index].Unit ? FString::Printf(TEXT("That's %s%s; you have %s."), *Money(Rows[Index].Unit),
-                Rows[Index].bUpgrade ? TEXT("") : TEXT(" each"), *Wallet())
+                IsOneOff(Rows[Index]) ? TEXT("") : TEXT(" each"), *Wallet())
             : TEXT("Your pack is full.");
         Refresh();
         return;

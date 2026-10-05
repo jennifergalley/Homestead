@@ -84,30 +84,6 @@ public:
     }
     static constexpr float MaxCellHeight = 220.0f;
 };
-// The same cell border as an SMenuButton, for tiles that are not buttons (empty pack cells).
-class SMenuCellBorder : public SLeafWidget
-{
-public:
-    SLATE_BEGIN_ARGS(SMenuCellBorder) {}
-    SLATE_END_ARGS()
-    void Construct(const FArguments&) { SetVisibility(EVisibility::HitTestInvisible); }
-    virtual FVector2D ComputeDesiredSize(float) const override { return FVector2D::ZeroVector; }
-    virtual int32 OnPaint(const FPaintArgs&, const FGeometry& Geometry, const FSlateRect&,
-        FSlateWindowElementList& Out, int32 LayerId, const FWidgetStyle& WidgetStyle, bool) const override
-    {
-        const FVector2f Size = FVector2f(Geometry.GetLocalSize());
-        const FSlateBrush* White = FCoreStyle::Get().GetBrush(TEXT("WhiteBrush"));
-        const FLinearColor Tint = WidgetStyle.GetColorAndOpacityTint();
-        HomesteadFrameStyle::ForEachCellRect(Size.X, Size.Y,
-            [&](HomesteadFrameStyle::ECellPart Part, float X, float Y, float W, float H)
-            {
-                FSlateDrawElement::MakeBox(Out, LayerId, Geometry.ToPaintGeometry(FVector2f(W, H),
-                    FSlateLayoutTransform(FVector2f(X, Y))), White, ESlateDrawEffect::None,
-                    HomesteadFrameStyle::CellColorOf(Part, false) * Tint);
-            });
-        return LayerId + 1;
-    }
-};
 class SMenuFocusAnchor : public SCompoundWidget
 {
 public:
@@ -362,7 +338,6 @@ inline int32 ShiftFieldBookPage(int32 Page, int32 Direction)
 
 using MenuDetail::SMenuButton;
 using MenuDetail::SMenuFocusAnchor;
-using MenuDetail::SMenuCellBorder;
 using MenuDetail::SHomesteadCraftFill;
 using MenuDetail::Ink;
 using MenuDetail::Muted;
