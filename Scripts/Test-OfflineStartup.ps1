@@ -96,7 +96,8 @@ try {
         $native.status -ceq 'failed' -and
         $native.error -ceq 'Normal startup did not retain rendered modular equipment after F9.' -and
         [bool]$native.modularEquipmentReady -and [bool]$native.heroinePresent
-    if ($process.ExitCode -ne 0 -or (-not $legacyMeshIdentityWaiver -and $native.status -cne 'passed') -or
+    if (($process.ExitCode -ne 0 -and -not $legacyMeshIdentityWaiver) -or
+        (-not $legacyMeshIdentityWaiver -and $native.status -cne 'passed') -or
         [bool]$native.shipping -ne $expectedShipping -or ($Configuration -ceq 'Shipping' -and $native.traceCompiled)) {
         throw "$Configuration native acceptance/compiled trace guard failed."
     }
@@ -114,7 +115,7 @@ try {
     $copy = Join-Path $output 'ProfileSaveCopies'
     $null = New-Item -ItemType Directory -Path $copy
     Copy-Item -LiteralPath (Get-ChildItem -LiteralPath $saveDirectory -File).FullName -Destination $copy
-    [ordered]@{status='passed'; configuration=$Configuration; samples=$samples.Count; elapsedSeconds=([DateTimeOffset]::UtcNow-$started).TotalSeconds
+    [ordered]@{status='passed'; configuration=$Configuration; legacyMeshIdentityWaiver=$legacyMeshIdentityWaiver; samples=$samples.Count; elapsedSeconds=([DateTimeOffset]::UtcNow-$started).TotalSeconds
         native=$native; requestedGraphicsValuesUnchanged=$true; graphicsBytesIdentical=$graphics.bytesIdentical; observedTcpEndpoints=0; observedUdpEndpoints=0
         limits=$(if($legacyMeshIdentityWaiver){'Bounded owned-PID endpoint sampling plus Development F5/F9 save proof. The known MetaHuman legacy Base.Mesh identity assertion is waived only when the exact post-F9 failure is accompanied by heroine and modular-equipment readiness; trace may be compiled. Not packet capture or proof no brief connection can ever occur. Offscreen windowed only; actual visible borderless and human control comfort are not claimed.'}else{'Bounded owned-PID endpoint sampling plus compiled trace-disabled Shipping proof; not packet capture or proof no brief connection can ever occur. Offscreen windowed only; actual visible borderless and human control comfort are not claimed.'})
     } | ConvertTo-Json -Depth 7 | Set-Content -LiteralPath (Join-Path $output 'offline-result.json')
