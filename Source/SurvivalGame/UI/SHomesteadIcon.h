@@ -46,7 +46,9 @@ private:
         RustedPickHead, Hay, Weeds, BrambleCanes, Kindling, ScrapIron, ScrapLead,
         Primroses, Bluebells, WildDaffodils, WildGarlic, OilLamp, OilFlask, PouchArrows, FishingPole, Fish,
         RiverTrout, RiverSalmon, LakePerch, LakeCarp, SeaMackerel, SeaBass,
-        SeedRoots, SeedTurnip, SeedCarrot, SeedPotato, SeedCabbage, SeedBroadBean, SeedStrawberry
+        SeedRoots, SeedTurnip, SeedCarrot, SeedPotato, SeedCabbage, SeedBroadBean, SeedStrawberry,
+        BakedPotatoes, RoastedTurnips, StewedCarrots, HerbedBroadBeans, CabbagePotatoStew, BerryCompote,
+        StrawberryCompote, RootVegetableHotpot, RawFishSlices, GrilledTrout, GrilledPerch
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{HomesteadPalette::Brass};
