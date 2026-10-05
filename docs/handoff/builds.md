@@ -7,15 +7,21 @@ Delivery is work-driven: the planner's Next build ships as soon as its admitted 
 reviewed, then Build after next moves up. Lanes implement only what Jenny has prioritized for a planner
 slot, then go idle; they do not pick up unflagged queue items.
 
-## 2026-10-04 — Next build
+## 2026-10-04 — 7:27:40 PM
 
 - Build ID: `20261004-next-01`
 - Package source SHA: `7bbab1c5175b23fd012c8ad1f5a134d81c93d487`
 - Status: delivered (Development)
-- Ships: the in-room new-game/naming save guard; closer village, beach, route flowers, and old-save
-  road recovery; legacy-only seed packet load merging; estate-tree felling/regrowth; flat meal ink
-  glyphs; Mr. Josiah Trethewey's clean-shaven MetaHuman clerk; and the reviewed sleep, rename, and
-  UI work already admitted on main.
+- Ships:
+- The village is about 63 seconds' sprint from the manor, with its square, beach, and route flowers.
+- Estate trees can be felled and regrow away from home and protected landmarks.
+- Sleep restores full energy.
+- The clerk and store use the Trethewey name.
+- UI polish and shared ornate frames are in.
+- Meals use flat ink glyphs.
+- Mr. Josiah Trethewey is a clean-shaven MetaHuman clerk.
+- New games spawn in the manor and retain the name form before a save can be made.
+- The installed Development build keeps the developer console and crash reports.
 - Verification: Native 24/24; Development editor/game compile and cook/package; 53 installed package
   hashes; 41 preserved package-local Saved/config hashes; release-save isolation; installed Development
   EstateSmoke and ToolRepeat passed. Development acceptance uses ordinary `Test-Game` routes
@@ -32,6 +38,10 @@ slot, then go idle; they do not pick up unflagged queue items.
   Player acceptance remains pending Jenny's playtest.
 - Accounting: per-build report unavailable: `assistant_usage_events` is missing from the session DBs.
   No estimated or zero-cost report was fabricated.
+
+## Next build
+
+- Map-shrink stage 2: half-scale terrain rebake after Jenny's approval.
 
 ## 2026-10-04 — 3:13 PM
 
