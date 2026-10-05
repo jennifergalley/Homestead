@@ -12,8 +12,9 @@ namespace SeedStacks
 {
 namespace
 {
-// Folds one layout's seed-packet groups into the first of each crop in `order` (layout indices),
-// collecting the retired group ids.
+// Folds one layout's single-packet seed groups (the shape older saves wrote) into the first of each crop in
+// `order` (layout indices), collecting the retired group ids. Groups of more than one are a stack she
+// arranged (a split included), so they are left as saved.
 bool Fold(InventoryLayout& layout, const std::vector<int>& order, std::set<int>& retired)
 {
     std::array<int, ItemCount> survivor;
@@ -21,7 +22,7 @@ bool Fold(InventoryLayout& layout, const std::vector<int>& order, std::set<int>&
     for (const int index : order)
     {
         auto& entry = layout[index];
-        if (entry.wearableId != 0 || !IsSeedPacket(entry.item)) continue;
+        if (entry.wearableId != 0 || !IsSeedPacket(entry.item) || entry.quantity != 1) continue;
         int& keep = survivor[static_cast<int>(entry.item)];
         if (keep < 0) { keep = index; continue; }
         if (entry.quantity > std::numeric_limits<int>::max() - layout[keep].quantity) return false;
