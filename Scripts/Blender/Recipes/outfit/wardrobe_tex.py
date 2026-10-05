@@ -218,7 +218,7 @@ def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, s
         col = col * (0.93 + 0.14 * m[..., 0:1])
         dirt_col = np.array([0.24, 0.19, 0.13]) if not wool else np.array([0.20, 0.155, 0.10])
         dirt = grime
-        if wool:
+        if wool and st.get("wool_wear", True):
             knees = np.zeros_like(H)
             for sx in (1.0, -1.0):
                 kc = np.array([0.105 * sx, -0.06, 0.50])
@@ -227,7 +227,7 @@ def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, s
             seat = T.smoothstep(xyz[..., 1], 0.03, 0.07) * T.smoothstep(xyz[..., 2], 0.80, 0.88) * (1 - T.smoothstep(xyz[..., 2], 0.95, 1.0))
             mud = 1 - T.smoothstep(xyz[..., 2], 0.09, 0.30)
             dirt = dirt + 0.30 * knees * (0.5 + m[..., 1]) + 0.12 * seat * m[..., 1] + 0.30 * mud * T.smoothstep(m[..., 2], 0.35, 0.7)
-        else:
+        elif not wool:
             if st["yellow"]:
                 # sweat-yellowed underarms and collar on unbleached linen
                 ua = np.zeros_like(H)
@@ -236,7 +236,7 @@ def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, s
                     ua = np.maximum(ua, 1 - T.smoothstep(np.linalg.norm(xyz - c[None, None], axis=-1), 0.02, 0.07))
                 col = col * (1 - st["yellow"] * 0.18 * ua[..., None] * np.array([0.0, 0.25, 1.0]))
             dust = (1 - T.smoothstep(xyz[..., 2], 1.02, 1.12)) * T.smoothstep(-xyz[..., 1], 0.0, 0.05)
-            dirt = dirt + 0.08 * dust * m[..., 1]
+            dirt = dirt + st.get("dust", 0.08) * dust * m[..., 1]
         dirt = np.clip(dirt, 0, 0.45)[..., None]
         col = col * (1 - dirt) + dirt_col * dirt * (0.8 + 0.4 * h_w[..., None])
         rgh = rgh + 0.03 * dirt[..., 0]

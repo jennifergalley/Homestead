@@ -71,8 +71,13 @@ def _import_skeletal(fbx):
     return mesh
 
 
-def _materials(props, parent, mesh, name):
-    textures = SOURCE / "Textures"
+def _find(stem):
+    """The exported FBX, in its own folder (ClerkApron/SKM_ClerkApron.fbx) or flat under SOURCE."""
+    return next(iter(sorted(SOURCE.rglob(f"{stem}.fbx"))), SOURCE / f"{stem}.fbx")
+
+
+def _materials(props, parent, mesh, name, fbx):
+    textures = fbx.parent / "Textures" if (fbx.parent / "Textures").is_dir() else fbx.parent
     materials = mesh.get_editor_property("static_materials" if isinstance(mesh, unreal.StaticMesh) else "materials")
     for index, slot in enumerate(materials):
         slot_name = str(slot.material_slot_name)
@@ -101,22 +106,22 @@ def run():
     parent = props.textured_parent()
     results = {}
     for name in GARMENTS:
-        fbx = SOURCE / f"{name}.fbx"
+        fbx = _find(name)
         if not fbx.exists():
             unreal.log_warning(f"Clerk garment not yet authored: {name}")
             continue
         mesh = _import_skeletal(fbx)
-        mesh.materials = _materials(props, parent, mesh, name)
+        mesh.materials = _materials(props, parent, mesh, name, fbx)
         props.save(mesh)
         bounds = mesh.get_bounds()
         results[name] = {"mesh": mesh.get_path_name(), "slots": [str(s.material_slot_name) for s in mesh.materials],
                          "extent_cm": [round(v * 2, 2) for v in (bounds.box_extent.x, bounds.box_extent.y,
                                                                  bounds.box_extent.z)],
                          "skeleton": mesh.skeleton.get_path_name()}
-    pencil = SOURCE / f"{PENCIL}.fbx"
+    pencil = _find(PENCIL)
     if pencil.exists():
         mesh = props.import_mesh(pencil, DEST, PENCIL)
-        mesh.set_editor_property("static_materials", _materials(props, parent, mesh, PENCIL))
+        mesh.set_editor_property("static_materials", _materials(props, parent, mesh, PENCIL, pencil))
         props.save(mesh)
         bounds = mesh.get_bounds()
         results[PENCIL] = {"mesh": mesh.get_path_name(),
