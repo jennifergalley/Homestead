@@ -32,9 +32,8 @@ DRIFT_RADIUS_M = 2.2
 SEED = 20261004
 KEEP_CLEAR_M = 3.0           # off the walked line itself
 STEP_M = 1.0
-STORE_CLEAR_M = 1.5       # flowers keep this far from a building footprint
+BED_SCALE = 2.6           # village beds are planted thick, so the clumps read from across the square
 STREET_CLEAR_M = 3.2      # and this far from the street centreline (half width 2.75 m)
-STORE_CLUMPS = 6
 
 
 def densify(points, step=STEP_M):
@@ -145,30 +144,76 @@ def fill(route, spans, rng, habitat):
 
 
 
-def store_front(layout, rng):
-    """Flower drifts either side of the walk up to the store door, clear of every footprint and the street."""
-    town = layout["town"]
-    door = np.array(layout["landmarks"]["GeneralStoreDoor"][:2])
-    street = densify(town["street"], 0.5)
-    store = np.array(town["store"]["footprint"])
-    lo, hi = store.min(axis=0) - STORE_CLEAR_M, store.max(axis=0) + STORE_CLEAR_M
-    blocks = [(np.array([b["x"], b["y"]]), 0.5 * np.hypot(b["width"], b["depth"]) + STORE_CLEAR_M)
-              for b in town["buildings"]]
-    out = []
-    for dx in (-5.0, 5.0, -7.5, 7.5):
-        for dy in (-5.0, -8.0):
-            kind = int(rng.choice((43, 44, 46, 48)))
-            for p in np.array([door[0] + dx, door[1] + dy]) + rng.normal(0.0, 1.0, (STORE_CLUMPS, 2)):
-                if np.all(p > lo) and np.all(p < hi):
-                    continue
-                if any(np.hypot(*(c - p)) < r for c, r in blocks):
-                    continue
-                if np.hypot(*(street - p).T).min() < STREET_CLEAR_M:
-                    continue
-                out.append((kind, TAG, p[0] * 100.0, p[1] * 100.0, rng.uniform(0, 360),
-                            FLOWER_SCALE[kind] * rng.uniform(0.85, 1.2)))
-    return out
+def bed_record(rng, p, kinds=(43, 44, 46, 48, 45), grow=BED_SCALE):
+    kind = int(rng.choice(kinds))
+    return (kind, TAG, p[0] * 100.0, p[1] * 100.0, rng.uniform(0, 360), FLOWER_SCALE[kind] * grow * rng.uniform(0.85, 1.2))
 
+
+def facades(layout):
+    """(front centre, outward unit vector, side unit vector, width, depth, door offset m) for every building."""
+    town = layout["town"]
+    rows = []
+    for b in town["buildings"]:
+        yaw = np.radians(b["yaw"])
+        out = np.array([-np.cos(yaw), -np.sin(yaw)])
+        side = np.array([-out[1], out[0]])
+        door = abs(b["doorAt"]) * max(0.0, b["width"] / 2 - 1.1 - 0.6)
+        rows.append((np.array([b["x"], b["y"]]), out, side, b["width"], b["depth"], door))
+    store = np.array(town["store"]["footprint"])
+    door = np.array(layout["landmarks"]["GeneralStoreDoor"][:2])
+    lo, hi = store.min(axis=0), store.max(axis=0)
+    rows.append((door + np.array([0.0, 0.5]), np.array([0.0, 1.0]), np.array([1.0, 0.0]), hi[0] - lo[0], hi[1] - lo[1], 0.0))
+    return rows
+
+
+def inside_any(p, rows, margin):
+    for front, out, side, width, depth, _ in rows:
+        rel = p - front
+        u, v = float(rel @ out), float(rel @ side)
+        if -depth - margin < u < margin and abs(v) < width / 2 + margin:
+            return True
+    return False
+
+
+def village_flowers(layout, rng, habitat):
+    """Beds along every facade either side of the door steps, and drifts where the spur leaves the road.
+
+    The door's side is not recorded here, so beds keep clear of the door's offset on both sides of the centre.
+    """
+    town = layout["town"]
+    street = densify(town["street"], 0.5)
+    road = densify(layout["road"], 0.5)
+    rows = facades(layout)
+    out = []
+
+    def clear_of_street(p):
+        return np.hypot(*(street - p).T).min() >= STREET_CLEAR_M
+
+    for front, normal, side, width, depth, door in rows:
+        half = width / 2 - 0.5
+        for v in np.arange(-half, half + 0.01, 0.55):
+            if abs(abs(v) - door) < 1.9 or (door == 0.0 and abs(v) < 2.0):
+                continue
+            for _ in range(4):
+                p = front + normal * rng.uniform(0.9, 1.5) + side * (v + rng.uniform(-0.3, 0.3))
+                if inside_any(p, rows, 0.4) or not clear_of_street(p):
+                    continue
+                out.append(bed_record(rng, p))
+    # Junction: drifts on both sides of the road and of the spur just past it.
+    j = min(int(town["junctionChainage"] / 0.5), len(road) - 2)
+    for centre_line, base, n in ((road, j, 80), (road, j + 40, 80), (street, 12, 40), (street, 32, 40)):
+        for _ in range(n):
+            k = min(base + int(rng.integers(-16, 16)), len(centre_line) - 2)
+            tangent = centre_line[k + 1] - centre_line[k]
+            tangent /= max(np.hypot(*tangent), 1e-9)
+            normal = np.array([-tangent[1], tangent[0]])
+            p = centre_line[k] + normal * rng.choice((-1.0, 1.0)) * rng.uniform(4.2, 7.5) + rng.normal(0.0, 0.6, 2)
+            if not habitat.allowed(p[None, :])[0] or inside_any(p, rows, 1.0) or not clear_of_street(p):
+                continue
+            if np.hypot(*(road - p).T).min() < STREET_CLEAR_M:
+                continue
+            out.append(bed_record(rng, p))
+    return out
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -191,7 +236,7 @@ def main():
             arr = np.array(fill(route, spans, rng, habitat), dtype=RECORD)
             records.append(arr)
             found = np.r_[found, np.c_[arr["x"], arr["y"]] / 100.0]
-        records.append(np.array(store_front(layout, rng), dtype=RECORD))
+        records.append(np.array(village_flowers(layout, rng, habitat), dtype=RECORD))
         extra = np.concatenate(records) if records else np.array([], dtype=RECORD)
         result = np.r_[base, extra]
         SCENERY.write_bytes(b"HSC1" + struct.pack("<I", len(result)) + result.tobytes())

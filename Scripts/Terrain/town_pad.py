@@ -1,6 +1,6 @@
-"""Level a building pad for the village at the foot of the drive (shrink-estate-map, stage 1).
+"""Level a building pad for the village in the woods north-east of the manor (shrink-estate-map, stage 1).
 
-The village moves from the far end of the road to a patch of hillside beside it, about 140 m from the manor.
+The village moves from the far end of the road to a hidden patch of hillside about 300 m from the manor forecourt.
 The ground there falls roughly 8% to the north-west, so a plain plane would cut and fill metres at the corners.
 This lays a gentler plane (PAD_GRADIENT_SHARE of the hill's own tilt) under the square and its buildings, with
 the lumps smoothed out, and blends it into the hillside over FALLOFF_M. The road is kept untouched.
@@ -27,7 +27,7 @@ PNG = os.path.join(HERE, "Estate_Heightmap_4033.png")
 LAYOUT = os.path.join(HERE, "estate_layout.json")
 SIZE, H = 4033, 2016
 
-CENTRE_M = (-96.0, -618.0)        # the square's centre (x north, y east); town_layout.py reads it from the layout
+CENTRE_M = (-100.0, -330.0)       # the square's centre (x north, y east); town_layout.py reads it from the layout
 CORE_HALF_M = (34.0, 42.0)         # the pad's level core: x and y half extents, the square and its buildings
 FALLOFF_M = 20.0                   # blended into the hillside over this width
 PAD_GRADIENT_SHARE = 0.75           # of the hill's own tilt: a gentle fall, not a terrace

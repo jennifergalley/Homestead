@@ -167,7 +167,7 @@ void UHomesteadMapComponent::RefreshModel()
         {Homestead::Anchor::CoveBeach, TEXT("The cove"), TEXT("Your own little beach where the river meets the sea."), EHomesteadMapGlyph::Cove},
         {Homestead::Anchor::MillSite, TEXT("Mill site"), TEXT("The old water mill's footings, by the ford."), EHomesteadMapGlyph::Mill},
         {Homestead::Anchor::EstateGateway, TEXT("Estate gateway"), TEXT("Where the estate drive meets the old road."), EHomesteadMapGlyph::Gateway},
-        {Homestead::Anchor::TownSquare, TEXT("Town"), TEXT("The village at the foot of the drive, above the estuary."), EHomesteadMapGlyph::Town},
+        {Homestead::Anchor::TownSquare, TEXT("Town"), TEXT("The village in the woods above the estuary."), EHomesteadMapGlyph::Town},
         {Homestead::Anchor::GeneralStoreDoor, TEXT("General store"), TEXT("Tools, seed and supplies; it buys your goods too."), EHomesteadMapGlyph::Store},
     };
     // The manor first: its footprint's middle, else where she wakes.
