@@ -239,6 +239,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
     {
         // Nothing the visuals are built from has changed: keep them and do only the per-refresh work.
         UpdateEstateGrass(State);
+        UpdateSceneryTreeStages(Simulation);
         bLampDropLit = Simulation.LampOil() > 0.0;
         UpdateLighting(State);
         LastRefreshMilliseconds = (FPlatformTime::Seconds() - RefreshStarted) * 1000;
@@ -279,6 +280,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
         ResourceLayoutSignature = MoveTemp(Layout);
     }
     if (State.fixedEstate) ClearEstateSceneryUnderPieces(Simulation, LayoutKey);
+    UpdateSceneryTreeStages(Simulation);
     UpdateEstateGrass(State);
     FString OuterLayout = FString::Printf(TEXT("%llu:%u:%d,%d;"),
         static_cast<unsigned long long>(State.world.seed), State.world.generationVersion,

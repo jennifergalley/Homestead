@@ -174,6 +174,17 @@ public:
     // Where an axe meets active tree ResourceId at waist height: the trunk's centre and radius
     // (cm). False when it isn't a standing mature tree.
     bool TreeChopTarget(int32 ResourceId, FVector2D& Centre, float& Radius) const;
+    // The estate's decorative trees (HomesteadWorldSceneryTrees.cpp, openspec chop-any-tree). The standing,
+    // unprotected tree nearest her within Reach whose trunk is in front of her (or within a pace); its
+    // trunk position is the simulation's key. Radius is the trunk's chop radius, cm.
+    bool FindSceneryTreeNear(const Homestead::Simulation& Simulation, FVector2D From, FVector2D Facing, float Reach,
+        FVector2D& Trunk, float& Radius) const;
+    // Call right after Simulation::FellSceneryTree: lifts a copy of the tree out of its batch to topple
+    // with DropFelledTree (the same machinery as a woodland tree) and brings the stump forward.
+    bool BeginFellingScenery(const Homestead::Simulation& Simulation, FVector2D Trunk);
+    // Brings the stumps and saplings, and the hidden standing trees, in step with State::felledTrees.
+    // Cheap to call every refresh: it only works when the felled set or the hour of the next stage changes.
+    void UpdateSceneryTreeStages(const Homestead::Simulation& Simulation, bool bForce = false);
     void SetPlacementPreview(bool Visible, const Homestead::PlacementTarget& Target, bool bValid);
     void SetDeconstructPreview(const Homestead::State& State, int32 StructureId, bool bValid);
     // A thin ground outline round one garden square (HomesteadWorldGardenOutline.cpp): green when the hoe or
@@ -395,6 +406,25 @@ private:
     TArray<float> EstateSceneryTrunkRadius; // Trees only: the trunk footprint kept clear of interactables.
     TArray<float> EstateSceneryFlowerRadius; // Full unscaled XY bounds, including the pivot offset; 0 for other kinds.
     TArray<TBitArray<>> EstateSceneryHidden;
+    // Choppable estate trees, in 20 m cells (HomesteadWorldSceneryTrees.cpp). Trunk is where the simulation
+    // keys it; Batch/Index locate its instance in EstateScenery.
+    struct FSceneryTreeRef
+    {
+        int32 Batch = INDEX_NONE;
+        int32 Index = INDEX_NONE;
+        float X = 0, Y = 0;
+        float TrunkRadius = 0;
+    };
+    TMap<FIntPoint, TArray<FSceneryTreeRef>> SceneryTreeGrid;
+    // Felled trees' instances (Batch << 32 | Index) that stay hidden, ORed into the clear-under-pieces pass.
+    TSet<uint64> FelledSceneryInstances;
+    UPROPERTY() TObjectPtr<UHierarchicalInstancedStaticMeshComponent> ScenerySaplings;
+    UPROPERTY() TObjectPtr<UHierarchicalInstancedStaticMeshComponent> SceneryStumps;
+    uint64 SceneryStageRevision = ~0ull;
+    uint64 SceneryStageSignature = 0;
+    double SceneryStageNextHour = 0;
+    const FSceneryTreeRef* FindSceneryTreeAt(FVector2D Trunk) const;
+    void RegisterSceneryTree(int32 Batch, int32 Index, float X, float Y, float TrunkRadius);
     // The near meadow round the camera on the fixed estate (HomesteadGrassField).
     UPROPERTY() TObjectPtr<class UHomesteadGrassField> EstateGrass;
     // Wetness and Daylight for the estate ground and meadow materials (Scripts/Terrain/build_ground.py).

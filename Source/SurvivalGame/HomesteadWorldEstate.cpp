@@ -266,6 +266,9 @@ bool AHomesteadWorld::BuildEstateScenery()
             }
             Base.Z -= Kind.RimLift * Record.Scale;
         }
+        if (Kind.bTree)
+            RegisterSceneryTree(BatchIndex, Transforms[BatchIndex].Num(), Record.X, Record.Y,
+                FMath::Clamp(Kind.Footprint * Record.Scale * 0.35f, 10.0f, 55.0f));
         Transforms[BatchIndex].Add(FTransform(Rotation, Base - Rotation.RotateVector(Anchor * Record.Scale), FVector(Record.Scale)));
     }
     int32 Total = 0, Cells = 0;
@@ -368,7 +371,8 @@ void AHomesteadWorld::ClearEstateSceneryUnderPieces(const Homestead::Simulation&
             const float Scale = Transforms[Index].GetScale3D().X;
             if (Radius <= 0)
             {
-                const bool bBlocking = NearNode(Location, NodeTrunkClear + Trunk * Scale);
+                const bool bBlocking = NearNode(Location, NodeTrunkClear + Trunk * Scale)
+                    || FelledSceneryInstances.Contains((static_cast<uint64>(Batch) << 32) | static_cast<uint32>(Index));
                 if (Hidden[Index] == bBlocking) continue;
                 Hidden[Index] = bBlocking;
                 FTransform Shown = Transforms[Index];

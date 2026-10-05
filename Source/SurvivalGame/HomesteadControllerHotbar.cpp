@@ -372,6 +372,11 @@ void AHomesteadController::UseSelectedTool()
         StartLampSetDown();
         return;
     }
+    if (Tool == Homestead::Item::Hatchet && Focus == EFocus::SceneryTree)
+    {
+        StartSceneryFell();
+        return;
+    }
     if (Tool == Homestead::Item::Hatchet && Focus == EFocus::Resource)
         for (const auto& Node : State().resources)
             if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::ForestTree)
