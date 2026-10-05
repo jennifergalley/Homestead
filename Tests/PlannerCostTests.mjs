@@ -2,8 +2,10 @@ import assert from "node:assert/strict";
 import { mkdtemp, mkdir, writeFile, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import test from "node:test";
+import { readdirSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { buildCostView, groupBuildCosts } from "../.github/extensions/openspec-task-planner/cost-view.mjs";
 import { loadAccountUsage, summarizeUsageRows } from "../.github/extensions/openspec-task-planner/account-usage.mjs";
 import { loadPlanner } from "../.github/extensions/openspec-task-planner/planner-data.mjs";
@@ -315,4 +317,14 @@ test("cost tab in an isolated browser shows the chart, summaries, strict heading
     assert.deepEqual(errors, []);
     assert.deepEqual(writes, []);
     assert.deepEqual(await Promise.all(paths.map((path) => readFile(path, "utf8"))), before);
+});
+
+test("every planner extension module passes a syntax check, including extension.mjs which no test imports", () => {
+    const dir = fileURLToPath(new URL("../.github/extensions/openspec-task-planner/", import.meta.url));
+    const modules = readdirSync(dir).filter((name) => name.endsWith(".mjs"));
+    assert.ok(modules.includes("extension.mjs"));
+    for (const name of modules) {
+        const result = spawnSync(process.execPath, ["--check", join(dir, name)], { encoding: "utf8" });
+        assert.equal(result.status, 0, name + ": " + result.stderr);
+    }
 });
