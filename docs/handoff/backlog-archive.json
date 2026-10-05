@@ -135,6 +135,100 @@
         }
       ],
       "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
+    },
+    {
+      "buildId": "20261004-next-01",
+      "archivedAt": "2026-10-05T02:27:40.3619242Z",
+      "status": "shipped-pending-player-acceptance",
+      "receipt": {
+        "buildRecord": "builds.md",
+        "changelist": "builds.md",
+        "sourceCommit": "7bbab1c5175b23fd012c8ad1f5a134d81c93d487",
+        "installedDevelopmentExecutableSha256": "6C4933A229423DC31DEE711ADF1C725FF8883C3B162B3E77A9C89F09BA0ACCD3",
+        "observedUsageReport": "accounting/reports/20261004-next-01.json",
+        "limitations": "Development acceptance uses ordinary Test-Game routes; observed usage accounting is not billing-reconciled and retains mixed-work, context-tier, and post-capture-tail limitations."
+      },
+      "inboxEntries": [
+        {
+          "id": "jenny-muucngun-k4z9j1",
+          "title": "Sleep always resets the energy bar entirely",
+          "description": "Sleeping has always fully restored energy in cozy life sims - let's match the standard practice.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T21:45:15.791Z",
+          "updatedUtc": "2026-10-04T21:48:55.882Z"
+        },
+        {
+          "id": "jenny-muu7h2lt-0jye7b",
+          "title": "Rename Pascoe to something else, non-Poldark-related",
+          "description": "The names of the people and places should explicitly avoid directly referencing Poldark, the family names, business names, or estate names.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T19:20:19.313Z"
+        },
+        {
+          "id": "jenny-muucngvp-51pwhy",
+          "title": "[Balance UI] Shared ornate frame (SHomesteadFrame)",
+          "description": "Source: Balance Agent UI audit, docs/design/cohesion.md §5 (2026-10-04). Size M-L. One code-drawn frame (double rule, corner flourish, paper grain) used across HUD, hotbar, shop and field book.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T21:45:15.829Z"
+        },
+        {
+          "id": "jenny-muucngw8-oi1cas",
+          "title": "[Balance UI] Quick-win UI polish",
+          "description": "Source: Balance Agent UI audit, docs/design/cohesion.md §5 (2026-10-04). Size S each: in-palette selection outline (not blue); ink ticks/crosses on craft rows; framed hotbar selection; ink keycaps; copy pass (store name, en dashes, date format).",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T21:45:15.848Z"
+        },
+        {
+          "id": "jenny-mutdt417-zj976u",
+          "title": "I'm not able to chop down trees",
+          "description": "It seems that in the shift from the survival MVP to the estate version of the game I lost the ability to chop down trees. We should still have the animation and sounds - please give me the ability to chop down any tree in the map, and depending on where it is (say, in a forest or far away from the manor or farm), it should have the capability to grow back (we can say it comes back as a fully formed tree for now and defer tree growth rates for later)",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T05:29:52.555Z"
+        },
+        {
+          "id": "jenny-muud0ujl-ddilgf",
+          "title": "[Balance] Something to see along every route",
+          "description": "Source: Balance Agent, docs/design/balance.md §9 \"Travel times\" (2026-10-04). Roughly every 50 m at a sprint (about 10 s), there should be a scenery or forage point: flowers, a stile, a view, a forageable.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T21:55:40.065Z",
+          "updatedUtc": "2026-10-04T21:58:41.933Z"
+        },
+        {
+          "id": "jenny-muue0he2-1xhiqg",
+          "title": "New spawn spawned me way outside the manor instead of in the room with the fireplace",
+          "description": "It also skipped the name / estate name form",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T22:23:22.634Z"
+        },
+        {
+          "id": "jenny-muuha81v-mpk0ja",
+          "title": "[Balance UI] Meal recipe icons match the tool glyphs",
+          "description": "Source: Balance Agent, docs/design/cohesion.md §5 icon style (2026-10-04). In the craft grid the meal icons sit on grey photo tiles while tools are flat ink glyphs; redraw meals as flat glyphs to match.",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T23:54:55.939Z"
+        },
+        {
+          "id": "jenny-muu7idr3-mphjdv",
+          "title": "MetaHuman model for the General Store clerk",
+          "description": "Instead of the placeholder heroine asset, the General Store clerk should use a MetaHuman model with period-appropriate clothing, and it should be a man in his 50s or so",
+          "imageFile": null,
+          "imageMime": null,
+          "createdUtc": "2026-10-04T19:21:20.415Z"
+        }
+      ],
+      "plannerOnlyItems": [
+        "widen-estate-beach",
+        "space-out-town-square"
+      ],
+      "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
     }
   ]
 }

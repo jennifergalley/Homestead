@@ -57,36 +57,12 @@
       "createdUtc": "2026-10-04T05:18:11.604Z"
     },
     {
-      "id": "jenny-mutdt417-zj976u",
-      "title": "I'm not able to chop down trees",
-      "description": "It seems that in the shift from the survival MVP to the estate version of the game I lost the ability to chop down trees. We should still have the animation and sounds - please give me the ability to chop down any tree in the map, and depending on where it is (say, in a forest or far away from the manor or farm), it should have the capability to grow back (we can say it comes back as a fully formed tree for now and defer tree growth rates for later)",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T05:29:52.555Z"
-    },
-    {
       "id": "jenny-mutdvi4f-5daxbq",
       "title": "I should be able to go down into the mine and mine for rock, ore and gems",
       "description": "The trapdoor in the Mine building asset should be usable, and I should be able to desend into dark tunnels, where I need to use my oil lamp for light, and my pickaxe to mine for ores, stone, and gems, as laid out in our plans. I should be able to sell these items in town and use them in crafting ingredients. Most important is the stone building recipes for rebuilding the manor to its former glory.",
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-04T05:31:44.127Z"
-    },
-    {
-      "id": "jenny-muu7h2lt-0jye7b",
-      "title": "Rename Pascoe to something else, non-Poldark-related",
-      "description": "The names of the people and places should explicitly avoid directly referencing Poldark, the family names, business names, or estate names.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T19:20:19.313Z"
-    },
-    {
-      "id": "jenny-muu7idr3-mphjdv",
-      "title": "MetaHuman model for the General Store clerk",
-      "description": "Instead of the placeholder heroine asset, the General Store clerk should use a MetaHuman model with period-appropriate clothing, and it should be a man in his 50s or so",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T19:21:20.415Z"
     },
     {
       "id": "jenny-muucngtd-ksulr2",
@@ -105,15 +81,6 @@
       "createdUtc": "2026-10-04T21:45:15.781Z"
     },
     {
-      "id": "jenny-muucngun-k4z9j1",
-      "title": "Sleep always resets the energy bar entirely",
-      "description": "Sleeping has always fully restored energy in cozy life sims - let's match the standard practice.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T21:45:15.791Z",
-      "updatedUtc": "2026-10-04T21:48:55.882Z"
-    },
-    {
       "id": "jenny-muucnguw-nc2d6p",
       "title": "[Balance] Snack values: bread 20, cheese 28",
       "description": "Source: Balance Agent, docs/design/balance.md §9 (2026-10-04). Set bread to restore 20 energy and cheese 28.",
@@ -130,28 +97,12 @@
       "createdUtc": "2026-10-04T21:45:15.818Z"
     },
     {
-      "id": "jenny-muucngvp-51pwhy",
-      "title": "[Balance UI] Shared ornate frame (SHomesteadFrame)",
-      "description": "Source: Balance Agent UI audit, docs/design/cohesion.md §5 (2026-10-04). Size M-L. One code-drawn frame (double rule, corner flourish, paper grain) used across HUD, hotbar, shop and field book.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T21:45:15.829Z"
-    },
-    {
       "id": "jenny-muucngvz-jtxxdm",
       "title": "[Balance UI] Energy capsule",
       "description": "Source: Balance Agent UI audit, docs/design/cohesion.md §5 (2026-10-04). Size S. Energy bar with ticks at 25 and 10, sage fill and a palette icon instead of the plain green bar.",
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-04T21:45:15.839Z"
-    },
-    {
-      "id": "jenny-muucngw8-oi1cas",
-      "title": "[Balance UI] Quick-win UI polish",
-      "description": "Source: Balance Agent UI audit, docs/design/cohesion.md §5 (2026-10-04). Size S each: in-palette selection outline (not blue); ink ticks/crosses on craft rows; framed hotbar selection; ink keycaps; copy pass (store name, en dashes, date format).",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T21:45:15.848Z"
     },
     {
       "id": "jenny-muucngwi-v8ki0g",
@@ -180,19 +131,11 @@
     {
       "id": "jenny-muucy9hz-jv5gx7",
       "title": "Shrink the map by about half; smaller estate; town closer",
-      "description": "The map is too big and it takes too long to get anywhere (Coral Island's size makes sense now). Scale the map down by roughly half, make the estate itself a tad smaller, and bring town closer so walking there doesn't take so long.",
+      "description": "The map is too big and it takes too long to get anywhere (Coral Island's size makes sense now). Scale the map down by roughly half, make the estate itself a tad smaller, and bring town closer so walking there doesn't take so long.\n\nStage 1 shipped 2026-10-04 7:28 PM: the village is now ~300 m / 63 s sprint from the manor, road trimmed to 852 m. Remaining: stage 2, the full half-scale shrink (terrain, water, scatter rebake; large, 3-5 days), per openspec/changes/shrink-estate-map.",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-04T21:53:39.479Z"
-    },
-    {
-      "id": "jenny-muud0ujl-ddilgf",
-      "title": "[Balance] Something to see along every route",
-      "description": "Source: Balance Agent, docs/design/balance.md §9 \"Travel times\" (2026-10-04). Roughly every 50 m at a sprint (about 10 s), there should be a scenery or forage point: flowers, a stile, a view, a forageable.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T21:55:40.065Z",
-      "updatedUtc": "2026-10-04T21:58:41.933Z"
+      "createdUtc": "2026-10-04T21:53:39.479Z",
+      "updatedUtc": "2026-10-05T02:29:34.824Z"
     },
     {
       "id": "jenny-muudyirr-dn5j2m",
@@ -219,20 +162,126 @@
       "createdUtc": "2026-10-04T22:21:51.191Z"
     },
     {
-      "id": "jenny-muue0he2-1xhiqg",
-      "title": "New spawn spawned me way outside the manor instead of in the room with the fireplace",
-      "description": "It also skipped the name / estate name form",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T22:23:22.634Z"
-    },
-    {
       "id": "jenny-muue8oyh-kmm2zg",
       "title": "[Balance UI] Call it \"the village\", not \"town\", in player copy",
       "description": "Source: Balance Agent, docs/design/cohesion.md §2 \"Settlement\" (2026-10-04). With town now ~200 m from the manor it reads as a village; change \"town\" to \"village\" in player-facing copy beyond map labels and the store greeting (fast-travel names, toasts, field book).",
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-04T22:29:45.689Z"
+    },
+    {
+      "id": "jenny-muuec1p1-u804w0",
+      "title": "Add a compost bin",
+      "description": "Add a compost bin so I can turn unwanted foliage like weeds, bramble canes, etc into a fertilizer that I can use on my crops to yield faster growth and better quality crops (game balancer, help me out here)",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T22:32:22.165Z"
+    },
+    {
+      "id": "jenny-muuf5kus-0g3f6k",
+      "title": "Alternate clothes should be equippable to any slot",
+      "description": "They also shouldn't be available in the manor chest, but available for purchase at the General Store when the game begins",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-04T22:55:20.02Z"
+    },
+    {
+      "id": "jenny-muuhzwpz-uqxqxp",
+      "title": "[Balance UI] Roasted roots steam: two wisps, not three",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §5 #6 glyph family (2026-10-04). Trim the roasted roots glyph from three steam wisps to two so it matches the other hot dishes.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T00:14:54.311Z"
+    },
+    {
+      "id": "jenny-muuhzwri-v5hjft",
+      "title": "Fishing pole glyph shows a reel",
+      "description": "Source: Orchestrator, spotted in the meal-glyph comparison preview (2026-10-04). The pole icon has a reel, but Jenny earlier asked for a traditional tip-line pole without a reel. Check the 3D pole too.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T00:14:54.366Z"
+    },
+    {
+      "id": "jenny-muuiony3-uh53hx",
+      "title": "[Balance UI] Village dressing",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 beauty (2026-10-04). Make the relocated village feel lived-in: packed-earth or cobbled square and lanes, cottage gardens, a well or pump, a bench. Also (Balance, cohesion.md §4): flower clumps read mostly as green leaves from ~10 m; favour bloom-heavy variants or tint toward blossom so the village front shows colour.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T00:34:09.339Z",
+      "updatedUtc": "2026-10-05T00:56:13.122Z"
+    },
+    {
+      "id": "jenny-muujmxu4-wltdrt",
+      "title": "[Balance UI] Selected-cell icon contrast",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §3 Selection (2026-10-04). Dark glyphs (hatchet, lamp) lose contrast on the rust selected fill; add a cream halo or lighter ink in the selected cell.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T01:00:48.46Z"
+    },
+    {
+      "id": "jenny-muujt69b-39ivgg",
+      "title": "[Balance UI] Craft detail subtitle contrast",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §3 Selection (2026-10-04). The \"Makes 1 X · +N Energy\" line is dark ink on the rust selected header and nearly unreadable; use cream text there.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T01:05:39.311Z"
+    },
+    {
+      "id": "jenny-muulq1xx-supo5x",
+      "title": "[Balance] Clearable home stumps",
+      "description": "Source: Balance Agent, docs/design/balance.md §6 clearing (2026-10-04). Trees felled within 60 m of home stay as permanent stumps; let the axe clear a near-home stump to bare ground (worn axe, ~3 energy, yields firewood/kindling like the small stump) so the farm edge doesn't fill with stumps.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T01:59:12.981Z"
+    },
+    {
+      "id": "jenny-muuls4to-xi7gl6",
+      "title": "[Balance] Clerk apron ties hang straight",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 (2026-10-04). Mr. Trethewey's apron tie ends flare out at the hips; make them hang straight.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T02:00:50.028Z"
+    },
+    {
+      "id": "jenny-muuls4v6-qjrmsp",
+      "title": "[Balance] Store counter props",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 (2026-10-04). The plain blue cylinder and blank box on the counter read as greybox; swap for period pieces (brass scale, tea canister, twine spool).",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T02:00:50.082Z"
+    },
+    {
+      "id": "jenny-muuls4vu-tjln72",
+      "title": "[Balance] Clerk whiskers and hair sheen",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §1 (2026-10-04). Strand grooms glittered white/gold under the shop light, so the clerk shipped clean-shaven. Bring back grey mutton-chop side whiskers (no chin beard) as hair cards or a baked texture, and fix the hairline sheen; without them he reads a little soft.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T02:00:50.106Z",
+      "updatedUtc": "2026-10-05T02:13:11.162Z"
+    },
+    {
+      "id": "jenny-muulwcho-6as7ci",
+      "title": "Seed split of 1+1 re-merges on load",
+      "description": "Source: Opus code review of Gameplay 1a31a1b7 (2026-10-04). Splitting a 2-seed stack into 1+1 of the same crop is indistinguishable from legacy single packets and gets folded back into one stack on reload. Fix: gate the legacy fold on save provenance (a flag written by new saves) instead of quantity.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T02:04:06.588Z"
+    },
+    {
+      "id": "jenny-muulwcjc-gj9t19",
+      "title": "Tree focus shows no reason when you can't chop",
+      "description": "Source: Opus code review of tree felling (2026-10-04). Protected or too-tired trees just stop being targetable with no message; show \"[E] Chop\" with the refusal reason instead (e.g. too tired, landmark tree).",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T02:04:06.648Z"
+    },
+    {
+      "id": "jenny-muulxhvp-250x9a",
+      "title": "[Balance] Readable regrowth saplings",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 (2026-10-04). A felled oak regrows as a tiny dark fir tuft lost in the grass; use a matching broadleaf sapling at knee-to-waist height, scaling with growth stage.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-05T02:05:00.229Z"
     }
   ]
 }

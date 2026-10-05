@@ -1,14 +1,24 @@
 {
   "order": [
+    "backlog:jenny-muucngx2-veoig6",
+    "backlog:jenny-muucngwt-i42bj1",
+    "backlog:jenny-muucngwi-v8ki0g",
+    "backlog:jenny-muucngvz-jtxxdm",
+    "backlog:jenny-muucngve-dfc8a4",
+    "backlog:jenny-muucnguw-nc2d6p",
+    "backlog:jenny-muucngud-3xpzgt",
+    "backlog:jenny-muucngtd-ksulr2",
+    "backlog:jenny-mutdvi4f-5daxbq",
+    "backlog:jenny-mutde36c-gtsw0n",
+    "backlog:jenny-mut6zr63-iu7hm9",
+    "backlog:jenny-mut6t8g6-mcldh5",
     "add-swimming",
-    "widen-estate-beach",
     "rebuild-manor-and-decorate",
     "backlog:jenny-mus1sztj-sinh3q",
     "backlog:jenny-mus200q1-469jig",
     "backlog:jenny-mus200pa-iiju4e",
     "fit-rucksack-straps",
     "reduce-foliage-shadow-motion",
-    "space-out-town-square",
     "restore-mine-pumping-and-deep-levels",
     "open-estate-mine-shallow-level",
     "fix-estate-river-source",
@@ -21,8 +31,9 @@
     "add-courtship-and-family",
     "add-boat-fishing"
   ],
-  "nextBuild": [],
-  "slots": {},
+  "slots": {
+    "backlog:jenny-muucy9hz-jv5gx7": "next"
+  },
   "removed": [
     "replace-heroine-with-metahuman",
     "prioritize-heroine-quality-and-tool-clarity",
@@ -54,7 +65,19 @@
     "backlog:jenny-mutdjl7e-nzl7lh",
     "backlog:jenny-mutd9wre-js2x1r",
     "backlog:jenny-muu6upvs-l7a0l6",
-    "backlog:jenny-muu6k1g1-qr5dx2"
+    "backlog:jenny-muu6k1g1-qr5dx2",
+    "backlog:jenny-muucngv5-50wj8m",
+    "backlog:jenny-muucngun-k4z9j1",
+    "backlog:jenny-muu7h2lt-0jye7b",
+    "backlog:jenny-muucngvp-51pwhy",
+    "backlog:jenny-muucngw8-oi1cas",
+    "backlog:jenny-mutdt417-zj976u",
+    "backlog:jenny-muud0ujl-ddilgf",
+    "widen-estate-beach",
+    "space-out-town-square",
+    "backlog:jenny-muue0he2-1xhiqg",
+    "backlog:jenny-muuha81v-mpk0ja",
+    "backlog:jenny-muu7idr3-mphjdv"
   ],
-  "updated": "2026-10-04T22:13:59.582Z"
+  "updated": "2026-10-05T02:29:24.274Z"
 }
