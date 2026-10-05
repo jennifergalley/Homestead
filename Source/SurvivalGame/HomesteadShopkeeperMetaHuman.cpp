@@ -116,13 +116,12 @@ bool AHomesteadShopkeeper::BuildMetaHuman()
         Garments.Add(Garment);
     }
 
+    // The mutton-chop beard and dense brows rendered as white/gold glitter at talk distance whatever
+    // their melanin, spec or strand LOD (2026-10-04 PIE), so he is clean-shaven and the face
+    // texture's baked brows show. Their assets stay assembled for a later groom fix.
     const FGroomSpec Specs[] = {
         {TEXT("Hair"), TEXT("Hair_S_SlickBack"),
             {TEXT("MI_WI_Hair_S_SlickBack_Hair"), TEXT("MI_WI_Hair_S_SlickBack_Hair_Cards"), TEXT("MI_WI_Hair_S_SlickBack_Hair_Helmet")}},
-        {TEXT("Beard"), TEXT("Beard_M_MuttonChops"),
-            {TEXT("MI_WI_Beard_M_MuttonChops_Hair"), TEXT("MI_WI_Beard_M_MuttonChops_Hair_Cards"), TEXT("MI_WI_Beard_M_MuttonChops_Hair_Helmet")}},
-        {TEXT("Eyebrows"), TEXT("Eyebrows_M_Dense"),
-            {TEXT("MI_WI_Eyebrows_M_Dense_Hair"), TEXT("MI_WI_Eyebrows_M_Dense_Facial_Hair")}},
         {TEXT("Eyelashes"), TEXT("Eyelashes_S_Sparse"), {TEXT("MI_WI_Eyelashes_S_Sparse_Hair")}},
     };
     Grooms.Reset();
