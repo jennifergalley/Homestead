@@ -413,7 +413,7 @@ private:
     // The UI gallery (Development builds) sets up isolated states for each UI surface.
     friend struct FHomesteadUIGallery;
     friend class UHomesteadMapComponent;
-    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth, RoadSign };
+    enum class EFocus { None, Resource, Drop, Plot, Fire, Bed, Chest, Water, Underbrush, Shopkeeper, StoreDoor, Hearth, RoadSign, SceneryTree };
     // General store (HomesteadShopFlow.cpp).
     TSharedPtr<HomesteadMenus::SHomesteadShop> ShopScreen;
     UPROPERTY() TArray<TObjectPtr<AHomesteadGeneralStore>> Stores;
@@ -644,6 +644,13 @@ private:
     // Felling in progress: the tree is already cleared; its standing copy topples after the last
     // stroke (or at once if she stops), with a chop sound per stroke.
     int32 FellResource = INDEX_NONE;
+    // FellResource while an estate scenery tree (not a resource node) is being felled.
+    static constexpr int32 SceneryFellMarker = -2;
+    // The scenery tree in focus while the axe is selected (EFocus::SceneryTree): its trunk, as the simulation keys it.
+    FVector2D FocusSceneryTrunk = FVector2D::ZeroVector;
+    float FocusSceneryRadius = 0;
+    // Fell the focused scenery tree (HomesteadControllerSceneryTrees.cpp).
+    void StartSceneryFell();
     int32 FellStrokes = 0, FellStrokesHeard = 0;
     uint32 FellStartsBefore = 0;
     bool bFellSeen = false;

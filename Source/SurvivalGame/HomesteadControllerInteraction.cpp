@@ -211,6 +211,7 @@ void AHomesteadController::Interact()
     // The pail is filled with the tool button (UseSelectedTool), not on E / A.
     case EFocus::Water: break;
     case EFocus::Underbrush: StartMacheteHack(); break;
+    case EFocus::SceneryTree: StartSceneryFell(); break;
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: InteractWithStore(); break;
     case EFocus::RoadSign: InteractWithRoadSign(); break;
