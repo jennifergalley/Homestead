@@ -41,7 +41,19 @@ slot, then go idle; they do not pick up unflagged queue items.
 
 ## Next build
 
-- Map-shrink stage 2: half-scale terrain rebake after Jenny's approval.
+- Brambles, weeds and branches regrow around the manor and farm.
+- More berry bushes and roots in the estate woods, with a distinct bush look and `[E] Pick Berries`.
+- Near-home stumps can be cleared with the axe.
+- Growing crops always show their type and day.
+- Iron tool upgrades at the General Store (2,000 coins each).
+- Bigger landmark icons on the minimap and compass.
+- Fishing is harder (about 60% get away, random waits) and plays out on a bob on the water.
+- Clothes swap on equip, are sold at the General Store, and fit her closely.
+- A smoother, well-worn path down to town, and a lived-in village.
+
+## Build after next
+
+- Map-shrink stage 2: half-scale terrain rebake (resets saves).
 
 ## 2026-10-04 — 3:13 PM
 

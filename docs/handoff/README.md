@@ -12,9 +12,9 @@ agent keeps both current.
   from real LIDAR), with no procedural world, cold, death or predators.
 - The authoritative design and round order: `openspec\changes\pivot-to-cozy-estate-life-sim\design.md`.
 - The working policy (playable increments, reuse first, OpenSpec before each round): `docs\game-plan.md`.
-- The current round: [round-3.md](round-3.md) (scheduled builds with a lean, token-efficient team).
-  Earlier rounds are history only; don't read them unless you need a specific detail:
-  [round-2.md](round-2.md) and [round-1.md](round-1.md).
+- The current round: [round-4.md](round-4.md) (registry for the build after `20261004-next-01`);
+  [round-3.md](round-3.md) still holds the standing work-driven build rules. Earlier rounds are
+  history only: [round-2.md](round-2.md) and [round-1.md](round-1.md).
 
 ## Product copy and UI principle
 
