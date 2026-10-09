@@ -372,6 +372,11 @@ void AHomesteadController::UseSelectedTool()
         StartLampSetDown();
         return;
     }
+    if (Tool == Homestead::Item::Hatchet && Focus == EFocus::SceneryStump)
+    {
+        StartSceneryStumpClear();
+        return;
+    }
     if (Tool == Homestead::Item::Hatchet && Focus == EFocus::SceneryTree)
     {
         StartSceneryFell();

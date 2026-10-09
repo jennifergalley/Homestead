@@ -95,10 +95,16 @@ const EstateLayout& ProvisionalEstateLayout();
 // 540000-540043 (clearing), derelict farm and estate disrepair 550000+ (manor), MVP woodland biome 560000-569999 (scatter.py / mvp_woodland.py),
 // clear-out near the manor 570000-579999 (clearing), field mushrooms 580000-580999 (seasons), public roadside
 // forage 581000-581099 and more estate brambles 582100-582299 (water, Scripts/Terrain/forage.py), lake-trail forage 582300-582399 (water,
-// Scripts/Terrain/lake_path_plants.py; placed last). Order matters: later sections yield to earlier
+// Scripts/Terrain/lake_path_plants.py), woodland forage 583000-583199 (Upkeep, Scripts/Terrain/woodland_forage.py) and
+// dormant windfall branch spots 584000-584199 (Upkeep, Scripts/Terrain/windfall_spots.py; placed last). Order matters: later sections yield to earlier
 // ones (keep clear of what's already placed), so add sections in id order: berries, then the farm,
 // then the clear-out. Farm-first skipped a quarter of the brambles and failed the simulation tests.
 const EstatePlacements& ProvisionalEstatePlacements();
+// Windfall spots (584000-584199) start with no branch lying there: they are FallenBranch placements that
+// materialise cleared, and the daily upkeep rule (HomesteadUpkeep.cpp) lets the wind drop one on them.
+constexpr int WindfallPlacementIdFirst = 584000;
+constexpr int WindfallPlacementIdLast = 584199;
+inline bool IsWindfallPlacement(int id) { return id >= WindfallPlacementIdFirst && id <= WindfallPlacementIdLast; }
 
 // The gap in the ruin's fallen front door on its south front, 10.5 m east of the ManorFootprint's
 // west end: the way she walks out of the ruin.

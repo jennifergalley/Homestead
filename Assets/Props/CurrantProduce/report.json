@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "CurrantProduce",
+  "description": "One sector (~100 degrees) of ripe red currant strigs for SM_WildCurrant (original): three strigs of 8-9 glossy berries. Place three copies at 0/120/240 degrees; pivot = bush base.",
+  "collision": "none",
+  "triangle_budget": 8000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/currant_produce.py",
+  "source_sha256": "355d2c33e4cd7bc9beb3beb6d76879f10012c826e0e529e1c244f9a0fd949a23",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_CurrantProduce": {
+      "vertices": 3939,
+      "triangles": 7524,
+      "size_cm": [
+        58.66,
+        38.22,
+        34.24
+      ],
+      "materials": [
+        {
+          "name": "M_CurrantProduce",
+          "textures": {
+            "basecolor": "T_CurrantProduce_basecolor.png",
+            "roughness": "T_CurrantProduce_roughness.png",
+            "normal": "T_CurrantProduce_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CurrantProduce_basecolor.png",
+          "roughness": "T_CurrantProduce_roughness.png",
+          "normal": "T_CurrantProduce_normal.png",
+          "ao": "T_CurrantProduce_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.46984630823135376,
+          0.1710100769996643,
+          0.3799999952316284
+        ]
+      },
+      "fbx": "SM_CurrantProduce.fbx",
+      "sha256": "faf5c23e506565e2bd33fbdbf3270175204e3dbb612fd4249760be59bb886f63",
+      "preview": "preview_SM_CurrantProduce.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CurrantProduce_hero.png",
+          "detail": "beauty_SM_CurrantProduce_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "textures": {
+    "T_CurrantProduce_basecolor.png": "3b3fa09e969386981387b48fc85067d5918fa9bc0c8e1aac6d19cdf3f7b487da",
+    "T_CurrantProduce_roughness.png": "aa4f1bbe56a15d818e6896e0bef1fbe747bb2ddd048978ffc42db684ce061634",
+    "T_CurrantProduce_normal.png": "e2288370fad068b71575bab7592d121fa93506a8ebb0c815abcad56d311d5519"
+  }
+}

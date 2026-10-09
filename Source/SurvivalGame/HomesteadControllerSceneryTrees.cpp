@@ -12,6 +12,18 @@
 // (Simulation::FellSceneryTree); the world lifts a copy of the tree out of its batch; the felling clip
 // and chop sounds are the ones a woodland tree already uses (PresentFelling / UpdatePendingFell).
 
+void AHomesteadController::StartSceneryStumpClear()
+{
+    if (Focus != EFocus::SceneryStump || !Landscape) return;
+    auto* Avatar = Cast<AHomesteadCharacter>(GetPawn());
+    const Homestead::Point Trunk{FocusSceneryTrunk.X, FocusSceneryTrunk.Y};
+    const auto Result = Sim.ClearSceneryStump(Trunk, PlayerPoint());
+    NotifyResourceAction(Result, nullptr);
+    if (!Result.ok) return;
+    Landscape->UpdateSceneryTreeStages(Sim, true);
+    if (Avatar) Avatar->PlayClear(Trunk);
+}
+
 void AHomesteadController::StartSceneryFell()
 {
     if (Focus != EFocus::SceneryTree || !Landscape) return;

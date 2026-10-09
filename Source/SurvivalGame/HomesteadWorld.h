@@ -179,6 +179,9 @@ public:
     // trunk position is the simulation's key. Radius is the trunk's chop radius, cm.
     bool FindSceneryTreeNear(const Homestead::Simulation& Simulation, FVector2D From, FVector2D Facing, float Reach,
         FVector2D& Trunk, float& Radius) const;
+    // The same for a near-home stump the axe can clear to bare ground (Simulation::ClearSceneryStump).
+    bool FindSceneryStumpNear(const Homestead::Simulation& Simulation, FVector2D From, FVector2D Facing, float Reach,
+        FVector2D& Trunk, float& Radius) const;
     // Call right after Simulation::FellSceneryTree: lifts a copy of the tree out of its batch to topple
     // with DropFelledTree (the same machinery as a woodland tree) and brings the stump forward.
     bool BeginFellingScenery(const Homestead::Simulation& Simulation, FVector2D Trunk);

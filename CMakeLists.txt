@@ -19,6 +19,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadCalendar.cpp
     Source/SurvivalGame/Simulation/HomesteadCalendarHooks.cpp
     Source/SurvivalGame/Simulation/HomesteadOvergrowth.cpp
+    Source/SurvivalGame/Simulation/HomesteadUpkeep.cpp
     Source/SurvivalGame/Simulation/HomesteadEstate.cpp
     Source/SurvivalGame/Simulation/HomesteadEstateDisrepair.cpp
     Source/SurvivalGame/Simulation/HomesteadFlowerCover.cpp
@@ -222,6 +223,15 @@ else()
     target_compile_options(HomesteadTreeFellingTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
 endif()
 add_test(NAME HomesteadTreeFellingTests COMMAND HomesteadTreeFellingTests)
+
+add_executable(HomesteadUpkeepTests Tests/HomesteadUpkeepTests.cpp)
+target_link_libraries(HomesteadUpkeepTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadUpkeepTests PRIVATE /W4 /WX /EHs-c-)
+else()
+    target_compile_options(HomesteadUpkeepTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
+endif()
+add_test(NAME HomesteadUpkeepTests COMMAND HomesteadUpkeepTests)
 
 add_executable(HomesteadCoveRouteTests Tests/HomesteadCoveRouteTests.cpp)
 target_link_libraries(HomesteadCoveRouteTests PRIVATE HomesteadSimulation)
