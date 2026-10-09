@@ -14,8 +14,6 @@
     "backlog:jenny-muulq1xx-supo5x",
     "backlog:jenny-muujt69b-39ivgg",
     "backlog:jenny-muujmxu4-wltdrt",
-    "backlog:jenny-muuhzwri-v5hjft",
-    "backlog:jenny-muuhzwpz-uqxqxp",
     "backlog:jenny-muuf5kus-0g3f6k",
     "backlog:jenny-muuec1p1-u804w0",
     "backlog:jenny-muue8oyh-kmm2zg",
@@ -58,7 +56,8 @@
     "backlog:jenny-mv1koymp-balsq1",
     "backlog:jenny-mv1koymq-balft1",
     "backlog:jenny-mv1l1aa7-refl01",
-    "backlog:jenny-mv1lb6ol-modcl1"
+    "backlog:jenny-mv1lb6ol-modcl1",
+    "backlog:jenny-mv1lg9k5-nocorn"
   ],
   "slots": {
     "backlog:jenny-muucy9hz-jv5gx7": "after-next",
@@ -72,7 +71,9 @@
     "backlog:jenny-muw5qdyb-5lcsxk": "next",
     "backlog:jenny-muw6zadi-id5vku": "next",
     "backlog:jenny-muxl8f94-ibw78l": "next",
-    "backlog:jenny-mv1lb6ol-modcl1": "next"
+    "backlog:jenny-mv1lb6ol-modcl1": "next",
+    "backlog:jenny-muw7gqsr-a3x5ig": "next",
+    "backlog:jenny-mv1lg9k5-nocorn": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -118,7 +119,9 @@
     "backlog:jenny-muue0he2-1xhiqg",
     "backlog:jenny-muuha81v-mpk0ja",
     "backlog:jenny-muu7idr3-mphjdv",
-    "backlog:jenny-mus1sztj-sinh3q"
+    "backlog:jenny-mus1sztj-sinh3q",
+    "backlog:jenny-muuhzwpz-uqxqxp",
+    "backlog:jenny-muuhzwri-v5hjft"
   ],
-  "updated": "2026-10-09T23:22:27.523Z"
+  "updated": "2026-10-09T23:25:59.525Z"
 }
