@@ -504,6 +504,30 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-09T22:41:07.923Z"
+    },
+    {
+      "id": "jenny-mv1koymo-balgr1",
+      "title": "[Balance] Stage 2: gentler village street grade",
+      "description": "Source: Balance Agent, docs/design/balance.md §9 travel (2026-10-09). During map-shrink stage 2, move the village street junction ~232 m up the road so the street grade is at most 12% (currently 21.3% at the kink).",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-09T23:04:45.648Z"
+    },
+    {
+      "id": "jenny-mv1koymp-balsq1",
+      "title": "[Balance UI] Cobbles, flower strips and cottage beds in the square",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 (2026-10-09). Make the square's cobble apron continuous, add flower strips along the house fronts, and lay cottage beds along walls and fences rather than in a grid.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-09T23:04:45.649Z"
+    },
+    {
+      "id": "jenny-mv1koymq-balft1",
+      "title": "[Balance UI] Fast travel toast wording",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §1-2 (2026-10-09). Change the toast \"Fast Travel Destination Unlocked: Town\" to \"Fast travel unlocked: the village\".",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-09T23:04:45.650Z"
     }
   ]
 }
