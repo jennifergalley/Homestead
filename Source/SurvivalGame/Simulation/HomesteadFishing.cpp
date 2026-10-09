@@ -16,6 +16,13 @@ std::uint64_t Mix(std::uint64_t value)
     value = (value ^ (value >> 27)) * 0x94D049BB133111EBull;
     return value ^ (value >> 31);
 }
+double Unit(std::uint64_t value)
+{
+    return static_cast<double>(Mix(value) >> 11) / 9007199254740992.0;
+}
+// Salts keep each seeded choice of a cast independent of the others.
+constexpr std::uint64_t BeatsSalt = 0xB3A75ull, EscapeSalt = 0xE5CA9Eull, EscapeBeatSalt = 0xE5CB3ull;
+constexpr std::uint64_t NibbleCountSalt = 0x41BB1Eull, NibbleTimeSalt = 0x41BB2Eull;
 const char* WaterName(FishingWater water)
 {
     switch (water)
@@ -50,11 +57,41 @@ bool StrikeReady(const FishingSession& session)
     return session.phase == FishingPhase::Landing && session.elapsed >= session.strikeAfter
         && session.elapsed <= session.strikeAfter + StrikeWindowSeconds;
 }
+bool FloatUnder(const FishingSession& session)
+{
+    return session.phase == FishingPhase::Bite || StrikeReady(session);
+}
+double Nibble(const FishingSession& session)
+{
+    const bool waiting = session.phase == FishingPhase::Waiting;
+    if (!waiting && session.phase != FishingPhase::Landing) return 0.0;
+    const double segment = waiting ? session.biteAfter : session.strikeAfter;
+    const double span = segment - 2.0 * NibbleQuietSeconds - NibbleSeconds;
+    if (span <= 0.0 || session.elapsed >= segment) return 0.0;
+    const std::uint64_t key = session.timingSeed ^ (waiting ? 0ull
+        : 0x100ull * static_cast<std::uint64_t>(session.landedBeats + 1));
+    const int count = static_cast<int>(Mix(key ^ NibbleCountSalt) % static_cast<std::uint64_t>(
+        (waiting ? MaxBiteNibbles : MaxStrikeTugs) + 1));
+    double strongest = 0.0;
+    for (int index = 0; index < count; ++index)
+    {
+        const double start = NibbleQuietSeconds + span * Unit(key ^ NibbleTimeSalt ^ static_cast<std::uint64_t>(index + 1));
+        const double into = session.elapsed - start;
+        if (into >= 0.0 && into < NibbleSeconds)
+            strongest = std::max(strongest, std::sin(3.14159265358979 * into / NibbleSeconds));
+    }
+    return strongest;
+}
 double StrikeAfter(const FishingSession& session)
 {
     const auto seed = Mix(session.timingSeed ^ static_cast<std::uint64_t>(session.landedBeats + 1));
     return MinStrikeSeconds + StrikeVariationSeconds * static_cast<double>(seed >> 11) / 9007199254740992.0;
 }
+}
+
+void Simulation::SetFishingEscapeChance(double chance)
+{
+    fishingEscapeChance_ = std::isfinite(chance) ? std::clamp(chance, 0.0, 1.0) : Fishing::EscapeChance;
 }
 
 FishingWater Simulation::FishingWaterAt(Point player) const
@@ -103,6 +140,12 @@ Result Simulation::BeginFishing(Point player)
     fishing_.originY = player.y;
     fishing_.biteAfter = Fishing::MinBiteSeconds + Fishing::BiteVariationSeconds
         * static_cast<double>(seed >> 11) / 9007199254740992.0;
+    fishing_.beats = Fishing::MinLandingBeats + static_cast<int>(Fishing::Mix(seed ^ Fishing::BeatsSalt)
+        % static_cast<std::uint64_t>(Fishing::MaxLandingBeats - Fishing::MinLandingBeats + 1));
+    if (Fishing::Unit(seed ^ Fishing::EscapeSalt) < fishingEscapeChance_)
+        // Only at the first or second strike, never the last, so a long fight isn't wasted.
+        fishing_.escapeBeat = static_cast<int>(Fishing::Mix(seed ^ Fishing::EscapeBeatSalt)
+            % static_cast<std::uint64_t>(std::min(2, fishing_.beats - 1)));
     fishing_.phase = FishingPhase::Casting;
     return Exert(Fishing::CastEnergy, {true, "", ResultCode::None, ++revision_});
 }
@@ -134,6 +177,14 @@ Result Simulation::AdvanceFishing(double seconds, Point player)
         || std::hypot(player.x - fishing_.originX, player.y - fishing_.originY) > Fishing::WalkAwayCm)
         return CancelFishing();
     fishing_.elapsed += seconds;
+    if (fishing_.phase == FishingPhase::Landing && fishing_.landedBeats == fishing_.escapeBeat
+        && fishing_.elapsed >= fishing_.strikeAfter)
+    {
+        fishing_ = {};
+        return {true, "It got away.", ResultCode::None, revision_};
+    }
+    const bool reacting = fishing_.phase == FishingPhase::Bite || fishing_.phase == FishingPhase::Landing
+        || fishing_.phase == FishingPhase::Waiting;
     const double deadline = fishing_.phase == FishingPhase::Casting ? Fishing::CastContactTimeoutSeconds
         : fishing_.phase == FishingPhase::Catching ? Fishing::CatchContactTimeoutSeconds
         : fishing_.phase == FishingPhase::Landing ? fishing_.strikeAfter + Fishing::StrikeWindowSeconds
@@ -141,7 +192,8 @@ Result Simulation::AdvanceFishing(double seconds, Point player)
     if (fishing_.elapsed > deadline)
     {
         fishing_ = {};
-        return {true, "No catch this time. Cast again when you're ready.", ResultCode::None, revision_};
+        return {true, reacting ? "The fish slipped the hook." : "No catch this time. Cast again when you're ready.",
+            ResultCode::None, revision_};
     }
     if (fishing_.phase == FishingPhase::Waiting && fishing_.elapsed >= fishing_.biteAfter)
         fishing_.phase = FishingPhase::Bite;
@@ -162,7 +214,7 @@ Result Simulation::FishingPress(Point player)
     }
     if (Fishing::StrikeReady(fishing_))
     {
-        if (fishing_.landedBeats + 1 < Fishing::LandingBeats)
+        if (fishing_.landedBeats + 1 < fishing_.beats)
         {
             ++fishing_.landedBeats;
             fishing_.elapsed = 0.0;
@@ -177,7 +229,7 @@ Result Simulation::FishingPress(Point player)
     if (fishing_.phase == FishingPhase::Casting || fishing_.phase == FishingPhase::Catching)
         return {false, "Let the fishing animation finish before pressing again.", ResultCode::Unavailable, revision_};
     fishing_ = {};
-    return {true, "The fish escaped the hook. Cast again and follow the timing cue.", ResultCode::None, revision_};
+    return {true, "Too soon \xE2\x80\x93 it shied away.", ResultCode::None, revision_};
 }
 
 Result Simulation::FishingAnimationContact(FishingContact contact, std::uint64_t token, Point player)

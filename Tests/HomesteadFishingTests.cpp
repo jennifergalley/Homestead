@@ -35,6 +35,8 @@ Homestead::Simulation Fisher(Homestead::FishingWater water)
     Homestead::Simulation sim;
     OK(sim.GrantItems(Homestead::Item::FishingPole, 1));
     sim.SetFishingWaterProbe([water](Homestead::Point p) { return p.x < 50.0 ? water : Homestead::FishingWater::None; });
+    // Timing tests need a fish that stays on; FishOdds covers the escape chance itself.
+    sim.SetFishingEscapeChance(0.0);
     return sim;
 }
 
@@ -54,6 +56,14 @@ void LandingBeat(Homestead::Simulation& sim, double cueOffset = Homestead::Fishi
 {
     OK(sim.AdvanceFishing(sim.FishingCast().strikeAfter + cueOffset, {0, 0}));
     OK(sim.FishingPress({0, 0}));
+}
+
+// Every remaining strike of a fish that stays on; ends on the catch.
+void LandRest(Homestead::Simulation& sim)
+{
+    for (int guard = 0; guard < Homestead::Fishing::MaxLandingBeats && sim.FishingCast().phase == Homestead::FishingPhase::Landing; ++guard)
+        LandingBeat(sim);
+    CHECK(sim.FishingCast().phase == Homestead::FishingPhase::Catching);
 }
 
 Homestead::Result Lift(Homestead::Simulation& sim)
@@ -138,9 +148,8 @@ void HabitatsAndReplay()
         CHECK(std::abs(sim.GetState().energy - (100.0 - Fishing::CastEnergy)) < 1e-9);
         LandingBeat(sim);
         CHECK(sim.Count(caught) == 0 && sim.FishingCast().landedBeats == 1);
-        LandingBeat(sim);
-        LandingBeat(replay);
-        LandingBeat(replay);
+        LandRest(sim);
+        LandRest(replay);
         CHECK(sim.FishingCast().phase == FishingPhase::Catching && sim.Count(caught) == 0);
         OK(Lift(sim));
         OK(Lift(replay));
@@ -170,7 +179,7 @@ void TimingAndCancellation()
     const auto revision = sim.GetRevision();
     const auto token = sim.FishingCast().token;
     const double delay = sim.FishingCast().biteAfter;
-    CHECK(delay >= 2.0 && delay < 4.0);
+    CHECK(delay >= Fishing::MinBiteSeconds && delay < Fishing::MinBiteSeconds + Fishing::BiteVariationSeconds);
     CHECK(!sim.FishingAnimationContact(FishingContact::CastSplash, token, {0, 0}));
     CHECK(!sim.FishingAnimationContact(FishingContact::CatchLift, token, {0, 0}));
     OK(sim.AdvanceFishing(Fishing::CastSplashSeconds, {0, 0}));
@@ -245,7 +254,7 @@ void TimingAndCancellation()
     const Item catchItem = sim.FishingCast().catchItem;
     LandingBeat(sim);
     CHECK(sim.FishingCast().strikeAfter != firstStrike);
-    LandingBeat(sim);
+    LandRest(sim);
     const auto catchToken = sim.FishingCast().token;
     CHECK(!sim.FishingAnimationContact(FishingContact::CatchLift, catchToken, {0, 0}));
     Simulation noContact = sim;
@@ -274,8 +283,7 @@ void TimingAndCancellation()
     CHECK(sim.FishingCast().phase == FishingPhase::Idle && sim.Count(catchItem) == 0);
     sim = Fisher(FishingWater::River);
     Hook(sim);
-    LandingBeat(sim);
-    LandingBeat(sim);
+    LandRest(sim);
     sim.SetFishingWaterProbe([](Point) { return FishingWater::Lake; });
     OK(sim.AdvanceFishing(Fishing::CatchLiftSeconds, {0, 0}));
     CHECK(sim.FishingCast().phase == FishingPhase::Idle && sim.Count(Item::RiverTrout) == 0 && sim.Count(Item::RiverSalmon) == 0);
@@ -319,8 +327,7 @@ void InterruptedCatchOnSmallMove()
     using namespace Homestead;
     auto sim = Fisher(FishingWater::River);
     Hook(sim);
-    LandingBeat(sim);
-    LandingBeat(sim);
+    LandRest(sim);
     const auto token = sim.FishingCast().token;
     const auto fish = sim.FishingCast().catchItem;
     const Point smallMove{1.0, 0.0};
@@ -457,6 +464,83 @@ void OriginalArtMappings()
     CHECK(!HomesteadOriginalItemArt::Find(Item::Count));
     CHECK(!HomesteadOriginalItemArt::FindIcon("fish"));
 }
+void FishOdds()
+{
+    using namespace Homestead;
+    auto sim = Fisher(FishingWater::River);
+    sim.SetFishingEscapeChance(std::numeric_limits<double>::quiet_NaN());
+    constexpr int casts = 600;
+    int escapes = 0, nibbling = 0;
+    std::set<int> beatCounts, escapeBeats;
+    double shortest = 1e9, longest = 0.0;
+    for (int index = 0; index < casts; ++index)
+    {
+        OK(sim.SetEnergy(100.0));
+        OK(sim.BeginFishing({0, 0}));
+        const auto& cast = sim.FishingCast();
+        CHECK(cast.beats >= Fishing::MinLandingBeats && cast.beats <= Fishing::MaxLandingBeats);
+        CHECK(cast.escapeBeat < 2 && cast.escapeBeat < cast.beats - 1);
+        beatCounts.insert(cast.beats);
+        if (cast.escapeBeat >= 0) { ++escapes; escapeBeats.insert(cast.escapeBeat); }
+        shortest = std::min(shortest, cast.biteAfter);
+        longest = std::max(longest, cast.biteAfter);
+        OK(sim.AdvanceFishing(Fishing::CastSplashSeconds, {0, 0}));
+        OK(sim.FishingAnimationContact(FishingContact::CastSplash, cast.token, {0, 0}));
+        bool shook = false;
+        while (sim.FishingCast().phase == FishingPhase::Waiting)
+        {
+            const double nibble = Fishing::Nibble(sim.FishingCast());
+            CHECK(nibble >= 0.0 && nibble <= 1.0 && !Fishing::FloatUnder(sim.FishingCast()));
+            if (nibble > 0.0)
+            {
+                shook = true;
+                CHECK(sim.FishingCast().elapsed >= Fishing::NibbleQuietSeconds);
+                CHECK(sim.FishingCast().elapsed <= sim.FishingCast().biteAfter - Fishing::NibbleQuietSeconds);
+            }
+            OK(sim.AdvanceFishing(0.05, {0, 0}));
+        }
+        CHECK(sim.FishingCast().phase == FishingPhase::Bite && Fishing::FloatUnder(sim.FishingCast()));
+        CHECK(Fishing::Nibble(sim.FishingCast()) == 0.0);
+        nibbling += shook ? 1 : 0;
+        OK(sim.CancelFishing());
+    }
+    // Balance's 50% escape over 600 casts lands well inside 42-58%.
+    CHECK(escapes > casts * 42 / 100 && escapes < casts * 58 / 100);
+    CHECK(beatCounts.size() == 3 && escapeBeats.size() == 2);
+    CHECK(shortest < Fishing::MinBiteSeconds + 1.0 && longest > Fishing::MinBiteSeconds + Fishing::BiteVariationSeconds - 1.0);
+    CHECK(nibbling > casts / 2 && nibbling < casts);
+
+    // A fish that escapes: strikes up to its escape beat land, then it throws the hook unpaid.
+    sim.SetFishingEscapeChance(1.0);
+    for (int index = 0; index < 8; ++index)
+    {
+        OK(sim.SetEnergy(100.0));
+        Hook(sim);
+        const Item fish = sim.FishingCast().catchItem;
+        const int escapeBeat = sim.FishingCast().escapeBeat;
+        CHECK(escapeBeat >= 0);
+        for (int beat = 0; beat < escapeBeat; ++beat) LandingBeat(sim);
+        CHECK(sim.FishingCast().phase == FishingPhase::Landing && sim.FishingCast().landedBeats == escapeBeat);
+        OK(sim.AdvanceFishing(sim.FishingCast().strikeAfter - 0.01, {0, 0}));
+        CHECK(sim.FishingCast().phase == FishingPhase::Landing && !Fishing::FloatUnder(sim.FishingCast()));
+        const auto gone = sim.AdvanceFishing(0.02, {0, 0});
+        CHECK(gone.ok && gone.message == "It got away.");
+        CHECK(sim.FishingCast().phase == FishingPhase::Idle && sim.Count(fish) == 0);
+    }
+
+    // Clicking while the float is up (a nibble or not) loses the fish; so does missing the window.
+    sim.SetFishingEscapeChance(0.0);
+    OK(sim.SetEnergy(100.0));
+    OK(sim.BeginFishing({0, 0}));
+    OK(sim.AdvanceFishing(Fishing::CastSplashSeconds, {0, 0}));
+    OK(sim.FishingAnimationContact(FishingContact::CastSplash, sim.FishingCast().token, {0, 0}));
+    const auto early = sim.FishingPress({0, 0});
+    CHECK(early.ok && early.message == "Too soon \xE2\x80\x93 it shied away." && sim.FishingCast().phase == FishingPhase::Idle);
+    Hook(sim);
+    LandingBeat(sim);
+    const auto late = sim.AdvanceFishing(sim.FishingCast().strikeAfter + Fishing::StrikeWindowSeconds + 0.01, {0, 0});
+    CHECK(late.ok && late.message == "The fish slipped the hook." && sim.FishingCast().phase == FishingPhase::Idle);
+}
 }
 
 int main()
@@ -466,6 +550,7 @@ int main()
     FishingTests::TimingAndCancellation();
     FishingTests::PresentationCompletionAndRecast();
     FishingTests::InterruptedCatchOnSmallMove();
+    FishingTests::FishOdds();
     FishingTests::Preparations();
     FishingTests::OriginalArtMappings();
     std::cout << "Fishing price, habitats, timing, cancellation, food and persistence: "
