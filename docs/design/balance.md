@@ -190,6 +190,13 @@ Each tool is crafted free from a rusted head (from salvage) and 2 branches. The 
 (axe 120, hoe 80, pail 90, scythe 250, billhook 180, pickaxe 220, lamp 150) are nominal, and no one
 buys tools. ✅ There's no coin gate on the core toolset, which is very cozy.
 
+**Iron upgrades (store, 2026-10-09):** 2,000 coins per tool (Jenny's number; 12,000 for all six).
+That's about 2.5 days of income each, so it's a mid-game goal, not a day-1 buy.
+- The upgrade only appears once she has crafted that tool.
+- Iron must feel better at once: energy × 0.75 per swing and one swing fewer (at least 1), on top
+  of the tool gates.
+- The row disappears once the tool is iron.
+
 ## 8. Fishing (9 PM slice)
 
 | Value | Now | Verdict |
