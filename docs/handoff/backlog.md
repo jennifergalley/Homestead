@@ -3,6 +3,7 @@
 Only Jenny-directed work belongs here. Every line is one player-checkable slice, not a speculative implementation plan. Lanes create or revise an OpenSpec change only after Jenny gives feedback or explicitly selects a later item. `priority.json` is Jenny's scheduling order, not an autonomous pickup queue: lanes implement only the items she prioritized for their build, then go idle. The planner canvas can drag-reorder the list; **Top**, **Next build**, **Quote**, and **Remove** act on it, with **Remove** archiving the change.
 
 <!-- jenny-inbox:start -->
+- **[Balance UI] Dim price on Owned clothing rows** — Balance Agent, 2026-10-09: Source: Balance Agent pre-ready review of Wardrobe (2026-10-09). On Owned clothing rows in the General Store, dim the price to muted ink so they read as unavailable.
 - **[Balance] Currants easier to spot** — Balance Agent, 2026-10-09: Source: Balance Agent review of Upkeep (2026-10-09, upkeep-1/01-thicket-hint.png). Currant strings are hard to see past ~10 m: add a few more trusses or brighten the red.
 - **[Balance] Playtest income after hard fishing** — Balance Agent, 2026-10-09: Source: Balance Agent, docs/design/balance.md §8 (2026-10-09). After hard fishing ships, playtest fishing income (~45 coins/min); revisit the §8 daily cap or fish prices only if it still trivialises crops.
 - **[Balance UI] Cornish hedge in the village** — Balance Agent, 2026-10-09: Source: Balance Agent, docs/design/cohesion.md §4 (2026-10-09). Replace the village ToyonHedge (a Californian shrub) with a Cornish hedge bank or hawthorn mesh.

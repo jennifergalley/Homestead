@@ -495,7 +495,15 @@
       "description": "Source: Balance Agent review of Upkeep (2026-10-09, upkeep-1/01-thicket-hint.png). Currant strings are hard to see past ~10 m: add a few more trusses or brighten the red.",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-09T22:39:31.220Z"
+      "createdUtc": "2026-10-09T22:39:31.22Z"
+    },
+    {
+      "id": "jenny-mv1jukpf-balow1",
+      "title": "[Balance UI] Dim price on Owned clothing rows",
+      "description": "Source: Balance Agent pre-ready review of Wardrobe (2026-10-09). On Owned clothing rows in the General Store, dim the price to muted ink so they read as unavailable.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-09T22:41:07.923Z"
     }
   ]
 }
