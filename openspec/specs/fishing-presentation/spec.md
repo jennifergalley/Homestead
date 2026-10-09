@@ -1,7 +1,7 @@
 # fishing-presentation Specification
 
 ## Purpose
-TBD - created by archiving change refine-fishing-presentation-and-icons. Update Purpose after archive.
+How fishing looks and reads to the player: the authored cast, bite and catch presentation, and the fishing pole and fish icons.
 
 ## Requirements
 

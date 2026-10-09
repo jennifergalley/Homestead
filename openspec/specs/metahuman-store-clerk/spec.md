@@ -1,7 +1,7 @@
 # metahuman-store-clerk Specification
 
 ## Purpose
-TBD - created by archiving change metahuman-store-clerk. Update Purpose after archive.
+The General Store clerk, Mr. Josiah Trethewey: a MetaHuman shopkeeper who stands at the counter with a period outfit and a counter idle.
 
 ## Requirements
 
