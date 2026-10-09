@@ -553,9 +553,10 @@ std::uint64_t PlacementHashWithout(int skippedId, int& count)
     {
         // The rack, and the later forage sections appended after it was pinned (roadside 581000-581999,
         // woods and hedges 582100-582299, the lake trail 582300-582399, the ruin's fallen roof timbers
-        // 582012-582013), so the hash still covers exactly the placements older saves know.
+        // 582012-582013, woodland forage and windfall spots 583000-584199), so the hash still covers exactly
+        // the placements older saves know.
         if (p.id == skippedId || (p.id >= 581000 && p.id < 582000) || (p.id >= 582100 && p.id < 582400)
-            || p.id == 582012 || p.id == 582013) continue;
+            || (p.id >= 583000 && p.id < 584200) || p.id == 582012 || p.id == 582013) continue;
         std::snprintf(line, sizeof line, "%d %d %.3f %.3f %.3f %.3f %.3f %d\n", p.id, static_cast<int>(p.kind),
             p.position.x, p.position.y, p.z, p.yaw, p.scale, p.minTier);
         for (const char* c = line; *c; ++c) { hash ^= static_cast<unsigned char>(*c); hash *= UINT64_C(1099511628211); }
@@ -573,12 +574,13 @@ void ToolRackIsSaveSafe()
     const std::uint64_t before = PlacementHashWithout(520006, count);
     CHECK(count == 2197 && before == UINT64_C(12311480322052281513));
     const auto& all = ProvisionalEstatePlacements().placements;
-    // The rack is the last placement but for the lake trail's forage (582300-582399), appended after it.
+    // The rack is the last placement but for the lake trail's forage (582300-582399), the woodland forage
+    // (583000-583199) and the windfall spots (584000-584199), appended after it.
     std::size_t rackAt = all.size();
     for (std::size_t i = 0; i < all.size(); ++i)
         if (all[i].id == 520006) rackAt = i;
     CHECK(rackAt < all.size() && all[rackAt].kind == ResourceKind::SalvagePile);
-    for (std::size_t i = rackAt + 1; i < all.size(); ++i) CHECK(all[i].id >= 582300 && all[i].id < 582400);
+    for (std::size_t i = rackAt + 1; i < all.size(); ++i) CHECK((all[i].id >= 582300 && all[i].id < 582400) || (all[i].id >= 583000 && all[i].id < 584200));
     const Point rack = all[rackAt].position;
     CHECK(PointInPolygon(ProvisionalEstateLayout().FindPolygon(Anchor::ManorFootprint)->points, rack));
     for (const auto& other : all)
@@ -603,8 +605,8 @@ void ToolRackIsSaveSafe()
     OK(loaded.Deserialize(saved));
     CHECK(at(loaded, 520001).cleared && at(loaded, nettle).cleared && !at(loaded, 520006).cleared);
     int cleared = 0, oldCleared = 0;
-    for (const auto& n : loaded.GetState().resources) cleared += n.cleared;
-    for (const auto& n : old.GetState().resources) oldCleared += n.cleared;
+    for (const auto& n : loaded.GetState().resources) cleared += n.cleared && !IsWindfallPlacement(n.id);
+    for (const auto& n : old.GetState().resources) oldCleared += n.cleared && !IsWindfallPlacement(n.id);
     CHECK(cleared == oldCleared);
     // Her next search, the rack included, gives the hoe blade; never a second billhook.
     OK(loaded.ClearOvergrowth(520006, Item::Count, at(loaded, 520006).position));

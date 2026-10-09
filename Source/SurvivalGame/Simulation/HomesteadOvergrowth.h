@@ -70,5 +70,9 @@ constexpr double AimHalfAngleDegrees = 80.0;
 // overgrowth has this daily chance of growing back.
 constexpr double CreepNeighbourDistance = 600.0;
 constexpr double CreepChance = 0.03;
+// A stable 0..99 roll for (id, salt): the same answer every time, so no gameplay depends on hidden RNG state.
+int StableRoll(int id, int salt);
+// Whether tilled or built-on ground lies within `reach` cm of `position` (plots and structures).
+bool GroundBuiltOn(const State& state, Point position, double reach);
 }
 }

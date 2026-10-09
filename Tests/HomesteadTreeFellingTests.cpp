@@ -126,7 +126,7 @@ void SaveRoundTrip()
 
 void BadSections()
 {
-    for (const char* text : {"-1", "5000", "1 0 0 5 2", "2 5 5 1 0 5 5 1 0", "2 9 9 1 0 3 3 1 0", "1 0 0 nan 1", "x"})
+    for (const char* text : {"-1", "5000", "1 0 0 5 3", "1 0 0 5 -1", "2 5 5 1 0 5 5 1 0", "2 9 9 1 0 3 3 1 0", "1 0 0 nan 1", "x"})
     {
         std::istringstream input(text);
         Homestead::State candidate;
@@ -144,6 +144,44 @@ std::string Reseal(const std::string& saved, const std::string& payload)
     std::string magic, version;
     header >> magic >> version;
     return magic + " " + version + " " + std::to_string(payload.size()) + " " + std::to_string(hash) + "\n" + payload;
+}
+
+void ClearStump()
+{
+    const Point far = Find(true, true), near = Find(false, true);
+    auto sim = Armed();
+    CHECK(sim.FellSceneryTree(near, near));
+    CHECK(sim.FellSceneryTree(far, far));
+    sim.SetEnergy(100.0);
+    CHECK(!sim.CheckClearSceneryStump(far, far));
+    CHECK(!sim.ClearSceneryStump(far, far));
+    CHECK(!sim.CheckClearSceneryStump(near, Point{near.x + 5000.0, near.y}));
+    sim.SetEnergy(2.0);
+    CHECK(!sim.ClearSceneryStump(near, near));
+    sim.SetEnergy(100.0);
+    CHECK(sim.CheckClearSceneryStump(near, near));
+    const int firewood = sim.Count(Homestead::Item::Firewood), kindling = sim.Count(Homestead::Item::Kindling);
+    const auto result = sim.ClearSceneryStump(near, near);
+    CHECK(result);
+    CHECK(std::abs(100.0 - sim.GetState().energy - Homestead::Exertion::ClearStumpEnergy) < 1e-6);
+    const int gotFirewood = sim.Count(Homestead::Item::Firewood) - firewood;
+    CHECK(gotFirewood >= TF::ClearStumpFirewoodMin && gotFirewood <= TF::ClearStumpFirewoodMax);
+    CHECK(sim.Count(Homestead::Item::Kindling) == kindling + TF::ClearStumpKindling);
+    CHECK(TF::StageOf(sim.GetState(), near) == TF::Stage::Cleared);
+    CHECK(!sim.ClearSceneryStump(near, near));
+    CHECK(!sim.FellSceneryTree(near, near));
+    // Cleared ground stays bare through time and a save.
+    sim.AdvanceGameHours(TF::RegrowHours * 2.0, far);
+    CHECK(TF::StageOf(sim.GetState(), near) == TF::Stage::Cleared);
+    const std::string saved = sim.Serialize();
+    auto loaded = Estate();
+    CHECK(loaded.Deserialize(saved));
+    CHECK(TF::StageOf(loaded.GetState(), near) == TF::Stage::Cleared);
+    CHECK(loaded.Serialize() == saved);
+    // A standing tree has no stump to clear.
+    const Point other = Find(false, true);
+    auto fresh = Armed();
+    CHECK(!fresh.CheckClearSceneryStump(other, other));
 }
 
 void Capacity()
@@ -171,6 +209,7 @@ int main()
     Regrowth();
     SaveRoundTrip();
     BadSections();
+    ClearStump();
     Capacity();
     std::cout << "HomesteadTreeFellingTests passed (" << TreeFellingChecks << " checks)\n";
     return 0;

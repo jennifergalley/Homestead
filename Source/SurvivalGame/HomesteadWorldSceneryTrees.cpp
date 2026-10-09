@@ -88,6 +88,33 @@ bool AHomesteadWorld::FindSceneryTreeNear(const Homestead::Simulation& Simulatio
     return true;
 }
 
+bool AHomesteadWorld::FindSceneryStumpNear(const Homestead::Simulation& Simulation, FVector2D From, FVector2D Facing,
+    float Reach, FVector2D& Trunk, float& Radius) const
+{
+    const Homestead::State& State = Simulation.GetState();
+    if (!State.fixedEstate || SceneryTreeGrid.IsEmpty()) return false;
+    const bool bFacing = Facing.Normalize();
+    float BestSquared = Reach * Reach;
+    const Homestead::FelledTree* Best = nullptr;
+    for (const Homestead::FelledTree& Entry : State.felledTrees)
+    {
+        if (Entry.cleared || Entry.regrows
+            || Homestead::TreeFelling::StageOf(Entry, State.hour) != Homestead::TreeFelling::Stage::Stump) continue;
+        const FVector2D To(Entry.xCm - From.X, Entry.yCm - From.Y);
+        const float DistanceSquared = To.SizeSquared();
+        if (DistanceSquared >= BestSquared) continue;
+        if (bFacing && DistanceSquared > FMath::Square(HomesteadSceneryTrees::AlwaysInReachCm)
+            && FVector2D::DotProduct(To.GetSafeNormal(), Facing) < 0.2f) continue;
+        BestSquared = DistanceSquared;
+        Best = &Entry;
+    }
+    if (!Best) return false;
+    Trunk = FVector2D(Best->xCm, Best->yCm);
+    const FSceneryTreeRef* Ref = FindSceneryTreeAt(Trunk);
+    Radius = Ref ? Ref->TrunkRadius : 20.0f;
+    return true;
+}
+
 bool AHomesteadWorld::BeginFellingScenery(const Homestead::Simulation& Simulation, FVector2D Trunk)
 {
     FinishFallingTree();
@@ -159,6 +186,7 @@ void AHomesteadWorld::UpdateSceneryTreeStages(const Homestead::Simulation& Simul
         // A spin that is the same every time the stage is drawn.
         const float Yaw = static_cast<float>(HomesteadWorldKeys::Mix(HomesteadWorldKeys::Seed,
             HomesteadWorldKeys::Pair(Entry.xCm, Entry.yCm)) % 360ull);
+        if (Stage == Homestead::TreeFelling::Stage::Cleared) continue;
         if (Stage == Homestead::TreeFelling::Stage::Stump)
         {
             const float Scale = StumpRadius > 1.0f ? FMath::Clamp(

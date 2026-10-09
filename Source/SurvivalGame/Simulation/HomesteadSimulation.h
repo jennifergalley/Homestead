@@ -237,13 +237,15 @@ struct UnderbrushEdit
 bool operator<(const UnderbrushEdit& a, const UnderbrushEdit& b);
 
 // A decorative (scenery) tree she has felled, keyed by its trunk position in whole centimetres
-// (HomesteadTreeFelling.h): the game hour it fell and whether it grows back.
+// (HomesteadTreeFelling.h): the game hour it fell, whether it grows back, and whether she has since
+// cleared its permanent stump to bare ground.
 struct FelledTree
 {
     int xCm = 0;
     int yCm = 0;
     double fellHour = 0.0;
     bool regrows = false;
+    bool cleared = false;
 };
 
 // A building's own grid, placed anywhere at any heading. Local cell (x, y) spans
@@ -470,6 +472,9 @@ constexpr double GatherEnergy = 0.5;
 constexpr double ClearEnergy = 1.0;
 constexpr double SaplingEnergy = 1.5;
 constexpr double FellEnergy = 4.0;
+// Clearing a near-home stump to bare ground with a worn axe (Balance, docs/design/balance.md §6): the same
+// as the small stump the axe clears, ~3 energy, scaled by the axe's tier like any overgrowth.
+constexpr double ClearStumpEnergy = 3.0;
 constexpr double WoodyUnderbrushEnergy = 1.5;
 constexpr double SoftUnderbrushEnergy = 0.8;
 constexpr double CraftEnergy = 0.8;
@@ -623,6 +628,11 @@ public:
     Result FellSceneryTree(Point tree, Point player);
     // Why she can't fell it now (no axe, too far, too tired, already down, protected), or ok. Spends nothing.
     Result CheckFellSceneryTree(Point tree, Point player) const;
+    // Clears the permanent stump a near-home tree leaves (HomesteadTreeFelling.cpp) to bare ground with
+    // the axe, for firewood and kindling; the stump never returns. `tree` is the felled trunk's position.
+    Result ClearSceneryStump(Point tree, Point player);
+    // Why she can't clear it now (no axe, too far, no stump, a stump that grows back, too tired), or ok.
+    Result CheckClearSceneryStump(Point tree, Point player) const;
     Result Eat(Item item);
     Result EatGroup(int groupId, std::uint64_t expectedRevision);
     Result Craft(Recipe recipe, Point player);
@@ -877,6 +887,9 @@ private:
     static bool ReadEconomy(std::istream& input, State& candidate, std::set<int>& ids);
     // Once a day at the 6 AM rollover: cleared grass and weeds near remaining overgrowth may regrow.
     void CreepWeeds(int day);
+    // Once a day at the 6 AM rollover too (HomesteadUpkeep.cpp): ground she has cleared near the manor and
+    // farm may grow over again, and the wind may drop a branch under a tree, so there is always some tidying.
+    void UpkeepRegrowth(int day);
     // Calendar hooks (HomesteadCalendarHooks.cpp). Step calls OnNewDay once for every 06:00 rollover
     // it crosses, and OnNewDay calls OnNewSeason first when that day begins a season. Features that
     // change with the day or the season add their call there rather than in Step.

@@ -139,6 +139,19 @@ void AHomesteadController::UpdateFocus()
         FocusSceneryRadius = SceneryRadius;
         bHasFocusTarget = false;
     }
+    // Or, failing a tree, a near-home stump she can clear out to bare ground.
+    if (Focus == EFocus::None && HotbarItem(SelectedHotbarSlot) == Homestead::Item::Hatchet
+        && Sim.Count(Homestead::Item::Hatchet) > 0 && Landscape
+        && Landscape->FindSceneryStumpNear(Sim, FVector2D(Position.x, Position.y), FVector2D(Forward.X, Forward.Y),
+            Homestead::TreeFelling::ReachCm, SceneryTrunk, SceneryRadius)
+        && Sim.CheckClearSceneryStump({SceneryTrunk.X, SceneryTrunk.Y}, Position).ok)
+    {
+        Focus = EFocus::SceneryStump;
+        FocusId = -1;
+        FocusSceneryTrunk = SceneryTrunk;
+        FocusSceneryRadius = SceneryRadius;
+        bHasFocusTarget = false;
+    }
     bool bOtherFacing = Focus != EFocus::None;
     if (bOtherFacing && bHasFocusTarget)
     {
@@ -213,6 +226,7 @@ FString AHomesteadController::FocusTitle() const
         return TEXT("Fresh stream water");
     case EFocus::Underbrush: return AHomesteadWorld::UnderbrushName(FocusBrushSpecies);
     case EFocus::SceneryTree: return TEXT("Tree");
+    case EFocus::SceneryStump: return TEXT("Stump");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusTitle();
     case EFocus::RoadSign: return RoadSignTitle();
@@ -269,6 +283,9 @@ FString AHomesteadController::FocusActions() const
                 }
                 // Loose stones are small enough to pick up by hand, unlike the rocks the pickaxe breaks.
                 if (Node.kind == Homestead::ResourceKind::Stones) return A + TEXT(" Pick up");
+                // Foraging hints (Jenny, 2026-10-04): berries are picked, roots dug.
+                if (Node.kind == Homestead::ResourceKind::BerryBush) return A + TEXT(" Pick Berries");
+                if (Node.kind == Homestead::ResourceKind::Roots) return A + TEXT(" Dig Roots");
                 return A + TEXT(" Gather");
             }
         return A + TEXT(" Gather");
@@ -319,6 +336,7 @@ FString AHomesteadController::FocusActions() const
         return Sim.Count(Homestead::Item::Water) >= Homestead::PailPortions ? FString(TEXT("Pail full")) : Use + TEXT(" Fill pail");
     case EFocus::Underbrush: return Use + TEXT(" Clear with Machete");
     case EFocus::SceneryTree: return Use + TEXT(" Fell");
+    case EFocus::SceneryStump: return Use + TEXT(" Clear stump");
     case EFocus::Shopkeeper:
     case EFocus::StoreDoor: return StoreFocusActions();
     case EFocus::RoadSign: return RoadSignActions();

@@ -153,6 +153,17 @@ bool OgCircleTouches(Point centre, double radius, const Footprint& area)
 
 const OvergrowthInfo* FindOvergrowth(ResourceKind kind) { return OgByKind(kind); }
 
+int Overgrowth::StableRoll(int id, int salt) { return OgRoll(id, salt); }
+
+bool Overgrowth::GroundBuiltOn(const State& state, Point position, double reach)
+{
+    for (const auto& plot : state.plots)
+        if (OgCircleTouches(position, reach, {PlotCenter(plot), {GardenCellSize * 0.5, GardenCellSize * 0.5}, 0.0})) return true;
+    for (const auto& structure : state.structures)
+        if (OgCircleTouches(position, reach, StructureFootprint(state, structure))) return true;
+    return false;
+}
+
 bool IsRubbish(ResourceKind kind)
 {
     return kind == ResourceKind::BrokenCrate || kind == ResourceKind::BrokenBarrel || kind == ResourceKind::RubbishHeap
@@ -562,12 +573,7 @@ void Simulation::CreepWeeds(int day)
         // Tilled or built-on ground never regrows overgrowth, nor does ground its spoil would reach.
         const auto* info = FindOvergrowth(node.kind);
         const double reach = info ? info->spoil : 40.0;
-        bool covered = false;
-        for (const auto& plot : state_.plots)
-            covered = covered || OgCircleTouches(node.position, reach, {PlotCenter(plot), {GardenCellSize * 0.5, GardenCellSize * 0.5}, 0.0});
-        for (const auto& structure : state_.structures)
-            covered = covered || OgCircleTouches(node.position, reach, StructureFootprint(state_, structure));
-        if (!covered) regrown.push_back(node.id);
+        if (!Overgrowth::GroundBuiltOn(state_, node.position, reach)) regrown.push_back(node.id);
     }
     if (regrown.empty()) return;
     for (auto& node : state_.resources)

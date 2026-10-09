@@ -19,6 +19,7 @@ void Simulation::OnNewDay(const Calendar::Date& today)
     // Townsfolk buy down her goods in the shops each morning.
     SellDownShops();
     CreepWeeds(today.dayIndex);
+    UpkeepRegrowth(today.dayIndex);
 }
 
 void Simulation::OnNewSeason(const Calendar::Date& today, Season from)

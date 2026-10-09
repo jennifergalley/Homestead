@@ -313,6 +313,27 @@ const EstatePlacements& ProvisionalEstatePlacements()
             table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateLakePathPlacements.inc"
+        // Woodland foraging (583000-583199, Scripts/Terrain/woodland_forage.py; Jenny, 2026-10-04): berry
+        // thickets, root spots, branch and stone piles across the estate's woods. After everything above
+        // with the same 3 m rule, so no earlier row moves.
+        auto woodlandForage = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateWoodlandForagePlacements.inc"
+        // Windfall spots (584000-584199, same script, --windfall): dormant fallen-branch placements under the
+        // trees near home. MaterializeEstate starts them cleared; Simulation::UpkeepRegrowth wakes a few.
+        auto windfall = [&](int id, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, ResourceKind::FallenBranch, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateWindfallPlacements.inc"
         // Town lane (530000+).
         return table;
     }();

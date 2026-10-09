@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "WildCurrant",
+  "description": "Wild red currant bush, 0.95 m tall and 1.1 m across: smooth pale upright thornless stems, small fresh-green lobed leaves and a few green unripe strigs (ripe fruit is SM_CurrantProduce). Walk-through.",
+  "collision": "none",
+  "triangle_budget": 25000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/wild_currant.py",
+  "source_sha256": "aa6ebae3be91b19bf3a19882851f6388045fe20f9645ef3213ad27cbc467d62c",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_WildCurrant": {
+      "vertices": 19651,
+      "triangles": 23675,
+      "size_cm": [
+        116.58,
+        104.97,
+        97.06
+      ],
+      "materials": [
+        {
+          "name": "M_WildCurrant",
+          "textures": {
+            "basecolor": "T_WildCurrant_basecolor.png",
+            "normal": "T_WildCurrant_normal.png",
+            "roughness": "T_WildCurrant_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.23558475613594054,
+          -0.4490759164094925,
+          0.6
+        ]
+      },
+      "fbx": "SM_WildCurrant.fbx",
+      "sha256": "fc99a1caafbec1a45ea71fd5de69fdfd38b30cc3874def3cc4b8dca0f58b88c0",
+      "preview": "preview_SM_WildCurrant.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_WildCurrant_hero.png",
+          "detail": "beauty_SM_WildCurrant_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_WildCurrant_LOD1": {
+      "vertices": 10085,
+      "triangles": 9350,
+      "size_cm": [
+        115.77,
+        104.82,
+        96.59
+      ],
+      "materials": [
+        {
+          "name": "M_WildCurrant",
+          "textures": {
+            "basecolor": "T_WildCurrant_basecolor.png",
+            "normal": "T_WildCurrant_normal.png",
+            "roughness": "T_WildCurrant_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.23558475613594054,
+          -0.4490759164094925,
+          0.6
+        ]
+      },
+      "fbx": "SM_WildCurrant_LOD1.fbx",
+      "sha256": "7f800303cf762169328be5298925eecd34765f979e85492cd1a90d658f74b1ec",
+      "preview": "preview_SM_WildCurrant_LOD1.png"
+    },
+    "SM_WildCurrant_LOD2": {
+      "vertices": 1424,
+      "triangles": 964,
+      "size_cm": [
+        122.57,
+        108.3,
+        91.67
+      ],
+      "materials": [
+        {
+          "name": "M_WildCurrant",
+          "textures": {
+            "basecolor": "T_WildCurrant_basecolor.png",
+            "normal": "T_WildCurrant_normal.png",
+            "roughness": "T_WildCurrant_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.23558475613594054,
+          -0.4490759164094925,
+          0.6
+        ]
+      },
+      "fbx": "SM_WildCurrant_LOD2.fbx",
+      "sha256": "3268b4be70380b2b3023decb2a01abca7503f2f30393a064c81a92c3eef0aa82",
+      "preview": "preview_SM_WildCurrant_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "leaf flutter 0 at leaf base -> 1 at tip, 0 on stems",
+    "A": "1"
+  },
+  "material_notes": "One material M_WildCurrant: T_WildCurrant_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "textures": {
+    "T_WildCurrant_basecolor.png": "f542aae4469cada7e3ff7584e4251e134ad43004f45663baccfc1904f3826965",
+    "T_WildCurrant_normal.png": "3846f02a5a6ca97180dd7ff420e6839e36356c557b3132f4223733f760015b68",
+    "T_WildCurrant_roughness.png": "43d95db575c30a1542c141b9f01d01ae7acf69f3a256b0fc886341413f448c4e"
+  }
+}

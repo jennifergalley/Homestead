@@ -1192,6 +1192,7 @@ Result MaterializeEstate(State& candidate, const EstatePlacements& placements)
             node.cleared = edit->cleared;
             node.readyAtHour = edit->readyAtHour;
         }
+        else if (IsWindfallPlacement(placement.id)) node.cleared = true;
         resources.push_back(node);
     }
     candidate.resources = std::move(resources);
