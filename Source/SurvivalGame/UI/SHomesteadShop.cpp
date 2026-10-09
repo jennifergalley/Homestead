@@ -10,6 +10,7 @@
 #include "../HomesteadShopkeeper.h"
 #include "../Simulation/HomesteadBackpack.h"
 #include "../Simulation/HomesteadFood.h"
+#include "../Simulation/HomesteadGarmentShop.h"
 #include "../Simulation/HomesteadItems.h"
 #include <algorithm>
 #include "Brushes/SlateColorBrush.h"
@@ -49,10 +50,14 @@ const FButtonStyle& ShopButtonStyle()
     return Style;
 }
 FString Utf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
-// The backpack and the fishing pole are one-off tools: a price, not "each".
+// The backpack, the fishing pole and each garment are one-offs: a price, not "each".
 template <typename RowType> bool IsOneOff(const RowType& Row)
 {
-    return Row.bUpgrade || (!Row.bHeroine && Row.Item == Homestead::Item::FishingPole);
+    return Row.bUpgrade || Row.Garment != INDEX_NONE || (!Row.bHeroine && Row.Item == Homestead::Item::FishingPole);
+}
+const Homestead::WearableDefinitionInfo* GarmentInfo(int32 Garment)
+{
+    return Garment == INDEX_NONE ? nullptr : Homestead::GetWearableDefinition(static_cast<Homestead::WearableDefinition>(Garment));
 }
 FString Money(int64 Amount) { return Utf8(Homestead::FormatMoney(Amount).c_str()); }
 }
@@ -167,6 +172,25 @@ void SHomesteadShop::BuildRows()
     Rows.Add(Goods);
     for (const Homestead::Item Item : ShopItems)
         if (!IsUpgradeGood(Item)) Rows.Add(GoodsRow(Item));
+    // Clothing (Jenny, 2026-10-04): one of each garment, shown as owned once she has it.
+    bool bClothing = false;
+    for (const auto& Offer : Homestead::GarmentShop::Offers)
+    {
+        if (!Homestead::GarmentShop::Offered(Shop->kind, Offer.definition)) continue;
+        if (!bClothing)
+        {
+            FRow Clothing;
+            Clothing.Header = TEXT("Clothing");
+            Rows.Add(Clothing);
+            bClothing = true;
+        }
+        FRow Row;
+        Row.Garment = static_cast<int32>(Offer.definition);
+        Row.bOwned = Homestead::GarmentShop::Owned(Sim.GetState(), Offer.definition);
+        Row.Available = Row.bOwned ? 0 : 1;
+        Row.Unit = Offer.price;
+        Rows.Add(Row);
+    }
     FRow Hers;
     Hers.Header = TEXT("From ") + EstateName();
     Rows.Add(Hers);
@@ -208,6 +232,8 @@ int32 SHomesteadShop::Limit(const FRow& Row) const
     const auto& Sim = Controller->Simulation();
     if (Tab == 0) return Row.Available;
     if (Row.bUpgrade) return Sim.GetState().money >= Row.Unit ? 1 : 0;
+    if (Row.Garment != INDEX_NONE)
+        return !Row.bOwned && Sim.GetState().money >= Row.Unit && Sim.UsedCapacity() < Sim.PackCapacity() ? 1 : 0;
     const int64 Affordable = Row.Unit > 0 ? Sim.GetState().money / Row.Unit : Sim.PackCapacity();
     int32 Room = Sim.PackCapacity() - Sim.UsedCapacity();
     Room = FMath::Min(Room, Sim.PackCapacity() - Sim.Count(Row.Item));
@@ -226,6 +252,7 @@ FString SHomesteadShop::RowLabel(int32 Index) const
 
 FString SHomesteadShop::RowName(const FRow& Row) const
 {
+    if (const auto* Info = GarmentInfo(Row.Garment)) return Utf8(Info->name);
     return Utf8(Row.bUpgrade ? Homestead::Backpack::Name : Homestead::ItemName(Row.Item));
 }
 
@@ -325,7 +352,13 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
     if (Tab == 0) Stock = FString::Printf(TEXT("%d carried"), Row.Available);
     else if (Row.bUpgrade) Stock = FString::Printf(TEXT("Carry %d"), Homestead::MaxPackCapacity);
     else if (Row.bHeroine) Stock = FString::Printf(TEXT("%d on the shelf"), Row.Available);
+    else if (Row.bOwned) Stock = TEXT("Owned");
     else Stock = TEXT("In stock");
+    const auto* Garment = GarmentInfo(Row.Garment);
+    const FName IconKind = Garment ? FName(UTF8_TO_TCHAR(Garment->key))
+        : Row.bUpgrade ? FName(TEXT("pack")) : FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Row.Item)));
+    const FString Description = Garment ? Utf8(Homestead::WearableDescription(static_cast<Homestead::WearableDefinition>(Row.Garment)))
+        : Utf8(Row.bUpgrade ? Homestead::Backpack::Description : Homestead::ItemDescription(Row.Item));
     auto Widget = SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(10, 5))
         .ButtonColorAndOpacity(bSelected ? ShopSelected : ShopRow)
         .OnClicked_Lambda([this, Index]() { Choose(Index); return FReply::Handled(); })
@@ -335,7 +368,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
             [
                 SNew(SBox).WidthOverride(38).HeightOverride(38)
                 [
-                    SNew(SHomesteadIcon).Kind(Row.bUpgrade ? FName(TEXT("pack")) : FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Row.Item))))
+                    SNew(SHomesteadIcon).Kind(IconKind)
                 ]
             ]
             + SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
@@ -350,10 +383,10 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
                     [ Label(RowName(Row), 17, bSelected ? ShopGold : ShopInk, false) ]
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(10, 0, 0, 1)
-                    [ Label(Row.bUpgrade || !Controller.IsValid() ? FString() : Utf8(Homestead::Food::EffectLabel(Controller->Simulation().GetState(), Row.Item).c_str()), 14, ShopGold, false) ]
+                    [ Label(Row.bUpgrade || Garment || !Controller.IsValid() ? FString() : Utf8(Homestead::Food::EffectLabel(Controller->Simulation().GetState(), Row.Item).c_str()), 14, ShopGold, false) ]
                 ]
                 + SVerticalBox::Slot().AutoHeight()
-                [ Label(Utf8(Row.bUpgrade ? Homestead::Backpack::Description : Homestead::ItemDescription(Row.Item)), 12, ShopMuted) ]
+                [ Label(Description, 12, ShopMuted) ]
             ]
             + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(16, 0)
             [
@@ -570,6 +603,7 @@ void SHomesteadShop::Choose(int32 Index)
         bStatusError = true;
         const auto& Sim = Controller->Simulation();
         Status = Tab == 0 ? TEXT("You have none to sell.")
+            : Rows[Index].bOwned ? TEXT("You already own this.")
             : Sim.GetState().money < Rows[Index].Unit ? FString::Printf(TEXT("That's %s%s; you have %s."), *Money(Rows[Index].Unit),
                 IsOneOff(Rows[Index]) ? TEXT("") : TEXT(" each"), *Wallet())
             : TEXT("Your pack is full.");
@@ -606,7 +640,9 @@ void SHomesteadShop::Confirm()
 {
     const FRow* Row = Chosen();
     if (!bQuantity || !Row || !Controller.IsValid()) return;
-    const auto Result = Row->bUpgrade ? Controller->ShopBuyBackpack(ShopId)
+    const auto Result = Row->Garment != INDEX_NONE
+        ? Controller->ShopBuyGarment(ShopId, static_cast<Homestead::WearableDefinition>(Row->Garment))
+        : Row->bUpgrade ? Controller->ShopBuyBackpack(ShopId)
         : Controller->ShopTrade(ShopId, Row->Item, Quantity, Tab == 0, Row->bHeroine);
     Status = UTF8_TO_TCHAR(Result.message.c_str());
     bStatusError = !Result.ok;

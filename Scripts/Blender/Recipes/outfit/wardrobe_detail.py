@@ -119,7 +119,7 @@ def _top_folds(g, V, fields, body, seed):
     ax = g.extra["axial"]
     h = np.zeros(len(V))
     torso = reg == 0
-    amp = {"tee": 0.0024, "longshirt": 0.0036, "coat": 0.0022}[kind]
+    amp = p.get("fold_amp", {"tee": 0.0024, "longshirt": 0.0036, "coat": 0.0022}[kind])
     # vertical drape folds falling from the bust and shoulder blades
     yc = np.array([body.center_y(z) for z in np.clip(V[:, 2], 0.9, 1.6)])
     th = np.arctan2(V[:, 0], -(V[:, 1] - yc))
@@ -147,14 +147,14 @@ def _top_folds(g, V, fields, body, seed):
             if kind == "tee":
                 # loose diagonal drag folds from the armpit across the sleeve underside
                 under = _smooth(np.cos(ang - math.pi), -0.2, 0.8)
-                h[m] += 0.0016 * under * np.sin(ang * 3.0 + s * 55.0 + _n1(s * 20, seed + 7))
+                h[m] += p.get("sleeve_fold", 0.0016) * under * np.sin(ang * 3.0 + s * 55.0 + _n1(s * 20, seed + 7))
             else:
                 L1 = arm.L1
                 s_end = S["s_end"]
                 # loose sleeve body: long soft folds along the arm, crowding into the cuff
                 body_f = _smooth(s, 0.06, 0.12) * (1 - _smooth(s, s_end - (p.get("cuff") or 0.03) - 0.01, s_end - (p.get("cuff") or 0.03)))
                 twist = ang * (5.0 if kind == "longshirt" else 3.0) + s * 9.0
-                h[m] += (0.0030 if kind == "longshirt" else 0.0020) * body_f * _n1(twist + 0.6 * _n3(P, seed + 12, 7.0), seed + 8)
+                h[m] += p.get("sleeve_fold", 0.0030 if kind == "longshirt" else 0.0020) * body_f * _n1(twist + 0.6 * _n3(P, seed + 12, 7.0), seed + 8)
                 # elbow: rings of compression folds on the inner elbow
                 elbow = np.exp(-((s - L1) / 0.045) ** 2)
                 h[m] += (0.0022 if kind == "longshirt" else 0.0026) * elbow * np.sin((s - L1) / 0.012 * math.pi + _n1(ang * 2, seed + 9))

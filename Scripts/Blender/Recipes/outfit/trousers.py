@@ -146,11 +146,11 @@ def trouser_offsets(g, V, body):
     p = g.extra["params"]
     per = np.array(body.lm["perineum"])
     d = np.linalg.norm(V - per, axis=1)
-    off = p["offset"] + 0.0060 * np.exp(-(d / 0.05) ** 2)
+    off = p["offset"] + p.get("crotch_ease", 0.0060) * np.exp(-(d / 0.05) ** 2)
     z = V[:, 2]
     zj, zk = p["junction_z"], p["knee_z"]
     thigh = np.clip((zj - z) / 0.08, 0, 1)
-    off += 0.0010 * thigh                                     # 4.5 mm over the thigh
+    off += p.get("thigh_ease", 0.0010) * thigh                # 4.5 mm over the thigh by default
     knee = np.exp(-((z - zk) / 0.07) ** 2)
     off += 0.0012 * knee
     below = np.clip((zk - 0.06 - z) / 0.10, 0, 1)

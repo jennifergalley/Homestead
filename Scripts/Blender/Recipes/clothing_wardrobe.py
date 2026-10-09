@@ -1,7 +1,7 @@
 """Homestead: the heroine's homespun wardrobe, a second batch of skinned garments on her MetaHuman body.
 
     SKM_LinenTee        plain linen T-tunic shirt (woad blue-grey), crew neck, mid-upper-arm sleeves
-    SKM_LinenLongShirt  loose unbleached linen shirt, laced slit neck, gathered cuffs
+    SKM_LinenLongShirt  fitted unbleached linen shirt, laced slit neck, gathered cuffs
     SKM_WoolTrousers    walnut-brown homespun wool twill, drawstring waist, boot-close below the knee
     SKM_FurCoat         sheepskin coat, hair side in, suede outside, fur collar/cuffs/front edges,
                         horn toggles on leather loops, ~2 cm of loft
@@ -78,6 +78,17 @@ THICKNESS = {  # cloth (m): base, at hems/edges
     "SKM_FurCoat": (0.020, 0.026),
 }
 T0 = time.time()
+# Jenny (2026-10-04): every garment fits her frame as closely as the starter tank top and shorts
+# (3.2 mm off the skin), tight and fitted rather than falling straight from the bust. These override
+# the shared outfit defaults (which the clerk's looser shirt and trousers keep).
+FITTED = {
+    "tee": dict(base=0.0030, hang=0.06, sleeve_ease=0.0030, fold_amp=0.0009, sleeve_fold=0.0008),
+    "longshirt": dict(base=0.0032, hang=0.10, sleeve_ease=0.0045, cuff_ease=0.0025, fold_amp=0.0014,
+                      sleeve_fold=0.0016),
+    "coat": dict(base=0.008, hang=0.22, sleeve_ease=0.009, cuff_ease=0.010, fold_amp=0.0016, sleeve_fold=0.0016),
+    "trousers": dict(offset=0.0030, crotch_ease=0.0040, thigh_ease=0.0003),
+}
+LEG_DRAPE_K = 0.08  # the thigh hugs the leg instead of falling from the hip's widest girth
 
 
 def log(msg):
@@ -187,6 +198,7 @@ def smooth_edges(V, F, loops, fixed, cons, hem_axis=None, iters=8):
 
 def fit_trousers(body, layers):
     p = Tr.trousers_params(body)
+    p.update(FITTED["trousers"])
     g = Tr.build_trousers(body, p)
     V, F = g.arrays()
     F = orient_out(V, F, body.all)
@@ -197,8 +209,8 @@ def fit_trousers(body, layers):
     lab = Tr.trouser_labels(g, V)
     off = Tr.trouser_offsets(g, V, body)
     cons = [(Labelled([body.torso, body.leg_l, body.leg_r], lab), off, None),
-            (Tr.LegDrape(body, p, "l"), np.zeros(len(V)), lab == 1),
-            (Tr.LegDrape(body, p, "r"), np.zeros(len(V)), lab == 2),
+            (Tr.LegDrape(body, p, "l", k=LEG_DRAPE_K), np.zeros(len(V)), lab == 1),
+            (Tr.LegDrape(body, p, "r", k=LEG_DRAPE_K), np.zeros(len(V)), lab == 2),
             (Tr.Plane(1.0, 0.0022), np.zeros(len(V)), lab == 1),
             (Tr.Plane(-1.0, 0.0022), np.zeros(len(V)), lab == 2)]
     V, gaps = Ly.relax_layers(V, F, fixed, cons, iters=170, log=log)
@@ -230,6 +242,7 @@ def top_offsets(g, V, body, prof):
 
 def fit_top(body, kind, belt, layers, prof):
     p = Tp.top_params(body, kind, belt)
+    p.update(FITTED[kind])
     g = Tp.build_top(body, p)
     V, F = g.arrays()
     F = orient_out(V, F, body.all)
@@ -860,8 +873,8 @@ WARMTH = {
     "SKM_FurCoat": dict(suggested=6.5, clo=1.0, why="~18 mm fleece loft (24 mm at trims), windproof skin, collar and "
                                                     "closed cuffs, insulates when damp; hip length"),
     "SKM_WoolTrousers": dict(suggested=2.0, clo=0.28, why="1.9 mm fulled wool + ~5 mm trapped air, full legs, warm when wet"),
-    "SKM_LinenLongShirt": dict(suggested=1.0, clo=0.2, why="1 mm linen but loose (11 mm air gap), long sleeves, cuffs"),
-    "SKM_LinenTee": dict(suggested=0.5, clo=0.1, why="1.2 mm linen, short sleeves, 7 mm air gap"),
+    "SKM_LinenLongShirt": dict(suggested=1.0, clo=0.2, why="1 mm linen, fitted (4.5 mm air gap), long sleeves, cuffs"),
+    "SKM_LinenTee": dict(suggested=0.5, clo=0.1, why="1.2 mm linen, short sleeves, fitted (3.7 mm air gap)"),
 }
 
 

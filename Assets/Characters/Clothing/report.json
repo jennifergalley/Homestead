@@ -43,7 +43,9 @@
    "junction_z": 0.9043802452087403,
    "knee_z": 0.5078586935997009,
    "hem_z": 0.08430229532718658,
-   "offset": 0.0035
+   "offset": 0.003,
+   "crotch_ease": 0.004,
+   "thigh_ease": 0.0003
   },
   "SKM_LinenTee": {
    "kind": "tee",
@@ -60,10 +62,12 @@
    "z_inb": 1.4777414407730103,
    "z_outb": 1.3850744857788087,
    "sleeve_end": 0.14,
-   "base": 0.0035,
-   "hang": 0.45,
-   "sleeve_ease": 0.0065,
-   "opening": false
+   "base": 0.003,
+   "hang": 0.06,
+   "sleeve_ease": 0.003,
+   "opening": false,
+   "fold_amp": 0.0009,
+   "sleeve_fold": 0.0008
   },
   "SKM_LinenLongShirt": {
    "kind": "longshirt",
@@ -79,14 +83,16 @@
    "zcb": 1.4757414407730103,
    "z_inb": 1.4797414407730103,
    "z_outb": 1.3850744857788087,
-   "base": 0.0045,
-   "hang": 0.72,
-   "sleeve_ease": 0.011,
+   "base": 0.0032,
+   "hang": 0.1,
+   "sleeve_ease": 0.0045,
    "cuff": 0.034,
-   "cuff_ease": 0.0035,
+   "cuff_ease": 0.0025,
    "slit": 0.11,
    "slit_open": 0.012,
-   "opening": false
+   "opening": false,
+   "fold_amp": 0.0014,
+   "sleeve_fold": 0.0016
   },
   "SKM_FurCoat": {
    "kind": "coat",
@@ -102,14 +108,16 @@
    "zcb": 1.4777414407730103,
    "z_inb": 1.4817414407730103,
    "z_outb": 1.3870744857788087,
-   "base": 0.01,
-   "hang": 0.8,
-   "sleeve_ease": 0.012,
+   "base": 0.008,
+   "hang": 0.22,
+   "sleeve_ease": 0.009,
    "cuff": 0.055,
-   "cuff_ease": 0.012,
+   "cuff_ease": 0.01,
    "opening": true,
    "open_gap": 0.003,
-   "facing": 0.032
+   "facing": 0.032,
+   "fold_amp": 0.0016,
+   "sleeve_fold": 0.0016
   }
  },
  "garments": {
@@ -118,7 +126,7 @@
    "triangles": 44506,
    "bones_weighted": 36,
    "accessories": 3,
-   "texel_uv_per_m": 0.7479011293445178,
+   "texel_uv_per_m": 0.76842513854367,
    "textures": {
     "basecolor": "T_WoolTrousers_basecolor.png",
     "normal": "T_WoolTrousers_normal.png",
@@ -128,23 +136,23 @@
    "texture_stats": {
     "albedo_max": 0.3021036982536316,
     "albedo_mean": [
-     0.08312330394983292,
-     0.0534093864262104,
-     0.03414520248770714
+     0.0832049772143364,
+     0.05347150191664696,
+     0.03419139236211777
     ],
-    "rough_mean": 0.9223405718803406,
-    "px_per_cm": 15.317015128975724,
+    "rough_mean": 0.9223394393920898,
+    "px_per_cm": 15.737346837374362,
     "resolution": 2048
    },
    "loft": {
     "cloth_mm": 1.93,
-    "air_gap_mm_median": 4.82,
-    "air_gap_mm_mean": 7.95
+    "air_gap_mm_median": 3.5,
+    "air_gap_mm_mean": 4.1
    },
    "below_knee_outer_mm": {
-    "max": 9.81,
-    "p99": 9.09,
-    "mean": 6.33
+    "max": 8.72,
+    "p99": 7.87,
+    "mean": 5.32
    }
   },
   "SKM_LinenTee": {
@@ -152,7 +160,7 @@
    "triangles": 26394,
    "bones_weighted": 47,
    "accessories": 2,
-   "texel_uv_per_m": 1.1150329669470522,
+   "texel_uv_per_m": 1.143378588931996,
    "textures": {
     "basecolor": "T_LinenTee_basecolor.png",
     "normal": "T_LinenTee_normal.png",
@@ -160,20 +168,20 @@
     "ao": "T_LinenTee_ao.png"
    },
    "texture_stats": {
-    "albedo_max": 0.5234419703483582,
+    "albedo_max": 0.5296578407287598,
     "albedo_mean": [
-     0.19017648696899414,
-     0.22737759351730347,
-     0.26341819763183594
+     0.1901261806488037,
+     0.22745536267757416,
+     0.2633272409439087
     ],
-    "rough_mean": 0.8881738185882568,
-    "px_per_cm": 22.83587516307563,
+    "rough_mean": 0.8881605863571167,
+    "px_per_cm": 23.416393501327278,
     "resolution": 2048
    },
    "loft": {
     "cloth_mm": 1.19,
-    "air_gap_mm_median": 7.32,
-    "air_gap_mm_mean": 8.91
+    "air_gap_mm_median": 3.7,
+    "air_gap_mm_mean": 4.39
    }
   },
   "SKM_LinenLongShirt": {
@@ -181,7 +189,7 @@
    "triangles": 40972,
    "bones_weighted": 67,
    "accessories": 2,
-   "texel_uv_per_m": 0.8562983278166238,
+   "texel_uv_per_m": 0.8711032864085468,
    "textures": {
     "basecolor": "T_LinenLongShirt_basecolor.png",
     "normal": "T_LinenLongShirt_normal.png",
@@ -189,20 +197,20 @@
     "ao": "T_LinenLongShirt_ao.png"
    },
    "texture_stats": {
-    "albedo_max": 0.6684103012084961,
+    "albedo_max": 0.6658331751823425,
     "albedo_mean": [
-     0.5347279906272888,
-     0.5017997622489929,
-     0.4311663508415222
+     0.5358849763870239,
+     0.5016471147537231,
+     0.4307570457458496
     ],
-    "rough_mean": 0.8881608247756958,
-    "px_per_cm": 17.536989753684455,
+    "rough_mean": 0.8881851434707642,
+    "px_per_cm": 17.84019530564704,
     "resolution": 2048
    },
    "loft": {
     "cloth_mm": 0.96,
-    "air_gap_mm_median": 10.99,
-    "air_gap_mm_mean": 11.98
+    "air_gap_mm_median": 4.51,
+    "air_gap_mm_mean": 4.92
    }
   },
   "SKM_FurCoat": {
@@ -210,7 +218,7 @@
    "triangles": 36048,
    "bones_weighted": 65,
    "accessories": 9,
-   "texel_uv_per_m": 0.66663074208666,
+   "texel_uv_per_m": 0.7050471733776155,
    "textures": {
     "basecolor": "T_FurCoat_basecolor.png",
     "normal": "T_FurCoat_normal.png",
@@ -218,21 +226,21 @@
     "ao": "T_FurCoat_ao.png"
    },
    "texture_stats": {
-    "albedo_max": 0.5926045775413513,
+    "albedo_max": 0.6004326343536377,
     "albedo_mean": [
-     0.23777452111244202,
-     0.1847219467163086,
-     0.1231178343296051
+     0.23692774772644043,
+     0.18530121445655823,
+     0.12320135533809662
     ],
-    "rough_mean": 0.8973673582077026,
-    "px_per_cm": 27.305225051370034,
+    "rough_mean": 0.8971989154815674,
+    "px_per_cm": 28.87873222154713,
     "resolution": 4096
    },
    "loft": {
-    "loft_mm_mean": 18.0,
-    "loft_mm_body": 17.3,
-    "loft_mm_trims": 24.0,
-    "air_gap_to_skin_mm_median": 16.2
+    "loft_mm_mean": 17.9,
+    "loft_mm_body": 17.2,
+    "loft_mm_trims": 23.9,
+    "air_gap_to_skin_mm_median": 9.9
    }
   },
   "detail_maps": {
@@ -287,79 +295,79 @@
    },
    "SKM_LinenTee": {
     "verts": 13200,
-    "inside": 300,
-    "inside_pct": 2.272727272727273,
-    "inside_near_edge": 25,
-    "max_depth_mm": 14.604173081603394,
-    "p99_depth_mm": 4.203044555243745
+    "inside": 216,
+    "inside_pct": 1.6363636363636365,
+    "inside_near_edge": 17,
+    "max_depth_mm": 13.217893239157968,
+    "p99_depth_mm": 2.176510526421745
    },
    "SKM_LinenLongShirt": {
     "verts": 20492,
-    "inside": 334,
-    "inside_pct": 1.629904352918212,
+    "inside": 227,
+    "inside_pct": 1.1077493656060902,
     "inside_near_edge": 0,
-    "max_depth_mm": 15.198142285450825,
-    "p99_depth_mm": 3.529693303231334
+    "max_depth_mm": 10.95240963480351,
+    "p99_depth_mm": 0.9343955735930914
    },
    "SKM_FurCoat": {
     "verts": 18064,
-    "inside": 475,
-    "inside_pct": 2.6295394154118688,
+    "inside": 411,
+    "inside_pct": 2.275243578387954,
     "inside_near_edge": 0,
-    "max_depth_mm": 27.432288272915763,
-    "p99_depth_mm": 8.959510319031946
+    "max_depth_mm": 21.267801799216805,
+    "p99_depth_mm": 7.108599529724314
    },
    "layers": {
     "SKM_LinenTee over SKM_PrimitiveShorts": {
-     "checked": 3382,
+     "checked": 3379,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenTee over SKM_WoolTrousers": {
-     "checked": 3382,
+     "checked": 3379,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
-     "checked": 6837,
+     "checked": 6858,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenLongShirt over SKM_WoolTrousers": {
-     "checked": 6837,
+     "checked": 6858,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_FurCoat over SKM_LinenTee": {
      "checked": 8324,
-     "inside": 196,
-     "inside_pct": 2.3546371936568957,
-     "max_depth_mm": 13.542547707414588,
-     "through_outer": 60,
-     "through_outer_pct": 0.7208073041806823
+     "inside": 141,
+     "inside_pct": 1.6938971648246037,
+     "max_depth_mm": 11.765547815382316,
+     "through_outer": 30,
+     "through_outer_pct": 0.36040365209034114
     },
     "SKM_FurCoat over SKM_LinenLongShirt": {
      "checked": 8324,
-     "inside": 248,
-     "inside_pct": 2.9793368572801535,
-     "max_depth_mm": 8.36475933490008,
-     "through_outer": 22,
-     "through_outer_pct": 0.2642960115329169
+     "inside": 170,
+     "inside_pct": 2.042287361845267,
+     "max_depth_mm": 8.780870010061925,
+     "through_outer": 20,
+     "through_outer_pct": 0.2402691013935608
     }
    }
   },
   "kneel_left_forward": {
    "SKM_WoolTrousers": {
     "verts": 22266,
-    "inside": 225,
-    "inside_pct": 1.0105092966855296,
-    "inside_near_edge": 2,
-    "max_depth_mm": 7.970051934467155,
-    "p99_depth_mm": 0.5118243082191334
+    "inside": 170,
+    "inside_pct": 0.7634959130512889,
+    "inside_near_edge": 4,
+    "max_depth_mm": 7.145832800172827,
+    "p99_depth_mm": 0.035752669685825904
    },
    "SKM_LinenTee": {
     "verts": 13200,
@@ -387,25 +395,25 @@
    },
    "layers": {
     "SKM_LinenTee over SKM_PrimitiveShorts": {
-     "checked": 3382,
+     "checked": 3379,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenTee over SKM_WoolTrousers": {
-     "checked": 3382,
+     "checked": 3379,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
-     "checked": 6837,
+     "checked": 6858,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenLongShirt over SKM_WoolTrousers": {
-     "checked": 6837,
+     "checked": 6858,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
@@ -431,74 +439,74 @@
   "squat": {
    "SKM_WoolTrousers": {
     "verts": 22266,
-    "inside": 1186,
-    "inside_pct": 5.326506781640169,
-    "inside_near_edge": 275,
-    "max_depth_mm": 22.837056454205,
-    "p99_depth_mm": 5.671564827956195
+    "inside": 846,
+    "inside_pct": 3.799514955537591,
+    "inside_near_edge": 268,
+    "max_depth_mm": 7.747516370575573,
+    "p99_depth_mm": 3.9119495796025854
    },
    "SKM_LinenTee": {
     "verts": 13200,
-    "inside": 312,
-    "inside_pct": 2.3636363636363638,
-    "inside_near_edge": 64,
-    "max_depth_mm": 11.987742683804568,
-    "p99_depth_mm": 5.344283304483432
+    "inside": 151,
+    "inside_pct": 1.143939393939394,
+    "inside_near_edge": 53,
+    "max_depth_mm": 7.53524742344836,
+    "p99_depth_mm": 0.8637697885818383
    },
    "SKM_LinenLongShirt": {
     "verts": 20492,
-    "inside": 363,
-    "inside_pct": 1.7714229943392543,
-    "inside_near_edge": 73,
-    "max_depth_mm": 16.07497793874716,
-    "p99_depth_mm": 5.678947514017198
+    "inside": 154,
+    "inside_pct": 0.7515127854772594,
+    "inside_near_edge": 46,
+    "max_depth_mm": 7.602235392626631,
+    "p99_depth_mm": 0.0
    },
    "SKM_FurCoat": {
     "verts": 18064,
-    "inside": 561,
-    "inside_pct": 3.1056244464127545,
-    "inside_near_edge": 291,
-    "max_depth_mm": 26.451426655676904,
-    "p99_depth_mm": 12.020750845703066
+    "inside": 454,
+    "inside_pct": 2.5132860938883965,
+    "inside_near_edge": 241,
+    "max_depth_mm": 20.819033269510133,
+    "p99_depth_mm": 6.745690466260273
    },
    "layers": {
     "SKM_LinenTee over SKM_PrimitiveShorts": {
-     "checked": 3382,
-     "inside": 83,
-     "inside_pct": 2.4541691306918985,
-     "max_depth_mm": 8.417888903966324
+     "checked": 3379,
+     "inside": 69,
+     "inside_pct": 2.042024267534774,
+     "max_depth_mm": 9.67485757859172
     },
     "SKM_LinenTee over SKM_WoolTrousers": {
-     "checked": 3382,
-     "inside": 160,
-     "inside_pct": 4.730928444707274,
-     "max_depth_mm": 10.759179751640154
+     "checked": 3379,
+     "inside": 53,
+     "inside_pct": 1.5685113939035218,
+     "max_depth_mm": 7.9997182231462505
     },
     "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
-     "checked": 6837,
-     "inside": 116,
-     "inside_pct": 1.6966505777387744,
-     "max_depth_mm": 13.435545788534737
+     "checked": 6858,
+     "inside": 54,
+     "inside_pct": 0.7874015748031495,
+     "max_depth_mm": 9.068066953895269
     },
     "SKM_LinenLongShirt over SKM_WoolTrousers": {
-     "checked": 6837,
-     "inside": 224,
-     "inside_pct": 3.2762907708059092,
-     "max_depth_mm": 15.422899088756704
+     "checked": 6858,
+     "inside": 53,
+     "inside_pct": 0.7728200641586468,
+     "max_depth_mm": 8.366174926585298
     },
     "SKM_FurCoat over SKM_LinenTee": {
      "checked": 8324,
-     "inside": 184,
-     "inside_pct": 2.2104757328207594,
-     "max_depth_mm": 15.194966429266428,
+     "inside": 85,
+     "inside_pct": 1.0211436809226335,
+     "max_depth_mm": 8.272362002061442,
      "through_outer": 0,
      "through_outer_pct": 0.0
     },
     "SKM_FurCoat over SKM_LinenLongShirt": {
      "checked": 8324,
-     "inside": 273,
-     "inside_pct": 3.2796732340221046,
-     "max_depth_mm": 7.593075273077616,
+     "inside": 100,
+     "inside_pct": 1.2013455069678038,
+     "max_depth_mm": 7.676363217520242,
      "through_outer": 0,
      "through_outer_pct": 0.0
     }
@@ -515,66 +523,66 @@
    },
    "SKM_LinenTee": {
     "verts": 13200,
-    "inside": 58,
-    "inside_pct": 0.43939393939393934,
-    "inside_near_edge": 19,
-    "max_depth_mm": 3.727924690783035,
+    "inside": 60,
+    "inside_pct": 0.45454545454545453,
+    "inside_near_edge": 26,
+    "max_depth_mm": 3.9142314560016467,
     "p99_depth_mm": 0.0
    },
    "SKM_LinenLongShirt": {
     "verts": 20492,
-    "inside": 60,
-    "inside_pct": 0.2927971891469842,
-    "inside_near_edge": 8,
-    "max_depth_mm": 4.438884598949972,
+    "inside": 64,
+    "inside_pct": 0.3123170017567832,
+    "inside_near_edge": 15,
+    "max_depth_mm": 3.5821016341326066,
     "p99_depth_mm": 0.0
    },
    "SKM_FurCoat": {
     "verts": 18064,
-    "inside": 65,
-    "inside_pct": 0.3598317094774136,
-    "inside_near_edge": 17,
-    "max_depth_mm": 7.583474475053545,
+    "inside": 63,
+    "inside_pct": 0.3487599645704163,
+    "inside_near_edge": 16,
+    "max_depth_mm": 8.007886282656724,
     "p99_depth_mm": 0.0
    },
    "layers": {
     "SKM_LinenTee over SKM_PrimitiveShorts": {
-     "checked": 3382,
+     "checked": 3379,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenTee over SKM_WoolTrousers": {
-     "checked": 3382,
+     "checked": 3379,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
-     "checked": 6837,
+     "checked": 6858,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenLongShirt over SKM_WoolTrousers": {
-     "checked": 6837,
+     "checked": 6858,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_FurCoat over SKM_LinenTee": {
      "checked": 8324,
-     "inside": 18,
-     "inside_pct": 0.2162421912542047,
-     "max_depth_mm": 2.930480033214276,
+     "inside": 12,
+     "inside_pct": 0.14416146083613646,
+     "max_depth_mm": 2.0850174103193386,
      "through_outer": 0,
      "through_outer_pct": 0.0
     },
     "SKM_FurCoat over SKM_LinenLongShirt": {
      "checked": 8324,
-     "inside": 23,
-     "inside_pct": 0.2763094666025949,
-     "max_depth_mm": 3.279335453602621,
+     "inside": 11,
+     "inside_pct": 0.13214800576645844,
+     "max_depth_mm": 1.4720019335000136,
      "through_outer": 0,
      "through_outer_pct": 0.0
     }
@@ -591,66 +599,66 @@
    },
    "SKM_LinenTee": {
     "verts": 13200,
-    "inside": 417,
-    "inside_pct": 3.159090909090909,
-    "inside_near_edge": 190,
-    "max_depth_mm": 18.26774672174331,
-    "p99_depth_mm": 6.210484044826825
+    "inside": 401,
+    "inside_pct": 3.037878787878788,
+    "inside_near_edge": 197,
+    "max_depth_mm": 18.60573534686956,
+    "p99_depth_mm": 6.56840879895658
    },
    "SKM_LinenLongShirt": {
     "verts": 20492,
-    "inside": 428,
-    "inside_pct": 2.0886199492484874,
-    "inside_near_edge": 156,
-    "max_depth_mm": 18.041872209149112,
-    "p99_depth_mm": 4.241674638535012
+    "inside": 434,
+    "inside_pct": 2.1178996681631856,
+    "inside_near_edge": 178,
+    "max_depth_mm": 18.353129748249938,
+    "p99_depth_mm": 4.360132931730725
    },
    "SKM_FurCoat": {
     "verts": 18064,
-    "inside": 338,
-    "inside_pct": 1.8711248892825507,
-    "inside_near_edge": 28,
-    "max_depth_mm": 19.71293754979334,
-    "p99_depth_mm": 5.111811703490528
+    "inside": 326,
+    "inside_pct": 1.804694419840567,
+    "inside_near_edge": 29,
+    "max_depth_mm": 19.030715542267824,
+    "p99_depth_mm": 4.274616777080823
    },
    "layers": {
     "SKM_LinenTee over SKM_PrimitiveShorts": {
-     "checked": 3382,
+     "checked": 3379,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenTee over SKM_WoolTrousers": {
-     "checked": 3382,
+     "checked": 3379,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenLongShirt over SKM_PrimitiveShorts": {
-     "checked": 6837,
+     "checked": 6858,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_LinenLongShirt over SKM_WoolTrousers": {
-     "checked": 6837,
+     "checked": 6858,
      "inside": 0,
      "inside_pct": 0.0,
      "max_depth_mm": 0.0
     },
     "SKM_FurCoat over SKM_LinenTee": {
      "checked": 8324,
-     "inside": 56,
-     "inside_pct": 0.6727534839019702,
-     "max_depth_mm": 11.471132209611316,
-     "through_outer": 4,
-     "through_outer_pct": 0.04805382027871216
+     "inside": 53,
+     "inside_pct": 0.6367131186929361,
+     "max_depth_mm": 10.51649713318324,
+     "through_outer": 6,
+     "through_outer_pct": 0.07208073041806823
     },
     "SKM_FurCoat over SKM_LinenLongShirt": {
      "checked": 8324,
-     "inside": 72,
-     "inside_pct": 0.8649687650168189,
-     "max_depth_mm": 7.1695286897559845,
+     "inside": 41,
+     "inside_pct": 0.4925516578567996,
+     "max_depth_mm": 18.51177964842188,
      "through_outer": 0,
      "through_outer_pct": 0.0
     }
@@ -973,11 +981,11 @@
    "uv_channel": 0,
    "uv_name": "DiffuseUV",
    "udim_u_offset": 1.0,
-   "covered_triangles": 11462,
+   "covered_triangles": 11493,
    "total_triangles": 60816,
-   "covered_vertices": 6021,
+   "covered_vertices": 6054,
    "per_garment_triangles": {
-    "SKM_WoolTrousers": 11462
+    "SKM_WoolTrousers": 11493
    },
    "margin_m": 0.012,
    "file": "WoolTrousers/BodyCoverageMask_WoolTrousers.png"
@@ -987,11 +995,11 @@
    "uv_channel": 0,
    "uv_name": "DiffuseUV",
    "udim_u_offset": 1.0,
-   "covered_triangles": 7942,
+   "covered_triangles": 7975,
    "total_triangles": 60816,
-   "covered_vertices": 4331,
+   "covered_vertices": 4348,
    "per_garment_triangles": {
-    "SKM_LinenTee": 7942
+    "SKM_LinenTee": 7975
    },
    "margin_m": 0.012,
    "file": "LinenTee/BodyCoverageMask_LinenTee.png"
@@ -1001,11 +1009,11 @@
    "uv_channel": 0,
    "uv_name": "DiffuseUV",
    "udim_u_offset": 1.0,
-   "covered_triangles": 14886,
+   "covered_triangles": 15061,
    "total_triangles": 60816,
-   "covered_vertices": 7892,
+   "covered_vertices": 7981,
    "per_garment_triangles": {
-    "SKM_LinenLongShirt": 14886
+    "SKM_LinenLongShirt": 15061
    },
    "margin_m": 0.012,
    "file": "LinenLongShirt/BodyCoverageMask_LinenLongShirt.png"
@@ -1015,11 +1023,11 @@
    "uv_channel": 0,
    "uv_name": "DiffuseUV",
    "udim_u_offset": 1.0,
-   "covered_triangles": 14226,
+   "covered_triangles": 14215,
    "total_triangles": 60816,
-   "covered_vertices": 7565,
+   "covered_vertices": 7582,
    "per_garment_triangles": {
-    "SKM_FurCoat": 14226
+    "SKM_FurCoat": 14215
    },
    "margin_m": 0.012,
    "file": "FurCoat/BodyCoverageMask_FurCoat.png"
@@ -1037,7 +1045,7 @@
   "normal_maps": "OpenGL (+Y): flip green in Unreal"
  },
  "pouch_clearance": {
-  "pouch_vertices_inside_trousers": 127,
+  "pouch_vertices_inside_trousers": 116,
   "min_signed_mm": -0.95,
   "placement_error_m": 0.037,
   "axis_flip": [
@@ -1048,43 +1056,14 @@
  },
  "belt_clearance": {
   "SKM_LinenTee": {
-   "min_hem_above_belt_top_mm": 6.8
+   "min_hem_above_belt_top_mm": 6.9
   },
   "SKM_LinenLongShirt": {
-   "min_hem_above_belt_top_mm": 6.3
+   "min_hem_above_belt_top_mm": 6.9
   },
   "SKM_FurCoat": {
-   "min_hem_above_belt_top_mm": 6.3
+   "min_hem_above_belt_top_mm": 8.6
   }
- },
- "files": {
-  "WoolTrousers/BodyCoverageMask_WoolTrousers.png": "126cd62d2d48f8809c119ca93009f631bb657dad494f45c8161c480079162f16",
-  "WoolTrousers/SKM_WoolTrousers.fbx": "6db949e1f35c641799521bbcd73ee03f84ab858b5d56da58f8b8547c59c2a9fa",
-  "WoolTrousers/Textures/T_HomespunWool_Detail_normal.png": "d1c1d1903f5db2799bd053444b2e66d981d1099a1935d81662f9b98ab1c33b10",
-  "WoolTrousers/Textures/T_HomespunWool_Detail_roughness.png": "506d68582dfdf37206f29fc7e537977f3e7ee7c16fe26fd1c8429b68af83b77e",
-  "WoolTrousers/Textures/T_HomespunWool_Detail_tone.png": "bcef5a69e945adce13393a3818be5629082686c8e82533598d3ef23bd7d51243",
-  "WoolTrousers/Textures/T_WoolTrousers_ao.png": "b30364937617bfb6a2cf8595d10be7cea606e89b1731b022b9cb1e5886d5a197",
-  "WoolTrousers/Textures/T_WoolTrousers_basecolor.png": "e172bf59a4b99089e85492ad45c4d62fd5c3ee7e0ee6ea6cfaf7fa8bd1d1f46a",
-  "WoolTrousers/Textures/T_WoolTrousers_normal.png": "969e708ed97d5a69c70f4e1413fa618811febe3c27f4b5d007d9bf8545a46c19",
-  "WoolTrousers/Textures/T_WoolTrousers_roughness.png": "1eec161bae07f44bdf4dddaa404e95b96154d502f1ae51b65f5a2ba945e6eacc",
-  "LinenTee/BodyCoverageMask_LinenTee.png": "bc1c7d96308fba466a1e55eb803062a439b15c0502efedd271e31acbaafabf90",
-  "LinenTee/SKM_LinenTee.fbx": "15f8046dc4ad6caa94c1b44b06ceee549eebba1d117dab15d129db4657fb8481",
-  "LinenTee/Textures/T_LinenTee_ao.png": "0d65c9db5202bf74a361be975512666dc48819ec8a6543316f89ed2eebaf88a6",
-  "LinenTee/Textures/T_LinenTee_basecolor.png": "aadf31814d6f099468728fb08aedaae71254bde8207de72141bd3b8868b9a0ad",
-  "LinenTee/Textures/T_LinenTee_normal.png": "718963170877d2cd719a274cb0b0c8a81fbcbc0275bfea7c48d2bf5cbcf2e56e",
-  "LinenTee/Textures/T_LinenTee_roughness.png": "3eb518df4bf5f92bc1fc0397e57a926d71123a6819734dcb9068b8ce5f93858d",
-  "LinenLongShirt/BodyCoverageMask_LinenLongShirt.png": "f6aaea0312bcf9ec4fc064a631aa0c37609ad2d2d2b6fef1302f8fd5d782ff2d",
-  "LinenLongShirt/SKM_LinenLongShirt.fbx": "d20e569c1fe1afeb9a935cc17b7f5ad8515bc9018d8eeef47749a1156a7c3491",
-  "LinenLongShirt/Textures/T_LinenLongShirt_ao.png": "006ce5b4baa5bc3a528a8a73093d68037e8714e73d45b27b33b3d310e8a94e41",
-  "LinenLongShirt/Textures/T_LinenLongShirt_basecolor.png": "2b080839e6bbd706854e97cfb3dbd1e92648fbb2ac66978bc678299ce0023ea6",
-  "LinenLongShirt/Textures/T_LinenLongShirt_normal.png": "2b0d05767e0d9372629b220a76b4a6408574f479c070c844b2a0378ac27c143f",
-  "LinenLongShirt/Textures/T_LinenLongShirt_roughness.png": "69fe792b6e18a4932d038726d28da1458d628ba8ddb024873815f29a992be6ec",
-  "FurCoat/BodyCoverageMask_FurCoat.png": "8ff6036ace35486a9daf9d67791823e970e8781e31d4dd88a214ae00ad20f309",
-  "FurCoat/SKM_FurCoat.fbx": "0e7372c9c63d8c3561c23cc464f20ab86a004e8b2b1302e146d0be5e7120634b",
-  "FurCoat/Textures/T_FurCoat_ao.png": "5195c1d80b17ada028fc8adbcf375103fca0523f5cb67b821bb14a7238261b0b",
-  "FurCoat/Textures/T_FurCoat_basecolor.png": "1d3eacb2c136c53199c3d0dcdfcb6c79a45cd6ed9022838a0535e9196a7e7a2b",
-  "FurCoat/Textures/T_FurCoat_normal.png": "dbedc181b5ad3dea53a077e12810a53ff84ecebf9ad9a8c05463a112fbda9346",
-  "FurCoat/Textures/T_FurCoat_roughness.png": "bf1fb3457388497a7f2325416833f2f99b7ba0342c46621b43de4bc4059b998d"
  },
  "warmth": {
   "scale": "0-10, relative; rough clo equivalents from typical garment tables",
@@ -1107,12 +1086,41 @@
   "SKM_LinenLongShirt": {
    "suggested": 1.0,
    "clo": 0.2,
-   "why": "1 mm linen but loose (11 mm air gap), long sleeves, cuffs"
+   "why": "1 mm linen, fitted (4.5 mm air gap), long sleeves, cuffs"
   },
   "SKM_LinenTee": {
    "suggested": 0.5,
    "clo": 0.1,
-   "why": "1.2 mm linen, short sleeves, 7 mm air gap"
+   "why": "1.2 mm linen, short sleeves, fitted (3.7 mm air gap)"
   }
+ },
+ "files": {
+  "WoolTrousers/BodyCoverageMask_WoolTrousers.png": "03934e90c757908f47b714617cc1329de789d8cf6ba337cd15d3ef92eeda8c0d",
+  "WoolTrousers/SKM_WoolTrousers.fbx": "5f68f04fd918fe85de8f6a6737feeb63039f951abd92ab52fdbfac5be85c30b4",
+  "WoolTrousers/Textures/T_HomespunWool_Detail_normal.png": "d1c1d1903f5db2799bd053444b2e66d981d1099a1935d81662f9b98ab1c33b10",
+  "WoolTrousers/Textures/T_HomespunWool_Detail_roughness.png": "506d68582dfdf37206f29fc7e537977f3e7ee7c16fe26fd1c8429b68af83b77e",
+  "WoolTrousers/Textures/T_HomespunWool_Detail_tone.png": "bcef5a69e945adce13393a3818be5629082686c8e82533598d3ef23bd7d51243",
+  "WoolTrousers/Textures/T_WoolTrousers_ao.png": "d0283b7515c3848fe113b5229e4cf4e8672c7c342e84251d0173bdf8b1f1eef8",
+  "WoolTrousers/Textures/T_WoolTrousers_basecolor.png": "8077a102f8e110114d01d2046b11183ff65bc0bccdf7b76c6851516eda6cd785",
+  "WoolTrousers/Textures/T_WoolTrousers_normal.png": "7c75939b71bd77b4842c5b728597f8aebe1c84b745cc2fe2f0dceeee9e14bf10",
+  "WoolTrousers/Textures/T_WoolTrousers_roughness.png": "c8f3453a6be57ff1473341c50ab5287c5bf410c46a97b81811717d9095f65b03",
+  "LinenTee/BodyCoverageMask_LinenTee.png": "fd00866827ec7a102b2381b04b0fa0a9b70c91c2b44cf8105a790c4bbc89f99b",
+  "LinenTee/SKM_LinenTee.fbx": "ae3a56aeb8d5637cea1a1a1ddf90e57c183463785f7986917f451e5b7cf76c0f",
+  "LinenTee/Textures/T_LinenTee_ao.png": "b89350bea82f5a36afb6592e4ff78b3deb1429110350a1ad3cfc419151c11a9d",
+  "LinenTee/Textures/T_LinenTee_basecolor.png": "dfedb4dada768e85c80422401dd431f18f2ae77dbe2da46b46d2d4f2a3755b04",
+  "LinenTee/Textures/T_LinenTee_normal.png": "32ae56918de999ebd63da259b91e414167c399de5b9b7c988a80f28c3a31d6f2",
+  "LinenTee/Textures/T_LinenTee_roughness.png": "b232c59707bddbd84ce9952718ac7000c4c6b1d79dac9f7b65aae57b11878799",
+  "LinenLongShirt/BodyCoverageMask_LinenLongShirt.png": "ee2fc3c478d34a61791243fe76ec9ee217b4f3b77f351cb24712a33d468850e1",
+  "LinenLongShirt/SKM_LinenLongShirt.fbx": "c875a72767a7ecdca7632beb6e55361bc26bbe6d25f4efadca74642ceb33761d",
+  "LinenLongShirt/Textures/T_LinenLongShirt_ao.png": "a94b426ebf524d601875db08e3c9bba9363c49571216f298b9cb65b8e44e2fcf",
+  "LinenLongShirt/Textures/T_LinenLongShirt_basecolor.png": "3031a93fb9b32ba2b984b6eb016f9bdc3e0a3423f11d66bf251b39a31c0ec7e3",
+  "LinenLongShirt/Textures/T_LinenLongShirt_normal.png": "d0006e760cd4c55dc4ff387e86d62b663ecdc82092de3d7f34f37bddd9ca7c0b",
+  "LinenLongShirt/Textures/T_LinenLongShirt_roughness.png": "89de489038c214d301b497fabd8cc0794f8d7cdfc7a094afa5eaf7f363b74a9a",
+  "FurCoat/BodyCoverageMask_FurCoat.png": "6df3f8356864f0913337ce13212a105008c5c735f2d44f3c451317bb38bd4d99",
+  "FurCoat/SKM_FurCoat.fbx": "0d238d699e365b1d55b69c023a8236dfa909e3c206e1780be0ab1c3d6924feb1",
+  "FurCoat/Textures/T_FurCoat_ao.png": "c9205bb68ebd109b9f4d89ceb8e508d8e069b0fdb664432cc1a42116f831af15",
+  "FurCoat/Textures/T_FurCoat_basecolor.png": "9009232c97a58a6c58462e47eaa9ac2988a847e79541b3341465f553c0cbc88a",
+  "FurCoat/Textures/T_FurCoat_normal.png": "b71cd0a847b923691cf9ef391c4b7d63a2e4fbb60c69e34d8cbb40c611a3b805",
+  "FurCoat/Textures/T_FurCoat_roughness.png": "214340737b6fbb20317bb8c52502404734544d405857e1aca8ef73e3885b3452"
  }
 }

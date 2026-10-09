@@ -326,3 +326,20 @@ void AHomesteadController::HomesteadMoney(int32 Coins)
     Notify(Result.ok ? FString::Printf(TEXT("Purse: %s"), *ShopText(Homestead::FormatMoney(State().money))) : ShopText(Result.message),
         !Result.ok);
 }
+
+Homestead::Result AHomesteadController::ShopBuyGarment(int32 ShopId, Homestead::WearableDefinition Garment)
+{
+    if (RejectPendingGroundSnapAction())
+        return {false, "Still finding your footing. Wait a moment.", Homestead::ResultCode::Unavailable, Sim.GetRevision()};
+    const int64 Before = State().money;
+    const auto Result = Sim.BuyGarment(ShopId, Garment, PlayerPoint());
+    UE_LOG(LogHomesteadShop, Display, TEXT("SHOP_TRADE garment item=%d ok=%d purse=%lld message=\"%s\""),
+        static_cast<int32>(Garment), Result.ok ? 1 : 0, static_cast<long long>(State().money), *ShopText(Result.message));
+    if (Result.ok)
+    {
+        LastWalletDelta = State().money - Before;
+        WalletDeltaRemaining = 3.0f;
+        PlayEffect(WoodTapB, Homestead::AudioLevels::Gain::ShopSale);
+    }
+    return Result;
+}

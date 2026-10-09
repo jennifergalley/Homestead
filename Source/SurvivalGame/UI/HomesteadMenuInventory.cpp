@@ -213,7 +213,7 @@ bool AHomesteadController::MenuItemAction(const FHomesteadRow& Row, EHomesteadIt
         {
             if (Row.Subject == EHomesteadMenuSubject::GarmentRecipe)
                 return Target.CraftGarment(static_cast<Homestead::WearableDefinition>(Row.SubjectId), PlayerPoint(), ExpectedRevision);
-            if (Action == EHomesteadItemAction::Equip) return Target.EquipWearable(Row.SubjectId, ExpectedRevision);
+            if (Action == EHomesteadItemAction::Equip) return Target.EquipWearable(Row.SubjectId, PlayerPoint(), ExpectedRevision);
             if (Action == EHomesteadItemAction::Unequip) return Target.UnequipWearable(Row.SubjectId, ExpectedRevision);
             const auto* Item = Target.GetWearable(Row.SubjectId);
             if (!Item) return {false, "That owned garment no longer exists."};

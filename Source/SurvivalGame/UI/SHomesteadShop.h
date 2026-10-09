@@ -63,6 +63,9 @@ private:
         bool bHeroine = false;
         // A one-time upgrade (the leather backpack) rather than goods: bought once, never a quantity.
         bool bUpgrade = false;
+        // A garment from the Clothing section (a Homestead::WearableDefinition), sold once each.
+        int32 Garment = INDEX_NONE;
+        bool bOwned = false;
         FString Header; // Set for section headings, which can't be chosen.
     };
     TWeakObjectPtr<AHomesteadController> Controller;

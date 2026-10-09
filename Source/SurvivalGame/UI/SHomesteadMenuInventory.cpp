@@ -41,30 +41,40 @@ void SHomesteadMenu::FocusEquipment(int32 Index, bool bPointer)
         return;
     }
     const auto Slot = VisibleEquipmentSlots[Index];
+    CancelPointerItemDrag();
     const int32 Id = Controller->State().equipment[static_cast<int32>(Slot)];
     FHomesteadRow Worn;
-    if (Id && Controller->MenuWearableRow(Id, Worn))
+    // A filled slot keeps the worn garment's own options (unequip, dye) below the swaps.
+    const bool bWorn = Id && Controller->MenuWearableRow(Id, Worn) && BuildItemOptions(Worn);
+    if (!bWorn)
     {
-        OpenItemContextMenuFor(Worn, PopupAnchorFor(Anchor, bPointer));
-        return;
+        PopupOptions.Reset();
+        PopupTitle = FString(EquipmentSlotNames[Index]) + TEXT(": empty");
     }
-    // An empty slot offers the carried garments that fit it.
-    PopupOptions.Reset();
-    PopupTitle = FString(EquipmentSlotNames[Index]) + TEXT(": empty");
+    // Every carried garment that fits, and any in the open chest, swaps straight in with no unequip
+    // first (Jenny, 2026-10-04); what it displaces goes back where it came from.
+    const auto Chest = Controller->ActiveStorageChest();
+    TArray<FPopupOption> Swaps;
     for (const auto& Instance : Controller->State().wearables)
     {
         const auto* Info = Homestead::GetWearableDefinition(Instance.definition);
+        const bool bStored = Chest.IsSet() && Instance.owner == Homestead::WearableOwner::Chest
+            && Instance.chestId == Chest.GetValue();
         FHomesteadRow Row;
-        if (Instance.owner != Homestead::WearableOwner::Carried || !Info
+        if ((Instance.owner != Homestead::WearableOwner::Carried && !bStored) || !Info
             || !(Info->slots & (1u << static_cast<int>(Slot))) || !Controller->MenuWearableRow(Instance.id, Row))
             continue;
-        PopupOptions.Add({[Label = TEXT("Wear ") + Row.Name]() { return Label; },
+        Swaps.Add({[Label = TEXT("Wear ") + Row.Name + (bStored ? TEXT(" from the chest") : TEXT(""))]() { return Label; },
             [this, Row]() { Controller->MenuItemAction(Row, EHomesteadItemAction::Equip, 1, Controller->Simulation().GetRevision()); },
             nullptr, EHomesteadItemAction::Equip});
     }
-    if (PopupOptions.IsEmpty())
-        PopupOptions.Add({[]() { return FString(TEXT("Nothing carried fits here")); }, nullptr, []() { return false; }, {}});
-    PopupOptions.Add({[]() { return FString(TEXT("Cancel")); }, nullptr, nullptr, {}});
+    PopupOptions.Insert(Swaps, 0);
+    if (!bWorn)
+    {
+        if (PopupOptions.IsEmpty())
+            PopupOptions.Add({[]() { return FString(TEXT("Nothing carried fits here")); }, nullptr, []() { return false; }, {}});
+        PopupOptions.Add({[]() { return FString(TEXT("Cancel")); }, nullptr, nullptr, {}});
+    }
     PopupAnchor = PopupAnchorFor(Anchor, bPointer);
     SetDialog(EDialog::Context);
 }
@@ -263,7 +273,12 @@ bool SHomesteadMenu::BuildItemOptions(const FHomesteadRow& Row)
                 SetDialog(EDialog::DropWearable);
             }, EHomesteadItemAction::Drop);
         }
-        else Add(TEXT("Take to pack"), Move, EHomesteadItemAction::Transfer);
+        else
+        {
+            // Worn straight from the chest; what it displaces goes into the chest.
+            Add(TEXT("Equip"), Act(EHomesteadItemAction::Equip, 1), EHomesteadItemAction::Equip);
+            Add(TEXT("Take to pack"), Move, EHomesteadItemAction::Transfer);
+        }
         const auto* Info = Homestead::GetWearableDefinition(static_cast<Homestead::WearableDefinition>(Row.Id));
         if (Info && Info->dyeable)
             Add(TEXT("Change dye..."), [this, Row]()

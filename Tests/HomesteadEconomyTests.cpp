@@ -3,6 +3,7 @@
 #include "HomesteadCrops.h"
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
+#include "HomesteadGarmentShop.h"
 #include "HomesteadHoldings.h"
 #include "HomesteadItems.h"
 #include "HomesteadPail.h"
@@ -367,6 +368,82 @@ void LeatherBackpackUpgrade()
     Simulation truncated;
     truncated.SetPlacements(ProvisionalEstatePlacements());
     CHECK(!truncated.Deserialize(stripped).ok);
+}
+
+void ClothingAtTheStore()
+{
+    // Jenny, 2026-10-04: clothes are bought at the general store from day one (none in the manor
+    // chest), one of each, and wearing one swaps it for what she has on without unequipping first.
+    Store store = OpenStore();
+    auto& sim = store.sim;
+    CHECK(std::size(GarmentShop::Offers) == 7);
+    Coins total = 0;
+    for (const auto& offer : GarmentShop::Offers)
+    {
+        total += offer.price;
+        CHECK(GarmentShop::Offered(ShopKind::GeneralStore, offer.definition));
+        CHECK(!GarmentShop::Owned(sim.GetState(), offer.definition));
+    }
+    CHECK(total == 1610 && GarmentShop::Price(WearableDefinition::LinenShirt) == 120);
+    CHECK(!GarmentShop::Offered(ShopKind::GeneralStore, WearableDefinition::LinenTunic)
+        && !GarmentShop::Offered(ShopKind::GeneralStore, WearableDefinition::LinenApron));
+    // Refusals change nothing: not for sale, or too far from the counter.
+    const std::uint64_t revision = sim.GetRevision();
+    const std::string before = sim.Serialize();
+    CHECK(!sim.BuyGarment(store.shop, WearableDefinition::LinenTunic, store.customer).ok);
+    CHECK(!sim.BuyGarment(store.shop, WearableDefinition::LinenShirt, {store.counter.x + 5000.0, store.counter.y}).ok);
+    CHECK(sim.GetRevision() == revision && sim.Serialize() == before);
+    // 1,000 coins: the shirt, the trousers and the fur boots, then the coat is too dear.
+    const auto bought = sim.BuyGarment(store.shop, WearableDefinition::LinenShirt, store.customer);
+    OK(bought);
+    CHECK(bought.message == "Bought the linen shirt for 120 coins.");
+    const int shirt = sim.GetState().wearables.back().id;
+    CHECK(sim.GetWearable(shirt)->definition == WearableDefinition::LinenShirt
+        && sim.GetWearable(shirt)->owner == WearableOwner::Carried);
+    CHECK(GarmentShop::Owned(sim.GetState(), WearableDefinition::LinenShirt) && sim.GetState().money == 880);
+    const auto again = sim.BuyGarment(store.shop, WearableDefinition::LinenShirt, store.customer);
+    CHECK(!again.ok && again.message == "You already own the linen shirt." && sim.GetState().money == 880);
+    OK(sim.BuyGarment(store.shop, WearableDefinition::Trousers, store.customer));
+    const int trousers = sim.GetState().wearables.back().id;
+    OK(sim.BuyGarment(store.shop, WearableDefinition::FurBoots, store.customer));
+    const auto dear = sim.BuyGarment(store.shop, WearableDefinition::FurCoat, store.customer);
+    CHECK(!dear.ok && dear.message == "That costs 600 coins; you have 380 coins.");
+    // A full pack has no room for one more.
+    Store full = OpenStore();
+    OK(full.sim.GrantItems(Item::Branch, full.sim.PackCapacity() - full.sim.UsedCapacity()));
+    const auto crowded = full.sim.BuyGarment(full.shop, WearableDefinition::WovenSandals, full.customer);
+    CHECK(!crowded.ok && crowded.code == ResultCode::Capacity && full.sim.GetState().money == 1000);
+
+    // Swap from her pack: the shirt goes straight over the starter tunic, which drops to her pack.
+    const int tunic = sim.GetState().equipment[static_cast<int>(EquipmentSlot::Torso)];
+    CHECK(sim.GetWearable(tunic)->definition == WearableDefinition::LinenTunic);
+    OK(sim.EquipWearable(shirt, sim.GetRevision()));
+    CHECK(sim.GetWearable(shirt)->owner == WearableOwner::Equipped && sim.GetWearable(tunic)->owner == WearableOwner::Carried);
+    // Swap from a chest she stands at: the displaced garment goes into that chest.
+    const Structure* chest = nullptr;
+    for (const auto& piece : sim.GetState().structures) if (piece.kind == Piece::Chest) chest = &piece;
+    CHECK(chest != nullptr);
+    const int chestId = chest->id;
+    const Point side = sim.StructureCenter(*chest);
+    OK(sim.MoveWearable(trousers, chestId, side, sim.GetRevision()));
+    OK(sim.MoveWearable(tunic, chestId, side, sim.GetRevision()));
+    const std::string stored = sim.Serialize();
+    CHECK(!sim.EquipWearable(trousers, sim.GetRevision()).ok);
+    CHECK(!sim.EquipWearable(trousers, {side.x + 5000.0, side.y}, sim.GetRevision()).ok && sim.Serialize() == stored);
+    OK(sim.EquipWearable(trousers, side, sim.GetRevision()));
+    CHECK(sim.GetWearable(trousers)->owner == WearableOwner::Equipped && sim.GetWearable(trousers)->chestId == 0);
+    // The tunic covers torso and legs, so wearing it from the chest sends shirt and trousers there.
+    OK(sim.EquipWearable(tunic, side, sim.GetRevision()));
+    for (int id : {shirt, trousers})
+        CHECK(sim.GetWearable(id)->owner == WearableOwner::Chest && sim.GetWearable(id)->chestId == chestId);
+    CHECK(sim.GetWearable(tunic)->owner == WearableOwner::Equipped);
+    CHECK(sim.GetState().equipment[static_cast<int>(EquipmentSlot::Torso)] == tunic
+        && sim.GetState().equipment[static_cast<int>(EquipmentSlot::Legs)] == tunic);
+    // It all survives save and reload.
+    Simulation reloaded;
+    reloaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(reloaded.Deserialize(sim.Serialize()));
+    CHECK(reloaded.Serialize() == sim.Serialize());
 }
 
 void StockSellsDownEachMorning()
@@ -1128,6 +1205,7 @@ int main(int argc, char** argv)
     Run("buy and eat a pasty", BuyAndEatAPasty);
     Run("buy back and pack capacity", BuyBackAndCapacity);
     Run("the leather backpack upgrade", LeatherBackpackUpgrade);
+    Run("clothing at the store, worn by swapping", ClothingAtTheStore);
     Run("her goods sell down each morning", StockSellsDownEachMorning);
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
     Run("no walk to town from town", NoWalkToTownFromTown);

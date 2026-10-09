@@ -682,7 +682,10 @@ public:
     Result EmptyPail();
     Result AddFuel(int structureId, Point player);
     Result Transfer(int chestId, Item item, int amount, Point player);
+    // Wears a carried garment; whatever it displaces (and an apron left with no top) goes to her pack.
     Result EquipWearable(int id, std::uint64_t expectedRevision);
+    // As above, or straight from the reachable chest holding it; then what it displaces goes into that chest.
+    Result EquipWearable(int id, Point player, std::uint64_t expectedRevision);
     Result UnequipWearable(int id, std::uint64_t expectedRevision);
     Result MoveWearable(int id, int destinationChestId, Point player, std::uint64_t expectedRevision);
     Result CraftGarment(WearableDefinition definition, Point player, std::uint64_t expectedRevision);
@@ -808,6 +811,8 @@ public:
     Result Buy(int shopId, Item item, int quantity, bool fromHeroineStock, Point player);
     // The leather backpack: a one-time upgrade at an open General Store (HomesteadBackpack.h).
     Result BuyBackpack(int shopId, Point player);
+    // One garment from the General Store's clothing (HomesteadGarmentShop.h), into her pack.
+    Result BuyGarment(int shopId, WearableDefinition definition, Point player);
     // Shows or hides the backpack on her back; capacity is unchanged either way.
     Result SetBackpackShown(bool shown);
     // Counts a shopkeeper greeting (a friendship stub).

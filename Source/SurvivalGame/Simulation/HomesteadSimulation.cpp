@@ -924,13 +924,13 @@ const char* WearableDescription(WearableDefinition definition)
     case WearableDefinition::LinenApron: return "A separate apron worn over a linen tunic.";
     case WearableDefinition::LeatherShoes: return "Lace-up shoes with socks from older saves. Authored color; not craftable.";
     case WearableDefinition::WovenFootwraps: return "Fiber-woven footwear, worn instead of shoes. Authored color.";
-    case WearableDefinition::LinenShirt: return "A short-sleeved shirt of undyed linen, loosely woven for warm days.";
-    case WearableDefinition::LinenLongShirt: return "A long-sleeved linen shirt with a drawstring neck.";
-    case WearableDefinition::Trousers: return "Close-woven homespun trousers, tied at the waist and snug below the knee.";
-    case WearableDefinition::FurCoat: return "A hide coat worn fur-side in, sewn with fiber thread.";
-    case WearableDefinition::FurBoots: return "Tall hide boots with a fur lining and a turned-down cuff.";
-    case WearableDefinition::WovenSandals: return "Plaited fiber soles tied on with cords. Cool and light.";
-    case WearableDefinition::TurnShoes: return "Soft hide shoes sewn inside out and turned, laced at the instep.";
+    case WearableDefinition::LinenShirt: return "A close-cut short-sleeved linen shirt, cool for summer work.";
+    case WearableDefinition::LinenLongShirt: return "A fitted long-sleeved linen shirt with a drawstring neck.";
+    case WearableDefinition::Trousers: return "Snug homespun trousers, laced at the waist.";
+    case WearableDefinition::FurCoat: return "A fitted hide coat, lined in fur against the winter wind.";
+    case WearableDefinition::FurBoots: return "Tall fur-lined boots with a turned-down cuff.";
+    case WearableDefinition::WovenSandals: return "Plaited soles laced at the ankle. Cool and light.";
+    case WearableDefinition::TurnShoes: return "Soft hide shoes, turned and laced at the instep.";
     default: return "Unknown garment";
     }
 }
@@ -1226,7 +1226,7 @@ Result Simulation::NewEstateGame(const EstateLayout& layout, const EstatePlaceme
         candidate.inventory[static_cast<int>(Item::WateringCan)] = 1;
         candidate.inventoryLayout.push_back({candidate.nextGroupId++, Item::WateringCan, 1, 0});
     }
-    // A few days' food and a change of clothes wait in the chest too.
+    // A few days' food waits in the chest too; clothes are bought at the general store.
     else Manor::StockStarterChest(candidate);
     const auto inventory = ValidateInventory(candidate);
     if (!inventory) return inventory;
@@ -1392,30 +1392,47 @@ Result Simulation::CommitInventory(State&& candidate, const char* message)
 
 Result Simulation::EquipWearable(int id, std::uint64_t expectedRevision)
 {
+    const double nowhere = std::numeric_limits<double>::quiet_NaN();
+    return EquipWearable(id, Point{nowhere, nowhere}, expectedRevision);
+}
+Result Simulation::EquipWearable(int id, Point player, std::uint64_t expectedRevision)
+{
     const auto ready = CheckRevision(expectedRevision);
     if (!ready) return ready;
     const auto* original = GetWearable(id);
-    if (!original || original->owner != WearableOwner::Carried)
+    const bool fromChest = original && original->owner == WearableOwner::Chest && ValidPoint(player);
+    if (!original || (original->owner != WearableOwner::Carried && !fromChest))
         return Bad("Take this garment into your pack before equipping it.");
     const auto* definition = GetWearableDefinition(original->definition);
     if (!definition) return Bad("This garment definition is unavailable.");
+    const int chestId = fromChest ? original->chestId : 0;
+    if (fromChest)
+        if (const auto access = ContainerAccess(state_, chestId, player); !access) return access;
     if (original->definition == WearableDefinition::LinenApron &&
         state_.equipment[static_cast<int>(EquipmentSlot::Torso)] == 0)
         return Bad("Equip a linen tunic before wearing an apron.");
     State candidate = state_;
+    // What it displaces swaps places with it: back to her pack, or into the chest it came from.
+    const auto displace = [&](WearableInstance& item)
+    {
+        item.owner = chestId == 0 ? WearableOwner::Carried : WearableOwner::Chest;
+        item.chestId = chestId;
+    };
     for (auto& item : candidate.wearables)
     {
         if (item.owner == WearableOwner::Equipped &&
             (GetWearableDefinition(item.definition)->slots & definition->slots) != 0)
-            item.owner = WearableOwner::Carried;
+            displace(item);
     }
-    Find(candidate.wearables, id)->owner = WearableOwner::Equipped;
+    auto* worn = Find(candidate.wearables, id);
+    worn->owner = WearableOwner::Equipped;
+    worn->chestId = 0;
     RefreshEquipment(candidate);
     // Trousers displace a tunic from the legs, which can leave an apron with nothing to tie over.
     if (const int apron = candidate.equipment[static_cast<int>(EquipmentSlot::Apron)];
         apron != 0 && candidate.equipment[static_cast<int>(EquipmentSlot::Torso)] == 0)
     {
-        Find(candidate.wearables, apron)->owner = WearableOwner::Carried;
+        displace(*Find(candidate.wearables, apron));
         RefreshEquipment(candidate);
     }
     return CommitInventory(std::move(candidate), "Garment equipped.");

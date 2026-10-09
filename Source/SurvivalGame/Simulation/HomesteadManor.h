@@ -44,16 +44,11 @@ std::string NameProblem(const std::string& trimmed, const char* what);
 // a doorway and roof, the hearth, the bed and a chest holding the pail and four branches.
 // Returns false (leaving `state` unchanged) when the layout has no room anchor.
 bool SeedStandingRoom(State& state, const EstateLayout& layout);
-// New estate games only (never on load, never SeedStandingRoomAt): provisions and a change of
-// clothes in the standing room's chest beside the pail and branches. Returns false, changing
-// nothing, when there is no heritage chest or they wouldn't fit.
+// New estate games only (never on load, never SeedStandingRoomAt): provisions in the standing room's
+// chest beside the pail and branches. Clothes are bought at the general store (HomesteadGarmentShop.h).
+// Returns false, changing nothing, when there is no heritage chest or they wouldn't fit.
 constexpr int StarterPasties = 3;
 constexpr int StarterBread = 2;
-// One of each finished outfit piece she isn't already wearing, in this order.
-constexpr WearableDefinition StarterWardrobe[] = {
-    WearableDefinition::LinenShirt, WearableDefinition::LinenLongShirt, WearableDefinition::Trousers,
-    WearableDefinition::FurCoat, WearableDefinition::FurBoots, WearableDefinition::WovenSandals,
-    WearableDefinition::TurnShoes};
 bool StockStarterChest(State& state);
 // The heritage building's id, or 0 when there is none.
 int HeritageBuildingId(const State& state);

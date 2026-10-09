@@ -6,10 +6,14 @@ They go over the always-on base layer in `Assets\Characters\PrimitiveOutfit` (ta
 
 | Garment | Folder | What it is |
 | --- | --- | --- |
-| `SKM_LinenTee` | `LinenTee\` | Plain linen T-tunic shirt, woad blue-grey. Crew neck with a bias binding, set-in sleeves to mid upper arm, hem at the high hip. Loose-ish: it falls straight from the bust. |
-| `SKM_LinenLongShirt` | `LinenLongShirt\` | Loose unbleached linen shirt: 11 cm neck slit laced criss-cross through worked eyelets, full sleeves gathered into 3.4 cm cuffs, hip length. |
-| `SKM_WoolTrousers` | `WoolTrousers\` | Walnut-brown fulled wool, 2/2 twill. Drawstring casing at the shorts' waist height; slightly tapered legs. Stays within 1 cm of the skin below the knee (for boots) and ends at the ankle bone. The left knee has a mended patch. |
-| `SKM_FurCoat` | `FurCoat\` | Hip-length sheepskin coat, hair side in: suede outside, fleece turned out at the collar, cuffs and front edges. Closes with three horn toggles on leather loops. About 2 cm of loft, fitted over the long shirt. |
+| `SKM_LinenTee` | `LinenTee\` | Plain linen T-tunic shirt, woad blue-grey. Crew neck with a bias binding, set-in sleeves to mid upper arm, hem at the high hip. Fitted: it follows her waist in under the bust. |
+| `SKM_LinenLongShirt` | `LinenLongShirt\` | Fitted unbleached linen shirt: 11 cm neck slit laced criss-cross through worked eyelets, close sleeves gathered into 3.4 cm cuffs, hip length. |
+| `SKM_WoolTrousers` | `WoolTrousers\` | Walnut-brown fulled wool, 2/2 twill. Drawstring casing at the shorts' waist height; snug through the seat and thigh, tapered legs. Stays within 1 cm of the skin below the knee (for boots) and ends at the ankle bone. The left knee has a mended patch. |
+| `SKM_FurCoat` | `FurCoat\` | Hip-length sheepskin coat, hair side in: suede outside, fleece turned out at the collar, cuffs and front edges. Closes with three horn toggles on leather loops. About 2 cm of loft, fitted and waisted over the long shirt. |
+
+Jenny (2026-10-04) asked for every garment to fit her about as closely as the starter tank top and
+shorts (3.2 mm off the skin): tight and fitted. The recipe's `FITTED` table sets the heroine's cloth
+offsets, drape and fold depth; the clerk's looser outfit keeps the shared `outfit\` defaults.
 
 Rebuild everything with the seeded recipe `Scripts\Blender\Recipes\clothing_wardrobe.py`, which
 uses the shared `outfit\` modules. It runs under Blender 5.2, headless:
@@ -85,8 +89,8 @@ The coat's material is one atlas:
    - the shirts clear the shorts' and trousers' waistbands;
    - the coat clears the tee and the long shirt.
 
-   Drape floors make the loose tops fall straight from the bust and shoulder blades, and the
-   trouser thighs fall from the hip. Openings (the shirt slit, the coat front) are cut after the
+   Drape floors are nearly off for her (`FITTED` hang 0.06-0.22, leg drape 0.08), so the tops
+   follow the waist in and the trouser thighs hug the leg. Openings (the shirt slit, the coat front) are cut after the
    solve so both edges still meet.
 3. **Folds.** Sculpted folds follow each garment: drape folds, elbow and knee bunching, cuff and
    neck gathers, ankle stacking.
@@ -117,22 +121,22 @@ The coat's material is one atlas:
 - White means the skin is fully hidden: at least 12 mm inside every opening.
 - The coat's mask counts skin up to 8 cm under it, since the coat sits over the shirt.
 - Covered body triangles, out of 60,816:
-  - LinenTee 7,942
-  - LinenLongShirt 14,886
-  - WoolTrousers 11,462
-  - FurCoat 14,226
+  - LinenTee 7,975
+  - LinenLongShirt 15,061
+  - WoolTrousers 11,493
+  - FurCoat 14,215
 
 ## Fit in the bind pose
 
 - 0 vertices inside the body for all four garments.
 - Median skin gap:
-  - tee 7.3 mm;
-  - long shirt 11.0 mm;
-  - trousers 4.8 mm;
-  - coat inner fleece 16 mm (the shirts sit in between).
-- Every hem ends at least 6 mm above the cord belt's top (tee 6.8, long shirt 6.3, coat 6.3).
-- Trousers below the knee: outer surface max 9.8 mm, p99 9.1 mm, mean 6.3 mm from the skin.
-- Where the forage pouch rests on her right hip, the trousers come up to 0.95 mm into it (127
+  - tee 3.7 mm;
+  - long shirt 4.5 mm;
+  - trousers 3.5 mm;
+  - coat inner fleece 9.9 mm (the shirts sit in between).
+- Every hem ends at least 6 mm above the cord belt's top (tee 6.9, long shirt 6.9, coat 8.6).
+- Trousers below the knee: outer surface max 8.7 mm, p99 7.9 mm, mean 5.3 mm from the skin.
+- Where the forage pouch rests on her right hip, the trousers come up to 0.95 mm into it (116
   pouch vertices). The pouch was fitted over the shorts; re-run `forage_pouch_fit.py` against
   the trousers if that shows.
 
@@ -144,11 +148,11 @@ beneath. For the coat it also gives how much shows through its whole loft ("thro
 
 | Pose | Tee | Long shirt | Trousers | Coat | Layers |
 | --- | --- | --- | --- | --- | --- |
-| walk | 2.3 % (15 mm), armpit side | 1.6 % (15 mm), armpit side | clean | 2.6 % (27 mm), armpit side | coat over tee 2.4 % / through 0.7 %, over long shirt 3.0 % / 0.3 % |
-| kneel, left leg forward | clean | clean | 1.0 % (8 mm), knee | clean | clean |
-| deep squat | 2.4 % (12 mm), front hem into the thighs | 1.8 % (16 mm), same | 5.3 % (23 mm), knee pit, seat, hip crease | 3.1 % (27 mm), front hem into the thighs | shirts over waistbands 2–5 %, coat over shirts 2–3 % / through 0 % |
-| arms overhead | 0.4 % (4 mm) | 0.3 % (4 mm) | clean | 0.4 % (8 mm) | < 0.3 % |
-| felling swing | 3.2 % (18 mm), armpit side | 2.1 % (18 mm), armpit side | clean | 1.9 % (20 mm), armpit side | coat over shirts 0.7–0.9 % / through < 0.2 % |
+| walk | 1.6 % (13 mm), armpit side | 1.1 % (11 mm), armpit side | clean | 2.3 % (21 mm), armpit side | coat over tee 1.7 % / through 0.4 %, over long shirt 2.0 % / 0.2 % |
+| kneel, left leg forward | clean | clean | 0.8 % (7 mm), knee | clean | clean |
+| deep squat | 1.1 % (8 mm), front hem into the thighs | 0.8 % (8 mm), same | 3.8 % (8 mm), knee pit, seat, hip crease | 2.5 % (21 mm), front hem into the thighs | shirts over waistbands 0.8–2 %, coat over shirts 1–1.2 % / through 0 % |
+| arms overhead | 0.5 % (4 mm) | 0.3 % (4 mm) | clean | 0.3 % (8 mm) | < 0.2 % |
+| felling swing | 3.0 % (19 mm), armpit side | 2.1 % (18 mm), armpit side | clean | 1.8 % (19 mm), armpit side | coat over shirts 0.5–0.6 % / through < 0.1 % |
 
 Where they fail and why:
 - **Walk and felling swing:** when the arms come down to her sides, the inner upper arm swings
@@ -173,8 +177,8 @@ Suggested relative warmth on the 0–10 scale, ranked by insulation:
 | --- | --- | --- | --- |
 | 1 | FurCoat | **+6.5** | ~18 mm fleece loft (24 mm at the trims), windproof skin, standing collar and closed cuffs. Wool fleece keeps insulating when damp. Roughly 1.0 clo. It stops at the high hip, so the thighs rely on the trousers. |
 | 2 | WoolTrousers | **+2** | 1.9 mm fulled wool plus about 5 mm of trapped air, full leg cover to the ankle, warm when wet. Roughly 0.25–0.3 clo. |
-| 3 | LinenLongShirt | **+1** | Thin linen (1 mm), but loose (11 mm median air gap), with long sleeves and closed cuffs. Roughly 0.2 clo. Linen wicks and cools when wet. |
-| 4 | LinenTee | **+0.5** (or 0) | 1.2 mm linen, short sleeves, 7 mm air gap. Roughly 0.1 clo. |
+| 3 | LinenLongShirt | **+1** | Thin linen (1 mm), fitted (4.5 mm median air gap), with long sleeves and closed cuffs. Roughly 0.2 clo. Linen wicks and cools when wet. |
+| 4 | LinenTee | **+0.5** (or 0) | 1.2 mm linen, short sleeves, fitted (3.7 mm air gap). Roughly 0.1 clo. |
 
 These match the targets (tee ≈ 0, long shirt ≈ 1, trousers ≈ 2, coat ≈ 6); the coat earns a
 little more for the loft actually built.

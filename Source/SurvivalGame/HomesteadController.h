@@ -347,6 +347,8 @@ public:
     Homestead::Result ShopTrade(int32 ShopId, Homestead::Item Item, int32 Quantity, bool bSell, bool bHeroineStock);
     // The one-time leather backpack (Simulation/HomesteadBackpack.h).
     Homestead::Result ShopBuyBackpack(int32 ShopId);
+    // One garment from the store's Clothing section (Simulation/HomesteadGarmentShop.h).
+    Homestead::Result ShopBuyGarment(int32 ShopId, Homestead::WearableDefinition Garment);
     void ShopClick();
     void NoteShopDevice(bool bPad);
     // The name she gave the estate ("the estate" in woodland games), for "From {Estate}" and toasts.
