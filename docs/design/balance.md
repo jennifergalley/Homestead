@@ -174,7 +174,8 @@ buyer (timber, twine, seeds, bramble canes, weeds) count as 0. The swings are wi
 | Slate heap | hand | 1 | 0.8 | 1–2 stone, lead 30%, scrap iron 30% | 27 |
 | Ruin timbers | axe, worn | 3 | 3.0 | 1–2 timber, 2–3 firewood, scrap iron 30% | 45 |
 
-Iron and steel tools gate thickets, bramble banks, large and ancient stumps, logs and boulders.
+Iron and steel tools gate thickets, bramble banks, large and ancient stumps, logs and boulders. Iron
+costs × 0.85 energy per swing and steel × 0.7, with fewer swings on the big nodes.
 Spring flowers sell for 10–15: wild garlic 10, primroses 12, bluebells 15. Berries sell for 6 each
 and roots for 4.
 
@@ -193,8 +194,8 @@ buys tools. ✅ There's no coin gate on the core toolset, which is very cozy.
 **Iron upgrades (store, 2026-10-09):** 2,000 coins per tool (Jenny's number; 12,000 for all six).
 That's about 2.5 days of income each, so it's a mid-game goal, not a day-1 buy.
 - The upgrade only appears once she has crafted that tool.
-- Iron must feel better at once: energy × 0.75 per swing and one swing fewer (at least 1), on top
-  of the tool gates.
+- Iron already pays off at once: energy × 0.85 per swing and fewer swings on stumps, rocks and
+  thickets (steel × 0.7). Keep that ladder.
 - The row disappears once the tool is iron.
 
 ## 8. Fishing (9 PM slice)
