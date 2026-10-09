@@ -50,6 +50,7 @@ slot, then go idle; they do not pick up unflagged queue items.
 - Fishing is harder (about 60% get away, random waits) and plays out on a bob on the water.
 - Clothes swap on equip, are sold at the General Store, and fit her closely.
 - A smoother, well-worn path down to town, and a lived-in village.
+- Modern clothes: tank top, crop top, jeans, leggings, leather jacket, sneakers, ankle boots.
 
 ## Build after next
 

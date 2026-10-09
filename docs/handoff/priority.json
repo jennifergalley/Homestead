@@ -57,7 +57,8 @@
     "backlog:jenny-mv1koymo-balgr1",
     "backlog:jenny-mv1koymp-balsq1",
     "backlog:jenny-mv1koymq-balft1",
-    "backlog:jenny-mv1l1aa7-refl01"
+    "backlog:jenny-mv1l1aa7-refl01",
+    "backlog:jenny-mv1lb6ol-modcl1"
   ],
   "slots": {
     "backlog:jenny-muucy9hz-jv5gx7": "after-next",
@@ -70,7 +71,8 @@
     "backlog:jenny-muw5lwnm-wwwu9y": "next",
     "backlog:jenny-muw5qdyb-5lcsxk": "next",
     "backlog:jenny-muw6zadi-id5vku": "next",
-    "backlog:jenny-muxl8f94-ibw78l": "next"
+    "backlog:jenny-muxl8f94-ibw78l": "next",
+    "backlog:jenny-mv1lb6ol-modcl1": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -118,5 +120,5 @@
     "backlog:jenny-muu7idr3-mphjdv",
     "backlog:jenny-mus1sztj-sinh3q"
   ],
-  "updated": "2026-10-09T23:14:20.623Z"
+  "updated": "2026-10-09T23:22:27.523Z"
 }
