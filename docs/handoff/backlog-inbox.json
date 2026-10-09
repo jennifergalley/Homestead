@@ -552,6 +552,14 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-09T23:25:59.525Z"
+    },
+    {
+      "id": "jenny-mv1lry6h-wfexp1",
+      "title": "Explain what Well fed does",
+      "description": "Jenny (2026-10-09): \"\\\"well fed\\\" status is never explained in game, so its unclear what that benefit entails. maybe we can include an explainer somewhere in the UI in the current build?\" Effect: 3 h after a Meal, work costs 15% less Energy (Food::WellFedHours, WellFedWorkFactor).",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-09T23:35:04.649Z"
     }
   ]
 }
