@@ -21,6 +21,9 @@ conflict, the cozier, more fun or more beautiful option wins.
   Prefer things a Cornish household of 1851 would know. Avoid modern words (sushi, upgrade,
   inventory in player copy, XP, quest) unless no period word reads clearly; clarity wins over
   period accuracy (pillar 1 beats pillar 3).
+- **Wardrobe exception (Jenny, 2026-10-09):** her outfits may be modern and fitted (tank tops,
+  jeans, leggings, sneakers, a biker jacket); the period rule doesn't bind clothing. Describe them
+  plainly by fit and feel, without brand names or a "modern" label.
 - **Names:** Cornish surnames and places (Trethewey, Trevennor, Penhallow, Tregarthen, Polwhele…)
   and plain Victorian given names. **Never reference *Poldark***: no Ross, Demelza, Nampara,
   Trenwith, Wheal Leisure/Grace, Warleggan, Pascoe, Hoskin(g), Jud, Prudie, Verity or close
