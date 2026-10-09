@@ -17,7 +17,7 @@ Build after next (Jenny, 2026-10-09) so it doesn't hold back the rest.
 | Integration Agent | `09ae4063-4f60-475e-bb88-7c6d6a7bbc7c` | Claude Sonnet 5 / medium | reserved slot | merge, package, promote; docs liaison |
 | Balance Agent | `81a547cd-0a72-4415-a617-460b5ade5f3c` | existing | — | review only |
 | Upkeep Agent | `0b009706-dca7-491b-8a2f-be986c0ba59e` | Claude Sonnet 5.5 / high | 8771 | bramble/weed/branch regrowth; more berry bushes and roots; clearable home stumps |
-| Gameplay Agent | `020b4924-7cda-4b6e-8356-74c831e30440` | Claude Sonnet 5.5 / high | 8772 | crop type/day tooltip; iron tools at store; bigger landmark icons |
+| Gameplay Agent | `1f460f04-3e05-46de-95a7-0d45fac84cfd` | Claude Sonnet 5.5 / high | 8772 | crop type/day tooltip; iron tools at store; bigger landmark icons |
 | Fishing Agent | `c630ec78-24ce-43d9-929f-0b354f08a801` | Claude Opus 5.5 / high | 8773 | harder fishing; bob-on-water presentation |
 | Wardrobe Agent | `d5e13a60-fa8b-48fe-9d83-cea4fedfdf8e` | Claude Opus 5.5 / high | 8774 | swap-equip clothes; clothes sold at store; refit garments |
 | Village Agent | `47fbb074-06a2-46f0-a579-48bb068884e2` | Claude Sonnet 5.5 / high | 8775 | smoother town path; village dressing |
