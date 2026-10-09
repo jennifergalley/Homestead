@@ -1121,6 +1121,9 @@ OpenSpec changes, not here.
 
 ### Editor, MCP and PIE
 
+- 2026-10-09: **Spawn the Axe for a PIE test:** `HomesteadGive Axe 1`, then `tap_key('Two')` to hold
+  it (it's the default slot-2 tool). With `gamepadPrompts` true, the focus card's interact hint
+  shows `[A]` instead of `[E]` — expected, not a bug.
 - 2026-09-28: **PIE stills.** `HighResShot 1920x1080` (via `execute_console_command(w, cmd, pc)`) writes
   to `Saved\Screenshots\WindowsEditor\`.
   `hshot` in `Scripts\McpHelpers.ps1` wraps this.
@@ -1193,6 +1196,14 @@ OpenSpec changes, not here.
 
 ### Tests and packaging
 
+- 2026-10-09: **Shared-machine contention this round:** the UBT mutex queue took about 19 minutes
+  and the shared editor slot about 40 minutes of waiting with 5 lanes active. Expect it; don't kill
+  a queued build (section 0.1).
+- 2026-10-09: **Exclude windfall placements from resource-count tests.** Windfall nodes (ids
+  584000-584199) start dormant and only count once woken; a test that counts cleared resources
+  must skip them with `Estate::IsWindfallPlacement(id)` or it over/under-counts.
+- 2026-10-09: `Test-Native.ps1`'s `HomesteadSimulationTests` passes standalone in about 250 s;
+  failures print only the line number (no message), so match it back to the assert in source.
 - 2026-09-27: When scripting the packaged suites, pass switches as a hashtable splat
   (`$p=@{Packaged=$true; NativeMenu=$true}; .\Scripts\Test-Game.ps1 @p`). An array splat such as
   `@('-NativeMenu')` binds as a positional string and silently runs only the default smoke test.
