@@ -66,3 +66,10 @@ Bed sleep beginning at or after the earlier of 6 PM and sunset SHALL end at the 
 #### Scenario: Ordinary daytime rest
 - **WHEN** the heroine sleeps during daytime with depleted energy
 - **THEN** she takes the ordinary energy-restoring rest rather than skipping to tomorrow
+
+### Requirement: Names avoid Poldark references
+Player-facing people, business and estate names SHALL NOT reference Poldark.
+
+#### Scenario: Store and clerk
+- **WHEN** she visits the general store
+- **THEN** it is Trethewey's and the clerk is Mr. Josiah Trethewey
