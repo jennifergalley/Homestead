@@ -73,3 +73,10 @@ Player-facing people, business and estate names SHALL NOT reference Poldark.
 #### Scenario: Store and clerk
 - **WHEN** she visits the general store
 - **THEN** it is Trethewey's and the clerk is Mr. Josiah Trethewey
+
+### Requirement: Every cooked meal grants Well fed
+Eating any Meal on the estate SHALL start Well fed for the standard duration.
+
+#### Scenario: Cooked meal
+- **WHEN** she eats any cooked meal
+- **THEN** the Well fed badge shows until three hours later
