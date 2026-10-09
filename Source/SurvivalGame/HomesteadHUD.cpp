@@ -435,7 +435,8 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     const APawn* Pawn = PC.GetPawn();
     const FString Actions = PC.FocusActions();
     // Nothing to do here: the open woodland's "[I] Field book" hint belongs to the controls strip.
-    if (!Pawn || Actions.IsEmpty() || Actions.Contains(TEXT("Field book"))) return 0;
+    const bool bCropCard = PC.IsCropFocused();
+    if (!Pawn || (Actions.IsEmpty() && !bCropCard) || Actions.Contains(TEXT("Field book"))) return 0;
     // "[E] Gather   [LMB] Clear with Knife" -> (key, verb) pairs; unkeyed hints stay plain text.
     TArray<FString> Parts;
     Actions.ParseIntoArray(Parts, TEXT("   "));
@@ -467,7 +468,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     for (const FCue& Cue : Cues) Keyed += Cue.Key.IsEmpty() ? 0 : 1;
     if (Keyed == 1)
         Cues.RemoveAll([&PC](const FCue& Cue) { return !Cue.Key.IsEmpty() && PC.IsHintRetired(Cue.Verb); });
-    if (Cues.IsEmpty()) return 0;
+    if (Cues.IsEmpty() && !bCropCard) return 0;
     // The words are the notices' EB Garamond (as the toast and the book's card); the key and pad
     // glyphs stay in the crisp sans on their pine stamps.
     constexpr float Size = 21, KeySize = 17, BadgeH = 28, Gap = 22, KeyPad = 11, Space = 9;
@@ -515,7 +516,8 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
     }
     ActionHeight += (Rows.Num() - 1) * RowGap;
     const float BoxWidth = Width + HudNoticeLayout::PadX * 2 + 2;
-    const float TitleHeight = TitleLines.IsEmpty() ? 0 : TitleLines.Num() * TitleLine + TitleGap;
+    const bool bTitleOnly = Cues.IsEmpty();
+    const float TitleHeight = TitleLines.IsEmpty() ? 0 : TitleLines.Num() * TitleLine + (bTitleOnly ? 0 : TitleGap);
     const float BoxHeight = HudNoticeLayout::PadTop + TitleHeight + ActionHeight + HudNoticeLayout::PadBottom;
     const float Left = NoticeLeft(BoxWidth, PC);
     const float CenterX = Left + BoxWidth * 0.5f;
@@ -532,7 +534,7 @@ float AHomesteadHUD::DrawInteractCue(const AHomesteadController& PC)
         bNoticeText = bThemeSerif;
         Y += TitleLine;
     }
-    if (!TitleLines.IsEmpty()) Y += TitleGap;
+    if (!TitleLines.IsEmpty() && !bTitleOnly) Y += TitleGap;
     for (int32 RowIndex = 0; RowIndex < Rows.Num(); ++RowIndex)
     {
         const FCueRow& Row = Rows[RowIndex];

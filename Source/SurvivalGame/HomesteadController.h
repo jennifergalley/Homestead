@@ -160,6 +160,8 @@ public:
     FString FocusTitle() const;
     FString FocusActions() const;
     bool IsChestFocused() const { return Focus == EFocus::Chest; }
+    // A planted plot always shows its crop card (name, day N of M), even with no action to offer.
+    bool IsCropFocused() const;
     // The floating action hints retire once each action has been done this many times; the counts
     // live in the user settings file, so they outlast saves and new woodlands.
     static constexpr int32 HintRetireUses = 3;
@@ -348,8 +350,9 @@ public:
     // The one-time leather backpack (Simulation/HomesteadBackpack.h).
     Homestead::Result ShopBuyBackpack(int32 ShopId);
     // One garment from the store's Clothing section (Simulation/HomesteadGarmentShop.h).
-    Homestead::Result ShopBuyGarment(int32 ShopId, Homestead::WearableDefinition Garment);
-    void ShopClick();
+    Homestead::Result ShopBuyGarment(int32 ShopId,     Homestead::WearableDefinition Garment);
+        // Iron upgrade for one worn tool (a Homestead::ToolKind value) at the General Store.
+        Homestead::Result ShopBuyToolUpgrade(int32 ShopId, int32 Tool);    void ShopClick();
     void NoteShopDevice(bool bPad);
     // The name she gave the estate ("the estate" in woodland games), for "From {Estate}" and toasts.
     FString EstateName() const;

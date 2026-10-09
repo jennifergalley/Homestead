@@ -18,7 +18,7 @@ constexpr float BandHeight = 40.0f, EndRadius = 20.0f;
 constexpr float CardinalSize = 17.0f, CardinalMinPx = 12.0f;
 constexpr float OrdinalSize = 11.5f, OrdinalMinPx = 9.0f;
 constexpr float TickLength = 6.0f, TickWidth = 1.4f;
-constexpr float TokenRadius = 10.5f, TokenMinPx = 9.0f, TokenDrop = 15.0f, TokenGap = 2.0f;
+constexpr float TokenRadius = 17.0f, TokenMinPx = 14.0f, TokenDrop = 24.0f, TokenGap = 3.0f;
 constexpr float CaretSize = 7.0f;
 // Edge fade: marks start fading at this fraction of the half-width and are gone at the end.
 constexpr float FadeStart = 0.72f;

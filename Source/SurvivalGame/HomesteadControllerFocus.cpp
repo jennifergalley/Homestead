@@ -155,6 +155,14 @@ void AHomesteadController::UpdateFocus()
     }
 }
 
+bool AHomesteadController::IsCropFocused() const
+{
+    if (Focus != EFocus::Plot) return false;
+    for (const auto& Plot : State().plots)
+        if (Plot.id == FocusId) return Plot.planted;
+    return false;
+}
+
 FString AHomesteadController::FocusTitle() const
 {
     switch (Focus)

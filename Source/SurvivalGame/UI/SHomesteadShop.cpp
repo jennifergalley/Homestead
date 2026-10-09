@@ -12,6 +12,8 @@
 #include "../Simulation/HomesteadFood.h"
 #include "../Simulation/HomesteadGarmentShop.h"
 #include "../Simulation/HomesteadItems.h"
+#include "../Simulation/HomesteadOvergrowth.h"
+#include "../Simulation/HomesteadToolUpgrades.h"
 #include <algorithm>
 #include "Brushes/SlateColorBrush.h"
 #include "Framework/Application/SlateApplication.h"
@@ -50,6 +52,7 @@ const FButtonStyle& ShopButtonStyle()
     return Style;
 }
 FString Utf8(const char* Text) { return UTF8_TO_TCHAR(Text); }
+FString Utf8(const std::string& Text) { return UTF8_TO_TCHAR(Text.c_str()); }
 // The backpack, the fishing pole and each garment are one-offs: a price, not "each".
 template <typename RowType> bool IsOneOff(const RowType& Row)
 {
@@ -150,8 +153,11 @@ void SHomesteadShop::BuildRows()
     };
     const auto IsUpgradeGood = [](Homestead::Item Item) { return Item == Homestead::Item::FishingPole; };
     const bool bBackpack = Homestead::Backpack::Offered(Sim.GetState(), Shop->kind);
+    TArray<int32> IronTools;
+    for (int32 Tool = 0; Tool < Homestead::ToolKindCount; ++Tool)
+        if (Homestead::ToolUpgrade::Offered(Sim.GetState(), Shop->kind, static_cast<Homestead::ToolKind>(Tool))) IronTools.Add(Tool);
     const auto& ShopItems = Homestead::ShopGoods(Shop->kind);
-    if (bBackpack || std::any_of(ShopItems.begin(), ShopItems.end(), IsUpgradeGood))
+    if (bBackpack || !IronTools.IsEmpty() || std::any_of(ShopItems.begin(), ShopItems.end(), IsUpgradeGood))
     {
         FRow Upgrades;
         Upgrades.Header = TEXT("Upgrades");
@@ -164,6 +170,15 @@ void SHomesteadShop::BuildRows()
         Backpack.Available = 1;
         Backpack.Unit = Homestead::Backpack::Price;
         Rows.Add(Backpack);
+    }
+    for (const int32 Tool : IronTools)
+    {
+        FRow Iron;
+        Iron.bUpgrade = true;
+        Iron.Tool = Tool;
+        Iron.Available = 1;
+        Iron.Unit = Homestead::ToolUpgrade::IronPrice;
+        Rows.Add(Iron);
     }
     for (const Homestead::Item Item : ShopItems)
         if (IsUpgradeGood(Item)) Rows.Add(GoodsRow(Item));
@@ -231,6 +246,8 @@ int32 SHomesteadShop::Limit(const FRow& Row) const
     if (!Controller.IsValid()) return 0;
     const auto& Sim = Controller->Simulation();
     if (Tab == 0) return Row.Available;
+    if (Row.Tool != INDEX_NONE)
+        return Sim.GetState().money >= Row.Unit && Homestead::ToolUpgrade::Owned(Sim.GetState(), static_cast<Homestead::ToolKind>(Row.Tool)) ? 1 : 0;
     if (Row.bUpgrade) return Sim.GetState().money >= Row.Unit ? 1 : 0;
     if (Row.Garment != INDEX_NONE)
         return !Row.bOwned && Sim.GetState().money >= Row.Unit && Sim.UsedCapacity() < Sim.PackCapacity() ? 1 : 0;
@@ -253,6 +270,7 @@ FString SHomesteadShop::RowLabel(int32 Index) const
 FString SHomesteadShop::RowName(const FRow& Row) const
 {
     if (const auto* Info = GarmentInfo(Row.Garment)) return Utf8(Info->name);
+    if (Row.Tool != INDEX_NONE) return Utf8(Homestead::ToolUpgrade::Name(static_cast<Homestead::ToolKind>(Row.Tool)));
     return Utf8(Row.bUpgrade ? Homestead::Backpack::Name : Homestead::ItemName(Row.Item));
 }
 
@@ -350,15 +368,23 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
     const bool bSelected = Index == Selection;
     FString Stock;
     if (Tab == 0) Stock = FString::Printf(TEXT("%d carried"), Row.Available);
+    else if (Row.Tool != INDEX_NONE)
+    {
+        const auto Tool = static_cast<Homestead::ToolKind>(Row.Tool);
+        const bool bOwned = Controller.IsValid() && Homestead::ToolUpgrade::Owned(Controller->Simulation().GetState(), Tool);
+        Stock = bOwned ? FString(TEXT("Worn to iron")) : Utf8(Homestead::ToolUpgrade::CraftFirst(Tool));
+    }
     else if (Row.bUpgrade) Stock = FString::Printf(TEXT("Carry %d"), Homestead::MaxPackCapacity);
     else if (Row.bHeroine) Stock = FString::Printf(TEXT("%d on the shelf"), Row.Available);
     else if (Row.bOwned) Stock = TEXT("Owned");
     else Stock = TEXT("In stock");
     const auto* Garment = GarmentInfo(Row.Garment);
     const FName IconKind = Garment ? FName(UTF8_TO_TCHAR(Garment->key))
+        : Row.Tool != INDEX_NONE ? FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Homestead::ToolItem(static_cast<Homestead::ToolKind>(Row.Tool)))))
         : Row.bUpgrade ? FName(TEXT("pack")) : FName(UTF8_TO_TCHAR(Homestead::ItemIcon(Row.Item)));
     const FString Description = Garment ? Utf8(Homestead::WearableDescription(static_cast<Homestead::WearableDefinition>(Row.Garment)))
-        : Utf8(Row.bUpgrade ? Homestead::Backpack::Description : Homestead::ItemDescription(Row.Item));
+            : Row.Tool != INDEX_NONE ? Utf8(Homestead::ToolUpgrade::Description(static_cast<Homestead::ToolKind>(Row.Tool)))
+            : Utf8(Row.bUpgrade ? Homestead::Backpack::Description : Homestead::ItemDescription(Row.Item));
     auto Widget = SNew(SButton).ButtonStyle(&ShopButtonStyle()).IsFocusable(false).ContentPadding(FMargin(10, 5))
         .ButtonColorAndOpacity(bSelected ? ShopSelected : ShopRow)
         .OnClicked_Lambda([this, Index]() { Choose(Index); return FReply::Handled(); })
@@ -383,7 +409,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
                     [ Label(RowName(Row), 17, bSelected ? ShopGold : ShopInk, false) ]
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(10, 0, 0, 1)
-                    [ Label(Row.bUpgrade || Garment || !Controller.IsValid() ? FString() : Utf8(Homestead::Food::EffectLabel(Controller->Simulation().GetState(), Row.Item).c_str()), 14, ShopGold, false) ]
+                    [ Label(Row.bUpgrade || Garment || Row.Tool != INDEX_NONE || !Controller.IsValid() ? FString() : Utf8(Homestead::Food::EffectLabel(Controller->Simulation().GetState(), Row.Item).c_str()), 14, ShopGold, false) ]
                 ]
                 + SVerticalBox::Slot().AutoHeight()
                 [ Label(Description, 12, ShopMuted) ]
@@ -642,6 +668,7 @@ void SHomesteadShop::Confirm()
     if (!bQuantity || !Row || !Controller.IsValid()) return;
     const auto Result = Row->Garment != INDEX_NONE
         ? Controller->ShopBuyGarment(ShopId, static_cast<Homestead::WearableDefinition>(Row->Garment))
+        : Row->Tool != INDEX_NONE ? Controller->ShopBuyToolUpgrade(ShopId, Row->Tool)
         : Row->bUpgrade ? Controller->ShopBuyBackpack(ShopId)
         : Controller->ShopTrade(ShopId, Row->Item, Quantity, Tab == 0, Row->bHeroine);
     Status = UTF8_TO_TCHAR(Result.message.c_str());
