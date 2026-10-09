@@ -290,7 +290,7 @@
       "description": "The terrain looks a little choppy, and the path doesn't seem as well-worn as it should be",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-05T03:38:28.460Z"
+      "createdUtc": "2026-10-05T03:38:28.46Z"
     },
     {
       "id": "jenny-muupccau-7hxtoa",
@@ -399,7 +399,7 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-06T04:54:17.335Z",
-      "updatedUtc": "2026-10-06T05:11:13.760Z"
+      "updatedUtc": "2026-10-06T05:11:13.76Z"
     },
     {
       "id": "jenny-muw7gqsr-a3x5ig",
@@ -439,7 +439,7 @@
       "description": "",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-06T05:08:02.470Z"
+      "createdUtc": "2026-10-06T05:08:02.47Z"
     },
     {
       "id": "jenny-muw7xgf1-mf7b5s",
@@ -472,6 +472,22 @@
       "imageFile": "jenny-muxlpdrg-rm1vq5-541bacaa-1881-4a0a-9047-6686ef7030bc.png",
       "imageMime": "image/png",
       "createdUtc": "2026-10-07T04:22:00.172Z"
+    },
+    {
+      "id": "jenny-mv1fzgcf-balfi1",
+      "title": "[Balance] Playtest income after hard fishing",
+      "description": "Source: Balance Agent, docs/design/balance.md §8 (2026-10-09). After hard fishing ships, playtest fishing income (~45 coins/min); revisit the §8 daily cap or fish prices only if it still trivialises crops.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-09T20:52:57.087Z"
+    },
+    {
+      "id": "jenny-mv1fzgcg-balhg1",
+      "title": "[Balance UI] Cornish hedge in the village",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 (2026-10-09). Replace the village ToyonHedge (a Californian shrub) with a Cornish hedge bank or hawthorn mesh.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-09T20:52:57.088Z"
     }
   ]
 }

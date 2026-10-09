@@ -49,7 +49,9 @@
     "add-handcart-hauling-and-dynamic-prices",
     "add-family-reputation-and-land-purchase",
     "add-courtship-and-family",
-    "add-boat-fishing"
+    "add-boat-fishing",
+    "backlog:jenny-mv1fzgcf-balfi1",
+    "backlog:jenny-mv1fzgcg-balhg1"
   ],
   "slots": {
     "backlog:jenny-muucy9hz-jv5gx7": "after-next",
@@ -110,5 +112,5 @@
     "backlog:jenny-muu7idr3-mphjdv",
     "backlog:jenny-mus1sztj-sinh3q"
   ],
-  "updated": "2026-10-09T20:25:08.416Z"
+  "updated": "2026-10-09T20:52:57.087Z"
 }
