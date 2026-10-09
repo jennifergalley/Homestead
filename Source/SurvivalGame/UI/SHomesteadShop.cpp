@@ -403,8 +403,7 @@ TSharedRef<SWidget> SHomesteadShop::BuildRow(int32 Index)
                 + SVerticalBox::Slot().AutoHeight()
                 [
                     // Food shows what eating one now would do before she buys it: its Energy, and for a
-                    // Meal on the estate until when she'd be Well fed (Homestead::Food::EffectLabel; the
-                    // clock is paused while the shop is open).
+                    // Meal on the estate its Well fed stat (Homestead::Food::EffectLabel).
                     SNew(SHorizontalBox)
                     + SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
                     [ Label(RowName(Row), 17, bSelected ? ShopGold : ShopInk, false) ]

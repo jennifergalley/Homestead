@@ -652,7 +652,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
         [this]() { return !Controller->IsPlanning() && Controller->IsBookOpen() && Controller->BookPage() == 4; });
     // The Guidebook (page 3) is retired: its keys open nothing, a request for it opens the pack, and
     // the tabs run Inventory, Craft, Build, Map, Appearance.
-    // The shop: food shows its Energy (a Meal also until when she'd be Well fed) and prices read as whole coins (Homestead::Food::EffectLabel,
+    // The shop: food shows its Energy (a Meal also its Well fed stat) and prices read as whole coins (Homestead::Food::EffectLabel,
     // Homestead::FormatMoney). A disclosed store is placed ahead of her at a known open hour.
     Add(TEXT("Shop Buy lists food with its Energy and prices in whole coins"),
         [this]()
@@ -673,7 +673,7 @@ void AHomesteadSmokeTest::PrepareNativeMenuChecks()
             const FString Pasty = UTF8_TO_TCHAR(Homestead::Food::EffectLabel(Controller->State(), Homestead::Item::Pasty).c_str());
             const FString Price = UTF8_TO_TCHAR(Homestead::FormatMoney(Homestead::BuyPrice(Homestead::Item::Pasty)).c_str());
             Results.Add(FString::Printf(TEXT("SHOP_LABELS purse=%s pasty=%s price=%s"), *Purse, *Pasty, *Price));
-            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && (Controller->State().fixedEstate ? Pasty.StartsWith(UTF8_TO_TCHAR("+40 Energy \xC2\xB7 Well fed until ")) : Pasty == TEXT("+40 Energy"))
+            return Purse.EndsWith(TEXT(" coins")) && !Purse.Contains(TEXT("$")) && (Controller->State().fixedEstate ? Pasty.StartsWith(UTF8_TO_TCHAR("+40 Energy \xC2\xB7 Well fed ")) : Pasty == TEXT("+40 Energy"))
                 && Price == TEXT("100 coins");
         }, 0.8f);
     Add(TEXT("Capture the shop's Buy page"), [this]() { Screenshot(TEXT("native-shop-buy")); },

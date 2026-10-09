@@ -536,22 +536,22 @@ void FoodLabelsAndWellFedBadge()
     Simulation sim = Estate();
     sim.SkipToHourOfDay(11.5);
     CHECK(Food::EffectLabel(sim.GetState(), Item::Bread) == "+12 Energy");
-    CHECK(Food::EffectLabel(sim.GetState(), Item::Pasty) == "+40 Energy \xC2\xB7 Well fed until 2:30 PM");
+    CHECK(Food::EffectLabel(sim.GetState(), Item::Pasty) == "+40 Energy \xC2\xB7 Well fed 3 h: work costs 15% less");
     CHECK(Food::EffectLabel(sim.GetState(), Item::Stone).empty());
     CHECK(Food::WellFedBadge(sim.GetState()).empty());
-    // The pack hover: Energy "each" belongs to the Energy, before the Well fed time.
+    // The pack hover: Energy "each" belongs to the Energy, before the Well fed stat.
     CHECK(Food::PackUseText(sim.GetState(), Item::Bread) == "Food: +12 Energy each. Eat one from your pack.");
     CHECK(Food::PackUseText(sim.GetState(), Item::Pasty)
-        == "Food: +40 Energy each. Well fed until 2:30 PM. Eat one from your pack.");
+        == "Food: +40 Energy each. Well fed: work costs 15% less Energy for 3 h. Eat one from your pack.");
     CHECK(Food::PackUseText(sim.GetState(), Item::Stone).empty());
     OK(sim.SetEnergy(50.0));
     OK(sim.GrantItems(Item::Pasty, 1));
     OK(sim.Eat(Item::Pasty));
-    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM");
-    // An hour on, a second meal would run to 3:30 PM; the badge still shows the live expiry.
+    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM \xC2\xB7 work costs 15% less");
+    // An hour on, the badge still shows the live expiry.
     sim.SkipToHourOfDay(12.5);
-    CHECK(Food::EffectLabel(sim.GetState(), Item::Pasty) == "+40 Energy \xC2\xB7 Well fed until 3:30 PM");
-    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM");
+    CHECK(Food::EffectLabel(sim.GetState(), Item::Pasty) == "+40 Energy \xC2\xB7 Well fed 3 h: work costs 15% less");
+    CHECK(Food::WellFedBadge(sim.GetState()) == "Well fed until 2:30 PM \xC2\xB7 work costs 15% less");
     // Once it runs out the badge goes.
     sim.SkipToHourOfDay(15.0);
     CHECK(!sim.IsWellFed() && Food::WellFedBadge(sim.GetState()).empty());
