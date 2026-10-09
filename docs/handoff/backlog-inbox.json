@@ -488,6 +488,14 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-09T20:52:57.088Z"
+    },
+    {
+      "id": "jenny-mv1jsi38-balcu1",
+      "title": "[Balance] Currants easier to spot",
+      "description": "Source: Balance Agent review of Upkeep (2026-10-09, upkeep-1/01-thicket-hint.png). Currant strings are hard to see past ~10 m: add a few more trusses or brighten the red.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-09T22:39:31.220Z"
     }
   ]
 }
