@@ -276,7 +276,7 @@ void AHomesteadGeneralStore::BuildShell(TFunctionRef<float(float, float)> Ground
     Box(FVector(-5, DoorHalfWidth * 2 - 18, 110), FVector(6, 6, 6), Tint(Tin, 0.3f), false, 0, DoorHinge);
     Box(FVector(-WallThickness - 6, 0, DoorHeight + 62), FVector(8, 360, 58), Tint(SignGreen, 0.7f), false);
     Words(TEXT("GENERAL STORE"), FVector(-WallThickness - 11, 0, DoorHeight + 70), 180.0f, 30.0f, FColor(222, 178, 96));
-    Words(TEXT("M. PASCOE  -  PROVISIONS & SUNDRIES"), FVector(-WallThickness - 11, 0, DoorHeight + 45), 180.0f, 11.0f,
+    Words(TEXT("J. TRETHEWEY  -  PROVISIONS & SUNDRIES"), FVector(-WallThickness - 11, 0, DoorHeight + 45), 180.0f, 11.0f,
         FColor(222, 206, 170));
     // Warm lamplight inside.
     for (float X : {260.0f, 640.0f})

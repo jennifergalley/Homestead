@@ -247,7 +247,7 @@ void BuyAndEatAPasty()
     Edit(sim, 40.0, 50.0);
     const auto bought = sim.Buy(store.shop, Item::Pasty, 1, false, store.customer);
     OK(bought);
-    CHECK(bought.message == "Bought 1 Cornish pasty for 100 coins.");
+    CHECK(bought.message == "Bought 1 Meat pasty for 100 coins.");
     CHECK(sim.GetState().money == StartingMoney - 100 && sim.Count(Item::Pasty) == 1);
     const double energy = sim.GetState().energy;
     OK(sim.Eat(Item::Pasty));

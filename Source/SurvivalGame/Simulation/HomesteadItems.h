@@ -66,7 +66,7 @@ struct ItemInfo
 // The catalogue row for an item; an "Unknown item" row for values outside the enum.
 const ItemInfo& GetItemInfo(Item item);
 const char* ItemName(Item item);
-// "1 Cornish pasty", "3 Cornish pasties", "12 Stone".
+// "1 Meat pasty", "3 Meat pasties", "12 Stone".
 std::string CountedName(Item item, int quantity);
 const char* ItemKey(Item item);
 // The item with this stable key, or Item::Count.
