@@ -80,6 +80,11 @@ generous and cozy.
 | Harvest | 0.6 | 166 |
 | Fill the pail | 0.3 | |
 | Craft, or make a garment | 0.8 | |
+
+**Store clothing (cosmetic, from day one; 2026-10-09):** linen shirt 120, long-sleeved linen shirt
+180, homespun trousers 200, woven sandals 60, turnshoes 150, fur boots 300, fur coat 600 (1,610 for
+the full set). Each garment is bought once; a garment she already owns shows "Owned" and can't be
+bought again.
 | Cook | 0.3 | |
 | Split firewood, build | 1.5 | |
 | Deconstruct | 1.0 | |
@@ -210,6 +215,23 @@ follow-up. The cozy fix keeps fishing short and fun rather than slow or stingy:
   show "The fish have stopped biting here today." That caps fishing at about 570 coins a day.
 - Optionally lengthen the bite to 3 s + 0–4 s for a calmer rhythm. Never make it longer than 8 s.
 - Keep the prices: they feel rewarding, and the cap does the balancing.
+
+### Hard-fishing card (Jenny, 2026-10-09, Next build): approved values
+
+Jenny asked for fishing to fail about 60% of the time and to be unpredictable. The 60% is read as
+the total failure rate an attentive player sees, so the random escape is 50% and normal mistiming
+makes up the rest.
+
+| Value | New |
+| --- | --- |
+| Bite wait | 4–12 s uniform, with 0–3 nibbles (a shiver of 0.3 s or less, no rings) |
+| Hook window | 0.8 s after the float sinks under collapsing rings |
+| Strikes | 2–4 random, 1.0–3.5 s apart, 0–1 fake tug per wait, **0.7 s** window (kept) |
+| Escape | 50% rolled at the hook, thrown at the first or second strike, never on the last |
+| Clicking on a nibble | the fish spooks: "Too soon – it shied away." |
+
+That lands about 40% of attempts, roughly one fish a minute (about 45 coins a minute). That is still
+above crops, so the daily-cap idea above is parked until a playtest.
 
 ## 9. Target pacing
 
