@@ -225,11 +225,20 @@ A lane delivers an increment like this:
    Every Balance suggestion becomes a backlog card: prefix its title with `[Balance]` or `[Balance UI]`,
    name the source document and section in its description, and have the Orchestrator add it through
    the planner backlog form/API for Jenny to prioritize later.
-2. Run the native tests: `Scripts\Test-Native.ps1 -Configuration Release`. Rebase onto `main` first
-   and run them again after the rebase. Other lanes' changes can break your tests (a pail added to
-   the pack broke a manor chest test). If the breakage comes from an interaction between lanes, say
-   so in your `[ready]` rather than silently patching the other lane's code; the orchestrator
-   assigns it.
+2. Run the native tests **once**, after rebasing onto `main`, just before `[ready]`:
+   `Scripts\Test-Native.ps1 -Configuration Release`. Skip it entirely if you changed no Simulation
+   or `Tests\` code. While iterating, run only the tests you touched (`ctest -R <name>` in the
+   native build dir), not the whole suite after every edit. Rerun after a fix only the test that
+   failed. If the breakage comes from an interaction between lanes, say so in your `[ready]`
+   rather than silently patching the other lane's code; the orchestrator assigns it.
+
+   **Test budget (Jenny, 2026-10-09):** test what you changed, once, and leave cross-lane
+   regression to Integration. Don't re-test unchanged code, don't repeat a passing run, don't run
+   Debug native, don't compile the game target, don't run packaged suites, and don't take PIE
+   passes or captures beyond what verifies your own visual/animation change or Jenny's review
+   media. Docs-, config- and data-only changes need no test or build. Integration runs the full
+   native suite, game compile and packaged checks **once per merged batch**, never per `[ready]`,
+   and skips them for docs-only merges.
 3. **Build only when your C++ changed** (Jenny's build policy, 2026-09-28). Close your editor (and
    Blender, if it's yours) first: on a loaded machine UBT runs out of memory and retries, and a
    5-minute build took 40. Batch several fixes, then
