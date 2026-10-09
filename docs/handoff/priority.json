@@ -1,5 +1,28 @@
 {
   "order": [
+    "rebuild-manor-and-decorate",
+    "backlog:jenny-mut6t8g6-mcldh5",
+    "backlog:jenny-muuiony3-uh53hx",
+    "backlog:jenny-muupccau-7hxtoa",
+    "backlog:jenny-muup9p7w-98hg1q",
+    "backlog:jenny-muulxhvp-250x9a",
+    "backlog:jenny-muulwcjc-gj9t19",
+    "backlog:jenny-muulwcho-6as7ci",
+    "backlog:jenny-muuls4vu-tjln72",
+    "backlog:jenny-muuls4v6-qjrmsp",
+    "backlog:jenny-muuls4to-xi7gl6",
+    "backlog:jenny-muulq1xx-supo5x",
+    "backlog:jenny-muujt69b-39ivgg",
+    "backlog:jenny-muujmxu4-wltdrt",
+    "backlog:jenny-muuhzwri-v5hjft",
+    "backlog:jenny-muuhzwpz-uqxqxp",
+    "backlog:jenny-muuf5kus-0g3f6k",
+    "backlog:jenny-muuec1p1-u804w0",
+    "backlog:jenny-muue8oyh-kmm2zg",
+    "backlog:jenny-muudyitz-cju6ta",
+    "backlog:jenny-muudyitk-ivvrch",
+    "backlog:jenny-muudyirr-dn5j2m",
+    "backlog:jenny-muucy9hz-jv5gx7",
     "backlog:jenny-muucngx2-veoig6",
     "backlog:jenny-muucngwt-i42bj1",
     "backlog:jenny-muucngwi-v8ki0g",
@@ -11,10 +34,7 @@
     "backlog:jenny-mutdvi4f-5daxbq",
     "backlog:jenny-mutde36c-gtsw0n",
     "backlog:jenny-mut6zr63-iu7hm9",
-    "backlog:jenny-mut6t8g6-mcldh5",
     "add-swimming",
-    "rebuild-manor-and-decorate",
-    "backlog:jenny-mus1sztj-sinh3q",
     "backlog:jenny-mus200q1-469jig",
     "backlog:jenny-mus200pa-iiju4e",
     "fit-rucksack-straps",
@@ -32,7 +52,17 @@
     "add-boat-fishing"
   ],
   "slots": {
-    "backlog:jenny-muucy9hz-jv5gx7": "next"
+    "backlog:jenny-muucy9hz-jv5gx7": "next",
+    "backlog:jenny-muur49ie-8t5yb7": "next",
+    "backlog:jenny-muuqynjo-mncq2v": "next",
+    "backlog:jenny-muuiony3-uh53hx": "next",
+    "backlog:jenny-muup9p7w-98hg1q": "next",
+    "backlog:jenny-muulq1xx-supo5x": "next",
+    "backlog:jenny-muuf5kus-0g3f6k": "next",
+    "backlog:jenny-muw5lwnm-wwwu9y": "next",
+    "backlog:jenny-muw5qdyb-5lcsxk": "next",
+    "backlog:jenny-muw6zadi-id5vku": "next",
+    "backlog:jenny-muxl8f94-ibw78l": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -77,7 +107,8 @@
     "space-out-town-square",
     "backlog:jenny-muue0he2-1xhiqg",
     "backlog:jenny-muuha81v-mpk0ja",
-    "backlog:jenny-muu7idr3-mphjdv"
+    "backlog:jenny-muu7idr3-mphjdv",
+    "backlog:jenny-mus1sztj-sinh3q"
   ],
-  "updated": "2026-10-05T02:29:24.274Z"
+  "updated": "2026-10-07T04:08:54.135Z"
 }
