@@ -80,16 +80,18 @@ generous and cozy.
 | Harvest | 0.6 | 166 |
 | Fill the pail | 0.3 | |
 | Craft, or make a garment | 0.8 | |
-
-**Store clothing (cosmetic, from day one; 2026-10-09):** linen shirt 120, long-sleeved linen shirt
-180, homespun trousers 200, woven sandals 60, turnshoes 150, fur boots 300, fur coat 600 (1,610 for
-the full set). Each garment is bought once; a garment she already owns shows "Owned" and can't be
-bought again.
 | Cook | 0.3 | |
 | Split firewood, build | 1.5 | |
 | Deconstruct | 1.0 | |
 | Fuel the lamp | 0.2 | |
 | Fishing cast | 1.5 | 66 |
+
+**Store clothing (cosmetic, from day one; 2026-10-09):** linen shirt 120, long-sleeved linen shirt
+180, homespun trousers 200, woven sandals 60, turnshoes 150, fur boots 300, fur coat 600 (1,610 for
+the full set). Each garment is bought once; a garment she already owns shows "Owned" and can't be
+bought again. Modern batch (Jenny waived the period for these): scoop tank top 100, cropped top 120,
+matte leggings 160, low-rise skinny jeans 220, low-top sneakers 180, flat leather ankle boots 240,
+cropped biker jacket 450 (1,470). Listed after the period garments.
 
 ✅ A full bar is a long, varied morning's work, and food tops it up. Energy is a gentle pacing cue,
 not a wall.
