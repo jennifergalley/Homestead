@@ -448,6 +448,11 @@ turn (with a wake-up if you need one).
 5. `create_session` can time out creating the worktree (`git command timed out after 300 seconds`)
    and still start the session on a half-checked-out tree. Every lane's first step is to confirm that
    `git status` is clean and `SurvivalGame.uproject` exists; if not, `git reset --hard HEAD`.
+6. **Check E: free space before spawning several worktrees at once.** Each fresh lane worktree
+   checks out about 7 GB and grows to 15-90 GB once it has its own `Build\`/DDC; spawning 5 lanes at
+   once has exhausted E: mid-checkout (`git read-tree ... No space left on device`). Confirm at least
+   25 GB free per new worktree first; reclaim space by removing clean, fully-pushed retired
+   worktrees with Jenny's approval (`git worktree remove`, then `git worktree prune`).
 6. **Confirm each spawned session actually started.** A session can be created with its CLI never
    running: one sat for 25 minutes without a commit. Within a few minutes of spawning, check
    `get_session` / `get_sessions_status` for `is_running: true` (not only `activity`), and look for
