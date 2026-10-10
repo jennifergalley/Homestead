@@ -461,6 +461,14 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-10T06:15:57.852Z"
+    },
+    {
+      "id": "jenny-mv2vznce-clfrck",
+      "title": "[Balance] Rock face for the cove cliff",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 beauty (stage 2 cove review, 2026-10-10). The steepest upper bay wall shows smeared bare earth (planar landscape UVs); give it a triplanar cliff material or granite rock meshes with thrift tufts.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-10T21:08:46.190Z"
     }
   ]
 }
