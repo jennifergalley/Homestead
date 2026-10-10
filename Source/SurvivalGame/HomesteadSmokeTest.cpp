@@ -6,6 +6,7 @@
 #include "HomesteadAnimInstance.h"
 #include "HomesteadWateringTool.h"
 #include "HomesteadHatchet.h"
+#include "Simulation/HomesteadRecipes.h"
 #include "HomesteadTestPaths.h"
 #include "UI/SHomesteadMenu.h"
 #include "GameFramework/Pawn.h"
@@ -417,7 +418,14 @@ void AHomesteadSmokeTest::Prepare()
         [this]() { return FMath::Abs(Controller->State().hour - PausedHour) < 0.000001; }, 1.0f);
     Add(TEXT("Gamepad bumper navigates to crafting"),
         [this]() { Tap(EKeys::Gamepad_RightShoulder); },
-        [this]() { return Controller->BookPage() == 1 && Controller->Rows().Num() == static_cast<int>(Homestead::Recipe::Count); });
+        [this]()
+        {
+            if (Controller->BookPage() != 1) return false;
+            int AvailableRecipes = 0;
+            for (int Index = 0; Index < static_cast<int>(Homestead::Recipe::Count); ++Index)
+                if (Homestead::IsRecipeAvailable(static_cast<Homestead::Recipe>(Index))) ++AvailableRecipes;
+            return Controller->Rows().Num() == AvailableRecipes;
+        });
     Add(TEXT("Capture field-book navigation"),
         [this]() { Screenshot(TEXT("field-book")); },
         []() { return true; }, 0.7f);
