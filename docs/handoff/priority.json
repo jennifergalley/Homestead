@@ -57,7 +57,8 @@
     "backlog:jenny-mv1l1aa7-refl01",
     "backlog:jenny-mv1lb6ol-modcl1",
     "backlog:jenny-mv1lg9k5-nocorn",
-    "backlog:jenny-mv1lry6h-wfexp1"
+    "backlog:jenny-mv1lry6h-wfexp1",
+    "backlog:jenny-mv1y9z2k-irnmsg"
   ],
   "slots": {
     "backlog:jenny-muucy9hz-jv5gx7": "after-next",
@@ -74,16 +75,7 @@
     "backlog:jenny-mv1lb6ol-modcl1": "next",
     "backlog:jenny-muw7gqsr-a3x5ig": "next",
     "backlog:jenny-mv1lg9k5-nocorn": "next",
-    "backlog:jenny-mv1lry6h-wfexp1": "next",
-    "reduce-foliage-shadow-motion": "after-next",
-    "fit-rucksack-straps": "after-next",
-    "backlog:jenny-mus200pa-iiju4e": "after-next",
-    "backlog:jenny-mus200q1-469jig": "after-next",
-    "add-swimming": "after-next",
-    "backlog:jenny-mut6zr63-iu7hm9": "after-next",
-    "backlog:jenny-mutdvi4f-5daxbq": "after-next",
-    "backlog:jenny-muuec1p1-u804w0": "after-next",
-    "backlog:jenny-mut6t8g6-mcldh5": "after-next"
+    "backlog:jenny-mv1lry6h-wfexp1": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -135,5 +127,5 @@
     "simplify-build-costs",
     "backlog:jenny-muucngwt-i42bj1"
   ],
-  "updated": "2026-10-09T23:41:32.841Z"
+  "updated": "2026-10-10T05:25:01.004Z"
 }

@@ -561,6 +561,14 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-09T23:35:04.649Z"
+    },
+    {
+      "id": "jenny-mv1y9z2k-irnmsg",
+      "title": "Iron upgrade row says \"pack full\" instead of \"craft first\"",
+      "description": "Found in the round-4 Opus 5 review of the Gameplay lane (2026-10-09): for a tool she hasn't crafted yet, the General Store iron upgrade row can show the pack-full refusal instead of \"Craft an axe first.\" Also tidy the ambiguous IsUpgradeRow() check.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-10T05:25:01.004Z"
     }
   ]
 }
