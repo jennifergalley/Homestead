@@ -1,11 +1,11 @@
 # Tasks
 
-Stage 1 (task 1.1) is implemented in the Map Agent's 2026-10-04 9 PM build, re-sited at Jenny's direction: the village sits about 300 m (62 s sprint, straight line) from the manor forecourt, hidden in the woods to the north-east, with a 248 m walkable spur from a 852 m road and a boundary pocket at the village. Walked routes: 290 m to the store, 348 m to the square (cap 360 m = 75 s). It stays unchecked until Jenny accepts it in play. Stage 2 (task 2.1) is not started and needs the Orchestrator's go-ahead.
+Stage 1 shipped in the 2026-10-04 9 PM build: the village about 300 m north-east of the manor (store 290 m, about 60 s sprinting). Jenny called the village walk, size and distance fine on 2026-10-10.
 
-## 1. Closer-town first delivery
+## 1. Closer village (stage 1)
 
-- [ ] 1.1 Deliver the relocated full-size town/store, short graded route and modest boundary pocket with coherent pad/scatter/sign/travel/map updates; verify targeted town/road/parcel/shop checks, editor compile and an ordinary manor-to-store sprint <=75 s with usable entry. Integration records shipped source and Jenny's acceptance separately.
+- [x] 1.1 Relocated village, short graded route and boundary pocket; Jenny accepted the walk on 2026-10-10.
 
-## 2. Compact-map acceptance
+## 2. Compact map (stage 2)
 
-- [ ] 2.1 Deliver the roughly 2 km map, 85-90% home-parcel area and coherent terrain/water/bridge/cove/placement/scatter/map rebake; verify dimensions, IDs, ground/map agreement and clear/till/save-load checks, then time farm/lake/town-store/beach/mine sprint caps 15/45/75/90/90 s and a <=about-3-minute daily circuit in game. Integration owns disclosed reset/version handling and release acceptance; Jenny checks that travel feels shorter and the world still reads naturally.
+- [ ] 2.1 Deliver the revised layout (design decisions 1-8; layout v3 approved by Jenny 2026-10-10): closer cove whose sand joins the long beach, mine ruin on the clifftop with its path, ~25 ha estate, village river path and roadside cottages, cropped map and playable edge, and named outlines for neighbours, communal land and for-sale plots. Player check: sprint manor to cove sand and to the mine within 60 s each, walk from the cove onto the long beach, and read the outlines on the map; farm, pond and store trips feel unchanged.
