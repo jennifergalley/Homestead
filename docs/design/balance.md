@@ -292,7 +292,8 @@ they are; the cove and mine come much closer.
 
 ### Estate, neighbours and communal land (stage 2)
 
-- **Her estate:** about 35–50 ha, down from about 90 ha. It keeps the manor core, farm, opening
+- **Her estate:** about 25 ha (Jenny's call on layout v3, 2026-10-10, below the 35–50 ha
+  suggested), down from about 90 ha. It keeps the manor core, farm, opening
   clearing, pond and its woods, her private cove, the mine, and enough woodland more than 60 m from
   home for felled trees to regrow.
 - **Neighbour estates:** two or three, smaller than hers (about 15–40 ha each), their houses
