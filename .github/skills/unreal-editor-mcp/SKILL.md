@@ -53,6 +53,12 @@ build, run editors and package on one PC with one RTX 5080 at the same time.
   (`jennifergalley-literate-eureka`, or any worktree with `Saved\IntegrationSession.marker`) it refuses
   while another lane's Unreal process runs. Check once; if the lanes' slot is taken, schedule a wake-up
   and end your turn.
+- **Before spawning N worktree sessions, confirm E: has >= 25 GB free per new worktree**
+  (Jenny, 2026-10-09). Spawning 5 lane sessions at once once filled E: to 0 bytes mid-checkout
+  (`git read-tree`: "No space left on device"); each fresh worktree is about a 7 GB checkout and
+  grows to 15-90 GB with `Build`/DDC. Fix a half-made worktree with `git reset --hard HEAD`. Remove
+  clean, fully-pushed retired worktrees first if space is short
+  (`git worktree remove <path>` then `git worktree prune`).
 - **One editor per worktree, on its own MCP port.** Pick a free port in 8766-8799:
   `8766..8799 | ? { -not (Get-NetTCPConnection -LocalPort $_ -State Listen -EA 0) } | select -First 1`.
   Pass it as `Start-EditorMcp.ps1 -Port <p>`, then dot-source `Scripts\McpHelpers.ps1 -Port <p>`
@@ -198,6 +204,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | `unreal.CustomInput(input_name=...)` fails in the constructor; or a Custom node won't compile | Constructor kwargs aren't supported; input/output names that clash with HLSL identifiers | Create it empty, then `set_editor_property('input_name', ...)`, and use unique names. In vertex-shader code sample with `Texture2DSampleLevel(Tex, TexSampler, uv, mip)`; the sampler is `<InputName>Sampler`. |
 | A `MaterialExpressionCollectionParameter` outputs nothing | It needs both `collection` (the MPC asset) and `parameter_name` set | Set both. `MPC_CameraSafeFoliage`'s `CameraPosition` and `HeroTargetPosition` vectors work from any material for player-aware effects. |
 | The whole Estate landscape (or another mesh) renders as a grey grid in PIE; the log says `Failed to compile Material for platform PCD3D_SM6, Default Material will be used in game` and `(Node CollectionParameter) CollectionParameter has invalid parameter None` | A committed material references Material Parameter Collection parameters whose IDs don't match the committed MPC (for example `MPC_EstateWeather` or `MPC_EstateGround` changed in a merge, weather `7dd81443`) | With PIE stopped, rebuild the material (`pyfile Scripts\Terrain\build_landscape_material.py` for `M_EstateLandscape`) and commit it. **Whenever you create or change an MPC, re-run the scripts that build the materials using it and commit the MPC and those materials together.** Then check a fresh editor launch's log for `Failed to compile Material`: your own DDC can hide the error. |
+| Need to spawn or hold an item for a quick PIE check | — | `HomesteadGive <ItemName> <Count>` (console command), for example `HomesteadGive Axe 1`; tap the matching number key (for example key Two) to hold it. |
+| The focus/interact card shows `[A]` instead of `[E]` | `gamepadPrompts` is `true` (it follows the last input device used, including in the editor) | Expected; not a bug. Toggle input device or the setting to see the keyboard glyph. |
 | `AttributeError: module 'unreal' has no attribute 'KismetMaterialLibrary'` when reading an MPC value | UE 5.8 Python exposes it as `MaterialLibrary` | Read at runtime with `unreal.MaterialLibrary.get_scalar_parameter_value(world, mpc, name)`. Create a new MPC with `AssetTools.create_asset(name, folder, unreal.MaterialParameterCollection, unreal.MaterialParameterCollectionFactoryNew())` and add `CollectionScalarParameter` entries (see `build_ground.build_mpc`). |
 | A `VolumeTexture` built from Python has the wrong tile size, or property errors | Setting `source2d_texture` resets the tile size to a default (102 for a 1024² atlas); `VolumeTexture` has a single address mode (no `address_x`) and no `blueprint_get_size_x` | Set `source2d_texture` first, then `source2d_tile_size_x/y`. In a Custom node sample it with `Texture3DSample(Vol, VolSampler, uvw)`. |
 | Turning Nanite on for a mesh from Python doesn't stick | `nanite_settings` is a struct copy | `s = m.get_editor_property('nanite_settings'); s.set_editor_property('enabled', True)`; for foliage also `s.set_editor_property('shape_preservation', unreal.NaniteShapePreservation.PRESERVE_AREA)`; then `m.set_editor_property('nanite_settings', s)` and `save_loaded_asset(m)`. A 464k-triangle mesh took about 58 s. Then audit its materials' usage flags (row above). |
@@ -1436,3 +1444,31 @@ OpenSpec changes, not here.
   world refresh (every 0.25 s) used to rotate the sun continuously, causing paired 30-39 ms stalls
   at 4K. On the VSM path `UpdateLighting` steps rotation by 0.5°; the default ray-traced sun
   moves continuously.
+- 2026-10-09 (Village lane): `E:\TerrainSource\work` npy is stale; terrain scripts must use
+  `$env:HOMESTEAD_TERRAIN_WORK` with a fresh work dir. Re-bake the map PNG/json with
+  `Scripts\Map\bake_estate_map.py` after `route_sights.py --bake`. `EstateHeightfield.r16` indexes
+  as `[row=y_m+2016, col=x_m+2016]`, little-endian u16, metres = `(raw-32768)/128`. Headless
+  `Import-Props.ps1` skips collision overrides and LODs; run `import_props.main([...])` inside the
+  editor, then `save_directory`. `Invoke-UnrealBuild.ps1` needs
+  `powershell -NoProfile -ExecutionPolicy Bypass -File`, and Source files must be CRLF or the git
+  LF warning aborts it. `Start-EditorMcp.ps1` can report an MCP timeout at 1200 s (or "did not
+  answer within 600 s") on a slow first launch while the editor is actually up — re-check the port
+  with `py` rather than restart. `build_ground.py` + `Homestead.ImportEstateMap` re-save
+  byte-different Estate/Ground assets (`MI/M_EstateGrass`, `SM_GrassPatch_LOD*`, `T_GrassWind`,
+  `T_Ground_*`); revert them with `git checkout`, keeping only `T_EstateGround`/`T_EstateCanopy`/map
+  assets. Cobble tile degenerate triangles fail FBX import; flat ground slabs thicker than the
+  terrain undulation get buried — use a conforming procedural mesh instead of instanced tiles
+  (terrain is triangle-interpolated, diagonal B-C). A town street needs a trail-style canopy cut
+  plus a density/height clear applied **after** the main wear block in `bake_ground.py` — the
+  generic wear-based density reduction runs before the street's wear is added, so the street stayed
+  grassy and under leaf litter. `berries.py` has no village-street clearance (only the main road,
+  6 m): regen can put a berry on the street. Placement-pin tests
+  (`HomesteadManorTests PlacementHashWithout`) include positions — moving any placement needs the
+  id excluded and the pin re-baselined. Map-shrink stage 2 carry-over order: delete `"townPath"`
+  from `estate_layout.json`, then `town_pad.py` → `town_path.py` → `town_layout.py` →
+  `public_road.py` → `weightmaps.py` → `route_sights.py --bake` → `village_dress.py` →
+  `bake_ground.py` → `Scripts\Map\bake_estate_map.py`. Dressing is runtime-built from
+  `HomesteadVillageDressing.inc` (generated by `village_dress.py`, relative to the village anchor).
+- 2026-10-09 (Upkeep lane): any test that counts cleared resources must now skip windfall nodes
+  (ids 584000-584199, dormant = cleared) — use `Estate IsWindfallPlacement(id)`. `Test-Native`'s
+  `HomesteadSimulationTests` passes standalone in ~250 s; failures print just the line number.

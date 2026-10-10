@@ -39,24 +39,81 @@ slot, then go idle; they do not pick up unflagged queue items.
 - Accounting: per-build report unavailable: `assistant_usage_events` is missing from the session DBs.
   No estimated or zero-cost report was fabricated.
 
-## Next build
+## 2026-10-09 — 11:02 PM
 
+- Build ID: `20261009-next-01`
+- Package source SHA: `75b7307fa2767609d76b5ce3244a4e93c34d6efa`
+- Status: delivered (Development)
+- Ships:
 - Brambles, weeds and branches regrow around the manor and farm.
 - More berry bushes and roots in the estate woods, with a distinct bush look and `[E] Pick Berries`.
 - Near-home stumps can be cleared with the axe.
 - Growing crops always show their type and day.
 - Iron tool upgrades at the General Store (2,000 coins each).
 - Bigger landmark icons on the minimap and compass.
-- Fishing is harder (about 60% get away, random waits) and plays out on a bob on the water.
-- Clothes swap on equip, are sold at the General Store, and fit her closely.
-- A smoother, well-worn path down to town, and a lived-in village.
-- Modern clothes: tank top, crop top, jeans, leggings, leather jacket, sneakers, ankle boots.
-- No Pascoe or Cornwall in-game; the setting is left unnamed.
+- Fishing is harder (about 50% escape at the first two strikes, random waits) and plays out on a
+  float on the water with a closing ring and high fishing camera; LMB only, no "Caught" toast.
+- Clothes swap on equip ("Wear X"), chests get an Equip action, and the General Store sells 7
+  garments plus 8 modern garments with icons (15 total), fitted closely.
+- A smoother, graded village street, plus village dressing: cobbled square, well, benches, hedges,
+  cottage gardens, flowers and a noticeboard placeholder.
+- No Pascoe or Cornwall in-game; the store is Trethewey's General Store, Mr. Trethewey the clerk,
+  and the meat pasty keeps its display name.
 - Well fed says what it does: work costs 15% less Energy for 3 hours.
+- Admitted lanes: Gameplay (`8fa4e3cc8`), Wardrobe + modern clothing (`b11107ccb`, `25ff298c8`),
+  Upkeep (`caf5eb525`), Fishing (`cfefbcc44`), Village (`8bdc73636`), plus orphaned Balance docs
+  (`04a57e644`, `d2211552c`, and the three files cherry-picked from `origin/jennifergalley-balance-agent`
+  after its archival: `docs/design/balance.md`, `docs/design/cohesion.md`,
+  `docs/handoff/balance-agent.md`).
+- Verification: Native 25/25 Release (post all merges); editor and game-target compile (two
+  non-fatal pre-existing/incidental warnings: `C4701` in `HomesteadControllerFocus.cpp:138`,
+  `C4457` in `HomesteadTreeFelling.cpp:135`); 3 Opus 5 risky reviews clean (Gameplay's iron-purchase
+  path and the merged shop rows surviving the Gameplay/Wardrobe conflict resolution; Upkeep's
+  save/serialize diff and placement-id ranges 583000-583119/584000-584179 against old-save
+  compatibility and id collisions; Village's berry-540012 placement move and the updated
+  `HomesteadManorTests` pin). `EstateSmoke`, `ToolRepeat`, and `-NativeSaveRetry` (the Development
+  F5/F9-equivalent proof: `Test-OfflineStartup.ps1` has a known pre-existing defect) all passed
+  against the installed Development package; `Assert-ReleaseSaveIsolation.ps1` passed against the
+  installed copy and its rollback. A UI-gallery PIE pass
+  (`Test-Game.ps1 -UIGallery -UIGalleryIds shop-fishing-pole,hud-wellfed,hud-fishing-bite,
+  hud-fishing-landing,focus-shopkeeper`) confirmed the Trethewey naming is live everywhere and the
+  "no Caught toast" fishing copy; it found the Well Fed HUD chip's text ("work costs 15% less")
+  clipping against the chip's right border at the default string length — a minor, non-blocking
+  cosmetic issue, reported below, not fixed this round. Esc-mid-cast was trusted to Fishing's own
+  native coverage rather than independently re-verified in a live PIE pass. The staged
+  bite/landing float-and-ring visuals did not render in the sandboxed `-UIGallery` route (a gallery
+  capture limitation, not a product defect — those ids need live water-proximity context). The
+  package cook incidentally re-saved 974 `Content/` files; all were discarded with
+  `git restore Content/` before verifying the main checkout was clean (a larger-scope recurrence of
+  the known "Ground bakes re-save byte-different uassets" issue — see the editor skill). The
+  installed executable SHA-256 is
+  `DC9B58F325BB621D3369618C96F8B41A6F8983CCF743E8ECEAD9BD9F1CCFE41F`. The install was packaged
+  in place at the main checkout's `Build\Windows` (no separate worktree-staging copy existed to
+  hash against); only the executable hash was recorded for traceability.
+- Promotion: `Homestead Estate.lnk` targets the Development `SurvivalGame.exe` with the existing
+  Estate map argument, package-local `-UserDir`, and unchanged Homestead icon. The retained rollback
+  is `E:\Repos\SurvivalGame\Build\Windows-20261004-evening-03` (current + one rollback, per policy;
+  no other dated releases present to prune).
+- Review: Balance OK recorded on each `[ready]` (Gameplay, Wardrobe x2, Upkeep, Village, Fishing).
+  Jenny approved review media for the new currant bush asset (Upkeep), the village dressing
+  (Village), the 7 garments plus all 8 modern garments (Wardrobe), and the fishing float/camera
+  rework (Fishing).
+- Known issues: Well Fed HUD chip text clips at the right border at the default string length
+  (new `[Balance UI]`-style finding, not blocking; backlog candidate). Fishing's "one catch
+  message" backlog card is closed by this delivery.
+- Accounting: `docs\handoff\accounting\reports\20261009-next-01.json` — 2,741 calls, 53,025.876335
+  AIU recorded across Orchestrator, Integration, the 5 lanes, and Balance, allocated from each
+  session's creation through capture; no missing sessions or excluded calls; one known limit (some
+  configured context tiers unrecorded). `session-store.db` does carry `assistant_usage_events` this
+  round, unlike 2026-10-04's build.
+
+## Next build
+
+- Map-shrink stage 2: half-scale terrain rebake (resets saves).
 
 ## Build after next
 
-- Map-shrink stage 2: half-scale terrain rebake (resets saves).
+- (unassigned — ask Jenny)
 
 ## 2026-10-04 — 3:13 PM
 
