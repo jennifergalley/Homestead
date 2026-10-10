@@ -73,7 +73,7 @@ generous and cozy.
 | Clear by hand | 1.0 | 100 |
 | Soft underbrush | 0.8 | 125 |
 | Woody underbrush or sapling | 1.5 | 66 |
-| Fell a tree | 4.0 | 25 |
+| Fell a tree (axe, any unprotected estate tree; +6 timber, +4 branches) | 4.0 | 25 |
 | Till | 2.0 | 50 |
 | Plant, water (each) | 0.4 | 250 |
 | Weed | 0.8 | 125 |
@@ -176,7 +176,8 @@ buyer (timber, twine, seeds, bramble canes, weeds) count as 0. The swings are wi
 | Slate heap | hand | 1 | 0.8 | 1–2 stone, lead 30%, scrap iron 30% | 27 |
 | Ruin timbers | axe, worn | 3 | 3.0 | 1–2 timber, 2–3 firewood, scrap iron 30% | 45 |
 
-Iron and steel tools gate thickets, bramble banks, large and ancient stumps, logs and boulders.
+Iron and steel tools gate thickets, bramble banks, large and ancient stumps, logs and boulders. Iron
+costs × 0.85 energy per swing and steel × 0.7, with fewer swings on the big nodes.
 Spring flowers sell for 10–15: wild garlic 10, primroses 12, bluebells 15. Berries sell for 6 each
 and roots for 4.
 
@@ -195,8 +196,8 @@ buys tools. ✅ There's no coin gate on the core toolset, which is very cozy.
 **Iron upgrades (store, 2026-10-09):** 2,000 coins per tool (Jenny's number; 12,000 for all six).
 That's about 2.5 days of income each, so it's a mid-game goal, not a day-1 buy.
 - The upgrade only appears once she has crafted that tool.
-- Iron must feel better at once: energy × 0.75 per swing and one swing fewer (at least 1), on top
-  of the tool gates.
+- Iron already pays off at once: energy × 0.85 per swing and fewer swings on stumps, rocks and
+  thickets (steel × 0.7). Keep that ladder.
 - The row disappears once the tool is iron.
 
 ## 8. Fishing (9 PM slice)
@@ -308,3 +309,7 @@ These are proposals for the Orchestrator to offer Jenny. None is scheduled.
   every Meal; tree felling on the map at 4 energy, with forest trees regrowing after 3 days beyond
   60 m of the manor and farm (a stump, then a sapling at day 1), and trees lining the roads and the
   town square left unchoppable. The shopkeeper is renamed Mr. Josiah Trethewey.
+- 2026-10-04 (batch2, Gameplay agent): felling yields +6 timber, +4 branches (about 16 coins of
+  branches per 4 energy, so it's no coin farm); stump 24 h → sapling → full tree at 72 h, only for
+  trees 60 m or more from home; road-verge (9 m) and village-square (45 m) trees are protected;
+  reach 4.5 m.

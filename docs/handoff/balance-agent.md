@@ -17,14 +17,30 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   and pole price approved; blocking copy fixes adopted by Gameplay UI along with a 0.7 s strike
   window.
 
+- 2026-10-04: fishing final balance OK (numbers, copy, visuals) on `9958a359` / Art `abead265`.
+  Non-blocking polish sent: one catch toast "Caught a lake carp.", cue panel off the heroine,
+  larger fish glyphs, shorter refusal/escape lines.
+
 ## Open
 
-- Fishing final "balance OK": waiting on the Gameplay UI SHA and the Art ring-cue screenshot (warm
-  brass, not saturated green).
-- Follow-ups proposed to the Orchestrator for Jenny (not scheduled): halve crop growth, daily
-  fishing catch, sleep 15/h, better-value snacks, cooked meals grant Well fed, UI audit items.
+- My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
+  snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
+  "[Balance UI]" cards, added by the Orchestrator 2026-10-04.
+
+## Backlog suggestions rule (Jenny, 2026-10-04)
+
+Every suggestion I make (balance, cohesion/UI, polish) becomes a backlog card tagged with its
+source. End each review by sending the Orchestrator a "Backlog suggestions" list: one line per
+card with a title, a one-sentence description and the doc section it came from. The Orchestrator
+adds them through the planner; I never edit the backlog files myself. Before suggesting a card be
+retired, check its current text in `docs/handoff/backlog-inbox.json` / `priority.json`: Jenny may
+have rewritten it (she turned "sleep 15/h" into "Sleep always resets the energy bar entirely").
 
 ## How lanes reach me
+
+Order for new assets and animations (Jenny, 2026-10-04): the lane sends me review media
+(screenshots plus MP4) and I give a cohesion OK or blocking changes. The lane then sends the batch
+to Jenny, and she approves it before [ready]. My OK comes first; it doesn't replace hers.
 
 Send the short proposal or final numbers/copy (plus a screenshot path for visible work) with
 `send_session_message`, delivery mode immediate. I answer with approve / approve-with-numbers or
