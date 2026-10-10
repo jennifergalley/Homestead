@@ -547,9 +547,10 @@ std::uint64_t PlacementHashWithout(int skippedId, int& count)
     {
         // The rack, and the later forage sections appended after it was pinned (roadside 581000-581999,
         // woods and hedges 582100-582299, the lake trail 582300-582399, the ruin's fallen roof timbers
-        // 582012-582013), so the hash still covers exactly the placements older saves know.
+        // 582012-582013), and the berry bush 540012 (moved 4.5 m off the village street, id and kind
+        // unchanged), so the hash still covers exactly the placements older saves know.
         if (p.id == skippedId || (p.id >= 581000 && p.id < 582000) || (p.id >= 582100 && p.id < 582400)
-            || p.id == 582012 || p.id == 582013) continue;
+            || p.id == 582012 || p.id == 582013 || p.id == 540012) continue;
         std::snprintf(line, sizeof line, "%d %d %.3f %.3f %.3f %.3f %.3f %d\n", p.id, static_cast<int>(p.kind),
             p.position.x, p.position.y, p.z, p.yaw, p.scale, p.minTier);
         for (const char* c = line; *c; ++c) { hash ^= static_cast<unsigned char>(*c); hash *= UINT64_C(1099511628211); }
@@ -565,7 +566,7 @@ void ToolRackIsSaveSafe()
     // still name the same things, and the rack waits unsearched with whichever head she lacks.
     int count = 0;
     const std::uint64_t before = PlacementHashWithout(520006, count);
-    CHECK(count == 2197 && before == UINT64_C(12311480322052281513));
+    CHECK(count == 2196 && before == UINT64_C(11063124984521852634));
     const auto& all = ProvisionalEstatePlacements().placements;
     // The rack is the last placement but for the lake trail's forage (582300-582399), appended after it.
     std::size_t rackAt = all.size();
