@@ -396,7 +396,10 @@ The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
 5. **Build-card timestamps are mandatory:** every shipped entry in `docs\handoff\builds.md` is
    headed exactly `## YYYY-MM-DD — h:mm AM/PM` using its actual local promotion time, ordered by
    that time. Put build IDs, scope, admission evidence, and descriptions in the card body—not its
-   heading. An admission that did not ship belongs in the delivered build card body, not in its own
+   heading. The status line is exactly `- Status: delivered` (put the configuration on its own
+   `- Configuration: Development` line), and the heading time has no seconds; otherwise the
+   planner's Measured build cost tab drops the build. Ship bullets must not start with
+   `Word words:`, which the planner reads as a field label. An admission that did not ship belongs in the delivered build card body, not in its own
    build heading.
 6. If packaging or the suites fail, it leaves the last good build on the shortcut and reports the failure.
 
