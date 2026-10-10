@@ -7,8 +7,9 @@ Usage: python Scripts/Terrain/compact_placements.py [--dry]   (after cove_bay.py
 Placement ids are save identity, so nothing here renumbers or moves a placement:
 - HomesteadEstateRetiredPlacements.inc lists the ids the bay, its sand, the new paths and the mine yard displaced
   (water or swash under them, the ground moved more than RETIRE_DZ_M, or within RETIRE_PATH_M of a path or step
-  centreline). ProvisionalEstatePlacements drops them, and everything off the estate, after the whole table is
-  built, so no other row's proximity skip changes: every surviving id keeps its kind and position.
+  centreline, except the manor clear-out, which a path just runs through). ProvisionalEstatePlacements drops
+  them, and everything off the estate, after the whole table is built, so no other row's proximity skip changes:
+  every surviving id keeps its kind and position.
 - HomesteadEstateCompactPlacements.inc appends new ids (585000-585199 fellable trees, 585200-585299 forage).
   Each tree takes the spot of a scatter tree of the same mesh, which leaves EstateScenery.bin.
 - EstateScenery.bin, once ("compactPlacements.scenery" in the layout): records on the bay's sand and water and
@@ -42,6 +43,7 @@ BEFORE = "f9cfadaf6"            # the heightfield before the compact map (the ap
 RETIRE_DZ_M = 0.5
 RETIRE_WATER_M = 0.8            # ground at or under this: swash, sand's edge or water
 RETIRE_PATH_M = 2.0
+CLEAROUT_IDS = (570000, 579999)  # clearout.py's manor clear-out: never path-retired
 GROUND_COVER = {3, 4, 9, 10, 11, 32, 33}   # bracken, yarrow, fern, grasses: stay on the bay's walls
 SAND_TOP_M = 2.5                # nothing grows on ground this low inside the bay
 TREE_KINDS = (0, 1)             # scatter meshes the fellable trees use: broadleaf (SM_TreeSmall02_Woodland), fir
@@ -147,7 +149,10 @@ def main():
     rows = placements()
     xy = np.array([(r[2], r[3]) for r in rows])
     now, was = bilinear(z_now, xy[:, 0], xy[:, 1]), bilinear(z_was, xy[:, 0], xy[:, 1])
-    on_path = lines.query(xy)[0] < RETIRE_PATH_M
+    # The manor clear-out stays whole (Jenny: the opening clearing is fine as it is): a path through it is
+    # simply overgrown until she clears it, so only moved or flooded ground retires a clear-out row.
+    clearout = np.array([CLEAROUT_IDS[0] <= r[0] <= CLEAROUT_IDS[1] for r in rows])
+    on_path = (lines.query(xy)[0] < RETIRE_PATH_M) & ~clearout
     (cx, cy), (hx, hy) = yard["centre"], yard["half"]
     in_yard = (np.abs(xy[:, 0] - cx) <= hx + 2) & (np.abs(xy[:, 1] - cy) <= hy + 2)
     displaced = (now < RETIRE_WATER_M) | (np.abs(now - was) > RETIRE_DZ_M) | on_path | in_yard
