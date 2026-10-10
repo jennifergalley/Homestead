@@ -34,6 +34,9 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-10: in-game evidence Balance OK (cove 58.2 s down / 58.9 s up, mine 33.4 s; landings,
   rails, mine on her land). Asked for grass/heath and flowers on the bare cliff face and steps cut
   before [ready] if cheap; otherwise card it as "[Balance] Dress the cove cliff and cut".
+- 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
+  slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
+  "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.
 
 ## Open
 
