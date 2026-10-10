@@ -299,8 +299,14 @@ they are; the cove and mine come much closer.
   300–600 m from her manor and separated by hedgerows or woods. None sits across her routes to the
   cove, mine, pond or village.
 - **Communal land clusters on the village:** a village green and allotments (the 1851 word; not
-  "community garden") within about 15–30 s of the square, a communal beach on the estuary within
-  about 30 s of the village, and a 60–100 m growth ring around the village pad.
+  "community garden") within about 15–30 s of the square and a 60–100 m growth ring around the
+  village pad. The communal beach (Chapel sands) sits about 600 m from the square, because no coast
+  lies near the fixed village; accepted (2026-10-10) as an occasional outing reached by a river
+  path, not a daily trip.
+- **Paths end naturally:** a road or path she can follow never runs into the invisible map edge; it
+  ends at a gate, milestone, ford or dense wood first.
+- **Day 1 survives the shrink:** every salvage pile with a rusted tool head stays on her land, and
+  the clearable nodes she keeps are worth at least about 1,500 coins (§6).
 - **Reserved land looks finished today:** fields, hedges, woods and flowered verges, never bare
   ground. World edges are natural (sea, moor, dense wood, hedged land) with no visible walls. Map
   labels use period names and Cornish surnames; player copy never says "reserved" or "future".

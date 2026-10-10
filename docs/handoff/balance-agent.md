@@ -23,7 +23,10 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 
 - 2026-10-10: map-shrink stage 2 budget sent to the Map Agent (4ff1041f) ahead of its consult:
   cove and mine 35–50 s (cap 60 s), manor core/pond/village unchanged, estate about 35–50 ha,
-  neighbour and communal sizing (`balance.md` §9). Awaiting its top-down layout for an OK.
+  neighbour and communal sizing (`balance.md` §9).
+- 2026-10-10: Map Agent layout draft reviewed (cove 50 s, mine 38 s, estate 36 ha). OK on travel,
+  with 3 blocking items: keep tool-head salvage and about 1,500 coins of clearing on her land; no
+  path running into the invisible edge; rename "Wheal Woods". Awaiting the revised panel.
 
 ## Open
 
