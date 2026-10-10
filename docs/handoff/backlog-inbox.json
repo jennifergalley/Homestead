@@ -523,11 +523,12 @@
     },
     {
       "id": "jenny-mv1koymq-balft1",
-      "title": "[Balance UI] Fast travel toast wording",
-      "description": "Source: Balance Agent, docs/design/cohesion.md §1-2 (2026-10-09). Change the toast \"Fast Travel Destination Unlocked: Town\" to \"Fast travel unlocked: the village\".",
+      "title": "[Balance UI] Call the town \"the village\" in toasts and labels",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §1-2 (2026-10-09), widened by the Village Agent. Change the toast \"Fast Travel Destination Unlocked: Town\" to \"Fast travel unlocked: the village\", and the other player-facing \"Town\" strings to \"village\": HomesteadTravel.cpp:86, HomesteadControllerTravel.cpp:37, TravelPlaces lines 24/42 (tests HomesteadTravelRestTests.cpp:105, HomesteadFeedbackTest.cpp:121).",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-09T23:04:45.65Z"
+      "createdUtc": "2026-10-09T23:04:45.65Z",
+      "updatedUtc": "2026-10-10T05:09:53.017Z"
     },
     {
       "id": "jenny-mv1l1aa7-refl01",
