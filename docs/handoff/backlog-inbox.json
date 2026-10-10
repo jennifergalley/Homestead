@@ -461,38 +461,6 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-10T06:15:57.852Z"
-    },
-    {
-      "id": "jenny-mv2n34ss-mcpath",
-      "title": "[Balance] Mine–cove link path",
-      "description": "Source: Balance Agent, docs/design/balance.md §9 travel (stage 2, 2026-10-10). A woodland/coastal path joining the mine and the cove so a manor → mine → cove → manor loop takes about 3 minutes.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-10T16:59:32.236Z"
-    },
-    {
-      "id": "jenny-mv2nnnwx-fortop",
-      "title": "[Balance] Woodland forage top-up after the shrink",
-      "description": "Source: Balance Agent, docs/design/balance.md §9 estate (stage 2, 2026-10-10). Refill her smaller estate to about 60-70 forage spots along paths and woods, not the old 120.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-10T17:15:30.129Z"
-    },
-    {
-      "id": "jenny-mv2nnnwy-clfstp",
-      "title": "[Balance] Cove cliff-step landings",
-      "description": "Source: Balance Agent, docs/design/balance.md §9 travel beauty rule (2026-10-10). A landing with a view or bench every ~20-25 steps, sea pinks on the cliff, rails so she can't step off.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-10T17:15:30.130Z"
-    },
-    {
-      "id": "jenny-mv2nnnwz-acres1",
-      "title": "[Balance UI] Map plot sizes in acres",
-      "description": "Source: Balance Agent, docs/design/cohesion.md §1 flavor (2026-10-10). If the map shows plot sizes, use 1851 acres (Top Field about 12 acres).",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-10T17:15:30.131Z"
     }
   ]
 }
