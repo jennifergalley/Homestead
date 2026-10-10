@@ -14,7 +14,8 @@ struct Vec
     double y = 0.0;
 };
 
-// The baked map's world rectangle: its north-west corner is (maxX, minY).
+// The baked map's world rectangle: its north-west corner is (maxX, minY). The defaults are the old full
+// Landscape's; the map views take the real sheet from DA_EstateMap (or PlayableBounds without a bake).
 struct MapTransform
 {
     double minX = -201600.0;
@@ -47,6 +48,8 @@ Vec ClampToRadius(Vec offset, double radius);
 bool ClipSegmentToCircle(Vec& a, Vec& b, Vec center, double radius);
 // Clips the segment to the rectangle [min, max]; false when nothing of it lies inside.
 bool ClipSegmentToRect(Vec& a, Vec& b, Vec min, Vec max);
+// Clips a convex polygon to the rectangle [min, max] (Sutherland-Hodgman); empty when nothing is inside.
+std::vector<Vec> ClipPolygonToRect(const std::vector<Vec>& polygon, Vec min, Vec max);
 
 using Segment = std::pair<Vec, Vec>;
 // Dashes along a closed ring (the last point joins the first), continuing the pattern across

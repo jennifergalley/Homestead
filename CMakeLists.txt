@@ -44,7 +44,9 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadTreeFelling.cpp
     Source/SurvivalGame/Simulation/HomesteadGardenTarget.cpp
     Source/SurvivalGame/Simulation/HomesteadEstateCoveRoute.cpp
-    Source/SurvivalGame/Simulation/HomesteadCoveRouteKit.cpp)
+    Source/SurvivalGame/Simulation/HomesteadCoveRouteKit.cpp
+    Source/SurvivalGame/Simulation/HomesteadReservedLand.cpp
+    Source/SurvivalGame/Simulation/HomesteadPlayableBounds.cpp)
 target_include_directories(HomesteadSimulation PUBLIC Source/SurvivalGame/Simulation)
 target_compile_features(HomesteadSimulation PUBLIC cxx_std_17)
 set_target_properties(HomesteadSimulation PROPERTIES CXX_EXTENSIONS OFF)
@@ -233,6 +235,15 @@ else()
 endif()
 add_test(NAME HomesteadUpkeepTests COMMAND HomesteadUpkeepTests)
 
+# Not a test: prints the placement table for Scripts/Terrain/compact_placements.py.
+add_executable(HomesteadPlacementDump Tests/Tools/HomesteadPlacementDump.cpp)
+target_link_libraries(HomesteadPlacementDump PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadPlacementDump PRIVATE /W4 /WX /EHs-c-)
+else()
+    target_compile_options(HomesteadPlacementDump PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
+endif()
+
 add_executable(HomesteadCoveRouteTests Tests/HomesteadCoveRouteTests.cpp)
 target_link_libraries(HomesteadCoveRouteTests PRIVATE HomesteadSimulation)
 if(MSVC)
@@ -289,3 +300,12 @@ else()
     target_compile_options(HomesteadAudioLevelTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
 endif()
 add_test(NAME HomesteadAudioLevelTests COMMAND HomesteadAudioLevelTests)
+
+add_executable(HomesteadPlayableBoundsTests Tests/HomesteadPlayableBoundsTests.cpp)
+target_link_libraries(HomesteadPlayableBoundsTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadPlayableBoundsTests PRIVATE /W4 /WX /EHs-c-)
+else()
+    target_compile_options(HomesteadPlayableBoundsTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
+endif()
+add_test(NAME HomesteadPlayableBoundsTests COMMAND HomesteadPlayableBoundsTests)

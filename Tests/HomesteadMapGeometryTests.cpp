@@ -36,6 +36,11 @@ void Transforms()
     CHECK(Near(WorldToUV(map, {-201600, 201600}), {1, 1}));
     CHECK(Near(WorldToUV(map, {0, 0}), {0.5, 0.5}));
     CHECK(Near(UVToWorld(map, WorldToUV(map, {-25350, -64050})), {-25350, -64050}, 1e-6));
+    // The cropped sheet (shrink-estate-map): X -92000..60000, Y -136000..16000; nothing assumes 4 km.
+    const MapTransform sheet{-92000.0, -136000.0, 152000.0, 152000.0};
+    CHECK(Near(WorldToUV(sheet, {60000, -136000}), {0, 0}));
+    CHECK(Near(WorldToUV(sheet, {-92000, 16000}), {1, 1}));
+    CHECK(Near(UVToWorld(sheet, WorldToUV(sheet, {-7119, 11588})), {-7119, 11588}, 1e-6));
 
     // North-up: north is screen-up, east is screen-right.
     View north{{1000, 2000}, {100, 100}, 0.01, 0.0};
@@ -75,6 +80,14 @@ void Clipping()
     CHECK(ClipSegmentToRect(a, b, {0, 0}, {10, 10}) && Near(a, {0, 5}) && Near(b, {10, 5}));
     a = {-5, -5}; b = {-1, 20};
     CHECK(!ClipSegmentToRect(a, b, {0, 0}, {10, 10}));
+    // A polygon clipped to the unit square: a diamond poking out of every side keeps an octagon of area 7/8.
+    const std::vector<Vec> diamond{{0.5, -0.25}, {1.25, 0.5}, {0.5, 1.25}, {-0.25, 0.5}};
+    const std::vector<Vec> clipped = ClipPolygonToRect(diamond, {0, 0}, {1, 1});
+    CHECK(clipped.size() == 8 && std::abs(std::abs(SignedArea(clipped)) - 0.875) < 1e-9);
+    for (const Vec& point : clipped) CHECK(point.x >= -1e-12 && point.x <= 1 + 1e-12 && point.y >= -1e-12 && point.y <= 1 + 1e-12);
+    const std::vector<Vec> inside{{0.2, 0.2}, {0.8, 0.2}, {0.5, 0.7}};
+    CHECK(ClipPolygonToRect(inside, {0, 0}, {1, 1}).size() == 3);
+    CHECK(ClipPolygonToRect({{2, 2}, {3, 2}, {3, 3}}, {0, 0}, {1, 1}).empty());
 }
 
 void DashesAndHatching()

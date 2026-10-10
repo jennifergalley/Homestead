@@ -114,6 +114,36 @@ bool ClipSegmentToRect(Vec& a, Vec& b, Vec min, Vec max)
     return true;
 }
 
+std::vector<Vec> ClipPolygonToRect(const std::vector<Vec>& polygon, Vec min, Vec max)
+{
+    std::vector<Vec> current = polygon;
+    // Each rectangle side as (axis, bound, keep-greater): x >= min.x, x <= max.x, y >= min.y, y <= max.y.
+    for (int side = 0; side < 4 && !current.empty(); ++side)
+    {
+        const bool alongX = side < 2;
+        const bool keepGreater = side % 2 == 0;
+        const double bound = alongX ? (keepGreater ? min.x : max.x) : (keepGreater ? min.y : max.y);
+        const auto Value = [alongX](Vec v) { return alongX ? v.x : v.y; };
+        const auto Inside = [&](Vec v) { return keepGreater ? Value(v) >= bound : Value(v) <= bound; };
+        std::vector<Vec> next;
+        next.reserve(current.size() + 2);
+        for (std::size_t i = 0; i < current.size(); ++i)
+        {
+            const Vec a = current[i], b = current[(i + 1) % current.size()];
+            const bool aIn = Inside(a), bIn = Inside(b);
+            if (aIn) next.push_back(a);
+            if (aIn != bIn)
+            {
+                const double t = (bound - Value(a)) / (Value(b) - Value(a));
+                next.push_back(Add(a, Mul(Sub(b, a), t)));
+            }
+        }
+        current = std::move(next);
+    }
+    if (current.size() < 3) current.clear();
+    return current;
+}
+
 std::vector<Segment> DashRing(const std::vector<Vec>& ring, double dash, double gap)
 {
     std::vector<Segment> dashes;

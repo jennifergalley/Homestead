@@ -1,8 +1,8 @@
 {
- "minX": -201600.0,
- "minY": -201600.0,
- "sizeX": 403200.0,
- "sizeY": 403200.0,
+ "minX": -93000.0,
+ "minY": -136000.0,
+ "sizeX": 152000.0,
+ "sizeY": 152000.0,
  "source": "Estate heightmap + scenery",
- "bakedAt": "2026-10-09T14:01:05"
+ "bakedAt": "2026-10-10T12:10:15"
 }

@@ -135,7 +135,13 @@ void WoodlandForageData()
             ++spots;
         }
     }
-    CHECK(bushes == 40 && roots == 30 && branches == 30 && stones == 20);
+    // The compact map's smaller estate keeps 22 of these 120 spots and tops woodland forage back up with new
+    // rows (585200-585299, Balance: about 65 in all; shrink-estate-map).
+    int topUp = 0;
+    for (const auto& p : ProvisionalEstatePlacements().placements)
+        topUp += p.id >= 585200 && p.id < 585300 && (p.kind == ResourceKind::BerryBush || p.kind == ResourceKind::Roots);
+    CHECK(bushes >= 5 && roots >= 5 && branches >= 5 && stones >= 5);
+    CHECK(bushes + roots + branches + stones + topUp >= 60);
     CHECK(spots >= 100);
     Simulation sim;
     CHECK(sim.NewEstateGame(ProvisionalEstateLayout(), ProvisionalEstatePlacements()));

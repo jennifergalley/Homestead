@@ -66,20 +66,31 @@ int32 SHomesteadMinimap::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
     Paint.Disc(Center + FVector2D(0, 3 * U), Radius + 7 * U, HomesteadMapPaint::RimShadow, MmRimSegments);
     Paint.Disc(Center, Radius + 5 * U, MmBezel, MmRimSegments);
 
-    // The baked map, cropped to the disc: a fan whose rim samples the texture under each point.
-    TArray<FVector2D> Points, UVs, Rim;
-    Points.Add(Center);
-    UVs.Add(MmToLocal(HomesteadMap::WorldToUV(Frame.Model->Transform, Frame.Player)));
-    for (int32 Index = 0; Index <= MmRimSegments; ++Index)
+    // The baked map, cropped to the disc. The disc is clipped to the sheet in UV space first (screen to UV is
+    // affine), so near the world's edge the plain paper shows past the sheet instead of its edge texels
+    // smeared outward; a convex fan of the clipped rim samples the texture under each point.
+    TArray<FVector2D> Rim;
+    std::vector<HomesteadMap::Vec> RimUVs;
+    for (int32 Index = 0; Index < MmRimSegments; ++Index)
     {
         const float Angle = Index * 2.0f * PI / MmRimSegments;
         const FVector2D Point = Center + FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * Radius;
-        Points.Add(Point);
-        if (Index < MmRimSegments) Rim.Add(Point);
-        UVs.Add(MmToLocal(HomesteadMap::WorldToUV(Frame.Model->Transform, HomesteadMap::ScreenToWorld(View, MmToVec(Point)))));
+        Rim.Add(Point);
+        RimUVs.push_back(HomesteadMap::WorldToUV(Frame.Model->Transform, HomesteadMap::ScreenToWorld(View, MmToVec(Point))));
     }
-    if (Frame.MapBrush) Paint.TexturedFan(Frame.MapBrush, Points, UVs, FLinearColor::White);
-    else Paint.Fill(Rim, HomesteadMapPaint::Parchment);
+    bool bAllOnSheet = Frame.MapBrush != nullptr;
+    for (const HomesteadMap::Vec& UV : RimUVs) bAllOnSheet &= UV.x >= 0.0 && UV.x <= 1.0 && UV.y >= 0.0 && UV.y <= 1.0;
+    if (!bAllOnSheet) Paint.Fill(Rim, HomesteadMapPaint::Parchment);
+    if (Frame.MapBrush)
+    {
+        TArray<FVector2D> Points, UVs;
+        for (const HomesteadMap::Vec& UV : HomesteadMap::ClipPolygonToRect(RimUVs, {0.0, 0.0}, {1.0, 1.0}))
+        {
+            Points.Add(MmToLocal(HomesteadMap::WorldToScreen(View, HomesteadMap::UVToWorld(Frame.Model->Transform, UV))));
+            UVs.Add(MmToLocal(UV));
+        }
+        Paint.TexturedFan(Frame.MapBrush, Points, UVs, FLinearColor::White);
+    }
 
     // The owned boundary, dashed in oxblood ink over a pale halo.
     for (const FHomesteadMapParcel& Parcel : Frame.Model->Parcels)

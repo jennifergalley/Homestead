@@ -186,6 +186,16 @@ bool IsPublicRoadsidePlacement(const EstatePlacement& placement)
 bool EstatePlacementAllowed(const EstateLayout& layout, const EstatePlacement& placement)
 {
     const LandmarkPolygon* boundary = layout.FindPolygon(Anchor::EstateBoundary);
-    return (boundary && PointInPolygon(boundary->points, placement.position)) || IsPublicRoadsidePlacement(placement);
+    return (boundary && PointInPolygon(boundary->points, placement.position)) || IsPublicRoadsidePlacement(placement)
+        || IsDriveVergeOvergrowth(placement);
+}
+
+bool IsDriveVergeOvergrowth(const EstatePlacement& placement)
+{
+    // The drive's verge overgrowth (550000+) past where the compact map's smaller estate ends (shrink-estate-map):
+    // it stays where it was, on the road's verge, so the walk to the village looks as it did.
+    if (placement.id < DriveVergeFirstId || placement.id > DriveVergeLastId) return false;
+    const PublicRoad& road = EstatePublicRoad();
+    return road.NearestTo(placement.position).distanceCm <= DriveVergeReachCm && !road.InBridgeKeepOut(placement.position);
 }
 }

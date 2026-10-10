@@ -26,6 +26,7 @@ class UDirectionalLightComponent;
 class USkyLightComponent;
 class UExponentialHeightFogComponent;
 class UPostProcessComponent;
+class AHomesteadRoadEndGate;
 
 USTRUCT()
 struct FHomesteadWorldVisual
@@ -404,6 +405,14 @@ private:
     bool bVillageBuilt = false;
     UPROPERTY()
     FHomesteadWorldVisual VillageVisual;
+    // The playable area's edge (HomesteadWorldEdge.cpp): invisible pawn-only walls along the layout's
+    // PlayableBounds and the shut field gate at the public road's far end, built once with the estate scenery.
+    void BuildWorldEdge();
+    bool bWorldEdgeBuilt = false;
+    UPROPERTY()
+    FHomesteadWorldVisual WorldEdgeVisual;
+    UPROPERTY()
+    TObjectPtr<AHomesteadRoadEndGate> RoadEndGate;
     UPROPERTY()
     TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> EstateScenery;
     // Hides low cover (bushes, ferns, grass, cobbles) wherever a placed piece now stands, so none

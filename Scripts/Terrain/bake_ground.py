@@ -265,6 +265,17 @@ def ground_fields(h, w, layout):
         density *= (1.0 - 0.95 * smoothstep(1.9, 0.7, d_cove)) * (1.0 - steps)
         height *= 1.0 - 0.8 * tread
         trail = np.maximum(trail, smoothstep(2.0, 0.8, d_cove).astype(np.float32))
+    # The other footpaths (estate_footpaths.py: to the mine, the clifftop link, the village to the river): a trodden
+    # track about 2 m wide, like the lake path.
+    for p in layout.get("footpaths", []):
+        if p.get("name") == "Cove":
+            continue
+        d_foot = line_distance(p["points"], h.shape)
+        tread = 0.9 * smoothstep(2.4, 0.9, d_foot) * (0.75 + 0.25 * clump)
+        wear = np.maximum(wear, tread)
+        density *= 1.0 - 0.95 * tread
+        height *= 1.0 - 0.8 * tread
+        trail = np.maximum(trail, smoothstep(2.6, 1.0, d_foot).astype(np.float32))
     tx, ty = lm["TownSquare"][:2]
     density *= smoothstep(100.0, 140.0, np.hypot(X - tx, Y - ty))
     # The town's street and square (town_layout.py): trodden soil, worn most down the middle of the street.

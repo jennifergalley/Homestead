@@ -194,6 +194,7 @@ bool AHomesteadWorld::BuildTerrain(const Homestead::State& State)
         BuildRoadBridge();
         BuildCoveRoute();
         BuildVillage();
+        BuildWorldEdge();
         return bScenery;
     }
     if (bFixedEstate)

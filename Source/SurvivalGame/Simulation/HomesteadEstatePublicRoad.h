@@ -103,6 +103,12 @@ const PublicRoad& EstatePublicRoad();
 constexpr int PublicRoadsideFirstId = 581000;
 constexpr int PublicRoadsideEndId = 581100;
 bool IsPublicRoadsidePlacement(const EstatePlacement& placement);
-// Where a placement may stand: on the estate, or the narrow public-roadside exception.
+// The drive's verge overgrowth (estate disrepair, 550000-559999) within 15 m of the road: it stays where it
+// stood when the compact map's smaller estate ended short of it (shrink-estate-map).
+constexpr int DriveVergeFirstId = 550000;
+constexpr int DriveVergeLastId = 559999;
+constexpr double DriveVergeReachCm = 1500.0;
+bool IsDriveVergeOvergrowth(const EstatePlacement& placement);
+// Where a placement may stand: on the estate, or the narrow public-roadside and drive-verge exceptions.
 bool EstatePlacementAllowed(const EstateLayout& layout, const EstatePlacement& placement);
 }

@@ -35,12 +35,23 @@ struct FHomesteadMapParcel
     bool bForSale = false;
 };
 
+// Neighbouring estates and communal land (Simulation/HomesteadReservedLand.h): a faint dashed outline,
+// named at its centroid when there's room; an empty label draws the outline alone.
+struct FHomesteadMapOutline
+{
+    FString Label;
+    std::vector<HomesteadMap::Vec> Ring;
+    HomesteadMap::Vec LabelAt;
+    bool bFaintest = false;
+};
+
 // Everything static the map views draw: rebuilt only when the layout or ownership changes.
 struct FHomesteadMapModel
 {
     HomesteadMap::MapTransform Transform;
     TArray<FHomesteadMapLandmark> Landmarks;
     TArray<FHomesteadMapParcel> Parcels;
+    TArray<FHomesteadMapOutline> Outlines;
     FString EstateName;
 };
 

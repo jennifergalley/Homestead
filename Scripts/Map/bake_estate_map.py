@@ -27,6 +27,8 @@ from scipy import ndimage
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HALF_M = 2016.0  # The 4033-vertex landscape spans -2016..2016 m on both axes.
+# The map sheet (x0, x1, y0, y1 m): the square round the layout's PlayableBounds (shrink-estate-map), set in main().
+SHEET = (-HALF_M, HALF_M, -HALF_M, HALF_M)
 
 
 def load_heights(path):
@@ -38,9 +40,29 @@ def load_heights(path):
 
 
 def world_to_px(x_m, y_m, size):
-    col = (y_m + HALF_M) / (2 * HALF_M) * size
-    row = (HALF_M - x_m) / (2 * HALF_M) * size
+    x0, x1, y0, y1 = SHEET
+    col = (y_m - y0) / (y1 - y0) * size
+    row = (x1 - x_m) / (x1 - x0) * size
     return col, row
+
+
+def sheet_for(layout):
+    """The square sheet round the layout's PlayableBounds, or the whole landscape without one."""
+    ring = layout.get("polygons", {}).get("PlayableBounds")
+    if not ring:
+        return (-HALF_M, HALF_M, -HALF_M, HALF_M)
+    xs, ys = [p[0] for p in ring], [p[1] for p in ring]
+    side = max(max(xs) - min(xs), max(ys) - min(ys))
+    cx, cy = (max(xs) + min(xs)) / 2.0, (max(ys) + min(ys)) / 2.0
+    return (cx - side / 2.0, cx + side / 2.0, cy - side / 2.0, cy + side / 2.0)
+
+
+def crop_heights(heights):
+    """The heights (rows north->south from x = HALF_M, columns west->east from y = -HALF_M) under the sheet."""
+    x0, x1, y0, y1 = SHEET
+    r0, r1 = int(round(HALF_M - x1)), int(round(HALF_M - x0))
+    c0, c1 = int(round(y0 + HALF_M)), int(round(y1 + HALF_M))
+    return heights[r0:r1 + 1, c0:c1 + 1]
 
 
 def line_mask(points, size, width_px, oversample=2):
@@ -102,7 +124,7 @@ def load_scenery(path):
 
 def woods_layers(scenery, size, oversample=2):
     """A soft woodland wash (from local tree and hazel density) and inked tree stamps."""
-    metres_per_px = 2 * HALF_M / size
+    metres_per_px = (SHEET[1] - SHEET[0]) / size
     density = np.zeros((size, size))
     woody = scenery[np.isin(scenery["kind"], list(SCENERY_TREES) + [SCENERY_HAZEL])]
     col, row = world_to_px(woody["x"] / 100.0, woody["y"] / 100.0, size)
@@ -142,7 +164,8 @@ def blend(base, color, alpha):
 
 
 def bake(heights, layout, size, capture=None, scenery=None, seed=7):
-    metres_per_px = 2 * HALF_M / size
+    metres_per_px = (SHEET[1] - SHEET[0]) / size
+    heights = crop_heights(heights)
     zoom = size / heights.shape[0]
     h = ndimage.zoom(heights, zoom, order=1)[:size, :size]
     h = ndimage.gaussian_filter(h, 0.6)
@@ -251,7 +274,7 @@ def bake(heights, layout, size, capture=None, scenery=None, seed=7):
         rgb = blend(rgb, [0.28, 0.20, 0.13], np.clip(ndimage.grey_dilation(np.maximum(square, street), size=3) - np.maximum(square, street), 0, 1) * 0.6)
         rgb = blend(rgb, [0.97, 0.93, 0.81], np.maximum(square, street) * 0.95)
         blocks = [town["store"]["footprint"]]
-        for b in town["buildings"]:
+        for b in town["buildings"] + layout.get("roadCottages", []):
             t = np.radians(b["yaw"])
             out, along = np.array([np.cos(t), np.sin(t)]), np.array([-np.sin(t), np.cos(t)])
             front = np.array([b["x"], b["y"]])
@@ -281,6 +304,8 @@ def main():
 
     with open(args.layout, "r", encoding="utf-8") as handle:
         layout = json.load(handle)
+    global SHEET
+    SHEET = sheet_for(layout)
     heights = load_heights(args.heightmap)
     capture = Image.open(args.capture) if args.capture else None
     scenery = load_scenery(args.scenery) if args.scenery and os.path.exists(args.scenery) else None
@@ -288,10 +313,10 @@ def main():
     os.makedirs(os.path.dirname(args.out), exist_ok=True)
     Image.fromarray(pixels, "RGB").save(args.out, optimize=True)
     info = {
-        "minX": -HALF_M * 100.0,
-        "minY": -HALF_M * 100.0,
-        "sizeX": HALF_M * 200.0,
-        "sizeY": HALF_M * 200.0,
+        "minX": SHEET[0] * 100.0,
+        "minY": SHEET[2] * 100.0,
+        "sizeX": (SHEET[1] - SHEET[0]) * 100.0,
+        "sizeY": (SHEET[3] - SHEET[2]) * 100.0,
         "source": ("Estate capture" if capture else "Estate heightmap") + (" + scenery" if scenery is not None else ""),
         "bakedAt": datetime.datetime.now().isoformat(timespec="seconds"),
     }

@@ -9,6 +9,8 @@
 #include "Misc/ConfigCacheIni.h"
 #include "Simulation/HomesteadEstate.h"
 #include "Simulation/HomesteadParcels.h"
+#include "Simulation/HomesteadPlayableBounds.h"
+#include "Simulation/HomesteadReservedLand.h"
 #include "UI/SHomesteadCompass.h"
 #include "UI/SHomesteadMinimap.h"
 
@@ -140,8 +142,21 @@ void UHomesteadMapComponent::RefreshModel()
     ModelKey = Key;
 
     TSharedPtr<FHomesteadMapModel> Next = MakeShared<FHomesteadMapModel>();
+    // The sheet's rectangle comes from DA_EstateMap (T_EstateMap.json); without the bake, the playable area.
+    const Homestead::PlayableRect Playable = Homestead::EstatePlayableRect(Layout);
     if (MapAsset) Next->Transform = MapAsset->Transform();
+    else if (Playable.valid)
+        Next->Transform = {Playable.minX, Playable.minY, Playable.maxX - Playable.minX, Playable.maxY - Playable.minY};
     Next->EstateName = EstateName(*Controller);
+    for (const Homestead::ReservedOutline& Reserved : Homestead::ReservedOutlinesFromLayout(Layout))
+    {
+        FHomesteadMapOutline Outline;
+        Outline.Label = UTF8_TO_TCHAR(Reserved.label.c_str());
+        for (const auto& Point : Reserved.polygon) Outline.Ring.push_back(ToVec(Point));
+        Outline.LabelAt = HomesteadMap::Centroid(Outline.Ring);
+        Outline.bFaintest = Reserved.faintest;
+        Next->Outlines.Add(MoveTemp(Outline));
+    }
     for (const auto& Parcel : Parcels)
     {
         FHomesteadMapParcel Shape;

@@ -63,7 +63,16 @@ FString UHomesteadEstateMapImport::CaptureEstateMap(int32 Resolution, const FStr
     const int32 Tiles = FMath::Max(1, Resolution / 2048);
     const int32 TileSize = Resolution / Tiles;
     Resolution = TileSize * Tiles;
-    constexpr double Min = -201600.0, Extent = 403200.0;
+    // The capture covers the current sheet (DA_EstateMap's square, from T_EstateMap.json), so the baker can fold
+    // it straight in; without an imported sheet, the whole original Landscape.
+    double MinX = -201600.0, MinY = -201600.0, Extent = 403200.0;
+    if (const UHomesteadEstateMap* Sheet = LoadObject<UHomesteadEstateMap>(nullptr, UHomesteadEstateMap::AssetPath, nullptr,
+            LOAD_NoWarn | LOAD_Quiet))
+    {
+        MinX = Sheet->WorldMin.X;
+        MinY = Sheet->WorldMin.Y;
+        Extent = FMath::Max(1.0, FMath::Max(Sheet->WorldSize.X, Sheet->WorldSize.Y));
+    }
     const double TileWorld = Extent / Tiles;
     const FString Output = OutputPng.IsEmpty()
         ? FPaths::ConvertRelativePathToFull(FPaths::Combine(FPaths::ProjectSavedDir(), TEXT("EstateMap/EstateCapture.png"))) : OutputPng;
@@ -72,7 +81,7 @@ FString UHomesteadEstateMapImport::CaptureEstateMap(int32 Resolution, const FStr
     if (UWorldPartition* Partition = World->GetWorldPartition())
     {
         UWorldPartitionEditorLoaderAdapter* Adapter = Partition->CreateEditorLoaderAdapter<FLoaderAdapterShape>(World,
-            FBox(FVector(Min, Min, -100000.0), FVector(Min + Extent, Min + Extent, 100000.0)), TEXT("Estate map capture"));
+            FBox(FVector(MinX, MinY, -100000.0), FVector(MinX + Extent, MinY + Extent, 100000.0)), TEXT("Estate map capture"));
         Adapter->GetLoaderAdapter()->Load();
     }
     FlushRenderingCommands();
@@ -104,7 +113,7 @@ FString UHomesteadEstateMapImport::CaptureEstateMap(int32 Resolution, const FStr
         {
             // Rows run north to south, columns west to east; looking straight down with yaw 0 puts
             // north (+X) at the top of each tile and east (+Y) on the right.
-            const FVector Centre(Min + Extent - (Row + 0.5) * TileWorld, Min + (Column + 0.5) * TileWorld, 150000.0);
+            const FVector Centre(MinX + Extent - (Row + 0.5) * TileWorld, MinY + (Column + 0.5) * TileWorld, 150000.0);
             Camera->SetActorLocationAndRotation(Centre, FRotator(-90.0, 0.0, 0.0));
             Capture->CaptureScene();
             FlushRenderingCommands();
@@ -132,16 +141,24 @@ FString UHomesteadEstateMapImport::ImportEstateMap(const FString& SourcePng)
     const FString Png = SourcePng.IsEmpty() ? DefaultSource() : FPaths::ConvertRelativePathToFull(SourcePng);
     if (!FPaths::FileExists(Png)) return FString::Printf(TEXT("%s is missing. Run Scripts/Map/bake_estate_map.py first."), *Png);
 
-    FVector2D WorldMin(-201600.0, -201600.0), WorldSize(403200.0, 403200.0);
+    // The sheet's world rectangle always comes from the bake's JSON (bake_estate_map.py writes it beside the
+    // PNG); guessing an extent would misplace everything drawn on the map.
+    FVector2D WorldMin, WorldSize;
     FString Source = TEXT("Estate heightmap"), BakedAt;
     FString Json;
-    if (FFileHelper::LoadFileToString(Json, *FPaths::ChangeExtension(Png, TEXT("json"))))
+    const FString JsonPath = FPaths::ChangeExtension(Png, TEXT("json"));
+    if (!FFileHelper::LoadFileToString(Json, *JsonPath))
+        return FString::Printf(TEXT("%s is missing. Run Scripts/Map/bake_estate_map.py first."), *JsonPath);
     {
         TSharedPtr<FJsonObject> Info;
         if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Json), Info) || !Info.IsValid())
             return TEXT("The map's transform JSON is unreadable.");
-        WorldMin = FVector2D(Info->GetNumberField(TEXT("minX")), Info->GetNumberField(TEXT("minY")));
-        WorldSize = FVector2D(Info->GetNumberField(TEXT("sizeX")), Info->GetNumberField(TEXT("sizeY")));
+        double MinX = 0, MinY = 0, SizeX = 0, SizeY = 0;
+        if (!Info->TryGetNumberField(TEXT("minX"), MinX) || !Info->TryGetNumberField(TEXT("minY"), MinY)
+            || !Info->TryGetNumberField(TEXT("sizeX"), SizeX) || !Info->TryGetNumberField(TEXT("sizeY"), SizeY))
+            return TEXT("The map's transform JSON needs minX, minY, sizeX and sizeY (cm).");
+        WorldMin = FVector2D(MinX, MinY);
+        WorldSize = FVector2D(SizeX, SizeY);
         Info->TryGetStringField(TEXT("source"), Source);
         Info->TryGetStringField(TEXT("bakedAt"), BakedAt);
         if (WorldSize.X <= 0 || WorldSize.Y <= 0) return TEXT("The map's transform JSON has no extent.");

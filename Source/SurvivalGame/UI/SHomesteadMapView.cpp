@@ -15,6 +15,9 @@ constexpr double MvMaxPixelsPerCm = 0.06;  // 6 px per metre: close enough to re
 constexpr double MvPlacePixelsPerCm = 0.025;
 constexpr float MvStickDeadZone = 0.2f;
 constexpr double MvStaleAxisSeconds = 0.25;
+// Reserved-land outline ink opacity: lighter than for-sale land's 0.7 dashes over its fill and 0.38 hatching.
+constexpr float MvOutlineAlpha = 0.36f;
+constexpr float MvFaintestOutlineAlpha = 0.22f;
 HomesteadUITheme::FThemeColor MvBackdrop(0.05f, 0.075f, 0.065f, 0.95f);
 HomesteadUITheme::FThemeColor MvPlate(0.025f, 0.05f, 0.038f, 0.82f);
 HomesteadUITheme::FThemeColor MvCream(0.95f, 0.92f, 0.82f, 1.0f);
@@ -318,6 +321,18 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
     }
     const float Scale = FMath::Clamp(Local.GetMin() / 560.0f, 0.8f, 1.6f);
 
+    // Neighbouring estates and common land: faint dashed ink only, lighter than the for-sale hatching.
+    for (const FHomesteadMapOutline& Outline : Model.Outlines)
+    {
+        std::vector<HomesteadMap::Vec> Screen;
+        Screen.reserve(Outline.Ring.size());
+        for (const HomesteadMap::Vec& Point : Outline.Ring) Screen.push_back(HomesteadMap::WorldToScreen(View, Point));
+        const FLinearColor OutlineInk(HomesteadMapPaint::Ink.R, HomesteadMapPaint::Ink.G, HomesteadMapPaint::Ink.B,
+            Outline.bFaintest ? MvFaintestOutlineAlpha : MvOutlineAlpha);
+        for (auto Dash : HomesteadMap::DashRing(Screen, 4.0 * Scale, 5.0 * Scale))
+            if (HomesteadMap::ClipSegmentToRect(Dash.first, Dash.second, Min, Max))
+                Paint.Segment(MvToLocal(Dash.first), MvToLocal(Dash.second), OutlineInk, Outline.bFaintest ? 0.9f : 1.1f);
+    }
     // Parcels: for-sale land dimmed and hatched, the owned estate dashed in oxblood.
     for (const FHomesteadMapParcel& Parcel : Model.Parcels)
     {
@@ -428,9 +443,35 @@ int32 SHomesteadMapView::OnPaint(const FPaintArgs&, const FGeometry& Geometry, c
         for (const FBox2D& Other : Badges) bClear &= !Box.Intersect(Other);
         if (!bClear) continue;
         const FBox2D Plate = Box.ExpandBy(FVector2D(4, 1));
+        Taken.Add(Plate);
         Paint.Fill({Plate.Min, FVector2D(Plate.Max.X, Plate.Min.Y), Plate.Max, FVector2D(Plate.Min.X, Plate.Max.Y)}, MvPlate);
         Paint.Text(TEXT("FOR SALE"), At - FVector2D(Title.X * 0.5f, Title.Y), LabelSize, MvCream, true, false);
         Paint.Text(Parcel.Label, At - FVector2D(Name.X * 0.5f, 0), LabelSize * 0.9f, MvCream, false, false);
+    }
+
+    // Neighbours' and common land's names, quieter than for-sale ones, where they fit and cover nothing.
+    for (const FHomesteadMapOutline& Outline : Model.Outlines)
+    {
+        if (Outline.Label.IsEmpty()) continue;
+        double Low = 1e300, High = -1e300;
+        for (const HomesteadMap::Vec& Point : Outline.Ring)
+        {
+            const HomesteadMap::Vec S = HomesteadMap::WorldToScreen(View, Point);
+            Low = FMath::Min(Low, S.x); High = FMath::Max(High, S.x);
+        }
+        const FVector2D At = MvToLocal(HomesteadMap::WorldToScreen(View, Outline.LabelAt));
+        if (At.X < 0 || At.Y < 0 || At.X > Local.X || At.Y > Local.Y) continue;
+        const float LabelSize = 11.0f * Scale;
+        const FVector2D Extent = HomesteadMapPaint::FPainter::MeasureText(Outline.Label, LabelSize, false);
+        if (High - Low < Extent.X + 12.0) continue;
+        const FBox2D Plate(At - Extent * 0.5f - FVector2D(4, 1), At + Extent * 0.5f + FVector2D(4, 1));
+        bool bClear = true;
+        for (const FBox2D& Other : Taken) bClear &= !Plate.Intersect(Other);
+        for (const FBox2D& Other : Badges) bClear &= !Plate.Intersect(Other);
+        if (!bClear) continue;
+        Taken.Add(Plate);
+        Paint.Fill({Plate.Min, FVector2D(Plate.Max.X, Plate.Min.Y), Plate.Max, FVector2D(Plate.Min.X, Plate.Max.Y)}, MvPlate);
+        Paint.Text(Outline.Label, At - Extent * 0.5f, LabelSize, MvCream, false, false);
     }
 
     // You are here: a slow pulse under her arrow.
