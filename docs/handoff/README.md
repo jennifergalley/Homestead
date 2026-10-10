@@ -359,7 +359,11 @@ needed, then clean only the paths you own. Keep only the current shortcut Develo
 immediately previous rollback; delete superseded Development releases and `Saved\Automation` test
 sandboxes unless they are actively needed. When in doubt, delete unnecessary
 project-owned artifacts—but never Jenny's current save game.
-The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM.
+The Disk Cleanup Agent performs the daily broader sweep at 10:00 AM. No sweep, script or lane ever
+deletes another session's `E:\CopilotScratch\<session-id>` while that session is unarchived; it may
+hold review media Jenny has approved. Point `TEMP`/`TMP` at `E:\CopilotScratch\<session-id>\tmp`,
+never at the session folder itself, so tools that clear their temp folder can't take your evidence
+with it.
 
 1. The orchestrator notifies lanes at the freeze; lanes close their editors
    (`Stop-MyEditor.ps1`) until the build is done, because Integration owns the Unreal slot.
