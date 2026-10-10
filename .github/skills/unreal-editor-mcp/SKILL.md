@@ -902,12 +902,25 @@ Notes from the 2026-10-09 Village lane (stage-2 village path dressing work):
 - `Invoke-UnrealBuild.ps1` must be launched as
   `powershell -NoProfile -ExecutionPolicy Bypass -File ...`; Source files must be CRLF, or the
   git LF warning aborts the build.
-- `Start-EditorMcp.ps1` can report an MCP timeout at 1200 s on a slow first launch even though the
-  editor is actually up by then — confirm with `py` before assuming the launch failed.
+- `Start-EditorMcp.ps1` can report an MCP timeout at 600-1200 s on a slow first launch even though
+  the editor is actually up by then (it finishes loading shortly after) — re-check the MCP port
+  with `py` before assuming the launch failed or restarting.
 - `build_ground.py` and `Homestead.ImportEstateMap` re-save several Estate/Ground assets
   byte-different on every run even with no real change (`MI/M_EstateGrass`, `SM_GrassPatch_LOD*`,
   `T_GrassWind`, `T_Ground_*`). `git checkout` those back out; keep only genuine changes to
-  `T_EstateGround`, `T_EstateCanopy` and the map assets.
+  `T_EstateGround`, `T_EstateCanopy`, `EstateGround.bin` and the map assets.
+- `bake_ground.py`'s generic wear-based density/litter reduction runs *before* a town street's own
+  wear is stamped in, so a street can come out still grassy and under leaf litter. A town street
+  needs its trail-style canopy cut plus a density/height clear applied explicitly *after* the main
+  wear block.
+- `berries.py` only keeps berries clear of the main road (6 m); it has no village-street clearance,
+  so a regen pass can place a berry bush on a village street.
+- `HomesteadManorTests`' `PlacementHashWithout` baseline pins specific placement positions. Moving
+  any existing placement (not just adding one) requires excluding its id and re-baselining the
+  pinned hash, or the test fails on the position drift alone.
+- Cobble tile meshes with degenerate triangles fail FBX import; flat ground slabs thicker than the
+  local terrain undulation get buried. Use a conforming procedural mesh instead of instanced flat
+  tiles — the terrain is triangle-interpolated (diagonal B-C), so a rigid slab doesn't follow it.
 - Stage-2 carry-over order for the village dressing pipeline: delete `"townPath"` from
   `estate_layout.json`, then run `town_pad.py` → `town_path.py` → `town_layout.py` →
   `public_road.py` → `weightmaps.py` → `route_sights.py --bake` → `village_dress.py` →
