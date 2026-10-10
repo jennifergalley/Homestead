@@ -115,7 +115,7 @@ slot, then go idle; they do not pick up unflagged queue items.
 
 ## Build after next
 
-- (unassigned — ask Jenny)
+- Move away from Cornish names: neutral invented names for the estate, neighbours, map places and the clerk.
 
 ## 2026-10-04 — 3:13 PM
 

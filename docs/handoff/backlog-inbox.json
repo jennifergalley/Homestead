@@ -468,7 +468,15 @@
       "description": "Source: Balance Agent, docs/design/cohesion.md §4 beauty (stage 2 cove review, 2026-10-10). The steepest upper bay wall shows smeared bare earth (planar landscape UVs); give it a triplanar cliff material or granite rock meshes with thrift tufts.",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-10T21:08:46.190Z"
+      "createdUtc": "2026-10-10T21:08:46.19Z"
+    },
+    {
+      "id": "jenny-mv2yi15t-decorn",
+      "title": "Move away from Cornish names",
+      "description": "Jenny (2026-10-10): \"let's start to move away from the Cornwall influence\" (follow-up to removing Pascoe and Cornwall; keep the setting fictional or ambiguous). Rename Cornish-style player-facing names to neutral invented ones: the default estate name Trevennor; the map shrink's Penhallow, Tregarthen, Polwhele, Penvose, Carn Wood; the clerk Josiah Trethewey and Trethewey's General Store; and any others a sweep finds (map labels, signs, dialogue, item text). Display names only: keep enum ids, save keys and asset paths.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-10T22:19:03.137Z"
     }
   ]
 }
