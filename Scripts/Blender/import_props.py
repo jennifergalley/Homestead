@@ -269,7 +269,7 @@ GRANITE_PARENT = "/Game/SurvivalGame/Materials/M_PropGranite"
 # would plug the stone doorway's opening.
 COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex", "StoneDoorway": "complex",
                        # A box round SM_FarmGateway would wall off the open gateway.
-                       "FarmFence": "complex"}
+                       "FarmFence": "complex", "VillageWell": "complex"}
 # Which LOD per-poly collision uses (default: the coarsest); the doorway keeps its reveals true.
 COLLISION_LOD = {"StoneDoorway": 1}
 # Million-triangle house-sized rocks render through Nanite; LOD1/LOD2 stay as the fallback.

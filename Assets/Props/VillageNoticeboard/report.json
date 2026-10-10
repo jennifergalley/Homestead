@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "VillageNoticeboard",
+  "description": "Weathered oak village noticeboard: two chunky posts, nine-plank board with framing rails and a ledge, small oak-shingle hood, pinned blank parchment notices; front +X, pivot bottom centre (original).",
+  "collision": "box (posts and board)",
+  "triangle_budget": 16000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/village_noticeboard.py",
+  "source_sha256": "2ca918a1755f697681a89fb1dd328abfccf331a8bc0d6f5c9968c7ffbaab3dea",
+  "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_VillageNoticeboard": {
+      "vertices": 6490,
+      "triangles": 11184,
+      "size_cm": [
+        31.1,
+        162.44,
+        235.1
+      ],
+      "materials": [
+        {
+          "name": "M_VillageNoticeboard",
+          "textures": {
+            "basecolor": "T_VillageNoticeboard_basecolor.png",
+            "roughness": "T_VillageNoticeboard_roughness.png",
+            "normal": "T_VillageNoticeboard_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageNoticeboard_basecolor.png",
+          "roughness": "T_VillageNoticeboard_roughness.png",
+          "normal": "T_VillageNoticeboard_normal.png",
+          "ao": "T_VillageNoticeboard_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          205
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          1.2
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_VillageNoticeboard.fbx",
+      "sha256": "47ad18b48fa467de1b850afed46be2d5fd5e1b7ababfdf65bb3599dc706795ab",
+      "preview": "preview_SM_VillageNoticeboard.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_VillageNoticeboard_hero.png",
+          "detail": "beauty_SM_VillageNoticeboard_detail.png",
+          "eye": "beauty_SM_VillageNoticeboard_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          205
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_VillageNoticeboard_LOD1": {
+      "vertices": 2544,
+      "triangles": 3353,
+      "size_cm": [
+        31.15,
+        161.91,
+        234.88
+      ],
+      "materials": [
+        {
+          "name": "M_VillageNoticeboard",
+          "textures": {
+            "basecolor": "T_VillageNoticeboard_basecolor.png",
+            "roughness": "T_VillageNoticeboard_roughness.png",
+            "normal": "T_VillageNoticeboard_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageNoticeboard_basecolor.png",
+          "roughness": "T_VillageNoticeboard_roughness.png",
+          "normal": "T_VillageNoticeboard_normal.png",
+          "ao": "T_VillageNoticeboard_ao.png"
+        },
+        "shared_with": "SM_VillageNoticeboard"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          205
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          1.2
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 5.0
+      },
+      "fbx": "SM_VillageNoticeboard_LOD1.fbx",
+      "sha256": "17fe9be44de6b15aa3f961610b6b68b63632c1fb474e69ef0eee7c71ed7dd300",
+      "preview": "preview_SM_VillageNoticeboard_LOD1.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_VillageNoticeboard": "Pivot = bottom centre on the ground line, post feet 6 cm below z = 0. Front faces +X; 160 cm wide (Y) x 25 cm deep (X) x ~235 cm tall. Box collision."
+  },
+  "pivot": "bottom centre on the ground line",
+  "facing": "+X",
+  "height_m": 2.35,
+  "width_m": 1.6,
+  "textures": {
+    "T_VillageNoticeboard_basecolor.png": "4cebbd10ed5a434bdfd46e100ce94eebfb841e789d11acf5725b2bd2f4a90246",
+    "T_VillageNoticeboard_roughness.png": "707177b5f57ddde645382504c19f63a467b6eb1645f840ed36e45d22dcca3254",
+    "T_VillageNoticeboard_normal.png": "f76927e87d883c23b96a93992119a0a5d85fab2a94cddf4c5b89de2403697ebd"
+  }
+}

@@ -23,6 +23,9 @@ SCENERY = ROOT / "Content" / "SurvivalGame" / "Estate" / "Runtime" / "EstateScen
 RECORD = np.dtype([("k", "u1"), ("pad", "S3"), ("x", "<f4"), ("y", "<f4"), ("yaw", "<f4"), ("s", "<f4")])
 TAG = b"RS1"
 FLOWER_KINDS = (42, 43, 44, 45, 46, 47, 48)
+# Bloom-heavy kinds for the planted beds and drifts (Balance, cohesion.md section 4): bluebell, primrose,
+# red campion and foxglove show colour from 10 m; wild garlic, cow parsley and wood anemone read as green leaves.
+BLOOM_KINDS = (42, 43, 46, 47, 47, 46)
 FLOWER_SCALE = {42: 1.0, 43: 1.0, 44: 1.0, 45: 1.0, 46: 1.0, 47: 1.0, 48: 1.0}
 SIGHT_RADIUS_M = 15.0        # a flower drift or forage point this close to the route is in view
 MAX_GAP_M = 50.0             # Jenny: a scenery or forage point about every 50 m at a sprint
@@ -120,7 +123,7 @@ def drift(route, ch, side, rng, habitat):
     for s in (side, -side):
         for offset in np.linspace(FILL_OFFSET_M[0], FILL_OFFSET_M[1] + 4.0, 5):
             centre = route[k] + normal * s * offset
-            kind = int(rng.choice((43, 44, 46, 48, 45)))
+            kind = int(rng.choice(BLOOM_KINDS))
             number = int(rng.integers(*DRIFT_CLUMPS))
             pts = centre + rng.normal(0.0, DRIFT_RADIUS_M * 0.5, (number, 2))
             pts = pts[habitat.allowed(pts)]
@@ -144,7 +147,7 @@ def fill(route, spans, rng, habitat):
 
 
 
-def bed_record(rng, p, kinds=(43, 44, 46, 48, 45), grow=BED_SCALE):
+def bed_record(rng, p, kinds=BLOOM_KINDS, grow=BED_SCALE):
     kind = int(rng.choice(kinds))
     return (kind, TAG, p[0] * 100.0, p[1] * 100.0, rng.uniform(0, 360), FLOWER_SCALE[kind] * grow * rng.uniform(0.85, 1.2))
 

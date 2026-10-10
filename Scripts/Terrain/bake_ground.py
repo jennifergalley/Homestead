@@ -272,7 +272,15 @@ def ground_fields(h, w, layout):
     if town:
         d_street = line_distance(town["street"], h.shape)
         hw = town["streetHalfWidth"]
-        wear = np.maximum(wear, 0.8 * smoothstep(hw + 0.8, hw - 0.8, d_street) * (0.7 + 0.3 * clump))
+        wear = np.maximum(wear, np.maximum(0.5 * smoothstep(hw + 1.0, hw - 0.4, d_street),
+                                           0.95 * smoothstep(2.4, 0.9, d_street)) * (0.75 + 0.25 * clump))
+        # Read as the road: bare of blades across the whole width and trodden soil through the leaf litter
+        # where the street passes under trees (the main road is DirtRoad over a cleared verge the same way).
+        wear = np.maximum(wear, 0.8 * smoothstep(hw + 0.5, hw - 0.9, d_street) * (0.75 + 0.25 * clump))
+        street_bare = smoothstep(hw + 0.3, hw - 0.9, d_street).astype(np.float32)
+        density *= 1.0 - 0.95 * street_bare
+        height *= 1.0 - 0.8 * street_bare
+        trail = np.maximum(trail, smoothstep(hw + 0.9, hw - 0.3, d_street).astype(np.float32))
         (cx, cy), hx, hy = town["square"]["centre"], town["square"]["halfX"], town["square"]["halfY"]
         out = np.maximum(np.abs(X - cx) - hx, np.abs(Y - cy) - hy)
         wear = np.maximum(wear, 0.55 * smoothstep(1.5, -1.0, out) * (0.6 + 0.4 * clump))

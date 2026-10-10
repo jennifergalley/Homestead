@@ -62,7 +62,7 @@ def main():
     town = L.get("town")
     if town:
         street = near_polyline(np.asarray(town["street"]), z.shape, 20.0)
-        w["DirtRoad"] = np.maximum(w["DirtRoad"], 1 - smoothstep(town["streetHalfWidth"] - 0.6, town["streetHalfWidth"] + 0.8, street))
+        w["DirtRoad"] = np.maximum(w["DirtRoad"], 1 - smoothstep(town["streetHalfWidth"] - 0.3, town["streetHalfWidth"] + 1.1, street))
         (cx, cy), hx, hy = town["square"]["centre"], town["square"]["halfX"], town["square"]["halfY"]
         out = np.maximum(np.abs(gxm - cx) - hx, np.abs((cols - H).astype(np.float32) - cy) - hy)
         w["DirtRoad"] = np.maximum(w["DirtRoad"], 1 - smoothstep(-0.5, 1.5, out))

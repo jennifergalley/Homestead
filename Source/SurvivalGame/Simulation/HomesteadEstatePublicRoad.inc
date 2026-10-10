@@ -230,4 +230,4 @@ arrival("Town", -9570.0, -35550.0, 6022.0, 270.0);
 // sign(name, chainage m, x cm, y cm, ground z cm, yaw deg): the face points along yaw
 sign("ManorRoadSign", 71.41, -17294.5, -58730.8, 8499.2, 310.5);
 sign("GatewayRoadSign", 834.00, -5764.7, 10313.7, 5818.8, 122.1);
-sign("TownRoadSign", 268.00, -4859.8, -43525.5, 7384.4, 236.0);
+sign("TownRoadSign", 268.00, -4859.8, -43525.5, 7307.8, 236.0);
