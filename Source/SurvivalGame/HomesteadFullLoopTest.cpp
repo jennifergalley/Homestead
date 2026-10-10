@@ -1259,9 +1259,12 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         [this, RootsBefore, SeedsBefore, WaterBefore, CropWaterStarts, WaterStarts]()
         {
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
+            // Roots' seed bonus is a 25% daily roll since "Keep planting hints visible, reduce
+            // seed returns and add eight crop meals" (249229b0d): 0 or +1, never a fixed +2.
+            const int Seeds = Controller->Simulation().Count(Homestead::Item::Seeds);
             return Plot && !Plot->planted && Plot->growth == 0
                 && Controller->Simulation().Count(Homestead::Item::Roots) == *RootsBefore + 4
-                && Controller->Simulation().Count(Homestead::Item::Seeds) == *SeedsBefore + 2
+                && Seeds >= *SeedsBefore && Seeds <= *SeedsBefore + 1
                 && Controller->Simulation().Count(Homestead::Item::Water) == *WaterBefore
                 && WaterStarts() == *CropWaterStarts
                 && !Controller->ToastIsError();
