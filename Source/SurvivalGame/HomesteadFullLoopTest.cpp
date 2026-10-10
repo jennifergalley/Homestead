@@ -1440,8 +1440,11 @@ void AHomesteadSmokeTest::PrepareFullLoop()
         },
         [this]()
         {
+            // a91565727 (2026-10-03, pre-round-4) made plain-success actions "quiet": they no longer
+            // clear a still-live refusal toast. The prior step deliberately left "Not ready yet" showing,
+            // so this real watering success does not clear it either; the moisture change is the proof.
             const auto* Plot = FindPlot(Controller->State(), GardenPlotId);
-            return Plot && Plot->planted && Plot->moisture > 0.99 && !Controller->ToastIsError();
+            return Plot && Plot->planted && Plot->moisture > 0.99;
         });
     Add(TEXT("Reload retains the exact living crop and no offline progression"),
         [this]() { Tap(EKeys::F9); Tap(EKeys::Gamepad_Special_Left); Tap(EKeys::Gamepad_RightShoulder); },
