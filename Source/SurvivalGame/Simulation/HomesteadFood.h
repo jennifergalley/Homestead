@@ -39,14 +39,14 @@ std::string EstateRefusal(const State& state, Item item);
 std::string EatOnEstate(State& state, Item item);
 
 // What one would do if she ate it now, for the shop and the pack before she eats: "+12 Energy" for a
-// Snack, and on the estate "+40 Energy · Well fed until 2:30 PM" for a Meal (the clock time is now +
-// WellFedHours; the book and shop pause the clock while she reads it). Empty for anything not food.
+// Snack, and on the estate "+40 Energy · Well fed 3 h: work costs 15% less" for a Meal (the numbers
+// come from WellFedWorkFactor and WellFedHours). Empty for anything not food.
 std::string EffectLabel(const State& state, Item item);
 // The pack hover's use line for food: "Food: +12 Energy each. Eat one from your pack.", and for a
-// Meal on the estate "Food: +40 Energy each. Well fed until 2:30 PM. Eat one from your pack." Empty
-// for anything that isn't food.
+// Meal on the estate "Food: +40 Energy each. Well fed: work costs 15% less Energy for 3 h. Eat one from your pack."
+// Empty for anything that isn't food.
 std::string PackUseText(const State& state, Item item);
-// The HUD's Well fed badge: "Well fed until 2:30 PM" while it lasts, otherwise empty.
+// The HUD's Well fed badge: "Well fed until 2:30 PM · work costs 15% less" while it lasts, otherwise empty.
 std::string WellFedBadge(const State& state);
 
 void WriteSaveSection(std::ostream& output, const State& state);

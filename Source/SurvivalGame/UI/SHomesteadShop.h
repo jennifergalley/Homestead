@@ -66,6 +66,8 @@ private:
         // A garment from the Clothing section (a Homestead::WearableDefinition), sold once each.
         int32 Garment = INDEX_NONE;
         bool bOwned = false;
+        // For an iron tool upgrade (also a bUpgrade row): the Homestead::ToolKind it upgrades.
+        int32 Tool = INDEX_NONE;
         FString Header; // Set for section headings, which can't be chosen.
     };
     TWeakObjectPtr<AHomesteadController> Controller;

@@ -11,7 +11,7 @@ namespace HomesteadMenus
 // Her energy and purse, stacked under the calendar at the top-right of the HUD: an icon beside the
 // bar, and the coin beside her balance. The last trade's change fades beside the balance. On the
 // estate there is no hunger, so the single Energy bar stands alone, and while she is Well fed a small
-// "Well fed until 2:30 PM" chip sits under the purse (so nothing above it moves when it comes and
+// "Well fed until 2:30 PM · work costs 15% less" chip sits under the purse (so nothing above it moves when it comes and
 // goes). The seeded woodland keeps its Food bar above Energy.
 class SHomesteadVitals : public SCompoundWidget
 {

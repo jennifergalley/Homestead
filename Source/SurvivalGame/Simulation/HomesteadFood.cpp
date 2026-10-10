@@ -42,11 +42,17 @@ std::string EatOnEstate(State& state, Item item)
     return wasFull ? "Your energy was already full. " + until + "." : energy + " \xC2\xB7 " + until;
 }
 
+namespace
+{
+std::string WellFedSavingText() { return "work costs " + std::to_string(std::lround((1.0 - WellFedWorkFactor) * 100.0)) + "% less"; }
+std::string WellFedHoursText() { return std::to_string(std::lround(WellFedHours)) + " h"; }
+}
+
 std::string EffectLabel(const State& state, Item item)
 {
     const std::string energy = FoodEnergyLabel(item);
     if (energy.empty() || !state.fixedEstate || FoodClassOf(item) != FoodClass::Meal) return energy;
-    return energy + " \xC2\xB7 Well fed until " + FormatHour(state.hour + WellFedHours);
+    return energy + " \xC2\xB7 Well fed " + WellFedHoursText() + ": " + WellFedSavingText();
 }
 
 std::string PackUseText(const State& state, Item item)
@@ -55,13 +61,15 @@ std::string PackUseText(const State& state, Item item)
     const std::string energy = FoodEnergyLabel(item);
     std::string text = energy.empty() ? std::string("Food.") : "Food: " + energy + " each.";
     if (state.fixedEstate && FoodClassOf(item) == FoodClass::Meal)
-        text += " Well fed until " + FormatHour(state.hour + WellFedHours) + ".";
+        text += " Well fed: " + WellFedSavingText() + " Energy for " + WellFedHoursText() + ".";
     return text + " Eat one from your pack.";
 }
 
 std::string WellFedBadge(const State& state)
 {
-    return IsWellFed(state) ? "Well fed until " + FormatHour(state.wellFedUntilHour) : std::string();
+    return IsWellFed(state)
+        ? "Well fed until " + FormatHour(state.wellFedUntilHour) + " \xC2\xB7 " + WellFedSavingText()
+        : std::string();
 }
 
 void WriteSaveSection(std::ostream& output, const State& state)

@@ -6,6 +6,7 @@
 #include "HomesteadCharacter.h"
 #include "HomesteadGeneralStore.h"
 #include "HomesteadShopkeeper.h"
+#include "Simulation/HomesteadOvergrowth.h"
 #include "UI/SHomesteadShop.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
@@ -24,7 +25,7 @@ FString AHomesteadController::GreetingFor(const Homestead::Shop& Shop) const
     const FString Estate = EstateName();
     if (Shop.greetings == 0)
         return FString::Printf(TEXT("Well now, you'll be the new lady up at %s! Josiah Trethewey. Word travels quick in a village "
-            "this size. If it's sold in Cornwall I've likely a shelf of it, and anything you bring down from the estate, "
+            "this size. If it's sold on this coast I've likely a shelf of it, and anything you bring down from the estate, "
             "set it on the counter and I'll give you a fair price."), *Estate);
     const double Hour = FMath::Fmod(State().hour, 24.0);
     const int32 Pick = Shop.greetings % 2;
@@ -112,6 +113,24 @@ Homestead::Result AHomesteadController::ShopBuyBackpack(int32 ShopId)
     const auto Result = Sim.BuyBackpack(ShopId, PlayerPoint());
     UE_LOG(LogTemp, Display, TEXT("SHOP_TRADE upgrade item=leather-backpack ok=%d purse=%lld capacity=%d message=\"%s\""),
         Result.ok ? 1 : 0, static_cast<long long>(State().money), Sim.PackCapacity(), *ShopText(Result.message));
+    if (Result.ok)
+    {
+        LastWalletDelta = State().money - Before;
+        WalletDeltaRemaining = 3.0f;
+        PlayEffect(WoodTapB, Homestead::AudioLevels::Gain::ShopSale);
+    }
+    return Result;
+}
+
+Homestead::Result AHomesteadController::ShopBuyToolUpgrade(int32 ShopId, int32 Tool)
+{
+    if (RejectPendingGroundSnapAction())
+        return {false, "Still finding your footing. Wait a moment.", Homestead::ResultCode::Unavailable, Sim.GetRevision()};
+    const int64 Before = State().money;
+    const auto Result = Sim.BuyToolUpgrade(ShopId, static_cast<Homestead::ToolKind>(Tool), PlayerPoint());
+    UE_LOG(LogTemp, Display, TEXT("SHOP_TRADE upgrade item=iron-%s ok=%d purse=%lld message=\"%s\""),
+        UTF8_TO_TCHAR(Homestead::ToolName(static_cast<Homestead::ToolKind>(Tool))), Result.ok ? 1 : 0,
+        static_cast<long long>(State().money), *ShopText(Result.message));
     if (Result.ok)
     {
         LastWalletDelta = State().money - Before;

@@ -151,8 +151,7 @@ bool AHomesteadController::MenuEntryRow(const Homestead::LayoutEntry& Entry, int
         Row.Name = Row.Label = FromUtf8(Homestead::ItemName(Entry.item));
         Row.Location = CurrentContainer == 0 ? FString(TEXT("Carried")) : ChestDisplayName(CurrentContainer);
         // Hover text: where and how many, what it is and (for food) what eating one now would do: its
-        // Energy each, and for a Meal on the estate until when she'd be Well fed (Homestead::Food::
-        // PackUseText; the book pauses the clock). Stats only, no how-to (Jenny 2026-09-30); the
+        // Energy each, and for a Meal on the estate its Well fed stat (Homestead::Food::PackUseText). Stats only, no how-to (Jenny 2026-09-30); the
         // internal stack id is not shown.
         FString Use = IsFood(Entry.item) ? FromUtf8(Homestead::Food::PackUseText(State(), Entry.item).c_str()) : FString();
         Use.RemoveFromEnd(TEXT(" Eat one from your pack."));

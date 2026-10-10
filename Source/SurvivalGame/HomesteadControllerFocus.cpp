@@ -155,6 +155,14 @@ void AHomesteadController::UpdateFocus()
     }
 }
 
+bool AHomesteadController::IsCropFocused() const
+{
+    if (Focus != EFocus::Plot) return false;
+    for (const auto& Plot : State().plots)
+        if (Plot.id == FocusId) return Plot.planted;
+    return false;
+}
+
 FString AHomesteadController::FocusTitle() const
 {
     switch (Focus)
@@ -333,10 +341,8 @@ FString AHomesteadController::FocusActions() const
         // Food on the hotbar is eaten with A / E (or X / F) when there's nothing else to use them on.
         if (const auto Food = SelectedHotbarFood(); Food != Homestead::Item::Count && Sim.Count(Food) > 0)
         {
-            // Sentence case under the verb, keeping a proper adjective ("Eat Cornish pasty", "Eat baked potato").
-            FString Name = Text(Homestead::ItemName(Food));
-            if (!Name.StartsWith(TEXT("Cornish"))) Name = Name.ToLower();
-            return A + TEXT(" Eat ") + Name;
+            // Sentence case under the verb ("Eat meat pasty", "Eat baked potato").
+            return A + TEXT(" Eat ") + Text(Homestead::ItemName(Food)).ToLower();
         }
         // With the hoe out, a red outline says why the square ahead can't be tilled (UpdateGardenOutline).
         if (ToolAvailable && SelectedTool == Homestead::Item::DiggingStick && !GardenOutlineReason.IsEmpty())

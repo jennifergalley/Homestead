@@ -34,6 +34,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadChests.cpp
     Source/SurvivalGame/Simulation/HomesteadBackpack.cpp
     Source/SurvivalGame/Simulation/HomesteadGarmentShop.cpp
+    Source/SurvivalGame/Simulation/HomesteadToolUpgrades.cpp
     Source/SurvivalGame/Simulation/HomesteadNightLight.cpp
     Source/SurvivalGame/Simulation/HomesteadPackRow.cpp
     Source/SurvivalGame/Simulation/HomesteadSeedStacks.cpp

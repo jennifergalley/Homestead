@@ -18,8 +18,8 @@ HomesteadMap::Vec MmToVec(FVector2D Value) { return {Value.X, Value.Y}; }
 // (0.667 px per unit there, where an 8.5-unit badge had shrunk to under 6 px).
 namespace MmStyle
 {
-constexpr float NearBadge = 12.5f, NearBadgeMinPx = 11.0f;
-constexpr float FarBadge = 9.5f, FarBadgeMinPx = 9.0f;
+constexpr float NearBadge = 20.0f, NearBadgeMinPx = 16.0f;
+constexpr float FarBadge = 15.0f, FarBadgeMinPx = 13.0f;
 constexpr float BadgeGap = 3.0f;
 constexpr float NorthLetter = 11.0f, NorthLetterMinPx = 10.0f;
 constexpr float Arrow = 11.0f, ArrowMinPx = 10.0f;

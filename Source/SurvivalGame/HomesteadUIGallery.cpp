@@ -488,7 +488,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("book-notice-error"), TEXT("Field book error notice: a rust-edged parchment card."),
         ECover::Notice, static_cast<int32>(ENotice::BookNoticeError), nullptr,
         [](AHomesteadController& PC) { PC.OpenBook(0); PC.Notify(TEXT("You can't carry any more. Store something in a chest first."), true); });
-    Add(TEXT("book-item-menu"), TEXT("Pack, a Cornish pasty's item menu: Eat, Move, Drop and the like."), ECover::Dialog, 3, nullptr,
+    Add(TEXT("book-item-menu"), TEXT("Pack, a meat pasty's item menu: Eat, Move, Drop and the like."), ECover::Dialog, 3, nullptr,
         [Later, ToPack](AHomesteadController& Opened)
         {
             ToPack(Opened, Item::Pasty);
@@ -610,7 +610,7 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
     Add(TEXT("hud-energy-exhausted"), TEXT("Energy below 10: the bar a muted red and pulsing, and the 'Exhausted' notice."),
         ECover::Hud, 15, nullptr,
         [](AHomesteadController& PC) { PC.Sim.SetEnergy(6.0); PC.Notify(TEXT("Exhausted"), true); });
-    Add(TEXT("hud-wellfed"), TEXT("Well fed: the pasty chip 'Well fed until …' under the purse, no toast."), ECover::Hud, 4, nullptr,
+    Add(TEXT("hud-wellfed"), TEXT("Well fed: the pasty chip 'Well fed until … · work costs 15% less' under the purse, no toast."), ECover::Hud, 4, nullptr,
         [](AHomesteadController& PC)
         {
             PC.Sim.SetEnergy(55.0);

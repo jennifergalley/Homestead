@@ -59,8 +59,8 @@ FBox2D UHomesteadMapComponent::CompassBox(float ViewWidth, float ViewHeight)
 {
     // Centred on the top row, level with the calendar (HomesteadHudLayout::CalendarTop), and never
     // closer than Gap to the calendar panel at the top-right (AHomesteadHUD::DrawHUD's CalendarX).
-    // The band is 40 units tall; the landmark tokens hang up to 30 below it.
-    constexpr float Top = 26, Height = 70, MaxWidth = 460, MinWidth = 280, Gap = 16, CalendarWidth = 460, Margin = 30;
+    // The band is 40 units tall; the landmark tokens hang up to 44 below it.
+    constexpr float Top = 26, Height = 84, MaxWidth = 460, MinWidth = 280, Gap = 16, CalendarWidth = 460, Margin = 30;
     const float CalendarLeft = FMath::Max(Margin, ViewWidth - Margin - CalendarWidth);
     const float Half = FMath::Min(MaxWidth * 0.5f, FMath::Min(ViewWidth * 0.5f - Margin, CalendarLeft - Gap - ViewWidth * 0.5f));
     if (Half * 2 < MinWidth || ViewHeight < Top + Height) return FBox2D(ForceInit);

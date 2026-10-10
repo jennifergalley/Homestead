@@ -6,7 +6,9 @@
 #include "HomesteadGarmentShop.h"
 #include "HomesteadHoldings.h"
 #include "HomesteadItems.h"
+#include "HomesteadOvergrowth.h"
 #include "HomesteadPail.h"
+#include "HomesteadToolUpgrades.h"
 #include "HomesteadSimulation.h"
 #include "HomesteadTravel.h"
 
@@ -245,7 +247,7 @@ void BuyAndEatAPasty()
     Edit(sim, 40.0, 50.0);
     const auto bought = sim.Buy(store.shop, Item::Pasty, 1, false, store.customer);
     OK(bought);
-    CHECK(bought.message == "Bought 1 Cornish pasty for 100 coins.");
+    CHECK(bought.message == "Bought 1 Meat pasty for 100 coins.");
     CHECK(sim.GetState().money == StartingMoney - 100 && sim.Count(Item::Pasty) == 1);
     const double energy = sim.GetState().energy;
     OK(sim.Eat(Item::Pasty));
@@ -445,6 +447,48 @@ void ClothingAtTheStore()
     OK(reloaded.Deserialize(sim.Serialize()));
     CHECK(reloaded.Serialize() == sim.Serialize());
 }
+
+void IronToolUpgrades()
+{
+    Store store = OpenStore();
+    auto& sim = store.sim;
+    CHECK(ToolUpgrade::IronPrice == 2000);
+    CHECK(ToolUpgrade::Name(ToolKind::Axe) == "Iron axe" && ToolUpgrade::Name(ToolKind::Pail) == "Iron-bound pail");
+    for (int tool = 0; tool < ToolKindCount; ++tool)
+        CHECK(ToolUpgrade::Offered(sim.GetState(), ShopKind::GeneralStore, static_cast<ToolKind>(tool)));
+    CHECK(!ToolUpgrade::Offered(sim.GetState(), ShopKind::Count, ToolKind::Axe));
+    // The tool has to be crafted first.
+    const std::uint64_t revision = sim.GetRevision();
+    const auto unowned = sim.BuyToolUpgrade(store.shop, ToolKind::Axe, store.customer);
+    CHECK(!unowned.ok && unowned.message == "Craft an axe first." && sim.GetRevision() == revision);
+    for (int tool = 0; tool < ToolKindCount; ++tool)
+        OK(sim.GrantItems(ToolItem(static_cast<ToolKind>(tool)), 1));
+    // 1,000 coins isn't enough; nothing changes.
+    const std::uint64_t poorRevision = sim.GetRevision();
+    const auto poor = sim.BuyToolUpgrade(store.shop, ToolKind::Axe, store.customer);
+    CHECK(!poor.ok && poor.message == "That costs 2,000 coins; you have 1,000 coins." && sim.GetRevision() == poorRevision);
+    CHECK(sim.GetToolTier(ToolKind::Axe) == ToolTier::Worn && sim.GetState().money == 1000);
+    // Too far from the counter, or a bad tool, is refused too.
+    OK(sim.GrantMoney(5000));
+    CHECK(!sim.BuyToolUpgrade(store.shop, ToolKind::Axe, {store.counter.x + 5000.0, store.counter.y}).ok);
+    CHECK(!sim.BuyToolUpgrade(store.shop, ToolKind::Count, store.customer).ok);
+    CHECK(sim.GetState().money == 6000);
+    // Each purchase upgrades one tool by one tier and costs 2,000.
+    OK(sim.BuyToolUpgrade(store.shop, ToolKind::Axe, store.customer));
+    CHECK(sim.GetToolTier(ToolKind::Axe) == ToolTier::Iron && sim.GetToolTier(ToolKind::Hoe) == ToolTier::Worn);
+    CHECK(sim.GetState().money == 4000);
+    CHECK(!ToolUpgrade::Offered(sim.GetState(), ShopKind::GeneralStore, ToolKind::Axe));
+    const auto again = sim.BuyToolUpgrade(store.shop, ToolKind::Axe, store.customer);
+    CHECK(!again.ok && sim.GetState().money == 4000);
+    OK(sim.BuyToolUpgrade(store.shop, ToolKind::Hoe, store.customer));
+    CHECK(sim.GetToolTier(ToolKind::Hoe) == ToolTier::Iron && sim.GetState().money == 2000);
+    // Saved and loaded: the tiers are part of the save already.
+    const std::string saved = sim.Serialize();
+    Simulation loaded;
+    loaded.SetPlacements(ProvisionalEstatePlacements());
+    OK(loaded.Deserialize(saved));
+    CHECK(loaded.GetToolTier(ToolKind::Axe) == ToolTier::Iron && loaded.GetToolTier(ToolKind::Pail) ==     ToolTier::Worn);
+    }
 
 void StockSellsDownEachMorning()
 {
@@ -1206,6 +1250,7 @@ int main(int argc, char** argv)
     Run("buy back and pack capacity", BuyBackAndCapacity);
     Run("the leather backpack upgrade", LeatherBackpackUpgrade);
     Run("clothing at the store, worn by swapping", ClothingAtTheStore);
+    Run("iron tool upgrades", IronToolUpgrades);
     Run("her goods sell down each morning", StockSellsDownEachMorning);
     Run("money and shops survive save and reload", EconomySurvivesSaveAndReload);
     Run("no walk to town from town", NoWalkToTownFromTown);

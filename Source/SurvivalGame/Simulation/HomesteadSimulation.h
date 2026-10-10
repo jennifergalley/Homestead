@@ -812,8 +812,9 @@ public:
     // The leather backpack: a one-time upgrade at an open General Store (HomesteadBackpack.h).
     Result BuyBackpack(int shopId, Point player);
     // One garment from the General Store's clothing (HomesteadGarmentShop.h), into her pack.
-    Result BuyGarment(int shopId, WearableDefinition definition, Point player);
-    // Shows or hides the backpack on her back; capacity is unchanged either way.
+    Result BuyGarment(int shopId,     WearableDefinition definition, Point player);
+        // A worn tool upgraded to iron at an open General Store (HomesteadToolUpgrades.h).
+        Result BuyToolUpgrade(int shopId, ToolKind tool, Point player);    // Shows or hides the backpack on her back; capacity is unchanged either way.
     Result SetBackpackShown(bool shown);
     // Counts a shopkeeper greeting (a friendship stub).
     Result GreetShopkeeper(int shopId);
