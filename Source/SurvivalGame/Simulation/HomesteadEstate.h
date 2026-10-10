@@ -32,7 +32,12 @@ constexpr const char* GeneralStoreCounter = "GeneralStoreCounter"; // Where the 
 // Polygons (world XY rings, not closed: the last point joins the first).
 constexpr const char* EstateBoundary = "EstateBoundary";
 constexpr const char* ManorFootprint = "ManorFootprint";
-constexpr const char* ForSaleParcelPrefix = "ForSale."; // ForSale.Woodland, ForSale.MoorField, ...
+constexpr const char* ForSaleParcelPrefix = "ForSale."; // ForSale.TopField, ForSale.CarnWood
+// Reserved land, outlined and named on the map only (no gameplay): neighbouring estates and communal land.
+constexpr const char* NeighbourPrefix = "Neighbour."; // Neighbour.Penhallow, Neighbour.Tregarthen, Neighbour.Polwhele
+constexpr const char* CommonPrefix = "Common."; // Common.VillageGreen, Common.Allotments, Common.ChapelSands, Common.VillageGrowth
+// The playable rectangle: the map sheet and the world's edge.
+constexpr const char* PlayableBounds = "PlayableBounds";
 // The derelict farm behind the manor: an axis-aligned field (a 4-point ring) and the gap of its
 // broken field gate on the fence (yaw faces out of the field).
 constexpr const char* DerelictFarm = "DerelictFarm";
@@ -100,6 +105,9 @@ const EstateLayout& ProvisionalEstateLayout();
 // ones (keep clear of what's already placed), so add sections in id order: berries, then the farm,
 // then the clear-out. Farm-first skipped a quarter of the brambles and failed the simulation tests.
 const EstatePlacements& ProvisionalEstatePlacements();
+// The same table as built before the compact map's retire pass (shrink-estate-map): the save-identity tests hash it to
+// prove the retirement only removes rows. Don't seed a game from it.
+const EstatePlacements& EstatePlacementsBeforeCompactMap();
 // Windfall spots (584000-584199) start with no branch lying there: they are FallenBranch placements that
 // materialise cleared, and the daily upkeep rule (HomesteadUpkeep.cpp) lets the wind drop one on them.
 constexpr int WindfallPlacementIdFirst = 584000;

@@ -1,4 +1,5 @@
 #include "HomesteadEstate.h"
+#include "HomesteadEstatePublicRoad.h"
 #include "HomesteadRuinDebris.h"
 
 #include <algorithm>
@@ -44,8 +45,8 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::StandingRoomOrigin, {-25600.0, -63800.0}, 8652.6, 0.0},
             {Anchor::StandingRoomSpawn, {-25750.0, -63800.0}, 8652.6, -90.0},
             {Anchor::EstateGateway, {-5500.0, 9000.0}, 5632.0, 60.0},
-            {Anchor::CoveBeach, {-65000.0, -51500.0}, 178.0, 215.0},
-            {Anchor::MineEntrance, {-40500.0, -100000.0}, 7224.0, 0.0},
+            {Anchor::CoveBeach, {-47600.0, -61600.0}, 180.0, 200.0},
+            {Anchor::MineEntrance, {-41000.0, -72200.0}, 5225.0, 0.0},
             {Anchor::MillSite, {-11800.0, -9200.0}, 3113.1, 0.0},
             {Anchor::RoadEstateEnd, {-5500.0, 9000.0}, 5632.0, 60.0},
             {Anchor::RoadTownEnd, {-4972.0, -44415.0}, 7423.0, 45.0},
@@ -57,11 +58,8 @@ const EstateLayout& ProvisionalEstateLayout()
         };
         layout.polygons = {
             {Anchor::EstateBoundary,
-                {{16000.0, -115000.0}, {16000.0, -33300.0}, {-6000.0, -33300.0}, {-6000.0, -38000.0},
-                 {-14000.0, -38000.0}, {-14000.0, -28200.0}, {-6000.0, -28200.0}, {-6000.0, -32700.0},
-                 {16000.0, -32700.0}, {16000.0, -25000.0}, {6000.0, -3000.0}, {-4000.0, 11000.0},
-                 {-20000.0, -5000.0}, {-35000.0, -21000.0}, {-52000.0, -32000.0}, {-76000.0, -43000.0},
-                 {-76000.0, -115000.0}}},
+                {{6000.0, -88000.0}, {6000.0, -60000.0}, {-4000.0, -50500.0}, {-7000.0, -47000.0},
+                 {-38000.0, -47000.0}, {-56000.0, -45000.0}, {-72000.0, -45000.0}, {-72000.0, -88000.0}}},
             // The ruin is 18 x 30 m; the 6 x 6 m standing room is its carved-out south-east corner.
             {Anchor::ManorFootprint,
                 {{-24100.0, -66500.0}, {-24100.0, -63500.0}, {-25300.0, -63500.0}, {-25300.0, -64100.0},
@@ -70,12 +68,28 @@ const EstateLayout& ProvisionalEstateLayout()
             // (about 4 degrees, 5.5 m of relief), 25 m or more off the road.
             {Anchor::DerelictFarm,
                 {{-22200.0, -70500.0}, {-22200.0, -64500.0}, {-16200.0, -64500.0}, {-16200.0, -70500.0}}},
-            {std::string(Anchor::ForSaleParcelPrefix) + "Woodland",
-                {{16000.0, -90000.0}, {60000.0, -90000.0}, {60000.0, -25000.0}, {16000.0, -25000.0}}},
-            {std::string(Anchor::ForSaleParcelPrefix) + "MoorField",
-                {{60000.0, -150000.0}, {100000.0, -150000.0}, {100000.0, -90000.0}, {60000.0, -90000.0}}},
-            {std::string(Anchor::ForSaleParcelPrefix) + "WestCove",
-                {{16000.0, -160000.0}, {16000.0, -115000.0}, {-76000.0, -115000.0}, {-76000.0, -160000.0}}},
+            // Jenny's compact map (Scripts/Terrain/compact_map.py, shrink-estate-map): two plots for sale beside
+            // the estate, then reserved land that the map outlines and names but nothing else uses.
+            {std::string(Anchor::ForSaleParcelPrefix) + "TopField",
+                {{7000.0, -103000.0}, {19000.0, -103000.0}, {19000.0, -60000.0}, {7000.0, -60000.0}}},
+            {std::string(Anchor::ForSaleParcelPrefix) + "CarnWood",
+                {{-52000.0, -113000.0}, {6000.0, -113000.0}, {6000.0, -89000.0}, {-52000.0, -89000.0}}},
+            {std::string(Anchor::NeighbourPrefix) + "Penhallow",
+                {{20000.0, -113000.0}, {54000.0, -113000.0}, {54000.0, -60000.0}, {20000.0, -60000.0}}},
+            {std::string(Anchor::NeighbourPrefix) + "Tregarthen",
+                {{-52000.0, -135000.0}, {20000.0, -135000.0}, {20000.0, -114000.0}, {-52000.0, -114000.0}}},
+            {std::string(Anchor::NeighbourPrefix) + "Polwhele",
+                {{-64000.0, -34000.0}, {-38000.0, -34000.0}, {-38000.0, 15000.0}, {-64000.0, 15000.0}}},
+            {std::string(Anchor::CommonPrefix) + "VillageGreen",
+                {{-14000.0, -25500.0}, {-6000.0, -25500.0}, {-6000.0, -19500.0}, {-14000.0, -19500.0}}},
+            {std::string(Anchor::CommonPrefix) + "Allotments",
+                {{-26500.0, -38500.0}, {-19500.0, -38500.0}, {-19500.0, -30000.0}, {-26500.0, -30000.0}}},
+            {std::string(Anchor::CommonPrefix) + "ChapelSands",
+                {{-77000.0, -39000.0}, {-65000.0, -39000.0}, {-65000.0, -28000.0}, {-77000.0, -28000.0}}},
+            {std::string(Anchor::CommonPrefix) + "VillageGrowth",
+                {{-21500.0, -45500.0}, {1500.0, -45500.0}, {1500.0, -20500.0}, {-21500.0, -20500.0}}},
+            {Anchor::PlayableBounds,
+                {{-90000.0, -136000.0}, {56000.0, -136000.0}, {56000.0, 16000.0}, {-90000.0, 16000.0}}},
         };
         return layout;
     }();
@@ -95,7 +109,7 @@ Point EstateManorFrontDoor(const EstateLayout& layout)
     return {south, west + 1050.0};
 }
 
-const EstatePlacements& ProvisionalEstatePlacements()
+const EstatePlacements& EstatePlacementsBeforeCompactMap()
 {
     static const EstatePlacements Placements = []
     {
@@ -126,7 +140,9 @@ const EstatePlacements& ProvisionalEstatePlacements()
         // valley falls south toward the cove. Everything stays outside ManorFootprint.
         int next = 510001;
         auto grow = [&](ResourceKind kind, double dx, double dy, int minTier = 0) { add(next++, kind, dx, dy, minTier); };
-        const Point cove = ProvisionalEstateLayout().PointOr(Anchor::CoveBeach, {room.x - 1.0, room.y});
+        // The valley's heading toward the old cove anchor (-65000, -51500), frozen when the cove moved closer
+        // (shrink-estate-map) so the opening overgrowth and its ids stay where they are.
+        const Point cove{-65000.0, -51500.0};
         const auto unit = [&](Point to) {
             const double x = to.x - room.x, y = to.y - room.y, length = std::sqrt(x * x + y * y);
             return length > 0 ? Point{x / length, y / length} : Point{1.0, 0.0};
@@ -334,7 +350,38 @@ const EstatePlacements& ProvisionalEstatePlacements()
             table.placements.push_back({id, ResourceKind::FallenBranch, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateWindfallPlacements.inc"
+        // Compact-map top-up (585000-585299, Scripts/Terrain/compact_placements.py; shrink-estate-map): fellable trees
+        // in her smaller estate's woods and forage beside her paths, last of all with the same 3 m rule.
+        auto topUp = [&](int id, ResourceKind kind, double x, double y)
+        {
+            for (const EstatePlacement& other : table.placements)
+                if ((other.position.x - x) * (other.position.x - x) + (other.position.y - y) * (other.position.y - y) < 300.0 * 300.0)
+                    return;
+            table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
+        };
+#include "HomesteadEstateCompactPlacements.inc"
         // Town lane (530000+).
+        return table;
+    }();
+    return Placements;
+}
+
+const EstatePlacements& ProvisionalEstatePlacements()
+{
+    // The compact map (shrink-estate-map) retires what its bay, sand and new paths displaced and everything off
+    // the smaller estate. It filters the whole built table, so no row's proximity skip changes: every surviving
+    // id keeps its kind and position, and retired ids are never reused.
+    static const EstatePlacements Placements = []
+    {
+        EstatePlacements table = EstatePlacementsBeforeCompactMap();
+        std::vector<int> retiredIds;
+        auto retired = [&](int id) { retiredIds.push_back(id); };
+#include "HomesteadEstateRetiredPlacements.inc"
+        std::sort(retiredIds.begin(), retiredIds.end());
+        const EstateLayout& layout = ProvisionalEstateLayout();
+        table.placements.erase(std::remove_if(table.placements.begin(), table.placements.end(), [&](const EstatePlacement& placement)
+            { return std::binary_search(retiredIds.begin(), retiredIds.end(), placement.id) || !EstatePlacementAllowed(layout, placement); }),
+            table.placements.end());
         return table;
     }();
     return Placements;

@@ -1,6 +1,7 @@
 // add-ruined-manor-and-arrival: the heritage standing room, the reserved manor footprint and the
 // new-game names. Kept apart from HomesteadSimulationTests so it builds and runs in seconds.
 #include "HomesteadEstate.h"
+#include "HomesteadEstatePublicRoad.h"
 #include "HomesteadManor.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadRuinDebris.h"
@@ -424,7 +425,9 @@ void DerelictFarmAndDisrepair()
     {
         const EstatePlacement& placement = placements[i];
         if (placement.id < 550000 || placement.id >= 560000) continue;
-        CHECK(PointInPolygon(boundary, placement.position) && !PointInPolygon(manor, placement.position));
+        // On the estate, or the drive's verge overgrowth past where the compact map's estate now ends.
+        CHECK((PointInPolygon(boundary, placement.position) || IsDriveVergeOvergrowth(placement))
+            && !PointInPolygon(manor, placement.position));
         const OvergrowthInfo* info = FindOvergrowth(placement.kind);
         CHECK(info != nullptr && placement.kind != ResourceKind::SalvagePile);
         worn += info && info->minTier == ToolTier::Worn;
@@ -543,7 +546,9 @@ std::uint64_t PlacementHashWithout(int skippedId, int& count)
     std::uint64_t hash = UINT64_C(14695981039346656037);
     count = 0;
     char line[256];
-    for (const auto& p : ProvisionalEstatePlacements().placements)
+    // The table as built before the compact map retires rows (shrink-estate-map), so the hash still proves no older
+    // id, kind or spot moved.
+    for (const auto& p : EstatePlacementsBeforeCompactMap().placements)
     {
         // The rack, and the later forage sections appended after it was pinned (roadside 581000-581999,
         // woods and hedges 582100-582299, the lake trail 582300-582399, the ruin's fallen roof timbers
@@ -551,7 +556,8 @@ std::uint64_t PlacementHashWithout(int skippedId, int& count)
         // (moved 4.5 m off the village street, id and kind unchanged), so the hash still covers exactly
         // the placements older saves know.
         if (p.id == skippedId || (p.id >= 581000 && p.id < 582000) || (p.id >= 582100 && p.id < 582400)
-            || (p.id >= 583000 && p.id < 584200) || p.id == 582012 || p.id == 582013 || p.id == 540012) continue;
+            || (p.id >= 583000 && p.id < 584200) || (p.id >= 585000 && p.id < 585300) || p.id == 582012 || p.id == 582013
+            || p.id == 540012) continue;
         std::snprintf(line, sizeof line, "%d %d %.3f %.3f %.3f %.3f %.3f %d\n", p.id, static_cast<int>(p.kind),
             p.position.x, p.position.y, p.z, p.yaw, p.scale, p.minTier);
         for (const char* c = line; *c; ++c) { hash ^= static_cast<unsigned char>(*c); hash *= UINT64_C(1099511628211); }
@@ -568,14 +574,24 @@ void ToolRackIsSaveSafe()
     int count = 0;
     const std::uint64_t before = PlacementHashWithout(520006, count);
     CHECK(count == 2196 && before == UINT64_C(11063124984521852634));
+    // The compact map only retires rows (shrink-estate-map): every live placement is the same row as before it.
+    {
+        const auto& was = EstatePlacementsBeforeCompactMap().placements;
+        for (const auto& p : ProvisionalEstatePlacements().placements)
+        {
+            const auto it = std::find_if(was.begin(), was.end(), [&](const EstatePlacement& q) { return q.id == p.id; });
+            CHECK(it != was.end() && it->kind == p.kind && it->position.x == p.position.x && it->position.y == p.position.y);
+        }
+    }
     const auto& all = ProvisionalEstatePlacements().placements;
     // The rack is the last placement but for the lake trail's forage (582300-582399), the woodland forage
-    // (583000-583199) and the windfall spots (584000-584199), appended after it.
+    // (583000-583199), the windfall spots (584000-584199) and the compact map's top-up (585000-585299), appended after it.
     std::size_t rackAt = all.size();
     for (std::size_t i = 0; i < all.size(); ++i)
         if (all[i].id == 520006) rackAt = i;
     CHECK(rackAt < all.size() && all[rackAt].kind == ResourceKind::SalvagePile);
-    for (std::size_t i = rackAt + 1; i < all.size(); ++i) CHECK((all[i].id >= 582300 && all[i].id < 582400) || (all[i].id >= 583000 && all[i].id < 584200));
+    for (std::size_t i = rackAt + 1; i < all.size(); ++i) CHECK((all[i].id >= 582300 && all[i].id < 582400) || (all[i].id >= 583000 && all[i].id < 584200)
+        || (all[i].id >= 585000 && all[i].id < 585300));
     const Point rack = all[rackAt].position;
     CHECK(PointInPolygon(ProvisionalEstateLayout().FindPolygon(Anchor::ManorFootprint)->points, rack));
     for (const auto& other : all)

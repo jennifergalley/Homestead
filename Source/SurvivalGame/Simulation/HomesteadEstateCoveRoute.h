@@ -141,12 +141,12 @@ constexpr double CoveRouteMinRiseCm = 15.0;
 constexpr double CoveRouteMaxRiseCm = 17.0;
 constexpr double CoveRouteMinGoingCm = 30.0;
 constexpr double CoveRouteMaxGoingCm = 35.0;
-constexpr int CoveRouteMaxRisers = 12;
+constexpr int CoveRouteMaxRisers = 24;
 constexpr double CoveRouteMinLandingCm = 120.0;
 constexpr double CoveRouteClearWidthCm = 140.0;
 constexpr double CoveRouteTreadWidthCm = 150.0;
 constexpr double CoveRouteCornerHalfCm = 75.0;   // cove_route.py CORNER_HALF_M
 constexpr double CoveRouteGroundSampleCm = 75.0;
 // The route's own limit: steeper than this is on steps.
-constexpr double CoveRouteMaxPathGrade = 1.0 / 7.0;
+constexpr double CoveRouteMaxPathGrade = 1.0 / 5.0;
 }

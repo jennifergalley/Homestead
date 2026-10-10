@@ -26,10 +26,13 @@ def c(rgb):
 
 
 def buildings():
-    town = json.load(open(LAYOUT)).get("town")
+    layout = json.load(open(LAYOUT))
+    town = layout.get("town")
     if not town:
         raise RuntimeError("estate_layout.json has no \"town\": run Scripts/Terrain/town_layout.py first.")
-    return town["buildings"]
+    # The labourers' cottages along the road out of the village (Scripts/Terrain/road_cottages.py) use the same
+    # building actor; their pads are graded, so they snap to level ground like the square's.
+    return town["buildings"] + layout.get("roadCottages", [])
 
 
 def load_town():

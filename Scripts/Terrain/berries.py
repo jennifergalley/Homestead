@@ -11,6 +11,8 @@ Output (committed): Source/SurvivalGame/Simulation/HomesteadEstateBerryPlacement
 `berry(id, x, y)` in cm (x north, y east). ProvisionalEstatePlacements skips any row that lands within
 3 m of an earlier placement, so ids stay stable when other lanes add placements.
 Deterministic (fixed seed). Needs the terrain work folder (HOMESTEAD_TERRAIN_WORK, see scatter.py).
+Its rows are save identity and the compact map (shrink-estate-map) shrank the boundary it reads: re-running it
+now would move ids. Retire or append rows instead (compact_placements.py).
 """
 import json, os, re
 import numpy as np
@@ -21,6 +23,7 @@ from skimage.measure import points_in_poly
 from scatter import HERE, ROOT, WORK, H, weights, sample, densify
 
 FIRST_ID = 540000
+STREET_CLEAR_M = 6.0      # from the village street's centre line and the square's edge
 
 
 def main():
@@ -56,6 +59,12 @@ def main():
     def trees_within(p, r):
         return np.array([len(n) for n in trees.query_ball_point(p, r)])
 
+    # The village's street and square (town_layout.py), kept clear of brambles.
+    town = L["town"]
+    street = cKDTree(densify(town["street"], 1.0))
+    square_c = np.array(town["square"]["centre"])
+    square_half = np.array([town["square"]["halfX"], town["square"]["halfY"]])
+
     def slope_at(p):
         r = np.clip(np.round(H - p[:, 0]).astype(int), 0, slope.shape[0] - 1)
         c = np.clip(np.round(H + p[:, 1]).astype(int), 0, slope.shape[1] - 1)
@@ -87,6 +96,10 @@ def main():
         keep &= overgrowth.query(p)[0] > 2.8
         # Brambles need light: no trunk within 4 m.
         keep &= trees.query(p)[0] > 4.0
+        # Off the village street and square (round-4 carry-over: 540012 once landed on the street).
+        keep &= street.query(p)[0] > STREET_CLEAR_M
+        keep &= ~((np.abs(p[:, 0] - square_c[0]) < square_half[0] + STREET_CLEAR_M)
+                  & (np.abs(p[:, 1] - square_c[1]) < square_half[1] + STREET_CLEAR_M))
         return keep
 
     chosen = []

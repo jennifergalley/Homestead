@@ -69,6 +69,20 @@ class EstateBeachTests(unittest.TestCase):
         west = set(np.unique(parts[:12][walk[:12]]))                       # the west boundary end
         self.assertTrue(east & west, "no walkable sand connects the headland to the west boundary")
 
+    def test_cove_to_beach(self):
+        """Walkable sand runs from the foot of the cove steps round the bay onto the long beach (shrink-estate-map)."""
+        cx, cy = self.layout["landmarks"]["CoveBeach"][:2]
+        y0, y1 = int(self.y_west), int(cy) + 40
+        sub = self.z[y0 + H:y1 + H + 1, X_WINDOW[0] + H:X_WINDOW[1] + H + 1]
+        gy, gx = np.gradient(sub)
+        high = maximum_filter(sub, size=3) > self.top + 0.6
+        walk = (sub >= self.swash - 0.02) & (sub <= self.top + 0.5) & ~high & (np.hypot(gx, gy) < WALK_SLOPE)
+        parts, _ = label(walk, structure=np.ones((3, 3)))
+        r, c = int(cy) - y0, int(cx) - X_WINDOW[0]
+        foot = set(np.unique(parts[r - 6:r + 7, c - 6:c + 7][walk[r - 6:r + 7, c - 6:c + 7]]))
+        west = set(np.unique(parts[:12][walk[:12]]))
+        self.assertTrue(foot & west, "no walkable sand from the cove steps' foot to the west end of the beach")
+
     def test_no_scarps(self):
         """No bank steeper than 1 in 2.9 in the sand or across the swash zone (above 1.5 m under the sea)."""
         zone = (self.sub >= -1.5) & (self.sub <= self.top + 0.5)

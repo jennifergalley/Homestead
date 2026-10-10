@@ -60,41 +60,31 @@ SIZE, H = 4033, 2016
 # "sharp": a path corner kept as it is (a path otherwise rounds its corners).
 CONTROL = [
     (-260.5, -654.5, "path"),     # outside the fallen front door on the ruin's south front
-    (-280.0, -647.0, "path"),
-    (-290.0, -637.0, "path"),
-    (-342.0, -611.0, "path"),     # first switchback
-    (-344.0, -651.0, "path"),
-    (-363.0, -673.0, "path"),
-    (-372.0, -676.0, "path"),     # second switchback
-    (-389.0, -662.0, "path"),
-    (-404.0, -632.0, "path"),
-    (-431.0, -607.0, "path"),
-    (-460.0, -580.0, "path"),
-    (-461.0, -541.0, "path"),     # third switchback, at the head of the valley side
-    (-493.0, -557.0, "stairs"),   # head of the cliff steps (fingerpost)
-    (-511.0, -548.0, "stairs"),
-    (-526.0, -533.0, "stairs"),
-    (-536.0, -511.0, "path"),     # a bench above the valley floor
-    (-524.0, -487.0, "stairs"),
-    (-521.0, -480.0, "path"),     # the foot of the bench steps, on the valley floor
-    # The path runs straight on 1.2 m off the flight's foot, then 2.4 m out to the side, before doubling
-    # back, so it passes 3 m or more off the flight's axis with its rail between (review, 2026-09-30: it ran
-    # under the treads).
-    (-520.5, -478.9, "path", "sharp"),
-    (-522.7, -478.0, "path", "sharp"),
-    (-538.0, -487.0, "stairs"),
-    (-543.0, -492.0, "path"),     # the foot of the last steps, onto the sand
-    (-556.0, -521.0, None),       # the sand at the head of the cove, west of the river mouth
+    (-285.0, -647.0, "path"),
+    (-330.0, -636.0, "path"),     # down the opening valley, between its overgrowth
+    (-375.0, -632.0, "path"),
+    (-392.8, -639.9, "path", "sharp"),   # the last 5 m straight on in line with the first flight
+    (-396.0, -636.0, "stairs"),   # head of the cliff steps on the bay's rim (fingerpost)
+    # A level platform at each switchback down the bay head's wall (shrink-estate-map): the path runs straight on
+    # 1.2 m off the flight's foot, then 3.5 m out to the side, so it never crosses the flight's rail.
+    (-428.0, -597.0, "path"),
+    (-428.95, -596.07, "path", "sharp"),
+    (-431.66, -598.29, "stairs"),
+    (-455.0, -640.0, "path"),
+    (-455.59, -641.05, "path", "sharp"),
+    (-459.08, -639.10, "stairs"),
+    (-473.0, -618.0, "path"),     # the foot of the last steps, onto the sand
+    (-476.0, -616.0, None),       # the sand at the head of the bay
 ]
 
-MAX_PATH_GRADE = 1.0 / 7.0       # a steep Cornish coast path, still walked without steps
+MAX_PATH_GRADE = 1.0 / 5.0       # a steep Cornish coast path down the natural slope, still walked without steps
 DESIGN_MARGIN = 0.97             # paths are designed this far inside the limit (chords on curves read steeper)
-STAIR_GRADE = (0.20, 0.42)       # a stair leg's mean fall per metre (flights and landings together)
+STAIR_GRADE = (0.20, 0.48)       # a stair leg's mean fall per metre (flights and landings together)
 RISE_M = (0.15, 0.17)            # Props' kit (add-cove-route-kit design.md)
 GOING_M = (0.30, 0.35)
 RAIL_PITCHES_DEG = (26.0, 28.0, 30.0)
 PITCH_TOLERANCE_DEG = 1.0        # a flight's pitch is within this of a raked rail bay's
-MAX_RISERS = 12
+MAX_RISERS = 24                  # a landing at least every 24 steps (Balance: every 20-25, shrink-estate-map)
 MIN_RISERS = 3
 LANDING_M = (1.2, 3.0)           # between flights
 MAX_HEAD_LANDING_M = 4.0         # a flat landing at the head of a stair leg takes any length left over

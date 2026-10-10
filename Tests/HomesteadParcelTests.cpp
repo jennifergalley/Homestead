@@ -148,7 +148,10 @@ void ParcelsComeFromTheLayout()
     CHECK(provisional.size() >= 2 && provisional[0].owned);
     for (std::size_t i = 1; i < provisional.size(); ++i) CHECK(provisional[i].forSale && !provisional[i].owned);
     CHECK(InOwnedParcel(provisional, layout.PointOr(Anchor::StandingRoomSpawn, {})));
-    CHECK(InOwnedParcel(provisional, layout.PointOr(Anchor::MillSite, {})));
+    // The compact map (shrink-estate-map): her cove and the mine ruin are hers; the mill by the ford is past the village.
+    CHECK(InOwnedParcel(provisional, layout.PointOr(Anchor::CoveBeach, {})));
+    CHECK(InOwnedParcel(provisional, layout.PointOr(Anchor::MineEntrance, {})));
+    CHECK(!InOwnedParcel(provisional, layout.PointOr(Anchor::MillSite, {})));
     CHECK(!InOwnedParcel(provisional, layout.PointOr(Anchor::TownSquare, {})));
     // The town road meets the estate drive at its junction, inside the owned land; the square is outside it.
     // Turned footprints report their true corners.

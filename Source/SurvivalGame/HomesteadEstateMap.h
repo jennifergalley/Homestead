@@ -18,7 +18,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map")
     TObjectPtr<UTexture2D> Texture;
-    // South-west corner (X south edge, Y west edge) and extent of the mapped world, in Unreal cm.
+    // South-west corner (X south edge, Y west edge) and extent of the mapped world, in Unreal cm, written by
+    // Homestead.ImportEstateMap from T_EstateMap.json (since shrink-estate-map, the PlayableBounds sheet). Keep
+    // these defaults: an asset whose values equal them doesn't store them, so changing them would move its sheet.
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map")
     FVector2D WorldMin = FVector2D(-201600.0, -201600.0);
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Map")

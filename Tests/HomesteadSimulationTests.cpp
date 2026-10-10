@@ -4659,12 +4659,16 @@ void OvergrowthTableAndPrompts()
         CHECK(placement.kind == ResourceKind::BerryBush);
         CHECK(PointInPolygon(boundary, placement.position) && !PointInPolygon(manor, placement.position));
         ++berries;
-        berriesByDoor += std::hypot(placement.position.x - frontDoor.x, placement.position.y - frontDoor.y) < 2000.0;
         for (const auto& other : all)
             if (other.id != placement.id)
                 CHECK(std::hypot(other.position.x - placement.position.x, other.position.y - placement.position.y) >= 300.0);
     }
-    CHECK(berries >= 36 && berriesByDoor >= 2);
+    // Any bramble counts toward the two by the door: the compact map's top-up (585200+) replaced one its cove path
+    // displaced, and the smaller estate keeps fewer of the first brambles (shrink-estate-map).
+    for (const auto& placement : all)
+        berriesByDoor += placement.kind == ResourceKind::BerryBush
+            && std::hypot(placement.position.x - frontDoor.x, placement.position.y - frontDoor.y) < 2000.0;
+    CHECK(berries >= 28 && berriesByDoor >= 2);
     Simulation estate;
     OK(estate.NewEstateGame(layout, ProvisionalEstatePlacements()));
 }
@@ -5165,9 +5169,11 @@ void RuinTimbersAreChoppedWithTheAxe()
     for (std::size_t i = 0; i < table.size(); ++i)
         if (table[i].id == 520006) rackAt = i;
     CHECK(firstTimber > lastForage && firstTimber < rackAt && rackAt < table.size());
-    // Only the lake trail's forage (582300-582399), the woodland forage and the windfall spots (583000-584199) come after the rack.
+    // Only the lake trail's forage (582300-582399), the woodland forage and the windfall spots (583000-584199) and the
+    // compact map's top-up (585000-585299) come after the rack.
     for (std::size_t i = rackAt + 1; i < table.size(); ++i)
-        CHECK((table[i].id >= 582300 && table[i].id < 582400) || (table[i].id >= 583000 && table[i].id < 584200));
+        CHECK((table[i].id >= 582300 && table[i].id < 582400) || (table[i].id >= 583000 && table[i].id < 584200)
+            || (table[i].id >= 585000 && table[i].id < 585300));
     Simulation sim;
     OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
     for (int id : {582012, 582013})
@@ -5711,9 +5717,11 @@ void MvpWoodlandPlacements()
         brambles += placement.kind == ResourceKind::BrambleThin || placement.kind == ResourceKind::BrambleThicket;
         nearest = std::min(nearest, std::hypot(placement.position.x - spawn.x, placement.position.y - spawn.y));
     }
-    CHECK(trees >= 150 && branches >= 30 && berries >= 20 && roots >= 20);
+    // Most of the MVP wood is in Carn Wood, for sale beside the compact map's skinnier estate (shrink-estate-map); its
+    // eastern edge stays hers.
+    CHECK(trees >= 30 && branches >= 5 && berries >= 5 && roots >= 5);
     // The MVP's blocking brambles are clearable overgrowth here.
-    CHECK(brambles >= 100);
+    CHECK(brambles >= 50);
     // West of the manor, about a minute's walk: the region's near edge is some 200 m out.
     CHECK(nearest > 15000.0 && nearest < 30000.0);
     Simulation estate;

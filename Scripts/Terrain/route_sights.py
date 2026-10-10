@@ -2,6 +2,7 @@
 
     python Scripts\\Terrain\\route_sights.py            # report gaps only
     python Scripts\\Terrain\\route_sights.py --bake     # add 'RS1' flower drifts and re-report
+    python Scripts\\Terrain\\route_sights.py --top-up   # keep the RS1 drifts there are; add drifts only in the gaps left
 
 A sight is a forage point, a flower clump, a fingerpost, a landmark or a bridge within SIGHT_RADIUS_M of a
 route. A sprint is 4.8 m/s, so a gap over MAX_GAP_M is more than about ten seconds with nothing to look at.
@@ -73,7 +74,8 @@ def routes(layout):
         "Town spur (junction to store)": spur,
         "Cove route": densify(cove[::5]),
         "Lake path": densify(layout["lake"]["path"]),
-        "Manor to mine": densify([manor, land["MineEntrance"][:2]]),
+        "Manor to mine": densify(next((p["points"] for p in layout.get("footpaths", []) if p.get("name") == "Mine"),
+                                      [manor, land["MineEntrance"][:2]])),
         "Manor to mill": densify([manor, land["MillSite"][:2]]),
     }
 
@@ -221,11 +223,13 @@ def village_flowers(layout, rng, habitat):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--bake", action="store_true")
+    parser.add_argument("--top-up", action="store_true", help="keep existing RS1 drifts; fill only the gaps left "
+                        "(the compact map's estate is smaller than the drifts the full bake planted outside it)")
     args = parser.parse_args()
     layout = json.loads((HERE / "estate_layout.json").read_text(encoding="utf-8"))
     scenery = read_scenery()
-    base = scenery[scenery["pad"] != TAG]
-    if args.bake:
+    base = scenery if args.top_up else scenery[scenery["pad"] != TAG]
+    if args.bake or args.top_up:
         import sys
         sys.path.insert(0, str(HERE))
         import estate_wildflowers as wf
@@ -239,7 +243,8 @@ def main():
             arr = np.array(fill(route, spans, rng, habitat), dtype=RECORD)
             records.append(arr)
             found = np.r_[found, np.c_[arr["x"], arr["y"]] / 100.0]
-        records.append(np.array(village_flowers(layout, rng, habitat), dtype=RECORD))
+        if not args.top_up:
+            records.append(np.array(village_flowers(layout, rng, habitat), dtype=RECORD))
         extra = np.concatenate(records) if records else np.array([], dtype=RECORD)
         result = np.r_[base, extra]
         SCENERY.write_bytes(b"HSC1" + struct.pack("<I", len(result)) + result.tobytes())

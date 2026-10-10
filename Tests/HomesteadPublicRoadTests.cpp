@@ -339,10 +339,11 @@ int main()
             Check(EstatePlacementAllowed(estateLayout, placement), "roadside row allowed", placement.id);
         }
     }
-    Check(estateBrambles >= 25, "at least 25 more estate brambles", estateBrambles);
+    // The compact map (shrink-estate-map) retired the rows off the smaller estate; its top-up adds others (585200+).
+    Check(estateBrambles >= 15, "at least 15 more estate brambles", estateBrambles);
     Check(roadsideNodes >= 4 && roadsideBrambles >= 1, "roadside forage stops", roadsideNodes);
     Check(farthest > 800.0, "roadside forage reaches the road's far end", farthest);
-    Check(brambles.size() >= 125, "about 130 pickable brambles in all", static_cast<double>(brambles.size()));
+    Check(brambles.size() >= 90, "about 100 pickable brambles in all", static_cast<double>(brambles.size()));
     // The new rows keep 3 m from every placement (the table's skip rule) and 8 m from each other.
     for (size_t i = 0; i < added.size(); ++i)
     {
@@ -353,8 +354,9 @@ int main()
             crowded += Distance(other.position, added[i]) < 300.0;
         Check(crowded == 1, "new forage 3 m clear of other placements", static_cast<double>(i));
     }
-    // Coverage: a pickable bramble within 120 m of the road at every 400 m mark (0-850 m).
-    for (double metres = 0.0; metres <= road.Length(); metres += 400.0)
+    // Coverage: a pickable bramble within 120 m of the road at the estate's end of the drive and the road's far
+    // end (the stretch past the village has left the smaller estate, shrink-estate-map).
+    for (const double metres : {0.0, road.Length()})
     {
         double nearest = 1e300;
         for (const Point& b : brambles) nearest = std::min(nearest, Distance(b, road.At(metres)));
@@ -531,13 +533,14 @@ int main()
             Check(besidePath >= 10 && deeper >= 4, "lake-trail forage beside the path and deeper in", besidePath);
             Check(left >= 6 && right >= 6, "lake-trail forage on both sides", left);
         }
-        Check(moreBrambles >= 45, "more estate brambles", moreBrambles);
-        Check(moreRoots >= 22, "more estate root patches", moreRoots);
+        // The smaller estate keeps the abundance pass's rows on its land (shrink-estate-map).
+        Check(moreBrambles >= 10, "more estate brambles", moreBrambles);
+        Check(moreRoots >= 5, "more estate root patches", moreRoots);
         (void)moreRoadsideRoots;
         // By zone, across every section of the table (the manor's berries, the MVP wood, the forage passes).
         Check(manorGrounds >= 38, "food round the manor (under 150 m)", manorGrounds);
-        Check(nearWoods >= 180, "food in the near woods and fields (150-450 m)", nearWoods);
-        Check(farEstate >= 55, "food in the far woods and fields (over 450 m)", farEstate);
+        Check(nearWoods >= 80, "food in the near woods and fields (150-450 m)", nearWoods);
+        (void)farEstate;   // the compact map's estate reaches only about 450 m from the manor (shrink-estate-map)
         Check(alongRoad >= 1, "food along the public road", alongRoad);
         // Coverage: from almost anywhere on the estate, food within 150 m (it was 85% before this pass).
         int cells = 0, covered = 0;
@@ -553,7 +556,7 @@ int main()
                         break;
                     }
             }
-        Check(cells > 1000 && covered >= 0.9 * cells, "food within 150 m of 90% of the estate", cells ? 100.0 * covered / cells : 0.0);
+        Check(cells > 300 && covered >= 0.9 * cells, "food within 150 m of 90% of the estate", cells ? 100.0 * covered / cells : 0.0);
 
         // An old save from before these rows loads them fresh and ready, keeps its own edits, and they pick and grow.
         EstatePlacements old;
@@ -571,7 +574,8 @@ int main()
         Check(before.NewEstateGame(estateLayout, old).ok, "pre-abundance game");
         const EstatePlacement* oldBramble = nullptr;
         for (const EstatePlacement& placement : old.placements)
-            if (placement.id == 582100) oldBramble = &placement;
+            if (!oldBramble && placement.id >= 582100 && placement.id < MoreEstateFoodFirstId && placement.kind == ResourceKind::BerryBush)
+                oldBramble = &placement;
         Check(oldBramble && before.Harvest(oldBramble->id, oldBramble->position).ok, "picked an older bramble");
         Simulation after;
         after.SetLayout(estateLayout);
@@ -599,19 +603,40 @@ int main()
         auto manifest = [&](int id, ResourceKind kind, double x, double y) { frozen.push_back({id, kind, {x, y}}); };
 #include "Data/HomesteadForageManifest.inc"
         Check(frozen.size() >= 59, "frozen forage rows", static_cast<double>(frozen.size()));
+        // The compact map (shrink-estate-map) may retire a row (its bay and paths displaced it, or it's off the smaller
+        // estate), never move it or change its kind; a retired id is never reused.
+        std::vector<int> retiredIds;
+        auto retired = [&](int id) { retiredIds.push_back(id); };
+#include "HomesteadEstateRetiredPlacements.inc"
+        std::vector<Frozen> live;
         for (const Frozen& row : frozen)
         {
             const EstatePlacement* now = nullptr;
             for (const EstatePlacement& placement : ProvisionalEstatePlacements().placements)
                 if (placement.id == row.id) now = &placement;
-            Check(now && now->kind == row.kind && Distance(now->position, row.at) < 0.05, "a frozen forage row moved, changed kind or vanished", row.id);
+            const EstatePlacement was{row.id, row.kind, row.at, 0.0, 0.0, 1.0, 0};
+            const bool isRetired = std::find(retiredIds.begin(), retiredIds.end(), row.id) != retiredIds.end()
+                || !EstatePlacementAllowed(estateLayout, was);
+            Check(now ? now->kind == row.kind && Distance(now->position, row.at) < 0.05 : isRetired,
+                  "a frozen forage row moved, changed kind or vanished", row.id);
+            if (now) live.push_back(row);
         }
+        Check(live.size() >= 30, "frozen forage rows still on the estate", static_cast<double>(live.size()));
+        frozen = live;
         Simulation sim;
         Check(sim.NewEstateGame(estateLayout, ProvisionalEstatePlacements()).ok, "forage save game");
         std::vector<int> picked;
+        bool bramble = false, rootPatch = false, roadsideStop = false;
         for (const Frozen& row : frozen)
-            if (picked.size() < 3 && (row.id == 582128 || row.id == 581000 || row.id == 582100))
-                if (sim.Harvest(row.id, row.at).ok) picked.push_back(row.id);
+        {
+            const bool roadsideRow = row.id >= PublicRoadsideFirstId && row.id < PublicRoadsideEndId;
+            bool& want = roadsideRow ? roadsideStop : row.kind == ResourceKind::BerryBush ? bramble : rootPatch;
+            if (!want && sim.Harvest(row.id, row.at).ok)
+            {
+                want = true;
+                picked.push_back(row.id);
+            }
+        }
         Check(picked.size() == 3, "picked a bramble, a root patch and a roadside stop", static_cast<double>(picked.size()));
         const std::string saved = sim.Serialize();
         Simulation loaded;
