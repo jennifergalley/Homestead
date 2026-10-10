@@ -4,15 +4,16 @@ the cove, with granite steps where the valley side is too steep for a path (add-
 The route is designed, not searched, each run: CONTROL holds its turning points and what kind of way leaves
 each one. They were found with `--search` (a grade-aware least-cost search over the heightfield: paths at
 1 in 7 or gentler, steps where steeper, a penalty on turns so it makes long traverses and a few real
-switchbacks, and 2.6 m clear of the interactive trees and big stones) and then eased by hand.
+switchbacks, and 2.6 m clear of the interactive trees and big stones) and then eased by hand. The compact map's
+route (shrink-estate-map) was laid by hand down the new bay's east wall: 278 m, 350 steps, paths up to 1 in 5.
 
 - A "path" leg is a graded earth path, no steeper than MAX_PATH_GRADE, following the ground as closely as
   that allows (the least-worst profile between its ends, as road_grade.py does for the road).
 - A "stairs" leg is straight and becomes flights of granite steps (Props' add-cove-route-kit: rise 15-17 cm,
-  going 30-35 cm, at most 12 risers, the flight pitched within a degree of the kit's 26/28/30 degree raked
+  going 30-35 cm, at most MAX_RISERS risers, the flight pitched within a degree of the kit's 26/28/30 degree raked
   rails) with landings of at least 1.2 m between them and a square landing where two stair legs meet.
 - The heights where legs meet are solved together (least squares to the ground, within each leg's limits),
-  so the steps take the steep valley side and the paths never exceed 1 in 7: every drop steeper than a path
+  so the steps take the steep valley side and the paths never exceed MAX_PATH_GRADE: every drop steeper than a path
   is on steps with a rail (the final descent to the beach is never an exposed dirt slope).
 - The heightfield is cut to the design: the path's bed, and a few centimetres under every tread and landing
   (TREAD_CLEARANCE_M), blending back to the ground over a short verge.
