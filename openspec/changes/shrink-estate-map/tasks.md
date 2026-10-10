@@ -8,4 +8,6 @@ Stage 1 shipped in the 2026-10-04 9 PM build: the village about 300 m north-east
 
 ## 2. Compact map (stage 2)
 
-- [ ] 2.1 Deliver the revised layout (design decisions 1-8; layout v3 approved by Jenny 2026-10-10): closer cove whose sand joins the long beach, mine ruin on the clifftop with its path, ~25 ha estate, village river path and roadside cottages, cropped map and playable edge, and named outlines for neighbours, communal land and for-sale plots. Player check: sprint manor to cove sand and to the mine within 60 s each, walk from the cove onto the long beach, and read the outlines on the map; farm, pond and store trips feel unchanged.
+- [x] 2.1 Deliver the revised layout (design decisions 1-8; layout v3 approved by Jenny 2026-10-10): closer cove whose sand joins the long beach, mine ruin on the clifftop with its path, ~25 ha estate, village river path and roadside cottages, cropped map and playable edge, and named outlines for neighbours, communal land and for-sale plots. Player check: sprint manor to cove sand and to the mine within 60 s each, walk from the cove onto the long beach, and read the outlines on the map; farm, pond and store trips feel unchanged.
+
+Verified in PIE 2026-10-10: cove 58.2 s down / 58.9 s up, mine 33.4 s, the whole beach walked from the cove, outlines read on the map; Jenny approved the review media and Balance OK'd it.
