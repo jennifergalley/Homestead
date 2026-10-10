@@ -461,6 +461,14 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-10T06:15:57.852Z"
+    },
+    {
+      "id": "jenny-mv2n34ss-mcpath",
+      "title": "[Balance] Mine–cove link path",
+      "description": "Source: Balance Agent, docs/design/balance.md §9 travel (stage 2, 2026-10-10). A woodland/coastal path joining the mine and the cove so a manor → mine → cove → manor loop takes about 3 minutes.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-10T16:59:32.236Z"
     }
   ]
 }
