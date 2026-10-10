@@ -382,6 +382,11 @@ const EstatePlacements& ProvisionalEstatePlacements()
         table.placements.erase(std::remove_if(table.placements.begin(), table.placements.end(), [&](const EstatePlacement& placement)
             { return std::binary_search(retiredIds.begin(), retiredIds.end(), placement.id) || !EstatePlacementAllowed(layout, placement); }),
             table.placements.end());
+        // Round 4 (shrink-estate-map): the compact map retired parcels/placements and shrank
+        // PlayableBounds without migrating pre-shrink saves (parcel purchases on retired land are
+        // dropped with no refund, and buildings outside the new bounds become unreachable). Bump the
+        // bake version so old saves are rejected cleanly instead of silently losing player state.
+        table.bakeVersion = 3;
         return table;
     }();
     return Placements;
