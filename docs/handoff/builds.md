@@ -7,11 +7,12 @@ Delivery is work-driven: the planner's Next build ships as soon as its admitted 
 reviewed, then Build after next moves up. Lanes implement only what Jenny has prioritized for a planner
 slot, then go idle; they do not pick up unflagged queue items.
 
-## 2026-10-04 — 7:27:40 PM
+## 2026-10-04 — 7:27 PM
 
 - Build ID: `20261004-next-01`
 - Package source SHA: `7bbab1c5175b23fd012c8ad1f5a134d81c93d487`
-- Status: delivered (Development)
+- Status: delivered
+- Configuration: Development
 - Ships:
 - The village is about 63 seconds' sprint from the manor, with its square, beach, and route flowers.
 - Estate trees can be felled and regrow away from home and protected landmarks.
@@ -43,7 +44,8 @@ slot, then go idle; they do not pick up unflagged queue items.
 
 - Build ID: `20261009-next-01`
 - Package source SHA: `75b7307fa2767609d76b5ce3244a4e93c34d6efa`
-- Status: delivered (Development)
+- Status: delivered
+- Configuration: Development
 - Ships:
 - Brambles, weeds and branches regrow around the manor and farm.
 - More berry bushes and roots in the estate woods, with a distinct bush look and `[E] Pick Berries`.
@@ -58,8 +60,8 @@ slot, then go idle; they do not pick up unflagged queue items.
 - A smoother, graded village street, plus village dressing: cobbled square, well, benches, hedges,
   cottage gardens, flowers and a noticeboard placeholder.
 - No Pascoe or Cornwall in-game; the store is Trethewey's General Store, Mr. Trethewey the clerk,
-  and the meat pasty keeps its display name.
-- Well fed says what it does: work costs 15% less Energy for 3 hours.
+  and the Cornish pasty is now the Meat pasty.
+- Well fed now states its benefit (work costs 15% less Energy for 3 hours).
 - Admitted lanes: Gameplay (`8fa4e3cc8`), Wardrobe + modern clothing (`b11107ccb`, `25ff298c8`),
   Upkeep (`caf5eb525`), Fishing (`cfefbcc44`), Village (`8bdc73636`), plus orphaned Balance docs
   (`04a57e644`, `d2211552c`, and the three files cherry-picked from `origin/jennifergalley-balance-agent`

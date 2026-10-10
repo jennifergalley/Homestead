@@ -453,6 +453,14 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-10T05:25:01.004Z"
+    },
+    {
+      "id": "jenny-mv203hr0-wfclip",
+      "title": "Well fed HUD badge text clips",
+      "description": "Found by Integration in the 2026-10-09 build's UI-gallery pass (hud-wellfed): the badge text \"Well fed until 2:30 PM · work costs 15% less\" clips against the chip's right border. Widen the chip or shorten the text.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-10T06:15:57.852Z"
     }
   ]
 }
