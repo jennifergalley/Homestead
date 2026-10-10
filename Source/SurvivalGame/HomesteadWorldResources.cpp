@@ -16,20 +16,20 @@
 
 namespace HomesteadWorldResourceLook
 {
-// Estate blackberry brambles (BerryBush): the fruiting bramble at about 1 m, with ripe clusters
-// scaled out onto the crown. The clusters go when she picks.
-constexpr float BerryBrambleScale = 0.8f;
-constexpr int32 BerryBrambleFruit = 3;
-constexpr float BerryFruitOffset = 24.0f, BerryFruitScale = 1.5f, BerryFruitLift = 20.0f;
+// Estate berry bushes (BerryBush): a wild red currant (SM_WildCurrant, about 1 m across) with three
+// sectors of ripe red strings (SM_CurrantProduce, one 120-degree sector each) that go one at a time
+// when she picks. Distinct from the bramble look on purpose. Authored by
+// Scripts/Blender/Recipes/wild_currant.py and currant_produce.py.
+constexpr float CurrantBushScale = 1.0f;
+constexpr int32 CurrantProduceSectors = 3;
+constexpr float CurrantSectorYawStep = 360.0f / CurrantProduceSectors;
 }
 
 using HomesteadWorldCommon::IsMvpWoodlandId;
 using HomesteadWorldLook::Stone;
-using HomesteadWorldResourceLook::BerryBrambleScale;
-using HomesteadWorldResourceLook::BerryBrambleFruit;
-using HomesteadWorldResourceLook::BerryFruitOffset;
-using HomesteadWorldResourceLook::BerryFruitScale;
-using HomesteadWorldResourceLook::BerryFruitLift;
+using HomesteadWorldResourceLook::CurrantBushScale;
+using HomesteadWorldResourceLook::CurrantProduceSectors;
+using HomesteadWorldResourceLook::CurrantSectorYawStep;
 
 void AHomesteadWorld::HideHeldProducePart(int32 Index)
 {
@@ -112,9 +112,10 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         return Mesh;
     };
     // bPivotGround: the mesh is authored part-sunk with its pivot on the ground line, so place the pivot,
-    // not the lowest point, on the terrain.
+    // not the lowest point, on the terrain. bPivotOrigin: place the mesh's own origin on the node rather
+    // than its bounds centre, for pieces authored to share one pivot (a bush and its berry sectors).
     auto Authored = [&](UStaticMesh* Mesh, FVector2D Offset, float Yaw, bool bProduce, float Scale = 1.0f, float Lift = 0.0f,
-        bool bPivotGround = false)
+        bool bPivotGround = false, bool bPivotOrigin = false)
     {
         if (bProduce != bProduceOnly || !Mesh) return;
         const FBox Bounds = Mesh->GetBoundingBox();
@@ -125,7 +126,8 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             return;
         }
         const FRotator Rotation(0, Yaw, 0);
-        const FVector Anchor(Bounds.GetCenter().X, Bounds.GetCenter().Y, bPivotGround ? 0.0 : Bounds.Min.Z);
+        const FVector Anchor(bPivotOrigin ? 0.0 : Bounds.GetCenter().X, bPivotOrigin ? 0.0 : Bounds.GetCenter().Y,
+            bPivotGround ? 0.0 : Bounds.Min.Z);
         FVector Ground = AtGround(Base.X + Offset.X, Base.Y + Offset.Y) + FVector(0, 0, Lift);
         // Soft ground cover (weeds, nettles, tall grass) sits on the soil actually drawn under its whole
         // clump, so none of it hovers on a slope or where the Landscape differs from the heightfield.
@@ -291,7 +293,7 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
     case Homestead::ResourceKind::BerryBush:
         if (Node.id >= Homestead::EstatePlacementIdBase && Node.id < Homestead::TransientResourceIdBase)
         {
-            // Estate: a fruiting blackberry bramble hung with ripe clusters that go when she picks them.
+            // Estate: a wild red-currant bush hung with ripe red strings that go when she picks them.
             auto Load = [&](const TCHAR* Folder, const TCHAR* Name) -> UStaticMesh*
             {
                 auto* Mesh = LoadObject<UStaticMesh>(nullptr,
@@ -299,20 +301,16 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
                 if (!Mesh)
                 {
                     bVisualBuildFailed = true;
-                    UE_LOG(LogHomesteadWorld, Error, TEXT("Berry bramble %d is missing authored mesh %s"), Node.id, Name);
+                    UE_LOG(LogHomesteadWorld, Error, TEXT("Berry bush %d is missing authored mesh %s"), Node.id, Name);
                 }
                 return Mesh;
             };
             const float Yaw = static_cast<float>(Variation % 360);
-            Authored(Load(TEXT("BlackberryBramble"), TEXT("SM_BlackberryBramble")), FVector2D::ZeroVector, Yaw, false,
-                BerryBrambleScale * Random.FRandRange(0.95f, 1.08f));
-            UStaticMesh* Fruit = Load(TEXT("BerryBushProduce"), TEXT("SM_BerryBushProduce"));
-            for (int I = 0; I < BerryBrambleFruit && Fruit; ++I)
-            {
-                const float Angle = FMath::DegreesToRadians(Yaw + I * 137.5f);
-                Authored(Fruit, FVector2D(FMath::Cos(Angle), FMath::Sin(Angle)) * BerryFruitOffset, Yaw + I * 97.0f, true,
-                    BerryFruitScale, Fruit->GetBoundingBox().Min.Z * BerryFruitScale + BerryFruitLift);
-            }
+            const float BushScale = CurrantBushScale * Random.FRandRange(0.9f, 1.12f);
+            Authored(Load(TEXT("WildCurrant"), TEXT("SM_WildCurrant")), FVector2D::ZeroVector, Yaw, false, BushScale, 0.0f, true, true);
+            UStaticMesh* Fruit = Load(TEXT("CurrantProduce"), TEXT("SM_CurrantProduce"));
+            for (int I = 0; I < CurrantProduceSectors && Fruit; ++I)
+                Authored(Fruit, FVector2D::ZeroVector, Yaw + I * CurrantSectorYawStep, true, BushScale, 0.0f, true, true);
             break;
         }
         for (int I = 0; I < 3; ++I)

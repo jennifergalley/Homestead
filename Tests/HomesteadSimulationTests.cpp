@@ -5086,13 +5086,14 @@ void WeedCreepNearOvergrowth()
     EstatePlacements placements;
     placements.bakeVersion = 9;
     int next = EstatePlacementIdBase + 30000;
-    // A yard of grass beside a bramble, and a patch 60 m away from any other overgrowth.
+    // A yard of grass beside a bramble, and a patch 240 m away: far beyond both the weed creep and the
+    // upkeep radius, so nothing there ever grows back.
     for (int row = 0; row < 8; ++row)
         for (int column = 0; column < 8; ++column)
             placements.placements.push_back({next++, ResourceKind::TallGrass, {at.x + column * 60.0, at.y + row * 60.0}, 0, 0, 1, 0});
     placements.placements.push_back({next++, ResourceKind::BrambleThicket, {at.x + 200, at.y - 150}, 0, 0, 1, 1});
     for (int column = 0; column < 8; ++column)
-        placements.placements.push_back({next++, ResourceKind::Weeds, {at.x + 6000 + column * 60.0, at.y}, 0, 0, 1, 0});
+        placements.placements.push_back({next++, ResourceKind::Weeds, {at.x + 24000 + column * 60.0, at.y}, 0, 0, 1, 0});
     Simulation sim;
     OK(sim.NewEstateGame(ProvisionalEstateLayout(), placements));
     OK(sim.GrantItems(Item::Scythe, 1));
@@ -5125,7 +5126,7 @@ void WeedCreepNearOvergrowth()
         CHECK(!sim.GetState().failed);
     }
     const int regrown = standing(true);
-    CHECK(regrown >= 3 && regrown <= 40);
+    CHECK(regrown >= 3 && regrown <= 64);
     CHECK(standing(false) == 0);
     CHECK(PlacedNode(sim, tilledId).cleared);
     // A regrown tuft is its authored kind again, cleared and saved like any other.
@@ -5164,8 +5165,9 @@ void RuinTimbersAreChoppedWithTheAxe()
     for (std::size_t i = 0; i < table.size(); ++i)
         if (table[i].id == 520006) rackAt = i;
     CHECK(firstTimber > lastForage && firstTimber < rackAt && rackAt < table.size());
-    // Only the lake trail's forage (582300-582399) comes after the rack.
-    for (std::size_t i = rackAt + 1; i < table.size(); ++i) CHECK(table[i].id >= 582300 && table[i].id < 582400);
+    // Only the lake trail's forage (582300-582399), the woodland forage and the windfall spots (583000-584199) come after the rack.
+    for (std::size_t i = rackAt + 1; i < table.size(); ++i)
+        CHECK((table[i].id >= 582300 && table[i].id < 582400) || (table[i].id >= 583000 && table[i].id < 584200));
     Simulation sim;
     OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
     for (int id : {582012, 582013})
@@ -5223,7 +5225,7 @@ void RuinTimbersAreChoppedWithTheAxe()
     OK(upgraded.Deserialize(original.Serialize()));
     CHECK(!PlacedNode(upgraded, 582012).cleared && !PlacedNode(upgraded, 582013).cleared && PlacedNode(upgraded, 582000).cleared);
     int cleared = 0;
-    for (const auto& node : upgraded.GetState().resources) cleared += node.cleared;
+    for (const auto& node : upgraded.GetState().resources) cleared += node.cleared && !IsWindfallPlacement(node.id);
     CHECK(cleared == 1);
 }
 

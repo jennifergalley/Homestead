@@ -1,6 +1,8 @@
 #include "HomesteadTreeFelling.h"
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
+#include "HomesteadOvergrowth.h"
+#include "HomesteadSimulationDetail.h"
 
 #include <algorithm>
 #include <cmath>
@@ -66,6 +68,7 @@ const FelledTree* Find(const State& state, Point tree)
 Stage StageOf(const FelledTree& entry, double hour)
 {
     const double age = hour - entry.fellHour;
+    if (entry.cleared) return Stage::Cleared;
     if (!entry.regrows) return Stage::Stump;
     if (age >= RegrowHours) return Stage::Standing;
     return age >= StumpHours ? Stage::Sapling : Stage::Stump;
@@ -78,6 +81,8 @@ Stage StageOf(const State& state, Point tree)
 }
 
 bool Regrows(Point tree) { return HomeDistance(tree) >= RegrowFromHomeCm; }
+
+double HomeDistanceCm(Point point) { return HomeDistance(point); }
 
 const char* ProtectedReason(Point tree)
 {
@@ -113,7 +118,8 @@ void WriteSaveSection(std::ostream& output, const State& state)
     if (state.felledTrees.empty()) return;
     output << SaveTag << ' ' << state.felledTrees.size();
     for (const FelledTree& entry : state.felledTrees)
-        output << ' ' << entry.xCm << ' ' << entry.yCm << ' ' << entry.fellHour << ' ' << (entry.regrows ? 1 : 0);
+        output << ' ' << entry.xCm << ' ' << entry.yCm << ' ' << entry.fellHour << ' '
+               << (entry.cleared ? 2 : entry.regrows ? 1 : 0);
     output << '\n';
 }
 
@@ -126,11 +132,12 @@ bool ReadSaveSection(std::istream& input, State& state)
     for (int index = 0; index < count; ++index)
     {
         FelledTree entry;
-        int regrows = 0;
-        if (!(input >> entry.xCm >> entry.yCm >> entry.fellHour >> regrows) || (regrows != 0 && regrows != 1)
+        int state = 0;
+        if (!(input >> entry.xCm >> entry.yCm >> entry.fellHour >> state) || state < 0 || state > 2
             || !std::isfinite(entry.fellHour) || std::abs(entry.xCm) > 1000000 || std::abs(entry.yCm) > 1000000
             || (!entries.empty() && !Before(entries.back(), entry.xCm, entry.yCm))) return false;
-        entry.regrows = regrows == 1;
+        entry.regrows = state == 1;
+        entry.cleared = state == 2;
         entries.push_back(entry);
     }
     state.felledTrees = std::move(entries);
@@ -169,5 +176,65 @@ Result Simulation::FellSceneryTree(Point tree, Point player)
     candidate.inventory[static_cast<int>(Item::Timber)] += 6;
     candidate.inventory[static_cast<int>(Item::Branch)] += 4;
     return Exert(Exertion::FellEnergy, CommitInventory(std::move(candidate), "Tree felled."));
+}
+
+namespace
+{
+double ClearStumpCost(const Simulation& sim)
+{
+    return Exertion::ClearStumpEnergy * TierEnergyFactor(sim.GetToolTier(ToolKind::Axe));
+}
+}
+
+Result Simulation::CheckClearSceneryStump(Point tree, Point player) const
+{
+    const auto refuse = [this](const char* text) { return Result{false, text, ResultCode::Invalid, revision_}; };
+    if (state_.failed) return refuse("You need to recover. Load your recent checkpoint to continue.");
+    if (!state_.fixedEstate) return refuse("There is no stump here to clear.");
+    if (Count(Item::Hatchet) == 0) return refuse("Craft an axe before clearing stumps.");
+    if (!std::isfinite(tree.x) || !std::isfinite(tree.y)
+        || std::hypot(tree.x - player.x, tree.y - player.y) > TreeFelling::ReachCm) return refuse("Move closer to clear this stump.");
+    const auto* entry = TreeFelling::Find(state_, tree);
+    if (!entry || TreeFelling::StageOf(*entry, state_.hour) == TreeFelling::Stage::Standing) return refuse("There is no stump here to clear.");
+    if (entry->cleared) return refuse("This ground is already cleared.");
+    if (entry->regrows) return refuse("This far from home the stump grows back on its own.");
+    if (auto ready = CheckExertion(ClearStumpCost(*this)); !ready) return ready;
+    return {true, "", ResultCode::None, revision_};
+}
+
+Result Simulation::ClearSceneryStump(Point tree, Point player)
+{
+    if (const auto check = CheckClearSceneryStump(tree, player); !check) return check;
+    State candidate = state_;
+    const int x = TreeFelling::Cm(tree.x), y = TreeFelling::Cm(tree.y);
+    const auto at = std::lower_bound(candidate.felledTrees.begin(), candidate.felledTrees.end(), 0,
+        [x, y](const FelledTree& other, int) { return other.xCm < x || (other.xCm == x && other.yCm < y); });
+    at->cleared = true;
+
+    // Rolled from the trunk position so a clear never depends on hidden RNG state.
+    const int id = x * 73856 ^ y * 19349;
+    Inventory yield{};
+    const int firewoodSpread = TreeFelling::ClearStumpFirewoodMax - TreeFelling::ClearStumpFirewoodMin + 1;
+    yield[static_cast<int>(Item::Firewood)] = TreeFelling::ClearStumpFirewoodMin + Overgrowth::StableRoll(id, 0) % firewoodSpread;
+    yield[static_cast<int>(Item::Kindling)] = TreeFelling::ClearStumpKindling;
+
+    std::string gained, dropped;
+    int room = Homestead::PackCapacity(candidate) - Detail::PackUsed(candidate);
+    for (int i = 0; i < ItemCount; ++i)
+    {
+        if (yield[i] <= 0) continue;
+        const Item item = static_cast<Item>(i);
+        const int fits = std::max(0, std::min({yield[i], room, Homestead::PackCapacity(candidate) - candidate.inventory[i]}));
+        candidate.inventory[i] += fits;
+        room -= fits;
+        gained += (gained.empty() ? "" : ", ") + std::to_string(yield[i]) + " " + ItemName(item);
+        if (const int left = yield[i] - fits; left > 0 && Detail::AddWorldDrop(candidate, tree, item, left))
+            dropped += (dropped.empty() ? "" : ", ") + std::to_string(left) + " " + ItemName(item);
+    }
+    std::string message = "Cleared the stump: +" + gained + ".";
+    if (!dropped.empty()) message = "Pack full: " + dropped + " left on the ground.";
+    auto done = Exert(ClearStumpCost(*this), CommitInventory(std::move(candidate), message.c_str()));
+    if (done.ok && !dropped.empty()) done.code = ResultCode::PackOverflow;
+    return done;
 }
 }

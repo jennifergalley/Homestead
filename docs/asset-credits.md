@@ -55,6 +55,12 @@ Thimbleberry, BrackenFern, WildStrawberry, GrassYarrowTuft, WildMarjoram and Net
 code and every leaf, flower, berry and bark texture is painted procedurally with numpy by that
 library. No scan, photo or third-party texture is used.
 
+The wild currant bush and its berry strings (`Assets\Props\` WildCurrant and CurrantProduce, imported to
+`Content/SurvivalGame/Environment/Props/<Name>/`; recipes `Scripts\Blender\Recipes\wild_currant.py` and
+`currant_produce.py`, built on `homestead_shrub.py` and `homestead_foliage.py`) are project-authored: the
+geometry is generated from code and every leaf, berry and bark texture is painted procedurally with numpy.
+No scan, photo or third-party texture is used.
+
 The Cornish woodland trees and shrubs (`Assets\Props\` Oak, Beech, Sycamore, Hawthorn, Holly and
 HazelCoppice, imported to
 `Content/SurvivalGame/Environment/Trees/<Name>/SM_<Name>`; recipes in `Scripts\Blender\Recipes\`, grown

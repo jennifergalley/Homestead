@@ -44,7 +44,7 @@ constexpr const TCHAR* DitherRadii[] = {TEXT("NearRadiusCm"), TEXT("CorridorRadi
 bool IsSwayingShrub(const UStaticMesh* Mesh)
 {
     static const FName Names[] = {TEXT("SM_BlackberryBramble"), TEXT("SM_BlackberryBrambleLarge"), TEXT("SM_ToyonHedge"),
-        TEXT("SM_DeerBrush"), TEXT("SM_Thimbleberry")};
+        TEXT("SM_DeerBrush"), TEXT("SM_Thimbleberry"), TEXT("SM_WildCurrant")};
     if (!Mesh) return false;
     for (const FName& Name : Names)
         if (Mesh->GetFName() == Name) return true;

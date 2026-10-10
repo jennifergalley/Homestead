@@ -12,7 +12,8 @@
 // are the village's and can't be felled. Growth rates beyond this fixed schedule are deferred.
 namespace Homestead::TreeFelling
 {
-// Optional trailing save section: "felled <count>" then count entries "<xCm> <yCm> <fellHour> <regrows 0|1>".
+// Optional trailing save section: "felled <count>" then count entries "<xCm> <yCm> <fellHour> <state>", where
+// state is 0 for a permanent stump, 1 for a stump that grows back and 2 for a permanent stump she has cleared.
 constexpr const char* SaveTag = "felled";
 // How close the trunk must be to chop it, cm (Simulation's Reach is 300; the underbrush's is 450).
 constexpr double ReachCm = 450.0;
@@ -24,10 +25,14 @@ constexpr double RegrowFromHomeCm = 6000.0;
 // Trees this close to the public road's centreline, or to the town square, can't be felled, cm.
 constexpr double RoadVergeCm = 900.0;
 constexpr double TownSquareCm = 4500.0;
+// Clearing a near-home stump yields what the small stump does (Overgrowth table): firewood and kindling.
+constexpr int ClearStumpFirewoodMin = 2, ClearStumpFirewoodMax = 3;
+constexpr int ClearStumpKindling = 1;
 // Bounds the save (a dense wood would take weeks to clear this many).
 constexpr int MaxFelled = 4096;
 
-enum class Stage { Standing, Stump, Sapling };
+// Cleared: a permanent stump she has axed out to bare ground; the standing tree stays gone.
+enum class Stage { Standing, Stump, Sapling, Cleared };
 
 int Cm(double value);
 const FelledTree* Find(const State& state, Point tree);
@@ -42,6 +47,8 @@ const char* ProtectedReason(Point tree);
 double NextChangeHour(const State& state);
 // Removes entries that have regrown.
 void Prune(State& state);
+// Distance from the manor footprint or the derelict farm, cm (the home that stumps stay near and upkeep tends).
+double HomeDistanceCm(Point point);
 
 void WriteSaveSection(std::ostream& output, const State& state);
 bool ReadSaveSection(std::istream& input, State& state);
