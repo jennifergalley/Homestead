@@ -38,6 +38,37 @@ STYLES = {
 }
 
 
+def knit(s_cm, t_cm, wales_per_cm, courses_per_cm, seed=0, rib=False):
+    """Weft-knit jersey (stockinette): each wale is a column of V-shaped loops whose two legs lean
+    out toward the head of the loop. ``rib`` sinks every other wale (1x1 rib). Returns height
+    [0,1] and tone."""
+    ws, ct = s_cm * wales_per_cm, t_cm * courses_per_cm
+    i = np.floor(ws); fu = ws - i - 0.5
+    j = np.floor(ct); fv = ct - j
+    fu = fu + 0.06 * (T.vnoise1(ct * 0.4 + i * 2.3, seed + 3) - 0.5)
+    x0 = 0.11 + 0.15 * fv
+    leg = np.exp(-((np.abs(fu) - x0) / 0.10) ** 2)
+    h = leg * (0.72 + 0.28 * np.sin(np.pi * fv))
+    tone = 0.95 + 0.08 * T.hash1(i * 31.0 + j * 7.0, seed + 5)
+    if rib:
+        raised = np.mod(i, 2) == 0
+        h = np.where(raised, h, 0.30 * h)
+        tone = tone * np.where(raised, 1.0, 0.84)
+    return h, tone
+
+
+def grain(s_cm, t_cm, seed=0, scale=9.0):
+    """Pebbled leather grain: domain-warped value noise gives soft rounded pebbles with fine
+    creases between them, plus pores. Returns height [0,1]."""
+    w1 = T.vnoise1(t_cm * scale * 0.7 + 3.1, seed) * 2.2
+    w2 = T.vnoise1(s_cm * scale * 0.7 - 1.7, seed + 1) * 2.2
+    n1 = T.vnoise1(s_cm * scale + w1, seed + 2)
+    n2 = T.vnoise1(t_cm * scale + w2, seed + 3)
+    peb = 1 - np.abs(n1 + n2 - 1.0)
+    pores = T.hash1(np.floor(s_cm * 70) * 13.7 + np.floor(t_cm * 70) * 5.3, seed + 4) > 0.97
+    return np.clip(peb ** 1.5 - 0.25 * pores, 0, 1)
+
+
 def twill(s_cm, t_cm, warp_per_cm, weft_per_cm, seed=0, period=None):
     """2/2 twill of hand-spun woollen yarn: warp floats over two picks, stepping one thread per
     pick, which makes the diagonal rib. Returns height [0,1], warp-on-top, tone, slub."""
@@ -97,6 +128,23 @@ def _seam_height(style, d, a, w, seed, H, col):
         g1 = T.vnoise1(warp_a * 0.75, seed + 35) - 0.5
         g2 = T.vnoise1(warp_a * 1.9 + d * 0.4, seed + 37) - 0.5
         H += (0.55 * g1 + 0.22 * g2) * (1 - T.smoothstep(d, w * 0.5, w + 2.2))
+    elif style == "cover":
+        # knit hem turned up and coverstitched: a flat band with a soft fold at the edge
+        band = 1 - T.smoothstep(d, w - 0.08, w + 0.04)
+        fold = np.sqrt(np.clip(1 - (d / 0.3) ** 2, 0, 1))
+        H += 0.18 * band + 0.20 * fold
+    elif style == "band":
+        # a flat sewn-on waistband (jeans) or knit elastic band (leggings)
+        band = 1 - T.smoothstep(d, w - 0.1, w + 0.05)
+        fold = np.sqrt(np.clip(1 - (d / 0.4) ** 2, 0, 1))
+        H += 0.26 * band + 0.25 * fold
+        H -= 0.16 * np.exp(-((d - w) / 0.07) ** 2)
+    elif style == "zip":
+        band = 1 - T.smoothstep(d, w - 0.04, w + 0.03)
+        teeth = 0.5 + 0.5 * np.sin(2 * np.pi * a / 0.32)
+        H += band * (0.25 + 0.45 * teeth)
+        tape = T.smoothstep(d, w, w + 0.05) * (1 - T.smoothstep(d, w + 0.55, w + 0.65))
+        H += 0.08 * tape
     elif style == "gather":
         # tiny stroked gathers either side of a gathering seam
         pl = np.sin(2 * np.pi * (a / 0.22 + 0.4 * T.vnoise1(a * 0.8, seed + 38)))
@@ -107,6 +155,7 @@ def _seam_height(style, d, a, w, seed, H, col):
 def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, seed=0, log=print,
                   eyelets=None, patch=None):
     st = STYLES[obj.name]
+    st.setdefault("fabric", "linen")
     R = R_out * supersample
     me = obj.data
     uvt, vt = _tri_data(me)
@@ -134,6 +183,8 @@ def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, s
     base = np.array(st["base"])
     thread_col = np.array(st["thread"])
     wool = st["fabric"] == "wool"
+    fabric = st["fabric"]
+    rough_clip = st.get("rough_clip", (0.80, 0.97))
     albedo = np.zeros((R, R, 3), np.float32)
     height = np.zeros((R, R), np.float32)
     rough = np.zeros((R, R), np.float32)
@@ -149,7 +200,37 @@ def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, s
         sub = T.upsample2(F2[a0:a1])[(y0 - 2 * a0):(y0 - 2 * a0) + (y1 - y0)]
         m = macro[y0:y1]
         xyz = sub[..., ixyz:ixyz + 3]
-        if wool:
+        if fabric == "knit":
+            h_w, tone = knit(s_cm, t_cm, st["warp"], st["weft"], seed, rib=st.get("rib", False))
+            slub = np.zeros_like(h_w)
+            fibre = T.hash1(np.floor(s_cm * 60) * 13.1 + np.floor(t_cm * 60) * 7.7, seed + 74)
+            heather = 1 + st.get("heather", 0.0) * (np.where(fibre > 0.9, 1.0, 0.0) + np.where(fibre < 0.08, -0.5, 0.0))
+            H = 0.10 * h_w
+            col = base[None, None, :] * (tone * (0.84 + 0.16 * h_w) * heather)[..., None]
+            rgh = st.get("rough", 0.86) - 0.04 * h_w
+        elif fabric == "denim":
+            h_w, warp_top, tone, slub = twill(s_cm, t_cm, st["warp"], st["weft"], seed)
+            weft_col = np.array(st["weft_col"])
+            # warp-faced (3/1): the indigo warp shows on most of the face, the ecru weft only in flecks
+            col = np.where(warp_top[..., None], base[None, None, :], st.get("weft_mix", 0.35) * weft_col[None, None, :] + (1 - st.get("weft_mix", 0.35)) * base[None, None, :])
+            col = col * (tone * (0.82 + 0.18 * h_w) * (1 + 0.10 * slub))[..., None]
+            H = 0.14 * h_w
+            rgh = 0.88 - 0.04 * h_w
+            # worn-in fades: lighter on the thigh fronts and the seat, whiskered at the hip crease
+            fz = T.smoothstep(xyz[..., 2], 0.48, 0.60) * (1 - T.smoothstep(xyz[..., 2], 0.84, 0.92))
+            front = T.smoothstep(-xyz[..., 1], -0.01, 0.05)
+            seat = T.smoothstep(xyz[..., 1], 0.04, 0.09) * T.smoothstep(xyz[..., 2], 0.80, 0.86) * (1 - T.smoothstep(xyz[..., 2], 0.93, 0.98))
+            whisk = front * T.smoothstep(xyz[..., 2], 0.80, 0.83) * (1 - T.smoothstep(xyz[..., 2], 0.86, 0.89)) * \
+                np.clip(np.sin(xyz[..., 0] * 180.0 + 3.0 * m[..., 2]) * 1.4 - 0.2, 0, 1)
+            fd = st.get("fade_denim", 0.0) * np.clip(fz * front * (0.55 + 0.6 * m[..., 1]) + 0.7 * seat + 0.8 * whisk, 0, 1)
+            col = col * (1 - fd[..., None]) + np.array(st["faded"])[None, None] * fd[..., None]
+        elif fabric == "leather":
+            h_w = grain(s_cm, t_cm, seed, st.get("grain", 9.0))
+            warp_top = np.ones_like(h_w, bool); tone = np.ones_like(h_w); slub = np.zeros_like(h_w)
+            H = 0.10 * h_w
+            col = base[None, None, :] * (0.80 + 0.30 * h_w)[..., None]
+            rgh = st.get("rough", 0.48) + 0.14 * (1 - h_w)
+        elif wool:
             h_w, warp_top, tone, slub = twill(s_cm, t_cm, st["warp"], st["weft"], seed)
             fuzz = T.vnoise1(s_cm * 38.0 + T.vnoise1(t_cm * 9.0, seed + 71) * 3.0, seed + 72) * 0.6 + \
                 T.vnoise1(t_cm * 41.0 + s_cm * 7.0, seed + 73) * 0.4
@@ -171,12 +252,15 @@ def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, s
         col = col * (1 - fade[..., None]) + np.array([0.62, 0.60, 0.55]) * base.mean() / 0.6 * fade[..., None] * 1.0
         stitch_mask = np.zeros_like(H)
         grime = np.zeros_like(H)
+        metal = np.zeros_like(H)
         for fname, (style, w, insets) in st["seams"].items():
             if fname not in ch:
                 continue
             d = sub[..., ch[fname]]
             a = sub[..., ch[fname] + 1]
             H = _seam_height(style, d, a, w, seed, H, col)
+            if style == "zip":
+                metal = np.maximum(metal, 1 - T.smoothstep(d, w - 0.04, w + 0.03))
             for k, inset in enumerate(insets):
                 sm = _stitches(d, a, inset, seed + 40 + 7 * k + sum(map(ord, fname)) % 97)
                 stitch_mask = np.maximum(stitch_mask, sm)
@@ -212,10 +296,36 @@ def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, s
             H += 0.22 * inside + 0.18 * inside * (1 - T.smoothstep(edge_d, 0.0, 0.25))
             ps = _stitches(edge_d, (xyz[..., 0] + xyz[..., 2]) * 100.0, 0.35, seed + 92) * inside
             stitch_mask = np.maximum(stitch_mask, ps)
+        # jeans: stitched back patch pockets (pointed at the bottom) and the J-stitched front fly
+        for (cx, cz, hw, hh) in st.get("pockets", ()):
+            back = T.smoothstep(xyz[..., 1], 0.02, 0.05)
+            du = np.abs(xyz[..., 0] - cx) / hw
+            dz = (xyz[..., 2] - cz) / hh
+            dv = np.where(dz < 0, -dz + 0.30 * du, dz)
+            inside = (np.maximum(du, dv) < 1.0) * back
+            edge_d = np.clip(1.0 - np.maximum(du, dv), 0, None) * min(hw, hh) * 100.0
+            H += 0.16 * inside + 0.12 * inside * (1 - T.smoothstep(edge_d, 0.0, 0.2))
+            along = (xyz[..., 0] + xyz[..., 2]) * 100.0
+            ps = np.maximum(_stitches(edge_d, along, 0.15, seed + 95), _stitches(edge_d, along, 0.45, seed + 96)) * inside
+            stitch_mask = np.maximum(stitch_mask, ps)
+        if st.get("fly"):
+            z_top, z_bot, xw = st["fly"]
+            front = T.smoothstep(-xyz[..., 1], 0.02, 0.06)
+            u = np.clip((xyz[..., 2] - z_bot) / 0.03, 0, 1)
+            xf = xw * np.sqrt(u)
+            in_z = (xyz[..., 2] > z_bot - 0.004) * (xyz[..., 2] < z_top)
+            d_fly = np.abs(np.abs(xyz[..., 0]) * np.sign(xyz[..., 0] + 1e-9) - xf) * 100.0
+            fs = np.maximum(_stitches(d_fly, xyz[..., 2] * 100.0, 0.0, seed + 97),
+                            _stitches(d_fly, xyz[..., 2] * 100.0, 0.55, seed + 98)) * front * in_z * (xyz[..., 0] > -0.002)
+            stitch_mask = np.maximum(stitch_mask, fs)
+            H -= 0.18 * np.exp(-(np.abs(xyz[..., 0]) * 100.0 / 0.08) ** 2) * front * in_z
         H += 0.30 * stitch_mask
-        H += (0.34 if not wool else 0.18) * (1 - m[..., 3]) ** 6 + 0.12 * (1 - m[..., 4]) ** 5
+        H += st.get("macro", 0.34 if not wool else 0.18) * (1 - m[..., 3]) ** 6 + 0.12 * (1 - m[..., 4]) ** 5
         col = col * (1 - stitch_mask[..., None]) + thread_col[None, None] * (0.9 + 0.1 * h_w[..., None]) * stitch_mask[..., None]
         col = col * (0.93 + 0.14 * m[..., 0:1])
+        if metal.any():
+            mt = np.array(st.get("metal", (0.52, 0.50, 0.47)))
+            col = col * (1 - metal[..., None]) + mt[None, None] * (0.8 + 0.3 * h_w[..., None] * 0 + 0.2 * metal[..., None]) * metal[..., None]
         dirt_col = np.array([0.24, 0.19, 0.13]) if not wool else np.array([0.20, 0.155, 0.10])
         dirt = grime
         if wool and st.get("wool_wear", True):
@@ -227,7 +337,7 @@ def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, s
             seat = T.smoothstep(xyz[..., 1], 0.03, 0.07) * T.smoothstep(xyz[..., 2], 0.80, 0.88) * (1 - T.smoothstep(xyz[..., 2], 0.95, 1.0))
             mud = 1 - T.smoothstep(xyz[..., 2], 0.09, 0.30)
             dirt = dirt + 0.30 * knees * (0.5 + m[..., 1]) + 0.12 * seat * m[..., 1] + 0.30 * mud * T.smoothstep(m[..., 2], 0.35, 0.7)
-        elif not wool:
+        elif fabric == "linen":
             if st["yellow"]:
                 # sweat-yellowed underarms and collar on unbleached linen
                 ua = np.zeros_like(H)
@@ -250,9 +360,10 @@ def compose_cloth(obj, fields, uvpm, out_dir, name, R_out=2048, supersample=2, s
             cord = thread_col if not wool else np.array([0.36, 0.31, 0.24])
             col[:rr] = 0.8 * cord[None, None] * (0.72 + 0.28 * ply[..., None]) * (0.95 + 0.1 * fib[..., None])
             rgh[:rr] = 0.9
+        rgh = rgh * (1 - metal) + 0.32 * metal
         albedo[y0:y1] = np.clip(col, 0, 0.74)
         height[y0:y1] = H
-        rough[y0:y1] = np.clip(rgh, 0.80, 0.97)
+        rough[y0:y1] = np.clip(rgh, min(rough_clip[0], 0.30), rough_clip[1]) if metal.any() else np.clip(rgh, *rough_clip)
     nrm = T.height_to_normal(height, texel_mm)
     cav = T.box_blur(height, max(2, int(px_per_cm * 0.12))) - height
     cav2 = T.box_blur(height, max(4, int(px_per_cm * 0.6))) - height

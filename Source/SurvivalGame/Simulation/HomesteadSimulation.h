@@ -117,7 +117,8 @@ constexpr std::uint32_t EstateWorldMarker = 0xE57A7Eu;
 enum class WearableDefinition : int
 {
     LinenTunic, LinenApron, LeatherShoes, WovenFootwraps,
-    LinenShirt, LinenLongShirt, Trousers, FurCoat, FurBoots, WovenSandals, TurnShoes, Count
+    LinenShirt, LinenLongShirt, Trousers, FurCoat, FurBoots, WovenSandals, TurnShoes,
+    ScoopTank, CropTop, SkinnyJeans, Leggings, BikerJacket, Sneakers, AnkleBoots, DarkJeans, Count
 };
 // Outer is a coat worn over whatever covers the torso.
 enum class EquipmentSlot : int { Torso, Legs, Apron, Feet, Outer, Count };

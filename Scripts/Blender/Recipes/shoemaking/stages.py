@@ -39,7 +39,8 @@ POSES = {
     "tiptoe": [("foot_l", X, 40), ("foot_r", X, 40), ("ball_l", X, -40), ("ball_r", X, -40)],
 }
 TOE_BONES = ("bigtoe", "indextoe", "middletoe", "ringtoe", "littletoe")
-WARMTH = {"WovenSandals": 0, "TurnShoes": 1, "FurBoots": 4}
+WARMTH = {"WovenSandals": 0, "TurnShoes": 1, "FurBoots": 4, "Sneakers": 1, "AnkleBoots": 3}
+TROUSER_OFFSET = 0.007         # trouser_standin pushes the leg out by this much (wool trousers over it)
 
 
 def log(msg):
@@ -308,6 +309,22 @@ def trouser_standin(arm, body_obj):
     return t
 
 
+def trouser_clearance(obj, body_obj):
+    """Where the boot shaft overlaps the trouser stand-in (hem at the ankle bone, 7 mm off the
+    skin), how far the boot stands off the skin there: below 7 mm the trousers sit over it."""
+    Vb, Nb, Tb = B.mesh_arrays(body_obj)
+    surf = B.Surface(Vb, Nb, Tb)
+    V, _, _ = B.mesh_arrays(obj)
+    tube = vattr(obj, "per") > 0
+    m = (V[:, 2] > 0.088) & ~tube
+    d, _, _ = surf.signed(V[m])
+    return dict(hem_z_mm=88.0, standin_offset_mm=1000 * TROUSER_OFFSET, shaft_verts_above_hem=int(m.sum()),
+                shaft_offset_max_mm=round(float(1000 * d.max()), 2),
+                shaft_offset_p99_mm=round(float(1000 * np.percentile(d, 99)), 2),
+                verts_beyond_standin=int((d > TROUSER_OFFSET).sum()),
+                fit="trousers sit over the shaft" if d.max() < TROUSER_OFFSET else "shaft pokes through the stand-in")
+
+
 # ---------------------------------------------------------------------- build
 
 def finish_build(name, built, arm, body_obj, VNT, bones, args):
@@ -362,6 +379,9 @@ def finish_build(name, built, arm, body_obj, VNT, bones, args):
                              tangents=True, normal_maps="OpenGL (+Y): flip green in Unreal"))
     if name == "FurBoots":
         report["loft_mean_mm"] = round(built.info["l"]["loft_mean_mm"], 2)
+    if name == "AnkleBoots":
+        report["trouser_standin"] = trouser_clearance(obj, body_obj)
+        log(f"{name}: trousers {report['trouser_standin']}")
     report["files"] = {fbx.name: sha256(fbx), mask.name: sha256(mask)}
     report["files"].update({f"Textures/{p.name}": sha256(p) for p in sorted(tex_dir.glob("*.png"))})
     (out / "report.json").write_text(json.dumps(report, indent=1, default=float) + "\n")
@@ -420,6 +440,12 @@ DETAIL = {
     "TurnShoes": {"detail_laces": ((0.14, -0.08, 0.07), (0.25, -1, 0.9), 0.34, 85, 8),
                   "detail_heel": ((0.13, 0.04, 0.04), (0.6, 1, 0.3), 0.34, 85, 8),
                   "detail_toe": ((0.16, -0.17, 0.02), (0.55, -1, 0.3), 0.33, 85, 8)},
+    "Sneakers": {"detail_laces": ((0.15, -0.10, 0.055), (0.35, -1, 0.8), 0.34, 85, 8),
+                 "detail_toe": ((0.16, -0.19, 0.012), (0.55, -1, 0.3), 0.33, 85, 8),
+                 "detail_heel": ((0.15, 0.04, 0.025), (0.6, 1, 0.3), 0.34, 85, 8)},
+    "AnkleBoots": {"detail_laces": ((0.14, -0.06, 0.075), (0.3, -1, 0.6), 0.36, 85, 8),
+                   "detail_welt": ((0.17, -0.13, 0.002), (1, -0.6, 0.55), 0.30, 85, 11),
+                   "detail_heel": ((0.14, 0.03, 0.03), (0.7, 1, 0.3), 0.34, 85, 8)},
 }
 
 
@@ -441,11 +467,13 @@ def render_stage(name, args):
     covered[np.asarray(body["footwear_covered_tris"], np.int64)] = True
     visible_group(body, covered)
     extras = [o for o in bpy.data.objects if o.name.startswith("SKM_Primitive")]
-    trousers = trouser_standin(arm, body) if name == "FurBoots" else None
+    trousers = trouser_standin(arm, body) if name in ("FurBoots", "AnkleBoots") else None
+    only_trouser_view = name == "AnkleBoots"      # her legs bare in every other view
     if trousers is not None:
+        trousers.hide_render = only_trouser_view
         for o in extras:
             if "Shorts" in o.name:
-                o.hide_render = True
+                o.hide_render = not only_trouser_view
     want = set(args.views or [])
     done = []
 
@@ -473,7 +501,15 @@ def render_stage(name, args):
             continue
         shoot(vname, tgt, d, dist, lens, (3840, 2160), fstop)
     if trousers is not None and (not want or "trousers" in want):
+        trousers.hide_render = False
+        for o in extras:
+            if "Shorts" in o.name:
+                o.hide_render = True
         shoot("trousers", (0.02, -0.05, 0.22), (-0.7, -1, 0.22), 2.1, 70, (3840, 2160), None)
+        trousers.hide_render = only_trouser_view
+        for o in extras:
+            if "Shorts" in o.name:
+                o.hide_render = not only_trouser_view
     for pose in POSES:
         if want and pose not in want:
             continue

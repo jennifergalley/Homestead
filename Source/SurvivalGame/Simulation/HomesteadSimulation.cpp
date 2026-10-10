@@ -596,7 +596,16 @@ constexpr WearableDefinitionInfo Wearables[] = {
     {WearableDefinition::FurCoat, "fur-coat", "Fur coat", Slot(EquipmentSlot::Outer), false, 4, 6},
     {WearableDefinition::FurBoots, "fur-boots", "Fur boots", Slot(EquipmentSlot::Feet), false, 2, 3},
     {WearableDefinition::WovenSandals, "woven-sandals", "Woven sandals", Slot(EquipmentSlot::Feet), false, 6, 0},
-    {WearableDefinition::TurnShoes, "turnshoes", "Turnshoes", Slot(EquipmentSlot::Feet), false, 2, 2}
+    {WearableDefinition::TurnShoes, "turnshoes", "Turnshoes", Slot(EquipmentSlot::Feet), false, 2, 2},
+    // Sold at the general store only (HomesteadGarmentShop.h); Jenny 2026-10-09: modern, fitted.
+    {WearableDefinition::ScoopTank, "scoop-tank", "Scoop tank", Slot(EquipmentSlot::Torso), false, 0},
+    {WearableDefinition::CropTop, "crop-top", "Cropped top", Slot(EquipmentSlot::Torso), false, 0},
+    {WearableDefinition::SkinnyJeans, "skinny-jeans", "Skinny jeans", Slot(EquipmentSlot::Legs), false, 0},
+    {WearableDefinition::Leggings, "leggings", "Leggings", Slot(EquipmentSlot::Legs), false, 0},
+    {WearableDefinition::BikerJacket, "biker-jacket", "Leather jacket", Slot(EquipmentSlot::Outer), false, 0},
+    {WearableDefinition::Sneakers, "sneakers", "Sneakers", Slot(EquipmentSlot::Feet), false, 0},
+    {WearableDefinition::AnkleBoots, "ankle-boots", "Ankle boots", Slot(EquipmentSlot::Feet), false, 0},
+    {WearableDefinition::DarkJeans, "dark-jeans", "Dark-rinse jeans", Slot(EquipmentSlot::Legs), false, 0}
 };
 static_assert(sizeof(Wearables) / sizeof(Wearables[0]) == static_cast<int>(WearableDefinition::Count));
 bool InContainer(const WearableInstance& item, int container)
@@ -931,6 +940,14 @@ const char* WearableDescription(WearableDefinition definition)
     case WearableDefinition::FurBoots: return "Tall fur-lined boots with a turned-down cuff.";
     case WearableDefinition::WovenSandals: return "Plaited soles laced at the ankle. Cool and light.";
     case WearableDefinition::TurnShoes: return "Soft hide shoes, turned and laced at the instep.";
+    case WearableDefinition::ScoopTank: return "A black scoop-necked tank, close and cool.";
+    case WearableDefinition::CropTop: return "A short top cut above the navel.";
+    case WearableDefinition::SkinnyJeans: return "Low-rise skinny jeans that hug every step.";
+    case WearableDefinition::Leggings: return "Soft matte leggings, snug from hip to ankle.";
+    case WearableDefinition::BikerJacket: return "A cropped leather jacket, zipped and fitted at the waist.";
+    case WearableDefinition::Sneakers: return "Low canvas sneakers, light on the lanes.";
+    case WearableDefinition::AnkleBoots: return "Flat leather ankle boots, sleek and laced to the bone.";
+    case WearableDefinition::DarkJeans: return "Low-rise skinny jeans in a deep indigo rinse.";
     default: return "Unknown garment";
     }
 }

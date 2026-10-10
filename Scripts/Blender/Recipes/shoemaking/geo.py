@@ -50,9 +50,12 @@ class MeshBuilder:
         return idx
 
     def add_grid(self, P, uv, part, cyclic=True, collapse_first=False, collapse_last=False, flip=False,
-                 attrs=None):
+                 attrs=None, keep=None):
         """P: (R, C, 3); uv: (R, C+1, 2) if cyclic else (R, C, 2). A collapsed first/last row is
-        stored as one vertex (a pole) and closed with triangles."""
+        stored as one vertex (a pole) and closed with triangles. ``keep`` (R-1, ncol) bool drops
+        the faces it marks False (hidden inside another part); ``build`` then drops loose verts."""
+        if keep is not None:
+            self.drop_loose = True
         R, C = P.shape[:2]
         flat = {k: np.asarray(v, float).reshape(R, C) for k, v in (attrs or {}).items()}
         idx = np.empty((R, C), np.int64)
@@ -66,6 +69,8 @@ class MeshBuilder:
         ncol = C if cyclic else C - 1
         for i in range(R - 1):
             for j in range(ncol):
+                if keep is not None and not keep[i, j]:
+                    continue
                 jn = (j + 1) % C
                 a, b, c, d = idx[i, j], idx[i, jn], idx[i + 1, jn], idx[i + 1, j]
                 ua, ub, uc, ud = uv[i, j], uv[i, j + 1], uv[i + 1, j + 1], uv[i + 1, j]
@@ -124,6 +129,8 @@ class MeshBuilder:
             bm = bmesh.new()
             bm.from_mesh(me)
             bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=weld)
+            if getattr(self, "drop_loose", False):
+                bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
             bm.to_mesh(me)
             bm.free()
         me.shade_smooth()

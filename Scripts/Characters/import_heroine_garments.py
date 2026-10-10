@@ -20,7 +20,9 @@ ROOT = Path(unreal.Paths.project_dir())
 CHARACTERS = ROOT / "Assets" / "Characters"
 # Must match MetaHumanGarmentSpecs in HomesteadCharacter.cpp.
 GARMENTS = ["SKM_LinenTee", "SKM_LinenLongShirt", "SKM_WoolTrousers", "SKM_FurCoat",
-            "SKM_FurBoots", "SKM_WovenSandals", "SKM_TurnShoes"]
+            "SKM_FurBoots", "SKM_WovenSandals", "SKM_TurnShoes",
+            "SKM_ScoopTank", "SKM_CropTop", "SKM_SkinnyJeans", "SKM_SkinnyJeansDark", "SKM_Leggings", "SKM_BikerJacket",
+            "SKM_Sneakers", "SKM_AnkleBoots"]
 DEST = "/Game/Characters/Heroine_MH/Assembled/Heroine/Garments"
 SKELETON = "/Game/Characters/Heroine_MH/Common/Female/Medium/NormalWeight/Body/metahuman_base_skel"
 LIB = unreal.EditorAssetLibrary

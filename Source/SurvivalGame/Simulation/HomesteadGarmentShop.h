@@ -12,7 +12,7 @@ namespace GarmentShop
 struct Offer
 {
     WearableDefinition definition;
-    Coins price; // Balance Agent, balance.md section 5 (d2211552c): the full set is 1,610 coins.
+    Coins price; // Balance Agent, balance.md section 5: the period set is 1,610 coins, the modern set 1,690.
 };
 constexpr Offer Offers[] = {
     {WearableDefinition::LinenShirt, 120},
@@ -22,6 +22,15 @@ constexpr Offer Offers[] = {
     {WearableDefinition::FurBoots, 300},
     {WearableDefinition::WovenSandals, 60},
     {WearableDefinition::TurnShoes, 150},
+    // Jenny 2026-10-09: a modern, fitted batch (Balance prices, balance.md section 5).
+    {WearableDefinition::ScoopTank, 100},
+    {WearableDefinition::CropTop, 120},
+    {WearableDefinition::SkinnyJeans, 220},
+    {WearableDefinition::DarkJeans, 220},
+    {WearableDefinition::Leggings, 160},
+    {WearableDefinition::BikerJacket, 450},
+    {WearableDefinition::Sneakers, 180},
+    {WearableDefinition::AnkleBoots, 240},
 };
 
 // The garment's price, or 0 when the store doesn't sell it.

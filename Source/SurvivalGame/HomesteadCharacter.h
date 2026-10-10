@@ -473,6 +473,10 @@ private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Backpack;
     bool bBackpackShown = false;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CordBelt;
+    // The belt's pivot in the reference pose, and how far the worn bottoms drop it (cm): low-rise
+    // jeans sit below the shorts' waistband the belt was fitted to, so belt and pouch ride lower.
+    FVector BeltPivotRef = FVector(0.0f, 2.25f, 103.28f);
+    float BeltDropCm = 0.0f;
     // The pouch hangs from the belt and lies on the outside of her right thigh, so it swings with
     // the thigh (forward and back about the belt, out and in about the hip) once her pose is final.
     FTransform PelvisRefPose;

@@ -1,6 +1,6 @@
 # Heroine footwear
 
-This folder holds three pairs of skinned footwear for the MetaHuman heroine. Each pair is one
+This folder holds five pairs of skinned footwear for the MetaHuman heroine. Each pair is one
 skeletal mesh with both feet and one material slot, and each is fitted to her full body
 (`SKM_MHC_Heroine_BodyMesh_Full`) and skinned to `metahuman_base_skel`.
 
@@ -9,6 +9,8 @@ skeletal mesh with both feet and one material slot, and each is fitted to her fu
 | [`FurBoots`](FurBoots/README.md) | Sheepskin winter boots to mid-calf, worn hair side in, with the fur cuff turned out, a smoked suede outside, a gathered hide sole and leather thong wraps | 12.0 mm | +1.20 cm | 4 |
 | [`WovenSandals`](WovenSandals/README.md) | Twined plant-fibre (sagebrush-bark) sandals with a corded rim, a toe cord, side and heel loops and ankle ties | 10.5 mm | +1.05 cm | 0 |
 | [`TurnShoes`](TurnShoes/README.md) | Soft low-cut vegetable-tanned turnshoes laced over the instep with a leather thong | 5.0 mm | +0.50 cm | 1 |
+| [`Sneakers`](Sneakers/README.md) | Low canvas sneakers, light on the lanes: a slim off-white duck low-top on a vulcanised gum sole with foxing, toe cap and flat laces | 12.0 mm | +1.20 cm | 1 |
+| [`AnkleBoots`](AnkleBoots/README.md) | Flat leather ankle boots, sleek and laced to the bone: close-fitting cognac calf with a round almond toe, a slim welted sole and a flat stacked heel | 9.5 mm | +0.95 cm | 3 |
 
 **Offset:** every footbed sits 0.5-0.6 mm below the bare sole, which rests at z = 0. The sole
 bottom is at −(sole thickness). To stand on the ground in footwear, lift the character by the
@@ -52,6 +54,28 @@ records their SHA-256.
    interpolated) and folds the toe bones into `ball_*`, so the toe box moves as one piece. It
    then smooths them, caps them at 8 influences and normalizes them.
 
+### Modern pairs (Sneakers, AnkleBoots)
+
+`shoemaking\modern.py` builds the two modern pairs on the same last:
+
+- **Laced upper.** `laced_upper` makes the lining, the outer upper with a lacing slit over a
+  stepped-down tongue, and the rolled top edge. Upper faces hidden inside the sole unit are
+  dropped (`MeshBuilder.add_grid(keep=...)`).
+- **Sole unit.** `sole_unit` sweeps a separate sole round the upper on a stadium of plan
+  columns: a vulcanised unit whose foxing tape hugs the canvas (sneakers), or a welt, sole edge
+  and stacked heel (boots).
+- **Hardware.** Eyelets, criss-cross lacing and a bow.
+- **Toe and last.** `toe_box` replaces the forefoot with a designed round toe and toe spring
+  instead of following her toes. `square_bottom` lasts the boot's bottom square, so the welt
+  follows the upper within about 2 mm.
+- **Textures.** `leather.py` adds the `canvas`, `vulc_rubber`, `flat_lace`, `calf`, `welt_sole`
+  and `round_lace` styles. The white canvas, rubber and lace may reach 0.7 linear albedo
+  (`ALBEDO_MAX`); every other part keeps the 0.6 cap.
+- **Trousers.** The ankle boots' `report.json` records `trouser_standin`. Snug trousers sit over
+  the shaft, which stands at most 6.4 mm off the skin.
+
+Rebuild just these with `--only Sneakers AnkleBoots`. That leaves the other three pairs untouched.
+
 ## Unreal import (all pairs)
 
 - **Units and axes.** Centimetres (UnitScaleFactor 1), Z up, −Y forward. The armature object
@@ -69,7 +93,7 @@ records their SHA-256.
   - White means that body triangle lies fully inside the shoe shell and at least 12 mm from any
     opening, so it is safe to hide.
   - Thongs, laces and cords never count as cover.
-  - The boots and the turnshoes hide the whole foot.
+  - The boots, the turnshoes and the sneakers hide the whole foot.
   - The sandals hide only the sole of the foot, so the toes and the top stay visible.
 
 ## Test poses

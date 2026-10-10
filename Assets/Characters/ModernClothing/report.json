@@ -1,0 +1,1164 @@
+{
+ "recipe": "Scripts/Blender/Recipes/modern_wardrobe.py",
+ "seed": 20261009,
+ "blender": "5.2.1 LTS",
+ "inputs": {
+  "SKM_MHC_Heroine_BodyMesh_Full.fbx": "0af14405858eecbf7acbb69aa6bc8b721427a984ffb4babed4adc0f4e2b512bc",
+  "SKM_MHC_Heroine_FaceMesh.fbx": "910b48efbc66eb2327512eb822df2eea54055d232036ca1cd4e3c45c7e6184bf",
+  "SKM_PrimitiveShorts.fbx": "2e9b5357e74e7c5fa819e8a4d8b1a3358ff1550f1fd0c68f02b6f5a186dc11e0"
+ },
+ "params": {
+  "SKM_SkinnyJeans": {
+   "name": "SKM_SkinnyJeans",
+   "kind": "trousers",
+   "pitch": 0.0112,
+   "waist_front_z": 1.0050000000000001,
+   "waist_back_rise": 0.045,
+   "junction_z": 0.9043802452087403,
+   "knee_z": 0.5078586935997009,
+   "hem_z": 0.08430229532718658,
+   "offset": 0.0026,
+   "crotch_ease": 0.003,
+   "thigh_ease": 0.0,
+   "knee_patch": false,
+   "drawstring": false,
+   "threads": false,
+   "waist_gather": 0.0,
+   "fold_scale": 0.6
+  },
+  "SKM_SkinnyJeansDark": {
+   "name": "SKM_SkinnyJeansDark",
+   "kind": "trousers",
+   "pitch": 0.0112,
+   "waist_front_z": 1.0050000000000001,
+   "waist_back_rise": 0.045,
+   "junction_z": 0.9043802452087403,
+   "knee_z": 0.5078586935997009,
+   "hem_z": 0.08430229532718658,
+   "offset": 0.0026,
+   "crotch_ease": 0.003,
+   "thigh_ease": 0.0,
+   "knee_patch": false,
+   "drawstring": false,
+   "threads": false,
+   "waist_gather": 0.0,
+   "fold_scale": 0.6
+  },
+  "SKM_Leggings": {
+   "name": "SKM_Leggings",
+   "kind": "trousers",
+   "pitch": 0.0112,
+   "waist_front_z": 1.0650000000000002,
+   "waist_back_rise": 0.035,
+   "junction_z": 0.9043802452087403,
+   "knee_z": 0.5078586935997009,
+   "hem_z": 0.09830229532718658,
+   "offset": 0.002,
+   "crotch_ease": 0.0012,
+   "thigh_ease": 0.0,
+   "knee_patch": false,
+   "drawstring": false,
+   "threads": false,
+   "waist_gather": 0.3,
+   "fold_scale": 0.3
+  },
+  "SKM_ScoopTank": {
+   "hem_z": 1.088,
+   "ua_z": 1.2990744857788086,
+   "fs_z": 1.392255139350891,
+   "bs_z": 1.3872551393508912,
+   "scoop_z": 1.3122551393508912,
+   "bscoop_z": 1.3022551393508912,
+   "strap_x": 0.10276293717622756,
+   "strap_w": 0.012,
+   "offset": 0.0025,
+   "kind": "tank",
+   "name": "SKM_ScoopTank",
+   "fold_amp": 0.0006,
+   "threads": false
+  },
+  "SKM_CropTop": {
+   "kind": "tee",
+   "pitch": 0.0095,
+   "hem_gap": 0.008,
+   "name": "SKM_CropTop",
+   "ua_z": 1.2910744857788086,
+   "x_in": 0.08,
+   "x_out": 0.142,
+   "zc": 1.3427414407730103,
+   "z_in": 1.4317414407730102,
+   "z_out": 1.3890744857788087,
+   "zcb": 1.4377414407730102,
+   "z_inb": 1.4677414407730103,
+   "z_outb": 1.3850744857788087,
+   "sleeve_end": 0.1,
+   "base": 0.0025,
+   "hang": 0.0,
+   "sleeve_ease": 0.0025,
+   "opening": false,
+   "fold_amp": 0.0008,
+   "sleeve_fold": 0.0006,
+   "threads": false
+  },
+  "SKM_BikerJacket": {
+   "kind": "coat",
+   "pitch": 0.0105,
+   "hem_gap": 0.0,
+   "name": "SKM_BikerJacket",
+   "ua_z": 1.2710744857788085,
+   "x_in": 0.072,
+   "x_out": 0.143,
+   "zc": 1.4277414407730102,
+   "z_in": 1.4437414407730103,
+   "z_out": 1.3910744857788087,
+   "zcb": 1.4777414407730103,
+   "z_inb": 1.4817414407730103,
+   "z_outb": 1.3870744857788087,
+   "base": 0.0055,
+   "hang": 0.0,
+   "sleeve_ease": 0.0055,
+   "cuff": 0.035,
+   "cuff_ease": 0.0035,
+   "opening": true,
+   "open_gap": 0.0012,
+   "facing": 0.02,
+   "fold_amp": 0.0014,
+   "sleeve_fold": 0.0012,
+   "threads": false
+  }
+ },
+ "garments": {
+  "SKM_SkinnyJeans": {
+   "vertices": 21518,
+   "triangles": 43040,
+   "bones_weighted": 35,
+   "accessories": 0,
+   "texel_uv_per_m": 0.7766210322177276,
+   "textures": {
+    "basecolor": "T_SkinnyJeans_basecolor.png",
+    "normal": "T_SkinnyJeans_normal.png",
+    "roughness": "T_SkinnyJeans_roughness.png",
+    "ao": "T_SkinnyJeans_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.5068732500076294,
+    "albedo_mean": [
+     0.05587151274085045,
+     0.07647516578435898,
+     0.14080089330673218
+    ],
+    "rough_mean": 0.8555501103401184,
+    "px_per_cm": 15.905198739819062,
+    "resolution": 2048
+   },
+   "loft": {
+    "cloth_mm": 1.53,
+    "air_gap_mm_median": 3.0,
+    "air_gap_mm_mean": 3.33
+   },
+   "below_knee_outer_mm": {
+    "max": 7.27,
+    "p99": 6.5,
+    "mean": 4.69
+   }
+  },
+  "SKM_SkinnyJeansDark": {
+   "vertices": 21518,
+   "triangles": 43040,
+   "bones_weighted": 35,
+   "accessories": 0,
+   "texel_uv_per_m": 0.7766210322177276,
+   "textures": {
+    "basecolor": "T_SkinnyJeansDark_basecolor.png",
+    "normal": "T_SkinnyJeansDark_normal.png",
+    "roughness": "T_SkinnyJeansDark_roughness.png",
+    "ao": "T_SkinnyJeansDark_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.5064314007759094,
+    "albedo_mean": [
+     0.02057156339287758,
+     0.024144429713487625,
+     0.047006405889987946
+    ],
+    "rough_mean": 0.8555501103401184,
+    "px_per_cm": 15.905198739819062,
+    "resolution": 2048
+   },
+   "loft": {
+    "cloth_mm": 1.53,
+    "air_gap_mm_median": 3.0,
+    "air_gap_mm_mean": 3.33
+   },
+   "below_knee_outer_mm": {
+    "max": 7.27,
+    "p99": 6.5,
+    "mean": 4.69
+   }
+  },
+  "SKM_Leggings": {
+   "vertices": 21702,
+   "triangles": 43408,
+   "bones_weighted": 36,
+   "accessories": 0,
+   "texel_uv_per_m": 0.7826154293328627,
+   "textures": {
+    "basecolor": "T_Leggings_basecolor.png",
+    "normal": "T_Leggings_normal.png",
+    "roughness": "T_Leggings_roughness.png",
+    "ao": "T_Leggings_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.07826602458953857,
+    "albedo_mean": [
+     0.046912141144275665,
+     0.046912141144275665,
+     0.05219142138957977
+    ],
+    "rough_mean": 0.8104923963546753,
+    "px_per_cm": 16.02796399273703,
+    "resolution": 2048
+   },
+   "loft": {
+    "cloth_mm": 0.92,
+    "air_gap_mm_median": 3.0,
+    "air_gap_mm_mean": 3.18
+   },
+   "below_knee_outer_mm": {
+    "max": 5.84,
+    "p99": 5.22,
+    "mean": 3.97
+   }
+  },
+  "SKM_ScoopTank": {
+   "vertices": 10980,
+   "triangles": 21968,
+   "bones_weighted": 33,
+   "accessories": 0,
+   "texel_uv_per_m": 1.227850675157348,
+   "textures": {
+    "basecolor": "T_ScoopTank_basecolor.png",
+    "normal": "T_ScoopTank_normal.png",
+    "roughness": "T_ScoopTank_roughness.png",
+    "ao": "T_ScoopTank_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.03383956849575043,
+    "albedo_mean": [
+     0.016037186607718468,
+     0.016037186607718468,
+     0.01845902018249035
+    ],
+    "rough_mean": 0.8318167328834534,
+    "px_per_cm": 25.146381827222484,
+    "resolution": 2048
+   },
+   "loft": {
+    "cloth_mm": 0.92,
+    "air_gap_mm_median": 2.8,
+    "air_gap_mm_mean": 3.43
+   }
+  },
+  "SKM_CropTop": {
+   "vertices": 9444,
+   "triangles": 18896,
+   "bones_weighted": 30,
+   "accessories": 0,
+   "texel_uv_per_m": 1.2696191893826518,
+   "textures": {
+    "basecolor": "T_CropTop_basecolor.png",
+    "normal": "T_CropTop_normal.png",
+    "roughness": "T_CropTop_roughness.png",
+    "ao": "T_CropTop_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.19645041227340698,
+    "albedo_mean": [
+     0.16724008321762085,
+     0.01232222467660904,
+     0.0211531650274992
+    ],
+    "rough_mean": 0.8474105596542358,
+    "px_per_cm": 26.00180099855671,
+    "resolution": 2048
+   },
+   "loft": {
+    "cloth_mm": 0.89,
+    "air_gap_mm_median": 2.8,
+    "air_gap_mm_mean": 3.53
+   }
+  },
+  "SKM_BikerJacket": {
+   "vertices": 15282,
+   "triangles": 30568,
+   "bones_weighted": 57,
+   "accessories": 0,
+   "texel_uv_per_m": 0.8706055146990442,
+   "textures": {
+    "basecolor": "T_BikerJacket_basecolor.png",
+    "normal": "T_BikerJacket_normal.png",
+    "roughness": "T_BikerJacket_roughness.png",
+    "ao": "T_BikerJacket_ao.png"
+   },
+   "texture_stats": {
+    "albedo_max": 0.30000001192092896,
+    "albedo_mean": [
+     0.01651770994067192,
+     0.01548768114298582,
+     0.014504529535770416
+    ],
+    "rough_mean": 0.5742303729057312,
+    "px_per_cm": 17.830000941036428,
+    "resolution": 2048
+   },
+   "loft": {
+    "cloth_mm": 2.08,
+    "air_gap_mm_median": 9.0,
+    "air_gap_mm_mean": 9.41
+   }
+  }
+ },
+ "bind_pose": {
+  "SKM_SkinnyJeans": {
+   "verts": 21518,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  },
+  "SKM_SkinnyJeansDark": {
+   "verts": 21518,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  },
+  "SKM_Leggings": {
+   "verts": 21702,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  },
+  "SKM_ScoopTank": {
+   "verts": 10980,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  },
+  "SKM_CropTop": {
+   "verts": 9444,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  },
+  "SKM_BikerJacket": {
+   "verts": 15282,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_edge": 0,
+   "max_depth_mm": 0.0,
+   "p99_depth_mm": 0.0
+  }
+ },
+ "test_poses": {
+  "walk": {
+   "SKM_SkinnyJeans": {
+    "verts": 21518,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_SkinnyJeansDark": {
+    "verts": 21518,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_Leggings": {
+    "verts": 21702,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_ScoopTank": {
+    "verts": 10980,
+    "inside": 52,
+    "inside_pct": 0.47358834244080145,
+    "inside_near_edge": 45,
+    "max_depth_mm": 4.490788827368967,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_CropTop": {
+    "verts": 9444,
+    "inside": 187,
+    "inside_pct": 1.9800931808555695,
+    "inside_near_edge": 93,
+    "max_depth_mm": 12.525131831875617,
+    "p99_depth_mm": 2.5353859568841948
+   },
+   "SKM_BikerJacket": {
+    "verts": 15282,
+    "inside": 326,
+    "inside_pct": 2.1332286349954193,
+    "inside_near_edge": 0,
+    "max_depth_mm": 13.359214805985676,
+    "p99_depth_mm": 5.242091371251295
+   },
+   "layers": {
+    "SKM_BikerJacket over SKM_ScoopTank": {
+     "checked": 15282,
+     "inside": 131,
+     "inside_pct": 0.8572176416699384,
+     "max_depth_mm": 9.865206512470094
+    },
+    "SKM_BikerJacket over SKM_CropTop": {
+     "checked": 15282,
+     "inside": 173,
+     "inside_pct": 1.1320507786938883,
+     "max_depth_mm": 11.555282185829364
+    }
+   }
+  },
+  "kneel_left_forward": {
+   "SKM_SkinnyJeans": {
+    "verts": 21518,
+    "inside": 140,
+    "inside_pct": 0.6506180871828237,
+    "inside_near_edge": 0,
+    "max_depth_mm": 6.527258328058575,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_SkinnyJeansDark": {
+    "verts": 21518,
+    "inside": 140,
+    "inside_pct": 0.6506180871828237,
+    "inside_near_edge": 0,
+    "max_depth_mm": 6.527258328058575,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_Leggings": {
+    "verts": 21702,
+    "inside": 126,
+    "inside_pct": 0.5805916505391209,
+    "inside_near_edge": 0,
+    "max_depth_mm": 5.774262044678984,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_ScoopTank": {
+    "verts": 10980,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_CropTop": {
+    "verts": 9444,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_BikerJacket": {
+    "verts": 15282,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "layers": {
+    "SKM_BikerJacket over SKM_ScoopTank": {
+     "checked": 15282,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_BikerJacket over SKM_CropTop": {
+     "checked": 15282,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    }
+   }
+  },
+  "squat": {
+   "SKM_SkinnyJeans": {
+    "verts": 21518,
+    "inside": 523,
+    "inside_pct": 2.430523282832977,
+    "inside_near_edge": 30,
+    "max_depth_mm": 4.9293025236030115,
+    "p99_depth_mm": 1.773127491575524
+   },
+   "SKM_SkinnyJeansDark": {
+    "verts": 21518,
+    "inside": 523,
+    "inside_pct": 2.430523282832977,
+    "inside_near_edge": 30,
+    "max_depth_mm": 4.9293025236030115,
+    "p99_depth_mm": 1.773127491575524
+   },
+   "SKM_Leggings": {
+    "verts": 21702,
+    "inside": 551,
+    "inside_pct": 2.53893650354806,
+    "inside_near_edge": 40,
+    "max_depth_mm": 4.9106197739227415,
+    "p99_depth_mm": 1.5824247632766795
+   },
+   "SKM_ScoopTank": {
+    "verts": 10980,
+    "inside": 6,
+    "inside_pct": 0.0546448087431694,
+    "inside_near_edge": 6,
+    "max_depth_mm": 1.2182344436052142,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_CropTop": {
+    "verts": 9444,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_BikerJacket": {
+    "verts": 15282,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "layers": {
+    "SKM_BikerJacket over SKM_ScoopTank": {
+     "checked": 15282,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_BikerJacket over SKM_CropTop": {
+     "checked": 15282,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    }
+   }
+  },
+  "arms_overhead": {
+   "SKM_SkinnyJeans": {
+    "verts": 21518,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_SkinnyJeansDark": {
+    "verts": 21518,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_Leggings": {
+    "verts": 21702,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_ScoopTank": {
+    "verts": 10980,
+    "inside": 67,
+    "inside_pct": 0.6102003642987249,
+    "inside_near_edge": 67,
+    "max_depth_mm": 3.2593987182313913,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_CropTop": {
+    "verts": 9444,
+    "inside": 37,
+    "inside_pct": 0.3917831427361288,
+    "inside_near_edge": 24,
+    "max_depth_mm": 2.2240783851023838,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_BikerJacket": {
+    "verts": 15282,
+    "inside": 31,
+    "inside_pct": 0.20285302970815342,
+    "inside_near_edge": 0,
+    "max_depth_mm": 3.3770655741703846,
+    "p99_depth_mm": 0.0
+   },
+   "layers": {
+    "SKM_BikerJacket over SKM_ScoopTank": {
+     "checked": 15282,
+     "inside": 5,
+     "inside_pct": 0.03271823059808925,
+     "max_depth_mm": 8.77003264048364
+    },
+    "SKM_BikerJacket over SKM_CropTop": {
+     "checked": 15282,
+     "inside": 14,
+     "inside_pct": 0.09161104567464992,
+     "max_depth_mm": 4.453125838299116
+    }
+   }
+  },
+  "felling_swing": {
+   "SKM_SkinnyJeans": {
+    "verts": 21518,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_SkinnyJeansDark": {
+    "verts": 21518,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_Leggings": {
+    "verts": 21702,
+    "inside": 0,
+    "inside_pct": 0.0,
+    "inside_near_edge": 0,
+    "max_depth_mm": 0.0,
+    "p99_depth_mm": 0.0
+   },
+   "SKM_ScoopTank": {
+    "verts": 10980,
+    "inside": 306,
+    "inside_pct": 2.7868852459016393,
+    "inside_near_edge": 306,
+    "max_depth_mm": 17.77583626995657,
+    "p99_depth_mm": 6.65252321714292
+   },
+   "SKM_CropTop": {
+    "verts": 9444,
+    "inside": 93,
+    "inside_pct": 0.9847522236340533,
+    "inside_near_edge": 19,
+    "max_depth_mm": 10.508247495047176,
+    "p99_depth_mm": 0.4660025636975393
+   },
+   "SKM_BikerJacket": {
+    "verts": 15282,
+    "inside": 349,
+    "inside_pct": 2.28373249574663,
+    "inside_near_edge": 94,
+    "max_depth_mm": 16.51377264816332,
+    "p99_depth_mm": 5.176957493345016
+   },
+   "layers": {
+    "SKM_BikerJacket over SKM_ScoopTank": {
+     "checked": 15282,
+     "inside": 0,
+     "inside_pct": 0.0,
+     "max_depth_mm": 0.0
+    },
+    "SKM_BikerJacket over SKM_CropTop": {
+     "checked": 15282,
+     "inside": 80,
+     "inside_pct": 0.523491689569428,
+     "max_depth_mm": 8.95691714552794
+    }
+   }
+  }
+ },
+ "exports": {
+  "SKM_SkinnyJeans": {
+   "file": "SkinnyJeans/SKM_SkinnyJeans.fbx",
+   "bones": 47,
+   "bone_names": [
+    "ankle_bck_l",
+    "ankle_bck_r",
+    "ankle_fwd_l",
+    "ankle_fwd_r",
+    "calf_correctiveRoot_l",
+    "calf_correctiveRoot_r",
+    "calf_kneeBack_l",
+    "calf_kneeBack_r",
+    "calf_knee_l",
+    "calf_knee_r",
+    "calf_l",
+    "calf_r",
+    "calf_twistCor_02_l",
+    "calf_twistCor_02_r",
+    "calf_twist_01_l",
+    "calf_twist_01_r",
+    "calf_twist_02_l",
+    "calf_twist_02_r",
+    "foot_l",
+    "foot_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "thigh_bck_l",
+    "thigh_bck_lwr_l",
+    "thigh_bck_lwr_r",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_in_l",
+    "thigh_in_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thigh_twistCor_01_l",
+    "thigh_twistCor_01_r",
+    "thigh_twistCor_02_l",
+    "thigh_twistCor_02_r",
+    "thigh_twist_01_l",
+    "thigh_twist_01_r",
+    "thigh_twist_02_l",
+    "thigh_twist_02_r"
+   ]
+  },
+  "SKM_SkinnyJeansDark": {
+   "file": "SkinnyJeansDark/SKM_SkinnyJeansDark.fbx",
+   "bones": 47,
+   "bone_names": [
+    "ankle_bck_l",
+    "ankle_bck_r",
+    "ankle_fwd_l",
+    "ankle_fwd_r",
+    "calf_correctiveRoot_l",
+    "calf_correctiveRoot_r",
+    "calf_kneeBack_l",
+    "calf_kneeBack_r",
+    "calf_knee_l",
+    "calf_knee_r",
+    "calf_l",
+    "calf_r",
+    "calf_twistCor_02_l",
+    "calf_twistCor_02_r",
+    "calf_twist_01_l",
+    "calf_twist_01_r",
+    "calf_twist_02_l",
+    "calf_twist_02_r",
+    "foot_l",
+    "foot_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "thigh_bck_l",
+    "thigh_bck_lwr_l",
+    "thigh_bck_lwr_r",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_in_l",
+    "thigh_in_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thigh_twistCor_01_l",
+    "thigh_twistCor_01_r",
+    "thigh_twistCor_02_l",
+    "thigh_twistCor_02_r",
+    "thigh_twist_01_l",
+    "thigh_twist_01_r",
+    "thigh_twist_02_l",
+    "thigh_twist_02_r"
+   ]
+  },
+  "SKM_Leggings": {
+   "file": "Leggings/SKM_Leggings.fbx",
+   "bones": 48,
+   "bone_names": [
+    "ankle_bck_l",
+    "ankle_bck_r",
+    "ankle_fwd_l",
+    "ankle_fwd_r",
+    "calf_correctiveRoot_l",
+    "calf_correctiveRoot_r",
+    "calf_kneeBack_l",
+    "calf_kneeBack_r",
+    "calf_knee_l",
+    "calf_knee_r",
+    "calf_l",
+    "calf_r",
+    "calf_twistCor_02_l",
+    "calf_twistCor_02_r",
+    "calf_twist_01_l",
+    "calf_twist_01_r",
+    "calf_twist_02_l",
+    "calf_twist_02_r",
+    "foot_l",
+    "foot_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "thigh_bck_l",
+    "thigh_bck_lwr_l",
+    "thigh_bck_lwr_r",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_in_l",
+    "thigh_in_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thigh_twistCor_01_l",
+    "thigh_twistCor_01_r",
+    "thigh_twistCor_02_l",
+    "thigh_twistCor_02_r",
+    "thigh_twist_01_l",
+    "thigh_twist_01_r",
+    "thigh_twist_02_l",
+    "thigh_twist_02_r"
+   ]
+  },
+  "SKM_ScoopTank": {
+   "file": "ScoopTank/SKM_ScoopTank.fbx",
+   "bones": 44,
+   "bone_names": [
+    "clavicle_l",
+    "clavicle_out_l",
+    "clavicle_out_r",
+    "clavicle_pec_l",
+    "clavicle_pec_r",
+    "clavicle_r",
+    "clavicle_scap_l",
+    "clavicle_scap_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "spine_04",
+    "spine_04_latissimus_l",
+    "spine_04_latissimus_r",
+    "spine_05",
+    "thigh_bck_l",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_lwr_l",
+    "thigh_fwd_lwr_r",
+    "thigh_fwd_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "upperarm_bck_l",
+    "upperarm_bck_r",
+    "upperarm_correctiveRoot_l",
+    "upperarm_correctiveRoot_r",
+    "upperarm_fwd_l",
+    "upperarm_fwd_r",
+    "upperarm_in_l",
+    "upperarm_in_r",
+    "upperarm_l",
+    "upperarm_out_l",
+    "upperarm_out_r",
+    "upperarm_r",
+    "upperarm_twistCor_01_l",
+    "upperarm_twistCor_01_r",
+    "upperarm_twist_01_l",
+    "upperarm_twist_01_r"
+   ]
+  },
+  "SKM_CropTop": {
+   "file": "CropTop/SKM_CropTop.fbx",
+   "bones": 40,
+   "bone_names": [
+    "clavicle_l",
+    "clavicle_out_l",
+    "clavicle_out_r",
+    "clavicle_pec_l",
+    "clavicle_pec_r",
+    "clavicle_r",
+    "clavicle_scap_l",
+    "clavicle_scap_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "spine_04",
+    "spine_04_latissimus_l",
+    "spine_04_latissimus_r",
+    "spine_05",
+    "upperarm_bck_l",
+    "upperarm_bck_r",
+    "upperarm_bicep_l",
+    "upperarm_bicep_r",
+    "upperarm_correctiveRoot_l",
+    "upperarm_correctiveRoot_r",
+    "upperarm_fwd_l",
+    "upperarm_fwd_r",
+    "upperarm_in_l",
+    "upperarm_in_r",
+    "upperarm_l",
+    "upperarm_out_l",
+    "upperarm_out_r",
+    "upperarm_r",
+    "upperarm_tricep_l",
+    "upperarm_tricep_r",
+    "upperarm_twistCor_01_l",
+    "upperarm_twistCor_01_r",
+    "upperarm_twistCor_02_l",
+    "upperarm_twistCor_02_r",
+    "upperarm_twist_01_l",
+    "upperarm_twist_01_r",
+    "upperarm_twist_02_l",
+    "upperarm_twist_02_r"
+   ]
+  },
+  "SKM_BikerJacket": {
+   "file": "BikerJacket/SKM_BikerJacket.fbx",
+   "bones": 74,
+   "bone_names": [
+    "clavicle_l",
+    "clavicle_out_l",
+    "clavicle_out_r",
+    "clavicle_pec_l",
+    "clavicle_pec_r",
+    "clavicle_r",
+    "clavicle_scap_l",
+    "clavicle_scap_r",
+    "hand_l",
+    "hand_r",
+    "lowerarm_bck_l",
+    "lowerarm_bck_r",
+    "lowerarm_correctiveRoot_l",
+    "lowerarm_correctiveRoot_r",
+    "lowerarm_fwd_l",
+    "lowerarm_fwd_r",
+    "lowerarm_in_l",
+    "lowerarm_in_r",
+    "lowerarm_l",
+    "lowerarm_out_l",
+    "lowerarm_out_r",
+    "lowerarm_r",
+    "lowerarm_twist_01_l",
+    "lowerarm_twist_01_r",
+    "lowerarm_twist_02_l",
+    "lowerarm_twist_02_r",
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "spine_04",
+    "spine_04_latissimus_l",
+    "spine_04_latissimus_r",
+    "spine_05",
+    "thigh_bck_l",
+    "thigh_bck_r",
+    "thigh_correctiveRoot_l",
+    "thigh_correctiveRoot_r",
+    "thigh_fwd_l",
+    "thigh_fwd_r",
+    "thigh_l",
+    "thigh_out_l",
+    "thigh_out_r",
+    "thigh_r",
+    "thumb_01_l",
+    "thumb_01_r",
+    "upperarm_bck_l",
+    "upperarm_bck_r",
+    "upperarm_bicep_l",
+    "upperarm_bicep_r",
+    "upperarm_correctiveRoot_l",
+    "upperarm_correctiveRoot_r",
+    "upperarm_fwd_l",
+    "upperarm_fwd_r",
+    "upperarm_in_l",
+    "upperarm_in_r",
+    "upperarm_l",
+    "upperarm_out_l",
+    "upperarm_out_r",
+    "upperarm_r",
+    "upperarm_tricep_l",
+    "upperarm_tricep_r",
+    "upperarm_twistCor_01_l",
+    "upperarm_twistCor_01_r",
+    "upperarm_twistCor_02_l",
+    "upperarm_twistCor_02_r",
+    "upperarm_twist_01_l",
+    "upperarm_twist_01_r",
+    "upperarm_twist_02_l",
+    "upperarm_twist_02_r",
+    "wrist_inner_l",
+    "wrist_inner_r",
+    "wrist_outer_l",
+    "wrist_outer_r"
+   ]
+  }
+ },
+ "coverage": {
+  "SKM_SkinnyJeans": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 11171,
+   "total_triangles": 60816,
+   "covered_vertices": 5886,
+   "per_garment_triangles": {
+    "SKM_SkinnyJeans": 11171
+   },
+   "margin_m": 0.012,
+   "file": "SkinnyJeans/BodyCoverageMask_SkinnyJeans.png"
+  },
+  "SKM_SkinnyJeansDark": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 11171,
+   "total_triangles": 60816,
+   "covered_vertices": 5886,
+   "per_garment_triangles": {
+    "SKM_SkinnyJeansDark": 11171
+   },
+   "margin_m": 0.012,
+   "file": "SkinnyJeansDark/BodyCoverageMask_SkinnyJeansDark.png"
+  },
+  "SKM_Leggings": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 11807,
+   "total_triangles": 60816,
+   "covered_vertices": 6246,
+   "per_garment_triangles": {
+    "SKM_Leggings": 11807
+   },
+   "margin_m": 0.012,
+   "file": "Leggings/BodyCoverageMask_Leggings.png"
+  },
+  "SKM_ScoopTank": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 3546,
+   "total_triangles": 60816,
+   "covered_vertices": 1926,
+   "per_garment_triangles": {
+    "SKM_ScoopTank": 3546
+   },
+   "margin_m": 0.012,
+   "file": "ScoopTank/BodyCoverageMask_ScoopTank.png"
+  },
+  "SKM_CropTop": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 4888,
+   "total_triangles": 60816,
+   "covered_vertices": 2741,
+   "per_garment_triangles": {
+    "SKM_CropTop": 4888
+   },
+   "margin_m": 0.012,
+   "file": "CropTop/BodyCoverageMask_CropTop.png"
+  },
+  "SKM_BikerJacket": {
+   "resolution": 2048,
+   "uv_channel": 0,
+   "uv_name": "DiffuseUV",
+   "udim_u_offset": 1.0,
+   "covered_triangles": 13247,
+   "total_triangles": 60816,
+   "covered_vertices": 7043,
+   "per_garment_triangles": {
+    "SKM_BikerJacket": 13247
+   },
+   "margin_m": 0.012,
+   "file": "BikerJacket/BodyCoverageMask_BikerJacket.png"
+  }
+ },
+ "export_settings": {
+  "units": "centimeters (FBX UnitScaleFactor 1.0)",
+  "axes": "Z up, -Y forward",
+  "armature": "object 'root' exported as the root bone above pelvis",
+  "leaf_bones": false,
+  "animation": false,
+  "deform_only": true,
+  "normal_maps": "OpenGL (+Y): flip green in Unreal"
+ },
+ "files": {
+  "SkinnyJeans/BodyCoverageMask_SkinnyJeans.png": "ada992f9ae2fe2fb0f49bd8c3f97337bfc5b83acbc22c3f8ae0df386a73719bd",
+  "SkinnyJeans/SKM_SkinnyJeans.fbx": "237c9a9d81675dabea712ad377a0f756da9423740e986398e8d5a55bb09047e2",
+  "SkinnyJeans/Textures/T_SkinnyJeans_ao.png": "d339d80ec9a5cb7f4ab35e88c7a83d1fbb15d9c054c6f38493b5ea81becf8102",
+  "SkinnyJeans/Textures/T_SkinnyJeans_basecolor.png": "14845b60facd0ee5cad98cfe4762086856eee6e1e405b5d68fd199a4c8a490c6",
+  "SkinnyJeans/Textures/T_SkinnyJeans_normal.png": "bde155c77d24f090cbaf69cd73db4d132be174b30e5bb083f20addc5f827720f",
+  "SkinnyJeans/Textures/T_SkinnyJeans_roughness.png": "923f5fb4a6f5b0f619cb1e9540ee4dc223027949e7a0550acee1858bad3f63cd",
+  "SkinnyJeansDark/BodyCoverageMask_SkinnyJeansDark.png": "ada992f9ae2fe2fb0f49bd8c3f97337bfc5b83acbc22c3f8ae0df386a73719bd",
+  "SkinnyJeansDark/SKM_SkinnyJeansDark.fbx": "ae5e66e3a284b4872244a38f66ee2839b21290a3e842465a8e809d625dbfdfc9",
+  "SkinnyJeansDark/Textures/T_SkinnyJeansDark_ao.png": "d339d80ec9a5cb7f4ab35e88c7a83d1fbb15d9c054c6f38493b5ea81becf8102",
+  "SkinnyJeansDark/Textures/T_SkinnyJeansDark_basecolor.png": "02a236e71cd9baf8de47bcf82b9dfd6fe8b05b1f58d1e8d4e23ee14e50e8fa90",
+  "SkinnyJeansDark/Textures/T_SkinnyJeansDark_normal.png": "bde155c77d24f090cbaf69cd73db4d132be174b30e5bb083f20addc5f827720f",
+  "SkinnyJeansDark/Textures/T_SkinnyJeansDark_roughness.png": "923f5fb4a6f5b0f619cb1e9540ee4dc223027949e7a0550acee1858bad3f63cd",
+  "Leggings/BodyCoverageMask_Leggings.png": "88b04dca6305a5e162954f0ba885951f52a988a51b83501ef4c18ba811f39510",
+  "Leggings/SKM_Leggings.fbx": "6afe0d3b3972a12cb042d427ae73f67dad8e16a05a96be6e23e9414eaaf29795",
+  "Leggings/Textures/T_Leggings_ao.png": "9148d15a88ae4b88a6b66fec10488b7d7d28d3de7dd29dcedfa73acf3d018e8b",
+  "Leggings/Textures/T_Leggings_basecolor.png": "101a4d12ba668a57da1c61b75e8663fe564c744e6cdf51ba7bc57f7433302a78",
+  "Leggings/Textures/T_Leggings_normal.png": "f3cc74f3344ea83ee889948eb46d5066151be45f32f77ee10736329879a61058",
+  "Leggings/Textures/T_Leggings_roughness.png": "8d142ee952a4b92b86cfc491c296770e4f475992cd4127f36b9c4761a42684ea",
+  "ScoopTank/BodyCoverageMask_ScoopTank.png": "26bc0eaaae1044ead8e573badde75fd8b5e326da0de0d41e2bbd64999ce6f180",
+  "ScoopTank/SKM_ScoopTank.fbx": "e4ad958bd5a5688137717495bd8729c8e80c8597a4cc3cf6f34e2a24676917bb",
+  "ScoopTank/Textures/T_ScoopTank_ao.png": "8b54c3903aa5a729f9f72a8519cac61ae6e913f49284cd3d2a840fed74e54191",
+  "ScoopTank/Textures/T_ScoopTank_basecolor.png": "91608084ed4a23618258faad117523fc323633320451e433ac767e7517abde76",
+  "ScoopTank/Textures/T_ScoopTank_normal.png": "5a5af789f5c5ae66a5b7c73332f44c8417e0b2b12f2f8fec7a423d809368c867",
+  "ScoopTank/Textures/T_ScoopTank_roughness.png": "e94e7b337a1f30eae213dd6ef7a3e8ef6a666d1a8df6a1e1fbf0f66ea8689c41",
+  "CropTop/BodyCoverageMask_CropTop.png": "e14e44104ed96b760c2836e19d781c070ff61a8be1ef6674a7e9d424b2083453",
+  "CropTop/SKM_CropTop.fbx": "52eb6dc328c06fc68dcd47df0b4d64f039a82d539846b9624a2c24c622b0d51e",
+  "CropTop/Textures/T_CropTop_ao.png": "e61d3e3df1ed9b5fd0f46359344050124761f4ea9db99ee8dbc7271b795ff973",
+  "CropTop/Textures/T_CropTop_basecolor.png": "a2542ba4e6eedd17628a7ac567ef2a58bb2753f46798b52d25875861133bc191",
+  "CropTop/Textures/T_CropTop_normal.png": "0e1e22cea67632a2878c049ba14b5d29f61aa7d463fd6307fb5fffbe55320fa5",
+  "CropTop/Textures/T_CropTop_roughness.png": "440b58dee715e6f7687a1682745ea5e607bebc64b2de7865e48c0b011218274e",
+  "BikerJacket/BodyCoverageMask_BikerJacket.png": "8d4400c378fd71c44cb572ce92b1b7a34d34d739c36dd7725f3614b7adc60266",
+  "BikerJacket/SKM_BikerJacket.fbx": "eb2b1ea28e843fa15767b68fd1bdb3b251772f5010a7fa37bbf0a2d354cf2fff",
+  "BikerJacket/Textures/T_BikerJacket_ao.png": "78cc3f3f88971a9fe56b3dcf4e0afc0ea57e8b08265432855886e70e859a48fa",
+  "BikerJacket/Textures/T_BikerJacket_basecolor.png": "a7df1d76e2d26f49044fd3727f694314e6f2c72ee638d0a749066c835ced6518",
+  "BikerJacket/Textures/T_BikerJacket_normal.png": "920f1928c3fbefaa641708c0a5144e94dbf7c0ad699e357ba423cfe89db5f4fb",
+  "BikerJacket/Textures/T_BikerJacket_roughness.png": "718859cd8c139d97a6baeb51d4c545badfb3ab40964e210290be678cfe9817a8"
+ }
+}

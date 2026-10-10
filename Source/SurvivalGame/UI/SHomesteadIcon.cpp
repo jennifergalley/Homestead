@@ -453,6 +453,14 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("fur-boots")), EKind::FurBoots},
         {FName(TEXT("woven-sandals")), EKind::WovenSandals},
         {FName(TEXT("turnshoes")), EKind::TurnShoes},
+        {FName(TEXT("scoop-tank")), EKind::ScoopTank},
+        {FName(TEXT("crop-top")), EKind::CropTop},
+        {FName(TEXT("skinny-jeans")), EKind::SkinnyJeans},
+        {FName(TEXT("dark-jeans")), EKind::DarkJeans},
+        {FName(TEXT("leggings")), EKind::Leggings},
+        {FName(TEXT("biker-jacket")), EKind::BikerJacket},
+        {FName(TEXT("sneakers")), EKind::Sneakers},
+        {FName(TEXT("ankle-boots")), EKind::AnkleBoots},
         {FName(TEXT("slot-torso")), EKind::SlotTorso},
         {FName(TEXT("slot-apron")), EKind::SlotApron},
         {FName(TEXT("slot-feet")), EKind::SlotFeet},
@@ -1312,6 +1320,87 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         P.Line({{6, 41}, {26, 41}}, Charcoal, 2);
         P.Line({{28, 34}, {47, 34}}, Charcoal, 2);
         break;
+    case EKind::ScoopTank:
+    {
+        // A black rib tank: slim straps, deep scoop, a close waist.
+        const FLinearColor Ink = Charcoal * 1.6f;
+        P.Shape({{19, 7}, {22, 7}, {23, 20}, {28, 27}, {33, 20}, {34, 7}, {37, 7}, {40, 20}, {38, 30},
+            {40, 48}, {16, 48}, {18, 30}, {16, 20}}, Ink);
+        P.Line({{23, 20}, {28, 27}, {33, 20}}, Gold, 1.5f);
+        P.Line({{17, 45}, {39, 45}}, Iron, 1.5f);
+        for (float X : {22.0f, 26.0f, 30.0f, 34.0f}) P.Line({{X, 32}, {X, 43}}, Iron * 0.8f, 1.0f);
+        break;
+    }
+    case EKind::CropTop:
+        // A crimson crop top: cap sleeves, a V of a scoop, cut high.
+        P.Shape({{18, 10}, {24, 10}, {28, 20}, {32, 10}, {38, 10}, {48, 18}, {43, 26}, {39, 23},
+            {39, 36}, {17, 36}, {17, 23}, {13, 26}, {8, 18}}, Berry);
+        P.Line({{24, 10}, {28, 20}, {32, 10}}, Gold, 1.5f);
+        P.Line({{18, 34}, {38, 34}}, Berry * 0.7f, 1.5f);
+        P.Line({{13, 24}, {17, 21}}, Berry * 0.7f, 1.5f);
+        P.Line({{43, 24}, {39, 21}}, Berry * 0.7f, 1.5f);
+        break;
+    case EKind::SkinnyJeans:
+    case EKind::DarkJeans:
+    {
+        // Skinny jeans, mid-blue or dark rinse: narrow legs, waistband, gold topstitching and a fly.
+        const FLinearColor Denim = IconKind == EKind::DarkJeans ? FLinearColor(0.09f, 0.13f, 0.27f) : FLinearColor(0.26f, 0.40f, 0.66f);
+        P.Shape({{16, 8}, {40, 8}, {41, 22}, {37, 50}, {31, 50}, {28, 24}, {25, 50}, {19, 50}, {15, 22}}, Denim);
+        P.Rect(16, 8, 24, 4, Denim * 0.75f);
+        P.Line({{28, 12}, {28, 20}, {30, 22}}, HayGold, 1.0f);
+        P.Line({{19, 13}, {23, 17}}, HayGold, 1.0f);
+        P.Line({{37, 13}, {33, 17}}, HayGold, 1.0f);
+        P.Line({{19, 47}, {25, 47}}, Denim * 0.7f, 1.5f);
+        P.Line({{31, 47}, {37, 47}}, Denim * 0.7f, 1.5f);
+        break;
+    }
+    case EKind::Leggings:
+        // Charcoal leggings: one smooth tapering silhouette with a broad waistband.
+        P.Shape({{17, 8}, {39, 8}, {40, 24}, {36, 50}, {31, 50}, {28, 25}, {25, 50}, {20, 50}, {16, 24}}, StoneGray * 0.55f);
+        P.Rect(17, 8, 22, 5, StoneGray * 0.4f);
+        P.Line({{22, 18}, {23, 44}}, StoneGray * 0.8f, 1.0f);
+        P.Line({{34, 18}, {33, 44}}, StoneGray * 0.8f, 1.0f);
+        break;
+    case EKind::BikerJacket:
+        // A cropped black leather jacket: stand collar, centre zip, zipped cuffs.
+        P.Shape({{19, 9}, {37, 9}, {46, 16}, {50, 44}, {44, 45}, {40, 24}, {40, 40},
+            {16, 40}, {16, 24}, {12, 45}, {6, 44}, {10, 16}}, Charcoal * 1.4f);
+        P.Shape({{19, 6}, {37, 6}, {37, 10}, {19, 10}}, Charcoal);
+        P.Line({{28, 10}, {28, 40}}, Iron * 1.4f, 1.5f);
+        P.Disc(28, 14, 1.5f, Iron * 1.6f);
+        P.Line({{6, 42}, {12, 43}}, Iron, 2);
+        P.Line({{50, 42}, {44, 43}}, Iron, 2);
+        P.Line({{16, 37}, {40, 37}}, Iron, 1.5f);
+        P.Line({{19, 18}, {25, 20}}, Iron * 0.9f, 1.0f);
+        P.Line({{37, 18}, {31, 20}}, Iron * 0.9f, 1.0f);
+        break;
+    case EKind::Sneakers:
+        // Pale canvas low-tops: rubber foxing, toe cap and laces.
+        P.Shape({{6, 30}, {14, 24}, {20, 24}, {29, 31}, {31, 37}, {29, 40}, {6, 40}}, Cream);
+        P.Shape({{27, 18}, {35, 12}, {41, 12}, {50, 19}, {52, 25}, {50, 28}, {27, 28}}, Cream);
+        P.Line({{6, 40}, {30, 40}}, StoneGray, 3);
+        P.Line({{27, 28}, {51, 28}}, StoneGray, 3);
+        P.Line({{23, 34}, {30, 36}}, StoneGray, 2);
+        P.Line({{44, 22}, {51, 24}}, StoneGray, 2);
+        P.Line({{15, 26}, {18, 30}}, Wood, 1.0f);
+        P.Line({{18, 26}, {15, 30}}, Wood, 1.0f);
+        P.Line({{36, 14}, {39, 18}}, Wood, 1.0f);
+        P.Line({{39, 14}, {36, 18}}, Wood, 1.0f);
+        break;
+    case EKind::AnkleBoots:
+    {
+        // Cognac leather ankle boots: slim shafts, laces, a low stacked heel.
+        const FLinearColor Cognac(0.62f, 0.33f, 0.14f);
+        P.Shape({{8, 16}, {18, 16}, {19, 30}, {27, 36}, {29, 42}, {8, 42}}, Cognac);
+        P.Shape({{30, 8}, {40, 8}, {41, 22}, {49, 28}, {51, 34}, {30, 34}}, Cognac * 0.85f);
+        P.Rect(8, 42, 6, 4, Charcoal);
+        P.Rect(30, 34, 6, 4, Charcoal);
+        P.Line({{8, 42}, {29, 42}}, Charcoal, 1.5f);
+        P.Line({{30, 34}, {51, 34}}, Charcoal, 1.5f);
+        P.Line({{14, 19}, {18, 23}, {14, 25}, {18, 29}}, Cream, 1.0f);
+        P.Line({{35, 11}, {39, 15}, {35, 17}, {39, 21}}, Cream, 1.0f);
+        break;
+    }
     case EKind::SlotTorso:
         P.Shape({{16, 10}, {24, 7}, {32, 7}, {40, 10}, {48, 22}, {42, 28},
             {38, 22}, {38, 49}, {18, 49}, {18, 22}, {14, 28}, {8, 22}}, Cream);
