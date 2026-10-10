@@ -9,6 +9,8 @@ from PIL import Image
 from scipy.ndimage import gaussian_filter, distance_transform_edt
 from scipy.spatial import cKDTree
 
+from cove_heath import CLIFF_SLOPE_DEG, heath_weight
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 WORK = os.environ.get("HOMESTEAD_TERRAIN_WORK", r"E:\TerrainSource\work")
 LAYERS = ["Pasture", "WoodlandFloor", "Moorland", "DuneSand", "Beach", "CliffRock", "DirtRoad"]
@@ -49,7 +51,9 @@ def main():
     gxm = (H - rows).astype(np.float32)
 
     w = {}
-    w["CliffRock"] = smoothstep(30, 42, slope)
+    # The cove's carved walls and cut stay heath: rock only on their steepest faces (cove_heath.py).
+    heath = heath_weight(gxm, (cols - H).astype(np.float32), L)
+    w["CliffRock"] = smoothstep(30, 42, slope) * (1 - heath) + smoothstep(*CLIFF_SLOPE_DEG, slope) * heath
     w["Beach"] = (1 - smoothstep(2.5, 5.0, z)) * (1 - smoothstep(30, 60, d_water)) * (1 - w["CliffRock"])
     # Dunes on the far (south-eastern) coast, just back from the beaches.
     rr = gaussian_filter(np.random.default_rng(7).random(z.shape).astype(np.float32), 25) * 10
