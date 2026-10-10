@@ -28,6 +28,7 @@ Gameplay and Wardrobe both add General Store stock; they coordinate the append-o
 
 - Map-shrink stage 2: half-scale terrain/water/scatter rebake (`openspec/changes/shrink-estate-map`,
   [map-shrink-planning.md](map-shrink-planning.md)). Resets saves.
+  Village carry-over (Village Agent, 8bdc73636): rerun town_pad.py, town_path.py, town_layout.py, public_road.py, weightmaps.py, route_sights.py --bake, village_dress.py, bake_ground.py, then Scripts\Map\bake_estate_map.py. `berries.py` has no village-street clearance, so add one before regenerating, or a berry can land back on the street (540012 was moved off it by hand).
 
 ## Placement ids claimed this round
 

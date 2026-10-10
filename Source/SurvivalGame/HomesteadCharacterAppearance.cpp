@@ -121,6 +121,7 @@ struct FMetaHumanGarmentSpec
     int32 Slot; // Index into MetaHumanGarments: 0 top, 1 legs, 2 coat, 3 feet.
     const TCHAR* Asset;
     float LiftCm; // Sole thickness (Assets/Characters/Footwear report character_offset_cm).
+    float BeltDropCm = 0; // Bottoms: how far below the shorts' waistband their own waist sits.
 };
 // Garments fitted to the MetaHuman body in Blender (Assets/Characters/Garments and Footwear) and
 // imported by Scripts/Characters/import_heroine_garments.py.
@@ -132,6 +133,16 @@ const FMetaHumanGarmentSpec MetaHumanGarmentSpecs[] = {
     {Homestead::WearableDefinition::FurBoots, 3, TEXT("SKM_FurBoots"), 1.2f},
     {Homestead::WearableDefinition::WovenSandals, 3, TEXT("SKM_WovenSandals"), 1.05f},
     {Homestead::WearableDefinition::TurnShoes, 3, TEXT("SKM_TurnShoes"), 0.5f},
+    // Assets/Characters/ModernClothing (modern_wardrobe.py) and Footwear/Sneakers, AnkleBoots.
+    {Homestead::WearableDefinition::ScoopTank, 0, TEXT("SKM_ScoopTank"), 0},
+    {Homestead::WearableDefinition::CropTop, 0, TEXT("SKM_CropTop"), 0},
+    // modern_wardrobe.py: jeans waist = navel - 10.5 cm, the shorts' = navel - 7.8 cm.
+    {Homestead::WearableDefinition::SkinnyJeans, 1, TEXT("SKM_SkinnyJeans"), 0, 2.7f},
+    {Homestead::WearableDefinition::DarkJeans, 1, TEXT("SKM_SkinnyJeansDark"), 0, 2.7f},
+    {Homestead::WearableDefinition::Leggings, 1, TEXT("SKM_Leggings"), 0},
+    {Homestead::WearableDefinition::BikerJacket, 2, TEXT("SKM_BikerJacket"), 0},
+    {Homestead::WearableDefinition::Sneakers, 3, TEXT("SKM_Sneakers"), 1.2f},
+    {Homestead::WearableDefinition::AnkleBoots, 3, TEXT("SKM_AnkleBoots"), 0.95f},
 };
 const FMetaHumanGarmentSpec* FindMetaHumanGarment(int32 Definition)
 {
@@ -551,7 +562,7 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         CordBelt->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("pelvis"));
         const FReferenceSkeleton& Skeleton = MetaHumanBody->GetRefSkeleton();
         const int32 Pelvis = Skeleton.FindBoneIndex(TEXT("pelvis"));
-        const FTransform BeltPivot(FVector(0.0f, 2.25f, 103.28f));
+        const FTransform BeltPivot(BeltPivotRef - FVector(0.0f, 0.0f, BeltDropCm));
         CordBelt->SetRelativeTransform(Pelvis == INDEX_NONE ? FTransform::Identity
             : BeltPivot.GetRelativeTransform(RefComponentTransform(Skeleton, Pelvis)));
         CordBelt->SetVisibility(true);
@@ -865,6 +876,7 @@ void AHomesteadCharacter::ApplyMetaHumanGarments()
 {
     if (!bMetaHumanActive || !MetaHumanOutfit || MetaHumanGarments.IsEmpty()) return;
     FootwearLift = 0;
+    BeltDropCm = 0;
     for (int32 Slot = 0; Slot < MetaHumanGarments.Num(); ++Slot)
     {
         USkeletalMeshComponent* Garment = MetaHumanGarments[Slot];
@@ -884,6 +896,15 @@ void AHomesteadCharacter::ApplyMetaHumanGarments()
         }
         Garment->SetVisibility(Fitted != nullptr);
         if (Fitted && Spec) FootwearLift = FMath::Max(FootwearLift, Spec->LiftCm);
+        if (Fitted && Spec) BeltDropCm = FMath::Max(BeltDropCm, Spec->BeltDropCm);
+    }
+    if (CordBelt)
+    {
+        const FReferenceSkeleton& Skeleton = MetaHumanBody->GetRefSkeleton();
+        const int32 Pelvis = Skeleton.FindBoneIndex(TEXT("pelvis"));
+        if (Pelvis != INDEX_NONE)
+            CordBelt->SetRelativeTransform(FTransform(BeltPivotRef - FVector(0.0f, 0.0f, BeltDropCm))
+                .GetRelativeTransform(RefComponentTransform(Skeleton, Pelvis)));
     }
     // The homespun tank top and shorts stay on as the base layer, hidden where a garment covers them.
     ShowMaterialSlot(*MetaHumanOutfit, TEXT("M_PrimitiveTankTop"), MetaHumanGarmentMesh(0) == nullptr);

@@ -117,7 +117,8 @@ constexpr std::uint32_t EstateWorldMarker = 0xE57A7Eu;
 enum class WearableDefinition : int
 {
     LinenTunic, LinenApron, LeatherShoes, WovenFootwraps,
-    LinenShirt, LinenLongShirt, Trousers, FurCoat, FurBoots, WovenSandals, TurnShoes, Count
+    LinenShirt, LinenLongShirt, Trousers, FurCoat, FurBoots, WovenSandals, TurnShoes,
+    ScoopTank, CropTop, SkinnyJeans, Leggings, BikerJacket, Sneakers, AnkleBoots, DarkJeans, Count
 };
 // Outer is a coat worn over whatever covers the torso.
 enum class EquipmentSlot : int { Torso, Legs, Apron, Feet, Outer, Count };
@@ -564,6 +565,8 @@ public:
     void SetWaterProbe(std::function<bool(Point)> probe) { waterProbe_ = std::move(probe); }
     bool NearWater(Point position) const;
     void SetFishingWaterProbe(std::function<FishingWater(Point)> probe) { fishingWaterProbe_ = std::move(probe); }
+    // Test seam: the chance a hooked fish gets away (default Fishing::EscapeChance); clamped to 0-1.
+    void SetFishingEscapeChance(double chance);
     FishingWater FishingWaterAt(Point player) const;
     const FishingSession& FishingCast() const { return fishing_; }
     Result CheckFishing(Point player) const;
@@ -867,6 +870,7 @@ private:
     std::function<bool(Point)> waterProbe_;
     std::function<FishingWater(Point)> fishingWaterProbe_;
     FishingSession fishing_;
+    double fishingEscapeChance_ = Fishing::EscapeChance;
     std::uint64_t nextFishingToken_ = 1;
     std::uint64_t revision_ = 0;
     int nextResourceHandle_ = TransientResourceIdBase;

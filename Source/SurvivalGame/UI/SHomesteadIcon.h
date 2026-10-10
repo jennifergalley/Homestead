@@ -48,7 +48,8 @@ private:
         RiverTrout, RiverSalmon, LakePerch, LakeCarp, SeaMackerel, SeaBass,
         SeedRoots, SeedTurnip, SeedCarrot, SeedPotato, SeedCabbage, SeedBroadBean, SeedStrawberry,
         BakedPotatoes, RoastedTurnips, StewedCarrots, HerbedBroadBeans, CabbagePotatoStew, BerryCompote,
-        StrawberryCompote, RootVegetableHotpot, RawFishSlices, GrilledTrout, GrilledPerch
+        StrawberryCompote, RootVegetableHotpot, RawFishSlices, GrilledTrout, GrilledPerch,
+        ScoopTank, CropTop, SkinnyJeans, Leggings, BikerJacket, Sneakers, AnkleBoots, DarkJeans
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{HomesteadPalette::Brass};

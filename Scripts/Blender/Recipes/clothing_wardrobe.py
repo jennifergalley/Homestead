@@ -439,6 +439,7 @@ from outfit import wardrobe_rig as WR  # noqa: E402
 from outfit import wardrobe_tex as WT  # noqa: E402
 
 EDGE_NAMES = {"trousers": ("waist", "leghem"), "tee": ("hem", "cuff", "neck"), "longshirt": ("hem", "cuff", "neck"),
+              "tank": ("hem", "neck"),
               "coat": ("hem", "cuff", "collartop", "opening")}
 BASE_TEX = ROOT / "Assets" / "Characters" / "PrimitiveOutfit" / "Textures"
 
@@ -550,7 +551,7 @@ def build_cloth(name, g, V, F, obj, body, layers, src, limb, arm, rng):
         sV, sN, sT = B.mesh_arrays(obj, evaluated=False)
         eye = WR.eyelets(g, V, B.Surface(sV, sN, sT))
         extra["eyelets"] = np.array(eye["l"] + eye["r"])
-    if kind == "trousers":
+    if kind == "trousers" and g.extra["params"].get("knee_patch", True):
         kn = body.bones["calf_l"][0]
         target = np.array([kn[0], kn[1] - 0.07, kn[2] + 0.02])
         c = V[np.argmin(np.linalg.norm(V - target, axis=1))]
@@ -577,13 +578,17 @@ def build_cloth(name, g, V, F, obj, body, layers, src, limb, arm, rng):
     g.extra["n_shell"] = len(obj.data.vertices)
     # loose threads: the tee's sleeve hems only (at the body hems they would hang over the cord
     # belt, at the trouser hems into the boots); the drawstring on the trousers
-    if kind == "tee":
+    pr = g.extra["params"]
+    if not pr.get("threads", True):
+        acc_fields = {}
+    elif kind == "tee":
         acc_fields = {"hem": fields["cuff"]}
     elif kind == "trousers":
         acc_fields = {k: v for k, v in fields.items() if k != "leghem"}
     else:
         acc_fields = {}
-    parts = R.accessories(obj, acc_fields, V, rng, drawstring=(kind == "trousers"))
+    drawstring = kind == "trousers" and pr.get("drawstring", True)
+    parts = R.accessories(obj, acc_fields, V, rng, drawstring=drawstring) if (acc_fields or drawstring) else []
     if eye is not None:
         parts += WR.lacing(obj, eye)
     join_parts(obj, parts, src)

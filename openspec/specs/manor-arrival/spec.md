@@ -48,3 +48,35 @@ A new game SHALL show a brief non-blocking title card with the estate name and t
 #### Scenario: Title card
 - **WHEN** a new game begins
 - **THEN** the title card appears and fades, and input is available again within about one second
+
+### Requirement: Bed sleep fully restores energy
+Any successful bed sleep SHALL leave energy at 100.
+
+#### Scenario: Short or dawn-limited sleep
+- **WHEN** she sleeps for any length in a reachable bed
+- **THEN** her energy is 100 on waking
+
+### Requirement: Evening bed sleep lasts until dawn
+Bed sleep beginning at or after the earlier of 6 PM and sunset SHALL end at the earlier of 6 AM and the following sunrise, regardless of when energy fills. Sleep after midnight but before dawn SHALL end that morning. Ordinary daytime energy-restoring sleep SHALL remain available. Time-dependent world consequences and sleep saving SHALL remain active.
+
+#### Scenario: Evening sleep with energy remaining
+- **WHEN** the heroine sleeps in a reachable bed after the evening threshold with partially depleted or full energy
+- **THEN** she wakes at the following dawn, not when energy first fills
+
+#### Scenario: Ordinary daytime rest
+- **WHEN** the heroine sleeps during daytime with depleted energy
+- **THEN** she takes the ordinary energy-restoring rest rather than skipping to tomorrow
+
+### Requirement: Names avoid Poldark references
+Player-facing people, business and estate names SHALL NOT reference Poldark.
+
+#### Scenario: Store and clerk
+- **WHEN** she visits the general store
+- **THEN** it is Trethewey's and the clerk is Mr. Josiah Trethewey
+
+### Requirement: Every cooked meal grants Well fed
+Eating any Meal on the estate SHALL start Well fed for the standard duration.
+
+#### Scenario: Cooked meal
+- **WHEN** she eats any cooked meal
+- **THEN** the Well fed badge shows until three hours later

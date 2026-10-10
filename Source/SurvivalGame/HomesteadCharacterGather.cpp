@@ -258,7 +258,7 @@ void AHomesteadCharacter::UpdatePouchSwing()
     const FQuat Flex = Swing(FVector::XAxisVector, 0.9f, -40.0f, 55.0f);
     const FQuat Abduct = Swing(FVector::YAxisVector, 1.0f, -20.0f, 20.0f);
     const FTransform AboutHip(Abduct, HipRef - Abduct.RotateVector(HipRef));
-    const FTransform Placed = FTransform(Flex, PouchPivotRef) * AboutHip;
+    const FTransform Placed = FTransform(Flex, PouchPivotRef - FVector(0.0f, 0.0f, BeltDropCm)) * AboutHip;
     ForagePouch->SetRelativeTransform(Placed.GetRelativeTransform(PelvisRefPose));
 }
 

@@ -15,6 +15,7 @@ import bpy
 import numpy as np
 
 from outfit import textures as T
+from . import modern as MD
 from . import pairs as PR
 
 S = T.smoothstep
@@ -335,13 +336,466 @@ def cord(F, seed):
     return base, h, 0.87 - 0.05 * ply
 
 
+# ===================================================== modern styles (MD pairs)
+# Canvas sneakers: cotton duck, vulcanised rubber, flat cotton lace. Ankle boots: polished
+# aniline calf, welt and stacked sole, waxed round lace. Albedo targets (linear): off-white duck
+# 0.59-0.66, white foxing rubber ~0.58, gum rubber (0.30, 0.17, 0.07), cognac calf ~(0.19, 0.075, 0.025)
+# burnished to ~(0.08, 0.03, 0.012), dark edge dressing ~0.05.
+
+def stitch_row(dist, along, offset, pitch, half_w=0.00042, duty=0.68):
+    """A row of lock stitches ``offset`` from a seam line: (thread mask, needle-hole pits)."""
+    ph = along / pitch
+    fr = ph - np.floor(ph)
+    dash = S(fr, 0.0, 0.07) * (1 - S(fr, duty - 0.07, duty))
+    across = np.exp(-((dist - offset) / half_w) ** 2)
+    pit = np.exp(-((dist - offset) / (0.8 * half_w)) ** 2) * np.exp(-((fr - 0.5 * (1 + duty)) / 0.05) ** 2)
+    return dash * across, pit
+
+
+def _u_seam(F):
+    """Distance from, and position along, the U round the lacing slit (eyestays + its bottom)."""
+    dx = np.maximum(F["dslit"], 0.0)
+    dy = np.maximum(F["sfr"] - F["slit_len"], 0.0)
+    d = np.sqrt(dx * dx + dy * dy)
+    along = np.where(dy > 0, F["slit_len"] + np.arctan2(dy, np.maximum(dx, 1e-5)) * np.maximum(d, 0.002), F["sfr"])
+    return d, along
+
+
+def _holes_dist(P, holes):
+    hd = np.full(len(P), 1.0)
+    for hp in holes:
+        hd = np.minimum(hd, np.linalg.norm(P - hp, axis=1))
+    return hd
+
+
+def _sneaker_zfox(F):
+    y = F["pos"][:, 1]
+    return 0.0095 + 0.0015 * S(y, F["heel_y"] - 0.05, F["heel_y"])
+
+
+def _cap(F):
+    P = F["pos"]
+    return np.sqrt(((P[:, 0] - F["toe_x"]) / F["cap_ax"]) ** 2 + ((P[:, 1] - F["tip_y"]) / F["cap_ay"]) ** 2)
+
+
+def white_rubber(F, seed):
+    P = F["pos"]
+    tone = fbm(P, 0.05, 3, seed)
+    alb = mix(col(0.585, 0.570, 0.528), col(0.615, 0.600, 0.560), S(tone, 0.3, 0.7))
+    stip = fbm(P, 0.00035, 2, seed + 1)
+    return alb * (0.985 + 0.03 * stip)[:, None], 0.025 * stip, 0.52 + 0.06 * stip
+
+
+def canvas(F, seed):
+    """Off-white 12 oz cotton duck: a tight plain weave in the flattened panel (Param UV, cm), soft
+    flex wrinkles across the vamp, lock-stitched eyestays, collar, heel and quarter seams, a rubber
+    toe cap glued over the front, a navy rubber heel label, punched eyelet holes, a little dust."""
+    P = F["pos"]
+    x, y, z = P[:, 0], P[:, 1], P[:, 2]
+    h_w, warp_top, tone, slub = T.weave(F["pu"] * 100, F["pv"] * 100, 13.0, 11.5, seed)
+    mott = fbm(P, 0.03, 3, seed + 1)
+    # broken in: washed-out tone drift, a warmer cast where it has been handled and worn
+    drift = fbm(P, 0.045, 3, seed + 9)
+    alb = col(0.645, 0.626, 0.584) * (0.95 + 0.10 * (mott - 0.5))[:, None] * (0.94 + 0.06 * tone)[:, None]
+    alb = mix(alb, alb * col(0.95, 0.94, 0.90), S(drift, 0.45, 0.75))
+    alb = alb * (0.80 + 0.20 * h_w)[:, None]
+    h = 0.075 * h_w + 0.02 * slub
+    rough = 0.84 + 0.08 * (1 - h_w)
+    # flex wrinkles across the vamp and short ones at the throat
+    ball = np.exp(-((y - F["ball_y"] - 0.008) / 0.022) ** 2) * S(z, 0.02, 0.035)
+    wr = S(ridge(P * np.array([0.25, 1.0, 0.7]), 0.011, 2, seed + 2), 0.55, 0.97) ** 2 * ball
+    h = h - 0.10 * wr
+    alb = alb * (1 - 0.025 * wr)[:, None]
+    # seams and stitching (thread a touch warmer than the duck)
+    thread = col(0.60, 0.575, 0.52)
+    sts, pits, grooves = np.zeros(len(P)), np.zeros(len(P)), np.zeros(len(P))
+    zf = _sneaker_zfox(F)
+    above = S(z, zf + 0.0005, zf + 0.002)
+    for off in (0.0042,):
+        s1, p1 = stitch_row(F["vtop"], F["dback"], off, 0.0029)
+        sts += s1; pits += p1
+    du, ua = _u_seam(F)
+    for off in (0.0022, 0.0046):
+        s1, p1 = stitch_row(du, ua, off, 0.0029)
+        on = (F["tongue"] < 0.5) & (F["sfr"] > -0.012)
+        sts += s1 * on; pits += p1 * on
+    db = F["dback"]
+    heel_back = above * S(y, F["heel_y"] - 0.07, F["heel_y"] - 0.05)
+    lab = (1 - S(db, 0.0105, 0.0115)) * S(z, zf + 0.0035, zf + 0.0045) * (1 - S(z, zf + 0.0165, zf + 0.0175)) * heel_back
+    grooves += np.exp(-(db / 0.00055) ** 2) * heel_back * (1 - lab)
+    for off in (0.0026,):
+        s1, p1 = stitch_row(db, z, off, 0.0029)
+        sts += s1 * heel_back * (1 - lab); pits += p1 * heel_back * (1 - lab)
+    # quarter over vamp at the side of the foot, slanting back as it rises
+    yq = F["ball_y"] + 0.050 + 0.45 * (z - 0.012)
+    dq = (y - yq) * 0.91
+    side = (F["dslit"] > 0.010) & (z > zf)
+    edge = np.exp(-(dq / 0.0005) ** 2) * side
+    grooves += edge
+    h = h + 0.18 * S(dq, -0.0003, 0.0003) * side
+    for off in (0.0016, 0.0036):
+        s1, p1 = stitch_row(dq, z + 0.3 * y, off, 0.0029)
+        sts += s1 * side; pits += p1 * side
+    sts = np.clip(sts, 0, 1)
+    h = h + 0.13 * sts - 0.10 * pits - 0.12 * grooves
+    alb = mix(alb, thread * (0.92 + 0.1 * fbm(P, 0.0008, 2, seed + 3))[:, None], S(sts, 0.3, 0.7))
+    alb = alb * (1 - 0.3 * pits - 0.18 * np.clip(grooves, 0, 1))[:, None]
+    # rubber toe cap and heel label
+    e = _cap(F)
+    cap = 1 - S(e, 0.988, 1.0)
+    ra, rh, rr = white_rubber(F, seed + 4)
+    alb = mix(alb, ra, cap)
+    h = h * (1 - cap) + (rh + 0.22) * cap - 0.10 * np.exp(-((e - 1.0) / 0.006) ** 2)
+    rough = rough * (1 - cap) + rr * cap
+    rim = lab * (1 - (1 - S(db, 0.0088, 0.0095)) * S(z, zf + 0.0052, zf + 0.006) * (1 - S(z, zf + 0.0148, zf + 0.0156)))
+    alb = mix(alb, col(0.024, 0.034, 0.078) * (0.95 + 0.1 * fbm(P, 0.002, 2, seed + 5))[:, None], lab)
+    h = h + 0.25 * lab + 0.08 * rim
+    rough = rough * (1 - lab) + (0.5 - 0.08 * rim) * lab
+    # eyelet holes punched through the eyestay
+    hd = _holes_dist(P, F["holes"])
+    hole = 1 - S(hd, 0.0017, 0.0021)
+    alb = alb * (1 - 0.93 * hole)[:, None]
+    h = h - 0.6 * hole
+    # dust along the foxing line and on the toe, a faint grey smudge or two
+    dust = (1 - S(z - zf, 0.0, 0.016)) * S(fbm(P, 0.010, 3, seed + 6), 0.38, 0.68) * (1 - cap)
+    smudge = S(fbm(P, 0.03, 3, seed + 7), 0.62, 0.8)
+    # grime ground into the weave (dark in the valleys, the thread tops cleaner)
+    valley = (1 - h_w) * S(fbm(P, 0.02, 3, seed + 10), 0.35, 0.7)
+    toe_g = S(-(y - (F["toe_y"] + 0.06)), 0.0, 0.05)
+    alb = mix(alb, col(0.40, 0.375, 0.335), 0.45 * dust + 0.18 * smudge + 0.10 * valley * (0.4 + toe_g))
+    alb = mix(alb, col(0.37, 0.35, 0.315), 0.22 * toe_g * S(fbm(P, 0.008, 3, seed + 11), 0.42, 0.7) * (1 - cap))
+    # the rubber toe cap: scuffed grey at the front, a scrape or two
+    capd = cap * S(fbm(P * np.array([1.0, 0.5, 1.0]), 0.004, 3, seed + 8), 0.55, 0.8) * toe_g
+    alb = mix(alb, col(0.44, 0.425, 0.395), 0.3 * capd)
+    rough = rough + 0.04 * dust + 0.05 * capd
+    return alb, h, rough
+
+
+def canvas_lining(F, seed):
+    """Cotton drill lining (a 2/1 twill) and a grey-beige sockliner worn darker at heel and ball."""
+    P = F["pos"]
+    u, v = F["pu"] * 100, F["pv"] * 100
+    tw = u * 16 + v * 16
+    rib = 0.5 + 0.5 * np.cos(2 * np.pi * tw / 1.5)
+    alb = col(0.56, 0.548, 0.515) * (0.9 + 0.1 * rib)[:, None] * (0.96 + 0.06 * fbm(P, 0.02, 3, seed))[:, None]
+    h = 0.05 * rib
+    z, y = P[:, 2], P[:, 1]
+    floor = 1 - S(z, 0.0008, 0.0025)
+    wear = np.exp(-((y - F["heel_y"] + 0.035) / 0.03) ** 2) + np.exp(-((y - F["ball_y"]) / 0.03) ** 2)
+    sock = col(0.47, 0.445, 0.405) * (1 - 0.15 * np.clip(wear, 0, 1))[:, None] * (0.95 + 0.08 * fbm(P, 0.003, 2, seed + 1))[:, None]
+    alb = mix(alb, sock, floor)
+    return alb, h * (1 - floor) + 0.04 * fbm(P, 0.0012, 2, seed + 2) * floor, 0.88 + 0.04 * floor
+
+
+def canvas_rim(F, seed):
+    """Collar binding: the duck folded over the top edge, a little greyed by handling."""
+    h_w, _, tone, _ = T.weave(F["pu"] * 100, F["pv"] * 100, 15.0, 13.0, seed)
+    alb = col(0.60, 0.582, 0.545) * (0.85 + 0.15 * h_w)[:, None] * (0.95 + 0.05 * tone)[:, None]
+    return alb, 0.05 * h_w, 0.86 + 0.04 * (1 - h_w)
+
+
+def vulc_rubber(F, seed):
+    """Vulcanised unit: gum outsole with a diamond tread and a smooth border; white foxing with a
+    gum edge band, a red line and a navy pinstripe; grime low on the wall, scuffs at toe and heel."""
+    P = F["pos"]
+    x, y, z = P[:, 0], P[:, 1], P[:, 2]
+    kind, zr, frac = F["kind"], F["zrel"], F["frac"]
+    alb, h, rough = white_rubber(F, seed)
+    gum_t = fbm(P, 0.02, 3, seed + 1)
+    gum = mix(col(0.28, 0.150, 0.058), col(0.34, 0.19, 0.075), S(gum_t, 0.3, 0.7))
+    wall = (kind > 0.5) & (kind < 1.5)
+    bot = kind < 0.5
+    band = wall & (zr < 0.0036)
+    alb = np.where(band[:, None], gum, alb)
+    h = h - 0.16 * np.exp(-((zr - 0.0036) / 0.00028) ** 2) * wall
+    navy = wall * S(zr, 0.0112, 0.01135) * (1 - S(zr, 0.0132, 0.01335))
+    red = wall * S(zr, 0.0092, 0.00935) * (1 - S(zr, 0.0099, 0.01005))
+    alb = mix(alb, col(0.022, 0.032, 0.080), navy)
+    alb = mix(alb, col(0.30, 0.030, 0.026), red)
+    rough = np.where(band, 0.48, rough)
+    # mould parting line and fine knurl on the foxing above the stripes
+    h = h - 0.05 * np.exp(-((zr - 0.0060) / 0.0002) ** 2) * wall
+    # outsole: diamond tread under a 5 mm smooth border, dust packed in the grooves, worn flat
+    a = (x + y) / 0.0042
+    b = (x - y) / 0.0042
+    dd = np.minimum(np.abs(a - np.floor(a) - 0.5), np.abs(b - np.floor(b) - 0.5))
+    groove = (1 - S(dd, 0.06, 0.13)) * (1 - S(frac, 0.84, 0.88))
+    wearz = np.clip(np.exp(-((y - F["ball_y"]) / 0.035) ** 2) + np.exp(-((y - F["heel_y"] + 0.03) / 0.03) ** 2), 0, 1)
+    gb = gum * (1 - 0.35 * groove)[:, None]
+    gb = mix(gb, col(0.33, 0.29, 0.23), (0.55 * groove + 0.2 * wearz * S(fbm(P, 0.004, 2, seed + 2), 0.4, 0.7))[:, None])
+    alb = np.where(bot[:, None], gb, alb)
+    h = np.where(bot, -0.5 * groove * (1 - 0.5 * wearz) + 0.04 * fbm(P, 0.0006, 2, seed + 3), h)
+    rough = np.where(bot, 0.62 + 0.15 * groove + 0.1 * wearz, rough)
+    # grime low on the wall, scuffs at the toe and heel
+    grime = wall * (1 - S(zr, 0.002, 0.014)) * S(fbm(P, 0.01, 3, seed + 4), 0.28, 0.65)
+    alb = mix(alb, col(0.29, 0.26, 0.215), 0.55 * grime)
+    # the foxing yellows a touch with wear, greyer toward the toe where it meets the ground
+    toe_w = wall * S(-(y - (F["toe_y"] + 0.04)), 0.0, 0.04)
+    alb = mix(alb, col(0.45, 0.43, 0.39), 0.35 * toe_w * S(fbm(P, 0.007, 2, seed + 7), 0.35, 0.7) * (1 - S(zr, 0.004, 0.014)))
+    alb = alb * (1 - 0.04 * S(fbm(P, 0.04, 2, seed + 8), 0.4, 0.8))[:, None] * col(1.0, 0.99, 0.965)
+    tip = S(-(y - F["toe_y"] - 0.01), 0.0, 0.02) + S(y - F["heel_y"], -0.01, 0.006)
+    scuff = S(fbm(P * np.array([1.0, 0.4, 1.0]), 0.004, 3, seed + 5), 0.66, 0.82) * np.clip(tip, 0, 1) * wall * (1 - 0.8 * (navy + red))
+    alb = mix(alb, col(0.42, 0.405, 0.375), 0.5 * scuff)
+    rough = rough + 0.12 * scuff + 0.06 * grime
+    return alb, h, rough
+
+
+def flat_lace(F, seed):
+    """7 mm flat cotton lace (tubular braid, chevrons), clear-sealed aglets at the ends."""
+    P = F["pos"]
+    u, v = F["pu"], F["pv"]
+    per = np.maximum(F["per"], 1e-4)
+    ang = u / per * 2 * np.pi
+    ph = v / 0.00065 + 1.2 * np.abs(np.sin(ang))
+    rib = np.sin(np.pi * (ph - np.floor(ph))) ** 0.8
+    fib = fbm(P, 0.0004, 2, seed)
+    alb = col(0.625, 0.612, 0.578) * (0.90 + 0.10 * rib)[:, None] * (0.95 + 0.07 * fib)[:, None]
+    edge = np.abs(np.cos(ang)) ** 8
+    alb = alb * (1 - 0.10 * edge)[:, None]
+    h = 0.05 * rib + 0.03 * fib
+    rough = 0.86 - 0.04 * rib
+    ag = S(F["aglet"], 0.3, 0.6)
+    alb = mix(alb, col(0.50, 0.49, 0.46), ag)
+    h = h * (1 - ag) + 0.05 * np.sin(v / 0.0012) * ag
+    rough = rough * (1 - ag) + 0.24 * ag
+    return alb, h, rough
+
+
+def nickel(F, seed):
+    """Rolled eyelets (no metallic channel in this material set: a bright grey, polished dielectric
+    with tarnish in the roll)."""
+    P = F["pos"]
+    tarn = S(fbm(P, 0.0015, 2, seed), 0.45, 0.75)
+    u = F["pu"] / np.maximum(F["per"], 1e-4)
+    roll = np.abs(np.cos(u * 2 * np.pi)) ** 4
+    alb = mix(col(0.42, 0.42, 0.43), col(0.22, 0.215, 0.21), 0.5 * tarn + 0.3 * roll)
+    return alb, 0.02 * tarn, 0.24 + 0.12 * tarn
+
+
+def calf(F, seed):
+    """Cognac aniline calf, polished: tonal mottling, very fine pores, burnished darker toe and
+    heel, creases across the vamp and the front of the ankle, lapped quarters, backstay and heel
+    counter double-stitched in cream, eyestays stitched round the lacing, punched eyelet holes."""
+    P = F["pos"]
+    x, y, z = P[:, 0], P[:, 1], P[:, 2]
+    tone = fbm(P, 0.05, 4, seed)
+    mott = fbm(P, 0.009, 3, seed + 1)
+    alb = mix(col(0.150, 0.058, 0.019), col(0.215, 0.088, 0.030), S(tone, 0.3, 0.72))
+    alb = alb * (0.90 + 0.2 * mott)[:, None]
+    f1, _, _, _ = cells(P, 0.00026, seed + 2)
+    pore = 1 - S(f1, 0.0, 0.2)
+    peel = fbm(P, 0.0011, 2, seed + 3)
+    sheen = fbm(P, 0.006, 3, seed + 9)
+    h = -0.014 * pore + 0.035 * (peel - 0.5) + 0.05 * (sheen - 0.5)
+    rough = 0.40 + 0.06 * pore + 0.10 * (sheen - 0.5) + 0.04 * (mott - 0.5)
+    # burnish: antique darkening at the toe, the heel and high on the shaft back
+    toe = S(-(y - (F["toe_y"] + 0.055)), 0.0, 0.05)
+    heel = S(y - (F["heel_y"] - 0.035), 0.0, 0.03) * (1 - S(z, 0.05, 0.10))
+    burn = np.clip(toe + 0.7 * heel, 0, 1) * (0.75 + 0.25 * fbm(P, 0.02, 2, seed + 4))
+    alb = mix(alb, col(0.068, 0.026, 0.011), 0.7 * burn)
+    rough = rough - 0.07 * burn
+    # creases: a few soft, broad flex lines across the vamp and the front of the ankle
+    ball = np.exp(-((y - F["ball_y"] - 0.006) / 0.016) ** 2) * S(z, 0.025, 0.04)
+    wv = (y - F["ball_y"]) / 0.0075 + 1.8 * fbm(P * np.array([0.3, 1, 1]), 0.02, 2, seed + 5)
+    cr = (0.5 + 0.5 * np.cos(2 * np.pi * wv)) ** 6 * ball
+    ank = np.exp(-((z - 0.074) / 0.012) ** 2) * S(F["dback"], 0.05, 0.08)
+    wa = z / 0.0065 + 1.5 * fbm(P * np.array([1, 1, 0.3]), 0.02, 2, seed + 6)
+    cr2 = (0.5 + 0.5 * np.cos(2 * np.pi * wa)) ** 6 * ank
+    h = h - 0.08 * cr - 0.06 * cr2
+    alb = alb * (1 - 0.06 * cr - 0.05 * cr2)[:, None]
+    rough = rough + 0.06 * cr + 0.05 * cr2
+    thread = col(0.30, 0.175, 0.085)
+    sts, pits, grooves = np.zeros(len(P)), np.zeros(len(P)), np.zeros(len(P))
+    not_tongue = F["tongue"] < 0.5
+    # topline (two rows)
+    for off in (0.0026, 0.0045):
+        s1, p1 = stitch_row(F["vtop"], F["dback"], off, 0.0026, half_w=0.00028)
+        sts += s1 * not_tongue; pits += p1 * not_tongue
+    # eyestays round the lacing slit
+    du, ua = _u_seam(F)
+    for off in (0.0022, 0.0040):
+        s1, p1 = stitch_row(du, ua, off, 0.0026, half_w=0.00028)
+        on = not_tongue & (F["sfr"] > -0.02)
+        sts += s1 * on; pits += p1 * on
+    edge_slit = np.exp(-(F["dslit"] / 0.0005) ** 2) * (F["sfr"] < F["slit_len"])
+    # quarters lapped over the vamp: a line from the foot of the lacing down and back to the welt
+    A = F["slit_end"]
+    B = np.array([A[0], F["ball_y"] + 0.040, 0.004])
+    tq = np.array([0.0, B[1] - A[1], B[2] - A[2]]); tq /= np.linalg.norm(tq)
+    nq = np.array([0.0, tq[2], -tq[1]])
+    if nq[1] < 0:
+        nq = -nq                                         # +: behind the line (the quarter)
+    rel = P - A
+    dq = rel @ nq
+    aq = rel @ tq
+    sideq = (F["dslit"] > 0.004) & (aq > -0.01)
+    lap = S(dq, -0.0003, 0.0003) * sideq
+    h = h + 0.22 * lap
+    grooves += np.exp(-(dq / 0.0005) ** 2) * sideq
+    for off in (0.0017, 0.0035):
+        s1, p1 = stitch_row(dq, aq, off, 0.0026, half_w=0.00028)
+        sts += s1 * sideq; pits += p1 * sideq
+    # backstay strip and heel counter
+    db = F["dback"]
+    zc = 0.052 * S(y, F["heel_y"] - 0.10, F["heel_y"] - 0.035) + 0.010
+    dc = z - zc
+    rear = y > F["heel_y"] - 0.105
+    bs = (z > zc - 0.002) & (y > F["heel_y"] - 0.06)
+    grooves += np.exp(-(db / 0.0005) ** 2) * bs + np.exp(-((db - 0.0082) / 0.0005) ** 2) * bs
+    h = h + 0.2 * (1 - S(db, 0.0079, 0.0085)) * bs
+    for off in (0.0062,):
+        s1, p1 = stitch_row(db, z, off, 0.0026, half_w=0.00028)
+        sts += s1 * bs; pits += p1 * bs
+    grooves += np.exp(-(dc / 0.0005) ** 2) * rear
+    h = h + 0.2 * (1 - S(dc, -0.0003, 0.0003)) * rear
+    for off in (-0.0017, -0.0035):
+        s1, p1 = stitch_row(dc, y + db, off, 0.0026, half_w=0.00028)
+        sts += s1 * rear; pits += p1 * rear
+    sts = np.clip(sts, 0, 1)
+    h = h + 0.08 * sts - 0.08 * pits - 0.10 * np.clip(grooves, 0, 1)
+    alb = mix(alb, thread * (0.9 + 0.15 * fbm(P, 0.0008, 2, seed + 7))[:, None], 0.85 * S(sts, 0.3, 0.7))
+    alb = alb * (1 - 0.35 * pits - 0.3 * np.clip(grooves + edge_slit, 0, 1))[:, None]
+    rough = rough + 0.12 * sts
+    # seams and edges take the burnish too
+    alb = mix(alb, alb * 0.72, 0.5 * np.clip(grooves * 3, 0, 1) * S(fbm(P, 0.004, 2, seed + 10), 0.3, 0.7))
+    # tongue a shade darker and unstitched
+    tg = F["tongue"]
+    alb = mix(alb, alb * 0.82, tg)
+    # eyelet holes
+    hd = _holes_dist(P, F["holes"])
+    hole = 1 - S(hd, 0.0012, 0.0015)
+    alb = alb * (1 - 0.93 * hole)[:, None]
+    h = h - 0.5 * hole
+    # a little dust where the upper meets the welt
+    dust = (1 - S(z, 0.0, 0.012)) * S(fbm(P, 0.012, 3, seed + 8), 0.5, 0.75)
+    alb = mix(alb, col(0.20, 0.15, 0.11), 0.3 * dust)
+    rough = rough + 0.08 * dust
+    return alb, h, rough
+
+
+def calf_lining(F, seed):
+    """Natural vegetable-tanned lining and a pale leather insole darkened where she stands."""
+    P = F["pos"]
+    z, y = P[:, 2], P[:, 1]
+    m = fbm(P, 0.02, 3, seed)
+    alb = mix(col(0.30, 0.205, 0.125), col(0.36, 0.25, 0.155), S(m, 0.3, 0.7)) * (0.95 + 0.08 * fbm(P, 0.0008, 2, seed + 1))[:, None]
+    floor = 1 - S(z, 0.0008, 0.0025)
+    wear = np.clip(np.exp(-((y - F["heel_y"] + 0.035) / 0.03) ** 2) + np.exp(-((y - F["ball_y"]) / 0.03) ** 2), 0, 1)
+    alb = alb * (1 - 0.25 * wear * floor)[:, None]
+    return alb, 0.03 * fbm(P, 0.0012, 2, seed + 2), 0.55 + 0.1 * floor
+
+
+def calf_rim(F, seed):
+    P = F["pos"]
+    m = fbm(P, 0.004, 2, seed)
+    return col(0.050, 0.026, 0.014) * (0.85 + 0.3 * m)[:, None], 0.02 * m, 0.34 + 0.08 * m
+
+
+def welt_sole(F, seed):
+    """Welt, sole edge and stacked heel, dressed dark brown and burnished; tan welt stitching
+    with dot-wheel marks; a natural leather sole worn at the ball and heel; rubber top-piece."""
+    P = F["pos"]
+    x, y, z = P[:, 0], P[:, 1], P[:, 2]
+    kind, zr, frac = F["kind"], F["zrel"], F["frac"]
+    wall = (kind > 0.5) & (kind < 1.5)
+    top = kind >= 1.5
+    bot = kind < 0.5
+    heel = y > F["breast_y"]
+    m = fbm(P, 0.008, 3, seed)
+    edge_col = mix(col(0.042, 0.023, 0.013), col(0.065, 0.036, 0.020), S(m, 0.3, 0.7))
+    alb = edge_col.copy()
+    h = 0.02 * fbm(P, 0.0006, 2, seed + 1)
+    rough = 0.33 + 0.08 * (m - 0.5)
+    # welt / outsole junction and the stacked lifts of the heel
+    y0, y1, rise = F["lift_p"]                     # the welt rises with the toe spring
+    jz = F["z_welt_bot"] + rise * S(-(y - y0), 0.0, y0 - y1) ** 1.3
+    h = h - 0.25 * np.exp(-((z - jz) / 0.0003) ** 2) * wall
+    lift = (z - F["z_bot"]) / 0.0019
+    li = np.floor(lift)
+    lfr = lift - li
+    ltone = T.hash1(li, seed + 2)
+    stack = wall & heel & (z < jz)
+    stack_col = mix(col(0.085, 0.048, 0.025), col(0.13, 0.078, 0.042), ltone[:, None])
+    stack_col = stack_col * (0.9 + 0.2 * fbm(P * np.array([1, 1, 4.0]), 0.004, 2, seed + 3))[:, None]
+    line = np.exp(-((lfr - 0.0) / 0.06) ** 2) + np.exp(-((lfr - 1.0) / 0.06) ** 2)
+    alb = np.where(stack[:, None], stack_col * (1 - 0.5 * line)[:, None], alb)
+    h = h - 0.08 * line * stack
+    rough = np.where(stack, 0.45, rough)
+    tp = wall & heel & (zr < 0.0028)
+    alb = np.where(tp[:, None], col(0.030, 0.028, 0.026), alb)
+    rough = np.where(tp, 0.72, rough)
+    # welt top: stitch row with dot-wheel impressions between the stitches
+    across = np.clip((kind - 2.0) / 0.9, 0, 1)
+    s1, p1 = stitch_row(across * 0.003, F["perim"], 0.0014, 0.0030, half_w=0.00032, duty=0.62)
+    s1 = s1 * top
+    alb = mix(alb, col(0.20, 0.12, 0.06), 0.8 * S(s1, 0.3, 0.7))
+    h = h + 0.10 * s1 - 0.08 * p1 * top
+    alb = alb * (1 - 0.3 * p1 * top)[:, None]
+    rough = rough + 0.12 * s1
+    # sole bottom
+    sole = mix(col(0.22, 0.14, 0.08), col(0.28, 0.185, 0.11), S(fbm(P, 0.02, 3, seed + 4), 0.3, 0.7))
+    wearz = np.clip(np.exp(-((y - F["ball_y"]) / 0.04) ** 2) + np.exp(-((y - F["toe_y"] - 0.02) / 0.03) ** 2), 0, 1)
+    scr = S(ridge(P * np.array([1.0, 0.35, 1.0]), 0.003, 2, seed + 5), 0.9, 1.0) * wearz
+    sole = mix(sole, col(0.12, 0.085, 0.06), (0.35 * wearz * S(fbm(P, 0.005, 2, seed + 6), 0.35, 0.7))[:, None])
+    sole = mix(sole, col(0.33, 0.25, 0.17), (0.5 * scr)[:, None])
+    rim_band = S(frac, 0.90, 0.94)
+    sole = mix(sole, edge_col, rim_band[:, None])
+    chan = np.exp(-((frac - 0.875) / 0.006) ** 2)
+    sole = sole * (1 - 0.25 * chan)[:, None]
+    rubber = col(0.032, 0.030, 0.028) * (0.9 + 0.2 * fbm(P, 0.003, 2, seed + 7))[:, None]
+    hb = bot & heel
+    sole = np.where(heel[:, None], mix(rubber, edge_col, S(frac, 0.95, 0.99)[:, None]), sole)
+    alb = np.where(bot[:, None], sole, alb)
+    h = np.where(bot, 0.03 * fbm(P, 0.0008, 2, seed + 8) - 0.08 * chan - 0.04 * scr, h)
+    rough = np.where(bot, np.where(heel, 0.75, 0.62 - 0.1 * wearz), rough)
+    h = np.where(hb, h + 0.04 * fbm(P, 0.0005, 2, seed + 9), h)
+    # scuffed toe edge
+    sc = wall * S(-(y - F["toe_y"]), -0.005, 0.01) * S(ridge(P, 0.002, 2, seed + 10), 0.9, 1.0)
+    alb = mix(alb, col(0.13, 0.085, 0.05), 0.5 * sc)
+    return alb, h, rough
+
+
+def round_lace(F, seed):
+    """2.6 mm waxed cotton lace, dark brown, with its two plies and a waxy sheen; dark aglets."""
+    P = F["pos"]
+    u, v = F["pu"], F["pv"]
+    per = np.maximum(F["per"], 1e-4)
+    ph = v / 0.0021 + 2 * u / per
+    ply = np.sin(np.pi * (ph - np.floor(ph))) ** 0.7
+    alb = col(0.052, 0.031, 0.018) * (0.75 + 0.35 * ply)[:, None] * (0.92 + 0.12 * fbm(P, 0.0005, 2, seed))[:, None]
+    h = 0.12 * ply
+    rough = 0.48 - 0.08 * ply
+    ag = S(F["aglet"], 0.3, 0.6)
+    alb = mix(alb, col(0.036, 0.030, 0.026), ag)
+    return alb, h * (1 - ag), rough * (1 - ag) + 0.22 * ag
+
+
+def brass(F, seed):
+    """Small antique-brass eyelets (dielectric stand-in: dark gold, glossy, tarnished in the roll)."""
+    P = F["pos"]
+    tarn = S(fbm(P, 0.0012, 2, seed), 0.4, 0.75)
+    u = F["pu"] / np.maximum(F["per"], 1e-4)
+    roll = np.abs(np.cos(u * 2 * np.pi)) ** 4
+    alb = mix(col(0.30, 0.205, 0.085), col(0.11, 0.075, 0.035), 0.55 * tarn + 0.3 * roll)
+    return alb, 0.02 * tarn, 0.26 + 0.12 * tarn
+
+
 KINDS = {
     PR.SUEDE: suede, PR.FUR_LINING: lambda F, s: wool(F, s, clean=0.6), PR.CUFF: cuff, PR.THONG: thong,
     PR.TURN_OUTER: turn_outer, PR.TURN_INNER: flesh_side, PR.TURN_RIM: turn_rim,
     PR.LACE: lambda F, s: thong(F, s, color=(0.14, 0.08, 0.042)), PR.SANDAL_SOLE: plant_sole, PR.CORD: cord,
+    MD.SNK_CANVAS: canvas, MD.SNK_LINING: canvas_lining, MD.SNK_RIM: canvas_rim, MD.SNK_RUBBER: vulc_rubber,
+    MD.SNK_LACE: flat_lace, MD.SNK_EYELET: nickel,
+    MD.BOOT_CALF: calf, MD.BOOT_LINING: calf_lining, MD.BOOT_RIM: calf_rim, MD.BOOT_SOLE: welt_sole,
+    MD.BOOT_LACE: round_lace, MD.BOOT_EYELET: brass,
 }
 DENSITY = {PR.FUR_LINING: 0.3, PR.TURN_INNER: 0.4, PR.TURN_RIM: 1.0, PR.CUFF: 1.0, PR.SUEDE: 1.0,
-           PR.THONG: 1.0, PR.LACE: 1.8, PR.CORD: 1.4, PR.SANDAL_SOLE: 1.0, PR.TURN_OUTER: 1.0}
+           PR.THONG: 1.0, PR.LACE: 1.8, PR.CORD: 1.4, PR.SANDAL_SOLE: 1.0, PR.TURN_OUTER: 1.0,
+           MD.SNK_CANVAS: 1.35, MD.SNK_LINING: 0.3, MD.SNK_RIM: 1.35, MD.SNK_RUBBER: 0.75, MD.SNK_LACE: 1.2,
+           MD.SNK_EYELET: 1.0, MD.BOOT_CALF: 1.3, MD.BOOT_LINING: 0.3, MD.BOOT_RIM: 1.3, MD.BOOT_SOLE: 0.75,
+           MD.BOOT_LACE: 1.2, MD.BOOT_EYELET: 1.0}
+# brightest linear albedo a part may reach (white canvas, rubber and lace are allowed past 0.6)
+ALBEDO_MAX = {MD.SNK_CANVAS: 0.7, MD.SNK_LINING: 0.7, MD.SNK_RIM: 0.7, MD.SNK_RUBBER: 0.7, MD.SNK_LACE: 0.7}
 
 
 # ------------------------------------------------------------------ plumbing
@@ -352,7 +806,8 @@ def _loops(me, layer):
     return uv.reshape(-1, 2)
 
 
-UNWRAP_PARTS = (PR.FUR_LINING, PR.SUEDE, PR.CUFF, PR.TURN_OUTER, PR.TURN_INNER, PR.TURN_RIM)
+UNWRAP_PARTS = (PR.FUR_LINING, PR.SUEDE, PR.CUFF, PR.TURN_OUTER, PR.TURN_INNER, PR.TURN_RIM,
+                MD.SNK_CANVAS, MD.SNK_LINING, MD.SNK_RIM, MD.BOOT_CALF, MD.BOOT_LINING, MD.BOOT_RIM)
 
 
 def select_faces(obj, mask):
@@ -570,7 +1025,7 @@ def synthesize(obj, built, out_dir, stem, R=2048, seed=0, extra=None, log=print)
         if "per" in ch:
             F["per"] = sel[:, ch["per"]].astype(np.float64)
         a, h, r = fn(F, seed + p)
-        albedo[m] = np.clip(a, 0, 0.6)
+        albedo[m] = np.clip(a, 0, ALBEDO_MAX.get(p, 0.6))
         height[m] = h
         rough[m] = np.clip(r, 0.3, 0.98)
         texel_mm[m] = 1000.0 / px_per_m[p]

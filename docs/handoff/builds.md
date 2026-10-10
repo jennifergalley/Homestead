@@ -51,6 +51,8 @@ slot, then go idle; they do not pick up unflagged queue items.
 - Clothes swap on equip, are sold at the General Store, and fit her closely.
 - A smoother, well-worn path down to town, and a lived-in village.
 - Modern clothes: tank top, crop top, jeans, leggings, leather jacket, sneakers, ankle boots.
+- No Pascoe or Cornwall in-game; the setting is left unnamed.
+- Well fed says what it does: work costs 15% less Energy for 3 hours.
 
 ## Build after next
 

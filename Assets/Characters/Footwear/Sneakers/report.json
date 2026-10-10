@@ -1,0 +1,383 @@
+{
+ "recipe": "Scripts/Blender/Recipes/footwear.py",
+ "seed": 20260927,
+ "blender": "5.2.1 LTS",
+ "inputs": {
+  "SKM_MHC_Heroine_BodyMesh_Full.fbx": "0af14405858eecbf7acbb69aa6bc8b721427a984ffb4babed4adc0f4e2b512bc",
+  "SKM_MHC_Heroine_FaceMesh.fbx": "910b48efbc66eb2327512eb822df2eea54055d232036ca1cd4e3c45c7e6184bf"
+ },
+ "asset": "SKM_Sneakers",
+ "material": "M_Sneakers",
+ "geometry": {
+  "vertices": 12954,
+  "triangles": 25452,
+  "bones_weighted": 10,
+  "max_influences": 4
+ },
+ "bones_exported": 15,
+ "bone_names": [
+  "ankle_bck_l",
+  "ankle_bck_r",
+  "ankle_fwd_l",
+  "ankle_fwd_r",
+  "ball_l",
+  "ball_r",
+  "calf_l",
+  "calf_r",
+  "calf_twist_01_l",
+  "calf_twist_01_r",
+  "foot_l",
+  "foot_r",
+  "pelvis",
+  "thigh_l",
+  "thigh_r"
+ ],
+ "sole_thickness_mm": 12.0,
+ "character_offset_cm": 1.2,
+ "footbed_z_mm": -0.5,
+ "fit": {
+  "l": {
+   "pivot": [
+    -0.10990708395838737,
+    0.14
+   ],
+   "inner_gap_min_mm": 1.1026509200763301,
+   "inner_gap_median_mm": 1.7584046300475968,
+   "topline_z_mm": {
+    "heel": 57.99999999999999,
+    "lateral": 39.99999999999999,
+    "throat": 75.0,
+    "medial": 46.0,
+    "tongue_tab": 95.0
+   },
+   "gap_worst_deficit_mm": 0.14306034511301605,
+   "toe_pole_z_mm": 11.868182187584676,
+   "sole_cols": 64,
+   "sole_rows": 18,
+   "sole_perimeter_mm": 675.2713073197311,
+   "sole_overhang_mm": {
+    "p50": 1.55,
+    "p90": 1.99,
+    "max": 3.43
+   },
+   "sole_length_mm": 287.35451702864265,
+   "sole_width_mm": 121.12717989270479,
+   "eyelet_pairs": 5,
+   "toe_spring_mm": 7.8
+  }
+ },
+ "textures": {
+  "resolution": 2048,
+  "uv_coverage": 0.6029489040374756,
+  "px_per_cm": {
+   "30": 61.2,
+   "31": 13.6,
+   "32": 61.2,
+   "33": 34.0,
+   "34": 56.4,
+   "35": 46.0
+  },
+  "albedo_mean": [
+   0.514278769493103,
+   0.4838902950286865,
+   0.43910473585128784
+  ],
+  "albedo_max": 0.6363179683685303,
+  "roughness_mean": 0.8054973483085632
+ },
+ "bind_pose": {
+  "verts": 12954,
+  "inside": 0,
+  "inside_pct": 0.0,
+  "inside_near_opening": 0,
+  "max_depth_mm": 0.0,
+  "p999_depth_mm": 0.0,
+  "inside_left": 0,
+  "inside_right": 0
+ },
+ "test_poses": {
+  "walk_heel_strike": {
+   "verts": 12954,
+   "inside": 2,
+   "inside_pct": 0.015,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.7,
+   "p999_depth_mm": 0.0,
+   "inside_left": 0,
+   "inside_right": 2
+  },
+  "walk_toe_off": {
+   "verts": 12954,
+   "inside": 2,
+   "inside_pct": 0.015,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.69,
+   "p999_depth_mm": 0.0,
+   "inside_left": 2,
+   "inside_right": 0
+  },
+  "kneel_toes_flexed": {
+   "verts": 12954,
+   "inside": 113,
+   "inside_pct": 0.872,
+   "inside_near_opening": 0,
+   "max_depth_mm": 2.37,
+   "p999_depth_mm": 1.87,
+   "inside_left": 56,
+   "inside_right": 57
+  },
+  "deep_squat": {
+   "verts": 12954,
+   "inside": 0,
+   "inside_pct": 0.0,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.0,
+   "p999_depth_mm": 0.0,
+   "inside_left": 0,
+   "inside_right": 0
+  },
+  "tiptoe": {
+   "verts": 12954,
+   "inside": 8,
+   "inside_pct": 0.062,
+   "inside_near_opening": 0,
+   "max_depth_mm": 0.97,
+   "p999_depth_mm": 0.09,
+   "inside_left": 4,
+   "inside_right": 4
+  }
+ },
+ "test_pose_definitions": {
+  "walk_heel_strike": [
+   [
+    "thigh_l",
+    "X",
+    -25
+   ],
+   [
+    "calf_l",
+    "X",
+    5
+   ],
+   [
+    "thigh_r",
+    "X",
+    12
+   ],
+   [
+    "calf_r",
+    "X",
+    40
+   ],
+   [
+    "foot_r",
+    "X",
+    5
+   ],
+   [
+    "ball_r",
+    "X",
+    -50
+   ]
+  ],
+  "walk_toe_off": [
+   [
+    "thigh_r",
+    "X",
+    -25
+   ],
+   [
+    "calf_r",
+    "X",
+    5
+   ],
+   [
+    "thigh_l",
+    "X",
+    12
+   ],
+   [
+    "calf_l",
+    "X",
+    40
+   ],
+   [
+    "foot_l",
+    "X",
+    5
+   ],
+   [
+    "ball_l",
+    "X",
+    -50
+   ]
+  ],
+  "kneel_toes_flexed": [
+   [
+    "thigh_l",
+    "X",
+    -8
+   ],
+   [
+    "thigh_r",
+    "X",
+    -8
+   ],
+   [
+    "calf_l",
+    "X",
+    100
+   ],
+   [
+    "calf_r",
+    "X",
+    100
+   ],
+   [
+    "foot_l",
+    "X",
+    -5
+   ],
+   [
+    "foot_r",
+    "X",
+    -5
+   ],
+   [
+    "ball_l",
+    "X",
+    -80
+   ],
+   [
+    "ball_r",
+    "X",
+    -80
+   ]
+  ],
+  "deep_squat": [
+   [
+    "pelvis",
+    "X",
+    18
+   ],
+   [
+    "thigh_l",
+    "X",
+    -118
+   ],
+   [
+    "thigh_r",
+    "X",
+    -118
+   ],
+   [
+    "thigh_l",
+    "Y",
+    -12
+   ],
+   [
+    "thigh_r",
+    "Y",
+    12
+   ],
+   [
+    "calf_l",
+    "X",
+    135
+   ],
+   [
+    "calf_r",
+    "X",
+    135
+   ],
+   [
+    "foot_l",
+    "X",
+    -35
+   ],
+   [
+    "foot_r",
+    "X",
+    -35
+   ],
+   [
+    "spine_01",
+    "X",
+    3
+   ],
+   [
+    "spine_02",
+    "X",
+    3
+   ],
+   [
+    "spine_03",
+    "X",
+    3
+   ],
+   [
+    "spine_04",
+    "X",
+    3
+   ],
+   [
+    "spine_05",
+    "X",
+    3
+   ]
+  ],
+  "tiptoe": [
+   [
+    "foot_l",
+    "X",
+    40
+   ],
+   [
+    "foot_r",
+    "X",
+    40
+   ],
+   [
+    "ball_l",
+    "X",
+    -40
+   ],
+   [
+    "ball_r",
+    "X",
+    -40
+   ]
+  ]
+ },
+ "coverage": {
+  "resolution": 2048,
+  "uv_channel": 0,
+  "uv_name": "DiffuseUV",
+  "udim_u_offset": 1.0,
+  "covered_triangles": 10875,
+  "total_triangles": 60816,
+  "margin_m": 0.012,
+  "foot_triangles_below_4cm": 10802,
+  "foot_triangles_below_4cm_covered_pct": 95.81
+ },
+ "suggested_warmth_0_10": 1,
+ "export_settings": {
+  "units": "centimeters (FBX UnitScaleFactor 1.0, raw cm values like the UE export)",
+  "axes": "Z up, -Y forward (FBX UpAxis Z, FrontAxis -Y)",
+  "armature": "object 'root' exported as the root bone above pelvis",
+  "leaf_bones": false,
+  "animation": false,
+  "deform_only": true,
+  "smoothing": "FACE",
+  "tangents": true,
+  "normal_maps": "OpenGL (+Y): flip green in Unreal"
+ },
+ "files": {
+  "SKM_Sneakers.fbx": "861a7d8c089b44222b41a57dc36105b8298080fb3841d01a80f70089d858d796",
+  "BodyCoverageMask_Sneakers.png": "acf91d3b41efc069628e9010ccf8883da59ef49ac4a6c5e06ea1ddf2ab2e8a6f",
+  "Textures/T_Sneakers_ao.png": "57c7a6522e6b4f38918028b73b959e8ac0e5dfaad68d01c5aae2c22ec7aa270b",
+  "Textures/T_Sneakers_basecolor.png": "0d27a8c511d68cf75884c575a02a65d89de7dd38cf0db70f6c6d83d0d02409ae",
+  "Textures/T_Sneakers_normal.png": "9a7fd68e2ec9021e70ce5baf898a1a705a7a7770d0f6292c7a16cfd2efbe9814",
+  "Textures/T_Sneakers_roughness.png": "e84a9979f826ac0de3668a69404ffc2eb17c9e5d0f0a32a7809881263f588cea"
+ }
+}

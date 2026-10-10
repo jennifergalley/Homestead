@@ -75,3 +75,10 @@ it SHALL not be bypassed to offer an unsafe save path.
 #### Scenario: World save succeeds but graphics persistence failed
 - **WHEN** quit is requested with a known outstanding graphics-save error
 - **THEN** the player is told which preference was not saved and can retry, stay, or explicitly accept exiting with that preference unsaved
+
+### Requirement: Quit controls match compact Settings scale
+The quit title, Save and Quit and Quit without saving controls SHALL use a smaller typography and button scale consistent with Settings, without altering save verification, confirmations or keyboard/controller navigation.
+
+#### Scenario: Open quit confirmation
+- **WHEN** the player selects Quit game in Settings
+- **THEN** its title and choices appear at the compact Settings scale and retain the existing safe exit behavior

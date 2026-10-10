@@ -19,6 +19,8 @@ struct FishingSession
     double strikeAfter = 0.0;
     std::uint64_t token = 0, timingSeed = 0;
     int landedBeats = 0;
+    // Strikes this fish needs, and the strike at which it throws the hook (-1: it stays on).
+    int beats = 0, escapeBeat = -1;
 };
 
 namespace Fishing
@@ -32,12 +34,24 @@ constexpr double CastSplashSeconds = 1.1, CatchLiftSeconds = 0.4;
 constexpr double CastContactTimeoutSeconds = 2.5;
 // The authored 0.8-second strike/lift also needs room for hitches and game-thread counter latency.
 constexpr double CatchContactTimeoutSeconds = 2.0;
-constexpr double MinBiteSeconds = 2.0, BiteVariationSeconds = 2.0, HookWindowSeconds = 0.9;
-constexpr double MinStrikeSeconds = 0.65, StrikeVariationSeconds = 0.6, StrikeWindowSeconds = 0.7;
-constexpr int LandingBeats = 2;
+// Jenny's harder fishing (harder-bob-fishing; numbers per balance.md section 8): about 60% of casts
+// fail for an attentive player, half by a hooked fish throwing the hook whatever the timing and the
+// rest by mistiming. Every wait is random so the rhythm can't be learned. Seconds of real time.
+constexpr double EscapeChance = 0.5;
+constexpr double MinBiteSeconds = 4.0, BiteVariationSeconds = 8.0, HookWindowSeconds = 0.8;
+constexpr double MinStrikeSeconds = 1.0, StrikeVariationSeconds = 2.5, StrikeWindowSeconds = 0.7;
+constexpr int MinLandingBeats = 2, MaxLandingBeats = 4;
+// False nibbles while waiting for the bite, and false tugs while waiting for each strike: the float
+// shivers for NibbleSeconds but stays up. None start within NibbleQuietSeconds of a segment's ends.
+constexpr int MaxBiteNibbles = 3, MaxStrikeTugs = 1;
+constexpr double NibbleSeconds = 0.3, NibbleQuietSeconds = 0.8;
 const char* WaterName(FishingWater water);
 Item CatchFor(FishingWater water, std::uint64_t seed);
 double Marker(const FishingSession& session);
 bool StrikeReady(const FishingSession& session);
+// The float is pulled under: the only time a click helps.
+bool FloatUnder(const FishingSession& session);
+// How hard a false nibble is shaking the float right now (0 when none, peaking at 1).
+double Nibble(const FishingSession& session);
 }
 }

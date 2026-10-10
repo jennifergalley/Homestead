@@ -16,7 +16,7 @@
 #include "UI/SHomesteadHotbar.h"
 #include "UI/SHomesteadHudScale.h"
 #include "UI/SHomesteadVitals.h"
-#include "UI/SHomesteadFishing.h"
+#include "UI/SHomesteadFishingRings.h"
 
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
@@ -80,10 +80,10 @@ void AHomesteadController::ShowHotbar()
     FishingRoot = SNew(SBox)
         .Visibility_Lambda([this]()
         {
-            return IsFishing() && ShouldShowHotbar() && !HasNativeMenu() && !IsNewGameSetup() && !IsNamingSetup()
+            return ShouldShowHotbar() && !HasNativeMenu() && !IsNewGameSetup() && !IsNamingSetup()
                 ? EVisibility::HitTestInvisible : EVisibility::Collapsed;
         })
-        [ SNew(HomesteadMenus::SHomesteadFishing).Controller(this) ];
+        [ SNew(HomesteadMenus::SHomesteadFishingRings).Controller(this) ];
     GEngine->GameViewport->AddViewportWidgetContent(FishingRoot.ToSharedRef(), 50);
 }
 

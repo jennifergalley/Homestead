@@ -119,7 +119,7 @@ def _top_folds(g, V, fields, body, seed):
     ax = g.extra["axial"]
     h = np.zeros(len(V))
     torso = reg == 0
-    amp = p.get("fold_amp", {"tee": 0.0024, "longshirt": 0.0036, "coat": 0.0022}[kind])
+    amp = p.get("fold_amp", {"tee": 0.0024, "longshirt": 0.0036, "coat": 0.0022}.get(kind, 0.0012))
     # vertical drape folds falling from the bust and shoulder blades
     yc = np.array([body.center_y(z) for z in np.clip(V[:, 2], 0.9, 1.6)])
     th = np.arctan2(V[:, 0], -(V[:, 1] - yc))
@@ -215,4 +215,6 @@ def _trouser_folds(g, V, fields, body, seed):
     # a few long drag lines down the thigh from the hip
     thigh = _smooth(p["junction_z"] - z, 0.02, 0.1) * (1 - _smooth(p["junction_z"] - z, 0.22, 0.34))
     h += 0.0010 * thigh * _n3(V * np.array([1.0, 1.0, 0.25]), seed + 6, 40.0)
-    return h
+    # jeans/leggings: no drawstring gathers at the waist, shallower bagging overall
+    h -= (1 - p.get("waist_gather", 1.0)) * gather * (0.0021 * _n1(a * 36, seed) + 0.0010 * _n1(a * 90, seed + 1))
+    return h * p.get("fold_scale", 1.0)

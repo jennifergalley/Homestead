@@ -378,7 +378,7 @@ void ClothingAtTheStore()
     // chest), one of each, and wearing one swaps it for what she has on without unequipping first.
     Store store = OpenStore();
     auto& sim = store.sim;
-    CHECK(std::size(GarmentShop::Offers) == 7);
+    CHECK(std::size(GarmentShop::Offers) == 15);
     Coins total = 0;
     for (const auto& offer : GarmentShop::Offers)
     {
@@ -386,7 +386,15 @@ void ClothingAtTheStore()
         CHECK(GarmentShop::Offered(ShopKind::GeneralStore, offer.definition));
         CHECK(!GarmentShop::Owned(sim.GetState(), offer.definition));
     }
-    CHECK(total == 1610 && GarmentShop::Price(WearableDefinition::LinenShirt) == 120);
+    CHECK(total == 3300 && GarmentShop::Price(WearableDefinition::LinenShirt) == 120);
+    CHECK(GarmentShop::Price(WearableDefinition::BikerJacket) == 450 && GarmentShop::Price(WearableDefinition::ScoopTank) == 100);
+    // Every garment the store sells has a name, a description and one equipment slot.
+    for (const auto& offer : GarmentShop::Offers)
+    {
+        const auto* info = GetWearableDefinition(offer.definition);
+        CHECK(info && std::strlen(info->name) > 0 && std::string(WearableDescription(offer.definition)) != "Unknown garment");
+        CHECK(info->slots != 0 && (info->slots & (info->slots - 1)) == 0);
+    }
     CHECK(!GarmentShop::Offered(ShopKind::GeneralStore, WearableDefinition::LinenTunic)
         && !GarmentShop::Offered(ShopKind::GeneralStore, WearableDefinition::LinenApron));
     // Refusals change nothing: not for sale, or too far from the counter.

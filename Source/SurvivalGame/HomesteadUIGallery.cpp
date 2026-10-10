@@ -753,17 +753,22 @@ const TArray<FHomesteadUIGallery::FEntry>& FHomesteadUIGallery::Entries()
             PC.Sim.GrantItems(Item::FishingPole, 1);
             PC.ChooseOnHotbar(Item::FishingPole);
             PC.Sim.SetFishingWaterProbe([](Point) { return Homestead::FishingWater::River; });
+            PC.Sim.SetFishingEscapeChance(0.0);
             const auto Cast = PC.Sim.BeginFishing(PC.PlayerPoint());
             PC.PrepareEstateSimulation(PC.Sim);
             if (!Cast) { PC.Notify(Cast); return; }
+            PC.Sim.AdvanceFishing(Homestead::Fishing::CastSplashSeconds, PC.PlayerPoint());
+            PC.Sim.FishingAnimationContact(Homestead::FishingContact::CastSplash, PC.Sim.FishingCast().token, PC.PlayerPoint());
             PC.Sim.AdvanceFishing(PC.Sim.FishingCast().biteAfter, PC.PlayerPoint());
-            if (Landing) PC.Sim.FishingPress(PC.PlayerPoint());
+            if (!Landing) return;
+            PC.Sim.FishingPress(PC.PlayerPoint());
+            PC.Sim.AdvanceFishing(PC.Sim.FishingCast().strikeAfter, PC.PlayerPoint());
         };
     };
-    Add(TEXT("hud-fishing-bite"), TEXT("Staged fishing bite: the active hook prompt and closing ring."),
+    Add(TEXT("hud-fishing-bite"), TEXT("Staged fishing bite: the float pulled under, with rings closing on it."),
         ECover::Hud, 16, nullptr, FishingStage(false), 0.4f);
-    Add(TEXT("hud-fishing-landing"), TEXT("Staged fishing landing: two strikes following the float's closing-ring cues."),
-        ECover::Hud, 17, nullptr, FishingStage(true), 1.1f);
+    Add(TEXT("hud-fishing-landing"), TEXT("Staged fishing strike: the hooked fish pulls the float under again, rings closing."),
+        ECover::Hud, 17, nullptr, FishingStage(true), 0.3f);
     Add(TEXT("hud-night"), TEXT("The world HUD at 10:30 PM: the moon in the calendar, the night-lit world."), ECover::Hud, 7, nullptr, Night, 1.5f);
     Add(TEXT("hud-rain"), TEXT("The world HUD in the rain: the rain cloud in the calendar, rain falling."), ECover::Hud, 8, nullptr, Rain, 1.5f);
     Add(TEXT("toast-night"), TEXT("A world notice at night: the parchment slip over the dark scene."), ECover::Hud, 9, nullptr,

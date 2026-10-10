@@ -5,6 +5,7 @@
 #include "InputActionValue.h"
 #include "HomesteadAppearance.h"
 #include "HomesteadWardrobePresentation.h"
+#include "HomesteadFishingPresentation.h"
 #include "HomesteadCharacter.generated.h"
 
 class UCameraComponent;
@@ -328,6 +329,14 @@ public:
     // The fish that comes up on the line at the catch (one of the six caught fish; anything else
     // shows the river trout). The controller sets it before or during the Catch pose.
     void SetFishingCatch(Homestead::Item Fish);
+    // The simulation's float cue for this frame (HomesteadControllerFishing.cpp PresentFishing).
+    void SetFishingCue(const FHomesteadFishingCue& Cue) { FishingCue = Cue; }
+    // Where the float lands, in degrees off her facing (right is positive), and the water surface's
+    // height there when known (else the float finds it with a trace); the controller picks both.
+    void SetFishingCast(float Degrees, TOptional<float> WaterZ) { FishingCastYaw = Degrees; FishingCastWaterZ = WaterZ; }
+    static constexpr float FishingCastReachCm = 480.0f;
+    // Where the float sits on the water (its waterline point), while it's out on the water.
+    bool FishingBobOnWater(FVector& OutWater) const { OutWater = FishingBobWater; return bFishingBobOnWater; }
     float ClearTargetYaw() const { return ClearYaw.Get(GetActorRotation().Yaw); }
     float TillTargetYaw() const { return TillYaw.Get(GetActorRotation().Yaw); }
     float WaterTargetYaw() const { return WaterYaw.Get(GetActorRotation().Yaw); }
@@ -390,14 +399,46 @@ private:
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> FishingLine;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> FishingFloat;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> FishingCatch;
+    // The same fish seen under the water before it's caught: it swims in, circles and noses the float.
+    UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> FishingSwimmer;
     UPROPERTY() TArray<TObjectPtr<UStaticMesh>> CaughtFishMeshes;
     Homestead::Item FishingCatchItem{};
     FVector FishingFloatAt = FVector::ZeroVector;
     FVector FishingFloatFrom = FVector::ZeroVector;
     bool bFishingFloatOut = false;
     float FishingBobTime = 0;
+    FHomesteadFishingCue FishingCue;
+    float FishingCastYaw = 0.0f;
+    TOptional<float> FishingCastWaterZ;
+    bool bPaintedFishingFloat = false;
+    // How long the float has been pulled under (s), for the quick sink before it vanishes.
+    // How far the float is pulled under (0 riding the water, 1 fully under), eased both ways.
+    float FishingSubmerge = 0;
+    float FishingSubmergeSpeed = 0;
+    // The swimming fish: where it starts its approach, its heading and place on the loiter circle.
+    FVector FishingSwimFrom = FVector::ZeroVector;
+    FVector FishingSwimAt = FVector::ZeroVector;
+    FVector FishingSwimHeading = FVector::ForwardVector;
+    float FishingSwimAngle = 0;
+    float FishingSwimStart = 0;
+    float FishingSwimArrive = 0;
+    float FishingSwimTurn = 1;
+    bool bFishingSwimPlanned = false;
+    // The fishing camera (Jenny, 2026-10-09): eases to a high view over her and the float while she
+    // fishes, like Coral Island, then back to the view she had.
+    float FishingCamBlend = 0;
+    FRotator FishingCamSavedView = FRotator::ZeroRotator;
+    FVector FishingCamSavedOffset = FVector::ZeroVector;
+    FVector FishingCamSavedSocket = FVector::ZeroVector;
+    float FishingCamSavedArm = 0;
+    bool bFishingCamSaved = false;
+    bool bFishingCamSavedCollision = true;
+    void UpdateFishingCamera(bool bFishing, float DeltaSeconds);
+    FVector FishingBobWater = FVector::ZeroVector;
+    bool bFishingBobOnWater = false;
     void CreateFishingTackle();
     void UpdateFishingTackle(UHomesteadAnimInstance& Animation, UStaticMeshComponent* Pole, float DeltaSeconds);
+    void UpdateFishingSwimmer(const FVector& Float, const FVector& TowardHer, EHomesteadFishingPose Pose, float DeltaSeconds);
     // The held lamp: a hanger at her grip (turned by the pendulum, like the pail), the lamp's parts
     // under it with the bail's top at the hanger, and the flame's light.
     UPROPERTY() TObjectPtr<USceneComponent> LampHanger;
@@ -432,6 +473,10 @@ private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Backpack;
     bool bBackpackShown = false;
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CordBelt;
+    // The belt's pivot in the reference pose, and how far the worn bottoms drop it (cm): low-rise
+    // jeans sit below the shorts' waistband the belt was fitted to, so belt and pouch ride lower.
+    FVector BeltPivotRef = FVector(0.0f, 2.25f, 103.28f);
+    float BeltDropCm = 0.0f;
     // The pouch hangs from the belt and lies on the outside of her right thigh, so it swings with
     // the thigh (forward and back about the belt, out and in about the hip) once her pose is final.
     FTransform PelvisRefPose;

@@ -51,3 +51,10 @@ Pointer, keyboard, and controller focus/direct manipulation SHALL move predictab
 #### Scenario: Cross between containers
 - **WHEN** directional input leaves a grid toward the other visible container
 - **THEN** focus reaches the nearest sensible tile/control without activating or transferring an item
+
+### Requirement: Focused chest names lead the interaction hint
+The focused chest's name SHALL be larger and more prominent than its keyed Open verb. Both SHALL remain readable without clipping or overlapping other HUD elements at 720p and 4K, including long custom names. Existing input and hint retirement SHALL remain unchanged.
+
+#### Scenario: Read a named chest
+- **WHEN** she faces a chest with a long custom name while an interaction hint is offered
+- **THEN** its full name leads the focus card and the current device's Open verb remains legible below it
