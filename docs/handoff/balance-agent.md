@@ -26,7 +26,11 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
   neighbour and communal sizing (`balance.md` §9).
 - 2026-10-10: Map Agent layout draft reviewed (cove 50 s, mine 38 s, estate 36 ha). OK on travel,
   with 3 blocking items: keep tool-head salvage and about 1,500 coins of clearing on her land; no
-  path running into the invisible edge; rename "Wheal Woods". Awaiting the revised panel.
+  path running into the invisible edge; rename "Wheal Woods".
+- 2026-10-10: revised layout Balance OK. All clearing stays on her land (about 4,900 coins); the
+  road ends at a gate and milestone ("Truro 14 miles"); Carn Wood; forage topped up to about 65;
+  cliff landings with rails. Still due: in-game sprint timings and a cliff-step check before the
+  Map Agent's [ready].
 
 ## Open
 
