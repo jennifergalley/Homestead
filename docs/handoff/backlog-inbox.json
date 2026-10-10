@@ -285,14 +285,6 @@
       "createdUtc": "2026-10-05T02:05:00.229Z"
     },
     {
-      "id": "jenny-muup9p7w-98hg1q",
-      "title": "The path down to town from the main road could be smoother",
-      "description": "The terrain looks a little choppy, and the path doesn't seem as well-worn as it should be",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-05T03:38:28.46Z"
-    },
-    {
       "id": "jenny-muupccau-7hxtoa",
       "title": "Normal height store clerk",
       "description": "There's a pretty big size disparity between the heroine and the general store clerk. Please make him either larger than me or the same size",
@@ -315,23 +307,6 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-05T04:09:51.129Z"
-    },
-    {
-      "id": "jenny-muuqynjo-mncq2v",
-      "title": "Brambles, weeds, branches should regrow occasionally around the manor and farm",
-      "description": "Imagine it's Washington and you're fighting off blackberry. The brambles and weeds should regrow around the manor and farm periodically, leading to an ongoing game loop of cleanup around the property (like in Disney Dreamlight Valley). Branches should also blow off of trees and land on the ground, so we can have more branches to cleanup, too.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-05T04:25:52.308Z"
-    },
-    {
-      "id": "jenny-muur49ie-8t5yb7",
-      "title": "Need more berry bushes and roots in woods on estate",
-      "description": "Foraging (walking around and collecting berries, roots, branches, stones) should  be its own gameplay loop alongside farming and fishing. Berry bushes also need to look very distinct from brambles, and walking up to them should trigger an interaction hint [E]: Pick Berries",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-05T04:30:14.054Z",
-      "updatedUtc": "2026-10-06T03:35:46.996Z"
     },
     {
       "id": "jenny-muurik7z-1lppa0",
@@ -359,22 +334,6 @@
       "updatedUtc": "2026-10-06T03:54:37.948Z"
     },
     {
-      "id": "jenny-muw5lwnm-wwwu9y",
-      "title": "Always show crop type & day number when pointing at growing crops",
-      "description": "Instead only seeing the crop type and day progress when I need to weed a growing crop, I should see it every time I point at the plot. I can't remember what I've planted, how long it's supposed to take or how long it's been, so seeing this tooltip anytime I point at the plot while it's growing will be really helpful.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-06T04:03:38.002Z"
-    },
-    {
-      "id": "jenny-muw5qdyb-5lcsxk",
-      "title": "Iron Tool upgrades at General Store",
-      "description": "Until we add mining to the game, we need a way to easily upgrade our tools to iron quality. Let's add those at the General Store as a placeholder, with each iron tool costing 2,000 coins each to start with.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-06T04:07:07.043Z"
-    },
-    {
       "id": "jenny-muw5uae9-2zgp1v",
       "title": "Add Quests",
       "description": "We need to give the user a campaign to play through; goals and milestones to aim for and achieve. These should be listed in a new tab in the Book called \"Quests\" to the right of the Map. These are presented as a checklist of items with a name and a description beneath it in italics, and each one gets its box checked off, its text crossed out, and is moved to the bottom of the list as it gets completed, most recently completed quests listed first so oldest completed are at the bottom. Not every quest should be available when the game starts; some should be unlocked through play, so it's not such an overwhelming list at first. When a new quest is added to the user's book, a toast should appear saying \"Quest Unlocked: <Title>\". \n\nI think some of the first ones should be: Clear the Estate (of debris and weeds); Grow Crops (purchase seeds, grow them to completion); Go Fish (acquire a fishing pole and catch your first fish); Iron Tools (acquire first iron tool); Farmer Level 1 (Grow and sell 25 completed crops); Fisher Level 1 (catch 25 fish); Home-Cooked Meals (cook and eat 25 meals); Explorer (visit every marked landmark on the map at least once)",
@@ -382,15 +341,6 @@
       "imageMime": null,
       "createdUtc": "2026-10-06T04:10:09.057Z",
       "updatedUtc": "2026-10-06T04:18:13.805Z"
-    },
-    {
-      "id": "jenny-muw6zadi-id5vku",
-      "title": "Fishing is too easy",
-      "description": "It's too easy to catch a lot of fish, very quickly. Please have fishing fail entirely like 60% of the time (it gets away). The minigame also needs to take longer before a fish even bites, with a variable / random wait time, and a variable / random wait in between \"strikes\" required. In other words nothing about it should be predictable / muscle memory, but rather a game of reaction times and paying attention.\n\nAlso, I'd really like the animations of the minigame to revolve around the actual bob on the surface of the water like how Coral Island and Hades do it, rather than this zoomed in view that pops up with the umber menu background. Please rework the fishing animations and assets to add a bob that is visible on the surface of the water and which disappears, indicating the need for clicks. You can also add some concentric circles that collapse on the bob to indicate a catch or click moment, as I think Coral Island does.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-06T04:42:01.926Z",
-      "updatedUtc": "2026-10-07T04:04:32.709Z"
     },
     {
       "id": "jenny-muw7f1tj-1z7rf1",
@@ -440,22 +390,6 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-06T05:08:02.47Z"
-    },
-    {
-      "id": "jenny-muw7xgf1-mf7b5s",
-      "title": "I should be able to clear the stump after felling a tree, just like I cleared the stumps on the derelict estate",
-      "description": "",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-06T05:08:36.061Z"
-    },
-    {
-      "id": "jenny-muxl8f94-ibw78l",
-      "title": "Bigger landmark icons for minimap and compass HUD",
-      "description": "Right now they're basically unreadable at 4K resolution - please just scale the icons up.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-07T04:08:48.952Z"
     },
     {
       "id": "jenny-muxleqei-7b7tfa",
@@ -537,30 +471,6 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-09T23:14:20.623Z"
-    },
-    {
-      "id": "jenny-mv1lb6ol-modcl1",
-      "title": "Modern clothing batch",
-      "description": "Jenny (2026-10-09, to Wardrobe): \"design me several more colored and various designs of different shirts, coats, bottoms and shoes for her to wear... a variety of modern-looking clothes - never mind the time period. I'd like to review each one before it goes in the game\" + \"They should all be fitted, sexy, attractive, and/or revealing, similar to the original clothes\". Picked: tank top, crop top, jeans, leggings, leather jacket, sneakers, ankle boots. Jenny reviews each garment before it goes in the game.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-09T23:22:02.517Z"
-    },
-    {
-      "id": "jenny-mv1lg9k5-nocorn",
-      "title": "Remove Pascoe and Cornwall from the game",
-      "description": "Jenny (2026-10-09): \"Please remove \\\"Pascoe's\\\" from the General store and any references to \\\"Cornwall\\\" - let's leave the location either fictional or ambiguous and totally disassociate from the Poldark inspiration in-game, so I could sell this game later without copyright issues.\"",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-09T23:25:59.525Z"
-    },
-    {
-      "id": "jenny-mv1lry6h-wfexp1",
-      "title": "Explain what Well fed does",
-      "description": "Jenny (2026-10-09): \"\\\"well fed\\\" status is never explained in game, so its unclear what that benefit entails. maybe we can include an explainer somewhere in the UI in the current build?\" Effect: 3 h after a Meal, work costs 15% less Energy (Food::WellFedHours, WellFedWorkFactor).",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-09T23:35:04.649Z"
     },
     {
       "id": "jenny-mv1y9z2k-irnmsg",

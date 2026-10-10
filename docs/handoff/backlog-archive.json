@@ -229,6 +229,37 @@
         "space-out-town-square"
       ],
       "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
+    },
+    {
+      "buildId": "20261009-next-01",
+      "archivedAt": "2026-10-10T06:00:00.000Z",
+      "status": "shipped-pending-player-acceptance",
+      "receipt": {
+        "buildRecord": "builds.md",
+        "changelist": "builds.md",
+        "observedUsageReport": "accounting/reports/20261009-next-01.json",
+        "recordedCalls": 2741,
+        "recordedAiu": "53025.876335",
+        "limitations": "Observed local runtime AIU only; external billing reconciliation, actual context tiers, and post-capture tails remain unknown."
+      },
+      "inboxEntries": [
+        "jenny-mv1lry6h-wfexp1",
+        "jenny-mv1lg9k5-nocorn",
+        "jenny-mv1lb6ol-modcl1",
+        "jenny-muxl8f94-ibw78l",
+        "jenny-muw7xgf1-mf7b5s",
+        "jenny-muw5qdyb-5lcsxk",
+        "jenny-muw5lwnm-wwwu9y",
+        "jenny-muur49ie-8t5yb7",
+        "jenny-muuqynjo-mncq2v",
+        "jenny-muup9p7w-98hg1q",
+        "jenny-muw6zadi-id5vku"
+      ],
+      "markdownOnlyEntries": [
+        "[Balance] Clearable home stumps",
+        "[Balance] Fishing: one catch message"
+      ],
+      "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
     }
   ]
 }
