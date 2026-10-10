@@ -109,7 +109,7 @@ slot, then go idle; they do not pick up unflagged queue items.
 
 ## Next build
 
-- Map-shrink stage 2: half-scale terrain rebake (resets saves).
+- Map-shrink stage 2 only (Jenny, 2026-10-09: isolated because it affects nearly everything): half-scale terrain rebake; resets saves.
 
 ## Build after next
 

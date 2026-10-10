@@ -2,7 +2,6 @@
   "order": [
     "rebuild-manor-and-decorate",
     "backlog:jenny-mut6t8g6-mcldh5",
-    "backlog:jenny-muuiony3-uh53hx",
     "backlog:jenny-muupccau-7hxtoa",
     "backlog:jenny-muulxhvp-250x9a",
     "backlog:jenny-muulwcjc-gj9t19",
@@ -10,10 +9,8 @@
     "backlog:jenny-muuls4vu-tjln72",
     "backlog:jenny-muuls4v6-qjrmsp",
     "backlog:jenny-muuls4to-xi7gl6",
-    "backlog:jenny-muulq1xx-supo5x",
     "backlog:jenny-muujt69b-39ivgg",
     "backlog:jenny-muujmxu4-wltdrt",
-    "backlog:jenny-muuf5kus-0g3f6k",
     "backlog:jenny-muuec1p1-u804w0",
     "backlog:jenny-muue8oyh-kmm2zg",
     "backlog:jenny-muudyitz-cju6ta",
@@ -57,11 +54,7 @@
     "backlog:jenny-mv1y9z2k-irnmsg"
   ],
   "slots": {
-    "backlog:jenny-muucy9hz-jv5gx7": "after-next",
-    "backlog:jenny-muuiony3-uh53hx": "next",
-    "backlog:jenny-muulq1xx-supo5x": "next",
-    "backlog:jenny-muuf5kus-0g3f6k": "next",
-    "backlog:jenny-muw7gqsr-a3x5ig": "next"
+    "backlog:jenny-muucy9hz-jv5gx7": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -122,7 +115,10 @@
     "backlog:jenny-muur49ie-8t5yb7",
     "backlog:jenny-muuqynjo-mncq2v",
     "backlog:jenny-muup9p7w-98hg1q",
-    "backlog:jenny-muw6zadi-id5vku"
+    "backlog:jenny-muw6zadi-id5vku",
+    "backlog:jenny-muuiony3-uh53hx",
+    "backlog:jenny-muulq1xx-supo5x",
+    "backlog:jenny-muuf5kus-0g3f6k"
   ],
-  "updated": "2026-10-10T06:05:00.000Z"
+  "updated": "2026-10-10T06:12:31.279Z"
 }

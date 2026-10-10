@@ -232,7 +232,7 @@
     },
     {
       "buildId": "20261009-next-01",
-      "archivedAt": "2026-10-10T06:00:00.000Z",
+      "archivedAt": "2026-10-10T06:00:00Z",
       "status": "shipped-pending-player-acceptance",
       "receipt": {
         "buildRecord": "builds.md",
@@ -253,7 +253,10 @@
         "jenny-muur49ie-8t5yb7",
         "jenny-muuqynjo-mncq2v",
         "jenny-muup9p7w-98hg1q",
-        "jenny-muw6zadi-id5vku"
+        "jenny-muw6zadi-id5vku",
+        "jenny-muuiony3-uh53hx",
+        "jenny-muulq1xx-supo5x",
+        "jenny-muuf5kus-0g3f6k"
       ],
       "markdownOnlyEntries": [
         "[Balance] Clearable home stumps",
