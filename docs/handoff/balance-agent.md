@@ -5,8 +5,8 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 
 | Field | Value |
 | --- | --- |
-| Session | 81a547cd-0a72-4415-a617-460b5ade5f3c ("Balance Agent") |
-| Branch / worktree | `jennifergalley-balance-agent` / `E:\Repos\copilot-worktrees\SurvivalGame\jennifergalley-probable-funicular` |
+| Session | ceb1109b-f156-451c-b890-ca91fa92f1c1 ("Balance Agent", from 2026-10-10; replaces archived 81a547cd) |
+| Branch / worktree | `jennifergalley-balance-agent-2c8` / `E:\Repos\copilot-worktrees\SurvivalGame\jennifergalley-supreme-broccoli` |
 | Model / configuration | Claude Opus 5.5, reasoning high, default context (as launched) |
 | Owned docs | `docs/design/balance.md`, `docs/design/cohesion.md`, this file |
 
@@ -20,6 +20,10 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-04: fishing final balance OK (numbers, copy, visuals) on `9958a359` / Art `abead265`.
   Non-blocking polish sent: one catch toast "Caught a lake carp.", cue panel off the heroine,
   larger fish glyphs, shorter refusal/escape lines.
+
+- 2026-10-10: map-shrink stage 2 budget sent to the Map Agent (4ff1041f) ahead of its consult:
+  cove and mine 35–50 s (cap 60 s), manor core/pond/village unchanged, estate about 35–50 ha,
+  neighbour and communal sizing (`balance.md` §9). Awaiting its top-down layout for an OK.
 
 ## Open
 

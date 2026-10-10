@@ -268,23 +268,42 @@ seconds. The MetaHuman sprints at 4.8 m/s. Sprinting costs no energy of its own;
 she walks at 2.1 m/s, about 2.3× slower, so walking is secondary context only. There's no
 movement-speed buff, and the map is scaled to fit these times.
 
+Stage 2 targets (Jenny's revised scope, 2026-10-10). The manor core, pond and village walk stay as
+they are; the cove and mine come much closer.
+
 | Route | Comfortable | Upper bound (max route length) | Today (sprint) |
 | --- | --- | --- | --- |
-| Farm → manor | 5–10 s | 15 s (72 m) | 8–12 s ✅ |
-| Manor → lake | 20–35 s | 45 s (216 m) | 44 s (at the bound) |
-| Manor → town/store | 40–60 s | 75 s (360 m) | 426–432 s 🔴 |
-| Manor → coast/beach | 45–70 s | 90 s (432 m) | 110–129 s 🔴 |
-| Manor → mine site | 45–70 s | 90 s (432 m) | about 91 s (estimate, no authored path) 🟡 |
+| Farm → manor | 5–10 s | 15 s (72 m) | 8–12 s ✅ keep |
+| Manor → pond | 20–35 s | 45 s (216 m) | 44 s ✅ keep (Jenny: fine) |
+| Manor → village store | 40–60 s | 75 s (360 m) | about 60 s (290 m walked, stage 1) ✅ keep |
+| Manor → cove (first dry sand) | 35–50 s | 60 s (288 m) | 109 s (525 m); 129 s to the CoveBeach marker 🔴 |
+| Manor → mine entrance | 35–50 s | 60 s (288 m), on a woodland path like the pond's | about 91 s (estimate, no authored path) 🔴 |
 
 - **Daily loop:** farm, then store, then one fishing spot, then home. That's at most about 3 minutes
   of sprinting, or 6% of the ~50-minute waking day; 60 s real is about 24 game minutes. On a
   low-energy walk the same loop is about 7 minutes, which is still acceptable.
-- **Distance order:** farm and manor are nearest, then the lake, then town. The coast and the mine
-  are trips she chooses to make.
-- **Town is the big one:** halving the map alone leaves it around 215 s, so it also has to move
-  close to the manor.
+- **Western loop (optional):** a mine–cove link path so manor → mine → cove → manor fits in about
+  3 minutes.
+- **Distance order:** farm and manor are nearest, then the pond, then the village, cove and mine at
+  about the same distance. The mine becomes a frequent hauling trip once mining ships, so nearer the
+  low end is better.
 - **Beauty:** no stretch longer than about 10 s of sprinting (about 50 m) without something to see
   or gather, such as flowers, a stile, a view or a forageable.
+
+### Estate, neighbours and communal land (stage 2)
+
+- **Her estate:** about 35–50 ha, down from about 90 ha. It keeps the manor core, farm, opening
+  clearing, pond and its woods, her private cove, the mine, and enough woodland more than 60 m from
+  home for felled trees to regrow.
+- **Neighbour estates:** two or three, smaller than hers (about 15–40 ha each), their houses
+  300–600 m from her manor and separated by hedgerows or woods. None sits across her routes to the
+  cove, mine, pond or village.
+- **Communal land clusters on the village:** a village green and allotments (the 1851 word; not
+  "community garden") within about 15–30 s of the square, a communal beach on the estuary within
+  about 30 s of the village, and a 60–100 m growth ring around the village pad.
+- **Reserved land looks finished today:** fields, hedges, woods and flowered verges, never bare
+  ground. World edges are natural (sea, moor, dense wood, hedged land) with no visible walls. Map
+  labels use period names and Cornish surnames; player copy never says "reserved" or "future".
 
 ### Proposed fixes to hit the targets
 
@@ -313,3 +332,6 @@ These are proposals for the Orchestrator to offer Jenny. None is scheduled.
   branches per 4 energy, so it's no coin farm); stump 24 h → sapling → full tree at 72 h, only for
   trees 60 m or more from home; road-verge (9 m) and village-square (45 m) trees are protected;
   reach 4.5 m.
+- 2026-10-10: stage 2 travel targets for Jenny's revised map-shrink scope (cove and mine 35–50 s,
+  cap 60 s; manor core, pond and village unchanged) and estate/neighbour/communal sizing (§9), sent
+  to the Map Agent.
