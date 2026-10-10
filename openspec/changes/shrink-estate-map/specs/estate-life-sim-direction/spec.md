@@ -2,22 +2,30 @@
 
 ## ADDED Requirements
 
-### Requirement: Compact map keeps human scale
+### Requirement: Compact map around a fixed manor core
 
-The playable landscape SHALL be roughly 2 km across in each direction, about half today's linear dimensions. The home estate SHALL be modestly smaller, targeting 85-90% of its previous usable parcel area rather than one-quarter area. The town SHALL remain outside the owned estate with its open square and usable lanes; characters, doors, farm cells, bridges and steps SHALL retain their usable human-scale dimensions. The fixed layout, ground, water, parcels, signs, map and travel destinations SHALL agree.
+The manor ruin, derelict farm, opening clear-out, pond and its woodland path, the village, its street and the road from the manor SHALL keep their positions and placement ids. The home estate SHALL hold about 25 ha of land and keep the manor core, pond woods, the cove, the beach below it and the mine ruin; the village SHALL lie outside it. The playable area and map sheet SHALL be about 1.5 km across, bounded by natural edges (sea, dense wood, hedged fields) with no visible walls.
 
-#### Scenario: Exploring the smaller estate
-- **WHEN** Jenny starts a new game on the completed compact-map release and follows its routes from manor to town, lake, coast and mine
-- **THEN** the world is visibly smaller without miniature buildings or blocked routes, and map markers, ownership and arrival points correspond to the actual places
+#### Scenario: Starting a game on the compact map
+- **WHEN** Jenny starts a new game and opens the map
+- **THEN** the sheet shows only the cropped area, her estate is visibly smaller, and the manor, farm, pond path and village look and sit as before
 
-### Requirement: Short trips are sized for sprint
+### Requirement: Near trips are sized for sprint
 
-With sufficient energy and the ordinary heroine's unchanged 4.8 m/s sprint, the intended unobstructed one-way routes SHALL take no more than 15 s from farm gate to manor, 45 s from manor to lake landing, 75 s from manor to town square AND store door, and 90 s from manor to both the beach arrival/named cove destination and the mine site. A farm/store/one-fishing-stop/home circuit SHALL fit within about three real minutes of sprinting without fast travel. Walking times SHALL be reported as fallback context, not substituted for the sprint sizing criteria.
+With energy of at least 25 and the unchanged 4.8 m/s sprint, the walked one-way routes from the manor SHALL take no more than 60 s to the cove's first sand and 60 s to the mine ruin, and farm, pond and store trips SHALL be no longer than today. Dry sand SHALL run continuously from the cove along the bay onto the long beach.
 
-#### Scenario: First closer-town delivery
-- **WHEN** Jenny sprints normally from the manor to the relocated town and enters the general store
-- **THEN** the store door is reached within 75 real seconds along the connected route, without teleporting or increasing movement speed
+#### Scenario: Walking to the cove and along the beach
+- **WHEN** Jenny sprints from the manor to the cove and on along the sand
+- **THEN** she reaches the sand within 60 s and can walk from the cove onto the long beach without swimming or climbing
 
-#### Scenario: Full compact-map circuit
-- **WHEN** the five routes and daily circuit are timed without stops on the completed compact map at energy >=25
-- **THEN** each route meets its sprint cap and the circuit fits about three minutes, with space to traverse normal gates, paths, bridge and stairs
+#### Scenario: Walking to the mine
+- **WHEN** Jenny sprints from the manor along the mine path
+- **THEN** she reaches the mine ruin within 60 s
+
+### Requirement: Reserved land is outlined on the map
+
+The map SHALL show faint dashed outlines with period names for neighbouring estates and communal land (a village green, allotments and a communal beach) and for land for sale next to her estate. Reserved land SHALL look finished in the world and SHALL NOT sit across her routes to the cove, mine, pond or village. Player copy SHALL NOT say "reserved" or "future".
+
+#### Scenario: Reading the map
+- **WHEN** Jenny opens the map
+- **THEN** she sees Penhallow, Tregarthen and Polwhele, the village green, allotments and Chapel sands outlined and named, with no neighbour gameplay
