@@ -111,7 +111,7 @@ slot, then go idle; they do not pick up unflagged queue items.
 
 ## Next build
 
-- Map-shrink stage 2 only (Jenny, 2026-10-09: isolated because it affects nearly everything): half-scale terrain rebake; resets saves.
+- Map shrink stage 2 only (isolated; Jenny 2026-10-09): keep the manor core and the town walk as they are; bring the cove and mine much closer; crop the unexplored world; outline reserved plots for neighbouring estates and communal areas (beach, park, community garden).
 
 ## Build after next
 

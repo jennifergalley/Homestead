@@ -130,12 +130,12 @@
     },
     {
       "id": "jenny-muucy9hz-jv5gx7",
-      "title": "Shrink the map by about half; smaller estate; town closer",
-      "description": "The map is too big and it takes too long to get anywhere (Coral Island's size makes sense now). Scale the map down by roughly half, make the estate itself a tad smaller, and bring town closer so walking there doesn't take so long.\n\nStage 1 shipped 2026-10-04 7:28 PM: the village is now ~300 m / 63 s sprint from the manor, road trimmed to 852 m. Remaining: stage 2, the full half-scale shrink (terrain, water, scatter rebake; large, 3-5 days), per openspec/changes/shrink-estate-map.",
+      "title": "Shrink the map: bring the cove and mine closer, reserve room for neighbours",
+      "description": "Jenny (2026-10-10, revised stage-2 scope): \"The immediate area around the ruined manor - the derelict farm, the area we need to clear when the game begins, the path to the pond through the woods, the walk to the town, and how far away and how large the town is now - that's all fine. What needs to change is: The cove is too far away, the mine is too far away, the estate is too big on the map, and there's much of the world that I don't think we'll ever end up actually exploring. I'd like to have some growing room for the town and other estates nearby (neighbors), as well as perhaps a communal beach and other communal areas, but in general I think the map can shrink considerably. Perhaps as part of the shrink we could consider outlining the shape of future neighboring estates on the map at least, so we make sure we leave some room for them, as well as some future communal areas like a beach, a park, maybe a community garden, etc.\" Stage 1 (village ~300 m from the manor) shipped 2026-10-04.",
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-04T21:53:39.479Z",
-      "updatedUtc": "2026-10-05T02:29:34.824Z"
+      "updatedUtc": "2026-10-10T16:55:12.559Z"
     },
     {
       "id": "jenny-muudyirr-dn5j2m",
