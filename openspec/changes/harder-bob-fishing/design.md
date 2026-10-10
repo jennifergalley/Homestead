@@ -1,15 +1,15 @@
 # Design
 
 ## Rules (simulation, seeded per cast)
-`FishingSession` gains `beats` (strikes needed, 2-4), `escapeBeat` (-1, or the strike at which the fish throws the hook). Waits stay seeded from the cast hash; nibble/tug times are a pure function of the seed and segment, so presentation and tests read the same times without stored arrays. An early click (any time the float isn't under) loses the fish, as before. When the fight reaches `escapeBeat`'s strike time the cast ends with "It got away." and no reward. A test-only `SetFishingEscapeChance` seam (like `SetFishingWaterProbe`) lets tests force a keeper; the default is Jenny's 60%.
+`FishingSession` gains `beats` (strikes needed, 2-4) and `escapeBeat` (-1, or the 1st/2nd strike at which the fish throws the hook, never the last). Waits stay seeded from the cast hash; nibble/tug times are a pure function of the seed and segment, so presentation and tests read the same times without stored arrays. A click while the float is up loses the fish ("Too soon – it shied away."); a missed window says "The fish slipped the hook."; an escape says "It got away." A test-only `SetFishingEscapeChance` seam (like `SetFishingWaterProbe`) lets tests force a keeper. A catch returns no message: the pack's "+1 <fish>" notice is the only catch message (Jenny, 2026-10-09).
 
-Numbers are agreed with Balance and live as named constants in `HomesteadFishing.h`.
+Numbers are Balance's (balance.md section 8; Jenny confirmed 60% means the total failure rate): escape 50%, bite 4-12 s, 0-3 nibbles and 0-1 fake tug per strike wait (0.3 s shiver), hook window 0.8 s, 2-4 strikes 1.0-3.5 s apart, strike window 0.7 s. Named constants in `HomesteadFishing.h`.
 
-## Presentation
-- `SHomesteadFishing` (the zoomed bank scene) is removed; the cancel hint moves to the focus line.
-- The float is a visible painted cork float on the water, sized for the gameplay camera. Waiting: lazy bob; nibble: shiver plus a small outgoing ripple; bite/strike ready: pulled under (hidden) with collapsing gilt rings over the reaction window; fight rest: back on the surface, towed and trembling; escape/miss: an outgoing splash ring and the existing Miss reel-in.
-- Rings are drawn by a HUD Slate leaf that projects world circles at the float's water height, so they sit on the water in perspective without new materials. Nothing scales with placements; it only paints while fishing.
+## Presentation (approved by Jenny in PIE review, 2026-10-09)
+- Controls: the left mouse button (RT) is the only fishing button. Esc/B open the menu as anywhere else (which reels in). The focus card shows only "[LMB] Cast line"; refusals are said once, by the click's notice.
+- The zoomed umber `SHomesteadFishing` panel is removed.
+- Camera: while fishing it eases to a high view (pitch -50, arm 6.2 m) over the midpoint of her and the float, and back to her own view afterwards. The room camera stays out while it's active (it fought it every frame and caused jitter), and the arm's collision probe is off.
+- The float (`SM_FishingFloat`, `fishing_float.py`, short quill) lands 4.8 m straight ahead, angling off only where straight ahead isn't open water; shown at 2.8x, shrinking to true size as it nears her. The line ties to the quill top throughout.
+- Cue: a bite or strike pulls the float under on a spring (eased down, bobbing back up when let go) while one gold ring closes on its spot across the reaction window. Nibbles shiver it with one faint ripple.
+- The fish being caught swims in just under the surface, arriving 30-60% through the wait, circles, noses the float on nibbles and holds under it thrashing while hooked.
 - The cast, fight, strike and catch clips are reused unchanged.
-
-## Risks
-Waits are long enough that idle wobble must read as "not yet": nibbles are deliberately small and short against the full sink.

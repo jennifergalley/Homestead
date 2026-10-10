@@ -10,7 +10,7 @@ red above the waterline and cream below, with a red-tipped quill and a flax whip
 the quill leaves the cork. No plastic bobber or borrowed geometry.
 
 Authored dimensions: cork body 48 mm across and 60 mm tall, quill 4.4 mm across running
-15 mm below the cork and 70 mm above it. The engine shows it larger than life
+15 mm below the cork and a short 35 mm above it (so the line ties on close to the water). The engine shows it larger than life
 (HomesteadCharacterFishing.cpp FloatDisplayScale) so it reads at the gameplay camera.
 The base pivot is the quill's foot; the waterline (the paint seam) is REPORT waterline_cm
 above it.
@@ -33,9 +33,9 @@ CORK_HEIGHT = 0.060
 CORK_RADIUS = 0.024
 CORK_WIDEST = 0.42   # fraction of the height where the body is widest
 SEAM = 0.50          # paint seam (waterline) as a fraction of the cork's height
-QUILL_ABOVE = 0.070
+QUILL_ABOVE = 0.035
 QUILL_RADIUS = 0.0022
-TIP_LENGTH = 0.024
+TIP_LENGTH = 0.014
 SIDES = 36
 RINGS = 40
 REPORT = {"waterline_cm": round(100.0 * (QUILL_BELOW + SEAM * CORK_HEIGHT), 2),

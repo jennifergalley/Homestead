@@ -196,7 +196,6 @@ public:
     double WaterEdgeDistance(Homestead::Point Position, bool bIncludeSea = true) const;
     Homestead::FishingWater ProbeFishingWater(Homestead::Point Position) const;
     bool IsFishing() const;
-    FString FishingPrompt() const;
     bool IsWorldReady() const { return bWorldReady; }
     uint32 WorldRecoveryCount() const { return WorldRecoveries; }
     // Where the construction preview currently resolves (snapped or free-standing).
@@ -712,6 +711,8 @@ private:
     void FishingInput();
     void TickFishing(float DeltaSeconds);
     void PresentFishing();
+    float ChooseFishingCastYaw(const class AHomesteadCharacter& Avatar) const;
+    TOptional<float> FishingWaterSurface(const FVector2D& At) const;
     Homestead::FishingPhase FishingPresentedPhase = Homestead::FishingPhase::Idle;
     uint64 FishingPresentedToken = 0;
     uint32 ObservedFishSplashes = 0;

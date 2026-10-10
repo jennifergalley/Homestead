@@ -310,10 +310,7 @@ FString AHomesteadController::FocusActions() const
     case EFocus::Chest: return A + TEXT(" Open");
     case EFocus::Water:
         if (ToolAvailable && SelectedTool == Homestead::Item::FishingPole)
-        {
-            if (IsFishing()) return FString();
             return FishingFocusText;
-        }
         // The pail is filled with the tool button; only offered with it in hand.
         if (!ToolAvailable || SelectedTool != Homestead::Item::WateringCan) return FString();
         return Sim.Count(Homestead::Item::Water) >= Homestead::PailPortions ? FString(TEXT("Pail full")) : Use + TEXT(" Fill pail");

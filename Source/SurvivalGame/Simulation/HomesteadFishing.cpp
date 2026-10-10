@@ -259,6 +259,7 @@ Result Simulation::FishingAnimationContact(FishingContact contact, std::uint64_t
         return {false, "The catch could not fit in your pack; the fish was returned to the water.", ResultCode::Capacity, revision_};
     }
     fishing_ = {};
-    return {true, "Caught " + CountedName(caught, 1) + ".", ResultCode::None, revision_};
+    // The pack's "+1 <fish>" pickup notice says it (Jenny, 2026-10-09: one catch message, not two).
+    return {true, "", ResultCode::None, revision_};
 }
 }

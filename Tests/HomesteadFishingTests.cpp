@@ -273,7 +273,9 @@ void TimingAndCancellation()
     OK(cancelled.CancelFishing());
     CHECK(!cancelled.FishingAnimationContact(FishingContact::CatchLift, catchToken, {0, 0}));
     Simulation success = sim;
-    OK(Lift(success));
+    const auto landed = Lift(success);
+    OK(landed);
+    CHECK(landed.message.empty());
     const auto caughtSave = success.Serialize();
     CHECK(success.Count(catchItem) == 1);
     CHECK(!success.FishingAnimationContact(FishingContact::CatchLift, catchToken, {0, 0}));

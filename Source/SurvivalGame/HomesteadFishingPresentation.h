@@ -16,6 +16,19 @@ enum class EHomesteadFishingPose : std::uint8_t
     Miss,  // slack line, rod lowered
 };
 
+// What the float on the water shows this frame (harder-bob-fishing), copied from the simulation by
+// the controller: a false nibble's shiver, and how far through the click window it is while the
+// fish has pulled it under (Homestead::Fishing::FloatUnder / Marker).
+struct FHomesteadFishingCue
+{
+    float Nibble = 0.0f;  // 0 still, 1 at a nibble's peak
+    float Window = -1.0f; // 0..1 through the click window while the float is under; -1 when it's up
+    float WaitSeconds = -1.0f; // seconds since the float landed, while waiting for a bite; -1 otherwise
+    float BiteSeconds = 0.0f;  // when the bite comes, on the same clock (for pacing the fish's approach)
+    bool bHooked = false;      // the fish has taken the hook (bite or fight)
+    bool Under() const { return Window >= 0.0f; }
+};
+
 // Segments of AN_HeroineMH_Fishing, authored by Content/Python/homestead_agent/fish_cast.py (SEGMENTS
 // and EVENTS there must match). Seconds on the clip's own timeline.
 namespace HomesteadFishingTiming

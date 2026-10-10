@@ -51,6 +51,50 @@ bool AHomesteadController::IsFishing() const
     return Sim.FishingCast().phase != Homestead::FishingPhase::Idle;
 }
 
+float AHomesteadController::ChooseFishingCastYaw(const AHomesteadCharacter& Avatar) const
+{
+    // Straight out in front of her (Jenny, 2026-10-09: the high fishing camera sees the float past her),
+    // angling off only where straight ahead isn't open water (shallows, a beach).
+    constexpr float Sides[] = {0.0f, 14.0f, -14.0f, 25.0f, -25.0f};
+    constexpr double OpenWaterCm = -120.0;
+    const FVector From = Avatar.GetActorLocation();
+    const FVector Facing = Avatar.GetActorForwardVector().GetSafeNormal2D();
+    float BestYaw = 0.0f;
+    double Best = TNumericLimits<double>::Max();
+    for (const float Yaw : Sides)
+    {
+        const FVector At = From + Facing.RotateAngleAxis(Yaw, FVector::UpVector) * AHomesteadCharacter::FishingCastReachCm;
+        const double Edge = WaterEdgeDistance({At.X, At.Y}, true);
+        if (Edge <= OpenWaterCm) return Yaw;
+        if (Edge < Best) { Best = Edge; BestYaw = Yaw; }
+    }
+    return BestYaw;
+}
+
+TOptional<float> AHomesteadController::FishingWaterSurface(const FVector2D& At) const
+{
+    // River and pond splines run along the water surface; the sea and anything else is left to the
+    // float's own trace. (The water meshes don't block visibility traces, so a trace finds the bed.)
+    TOptional<float> Surface;
+    double Best = TNumericLimits<double>::Max();
+    const FVector Here(At.X, At.Y, GroundHeight(At.X, At.Y));
+    for (const auto& Weak : EstateWaterSplines)
+        if (const USplineComponent* Spline = Weak.Get())
+        {
+            const FVector Closest = Spline->FindLocationClosestToWorldLocation(Here, ESplineCoordinateSpace::World);
+            const double Distance = FVector::Dist2D(Closest, Here);
+            const bool bInside = Spline->IsClosedLoop()
+                ? HomesteadWaterProbe::ShoreContains(*Spline, At)
+                : Distance <= 100.0 * Spline->GetScaleAtSplineInputKey(Spline->FindInputKeyClosestToWorldLocation(Here)).Y;
+            if (bInside && Distance < Best)
+            {
+                Best = Distance;
+                Surface = static_cast<float>(Closest.Z);
+            }
+        }
+    return Surface;
+}
+
 bool AHomesteadController::UpdateFishingFocus(Homestead::Point Position)
 {
     FocusedFishingWater = Homestead::FishingWater::None;
@@ -58,12 +102,10 @@ bool AHomesteadController::UpdateFishingFocus(Homestead::Point Position)
     if (SelectedCarriedTool() != Homestead::Item::FishingPole) return false;
     FocusedFishingWater = Sim.FishingWaterAt(Position);
     if (FocusedFishingWater == Homestead::FishingWater::None) return false;
+    // The focus card names the verb only; a refusal (too tired, pack full) is said once, by the click's
+    // notice (Jenny, 2026-10-09: it was shown twice, in the card and the notice).
     if (!IsFishing())
-    {
-        const auto Ready = Sim.CheckFishing(Position);
-        FishingFocusText = Ready.ok ? bGamepad ? TEXT("[RT] Cast line") : TEXT("[LMB] Cast line")
-            : UTF8_TO_TCHAR(Ready.message.c_str());
-    }
+        FishingFocusText = bGamepad ? TEXT("[RT] Cast line") : TEXT("[LMB] Cast line");
     return true;
 }
 
@@ -146,6 +188,16 @@ void AHomesteadController::PresentFishing()
     auto* Animation = Avatar ? Cast<UHomesteadAnimInstance>(Avatar->GetMesh()->GetAnimInstance()) : nullptr;
     if (!Animation) return;
     const auto& Session = Sim.FishingCast();
+    FHomesteadFishingCue Cue;
+    Cue.Nibble = static_cast<float>(Homestead::Fishing::Nibble(Session));
+    if (Homestead::Fishing::FloatUnder(Session)) Cue.Window = static_cast<float>(Homestead::Fishing::Marker(Session));
+    if (Session.phase == Homestead::FishingPhase::Waiting)
+    {
+        Cue.WaitSeconds = static_cast<float>(Session.elapsed);
+        Cue.BiteSeconds = static_cast<float>(Session.biteAfter);
+    }
+    Cue.bHooked = Session.phase == Homestead::FishingPhase::Bite || Session.phase == Homestead::FishingPhase::Landing;
+    Avatar->SetFishingCue(Cue);
     if (Session.phase == Homestead::FishingPhase::Idle
         && HomesteadFishingPresentationRules::FinishedMiss(
             Animation->FishingPose() == EHomesteadFishingPose::Miss, Animation->HasFishingClip(),
@@ -156,6 +208,11 @@ void AHomesteadController::PresentFishing()
     if (Session.token != FishingPresentedToken && Session.phase != Homestead::FishingPhase::Idle)
     {
         FishingPresentedToken = Session.token;
+        Avatar->SetFishingCatch(Session.catchItem);
+        const float CastYaw = ChooseFishingCastYaw(*Avatar);
+        const FVector Landing = Avatar->GetActorLocation() + Avatar->GetActorForwardVector().GetSafeNormal2D()
+            .RotateAngleAxis(CastYaw, FVector::UpVector) * AHomesteadCharacter::FishingCastReachCm;
+        Avatar->SetFishingCast(CastYaw, FishingWaterSurface(FVector2D(Landing.X, Landing.Y)));
         bFishingLiftSucceeded = false;
         ObservedFishSplashes = Animation->FishCastSplashes();
         ObservedFishLifts = Animation->FishCatchLifts();
@@ -179,20 +236,4 @@ void AHomesteadController::PresentFishing()
     }
     FishingPresentedPhase = Session.phase;
     Animation->SetFishingPose(Pose);
-}
-
-FString AHomesteadController::FishingPrompt() const
-{
-    const auto& Cast = Sim.FishingCast();
-    const TCHAR* Press = UsesGamepad() ? TEXT("[RT]") : TEXT("[LMB]");
-    switch (Cast.phase)
-    {
-    case Homestead::FishingPhase::Casting: return TEXT("Casting...");
-    case Homestead::FishingPhase::Waiting: return TEXT("Watch the float...");
-    case Homestead::FishingPhase::Bite: return FString::Printf(TEXT("Bite! %s"), Press);
-    case Homestead::FishingPhase::Landing:
-        return Homestead::Fishing::StrikeReady(Cast) ? FString::Printf(TEXT("Strike! %s"), Press) : TEXT("Hold steady...");
-    case Homestead::FishingPhase::Catching: return TEXT("Lifting the catch...");
-    default: return FString();
-    }
 }

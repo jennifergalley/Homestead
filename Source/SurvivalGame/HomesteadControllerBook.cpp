@@ -128,7 +128,6 @@ void AHomesteadController::OpenMap() { if (!IsFailed()) OpenBook(7); }
 void AHomesteadController::Back()
 {
     if (IsFailed()) { RetryCheckpoint(); return; }
-    if (IsFishing()) { Notify(Sim.CancelFishing()); return; }
     if (bBookOpen) CloseBook();
     else if (bPlanning) EndPlacement();
     else if (CancelShopWait()) PlayEffect(UIClick, Homestead::AudioLevels::Gain::UIClickFaint);

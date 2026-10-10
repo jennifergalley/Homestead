@@ -154,7 +154,8 @@ void AHomesteadCharacter::Tick(float DeltaSeconds)
     }
     UpdateStickAlignment(DeltaSeconds);
     UpdateHairMotion(DeltaSeconds);
-    if (!Lab) UpdateRoomCamera(DeltaSeconds);
+    // The fishing camera owns the arm's offsets while it's active (UpdateFishingCamera).
+    if (!Lab && !bFishingCamSaved) UpdateRoomCamera(DeltaSeconds);
     if (CameraSnapFrames > 0 && --CameraSnapFrames == 0) CameraArm->bEnableCameraLag = true;
     if (!bAppearancePreview && CameraFoliageParameters && Camera && GetWorld())
     {

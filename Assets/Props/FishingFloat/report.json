@@ -6,7 +6,7 @@
   "triangle_budget": 8000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/fishing_float.py",
-  "source_sha256": "501b9ce7d5c29bbe4df4ff6e95a7a9105735b4107db82aae58783584a8b7211e",
+  "source_sha256": "16ba34b29d397994c3d2d441c3ebba36d16a5267d02d1a73551875f9fa22e3f8",
   "provenance": "Original procedural geometry and PBR materials; no borrowed mesh or image.",
   "meshes": {
     "SM_FishingFloat": {
@@ -15,7 +15,7 @@
       "size_cm": [
         4.8,
         4.8,
-        14.5
+        11.0
       ],
       "materials": [
         {
@@ -56,18 +56,40 @@
         "detail_distance": 0.35
       },
       "fbx": "SM_FishingFloat.fbx",
-      "sha256": "7b6f40f9a12c6990a61b47f955e2881d77a77c68c00091f36eeea70324819d90",
-      "preview": "preview_SM_FishingFloat.png"
+      "sha256": "5198daa7856a13997ad7de7b38abd08f5fefeb3024df949c68a69a2f0b569a8e",
+      "preview": "preview_SM_FishingFloat.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FishingFloat_hero.png",
+          "detail": "beauty_SM_FishingFloat_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
     }
   },
   "warnings": [],
   "waterline_cm": 4.5,
-  "top_cm": 14.5,
+  "top_cm": 11.0,
   "cork_radius_cm": 2.4,
   "textures": {
-    "T_FishingFloat_basecolor.png": "582a777cdc22a06bbced7fee415d41c0e25a80d299fd712a05f1539c8ca2671b",
-    "T_FishingFloat_roughness.png": "141a0bc01c6c8b46bf9b76fea739b394cd620d9aef2dee8abca71795129d07a4",
+    "T_FishingFloat_basecolor.png": "b014926e0adfbf35e2ddef61add4c0f7422ac4a075c97f5b96ca04021baf53e3",
+    "T_FishingFloat_roughness.png": "1e301d1d2d99027034e9613256e1ce73b4a3733bb079ba0d23a03536abab83bc",
     "T_FishingFloat_metallic.png": "5630edf42913f842e57308503a7e0977e721d09027a12c453b8878c22108cd37",
-    "T_FishingFloat_normal.png": "35de6f8c1088c657c7ade6c88d9a5fc40287a594cf0675a78dc5e1bcb317d093"
+    "T_FishingFloat_normal.png": "938d02f3d13e8638c5e0ce73ccef4364797f536c51881b19847d4c8f5a8e37dc"
   }
 }
