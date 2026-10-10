@@ -1472,3 +1472,16 @@ OpenSpec changes, not here.
 - 2026-10-09 (Upkeep lane): any test that counts cleared resources must now skip windfall nodes
   (ids 584000-584199, dormant = cleared) — use `Estate IsWindfallPlacement(id)`. `Test-Native`'s
   `HomesteadSimulationTests` passes standalone in ~250 s; failures print just the line number.
+- 2026-10-10 (Map lane, stage-2 compact map): writing `EstateHeightfield.r16` /
+  `Estate_Heightmap_4033.png` / `EstateScenery.bin` right after a previous script wrote them can
+  throw `Errno 22 "Invalid argument"` — it's a transient lock; wait a few seconds and rerun the
+  step (also recorded in `Scripts\Terrain\README` "Compact map"). `route_sights.py --bake` deletes
+  RS1 drifts that fall outside the estate boundary (village/road); run it with `--top-up` after a
+  regeneration to restore them. `HomesteadEditorPython` (the `run_python`/`py` helper) only
+  registers when `Start-EditorMcp.ps1` is launched with `-AllowPython`; without it you get
+  "Toolset ... not found". `E:\TerrainSource\work\game_reshaped_4033.npy` is a shared work file
+  read by other lanes' terrain scripts — after a compact-map regeneration it is synced to the new
+  r16, so don't assume it's stale without checking its timestamp. The map sheet baked by
+  `Scripts\Map\bake_estate_map.py` is now the 1520 m square around `PlayableBounds`
+  (X -930..590 m, Y -1360..160 m), not the old 4 km estate square — see `docs/setup.md`
+  "Estate map".

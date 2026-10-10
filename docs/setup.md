@@ -104,7 +104,8 @@ Development tools.
 
 The HUD minimap and the field book's Map tab share one baked, stylised top-down map:
 `/Game/SurvivalGame/UI/Map/T_EstateMap` plus `DA_EstateMap`, which records the world rectangle
-it covers (the full ±201600 cm estate square, north up). Re-bake it whenever the terrain, water,
+it covers (since map-shrink stage 2, the 1520 m square around `PlayableBounds`, X -930..590 m,
+Y -1360..160 m, north up; before stage 2 this was the full ±201600 cm estate square). Re-bake it whenever the terrain, water,
 road or scenery changes meaningfully, including after `Scripts\Terrain\scatter.py` re-bakes the
 scenery scatter, and before a release:
 
