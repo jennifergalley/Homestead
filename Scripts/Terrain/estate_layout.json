@@ -9024,5 +9024,13 @@
   "falloff": 20.0,
   "gradientShare": 0.75,
   "level": 58.33
+ },
+ "townPath": {
+  "graded": true,
+  "flat": 3.0,
+  "falloff": 9.0,
+  "crownFall": 0.0333,
+  "averageGrade": 0.1387,
+  "maxGrade": 0.2133
  }
 }

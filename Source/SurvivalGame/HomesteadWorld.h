@@ -394,6 +394,13 @@ private:
     bool bCoveRouteBuilt = false;
     UPROPERTY()
     FHomesteadWorldVisual CoveRouteVisual;
+    // The village's lanes, well, benches, store clutter and cottage gardens (HomesteadWorldVillage.cpp), built
+    // once with the estate scenery from HomesteadVillageDressing.inc.
+    void BuildVillage();
+    void BuildVillagePaving();
+    bool bVillageBuilt = false;
+    UPROPERTY()
+    FHomesteadWorldVisual VillageVisual;
     UPROPERTY()
     TArray<TObjectPtr<UHierarchicalInstancedStaticMeshComponent>> EstateScenery;
     // Hides low cover (bushes, ferns, grass, cobbles) wherever a placed piece now stands, so none
