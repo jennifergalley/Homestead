@@ -38,6 +38,8 @@ from PIL import Image
 from scipy.ndimage import distance_transform_edt, gaussian_filter, map_coordinates, maximum_filter, zoom
 from skimage.draw import polygon as fill_polygon
 
+from cove_heath import GRASS_SLOPE_DEG, STONY_KEEP, heath_weight
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 WORK = os.environ.get("HOMESTEAD_TERRAIN_WORK", r"E:\TerrainSource\work")
@@ -185,6 +187,7 @@ def ground_fields(h, w, layout):
     gy, gx = np.gradient(gaussian_filter(h, 1.0))
     slope = np.degrees(np.arctan(np.hypot(gx, gy)))
     aspect_south = -gx / (np.hypot(gx, gy) + 1e-6)        # 1 where the ground faces south (-X)
+    heath = heath_weight(X, Y, layout)                    # the cove's carved walls and cut (cove_heath.py)
 
     patch = fbm((SIZE, SIZE), 3, 64, 11)                  # ~60 m patchiness
     clump = fbm((SIZE, SIZE), 2, 640, 12)                 # ~6 m clumps
@@ -194,7 +197,7 @@ def ground_fields(h, w, layout):
                + w["DirtRoad"] * 0.75)
     density *= 0.78 + 0.22 * patch
     density *= np.where(clump < 0.22, 0.55 + 2.0 * clump, 1.0)
-    density *= smoothstep(40.0, 30.0, slope)
+    density *= smoothstep(40.0, 30.0, slope) * (1 - heath) + smoothstep(*GRASS_SLOPE_DEG, slope) * heath
     density *= smoothstep(0.5, 1.3, h)
 
     height = (w["Pasture"] * 0.9 + w["Moorland"] * 0.45 + w["WoodlandFloor"] * 0.6 + w["DuneSand"] * 0.7
@@ -325,7 +328,7 @@ def ground_fields(h, w, layout):
 
     density = np.clip(density, 0, 1)
     # Stony soil on steep banks that aren't painted cliff (the cliff layer has its own rock).
-    stony = smoothstep(20.0, 34.0, gaussian_filter(slope, 2.0)) * (1.0 - w["CliffRock"])
+    stony = smoothstep(20.0, 34.0, gaussian_filter(slope, 2.0)) * (1.0 - w["CliffRock"]) * (1.0 - (1.0 - STONY_KEEP) * heath)
     fields = {"density": density, "height": np.clip(height, 0, 1), "dry": np.clip(dry, 0, 1), "wear": np.clip(wear, 0, 1),
               "canopy": canopy, "stony": np.clip(stony, 0, 1), "zone": floor}
 
