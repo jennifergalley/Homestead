@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "VillageBench",
+  "description": "Two-person weathered oak plank bench, 1.6 m long, seat 0.45 m high, on carved end slabs with a through-tenoned stretcher and aprons; pivot = seat centre on the ground (original).",
+  "collision": "box",
+  "triangle_budget": 16000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/village_bench.py",
+  "source_sha256": "4523aa9d0124575f41dacb4b082a942bb1370e4f8c5e2bdc8c5454fbc362c22b",
+  "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_VillageBench": {
+      "vertices": 5578,
+      "triangles": 11056,
+      "size_cm": [
+        47.58,
+        162.73,
+        47.69
+      ],
+      "materials": [
+        {
+          "name": "M_VillageBench",
+          "textures": {
+            "basecolor": "T_VillageBench_basecolor.png",
+            "roughness": "T_VillageBench_roughness.png",
+            "normal": "T_VillageBench_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageBench_basecolor.png",
+          "roughness": "T_VillageBench_roughness.png",
+          "normal": "T_VillageBench_normal.png",
+          "ao": "T_VillageBench_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.3
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 3.2
+      },
+      "fbx": "SM_VillageBench.fbx",
+      "sha256": "fd106b55faef345b2ba95c0e918775efe4ec979b7ab5fe437b576d465be9940c",
+      "preview": "preview_SM_VillageBench.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_VillageBench_hero.png",
+          "detail": "beauty_SM_VillageBench_detail.png",
+          "eye": "beauty_SM_VillageBench_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          1600,
+          900
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_VillageBench": "Pivot = seat footprint centre on the ground line. Long axis Y (1.6 m seat), sitter faces +X, 0.45 m seat height, 0.45 m deep. Backless and symmetric."
+  },
+  "pivot": "centre of the seat footprint at ground level",
+  "seat_height_m": 0.45,
+  "long_axis": "Y",
+  "facing": "+X (symmetric, backless)",
+  "textures": {
+    "T_VillageBench_basecolor.png": "1cc61dbb0622bf0ab47dc38716ddff7d3e015e40c7c546b7fe48142fa0362c0b",
+    "T_VillageBench_roughness.png": "c3f0f854735cb49bd4a5042f943af878eb15f5287c9dfa949059bf0ee87a8f06",
+    "T_VillageBench_normal.png": "809face1ff542431c72f57673898902b2017b1916e9760e78f72e6227ddf2ae6"
+  }
+}

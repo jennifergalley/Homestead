@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "VillageCobbles",
+  "description": "Irregular ~3 m patch of set granite cobbles with earth/lime joints, low relief and a feathered rim that sinks below the ground line; no collision; pivot = bottom centre (original).",
+  "collision": "none",
+  "triangle_budget": 60000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/village_cobbles.py",
+  "source_sha256": "7c51111d3c6536053784a8cbf5a5368818b18a8e194b57cf50c74be18d2e77e8",
+  "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_VillageCobbles": {
+      "vertices": 18284,
+      "triangles": 32860,
+      "size_cm": [
+        300.0,
+        310.0,
+        8.35
+      ],
+      "materials": [
+        {
+          "name": "M_VillageCobbles",
+          "textures": {
+            "basecolor": "T_VillageCobbles_basecolor.png",
+            "roughness": "T_VillageCobbles_roughness.png",
+            "normal": "T_VillageCobbles_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageCobbles_basecolor.png",
+          "roughness": "T_VillageCobbles_roughness.png",
+          "normal": "T_VillageCobbles_normal.png",
+          "ao": "T_VillageCobbles_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.02
+        ],
+        "ground": "origin"
+      },
+      "fbx": "SM_VillageCobbles.fbx",
+      "sha256": "b4bc9302cf6a99b4ee8f1d740b40be20c5654260af1b0921901157deb18f1faa",
+      "preview": "preview_SM_VillageCobbles.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_VillageCobbles_hero.png",
+          "detail": "beauty_SM_VillageCobbles_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          1600,
+          900
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_VillageCobbles_LOD1": {
+      "vertices": 6070,
+      "triangles": 9858,
+      "size_cm": [
+        300.01,
+        310.01,
+        8.53
+      ],
+      "materials": [
+        {
+          "name": "M_VillageCobbles",
+          "textures": {
+            "basecolor": "T_VillageCobbles_basecolor.png",
+            "roughness": "T_VillageCobbles_roughness.png",
+            "normal": "T_VillageCobbles_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageCobbles_basecolor.png",
+          "roughness": "T_VillageCobbles_roughness.png",
+          "normal": "T_VillageCobbles_normal.png",
+          "ao": "T_VillageCobbles_ao.png"
+        },
+        "shared_with": "SM_VillageCobbles"
+      },
+      "review": {},
+      "fbx": "SM_VillageCobbles_LOD1.fbx",
+      "sha256": "a6e56b28f279af8a90511cfd727820ee48b2d0847136fe8c08ba5018e13826d2",
+      "preview": "preview_SM_VillageCobbles_LOD1.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_VillageCobbles": "Pivot = bottom centre on the ground line (z = 0). Irregular outline about 3 m across; setts 12-22 cm, 1-4 cm above the joint bed; the rim sinks 2-3 cm below z = 0."
+  },
+  "pivot": "bottom centre, z = 0 ground line",
+  "max_relief_m": 0.04,
+  "textures": {
+    "T_VillageCobbles_basecolor.png": "2e69d40e2e1c39fe1935598ad260fe6d72d6f20e07468dcc5fe8e8d4bb9efe67",
+    "T_VillageCobbles_roughness.png": "9ee78255c8542a8fb215f38809beddbbda17c5943a9ab70c2e0d0b2371653f78",
+    "T_VillageCobbles_normal.png": "39dfee87fb61f4d440eb090b0e3514bba2c8ca2240b5ed4990de7c9ee578574a"
+  }
+}

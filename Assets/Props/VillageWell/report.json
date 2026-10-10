@@ -1,0 +1,211 @@
+{
+  "schema": 1,
+  "name": "VillageWell",
+  "description": "Roofed granite well: dressed-stone kerb with coping, dark water, two oak posts with braces, ridge beam and shingle roof, windlass with crank, rope and hooped oak bucket; pivot = ring centre at ground (original).",
+  "collision": "box in recipe; complex-as-simple via import_props",
+  "triangle_budget": 30000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/village_well.py",
+  "source_sha256": "560ca4d446e5e31a57075c0a053e5bb8073740fcc2f78d8b6b0ceec178c3f921",
+  "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_VillageWell": {
+      "vertices": 17157,
+      "triangles": 28368,
+      "size_cm": [
+        205.43,
+        192.53,
+        305.51
+      ],
+      "materials": [
+        {
+          "name": "M_VillageWell",
+          "textures": {
+            "basecolor": "T_VillageWell_basecolor.png",
+            "roughness": "T_VillageWell_roughness.png",
+            "normal": "T_VillageWell_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageWell_basecolor.png",
+          "roughness": "T_VillageWell_roughness.png",
+          "normal": "T_VillageWell_normal.png",
+          "ao": "T_VillageWell_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          1.25
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 5.2
+      },
+      "fbx": "SM_VillageWell.fbx",
+      "sha256": "212682884e96d2bf9ce592381118d67d1229be0a1b39fbbdd999571d354f08ba",
+      "preview": "preview_SM_VillageWell.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_VillageWell_hero.png",
+          "detail": "beauty_SM_VillageWell_detail.png",
+          "eye": "beauty_SM_VillageWell_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 64,
+        "resolution": [
+          1600,
+          900
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_VillageWell_LOD1": {
+      "vertices": 8770,
+      "triangles": 12765,
+      "size_cm": [
+        205.06,
+        192.19,
+        305.38
+      ],
+      "materials": [
+        {
+          "name": "M_VillageWell",
+          "textures": {
+            "basecolor": "T_VillageWell_basecolor.png",
+            "roughness": "T_VillageWell_roughness.png",
+            "normal": "T_VillageWell_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageWell_basecolor.png",
+          "roughness": "T_VillageWell_roughness.png",
+          "normal": "T_VillageWell_normal.png",
+          "ao": "T_VillageWell_ao.png"
+        },
+        "shared_with": "SM_VillageWell"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          1.25
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 5.2
+      },
+      "fbx": "SM_VillageWell_LOD1.fbx",
+      "sha256": "d8937d64a58371c905239776fb9033f19d8c61ed6f1fdc3bcc3f1fe337081ac7",
+      "preview": "preview_SM_VillageWell_LOD1.png"
+    },
+    "SM_VillageWell_LOD2": {
+      "vertices": 3795,
+      "triangles": 4537,
+      "size_cm": [
+        204.95,
+        192.04,
+        305.14
+      ],
+      "materials": [
+        {
+          "name": "M_VillageWell",
+          "textures": {
+            "basecolor": "T_VillageWell_basecolor.png",
+            "roughness": "T_VillageWell_roughness.png",
+            "normal": "T_VillageWell_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageWell_basecolor.png",
+          "roughness": "T_VillageWell_roughness.png",
+          "normal": "T_VillageWell_normal.png",
+          "ao": "T_VillageWell_ao.png"
+        },
+        "shared_with": "SM_VillageWell"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          1.25
+        ],
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 5.2
+      },
+      "fbx": "SM_VillageWell_LOD2.fbx",
+      "sha256": "e7ed4e4a60ff44c591f3a6256d72e7f28616b296e0436401cacabceedc91f74f",
+      "preview": "preview_SM_VillageWell_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_VillageWell": "Pivot = ring centre at ground level (z = 0); skirt buried to z = -0.30. Rim top 0.90 m, water 0.40 m, eave 2.0 m, ridge 2.7 m. Ridge/posts/windlass along X, crank at +X. Import with complex-as-simple collision (see import_props.COLLISION_OVERRIDES)."
+  },
+  "pivot": "ring centre at ground level, skirt below",
+  "rim_height_m": 0.9,
+  "water_depth_below_rim_m": 0.5,
+  "eave_height_m": 2.0,
+  "ridge_height_m": 2.7,
+  "textures": {
+    "T_VillageWell_basecolor.png": "b4556e8ace0a466609887062eed3d4730022151c0e943ed27ef3d2a47f4b667a",
+    "T_VillageWell_roughness.png": "a76a346c31b3b8c0ea2cd71e39cf142530bc17bb2c6704d01b9bb0d1dea8d694",
+    "T_VillageWell_normal.png": "26308ffdb75b6d48a656ebe55c65baa17692068e0373f8d433da010dc550222e"
+  }
+}

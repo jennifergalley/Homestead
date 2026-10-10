@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "VillageCobbleTile",
+  "description": "Seamless 4 m x 4 m tile of set granite cobbles with earth/lime joints and very low relief; periodic sett lattice so tiles join edge to edge at any yaw; no collision; pivot = bottom centre (original).",
+  "collision": "none",
+  "triangle_budget": 9500,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/village_cobble_tile.py",
+  "source_sha256": "431512765ae0ff6cca36855d07073fb2e554b2756406daa0ae670263a571e29a",
+  "provenance": "Original project-authored procedural geometry and procedural materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_VillageCobbleTile": {
+      "vertices": 6084,
+      "triangles": 8272,
+      "size_cm": [
+        400.0,
+        400.0,
+        5.01
+      ],
+      "materials": [
+        {
+          "name": "M_VillageCobbleTile",
+          "textures": {
+            "basecolor": "T_VillageCobbleTile_basecolor.png",
+            "roughness": "T_VillageCobbleTile_roughness.png",
+            "normal": "T_VillageCobbleTile_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageCobbleTile_basecolor.png",
+          "roughness": "T_VillageCobbleTile_roughness.png",
+          "normal": "T_VillageCobbleTile_normal.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "ground": "origin"
+      },
+      "fbx": "SM_VillageCobbleTile.fbx",
+      "sha256": "a45450bf45789d4ed9d1d5c615639cb6ef6d612226f62871b02505a530e4f833",
+      "preview": "preview_SM_VillageCobbleTile.png"
+    },
+    "SM_VillageCobbleTile_LOD1": {
+      "vertices": 1201,
+      "triangles": 2040,
+      "size_cm": [
+        400.0,
+        400.0,
+        4.75
+      ],
+      "materials": [
+        {
+          "name": "M_VillageCobbleTile",
+          "textures": {
+            "basecolor": "T_VillageCobbleTile_basecolor.png",
+            "roughness": "T_VillageCobbleTile_roughness.png",
+            "normal": "T_VillageCobbleTile_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 48,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_VillageCobbleTile_basecolor.png",
+          "roughness": "T_VillageCobbleTile_roughness.png",
+          "normal": "T_VillageCobbleTile_normal.png"
+        },
+        "shared_with": "SM_VillageCobbleTile"
+      },
+      "review": {},
+      "fbx": "SM_VillageCobbleTile_LOD1.fbx",
+      "sha256": "86b3e1d5197d2ee0cdc0c00cd261c197c4ad8edcd3d9510cf730bbd0fd54789e",
+      "preview": "preview_SM_VillageCobbleTile_LOD1.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "SM_VillageCobbleTile": "Pivot = bottom centre (x = y = 0), z = 0 ground line. 4.0 x 4.0 m footprint tiles edge to edge at yaw 0/90/180/270: the sett lattice is periodic and cut on the square. Sett tops z 0.004-0.02, joint bottoms z -0.012, skirt base z -0.03. One planar UV island (u = (x+2)/4, v = (y+2)/4)."
+  },
+  "pivot": "bottom centre of the footprint, z = 0 ground line (skirt base at z = -0.03)",
+  "tile_m": 4.0,
+  "max_relief_m": 0.03,
+  "textures": {
+    "T_VillageCobbleTile_basecolor.png": "547c4a380a1e8c9412ef83d6ee21f8d5ee6a0046c8a6547bd8287545ef5b6308",
+    "T_VillageCobbleTile_roughness.png": "d095b69b9c1077c07168f4dca8fd0bea0eb7513067dcc7251bb6b30bef83b65c",
+    "T_VillageCobbleTile_normal.png": "d295d7c86dbea4999a9889d3bf88f0d3b5c59ef445d7ba8afb6d62f662d00d1c"
+  }
+}
