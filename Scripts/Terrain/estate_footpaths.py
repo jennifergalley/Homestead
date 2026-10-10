@@ -35,12 +35,15 @@ SMOOTH_GROUND_M = 1.5
 COVE_KEEP_M = (1.8, 3.8)      # the cove route's bed stays as cove_route.py graded it: no change within the first,
                               # blending in by the second (a path joining it meets its level)
 
-# (name, control points (x, y) m, max grade, pin the start to this height or None for the ground)
+# (name, control points (x, y) m, max grade). The mine path falls 34 m in 160 m from the forecourt, so it
+# takes 1 in 4 (at 1 in 5 it would need a 4 m cutting through the forecourt and the manor clear-out).
 PATHS = [
-    ("Mine", [(-252, -668), (-270, -688), (-300, -700), (-340, -712), (-375, -718), (-401, -721)], 1.0 / 5.0),
-    ("MineLink", [(-404, -716), (-398, -690), (-392, -662), (-394, -645), (-397, -638)], 1.0 / 5.0),
-    ("VillageRiver", [(-118, -322), (-138, -322), (-162, -345), (-190, -350), (-202, -328), (-212, -306),
-                      (-236, -298), (-258, -292), (-278, -287)], 1.0 / 5.0),
+    ("Mine", [(-266, -653), (-272, -664), (-282, -680), (-300, -698), (-340, -712), (-375, -718), (-401, -721)], 1.0 / 4.0),
+    ("MineLink", [(-404, -716), (-412, -700), (-418, -684), (-410, -670), (-402, -658), (-401, -645), (-397, -638)],
+     1.0 / 5.0),
+    # Down the valley side in two short zigzags (the straight line needed a 4 m cutting).
+    ("VillageRiver", [(-118, -322), (-146, -308), (-178, -298), (-192, -302), (-234, -330), (-246, -318),
+                      (-258, -322), (-262, -304), (-278, -287)], 1.0 / 4.0),
 ]
 YARD = {"centre": (-410.0, -722.0), "half": (9.0, 7.0), "blend": 8.0}   # the mine ruin's level yard
 

@@ -46,7 +46,7 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::StandingRoomSpawn, {-25750.0, -63800.0}, 8652.6, -90.0},
             {Anchor::EstateGateway, {-5500.0, 9000.0}, 5632.0, 60.0},
             {Anchor::CoveBeach, {-47600.0, -61600.0}, 180.0, 200.0},
-            {Anchor::MineEntrance, {-41000.0, -72200.0}, 5225.0, 0.0},
+            {Anchor::MineEntrance, {-41000.0, -72200.0}, 5223.0, 0.0},
             {Anchor::MillSite, {-11800.0, -9200.0}, 3113.1, 0.0},
             {Anchor::RoadEstateEnd, {-5500.0, 9000.0}, 5632.0, 60.0},
             {Anchor::RoadTownEnd, {-4972.0, -44415.0}, 7423.0, 45.0},
