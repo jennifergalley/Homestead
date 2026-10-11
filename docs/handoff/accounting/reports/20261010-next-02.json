@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "buildId": "20261010-next-02",
+  "authorizedAt": "2026-10-10T19:20:00.000Z",
+  "generatedAt": "2026-10-11T17:17:19.693Z",
+  "status": "incomplete",
+  "unit": "nano-AIU",
+  "displayUnit": "AIU",
+  "nanoPerAiu": "1000000000",
+  "unitEvidence": "Runtime assistant_usage_events.total_nano_aiu; AIU display is nano / 1e9. Not reconciled to billing credits.",
+  "allocationPolicy": "Covers the Map feedback build (round 4's third lane set: Map, Beach, Gameplay, Names, Lighting, Cave, their Balance review, and Integration's merge/review/package/test/promote/closure) for build 20261010-next-02, allocated from the 2026-10-10 19:20 kickoff. Excludes 20261010-next-01 (map-shrink stage 2 and its own Balance/Integration segments), already allocated and reported separately.",
+  "legacy": {
+    "status": "unattributed",
+    "recordedNanoAiu": null
+  },
+  "coverage": {
+    "limits": [
+      "FINAL: batch cleared (Names, Lighting, Map, Gameplay, Cave, Beach all [ready] and merged); segments below carry final commit SHAs. session_store_sql returned no per-call usage rows for these local worktree sessions (cloud query: 0 rows on exact session IDs; local source: session_usage table absent), so the paired usage snapshot has events: [] and the generated report (reports\\20261010-next-02.json) is genuinely status \"incomplete\" with zero recordedNanoAiu and no estimated figures of any kind; totals and per-segment costs for this build are unavailable, not approximated.",
+      "Recorded nano-AIU is not billing-reconciled AI credits.",
+      "Some calls have no recorded reasoning effort; preserve unknown in the export, not an inferred high value.",
+      "authorizedAt is a single global floor applied across every session in this allocation; per-segment since values are evidence, not independent filters.",
+      "The orchestrator session (cfe8292c-5320-4ab3-a942-1b64c2cc956b) is coordination-only per standing policy and is not billed as a segment here.",
+      "No call records captured for: 94e0bd8e-ab39-402c-8aa3-0b9365489bc9, 8c44fafc-9777-4063-86f9-071f7722293f, 5b555e6e-49a2-4592-9abb-1a857ebd5a67, 72b7d774-d285-4f3d-93a5-d62f61927853, 0816ef4d-8f71-4df4-bb26-62e659d21fdb, d6ef3d58-ed8a-4297-9f27-e3a51528c59d, ceb1109b-f156-451c-b890-ca91fa92f1c1, 09ae4063-4f60-475e-bb88-7c6d6a7bbc7c"
+    ],
+    "missingSessions": [
+      "94e0bd8e-ab39-402c-8aa3-0b9365489bc9",
+      "8c44fafc-9777-4063-86f9-071f7722293f",
+      "5b555e6e-49a2-4592-9abb-1a857ebd5a67",
+      "72b7d774-d285-4f3d-93a5-d62f61927853",
+      "0816ef4d-8f71-4df4-bb26-62e659d21fdb",
+      "d6ef3d58-ed8a-4297-9f27-e3a51528c59d",
+      "ceb1109b-f156-451c-b890-ca91fa92f1c1",
+      "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c"
+    ],
+    "excludedCalls": 0,
+    "retryClassification": "Manual event-range classification; unclassified calls remain unknown",
+    "billingReconciliation": "not supplied",
+    "finalCapture": false
+  },
+  "totals": {
+    "calls": 0,
+    "recordedCalls": 0,
+    "estimatedCalls": 0,
+    "ratedCalls": 0,
+    "firstEventId": null,
+    "lastEventId": null,
+    "since": null,
+    "until": null,
+    "maxPromptTokens": 0,
+    "unknownCostCalls": 0,
+    "recordedNanoAiu": "0",
+    "estimatedNanoAiu": "0",
+    "tokenCostsNanoAiu": {
+      "input": "0",
+      "cache_read": "0",
+      "cache_write": "0",
+      "output": "0"
+    },
+    "otherTokenCostsNanoAiu": "0",
+    "recordedMinusRatedNanoAiu": "0"
+  },
+  "segments": [],
+  "captures": [
+    {
+      "sourceId": "local-assistant-usage-v1",
+      "capturedAt": "2026-10-11T16:45:00.000Z",
+      "throughEventId": null,
+      "sessionIds": [
+        "94e0bd8e-ab39-402c-8aa3-0b9365489bc9",
+        "8c44fafc-9777-4063-86f9-071f7722293f",
+        "5b555e6e-49a2-4592-9abb-1a857ebd5a67",
+        "72b7d774-d285-4f3d-93a5-d62f61927853",
+        "0816ef4d-8f71-4df4-bb26-62e659d21fdb",
+        "d6ef3d58-ed8a-4297-9f27-e3a51528c59d",
+        "ceb1109b-f156-451c-b890-ca91fa92f1c1",
+        "09ae4063-4f60-475e-bb88-7c6d6a7bbc7c"
+      ],
+      "since": "2026-10-10T19:20:00.000Z"
+    }
+  ],
+  "records": []
+}

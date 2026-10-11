@@ -16,5 +16,5 @@
   ],
   "since": "2026-10-10T19:20:00.000Z",
   "events": [],
-  "notes": "No per-call usage events were retrievable for this build at closure time (session_store_sql returned 0 rows for this window; local store has no session_usage table). Unlike 20261010-next-01-usage.json, this file intentionally ships with an empty events[] array. Totals and segments for this build are captured only as best-effort estimates in reports/20261010-next-02.json (status: \"estimated\"), derived from the completed-work boundaryEvidence text in accounting/20261010-next-02-allocation.json, not from recorded per-call token data. Do not treat this file's absence of events as zero usage; treat it as unavailable."
+  "notes": "No per-call usage events were retrievable for this build at closure time (session_store_sql returned 0 rows for this window; local store has no session_usage table for these sessions). Unlike 20261010-next-01-usage.json, this file intentionally ships with an empty events[] array. The generated reports/20261010-next-02.json is genuinely status \"incomplete\" with zero recordedNanoAiu and no estimated figures of any kind: costs for this build are unavailable, not approximated. Do not treat this file's absence of events as zero usage; treat it as unavailable."
 }

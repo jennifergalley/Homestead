@@ -72,14 +72,13 @@ slot, then go idle; they do not pick up unflagged queue items.
 - The cove walk takes about 80 seconds end to end; acceptable but noted for future pacing passes.
 - The village walk takes about 90 seconds; pending Jenny's card before further tuning.
 - Cave and beach art are first-pass (prop sets, lighting, decor density not yet polished).
-- Accounting: `docs\handoff\accounting\reports\20261010-next-02.json` (status: estimated — no
-  real per-call usage data was retrievable for this build; cloud `session_store_sql` returned zero
-  rows and the local store lacks the usage table, so all figures are best-effort estimates, not
-  measured). Estimated 2650 calls / 141,000,000,000 nano-AIU across 8 segments: Map Agent
-  (claude-opus-5.5/high, 32B), Beach Agent (claude-opus-5.5/high, 30B), Gameplay Agent
-  (claude-sonnet-5.5/high, 13B), Names Agent (claude-sonnet-5.5/high, 8B), Lighting Agent
-  (claude-sonnet-5.5/high, 11B), Cave Agent (claude-opus-5.5/high, 27B), Balance Agent
-  (claude-opus-5.5/high, 9B), Integration/self (claude-sonnet-5/medium, 11B).
+- Accounting: `docs\handoff\accounting\reports\20261010-next-02.json` (status: incomplete, 0
+  calls, 0 recorded nano-AIU — not an estimate). `session_store_sql` returned no per-call usage
+  rows for the 8 sessions in this build's window (cloud query: 0 rows on exact session IDs; local
+  source: session_usage table absent), so the paired usage snapshot has `events: []` and totals
+  and per-segment costs for this build are genuinely unavailable, not approximated. All 8 sessions
+  (Map Agent, Beach Agent, Gameplay Agent, Names Agent, Lighting Agent, Cave Agent, Balance Agent,
+  Integration/self) are listed under `coverage.missingSessions`.
 
 ## 2026-10-10 — 5:18 PM
 
