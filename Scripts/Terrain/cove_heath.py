@@ -79,7 +79,16 @@ def heath_weight(x, y, layout):
     d_route = cKDTree(line).query(pts)[0]
     excess = np.minimum(d_bay - BAY_REACH_M, d_route - ROUTE_REACH_M)
     t = np.clip(1.0 - excess / FADE_M, 0.0, 1.0)
-    out[win] = t * t * (3 - 2 * t)
+    w = t * t * (3 - 2 * t)
+    # The coast mix keeps the bay's west wall a bare rock cliff (coast_mix.py): no heath on it.
+    west = layout.get("coastMix", {}).get("westCliff")
+    if west:
+        west = np.asarray(west, np.float64)
+        d_west = cKDTree(_dense(np.vstack([west, west[:1]]))).query(pts)[0]
+        inside = Path(west).contains_points(pts)
+        u = np.clip(np.where(inside, 1.0, 1.0 - d_west / FADE_M), 0.0, 1.0)
+        w *= 1.0 - u * u * (3 - 2 * u)
+    out[win] = w
     return out
 
 

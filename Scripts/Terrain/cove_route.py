@@ -61,24 +61,20 @@ SIZE, H = 4033, 2016
 # "sharp": a path corner kept as it is (a path otherwise rounds its corners).
 CONTROL = [
     (-260.5, -654.5, "path"),     # outside the fallen front door on the ruin's south front
-    (-285.0, -647.0, "path"),
-    (-330.0, -636.0, "path"),     # down the opening valley, between its overgrowth
-    (-375.0, -632.0, "path"),
-    (-392.8, -639.9, "path", "sharp"),   # the last 5 m straight on in line with the first flight
-    (-396.0, -636.0, "stairs"),   # head of the cliff steps on the bay's rim (fingerpost)
-    # A level platform at each switchback down the bay head's wall (shrink-estate-map): the path runs straight on
-    # 1.2 m off the flight's foot, then 3.5 m out to the side, so it never crosses the flight's rail.
-    (-428.0, -597.0, "path"),
-    (-428.95, -596.07, "path", "sharp"),
-    (-431.66, -598.29, "stairs"),
-    (-455.0, -640.0, "path"),
-    (-455.59, -641.05, "path", "sharp"),
-    (-459.08, -639.10, "stairs"),
-    (-473.0, -618.0, "path"),     # the foot of the last steps, onto the sand
-    (-476.0, -616.0, None),       # the sand at the head of the bay
+    (-300.0, -647.0, "path"),     # south across the manor's terrace
+    (-350.0, -642.0, "path"),
+    (-306.0, -578.0, "path", "sharp"),   # down across the coombe's west side, facing the bay
+    (-310.0, -576.0, "stairs"),   # a short flight down at the first bend
+    (-320.0, -573.0, "path"),
+    (-392.0, -601.0, "path", "sharp"),
+    (-395.0, -599.0, "stairs"),   # and another at the second
+    (-409.0, -584.0, "path"),
+    (-430.0, -540.0, "path"),
+    (-458.0, -580.0, "path"),
+    (-490.0, -580.0, None),       # the sand at the head of the bay
 ]
 
-MAX_PATH_GRADE = 1.0 / 5.0       # a steep Cornish coast path down the natural slope, still walked without steps
+MAX_PATH_GRADE = 1.0 / 4.0       # a coast path down the coombe's natural slope (Jenny chose 1 in 4 with two short flights, 2026-10-10)
 DESIGN_MARGIN = 0.97             # paths are designed this far inside the limit (chords on curves read steeper)
 STAIR_GRADE = (0.20, 0.48)       # a stair leg's mean fall per metre (flights and landings together)
 RISE_M = (0.15, 0.17)            # Props' kit (add-cove-route-kit design.md)
@@ -102,10 +98,12 @@ TREAD_CLEARANCE_M = 0.05         # the ground stays at least this far under a tr
 CLEARANCE_MARGIN_M = 0.006       # ... plus this, for the r16's 1/128 m steps
 PATH_BED_HALF_M = 1.2            # heightfield cells set to the path's bed this far out
 STAIR_BED_HALF_M = 2.2           # ... and to the stairs' (a tread edge's bilinear cell reaches 0.75 + 1.42 m)
-VERGE_M = 2.5                    # then blended back to the ground
+VERGE_M = 2.5                    # then blended back to the ground over this,
+VERGE_PER_M = 3.0                # plus this much per metre of cut or fill (a soft shelf, never a trench or bank)
+VERGE_MAX_M = 20.0
 RIVER_MARGIN_M = 2.0             # corridor cells never touch the river channel (its half width plus this)
-KERB_DROP_M = 0.45               # the ground 2 m out from the path's edge this far below its bed: a kerb
-RAIL_DROP_M = 1.1                # ... this far: a rail
+KERB_DROP_M = 0.8                # the ground 2 m out from the path's edge this far below its bed: a kerb
+RAIL_DROP_M = 1.4                # ... this far: a rail
 SIDE_PROBE_M = 2.0
 MIN_RUN_M = 3.0                  # kerb and rail runs shorter than this are dropped, gaps shorter bridged
 CLEAR_SCENERY_M = 2.4            # half width of the scatter cleared along the route
@@ -658,7 +656,11 @@ def corridor_change(stations, z, layout):
     stair = np.array([st[4] == "stairs" for st in stations])
     leg = np.array([st[5] for st in stations])
     flat = np.where(stair, STAIR_BED_HALF_M, PATH_BED_HALF_M)
-    reach = STAIR_BED_HALF_M + VERGE_M
+    # The verge widens with the cut or fill, so the hillside is reshaped smoothly round the path (no trench walls
+    # or raised bank either side: Jenny, 2026-10-10).
+    ground = bilinear(z, xy[:, 0], xy[:, 1])
+    verge = np.minimum(VERGE_M + VERGE_PER_M * np.abs(bed - ground), VERGE_MAX_M)
+    reach = float((flat + verge).max())
     x0, x1 = int(math.floor(xy[:, 0].min() - reach)), int(math.ceil(xy[:, 0].max() + reach))
     y0, y1 = int(math.floor(xy[:, 1].min() - reach)), int(math.ceil(xy[:, 1].max() + reach))
     gx, gy = np.meshgrid(np.arange(x0, x1 + 1), np.arange(y0, y1 + 1))
@@ -666,7 +668,7 @@ def corridor_change(stations, z, layout):
     d, i = cKDTree(xy).query(pts, distance_upper_bound=reach)
     keep = np.isfinite(d)
     pts, d, i = pts[keep], d[keep], i[keep]
-    t = np.clip((d - flat[i]) / VERGE_M, 0.0, 1.0)
+    t = np.clip((d - flat[i]) / verge[i], 0.0, 1.0)
     w = 1.0 - t * t * (3 - 2 * t)
     target = along_bed(xy, bed, leg, pts, i)
     # A path's own bed has priority over its flat width: where another leg's steps are nearer (a hairpin at a
@@ -1090,11 +1092,25 @@ def main():
                     + (smooth[r0 + 1, c0] * (1 - fc) + smooth[r0 + 1, c0 + 1] * fc) * fr)
 
         zs, _, stations, flights, landings = design(runs, ground_fn)
-        kerbs, rails, s = edges(stations, flights, landings, runs, ground_fn)
+        rows_, cols_, change_ = corridor_change(stations, z, layout)
+        # Kerbs and rails stand where the graded ground (the reshaped hillside round the path) falls away.
+        graded_z = z.copy()
+        graded_z[rows_, cols_] += change_
+        graded = gaussian_filter(graded_z[y0 + H:y1 + H + 1, x0 + H:x1 + H + 1], SMOOTH_GROUND_M)
+
+        def graded_fn(x, y):
+            c = np.asarray(x, np.float64) - x0
+            r = np.asarray(y, np.float64) - y0
+            c0 = np.clip(np.floor(c).astype(int), 0, graded.shape[1] - 2)
+            r0 = np.clip(np.floor(r).astype(int), 0, graded.shape[0] - 2)
+            fc, fr = c - c0, r - r0
+            return ((graded[r0, c0] * (1 - fc) + graded[r0, c0 + 1] * fc) * (1 - fr)
+                    + (graded[r0 + 1, c0] * (1 - fc) + graded[r0 + 1, c0 + 1] * fc) * fr)
+
+        kerbs, rails, s = edges(stations, flights, landings, runs, graded_fn)
         posts = fingerposts(stations, runs, flights)
         centreline = [[round(float(st[0]), 3), round(float(st[1]), 3), round(float(st[3]), 3), round(float(st[2]), 3),
                        round(float(si), 3), int(st[4] == "stairs")] for st, si in zip(stations, s)]
-        rows_, cols_, change_ = corridor_change(stations, z, layout)
         rnd = lambda items: [{k: (round(float(v), 4) if isinstance(v, (float, np.floating)) else v) for k, v in d.items()}
                              for d in items]
         route = {"graded": True, "control": [list(c[:2]) for c in CONTROL], "kinds": [c[2] for c in CONTROL[:-1]],
@@ -1126,7 +1142,7 @@ def main():
         xs = np.arange(int(c[:, 0].min()) - 8, int(c[:, 0].max()) + 9)
         ys = np.arange(int(c[:, 1].min()) - 8, int(c[:, 1].max()) + 9)
         X, Y = np.meshgrid(xs, ys, indexing="ij")
-        near = cKDTree(c[:, :2]).query(np.c_[X.ravel(), Y.ravel()])[0].reshape(X.shape) <= STAIR_BED_HALF_M + VERGE_M + 1
+        near = cKDTree(c[:, :2]).query(np.c_[X.ravel(), Y.ravel()])[0].reshape(X.shape) <= STAIR_BED_HALF_M + VERGE_MAX_M + 1
         graded = z[Y + H, X + H]
         stale = near & (np.abs(zn[H - X, H + Y] - graded) > 0.01)
         if stale.any():

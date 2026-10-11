@@ -301,8 +301,100 @@ MEL.connect_material_expressions(depth, '', far_mix, 'D')
 
 y = -900
 colour, rough = {}, {}
+
+# Steep cliff faces (Balance cohesion §4, Jenny's striations, 2026-10-10): the CliffRock layer is projected along
+# all three world axes and blended by the surface normal, so a vertical face shows rock at its true scale instead
+# of the planar top-down mapping smeared into streaks. Normals are blended in world space (whiteout) and turned
+# back into the landscape's tangent space.
+TRIPLANAR_HLSL = '''
+float3 N = normalize(Nw);
+float3 bw = pow(abs(N), 4.0);
+bw /= (bw.x + bw.y + bw.z);
+float3 col = lerp(DX, DXf, Far) * bw.x + lerp(DY, DYf, Far) * bw.y + lerp(DZ, DZf, Far) * bw.z;
+float3 tx = float3(NX.xy + N.zy, abs(NX.z) * N.x);
+float3 ty = float3(NY.xy + N.xz, abs(NY.z) * N.y);
+float3 tz = float3(NZ.xy + N.xy, abs(NZ.z) * N.z);
+NormalOut = normalize(tx.zyx * bw.x + ty.xzy * bw.y + tz.xyz * bw.z);
+RoughOut = RX * bw.x + RY * bw.y + RZ * bw.z;
+return col;
+'''
+
+
+def triplanar(layer, metres, x, y):
+    wp = MEL.create_material_expression(mat, unreal.MaterialExpressionWorldPosition, x - 600, y)
+    planes = {}
+    for axis, (a, b) in {'X': ('b', 'g'), 'Y': ('r', 'b'), 'Z': ('r', 'g')}.items():   # zy, xz, xy
+        uvs = []
+        for scale in (metres, metres * 4.3):
+            m1 = MEL.create_material_expression(mat, unreal.MaterialExpressionComponentMask, x - 500, y)
+            for ch in 'rgba':
+                m1.set_editor_property(ch, ch == a)
+            MEL.connect_material_expressions(wp, '', m1, '')
+            m2 = MEL.create_material_expression(mat, unreal.MaterialExpressionComponentMask, x - 500, y + 30)
+            for ch in 'rgba':
+                m2.set_editor_property(ch, ch == b)
+            MEL.connect_material_expressions(wp, '', m2, '')
+            ap = MEL.create_material_expression(mat, unreal.MaterialExpressionAppendVector, x - 420, y)
+            MEL.connect_material_expressions(m1, '', ap, 'A')
+            MEL.connect_material_expressions(m2, '', ap, 'B')
+            dv = MEL.create_material_expression(mat, unreal.MaterialExpressionDivide, x - 340, y)
+            dv.set_editor_property('const_b', scale * 100.0)
+            MEL.connect_material_expressions(ap, '', dv, 'A')
+            uvs.append(dv)
+
+        def tex(slot, uvn, kind):
+            t = MEL.create_material_expression(mat, unreal.MaterialExpressionTextureSample, x - 250, y)
+            t.set_editor_property('texture', texture(layer, slot))
+            t.set_editor_property('sampler_type', kind)
+            t.set_editor_property('sampler_source', unreal.SamplerSourceMode.SSM_WRAP_WORLD_GROUP_SETTINGS)
+            MEL.connect_material_expressions(uvn, '', t, 'UVs')
+            return t
+        ST = unreal.MaterialSamplerType
+        planes[axis] = (tex('D', uvs[0], ST.SAMPLERTYPE_COLOR), tex('D', uvs[1], ST.SAMPLERTYPE_COLOR),
+                        tex('N', uvs[0], ST.SAMPLERTYPE_NORMAL), tex('R', uvs[0], ST.SAMPLERTYPE_MASKS))
+        y += 240
+    nws = MEL.create_material_expression(mat, unreal.MaterialExpressionVertexNormalWS, x - 250, y)
+    c = MEL.create_material_expression(mat, unreal.MaterialExpressionCustom, x, y)
+    c.set_editor_property('code', TRIPLANAR_HLSL)
+    c.set_editor_property('output_type', unreal.CustomMaterialOutputType.CMOT_FLOAT3)
+    c.set_editor_property('description', 'TriplanarCliff')
+    inputs = [('Nw', nws, ''), ('Far', far_mix, '')]
+    for axis in 'XYZ':
+        d, df, nn, rr = planes[axis]
+        inputs += [('D' + axis, d, 'RGB'), ('D' + axis + 'f', df, 'RGB'), ('N' + axis, nn, 'RGB'), ('R' + axis, rr, 'R')]
+    ins = []
+    for name, *_ in inputs:
+        ci = unreal.CustomInput(); ci.set_editor_property('input_name', name); ins.append(ci)
+    c.set_editor_property('inputs', ins)
+    outs = []
+    for name, kind in (('NormalOut', unreal.CustomMaterialOutputType.CMOT_FLOAT3), ('RoughOut', unreal.CustomMaterialOutputType.CMOT_FLOAT1)):
+        o = unreal.CustomOutput(); o.set_editor_property('output_name', name); o.set_editor_property('output_type', kind); outs.append(o)
+    c.set_editor_property('additional_outputs', outs)
+    for name, src, out in inputs:
+        if not MEL.connect_material_expressions(src, out, c, name):
+            raise RuntimeError(f'TriplanarCliff: could not wire {name}')
+    to_tangent = MEL.create_material_expression(mat, unreal.MaterialExpressionTransform, x + 200, y)
+    to_tangent.set_editor_property('transform_source_type', unreal.MaterialVectorCoordTransformSource.TRANSFORMSOURCE_WORLD)
+    to_tangent.set_editor_property('transform_type', unreal.MaterialVectorCoordTransform.TRANSFORM_TANGENT)
+    MEL.connect_material_expressions(c, 'NormalOut', to_tangent, '')
+    return c, to_tangent, y + 240
+
+
 for n in LAYERS:
     s = TILING[n]
+    if n == 'CliffRock':
+        tri, tri_n, y = triplanar(n, s, -1200, y)
+        tint = MEL.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -650, y)
+        tint.set_editor_property('parameter_name', 'Tint_' + n)
+        tint.set_editor_property('default_value', unreal.LinearColor(*TINT[n], 1.0))
+        mul = MEL.create_material_expression(mat, unreal.MaterialExpressionMultiply, -500, y)
+        MEL.connect_material_expressions(tri, '', mul, 'A')
+        MEL.connect_material_expressions(tint, 'RGB', mul, 'B')
+        colour[n] = (mul, '')
+        MEL.connect_material_expressions(tri_n, '', nm, 'Layer ' + n)
+        rough[n] = (tri, 'RoughOut')
+        y += 260
+        continue
     near = sample(n, 'D', s, -1200, y, unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
     far = sample(n, 'D', s * 4.3, -1200, y + 60, unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
     lerp = MEL.create_material_expression(mat, unreal.MaterialExpressionLinearInterpolate, -800, y)
