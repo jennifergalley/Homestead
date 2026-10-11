@@ -69,6 +69,9 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-11: cave re-shots OK to ship as a first pass (outcrops read as rock, pool no longer
   glows). Rock face, pool clarity and shaft, planting and goblin's gold carded; tideline nodes ship
   with the Beach branch.
+- 2026-10-11: Beach Agent pre-[ready]: numbers, copy, 06:00 refresh and campfire OK. Blocking: the
+  three new meal icons are photo-like rectangles, not the ink house style. Carded: laver held
+  handful and held shell. Check after merge that the store title reads Aldridge's.
 - 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
   slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
   "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.
