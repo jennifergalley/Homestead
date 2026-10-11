@@ -3,7 +3,9 @@
 #include "HomesteadControllerText.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadAnimInstance.h"
+#include "HomesteadBeachLook.h"
 #include "HomesteadWorld.h"
+#include "Simulation/HomesteadBeach.h"
 #include "Simulation/HomesteadCrops.h"
 #include "Simulation/HomesteadGardenTarget.h"
 #include "Simulation/HomesteadGatherPose.h"
@@ -58,6 +60,23 @@ void AHomesteadController::Interact()
     {
     case EFocus::Resource:
     {
+        // The beach campfire: lit, it cooks like a cookfire; unlit, E lights it with driftwood (the
+        // same quiet wood tap as fuelling a cookfire).
+        const Homestead::ResourceNode* Campfire = nullptr;
+        for (const auto& Node : State().resources)
+            if (Node.id == FocusId && Node.kind == Homestead::ResourceKind::BeachCampfire) { Campfire = &Node; break; }
+        if (Campfire)
+        {
+            if (Homestead::Beach::CampfireLit(*Campfire, State().hour))
+            {
+                OpenBook(1);
+                Selection = static_cast<int32>(Homestead::Recipe::SteamedMussels);
+                if (NativeMenu && !NativeMenu->FocusSubject(EHomesteadMenuSubject::Recipe, Selection, 0))
+                    Notify(TEXT("The cookfire recipe could not be selected."), true);
+            }
+            else NotifyResourceAction(Sim.Harvest(FocusId, Position), WoodTapA);
+            break;
+        }
         bool Forage = false;
         bool Tree = false;
         bool Reeds = false;
@@ -114,6 +133,13 @@ void AHomesteadController::Interact()
                     // that grows (roots, berries, flowers, weeds) is picked into the hip pouch.
                     const auto Gather = Pose == Homestead::GatherPose::Sticks ? EHomesteadKneelGather::Sticks
                         : Pose == Homestead::GatherPose::Stones ? EHomesteadKneelGather::Stones : EHomesteadKneelGather::Pouch;
+                    // Driftwood comes up as driftwood, not the woodland branch props.
+                    if (Gather == EHomesteadKneelGather::Sticks)
+                    {
+                        const bool bDriftwood = Kind == Homestead::ResourceKind::Driftwood;
+                        Avatar->UseStickProps(bDriftwood ? HomesteadBeachLook::DriftwoodStick(1) : nullptr,
+                            bDriftwood ? HomesteadBeachLook::DriftwoodStick(2) : nullptr, HomesteadBeachLook::DriftwoodScale);
+                    }
                     FVector2D Target(ActionTarget.x, ActionTarget.y);
                     // Berries are picked from the near side of the bush, not its centre; an estate
                     // blackberry bramble is a metre across, so she reaches in at its edge.
@@ -134,7 +160,14 @@ void AHomesteadController::Interact()
                         const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
                         if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * FMath::Clamp(Toward.Size() - 30.0f, 0.0f, Edge);
                     }
-                    if (Avatar->PlayKneelGather(Gather, Target, Berries) && Landscape)
+                    // A shore rock (mussels, laver) is about 90 cm across: she kneels beside it and reaches onto its top.
+                    else if (Kind == Homestead::ResourceKind::MusselBed || Kind == Homestead::ResourceKind::LaverRocks)
+                    {
+                        constexpr float ShoreRockReachCm = 52.0f;
+                        const FVector2D Toward = FVector2D(Position.x, Position.y) - Target;
+                        if (Toward.Size() > 1.0f) Target += Toward.GetSafeNormal() * ShoreRockReachCm;
+                    }
+                    if (Avatar->PlayKneelGather(Gather, Target, Berries, HomesteadBeachLook::HeldMesh(Kind)) && Landscape)
                     {
                         Landscape->HoldProduce(FocusId);
                         HeldStickPile = FocusId;

@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "name": "SeaCampion",
+  "description": "A mat of sea campion in flower, 11 cm tall and 32 cm across: trailing stems of waxy blue-green paired leaves and white bilobed flowers over inflated pink-veined bladder calyces. Walk-through.",
+  "collision": "none",
+  "triangle_budget": 5000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/sea_campion.py",
+  "source_sha256": "e3283ca6bb79bf9ea7eb3f7e0384a7b2668ead91e9620e835de03625d1083f94",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_SeaCampionClump": {
+      "vertices": 4737,
+      "triangles": 4756,
+      "size_cm": [
+        35.74,
+        40.48,
+        9.59
+      ],
+      "materials": [
+        {
+          "name": "M_SeaCampion",
+          "textures": {
+            "basecolor": "T_SeaCampion_basecolor.png",
+            "normal": "T_SeaCampion_normal.png",
+            "roughness": "T_SeaCampion_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.030321710705757142,
+          -0.01603697121143341,
+          0.06
+        ],
+        "ground": "origin",
+        "detail_distance": 0.4,
+        "detail_fstop": 9.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.4
+      },
+      "fbx": "SM_SeaCampionClump.fbx",
+      "sha256": "73ee7ecc1f97ef346439f7e883bb321838e69b38305cbef982052434c2826155",
+      "preview": "preview_SM_SeaCampionClump.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SeaCampionClump_hero.png",
+          "detail": "beauty_SM_SeaCampionClump_detail.png",
+          "eye": "beauty_SM_SeaCampionClump_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_SeaCampionClump_LOD1": {
+      "vertices": 1280,
+      "triangles": 1274,
+      "size_cm": [
+        35.92,
+        33.9,
+        8.86
+      ],
+      "materials": [
+        {
+          "name": "M_SeaCampion",
+          "textures": {
+            "basecolor": "T_SeaCampion_basecolor.png",
+            "normal": "T_SeaCampion_normal.png",
+            "roughness": "T_SeaCampion_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.030321710705757142,
+          -0.01603697121143341,
+          0.06
+        ],
+        "ground": "origin",
+        "detail_distance": 0.4,
+        "detail_fstop": 9.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.4
+      },
+      "fbx": "SM_SeaCampionClump_LOD1.fbx",
+      "sha256": "273f39743e6a543e2b0a676cb5f9d91ad2d0c48dc8f2eea8748176cd503fad1d",
+      "preview": "preview_SM_SeaCampionClump_LOD1.png"
+    },
+    "SM_SeaCampionClump_LOD2": {
+      "vertices": 403,
+      "triangles": 354,
+      "size_cm": [
+        33.66,
+        34.18,
+        8.93
+      ],
+      "materials": [
+        {
+          "name": "M_SeaCampion",
+          "textures": {
+            "basecolor": "T_SeaCampion_basecolor.png",
+            "normal": "T_SeaCampion_normal.png",
+            "roughness": "T_SeaCampion_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.030321710705757142,
+          -0.01603697121143341,
+          0.06
+        ],
+        "ground": "origin",
+        "detail_distance": 0.4,
+        "detail_fstop": 9.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.4
+      },
+      "fbx": "SM_SeaCampionClump_LOD2.fbx",
+      "sha256": "c03a907f452804f8158d21b00c7085b72f1a0db578d714c5351a3a72a72b0d1c",
+      "preview": "preview_SM_SeaCampionClump_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.006
+  },
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "height above ground / plant height",
+    "G": "per-stem random phase",
+    "B": "flutter 0 at leaf base -> 1 at leaf tip",
+    "A": "1"
+  },
+  "material_notes": "One material M_SeaCampion: T_SeaCampion_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "placement": "Ground line at z = 0 (pivot); stem bases start 6 mm below. Random yaw, 0.8-1.2 scale.",
+  "textures": {
+    "T_SeaCampion_basecolor.png": "b01fa7ac8a97d36cf9f854f18ce29b9240c32a4640f2c78f284b6b31e3565cd5",
+    "T_SeaCampion_normal.png": "6c2e4ef0a2bffdc26cf2c87c7862aec9dc6f416ce7135a8dd543297f696adf9a",
+    "T_SeaCampion_roughness.png": "55ae180abe77dcb343d7128cc26b583cd20b47666e7b3b363a5693420339f039"
+  }
+}

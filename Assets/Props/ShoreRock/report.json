@@ -1,0 +1,633 @@
+{
+  "schema": 1,
+  "name": "ShoreRock",
+  "description": "Low sea-worn granite shore boulder (~90 x 70 x 35 cm) with wet band, barnacles and limpets; mussel-clump and laver produce variants in the same frame; held mussels and laver.",
+  "collision": "convex",
+  "triangle_budget": 8000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/shore_rock.py",
+  "source_sha256": "6e4a9a89086e682028b179a40fb31968f8a0ca33b53b804474fe726d431f9861",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_ShoreRock": {
+      "vertices": 3698,
+      "triangles": 7376,
+      "size_cm": [
+        93.56,
+        76.77,
+        40.79
+      ],
+      "materials": [
+        {
+          "name": "M_ShoreRock",
+          "textures": {
+            "basecolor": "T_ShoreRock_basecolor.png",
+            "roughness": "T_ShoreRock_roughness.png",
+            "normal": "T_ShoreRock_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_ShoreRock_basecolor.png",
+          "roughness": "T_ShoreRock_roughness.png",
+          "normal": "T_ShoreRock_normal.png",
+          "ao": "T_ShoreRock_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "focus": [
+          0.05,
+          -0.33,
+          0.1
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_ShoreRock.fbx",
+      "sha256": "f54d88667539b83437d37b6fea1eedd9452e1cfe5d2488bbf8eaba7d03e62cb4",
+      "preview": "preview_SM_ShoreRock.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_ShoreRock_hero.png",
+          "detail": "beauty_SM_ShoreRock_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_ShoreRock_LOD1": {
+      "vertices": 1310,
+      "triangles": 2600,
+      "size_cm": [
+        93.57,
+        76.8,
+        40.8
+      ],
+      "materials": [
+        {
+          "name": "M_ShoreRock",
+          "textures": {
+            "basecolor": "T_ShoreRock_basecolor.png",
+            "roughness": "T_ShoreRock_roughness.png",
+            "normal": "T_ShoreRock_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_ShoreRock_basecolor.png",
+          "roughness": "T_ShoreRock_roughness.png",
+          "normal": "T_ShoreRock_normal.png",
+          "ao": "T_ShoreRock_ao.png"
+        },
+        "shared_with": "SM_ShoreRock"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "focus": [
+          0.05,
+          -0.33,
+          0.1
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_ShoreRock_LOD1.fbx",
+      "sha256": "766d56a1404a64d9654cec3a4913c549b8dc63ad3eb8a7c0498ac0d8bf230cd8",
+      "preview": "preview_SM_ShoreRock_LOD1.png"
+    },
+    "SM_ShoreRock_LOD2": {
+      "vertices": 460,
+      "triangles": 900,
+      "size_cm": [
+        93.67,
+        76.72,
+        40.79
+      ],
+      "materials": [
+        {
+          "name": "M_ShoreRock",
+          "textures": {
+            "basecolor": "T_ShoreRock_basecolor.png",
+            "roughness": "T_ShoreRock_roughness.png",
+            "normal": "T_ShoreRock_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_ShoreRock_basecolor.png",
+          "roughness": "T_ShoreRock_roughness.png",
+          "normal": "T_ShoreRock_normal.png",
+          "ao": "T_ShoreRock_ao.png"
+        },
+        "shared_with": "SM_ShoreRock"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "focus": [
+          0.05,
+          -0.33,
+          0.1
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_ShoreRock_LOD2.fbx",
+      "sha256": "2db52134b293274871195f05bc9017897e2ea27a2a5b286b745c94165be10775",
+      "preview": "preview_SM_ShoreRock_LOD2.png"
+    },
+    "SM_MusselClump": {
+      "vertices": 3314,
+      "triangles": 6220,
+      "size_cm": [
+        17.15,
+        19.08,
+        9.09
+      ],
+      "materials": [
+        {
+          "name": "M_MusselClump",
+          "textures": {
+            "basecolor": "T_MusselClump_basecolor.png",
+            "roughness": "T_MusselClump_roughness.png",
+            "normal": "T_MusselClump_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MusselClump_basecolor.png",
+          "roughness": "T_MusselClump_roughness.png",
+          "normal": "T_MusselClump_normal.png",
+          "ao": "T_MusselClump_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest",
+        "focus": null,
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 0.35
+      },
+      "fbx": "SM_MusselClump.fbx",
+      "sha256": "d7ad2bbf31caf18610d95eb10f8064f7564904d0fe7cad84e8cb5a8a300129f0",
+      "preview": "preview_SM_MusselClump.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_MusselClump_hero.png",
+          "detail": "beauty_SM_MusselClump_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_MusselClump_LOD1": {
+      "vertices": 1571,
+      "triangles": 2798,
+      "size_cm": [
+        17.15,
+        19.07,
+        9.09
+      ],
+      "materials": [
+        {
+          "name": "M_MusselClump",
+          "textures": {
+            "basecolor": "T_MusselClump_basecolor.png",
+            "roughness": "T_MusselClump_roughness.png",
+            "normal": "T_MusselClump_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MusselClump_basecolor.png",
+          "roughness": "T_MusselClump_roughness.png",
+          "normal": "T_MusselClump_normal.png",
+          "ao": "T_MusselClump_ao.png"
+        },
+        "shared_with": "SM_MusselClump"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "focus": [
+          0.05,
+          -0.33,
+          0.1
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_MusselClump_LOD1.fbx",
+      "sha256": "8ceb5f46304c32c5bf0b800266361c4201771ce4d1c8a49030c51793a1e2a9ce",
+      "preview": "preview_SM_MusselClump_LOD1.png"
+    },
+    "SM_LaverFronds": {
+      "vertices": 3810,
+      "triangles": 7220,
+      "size_cm": [
+        44.8,
+        49.53,
+        10.69
+      ],
+      "materials": [
+        {
+          "name": "M_LaverFronds",
+          "textures": {
+            "basecolor": "T_LaverFronds_basecolor.png",
+            "roughness": "T_LaverFronds_roughness.png",
+            "normal": "T_LaverFronds_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_LaverFronds_basecolor.png",
+          "roughness": "T_LaverFronds_roughness.png",
+          "normal": "T_LaverFronds_normal.png",
+          "ao": "T_LaverFronds_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest",
+        "focus": null,
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 0.4
+      },
+      "fbx": "SM_LaverFronds.fbx",
+      "sha256": "09ad0c08254d9a11194df7d0acf0037b3b1bd26f005625c9b66bc36b6a03f848",
+      "preview": "preview_SM_LaverFronds.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_LaverFronds_hero.png",
+          "detail": "beauty_SM_LaverFronds_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_LaverFronds_LOD1": {
+      "vertices": 2005,
+      "triangles": 3610,
+      "size_cm": [
+        44.8,
+        49.53,
+        10.69
+      ],
+      "materials": [
+        {
+          "name": "M_LaverFronds",
+          "textures": {
+            "basecolor": "T_LaverFronds_basecolor.png",
+            "roughness": "T_LaverFronds_roughness.png",
+            "normal": "T_LaverFronds_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_LaverFronds_basecolor.png",
+          "roughness": "T_LaverFronds_roughness.png",
+          "normal": "T_LaverFronds_normal.png",
+          "ao": "T_LaverFronds_ao.png"
+        },
+        "shared_with": "SM_LaverFronds"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "focus": [
+          0.05,
+          -0.33,
+          0.1
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_LaverFronds_LOD1.fbx",
+      "sha256": "e144916ef13643ed92b7f3951211ae25db3d5ec74e75e35eafba03e1592ff7bb",
+      "preview": "preview_SM_LaverFronds_LOD1.png"
+    },
+    "SM_MusselHeld": {
+      "vertices": 1914,
+      "triangles": 3704,
+      "size_cm": [
+        6.37,
+        5.83,
+        7.33
+      ],
+      "materials": [
+        {
+          "name": "M_MusselHeld",
+          "textures": {
+            "basecolor": "T_MusselHeld_basecolor.png",
+            "roughness": "T_MusselHeld_roughness.png",
+            "normal": "T_MusselHeld_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_MusselHeld_basecolor.png",
+          "roughness": "T_MusselHeld_roughness.png",
+          "normal": "T_MusselHeld_normal.png",
+          "ao": "T_MusselHeld_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          90,
+          0,
+          0
+        ],
+        "ground": "lowest",
+        "focus": null,
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 0.2
+      },
+      "fbx": "SM_MusselHeld.fbx",
+      "sha256": "7824b5d4b954083c3b2560f0a65c263bb8455ec9027142ba21c2fd4bced0bf44",
+      "preview": "preview_SM_MusselHeld.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_MusselHeld_hero.png",
+          "detail": "beauty_SM_MusselHeld_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          90,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_LaverHeld": {
+      "vertices": 2662,
+      "triangles": 4640,
+      "size_cm": [
+        6.88,
+        5.26,
+        14.47
+      ],
+      "materials": [
+        {
+          "name": "M_LaverHeld",
+          "textures": {
+            "basecolor": "T_LaverHeld_basecolor.png",
+            "roughness": "T_LaverHeld_roughness.png",
+            "normal": "T_LaverHeld_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 64,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_LaverHeld_basecolor.png",
+          "roughness": "T_LaverHeld_roughness.png",
+          "normal": "T_LaverHeld_normal.png",
+          "ao": "T_LaverHeld_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest",
+        "focus": null,
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "detail_distance": 0.25
+      },
+      "fbx": "SM_LaverHeld.fbx",
+      "sha256": "b592f57d93296b70ad8db8694ab53e4fb24c7330db1709d1b95c6956bd3907d9",
+      "preview": "preview_SM_LaverHeld.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_LaverHeld_hero.png",
+          "detail": "beauty_SM_LaverHeld_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.067,
+    "placement": "Origin is the sand line under the rock's bounds centre; place at sand height (already bedded 7 cm). Seaward = Blender -Y = Unreal +Y.",
+    "collision": "Convex hull on SM_ShoreRock. The importer applies the set's collision to every mesh, so give the produce and held components NoCollision in game.",
+    "produce_frame": "SM_MusselClump and SM_LaverFronds share SM_ShoreRock's origin and axes (produceOffsetCm [0, 0, 0]); spawn them at the rock's transform."
+  },
+  "produce": {
+    "SM_MusselClump": {
+      "count": 26,
+      "byssus_threads": 29,
+      "produceOffsetCm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "frame": "Same local frame and origin as SM_ShoreRock (not re-pivoted); place at the rock's transform."
+    },
+    "SM_LaverFronds": {
+      "fronds": 5,
+      "produceOffsetCm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "frame": "Same local frame and origin as SM_ShoreRock (not re-pivoted); place at the rock's transform.",
+      "two_sided": "Geometric: every sheet is doubled with a flipped back face 0.3 mm behind it."
+    }
+  },
+  "held": {
+    "SM_MusselHeld": "Pivot = pinch point at the gathered byssus tuft; +Z up out of the pinch, a tight bunch of three mussels (5.2-6.3 cm) hangs in -Z, umbos 0.6-1.2 cm below the pivot; the frayed tuft end rises ~0.5 cm above it.",
+    "SM_LaverHeld": "Pivot = top pinch where the fronds are gathered; +Z up out of the pinch, three broad limp sheets and two strap fronds hang ~10-14 cm in -Z, wider below."
+  },
+  "textures": {
+    "T_ShoreRock_basecolor.png": "9edca9579918e1a4fd774e5a27210f4aa55574ab3241e57d0dda076e0b13c134",
+    "T_ShoreRock_roughness.png": "26f7f76305f4707cb342db2fe019a5db8c897582cff529ffe8239e5b0c572496",
+    "T_ShoreRock_normal.png": "ded9e366e3035757b47aa3d5cf0bcc84f2283ffab63cb18b18457e9cfe0d484d",
+    "T_MusselClump_basecolor.png": "59deb54d75784353d602e16b65e387e5b25216f8af0386a3c510c99089b462db",
+    "T_MusselClump_roughness.png": "7e3f8a8a862e4d427d6a1f76e8fbe86a9fd708c609b7a3dd75db8c9afd14f3d9",
+    "T_MusselClump_normal.png": "92cd3be4100519195666f519270c0212bacf62228911cae9f671011b4d44caf1",
+    "T_LaverFronds_basecolor.png": "fc025b79c8d679276ad4d615a1436ff4c13ebef8f9465eb7c463887c0e4bcd3a",
+    "T_LaverFronds_roughness.png": "b4c6f6d9f396716f41ea88fa298eeeae1d272141f3a1a690276969f3d232b40c",
+    "T_LaverFronds_normal.png": "ae31f8b1bc03efd58cd001a026ffd17d6678b6dee0f6b71047b5518b0e393917",
+    "T_MusselHeld_basecolor.png": "02742e7cddb35f13255f0d4e094af38b7735d3f61143e9eba3d841f7559d7a07",
+    "T_MusselHeld_roughness.png": "cd669c9f82129f422ea66dcac9ec91427bba21fbdcdd4ccfb28b071ecc1fb19c",
+    "T_MusselHeld_normal.png": "7eed81805aa8fc18ed5faed04174887057b76576088328e76a11376bc7ad58b0",
+    "T_LaverHeld_basecolor.png": "e55e0436100a4edf905b660e7ce0beaba48274e73ad5cba7dd0219eaaf3f0487",
+    "T_LaverHeld_roughness.png": "02cc2164e17ec2a9be556df9e21616b72f475673b926e3eadd2126582303307d",
+    "T_LaverHeld_normal.png": "0130778cd0a485fb79659afdc10269a10f52a9b56aef668f6df99a6fb60edb90"
+  }
+}

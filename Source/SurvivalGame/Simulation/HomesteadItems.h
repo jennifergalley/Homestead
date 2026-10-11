@@ -31,6 +31,8 @@ enum class Item : int
     FishingPole, RiverTrout, RiverSalmon, LakePerch, LakeCarp, SeaMackerel, SeaBass,
     RawFishSlices, GrilledTrout, GrilledPerch, GrilledMackerel,
     FishSoup, FishAndPotatoes, HerbedCarp, MackerelChowder,
+    // add-beach-gathering: beach finds and the dishes made from them.
+    Seashell, Driftwood, Mussels, Laver, SteamedMussels, MusselPotatoBroth, FriedLaver,
     Count
 };
 constexpr int ItemCount = static_cast<int>(Item::Count);

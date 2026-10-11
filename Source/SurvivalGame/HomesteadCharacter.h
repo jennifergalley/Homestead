@@ -190,6 +190,9 @@ public:
     // clump she pulls (null: the garden's nettle tuft); each fistful shows in her hand from its pull to
     // its toss, then flies back over her shoulder and lies there until the clip ends.
     bool PlayPullWeeds(Homestead::Point Target, UStaticMesh* Handful = nullptr);
+    // The two sticks a Sticks kneel lifts: driftwood on the beach (add-beach-gathering), else (null) the
+    // woodland branch props at CarriedStickScale. Call before PlayKneelGather.
+    void UseStickProps(UStaticMesh* First, UStaticMesh* Second, float Scale);
     bool CanPullWeeds() const { return bMetaHumanActive && PullWeedsAnimation != nullptr; }
     // Seconds into the weed pull while it plays, else -1. That may still be an earlier pull's tail: a pull
     // queued behind it only owns the phase once PullWeedsStarts() has moved on from where it was.
@@ -385,6 +388,9 @@ private:
     UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> CarriedReeds;
     // Two branch props that appear in her hand and stack on her left forearm during the stick gather.
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> CarriedSticks;
+    // The branch meshes CarriedSticks were made with, restored after a driftwood gather (UseStickProps).
+    UPROPERTY() TArray<TObjectPtr<UStaticMesh>> DefaultStickMeshes;
+    float StickPropScale = CarriedStickScale;
     // Two stones for the stone gather (same meshes and sizes as the woodland's stone pile).
     UPROPERTY(VisibleAnywhere) TArray<TObjectPtr<UStaticMeshComponent>> CarriedStones;
     // The root or berry cluster in her right hand during a pouch gather.

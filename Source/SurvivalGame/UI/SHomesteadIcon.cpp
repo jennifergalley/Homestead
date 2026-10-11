@@ -353,6 +353,19 @@ const FLinearColor HayGold(0.86f, 0.72f, 0.36f);
             {52, Y}}, Charcoal, MealInkWidth);
     }
 
+    // add-beach-gathering: an opened blue mussel lying in the dish, its orange flesh in the shell.
+    const FLinearColor MealMusselShell(0.16f, 0.19f, 0.30f);
+    const FLinearColor MealMusselFlesh(0.93f, 0.55f, 0.24f);
+    const FLinearColor MealLaver(0.22f, 0.24f, 0.16f);
+    void PaintMealMussel(FIconPainter& P, float X, float Y, float Degrees)
+    {
+        P.SetPose(Degrees, 1.0f, FVector2D(0.0f, 0.0f), FVector2D(X, Y));
+        P.Shape({{-5.5f, 0}, {-2, -2.8f}, {3, -2.6f}, {5.5f, -0.6f}, {4.5f, 1.8f}, {-2, 2.2f}}, MealMusselShell);
+        P.Shape({{-3.6f, 0}, {-1.4f, -1.6f}, {2.6f, -1.4f}, {3.8f, 0}, {2.4f, 1.1f}, {-1.6f, 1.2f}}, MealMusselFlesh);
+        P.Line({{-5.5f, 0}, {-2, 2.2f}, {4.5f, 1.8f}}, Charcoal, 0.9f);
+        P.ClearPose();
+    }
+
     // A serving plank laid out in fish-body coordinates; it follows the current pose.
     void PaintMealPlank(FIconPainter& P)
     {
@@ -524,7 +537,10 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("root-vegetable-hotpot")), EKind::RootVegetableHotpot},
         {FName(TEXT("raw-fish-slices")), EKind::RawFishSlices},
         {FName(TEXT("grilled-trout")), EKind::GrilledTrout},
-        {FName(TEXT("grilled-perch")), EKind::GrilledPerch}
+        {FName(TEXT("grilled-perch")), EKind::GrilledPerch},
+        {FName(TEXT("steamed-mussels")), EKind::SteamedMussels},
+        {FName(TEXT("mussel-potato-broth")), EKind::MusselPotatoBroth},
+        {FName(TEXT("fried-laver")), EKind::FriedLaver}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -842,6 +858,39 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         PaintMealSteam(P, 8, 22);
         break;
     }
+    case EKind::SteamedMussels:
+        // Opened mussels heaped in a bowl of their liquor.
+        PaintMealBowlBack(P, HayGold * 0.5f + Wood * 0.35f);
+        PaintMealMussel(P, 17, 24, -14.0f);
+        PaintMealMussel(P, 39, 24, 16.0f);
+        PaintMealMussel(P, 28, 21.5f, 4.0f);
+        PaintMealMussel(P, 22, 28, 22.0f);
+        PaintMealMussel(P, 34, 28, -20.0f);
+        PaintMealBowlFront(P);
+        PaintMealSteam(P, 22, 17);
+        break;
+    case EKind::MusselPotatoBroth:
+        // A cloudy broth with potato cubes, laver ribbons and two mussels.
+        PaintMealBowlBack(P, MealGlaze * 0.82f);
+        P.Shape({{13, 25}, {18, 24}, {19, 28.5f}, {14, 29}}, MealPotato);
+        P.Shape({{33, 23.5f}, {38.5f, 23}, {39, 27.5f}, {33.5f, 28}}, MealPotato);
+        P.Line({{20, 26}, {24, 24}, {27, 26.5f}, {31, 24.5f}}, MealLaver, 1.8f);
+        P.Line({{36, 29}, {40, 27.5f}, {44, 29}}, MealLaver, 1.6f);
+        PaintMealMussel(P, 26, 29.5f, 8.0f);
+        PaintMealMussel(P, 42, 24.5f, -24.0f);
+        PaintMealBowlFront(P);
+        PaintMealSteam(P, 18, 18);
+        break;
+    case EKind::FriedLaver:
+        // Crisp dark laver cakes on a plate.
+        PaintMealPlate(P, 33);
+        P.Shape({{11, 31}, {15, 26}, {22, 25}, {25, 29}, {21, 34.5f}, {13, 35}}, MealLaver);
+        P.Shape({{24, 28}, {29, 23.5f}, {37, 24}, {39, 29}, {33, 33}, {26, 32.5f}}, MealLaver * 1.2f);
+        P.Shape({{34, 32}, {39, 28.5f}, {45, 29.5f}, {46, 34}, {40, 37}, {35, 35.5f}}, MealLaver * 0.9f);
+        for (const FVector2D& Crisp : {FVector2D(16, 29), FVector2D(30, 27), FVector2D(41, 32.5f)})
+            P.Line({{Crisp.X - 2.5f, Crisp.Y}, {Crisp.X, Crisp.Y - 1.2f}, {Crisp.X + 2.5f, Crisp.Y}}, HayGold * 0.75f, 1.0f);
+        PaintMealSteam(P, 24, 21);
+        break;
     case EKind::SeedRoots:
         PaintSeedPacket(P, Wood);
         P.Root(23, 23, RootOrange);

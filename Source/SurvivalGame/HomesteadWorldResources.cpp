@@ -1,4 +1,5 @@
 #include "HomesteadWorld.h"
+#include "HomesteadBeachLook.h"
 #include "HomesteadCharacter.h"
 #include "HomesteadWorldCommon.h"
 #include "HomesteadWorldLog.h"
@@ -182,7 +183,8 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         const bool bSolid = Kind == ResourceKind::StumpSmall || Kind == ResourceKind::StumpMedium
             || Kind == ResourceKind::StumpLarge || Kind == ResourceKind::StumpAncient || Kind == ResourceKind::FallenLog
             || Kind == ResourceKind::GiantLog || Kind == ResourceKind::Boulder || Kind == ResourceKind::BrokenBarrel
-            || Kind == ResourceKind::BrokenCrate || Kind == ResourceKind::RubbishHeap || Kind == ResourceKind::RuinTimbers;
+            || Kind == ResourceKind::BrokenCrate || Kind == ResourceKind::RubbishHeap || Kind == ResourceKind::RuinTimbers
+            || Kind == ResourceKind::MusselBed || Kind == ResourceKind::LaverRocks || Kind == ResourceKind::BeachCampfire;
         if (bSolid && !bProduce && !bStagingResourceBuild)
         {
             const FVector Extent = Bounds.GetExtent() * Scale;
@@ -200,12 +202,18 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             else
             {
                 auto* Box = NewObject<UBoxComponent>(this);
-                Box->SetBoxExtent(FVector(Extent.X * 0.85f, Extent.Y * 0.85f, Extent.Z), false);
+                // The beach's shore rocks and campfire ring are below her 45 cm step height (and can sit a few cm
+                // under the drawn sand): a box a metre tall stops her at their edge instead of letting her climb on.
+                const bool bBeach = Kind == ResourceKind::BeachCampfire || Kind == ResourceKind::MusselBed
+                    || Kind == ResourceKind::LaverRocks;
+                const float BoxHalfZ = bBeach ? FMath::Max(Extent.Z, 50.0f) : Extent.Z;
+                Box->SetBoxExtent(FVector(Extent.X * 0.85f, Extent.Y * 0.85f, BoxHalfZ), false);
                 Blocker = Box;
             }
             Blocker->SetupAttachment(GetRootComponent());
             Blocker->SetMobility(EComponentMobility::Movable);
-            const float Rise = bRound ? CastChecked<UCapsuleComponent>(Blocker)->GetUnscaledCapsuleHalfHeight() : Extent.Z;
+            const float Rise = bRound ? CastChecked<UCapsuleComponent>(Blocker)->GetUnscaledCapsuleHalfHeight()
+                : CastChecked<UBoxComponent>(Blocker)->GetUnscaledBoxExtent().Z;
             const float Bottom = bPivotGround ? static_cast<float>(Bounds.Min.Z) * Scale : 0.0f;
             Blocker->SetRelativeTransform(FTransform(Rotation, Ground + FVector(0, 0, Bottom + Rise)));
             Blocker->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
@@ -213,8 +221,10 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             Blocker->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
             // The ruin's fallen roof timbers used to block as ruin scenery; as a resource they stop
             // only her (a pawn), so nothing else (felled trees, drops, traces) snags on the proxy. The
-            // pile is under 60 cm, within her step height: without this she walked up onto it (PIE).
-            if (Kind == ResourceKind::RuinTimbers)
+            // pile is under 60 cm, within her step height: without this she walked up onto it (PIE). The
+            // beach's shore rocks and campfire ring are as low, and likewise stop her at their edge.
+            if (Kind == ResourceKind::RuinTimbers || Kind == ResourceKind::MusselBed || Kind == ResourceKind::LaverRocks
+                || Kind == ResourceKind::BeachCampfire)
             {
                 Blocker->SetCollisionResponseToAllChannels(ECR_Ignore);
                 Blocker->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
@@ -247,6 +257,8 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
         }
         break;
     case Homestead::ResourceKind::Stones:
+    // Beach pebbles are the same loose hand stones she lifts from the woodland piles (add-beach-gathering).
+    case Homestead::ResourceKind::BeachPebbles:
         if (bProduceOnly)
         {
             for (int I = 0; I < 3; ++I)
@@ -439,6 +451,60 @@ void AHomesteadWorld::BuildResource(FHomesteadWorldVisual& Visual, const Homeste
             bVisualBuildFailed = true;
             UE_LOG(LogHomesteadWorld, Error, TEXT("Generated sapling has illegal palette role %d."),
                 static_cast<int32>(Entity.paletteRole));
+        }
+        break;
+    }
+    // add-beach-gathering: the beach finds and the beach campfire (HomesteadBeachLook.h). The shore rock,
+    // its mussels or laver, and the campfire's parts share one authored origin, so they stack at the node.
+    case Homestead::ResourceKind::Seashells:
+    case Homestead::ResourceKind::Driftwood:
+    case Homestead::ResourceKind::MusselBed:
+    case Homestead::ResourceKind::LaverRocks:
+    case Homestead::ResourceKind::BeachCampfire:
+    {
+        auto Load = [&](const TCHAR* Folder, const TCHAR* Name) -> UStaticMesh*
+        {
+            UStaticMesh* Mesh = HomesteadBeachLook::LoadProp(Folder, Name);
+            if (!Mesh)
+            {
+                bVisualBuildFailed = true;
+                UE_LOG(LogHomesteadWorld, Error, TEXT("Beach resource %d is missing authored mesh %s/%s"), Node.id, Folder, Name);
+            }
+            return Mesh;
+        };
+        const float Yaw = static_cast<float>(Variation % 360);
+        switch (Node.kind)
+        {
+        case Homestead::ResourceKind::Seashells:
+            if (bProduceOnly) Authored(Load(TEXT("BeachShells"), TEXT("SM_BeachShells")), FVector2D::ZeroVector, Yaw, true,
+                Random.FRandRange(0.9f, 1.1f), 0.0f, true);
+            break;
+        case Homestead::ResourceKind::Driftwood:
+            // Three sticks in a loose heap; she lifts components 1 and 2 (_b, _c), as from a branch pile.
+            if (bProduceOnly)
+            {
+                static const TCHAR* const Sticks[] = {TEXT("SM_Driftwood_a"), TEXT("SM_Driftwood_b"), TEXT("SM_Driftwood_c")};
+                for (int32 I = 0; I < 3; ++I)
+                    Authored(Load(TEXT("Driftwood"), Sticks[I]), FVector2D(I * 11 - 11, I * 8 - 8), Yaw + I * 41.0f, true,
+                        HomesteadBeachLook::DriftwoodScale);
+            }
+            break;
+        case Homestead::ResourceKind::MusselBed:
+        case Homestead::ResourceKind::LaverRocks:
+        {
+            const bool bMussels = Node.kind == Homestead::ResourceKind::MusselBed;
+            const float Scale = Random.FRandRange(0.9f, 1.12f);
+            Authored(Load(TEXT("ShoreRock"), TEXT("SM_ShoreRock")), FVector2D::ZeroVector, Yaw, false, Scale, 0.0f, true, true);
+            Authored(Load(TEXT("ShoreRock"), bMussels ? TEXT("SM_MusselClump") : TEXT("SM_LaverFronds")), FVector2D::ZeroVector, Yaw, true,
+                Scale, 0.0f, true, true);
+            break;
+        }
+        default:
+            // The pit always; a fresh stack of driftwood laid ready while it's unlit (UpdateBeachCampfires adds
+            // the burning stack, embers, flames and light while it burns).
+            Authored(Load(TEXT("BeachCampfire"), TEXT("SM_BeachFirePit")), FVector2D::ZeroVector, Yaw, false, 1.0f, 0.0f, true, true);
+            Authored(Load(TEXT("BeachCampfire"), TEXT("SM_CampfireStack")), FVector2D::ZeroVector, Yaw, true, 1.0f, 0.0f, true, true);
+            break;
         }
         break;
     }

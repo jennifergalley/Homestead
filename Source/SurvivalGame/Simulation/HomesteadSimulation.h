@@ -37,6 +37,9 @@ enum class ResourceKind : int
     SlateHeap,
     // The manor's fallen roof timbers, chopped up with the worn axe.
     RuinTimbers,
+    // add-beach-gathering: beach finds that come back every morning, and the beach campfire she lights
+    // with driftwood (its readyAtHour is the hour it burns out; HomesteadBeach.h).
+    Seashells, Driftwood, BeachPebbles, MusselBed, LaverRocks, BeachCampfire,
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
@@ -48,6 +51,8 @@ enum class Recipe : int
     CabbagePotatoStew, BerryCompote, StrawberryCompote, RootVegetableHotpot,
     RawFishSlices, GrilledTrout, GrilledPerch, GrilledMackerel,
     FishSoup, FishAndPotatoes, HerbedCarp, MackerelChowder,
+    // add-beach-gathering.
+    SteamedMussels, MusselPotatoBroth, FriedLaver,
     Count
 };
 // One of each tool; its tier belongs to the tool type (State::toolTiers).
@@ -621,6 +626,9 @@ public:
     int FindDeconstructTarget(Point aim, double maxDistance) const;
 
     Result Harvest(int nodeId, Point player);
+    // Lights the beach campfire with Beach::CampfireDriftwood driftwood (HomesteadBeach.h). Harvest
+    // routes a campfire here.
+    Result LightBeachCampfire(int nodeId, Point player);
     Result Clear(int nodeId, Point player);
     // Hack away one underbrush plant at `plant` (validated by the caller's world). Woody shrubs
     // yield a branch, soft growth yields fiber.

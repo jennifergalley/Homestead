@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "name": "DriftwoodSticks",
+  "description": "A loose cluster of five thin sea-bleached sticks and twigs 21-58 cm with a few strands of dried bladderwrack caught over them. Ground-hugging scenery, no collision.",
+  "collision": "none",
+  "triangle_budget": 4000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/driftwood_sticks.py",
+  "source_sha256": "ccb4fcfdd7ff19eb5972a3a3708752224942c81499c94906b0d36b197e416695",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_DriftwoodSticks": {
+      "vertices": 1772,
+      "triangles": 3256,
+      "size_cm": [
+        58.85,
+        42.05,
+        5.33
+      ],
+      "materials": [
+        {
+          "name": "M_DriftwoodSticks",
+          "textures": {
+            "basecolor": "T_DriftwoodSticks_basecolor.png",
+            "roughness": "T_DriftwoodSticks_roughness.png",
+            "normal": "T_DriftwoodSticks_normal.png",
+            "ao": "T_DriftwoodSticks_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.05947087466716766,
+          0.012795984745025635,
+          0.02
+        ],
+        "ground": "origin",
+        "detail_distance": 0.45,
+        "detail_fstop": 11.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.6
+      },
+      "fbx": "SM_DriftwoodSticks.fbx",
+      "sha256": "5cc804088a162191d98a8963e28a882d8d06f08fad4c24337e9e16ce2df1518e",
+      "preview": "preview_SM_DriftwoodSticks.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_DriftwoodSticks_hero.png",
+          "detail": "beauty_SM_DriftwoodSticks_detail.png",
+          "eye": "beauty_SM_DriftwoodSticks_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_DriftwoodSticks_LOD1": {
+      "vertices": 958,
+      "triangles": 1628,
+      "size_cm": [
+        58.84,
+        42.06,
+        5.29
+      ],
+      "materials": [
+        {
+          "name": "M_DriftwoodSticks",
+          "textures": {
+            "basecolor": "T_DriftwoodSticks_basecolor.png",
+            "roughness": "T_DriftwoodSticks_roughness.png",
+            "normal": "T_DriftwoodSticks_normal.png",
+            "ao": "T_DriftwoodSticks_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.05947087466716766,
+          0.012795984745025635,
+          0.02
+        ],
+        "ground": "origin",
+        "detail_distance": 0.45,
+        "detail_fstop": 11.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.6
+      },
+      "fbx": "SM_DriftwoodSticks_LOD1.fbx",
+      "sha256": "e0cd1b053150620569fba6d25aead6b3222bc10104b234082ae0be97a60219ac",
+      "preview": "preview_SM_DriftwoodSticks_LOD1.png"
+    },
+    "SM_DriftwoodSticks_LOD2": {
+      "vertices": 551,
+      "triangles": 814,
+      "size_cm": [
+        58.71,
+        42.09,
+        5.49
+      ],
+      "materials": [
+        {
+          "name": "M_DriftwoodSticks",
+          "textures": {
+            "basecolor": "T_DriftwoodSticks_basecolor.png",
+            "roughness": "T_DriftwoodSticks_roughness.png",
+            "normal": "T_DriftwoodSticks_normal.png",
+            "ao": "T_DriftwoodSticks_ao.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.05947087466716766,
+          0.012795984745025635,
+          0.02
+        ],
+        "ground": "origin",
+        "detail_distance": 0.45,
+        "detail_fstop": 11.0,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 1.6
+      },
+      "fbx": "SM_DriftwoodSticks_LOD2.fbx",
+      "sha256": "241853a626b3b6d24b5525b1d78e4bc5d8e7bdb543318066fb7581937fa4cbd9",
+      "preview": "preview_SM_DriftwoodSticks_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.006,
+    "bake": {
+      "size": 2048,
+      "samples": 64,
+      "device": "OPTIX",
+      "normal": "OpenGL",
+      "method": "high-to-low selected-to-active",
+      "maps": {
+        "basecolor": "T_DriftwoodSticks_basecolor.png",
+        "roughness": "T_DriftwoodSticks_roughness.png",
+        "normal": "T_DriftwoodSticks_normal.png",
+        "ao": "T_DriftwoodSticks_ao.png"
+      }
+    },
+    "lods": {
+      "SM_DriftwoodSticks": 3256,
+      "SM_DriftwoodSticks_LOD1": 1628,
+      "SM_DriftwoodSticks_LOD2": 814
+    },
+    "material": "Baked from a dense displaced high mesh with the DriftwoodLog wood material and a wrack material (homestead_highbake); M_PropTextured."
+  },
+  "placement": "Ground line at z = 0 (pivot, bottom centre); sticks bed 3-6 mm below it. Random yaw, 0.8-1.2 scale.",
+  "textures": {
+    "T_DriftwoodSticks_basecolor.png": "d17b4007d9edd751a3862507c5f09af13bfcd28e19cd65273e1a7d9b574e780e",
+    "T_DriftwoodSticks_roughness.png": "7384ce055e4baaa2c3c42e56c01797f2b21600d456e429ef62e0547af4ae11cc",
+    "T_DriftwoodSticks_normal.png": "da2518f651f8768b57c2a0488369711c6df9fec7118bd54ddf1fd9d57b5262d0",
+    "T_DriftwoodSticks_ao.png": "a1501a4eefb50552aeadf33fc00c57da24c05f04aae97098b9f4dcba2292aefd"
+  }
+}

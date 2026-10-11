@@ -34,6 +34,7 @@ add_library(HomesteadSimulation STATIC
     Source/SurvivalGame/Simulation/HomesteadDoor.cpp
     Source/SurvivalGame/Simulation/HomesteadChests.cpp
     Source/SurvivalGame/Simulation/HomesteadBackpack.cpp
+    Source/SurvivalGame/Simulation/HomesteadBeach.cpp
     Source/SurvivalGame/Simulation/HomesteadGarmentShop.cpp
     Source/SurvivalGame/Simulation/HomesteadToolUpgrades.cpp
     Source/SurvivalGame/Simulation/HomesteadNightLight.cpp
@@ -235,6 +236,15 @@ else()
     target_compile_options(HomesteadUpkeepTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
 endif()
 add_test(NAME HomesteadUpkeepTests COMMAND HomesteadUpkeepTests)
+
+add_executable(HomesteadBeachTests Tests/HomesteadBeachTests.cpp)
+target_link_libraries(HomesteadBeachTests PRIVATE HomesteadSimulation)
+if(MSVC)
+    target_compile_options(HomesteadBeachTests PRIVATE /W4 /WX /EHs-c-)
+else()
+    target_compile_options(HomesteadBeachTests PRIVATE -Wall -Wextra -Wpedantic -Werror -fno-exceptions)
+endif()
+add_test(NAME HomesteadBeachTests COMMAND HomesteadBeachTests)
 
 # Not a test: prints the placement table for Scripts/Terrain/compact_placements.py.
 add_executable(HomesteadPlacementDump Tests/Tools/HomesteadPlacementDump.cpp)

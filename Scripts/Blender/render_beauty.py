@@ -26,6 +26,9 @@ def main():
     parser.add_argument("--mesh", action="append")
     parser.add_argument("--view", action="append", help="hero, detail and/or eye (default: recipe BEAUTY views)")
     parser.add_argument("--prefix", default="beauty", help="Output file prefix (e.g. draft for quick passes)")
+    parser.add_argument("--transparent", action="store_true",
+                        help="Render an RGBA PNG with a transparent background (no soil ground) "
+                             "for icon-cut hero renders, instead of the opaque studio backdrop")
     args = parser.parse_args(argv)
     folder = Path(bpy.data.filepath).parent
     report_path = folder / "report.json"
@@ -45,9 +48,14 @@ def main():
                                    ground=review.get("ground", "lowest"),
                                    eye_distance=review.get("eye_distance"),
                                    detail_distance=review.get("detail_distance"),
-                                   detail_fstop=review.get("detail_fstop", 22.0))
+                                   detail_fstop=review.get("detail_fstop", 22.0),
+                                   transparent=args.transparent)
         result["views"] = {view: Path(p).name for view, p in result["views"].items()}
         if args.prefix == "beauty":
+            # Re-rendering a subset of views (e.g. --view hero only) must not drop the
+            # record of other views whose files are untouched on disk.
+            previous_views = report["meshes"][name].get("beauty", {}).get("views", {})
+            result["views"] = {**previous_views, **result["views"]}
             report["meshes"][name]["beauty"] = result
         print(f"HOMESTEAD_BEAUTY {name} {result['device']} {result['gpus']} {result['views']}")
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")

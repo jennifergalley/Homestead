@@ -34,6 +34,15 @@ inline constexpr Entry Entries[] = {
     {Homestead::Item::SeaMackerel, "sea-mackerel", "CaughtFish", "SM_SeaMackerel", nullptr, true},
     {Homestead::Item::SeaBass, "sea-bass", "CaughtFish", "SM_SeaBass", nullptr, true},
     {Homestead::Item::FishingPole, "fishing-pole", "FishingPole", "SM_FishingPole", nullptr, false},
+    // add-beach-gathering.
+    {Homestead::Item::SteamedMussels, "steamed-mussels", "PreparedFood", "SM_SteamedMussels", "SM_SteamedMusselsPortion", false},
+    {Homestead::Item::MusselPotatoBroth, "mussel-potato-broth", "PreparedFood", "SM_MusselPotatoBroth", "SM_MusselPotatoBrothPortion", false},
+    {Homestead::Item::FriedLaver, "fried-laver", "PreparedFood", "SM_FriedLaver", "SM_FriedLaverPortion", false},
+    // Beach finds: their icon renders, and the held meshes as what lies on the ground when dropped.
+    {Homestead::Item::Seashell, "seashell", "BeachShells", "SM_SeashellHeld", nullptr, false},
+    {Homestead::Item::Driftwood, "driftwood", "Driftwood", "SM_Driftwood_a", nullptr, false},
+    {Homestead::Item::Mussels, "mussels", "ShoreRock", "SM_MusselHeld", nullptr, false},
+    {Homestead::Item::Laver, "laver", "ShoreRock", "SM_LaverHeld", nullptr, false},
 };
 
 inline const Entry* Find(Homestead::Item item)

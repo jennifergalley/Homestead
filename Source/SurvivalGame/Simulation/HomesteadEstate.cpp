@@ -364,6 +364,10 @@ const EstatePlacements& EstatePlacementsBeforeCompactMap()
         // the new cove path or the moved village street displaced, with the same 3 m rule.
         auto coastMix = topUp;
 #include "HomesteadEstateCoastMixPlacements.inc"
+        // Beach finds and the beach campfire (586000-586099, Scripts/Terrain/beach_detritus.py; add-beach-gathering),
+        // last of all with the same 3 m rule (the generator keeps them 3.2 m from every row above).
+        auto beachFind = topUp;
+#include "HomesteadEstateBeachPlacements.inc"
         // Town lane (530000+).
         return table;
     }();

@@ -393,6 +393,23 @@ heights into the work npy (`HOMESTEAD_TERRAIN_WORK`) wherever it raised the grou
 that already has the belt stays right. Once graded it neither redesigns nor re-measures (the design reads the
 old waterline, which the belt has moved), even with `--dry`.
 
+### Beach finds and decor (`beach_detritus.py`)
+
+The beach's gatherable finds (add-beach-gathering, ids 586000-586099) and its decorative scatter (scenery kinds
+49-55). It reads the work npy and the `Beach` weightmap, so run it after any coast rebake and `weightmaps.py`:
+finds go on painted sand within 140 m of the foot of the cove steps (mussel beds and laver rocks 0.6-4 m from the
+sea, shell scatters on the tideline, driftwood and pebbles on the dry upper beach, the campfire on flat dry sand
+10-28 m from the steps), off the cove route, the river and the sea cave's mouth. Ids are frozen per kind slot; once
+`HomesteadEstateBeachPlacements.inc` has rows they're kept (`--replan` only before they ship). The decor (shell and
+pebble drifts, wrack along the shore, driftwood sticks and logs, thrift and sea campion where the sand meets the
+grass) is replanned every run: it drops every earlier record of kinds 49-55 from `EstateScenery.bin` and appends the
+new ones, so rerun it after `scatter.py` rewrites the scenery.
+
+```powershell
+python Scripts\Terrain\beach_detritus.py --dry   # plan and report only
+python Scripts\Terrain\beach_detritus.py         # write the rows (first time) and the decor records
+```
+
 ## Ground and meadow (`bake_ground.py`, `build_ground.py`, `build_landscape_material.py`)
 
 `bake_ground.py` (about 90 s) reads the heightfield, the paint-layer weights, `estate_layout.json` and

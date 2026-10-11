@@ -404,6 +404,7 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
         TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_b.SM_DryBranchesMedium01_b"),
         TEXT("/Game/Trials/WoodlandResources_20260921_01/Meshes/SM_DryBranchesMedium01_c.SM_DryBranchesMedium01_c")};
     CarriedSticks.Reset();
+    DefaultStickMeshes.Reset();
     for (int32 Index = 0; Index < 2; ++Index)
         if (UStaticMesh* Branch = LoadObject<UStaticMesh>(nullptr, StickMeshes[Index]))
         {
@@ -414,6 +415,7 @@ bool AHomesteadCharacter::LoadMetaHumanStack()
             Stick->SetVisibility(false);
             Stick->RegisterComponent();
             CarriedSticks.Add(Stick);
+            DefaultStickMeshes.Add(Branch);
         }
     GatherPouchAnimation = LoadMetaHumanAsset<UAnimSequence>(TEXT("Animations/AN_HeroineMH_KneelGatherPouch"));
     if (GatherPouchAnimation && GatherPouchAnimation->GetSkeleton() != MetaHumanBody->GetSkeleton())

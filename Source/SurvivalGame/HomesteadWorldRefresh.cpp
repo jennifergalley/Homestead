@@ -415,6 +415,7 @@ bool AHomesteadWorld::Refresh(const Homestead::Simulation& Simulation)
                 if (Bone && Bone->IsVisible() == bReady) Bone->SetVisibility(!bReady);
     }
     if (Transition) CancelStagedResources();
+    RefreshBeachCampfires(State);
 
     const double StructuresStarted = FPlatformTime::Seconds();
     std::vector<Homestead::Structure> NearStructures;

@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "BeachWrack",
+  "description": "A 2.5 m wavy strandline of dried and damp bladderwrack and kelp with tangles, stipes and caught shell bits, a few centimetres thick. Walk-through scenery.",
+  "collision": "none",
+  "triangle_budget": 6000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/beach_wrack.py",
+  "source_sha256": "dedf8c0562ac8c439ba97acda50831027ba195ec29f7421a0d478d09754e7330",
+  "provenance": "Original project-authored procedural geometry and numpy-painted textures; no third-party asset.",
+  "meshes": {
+    "SM_BeachWrack": {
+      "vertices": 4435,
+      "triangles": 5778,
+      "size_cm": [
+        270.1,
+        91.69,
+        9.22
+      ],
+      "materials": [
+        {
+          "name": "M_BeachWrack",
+          "textures": {
+            "basecolor": "T_BeachWrack_basecolor.png",
+            "normal": "T_BeachWrack_normal.png",
+            "roughness": "T_BeachWrack_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.3975659966468811,
+          -0.07048490643501282,
+          0.03
+        ],
+        "ground": "origin",
+        "detail_distance": 0.55,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.6
+      },
+      "fbx": "SM_BeachWrack.fbx",
+      "sha256": "ef43feb0dc90ddc48188193d64d66aeb08b507598933b4cb11ab08d9ed314aea",
+      "preview": "preview_SM_BeachWrack.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BeachWrack_hero.png",
+          "detail": "beauty_SM_BeachWrack_detail.png",
+          "eye": "beauty_SM_BeachWrack_eye.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_BeachWrack_LOD1": {
+      "vertices": 1514,
+      "triangles": 1448,
+      "size_cm": [
+        270.1,
+        90.25,
+        9.25
+      ],
+      "materials": [
+        {
+          "name": "M_BeachWrack",
+          "textures": {
+            "basecolor": "T_BeachWrack_basecolor.png",
+            "normal": "T_BeachWrack_normal.png",
+            "roughness": "T_BeachWrack_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.3975659966468811,
+          -0.07048490643501282,
+          0.03
+        ],
+        "ground": "origin",
+        "detail_distance": 0.55,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.6
+      },
+      "fbx": "SM_BeachWrack_LOD1.fbx",
+      "sha256": "578e3da0766fb4c4a9d0e829428de4d0725b8dd984ace9ae74ace8d3547e496a",
+      "preview": "preview_SM_BeachWrack_LOD1.png"
+    },
+    "SM_BeachWrack_LOD2": {
+      "vertices": 490,
+      "triangles": 286,
+      "size_cm": [
+        262.56,
+        90.25,
+        7.71
+      ],
+      "materials": [
+        {
+          "name": "M_BeachWrack",
+          "textures": {
+            "basecolor": "T_BeachWrack_basecolor.png",
+            "normal": "T_BeachWrack_normal.png",
+            "roughness": "T_BeachWrack_roughness.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          -0.3975659966468811,
+          -0.07048490643501282,
+          0.03
+        ],
+        "ground": "origin",
+        "detail_distance": 0.55,
+        "views": [
+          "hero",
+          "detail",
+          "eye"
+        ],
+        "eye_distance": 2.6
+      },
+      "fbx": "SM_BeachWrack_LOD2.fbx",
+      "sha256": "b3233bc55dca571cbf427d883b432f4647b6c4d4b9a8de082e0bf3d2d48eca06",
+      "preview": "preview_SM_BeachWrack_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "sink_depth_m": 0.006
+  },
+  "blocking": false,
+  "wind": {
+    "attribute": "Wind (vertex colour)",
+    "R": "~0 (lies on the sand: no sway)",
+    "G": "random",
+    "B": "0 (no flutter)",
+    "A": "1"
+  },
+  "material_notes": "One material M_BeachWrack: T_BeachWrack_basecolor (sRGB, alpha = opacity mask, clip 0.5), _normal (OpenGL, flip green for Unreal), _roughness (R roughness, G translucency mask, B AO). Two-sided foliage, masked.",
+  "placement": "Ground line at z = 0; lowest cards 6 mm below. Long axis along X. Random yaw, 0.8-1.2 scale.",
+  "textures": {
+    "T_BeachWrack_basecolor.png": "433d41adaac8b7ebc986cbee1767a72c20eea78921931912dff19b178d7ada3b",
+    "T_BeachWrack_normal.png": "642b58764f63c5ccc5d908fef707bd17a45621309188ee4b0fc7c2bc67710bce",
+    "T_BeachWrack_roughness.png": "9c44cc4b085df7b94a3d6d0541620241c94c1b39f2df6e7d04163aa39c829561"
+  }
+}

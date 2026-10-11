@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "name": "MusselPotatoBrothSource",
+  "description": "Held original mussel, potato and laver broth and a food-bearing maple spoon.",
+  "collision": "none",
+  "triangle_budget": 80000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/mussel_potato_broth.py",
+  "source_sha256": "8043fde7873df37402beeeea072e00376ca9df5fb2cb0c4ce7a1ede8e6b6f009",
+  "provenance": "Original creamware bowl, broth volume, potato chunks, solidified mussels, laver blades and spoon lens; procedural PBR.",
+  "meshes": {
+    "SM_MusselPotatoBroth": {
+      "vertices": 29104,
+      "triangles": 58104,
+      "size_cm": [
+        15.94,
+        15.94,
+        7.47
+      ],
+      "materials": [
+        {
+          "name": "M_MusselBrothCreamware",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MusselBrothLiquid",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.07
+        },
+        {
+          "name": "M_MusselBrothLaver",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MusselBrothPotato",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MusselBrothMeat",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MusselBrothShell",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MusselBrothNacre",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.018,
+          0.04787844033603324
+        ],
+        "detail_distance": 0.32,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_MusselPotatoBroth.fbx",
+      "sha256": "77a7e56803d283bffcf8a81ee108f875183258b913a7ce6e70a7a3e3d625275d",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_MusselPotatoBroth_hero.png",
+          "detail": "beauty_SM_MusselPotatoBroth_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "ground": "lowest",
+        "transparent": true
+      }
+    },
+    "SM_MusselPotatoBrothPortion": {
+      "vertices": 5820,
+      "triangles": 11620,
+      "size_cm": [
+        2.62,
+        17.0,
+        1.45
+      ],
+      "materials": [
+        {
+          "name": "M_MusselBrothMapleSpoon",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MusselBrothSpoonful",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.07
+        },
+        {
+          "name": "M_MusselBrothSpoonMeat",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MusselBrothSpoonPotato",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_MusselBrothSpoonLaver",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.05492307993769646,
+          0.007478022007271648
+        ],
+        "detail_distance": 0.25,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_MusselPotatoBrothPortion.fbx",
+      "sha256": "bdfdc3f3ad4eca70f630db4dce41a6e6a37f392b458118f838392ab91fa154d5",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_MusselPotatoBrothPortion_hero.png",
+          "detail": "beauty_SM_MusselPotatoBrothPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "MusselPotatoBroth",
+  "ingredients": {
+    "Mussels": 3,
+    "Potato": 1,
+    "Laver": 1,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "92ae2a308f7ee89a013ebd60e0bb56eb2e3995b8ff0464432fda03eb40def896",
+  "food_material_source_sha256": "92ae2a308f7ee89a013ebd60e0bb56eb2e3995b8ff0464432fda03eb40def896",
+  "shared_food_geometry_sha256": "cdd7e0a8e6a2b4aa4ae40d7469e3140f2cedaa30d249f6221fdb8524b0f26c53",
+  "shared_food_material_sha256": "e4cf58e16e94e75354f3ed579c9cb408d457e8bedfda8c92a193ea074110ae93"
+}

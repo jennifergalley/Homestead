@@ -1,11 +1,16 @@
-"""Export Jenny's frozen original eleven meals without rebuilding art.
+"""Export Jenny's frozen original eleven meals, plus the later beach meals, without rebuilding art.
 
 Usage: Invoke-BlenderLive.ps1 -File Scripts\\Blender\\export_fishing_playtest.py
        -Arguments @('--set','PreparedFood','--out','<E: scratch>')
+   or, headless, append only the beach meals to the committed set (the frozen 22 meshes,
+   their textures and report entries are left byte-identical):
+       blender -b --factory-startup --python Scripts\\Blender\\export_fishing_playtest.py --
+           --set PreparedFood --out Assets\\Props\\PreparedFood --add-beach-meals
 1024px/16-sample provisional maps; no beauty renders, causal probes or UE work.
 Frozen source files remain untouched. Integration owns import and release checks.
 """
 import argparse
+import contextlib
 import hashlib
 import json
 import struct
@@ -16,7 +21,10 @@ from pathlib import Path
 import bpy
 import bmesh
 from mathutils import Vector
-import homestead_kit as kit
+
+# Headless --python runs don't put the pipeline folder on sys.path.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import homestead_kit as kit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 FREEZE = "843324c17b85b5432785fc7a6b9e333702dc26ec"
@@ -34,6 +42,12 @@ MEALS = (
     ("GrilledTrout", "GrilledTroutSourceProof", "GrilledTroutSource.blend"),
     ("GrilledPerch", "GrilledPerchSourceProof", "GrilledPerchSource.blend"),
 )
+# Authored after the freeze (add-beach-gathering); hashed directly instead of against FREEZE.
+BEACH_MEALS = (
+    ("SteamedMussels", "SteamedMusselsSourceProof", "SteamedMusselsSource.blend"),
+    ("MusselPotatoBroth", "MusselPotatoBrothSourceProof", "MusselPotatoBrothSource.blend"),
+    ("FriedLaver", "FriedLaverSourceProof", "FriedLaverSource.blend"),
+)
 TEXTURE_SIZE = 1024
 BAKE_SAMPLES = 16
 SPOON_MATERIALS = {
@@ -41,7 +55,18 @@ SPOON_MATERIALS = {
     "SM_BerryCompotePortion": "M_BerryReductionMapleSpoon",
     "SM_StrawberryCompotePortion": "M_StrawberryReductionMapleSpoon",
     "SM_RootVegetableHotpotPortion": "M_RootHotpotMapleSpoon",
+    "SM_MusselPotatoBrothPortion": "M_MusselBrothMapleSpoon",
 }
+
+
+def ui_override():
+    """Live Blender bakes/exports need a 3D-view context; headless runs need none."""
+    if bpy.app.background or not bpy.context.window_manager.windows:
+        return contextlib.nullcontext()
+    window = bpy.context.window_manager.windows[0]
+    area = next(area for area in window.screen.areas if area.type == "VIEW_3D")
+    region = next(region for region in area.regions if region.type == "WINDOW")
+    return bpy.context.temp_override(window=window, area=area, region=region)
 
 
 def edible_only(obj: bpy.types.Object) -> dict:
@@ -113,10 +138,7 @@ def export_mesh(name: str, source_info: dict, out: Path) -> dict:
         other.hide_render = True
     try:
         maps = ("basecolor", "roughness", "normal")
-        window = bpy.context.window_manager.windows[0]
-        area = next(area for area in window.screen.areas if area.type == "VIEW_3D")
-        region = next(region for region in area.regions if region.type == "WINDOW")
-        with bpy.context.temp_override(window=window, area=area, region=region):
+        with ui_override():
             baked = kit.bake(obj, out / "Textures", name[3:], size=TEXTURE_SIZE,
                              samples=BAKE_SAMPLES, maps=maps)
     finally:
@@ -130,7 +152,7 @@ def export_mesh(name: str, source_info: dict, out: Path) -> dict:
     info.update({"bake": baked, "review": source_info.get("review", {}),
                  "fbx": name + ".fbx", "frozen_geometry_uv_sha256": frozen_geometry,
                  "export_geometry_uv_sha256": before, "derivative": derivative})
-    with bpy.context.temp_override(window=window, area=area, region=region):
+    with ui_override():
         info["sha256"] = kit.export_fbx(obj, out / info["fbx"])
     for file in baked["maps"].values():
         if not (out / "Textures" / file).is_file():
@@ -139,54 +161,75 @@ def export_mesh(name: str, source_info: dict, out: Path) -> dict:
     return info
 
 
+def export_meal(report: dict, item: str, folder: str, filename: str, out: Path,
+                previous: dict | None, frozen: bool) -> None:
+    source = ROOT / "Assets" / "Props" / "PreparedFood" / folder
+    blend = source / filename
+    source_hash = frozen_hash(blend) if frozen else hashlib.sha256(blend.read_bytes()).hexdigest()
+    original = json.loads((source / "report.json").read_text())
+    bpy.ops.wm.open_mainfile(filepath=str(blend))
+    names = ("SM_" + item, "SM_" + item + "Portion")
+    if set(original["meshes"]) != set(names):
+        raise RuntimeError("Meal source has unexpected meshes: " + item)
+    report["sources"][item] = {"blend": blend.relative_to(ROOT).as_posix(),
+                               "sha256": source_hash, "ingredients": original["ingredients"]}
+    if not frozen:
+        report["sources"][item]["added_after_freeze"] = True
+    report["item_meshes"][item] = {"serving": names[0], "portion": names[1]}
+    for name in names:
+        if previous and name not in SPOON_MATERIALS and name in previous["meshes"]:
+            report["meshes"][name] = previous["meshes"][name]
+        else:
+            report["meshes"][name] = export_mesh(name, original["meshes"][name], out)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--set", choices=("PreparedFood",), required=True)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--refresh-bites", action="store_true",
-                        help="Replace only four utensil-free portions in an existing complete export.")
+                        help="Replace only the utensil-free portions in an existing complete export.")
+    parser.add_argument("--add-beach-meals", action="store_true",
+                        help="Export only the beach meals into an existing frozen export, keeping the rest.")
     args = parser.parse_args(sys.argv[sys.argv.index("--") + 1:])
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=True)
     previous = json.loads((out / "report.json").read_text()) if args.refresh_bites else None
     if previous and previous["source_freeze_commit"] != FREEZE:
         raise RuntimeError("Partial refresh requires the exact frozen export.")
-    report = {"schema": 1, "name": args.set, "collision": "none",
-              "source_freeze_commit": FREEZE, "provisional_appearance": True,
-              "final_realism_accepted": False, "blender": bpy.app.version_string,
-              "provenance": "Frozen original Homestead geometry/procedural art; no reused older game assets.",
-              "meshes": {}, "sources": {}, "warnings": [
-                  "Provisional appearance: known baked relief patching is not resolved.",
-                  "Unreal imports, material compilation and eating alignment require Integration verification."]}
-    if args.set == "PreparedFood":
+    if args.add_beach_meals:
+        report = json.loads((out / "report.json").read_text())
+        if report["source_freeze_commit"] != FREEZE or not {item for item, _, _ in MEALS} <= set(report["item_meshes"]):
+            raise RuntimeError("Adding beach meals requires the exact frozen eleven-meal export.")
+        for item, _, _ in BEACH_MEALS:
+            report["sources"].pop(item, None)
+            report["item_meshes"].pop(item, None)
+            for suffix in ("", "Portion"):
+                report["meshes"].pop("SM_" + item + suffix, None)
+        for item, folder, filename in BEACH_MEALS:
+            export_meal(report, item, folder, filename, out, None, frozen=False)
+    else:
+        report = {"schema": 1, "name": args.set, "collision": "none",
+                  "source_freeze_commit": FREEZE, "provisional_appearance": True,
+                  "final_realism_accepted": False, "blender": bpy.app.version_string,
+                  "provenance": "Frozen original Homestead geometry/procedural art; no reused older game assets.",
+                  "meshes": {}, "sources": {}, "warnings": [
+                      "Provisional appearance: known baked relief patching is not resolved.",
+                      "Unreal imports, material compilation and eating alignment require Integration verification."]}
         report["triangle_budget"] = 80000
         report["deferred_items"] = list(DEFERRED)
         report["item_meshes"] = {}
         for item, folder, filename in MEALS:
-            source = ROOT / "Assets" / "Props" / "PreparedFood" / folder
-            blend = source / filename
-            source_hash = frozen_hash(blend)
-            original = json.loads((source / "report.json").read_text())
-            bpy.ops.wm.open_mainfile(filepath=str(blend))
-            names = ("SM_" + item, "SM_" + item + "Portion")
-            if set(original["meshes"]) != set(names):
-                raise RuntimeError("Frozen meal has unexpected meshes: " + item)
-            report["sources"][item] = {"blend": blend.relative_to(ROOT).as_posix(),
-                                       "sha256": source_hash, "ingredients": original["ingredients"]}
-            report["item_meshes"][item] = {"serving": names[0], "portion": names[1]}
-            for name in names:
-                if previous and name not in SPOON_MATERIALS:
-                    report["meshes"][name] = previous["meshes"][name]
-                else:
-                    report["meshes"][name] = export_mesh(name, original["meshes"][name], out)
-        if len(report["meshes"]) != 22:
-            raise RuntimeError("The eleven-meal playtest requires eleven servings and eleven edible portions")
+            export_meal(report, item, folder, filename, out, previous, frozen=True)
+        for item, folder, filename in BEACH_MEALS:
+            export_meal(report, item, folder, filename, out, previous, frozen=False)
+    if len(report["meshes"]) != 2 * (len(MEALS) + len(BEACH_MEALS)):
+        raise RuntimeError("The playtest set requires one serving and one edible portion per admitted meal")
     for name, info in report["meshes"].items():
         if info["triangles"] > report["triangle_budget"]:
-            raise RuntimeError("Frozen source exceeds the established mesh ceiling: " + name)
+            raise RuntimeError("Meal source exceeds the established mesh ceiling: " + name)
     (out / "report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print("PLAYTEST_ORIGINAL_SET_READY", args.set, len(report["meshes"]), flush=True)
-
 
 if __name__ == "__main__":
     main()

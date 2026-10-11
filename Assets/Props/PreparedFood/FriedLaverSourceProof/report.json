@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "FriedLaverSource",
+  "description": "Held original crisp fried laver on a shell-edged plate and one piece to eat.",
+  "collision": "none",
+  "triangle_budget": 80000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/fried_laver.py",
+  "source_sha256": "6309f705adc1023eb95318478aed89aadc86219aa36bb7b625d73a66b8019215",
+  "provenance": "Original crumpled laver sheets, crumbled flakes and scalloped shell-edge plate; procedural PBR.",
+  "meshes": {
+    "SM_FriedLaver": {
+      "vertices": 35874,
+      "triangles": 71680,
+      "size_cm": [
+        18.02,
+        18.02,
+        3.16
+      ],
+      "materials": [
+        {
+          "name": "M_FriedLaverPearlware",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        },
+        {
+          "name": "M_FriedLaverSheets",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          0.0,
+          -0.02,
+          0.02191114365548128
+        ],
+        "detail_distance": 0.3,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_FriedLaver.fbx",
+      "sha256": "ae04ab9e5782ade8402049f5115cc3f9d6d1275bfe2c9bf716b293c2ba4efb67",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FriedLaver_hero.png",
+          "detail": "beauty_SM_FriedLaver_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "ground": "lowest",
+        "transparent": true
+      }
+    },
+    "SM_FriedLaverPortion": {
+      "vertices": 2306,
+      "triangles": 4608,
+      "size_cm": [
+        4.99,
+        3.55,
+        0.74
+      ],
+      "materials": [
+        {
+          "name": "M_FriedLaverPiece",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.5
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "focus": [
+          -0.0015868199989199638,
+          -0.0037611438892781734,
+          0.010744385369122028
+        ],
+        "detail_distance": 0.22,
+        "detail_fstop": 64
+      },
+      "fbx": "SM_FriedLaverPortion.fbx",
+      "sha256": "e8a404228ed5d415a8f57de689eabb18ca8c03694893546c341b4081b58b2a14",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_FriedLaverPortion_hero.png",
+          "detail": "beauty_SM_FriedLaverPortion_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 192,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          14
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "draft_only": true,
+  "draft_mode": "source",
+  "food_item": "FriedLaver",
+  "ingredients": {
+    "Laver": 2,
+    "Kindling": 1
+  },
+  "original_food": true,
+  "not_import_or_art_acceptance": true,
+  "eating_grip_not_verified": true,
+  "no_new_animation": true,
+  "food_geometry_source_sha256": "92ae2a308f7ee89a013ebd60e0bb56eb2e3995b8ff0464432fda03eb40def896",
+  "food_material_source_sha256": "92ae2a308f7ee89a013ebd60e0bb56eb2e3995b8ff0464432fda03eb40def896",
+  "shared_food_geometry_sha256": "cdd7e0a8e6a2b4aa4ae40d7469e3140f2cedaa30d249f6221fdb8524b0f26c53"
+}

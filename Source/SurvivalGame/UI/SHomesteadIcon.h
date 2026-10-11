@@ -49,7 +49,9 @@ private:
         SeedRoots, SeedTurnip, SeedCarrot, SeedPotato, SeedCabbage, SeedBroadBean, SeedStrawberry,
         BakedPotatoes, RoastedTurnips, StewedCarrots, HerbedBroadBeans, CabbagePotatoStew, BerryCompote,
         StrawberryCompote, RootVegetableHotpot, RawFishSlices, GrilledTrout, GrilledPerch,
-        ScoopTank, CropTop, SkinnyJeans, Leggings, BikerJacket, Sneakers, AnkleBoots, DarkJeans
+        ScoopTank, CropTop, SkinnyJeans, Leggings, BikerJacket, Sneakers, AnkleBoots, DarkJeans,
+        // add-beach-gathering: after the seed kinds, so the >= SeedRoots glyph-first rule draws them as ink dishes.
+        SteamedMussels, MusselPotatoBroth, FriedLaver
     };
     TAttribute<FName> Kind{FName(TEXT("pack"))};
     TAttribute<FLinearColor> Tint{HomesteadPalette::Brass};

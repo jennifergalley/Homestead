@@ -456,7 +456,13 @@ void OriginalArtMappings()
             CHECK(std::string(art.folder) == "CaughtFish");
         }
     }
-    CHECK(meals == 11 && fish == 6 && items.size() == 18);
+    CHECK(meals == 14 && fish == 6 && items.size() == 25);
+    // The beach finds (add-beach-gathering) show their own renders and drop as their held meshes.
+    for (const Item item : {Item::Seashell, Item::Driftwood, Item::Mussels, Item::Laver})
+    {
+        const auto* art = HomesteadOriginalItemArt::Find(item);
+        CHECK(art && !art->portion && !art->fish && !IsEdible(item));
+    }
     for (int index = static_cast<int>(Item::GrilledMackerel); index <= static_cast<int>(Item::MackerelChowder); ++index)
     {
         const Item item = static_cast<Item>(index);

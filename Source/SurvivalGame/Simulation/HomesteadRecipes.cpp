@@ -57,6 +57,27 @@ constexpr bool InOrder()
 static_assert(sizeof(Table) / sizeof(Table[0]) == 8 && InOrder(), "Fish meals follow the append-only enums.");
 }
 
+// add-beach-gathering (Balance 2026-10-10).
+namespace BeachMeals
+{
+constexpr MealRecipeInfo Table[] = {
+    {Recipe::SteamedMussels, Item::SteamedMussels, {{{Item::Mussels, 3}, {Item::Kindling, 1}, {}, {}}}},
+    {Recipe::MusselPotatoBroth, Item::MusselPotatoBroth,
+        {{{Item::Mussels, 3}, {Item::Potato, 1}, {Item::Laver, 1}, {Item::Kindling, 1}}}},
+    {Recipe::FriedLaver, Item::FriedLaver, {{{Item::Laver, 2}, {Item::Kindling, 1}, {}, {}}}},
+};
+constexpr int Count = sizeof(Table) / sizeof(Table[0]);
+constexpr bool InOrder()
+{
+    for (int i = 0; i < Count; ++i)
+        if (static_cast<int>(Table[i].recipe) != static_cast<int>(Recipe::SteamedMussels) + i
+            || static_cast<int>(Table[i].output) != static_cast<int>(Item::SteamedMussels) + i)
+            return false;
+    return true;
+}
+static_assert(Count == 3 && InOrder(), "Beach meals follow the append-only enums.");
+}
+
 const MealRecipeInfo* FindCropMeal(Recipe recipe)
 {
     if (recipe < Recipe::RoastedTurnips || recipe > Recipe::RootVegetableHotpot) return nullptr;
@@ -68,6 +89,19 @@ const MealRecipeInfo* FindFishMeal(Recipe recipe)
 {
     if (recipe < Recipe::RawFishSlices || recipe > Recipe::MackerelChowder) return nullptr;
     return &FishMeals::Table[static_cast<int>(recipe) - static_cast<int>(Recipe::RawFishSlices)];
+}
+
+const MealRecipeInfo* FindBeachMeal(Recipe recipe)
+{
+    if (recipe < Recipe::SteamedMussels || recipe > Recipe::FriedLaver) return nullptr;
+    return &BeachMeals::Table[static_cast<int>(recipe) - static_cast<int>(Recipe::SteamedMussels)];
+}
+
+const MealRecipeInfo* FindMeal(Recipe recipe)
+{
+    if (const auto* meal = FindCropMeal(recipe)) return meal;
+    if (const auto* meal = FindFishMeal(recipe)) return meal;
+    return FindBeachMeal(recipe);
 }
 
 bool IsRecipeAvailable(Recipe recipe)
@@ -96,6 +130,7 @@ Inventory CropMealChange(Recipe recipe)
     return MealRecipes::Change(FindCropMeal(recipe));
 }
 Inventory FishMealChange(Recipe recipe) { return MealRecipes::Change(FindFishMeal(recipe)); }
+Inventory MealChange(Recipe recipe) { return MealRecipes::Change(FindMeal(recipe)); }
 
 double CropMealEnergyForCost(std::int64_t saleCoins)
 {
