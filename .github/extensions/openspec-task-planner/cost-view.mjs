@@ -81,11 +81,14 @@ const weekDays = 7;
 
 // Jenny's slice of the monthly credit pool, spread evenly across the billing period in
 // week blocks that start on the period's first day (the last block may be short).
-function creditShare(period, today, shareCredits, usage) {
+// aiuPerCredit converts billed credits to local AIU (calibrated against GitHub's usage page);
+// local AIU run higher than billed credits, so the allotment is expressed in local AIU.
+function creditShare(period, today, shareCredits, usage, aiuPerCredit = 1) {
     const account = usage?.status === "ok" ? usage : null;
     const dayNano = (day) => account ? BigInt(account.days[day.date] ?? 0) : nano(day.recordedNanoAiu);
     if (!Number.isInteger(shareCredits) || shareCredits <= 0) throw new Error("Invalid credit share.");
-    const total = BigInt(shareCredits) * nanoPerAiu;
+    if (!(typeof aiuPerCredit === "number" && Number.isFinite(aiuPerCredit) && aiuPerCredit > 0)) throw new Error("Invalid AIU per credit.");
+    const total = BigInt(Math.round(shareCredits * aiuPerCredit)) * nanoPerAiu;
     const dayCount = BigInt(period.days.length);
     const weeks = [];
     let allocated = 0n;
@@ -107,7 +110,7 @@ function creditShare(period, today, shareCredits, usage) {
     const elapsed = BigInt(period.days.filter((day) => day.date <= today).length);
     const paceAllowed = total * elapsed / dayCount;
     return {
-        shareCredits, totalNanoAiu: String(total), recordedNanoAiu: String(used),
+        shareCredits, aiuPerCredit, totalNanoAiu: String(total), recordedNanoAiu: String(used),
         remainingNanoAiu: String(total > used ? total - used : 0n), overNanoAiu: String(used > total ? used - total : 0n),
         percentUsed: Number(used * 10_000n / total) / 100,
         paceAllowedNanoAiu: String(paceAllowed), unknown: account ? false : period.unknown,
@@ -175,7 +178,7 @@ export function buildCostView({ reports = [], builds = [], manifests = [], cycle
             }
             period.recordedNanoAiu = String(period.days.reduce((sum, day) => sum + nano(day.recordedNanoAiu), 0n));
             period.unknown = period.days.some((day) => day.unknown);
-            period.share = creditShare(period, today, cycle.shareCredits ?? defaultShareCredits, usage);
+            period.share = creditShare(period, today, cycle.shareCredits ?? defaultShareCredits, usage, cycle.aiuPerCredit ?? 1);
         } else period.message = "Billing dates need updating. The last confirmed period is not current.";
     }
     return { period, shipped, unshippedReports: reports.filter((report) => !used.has(report.buildId)).length };

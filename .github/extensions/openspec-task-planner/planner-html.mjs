@@ -532,7 +532,8 @@ export function renderPlannerHtml() {
       const title = el("h2", "", "Your share of this month's credits" + (allProjects ? " — all projects" : ""));
       title.id = "cost-share-title";
       const used = Number(BigInt(share.recordedNanoAiu)) / 1e9;
-      const total = share.shareCredits;
+      const total = Number(BigInt(share.totalNanoAiu)) / 1e9;
+      const rate = share.aiuPerCredit ?? 1;
       const meter = (value, allowed, pace) => {
         const bar = el("div", "cost-meter" + (value > allowed ? " over" : ""));
         bar.setAttribute("role", "progressbar");
@@ -551,7 +552,9 @@ export function renderPlannerHtml() {
         return bar;
       };
       const head = el("div", "cost-share-head");
-      head.append(el("span", "", aiu(share.recordedNanoAiu) + " of " + total.toLocaleString("en-US") + " used (" + share.percentUsed + "%)" + (share.unknown ? " + unknown costs" : "")),
+      const credits = (value) => Math.round(value / rate).toLocaleString("en-US");
+      head.append(el("span", "", aiu(share.recordedNanoAiu) + " of " + total.toLocaleString("en-US", { maximumFractionDigits: 0 }) + " AIU used (" + share.percentUsed + "%)"
+          + (rate !== 1 ? " ≈ " + credits(used) + " of " + share.shareCredits.toLocaleString("en-US") + " credits" : "") + (share.unknown ? " + unknown costs" : "")),
         el("span", "muted", BigInt(share.overNanoAiu) > 0n ? aiu(share.overNanoAiu) + " over your share" : aiu(share.remainingNanoAiu) + " left"));
       const paced = Number(BigInt(share.paceAllowedNanoAiu)) / 1e9;
       section.append(title, head, meter(used, total, paced),

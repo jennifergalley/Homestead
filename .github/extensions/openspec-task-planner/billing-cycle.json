@@ -4,5 +4,7 @@
   "reset": "2026-11-01",
   "timeZone": "America/Los_Angeles",
   "shareCredits": 500000,
-  "evidence": "Jenny confirmed on 2026-10-04 that the cycle started Oct 1 and resets Nov 1."
+  "evidence": "Jenny confirmed on 2026-10-04 that the cycle started Oct 1 and resets Nov 1.",
+  "aiuPerCredit": 1.92,
+  "aiuPerCreditEvidence": "Jenny, 2026-10-11: local accounting showed ~860k AIU for Jenny and Alex combined while GitHub's usage page showed 448k of 1M credits used (860/448 = 1.92 local AIU per billed credit). Jenny's 500,000-credit share = ~960,000 local AIU."
 }
