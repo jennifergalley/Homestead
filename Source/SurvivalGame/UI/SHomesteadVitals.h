@@ -41,7 +41,9 @@ public:
     static int32 WarningBand(double Value, int32 Previous);
     static const TCHAR* WarningText(int32 Meter, int32 Band);
     // Top = the calendar's top (26) + height (100) + an 8-unit gap (HomesteadHudLayout in HomesteadHUD.h).
-    static constexpr float Right = 30, Top = 134, RowHeight = 54, RowGap = 6, Width = 460, ChipHeight = 38;
+    // ChipHeight fits two wrapped lines (the longest badge, "Well fed until 12:45 PM - work costs
+    // 15% less", overflows the chip's single-line width; see WellFedChip's WrapTextAt).
+    static constexpr float Right = 30, Top = 134, RowHeight = 54, RowGap = 6, Width = 460, ChipHeight = 60;
 
 private:
     virtual void Tick(const FGeometry& Geometry, double Time, float Delta) override;

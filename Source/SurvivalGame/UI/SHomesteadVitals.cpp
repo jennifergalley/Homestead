@@ -321,6 +321,9 @@ TSharedRef<SWidget> SHomesteadVitals::WellFedChip()
                 SNew(STextBlock)
                 .Font(HomesteadUITheme::Font(TEXT("Bold"), VitalsStyle::ChipTextSize))
                 .ColorAndOpacity(VitalsStyle::Gold)
+                // Wraps to a second line instead of clipping (the badge's longest form runs past one line at this width).
+                .AutoWrapText(true)
+                .WrapTextAt(VitalsStyle::BarWidth)
                 .Text_Lambda([this]()
                 {
                     return Controller.IsValid()
