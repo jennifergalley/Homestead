@@ -24,7 +24,10 @@ namespace HomesteadWorldMineLook
 {
 const TCHAR* const NodeMeshFolder = TEXT("/Game/SurvivalGame/Environment/Props/MineNodes/");
 const TCHAR* const SignArmMeshPath = TEXT("/Game/SurvivalGame/Environment/Props/Fingerpost/SM_Fingerpost_ToTheMineArm.SM_Fingerpost_ToTheMineArm");
-const TCHAR* const LidMeshPath = TEXT("/Game/SurvivalGame/Environment/Props/MineHouse/SM_MineTrapdoorLid.SM_MineTrapdoorLid");
+// The lid moved with the furnishing set; the first path that loads wins, then the stand-in slab.
+const TCHAR* const LidMeshPaths[] = {
+    TEXT("/Game/SurvivalGame/Environment/Props/MineFurnishing/SM_MineTrapdoorLid.SM_MineTrapdoorLid"),
+    TEXT("/Game/SurvivalGame/Environment/Props/MineHouse/SM_MineTrapdoorLid.SM_MineTrapdoorLid")};
 const TCHAR* const DripsPath = TEXT("/Game/SurvivalGame/Audio/Ambience/SeaCaveDrips.SeaCaveDrips");
 
 // The trapdoor lid swings about its hinge: shut is flat (pitch 0), open stands past upright.
@@ -152,7 +155,12 @@ void AHomesteadWorld::BuildMine()
         FVector(Layout.trapdoor.hingeX, Layout.trapdoor.hingeY, Layout.trapdoor.hingeZ),
         FRotator(0.0f, static_cast<float>(Layout.trapdoor.yaw), 0.0f));
     MineTrapdoorPivot->RegisterComponent();
-    UStaticMesh* LidMesh = LoadObject<UStaticMesh>(nullptr, LidMeshPath, nullptr, LOAD_NoWarn | LOAD_Quiet);
+    UStaticMesh* LidMesh = nullptr;
+    for (const TCHAR* LidMeshPath : LidMeshPaths)
+    {
+        LidMesh = LoadObject<UStaticMesh>(nullptr, LidMeshPath, nullptr, LOAD_NoWarn | LOAD_Quiet);
+        if (LidMesh) break;
+    }
     MineTrapdoorLid = NewObject<UStaticMeshComponent>(this, TEXT("MineTrapdoorLid"));
     MineTrapdoorLid->SetupAttachment(MineTrapdoorPivot);
     MineTrapdoorLid->SetMobility(EComponentMobility::Movable);
