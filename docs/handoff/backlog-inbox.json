@@ -499,7 +499,7 @@
       "description": "It looks like the terrain sculpting is visibly obvious from these lines and cross-hatching in the cliff faces",
       "imageFile": "jenny-mv35x0yc-msnmr4-cfa50728-ebbf-42b5-b249-28b6a9e7f16f.png",
       "imageMime": "image/png",
-      "createdUtc": "2026-10-11T01:46:40.020Z"
+      "createdUtc": "2026-10-11T01:46:40.02Z"
     },
     {
       "id": "jenny-mv363xm4-0bz4sk",
@@ -563,7 +563,7 @@
       "description": "Please add seashells, rocks, driftwood, and other beach detritus, both for decoration and plenty for gathering that refresh daily, including edible gathers like mussels or something believable from the beach or shallows, and let me prepare them as dishes or sell them at the General Store",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-11T02:11:36.130Z"
+      "createdUtc": "2026-10-11T02:11:36.13Z"
     },
     {
       "id": "jenny-mv376d6c-vmhkjy",
@@ -571,7 +571,15 @@
       "description": "Just like in Poldark, please add a cave into the cliffs along the beach, that has a cool little water reservoir inside, or something else interesting to explore - it should be fairly sizable",
       "imageFile": null,
       "imageMime": null,
-      "createdUtc": "2026-10-11T02:21:55.380Z"
+      "createdUtc": "2026-10-11T02:21:55.38Z"
+    },
+    {
+      "id": "jenny-mv37dekn-bchfir",
+      "title": "Beach campfire lit with driftwood",
+      "description": "Jenny (2026-10-10): \"please also ask the beach agent to make a static campfire pile on the beach that I can provide some driftwood to in order to light, and it then burns for a few hours until burning out, shedding light in an area around it just like the lamp, but more orange and flickering.\"",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T02:27:23.783Z"
     }
   ]
 }

@@ -50,7 +50,8 @@
     "backlog:jenny-mv1l1aa7-refl01",
     "backlog:jenny-mv1y9z2k-irnmsg",
     "backlog:jenny-mv2vznce-clfrck",
-    "backlog:jenny-mv2yi15t-decorn"
+    "backlog:jenny-mv2yi15t-decorn",
+    "backlog:jenny-mv37dekn-bchfir"
   ],
   "slots": {
     "backlog:jenny-mv2yi15t-decorn": "next",
@@ -76,7 +77,8 @@
     "backlog:jenny-mv1koymo-balgr1": "next",
     "backlog:jenny-mv1koymq-balft1": "next",
     "backlog:jenny-mv2vznce-clfrck": "next",
-    "backlog:jenny-mv376d6c-vmhkjy": "next"
+    "backlog:jenny-mv376d6c-vmhkjy": "next",
+    "backlog:jenny-mv37dekn-bchfir": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -153,5 +155,5 @@
     "backlog:jenny-mv1fzgcg-balhg1",
     "animation-led-fishing-gameplay"
   ],
-  "updated": "2026-10-11T02:22:04.841Z"
+  "updated": "2026-10-11T02:27:23.783Z"
 }
