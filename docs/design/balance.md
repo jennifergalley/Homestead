@@ -41,7 +41,7 @@ hours. A typical 1–2 hour session never harvests anything it planted, which br
 
 | Item | Base → buy | Energy | Class | Coins per energy |
 | --- | --- | --- | --- | --- |
-| Cornish pasty | 80 → 100 | 40, plus Well fed for 3 h | Meal | 2.5 |
+| Pasty | 80 → 100 | 40, plus Well fed for 3 h | Meal | 2.5 |
 | Bread | 40 → 50 | 12 | Snack | 4.2 |
 | Cheese | 60 → 75 | 15 | Snack | 5.0 |
 | Twine | 20 → 25 | – | Material | |
@@ -243,6 +243,24 @@ makes up the rest.
 That lands about 40% of attempts, roughly one fish a minute (about 45 coins a minute). That is still
 above crops, so the daily-cap idea above is parked until a playtest.
 
+## 8a. Beach gathering (card `jenny-mv36t3cy-p7dm5i`, approved plan 2026-10-10)
+
+| Node | Count | Yield (sell each) | ≈ coins |
+| --- | --- | --- | --- |
+| Shell scatter | 10 | 2 seashells (5) | 100 |
+| Driftwood | 8 | 3 driftwood (3) | 72 |
+| Beach pebbles | 6 | 2 stone (5) | 60 |
+| Mussel bed | 8 | 3 mussels (6) | 144 |
+| Laver rocks | 8 | 2 laver (4) | 64 |
+
+0.5 energy per node, all refreshing at 06:00: about 440 coins and 20 energy a day, mostly on her own
+cove. ✅ That's a pleasant daily stroll, roughly fishing's per-minute rate but capped, so it doesn't
+crowd out crops. The Beach Agent proposed 56 nodes (about 830 coins); trimmed here.
+
+Meals (Cookfire, Well fed): steamed mussels (3 mussels) 25; mussel and potato broth (3 mussels,
+potato, laver) 35; fried laver (2 laver) 19. The beach campfire takes 3 driftwood and 0.2 energy,
+burns 4 game hours, works as a cookfire while lit, and can be relit.
+
 ## 9. Target pacing
 
 These are targets for lanes to tune toward; there's no telemetry yet. They assume a 60-minute day.
@@ -276,7 +294,7 @@ they are; the cove and mine come much closer.
 | Farm → manor | 5–10 s | 15 s (72 m) | 8–12 s ✅ keep |
 | Manor → pond | 20–35 s | 45 s (216 m) | 44 s ✅ keep (Jenny: fine) |
 | Manor → village store | 40–60 s | 75 s (360 m) | about 60 s (290 m walked, stage 1) ✅ keep |
-| Manor → cove (first dry sand) | 35–50 s | 60 s (288 m) | 109 s (525 m); 129 s to the CoveBeach marker 🔴 |
+| Manor → cove (first dry sand) | about 75 s | 75 s (360 m): mostly ≤1 in 4 natural slope with one or two short stone flights (Jenny's pick, 2026-10-11, for the mixed-coast card) | 58 s with 350 steps (stage 2); new path about 350 m 🟡 |
 | Manor → mine entrance | 35–50 s | 60 s (288 m), on a woodland path like the pond's | about 91 s (estimate, no authored path) 🔴 |
 
 - **Daily loop:** farm, then store, then one fishing spot, then home. That's at most about 3 minutes
@@ -301,7 +319,7 @@ they are; the cove and mine come much closer.
   cove, mine, pond or village.
 - **Communal land clusters on the village:** a village green and allotments (the 1851 word; not
   "community garden") within about 15–30 s of the square and a 60–100 m growth ring around the
-  village pad. The communal beach (Chapel sands) sits about 600 m from the square, because no coast
+  village pad. The communal beach (Gull Sands) sits about 600 m from the square, because no coast
   lies near the fixed village; accepted (2026-10-10) as an occasional outing reached by a river
   path, not a daily trip.
 - **Paths end naturally:** a road or path she can follow never runs into the invisible map edge; it
@@ -310,7 +328,7 @@ they are; the cove and mine come much closer.
   the clearable nodes she keeps are worth at least about 1,500 coins (§6).
 - **Reserved land looks finished today:** fields, hedges, woods and flowered verges, never bare
   ground. World edges are natural (sea, moor, dense wood, hedged land) with no visible walls. Map
-  labels use period names and Cornish surnames; player copy never says "reserved" or "future".
+  labels use invented English or Scottish names (cohesion §1); player copy never says "reserved" or "future".
 
 ### Proposed fixes to hit the targets
 

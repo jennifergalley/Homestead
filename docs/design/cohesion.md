@@ -9,31 +9,34 @@ conflict, the cozier, more fun or more beautiful option wins.
 
 ## 1. Flavor
 
-- **Where and when:** the Trevennor estate, a neglected manor on the Cornish coast, spring 1851 on.
-  The heroine, Eleanor Cavendish, has inherited it and is bringing it back to life. The world is
-  coves, river valleys, hedge banks, granite, slate, engine-house ruins far off, a village at the
-  foot of the drive (about 200 m from the manor, above the estuary) with
-  Trethewey's general store (Mr. Josiah Trethewey, a shopkeeper in his fifties; renamed from
-  Pascoe, a Poldark surname, on 2026-10-04).
+- **Where and when:** the Larkhollow estate (the default name), a neglected manor on a fictional
+  stretch of British coast, spring 1851 on. The setting is deliberately unplaced: no county, and
+  no Cornish influence (Jenny, 2026-10-10). The heroine, Eleanor Cavendish, has inherited it and is
+  bringing it back to life. The world is coves, cliffs, river valleys, hedge banks, woods, an old
+  mine ruin on the clifftop, and a village about 300 m from the manor with Aldridge's general store
+  (Mr. Callum Aldridge, the shopkeeper). Beyond her land lie the Ashgrove, Brackenburn and Thornley
+  estates, Hollin Wood (for sale), Gull Sands (the communal beach), and the road to Marlbury.
 - **Mood:** warm, unhurried, hopeful. Work is satisfying, never punishing; she doesn't starve,
   faint or die on the estate. Setbacks are gentle (a doze in the field, a missed fish).
 - **Period feel without pastiche:** coins, posies, pasties, lamp oil, hemp twine, a field book.
-  Prefer things a Cornish household of 1851 would know. Avoid modern words (sushi, upgrade,
-  inventory in player copy, XP, quest) unless no period word reads clearly; clarity wins over
-  period accuracy (pillar 1 beats pillar 3).
+  Prefer things an English or Scottish country household of 1851 would know. Avoid modern words
+  (sushi, upgrade, inventory in player copy, XP, quest) unless no period word reads clearly;
+  clarity wins over period accuracy (pillar 1 beats pillar 3).
 - **Wardrobe exception (Jenny, 2026-10-09):** her outfits may be modern and fitted (tank tops,
   jeans, leggings, sneakers, a biker jacket); the period rule doesn't bind clothing. Describe them
   plainly by fit and feel, without brand names or a "modern" label.
-- **Names:** Cornish surnames and places (Trethewey, Trevennor, Penhallow, Tregarthen, Polwhele…)
-  and plain Victorian given names. **Never reference *Poldark***: no Ross, Demelza, Nampara,
-  Trenwith, Wheal Leisure/Grace, Warleggan, Pascoe, Hoskin(g), Jud, Prudie, Verity or close
-  variants. If a name sounds like the show, pick another.
+- **Names:** believable, invented English or Scottish names that read slightly modern (Jenny's
+  option B): compound place names (Larkhollow, Ashgrove, Brackenburn, Thornley, Hollin Wood,
+  Marlbury) and plain given names and surnames (Callum Aldridge). Title-case place names. **No
+  Cornish names** (no Pen-, Tre-, Pol-, Carn, Wheal, Truro, "Cornish"), and **never reference
+  *Poldark***: no Ross, Demelza, Nampara, Trenwith, Warleggan, Pascoe, Hoskin(g), Jud, Prudie,
+  Verity or close variants. Avoid real towns and famous estates.
 
 ## 2. Copy conventions
 
 | Surface | Rule | Example |
 | --- | --- | --- |
-| Interaction hint (focus card) | Name, then keyed verbs. Title-case the name, sentence-case the verb. | `[E] Harvest Turnips` · `[E] Eat Cornish pasty` |
+| Interaction hint (focus card) | Name, then keyed verbs. Title-case the name, sentence-case the verb. | `[E] Harvest Turnips` · `[E] Eat Pasty` |
 | Tool use | Tools act on click / gamepad tool button; `E` only interacts. | `[LMB] Strike!` |
 | Refusal | 4–6 words, no "You can't". | "Needs a fishing pole." · "The pack is full." |
 | HUD notice (toast) | Only for non-obvious outcomes; one line; no exclamation spam. | "The fish have stopped biting here today." |
@@ -41,8 +44,8 @@ conflict, the cozier, more fun or more beautiful option wins.
 | Numbers | Thousands commas; "coins", not "c" or "$". | "1,500 coins" |
 | Ranges | En dash, no spaces for numbers; spaced en dash for clauses. | "Open 8 AM–6 PM" · "Hotbar – the first row" |
 | Dates | `Mon, Spring 1, 1851` style everywhere. Weather words match the HUD. | |
-| Store name | Full: **Trethewey's general store**; short: **the general store**. Sentence case unless it's a title heading. | |
-| Settlement | **The village**, never "town", now that it sits at the foot of the drive. Map label: "The village at the foot of the drive, above the estuary". | "Word travels quick in a village." |
+| Store name | Full: **Aldridge's general store**; short: **the general store**. Sentence case unless it's a title heading. Shop sign: "C. ALDRIDGE – PROVISIONS & SUNDRIES". | |
+| Settlement | **The village**, never "town". Map label: "The village". | "Word travels quick in a village." |
 
 Assume the player knows farming games: don't toast obvious outcomes (picked up 1 hay) and don't
 explain standard verbs.
@@ -111,4 +114,7 @@ build #2, then #1 and #3 use it). Fast wins that need no new art: #4, #5, #8, #1
 
 ## Changelog
 
+- 2026-10-10: §1–2 rewritten for Jenny's move away from Cornish names (option B: slightly modern
+  English or Scottish): Larkhollow, Mr. Callum Aldridge, Ashgrove/Brackenburn/Thornley, Hollin
+  Wood, Gull Sands, Marlbury; "Pasty" replaces "Cornish pasty".
 - 2026-10-04: first page and UI audit (Balance Agent).

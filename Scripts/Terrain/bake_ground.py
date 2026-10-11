@@ -7,7 +7,7 @@ Outputs:
                                              B = dryness (straw), A = wear (bare, trodden soil)
   Saved/Ground/T_EstateCanopy.png            2048^2 RGBA: R = tree canopy cover (leaf litter and moss
                                              underfoot), G = stony soil on steep banks, B = the MVP
-                                             woodland zone (mvp_woodland.json)
+                                             woodland zone (mvp_woodland.json), A = granite on steep ground
   Content/SurvivalGame/Estate/Runtime/EstateGround.bin
                                              1024^2 cells for the game (HomesteadEstateGround):
                                              "HGD1", u16 size, then per cell u8 grass density (max over
@@ -330,7 +330,10 @@ def ground_fields(h, w, layout):
     # Stony soil on steep banks that aren't painted cliff (the cliff layer has its own rock).
     stony = smoothstep(20.0, 34.0, gaussian_filter(slope, 2.0)) * (1.0 - w["CliffRock"]) * (1.0 - (1.0 - STONY_KEEP) * heath)
     fields = {"density": density, "height": np.clip(height, 0, 1), "dry": np.clip(dry, 0, 1), "wear": np.clip(wear, 0, 1),
-              "canopy": canopy, "stony": np.clip(stony, 0, 1), "zone": floor}
+              "canopy": canopy, "stony": np.clip(stony, 0, 1), "zone": floor,
+              # Steep ground of any layer shows granite (build_landscape_material.py), from a smooth slope, not the
+              # landscape's per-vertex normal, which drew a one-quad crease as a row of triangle teeth.
+              "rock": smoothstep(33.0, 46.0, gaussian_filter(slope, 1.5))}
 
     surface = np.full(h.shape, SURFACES["Soil"], np.uint8)
     dominant = np.argmax(np.stack([w[n] for n in LAYERS]), axis=0)
@@ -355,8 +358,7 @@ def write_ground(fields, surface):
     img = np.stack(chans, -1)
     Image.fromarray(np.round(np.clip(img, 0, 1) * 255).astype(np.uint8), "RGBA").save(
         os.path.join(REPO, "Saved", "Ground", "T_EstateGround.png"))
-    extra = np.stack([map_coordinates(fields[k], [yy, xx], order=1, mode="nearest") for k in ("canopy", "stony", "zone")]
-                     + [np.ones((TEX, TEX))], -1)
+    extra = np.stack([map_coordinates(fields[k], [yy, xx], order=1, mode="nearest") for k in ("canopy", "stony", "zone", "rock")], -1)
     Image.fromarray(np.round(np.clip(extra, 0, 1) * 255).astype(np.uint8), "RGBA").save(
         os.path.join(REPO, "Saved", "Ground", "T_EstateCanopy.png"))
 

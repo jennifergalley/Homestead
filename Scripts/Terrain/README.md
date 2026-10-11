@@ -331,14 +331,16 @@ the path instead of a trench or bank. The village street leaves the road at 350 
 `village_junction.py` takes the old street's grade back out first.
 
 Run once, in this order, with `HOMESTEAD_TERRAIN_WORK` set: `coast_mix.py`, `cove_route.py`, `coast_soften.py` (rounds the west
-cliff's end against the hillside and strews granite ledges on the coast's cliff faces), `estate_footpaths.py`,
+cliff's end against the hillside), `coast_detail.py` (crags on the cliff faces, a wandering waterline, scrub and
+wildflowers on the regraded ground, erratics at the cove's west cliff foot; keeps the sea cave's crag and roof),
+`estate_footpaths.py`,
 `compact_map.py` (CoveBeach), `village_junction.py`, `town_layout.py`, `town_path.py`, `town_layout.py`,
 `coast_mix_placements.py` (retires displaced ids into `HomesteadEstateCoastMixRetired.inc`, never moving one),
 `public_road.py`, `weightmaps.py`, `route_sights.py --top-up`, `village_dress.py`, `cove_heath.py`, `bake_ocean.py`,
 `bake_outer_land.py`, `bake_ground.py`, `Scripts\Map\bake_estate_map.py`. Generated sources must be CRLF before
 `Invoke-UnrealBuild.ps1`. In the editor: `ApplyEstateHeightfield` and `ApplyEstateWeightmaps` over the whole map,
 `build_ocean.py`, `build_outer_land.py`, `place_water.py`, `build_ground.py`, `build_landscape_material.py` (the
-CliffRock layer is triplanar) and `ImportEstateMap`.
+CliffRock layer is triplanar, and any ground steeper than about 35 degrees takes that granite) and `ImportEstateMap`.
 
 After a large `ApplyEstateHeightfield`, check the landscape component seams (every 126 vertices): vertices shared by
 two components can keep a stale height in one of them (a 200 m tall sheet of stretched texture at x = -378 m after the

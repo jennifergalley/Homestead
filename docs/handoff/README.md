@@ -80,10 +80,19 @@ Tokens are the scarce resource. Every session follows these rules:
 - **Jenny verifies in-game.** Lanes don't open the editor for screenshots or self-QA unless the task
   can't be checked any other way (animation and art usually need it; UI and logic usually don't).
 
-There is no cap on concurrent implementers. The machine limits remain: at most two Unreal processes
-total, one reserved for Integration; no heavy editor or cook work while Jenny plays; never use
-`-Force`; and Integration alone runs one UAT package at a time. An idle or waiting session schedules
-a wake-up and ends its turn rather than sleeping or polling.
+There is no cap on concurrent implementers, but the machine is (Jenny, 2026-10-10): **at most 2
+heavy jobs at once across all agent sessions**. A heavy job is any Blender process, Unreal editor or
+commandlet, C++/UBT/native-test build, or UAT package; several parallel Blender processes count as
+several. The orchestrator grants the two slots, a slot holder runs one heavy process at a time and
+tells the orchestrator when it releases, and lanes do code, scripts and docs without a slot.
+Integration gets a slot first when it merges, builds or packages. No heavy editor or cook work while
+Jenny plays; never use `-Force`; and Integration alone runs one UAT package at a time. An idle or
+waiting session schedules a wake-up and ends its turn rather than sleeping or polling.
+
+**Spawn lanes sequentially** (Jenny, 2026-10-10): start at most two heavy lanes (Blender, Unreal or
+C++ builds) at a time, in dependency order, and spawn the next queued lane when one sends `[ready]`.
+Light sessions (Balance, docs, text-only or planning) may run alongside. Lanes don't fan out
+sub-agents that run heavy jobs in parallel; sub-agents count against the same two slots.
 
 ## Roles
 
