@@ -91,3 +91,4 @@ Plan: `openspec/changes/open-estate-mine-shallow-level` (decisions D1-D5 in its 
 - Heavy slots: slot 1 Mine Art, slot 2 Mine Gameplay; Integration takes priority when it builds.
 - Queued for Next once a slot frees: Quests, compost bin, [Balance] currants easier to spot, [Balance UI] dim price on Owned clothing, remove the building menu and wooden buildings, remove the controls hint bar (`jenny-mv448c92`).
 - Jenny wants frequent progress shots: lanes send `[progress] <milestone> <folder>`; Mine Art stops for her approval after the house blockout.
+| Test Tools Agent | `979b7777-3fce-47ab-9cb7-6b83b4410c7b` | Claude Sonnet 5.5 / high | — (no slot; Mine Gameplay builds/verifies) | open-store teleport-and-sell test helper |
