@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "name": "BeachShells",
+  "description": "Gatherable strandline shell scatter (cockles, limpets, periwinkles, mussel and razor valves; ~28 cm) and a held cockle valve (pinch pivot).",
+  "collision": "none",
+  "triangle_budget": 6000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/beach_shells.py",
+  "source_sha256": "9863fd65c75ef9ee4424dfcf3096ec836bf7a6aeee2e63deed85ab2af9eccf58",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_BeachShells": {
+      "vertices": 3018,
+      "triangles": 6000,
+      "size_cm": [
+        23.94,
+        16.33,
+        2.41
+      ],
+      "materials": [
+        {
+          "name": "M_BeachShells",
+          "textures": {
+            "basecolor": "T_BeachShells_basecolor.png",
+            "roughness": "T_BeachShells_roughness.png",
+            "normal": "T_BeachShells_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BeachShells_basecolor.png",
+          "roughness": "T_BeachShells_roughness.png",
+          "normal": "T_BeachShells_normal.png",
+          "ao": "T_BeachShells_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "focus": [
+          -0.06,
+          -0.04,
+          0.008
+        ],
+        "detail_distance": 0.3
+      },
+      "fbx": "SM_BeachShells.fbx",
+      "sha256": "07af239fc82904ef012c1bf6ee832ae20040d46c6e7165dfebaab82c3e774589",
+      "preview": "preview_SM_BeachShells.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BeachShells_hero.png",
+          "detail": "beauty_SM_BeachShells_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_BeachShells_LOD1": {
+      "vertices": 1368,
+      "triangles": 2700,
+      "size_cm": [
+        23.93,
+        16.33,
+        2.41
+      ],
+      "materials": [
+        {
+          "name": "M_BeachShells",
+          "textures": {
+            "basecolor": "T_BeachShells_basecolor.png",
+            "roughness": "T_BeachShells_roughness.png",
+            "normal": "T_BeachShells_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BeachShells_basecolor.png",
+          "roughness": "T_BeachShells_roughness.png",
+          "normal": "T_BeachShells_normal.png",
+          "ao": "T_BeachShells_ao.png"
+        },
+        "shared_with": "SM_BeachShells"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "focus": [
+          -0.06,
+          -0.04,
+          0.008
+        ],
+        "detail_distance": 0.3
+      },
+      "fbx": "SM_BeachShells_LOD1.fbx",
+      "sha256": "009ed09208e3ac3e26e67025d76217f9e21e1266703f98d35b0e5a867974e691",
+      "preview": "preview_SM_BeachShells_LOD1.png"
+    },
+    "SM_SeashellHeld": {
+      "vertices": 2466,
+      "triangles": 4928,
+      "size_cm": [
+        3.73,
+        1.36,
+        3.18
+      ],
+      "materials": [
+        {
+          "name": "M_SeashellHeld",
+          "textures": {
+            "basecolor": "T_SeashellHeld_basecolor.png",
+            "roughness": "T_SeashellHeld_roughness.png",
+            "normal": "T_SeashellHeld_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 1024,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SeashellHeld_basecolor.png",
+          "roughness": "T_SeashellHeld_roughness.png",
+          "normal": "T_SeashellHeld_normal.png",
+          "ao": "T_SeashellHeld_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          -90,
+          0,
+          0
+        ],
+        "ground": "lowest",
+        "focus": null,
+        "detail_distance": 0.14,
+        "detail_fstop": 32.0
+      },
+      "fbx": "SM_SeashellHeld.fbx",
+      "sha256": "e4fad1e54ef30051ab6d754121b3ec9f1f75435585e964b581b2425001a4b3b8",
+      "preview": "preview_SM_SeashellHeld.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_SeashellHeld_hero.png",
+          "detail": "beauty_SM_SeashellHeld_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          -90,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    }
+  },
+  "warnings": [],
+  "held": {
+    "SM_SeashellHeld": "Pivot = pinch point on the dorsal (umbo/hinge) margin, mid-wall, 4 mm below the top edge. +Z up out of the pinch, valve hangs in -Z; valve plane XZ, thumb/finger close along Y (dome toward -Y in Blender = +Y in Unreal). Length 3.5 cm."
+  },
+  "scatter": {
+    "pivot": "Sand line (z = 0) under the scatter's bounds centre; shells bedded 1-5 mm below it, so place at sand height.",
+    "shells": [
+      "cockle 3.4 cm",
+      "cockle 2.9 cm concave-up",
+      "limpet 4.3 cm",
+      "limpet 3.6 cm concave-up",
+      "winkle 2.5 cm",
+      "winkle 1.9 cm",
+      "mussel 5.7 cm concave-up",
+      "mussel 4.8 cm",
+      "razor 12.8 cm"
+    ],
+    "collision": "none (gatherable pickup)"
+  },
+  "textures": {
+    "T_BeachShells_basecolor.png": "2be8280707e226a815f1c279e8a5c13b7e00f52187d2bd8cac204ddfc44f9de0",
+    "T_BeachShells_roughness.png": "45d14337a93174038d6cc82b7ab7704da3eb866a0a770491eda1a9a20dafc265",
+    "T_BeachShells_normal.png": "b1c3c45bb441614da3c6e7ad5c3b40f0f9d2584278274f5b5b35183c8af9fbb0",
+    "T_SeashellHeld_basecolor.png": "d3b20e66c3cd45ad3b07f5507f3e629201bd6ebfab748dbba77ebd5880fe366b",
+    "T_SeashellHeld_roughness.png": "04f5dc5099c4a0fcf86c361c1d509720573edb3028a9f428d92040cf31fee01a",
+    "T_SeashellHeld_normal.png": "f2d07536e647ba6bab34c5aca0b5e82e83827335c1c461cb9a7e1c7a653a8e89"
+  }
+}

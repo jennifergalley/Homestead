@@ -1,0 +1,437 @@
+{
+  "schema": 1,
+  "name": "BeachCampfire",
+  "description": "Beach campfire kit on a shared origin (pit bottom centre at sand level): granite cobble ring with ash bed, unlit driftwood tepee with marram/wrack tinder, burning collapsed stack, emissive ember bed and flame tongues (original).",
+  "collision": "none",
+  "triangle_budget": 12000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/beach_campfire.py",
+  "source_sha256": "2ee878da335de03a06d7814d4bb83b9ad8e0ce62798690c20baf899661a2803f",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_BeachFirePit": {
+      "vertices": 5959,
+      "triangles": 11720,
+      "size_cm": [
+        90.55,
+        96.58,
+        13.26
+      ],
+      "materials": [
+        {
+          "name": "M_BeachFirePit",
+          "textures": {
+            "basecolor": "T_BeachFirePit_basecolor.png",
+            "roughness": "T_BeachFirePit_roughness.png",
+            "normal": "T_BeachFirePit_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_BeachFirePit_basecolor.png",
+          "roughness": "T_BeachFirePit_roughness.png",
+          "normal": "T_BeachFirePit_normal.png",
+          "ao": "T_BeachFirePit_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.0,
+          0.3,
+          0.06
+        ],
+        "detail_distance": 0.75
+      },
+      "fbx": "SM_BeachFirePit.fbx",
+      "sha256": "45507eb781fd1df5b80b1fac4fd16134983ed8a40c28c6dd1a3bb63c084a6ca1",
+      "preview": "preview_SM_BeachFirePit.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_BeachFirePit_hero.png",
+          "detail": "beauty_SM_BeachFirePit_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_CampfireStack": {
+      "vertices": 4047,
+      "triangles": 7758,
+      "size_cm": [
+        44.54,
+        47.67,
+        48.5
+      ],
+      "materials": [
+        {
+          "name": "M_CampfireStack",
+          "textures": {
+            "basecolor": "T_CampfireStack_basecolor.png",
+            "roughness": "T_CampfireStack_roughness.png",
+            "normal": "T_CampfireStack_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CampfireStack_basecolor.png",
+          "roughness": "T_CampfireStack_roughness.png",
+          "normal": "T_CampfireStack_normal.png",
+          "ao": "T_CampfireStack_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.12
+        ],
+        "detail_distance": 0.7
+      },
+      "fbx": "SM_CampfireStack.fbx",
+      "sha256": "133b00a47c17657bb4ea4ab60e9df4f9adbef04bdc3e392269dd108f422c284f",
+      "preview": "preview_SM_CampfireStack.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CampfireStack_hero.png",
+          "detail": "beauty_SM_CampfireStack_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_CampfireBurning": {
+      "vertices": 1318,
+      "triangles": 2604,
+      "size_cm": [
+        50.1,
+        49.81,
+        24.6
+      ],
+      "materials": [
+        {
+          "name": "M_CampfireBurning",
+          "textures": {
+            "basecolor": "T_CampfireBurning_basecolor.png",
+            "roughness": "T_CampfireBurning_roughness.png",
+            "normal": "T_CampfireBurning_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_CampfireBurning_basecolor.png",
+          "roughness": "T_CampfireBurning_roughness.png",
+          "normal": "T_CampfireBurning_normal.png",
+          "ao": "T_CampfireBurning_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.1
+        ],
+        "detail_distance": 0.6
+      },
+      "fbx": "SM_CampfireBurning.fbx",
+      "sha256": "b8151ca56700b673b1d731eb285ae1eb656f44abf4a679cc1b6ccd3775c5f515",
+      "preview": "preview_SM_CampfireBurning.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CampfireBurning_hero.png",
+          "detail": "beauty_SM_CampfireBurning_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_CampfireEmbers": {
+      "vertices": 1356,
+      "triangles": 2564,
+      "size_cm": [
+        27.0,
+        26.44,
+        23.35
+      ],
+      "materials": [
+        {
+          "name": "M_CampfireEmbers",
+          "color": [
+            0.8,
+            0.8,
+            0.8
+          ],
+          "roughness": 0.85
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.05
+        ],
+        "detail_distance": 0.5
+      },
+      "fbx": "SM_CampfireEmbers.fbx",
+      "sha256": "f1c05570ece27b2fa81afb1cc26b9476af24bb9df029349967fcd895c2e0f237",
+      "preview": "preview_SM_CampfireEmbers.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CampfireEmbers_hero.png",
+          "detail": "beauty_SM_CampfireEmbers_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    },
+    "SM_CampfireFlames": {
+      "vertices": 1370,
+      "triangles": 2720,
+      "size_cm": [
+        38.34,
+        29.67,
+        68.5
+      ],
+      "materials": [
+        {
+          "name": "M_CampfireFlame",
+          "color": [
+            1.0,
+            0.45,
+            0.1
+          ],
+          "roughness": 0.4
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero",
+          "detail"
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          0.3
+        ]
+      },
+      "fbx": "SM_CampfireFlames.fbx",
+      "sha256": "7d264e6729664acbafcf1f7d5a6013a7275fe7bda9d46cf272b50bdc8000a314",
+      "preview": "preview_SM_CampfireFlames.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_CampfireFlames_hero.png",
+          "detail": "beauty_SM_CampfireFlames_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 256,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "origin"
+      }
+    }
+  },
+  "warnings": [],
+  "unreal_frame": "Unreal local cm: Blender (x, y, z) imports as Unreal (x, -y, z).",
+  "pivot": "All five meshes share one origin: bottom centre of the pit at sand level (0, 0, 0). No mesh is re-pivoted; place them all at the same transform.",
+  "mesh_offsets_cm": {
+    "SM_BeachFirePit": [
+      0,
+      0,
+      0
+    ],
+    "SM_CampfireStack": [
+      0,
+      0,
+      0
+    ],
+    "SM_CampfireBurning": [
+      0,
+      0,
+      0
+    ],
+    "SM_CampfireEmbers": [
+      0,
+      0,
+      0
+    ],
+    "SM_CampfireFlames": [
+      0,
+      0,
+      0
+    ]
+  },
+  "states": {
+    "unlit": [
+      "SM_BeachFirePit",
+      "SM_CampfireStack"
+    ],
+    "lit": [
+      "SM_BeachFirePit",
+      "SM_CampfireBurning",
+      "SM_CampfireEmbers",
+      "SM_CampfireFlames"
+    ]
+  },
+  "collision_note": "No collision on any part (walkable, ankle-high ring; the heroine stands at its edge).",
+  "flames_uv": "SM_CampfireFlames: closed tapered tongues; UV V runs 0 at each tongue's base to 1 at its tip, U runs around the tongue inside that tongue's own strip [k/N, (k+1)/N].",
+  "placement": "Set on flat sand at terrain height; the cobbles extend 3.5 cm below the origin.",
+  "fire_cm": {
+    "flame_base_centre": [
+      0.0,
+      0.0,
+      7.0
+    ],
+    "flame_top": [
+      4.0,
+      3.0,
+      72.5
+    ],
+    "ember_bed_radius": 16.0,
+    "light_suggested": [
+      0.0,
+      0.0,
+      45.0
+    ]
+  },
+  "textures": {
+    "T_BeachFirePit_basecolor.png": "4e3f39c4b17e40de981a49fb7c64b65556dd3a692c9f218e3ee48f40501efa4b",
+    "T_BeachFirePit_roughness.png": "22eb00bd3d41e32b6b4a36c6fb83270c16b4d593c3a1b8c4e0e79eef7c822171",
+    "T_BeachFirePit_normal.png": "3f8a73c4d2ce4b31dde0081a7cdbd5c191a9653e2ec660a47d230c35fe459380",
+    "T_CampfireStack_basecolor.png": "e5afdd18eb6ebf785b826484603b72a76a3c0745241a7d165860039434396992",
+    "T_CampfireStack_roughness.png": "a210e52887f8c14377d3128e829a6dcc50f28f02a60c50aaa1d8313e89de499d",
+    "T_CampfireStack_normal.png": "a02fa09739c742fc3bc5bac68aae3dffd86f247811ac07326ff8745b14b9dd94",
+    "T_CampfireBurning_basecolor.png": "6c84c10a261d8be198d2a7e74af28ecf12b5a4c9814c340d846e576d60013932",
+    "T_CampfireBurning_roughness.png": "6fb8d861524cd790a6768b08031810da882b9fa399d5f6900577aeb8c046594d",
+    "T_CampfireBurning_normal.png": "a470c0ba8e28fdde16db431aeca2b2d5750ed20b60f73cb16570fae8b72969fc"
+  }
+}

@@ -1,0 +1,396 @@
+{
+  "schema": 1,
+  "name": "Driftwood",
+  "description": "Three sea-bleached driftwood sticks (62, 48 and 72 cm) along local Y; pivot centre-underside; LOD1.",
+  "collision": "Convex hull per stick (only matters if one is dropped as a physics prop).",
+  "triangle_budget": 6000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/driftwood.py",
+  "source_sha256": "103fafa4a816da92812ba29ad4ede1732024a10d458237452b85357f2704c70f",
+  "provenance": "Original project-authored procedural geometry and materials; no third-party asset or texture.",
+  "meshes": {
+    "SM_Driftwood_a": {
+      "vertices": 2302,
+      "triangles": 4600,
+      "size_cm": [
+        7.05,
+        64.7,
+        4.91
+      ],
+      "materials": [
+        {
+          "name": "M_Driftwood_a",
+          "textures": {
+            "basecolor": "T_Driftwood_a_basecolor.png",
+            "roughness": "T_Driftwood_a_roughness.png",
+            "normal": "T_Driftwood_a_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Driftwood_a_basecolor.png",
+          "roughness": "T_Driftwood_a_roughness.png",
+          "normal": "T_Driftwood_a_normal.png",
+          "ao": "T_Driftwood_a_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_Driftwood_a.fbx",
+      "sha256": "203e1577af278b8fdd3ade502ffc18297fcd4a7f0b03805e6a0b56e56a95197d",
+      "preview": "preview_SM_Driftwood_a.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Driftwood_a_hero.png",
+          "detail": "beauty_SM_Driftwood_a_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_Driftwood_a_LOD1": {
+      "vertices": 807,
+      "triangles": 1610,
+      "size_cm": [
+        7.04,
+        64.7,
+        4.92
+      ],
+      "materials": [
+        {
+          "name": "M_Driftwood_a",
+          "textures": {
+            "basecolor": "T_Driftwood_a_basecolor.png",
+            "roughness": "T_Driftwood_a_roughness.png",
+            "normal": "T_Driftwood_a_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Driftwood_a_basecolor.png",
+          "roughness": "T_Driftwood_a_roughness.png",
+          "normal": "T_Driftwood_a_normal.png",
+          "ao": "T_Driftwood_a_ao.png"
+        },
+        "shared_with": "SM_Driftwood_a"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_Driftwood_a_LOD1.fbx",
+      "sha256": "fca24085ddb32c97efa9964424a37602e2cbd208c9020ae862de54d13d17bb58",
+      "preview": "preview_SM_Driftwood_a_LOD1.png"
+    },
+    "SM_Driftwood_b": {
+      "vertices": 2102,
+      "triangles": 4200,
+      "size_cm": [
+        8.16,
+        50.1,
+        3.85
+      ],
+      "materials": [
+        {
+          "name": "M_Driftwood_b",
+          "textures": {
+            "basecolor": "T_Driftwood_b_basecolor.png",
+            "roughness": "T_Driftwood_b_roughness.png",
+            "normal": "T_Driftwood_b_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Driftwood_b_basecolor.png",
+          "roughness": "T_Driftwood_b_roughness.png",
+          "normal": "T_Driftwood_b_normal.png",
+          "ao": "T_Driftwood_b_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_Driftwood_b.fbx",
+      "sha256": "fffdcb509251ad7a87ead8f5e755600ba593a20f9251b051a26f24df03544ec4",
+      "preview": "preview_SM_Driftwood_b.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Driftwood_b_hero.png",
+          "detail": "beauty_SM_Driftwood_b_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_Driftwood_b_LOD1": {
+      "vertices": 737,
+      "triangles": 1470,
+      "size_cm": [
+        8.15,
+        50.09,
+        3.86
+      ],
+      "materials": [
+        {
+          "name": "M_Driftwood_b",
+          "textures": {
+            "basecolor": "T_Driftwood_b_basecolor.png",
+            "roughness": "T_Driftwood_b_roughness.png",
+            "normal": "T_Driftwood_b_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Driftwood_b_basecolor.png",
+          "roughness": "T_Driftwood_b_roughness.png",
+          "normal": "T_Driftwood_b_normal.png",
+          "ao": "T_Driftwood_b_ao.png"
+        },
+        "shared_with": "SM_Driftwood_b"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_Driftwood_b_LOD1.fbx",
+      "sha256": "7af874933a78c5df131a2e424fa1154d27d216006d0d53c56e6d3e1e7a26cbb6",
+      "preview": "preview_SM_Driftwood_b_LOD1.png"
+    },
+    "SM_Driftwood_c": {
+      "vertices": 2502,
+      "triangles": 5000,
+      "size_cm": [
+        9.81,
+        75.33,
+        4.84
+      ],
+      "materials": [
+        {
+          "name": "M_Driftwood_c",
+          "textures": {
+            "basecolor": "T_Driftwood_c_basecolor.png",
+            "roughness": "T_Driftwood_c_roughness.png",
+            "normal": "T_Driftwood_c_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Driftwood_c_basecolor.png",
+          "roughness": "T_Driftwood_c_roughness.png",
+          "normal": "T_Driftwood_c_normal.png",
+          "ao": "T_Driftwood_c_ao.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_Driftwood_c.fbx",
+      "sha256": "c7481cbedef48445f692e3d9aca2d52a631920ab48786e722925c8c9d353f8b0",
+      "preview": "preview_SM_Driftwood_c.png",
+      "beauty": {
+        "views": {
+          "hero": "beauty_SM_Driftwood_c_hero.png",
+          "detail": "beauty_SM_Driftwood_c_detail.png"
+        },
+        "device": "OPTIX",
+        "gpus": [
+          "NVIDIA GeForce RTX 5080"
+        ],
+        "samples": 128,
+        "resolution": [
+          3840,
+          2160
+        ],
+        "hdri": "kloofendal_48d_partly_cloudy_puresky_2k.exr",
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "ground": "lowest"
+      }
+    },
+    "SM_Driftwood_c_LOD1": {
+      "vertices": 877,
+      "triangles": 1750,
+      "size_cm": [
+        9.8,
+        75.33,
+        4.84
+      ],
+      "materials": [
+        {
+          "name": "M_Driftwood_c",
+          "textures": {
+            "basecolor": "T_Driftwood_c_basecolor.png",
+            "roughness": "T_Driftwood_c_roughness.png",
+            "normal": "T_Driftwood_c_normal.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 2048,
+        "samples": 96,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_Driftwood_c_basecolor.png",
+          "roughness": "T_Driftwood_c_roughness.png",
+          "normal": "T_Driftwood_c_normal.png",
+          "ao": "T_Driftwood_c_ao.png"
+        },
+        "shared_with": "SM_Driftwood_c"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "views": [
+          "hero",
+          "detail"
+        ]
+      },
+      "fbx": "SM_Driftwood_c_LOD1.fbx",
+      "sha256": "1e2e8b445e294ee88a8982bab7f14cf5e4fb55ee01c4493e89af05e54eba98e2",
+      "preview": "preview_SM_Driftwood_c_LOD1.png"
+    }
+  },
+  "warnings": [],
+  "pivot": "Centre of each stick at its underside (bounds centre X/Y, lowest Z). Long axis = local Y.",
+  "sticks": {
+    "SM_Driftwood_a": {
+      "length_cm": 62.0,
+      "diameter_cm": 4.2,
+      "features": [
+        "bump",
+        "stub"
+      ]
+    },
+    "SM_Driftwood_b": {
+      "length_cm": 48.0,
+      "diameter_cm": 3.2,
+      "features": [
+        "bump",
+        "fork"
+      ]
+    },
+    "SM_Driftwood_c": {
+      "length_cm": 72.0,
+      "diameter_cm": 5.4,
+      "features": [
+        "flush"
+      ]
+    }
+  },
+  "textures": {
+    "T_Driftwood_a_basecolor.png": "f7cbdda9623d16afe8ccd7d3c4efd08ea6eb9e55da9296130ab2a401330c02b3",
+    "T_Driftwood_a_roughness.png": "9492a90971bbae260bd0d191ca00dd7b4215fbaf012ab23ec7ac9e5f701def5c",
+    "T_Driftwood_a_normal.png": "01bcbca7d9a591a3d1d623c6161919c3785b9217e3f21565b128d72f7017b272",
+    "T_Driftwood_b_basecolor.png": "9f787193bcad490ccd5076d2791e39fc5270a305a156f616fe2c95b97d67422b",
+    "T_Driftwood_b_roughness.png": "ee59705150d1584d4d0ae5fc7e900b69ecf5131a0a4fbfa37d03f88587f036d9",
+    "T_Driftwood_b_normal.png": "052576654f4d0e675950b98d2f867c409ec3314f0b12fdecc30b2fce44db6dec",
+    "T_Driftwood_c_basecolor.png": "5f06e2baf4fe2791823be876d5ecafa43ac89c3973bd14d0d75c8ff27ce15eff",
+    "T_Driftwood_c_roughness.png": "9e015b9257f9b8b538b765c0a33f38fc1fbe06751774b79b24fe9cd934e9480e",
+    "T_Driftwood_c_normal.png": "79bb89ffad4f70d91ab6125774f812abbaeb14856df420c1efddbe9621d37320"
+  }
+}
