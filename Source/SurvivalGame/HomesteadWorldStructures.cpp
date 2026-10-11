@@ -62,6 +62,11 @@ float AHomesteadWorld::GetRoomMix() const
     return Weather ? Weather->GetRoomMix() : 0.0f;
 }
 
+float AHomesteadWorld::GetCaveMix() const
+{
+    return Weather ? Weather->GetCaveMix() : 0.0f;
+}
+
 void AHomesteadWorld::UpdateHearthSound(float DeltaSeconds)
 {
     HearthSounds.RemoveAll([](const FHearthSound& Sound) { return !Sound.Audio.IsValid(); });

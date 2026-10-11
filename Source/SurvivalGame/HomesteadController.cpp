@@ -54,6 +54,7 @@
 #include "UI/SHomesteadVitals.h"
 #include "HomesteadMapComponent.h"
 #include "Simulation/HomesteadManor.h"
+#include "Simulation/HomesteadSeaCave.h"
 #include "Simulation/HomesteadLamp.h"
 #include "Simulation/HomesteadPail.h"
 #include "UI/SHomesteadNames.h"
@@ -326,11 +327,14 @@ void AHomesteadController::Tick(float DeltaSeconds)
     {
         if (!PrepareWorldAt({PendingLocation.X, PendingLocation.Y})) return;
         const float Ground = GroundHeight(PendingLocation.X, PendingLocation.Y);
+        // A save made in the sea cave stands her on its floor, not on the cliff above it.
+        const float LoadGround = bEstateMap ? static_cast<float>(Homestead::SeaCaveAwareGround(Homestead::EstateSeaCave(),
+            {PendingLocation.X, PendingLocation.Y}, PendingLocation.Z, Ground)) : Ground;
         if (bEstateMap)
         {
             // Wait (in place, movement off) for World Partition to stream in the ground under the spawn,
             // then stand her on it. Standalone and packaged games take about a minute to stream it.
-            PendingLocation.Z = bFreshTerrainSpawn ? Ground + 150.0f : FMath::Max(PendingLocation.Z, Ground + 100.0f);
+            PendingLocation.Z = bFreshTerrainSpawn ? Ground + 150.0f : FMath::Max(PendingLocation.Z, LoadGround + 100.0f);
             if (!SettleOnGround(PendingLocation, EstateSpawnWait, DeltaSeconds, 180.0f,
                 bFreshTerrainSpawn ? TEXT("new game") : TEXT("load"))) return;
         }
@@ -409,7 +413,8 @@ void AHomesteadController::Tick(float DeltaSeconds)
             if (ToastRemaining <= 0) Notify(TEXT("The water's too deep to wade any further."));
             return;
         }
-        if (Position.Z < Surface - 200)
+        if (Position.Z < Surface - 200
+            && !(bEstateMap && Homestead::InSeaCave(Homestead::EstateSeaCave(), {Position.X, Position.Y}, Position.Z, Surface)))
         {
             ++WorldRecoveries;
             Notify(TEXT("Recovered the character above the generated terrain; this traversal needs review."), true);

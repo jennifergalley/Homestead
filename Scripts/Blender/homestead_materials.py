@@ -1308,7 +1308,7 @@ def _granite_grains(g, vector, grain, w=None):
 def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45, moss=0.12,
             iron=0.25, streaks=0.3, soil=0.2, soil_height=0.12, enclaves=0.4, megacrysts=0.0,
             relief=1.0, north=(0.0, 1.0, 0.0), seed=0.0, fresh="fresh", spots=1.0, film=0.5,
-            offset_attr=None, tint_attr=None):
+            offset_attr=None, tint_attr=None, cave=False):
     """Weathered Sierra Nevada granite for rocks meshed in meters with pcoord = object
     coordinates and the ground line at z = 0.
 
@@ -1329,6 +1329,8 @@ def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45,
       from many stones: the offset (m) shifts every noise pattern so neighbouring stones
       don't continue each other's markings, and the tint (~1, 1, 1) multiplies each stone's
       colour. The soil line and facing masks still use the shared object coordinates.
+    - ``cave``: read the sea-cave masks ``crust``, ``algae``, ``sand`` and ``wet`` (0..1 point attributes,
+      ``Recipes/sea_cave.py``); off by default, so other rocks are unchanged.
     """
     g = Graph(name)
     p = g.coord()
@@ -1506,11 +1508,43 @@ def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45,
     else:
         dirt = None
 
+    # Sea-cave surfaces (``cave=True``), from 0..1 point attributes the recipe writes: ``crust`` (pink-mauve
+    # encrusting coralline algae with barnacles in the splash zone), ``algae`` (a green film where light
+    # reaches), ``sand`` (the pale, damp sand floor) and ``wet`` (darker, glossier rock).
+    cave_masks = []
+    if cave:
+        def attr(attr_name):
+            return g.node("ShaderNodeAttribute", attribute_name=attr_name, attribute_type="GEOMETRY").outputs["Fac"]
+        crust_attr, algae_attr, sand_attr, wet_attr = attr("crust"), attr("algae"), attr("sand"), attr("wet")
+        mott = g.noise(ps, scale=7.0, detail=4.0, roughness=0.6).outputs["Fac"]
+        crust_col = g.mix((0.20, 0.13, 0.14), (0.34, 0.25, 0.25), g.remap(mott, 0.35, 0.68))
+        barnacle = g.node("ShaderNodeTexVoronoi", Vector=ps, Scale=1.0 / 0.014, Randomness=1.0, feature="F1")
+        shell = g.math("MULTIPLY", g.remap(barnacle.outputs["Distance"], 0.42, 0.3),
+                       g.remap(g.channel(barnacle.outputs["Color"], 0), 0.45, 0.5))
+        crust_col = g.mix(crust_col, (0.46, 0.44, 0.40), g.math("MULTIPLY", shell, 0.85))
+        crust_mask = g.math("MULTIPLY", crust_attr, 0.95)
+        color = g.mix(color, crust_col, crust_mask)
+        film_noise = g.noise(ps, scale=3.0, detail=5.0, roughness=0.6).outputs["Fac"]
+        algae_mask = g.math("MULTIPLY", algae_attr, g.remap(film_noise, 0.38, 0.62, 0.35, 0.9))
+        color = g.mix(color, g.mix((0.035, 0.07, 0.022), (0.07, 0.10, 0.035), g.remap(mott, 0.3, 0.7)), algae_mask)
+        ripple = g.noise(g.scale(ps, (1.0, 3.5, 1.0)), scale=3.0, detail=3.0).outputs["Fac"]
+        grit = g.noise(ps, scale=1.0 / 0.004, detail=2.0).outputs["Fac"]
+        sand_col = g.mix((0.21, 0.18, 0.13), (0.33, 0.29, 0.21), g.remap(ripple, 0.3, 0.7))
+        sand_col = g.mix(sand_col, (0.85, 0.82, 0.78), g.remap(grit, 0.45, 0.6, 0.0, 0.35), blend="MULTIPLY")
+        color = g.mix(color, sand_col, sand_attr)
+        # Water darkens rock to roughly half its albedo and gives it a sheen.
+        color = g.mix(color, (0.55, 0.55, 0.56), wet_attr, blend="MULTIPLY")
+        cave_masks = [(crust_mask, 0.8), (algae_mask, 0.55), (sand_attr, 0.9)]
+        rough = g.node("ShaderNodeMix", data_type="FLOAT", Factor=sand_attr, A=rough, B=0.9).outputs[0]
+
     g.set("Base Color", color)
     roughness = rough
-    for mask, value in ((streak_mask, 0.66), (lichen_mask, 0.9), (moss_mask, 0.95), (dirt, 0.95)):
+    for mask, value in ((streak_mask, 0.66), (lichen_mask, 0.9), (moss_mask, 0.95), (dirt, 0.95), *cave_masks):
         if mask is not None:
             roughness = g.node("ShaderNodeMix", data_type="FLOAT", Factor=mask, A=roughness, B=value).outputs[0]
+    if cave:
+        roughness = g.node("ShaderNodeMix", data_type="FLOAT", Factor=g.math("MULTIPLY", wet_attr, 0.75),
+                           A=roughness, B=0.32).outputs[0]
     g.set("Roughness", roughness)
 
     grit = g.noise(ps, scale=1.0 / 0.0012, detail=2.0).outputs["Fac"]
@@ -1526,7 +1560,7 @@ def granite(name, grain=0.0045, grains=True, scale=1.0, patina=0.7, lichen=0.45,
     # Where crystals show through: 1 on bare rock, 0 under lichen, moss and soil. Big rocks
     # bake it (map role "mask") to gate the shared tiling crystal detail.
     cover = g.math("MAXIMUM", 0.0, 0.0)
-    for mask in (lichen_mask, moss_mask, dirt):
+    for mask in (lichen_mask, moss_mask, dirt, *(m for m, _ in cave_masks)):
         if mask is not None:
             cover = g.math("MAXIMUM", cover, mask)
     g.math("SUBTRACT", 1.0, g.math("MINIMUM", g.math("MULTIPLY", cover, 0.7), 1.0)).node.label = "HOMESTEAD_MASK"

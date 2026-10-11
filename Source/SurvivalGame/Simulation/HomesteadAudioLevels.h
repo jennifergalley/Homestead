@@ -90,6 +90,10 @@ constexpr float ScytheSwish = 0.25f;     // Jenny: twice as loud as needed; -6 d
 constexpr double CreekGain = 0.35;        // AHomesteadController::CreekGain, times the Ambience slider
 constexpr double RainFullGain = 0.45;     // RainOutdoorGain x RainLoudness at full rain, times Ambience
 constexpr double HearthCrackleGain = 0.32; // RoomAudio::HearthGain, inside the room
+// The sea cave's loops (HomesteadSeaCaveScenery.cpp: DripsGain / SurfGain, times the Ambience slider), heard at full
+// gain inside the chamber.
+constexpr double SeaCaveDripsGain = 0.2;
+constexpr double SeaCaveSurfGain = 0.17;
 
 // Music: every track is matched to this integrated loudness at full slider (the per-track gain is
 // 10^((MusicTargetLufs - loudness) / 20)), from each track's stated loudness. The gate holds each stated
@@ -120,6 +124,8 @@ inline constexpr Cue Cues[] = {
     {"Creek", "Audio/Ambience/CreekLoop.wav", Category::AmbienceBed, Bus::Ambience, CreekGain},
     {"Rain, full", "Audio/Ambience/RainLoop.wav", Category::Weather, Bus::Ambience, RainFullGain},
     {"Hearth crackle", "Audio/Ambience/HearthCrackle.wav", Category::Hearth, Bus::Direct, HearthCrackleGain},
+    {"Sea cave drips", "Audio/Ambience/SeaCaveDrips.wav", Category::AmbienceBed, Bus::Ambience, SeaCaveDripsGain},
+    {"Sea cave surf", "Audio/Ambience/SeaCaveSurf.wav", Category::AmbienceBed, Bus::Ambience, SeaCaveSurfGain},
     {"Music: EveningHarp", "Source/evening-harp/EveningHarp.mp3", Category::Music, Bus::Music, 0.0},
     {"Music: WhispersOfTheGlen", "Source/whispers-of-the-glen/WhispersOfTheGlen.mp3", Category::Music, Bus::Music, 0.0},
     {"Music: MedievalTheme", "Source/medieval-theme/MedievalTheme.mp3", Category::Music, Bus::Music, 0.0},

@@ -10,6 +10,7 @@
 #include "GameFramework/PlayerController.h"
 #include "HomesteadController.h"
 #include "HomesteadEstateTerrain.h"
+#include "Simulation/HomesteadSeaCave.h"
 #include "Materials/MaterialInterface.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
@@ -167,6 +168,14 @@ void UHomesteadWeather::TickWeather(float DeltaSeconds)
     const APawn* Heroine = Viewer->GetPawn();
     const bool bRoomed = Heroine && IsInRoom(Heroine->GetActorLocation());
     Roomed = FMath::FInterpConstantTo(Roomed, bRoomed ? 1.0f : 0.0f, DeltaSeconds, 1.0f);
+    // In the sea cave: how far in she is (its mouth stays daylit), eased (GetCaveMix).
+    float CaveTarget = 0.0f;
+    if (Heroine)
+    {
+        const FVector At = Heroine->GetActorLocation();
+        CaveTarget = static_cast<float>(Homestead::SeaCaveDepth(Homestead::EstateSeaCave(), {At.X, At.Y}, At.Z));
+    }
+    Caved = FMath::FInterpConstantTo(Caved, CaveTarget, DeltaSeconds, 1.0f);
     StreakFade = FMath::FInterpConstantTo(StreakFade, bOverhead && !bInShelter ? 0.0f : 1.0f, DeltaSeconds, 3.0f);
 
     const bool bRaining = Rain > 0.001f && StreakFade > 0.001f;

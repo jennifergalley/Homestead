@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "SeaCave",
+  "description": "Granite sea cave fitted into the cove's west cliff: mouth cleft under a crag, a bending passage and a domed chamber with a rock-basin pool, a ledge and a roof fissure; Nanite LOD0.",
+  "collision": "none",
+  "triangle_budget": 1800000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/sea_cave.py",
+  "source_sha256": "827a71a39de788f6f0aafcac75b97d3e997d8df1c35428141db3d17b075c425f",
+  "provenance": "Original project-authored geometry; no third-party asset or texture",
+  "meshes": {
+    "SM_SeaCave": {
+      "vertices": 565289,
+      "triangles": 1128778,
+      "size_cm": [
+        4113.62,
+        2139.98,
+        1481.84
+      ],
+      "materials": [
+        {
+          "name": "M_SeaCave",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_SeaCave_normal.png",
+            "mask": "T_SeaCave_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 32,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SeaCave_basecolor.png",
+          "roughness": "T_SeaCave_roughness.png",
+          "normal": "T_SeaCave_normal.png",
+          "ao": "T_SeaCave_ao.png",
+          "mask": "T_SeaCave_mask.png"
+        }
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          24.0,
+          2.0,
+          2.0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero"
+        ],
+        "eye_distance": 60.0
+      },
+      "fbx": "SM_SeaCave.fbx",
+      "sha256": "18f973184772fc235e43b0d8e013c25b154fc46ebb568083da78d836bd5421ae",
+      "preview": "preview_SM_SeaCave.png"
+    },
+    "SM_SeaCave_LOD1": {
+      "vertices": 110737,
+      "triangles": 220000,
+      "size_cm": [
+        4113.64,
+        2139.99,
+        1481.88
+      ],
+      "materials": [
+        {
+          "name": "M_SeaCave",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_SeaCave_normal.png",
+            "mask": "T_SeaCave_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 32,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SeaCave_basecolor.png",
+          "roughness": "T_SeaCave_roughness.png",
+          "normal": "T_SeaCave_normal.png",
+          "ao": "T_SeaCave_ao.png",
+          "mask": "T_SeaCave_mask.png"
+        },
+        "shared_with": "SM_SeaCave"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          24.0,
+          2.0,
+          2.0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero"
+        ],
+        "eye_distance": 60.0
+      },
+      "fbx": "SM_SeaCave_LOD1.fbx",
+      "sha256": "4e5be197a460a4d4abcc602e2dc80c789b92aebbf7f9def069e3a12b67e74336",
+      "preview": "preview_SM_SeaCave_LOD1.png"
+    },
+    "SM_SeaCave_LOD2": {
+      "vertices": 30428,
+      "triangles": 59999,
+      "size_cm": [
+        4113.78,
+        2140.16,
+        1481.36
+      ],
+      "materials": [
+        {
+          "name": "M_SeaCave",
+          "textures": {
+            "basecolor": "T_GraniteDetail_basecolor.png",
+            "roughness": "T_GraniteDetail_roughness.png",
+            "normal": "T_SeaCave_normal.png",
+            "mask": "T_SeaCave_mask.png",
+            "t_granitedetail_height": "T_GraniteDetail_height.png"
+          },
+          "blend_method": "DITHERED"
+        }
+      ],
+      "bake": {
+        "size": 4096,
+        "samples": 32,
+        "device": "OPTIX",
+        "normal": "OpenGL",
+        "maps": {
+          "basecolor": "T_SeaCave_basecolor.png",
+          "roughness": "T_SeaCave_roughness.png",
+          "normal": "T_SeaCave_normal.png",
+          "ao": "T_SeaCave_ao.png",
+          "mask": "T_SeaCave_mask.png"
+        },
+        "shared_with": "SM_SeaCave"
+      },
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          24.0,
+          2.0,
+          2.0
+        ],
+        "ground": "origin",
+        "views": [
+          "hero"
+        ],
+        "eye_distance": 60.0
+      },
+      "fbx": "SM_SeaCave_LOD2.fbx",
+      "sha256": "16ac7a37b227d9f739e52eac023e39e46b92267b58a0b0495319c1cedfc13b33",
+      "preview": "preview_SM_SeaCave_LOD2.png"
+    }
+  },
+  "warnings": [],
+  "notes": {
+    "frame": "Origin on the cliff foot at the mouth, floor level; +X inland. Place with HomesteadSeaCave.inc's anchor and yaw (the runtime does).",
+    "site": {
+      "note": "Sea cave site (Recipes/sea_cave.py): the mouth's floor on the cliff foot of the cove bay's west wall, world metres (+X north, +Y east); yaw is the cave's inland direction (deg from +X toward +Y). Refit after the Map Agent's coastline rebake, then rebuild the recipe and repaint the holes.",
+      "anchor_m": [
+        -530.0,
+        -676.0
+      ],
+      "yaw_deg": -90.0
+    },
+    "floor_m": 1.703,
+    "holes": "48 quads; paint Scripts/Terrain/sea_cave_holes.json with build_landscape_holes.py",
+    "collision": "Complex-as-simple on LOD2: she walks the floor, the ramps and the pool's edge.",
+    "material": "Macro bake + GraniteDetail tiling layer (as GraniteDome); cave masks in the bake.",
+    "detail_textures": [
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_basecolor.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_normal.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_roughness.png",
+      "Assets/Props/GraniteDetail/Textures/T_GraniteDetail_height.png"
+    ]
+  },
+  "nanite": true,
+  "textures": {
+    "T_SeaCave_basecolor.png": "d6716cb6bdc8bb806fee3a05a25f84f55447d50f28a6a7b13d1d061771e87ebb",
+    "T_SeaCave_roughness.png": "d2338a03331c84264e56cdf064fc0e0332bfa45c09004fdbcd1558bc91f1a76f",
+    "T_SeaCave_normal.png": "da7514ba57ea3f85ed0d860dc0be18616f8766275888c43b8ebb68e98027e596",
+    "GraniteDetail/Textures/T_GraniteDetail_basecolor.png": "20bd1015303216f78bae29e69c03f58a7ce2a16db1f7f007e5eb2f898ea34e96",
+    "T_SeaCave_mask.png": "9a34d06b7f5aee1b6699ba2a23069a1acea7b9d418a17069466349b97fa80389",
+    "GraniteDetail/Textures/T_GraniteDetail_roughness.png": "98d7e5b417f36d8c964e4100bd0c6a1c3027f73b50c4118fcf0f204d78921815",
+    "GraniteDetail/Textures/T_GraniteDetail_height.png": "24ca9ea7a59e128dd0a8eda9a6699fd151726aaa8e686d3fe7e9be609b7cd549"
+  }
+}

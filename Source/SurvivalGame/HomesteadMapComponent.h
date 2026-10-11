@@ -15,7 +15,7 @@ class SWidget;
 
 // Glyphs drawn for named places on the minimap and the Map tab (original shapes; see
 // UI/HomesteadMapPainter.h).
-enum class EHomesteadMapGlyph : uint8 { Manor, Mine, Cove, Mill, Gateway, Road, Town, Store };
+enum class EHomesteadMapGlyph : uint8 { Manor, Mine, Cove, Mill, Gateway, Road, Town, Store, Cave };
 
 struct FHomesteadMapLandmark
 {

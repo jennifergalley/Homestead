@@ -5,6 +5,7 @@
 #include "HomesteadEstateTerrain.h"
 #include "Simulation/HomesteadEstate.h"
 #include "Simulation/HomesteadEstatePublicRoad.h"
+#include "Simulation/HomesteadSeaCave.h"
 
 #include "Engine/World.h"
 #include "Components/CapsuleComponent.h"
@@ -118,7 +119,10 @@ bool AHomesteadController::SettleOnGround(FVector& Target, float& Waited, float 
     // A pending snap never accepts the riverbed as the bridge deck; rollback is safer.
     if (bOnBridge && bFound && Hit.ImpactPoint.Z < Deck.deckZ - 10.0
         && (bPendingGroundSnap || Waited < HomesteadSettleTuning::BridgeSettleHoldSeconds)) bFound = false;
-    const bool bLandscapeReady = !bEstateMap || HomesteadGroundSnap::HasLandscapeCollision(GetWorld(), Target, End, Avatar);
+    const bool bInSeaCave = bEstateMap && Homestead::InSeaCave(Homestead::EstateSeaCave(), {Target.X, Target.Y}, Target.Z, Ground);
+    // In the sea cave the landscape is overhead: its floor is the cave's own (always loaded) rock.
+    const bool bLandscapeReady = !bEstateMap || bInSeaCave
+        || HomesteadGroundSnap::HasLandscapeCollision(GetWorld(), Target, End, Avatar);
     if ((!bFound || !bLandscapeReady) && Waited < HoldLimitSeconds)
     {
         const double Now = FPlatformTime::Seconds();

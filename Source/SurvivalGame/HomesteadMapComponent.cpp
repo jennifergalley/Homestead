@@ -11,6 +11,7 @@
 #include "Simulation/HomesteadParcels.h"
 #include "Simulation/HomesteadPlayableBounds.h"
 #include "Simulation/HomesteadReservedLand.h"
+#include "Simulation/HomesteadSeaCave.h"
 #include "UI/SHomesteadCompass.h"
 #include "UI/SHomesteadMinimap.h"
 
@@ -200,6 +201,10 @@ void UHomesteadMapComponent::RefreshModel()
     for (const FLandmarkInfo& Place : Places)
         if (const Homestead::Landmark* Found = Layout.FindLandmark(Place.Anchor))
             Next->Landmarks.Add({Place.Name, Place.Description, Place.Glyph, ToVec(Found->position)});
+    // The sea cave isn't a layout landmark: its mouth is where Recipes/sea_cave.py fitted it.
+    if (const Homestead::SeaCave& Cave = Homestead::EstateSeaCave(); Cave.valid())
+        Next->Landmarks.Add({TEXT("Sea cave"), TEXT("A cave in the cove's west cliff, with a still pool inside."),
+            EHomesteadMapGlyph::Cave, ToVec(Cave.anchor)});
     // The road itself is drawn on the map; it has no label (Jenny, 2026-09-29).
     Model = Next;
 }

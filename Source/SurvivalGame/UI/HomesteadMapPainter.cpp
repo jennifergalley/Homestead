@@ -182,6 +182,12 @@ void FPainter::Glyph(EHomesteadMapGlyph Kind, FVector2D Center, float Size, cons
         Fill({P(-0.8f, -0.45f), P(0.8f, -0.45f), P(0.7f, -0.15f), P(-0.7f, -0.15f)}, Color);
         Disc(P(0.0f, 0.25f), S * 0.18f, FLinearColor(0.95f, 0.89f, 0.72f, Color.A), 12);
         break;
+    case EHomesteadMapGlyph::Cave:
+        // A rock outcrop with the dark arch of a cave mouth in its foot (the paper shows through the arch).
+        Fill({P(-0.82f, 0.6f), P(-0.68f, -0.12f), P(-0.28f, -0.55f), P(0.28f, -0.62f), P(0.7f, -0.22f), P(0.82f, 0.6f)}, Color);
+        Fill({P(-0.3f, 0.6f), P(-0.3f, 0.16f), P(-0.16f, -0.08f), P(0.0f, -0.15f), P(0.16f, -0.08f), P(0.3f, 0.16f),
+            P(0.3f, 0.6f)}, FLinearColor(0.95f, 0.89f, 0.72f, Color.A));
+        break;
     }
 }
 

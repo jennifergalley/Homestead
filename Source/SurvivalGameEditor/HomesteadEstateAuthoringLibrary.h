@@ -56,4 +56,16 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Homestead Estate")
     static FString ApplyEstateWeightmaps(const FString& WeightmapFolder, const TArray<FName>& LayerNames, int32 MinX,
         int32 MinY, int32 MaxX, int32 MaxY, int32 TileSize = 63, bool bDryRun = true);
+
+    /**
+     * Paints the Landscape's Visibility layer (holes, in rendering and collision) on its base edit layer: full at
+     * each of Vertices (column, row in the heightfield's grid) and clear everywhere else in the vertex rectangle
+     * [MinX..MaxX] x [MinY..MaxY], so a refit replaces the old hole. The landscape needs a hole material
+     * (LandscapeHoleMaterial with a Landscape Visibility Mask) for the rendered hole. Loads that part of the World
+     * Partition first; with bDryRun it only reports. Save the dirty proxies afterwards. Used for the sea cave
+     * (Scripts/Terrain/build_landscape_holes.py).
+     */
+    UFUNCTION(BlueprintCallable, Category = "Homestead Estate")
+    static FString PaintEstateLandscapeHoles(const TArray<FIntPoint>& Vertices, int32 MinX, int32 MinY, int32 MaxX,
+        int32 MaxY, bool bDryRun = true);
 };
