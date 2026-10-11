@@ -1,6 +1,6 @@
 # Open the estate mine: shallow level
 
-Status: **draft for Jenny's review** (2026-10-11). Nothing is built until she approves it.
+Status: **decisions recorded** (Jenny, 2026-10-11; design §8). Awaiting her go to build.
 
 ## Why
 
@@ -32,8 +32,8 @@ Ore and gems are a sideline for selling and later crafting. Her planner cards se
    morning, and on seams and veins for coal, copper ore and the occasional quartz or amethyst. All
    of it stacks, and the general store buys it.
 4. **Stone for the manor.** Stone becomes the main material of the manor restoration. This change
-   delivers the stone supply and its numbers. The restoration itself is the companion change
-   `rebuild-manor-and-decorate`, which needs a rewrite (see "Decisions for Jenny").
+   delivers the stone supply and its numbers. The restoration itself, commissioned from a village
+   mason, is the follow-up change `rebuild-manor-and-decorate` (Jenny's D1 and D2).
 
 ## Reuse research
 

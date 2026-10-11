@@ -1,4 +1,4 @@
 # Tasks
 
 ## Playtest queue
-- [ ] 1. When selected for a future round, rebuild one manor room and place decor in it.
+- [ ] 1. When scheduled: commission the great hall from the village mason with its materials in estate chests; it's restored the next morning.

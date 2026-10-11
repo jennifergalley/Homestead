@@ -64,21 +64,20 @@ fall somewhere she can't climb out of. Ambient sound: drips, creaking timber and
 
 ## 5. Gentle failure
 
-If she runs out of energy underground, she wakes at the mine house's ground floor, not the manor,
-and loses nothing (Decision D4; the old spec lost "some ore"). It's the same cozy rule as everywhere
-else: no death, no harm.
+If she runs out of energy underground, she wakes on the mine house's ground floor, not at the manor,
+fully rested and with nothing lost (Jenny's D4). It's the same cozy rule as everywhere else: no
+death, no harm.
 
 ## 6. Stone and the manor (the reason for the mine)
 
-The manor restoration is `rebuild-manor-and-decorate`, which needs a rewrite before it's built: its
-spec assumes "freeform rebuilding with the snapped building system", and Jenny has just scheduled
-**removing** that building menu (card `jenny-mv48a218`). Recommended replacement (Decision D1):
-**restoration projects**. She walks up to a ruined part of the manor (the hall, kitchen, bedchamber,
-upper floor, roof and chimneys) and sees what it needs: stone, timber, perhaps lime mortar and coins
-for a mason. She hands materials over a little at a time, and once the part is fully supplied it's
-restored overnight, much as in Coral Island and Stardew Valley. The mine plan only needs to supply
-enough stone, at a rate Balance sets in §7, for each stage to take a few days of mixed play rather
-than a week of grinding.
+The manor restoration is `rebuild-manor-and-decorate`, a separate follow-up build (Jenny's D2). Her
+D1 design: she saves the raw materials for each restoration stage in **chests on the estate**, then
+**commissions a mason in the village**, Coral Island-style. The mason takes the materials straight
+from her estate chests when she commissions the work (she can't carry 200 stone to town), she pays
+the fee, and the stage is restored overnight. There are no part-deliveries and no progress bar that
+fills by itself. The mason runs a business of their own, separate from the General Store, which is
+added in the restoration build. This mine change only has to supply enough stone, at the rate §7
+sets.
 
 ## 7. Numbers (Balance Agent, 2026-10-11)
 
@@ -146,8 +145,10 @@ the mine house is 33 s, and a loop of the level takes 30–45 s.
 
 ### Manor stone budget (for `rebuild-manor-and-decorate`)
 
-Each stage is a restoration project: she delivers stone and timber a bit at a time, pays the mason,
-and the part is restored overnight once it's fully supplied.
+Each stage is a restoration project. She stores its stone and timber in estate chests, then
+commissions the village mason, who takes the materials from those chests and charges the fee, and
+the part is restored overnight (Jenny's D1, superseding the delivery model this section first
+assumed).
 
 | Stage | Stone | Timber | Mason's wages and lime (coins) | Days of mixed play |
 | --- | --- | --- | --- | --- |
@@ -162,28 +163,28 @@ and the part is restored overnight once it's fully supplied.
   days) and coins (about one day's mixed income per stage) are never the bottleneck.
 - **The stages grow,** so the first two land quickly and show her the payoff, and the roof is the
   big finale.
-- **Each stage should show progress at the site,** e.g. "Stone 140 / 200 · Timber 20 / 20 · Mason
-  paid". The overnight restoration should be a visible change, ideally with flowers in new window
-  boxes from the bedchamber on.
+- **Each stage's cost shows at the mason's,** e.g. "Stone 140 / 200 · Timber 20 / 20" counted from
+  her estate chests. The overnight restoration should be a visible change, ideally with flowers in
+  new window boxes from the bedchamber on.
 - **Timber** has no buyer today, so the manor becomes its first real use. Lime folds into the
   mason's coin fee rather than becoming a new item.
 
-## 8. Decisions for Jenny
+## 8. Decisions (Jenny, 2026-10-11)
 
-- **D1. How the manor restores:** restoration projects that she supplies with stone and timber,
-  restored overnight (recommended), versus wall-by-wall building with a new stone-only build tool.
-- **D2. Build split:** (a) build 1 is the mine house plus the shallow level, and build 2 is the
-  first manor restoration project (recommended, so the payoff follows straight after); or (b) both
-  in one build; or (c) the mine house first, alone, then the tunnels.
-- **D3. Chalk marks:** drop them; the lit ladder shaft and a looping layout are enough
-  (recommended).
-- **D4. Exhaustion underground:** wake at the mine house with nothing lost (recommended), or lose
-  some ore.
-- **D5. Mine house look:** a Cornish-style engine house (tall stone, chimney stack, slate roof) to
-  match the "engine house on the clifftop" text, or a plainer stone mine office. The setting is
-  moving away from Cornwall, so check whether an engine house still fits.
+- **D1. Manor restoration:** restoration projects, restored overnight. She saves each stage's raw
+  materials in chests on the estate and commissions a mason in the village, Coral Island-style. The
+  mason takes the materials straight from her estate chests when she commissions the work. The
+  mason runs a business of their own, with its own keeper, separate from the General Store; it's
+  added in the follow-up restoration build.
+- **D2. Build split:** (a) the mine only first. The manor restoration is a follow-up build.
+- **D3. Chalk marks:** dropped.
+- **D4. Exhaustion underground:** she wakes at the mine house fully rested, with nothing lost.
+- **D5. Mine house look:** an engine house in a similar style to a Cornish one, without needing to
+  be fully Cornish. Jenny agrees with Balance's take: granite walls, a slate roof and a chimney
+  stack, in a modest engine-house or winding-house form that would fit Wales, Derbyshire or
+  Shropshire as well. Its label is "The mine".
 
-**Balance views (2026-10-11):**
+**Balance views before Jenny decided (2026-10-11):**
 
 - **D1:** agree with restoration projects. Deliveries in any amount and a progress line at the site
   keep it cozy, with no fiddly wall placement. An overnight before/after is the reward.

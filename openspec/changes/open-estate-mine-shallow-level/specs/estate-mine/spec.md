@@ -30,9 +30,9 @@ slower cadence. The general store SHALL buy all of them.
 - **THEN** she leaves with enough stone for a visible step of the manor restoration, plus some coal and copper ore
 
 ### Requirement: Exhaustion underground is harmless
-Running out of energy in the mine SHALL return her to the mine house's ground floor with nothing
-lost.
+Running out of energy in the mine SHALL return her to the mine house's ground floor fully rested,
+with nothing lost.
 
 #### Scenario: Worn out below
 - **WHEN** her energy reaches zero in the tunnels
-- **THEN** she wakes in the mine house with her pack unchanged
+- **THEN** she wakes in the mine house with full energy and her pack unchanged
