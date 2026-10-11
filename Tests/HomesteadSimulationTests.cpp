@@ -4664,12 +4664,13 @@ void OvergrowthTableAndPrompts()
             if (other.id != placement.id)
                 CHECK(std::hypot(other.position.x - placement.position.x, other.position.y - placement.position.y) >= 300.0);
     }
-    // Any bramble counts toward the two by the door: the compact map's top-up (585200+) replaced one its cove path
-    // displaced, and the smaller estate keeps fewer of the first brambles (shrink-estate-map).
+    // Any bramble counts toward the one by the door: the compact map's top-up (585200) once made a second, but it
+    // stood inside the standing room and is retired (Jenny), and the smaller estate keeps fewer of the first
+    // brambles (shrink-estate-map).
     for (const auto& placement : all)
         berriesByDoor += placement.kind == ResourceKind::BerryBush
             && std::hypot(placement.position.x - frontDoor.x, placement.position.y - frontDoor.y) < 2000.0;
-    CHECK(berries >= 28 && berriesByDoor >= 2);
+    CHECK(berries >= 28 && berriesByDoor >= 1);
     Simulation estate;
     OK(estate.NewEstateGame(layout, ProvisionalEstatePlacements()));
 }
