@@ -73,3 +73,21 @@ Gameplay and Wardrobe both add General Store stock; they coordinate the append-o
 - Work continues overnight until this build is on the shortcut; lanes run in autopilot.
 - The Orchestrator approves review media on Jenny's behalf; lanes record that in their ready evidence.
 - After the build is promoted and closure is done, the Orchestrator shuts the PC down.
+
+## Mine build (started 2026-10-11 13:15)
+
+Jenny's Next build. The mine goes first (design D2); the other Next cards queue behind it as slots free up.
+Plan: `openspec/changes/open-estate-mine-shallow-level` (decisions D1-D5 in its design §8).
+
+| Name | Session | Model | MCP port | Scope |
+| --- | --- | --- | --- | --- |
+| Orchestrator Agent | `fc0ce9e2-4586-4dec-8f40-6561960819c3` | Claude Opus 5.5 / high | — | coordinates only |
+| Mine Art Agent | `029d7c8b-39a6-4be0-8c9a-ff230c5aef11` | Claude Opus 5.5 / high | 8782 | engine-house mine house and furnished room, trapdoor and shaft, tunnel kit, shallow level geometry |
+| Mine Gameplay Agent | `d3cc45c6-7209-44d9-9069-1f3e6a242412` | Claude Sonnet 5.5 / high | 8783 | mining simulation, items, refill, trapdoor travel, darkness/post-process, store sales; fingerpost "To the mine" (`jenny-mv455cm5`) |
+| Balance Agent | `ceb1109b-f156-451c-b890-ca91fa92f1c1` | Claude Opus 5.5 / high | — | review only |
+| Integration Agent | `09ae4063-4f60-475e-bb88-7c6d6a7bbc7c` | Claude Sonnet 5 / medium | reserved slot | merge, package, promote |
+
+- Placement ids: Mine Art and Mine Gameplay share 588000-588199 (lanes record their use here).
+- Heavy slots: slot 1 Mine Art, slot 2 Mine Gameplay; Integration takes priority when it builds.
+- Queued for Next once a slot frees: Quests, compost bin, [Balance] currants easier to spot, [Balance UI] dim price on Owned clothing, remove the building menu and wooden buildings, remove the controls hint bar (`jenny-mv448c92`).
+- Jenny wants frequent progress shots: lanes send `[progress] <milestone> <folder>`; Mine Art stops for her approval after the house blockout.
