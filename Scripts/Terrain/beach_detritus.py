@@ -19,8 +19,9 @@ Kind bytes match EstateSceneryKinds in HomesteadWorldEstate.cpp (claimed 49-56 o
 
 Ids are save identity and frozen per kind slot (ID_SLOTS): the campfire is 586000, then each kind owns a fixed run, and
 the cave's rows take the last slot of their kind. Once the .inc exists its rows are kept; --replan only before shipping.
-Run after the Map Agent has settled the coast (it rebakes the heightfield work npy and the Beach weightmap). Needs the
-terrain work folder (HOMESTEAD_TERRAIN_WORK, see scatter.py). Deterministic (fixed seeds).
+Run after the Map Agent has settled the coast. Heights come from the committed EstateHeightfield.r16 (the shared terrain
+work npy can lag a rebake); sand is ground 0.05-1.95 m above the sea, gently sloped, within 45 m of it. Needs only the
+committed repo files. Deterministic (fixed seeds).
 """
 import argparse
 import json
@@ -41,6 +42,7 @@ from scatter import HERE, ROOT, WORK, H, sample, densify  # noqa: E402
 SIM = os.path.join(ROOT, "Source", "SurvivalGame", "Simulation")
 INC = os.path.join(SIM, "HomesteadEstateBeachPlacements.inc")
 SCENERY = os.path.join(ROOT, "Content", "SurvivalGame", "Estate", "Runtime", "EstateScenery.bin")
+R16 = os.path.join(ROOT, "Content", "SurvivalGame", "Estate", "Runtime", "EstateHeightfield.r16")
 COVE_ROUTE = os.path.join(HERE, "cove_route.json")
 RECORD = np.dtype([("k", "u1"), ("pad", "V3"), ("x", "<f4"), ("y", "<f4"), ("yaw", "<f4"), ("s", "<f4")])
 SEED = 20261010
@@ -58,8 +60,8 @@ ID_SLOTS = {  # kind: (first id, count) - Balance 2026-10-10
 # The sea cave's tideline (Cave Agent): kind -> (x m, y m), or None until it sends the settled mouth. Each takes the
 # last id of its kind's slot.
 CAVE_ROWS = {"Seashells": None, "MusselBed": None}
-CAVE_MOUTH = (-530.0, -680.0)     # planned (Cave Agent); decor and other finds keep CAVE_CLEAR_M from it
-CAVE_CLEAR_M = 8.0
+CAVE_MOUTH = (-530.0, -688.0)     # Map Agent 2026-10-10 (settled mouth); decor and other finds keep CAVE_CLEAR_M from it
+CAVE_CLEAR_M = 10.0
 
 # Scenery kinds (EstateSceneryKinds 49-55; 56 spare).
 SHELL_DRIFT, PEBBLE_DRIFT, WRACK, DRIFT_STICKS, DRIFT_LOG, THRIFT, SEA_CAMPION = range(49, 56)
@@ -73,13 +75,15 @@ DECOR_APART_M = {SHELL_DRIFT: 2.5, PEBBLE_DRIFT: 3.0, WRACK: 4.0, DRIFT_STICKS: 
 
 # The beach (game metres; +x north, +y east; the sea lies south).
 WINDOW_X = (-900.0, -350.0)       # rows of the heightfield the coast lies in
-BEACH_WEIGHT = 0.4                # painted Beach (weightmaps.py) at or above this is sand
-MAX_SAND_Z = 3.5                  # above the berm is the grass slope or the cliff
+SAND_TOP_M = 1.95                 # Map Agent: the berm is 1.7 m; a little over for the grade's noise
+SAND_REACH_M = 45.0               # the dry beaches are ~24-38 m wide
+BEACH_WEIGHT = 0.5                # the sand mask (Coast.beach) is 0/1
+MAX_SAND_Z = SAND_TOP_M
 MAX_SLOPE_DEG = 14.0
 WATERLINE_M = (0.6, 4.0)          # from the sea: mussel and laver rocks
 STRAND_M = (3.0, 12.0)            # the wet-sand tideline: shell scatters, shell drifts, wrack
-UPPER_M = (9.0, 60.0)             # dry upper beach: driftwood, pebbles, logs, the campfire
-FRINGE_WEIGHT = (0.08, 0.4)       # where the sand fades into grass: thrift and sea campion
+UPPER_M = (9.0, 45.0)             # dry upper beach: driftwood, pebbles, logs, the campfire
+FRINGE_M = (0.5, 6.0)             # thrift and sea campion: just above the sand, where it meets the grass
 FRINGE_MAX_Z = 8.0
 FRINGE_MAX_SLOPE_DEG = 32.0
 
@@ -99,14 +103,15 @@ CAMPFIRE_CLEAR_M = 5.0            # nothing else (finds, logs, flowers) right be
 
 
 def load():
-    z = np.load(os.path.join(WORK, "game_reshaped_4033.npy"))
-    beach = np.asarray(Image.open(os.path.join(WORK, "weights", "Beach.png"))).astype(np.float32) / 255
-    beach = beach.T[::-1, :]
+    # The committed heightfield is the settled coast (the shared work npy can lag a rebake): r16 rows/cols map to
+    # the work frame as npy[2H - col, row] = r16[row, col] (coast_mix.py).
+    raw = np.fromfile(R16, "<u2").reshape(2 * H + 1, 2 * H + 1)
+    z = ((raw.astype(np.float64) - 32768.0) / 128.0)[:, ::-1].T.copy()
     gy, gx = np.gradient(gaussian_filter(z, 1.0))
     slope = np.degrees(np.arctan(np.hypot(gx, gy)))
     layout = json.load(open(os.path.join(HERE, "estate_layout.json")))
     route = json.load(open(COVE_ROUTE))
-    return z, beach, slope, layout, route
+    return z, slope, layout, route
 
 
 def sea_distance(z):
@@ -139,8 +144,12 @@ def existing_points():
 
 class Coast:
     def __init__(self):
-        self.z, self.beach, self.slope, self.layout, self.route = load()
+        self.z, self.slope, self.layout, self.route = load()
         self.dsea, self.sea = sea_distance(self.z)
+        # Sand: the berm and foreshore (Map Agent, 2026-10-10: dry sand 0.3-1.7 m above the sea), gently sloped and
+        # near the sea, so a cliff ledge or the grass slope above never counts.
+        self.beach = ((self.z > 0.05) & (self.z < SAND_TOP_M) & (self.slope < MAX_SLOPE_DEG)
+                      & (self.dsea < SAND_REACH_M)).astype(np.float32)
         self.steps = np.array(self.route["control"][-1], np.float64)
         self.route_tree = cKDTree(np.asarray(self.route["centreline"], np.float64)[:, :2])
         self.river_tree = cKDTree(densify(self.layout["river"], 1.0))
@@ -265,7 +274,10 @@ def plan_decor(coast, rng, finds):
     p = coast.candidates(rng, 1500000)
     d = coast.describe(p)
     sand = (d["beach"] >= BEACH_WEIGHT) & (d["z"] < MAX_SAND_Z) & (d["slope"] < MAX_SLOPE_DEG)
-    fringe = ((d["beach"] >= FRINGE_WEIGHT[0]) & (d["beach"] < FRINGE_WEIGHT[1]) & (d["z"] > 0.8)
+    # The fringe: ground just above the sand (within FRINGE_M of it), not too steep, below the cliff tops.
+    sand_edge = distance_transform_edt(coast.beach < 0.5)
+    edge = coast.at(sand_edge, p)
+    fringe = ((d["beach"] < BEACH_WEIGHT) & (edge >= FRINGE_M[0]) & (edge <= FRINGE_M[1]) & (d["z"] > 0.8)
               & (d["z"] < FRINGE_MAX_Z) & (d["slope"] < FRINGE_MAX_SLOPE_DEG))
     find_pts = np.array([q for _, _, q in finds])
     find_tree = cKDTree(find_pts)
@@ -320,6 +332,16 @@ def main():
     rows = committed_rows()
     if not rows or args.replan:
         rows = plan_finds(coast, rng)
+        if not args.dry:
+            write_rows(rows)
+    else:
+        # The cave's two rows arrive after the rest ship: append them in their reserved slots, moving nothing.
+        have = {pid for _, pid, _ in rows}
+        for kind, cave in CAVE_ROWS.items():
+            pid = ID_SLOTS[kind][0] + ID_SLOTS[kind][1] - 1
+            if cave is not None and pid not in have:
+                rows.append((kind, pid, tuple(cave)))
+        rows.sort(key=lambda row: row[1])
         if not args.dry:
             write_rows(rows)
     decor = plan_decor(coast, np.random.default_rng(SEED + 1), rows)
