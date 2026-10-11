@@ -35,9 +35,9 @@ LOWER_Z = 1.52
 ARM_LEN = 0.80
 ARM_H = 0.13
 ARM_T = 0.03
-TEXT_SIZE = 0.066
+TEXT_SIZE = 0.078
 # The lettering stays inside this much of the arm, from the post's face toward the tip's taper.
-TEXT_FIELD = 0.50
+TEXT_FIELD = 0.60
 
 
 def lettering(kit, name, text, face, paint, arm_z, turn):
@@ -110,7 +110,8 @@ def build_one(kit, oak, paint, mesh_name, arms):
 def build(kit):
     oak = kit.mats.wood("M_FingerpostOak", light=(0.30, 0.28, 0.25), dark=(0.10, 0.095, 0.085), grain=1.1,
                         roughness=0.8, weathering=0.8, grime=0.3, seed=71.0, relief=1.2)
-    paint = kit.material("M_FingerpostPaint", (0.80, 0.79, 0.74), roughness=0.85)
+    # Near-black lettering: chalk-white letters vanish against the silvered oak in daylight.
+    paint = kit.material("M_FingerpostPaint", (0.025, 0.023, 0.02), roughness=0.9)
     return [
         build_one(kit, oak, paint, "SM_Fingerpost_ToTheVillage", [("To the village", UPPER_Z, 1.0)]),
         build_one(kit, oak, paint, "SM_Fingerpost_ToTheManor", [("To the manor", UPPER_Z, 1.0)]),

@@ -6,7 +6,7 @@
   "triangle_budget": 16000,
   "blender": "5.2.1 LTS",
   "source": "Scripts/Blender/Recipes/fingerpost_road.py",
-  "source_sha256": "45f54019bbf1abc1c37028e2d94eb7e9ade0c1004479e6f30f1c5be55a19e1d2",
+  "source_sha256": "7f49533d0daa6fe0a1c6f98dfd4818251641c735769765a95d2c1084ba745a8f",
   "provenance": "Original project-authored procedural geometry and materials. Lettering: Blender's bundled default font (DejaVu Sans, Bitstream Vera licence, permits embedding and modification).",
   "meshes": {
     "SM_Fingerpost_ToTheVillage": {
@@ -53,8 +53,7 @@
         ]
       },
       "fbx": "SM_Fingerpost_ToTheVillage.fbx",
-      "sha256": "12c62c56e386638cd600c66421898220bdf1ec66375ec15d1bcd8416094378f5",
-      "preview": "preview_SM_Fingerpost_ToTheVillage.png"
+      "sha256": "a9df6452078ca7a90d223dcd09564c3e6b489007d2f454973784dbde8e2d5716"
     },
     "SM_Fingerpost_ToTheManor": {
       "vertices": 3306,
@@ -100,8 +99,7 @@
         ]
       },
       "fbx": "SM_Fingerpost_ToTheManor.fbx",
-      "sha256": "2100d504495507047517806515bb2bede4cfbbd65530de25030e91fba1c2c8c4",
-      "preview": "preview_SM_Fingerpost_ToTheManor.png"
+      "sha256": "4a6b431b9d5a671cef6ddb9a88aaf99c475f3a056b705dacd993fd8b175a214b"
     },
     "SM_Fingerpost_VillageManor": {
       "vertices": 4064,
@@ -147,8 +145,7 @@
         ]
       },
       "fbx": "SM_Fingerpost_VillageManor.fbx",
-      "sha256": "a45521595d8de1b351312d46a4af47e442de7bbfa7db44ef0529f51329b90699",
-      "preview": "preview_SM_Fingerpost_VillageManor.png"
+      "sha256": "61d3dfe5a968e43f4bbf1459cbe3766f62dfd725e5532b30e9fdaa435f77dcf0"
     }
   },
   "warnings": [],
@@ -161,14 +158,14 @@
     "Manor"
   ],
   "textures": {
-    "T_Fingerpost_ToTheVillage_basecolor.png": "4fadc88230e5b4965c738b424cb7609c7388273c8a8214e6012387172b693c52",
-    "T_Fingerpost_ToTheVillage_roughness.png": "b2d16294d7b405d5e93d970e0ab875f567417cf0661e4e20d8d9de4f7310d24c",
-    "T_Fingerpost_ToTheVillage_normal.png": "46d88054b2d06cce444e24bc610c3735b9f717fb86b6173112b195ef1a2b1225",
-    "T_Fingerpost_ToTheManor_basecolor.png": "d6c4cd240f2c5517f1a953e55d13a842d6a4349ced3b4401c72825a2cfde177c",
-    "T_Fingerpost_ToTheManor_roughness.png": "e267e3f30edc9a26a4491331f3a0a54308bfe2a84d92fd3ddd0f2eefec882813",
-    "T_Fingerpost_ToTheManor_normal.png": "128d7b3a37baabb956cdb9734caf30ce7554420e57ff85cafdc4642c59462176",
-    "T_Fingerpost_VillageManor_basecolor.png": "e075b11054a7399c018df398ebb6924add98b445937228d583dfebe3e1479370",
-    "T_Fingerpost_VillageManor_roughness.png": "cb380f4d353839327dec08ac90eb9aeab0cf797acf11f76ec18d9755a4d50a17",
-    "T_Fingerpost_VillageManor_normal.png": "bcfd261105abec3bb9499c7cbdd03d06b268264a90101d63b6c75098ab5cf794"
+    "T_Fingerpost_ToTheVillage_basecolor.png": "8d709a9c1d143c1443b2d503c5d50d47b91579d51a2602756e39369060e2fbf4",
+    "T_Fingerpost_ToTheVillage_roughness.png": "1727bb74eb1bb6ac8538d6972080bdd4ab724f2c5525adba3015ed439ce762d9",
+    "T_Fingerpost_ToTheVillage_normal.png": "4b060986204374e0b1cea1deffca0c722b41ce4a19088008256197108b54ae49",
+    "T_Fingerpost_ToTheManor_basecolor.png": "2edb81f64f13062152eff0e7cb7658f530c04296949270e2b923c724bcea8644",
+    "T_Fingerpost_ToTheManor_roughness.png": "b0e837734b76ea9362420e7ed27e4560926c9b0fab681d1c5538ceff2081c273",
+    "T_Fingerpost_ToTheManor_normal.png": "53a36a03f11a7d355ddc63ae405ffd451b21fa9bfbca330dd391155f7d3dc27f",
+    "T_Fingerpost_VillageManor_basecolor.png": "3ffc96516178bd0741a7f5e3ea322678af7638ac7bbf3d231829752499a84544",
+    "T_Fingerpost_VillageManor_roughness.png": "1c507781de0e38b18a4a7cb36241bd0a2c580df88e927669a760b9c3e5508fbe",
+    "T_Fingerpost_VillageManor_normal.png": "77b2adfbd6207fd2ade3530d8fda916b080dcae3c2338d78e354d98d47f5eee2"
   }
 }

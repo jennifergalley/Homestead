@@ -74,7 +74,7 @@ void AHomesteadRoadSign::Place(const FString& Name, const FVector& Location, flo
     SignName = Name;
     SetActorLocationAndRotation(Location, FRotator(0, Yaw, 0));
     const TCHAR* MeshObject = MeshObjectFor(Name);
-    if (!Authored->GetStaticMesh() && MeshObject && FPackageName::DoesPackageExist(FPackageName::ObjectPathToPackageName(MeshObject)))
+    if (!Authored->GetStaticMesh() && MeshObject && FPackageName::DoesPackageExist(FPackageName::ObjectPathToPackageName(FString(MeshObject))))
         if (UStaticMesh* Mesh = LoadObject<UStaticMesh>(nullptr, MeshObject)) Authored->SetStaticMesh(Mesh);
     bStandIn = Authored->GetStaticMesh() == nullptr;
     Authored->SetVisibility(!bStandIn);
