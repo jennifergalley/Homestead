@@ -1,5 +1,6 @@
 {
   "order": [
+    "backlog:jenny-mv3ixzwc-vlwalk",
     "rebuild-manor-and-decorate",
     "backlog:jenny-muupccau-7hxtoa",
     "backlog:jenny-muulxhvp-250x9a",
@@ -55,7 +56,8 @@
     "backlog:jenny-mv37umtc-mnrbry",
     "backlog:jenny-mv388rpu-litwin",
     "backlog:jenny-mv388rpv-fpdist",
-    "backlog:jenny-mv3g4re0-cvbnch"
+    "backlog:jenny-mv3g4re0-cvbnch",
+    "backlog:jenny-mv3lucwr-gobgld"
   ],
   "slots": {
     "backlog:jenny-mv2yi15t-decorn": "next",
@@ -160,5 +162,5 @@
     "backlog:jenny-mv1fzgcg-balhg1",
     "animation-led-fishing-gameplay"
   ],
-  "updated": "2026-10-11T06:32:37.032Z"
+  "updated": "2026-10-11T09:12:29.403Z"
 }

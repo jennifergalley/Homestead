@@ -612,6 +612,22 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-11T06:32:37.032Z"
+    },
+    {
+      "id": "jenny-mv3ixzwc-vlwalk",
+      "title": "[Balance] Village walk: grade or time",
+      "description": "Source: Balance Agent, docs/design/balance.md §9 travel (2026-10-11). Moving the village street junction ~90 m up the road for a gentler grade (Jenny's scheduled card) made the manor-to-village walk ~90 s (432 m) instead of ~60 s. Pick one: put the junction back (fast, steeper street), keep it (gentle, 90 s), or keep the old junction and add a gentle S-bend or steps so the street stays at most 12% without the long detour.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T07:51:20.316Z"
+    },
+    {
+      "id": "jenny-mv3lucwr-gobgld",
+      "title": "[Balance] Glowing moss in the sea cave",
+      "description": "Source: Balance Agent, docs/design/cohesion.md §4 beauty (sea-cave review, 2026-10-11). A faint gold-green glowing moss (goblin's gold) near the cave mouth; needs a new asset.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T09:12:29.403Z"
     }
   ]
 }
