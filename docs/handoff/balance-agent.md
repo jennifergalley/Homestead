@@ -52,7 +52,12 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-10: Map Agent (94e0bd8e) mixed-coast plan: I proposed a 90 s cove cap for a step-free
   1-in-4 path; the Orchestrator reverted it to Jenny's call (options: 1-in-4 ~90 s, a lower cove
   site, or a slope plus one short flight). Jenny picked the slope plus one or two short stone
-  flights: about 350 m, cap 75 s (§9 updated). Awaiting its timed sprint and viewpoint shot.
+  flights: about 350 m, cap 75 s (§9 updated).
+- 2026-10-11 (night): Map Agent coast evidence OK to ship: cove 80 s / 378 m (5 s over; asked it
+  to trim if that's quick), cave 13 s from the path foot, mine link on the terrace, village street
+  8% average. Carded: viewpoint bench. The west cliff, bare cove-head slope, cliff striations and
+  straight waterline became the Orchestrator's blocking fixes instead; re-check shots 03 and 04 in
+  the Map Agent's next [review].
 - 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
   slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
   "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.

@@ -23,7 +23,6 @@ retired(540026);
 retired(540027);
 retired(582122);
 retired(582158);
-retired(582173);
 retired(582177);
 retired(583014);
 retired(583015);

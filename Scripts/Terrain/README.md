@@ -304,6 +304,14 @@ re-emits the data; to move the route, restore the heightfield from before it and
 `scatter.py` clears a fresh scatter off it after the lake. Set `HOMESTEAD_TERRAIN_WORK` to your work folder
 (the script keeps its `game_reshaped_4033.npy` in step round the route).
 
+**The shared work npy can lag committed terrain rebakes by hours** when several terrain-touching
+lanes are active at once (seen 2026-10 with Map and Beach both working the coast). The committed
+`EstateHeightfield.r16` is always current; the work npy is only a scratch copy and isn't refreshed
+until its owning script re-runs. A coast-sampling generator should read the r16 directly rather than
+risk a stale npy. Convert a raw r16 sample into the npy's frame/orientation with
+`z = ((r16 - 32768) / 128)[:, ::-1].T`, matching the index relationship `npy[2H-col, row] =
+r16[row, col]` established in `coast_mix.py`. `beach_detritus.py` already reads the r16 this way.
+
 ### Compact map (stage 2 of `shrink-estate-map`)
 
 Run once, in this order, from the pre-compact artifacts (`f9cfadaf6`): `compact_map.py` (layout polygons,
