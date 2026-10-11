@@ -25,6 +25,9 @@ const FLinearColor LightColor(1.0f, 0.62f, 0.30f);
 // Parent's frame. Returns the parts, the flame last (null if missing), or an empty array when the
 // lamp mesh hasn't been imported.
 TArray<UStaticMeshComponent*> AddParts(UObject* Outer, USceneComponent* Parent, const FVector& Offset, FName Prefix);
+// 0 on the surface .. 1 in the mine (the player's mine mix, set each tick by the world): the lamp's light narrows
+// to a tight pool underground.
+void SetUndergroundMix(float Mix);
 // A point light at the flame, under Parent (same Offset convention). Registered, initially on.
 UPointLightComponent* AddLight(UObject* Outer, USceneComponent* Parent, const FVector& Offset, FName Name);
 // A small oil flame: mostly steady, with quick shivers. Time in seconds; about 0.9-1.05.

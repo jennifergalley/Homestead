@@ -1,3 +1,4 @@
+#include "HomesteadLampLook.h"
 #include "HomesteadWorld.h"
 #include "HomesteadWorldLog.h"
 #include "HomesteadWorldLook.h"
@@ -5,11 +6,14 @@
 
 #include "Components/AudioComponent.h"
 #include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/PointLightComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "Engine/CollisionProfile.h"
 #include "Engine/StaticMesh.h"
+#include "Kismet/GameplayStatics.h"
 #include "Sound/SoundWave.h"
 
 // The estate mine on the actor side: the mine's resource nodes and pile, the trapdoor lid, the shaft of
@@ -19,12 +23,14 @@
 namespace HomesteadWorldMineLook
 {
 const TCHAR* const NodeMeshFolder = TEXT("/Game/SurvivalGame/Environment/Props/MineNodes/");
+const TCHAR* const SignArmMeshPath = TEXT("/Game/SurvivalGame/Environment/Props/Fingerpost/SM_Fingerpost_ToTheMineArm.SM_Fingerpost_ToTheMineArm");
 const TCHAR* const LidMeshPath = TEXT("/Game/SurvivalGame/Environment/Props/MineHouse/SM_MineTrapdoorLid.SM_MineTrapdoorLid");
 const TCHAR* const DripsPath = TEXT("/Game/SurvivalGame/Audio/Ambience/SeaCaveDrips.SeaCaveDrips");
 
 // The trapdoor lid swings about its hinge: shut is flat (pitch 0), open stands past upright.
 constexpr float LidOpenPitchDegrees = 100.0f;
 constexpr float LidSwingSeconds = 0.5f;
+constexpr float TrapdoorRailHeightCm = 110.0f;  // the invisible rail round the opening (waist high)
 // The stand-in lid, when the authored one isn't imported: a 120 cm square slab with its top flush at the hinge.
 constexpr float StandInLidThicknessCm = 6.0f;
 
@@ -48,7 +54,7 @@ constexpr float NodeDepthCm = 60.0f;
 constexpr float NodeWidthCm = 120.0f;
 constexpr float NodeHeightCm = 130.0f;
 // The fingerpost's "To the mine" arm. The post stands at the cove fingerpost beside the manor ruin; the
-// arm is the cove arm's size (SM_Fingerpost_ToTheCove: 62 x 13 x 3 cm), one board's depth below it.
+// arm is SM_Fingerpost_ToTheMineArm (the stand-in cube is the cove arm's size), one board below it.
 const FVector CoveFingerpostFoot(-26689.6, -65471.1, 8646.4);
 constexpr float SignArmHeightCm = 143.0f;
 constexpr float SignArmLengthCm = 62.0f;
@@ -56,7 +62,19 @@ constexpr float SignArmDepthCm = 3.0f;
 constexpr float SignArmHeightSizeCm = 13.0f;
 constexpr float SignTextSizeCm = 7.0f;
 constexpr float SignTextProudCm = 0.6f;
-const FColor SignPaint(238, 226, 196);
+const FColor SignPaint(30, 24, 18);
+const FLinearColor SignBoard(0.15f, 0.125f, 0.095f);
+
+// The faint fill that lets her make out tunnel outlines with no lamp (design D2): an unshadowed point light that
+// follows her, scaled by the underground mix. The tunnels are sealed from the sky, so the sky light can't do this.
+constexpr float FillRadiusCm = 900.0f;
+constexpr float FillHeightAboveFeetCm = 150.0f;
+// The lamp's own non-physical falloff shape (HomesteadLampLook), so the fill reads in the same units as the lamp.
+constexpr float FillFalloffExponent = 2.0f;
+// A drop this near her underground lies on her floor, not on the surface terrain overhead.
+constexpr float DropNearPawnCm = 1500.0f;
+TAutoConsoleVariable<float> CVarMineFill(TEXT("homestead.MineFill"), 0.03f,
+    TEXT("Intensity (lamp units: the lamp is about 4) of the faint fill light that follows her underground, so tunnel outlines show without the lamp."));
 }
 
 using HomesteadWorldLook::Stone;
@@ -115,6 +133,17 @@ void AHomesteadWorld::BuildMine()
     MineShaft->SetCastShadows(true);
     MineShaft->RegisterComponent();
 
+    MineFill = NewObject<UPointLightComponent>(this, TEXT("MineFillLight"));
+    MineFill->SetupAttachment(GetRootComponent());
+    MineFill->SetMobility(EComponentMobility::Movable);
+    MineFill->SetCastShadows(false);
+    MineFill->SetUseInverseSquaredFalloff(false);
+    MineFill->SetLightFalloffExponent(FillFalloffExponent);
+    MineFill->SetAttenuationRadius(FillRadiusCm);
+    MineFill->SetIntensity(0.0f);
+    MineFill->SetLightColor(FLinearColor(0.7f, 0.8f, 1.0f));
+    MineFill->RegisterComponent();
+
     // The trapdoor lid: pivot on the hinge, the lid lying along +X; the authored mesh's own pivot is the hinge.
     MineTrapdoorPivot = NewObject<USceneComponent>(this, TEXT("MineTrapdoorPivot"));
     MineTrapdoorPivot->SetupAttachment(GetRootComponent());
@@ -148,6 +177,27 @@ void AHomesteadWorld::BuildMine()
     MineTrapdoorLid->SetCanEverAffectNavigation(false);
     MineTrapdoorLid->RegisterComponent();
 
+    // The opening is never walkable: an invisible rail round the lid's footprint, so the climb prompt is the only
+    // way down. It ignores the camera and visibility traces, so focus and the camera arm pass through it.
+    {
+        const double HingeYaw = FMath::DegreesToRadians(Layout.trapdoor.yaw);
+        const FVector Centre(Layout.trapdoor.hingeX + FMath::Cos(HingeYaw) * Layout.trapdoor.lidLength * 0.5,
+            Layout.trapdoor.hingeY + FMath::Sin(HingeYaw) * Layout.trapdoor.lidLength * 0.5,
+            Layout.trapdoor.hingeZ + TrapdoorRailHeightCm * 0.5f);
+        UBoxComponent* Rail = NewObject<UBoxComponent>(this, TEXT("MineTrapdoorRail"));
+        Rail->SetupAttachment(GetRootComponent());
+        Rail->SetMobility(EComponentMobility::Movable);
+        Rail->SetBoxExtent(FVector(Layout.trapdoor.lidLength * 0.5, Layout.trapdoor.lidWidth * 0.5, TrapdoorRailHeightCm * 0.5f), false);
+        Rail->SetWorldLocationAndRotation(Centre, FRotator(0.0f, static_cast<float>(Layout.trapdoor.yaw), 0.0f));
+        Rail->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+        Rail->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
+        Rail->SetCollisionResponseToChannel(ECC_Visibility, ECR_Ignore);
+        Rail->SetGenerateOverlapEvents(false);
+        Rail->SetCanEverAffectNavigation(false);
+        Rail->SetHiddenInGame(true);
+        Rail->RegisterComponent();
+        MineVisual.Components.Add(Rail);
+    }
     // Drips: the ladder foot, then every few floors along the galleries.
     if (USoundWave* Drips = LoadObject<USoundWave>(nullptr, DripsPath, nullptr, LOAD_NoWarn | LOAD_Quiet))
     {
@@ -187,19 +237,30 @@ void AHomesteadWorld::BuildMine()
         const float Yaw = FMath::RadiansToDegrees(FMath::Atan2(Toward.Y, Toward.X));
         const FRotator ArmRotation(0.0f, Yaw, 0.0f);
         const FVector Pivot = CoveFingerpostFoot + FVector(0, 0, SignArmHeightCm);
+        UStaticMesh* SignArmMesh = LoadObject<UStaticMesh>(nullptr, SignArmMeshPath, nullptr, LOAD_NoWarn | LOAD_Quiet);
         UStaticMeshComponent* Arm = NewObject<UStaticMeshComponent>(this, TEXT("MineSignArm"), RF_Transient);
         Arm->SetupAttachment(GetRootComponent());
         Arm->SetMobility(EComponentMobility::Movable);
-        Arm->SetStaticMesh(Cube);
-        Arm->SetMaterial(0, Material(HomesteadWorldLook::Wood, 0.9f));
-        Arm->SetWorldTransform(FTransform(ArmRotation, Pivot + ArmRotation.RotateVector(FVector(SignArmLengthCm * 0.5f, 0, 0)),
-            FVector(SignArmLengthCm, SignArmDepthCm, SignArmHeightSizeCm) / 100.0f));
+        if (SignArmMesh)
+        {
+            // The authored arm (Scripts/Blender/Recipes/fingerpost.py) has its pivot at the post's foot and its
+            // board and lettering already at SignArmHeightCm, so it hangs under the cove arm in the same style.
+            Arm->SetStaticMesh(SignArmMesh);
+            Arm->SetWorldTransform(FTransform(ArmRotation, CoveFingerpostFoot));
+        }
+        else
+        {
+            Arm->SetStaticMesh(Cube);
+            Arm->SetMaterial(0, Material(SignBoard, 0.9f));
+            Arm->SetWorldTransform(FTransform(ArmRotation, Pivot + ArmRotation.RotateVector(FVector(SignArmLengthCm * 0.5f, 0, 0)),
+                FVector(SignArmLengthCm, SignArmDepthCm, SignArmHeightSizeCm) / 100.0f));
+        }
         Arm->SetCollisionProfileName(UCollisionProfile::NoCollision_ProfileName);
         Arm->SetGenerateOverlapEvents(false);
         Arm->SetCanEverAffectNavigation(false);
         Arm->RegisterComponent();
         MineVisual.Components.Add(Arm);
-        for (const float Side : {1.0f, -1.0f})
+        for (const float Side : SignArmMesh ? TArray<float>() : TArray<float>{1.0f, -1.0f})
         {
             const FRotator FaceRotation(0.0f, Yaw + 90.0f * Side, 0.0f);
             UTextRenderComponent* Words = NewObject<UTextRenderComponent>(this, NAME_None, RF_Transient);
@@ -236,6 +297,12 @@ void AHomesteadWorld::TickMine(float DeltaSeconds)
         MineTrapdoorPivot->SetRelativeRotation(FRotator(LidOpenPitchDegrees * Eased, static_cast<float>(Homestead::Mine::GetLayout().trapdoor.yaw), 0.0f));
     }
     const float Mix = GetMineMix();
+    HomesteadLampLook::SetUndergroundMix(Mix);
+    {
+        const APawn* Pawn = UGameplayStatics::GetPlayerPawn(this, 0);
+        MineFill->SetIntensity(Pawn ? CVarMineFill.GetValueOnGameThread() * Mix : 0.0f);
+        if (Pawn && Mix > 0.0f) MineFill->SetWorldLocation(Pawn->GetActorLocation() + FVector(0.0f, 0.0f, FillHeightAboveFeetCm - 90.0f));
+    }
     if (FMath::Abs(Mix - MineSoundMix) > SoundMixEpsilon || (Mix == 0.0f && MineSoundMix != 0.0f))
     {
         MineSoundMix = Mix;
@@ -244,6 +311,18 @@ void AHomesteadWorld::TickMine(float DeltaSeconds)
             if (MineSounds[Index]) MineSounds[Index]->SetVolumeMultiplier(MineSoundGains[Index] * Mix);
         }
     }
+}
+
+bool AHomesteadWorld::FindMineFloorZ(const Homestead::Point& At, float& OutZ) const
+{
+    const APawn* Pawn = UGameplayStatics::GetPlayerPawn(this, 0);
+    if (!Pawn || !bMineBuilt) return false;
+    const FVector Here = Pawn->GetActorLocation();
+    if (!Homestead::Mine::IsUnderground({Here.X, Here.Y}, Here.Z)) return false;
+    if (FVector2D::Distance(FVector2D(At.x, At.y), FVector2D(Here.X, Here.Y)) > HomesteadWorldMineLook::DropNearPawnCm) return false;
+    const UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(Pawn->GetRootComponent());
+    OutZ = Here.Z - (Capsule ? Capsule->GetScaledCapsuleHalfHeight() : 88.0f);
+    return true;
 }
 
 void AHomesteadWorld::BuildMineResource(FHomesteadWorldVisual& Visual, const Homestead::ResourceNode& Node, bool bProduceOnly)

@@ -1,5 +1,6 @@
 #include "HomesteadEstate.h"
 #include "HomesteadItems.h"
+#include "HomesteadLampLight.h"
 #include "HomesteadMine.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadShops.h"
@@ -379,6 +380,14 @@ void AimedMineNodeFollowsFacingAndLevel()
     CHECK(Swing(sim, rock).ok);
     CHECK(sim.MineDepleted(rock) && sim.FindAimedMine(player, spot->z, toward) == rock);
 }
+
+void MineLampPoolsAFewMetres()
+{
+    // The mine's lamp pools round her: still readable at 4 m, and black well before the next gallery.
+    CHECK(LampReachCm(MineOilLampLight, 0.2) < 600.0);
+    CHECK(LampReachCm(MineOilLampLight, 0.2) > 300.0);
+    CHECK(LampReachCm(MineOilLampLight, 0.2) < LampReachCm(OilLampLight, 0.2));
+}
 }
 
 int main()
@@ -397,6 +406,7 @@ int main()
     ExhaustionUndergroundWakesAtTheMineHouse();
     SaveRoundTripKeepsMinedNodes();
     AimedMineNodeFollowsFacingAndLevel();
+    MineLampPoolsAFewMetres();
     std::cout << "Mine tests passed (" << MineChecks << " checks)\n";
     return 0;
 }

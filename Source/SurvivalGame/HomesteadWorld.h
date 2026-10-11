@@ -25,6 +25,7 @@ class USceneComponent;
 class UDirectionalLightComponent;
 class USkyLightComponent;
 class USpotLightComponent;
+class UPointLightComponent;
 class UAudioComponent;
 class UExponentialHeightFogComponent;
 class UPostProcessComponent;
@@ -443,6 +444,9 @@ private:
     // The daylight shaft down the mine's ladder well; UpdateLighting scales it with the day.
     UPROPERTY()
     TObjectPtr<USpotLightComponent> MineShaft;
+    // A faint, shadowless fill that follows her underground so outlines show with no lamp (CVar homestead.MineFill).
+    UPROPERTY()
+    TObjectPtr<UPointLightComponent> MineFill;
     // The trapdoor lid's hinge pivot (its mesh is a child), opened and shut as she climbs (SetMineTrapdoorOpen).
     UPROPERTY()
     TObjectPtr<USceneComponent> MineTrapdoorPivot;
@@ -459,6 +463,8 @@ public:
     // Opens (true) or shuts the trapdoor lid; it swings over about half a second (TickMine).
     void SetMineTrapdoorOpen(bool bOpen) { MineLidTarget = bOpen ? 1.0f : 0.0f; }
     void TickMine(float DeltaSeconds);
+    // When she is underground and the drop lies near her, the floor she stands on (the surface terrain is 44 m up).
+    bool FindMineFloorZ(const Homestead::Point& At, float& OutZ) const;
 private:
     // The sea cave in the cove's west cliff (HomesteadSeaCaveScenery, HomesteadWorldSeaCave.cpp), placed once with
     // the estate scenery; UpdateLighting feeds its fissure the sky.

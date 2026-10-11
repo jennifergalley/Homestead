@@ -11,6 +11,9 @@
 
 namespace HomesteadLampLookTuning
 {
+// Game-thread only; HomesteadLampLook::SetUndergroundMix writes it.
+float UndergroundMix = 0.0f;
+
 TAutoConsoleVariable<float> CVarLampIntensity(TEXT("homestead.LampIntensity"),
     static_cast<float>(Homestead::OilLampLight.intensity),
     TEXT("Oil lamp light: unitless intensity (about lux at the flame) with the gentle falloff."));
@@ -33,6 +36,14 @@ Homestead::LampLightProfile CurrentProfile()
     Profile.intensity = FMath::Max(0.0f, CVarLampIntensity.GetValueOnGameThread());
     Profile.radiusCm = FMath::Max(100.0f, CVarLampRadius.GetValueOnGameThread() * 100.0f);
     Profile.falloffExponent = FMath::Max(0.1f, CVarLampFalloff.GetValueOnGameThread());
+    if (UndergroundMix > 0.0f)
+    {
+        const double Mix = UndergroundMix;
+        const Homestead::LampLightProfile& Mine = Homestead::MineOilLampLight;
+        Profile.intensity = FMath::Lerp(Profile.intensity, Mine.intensity, Mix);
+        Profile.radiusCm = FMath::Lerp(Profile.radiusCm, Mine.radiusCm, Mix);
+        Profile.falloffExponent = FMath::Lerp(Profile.falloffExponent, Mine.falloffExponent, Mix);
+    }
     return Profile;
 }
 
@@ -51,6 +62,11 @@ void ApplyProfile(UPointLightComponent* Light, float Shiver)
 
 namespace HomesteadLampLook
 {
+void SetUndergroundMix(float Mix)
+{
+    HomesteadLampLookTuning::UndergroundMix = FMath::Clamp(Mix, 0.0f, 1.0f);
+}
+
 namespace
 {
 const TCHAR* PropFolder = TEXT("/Game/SurvivalGame/Environment/Props/OilLamp/");
