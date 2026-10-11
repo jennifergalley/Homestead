@@ -129,15 +129,6 @@
       "createdUtc": "2026-10-04T21:45:15.878Z"
     },
     {
-      "id": "jenny-muucy9hz-jv5gx7",
-      "title": "Shrink the map: bring the cove and mine closer, reserve room for neighbours",
-      "description": "Jenny (2026-10-10, revised stage-2 scope): \"The immediate area around the ruined manor - the derelict farm, the area we need to clear when the game begins, the path to the pond through the woods, the walk to the town, and how far away and how large the town is now - that's all fine. What needs to change is: The cove is too far away, the mine is too far away, the estate is too big on the map, and there's much of the world that I don't think we'll ever end up actually exploring. I'd like to have some growing room for the town and other estates nearby (neighbors), as well as perhaps a communal beach and other communal areas, but in general I think the map can shrink considerably. Perhaps as part of the shrink we could consider outlining the shape of future neighboring estates on the map at least, so we make sure we leave some room for them, as well as some future communal areas like a beach, a park, maybe a community garden, etc.\" Stage 1 (village ~300 m from the manor) shipped 2026-10-04.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-04T21:53:39.479Z",
-      "updatedUtc": "2026-10-10T16:55:12.559Z"
-    },
-    {
       "id": "jenny-muudyirr-dn5j2m",
       "title": "[Balance] Trees grow back in stages",
       "description": "Source: Balance Agent, docs/design/balance.md changelog (9 PM trees, 2026-10-04). A felled forest tree shows a stump, then a sapling on day 1, then a full tree on day 3.",
@@ -453,14 +444,6 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-10T05:25:01.004Z"
-    },
-    {
-      "id": "jenny-mv203hr0-wfclip",
-      "title": "Well fed HUD badge text clips",
-      "description": "Found by Integration in the 2026-10-09 build's UI-gallery pass (hud-wellfed): the badge text \"Well fed until 2:30 PM · work costs 15% less\" clips against the chip's right border. Widen the chip or shorten the text.",
-      "imageFile": null,
-      "imageMime": null,
-      "createdUtc": "2026-10-10T06:15:57.852Z"
     },
     {
       "id": "jenny-mv2vznce-clfrck",

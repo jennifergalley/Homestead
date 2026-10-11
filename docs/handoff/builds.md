@@ -14,16 +14,14 @@ slot, then go idle; they do not pick up unflagged queue items.
 - Status: delivered
 - Configuration: Development
 - Ships:
-- Map shrink stage 2: new coast and cove with cliff steps down to the water; the mine moved up to
+- Old saves don't load into the new map (they say so and stay untouched), so start a new game.
+- A smaller map, with a new coast and cove with cliff steps down to the water; the mine moved up to
   the clifftop; the map cropped to a 1520 m square around PlayableBounds with walls at the edges;
   the Penvose gate; roadside cottages; neighbour and commons area outlines. 50 retired placement
   ids, 145 new ones (585000-585299).
-- Carries forward the already-admitted batch from the prior build: village street and dressing,
-  iron tool upgrades, 15 total garments (7 classic + 8 modern), the harder fishing rework, Well fed
-  text, and the Trethewey renaming.
 - Well fed's HUD chip text no longer clips past the panel's right edge (chip height 38→60,
   word-wrapped) — fixes the cosmetic issue flagged in the prior build.
-- Admitted: Map shrink stage 2 (`1f8fdf647`, rebased), plus Balance docs
+- Admitted: map shrink stage 2 (`1f8fdf647`, rebased), plus Balance docs
   (`b3beabaff`, `5a9e312c2`, `9397e1fb0`, `7460bc1c2` — stage-2 travel targets, layout review, and
   final OK, including confirming the cove heath fix `babfe357e` is included).
 - Verification: Native 26/26 (bakeVersion bump included); editor/game Development compile and

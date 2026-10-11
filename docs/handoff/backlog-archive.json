@@ -263,6 +263,21 @@
         "[Balance] Fishing: one catch message"
       ],
       "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
+    },
+    {
+      "buildId": "20261010-next-01",
+      "archivedAt": "2026-10-11T00:22:14Z",
+      "status": "shipped-pending-player-acceptance",
+      "receipt": {
+        "buildRecord": "builds.md",
+        "changelist": "builds.md"
+      },
+      "inboxEntries": [
+        "jenny-muucy9hz-jv5gx7",
+        "jenny-mv203hr0-wfclip"
+      ],
+      "markdownOnlyEntries": [],
+      "acceptance": "Jenny's player acceptance remains pending; archival removes shipped work from the active backlog and does not claim acceptance."
     }
   ]
 }
