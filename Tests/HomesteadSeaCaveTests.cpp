@@ -89,6 +89,11 @@ int main()
     Check(SeaCaveAwareGround(cave, cave.ToWorld({-4000.0, 0.0}), centre, 55.0) == 55.0, "outside: the landscape is the ground");
     // The cave takes over before the controller's fall-through check (her centre 200 cm under the surface) would.
     Check(SeaCaveBelowSurfaceCm < 200.0, "the cave takes over before the fall-through check", SeaCaveBelowSurfaceCm);
+    // The chamber's light: daylit at the mouth, dim deep in, nothing outside.
+    Check(SeaCaveDepth(cave, cave.ToWorld({-500.0, 0.0}), feet) == 0.0, "outside the mouth: daylight");
+    Check(SeaCaveDepth(cave, cave.anchor, feet) == 0.0, "at the mouth: daylight");
+    Check(SeaCaveDepth(cave, pool, feet) > 0.99, "in the chamber: dim", SeaCaveDepth(cave, pool, feet));
+    Check(SeaCaveDepth(cave, pool, cave.roofMaxZ + 500.0) == 0.0, "on the hill above: daylight");
 
     // The cove cliff's dressing: rocks clear of the cave (its hillside is the cave's roof) and its mouth.
     int rocks = 0, plants = 0;

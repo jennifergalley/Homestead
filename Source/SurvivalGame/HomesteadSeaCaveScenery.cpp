@@ -39,7 +39,7 @@ constexpr float CardBelowTopCm = 15.0f;
 // The thread of sky through it, as a narrow spot light down onto the pool (lumens). Daylight sky through a
 // slot this size, against eye adaptation in a dim chamber; at night a faint blue moonlight (Balance: night is
 // never pitch black in the estate, and her lamp lights the rest).
-constexpr float ShaftDayLumens = 9000.0f;
+constexpr float ShaftDayLumens = 3500.0f;   // tuned in RT-on PIE against the cave's dimmed sky fill
 constexpr float ShaftNightLumens = 450.0f;
 constexpr float ShaftOvercastScale = 0.45f;
 constexpr float ShaftInnerConeDeg = 10.0f;

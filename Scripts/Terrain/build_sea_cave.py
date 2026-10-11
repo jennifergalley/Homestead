@@ -24,12 +24,19 @@ FOLDER = "/Game/SurvivalGame/Environment/SeaCave"
 POND = "/Game/SurvivalGame/Materials/M_EstatePond"
 AUDIO = "/Game/SurvivalGame/Audio/Ambience"
 POOL_LOOK = {"RippleScale": (0.02, 0.02, 1.0), "Specular": 0.9, "Roughness": 0.015,
-             "Absorption": (0.03, 0.012, 0.02), "Scattering": (0.0002, 0.0006, 0.0004),
+             "Absorption": (0.05, 0.035, 0.04), "Scattering": (0.00005, 0.0001, 0.0001),
              "ShallowFoam": 0.0, "DeepFoam": 0.0}
 
 LIB = unreal.EditorAssetLibrary
 MEL = unreal.MaterialEditingLibrary
 TOOLS = unreal.AssetToolsHelpers.get_asset_tools()
+
+
+def _build_settings(mesh):
+    settings = unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).get_lod_build_settings(mesh, 0)
+    settings.set_editor_property("distance_field_resolution_scale", 4.0)
+    settings.set_editor_property("generate_distance_field_as_if_two_sided", True)
+    return settings
 
 
 def import_mesh():
@@ -38,6 +45,14 @@ def import_mesh():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     module.main(["SeaCave", "Thrift"])
+    # The cave is a one-sided skin seen from inside: give Lumen enough to occlude the sky with. A finer distance
+    # field (software Lumen) and a fuller Nanite fallback (the triangles hardware ray tracing traces).
+    mesh = unreal.load_asset("/Game/SurvivalGame/Environment/Props/SeaCave/SM_SeaCave")
+    unreal.get_editor_subsystem(unreal.StaticMeshEditorSubsystem).set_lod_build_settings(mesh, 0, _build_settings(mesh))
+    nanite = mesh.get_editor_property("nanite_settings")
+    nanite.set_editor_property("fallback_percent_triangles", 25.0)
+    mesh.set_editor_property("nanite_settings", nanite)
+    LIB.save_loaded_asset(mesh, False)
     for name in ("SeaCave", "Thrift"):
         LIB.save_directory(f"/Game/SurvivalGame/Environment/Props/{name}", False, True)
 

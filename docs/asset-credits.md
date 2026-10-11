@@ -110,6 +110,14 @@ from the estate heightfield and the outer land ring, the capillary-ripple normal
 the foam lace from Worley and fBm noise, and the looping wind-sea volume from an FFT of a Phillips spectrum. The waves themselves are analytic HLSL in the
 material. No scanned, photographed or downloaded texture or mesh is used.
 
+The sea cave (`Assets\Props\SeaCave`, `Scripts\Blender\Recipes\sea_cave.py`) is project-authored: a signed-distance
+granite cave fitted to the estate heightfield, with procedural granite and cave materials (coralline crust,
+algae, wet rock, sand) baked to textures and the shared project-authored GraniteDetail maps. Thrift
+(`Assets\Props\Thrift`, `Recipes\thrift.py`) is project-authored procedural geometry with numpy-painted textures.
+The cove cliff's dressing (`Scripts\Terrain\cove_cliff_rocks.py`) reuses the estate's own granite props. The cave's
+drip and muffled-surf loops (`Assets\Audio\Ambience\SeaCaveDrips.wav`, `SeaCaveSurf.wav`) are synthesised by
+`Scripts\generate_sea_cave_audio.py`. No third-party asset, texture or recording is used.
+
 ## Fonts
 
 The title card, the Names step, the display headings and the field book's notice card use **EB Garamond** (Regular and Italic,

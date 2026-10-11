@@ -320,6 +320,12 @@ private:
     // down (EV, scaled by the room mix and daylight) so the room reads as dim, with daylight at the
     // door and the hearth as the key; at night the lamp and hearth already set the level.
     static constexpr float IndoorDayExposureBias = -0.7f;
+    // Deep in the sea cave by day (GetCaveMix): the sky fill falls to this share and the exposure is held down this far
+    // (EV), so the chamber reads dim with the fissure's shaft as its key light. Tuned in RT-on PIE (add-sea-cave).
+    static constexpr float CaveDaySkyScale = 0.4f;
+    static constexpr float CaveDayExposureBias = -0.75f;
+    // 0 outside .. 1 deep in the sea cave, eased (UHomesteadWeather::GetCaveMix).
+    float GetCaveMix() const;
     // The hearth as a settled low fire: a warm key low in front of the opening, oil-lamp strength
     // (HomesteadLampLook's lamp is 1400 / 1000 cm), rather than a floodlight filling the room.
     static constexpr float HearthIntensity = 2600.0f;

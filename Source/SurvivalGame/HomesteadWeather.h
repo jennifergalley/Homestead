@@ -57,6 +57,8 @@ public:
      *  within its walls (the cell squares tile a room, so walking between cells doesn't dip), so porches
      *  and overhangs don't count and the camera crossing a threshold doesn't flip it. The interior daylight (sky fill, exposure) follows this. */
     float GetRoomMix() const { return Roomed; }
+    /** 0 .. 1, eased: how deep in the sea cave she is (Homestead::SeaCaveDepth). Its chamber's daylight follows this. */
+    float GetCaveMix() const { return Caved; }
 
 private:
     bool LoadAssets();
@@ -74,6 +76,7 @@ private:
     float Daylight = 1.0f;
     float Indoors = 0.0f;       // 0 outdoors .. 1 indoors, eased.
     float Roomed = 0.0f;        // GetRoomMix.
+    float Caved = 0.0f;         // GetCaveMix.
     float StreakFade = 1.0f;    // 0 under a roof that isn't a building piece.
     float OverheadCheckIn = 0.0f;
     bool bOverhead = false;

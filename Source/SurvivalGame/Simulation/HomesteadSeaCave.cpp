@@ -118,4 +118,14 @@ double SeaCaveAwareGround(const SeaCave& cave, Point point, double z, double sur
 {
     return InSeaCave(cave, point, z, surfaceZ) ? cave.floorMinZ : surfaceZ;
 }
+
+double SeaCaveDepth(const SeaCave& cave, Point point, double z)
+{
+    if (!cave.valid() || !std::isfinite(z) || z > cave.roofMaxZ || z < cave.floorMinZ - SeaCaveBelowFloorCm) return 0.0;
+    if (!PointInPolygon(cave.footprint, point)) return 0.0;
+    const double along = cave.ToLocal(point).x;
+    const double t = (along - SeaCaveDarkFromCm) / (SeaCaveDarkFullCm - SeaCaveDarkFromCm);
+    const double c = t < 0.0 ? 0.0 : t > 1.0 ? 1.0 : t;
+    return c * c * (3.0 - 2.0 * c);
+}
 }

@@ -68,6 +68,12 @@ constexpr double SeaCaveBelowFloorCm = 250.0;
 
 // Whether a body at `point`, height `z` (cm), with the landscape surface at `surfaceZ` there, is inside the cave.
 bool InSeaCave(const SeaCave& cave, Point point, double z, double surfaceZ);
+// How deep inside the cave a point is for its light, 0 outside or at the mouth .. 1 in the chamber: the sky light
+// fades with it (it would otherwise reach through the rock, a real-time capture having no occlusion this deep).
+// Ramps from SeaCaveDarkFromCm to SeaCaveDarkFullCm along the cave's axis.
+constexpr double SeaCaveDarkFromCm = 150.0;
+constexpr double SeaCaveDarkFullCm = 1100.0;
+double SeaCaveDepth(const SeaCave& cave, Point point, double z);
 // The ground to hold her against: the landscape outside, the cave's lowest floor inside it.
 double SeaCaveAwareGround(const SeaCave& cave, Point point, double z, double surfaceZ);
 }
