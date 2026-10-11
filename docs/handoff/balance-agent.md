@@ -37,6 +37,8 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-10: Names Agent (72b7d774) rename table OK with small changes (Gull Sands, "my dear",
   en dashes, pasty/Cornish sweep). After Jenny picks the names, rewrite `cohesion.md` §1–2 to
   neutral rural English (estate, clerk, store, neighbours, places) and update `balance.md` names.
+- 2026-10-10: Beach Agent (8c44fafc) plan approved with trimmed numbers (`balance.md` §8a; laver
+  instead of sea lettuce). Awaiting its pre-[ready] screenshot, sell lines and cooked dish.
 - 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
   slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
   "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.
