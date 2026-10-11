@@ -86,7 +86,7 @@ int main()
     Check(Distance(last.position, cove) < 10000.0, "ends at the cove", Distance(last.position, cove));
     Check(last.walkZ > 100.0 && last.walkZ < 500.0, "ends on the sand, just above the sea", last.walkZ);
     Check(first.walkZ - last.walkZ > 8000.0, "falls the manor's 80-odd metres", first.walkZ - last.walkZ);
-    Check(route.Length() > 200.0 && route.Length() < 288.0, "a minute's sprint or less (shrink-estate-map)", route.Length());
+    Check(route.Length() > 200.0 && route.Length() < 400.0, "about 80 s sprinting (Jenny's pick, 2026-10-10)", route.Length());
 
     const std::vector<Point>& boundary = layout.FindPolygon(Anchor::EstateBoundary)->points;
     for (size_t i = 0; i < route.stations.size(); ++i)
@@ -100,7 +100,7 @@ int main()
         // No exposed slope: anything steeper than a path is on steps.
         if (run > 0.5 && std::fabs(s.walkZ - p.walkZ) / (run * 100.0) > CoveRouteMaxPathGrade + 0.01)
             Check(s.onSteps || p.onSteps, "steep only on steps", s.metres);
-        // A metre of steps climbs at most 100 / 30 + 1 risers; a metre of path 1 in 5.
+        // A metre of steps climbs at most 100 / 30 + 1 risers; a metre of path 1 in 4.
         const double most = (s.onSteps || p.onSteps) ? (100.0 / CoveRouteMinGoingCm + 1.0) * CoveRouteMaxRiseCm
                                                      : CoveRouteMaxPathGrade * run * 100.0 + 1.0;
         Check(std::fabs(s.walkZ - p.walkZ) <= most, "no drop between stations", s.metres);
@@ -118,7 +118,7 @@ int main()
         if (!path) continue;
         const double grade = std::fabs(route.stations[j].walkZ - route.stations[i].walkZ)
             / ((route.stations[j].metres - route.stations[i].metres) * 100.0);
-        Check(grade <= CoveRouteMaxPathGrade + 0.005, "path no steeper than 1 in 5", grade);
+        Check(grade <= CoveRouteMaxPathGrade + 0.005, "path no steeper than 1 in 4", grade);
     }
 
     // Flights within Props' kit, with landings between, joined to the path or a landing at both ends.
@@ -155,7 +155,7 @@ int main()
         Check(railed >= 0.95 * f.treads * f.going, "every flight railed", railed);
     }
     for (const CoveRouteLanding& l : route.landings) Check(l.length >= CoveRouteMinLandingCm, "landings at least 1.2 m", l.length);
-    Check(route.Steps() >= 100, "steps down the valley side", route.Steps());
+    Check(route.Steps() >= 40 && route.Steps() <= 120, "two short stepped pitches, the rest a path", route.Steps());
 
     // Where she steps on and off each flight, the graded ground is the level she steps from: no pit in front
     // of the bottom riser (review, 2026-09-30: 12-17 cm, a 30 cm first step), nothing standing proud at the top.
@@ -244,7 +244,7 @@ int main()
             if (!path) continue;
             const double grade = std::fabs(route.ground[j].centreZ - route.ground[i].centreZ)
                 / ((route.stations[j].metres - route.stations[i].metres) * 100.0);
-            Check(grade <= CoveRouteMaxPathGrade + 0.02, "the graded path within 1 in 5", grade);
+            Check(grade <= CoveRouteMaxPathGrade + 0.02, "the graded path within 1 in 4", grade);
         }
     }
 
@@ -349,7 +349,7 @@ int main()
     {
         const CoveRoute::Nearest n = route.NearestTo(k.position);
         Check(n.distanceCm > 0.45 * CoveRouteClearWidthCm && n.distanceCm < 90.0, "kerb on the path's edge", n.distanceCm);
-        // The nearest 1 m station is up to half a metre along the path (1 in 5), or a riser away at a flight.
+        // The nearest 1 m station is up to half a metre along the path (1 in 4), or a riser away at a flight.
         Check(std::fabs(k.z - route.stations[n.station].walkZ - 20.0) < 20.0, "kerb 20 cm proud", k.z - route.stations[n.station].walkZ);
     }
     for (const CoveRouteRail& r : route.rails)

@@ -59,6 +59,11 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water", meta = (ClampMin = "0"))
     float SpringFroth = 400.0f;
 
+    /** Broken water where the river runs into the surf, fading in over this distance before the mouth (cm), so
+     *  river and sea meet in foam rather than a hard line (Jenny, 2026-10-10). */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Water", meta = (ClampMin = "0"))
+    float MouthFroth = 1400.0f;
+
     /** Rebuilds the surface from the spline (also runs on construction). */
     UFUNCTION(BlueprintCallable, CallInEditor, Category = "Water")
     void RebuildSurface();

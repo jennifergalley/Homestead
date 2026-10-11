@@ -316,6 +316,28 @@ Then `route_sights.py --top-up` (not `--bake`: its habitat is boundary-limited a
 road drifts). Re-run a step if it fails with `Errno 22` writing the r16 or PNG right after the last one
 (a transient file lock). The cove bay, cove route, footpaths and cottages each grade once (flags in the
 layout); to redo them, check the generated files out from `f9cfadaf6` and replay the chain.
+
+### Coast mix (map stage 3, Jenny's 2026-10-10 terrain feedback)
+
+About half the playable coast becomes grassy slopes down to the sand (`coast_mix.py`): the cove's head and east
+side are a concave hillside rising from the sand (the coombe the cove path walks down), its west wall stays a rock
+cliff (the sea cave's mouth is in it), and Gull Sands east of the river mouth is a slope with 24 m of dry sand.
+Stage 2's bay, cove route and footpath cuts are taken back out first, so the mine, mine-link and village-river
+paths lie flush on the ground (only bake_ground's wear marks them). Outside the playable rectangle, gentle banks
+into the sea are pushed into cliff faces, and `bake_outer_land.py` drops its ring's coast in a cliff
+(`COAST_TOP`, `COAST_FACE`). The cove route is a 1 in 4 path with two short stepped pitches (378 m);
+`cove_route.py` widens its verge with the cut or fill (`VERGE_PER_M`), so the hillside is reshaped softly round
+the path instead of a trench or bank. The village street leaves the road at 350 m (`town_layout.py`), and
+`village_junction.py` takes the old street's grade back out first.
+
+Run once, in this order, with `HOMESTEAD_TERRAIN_WORK` set: `coast_mix.py`, `cove_route.py`, `estate_footpaths.py`,
+`compact_map.py` (CoveBeach), `village_junction.py`, `town_layout.py`, `town_path.py`, `town_layout.py`,
+`coast_mix_placements.py` (retires displaced ids into `HomesteadEstateCoastMixRetired.inc`, never moving one),
+`public_road.py`, `weightmaps.py`, `route_sights.py --top-up`, `village_dress.py`, `cove_heath.py`, `bake_ocean.py`,
+`bake_outer_land.py`, `bake_ground.py`, `Scripts\Map\bake_estate_map.py`. Generated sources must be CRLF before
+`Invoke-UnrealBuild.ps1`. In the editor: `ApplyEstateHeightfield` and `ApplyEstateWeightmaps` over the whole map,
+`build_ocean.py`, `build_outer_land.py`, `place_water.py`, `build_ground.py`, `build_landscape_material.py` (the
+CliffRock layer is triplanar) and `ImportEstateMap`.
 ### Beach belt (`beach_belt.py`)
 
 A dry sand belt along the foot of the estate's south cliffs, from the west boundary (y = -1150 m) to the
