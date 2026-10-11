@@ -540,7 +540,11 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         {FName(TEXT("grilled-perch")), EKind::GrilledPerch},
         {FName(TEXT("steamed-mussels")), EKind::SteamedMussels},
         {FName(TEXT("mussel-potato-broth")), EKind::MusselPotatoBroth},
-        {FName(TEXT("fried-laver")), EKind::FriedLaver}
+        {FName(TEXT("fried-laver")), EKind::FriedLaver},
+        {FName(TEXT("coal")), EKind::Coal},
+        {FName(TEXT("copper-ore")), EKind::CopperOre},
+        {FName(TEXT("quartz")), EKind::Quartz},
+        {FName(TEXT("amethyst")), EKind::Amethyst}
     };
 
     const FName CurrentKind = Kind.Get();
@@ -890,6 +894,38 @@ int32 SHomesteadIcon::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedG
         for (const FVector2D& Crisp : {FVector2D(16, 29), FVector2D(30, 27), FVector2D(41, 32.5f)})
             P.Line({{Crisp.X - 2.5f, Crisp.Y}, {Crisp.X, Crisp.Y - 1.2f}, {Crisp.X + 2.5f, Crisp.Y}}, HayGold * 0.75f, 1.0f);
         PaintMealSteam(P, 24, 21);
+        break;
+    case EKind::Coal:
+        // A dark, faceted lump with a sheen on its top edge.
+        P.Shape({{9, 36}, {14, 22}, {26, 13}, {40, 16}, {48, 29}, {44, 42}, {28, 47}, {14, 44}}, Charcoal);
+        P.Shape({{14, 23}, {26, 14}, {33, 21}, {23, 29}, {11, 33}}, Charcoal * 2.2f);
+        P.Line({{33, 21}, {41, 18}}, StoneGray, 1.5f);
+        P.Line({{23, 29}, {27, 40}}, Charcoal * 0.5f, 1.5f);
+        P.Line({{16, 20}, {26, 15}}, Cream, 1.4f);
+        break;
+    case EKind::CopperOre:
+        // Grey rock threaded with green-blue copper streaks.
+        P.Shape({{8, 35}, {13, 20}, {27, 11}, {43, 17}, {49, 36}, {36, 45}, {18, 44}}, StoneGray);
+        P.Shape({{13, 21}, {27, 12}, {34, 25}, {22, 32}, {9, 35}}, StoneGray * 1.25f);
+        P.Line({{16, 38}, {26, 31}, {33, 36}, {44, 28}}, FLinearColor(0.30f, 0.62f, 0.45f), 3.2f);
+        P.Line({{20, 22}, {28, 26}, {31, 17}}, FLinearColor(0.30f, 0.62f, 0.45f), 2.4f);
+        P.Disc(38, 38, 2.6f, FLinearColor(0.72f, 0.42f, 0.24f));
+        break;
+    case EKind::Quartz:
+        // A clear, pale crystal cluster.
+        P.Shape({{20, 46}, {17, 26}, {24, 10}, {32, 26}, {30, 46}}, FLinearColor(0.82f, 0.90f, 0.94f));
+        P.Shape({{24, 10}, {32, 26}, {26, 30}}, FLinearColor(1.00f, 1.00f, 1.00f));
+        P.Shape({{30, 46}, {32, 30}, {40, 20}, {46, 30}, {43, 46}}, FLinearColor(0.70f, 0.82f, 0.88f));
+        P.Shape({{10, 46}, {11, 35}, {16, 29}, {19, 38}, {18, 46}}, FLinearColor(0.76f, 0.86f, 0.90f));
+        P.Line({{24, 12}, {20, 28}}, Cream, 1.2f);
+        break;
+    case EKind::Amethyst:
+        // The same cluster, deep violet.
+        P.Shape({{20, 46}, {17, 26}, {24, 10}, {32, 26}, {30, 46}}, FLinearColor(0.56f, 0.30f, 0.70f));
+        P.Shape({{24, 10}, {32, 26}, {26, 30}}, FLinearColor(0.78f, 0.58f, 0.88f));
+        P.Shape({{30, 46}, {32, 30}, {40, 20}, {46, 30}, {43, 46}}, FLinearColor(0.44f, 0.22f, 0.58f));
+        P.Shape({{10, 46}, {11, 35}, {16, 29}, {19, 38}, {18, 46}}, FLinearColor(0.50f, 0.26f, 0.64f));
+        P.Line({{24, 12}, {20, 28}}, FLinearColor(0.90f, 0.80f, 0.96f), 1.2f);
         break;
     case EKind::SeedRoots:
         PaintSeedPacket(P, Wood);

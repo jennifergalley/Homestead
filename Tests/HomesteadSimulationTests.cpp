@@ -5180,7 +5180,7 @@ void RuinTimbersAreChoppedWithTheAxe()
     for (std::size_t i = rackAt + 1; i < table.size(); ++i)
         CHECK((table[i].id >= 582300 && table[i].id < 582400) || (table[i].id >= 583000 && table[i].id < 584200)
             || (table[i].id >= 585000 && table[i].id < 585300) || (table[i].id >= 586000 && table[i].id < 586100)
-            || (table[i].id >= 587000 && table[i].id < 587100));
+            || (table[i].id >= 587000 && table[i].id < 587100) || (table[i].id >= 588000 && table[i].id < 588200));
     Simulation sim;
     OK(sim.NewEstateGame(layout, ProvisionalEstatePlacements()));
     for (int id : {582012, 582013})
@@ -5289,11 +5289,13 @@ void EveryHandGatherHasItsOwnPose()
         const auto kind = static_cast<ResourceKind>(i);
         const GatherPose pose = HandGatherPose(kind);
         if (const auto* info = FindOvergrowth(kind)) CHECK(info->byHand == (pose != GatherPose::None));
-        // The beach campfire is lit, not gathered (add-beach-gathering).
-        else CHECK((kind == ResourceKind::ForestTree || kind == ResourceKind::BeachCampfire) == (pose == GatherPose::None));
+        // The beach campfire is lit, not gathered (add-beach-gathering); mine faces are only ever picked (estate-mine).
+        else CHECK((kind == ResourceKind::ForestTree || kind == ResourceKind::BeachCampfire || kind == ResourceKind::MineRockFace
+                       || kind == ResourceKind::MineCoalSeam || kind == ResourceKind::MineCopperVein || kind == ResourceKind::MineGemPocket)
+                   == (pose == GatherPose::None));
     }
     for (auto kind : {ResourceKind::Stones, ResourceKind::SalvagePile, ResourceKind::RubbishHeap, ResourceKind::SlateHeap,
-             ResourceKind::BeachPebbles})
+             ResourceKind::BeachPebbles, ResourceKind::MinePile})
         CHECK(HandGatherPose(kind) == GatherPose::Stones);
     for (auto kind : {ResourceKind::Branches, ResourceKind::FallenBranch, ResourceKind::BrokenCrate,
              ResourceKind::BrokenBarrel, ResourceKind::RottenPlanks, ResourceKind::Driftwood})

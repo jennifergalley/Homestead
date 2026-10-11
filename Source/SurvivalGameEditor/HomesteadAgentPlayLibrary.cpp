@@ -189,6 +189,11 @@ namespace
         case Homestead::ResourceKind::MusselBed: return TEXT("MusselBed");
         case Homestead::ResourceKind::LaverRocks: return TEXT("LaverRocks");
         case Homestead::ResourceKind::BeachCampfire: return TEXT("BeachCampfire");
+        case Homestead::ResourceKind::MineRockFace: return TEXT("MineRockFace");
+        case Homestead::ResourceKind::MineCoalSeam: return TEXT("MineCoalSeam");
+        case Homestead::ResourceKind::MineCopperVein: return TEXT("MineCopperVein");
+        case Homestead::ResourceKind::MineGemPocket: return TEXT("MineGemPocket");
+        case Homestead::ResourceKind::MinePile: return TEXT("MinePile");
         default: return TEXT("Unknown");
         }
     }

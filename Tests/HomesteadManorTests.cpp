@@ -557,7 +557,7 @@ std::uint64_t PlacementHashWithout(int skippedId, int& count)
         // the placements older saves know.
         if (p.id == skippedId || (p.id >= 581000 && p.id < 582000) || (p.id >= 582100 && p.id < 582400)
             || (p.id >= 583000 && p.id < 584200) || (p.id >= 585000 && p.id < 585300) || (p.id >= 586000 && p.id < 586100)
-            || (p.id >= 587000 && p.id < 587100) || p.id == 582012 || p.id == 582013
+            || (p.id >= 587000 && p.id < 587100) || (p.id >= 588000 && p.id < 588200) || p.id == 582012 || p.id == 582013
             || p.id == 540012) continue;
         std::snprintf(line, sizeof line, "%d %d %.3f %.3f %.3f %.3f %.3f %d\n", p.id, static_cast<int>(p.kind),
             p.position.x, p.position.y, p.z, p.yaw, p.scale, p.minTier);
@@ -592,7 +592,8 @@ void ToolRackIsSaveSafe()
         if (all[i].id == 520006) rackAt = i;
     CHECK(rackAt < all.size() && all[rackAt].kind == ResourceKind::SalvagePile);
     for (std::size_t i = rackAt + 1; i < all.size(); ++i) CHECK((all[i].id >= 582300 && all[i].id < 582400) || (all[i].id >= 583000 && all[i].id < 584200)
-        || (all[i].id >= 585000 && all[i].id < 585300) || (all[i].id >= 586000 && all[i].id < 586100) || (all[i].id >= 587000 && all[i].id < 587100));
+        || (all[i].id >= 585000 && all[i].id < 585300) || (all[i].id >= 586000 && all[i].id < 586100) || (all[i].id >= 587000 && all[i].id < 587100)
+        || (all[i].id >= 588000 && all[i].id < 588200));
     const Point rack = all[rackAt].position;
     CHECK(PointInPolygon(ProvisionalEstateLayout().FindPolygon(Anchor::ManorFootprint)->points, rack));
     for (const auto& other : all)

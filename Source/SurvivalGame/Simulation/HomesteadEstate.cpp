@@ -1,5 +1,6 @@
 #include "HomesteadEstate.h"
 #include "HomesteadEstatePublicRoad.h"
+#include "HomesteadMine.h"
 #include "HomesteadRuinDebris.h"
 
 #include <algorithm>
@@ -368,6 +369,12 @@ const EstatePlacements& EstatePlacementsBeforeCompactMap()
         // last of all with the same 3 m rule (the generator keeps them 3.2 m from every row above).
         auto beachFind = topUp;
 #include "HomesteadEstateBeachPlacements.inc"
+        // The estate mine (588000-588199; open-estate-mine-shallow-level): the one-time stone pile in the mine house
+        // and every rock face, coal seam, copper vein and gem pocket of the tunnels below, at the sockets the layout
+        // publishes. Pushed directly: they sit tunnel-close together and far under other placements, so no 3 m rule.
+        table.placements.push_back({Mine::PileId, ResourceKind::MinePile, {Mine::GetLayout().pile.x, Mine::GetLayout().pile.y}, Mine::GetLayout().pile.z, 0.0, 1.0, 0});
+        for (const Mine::Node& node : Mine::GetLayout().nodes)
+            table.placements.push_back({node.id, Mine::ResourceFor(node.kind), {node.x, node.y}, node.z, node.yaw, 1.0, 0});
         // Town lane (530000+).
         return table;
     }();

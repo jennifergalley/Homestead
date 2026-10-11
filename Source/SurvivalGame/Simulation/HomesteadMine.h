@@ -1,0 +1,101 @@
+#pragma once
+
+#include "HomesteadSimulation.h"
+
+#include <vector>
+
+// The estate mine (openspec change open-estate-mine-shallow-level): a stone mine house on the surface
+// with a trapdoor, and a dark tunnel level far below it that she mines with the pickaxe by lamplight.
+// Everything here is plain C++17 with no Unreal types. The layout (house, trapdoor, ladder, node
+// sockets, walkable floors) is published by the Mine Art Agent in HomesteadMineLayout.inc; until that
+// lands the greybox HomesteadMineLayoutGreybox.inc stands in. World units are cm, yaw is degrees from
+// +X toward +Y.
+namespace Homestead::Mine
+{
+// Estate placement ids: 588000-588099 are the mine's fixed pieces, 588100-588199 are the gameplay lane's.
+constexpr int FirstPlacementId = 588000;
+constexpr int LastPlacementId = 588199;
+constexpr int PileId = 588000;
+constexpr int TrapdoorId = 588001;
+constexpr int LadderFootId = 588002;
+
+// The one-time pile upstairs.
+constexpr int PileStone = 25;
+
+// Underground rules, all in cm.
+constexpr double ReachZCm = 220.0;                // Vertical reach to a node's socket.
+constexpr double UndergroundCeilingAboveFloorCm = 1500.0; // Above this over the lowest floor she is "in the house".
+constexpr double FootprintMarginCm = 600.0;       // Margin around the walkable floors that still counts as the mine.
+constexpr double StuckSlackCm = 220.0;            // How far past a floor's edge before the stuck rule moves her.
+constexpr double StuckBelowFloorCm = 300.0;       // Below the lowest floor by this much she has fallen out of the level.
+
+enum class NodeKind { Rock, Coal, Copper, Gem };
+
+struct Spot
+{
+    double x = 0.0, y = 0.0, z = 0.0, yaw = 0.0;
+};
+
+struct Trapdoor
+{
+    double hingeX = 0.0, hingeY = 0.0, hingeZ = 0.0, yaw = 0.0;
+    double lidLength = 0.0, lidWidth = 0.0;
+};
+
+// One mineable socket. The wall normal points out of the rock toward the gallery.
+struct Node
+{
+    int id = 0;
+    NodeKind kind = NodeKind::Rock;
+    double x = 0.0, y = 0.0, z = 0.0, yaw = 0.0, normalX = 0.0, normalY = 0.0;
+};
+
+// A walkable stretch of tunnel: a centreline with a half-width, at floor height z.
+struct FloorSegment
+{
+    Point a, b;
+    double halfWidth = 0.0;
+    double z = 0.0;
+};
+
+struct Layout
+{
+    Spot house;
+    Spot door;
+    Spot houseFloor;     // Where she wakes in the ground-floor room.
+    Trapdoor trapdoor;
+    Spot ladderTop;      // Where she stands to go down.
+    Spot ladderFoot;     // Where she arrives below, and where the stuck rule returns her.
+    Spot pile;
+    Spot deskLamp;
+    Spot daylight;       // The shaft of daylight at the ladder foot.
+    std::vector<Node> nodes;
+    std::vector<FloorSegment> floors;
+};
+
+const Layout& GetLayout();
+
+ResourceKind ResourceFor(NodeKind kind);
+bool IsMineNodeKind(ResourceKind kind);   // Rock face, coal seam, copper vein or gem pocket.
+bool IsMinePlacementId(int id);
+const Node* FindNode(int id);
+
+// Swings, energy (at the worn tier) and the hours after the next 06:00 that a mined node stays bare.
+struct NodeInfo
+{
+    int swings[ToolTierCount] = {};
+    double energy = 0.0;
+    int minYield = 0, maxYield = 0;
+    double extraRefillHours = 0.0;
+};
+const NodeInfo& InfoFor(NodeKind kind);
+
+// Whether the point at height z is in the tunnel level.
+bool IsUnderground(Point p, double z);
+// Distance beyond the nearest floor's edge (negative when on it), over all segments at z's level.
+double OutsideFloorBy(Point p);
+// The stuck rule: underground, below the level or off every floor by StuckSlackCm.
+bool IsStuck(Point p, double z);
+// Where the stuck rule and a ladder climb put her.
+Spot StuckTarget();
+}

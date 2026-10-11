@@ -40,6 +40,9 @@ enum class ResourceKind : int
     // add-beach-gathering: beach finds that come back every morning, and the beach campfire she lights
     // with driftwood (its readyAtHour is the hour it burns out; HomesteadBeach.h).
     Seashells, Driftwood, BeachPebbles, MusselBed, LaverRocks, BeachCampfire,
+    // open-estate-mine-shallow-level: the mine's nodes (struck with the pickaxe by Simulation::MineNode; their
+    // readyAtHour is when they next hold ore) and the one-time rock pile in the mine house (hand pickup).
+    MineRockFace, MineCoalSeam, MineCopperVein, MineGemPocket, MinePile,
     Count
 };
 // First tools are hafted by hand from a salvaged rusted head and two branches.
@@ -801,6 +804,21 @@ public:
     MowSweepResult MowSweep(const std::vector<int>& targets, Point player);
     static double ScytheArcRadius(ToolTier tier);
     static double ScytheArcHalfAngle(ToolTier tier);
+
+    // The estate mine (HomesteadMine.cpp). `playerZ` is her height in cm: the simulation is 2D, and the
+    // tunnels lie directly under the surface, so a node only answers to someone standing at its level.
+    // CheckMine refuses with the player-facing reason: "Too dark to work." without a lit lamp,
+    // "Needs a pickaxe." without one, and "Nothing left here until it comes back." while it's bare.
+    Result CheckMine(int nodeId, Item tool, Point player, double playerZ) const;
+    // Swings her pickaxe tier needs to work the node (the last one commits), and the Energy that costs.
+    int MineSwings(int nodeId) const;
+    double MineCost(int nodeId) const;
+    // Works the node once: spends Energy, grants its yield (overflow is left on the ground) and leaves
+    // it bare until its refill morning.
+    Result MineNode(int nodeId, Item tool, Point player, double playerZ);
+    // Exhaustion underground: she sleeps it off (Exertion::DozeHours), wakes fully rested with her pack
+    // untouched, and the game carries her to the mine house's ground floor. Fails when she isn't underground.
+    Result WakeAtMine(Point player, double playerZ);
 
     void Advance(double realSeconds, Point player, bool paused = false);
     void AdvanceGameHours(double hours, Point player);

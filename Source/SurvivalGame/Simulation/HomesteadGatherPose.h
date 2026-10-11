@@ -27,6 +27,8 @@ constexpr GatherPose HandGatherPose(ResourceKind kind)
     case ResourceKind::RubbishHeap:
     case ResourceKind::SlateHeap:
     case ResourceKind::BeachPebbles:
+    // The mine's one-time pile of cut stone is lifted the same way.
+    case ResourceKind::MinePile:
         return GatherPose::Stones;
     case ResourceKind::Roots:
     case ResourceKind::BerryBush:

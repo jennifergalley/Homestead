@@ -10,6 +10,7 @@
 #include "HomesteadFood.h"
 #include "HomesteadParcels.h"
 #include "HomesteadManor.h"
+#include "HomesteadMine.h"
 #include "HomesteadLamp.h"
 #include "HomesteadOvergrowth.h"
 #include "HomesteadPackRow.h"
@@ -178,6 +179,11 @@ double Regrowth(ResourceKind kind)
     case ResourceKind::MusselBed:
     case ResourceKind::LaverRocks: return 24.0;
     case ResourceKind::BeachCampfire: return Beach::CampfireBurnHours;
+    // Mine nodes: readyAtHour is set to the next 06:00 plus 0/24/48/96 h (HomesteadMine.cpp), so it never exceeds this.
+    case ResourceKind::MineRockFace: return 24.0;
+    case ResourceKind::MineCoalSeam: return 48.0;
+    case ResourceKind::MineCopperVein: return 72.0;
+    case ResourceKind::MineGemPocket: return 120.0;
     default: return 0.0;
     }
 }
@@ -196,6 +202,8 @@ Inventory Yield(ResourceKind kind)
     case ResourceKind::Bluebells: return Items({{Item::Bluebells, 3}});
     case ResourceKind::WildDaffodils: return Items({{Item::WildDaffodils, 3}});
     case ResourceKind::WildGarlic: return Items({{Item::WildGarlic, 3}});
+    // The one-time pile of dressed stone in the mine house; the mine nodes yield through Simulation::MineNode.
+    case ResourceKind::MinePile: return Items({{Item::Stone, Mine::PileStone}});
     // Reeds, deer remains and the overgrowth kinds (see HomesteadOvergrowth) yield nothing here.
     default: return Beach::DailyYield(kind);
     }
@@ -989,7 +997,8 @@ const char* ResourceName(ResourceKind kind)
         "Salvage pile", "Primroses", "Bluebells", "Wild daffodils", "Wild garlic",
         "Nettles", "Stump", "Broken crate", "Broken barrel", "Rubbish heap", "Rotten planks",
         "Fallen slates", "Fallen roof timbers",
-        "Seashells", "Driftwood", "Beach pebbles", "Mussel bed", "Laver", "Beach campfire"};
+        "Seashells", "Driftwood", "Beach pebbles", "Mussel bed", "Laver", "Beach campfire",
+        "Rock face", "Coal seam", "Copper vein", "Gem pocket", "Pile of rock"};
     static_assert(sizeof(names) / sizeof(names[0]) == static_cast<int>(ResourceKind::Count), "Every resource needs a name.");
     return ValidEnum(kind, ResourceKind::Count) ? names[static_cast<int>(kind)] : "Unknown resource";
 }
@@ -1958,6 +1967,8 @@ bool Simulation::CanHarvest(int nodeId) const
     if (state_.failed || !node || node->cleared || node->readyAtHour > state_.hour || Retired(node->kind)) return false;
     // Overgrowth is cleared with its tool (ClearOvergrowth); only boughs and salvage piles come away by hand.
     if (const auto* overgrowth = FindOvergrowth(node->kind)) return overgrowth->byHand;
+    // Mine faces, seams, veins and pockets are only worked with the pickaxe (Simulation::MineNode).
+    if (Mine::IsMineNodeKind(node->kind)) return false;
     return !RequiresHatchet(node->kind) || Count(Item::Hatchet) > 0;
 }
 int Simulation::FindNearestResource(Point position, double maxDistance) const
@@ -2033,18 +2044,30 @@ Result Simulation::Harvest(int nodeId, Point player)
     }
     if (!Near(player, node->position)) return Bad("Move closer to gather this resource.");
     if (Retired(node->kind)) return Bad("There's nothing here worth taking.");
+    if (Mine::IsMineNodeKind(node->kind)) return Bad("Swing your pickaxe at this.");
     if (node->kind == ResourceKind::BeachCampfire) return LightBeachCampfire(nodeId, player);
     if (node->readyAtHour > state_.hour) return Bad("Nothing to gather here.");
     const double cost = HarvestCost(nodeId);
     if (auto ready = CheckExertion(cost); !ready) return ready;
     const Inventory yield = Yield(node->kind);
+    // The mine house's pile is taken whole, once: there has to be room for all of it.
+    if (node->kind == ResourceKind::MinePile && Detail::PackUsed(state_) + Mine::PileStone > Homestead::PackCapacity(state_))
+        return Bad("Not enough room for " + std::to_string(Mine::PileStone) + " stone.");
     State candidate = state_;
     auto* updated = Find(candidate.resources, nodeId);
-    updated->readyAtHour = Beach::IsDailyForage(node->kind) ? Beach::NextMorning(state_.hour)
-        : state_.hour + Regrowth(node->kind);
+    if (node->kind == ResourceKind::MinePile)
+    {
+        updated->cleared = true;
+        updated->readyAtHour = 0.0;
+    }
+    else
+        updated->readyAtHour = Beach::IsDailyForage(node->kind) ? Beach::NextMorning(state_.hour)
+            : state_.hour + Regrowth(node->kind);
     if (!SaveResourceEdit(candidate, *updated)) return Bad("The world has reached its 16384 persistent resource edit limit.");
     for (int i = 0; i < ItemCount; ++i) candidate.inventory[i] += yield[i];
-    const std::string message = std::string("Gathered ") + ResourceName(node->kind) + ".";
+    const std::string message = node->kind == ResourceKind::MinePile
+        ? "Took " + std::to_string(Mine::PileStone) + " stone from the pile."
+        : std::string("Gathered ") + ResourceName(node->kind) + ".";
     return Exert(cost, CommitInventory(std::move(candidate), message.c_str()));
 }
 Result Simulation::LightBeachCampfire(int nodeId, Point player)
@@ -2071,6 +2094,8 @@ Result Simulation::Clear(int nodeId, Point player)
     if (!node || node->cleared) return Bad("This patch has already been cleared.");
     if (IsOvergrowth(node->kind)) return Harvest(nodeId, player);
     if (Beach::IsBeachKind(node->kind)) return Bad("The tide brings these back; there's nothing to clear.");
+    if (Mine::IsMineNodeKind(node->kind) || node->kind == ResourceKind::MinePile)
+        return Bad("There's nothing to clear here.");
     if (!Near(player, node->position)) return Bad("Move closer to clear this patch.");
     if (RequiresHatchet(node->kind) && Count(Item::Hatchet) == 0)
         return Bad("Craft an axe before felling trees.");
