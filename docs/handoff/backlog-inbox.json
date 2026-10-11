@@ -460,6 +460,110 @@
       "imageFile": null,
       "imageMime": null,
       "createdUtc": "2026-10-10T22:19:03.137Z"
+    },
+    {
+      "id": "jenny-mv35nz8l-69q2cp",
+      "title": "Make cliffs visible from the edge of the map... into cliffs",
+      "description": "",
+      "imageFile": "jenny-mv35nz8l-69q2cp-60d07356-421c-4de6-89df-660de6bb109e.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T01:39:37.893Z"
+    },
+    {
+      "id": "jenny-mv35r4wh-fczf2d",
+      "title": "It's possible to fall into areas that should be off-limits",
+      "description": "Near the edges of the map, e.g. the bottom right corner, it's possible to fall off the cliffs (walking, really) into an area that is impassably surrounded by cliffs and water, from whence there is no escape. Please make it impossible to walk somewhere (e.g. off a cliff) that you can't walk back out of.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T01:42:05.201Z"
+    },
+    {
+      "id": "jenny-mv35snup-klx997",
+      "title": "Populate the mill site",
+      "description": "Make an asset for the building of the mill site, make an actual business out of it, and add a man who works it.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T01:43:16.417Z"
+    },
+    {
+      "id": "jenny-mv35vb8c-tfvzwm",
+      "title": "Where the river meets the ocean needs better water transition",
+      "description": "Right now it is two textures meeting, with nothing to transition them, so there is a sharp, harsh line",
+      "imageFile": "jenny-mv35vb8c-tfvzwm-b3f89d14-f9ed-46b3-9b41-e83156efa03d.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T01:45:20.028Z"
+    },
+    {
+      "id": "jenny-mv35x0yc-msnmr4",
+      "title": "Grassy striations and lines in the cliffs",
+      "description": "It looks like the terrain sculpting is visibly obvious from these lines and cross-hatching in the cliff faces",
+      "imageFile": "jenny-mv35x0yc-msnmr4-cfa50728-ebbf-42b5-b249-28b6a9e7f16f.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T01:46:40.020Z"
+    },
+    {
+      "id": "jenny-mv363xm4-0bz4sk",
+      "title": "The paths to the cove and mine from the manor are raised or lowered compared to the surrounding terrain",
+      "description": "Rather than natural walking paths that are flush with their environs, the walking paths are either artificially raised (the mine) or lowered (the cove) in the terrain, leaving them looking quite unnatural. They should instead be flush with their surrounding terrain, and just be a change in the terrain of the ground so it looks like a path rather than grass.",
+      "imageFile": "jenny-mv363xm4-0bz4sk-eb4ba763-4f07-45ee-a0d1-1b130dd5a316.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T01:52:02.284Z"
+    },
+    {
+      "id": "jenny-mv365lx0-fwrz7h",
+      "title": "Grassy, raised edge along cove stairs looks quite unnatural",
+      "description": "It should just drop away on the other side of the staircase and be an open cliff, rather than this unnatural raised, grassy edge",
+      "imageFile": "jenny-mv365lx0-fwrz7h-643b07f8-5500-47a9-9160-27bd0aeddf8a.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T01:53:20.436Z"
+    },
+    {
+      "id": "jenny-mv36anwp-45j39c",
+      "title": "This boulder is somehow covered with shadows?",
+      "description": "I think its textures got messed up?",
+      "imageFile": "jenny-mv36anwp-45j39c-b76e40f7-6bf2-49a5-8e1d-87a83543e9d0.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T01:57:16.297Z"
+    },
+    {
+      "id": "jenny-mv36dyqn-j47ik3",
+      "title": "Start a new woodland should be Start a new game",
+      "description": "",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T01:59:50.303Z"
+    },
+    {
+      "id": "jenny-mv36hil7-hhvlou",
+      "title": "Odd lines in the grass",
+      "description": "There are sometimes odd lines in the grass that look totally unnatural, like an artifact of how the terrain was shaped.",
+      "imageFile": "jenny-mv36hil7-hhvlou-8029ba06-27ae-4bb8-9782-f98d22304d68.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T02:02:35.995Z"
+    },
+    {
+      "id": "jenny-mv36lya3-19gffn",
+      "title": "Corner on the beach",
+      "description": "This corner on the beach is quite unnatural and angled - please smooth and round it to be more natural",
+      "imageFile": "jenny-mv36lya3-19gffn-74e91ae3-f6c7-492a-9b1f-7a3356acf369.png",
+      "imageMime": "image/png",
+      "createdUtc": "2026-10-11T02:06:02.955Z"
+    },
+    {
+      "id": "jenny-mv36q19u-o4j1q7",
+      "title": "Mix of coastal cliffs and smooth descending gradient",
+      "description": "Instead of having nothing but cliffs along the beaches, can we have some cliffs and some places where the ground slopes naturally down to the beach, abandoning the Cornwall-only aesthetic of coastal cliffs? I'd like about a 50/50 or 60/40 mix of cliffs to gradual descent. This should make the path down to the cove easier to manage, and have it follow a natural gradient rather than a cliff face.",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T02:09:13.458Z"
+    },
+    {
+      "id": "jenny-mv36t3cy-p7dm5i",
+      "title": "Shells, rocks, driftwood, other beach detritus",
+      "description": "Please add seashells, rocks, driftwood, and other beach detritus, both for decoration and plenty for gathering that refresh daily, including edible gathers like mussels or something believable from the beach or shallows, and let me prepare them as dishes or sell them at the General Store",
+      "imageFile": null,
+      "imageMime": null,
+      "createdUtc": "2026-10-11T02:11:36.130Z"
     }
   ]
 }

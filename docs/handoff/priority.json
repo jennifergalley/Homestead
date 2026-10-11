@@ -1,7 +1,6 @@
 {
   "order": [
     "rebuild-manor-and-decorate",
-    "backlog:jenny-mut6t8g6-mcldh5",
     "backlog:jenny-muupccau-7hxtoa",
     "backlog:jenny-muulxhvp-250x9a",
     "backlog:jenny-muulwcjc-gj9t19",
@@ -43,7 +42,6 @@
     "add-courtship-and-family",
     "add-boat-fishing",
     "backlog:jenny-mv1fzgcf-balfi1",
-    "backlog:jenny-mv1fzgcg-balhg1",
     "backlog:jenny-mv1jsi38-balcu1",
     "backlog:jenny-mv1jukpf-balow1",
     "backlog:jenny-mv1koymo-balgr1",
@@ -55,7 +53,29 @@
     "backlog:jenny-mv2yi15t-decorn"
   ],
   "slots": {
-    "backlog:jenny-mv2yi15t-decorn": "next"
+    "backlog:jenny-mv2yi15t-decorn": "next",
+    "backlog:jenny-mv36t3cy-p7dm5i": "next",
+    "backlog:jenny-mv36q19u-o4j1q7": "next",
+    "backlog:jenny-mv36lya3-19gffn": "next",
+    "backlog:jenny-mv36hil7-hhvlou": "next",
+    "backlog:jenny-mv36dyqn-j47ik3": "next",
+    "backlog:jenny-mv36anwp-45j39c": "next",
+    "backlog:jenny-mv365lx0-fwrz7h": "next",
+    "backlog:jenny-mv363xm4-0bz4sk": "next",
+    "backlog:jenny-mv35x0yc-msnmr4": "next",
+    "backlog:jenny-mv35vb8c-tfvzwm": "next",
+    "backlog:jenny-mv35r4wh-fczf2d": "next",
+    "backlog:jenny-mv35nz8l-69q2cp": "next",
+    "backlog:jenny-muxlpdrg-rm1vq5": "next",
+    "backlog:jenny-muw7mbbm-fc1pkl": "next",
+    "backlog:jenny-muw7gqsr-a3x5ig": "next",
+    "backlog:jenny-muw4to3b-smthbr": "next",
+    "backlog:jenny-muuqe1w9-46ibyt": "next",
+    "fix-estate-river-source": "next",
+    "backlog:jenny-mv1jsi38-balcu1": "after-next",
+    "backlog:jenny-mv1koymo-balgr1": "next",
+    "backlog:jenny-mv1koymq-balft1": "next",
+    "backlog:jenny-mv2vznce-clfrck": "next"
   },
   "removed": [
     "replace-heroine-with-metahuman",
@@ -125,7 +145,12 @@
     "backlog:jenny-mv2nnnwy-clfstp",
     "backlog:jenny-mv2nnnwz-acres1",
     "backlog:jenny-muucy9hz-jv5gx7",
-    "backlog:jenny-mv203hr0-wfclip"
+    "backlog:jenny-mv203hr0-wfclip",
+    "backlog:jenny-muurik7z-1lppa0",
+    "backlog:jenny-muuqa6l2-z1awzr",
+    "backlog:jenny-mut6t8g6-mcldh5",
+    "backlog:jenny-mv1fzgcg-balhg1",
+    "animation-led-fishing-gameplay"
   ],
-  "updated": "2026-10-11T00:22:14.332Z"
+  "updated": "2026-10-11T02:19:26.191Z"
 }
