@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "MineTunnelsBlockout",
+  "description": "Greybox of the mine's shallow level: galleries, drifts, ladder chamber and shaft, sump.",
+  "collision": "none",
+  "triangle_budget": 400000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/mine_tunnels_blockout.py",
+  "source_sha256": "ac836e813cdc07e002bdc137cc4809d621a3b7e88a87979125e7ef88beebd6c4",
+  "provenance": "Original project-authored blockout geometry.",
+  "meshes": {
+    "SM_MineTunnelsBlockout": {
+      "vertices": 76939,
+      "triangles": 153354,
+      "size_cm": [
+        7841.93,
+        4733.16,
+        1402.66
+      ],
+      "materials": [
+        {
+          "name": "M_MineGreyRock",
+          "color": [
+            0.3,
+            0.3,
+            0.29
+          ],
+          "roughness": 0.95
+        },
+        {
+          "name": "M_MineGreyTimber",
+          "color": [
+            0.24,
+            0.15,
+            0.08
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineGreyIron",
+          "color": [
+            0.12,
+            0.1,
+            0.09
+          ],
+          "roughness": 0.6
+        },
+        {
+          "name": "M_MineGreyWater",
+          "color": [
+            0.02,
+            0.03,
+            0.03
+          ],
+          "roughness": 0.1
+        },
+        {
+          "name": "M_MineGreyRockFace",
+          "color": [
+            0.45,
+            0.43,
+            0.4
+          ],
+          "roughness": 0.9
+        },
+        {
+          "name": "M_MineGreyCoal",
+          "color": [
+            0.03,
+            0.03,
+            0.03
+          ],
+          "roughness": 0.6
+        },
+        {
+          "name": "M_MineGreyCopper",
+          "color": [
+            0.15,
+            0.35,
+            0.28
+          ],
+          "roughness": 0.7
+        },
+        {
+          "name": "M_MineGreyGem",
+          "color": [
+            0.45,
+            0.25,
+            0.6
+          ],
+          "roughness": 0.3
+        }
+      ],
+      "review": {},
+      "fbx": "SM_MineTunnelsBlockout.fbx",
+      "sha256": "4f6d123e05586fd264d34e8558fa269b40d484f30b4c0cd44cabf37575f5438c",
+      "preview": "preview_SM_MineTunnelsBlockout.png"
+    }
+  },
+  "warnings": [],
+  "pivot": "Tunnel frame origin (ladder foot), Unreal frame; place at layout.tunnel_world(), yaw 0."
+}

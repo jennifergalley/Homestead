@@ -271,7 +271,9 @@ COLLISION_OVERRIDES = {"GraniteSplitBoulder": "complex", "StoneDoorway": "comple
                        # A box round SM_FarmGateway would wall off the open gateway.
                        "FarmFence": "complex", "VillageWell": "complex",
                        # She walks into, round and out of the sea cave on its own rock.
-                       "SeaCave": "complex"}
+                       "SeaCave": "complex",
+                       # She walks in through the mine house's door and along the mine's galleries.
+                       "MineHouseBlockout": "complex", "MineTunnelsBlockout": "complex"}
 # Which LOD per-poly collision uses (default: the coarsest); the doorway keeps its reveals true.
 COLLISION_LOD = {"StoneDoorway": 1}
 # Million-triangle house-sized rocks render through Nanite; LOD1/LOD2 stay as the fallback.

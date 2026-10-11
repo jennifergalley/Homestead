@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "name": "MineHouseBlockout",
+  "description": "Blockout of the mine house (engine-house style) and its furnished ground-floor room.",
+  "collision": "none",
+  "triangle_budget": 60000,
+  "blender": "5.2.1 LTS",
+  "source": "Scripts/Blender/Recipes/mine_house_blockout.py",
+  "source_sha256": "0d808f45c638a68de922245cbd73f62d7e6536137907cbf3b4982c1d55ff4dda",
+  "provenance": "Original project-authored blockout geometry.",
+  "meshes": {
+    "SM_MineHouseBlockout": {
+      "vertices": 2134,
+      "triangles": 4190,
+      "size_cm": [
+        1065.0,
+        770.28,
+        2120.0
+      ],
+      "materials": [
+        {
+          "name": "M_MineBlockDressed",
+          "color": [
+            0.34,
+            0.33,
+            0.31
+          ],
+          "roughness": 0.9
+        },
+        {
+          "name": "M_MineBlockBoards",
+          "color": [
+            0.3,
+            0.21,
+            0.13
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineBlockTimber",
+          "color": [
+            0.22,
+            0.14,
+            0.08
+          ],
+          "roughness": 0.85
+        },
+        {
+          "name": "M_MineBlockStone",
+          "color": [
+            0.26,
+            0.255,
+            0.24
+          ],
+          "roughness": 0.9
+        },
+        {
+          "name": "M_MineBlockShaft",
+          "color": [
+            0.02,
+            0.02,
+            0.02
+          ],
+          "roughness": 1.0
+        },
+        {
+          "name": "M_MineBlockSlate",
+          "color": [
+            0.1,
+            0.11,
+            0.13
+          ],
+          "roughness": 0.7
+        },
+        {
+          "name": "M_MineBlockBrick",
+          "color": [
+            0.33,
+            0.14,
+            0.09
+          ],
+          "roughness": 0.9
+        },
+        {
+          "name": "M_MineBlockLamp",
+          "color": [
+            0.95,
+            0.7,
+            0.3
+          ],
+          "roughness": 0.4
+        },
+        {
+          "name": "M_MineBlockRock",
+          "color": [
+            0.3,
+            0.3,
+            0.29
+          ],
+          "roughness": 0.95
+        }
+      ],
+      "review": {
+        "pose": [
+          0,
+          0,
+          0
+        ],
+        "focus": [
+          0.0,
+          0.0,
+          3.0
+        ],
+        "views": [
+          "hero"
+        ]
+      },
+      "fbx": "SM_MineHouseBlockout.fbx",
+      "sha256": "1b47f79474ff8179a2e003983c1a950284a3326013619a2ad570fc709f891e17",
+      "preview": "preview_SM_MineHouseBlockout.png"
+    }
+  },
+  "warnings": [],
+  "pivot": "House origin on the mine yard (Anchor::MineEntrance), Unreal frame; place at yaw 0."
+}
