@@ -79,6 +79,10 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 
 ## Open
 
+- 2026-10-11: filled `open-estate-mine-shallow-level` design §7 (mine numbers and manor stone
+  budget) and §8 views; summary in `balance.md` §8b. Waiting on Jenny's D1–D5 answers; re-check
+  the numbers before the mine lanes' [ready].
+
 - My first 12 suggestions (halve crop growth, daily fishing catch, sleep 15/h, better-value
   snacks, cooked meals grant Well fed, UI audit items) are on Jenny's backlog as "[Balance]" /
   "[Balance UI]" cards, added by the Orchestrator 2026-10-04.

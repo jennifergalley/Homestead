@@ -261,6 +261,23 @@ Meals (Cookfire, Well fed): steamed mussels (3 mussels) 25; mussel and potato br
 potato, laver) 35; fried laver (2 laver) 19. The beach campfire takes 3 driftwood and 0.2 energy,
 burns 4 game hours, works as a cookfire while lit, and can be relit.
 
+## 8b. Mine and manor restoration (planned; `open-estate-mine-shallow-level` design §7)
+
+Planned numbers, not yet built. The source of truth is the design's §7.
+
+- **Rock faces:** 20, each 3 swings and 2.5 energy (worn) for about 6 stone, back every morning. A
+  full clear gives about 120 stone for about 62 energy, and about 8 real minutes door to door.
+- **Ore:** coal (6 seams, 2–3 coal, every 2 days, 10 coins), copper ore (4 veins, 2 ore, every 3
+  days, 25 coins), and gem pockets (3, quartz 35 or amethyst 150, every 5 days). That's about 185
+  coins of ore a day.
+- **No limits beyond pack room;** the lamp oil is never binding. There's a one-time pile of 25
+  stone upstairs in the mine house.
+- **Manor:** 5 stages (great hall, kitchen, bedchamber, upper floor, roof and chimneys) cost 1,500
+  stone, 215 timber and 7,000 coins in total. That's about 12 game days of mixed play, with the
+  stages growing from 200 to 450 stone.
+- ✅ This gives a steady, visible goal with no grind. Stone (about 130 a day) sets the pace; timber
+  and coins never block.
+
 ## 9. Target pacing
 
 These are targets for lanes to tune toward; there's no telemetry yet. They assume a 60-minute day.
