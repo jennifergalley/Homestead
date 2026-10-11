@@ -180,7 +180,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | Editor startup holds for up to 30 minutes at `Launching UnrealBuildTool... -Mode=QueryTargets` | The editor refreshes its cached target list with a single-instance UBT mode (`DesktopPlatformBase.cpp`), which queues behind other worktrees' UBT builds | `Start-EditorMcp.ps1` now stops its own editor's QueryTargets child tree (`cmd.exe` and its `PING`) after 2 minutes, as it does for ValidatePlatforms; the editor then uses the existing cache. By hand: stop that `cmd.exe` and its children by PID. |
 | MCP never answers (20 min, log frozen) after `-Map /Game/SurvivalGame/Maps/Estate` | Opening the 4 km World Partition map through `-Map` during startup | Don't pass `-Map`: the Estate is now the default startup map and opens cleanly without it. |
 | Every MCP call times out for minutes, but the editor process is still responding | The shared zenserver (`%LOCALAPPDATA%\UnrealEngine\Common\Zen`) stopped answering and the game thread is blocked on it; it recovers by itself (one stall lasted 1009 s: `post recovery finished in 1009.384 seconds`) | Search `Saved\Logs\SurvivalGame.log` for `LogZenServiceInstance` and wait. Don't kill the editor, and never stop `zenserver.exe`. |
-| MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`. Quiet isn't hung. |
+| MCP takes more than 10 min to answer on the first launch after a build | Shader and DDC warm-up; a fresh worktree's first launch is a 10+ min cold DDC compile and is CPU-bound, not RAM-bound | Normal. Use `-TimeoutSeconds 1200`; watch `Saved\Logs\SurvivalGame.log`, or poll `st` for `worldReady` once the server answers. Quiet isn't hung. |
 | `DXGI_ERROR_DEVICE_REMOVED` / `DRIVER_INTERNAL_ERROR`; every Unreal process dies | Several editors creating ray-tracing pipelines (RTPSO) at once on one GPU | Ray tracing is off by default in agent editors. Keep to 2 Unreal processes. |
 | "GPU Crashed or D3D Device Removed" about 10 s into a new Estate game (frame 4, after the ground settles), Aftermath `Status: Timeout`, `Function = MicropolyRasterize`; every Unreal process on the machine dies | Only with ray tracing off: the sun then uses virtual shadow maps, and the first frame rasterizes the dense Nanite estate into every empty clipmap page in one dispatch, past Windows' 2 s GPU timeout (TDR). Not a clipmap-level issue (`r.Shadow.Virtual.Clipmap.LastLevel=19` still crashed). RT off crashed 5 of 5 runs; RT off plus VSM off was fine 3 of 3; RT on is fine | `Start-EditorMcp.ps1` now passes `-DPCVars=r.RayTracing.Enable=0,r.Shadow.Virtual.Enable=0` (comma-separated). Any hand-run launch with RT off (a standalone `-game`, an older launcher) must add `r.Shadow.Virtual.Enable=0` too. Jenny's packaged build runs with RT on and isn't affected. Evidence: `E:\CopilotScratch\a1648ae7\gpu-*.log`. |
 | `Video memory has been exhausted` (for example 2 GB over budget); captures take 3-20 s and slow-mo bursts miss clips | 3 editors plus the 4 km Estate landscape, or 3 editors plus a packaged game | Keep to the 2-process limit, and close idle editors. |
@@ -214,6 +214,8 @@ Search this table for the error text before debugging. Add a row when you solve 
 | An OBJ imported through Interchange comes in mirrored and invisible from outside, or data stored in UVs comes out wrong | Interchange maps OBJ (x, y, z) to Unreal (x, −y, z), which flips winding, **and** flips texture V (v → 1 − v) | Write y negated and swap face winding (a, c, b). A mesh that stores data in UV0 (for example grass-blade roots) must detect or undo the V flip (`build_ground.py` compares vertex positions with their UVs after import). Set `use_full_precision_u_vs` when UVs hold values above about 16; half floats lose the fraction. |
 | Distant Estate land missing from elevated or far PIE views | PIE streams about 8 landscape proxies (252 m each, roughly ±400 m) around the **pawn**, with no HLOD, and streaming follows the pawn, not the view target | Move or park the pawn (`MOVE_FLYING`) near the camera for distant captures. |
 | `Import-Props.ps1` imports meshes without LODs or collision | `StaticMeshEditorSubsystem` is missing under `-run=pythonscript` | Import inside your running editor with `run_python` (section 8; Props in section 9). |
+| `Import-Props.ps1` fails with no useful error in the console output | It buries the real cause inside `Build\Logs\prop-import.log` | Print the first `LogPython: Error` / `could not be found` line from that log before debugging further. |
+| `FPackageName::ObjectPathToPackageName(const TCHAR*)` is ambiguous (C++ build error) | UE 5.8 added an overload; a raw string/`TCHAR*` no longer resolves | Pass an `FString` instead. |
 | Edits to `import_props.py` don't take effect | `import` returns the cached module | Load with `importlib.util.spec_from_file_location` + `exec_module`. |
 | C++ duplicate-symbol or redefinition errors (`C2084 function already has a body`) between unrelated `.cpp` files, often only when packaging | Unreal unity builds merge translation units, anonymous namespaces included. The editor build compiles git-modified files outside unity (adaptive unity), so clashes first appear in the packaged game build | See the `homestead-code-conventions` skill, "Unreal C++". |
 | `error C2487` on a `static constexpr` line in a UCLASS | Several declarators in one line of an `_API`-exported class | See the `homestead-code-conventions` skill, "Unreal C++". |
@@ -240,7 +242,7 @@ Search this table for the error text before debugging. Add a row when you solve 
 | After `build_ground.py` or `build_landscape_material.py` in the editor, `M_EstateGrass`/`MI_EstateGrass`, `SM_GrassPatch_LOD0-2`, `T_GrassWind`, `T_Ground_Stony`/`Trodden_*` and `M_EstateLandscape` show as modified | The bake re-saves them byte-different with identical content | Close the editor, then `git checkout -- Content` unless you actually changed the bake's inputs. |
 | `scatter.py` leaves a diff in the placement `.inc` that is only line endings | It writes LF, and the checkout uses `core.autocrlf` | Harmless. Check with `git diff --ignore-cr-at-eol` (or `-w`) and don't commit a line-ending-only change. |
 | PIE woodland forest floor near-black at noon; terrain half streamed | Agent editors run with ray tracing off; the game's lighting is tuned for RT | Don't judge brightness, night lighting or shadows in PIE. Use the packaged build (RT on), or `-RayTracing` when process limits allow. |
-| Estate nights look like a bright moonlit day | Current main still has the pre-review exposure path; Jenny's final pending Set A is `NightMoonLux=0.2`, `NightSky=0.3`, `NightMinExposure=-1` | Do not judge night/lamp balance in agent PIE (RT off). Water supplies a side-by-side screenshot sheet; Integration must verify the approved set in packaged RT-on before its 7:30 AM delivery receipt. Jenny's Shipping build has no console, so do not ask her to trial CVars. |
+| Estate night captures look falsely bright right after a time jump | Eye adaptation hasn't settled yet after `HomesteadMorning`/`tp` | Wait about 10-20 s before judging or capturing night brightness. Still don't judge night/lamp balance in agent PIE (RT off); use the packaged build (RT on). |
 | PIE says `pie:true` but has no `worldReady`/location/control yaw, the viewport is black, and `shot` says `Failed to capture any editor windows` | The editor main window is minimized (`IsIconic`), so PIE never brings up the world despite the session starting | Restore the editor window, then restart PIE: use `ShowWindow((Get-Process -Id <editor-pid>).MainWindowHandle, 4)`, then `unpie; pie`. Verify `worldReady` and pawn spawn before testing. |
 | A red on-screen warning in Development builds: "Cached lighting in Lumen ... going to be clipped ... r.EyeAdaptation.CachedLightingPreExposure", in full sun (about EV 13.5) | The cached-lighting pre-exposure range didn't cover bright sun | `DefaultEngine.ini` `[SystemSettings]` sets `r.EyeAdaptation.CachedLightingPreExposure=8` (about EV -4 to 16). If it returns, adjust that value, not the exposure. |
 | `'HomesteadLabController' object has no attribute 'get_pawn'` | Not exposed to Python | `unreal.GameplayStatics.get_player_pawn(world, 0)`. |
@@ -313,6 +315,9 @@ pwsh -NoProfile -File .\Scripts\Start-EditorMcp.ps1 -Port 8768 -AllowPython -Ski
   another worktree is building).
 - A cold start can take more than 10 minutes. Quiet is not hung; check `Saved\Logs\SurvivalGame.log`
   and table 0.1 (the `ValidatePlatforms` hang).
+- `Start-EditorMcp.ps1` itself has no `-WaitMutex` switch: a cold start simply waits out whatever
+  it's queued behind (ValidatePlatforms/QueryTargets child trees, UBT). That's expected; don't
+  retry the launch in a loop (table 0.1).
 - C++ changes: quit the editor (it locks its module DLLs), run the build (the script's build step,
   or `Scripts\Invoke-UnrealBuild.ps1` (it wraps `Build.bat SurvivalGameEditor Win64 Development "-Project=<worktree>\SurvivalGame.uproject"
   -WaitMutex -NoHotReloadFromIDE`), and relaunch with `-SkipBuild`. Live Coding is off in agent
@@ -1457,6 +1462,12 @@ OpenSpec changes, not here.
 - 2026-09-26: **An invisible ground prop is usually back-face culled.** Check the FBX's average face
   normal z in Blender; an open sheet from `kit.recalc_normals` can face down (see
   docs/blender-assets.md).
+- 2026-10-10 (Gameplay lane): **Blender bake resolution vs. machine load.** A 4096 bake took about
+  28 min/mesh under machine load, vs. about 1 min at 2048. Keep bake resolution at 2048 while
+  other lanes are building/baking.
+- 2026-10-10 (Gameplay lane): **Signpost lettering contrast.** Chalk-white lettering on silvered
+  oak has no contrast; `fingerpost.py` (used by the Cove lane) has this weakness, fixed only in
+  `fingerpost_road.py`. Any new signpost script should start from `fingerpost_road.py`.
 
 ### World, terrain, water and lighting
 
@@ -1526,6 +1537,10 @@ OpenSpec changes, not here.
   `public_road.py` → `weightmaps.py` → `route_sights.py --bake` → `village_dress.py` →
   `bake_ground.py` → `Scripts\Map\bake_estate_map.py`. Dressing is runtime-built from
   `HomesteadVillageDressing.inc` (generated by `village_dress.py`, relative to the village anchor).
+- 2026-10-10 (Gameplay lane): **HAND-RETIRED marker convention is preserved by `compact_placements.py`.**
+  A placement in `HomesteadEstateRetiredPlacements.inc` marked `HAND-RETIRED` keeps a ±2 m
+  exclusion zone for forage regeneration around its old position; don't strip that marker when
+  hand-editing the `.inc`.
 - 2026-10-09 (Upkeep lane): any test that counts cleared resources must now skip windfall nodes
   (ids 584000-584199, dormant = cleared) — use `Estate IsWindfallPlacement(id)`. `Test-Native`'s
   `HomesteadSimulationTests` passes standalone in ~250 s; failures print just the line number.
@@ -1542,3 +1557,7 @@ OpenSpec changes, not here.
   `Scripts\Map\bake_estate_map.py` is now the 1520 m square around `PlayableBounds`
   (X -930..590 m, Y -1360..160 m), not the old 4 km estate square — see `docs/setup.md`
   "Estate map".
+- 2026-10-10 (Lighting lane): moonrise is removed. Nights are now a fixed, single-level moonlight
+  at 0.2 lux with a hidden-disc moon that fades in at dusk and out at dawn (no moonrise animation).
+  `HomesteadLampOil 0` extinguishes the held lamp for lamp-off reference shots. Still don't judge
+  night/lamp balance in agent PIE (RT off); verify in the packaged build (RT on).

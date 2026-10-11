@@ -44,6 +44,20 @@ features for balance and cohesion. Docs-only; holds no implementer slot.
 - 2026-10-10: Cave Agent (d6ef3d58) sea-cave plan OK: night glow, a safe pool, flowers and ferns, 2
   beach nodes at the mouth from the Beach Agent's 40, map label "Sea cave". Awaiting day and night
   screenshots.
+- 2026-10-10: Gameplay Agent (5b555e6e) batch OK: meadow herbs 38 → 19 patches (keep 10 coins;
+  57 herbs a day), fingerposts replace the travel signs, ridges cleared only under tilled plots,
+  the standing-room berry bush removed, "Start a new game". Awaiting screenshots.
+- 2026-10-10: Lighting Agent (0816ef4d) persistent-moonlight night OK at 0.2 lux ground (Set A
+  unchanged); suggested village lit windows as later polish.
+- 2026-10-10: Map Agent (94e0bd8e) mixed-coast plan: I proposed a 90 s cove cap for a step-free
+  1-in-4 path; the Orchestrator reverted it to Jenny's call (options: 1-in-4 ~90 s, a lower cove
+  site, or a slope plus one short flight). Jenny picked the slope plus one or two short stone
+  flights: about 350 m, cap 75 s (§9 updated).
+- 2026-10-11 (night): Map Agent coast evidence OK to ship: cove 80 s / 378 m (5 s over; asked it
+  to trim if that's quick), cave 13 s from the path foot, mine link on the terrace, village street
+  8% average. Carded: viewpoint bench. The west cliff, bare cove-head slope, cliff striations and
+  straight waterline became the Orchestrator's blocking fixes instead; re-check shots 03 and 04 in
+  the Map Agent's next [review].
 - 2026-10-10: heath fix in (`babfe357e`): the cut reads green and 73 flower clumps dress the cove
   slopes. The steepest upper bay wall stays smeared bare earth (planar UVs), carded as
   "[Balance] Rock face for the cove cliff". Map Agent shipped [ready]. Nothing open.

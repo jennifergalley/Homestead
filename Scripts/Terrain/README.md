@@ -304,6 +304,14 @@ re-emits the data; to move the route, restore the heightfield from before it and
 `scatter.py` clears a fresh scatter off it after the lake. Set `HOMESTEAD_TERRAIN_WORK` to your work folder
 (the script keeps its `game_reshaped_4033.npy` in step round the route).
 
+**The shared work npy can lag committed terrain rebakes by hours** when several terrain-touching
+lanes are active at once (seen 2026-10 with Map and Beach both working the coast). The committed
+`EstateHeightfield.r16` is always current; the work npy is only a scratch copy and isn't refreshed
+until its owning script re-runs. A coast-sampling generator should read the r16 directly rather than
+risk a stale npy. Convert a raw r16 sample into the npy's frame/orientation with
+`z = ((r16 - 32768) / 128)[:, ::-1].T`, matching the index relationship `npy[2H-col, row] =
+r16[row, col]` established in `coast_mix.py`. `beach_detritus.py` already reads the r16 this way.
+
 ### Compact map (stage 2 of `shrink-estate-map`)
 
 Run once, in this order, from the pre-compact artifacts (`f9cfadaf6`): `compact_map.py` (layout polygons,
@@ -331,14 +339,16 @@ the path instead of a trench or bank. The village street leaves the road at 350 
 `village_junction.py` takes the old street's grade back out first.
 
 Run once, in this order, with `HOMESTEAD_TERRAIN_WORK` set: `coast_mix.py`, `cove_route.py`, `coast_soften.py` (rounds the west
-cliff's end against the hillside and strews granite ledges on the coast's cliff faces), `estate_footpaths.py`,
+cliff's end against the hillside), `coast_detail.py` (crags on the cliff faces, a wandering waterline, scrub and
+wildflowers on the regraded ground, erratics at the cove's west cliff foot; keeps the sea cave's crag and roof),
+`estate_footpaths.py`,
 `compact_map.py` (CoveBeach), `village_junction.py`, `town_layout.py`, `town_path.py`, `town_layout.py`,
 `coast_mix_placements.py` (retires displaced ids into `HomesteadEstateCoastMixRetired.inc`, never moving one),
 `public_road.py`, `weightmaps.py`, `route_sights.py --top-up`, `village_dress.py`, `cove_heath.py`, `bake_ocean.py`,
 `bake_outer_land.py`, `bake_ground.py`, `Scripts\Map\bake_estate_map.py`. Generated sources must be CRLF before
 `Invoke-UnrealBuild.ps1`. In the editor: `ApplyEstateHeightfield` and `ApplyEstateWeightmaps` over the whole map,
 `build_ocean.py`, `build_outer_land.py`, `place_water.py`, `build_ground.py`, `build_landscape_material.py` (the
-CliffRock layer is triplanar) and `ImportEstateMap`.
+CliffRock layer is triplanar, and any ground steeper than about 35 degrees takes that granite) and `ImportEstateMap`.
 
 After a large `ApplyEstateHeightfield`, check the landscape component seams (every 126 vertices): vertices shared by
 two components can keep a stale height in one of them (a 200 m tall sheet of stretched texture at x = -378 m after the

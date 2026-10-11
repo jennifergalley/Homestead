@@ -165,6 +165,7 @@ slot, then go idle; they do not pick up unflagged queue items.
 - Neutral, non-Cornish names; the town is called the village.
 - Darker, moonlit nights without a second sun.
 - The title screen says Start a new game.
+- No more berry bush in the manor's standing room.
 
 ## Build after next
 

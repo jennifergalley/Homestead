@@ -91,7 +91,7 @@ int main()
             gate ? Distance(gateway->position, gate->position) : -1.0);
         Check(townEnd && Distance(town->position, townEnd->position) < 1000.0, "town stop at the road's town end",
             townEnd ? Distance(town->position, townEnd->position) : -1.0);
-        Check(std::abs(road.WalkMetres(manor->chainage, town->chainage) - 248.0) < 1.0, "manor to town walk",
+        Check(std::abs(road.WalkMetres(manor->chainage, town->chainage) - 338.0) < 1.0, "manor to town walk",
             road.WalkMetres(manor->chainage, town->chainage));
         Check(road.WalkMetres(town->chainage, manor->chainage) == road.WalkMetres(manor->chainage, town->chainage), "walk is symmetric");
         Check(manor->z > 0.0 && town->z > 0.0, "stop heights above the sea");
@@ -666,7 +666,9 @@ int main()
         {
             if (!manorStop) break;
             const TravelPlan plan = PlanTravel(sim.GetState(), manorStop->position, destination);
-            Check(plan.ok && plan.totalMetres <= 360.0, "manor to the village is at most 360 m (75 s at a sprint)", plan.totalMetres);
+            // The village street leaves the road 90 m further on for a gentler grade (Jenny scheduled the [Balance] card,
+            // 2026-10-10): about 90 s at a sprint.
+            Check(plan.ok && plan.totalMetres <= 440.0, "manor to the village is at most 440 m (90 s at a sprint)", plan.totalMetres);
             Check(plan.ok && plan.totalMetres >= 250.0, "manor to the village is a real walk, not a doorstep", plan.totalMetres);
         }
         for (const int id : {581032, 581033, 581034})
