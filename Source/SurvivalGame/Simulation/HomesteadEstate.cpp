@@ -45,11 +45,11 @@ const EstateLayout& ProvisionalEstateLayout()
             {Anchor::StandingRoomOrigin, {-25600.0, -63800.0}, 8652.6, 0.0},
             {Anchor::StandingRoomSpawn, {-25750.0, -63800.0}, 8652.6, -90.0},
             {Anchor::EstateGateway, {-5500.0, 9000.0}, 5632.0, 60.0},
-            {Anchor::CoveBeach, {-47600.0, -61600.0}, 180.0, 200.0},
+            {Anchor::CoveBeach, {-49000.0, -58000.0}, 180.0, 200.0},
             {Anchor::MineEntrance, {-41000.0, -72200.0}, 5223.0, 0.0},
             {Anchor::MillSite, {-11800.0, -9200.0}, 3113.1, 0.0},
             {Anchor::RoadEstateEnd, {-5500.0, 9000.0}, 5632.0, 60.0},
-            {Anchor::RoadTownEnd, {-4972.0, -44415.0}, 7423.0, 45.0},
+            {Anchor::RoadTownEnd, {-189.0, -36565.0}, 6984.0, 45.0},
             {Anchor::TownSquare, {-10000.0, -33000.0}, 5833.0, 0.0},
             {Anchor::GeneralStoreDoor, {-9570.0, -35950.0}, 6046.0, -90.0},
             {Anchor::GeneralStoreCounter, {-9570.0, -36550.0}, 6083.0, -270.0},
@@ -360,6 +360,10 @@ const EstatePlacements& EstatePlacementsBeforeCompactMap()
             table.placements.push_back({id, kind, {x, y}, 0.0, 0.0, 1.0, 0});
         };
 #include "HomesteadEstateCompactPlacements.inc"
+        // Coast-mix replacements (587000-587099, Scripts/Terrain/coast_mix_placements.py): a bramble beside each one
+        // the new cove path or the moved village street displaced, with the same 3 m rule.
+        auto coastMix = topUp;
+#include "HomesteadEstateCoastMixPlacements.inc"
         // Town lane (530000+).
         return table;
     }();
@@ -377,6 +381,7 @@ const EstatePlacements& ProvisionalEstatePlacements()
         std::vector<int> retiredIds;
         auto retired = [&](int id) { retiredIds.push_back(id); };
 #include "HomesteadEstateRetiredPlacements.inc"
+#include "HomesteadEstateCoastMixRetired.inc"
         std::sort(retiredIds.begin(), retiredIds.end());
         const EstateLayout& layout = ProvisionalEstateLayout();
         table.placements.erase(std::remove_if(table.placements.begin(), table.placements.end(), [&](const EstatePlacement& placement)

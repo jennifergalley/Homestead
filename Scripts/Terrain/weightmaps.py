@@ -81,6 +81,12 @@ def main():
         out[name] = v
         remaining = remaining - v
     total = sum(out.values())
+    # Near sea level the beach meets the cliff foot within a metre, and a layer swap across one landscape quad
+    # draws as a row of triangle teeth (Jenny's review, 2026-10-10): soften the weights there over a few metres.
+    shore = (1 - smoothstep(6.0, 10.0, z)) * (1 - smoothstep(30, 60, d_water))
+    for name in out:
+        out[name] = out[name] + (gaussian_filter(out[name], 2.0) - out[name]) * shore
+    total = sum(out.values())
     os.makedirs(os.path.join(WORK, "weights"), exist_ok=True)
     acc = np.zeros(z.shape, np.int32)
     quant = {}
