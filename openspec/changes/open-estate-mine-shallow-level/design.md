@@ -170,8 +170,6 @@ and the part is restored overnight once it's fully supplied.
 
 ## 8. Decisions for Jenny
 
-## 8. Decisions for Jenny
-
 - **D1. How the manor restores:** restoration projects that she supplies with stone and timber,
   restored overnight (recommended), versus wall-by-wall building with a new stone-only build tool.
 - **D2. Build split:** (a) build 1 is the mine house plus the shallow level, and build 2 is the
